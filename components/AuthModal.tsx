@@ -47,7 +47,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, user, sig
         setProfileType('store');
       } else {
         // Fluxo padrão
-        setMode('login'); // Ou manter o último estado se preferir
+        setMode('login'); 
         setProfileType('user');
       }
     }
@@ -76,7 +76,21 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, user, sig
     setIsLoading(true);
     setError('');
     try {
-      await signInWithPopup(auth, googleProvider);
+      const result = await signInWithPopup(auth, googleProvider);
+      
+      // Ao logar com Google, verificamos/criamos perfil padrão como cliente se não existir
+      if (result.user && supabase) {
+         const { data } = await supabase.from('profiles').select('role').eq('firebase_uid', result.user.uid).single();
+         if (!data) {
+             await supabase.from('profiles').insert({
+                 firebase_uid: result.user.uid,
+                 email: result.user.email,
+                 role: 'cliente',
+                 created_at: new Date().toISOString()
+             });
+         }
+      }
+
       setSuccessMsg('Login com Google realizado com sucesso!');
       setTimeout(onClose, 1500);
     } catch (err: any) {
@@ -93,7 +107,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, user, sig
     setIsLoading(true);
 
     try {
-      // --- FLUXO DE CAPTURA DE LEAD (QR CODE) ---
+      // --- FLUXO DE CAPTURA DE LEAD (QR CODE) - SEM AUTH COMPLETA ---
       if (signupContext === 'merchant_lead_qr') {
         if (!supabase) {
            throw new Error("Erro de configuração: Supabase não inicializado.");
@@ -127,7 +141,28 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, user, sig
         setSuccessMsg('Login realizado com sucesso!');
         setTimeout(onClose, 1000);
       } else {
-        await createUserWithEmailAndPassword(auth, email, password);
+        // REGISTER
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const firebaseUser = userCredential.user;
+
+        // CRUCIAL: Salvar o perfil no Supabase imediatamente para definir o ROLE
+        if (firebaseUser && supabase) {
+            const roleToSave = profileType === 'store' ? 'lojista' : 'cliente';
+            
+            const { error: profileError } = await supabase.from('profiles').insert({
+                firebase_uid: firebaseUser.uid,
+                email: email,
+                role: roleToSave,
+                created_at: new Date().toISOString()
+            });
+
+            if (profileError) {
+                console.error("Erro ao salvar perfil:", profileError);
+                // Não bloqueamos o fluxo, mas o usuário pode ficar sem role. 
+                // O App.tsx tratará fallback.
+            }
+        }
+
         setSuccessMsg('Conta criada com sucesso!');
         setTimeout(onClose, 1000);
       }
@@ -238,23 +273,21 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, user, sig
             </div>
           )}
 
-          {/* Profile Type Selector (Only for Register or Lead Capture) */}
-          {(mode === 'register' || signupContext === 'merchant_lead_qr') && (
+          {/* Profile Type Selector (Only for Register) */}
+          {mode === 'register' && signupContext !== 'merchant_lead_qr' && (
             <div className="w-full mb-6">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 ml-1">
-                Tipo de perfil
+                Quero ser:
               </label>
               <div className="grid grid-cols-2 gap-4">
-                {/* Botão Usuário - Desabilitado no modo QR de Lojista */}
                 <button 
                   type="button"
-                  disabled={signupContext === 'merchant_lead_qr'}
                   onClick={() => setProfileType('user')}
                   className={`relative p-4 rounded-xl border-2 flex items-center gap-3 transition-all h-[72px] ${
                     profileType === 'user' 
                       ? 'border-primary-500 bg-white dark:bg-gray-800 shadow-md ring-1 ring-primary-500/20' 
                       : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:border-gray-300'
-                  } ${signupContext === 'merchant_lead_qr' ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  }`}
                 >
                   <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-colors ${
                     profileType === 'user' ? 'border-primary-500' : 'border-gray-300'
@@ -263,10 +296,10 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, user, sig
                   </div>
                   <div className="flex flex-col items-start">
                     <span className={`text-sm font-bold leading-tight ${profileType === 'user' ? 'text-gray-900 dark:text-white' : 'text-gray-600'}`}>
-                      Usuário
+                      Cliente
                     </span>
                     <span className={`text-xs ${profileType === 'user' ? 'text-gray-600 dark:text-gray-300' : 'text-gray-500'}`}>
-                      (cliente)
+                      (usuário)
                     </span>
                   </div>
                 </button>
@@ -296,7 +329,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, user, sig
           {/* Form Fields */}
           <form className="w-full space-y-4" onSubmit={handleSubmit}>
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 ml-1">E-mail Comercial</label>
+              <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 ml-1">E-mail</label>
               <div className="relative">
                 <input 
                   type="email" 
@@ -309,7 +342,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, user, sig
               </div>
             </div>
 
-            {/* Senha - Esconder no fluxo de Lead QR se não for necessário criar conta */}
+            {/* Senha */}
             {signupContext !== 'merchant_lead_qr' && (
               <div className="space-y-1.5">
                 <div className="flex justify-between items-center ml-1">

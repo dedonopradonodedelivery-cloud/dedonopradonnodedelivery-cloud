@@ -51,6 +51,7 @@ import { MerchantPanel } from './components/MerchantPanel';
 import { UserCashbackFlow } from './components/UserCashbackFlow';
 import { MapPin, Crown } from 'lucide-react';
 import { auth } from './lib/firebase';
+import { supabase } from './lib/supabase';
 import { onAuthStateChanged, User } from 'firebase/auth';
 import { Category, Store, AdType } from './types';
 import { getStoreLogo } from './utils/mockLogos';
@@ -223,25 +224,46 @@ const App: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       setUser(currentUser);
-      if (currentUser && activeTab === 'cashback_landing') {
-        setActiveTab('cashback');
-      }
-      if (currentUser && activeTab === 'freguesia_connect_public') {
-        setActiveTab('home');
+      
+      if (currentUser) {
+        // Buscar o ROLE correto no banco Supabase
+        if (supabase) {
+            try {
+                const { data, error } = await supabase
+                    .from('profiles')
+                    .select('role')
+                    .eq('firebase_uid', currentUser.uid)
+                    .single();
+                
+                if (data && data.role === 'lojista') {
+                    setUserRole('lojista');
+                } else {
+                    setUserRole('cliente'); // Fallback seguro
+                }
+            } catch (err) {
+                console.error("Erro ao buscar role:", err);
+                setUserRole('cliente');
+            }
+        } else {
+            // Fallback se sem supabase
+            setUserRole('cliente');
+        }
+
+        // Redirecionamentos pós login
+        if (activeTab === 'cashback_landing') {
+            setActiveTab('cashback');
+        }
+        if (activeTab === 'freguesia_connect_public') {
+            setActiveTab('home');
+        }
+      } else {
+        setUserRole(null);
       }
     });
     return () => unsubscribe();
   }, [activeTab]);
-
-  useEffect(() => {
-    if (!user) {
-      setUserRole(null);
-      return;
-    }
-    if (!userRole) setUserRole('cliente'); 
-  }, [user]);
 
   useEffect(() => {
     const timer = setTimeout(() => setIsLoading(false), 5000);
