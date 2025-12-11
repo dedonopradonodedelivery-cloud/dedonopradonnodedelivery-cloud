@@ -1,0 +1,8 @@
+{
+  "name": "Novo Agora - Localizei V2",
+  "description": "Assistente inteligente de localização utilizando Gemini e Google Maps para encontrar lugares, serviços e rotas com precisão.",
+  "requestFramePermissions": [
+    "geolocation",
+    "microphone"
+  ]
+}
