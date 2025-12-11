@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { X, ShoppingBag, Eye, EyeOff, LogOut, User as UserIcon, CheckCircle2 } from 'lucide-react';
 import { auth, googleProvider } from '../lib/firebase';
@@ -80,12 +79,15 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, user, sig
       
       // Ao logar com Google, verificamos/criamos perfil padrão como cliente se não existir
       if (result.user && supabase) {
+         // Verifica se já existe perfil para manter a role existente
          const { data } = await supabase.from('profiles').select('role').eq('firebase_uid', result.user.uid).single();
+         
          if (!data) {
+             // Se não existe, cria como cliente padrão
              await supabase.from('profiles').insert({
                  firebase_uid: result.user.uid,
                  email: result.user.email,
-                 role: 'cliente', // Google login defaulta para cliente
+                 role: 'cliente', 
                  created_at: new Date().toISOString()
              });
          }
@@ -146,31 +148,31 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, user, sig
         const firebaseUser = userCredential.user;
 
         // CRUCIAL: Salvar o perfil no Supabase imediatamente para definir o ROLE
-        // Isso garante que o App.tsx leia 'lojista' quando o usuário logar
         if (firebaseUser && supabase) {
+            // Mapeia a seleção da UI para o valor do banco
+            // profileType 'store' -> role 'lojista'
+            // profileType 'user'  -> role 'cliente'
             const roleToSave = profileType === 'store' ? 'lojista' : 'cliente';
             
             // Usamos upsert para garantir que crie ou atualize
             const { error: profileError } = await supabase.from('profiles').upsert({
                 firebase_uid: firebaseUser.uid,
                 email: email,
-                role: roleToSave, // Aqui definimos se é lojista ou cliente
+                role: roleToSave, 
                 created_at: new Date().toISOString()
             }, { onConflict: 'firebase_uid' });
 
             if (profileError) {
                 console.error("Erro ao salvar perfil:", profileError);
-                // Mesmo com erro no perfil, o Auth do Firebase foi criado. 
-                // O App.tsx tratará fallback como cliente.
+                // O usuário foi criado no Firebase, mas falhou no Supabase.
+                // O App.tsx tratará isso como fallback 'cliente'.
             }
         }
 
         setSuccessMsg('Conta criada com sucesso!');
-        // Pequeno delay para garantir que o banco processou antes de fechar
         setTimeout(onClose, 1500);
       }
     } catch (err: any) {
-      // Tratamento de erros
       console.error(err);
       if (err.code === 'auth/email-already-in-use') {
           setError('Este e-mail já está cadastrado.');

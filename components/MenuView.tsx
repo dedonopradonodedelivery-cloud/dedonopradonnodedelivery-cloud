@@ -61,7 +61,7 @@ export const MenuView: React.FC<MenuViewProps> = ({ user, userRole, onAuthClick,
   // Decide o título do perfil com base no papel se não houver nome
   const profileTitle = user?.displayName 
     ? user.displayName 
-    : isMerchant 
+    : userRole === 'lojista' 
         ? 'Parceiro Localizei' 
         : 'Usuário Localizei';
 

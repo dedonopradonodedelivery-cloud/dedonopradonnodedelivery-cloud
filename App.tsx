@@ -228,14 +228,15 @@ const App: React.FC = () => {
       setUser(currentUser);
       
       if (currentUser) {
-        // Buscar o ROLE correto no banco Supabase
+        // --- BUSCA OFICIAL DO PAPEL (ROLE) NO BANCO DE DADOS ---
         if (supabase) {
             try {
+                // Consulta o papel na tabela profiles
                 const { data, error } = await supabase
                     .from('profiles')
                     .select('role')
                     .eq('firebase_uid', currentUser.uid)
-                    .single();
+                    .maybeSingle(); // maybeSingle evita erro se não existir ainda
                 
                 if (data && data.role === 'lojista') {
                     setUserRole('lojista');
@@ -244,10 +245,10 @@ const App: React.FC = () => {
                 }
             } catch (err) {
                 console.error("Erro ao buscar role:", err);
-                setUserRole('cliente');
+                setUserRole('cliente'); // Em caso de erro, assume cliente por segurança
             }
         } else {
-            // Fallback se sem supabase
+            // Fallback se sem supabase (ambiente de dev limitado)
             setUserRole('cliente');
         }
 
