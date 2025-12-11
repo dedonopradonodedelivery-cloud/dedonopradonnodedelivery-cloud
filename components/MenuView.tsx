@@ -57,8 +57,13 @@ const SectionTitle: React.FC<{ title: string }> = ({ title }) => (
 
 export const MenuView: React.FC<MenuViewProps> = ({ user, userRole, onAuthClick, onNavigate }) => {
   const isMerchant = userRole === 'lojista';
-  // Mock para simulação de status pendente se necessário no futuro
-  // const isPending = userRole === 'pending'; 
+  
+  // Decide o título do perfil com base no papel se não houver nome
+  const profileTitle = user?.displayName 
+    ? user.displayName 
+    : isMerchant 
+        ? 'Parceiro Localizei' 
+        : 'Usuário Localizei';
 
   const handleLogout = async () => {
     try {
@@ -134,7 +139,7 @@ export const MenuView: React.FC<MenuViewProps> = ({ user, userRole, onAuthClick,
           </div>
           <div className="flex-1">
             <h3 className="font-bold text-gray-900 dark:text-white text-base">
-                {user.displayName || 'Usuário Localizei'}
+                {profileTitle}
             </h3>
             <p className="text-xs text-primary-500 font-bold mt-0.5 flex items-center gap-1">
                 Ver meu perfil completo
@@ -161,19 +166,6 @@ export const MenuView: React.FC<MenuViewProps> = ({ user, userRole, onAuthClick,
                 <ChevronRight className="w-5 h-5 text-indigo-200 group-hover:text-white transition-colors" />
             </button>
         )}
-
-        {/* Simulando estado de aprovação, caso existisse a prop 'pending' ou similar */}
-        {/* 
-        {userRole === 'pending' && (
-            <div className="w-full bg-yellow-50 dark:bg-yellow-900/20 p-4 rounded-2xl border border-yellow-200 dark:border-yellow-800 flex items-center gap-3 mb-6">
-                <Clock className="w-5 h-5 text-yellow-600 dark:text-yellow-400" />
-                <div>
-                    <h3 className="font-bold text-yellow-800 dark:text-yellow-200 text-sm">Aprovação em Análise</h3>
-                    <p className="text-xs text-yellow-600 dark:text-yellow-400">Seu cadastro de lojista está sendo verificado.</p>
-                </div>
-            </div>
-        )} 
-        */}
 
         {/* 4) Seção Minha Conta */}
         <SectionTitle title="Minha Conta" />
