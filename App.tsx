@@ -132,7 +132,11 @@ const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState('home');
   const [isLoading, setIsLoading] = useState(true);
   const [isDarkMode, setIsDarkMode] = useState(false);
+  
+  // Auth State Management
   const [isAuthOpen, setIsAuthOpen] = useState(false);
+  const [authContext, setAuthContext] = useState<'default' | 'merchant_lead_qr'>('default');
+  
   const [user, setUser] = useState<User | null>(null);
   const [userRole, setUserRole] = useState<'cliente' | 'lojista' | null>(null);
 
@@ -166,6 +170,12 @@ const App: React.FC = () => {
 
   const toggleTheme = () => setIsDarkMode(!isDarkMode);
 
+  // Função centralizada para abrir o modal de autenticação com contexto
+  const handleOpenAuth = (context: 'default' | 'merchant_lead_qr' = 'default') => {
+    setAuthContext(context);
+    setIsAuthOpen(true);
+  };
+
   // Lógica para determinar qual estado de busca e placeholder usar no Header
   const isServiceTab = activeTab === 'services';
   const currentSearchTerm = isServiceTab ? serviceSearch : globalSearch;
@@ -183,6 +193,7 @@ const App: React.FC = () => {
   useEffect(() => {
     const path = window.location.pathname;
     
+    // Check for Merchant Pay Deep Link
     const matchMerchantPay = path.match(/\/merchant\/([^/]+)\/pay/);
     if (matchMerchantPay && matchMerchantPay[1]) {
       setDeepLinkMerchantId(matchMerchantPay[1]);
@@ -190,11 +201,20 @@ const App: React.FC = () => {
       return;
     }
 
+    // Check for Cashback QR
     const matchCashbackQr = path.match(/\/cashback\/loja\/([^/]+)/);
     if (matchCashbackQr && matchCashbackQr[1]) {
       setQrMerchantId(matchCashbackQr[1]);
       setActiveTab('cashback_pay_qr');
+      return;
     }
+
+    // Check for Merchant Registration QR (Simulated via URL param for now)
+    const searchParams = new URLSearchParams(window.location.search);
+    if (searchParams.get('register_merchant') === 'true') {
+        handleOpenAuth('merchant_lead_qr');
+    }
+
   }, []);
 
   useEffect(() => {
@@ -384,7 +404,7 @@ const App: React.FC = () => {
             <Header
               isDarkMode={isDarkMode}
               toggleTheme={toggleTheme}
-              onAuthClick={() => setIsAuthOpen(true)}
+              onAuthClick={() => handleOpenAuth('default')}
               user={user}
               searchTerm={currentSearchTerm}
               onSearchChange={handleSearchChange}
@@ -411,7 +431,7 @@ const App: React.FC = () => {
                 user={user}
                 userRole={userRole}
                 onSpinWin={handleSpinWin}
-                onRequireLogin={() => setIsAuthOpen(true)}
+                onRequireLogin={() => handleOpenAuth('default')}
               />
             )}
 
@@ -557,7 +577,7 @@ const App: React.FC = () => {
             {activeTab === 'cashback_landing' && (
               <CashbackLandingView
                 onBack={() => setActiveTab('home')}
-                onLogin={() => setIsAuthOpen(true)}
+                onLogin={() => handleOpenAuth('default')}
               />
             )}
 
@@ -566,7 +586,7 @@ const App: React.FC = () => {
                 user={user}
                 userRole={userRole}
                 onBack={() => setActiveTab('home')}
-                onLogin={() => setIsAuthOpen(true)}
+                onLogin={() => handleOpenAuth('default')}
                 onNavigate={setActiveTab}
               />
             )}
@@ -575,7 +595,7 @@ const App: React.FC = () => {
               <MenuView
                 user={user}
                 userRole={userRole}
-                onAuthClick={() => setIsAuthOpen(true)}
+                onAuthClick={() => handleOpenAuth('default')}
                 onNavigate={(view) => {
                     if (view === 'patrocinador_master') setSponsorOrigin('profile');
                     setActiveTab(view);
@@ -620,7 +640,7 @@ const App: React.FC = () => {
               <MerchantPayRoute 
                 merchantId={deepLinkMerchantId}
                 user={user}
-                onLogin={() => setIsAuthOpen(true)}
+                onLogin={() => handleOpenAuth('default')}
                 onBack={() => setActiveTab('home')}
                 onComplete={handlePaymentComplete}
               />
@@ -630,7 +650,7 @@ const App: React.FC = () => {
               <CashbackPayFromQrScreen 
                 merchantId={qrMerchantId}
                 user={user}
-                onLogin={() => setIsAuthOpen(true)}
+                onLogin={() => handleOpenAuth('default')}
                 onBack={() => setActiveTab('home')}
                 onComplete={handlePaymentComplete}
               />
@@ -680,7 +700,7 @@ const App: React.FC = () => {
             {activeTab === 'freguesia_connect_public' && (
               <FreguesiaConnectPublic
                 onBack={() => setActiveTab('home')}
-                onLogin={() => setIsAuthOpen(true)}
+                onLogin={() => handleOpenAuth('default')}
               />
             )}
 
@@ -732,6 +752,7 @@ const App: React.FC = () => {
             isOpen={isAuthOpen}
             onClose={() => setIsAuthOpen(false)}
             user={user}
+            signupContext={authContext}
           />
 
           <QuoteRequestModal
