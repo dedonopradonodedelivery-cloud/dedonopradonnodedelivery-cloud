@@ -1,8 +1,7 @@
 {
-  "name": "Novo Agora - Localizei V2",
-  "description": "Assistente inteligente de localização utilizando Gemini e Google Maps para encontrar lugares, serviços e rotas com precisão.",
+  "name": "Novo Agora - Localizei Freguesia",
+  "description": "O super-app da Freguesia. Conecte-se com comércios, serviços e profissionais locais. Ganhe cashback e fortaleça o ecossistema do bairro.",
   "requestFramePermissions": [
-    "geolocation",
-    "microphone"
+    "geolocation"
   ]
 }
