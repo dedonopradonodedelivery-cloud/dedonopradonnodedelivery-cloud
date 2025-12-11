@@ -19,6 +19,7 @@ import { FreguesiaConnectRestricted } from './components/FreguesiaConnectRestric
 import { RewardDetailsView } from './components/RewardDetailsView';
 import { PrizeHistoryView } from './components/PrizeHistoryView';
 import { AuthModal } from './components/AuthModal';
+import { MerchantLeadModal } from './components/MerchantLeadModal'; // NOVO IMPORT
 import { QuickRegister } from './components/QuickRegister';
 import { MenuView } from './components/MenuView';
 import { ServicesView } from './components/ServicesView';
@@ -137,6 +138,9 @@ const App: React.FC = () => {
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [authContext, setAuthContext] = useState<'default' | 'merchant_lead_qr'>('default');
   
+  // NOVO STATE: Controle exclusivo do modal de Lead Lojista (QR)
+  const [isMerchantLeadModalOpen, setIsMerchantLeadModalOpen] = useState(false);
+
   const [user, setUser] = useState<User | null>(null);
   const [userRole, setUserRole] = useState<'cliente' | 'lojista' | null>(null);
 
@@ -170,7 +174,7 @@ const App: React.FC = () => {
 
   const toggleTheme = () => setIsDarkMode(!isDarkMode);
 
-  // Função centralizada para abrir o modal de autenticação com contexto
+  // Função centralizada para abrir o modal de autenticação (APENAS FLUXO NORMAL)
   const handleOpenAuth = (context: 'default' | 'merchant_lead_qr' = 'default') => {
     setAuthContext(context);
     setIsAuthOpen(true);
@@ -212,7 +216,8 @@ const App: React.FC = () => {
     // Check for Merchant Registration QR (Simulated via URL param for now)
     const searchParams = new URLSearchParams(window.location.search);
     if (searchParams.get('register_merchant') === 'true') {
-        handleOpenAuth('merchant_lead_qr');
+        // CORREÇÃO: Abre o NOVO modal de lead e não o modal de Auth.
+        setIsMerchantLeadModalOpen(true);
     }
 
   }, []);
@@ -489,11 +494,12 @@ const App: React.FC = () => {
             )}
 
             {activeTab === 'service_subcategories' && selectedServiceMacro && (
-              <SubcategoriesView
-                macroId={selectedServiceMacro.id}
-                macroName={selectedServiceMacro.name}
+              <SubcategoryStoreList
+                subcategoryName={selectedServiceMacro.name}
                 onBack={() => setActiveTab('services')}
-                onSelectSubcategory={handleSelectServiceSubcategory}
+                onStoreClick={handleSelectStore}
+                stores={stores} // Idealmente filtrar por serviço aqui
+                sponsoredBanners={[]}
               />
             )}
 
@@ -753,6 +759,12 @@ const App: React.FC = () => {
             onClose={() => setIsAuthOpen(false)}
             user={user}
             signupContext={authContext}
+          />
+
+          {/* Modal Dedicado para Lead de Lojista - Sem Auth */}
+          <MerchantLeadModal 
+            isOpen={isMerchantLeadModalOpen}
+            onClose={() => setIsMerchantLeadModalOpen(false)}
           />
 
           <QuoteRequestModal
