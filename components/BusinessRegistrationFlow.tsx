@@ -1,6 +1,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { ChevronLeft, Search, Building2, Smartphone, Mail, CheckCircle2, AlertTriangle, Upload, ArrowRight, ShieldCheck, MessageSquare } from 'lucide-react';
+import { supabase } from '../lib/supabase';
 
 interface BusinessRegistrationFlowProps {
   onBack: () => void;
@@ -37,22 +38,48 @@ export const BusinessRegistrationFlow: React.FC<BusinessRegistrationFlowProps> =
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSearchSubmit = (e: React.FormEvent) => {
+  const handleSearchSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     
-    // Simulate API Check
-    setTimeout(() => {
-      setIsLoading(false);
-      const cleanCNPJ = formData.cnpj.replace(/\D/g, '');
-      
-      // If CNPJ matches mock, go to "Found/Claim" flow
-      if (cleanCNPJ === EXISTING_STORE_MOCK.cnpj) {
-        setStep('found');
+    // NOVO FLUXO: Apenas capturar o lead, sem criar usuário ou avançar etapas de OTP.
+    try {
+      if (supabase) {
+        const { error } = await supabase.from('merchant_leads').insert({
+          email: formData.email,
+          phone: formData.phone,
+          name: formData.name, // Nome do responsável ou da loja
+          cnpj: formData.cnpj,
+          source: 'qr_code', // Identificador da origem
+          created_at: new Date().toISOString()
+        });
+
+        if (error) throw error;
       } else {
-        setStep('not_found');
+        // Simulação caso Supabase não esteja configurado no ambiente
+        console.log("Modo Demo: Lead capturado", formData);
+        await new Promise(resolve => setTimeout(resolve, 1000));
       }
-    }, 1500);
+
+      // Sucesso
+      alert("Pronto! Recebemos seu e-mail e vamos entrar em contato em breve.");
+      
+      // Limpar formulário
+      setFormData({
+        cnpj: '',
+        name: '',
+        phone: '',
+        email: ''
+      });
+
+      // NÃO avançamos para setStep('found') ou 'otp'. O fluxo encerra aqui como captura de lead.
+
+    } catch (err) {
+      console.error("Erro ao salvar lead:", err);
+      alert("Não conseguimos salvar seu e-mail agora, tente novamente em alguns minutos.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const sendVerificationCode = (method: 'whatsapp' | 'sms' | 'email') => {
@@ -101,7 +128,7 @@ export const BusinessRegistrationFlow: React.FC<BusinessRegistrationFlowProps> =
   const renderSearch = () => (
     <div className="animate-in slide-in-from-right duration-300">
       <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2 font-display">Cadastrar meu negócio</h2>
-      <p className="text-gray-500 text-sm mb-8">Preencha os dados abaixo para localizarmos sua empresa.</p>
+      <p className="text-gray-500 text-sm mb-8">Preencha os dados abaixo para entrarmos em contato.</p>
 
       <form onSubmit={handleSearchSubmit} className="space-y-5">
         <div>
@@ -114,7 +141,6 @@ export const BusinessRegistrationFlow: React.FC<BusinessRegistrationFlowProps> =
                 className="w-full p-4 bg-gray-50 dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 outline-none focus:border-[#1E5BFF] transition-colors"
                 required
             />
-            <p className="text-[10px] text-gray-400 mt-1">Digite 12345678000199 para simular loja existente.</p>
         </div>
         <div>
             <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Nome da Loja</label>
@@ -156,12 +182,19 @@ export const BusinessRegistrationFlow: React.FC<BusinessRegistrationFlowProps> =
             disabled={isLoading}
             className="w-full bg-[#1E5BFF] hover:bg-[#1749CC] text-white font-bold py-4 rounded-2xl shadow-lg shadow-blue-500/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2 mt-4"
         >
-            {isLoading ? 'Buscando...' : 'Continuar cadastro'}
+            {isLoading ? 'Enviando...' : 'Cadastrar interesse'}
             {!isLoading && <ArrowRight className="w-5 h-5" />}
         </button>
+        
+        <p className="text-center text-xs text-gray-400 mt-4">
+            Ao clicar em cadastrar, você concorda em receber nosso contato comercial.
+        </p>
       </form>
     </div>
   );
+
+  // Manteve-se os renders abaixo caso a lógica de "Claim" (Reivindicar) precise ser reativada no futuro, 
+  // mas o step inicial 'search' agora encerra o fluxo sem transitar para eles.
 
   const renderNotFound = () => (
     <div className="animate-in slide-in-from-right duration-300 flex flex-col items-center text-center pt-8">
@@ -377,6 +410,11 @@ export const BusinessRegistrationFlow: React.FC<BusinessRegistrationFlowProps> =
         {/* Content */}
         <div className="p-6 pb-24 max-w-md mx-auto">
             {step === 'search' && renderSearch()}
+            {/* 
+                Os steps abaixo ('found', 'not_found', etc.) permanecem no código caso
+                futuramente se queira reabilitar o fluxo de reivindicação de loja (Claim).
+                Atualmente, o fluxo termina em 'search' com a captura do lead.
+            */}
             {step === 'found' && renderFound()}
             {step === 'not_found' && renderNotFound()}
             {step === 'select_method' && renderSelectMethod()}
