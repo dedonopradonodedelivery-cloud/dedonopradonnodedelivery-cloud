@@ -1,7 +1,5 @@
-
 import React, { useState } from 'react';
 import { X, Store, CheckCircle2, ArrowRight, Loader2, AlertCircle } from 'lucide-react';
-import { supabase } from '../lib/supabase';
 
 interface MerchantLeadModalProps {
   isOpen: boolean;
@@ -9,9 +7,9 @@ interface MerchantLeadModalProps {
 }
 
 export const MerchantLeadModal: React.FC<MerchantLeadModalProps> = ({ isOpen, onClose }) => {
-  const [email, setEmail] = useState('');
   const [name, setName] = useState('');
-  const [storeName, setStoreName] = useState('');
+  const [phone, setPhone] = useState('');
+  const [category, setCategory] = useState('');
   
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
@@ -24,34 +22,46 @@ export const MerchantLeadModal: React.FC<MerchantLeadModalProps> = ({ isOpen, on
     setIsLoading(true);
     setErrorMsg('');
 
-    try {
-      if (!supabase) {
-        // Fallback para ambiente de desenvolvimento sem Supabase configurado
-        console.warn("Supabase client not found. Simulating success.");
-        await new Promise(resolve => setTimeout(resolve, 1000));
-      } else {
-        // INSERÇÃO DIRETA NA TABELA DE LEADS - SEM AUTH
-        const { error } = await supabase.from('merchant_leads').insert({
-          email,
-          name: name || null,
-          store_name: storeName || null,
-          source: 'qr_code',
-          created_at: new Date().toISOString()
-        });
+    // Obtendo a chave anônima do ambiente (Vite)
+    // Usamos (import.meta as any) para compatibilidade com TypeScript caso a definição de tipos do Vite não esteja explícita
+    const anonKey = (import.meta as any).env.VITE_SUPABASE_ANON_KEY;
 
-        if (error) throw error;
+    if (!anonKey) {
+      console.error("VITE_SUPABASE_ANON_KEY não configurada");
+      setErrorMsg("Erro de configuração do sistema.");
+      setIsLoading(false);
+      return;
+    }
+
+    try {
+      const response = await fetch('https://nyneuuvcdmtqjyaqrztz.supabase.co/functions/v1/merchant_leads', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${anonKey}`,
+          'apikey': anonKey
+        },
+        body: JSON.stringify({
+          nome: name,
+          telefone: phone,
+          categoria: category,
+          origem: 'site'
+        })
+      });
+
+      if (response.ok) {
+        setIsSuccess(true);
+        // Fechar automaticamente após alguns segundos
+        setTimeout(() => {
+          handleClose();
+        }, 3000);
+      } else {
+        throw new Error('Erro na requisição');
       }
 
-      setIsSuccess(true);
-      
-      // Fechar automaticamente após alguns segundos
-      setTimeout(() => {
-        handleClose();
-      }, 3000);
-
     } catch (err: any) {
-      console.error("Erro ao salvar lead:", err);
-      setErrorMsg("Não conseguimos salvar seu contato agora. Tente novamente em alguns instantes.");
+      console.error("Erro ao enviar lead:", err);
+      setErrorMsg("Erro ao enviar. Tente novamente.");
     } finally {
       setIsLoading(false);
     }
@@ -59,9 +69,9 @@ export const MerchantLeadModal: React.FC<MerchantLeadModalProps> = ({ isOpen, on
 
   const handleClose = () => {
     // Resetar estados ao fechar
-    setEmail('');
     setName('');
-    setStoreName('');
+    setPhone('');
+    setCategory('');
     setIsSuccess(false);
     setErrorMsg('');
     onClose();
@@ -93,7 +103,7 @@ export const MerchantLeadModal: React.FC<MerchantLeadModalProps> = ({ isOpen, on
                 <CheckCircle2 className="w-8 h-8" />
               </div>
               <p className="text-gray-600 dark:text-gray-300 text-sm max-w-xs leading-relaxed">
-                Recebemos seu interesse. Nossa equipe de parcerias entrará em contato pelo e-mail <strong>{email}</strong> em breve.
+                Cadastro enviado com sucesso! Entraremos em contato.
               </p>
               <button 
                 onClick={handleClose}
@@ -108,7 +118,7 @@ export const MerchantLeadModal: React.FC<MerchantLeadModalProps> = ({ isOpen, on
                 Seja um Parceiro
               </h2>
               <p className="text-sm text-gray-500 dark:text-gray-400 text-center mb-8 max-w-[280px] leading-relaxed">
-                Cadastre seus dados abaixo para receber nossa proposta comercial exclusiva para lojistas da Freguesia.
+                Preencha os dados abaixo para cadastrar seu negócio.
               </p>
 
               {errorMsg && (
@@ -121,47 +131,49 @@ export const MerchantLeadModal: React.FC<MerchantLeadModalProps> = ({ isOpen, on
               <form onSubmit={handleSubmit} className="w-full space-y-4">
                 <div>
                   <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase mb-1.5 ml-1">
-                    Seu E-mail (Obrigatório)
+                    Nome do responsável
                   </label>
                   <input 
-                    type="email" 
+                    type="text" 
                     required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="loja@exemplo.com"
-                    className="w-full px-4 py-3.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all dark:text-white"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase mb-1.5 ml-1">
-                    Nome da Loja (Opcional)
-                  </label>
-                  <input 
-                    type="text" 
-                    value={storeName}
-                    onChange={(e) => setStoreName(e.target.value)}
-                    placeholder="Ex: Padaria Imperial"
-                    className="w-full px-4 py-3.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all dark:text-white"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase mb-1.5 ml-1">
-                    Seu Nome (Opcional)
-                  </label>
-                  <input 
-                    type="text" 
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    placeholder="Ex: João Silva"
+                    placeholder="Seu nome completo"
+                    className="w-full px-4 py-3.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all dark:text-white"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase mb-1.5 ml-1">
+                    Telefone / WhatsApp
+                  </label>
+                  <input 
+                    type="tel" 
+                    required
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    placeholder="(21) 99999-9999"
+                    className="w-full px-4 py-3.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all dark:text-white"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase mb-1.5 ml-1">
+                    Categoria do negócio
+                  </label>
+                  <input 
+                    type="text" 
+                    required
+                    value={category}
+                    onChange={(e) => setCategory(e.target.value)}
+                    placeholder="Ex: Restaurante, Moda, Serviços"
                     className="w-full px-4 py-3.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all dark:text-white"
                   />
                 </div>
 
                 <button 
                   type="submit"
-                  disabled={isLoading || !email}
+                  disabled={isLoading || !name || !phone || !category}
                   className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 text-white font-bold py-4 rounded-2xl shadow-lg shadow-indigo-500/20 active:scale-[0.98] transition-all mt-4 flex items-center justify-center gap-2"
                 >
                   {isLoading ? (
@@ -171,7 +183,7 @@ export const MerchantLeadModal: React.FC<MerchantLeadModalProps> = ({ isOpen, on
                     </>
                   ) : (
                     <>
-                      Quero saber mais
+                      Enviar Cadastro
                       <ArrowRight className="w-5 h-5" />
                     </>
                   )}

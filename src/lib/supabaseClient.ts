@@ -1,21 +1,10 @@
-
 import { createClient } from '@supabase/supabase-js';
 
-// Helper to safely access environment variables
-const getEnv = (key: string) => {
-  if (typeof import.meta !== 'undefined' && (import.meta as any).env) {
-    return (import.meta as any).env[key];
-  }
-  return undefined;
-};
+const SUPABASE_URL = 'https://nyneuuvcdmtqjyaqrztz.supabase.co';
+const SUPABASE_ANON_KEY =
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im55bmV1dXZjZG10cWp5YXFyenR6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMxMzE5OTQsImV4cCI6MjA3ODcwNzk5NH0.myPZeiXk-0NQIlyvwgLlfIxei5sLoNpwexwDnxlJLUk';
 
-const supabaseUrl = getEnv('VITE_SUPABASE_URL');
-const supabaseAnonKey = getEnv('VITE_SUPABASE_ANON_KEY');
-
-if (!supabaseUrl || !supabaseAnonKey) {
-  console.warn('Supabase env vars missing. Realtime features will not work in this environment.');
-}
-
-export const supabase = (supabaseUrl && supabaseAnonKey) 
-  ? createClient(supabaseUrl, supabaseAnonKey) 
-  : null;
+export const supabase = createClient(
+  SUPABASE_URL,
+  SUPABASE_ANON_KEY
+);

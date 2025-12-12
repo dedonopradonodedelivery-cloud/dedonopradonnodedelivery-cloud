@@ -1,20 +1,10 @@
-import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import { createClient } from '@supabase/supabase-js';
 
-// Garantir que import.meta exista sem quebrar o Preview do AI Studio
-const env = (import.meta && (import.meta as any).env) ? (import.meta as any).env : null;
+const SUPABASE_URL = 'https://nyneuuvcdmtqjyaqrztz.supabase.co';
+const SUPABASE_ANON_KEY =
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im55bmV1dXZjZG10cWp5YXFyenR6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMxMzE5OTQsImV4cCI6MjA3ODcwNzk5NH0.myPZeiXk-0NQIlyvwgLlfIxei5sLoNpwexwDnxlJLUk';
 
-const SUPABASE_URL = env?.VITE_SUPABASE_URL;
-const SUPABASE_ANON_KEY = env?.VITE_SUPABASE_ANON_KEY;
-
-// Cliente pode ser null no AI Studio
-let supabase: SupabaseClient | null = null;
-
-if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
-  console.warn(
-    'Supabase env vars not available. Running with supabase = null (AI Studio Preview).'
-  );
-} else {
-  supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-}
-
-export { supabase };
+export const supabase = createClient(
+  SUPABASE_URL,
+  SUPABASE_ANON_KEY
+);
