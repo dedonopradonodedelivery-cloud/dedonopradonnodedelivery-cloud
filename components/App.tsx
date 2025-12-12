@@ -229,7 +229,7 @@ const App: React.FC = () => {
             nome: currentUser.user_metadata?.full_name ?? currentUser.email ?? null, 
             telefone: null 
           }, 
-          { onConflict: 'id' }
+          { onConflict: 'id', ignoreDuplicates: true } // Não sobrescreve se já existir
         );
     } catch (err) {
       console.warn("Erro ao garantir perfil:", err);
@@ -243,6 +243,14 @@ const App: React.FC = () => {
       }
       
       try {
+          // 1. Tentar ler do metadata (mais rápido)
+          if (currentUser.user_metadata?.role) {
+              const metaRole = currentUser.user_metadata.role === 'lojista' ? 'lojista' : 'cliente';
+              setUserRole(metaRole);
+              return metaRole;
+          }
+
+          // 2. Fallback para DB
           const { data } = await supabase
               .from('profiles')
               .select('role')
@@ -259,12 +267,13 @@ const App: React.FC = () => {
       }
   };
 
+  // --- GLOBAL AUTH LISTENER ---
   useEffect(() => {
     const initAuth = async () => {
         const { data: { session } } = await supabase.auth.getSession();
         
         if (session?.user) {
-            setUser(session.user as any); // Cast for compatibility
+            setUser(session.user as any); 
             await ensureProfile(session.user);
             await checkAndSetRole(session.user);
         }
@@ -276,18 +285,24 @@ const App: React.FC = () => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
         if (event === 'SIGNED_IN' && session?.user) {
             setUser(session.user as any);
+            
+            // Garantir que perfil existe (fallback)
             await ensureProfile(session.user);
+            
+            // Definir role
             const role = await checkAndSetRole(session.user);
             
+            // FECHAR MODAL DE AUTH
+            setIsAuthOpen(false);
+
+            // REDIRECIONAR
             if (role === 'lojista') {
               setActiveTab('store_area');
+            } else {
+              // Redireciona usuário para o painel (Menu/Perfil)
+              setActiveTab('profile'); 
             }
-            if (activeTab === 'cashback_landing') {
-                setActiveTab('cashback');
-            }
-            if (activeTab === 'freguesia_connect_public') {
-                setActiveTab('home');
-            }
+
         } else if (event === 'SIGNED_OUT') {
             setUser(null);
             setUserRole(null);
@@ -296,7 +311,7 @@ const App: React.FC = () => {
     });
 
     return () => subscription.unsubscribe();
-  }, [activeTab]);
+  }, []);
 
   useEffect(() => {
     const timer = setTimeout(() => setIsLoading(false), 5000);
@@ -304,9 +319,7 @@ const App: React.FC = () => {
   }, []);
 
   const handleLoginSuccess = async () => {
-      // Pequeno delay para garantir que o banco já processou a inserção do profile se foi concorrente
-      await new Promise(r => setTimeout(r, 500));
-      // A lógica de redirecionamento agora é tratada principalmente no onAuthStateChange
+      // Callback legado, mantido por compatibilidade, mas o trabalho pesado agora é no onAuthStateChange
   };
 
   const handleSelectCategory = (category: Category) => {

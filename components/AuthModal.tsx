@@ -1,6 +1,5 @@
-
 import React, { useState, useEffect } from 'react';
-import { X, ShoppingBag, Eye, EyeOff, LogOut, User as UserIcon } from 'lucide-react';
+import { X, ShoppingBag, Eye, EyeOff, LogOut, User as UserIcon, CheckCircle2 } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import { User } from '@supabase/supabase-js';
 
@@ -30,10 +29,12 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [successMsg, setSuccessMsg] = useState('');
 
   useEffect(() => {
     if (isOpen) {
       setError('');
+      setSuccessMsg('');
       setEmail('');
       setPassword('');
 
@@ -57,6 +58,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     setProfileType('user');
     setShowPassword(false);
     setError('');
+    setSuccessMsg('');
   };
 
   const handleGoogleLogin = async () => {
@@ -88,6 +90,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setSuccessMsg('');
     setIsLoading(true);
 
     try {
@@ -98,6 +101,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           password,
         });
         if (signInError) throw signInError;
+        
+        // Não chamamos onClose aqui. O listener no App.tsx detectará o login e fechará o modal.
       } 
       // 2. FLUXO DE CADASTRO (USUÁRIO E LOJISTA)
       else {
@@ -136,16 +141,12 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
           if (profileError) {
             console.error('Erro ao criar perfil:', profileError);
-            // Não bloqueamos o fluxo aqui, pois o usuário já está autenticado,
-            // mas logamos o erro.
           }
         }
+        
+        setSuccessMsg('Cadastro realizado! Entrando...');
+        // Não chamamos onClose aqui. Aguardamos o listener global.
       }
-
-      // SUCESSO: Notifica o App e fecha o modal IMEDIATAMENTE.
-      // Sem mensagens de sucesso, sem delays.
-      if (onLoginSuccess) onLoginSuccess();
-      onClose();
 
     } catch (err: any) {
       console.error(err);
@@ -157,7 +158,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   const handleLogout = async () => {
     try {
       await supabase.auth.signOut();
-      onClose();
+      // O listener global fechará o modal ou redirecionará
     } catch (err: any) {
       setError(err.message);
     }
@@ -236,6 +237,12 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           {error && (
             <div className="w-full bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 text-xs p-3 rounded-xl mb-4 text-center font-medium border border-red-100 dark:border-red-800">
               {error}
+            </div>
+          )}
+          {successMsg && (
+            <div className="w-full bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 text-xs p-3 rounded-xl mb-4 text-center font-bold border border-green-100 dark:border-green-800 flex items-center justify-center gap-2">
+              <CheckCircle2 className="w-4 h-4" />
+              {successMsg}
             </div>
           )}
 
