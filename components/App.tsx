@@ -286,21 +286,27 @@ const App: React.FC = () => {
         if (event === 'SIGNED_IN' && session?.user) {
             setUser(session.user as any);
             
-            // Garantir que perfil existe (fallback)
-            await ensureProfile(session.user);
-            
-            // Definir role
-            const role = await checkAndSetRole(session.user);
-            
-            // FECHAR MODAL DE AUTH
+            // IMPORTANTE: Fechar o modal IMEDIATAMENTE após detectar o login.
+            // Não esperar o perfil carregar para destravar a UI.
             setIsAuthOpen(false);
 
-            // REDIRECIONAR
-            if (role === 'lojista') {
-              setActiveTab('store_area');
-            } else {
-              // Redireciona usuário para o painel (Menu/Perfil)
-              setActiveTab('profile'); 
+            try {
+                // Garantir que perfil existe (fallback)
+                await ensureProfile(session.user);
+                
+                // Definir role
+                const role = await checkAndSetRole(session.user);
+                
+                // REDIRECIONAR
+                if (role === 'lojista') {
+                  setActiveTab('store_area');
+                } else {
+                  // Redireciona usuário para o painel (Menu/Perfil)
+                  setActiveTab('profile'); 
+                }
+            } catch (error) {
+                console.error("Erro no fluxo pós-login:", error);
+                // Mesmo com erro no perfil, o modal já fechou e o usuário está logado.
             }
 
         } else if (event === 'SIGNED_OUT') {
