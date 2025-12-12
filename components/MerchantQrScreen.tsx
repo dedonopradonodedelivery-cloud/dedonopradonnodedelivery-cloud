@@ -12,7 +12,7 @@ export const MerchantQrScreen: React.FC<MerchantQrScreenProps> = ({ onBack, user
   const [copied, setCopied] = useState(false);
 
   // Derive merchant data safely
-  const merchantId = user?.uid || 'demo-merchant-id';
+  const merchantId = user?.id || 'demo-merchant-id';
   // Generate a mock PIN based on ID for visual purposes
   const pin = merchantId.substring(0, 6).toUpperCase();
   

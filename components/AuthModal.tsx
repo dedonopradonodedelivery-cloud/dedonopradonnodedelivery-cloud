@@ -1,14 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, ShoppingBag, Eye, EyeOff, LogOut, User as UserIcon, CheckCircle2 } from 'lucide-react';
-import { auth, googleProvider } from '../lib/firebase';
-import { supabase } from '../lib/supabase';
-import {
-  signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
-  signInWithPopup,
-  signOut,
-  User
-} from 'firebase/auth';
+import { supabase } from '../lib/supabaseClient';
+import { User } from '@supabase/supabase-js';
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -78,39 +71,23 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     setIsLoading(true);
     setError('');
     try {
-      const result = await signInWithPopup(auth, googleProvider);
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: window.location.origin,
+        },
+      });
 
-      if (result.user && supabase) {
-        // cria/garante profile como cliente
-        const { data } = await supabase
-          .from('profiles')
-          .select('role')
-          .eq('firebase_uid', result.user.uid)
-          .single();
-
-        if (!data) {
-          await supabase.from('profiles').insert({
-            firebase_uid: result.user.uid,
-            email: result.user.email,
-            role: 'cliente',
-            created_at: new Date().toISOString()
-          });
-        }
-      }
-
-      setSuccessMsg('Login com Google realizado com sucesso!');
-      onLoginSuccess?.();
-      setTimeout(onClose, 1500);
+      if (error) throw error;
+      
+      // O redirecionamento acontecerá, então o código abaixo pode não ser alcançado imediatamente
     } catch (err: any) {
       setError(`Erro Google: ${err.message}`);
-    } finally {
       setIsLoading(false);
     }
   };
 
   const insertMerchantLead = async (source: 'qr_code' | 'cadastro_lojista') => {
-    if (!supabase) throw new Error('Erro de configuração: Supabase não inicializado.');
-
     const { error: insertError } = await supabase.from('merchant_leads').insert({
       email,
       profile_type: 'lojista',
@@ -142,7 +119,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       }
 
       // 2) Se o usuário escolheu LOJISTA no cadastro normal:
-      //    -> NÃO cria usuário Firebase. Apenas captura lead.
+      //    -> NÃO cria usuário Auth. Apenas captura lead.
       if (mode === 'register' && profileType === 'store') {
         await insertMerchantLead('cadastro_lojista');
 
@@ -155,53 +132,34 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         return;
       }
 
-      // 3) Fluxo normal de CLIENTE
+      // 3) Fluxo normal de CLIENTE (Login ou Cadastro via Supabase Auth)
       if (mode === 'login') {
-        await signInWithEmailAndPassword(auth, email, password);
+        const { error: signInError } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
+        if (signInError) throw signInError;
+
         setSuccessMsg('Login realizado com sucesso!');
         onLoginSuccess?.();
         setTimeout(onClose, 1000);
         return;
       }
 
-      // 4) Registro de CLIENTE (Firebase + Profile no Supabase)
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      const firebaseUser = userCredential.user;
+      // 4) Registro de CLIENTE
+      const { error: signUpError } = await supabase.auth.signUp({
+        email,
+        password,
+      });
+      if (signUpError) throw signUpError;
 
-      if (firebaseUser && supabase) {
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .upsert(
-            {
-              firebase_uid: firebaseUser.uid,
-              email,
-              role: 'cliente',
-              created_at: new Date().toISOString()
-            },
-            { onConflict: 'firebase_uid' }
-          );
-
-        if (profileError) throw profileError;
-      }
-
-      setSuccessMsg('Conta criada com sucesso!');
+      setSuccessMsg('Conta criada com sucesso! Verifique seu e-mail.');
       onLoginSuccess?.();
-      setTimeout(onClose, 1500);
+      setTimeout(onClose, 2000);
+
     } catch (err: any) {
       console.error(err);
-      if (err.code === 'auth/email-already-in-use') {
-        setError('Este e-mail já está cadastrado.');
-      } else if (
-        err.code === 'auth/wrong-password' ||
-        err.code === 'auth/user-not-found' ||
-        err.code === 'auth/invalid-credential'
-      ) {
-        setError('E-mail ou senha incorretos.');
-      } else if (err.code === 'auth/weak-password') {
-        setError('A senha deve ter pelo menos 6 caracteres.');
-      } else {
-        setError(err.message || 'Ocorreu um erro ao processar sua solicitação.');
-      }
+      setError(err.message || 'Ocorreu um erro ao processar sua solicitação.');
     } finally {
       setIsLoading(false);
     }
@@ -209,7 +167,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
   const handleLogout = async () => {
     try {
-      await signOut(auth);
+      await supabase.auth.signOut();
       setSuccessMsg('Você saiu da conta.');
       setTimeout(onClose, 1000);
     } catch (err: any) {
@@ -227,8 +185,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           </button>
 
           <div className="w-20 h-20 bg-gray-200 rounded-full mb-4 overflow-hidden border-4 border-primary-500">
-            {user.photoURL ? (
-              <img src={user.photoURL} alt="User" className="w-full h-full object-cover" />
+            {user.user_metadata?.avatar_url ? (
+              <img src={user.user_metadata.avatar_url} alt="User" className="w-full h-full object-cover" />
             ) : (
               <div className="w-full h-full flex items-center justify-center bg-primary-100 text-primary-600">
                 <UserIcon className="w-10 h-10" />
@@ -236,7 +194,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             )}
           </div>
 
-          <h2 className="text-xl font-bold text-gray-800 dark:text-white mb-1">{user.displayName || 'Usuário Localizei'}</h2>
+          <h2 className="text-xl font-bold text-gray-800 dark:text-white mb-1">
+            {user.user_metadata?.full_name || user.email || 'Usuário Localizei'}
+          </h2>
           <p className="text-sm text-gray-500 mb-6">{user.email}</p>
 
           <button
@@ -371,7 +331,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               </div>
             </div>
 
-            {/* Senha só aparece para cliente (login ou register cliente) */}
             {!isMerchantLeadFlow && (
               <div className="space-y-1.5">
                 <div className="flex justify-between items-center ml-1">
@@ -446,7 +405,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                       <path fill="none" d="M0 0h48v48H0z"></path>
                     </svg>
                   </div>
-                  Google
+                  Continuar com Google
                 </button>
               </div>
 

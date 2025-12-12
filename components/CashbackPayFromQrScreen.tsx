@@ -1,6 +1,6 @@
 
 import React, { useEffect } from 'react';
-import { User } from 'firebase/auth';
+import { User } from '@supabase/supabase-js';
 import { Lock } from 'lucide-react';
 import { CashbackPaymentScreen } from './CashbackPaymentScreen';
 

@@ -10,14 +10,14 @@ import {
   Info, 
   LogOut, 
   Store, 
-  Users,
-  Clock
+  Users
 } from 'lucide-react';
-import { auth } from '../lib/firebase';
+import { supabase } from '../lib/supabaseClient';
 import { MasterSponsorBanner } from './MasterSponsorBanner';
+import { User } from '@supabase/supabase-js';
 
 interface MenuViewProps {
-  user: any;
+  user: User | null;
   userRole: 'cliente' | 'lojista' | null;
   onAuthClick: () => void;
   onNavigate: (view: string) => void;
@@ -59,15 +59,15 @@ export const MenuView: React.FC<MenuViewProps> = ({ user, userRole, onAuthClick,
   const isMerchant = userRole === 'lojista';
   
   // Decide o título do perfil com base no papel se não houver nome
-  const profileTitle = user?.displayName 
-    ? user.displayName 
+  const profileTitle = user?.user_metadata?.full_name 
+    ? user.user_metadata.full_name 
     : userRole === 'lojista' 
         ? 'Parceiro Localizei' 
         : 'Usuário Localizei';
 
   const handleLogout = async () => {
     try {
-      await auth.signOut();
+      await supabase.auth.signOut();
       onNavigate('home');
     } catch (error) {
       console.error("Error logging out", error);
@@ -131,8 +131,8 @@ export const MenuView: React.FC<MenuViewProps> = ({ user, userRole, onAuthClick,
           className="mt-6 bg-white dark:bg-gray-800 p-4 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 flex items-center gap-4 cursor-pointer active:scale-[0.98] transition-transform mb-6"
         >
           <div className="w-14 h-14 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center overflow-hidden border-2 border-white dark:border-gray-600 shadow-sm">
-            {user?.photoURL ? (
-               <img src={user.photoURL} alt="Perfil" className="w-full h-full object-cover" />
+            {user?.user_metadata?.avatar_url ? (
+               <img src={user.user_metadata.avatar_url} alt="Perfil" className="w-full h-full object-cover" />
             ) : (
                <UserIcon className="w-6 h-6 text-gray-400" />
             )}
@@ -244,7 +244,7 @@ export const MenuView: React.FC<MenuViewProps> = ({ user, userRole, onAuthClick,
 
         {/* Version Info */}
         <div className="text-center pt-8 pb-4">
-            <p className="text-[10px] text-gray-400">Localizei Freguesia v1.0.5</p>
+            <p className="text-[10px] text-gray-400">Localizei Freguesia v1.0.6</p>
         </div>
 
       </div>

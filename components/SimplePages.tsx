@@ -7,7 +7,6 @@ import {
   CheckCircle, 
   Share2, 
   Heart, 
-  Info, 
   MapPin, 
   Crown, 
   Rocket, 
@@ -22,13 +21,14 @@ import {
   Lightbulb,
   Zap
 } from 'lucide-react';
-import { supabase } from '../lib/supabase';
-import { auth } from '../lib/firebase';
+import { supabase } from '../lib/supabaseClient';
 import { Store, AdType } from '../types';
+import { User } from '@supabase/supabase-js';
 
 interface SimplePageProps {
   onBack: () => void;
   onNavigate?: (view: string) => void;
+  user?: User | null;
 }
 
 export const SupportView: React.FC<SimplePageProps> = ({ onBack }) => {
@@ -238,10 +238,9 @@ export const AboutView: React.FC<SimplePageProps> = ({ onBack }) => {
   );
 };
 
-export const FavoritesView: React.FC<SimplePageProps> = ({ onBack, onNavigate }) => {
+export const FavoritesView: React.FC<SimplePageProps> = ({ onBack, onNavigate, user }) => {
   const [favorites, setFavorites] = useState<Store[]>([]);
   const [loading, setLoading] = useState(true);
-  const user = auth.currentUser;
 
   useEffect(() => {
     const fetchFavorites = async () => {
@@ -254,7 +253,7 @@ export const FavoritesView: React.FC<SimplePageProps> = ({ onBack, onNavigate })
         const { data, error } = await supabase
           .from("favorites")
           .select("businesses(*)")
-          .eq("user_id", user.uid);
+          .eq("user_id", user.id);
 
         if (error) throw error;
 
@@ -298,7 +297,7 @@ export const FavoritesView: React.FC<SimplePageProps> = ({ onBack, onNavigate })
         const { error } = await supabase
             .from('favorites')
             .delete()
-            .match({ user_id: user.uid, business_id: storeId });
+            .match({ user_id: user.id, business_id: storeId });
         
         if (error) throw error;
     } catch(err) {

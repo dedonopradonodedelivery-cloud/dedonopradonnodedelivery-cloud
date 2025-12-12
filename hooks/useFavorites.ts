@@ -1,7 +1,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
-import { supabase } from '../lib/supabase';
-import { User } from 'firebase/auth';
+import { supabase } from '../lib/supabaseClient';
+import { User } from '@supabase/supabase-js';
 
 export const useFavorites = (user: User | null) => {
   const [favoritesIds, setFavoritesIds] = useState<string[]>([]);
@@ -20,7 +20,7 @@ export const useFavorites = (user: User | null) => {
         const { data, error } = await supabase
           .from('favorites')
           .select('business_id')
-          .eq('user_id', user.uid);
+          .eq('user_id', user.id);
 
         if (error) throw error;
 
@@ -56,14 +56,14 @@ export const useFavorites = (user: User | null) => {
         const { error } = await supabase
           .from('favorites')
           .delete()
-          .match({ user_id: user.uid, business_id: storeId });
+          .match({ user_id: user.id, business_id: storeId });
         
         if (error) throw error;
       } else {
         // Adicionar
         const { error } = await supabase
           .from('favorites')
-          .insert({ user_id: user.uid, business_id: storeId });
+          .insert({ user_id: user.id, business_id: storeId });
         
         if (error) throw error;
       }

@@ -1,13 +1,15 @@
+
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Star, Loader2, AlertCircle, ChevronRight, BadgeCheck, Heart, Check, Coins } from 'lucide-react';
+import { Star, Loader2, AlertCircle, BadgeCheck, Heart, Coins } from 'lucide-react';
 import { Store, AdType } from '../types';
 import { useFavorites } from '../hooks/useFavorites';
-import { auth } from '../lib/firebase';
+import { User } from '@supabase/supabase-js';
 
 interface LojasEServicosListProps {
   onStoreClick?: (store: Store) => void;
   onViewAll?: () => void;
   activeFilter?: 'all' | 'cashback' | 'top_rated' | 'open_now';
+  user?: User | null;
 }
 
 const CATEGORIES_MOCK = ['Alimentação', 'Beleza', 'Serviços', 'Pets', 'Moda', 'Saúde'];
@@ -63,14 +65,14 @@ const RAW_STORES = generateFakeStores();
 const ALL_SORTED_STORES = sortStores([...RAW_STORES]);
 const ITEMS_PER_PAGE = 12;
 
-export const LojasEServicosList: React.FC<LojasEServicosListProps> = ({ onStoreClick, onViewAll, activeFilter = 'all' }) => {
+export const LojasEServicosList: React.FC<LojasEServicosListProps> = ({ onStoreClick, onViewAll, activeFilter = 'all', user = null }) => {
   const [visibleStores, setVisibleStores] = useState<Store[]>([]);
   const [filteredStores, setFilteredStores] = useState<Store[]>([]);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [error, setError] = useState(false);
   
-  const { toggleFavorite, isFavorite } = useFavorites(auth.currentUser);
+  const { toggleFavorite, isFavorite } = useFavorites(user);
   
   const observer = useRef<IntersectionObserver | null>(null);
 
@@ -133,7 +135,7 @@ export const LojasEServicosList: React.FC<LojasEServicosListProps> = ({ onStoreC
 
   const handleToggleFavorite = async (e: React.MouseEvent, id: string) => {
     e.stopPropagation();
-    if (!auth.currentUser) {
+    if (!user) {
         alert("Faça login para favoritar lojas!");
         return;
     }

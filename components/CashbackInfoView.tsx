@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { User } from 'firebase/auth';
+import { User } from '@supabase/supabase-js';
 import { ChevronLeft, Store, Sparkles, ArrowRight, Lock, Clock } from 'lucide-react';
 import { CashbackIcon } from './CashbackIcon';
 
@@ -165,7 +165,7 @@ export const CashbackInfoView: React.FC<CashbackInfoViewProps> = ({
         </div>
         
         <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
-          Olá, {user.displayName?.split(' ')[0] || 'Cliente'}!
+          Olá, {user.user_metadata?.full_name?.split(' ')[0] || 'Cliente'}!
         </h2>
 
         <CountdownDisplay />

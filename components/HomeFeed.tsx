@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { CATEGORIES } from '../constants';
 import { AdType, Category, Store } from '../types';
@@ -5,31 +6,21 @@ import {
   ChevronRight, 
   Coins, 
   Wrench, 
-  Store as StoreIcon,
-  Users,
-  Scissors,
-  Dog,
-  Utensils,
   Sparkles,
   Crown,
   Loader2,
   AlertCircle,
-  X,
   ArrowRight,
-  ThumbsUp,
-  Calendar,
-  MapPin,
   Filter,
   Percent,
   Star,
-  BadgeCheck,
-  QrCode
+  X
 } from 'lucide-react';
 import { QuoteRequestModal } from './QuoteRequestModal';
 import { EditorialCollection } from './EditorialListView';
-import { supabase } from '../lib/supabase';
+import { supabase } from '../lib/supabaseClient';
 import { LojasEServicosList } from './LojasEServicosList';
-import { User } from 'firebase/auth';
+import { User } from '@supabase/supabase-js';
 import { SpinWheelView } from './SpinWheelView';
 import { getStoreLogo } from '../utils/mockLogos';
 
@@ -47,10 +38,10 @@ interface HomeFeedProps {
 }
 
 const TOP_SEARCHED = [
-  { id: 1, title: "Pizza", image: "https://images.unsplash.com/photo-1513104890138-7c749659a591?q=80&w=400&auto=format=fit=crop", icon: <Utensils className="w-4 h-4 text-white" /> },
-  { id: 3, title: "Salão de beleza", image: "https://images.unsplash.com/photo-1560066984-138dadb4c035?q=80&w=400&auto=format=fit=crop", icon: <Scissors className="w-4 h-4 text-white" /> },
-  { id: 4, title: "Veterinário", image: "https://images.unsplash.com/photo-1553688738-a278b9f063e0?q=80&w=400&auto=format=fit=crop", icon: <Dog className="w-4 h-4 text-white" /> },
-  { id: 5, title: "Mecânica", image: "https://images.unsplash.com/photo-1530046339160-ce3e41600f2e?q=80&w=400&auto=format=fit=crop", icon: <Wrench className="w-4 h-4 text-white" /> }
+  { id: 1, title: "Pizza", image: "https://images.unsplash.com/photo-1513104890138-7c749659a591?q=80&w=400&auto=format=fit=crop" },
+  { id: 3, title: "Salão de beleza", image: "https://images.unsplash.com/photo-1560066984-138dadb4c035?q=80&w=400&auto=format=fit=crop" },
+  { id: 4, title: "Veterinário", image: "https://images.unsplash.com/photo-1553688738-a278b9f063e0?q=80&w=400&auto=format=fit=crop" },
+  { id: 5, title: "Mecânica", image: "https://images.unsplash.com/photo-1530046339160-ce3e41600f2e?q=80&w=400&auto=format=fit=crop" }
 ];
 
 const EDITORIAL_THEMES: EditorialCollection[] = [
@@ -69,8 +60,6 @@ const CASHBACK_HIGHLIGHTS = [
   { id: 'cb4', name: 'Smart Fit', category: 'Academia', cashback: 10, logoUrl: getStoreLogo(7) },
   { id: 'cb5', name: 'Rei do Mate', category: 'Lanches', cashback: 15, logoUrl: getStoreLogo(8) },
 ];
-
-// Removed RECOMMENDED_FOR_YOU per request
 
 // Modal da Roleta (bottom sheet)
 const SpinWheelModal: React.FC<{
@@ -557,6 +546,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
                     onStoreClick={onStoreClick} 
                     onViewAll={() => onNavigate('explore')}
                     activeFilter={listFilter}
+                    user={user}
                 />
             </div>
         </div>
@@ -572,7 +562,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
       <SpinWheelModal 
         isOpen={isSpinWheelOpen}
         onClose={() => setIsSpinWheelOpen(false)}
-        userId={user?.uid || null}
+        userId={user?.id || null}
         userRole={userRole || null}
         onWin={handleSpinWin}
         onRequireLogin={onRequireLogin}

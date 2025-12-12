@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { User } from 'firebase/auth';
+import { User } from '@supabase/supabase-js';
 import { 
   ChevronLeft, 
   Camera, 
@@ -20,7 +20,7 @@ interface EditProfileViewProps {
 }
 
 export const EditProfileView: React.FC<EditProfileViewProps> = ({ user, onBack }) => {
-  const [name, setName] = useState(user.displayName || '');
+  const [name, setName] = useState(user.user_metadata?.full_name || '');
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState(user.email || '');
   const [birthDate, setBirthDate] = useState('');
@@ -99,8 +99,8 @@ export const EditProfileView: React.FC<EditProfileViewProps> = ({ user, onBack }
         <div className="flex flex-col items-center mb-8">
           <div className="relative group cursor-pointer">
             <div className="w-28 h-28 rounded-full bg-gray-200 dark:bg-gray-800 overflow-hidden border-4 border-white dark:border-gray-700 shadow-lg">
-              {user.photoURL ? (
-                <img src={user.photoURL} alt="Avatar" className="w-full h-full object-cover" />
+              {user.user_metadata?.avatar_url ? (
+                <img src={user.user_metadata.avatar_url} alt="Avatar" className="w-full h-full object-cover" />
               ) : (
                 <div className="w-full h-full flex items-center justify-center text-gray-400">
                   <UserIcon className="w-12 h-12" />

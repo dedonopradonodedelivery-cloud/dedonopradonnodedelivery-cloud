@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Layout } from './components/Layout';
 import { Header } from './components/Header';
@@ -54,9 +55,7 @@ import { User } from '@supabase/supabase-js';
 import { Category, Store, AdType } from './types';
 import { getStoreLogo } from './utils/mockLogos';
 
-// =============================
-// MOCK DE LOJAS PARA AMBIENTE SEM SUPABASE
-// =============================
+// ... (MOCK_STORES constant remains the same) ...
 const MOCK_STORES: Store[] = [
   {
     id: '1',
@@ -797,7 +796,7 @@ const App: React.FC = () => {
             {activeTab === 'support' && <SupportView onBack={() => setActiveTab('profile')} />}
             {activeTab === 'invite_friend' && <InviteFriendView onBack={() => setActiveTab('profile')} />}
             {activeTab === 'about' && <AboutView onBack={() => setActiveTab('profile')} />}
-            {activeTab === 'favorites' && <FavoritesView onBack={() => setActiveTab('profile')} onNavigate={setActiveTab} />}
+            {activeTab === 'favorites' && <FavoritesView user={user} onBack={() => setActiveTab('profile')} onNavigate={setActiveTab} />}
             {activeTab === 'become_sponsor' && <SponsorInfoView onBack={() => setActiveTab('profile')} />}
             {activeTab === 'edit_profile' && user && <EditProfileView user={user as any} onBack={() => setActiveTab('profile')} />}
             

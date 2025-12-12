@@ -1,6 +1,6 @@
 
-import React, { useState, useEffect } from 'react';
-import { User } from 'firebase/auth';
+import React, { useState } from 'react';
+import { User } from '@supabase/supabase-js';
 import { useProfile } from '../hooks/useProfile';
 import { User as UserIcon, Smartphone, ChevronRight, CheckCircle2 } from 'lucide-react';
 
@@ -12,7 +12,7 @@ interface QuickRegisterProps {
 export const QuickRegister: React.FC<QuickRegisterProps> = ({ user, onComplete }) => {
   const { saveProfile, isSaving, error } = useProfile();
   
-  const [name, setName] = useState(user.displayName || '');
+  const [name, setName] = useState(user.user_metadata?.full_name || '');
   const [phone, setPhone] = useState('');
   
   // Custom Blue color matching the brand
@@ -52,9 +52,9 @@ export const QuickRegister: React.FC<QuickRegisterProps> = ({ user, onComplete }
     }
 
     const success = await saveProfile({
-      firebase_uid: user.uid,
-      email: user.email,
-      avatar_url: user.photoURL,
+      firebase_uid: user.id,
+      email: user.email ?? null,
+      avatar_url: user.user_metadata?.avatar_url,
       nome: name,
       telefone: phone,
       role: 'cliente'
@@ -88,8 +88,8 @@ export const QuickRegister: React.FC<QuickRegisterProps> = ({ user, onComplete }
         <div className="flex justify-center mb-8">
           <div className="relative">
             <div className="w-28 h-28 rounded-full bg-gray-100 p-1 shadow-lg shadow-blue-100 border-2 border-white">
-              {user.photoURL ? (
-                <img src={user.photoURL} alt="Profile" className="w-full h-full rounded-full object-cover" />
+              {user.user_metadata?.avatar_url ? (
+                <img src={user.user_metadata.avatar_url} alt="Profile" className="w-full h-full rounded-full object-cover" />
               ) : (
                 <div className="w-full h-full rounded-full bg-blue-50 flex items-center justify-center text-blue-400">
                   <UserIcon className="w-12 h-12" />

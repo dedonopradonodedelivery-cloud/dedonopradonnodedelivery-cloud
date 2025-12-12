@@ -1,9 +1,9 @@
 
 import React, { useEffect, useState } from 'react';
-import { User } from 'firebase/auth';
+import { User } from '@supabase/supabase-js';
 import { Loader2, AlertCircle, Lock } from 'lucide-react';
 import { CashbackPaymentScreen } from './CashbackPaymentScreen';
-import { supabase } from '../lib/supabase';
+import { supabase } from '../lib/supabaseClient';
 
 interface MerchantPayRouteProps {
   merchantId: string;
