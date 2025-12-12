@@ -14,15 +14,16 @@ interface AuthModalProps {
   isOpen: boolean;
   onClose: () => void;
   user: User | null;
-  signupContext?: 'default' | 'merchant_lead_qr'; // Contexto para diferenciar fluxos
+  signupContext?: 'default' | 'merchant_lead_qr';
+  onLoginSuccess?: () => void; // Callback para forçar atualização do app
 }
 
 type AuthMode = 'register' | 'login';
 type ProfileType = 'user' | 'store';
 
-export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, user, signupContext = 'default' }) => {
+export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, user, signupContext = 'default', onLoginSuccess }) => {
   const [mode, setMode] = useState<AuthMode>('login');
-  const [profileType, setProfileType] = useState<ProfileType>('user'); // Estado que controla o toggle
+  const [profileType, setProfileType] = useState<ProfileType>('user'); 
   const [showPassword, setShowPassword] = useState(false);
   
   // Auth Form State
@@ -40,12 +41,10 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, user, sig
       setEmail('');
       setPassword('');
 
-      // Configuração específica para fluxo de QR Code de Lojista (Lead)
       if (signupContext === 'merchant_lead_qr') {
         setMode('register');
         setProfileType('store');
       } else {
-        // Fluxo padrão
         setMode('login'); 
         setProfileType('user');
       }
@@ -55,7 +54,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, user, sig
   if (!isOpen) return null;
 
   const handleModeSwitch = () => {
-    // Se for fluxo de QR Code, não permite trocar para login
     if (signupContext === 'merchant_lead_qr') return;
 
     setMode(mode === 'register' ? 'login' : 'register');
@@ -66,7 +64,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, user, sig
   };
 
   const handleGoogleLogin = async () => {
-    // Desabilitado no fluxo de Lead QR por enquanto (opcional)
     if (signupContext === 'merchant_lead_qr') {
        setError("Por favor, cadastre seu e-mail manualmente para contato.");
        return;
@@ -77,13 +74,10 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, user, sig
     try {
       const result = await signInWithPopup(auth, googleProvider);
       
-      // Ao logar com Google, verificamos/criamos perfil padrão como cliente se não existir
       if (result.user && supabase) {
-         // Verifica se já existe perfil para manter a role existente
          const { data } = await supabase.from('profiles').select('role').eq('firebase_uid', result.user.uid).single();
          
          if (!data) {
-             // Se não existe, cria como cliente padrão
              await supabase.from('profiles').insert({
                  firebase_uid: result.user.uid,
                  email: result.user.email,
@@ -94,6 +88,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, user, sig
       }
 
       setSuccessMsg('Login com Google realizado com sucesso!');
+      if (onLoginSuccess) onLoginSuccess();
       setTimeout(onClose, 1500);
     } catch (err: any) {
       setError(`Erro Google: ${err.message}`);
@@ -109,17 +104,16 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, user, sig
     setIsLoading(true);
 
     try {
-      // --- FLUXO DE CAPTURA DE LEAD (QR CODE) - SEM AUTH COMPLETA ---
+      // --- FLUXO DE CAPTURA DE LEAD (QR CODE) ---
       if (signupContext === 'merchant_lead_qr') {
         if (!supabase) {
            throw new Error("Erro de configuração: Supabase não inicializado.");
         }
 
-        // Salvar apenas o lead, SEM criar usuário no Auth
         const { error: insertError } = await supabase.from('merchant_leads').insert({
           email: email,
           profile_type: 'lojista',
-          source: 'qr_code', // Rastreamento da origem
+          source: 'qr_code',
           created_at: new Date().toISOString()
         });
 
@@ -127,34 +121,30 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, user, sig
 
         setSuccessMsg('Pronto! Recebemos seu interesse e entraremos em contato.');
         
-        // Limpar e fechar após sucesso
         setTimeout(() => {
           setEmail('');
           setPassword('');
           onClose();
         }, 2500);
         
-        return; // Interrompe aqui, não faz login
+        return; 
       }
 
-      // --- FLUXO PADRÃO (Criação de Conta / Login) ---
+      // --- FLUXO PADRÃO ---
       if (mode === 'login') {
         await signInWithEmailAndPassword(auth, email, password);
         setSuccessMsg('Login realizado com sucesso!');
+        if (onLoginSuccess) onLoginSuccess();
         setTimeout(onClose, 1000);
       } else {
         // REGISTER
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         const firebaseUser = userCredential.user;
 
-        // CRUCIAL: Salvar o perfil no Supabase imediatamente para definir o ROLE
+        // CRUCIAL: Salvar o perfil no Supabase
         if (firebaseUser && supabase) {
-            // Mapeia a seleção da UI para o valor do banco
-            // profileType 'store' -> role 'lojista'
-            // profileType 'user'  -> role 'cliente'
             const roleToSave = profileType === 'store' ? 'lojista' : 'cliente';
             
-            // Usamos upsert para garantir que crie ou atualize
             const { error: profileError } = await supabase.from('profiles').upsert({
                 firebase_uid: firebaseUser.uid,
                 email: email,
@@ -164,12 +154,14 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, user, sig
 
             if (profileError) {
                 console.error("Erro ao salvar perfil:", profileError);
-                // O usuário foi criado no Firebase, mas falhou no Supabase.
-                // O App.tsx tratará isso como fallback 'cliente'.
             }
         }
 
         setSuccessMsg('Conta criada com sucesso!');
+        
+        // Notifica o componente pai (App) para atualizar o userRole e redirecionar se necessário
+        if (onLoginSuccess) onLoginSuccess();
+        
         setTimeout(onClose, 1500);
       }
     } catch (err: any) {
@@ -285,7 +277,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, user, sig
                 Quero ser:
               </label>
               <div className="grid grid-cols-2 gap-4">
-                {/* Botão Usuário - Desabilitado no modo QR de Lojista */}
                 <button 
                   type="button"
                   disabled={signupContext === 'merchant_lead_qr'}
@@ -351,7 +342,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, user, sig
               </div>
             </div>
 
-            {/* Senha - Esconder no fluxo de Lead QR se não for necessário criar conta */}
             {signupContext !== 'merchant_lead_qr' && (
               <div className="space-y-1.5">
                 <div className="flex justify-between items-center ml-1">
@@ -396,7 +386,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, user, sig
             </button>
           </form>
 
-          {/* Divider and Footer Links - Only for Standard Flow */}
           {signupContext === 'default' && (
             <>
               <div className="relative w-full my-8">

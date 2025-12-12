@@ -223,44 +223,48 @@ const App: React.FC = () => {
 
   }, []);
 
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-      setUser(currentUser);
+  // Extraída a lógica de verificação de role para reutilização
+  const checkAndSetRole = async (currentUser: User | null) => {
+      if (!currentUser) {
+          setUserRole(null);
+          return null;
+      }
       
-      if (currentUser) {
-        // --- BUSCA OFICIAL DO PAPEL (ROLE) NO BANCO DE DADOS ---
-        if (supabase) {
+      if (supabase) {
             try {
-                // Consulta o papel na tabela profiles
-                const { data, error } = await supabase
+                const { data } = await supabase
                     .from('profiles')
                     .select('role')
                     .eq('firebase_uid', currentUser.uid)
-                    .maybeSingle(); // maybeSingle evita erro se não existir ainda
+                    .maybeSingle();
                 
-                if (data && data.role === 'lojista') {
-                    setUserRole('lojista');
-                } else {
-                    setUserRole('cliente'); // Fallback seguro
-                }
+                const role = (data?.role === 'lojista') ? 'lojista' : 'cliente';
+                setUserRole(role);
+                return role;
             } catch (err) {
                 console.error("Erro ao buscar role:", err);
-                setUserRole('cliente'); // Em caso de erro, assume cliente por segurança
+                setUserRole('cliente');
+                return 'cliente';
             }
-        } else {
-            // Fallback se sem supabase (ambiente de dev limitado)
-            setUserRole('cliente');
-        }
+      } else {
+          setUserRole('cliente');
+          return 'cliente';
+      }
+  };
 
-        // Redirecionamentos pós login
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+      setUser(currentUser);
+      await checkAndSetRole(currentUser);
+
+      // Redirecionamentos pós login (automáticos de navegação pendente)
+      if (currentUser) {
         if (activeTab === 'cashback_landing') {
             setActiveTab('cashback');
         }
         if (activeTab === 'freguesia_connect_public') {
             setActiveTab('home');
         }
-      } else {
-        setUserRole(null);
       }
     });
     return () => unsubscribe();
@@ -270,6 +274,21 @@ const App: React.FC = () => {
     const timer = setTimeout(() => setIsLoading(false), 5000);
     return () => clearTimeout(timer);
   }, []);
+
+  // Função chamada pelo AuthModal após um registro/login bem-sucedido
+  const handleLoginSuccess = async () => {
+      // Pequeno delay para garantir que o banco já processou a inserção do profile se foi concorrente
+      await new Promise(r => setTimeout(r, 500));
+      
+      if (auth.currentUser) {
+          const role = await checkAndSetRole(auth.currentUser);
+          
+          // Se for lojista, força o redirecionamento para o painel
+          if (role === 'lojista') {
+              setActiveTab('store_area');
+          }
+      }
+  };
 
   const handleSelectCategory = (category: Category) => {
     setSelectedCategory(category);
@@ -782,6 +801,7 @@ const App: React.FC = () => {
             onClose={() => setIsAuthOpen(false)}
             user={user}
             signupContext={authContext}
+            onLoginSuccess={handleLoginSuccess}
           />
 
           {/* Modal Dedicado para Lead de Lojista - Sem Auth */}
