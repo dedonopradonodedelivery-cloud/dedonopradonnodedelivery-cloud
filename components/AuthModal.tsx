@@ -38,7 +38,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       setEmail('');
       setPassword('');
 
-      // Se veio do QR, força o modo lead lojista (sem login)
+      // Se veio do QR, força o modo lead lojista (cadastro)
       if (signupContext === 'merchant_lead_qr') {
         setMode('register');
         setProfileType('store');
@@ -62,7 +62,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   };
 
   const handleGoogleLogin = async () => {
-    // Não permita lojista via Google (lead precisa ser capturado)
+    // Não permita lojista via Google (lead precisa ser capturado ou ter fluxo específico)
+    // Para simplificar, mantemos a restrição visual, mas a lógica de cadastro abaixo resolve o fluxo de email/senha
     if (signupContext === 'merchant_lead_qr' || (mode === 'register' && profileType === 'store')) {
       setError('Para lojista, cadastre o e-mail manualmente para contato.');
       return;
@@ -80,22 +81,10 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
       if (error) throw error;
       
-      // O redirecionamento acontecerá, então o código abaixo pode não ser alcançado imediatamente
     } catch (err: any) {
       setError(`Erro Google: ${err.message}`);
       setIsLoading(false);
     }
-  };
-
-  const insertMerchantLead = async (source: 'qr_code' | 'cadastro_lojista') => {
-    const { error: insertError } = await supabase.from('merchant_leads').insert({
-      email,
-      profile_type: 'lojista',
-      source,
-      created_at: new Date().toISOString()
-    });
-
-    if (insertError) throw insertError;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -105,34 +94,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     setIsLoading(true);
 
     try {
-      // 1) QR Lead (já existia)
-      if (signupContext === 'merchant_lead_qr') {
-        await insertMerchantLead('qr_code');
-
-        setSuccessMsg('Pronto! Recebemos seu interesse e entraremos em contato.');
-        setTimeout(() => {
-          setEmail('');
-          setPassword('');
-          onClose();
-        }, 2500);
-        return;
-      }
-
-      // 2) Se o usuário escolheu LOJISTA no cadastro normal:
-      //    -> NÃO cria usuário Auth. Apenas captura lead.
-      if (mode === 'register' && profileType === 'store') {
-        await insertMerchantLead('cadastro_lojista');
-
-        setSuccessMsg('Cadastro de lojista recebido! Nossa equipe vai entrar em contato.');
-        setTimeout(() => {
-          setEmail('');
-          setPassword('');
-          onClose();
-        }, 2000);
-        return;
-      }
-
-      // 3) Fluxo normal de CLIENTE (Login ou Cadastro via Supabase Auth)
+      // 1. FLUXO DE LOGIN
       if (mode === 'login') {
         const { error: signInError } = await supabase.auth.signInWithPassword({
           email,
@@ -141,21 +103,57 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         if (signInError) throw signInError;
 
         setSuccessMsg('Login realizado com sucesso!');
-        onLoginSuccess?.();
-        setTimeout(onClose, 1000);
-        return;
+      } 
+      // 2. FLUXO DE CADASTRO (USUÁRIO E LOJISTA)
+      else {
+        // Cria o usuário no Auth do Supabase
+        const { data: authData, error: signUpError } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            data: {
+              // Salva a role nos metadados para garantir integridade futura
+              role: profileType === 'store' ? 'lojista' : 'cliente'
+            }
+          }
+        });
+
+        if (signUpError) throw signUpError;
+
+        // Se o usuário foi criado, garantimos que o perfil exista na tabela 'profiles' com a role correta
+        if (authData.user) {
+          const role = profileType === 'store' ? 'lojista' : 'cliente';
+          
+          // Upsert garante que se o perfil já existir (por trigger), atualizamos a role
+          const { error: profileError } = await supabase
+            .from('profiles')
+            .upsert({
+              id: authData.user.id,
+              email: email,
+              role: role,
+              created_at: new Date().toISOString()
+            }, { onConflict: 'id' });
+
+          if (profileError) {
+            console.error('Erro ao criar perfil:', profileError);
+            // Não bloqueamos o fluxo aqui, pois o usuário já está autenticado,
+            // mas logamos o erro.
+          }
+        }
+
+        setSuccessMsg(profileType === 'store' 
+          ? 'Conta de parceiro criada! Acessando painel...' 
+          : 'Conta criada! Entrando...'
+        );
       }
 
-      // 4) Registro de CLIENTE
-      const { error: signUpError } = await supabase.auth.signUp({
-        email,
-        password,
-      });
-      if (signUpError) throw signUpError;
-
-      setSuccessMsg('Conta criada com sucesso! Verifique seu e-mail.');
-      onLoginSuccess?.();
-      setTimeout(onClose, 2000);
+      // Notifica o componente pai (App.tsx) para atualizar o estado e redirecionar
+      if (onLoginSuccess) onLoginSuccess();
+      
+      // Fecha o modal após um breve delay visual
+      setTimeout(() => {
+        onClose();
+      }, 1500);
 
     } catch (err: any) {
       console.error(err);
@@ -239,7 +237,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
           <p className="text-sm text-gray-500 dark:text-gray-400 text-center mb-8 max-w-[260px] leading-relaxed">
             {isMerchantLeadFlow
-              ? 'Cadastre seu e-mail comercial para receber o contato da nossa equipe.'
+              ? 'Cadastre seu e-mail comercial para acessar o painel do parceiro.'
               : mode === 'register'
                 ? 'Comece a usar nosso app preenchendo seus dados'
                 : 'Entre com seu e-mail e senha para continuar'}
@@ -369,7 +367,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               {isLoading
                 ? 'Processando...'
                 : isMerchantLeadFlow
-                  ? 'Enviar cadastro'
+                  ? 'Criar conta parceiro'
                   : mode === 'register'
                     ? 'Criar conta'
                     : 'Entrar'}
