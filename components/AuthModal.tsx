@@ -106,6 +106,11 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       } 
       // 2. FLUXO DE CADASTRO (USUÁRIO E LOJISTA)
       else {
+        // Validação básica de senha
+        if (password.length < 6) {
+          throw new Error('A senha deve ter no mínimo 6 caracteres.');
+        }
+
         // Cria o usuário no Auth do Supabase
         const { data: authData, error: signUpError } = await supabase.auth.signUp({
           email,
@@ -329,35 +334,33 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               </div>
             </div>
 
-            {!isMerchantLeadFlow && (
-              <div className="space-y-1.5">
-                <div className="flex justify-between items-center ml-1">
-                  <label className="text-xs font-semibold text-gray-700 dark:text-gray-300">Senha</label>
-                  {mode === 'login' && (
-                    <button type="button" className="text-xs font-bold text-primary-500 hover:text-primary-600">
-                      Esqueceu a senha?
-                    </button>
-                  )}
-                </div>
-                <div className="relative">
-                  <input
-                    type={showPassword ? 'text' : 'password'}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                    placeholder={mode === 'register' ? 'Crie uma senha forte' : 'Digite sua senha'}
-                    className="w-full pl-4 pr-12 py-3.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all dark:text-white placeholder-gray-400"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
-                  >
-                    {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+            <div className="space-y-1.5">
+              <div className="flex justify-between items-center ml-1">
+                <label className="text-xs font-semibold text-gray-700 dark:text-gray-300">Senha</label>
+                {mode === 'login' && (
+                  <button type="button" className="text-xs font-bold text-primary-500 hover:text-primary-600">
+                    Esqueceu a senha?
                   </button>
-                </div>
+                )}
               </div>
-            )}
+              <div className="relative">
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  placeholder={mode === 'register' ? 'Crie uma senha forte (min. 6)' : 'Digite sua senha'}
+                  className="w-full pl-4 pr-12 py-3.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all dark:text-white placeholder-gray-400"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                >
+                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                </button>
+              </div>
+            </div>
 
             <button
               type="submit"
