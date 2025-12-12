@@ -151,6 +151,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     } catch (err: any) {
       console.error(err);
       setError(err.message || 'Ocorreu um erro ao processar sua solicitação.');
+    } finally {
       setIsLoading(false);
     }
   };
