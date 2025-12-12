@@ -174,7 +174,19 @@ const App: React.FC = () => {
 
   const toggleTheme = () => setIsDarkMode(!isDarkMode);
 
+  // Monitora a sessão: Se usuário existir, garante que o modal de Auth fecha.
+  useEffect(() => {
+    if (user) {
+        setIsAuthOpen(false);
+    }
+  }, [user]);
+
   const handleOpenAuth = (context: 'default' | 'merchant_lead_qr' = 'default') => {
+    if (user) {
+        // Se já estiver logado, não abre modal de login, vai para o perfil
+        setActiveTab('profile');
+        return;
+    }
     setAuthContext(context);
     setIsAuthOpen(true);
   };
@@ -287,7 +299,6 @@ const App: React.FC = () => {
             setUser(session.user as any);
             
             // IMPORTANTE: Fechar o modal IMEDIATAMENTE após detectar o login.
-            // Não esperar o perfil carregar para destravar a UI.
             setIsAuthOpen(false);
 
             try {
@@ -297,12 +308,14 @@ const App: React.FC = () => {
                 // Definir role
                 const role = await checkAndSetRole(session.user);
                 
-                // REDIRECIONAR
-                if (role === 'lojista') {
-                  setActiveTab('store_area');
-                } else {
-                  // Redireciona usuário para o painel (Menu/Perfil)
-                  setActiveTab('profile'); 
+                // REDIRECIONAR se não estiver em uma rota de pagamento
+                if (activeTab !== 'merchant_pay_route' && activeTab !== 'cashback_pay_qr') {
+                    if (role === 'lojista') {
+                        setActiveTab('store_area');
+                    } else {
+                        // Redireciona usuário para o painel (Menu/Perfil)
+                        setActiveTab('profile'); 
+                    }
                 }
             } catch (error) {
                 console.error("Erro no fluxo pós-login:", error);
@@ -317,7 +330,7 @@ const App: React.FC = () => {
     });
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [activeTab]);
 
   useEffect(() => {
     const timer = setTimeout(() => setIsLoading(false), 5000);
@@ -834,13 +847,16 @@ const App: React.FC = () => {
 
           </main>
 
-          <AuthModal
-            isOpen={isAuthOpen}
-            onClose={() => setIsAuthOpen(false)}
-            user={user as any}
-            signupContext={authContext}
-            onLoginSuccess={handleLoginSuccess}
-          />
+          {/* Renders AuthModal ONLY when there is NO user session */}
+          {!user && (
+            <AuthModal
+                isOpen={isAuthOpen}
+                onClose={() => setIsAuthOpen(false)}
+                user={user}
+                signupContext={authContext}
+                onLoginSuccess={handleLoginSuccess}
+            />
+          )}
 
           <MerchantLeadModal 
             isOpen={isMerchantLeadModalOpen}
