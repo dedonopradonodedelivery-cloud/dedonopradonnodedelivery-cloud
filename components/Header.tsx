@@ -98,26 +98,26 @@ export const Header: React.FC<HeaderProps> = ({
         <div 
           className={`
             overflow-hidden transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]
-            ${showCategories && isHome ? 'max-h-24 opacity-100' : 'max-h-0 opacity-0'}
+            ${showCategories && isHome ? 'max-h-28 opacity-100' : 'max-h-0 opacity-0'}
           `}
         >
-          <div className="flex items-center gap-6 overflow-x-auto no-scrollbar px-5 pb-3 pt-1">
+          <div className="flex items-center gap-3 overflow-x-auto no-scrollbar px-5 pb-3 pt-1">
             {CATEGORIES.map((cat) => (
               <button 
                 key={cat.id} 
                 onClick={() => onSelectCategory && onSelectCategory(cat)}
-                className="flex flex-col items-center gap-1.5 min-w-[64px] group cursor-pointer"
+                className="flex flex-col items-center justify-center gap-1 min-w-[76px] w-[76px] h-[72px] p-2 rounded-2xl bg-[#EAF2FF] dark:bg-gray-800 border border-[#DBEAFE] dark:border-gray-700 shadow-sm hover:shadow-md active:scale-95 transition-all group snap-start cursor-pointer"
               >
-                <div className="w-8 h-8 text-gray-400 group-hover:text-[#2D6DF6] transition-colors">
+                <div className="w-8 h-8 flex items-center justify-center text-[#2D6DF6] dark:text-blue-400 group-hover:scale-110 transition-transform duration-300">
                   {/* Clone element to force color inheritance or styling if needed */}
                   {React.isValidElement(cat.icon) 
                     ? React.cloneElement(cat.icon as React.ReactElement<any>, { 
-                        className: "w-7 h-7 text-gray-500 dark:text-gray-400 group-hover:text-[#2D6DF6] dark:group-hover:text-[#2D6DF6] transition-colors", 
-                        strokeWidth: 1.5 
+                        className: "w-6 h-6 text-[#2D6DF6] dark:text-blue-400", 
+                        strokeWidth: 2 
                       }) 
                     : cat.icon}
                 </div>
-                <span className="text-[10px] font-medium text-gray-500 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white whitespace-nowrap transition-colors">
+                <span className="text-[10px] font-bold text-gray-600 dark:text-gray-300 text-center leading-tight line-clamp-1 w-full">
                   {cat.name}
                 </span>
               </button>
