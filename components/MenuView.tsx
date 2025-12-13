@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   User as UserIcon, 
   ChevronRight, 
@@ -9,7 +9,8 @@ import {
   Info, 
   LogOut, 
   Store, 
-  Users
+  Users,
+  Loader2
 } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import { MasterSponsorBanner } from './MasterSponsorBanner';
@@ -56,6 +57,7 @@ const SectionTitle: React.FC<{ title: string }> = ({ title }) => (
 
 export const MenuView: React.FC<MenuViewProps> = ({ user, userRole, onAuthClick, onNavigate }) => {
   const isMerchant = userRole === 'lojista';
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   
   // Decide o título do perfil: Nome > Email > Fallback Genérico
   const profileTitle = user?.user_metadata?.full_name 
@@ -67,12 +69,23 @@ export const MenuView: React.FC<MenuViewProps> = ({ user, userRole, onAuthClick,
             : 'Usuário Localizei';
 
   const handleLogout = async () => {
+    if (isLoggingOut) return;
+    setIsLoggingOut(true);
+
     try {
-      await supabase.auth.signOut();
-      // O App.tsx detectará o evento SIGNED_OUT e limpará o estado global
-      onNavigate('home');
+      // Tenta deslogar no Supabase
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
     } catch (error) {
-      console.error("Error logging out", error);
+      console.error("Erro ao sair (API):", error);
+      // Fallback: Se der erro na API (ex: sem internet), força a limpeza local
+      localStorage.clear();
+    } finally {
+      // Sempre navega para home e reseta o estado visual
+      setIsLoggingOut(false);
+      onNavigate('home');
+      // Força um reload suave para garantir que o estado global limpe se o listener falhar
+      // window.location.reload(); // Opcional, mas App.tsx deve lidar com o evento SIGNED_OUT
     }
   };
 
@@ -237,16 +250,21 @@ export const MenuView: React.FC<MenuViewProps> = ({ user, userRole, onAuthClick,
         <div className="mt-8">
             <button 
                 onClick={handleLogout}
-                className="w-full p-4 rounded-2xl bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 font-bold text-sm flex items-center justify-center gap-2 hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors border border-red-100 dark:border-red-900/30 active:scale-[0.98]"
+                disabled={isLoggingOut}
+                className="w-full p-4 rounded-2xl bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 font-bold text-sm flex items-center justify-center gap-2 hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors border border-red-100 dark:border-red-900/30 active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed"
             >
-                <LogOut className="w-4 h-4" />
-                Sair do aplicativo
+                {isLoggingOut ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                    <LogOut className="w-4 h-4" />
+                )}
+                {isLoggingOut ? 'Saindo...' : 'Sair do aplicativo'}
             </button>
         </div>
 
         {/* Version Info */}
         <div className="text-center pt-8 pb-4">
-            <p className="text-[10px] text-gray-400">Localizei Freguesia v1.0.7</p>
+            <p className="text-[10px] text-gray-400">Localizei Freguesia v1.0.8</p>
         </div>
 
       </div>
