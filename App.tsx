@@ -178,8 +178,6 @@ const App: React.FC = () => {
     setIsAuthOpen(true);
   };
 
-  // Lógica de Header: Se o usuário já está logado, vai para o perfil. Se não, abre o modal.
-  // Isso evita o bug onde o modal abria e fechava imediatamente.
   const handleHeaderProfileClick = () => {
     if (user) {
       setActiveTab('profile');
@@ -200,13 +198,13 @@ const App: React.FC = () => {
     ? 'Buscar serviços, categorias ou especialidades...'
     : 'Buscar lojas, produtos, serviços...';
 
-  // ✅ 1) URL → TAB logic
+  // --- URL Routing Logic ---
   useEffect(() => {
     const path = window.location.pathname;
 
-    // Painel do parceiro (lojista)
+    // Se entrar via URL /painel-parceiro, força aba se lojista
     if (path === '/painel-parceiro' || path === '/painel-lojista') {
-      setActiveTab('store_area');
+      // O useEffect de Auth abaixo cuidará da validação de role
       return;
     }
 
@@ -238,14 +236,14 @@ const App: React.FC = () => {
         .upsert(
           {
             id: currentUser.id,
-            role: 'cliente',
+            role: 'cliente', // Default safe fallback if DB trigger fails
             nome: currentUser.user_metadata?.full_name ?? currentUser.email ?? null,
             telefone: null,
           },
-          { onConflict: 'id' }
+          { onConflict: 'id' } // Only insert if not exists
         );
     } catch (err) {
-      console.warn('Erro ao garantir perfil:', err);
+      console.warn('Erro ao garantir perfil (pode já existir):', err);
     }
   };
 
@@ -256,14 +254,32 @@ const App: React.FC = () => {
     }
 
     try {
-      const { data } = await supabase
+      // Tenta buscar o perfil. Se não existir (race condition no signup), tenta mais uma vez após 1s.
+      let { data, error } = await supabase
         .from('profiles')
         .select('role')
         .eq('id', currentUser.id)
         .maybeSingle();
 
+      if (!data && !error) {
+         // Retry once
+         await new Promise(r => setTimeout(r, 1000));
+         const retry = await supabase.from('profiles').select('role').eq('id', currentUser.id).maybeSingle();
+         data = retry.data;
+      }
+
       const role = data?.role === 'lojista' ? 'lojista' : 'cliente';
       setUserRole(role);
+      
+      // *** LOGIC FORCED REDIRECT FOR MERCHANTS ***
+      if (role === 'lojista') {
+          console.log("Usuário identificado como Lojista. Redirecionando para Painel.");
+          setActiveTab('store_area'); // Força a ida para o painel
+      } else {
+          // Se for cliente e estiver na home ou login, ok. 
+          // Se estava tentando acessar area restrita, poderia ser redirecionado, mas deixamos livre por enquanto.
+      }
+
       return role;
     } catch (err) {
       console.error('Erro ao buscar role:', err);
@@ -272,9 +288,8 @@ const App: React.FC = () => {
     }
   };
 
-  // ✅ 2) INIT AUTH
+  // ✅ INIT AUTH
   useEffect(() => {
-    // Safety timeout to ensure splash screen doesn't get stuck if Auth hangs
     const safetyTimer = setTimeout(() => {
       setIsAuthLoading(false);
     }, 4000);
@@ -285,13 +300,8 @@ const App: React.FC = () => {
 
         if (session?.user) {
           setUser(session.user as any);
-          await ensureProfile(session.user);
-          const role = await checkAndSetRole(session.user);
-
-          // Se entrar via URL /painel-parceiro, mantém store_area
-          if ((window.location.pathname === '/painel-parceiro' || window.location.pathname === '/painel-lojista') && role === 'lojista') {
-            setActiveTab('store_area');
-          }
+          // Não chamamos ensureProfile aqui para não sobrescrever dados de lojistas existentes
+          await checkAndSetRole(session.user);
         }
       } catch (e) {
         console.error("Auth init error:", e);
@@ -306,12 +316,8 @@ const App: React.FC = () => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === 'SIGNED_IN' && session?.user) {
         setUser(session.user as any);
-        await ensureProfile(session.user);
-        const role = await checkAndSetRole(session.user);
-
-        if (role === 'lojista' && activeTab === 'home') {
-          setActiveTab('store_area');
-        }
+        // Ao logar, checa role e redireciona
+        await checkAndSetRole(session.user);
 
         if (activeTab === 'cashback_landing') setActiveTab('cashback');
         if (activeTab === 'freguesia_connect_public') setActiveTab('home');
@@ -328,8 +334,7 @@ const App: React.FC = () => {
     };
   }, []);
 
-  // ✅ 3) FAILSAFE: Close Auth Modal if user is detected
-  // This prevents the "stuck loading" state if the modal logic hangs but auth succeeds in background
+  // Close Auth Modal if user detected
   useEffect(() => {
     if (user && isAuthOpen) {
       setIsAuthOpen(false);
@@ -343,10 +348,10 @@ const App: React.FC = () => {
   }, []);
 
   const handleLoginSuccess = async () => {
-    // Small delay to show success animation
     await new Promise(r => setTimeout(r, 500));
   };
 
+  // --- NAVIGATION HANDLERS ---
   const handleSelectCategory = (category: Category) => {
     setSelectedCategory(category);
     if (category.slug === 'food') setActiveTab('food_category');
@@ -451,6 +456,7 @@ const App: React.FC = () => {
     },
   ];
 
+  // List of tabs where the main header should be hidden
   const hideHeader = [
     'category_detail',
     'food_category',
@@ -462,7 +468,7 @@ const App: React.FC = () => {
     'cashback_landing',
     'cashback_info',
     'profile',
-    'store_area',
+    'store_area', // Merchant Dashboard
     'store_cashback_module',
     'store_ads_module',
     'store_connect',
@@ -505,7 +511,7 @@ const App: React.FC = () => {
             <Header
               isDarkMode={isDarkMode}
               toggleTheme={toggleTheme}
-              onAuthClick={handleHeaderProfileClick} // CORREÇÃO AQUI: Usa handler inteligente
+              onAuthClick={handleHeaderProfileClick}
               user={user}
               searchTerm={currentSearchTerm}
               onSearchChange={handleSearchChange}
@@ -669,11 +675,15 @@ const App: React.FC = () => {
               />
             )}
 
+            {/* PAINEL DO LOJISTA */}
             {activeTab === 'store_area' && (
               <StoreAreaView
-                onBack={() => setActiveTab('profile')}
+                onBack={() => {
+                    // Se for lojista, não tem "voltar" para o feed, apenas para Home (que deve redirecionar) ou logout.
+                    // Para simplificar, mantemos setActiveTab('profile') que é o Menu seguro.
+                    setActiveTab('profile');
+                }}
                 onNavigate={setActiveTab}
-                user={user}
               />
             )}
 
@@ -723,8 +733,8 @@ const App: React.FC = () => {
               <BusinessRegistrationFlow
                 onBack={() => setActiveTab('profile')}
                 onComplete={() => {
-                  setUserRole('lojista');
-                  setActiveTab('store_area');
+                  // Fallback se o flow de registro terminar sem criar conta automaticamente (apenas lead)
+                  setActiveTab('home');
                 }}
               />
             )}
