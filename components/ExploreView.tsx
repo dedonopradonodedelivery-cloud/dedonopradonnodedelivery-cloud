@@ -415,28 +415,48 @@ export const ExploreView: React.FC<ExploreViewProps> = ({
     <>
       <div className="px-4 py-4 space-y-6">
         
-        {/* Stories Section */}
+        {/* Stories Section - REDESIGNED 9:16 CARDS */}
         <section className="mt-2">
-          <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center justify-between mb-3 px-1">
             <h2 className="text-sm font-semibold text-gray-900 dark:text-white">
               Stories da Freguesia
             </h2>
           </div>
-          <div className="flex gap-4 overflow-x-auto pb-2 no-scrollbar -mx-4 px-4">
+          
+          <div className="flex gap-3 overflow-x-auto pb-4 no-scrollbar -mx-4 px-4 snap-x">
             {EXPLORE_STORIES.map((story, index) => (
               <button
                 key={story.id}
                 onClick={() => setActiveStoryIndex(index)}
-                className="flex flex-col items-center gap-1.5 flex-shrink-0 group"
+                className="snap-start relative flex-shrink-0 w-28 h-48 rounded-xl overflow-hidden group shadow-md border border-gray-100 dark:border-gray-800"
               >
-                <div className={`p-[2px] rounded-full ${story.isLive ? 'bg-gradient-to-tr from-orange-500 via-pink-500 to-purple-600 animate-pulse' : 'bg-gradient-to-tr from-orange-400 to-yellow-400'}`}>
-                  <div className="w-[60px] h-[60px] rounded-full border-2 border-white dark:border-gray-900 overflow-hidden bg-gray-200 p-[1px]">
-                    <img src={story.logo} alt={story.merchantName} className="w-full h-full object-cover rounded-full group-hover:scale-105 transition-transform" />
+                {/* Image Background */}
+                <img 
+                  src={story.logo} 
+                  alt={story.merchantName} 
+                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
+                />
+                
+                {/* Gradient Overlay for Text Visibility */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent opacity-90" />
+
+                {/* Live Badge if applicable */}
+                {story.isLive && (
+                  <div className="absolute top-2 right-2 bg-red-600/90 text-white text-[8px] font-bold px-1.5 py-0.5 rounded-md animate-pulse z-10 border border-white/20">
+                    AO VIVO
                   </div>
+                )}
+
+                {/* Content Overlay */}
+                <div className="absolute bottom-3 left-2 right-2 z-10 flex flex-col items-start text-left">
+                   {/* Mini Avatar on Card */}
+                   <div className={`w-8 h-8 rounded-full p-[1px] mb-1.5 ${story.isLive ? 'bg-gradient-to-tr from-orange-500 to-purple-600' : 'bg-white/30'}`}>
+                        <img src={story.logo} className="w-full h-full rounded-full object-cover border border-black/10" alt="" />
+                   </div>
+                   <span className="text-white text-[10px] font-bold leading-tight line-clamp-2 drop-shadow-md">
+                      {story.merchantName}
+                   </span>
                 </div>
-                <span className="text-[10px] text-gray-600 dark:text-gray-300 font-medium truncate w-[64px] text-center">
-                  {story.merchantName}
-                </span>
               </button>
             ))}
           </div>

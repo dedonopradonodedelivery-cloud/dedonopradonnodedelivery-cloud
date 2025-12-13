@@ -59,13 +59,36 @@ export const SpinWheelView: React.FC<SpinWheelViewProps> = ({ userId, userRole, 
   const [spinStatus, setSpinStatus] = useState<SpinStatus>('loading');
   const [spinResult, setSpinResult] = useState<Prize | null>(null);
   const [lastSpinDate, setLastSpinDate] = useState<Date | null>(null);
-  const [isMuted, setIsMuted] = useState(false);
+  
+  // Audio state with persistence
+  const [isMuted, setIsMuted] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('localizei_wheel_muted') === 'true';
+    }
+    return false;
+  });
 
+  const isMutedRef = useRef(isMuted);
   const audioRefs = useRef<Record<string, HTMLAudioElement | null>>({
     spin: null, win: null, lose: null,
   });
 
   const timeUntilNextSpin = useCountdown(lastSpinDate);
+
+  // Sync isMuted state with Ref and LocalStorage
+  useEffect(() => {
+    isMutedRef.current = isMuted;
+    localStorage.setItem('localizei_wheel_muted', String(isMuted));
+    
+    // Manage sound if toggled during spin
+    if (isSpinning) {
+      if (isMuted) {
+        stopSound('spin');
+      } else {
+        playSound('spin');
+      }
+    }
+  }, [isMuted, isSpinning]);
 
   // --- Initialize Sounds ---
   useEffect(() => {
@@ -76,23 +99,25 @@ export const SpinWheelView: React.FC<SpinWheelViewProps> = ({ userId, userRole, 
     });
     if (audioRefs.current.spin) {
         audioRefs.current.spin.loop = true; // Som de giro em loop
-        audioRefs.current.spin.volume = 0.5;
+        audioRefs.current.spin.volume = 0.3; // Lower volume for background effect
     }
+    if (audioRefs.current.win) audioRefs.current.win.volume = 0.6;
+    if (audioRefs.current.lose) audioRefs.current.lose.volume = 0.5;
   }, []);
   
   const playSound = (key: 'spin' | 'win' | 'lose') => {
-    if (isMuted) return;
+    if (isMutedRef.current) return;
     const audio = audioRefs.current[key];
     if (audio) {
       if (key === 'spin') {
-        audio.volume = 0.5;
-        audio.loop = true;
+        audio.currentTime = 0;
+        audio.play().catch(e => console.log("Audio play failed:", e));
       } else {
-        audio.loop = false;
-        audio.volume = 0.8;
+        // Stop spin sound before playing result
+        stopSound('spin');
+        audio.currentTime = 0;
+        audio.play().catch(e => console.log("Audio play failed:", e));
       }
-      audio.currentTime = 0;
-      audio.play().catch(e => console.log("Audio play failed:", e));
     }
   };
 
@@ -253,7 +278,9 @@ export const SpinWheelView: React.FC<SpinWheelViewProps> = ({ userId, userRole, 
       stopSound('spin');
       
       const result = PRIZES[winningSegmentIndex];
+      // Note: playSound checks isMutedRef internally
       playSound(result.prize_type === 'nao_foi_dessa_vez' ? 'lose' : 'win');
+      
       setSpinResult(result);
       setIsSpinning(false);
 
