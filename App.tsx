@@ -178,6 +178,16 @@ const App: React.FC = () => {
     setIsAuthOpen(true);
   };
 
+  // Lógica de Header: Se o usuário já está logado, vai para o perfil. Se não, abre o modal.
+  // Isso evita o bug onde o modal abria e fechava imediatamente.
+  const handleHeaderProfileClick = () => {
+    if (user) {
+      setActiveTab('profile');
+    } else {
+      handleOpenAuth('default');
+    }
+  };
+
   const isServiceTab = activeTab === 'services';
   const currentSearchTerm = isServiceTab ? serviceSearch : globalSearch;
 
@@ -495,7 +505,7 @@ const App: React.FC = () => {
             <Header
               isDarkMode={isDarkMode}
               toggleTheme={toggleTheme}
-              onAuthClick={() => handleOpenAuth('default')}
+              onAuthClick={handleHeaderProfileClick} // CORREÇÃO AQUI: Usa handler inteligente
               user={user}
               searchTerm={currentSearchTerm}
               onSearchChange={handleSearchChange}

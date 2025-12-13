@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { 
   User as UserIcon, 
@@ -58,16 +57,19 @@ const SectionTitle: React.FC<{ title: string }> = ({ title }) => (
 export const MenuView: React.FC<MenuViewProps> = ({ user, userRole, onAuthClick, onNavigate }) => {
   const isMerchant = userRole === 'lojista';
   
-  // Decide o título do perfil com base no papel se não houver nome
+  // Decide o título do perfil: Nome > Email > Fallback Genérico
   const profileTitle = user?.user_metadata?.full_name 
     ? user.user_metadata.full_name 
-    : userRole === 'lojista' 
-        ? 'Parceiro Localizei' 
-        : 'Usuário Localizei';
+    : user?.email 
+        ? user.email 
+        : userRole === 'lojista' 
+            ? 'Parceiro Localizei' 
+            : 'Usuário Localizei';
 
   const handleLogout = async () => {
     try {
       await supabase.auth.signOut();
+      // O App.tsx detectará o evento SIGNED_OUT e limpará o estado global
       onNavigate('home');
     } catch (error) {
       console.error("Error logging out", error);
@@ -137,8 +139,8 @@ export const MenuView: React.FC<MenuViewProps> = ({ user, userRole, onAuthClick,
                <UserIcon className="w-6 h-6 text-gray-400" />
             )}
           </div>
-          <div className="flex-1">
-            <h3 className="font-bold text-gray-900 dark:text-white text-base">
+          <div className="flex-1 overflow-hidden">
+            <h3 className="font-bold text-gray-900 dark:text-white text-base truncate">
                 {profileTitle}
             </h3>
             <p className="text-xs text-primary-500 font-bold mt-0.5 flex items-center gap-1">
@@ -235,7 +237,7 @@ export const MenuView: React.FC<MenuViewProps> = ({ user, userRole, onAuthClick,
         <div className="mt-8">
             <button 
                 onClick={handleLogout}
-                className="w-full p-4 rounded-2xl bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 font-bold text-sm flex items-center justify-center gap-2 hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors border border-red-100 dark:border-red-900/30"
+                className="w-full p-4 rounded-2xl bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 font-bold text-sm flex items-center justify-center gap-2 hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors border border-red-100 dark:border-red-900/30 active:scale-[0.98]"
             >
                 <LogOut className="w-4 h-4" />
                 Sair do aplicativo
@@ -244,7 +246,7 @@ export const MenuView: React.FC<MenuViewProps> = ({ user, userRole, onAuthClick,
 
         {/* Version Info */}
         <div className="text-center pt-8 pb-4">
-            <p className="text-[10px] text-gray-400">Localizei Freguesia v1.0.6</p>
+            <p className="text-[10px] text-gray-400">Localizei Freguesia v1.0.7</p>
         </div>
 
       </div>
