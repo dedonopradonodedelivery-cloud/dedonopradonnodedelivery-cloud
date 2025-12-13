@@ -190,7 +190,7 @@ const App: React.FC = () => {
     ? 'Buscar serviços, categorias ou especialidades...'
     : 'Buscar lojas, produtos, serviços...';
 
-  // ✅ 1) URL → TAB (isso evita que /painel-parceiro caia em home quando já está dentro do app)
+  // ✅ 1) URL → TAB logic
   useEffect(() => {
     const path = window.location.pathname;
 
@@ -200,7 +200,7 @@ const App: React.FC = () => {
       return;
     }
 
-    // Mantém seus deep links existentes
+    // Deep links
     const matchMerchantPay = path.match(/\/merchant\/([^/]+)\/pay/);
     if (matchMerchantPay && matchMerchantPay[1]) {
       setDeepLinkMerchantId(matchMerchantPay[1]);
@@ -262,8 +262,13 @@ const App: React.FC = () => {
     }
   };
 
-  // ✅ 2) initAuth com finally (isso evita travar no splash)
+  // ✅ 2) INIT AUTH - FIXED: Moved out dependencies to prevent infinite loops and added safety timeout
   useEffect(() => {
+    // Safety timeout to ensure splash screen doesn't get stuck if Auth hangs
+    const safetyTimer = setTimeout(() => {
+      setIsAuthLoading(false);
+    }, 4000);
+
     const initAuth = async () => {
       try {
         const { data: { session } } = await supabase.auth.getSession();
@@ -278,8 +283,11 @@ const App: React.FC = () => {
             setActiveTab('store_area');
           }
         }
+      } catch (e) {
+        console.error("Auth init error:", e);
       } finally {
         setIsAuthLoading(false);
+        clearTimeout(safetyTimer);
       }
     };
 
@@ -291,8 +299,7 @@ const App: React.FC = () => {
         await ensureProfile(session.user);
         const role = await checkAndSetRole(session.user);
 
-        // ✅ lojista cai direto no painel interno
-        if (role === 'lojista') {
+        if (role === 'lojista' && activeTab === 'home') {
           setActiveTab('store_area');
         }
 
@@ -305,11 +312,15 @@ const App: React.FC = () => {
       }
     });
 
-    return () => subscription.unsubscribe();
-  }, [activeTab]);
+    return () => {
+      subscription.unsubscribe();
+      clearTimeout(safetyTimer);
+    };
+  }, []); // Intentionally empty dependency array
 
+  // General Loading Timeout
   useEffect(() => {
-    const timer = setTimeout(() => setIsLoading(false), 5000);
+    const timer = setTimeout(() => setIsLoading(false), 3500);
     return () => clearTimeout(timer);
   }, []);
 
