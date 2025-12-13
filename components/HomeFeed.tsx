@@ -14,7 +14,12 @@ import {
   Filter,
   Percent,
   Star,
-  X
+  X,
+  MapPin,
+  Store as StoreIcon,
+  Compass,
+  Wallet,
+  Users
 } from 'lucide-react';
 import { QuoteRequestModal } from './QuoteRequestModal';
 import { EditorialCollection } from './EditorialListView';
@@ -176,13 +181,54 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
 
   const MINI_BANNERS = [
     { 
-      id: 'cashback', 
-      title: "Cashback Local", 
-      subtitle: "Dinheiro de volta.", 
-      icon: <Coins className="w-8 h-8 text-white" />, 
-      image: "https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?q=80&w=800&auto=format=fit=crop", 
+      id: 'community-connect', 
+      title: "Conectando quem empreende e quem consome na Freguesia.", 
+      subtitle: "Uma rede local que fortalece o bairro.", 
+      icon: <Users className="w-8 h-8 text-white" />, 
+      image: "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?q=80&w=800&auto=format=fit=crop", 
+      action: () => onNavigate('freguesia_connect_public'), 
+      cta: "Saiba mais",
+      theme: 'blue-royal'
+    },
+    { 
+      id: 'merchant-claim', 
+      title: "Tem um negócio aqui?", 
+      subtitle: "Reivindique sua loja na Localizei e alcance mais clientes.", 
+      icon: <StoreIcon className="w-8 h-8 text-white" />, 
+      image: "https://images.unsplash.com/photo-1556742031-c6961e8560b0?q=80&w=800&auto=format=fit=crop", 
+      action: () => onNavigate('business_registration'), 
+      cta: "Cadastrar",
+      theme: 'blue-dark'
+    },
+    { 
+      id: 'freguesia-hub', 
+      title: "Tudo o que você precisa na Freguesia, em um só lugar.", 
+      subtitle: "Comércios, serviços e vantagens locais.", 
+      icon: <MapPin className="w-8 h-8 text-white" />, 
+      image: "https://images.unsplash.com/photo-1524661135-423995f22d0b?q=80&w=800&auto=format=fit=crop", // Map/Location style image
+      action: () => onNavigate('explore'), 
+      cta: "Conhecer",
+      theme: 'blue-primary'
+    },
+    { 
+      id: 'cashback-rewards', 
+      title: "Ganhe cashback comprando no bairro.", 
+      subtitle: "Compre local e receba parte do valor de volta.", 
+      icon: <Wallet className="w-8 h-8 text-white" />, 
+      image: "https://images.unsplash.com/photo-1580519542036-c47de6196ba5?q=80&w=800&auto=format=fit=crop", // Money/Phone/Coins
       action: () => onNavigate('cashback_info'), 
-      cta: "Ver Agora" 
+      cta: "Começar",
+      theme: 'green'
+    },
+    { 
+      id: 'local-discovery', 
+      title: "Descubra serviços e comércios perto de você.", 
+      subtitle: "Alimentação, pets, saúde, beleza e muito mais.", 
+      icon: <Compass className="w-8 h-8 text-white" />, 
+      image: "https://images.unsplash.com/photo-1556745753-b2904692b3cd?q=80&w=800&auto=format=fit=crop", 
+      action: () => onNavigate('explore'), 
+      cta: "Explorar",
+      theme: 'blue-teal'
     },
     { 
       id: 'services', 
@@ -191,16 +237,8 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
       icon: <Wrench className="w-8 h-8 text-white" />, 
       image: "https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?q=80&w=800&auto=format=fit=crop", 
       action: () => onNavigate('services'), 
-      cta: "Orçamento" 
-    },
-    { 
-      id: 'achadinhos', 
-      title: "Achados de Hoje", 
-      subtitle: "Ofertas especiais.", 
-      icon: <Sparkles className="w-8 h-8 text-white" />, 
-      image: "https://images.unsplash.com/photo-1483985988355-763728e1935b?q=80&w=800&auto=format=fit=crop", 
-      action: () => onNavigate('marketplace'), 
-      cta: "Ver Ofertas" 
+      cta: "Orçamento",
+      theme: 'default'
     }
   ];
 
@@ -362,7 +400,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
                     style={{ scrollPaddingLeft: '20px' }}
                  >
                     {MINI_BANNERS.map((banner) => {
-                        const heightClass = 'h-[140px]'; // Increased height
+                        const heightClass = 'h-[140px]'; 
                         const paddingClass = 'p-4';
                         const titleClass = 'text-[15px] mb-0.5 font-extrabold relative z-10';
                         const subtitleClass = 'mb-1.5 text-[11px] leading-snug relative z-10';
@@ -373,13 +411,32 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
                             ? React.cloneElement(banner.icon as React.ReactElement<any>, { className: "w-5 h-5 text-white" })
                             : banner.icon;
 
+                        let gradientClass = "bg-gradient-to-r from-black/80 to-black/20"; // Default
+                        
+                        const theme = (banner as any).theme;
+
+                        if (theme === 'green') {
+                            gradientClass = "bg-gradient-to-r from-emerald-600/95 to-emerald-500/80";
+                        } else if (theme === 'blue-royal') {
+                            gradientClass = "bg-gradient-to-r from-indigo-700/95 to-blue-700/85";
+                        } else if (theme === 'blue-dark') {
+                            gradientClass = "bg-gradient-to-r from-slate-800/95 to-blue-900/85";
+                        } else if (theme === 'blue-primary') {
+                            gradientClass = "bg-gradient-to-r from-blue-600/95 to-blue-500/80";
+                        } else if (theme === 'blue-teal') {
+                            gradientClass = "bg-gradient-to-r from-cyan-700/95 to-blue-600/80";
+                        } else if (theme === 'orange') {
+                             // Fallback
+                             gradientClass = "bg-gradient-to-r from-blue-600/95 to-blue-500/80"; 
+                        }
+
                         return (
                             <div key={banner.id} onClick={banner.action} className="min-w-[88%] sm:min-w-[340px] snap-center cursor-pointer relative active:scale-[0.98] transition-transform">
                                 <div className={`w-full ${heightClass} rounded-[20px] bg-black ${paddingClass} flex flex-row items-center justify-between shadow-lg shadow-gray-200/60 dark:shadow-none relative overflow-hidden transition-all group`}>
                                 
                                 <div className="absolute inset-0 z-0">
                                     <img src={banner.image} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" alt="" />
-                                    <div className="absolute inset-0 bg-gradient-to-r from-black/80 to-black/20" />
+                                    <div className={`absolute inset-0 ${gradientClass}`} />
                                 </div>
 
                                 <div className="z-10 relative flex-shrink-0 mr-3">
