@@ -19,7 +19,8 @@ import {
   Store as StoreIcon,
   Compass,
   Wallet,
-  Users
+  Users,
+  Search
 } from 'lucide-react';
 import { QuoteRequestModal } from './QuoteRequestModal';
 import { EditorialCollection } from './EditorialListView';
@@ -180,6 +181,16 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
   }, [activeSearchTerm]);
 
   const MINI_BANNERS = [
+    { 
+      id: 'discovery-findings',
+      title: "Descubra achados da Freguesia.",
+      subtitle: "Promoções, serviços diferentes, novidades e oportunidades locais.",
+      icon: <Search className="w-8 h-8 text-white" />,
+      image: "https://images.unsplash.com/photo-1481437156560-3205f6a55735?q=80&w=800&auto=format=fit=crop",
+      action: () => onNavigate('explore'),
+      cta: "Descobrir",
+      theme: 'blue-discovery'
+    },
     { 
       id: 'community-connect', 
       title: "Conectando quem empreende e quem consome na Freguesia.", 
@@ -363,13 +374,13 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
 
             <div className="w-full">
                <div ref={categoryScrollRef} onScroll={handleCategoryScroll} className="overflow-x-auto px-5 pb-2 no-scrollbar">
-                  <div className="grid grid-rows-2 grid-flow-col gap-x-5 gap-y-4 w-max">
+                  <div className="grid grid-rows-2 grid-flow-col gap-x-4 gap-y-6 w-max">
                       {CATEGORIES.map((cat) => (
-                        <div key={cat.id} onClick={() => onSelectCategory(cat)} className="flex flex-col items-center gap-1.5 cursor-pointer group active:scale-95 transition-transform w-[68px]">
-                            <div className="w-14 h-14 bg-[#EEF4FF] dark:bg-gray-800 rounded-2xl shadow-sm border border-[#EEF4FF] dark:border-gray-700 flex items-center justify-center group-hover:shadow-md group-active:bg-[#DCE8FF] group-hover:bg-[#DCE8FF] transition-all">
-                                {React.isValidElement(cat.icon) ? React.cloneElement(cat.icon as React.ReactElement<any>, { className: "w-6 h-6 text-primary-500" }) : cat.icon}
+                        <div key={cat.id} onClick={() => onSelectCategory(cat)} className="flex flex-col items-center gap-2 cursor-pointer group active:scale-95 transition-transform w-[80px]">
+                            <div className="w-[72px] h-[72px] bg-[#EEF4FF] dark:bg-gray-800 rounded-[24px] shadow-sm border border-[#EEF4FF] dark:border-gray-700 flex items-center justify-center group-hover:shadow-md group-active:bg-[#DCE8FF] group-hover:bg-[#DCE8FF] transition-all">
+                                {React.isValidElement(cat.icon) ? React.cloneElement(cat.icon as React.ReactElement<any>, { className: "w-8 h-8 text-primary-500" }) : cat.icon}
                             </div>
-                            <span className="text-[10px] font-medium text-gray-600 dark:text-gray-400 text-center leading-tight w-full">{cat.name}</span>
+                            <span className="text-[11px] font-medium text-gray-600 dark:text-gray-400 text-center leading-tight w-full line-clamp-2">{cat.name}</span>
                         </div>
                       ))}
                   </div>
@@ -425,6 +436,8 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
                             gradientClass = "bg-gradient-to-r from-blue-600/95 to-blue-500/80";
                         } else if (theme === 'blue-teal') {
                             gradientClass = "bg-gradient-to-r from-cyan-700/95 to-blue-600/80";
+                        } else if (theme === 'blue-discovery') {
+                            gradientClass = "bg-gradient-to-r from-[#2D6DF6]/95 to-[#0EA5E9]/90";
                         } else if (theme === 'orange') {
                              // Fallback
                              gradientClass = "bg-gradient-to-r from-blue-600/95 to-blue-500/80"; 
