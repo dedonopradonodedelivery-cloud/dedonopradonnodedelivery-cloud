@@ -145,15 +145,28 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         }
         
         setSuccessMsg('Cadastro realizado! Entrando...');
-        // Não chamamos onClose aqui. Aguardamos o listener global.
+
+        // LÓGICA DE REDIRECIONAMENTO FORÇADO
+        if (authData.session) {
+            // Se já temos sessão (email confirmado ou auto-confirm), recarregamos a página 
+            // para garantir que o App.tsx pegue o perfil atualizado e redirecione para a área correta.
+            setTimeout(() => {
+                window.location.reload();
+            }, 1500);
+        } else if (authData.user && !authData.session) {
+            // Caso exija confirmação de email
+            setSuccessMsg('Verifique seu e-mail para confirmar o cadastro!');
+            setIsLoading(false); // Para permitir fechar ou tentar de novo
+        }
       }
 
     } catch (err: any) {
       console.error(err);
       setError(err.message || 'Ocorreu um erro ao processar sua solicitação.');
-    } finally {
       setIsLoading(false);
     }
+    // Nota: removemos o 'finally { setIsLoading(false) }' do fluxo de sucesso com reload 
+    // para evitar que o botão volte ao estado normal antes da página recarregar.
   };
 
   const handleLogout = async () => {
