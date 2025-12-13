@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { CATEGORIES } from '../constants';
 import { AdType, Category, Store } from '../types';
@@ -174,9 +175,33 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
   }, [activeSearchTerm]);
 
   const MINI_BANNERS = [
-    { id: 'cashback', title: "Cashback Local", subtitle: "Dinheiro de volta.", icon: <Coins className="w-8 h-8 text-white" />, bgClass: "bg-gradient-to-r from-[#1E5BFF] to-[#1B54D9]", action: () => onNavigate('cashback_info'), cta: "Ver Agora" },
-    { id: 'services', title: "Peça um Orçamento", subtitle: "Receba até 5 orçamentos.", icon: <Wrench className="w-8 h-8 text-white" />, bgClass: "bg-gradient-to-r from-blue-600 to-cyan-500", action: () => onNavigate('services'), cta: "Orçamento" },
-    { id: 'achadinhos', title: "Achados de Hoje", subtitle: "Ofertas especiais.", icon: <Sparkles className="w-8 h-8 text-white" />, bgClass: "bg-gradient-to-r from-pink-500 to-rose-500", action: () => onNavigate('marketplace'), cta: "Ver Ofertas" }
+    { 
+      id: 'cashback', 
+      title: "Cashback Local", 
+      subtitle: "Dinheiro de volta.", 
+      icon: <Coins className="w-8 h-8 text-white" />, 
+      image: "https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?q=80&w=800&auto=format=fit=crop", 
+      action: () => onNavigate('cashback_info'), 
+      cta: "Ver Agora" 
+    },
+    { 
+      id: 'services', 
+      title: "Peça um Orçamento", 
+      subtitle: "Receba até 5 orçamentos.", 
+      icon: <Wrench className="w-8 h-8 text-white" />, 
+      image: "https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?q=80&w=800&auto=format=fit=crop", 
+      action: () => onNavigate('services'), 
+      cta: "Orçamento" 
+    },
+    { 
+      id: 'achadinhos', 
+      title: "Achados de Hoje", 
+      subtitle: "Ofertas especiais.", 
+      icon: <Sparkles className="w-8 h-8 text-white" />, 
+      image: "https://images.unsplash.com/photo-1483985988355-763728e1935b?q=80&w=800&auto=format=fit=crop", 
+      action: () => onNavigate('marketplace'), 
+      cta: "Ver Ofertas" 
+    }
   ];
 
   const handleCategoryScroll = () => {
@@ -337,11 +362,11 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
                     style={{ scrollPaddingLeft: '20px' }}
                  >
                     {MINI_BANNERS.map((banner) => {
-                        const heightClass = 'h-[90px]'; 
+                        const heightClass = 'h-[140px]'; // Increased height
                         const paddingClass = 'p-4';
-                        const titleClass = 'text-[15px] mb-0.5 font-extrabold';
-                        const subtitleClass = 'mb-1.5 text-[11px] leading-snug';
-                        const btnPaddingClass = 'px-3 py-1 text-[9px]';
+                        const titleClass = 'text-[15px] mb-0.5 font-extrabold relative z-10';
+                        const subtitleClass = 'mb-1.5 text-[11px] leading-snug relative z-10';
+                        const btnPaddingClass = 'px-3 py-1 text-[9px] relative z-10';
                         const iconContainerClass = 'w-10 h-10';
                         
                         const IconElement = React.isValidElement(banner.icon) 
@@ -350,8 +375,13 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
 
                         return (
                             <div key={banner.id} onClick={banner.action} className="min-w-[88%] sm:min-w-[340px] snap-center cursor-pointer relative active:scale-[0.98] transition-transform">
-                                <div className={`w-full ${heightClass} rounded-[20px] ${banner.bgClass} ${paddingClass} flex flex-row items-center justify-between shadow-lg shadow-gray-200/60 dark:shadow-none relative overflow-hidden transition-all`}>
+                                <div className={`w-full ${heightClass} rounded-[20px] bg-black ${paddingClass} flex flex-row items-center justify-between shadow-lg shadow-gray-200/60 dark:shadow-none relative overflow-hidden transition-all group`}>
                                 
+                                <div className="absolute inset-0 z-0">
+                                    <img src={banner.image} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" alt="" />
+                                    <div className="absolute inset-0 bg-gradient-to-r from-black/80 to-black/20" />
+                                </div>
+
                                 <div className="z-10 relative flex-shrink-0 mr-3">
                                     <div className={`${iconContainerClass} bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm border border-white/10 shadow-inner`}>
                                         {IconElement}
@@ -368,9 +398,6 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
                                         {banner.cta} <ArrowRight className="w-2.5 h-2.5" />
                                     </button>
                                 </div>
-
-                                <div className="absolute -right-6 -bottom-6 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
-                                <div className="absolute -left-6 -top-6 w-24 h-24 bg-white/5 rounded-full blur-xl"></div>
                                 </div>
                             </div>
                         );
