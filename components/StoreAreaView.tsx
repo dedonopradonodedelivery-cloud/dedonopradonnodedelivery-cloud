@@ -1,26 +1,15 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   ChevronLeft, 
   BadgeCheck, 
-  DollarSign, 
-  ShoppingBag, 
-  Users, 
-  Repeat, 
   TrendingUp, 
-  Wallet, 
   Megaphone, 
   ChevronRight,
   Settings,
   HelpCircle,
   CreditCard,
-  LayoutDashboard,
-  Calendar,
   Bell,
-  QrCode,
-  AlertTriangle,
-  Mail,
-  Lock,
-  Loader2
+  QrCode
 } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import { User } from '@supabase/supabase-js';
@@ -31,38 +20,11 @@ interface StoreAreaViewProps {
   user?: User | null;
 }
 
-// Mock Base Data (Reference for 30 days)
+// Mock Base Data
 const STORE_DATA = {
   name: "Minha Loja",
   logo: "https://images.unsplash.com/photo-1594212699903-ec8a3eca50f5?q=80&w=200&auto=format&fit=crop",
-  baseKpis: {
-    sales: 0,
-    orders: 0,
-    newCustomers: 0,
-    recurringCustomers: 0,
-    cashbackGiven: 0,
-    adBalance: 0.00
-  },
 };
-
-type DateRange = '7d' | '15d' | '30d' | '90d' | 'custom';
-
-const KPICard: React.FC<{ 
-  icon: React.ElementType; 
-  label: string; 
-  value: string; 
-  color: string 
-}> = ({ icon: Icon, label, value, color }) => (
-  <div className="bg-white dark:bg-gray-800 p-3 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm flex flex-col justify-between h-24 transition-all duration-300 animate-in fade-in">
-    <div className={`w-8 h-8 rounded-full flex items-center justify-center ${color} bg-opacity-10 dark:bg-opacity-20`}>
-      <Icon className={`w-4 h-4 ${color.replace('bg-', 'text-')}`} />
-    </div>
-    <div>
-      <p className="text-[10px] text-gray-500 dark:text-gray-400 font-medium uppercase tracking-wide truncate">{label}</p>
-      <p className="text-lg font-bold text-gray-900 dark:text-white leading-tight">{value}</p>
-    </div>
-  </div>
-);
 
 const MenuLink: React.FC<{ 
   icon: React.ElementType; 
@@ -94,7 +56,6 @@ const MenuLink: React.FC<{
 
 export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate, user }) => {
   const [isCashbackEnabled, setIsCashbackEnabled] = useState(false);
-  const [dateRange, setDateRange] = useState<DateRange>('30d');
   const [pendingRequestsCount, setPendingRequestsCount] = useState(0);
   
   // Agora que a confirmação de email não é obrigatória, assumimos verificado se logado.
@@ -134,17 +95,6 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
 
     return () => { supabase.removeChannel(sub); };
   }, [user]);
-
-  const formatCurrency = (val: number) => 
-    val.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-
-  const filterOptions: { id: DateRange; label: string }[] = [
-      { id: '7d', label: '7 dias' },
-      { id: '15d', label: '15 dias' },
-      { id: '30d', label: '30 dias' },
-      { id: '90d', label: '90 dias' },
-      { id: 'custom', label: 'Personalizado' },
-  ];
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-24 font-sans animate-in slide-in-from-right duration-300">
@@ -206,72 +156,22 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
             </button>
         )}
 
-        {/* --- VISÃO GERAL & FILTROS --- */}
-        <div>
-            <div className="flex items-center justify-between mb-4 px-1">
-                <h2 className="text-base font-bold text-gray-800 dark:text-gray-200 flex items-center gap-2">
-                    <LayoutDashboard className="w-4 h-4 text-[#2D6DF6]" />
-                    Visão Geral
-                </h2>
+        {/* --- NEW BUTTON: PAINEL DE TRANSAÇÕES --- */}
+        <button
+            onClick={() => onNavigate && onNavigate('merchant_panel')}
+            className="w-full bg-gradient-to-r from-[#1E5BFF] to-[#1749CC] text-white p-5 rounded-3xl shadow-lg shadow-blue-500/20 flex items-center justify-between active:scale-[0.98] transition-transform"
+        >
+            <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/10">
+                    <QrCode className="w-6 h-6 text-white" />
+                </div>
+                <div className="text-left">
+                    <h3 className="font-bold text-lg leading-none mb-1">Terminal de Caixa</h3>
+                    <p className="text-xs text-blue-100">Gerar QR, PIN e validar compras</p>
+                </div>
             </div>
-
-            {/* Filter Scroll */}
-            <div className="flex gap-2 overflow-x-auto no-scrollbar mb-6 pb-2 -mx-5 px-5">
-                {filterOptions.map((opt) => (
-                    <button
-                        key={opt.id}
-                        onClick={() => setDateRange(opt.id)}
-                        className={`flex-shrink-0 px-4 py-2 rounded-full text-xs font-bold transition-all border ${
-                            dateRange === opt.id
-                            ? 'bg-[#1E5BFF] text-white border-[#1E5BFF] shadow-md shadow-blue-500/20'
-                            : 'bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 border-gray-200 dark:border-gray-700 hover:border-blue-200 dark:hover:border-gray-600'
-                        }`}
-                    >
-                        {opt.id === 'custom' && <Calendar className="w-3 h-3 inline-block mr-1.5 -mt-0.5" />}
-                        {opt.label}
-                    </button>
-                ))}
-            </div>
-
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                <KPICard 
-                    icon={DollarSign} 
-                    label="Vendas Localizei" 
-                    value={formatCurrency(STORE_DATA.baseKpis.sales)} 
-                    color="bg-green-500"
-                />
-                <KPICard 
-                    icon={ShoppingBag} 
-                    label="Pedidos" 
-                    value={STORE_DATA.baseKpis.orders.toString()} 
-                    color="bg-blue-500"
-                />
-                <KPICard 
-                    icon={Users} 
-                    label="Novos Clientes" 
-                    value={`+${STORE_DATA.baseKpis.newCustomers}`} 
-                    color="bg-purple-500"
-                />
-                <KPICard 
-                    icon={Repeat} 
-                    label="Recorrentes" 
-                    value={STORE_DATA.baseKpis.recurringCustomers.toString()} 
-                    color="bg-[#1E5BFF]"
-                />
-                <KPICard 
-                    icon={TrendingUp} 
-                    label="Cashback Gerado" 
-                    value={formatCurrency(STORE_DATA.baseKpis.cashbackGiven)} 
-                    color="bg-[#1E5BFF]"
-                />
-                <KPICard 
-                    icon={Wallet} 
-                    label="Saldo Anúncios" 
-                    value={formatCurrency(STORE_DATA.baseKpis.adBalance)} 
-                    color="bg-gray-500"
-                />
-            </div>
-        </div>
+            <ChevronRight className="w-5 h-5 text-white/70" />
+        </button>
 
         {/* --- NAVIGATION LIST --- */}
         <div>
