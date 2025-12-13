@@ -53,6 +53,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       setError('');
       setSuccessMsg('');
       setWebsite('');
+      setIsLoading(false); // Reset loading state when opening
       if (signupContext === 'merchant_lead_qr') {
         setMode('register');
         setProfileType('store');
@@ -94,10 +95,15 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
     try {
       if (mode === 'login') {
-        const { error } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
+        // Race condition timeout to prevent infinite loading
+        const { error } = await Promise.race([
+            supabase.auth.signInWithPassword({
+                email,
+                password,
+            }),
+            new Promise((_, reject) => setTimeout(() => reject(new Error('O login demorou muito. Verifique sua conexão e tente novamente.')), 10000))
+        ]) as any;
+
         if (error) throw error;
 
         finishAuth();
@@ -135,7 +141,15 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         }
       }
     } catch (err: any) {
-      setError(err?.message || 'Erro ao autenticar');
+      const msg = err?.message || 'Erro ao autenticar';
+      
+      // Auto-switch to login if user exists
+      if (msg.includes('User already registered') || msg.includes('already registered')) {
+        setMode('login');
+        setError('E-mail já cadastrado. Por favor, faça login.');
+      } else {
+        setError(msg);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -150,11 +164,11 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   return (
     <div className="fixed inset-0 z-[60] bg-black/60 flex items-center justify-center p-4">
       <div className="bg-white dark:bg-gray-900 w-full max-w-md rounded-3xl p-6 relative">
-        <button onClick={onClose} className="absolute top-4 right-4">
+        <button onClick={onClose} className="absolute top-4 right-4 text-gray-500 dark:text-gray-400">
           <X />
         </button>
 
-        <h2 className="text-2xl font-bold text-center mb-4">
+        <h2 className="text-2xl font-bold text-center mb-4 text-gray-900 dark:text-white">
           {mode === 'login' ? 'Entrar' : 'Criar conta'}
         </h2>
 
@@ -163,8 +177,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             <button
               type="button"
               onClick={() => setProfileType('cliente')}
-              className={`flex-1 py-2 rounded ${
-                profileType === 'cliente' ? 'bg-blue-600 text-white' : 'bg-gray-200'
+              className={`flex-1 py-2 rounded transition-colors ${
+                profileType === 'cliente' ? 'bg-blue-600 text-white' : 'bg-gray-200 dark:bg-gray-700 dark:text-gray-300'
               }`}
             >
               Cliente
@@ -172,8 +186,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             <button
               type="button"
               onClick={() => setProfileType('store')}
-              className={`flex-1 py-2 rounded ${
-                profileType === 'store' ? 'bg-blue-600 text-white' : 'bg-gray-200'
+              className={`flex-1 py-2 rounded transition-colors ${
+                profileType === 'store' ? 'bg-blue-600 text-white' : 'bg-gray-200 dark:bg-gray-700 dark:text-gray-300'
               }`}
             >
               Lojista
@@ -189,34 +203,61 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             placeholder="Email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full p-3 rounded bg-gray-100"
+            className="w-full p-3 rounded-xl bg-gray-100 dark:bg-gray-800 dark:text-white border border-transparent focus:border-blue-500 outline-none"
             required
           />
 
-          <input
-            type={showPassword ? 'text' : 'password'}
-            placeholder="Senha"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full p-3 rounded bg-gray-100"
-            required
-          />
+          <div className="relative">
+            <input
+                type={showPassword ? 'text' : 'password'}
+                placeholder="Senha"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full p-3 rounded-xl bg-gray-100 dark:bg-gray-800 dark:text-white border border-transparent focus:border-blue-500 outline-none pr-10"
+                required
+            />
+            <button 
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"
+            >
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+            </button>
+          </div>
 
-          {error && <p className="text-red-600 text-sm">{error}</p>}
-          {successMsg && <p className="text-green-600 text-sm">{successMsg}</p>}
+          {error && (
+            <div className="p-3 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 text-sm rounded-lg flex items-start gap-2">
+                <span className="mt-0.5 font-bold">⚠️</span>
+                <span>{error}</span>
+            </div>
+          )}
+          
+          {successMsg && (
+            <div className="p-3 bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 text-sm rounded-lg flex items-center gap-2">
+                <CheckCircle2 size={16} />
+                <span>{successMsg}</span>
+            </div>
+          )}
 
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full bg-blue-600 text-white py-3 rounded"
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 rounded-xl transition-all active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
           >
-            {isLoading ? '...' : 'Continuar'}
+            {isLoading ? (
+                <>
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    {mode === 'login' ? 'Entrando...' : 'Criando...'}
+                </>
+            ) : (
+                mode === 'login' ? 'Continuar' : 'Cadastrar'
+            )}
           </button>
         </form>
 
-        <p className="text-center mt-4 text-sm">
+        <p className="text-center mt-6 text-sm text-gray-500 dark:text-gray-400">
           {mode === 'login' ? 'Não tem conta?' : 'Já tem conta?'}
-          <button onClick={toggleMode} className="ml-1 text-blue-600 font-bold">
+          <button onClick={toggleMode} className="ml-1 text-blue-600 dark:text-blue-400 font-bold hover:underline">
             {mode === 'login' ? 'Cadastrar' : 'Entrar'}
           </button>
         </p>

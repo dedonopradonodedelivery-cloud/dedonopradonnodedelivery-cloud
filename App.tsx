@@ -262,7 +262,7 @@ const App: React.FC = () => {
     }
   };
 
-  // ✅ 2) INIT AUTH - FIXED: Moved out dependencies to prevent infinite loops and added safety timeout
+  // ✅ 2) INIT AUTH
   useEffect(() => {
     // Safety timeout to ensure splash screen doesn't get stuck if Auth hangs
     const safetyTimer = setTimeout(() => {
@@ -316,7 +316,15 @@ const App: React.FC = () => {
       subscription.unsubscribe();
       clearTimeout(safetyTimer);
     };
-  }, []); // Intentionally empty dependency array
+  }, []);
+
+  // ✅ 3) FAILSAFE: Close Auth Modal if user is detected
+  // This prevents the "stuck loading" state if the modal logic hangs but auth succeeds in background
+  useEffect(() => {
+    if (user && isAuthOpen) {
+      setIsAuthOpen(false);
+    }
+  }, [user, isAuthOpen]);
 
   // General Loading Timeout
   useEffect(() => {
@@ -325,6 +333,7 @@ const App: React.FC = () => {
   }, []);
 
   const handleLoginSuccess = async () => {
+    // Small delay to show success animation
     await new Promise(r => setTimeout(r, 500));
   };
 
