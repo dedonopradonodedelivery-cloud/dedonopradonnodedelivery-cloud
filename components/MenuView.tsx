@@ -73,19 +73,29 @@ export const MenuView: React.FC<MenuViewProps> = ({ user, userRole, onAuthClick,
     setIsLoggingOut(true);
 
     try {
-      // Tenta deslogar no Supabase
-      const { error } = await supabase.auth.signOut();
-      if (error) throw error;
+      // Cria uma promessa de timeout de 2 segundos
+      const timeOutPromise = new Promise((_, reject) => {
+          setTimeout(() => reject(new Error('Logout timeout')), 2000);
+      });
+
+      // Tenta deslogar no Supabase, mas desiste se demorar mais que 2s
+      await Promise.race([
+          supabase.auth.signOut(),
+          timeOutPromise
+      ]);
     } catch (error) {
-      console.error("Erro ao sair (API):", error);
-      // Fallback: Se der erro na API (ex: sem internet), força a limpeza local
-      localStorage.clear();
+      console.warn("Forçando logout após timeout ou erro:", error);
     } finally {
-      // Sempre navega para home e reseta o estado visual
+      // Limpeza nuclear: Garante que o usuário saia mesmo se a API falhar
+      localStorage.clear();
+      sessionStorage.clear();
+      
+      // Reseta estado visual
       setIsLoggingOut(false);
+      
+      // Navega para home e força recarregamento para limpar memória
       onNavigate('home');
-      // Força um reload suave para garantir que o estado global limpe se o listener falhar
-      // window.location.reload(); // Opcional, mas App.tsx deve lidar com o evento SIGNED_OUT
+      window.location.reload(); 
     }
   };
 
@@ -264,7 +274,7 @@ export const MenuView: React.FC<MenuViewProps> = ({ user, userRole, onAuthClick,
 
         {/* Version Info */}
         <div className="text-center pt-8 pb-4">
-            <p className="text-[10px] text-gray-400">Localizei Freguesia v1.0.8</p>
+            <p className="text-[10px] text-gray-400">Localizei Freguesia v1.0.9</p>
         </div>
 
       </div>
