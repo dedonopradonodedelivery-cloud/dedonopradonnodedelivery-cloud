@@ -178,7 +178,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
     { 
       id: 'discovery-findings',
       title: "Descubra achados da Freguesia.",
-      subtitle: "Promoções, serviços diferentes, novidades e oportunidades locais.",
+      subtitle: "Promoções, serviços e novidades.",
       icon: <Search className="w-8 h-8 text-white" />,
       image: "https://images.unsplash.com/photo-1481437156560-3205f6a55735?q=80&w=800&auto=format=fit=crop",
       action: () => onNavigate('explore'),
@@ -187,8 +187,8 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
     },
     { 
       id: 'community-connect', 
-      title: "Conectando quem empreende e quem consome na Freguesia.", 
-      subtitle: "Uma rede local que fortalece o bairro.", 
+      title: "Conectando empreendedores e clientes.", 
+      subtitle: "Uma rede que fortalece o bairro.", 
       icon: <Users className="w-8 h-8 text-white" />, 
       image: "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?q=80&w=800&auto=format=fit=crop", 
       action: () => onNavigate('freguesia_connect_public'), 
@@ -198,7 +198,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
     { 
       id: 'merchant-claim', 
       title: "Tem um negócio aqui?", 
-      subtitle: "Reivindique sua loja na Localizei e alcance mais clientes.", 
+      subtitle: "Cadastre sua loja na Localizei.", 
       icon: <StoreIcon className="w-8 h-8 text-white" />, 
       image: "https://images.unsplash.com/photo-1556742031-c6961e8560b0?q=80&w=800&auto=format=fit=crop", 
       action: () => onNavigate('business_registration'), 
@@ -207,28 +207,28 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
     },
     { 
       id: 'freguesia-hub', 
-      title: "Tudo o que você precisa na Freguesia, em um só lugar.", 
-      subtitle: "Comércios, serviços e vantagens locais.", 
+      title: "Tudo o que você precisa na Freguesia.", 
+      subtitle: "Comércios, serviços e vantagens.", 
       icon: <MapPin className="w-8 h-8 text-white" />, 
-      image: "https://images.unsplash.com/photo-1524661135-423995f22d0b?q=80&w=800&auto=format=fit=crop", // Map/Location style image
+      image: "https://images.unsplash.com/photo-1524661135-423995f22d0b?q=80&w=800&auto=format=fit=crop", 
       action: () => onNavigate('explore'), 
       cta: "Conhecer",
       theme: 'blue-primary'
     },
     { 
       id: 'cashback-rewards', 
-      title: "Ganhe cashback comprando no bairro.", 
-      subtitle: "Compre local e receba parte do valor de volta.", 
+      title: "Ganhe cashback comprando local.", 
+      subtitle: "Receba parte do valor de volta.", 
       icon: <Wallet className="w-8 h-8 text-white" />, 
-      image: "https://images.unsplash.com/photo-1580519542036-c47de6196ba5?q=80&w=800&auto=format=fit=crop", // Money/Phone/Coins
+      image: "https://images.unsplash.com/photo-1580519542036-c47de6196ba5?q=80&w=800&auto=format=fit=crop", 
       action: () => onNavigate('cashback_info'), 
       cta: "Começar",
       theme: 'green'
     },
     { 
       id: 'local-discovery', 
-      title: "Descubra serviços e comércios perto de você.", 
-      subtitle: "Alimentação, pets, saúde, beleza e muito mais.", 
+      title: "Descubra serviços perto de você.", 
+      subtitle: "Alimentação, pets, saúde e mais.", 
       icon: <Compass className="w-8 h-8 text-white" />, 
       image: "https://images.unsplash.com/photo-1556745753-b2904692b3cd?q=80&w=800&auto=format=fit=crop", 
       action: () => onNavigate('explore'), 
@@ -237,8 +237,8 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
     },
     { 
       id: 'services', 
-      title: "Peça um Orçamento", 
-      subtitle: "Receba até 5 orçamentos.", 
+      title: "Peça um Orçamento Grátis", 
+      subtitle: "Receba até 5 propostas.", 
       icon: <Wrench className="w-8 h-8 text-white" />, 
       image: "https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?q=80&w=800&auto=format=fit=crop", 
       action: () => onNavigate('services'), 
@@ -361,12 +361,12 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
 
             <div className="w-full relative group">
                  <div className="px-5 mb-3 flex items-center justify-between">
-                    <h3 className="text-base font-semibold text-gray-900 dark:text-white">O que você vai encontrar na Localizei</h3>
+                    <h3 className="text-base font-semibold text-gray-900 dark:text-white">O que você vai encontrar</h3>
                  </div>
                  
                  <button 
                     onClick={handleBannerScrollRight}
-                    className="absolute right-2 top-1/2 translate-y-1/4 z-20 bg-white/90 dark:bg-gray-800/90 p-2 rounded-full shadow-lg text-gray-600 dark:text-gray-300 backdrop-blur-sm border border-gray-100 dark:border-gray-700 active:scale-95 transition-all opacity-0 group-hover:opacity-100 hidden sm:block"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 z-20 bg-white/90 dark:bg-gray-800/90 p-2 rounded-full shadow-lg text-gray-600 dark:text-gray-300 backdrop-blur-sm border border-gray-100 dark:border-gray-700 active:scale-95 transition-all opacity-0 group-hover:opacity-100 hidden sm:block"
                     aria-label="Próximo banner"
                  >
                     <ArrowRight className="w-5 h-5" />
@@ -374,72 +374,50 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
 
                  <div 
                     ref={bannerScrollRef}
-                    className="flex gap-3 overflow-x-auto px-5 pb-4 no-scrollbar snap-x snap-mandatory items-start"
-                    style={{ scrollPaddingLeft: '20px' }}
+                    className="flex gap-2 overflow-x-auto px-4 pb-2 no-scrollbar snap-x snap-mandatory items-start"
+                    style={{ scrollPaddingLeft: '16px' }}
                  >
                     {MINI_BANNERS.map((banner) => {
-                        const heightClass = 'h-[140px]'; 
-                        const paddingClass = 'p-4';
-                        const titleClass = 'text-[15px] mb-0.5 font-extrabold relative z-10';
-                        const subtitleClass = 'mb-1.5 text-[11px] leading-snug relative z-10';
-                        const btnPaddingClass = 'px-3 py-1 text-[9px] relative z-10';
-                        const iconContainerClass = 'w-10 h-10';
-                        
-                        const IconElement = React.isValidElement(banner.icon) 
-                            ? React.cloneElement(banner.icon as React.ReactElement<any>, { className: "w-5 h-5 text-white" })
-                            : banner.icon;
-
-                        let gradientClass = "bg-gradient-to-r from-black/80 to-black/20"; // Default
-                        
+                        const heightClass = 'h-[120px]';
                         const theme = (banner as any).theme;
+                        let gradientClass = "bg-gradient-to-r from-gray-900 via-gray-900/60 to-transparent";
 
                         if (theme === 'green') {
-                            gradientClass = "bg-gradient-to-r from-emerald-600/95 to-emerald-500/80";
+                            gradientClass = "bg-gradient-to-r from-emerald-800 via-emerald-600/60 to-transparent";
                         } else if (theme === 'blue-royal') {
-                            gradientClass = "bg-gradient-to-r from-indigo-700/95 to-blue-700/85";
+                            gradientClass = "bg-gradient-to-r from-indigo-900 via-indigo-800/60 to-transparent";
                         } else if (theme === 'blue-dark') {
-                            gradientClass = "bg-gradient-to-r from-slate-800/95 to-blue-900/85";
+                            gradientClass = "bg-gradient-to-r from-slate-900 via-slate-800/60 to-transparent";
                         } else if (theme === 'blue-primary') {
-                            gradientClass = "bg-gradient-to-r from-blue-600/95 to-blue-500/80";
+                            gradientClass = "bg-gradient-to-r from-blue-800 via-blue-600/60 to-transparent";
                         } else if (theme === 'blue-teal') {
-                            gradientClass = "bg-gradient-to-r from-cyan-700/95 to-blue-600/80";
+                            gradientClass = "bg-gradient-to-r from-cyan-900 via-cyan-700/60 to-transparent";
                         } else if (theme === 'blue-discovery') {
-                            gradientClass = "bg-gradient-to-r from-[#2D6DF6]/95 to-[#0EA5E9]/90";
-                        } else if (theme === 'orange') {
-                             // Fallback
-                             gradientClass = "bg-gradient-to-r from-blue-600/95 to-blue-500/80"; 
+                            gradientClass = "bg-gradient-to-r from-[#2D6DF6] via-[#0EA5E9]/60 to-transparent";
                         }
 
                         return (
-                            <div key={banner.id} onClick={banner.action} className="min-w-[88%] sm:min-w-[340px] snap-center cursor-pointer relative active:scale-[0.98] transition-transform">
-                                <div className={`w-full ${heightClass} rounded-[20px] bg-black ${paddingClass} flex flex-row items-center justify-between shadow-lg shadow-gray-200/60 dark:shadow-none relative overflow-hidden transition-all group`}>
+                            <div key={banner.id} onClick={banner.action} className="min-w-[93%] sm:min-w-[340px] snap-center cursor-pointer relative active:scale-[0.98] transition-transform">
+                                <div className={`w-full ${heightClass} rounded-2xl bg-black flex flex-row items-center justify-between shadow-md shadow-gray-200/50 dark:shadow-none relative overflow-hidden transition-all group`}>
                                 
                                 <div className="absolute inset-0 z-0">
-                                    <img src={banner.image} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" alt="" />
+                                    <img src={banner.image} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 opacity-90" alt="" />
                                     <div className={`absolute inset-0 ${gradientClass}`} />
                                 </div>
 
-                                <div className="z-10 relative flex-shrink-0 mr-3">
-                                    <div className={`${iconContainerClass} bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm border border-white/10 shadow-inner`}>
-                                        {IconElement}
+                                <div className="z-10 flex flex-col justify-center h-full flex-1 pl-5 pr-12 py-3">
+                                    <h3 className="text-white font-bold text-lg leading-tight mb-1 drop-shadow-md w-[80%]">{banner.title}</h3>
+                                    <p className="text-white/90 text-xs font-medium line-clamp-1 mb-3 w-[90%]">{banner.subtitle}</p>
+                                    
+                                    <div className="flex items-center gap-1 text-white text-xs font-bold bg-white/20 hover:bg-white/30 backdrop-blur-md w-fit px-3 py-1.5 rounded-full transition-colors">
+                                        {banner.cta} <ArrowRight className="w-3 h-3" />
                                     </div>
-                                </div>
-
-                                <div className="z-10 flex flex-col justify-center h-full flex-1 min-w-0">
-                                    <h3 className={`text-white font-display leading-tight tracking-tight ${titleClass}`}>{banner.title}</h3>
-                                    <p className={`text-white/90 font-medium ${subtitleClass}`}>{banner.subtitle}</p>
-                                </div>
-
-                                <div className="z-10 flex-shrink-0 ml-2">
-                                    <button className={`bg-white/20 hover:bg-white/30 backdrop-blur-md border border-white/20 text-white font-bold rounded-full w-fit transition-colors flex items-center gap-1 ${btnPaddingClass}`}>
-                                        {banner.cta} <ArrowRight className="w-2.5 h-2.5" />
-                                    </button>
                                 </div>
                                 </div>
                             </div>
                         );
                     })}
-                    <div className="min-w-[5px] flex-shrink-0"></div>
+                    <div className="min-w-[12px] flex-shrink-0"></div>
                  </div>
             </div>
 
