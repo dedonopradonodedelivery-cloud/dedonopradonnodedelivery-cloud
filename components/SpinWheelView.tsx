@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { supabase } from '../lib/supabaseClient';
-import { Gift, RefreshCw, ThumbsDown, X, Loader2, History, Wallet, Volume2, VolumeX, Lock, ArrowRight, PartyPopper } from 'lucide-react';
+import { Gift, RefreshCw, ThumbsDown, History, Wallet, Volume2, VolumeX, Lock, ArrowRight } from 'lucide-react';
 import { useCountdown } from '../hooks/useCountdown';
 
 // --- Tipos e Constantes ---
@@ -27,22 +27,23 @@ interface Prize {
   description: string;
 }
 
+// Paleta de cores vibrantes e contrastantes
 const PRIZES: Prize[] = [
-  { prize_key: 'reais_5', line1: 'R$ 5', line2: 'de Volta', prize_label: 'R$ 5,00 de Volta', prize_type: 'cashback', prize_value: 5, status: 'creditado', color: '#FFFFFF', textColor: '#1E5BFF', description: 'O valor foi creditado na sua carteira digital.' },
-  { prize_key: 'cashback_5', line1: '5%', line2: 'Cashback', prize_label: '5% Cashback', prize_type: 'cashback', prize_value: 5, status: 'creditado', color: '#1E5BFF', textColor: '#FFFFFF', description: '5% de cashback garantido na próxima compra.' },
-  { prize_key: 'lose', line1: 'Não foi', line2: 'dessa vez', prize_label: 'Não foi dessa vez', prize_type: 'nao_foi_dessa_vez', status: 'nao_aplicavel', color: '#FFFFFF', textColor: '#6B7280', description: 'Tente novamente amanhã para ganhar prêmios.' },
-  { prize_key: 'cashback_10', line1: '10%', line2: 'Cashback', prize_label: '10% Cashback', prize_type: 'cashback', prize_value: 10, status: 'creditado', color: '#1E5BFF', textColor: '#FFFFFF', description: '10% de cashback acumulado na sua carteira.' },
-  { prize_key: 'spin_again', line1: 'Gire', line2: 'de Novo', prize_label: 'Gire de Novo', prize_type: 'gire_de_novo', status: 'nao_aplicavel', color: '#FFFFFF', textColor: '#1E5BFF', description: 'Você ganhou uma nova chance! Gire a roleta novamente.' },
-  { prize_key: 'reais_10', line1: 'Cupom', line2: 'R$ 10', prize_label: 'Cupom R$ 10,00', prize_type: 'cupom', prize_value: 10, prize_code: 'LOCAL10', status: 'pendente', color: '#1E5BFF', textColor: '#FFFFFF', description: 'Cupom de R$ 10 para usar em parceiros locais.' },
-  { prize_key: 'gift_local', line1: 'Brinde', line2: 'Local', prize_label: 'Brinde Surpresa', prize_type: 'cupom', prize_code: 'BRINDE2024', status: 'pendente', color: '#FFFFFF', textColor: '#1E5BFF', description: 'Você ganhou um brinde exclusivo em lojas participantes.' },
-  { prize_key: 'cashback_15', line1: '15%', line2: 'Cashback', prize_label: '15% Cashback', prize_type: 'cashback', prize_value: 15, status: 'creditado', color: '#1E5BFF', textColor: '#FFFFFF', description: 'Incríveis 15% de volta na sua próxima compra!' },
+  { prize_key: 'reais_5', line1: 'R$ 5', line2: 'de Volta', prize_label: 'R$ 5,00 de Volta', prize_type: 'cashback', prize_value: 5, status: 'creditado', color: '#00C853', textColor: '#FFFFFF', description: 'O valor foi creditado na sua carteira digital.' }, // Verde Vibrante
+  { prize_key: 'cashback_5', line1: '5%', line2: 'Cashback', prize_label: '5% Cashback', prize_type: 'cashback', prize_value: 5, status: 'creditado', color: '#2962FF', textColor: '#FFFFFF', description: '5% de cashback garantido na próxima compra.' }, // Azul Real
+  { prize_key: 'lose', line1: 'Não foi', line2: 'dessa vez', prize_label: 'Não foi dessa vez', prize_type: 'nao_foi_dessa_vez', status: 'nao_aplicavel', color: '#D50000', textColor: '#FFFFFF', description: 'Tente novamente amanhã para ganhar prêmios.' }, // Vermelho
+  { prize_key: 'cashback_10', line1: '10%', line2: 'Cashback', prize_label: '10% Cashback', prize_type: 'cashback', prize_value: 10, status: 'creditado', color: '#AA00FF', textColor: '#FFFFFF', description: '10% de cashback acumulado na sua carteira.' }, // Roxo
+  { prize_key: 'spin_again', line1: 'Gire', line2: 'de Novo', prize_label: 'Gire de Novo', prize_type: 'gire_de_novo', status: 'nao_aplicavel', color: '#FF6D00', textColor: '#FFFFFF', description: 'Você ganhou uma nova chance! Gire a roleta novamente.' }, // Laranja
+  { prize_key: 'reais_10', line1: 'Cupom', line2: 'R$ 10', prize_label: 'Cupom R$ 10,00', prize_type: 'cupom', prize_value: 10, prize_code: 'LOCAL10', status: 'pendente', color: '#00B8D4', textColor: '#FFFFFF', description: 'Cupom de R$ 10 para usar em parceiros locais.' }, // Ciano
+  { prize_key: 'gift_local', line1: 'Brinde', line2: 'Local', prize_label: 'Brinde Surpresa', prize_type: 'cupom', prize_code: 'BRINDE2024', status: 'pendente', color: '#C51162', textColor: '#FFFFFF', description: 'Você ganhou um brinde exclusivo em lojas participantes.' }, // Pink
+  { prize_key: 'cashback_15', line1: '15%', line2: 'Cashback', prize_label: '15% Cashback', prize_type: 'cashback', prize_value: 15, status: 'creditado', color: '#FFD600', textColor: '#000000', description: 'Incríveis 15% de volta na sua próxima compra!' }, // Amarelo Ouro (Texto Preto)
 ];
 
 const SEGMENT_COUNT = PRIZES.length;
 const SEGMENT_ANGLE = 360 / SEGMENT_COUNT;
-const SPIN_DURATION_MS = 4000;
+const SPIN_DURATION_MS = 4500; // Um pouco mais longo para aumentar a tensão
 
-// Remote URLs for sounds
+// Remote URLs for sounds - Usando sons mais "gameficados"
 const SOUND_URLS = {
   spin: "https://assets.mixkit.co/sfx/preview/mixkit-game-wheel-spinning-2012.mp3",
   win: "https://assets.mixkit.co/sfx/preview/mixkit-winning-chimes-2015.mp3",
@@ -74,8 +75,8 @@ export const SpinWheelView: React.FC<SpinWheelViewProps> = ({ userId, userRole, 
       audioRefs.current[key] = audio;
     });
     if (audioRefs.current.spin) {
-        audioRefs.current.spin.loop = true;
-        audioRefs.current.spin.volume = 0.4;
+        audioRefs.current.spin.loop = true; // Som de giro em loop
+        audioRefs.current.spin.volume = 0.5;
     }
   }, []);
   
@@ -83,7 +84,13 @@ export const SpinWheelView: React.FC<SpinWheelViewProps> = ({ userId, userRole, 
     if (isMuted) return;
     const audio = audioRefs.current[key];
     if (audio) {
-      if (key === 'spin') audio.volume = 0.4;
+      if (key === 'spin') {
+        audio.volume = 0.5;
+        audio.loop = true;
+      } else {
+        audio.loop = false;
+        audio.volume = 0.8;
+      }
       audio.currentTime = 0;
       audio.play().catch(e => console.log("Audio play failed:", e));
     }
@@ -108,7 +115,7 @@ export const SpinWheelView: React.FC<SpinWheelViewProps> = ({ userId, userRole, 
         return; 
       }
 
-      // 2. Check LocalStorage first for instant feedback (UI Optimistic Update)
+      // 2. Check LocalStorage first
       const localLastSpin = localStorage.getItem(`last_spin_${userId}`);
       if (localLastSpin) {
         const lastDate = new Date(localLastSpin);
@@ -117,15 +124,12 @@ export const SpinWheelView: React.FC<SpinWheelViewProps> = ({ userId, userRole, 
             setLastSpinDate(lastDate);
             setSpinStatus('cooldown');
           }
-          // We can return early if local storage says cooldown, but querying DB is safer to sync devices
-          // For this specific fix to ensure buttons don't hang, we rely heavily on this.
         }
       }
 
-      // 3. Prepare fallback logic
+      // 3. Prepare fallback
       const setReadyFallback = () => {
         if (isMounted) {
-           // Double check cooldown hasn't been set by local storage already
            if (localLastSpin && isSameDay(new Date(localLastSpin), new Date())) {
              setSpinStatus('cooldown');
            } else {
@@ -141,7 +145,6 @@ export const SpinWheelView: React.FC<SpinWheelViewProps> = ({ userId, userRole, 
 
       try {
         // 4. DB Call with Timeout Race
-        // Se o Supabase demorar mais de 2s (conexão ruim ou tabela inexistente), libera o giro.
         const dbPromise = supabase
           .from('roulette_spins')
           .select('spin_date')
@@ -168,7 +171,6 @@ export const SpinWheelView: React.FC<SpinWheelViewProps> = ({ userId, userRole, 
               setSpinStatus('ready');
             }
           } else {
-            // No previous spins found
             setSpinStatus('ready');
           }
         }
@@ -193,14 +195,11 @@ export const SpinWheelView: React.FC<SpinWheelViewProps> = ({ userId, userRole, 
   const saveSpinResult = async (result: Prize) => {
     if (!userId) return false;
     
-    // Save to LocalStorage (Fallback & Performance)
     localStorage.setItem(`last_spin_${userId}`, new Date().toISOString());
 
-    if (!supabase) return true; // Demo mode success
+    if (!supabase) return true; 
 
     try {
-      // Don't save 'gire_de_novo' as a used turn record in DB immediately to allow re-spin logic on UI
-      // But typically 'gire_de_novo' implies we DON'T count this as the daily spin.
       if (result.prize_type === 'gire_de_novo') return true;
 
       const { error } = await supabase.from('roulette_spins').insert({
@@ -213,7 +212,6 @@ export const SpinWheelView: React.FC<SpinWheelViewProps> = ({ userId, userRole, 
       });
       
       if (error) {
-          // If insert fails (e.g. table doesn't exist), we ignore it so user isn't blocked visually.
           console.warn("Could not save spin to DB:", error.message);
       }
       return true;
@@ -235,18 +233,17 @@ export const SpinWheelView: React.FC<SpinWheelViewProps> = ({ userId, userRole, 
     setSpinResult(null);
     playSound('spin');
 
-    // Deterministcally random logic
+    // Logic for Rotation
     const winningSegmentIndex = Math.floor(Math.random() * SEGMENT_COUNT);
     
+    // SVG coordinate system adjustment
     const segmentCenter = winningSegmentIndex * SEGMENT_ANGLE + SEGMENT_ANGLE / 2;
-    // Add extra rotations (5 full spins) + alignment
-    const baseRotation = 360 * 5; 
-    // Random offset within the segment for realism (+/- 40% of segment width)
-    const randomOffset = (Math.random() - 0.5) * (SEGMENT_ANGLE * 0.8);
+    const baseRotation = 360 * 6; // 6 full spins
+    const randomOffset = (Math.random() - 0.5) * (SEGMENT_ANGLE * 0.6); // Randomness inside slice
     
+    // Calculate final angle to land under the pointer (at 270 deg / top)
     const finalAngle = 270 - segmentCenter + randomOffset;
     
-    // Ensure we always rotate forward significantly
     const currentRotMod = rotation % 360;
     const targetRotation = rotation + baseRotation + (360 - currentRotMod) + finalAngle;
 
@@ -275,7 +272,7 @@ export const SpinWheelView: React.FC<SpinWheelViewProps> = ({ userId, userRole, 
     if (!spinResult) return;
 
     if (spinResult.prize_type === 'cashback') {
-        onViewHistory(); // Go to wallet
+        onViewHistory(); 
     } else if (spinResult.prize_type === 'cupom') {
         onWin({
             label: spinResult.prize_label,
@@ -318,26 +315,18 @@ export const SpinWheelView: React.FC<SpinWheelViewProps> = ({ userId, userRole, 
     }
     
     let text: React.ReactNode = 'Girar Agora!';
-    
-    // Safety: If it's been loading for too long, just enable it
     let disabled = isSpinning;
 
     if (isSpinning) {
-      text = (
-        <>
-          <Loader2 className="w-5 h-5 animate-spin mr-2" />
-          Boa sorte...
-        </>
-      );
+      text = 'Girando...';
     } else if (spinStatus === 'loading') {
-      // While checking DB
-      text = <Loader2 className="w-5 h-5 animate-spin" />;
+      text = 'Carregando...';
       disabled = true;
     } else if (spinStatus === 'no_user') {
       text = 'Faça Login para Girar';
-      disabled = false; // Allow click to trigger login flow
+      disabled = false; 
     } else if (spinStatus === 'error') {
-      text = 'Tentar Novamente'; // Allow retry
+      text = 'Tentar Novamente';
       disabled = false;
     }
 
@@ -345,9 +334,10 @@ export const SpinWheelView: React.FC<SpinWheelViewProps> = ({ userId, userRole, 
       <button 
         onClick={handleSpin} 
         disabled={disabled} 
-        className="w-full h-14 bg-gradient-to-r from-[#1E5BFF] to-[#4D7CFF] text-white font-bold text-base rounded-2xl shadow-lg shadow-blue-500/30 active:scale-95 transition-all disabled:from-gray-400 disabled:to-gray-500 disabled:shadow-none disabled:cursor-not-allowed flex items-center justify-center"
+        className="w-full h-14 bg-gradient-to-r from-[#1E5BFF] to-[#4D7CFF] text-white font-bold text-lg rounded-2xl shadow-lg shadow-blue-500/30 active:scale-95 transition-all disabled:from-gray-400 disabled:to-gray-500 disabled:shadow-none disabled:cursor-not-allowed flex items-center justify-center relative overflow-hidden group"
       >
-        {text}
+        <span className="relative z-10">{text}</span>
+        {!disabled && <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>}
       </button>
     );
   };
@@ -383,112 +373,141 @@ export const SpinWheelView: React.FC<SpinWheelViewProps> = ({ userId, userRole, 
 
   return (
     <div className="bg-[#F7F7F7] dark:bg-gray-900 rounded-t-3xl shadow-2xl p-5 pt-4 w-full max-w-md mx-auto relative overflow-hidden font-sans">
+      {/* Handle Bar */}
       <div className="w-10 h-1 bg-gray-300 dark:bg-gray-700 rounded-full mx-auto mb-3"></div>
       
+      {/* Top Controls */}
       <div className="flex items-center justify-between mb-5">
-        <button onClick={() => setIsMuted(!isMuted)} className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors">
+        <button onClick={() => setIsMuted(!isMuted)} className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors bg-white dark:bg-gray-800 rounded-full shadow-sm">
           {isMuted ? <VolumeX size={18} /> : <Volume2 size={18} />}
         </button>
         <div className="text-center">
-            <h2 className="text-xl font-bold text-gray-800 dark:text-white font-display">Roleta da Freguesia</h2>
-            <p className="text-xs text-gray-500 dark:text-gray-400">Gire uma vez por dia e ganhe!</p>
+            <h2 className="text-xl font-bold text-gray-800 dark:text-white font-display uppercase tracking-wide">Sorteio Diário</h2>
         </div>
-        <button onClick={onViewHistory} className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors">
+        <button onClick={onViewHistory} className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors bg-white dark:bg-gray-800 rounded-full shadow-sm">
             <History size={18} />
         </button>
       </div>
       
-      <div className="relative w-full max-w-[300px] mx-auto aspect-square flex items-center justify-center mb-5">
-        {/* Pointer (North) */}
-        <div className="absolute -top-1 left-1/2 -translate-x-1/2 z-20" style={{ filter: 'drop-shadow(0 4px 5px rgba(0,0,0,0.25))' }}>
-          <div className="w-0 h-0 border-l-[12px] border-l-transparent border-r-[12px] border-r-transparent border-t-[20px] border-t-[#1E5BFF]"></div>
-        </div>
-        <div className="absolute w-14 h-14 bg-white dark:bg-gray-800 rounded-full border-4 border-[#1E5BFF] shadow-inner z-10 flex items-center justify-center">
-            <div className="w-2 h-2 bg-[#1E5BFF] rounded-full"></div>
-        </div>
+      {/* Wheel Container */}
+      <div className="relative w-full max-w-[320px] mx-auto aspect-square flex items-center justify-center mb-6">
         
+        {/* Pointer (North) - Styled as a Ticker */}
+        <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-20 pointer-events-none drop-shadow-lg">
+          <div className="w-8 h-10 bg-white dark:bg-gray-200 clip-triangle shadow-md" style={{ clipPath: 'polygon(50% 100%, 0% 0%, 100% 0%)', backgroundColor: '#FFF' }}></div>
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-4 bg-red-600 rounded-t-lg"></div>
+        </div>
+
+        {/* Outer Ring & Shadow */}
+        <div className="absolute inset-[-10px] rounded-full bg-gradient-to-b from-gray-200 to-gray-400 dark:from-gray-700 dark:to-gray-900 shadow-2xl z-0"></div>
+        
+        {/* The Wheel */}
         <div 
-          className="relative w-full h-full rounded-full transition-transform ease-[cubic-bezier(0.2,0.8,0.2,1)] border-8 border-white dark:border-gray-800 shadow-xl"
-          style={{ transform: `rotate(${rotation}deg)`, transitionDuration: `${isSpinning ? SPIN_DURATION_MS : 0}ms` }}
+          className="relative w-full h-full rounded-full transition-transform border-[6px] border-white dark:border-gray-800 shadow-inner z-10"
+          style={{ 
+            transform: `rotate(${rotation}deg)`, 
+            transitionDuration: `${isSpinning ? SPIN_DURATION_MS : 0}ms`,
+            transitionTimingFunction: 'cubic-bezier(0.25, 0.1, 0.25, 1)' 
+          }}
         >
           <svg viewBox="0 0 200 200" className="w-full h-full rounded-full overflow-hidden">
             {PRIZES.map((prize, i) => {
               const { x, y, rotation } = getTextPosition(i);
               return (
                 <g key={i}>
-                  <path d={getPath(i)} fill={prize.color} stroke="#E0E0E0" strokeWidth="0.5" />
+                  <path d={getPath(i)} fill={prize.color} stroke="rgba(255,255,255,0.2)" strokeWidth="1" />
+                  
+                  {/* Prize Text */}
                   <text 
                     x={x} 
                     y={y} 
                     fill={prize.textColor} 
-                    fontSize="7.5" 
-                    fontWeight="800" 
+                    fontSize="7" 
+                    fontWeight="900" 
                     fontFamily="sans-serif"
                     textAnchor="middle" 
                     dominantBaseline="middle"
                     transform={`rotate(${rotation + 90}, ${x}, ${y})`}
+                    style={{ textShadow: '0px 1px 2px rgba(0,0,0,0.2)' }}
                   >
                     <tspan x={x} dy="-3">{prize.line1}</tspan>
                     <tspan x={x} dy="8">{prize.line2}</tspan>
                   </text>
+
+                  {/* Decorative Dots/Pegs on rim */}
+                  <circle 
+                    cx={100 + 92 * Math.cos(((i * SEGMENT_ANGLE) + SEGMENT_ANGLE/2) * Math.PI / 180)} 
+                    cy={100 + 92 * Math.sin(((i * SEGMENT_ANGLE) + SEGMENT_ANGLE/2) * Math.PI / 180)} 
+                    r="2" 
+                    fill="white" 
+                    opacity="0.8"
+                  />
                 </g>
               );
             })}
           </svg>
         </div>
+
+        {/* Center Hub */}
+        <div className="absolute w-16 h-16 bg-white dark:bg-gray-800 rounded-full border-4 border-gray-100 dark:border-gray-700 shadow-xl z-10 flex items-center justify-center">
+            <div className="w-12 h-12 bg-gradient-to-br from-[#1E5BFF] to-[#0039A6] rounded-full flex items-center justify-center shadow-inner">
+                <span className="text-white font-black text-xs">SPIN</span>
+            </div>
+        </div>
       </div>
 
       {renderSpinButton()}
 
-      {/* RESULT MODAL */}
+      {/* RESULT MODAL OVERLAY */}
       {spinResult && (
-        <div className="absolute inset-0 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md z-30 flex items-center justify-center rounded-t-3xl animate-in fade-in duration-300">
+        <div className="absolute inset-0 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md z-30 flex items-center justify-center rounded-t-3xl animate-in fade-in duration-500">
            <div className="text-center p-6 flex flex-col items-center max-w-xs w-full">
                
                {/* Confetti for Wins */}
                {spinResult.prize_type !== 'nao_foi_dessa_vez' && (
                    <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
-                       {/* Pure CSS Confetti placeholder - in real app, use a canvas confetti lib */}
-                       <div className="absolute top-1/4 left-1/4 w-2 h-2 bg-red-500 rounded-full animate-ping"></div>
-                       <div className="absolute top-1/3 right-1/4 w-2 h-2 bg-blue-500 rounded-full animate-ping delay-75"></div>
-                       <div className="absolute bottom-1/3 left-1/3 w-2 h-2 bg-green-500 rounded-full animate-ping delay-150"></div>
+                       <div className="absolute top-1/4 left-1/4 w-3 h-3 bg-red-500 rounded-full animate-bounce delay-75"></div>
+                       <div className="absolute top-1/3 right-1/4 w-3 h-3 bg-blue-500 rounded-full animate-bounce delay-150"></div>
+                       <div className="absolute bottom-1/3 left-1/3 w-3 h-3 bg-green-500 rounded-full animate-bounce delay-300"></div>
+                       <div className="absolute top-10 right-10 w-2 h-2 bg-yellow-400 rounded-full animate-ping"></div>
                    </div>
                )}
 
                {/* Icon */}
-               <div className={`mb-6 p-6 rounded-full shadow-lg animate-bounce-short ${
-                   spinResult.prize_type === 'nao_foi_dessa_vez' 
-                   ? 'bg-gray-100 dark:bg-gray-800 text-gray-400' 
-                   : 'bg-gradient-to-br from-[#1E5BFF] to-[#4D7CFF] text-white'
-               }`}>
+               <div 
+                 className="mb-6 p-6 rounded-full shadow-2xl animate-bounce-short border-4 border-white dark:border-gray-800"
+                 style={{ backgroundColor: spinResult.color }}
+               >
                     {spinResult.prize_type === 'nao_foi_dessa_vez' ? (
-                        <ThumbsDown size={48} strokeWidth={1.5} />
+                        <ThumbsDown size={48} strokeWidth={2} color="#FFF" />
                     ) : spinResult.prize_type === 'cashback' ? (
-                        <Wallet size={48} strokeWidth={1.5} />
+                        <Wallet size={48} strokeWidth={2} color={spinResult.textColor} />
                     ) : spinResult.prize_type === 'gire_de_novo' ? (
-                        <RefreshCw size={48} strokeWidth={1.5} />
+                        <RefreshCw size={48} strokeWidth={2} color={spinResult.textColor} />
                     ) : (
-                        <Gift size={48} strokeWidth={1.5} />
+                        <Gift size={48} strokeWidth={2} color={spinResult.textColor} />
                     )}
                </div>
 
                {/* Title */}
-               <h3 className="text-2xl font-black text-gray-900 dark:text-white mb-2 leading-tight">
-                   {spinResult.prize_type === 'nao_foi_dessa_vez' ? 'Poxa, não foi dessa vez!' : 'Você ganhou!'}
+               <h3 className="text-3xl font-black text-gray-900 dark:text-white mb-2 leading-tight tracking-tight">
+                   {spinResult.prize_type === 'nao_foi_dessa_vez' ? 'Poxa!' : 'PARABÉNS!'}
                </h3>
 
                {/* Prize Name */}
-               <p className="text-xl font-bold text-[#1E5BFF] mb-2">{spinResult.prize_label}</p>
+               <p className="text-xl font-bold mb-3" style={{ color: spinResult.prize_type === 'nao_foi_dessa_vez' ? '#666' : '#1E5BFF' }}>
+                 {spinResult.prize_label}
+               </p>
 
                {/* Description */}
-               <p className="text-sm text-gray-500 dark:text-gray-400 mb-8 leading-relaxed">
+               <p className="text-sm text-gray-500 dark:text-gray-400 mb-8 leading-relaxed font-medium">
                    {spinResult.description}
                </p>
                
                {/* Action Button */}
                <button 
                  onClick={handleClaimReward}
-                 className="w-full bg-[#1E5BFF] hover:bg-[#1749CC] text-white font-bold py-4 rounded-2xl shadow-lg shadow-blue-500/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                 className="w-full bg-[#1E5BFF] hover:bg-[#1749CC] text-white font-bold py-4 rounded-2xl shadow-xl shadow-blue-500/30 active:scale-[0.98] transition-all flex items-center justify-center gap-2 transform hover:-translate-y-1"
                >
                  {spinResult.prize_type === 'nao_foi_dessa_vez' ? 'Tentar amanhã' 
                   : spinResult.prize_type === 'gire_de_novo' ? 'Girar Novamente'
