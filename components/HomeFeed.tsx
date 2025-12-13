@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { CATEGORIES } from '../constants';
 import { AdType, Category, Store } from '../types';
@@ -338,8 +337,8 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
                     style={{ scrollPaddingLeft: '20px' }}
                  >
                     {MINI_BANNERS.map((banner) => {
-                        const heightClass = 'h-[72px]'; 
-                        const paddingClass = 'p-3.5';
+                        const heightClass = 'h-[90px]'; 
+                        const paddingClass = 'p-4';
                         const titleClass = 'text-[15px] mb-0.5 font-extrabold';
                         const subtitleClass = 'mb-1.5 text-[11px] leading-snug';
                         const btnPaddingClass = 'px-3 py-1 text-[9px]';
