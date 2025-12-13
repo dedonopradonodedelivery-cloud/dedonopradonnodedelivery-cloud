@@ -670,7 +670,11 @@ const App: React.FC = () => {
             )}
 
             {activeTab === 'store_area' && (
-              <StoreAreaView onBack={() => setActiveTab('profile')} onNavigate={setActiveTab} />
+              <StoreAreaView 
+                onBack={() => setActiveTab('profile')} 
+                onNavigate={setActiveTab} 
+                user={user}
+              />
             )}
 
             {activeTab === 'merchant_qr' && (
