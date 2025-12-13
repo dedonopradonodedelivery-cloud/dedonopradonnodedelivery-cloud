@@ -1,0 +1,9 @@
+{
+  "rewrites": [
+    { "source": "/painel-parceiro", "destination": "/" },
+    { "source": "/painel-lojista", "destination": "/" },
+    { "source": "/merchant/:path*", "destination": "/" },
+    { "source": "/cashback/:path*", "destination": "/" },
+    { "source": "/(.*)", "destination": "/" }
+  ]
+}
