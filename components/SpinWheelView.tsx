@@ -99,33 +99,50 @@ export const SpinWheelView: React.FC<SpinWheelViewProps> = ({ userId, userRole, 
 
   // --- Check Eligibility ---
   useEffect(() => {
+    let isMounted = true;
+
     const checkSpinAbility = async () => {
+      // 1. Basic Check
       if (!userId) { 
-        setSpinStatus('no_user'); 
+        if(isMounted) setSpinStatus('no_user'); 
         return; 
       }
 
-      // Check LocalStorage first for instant feedback/demo fallback
+      // 2. Check LocalStorage first for instant feedback (UI Optimistic Update)
       const localLastSpin = localStorage.getItem(`last_spin_${userId}`);
       if (localLastSpin) {
         const lastDate = new Date(localLastSpin);
         if (isSameDay(lastDate, new Date())) {
-          setLastSpinDate(lastDate);
-          setSpinStatus('cooldown');
-          // We can return early, but ideally we check DB too for sync
+          if(isMounted) {
+            setLastSpinDate(lastDate);
+            setSpinStatus('cooldown');
+          }
+          // We can return early if local storage says cooldown, but querying DB is safer to sync devices
+          // For this specific fix to ensure buttons don't hang, we rely heavily on this.
         }
       }
 
-      if (!supabase) { 
-        // If Supabase is missing, rely on local storage logic above or default to ready
-        if (!localLastSpin || !isSameDay(new Date(localLastSpin), new Date())) {
-            setSpinStatus('ready'); 
+      // 3. Prepare fallback logic
+      const setReadyFallback = () => {
+        if (isMounted) {
+           // Double check cooldown hasn't been set by local storage already
+           if (localLastSpin && isSameDay(new Date(localLastSpin), new Date())) {
+             setSpinStatus('cooldown');
+           } else {
+             setSpinStatus('ready');
+           }
         }
+      };
+
+      if (!supabase) { 
+        setReadyFallback();
         return; 
       }
 
       try {
-        const { data, error } = await supabase
+        // 4. DB Call with Timeout Race
+        // Se o Supabase demorar mais de 2s (conexão ruim ou tabela inexistente), libera o giro.
+        const dbPromise = supabase
           .from('roulette_spins')
           .select('spin_date')
           .eq('user_id', userId)
@@ -133,29 +150,37 @@ export const SpinWheelView: React.FC<SpinWheelViewProps> = ({ userId, userRole, 
           .limit(1)
           .maybeSingle();
 
+        const timeoutPromise = new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('Timeout')), 3000)
+        );
+
+        const { data, error } = await Promise.race([dbPromise, timeoutPromise]) as any;
+
         if (error) throw error;
 
-        if (data) {
-          const lastDate = new Date(data.spin_date);
-          if (isSameDay(lastDate, new Date())) {
-            setLastSpinDate(lastDate);
-            setSpinStatus('cooldown');
+        if (isMounted) {
+          if (data) {
+            const lastDate = new Date(data.spin_date);
+            if (isSameDay(lastDate, new Date())) {
+              setLastSpinDate(lastDate);
+              setSpinStatus('cooldown');
+            } else {
+              setSpinStatus('ready');
+            }
           } else {
+            // No previous spins found
             setSpinStatus('ready');
           }
-        } else {
-          setSpinStatus('ready');
         }
       } catch (error) {
-        console.error("Error checking spin status:", error);
-        // Fallback to local storage status or ready if local is also clear
-        if (!localLastSpin || !isSameDay(new Date(localLastSpin), new Date())) {
-            setSpinStatus('ready');
-        }
+        console.error("Spin check failed/timeout, falling back to local/ready:", error);
+        setReadyFallback();
       }
     };
 
     checkSpinAbility();
+
+    return () => { isMounted = false; };
   }, [userId]);
 
   const isSameDay = (d1: Date, d2: Date) => {
@@ -174,8 +199,8 @@ export const SpinWheelView: React.FC<SpinWheelViewProps> = ({ userId, userRole, 
     if (!supabase) return true; // Demo mode success
 
     try {
-      // Don't save 'gire_de_novo' as a used turn record, or maybe save with special status
-      // Here we only save "final" results that consume the daily turn
+      // Don't save 'gire_de_novo' as a used turn record in DB immediately to allow re-spin logic on UI
+      // But typically 'gire_de_novo' implies we DON'T count this as the daily spin.
       if (result.prize_type === 'gire_de_novo') return true;
 
       const { error } = await supabase.from('roulette_spins').insert({
@@ -187,11 +212,13 @@ export const SpinWheelView: React.FC<SpinWheelViewProps> = ({ userId, userRole, 
         spin_date: new Date().toISOString(),
       });
       
-      if (error) throw error;
+      if (error) {
+          // If insert fails (e.g. table doesn't exist), we ignore it so user isn't blocked visually.
+          console.warn("Could not save spin to DB:", error.message);
+      }
       return true;
     } catch (error) {
       console.error("Failed to save spin result to DB:", error);
-      // Return true anyway so UI doesn't break for user (client-side claim)
       return true;
     }
   };
@@ -208,14 +235,9 @@ export const SpinWheelView: React.FC<SpinWheelViewProps> = ({ userId, userRole, 
     setSpinResult(null);
     playSound('spin');
 
+    // Deterministcally random logic
     const winningSegmentIndex = Math.floor(Math.random() * SEGMENT_COUNT);
     
-    // Calculate rotation:
-    // We want the winning segment to end up at 270deg (Top).
-    // SVG segments start at 0deg (3 o'clock) and go clockwise.
-    // Index 0 center is at Angle/2.
-    // To move Index 0 center to 270, we rotate by 270 - Angle/2.
-    // To move Index i center to 270, we rotate by 270 - (i * Angle + Angle/2).
     const segmentCenter = winningSegmentIndex * SEGMENT_ANGLE + SEGMENT_ANGLE / 2;
     // Add extra rotations (5 full spins) + alignment
     const baseRotation = 360 * 5; 
@@ -239,7 +261,6 @@ export const SpinWheelView: React.FC<SpinWheelViewProps> = ({ userId, userRole, 
       setIsSpinning(false);
 
       if (result.prize_type !== 'gire_de_novo') {
-        // Only trigger cooldown if it's not a free spin
         const saved = await saveSpinResult(result);
         if (saved) {
           setLastSpinDate(new Date());
@@ -256,7 +277,6 @@ export const SpinWheelView: React.FC<SpinWheelViewProps> = ({ userId, userRole, 
     if (spinResult.prize_type === 'cashback') {
         onViewHistory(); // Go to wallet
     } else if (spinResult.prize_type === 'cupom') {
-        // Pass a standardized reward object to the parent
         onWin({
             label: spinResult.prize_label,
             code: spinResult.prize_code || 'CODE123',
@@ -264,11 +284,9 @@ export const SpinWheelView: React.FC<SpinWheelViewProps> = ({ userId, userRole, 
             description: spinResult.description
         });
     } else if (spinResult.prize_type === 'gire_de_novo') {
-        // Reset and allow spin again
         setSpinResult(null);
         setSpinStatus('ready');
     } else {
-        // Lose -> Just close
         setSpinResult(null);
     }
   };
@@ -300,7 +318,9 @@ export const SpinWheelView: React.FC<SpinWheelViewProps> = ({ userId, userRole, 
     }
     
     let text: React.ReactNode = 'Girar Agora!';
-    let disabled = isSpinning || spinStatus === 'loading' || spinStatus === 'error';
+    
+    // Safety: If it's been loading for too long, just enable it
+    let disabled = isSpinning;
 
     if (isSpinning) {
       text = (
@@ -310,11 +330,15 @@ export const SpinWheelView: React.FC<SpinWheelViewProps> = ({ userId, userRole, 
         </>
       );
     } else if (spinStatus === 'loading') {
+      // While checking DB
       text = <Loader2 className="w-5 h-5 animate-spin" />;
+      disabled = true;
     } else if (spinStatus === 'no_user') {
       text = 'Faça Login para Girar';
+      disabled = false; // Allow click to trigger login flow
     } else if (spinStatus === 'error') {
-      text = 'Erro de Conexão';
+      text = 'Tentar Novamente'; // Allow retry
+      disabled = false;
     }
 
     return (
