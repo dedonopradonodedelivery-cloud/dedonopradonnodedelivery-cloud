@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Layout } from './components/Layout';
 import { Header } from './components/Header';
@@ -520,6 +521,7 @@ const App: React.FC = () => {
               userRole={userRole}
               onOpenMerchantQr={() => setActiveTab('merchant_qr')}
               customPlaceholder={searchPlaceholder}
+              onSelectCategory={handleSelectCategory}
             />
           )}
 

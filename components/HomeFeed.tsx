@@ -1,13 +1,10 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { CATEGORIES } from '../constants';
 import { AdType, Category, Store } from '../types';
 import { 
   ChevronRight, 
   Coins, 
   Wrench, 
-  Sparkles,
-  Crown,
   Loader2,
   AlertCircle,
   ArrowRight,
@@ -132,9 +129,6 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
   const [hasSearched, setHasSearched] = useState(false);
   const searchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const categoryScrollRef = useRef<HTMLDivElement>(null);
-  const [categoryProgress, setCategoryProgress] = useState(0);
-
   const bannerScrollRef = useRef<HTMLDivElement>(null);
 
   const [isQuoteModalOpen, setIsQuoteModalOpen] = useState(false);
@@ -253,13 +247,6 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
     }
   ];
 
-  const handleCategoryScroll = () => {
-    if (categoryScrollRef.current) {
-      const { scrollLeft, scrollWidth, clientWidth } = categoryScrollRef.current;
-      if (scrollWidth > clientWidth) setCategoryProgress(scrollLeft / (scrollWidth - clientWidth));
-    }
-  };
-
   const handleBannerScrollRight = () => {
     if (bannerScrollRef.current) {
       const scrollAmount = bannerScrollRef.current.clientWidth * 0.85;
@@ -281,7 +268,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
   };
   
   return (
-    <div className="flex flex-col gap-4 mt-[12px] pb-24 bg-gray-50 dark:bg-gray-900 w-full max-w-md mx-auto !pt-0 animate-in fade-in duration-500">
+    <div className="flex flex-col gap-4 mt-4 pb-24 bg-gray-50 dark:bg-gray-900 w-full max-w-md mx-auto !pt-0 animate-in fade-in duration-500">
       <style>{`
         @keyframes wheel-spin-once {
           0% { transform: rotate(0deg); }
@@ -326,7 +313,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
              )}
         </div>
       ) : (
-        <div className="flex flex-col gap-6 w-full">
+        <div className="flex flex-col gap-6 w-full mt-2">
             
             <div className="px-5 w-full">
               <div
@@ -370,26 +357,6 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
                     </button>
                 </div>
               </div>
-            </div>
-
-            <div className="w-full">
-               <div ref={categoryScrollRef} onScroll={handleCategoryScroll} className="overflow-x-auto px-5 pb-2 no-scrollbar">
-                  <div className="grid grid-rows-2 grid-flow-col gap-x-4 gap-y-6 w-max">
-                      {CATEGORIES.map((cat) => (
-                        <div key={cat.id} onClick={() => onSelectCategory(cat)} className="flex flex-col items-center gap-2 cursor-pointer group active:scale-95 transition-transform w-[80px]">
-                            <div className="w-[72px] h-[72px] bg-[#EEF4FF] dark:bg-gray-800 rounded-[24px] shadow-sm border border-[#EEF4FF] dark:border-gray-700 flex items-center justify-center group-hover:shadow-md group-active:bg-[#DCE8FF] group-hover:bg-[#DCE8FF] transition-all">
-                                {React.isValidElement(cat.icon) ? React.cloneElement(cat.icon as React.ReactElement<any>, { className: "w-8 h-8 text-primary-500" }) : cat.icon}
-                            </div>
-                            <span className="text-[11px] font-medium text-gray-600 dark:text-gray-400 text-center leading-tight w-full line-clamp-2">{cat.name}</span>
-                        </div>
-                      ))}
-                  </div>
-               </div>
-               <div className="flex justify-center w-full mt-2">
-                  <div className="w-12 h-1 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                      <div className="h-full bg-primary-500 rounded-full" style={{ width: '33%', transform: `translateX(${categoryProgress * 200}%)` }} />
-                  </div>
-               </div>
             </div>
 
             <div className="w-full relative group">

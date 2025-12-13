@@ -1,11 +1,13 @@
 
-import React, { useState, useEffect } from 'react';
-import { Search, Sun, Moon, User as UserIcon, QrCode, ScanLine, MapPin, ChevronDown, Bell } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Search, Sun, Moon } from 'lucide-react';
+import { Category } from '../types';
+import { CATEGORIES } from '../constants';
 
 interface HeaderProps {
   isDarkMode: boolean;
   toggleTheme: () => void;
-  onAuthClick: () => void;
+  onAuthClick: () => void; // Kept for interface compatibility, but not used in UI
   user: any;
   searchTerm: string;
   onSearchChange: (value: string) => void;
@@ -14,163 +16,116 @@ interface HeaderProps {
   userRole: "cliente" | "lojista" | null;
   onOpenMerchantQr?: () => void;
   customPlaceholder?: string;
+  onSelectCategory?: (category: Category) => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
   isDarkMode,
   toggleTheme,
-  onAuthClick,
-  user,
   searchTerm,
   onSearchChange,
-  onNavigate,
-  userRole,
-  onOpenMerchantQr,
-  customPlaceholder
+  activeTab,
+  customPlaceholder,
+  onSelectCategory
 }) => {
-  const [locationText, setLocationText] = useState<string>('Freguesia, Rio de Janeiro');
-  const [isScrolled, setIsScrolled] = useState(false);
+  const [showCategories, setShowCategories] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
+  const isHome = activeTab === 'home';
 
   useEffect(() => {
-    // Basic geolocation mock or real implementation
-    if ('geolocation' in navigator) {
-      navigator.geolocation.getCurrentPosition(
-        () => setLocationText('Freguesia, Rio de Janeiro'),
-        (error) => {
-          console.log('Geo error, using default:', error);
-          setLocationText('Freguesia, Rio de Janeiro');
-        }
-      );
-    }
-
     const handleScroll = () => {
-      // Threshold set to approx height of the top bar (64px) to trigger sticky state visual changes
-      setIsScrolled(window.scrollY > 10);
+      const currentScrollY = window.scrollY;
+      
+      // Logic: Show at top, hide on scroll down, show on scroll up
+      if (currentScrollY < 10) {
+        setShowCategories(true);
+      } else if (currentScrollY > lastScrollY && currentScrollY > 50) {
+        setShowCategories(false); // Scrolling down
+      } else if (currentScrollY < lastScrollY) {
+        setShowCategories(true); // Scrolling up
+      }
+      
+      setLastScrollY(currentScrollY);
     };
 
-    window.addEventListener('scroll', handleScroll);
+    if (isHome) {
+      window.addEventListener('scroll', handleScroll, { passive: true });
+    } else {
+      setShowCategories(false);
+    }
+
     return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  }, [lastScrollY, isHome]);
 
-  const renderQrButton = () => {
-    if (!user || !userRole) return null;
-
-    if (userRole === 'cliente') {
-      return (
-        <button
-          onClick={() => onNavigate('qrcode_scan')}
-          className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md text-white flex items-center justify-center hover:bg-white/30 transition-all active:scale-90 shadow-sm border border-white/10"
-          title="Ler QR Code"
-        >
-          <ScanLine className="w-5 h-5" />
-        </button>
-      );
-    }
-
-    if (userRole === 'lojista') {
-      return (
-        <button
-          onClick={() => onOpenMerchantQr ? onOpenMerchantQr() : onNavigate('merchant_qr')}
-          className="w-10 h-10 rounded-full bg-white text-[#2D6DF6] flex items-center justify-center hover:bg-gray-100 transition-all active:scale-90 shadow-sm"
-          title="Meu QR Code"
-        >
-          <QrCode className="w-5 h-5" />
-        </button>
-      );
-    }
-
-    return null;
-  };
+  // Reset state when tab changes
+  useEffect(() => {
+    setShowCategories(isHome);
+  }, [isHome]);
 
   return (
-    <>
-      {/* 
-        CONTAINER 1: Top Row (Location & Icons) 
-        Blue background styling applied here.
-      */}
-      <div className="w-full bg-[#2D6DF6] dark:bg-[#1540AD] pt-4 pb-2 px-5 transition-colors duration-300">
-        <div className="flex items-center justify-between max-w-md mx-auto">
-          
-          {/* Location Selector */}
-          <div className="flex flex-col cursor-pointer group">
-            <span className="text-[10px] font-bold text-blue-100 uppercase tracking-wider ml-0.5 mb-0.5 group-hover:text-white transition-colors">
-              Localização atual
-            </span>
-            <div className="flex items-center gap-1.5 text-white transition-colors">
-              <MapPin className="w-4 h-4 text-white fill-white/20" />
-              <span className="font-bold text-sm truncate max-w-[160px] leading-tight">
-                {locationText}
-              </span>
-              <ChevronDown className="w-3 h-3 text-blue-200 group-hover:text-white transition-colors mt-0.5" />
-            </div>
-          </div>
-
-          {/* Right Actions */}
-          <div className="flex items-center gap-2.5">
-            {renderQrButton()}
-
-            <button 
-              onClick={toggleTheme}
-              className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md text-white border border-white/10 flex items-center justify-center hover:bg-white/30 transition-all active:scale-90"
-            >
-              {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-            </button>
-
-            <button 
-              onClick={onAuthClick}
-              className="relative p-0.5 rounded-full border-2 border-white/30 hover:border-white transition-colors active:scale-95"
-            >
-              <div className="w-9 h-9 rounded-full bg-white/20 backdrop-blur-md overflow-hidden flex items-center justify-center">
-                {user?.photoURL ? (
-                  <img src={user.photoURL} alt="Perfil" className="w-full h-full object-cover" />
-                ) : (
-                  <UserIcon className="w-5 h-5 text-white" />
-                )}
-              </div>
-              {/* Notification Dot Mock */}
-              {!user && (
-                <span className="absolute top-0 right-0 w-3 h-3 bg-red-500 border-2 border-[#2D6DF6] rounded-full"></span>
-              )}
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* 
-        CONTAINER 2: Search Bar
-        This part IS sticky. 
-        - When at top: Blue background with rounded bottom corners to frame the header.
-        - When scrolled: White/Dark background with blur for stickiness.
-      */}
-      <div 
-        className={`
-          sticky top-0 z-40 w-full px-5 transition-all duration-300
-          ${isScrolled 
-            ? 'bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border-b border-gray-200 dark:border-gray-800 shadow-sm pt-2 pb-3' 
-            : 'bg-[#2D6DF6] dark:bg-[#1540AD] pt-0 pb-6 rounded-b-[32px] shadow-lg shadow-blue-900/20 mb-2'
-          }
-        `}
-      >
-        <div className="max-w-md mx-auto">
-          <div className="relative group">
-            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-              <Search className={`h-5 w-5 transition-colors ${isScrolled ? 'text-gray-400 group-focus-within:text-[#2D6DF6]' : 'text-gray-400 group-focus-within:text-[#2D6DF6]'}`} />
+    <div 
+      className={`
+        sticky top-0 z-40 w-full bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border-b border-gray-100 dark:border-gray-800 transition-all duration-300 ease-in-out shadow-sm
+        ${showCategories && isHome ? 'pb-0' : 'pb-0'}
+      `}
+    >
+      <div className="max-w-md mx-auto flex flex-col">
+        
+        {/* Top Row: Search + Theme */}
+        <div className="flex items-center gap-3 px-5 py-3">
+          <div className="relative flex-1 group">
+            <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+              <Search className="h-4 w-4 text-gray-400 group-focus-within:text-[#2D6DF6] transition-colors" />
             </div>
             <input
               type="text"
               value={searchTerm}
               onChange={(e) => onSearchChange(e.target.value)}
-              placeholder={customPlaceholder || "Buscar lojas, produtos, serviços..."}
-              className={`block w-full pl-11 pr-4 py-3.5 border-none rounded-2xl text-sm font-medium placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#2D6DF6]/50 transition-all shadow-sm
-                ${isScrolled 
-                  ? 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white focus:bg-white dark:focus:bg-gray-800' 
-                  : 'bg-white dark:bg-gray-900 text-gray-900 dark:text-white'
-                }
-              `}
+              placeholder={customPlaceholder || "Buscar..."}
+              className="block w-full pl-10 pr-4 py-2.5 bg-gray-100 dark:bg-gray-800 border-none rounded-full text-sm font-medium text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#2D6DF6]/50 transition-all shadow-inner"
             />
           </div>
+
+          <button 
+            onClick={toggleTheme}
+            className="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-all active:scale-95 border border-transparent dark:border-gray-700"
+          >
+            {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+          </button>
         </div>
+
+        {/* Categories Row (Collapsible) */}
+        <div 
+          className={`
+            overflow-hidden transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]
+            ${showCategories && isHome ? 'max-h-24 opacity-100' : 'max-h-0 opacity-0'}
+          `}
+        >
+          <div className="flex items-center gap-6 overflow-x-auto no-scrollbar px-5 pb-3 pt-1">
+            {CATEGORIES.map((cat) => (
+              <button 
+                key={cat.id} 
+                onClick={() => onSelectCategory && onSelectCategory(cat)}
+                className="flex flex-col items-center gap-1.5 min-w-[64px] group cursor-pointer"
+              >
+                <div className="w-8 h-8 text-gray-400 group-hover:text-[#2D6DF6] transition-colors">
+                  {/* Clone element to force color inheritance or styling if needed */}
+                  {React.isValidElement(cat.icon) 
+                    ? React.cloneElement(cat.icon as React.ReactElement<any>, { 
+                        className: "w-7 h-7 text-gray-500 dark:text-gray-400 group-hover:text-[#2D6DF6] dark:group-hover:text-[#2D6DF6] transition-colors", 
+                        strokeWidth: 1.5 
+                      }) 
+                    : cat.icon}
+                </div>
+                <span className="text-[10px] font-medium text-gray-500 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white whitespace-nowrap transition-colors">
+                  {cat.name}
+                </span>
+              </button>
+            ))}
+          </div>
+        </div>
+
       </div>
-    </>
+    </div>
   );
 };
