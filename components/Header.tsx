@@ -30,6 +30,8 @@ export const Header: React.FC<HeaderProps> = ({
 }) => {
   const [showCategories, setShowCategories] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
+  const [activeDot, setActiveDot] = useState(0);
+  const categoriesRef = useRef<HTMLDivElement>(null);
   const isHome = activeTab === 'home';
 
   useEffect(() => {
@@ -61,6 +63,19 @@ export const Header: React.FC<HeaderProps> = ({
   useEffect(() => {
     setShowCategories(isHome);
   }, [isHome]);
+
+  const handleCategoriesScroll = () => {
+    if (categoriesRef.current) {
+      const { scrollLeft, scrollWidth, clientWidth } = categoriesRef.current;
+      const maxScroll = scrollWidth - clientWidth;
+      if (maxScroll > 0) {
+        const percentage = scrollLeft / maxScroll;
+        // Map 0-1 to 0-3 (4 dots) based on approximate pages
+        const dotIndex = Math.min(Math.round(percentage * 3), 3);
+        setActiveDot(dotIndex);
+      }
+    }
+  };
 
   return (
     <div 
@@ -98,29 +113,54 @@ export const Header: React.FC<HeaderProps> = ({
         <div 
           className={`
             overflow-hidden transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]
-            ${showCategories && isHome ? 'max-h-28 opacity-100' : 'max-h-0 opacity-0'}
+            ${showCategories && isHome ? 'max-h-32 opacity-100' : 'max-h-0 opacity-0'}
           `}
         >
-          <div className="flex items-center gap-3 overflow-x-auto no-scrollbar px-5 pb-3 pt-1">
-            {CATEGORIES.map((cat) => (
-              <button 
-                key={cat.id} 
-                onClick={() => onSelectCategory && onSelectCategory(cat)}
-                className="flex flex-col items-center justify-center gap-1 min-w-[76px] w-[76px] h-[72px] p-2 rounded-2xl bg-[#EAF2FF] dark:bg-gray-800 border border-[#DBEAFE] dark:border-gray-700 shadow-sm hover:shadow-md active:scale-95 transition-all group snap-start cursor-pointer"
-              >
-                <div className="w-8 h-8 flex items-center justify-center text-[#2D6DF6] dark:text-blue-400 group-hover:scale-110 transition-transform duration-300">
-                  {/* Clone element to force color inheritance or styling if needed */}
-                  {React.isValidElement(cat.icon) 
-                    ? React.cloneElement(cat.icon as React.ReactElement<any>, { 
-                        className: "w-6 h-6 text-[#2D6DF6] dark:text-blue-400", 
-                        strokeWidth: 2 
-                      }) 
-                    : cat.icon}
-                </div>
-                <span className="text-[10px] font-bold text-gray-600 dark:text-gray-300 text-center leading-tight line-clamp-1 w-full">
-                  {cat.name}
-                </span>
-              </button>
+          <div className="relative">
+            {/* Fade Effect on Right */}
+            <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-white dark:from-gray-900 to-transparent pointer-events-none z-10" />
+            
+            <div 
+              ref={categoriesRef}
+              onScroll={handleCategoriesScroll}
+              className="flex items-center gap-3 overflow-x-auto no-scrollbar px-5 pb-1 pt-1"
+            >
+              {CATEGORIES.map((cat) => (
+                <button 
+                  key={cat.id} 
+                  onClick={() => onSelectCategory && onSelectCategory(cat)}
+                  className="flex flex-col items-center justify-center gap-1 min-w-[76px] w-[76px] h-[72px] p-2 rounded-2xl bg-[#EAF2FF] dark:bg-gray-800 border border-[#DBEAFE] dark:border-gray-700 shadow-sm hover:shadow-md active:scale-95 transition-all group snap-start cursor-pointer flex-shrink-0"
+                >
+                  <div className="w-8 h-8 flex items-center justify-center text-[#2D6DF6] dark:text-blue-400 group-hover:scale-110 transition-transform duration-300">
+                    {/* Clone element to force color inheritance or styling if needed */}
+                    {React.isValidElement(cat.icon) 
+                      ? React.cloneElement(cat.icon as React.ReactElement<any>, { 
+                          className: "w-6 h-6 text-[#2D6DF6] dark:text-blue-400", 
+                          strokeWidth: 2 
+                        }) 
+                      : cat.icon}
+                  </div>
+                  <span className="text-[10px] font-bold text-gray-600 dark:text-gray-300 text-center leading-tight line-clamp-1 w-full">
+                    {cat.name}
+                  </span>
+                </button>
+              ))}
+              {/* Padding Element to ensure last item is fully visible/clickable with fade */}
+              <div className="w-2 flex-shrink-0" />
+            </div>
+          </div>
+
+          {/* Sutil Scroll Indicator Dots */}
+          <div className="flex justify-center gap-1.5 pb-2 pt-1">
+            {[0, 1, 2, 3].map((i) => (
+              <div 
+                key={i} 
+                className={`h-1 rounded-full transition-all duration-300 ${
+                  activeDot === i 
+                    ? 'w-3 bg-[#2D6DF6] dark:bg-blue-400' 
+                    : 'w-1 bg-gray-200 dark:bg-gray-700'
+                }`} 
+              />
             ))}
           </div>
         </div>
