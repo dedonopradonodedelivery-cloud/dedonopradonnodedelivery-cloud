@@ -14,14 +14,11 @@ import {
   Zap,
   Flame,
   Star,
-  MapPin,
-  ThumbsUp,
   ShieldCheck,
-  Wallet,
   Clock,
   MessageSquare,
-  Search,
-  User
+  MessageCircle,
+  Phone
 } from 'lucide-react';
 
 interface ServicesViewProps {
@@ -101,7 +98,7 @@ const LIVE_STORIES = [
     status: 'Em atendimento', 
     badge: '🔴 Agora', 
     badgeColor: 'bg-red-500',
-    responseTime: '~2 min',
+    responseTime: 'Responde em ~5 min',
     image: 'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?q=80&w=400&auto=format=fit=crop' 
   },
   { 
@@ -111,7 +108,7 @@ const LIVE_STORIES = [
     status: 'Resposta rápida', 
     badge: '🟢 Online', 
     badgeColor: 'bg-green-500',
-    responseTime: 'Imediato',
+    responseTime: 'Online agora',
     image: 'https://images.unsplash.com/photo-1621905252507-b35492cc74b4?q=80&w=400&auto=format=fit=crop' 
   },
   { 
@@ -124,16 +121,6 @@ const LIVE_STORIES = [
     responseTime: '~10 min',
     image: 'https://images.unsplash.com/photo-1600585152220-90363fe7e115?q=80&w=400&auto=format=fit=crop' 
   },
-  { 
-    id: 4, 
-    name: 'Dr. Reparo', 
-    role: 'Marido de Aluguel', 
-    status: 'Disponível', 
-    badge: '⚡ Rápido', 
-    badgeColor: 'bg-blue-500',
-    responseTime: '~5 min',
-    image: 'https://images.unsplash.com/photo-1581578731117-10d52143b0d8?q=80&w=400&auto=format=fit=crop' 
-  },
 ];
 
 const NEIGHBORHOOD_ACTIVITY = [
@@ -143,10 +130,38 @@ const NEIGHBORHOOD_ACTIVITY = [
   "Novo profissional verificado: Dra. Pet"
 ];
 
+// Enhanced Professional List for Discovery
 const DISCOVER_SERVICES = [
-  { id: 'd1', name: 'João Eletricista', category: 'Elétrica Residencial', rating: 4.9, reviews: 124, badges: ['⚡ Rápido', 'Verificado'], response: '< 5 min' },
-  { id: 'd2', name: 'Maria Diarista', category: 'Limpeza e Organização', rating: 5.0, reviews: 89, badges: ['⭐ Favorito', 'Cashback'], response: '~ 15 min' },
-  { id: 'd3', name: 'Tech Fix', category: 'Conserto Celulares', rating: 4.8, reviews: 210, badges: ['🔥 Em alta'], response: 'Online' },
+  { 
+    id: 'd1', 
+    name: 'João Eletricista', 
+    category: 'Elétrica Residencial', 
+    rating: 4.9, 
+    reviews: 124, 
+    badges: ['⚡ Responde rápido', '🏅 Popular no bairro'], 
+    response: '< 5 min',
+    whatsappAvailable: true
+  },
+  { 
+    id: 'd2', 
+    name: 'Maria Diarista', 
+    category: 'Limpeza e Organização', 
+    rating: 5.0, 
+    reviews: 89, 
+    badges: ['⭐ Avaliação alta', 'Verificado'], 
+    response: '~ 15 min',
+    whatsappAvailable: true
+  },
+  { 
+    id: 'd3', 
+    name: 'Tech Fix', 
+    category: 'Conserto Celulares', 
+    rating: 4.8, 
+    reviews: 210, 
+    badges: ['⚡ Responde rápido'], 
+    response: 'Online',
+    whatsappAvailable: true
+  },
 ];
 
 export const ServicesView: React.FC<ServicesViewProps> = ({ onSelectMacro, onOpenTerms, onNavigate, searchTerm = '' }) => {
@@ -159,6 +174,7 @@ export const ServicesView: React.FC<ServicesViewProps> = ({ onSelectMacro, onOpe
     const handleScroll = () => {
       if (heroRef.current) {
         const heroBottom = heroRef.current.getBoundingClientRect().bottom;
+        // Show sticky CTA when Hero is scrolled out of view
         setShowStickyCTA(heroBottom < 0);
       }
     };
@@ -181,7 +197,7 @@ export const ServicesView: React.FC<ServicesViewProps> = ({ onSelectMacro, onOpe
   });
 
   return (
-    <div className="min-h-screen bg-[#F7F8FA] dark:bg-gray-900 font-sans animate-in fade-in duration-500 pb-32">
+    <div className="min-h-screen bg-[#F7F8FA] dark:bg-gray-900 font-sans animate-in fade-in duration-500 pb-36">
       
       <div className="flex flex-col gap-6">
         
@@ -208,10 +224,10 @@ export const ServicesView: React.FC<ServicesViewProps> = ({ onSelectMacro, onOpe
               <div className="absolute top-[-50px] right-[-50px] w-48 h-48 bg-white/10 rounded-full blur-3xl pointer-events-none"></div>
 
               <div className="relative z-10">
-                {/* Onboarding Badge (Mock First Time) */}
+                {/* Invisible Onboarding Badge */}
                 <div className="inline-flex items-center gap-1 bg-white/20 backdrop-blur-sm px-2 py-0.5 rounded-lg mb-3 border border-white/10">
                   <Clock className="w-3 h-3 text-white" />
-                  <span className="text-[10px] font-bold text-white uppercase tracking-wide">Leva menos de 1 min</span>
+                  <span className="text-[10px] font-bold text-white uppercase tracking-wide">Primeira vez? Leva &lt; 1 min</span>
                 </div>
 
                 <h2 className="text-2xl font-bold text-white leading-tight mb-2 tracking-tight font-display">
@@ -226,7 +242,8 @@ export const ServicesView: React.FC<ServicesViewProps> = ({ onSelectMacro, onOpe
                   className="w-full bg-white text-[#0A46FF] font-bold py-3.5 rounded-xl shadow-sm flex items-center justify-center gap-2 group-hover:bg-blue-50 transition-colors relative overflow-hidden"
                 >
                   <span className="relative z-10 flex items-center gap-2">
-                    Pedir orçamento agora <ArrowRight className="w-4 h-4" strokeWidth={3} />
+                    Pedir orçamento
+                    <ArrowRight className="w-4 h-4" strokeWidth={3} />
                   </span>
                 </button>
                 
@@ -240,7 +257,7 @@ export const ServicesView: React.FC<ServicesViewProps> = ({ onSelectMacro, onOpe
           </div>
         )}
 
-        {/* 3. ANTI-ANXIETY MICRO-FLOW (Horizontal) */}
+        {/* 3. EDUCATION FLOW (SIMPLE) */}
         {!searchTerm && (
           <div className="px-5">
             <div className="bg-white dark:bg-gray-800 rounded-2xl p-4 border border-gray-100 dark:border-gray-700 shadow-sm">
@@ -265,7 +282,7 @@ export const ServicesView: React.FC<ServicesViewProps> = ({ onSelectMacro, onOpe
           </div>
         )}
 
-        {/* 4. AGORA NA FREGUESIA (URGENCY STORIES) */}
+        {/* 4. AGORA NA FREGUESIA (LIVE ACTIVITY) */}
         {!searchTerm && (
           <div className="pl-5 pt-2">
             <div className="flex items-center gap-2 mb-3 pr-5">
@@ -305,8 +322,9 @@ export const ServicesView: React.FC<ServicesViewProps> = ({ onSelectMacro, onOpe
                       <h4 className="text-white font-bold text-xs leading-tight shadow-black drop-shadow-md">{item.name}</h4>
                       <p className="text-[10px] text-gray-300 font-medium">{item.role}</p>
                     </div>
+                    {/* PRIMARY ACTION: Quote */}
                     <div className="text-[9px] font-bold text-white bg-white/20 backdrop-blur-md px-2 py-1.5 rounded-lg text-center border border-white/20 hover:bg-white/30 transition-colors">
-                      Chamar no Zap
+                      Pedir orçamento
                     </div>
                   </div>
                 </div>
@@ -315,7 +333,7 @@ export const ServicesView: React.FC<ServicesViewProps> = ({ onSelectMacro, onOpe
           </div>
         )}
 
-        {/* 5. O QUE VOCÊ PRECISA? (CATEGORIAS) */}
+        {/* 5. CATEGORIES & EMERGENCY */}
         <div className="px-5">
           <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
             O que você precisa?
@@ -326,46 +344,64 @@ export const ServicesView: React.FC<ServicesViewProps> = ({ onSelectMacro, onOpe
               const Icon = item.icon;
               const isEmergency = item.id === 'emergency';
 
+              // EMERGENCY CARD (SPECIAL LAYOUT)
+              if (isEmergency) {
+                return (
+                  <div
+                    key={item.id}
+                    className="col-span-2 bg-red-600 rounded-[20px] p-4 text-white shadow-lg shadow-red-500/20 relative overflow-hidden"
+                  >
+                    <div className="flex justify-between items-start relative z-10">
+                      <div>
+                        <div className="flex items-center gap-2 mb-1">
+                          <Icon className="w-5 h-5 text-white" strokeWidth={3} />
+                          <h3 className="text-lg font-bold">Emergência</h3>
+                        </div>
+                        <p className="text-xs text-red-100 font-medium mb-3">Atendimento imediato • 24h</p>
+                      </div>
+                      <span className="text-[10px] font-bold bg-white/20 px-2 py-1 rounded-full backdrop-blur-sm animate-pulse border border-white/20">
+                        Plantão Ativo
+                      </span>
+                    </div>
+
+                    <div className="flex gap-3 relative z-10">
+                      <button 
+                        onClick={() => onSelectMacro(item.id, item.name)}
+                        className="flex-1 bg-white text-red-600 font-bold text-sm py-2.5 rounded-xl shadow-sm active:scale-95 transition-transform flex items-center justify-center"
+                      >
+                        Pedir orçamento
+                      </button>
+                      <button 
+                        className="flex-1 border border-white/30 text-white font-medium text-xs py-2.5 rounded-xl hover:bg-white/10 active:scale-95 transition-transform flex items-center justify-center gap-1"
+                      >
+                        <Phone className="w-3 h-3" />
+                        Chamar agora (24h)
+                      </button>
+                    </div>
+                  </div>
+                );
+              }
+
+              // STANDARD CATEGORY CARD
               return (
                 <button
                   key={item.id}
                   onClick={() => onSelectMacro(item.id, item.name)}
-                  className={`
-                    relative overflow-hidden rounded-[20px] p-4 text-left shadow-sm hover:shadow-md transition-all active:scale-[0.98] group min-h-[130px] flex flex-col justify-between
-                    ${isEmergency 
-                      ? 'col-span-2 bg-red-600 text-white border-none shadow-red-500/20 shadow-lg' 
-                      : 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white border border-gray-100 dark:border-gray-700'}
-                  `}
+                  className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white border border-gray-100 dark:border-gray-700 relative overflow-hidden rounded-[20px] p-4 text-left shadow-sm hover:shadow-md transition-all active:scale-[0.98] group min-h-[130px] flex flex-col justify-between"
                 >
-                  <div className="flex justify-between items-start">
-                    <div className={`
-                      w-10 h-10 rounded-xl flex items-center justify-center mb-3
-                      ${isEmergency ? 'bg-white/20 text-white' : 'bg-blue-50 dark:bg-gray-700 text-[#0A46FF] dark:text-blue-400'}
-                    `}>
-                      <Icon className="w-5 h-5" strokeWidth={isEmergency ? 2.5 : 2} />
-                    </div>
-                    {isEmergency && (
-                      <span className="text-[10px] font-bold bg-white/20 px-2 py-1 rounded-full backdrop-blur-sm animate-pulse border border-white/20">
-                        Plantão 24h
-                      </span>
-                    )}
+                  <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-3 bg-blue-50 dark:bg-gray-700 text-[#0A46FF] dark:text-blue-400">
+                    <Icon className="w-5 h-5" strokeWidth={2} />
                   </div>
                   
                   <div>
-                    <span className={`block font-bold text-base leading-tight mb-1 ${isEmergency ? 'text-white' : 'text-gray-900 dark:text-white'}`}>
+                    <span className="block font-bold text-base leading-tight mb-1">
                       {item.name}
                     </span>
-                    {isEmergency ? (
-                      <span className="block text-xs text-red-100 opacity-90 mb-2 font-medium">
-                        {item.description}
-                      </span>
-                    ) : (
-                        <span className="block text-[10px] text-gray-400 dark:text-gray-500 mb-2 font-medium">
-                            Orçamento grátis
-                        </span>
-                    )}
-                    <span className={`text-[10px] font-bold flex items-center gap-1 mt-auto ${isEmergency ? 'text-white' : 'text-blue-600 dark:text-blue-400'}`}>
-                      {isEmergency ? 'Chamar Agora' : 'Pedir orçamento'} <ArrowRight className="w-3 h-3 transition-transform group-hover:translate-x-1" />
+                    <span className="block text-[10px] text-gray-400 dark:text-gray-500 mb-2 font-medium">
+                        Orçamento grátis
+                    </span>
+                    <span className="text-[10px] font-bold flex items-center gap-1 mt-auto text-blue-600 dark:text-blue-400">
+                      Pedir orçamento <ArrowRight className="w-3 h-3 transition-transform group-hover:translate-x-1" />
                     </span>
                   </div>
                 </button>
@@ -374,60 +410,102 @@ export const ServicesView: React.FC<ServicesViewProps> = ({ onSelectMacro, onOpe
           </div>
         </div>
 
-        {/* 6. CONTINUE DESCOBRINDO (LISTA) */}
+        {/* 6. RECOMMENDED PROFESSIONALS (Ranked & Trusted) */}
         <div className="px-5">
-          <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">
-            Recomendados no bairro 👇
-          </h3>
+          <div className="mb-4">
+            <h3 className="text-lg font-bold text-gray-900 dark:text-white leading-tight">
+              Recomendados no bairro
+            </h3>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+              Bem avaliados e com resposta rápida na Freguesia
+            </p>
+          </div>
           
-          <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-4">
             {DISCOVER_SERVICES.map((item, i) => (
               <div 
                 key={item.id}
-                onClick={() => onSelectMacro('pro', item.category)}
-                className="bg-white dark:bg-gray-800 p-3 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 flex gap-3 relative group active:scale-[0.99] transition-transform cursor-pointer"
+                className="bg-white dark:bg-gray-800 p-4 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col gap-3 relative group transition-all hover:shadow-md"
               >
-                <div className="w-[72px] h-[72px] bg-gray-100 dark:bg-gray-700 rounded-xl flex items-center justify-center shrink-0 border border-gray-100 dark:border-gray-600 text-xl font-bold text-gray-400">
-                  {item.name.charAt(0)}
-                </div>
-                
-                <div className="flex-1 min-w-0 pr-24">
-                  <div className="flex justify-between items-start">
-                    <h4 className="font-bold text-gray-900 dark:text-white text-sm truncate">{item.name}</h4>
+                {/* Header Row */}
+                <div className="flex gap-3 items-start">
+                  <div className="w-12 h-12 bg-gray-100 dark:bg-gray-700 rounded-xl flex items-center justify-center shrink-0 border border-gray-100 dark:border-gray-600 text-lg font-bold text-gray-400">
+                    {item.name.charAt(0)}
                   </div>
                   
-                  <div className="flex items-center gap-2 mt-1">
-                    <div className="flex items-center gap-0.5 text-[10px] font-bold text-yellow-500">
-                      <Star className="w-3 h-3 fill-current" /> {item.rating}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex justify-between items-start">
+                      <h4 className="font-bold text-gray-900 dark:text-white text-base truncate">{item.name}</h4>
+                      <div className="flex items-center gap-1 text-xs font-bold text-yellow-500 bg-yellow-50 dark:bg-yellow-900/20 px-1.5 py-0.5 rounded">
+                        <Star className="w-3 h-3 fill-current" /> {item.rating}
+                      </div>
                     </div>
-                    <span className="text-[10px] text-gray-400">• {item.category}</span>
-                  </div>
-
-                  <div className="flex items-center gap-2 mt-2">
-                     <div className="flex items-center gap-1 text-[9px] font-bold text-green-600 bg-green-50 dark:bg-green-900/20 px-1.5 py-0.5 rounded">
-                        <Clock className="w-2.5 h-2.5" />
-                        {item.response}
-                     </div>
-                     {item.badges.includes('Verificado') && (
-                         <div className="flex items-center gap-1 text-[9px] font-bold text-blue-600 bg-blue-50 dark:bg-blue-900/20 px-1.5 py-0.5 rounded">
-                            <ShieldCheck className="w-2.5 h-2.5" />
-                            Verificado
-                         </div>
-                     )}
+                    <p className="text-xs text-gray-500 dark:text-gray-400">{item.category}</p>
                   </div>
                 </div>
 
-                <button 
-                  className="absolute right-3 top-1/2 -translate-y-1/2 bg-[#0A46FF] text-white text-[10px] font-bold px-4 py-2 rounded-full shadow-md active:scale-95 transition-transform hover:bg-[#0039CC]"
-                >
-                  Orçamento
-                </button>
+                {/* Badges Row */}
+                <div className="flex flex-wrap gap-2">
+                   <div className="flex items-center gap-1 text-[10px] font-bold text-green-600 bg-green-50 dark:bg-green-900/20 px-2 py-1 rounded-md border border-green-100 dark:border-green-800">
+                      <Clock className="w-3 h-3" />
+                      {item.response}
+                   </div>
+                   {item.badges.map(badge => (
+                      <span key={badge} className="text-[10px] font-medium bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-2 py-1 rounded-md border border-gray-200 dark:border-gray-600">
+                        {badge}
+                      </span>
+                   ))}
+                </div>
+
+                {/* CTAs Row - Strict Hierarchy */}
+                <div className="flex flex-col gap-2 mt-1">
+                  <button 
+                    onClick={() => onSelectMacro('pro', item.category)}
+                    className="w-full bg-[#0A46FF] text-white text-sm font-bold py-3 rounded-xl shadow-md shadow-blue-500/20 active:scale-[0.98] transition-transform flex items-center justify-center gap-2"
+                  >
+                    Pedir orçamento
+                  </button>
+                  
+                  {item.whatsappAvailable && (
+                    <button 
+                      className="w-full flex items-center justify-center gap-2 py-2 rounded-xl text-xs font-bold text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 transition-colors"
+                    >
+                      <MessageCircle className="w-4 h-4" />
+                      Chamar no WhatsApp
+                    </button>
+                  )}
+                </div>
+
+                {/* Trust Micro-copy */}
+                <div className="flex justify-center">
+                  <p className="text-[9px] text-gray-400 font-medium flex items-center gap-1">
+                    <ShieldCheck className="w-2.5 h-2.5" /> Contato direto, sem compromisso
+                  </p>
+                </div>
               </div>
             ))}
           </div>
         </div>
 
-        {/* 7. PATROCINADOR MASTER */}
+        {/* 7. CLOSURE BLOCK (Decision Helper) */}
+        <div className="px-5 mt-4">
+          <div className="bg-gray-100 dark:bg-gray-800/50 rounded-2xl p-5 text-center border border-gray-200 dark:border-gray-700">
+            <h4 className="font-bold text-gray-900 dark:text-white text-sm mb-1">
+              Ainda não encontrou o que precisa?
+            </h4>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mb-4 max-w-[200px] mx-auto">
+              Nós encontramos para você. É grátis e rápido.
+            </p>
+            <button 
+              onClick={() => onSelectMacro('home', 'Geral')}
+              className="w-full bg-white dark:bg-gray-800 text-[#0A46FF] text-sm font-bold border border-[#0A46FF] px-6 py-3 rounded-xl hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors shadow-sm"
+            >
+              Pedir orçamento
+            </button>
+          </div>
+        </div>
+
+        {/* 8. PATROCINADOR MASTER */}
         <div className="px-5">
           <div 
             onClick={() => onNavigate('patrocinador_master')}
@@ -473,7 +551,7 @@ export const ServicesView: React.FC<ServicesViewProps> = ({ onSelectMacro, onOpe
         >
             <span className="flex items-center gap-2 text-sm">
                 <MessageSquare className="w-4 h-4 fill-white text-white" />
-                Pedir orçamento rápido
+                Pedir orçamento
             </span>
             <ArrowRight className="w-4 h-4" />
         </button>
