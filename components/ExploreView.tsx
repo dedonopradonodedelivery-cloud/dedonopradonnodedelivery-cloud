@@ -860,14 +860,14 @@ export const ExploreView: React.FC<ExploreViewProps> = ({
                             </p>
                         </div>
 
-                        <div className="space-y-3">
+                        <div className="space-y-4">
                             {displayedFeed.map((store, idx) => {
                                 const badges = [
-                                    { icon: Flame, text: "Em alta", color: "text-orange-500 bg-orange-50 dark:bg-orange-900/20" },
-                                    { icon: MousePointerClick, text: "Muitos acessos", color: "text-blue-500 bg-blue-50 dark:bg-blue-900/20" },
-                                    { icon: Coins, text: "Cashback", color: "text-green-600 bg-green-50 dark:bg-green-900/20" },
-                                    { icon: TrendingUp, text: "Bombando", color: "text-purple-500 bg-purple-50 dark:bg-purple-900/20" },
-                                    { icon: Heart, text: "Favorito", color: "text-red-500 bg-red-50 dark:bg-red-900/20" }
+                                    { icon: Flame, text: "Em alta", color: "text-orange-600 bg-orange-50 dark:bg-orange-900/20 border-orange-100 dark:border-orange-800" },
+                                    { icon: TrendingUp, text: "Bombando", color: "text-purple-600 bg-purple-50 dark:bg-purple-900/20 border-purple-100 dark:border-purple-800" },
+                                    { icon: Coins, text: "Cashback", color: "text-green-600 bg-green-50 dark:bg-green-900/20 border-green-100 dark:border-green-800" },
+                                    { icon: Heart, text: "Favorito", color: "text-yellow-600 bg-yellow-50 dark:bg-yellow-900/20 border-yellow-100 dark:border-yellow-800" },
+                                    { icon: MousePointerClick, text: "Muitos acessos", color: "text-blue-600 bg-blue-50 dark:bg-blue-900/20 border-blue-100 dark:border-blue-800" }
                                 ];
                                 // Deterministic badge assignment based on index
                                 const badge = badges[idx % badges.length];
@@ -876,10 +876,10 @@ export const ExploreView: React.FC<ExploreViewProps> = ({
                                     <button 
                                         key={`feed-${store.id}-${idx}`}
                                         onClick={() => onStoreClick(store)}
-                                        className="w-full bg-white dark:bg-gray-800 p-3 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 flex gap-3 items-center animate-in slide-in-from-bottom-4 duration-700 fill-mode-forwards"
+                                        className="w-full bg-white dark:bg-gray-800 p-3 rounded-2xl shadow-sm hover:shadow-md border border-gray-100 dark:border-gray-700 flex gap-4 items-center animate-in slide-in-from-bottom-4 duration-700 fill-mode-forwards active:scale-[0.99] transition-all"
                                         style={{ animationDelay: `${idx * 50}ms` }}
                                     >
-                                        <div className="w-16 h-16 rounded-xl bg-gray-100 dark:bg-gray-700 overflow-hidden flex-shrink-0">
+                                        <div className="w-14 h-14 rounded-full bg-gray-100 dark:bg-gray-700 overflow-hidden flex-shrink-0 border border-gray-100 dark:border-gray-600">
                                             <img 
                                                 src={store.logoUrl || getStoreLogo(store.name.length)} 
                                                 alt={store.name} 
@@ -887,21 +887,20 @@ export const ExploreView: React.FC<ExploreViewProps> = ({
                                             />
                                         </div>
                                         <div className="flex-1 text-left min-w-0">
-                                            <div className="flex justify-between items-start">
-                                                <h4 className="font-bold text-gray-900 dark:text-white text-sm truncate">{store.name}</h4>
-                                                <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1 ${badge.color}`}>
-                                                    <badge.icon className="w-2.5 h-2.5" />
+                                            <div className="flex justify-between items-start mb-1">
+                                                <h4 className="font-bold text-gray-900 dark:text-white text-[15px] truncate max-w-[65%]">{store.name}</h4>
+                                                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1 border ${badge.color}`}>
+                                                    <badge.icon className="w-3 h-3" />
                                                     {badge.text}
                                                 </span>
                                             </div>
-                                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 truncate">{store.category} • {store.subcategory}</p>
-                                            <div className="flex items-center gap-2 mt-1.5">
-                                                <div className="flex items-center gap-1 text-[10px] text-gray-400">
-                                                    <Footprints className="w-3 h-3" />
-                                                    {store.distance}
+                                            <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{store.category} • {store.subcategory}</p>
+                                            <div className="flex items-center gap-3 mt-1.5">
+                                                <div className="flex items-center gap-1 text-[11px] text-gray-400 font-medium">
+                                                    <MapPin className="w-3 h-3" />
+                                                    Freguesia · RJ
                                                 </div>
-                                                <span className="w-0.5 h-0.5 bg-gray-300 rounded-full"></span>
-                                                <div className="flex items-center gap-0.5 text-[10px] font-bold text-yellow-500">
+                                                <div className="flex items-center gap-1 text-[11px] font-bold text-yellow-500 bg-yellow-50 dark:bg-yellow-900/10 px-1.5 py-0.5 rounded">
                                                     <Star className="w-3 h-3 fill-current" />
                                                     {store.rating}
                                                 </div>
@@ -921,14 +920,15 @@ export const ExploreView: React.FC<ExploreViewProps> = ({
                         
                         {hasMoreFeed && (
                             <div className="mt-8 flex flex-col items-center animate-in fade-in duration-700 delay-300">
-                                <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-3">
+                                <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-4">
                                     Você já descobriu bastante coisa hoje 👀
                                 </p>
                                 <button 
                                     onClick={handleLoadMore}
-                                    className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 font-bold text-xs px-6 py-3 rounded-full shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors active:scale-95"
+                                    className="bg-transparent border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 font-bold text-xs px-8 py-3 rounded-full hover:bg-gray-50 dark:hover:bg-gray-800 transition-all active:scale-95 flex items-center gap-2"
                                 >
                                     Continuar explorando
+                                    <ArrowRight className="w-3.5 h-3.5" />
                                 </button>
                             </div>
                         )}
