@@ -12,7 +12,7 @@ import {
   Users,
   Loader2
 } from 'lucide-react';
-import { supabase } from '../lib/supabaseClient';
+import { useAuth } from '../contexts/AuthContext';
 import { MasterSponsorBanner } from './MasterSponsorBanner';
 import { User } from '@supabase/supabase-js';
 
@@ -56,6 +56,7 @@ const SectionTitle: React.FC<{ title: string }> = ({ title }) => (
 );
 
 export const MenuView: React.FC<MenuViewProps> = ({ user, userRole, onAuthClick, onNavigate }) => {
+  const { signOut } = useAuth();
   const isMerchant = userRole === 'lojista';
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   
@@ -73,18 +74,14 @@ export const MenuView: React.FC<MenuViewProps> = ({ user, userRole, onAuthClick,
     setIsLoggingOut(true);
 
     try {
-      // Race condition protection: prevent infinite loading if network hangs.
-      // Tenta fazer o signOut, mas se demorar mais que 2.5s, libera a UI.
-      await Promise.race([
-        supabase.auth.signOut(),
-        new Promise(resolve => setTimeout(resolve, 2500)) 
-      ]);
+      // Chama o signOut do contexto
+      // O contexto atualizará o estado 'user' para null
+      // A App.tsx reagirá e renderizará a UI apropriada (Guest ou Home)
+      await signOut();
     } catch (error) {
-      console.warn("Erro ou timeout ao realizar logout:", error);
+      console.warn("Erro ao realizar logout:", error);
     } finally {
-      // Garante que o loading pare e a navegação ocorra
       setIsLoggingOut(false);
-      onNavigate('home');
     }
   };
 

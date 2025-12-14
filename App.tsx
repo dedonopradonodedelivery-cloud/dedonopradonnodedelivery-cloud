@@ -50,7 +50,7 @@ import { MerchantPanel } from './components/MerchantPanel';
 import { UserCashbackFlow } from './components/UserCashbackFlow';
 import { MapPin, Crown } from 'lucide-react';
 import { supabase } from './lib/supabaseClient';
-import { User } from '@supabase/supabase-js';
+import { useAuth } from './contexts/AuthContext';
 import { Category, Store, AdType, EditorialCollection } from './types';
 import { getStoreLogo } from './utils/mockLogos';
 
@@ -129,12 +129,14 @@ const MOCK_STORES: Store[] = [
 ];
 
 const App: React.FC = () => {
+  // Use Centralized Auth Context
+  const { user, userRole, loading: isAuthLoading } = useAuth();
+
   const [activeTab, setActiveTab] = useState('home');
   const [isLoading, setIsLoading] = useState(true);
   const [isDarkMode, setIsDarkMode] = useState(false);
-  const [isAuthLoading, setIsAuthLoading] = useState(true);
 
-  // Ref para acessar activeTab atual dentro de listeners sem stale closure
+  // Ref para acessar activeTab atual dentro de listeners sem stale closure (se necessário)
   const activeTabRef = useRef(activeTab);
   
   // Atualiza a ref sempre que o estado mudar
@@ -142,15 +144,12 @@ const App: React.FC = () => {
     activeTabRef.current = activeTab;
   }, [activeTab]);
 
-  // Auth State Management
+  // Auth State Management (UI Only)
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [authContext, setAuthContext] = useState<'default' | 'merchant_lead_qr'>('default');
 
   // Controle do modal de Lead Lojista (QR)
   const [isMerchantLeadModalOpen, setIsMerchantLeadModalOpen] = useState(false);
-
-  const [user, setUser] = useState<User | null>(null);
-  const [userRole, setUserRole] = useState<'cliente' | 'lojista' | null>(null);
 
   const [globalSearch, setGlobalSearch] = useState('');
   const [serviceSearch, setServiceSearch] = useState('');
@@ -206,13 +205,34 @@ const App: React.FC = () => {
     ? 'Buscar serviços, categorias ou especialidades...'
     : 'Buscar lojas, produtos, serviços...';
 
+  // --- REACTION TO AUTH STATE CHANGES ---
+  useEffect(() => {
+    // 1. Fechar modal de auth se logar
+    if (user && isAuthOpen) {
+      setIsAuthOpen(false);
+    }
+
+    // 2. Redirecionar se estiver em área protegida e deslogar
+    if (!user && !isAuthLoading) {
+        const protectedTabs = ['profile', 'store_area', 'favorites', 'edit_profile', 'merchant_panel'];
+        if (protectedTabs.includes(activeTab)) {
+            setActiveTab('home');
+        }
+    }
+
+    // 3. Redirecionamento específico para Lojista ao logar
+    if (user && userRole === 'lojista' && activeTab === 'home') {
+        // Opcional: Forçar ida para painel, ou deixar o usuário escolher no menu
+        // setActiveTab('store_area'); 
+    }
+  }, [user, userRole, isAuthLoading, isAuthOpen, activeTab]);
+
+
   // --- URL Routing Logic ---
   useEffect(() => {
     const path = window.location.pathname;
 
-    // Se entrar via URL /painel-parceiro, força aba se lojista
     if (path === '/painel-parceiro' || path === '/painel-lojista') {
-      // O useEffect de Auth abaixo cuidará da validação de role
       return;
     }
 
@@ -237,139 +257,14 @@ const App: React.FC = () => {
     }
   }, []);
 
-  const ensureProfile = async (currentUser: User) => {
-    try {
-      await supabase
-        .from('profiles')
-        .upsert(
-          {
-            id: currentUser.id,
-            role: 'cliente', // Default safe fallback if DB trigger fails
-            nome: currentUser.user_metadata?.full_name ?? currentUser.email ?? null,
-            telefone: null,
-          },
-          { onConflict: 'id' } // Only insert if not exists
-        );
-    } catch (err) {
-      console.warn('Erro ao garantir perfil (pode já existir):', err);
-    }
-  };
-
-  const checkAndSetRole = async (currentUser: User | null) => {
-    if (!currentUser) {
-      setUserRole(null);
-      return null;
-    }
-
-    try {
-      // Tenta buscar o perfil. Se não existir (race condition no signup), tenta mais uma vez após 1s.
-      let { data, error } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', currentUser.id)
-        .maybeSingle();
-
-      if (!data && !error) {
-         // Retry once
-         await new Promise(r => setTimeout(r, 1000));
-         const retry = await supabase.from('profiles').select('role').eq('id', currentUser.id).maybeSingle();
-         data = retry.data;
-      }
-
-      const role = data?.role === 'lojista' ? 'lojista' : 'cliente';
-      setUserRole(role);
-      
-      // *** LOGIC FORCED REDIRECT FOR MERCHANTS ***
-      if (role === 'lojista') {
-          console.log("Usuário identificado como Lojista. Redirecionando para Painel.");
-          setActiveTab('store_area'); // Força a ida para o painel
-      } else {
-          // Se for cliente e estiver na home ou login, ok. 
-          // Se estava tentando acessar area restrita, poderia ser redirecionado, mas deixamos livre por enquanto.
-      }
-
-      return role;
-    } catch (err) {
-      console.error('Erro ao buscar role:', err);
-      setUserRole('cliente');
-      return 'cliente';
-    }
-  };
-
-  // ✅ INIT AUTH & LISTENER
-  useEffect(() => {
-    const safetyTimer = setTimeout(() => {
-      setIsAuthLoading(false);
-    }, 4000);
-
-    const initAuth = async () => {
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
-
-        if (session?.user) {
-          setUser(session.user as any);
-          await checkAndSetRole(session.user);
-        }
-      } catch (e) {
-        console.error("Auth init error:", e);
-      } finally {
-        setIsAuthLoading(false);
-        clearTimeout(safetyTimer);
-      }
-    };
-
-    initAuth();
-
-    // Listen for Auth Changes (Login, Logout, etc)
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      // Logic handling
-      if (event === 'SIGNED_IN' && session?.user) {
-        setUser(session.user as any);
-        await checkAndSetRole(session.user);
-
-        // Usar a ref para evitar stale closure
-        const currentTab = activeTabRef.current;
-        if (currentTab === 'cashback_landing') setActiveTab('cashback');
-        if (currentTab === 'freguesia_connect_public') setActiveTab('home');
-      
-      } else if (event === 'TOKEN_REFRESHED' && session?.user) {
-         // Apenas atualiza o usuário sem redirecionar, para não interromper a navegação
-         setUser(session.user as any);
-         // Opcional: revalidar role se necessário, mas geralmente não precisa bloquear UI
-      
-      } else if (event === 'SIGNED_OUT' || !session) {
-        // Robust cleanup for logout
-        setUser(null);
-        setUserRole(null);
-        
-        // Verifica a aba atual via Ref para decidir se redireciona
-        const currentTab = activeTabRef.current;
-        if (currentTab === 'profile' || currentTab === 'store_area') {
-            setActiveTab('home');
-        }
-      }
-    });
-
-    return () => {
-      subscription.unsubscribe();
-      clearTimeout(safetyTimer);
-    };
-  }, []); // Dependência vazia: roda apenas uma vez no mount
-
-  // Close Auth Modal if user detected
-  useEffect(() => {
-    if (user && isAuthOpen) {
-      setIsAuthOpen(false);
-    }
-  }, [user, isAuthOpen]);
-
-  // General Loading Timeout
+  // General Loading Timeout (Visual splash)
   useEffect(() => {
     const timer = setTimeout(() => setIsLoading(false), 3500);
     return () => clearTimeout(timer);
   }, []);
 
   const handleLoginSuccess = async () => {
+    // AuthProvider handles state, just wait a bit for UI transition
     await new Promise(r => setTimeout(r, 500));
   };
 
@@ -565,6 +460,8 @@ const App: React.FC = () => {
               />
             )}
 
+            {/* ... Rest of the components remain the same, just passing the new Context-derived user ... */}
+            
             {activeTab === 'explore' && (
               <ExploreView
                 stores={stores}
@@ -701,8 +598,6 @@ const App: React.FC = () => {
             {activeTab === 'store_area' && (
               <StoreAreaView
                 onBack={() => {
-                    // Se for lojista, não tem "voltar" para o feed, apenas para Home (que deve redirecionar) ou logout.
-                    // Para simplificar, mantemos setActiveTab('profile') que é o Menu seguro.
                     setActiveTab('profile');
                 }}
                 onNavigate={setActiveTab}
@@ -755,7 +650,6 @@ const App: React.FC = () => {
               <BusinessRegistrationFlow
                 onBack={() => setActiveTab('profile')}
                 onComplete={() => {
-                  // Fallback se o flow de registro terminar sem criar conta automaticamente (apenas lead)
                   setActiveTab('home');
                 }}
               />

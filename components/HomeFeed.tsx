@@ -179,60 +179,54 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
       title: "Descubra achados da Freguesia.",
       subtitle: "Promoções, serviços e novidades.",
       icon: <Search className="w-8 h-8 text-white" />,
-      image: "https://images.unsplash.com/photo-1481437156560-3205f6a55735?q=80&w=800&auto=format=fit=crop",
       action: () => onNavigate('explore'),
       cta: "Descobrir",
-      gradient: "from-[#1E40AF] via-[#1E40AF]/60 to-transparent" // Azul Royal Profundo
+      bgClass: "bg-[#1D4ED8]" // Azul Royal Sólido
     },
     { 
       id: 'community-connect', 
       title: "Conectando empreendedores.", 
       subtitle: "Uma rede que fortalece o bairro.", 
       icon: <Users className="w-8 h-8 text-white" />, 
-      image: "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?q=80&w=800&auto=format=fit=crop", 
       action: () => onNavigate('freguesia_connect_public'), 
       cta: "Saiba mais",
-      gradient: "from-[#7C3AED] via-[#7C3AED]/60 to-transparent" // Roxo Vibrante
+      bgClass: "bg-gradient-to-r from-blue-600 to-purple-600" // Gradiente Azul -> Roxo
     },
     { 
       id: 'merchant-claim', 
       title: "Tem um negócio aqui?", 
       subtitle: "Cadastre sua loja na Localizei.", 
       icon: <StoreIcon className="w-8 h-8 text-white" />, 
-      image: "https://images.unsplash.com/photo-1556742031-c6961e8560b0?q=80&w=800&auto=format=fit=crop", 
       action: () => onNavigate('business_registration'), 
       cta: "Cadastrar",
-      gradient: "from-[#059669] via-[#059669]/60 to-transparent" // Verde Esmeralda
+      bgClass: "bg-[#059669]" // Verde Esmeralda Sólido
     },
     { 
       id: 'freguesia-hub', 
       title: "Tudo o que você precisa.", 
       subtitle: "Comércios, serviços e vantagens.", 
       icon: <MapPin className="w-8 h-8 text-white" />, 
-      image: "https://images.unsplash.com/photo-1524661135-423995f22d0b?q=80&w=800&auto=format=fit=crop", 
       action: () => onNavigate('explore'), 
       cta: "Conhecer",
-      gradient: "from-[#EA580C] via-[#EA580C]/60 to-transparent" // Laranja Intenso
+      bgClass: "bg-gradient-to-r from-orange-500 to-red-600" // Gradiente Laranja -> Vermelho
     },
     { 
       id: 'cashback-rewards', 
       title: "Ganhe cashback.", 
       subtitle: "Receba parte do valor de volta.", 
       icon: <Wallet className="w-8 h-8 text-white" />, 
-      image: "https://images.unsplash.com/photo-1580519542036-c47de6196ba5?q=80&w=800&auto=format=fit=crop", 
       action: () => onNavigate('cashback_info'), 
       cta: "Começar",
-      gradient: "from-[#DB2777] via-[#DB2777]/60 to-transparent" // Rosa Magenta
+      bgClass: "bg-[#DB2777]" // Rosa Magenta Sólido
     },
     { 
       id: 'services', 
       title: "Peça um Orçamento Grátis", 
       subtitle: "Receba até 5 propostas.", 
       icon: <Wrench className="w-8 h-8 text-white" />, 
-      image: "https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?q=80&w=800&auto=format=fit=crop", 
       action: () => onNavigate('services'), 
       cta: "Orçamento",
-      gradient: "from-[#0891B2] via-[#0891B2]/60 to-transparent" // Ciano Vibrante
+      bgClass: "bg-[#0891B2]" // Azul Ciano Sólido
     }
   ];
 
@@ -360,21 +354,15 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
                     {MINI_BANNERS.map((banner) => {
                         // Increased height to 35vh (approx 320-350px on modern phones)
                         const heightClass = 'h-[35vh] min-h-[260px] max-h-[400px]';
-                        const gradientClass = banner.gradient || "bg-gradient-to-t from-black/90 via-black/40 to-transparent";
 
                         return (
                             <div key={banner.id} onClick={banner.action} className="min-w-full snap-center cursor-pointer relative px-5">
-                                <div className={`w-full ${heightClass} bg-gray-200 relative overflow-hidden rounded-[24px]`}>
-                                
-                                <div className="absolute inset-0 z-0">
-                                    <img src={banner.image} className="w-full h-full object-cover" alt="" />
-                                    <div className={`absolute inset-0 bg-gradient-to-t ${gradientClass}`} />
-                                </div>
-
-                                <div className="absolute bottom-0 left-0 right-0 p-6 pb-10 z-10 flex flex-col justify-end h-full">
-                                    <h3 className="text-white font-bold text-3xl leading-tight mb-2 drop-shadow-md w-[90%]">{banner.title}</h3>
-                                    <p className="text-white/90 text-sm font-medium line-clamp-2 w-[90%] opacity-90">{banner.subtitle}</p>
-                                </div>
+                                <div className={`w-full ${heightClass} relative overflow-hidden rounded-[24px] ${banner.bgClass} shadow-sm`}>
+                                    {/* Content Overlay */}
+                                    <div className="absolute bottom-0 left-0 right-0 p-6 pb-10 z-10 flex flex-col justify-end h-full">
+                                        <h3 className="text-white font-bold text-3xl leading-tight mb-2 drop-shadow-md w-[90%]">{banner.title}</h3>
+                                        <p className="text-white/90 text-sm font-medium line-clamp-2 w-[90%] opacity-90">{banner.subtitle}</p>
+                                    </div>
                                 </div>
                             </div>
                         );
