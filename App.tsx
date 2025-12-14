@@ -289,7 +289,7 @@ const App: React.FC = () => {
     }
   };
 
-  // ✅ INIT AUTH
+  // ✅ INIT AUTH & LISTENER
   useEffect(() => {
     const safetyTimer = setTimeout(() => {
       setIsAuthLoading(false);
@@ -301,7 +301,6 @@ const App: React.FC = () => {
 
         if (session?.user) {
           setUser(session.user as any);
-          // Não chamamos ensureProfile aqui para não sobrescrever dados de lojistas existentes
           await checkAndSetRole(session.user);
         }
       } catch (e) {
@@ -314,18 +313,22 @@ const App: React.FC = () => {
 
     initAuth();
 
+    // Listen for Auth Changes (Login, Logout, etc)
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      // Logic handling
       if (event === 'SIGNED_IN' && session?.user) {
         setUser(session.user as any);
-        // Ao logar, checa role e redireciona
         await checkAndSetRole(session.user);
 
         if (activeTab === 'cashback_landing') setActiveTab('cashback');
         if (activeTab === 'freguesia_connect_public') setActiveTab('home');
-      } else if (event === 'SIGNED_OUT') {
+      } else if (event === 'SIGNED_OUT' || !session) {
+        // Robust cleanup for logout
         setUser(null);
         setUserRole(null);
-        setActiveTab('home');
+        if (activeTab === 'profile' || activeTab === 'store_area') {
+            setActiveTab('home');
+        }
       }
     });
 
@@ -333,7 +336,7 @@ const App: React.FC = () => {
       subscription.unsubscribe();
       clearTimeout(safetyTimer);
     };
-  }, []);
+  }, []); // Remove dependency on activeTab to avoid loop re-subscriptions
 
   // Close Auth Modal if user detected
   useEffect(() => {
