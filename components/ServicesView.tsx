@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   TriangleAlert, 
   Hammer, 
@@ -8,8 +8,6 @@ import {
   Dog, 
   Sparkles, 
   Briefcase, 
-  Search, 
-  MessageSquare, 
   CheckCircle2, 
   ArrowRight, 
   Shield,
@@ -21,8 +19,9 @@ import {
   ShieldCheck,
   Wallet,
   Clock,
-  Activity,
-  UserCheck
+  MessageSquare,
+  Search,
+  User
 } from 'lucide-react';
 
 interface ServicesViewProps {
@@ -102,6 +101,7 @@ const LIVE_STORIES = [
     status: 'Em atendimento', 
     badge: '🔴 Agora', 
     badgeColor: 'bg-red-500',
+    responseTime: '~2 min',
     image: 'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?q=80&w=400&auto=format=fit=crop' 
   },
   { 
@@ -111,6 +111,7 @@ const LIVE_STORIES = [
     status: 'Resposta rápida', 
     badge: '🟢 Online', 
     badgeColor: 'bg-green-500',
+    responseTime: 'Imediato',
     image: 'https://images.unsplash.com/photo-1621905252507-b35492cc74b4?q=80&w=400&auto=format=fit=crop' 
   },
   { 
@@ -120,6 +121,7 @@ const LIVE_STORIES = [
     status: 'Caminhão livre', 
     badge: '🟢 Livre', 
     badgeColor: 'bg-green-500',
+    responseTime: '~10 min',
     image: 'https://images.unsplash.com/photo-1600585152220-90363fe7e115?q=80&w=400&auto=format=fit=crop' 
   },
   { 
@@ -129,26 +131,48 @@ const LIVE_STORIES = [
     status: 'Disponível', 
     badge: '⚡ Rápido', 
     badgeColor: 'bg-blue-500',
+    responseTime: '~5 min',
     image: 'https://images.unsplash.com/photo-1581578731117-10d52143b0d8?q=80&w=400&auto=format=fit=crop' 
   },
 ];
 
-const TRENDING_SERVICES = [
-  { id: 1, name: 'Limpeza de Ar', category: 'Casa', badge: '🔥 Em alta' },
-  { id: 2, name: 'Eletricista', category: 'Emergência', badge: '⚡ Rápido' },
-  { id: 3, name: 'Montador', category: 'Casa', badge: '🟢 Disponível' },
-  { id: 4, name: 'Fretes', category: 'Logística', badge: '🚀 Urgente' },
+const NEIGHBORHOOD_ACTIVITY = [
+  "Maria pediu um Eletricista há 5 min",
+  "João avaliou a Padaria Imperial",
+  "3 vizinhos pediram Orçamento de Pintura",
+  "Novo profissional verificado: Dra. Pet"
 ];
 
 const DISCOVER_SERVICES = [
-  { id: 'd1', name: 'João Eletricista', category: 'Elétrica Residencial', rating: 4.9, reviews: 124, badges: ['⚡ Rápido', 'Verificado'] },
-  { id: 'd2', name: 'Maria Diarista', category: 'Limpeza e Organização', rating: 5.0, reviews: 89, badges: ['⭐ Favorito', 'Cashback'] },
-  { id: 'd3', name: 'Tech Fix', category: 'Conserto Celulares', rating: 4.8, reviews: 210, badges: ['🔥 Em alta'] },
-  { id: 'd4', name: 'Dr. Pet', category: 'Veterinário em Domicílio', rating: 4.9, reviews: 56, badges: ['Plantão 24h'] },
-  { id: 'd5', name: 'SOS Encanador', category: 'Hidráulica', rating: 4.7, reviews: 34, badges: ['Urgente'] },
+  { id: 'd1', name: 'João Eletricista', category: 'Elétrica Residencial', rating: 4.9, reviews: 124, badges: ['⚡ Rápido', 'Verificado'], response: '< 5 min' },
+  { id: 'd2', name: 'Maria Diarista', category: 'Limpeza e Organização', rating: 5.0, reviews: 89, badges: ['⭐ Favorito', 'Cashback'], response: '~ 15 min' },
+  { id: 'd3', name: 'Tech Fix', category: 'Conserto Celulares', rating: 4.8, reviews: 210, badges: ['🔥 Em alta'], response: 'Online' },
 ];
 
 export const ServicesView: React.FC<ServicesViewProps> = ({ onSelectMacro, onOpenTerms, onNavigate, searchTerm = '' }) => {
+  const [showStickyCTA, setShowStickyCTA] = useState(false);
+  const [activityIndex, setActivityIndex] = useState(0);
+  const heroRef = useRef<HTMLDivElement>(null);
+
+  // Scroll listener for Sticky CTA
+  useEffect(() => {
+    const handleScroll = () => {
+      if (heroRef.current) {
+        const heroBottom = heroRef.current.getBoundingClientRect().bottom;
+        setShowStickyCTA(heroBottom < 0);
+      }
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Activity Ticker
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setActivityIndex((prev) => (prev + 1) % NEIGHBORHOOD_ACTIVITY.length);
+    }, 4000);
+    return () => clearInterval(interval);
+  }, []);
   
   const filteredServices = MACRO_SERVICES.filter(service => {
     const term = searchTerm.toLowerCase().trim();
@@ -159,106 +183,99 @@ export const ServicesView: React.FC<ServicesViewProps> = ({ onSelectMacro, onOpe
   return (
     <div className="min-h-screen bg-[#F7F8FA] dark:bg-gray-900 font-sans animate-in fade-in duration-500 pb-32">
       
-      <div className="flex flex-col gap-8">
+      <div className="flex flex-col gap-6">
         
-        {/* 1. HERO CONVERSION CARD (TOPO) */}
+        {/* 1. NEIGHBORHOOD PULSE (Social Proof) */}
         {!searchTerm && (
-          <div className="px-5 pt-6">
+          <div className="px-5 pt-4 -mb-2">
+            <div className="flex items-center gap-2 bg-white dark:bg-gray-800 py-1.5 px-3 rounded-full border border-gray-100 dark:border-gray-700 shadow-sm w-fit">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+              </span>
+              <p className="text-[10px] font-medium text-gray-500 dark:text-gray-400 animate-in fade-in slide-in-from-bottom-1 duration-500 key={activityIndex}">
+                {NEIGHBORHOOD_ACTIVITY[activityIndex]}
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* 2. HERO CONVERSION CARD */}
+        {!searchTerm && (
+          <div className="px-5 pt-2" ref={heroRef}>
             <div className="relative w-full rounded-[24px] bg-gradient-to-r from-[#0A46FF] to-[#0039CC] p-6 shadow-lg shadow-blue-500/20 overflow-hidden group cursor-pointer active:scale-[0.99] transition-all">
               {/* Subtle glow effect */}
               <div className="absolute top-[-50px] right-[-50px] w-48 h-48 bg-white/10 rounded-full blur-3xl pointer-events-none"></div>
 
               <div className="relative z-10">
+                {/* Onboarding Badge (Mock First Time) */}
+                <div className="inline-flex items-center gap-1 bg-white/20 backdrop-blur-sm px-2 py-0.5 rounded-lg mb-3 border border-white/10">
+                  <Clock className="w-3 h-3 text-white" />
+                  <span className="text-[10px] font-bold text-white uppercase tracking-wide">Leva menos de 1 min</span>
+                </div>
+
                 <h2 className="text-2xl font-bold text-white leading-tight mb-2 tracking-tight font-display">
-                  Precisando de um serviço agora?
+                  Qual serviço você precisa?
                 </h2>
                 <p className="text-sm text-blue-100 font-medium leading-relaxed max-w-[90%] mb-6">
-                  Receba até 5 orçamentos gratuitos de profissionais da Freguesia.
+                  Receba até 5 orçamentos gratuitos de profissionais verificados da Freguesia.
                 </p>
                 
                 <button 
-                  onClick={() => onSelectMacro('home', 'Casa & Reparos')} // Default CTA
-                  className="w-full bg-white text-[#0A46FF] font-bold py-3.5 rounded-xl shadow-sm flex items-center justify-center gap-2 group-hover:bg-blue-50 transition-colors"
+                  onClick={() => onSelectMacro('home', 'Casa & Reparos')} 
+                  className="w-full bg-white text-[#0A46FF] font-bold py-3.5 rounded-xl shadow-sm flex items-center justify-center gap-2 group-hover:bg-blue-50 transition-colors relative overflow-hidden"
                 >
-                  Pedir orçamento agora
-                  <ArrowRight className="w-4 h-4" strokeWidth={3} />
+                  <span className="relative z-10 flex items-center gap-2">
+                    Pedir orçamento agora <ArrowRight className="w-4 h-4" strokeWidth={3} />
+                  </span>
                 </button>
                 
-                <div className="flex items-center justify-center gap-3 mt-4 text-[10px] text-blue-100 font-medium">
-                  <span className="flex items-center gap-1"><CheckCircle2 className="w-3 h-3" /> Sem compromisso</span>
-                  <span className="flex items-center gap-1"><Zap className="w-3 h-3" /> Resposta rápida</span>
+                <div className="flex items-center justify-center gap-4 mt-4 text-[10px] text-blue-100 font-medium opacity-90">
+                  <span className="flex items-center gap-1.5"><CheckCircle2 className="w-3 h-3" /> Grátis</span>
+                  <span className="flex items-center gap-1.5"><ShieldCheck className="w-3 h-3" /> Seguro</span>
+                  <span className="flex items-center gap-1.5"><Zap className="w-3 h-3" /> Rápido</span>
                 </div>
               </div>
             </div>
           </div>
         )}
 
-        {/* 2. PASSO A PASSO (CONFIANÇA) */}
+        {/* 3. ANTI-ANXIETY MICRO-FLOW (Horizontal) */}
         {!searchTerm && (
           <div className="px-5">
-            <div className="relative pl-4 space-y-5">
-              {/* Connecting Line */}
-              <div className="absolute left-[23px] top-3 bottom-3 w-[2px] bg-gray-200 dark:bg-gray-700"></div>
-
-              <div className="relative flex items-start gap-4">
-                <div className="w-5 h-5 rounded-full bg-white dark:bg-gray-800 border-2 border-[#0A46FF] z-10 flex items-center justify-center shrink-0 mt-0.5">
-                  <div className="w-1.5 h-1.5 bg-[#0A46FF] rounded-full"></div>
+            <div className="bg-white dark:bg-gray-800 rounded-2xl p-4 border border-gray-100 dark:border-gray-700 shadow-sm">
+              <div className="flex justify-between items-start text-center relative">
+                {/* Connecting Line */}
+                <div className="absolute top-3 left-6 right-6 h-[2px] bg-gray-100 dark:bg-gray-700 -z-0"></div>
+                
+                <div className="flex flex-col items-center gap-2 relative z-10 flex-1">
+                  <div className="w-7 h-7 rounded-full bg-blue-50 dark:bg-blue-900/30 text-[#0A46FF] flex items-center justify-center border-2 border-white dark:border-gray-800 font-bold text-xs">1</div>
+                  <p className="text-[10px] font-bold text-gray-600 dark:text-gray-300 leading-tight">Descreva<br/>o pedido</p>
                 </div>
-                <div>
-                  <h4 className="text-sm font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                    Escolha a categoria
-                  </h4>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 leading-snug">Selecione o tipo de serviço que você precisa.</p>
+                <div className="flex flex-col items-center gap-2 relative z-10 flex-1">
+                  <div className="w-7 h-7 rounded-full bg-blue-50 dark:bg-blue-900/30 text-[#0A46FF] flex items-center justify-center border-2 border-white dark:border-gray-800 font-bold text-xs">2</div>
+                  <p className="text-[10px] font-bold text-gray-600 dark:text-gray-300 leading-tight">Receba<br/>orçamentos</p>
                 </div>
-              </div>
-
-              <div className="relative flex items-start gap-4">
-                <div className="w-5 h-5 rounded-full bg-white dark:bg-gray-800 border-2 border-[#0A46FF] z-10 flex items-center justify-center shrink-0 mt-0.5">
-                  <div className="w-1.5 h-1.5 bg-[#0A46FF] rounded-full"></div>
-                </div>
-                <div>
-                  <h4 className="text-sm font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                    Descreva o pedido
-                  </h4>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 leading-snug">Explique o problema e envie fotos, se quiser.</p>
+                <div className="flex flex-col items-center gap-2 relative z-10 flex-1">
+                  <div className="w-7 h-7 rounded-full bg-blue-50 dark:bg-blue-900/30 text-[#0A46FF] flex items-center justify-center border-2 border-white dark:border-gray-800 font-bold text-xs">3</div>
+                  <p className="text-[10px] font-bold text-gray-600 dark:text-gray-300 leading-tight">Negocie<br/>direto</p>
                 </div>
               </div>
-
-              <div className="relative flex items-start gap-4">
-                <div className="w-5 h-5 rounded-full bg-white dark:bg-gray-800 border-2 border-green-500 z-10 flex items-center justify-center shrink-0 mt-0.5">
-                  <div className="w-1.5 h-1.5 bg-green-500 rounded-full"></div>
-                </div>
-                <div>
-                  <h4 className="text-sm font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                    Receba orçamentos
-                  </h4>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 leading-snug">Profissionais da Freguesia entram em contato.</p>
-                </div>
-              </div>
-              
-              <button onClick={onOpenTerms} className="text-[10px] font-bold text-gray-400 hover:text-[#0A46FF] transition-colors pl-9">
-                Ler termos de uso →
-              </button>
             </div>
           </div>
         )}
 
-        {/* 3. AGORA NA FREGUESIA - SERVIÇOS AO VIVO (STORIES 9:16) */}
+        {/* 4. AGORA NA FREGUESIA (URGENCY STORIES) */}
         {!searchTerm && (
-          <div className="pl-5">
+          <div className="pl-5 pt-2">
             <div className="flex items-center gap-2 mb-3 pr-5">
-              <span className="relative flex h-3 w-3">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+              <h3 className="text-base font-bold text-gray-900 dark:text-white leading-none flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></div>
+                Agora na Freguesia
+              </h3>
+              <span className="text-[10px] text-gray-400 font-medium ml-auto">
+                Profissionais online
               </span>
-              <div className="flex flex-col">
-                <h3 className="text-base font-bold text-gray-900 dark:text-white leading-none">
-                  Agora na Freguesia
-                </h3>
-                <p className="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5">
-                  Profissionais ativos neste momento
-                </p>
-              </div>
             </div>
 
             <div className="flex gap-3 overflow-x-auto pb-4 pr-5 no-scrollbar snap-x">
@@ -272,8 +289,8 @@ export const ServicesView: React.FC<ServicesViewProps> = ({ onSelectMacro, onOpe
                   <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-black/10"></div>
                   
                   {/* Badge Topo */}
-                  <div className="absolute top-2 left-2">
-                    <span className={`text-[9px] font-bold text-white px-2 py-0.5 rounded-full flex items-center gap-1 shadow-sm backdrop-blur-md ${item.badgeColor} bg-opacity-90`}>
+                  <div className="absolute top-2 left-2 right-2 flex justify-between items-start">
+                    <span className={`text-[8px] font-bold text-white px-2 py-0.5 rounded-full flex items-center gap-1 shadow-sm backdrop-blur-md ${item.badgeColor} bg-opacity-90`}>
                       {item.badge}
                     </span>
                   </div>
@@ -281,15 +298,15 @@ export const ServicesView: React.FC<ServicesViewProps> = ({ onSelectMacro, onOpe
                   {/* Info Bottom */}
                   <div className="absolute bottom-3 left-2 right-2 text-left">
                     <div className="flex flex-col gap-0.5 mb-2">
+                      <div className="flex items-center gap-1 mb-1">
+                         <Clock className="w-2.5 h-2.5 text-green-400" />
+                         <span className="text-[9px] text-green-300 font-bold">{item.responseTime}</span>
+                      </div>
                       <h4 className="text-white font-bold text-xs leading-tight shadow-black drop-shadow-md">{item.name}</h4>
                       <p className="text-[10px] text-gray-300 font-medium">{item.role}</p>
-                      <p className="text-[9px] text-green-300 font-bold flex items-center gap-1 mt-0.5">
-                        <span className="w-1 h-1 bg-green-400 rounded-full animate-pulse"></span>
-                        {item.status}
-                      </p>
                     </div>
                     <div className="text-[9px] font-bold text-white bg-white/20 backdrop-blur-md px-2 py-1.5 rounded-lg text-center border border-white/20 hover:bg-white/30 transition-colors">
-                      Ver agora
+                      Chamar no Zap
                     </div>
                   </div>
                 </div>
@@ -298,7 +315,7 @@ export const ServicesView: React.FC<ServicesViewProps> = ({ onSelectMacro, onOpe
           </div>
         )}
 
-        {/* 4. O QUE VOCÊ PRECISA? (CATEGORIAS) */}
+        {/* 5. O QUE VOCÊ PRECISA? (CATEGORIAS) */}
         <div className="px-5">
           <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
             O que você precisa?
@@ -338,13 +355,17 @@ export const ServicesView: React.FC<ServicesViewProps> = ({ onSelectMacro, onOpe
                     <span className={`block font-bold text-base leading-tight mb-1 ${isEmergency ? 'text-white' : 'text-gray-900 dark:text-white'}`}>
                       {item.name}
                     </span>
-                    {isEmergency && (
+                    {isEmergency ? (
                       <span className="block text-xs text-red-100 opacity-90 mb-2 font-medium">
                         {item.description}
                       </span>
+                    ) : (
+                        <span className="block text-[10px] text-gray-400 dark:text-gray-500 mb-2 font-medium">
+                            Orçamento grátis
+                        </span>
                     )}
                     <span className={`text-[10px] font-bold flex items-center gap-1 mt-auto ${isEmergency ? 'text-white' : 'text-blue-600 dark:text-blue-400'}`}>
-                      Pedir orçamento <ArrowRight className="w-3 h-3 transition-transform group-hover:translate-x-1" />
+                      {isEmergency ? 'Chamar Agora' : 'Pedir orçamento'} <ArrowRight className="w-3 h-3 transition-transform group-hover:translate-x-1" />
                     </span>
                   </div>
                 </button>
@@ -353,92 +374,18 @@ export const ServicesView: React.FC<ServicesViewProps> = ({ onSelectMacro, onOpe
           </div>
         </div>
 
-        {/* 5. SERVIÇOS EM ALTA */}
-        {!searchTerm && (
-          <div className="pl-5">
-            <div className="flex items-center justify-between mb-3 px-1 pr-5">
-              <h3 className="text-base font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                <Flame className="w-4 h-4 text-orange-500 fill-orange-500" />
-                Serviços em alta
-              </h3>
-              <span className="text-[10px] text-green-600 font-bold bg-green-50 px-2 py-0.5 rounded-full flex items-center gap-1">
-                <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span>
-                Profissionais disponíveis
-              </span>
-            </div>
-
-            <div className="flex gap-3 overflow-x-auto pb-2 pr-5 no-scrollbar">
-              {TRENDING_SERVICES.map((srv) => (
-                <button
-                  key={srv.id}
-                  onClick={() => onSelectMacro('home', srv.category)}
-                  className="min-w-[150px] bg-white dark:bg-gray-800 p-3 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm flex flex-col gap-3 active:scale-95 transition-transform"
-                >
-                  <div className="flex justify-between items-start">
-                    <div className="p-1.5 bg-gray-50 dark:bg-gray-700 rounded-lg text-gray-600 dark:text-gray-300">
-                      <Zap className="w-4 h-4" />
-                    </div>
-                    <span className="text-[9px] font-bold bg-orange-50 text-orange-600 px-1.5 py-0.5 rounded border border-orange-100">
-                      {srv.badge}
-                    </span>
-                  </div>
-                  <div className="text-left">
-                    <p className="font-bold text-sm text-gray-900 dark:text-white leading-tight">{srv.name}</p>
-                    <p className="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5">{srv.category}</p>
-                  </div>
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* 6. SELOS DE CONFIANÇA */}
-        <div className="px-5">
-          <div className="bg-white dark:bg-gray-800 rounded-2xl p-5 border border-gray-100 dark:border-gray-700 shadow-sm">
-            <div className="grid grid-cols-2 gap-y-4 gap-x-2">
-              <div className="flex items-start gap-2.5">
-                <ShieldCheck className="w-4 h-4 text-green-600 mt-0.5 shrink-0" />
-                <div>
-                  <p className="text-xs font-bold text-gray-900 dark:text-white">Verificados</p>
-                  <p className="text-[10px] text-gray-500 dark:text-gray-400 leading-tight">Profissionais checados</p>
-                </div>
-              </div>
-              <div className="flex items-start gap-2.5">
-                <ThumbsUp className="w-4 h-4 text-blue-600 mt-0.5 shrink-0" />
-                <div>
-                  <p className="text-xs font-bold text-gray-900 dark:text-white">Avaliações</p>
-                  <p className="text-[10px] text-gray-500 dark:text-gray-400 leading-tight">Opiniões reais</p>
-                </div>
-              </div>
-              <div className="flex items-start gap-2.5">
-                <MapPin className="w-4 h-4 text-red-600 mt-0.5 shrink-0" />
-                <div>
-                  <p className="text-xs font-bold text-gray-900 dark:text-white">Local</p>
-                  <p className="text-[10px] text-gray-500 dark:text-gray-400 leading-tight">Atendimento no bairro</p>
-                </div>
-              </div>
-              <div className="flex items-start gap-2.5">
-                <Wallet className="w-4 h-4 text-purple-600 mt-0.5 shrink-0" />
-                <div>
-                  <p className="text-xs font-bold text-gray-900 dark:text-white">Grátis</p>
-                  <p className="text-[10px] text-gray-500 dark:text-gray-400 leading-tight">Para pedir orçamento</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* 7. CONTINUE DESCOBRINDO (LISTA) */}
+        {/* 6. CONTINUE DESCOBRINDO (LISTA) */}
         <div className="px-5">
           <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">
-            Continue descobrindo 👇
+            Recomendados no bairro 👇
           </h3>
           
           <div className="flex flex-col gap-3">
             {DISCOVER_SERVICES.map((item, i) => (
               <div 
                 key={item.id}
-                className="bg-white dark:bg-gray-800 p-3 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 flex gap-3 relative group active:scale-[0.99] transition-transform"
+                onClick={() => onSelectMacro('pro', item.category)}
+                className="bg-white dark:bg-gray-800 p-3 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 flex gap-3 relative group active:scale-[0.99] transition-transform cursor-pointer"
               >
                 <div className="w-[72px] h-[72px] bg-gray-100 dark:bg-gray-700 rounded-xl flex items-center justify-center shrink-0 border border-gray-100 dark:border-gray-600 text-xl font-bold text-gray-400">
                   {item.name.charAt(0)}
@@ -456,27 +403,31 @@ export const ServicesView: React.FC<ServicesViewProps> = ({ onSelectMacro, onOpe
                     <span className="text-[10px] text-gray-400">• {item.category}</span>
                   </div>
 
-                  <div className="flex flex-wrap gap-1 mt-2">
-                    {item.badges.map(badge => (
-                      <span key={badge} className="text-[9px] bg-gray-50 dark:bg-gray-700 text-gray-500 dark:text-gray-300 px-1.5 py-0.5 rounded border border-gray-100 dark:border-gray-600">
-                        {badge}
-                      </span>
-                    ))}
+                  <div className="flex items-center gap-2 mt-2">
+                     <div className="flex items-center gap-1 text-[9px] font-bold text-green-600 bg-green-50 dark:bg-green-900/20 px-1.5 py-0.5 rounded">
+                        <Clock className="w-2.5 h-2.5" />
+                        {item.response}
+                     </div>
+                     {item.badges.includes('Verificado') && (
+                         <div className="flex items-center gap-1 text-[9px] font-bold text-blue-600 bg-blue-50 dark:bg-blue-900/20 px-1.5 py-0.5 rounded">
+                            <ShieldCheck className="w-2.5 h-2.5" />
+                            Verificado
+                         </div>
+                     )}
                   </div>
                 </div>
 
                 <button 
-                  onClick={() => onSelectMacro('pro', item.category)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 bg-[#0A46FF] text-white text-[10px] font-bold px-4 py-2 rounded-full shadow-md active:scale-95 transition-transform hover:bg-[#0039CC]"
                 >
-                  Pedir orçamento
+                  Orçamento
                 </button>
               </div>
             ))}
           </div>
         </div>
 
-        {/* 8. PATROCINADOR MASTER */}
+        {/* 7. PATROCINADOR MASTER */}
         <div className="px-5">
           <div 
             onClick={() => onNavigate('patrocinador_master')}
@@ -513,6 +464,21 @@ export const ServicesView: React.FC<ServicesViewProps> = ({ onSelectMacro, onOpe
         </div>
 
       </div>
+
+      {/* SMART STICKY CTA (Context Aware) */}
+      <div className={`fixed bottom-[70px] left-0 right-0 px-5 z-40 transition-all duration-300 transform ${showStickyCTA ? 'translate-y-0 opacity-100' : 'translate-y-20 opacity-0 pointer-events-none'}`}>
+        <button 
+            onClick={() => onSelectMacro('home', 'Geral')}
+            className="w-full bg-[#0A46FF] text-white font-bold py-3.5 rounded-full shadow-xl shadow-blue-600/30 flex items-center justify-between px-6 active:scale-[0.98] transition-transform"
+        >
+            <span className="flex items-center gap-2 text-sm">
+                <MessageSquare className="w-4 h-4 fill-white text-white" />
+                Pedir orçamento rápido
+            </span>
+            <ArrowRight className="w-4 h-4" />
+        </button>
+      </div>
+
     </div>
   );
 };
