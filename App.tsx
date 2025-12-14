@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Layout } from './components/Layout';
 import { Header } from './components/Header';
@@ -597,12 +596,11 @@ const App: React.FC = () => {
             {activeTab === 'service_terms' && <ServiceTermsView onBack={() => setActiveTab('services')} />}
 
             {activeTab === 'service_subcategories' && selectedServiceMacro && (
-              <SubcategoryStoreList
-                subcategoryName={selectedServiceMacro.name}
+              <SubcategoriesView
+                macroId={selectedServiceMacro.id}
+                macroName={selectedServiceMacro.name}
                 onBack={() => setActiveTab('services')}
-                onStoreClick={handleSelectStore}
-                stores={stores}
-                sponsoredBanners={[]}
+                onSelectSubcategory={handleSelectServiceSubcategory}
               />
             )}
 
