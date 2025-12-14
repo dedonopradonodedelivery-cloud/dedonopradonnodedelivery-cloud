@@ -292,14 +292,21 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
           0%, 100% { transform: translate(0, 0) scale(1); }
           50% { transform: translate(-10px, 10px) scale(1.1); }
         }
-        @keyframes float-heart-y {
-          0%, 100% { transform: translateY(0); }
-          50% { transform: translateY(-8px); }
+        /* Updated Premium Organic Float for Badge */
+        @keyframes float-badge-premium {
+          0% { transform: translate(0, 0) rotate(0deg) scale(1); }
+          33% { transform: translate(2px, 4px) rotate(0.8deg) scale(0.99); }
+          66% { transform: translate(-1px, 7px) rotate(-0.5deg) scale(0.99); }
+          100% { transform: translate(0, 0) rotate(0deg) scale(1); }
         }
-        /* New Subtle Internal Float */
-        @keyframes float-badge-internal {
-          0%, 100% { transform: translateY(0); }
-          50% { transform: translateY(6px); }
+        /* NEW: Heartbeat Premium Animation */
+        @keyframes heartbeat-premium {
+          0% { transform: scale(1) translateY(0); }
+          8% { transform: scale(1.035) translateY(-1.5px); } /* Beat 1 */
+          16% { transform: scale(1) translateY(0); }
+          22% { transform: scale(1.02) translateY(-0.5px); } /* Beat 2 */
+          30% { transform: scale(1) translateY(0); }
+          100% { transform: scale(1) translateY(0); } /* Long Pause */
         }
         .animate-blob {
           animation: blob-float 8s infinite ease-in-out;
@@ -307,14 +314,15 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
         .animate-blob-delay {
           animation: blob-float-reverse 10s infinite ease-in-out;
         }
-        .animate-float-badge-internal {
-          animation: float-badge-internal 3.5s ease-in-out infinite;
+        .animate-float-badge-premium {
+          animation: float-badge-premium 4.5s ease-in-out infinite;
         }
         .animate-float-heart {
-          animation: float-heart-y 3.5s ease-in-out infinite;
+          animation: heartbeat-premium 2.4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+          transform-origin: center;
         }
         @media (prefers-reduced-motion: reduce) {
-          .animate-float-heart, .animate-blob, .animate-float-badge-internal {
+          .animate-float-heart, .animate-blob, .animate-float-badge-premium {
             animation: none;
           }
         }
@@ -371,15 +379,15 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
                   <div className="absolute top-0 right-0 w-[250px] h-[250px] bg-white/10 rounded-full blur-[80px] -mr-20 -mt-20 pointer-events-none mix-blend-overlay animate-blob"></div>
                   <div className="absolute bottom-0 left-0 w-[180px] h-[180px] bg-indigo-500/30 rounded-full blur-[60px] -ml-10 -mb-10 pointer-events-none mix-blend-screen animate-blob-delay"></div>
                   
-                  {/* Floating Cash Value Badge (Visual Promise) - Compact Position & Integrated Animation */}
-                  <div className="absolute top-5 right-5 z-20 animate-float-badge-internal cursor-default pointer-events-none sm:pointer-events-auto">
-                    <div className="bg-white/20 backdrop-blur-lg border border-white/40 rounded-xl p-1.5 pr-2.5 flex items-center gap-1.5 shadow-lg shadow-blue-900/10 group-hover:scale-[1.02] transition-transform duration-500">
-                        <div className="bg-green-400 rounded-full w-6 h-6 flex items-center justify-center shadow-inner ring-2 ring-white/30">
-                            <span className="font-bold text-green-900 text-[10px]">$</span>
+                  {/* Floating Cash Value Badge (Visual Promise) - Compact Position & Organic Animation */}
+                  <div className="absolute top-5 right-5 z-20 animate-float-badge-premium cursor-default pointer-events-none sm:pointer-events-auto">
+                    <div className="bg-white/20 backdrop-blur-lg border border-white/40 rounded-2xl p-2 pr-3.5 flex items-center gap-2 shadow-lg shadow-blue-900/10 group-hover:scale-[1.02] transition-transform duration-500">
+                        <div className="bg-green-400 rounded-full w-8 h-8 flex items-center justify-center shadow-inner ring-2 ring-white/30">
+                            <span className="font-bold text-green-900 text-xs">$</span>
                         </div>
-                        <div className="flex flex-col">
-                            <span className="text-[7px] uppercase font-bold text-green-100 leading-none mb-0.5">Saldo</span>
-                            <span className="text-xs font-extrabold text-white leading-none tracking-tight">R$ 12,40</span>
+                        <div className="flex flex-col justify-center">
+                            <span className="text-[9px] uppercase font-bold text-green-100 leading-none mb-0.5">Saldo</span>
+                            <span className="text-sm font-black text-white leading-none tracking-tight shadow-black drop-shadow-sm">R$ 12,40</span>
                         </div>
                     </div>
                   </div>
