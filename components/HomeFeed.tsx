@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { AdType, Category, Store, EditorialCollection } from '../types';
 import { 
@@ -183,7 +182,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
       image: "https://images.unsplash.com/photo-1481437156560-3205f6a55735?q=80&w=800&auto=format=fit=crop",
       action: () => onNavigate('explore'),
       cta: "Descobrir",
-      theme: 'blue-discovery'
+      gradient: "from-[#1E40AF] via-[#1E40AF]/60 to-transparent" // Azul Royal Profundo
     },
     { 
       id: 'community-connect', 
@@ -193,7 +192,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
       image: "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?q=80&w=800&auto=format=fit=crop", 
       action: () => onNavigate('freguesia_connect_public'), 
       cta: "Saiba mais",
-      theme: 'blue-royal'
+      gradient: "from-[#7C3AED] via-[#7C3AED]/60 to-transparent" // Roxo Vibrante
     },
     { 
       id: 'merchant-claim', 
@@ -203,7 +202,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
       image: "https://images.unsplash.com/photo-1556742031-c6961e8560b0?q=80&w=800&auto=format=fit=crop", 
       action: () => onNavigate('business_registration'), 
       cta: "Cadastrar",
-      theme: 'blue-dark'
+      gradient: "from-[#059669] via-[#059669]/60 to-transparent" // Verde Esmeralda
     },
     { 
       id: 'freguesia-hub', 
@@ -213,7 +212,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
       image: "https://images.unsplash.com/photo-1524661135-423995f22d0b?q=80&w=800&auto=format=fit=crop", 
       action: () => onNavigate('explore'), 
       cta: "Conhecer",
-      theme: 'blue-primary'
+      gradient: "from-[#EA580C] via-[#EA580C]/60 to-transparent" // Laranja Intenso
     },
     { 
       id: 'cashback-rewards', 
@@ -223,7 +222,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
       image: "https://images.unsplash.com/photo-1580519542036-c47de6196ba5?q=80&w=800&auto=format=fit=crop", 
       action: () => onNavigate('cashback_info'), 
       cta: "Começar",
-      theme: 'green'
+      gradient: "from-[#DB2777] via-[#DB2777]/60 to-transparent" // Rosa Magenta
     },
     { 
       id: 'services', 
@@ -233,7 +232,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
       image: "https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?q=80&w=800&auto=format=fit=crop", 
       action: () => onNavigate('services'), 
       cta: "Orçamento",
-      theme: 'default'
+      gradient: "from-[#0891B2] via-[#0891B2]/60 to-transparent" // Ciano Vibrante
     }
   ];
 
@@ -361,8 +360,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
                     {MINI_BANNERS.map((banner) => {
                         // Increased height to 35vh (approx 320-350px on modern phones)
                         const heightClass = 'h-[35vh] min-h-[260px] max-h-[400px]';
-                        const theme = (banner as any).theme;
-                        let gradientClass = "bg-gradient-to-t from-black/90 via-black/40 to-transparent";
+                        const gradientClass = banner.gradient || "bg-gradient-to-t from-black/90 via-black/40 to-transparent";
 
                         return (
                             <div key={banner.id} onClick={banner.action} className="min-w-full snap-center cursor-pointer relative px-5">
@@ -370,7 +368,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
                                 
                                 <div className="absolute inset-0 z-0">
                                     <img src={banner.image} className="w-full h-full object-cover" alt="" />
-                                    <div className={`absolute inset-0 ${gradientClass}`} />
+                                    <div className={`absolute inset-0 bg-gradient-to-t ${gradientClass}`} />
                                 </div>
 
                                 <div className="absolute bottom-0 left-0 right-0 p-6 pb-10 z-10 flex flex-col justify-end h-full">
