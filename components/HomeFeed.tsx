@@ -292,14 +292,31 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
           0%, 100% { transform: translate(0, 0) scale(1); }
           50% { transform: translate(-10px, 10px) scale(1.1); }
         }
+        @keyframes float-heart-y {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-8px); }
+        }
+        /* New Subtle Internal Float */
+        @keyframes float-badge-internal {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(6px); }
+        }
         .animate-blob {
           animation: blob-float 8s infinite ease-in-out;
         }
         .animate-blob-delay {
           animation: blob-float-reverse 10s infinite ease-in-out;
         }
-        .animate-float-badge {
-          animation: blob-float 6s infinite ease-in-out;
+        .animate-float-badge-internal {
+          animation: float-badge-internal 3.5s ease-in-out infinite;
+        }
+        .animate-float-heart {
+          animation: float-heart-y 3.5s ease-in-out infinite;
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .animate-float-heart, .animate-blob, .animate-float-badge-internal {
+            animation: none;
+          }
         }
       `}</style>
       
@@ -346,65 +363,65 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
               </p>
             </div>
 
-            {/* --- NEW PREMIUM HERO SECTION --- */}
+            {/* --- COMPACT HERO SECTION (25-35% SHORTER) --- */}
             <div className="px-5 w-full">
-               <div className="w-full bg-gradient-to-br from-[#2D6DF6] via-[#2563EB] to-[#0F359E] rounded-[32px] p-6 sm:p-8 text-white relative overflow-hidden shadow-xl shadow-blue-600/20 group transform transition-all active:scale-[0.99] hover:scale-[1.01] border border-white/10">
+               <div className="w-full bg-gradient-to-br from-[#2D6DF6] via-[#2563EB] to-[#0F359E] rounded-[28px] p-5 text-white relative overflow-hidden shadow-xl shadow-blue-600/20 group transform transition-all active:scale-[0.99] hover:scale-[1.01] border border-white/10">
                   
                   {/* Dynamic Background Elements (Parallax-like) */}
-                  <div className="absolute top-0 right-0 w-[300px] h-[300px] bg-white/10 rounded-full blur-[80px] -mr-20 -mt-20 pointer-events-none mix-blend-overlay animate-blob"></div>
-                  <div className="absolute bottom-0 left-0 w-[200px] h-[200px] bg-indigo-500/30 rounded-full blur-[60px] -ml-10 -mb-10 pointer-events-none mix-blend-screen animate-blob-delay"></div>
+                  <div className="absolute top-0 right-0 w-[250px] h-[250px] bg-white/10 rounded-full blur-[80px] -mr-20 -mt-20 pointer-events-none mix-blend-overlay animate-blob"></div>
+                  <div className="absolute bottom-0 left-0 w-[180px] h-[180px] bg-indigo-500/30 rounded-full blur-[60px] -ml-10 -mb-10 pointer-events-none mix-blend-screen animate-blob-delay"></div>
                   
-                  {/* Floating Cash Value Badge (Visual Promise) */}
-                  <div className="absolute top-5 right-5 z-20 animate-float-badge cursor-default pointer-events-none sm:pointer-events-auto">
-                    <div className="bg-white/20 backdrop-blur-lg border border-white/40 rounded-2xl p-2 pr-3 flex items-center gap-2 shadow-lg transform rotate-6 hover:rotate-0 transition-transform duration-500 group-hover:-translate-y-1">
-                        <div className="bg-green-400 rounded-full w-8 h-8 flex items-center justify-center shadow-inner ring-2 ring-white/30">
-                            <span className="font-bold text-green-900 text-xs">$</span>
+                  {/* Floating Cash Value Badge (Visual Promise) - Compact Position & Integrated Animation */}
+                  <div className="absolute top-5 right-5 z-20 animate-float-badge-internal cursor-default pointer-events-none sm:pointer-events-auto">
+                    <div className="bg-white/20 backdrop-blur-lg border border-white/40 rounded-xl p-1.5 pr-2.5 flex items-center gap-1.5 shadow-lg shadow-blue-900/10 group-hover:scale-[1.02] transition-transform duration-500">
+                        <div className="bg-green-400 rounded-full w-6 h-6 flex items-center justify-center shadow-inner ring-2 ring-white/30">
+                            <span className="font-bold text-green-900 text-[10px]">$</span>
                         </div>
                         <div className="flex flex-col">
-                            <span className="text-[8px] uppercase font-bold text-green-100 leading-none mb-0.5">Seu Saldo</span>
-                            <span className="text-sm font-extrabold text-white leading-none tracking-tight">R$ 12,40</span>
+                            <span className="text-[7px] uppercase font-bold text-green-100 leading-none mb-0.5">Saldo</span>
+                            <span className="text-xs font-extrabold text-white leading-none tracking-tight">R$ 12,40</span>
                         </div>
                     </div>
                   </div>
 
-                  <div className="relative z-10 flex flex-col items-start pt-2">
-                    {/* Top Badge */}
-                    <div className="inline-flex items-center gap-1.5 py-1.5 px-3 rounded-full bg-white/10 border border-white/20 backdrop-blur-md mb-5 shadow-sm">
-                      <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span>
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-white/90">
+                  <div className="relative z-10 flex flex-col items-start pt-1">
+                    {/* Top Badge - Compact */}
+                    <div className="inline-flex items-center gap-1.5 py-1 px-2.5 rounded-full bg-white/10 border border-white/20 backdrop-blur-md mb-2.5 shadow-sm">
+                      <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse"></span>
+                      <span className="text-[9px] font-bold uppercase tracking-wider text-white/90">
                         O Melhor do Bairro
                       </span>
                     </div>
 
-                    {/* Headline with Soft Glow */}
-                    <h1 className="text-[32px] leading-[1.1] font-display font-bold mb-3 drop-shadow-md tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white via-blue-50 to-white animate-in fade-in slide-in-from-left-2 duration-700">
+                    {/* Headline - Compact */}
+                    <h1 className="text-[26px] leading-[1.1] font-display font-bold mb-1.5 drop-shadow-md tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white via-blue-50 to-white animate-in fade-in slide-in-from-left-2 duration-700">
                       Explore e<br/>Economize.
                     </h1>
 
-                    {/* Subtitle */}
-                    <p className="text-blue-50 text-sm font-medium leading-relaxed mb-6 max-w-[85%] opacity-90">
+                    {/* Subtitle - Compact */}
+                    <p className="text-blue-50 text-xs font-medium leading-relaxed mb-4 max-w-[80%] opacity-90">
                       O guia oficial de economia e lazer do seu bairro.
                     </p>
 
-                    {/* Micro-signals (Value Props) */}
-                    <div className="flex items-center gap-4 mb-8 w-full pr-10">
-                        <div className="flex items-center gap-2 bg-white/5 border border-white/10 px-3 py-2 rounded-xl backdrop-blur-sm flex-1 justify-center hover:bg-white/10 transition-colors">
-                            <Wallet className="w-4 h-4 text-green-300 drop-shadow-sm" />
-                            <span className="text-xs font-bold text-white">Cashback</span>
+                    {/* Micro-signals (Value Props) - Compact */}
+                    <div className="flex items-center gap-3 mb-4 w-full pr-8">
+                        <div className="flex items-center gap-1.5 bg-white/5 border border-white/10 px-2.5 py-1.5 rounded-lg backdrop-blur-sm flex-1 justify-center hover:bg-white/10 transition-colors">
+                            <Wallet className="w-3.5 h-3.5 text-green-300 drop-shadow-sm" />
+                            <span className="text-[11px] font-bold text-white">Cashback</span>
                         </div>
-                        <div className="flex items-center gap-2 bg-white/5 border border-white/10 px-3 py-2 rounded-xl backdrop-blur-sm flex-1 justify-center hover:bg-white/10 transition-colors">
-                            <Sparkles className="w-4 h-4 text-yellow-300 drop-shadow-sm" />
-                            <span className="text-xs font-bold text-white">Ofertas</span>
+                        <div className="flex items-center gap-1.5 bg-white/5 border border-white/10 px-2.5 py-1.5 rounded-lg backdrop-blur-sm flex-1 justify-center hover:bg-white/10 transition-colors">
+                            <Sparkles className="w-3.5 h-3.5 text-yellow-300 drop-shadow-sm" />
+                            <span className="text-[11px] font-bold text-white">Ofertas</span>
                         </div>
                     </div>
 
-                    {/* Strong CTA with Smooth Transition */}
+                    {/* Strong CTA - Compact */}
                     <button 
                       onClick={() => onNavigate('explore')}
-                      className="w-full bg-white text-[#2D6DF6] text-sm font-extrabold py-4 px-6 rounded-2xl shadow-xl shadow-blue-900/10 active:scale-[0.98] transition-all duration-300 flex items-center justify-center gap-2 group/btn hover:bg-blue-50 hover:scale-[1.01] relative overflow-hidden"
+                      className="w-full bg-white text-[#2D6DF6] text-xs font-extrabold py-3 px-6 rounded-xl shadow-xl shadow-blue-900/10 active:scale-[0.98] transition-all duration-300 flex items-center justify-center gap-2 group/btn hover:bg-blue-50 hover:scale-[1.01] relative overflow-hidden"
                     >
                       <span className="relative z-10">Começar a explorar</span>
-                      <ArrowRight className="w-4 h-4 relative z-10 group-hover/btn:translate-x-1 transition-transform" strokeWidth={3} />
+                      <ArrowRight className="w-3.5 h-3.5 relative z-10 group-hover/btn:translate-x-1 transition-transform" strokeWidth={3} />
                     </button>
                   </div>
                </div>
@@ -561,7 +578,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
             <div className="px-5 w-full">
                <div className="relative bg-gradient-to-br from-[#F0F7FF] to-[#E6F0FF] dark:from-gray-800 dark:to-gray-800/80 rounded-2xl p-5 border border-blue-100 dark:border-gray-700 shadow-sm overflow-hidden active:scale-[0.99] transition-transform">
                   
-                  <div className="absolute top-0 right-0 p-3 opacity-10 pointer-events-none">
+                  <div className="absolute top-0 right-0 p-3 opacity-10 pointer-events-none animate-float-heart">
                      <Heart className="w-24 h-24 text-blue-600 fill-blue-600" />
                   </div>
 
