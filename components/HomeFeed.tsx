@@ -23,7 +23,9 @@ import {
   Flame,
   Trophy,
   Heart,
-  Zap
+  Zap,
+  ShoppingBag,
+  Target
 } from 'lucide-react';
 import { QuoteRequestModal } from './QuoteRequestModal';
 import { supabase } from '../lib/supabaseClient';
@@ -503,6 +505,57 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
                         
                         {/* Decorative background blur */}
                         <div className="absolute right-0 top-0 w-20 h-20 bg-white/10 rounded-full blur-xl -mr-6 -mt-6 pointer-events-none group-hover:bg-white/20 transition-colors"></div>
+                    </div>
+                 </div>
+
+                 {/* --- NEXT STEP (JOURNEY) --- */}
+                 <div className="space-y-2 mt-2">
+                    <div className="flex items-center gap-2 pr-5">
+                       <Target className="w-3.5 h-3.5 text-gray-400" />
+                       <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider">Seu próximo passo</h4>
+                    </div>
+                    <div className="flex gap-3 overflow-x-auto pb-2 pr-5 no-scrollbar snap-x">
+                        {/* Mission 1: Use Cashback */}
+                        <div 
+                            onClick={() => onNavigate('explore')}
+                            className="snap-start min-w-[140px] p-3 rounded-xl bg-gradient-to-br from-emerald-50 to-teal-100 dark:from-emerald-900/30 dark:to-teal-900/30 border border-emerald-200 dark:border-emerald-800 flex flex-col gap-1.5 cursor-pointer active:scale-95 transition-transform"
+                        >
+                            <div className="w-8 h-8 rounded-full bg-white dark:bg-emerald-900/50 flex items-center justify-center text-emerald-600 dark:text-emerald-400 shadow-sm">
+                                <ShoppingBag className="w-4 h-4" />
+                            </div>
+                            <div>
+                                <p className="text-xs font-bold text-emerald-800 dark:text-emerald-200">Use seu saldo</p>
+                                <p className="text-[10px] text-emerald-600 dark:text-emerald-400 leading-tight">Economize agora perto de você</p>
+                            </div>
+                        </div>
+
+                        {/* Mission 2: Discover */}
+                        <div 
+                            onClick={() => onNavigate('explore')}
+                            className="snap-start min-w-[140px] p-3 rounded-xl bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-blue-900/30 dark:to-indigo-900/30 border border-blue-200 dark:border-blue-800 flex flex-col gap-1.5 cursor-pointer active:scale-95 transition-transform"
+                        >
+                            <div className="w-8 h-8 rounded-full bg-white dark:bg-blue-900/50 flex items-center justify-center text-blue-600 dark:text-blue-400 shadow-sm">
+                                <Compass className="w-4 h-4" />
+                            </div>
+                            <div>
+                                <p className="text-xs font-bold text-blue-800 dark:text-blue-200">Descubra algo novo</p>
+                                <p className="text-[10px] text-blue-600 dark:text-blue-400 leading-tight">Lojas que você ainda não conhece</p>
+                            </div>
+                        </div>
+
+                        {/* Mission 3: Earn More */}
+                        <div 
+                            onClick={() => onNavigate('explore')}
+                            className="snap-start min-w-[140px] p-3 rounded-xl bg-gradient-to-br from-orange-50 to-amber-100 dark:from-orange-900/30 dark:to-amber-900/30 border border-orange-200 dark:border-orange-800 flex flex-col gap-1.5 cursor-pointer active:scale-95 transition-transform"
+                        >
+                            <div className="w-8 h-8 rounded-full bg-white dark:bg-orange-900/50 flex items-center justify-center text-orange-600 dark:text-orange-400 shadow-sm">
+                                <TrendingUp className="w-4 h-4" />
+                            </div>
+                            <div>
+                                <p className="text-xs font-bold text-orange-800 dark:text-orange-200">Ganhe mais</p>
+                                <p className="text-[10px] text-orange-600 dark:text-orange-400 leading-tight">Complete sua meta mais rápido</p>
+                            </div>
+                        </div>
                     </div>
                  </div>
 

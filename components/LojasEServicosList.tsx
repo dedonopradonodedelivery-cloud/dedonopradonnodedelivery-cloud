@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Star, Loader2, AlertCircle, BadgeCheck, Heart, Coins } from 'lucide-react';
+import { Star, Loader2, AlertCircle, BadgeCheck, Heart, Coins, TrendingUp, Zap, Award } from 'lucide-react';
 import { Store, AdType } from '../types';
 import { useFavorites } from '../hooks/useFavorites';
 import { User } from '@supabase/supabase-js';
@@ -29,13 +29,13 @@ const generateFakeStores = (): Store[] => {
       category: CATEGORIES_MOCK[catIndex],
       subcategory: SUBCATEGORIES_MOCK[catIndex],
       logoUrl: '/assets/default-logo.png', // Usando logoUrl padrão
-      rating: Number((3.5 + Math.random() * 1.5).toFixed(1)),
+      rating: Number((3.8 + Math.random() * 1.2).toFixed(1)), // Ratings um pouco melhores para parecer aspiracional
       reviewsCount: Math.floor(Math.random() * 500) + 10,
       description: 'O melhor atendimento da região.',
       distance: `${(Math.random() * 5).toFixed(1)}km`,
       adType: isPremium ? AdType.PREMIUM : AdType.ORGANIC,
       isSponsored: isSponsored || isPremium,
-      verified: i % 3 === 0,
+      verified: i % 2 === 0, // Mais verificados
       cashback: hasCashback ? (Math.floor(Math.random() * 10) + 2) : undefined,
       address: 'Rua Exemplo, 123',
       isOpenNow: isOpenNow,
@@ -64,6 +64,36 @@ const sortStores = (stores: Store[]) => {
 const RAW_STORES = generateFakeStores();
 const ALL_SORTED_STORES = sortStores([...RAW_STORES]);
 const ITEMS_PER_PAGE = 12;
+
+const getStoreExtras = (index: number, store: Store) => {
+  let badge = null;
+  
+  if (store.cashback && store.cashback > 8) {
+     badge = { text: '💸 Cashback Alto', color: 'bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300 border-green-200 dark:border-green-800' };
+  } else if (store.rating >= 4.9) {
+     badge = { text: '⭐ Favorita da Freguesia', color: 'bg-yellow-100 dark:bg-yellow-900/40 text-yellow-700 dark:text-yellow-300 border-yellow-200 dark:border-yellow-800' };
+  } else if ((store.reviewsCount || 0) > 300) {
+     badge = { text: '🔥 Mais visitada', color: 'bg-orange-100 dark:bg-orange-900/40 text-orange-700 dark:text-orange-300 border-orange-200 dark:border-orange-800' };
+  } else if (store.isSponsored) {
+     badge = { text: '💎 Destaque Premium', color: 'bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800' };
+  } else if (index % 5 === 0) {
+     badge = { text: '⚡ Responde rápido', color: 'bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800' };
+  }
+
+  const copies = [
+    "Muito elogiada pelos moradores",
+    "Clientes voltam sempre",
+    "Atendimento 5 estrelas",
+    "Uma das mais recomendadas",
+    "Sucesso absoluto no bairro",
+    "Qualidade garantida"
+  ];
+  
+  // Deterministic copy based on index
+  const copy = copies[index % copies.length];
+
+  return { badge, copy };
+};
 
 export const LojasEServicosList: React.FC<LojasEServicosListProps> = ({ onStoreClick, onViewAll, activeFilter = 'all', user = null }) => {
   const [visibleStores, setVisibleStores] = useState<Store[]>([]);
@@ -145,16 +175,17 @@ export const LojasEServicosList: React.FC<LojasEServicosListProps> = ({ onStoreC
   return (
     <div className="flex flex-col w-full pb-4">
       
-      <div className="flex justify-between items-end mb-3 px-1">
-        <h3 className="text-base font-semibold text-gray-800 dark:text-white leading-none">
+      <div className="flex justify-between items-end mb-4 px-1">
+        <h3 className="text-base font-bold text-gray-800 dark:text-white leading-none flex items-center gap-2">
+          <Award className="w-4 h-4 text-[#1E5BFF]" />
           Lojas & Serviços
         </h3>
         {onViewAll ? (
             <button 
                 onClick={onViewAll}
-                className="text-sm font-medium text-primary-500 hover:text-primary-600 transition-colors"
+                className="text-xs font-bold text-[#1E5BFF] hover:text-[#1749CC] transition-colors bg-blue-50 dark:bg-blue-900/20 px-3 py-1 rounded-full"
             >
-                Ver mais
+                Ver tudo
             </button>
         ) : (
             <span className="text-[10px] text-gray-400 font-medium">
@@ -163,81 +194,80 @@ export const LojasEServicosList: React.FC<LojasEServicosListProps> = ({ onStoreC
         )}
       </div>
 
-      <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-4">
         {visibleStores.map((store, index) => {
             const isLastElement = index === visibleStores.length - 1;
-            const isSponsored = store.isSponsored || store.adType === AdType.PREMIUM;
             const isFavorited = isFavorite(store.id);
+            const { badge, copy } = getStoreExtras(index, store);
             
             return (
                 <div
                     key={store.id}
                     ref={isLastElement ? lastStoreElementRef : null}
                     onClick={() => onStoreClick && onStoreClick(store)}
-                    className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-3 flex gap-3 cursor-pointer active:bg-gray-50 dark:active:bg-gray-700/50 transition-colors relative group"
+                    className={`bg-white dark:bg-gray-800 rounded-2xl p-3 flex gap-3 cursor-pointer relative group transition-all duration-300 border ${badge?.text === '💎 Destaque Premium' ? 'border-purple-100 dark:border-purple-900/50 shadow-md' : 'border-gray-100 dark:border-gray-700 shadow-sm'} hover:shadow-lg hover:-translate-y-0.5 active:scale-[0.99]`}
                 >
-                    {isSponsored && (
-                        <div className="absolute top-2 right-3 z-10 pointer-events-none">
-                            <span className="text-[10px] font-medium text-[#7A7A7A] dark:text-gray-400">
-                                Patrocinado
+                    {/* Badge Positioned Top Right */}
+                    <div className="absolute top-3 right-3 z-10 pointer-events-none">
+                        {badge && (
+                            <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full border ${badge.color}`}>
+                                {badge.text}
                             </span>
-                        </div>
-                    )}
+                        )}
+                    </div>
 
-                    <div className="w-[80px] h-[80px] flex-shrink-0 relative rounded-xl overflow-hidden bg-gray-50 dark:bg-gray-700">
+                    <div className="w-[88px] h-[88px] flex-shrink-0 relative rounded-xl overflow-hidden bg-gray-50 dark:bg-gray-700 border border-gray-100 dark:border-gray-600">
                         <img 
                             src={store.logoUrl || "/assets/default-logo.png"} 
                             alt={store.name} 
-                            className="w-full h-full object-contain"
+                            className="w-full h-full object-contain p-1"
                             loading="lazy"
                         />
+                        {store.cashback && (
+                            <div className="absolute bottom-0 left-0 right-0 bg-green-500 text-white text-[9px] font-bold text-center py-0.5">
+                                {store.cashback}% VOLTA
+                            </div>
+                        )}
                     </div>
 
-                    <div className="flex-1 flex flex-col justify-center min-w-0 py-0.5 pr-8">
-                        <div className="flex flex-col gap-1 mb-1">
-                             <div className="flex items-center gap-1.5 flex-wrap">
-                               <h4 className="font-bold text-gray-800 dark:text-white text-sm leading-tight truncate max-w-[85%]">
+                    <div className="flex-1 flex flex-col justify-center min-w-0 pr-1">
+                        <div className="flex flex-col gap-0.5 mb-1.5">
+                             <div className="flex items-center gap-1.5 pr-16"> {/* Padding right to avoid overlap with badge */}
+                               <h4 className="font-bold text-gray-900 dark:text-white text-sm leading-tight truncate">
                                   {store.name}
                                </h4>
-                               
                                {store.verified && (
-                                 <BadgeCheck className="w-4 h-4 text-white fill-[#1E5BFF] shrink-0" aria-label="Loja Verificada" />
-                               )}
-
-                               {store.cashback && (
-                                 <div className="w-3.5 h-3.5 bg-black rounded-full flex items-center justify-center shrink-0" title="Cashback Ativo">
-                                    <Coins className="w-2.5 h-2.5 text-[#FFD447] fill-[#FFD447]" strokeWidth={1} aria-label="Cashback" />
-                                 </div>
+                                 <BadgeCheck className="w-3.5 h-3.5 text-[#1E5BFF] fill-white shrink-0" aria-label="Verificado" />
                                )}
                              </div>
+                             
+                             {/* Emotional Micro-copy */}
+                             <p className="text-[10px] font-medium text-gray-500 dark:text-gray-400 italic">
+                                {copy}
+                             </p>
                         </div>
 
-                        <div className="flex items-center gap-2 text-[11px] text-gray-500 dark:text-gray-400">
-                             <div className="flex items-center gap-0.5 text-[#1E5BFF] font-bold">
+                        <div className="flex items-center gap-3 text-[11px] text-gray-500 dark:text-gray-400 mt-auto">
+                             <div className="flex items-center gap-1 bg-yellow-50 dark:bg-yellow-900/10 px-1.5 py-0.5 rounded text-yellow-700 dark:text-yellow-400 font-bold border border-yellow-100 dark:border-yellow-800/30">
                                 <Star className="w-3 h-3 fill-current" />
                                 <span>{store.rating}</span>
                              </div>
-                             <span className="w-0.5 h-0.5 bg-gray-300 rounded-full"></span>
-                             <span className="truncate max-w-[100px]">{store.category}</span>
-                             <span className="w-0.5 h-0.5 bg-gray-300 rounded-full"></span>
+                             <span className="truncate max-w-[80px] font-medium">{store.category}</span>
+                             <span className="w-1 h-1 bg-gray-300 rounded-full"></span>
                              <span>{store.distance}</span>
                         </div>
                     </div>
                     
                     <button 
                         onClick={(e) => handleToggleFavorite(e, store.id)}
-                        className={`absolute bottom-3 right-3 w-8 h-8 rounded-full flex items-center justify-center shadow-sm border transition-all duration-200 z-20 ${
+                        className={`absolute bottom-3 right-3 w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200 z-20 ${
                             isFavorited 
-                            ? 'bg-[#E8EFFF] border-blue-100' 
-                            : 'bg-white dark:bg-gray-800 border-gray-100 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700'
+                            ? 'bg-red-50 dark:bg-red-900/20 text-red-500' 
+                            : 'bg-gray-50 dark:bg-gray-700/50 text-gray-400 hover:text-red-400'
                         }`}
                     >
                         <Heart 
-                            className={`w-4 h-4 transition-colors ${
-                                isFavorited 
-                                ? 'text-[#1E5BFF] fill-[#1E5BFF]' 
-                                : 'text-gray-400 dark:text-gray-500'
-                            }`} 
+                            className={`w-4 h-4 transition-colors ${isFavorited ? 'fill-current' : ''}`} 
                         />
                     </button>
                 </div>
@@ -247,16 +277,16 @@ export const LojasEServicosList: React.FC<LojasEServicosListProps> = ({ onStoreC
 
       {loading && (
         <div className="w-full flex justify-center py-6">
-            <div className="flex items-center gap-2 text-primary-500 bg-white dark:bg-gray-800 px-3 py-1.5 rounded-full shadow-sm border border-gray-100 dark:border-gray-700">
-                <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                <span className="text-[11px] font-bold">Carregando...</span>
+            <div className="flex items-center gap-2 text-[#1E5BFF] bg-white dark:bg-gray-800 px-4 py-2 rounded-full shadow-md border border-blue-100 dark:border-gray-700">
+                <Loader2 className="w-4 h-4 animate-spin" />
+                <span className="text-xs font-bold">Buscando mais opções...</span>
             </div>
         </div>
       )}
 
       {error && (
         <div className="w-full flex justify-center py-4">
-            <div className="flex items-center gap-2 text-red-500 bg-red-50 dark:bg-red-900/20 px-4 py-2 rounded-xl">
+            <div className="flex items-center gap-2 text-red-500 bg-red-50 dark:bg-red-900/20 px-4 py-2 rounded-xl border border-red-100 dark:border-red-800">
                 <AlertCircle className="w-4 h-4" />
                 <span className="text-xs font-bold">Erro ao carregar.</span>
                 <button onClick={() => { setHasMore(true); loadMore(); }} className="underline ml-1 font-bold">Tentar novamente</button>
@@ -266,8 +296,8 @@ export const LojasEServicosList: React.FC<LojasEServicosListProps> = ({ onStoreC
 
       {!hasMore && !loading && (
         <div className="w-full text-center py-8">
-            <p className="text-[11px] text-gray-400 dark:text-gray-600 font-medium">
-                Você chegou ao fim das lojas por aqui 👋
+            <p className="text-[11px] text-gray-400 dark:text-gray-600 font-medium bg-gray-50 dark:bg-gray-800/50 inline-block px-4 py-1.5 rounded-full">
+                Você viu todas as lojas disponíveis ✨
             </p>
         </div>
       )}
