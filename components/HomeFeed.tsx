@@ -25,7 +25,11 @@ import {
   Heart,
   Zap,
   ShoppingBag,
-  Target
+  Target,
+  Clock,
+  Calendar,
+  MessageCircle,
+  CheckCircle2
 } from 'lucide-react';
 import { QuoteRequestModal } from './QuoteRequestModal';
 import { supabase } from '../lib/supabaseClient';
@@ -197,6 +201,9 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
   const [listFilter, setListFilter] = useState<'all' | 'cashback' | 'top_rated' | 'open_now'>('all');
 
   const [hasSpun, setHasSpun] = useState(false);
+  
+  // Daily Check-in State
+  const [hasCheckedIn, setHasCheckedIn] = useState(false);
 
   useEffect(() => {
     const timer = setTimeout(() => setHasSpun(true), 100);
@@ -245,6 +252,10 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
   const handleSpinWin = (reward: any) => {
     setIsSpinWheelOpen(false);
     onSpinWin(reward);
+  };
+
+  const handleCheckIn = () => {
+    setHasCheckedIn(true);
   };
   
   return (
@@ -388,7 +399,39 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
                </div>
             </div>
 
-            {/* --- SPIN WHEEL CTA (Preserved below Hero) --- */}
+            {/* --- DAILY CHECK-IN SECTION (NEW) --- */}
+            <div className="px-5 w-full">
+               <div className="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-sm border border-blue-100 dark:border-gray-700 flex items-center justify-between gap-4 transition-all duration-300">
+                  <div className="flex-1 min-w-0">
+                     <h3 className="font-bold text-gray-900 dark:text-white text-sm flex items-center gap-2">
+                        {hasCheckedIn ? (
+                            <>Check-in realizado! <CheckCircle2 className="w-4 h-4 text-green-500 fill-green-100" /></>
+                        ) : (
+                            <>👋 Bom te ver por aqui!</>
+                        )}
+                     </h3>
+                     <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 leading-relaxed">
+                        {hasCheckedIn 
+                            ? 'Você está por dentro da Freguesia hoje 🚀' 
+                            : 'Que tal conferir o que está rolando hoje no bairro?'}
+                     </p>
+                  </div>
+                  
+                  <button
+                    onClick={handleCheckIn}
+                    disabled={hasCheckedIn}
+                    className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap flex-shrink-0 ${
+                        hasCheckedIn 
+                        ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 cursor-default border border-green-200 dark:border-green-800' 
+                        : 'bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-200 dark:shadow-none active:scale-95'
+                    }`}
+                  >
+                    {hasCheckedIn ? 'Feito' : 'Fazer check-in'}
+                  </button>
+               </div>
+            </div>
+
+            {/* --- SPIN WHEEL CTA --- */}
             <div className="px-5 w-full">
               <div
                 onClick={handleSpinWheelClick}
@@ -466,6 +509,114 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
                        </div>
                     )})}
                  </div>
+            </div>
+
+            {/* --- HOJE NA FREGUESIA (NEW SECTION) --- */}
+            <div className="pl-5 space-y-3 w-full mt-2">
+                <div className="pr-5">
+                    <div className="flex items-center justify-between mb-1">
+                        <h3 className="text-base font-extrabold text-gray-900 dark:text-white flex items-center gap-2">
+                            <Calendar className="w-4 h-4 text-orange-500" />
+                            Hoje na Freguesia
+                        </h3>
+                    </div>
+                    <p className="text-[10px] font-medium text-gray-400 dark:text-gray-500 flex items-center gap-1.5">
+                        <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
+                        Atualizado hoje • conteúdo muda diariamente
+                    </p>
+                </div>
+
+                <div className="flex gap-3 overflow-x-auto pb-3 pr-5 no-scrollbar snap-x">
+                    {/* Card 1: Movimento agora */}
+                    <div 
+                        onClick={() => onNavigate('explore')}
+                        className="snap-start min-w-[150px] bg-gradient-to-br from-orange-50 to-red-50 dark:from-orange-900/20 dark:to-red-900/20 border border-orange-100 dark:border-orange-800 rounded-xl p-3 flex flex-col justify-between cursor-pointer active:scale-95 transition-transform"
+                    >
+                        <div className="w-8 h-8 rounded-full bg-white dark:bg-orange-900/40 flex items-center justify-center text-orange-500 mb-2 shadow-sm">
+                            <TrendingUp className="w-4 h-4" />
+                        </div>
+                        <div>
+                            <h4 className="font-bold text-gray-800 dark:text-orange-100 text-xs mb-0.5">Movimento agora</h4>
+                            <p className="text-[10px] text-gray-500 dark:text-gray-400 leading-tight">Lojas com mais visitas hoje</p>
+                        </div>
+                    </div>
+
+                    {/* Card 2: Cashback alto hoje */}
+                    <div 
+                        onClick={() => onNavigate('explore')}
+                        className="snap-start min-w-[150px] bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border border-green-100 dark:border-green-800 rounded-xl p-3 flex flex-col justify-between cursor-pointer active:scale-95 transition-transform"
+                    >
+                        <div className="w-8 h-8 rounded-full bg-white dark:bg-green-900/40 flex items-center justify-center text-green-500 mb-2 shadow-sm">
+                            <Percent className="w-4 h-4" />
+                        </div>
+                        <div>
+                            <h4 className="font-bold text-gray-800 dark:text-green-100 text-xs mb-0.5">Cashback alto hoje</h4>
+                            <p className="text-[10px] text-gray-500 dark:text-gray-400 leading-tight">Ofertas acima da média</p>
+                        </div>
+                    </div>
+
+                    {/* Card 3: Últimas horas */}
+                    <div 
+                        onClick={() => onNavigate('explore')}
+                        className="snap-start min-w-[150px] bg-gradient-to-br from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 border border-purple-100 dark:border-purple-800 rounded-xl p-3 flex flex-col justify-between cursor-pointer active:scale-95 transition-transform"
+                    >
+                        <div className="w-8 h-8 rounded-full bg-white dark:bg-purple-900/40 flex items-center justify-center text-purple-500 mb-2 shadow-sm">
+                            <Clock className="w-4 h-4" />
+                        </div>
+                        <div>
+                            <h4 className="font-bold text-gray-800 dark:text-purple-100 text-xs mb-0.5">Últimas horas</h4>
+                            <p className="text-[10px] text-gray-500 dark:text-gray-400 leading-tight">Promoções que acabam hoje</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* --- A FREGUESIA ESTÁ USANDO (NEW SECTION) --- */}
+            <div className="pl-5 space-y-3 w-full mt-2">
+                <div className="pr-5">
+                    <h3 className="text-base font-extrabold text-gray-900 dark:text-white flex items-center gap-2">
+                        <Users className="w-4 h-4 text-indigo-500" />
+                        A Freguesia está usando
+                    </h3>
+                    <p className="text-[10px] font-medium text-gray-400 dark:text-gray-500">
+                        Baseado na atividade recente da região
+                    </p>
+                </div>
+
+                <div className="flex gap-3 overflow-x-auto pb-3 pr-5 no-scrollbar snap-x">
+                    {/* Card 1 */}
+                    <div className="snap-start min-w-[200px] bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl p-3 flex items-center gap-3 shadow-sm">
+                        <div className="w-10 h-10 rounded-full bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center text-indigo-600 shrink-0">
+                            <Users className="w-5 h-5" />
+                        </div>
+                        <div>
+                            <span className="block text-xs font-bold text-gray-800 dark:text-gray-200">Economia</span>
+                            <span className="block text-[10px] text-gray-500">38 pessoas economizaram hoje</span>
+                        </div>
+                    </div>
+
+                    {/* Card 2 */}
+                    <div className="snap-start min-w-[200px] bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl p-3 flex items-center gap-3 shadow-sm">
+                        <div className="w-10 h-10 rounded-full bg-rose-50 dark:bg-rose-900/20 flex items-center justify-center text-rose-600 shrink-0">
+                            <Flame className="w-5 h-5" />
+                        </div>
+                        <div>
+                            <span className="block text-xs font-bold text-gray-800 dark:text-gray-200">Em Alta</span>
+                            <span className="block text-[10px] text-gray-500">Muito usado esta semana</span>
+                        </div>
+                    </div>
+
+                     {/* Card 3 */}
+                     <div className="snap-start min-w-[200px] bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl p-3 flex items-center gap-3 shadow-sm">
+                        <div className="w-10 h-10 rounded-full bg-amber-50 dark:bg-amber-900/20 flex items-center justify-center text-amber-600 shrink-0">
+                            <Star className="w-5 h-5" />
+                        </div>
+                        <div>
+                            <span className="block text-xs font-bold text-gray-800 dark:text-gray-200">Favoritos</span>
+                            <span className="block text-[10px] text-gray-500">Lojas preferidas do bairro</span>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             {/* --- CASHBACK SECTION (ENHANCED GAMIFICATION) --- */}
