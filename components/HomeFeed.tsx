@@ -130,6 +130,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
   const searchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const bannerScrollRef = useRef<HTMLDivElement>(null);
+  const [activeBannerIndex, setActiveBannerIndex] = useState(0);
 
   const [isQuoteModalOpen, setIsQuoteModalOpen] = useState(false);
   const [selectedQuoteNiche, setSelectedQuoteNiche] = useState('');
@@ -247,9 +248,18 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
     }
   ];
 
+  const handleBannerScroll = () => {
+    if (bannerScrollRef.current) {
+        const { scrollLeft, clientWidth } = bannerScrollRef.current;
+        // Simple calculation to find the index of the centered element
+        const newIndex = Math.round(scrollLeft / clientWidth);
+        setActiveBannerIndex(newIndex);
+    }
+  };
+
   const handleBannerScrollRight = () => {
     if (bannerScrollRef.current) {
-      const scrollAmount = bannerScrollRef.current.clientWidth * 0.85;
+      const scrollAmount = bannerScrollRef.current.clientWidth * 0.93; // Matches banner width approx
       bannerScrollRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
     }
   };
@@ -360,13 +370,14 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
             </div>
 
             <div className="w-full relative group">
-                 <div className="px-5 mb-3 flex items-center justify-between">
-                    <h3 className="text-base font-semibold text-gray-900 dark:text-white">O que você vai encontrar</h3>
-                 </div>
+                 {/* 
+                    Original title was: "O que você vai encontrar"
+                    Removed for cleaner look since banners are self-explanatory
+                 */}
                  
                  <button 
                     onClick={handleBannerScrollRight}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 z-20 bg-white/90 dark:bg-gray-800/90 p-2 rounded-full shadow-lg text-gray-600 dark:text-gray-300 backdrop-blur-sm border border-gray-100 dark:border-gray-700 active:scale-95 transition-all opacity-0 group-hover:opacity-100 hidden sm:block"
+                    className="absolute right-2 top-[40%] -translate-y-1/2 z-20 bg-white/90 dark:bg-gray-800/90 p-2 rounded-full shadow-lg text-gray-600 dark:text-gray-300 backdrop-blur-sm border border-gray-100 dark:border-gray-700 active:scale-95 transition-all opacity-0 group-hover:opacity-100 hidden sm:block"
                     aria-label="Próximo banner"
                  >
                     <ArrowRight className="w-5 h-5" />
@@ -374,50 +385,61 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
 
                  <div 
                     ref={bannerScrollRef}
-                    className="flex gap-2 overflow-x-auto px-4 pb-2 no-scrollbar snap-x snap-mandatory items-start"
+                    onScroll={handleBannerScroll}
+                    className="flex gap-3 overflow-x-auto px-4 pb-2 no-scrollbar snap-x snap-mandatory items-start"
                     style={{ scrollPaddingLeft: '16px' }}
                  >
                     {MINI_BANNERS.map((banner) => {
-                        const heightClass = 'h-[120px]';
+                        // Increased height to 170px to match standard main banners (iFood style)
+                        const heightClass = 'h-[170px]';
                         const theme = (banner as any).theme;
                         let gradientClass = "bg-gradient-to-r from-gray-900 via-gray-900/60 to-transparent";
 
                         if (theme === 'green') {
-                            gradientClass = "bg-gradient-to-r from-emerald-800 via-emerald-600/60 to-transparent";
+                            gradientClass = "bg-gradient-to-r from-emerald-900 via-emerald-800/80 to-transparent";
                         } else if (theme === 'blue-royal') {
-                            gradientClass = "bg-gradient-to-r from-indigo-900 via-indigo-800/60 to-transparent";
+                            gradientClass = "bg-gradient-to-r from-indigo-900 via-indigo-800/80 to-transparent";
                         } else if (theme === 'blue-dark') {
-                            gradientClass = "bg-gradient-to-r from-slate-900 via-slate-800/60 to-transparent";
+                            gradientClass = "bg-gradient-to-r from-slate-900 via-slate-800/80 to-transparent";
                         } else if (theme === 'blue-primary') {
-                            gradientClass = "bg-gradient-to-r from-blue-800 via-blue-600/60 to-transparent";
+                            gradientClass = "bg-gradient-to-r from-blue-900 via-blue-800/80 to-transparent";
                         } else if (theme === 'blue-teal') {
-                            gradientClass = "bg-gradient-to-r from-cyan-900 via-cyan-700/60 to-transparent";
+                            gradientClass = "bg-gradient-to-r from-cyan-900 via-cyan-800/80 to-transparent";
                         } else if (theme === 'blue-discovery') {
-                            gradientClass = "bg-gradient-to-r from-[#2D6DF6] via-[#0EA5E9]/60 to-transparent";
+                            gradientClass = "bg-gradient-to-r from-[#1E3A8A] via-[#1E40AF]/80 to-transparent";
                         }
 
                         return (
                             <div key={banner.id} onClick={banner.action} className="min-w-[93%] sm:min-w-[340px] snap-center cursor-pointer relative active:scale-[0.98] transition-transform">
-                                <div className={`w-full ${heightClass} rounded-2xl bg-black flex flex-row items-center justify-between shadow-md shadow-gray-200/50 dark:shadow-none relative overflow-hidden transition-all group`}>
+                                <div className={`w-full ${heightClass} rounded-[20px] bg-black flex flex-row items-center justify-between shadow-md shadow-gray-200/50 dark:shadow-none relative overflow-hidden transition-all group`}>
                                 
                                 <div className="absolute inset-0 z-0">
                                     <img src={banner.image} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 opacity-90" alt="" />
                                     <div className={`absolute inset-0 ${gradientClass}`} />
                                 </div>
 
-                                <div className="z-10 flex flex-col justify-center h-full flex-1 pl-5 pr-12 py-3">
-                                    <h3 className="text-white font-bold text-lg leading-tight mb-1 drop-shadow-md w-[80%]">{banner.title}</h3>
-                                    <p className="text-white/90 text-xs font-medium line-clamp-1 mb-3 w-[90%]">{banner.subtitle}</p>
-                                    
-                                    <div className="flex items-center gap-1 text-white text-xs font-bold bg-white/20 hover:bg-white/30 backdrop-blur-md w-fit px-3 py-1.5 rounded-full transition-colors">
-                                        {banner.cta} <ArrowRight className="w-3 h-3" />
-                                    </div>
+                                <div className="z-10 flex flex-col justify-end h-full flex-1 pl-5 pr-12 py-5">
+                                    {/* Text larger for main banner feel */}
+                                    <h3 className="text-white font-bold text-2xl leading-tight mb-1.5 drop-shadow-md w-[85%]">{banner.title}</h3>
+                                    <p className="text-white/90 text-sm font-medium line-clamp-2 w-[90%] opacity-90">{banner.subtitle}</p>
                                 </div>
                                 </div>
                             </div>
                         );
                     })}
                     <div className="min-w-[12px] flex-shrink-0"></div>
+                 </div>
+
+                 {/* Carousel Indicators */}
+                 <div className="flex justify-center gap-1.5 mt-1 mb-2">
+                    {MINI_BANNERS.map((_, idx) => (
+                        <div 
+                            key={idx} 
+                            className={`h-1.5 rounded-full transition-all duration-300 ${
+                                idx === activeBannerIndex ? 'w-5 bg-gray-800 dark:bg-white' : 'w-1.5 bg-gray-300 dark:bg-gray-700'
+                            }`}
+                        />
+                    ))}
                  </div>
             </div>
 
