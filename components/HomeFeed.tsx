@@ -185,8 +185,8 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
   const [hasCheckedIn, setHasCheckedIn] = useState(false);
   const [streakCount, setStreakCount] = useState(2); // Mock streak start
 
-  // Invite Simulation State
-  const [showInviteToast, setShowInviteToast] = useState(false);
+  // Toast / Feedback State
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   // Time-based Personalization (Shortened)
   const timeContext = useMemo(() => {
@@ -195,6 +195,18 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
     if (hour < 15) return { label: 'Almoço', sub: 'Fome?' };
     if (hour < 19) return { label: 'Lanche', sub: 'Pausa' };
     return { label: 'Jantar', sub: 'Delivery' };
+  }, []);
+
+  // 1) Dynamic Welcome Message Logic
+  const welcomeMessage = useMemo(() => {
+    const msgs = [
+      "Bom te ver por aqui 👋",
+      "Pronto para economizar hoje?",
+      "O bairro tem novidades pra você",
+      "Que bom ter você de volta 💙",
+      "Descubra o melhor da Freguesia ✨"
+    ];
+    return msgs[Math.floor(Math.random() * msgs.length)];
   }, []);
 
   useEffect(() => {
@@ -246,14 +258,20 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
     onSpinWin(reward);
   };
 
+  const showFeedback = (msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(null), 3000);
+  };
+
   const handleCheckIn = () => {
     setHasCheckedIn(true);
     setStreakCount(prev => prev + 1);
+    // 3) Micro-feedback positivo
+    showFeedback("Você está aproveitando bem 💙");
   };
 
   const handleInvite = () => {
-    setShowInviteToast(true);
-    setTimeout(() => setShowInviteToast(false), 3000);
+    showFeedback("Boa escolha 👍 Convite simulado!");
   };
   
   return (
@@ -321,6 +339,13 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
       ) : (
         <div className="flex flex-col gap-8 w-full mt-2">
             
+            {/* 1) Dynamic Welcome Message */}
+            <div className="px-5 -mb-2">
+              <p className="text-gray-500 dark:text-gray-400 text-sm font-medium font-display animate-in fade-in duration-700">
+                {welcomeMessage}
+              </p>
+            </div>
+
             {/* --- NEW PREMIUM HERO SECTION --- */}
             <div className="px-5 w-full">
                <div className="w-full bg-gradient-to-br from-[#2D6DF6] via-[#2563EB] to-[#0F359E] rounded-[32px] p-6 sm:p-8 text-white relative overflow-hidden shadow-xl shadow-blue-600/20 group transform transition-all active:scale-[0.99] hover:scale-[1.01] border border-white/10">
@@ -358,7 +383,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
 
                     {/* Subtitle */}
                     <p className="text-blue-50 text-sm font-medium leading-relaxed mb-6 max-w-[85%] opacity-90">
-                      Descubra lugares incríveis na Freguesia e ganhe cashback.
+                      O guia oficial de economia e lazer do seu bairro.
                     </p>
 
                     {/* Micro-signals (Value Props) */}
@@ -402,14 +427,14 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
                                         </span>
                                     ) : (
                                         <span className="flex items-center gap-1">
-                                            Ritmo Diário <Flame className="w-4 h-4 text-orange-500 fill-orange-500 animate-pulse" />
+                                            Sua Sequência <Flame className="w-4 h-4 text-orange-500 fill-orange-500 animate-pulse" />
                                         </span>
                                     )}
                                 </h3>
                                 <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 font-medium">
                                     {hasCheckedIn 
                                         ? "Continue assim! 🚀" 
-                                        : "Marque presença e ganhe."}
+                                        : "Marque presença. Ganhe recompensas."}
                                 </p>
                             </div>
                             
@@ -751,58 +776,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
                     </div>
                  </div>
 
-                 {/* --- SUGESTÕES RÁPIDAS --- */}
-                 <div className="space-y-3 mt-4">
-                    <div className="flex items-center gap-2 pr-5">
-                       <Target className="w-4 h-4 text-gray-400" />
-                       <h4 className="text-sm font-bold text-gray-500 uppercase tracking-wider">Sugestões Rápidas</h4>
-                    </div>
-                    <div className="flex gap-3 overflow-x-auto pb-2 pr-5 no-scrollbar snap-x">
-                        {/* Mission 1 */}
-                        <div 
-                            onClick={() => onNavigate('explore')}
-                            className="snap-start min-w-[140px] p-4 rounded-2xl bg-gradient-to-br from-emerald-50 to-teal-100 dark:from-emerald-900/30 dark:to-teal-900/30 border border-emerald-200 dark:border-emerald-800 flex flex-col gap-2 cursor-pointer active:scale-95 transition-transform"
-                        >
-                            <div className="w-8 h-8 rounded-full bg-white dark:bg-emerald-900/50 flex items-center justify-center text-emerald-600 dark:text-emerald-400 shadow-sm">
-                                <ShoppingBag className="w-4 h-4" />
-                            </div>
-                            <div>
-                                <p className="text-xs font-bold text-emerald-800 dark:text-emerald-200">Use saldo</p>
-                                <p className="text-[10px] text-emerald-600 dark:text-emerald-400 leading-tight">Economize agora</p>
-                            </div>
-                        </div>
-
-                        {/* Mission 2 */}
-                        <div 
-                            onClick={() => onNavigate('explore')}
-                            className="snap-start min-w-[140px] p-4 rounded-2xl bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-blue-900/30 dark:to-indigo-900/30 border border-blue-200 dark:border-blue-800 flex flex-col gap-2 cursor-pointer active:scale-95 transition-transform"
-                        >
-                            <div className="w-8 h-8 rounded-full bg-white dark:bg-blue-900/50 flex items-center justify-center text-blue-600 dark:text-blue-400 shadow-sm">
-                                <Compass className="w-4 h-4" />
-                            </div>
-                            <div>
-                                <p className="text-xs font-bold text-blue-800 dark:text-blue-200">Descubra</p>
-                                <p className="text-[10px] text-blue-600 dark:text-blue-400 leading-tight">Lojas novas</p>
-                            </div>
-                        </div>
-
-                        {/* Mission 3 */}
-                        <div 
-                            onClick={() => onNavigate('explore')}
-                            className="snap-start min-w-[140px] p-4 rounded-2xl bg-gradient-to-br from-orange-50 to-amber-100 dark:from-orange-900/30 dark:to-amber-900/30 border border-orange-200 dark:border-orange-800 flex flex-col gap-2 cursor-pointer active:scale-95 transition-transform"
-                        >
-                            <div className="w-8 h-8 rounded-full bg-white dark:bg-orange-900/50 flex items-center justify-center text-orange-600 dark:text-orange-400 shadow-sm">
-                                <TrendingUp className="w-4 h-4" />
-                            </div>
-                            <div>
-                                <p className="text-xs font-bold text-orange-800 dark:text-orange-200">Ganhe mais</p>
-                                <p className="text-[10px] text-orange-600 dark:text-orange-400 leading-tight">Acelere a meta</p>
-                            </div>
-                        </div>
-                    </div>
-                 </div>
-
-                 <div className="flex gap-3 overflow-x-auto pb-3 pr-5 no-scrollbar">
+                 <div className="flex gap-3 overflow-x-auto pb-3 pr-5 no-scrollbar mt-4">
                     {CASHBACK_HIGHLIGHTS.map((store) => (
                        <div key={store.id} onClick={() => {
                            const mockStore: Store = {
@@ -939,17 +913,25 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
                     user={user}
                 />
             </div>
+
+            {/* 2) Habit Footer - Light emotional close */}
+            <div className="mt-8 mb-4 flex flex-col items-center justify-center text-center opacity-60">
+              <Star className="w-4 h-4 text-gray-400 mb-2" />
+              <p className="text-xs font-medium text-gray-500 dark:text-gray-400">
+                Volte amanhã — sempre tem algo novo na Freguesia
+              </p>
+            </div>
         </div>
       )}
 
-      {/* Toast de Convite */}
+      {/* Toast de Convite / Feedback */}
       <div 
         className={`fixed bottom-24 left-1/2 -translate-x-1/2 bg-gray-900 text-white px-4 py-2 rounded-full text-xs font-bold shadow-xl transition-all duration-300 z-50 flex items-center gap-2 ${
-            showInviteToast ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0 pointer-events-none'
+            toastMessage ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0 pointer-events-none'
         }`}
       >
         <Heart className="w-3.5 h-3.5 text-red-400 fill-red-400" />
-        Convite simulado com sucesso!
+        {toastMessage}
       </div>
 
       <QuoteRequestModal
