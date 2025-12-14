@@ -50,18 +50,29 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     let mounted = true;
 
-    // 1. Verificação Inicial Rápida (LocalStorage)
+    // 1. Verificação Inicial Rápida com Timeout de Segurança
     const initAuth = async () => {
+      // Cria uma promessa que "falha" (ou resolve como guest) após 3 segundos
+      // Isso impede que o app fique travado no Splash se o Supabase não responder
+      const timeoutPromise = new Promise((resolve) => 
+        setTimeout(() => resolve({ data: { session: null }, error: 'timeout' }), 3000)
+      );
+
       try {
-        const { data } = await supabase.auth.getSession();
+        // Corrida: Quem responder primeiro (Supabase ou Timeout) ganha
+        const { data } = await Promise.race([
+          supabase.auth.getSession(),
+          timeoutPromise
+        ]) as any;
         
         if (mounted) {
-          setSession(data.session);
-          setUser(data.session?.user ?? null);
+          const currentSession = data?.session ?? null;
+          setSession(currentSession);
+          setUser(currentSession?.user ?? null);
           
-          if (data.session?.user) {
+          if (currentSession?.user) {
             // Busca role em background - NÃO bloqueia o splash
-            fetchUserRole(data.session.user.id);
+            fetchUserRole(currentSession.user.id);
           }
         }
       } catch (err) {
@@ -74,7 +85,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     initAuth();
 
-    // 2. Listener para mudanças futuras
+    // 2. Listener para mudanças futuras (Login/Logout em tempo real)
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, currentSession) => {
       if (!mounted) return;
 
@@ -91,7 +102,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setSession(null);
       }
       
-      // Garante liberação caso o listener dispare antes do initAuth
+      // Garante liberação caso o listener dispare antes ou depois do initAuth
       setAuthResolved(true);
     });
 
