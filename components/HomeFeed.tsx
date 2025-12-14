@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { AdType, Category, Store, EditorialCollection } from '../types';
 import { 
@@ -16,7 +17,13 @@ import {
   Compass,
   Wallet,
   Users,
-  Search
+  Search,
+  Sparkles,
+  TrendingUp,
+  Flame,
+  Trophy,
+  Heart,
+  Zap
 } from 'lucide-react';
 import { QuoteRequestModal } from './QuoteRequestModal';
 import { supabase } from '../lib/supabaseClient';
@@ -45,13 +52,68 @@ const TOP_SEARCHED = [
   { id: 5, title: "Mecânica", image: "https://images.unsplash.com/photo-1530046339160-ce3e41600f2e?q=80&w=400&auto=format=fit=crop" }
 ];
 
-const EDITORIAL_THEMES: EditorialCollection[] = [
-  { id: 'coffee', title: 'Melhores Cafés', subtitle: '', image: 'https://images.unsplash.com/photo-1497935586351-b67a49e012bf?q=80&w=600&auto=format=fit=crop', keywords: ['café', 'padaria', 'confeitaria', 'bistrô'] },
-  { id: 'barber', title: 'Corte de Confiança', subtitle: '', image: 'https://images.unsplash.com/photo-1585747860715-2ba37e788b70?q=80&w=600&auto=format=fit=crop', keywords: ['barbearia', 'cabeleireiro', 'salão', 'cortes'] },
-  { id: 'sweets', title: 'Docerias Amadas', subtitle: '', image: 'https://images.unsplash.com/photo-1559598467-f8b76c8155d0?q=80&w=600&auto=format=fit=crop', keywords: ['doce', 'bolo', 'torta', 'sorvete', 'açaí'] },
-  { id: 'top-rated', title: 'Os Top Avaliados', subtitle: '', image: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=600&auto=format=fit=crop', keywords: [] },
-  { id: 'party', title: 'Festas', subtitle: '', image: 'https://images.unsplash.com/photo-1530103862676-de3c9a59af38?q=80&w=600&auto=format=fit=crop', keywords: ['festa', 'decoração', 'buffet'] },
-  { id: 'fashion', title: 'Moda', subtitle: '', image: 'https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?q=80&w=600&auto=format=fit=crop', keywords: ['roupa', 'moda', 'boutique'] },
+// Enhanced Editorial Themes with Emotional Copy and Badges
+const EDITORIAL_THEMES: (EditorialCollection & { badge?: string; badgeColor?: string; icon?: React.ElementType })[] = [
+  { 
+    id: 'coffee', 
+    title: 'O café que virou vício', 
+    subtitle: 'Pausa obrigatória', 
+    image: 'https://images.unsplash.com/photo-1497935586351-b67a49e012bf?q=80&w=600&auto=format=fit=crop', 
+    keywords: ['café', 'padaria', 'confeitaria', 'bistrô'],
+    badge: '+1k pedidos',
+    badgeColor: 'bg-orange-500',
+    icon: Flame
+  },
+  { 
+    id: 'barber', 
+    title: 'Onde todo mundo corta', 
+    subtitle: 'Estilo garantido', 
+    image: 'https://images.unsplash.com/photo-1585747860715-2ba37e788b70?q=80&w=600&auto=format=fit=crop', 
+    keywords: ['barbearia', 'cabeleireiro', 'salão', 'cortes'],
+    badge: 'Trending',
+    badgeColor: 'bg-purple-500',
+    icon: TrendingUp
+  },
+  { 
+    id: 'sweets', 
+    title: 'Impossível comer um só', 
+    subtitle: 'Doçuras do bairro', 
+    image: 'https://images.unsplash.com/photo-1559598467-f8b76c8155d0?q=80&w=600&auto=format=fit=crop', 
+    keywords: ['doce', 'bolo', 'torta', 'sorvete', 'açaí'],
+    badge: '⭐ 4.9',
+    badgeColor: 'bg-yellow-500',
+    icon: Star
+  },
+  { 
+    id: 'top-rated', 
+    title: 'A Elite do Bairro', 
+    subtitle: 'Os mais elogiados', 
+    image: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=600&auto=format=fit=crop', 
+    keywords: [],
+    badge: 'Campeões',
+    badgeColor: 'bg-blue-500',
+    icon: Trophy
+  },
+  { 
+    id: 'party', 
+    title: 'Pra festa perfeita', 
+    subtitle: 'Tudo para celebrar', 
+    image: 'https://images.unsplash.com/photo-1530103862676-de3c9a59af38?q=80&w=600&auto=format=fit=crop', 
+    keywords: ['festa', 'decoração', 'buffet'],
+    badge: 'Bombando',
+    badgeColor: 'bg-pink-500',
+    icon: Sparkles
+  },
+  { 
+    id: 'fashion', 
+    title: 'Looks da Semana', 
+    subtitle: 'Moda local', 
+    image: 'https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?q=80&w=600&auto=format=fit=crop', 
+    keywords: ['roupa', 'moda', 'boutique'],
+    badge: 'Tendência',
+    badgeColor: 'bg-emerald-500',
+    icon: Heart
+  },
 ];
 
 const CASHBACK_HIGHLIGHTS = [
@@ -127,9 +189,6 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
   const [hasSearched, setHasSearched] = useState(false);
   const searchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const bannerScrollRef = useRef<HTMLDivElement>(null);
-  const [activeBannerIndex, setActiveBannerIndex] = useState(0);
-
   const [isQuoteModalOpen, setIsQuoteModalOpen] = useState(false);
   const [selectedQuoteNiche, setSelectedQuoteNiche] = useState('');
 
@@ -173,72 +232,6 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
     return () => { if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current); };
   }, [activeSearchTerm]);
 
-  const MINI_BANNERS = [
-    { 
-      id: 'discovery-findings',
-      title: "Descubra achados da Freguesia.",
-      subtitle: "Promoções, serviços e novidades.",
-      icon: <Search className="w-8 h-8 text-white" />,
-      action: () => onNavigate('explore'),
-      cta: "Descobrir",
-      bgClass: "bg-[#1D4ED8]" // Azul Royal Sólido
-    },
-    { 
-      id: 'community-connect', 
-      title: "Conectando empreendedores.", 
-      subtitle: "Uma rede que fortalece o bairro.", 
-      icon: <Users className="w-8 h-8 text-white" />, 
-      action: () => onNavigate('freguesia_connect_public'), 
-      cta: "Saiba mais",
-      bgClass: "bg-gradient-to-r from-blue-600 to-purple-600" // Gradiente Azul -> Roxo
-    },
-    { 
-      id: 'merchant-claim', 
-      title: "Tem um negócio aqui?", 
-      subtitle: "Cadastre sua loja na Localizei.", 
-      icon: <StoreIcon className="w-8 h-8 text-white" />, 
-      action: () => onNavigate('business_registration'), 
-      cta: "Cadastrar",
-      bgClass: "bg-[#059669]" // Verde Esmeralda Sólido
-    },
-    { 
-      id: 'freguesia-hub', 
-      title: "Tudo o que você precisa.", 
-      subtitle: "Comércios, serviços e vantagens.", 
-      icon: <MapPin className="w-8 h-8 text-white" />, 
-      action: () => onNavigate('explore'), 
-      cta: "Conhecer",
-      bgClass: "bg-gradient-to-r from-orange-500 to-red-600" // Gradiente Laranja -> Vermelho
-    },
-    { 
-      id: 'cashback-rewards', 
-      title: "Ganhe cashback.", 
-      subtitle: "Receba parte do valor de volta.", 
-      icon: <Wallet className="w-8 h-8 text-white" />, 
-      action: () => onNavigate('cashback_info'), 
-      cta: "Começar",
-      bgClass: "bg-[#DB2777]" // Rosa Magenta Sólido
-    },
-    { 
-      id: 'services', 
-      title: "Peça um Orçamento Grátis", 
-      subtitle: "Receba até 5 propostas.", 
-      icon: <Wrench className="w-8 h-8 text-white" />, 
-      action: () => onNavigate('services'), 
-      cta: "Orçamento",
-      bgClass: "bg-[#0891B2]" // Azul Ciano Sólido
-    }
-  ];
-
-  const handleBannerScroll = () => {
-    if (bannerScrollRef.current) {
-        const { scrollLeft, clientWidth } = bannerScrollRef.current;
-        // Simple calculation to find the index of the centered element
-        const newIndex = Math.round(scrollLeft / clientWidth);
-        setActiveBannerIndex(newIndex);
-    }
-  };
-
   const handleSpinWheelClick = () => {
     if (user) {
       setIsSpinWheelOpen(true);
@@ -261,6 +254,23 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
         }
         .spin-wheel-animate {
           animation: wheel-spin-once 5s ease-out forwards;
+        }
+        @keyframes blob-float {
+          0%, 100% { transform: translate(0, 0) scale(1); }
+          50% { transform: translate(15px, -15px) scale(1.05); }
+        }
+        @keyframes blob-float-reverse {
+          0%, 100% { transform: translate(0, 0) scale(1); }
+          50% { transform: translate(-10px, 10px) scale(1.1); }
+        }
+        .animate-blob {
+          animation: blob-float 8s infinite ease-in-out;
+        }
+        .animate-blob-delay {
+          animation: blob-float-reverse 10s infinite ease-in-out;
+        }
+        .animate-float-badge {
+          animation: blob-float 6s infinite ease-in-out;
         }
       `}</style>
       
@@ -300,120 +310,202 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
       ) : (
         <div className="flex flex-col gap-6 w-full mt-2">
             
+            {/* --- NEW PREMIUM HERO SECTION --- */}
+            <div className="px-5 w-full">
+               <div className="w-full bg-gradient-to-br from-[#2D6DF6] via-[#2563EB] to-[#0F359E] rounded-[32px] p-6 sm:p-8 text-white relative overflow-hidden shadow-xl shadow-blue-600/20 group transform transition-all hover:scale-[1.01] border border-white/10">
+                  
+                  {/* Dynamic Background Elements (Parallax-like) */}
+                  <div className="absolute top-0 right-0 w-[300px] h-[300px] bg-white/10 rounded-full blur-[80px] -mr-20 -mt-20 pointer-events-none mix-blend-overlay animate-blob"></div>
+                  <div className="absolute bottom-0 left-0 w-[200px] h-[200px] bg-indigo-500/30 rounded-full blur-[60px] -ml-10 -mb-10 pointer-events-none mix-blend-screen animate-blob-delay"></div>
+                  
+                  {/* Floating Cash Value Badge (Visual Promise) */}
+                  <div className="absolute top-5 right-5 z-20 animate-float-badge cursor-default pointer-events-none sm:pointer-events-auto">
+                    <div className="bg-white/20 backdrop-blur-lg border border-white/40 rounded-2xl p-2 pr-3 flex items-center gap-2 shadow-lg transform rotate-6 hover:rotate-0 transition-transform duration-500 group-hover:-translate-y-1">
+                        <div className="bg-green-400 rounded-full w-8 h-8 flex items-center justify-center shadow-inner ring-2 ring-white/30">
+                            <span className="font-bold text-green-900 text-xs">$</span>
+                        </div>
+                        <div className="flex flex-col">
+                            <span className="text-[8px] uppercase font-bold text-green-100 leading-none mb-0.5">Ganhe de volta</span>
+                            <span className="text-sm font-extrabold text-white leading-none tracking-tight">+ R$ 12,40</span>
+                        </div>
+                    </div>
+                  </div>
+
+                  <div className="relative z-10 flex flex-col items-start pt-2">
+                    {/* Top Badge */}
+                    <div className="inline-flex items-center gap-1.5 py-1.5 px-3 rounded-full bg-white/10 border border-white/20 backdrop-blur-md mb-5 shadow-sm">
+                      <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span>
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-white/90">
+                        O Super-App do Bairro
+                      </span>
+                    </div>
+
+                    {/* Headline with Soft Glow */}
+                    <h1 className="text-[32px] leading-[1.1] font-display font-bold mb-3 drop-shadow-md tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white via-blue-50 to-white animate-in fade-in slide-in-from-left-2 duration-700">
+                      Viva o melhor<br/>da Freguesia.
+                    </h1>
+
+                    {/* Subtitle */}
+                    <p className="text-blue-50 text-sm font-medium leading-relaxed mb-6 max-w-[85%] opacity-90">
+                      Economize, descubra novos lugares e ganhe cashback em cada compra.
+                    </p>
+
+                    {/* Micro-signals (Value Props) */}
+                    <div className="flex items-center gap-4 mb-8 w-full pr-10">
+                        <div className="flex items-center gap-2 bg-white/5 border border-white/10 px-3 py-2 rounded-xl backdrop-blur-sm flex-1 justify-center hover:bg-white/10 transition-colors">
+                            <Wallet className="w-4 h-4 text-green-300 drop-shadow-sm" />
+                            <span className="text-xs font-bold text-white">Cashback</span>
+                        </div>
+                        <div className="flex items-center gap-2 bg-white/5 border border-white/10 px-3 py-2 rounded-xl backdrop-blur-sm flex-1 justify-center hover:bg-white/10 transition-colors">
+                            <Sparkles className="w-4 h-4 text-yellow-300 drop-shadow-sm" />
+                            <span className="text-xs font-bold text-white">Descobertas</span>
+                        </div>
+                    </div>
+
+                    {/* Strong CTA with Smooth Transition */}
+                    <button 
+                      onClick={() => onNavigate('explore')}
+                      className="w-full bg-white text-[#2D6DF6] text-sm font-extrabold py-4 px-6 rounded-2xl shadow-xl shadow-blue-900/10 active:scale-[0.98] transition-all duration-300 flex items-center justify-center gap-2 group/btn hover:bg-blue-50 hover:scale-[1.01] relative overflow-hidden"
+                    >
+                      <span className="relative z-10">Começar a explorar</span>
+                      <ArrowRight className="w-4 h-4 relative z-10 group-hover/btn:translate-x-1 transition-transform" strokeWidth={3} />
+                    </button>
+
+                    {/* Social Proof / Curiosity Element */}
+                    <div className="mt-4 flex items-center gap-2 opacity-80 pl-1">
+                        <div className="flex -space-x-1.5">
+                            <div className="w-4 h-4 rounded-full bg-white/30 border border-white/20"></div>
+                            <div className="w-4 h-4 rounded-full bg-white/40 border border-white/20"></div>
+                            <div className="w-4 h-4 rounded-full bg-white/50 border border-white/20"></div>
+                        </div>
+                        <span className="text-[10px] font-medium text-white/90">
+                            + de 1.200 ofertas na Freguesia hoje
+                        </span>
+                    </div>
+                  </div>
+               </div>
+            </div>
+
+            {/* --- SPIN WHEEL CTA (Preserved below Hero) --- */}
             <div className="px-5 w-full">
               <div
                 onClick={handleSpinWheelClick}
-                className="w-full rounded-2xl bg-gradient-to-r from-blue-100 via-indigo-50 to-purple-100 dark:from-gray-800 dark:to-gray-700 border border-blue-200/60 dark:border-gray-600 shadow-md shadow-blue-100/50 flex items-center px-2 py-3 relative overflow-hidden group cursor-pointer active:scale-[0.98] transition-all duration-300"
+                className="w-full rounded-2xl bg-gradient-to-r from-indigo-50 via-purple-50 to-white dark:from-gray-800 dark:to-gray-700 border border-indigo-100 dark:border-gray-600 shadow-sm flex items-center px-2 py-3 relative overflow-hidden group cursor-pointer active:scale-[0.98] transition-all duration-300"
               >
-                <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-blue-400/20 to-transparent rounded-full blur-xl -mr-6 -mt-6 pointer-events-none"></div>
-                <div className="absolute bottom-0 left-1/3 w-16 h-16 bg-indigo-400/20 rounded-full blur-lg pointer-events-none"></div>
-                
                 <div className="relative z-10 flex-shrink-0 mr-2">
-                  <div className={`w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-lg ring-2 ring-white/50 relative ${hasSpun ? 'spin-wheel-animate' : ''}`}>
+                  <div className={`w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-lg ring-2 ring-indigo-100 dark:ring-gray-600 relative ${hasSpun ? 'spin-wheel-animate' : ''}`}>
                     <svg viewBox="0 0 32 32" className="w-full h-full drop-shadow-sm" xmlns="http://www.w3.org/2000/svg">
-                        <circle cx="16" cy="16" r="15" fill="white" stroke="#FFE0B2" strokeWidth="1" />
-                        <path d="M16 16 L16 1 A15 15 0 0 1 26.6 5.4 Z" fill="#FF5252" /> 
-                        <path d="M16 16 L26.6 5.4 A15 15 0 0 1 31 16 Z" fill="#FFD740" />
-                        <path d="M16 16 L31 16 A15 15 0 0 1 26.6 26.6 Z" fill="#448AFF" />
-                        <path d="M16 16 L26.6 26.6 A15 15 0 0 1 16 31 Z" fill="#69F0AE" />
-                        <path d="M16 16 L16 31 A15 15 0 0 1 5.4 26.6 Z" fill="#FF4081" />
-                        <path d="M16 16 L5.4 26.6 A15 15 0 0 1 1 16 Z" fill="#E040FB" />
-                        <path d="M16 16 L1 16 A15 15 0 0 1 5.4 5.4 Z" fill="#536DFE" />
-                        <path d="M16 16 L5.4 5.4 A15 15 0 0 1 16 1 Z" fill="#FFAB40" />
-                        <circle cx="16" cy="16" r="3" fill="white" stroke="#ECEFF1" strokeWidth="1" />
-                        <circle cx="16" cy="16" r="1.5" fill="#37474F" />
-                        <path d="M16 0 L18 4 H14 L16 0Z" fill="#D32F2F" stroke="white" strokeWidth="0.5" />
+                        <circle cx="16" cy="16" r="15" fill="white" stroke="#E0E7FF" strokeWidth="1" />
+                        <path d="M16 16 L16 1 A15 15 0 0 1 26.6 5.4 Z" fill="#F43F5E" /> 
+                        <path d="M16 16 L26.6 5.4 A15 15 0 0 1 31 16 Z" fill="#FBBF24" />
+                        <path d="M16 16 L31 16 A15 15 0 0 1 26.6 26.6 Z" fill="#3B82F6" />
+                        <path d="M16 16 L26.6 26.6 A15 15 0 0 1 16 31 Z" fill="#10B981" />
+                        <path d="M16 16 L16 31 A15 15 0 0 1 5.4 26.6 Z" fill="#EC4899" />
+                        <path d="M16 16 L5.4 26.6 A15 15 0 0 1 1 16 Z" fill="#A855F7" />
+                        <path d="M16 16 L1 16 A15 15 0 0 1 5.4 5.4 Z" fill="#6366F1" />
+                        <path d="M16 16 L5.4 5.4 A15 15 0 0 1 16 1 Z" fill="#F97316" />
+                        <circle cx="16" cy="16" r="3" fill="white" stroke="#EEF2FF" strokeWidth="1" />
                     </svg>
                   </div>
                 </div>
                 
                 <div className="relative z-10 flex-1 flex flex-col justify-center min-w-0 mr-1">
-                    <span className="text-[10px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider mb-0.5 whitespace-nowrap">
-                      Roleta Localizei
+                    <span className="text-[10px] font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider mb-0.5 whitespace-nowrap">
+                      Sorteio Diário
                     </span>
-                    <span className="text-[11px] xs:text-[12px] sm:text-[13px] font-bold text-gray-900 dark:text-white leading-none whitespace-nowrap overflow-visible">
-                      Ganhe prêmios todos os dias
+                    <span className="text-[12px] font-bold text-gray-900 dark:text-white leading-none">
+                      Gire e ganhe prêmios
                     </span>
                 </div>
 
                 <div className="relative z-10 flex-shrink-0 ml-1">
-                    <button className="bg-gradient-to-r from-[#1E5BFF] to-[#1B54D9] text-white text-[10px] font-bold px-4 py-2 rounded-full shadow-md shadow-blue-500/20 active:scale-95 transition-transform uppercase tracking-wide whitespace-nowrap">
-                        Gire Agora
+                    <button className="bg-indigo-600 text-white text-[10px] font-bold px-4 py-2 rounded-full shadow-md shadow-indigo-200 dark:shadow-none active:scale-95 transition-transform uppercase tracking-wide whitespace-nowrap">
+                        Jogar
                     </button>
                 </div>
               </div>
             </div>
 
-            <div className="w-full relative group mt-0">
-                 
-                 <div 
-                    ref={bannerScrollRef}
-                    onScroll={handleBannerScroll}
-                    className="flex overflow-x-auto snap-x snap-mandatory no-scrollbar w-full"
-                 >
-                    {MINI_BANNERS.map((banner) => {
-                        // Increased height to 35vh (approx 320-350px on modern phones)
-                        const heightClass = 'h-[35vh] min-h-[260px] max-h-[400px]';
-
-                        return (
-                            <div key={banner.id} onClick={banner.action} className="min-w-full snap-center cursor-pointer relative px-5">
-                                <div className={`w-full ${heightClass} relative overflow-hidden rounded-[24px] ${banner.bgClass} shadow-sm`}>
-                                    {/* Content Overlay */}
-                                    <div className="absolute bottom-0 left-0 right-0 p-6 pb-10 z-10 flex flex-col justify-end h-full">
-                                        <h3 className="text-white font-bold text-3xl leading-tight mb-2 drop-shadow-md w-[90%]">{banner.title}</h3>
-                                        <p className="text-white/90 text-sm font-medium line-clamp-2 w-[90%] opacity-90">{banner.subtitle}</p>
-                                    </div>
-                                </div>
-                            </div>
-                        );
-                    })}
-                 </div>
-
-                 {/* Carousel Indicators - Overlay inside the image area at bottom */}
-                 <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-1.5 z-20 pointer-events-none">
-                    {MINI_BANNERS.map((_, idx) => (
-                        <div 
-                            key={idx} 
-                            className={`h-1.5 rounded-full transition-all duration-300 shadow-sm ${
-                                idx === activeBannerIndex ? 'w-5 bg-white' : 'w-1.5 bg-white/50'
-                            }`}
-                        />
-                    ))}
-                 </div>
-            </div>
-
-            <div className="pl-5 space-y-2.5 w-full">
+            {/* --- ACHIEVEMENTS / DISCOVERIES --- */}
+            <div className="pl-5 space-y-3 w-full">
                  <div className="flex items-center justify-between pr-5">
-                    <h3 className="text-base font-semibold text-gray-900 dark:text-white">Achadinhos da Freguesia</h3>
+                    <div className="flex items-center gap-2">
+                        <Sparkles className="w-4 h-4 text-purple-500 fill-purple-100" />
+                        <h3 className="text-base font-extrabold text-gray-900 dark:text-white">Achadinhos & Curiosidades</h3>
+                    </div>
                     <button 
                         onClick={() => onNavigate('marketplace')}
-                        className="text-sm font-medium text-primary-500 hover:text-primary-600 transition-colors"
+                        className="text-xs font-bold text-purple-600 hover:text-purple-700 bg-purple-50 dark:bg-purple-900/20 px-2 py-1 rounded-lg transition-colors"
                     >
-                        Ver mais
+                        Ver todos
                     </button>
                  </div>
-                 <div className="flex gap-3 overflow-x-auto pb-3 pr-5 no-scrollbar">
-                    {EDITORIAL_THEMES.map((theme) => (
-                       <div key={theme.id} className="min-w-[108px] w-[108px] h-[192px] rounded-2xl overflow-hidden relative cursor-pointer group active:scale-[0.98] transition-transform shadow-md" onClick={() => onSelectCollection(theme)}>
+                 
+                 <div className="flex gap-4 overflow-x-auto pb-4 pr-5 no-scrollbar snap-x snap-mandatory">
+                    {EDITORIAL_THEMES.map((theme) => {
+                       const Icon = theme.icon || Sparkles;
+                       return (
+                       <div key={theme.id} className="min-w-[140px] w-[140px] h-[200px] rounded-2xl overflow-hidden relative cursor-pointer group active:scale-[0.98] transition-transform shadow-lg snap-center" onClick={() => onSelectCollection(theme)}>
                           <img src={theme.image} alt={theme.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex flex-col justify-center items-center p-3 text-center">
-                             <h4 className="font-bold text-white text-base font-display leading-tight">{theme.title}</h4>
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent"></div>
+                          
+                          {/* Social Proof Badge */}
+                          {theme.badge && (
+                              <div className={`absolute top-2 left-2 ${theme.badgeColor || 'bg-black/50'} backdrop-blur-md px-2 py-1 rounded-lg flex items-center gap-1 shadow-sm`}>
+                                  <Icon className="w-3 h-3 text-white" />
+                                  <span className="text-[9px] font-bold text-white uppercase tracking-wide">{theme.badge}</span>
+                              </div>
+                          )}
+
+                          <div className="absolute bottom-0 left-0 p-3 w-full">
+                             <h4 className="font-display font-bold text-white text-lg leading-tight drop-shadow-md mb-1">{theme.title}</h4>
+                             <p className="text-[10px] text-gray-300 font-medium line-clamp-1">{theme.subtitle}</p>
                           </div>
                        </div>
-                    ))}
+                    )})}
                  </div>
             </div>
 
-            <div className="pl-5 space-y-2.5 w-full">
+            {/* --- CASHBACK SECTION (ENHANCED GAMIFICATION) --- */}
+            <div className="pl-5 space-y-3 w-full">
+                 {/* Header */}
                  <div className="flex items-center justify-between pr-5">
-                    <h3 className="text-base font-semibold text-gray-900 dark:text-white">Lojas com Cashback</h3>
+                    <h3 className="text-base font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                        <Coins className="w-4 h-4 text-green-500 fill-green-500" />
+                        Ganhe de Volta
+                    </h3>
                     <button 
                         onClick={() => onNavigate('explore')}
-                        className="text-sm font-medium text-primary-500 hover:text-primary-600 transition-colors"
+                        className="text-xs font-bold text-green-600 hover:text-green-700 bg-green-50 dark:bg-green-900/20 px-3 py-1.5 rounded-full transition-colors active:scale-95"
                     >
-                        Ver todas
+                        Turbinar Carteira
                     </button>
                  </div>
+
+                 {/* GAMIFICATION GOAL TRACKER (REWARD LOOP) */}
+                 <div className="pr-5">
+                    <div className="bg-gradient-to-r from-green-500 to-emerald-700 rounded-xl p-3 text-white shadow-lg shadow-green-500/20 relative overflow-hidden group cursor-pointer active:scale-[0.99] transition-transform" onClick={() => onNavigate('user_cashback_flow')}>
+                        <div className="relative z-10 flex justify-between items-center mb-1.5">
+                            <span className="text-[10px] font-black uppercase tracking-wide flex items-center gap-1">
+                                <Zap className="w-3 h-3 text-yellow-300 fill-yellow-300" />
+                                Meta de Cashback
+                            </span>
+                            <span className="text-[10px] font-bold bg-white/20 px-1.5 py-0.5 rounded text-white">
+                                R$ 12,40 <span className="opacity-60">/ R$ 50,00</span>
+                            </span>
+                        </div>
+                        <div className="w-full bg-black/20 rounded-full h-1.5 mb-1.5 overflow-hidden">
+                            <div className="bg-gradient-to-r from-yellow-300 to-yellow-500 h-full rounded-full transition-all duration-1000 w-[25%] shadow-[0_0_10px_rgba(250,204,21,0.6)] animate-pulse"></div>
+                        </div>
+                        <p className="text-[10px] font-medium text-green-50">
+                            Faltam apenas <span className="font-bold text-white">R$ 37,60</span> para desbloquear o bônus extra! 🚀
+                        </p>
+                        
+                        {/* Decorative background blur */}
+                        <div className="absolute right-0 top-0 w-20 h-20 bg-white/10 rounded-full blur-xl -mr-6 -mt-6 pointer-events-none group-hover:bg-white/20 transition-colors"></div>
+                    </div>
+                 </div>
+
                  <div className="flex gap-3 overflow-x-auto pb-3 pr-5 no-scrollbar">
                     {CASHBACK_HIGHLIGHTS.map((store) => (
                        <div key={store.id} onClick={() => {
@@ -430,17 +522,17 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
                                cashback: store.cashback
                            };
                            if (onStoreClick) onStoreClick(mockStore);
-                       }} className="min-w-[140px] w-[140px] bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden flex flex-col group cursor-pointer active:scale-95 transition-transform">
+                       }} className="min-w-[140px] w-[140px] bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden flex flex-col group cursor-pointer active:scale-95 transition-transform hover:shadow-md hover:border-green-100 dark:hover:border-green-900/30">
                           <div className="h-24 w-full relative bg-gray-50 dark:bg-gray-700 flex items-center justify-center p-2">
                               <img src={store.logoUrl || getStoreLogo(store.name.length)} alt={store.name} className="w-full h-full object-contain rounded-lg" />
-                              <div className="absolute top-2 left-2 bg-green-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-md shadow-sm flex items-center gap-0.5">
-                                <Coins className="w-3 h-3" />
+                              <div className="absolute top-2 left-2 bg-green-500 text-white text-[10px] font-extrabold px-1.5 py-0.5 rounded-md shadow-lg shadow-green-500/30 flex items-center gap-0.5 animate-pulse">
+                                <Coins className="w-3 h-3 fill-white" />
                                 {store.cashback}%
                               </div>
                           </div>
                           <div className="p-2.5 flex flex-col flex-1 justify-between">
                              <div>
-                                <h4 className="font-bold text-gray-800 dark:text-white text-xs line-clamp-1">{store.name}</h4>
+                                <h4 className="font-bold text-gray-800 dark:text-white text-xs line-clamp-1 group-hover:text-green-600 transition-colors">{store.name}</h4>
                                 <p className="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5">{store.category}</p>
                              </div>
                           </div>
