@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Star, Loader2, AlertCircle, BadgeCheck, Heart, Coins, TrendingUp, Zap, Award } from 'lucide-react';
+import { Star, Loader2, AlertCircle, BadgeCheck, Heart, Coins, TrendingUp, Zap, Award, Eye, Rocket } from 'lucide-react';
 import { Store, AdType } from '../types';
 import { useFavorites } from '../hooks/useFavorites';
 import { User } from '@supabase/supabase-js';
@@ -45,19 +45,28 @@ const generateFakeStores = (): Store[] => {
 
 const sortStores = (stores: Store[]) => {
   return stores.sort((a, b) => {
-    const aIsSponsored = a.isSponsored || a.adType === AdType.PREMIUM;
-    const bIsSponsored = b.isSponsored || b.adType === AdType.PREMIUM;
+    // 1. Sponsored / Premium (Paid Priority)
+    const aSponsored = a.isSponsored || a.adType === AdType.PREMIUM;
+    const bSponsored = b.isSponsored || b.adType === AdType.PREMIUM;
 
-    if (aIsSponsored && !bIsSponsored) return -1;
-    if (!aIsSponsored && bIsSponsored) return 1;
+    if (aSponsored && !bSponsored) return -1;
+    if (!aSponsored && bSponsored) return 1;
 
+    // 2. Smart Recommendation: High Rating + Cashback (Simulates "Best Value")
+    const aSmart = (a.rating >= 4.5 && (a.cashback || 0) > 0);
+    const bSmart = (b.rating >= 4.5 && (b.cashback || 0) > 0);
+    if (aSmart && !bSmart) return -1;
+    if (!aSmart && bSmart) return 1;
+
+    // 3. Cashback Availability
     const aHasCashback = !!a.cashback;
     const bHasCashback = !!b.cashback;
 
     if (aHasCashback && !bHasCashback) return -1;
     if (!aHasCashback && bHasCashback) return 1;
 
-    return 0;
+    // 4. Rating as Tie-breaker
+    return (b.rating || 0) - (a.rating || 0);
   });
 };
 
@@ -67,7 +76,9 @@ const ITEMS_PER_PAGE = 12;
 
 const getStoreExtras = (index: number, store: Store) => {
   let badge = null;
+  let activityBadge = null; // New live activity badge
   
+  // Static Badges logic
   if (store.cashback && store.cashback > 8) {
      badge = { text: '💸 Cashback Alto', color: 'bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300 border-green-200 dark:border-green-800' };
   } else if (store.rating >= 4.9) {
@@ -78,6 +89,16 @@ const getStoreExtras = (index: number, store: Store) => {
      badge = { text: '💎 Destaque Premium', color: 'bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800' };
   } else if (index % 5 === 0) {
      badge = { text: '⚡ Responde rápido', color: 'bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800' };
+  }
+
+  // Live Activity Badges (Random logic for demo feeling)
+  // Only show on ~20% of items to not clutter
+  if (Math.random() > 0.8) {
+      if (Math.random() > 0.5) {
+          activityBadge = { text: '👀 3 pessoas vendo', icon: Eye, color: 'text-gray-500 bg-gray-100 dark:bg-gray-700' };
+      } else {
+          activityBadge = { text: '🚀 Em alta agora', icon: Rocket, color: 'text-green-600 bg-green-50 dark:bg-green-900/20' };
+      }
   }
 
   const copies = [
@@ -92,7 +113,7 @@ const getStoreExtras = (index: number, store: Store) => {
   // Deterministic copy based on index
   const copy = copies[index % copies.length];
 
-  return { badge, copy };
+  return { badge, copy, activityBadge };
 };
 
 export const LojasEServicosList: React.FC<LojasEServicosListProps> = ({ onStoreClick, onViewAll, activeFilter = 'all', user = null }) => {
@@ -198,7 +219,7 @@ export const LojasEServicosList: React.FC<LojasEServicosListProps> = ({ onStoreC
         {visibleStores.map((store, index) => {
             const isLastElement = index === visibleStores.length - 1;
             const isFavorited = isFavorite(store.id);
-            const { badge, copy } = getStoreExtras(index, store);
+            const { badge, copy, activityBadge } = getStoreExtras(index, store);
             
             return (
                 <div
@@ -208,10 +229,17 @@ export const LojasEServicosList: React.FC<LojasEServicosListProps> = ({ onStoreC
                     className={`bg-white dark:bg-gray-800 rounded-2xl p-3 flex gap-3 cursor-pointer relative group transition-all duration-300 border ${badge?.text === '💎 Destaque Premium' ? 'border-purple-100 dark:border-purple-900/50 shadow-md' : 'border-gray-100 dark:border-gray-700 shadow-sm'} hover:shadow-lg hover:-translate-y-0.5 active:scale-[0.99]`}
                 >
                     {/* Badge Positioned Top Right */}
-                    <div className="absolute top-3 right-3 z-10 pointer-events-none">
+                    <div className="absolute top-3 right-3 z-10 pointer-events-none flex flex-col items-end gap-1">
                         {badge && (
                             <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full border ${badge.color}`}>
                                 {badge.text}
+                            </span>
+                        )}
+                        {/* Live Activity Badge */}
+                        {activityBadge && (
+                            <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1 ${activityBadge.color}`}>
+                                <activityBadge.icon className="w-2.5 h-2.5" />
+                                {activityBadge.text}
                             </span>
                         )}
                     </div>
