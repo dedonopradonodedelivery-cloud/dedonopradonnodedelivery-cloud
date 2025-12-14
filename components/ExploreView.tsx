@@ -27,7 +27,8 @@ import {
   ArrowRight,
   RefreshCw,
   Gift,
-  Bell
+  Bell,
+  Play
 } from "lucide-react";
 import { useUserLocation } from "../hooks/useUserLocation";
 import { useMediaQuery } from "../hooks/useMediaQuery";
@@ -56,7 +57,9 @@ const EXPLORE_STORIES = [
     logo: getStoreLogo(1), 
     videoUrl: 'https://videos.pexels.com/video-files/852395/852395-sd_540_960_30fps.mp4', 
     isLive: true,
-    viewers: 124
+    viewers: 124,
+    badgeColor: 'bg-red-600',
+    badgeText: 'AO VIVO'
   },
   { 
     id: 's1', 
@@ -66,7 +69,10 @@ const EXPLORE_STORIES = [
     logo: getStoreLogo(8), 
     videoUrl: 'https://videos.pexels.com/video-files/2942857/2942857-sd_540_960_24fps.mp4', 
     isLive: false,
-    viewers: 12
+    viewers: 42,
+    badgeColor: 'bg-green-600',
+    badgeText: 'Gera Cashback',
+    icon: Zap
   },
   { 
     id: 's2', 
@@ -75,7 +81,9 @@ const EXPLORE_STORIES = [
     status: 'Dica',
     logo: getStoreLogo(7), 
     videoUrl: 'https://videos.pexels.com/video-files/4434246/4434246-sd_540_960_25fps.mp4', 
-    isLive: false 
+    isLive: false,
+    badgeColor: 'bg-black/60 backdrop-blur-md',
+    badgeText: 'Novo hoje'
   },
   { 
     id: 's4', 
@@ -84,7 +92,10 @@ const EXPLORE_STORIES = [
     status: 'Novidade',
     logo: getStoreLogo(11), 
     videoUrl: 'https://videos.pexels.com/video-files/6333333/6333333-sd_540_960_30fps.mp4', 
-    isLive: false 
+    isLive: false,
+    viewers: 15,
+    badgeColor: 'bg-blue-600',
+    badgeText: 'Trending'
   },
   { 
     id: 's5', 
@@ -93,7 +104,9 @@ const EXPLORE_STORIES = [
     status: 'Bastidores',
     logo: getStoreLogo(5), 
     videoUrl: 'https://videos.pexels.com/video-files/4625753/4625753-sd_540_960_25fps.mp4', 
-    isLive: false 
+    isLive: false,
+    badgeColor: 'bg-orange-500',
+    badgeText: 'Oferta Relâmpago'
   },
 ];
 
@@ -572,29 +585,82 @@ export const ExploreView: React.FC<ExploreViewProps> = ({
 
       <div className="px-4 pb-4 space-y-6">
         
+        {/* 1) SEÇÃO AGORA NA FREGUESIA (Vertical Cards 9:16) */}
         <section className="mt-2">
-          <div className="flex items-center justify-between mb-2">
-            <h2 className="text-sm font-semibold text-gray-900 dark:text-white">
+          <div className="flex items-center justify-between mb-3 px-1">
+            <h2 className="text-sm font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
               Agora na Freguesia
             </h2>
           </div>
-          <div className="flex gap-4 overflow-x-auto pb-2 no-scrollbar -mx-4 px-4">
-            {EXPLORE_STORIES.map((story, index) => (
-              <button
-                key={story.id}
-                onClick={() => setActiveStoryIndex(index)}
-                className="flex flex-col items-center gap-1.5 flex-shrink-0 group"
-              >
-                <div className={`p-[2px] rounded-full ${story.isLive ? 'bg-gradient-to-tr from-orange-500 via-pink-500 to-purple-600 animate-pulse' : 'bg-gradient-to-tr from-orange-400 to-yellow-400'}`}>
-                  <div className="w-[60px] h-[60px] rounded-full border-2 border-white dark:border-gray-900 overflow-hidden bg-gray-200 p-[1px]">
-                    <img src={story.logo} alt={story.merchantName} className="w-full h-full object-cover rounded-full group-hover:scale-105 transition-transform" />
+          <div className="flex gap-3 overflow-x-auto pb-4 no-scrollbar -mx-4 px-4 snap-x">
+            {EXPLORE_STORIES.map((story, index) => {
+              const BadgeIcon = story.icon;
+              return (
+                <button
+                  key={story.id}
+                  onClick={() => setActiveStoryIndex(index)}
+                  className="relative flex-shrink-0 w-[130px] aspect-[9/16] rounded-2xl overflow-hidden group active:scale-95 transition-all duration-300 shadow-sm border border-gray-100 dark:border-gray-800 snap-center hover:shadow-lg"
+                >
+                  {/* Background - using video poster style */}
+                  <div className="absolute inset-0 bg-gray-900">
+                     <video 
+                       src={story.videoUrl} 
+                       className="w-full h-full object-cover opacity-95 group-hover:scale-105 transition-transform duration-700" 
+                       muted 
+                       loop 
+                       playsInline 
+                     /> 
+                     {/* Gradient Overlay */}
+                     <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/90"></div>
                   </div>
-                </div>
-                <span className="text-[10px] text-gray-600 dark:text-gray-300 font-medium truncate w-[64px] text-center">
-                  {story.merchantName}
-                </span>
-              </button>
-            ))}
+
+                  {/* Top Badges */}
+                  <div className="absolute top-2 left-2 flex flex-col items-start gap-1 z-10">
+                      {story.isLive ? (
+                          <span className="bg-red-600 text-white text-[8px] font-extrabold px-1.5 py-0.5 rounded animate-pulse shadow-sm tracking-wide">
+                              AO VIVO
+                          </span>
+                      ) : (
+                          <span className={`${story.badgeColor || 'bg-black/60 backdrop-blur-md'} text-white text-[8px] font-bold px-2 py-0.5 rounded flex items-center gap-1 shadow-sm border border-white/10`}>
+                              {BadgeIcon && <BadgeIcon className="w-2 h-2 fill-white" />}
+                              {story.badgeText}
+                          </span>
+                      )}
+                      
+                      {story.viewers && (
+                          <span className="text-[8px] text-white/90 font-medium drop-shadow-md bg-black/30 px-1.5 rounded backdrop-blur-sm">
+                              {story.viewers} vendo agora
+                          </span>
+                      )}
+                  </div>
+
+                  {/* Bottom Content */}
+                  <div className="absolute bottom-0 left-0 right-0 p-3 text-left z-10">
+                      <div className="flex items-center gap-1.5 mb-1">
+                          <div className="w-4 h-4 rounded-full border border-white/60 overflow-hidden flex-shrink-0 bg-white">
+                              <img src={story.logo} className="w-full h-full object-cover" />
+                          </div>
+                          <span className="text-[10px] font-bold text-white truncate leading-none shadow-black drop-shadow-md">
+                              {story.merchantName}
+                          </span>
+                      </div>
+                      
+                      <p className="text-[9px] text-gray-200 mb-2 truncate pl-0.5 opacity-90">
+                          {story.category}
+                      </p>
+
+                      <div className="bg-white/20 backdrop-blur-md border border-white/30 rounded-lg py-1 px-1.5 flex items-center justify-center gap-1 group-active:bg-white/30 transition-colors w-full">
+                          <span className="text-[8px] font-bold text-white uppercase tracking-wide">Assistir agora</span>
+                          <ChevronRight className="w-2.5 h-2.5 text-white" />
+                      </div>
+                  </div>
+                  
+                  {/* Subtle Border Glow on Hover */}
+                  <div className="absolute inset-0 rounded-2xl border-2 border-transparent group-hover:border-white/20 pointer-events-none transition-colors"></div>
+                </button>
+              );
+            })}
           </div>
         </section>
 
