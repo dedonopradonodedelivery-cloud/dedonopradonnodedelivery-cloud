@@ -218,12 +218,6 @@ const App: React.FC = () => {
             setActiveTab('home');
         }
     }
-
-    // 3. Redirecionamento específico para Lojista ao logar
-    if (user && userRole === 'lojista' && activeTab === 'home') {
-        // Opcional: Forçar ida para painel, ou deixar o usuário escolher no menu
-        // setActiveTab('store_area'); 
-    }
   }, [user, userRole, isAuthLoading, isAuthOpen, activeTab]);
 
 
@@ -318,7 +312,7 @@ const App: React.FC = () => {
     setActiveTab('cashback');
   };
 
-  // SPLASH SCREEN: Renderiza apenas se o AuthContext estiver carregando
+  // SPLASH SCREEN: Renderiza apenas se o AuthContext estiver carregando (authResolved = false)
   if (isAuthLoading) {
     return (
       <div className="fixed inset-0 bg-gradient-to-br from-[#2D6DF6] to-[#1B54D9] flex flex-col items-center justify-center text-white z-50">
@@ -348,6 +342,7 @@ const App: React.FC = () => {
     );
   }
 
+  // Se passou do splash, renderiza o App
   if (user && needsProfileSetup) {
     return <QuickRegister user={user as any} onComplete={handleProfileComplete} />;
   }
@@ -379,7 +374,7 @@ const App: React.FC = () => {
     'cashback_landing',
     'cashback_info',
     'profile',
-    'store_area', // Merchant Dashboard
+    'store_area', 
     'store_cashback_module',
     'store_ads_module',
     'store_connect',
@@ -454,7 +449,7 @@ const App: React.FC = () => {
               />
             )}
 
-            {/* ... Rest of the components remain the same, just passing the new Context-derived user ... */}
+            {/* ... Rest of the components ... */}
             
             {activeTab === 'explore' && (
               <ExploreView

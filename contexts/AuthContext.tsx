@@ -22,8 +22,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [userRole, setUserRole] = useState<'cliente' | 'lojista' | null>(null);
-  // O estado loading começa explicitamente como TRUE
-  const [loading, setLoading] = useState(true);
+  
+  // ESTADO DE SEGURANÇA: authResolved
+  // true = O sistema já verificou se há ou não usuário (logado ou deslogado).
+  // false = Ainda não sabemos nada (Splash Screen).
+  const [authResolved, setAuthResolved] = useState(false);
 
   const fetchUserRole = async (userId: string) => {
     try {
@@ -47,35 +50,31 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     let mounted = true;
 
-    // Função de inicialização robusta
+    // 1. Verificação Inicial Rápida (LocalStorage)
     const initAuth = async () => {
       try {
-        // Tenta obter a sessão inicial
-        const { data: { session: initialSession }, error } = await supabase.auth.getSession();
+        const { data } = await supabase.auth.getSession();
         
-        if (error) throw error;
-
         if (mounted) {
-          setSession(initialSession);
-          setUser(initialSession?.user ?? null);
-
-          if (initialSession?.user) {
-            await fetchUserRole(initialSession.user.id);
+          setSession(data.session);
+          setUser(data.session?.user ?? null);
+          
+          if (data.session?.user) {
+            // Busca role em background - NÃO bloqueia o splash
+            fetchUserRole(data.session.user.id);
           }
         }
       } catch (err) {
-        console.error("Erro na verificação de sessão inicial:", err);
+        console.error("Erro no getSession:", err);
       } finally {
-        // GARANTE que o loading seja falso após a verificação inicial, independente do resultado
-        if (mounted) {
-          setLoading(false);
-        }
+        // REGRA DE OURO: Sempre libera o app após a checagem inicial
+        if (mounted) setAuthResolved(true);
       }
     };
 
     initAuth();
 
-    // Listener para mudanças de estado (Login, Logout, Refresh)
+    // 2. Listener para mudanças futuras
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, currentSession) => {
       if (!mounted) return;
 
@@ -84,7 +83,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
       if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'INITIAL_SESSION') {
         if (currentSession?.user) {
-          await fetchUserRole(currentSession.user.id);
+          fetchUserRole(currentSession.user.id);
         }
       } else if (event === 'SIGNED_OUT') {
         setUserRole(null);
@@ -92,8 +91,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setSession(null);
       }
       
-      // Garante que o loading saia caso o onAuthStateChange dispare antes ou depois do init
-      setLoading(false);
+      // Garante liberação caso o listener dispare antes do initAuth
+      setAuthResolved(true);
     });
 
     return () => {
@@ -105,10 +104,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const signOut = async () => {
     try {
       await supabase.auth.signOut();
+      setUser(null);
+      setSession(null);
+      setUserRole(null);
     } catch (error) {
       console.error("Erro ao fazer logout:", error);
     }
   };
+
+  // Se authResolved for true, loading é false (app liberado)
+  const loading = !authResolved;
 
   return (
     <AuthContext.Provider value={{ user, session, userRole, loading, signOut }}>
