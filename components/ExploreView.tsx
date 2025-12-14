@@ -28,7 +28,14 @@ import {
   Coffee,
   RefreshCw,
   Gift,
-  Bell
+  Bell,
+  Eye,
+  ArrowRight,
+  Flame,
+  ThumbsUp,
+  MousePointerClick,
+  TrendingUp,
+  Footprints
 } from "lucide-react";
 import { useUserLocation } from "../hooks/useUserLocation";
 import { useMediaQuery } from "../hooks/useMediaQuery";
@@ -57,7 +64,8 @@ const EXPLORE_STORIES = [
     statusColor: 'bg-red-600',
     logo: getStoreLogo(1), 
     videoUrl: 'https://videos.pexels.com/video-files/852395/852395-sd_540_960_30fps.mp4', 
-    isLive: true 
+    isLive: true,
+    viewers: 124
   },
   { 
     id: 's1', 
@@ -67,7 +75,8 @@ const EXPLORE_STORIES = [
     statusColor: 'bg-indigo-600',
     logo: getStoreLogo(8), 
     videoUrl: 'https://videos.pexels.com/video-files/2942857/2942857-sd_540_960_24fps.mp4', 
-    isLive: false 
+    isLive: false,
+    viewers: 12
   },
   { 
     id: 's2', 
@@ -367,10 +376,20 @@ export const ExploreView: React.FC<ExploreViewProps> = ({
   const [sortOption, setSortOption] = useState<"nearby" | "topRated" | "cashback" | null>(null);
   const [selectedStyle, setSelectedStyle] = useState<string | null>(null);
   
+  // Feed State
+  const [feedLimit, setFeedLimit] = useState(6);
+  
   const [activeStoryIndex, setActiveStoryIndex] = useState<number | null>(null);
   const [storyProgress, setStoryProgress] = useState(0);
   const [isMuted, setIsMuted] = useState(true);
   const videoRef = useRef<HTMLVideoElement>(null);
+
+  // --- Smart Ordering Logic ---
+  const sortedStories = useMemo(() => {
+    // Priority: Ao vivo (1) > Promoção (2) > Novidade (3) > Dica (4) > Bastidores (5)
+    const priority: Record<string, number> = { 'Ao vivo': 1, 'Promoção': 2, 'Novidade': 3, 'Dica': 4, 'Bastidores': 5 };
+    return [...EXPLORE_STORIES].sort((a, b) => (priority[a.status] || 9) - (priority[b.status] || 9));
+  }, []);
 
   const nearbyStores = useMemo(() => {
     if (!stores.length) return [];
@@ -489,7 +508,21 @@ export const ExploreView: React.FC<ExploreViewProps> = ({
     return list;
   }, [stores, sortOption, location, selectedStyle]);
 
-  const activeStory = activeStoryIndex !== null ? EXPLORE_STORIES[activeStoryIndex] : null;
+  // --- Infinite Feed Logic ---
+  const feedStores = useMemo(() => {
+    // Duplicate stores to create a longer feed experience from limited mock data
+    const base = sortedStores.length > 0 ? sortedStores : stores;
+    return [...base, ...base, ...base].slice(0, 30); // Max 30 for safety
+  }, [sortedStores, stores]);
+
+  const displayedFeed = feedStores.slice(0, feedLimit);
+  const hasMoreFeed = feedLimit < feedStores.length;
+
+  const handleLoadMore = () => {
+    setFeedLimit(prev => Math.min(prev + 6, feedStores.length));
+  };
+
+  const activeStory = activeStoryIndex !== null ? sortedStories[activeStoryIndex] : null;
 
   useEffect(() => {
     let interval: any;
@@ -512,7 +545,7 @@ export const ExploreView: React.FC<ExploreViewProps> = ({
   }, [activeStoryIndex]);
 
   const handleNextStory = () => {
-    if (activeStoryIndex !== null && activeStoryIndex < EXPLORE_STORIES.length - 1) {
+    if (activeStoryIndex !== null && activeStoryIndex < sortedStories.length - 1) {
       setActiveStoryIndex(activeStoryIndex + 1);
     } else {
       setActiveStoryIndex(null); 
@@ -527,59 +560,156 @@ export const ExploreView: React.FC<ExploreViewProps> = ({
     }
   };
 
+  const QuickDiscoveryChip = ({ label, active, onClick, icon: Icon }: any) => (
+    <button
+      onClick={onClick}
+      className={`
+        flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-bold transition-all border whitespace-nowrap
+        ${active 
+          ? 'bg-[#1E5BFF] text-white border-[#1E5BFF] shadow-sm' 
+          : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-700 hover:border-gray-300'
+        }
+      `}
+    >
+      {Icon && <Icon className="w-3 h-3" />}
+      {label}
+    </button>
+  );
+
   return (
     <>
+      <style>{`
+        @keyframes breath {
+          0%, 100% { transform: scale(1); }
+          50% { transform: scale(1.03); }
+        }
+        .animate-breath {
+          animation: breath 4s ease-in-out infinite;
+        }
+      `}</style>
+
       <div className="px-4 py-4 space-y-6">
         
-        {/* Stories Section */}
-        <section className="mt-2">
+        {/* 1) NOVO: IDENTITY HEADER */}
+        <div className="mt-2 animate-in fade-in slide-in-from-top-4 duration-500">
+            <h1 className="text-xl font-bold text-gray-900 dark:text-white font-display">Descobrir na Freguesia 👀</h1>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">O que está rolando agora, perto de você</p>
+        </div>
+
+        {/* 2) STORIES: UPDATED COPY */}
+        <section>
           <div className="flex items-center justify-between mb-3 px-1">
-            <div className="flex items-center gap-2">
-                <PlayCircle className="w-4 h-4 text-red-500 fill-red-500 animate-pulse" />
-                <h2 className="text-sm font-semibold text-gray-900 dark:text-white">
-                Agora na Freguesia
-                </h2>
+            <div>
+                <div className="flex items-center gap-2">
+                    <PlayCircle className="w-4 h-4 text-red-500 fill-red-500 animate-pulse" />
+                    <h2 className="text-sm font-semibold text-gray-900 dark:text-white">
+                        Agora na Freguesia
+                    </h2>
+                </div>
+                <p className="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5 ml-6">
+                    Conteúdo ao vivo dos lojistas
+                </p>
             </div>
           </div>
           
           <div className="flex gap-3 overflow-x-auto pb-4 no-scrollbar -mx-4 px-4 snap-x">
-            {EXPLORE_STORIES.map((story, index) => {
-                const isActive = story.isLive || story.status === 'Promoção';
+            {sortedStories.map((story, index) => {
+                const isLive = story.isLive;
+                // Active/Focus logic: prioritize Live or specific promoted items
+                const isFocus = isLive || story.status === 'Ao vivo' || story.status === 'Promoção';
+                const isHighlight = index === 0;
+                
+                // Badge Logic: Hierarchy (Live > Viewing > New > Default)
+                let mainBadge = null;
+                if (isLive) {
+                    mainBadge = (
+                        <div className="bg-red-600 text-white text-[9px] font-bold px-2 py-0.5 rounded flex items-center gap-1 shadow-sm">
+                            <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+                            AO VIVO
+                        </div>
+                    );
+                } else if (story.viewers && story.viewers > 10) {
+                     mainBadge = (
+                        <div className="bg-black/60 backdrop-blur-md text-white text-[9px] font-bold px-2 py-0.5 rounded flex items-center gap-1 border border-white/10 shadow-sm">
+                            <Eye className="w-3 h-3" />
+                            {story.viewers} vendo
+                        </div>
+                    );
+                } else if (story.status === 'Novidade') {
+                     mainBadge = (
+                        <div className="bg-green-600 text-white text-[9px] font-bold px-2 py-0.5 rounded flex items-center gap-1 shadow-sm">
+                            <span className="w-1.5 h-1.5 rounded-full bg-white" />
+                            Novo
+                        </div>
+                    );
+                } else {
+                    mainBadge = (
+                         <div className={`${story.statusColor} text-white text-[9px] font-bold px-2 py-0.5 rounded shadow-sm border border-white/20`}>
+                            {story.status}
+                        </div>
+                    );
+                }
+
+                // Promo Cashback Badge
+                const showCashbackBadge = story.status === 'Promoção';
+
                 return (
                   <button
                     key={story.id}
                     onClick={() => setActiveStoryIndex(index)}
-                    className={`snap-start relative flex-shrink-0 w-28 h-48 rounded-xl overflow-hidden group shadow-md border dark:border-gray-800 transition-all ${isActive ? 'ring-2 ring-offset-2 ring-offset-gray-50 dark:ring-offset-gray-900 ring-indigo-500/50' : 'border-gray-100'}`}
+                    className={`
+                        snap-start relative flex-shrink-0 w-28 h-48 rounded-xl overflow-hidden group 
+                        transition-all duration-300 ease-[cubic-bezier(0.25,0.1,0.25,1)]
+                        active:after:absolute active:after:inset-0 active:after:bg-white active:after:opacity-20 active:after:transition-opacity
+                        ${isFocus 
+                            ? 'grayscale-0 ring-2 ring-blue-500 ring-offset-2 dark:ring-offset-gray-900 shadow-lg shadow-blue-500/20 scale-100 z-10' 
+                            : 'grayscale-[0.1] opacity-95 scale-95 border border-gray-100 dark:border-gray-800'
+                        }
+                    `}
                   >
-                    {/* Image Background */}
-                    <img 
-                      src={story.logo} 
-                      alt={story.merchantName} 
-                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
-                    />
+                    {/* Image Background with Breath Animation if Focus */}
+                    <div className={`w-full h-full relative ${isFocus ? 'animate-breath' : ''}`}>
+                        <img 
+                        src={story.logo} 
+                        alt={story.merchantName} 
+                        className="w-full h-full object-cover transition-transform duration-700" 
+                        />
+                    </div>
                     
                     {/* Gradient Overlay for Text Visibility */}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-90" />
 
-                    {/* Status Badge */}
-                    <div className={`absolute top-2 left-2 ${story.statusColor} text-white text-[8px] font-bold px-1.5 py-0.5 rounded-md z-10 shadow-sm border border-white/20 flex items-center gap-1`}>
-                        {story.isLive && <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />}
-                        {story.status}
+                    {/* Main Badge (Top Left) */}
+                    <div className="absolute top-2 left-2 z-10">
+                        {mainBadge}
                     </div>
+
+                    {/* Cashback Badge (Below Main Badge if Promo) */}
+                    {showCashbackBadge && (
+                       <div className="absolute top-8 left-2 z-10 bg-green-500/90 text-white text-[7px] font-bold px-1.5 py-0.5 rounded flex items-center gap-0.5 shadow-sm backdrop-blur-sm border border-white/10">
+                         <Coins className="w-2 h-2" /> Gera cashback
+                       </div>
+                    )}
 
                     {/* Content Overlay */}
                     <div className="absolute bottom-2 left-2 right-2 z-10 flex flex-col items-start text-left">
-                      <span className="text-white text-[11px] font-bold leading-tight line-clamp-2 drop-shadow-md mb-0.5">
+                      <span className="text-white text-[11px] font-bold leading-tight line-clamp-2 drop-shadow-md mb-1">
                           {story.merchantName}
                       </span>
-                      <div className="flex items-center gap-1 mb-1.5">
-                          <Tag className="w-2.5 h-2.5 text-gray-300" />
-                          <span className="text-[9px] text-gray-300 font-medium">{story.category}</span>
-                      </div>
                       
                       {/* Micro CTA */}
-                      <div className="flex items-center gap-1 text-[8px] font-bold text-white/80 bg-white/20 px-1.5 py-0.5 rounded-full backdrop-blur-sm">
-                          Toque para ver <ChevronRight className="w-2 h-2" />
+                      <div className="flex flex-col items-start gap-1">
+                          <div className="flex items-center gap-1 text-[9px] font-bold text-white/90 bg-white/20 px-2 py-1 rounded-full backdrop-blur-sm group-active:bg-white/40 transition-colors">
+                              Assistindo agora 
+                              <ArrowRight className="w-2.5 h-2.5 group-hover:translate-x-0.5 transition-transform" />
+                          </div>
+                          
+                          {/* FOMO Text for Highlight Item */}
+                          {isHighlight && (
+                             <span className="text-[7px] text-white/70 font-medium ml-1 animate-pulse">
+                               Última chance hoje
+                             </span>
+                          )}
                       </div>
                     </div>
                   </button>
@@ -588,7 +718,7 @@ export const ExploreView: React.FC<ExploreViewProps> = ({
           </div>
         </section>
 
-        {/* SECTION REPLACED: INTERACTIVE STYLE DISCOVERY */}
+        {/* 3) STYLE DISCOVERY: WITH FEEDBACK */}
         <section className="mt-4 mb-2">
           <div className="flex items-center justify-between mb-4 px-1">
             <h2 className="text-sm font-semibold text-gray-900 dark:text-white leading-tight">
@@ -643,6 +773,15 @@ export const ExploreView: React.FC<ExploreViewProps> = ({
                 onClick={() => setSelectedStyle(selectedStyle === "Experiências" ? null : "Experiências")}
             />
           </div>
+          
+          {selectedStyle && (
+              <div className="px-1 mt-2 animate-in fade-in slide-in-from-top-2 duration-300">
+                  <p className="text-xs text-blue-600 dark:text-blue-400 font-medium flex items-center gap-1.5">
+                      <Sparkles className="w-3.5 h-3.5" />
+                      Mostrando opções para você: <span className="font-bold">{selectedStyle}</span>
+                  </p>
+              </div>
+          )}
         </section>
 
         {hasAnyStore ? (
@@ -661,23 +800,139 @@ export const ExploreView: React.FC<ExploreViewProps> = ({
                 // DEFAULT LISTS IF NO STYLE SELECTED
                 <>
                     <HorizontalStoreSection
-                    title="Perto de você agora"
-                    subtitle="A poucos minutos da sua localização"
-                    stores={nearbyStores}
-                    onStoreClick={onStoreClick}
-                    onViewAll={onFilterClick}
-                    onMapClick={onLocationClick}
-                    variant="nearby"
+                        title="Perto de você agora"
+                        subtitle="A poucos minutos da sua localização"
+                        stores={nearbyStores}
+                        onStoreClick={onStoreClick}
+                        onViewAll={onFilterClick}
+                        onMapClick={onLocationClick}
+                        variant="nearby"
                     />
 
+                    {/* 4) NEW BLOCK: DESCOBERTAS RÁPIDAS (Quick Discoveries) */}
+                    <div className="mb-8 pl-1">
+                        <div className="flex gap-2 overflow-x-auto no-scrollbar pb-2">
+                            <QuickDiscoveryChip 
+                                label="Aberto agora" 
+                                icon={Clock} 
+                                active={selectedFilter === 'open_now'}
+                                onClick={() => handleFilterClick('open_now')}
+                            />
+                            <QuickDiscoveryChip 
+                                label="Até 500m" 
+                                icon={MapPin} 
+                                active={sortOption === 'nearby'}
+                                onClick={() => handleFilterClick('nearby')}
+                            />
+                            <QuickDiscoveryChip 
+                                label="Gera cashback" 
+                                icon={Coins} 
+                                active={selectedFilter === 'cashback'}
+                                onClick={() => handleFilterClick('cashback')}
+                            />
+                            <QuickDiscoveryChip 
+                                label="Bem avaliado" 
+                                icon={ThumbsUp} 
+                                active={sortOption === 'topRated'}
+                                onClick={() => handleFilterClick('top_rated')}
+                            />
+                        </div>
+                    </div>
+
+                    {/* 5) UPDATED: CURATED SECTION */}
                     <HorizontalStoreSection
-                    title="Escolhidos pra você"
-                    subtitle="Baseado no que você curte e no que está bombando"
-                    stores={sortedStores}
-                    onStoreClick={onStoreClick}
-                    onViewAll={onFilterClick}
-                    variant="curated"
+                        title="Você provavelmente vai gostar 💙"
+                        subtitle="Baseado no que você vê e no que o bairro mais usa"
+                        stores={sortedStores}
+                        onStoreClick={onStoreClick}
+                        onViewAll={onFilterClick}
+                        variant="curated"
                     />
+
+                    {/* NEW VERTICAL INFINITE FEED */}
+                    <section className="mt-8 mb-4">
+                        <div className="px-1 mb-4">
+                            <h3 className="text-lg font-bold text-gray-900 dark:text-white leading-tight">
+                                Continue descobrindo 👇
+                            </h3>
+                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                                Mais coisas que estão rolando agora na Freguesia
+                            </p>
+                        </div>
+
+                        <div className="space-y-3">
+                            {displayedFeed.map((store, idx) => {
+                                const badges = [
+                                    { icon: Flame, text: "Em alta", color: "text-orange-500 bg-orange-50 dark:bg-orange-900/20" },
+                                    { icon: MousePointerClick, text: "Muitos acessos", color: "text-blue-500 bg-blue-50 dark:bg-blue-900/20" },
+                                    { icon: Coins, text: "Cashback", color: "text-green-600 bg-green-50 dark:bg-green-900/20" },
+                                    { icon: TrendingUp, text: "Bombando", color: "text-purple-500 bg-purple-50 dark:bg-purple-900/20" },
+                                    { icon: Heart, text: "Favorito", color: "text-red-500 bg-red-50 dark:bg-red-900/20" }
+                                ];
+                                // Deterministic badge assignment based on index
+                                const badge = badges[idx % badges.length];
+                                
+                                return (
+                                    <button 
+                                        key={`feed-${store.id}-${idx}`}
+                                        onClick={() => onStoreClick(store)}
+                                        className="w-full bg-white dark:bg-gray-800 p-3 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 flex gap-3 items-center animate-in slide-in-from-bottom-4 duration-700 fill-mode-forwards"
+                                        style={{ animationDelay: `${idx * 50}ms` }}
+                                    >
+                                        <div className="w-16 h-16 rounded-xl bg-gray-100 dark:bg-gray-700 overflow-hidden flex-shrink-0">
+                                            <img 
+                                                src={store.logoUrl || getStoreLogo(store.name.length)} 
+                                                alt={store.name} 
+                                                className="w-full h-full object-cover"
+                                            />
+                                        </div>
+                                        <div className="flex-1 text-left min-w-0">
+                                            <div className="flex justify-between items-start">
+                                                <h4 className="font-bold text-gray-900 dark:text-white text-sm truncate">{store.name}</h4>
+                                                <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1 ${badge.color}`}>
+                                                    <badge.icon className="w-2.5 h-2.5" />
+                                                    {badge.text}
+                                                </span>
+                                            </div>
+                                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 truncate">{store.category} • {store.subcategory}</p>
+                                            <div className="flex items-center gap-2 mt-1.5">
+                                                <div className="flex items-center gap-1 text-[10px] text-gray-400">
+                                                    <Footprints className="w-3 h-3" />
+                                                    {store.distance}
+                                                </div>
+                                                <span className="w-0.5 h-0.5 bg-gray-300 rounded-full"></span>
+                                                <div className="flex items-center gap-0.5 text-[10px] font-bold text-yellow-500">
+                                                    <Star className="w-3 h-3 fill-current" />
+                                                    {store.rating}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </button>
+                                );
+                            })}
+                        </div>
+
+                        {/* Soft Stop Sensor */}
+                        {!hasMoreFeed && (
+                            <div className="mt-8 text-center pb-4 opacity-60">
+                                <p className="text-xs font-medium text-gray-400">Isso é tudo por enquanto :)</p>
+                            </div>
+                        )}
+                        
+                        {hasMoreFeed && (
+                            <div className="mt-8 flex flex-col items-center animate-in fade-in duration-700 delay-300">
+                                <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-3">
+                                    Você já descobriu bastante coisa hoje 👀
+                                </p>
+                                <button 
+                                    onClick={handleLoadMore}
+                                    className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 font-bold text-xs px-6 py-3 rounded-full shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors active:scale-95"
+                                >
+                                    Continuar explorando
+                                </button>
+                            </div>
+                        )}
+                    </section>
 
                     {cashbackStores.length > 0 && (
                     <HorizontalStoreSection
@@ -711,15 +966,15 @@ export const ExploreView: React.FC<ExploreViewProps> = ({
           </div>
         )}
 
-        {/* --- RETENTION BLOCK: 'Volte amanhã' --- */}
+        {/* 6) UPDATED: RETENTION BLOCK */}
         <section className="mt-8 mb-6 px-1">
             <div className="bg-gradient-to-br from-indigo-50 to-blue-50 dark:from-indigo-900/20 dark:to-blue-900/20 rounded-2xl p-6 border border-indigo-100 dark:border-indigo-800 text-center relative overflow-hidden">
                 {/* Decorative */}
                 <div className="absolute top-0 right-0 w-24 h-24 bg-blue-200/20 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none"></div>
 
-                <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">Volte amanhã</h3>
+                <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">Sempre tem algo novo na Freguesia</h3>
                 <p className="text-sm text-gray-600 dark:text-gray-300 mb-6 max-w-xs mx-auto">
-                    Todo dia tem novidade diferente na Freguesia
+                    Quem entra todo dia, economiza mais
                 </p>
 
                 <div className="grid grid-cols-3 gap-2 mb-6">
@@ -760,7 +1015,7 @@ export const ExploreView: React.FC<ExploreViewProps> = ({
       {activeStory && (
         <div className="fixed inset-0 z-[100] bg-black animate-in fade-in zoom-in-95 duration-200 flex flex-col">
           <div className="absolute top-0 left-0 right-0 z-20 flex gap-1 p-2 pt-3">
-             {EXPLORE_STORIES.map((s, i) => (
+             {sortedStories.map((s, i) => (
                  <div key={s.id} className="h-1 flex-1 bg-white/30 rounded-full overflow-hidden">
                      <div 
                         className="h-full bg-white transition-all duration-100 ease-linear"
