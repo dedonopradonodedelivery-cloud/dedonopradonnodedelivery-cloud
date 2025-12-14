@@ -365,7 +365,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
                         let gradientClass = "bg-gradient-to-t from-black/90 via-black/40 to-transparent";
 
                         return (
-                            <div key={banner.id} onClick={banner.action} className="min-w-full snap-center cursor-pointer relative px-0">
+                            <div key={banner.id} onClick={banner.action} className="min-w-full snap-center cursor-pointer relative px-5">
                                 <div className={`w-full ${heightClass} bg-gray-200 relative overflow-hidden rounded-[24px]`}>
                                 
                                 <div className="absolute inset-0 z-0">
