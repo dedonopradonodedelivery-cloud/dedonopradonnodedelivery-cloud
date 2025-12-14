@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Layout } from './components/Layout';
 import { Header } from './components/Header';
 import { HomeFeed } from './components/HomeFeed';
@@ -133,6 +133,14 @@ const App: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [isAuthLoading, setIsAuthLoading] = useState(true);
+
+  // Ref para acessar activeTab atual dentro de listeners sem stale closure
+  const activeTabRef = useRef(activeTab);
+  
+  // Atualiza a ref sempre que o estado mudar
+  useEffect(() => {
+    activeTabRef.current = activeTab;
+  }, [activeTab]);
 
   // Auth State Management
   const [isAuthOpen, setIsAuthOpen] = useState(false);
@@ -319,13 +327,24 @@ const App: React.FC = () => {
         setUser(session.user as any);
         await checkAndSetRole(session.user);
 
-        if (activeTab === 'cashback_landing') setActiveTab('cashback');
-        if (activeTab === 'freguesia_connect_public') setActiveTab('home');
+        // Usar a ref para evitar stale closure
+        const currentTab = activeTabRef.current;
+        if (currentTab === 'cashback_landing') setActiveTab('cashback');
+        if (currentTab === 'freguesia_connect_public') setActiveTab('home');
+      
+      } else if (event === 'TOKEN_REFRESHED' && session?.user) {
+         // Apenas atualiza o usuário sem redirecionar, para não interromper a navegação
+         setUser(session.user as any);
+         // Opcional: revalidar role se necessário, mas geralmente não precisa bloquear UI
+      
       } else if (event === 'SIGNED_OUT' || !session) {
         // Robust cleanup for logout
         setUser(null);
         setUserRole(null);
-        if (activeTab === 'profile' || activeTab === 'store_area') {
+        
+        // Verifica a aba atual via Ref para decidir se redireciona
+        const currentTab = activeTabRef.current;
+        if (currentTab === 'profile' || currentTab === 'store_area') {
             setActiveTab('home');
         }
       }
@@ -335,7 +354,7 @@ const App: React.FC = () => {
       subscription.unsubscribe();
       clearTimeout(safetyTimer);
     };
-  }, []); // Remove dependency on activeTab to avoid loop re-subscriptions
+  }, []); // Dependência vazia: roda apenas uma vez no mount
 
   // Close Auth Modal if user detected
   useEffect(() => {

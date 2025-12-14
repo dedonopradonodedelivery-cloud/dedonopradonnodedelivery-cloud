@@ -73,13 +73,16 @@ export const MenuView: React.FC<MenuViewProps> = ({ user, userRole, onAuthClick,
     setIsLoggingOut(true);
 
     try {
-      // O signOut dispara o evento 'SIGNED_OUT' que o App.tsx escuta para limpar o estado global.
-      // NÃO limpar localStorage manualmente aqui, pois isso impede o Supabase de processar o evento corretamente.
-      const { error } = await supabase.auth.signOut();
-      if (error) throw error;
+      // Race condition protection: prevent infinite loading if network hangs.
+      // Tenta fazer o signOut, mas se demorar mais que 2.5s, libera a UI.
+      await Promise.race([
+        supabase.auth.signOut(),
+        new Promise(resolve => setTimeout(resolve, 2500)) 
+      ]);
     } catch (error) {
-      console.warn("Erro ao realizar logout:", error);
+      console.warn("Erro ou timeout ao realizar logout:", error);
     } finally {
+      // Garante que o loading pare e a navegação ocorra
       setIsLoggingOut(false);
       onNavigate('home');
     }
