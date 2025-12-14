@@ -22,9 +22,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [userRole, setUserRole] = useState<'cliente' | 'lojista' | null>(null);
+  // O estado loading começa explicitamente como TRUE
   const [loading, setLoading] = useState(true);
 
-  // Função auxiliar para buscar a role
   const fetchUserRole = async (userId: string) => {
     try {
       const { data, error } = await supabase
@@ -36,7 +36,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       if (data) {
         setUserRole(data.role === 'lojista' ? 'lojista' : 'cliente');
       } else {
-        // Fallback seguro se o perfil ainda não existir
         setUserRole('cliente'); 
       }
     } catch (error) {
@@ -48,47 +47,52 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     let mounted = true;
 
-    const initializeAuth = async () => {
+    // Função de inicialização robusta
+    const initAuth = async () => {
       try {
-        // 1. Obter sessão inicial
-        const { data: { session: initialSession } } = await supabase.auth.getSession();
+        // Tenta obter a sessão inicial
+        const { data: { session: initialSession }, error } = await supabase.auth.getSession();
         
+        if (error) throw error;
+
         if (mounted) {
           setSession(initialSession);
           setUser(initialSession?.user ?? null);
-          
+
           if (initialSession?.user) {
             await fetchUserRole(initialSession.user.id);
           }
         }
-      } catch (error) {
-        console.error("Erro na inicialização do Auth:", error);
+      } catch (err) {
+        console.error("Erro na verificação de sessão inicial:", err);
       } finally {
-        if (mounted) setLoading(false);
+        // GARANTE que o loading seja falso após a verificação inicial, independente do resultado
+        if (mounted) {
+          setLoading(false);
+        }
       }
     };
 
-    initializeAuth();
+    initAuth();
 
-    // 2. Configurar Listener Único
+    // Listener para mudanças de estado (Login, Logout, Refresh)
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, currentSession) => {
       if (!mounted) return;
 
-      // Atualiza estado básico
       setSession(currentSession);
       setUser(currentSession?.user ?? null);
 
-      if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+      if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'INITIAL_SESSION') {
         if (currentSession?.user) {
           await fetchUserRole(currentSession.user.id);
         }
       } else if (event === 'SIGNED_OUT') {
-        // Limpeza explícita
         setUserRole(null);
         setUser(null);
         setSession(null);
       }
       
+      // Garante que o loading saia caso o onAuthStateChange dispare antes ou depois do init
       setLoading(false);
     });
 
@@ -101,7 +105,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const signOut = async () => {
     try {
       await supabase.auth.signOut();
-      // O listener onAuthStateChange cuidará de limpar o estado
     } catch (error) {
       console.error("Erro ao fazer logout:", error);
     }

@@ -129,11 +129,10 @@ const MOCK_STORES: Store[] = [
 ];
 
 const App: React.FC = () => {
-  // Use Centralized Auth Context
+  // Use Centralized Auth Context - isAuthLoading é a única fonte de verdade para o splash
   const { user, userRole, loading: isAuthLoading } = useAuth();
 
   const [activeTab, setActiveTab] = useState('home');
-  const [isLoading, setIsLoading] = useState(true);
   const [isDarkMode, setIsDarkMode] = useState(false);
 
   // Ref para acessar activeTab atual dentro de listeners sem stale closure (se necessário)
@@ -257,12 +256,6 @@ const App: React.FC = () => {
     }
   }, []);
 
-  // General Loading Timeout (Visual splash)
-  useEffect(() => {
-    const timer = setTimeout(() => setIsLoading(false), 3500);
-    return () => clearTimeout(timer);
-  }, []);
-
   const handleLoginSuccess = async () => {
     // AuthProvider handles state, just wait a bit for UI transition
     await new Promise(r => setTimeout(r, 500));
@@ -325,7 +318,8 @@ const App: React.FC = () => {
     setActiveTab('cashback');
   };
 
-  if (isLoading || isAuthLoading) {
+  // SPLASH SCREEN: Renderiza apenas se o AuthContext estiver carregando
+  if (isAuthLoading) {
     return (
       <div className="fixed inset-0 bg-gradient-to-br from-[#2D6DF6] to-[#1B54D9] flex flex-col items-center justify-center text-white z-50">
         <div className="relative flex flex-col items-center justify-center">
