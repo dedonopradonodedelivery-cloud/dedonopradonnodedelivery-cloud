@@ -1,14 +1,7 @@
+
 import React, { useMemo } from 'react';
 import { ChevronLeft, Star, MapPin, BadgeCheck } from 'lucide-react';
-import { Store, AdType } from '../types';
-
-export interface EditorialCollection {
-  id: string;
-  title: string;
-  subtitle: string;
-  image: string;
-  keywords: string[]; 
-}
+import { Store, AdType, EditorialCollection } from '../types';
 
 interface EditorialListViewProps {
   collection: EditorialCollection;

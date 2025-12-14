@@ -28,7 +28,7 @@ import { SpecialtiesView } from './components/SpecialtiesView';
 import { StoreAreaView } from './components/StoreAreaView';
 import { QuoteRequestModal } from './components/QuoteRequestModal';
 import { ServiceSuccessView } from './components/ServiceSuccessView';
-import { EditorialListView, EditorialCollection } from './components/EditorialListView';
+import { EditorialListView } from './components/EditorialListView';
 import { SupportView, InviteFriendView, AboutView, FavoritesView, SponsorInfoView } from './components/SimplePages';
 import { CashbackInfoView } from './components/CashbackInfoView';
 import { EditProfileView } from './components/EditProfileView';
@@ -52,7 +52,7 @@ import { UserCashbackFlow } from './components/UserCashbackFlow';
 import { MapPin, Crown } from 'lucide-react';
 import { supabase } from './lib/supabaseClient';
 import { User } from '@supabase/supabase-js';
-import { Category, Store, AdType } from './types';
+import { Category, Store, AdType, EditorialCollection } from './types';
 import { getStoreLogo } from './utils/mockLogos';
 
 // =============================

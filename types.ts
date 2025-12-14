@@ -1,3 +1,4 @@
+
 import React from 'react';
 
 export enum AdType {
@@ -121,4 +122,12 @@ export interface CashbackTransaction {
   status: 'pending' | 'approved' | 'rejected';
   created_at?: string;
   approved_at?: string;
+}
+
+export interface EditorialCollection {
+  id: string;
+  title: string;
+  subtitle: string;
+  image: string;
+  keywords: string[]; 
 }
