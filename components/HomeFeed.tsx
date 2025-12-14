@@ -188,7 +188,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
     },
     { 
       id: 'community-connect', 
-      title: "Conectando empreendedores e clientes.", 
+      title: "Conectando empreendedores.", 
       subtitle: "Uma rede que fortalece o bairro.", 
       icon: <Users className="w-8 h-8 text-white" />, 
       image: "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?q=80&w=800&auto=format=fit=crop", 
@@ -208,7 +208,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
     },
     { 
       id: 'freguesia-hub', 
-      title: "Tudo o que você precisa na Freguesia.", 
+      title: "Tudo o que você precisa.", 
       subtitle: "Comércios, serviços e vantagens.", 
       icon: <MapPin className="w-8 h-8 text-white" />, 
       image: "https://images.unsplash.com/photo-1524661135-423995f22d0b?q=80&w=800&auto=format=fit=crop", 
@@ -218,23 +218,13 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
     },
     { 
       id: 'cashback-rewards', 
-      title: "Ganhe cashback comprando local.", 
+      title: "Ganhe cashback.", 
       subtitle: "Receba parte do valor de volta.", 
       icon: <Wallet className="w-8 h-8 text-white" />, 
       image: "https://images.unsplash.com/photo-1580519542036-c47de6196ba5?q=80&w=800&auto=format=fit=crop", 
       action: () => onNavigate('cashback_info'), 
       cta: "Começar",
       theme: 'green'
-    },
-    { 
-      id: 'local-discovery', 
-      title: "Descubra serviços perto de você.", 
-      subtitle: "Alimentação, pets, saúde e mais.", 
-      icon: <Compass className="w-8 h-8 text-white" />, 
-      image: "https://images.unsplash.com/photo-1556745753-b2904692b3cd?q=80&w=800&auto=format=fit=crop", 
-      action: () => onNavigate('explore'), 
-      cta: "Explorar",
-      theme: 'blue-teal'
     },
     { 
       id: 'services', 
@@ -254,13 +244,6 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
         // Simple calculation to find the index of the centered element
         const newIndex = Math.round(scrollLeft / clientWidth);
         setActiveBannerIndex(newIndex);
-    }
-  };
-
-  const handleBannerScrollRight = () => {
-    if (bannerScrollRef.current) {
-      const scrollAmount = bannerScrollRef.current.clientWidth * 0.93; // Matches banner width approx
-      bannerScrollRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
     }
   };
 
@@ -369,74 +352,45 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
               </div>
             </div>
 
-            <div className="w-full relative group">
-                 {/* 
-                    Original title was: "O que você vai encontrar"
-                    Removed for cleaner look since banners are self-explanatory
-                 */}
+            <div className="w-full relative group mt-0">
                  
-                 <button 
-                    onClick={handleBannerScrollRight}
-                    className="absolute right-2 top-[40%] -translate-y-1/2 z-20 bg-white/90 dark:bg-gray-800/90 p-2 rounded-full shadow-lg text-gray-600 dark:text-gray-300 backdrop-blur-sm border border-gray-100 dark:border-gray-700 active:scale-95 transition-all opacity-0 group-hover:opacity-100 hidden sm:block"
-                    aria-label="Próximo banner"
-                 >
-                    <ArrowRight className="w-5 h-5" />
-                 </button>
-
                  <div 
                     ref={bannerScrollRef}
                     onScroll={handleBannerScroll}
-                    className="flex gap-3 overflow-x-auto px-4 pb-2 no-scrollbar snap-x snap-mandatory items-start"
-                    style={{ scrollPaddingLeft: '16px' }}
+                    className="flex overflow-x-auto snap-x snap-mandatory no-scrollbar w-full"
                  >
                     {MINI_BANNERS.map((banner) => {
-                        // Increased height to 170px to match standard main banners (iFood style)
-                        const heightClass = 'h-[170px]';
+                        // Increased height to 35vh (approx 320-350px on modern phones)
+                        const heightClass = 'h-[35vh] min-h-[260px] max-h-[400px]';
                         const theme = (banner as any).theme;
-                        let gradientClass = "bg-gradient-to-r from-gray-900 via-gray-900/60 to-transparent";
-
-                        if (theme === 'green') {
-                            gradientClass = "bg-gradient-to-r from-emerald-900 via-emerald-800/80 to-transparent";
-                        } else if (theme === 'blue-royal') {
-                            gradientClass = "bg-gradient-to-r from-indigo-900 via-indigo-800/80 to-transparent";
-                        } else if (theme === 'blue-dark') {
-                            gradientClass = "bg-gradient-to-r from-slate-900 via-slate-800/80 to-transparent";
-                        } else if (theme === 'blue-primary') {
-                            gradientClass = "bg-gradient-to-r from-blue-900 via-blue-800/80 to-transparent";
-                        } else if (theme === 'blue-teal') {
-                            gradientClass = "bg-gradient-to-r from-cyan-900 via-cyan-800/80 to-transparent";
-                        } else if (theme === 'blue-discovery') {
-                            gradientClass = "bg-gradient-to-r from-[#1E3A8A] via-[#1E40AF]/80 to-transparent";
-                        }
+                        let gradientClass = "bg-gradient-to-t from-black/90 via-black/40 to-transparent";
 
                         return (
-                            <div key={banner.id} onClick={banner.action} className="min-w-[93%] sm:min-w-[340px] snap-center cursor-pointer relative active:scale-[0.98] transition-transform">
-                                <div className={`w-full ${heightClass} rounded-[20px] bg-black flex flex-row items-center justify-between shadow-md shadow-gray-200/50 dark:shadow-none relative overflow-hidden transition-all group`}>
+                            <div key={banner.id} onClick={banner.action} className="min-w-full snap-center cursor-pointer relative">
+                                <div className={`w-full ${heightClass} bg-gray-200 relative overflow-hidden`}>
                                 
                                 <div className="absolute inset-0 z-0">
-                                    <img src={banner.image} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 opacity-90" alt="" />
+                                    <img src={banner.image} className="w-full h-full object-cover" alt="" />
                                     <div className={`absolute inset-0 ${gradientClass}`} />
                                 </div>
 
-                                <div className="z-10 flex flex-col justify-end h-full flex-1 pl-5 pr-12 py-5">
-                                    {/* Text larger for main banner feel */}
-                                    <h3 className="text-white font-bold text-2xl leading-tight mb-1.5 drop-shadow-md w-[85%]">{banner.title}</h3>
+                                <div className="absolute bottom-0 left-0 right-0 p-6 pb-10 z-10 flex flex-col justify-end h-full">
+                                    <h3 className="text-white font-bold text-3xl leading-tight mb-2 drop-shadow-md w-[90%]">{banner.title}</h3>
                                     <p className="text-white/90 text-sm font-medium line-clamp-2 w-[90%] opacity-90">{banner.subtitle}</p>
                                 </div>
                                 </div>
                             </div>
                         );
                     })}
-                    <div className="min-w-[12px] flex-shrink-0"></div>
                  </div>
 
-                 {/* Carousel Indicators */}
-                 <div className="flex justify-center gap-1.5 mt-1 mb-2">
+                 {/* Carousel Indicators - Overlay inside the image area at bottom */}
+                 <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-1.5 z-20 pointer-events-none">
                     {MINI_BANNERS.map((_, idx) => (
                         <div 
                             key={idx} 
-                            className={`h-1.5 rounded-full transition-all duration-300 ${
-                                idx === activeBannerIndex ? 'w-5 bg-gray-800 dark:bg-white' : 'w-1.5 bg-gray-300 dark:bg-gray-700'
+                            className={`h-1.5 rounded-full transition-all duration-300 shadow-sm ${
+                                idx === activeBannerIndex ? 'w-5 bg-white' : 'w-1.5 bg-white/50'
                             }`}
                         />
                     ))}
