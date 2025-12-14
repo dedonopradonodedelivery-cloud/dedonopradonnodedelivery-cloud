@@ -32,7 +32,7 @@ interface ServicesViewProps {
   searchTerm?: string;
 }
 
-// --- CONFIGURATION ---
+// --- CONFIGURATION & MOCK DATA ---
 
 const MACRO_SERVICES = [
   { 
@@ -94,10 +94,43 @@ const MACRO_SERVICES = [
   },
 ];
 
-const LIVE_SERVICES = [
-  { id: 1, name: 'Refrigeração Polar', status: 'Em atendimento', badge: '🔴 Agora', count: '2 técnicos', image: 'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?q=80&w=400&auto=format=fit=crop' },
-  { id: 2, name: 'SOS Elétrica', status: 'Resposta rápida', badge: '⚡ Online', count: 'Ativo', image: 'https://images.unsplash.com/photo-1621905252507-b35492cc74b4?q=80&w=400&auto=format=fit=crop' },
-  { id: 3, name: 'Mudanças Ágil', status: 'Disponível hoje', badge: '🟢 Livre', count: 'Caminhão ok', image: 'https://images.unsplash.com/photo-1600585152220-90363fe7e115?q=80&w=400&auto=format=fit=crop' },
+const LIVE_STORIES = [
+  { 
+    id: 1, 
+    name: 'Refrigeração Polar', 
+    role: 'Técnico de Ar', 
+    status: 'Em atendimento', 
+    badge: '🔴 Agora', 
+    badgeColor: 'bg-red-500',
+    image: 'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?q=80&w=400&auto=format=fit=crop' 
+  },
+  { 
+    id: 2, 
+    name: 'SOS Elétrica', 
+    role: 'Eletricista', 
+    status: 'Resposta rápida', 
+    badge: '🟢 Online', 
+    badgeColor: 'bg-green-500',
+    image: 'https://images.unsplash.com/photo-1621905252507-b35492cc74b4?q=80&w=400&auto=format=fit=crop' 
+  },
+  { 
+    id: 3, 
+    name: 'Mudanças Ágil', 
+    role: 'Fretes', 
+    status: 'Caminhão livre', 
+    badge: '🟢 Livre', 
+    badgeColor: 'bg-green-500',
+    image: 'https://images.unsplash.com/photo-1600585152220-90363fe7e115?q=80&w=400&auto=format=fit=crop' 
+  },
+  { 
+    id: 4, 
+    name: 'Dr. Reparo', 
+    role: 'Marido de Aluguel', 
+    status: 'Disponível', 
+    badge: '⚡ Rápido', 
+    badgeColor: 'bg-blue-500',
+    image: 'https://images.unsplash.com/photo-1581578731117-10d52143b0d8?q=80&w=400&auto=format=fit=crop' 
+  },
 ];
 
 const TRENDING_SERVICES = [
@@ -108,10 +141,10 @@ const TRENDING_SERVICES = [
 ];
 
 const DISCOVER_SERVICES = [
-  { id: 'd1', name: 'João Eletricista', category: 'Elétrica', rating: 4.9, reviews: 124, badges: ['⚡ Rápido', 'Verificado'] },
-  { id: 'd2', name: 'Maria Diarista', category: 'Limpeza', rating: 5.0, reviews: 89, badges: ['⭐ Favorito', 'Cashback'] },
-  { id: 'd3', name: 'Tech Fix', category: 'Celulares', rating: 4.8, reviews: 210, badges: ['🔥 Em alta'] },
-  { id: 'd4', name: 'Dr. Pet', category: 'Veterinário', rating: 4.9, reviews: 56, badges: ['Plantão 24h'] },
+  { id: 'd1', name: 'João Eletricista', category: 'Elétrica Residencial', rating: 4.9, reviews: 124, badges: ['⚡ Rápido', 'Verificado'] },
+  { id: 'd2', name: 'Maria Diarista', category: 'Limpeza e Organização', rating: 5.0, reviews: 89, badges: ['⭐ Favorito', 'Cashback'] },
+  { id: 'd3', name: 'Tech Fix', category: 'Conserto Celulares', rating: 4.8, reviews: 210, badges: ['🔥 Em alta'] },
+  { id: 'd4', name: 'Dr. Pet', category: 'Veterinário em Domicílio', rating: 4.9, reviews: 56, badges: ['Plantão 24h'] },
   { id: 'd5', name: 'SOS Encanador', category: 'Hidráulica', rating: 4.7, reviews: 34, badges: ['Urgente'] },
 ];
 
@@ -154,14 +187,13 @@ export const ServicesView: React.FC<ServicesViewProps> = ({ onSelectMacro, onOpe
                 <div className="flex items-center justify-center gap-3 mt-4 text-[10px] text-blue-100 font-medium">
                   <span className="flex items-center gap-1"><CheckCircle2 className="w-3 h-3" /> Sem compromisso</span>
                   <span className="flex items-center gap-1"><Zap className="w-3 h-3" /> Resposta rápida</span>
-                  <span className="hidden sm:flex items-center gap-1"><MapPin className="w-3 h-3" /> Local</span>
                 </div>
               </div>
             </div>
           </div>
         )}
 
-        {/* 2. COMO FUNCIONA (MICRO FLUXO) */}
+        {/* 2. PASSO A PASSO (CONFIANÇA) */}
         {!searchTerm && (
           <div className="px-5">
             <div className="relative pl-4 space-y-5">
@@ -211,7 +243,7 @@ export const ServicesView: React.FC<ServicesViewProps> = ({ onSelectMacro, onOpe
           </div>
         )}
 
-        {/* 3. AGORA NA FREGUESIA - SERVIÇOS AO VIVO (STORIES STYLE) */}
+        {/* 3. AGORA NA FREGUESIA - SERVIÇOS AO VIVO (STORIES 9:16) */}
         {!searchTerm && (
           <div className="pl-5">
             <div className="flex items-center gap-2 mb-3 pr-5">
@@ -219,37 +251,44 @@ export const ServicesView: React.FC<ServicesViewProps> = ({ onSelectMacro, onOpe
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
               </span>
-              <h3 className="text-base font-bold text-gray-900 dark:text-white">
-                Agora na Freguesia
-              </h3>
+              <div className="flex flex-col">
+                <h3 className="text-base font-bold text-gray-900 dark:text-white leading-none">
+                  Agora na Freguesia
+                </h3>
+                <p className="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5">
+                  Profissionais ativos neste momento
+                </p>
+              </div>
             </div>
 
             <div className="flex gap-3 overflow-x-auto pb-4 pr-5 no-scrollbar snap-x">
-              {LIVE_SERVICES.map((item) => (
+              {LIVE_STORIES.map((item) => (
                 <div 
                   key={item.id}
                   onClick={() => onSelectMacro('home', item.name)}
-                  className="snap-center relative flex-shrink-0 w-[140px] aspect-[9/16] rounded-2xl overflow-hidden group active:scale-95 transition-all shadow-md cursor-pointer"
+                  className="snap-center relative flex-shrink-0 w-[120px] h-[200px] rounded-2xl overflow-hidden group active:scale-95 transition-all shadow-md cursor-pointer border border-gray-100 dark:border-gray-800"
                 >
                   <img src={item.image} alt={item.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-black/10"></div>
                   
                   {/* Badge Topo */}
                   <div className="absolute top-2 left-2">
-                    <span className="text-[9px] font-bold text-white bg-black/50 backdrop-blur-md px-2 py-0.5 rounded-full flex items-center gap-1 border border-white/10">
+                    <span className={`text-[9px] font-bold text-white px-2 py-0.5 rounded-full flex items-center gap-1 shadow-sm backdrop-blur-md ${item.badgeColor} bg-opacity-90`}>
                       {item.badge}
                     </span>
                   </div>
 
                   {/* Info Bottom */}
-                  <div className="absolute bottom-3 left-3 right-3 text-left">
-                    <div className="flex items-center gap-1 mb-1">
-                      <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></div>
-                      <span className="text-[9px] text-green-300 font-medium">{item.count}</span>
+                  <div className="absolute bottom-3 left-2 right-2 text-left">
+                    <div className="flex flex-col gap-0.5 mb-2">
+                      <h4 className="text-white font-bold text-xs leading-tight shadow-black drop-shadow-md">{item.name}</h4>
+                      <p className="text-[10px] text-gray-300 font-medium">{item.role}</p>
+                      <p className="text-[9px] text-green-300 font-bold flex items-center gap-1 mt-0.5">
+                        <span className="w-1 h-1 bg-green-400 rounded-full animate-pulse"></span>
+                        {item.status}
+                      </p>
                     </div>
-                    <h4 className="text-white font-bold text-xs leading-tight mb-0.5 shadow-sm">{item.name}</h4>
-                    <p className="text-[10px] text-gray-300 mb-2">{item.status}</p>
-                    <div className="text-[9px] font-bold text-white bg-white/20 backdrop-blur-md px-2 py-1 rounded text-center">
+                    <div className="text-[9px] font-bold text-white bg-white/20 backdrop-blur-md px-2 py-1.5 rounded-lg text-center border border-white/20 hover:bg-white/30 transition-colors">
                       Ver agora
                     </div>
                   </div>
@@ -277,7 +316,7 @@ export const ServicesView: React.FC<ServicesViewProps> = ({ onSelectMacro, onOpe
                   className={`
                     relative overflow-hidden rounded-[20px] p-4 text-left shadow-sm hover:shadow-md transition-all active:scale-[0.98] group min-h-[130px] flex flex-col justify-between
                     ${isEmergency 
-                      ? 'col-span-2 bg-red-600 text-white border-none' 
+                      ? 'col-span-2 bg-red-600 text-white border-none shadow-red-500/20 shadow-lg' 
                       : 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white border border-gray-100 dark:border-gray-700'}
                   `}
                 >
@@ -289,8 +328,8 @@ export const ServicesView: React.FC<ServicesViewProps> = ({ onSelectMacro, onOpe
                       <Icon className="w-5 h-5" strokeWidth={isEmergency ? 2.5 : 2} />
                     </div>
                     {isEmergency && (
-                      <span className="text-[10px] font-bold bg-white/20 px-2 py-1 rounded-full backdrop-blur-sm animate-pulse">
-                        24h
+                      <span className="text-[10px] font-bold bg-white/20 px-2 py-1 rounded-full backdrop-blur-sm animate-pulse border border-white/20">
+                        Plantão 24h
                       </span>
                     )}
                   </div>
@@ -305,7 +344,7 @@ export const ServicesView: React.FC<ServicesViewProps> = ({ onSelectMacro, onOpe
                       </span>
                     )}
                     <span className={`text-[10px] font-bold flex items-center gap-1 mt-auto ${isEmergency ? 'text-white' : 'text-blue-600 dark:text-blue-400'}`}>
-                      Pedir orçamento <ArrowRight className="w-3 h-3" />
+                      Pedir orçamento <ArrowRight className="w-3 h-3 transition-transform group-hover:translate-x-1" />
                     </span>
                   </div>
                 </button>
@@ -322,6 +361,10 @@ export const ServicesView: React.FC<ServicesViewProps> = ({ onSelectMacro, onOpe
                 <Flame className="w-4 h-4 text-orange-500 fill-orange-500" />
                 Serviços em alta
               </h3>
+              <span className="text-[10px] text-green-600 font-bold bg-green-50 px-2 py-0.5 rounded-full flex items-center gap-1">
+                <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span>
+                Profissionais disponíveis
+              </span>
             </div>
 
             <div className="flex gap-3 overflow-x-auto pb-2 pr-5 no-scrollbar">
@@ -349,7 +392,7 @@ export const ServicesView: React.FC<ServicesViewProps> = ({ onSelectMacro, onOpe
           </div>
         )}
 
-        {/* 6. PROVAS DE CONFIANÇA */}
+        {/* 6. SELOS DE CONFIANÇA */}
         <div className="px-5">
           <div className="bg-white dark:bg-gray-800 rounded-2xl p-5 border border-gray-100 dark:border-gray-700 shadow-sm">
             <div className="grid grid-cols-2 gap-y-4 gap-x-2">
@@ -395,7 +438,7 @@ export const ServicesView: React.FC<ServicesViewProps> = ({ onSelectMacro, onOpe
             {DISCOVER_SERVICES.map((item, i) => (
               <div 
                 key={item.id}
-                className="bg-white dark:bg-gray-800 p-3 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 flex gap-3 relative group"
+                className="bg-white dark:bg-gray-800 p-3 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 flex gap-3 relative group active:scale-[0.99] transition-transform"
               >
                 <div className="w-[72px] h-[72px] bg-gray-100 dark:bg-gray-700 rounded-xl flex items-center justify-center shrink-0 border border-gray-100 dark:border-gray-600 text-xl font-bold text-gray-400">
                   {item.name.charAt(0)}
@@ -424,7 +467,7 @@ export const ServicesView: React.FC<ServicesViewProps> = ({ onSelectMacro, onOpe
 
                 <button 
                   onClick={() => onSelectMacro('pro', item.category)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 bg-[#0A46FF] text-white text-[10px] font-bold px-4 py-2 rounded-full shadow-md active:scale-95 transition-transform"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 bg-[#0A46FF] text-white text-[10px] font-bold px-4 py-2 rounded-full shadow-md active:scale-95 transition-transform hover:bg-[#0039CC]"
                 >
                   Pedir orçamento
                 </button>
