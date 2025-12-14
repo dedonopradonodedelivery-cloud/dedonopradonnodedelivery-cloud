@@ -213,7 +213,8 @@ const App: React.FC = () => {
 
     // 2. Redirecionar se estiver em área protegida e deslogar
     if (!user && !isAuthLoading) {
-        const protectedTabs = ['profile', 'store_area', 'favorites', 'edit_profile', 'merchant_panel'];
+        // 'profile' foi removido desta lista para permitir que o usuário veja a tela de "Visitante/Login" do MenuView
+        const protectedTabs = ['store_area', 'favorites', 'edit_profile', 'merchant_panel'];
         if (protectedTabs.includes(activeTab)) {
             setActiveTab('home');
         }
