@@ -20,7 +20,15 @@ import {
   Volume2,
   VolumeX,
   Heart,
-  Users
+  Users,
+  PlayCircle,
+  Tag,
+  Map as MapIcon,
+  Smile,
+  Coffee,
+  RefreshCw,
+  Gift,
+  Bell
 } from "lucide-react";
 import { useUserLocation } from "../hooks/useUserLocation";
 import { useMediaQuery } from "../hooks/useMediaQuery";
@@ -42,8 +50,21 @@ type ExploreViewProps = {
 // --- MOCK DATA FOR STORIES ---
 const EXPLORE_STORIES = [
   { 
+    id: 's3', 
+    merchantName: 'Burger King', 
+    category: 'Comida',
+    status: 'Ao vivo',
+    statusColor: 'bg-red-600',
+    logo: getStoreLogo(1), 
+    videoUrl: 'https://videos.pexels.com/video-files/852395/852395-sd_540_960_30fps.mp4', 
+    isLive: true 
+  },
+  { 
     id: 's1', 
     merchantName: 'Padaria Imperial', 
+    category: 'Padaria',
+    status: 'Promoção',
+    statusColor: 'bg-indigo-600',
     logo: getStoreLogo(8), 
     videoUrl: 'https://videos.pexels.com/video-files/2942857/2942857-sd_540_960_24fps.mp4', 
     isLive: false 
@@ -51,20 +72,19 @@ const EXPLORE_STORIES = [
   { 
     id: 's2', 
     merchantName: 'Fit Studio', 
+    category: 'Fitness',
+    status: 'Dica',
+    statusColor: 'bg-emerald-600',
     logo: getStoreLogo(7), 
     videoUrl: 'https://videos.pexels.com/video-files/4434246/4434246-sd_540_960_25fps.mp4', 
     isLive: false 
   },
   { 
-    id: 's3', 
-    merchantName: 'Burger King', 
-    logo: getStoreLogo(1), 
-    videoUrl: 'https://videos.pexels.com/video-files/852395/852395-sd_540_960_30fps.mp4', 
-    isLive: true 
-  },
-  { 
     id: 's4', 
     merchantName: 'Moda Freguesia', 
+    category: 'Moda',
+    status: 'Novidade',
+    statusColor: 'bg-blue-600',
     logo: getStoreLogo(11), 
     videoUrl: 'https://videos.pexels.com/video-files/6333333/6333333-sd_540_960_30fps.mp4', 
     isLive: false 
@@ -72,29 +92,50 @@ const EXPLORE_STORIES = [
   { 
     id: 's5', 
     merchantName: 'Pet Shop Bob', 
+    category: 'Serviço',
+    status: 'Bastidores',
+    statusColor: 'bg-orange-500',
     logo: getStoreLogo(5), 
     videoUrl: 'https://videos.pexels.com/video-files/4625753/4625753-sd_540_960_25fps.mp4', 
     isLive: false 
   },
 ];
 
-const CategoryChip: React.FC<{
+// --- STYLE CARD COMPONENT ---
+const StyleCard: React.FC<{
+  id: string;
   label: string;
-  active?: boolean;
-  icon?: React.ReactNode;
-  onClick?: () => void;
-}> = ({ label, active, icon, onClick }) => (
+  active: boolean;
+  icon: React.ElementType;
+  gradient: string;
+  iconColor: string;
+  onClick: () => void;
+}> = ({ id, label, active, icon: Icon, gradient, iconColor, onClick }) => (
   <button
     onClick={onClick}
-    className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-medium transition-all whitespace-nowrap flex-shrink-0
-      ${
-        active
-          ? "bg-[#1E5BFF] text-white border-transparent shadow-sm"
-          : "bg-white/80 dark:bg-gray-900/40 text-gray-700 dark:text-gray-200 border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800/80"
-      }`}
+    className={`
+      relative min-w-[100px] h-[110px] rounded-2xl flex flex-col items-center justify-center gap-3 transition-all duration-300 active:scale-95 group overflow-hidden
+      ${active 
+        ? `${gradient} text-white shadow-lg scale-105 ring-2 ring-offset-2 ring-offset-gray-50 dark:ring-offset-gray-900 ring-transparent` 
+        : 'bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md'
+      }
+    `}
   >
-    {icon && <span className="w-3.5 h-3.5 flex items-center justify-center">{icon}</span>}
-    <span>{label}</span>
+    {/* Background Pattern for active state */}
+    {active && (
+        <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-from),_transparent)]" />
+    )}
+
+    <div className={`
+      w-10 h-10 rounded-full flex items-center justify-center transition-colors duration-300
+      ${active ? 'bg-white/20 backdrop-blur-sm' : 'bg-gray-50 dark:bg-gray-700'}
+    `}>
+        <Icon className={`w-5 h-5 ${active ? 'text-white' : iconColor}`} />
+    </div>
+    
+    <span className={`text-xs font-bold ${active ? 'text-white' : 'text-gray-600 dark:text-gray-300'}`}>
+        {label}
+    </span>
   </button>
 );
 
@@ -104,6 +145,8 @@ type HorizontalStoreSectionProps = {
   stores: Store[];
   onStoreClick: (store: Store) => void;
   onViewAll?: () => void;
+  onMapClick?: () => void;
+  variant?: 'default' | 'nearby' | 'curated';
 };
 
 const HorizontalStoreSection: React.FC<HorizontalStoreSectionProps> = ({
@@ -112,6 +155,8 @@ const HorizontalStoreSection: React.FC<HorizontalStoreSectionProps> = ({
   stores,
   onStoreClick,
   onViewAll,
+  onMapClick,
+  variant = 'default'
 }) => {
   if (!stores.length) return null;
 
@@ -131,51 +176,100 @@ const HorizontalStoreSection: React.FC<HorizontalStoreSectionProps> = ({
           )}
         </div>
 
-        {/* Botão Ver mais substitui as setas */}
-        <button 
-          onClick={onViewAll}
-          className="text-xs font-medium text-blue-600 dark:text-blue-400 hover:text-blue-700 transition-colors flex items-center gap-0.5"
-        >
-          Ver mais
-        </button>
+        <div className="flex items-center gap-2">
+            {onMapClick && (
+                <button 
+                    onClick={onMapClick}
+                    className="text-[10px] font-bold text-[#1E5BFF] bg-blue-50 dark:bg-blue-900/20 px-2.5 py-1.5 rounded-full flex items-center gap-1 hover:bg-blue-100 transition-colors"
+                >
+                    <MapIcon className="w-3 h-3" />
+                    Ver no mapa
+                </button>
+            )}
+            {!onMapClick && (
+                <button 
+                onClick={onViewAll}
+                className="text-xs font-medium text-blue-600 dark:text-blue-400 hover:text-blue-700 transition-colors flex items-center gap-0.5"
+                >
+                Ver mais
+                </button>
+            )}
+        </div>
       </div>
 
       <div
         className="horizontal-scroll flex gap-3 overflow-x-auto pb-1 no-scrollbar -mx-0.5 px-0.5"
       >
-        {stores.map((store) => (
+        {stores.map((store, index) => {
+          // Logic for Curated Badges
+          let curatedBadge = null;
+          if (variant === 'curated') {
+             if ((store.rating || 0) >= 4.8) {
+                 curatedBadge = { text: "⭐ Bem avaliado", bg: "bg-yellow-500", textCol: "text-white" };
+             } else if ((store.reviewsCount || 0) > 100) {
+                 curatedBadge = { text: "🔥 Popular", bg: "bg-orange-500", textCol: "text-white" };
+             } else {
+                 curatedBadge = { text: "💙 Favorito do bairro", bg: "bg-blue-600", textCol: "text-white" };
+             }
+          }
+
+          return (
           <button
             key={store.id}
             onClick={() => onStoreClick(store)}
             className="min-w-[250px] max-w-[260px] bg-white dark:bg-gray-900 rounded-2xl shadow-[0_10px_30px_rgba(15,23,42,0.08)] dark:shadow-[0_10px_30px_rgba(0,0,0,0.45)] border border-gray-100 dark:border-gray-800 overflow-hidden group text-left hover:-translate-y-0.5 transition-all duration-200"
           >
-            <div className="relative h-24 bg-gray-100 dark:bg-gray-800 overflow-hidden">
+            <div className="relative h-28 bg-gray-100 dark:bg-gray-800 overflow-hidden">
               <img
                 src={(store as any).coverImage || store.image || (store as any).imageUrl}
                 alt={store.name}
                 className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/5 to-transparent" />
 
-              <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between gap-2">
-                <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-black/70 backdrop-blur-sm">
-                  <Star className="w-3 h-3 text-yellow-400 fill-yellow-400" />
-                  <span className="text-[11px] font-semibold text-white">
-                    {store.rating?.toFixed(1) || "Novo"}
-                  </span>
-                  {store.reviewsCount !== undefined && (
-                    <span className="text-[10px] text-white/70">
-                      ({store.reviewsCount})
-                    </span>
-                  )}
-                </div>
+              {/* CURATED BADGE (Top Left) */}
+              {variant === 'curated' && curatedBadge && (
+                  <div className={`absolute top-2 left-2 px-2 py-1 rounded-lg text-[10px] font-bold shadow-sm z-10 ${curatedBadge.bg} ${curatedBadge.textCol}`}>
+                      {curatedBadge.text}
+                  </div>
+              )}
 
-                <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-black/70 backdrop-blur-sm">
-                  <MapPin className="w-3 h-3 text-white/90" />
-                  <span className="text-[10px] text-white/90">
-                    {(store as any).distanceText || store.distance || "Perto de você"}
-                  </span>
-                </div>
+              {/* OVERLAYS: Variant Logic */}
+              <div className="absolute bottom-2 left-2 right-2 flex items-end justify-between gap-2">
+                
+                {variant === 'nearby' ? (
+                    // VARIANT NEARBY: Foco em Tempo e Distância
+                    <div className="flex gap-1.5">
+                        <div className="flex items-center gap-1 px-2 py-1 rounded-lg bg-white/95 backdrop-blur-sm shadow-sm">
+                            <span className="text-[10px] font-bold text-gray-900">⏱ {(store as any).eta || "3 min"}</span>
+                        </div>
+                        <div className="flex items-center gap-1 px-2 py-1 rounded-lg bg-black/60 backdrop-blur-sm border border-white/10">
+                            <span className="text-[10px] font-bold text-white">📍 {(store as any).distanceText || store.distance || "500m"}</span>
+                        </div>
+                    </div>
+                ) : (
+                    // VARIANT DEFAULT & CURATED (Bottom Info)
+                    <>
+                        <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-black/70 backdrop-blur-sm">
+                        <Star className="w-3 h-3 text-yellow-400 fill-yellow-400" />
+                        <span className="text-[11px] font-semibold text-white">
+                            {store.rating?.toFixed(1) || "Novo"}
+                        </span>
+                        {store.reviewsCount !== undefined && (
+                            <span className="text-[10px] text-white/70">
+                            ({store.reviewsCount})
+                            </span>
+                        )}
+                        </div>
+
+                        <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-black/70 backdrop-blur-sm">
+                        <MapPin className="w-3 h-3 text-white/90" />
+                        <span className="text-[10px] text-white/90">
+                            {(store as any).distanceText || store.distance || "Perto"}
+                        </span>
+                        </div>
+                    </>
+                )}
               </div>
             </div>
 
@@ -183,7 +277,6 @@ const HorizontalStoreSection: React.FC<HorizontalStoreSectionProps> = ({
               <div className="flex items-start justify-between gap-2 mb-1.5">
                 <div className="min-w-0 flex items-center gap-2">
                   <div className="w-8 h-8 rounded-full border border-gray-100 dark:border-gray-700 overflow-hidden flex-shrink-0">
-                    {/* Using new Logo Logic */}
                     <img src={store.logoUrl || getStoreLogo(store.name.length)} alt="" className="w-full h-full object-cover" />
                   </div>
                   <div>
@@ -235,7 +328,8 @@ const HorizontalStoreSection: React.FC<HorizontalStoreSectionProps> = ({
                       {(store as any).status || "Aberto agora"}
                     </span>
                   </div>
-                  {(store as any).eta && (
+                  {/* Se não for variant 'nearby', mostra ETA aqui embaixo. Se for 'nearby', já mostrou na foto */}
+                  {variant !== 'nearby' && (store as any).eta && (
                     <span className="text-[10px] text-gray-400">
                       • {(store as any).eta} min
                     </span>
@@ -252,7 +346,7 @@ const HorizontalStoreSection: React.FC<HorizontalStoreSectionProps> = ({
               </div>
             </div>
           </button>
-        ))}
+        )})}
       </div>
     </section>
   );
@@ -365,9 +459,31 @@ export const ExploreView: React.FC<ExploreViewProps> = ({
     }
 
     if (selectedStyle) {
-      list = list.filter((store) =>
-        (store as any).tags?.some((tag: string) => tag.toLowerCase().includes(selectedStyle.toLowerCase()))
-      );
+      // Enhanced Filter Logic for Styles
+      if (selectedStyle === "Romântico") {
+          list = list.filter(store => 
+              (store as any).tags?.some((t:string) => t.toLowerCase() === 'romântico') ||
+              store.category.toLowerCase().includes('restaurante')
+          );
+      } else if (selectedStyle === "Família") {
+          list = list.filter(store => 
+              (store as any).tags?.some((t:string) => ['família', 'kids', 'lazer'].includes(t.toLowerCase()))
+          );
+      } else if (selectedStyle === "Moderno") {
+          list = list.filter(store => 
+              (store as any).tags?.some((t:string) => ['moderno', 'trendy', 'novo'].includes(t.toLowerCase()))
+          );
+      } else if (selectedStyle === "Econômico") {
+          list = list.filter(store => 
+              (store as any).priceLevel === 1 ||
+              (store as any).tags?.some((t:string) => t.toLowerCase() === 'promoção')
+          );
+      } else if (selectedStyle === "Experiências") {
+          list = list.filter(store => 
+              store.category.toLowerCase().includes('serviço') ||
+              (store as any).tags?.some((t:string) => ['workshop', 'lazer', 'spa'].includes(t.toLowerCase()))
+          );
+      }
     }
 
     return list;
@@ -415,88 +531,173 @@ export const ExploreView: React.FC<ExploreViewProps> = ({
     <>
       <div className="px-4 py-4 space-y-6">
         
-        {/* Stories Section - REDESIGNED 9:16 CARDS */}
+        {/* Stories Section */}
         <section className="mt-2">
           <div className="flex items-center justify-between mb-3 px-1">
-            <h2 className="text-sm font-semibold text-gray-900 dark:text-white">
-              Stories da Freguesia
-            </h2>
+            <div className="flex items-center gap-2">
+                <PlayCircle className="w-4 h-4 text-red-500 fill-red-500 animate-pulse" />
+                <h2 className="text-sm font-semibold text-gray-900 dark:text-white">
+                Agora na Freguesia
+                </h2>
+            </div>
           </div>
           
           <div className="flex gap-3 overflow-x-auto pb-4 no-scrollbar -mx-4 px-4 snap-x">
-            {EXPLORE_STORIES.map((story, index) => (
-              <button
-                key={story.id}
-                onClick={() => setActiveStoryIndex(index)}
-                className="snap-start relative flex-shrink-0 w-28 h-48 rounded-xl overflow-hidden group shadow-md border border-gray-100 dark:border-gray-800"
-              >
-                {/* Image Background */}
-                <img 
-                  src={story.logo} 
-                  alt={story.merchantName} 
-                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
-                />
-                
-                {/* Gradient Overlay for Text Visibility */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent opacity-90" />
+            {EXPLORE_STORIES.map((story, index) => {
+                const isActive = story.isLive || story.status === 'Promoção';
+                return (
+                  <button
+                    key={story.id}
+                    onClick={() => setActiveStoryIndex(index)}
+                    className={`snap-start relative flex-shrink-0 w-28 h-48 rounded-xl overflow-hidden group shadow-md border dark:border-gray-800 transition-all ${isActive ? 'ring-2 ring-offset-2 ring-offset-gray-50 dark:ring-offset-gray-900 ring-indigo-500/50' : 'border-gray-100'}`}
+                  >
+                    {/* Image Background */}
+                    <img 
+                      src={story.logo} 
+                      alt={story.merchantName} 
+                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
+                    />
+                    
+                    {/* Gradient Overlay for Text Visibility */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-90" />
 
-                {/* Live Badge if applicable */}
-                {story.isLive && (
-                  <div className="absolute top-2 right-2 bg-red-600/90 text-white text-[8px] font-bold px-1.5 py-0.5 rounded-md animate-pulse z-10 border border-white/20">
-                    AO VIVO
-                  </div>
-                )}
+                    {/* Status Badge */}
+                    <div className={`absolute top-2 left-2 ${story.statusColor} text-white text-[8px] font-bold px-1.5 py-0.5 rounded-md z-10 shadow-sm border border-white/20 flex items-center gap-1`}>
+                        {story.isLive && <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />}
+                        {story.status}
+                    </div>
 
-                {/* Content Overlay */}
-                <div className="absolute bottom-3 left-2 right-2 z-10 flex flex-col items-start text-left">
-                   {/* Mini Avatar on Card */}
-                   <div className={`w-8 h-8 rounded-full p-[1px] mb-1.5 ${story.isLive ? 'bg-gradient-to-tr from-orange-500 to-purple-600' : 'bg-white/30'}`}>
-                        <img src={story.logo} className="w-full h-full rounded-full object-cover border border-black/10" alt="" />
-                   </div>
-                   <span className="text-white text-[10px] font-bold leading-tight line-clamp-2 drop-shadow-md">
-                      {story.merchantName}
-                   </span>
-                </div>
-              </button>
-            ))}
+                    {/* Content Overlay */}
+                    <div className="absolute bottom-2 left-2 right-2 z-10 flex flex-col items-start text-left">
+                      <span className="text-white text-[11px] font-bold leading-tight line-clamp-2 drop-shadow-md mb-0.5">
+                          {story.merchantName}
+                      </span>
+                      <div className="flex items-center gap-1 mb-1.5">
+                          <Tag className="w-2.5 h-2.5 text-gray-300" />
+                          <span className="text-[9px] text-gray-300 font-medium">{story.category}</span>
+                      </div>
+                      
+                      {/* Micro CTA */}
+                      <div className="flex items-center gap-1 text-[8px] font-bold text-white/80 bg-white/20 px-1.5 py-0.5 rounded-full backdrop-blur-sm">
+                          Toque para ver <ChevronRight className="w-2 h-2" />
+                      </div>
+                    </div>
+                  </button>
+                );
+            })}
+          </div>
+        </section>
+
+        {/* SECTION REPLACED: INTERACTIVE STYLE DISCOVERY */}
+        <section className="mt-4 mb-2">
+          <div className="flex items-center justify-between mb-4 px-1">
+            <h2 className="text-sm font-semibold text-gray-900 dark:text-white leading-tight">
+              Como você quer viver a Freguesia hoje?
+            </h2>
+          </div>
+
+          <div className="flex gap-3 overflow-x-auto pb-4 no-scrollbar -mx-4 px-4 snap-x">
+            <StyleCard 
+                id="Romântico" 
+                label="Romântico" 
+                icon={Heart} 
+                active={selectedStyle === "Romântico"} 
+                gradient="bg-gradient-to-br from-pink-500 to-rose-500"
+                iconColor="text-pink-500"
+                onClick={() => setSelectedStyle(selectedStyle === "Romântico" ? null : "Romântico")}
+            />
+            <StyleCard 
+                id="Família" 
+                label="Família" 
+                icon={Users} 
+                active={selectedStyle === "Família"} 
+                gradient="bg-gradient-to-br from-green-500 to-emerald-500"
+                iconColor="text-emerald-500"
+                onClick={() => setSelectedStyle(selectedStyle === "Família" ? null : "Família")}
+            />
+            <StyleCard 
+                id="Moderno" 
+                label="Moderno" 
+                icon={Zap} 
+                active={selectedStyle === "Moderno"} 
+                gradient="bg-gradient-to-br from-violet-500 to-purple-500"
+                iconColor="text-violet-500"
+                onClick={() => setSelectedStyle(selectedStyle === "Moderno" ? null : "Moderno")}
+            />
+            <StyleCard 
+                id="Econômico" 
+                label="Econômico" 
+                icon={Coins} 
+                active={selectedStyle === "Econômico"} 
+                gradient="bg-gradient-to-br from-yellow-500 to-amber-500"
+                iconColor="text-amber-500"
+                onClick={() => setSelectedStyle(selectedStyle === "Econômico" ? null : "Econômico")}
+            />
+            <StyleCard 
+                id="Experiências" 
+                label="Experiências" 
+                icon={Sparkles} 
+                active={selectedStyle === "Experiências"} 
+                gradient="bg-gradient-to-br from-blue-500 to-indigo-500"
+                iconColor="text-indigo-500"
+                onClick={() => setSelectedStyle(selectedStyle === "Experiências" ? null : "Experiências")}
+            />
           </div>
         </section>
 
         {hasAnyStore ? (
           <React.Fragment>
-            <HorizontalStoreSection
-              title="Lojas perto de você"
-              subtitle="Sugestões na Freguesia e arredores"
-              stores={nearbyStores}
-              onStoreClick={onStoreClick}
-              onViewAll={onFilterClick}
-            />
+            {selectedStyle ? (
+                // IF STYLE SELECTED, SHOW FILTERED LIST
+                <HorizontalStoreSection
+                    title={`Para você: ${selectedStyle}`}
+                    subtitle="Sugestões baseadas no seu estilo escolhido"
+                    stores={sortedStores}
+                    onStoreClick={onStoreClick}
+                    onViewAll={onFilterClick}
+                    variant="curated"
+                />
+            ) : (
+                // DEFAULT LISTS IF NO STYLE SELECTED
+                <>
+                    <HorizontalStoreSection
+                    title="Perto de você agora"
+                    subtitle="A poucos minutos da sua localização"
+                    stores={nearbyStores}
+                    onStoreClick={onStoreClick}
+                    onViewAll={onFilterClick}
+                    onMapClick={onLocationClick}
+                    variant="nearby"
+                    />
 
-            <HorizontalStoreSection
-              title="Pra você"
-              subtitle="Selecionadas pelo seu estilo e avaliações"
-              stores={sortedStores}
-              onStoreClick={onStoreClick}
-              onViewAll={onFilterClick}
-            />
+                    <HorizontalStoreSection
+                    title="Escolhidos pra você"
+                    subtitle="Baseado no que você curte e no que está bombando"
+                    stores={sortedStores}
+                    onStoreClick={onStoreClick}
+                    onViewAll={onFilterClick}
+                    variant="curated"
+                    />
 
-            {cashbackStores.length > 0 && (
-              <HorizontalStoreSection
-                title="Com cashback"
-                subtitle="Ganhe parte do valor de volta nas suas compras"
-                stores={cashbackStores}
-                onStoreClick={onStoreClick}
-                onViewAll={() => handleFilterClick("cashback")}
-              />
+                    {cashbackStores.length > 0 && (
+                    <HorizontalStoreSection
+                        title="Com cashback"
+                        subtitle="Ganhe parte do valor de volta nas suas compras"
+                        stores={cashbackStores}
+                        onStoreClick={onStoreClick}
+                        onViewAll={() => handleFilterClick("cashback")}
+                    />
+                    )}
+
+                    <HorizontalStoreSection
+                    title="Tendências na Freguesia"
+                    subtitle="Lugares que estão chamando atenção por aqui"
+                    stores={trendingStores}
+                    onStoreClick={onStoreClick}
+                    onViewAll={onFilterClick}
+                    />
+                </>
             )}
-
-            <HorizontalStoreSection
-              title="Tendências na Freguesia"
-              subtitle="Lugares que estão chamando atenção por aqui"
-              stores={trendingStores}
-              onStoreClick={onStoreClick}
-              onViewAll={onFilterClick}
-            />
           </React.Fragment>
         ) : (
           <div className="pt-8 pb-4 flex flex-col items-center text-center text-gray-500 dark:text-gray-400">
@@ -510,44 +711,47 @@ export const ExploreView: React.FC<ExploreViewProps> = ({
           </div>
         )}
 
-        {/* SECTION REPLACED: STYLE FILTER CHIPS */}
-        <section className="mt-6 mb-2">
-          <div className="flex items-center justify-between mb-3 px-1">
-            <h2 className="text-sm font-semibold text-gray-900 dark:text-white">
-              Descubra seu estilo na Freguesia
-            </h2>
-          </div>
+        {/* --- RETENTION BLOCK: 'Volte amanhã' --- */}
+        <section className="mt-8 mb-6 px-1">
+            <div className="bg-gradient-to-br from-indigo-50 to-blue-50 dark:from-indigo-900/20 dark:to-blue-900/20 rounded-2xl p-6 border border-indigo-100 dark:border-indigo-800 text-center relative overflow-hidden">
+                {/* Decorative */}
+                <div className="absolute top-0 right-0 w-24 h-24 bg-blue-200/20 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none"></div>
 
-          <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar -mx-4 px-4">
-            <CategoryChip
-              label="Romântico"
-              active={selectedStyle === "Romântico"}
-              icon={<Heart className={`w-3 h-3 ${selectedStyle === "Romântico" ? "text-white" : "text-pink-500"}`} />}
-              onClick={() => setSelectedStyle(selectedStyle === "Romântico" ? null : "Romântico")}
-            />
-            <CategoryChip
-              label="Família"
-              active={selectedStyle === "Família"}
-              icon={<Users className={`w-3 h-3 ${selectedStyle === "Família" ? "text-white" : "text-emerald-500"}`} />}
-              onClick={() => setSelectedStyle(selectedStyle === "Família" ? null : "Família")}
-            />
-            <CategoryChip
-              label="Moderno"
-              active={selectedStyle === "Moderno"}
-              icon={<Zap className={`w-3 h-3 ${selectedStyle === "Moderno" ? "text-white" : "text-violet-500"}`} />}
-              onClick={() => setSelectedStyle(selectedStyle === "Moderno" ? null : "Moderno")}
-            />
-            <CategoryChip
-              label="Clássico"
-              active={selectedStyle === "Clássico"}
-              icon={<Star className={`w-3 h-3 ${selectedStyle === "Clássico" ? "text-white" : "text-amber-500"}`} />}
-              onClick={() => setSelectedStyle(selectedStyle === "Clássico" ? null : "Clássico")}
-            />
-          </div>
+                <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">Volte amanhã</h3>
+                <p className="text-sm text-gray-600 dark:text-gray-300 mb-6 max-w-xs mx-auto">
+                    Todo dia tem novidade diferente na Freguesia
+                </p>
+
+                <div className="grid grid-cols-3 gap-2 mb-6">
+                    <div className="flex flex-col items-center gap-1">
+                        <div className="w-10 h-10 bg-white dark:bg-gray-800 rounded-full flex items-center justify-center text-blue-500 shadow-sm border border-gray-100 dark:border-gray-700">
+                            <RefreshCw className="w-5 h-5" />
+                        </div>
+                        <span className="text-[10px] font-medium text-gray-600 dark:text-gray-400">Conteúdo diário</span>
+                    </div>
+                    <div className="flex flex-col items-center gap-1">
+                        <div className="w-10 h-10 bg-white dark:bg-gray-800 rounded-full flex items-center justify-center text-pink-500 shadow-sm border border-gray-100 dark:border-gray-700">
+                            <Gift className="w-5 h-5" />
+                        </div>
+                        <span className="text-[10px] font-medium text-gray-600 dark:text-gray-400">Sorteios</span>
+                    </div>
+                    <div className="flex flex-col items-center gap-1">
+                        <div className="w-10 h-10 bg-white dark:bg-gray-800 rounded-full flex items-center justify-center text-green-500 shadow-sm border border-gray-100 dark:border-gray-700">
+                            <Zap className="w-5 h-5" />
+                        </div>
+                        <span className="text-[10px] font-medium text-gray-600 dark:text-gray-400">Cashback</span>
+                    </div>
+                </div>
+
+                <button className="w-full bg-[#1E5BFF] hover:bg-blue-700 text-white text-sm font-bold py-3 rounded-xl shadow-lg shadow-blue-500/20 active:scale-95 transition-all flex items-center justify-center gap-2">
+                    <Bell className="w-4 h-4" />
+                    Ativar lembrete diário
+                </button>
+            </div>
         </section>
 
         {/* --- ADDED MASTER SPONSOR BANNER --- */}
-        <section className="mt-6 mb-8">
+        <section className="mt-2 mb-8">
            <MasterSponsorBanner onClick={onViewMasterSponsor} />
         </section>
 
@@ -575,7 +779,9 @@ export const ExploreView: React.FC<ExploreViewProps> = ({
                   </div>
                   <div className="text-white drop-shadow-md">
                       <p className="font-bold text-sm leading-tight">{activeStory.merchantName}</p>
-                      <p className="text-[10px] opacity-80">Patrocinado</p>
+                      <p className="text-[10px] opacity-80 flex items-center gap-1">
+                        {activeStory.status} • {activeStory.category}
+                      </p>
                   </div>
               </div>
               <div className="flex items-center gap-4">
