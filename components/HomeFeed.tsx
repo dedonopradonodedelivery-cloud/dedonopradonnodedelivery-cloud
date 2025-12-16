@@ -6,7 +6,7 @@ import {
   Coins, 
   Loader2,
   AlertCircle,
-  ArrowRight,
+  ArrowRight, 
   Filter,
   Percent,
   Star,
@@ -29,7 +29,9 @@ import {
   Share2,
   Gift,
   Activity,
-  Eye
+  Eye,
+  Store as StoreIcon,
+  Briefcase
 } from 'lucide-react';
 import { QuoteRequestModal } from './QuoteRequestModal';
 import { supabase } from '../lib/supabaseClient';
@@ -197,18 +199,6 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
     return { label: 'Jantar', sub: 'Delivery' };
   }, []);
 
-  // 1) Dynamic Welcome Message Logic
-  const welcomeMessage = useMemo(() => {
-    const msgs = [
-      "Bom te ver por aqui 👋",
-      "Pronto para economizar hoje?",
-      "O bairro tem novidades pra você",
-      "Que bom ter você de volta 💙",
-      "Descubra o melhor da Freguesia ✨"
-    ];
-    return msgs[Math.floor(Math.random() * msgs.length)];
-  }, []);
-
   useEffect(() => {
     const timer = setTimeout(() => setHasSpun(true), 100);
     return () => clearTimeout(timer);
@@ -292,39 +282,61 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
           0%, 100% { transform: translate(0, 0) scale(1); }
           50% { transform: translate(-10px, 10px) scale(1.1); }
         }
-        /* Updated Premium Organic Float for Badge */
-        @keyframes float-badge-premium {
-          0% { transform: translate(0, 0) rotate(0deg) scale(1); }
-          33% { transform: translate(2px, 4px) rotate(0.8deg) scale(0.99); }
-          66% { transform: translate(-1px, 7px) rotate(-0.5deg) scale(0.99); }
-          100% { transform: translate(0, 0) rotate(0deg) scale(1); }
+        
+        /* Layer 1: Primary Drift (Continuous, No Stops) */
+        @keyframes drift-continuous {
+          0%   { transform: translate(0px, 0px); }
+          15%  { transform: translate(-5px, 8px); }
+          30%  { transform: translate(-15px, 18px); }
+          45%  { transform: translate(-26px, 24px); } /* Lowest-Right */
+          60%  { transform: translate(-20px, 15px); }
+          75%  { transform: translate(-10px, 5px); }
+          90%  { transform: translate(-2px, 2px); }
+          100% { transform: translate(0px, 0px); }
         }
-        /* NEW: Heartbeat Premium Animation */
-        @keyframes heartbeat-premium {
-          0% { transform: scale(1) translateY(0); }
-          8% { transform: scale(1.035) translateY(-1.5px); } /* Beat 1 */
-          16% { transform: scale(1) translateY(0); }
-          22% { transform: scale(1.02) translateY(-0.5px); } /* Beat 2 */
-          30% { transform: scale(1) translateY(0); }
-          100% { transform: scale(1) translateY(0); } /* Long Pause */
+
+        /* Layer 2: Micro Float & Breath (Subtle, Organic) */
+        @keyframes float-micro {
+          0%, 100% { 
+            transform: translateY(0) scale(1); 
+            filter: drop-shadow(0 10px 12px rgba(0,0,0,0.2));
+          }
+          50% { 
+            transform: translateY(4px) scale(1.02); 
+            filter: drop-shadow(0 14px 16px rgba(0,0,0,0.25));
+          }
         }
+
         .animate-blob {
           animation: blob-float 8s infinite ease-in-out;
         }
         .animate-blob-delay {
           animation: blob-float-reverse 10s infinite ease-in-out;
         }
-        .animate-float-badge-premium {
-          animation: float-badge-premium 4.5s ease-in-out infinite;
+        
+        .animate-drift-continuous {
+          animation: drift-continuous 7.5s linear infinite;
+        }
+        .animate-float-micro {
+          animation: float-micro 2.8s ease-in-out infinite;
+        }
+
+        .paused {
+          animation-play-state: paused;
+        }
+        
+        /* Premium Heartbeat */
+        @keyframes heartbeat-premium {
+          0% { transform: scale(1) translateY(0); }
+          8% { transform: scale(1.035) translateY(-1.5px); }
+          16% { transform: scale(1) translateY(0); }
+          22% { transform: scale(1.02) translateY(-0.5px); }
+          30% { transform: scale(1) translateY(0); }
+          100% { transform: scale(1) translateY(0); }
         }
         .animate-float-heart {
           animation: heartbeat-premium 2.4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
           transform-origin: center;
-        }
-        @media (prefers-reduced-motion: reduce) {
-          .animate-float-heart, .animate-blob, .animate-float-badge-premium {
-            animation: none;
-          }
         }
       `}</style>
       
@@ -364,30 +376,42 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
       ) : (
         <div className="flex flex-col gap-8 w-full mt-2">
             
-            {/* 1) Dynamic Welcome Message */}
-            <div className="px-5 -mb-2">
-              <p className="text-gray-500 dark:text-gray-400 text-sm font-medium font-display animate-in fade-in duration-700">
-                {welcomeMessage}
-              </p>
-            </div>
-
-            {/* --- COMPACT HERO SECTION (25-35% SHORTER) --- */}
-            <div className="px-5 w-full">
-               <div className="w-full bg-gradient-to-br from-[#2D6DF6] via-[#2563EB] to-[#0F359E] rounded-[28px] p-5 text-white relative overflow-hidden shadow-xl shadow-blue-600/20 group transform transition-all active:scale-[0.99] hover:scale-[1.01] border border-white/10">
+            {/* --- COMPACT HERO SECTION --- */}
+            <div className="px-5 w-full relative">
+               <div className="w-full bg-gradient-to-br from-[#2D6DF6] via-[#2563EB] to-[#0F359E] rounded-[28px] p-5 text-white relative overflow-visible shadow-xl shadow-blue-600/20 group transform transition-all active:scale-[0.99] hover:scale-[1.01] border border-white/10">
                   
-                  {/* Dynamic Background Elements (Parallax-like) */}
-                  <div className="absolute top-0 right-0 w-[250px] h-[250px] bg-white/10 rounded-full blur-[80px] -mr-20 -mt-20 pointer-events-none mix-blend-overlay animate-blob"></div>
-                  <div className="absolute bottom-0 left-0 w-[180px] h-[180px] bg-indigo-500/30 rounded-full blur-[60px] -ml-10 -mb-10 pointer-events-none mix-blend-screen animate-blob-delay"></div>
+                  {/* Dynamic Background Elements */}
+                  <div className="absolute top-0 right-0 w-[250px] h-[250px] bg-white/10 rounded-full blur-[80px] -mr-20 -mt-20 pointer-events-none mix-blend-overlay animate-blob overflow-hidden"></div>
+                  <div className="absolute bottom-0 left-0 w-[180px] h-[180px] bg-indigo-500/30 rounded-full blur-[60px] -ml-10 -mb-10 pointer-events-none mix-blend-screen animate-blob-delay overflow-hidden"></div>
                   
-                  {/* Floating Cash Value Badge (Visual Promise) - Compact Position & Organic Animation */}
-                  <div className="absolute top-5 right-5 z-20 animate-float-badge-premium cursor-default pointer-events-none sm:pointer-events-auto">
-                    <div className="bg-white/20 backdrop-blur-lg border border-white/40 rounded-2xl p-2 pr-3.5 flex items-center gap-2 shadow-lg shadow-blue-900/10 group-hover:scale-[1.02] transition-transform duration-500">
-                        <div className="bg-green-400 rounded-full w-8 h-8 flex items-center justify-center shadow-inner ring-2 ring-white/30">
-                            <span className="font-bold text-green-900 text-xs">$</span>
-                        </div>
-                        <div className="flex flex-col justify-center">
-                            <span className="text-[9px] uppercase font-bold text-green-100 leading-none mb-0.5">Saldo</span>
-                            <span className="text-sm font-black text-white leading-none tracking-tight shadow-black drop-shadow-sm">R$ 12,40</span>
+                  {/* Floating Cash Value Badge (Visual Promise) - Layered Continuous Motion */}
+                  <div 
+                    className="absolute top-5 right-5 z-20 group/badge"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                    }}
+                  >
+                    {/* Layer 1: Continuous Drift (No Stops) */}
+                    <div className="animate-drift-continuous group-hover/badge:paused">
+                        {/* Layer 2: Micro Float & Breath */}
+                        <div className="animate-float-micro cursor-pointer transition-transform duration-200 group-active/badge:scale-95">
+                            <div className="bg-white/20 backdrop-blur-lg border border-white/40 rounded-2xl p-2 pr-3.5 flex items-center gap-2 shadow-lg shadow-blue-900/10">
+                                <div className="bg-green-400 rounded-full w-8 h-8 flex items-center justify-center shadow-inner ring-2 ring-white/30">
+                                    <span className="font-bold text-green-900 text-xs">$</span>
+                                </div>
+                                <div className="flex flex-col justify-center">
+                                    <span className="text-[9px] uppercase font-bold text-green-100 leading-none mb-0.5">Saldo</span>
+                                    <span className="text-sm font-black text-white leading-none tracking-tight shadow-black drop-shadow-sm">R$ 12,40</span>
+                                </div>
+                            </div>
+                            
+                            {/* Tooltip */}
+                            <div className="absolute top-[120%] right-0 w-32 bg-gray-900/95 backdrop-blur-md text-white text-[10px] font-medium p-2.5 rounded-xl text-center shadow-xl border border-white/10 opacity-0 translate-y-2 group-hover/badge:opacity-100 group-hover/badge:translate-y-0 transition-all duration-300 pointer-events-none z-30">
+                                Você já economizou <span className="text-green-400 font-bold">R$ 12,40</span> aqui
+                                {/* Little arrow */}
+                                <div className="absolute -top-1 right-8 w-2 h-2 bg-gray-900 rotate-45 border-t border-l border-white/10"></div>
+                            </div>
                         </div>
                     </div>
                   </div>
@@ -412,23 +436,29 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
                     </p>
 
                     {/* Micro-signals (Value Props) - Compact */}
-                    <div className="flex items-center gap-3 mb-4 w-full pr-8">
-                        <div className="flex items-center gap-1.5 bg-white/5 border border-white/10 px-2.5 py-1.5 rounded-lg backdrop-blur-sm flex-1 justify-center hover:bg-white/10 transition-colors">
-                            <Wallet className="w-3.5 h-3.5 text-green-300 drop-shadow-sm" />
-                            <span className="text-[11px] font-bold text-white">Cashback</span>
-                        </div>
-                        <div className="flex items-center gap-1.5 bg-white/5 border border-white/10 px-2.5 py-1.5 rounded-lg backdrop-blur-sm flex-1 justify-center hover:bg-white/10 transition-colors">
-                            <Sparkles className="w-3.5 h-3.5 text-yellow-300 drop-shadow-sm" />
-                            <span className="text-[11px] font-bold text-white">Ofertas</span>
-                        </div>
+                    <div className="flex items-center gap-3 mb-4 w-full">
+                        <button 
+                            onClick={() => onNavigate('explore')}
+                            className="flex items-center gap-1.5 bg-white/10 border border-white/20 px-3 py-2 rounded-xl backdrop-blur-md flex-1 justify-center hover:bg-white/20 transition-all active:scale-95 group shadow-sm"
+                        >
+                            <StoreIcon className="w-3.5 h-3.5 text-green-300 drop-shadow-sm group-hover:scale-110 transition-transform" />
+                            <span className="text-[10px] font-bold text-white whitespace-nowrap">Explorar Lojas</span>
+                        </button>
+                        <button 
+                            onClick={() => onNavigate('services')}
+                            className="flex items-center gap-1.5 bg-white/10 border border-white/20 px-3 py-2 rounded-xl backdrop-blur-md flex-1 justify-center hover:bg-white/20 transition-all active:scale-95 group shadow-sm"
+                        >
+                            <Briefcase className="w-3.5 h-3.5 text-yellow-300 drop-shadow-sm group-hover:scale-110 transition-transform" />
+                            <span className="text-[10px] font-bold text-white whitespace-nowrap">Serviços Perto de Você</span>
+                        </button>
                     </div>
 
-                    {/* Strong CTA - Compact */}
+                    {/* Strong CTA - Pre-launch Cashback */}
                     <button 
-                      onClick={() => onNavigate('explore')}
+                      onClick={() => onNavigate('cashback_info')}
                       className="w-full bg-white text-[#2D6DF6] text-xs font-extrabold py-3 px-6 rounded-xl shadow-xl shadow-blue-900/10 active:scale-[0.98] transition-all duration-300 flex items-center justify-center gap-2 group/btn hover:bg-blue-50 hover:scale-[1.01] relative overflow-hidden"
                     >
-                      <span className="relative z-10">Começar a explorar</span>
+                      <span className="relative z-10">Ganhe Cashback no Bairro</span>
                       <ArrowRight className="w-3.5 h-3.5 relative z-10 group-hover/btn:translate-x-1 transition-transform" strokeWidth={3} />
                     </button>
                   </div>

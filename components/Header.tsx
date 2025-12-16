@@ -39,7 +39,8 @@ export const Header: React.FC<HeaderProps> = ({
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
-      setIsScrolled(currentScrollY > 20);
+      // Threshold slightly increased to allow banner to scroll a bit before compacting
+      setIsScrolled(currentScrollY > 40);
     };
 
     if (isHome) {
@@ -66,14 +67,14 @@ export const Header: React.FC<HeaderProps> = ({
   return (
     <div 
       className={`
-        sticky top-0 z-40 w-full bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border-b border-gray-100 dark:border-gray-800 transition-all duration-500 ease-in-out shadow-sm
+        sticky top-0 z-40 w-full bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border-b border-gray-100 dark:border-gray-800 transition-all duration-300 ease-in-out shadow-sm
         ${isHome ? 'pb-0' : 'pb-0'}
       `}
     >
       <div className="max-w-md mx-auto flex flex-col">
         
         {/* Top Row: Search + Theme + (Merchant QR) */}
-        <div className={`flex items-center gap-3 px-5 transition-all duration-500 ease-in-out ${isScrolled && isHome ? 'py-2' : 'py-3'}`}>
+        <div className={`flex items-center gap-3 px-5 transition-all duration-300 ease-in-out ${isScrolled && isHome ? 'py-2' : 'py-3'}`}>
           <div className="relative flex-1 group">
             <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
               <Search className="h-4 w-4 text-gray-400 group-focus-within:text-[#2D6DF6] transition-colors" />
@@ -105,10 +106,10 @@ export const Header: React.FC<HeaderProps> = ({
           )}
         </div>
 
-        {/* Categories Row (Collapsible) */}
+        {/* Categories Row (Transforming from Tiles to Chips) */}
         <div 
           className={`
-            overflow-hidden transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)]
+            overflow-hidden transition-all duration-300 ease-in-out
             ${isHome ? (isScrolled ? 'max-h-16 opacity-100' : 'max-h-32 opacity-100') : 'max-h-0 opacity-0'}
           `}
         >
@@ -119,39 +120,42 @@ export const Header: React.FC<HeaderProps> = ({
             <div 
               ref={categoriesRef}
               onScroll={handleCategoriesScroll}
-              className={`flex items-center gap-3 overflow-x-auto no-scrollbar px-5 transition-all duration-500 ease-in-out ${isScrolled ? 'pb-3 pt-0' : 'pb-1 pt-1'}`}
+              className={`flex items-center gap-3 overflow-x-auto no-scrollbar px-5 transition-all duration-300 ease-in-out ${isScrolled ? 'pb-3 pt-0 items-center' : 'pb-1 pt-1'}`}
             >
               {CATEGORIES.map((cat) => (
                 <button 
                   key={cat.id} 
                   onClick={() => onSelectCategory && onSelectCategory(cat)}
                   className={`
-                    flex items-center justify-center rounded-2xl bg-[#EAF2FF] dark:bg-gray-800 border border-[#DBEAFE] dark:border-gray-700 shadow-sm hover:shadow-md active:scale-95 group snap-start cursor-pointer flex-shrink-0
-                    transition-all duration-500 ease-in-out
+                    flex items-center justify-center cursor-pointer flex-shrink-0 group snap-start
+                    border border-[#DBEAFE] dark:border-gray-700 shadow-sm hover:shadow-md active:scale-95
+                    transition-all duration-300 ease-in-out
                     ${isScrolled 
-                      ? 'min-w-fit px-4 h-9 gap-0' 
-                      : 'flex-col gap-1 min-w-[76px] w-[76px] h-[72px] p-2'}
+                      ? 'flex-row h-10 px-4 gap-2 rounded-full bg-white dark:bg-gray-800 min-w-fit' // Chip Mode
+                      : 'flex-col w-[76px] h-[72px] p-2 gap-1 rounded-2xl bg-[#EAF2FF] dark:bg-gray-800'} // Tile Mode
                   `}
                 >
                   <div 
                     className={`
-                      flex items-center justify-center text-[#2D6DF6] dark:text-blue-400 transition-all duration-500 ease-in-out origin-bottom
+                      flex items-center justify-center text-[#2D6DF6] dark:text-blue-400 transition-all duration-300 ease-in-out
                       ${isScrolled 
-                        ? 'w-0 h-0 opacity-0 overflow-hidden -translate-y-2' 
-                        : 'w-8 h-8 opacity-100 translate-y-0 group-hover:scale-110'}
+                        ? 'w-4 h-4' // Icon size in Chip
+                        : 'w-7 h-7 group-hover:scale-110 mb-0.5'} // Icon size in Tile
                     `}
                   >
                     {React.isValidElement(cat.icon) 
                       ? React.cloneElement(cat.icon as React.ReactElement<any>, { 
-                          className: `transition-all duration-500 ${isScrolled ? 'w-0 h-0' : 'w-6 h-6'} text-[#2D6DF6] dark:text-blue-400`, 
-                          strokeWidth: 2 
+                          className: `transition-all duration-300 ${isScrolled ? 'w-4 h-4' : 'w-7 h-7'} text-[#2D6DF6] dark:text-blue-400`, 
+                          strokeWidth: isScrolled ? 2.5 : 2 
                         }) 
                       : cat.icon}
                   </div>
                   <span 
                     className={`
-                      font-bold text-gray-600 dark:text-gray-300 text-center leading-tight whitespace-nowrap transition-all duration-500 ease-in-out
-                      ${isScrolled ? 'text-xs' : 'text-[10px] line-clamp-1 w-full'}
+                      font-bold text-gray-600 dark:text-gray-300 leading-tight transition-all duration-300 ease-in-out
+                      ${isScrolled 
+                        ? 'text-xs whitespace-nowrap' 
+                        : 'text-[10px] text-center line-clamp-1 w-full'}
                     `}
                   >
                     {cat.name}
@@ -162,7 +166,7 @@ export const Header: React.FC<HeaderProps> = ({
             </div>
           </div>
 
-          <div className={`flex justify-center gap-1.5 transition-all duration-500 ease-in-out overflow-hidden ${isScrolled ? 'h-0 opacity-0 pb-0' : 'h-3 opacity-100 pb-2 pt-1'}`}>
+          <div className={`flex justify-center gap-1.5 transition-all duration-300 ease-in-out overflow-hidden ${isScrolled ? 'h-0 opacity-0 pb-0' : 'h-3 opacity-100 pb-2 pt-1'}`}>
             {[0, 1, 2, 3].map((i) => (
               <div 
                 key={i} 
