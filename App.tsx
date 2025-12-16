@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { Layout } from './components/Layout';
 import { Header } from './components/Header';
@@ -42,6 +43,7 @@ import { StoreFinanceModule } from './components/StoreFinanceModule';
 import { StoreSupportModule } from './components/StoreSupportModule';
 import { MerchantQrScreen } from './components/MerchantQrScreen';
 import { CashbackScanScreen } from './components/CashbackScanScreen';
+import { ScanConfirmationScreen } from './components/ScanConfirmationScreen'; // NOVO COMPONENTE
 import { CashbackPaymentScreen } from './components/CashbackPaymentScreen';
 import { MerchantCashbackRequests } from './components/MerchantCashbackRequests';
 import { MerchantPayRoute } from './components/MerchantPayRoute';
@@ -129,25 +131,28 @@ const MOCK_STORES: Store[] = [
 ];
 
 const App: React.FC = () => {
-  // Use Centralized Auth Context - isAuthLoading é a única fonte de verdade para o splash
+  // Use Centralized Auth Context
   const { user, userRole, loading: isAuthLoading } = useAuth();
 
   const [activeTab, setActiveTab] = useState('home');
   const [isDarkMode, setIsDarkMode] = useState(false);
 
-  // Ref para acessar activeTab atual dentro de listeners sem stale closure (se necessário)
+  // Ref para acessar activeTab atual
   const activeTabRef = useRef(activeTab);
   
-  // Atualiza a ref sempre que o estado mudar
   useEffect(() => {
     activeTabRef.current = activeTab;
   }, [activeTab]);
 
-  // Auth State Management (UI Only)
+  // RESET SCROLL: Garante que a tela volte ao topo ao trocar de aba
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [activeTab]);
+
+  // Auth State Management
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [authContext, setAuthContext] = useState<'default' | 'merchant_lead_qr'>('default');
 
-  // Controle do modal de Lead Lojista (QR)
   const [isMerchantLeadModalOpen, setIsMerchantLeadModalOpen] = useState(false);
 
   const [globalSearch, setGlobalSearch] = useState('');
@@ -192,6 +197,17 @@ const App: React.FC = () => {
     }
   };
 
+  // --- LOGIC FOR CENTRAL CASHBACK BUTTON ---
+  const handleCashbackClick = () => {
+    if (user) {
+      setActiveTab('qrcode_scan'); // Vai para o scanner
+    } else {
+      // Abre login com mensagem personalizada (via context ou prop no AuthModal)
+      handleOpenAuth('default');
+      // O AuthModal poderia receber uma prop extra para mostrar "Faça login para acumular cashback"
+    }
+  };
+
   const isServiceTab = activeTab === 'services';
   const currentSearchTerm = isServiceTab ? serviceSearch : globalSearch;
 
@@ -213,8 +229,10 @@ const App: React.FC = () => {
 
     // 2. Redirecionar se estiver em área protegida e deslogar
     if (!user && !isAuthLoading) {
-        // 'profile' foi removido desta lista para permitir que o usuário veja a tela de "Visitante/Login" do MenuView
-        const protectedTabs = ['store_area', 'favorites', 'edit_profile', 'merchant_panel'];
+        const protectedTabs = [
+            'store_area', 'favorites', 'edit_profile', 'merchant_panel', 
+            'qrcode_scan', 'scan_confirmation', 'cashback_payment' // Protected scan flows
+        ];
         if (protectedTabs.includes(activeTab)) {
             setActiveTab('home');
         }
@@ -230,7 +248,6 @@ const App: React.FC = () => {
       return;
     }
 
-    // Deep links
     const matchMerchantPay = path.match(/\/merchant\/([^/]+)\/pay/);
     if (matchMerchantPay && matchMerchantPay[1]) {
       setDeepLinkMerchantId(matchMerchantPay[1]);
@@ -252,7 +269,6 @@ const App: React.FC = () => {
   }, []);
 
   const handleLoginSuccess = async () => {
-    // AuthProvider handles state, just wait a bit for UI transition
     await new Promise(r => setTimeout(r, 500));
   };
 
@@ -303,8 +319,16 @@ const App: React.FC = () => {
     setActiveTab('home');
   };
 
+  // --- SCAN FLOW HANDLERS ---
+  
+  // 1. Scan Sucesso -> Vai para Confirmação
   const handleScanSuccess = (data: { merchantId: string; storeId: string }) => {
     setScannedData(data);
+    setActiveTab('scan_confirmation');
+  };
+
+  // 2. Confirmação Loja -> Vai para Pagamento
+  const handleConfirmStore = () => {
     setActiveTab('cashback_payment');
   };
 
@@ -313,7 +337,7 @@ const App: React.FC = () => {
     setActiveTab('cashback');
   };
 
-  // SPLASH SCREEN: Renderiza apenas se o AuthContext estiver carregando (authResolved = false)
+  // SPLASH SCREEN
   if (isAuthLoading) {
     return (
       <div className="fixed inset-0 bg-gradient-to-br from-[#2D6DF6] to-[#1B54D9] flex flex-col items-center justify-center text-white z-50">
@@ -343,7 +367,6 @@ const App: React.FC = () => {
     );
   }
 
-  // Se passou do splash, renderiza o App
   if (user && needsProfileSetup) {
     return <QuickRegister user={user as any} onComplete={handleProfileComplete} />;
   }
@@ -401,8 +424,9 @@ const App: React.FC = () => {
     'patrocinador_master',
     'business_registration',
     'merchant_qr',
-    'qrcode_scan',
-    'cashback_payment',
+    'qrcode_scan', // Header próprio
+    'scan_confirmation', // Header próprio ou sem header
+    'cashback_payment', // Header próprio
     'merchant_requests',
     'merchant_pay_route',
     'cashback_pay_qr',
@@ -413,7 +437,13 @@ const App: React.FC = () => {
   return (
     <div className={isDarkMode ? 'dark' : ''}>
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex justify-center transition-colors duration-300 relative">
-        <Layout activeTab={activeTab} setActiveTab={setActiveTab} userRole={userRole}>
+        <Layout 
+            activeTab={activeTab} 
+            setActiveTab={setActiveTab} 
+            userRole={userRole} 
+            // Passar função customizada para o botão de Cashback na BottomNav
+            onCashbackClick={handleCashbackClick} 
+        >
           {!hideHeader && (
             <Header
               isDarkMode={isDarkMode}
@@ -450,8 +480,7 @@ const App: React.FC = () => {
               />
             )}
 
-            {/* ... Rest of the components ... */}
-            
+            {/* ... Rest of components ... */}
             {activeTab === 'explore' && (
               <ExploreView
                 stores={stores}
@@ -468,6 +497,35 @@ const App: React.FC = () => {
               />
             )}
 
+            {/* FLUXO DE CASHBACK USUÁRIO (Scan -> Confirmação -> Pagamento) */}
+            
+            {activeTab === 'qrcode_scan' && (
+                <CashbackScanScreen 
+                    onBack={() => setActiveTab('home')} 
+                    onScanSuccess={handleScanSuccess} 
+                />
+            )}
+
+            {activeTab === 'scan_confirmation' && scannedData && (
+                <ScanConfirmationScreen 
+                    storeId={scannedData.storeId}
+                    onConfirm={handleConfirmStore}
+                    onCancel={() => setActiveTab('home')}
+                />
+            )}
+
+            {activeTab === 'cashback_payment' && scannedData && (
+              <CashbackPaymentScreen
+                user={user as any}
+                merchantId={scannedData.merchantId}
+                storeId={scannedData.storeId}
+                onBack={() => setActiveTab('home')}
+                onComplete={handlePaymentComplete}
+              />
+            )}
+
+            {/* ... Other existing components ... */}
+            
             {activeTab === 'editorial_list' && selectedCollection && (
               <EditorialListView
                 collection={selectedCollection}
@@ -598,19 +656,7 @@ const App: React.FC = () => {
 
             {activeTab === 'merchant_panel' && <MerchantPanel onBack={() => setActiveTab('store_area')} />}
 
-            {activeTab === 'qrcode_scan' && <CashbackScanScreen onBack={() => setActiveTab('home')} onScanSuccess={handleScanSuccess} />}
-
             {activeTab === 'user_cashback_flow' && <UserCashbackFlow onBack={() => setActiveTab('profile')} />}
-
-            {activeTab === 'cashback_payment' && scannedData && (
-              <CashbackPaymentScreen
-                user={user as any}
-                merchantId={scannedData.merchantId}
-                storeId={scannedData.storeId}
-                onBack={() => setActiveTab('home')}
-                onComplete={handlePaymentComplete}
-              />
-            )}
 
             {activeTab === 'merchant_pay_route' && deepLinkMerchantId && (
               <MerchantPayRoute

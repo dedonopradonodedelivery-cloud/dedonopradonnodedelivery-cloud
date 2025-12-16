@@ -18,8 +18,10 @@ import {
   Clock,
   MessageSquare,
   MessageCircle,
-  Phone
+  Phone,
+  BarChart3
 } from 'lucide-react';
+import { supabase } from '../lib/supabaseClient';
 
 interface ServicesViewProps {
   onSelectMacro: (id: string, name: string) => void;
@@ -130,44 +132,188 @@ const NEIGHBORHOOD_ACTIVITY = [
   "Novo profissional verificado: Dra. Pet"
 ];
 
-// Enhanced Professional List for Discovery
-const DISCOVER_SERVICES = [
+// --- EXTENDED SERVICE PROVIDER DATABASE (MOCK) ---
+// Includes Premium flags, verification status, and ratings for the algorithm.
+interface ServiceProvider {
+  id: string;
+  name: string;
+  category: string;
+  rating: number;
+  reviews: number;
+  badges: string[];
+  response: string;
+  whatsappAvailable: boolean;
+  isPremium: boolean; // Flag for Ad Engine
+  verified: boolean;  // Flag for Ad Engine
+}
+
+const SERVICE_PROVIDERS_POOL: ServiceProvider[] = [
+  // --- PREMIUM CANDIDATES ---
   { 
-    id: 'd1', 
+    id: 'p_joao_eletr', 
     name: 'João Eletricista', 
     category: 'Elétrica Residencial', 
     rating: 4.9, 
     reviews: 124, 
-    badges: ['⚡ Responde rápido', '🏅 Popular no bairro'], 
-    response: '< 5 min',
-    whatsappAvailable: true
+    badges: ['⚡ Rápido', '🏅 Top Pro'], 
+    response: '< 5 min', 
+    whatsappAvailable: true,
+    isPremium: true,
+    verified: true
   },
   { 
-    id: 'd2', 
+    id: 'p_maria_clean', 
     name: 'Maria Diarista', 
     category: 'Limpeza e Organização', 
     rating: 5.0, 
     reviews: 89, 
-    badges: ['⭐ Avaliação alta', 'Verificado'], 
-    response: '~ 15 min',
-    whatsappAvailable: true
+    badges: ['⭐ Impecável', 'Verificado'], 
+    response: '~ 15 min', 
+    whatsappAvailable: true,
+    isPremium: true,
+    verified: true
   },
   { 
-    id: 'd3', 
-    name: 'Tech Fix', 
+    id: 'p_tech_fix', 
+    name: 'Tech Fix Freguesia', 
     category: 'Conserto Celulares', 
     rating: 4.8, 
     reviews: 210, 
-    badges: ['⚡ Responde rápido'], 
-    response: 'Online',
-    whatsappAvailable: true
+    badges: ['⚡ Na Hora'], 
+    response: 'Online', 
+    whatsappAvailable: true,
+    isPremium: true,
+    verified: true
+  },
+  { 
+    id: 'p_refrig_polar', 
+    name: 'Refrigeração Polar', 
+    category: 'Climatização', 
+    rating: 4.7, 
+    reviews: 56, 
+    badges: ['❄️ Verão', 'Garantia'], 
+    response: '~ 30 min', 
+    whatsappAvailable: true,
+    isPremium: true,
+    verified: true
+  },
+  { 
+    id: 'p_doutor_pet', 
+    name: 'Dr. Pet em Casa', 
+    category: 'Veterinário', 
+    rating: 4.9, 
+    reviews: 112, 
+    badges: ['🐾 24h', 'Amoroso'], 
+    response: 'Imediato', 
+    whatsappAvailable: true,
+    isPremium: true,
+    verified: true
+  },
+
+  // --- ORGANIC CANDIDATES ---
+  { 
+    id: 'o_pedro_pintor', 
+    name: 'Pedro Pinturas', 
+    category: 'Pintura', 
+    rating: 4.6, 
+    reviews: 34, 
+    badges: ['🎨 Detalhe'], 
+    response: '~ 1h', 
+    whatsappAvailable: true,
+    isPremium: false,
+    verified: true
+  },
+  { 
+    id: 'o_marido_aluguel', 
+    name: 'Resolve Tudo', 
+    category: 'Marido de Aluguel', 
+    rating: 4.5, 
+    reviews: 78, 
+    badges: ['🛠️ Prático'], 
+    response: '~ 20 min', 
+    whatsappAvailable: false, // Forces app chat
+    isPremium: false,
+    verified: true
   },
 ];
+
+const ADS_CAP_PER_DAY = 3; // Max views per user per provider per day
 
 export const ServicesView: React.FC<ServicesViewProps> = ({ onSelectMacro, onOpenTerms, onNavigate, searchTerm = '' }) => {
   const [showStickyCTA, setShowStickyCTA] = useState(false);
   const [activityIndex, setActivityIndex] = useState(0);
+  const [displayedPros, setDisplayedPros] = useState<ServiceProvider[]>([]);
   const heroRef = useRef<HTMLDivElement>(null);
+
+  // --- AD ENGINE LOGIC ---
+  useEffect(() => {
+    // 1. Get user view history from local storage
+    const today = new Date().toDateString();
+    
+    const checkCap = (providerId: string) => {
+      const key = `ad_views_${providerId}_${today}`;
+      const views = parseInt(localStorage.getItem(key) || '0');
+      return views < ADS_CAP_PER_DAY;
+    };
+
+    const incrementView = (providerId: string) => {
+      const key = `ad_views_${providerId}_${today}`;
+      const views = parseInt(localStorage.getItem(key) || '0');
+      localStorage.setItem(key, (views + 1).toString());
+    };
+
+    // 2. Filter & Shuffle Premiums
+    const eligiblePremiums = SERVICE_PROVIDERS_POOL.filter(
+      p => p.isPremium && p.verified && p.rating >= 4.5 && checkCap(p.id)
+    );
+
+    // Shuffle (Fisher-Yates) to ensure fairness rotation
+    for (let i = eligiblePremiums.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [eligiblePremiums[i], eligiblePremiums[j]] = [eligiblePremiums[j], eligiblePremiums[i]];
+    }
+
+    // 3. Select up to 3 Premiums
+    const selectedPremiums = eligiblePremiums.slice(0, 3);
+
+    // 4. Record Impressions
+    selectedPremiums.forEach(p => {
+      incrementView(p.id);
+      trackAdMetric('impression', p.id);
+    });
+
+    // 5. Fill remaining spots with Organics if needed
+    let finalSelection = [...selectedPremiums];
+    if (finalSelection.length < 3) {
+      const organics = SERVICE_PROVIDERS_POOL
+        .filter(p => !p.isPremium)
+        .sort((a, b) => b.rating - a.rating) // Best rated organics first
+        .slice(0, 3 - finalSelection.length);
+      
+      finalSelection = [...finalSelection, ...organics];
+    }
+
+    setDisplayedPros(finalSelection);
+
+  }, []); // Run once on mount
+
+  // --- METRICS HANDLER ---
+  const trackAdMetric = async (type: 'impression' | 'click_quote' | 'click_whatsapp', providerId: string) => {
+    // console.log(`[AdMetric] ${type} for provider ${providerId}`);
+    
+    // Simulating Database Call
+    if (supabase) {
+      // In a real app, this table 'ad_metrics' would exist
+      /*
+      await supabase.from('ad_metrics').insert({
+        provider_id: providerId,
+        event_type: type,
+        placement: 'servicos_premium_recomendados',
+        timestamp: new Date().toISOString()
+      });
+      */
+    }
+  };
 
   // Scroll listener for Sticky CTA
   useEffect(() => {
@@ -410,37 +556,56 @@ export const ServicesView: React.FC<ServicesViewProps> = ({ onSelectMacro, onOpe
           </div>
         </div>
 
-        {/* 6. RECOMMENDED PROFESSIONALS (Ranked & Trusted) */}
+        {/* 6. RECOMMENDED PROFESSIONALS (ADS ENGINE - PREMIUM & ORGANIC MIX) */}
         <div className="px-5">
-          <div className="mb-4">
-            <h3 className="text-lg font-bold text-gray-900 dark:text-white leading-tight">
-              Recomendados no bairro
-            </h3>
-            <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-              Bem avaliados e com resposta rápida na Freguesia
-            </p>
+          <div className="mb-4 flex items-center justify-between">
+            <div>
+                <h3 className="text-lg font-bold text-gray-900 dark:text-white leading-tight flex items-center gap-2">
+                  Destaques no bairro
+                  <span className="bg-yellow-100 text-yellow-700 text-[10px] font-bold px-2 py-0.5 rounded-full border border-yellow-200">TOP</span>
+                </h3>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                  Profissionais verificados com alta reputação
+                </p>
+            </div>
           </div>
           
           <div className="flex flex-col gap-4">
-            {DISCOVER_SERVICES.map((item, i) => (
+            {displayedPros.map((item, i) => (
               <div 
                 key={item.id}
-                className="bg-white dark:bg-gray-800 p-4 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col gap-3 relative group transition-all hover:shadow-md"
+                className={`
+                    p-4 rounded-2xl shadow-sm flex flex-col gap-3 relative group transition-all hover:shadow-md
+                    ${item.isPremium 
+                        ? 'bg-gradient-to-br from-white to-blue-50 dark:from-gray-800 dark:to-gray-800/80 border border-blue-200 dark:border-blue-900/50' 
+                        : 'bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700'
+                    }
+                `}
+                onClick={() => trackAdMetric('impression', item.id)} // Log impression visually (in code logic it's done on load)
               >
+                {/* Premium Badge */}
+                {item.isPremium && (
+                    <div className="absolute top-0 right-0 bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 text-[9px] font-bold px-2 py-1 rounded-bl-xl rounded-tr-xl border-l border-b border-blue-200 dark:border-blue-800/50 uppercase tracking-wide flex items-center gap-1">
+                        <BarChart3 className="w-3 h-3" /> Patrocinado
+                    </div>
+                )}
+
                 {/* Header Row */}
-                <div className="flex gap-3 items-start">
-                  <div className="w-12 h-12 bg-gray-100 dark:bg-gray-700 rounded-xl flex items-center justify-center shrink-0 border border-gray-100 dark:border-gray-600 text-lg font-bold text-gray-400">
+                <div className="flex gap-3 items-start mt-1">
+                  <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 text-lg font-bold ${item.isPremium ? 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' : 'bg-gray-100 text-gray-400 dark:bg-gray-700'}`}>
                     {item.name.charAt(0)}
                   </div>
                   
                   <div className="flex-1 min-w-0">
                     <div className="flex justify-between items-start">
-                      <h4 className="font-bold text-gray-900 dark:text-white text-base truncate">{item.name}</h4>
-                      <div className="flex items-center gap-1 text-xs font-bold text-yellow-500 bg-yellow-50 dark:bg-yellow-900/20 px-1.5 py-0.5 rounded">
-                        <Star className="w-3 h-3 fill-current" /> {item.rating}
-                      </div>
+                      <h4 className="font-bold text-gray-900 dark:text-white text-base truncate pr-20">{item.name}</h4>
                     </div>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">{item.category}</p>
+                    <div className="flex items-center gap-2 mt-0.5">
+                        <p className="text-xs text-gray-500 dark:text-gray-400">{item.category}</p>
+                        <div className="flex items-center gap-1 text-[10px] font-bold text-yellow-600 bg-yellow-50 dark:bg-yellow-900/20 px-1.5 py-0.5 rounded border border-yellow-100 dark:border-yellow-800/30">
+                            <Star className="w-2.5 h-2.5 fill-current" /> {item.rating}
+                        </div>
+                    </div>
                   </div>
                 </div>
 
@@ -460,15 +625,19 @@ export const ServicesView: React.FC<ServicesViewProps> = ({ onSelectMacro, onOpe
                 {/* CTAs Row - Strict Hierarchy */}
                 <div className="flex flex-col gap-2 mt-1">
                   <button 
-                    onClick={() => onSelectMacro('pro', item.category)}
-                    className="w-full bg-[#0A46FF] text-white text-sm font-bold py-3 rounded-xl shadow-md shadow-blue-500/20 active:scale-[0.98] transition-transform flex items-center justify-center gap-2"
+                    onClick={() => {
+                        trackAdMetric('click_quote', item.id);
+                        onSelectMacro('pro', item.category);
+                    }}
+                    className={`w-full text-white text-sm font-bold py-3 rounded-xl shadow-md active:scale-[0.98] transition-transform flex items-center justify-center gap-2 ${item.isPremium ? 'bg-gradient-to-r from-blue-600 to-indigo-600 shadow-blue-500/20' : 'bg-[#0A46FF] shadow-blue-500/10'}`}
                   >
                     Pedir orçamento
                   </button>
                   
                   {item.whatsappAvailable && (
                     <button 
-                      className="w-full flex items-center justify-center gap-2 py-2 rounded-xl text-xs font-bold text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 transition-colors"
+                      onClick={() => trackAdMetric('click_whatsapp', item.id)}
+                      className="w-full flex items-center justify-center gap-2 py-2 rounded-xl text-xs font-bold text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 transition-colors border border-transparent hover:border-green-100"
                     >
                       <MessageCircle className="w-4 h-4" />
                       Chamar no WhatsApp

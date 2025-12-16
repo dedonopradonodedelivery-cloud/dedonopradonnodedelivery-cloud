@@ -1,5 +1,6 @@
+
 import React, { useState, useEffect } from "react";
-import { Camera, QrCode, KeyRound, ArrowLeft, Loader2, ArrowRight } from "lucide-react";
+import { Camera, QrCode, KeyRound, ArrowLeft, Loader2, ArrowRight, XCircle, AlertTriangle } from "lucide-react";
 import { useQrScanner } from "../hooks/useQrScanner";
 
 interface CashbackScanScreenProps {
@@ -7,14 +8,6 @@ interface CashbackScanScreenProps {
   onScanSuccess: (data: { merchantId: string; storeId: string }) => void;
 }
 
-/**
- * Tela de leitura de QR + fallback por PIN
- *
- * - Usa o hook useQrScanner (câmera + jsQR)
- * - Tem botão claro de "Iniciar Leitura" (obrigatório p/ iPhone)
- * - Tem aba para alternar entre QR e PIN
- * - Exibe mensagem de erro quando a câmera é bloqueada
- */
 export const CashbackScanScreen: React.FC<CashbackScanScreenProps> = ({ onBack, onScanSuccess }) => {
   const {
     videoRef,
@@ -31,42 +24,44 @@ export const CashbackScanScreen: React.FC<CashbackScanScreenProps> = ({ onBack, 
   const [pin, setPin] = useState("");
   const [hasScanned, setHasScanned] = useState(false);
 
-  // Quando ler um QR com sucesso
+  // Iniciar scanner automaticamente ao abrir (UX requirement: "Imediato")
+  useEffect(() => {
+    if (activeTab === "qr") {
+        startScanner();
+    }
+    return () => stopScanner();
+  }, [activeTab]);
+
   useEffect(() => {
     if (result) {
       setHasScanned(true);
-      console.log("QR lido:", result);
-      
       try {
-        // Tenta parsear o JSON do QR
-        // Formato esperado: { type: "localizei_cashback_qr", merchantId: "...", storeId: "...", env: "..." }
         const data = JSON.parse(result);
-        if (data.merchantId && data.storeId) {
+        // Suporte a formatos legados ou simples para robustez
+        const merchantId = data.merchantId || data.id; 
+        const storeId = data.storeId || data.merchantId || data.id;
+
+        if (merchantId) {
             stopScanner();
-            onScanSuccess({ merchantId: data.merchantId, storeId: data.storeId });
+            onScanSuccess({ merchantId, storeId });
         } else {
-            // Fallback se não for JSON do nosso padrão, mas tiver dados
-            console.warn("QR fora do padrão:", result);
-            alert("QR Code inválido para cashback.");
-            setHasScanned(false);
+            // Fallback: talvez o QR seja apenas o ID string direto
+            if (typeof result === 'string' && result.length > 5) {
+                 stopScanner();
+                 onScanSuccess({ merchantId: result, storeId: result });
+            } else {
+                setHasScanned(false);
+            }
         }
       } catch (e) {
-        // Fallback para testes simples ou formatos antigos
-        console.warn("QR não é JSON válido", result);
-        // Para demo, se ler qualquer coisa, avisa
-        alert(`QR lido: ${result}. (Formato inválido para cashback)`);
-        setHasScanned(false);
+        // Fallback para string simples (ex: URL ou ID direto)
+        console.warn("QR não JSON, usando raw string");
+        stopScanner();
+        // Assume que o QR é o ID se falhar o parse
+        onScanSuccess({ merchantId: result, storeId: result });
       }
     }
   }, [result]);
-
-  // Limpa stream ao desmontar
-  useEffect(() => {
-    return () => {
-      stopScanner();
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   const handleStartScan = () => {
     setHasScanned(false);
@@ -75,208 +70,139 @@ export const CashbackScanScreen: React.FC<CashbackScanScreenProps> = ({ onBack, 
 
   const handlePinSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!pin.trim()) return;
-
-    console.log("PIN informado:", pin);
-    
-    // Simulação de validação de PIN
-    if (pin.length >= 6) {
-        // Em produção, isso chamaria uma API para validar o PIN e retornar o merchantId
-        onScanSuccess({ merchantId: 'merchant_pin_lookup', storeId: 'store_pin_lookup' });
-    } else {
-        alert("PIN inválido. Digite 6 números.");
-    }
+    if (pin.length < 4) return;
+    // Simulação de sucesso com PIN
+    onScanSuccess({ merchantId: 'merchant_pin_lookup', storeId: 'store_pin_lookup' });
   };
 
   return (
-    <div className="min-h-screen bg-[#05060A] text-white flex flex-col animate-in fade-in duration-300">
-      {/* Header simples */}
-      <div className="pt-4 px-4 pb-2 flex items-center justify-center relative">
+    <div className="min-h-screen bg-black text-white flex flex-col animate-in fade-in duration-300">
+      
+      {/* Header Fixo */}
+      <div className="pt-6 px-5 pb-4 flex flex-col items-center relative bg-gradient-to-b from-black/80 to-transparent z-10">
         <button
           type="button"
-          className="absolute left-4 top-4 inline-flex items-center justify-center w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
+          className="absolute left-5 top-6 p-2 rounded-full bg-white/10 backdrop-blur-md hover:bg-white/20 transition-colors"
           onClick={onBack}
         >
-          <ArrowLeft className="w-5 h-5 text-white" />
+          <ArrowLeft className="w-6 h-6 text-white" />
         </button>
 
-        <div className="inline-flex px-4 py-1.5 rounded-full bg-white/5 border border-white/10">
-          <span className="text-[11px] font-semibold tracking-wide uppercase">
-            Escanear QR do Lojista
-          </span>
-        </div>
+        <h1 className="text-lg font-bold text-white mb-1">Escaneie o QR do lojista</h1>
+        <p className="text-sm text-white/70 font-medium">Registre sua compra e receba cashback</p>
       </div>
 
-      {/* Tabs: QR / PIN */}
-      <div className="px-6 mt-6">
-        <div className="bg-white/10 rounded-2xl p-1 flex items-center">
-          <button
-            type="button"
-            onClick={() => setActiveTab("qr")}
-            className={`flex-1 inline-flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-bold transition-all ${
-              activeTab === "qr"
-                ? "bg-white text-black shadow-sm"
-                : "text-white/60 hover:text-white"
-            }`}
-          >
-            <QrCode className="w-4 h-4" />
-            QR Code
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              setActiveTab("pin");
-              stopScanner();
-            }}
-            className={`flex-1 inline-flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-bold transition-all ${
-              activeTab === "pin"
-                ? "bg-white text-black shadow-sm"
-                : "text-white/60 hover:text-white"
-            }`}
-          >
-            <KeyRound className="w-4 h-4" />
-            Digitar PIN
-          </button>
-        </div>
-      </div>
-
-      {/* Conteúdo */}
-      <div className="flex-1 flex flex-col items-center justify-start pt-10 px-6">
+      {/* Conteúdo Principal */}
+      <div className="flex-1 flex flex-col items-center justify-center px-6 -mt-10">
+        
         {activeTab === "qr" ? (
           <>
-            {/* Moldura do scanner */}
-            <div className="relative w-[280px] h-[280px] rounded-[40px] border-4 border-[#2D6DF6] bg-black/40 overflow-hidden flex items-center justify-center shadow-[0_0_40px_rgba(45,109,246,0.3)]">
-              {/* Vídeo da câmera */}
+            {/* Viewfinder */}
+            <div className="relative w-72 h-72 rounded-[32px] border-[3px] border-white/20 overflow-hidden shadow-[0_0_0_100vmax_rgba(0,0,0,0.6)] z-0">
+              
+              {/* Câmera */}
               <video
                 ref={videoRef}
                 className="absolute inset-0 w-full h-full object-cover"
                 muted
                 playsInline
               />
-              {/* Canvas invisível para leitura do frame */}
-              <canvas
-                ref={canvasRef}
-                className="hidden"
-              />
+              <canvas ref={canvasRef} className="hidden" />
 
-              {/* Linha vermelha animada */}
-              {scanning && (
-                  <div className="absolute left-4 right-4 h-[2px] bg-red-500 shadow-[0_0_15px_rgba(248,113,113,1)] animate-[scan_2s_infinite_linear]" style={{ top: '50%' }} />
-              )}
+              {/* Elementos de Overlay */}
+              <div className="absolute inset-0 border-[3px] border-[#1E5BFF] rounded-[30px] opacity-50"></div>
               
-              {!scanning && !result && (
-                  <div className="absolute inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-                      <Camera className="w-12 h-12 text-white/50" />
+              {/* Scan Animation Line */}
+              {scanning && (
+                  <div className="absolute top-0 left-4 right-4 h-0.5 bg-[#1E5BFF] shadow-[0_0_20px_#1E5BFF] animate-[scan_2s_infinite_ease-in-out]"></div>
+              )}
+
+              {/* State: Permissão Negada ou Erro */}
+              {error && (
+                  <div className="absolute inset-0 bg-black/90 flex flex-col items-center justify-center p-4 text-center">
+                      <div className="w-12 h-12 bg-red-500/20 rounded-full flex items-center justify-center mb-3">
+                          <XCircle className="w-6 h-6 text-red-500" />
+                      </div>
+                      <p className="text-sm font-bold text-white mb-1">Câmera indisponível</p>
+                      <p className="text-xs text-white/60 mb-4">Verifique as permissões do seu navegador.</p>
+                      <button 
+                        onClick={handleStartScan}
+                        className="text-xs font-bold text-[#1E5BFF] bg-white/10 px-4 py-2 rounded-full"
+                      >
+                        Tentar Novamente
+                      </button>
                   </div>
+              )}
+
+              {/* State: Carregando */}
+              {scanning && !result && !error && (
+                 <div className="absolute bottom-4 left-0 right-0 flex justify-center">
+                    <div className="bg-black/50 backdrop-blur-md px-3 py-1.5 rounded-full flex items-center gap-2">
+                        <Loader2 className="w-3 h-3 text-white animate-spin" />
+                        <span className="text-[10px] font-bold text-white/90 uppercase tracking-wide">Buscando QR...</span>
+                    </div>
+                 </div>
               )}
             </div>
 
-            {/* Mensagem de instrução */}
-            <p className="mt-8 text-center text-sm text-white/70 max-w-[260px] leading-relaxed">
-              Aponte a câmera para o código QR no balcão ou celular do lojista.
-            </p>
-
-            {/* Status de leitura */}
-            {scanning && !result && (
-              <div className="mt-4 inline-flex items-center gap-2 text-xs font-medium text-[#2D6DF6] bg-[#2D6DF6]/10 px-4 py-2 rounded-full">
-                <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                <span>Procurando QR Code...</span>
-              </div>
-            )}
-
-            {hasScanned && result && (
-              <div className="mt-4 text-sm font-bold text-emerald-400 flex items-center gap-2">
-                <Loader2 className="w-4 h-4 animate-spin" />
-                Processando leitura...
-              </div>
-            )}
-
-            {error && (
-              <div className="mt-4 text-xs text-red-400 text-center max-w-xs bg-red-500/10 p-3 rounded-xl border border-red-500/20">
-                <p className="font-bold mb-1">Erro na câmera</p>
-                <span className="text-white/70">
-                  Verifique as permissões do navegador ou tente usar o PIN.
-                </span>
-              </div>
-            )}
-
-            {/* Botão: iniciar / reiniciar leitura */}
-            {!scanning && (
-                <button
-                type="button"
-                onClick={handleStartScan}
-                className="mt-8 inline-flex items-center justify-center gap-2 px-8 py-4 rounded-2xl bg-[#2D6DF6] text-white text-base font-bold shadow-lg shadow-blue-600/20 active:scale-95 transition-transform"
+            {/* Alternativa PIN */}
+            <div className="mt-12 flex flex-col items-center gap-4 z-10">
+                <p className="text-sm text-white/50">Não consegue ler o código?</p>
+                <button 
+                    onClick={() => { stopScanner(); setActiveTab("pin"); }}
+                    className="flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white font-bold py-3 px-6 rounded-full transition-all active:scale-95"
                 >
-                <Camera className="w-5 h-5" />
-                Abrir Câmera
+                    <KeyRound className="w-4 h-4" />
+                    Digitar código do lojista
                 </button>
-            )}
+            </div>
             
-            {scanning && (
-                <button
-                type="button"
-                onClick={stopScanner}
-                className="mt-8 text-white/60 text-sm font-bold hover:text-white transition-colors"
-                >
-                Cancelar
-                </button>
-            )}
-
-            {/* Botão de simulação (para testes sem câmera) */}
+            {/* Dev Helper */}
             <button
-              type="button"
-              onClick={() => {
-                const mockPayload = JSON.stringify({
-                    merchantId: "mock_merchant_id",
-                    storeId: "mock_store_id"
-                });
-                setResult(mockPayload);
-                setHasScanned(true);
-              }}
-              className="mt-6 text-[10px] text-white/30 hover:text-white/50 transition-colors uppercase tracking-widest"
+              onClick={() => onScanSuccess({ merchantId: 'dev_mock', storeId: 'dev_mock' })}
+              className="fixed bottom-4 right-4 text-[10px] text-white/10 hover:text-white/50"
             >
-              Simular Leitura (Dev)
+              [DEV: Simular Scan]
             </button>
           </>
         ) : (
-          <>
-            {/* Campo de PIN */}
-            <div className="w-full max-w-xs flex flex-col items-center animate-in zoom-in-95 duration-300">
-              <div className="w-16 h-16 bg-white/10 rounded-full flex items-center justify-center mb-6">
-                  <KeyRound className="w-8 h-8 text-white" />
-              </div>
-              
-              <p className="text-center text-sm text-white/80 mb-8 leading-relaxed">
-                Peça o <span className="font-bold text-white">PIN de 6 dígitos</span> ao lojista e digite abaixo para validar sua compra.
-              </p>
+          <div className="w-full max-w-xs animate-in slide-in-from-right duration-300">
+             <div className="text-center mb-8">
+                <div className="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <KeyRound className="w-8 h-8 text-[#1E5BFF]" />
+                </div>
+                <h2 className="text-xl font-bold text-white mb-2">Código do Lojista</h2>
+                <p className="text-sm text-white/60">Peça o PIN de 6 dígitos no caixa.</p>
+             </div>
 
-              <form onSubmit={handlePinSubmit} className="w-full">
+             <form onSubmit={handlePinSubmit}>
                 <input
                     type="tel"
-                    inputMode="numeric"
                     maxLength={6}
                     value={pin}
                     onChange={(e) => setPin(e.target.value.replace(/[^0-9]/g, ""))}
-                    className="w-full text-center text-3xl font-bold tracking-[0.5em] bg-white/5 border-2 border-white/10 rounded-2xl py-6 text-white placeholder:text-white/20 focus:outline-none focus:border-[#2D6DF6] focus:bg-white/10 transition-all mb-8"
+                    className="w-full bg-white/10 border-2 border-white/10 rounded-2xl py-4 text-center text-3xl font-bold text-white tracking-[0.3em] outline-none focus:border-[#1E5BFF] transition-colors mb-6 placeholder-white/10"
                     placeholder="000000"
                     autoFocus
                 />
-
+                
                 <button
                     type="submit"
-                    disabled={pin.length < 6}
-                    className={`w-full py-4 rounded-2xl text-base font-bold shadow-lg transition-all active:scale-[0.98] flex items-center justify-center gap-2 ${
-                    pin.length >= 6
-                        ? "bg-white text-black hover:bg-gray-100"
-                        : "bg-white/10 text-white/40 cursor-not-allowed shadow-none"
-                    }`}
+                    disabled={pin.length < 4}
+                    className="w-full bg-[#1E5BFF] hover:bg-[#1749CC] disabled:bg-white/10 disabled:text-white/30 text-white font-bold py-4 rounded-2xl flex items-center justify-center gap-2 transition-all active:scale-95"
                 >
-                    Confirmar PIN
+                    Continuar
                     <ArrowRight className="w-5 h-5" />
                 </button>
-              </form>
-            </div>
-          </>
+             </form>
+
+             <button 
+                onClick={() => setActiveTab("qr")}
+                className="w-full text-center mt-6 text-sm font-bold text-white/50 hover:text-white transition-colors"
+             >
+                Voltar para Câmera
+             </button>
+          </div>
         )}
       </div>
     </div>

@@ -1,13 +1,13 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Search, Sun, Moon } from 'lucide-react';
+import { Search, Sun, Moon, QrCode } from 'lucide-react';
 import { Category } from '../types';
 import { CATEGORIES } from '../constants';
 
 interface HeaderProps {
   isDarkMode: boolean;
   toggleTheme: () => void;
-  onAuthClick: () => void; // Kept for interface compatibility, but not used in UI
+  onAuthClick: () => void;
   user: any;
   searchTerm: string;
   onSearchChange: (value: string) => void;
@@ -25,6 +25,8 @@ export const Header: React.FC<HeaderProps> = ({
   searchTerm,
   onSearchChange,
   activeTab,
+  userRole,
+  onOpenMerchantQr,
   customPlaceholder,
   onSelectCategory
 }) => {
@@ -32,11 +34,11 @@ export const Header: React.FC<HeaderProps> = ({
   const [activeDot, setActiveDot] = useState(0);
   const categoriesRef = useRef<HTMLDivElement>(null);
   const isHome = activeTab === 'home';
+  const isMerchant = userRole === 'lojista';
 
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
-      // Trigger collapse slightly after starting to scroll to avoid jitter
       setIsScrolled(currentScrollY > 20);
     };
 
@@ -55,7 +57,6 @@ export const Header: React.FC<HeaderProps> = ({
       const maxScroll = scrollWidth - clientWidth;
       if (maxScroll > 0) {
         const percentage = scrollLeft / maxScroll;
-        // Map 0-1 to 0-3 (4 dots) based on approximate pages
         const dotIndex = Math.min(Math.round(percentage * 3), 3);
         setActiveDot(dotIndex);
       }
@@ -71,7 +72,7 @@ export const Header: React.FC<HeaderProps> = ({
     >
       <div className="max-w-md mx-auto flex flex-col">
         
-        {/* Top Row: Search + Theme */}
+        {/* Top Row: Search + Theme + (Merchant QR) */}
         <div className={`flex items-center gap-3 px-5 transition-all duration-500 ease-in-out ${isScrolled && isHome ? 'py-2' : 'py-3'}`}>
           <div className="relative flex-1 group">
             <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
@@ -92,6 +93,16 @@ export const Header: React.FC<HeaderProps> = ({
           >
             {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
           </button>
+
+          {/* Exibe QR Code no header APENAS para lojistas (atalho rápido) */}
+          {isMerchant && onOpenMerchantQr && (
+             <button 
+                onClick={onOpenMerchantQr}
+                className={`rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-[#1E5BFF] hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-all active:scale-95 ${isScrolled && isHome ? 'w-9 h-9' : 'w-10 h-10'}`}
+             >
+                <QrCode className="w-5 h-5" />
+             </button>
+          )}
         </div>
 
         {/* Categories Row (Collapsible) */}
@@ -130,7 +141,6 @@ export const Header: React.FC<HeaderProps> = ({
                         : 'w-8 h-8 opacity-100 translate-y-0 group-hover:scale-110'}
                     `}
                   >
-                    {/* Clone element to force color inheritance or styling if needed */}
                     {React.isValidElement(cat.icon) 
                       ? React.cloneElement(cat.icon as React.ReactElement<any>, { 
                           className: `transition-all duration-500 ${isScrolled ? 'w-0 h-0' : 'w-6 h-6'} text-[#2D6DF6] dark:text-blue-400`, 
@@ -148,12 +158,10 @@ export const Header: React.FC<HeaderProps> = ({
                   </span>
                 </button>
               ))}
-              {/* Padding Element to ensure last item is fully visible/clickable with fade */}
               <div className="w-2 flex-shrink-0" />
             </div>
           </div>
 
-          {/* Sutil Scroll Indicator Dots - Hide when scrolled to save space */}
           <div className={`flex justify-center gap-1.5 transition-all duration-500 ease-in-out overflow-hidden ${isScrolled ? 'h-0 opacity-0 pb-0' : 'h-3 opacity-100 pb-2 pt-1'}`}>
             {[0, 1, 2, 3].map((i) => (
               <div 
