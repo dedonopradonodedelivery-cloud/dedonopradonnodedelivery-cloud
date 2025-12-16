@@ -139,6 +139,9 @@ export const CashbackInfoView: React.FC<CashbackInfoViewProps> = ({
     return (
       <div className="flex flex-col items-center w-full max-w-sm mx-auto">
         
+        {/* 0. Countdown (Moved to top) */}
+        <CountdownDisplay />
+
         {/* 1. Impact Header */}
         <div className="text-center mb-10 mt-2">
             <h1 className="text-[26px] font-extrabold text-gray-900 dark:text-white leading-tight mb-3 font-display">
@@ -207,9 +210,6 @@ export const CashbackInfoView: React.FC<CashbackInfoViewProps> = ({
                 </p>
             </div>
         </div>
-
-        {/* 4. Countdown */}
-        <CountdownDisplay />
 
         {/* 5. CTA */}
         <div className="w-full space-y-3">
