@@ -106,7 +106,7 @@ const App: React.FC = () => {
             <div className="animate-sponsor-float">
               <div className="bg-white/10 backdrop-blur-2xl px-6 py-4 rounded-[2rem] border border-white/20 flex items-center gap-4 shadow-2xl relative overflow-hidden group">
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full animate-shimmer"></div>
-                <div className="w-10 h-10 bg-gradient-to-br from-yellow-300 to-orange-500 rounded-2xl flex items-center justify-center shadow-lg">
+                <div className="w-10 h-10 bg-gradient-to-br from-yellow-300 to-orange-500 rounded-2xl flex items-center justify-center shadow-lg animate-sponsor-logo-pulse">
                   <Crown className="w-6 h-6 text-white fill-white" />
                 </div>
                 <div className="flex flex-col text-left">

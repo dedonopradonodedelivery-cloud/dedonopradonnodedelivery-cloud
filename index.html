@@ -36,6 +36,7 @@
               'float': 'float 5s ease-in-out infinite',
               'sponsor-reveal': 'sponsorReveal 1.2s cubic-bezier(0.2, 0.8, 0.2, 1) forwards',
               'sponsor-float': 'sponsorFloat 4s ease-in-out infinite',
+              'sponsor-logo-pulse': 'sponsorLogoPulse 3s ease-in-out infinite',
               'glow-pulse': 'glowPulse 4s ease-in-out infinite',
               'soft-pulse': 'softPulse 4s ease-in-out infinite',
               'banner-img-parallax': 'bannerParallax 8s ease-in-out infinite',
@@ -77,6 +78,10 @@
               sponsorFloat: {
                 '0%, 100%': { transform: 'translateY(0)' },
                 '50%': { transform: 'translateY(-4px)' },
+              },
+              sponsorLogoPulse: {
+                '0%, 100%': { transform: 'scale(1) rotate(0deg)' },
+                '50%': { transform: 'scale(1.12) rotate(5deg)' },
               },
               glowPulse: {
                 '0%, 100%': { opacity: '0.15', transform: 'scale(1)' },

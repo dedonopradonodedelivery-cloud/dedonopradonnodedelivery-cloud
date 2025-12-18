@@ -222,18 +222,18 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
       case 'hero':
         return (
           <div key="hero" className="relative group overflow-hidden">
-            {/* Carousel Container - Height Capped for fold consistency */}
+            {/* Carousel Container - Edge-to-edge (px-0) */}
             <div 
               ref={carouselRef}
               onScroll={handleScroll}
-              className="flex overflow-x-auto snap-x snap-mandatory no-scrollbar px-5 scroll-smooth"
+              className="flex overflow-x-auto snap-x snap-mandatory no-scrollbar px-0 scroll-smooth"
             >
               {banners.map((banner) => (
-                <div key={banner.id} className="min-w-full snap-center pr-2 last:pr-0">
-                  <div className="w-full bg-[#1E5BFF] rounded-[28px] overflow-hidden shadow-[0_12px_40px_rgba(30,91,255,0.2)] flex h-[200px] relative border border-white/10">
+                <div key={banner.id} className="min-w-full snap-center">
+                  <div className="w-full bg-[#1E5BFF] overflow-hidden shadow-[0_12px_40px_rgba(30,91,255,0.2)] flex h-[200px] relative border-b border-white/10">
                     
-                    {/* Conteúdo Esquerdo - Fixed background and high contrast text */}
-                    <div className="flex-1 p-5 pr-1 text-white flex flex-col justify-center relative z-20 animate-banner-text-in">
+                    {/* Conteúdo Esquerdo - Ajustado para alinhamento edge-to-edge */}
+                    <div className="flex-1 p-6 pr-1 text-white flex flex-col justify-center relative z-20 animate-banner-text-in">
                       <div className="flex items-center gap-2 mb-2">
                         <div className="flex items-center gap-1.5 opacity-90">
                           {banner.icon}
@@ -244,7 +244,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
                         {banner.isSponsored && (
                           <div className="flex items-center gap-1.5 animate-in fade-in duration-700">
                             <span className="w-1 h-1 rounded-full bg-white/40"></span>
-                            <span className="text-[7px] font-black uppercase tracking-[0.2em] bg-white/20 px-1.5 py-0.5 rounded-md border border-white/20 backdrop-blur-md">
+                            <span className="text-[7px] font-black uppercase tracking-[0.2em] bg-white/20 px-1.5 py-0.5 rounded-md border border-white/10 backdrop-blur-md">
                                Patrocinado
                             </span>
                           </div>
@@ -276,17 +276,14 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
                       </button>
                     </div>
 
-                    {/* Metade Direita - Enhanced Overlay for Text Legibility */}
+                    {/* Metade Direita - Visual Parallax preenchendo até a borda */}
                     <div className="w-[45%] relative overflow-hidden">
-                      {/* Smooth shadow overlap for seamless transition */}
                       <div className="absolute inset-y-0 left-0 bg-gradient-to-r from-[#1E5BFF] via-[#1E5BFF]/60 to-transparent z-10 w-16"></div>
-                      {/* Image Parallax */}
                       <img 
                         src={banner.image} 
                         alt={banner.title} 
                         className="w-full h-full object-cover animate-banner-img-parallax brightness-[0.9] contrast-[1.05]"
                       />
-                      {/* Universal darkening layer for bright images */}
                       <div className="absolute inset-0 bg-blue-950/20 pointer-events-none z-0"></div>
                     </div>
                   </div>
@@ -294,7 +291,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
               ))}
             </div>
 
-            {/* Compact Pagination Dots */}
+            {/* Indicadores Visuais Compactos */}
             <div className="flex justify-center gap-1.5 mt-3">
               {banners.map((_, i) => (
                 <div 
@@ -481,7 +478,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
              </div>
         </div>
       ) : (
-        <div className="flex flex-col gap-8 w-full mt-5">
+        <div className="flex flex-col gap-8 w-full mt-0">
             {contextConfig.sectionOrder.map((sectionKey: string) => renderSection(sectionKey))}
             <div className="mt-12 mb-4 flex flex-col items-center justify-center text-center opacity-40">
               <Star className="w-4 h-4 text-gray-400 mb-2" />
