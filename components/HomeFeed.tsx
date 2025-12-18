@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { AdType, Category, Store, EditorialCollection } from '../types';
 import { 
   ChevronRight, 
@@ -7,23 +7,28 @@ import {
   ArrowRight, 
   Star,
   X,
-  MapPin,
   Wallet,
   Users,
   TrendingUp,
   Flame,
-  Trophy,
   Zap,
   Dices,
-  CheckCircle2,
   Clock,
-  Search
+  Timer,
+  Coffee,
+  ShoppingBag,
+  Moon,
+  Sun,
+  Utensils,
+  Award,
+  ShieldCheck,
+  LayoutDashboard,
+  ExternalLink
 } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import { LojasEServicosList } from './LojasEServicosList';
 import { User } from '@supabase/supabase-js';
 import { SpinWheelView } from './SpinWheelView';
-import { getStoreLogo } from '../utils/mockLogos';
 
 interface HomeFeedProps {
   onNavigate: (view: string) => void;
@@ -38,67 +43,22 @@ interface HomeFeedProps {
   onRequireLogin: () => void;
 }
 
-const TRENDING_TAGS = [
-  { id: 1, label: 'Sushi', icon: '🍣' },
-  { id: 2, label: 'Academia', icon: '💪' },
-  { id: 3, label: 'Pet Shop', icon: '🐾' },
-  { id: 4, label: 'Pizza', icon: '🍕' },
-  { id: 5, label: 'Salão', icon: '💇‍♀️' },
-  { id: 6, label: 'Farmácia', icon: '💊' },
-];
+type TimeContext = 'morning' | 'afternoon' | 'night';
 
-const EDITORIAL_THEMES: (EditorialCollection & { badge?: string })[] = [
-  { 
-    id: 'coffee', 
-    title: 'Pausa para o Café', 
-    subtitle: 'Favoritos do bairro', 
-    image: 'https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?q=80&w=600&auto=format=fit=crop', 
-    keywords: ['café', 'padaria', 'confeitaria'],
-    badge: 'Popular'
-  },
-  { 
-    id: 'style', 
-    title: 'Guia de Estilo', 
-    subtitle: 'Renove seu visual', 
-    image: 'https://images.unsplash.com/photo-1558747785-05961248f733?q=80&w=600&auto=format=fit=crop', 
-    keywords: ['barbearia', 'cabeleireiro', 'roupas'],
-    badge: 'Novo'
-  },
-  { 
-    id: 'health', 
-    title: 'Viver Bem', 
-    subtitle: 'Saúde & Foco', 
-    image: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?q=80&w=600&auto=format=fit=crop', 
-    keywords: ['academia', 'clinica', 'nutrição'],
-    badge: 'Destaque'
-  },
-];
-
-const SpinWheelModal: React.FC<{
-  isOpen: boolean;
-  onClose: () => void;
-  userId: string | null;
-  userRole: 'cliente' | 'lojista' | null;
-  onWin: (reward: any) => void;
-  onRequireLogin: () => void;
-  onViewHistory: () => void;
-}> = ({ isOpen, onClose, userId, userRole, onWin, onRequireLogin, onViewHistory }) => {
-  if (!isOpen) return null;
-  return (
-    <div className="fixed inset-0 z-[60] bg-black/60 backdrop-blur-sm flex items-end justify-center" onClick={onClose}>
-      <div className="bg-transparent w-full max-w-md relative" onClick={(e) => e.stopPropagation()}>
-        <div className="absolute top-4 right-4 z-50">
-           <button onClick={onClose} className="p-2 text-gray-200 hover:text-white bg-black/30 backdrop-blur-sm rounded-full active:scale-95 transition-transform">
-              <X className="w-5 h-5" />
-            </button>
-        </div>
-        <div className="animate-in slide-in-from-bottom duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]">
-            <SpinWheelView userId={userId} userRole={userRole} onWin={onWin} onRequireLogin={onRequireLogin} onViewHistory={onViewHistory} />
-        </div>
-      </div>
-    </div>
-  );
-};
+// Interface preparada para monetização futura
+interface BannerItem {
+  id: string;
+  badge: string;
+  icon: React.ReactNode;
+  title: string;
+  subtitle: string;
+  image: string;
+  cta: string;
+  action: () => void;
+  isSponsored?: boolean;
+  advertiserName?: string;
+  ctaLink?: string;
+}
 
 export const HomeFeed: React.FC<HomeFeedProps> = ({ 
   onNavigate, 
@@ -113,42 +73,394 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
   onRequireLogin
 }) => {
   const [isSpinWheelOpen, setIsSpinWheelOpen] = useState(false);
+  const [activeBannerIndex, setActiveBannerIndex] = useState(0);
+  const carouselRef = useRef<HTMLDivElement>(null);
+  const autoplayTimerRef = useRef<any | null>(null);
+
   const activeSearchTerm = externalSearchTerm || '';
   const [searchResults, setSearchResults] = useState<Store[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [listFilter, setListFilter] = useState<'all' | 'cashback' | 'top_rated' | 'open_now'>('all');
-  const [onlineVizinhos] = useState(312);
+
+  const timeContext = useMemo((): TimeContext => {
+    const hour = new Date().getHours();
+    if (hour >= 6 && hour < 12) return 'morning';
+    if (hour >= 12 && hour < 18) return 'afternoon';
+    return 'night';
+  }, []);
+
+  const banners = useMemo((): BannerItem[] => {
+    const morningImg = 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?q=80&w=600&auto=format&fit=crop';
+    const afternoonImg = 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?q=80&w=600&auto=format&fit=crop';
+    const nightImg = 'https://images.unsplash.com/photo-1513104890138-7c749659a591?q=80&w=600&auto=format&fit=crop';
+    
+    const contextMap = {
+      morning: { greeting: 'Bom dia!', title: 'Café da manhã\nno bairro.', sub: 'Comece o dia com cashback.', img: morningImg },
+      afternoon: { greeting: 'Boa tarde!', title: 'Resolva seu dia\nna Freguesia.', sub: 'Economize perto de você.', img: afternoonImg },
+      night: { greeting: 'Boa noite!', title: 'Sua noite com\num cashback.', sub: 'As melhores mesas do bairro.', img: nightImg }
+    };
+
+    const currentContext = contextMap[timeContext];
+
+    return [
+      {
+        id: 'main_context',
+        badge: currentContext.greeting,
+        icon: timeContext === 'morning' ? <Sun className="w-3 h-3" /> : <Moon className="w-3 h-3" />,
+        title: currentContext.title,
+        subtitle: currentContext.sub,
+        image: currentContext.img,
+        cta: 'Ativar Cashback',
+        action: () => onNavigate('cashback_info'),
+        isSponsored: false
+      },
+      {
+        id: 'ad_real_estate',
+        badge: 'Oportunidade',
+        icon: <TrendingUp className="w-3 h-3" />,
+        title: 'Seu imóvel na\nmelhor vitrine.',
+        subtitle: 'Anuncie com a imobiliária que mais cresce no bairro.',
+        image: 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?q=80&w=600&auto=format&fit=crop',
+        cta: 'Conhecer',
+        action: () => window.open('https://primefreguesia.com.br', '_blank'),
+        isSponsored: true,
+        advertiserName: 'Prime Imobiliária',
+        ctaLink: 'https://primefreguesia.com.br'
+      },
+      {
+        id: 'connect_b2b',
+        badge: 'Networking',
+        icon: <Users className="w-3 h-3" />,
+        title: 'Freguesia\nConnect.',
+        subtitle: 'Conecte sua empresa ao ecossistema local.',
+        image: 'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?q=80&w=600&auto=format&fit=crop',
+        cta: 'Saiba Mais',
+        action: () => onNavigate('freguesia_connect_public'),
+        isSponsored: false
+      }
+    ];
+  }, [timeContext, onNavigate]);
 
   useEffect(() => {
-    let timeout: any;
-    if (!activeSearchTerm.trim()) { setSearchResults([]); setIsSearching(false); return; }
-    setIsSearching(true);
-    timeout = setTimeout(async () => {
-        try {
-            const { data } = await supabase.from('businesses').select('*')
-                .or(`name.ilike.%${activeSearchTerm}%,category.ilike.%${activeSearchTerm}%`)
-                .limit(8);
-            
-            const mapped: Store[] = (data || []).map((item: any) => ({
-                id: item.id, 
-                name: item.name, 
-                category: item.category, 
-                subcategory: item.subCategory,
-                description: item.description || '', // Fix: Adicionado propriedade obrigatória
-                logoUrl: item.logoUrl || getStoreLogo(item.name.length),
-                rating: item.rating || 0, 
-                distance: 'Freguesia', 
-                adType: AdType.ORGANIC,
-            }));
-            setSearchResults(mapped);
-        } catch (err) { console.error(err); } finally { setIsSearching(false); }
-    }, 400);
-    return () => clearTimeout(timeout);
-  }, [activeSearchTerm]);
+    const startAutoplay = () => {
+      autoplayTimerRef.current = setInterval(() => {
+        if (carouselRef.current) {
+          const nextIndex = (activeBannerIndex + 1) % banners.length;
+          const scrollAmount = carouselRef.current.offsetWidth * nextIndex;
+          carouselRef.current.scrollTo({ left: scrollAmount, behavior: 'smooth' });
+          setActiveBannerIndex(nextIndex);
+        }
+      }, 7000);
+    };
+
+    startAutoplay();
+    return () => {
+      if (autoplayTimerRef.current) clearInterval(autoplayTimerRef.current);
+    };
+  }, [activeBannerIndex, banners.length]);
+
+  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    const scrollLeft = e.currentTarget.scrollLeft;
+    const width = e.currentTarget.offsetWidth;
+    if (width > 0) {
+      const newIndex = Math.round(scrollLeft / width);
+      if (newIndex !== activeBannerIndex) {
+        setActiveBannerIndex(newIndex);
+      }
+    }
+  };
+
+  const contextConfig = useMemo(() => {
+    switch (timeContext) {
+      case 'morning':
+        return {
+          tags: [
+            { id: 1, label: 'Padaria', icon: '🥐' },
+            { id: 2, label: 'Café', icon: '☕' },
+            { id: 3, label: 'Hortifruti', icon: '🍎' },
+            { id: 4, label: 'Academia', icon: '💪' },
+          ],
+          highlights: [
+            { id: 1, title: 'Pão Quentinho', desc: 'Padaria Imperial • 8%', icon: <Coffee className="w-4 h-4 text-amber-500" />, bg: 'bg-amber-50', borderColor: 'border-amber-100' },
+            { id: 2, title: 'Energia', desc: 'Fit Studio Bombando', icon: <Zap className="w-4 h-4 text-blue-500" />, bg: 'bg-blue-50', borderColor: 'border-blue-100' },
+          ],
+          sectionOrder: ['hero', 'highlights', 'tags', 'wallet', 'filters', 'list', 'editorial', 'bonus']
+        };
+      case 'afternoon':
+        return {
+          tags: [
+            { id: 1, label: 'Almoço', icon: '🍽️' },
+            { id: 2, label: 'Moda', icon: '👕' },
+            { id: 3, label: 'Serviços', icon: '🛠️' },
+            { id: 4, label: 'Saúde', icon: '🏥' },
+          ],
+          highlights: [
+            { id: 1, title: 'Prato do Dia', desc: 'Restaurante Sabor • 10%', icon: <Utensils className="w-4 h-4 text-orange-500" />, bg: 'bg-orange-50', borderColor: 'border-orange-100' },
+            { id: 2, title: 'Promoção', desc: 'Moda RJ: 20% OFF', icon: <ShoppingBag className="w-4 h-4 text-purple-500" />, bg: 'bg-purple-50', borderColor: 'border-purple-100' },
+          ],
+          sectionOrder: ['hero', 'tags', 'highlights', 'wallet', 'filters', 'list', 'editorial', 'bonus']
+        };
+      default:
+        return {
+          tags: [
+            { id: 1, label: 'Sushi', icon: '🍣' },
+            { id: 2, label: 'Pizza', icon: '🍕' },
+            { id: 3, label: 'Burger', icon: '🍔' },
+            { id: 4, label: 'Açaí', icon: '🍧' },
+          ],
+          highlights: [
+            { id: 1, title: 'Delivery Grátis', desc: 'Pizza Place • 12% back', icon: <Moon className="w-4 h-4 text-indigo-500" />, bg: 'bg-indigo-50', borderColor: 'border-indigo-100' },
+            { id: 2, title: 'Happy Hour', desc: 'Chopp em dobro no Zé', icon: <Flame className="w-4 h-4 text-red-500" />, bg: 'bg-red-100', borderColor: 'border-red-100' },
+          ],
+          sectionOrder: ['hero', 'highlights', 'editorial', 'wallet', 'tags', 'filters', 'list', 'bonus']
+        };
+    }
+  }, [timeContext]);
+
+  const renderSection = (key: string) => {
+    switch (key) {
+      case 'hero':
+        return (
+          <div key="hero" className="relative group overflow-hidden">
+            {/* Carousel Container - Height Capped for fold consistency */}
+            <div 
+              ref={carouselRef}
+              onScroll={handleScroll}
+              className="flex overflow-x-auto snap-x snap-mandatory no-scrollbar px-5 scroll-smooth"
+            >
+              {banners.map((banner) => (
+                <div key={banner.id} className="min-w-full snap-center pr-2 last:pr-0">
+                  <div className="w-full bg-[#1E5BFF] rounded-[28px] overflow-hidden shadow-[0_12px_40px_rgba(30,91,255,0.2)] flex h-[200px] relative border border-white/10">
+                    
+                    {/* Conteúdo Esquerdo - Fixed background and high contrast text */}
+                    <div className="flex-1 p-5 pr-1 text-white flex flex-col justify-center relative z-20 animate-banner-text-in">
+                      <div className="flex items-center gap-2 mb-2">
+                        <div className="flex items-center gap-1.5 opacity-90">
+                          {banner.icon}
+                          <span className="text-[9px] font-black uppercase tracking-[0.2em]">{banner.badge}</span>
+                        </div>
+                        
+                        {/* Selo Patrocinado AA Compliant */}
+                        {banner.isSponsored && (
+                          <div className="flex items-center gap-1.5 animate-in fade-in duration-700">
+                            <span className="w-1 h-1 rounded-full bg-white/40"></span>
+                            <span className="text-[7px] font-black uppercase tracking-[0.2em] bg-white/20 px-1.5 py-0.5 rounded-md border border-white/20 backdrop-blur-md">
+                               Patrocinado
+                            </span>
+                          </div>
+                        )}
+                      </div>
+
+                      <h1 className="text-[22px] font-black mb-1 leading-[1.15] tracking-tight whitespace-pre-line drop-shadow-[0_2px_4px_rgba(0,0,0,0.2)]">
+                        {banner.title}
+                      </h1>
+                      
+                      <p className="text-blue-50 text-[11px] font-medium mb-4 opacity-95 leading-tight line-clamp-2 drop-shadow-sm">
+                        {banner.isSponsored && (
+                          <span className="font-black text-white">{banner.advertiserName} • </span>
+                        )}
+                        {banner.subtitle}
+                      </p>
+
+                      <button 
+                        onClick={banner.action} 
+                        className="w-fit bg-white text-[#1E5BFF] text-[11px] font-black px-4 py-2.5 rounded-xl active:scale-[0.97] transition-all flex items-center justify-center gap-1.5 shadow-lg shadow-black/10 relative overflow-hidden group/btn"
+                      >
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-blue-50/20 to-transparent -translate-x-full group-hover/btn:animate-shimmer"></div>
+                        {banner.cta}
+                        {banner.isSponsored ? (
+                          <ExternalLink className="w-3 h-3" strokeWidth={3} />
+                        ) : (
+                          <ArrowRight className="w-3 h-3" strokeWidth={3} />
+                        )}
+                      </button>
+                    </div>
+
+                    {/* Metade Direita - Enhanced Overlay for Text Legibility */}
+                    <div className="w-[45%] relative overflow-hidden">
+                      {/* Smooth shadow overlap for seamless transition */}
+                      <div className="absolute inset-y-0 left-0 bg-gradient-to-r from-[#1E5BFF] via-[#1E5BFF]/60 to-transparent z-10 w-16"></div>
+                      {/* Image Parallax */}
+                      <img 
+                        src={banner.image} 
+                        alt={banner.title} 
+                        className="w-full h-full object-cover animate-banner-img-parallax brightness-[0.9] contrast-[1.05]"
+                      />
+                      {/* Universal darkening layer for bright images */}
+                      <div className="absolute inset-0 bg-blue-950/20 pointer-events-none z-0"></div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Compact Pagination Dots */}
+            <div className="flex justify-center gap-1.5 mt-3">
+              {banners.map((_, i) => (
+                <div 
+                  key={i} 
+                  className={`h-1 rounded-full transition-all duration-500 ${
+                    activeBannerIndex === i 
+                    ? 'w-5 bg-[#1E5BFF]' 
+                    : 'w-1 bg-gray-200 dark:bg-gray-700'
+                  }`}
+                />
+              ))}
+            </div>
+          </div>
+        );
+      case 'highlights':
+        return (
+          <div key="highlights" className="space-y-3.5 animate-in slide-in-from-bottom-2 duration-500">
+            <div className="px-5 flex items-center justify-between">
+              <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.25em]">Hoje no seu bairro</h3>
+              <div className="flex items-center gap-1.5 bg-blue-50 dark:bg-blue-900/20 px-2 py-0.5 rounded-full">
+                <div className="w-1 h-1 rounded-full bg-[#1E5BFF] animate-pulse"></div>
+                <span className="text-[9px] font-bold text-[#1E5BFF] uppercase">Live</span>
+              </div>
+            </div>
+            <div className="flex gap-3.5 overflow-x-auto no-scrollbar px-5 snap-x">
+              {contextConfig.highlights.map((item: any) => (
+                <div key={item.id} className={`snap-center flex-shrink-0 w-[190px] p-4.5 rounded-2xl border ${item.borderColor} ${item.bg} flex flex-col gap-2.5 shadow-sm active:scale-95 transition-all cursor-pointer`}>
+                  <div className="flex items-center justify-between">
+                    <span className="text-[9px] font-black text-gray-400 uppercase tracking-tighter">{item.title}</span>
+                    {item.icon}
+                  </div>
+                  <p className="text-[13px] font-black text-gray-800 dark:text-white leading-tight">{item.desc}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+      case 'tags':
+        return (
+          <div key="tags" className="space-y-3">
+              <div className="px-5"><h3 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.25em]">Mais buscados</h3></div>
+              <div className="flex gap-2.5 overflow-x-auto no-scrollbar px-5">
+                  {contextConfig.tags.map((tag: any) => (
+                      <button key={tag.id} className="flex-shrink-0 flex items-center gap-2.5 bg-white dark:bg-gray-800 px-5 py-3 rounded-full border border-gray-100 dark:border-gray-700 shadow-sm active:scale-95 transition-all">
+                          <span className="text-base">{tag.icon}</span>
+                          <span className="text-xs font-black text-gray-700 dark:text-gray-300">{tag.label}</span>
+                      </button>
+                  ))}
+              </div>
+          </div>
+        );
+      case 'wallet':
+        return (
+          <div key="wallet" className="px-5 w-full">
+              <div className="bg-white dark:bg-gray-800 rounded-[28px] p-5 border border-gray-100 dark:border-gray-700 shadow-sm flex flex-col gap-4 active:scale-[0.98] transition-all cursor-pointer" onClick={() => onNavigate('user_cashback_flow')}>
+                  <div className="flex justify-between items-center">
+                      <div className="flex items-center gap-3.5">
+                          <div className="w-10 h-10 rounded-2xl bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center text-[#1E5BFF]"><Wallet className="w-5 h-5" /></div>
+                          <div>
+                              <p className="text-[10px] font-black text-gray-400 uppercase tracking-wider mb-0.5">Meu Saldo</p>
+                              <p className="text-xl font-black text-gray-900 dark:text-white leading-none">R$ 12,50</p>
+                          </div>
+                      </div>
+                      <div className="text-right">
+                          <p className="text-[9px] font-black text-gray-400 uppercase mb-0.5">Resgate em</p>
+                          <p className="text-xs font-black text-gray-700 dark:text-gray-300">R$ 50,00</p>
+                      </div>
+                  </div>
+                  <div className="h-1.5 w-full bg-gray-100 dark:bg-gray-700/50 rounded-full overflow-hidden">
+                      <div className="h-full bg-[#1E5BFF] w-[25%] rounded-full shadow-[0_0_10px_rgba(30,91,255,0.3)]"></div>
+                  </div>
+              </div>
+          </div>
+        );
+      case 'filters':
+        return (
+          <div key="filters" className="px-5 w-full -mb-1">
+              <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
+                  {[
+                    { id: 'all', label: 'Tudo', icon: Zap },
+                    { id: 'cashback', label: 'Cashback', icon: TrendingUp },
+                    { id: 'top_rated', label: 'Melhores', icon: Star },
+                    { id: 'open_now', label: 'Abertos', icon: Clock }
+                  ].map((btn) => (
+                    <button key={btn.id} onClick={() => setListFilter(btn.id as any)} className={`flex items-center gap-2 px-5 py-3 rounded-2xl border text-[11px] font-black transition-all active:scale-95 shadow-sm whitespace-nowrap ${listFilter === btn.id ? 'bg-gray-900 text-white border-gray-900 dark:bg-white dark:text-gray-900' : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border-gray-100 dark:border-gray-700'}`}>
+                        {btn.label}
+                    </button>
+                  ))}
+              </div>
+          </div>
+        );
+      case 'list':
+        return (
+          <div key="list" className="px-5 pb-2 min-h-[300px] w-full">
+              <div className="flex items-center gap-2 mb-4">
+                 <ShieldCheck className="w-3.5 h-3.5 text-blue-500" />
+                 <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Parceiros Verificados</span>
+              </div>
+              <LojasEServicosList onStoreClick={onStoreClick} onViewAll={() => onNavigate('explore')} activeFilter={listFilter} user={user} />
+          </div>
+        );
+      case 'editorial':
+        const themes = [
+          { id: 'coffee', title: 'Pausa para o Café', subtitle: 'Favoritos do bairro', image: 'https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?q=80&w=600&auto=format&fit=crop', keywords: ['café', 'padaria'], badge: 'Popular' },
+          { id: 'health', title: 'Viver Bem', subtitle: 'Saúde & Foco', image: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?q=80&w=600&auto=format&fit=crop', keywords: ['academia', 'clinica'], badge: 'Destaque' },
+        ];
+        return (
+          <div key="editorial" className="space-y-4 w-full">
+              <div className="px-5 flex items-center justify-between">
+                  <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.25em]">Descubra o bairro</h3>
+              </div>
+              <div className="flex gap-4 overflow-x-auto pb-6 no-scrollbar snap-x px-5">
+                  {themes.map((theme) => (
+                      <div key={theme.id} className="snap-center min-w-[270px] w-[270px] h-[170px] rounded-[32px] overflow-hidden relative cursor-pointer active:scale-[0.98] transition-all shadow-xl group" onClick={() => onSelectCollection(theme as any)}>
+                          <img src={theme.image} className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000" alt={theme.title} />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent"></div>
+                          <div className="absolute bottom-5 left-6 right-6">
+                              <h4 className="text-white font-black text-lg leading-tight mb-1">{theme.title}</h4>
+                              <p className="text-blue-200 text-[10px] font-bold opacity-80 uppercase tracking-widest">{theme.subtitle}</p>
+                          </div>
+                      </div>
+                  ))}
+              </div>
+          </div>
+        );
+      case 'bonus':
+        return (
+          <div key="bonus" className="px-5 mt-4 space-y-4">
+              <div className="flex items-center gap-2 mb-2">
+                 <Award className="w-4 h-4 text-[#1E5BFF]" />
+                 <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.25em]">Clube Localizei</h3>
+              </div>
+              <button onClick={() => onNavigate('user_cashback_flow')} className="w-full bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-3xl p-5 flex items-center justify-between group active:scale-[0.98] transition-all shadow-sm">
+                  <div className="flex items-center gap-4">
+                      <div className="bg-orange-50 dark:bg-orange-900/20 rounded-2xl w-11 h-11 flex items-center justify-center text-orange-500"><Flame className="w-6 h-6 fill-current" /></div>
+                      <div className="text-left">
+                          <p className="text-sm font-black text-gray-800 dark:text-white leading-tight">Sequência de 3 Dias</p>
+                          <p className="text-[10px] text-emerald-600 font-black uppercase mt-1 tracking-wide">Check-in disponível + R$ 0,50</p>
+                      </div>
+                  </div>
+                  <ChevronRight className="w-5 h-5 text-gray-300 group-hover:translate-x-1 transition-transform" />
+              </button>
+              <div className="grid grid-cols-2 gap-3.5">
+                  <button onClick={() => setIsSpinWheelOpen(true)} className="bg-white dark:bg-gray-800 p-5 rounded-3xl border border-gray-100 dark:border-gray-700 shadow-sm flex flex-col items-center gap-3 active:scale-95 transition-transform">
+                      <div className="w-10 h-10 bg-purple-50 dark:bg-purple-900/30 rounded-full flex items-center justify-center text-purple-600"><Dices className="w-5 h-5" /></div>
+                      <div className="text-center">
+                          <p className="text-xs font-black text-gray-800 dark:text-white">Roleta</p>
+                          <p className="text-[9px] text-gray-400 font-black uppercase mt-1">Tente a Sorte</p>
+                      </div>
+                  </button>
+                  <button onClick={() => onNavigate('invite_friend')} className="bg-white dark:bg-gray-800 p-5 rounded-3xl border border-gray-100 dark:border-gray-700 shadow-sm flex flex-col items-center gap-3 active:scale-95 transition-transform">
+                      <div className="w-10 h-10 bg-green-50 dark:bg-green-900/30 rounded-full flex items-center justify-center text-green-600"><Users className="w-5 h-5" /></div>
+                      <div className="text-center">
+                          <p className="text-xs font-black text-gray-800 dark:text-white">Indicar</p>
+                          <p className="text-[9px] text-gray-400 font-black uppercase mt-1">Ganhe R$ 5,00</p>
+                      </div>
+                  </button>
+              </div>
+          </div>
+        );
+      default: return null;
+    }
+  };
 
   return (
-    <div className="flex flex-col gap-6 pb-28 bg-gray-50 dark:bg-gray-900 w-full max-w-md mx-auto !pt-0 animate-in fade-in duration-500">
-      
+    <div className="flex flex-col gap-8 pb-32 bg-gray-50 dark:bg-gray-900 w-full max-w-md mx-auto animate-in fade-in duration-500 overflow-x-hidden">
       {activeSearchTerm ? (
         <div className="px-5 mt-4 min-h-[50vh]">
              <div className="flex items-center gap-2 mb-4">
@@ -156,8 +468,8 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
                 <h3 className="font-bold text-sm text-gray-500 uppercase tracking-wider">Resultados para "{activeSearchTerm}"</h3>
              </div>
              <div className="flex flex-col gap-3">
-                {searchResults.map((store) => (
-                <div key={store.id} onClick={() => onStoreClick && onStoreClick(store)} className="bg-white dark:bg-gray-800 rounded-2xl p-3 shadow-sm border border-gray-100 dark:border-gray-700 flex gap-3 cursor-pointer active:scale-[0.99] transition-all">
+                {stores.filter(s => s.name.toLowerCase().includes(activeSearchTerm.toLowerCase())).map((store) => (
+                <div key={store.id} onClick={() => onStoreClick && onStoreClick(store)} className="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-gray-700 flex gap-4 cursor-pointer active:scale-[0.98] transition-all">
                     <div className="w-12 h-12 rounded-xl overflow-hidden flex-shrink-0 bg-gray-50"><img src={store.logoUrl} className="w-full h-full object-contain" alt={store.name} /></div>
                     <div className="flex-1 flex flex-col justify-center">
                         <h4 className="font-bold text-gray-800 dark:text-white text-sm truncate">{store.name}</h4>
@@ -169,185 +481,24 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
              </div>
         </div>
       ) : (
-        <div className="flex flex-col gap-6 w-full mt-4">
-            
-            {/* 1. HERO - PROPOSTA DE VALOR */}
-            <div className="px-5 w-full">
-               <div className="w-full bg-[#1E5BFF] rounded-[32px] p-6 text-white relative overflow-hidden shadow-2xl shadow-blue-500/20">
-                  <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-3xl -mr-10 -mt-10"></div>
-                  <div className="relative z-10">
-                    <div className="flex items-center gap-2 mb-4 opacity-90">
-                        <div className="relative flex h-2 w-2">
-                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                            <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
-                        </div>
-                        <span className="text-[10px] font-black uppercase tracking-widest">{onlineVizinhos} vizinhos ativos agora</span>
-                    </div>
-                    <h1 className="text-[28px] font-black mb-2 leading-[1.1] tracking-tight">O seu bairro agora<br/>te dá dinheiro.</h1>
-                    <p className="text-blue-100 text-xs font-medium mb-6 opacity-90 leading-relaxed">Ganhe cashback real comprando no comércio local da Freguesia.</p>
-                    <button onClick={() => onNavigate('cashback_info')} className="w-full bg-white text-[#1E5BFF] text-sm font-black py-4 rounded-2xl active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-xl shadow-black/10">
-                      Ativar Cashback Grátis
-                      <ArrowRight className="w-4 h-4" strokeWidth={3} />
-                    </button>
-                  </div>
-               </div>
-            </div>
-
-            {/* 2. MAIS BUSCADOS (TAGS OTIMIZADAS) */}
-            <div className="space-y-3">
-                <div className="px-5">
-                    <h3 className="text-xs font-black text-gray-400 uppercase tracking-[0.2em]">Mais buscados hoje</h3>
-                </div>
-                <div className="flex gap-2 overflow-x-auto no-scrollbar px-5">
-                    {TRENDING_TAGS.map((tag) => (
-                        <button 
-                            key={tag.id}
-                            onClick={() => onNavigate('explore')}
-                            className="flex-shrink-0 flex items-center gap-2 bg-white dark:bg-gray-800 px-4 py-2.5 rounded-full border border-gray-100 dark:border-gray-700 shadow-sm active:scale-95 transition-all"
-                        >
-                            <span className="text-sm">{tag.icon}</span>
-                            <span className="text-xs font-bold text-gray-700 dark:text-gray-300">{tag.label}</span>
-                        </button>
-                    ))}
-                </div>
-            </div>
-
-            {/* 3. DASHBOARD / STATUS */}
-            <div className="px-5 w-full">
-                <div className="bg-white dark:bg-gray-800 rounded-3xl p-4 border border-gray-100 dark:border-gray-700 shadow-sm flex flex-col gap-3 active:scale-[0.99] transition-all cursor-pointer group" onClick={() => onNavigate('user_cashback_flow')}>
-                    <div className="flex justify-between items-center">
-                        <div className="flex items-center gap-3">
-                            <div className="w-9 h-9 rounded-2xl bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center text-[#1E5BFF] transition-colors group-hover:bg-[#1E5BFF] group-hover:text-white"><Wallet className="w-5 h-5" /></div>
-                            <div>
-                                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-tight leading-none mb-1">Meu Saldo</p>
-                                <p className="text-lg font-black text-gray-900 dark:text-white leading-none">R$ 12,50</p>
-                            </div>
-                        </div>
-                        <div className="text-right">
-                            <p className="text-[10px] font-bold text-gray-400 uppercase mb-1">Resgate em</p>
-                            <p className="text-xs font-black text-gray-700 dark:text-gray-300">R$ 50,00</p>
-                        </div>
-                    </div>
-                    <div className="h-1.5 w-full bg-gray-100 dark:bg-gray-700/50 rounded-full overflow-hidden">
-                        <div className="h-full bg-[#1E5BFF] w-[25%] rounded-full shadow-[0_0_8px_rgba(30,91,255,0.4)]"></div>
-                    </div>
-                </div>
-            </div>
-
-            {/* 4. FILTROS RÁPIDOS */}
-            <div className="px-5 w-full -mb-2">
-                <div className="flex gap-2 overflow-x-auto no-scrollbar">
-                    {[
-                      { id: 'all', label: 'Tudo', icon: Zap },
-                      { id: 'cashback', label: 'Cashback', icon: TrendingUp },
-                      { id: 'top_rated', label: 'Melhores', icon: Star },
-                      { id: 'open_now', label: 'Abertos', icon: Clock }
-                    ].map((btn) => (
-                      <button
-                          key={btn.id}
-                          onClick={() => setListFilter(btn.id as any)}
-                          className={`flex items-center gap-2 px-5 py-3 rounded-2xl border text-xs font-black transition-all active:scale-95 shadow-sm whitespace-nowrap ${
-                          listFilter === btn.id ? 'bg-gray-900 text-white border-gray-900 dark:bg-white dark:text-gray-900' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-100 dark:border-gray-700'
-                          }`}
-                      >
-                          {btn.label}
-                      </button>
-                    ))}
-                </div>
-            </div>
-
-            {/* 5. LISTA PRINCIPAL */}
-            <div className="px-5 pb-2 min-h-[300px] w-full">
-                <LojasEServicosList 
-                    onStoreClick={onStoreClick} 
-                    onViewAll={() => onNavigate('explore')}
-                    activeFilter={listFilter}
-                    user={user}
-                />
-            </div>
-
-            {/* 6. DESCUBRA O BAIRRO (MAGAZINE STYLE) */}
-            <div className="space-y-4 w-full">
-                <div className="px-5 flex items-center justify-between">
-                    <h3 className="text-xs font-black text-gray-400 uppercase tracking-[0.2em]">Descubra o bairro</h3>
-                    <button onClick={() => onNavigate('explore')} className="text-[10px] font-black text-[#1E5BFF] uppercase tracking-wider">Ver tudo</button>
-                </div>
-                <div className="flex gap-4 overflow-x-auto pb-4 no-scrollbar snap-x px-5">
-                    {EDITORIAL_THEMES.map((theme) => (
-                        <div 
-                            key={theme.id} 
-                            className="snap-center min-w-[260px] w-[260px] h-[160px] rounded-[32px] overflow-hidden relative cursor-pointer active:scale-95 transition-all shadow-lg group"
-                            onClick={() => onSelectCollection(theme)}
-                        >
-                            <img src={theme.image} className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt={theme.title} />
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent"></div>
-                            <div className="absolute top-4 right-4">
-                                <span className="bg-white/20 backdrop-blur-md border border-white/30 text-white text-[9px] font-black px-2 py-1 rounded-full uppercase tracking-widest">{theme.badge}</span>
-                            </div>
-                            <div className="absolute bottom-5 left-5 right-5">
-                                <h4 className="text-white font-black text-lg leading-tight mb-1">{theme.title}</h4>
-                                <p className="text-blue-100 text-[10px] font-bold opacity-80 uppercase tracking-wider">{theme.subtitle}</p>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            </div>
-
-            {/* 7. GANHE BÔNUS (GAMIFICAÇÃO) */}
-            <div className="px-5 mt-2 space-y-4">
-                <div className="flex items-center justify-between mb-2">
-                    <h3 className="text-xs font-black text-gray-400 uppercase tracking-[0.2em]">Bônus & Recompensas</h3>
-                </div>
-                <button 
-                    onClick={() => onNavigate('user_cashback_flow')}
-                    className="w-full bg-[#FFF9F2] dark:bg-orange-900/10 border border-orange-100 dark:border-orange-800/30 rounded-3xl p-5 flex items-center justify-between group active:scale-[0.99] transition-all"
-                >
-                    <div className="flex items-center gap-4">
-                        <div className="bg-orange-500 rounded-2xl w-12 h-12 flex items-center justify-center text-white shadow-lg shadow-orange-500/20">
-                            <Flame className="w-6 h-6 fill-current" />
-                        </div>
-                        <div className="text-left">
-                            <p className="text-sm font-black text-gray-900 dark:text-white leading-tight">Sequência: 3 Dias</p>
-                            <p className="text-[11px] text-orange-600 font-bold uppercase tracking-wide mt-1 flex items-center gap-1">Check-in hoje + R$ 0,50 <Zap className="w-3 h-3 fill-current" /></p>
-                        </div>
-                    </div>
-                    <ChevronRight className="w-5 h-5 text-orange-400 group-hover:translate-x-1 transition-transform" />
-                </button>
-                <div className="grid grid-cols-2 gap-3">
-                    <button onClick={() => setIsSpinWheelOpen(true)} className="bg-white dark:bg-gray-800 p-4 rounded-3xl border border-gray-100 dark:border-gray-700 shadow-sm flex flex-col items-center gap-3 active:scale-95 transition-transform">
-                        <div className="w-10 h-10 bg-purple-50 dark:bg-purple-900/30 rounded-full flex items-center justify-center text-purple-600"><Dices className="w-5 h-5" /></div>
-                        <div className="text-center">
-                            <p className="text-xs font-black text-gray-900 dark:text-white">Roleta</p>
-                            <p className="text-[9px] text-gray-400 font-black uppercase mt-0.5">Tente a Sorte</p>
-                        </div>
-                    </button>
-                    <button onClick={() => onNavigate('invite_friend')} className="bg-white dark:bg-gray-800 p-4 rounded-3xl border border-gray-100 dark:border-gray-700 shadow-sm flex flex-col items-center gap-3 active:scale-95 transition-transform">
-                        <div className="w-10 h-10 bg-green-50 dark:bg-green-900/30 rounded-full flex items-center justify-center text-green-600"><Users className="w-5 h-5" /></div>
-                        <div className="text-center">
-                            <p className="text-xs font-black text-gray-900 dark:text-white">Indicar</p>
-                            <p className="text-[9px] text-gray-400 font-black uppercase mt-0.5">Ganhe R$ 5,00</p>
-                        </div>
-                    </button>
-                </div>
-            </div>
-
-            {/* FOOTER */}
-            <div className="mt-8 mb-4 flex flex-col items-center justify-center text-center opacity-30">
+        <div className="flex flex-col gap-8 w-full mt-5">
+            {contextConfig.sectionOrder.map((sectionKey: string) => renderSection(sectionKey))}
+            <div className="mt-12 mb-4 flex flex-col items-center justify-center text-center opacity-40">
               <Star className="w-4 h-4 text-gray-400 mb-2" />
-              <p className="text-[9px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-[0.4em]">Freguesia • Rio de Janeiro</p>
+              <p className="text-[9px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-[0.5em]">Freguesia • Localizei v1.0.9</p>
             </div>
         </div>
       )}
-
-      <SpinWheelModal 
-        isOpen={isSpinWheelOpen} 
-        onClose={() => setIsSpinWheelOpen(false)} 
-        userId={user?.id || null} 
-        userRole={userRole || null} 
-        onWin={onSpinWin} 
-        onRequireLogin={onRequireLogin} 
-        onViewHistory={() => onNavigate('prize_history')} 
-      />
+      {isSpinWheelOpen && (
+        <div className="fixed inset-0 z-[100] bg-black/70 backdrop-blur-md flex items-end justify-center animate-in fade-in" onClick={() => setIsSpinWheelOpen(false)}>
+          <div className="bg-transparent w-full max-w-md relative" onClick={(e) => e.stopPropagation()}>
+            <div className="absolute top-4 right-5 z-50"><button onClick={() => setIsSpinWheelOpen(false)} className="p-2.5 text-gray-200 hover:text-white bg-white/10 backdrop-blur-md rounded-full active:scale-90 transition-transform"><X className="w-5 h-5" /></button></div>
+            <div className="animate-in slide-in-from-bottom duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]">
+                <SpinWheelView userId={user?.id || null} userRole={userRole || null} onWin={onSpinWin} onRequireLogin={onRequireLogin} onViewHistory={() => onNavigate('prize_history')} />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

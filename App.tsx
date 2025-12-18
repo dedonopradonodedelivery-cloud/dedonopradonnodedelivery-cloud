@@ -1,64 +1,24 @@
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Layout } from './components/Layout';
 import { Header } from './components/Header';
 import { HomeFeed } from './components/HomeFeed';
 import { ExploreView } from './components/ExploreView';
-import { StatusView } from './components/StatusView';
-import { MarketplaceView } from './components/MarketplaceView';
-import { CategoryView } from './components/CategoryView';
-import { CategoriaAlimentacao } from './components/CategoriaAlimentacao';
-import { SubcategoryStoreList } from './components/SubcategoryStoreList';
 import { StoreDetailView } from './components/StoreDetailView';
-import { StoreCategoryView } from './components/StoreCategoryView';
 import { CashbackView } from './components/CashbackView';
-import { CashbackLandingView } from './components/CashbackLandingView';
-import { FreguesiaConnectPublic } from './components/FreguesiaConnectPublic';
-import { FreguesiaConnectDashboard } from './components/FreguesiaConnectDashboard';
-import { FreguesiaConnectRestricted } from './components/FreguesiaConnectRestricted';
-import { RewardDetailsView } from './components/RewardDetailsView';
-import { PrizeHistoryView } from './components/PrizeHistoryView';
-import { AuthModal } from './components/AuthModal';
-import { MerchantLeadModal } from './components/MerchantLeadModal';
-import { QuickRegister } from './components/QuickRegister';
-import { MenuView } from './components/MenuView';
-import { ServicesView } from './components/ServicesView';
-import { SubcategoriesView } from './components/SubcategoriesView';
-import { SpecialtiesView } from './components/SpecialtiesView';
-import { StoreAreaView } from './components/StoreAreaView';
-import { QuoteRequestModal } from './components/QuoteRequestModal';
-import { ServiceSuccessView } from './components/ServiceSuccessView';
-import { EditorialListView } from './components/EditorialListView';
-import { SupportView, InviteFriendView, AboutView, FavoritesView, SponsorInfoView } from './components/SimplePages';
 import { CashbackInfoView } from './components/CashbackInfoView';
-import { EditProfileView } from './components/EditProfileView';
-import { ServiceTermsView } from './components/ServiceTermsView';
+import { RewardDetailsView } from './components/RewardDetailsView';
+import { AuthModal } from './components/AuthModal';
+import { MenuView } from './components/MenuView';
 import { PatrocinadorMasterScreen } from './components/PatrocinadorMasterScreen';
-import { BusinessRegistrationFlow } from './components/BusinessRegistrationFlow';
-import { StoreCashbackModule } from './components/StoreCashbackModule';
-import { StoreAdsModule } from './components/StoreAdsModule';
-import { StoreConnectModule } from './components/StoreConnectModule';
-import { StoreProfileEdit } from './components/StoreProfileEdit';
-import { StoreFinanceModule } from './components/StoreFinanceModule';
-import { StoreSupportModule } from './components/StoreSupportModule';
-import { MerchantQrScreen } from './components/MerchantQrScreen';
 import { CashbackScanScreen } from './components/CashbackScanScreen';
 import { ScanConfirmationScreen } from './components/ScanConfirmationScreen';
 import { CashbackPaymentScreen } from './components/CashbackPaymentScreen';
-import { MerchantCashbackRequests } from './components/MerchantCashbackRequests';
-import { MerchantPayRoute } from './components/MerchantPayRoute';
-import { CashbackPayFromQrScreen } from './components/CashbackPayFromQrScreen';
-import { MerchantPanel } from './components/MerchantPanel';
-import { UserCashbackFlow } from './components/UserCashbackFlow';
-import { MapPin, Crown } from 'lucide-react';
-import { supabase } from './lib/supabaseClient';
+import { MapPin, Crown, ShieldCheck } from 'lucide-react';
 import { useAuth } from './contexts/AuthContext';
 import { Category, Store, AdType, EditorialCollection } from './types';
 import { getStoreLogo } from './utils/mockLogos';
 
-// =============================
-// MOCK DE LOJAS
-// =============================
 const MOCK_STORES: Store[] = [
   {
     id: '1',
@@ -77,23 +37,6 @@ const MOCK_STORES: Store[] = [
     hours: 'Seg a Dom • 11h às 23h',
     verified: true,
   },
-  {
-    id: '2',
-    name: 'Padaria do Vale',
-    category: 'Alimentação',
-    description: 'Pães fresquinhos e café da manhã completo.',
-    logoUrl: getStoreLogo(2),
-    rating: 4.6,
-    reviewsCount: 87,
-    distance: 'Freguesia • RJ',
-    cashback: 3,
-    adType: AdType.PREMIUM,
-    subcategory: 'Padaria',
-    address: 'Estrada dos Três Rios, 800 - Freguesia',
-    phone: '(21) 98888-2222',
-    hours: 'Todos os dias • 6h às 21h',
-    verified: true,
-  },
 ];
 
 const App: React.FC = () => {
@@ -102,79 +45,90 @@ const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState('home');
   const [isDarkMode, setIsDarkMode] = useState(false);
   
-  // Timer de 5 segundos (5000ms) para o Splash
   useEffect(() => {
+    // Garante que o splash dure exatamente o tempo da animação (5s)
     const timer = setTimeout(() => {
       setMinSplashTimeElapsed(true);
     }, 5000);
     return () => clearTimeout(timer);
   }, []);
 
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, [activeTab]);
-
-  // Auth States
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [authContext, setAuthContext] = useState<'default' | 'merchant_lead_qr'>('default');
-  const [isMerchantLeadModalOpen, setIsMerchantLeadModalOpen] = useState(false);
   const [globalSearch, setGlobalSearch] = useState('');
-  const [serviceSearch, setServiceSearch] = useState('');
-  const [needsProfileSetup, setNeedsProfileSetup] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
   const [selectedStore, setSelectedStore] = useState<Store | null>(null);
-  const [selectedSubcategoryName, setSelectedSubcategoryName] = useState<string | null>(null);
   const [selectedCollection, setSelectedCollection] = useState<EditorialCollection | null>(null);
-  const [selectedServiceMacro, setSelectedServiceMacro] = useState<{ id: string; name: string } | null>(null);
-  const [selectedServiceSubcategory, setSelectedServiceSubcategory] = useState<string | null>(null);
-  const [isQuoteModalOpen, setIsQuoteModalOpen] = useState(false);
-  const [quoteCategoryName, setQuoteCategoryName] = useState('');
   const [selectedReward, setSelectedReward] = useState<any>(null);
   const [scannedData, setScannedData] = useState<{ merchantId: string; storeId: string } | null>(null);
-  const [deepLinkMerchantId, setDeepLinkMerchantId] = useState<string | null>(null);
-  const [qrMerchantId, setQrMerchantId] = useState<string | null>(null);
-  const [lastTransaction, setLastTransaction] = useState<any>(null);
-  const [sponsorOrigin, setSponsorOrigin] = useState<string | null>(null);
 
   const toggleTheme = () => setIsDarkMode(!isDarkMode);
-  const handleOpenAuth = (context: 'default' | 'merchant_lead_qr' = 'default') => {
-    setAuthContext(context);
-    setIsAuthOpen(true);
-  };
-
-  const handleHeaderProfileClick = () => {
-    if (user) setActiveTab('profile');
-    else handleOpenAuth('default');
-  };
-
+  
   const handleCashbackClick = () => {
     if (user) setActiveTab('qrcode_scan');
-    else handleOpenAuth('default');
+    else setIsAuthOpen(true);
   };
 
-  const isServiceTab = activeTab === 'services';
-  const currentSearchTerm = isServiceTab ? serviceSearch : globalSearch;
-  const handleSearchChange = (val: string) => {
-    if (isServiceTab) setServiceSearch(val);
-    else setGlobalSearch(val);
-  };
+  const isAppReady = !isAuthLoading && minSplashTimeElapsed;
 
-  const searchPlaceholder = isServiceTab
-    ? 'Buscar serviços, categorias ou especialidades...'
-    : 'Buscar lojas, produtos, serviços...';
+  if (!isAppReady) {
+    return (
+      <div className="fixed inset-0 bg-[#1E5BFF] flex flex-col items-center justify-center text-white z-[999] overflow-hidden">
+        {/* Background Animated Elements */}
+        <div className="absolute inset-0 bg-gradient-to-br from-[#1E5BFF] via-[#1E5BFF] to-[#0F359E]"></div>
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-white/5 rounded-full blur-[120px] animate-glow-pulse"></div>
 
-  useEffect(() => {
-    if (user && isAuthOpen) setIsAuthOpen(false);
-    if (!user && !isAuthLoading) {
-        const protectedTabs = ['store_area', 'favorites', 'edit_profile', 'merchant_panel', 'qrcode_scan', 'scan_confirmation', 'cashback_payment'];
-        if (protectedTabs.includes(activeTab)) setActiveTab('home');
-    }
-  }, [user, userRole, isAuthLoading, isAuthOpen, activeTab]);
+        <div className="relative flex flex-col items-center justify-center z-10">
+          <div className="animate-float">
+            <div className="w-24 h-24 bg-white rounded-[2.5rem] flex items-center justify-center shadow-[0_20px_60px_rgba(0,0,0,0.2)] mb-6 animate-pop-in">
+              <MapPin className="w-12 h-12 text-[#1E5BFF] fill-[#1E5BFF]" />
+            </div>
+          </div>
+          
+          <div className="animate-soft-pulse text-center">
+            <h1 className="text-5xl font-black font-display animate-slide-up tracking-tighter drop-shadow-md">
+              Localizei
+            </h1>
+            <div className="flex items-center justify-center gap-2 mt-2 animate-tracking-expand opacity-0 [animation-delay:800ms] [animation-fill-mode:forwards]">
+              <div className="h-[1px] w-4 bg-blue-300"></div>
+              <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-blue-200">Freguesia</span>
+              <div className="h-[1px] w-4 bg-blue-300"></div>
+            </div>
+          </div>
+        </div>
+
+        {/* Sponsor Block */}
+        <div className="absolute bottom-20 left-0 right-0 flex flex-col items-center px-10 z-10">
+          <div className="animate-sponsor-reveal opacity-0 [animation-delay:1800ms] [animation-fill-mode:forwards] w-full max-w-[280px]">
+            <p className="text-[8px] font-black text-blue-300/60 uppercase tracking-[0.4em] mb-4 text-center animate-soft-pulse">
+              Patrocinador Master
+            </p>
+            <div className="animate-sponsor-float">
+              <div className="bg-white/10 backdrop-blur-2xl px-6 py-4 rounded-[2rem] border border-white/20 flex items-center gap-4 shadow-2xl relative overflow-hidden group">
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full animate-shimmer"></div>
+                <div className="w-10 h-10 bg-gradient-to-br from-yellow-300 to-orange-500 rounded-2xl flex items-center justify-center shadow-lg">
+                  <Crown className="w-6 h-6 text-white fill-white" />
+                </div>
+                <div className="flex flex-col text-left">
+                  <p className="font-black text-lg tracking-tight text-white leading-none">Grupo Esquematiza</p>
+                  <p className="text-[9px] font-bold text-blue-200 uppercase mt-1">Segurança & Facilities</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Progress Bar */}
+        <div className="absolute bottom-0 left-0 right-0 h-1.5 bg-white/10">
+           <div className="h-full bg-white shadow-[0_0_15px_rgba(255,255,255,0.8)] transition-all duration-[5000ms] ease-linear" style={{ width: minSplashTimeElapsed ? '100%' : '0%' }} />
+        </div>
+      </div>
+    );
+  }
 
   const handleSelectCategory = (category: Category) => {
     setSelectedCategory(category);
-    if (category.slug === 'food') setActiveTab('food_category');
-    else setActiveTab('category_detail');
+    setActiveTab(category.slug === 'food' ? 'food_category' : 'category_detail');
   };
 
   const handleSelectStore = (store: Store) => {
@@ -182,86 +136,28 @@ const App: React.FC = () => {
     setActiveTab('store_detail');
   };
 
-  // DETERMINA SE O SPLASH DEVE ESTAR VISÍVEL
-  // Regra: Enquanto o Auth estiver carregando OU o tempo de 5s não tiver passado
-  const isAppReady = !isAuthLoading && minSplashTimeElapsed;
-
-  if (!isAppReady) {
-    return (
-      <div className="fixed inset-0 bg-gradient-to-br from-[#2D6DF6] to-[#1B54D9] flex flex-col items-center justify-center text-white z-[999]">
-        <div className="relative flex flex-col items-center justify-center">
-          <div className="w-16 h-16 bg-white rounded-3xl flex items-center justify-center shadow-2xl mb-4 animate-pop-in">
-            <MapPin className="w-8 h-8 text-[#2D6DF6] fill-[#2D6DF6]" />
-          </div>
-          <div className="text-4xl font-bold font-display animate-slide-up [animation-fill-mode:forwards]">
-            Localizei
-          </div>
-          <div className="text-xs font-light uppercase mt-2 animate-tracking-expand opacity-0 [animation-delay:800ms] [animation-fill-mode:forwards]">
-            Freguesia
-          </div>
-        </div>
-        <div className="mt-16 text-center animate-fade-in opacity-0 [animation-delay:1500ms] [animation-fill-mode:forwards]">
-          <p className="text-[9px] opacity-70 uppercase tracking-wider mb-1">
-            Patrocinador Master
-          </p>
-          <div className="bg-white/10 backdrop-blur-sm px-5 py-1.5 rounded-full border border-white/20 flex items-center gap-2 shadow-lg">
-            <Crown className="w-3.5 h-3.5 text-yellow-300 fill-yellow-300 drop-shadow-md" />
-            <p className="font-bold text-base tracking-wide text-white drop-shadow-sm">
-              Grupo Esquematiza
-            </p>
-          </div>
-        </div>
-        {/* Loader discreto indicando progresso dos 5s */}
-        <div className="absolute bottom-10 left-0 right-0 flex justify-center">
-           <div className="w-48 h-1 bg-white/10 rounded-full overflow-hidden">
-              <div 
-                className="h-full bg-white/40 transition-all duration-[5000ms] ease-linear"
-                style={{ width: minSplashTimeElapsed ? '100%' : '0%' }}
-              />
-           </div>
-        </div>
-      </div>
-    );
-  }
-
-  // List of tabs where the main header should be hidden
-  const hideHeader = [
-    'category_detail', 'food_category', 'subcategory_store_list', 'verified_stores', 'store_detail', 'store_category', 'cashback', 'cashback_landing', 'cashback_info', 'profile', 'store_area', 'store_cashback_module', 'store_ads_module', 'store_connect', 'store_profile', 'store_finance', 'store_support', 'service_subcategories', 'service_specialties', 'service_success', 'service_terms', 'editorial_list', 'freguesia_connect_public', 'freguesia_connect_dashboard', 'freguesia_connect_restricted', 'reward_details', 'prize_history', 'support', 'invite_friend', 'about', 'favorites', 'become_sponsor', 'edit_profile', 'patrocinador_master', 'business_registration', 'merchant_qr', 'qrcode_scan', 'scan_confirmation', 'cashback_payment', 'merchant_requests', 'merchant_pay_route', 'cashback_pay_qr', 'merchant_panel', 'user_cashback_flow',
-  ].includes(activeTab);
-
   return (
     <div className={isDarkMode ? 'dark' : ''}>
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex justify-center transition-colors duration-300 relative">
-        <Layout 
-            activeTab={activeTab} 
-            setActiveTab={setActiveTab} 
-            userRole={userRole} 
-            onCashbackClick={handleCashbackClick} 
-        >
-          {!hideHeader && (
+        <Layout activeTab={activeTab} setActiveTab={setActiveTab} userRole={userRole} onCashbackClick={handleCashbackClick}>
+          {!['category_detail', 'food_category', 'store_detail', 'profile', 'patrocinador_master'].includes(activeTab) && (
             <Header
               isDarkMode={isDarkMode}
               toggleTheme={toggleTheme}
-              onAuthClick={handleHeaderProfileClick}
+              onAuthClick={() => setActiveTab('profile')}
               user={user}
-              searchTerm={currentSearchTerm}
-              onSearchChange={handleSearchChange}
+              searchTerm={globalSearch}
+              onSearchChange={setGlobalSearch}
               onNavigate={setActiveTab}
               activeTab={activeTab}
               userRole={userRole}
-              onOpenMerchantQr={() => setActiveTab('merchant_qr')}
-              customPlaceholder={searchPlaceholder}
               onSelectCategory={handleSelectCategory}
             />
           )}
-
-          <main className="animate-in fade-in duration-500">
+          <main className="animate-in fade-in duration-500 w-full max-w-md mx-auto">
             {activeTab === 'home' && (
               <HomeFeed
-                onNavigate={(view) => {
-                  if (view === 'patrocinador_master') setSponsorOrigin('home');
-                  setActiveTab(view);
-                }}
+                onNavigate={setActiveTab}
                 onSelectCategory={handleSelectCategory}
                 onSelectCollection={setSelectedCollection}
                 onStoreClick={handleSelectStore}
@@ -270,87 +166,35 @@ const App: React.FC = () => {
                 user={user as any}
                 userRole={userRole}
                 onSpinWin={(reward) => { setSelectedReward(reward); setActiveTab('reward_details'); }}
-                onRequireLogin={() => handleOpenAuth('default')}
+                onRequireLogin={() => setIsAuthOpen(true)}
               />
             )}
-
             {activeTab === 'explore' && (
-              <ExploreView
-                stores={MOCK_STORES}
-                searchQuery={globalSearch}
-                onStoreClick={handleSelectStore}
-                onLocationClick={() => {}}
-                onFilterClick={() => {}}
-                onOpenPlans={() => setActiveTab('become_sponsor')}
-                onViewAllVerified={() => setActiveTab('verified_stores')}
-              />
+              <ExploreView stores={MOCK_STORES} searchQuery={globalSearch} onStoreClick={handleSelectStore} onLocationClick={() => {}} onFilterClick={() => {}} onOpenPlans={() => {}} />
             )}
-
             {activeTab === 'qrcode_scan' && (
-                <CashbackScanScreen 
-                    onBack={() => setActiveTab('home')} 
-                    onScanSuccess={(data) => { setScannedData(data); setActiveTab('scan_confirmation'); }} 
-                />
+                <CashbackScanScreen onBack={() => setActiveTab('home')} onScanSuccess={(data) => { setScannedData(data); setActiveTab('scan_confirmation'); }} />
             )}
-
             {activeTab === 'scan_confirmation' && scannedData && (
-                <ScanConfirmationScreen 
-                    storeId={scannedData.storeId}
-                    onConfirm={() => setActiveTab('cashback_payment')}
-                    onCancel={() => setActiveTab('home')}
-                />
+                <ScanConfirmationScreen storeId={scannedData.storeId} onConfirm={() => setActiveTab('cashback_payment')} onCancel={() => setActiveTab('home')} />
             )}
-
             {activeTab === 'cashback_payment' && scannedData && (
-              <CashbackPaymentScreen
-                user={user as any}
-                merchantId={scannedData.merchantId}
-                storeId={scannedData.storeId}
-                onBack={() => setActiveTab('home')}
-                onComplete={(tx) => { setLastTransaction(tx); setActiveTab('cashback'); }}
-              />
+              <CashbackPaymentScreen user={user as any} merchantId={scannedData.merchantId} storeId={scannedData.storeId} onBack={() => setActiveTab('home')} onComplete={() => setActiveTab('home')} />
             )}
-
             {activeTab === 'profile' && (
-              <MenuView
-                user={user as any}
-                userRole={userRole}
-                onAuthClick={() => handleOpenAuth('default')}
-                onNavigate={setActiveTab}
-              />
+              <MenuView user={user as any} userRole={userRole} onAuthClick={() => setIsAuthOpen(true)} onNavigate={setActiveTab} />
             )}
-            
-            {activeTab === 'cashback_info' && (
-              <CashbackInfoView
-                user={user as any}
-                userRole={userRole}
-                onBack={() => setActiveTab('home')}
-                onLogin={() => handleOpenAuth('default')}
-                onNavigate={setActiveTab}
-              />
-            )}
-
             {activeTab === 'patrocinador_master' && (
               <PatrocinadorMasterScreen onBack={() => setActiveTab('home')} />
             )}
-
             {activeTab === 'store_detail' && selectedStore && (
               <StoreDetailView store={selectedStore} onBack={() => setActiveTab('home')} />
             )}
-
             {activeTab === 'reward_details' && (
               <RewardDetailsView reward={selectedReward} onBack={() => setActiveTab('home')} onHome={() => setActiveTab('home')} />
             )}
-
-            {/* Renderizar outros componentes conforme necessário */}
           </main>
-
-          <AuthModal
-            isOpen={isAuthOpen}
-            onClose={() => setIsAuthOpen(false)}
-            user={user as any}
-            signupContext={authContext}
-          />
+          <AuthModal isOpen={isAuthOpen} onClose={() => setIsAuthOpen(false)} user={user as any} signupContext={authContext} />
         </Layout>
       </div>
     </div>
