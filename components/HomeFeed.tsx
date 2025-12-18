@@ -20,7 +20,8 @@ import {
   Award,
   ShieldCheck,
   MessageCircle,
-  Handshake
+  Handshake,
+  Tag
 } from 'lucide-react';
 import { LojasEServicosList } from './LojasEServicosList';
 import { User } from '@supabase/supabase-js';
@@ -47,11 +48,12 @@ interface BannerItem {
   icon: React.ReactNode;
   title: string;
   subtitle: string;
-  image: string;
+  image?: string;
   cta: string;
   action: () => void;
   isSponsored?: boolean;
-  gradient?: string;
+  gradient: string;
+  animationClass: string;
 }
 
 export const HomeFeed: React.FC<HomeFeedProps> = ({ 
@@ -86,59 +88,78 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
       {
         id: 'cashback_promo',
         badge: 'ECONOMIA REAL',
-        icon: <Wallet className="w-3 h-3" />,
-        title: 'Cashback no\ncomércio do bairro',
-        subtitle: 'Compre perto de casa e ganhe dinheiro de volta.',
-        image: 'https://nyneuuvcdmtqjyaqrztz.supabase.co/storage/v1/object/public/assets/cashback_bag.png?t=1',
-        gradient: 'from-[#2D6DF6] to-[#1B54D9]',
+        icon: <Tag className="w-16 h-16 text-white/20" />,
+        title: 'Ganhe dinheiro\ncomprando na Freguesia',
+        subtitle: 'Cashback real em lojas do seu bairro.\nNenhum outro app local faz isso.',
+        gradient: 'from-emerald-500 to-emerald-600',
         cta: 'Ativar cashback',
         action: () => onNavigate('cashback_info'),
-        isSponsored: false
+        isSponsored: false,
+        animationClass: 'animate-pulse-soft'
       },
       {
         id: 'whatsapp_services',
         badge: 'AGILIDADE',
-        icon: <MessageCircle className="w-3 h-3" />,
-        title: 'Serviços locais em\npoucos minutos',
-        subtitle: 'Peça orçamento de eletricista, encanador, limpeza, manutenção e mais — direto no WhatsApp',
-        image: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=600&auto=format&fit=crop',
-        gradient: 'from-[#1540AD] to-[#0F359E]',
+        icon: <MessageCircle className="w-16 h-16 text-white/20" />,
+        title: 'Serviços locais\nem minutos',
+        subtitle: 'Peça orçamento de eletricista, encanador, limpeza e mais, direto no WhatsApp.',
+        gradient: 'from-blue-500 to-blue-600',
         cta: 'Pedir orçamento agora',
         action: () => onNavigate('explore'),
-        isSponsored: false
+        isSponsored: false,
+        animationClass: 'animate-bounce-y'
       },
       {
         id: 'freguesia_connect',
         badge: 'NETWORKING',
-        icon: <Handshake className="w-3 h-3" />,
-        title: 'Seu negócio conectado\ncresce mais',
-        subtitle: 'Networking, parcerias e visibilidade entre empreendedores da Freguesia',
-        image: 'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?q=80&w=600&auto=format&fit=crop',
-        gradient: 'from-[#4F46E5] via-[#4338CA] to-[#4F46E5]',
+        icon: <Handshake className="w-16 h-16 text-white/20" />,
+        title: 'Seu negócio conectado\nà Freguesia',
+        subtitle: 'Networking, parcerias e visibilidade entre lojistas locais.',
+        gradient: 'from-indigo-600 to-violet-700',
         cta: 'Entrar no Freguesia Connect',
         action: () => onNavigate('freguesia_connect_public'),
-        isSponsored: false
+        isSponsored: false,
+        animationClass: 'animate-slide-x'
       }
     ];
 
     const premiumAds = stores
       .filter(s => s.adType === AdType.PREMIUM || s.isSponsored)
       .sort(() => Math.random() - 0.5)
-      .slice(0, 3)
+      .slice(0, 1)
       .map(store => ({
         id: `ad-${store.id}`,
         badge: 'PATROCINADO',
-        icon: <Zap className="w-3 h-3" />,
+        icon: <Zap className="w-16 h-16 text-white/10" />,
         title: store.name,
         subtitle: store.description,
-        image: store.logoUrl || store.image || 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=600&auto=format&fit=crop',
-        gradient: 'from-[#0F172A] to-[#1E293B]',
+        image: store.logoUrl || store.image,
+        gradient: 'from-slate-900 to-slate-800',
         cta: 'Ver mais',
         action: () => onStoreClick?.(store),
-        isSponsored: true
+        isSponsored: true,
+        animationClass: 'animate-premium-glow'
       }));
 
-    return [...fixedBanners.slice(0, 2), ...premiumAds, ...fixedBanners.slice(2)];
+    const list = [...fixedBanners];
+    if (premiumAds.length > 0) {
+      list.splice(1, 0, premiumAds[0]);
+    } else {
+      list.push({
+        id: 'clube_localizei',
+        badge: 'EXCLUSIVO',
+        icon: <Award className="w-16 h-16 text-white/20" />,
+        title: 'Clube de Benefícios\nLocalizei',
+        subtitle: 'Acesse ofertas exclusivas e participe de sorteios semanais no bairro.',
+        gradient: 'from-amber-500 to-orange-600',
+        cta: 'Explorar Clube',
+        action: () => onNavigate('explore'),
+        isSponsored: false,
+        animationClass: 'animate-pulse'
+      });
+    }
+
+    return list.slice(0, 4);
   }, [onNavigate, stores, onStoreClick]);
 
   useEffect(() => {
@@ -176,19 +197,28 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
       case 'morning':
         return {
           tags: [{ id: 1, label: 'Padaria', icon: '🥐' }, { id: 2, label: 'Café', icon: '☕' }, { id: 3, label: 'Hortifruti', icon: '🍎' }, { id: 4, label: 'Academia', icon: '💪' }],
-          highlights: [{ id: 1, title: 'Pão Quentinho', desc: 'Padaria Imperial • 8%', icon: <Coffee /> }, { id: 2, title: 'Energia', desc: 'Fit Studio Bombando', icon: <Zap /> }],
+          highlights: [
+            { id: 1, title: 'Pão Quentinho', desc: 'Padaria Imperial • 8%', icon: <Coffee className="text-amber-600" />, bg: 'bg-amber-50 dark:bg-amber-900/20' },
+            { id: 2, title: 'Energia', desc: 'Fit Studio Bombando', icon: <Zap className="text-sky-600" />, bg: 'bg-sky-50 dark:bg-sky-900/20' }
+          ],
           sectionOrder: commonOrder
         };
       case 'afternoon':
         return {
           tags: [{ id: 1, label: 'Almoço', icon: '🍽️' }, { id: 2, label: 'Moda', icon: '👕' }, { id: 3, label: 'Serviços', icon: '🛠️' }, { id: 4, label: 'Saúde', icon: '🏥' }],
-          highlights: [{ id: 1, title: 'Prato do Dia', desc: 'Restaurante Sabor • 10%', icon: <Utensils /> }, { id: 2, title: 'Promoção', desc: 'Moda RJ: 20% OFF', icon: <ShoppingBag /> }],
+          highlights: [
+            { id: 1, title: 'Prato do Dia', desc: 'Restaurante Sabor • 10%', icon: <Utensils className="text-orange-600" />, bg: 'bg-orange-50 dark:bg-orange-900/20' },
+            { id: 2, title: 'Promoção', desc: 'Moda RJ: 20% OFF', icon: <ShoppingBag className="text-pink-600" />, bg: 'bg-pink-50 dark:bg-pink-900/20' }
+          ],
           sectionOrder: ['hero', 'tags', 'highlights', 'wallet', 'roulette_banner', 'filters', 'list', 'editorial', 'bonus']
         };
       default:
         return {
           tags: [{ id: 1, label: 'Sushi', icon: '🍣' }, { id: 2, label: 'Pizza', icon: '🍕' }, { id: 3, label: 'Burger', icon: '🍔' }, { id: 4, label: 'Açaí', icon: '🍧' }],
-          highlights: [{ id: 1, title: 'Delivery Grátis', desc: 'Pizza Place • 12% back', icon: <Moon /> }, { id: 2, title: 'Happy Hour', desc: 'Chopp em dobro no Zé', icon: <Flame /> }],
+          highlights: [
+            { id: 1, title: 'Delivery Grátis', desc: 'Pizza Place • 12% back', icon: <Moon className="text-indigo-600" />, bg: 'bg-indigo-50 dark:bg-indigo-900/20' },
+            { id: 2, title: 'Happy Hour', desc: 'Chopp em dobro no Zé', icon: <Flame className="text-red-600" />, bg: 'bg-red-50 dark:bg-red-900/20' }
+          ],
           sectionOrder: ['hero', 'highlights', 'roulette_banner', 'editorial', 'wallet', 'tags', 'filters', 'list', 'bonus']
         };
     }
@@ -198,7 +228,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
     switch (key) {
       case 'hero':
         return (
-          <div key="hero" className="relative pt-2 pb-0 overflow-hidden">
+          <div key="hero" className="relative pt-4 pb-2">
             <div 
               ref={carouselRef}
               onScroll={handleScroll}
@@ -207,41 +237,49 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
               {banners.map((banner, index) => {
                 const isActive = activeBannerIndex === index;
                 return (
-                  <div key={banner.id} className="min-w-full snap-center px-4 pb-6">
-                    <div className={`w-full bg-gradient-to-br ${banner.gradient} rounded-3xl overflow-hidden shadow-[0_8px_30px_rgba(0,0,0,0.12)] border border-white/10 h-[180px] relative flex`}>
-                      <div className="flex-1 p-6 flex flex-col justify-center relative z-10">
-                        <div className="flex items-center gap-1.5 mb-2">
-                          <span className={`text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full ${banner.isSponsored ? 'text-blue-300 bg-white/5' : 'text-white/80 bg-white/10'}`}>
+                  <div key={banner.id} className="min-w-full snap-center px-4">
+                    <div className={`w-full bg-gradient-to-br ${banner.gradient} rounded-[28px] overflow-hidden shadow-[0_8px_24px_rgba(0,0,0,0.08)] relative h-[175px] transition-all duration-500`}>
+                      <div className="absolute right-[-10px] top-1/2 -translate-y-1/2 opacity-40 group-hover:opacity-60 transition-opacity">
+                         {banner.image ? (
+                           <div className="w-[120px] h-[120px] rounded-3xl overflow-hidden shadow-2xl border-4 border-white/20 mr-6">
+                              <img src={banner.image} alt="" className="w-full h-full object-cover" />
+                           </div>
+                         ) : (
+                           <div className="mr-8 scale-150">
+                             {banner.icon}
+                           </div>
+                         )}
+                      </div>
+                      <div className="relative z-10 p-6 flex flex-col justify-center h-full max-w-[70%]">
+                        <div className="flex items-center gap-2 mb-2">
+                          <span className={`text-[8px] font-black uppercase tracking-[0.2em] px-2 py-0.5 rounded-full ${banner.isSponsored ? 'bg-blue-500/20 text-blue-300 border border-blue-400/30' : 'bg-white/15 text-white/90'}`}>
                             {banner.badge}
                           </span>
                         </div>
-                        <h1 className="text-xl font-bold text-white mb-1 leading-tight whitespace-pre-line truncate max-w-full">
+                        <h1 className="text-lg font-bold text-white mb-1.5 leading-tight whitespace-pre-line tracking-tight">
                           {banner.title}
                         </h1>
-                        <p className="text-white/70 text-[10px] font-medium mb-4 leading-tight line-clamp-2 max-w-[180px]">
+                        <p className="text-white/70 text-[10px] font-medium mb-4 leading-relaxed line-clamp-2">
                           {banner.subtitle}
                         </p>
                         <button 
                           onClick={banner.action} 
-                          className={`w-fit bg-white text-gray-900 text-[11px] font-bold px-4 py-2 rounded-full active:scale-95 transition-all flex items-center gap-2 
-                            ${banner.isSponsored && isActive ? 'animate-premium-glow' : ''}`}
+                          className={`w-fit bg-white text-gray-900 text-[11px] font-bold px-4 py-2 rounded-full active:scale-95 transition-all flex items-center gap-2 shadow-lg
+                            ${isActive ? banner.animationClass : ''}`}
                         >
-                          {banner.cta} <ArrowRight className="w-3 h-3" />
+                          {banner.cta} 
+                          <ArrowRight className={`w-3 h-3 ${banner.id === 'cashback_promo' ? 'animate-bounce-x translate-x-1' : ''}`} />
                         </button>
                       </div>
-                      <div className="w-[120px] h-full relative">
-                        <img src={banner.image} alt="" className="w-full h-full object-cover" />
-                        <div className="absolute inset-0 bg-gradient-to-r from-inherit via-transparent to-transparent"></div>
+                      <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-1.5 pointer-events-none">
+                        {banners.map((_, i) => (
+                          <div key={i} className={`h-1 rounded-full transition-all duration-300 ${activeBannerIndex === i ? 'w-4 bg-white' : 'w-1.5 bg-white/40'}`} />
+                        ))}
                       </div>
                     </div>
                   </div>
                 );
               })}
-            </div>
-            <div className="flex justify-center gap-1.5 mt-[-10px] mb-2">
-              {banners.map((_, i) => (
-                <div key={i} className={`h-1 rounded-full transition-all ${activeBannerIndex === i ? 'w-4 bg-[#1E5BFF]' : 'w-1 bg-gray-200'}`} />
-              ))}
             </div>
           </div>
         );
@@ -250,7 +288,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
           <div key="roulette_banner" className="px-5">
             <button 
               onClick={() => setIsSpinWheelOpen(true)}
-              className="w-full bg-gradient-to-r from-purple-600 to-pink-600 rounded-2xl p-5 text-white flex items-center justify-between shadow-[0_8px_20px_rgba(147,51,234,0.2)] active:scale-[0.98] transition-all relative overflow-hidden group"
+              className="w-full bg-gradient-to-r from-purple-600 to-pink-600 rounded-2xl p-5 text-white flex items-center justify-between shadow-[0_4px_12px_rgba(147,51,234,0.15)] active:scale-[0.98] transition-all relative overflow-hidden group"
             >
               <div className="flex items-center gap-4 relative z-10">
                 <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/10">
@@ -277,15 +315,15 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
               {contextConfig.highlights.map((item: any) => (
                 <div 
                   key={item.id} 
-                  className="snap-center flex-shrink-0 w-[190px] bg-white dark:bg-gray-800 p-4 rounded-2xl shadow-[0_4px_12px_rgba(0,0,0,0.05)] flex flex-col gap-4 active:scale-95 transition-all cursor-pointer group"
+                  className={`snap-center flex-shrink-0 w-[190px] ${item.bg} p-4 rounded-2xl flex flex-col gap-4 active:scale-95 transition-all cursor-pointer group shadow-none`}
                 >
                   <div className="flex items-center justify-between">
-                    <div className="px-2 py-0.5 rounded-lg bg-blue-50 dark:bg-blue-900/30">
-                      <span className="text-[9px] font-black uppercase tracking-tight text-primary-600 dark:text-primary-400">
+                    <div className="px-2 py-0.5 rounded-lg bg-white/60 dark:bg-black/20">
+                      <span className="text-[9px] font-black uppercase tracking-tight text-gray-800 dark:text-white/80">
                         {item.title}
                       </span>
                     </div>
-                    <div className="opacity-40 text-gray-400 group-hover:text-primary-500 transition-colors">
+                    <div className="opacity-80 transition-colors">
                       {item.icon}
                     </div>
                   </div>
@@ -302,9 +340,9 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
           <div key="tags" className="py-2">
               <div className="flex gap-2.5 overflow-x-auto no-scrollbar px-5">
                   {contextConfig.tags.map((tag: any) => (
-                      <button key={tag.id} className="flex-shrink-0 flex items-center gap-2.5 bg-white dark:bg-gray-800 px-4 py-2.5 rounded-full shadow-[0_2px_8px_rgba(0,0,0,0.04)] border border-gray-100 dark:border-gray-700 active:scale-95 transition-all">
-                          <span className="text-base">{tag.icon}</span>
-                          <span className="text-xs font-bold text-gray-700 dark:text-gray-300">{tag.label}</span>
+                      <button key={tag.id} className="flex-shrink-0 flex items-center gap-2.5 bg-slate-100 dark:bg-slate-800 px-4 py-2.5 rounded-full shadow-none border border-transparent active:scale-95 transition-all">
+                          <span className="text-base grayscale-0">{tag.icon}</span>
+                          <span className="text-xs font-bold text-slate-700 dark:text-slate-200">{tag.label}</span>
                       </button>
                   ))}
               </div>
@@ -340,7 +378,15 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
                     { id: 'top_rated', label: 'Melhores', icon: Star },
                     { id: 'open_now', label: 'Abertos', icon: Clock }
                   ].map((btn) => (
-                    <button key={btn.id} onClick={() => setListFilter(btn.id as any)} className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border text-[11px] font-bold transition-all active:scale-95 shadow-[0_2px_8px_rgba(0,0,0,0.04)] whitespace-nowrap ${listFilter === btn.id ? 'bg-gray-900 text-white border-gray-900 dark:bg-white dark:text-gray-900' : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border-gray-100 dark:border-gray-700'}`}>
+                    <button 
+                      key={btn.id} 
+                      onClick={() => setListFilter(btn.id as any)} 
+                      className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border text-[11px] font-bold transition-all active:scale-95 whitespace-nowrap 
+                        ${listFilter === btn.id 
+                          ? 'bg-primary-500 text-white border-primary-500 shadow-lg shadow-primary-500/20' 
+                          : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-transparent'}`}
+                    >
+                        <btn.icon className={`w-3.5 h-3.5 ${listFilter === btn.id ? 'text-white' : 'text-primary-500'}`} />
                         {btn.label}
                     </button>
                   ))}
