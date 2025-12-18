@@ -23,7 +23,10 @@ import {
   Award,
   ShieldCheck,
   LayoutDashboard,
-  ExternalLink
+  ExternalLink,
+  Info,
+  MessageCircle,
+  Briefcase
 } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import { LojasEServicosList } from './LojasEServicosList';
@@ -45,10 +48,9 @@ interface HomeFeedProps {
 
 type TimeContext = 'morning' | 'afternoon' | 'night';
 
-// Interface preparada para monetização futura
 interface BannerItem {
   id: string;
-  badge: string;
+  badge?: string;
   icon: React.ReactNode;
   title: string;
   subtitle: string;
@@ -56,8 +58,6 @@ interface BannerItem {
   cta: string;
   action: () => void;
   isSponsored?: boolean;
-  advertiserName?: string;
-  ctaLink?: string;
 }
 
 export const HomeFeed: React.FC<HomeFeedProps> = ({ 
@@ -90,56 +90,64 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
   }, []);
 
   const banners = useMemo((): BannerItem[] => {
-    const morningImg = 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?q=80&w=600&auto=format&fit=crop';
-    const afternoonImg = 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?q=80&w=600&auto=format&fit=crop';
-    const nightImg = 'https://images.unsplash.com/photo-1513104890138-7c749659a591?q=80&w=600&auto=format&fit=crop';
-    
-    const contextMap = {
-      morning: { greeting: 'Bom dia!', title: 'Café da manhã\nno bairro.', sub: 'Comece o dia com cashback.', img: morningImg },
-      afternoon: { greeting: 'Boa tarde!', title: 'Resolva seu dia\nna Freguesia.', sub: 'Economize perto de você.', img: afternoonImg },
-      night: { greeting: 'Boa noite!', title: 'Sua noite com\num cashback.', sub: 'As melhores mesas do bairro.', img: nightImg }
-    };
-
-    const currentContext = contextMap[timeContext];
-
     return [
       {
-        id: 'main_context',
-        badge: currentContext.greeting,
-        icon: timeContext === 'morning' ? <Sun className="w-3 h-3" /> : <Moon className="w-3 h-3" />,
-        title: currentContext.title,
-        subtitle: currentContext.sub,
-        image: currentContext.img,
-        cta: 'Ativar Cashback',
+        id: 'institutional',
+        badge: 'O Bairro Conectado',
+        icon: <Info className="w-3 h-3" />,
+        title: 'O que é o Localizei Freguesia',
+        subtitle: 'Conecta moradores ao comércio local, fortalece o bairro e gera economia real.',
+        image: 'https://images.unsplash.com/photo-1517457373958-b7bdd4587205?q=80&w=600&auto=format&fit=crop',
+        cta: 'Entender como funciona',
+        action: () => onNavigate('about'),
+        isSponsored: false
+      },
+      {
+        id: 'cashback_promo',
+        badge: 'Economia Real',
+        icon: <Wallet className="w-3 h-3" />,
+        title: 'Cashback no comércio do bairro',
+        subtitle: 'Compre perto de casa e ganhe dinheiro de volta.',
+        image: 'https://images.unsplash.com/photo-1559526324-4b87b5e36e44?q=80&w=600&auto=format&fit=crop',
+        cta: 'Ativar cashback',
         action: () => onNavigate('cashback_info'),
         isSponsored: false
       },
       {
-        id: 'ad_real_estate',
-        badge: 'Oportunidade',
-        icon: <TrendingUp className="w-3 h-3" />,
-        title: 'Seu imóvel na\nmelhor vitrine.',
-        subtitle: 'Anuncie com a imobiliária que mais cresce no bairro.',
-        image: 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?q=80&w=600&auto=format&fit=crop',
-        cta: 'Conhecer',
-        action: () => window.open('https://primefreguesia.com.br', '_blank'),
-        isSponsored: true,
-        advertiserName: 'Prime Imobiliária',
-        ctaLink: 'https://primefreguesia.com.br'
+        id: 'whatsapp_services',
+        badge: 'Praticidade',
+        icon: <MessageCircle className="w-3 h-3" />,
+        title: 'Orçamentos rápidos pelo WhatsApp',
+        subtitle: 'Peça cotações de serviços locais direto no WhatsApp, sem complicação.',
+        image: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=600&auto=format&fit=crop',
+        cta: 'Solicitar orçamento',
+        action: () => onNavigate('explore'), // Direciona para explorar serviços
+        isSponsored: false
       },
       {
-        id: 'connect_b2b',
+        id: 'freguesia_connect',
         badge: 'Networking',
         icon: <Users className="w-3 h-3" />,
-        title: 'Freguesia\nConnect.',
-        subtitle: 'Conecte sua empresa ao ecossistema local.',
+        title: 'Freguesia Connect',
+        subtitle: 'Um grupo de networking para empresas que querem crescer juntas no bairro.',
         image: 'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?q=80&w=600&auto=format&fit=crop',
-        cta: 'Saiba Mais',
+        cta: 'Conhecer o grupo',
         action: () => onNavigate('freguesia_connect_public'),
         isSponsored: false
+      },
+      {
+        id: 'sponsored_ads',
+        badge: 'Destaque',
+        icon: <Zap className="w-3 h-3" />,
+        title: 'Espaço Patrocinado',
+        subtitle: 'Banner reservado para lojistas com Ads Premium.',
+        image: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=600&auto=format&fit=crop',
+        cta: 'Saiba mais',
+        action: () => onNavigate('patrocinador_master'),
+        isSponsored: true
       }
     ];
-  }, [timeContext, onNavigate]);
+  }, [onNavigate]);
 
   useEffect(() => {
     const startAutoplay = () => {
@@ -150,7 +158,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
           carouselRef.current.scrollTo({ left: scrollAmount, behavior: 'smooth' });
           setActiveBannerIndex(nextIndex);
         }
-      }, 7000);
+      }, 6000);
     };
 
     startAutoplay();
@@ -174,44 +182,20 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
     switch (timeContext) {
       case 'morning':
         return {
-          tags: [
-            { id: 1, label: 'Padaria', icon: '🥐' },
-            { id: 2, label: 'Café', icon: '☕' },
-            { id: 3, label: 'Hortifruti', icon: '🍎' },
-            { id: 4, label: 'Academia', icon: '💪' },
-          ],
-          highlights: [
-            { id: 1, title: 'Pão Quentinho', desc: 'Padaria Imperial • 8%', icon: <Coffee className="w-4 h-4 text-amber-500" />, bg: 'bg-amber-50', borderColor: 'border-amber-100' },
-            { id: 2, title: 'Energia', desc: 'Fit Studio Bombando', icon: <Zap className="w-4 h-4 text-blue-500" />, bg: 'bg-blue-50', borderColor: 'border-blue-100' },
-          ],
+          tags: [{ id: 1, label: 'Padaria', icon: '🥐' }, { id: 2, label: 'Café', icon: '☕' }, { id: 3, label: 'Hortifruti', icon: '🍎' }, { id: 4, label: 'Academia', icon: '💪' }],
+          highlights: [{ id: 1, title: 'Pão Quentinho', desc: 'Padaria Imperial • 8%', icon: <Coffee className="w-4 h-4 text-amber-500" />, bg: 'bg-amber-50', borderColor: 'border-amber-100' }, { id: 2, title: 'Energia', desc: 'Fit Studio Bombando', icon: <Zap className="w-4 h-4 text-blue-500" />, bg: 'bg-blue-50', borderColor: 'border-blue-100' }],
           sectionOrder: ['hero', 'highlights', 'tags', 'wallet', 'filters', 'list', 'editorial', 'bonus']
         };
       case 'afternoon':
         return {
-          tags: [
-            { id: 1, label: 'Almoço', icon: '🍽️' },
-            { id: 2, label: 'Moda', icon: '👕' },
-            { id: 3, label: 'Serviços', icon: '🛠️' },
-            { id: 4, label: 'Saúde', icon: '🏥' },
-          ],
-          highlights: [
-            { id: 1, title: 'Prato do Dia', desc: 'Restaurante Sabor • 10%', icon: <Utensils className="w-4 h-4 text-orange-500" />, bg: 'bg-orange-50', borderColor: 'border-orange-100' },
-            { id: 2, title: 'Promoção', desc: 'Moda RJ: 20% OFF', icon: <ShoppingBag className="w-4 h-4 text-purple-500" />, bg: 'bg-purple-50', borderColor: 'border-purple-100' },
-          ],
+          tags: [{ id: 1, label: 'Almoço', icon: '🍽️' }, { id: 2, label: 'Moda', icon: '👕' }, { id: 3, label: 'Serviços', icon: '🛠️' }, { id: 4, label: 'Saúde', icon: '🏥' }],
+          highlights: [{ id: 1, title: 'Prato do Dia', desc: 'Restaurante Sabor • 10%', icon: <Utensils className="w-4 h-4 text-orange-500" />, bg: 'bg-orange-50', borderColor: 'border-orange-100' }, { id: 2, title: 'Promoção', desc: 'Moda RJ: 20% OFF', icon: <ShoppingBag className="w-4 h-4 text-purple-500" />, bg: 'bg-purple-50', borderColor: 'border-purple-100' }],
           sectionOrder: ['hero', 'tags', 'highlights', 'wallet', 'filters', 'list', 'editorial', 'bonus']
         };
       default:
         return {
-          tags: [
-            { id: 1, label: 'Sushi', icon: '🍣' },
-            { id: 2, label: 'Pizza', icon: '🍕' },
-            { id: 3, label: 'Burger', icon: '🍔' },
-            { id: 4, label: 'Açaí', icon: '🍧' },
-          ],
-          highlights: [
-            { id: 1, title: 'Delivery Grátis', desc: 'Pizza Place • 12% back', icon: <Moon className="w-4 h-4 text-indigo-500" />, bg: 'bg-indigo-50', borderColor: 'border-indigo-100' },
-            { id: 2, title: 'Happy Hour', desc: 'Chopp em dobro no Zé', icon: <Flame className="w-4 h-4 text-red-500" />, bg: 'bg-red-100', borderColor: 'border-red-100' },
-          ],
+          tags: [{ id: 1, label: 'Sushi', icon: '🍣' }, { id: 2, label: 'Pizza', icon: '🍕' }, { id: 3, label: 'Burger', icon: '🍔' }, { id: 4, label: 'Açaí', icon: '🍧' }],
+          highlights: [{ id: 1, title: 'Delivery Grátis', desc: 'Pizza Place • 12% back', icon: <Moon className="w-4 h-4 text-indigo-500" />, bg: 'bg-indigo-50', borderColor: 'border-indigo-100' }, { id: 2, title: 'Happy Hour', desc: 'Chopp em dobro no Zé', icon: <Flame className="w-4 h-4 text-red-500" />, bg: 'bg-red-100', borderColor: 'border-red-100' }],
           sectionOrder: ['hero', 'highlights', 'editorial', 'wallet', 'tags', 'filters', 'list', 'bonus']
         };
     }
@@ -222,84 +206,75 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
       case 'hero':
         return (
           <div key="hero" className="relative group overflow-hidden">
-            {/* Carousel Container - Edge-to-edge (px-0) */}
+            {/* Carousel Container */}
             <div 
               ref={carouselRef}
               onScroll={handleScroll}
               className="flex overflow-x-auto snap-x snap-mandatory no-scrollbar px-0 scroll-smooth"
             >
               {banners.map((banner) => (
-                <div key={banner.id} className="min-w-full snap-center">
-                  <div className="w-full bg-[#1E5BFF] overflow-hidden shadow-[0_12px_40px_rgba(30,91,255,0.2)] flex h-[200px] relative border-b border-white/10">
+                <div key={banner.id} className="min-w-full snap-center px-4">
+                  <div className="w-full bg-primary-600 rounded-[28px] overflow-hidden shadow-[0_12px_40px_rgba(0,0,0,0.12)] flex h-[190px] relative border border-white/10">
                     
-                    {/* Conteúdo Esquerdo - Ajustado para alinhamento edge-to-edge */}
-                    <div className="flex-1 p-6 pr-1 text-white flex flex-col justify-center relative z-20 animate-banner-text-in">
+                    {/* Conteúdo Esquerdo */}
+                    <div className="flex-1 p-6 pr-0 text-white flex flex-col justify-center relative z-20 animate-banner-text-in">
                       <div className="flex items-center gap-2 mb-2">
                         <div className="flex items-center gap-1.5 opacity-90">
                           {banner.icon}
                           <span className="text-[9px] font-black uppercase tracking-[0.2em]">{banner.badge}</span>
                         </div>
                         
-                        {/* Selo Patrocinado AA Compliant */}
                         {banner.isSponsored && (
-                          <div className="flex items-center gap-1.5 animate-in fade-in duration-700">
+                          <div className="flex items-center gap-1.5">
                             <span className="w-1 h-1 rounded-full bg-white/40"></span>
-                            <span className="text-[7px] font-black uppercase tracking-[0.2em] bg-white/20 px-1.5 py-0.5 rounded-md border border-white/10 backdrop-blur-md">
+                            <span className="text-[7px] font-black uppercase tracking-[0.2em] bg-white/20 px-1.5 py-0.5 rounded-md border border-white/10">
                                Patrocinado
                             </span>
                           </div>
                         )}
                       </div>
 
-                      <h1 className="text-[22px] font-black mb-1 leading-[1.15] tracking-tight whitespace-pre-line drop-shadow-[0_2px_4px_rgba(0,0,0,0.2)]">
+                      <h1 className="text-[19px] font-black mb-1 leading-[1.2] tracking-tight whitespace-pre-line drop-shadow-md">
                         {banner.title}
                       </h1>
                       
-                      <p className="text-blue-50 text-[11px] font-medium mb-4 opacity-95 leading-tight line-clamp-2 drop-shadow-sm">
-                        {banner.isSponsored && (
-                          <span className="font-black text-white">{banner.advertiserName} • </span>
-                        )}
+                      <p className="text-white/80 text-[11px] font-medium mb-4 opacity-95 leading-tight line-clamp-2 pr-4">
                         {banner.subtitle}
                       </p>
 
                       <button 
                         onClick={banner.action} 
-                        className="w-fit bg-white text-[#1E5BFF] text-[11px] font-black px-4 py-2.5 rounded-xl active:scale-[0.97] transition-all flex items-center justify-center gap-1.5 shadow-lg shadow-black/10 relative overflow-hidden group/btn"
+                        className="w-fit bg-white text-primary-600 text-[11px] font-black px-4 py-2 rounded-xl active:scale-[0.97] transition-all flex items-center justify-center gap-1.5 shadow-lg shadow-black/10"
                       >
-                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-blue-50/20 to-transparent -translate-x-full group-hover/btn:animate-shimmer"></div>
                         {banner.cta}
-                        {banner.isSponsored ? (
-                          <ExternalLink className="w-3 h-3" strokeWidth={3} />
-                        ) : (
-                          <ArrowRight className="w-3 h-3" strokeWidth={3} />
-                        )}
+                        <ArrowRight className="w-3 h-3" strokeWidth={3} />
                       </button>
                     </div>
 
-                    {/* Metade Direita - Visual Parallax preenchendo até a borda */}
-                    <div className="w-[45%] relative overflow-hidden">
-                      <div className="absolute inset-y-0 left-0 bg-gradient-to-r from-[#1E5BFF] via-[#1E5BFF]/60 to-transparent z-10 w-16"></div>
+                    {/* Metade Direita */}
+                    <div className="w-[42%] relative overflow-hidden">
+                      <div className="absolute inset-y-0 left-0 bg-gradient-to-r from-primary-600 via-primary-600/40 to-transparent z-10 w-16"></div>
                       <img 
                         src={banner.image} 
                         alt={banner.title} 
-                        className="w-full h-full object-cover animate-banner-img-parallax brightness-[0.9] contrast-[1.05]"
+                        className="w-full h-full object-cover animate-banner-img-parallax brightness-[0.95]"
                       />
-                      <div className="absolute inset-0 bg-blue-950/20 pointer-events-none z-0"></div>
+                      <div className="absolute inset-0 bg-primary-900/10 pointer-events-none z-0"></div>
                     </div>
                   </div>
                 </div>
               ))}
             </div>
 
-            {/* Indicadores Visuais Compactos */}
-            <div className="flex justify-center gap-1.5 mt-3">
+            {/* Indicadores Compactos */}
+            <div className="flex justify-center gap-1.5 mt-4">
               {banners.map((_, i) => (
                 <div 
                   key={i} 
-                  className={`h-1 rounded-full transition-all duration-500 ${
+                  className={`h-1.5 rounded-full transition-all duration-500 ${
                     activeBannerIndex === i 
-                    ? 'w-5 bg-[#1E5BFF]' 
-                    : 'w-1 bg-gray-200 dark:bg-gray-700'
+                    ? 'w-6 bg-primary-500' 
+                    : 'w-1.5 bg-gray-200 dark:bg-gray-700'
                   }`}
                 />
               ))}
