@@ -225,15 +225,15 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
     switch (key) {
       case 'hero':
         return (
-          <div key="hero" className="relative group overflow-hidden bg-white dark:bg-gray-900 pb-8 pt-2">
+          <div key="hero" className="relative group bg-transparent pt-2 pb-0 overflow-hidden">
             <div 
               ref={carouselRef}
               onScroll={handleScroll}
               className="flex overflow-x-auto snap-x snap-mandatory no-scrollbar px-0 scroll-smooth"
             >
               {banners.map((banner, index) => (
-                <div key={banner.id} className="min-w-full snap-center px-4 pb-6">
-                  <div className="w-full bg-primary-600 rounded-[28px] overflow-hidden shadow-[0_25px_30px_-20px_rgba(0,0,0,0.25)] border-none h-[190px] relative flex">
+                <div key={banner.id} className="min-w-full snap-center px-4 pb-4">
+                  <div className="w-full bg-primary-600 rounded-[28px] overflow-hidden shadow-[0_20px_40px_-20px_rgba(0,0,0,0.3)] border-none h-[190px] relative flex">
                     
                     {/* Bloco Único de Conteúdo - Texto com z-index alto */}
                     <div className="flex-1 p-6 pr-4 text-white flex flex-col justify-center relative z-20">
@@ -286,15 +286,15 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
               ))}
             </div>
 
-            {/* Indicadores Internos (Overlay) */}
-            <div className="absolute bottom-10 left-0 right-0 flex justify-center gap-1.5 z-30 pointer-events-none px-4">
+            {/* Indicadores Internos (Overlay dentro do Banner) */}
+            <div className="absolute bottom-8 left-0 right-0 flex justify-center gap-1.5 z-30 pointer-events-none px-4">
               {banners.map((_, i) => (
                 <div 
                   key={i} 
                   className={`h-1 rounded-full transition-all duration-500 shadow-sm ${
                     activeBannerIndex === i 
-                    ? 'w-6 bg-gray-900 dark:bg-white' 
-                    : 'w-1.5 bg-gray-300 dark:bg-white/40'
+                    ? 'w-6 bg-white' 
+                    : 'w-1.5 bg-white/40'
                   }`}
                 />
               ))}
