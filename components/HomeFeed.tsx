@@ -233,7 +233,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
             >
               {banners.map((banner, index) => (
                 <div key={banner.id} className="min-w-full snap-center px-4 pb-6">
-                  <div className="w-full bg-primary-600 rounded-[28px] overflow-hidden shadow-[0_22px_45px_-15px_rgba(45,109,246,0.35)] h-[190px] relative flex">
+                  <div className="w-full bg-primary-600 rounded-[28px] overflow-hidden shadow-[0_15px_35px_-12px_rgba(0,0,0,0.2)] border-none h-[190px] relative flex">
                     
                     {/* Bloco Único de Conteúdo - Texto com z-index alto */}
                     <div className="flex-1 p-6 pr-4 text-white flex flex-col justify-center relative z-20">
