@@ -14,6 +14,7 @@ import { PatrocinadorMasterScreen } from './components/PatrocinadorMasterScreen'
 import { CashbackScanScreen } from './components/CashbackScanScreen';
 import { ScanConfirmationScreen } from './components/ScanConfirmationScreen';
 import { CashbackPaymentScreen } from './components/CashbackPaymentScreen';
+import { PrizeHistoryView } from './components/PrizeHistoryView';
 import { MapPin, Crown, ShieldCheck } from 'lucide-react';
 import { useAuth } from './contexts/AuthContext';
 import { Category, Store, AdType, EditorialCollection } from './types';
@@ -99,7 +100,7 @@ const App: React.FC = () => {
 
         {/* Sponsor Block */}
         <div className="absolute bottom-20 left-0 right-0 flex flex-col items-center px-10 z-10">
-          <div className="animate-sponsor-reveal opacity-0 [animation-delay:1800ms] [animation-fill-mode:forwards] w-full max-w-[280px]">
+          <div className="opacity-0 [animation-delay:1500ms] [animation-fill-mode:forwards] animate-sponsor-spin-in w-full max-w-[280px]">
             <p className="text-[8px] font-black text-blue-300/60 uppercase tracking-[0.4em] mb-4 text-center animate-soft-pulse">
               Patrocinador Master
             </p>
@@ -140,7 +141,7 @@ const App: React.FC = () => {
     <div className={isDarkMode ? 'dark' : ''}>
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex justify-center transition-colors duration-300 relative">
         <Layout activeTab={activeTab} setActiveTab={setActiveTab} userRole={userRole} onCashbackClick={handleCashbackClick}>
-          {!['category_detail', 'food_category', 'store_detail', 'profile', 'patrocinador_master'].includes(activeTab) && (
+          {!['category_detail', 'food_category', 'store_detail', 'profile', 'patrocinador_master', 'prize_history', 'reward_details'].includes(activeTab) && (
             <Header
               isDarkMode={isDarkMode}
               toggleTheme={toggleTheme}
@@ -192,6 +193,9 @@ const App: React.FC = () => {
             )}
             {activeTab === 'reward_details' && (
               <RewardDetailsView reward={selectedReward} onBack={() => setActiveTab('home')} onHome={() => setActiveTab('home')} />
+            )}
+            {activeTab === 'prize_history' && user && (
+              <PrizeHistoryView userId={user.id} onBack={() => setActiveTab('home')} onGoToSpinWheel={() => setActiveTab('home')} />
             )}
           </main>
           <AuthModal isOpen={isAuthOpen} onClose={() => setIsAuthOpen(false)} user={user as any} signupContext={authContext} />

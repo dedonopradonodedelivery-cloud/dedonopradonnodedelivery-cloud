@@ -35,6 +35,7 @@
               'tracking-expand': 'trackingExpand 1.5s ease-out forwards',
               'float': 'float 5s ease-in-out infinite',
               'sponsor-reveal': 'sponsorReveal 1.2s cubic-bezier(0.2, 0.8, 0.2, 1) forwards',
+              'sponsor-spin-in': 'spinDecelerate 2.2s cubic-bezier(0.19, 1, 0.22, 1) forwards',
               'sponsor-float': 'sponsorFloat 4s ease-in-out infinite',
               'sponsor-logo-pulse': 'sponsorLogoPulse 3s ease-in-out infinite',
               'glow-pulse': 'glowPulse 4s ease-in-out infinite',
@@ -54,6 +55,10 @@
               fadeIn: {
                 '0%': { opacity: '0' },
                 '100%': { opacity: '1' },
+              },
+              spinDecelerate: {
+                '0%': { opacity: '0', transform: 'rotate(720deg) scale(0.3)' },
+                '100%': { opacity: '1', transform: 'rotate(0deg) scale(1)' },
               },
               bannerTextIn: {
                 '0%': { opacity: '0', transform: 'translateX(-10px)' },

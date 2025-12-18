@@ -121,7 +121,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
         subtitle: 'Peça cotações de serviços locais direto no WhatsApp, sem complicação.',
         image: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=600&auto=format&fit=crop',
         cta: 'Solicitar orçamento',
-        action: () => onNavigate('explore'), // Direciona para explorar serviços
+        action: () => onNavigate('explore'),
         isSponsored: false
       },
       {
@@ -178,6 +178,26 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
     }
   };
 
+  const getImageAnimation = (bannerId: string, index: number) => {
+    const isActive = activeBannerIndex === index;
+    if (!isActive && bannerId !== 'freguesia_connect') return "opacity-0";
+
+    switch (bannerId) {
+      case 'institutional':
+        return "animate-in slide-in-from-bottom-8 fade-in duration-500 fill-mode-forwards";
+      case 'cashback_promo':
+        return "animate-in zoom-in-75 spin-in-2 fade-in duration-600 fill-mode-forwards";
+      case 'whatsapp_services':
+        return "animate-in zoom-in-90 fade-in duration-500 ease-out fill-mode-forwards";
+      case 'freguesia_connect':
+        return "animate-float duration-[4s] ease-in-out infinite fade-in";
+      case 'sponsored_ads':
+        return "animate-in fade-in duration-700 fill-mode-forwards";
+      default:
+        return "fade-in";
+    }
+  };
+
   const contextConfig = useMemo(() => {
     switch (timeContext) {
       case 'morning':
@@ -205,40 +225,35 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
     switch (key) {
       case 'hero':
         return (
-          <div key="hero" className="relative group overflow-hidden">
-            {/* Carousel Container */}
+          <div key="hero" className="relative group overflow-hidden bg-white dark:bg-gray-900 pb-4 pt-2">
             <div 
               ref={carouselRef}
               onScroll={handleScroll}
               className="flex overflow-x-auto snap-x snap-mandatory no-scrollbar px-0 scroll-smooth"
             >
-              {banners.map((banner) => (
-                <div key={banner.id} className="min-w-full snap-center px-4">
-                  <div className="w-full bg-primary-600 rounded-[28px] overflow-hidden shadow-[0_12px_40px_rgba(0,0,0,0.12)] flex h-[190px] relative border border-white/10">
+              {banners.map((banner, index) => (
+                <div key={banner.id} className="min-w-full snap-center px-4 pb-6">
+                  <div className="w-full bg-primary-600 rounded-[28px] overflow-hidden shadow-[0_22px_45px_-15px_rgba(45,109,246,0.35)] h-[190px] relative flex">
                     
-                    {/* Conteúdo Esquerdo */}
-                    <div className="flex-1 p-6 pr-0 text-white flex flex-col justify-center relative z-20 animate-banner-text-in">
+                    {/* Bloco Único de Conteúdo - Texto com z-index alto */}
+                    <div className="flex-1 p-6 pr-4 text-white flex flex-col justify-center relative z-20">
                       <div className="flex items-center gap-2 mb-2">
                         <div className="flex items-center gap-1.5 opacity-90">
                           {banner.icon}
                           <span className="text-[9px] font-black uppercase tracking-[0.2em]">{banner.badge}</span>
                         </div>
-                        
                         {banner.isSponsored && (
-                          <div className="flex items-center gap-1.5">
-                            <span className="w-1 h-1 rounded-full bg-white/40"></span>
-                            <span className="text-[7px] font-black uppercase tracking-[0.2em] bg-white/20 px-1.5 py-0.5 rounded-md border border-white/10">
-                               Patrocinado
-                            </span>
+                          <div className="flex items-center gap-1.5 bg-white/20 px-1.5 py-0.5 rounded-md border border-white/10">
+                            <span className="text-[7px] font-black uppercase tracking-[0.2em]">Patrocinado</span>
                           </div>
                         )}
                       </div>
 
-                      <h1 className="text-[19px] font-black mb-1 leading-[1.2] tracking-tight whitespace-pre-line drop-shadow-md">
+                      <h1 className="text-[19px] font-black mb-1 leading-[1.2] tracking-tight whitespace-pre-line drop-shadow-md max-w-[65%]">
                         {banner.title}
                       </h1>
                       
-                      <p className="text-white/80 text-[11px] font-medium mb-4 opacity-95 leading-tight line-clamp-2 pr-4">
+                      <p className="text-white/80 text-[11px] font-medium mb-4 opacity-95 leading-tight line-clamp-2 max-w-[60%]">
                         {banner.subtitle}
                       </p>
 
@@ -251,30 +266,35 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
                       </button>
                     </div>
 
-                    {/* Metade Direita */}
-                    <div className="w-[42%] relative overflow-hidden">
-                      <div className="absolute inset-y-0 left-0 bg-gradient-to-r from-primary-600 via-primary-600/40 to-transparent z-10 w-16"></div>
+                    {/* Overlay Decorativo da Imagem - Mantendo container único */}
+                    <div className="absolute top-0 right-0 h-full w-[50%] z-10 pointer-events-none">
+                      {/* Gradiente de Mascaramento para suavizar encontro com texto */}
+                      <div className="absolute inset-y-0 left-0 w-16 bg-gradient-to-r from-primary-600 to-transparent z-10"></div>
+                      
+                      {/* Imagem com Animação Condicional */}
                       <img 
                         src={banner.image} 
-                        alt={banner.title} 
-                        className="w-full h-full object-cover animate-banner-img-parallax brightness-[0.95]"
+                        alt="" 
+                        className={`w-full h-full object-cover brightness-[0.95] ${getImageAnimation(banner.id, index)}`}
                       />
-                      <div className="absolute inset-0 bg-primary-900/10 pointer-events-none z-0"></div>
+                      
+                      {/* Camada de cor extra para profundidade */}
+                      <div className="absolute inset-0 bg-primary-900/5 z-0"></div>
                     </div>
                   </div>
                 </div>
               ))}
             </div>
 
-            {/* Indicadores Compactos */}
-            <div className="flex justify-center gap-1.5 mt-4">
+            {/* Indicadores Internos (Overlay) */}
+            <div className="absolute bottom-6 left-0 right-0 flex justify-center gap-1.5 z-30 pointer-events-none px-4">
               {banners.map((_, i) => (
                 <div 
                   key={i} 
-                  className={`h-1.5 rounded-full transition-all duration-500 ${
+                  className={`h-1 rounded-full transition-all duration-500 shadow-sm ${
                     activeBannerIndex === i 
-                    ? 'w-6 bg-primary-500' 
-                    : 'w-1.5 bg-gray-200 dark:bg-gray-700'
+                    ? 'w-6 bg-white' 
+                    : 'w-1.5 bg-white/40'
                   }`}
                 />
               ))}
@@ -466,7 +486,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
           <div className="bg-transparent w-full max-w-md relative" onClick={(e) => e.stopPropagation()}>
             <div className="absolute top-4 right-5 z-50"><button onClick={() => setIsSpinWheelOpen(false)} className="p-2.5 text-gray-200 hover:text-white bg-white/10 backdrop-blur-md rounded-full active:scale-90 transition-transform"><X className="w-5 h-5" /></button></div>
             <div className="animate-in slide-in-from-bottom duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]">
-                <SpinWheelView userId={user?.id || null} userRole={userRole || null} onWin={onSpinWin} onRequireLogin={onRequireLogin} onViewHistory={() => onNavigate('prize_history')} />
+                <SpinWheelView userId={user?.id || null} userRole={userRole || null} onWin={onSpinWin} onRequireLogin={onRequireLogin} onViewHistory={() => { setIsSpinWheelOpen(false); onNavigate('prize_history'); }} />
             </div>
           </div>
         </div>
