@@ -42,6 +42,10 @@
               'soft-pulse': 'softPulse 4s ease-in-out infinite',
               'banner-img-parallax': 'bannerParallax 8s ease-in-out infinite',
               'banner-text-in': 'bannerTextIn 0.4s ease-out forwards',
+              'pulse-soft': 'pulseSoft 3s ease-in-out infinite',
+              'bounce-x': 'bounceX 2.5s ease-in-out infinite',
+              'premium-in': 'premiumIn 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+              'glow-slow': 'glowSlow 4s ease-in-out infinite',
             },
             keyframes: {
               popIn: {
@@ -95,6 +99,22 @@
               softPulse: {
                 '0%, 100%': { opacity: '1', transform: 'scale(1)' },
                 '50%': { opacity: '0.9', transform: 'scale(0.99)' },
+              },
+              pulseSoft: {
+                '0%, 100%': { transform: 'scale(1)' },
+                '50%': { transform: 'scale(1.05)' },
+              },
+              bounceX: {
+                '0%, 100%': { transform: 'translateX(0)' },
+                '50%': { transform: 'translateX(5px)' },
+              },
+              premiumIn: {
+                '0%': { opacity: '0', transform: 'scale(0.96) translateY(5px)' },
+                '100%': { opacity: '1', transform: 'scale(1) translateY(0)' },
+              },
+              glowSlow: {
+                '0%, 100%': { boxShadow: '0 0 0px rgba(59, 130, 246, 0)' },
+                '50%': { boxShadow: '0 0 15px rgba(59, 130, 246, 0.4)' },
               }
             }
           }

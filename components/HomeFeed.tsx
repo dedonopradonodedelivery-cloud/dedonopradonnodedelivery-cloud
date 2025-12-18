@@ -209,35 +209,42 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
               onScroll={handleScroll}
               className="flex overflow-x-auto snap-x snap-mandatory no-scrollbar px-0 scroll-smooth"
             >
-              {banners.map((banner, index) => (
-                <div key={banner.id} className="min-w-full snap-center px-4 pb-6">
-                  <div className={`w-full bg-gradient-to-br ${banner.gradient} rounded-3xl overflow-hidden shadow-lg border border-white/10 h-[180px] relative flex`}>
-                    <div className="flex-1 p-6 flex flex-col justify-center relative z-10">
-                      <div className="flex items-center gap-1.5 mb-2">
-                        <span className={`text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full ${banner.isSponsored ? 'text-blue-300 bg-white/5' : 'text-white/80 bg-white/10'}`}>
-                          {banner.badge}
-                        </span>
+              {banners.map((banner, index) => {
+                const isActive = activeBannerIndex === index;
+                return (
+                  <div key={banner.id} className="min-w-full snap-center px-4 pb-6">
+                    <div className={`w-full bg-gradient-to-br ${banner.gradient} rounded-3xl overflow-hidden shadow-lg border border-white/10 h-[180px] relative flex`}>
+                      <div className="flex-1 p-6 flex flex-col justify-center relative z-10">
+                        <div className="flex items-center gap-1.5 mb-2">
+                          <span className={`text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full ${banner.isSponsored ? 'text-blue-300 bg-white/5' : 'text-white/80 bg-white/10'}`}>
+                            {banner.badge}
+                          </span>
+                        </div>
+                        <h1 className="text-xl font-bold text-white mb-1 leading-tight whitespace-pre-line truncate max-w-full">
+                          {banner.title}
+                        </h1>
+                        <p className="text-white/70 text-[10px] font-medium mb-4 leading-tight line-clamp-2 max-w-[180px]">
+                          {banner.subtitle}
+                        </p>
+                        <button 
+                          onClick={banner.action} 
+                          className={`w-fit bg-white text-gray-900 text-[11px] font-bold px-4 py-2 rounded-full active:scale-95 transition-transform flex items-center gap-2 
+                            ${banner.id === 'cashback_promo' ? 'animate-pulse-soft shadow-lg' : ''} 
+                            ${banner.id === 'whatsapp_services' ? 'animate-bounce-x shadow-md' : ''}
+                            ${banner.id === 'freguesia_connect' && isActive ? 'animate-premium-in shadow-lg' : ''}
+                            ${banner.isSponsored && isActive ? 'animate-glow-slow shadow-blue-500/20' : ''}`}
+                        >
+                          {banner.cta} <ArrowRight className={`w-3 h-3 ${banner.id === 'whatsapp_services' ? 'animate-pulse' : ''}`} />
+                        </button>
                       </div>
-                      <h1 className="text-xl font-bold text-white mb-1 leading-tight whitespace-pre-line truncate max-w-full">
-                        {banner.title}
-                      </h1>
-                      <p className="text-white/70 text-[10px] font-medium mb-4 leading-tight line-clamp-2 max-w-[180px]">
-                        {banner.subtitle}
-                      </p>
-                      <button 
-                        onClick={banner.action} 
-                        className="w-fit bg-white text-gray-900 text-[11px] font-bold px-4 py-2 rounded-full active:scale-95 transition-transform flex items-center gap-2"
-                      >
-                        {banner.cta} <ArrowRight className="w-3 h-3" />
-                      </button>
-                    </div>
-                    <div className="w-[120px] h-full relative">
-                      <img src={banner.image} alt="" className="w-full h-full object-cover" />
-                      <div className="absolute inset-0 bg-gradient-to-r from-inherit via-transparent to-transparent"></div>
+                      <div className="w-[120px] h-full relative">
+                        <img src={banner.image} alt="" className="w-full h-full object-cover" />
+                        <div className="absolute inset-0 bg-gradient-to-r from-inherit via-transparent to-transparent"></div>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
             <div className="flex justify-center gap-1.5 mt-[-10px] mb-4">
               {banners.map((_, i) => (
