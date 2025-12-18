@@ -158,7 +158,7 @@ const App: React.FC = () => {
 
   return (
     <div className={isDarkMode ? 'dark' : ''}>
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex justify-center transition-colors duration-300 relative">
+      <div className="min-h-screen bg-white dark:bg-gray-900 flex justify-center transition-colors duration-300 relative">
         <Layout activeTab={activeTab} setActiveTab={setActiveTab} userRole={userRole} onCashbackClick={handleCashbackClick}>
           {!['category_detail', 'food_category', 'store_detail', 'profile', 'patrocinador_master', 'prize_history', 'reward_details', 'freguesia_connect_public', 'freguesia_connect_dashboard', 'freguesia_connect_restricted'].includes(activeTab) && (
             <Header
