@@ -14,21 +14,16 @@ import {
   Zap,
   Dices,
   Clock,
-  Timer,
   Coffee,
   ShoppingBag,
   Moon,
-  Sun,
   Utensils,
   Award,
   ShieldCheck,
-  LayoutDashboard,
-  ExternalLink,
   Info,
   MessageCircle,
-  Briefcase
+  Gift
 } from 'lucide-react';
-import { supabase } from '../lib/supabaseClient';
 import { LojasEServicosList } from './LojasEServicosList';
 import { User } from '@supabase/supabase-js';
 import { SpinWheelView } from './SpinWheelView';
@@ -58,6 +53,7 @@ interface BannerItem {
   cta: string;
   action: () => void;
   isSponsored?: boolean;
+  gradient?: string;
 }
 
 export const HomeFeed: React.FC<HomeFeedProps> = ({ 
@@ -78,8 +74,6 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
   const autoplayTimerRef = useRef<any | null>(null);
 
   const activeSearchTerm = externalSearchTerm || '';
-  const [searchResults, setSearchResults] = useState<Store[]>([]);
-  const [isSearching, setIsSearching] = useState(false);
   const [listFilter, setListFilter] = useState<'all' | 'cashback' | 'top_rated' | 'open_now'>('all');
 
   const timeContext = useMemo((): TimeContext => {
@@ -92,59 +86,52 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
   const banners = useMemo((): BannerItem[] => {
     return [
       {
-        id: 'institutional',
-        badge: 'O Bairro Conectado',
-        icon: <Info className="w-3 h-3" />,
-        title: 'O que é o Localizei Freguesia',
-        subtitle: 'Conecta moradores ao comércio local, fortalece o bairro e gera economia real.',
-        image: 'https://images.unsplash.com/photo-1517457373958-b7bdd4587205?q=80&w=600&auto=format&fit=crop',
-        cta: 'Entender como funciona',
-        action: () => onNavigate('about'),
-        isSponsored: false
-      },
-      {
         id: 'cashback_promo',
-        badge: 'Economia Real',
+        badge: 'ECONOMIA REAL',
         icon: <Wallet className="w-3 h-3" />,
-        title: 'Cashback no comércio do bairro',
+        title: 'Cashback no\ncomércio do bairro',
         subtitle: 'Compre perto de casa e ganhe dinheiro de volta.',
-        image: 'https://images.unsplash.com/photo-1559526324-4b87b5e36e44?q=80&w=600&auto=format&fit=crop',
+        image: 'https://nyneuuvcdmtqjyaqrztz.supabase.co/storage/v1/object/public/assets/cashback_bag.png?t=1',
+        gradient: 'from-[#2D6DF6] to-[#1B54D9]',
         cta: 'Ativar cashback',
         action: () => onNavigate('cashback_info'),
         isSponsored: false
       },
       {
         id: 'whatsapp_services',
-        badge: 'Praticidade',
+        badge: 'PRATICIDADE',
         icon: <MessageCircle className="w-3 h-3" />,
-        title: 'Orçamentos rápidos pelo WhatsApp',
-        subtitle: 'Peça cotações de serviços locais direto no WhatsApp, sem complicação.',
+        title: 'Orçamentos rápidos\npelo WhatsApp',
+        subtitle: 'Cotações de serviços locais direto no celular.',
         image: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=600&auto=format&fit=crop',
-        cta: 'Solicitar orçamento',
+        gradient: 'from-[#1540AD] to-[#0F359E]',
+        cta: 'Solicitar',
         action: () => onNavigate('explore'),
         isSponsored: false
       },
       {
-        id: 'freguesia_connect',
-        badge: 'Networking',
-        icon: <Users className="w-3 h-3" />,
-        title: 'Freguesia Connect',
-        subtitle: 'Um grupo de networking para empresas que querem crescer juntas no bairro.',
-        image: 'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?q=80&w=600&auto=format&fit=crop',
-        cta: 'Conhecer o grupo',
-        action: () => onNavigate('freguesia_connect_public'),
-        isSponsored: false
-      },
-      {
         id: 'sponsored_ads',
-        badge: 'Destaque',
+        badge: 'DESTAQUE',
         icon: <Zap className="w-3 h-3" />,
-        title: 'Espaço Patrocinado',
-        subtitle: 'Banner reservado para lojistas com Ads Premium.',
+        title: 'Seu negócio no topo\nda Freguesia',
+        subtitle: 'Aumente suas vendas com anúncios premium.',
         image: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=600&auto=format&fit=crop',
-        cta: 'Saiba mais',
+        gradient: 'from-[#0F172A] to-[#1E293B]',
+        cta: 'Anunciar agora',
         action: () => onNavigate('patrocinador_master'),
         isSponsored: true
+      },
+      {
+        id: 'institutional',
+        badge: 'CONECTIVIDADE',
+        icon: <Info className="w-3 h-3" />,
+        title: 'O que é o\nLocalizei Freguesia',
+        subtitle: 'Conectamos moradores ao melhor do bairro.',
+        image: 'https://images.unsplash.com/photo-1517457373958-b7bdd4587205?q=80&w=600&auto=format&fit=crop',
+        gradient: 'from-[#2D6DF6] via-[#1B54D9] to-[#2D6DF6]',
+        cta: 'Como funciona',
+        action: () => onNavigate('about'),
+        isSponsored: false
       }
     ];
   }, [onNavigate]);
@@ -178,45 +165,26 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
     }
   };
 
-  const getImageAnimation = (bannerId: string, index: number) => {
-    const isActive = activeBannerIndex === index;
-    if (!isActive && bannerId !== 'freguesia_connect') return "opacity-0";
-
-    switch (bannerId) {
-      case 'institutional':
-        return "animate-in slide-in-from-bottom-8 fade-in duration-500 fill-mode-forwards";
-      case 'cashback_promo':
-        return "animate-in zoom-in-75 spin-in-2 fade-in duration-600 fill-mode-forwards";
-      case 'whatsapp_services':
-        return "animate-in zoom-in-90 fade-in duration-500 ease-out fill-mode-forwards";
-      case 'freguesia_connect':
-        return "animate-float duration-[4s] ease-in-out infinite fade-in";
-      case 'sponsored_ads':
-        return "animate-in fade-in duration-700 fill-mode-forwards";
-      default:
-        return "fade-in";
-    }
-  };
-
   const contextConfig = useMemo(() => {
+    const commonOrder = ['hero', 'highlights', 'tags', 'wallet', 'roulette_banner', 'filters', 'list', 'editorial', 'bonus'];
     switch (timeContext) {
       case 'morning':
         return {
           tags: [{ id: 1, label: 'Padaria', icon: '🥐' }, { id: 2, label: 'Café', icon: '☕' }, { id: 3, label: 'Hortifruti', icon: '🍎' }, { id: 4, label: 'Academia', icon: '💪' }],
-          highlights: [{ id: 1, title: 'Pão Quentinho', desc: 'Padaria Imperial • 8%', icon: <Coffee className="w-4 h-4 text-amber-500" />, bg: 'bg-amber-50', borderColor: 'border-amber-100' }, { id: 2, title: 'Energia', desc: 'Fit Studio Bombando', icon: <Zap className="w-4 h-4 text-blue-500" />, bg: 'bg-blue-50', borderColor: 'border-blue-100' }],
-          sectionOrder: ['hero', 'highlights', 'tags', 'wallet', 'filters', 'list', 'editorial', 'bonus']
+          highlights: [{ id: 1, title: 'Pão Quentinho', desc: 'Padaria Imperial • 8%', icon: <Coffee />, bg: 'bg-amber-50', borderColor: 'border-amber-100' }, { id: 2, title: 'Energia', desc: 'Fit Studio Bombando', icon: <Zap />, bg: 'bg-blue-50', borderColor: 'border-blue-100' }],
+          sectionOrder: commonOrder
         };
       case 'afternoon':
         return {
           tags: [{ id: 1, label: 'Almoço', icon: '🍽️' }, { id: 2, label: 'Moda', icon: '👕' }, { id: 3, label: 'Serviços', icon: '🛠️' }, { id: 4, label: 'Saúde', icon: '🏥' }],
-          highlights: [{ id: 1, title: 'Prato do Dia', desc: 'Restaurante Sabor • 10%', icon: <Utensils className="w-4 h-4 text-orange-500" />, bg: 'bg-orange-50', borderColor: 'border-orange-100' }, { id: 2, title: 'Promoção', desc: 'Moda RJ: 20% OFF', icon: <ShoppingBag className="w-4 h-4 text-purple-500" />, bg: 'bg-purple-50', borderColor: 'border-purple-100' }],
-          sectionOrder: ['hero', 'tags', 'highlights', 'wallet', 'filters', 'list', 'editorial', 'bonus']
+          highlights: [{ id: 1, title: 'Prato do Dia', desc: 'Restaurante Sabor • 10%', icon: <Utensils />, bg: 'bg-orange-50', borderColor: 'border-orange-100' }, { id: 2, title: 'Promoção', desc: 'Moda RJ: 20% OFF', icon: <ShoppingBag />, bg: 'bg-purple-50', borderColor: 'border-purple-100' }],
+          sectionOrder: ['hero', 'tags', 'highlights', 'wallet', 'roulette_banner', 'filters', 'list', 'editorial', 'bonus']
         };
       default:
         return {
           tags: [{ id: 1, label: 'Sushi', icon: '🍣' }, { id: 2, label: 'Pizza', icon: '🍕' }, { id: 3, label: 'Burger', icon: '🍔' }, { id: 4, label: 'Açaí', icon: '🍧' }],
-          highlights: [{ id: 1, title: 'Delivery Grátis', desc: 'Pizza Place • 12% back', icon: <Moon className="w-4 h-4 text-indigo-500" />, bg: 'bg-indigo-50', borderColor: 'border-indigo-100' }, { id: 2, title: 'Happy Hour', desc: 'Chopp em dobro no Zé', icon: <Flame className="w-4 h-4 text-red-500" />, bg: 'bg-red-100', borderColor: 'border-red-100' }],
-          sectionOrder: ['hero', 'highlights', 'editorial', 'wallet', 'tags', 'filters', 'list', 'bonus']
+          highlights: [{ id: 1, title: 'Delivery Grátis', desc: 'Pizza Place • 12% back', icon: <Moon />, bg: 'bg-indigo-50', borderColor: 'border-indigo-100' }, { id: 2, title: 'Happy Hour', desc: 'Chopp em dobro no Zé', icon: <Flame />, bg: 'bg-red-100', borderColor: 'border-red-100' }],
+          sectionOrder: ['hero', 'highlights', 'roulette_banner', 'editorial', 'wallet', 'tags', 'filters', 'list', 'bonus']
         };
     }
   }, [timeContext]);
@@ -225,100 +193,96 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
     switch (key) {
       case 'hero':
         return (
-          <div key="hero" className="relative group bg-transparent pt-2 pb-0 overflow-hidden">
+          <div key="hero" className="relative bg-white pt-4 pb-0 overflow-hidden">
             <div 
               ref={carouselRef}
               onScroll={handleScroll}
               className="flex overflow-x-auto snap-x snap-mandatory no-scrollbar px-0 scroll-smooth"
             >
               {banners.map((banner, index) => (
-                <div key={banner.id} className="min-w-full snap-center px-4 pb-4">
-                  <div className="w-full bg-primary-600 rounded-[28px] overflow-hidden shadow-[0_20px_40px_-20px_rgba(0,0,0,0.3)] border-none h-[190px] relative flex">
-                    
-                    {/* Bloco Único de Conteúdo - Texto com z-index alto */}
-                    <div className="flex-1 p-6 pr-4 text-white flex flex-col justify-center relative z-20">
-                      <div className="flex items-center gap-2 mb-2">
-                        <div className="flex items-center gap-1.5 opacity-90">
-                          {banner.icon}
-                          <span className="text-[9px] font-black uppercase tracking-[0.2em]">{banner.badge}</span>
-                        </div>
-                        {banner.isSponsored && (
-                          <div className="flex items-center gap-1.5 bg-white/20 px-1.5 py-0.5 rounded-md border border-white/10">
-                            <span className="text-[7px] font-black uppercase tracking-[0.2em]">Patrocinado</span>
-                          </div>
-                        )}
+                <div key={banner.id} className="min-w-full snap-center px-4 pb-6">
+                  <div className={`w-full bg-gradient-to-br ${banner.gradient} rounded-3xl overflow-hidden shadow-lg border border-white/10 h-[180px] relative flex`}>
+                    <div className="flex-1 p-6 flex flex-col justify-center relative z-10">
+                      <div className="flex items-center gap-1.5 mb-2">
+                        <span className="text-[9px] font-black uppercase tracking-wider text-white/80 bg-white/10 px-2 py-0.5 rounded-full">
+                          {banner.badge}
+                        </span>
                       </div>
-
-                      <h1 className="text-[19px] font-black mb-1 leading-[1.2] tracking-tight whitespace-pre-line drop-shadow-md max-w-[65%]">
+                      <h1 className="text-xl font-bold text-white mb-1 leading-tight whitespace-pre-line">
                         {banner.title}
                       </h1>
-                      
-                      <p className="text-white/80 text-[11px] font-medium mb-4 opacity-95 leading-tight line-clamp-2 max-w-[60%]">
+                      <p className="text-white/70 text-[10px] font-medium mb-4 leading-tight line-clamp-2 max-w-[180px]">
                         {banner.subtitle}
                       </p>
-
                       <button 
                         onClick={banner.action} 
-                        className="w-fit bg-white text-primary-600 text-[11px] font-black px-4 py-2 rounded-xl active:scale-[0.97] transition-all flex items-center justify-center gap-1.5 shadow-lg shadow-black/10"
+                        className="w-fit bg-white text-gray-900 text-[11px] font-bold px-4 py-2 rounded-full active:scale-95 transition-transform flex items-center gap-2"
                       >
-                        {banner.cta}
-                        <ArrowRight className="w-3 h-3" strokeWidth={3} />
+                        {banner.cta} <ArrowRight className="w-3 h-3" />
                       </button>
                     </div>
-
-                    {/* Overlay Decorativo da Imagem - Mantendo container único */}
-                    <div className="absolute top-0 right-0 h-full w-[50%] z-10 pointer-events-none">
-                      {/* Gradiente de Mascaramento para suavizar encontro com texto */}
-                      <div className="absolute inset-y-0 left-0 w-16 bg-gradient-to-r from-primary-600 to-transparent z-10"></div>
-                      
-                      {/* Imagem com Animação Condicional */}
-                      <img 
-                        src={banner.image} 
-                        alt="" 
-                        className={`w-full h-full object-cover brightness-[0.95] ${getImageAnimation(banner.id, index)}`}
-                      />
-                      
-                      {/* Camada de cor extra para profundidade */}
-                      <div className="absolute inset-0 bg-primary-900/5 z-0"></div>
+                    <div className="w-[120px] h-full relative">
+                      <img src={banner.image} alt="" className="w-full h-full object-cover" />
+                      <div className="absolute inset-0 bg-gradient-to-r from-inherit via-transparent to-transparent"></div>
                     </div>
                   </div>
                 </div>
               ))}
             </div>
-
-            {/* Indicadores Internos (Overlay dentro do Banner) */}
-            <div className="absolute bottom-8 left-0 right-0 flex justify-center gap-1.5 z-30 pointer-events-none px-4">
+            <div className="flex justify-center gap-1.5 mt-[-10px] mb-4">
               {banners.map((_, i) => (
-                <div 
-                  key={i} 
-                  className={`h-1 rounded-full transition-all duration-500 shadow-sm ${
-                    activeBannerIndex === i 
-                    ? 'w-6 bg-white' 
-                    : 'w-1.5 bg-white/40'
-                  }`}
-                />
+                <div key={i} className={`h-1 rounded-full transition-all ${activeBannerIndex === i ? 'w-4 bg-primary-500' : 'w-1 bg-gray-200'}`} />
               ))}
             </div>
           </div>
         );
+      case 'roulette_banner':
+        return (
+          <div key="roulette_banner" className="px-5">
+            <button 
+              onClick={() => setIsSpinWheelOpen(true)}
+              className="w-full bg-gradient-to-r from-purple-600 to-pink-600 rounded-3xl p-5 text-white flex items-center justify-between shadow-lg shadow-purple-500/20 active:scale-[0.98] transition-all relative overflow-hidden group"
+            >
+              <div className="flex items-center gap-4 relative z-10">
+                <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/10">
+                  <Dices className="w-7 h-7 text-white" />
+                </div>
+                <div className="text-left">
+                  <h3 className="font-bold text-lg leading-none mb-1">Roleta da Sorte</h3>
+                  <p className="text-xs text-purple-100">Tente a sorte e ganhe prêmios!</p>
+                </div>
+              </div>
+              <ArrowRight className="w-6 h-6 text-white/50 group-hover:translate-x-1 transition-transform" />
+            </button>
+          </div>
+        );
       case 'highlights':
         return (
-          <div key="highlights" className="space-y-3.5 animate-in slide-in-from-bottom-2 duration-500">
-            <div className="px-5 flex items-center justify-between">
-              <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.25em]">Hoje no seu bairro</h3>
-              <div className="flex items-center gap-1.5 bg-blue-50 dark:bg-blue-900/20 px-2 py-0.5 rounded-full">
-                <div className="w-1 h-1 rounded-full bg-[#1E5BFF] animate-pulse"></div>
-                <span className="text-[9px] font-bold text-[#1E5BFF] uppercase">Live</span>
-              </div>
+          <div key="highlights" className="space-y-4 pt-2 pb-2">
+            <div className="px-5 flex items-end justify-between">
+              <h3 className="text-lg font-bold text-gray-900 dark:text-white tracking-tight leading-none">
+                Hoje no seu bairro
+              </h3>
             </div>
             <div className="flex gap-3.5 overflow-x-auto no-scrollbar px-5 snap-x">
               {contextConfig.highlights.map((item: any) => (
-                <div key={item.id} className={`snap-center flex-shrink-0 w-[190px] p-4.5 rounded-2xl border ${item.borderColor} ${item.bg} flex flex-col gap-2.5 shadow-sm active:scale-95 transition-all cursor-pointer`}>
+                <div 
+                  key={item.id} 
+                  className="snap-center flex-shrink-0 w-[190px] bg-white dark:bg-gray-800 p-4 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm flex flex-col gap-4 active:scale-95 transition-all cursor-pointer group"
+                >
                   <div className="flex items-center justify-between">
-                    <span className="text-[9px] font-black text-gray-400 uppercase tracking-tighter">{item.title}</span>
-                    {item.icon}
+                    <div className={`px-2 py-0.5 rounded-lg ${item.bg} bg-opacity-70 border border-transparent`}>
+                      <span className={`text-[9px] font-black uppercase tracking-tight ${item.borderColor.replace('border-', 'text-')}`}>
+                        {item.title}
+                      </span>
+                    </div>
+                    <div className="opacity-40 text-gray-400 group-hover:text-primary-500 transition-colors">
+                      {item.icon}
+                    </div>
                   </div>
-                  <p className="text-[13px] font-black text-gray-800 dark:text-white leading-tight">{item.desc}</p>
+                  <p className="text-[14px] font-bold text-gray-800 dark:text-gray-100 leading-tight">
+                    {item.desc}
+                  </p>
                 </div>
               ))}
             </div>
@@ -327,12 +291,11 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
       case 'tags':
         return (
           <div key="tags" className="space-y-3">
-              <div className="px-5"><h3 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.25em]">Mais buscados</h3></div>
               <div className="flex gap-2.5 overflow-x-auto no-scrollbar px-5">
                   {contextConfig.tags.map((tag: any) => (
-                      <button key={tag.id} className="flex-shrink-0 flex items-center gap-2.5 bg-white dark:bg-gray-800 px-5 py-3 rounded-full border border-gray-100 dark:border-gray-700 shadow-sm active:scale-95 transition-all">
+                      <button key={tag.id} className="flex-shrink-0 flex items-center gap-2.5 bg-white dark:bg-gray-800 px-4 py-2.5 rounded-full border border-gray-100 dark:border-gray-700 shadow-sm active:scale-95 transition-all">
                           <span className="text-base">{tag.icon}</span>
-                          <span className="text-xs font-black text-gray-700 dark:text-gray-300">{tag.label}</span>
+                          <span className="text-xs font-bold text-gray-700 dark:text-gray-300">{tag.label}</span>
                       </button>
                   ))}
               </div>
@@ -341,22 +304,19 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
       case 'wallet':
         return (
           <div key="wallet" className="px-5 w-full">
-              <div className="bg-white dark:bg-gray-800 rounded-[28px] p-5 border border-gray-100 dark:border-gray-700 shadow-sm flex flex-col gap-4 active:scale-[0.98] transition-all cursor-pointer" onClick={() => onNavigate('user_cashback_flow')}>
+              <div className="bg-white dark:bg-gray-800 rounded-3xl p-5 border border-gray-100 dark:border-gray-700 shadow-sm flex flex-col gap-4 active:scale-[0.98] transition-all cursor-pointer" onClick={() => onNavigate('user_cashback_flow')}>
                   <div className="flex justify-between items-center">
                       <div className="flex items-center gap-3.5">
                           <div className="w-10 h-10 rounded-2xl bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center text-[#1E5BFF]"><Wallet className="w-5 h-5" /></div>
                           <div>
-                              <p className="text-[10px] font-black text-gray-400 uppercase tracking-wider mb-0.5">Meu Saldo</p>
-                              <p className="text-xl font-black text-gray-900 dark:text-white leading-none">R$ 12,50</p>
+                              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-0.5">Meu Saldo</p>
+                              <p className="text-xl font-bold text-gray-900 dark:text-white leading-none">R$ 12,50</p>
                           </div>
                       </div>
-                      <div className="text-right">
-                          <p className="text-[9px] font-black text-gray-400 uppercase mb-0.5">Resgate em</p>
-                          <p className="text-xs font-black text-gray-700 dark:text-gray-300">R$ 50,00</p>
-                      </div>
+                      <ChevronRight className="w-5 h-5 text-gray-300" />
                   </div>
                   <div className="h-1.5 w-full bg-gray-100 dark:bg-gray-700/50 rounded-full overflow-hidden">
-                      <div className="h-full bg-[#1E5BFF] w-[25%] rounded-full shadow-[0_0_10px_rgba(30,91,255,0.3)]"></div>
+                      <div className="h-full bg-[#1E5BFF] w-[25%] rounded-full"></div>
                   </div>
               </div>
           </div>
@@ -371,7 +331,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
                     { id: 'top_rated', label: 'Melhores', icon: Star },
                     { id: 'open_now', label: 'Abertos', icon: Clock }
                   ].map((btn) => (
-                    <button key={btn.id} onClick={() => setListFilter(btn.id as any)} className={`flex items-center gap-2 px-5 py-3 rounded-2xl border text-[11px] font-black transition-all active:scale-95 shadow-sm whitespace-nowrap ${listFilter === btn.id ? 'bg-gray-900 text-white border-gray-900 dark:bg-white dark:text-gray-900' : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border-gray-100 dark:border-gray-700'}`}>
+                    <button key={btn.id} onClick={() => setListFilter(btn.id as any)} className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl border text-[11px] font-bold transition-all active:scale-95 shadow-sm whitespace-nowrap ${listFilter === btn.id ? 'bg-gray-900 text-white border-gray-900 dark:bg-white dark:text-gray-900' : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border-gray-100 dark:border-gray-700'}`}>
                         {btn.label}
                     </button>
                   ))}
@@ -383,7 +343,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
           <div key="list" className="px-5 pb-2 min-h-[300px] w-full">
               <div className="flex items-center gap-2 mb-4">
                  <ShieldCheck className="w-3.5 h-3.5 text-blue-500" />
-                 <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Parceiros Verificados</span>
+                 <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Parceiros Verificados</span>
               </div>
               <LojasEServicosList onStoreClick={onStoreClick} onViewAll={() => onNavigate('explore')} activeFilter={listFilter} user={user} />
           </div>
@@ -395,16 +355,13 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
         ];
         return (
           <div key="editorial" className="space-y-4 w-full">
-              <div className="px-5 flex items-center justify-between">
-                  <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.25em]">Descubra o bairro</h3>
-              </div>
               <div className="flex gap-4 overflow-x-auto pb-6 no-scrollbar snap-x px-5">
                   {themes.map((theme) => (
-                      <div key={theme.id} className="snap-center min-w-[270px] w-[270px] h-[170px] rounded-[32px] overflow-hidden relative cursor-pointer active:scale-[0.98] transition-all shadow-xl group" onClick={() => onSelectCollection(theme as any)}>
+                      <div key={theme.id} className="snap-center min-w-[270px] w-[270px] h-[160px] rounded-3xl overflow-hidden relative cursor-pointer active:scale-[0.98] transition-all shadow-md group" onClick={() => onSelectCollection(theme as any)}>
                           <img src={theme.image} className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000" alt={theme.title} />
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent"></div>
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
                           <div className="absolute bottom-5 left-6 right-6">
-                              <h4 className="text-white font-black text-lg leading-tight mb-1">{theme.title}</h4>
+                              <h4 className="text-white font-bold text-lg leading-tight mb-1">{theme.title}</h4>
                               <p className="text-blue-200 text-[10px] font-bold opacity-80 uppercase tracking-widest">{theme.subtitle}</p>
                           </div>
                       </div>
@@ -419,29 +376,19 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
                  <Award className="w-4 h-4 text-[#1E5BFF]" />
                  <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.25em]">Clube Localizei</h3>
               </div>
-              <button onClick={() => onNavigate('user_cashback_flow')} className="w-full bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-3xl p-5 flex items-center justify-between group active:scale-[0.98] transition-all shadow-sm">
-                  <div className="flex items-center gap-4">
-                      <div className="bg-orange-50 dark:bg-orange-900/20 rounded-2xl w-11 h-11 flex items-center justify-center text-orange-500"><Flame className="w-6 h-6 fill-current" /></div>
-                      <div className="text-left">
-                          <p className="text-sm font-black text-gray-800 dark:text-white leading-tight">Sequência de 3 Dias</p>
-                          <p className="text-[10px] text-emerald-600 font-black uppercase mt-1 tracking-wide">Check-in disponível + R$ 0,50</p>
-                      </div>
-                  </div>
-                  <ChevronRight className="w-5 h-5 text-gray-300 group-hover:translate-x-1 transition-transform" />
-              </button>
               <div className="grid grid-cols-2 gap-3.5">
                   <button onClick={() => setIsSpinWheelOpen(true)} className="bg-white dark:bg-gray-800 p-5 rounded-3xl border border-gray-100 dark:border-gray-700 shadow-sm flex flex-col items-center gap-3 active:scale-95 transition-transform">
                       <div className="w-10 h-10 bg-purple-50 dark:bg-purple-900/30 rounded-full flex items-center justify-center text-purple-600"><Dices className="w-5 h-5" /></div>
                       <div className="text-center">
-                          <p className="text-xs font-black text-gray-800 dark:text-white">Roleta</p>
-                          <p className="text-[9px] text-gray-400 font-black uppercase mt-1">Tente a Sorte</p>
+                          <p className="text-xs font-bold text-gray-800 dark:text-white">Roleta</p>
+                          <p className="text-[9px] text-gray-400 font-bold uppercase mt-1">Tente a Sorte</p>
                       </div>
                   </button>
                   <button onClick={() => onNavigate('invite_friend')} className="bg-white dark:bg-gray-800 p-5 rounded-3xl border border-gray-100 dark:border-gray-700 shadow-sm flex flex-col items-center gap-3 active:scale-95 transition-transform">
                       <div className="w-10 h-10 bg-green-50 dark:bg-green-900/30 rounded-full flex items-center justify-center text-green-600"><Users className="w-5 h-5" /></div>
                       <div className="text-center">
-                          <p className="text-xs font-black text-gray-800 dark:text-white">Indicar</p>
-                          <p className="text-[9px] text-gray-400 font-black uppercase mt-1">Ganhe R$ 5,00</p>
+                          <p className="text-xs font-bold text-gray-800 dark:text-white">Indicar</p>
+                          <p className="text-[9px] text-gray-400 font-bold uppercase mt-1">Ganhe R$ 5,00</p>
                       </div>
                   </button>
               </div>
@@ -456,7 +403,6 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
       {activeSearchTerm ? (
         <div className="px-5 mt-4 min-h-[50vh]">
              <div className="flex items-center gap-2 mb-4">
-                {isSearching && <Loader2 className="w-4 h-4 animate-spin text-[#1E5BFF]" />}
                 <h3 className="font-bold text-sm text-gray-500 uppercase tracking-wider">Resultados para "{activeSearchTerm}"</h3>
              </div>
              <div className="flex flex-col gap-3">
