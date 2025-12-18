@@ -15,6 +15,9 @@ import { CashbackScanScreen } from './components/CashbackScanScreen';
 import { ScanConfirmationScreen } from './components/ScanConfirmationScreen';
 import { CashbackPaymentScreen } from './components/CashbackPaymentScreen';
 import { PrizeHistoryView } from './components/PrizeHistoryView';
+import { FreguesiaConnectPublic } from './components/FreguesiaConnectPublic';
+import { FreguesiaConnectDashboard } from './components/FreguesiaConnectDashboard';
+import { FreguesiaConnectRestricted } from './components/FreguesiaConnectRestricted';
 import { MapPin, Crown, ShieldCheck } from 'lucide-react';
 import { useAuth } from './contexts/AuthContext';
 import { Category, Store, AdType, EditorialCollection } from './types';
@@ -36,6 +39,22 @@ const MOCK_STORES: Store[] = [
     address: 'Rua Tirol, 1245 - Freguesia',
     phone: '(21) 99999-1111',
     hours: 'Seg a Dom • 11h às 23h',
+    verified: true,
+  },
+  {
+    id: 'premium-test',
+    name: 'Padaria Imperial',
+    category: 'Alimentação',
+    description: 'O melhor pão quentinho e café artesanal da Freguesia. Venha conferir!',
+    logoUrl: getStoreLogo(8),
+    rating: 4.9,
+    reviewsCount: 450,
+    distance: 'Freguesia • RJ',
+    cashback: 10,
+    adType: AdType.PREMIUM,
+    subcategory: 'Padaria',
+    address: 'Estrada dos Três Rios, 1000',
+    phone: '(21) 98888-2222',
     verified: true,
   },
 ];
@@ -141,7 +160,7 @@ const App: React.FC = () => {
     <div className={isDarkMode ? 'dark' : ''}>
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex justify-center transition-colors duration-300 relative">
         <Layout activeTab={activeTab} setActiveTab={setActiveTab} userRole={userRole} onCashbackClick={handleCashbackClick}>
-          {!['category_detail', 'food_category', 'store_detail', 'profile', 'patrocinador_master', 'prize_history', 'reward_details'].includes(activeTab) && (
+          {!['category_detail', 'food_category', 'store_detail', 'profile', 'patrocinador_master', 'prize_history', 'reward_details', 'freguesia_connect_public', 'freguesia_connect_dashboard', 'freguesia_connect_restricted'].includes(activeTab) && (
             <Header
               isDarkMode={isDarkMode}
               toggleTheme={toggleTheme}
@@ -172,6 +191,15 @@ const App: React.FC = () => {
             )}
             {activeTab === 'explore' && (
               <ExploreView stores={MOCK_STORES} searchQuery={globalSearch} onStoreClick={handleSelectStore} onLocationClick={() => {}} onFilterClick={() => {}} onOpenPlans={() => {}} />
+            )}
+            {activeTab === 'freguesia_connect_public' && (
+                <FreguesiaConnectPublic onBack={() => setActiveTab('home')} onLogin={() => setIsAuthOpen(true)} />
+            )}
+            {activeTab === 'freguesia_connect_dashboard' && (
+                <FreguesiaConnectDashboard onBack={() => setActiveTab('home')} />
+            )}
+            {activeTab === 'freguesia_connect_restricted' && (
+                <FreguesiaConnectRestricted onBack={() => setActiveTab('home')} />
             )}
             {activeTab === 'qrcode_scan' && (
                 <CashbackScanScreen onBack={() => setActiveTab('home')} onScanSuccess={(data) => { setScannedData(data); setActiveTab('scan_confirmation'); }} />

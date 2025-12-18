@@ -22,7 +22,8 @@ import {
   ShieldCheck,
   Info,
   MessageCircle,
-  Gift
+  Gift,
+  Handshake
 } from 'lucide-react';
 import { LojasEServicosList } from './LojasEServicosList';
 import { User } from '@supabase/supabase-js';
@@ -84,7 +85,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
   }, []);
 
   const banners = useMemo((): BannerItem[] => {
-    return [
+    const fixedBanners: BannerItem[] = [
       {
         id: 'cashback_promo',
         badge: 'ECONOMIA REAL',
@@ -99,42 +100,51 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
       },
       {
         id: 'whatsapp_services',
-        badge: 'PRATICIDADE',
+        badge: 'AGILIDADE',
         icon: <MessageCircle className="w-3 h-3" />,
-        title: 'Orçamentos rápidos\npelo WhatsApp',
-        subtitle: 'Cotações de serviços locais direto no celular.',
+        title: 'Serviços locais em\npoucos minutos',
+        subtitle: 'Peça orçamento de eletricista, encanador, limpeza, manutenção e mais — direto no WhatsApp',
         image: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=600&auto=format&fit=crop',
         gradient: 'from-[#1540AD] to-[#0F359E]',
-        cta: 'Solicitar',
+        cta: 'Pedir orçamento agora',
         action: () => onNavigate('explore'),
         isSponsored: false
       },
       {
-        id: 'sponsored_ads',
-        badge: 'DESTAQUE',
-        icon: <Zap className="w-3 h-3" />,
-        title: 'Seu negócio no topo\nda Freguesia',
-        subtitle: 'Aumente suas vendas com anúncios premium.',
-        image: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=600&auto=format&fit=crop',
-        gradient: 'from-[#0F172A] to-[#1E293B]',
-        cta: 'Anunciar agora',
-        action: () => onNavigate('patrocinador_master'),
-        isSponsored: true
-      },
-      {
-        id: 'institutional',
-        badge: 'CONECTIVIDADE',
-        icon: <Info className="w-3 h-3" />,
-        title: 'O que é o\nLocalizei Freguesia',
-        subtitle: 'Conectamos moradores ao melhor do bairro.',
-        image: 'https://images.unsplash.com/photo-1517457373958-b7bdd4587205?q=80&w=600&auto=format&fit=crop',
-        gradient: 'from-[#2D6DF6] via-[#1B54D9] to-[#2D6DF6]',
-        cta: 'Como funciona',
-        action: () => onNavigate('about'),
+        id: 'freguesia_connect',
+        badge: 'NETWORKING',
+        icon: <Handshake className="w-3 h-3" />,
+        title: 'Seu negócio conectado\ncresce mais',
+        subtitle: 'Networking, parcerias e visibilidade entre empreendedores da Freguesia',
+        image: 'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?q=80&w=600&auto=format&fit=crop',
+        gradient: 'from-[#4F46E5] via-[#4338CA] to-[#4F46E5]',
+        cta: 'Entrar no Freguesia Connect',
+        action: () => onNavigate('freguesia_connect_public'),
         isSponsored: false
       }
     ];
-  }, [onNavigate]);
+
+    // Lógica de Ads Premium: Filtra lojas reais que pagam pelo Ads Premium
+    const premiumAds = stores
+      .filter(s => s.adType === AdType.PREMIUM || s.isSponsored)
+      .sort(() => Math.random() - 0.5) // Aleatoriedade para rotatividade justa
+      .slice(0, 3) // Limita a 3 anúncios para não sobrecarregar o carrossel
+      .map(store => ({
+        id: `ad-${store.id}`,
+        badge: 'PATROCINADO',
+        icon: <Zap className="w-3 h-3" />,
+        title: store.name,
+        subtitle: store.description,
+        image: store.logoUrl || store.image || 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=600&auto=format&fit=crop',
+        gradient: 'from-[#0F172A] to-[#1E293B]', // Estilo premium escuro
+        cta: 'Ver mais',
+        action: () => onStoreClick?.(store),
+        isSponsored: true
+      }));
+
+    // Insere os anúncios reais após os banners fixos de conversão
+    return [...fixedBanners.slice(0, 2), ...premiumAds, ...fixedBanners.slice(2)];
+  }, [onNavigate, stores, onStoreClick]);
 
   useEffect(() => {
     const startAutoplay = () => {
@@ -204,11 +214,11 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
                   <div className={`w-full bg-gradient-to-br ${banner.gradient} rounded-3xl overflow-hidden shadow-lg border border-white/10 h-[180px] relative flex`}>
                     <div className="flex-1 p-6 flex flex-col justify-center relative z-10">
                       <div className="flex items-center gap-1.5 mb-2">
-                        <span className="text-[9px] font-black uppercase tracking-wider text-white/80 bg-white/10 px-2 py-0.5 rounded-full">
+                        <span className={`text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full ${banner.isSponsored ? 'text-blue-300 bg-white/5' : 'text-white/80 bg-white/10'}`}>
                           {banner.badge}
                         </span>
                       </div>
-                      <h1 className="text-xl font-bold text-white mb-1 leading-tight whitespace-pre-line">
+                      <h1 className="text-xl font-bold text-white mb-1 leading-tight whitespace-pre-line truncate max-w-full">
                         {banner.title}
                       </h1>
                       <p className="text-white/70 text-[10px] font-medium mb-4 leading-tight line-clamp-2 max-w-[180px]">
@@ -231,7 +241,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
             </div>
             <div className="flex justify-center gap-1.5 mt-[-10px] mb-4">
               {banners.map((_, i) => (
-                <div key={i} className={`h-1 rounded-full transition-all ${activeBannerIndex === i ? 'w-4 bg-primary-500' : 'w-1 bg-gray-200'}`} />
+                <div key={i} className={`h-1 rounded-full transition-all ${activeBannerIndex === i ? 'w-4 bg-[#1E5BFF]' : 'w-1 bg-gray-200'}`} />
               ))}
             </div>
           </div>
