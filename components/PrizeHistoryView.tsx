@@ -176,7 +176,7 @@ export const PrizeHistoryView: React.FC<PrizeHistoryViewProps> = ({ userId, onBa
                 <AlertTriangle className="w-10 h-10 text-red-500" />
             </div>
             <h2 className="text-lg font-bold text-gray-800 dark:text-white">Ocorreu um erro</h2>
-            <p className="text-gray-500 dark:text-gray-400 mt-2 mb-8 text-sm">Não foi possível carregar seu histórico.</p>
+            <p className="text-gray-500 dark:text-gray-400 mt-2 mb-8 text-sm">Não foi possível carregar seu histórico. Verifique sua conexão e tente novamente.</p>
             <button onClick={() => fetchSpins(0)} className="font-bold text-primary-500 text-sm">
               Tentar Novamente
             </button>

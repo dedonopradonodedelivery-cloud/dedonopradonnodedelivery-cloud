@@ -24,6 +24,8 @@ import { SpecialtiesView } from './components/SpecialtiesView';
 import { ServiceSuccessView } from './components/ServiceSuccessView';
 import { ServiceTermsView } from './components/ServiceTermsView';
 import { QuoteRequestModal } from './components/QuoteRequestModal';
+import { StoreAreaView } from './components/StoreAreaView';
+import { MerchantQrScreen } from './components/MerchantQrScreen';
 import { MapPin, Crown } from 'lucide-react';
 import { useAuth } from './contexts/AuthContext';
 import { Category, Store, AdType, EditorialCollection } from './types';
@@ -178,6 +180,7 @@ const App: React.FC = () => {
   };
 
   const headerExclusionList = [
+    'store_area', 'merchant_qr',
     'category_detail', 'food_category', 'store_detail', 'profile', 
     'patrocinador_master', 'prize_history', 'reward_details', 
     'freguesia_connect_public', 'freguesia_connect_dashboard', 'freguesia_connect_restricted',
@@ -200,6 +203,7 @@ const App: React.FC = () => {
               activeTab={activeTab}
               userRole={userRole}
               onSelectCategory={handleSelectCategory}
+              onOpenMerchantQr={() => setActiveTab('merchant_qr')}
             />
           )}
           <main className="animate-in fade-in duration-500 w-full max-w-md mx-auto">
@@ -235,6 +239,27 @@ const App: React.FC = () => {
                 onNavigate={setActiveTab}
                 searchTerm={globalSearch}
               />
+            )}
+            {activeTab === 'store_area' && (
+              userRole === 'lojista' ? (
+                <StoreAreaView 
+                  user={user}
+                  onBack={() => setActiveTab('home')} 
+                  onNavigate={setActiveTab} 
+                />
+              ) : (
+                <FreguesiaConnectRestricted onBack={() => setActiveTab('home')} />
+              )
+            )}
+            {activeTab === 'merchant_qr' && (
+              userRole === 'lojista' ? (
+                <MerchantQrScreen 
+                  user={user} 
+                  onBack={() => setActiveTab('home')} 
+                />
+              ) : (
+                <FreguesiaConnectRestricted onBack={() => setActiveTab('home')} />
+              )
             )}
             {activeTab === 'service_subcategories' && selectedServiceMacro && (
               <SubcategoriesView 

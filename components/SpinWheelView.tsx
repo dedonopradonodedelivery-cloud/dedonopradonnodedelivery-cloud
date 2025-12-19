@@ -151,15 +151,32 @@ export const SpinWheelView: React.FC<SpinWheelViewProps> = ({ userId, userRole, 
 
   const isSameDay = (d1: Date, d2: Date) => d1.getFullYear() === d2.getFullYear() && d1.getMonth() === d2.getMonth() && d1.getDate() === d2.getDate();
 
-  const saveSpinResult = async (result: Prize) => {
+  const saveSpinResult = async (result: Prize): Promise<boolean> => {
     if (!userId) return false;
-    localStorage.setItem(`last_spin_${userId}`, new Date().toISOString());
-    if (!supabase) return true; 
+
+    if (result.prize_type === 'gire_de_novo') {
+      return true; // Don't persist, but it's a "successful" flow.
+    }
+
     try {
-      if (result.prize_type === 'gire_de_novo') return true;
-      await supabase.from('roulette_spins').insert({ user_id: userId, prize_type: result.prize_type, prize_label: result.prize_label, prize_value: result.prize_value, status: result.status, spin_date: new Date().toISOString() });
+      if (supabase) {
+        const { error } = await supabase.from('roulette_spins').insert({
+          user_id: userId,
+          prize_type: result.prize_type,
+          prize_label: result.prize_label,
+          prize_value: result.prize_value,
+          status: result.status,
+          spin_date: new Date().toISOString(),
+        });
+        if (error) throw error;
+      }
+      // Only update local cooldown if DB write succeeds
+      localStorage.setItem(`last_spin_${userId}`, new Date().toISOString());
       return true;
-    } catch (error) { return true; }
+    } catch (error) {
+      console.error("Erro ao salvar resultado do giro no backend:", error);
+      return false; // Critical: return false on failure.
+    }
   };
 
   const handleSpin = () => {
@@ -178,28 +195,52 @@ export const SpinWheelView: React.FC<SpinWheelViewProps> = ({ userId, userRole, 
     const finalAngle = 270 - segmentCenter + randomOffset;
     const targetRotation = rotation + baseRotation + (360 - (rotation % 360)) + finalAngle;
     setRotation(targetRotation);
+
     setTimeout(async () => {
       stopSound('spin');
       const result = PRIZES[winningSegmentIndex];
       playSound(result.prize_type === 'nao_foi_dessa_vez' ? 'lose' : 'win');
-      setSpinResult(result);
+
+      const savedSuccessfully = await saveSpinResult(result);
+
+      if (!savedSuccessfully && result.prize_type !== 'nao_foi_dessa_vez' && result.prize_type !== 'gire_de_novo') {
+        setSpinResult({
+          ...result,
+          prize_label: `${result.prize_label} (Garantido)`,
+          description: "Seu prêmio foi garantido! Tivemos um problema para registrar, mas ele será processado em breve. Você pode conferir no seu histórico mais tarde.",
+          saveError: true,
+        } as any);
+      } else {
+        setSpinResult(result);
+      }
+      
       setIsSpinning(false);
+      
       if (result.prize_type !== 'gire_de_novo') {
-        const saved = await saveSpinResult(result);
-        if (saved) {
-          setLastSpinDate(new Date());
-          setSpinStatus('cooldown');
-        }
+        setLastSpinDate(new Date());
+        setSpinStatus('cooldown');
       }
     }, SPIN_DURATION_MS);
   };
 
   const handleClaimReward = () => {
     if (!spinResult) return;
-    if (spinResult.prize_type === 'cashback') onViewHistory(); 
-    else if (spinResult.prize_type === 'cupom') onWin({ label: spinResult.prize_label, code: spinResult.prize_code || 'CODE123', value: spinResult.prize_value?.toString() || '0', description: spinResult.description });
-    else if (spinResult.prize_type === 'gire_de_novo') { setSpinResult(null); setSpinStatus('ready'); }
-    else setSpinResult(null);
+
+    if ((spinResult as any).saveError) {
+        setSpinResult(null);
+        return;
+    }
+
+    if (spinResult.prize_type === 'cashback') {
+        onViewHistory(); 
+    } else if (spinResult.prize_type === 'cupom') {
+        onWin({ label: spinResult.prize_label, code: spinResult.prize_code || 'CODE123', value: spinResult.prize_value?.toString() || '0', description: spinResult.description });
+    } else if (spinResult.prize_type === 'gire_de_novo') { 
+        setSpinResult(null); 
+        setSpinStatus('ready'); 
+    } else {
+        setSpinResult(null);
+    }
   };
 
   const getPath = (index: number) => {
@@ -319,8 +360,8 @@ export const SpinWheelView: React.FC<SpinWheelViewProps> = ({ userId, userRole, 
                  onClick={handleClaimReward}
                  className="w-full bg-[#1E5BFF] hover:bg-[#1749CC] text-white font-black py-4 rounded-2xl shadow-xl shadow-blue-500/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
                >
-                 {spinResult.prize_type === 'nao_foi_dessa_vez' ? 'Tentar amanhã' : 'Resgatar Prêmio'}
-                 <ArrowRight className="w-5 h-5" strokeWidth={3} />
+                 {(spinResult as any).saveError ? 'Entendido' : spinResult.prize_type === 'nao_foi_dessa_vez' ? 'Tentar amanhã' : 'Resgatar Prêmio'}
+                 {!((spinResult as any).saveError) && <ArrowRight className="w-5 h-5" strokeWidth={3} />}
                </button>
            </div>
         </div>

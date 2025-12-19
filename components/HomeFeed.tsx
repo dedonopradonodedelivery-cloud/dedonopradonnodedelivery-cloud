@@ -424,7 +424,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
           <div key="roulette_banner" className="px-5">
             <button onClick={() => setIsSpinWheelOpen(true)} className="w-full bg-gradient-to-r from-purple-600 to-pink-600 rounded-3xl p-5 text-white flex items-center justify-between shadow-[0_8px_25px_rgba(147,51,234,0.2)] active:scale-[0.98] transition-all relative overflow-hidden group border border-white/10">
               <div className="flex items-center gap-4 relative z-10">
-                <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/10">
+                <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/10 animate-spin-slow">
                   <Dices className="w-7 h-7 text-white" />
                 </div>
                 <div className="text-left">
