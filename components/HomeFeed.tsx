@@ -405,9 +405,9 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
               </div>
             </div>
             <div className="px-5 mt-2">
-              <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1 relative overflow-hidden">
+              <div className="w-full bg-gray-200/70 dark:bg-gray-700/50 rounded-full h-0.5 relative overflow-hidden">
                 <div
-                  className="bg-blue-500 h-1 rounded-full absolute"
+                  className="bg-blue-400 dark:bg-blue-500 h-0.5 rounded-full absolute"
                   style={{
                     width: '25%',
                     left: `${categoryScrollProgress * 0.75}%`,
