@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Home, Search, QrCode, Heart, User, Store } from 'lucide-react';
+import { Home, Search, QrCode, Heart, User, Store, Wrench } from 'lucide-react';
 
 interface BottomNavProps {
   activeTab: string;
@@ -71,8 +71,8 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
   const clientNavItems = [
     { id: 'home', icon: Home, label: 'Início' },
     { id: 'explore', icon: Search, label: 'Explorar' },
-    { id: 'qrcode_scan', icon: QrCode, label: 'Cashback', isCenter: true }, // Botão Central
-    { id: 'favorites', icon: Heart, label: 'Favoritos' },
+    { id: 'qrcode_scan', icon: QrCode, label: 'Cashback', isCenter: true },
+    { id: 'services', icon: Wrench, label: 'Serviços' },
     { id: 'profile', icon: User, label: 'Perfil' },
   ];
 

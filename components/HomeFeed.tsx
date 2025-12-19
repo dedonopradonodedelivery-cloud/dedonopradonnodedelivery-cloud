@@ -231,7 +231,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
                 const isActive = activeBannerIndex === index;
                 return (
                   <div key={banner.id} className="min-w-full snap-center px-4">
-                    <div className={`w-full bg-gradient-to-br ${banner.gradient} rounded-[24px] overflow-hidden shadow-[0_8px_30px_rgba(0,0,0,0.12)] relative h-[290px] flex items-center transition-all duration-500 border border-white/10`}>
+                    <div className={`w-full bg-gradient-to-br ${banner.gradient} rounded-[24px] overflow-hidden shadow-[0_8px_30px_rgba(0,0,0,0.12)] relative h-[190px] flex items-center transition-all duration-500 border border-white/10`}>
                       
                       <div className="absolute right-4 top-1/2 -translate-y-1/2 z-20 pointer-events-none transition-all duration-1000">
                          {banner.image ? (
@@ -285,12 +285,13 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
         return (
           <div key="wallet" className="px-5 py-4">
               <div 
-                className="premium-glass rounded-[28px] p-8 flex flex-col gap-5 active:scale-[0.99] transition-all cursor-pointer relative overflow-y-auto no-scrollbar group animate-balance-load border border-white/20 h-[190px]"
+                className="bg-gradient-to-br from-emerald-600 to-teal-800 rounded-[28px] p-6 flex flex-col gap-4 active:scale-[0.99] transition-all cursor-pointer relative overflow-hidden group animate-balance-load border border-white/20 h-[290px]"
                 onClick={() => onNavigate('user_cashback_flow')}
               >
-                  {/* Premium Background Elements */}
-                  <div className="absolute top-0 right-0 w-56 h-56 bg-white/15 rounded-full blur-[70px] -mr-24 -mt-24 group-hover:scale-110 transition-transform duration-1000"></div>
-                  <div className="absolute bottom-0 left-0 w-48 h-48 bg-blue-400/20 rounded-full blur-[60px] -ml-16 -mb-16 opacity-60"></div>
+                  {/* Decorative background icon */}
+                  <div className="absolute -right-12 top-1/2 -translate-y-1/2 text-white/5 pointer-events-none transform-gpu rotate-[-20deg]">
+                      <Coins size={240} strokeWidth={0.5} />
+                  </div>
                   
                   {/* Top Bar: Labels + Controls */}
                   <div className="flex justify-between items-center relative z-10">
@@ -299,10 +300,10 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
                             <Wallet className="w-5 h-5" />
                           </div>
                           <div>
-                            <p className="text-[10px] font-black text-blue-100/60 uppercase tracking-[0.3em] mb-0.5">Meu Saldo</p>
+                            <p className="text-[10px] font-black text-emerald-100/60 uppercase tracking-[0.3em] mb-0.5">Meu Saldo</p>
                             <div className="flex items-center gap-1.5">
                                 <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse"></span>
-                                <span className="text-[9px] text-blue-100/50 font-bold tracking-widest uppercase">Carteira Segura</span>
+                                <span className="text-[9px] text-emerald-100/50 font-bold tracking-widest uppercase">Carteira Segura</span>
                             </div>
                           </div>
                       </div>
@@ -315,14 +316,14 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
                         >
                           {showBalance ? <Eye className="w-4.5 h-4.5" /> : <EyeOff className="w-4.5 h-4.5" />}
                         </button>
-                        <div className="p-3 rounded-full bg-white text-[#1E5BFF] shadow-2xl group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform">
+                        <div className="p-3 rounded-full bg-white text-emerald-700 shadow-2xl group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform">
                           <ArrowUpRight className="w-4.5 h-4.5" strokeWidth={3.5} />
                         </div>
                       </div>
                   </div>
 
                   {/* Main Value: Scaled to maximum prominence */}
-                  <div className="relative z-10 flex flex-col items-start min-h-[90px]">
+                  <div className="relative z-10 flex flex-col items-start mt-4">
                       <div className="flex items-baseline gap-3 transition-all duration-500 group-hover:translate-x-1">
                         {showBalance ? (
                           <div className="flex items-baseline gap-3 animate-balance-load">
@@ -338,24 +339,24 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
                   </div>
 
                   {/* Footer Stats & Progress */}
-                  <div className="relative z-10 mt-2 space-y-4">
+                  <div className="relative z-10 mt-auto space-y-4">
                     <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-black/30 backdrop-blur-sm border border-white/5 w-fit animate-in slide-in-from-left duration-700">
                         <div className="w-4.5 h-4.5 bg-yellow-400 rounded-full flex items-center justify-center shadow-[0_0_10px_rgba(250,204,21,0.5)]">
-                            <Coins className="w-2.5 h-2.5 text-blue-900 fill-blue-900" />
+                            <Coins className="w-2.5 h-2.5 text-teal-900 fill-teal-900" />
                         </div>
                         <span className="text-[10px] font-black text-white uppercase tracking-[0.15em]">+ R$ 2,50 acumulados hoje</span>
                     </div>
 
                     <div className="space-y-3">
                         <div className="flex justify-between items-center px-1">
-                            <span className="text-[11px] font-bold text-blue-100/70 flex items-center gap-2">
+                            <span className="text-[11px] font-bold text-emerald-100/70 flex items-center gap-2">
                                 Próximo Resgate em Parceiros
                                 <TrendingUp className="w-3 h-3 text-green-400" />
                             </span>
                             <span className="text-[10px] font-black text-white bg-white/20 px-2.5 py-1 rounded-lg border border-white/10">25%</span>
                         </div>
                         <div className="h-3 w-full bg-black/20 rounded-full overflow-hidden border border-white/5 p-[1px] relative">
-                            <div className="h-full bg-gradient-to-r from-blue-300 via-white to-blue-200 w-[25%] rounded-full shadow-[0_0_20px_rgba(255,255,255,0.8)] relative overflow-hidden">
+                            <div className="h-full bg-gradient-to-r from-emerald-300 via-white to-emerald-200 w-[25%] rounded-full shadow-[0_0_20px_rgba(255,255,255,0.8)] relative overflow-hidden">
                                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/60 to-transparent -translate-x-full animate-shimmer"></div>
                             </div>
                         </div>

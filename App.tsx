@@ -18,6 +18,12 @@ import { PrizeHistoryView } from './components/PrizeHistoryView';
 import { FreguesiaConnectPublic } from './components/FreguesiaConnectPublic';
 import { FreguesiaConnectDashboard } from './components/FreguesiaConnectDashboard';
 import { FreguesiaConnectRestricted } from './components/FreguesiaConnectRestricted';
+import { ServicesView } from './components/ServicesView';
+import { SubcategoriesView } from './components/SubcategoriesView';
+import { SpecialtiesView } from './components/SpecialtiesView';
+import { ServiceSuccessView } from './components/ServiceSuccessView';
+import { ServiceTermsView } from './components/ServiceTermsView';
+import { QuoteRequestModal } from './components/QuoteRequestModal';
 import { MapPin, Crown } from 'lucide-react';
 import { useAuth } from './contexts/AuthContext';
 import { Category, Store, AdType, EditorialCollection } from './types';
@@ -92,6 +98,12 @@ const App: React.FC = () => {
   const [selectedReward, setSelectedReward] = useState<any>(null);
   const [scannedData, setScannedData] = useState<{ merchantId: string; storeId: string } | null>(null);
 
+  // States for Services Flow
+  const [selectedServiceMacro, setSelectedServiceMacro] = useState<{id: string, name: string} | null>(null);
+  const [selectedServiceSub, setSelectedServiceSub] = useState<string | null>(null);
+  const [isQuoteModalOpen, setIsQuoteModalOpen] = useState(false);
+  const [quoteCategory, setQuoteCategory] = useState('');
+
   const toggleTheme = () => setIsDarkMode(!isDarkMode);
   
   const handleCashbackClick = () => {
@@ -165,11 +177,18 @@ const App: React.FC = () => {
     setActiveTab('store_detail');
   };
 
+  const headerExclusionList = [
+    'category_detail', 'food_category', 'store_detail', 'profile', 
+    'patrocinador_master', 'prize_history', 'reward_details', 
+    'freguesia_connect_public', 'freguesia_connect_dashboard', 'freguesia_connect_restricted',
+    'service_subcategories', 'service_specialties', 'service_terms', 'service_success'
+  ];
+
   return (
     <div className={isDarkMode ? 'dark' : ''}>
       <div className="min-h-screen bg-white dark:bg-gray-900 flex justify-center transition-colors duration-300 relative">
         <Layout activeTab={activeTab} setActiveTab={setActiveTab} userRole={userRole} onCashbackClick={handleCashbackClick}>
-          {!['category_detail', 'food_category', 'store_detail', 'profile', 'patrocinador_master', 'prize_history', 'reward_details', 'freguesia_connect_public', 'freguesia_connect_dashboard', 'freguesia_connect_restricted'].includes(activeTab) && (
+          {!headerExclusionList.includes(activeTab) && (
             <Header
               isDarkMode={isDarkMode}
               toggleTheme={toggleTheme}
@@ -200,6 +219,52 @@ const App: React.FC = () => {
             )}
             {activeTab === 'explore' && (
               <ExploreView stores={MOCK_STORES} searchQuery={globalSearch} onStoreClick={handleSelectStore} onLocationClick={() => {}} onFilterClick={() => {}} onOpenPlans={() => {}} />
+            )}
+            {activeTab === 'services' && (
+              <ServicesView 
+                onSelectMacro={(id, name) => {
+                  setSelectedServiceMacro({id, name});
+                  if (id === 'emergency') {
+                    setQuoteCategory(name);
+                    setIsQuoteModalOpen(true);
+                  } else {
+                    setActiveTab('service_subcategories');
+                  }
+                }} 
+                onOpenTerms={() => setActiveTab('service_terms')}
+                onNavigate={setActiveTab}
+                searchTerm={globalSearch}
+              />
+            )}
+            {activeTab === 'service_subcategories' && selectedServiceMacro && (
+              <SubcategoriesView 
+                macroId={selectedServiceMacro.id}
+                macroName={selectedServiceMacro.name}
+                onBack={() => setActiveTab('services')}
+                onSelectSubcategory={(subName) => {
+                  setSelectedServiceSub(subName);
+                  setActiveTab('service_specialties');
+                }}
+              />
+            )}
+            {activeTab === 'service_specialties' && selectedServiceSub && (
+              <SpecialtiesView 
+                subcategoryName={selectedServiceSub}
+                onBack={() => setActiveTab('service_subcategories')}
+                onSelectSpecialty={(specialty) => {
+                  setQuoteCategory(`${selectedServiceSub} - ${specialty}`);
+                  setIsQuoteModalOpen(true);
+                }}
+              />
+            )}
+            {activeTab === 'service_success' && (
+              <ServiceSuccessView
+                onViewRequests={() => alert('Navegar para Meus Pedidos')}
+                onHome={() => setActiveTab('home')}
+              />
+            )}
+            {activeTab === 'service_terms' && (
+              <ServiceTermsView onBack={() => setActiveTab('services')} />
             )}
             {activeTab === 'freguesia_connect_public' && (
                 <FreguesiaConnectPublic onBack={() => setActiveTab('home')} onLogin={() => setIsAuthOpen(true)} />
@@ -236,6 +301,17 @@ const App: React.FC = () => {
             )}
           </main>
           <AuthModal isOpen={isAuthOpen} onClose={() => setIsAuthOpen(false)} user={user as any} signupContext={authContext} />
+          {isQuoteModalOpen && (
+              <QuoteRequestModal 
+                  isOpen={isQuoteModalOpen}
+                  onClose={() => setIsQuoteModalOpen(false)}
+                  categoryName={quoteCategory}
+                  onSuccess={() => {
+                      setIsQuoteModalOpen(false);
+                      setActiveTab('service_success');
+                  }}
+              />
+          )}
         </Layout>
       </div>
     </div>
