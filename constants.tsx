@@ -206,13 +206,6 @@ export const CHANNELS: Channel[] = [
 
 export const EDITORIAL_COLLECTIONS: EditorialCollection[] = [
   { 
-    id: 'top-rated', 
-    title: '⭐ Favoritos da Vizinhança', 
-    subtitle: 'Os locais com as melhores avaliações do bairro', 
-    image: 'https://images.unsplash.com/photo-1521017432531-fbd92d768814?q=80&w=800&auto=format=fit=crop', 
-    keywords: [] 
-  },
-  { 
     id: 'almoço-semana', 
     title: '🍛 Almoço durante a semana', 
     subtitle: 'Opções rápidas e saborosas perto de você', 
@@ -220,9 +213,16 @@ export const EDITORIAL_COLLECTIONS: EditorialCollection[] = [
     keywords: ['restaurante', 'almoço', 'executivo', 'prato feito', 'hamburgueria'] 
   },
   { 
+    id: 'top-rated', 
+    title: '⭐ Favoritos da Vizinhança', 
+    subtitle: 'Os locais mais bem avaliados pelos moradores.', 
+    image: 'https://images.unsplash.com/photo-1521017432531-fbd92d768814?q=80&w=800&auto=format=fit=crop', 
+    keywords: [] 
+  },
+  { 
     id: 'happy-hour', 
     title: '🍻 Happy Hour & Fim de Tarde', 
-    subtitle: 'Encontre os melhores bares e petiscos para relaxar', 
+    subtitle: 'Bares e petiscos para relaxar depois do dia.', 
     image: 'https://images.unsplash.com/photo-1514933651103-005eec06c04b?q=80&w=800&auto=format=fit=crop', 
     keywords: ['bar', 'happy hour', 'petiscos', 'chopp'] 
   },

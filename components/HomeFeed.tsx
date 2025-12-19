@@ -34,7 +34,8 @@ import {
   Wrench,
   Bike,
   Rocket,
-  Sparkles
+  Sparkles,
+  Compass
 } from 'lucide-react';
 import { LojasEServicosList } from './LojasEServicosList';
 import { User } from '@supabase/supabase-js';
@@ -64,6 +65,7 @@ interface Suggestion {
   icon: React.ReactNode;
   bg: string;
   tags: string[]; // e.g., ['morning', 'breakfast', 'cold']
+  score?: number;
 }
 
 // --- NOVO SISTEMA DE SUGESTÕES DINÂMICAS ---
@@ -194,16 +196,6 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
     }
   }, []);
 
-  // Funcionalidade de ocultar saldo com persistência na sessão
-  const [showBalance, setShowBalance] = useState(() => {
-    const saved = sessionStorage.getItem('localizei_show_balance');
-    return saved !== null ? saved === 'true' : true;
-  });
-
-  useEffect(() => {
-    sessionStorage.setItem('localizei_show_balance', String(showBalance));
-  }, [showBalance]);
-
   const activeSearchTerm = externalSearchTerm || '';
   const [listFilter, setListFilter] = useState<'all' | 'cashback' | 'top_rated' | 'open_now'>('all');
 
@@ -230,23 +222,28 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
     const timeTag = getTimeTag(hour);
     const tempTag = getTempTag(temp);
     
-    // Motor de pontuação com fallback integrado
     const scoredSuggestions = SUGGESTION_POOL.map(s => {
-      let score = Math.random() * 5; // Base aleatória para desempate
+      let score = Math.random() * 5; 
       const isTimeMatch = s.tags.includes(timeTag);
       const isTempMatch = s.tags.includes(tempTag);
 
       if (isTimeMatch) {
-        score += 100; // Pontuação alta para correspondência de horário
+        score += 100;
         if (isTempMatch) {
-          score += 50; // Bônus extra para correspondência perfeita (horário + temp)
+          score += 50;
         }
       }
       return { ...s, score };
     })
-    .sort((a, b) => b.score - a.score);
+    .sort((a, b) => (b.score || 0) - (a.score || 0));
+    
+    const contextualSuggestions = scoredSuggestions.filter(s => (s.score || 0) >= 100);
+
+    if (contextualSuggestions.length === 0) {
+      return [];
+    }
       
-    return scoredSuggestions.slice(0, TARGET_SUGGESTION_COUNT);
+    return contextualSuggestions.slice(0, TARGET_SUGGESTION_COUNT);
   }, []);
 
 
@@ -282,7 +279,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
         title: 'O guia definitivo da\nnossa vizinhança',
         subtitle: 'Tudo o que você precisa em um só lugar',
         gradient: 'from-sky-500 to-blue-500',
-        cta: 'Conhecer mais',
+        cta: 'Explorar o Guia',
         action: () => onNavigate('about'),
         ctaClass: ''
       },
@@ -474,138 +471,39 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
             </div>
           </div>
         );
-      case 'wallet':
-        // --- NOVO BANNER DE CASHBACK REATORADO ---
+      case 'recommendations':
+        return null; // This section is removed
+      case 'trending': // Replaced with Editorial Collections
         return (
-          <div key="wallet" className="px-5">
-            {/* ESTADO 1: CONVIDADO (SEM LOGIN) */}
-            {!user && (
-              <div 
-                onClick={onRequireLogin}
-                className="bg-gradient-to-br from-gray-900 to-black rounded-[28px] p-6 flex items-center justify-between h-[190px] cursor-pointer group active:scale-[0.99] transition-transform"
-              >
-                <div className="relative z-10">
-                  <div className="w-12 h-12 rounded-2xl bg-amber-400/10 backdrop-blur-md flex items-center justify-center text-amber-400 border border-amber-400/20 mb-3">
-                    <Wallet className="w-6 h-6"/>
-                  </div>
-                  <h3 className="font-bold text-amber-300 text-lg leading-tight mb-1">Ganhe dinheiro de volta no bairro</h3>
-                  <p className="text-amber-200/80 text-sm">Crie sua conta e comece a economizar.</p>
-                </div>
-                <div className="p-3 rounded-full bg-amber-400 text-black shadow-lg group-hover:scale-110 transition-transform">
-                  <ArrowRight className="w-5 h-5" strokeWidth={3} />
-                </div>
-              </div>
-            )}
-
-            {/* ESTADO 2: LOJISTA LOGADO */}
-            {user && userRole === 'lojista' && (
-              <div 
-                onClick={() => onNavigate('store_area')}
-                className="bg-gradient-to-br from-gray-900 to-black rounded-[28px] p-6 h-[190px] cursor-pointer group active:scale-[0.99] transition-transform flex flex-col justify-between"
-              >
-                <div>
-                  <div className="flex justify-between items-start">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-amber-400/10 backdrop-blur-md flex items-center justify-center text-amber-400 border border-amber-400/20">
-                        <BarChart3 className="w-5 h-5"/>
-                      </div>
-                      <div>
-                        <p className="text-sm font-bold text-amber-300">Painel de Cashback</p>
-                        <p className="text-xs text-amber-200/80">Performance do seu negócio</p>
-                      </div>
-                    </div>
-                    <div className="p-3 rounded-full bg-white/10 group-hover:bg-white/20 transition-colors">
-                      <ArrowUpRight className="w-4 h-4 text-white" strokeWidth={3} />
-                    </div>
-                  </div>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <p className="text-[10px] uppercase font-bold text-amber-200/70 tracking-wider">Cashback Gerado</p>
-                    <p className="text-2xl font-bold text-amber-300">R$ 622,50</p>
-                  </div>
-                  <div>
-                    <p className="text-[10px] uppercase font-bold text-amber-200/70 tracking-wider">Clientes Impactados</p>
-                    <p className="text-2xl font-bold text-amber-300">114</p>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* ESTADO 3: CLIENTE LOGADO */}
-            {user && userRole === 'cliente' && (
-              <div 
-                onClick={() => onNavigate('user_cashback_flow')}
-                className="bg-gradient-to-br from-gray-900 to-black rounded-[28px] p-6 h-[190px] cursor-pointer group active:scale-[0.99] transition-transform flex flex-col justify-between"
-              >
-                <div className="flex justify-between items-start">
-                  <div>
-                    <p className="text-[10px] font-black text-amber-200/80 uppercase tracking-[0.3em] mb-0.5">Meu Saldo</p>
-                    <div className="flex items-center gap-1.5">
-                        <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
-                        <span className="text-[9px] text-amber-200/60 font-bold tracking-widest uppercase">Carteira Segura</span>
-                    </div>
-                  </div>
-                  <button 
-                    onClick={(e) => { e.stopPropagation(); setShowBalance(!showBalance); }}
-                    className="p-3 rounded-full bg-white/10 backdrop-blur-md border border-white/10 text-amber-300 hover:bg-white/20 transition-all active:scale-90"
-                    aria-label={showBalance ? "Ocultar saldo" : "Mostrar saldo"}
-                  >
-                    {showBalance ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
-                  </button>
-                </div>
-
-                <div className="flex items-center justify-between">
-                    <div className="flex items-baseline gap-2">
-                      {showBalance ? (
-                          <>
-                            <span className="text-amber-300 text-3xl font-bold opacity-60">R$</span>
-                            <span className="text-5xl font-black text-amber-300 tracking-tighter leading-none">12,50</span>
-                          </>
-                      ) : (
-                          <span className="text-4xl font-black text-amber-200/25 tracking-[0.3em] leading-none select-none">•••••</span>
-                      )}
-                    </div>
-                    <div className="p-3 rounded-full bg-amber-400 text-black shadow-xl group-hover:scale-110 transition-transform">
-                      <ArrowUpRight className="w-5 h-5" strokeWidth={3} />
+          <div key="trending" className="px-5">
+            <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                    <Compass className="w-3.5 h-3.5 text-gray-400"/>
+                    <div>
+                        <h3 className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">Guias da Vizinhança</h3>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Seleções especiais para te ajudar a decidir.</p>
                     </div>
                 </div>
-              </div>
-            )}
+                <button onClick={() => onNavigate('explore')} className="text-xs font-bold text-primary-500">Ver tudo</button>
+            </div>
+            <div className="grid grid-cols-1 gap-4">
+              {EDITORIAL_COLLECTIONS.map((collection) => (
+                <button
+                  key={collection.id}
+                  onClick={() => onSelectCollection(collection)}
+                  className="w-full h-32 rounded-2xl overflow-hidden relative group active:scale-[0.98] transition-transform shadow-lg shadow-black/5"
+                >
+                  <img src={collection.image} alt={collection.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent"></div>
+                  <div className="absolute bottom-0 left-0 right-0 p-4 text-left">
+                    <h4 className="text-white font-bold text-lg leading-tight drop-shadow-md">{collection.title}</h4>
+                    <p className="text-white/90 text-xs drop-shadow-sm">{collection.subtitle}</p>
+                  </div>
+                </button>
+              ))}
+            </div>
           </div>
         );
-      case 'master_sponsor':
-        return null;
-        case 'recommendations':
-          return null; // This section is removed
-        case 'trending': // Replaced with Editorial Collections
-          return (
-            <div key="trending" className="px-5">
-              <div className="flex items-center justify-between mb-4">
-                  <div>
-                      <h3 className="text-base font-bold text-gray-800 dark:text-gray-200">Guias da Vizinhança</h3>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">Seleções especiais para te ajudar a decidir.</p>
-                  </div>
-                  <button onClick={() => onNavigate('explore')} className="text-xs font-bold text-primary-500">Ver tudo</button>
-              </div>
-              <div className="grid grid-cols-1 gap-4">
-                {EDITORIAL_COLLECTIONS.map((collection) => (
-                  <button
-                    key={collection.id}
-                    onClick={() => onSelectCollection(collection)}
-                    className="w-full h-32 rounded-2xl overflow-hidden relative group active:scale-[0.98] transition-transform shadow-lg shadow-black/5"
-                  >
-                    <img src={collection.image} alt={collection.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent"></div>
-                    <div className="absolute bottom-0 left-0 right-0 p-4 text-left">
-                      <h4 className="text-white font-bold text-lg leading-tight drop-shadow-md">{collection.title}</h4>
-                      <p className="text-white/90 text-xs drop-shadow-sm">{collection.subtitle}</p>
-                    </div>
-                  </button>
-                ))}
-              </div>
-            </div>
-          );
       case 'filters':
         return (
           <div key="filters" className="px-5">
@@ -636,6 +534,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
           </div>
         );
       case 'highlights':
+        if (dynamicSuggestions.length === 0) return null;
         return (
           <div key="highlights" className="px-5">
             <div className="flex items-center gap-1.5 mb-2 px-1">
@@ -681,9 +580,6 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
             </button>
           </div>
         );
-      case 'tags':
-        // This section is now superseded by the dynamic suggestions
-        return null;
       case 'list':
         return (
           <div key="list" className="px-5 min-h-[300px]">
@@ -716,14 +612,17 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
         </div>
       ) : (
         <div className="flex flex-col gap-6 w-full">
+            {/* 1. Ordem Final dos Blocos */}
             {renderSection('categories')}
             {renderSection('hero')}
-            {user && renderSection('wallet')}
             {renderSection('roulette_banner')}
             {renderSection('highlights')}
             {renderSection('trending')}
             {renderSection('filters')}
             {renderSection('list')}
+            <div className="px-5">
+              <MasterSponsorBanner onClick={() => onNavigate('patrocinador_master')} />
+            </div>
 
             <div className="mt-8 mb-4 flex flex-col items-center justify-center text-center opacity-40">
               <Star className="w-4 h-4 text-gray-400 mb-2" />
