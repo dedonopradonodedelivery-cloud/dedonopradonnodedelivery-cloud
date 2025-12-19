@@ -629,7 +629,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
       case 'list':
         return (
           <div key="list" className="px-5 min-h-[300px]">
-              <LojasEServicosList onStoreClick={onStoreClick} onViewAll={() => onNavigate('explore')} activeFilter={listFilter} user={user} />
+              <LojasEServicosList onStoreClick={onStoreClick} onViewAll={() => onNavigate('explore')} activeFilter={listFilter} user={user} onNavigate={onNavigate} />
           </div>
         );
       default: return null;

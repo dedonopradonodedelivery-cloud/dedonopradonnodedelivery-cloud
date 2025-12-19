@@ -10,6 +10,7 @@ interface LojasEServicosListProps {
   onViewAll?: () => void;
   activeFilter?: 'all' | 'cashback' | 'top_rated' | 'open_now';
   user?: User | null;
+  onNavigate?: (view: string) => void;
 }
 
 const CATEGORIES_MOCK = ['Alimentação', 'Beleza', 'Serviços', 'Pets', 'Moda', 'Saúde'];
@@ -126,7 +127,7 @@ const getStoreExtras = (index: number, store: Store) => {
   return { badge, copy, activityBadge };
 };
 
-export const LojasEServicosList: React.FC<LojasEServicosListProps> = ({ onStoreClick, onViewAll, activeFilter = 'all', user = null }) => {
+export const LojasEServicosList: React.FC<LojasEServicosListProps> = ({ onStoreClick, onViewAll, activeFilter = 'all', user = null, onNavigate }) => {
   const [visibleStores, setVisibleStores] = useState<Store[]>([]);
   const [filteredStores, setFilteredStores] = useState<Store[]>([]);
   const [loading, setLoading] = useState(false);
@@ -194,10 +195,10 @@ export const LojasEServicosList: React.FC<LojasEServicosListProps> = ({ onStoreC
         {/* Card do Patrocinador Master - Fixo no topo */}
         <div
           key={MASTER_SPONSOR_STORE.id}
-          onClick={() => onStoreClick && onStoreClick(MASTER_SPONSOR_STORE)}
-          className="bg-white dark:bg-gray-800 rounded-2xl p-3 flex gap-3 cursor-pointer relative group transition-all duration-300 shadow-[0_4px_12px_rgba(0,0,0,0.05)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] active:scale-[0.99] border-2 border-amber-400/50 dark:border-amber-500/30 shadow-amber-500/10"
+          onClick={() => onNavigate && onNavigate('patrocinador_master')}
+          className="bg-white dark:bg-gray-800 rounded-2xl p-3 flex gap-3 cursor-pointer relative group transition-all duration-300 shadow-[0_4px_12px_rgba(0,0,0,0.05)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] active:scale-[0.99] border-2 border-amber-400/50 dark:border-amber-500/30 shadow-amber-500/10 mt-2"
         >
-          <div className="absolute top-3 right-3 z-10 pointer-events-none">
+          <div className="absolute top-0 right-4 -translate-y-1/2 z-10 pointer-events-none">
             <span className="text-xs font-black px-3 py-1.5 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 text-white shadow-xl shadow-amber-500/40 uppercase tracking-wider flex items-center gap-1.5">
               <Crown className="w-3.5 h-3.5" />
               Patrocinador Master
@@ -208,7 +209,7 @@ export const LojasEServicosList: React.FC<LojasEServicosListProps> = ({ onStoreC
           </div>
           <div className="flex-1 flex flex-col justify-center min-w-0 pr-1">
             <div className="flex flex-col gap-0.5 mb-1.5">
-              <div className="flex items-center gap-1.5 pr-16">
+              <div className="flex items-center gap-1.5">
                 <h4 className="font-bold text-gray-900 dark:text-white text-sm leading-tight truncate">{MASTER_SPONSOR_STORE.name}</h4>
                 <BadgeCheck className="w-3.5 h-3.5 text-[#1E5BFF] fill-white shrink-0" />
               </div>
@@ -238,20 +239,22 @@ export const LojasEServicosList: React.FC<LojasEServicosListProps> = ({ onStoreC
                     key={store.id}
                     ref={isLastElement ? lastStoreElementRef : null}
                     onClick={() => onStoreClick && onStoreClick(store)}
-                    className={`bg-white dark:bg-gray-800 rounded-2xl p-3 flex gap-3 cursor-pointer relative group transition-all duration-300 shadow-[0_4px_12px_rgba(0,0,0,0.05)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] active:scale-[0.99] border-2 ${isSponsored ? 'border-[#1E5BFF]/20 dark:border-[#1E5BFF]/10' : 'border-transparent'}`}
+                    className={`bg-white dark:bg-gray-800 rounded-2xl p-3 flex gap-3 cursor-pointer relative group transition-all duration-300 shadow-[0_4px_12px_rgba(0,0,0,0.05)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] active:scale-[0.99] border-2 ${isSponsored ? 'border-[#1E5BFF]/20 dark:border-[#1E5BFF]/10 mt-2' : 'border-transparent mt-2'}`}
                 >
-                    <div className="absolute top-3 right-3 z-10 pointer-events-none flex flex-col items-end gap-1">
-                        {isSponsored && (
-                            <span className="text-xs font-black px-3 py-1.5 rounded-full bg-[#1E5BFF] text-white shadow-xl shadow-blue-500/40 uppercase tracking-wider">
-                                Patrocinado
-                            </span>
-                        )}
-                        {badge && !isSponsored && (
-                            <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${badge.color}`}>
-                                {badge.text}
-                            </span>
-                        )}
-                    </div>
+                    {(isSponsored || badge) && (
+                      <div className="absolute top-0 right-4 -translate-y-1/2 z-10 pointer-events-none flex flex-col items-end gap-1">
+                          {isSponsored && (
+                              <span className="text-xs font-black px-3 py-1.5 rounded-full bg-[#1E5BFF] text-white shadow-xl shadow-blue-500/40 uppercase tracking-wider">
+                                  Patrocinado
+                              </span>
+                          )}
+                          {badge && !isSponsored && (
+                              <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${badge.color}`}>
+                                  {badge.text}
+                              </span>
+                          )}
+                      </div>
+                    )}
 
                     <div className="w-[88px] h-[88px] flex-shrink-0 relative rounded-xl overflow-hidden bg-gray-50 dark:bg-gray-700">
                         <img src={store.logoUrl || "/assets/default-logo.png"} alt={store.name} className="w-full h-full object-contain p-1" loading="lazy" />
@@ -264,7 +267,7 @@ export const LojasEServicosList: React.FC<LojasEServicosListProps> = ({ onStoreC
 
                     <div className="flex-1 flex flex-col justify-center min-w-0 pr-1">
                         <div className="flex flex-col gap-0.5 mb-1.5">
-                             <div className="flex items-center gap-1.5 pr-16">
+                             <div className="flex items-center gap-1.5">
                                <h4 className="font-bold text-gray-900 dark:text-white text-sm leading-tight truncate">{store.name}</h4>
                                {store.verified && <BadgeCheck className="w-3.5 h-3.5 text-[#1E5BFF] fill-white shrink-0" />}
                              </div>
