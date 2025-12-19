@@ -148,7 +148,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
   const carouselRef = useRef<HTMLDivElement>(null);
   const autoplayTimerRef = useRef<any | null>(null);
   const categoryScrollRef = useRef<HTMLDivElement>(null);
-  const [categoryScrollProgress, setCategoryScrollProgress] = useState(0);
+  const [indicatorOffset, setIndicatorOffset] = useState(0);
 
 
   // Funcionalidade de ocultar saldo com persistência na sessão
@@ -277,36 +277,65 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
     return list;
   }, [onNavigate, stores, onStoreClick]);
 
+  const carouselBanners = useMemo(() => {
+    return banners.length > 1 ? [...banners, banners[0]] : banners;
+  }, [banners]);
+
+  // Autoplay and infinite loop logic
   useEffect(() => {
-    if (autoplayTimerRef.current) clearInterval(autoplayTimerRef.current);
+    if (banners.length <= 1) return;
+  
     autoplayTimerRef.current = setInterval(() => {
       if (carouselRef.current) {
-        const nextIndex = (activeBannerIndex + 1) % banners.length;
-        const scrollAmount = carouselRef.current.offsetWidth * nextIndex;
-        carouselRef.current.scrollTo({ left: scrollAmount, behavior: 'smooth' });
-        setActiveBannerIndex(nextIndex);
+        carouselRef.current.scrollBy({
+          left: carouselRef.current.offsetWidth,
+          behavior: 'smooth',
+        });
       }
     }, 4000);
-    return () => clearInterval(autoplayTimerRef.current);
-  }, [activeBannerIndex, banners.length]);
-
+  
+    return () => {
+      if (autoplayTimerRef.current) {
+        clearInterval(autoplayTimerRef.current);
+      }
+    };
+  }, [banners.length]);
+  
   const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
-    const scrollLeft = e.currentTarget.scrollLeft;
-    const width = e.currentTarget.offsetWidth;
-    if (width > 0) {
-      const newIndex = Math.round(scrollLeft / width);
-      if (newIndex !== activeBannerIndex) setActiveBannerIndex(newIndex);
+    const target = e.currentTarget;
+    if (!target) return;
+  
+    const { scrollLeft, clientWidth, scrollWidth } = target;
+    
+    // Update the indicator dots based on the current slide
+    const newIndex = Math.round(scrollLeft / clientWidth);
+    const newActiveDotIndex = newIndex % banners.length;
+    
+    if (newActiveDotIndex !== activeBannerIndex) {
+        setActiveBannerIndex(newActiveDotIndex);
+    }
+
+    // Check if we're at the very end (the cloned slide)
+    const isAtEnd = scrollLeft + clientWidth >= scrollWidth - 1;
+
+    if (isAtEnd) {
+      // We have scrolled to the cloned slide. Instantly jump back to the start without animation.
+      target.style.scrollBehavior = 'auto';
+      target.scrollLeft = 0;
+      target.style.scrollBehavior = 'smooth';
     }
   };
+
 
   const handleCategoryScroll = (e: React.UIEvent<HTMLDivElement>) => {
     const { scrollLeft, scrollWidth, clientWidth } = e.currentTarget;
     if (scrollWidth <= clientWidth) {
-      setCategoryScrollProgress(0);
+      setIndicatorOffset(0);
       return;
     }
-    const progress = (scrollLeft / (scrollWidth - clientWidth)) * 100;
-    setCategoryScrollProgress(progress);
+    // Simplified ratio for subtle movement, not a 1:1 scrollbar mapping.
+    const scrollRatio = clientWidth / scrollWidth;
+    setIndicatorOffset(scrollLeft * scrollRatio);
   };
 
 
@@ -316,10 +345,10 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
         return (
           <div key="hero" className="relative bg-white dark:bg-gray-900">
             <div ref={carouselRef} onScroll={handleScroll} className="flex overflow-x-auto snap-x snap-mandatory no-scrollbar px-0 scroll-smooth">
-              {banners.map((banner, index) => {
-                const isActive = activeBannerIndex === index;
+              {carouselBanners.map((banner, index) => {
+                const isActive = activeBannerIndex === (index % banners.length);
                 return (
-                  <div key={banner.id} className="min-w-full snap-center px-4">
+                  <div key={`${banner.id}-${index}`} className="min-w-full snap-center px-4">
                     <div className={`w-full bg-gradient-to-br ${banner.gradient} rounded-[24px] overflow-hidden shadow-[0_8px_30px_rgba(0,0,0,0.12)] relative h-[190px] flex items-center transition-all duration-500 border border-white/10`}>
                       
                       <div className="absolute right-4 top-1/2 -translate-y-1/2 z-20 pointer-events-none transition-all duration-1000">
@@ -356,7 +385,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
                           <div 
                             key={i} 
                             className={`h-1 rounded-full transition-all duration-500 ${
-                                activeBannerIndex === i 
+                                activeBannerIndex === i
                                 ? 'w-4 bg-white shadow-[0_0_8px_rgba(255,255,255,0.8)]' 
                                 : 'w-1 bg-white/40'
                             }`} 
@@ -409,8 +438,8 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
                 <div
                   className="bg-blue-400 dark:bg-blue-500 h-px rounded-full absolute"
                   style={{
-                    width: '18%',
-                    left: `${categoryScrollProgress * 0.82}%`,
+                    width: '40px',
+                    transform: `translateX(${indicatorOffset}px)`,
                   }}
                 ></div>
               </div>
@@ -518,16 +547,14 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
           </div>
         );
       case 'master_sponsor':
-        return (
-          <div key="master_sponsor" className="px-5 mt-6">
-            <MasterSponsorBanner 
-                onClick={() => onNavigate('patrocinador_master')}
-            />
-          </div>
-        );
+        return null;
       case 'filters':
         return (
           <div key="filters" className="px-5">
+            <div className="flex items-center gap-1.5 mb-3 px-1">
+                 <ShieldCheck className="w-3.5 h-3.5 text-gray-400" />
+                 <h3 className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">Lojas & Serviços</h3>
+            </div>
             <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
               {[
                 { id: 'all', label: 'Tudo', icon: Zap },
@@ -552,18 +579,22 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
         );
       case 'highlights':
         return (
-          <div key="highlights" className="space-y-4">
-            <div className="px-5">
-              <h3 className="text-base font-bold text-gray-900 dark:text-white tracking-tight">Agora no seu bairro</h3>
+          <div key="highlights" className="px-5">
+            <div className="flex items-center gap-1.5 mb-2 px-1">
+              <Flame className="w-3.5 h-3.5 text-gray-400" />
+              <h3 className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">Agora no seu bairro</h3>
             </div>
-            <div className="flex gap-3.5 overflow-x-auto no-scrollbar px-5 snap-x">
+            <div className="flex gap-3.5 overflow-x-auto no-scrollbar snap-x pt-2">
               {dynamicSuggestions.map((item: Suggestion) => (
-                <div key={item.id} className={`snap-center flex-shrink-0 w-[190px] ${item.bg} p-5 rounded-[24px] flex flex-col gap-4 active:scale-95 transition-all cursor-pointer group shadow-sm hover:shadow-md`}>
+                <div key={item.id} className={`snap-center flex-shrink-0 w-[190px] bg-[#EAF2FF] dark:bg-gray-800 border border-[#DBEAFE] dark:border-gray-700 p-5 rounded-[24px] flex flex-col gap-4 active:scale-95 transition-all cursor-pointer group shadow-sm hover:shadow-md`}>
                   <div className="flex items-center justify-between">
-                    <div className="px-2.5 py-1 rounded-lg bg-white/30 dark:bg-black/20 border border-white/20">
-                      <span className="text-[9px] font-black uppercase tracking-wider text-gray-800 dark:text-white/90">{item.title}</span>
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">{item.title}</span>
+                    <div className="opacity-100 transition-transform group-hover:scale-110 duration-300 drop-shadow-sm">
+                      {React.cloneElement(item.icon as React.ReactElement<any>, { 
+                          className: 'text-[#2D6DF6] dark:text-blue-400',
+                          size: 24
+                      })}
                     </div>
-                    <div className="opacity-100 transition-transform group-hover:scale-110 duration-300 drop-shadow-sm">{item.icon}</div>
                   </div>
                   <p className="text-[15px] font-bold text-gray-900 dark:text-white leading-tight">{item.subtitle}</p>
                 </div>
@@ -598,10 +629,6 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
       case 'list':
         return (
           <div key="list" className="px-5 min-h-[300px]">
-              <div className="flex items-center gap-2 mb-4">
-                 <ShieldCheck className="w-3.5 h-3.5 text-blue-500" />
-                 <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Parceiros Verificados</span>
-              </div>
               <LojasEServicosList onStoreClick={onStoreClick} onViewAll={() => onNavigate('explore')} activeFilter={listFilter} user={user} />
           </div>
         );
@@ -610,7 +637,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
   };
 
   return (
-    <div className="flex flex-col gap-4 pb-32 bg-white dark:bg-gray-900 w-full max-w-md mx-auto animate-in fade-in duration-500 overflow-x-hidden">
+    <div className="flex flex-col gap-6 pb-32 bg-white dark:bg-gray-900 w-full max-w-md mx-auto animate-in fade-in duration-500 overflow-x-hidden">
       {activeSearchTerm ? (
         <div className="px-5 mt-4 min-h-[50vh]">
              <div className="flex items-center gap-2 mb-4">
@@ -630,13 +657,12 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
              </div>
         </div>
       ) : (
-        <div className="flex flex-col gap-4 w-full">
+        <div className="flex flex-col gap-6 w-full">
             {renderSection('categories')}
             {renderSection('hero')}
             {user && renderSection('wallet')}
             {renderSection('roulette_banner')}
             {renderSection('highlights')}
-            {renderSection('master_sponsor')}
             {renderSection('filters')}
             {renderSection('list')}
 

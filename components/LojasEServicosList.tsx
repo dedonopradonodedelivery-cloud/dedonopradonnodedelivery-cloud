@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Star, Loader2, AlertCircle, BadgeCheck, Heart, Award, Eye, Rocket } from 'lucide-react';
+import { Star, Loader2, AlertCircle, BadgeCheck, Heart, Award, Eye, Rocket, Crown } from 'lucide-react';
 import { Store, AdType } from '../types';
 import { useFavorites } from '../hooks/useFavorites';
 import { User } from '@supabase/supabase-js';
@@ -41,6 +41,23 @@ const generateFakeStores = (): Store[] => {
       isOpenNow: isOpenNow,
     };
   });
+};
+
+const MASTER_SPONSOR_STORE: Store = {
+  id: 'master-sponsor-esquematiza',
+  name: 'Grupo Esquematiza',
+  category: 'Segurança & Facilities',
+  subcategory: 'Patrocinador Master',
+  logoUrl: '', // Rendered as an icon
+  rating: 5.0,
+  reviewsCount: 999,
+  description: 'Segurança e serviços com excelência para empresas e condomínios.',
+  distance: 'Freguesia • RJ',
+  adType: AdType.PREMIUM,
+  isSponsored: true,
+  verified: true,
+  isOpenNow: true,
+  cashback: 10, // Example value
 };
 
 // ALGORITMO CRÍTICO: ORDENAÇÃO POR MONETIZAÇÃO
@@ -168,19 +185,49 @@ export const LojasEServicosList: React.FC<LojasEServicosListProps> = ({ onStoreC
     await toggleFavorite(id);
   };
 
+  const isMasterSponsorFavorite = isFavorite(MASTER_SPONSOR_STORE.id);
+
   return (
     <div className="flex flex-col w-full">
-      <div className="flex justify-between items-end mb-4 px-1">
-        <h3 className="text-base font-bold text-gray-800 dark:text-white leading-none flex items-center gap-2">
-          <Award className="w-4 h-4 text-[#1E5BFF]" />
-          Lojas & Serviços
-        </h3>
-        {onViewAll && (
-            <button onClick={onViewAll} className="text-xs font-bold text-[#1E5BFF] hover:text-[#1749CC] transition-colors bg-blue-50 dark:bg-blue-900/20 px-3 py-1 rounded-full">Ver tudo</button>
-        )}
-      </div>
-
       <div className="flex flex-col gap-4 pb-6">
+        
+        {/* Card do Patrocinador Master - Fixo no topo */}
+        <div
+          key={MASTER_SPONSOR_STORE.id}
+          onClick={() => onStoreClick && onStoreClick(MASTER_SPONSOR_STORE)}
+          className="bg-white dark:bg-gray-800 rounded-2xl p-3 flex gap-3 cursor-pointer relative group transition-all duration-300 shadow-[0_4px_12px_rgba(0,0,0,0.05)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] active:scale-[0.99] border-2 border-amber-400/50 dark:border-amber-500/30 shadow-amber-500/10"
+        >
+          <div className="absolute top-3 right-3 z-10 pointer-events-none">
+            <span className="text-xs font-black px-3 py-1.5 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 text-white shadow-xl shadow-amber-500/40 uppercase tracking-wider flex items-center gap-1.5">
+              <Crown className="w-3.5 h-3.5" />
+              Patrocinador Master
+            </span>
+          </div>
+          <div className="w-[88px] h-[88px] flex-shrink-0 relative rounded-xl overflow-hidden bg-slate-900 flex items-center justify-center">
+            <Crown className="w-10 h-10 text-amber-400" />
+          </div>
+          <div className="flex-1 flex flex-col justify-center min-w-0 pr-1">
+            <div className="flex flex-col gap-0.5 mb-1.5">
+              <div className="flex items-center gap-1.5 pr-16">
+                <h4 className="font-bold text-gray-900 dark:text-white text-sm leading-tight truncate">{MASTER_SPONSOR_STORE.name}</h4>
+                <BadgeCheck className="w-3.5 h-3.5 text-[#1E5BFF] fill-white shrink-0" />
+              </div>
+              <p className="text-[10px] font-medium text-gray-400 dark:text-gray-500 italic">{MASTER_SPONSOR_STORE.description}</p>
+            </div>
+            <div className="flex items-center gap-3 text-[11px] text-gray-500 dark:text-gray-400 mt-auto">
+              <div className="flex items-center gap-1 bg-yellow-50 dark:bg-yellow-900/10 px-1.5 py-0.5 rounded text-yellow-700 dark:text-yellow-400 font-bold">
+                <Star className="w-3 h-3 fill-current" />
+                <span>{MASTER_SPONSOR_STORE.rating}</span>
+              </div>
+              <span className="truncate max-w-[80px] font-medium">{MASTER_SPONSOR_STORE.category}</span>
+            </div>
+          </div>
+          <button onClick={(e) => handleToggleFavorite(e, MASTER_SPONSOR_STORE.id)} className={`absolute bottom-3 right-3 w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200 z-20 ${isMasterSponsorFavorite ? 'bg-red-50 dark:bg-red-900/20 text-red-500' : 'bg-gray-50 dark:bg-gray-700/50 text-gray-400 hover:text-red-400'}`}>
+            <Heart className={`w-4 h-4 transition-colors ${isMasterSponsorFavorite ? 'fill-current' : ''}`} />
+          </button>
+        </div>
+        
+        {/* Lista de Lojas normais */}
         {visibleStores.map((store, index) => {
             const isLastElement = index === visibleStores.length - 1;
             const isFavorited = isFavorite(store.id);
