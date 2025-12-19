@@ -32,7 +32,9 @@ import {
   Snowflake,
   Wind,
   Wrench,
-  Bike
+  Bike,
+  Rocket,
+  Sparkles
 } from 'lucide-react';
 import { LojasEServicosList } from './LojasEServicosList';
 import { User } from '@supabase/supabase-js';
@@ -574,61 +576,91 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
         );
       case 'master_sponsor':
         return null;
-      case 'recommendations':
-        return (
-          <div key="recommendations" className="px-5">
-            <div className="flex items-center gap-1.5 mb-3 px-1">
-              <Users className="w-3.5 h-3.5 text-gray-400" />
-              <h3 className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">Recomendações</h3>
-            </div>
-            <div className="bg-white dark:bg-gray-800 rounded-3xl p-5 shadow-sm border border-gray-100 dark:border-gray-700">
-              <h3 className="font-bold text-gray-900 dark:text-white mb-1">Negócios que os moradores recomendam</h3>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mb-4">Encontre os favoritos do bairro com um clique.</p>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <button onClick={() => setListFilter('top_rated')} className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-                  <div className="w-8 h-8 rounded-full bg-yellow-100 text-yellow-600 flex items-center justify-center"><Star className="w-4 h-4" /></div>
-                  <span className="text-sm font-semibold text-gray-700 dark:text-gray-200">Melhores Avaliados</span>
+        case 'recommendations':
+          return (
+            <div key="recommendations" className="px-5">
+              <div className="flex items-center gap-1.5 mb-3 px-1">
+                <Users className="w-3.5 h-3.5 text-gray-400" />
+                <h3 className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">Decisões Rápidas</h3>
+              </div>
+              <div className="grid grid-cols-1 gap-3">
+                <button onClick={() => setListFilter('top_rated')} className="w-full bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-gray-700 flex items-center justify-between group active:scale-[0.99] transition-transform">
+                    <div className="flex items-center gap-4">
+                        <div className="w-10 h-10 rounded-xl bg-yellow-50 dark:bg-yellow-900/20 flex items-center justify-center text-yellow-500"><Award className="w-5 h-5" /></div>
+                        <div className="text-left">
+                            <h3 className="font-bold text-gray-800 dark:text-white text-sm">Favoritos da Vizinhança</h3>
+                            <p className="text-xs text-gray-500 dark:text-gray-400">Os mais bem avaliados do bairro.</p>
+                        </div>
+                    </div>
+                    <ChevronRight className="w-5 h-5 text-gray-300 group-hover:text-primary-500 transition-colors" />
                 </button>
-                <button onClick={() => setListFilter('cashback')} className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-                  <div className="w-8 h-8 rounded-full bg-green-100 text-green-600 flex items-center justify-center"><TrendingUp className="w-4 h-4" /></div>
-                  <span className="text-sm font-semibold text-gray-700 dark:text-gray-200">Com Cashback</span>
+                <button onClick={() => setListFilter('cashback')} className="w-full bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-gray-700 flex items-center justify-between group active:scale-[0.99] transition-transform">
+                    <div className="flex items-center gap-4">
+                        <div className="w-10 h-10 rounded-xl bg-green-50 dark:bg-green-900/20 flex items-center justify-center text-green-600"><Coins className="w-5 h-5" /></div>
+                        <div className="text-left">
+                            <h3 className="font-bold text-gray-800 dark:text-white text-sm">Economize no Bairro</h3>
+                            <p className="text-xs text-gray-500 dark:text-gray-400">Encontre lojas com cashback.</p>
+                        </div>
+                    </div>
+                    <ChevronRight className="w-5 h-5 text-gray-300 group-hover:text-primary-500 transition-colors" />
                 </button>
-                 <button onClick={() => setListFilter('open_now')} className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors col-span-1 sm:col-span-2">
-                  <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center"><Clock className="w-4 h-4" /></div>
-                  <span className="text-sm font-semibold text-gray-700 dark:text-gray-200">Abertos Agora</span>
+                <button onClick={() => onNavigate('explore')} className="w-full bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-gray-700 flex items-center justify-between group active:scale-[0.99] transition-transform">
+                    <div className="flex items-center gap-4">
+                        <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center text-blue-600"><Rocket className="w-5 h-5" /></div>
+                        <div className="text-left">
+                            <h3 className="font-bold text-gray-800 dark:text-white text-sm">Novidades na Área</h3>
+                            <p className="text-xs text-gray-500 dark:text-gray-400">Veja as novas lojas cadastradas.</p>
+                        </div>
+                    </div>
+                    <ChevronRight className="w-5 h-5 text-gray-300 group-hover:text-primary-500 transition-colors" />
                 </button>
               </div>
             </div>
-          </div>
-        );
-      case 'trending':
-        return (
-          <div key="trending" className="px-5">
-            <div className="flex items-center gap-1.5 mb-3 px-1">
-              <TrendingUp className="w-3.5 h-3.5 text-gray-400" />
-              <h3 className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">Em alta perto de você</h3>
+          );
+        case 'trending':
+          return (
+            <div key="trending" className="pl-5">
+              <div className="flex items-center justify-between mb-3 pr-5">
+                  <div>
+                      <h3 className="text-base font-bold text-gray-900 dark:text-white">Em alta no bairro</h3>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">O que seus vizinhos estão procurando.</p>
+                  </div>
+                  <button onClick={() => onNavigate('explore')} className="text-xs font-bold text-primary-500">Ver tudo</button>
+              </div>
+              <div className="flex gap-3 overflow-x-auto no-scrollbar pb-2 pr-5">
+                  <button
+                      onClick={() => onSelectCategory(CATEGORIES.find(c => c.slug === 'food')!)}
+                      className="snap-center flex-shrink-0 w-[150px] h-[180px] bg-gradient-to-br from-amber-500 to-orange-600 rounded-2xl p-4 flex flex-col justify-between text-white group shadow-lg"
+                  >
+                      <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center"><Utensils className="w-5 h-5" /></div>
+                      <div>
+                          <p className="text-xs font-medium">Restaurantes</p>
+                          <h4 className="font-bold text-lg leading-tight">Onde Almoçar?</h4>
+                      </div>
+                  </button>
+                  <button
+                      onClick={() => onNavigate('services')}
+                      className="snap-center flex-shrink-0 w-[150px] h-[180px] bg-gradient-to-br from-sky-500 to-blue-600 rounded-2xl p-4 flex flex-col justify-between text-white group shadow-lg"
+                  >
+                      <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center"><Wrench className="w-5 h-5" /></div>
+                      <div>
+                          <p className="text-xs font-medium">Serviços Rápidos</p>
+                          <h4 className="font-bold text-lg leading-tight">Resolver Pendências</h4>
+                      </div>
+                  </button>
+                  <button
+                      onClick={() => onSelectCategory(CATEGORIES.find(c => c.slug === 'beauty')!)}
+                      className="snap-center flex-shrink-0 w-[150px] h-[180px] bg-gradient-to-br from-pink-500 to-rose-600 rounded-2xl p-4 flex flex-col justify-between text-white group shadow-lg"
+                  >
+                      <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center"><Sparkles className="w-5 h-5" /></div>
+                      <div>
+                          <p className="text-xs font-medium">Cuidados Pessoais</p>
+                          <h4 className="font-bold text-lg leading-tight">Hora de se Cuidar</h4>
+                      </div>
+                  </button>
+              </div>
             </div>
-            <button
-              onClick={() => setListFilter('top_rated')}
-              className="w-full bg-white dark:bg-gray-800 rounded-3xl p-5 shadow-sm border border-gray-100 dark:border-gray-700 flex items-center justify-between group active:scale-[0.99] transition-transform"
-            >
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-2xl bg-purple-100 dark:bg-purple-900/20 flex items-center justify-center text-purple-600 dark:text-purple-400">
-                  <Flame className="w-6 h-6" />
-                </div>
-                <div className="text-left">
-                  <h3 className="font-bold text-gray-900 dark:text-white text-base">Os mais procurados hoje</h3>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 leading-snug">
-                    Os serviços e lojas mais procurados hoje no seu bairro.
-                  </p>
-                </div>
-              </div>
-              <div className="p-2 rounded-full bg-gray-50 dark:bg-gray-700/50 group-hover:bg-gray-100 dark:group-hover:bg-gray-700 transition-colors">
-                <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-purple-600" />
-              </div>
-            </button>
-          </div>
-        );
+          );
       case 'filters':
         return (
           <div key="filters" className="px-5">
