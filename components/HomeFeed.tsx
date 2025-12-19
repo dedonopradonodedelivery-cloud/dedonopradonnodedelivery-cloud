@@ -38,6 +38,7 @@ import { LojasEServicosList } from './LojasEServicosList';
 import { User } from '@supabase/supabase-js';
 import { SpinWheelView } from './SpinWheelView';
 import { MasterSponsorBanner } from './MasterSponsorBanner';
+import { CATEGORIES } from '../constants';
 
 interface HomeFeedProps {
   onNavigate: (view: string) => void;
@@ -146,6 +147,9 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
   const [activeBannerIndex, setActiveBannerIndex] = useState(0);
   const carouselRef = useRef<HTMLDivElement>(null);
   const autoplayTimerRef = useRef<any | null>(null);
+  const categoryScrollRef = useRef<HTMLDivElement>(null);
+  const [categoryScrollProgress, setCategoryScrollProgress] = useState(0);
+
 
   // Funcionalidade de ocultar saldo com persistência na sessão
   const [showBalance, setShowBalance] = useState(() => {
@@ -161,6 +165,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
   const [listFilter, setListFilter] = useState<'all' | 'cashback' | 'top_rated' | 'open_now'>('all');
 
   const dynamicSuggestions = useMemo((): Suggestion[] => {
+    const TARGET_SUGGESTION_COUNT = 6;
     const hour = new Date().getHours();
     const { temp } = getMockWeather(hour);
     
@@ -182,16 +187,23 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
     const timeTag = getTimeTag(hour);
     const tempTag = getTempTag(temp);
     
-    const suggestions = SUGGESTION_POOL
-      .filter(s => s.tags.includes(timeTag))
-      .map(s => ({
-        ...s,
-        // Pontuação: Base + Bônus de Temperatura + Aleatoriedade
-        score: 10 + (s.tags.includes(tempTag) ? 20 : 0) + (Math.random() * 5)
-      }))
-      .sort((a, b) => b.score - a.score);
+    // Motor de pontuação com fallback integrado
+    const scoredSuggestions = SUGGESTION_POOL.map(s => {
+      let score = Math.random() * 5; // Base aleatória para desempate
+      const isTimeMatch = s.tags.includes(timeTag);
+      const isTempMatch = s.tags.includes(tempTag);
+
+      if (isTimeMatch) {
+        score += 100; // Pontuação alta para correspondência de horário
+        if (isTempMatch) {
+          score += 50; // Bônus extra para correspondência perfeita (horário + temp)
+        }
+      }
+      return { ...s, score };
+    })
+    .sort((a, b) => b.score - a.score);
       
-    return suggestions.slice(0, 4);
+    return scoredSuggestions.slice(0, TARGET_SUGGESTION_COUNT);
   }, []);
 
 
@@ -287,6 +299,17 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
     }
   };
 
+  const handleCategoryScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    const { scrollLeft, scrollWidth, clientWidth } = e.currentTarget;
+    if (scrollWidth <= clientWidth) {
+      setCategoryScrollProgress(0);
+      return;
+    }
+    const progress = (scrollLeft / (scrollWidth - clientWidth)) * 100;
+    setCategoryScrollProgress(progress);
+  };
+
+
   const renderSection = (key: string) => {
     switch (key) {
       case 'hero':
@@ -344,6 +367,53 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
                   </div>
                 );
               })}
+            </div>
+          </div>
+        );
+      case 'categories':
+        return (
+          <div key="categories" className="py-2 pt-4">
+            <div 
+              ref={categoryScrollRef}
+              onScroll={handleCategoryScroll}
+              className="flex overflow-x-auto no-scrollbar px-5 pb-2"
+            >
+              <div className="grid grid-flow-col grid-rows-2 gap-3">
+                {CATEGORIES.map((cat) => (
+                  <button 
+                    key={cat.id} 
+                    onClick={() => onSelectCategory(cat)}
+                    className="flex flex-col w-[76px] h-[72px] p-2 gap-1 rounded-2xl bg-[#EAF2FF] dark:bg-gray-800 items-center justify-center cursor-pointer flex-shrink-0 group snap-start border border-[#DBEAFE] dark:border-gray-700 shadow-sm hover:shadow-md active:scale-95 transition-all duration-300 ease-in-out"
+                  >
+                    <div 
+                      className="flex items-center justify-center text-[#2D6DF6] dark:text-blue-400 w-7 h-7 group-hover:scale-110 transition-transform duration-300 ease-in-out"
+                    >
+                      {React.isValidElement(cat.icon) 
+                        ? React.cloneElement(cat.icon as React.ReactElement<any>, { 
+                            className: `w-7 h-7 text-[#2D6DF6] dark:text-blue-400`, 
+                            strokeWidth: 2 
+                          }) 
+                        : cat.icon}
+                    </div>
+                    <span 
+                      className="font-bold text-gray-600 dark:text-gray-300 text-[10px] text-center line-clamp-1 w-full"
+                    >
+                      {cat.name}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="px-5 mt-2">
+              <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1 relative overflow-hidden">
+                <div
+                  className="bg-blue-500 h-1 rounded-full absolute"
+                  style={{
+                    width: '25%',
+                    left: `${categoryScrollProgress * 0.75}%`,
+                  }}
+                ></div>
+              </div>
             </div>
           </div>
         );
@@ -603,6 +673,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
         </div>
       ) : (
         <div className="flex flex-col gap-4 w-full mt-0">
+            {renderSection('categories')}
             {renderSection('hero')}
             {user && renderSection('wallet')}
             {renderSection('roulette_banner')}

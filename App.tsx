@@ -202,7 +202,6 @@ const App: React.FC = () => {
               onNavigate={setActiveTab}
               activeTab={activeTab}
               userRole={userRole}
-              onSelectCategory={handleSelectCategory}
               onOpenMerchantQr={() => setActiveTab('merchant_qr')}
             />
           )}
