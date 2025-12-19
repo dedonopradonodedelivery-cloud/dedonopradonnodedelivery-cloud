@@ -479,19 +479,19 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
             {user && userRole === 'cliente' && (
               <div 
                 onClick={() => onNavigate('user_cashback_flow')}
-                className="bg-gradient-to-br from-emerald-600 to-teal-800 rounded-[28px] p-6 h-[190px] cursor-pointer group active:scale-[0.99] transition-transform flex flex-col justify-between"
+                className="bg-gradient-to-br from-amber-400 to-yellow-500 rounded-[28px] p-6 h-[190px] cursor-pointer group active:scale-[0.99] transition-transform flex flex-col justify-between"
               >
                 <div className="flex justify-between items-start">
                   <div>
-                    <p className="text-[10px] font-black text-emerald-100/60 uppercase tracking-[0.3em] mb-0.5">Meu Saldo</p>
+                    <p className="text-[10px] font-black text-amber-900/70 uppercase tracking-[0.3em] mb-0.5">Meu Saldo</p>
                     <div className="flex items-center gap-1.5">
-                        <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse"></span>
-                        <span className="text-[9px] text-emerald-100/50 font-bold tracking-widest uppercase">Carteira Segura</span>
+                        <span className="w-1.5 h-1.5 rounded-full bg-green-600 animate-pulse"></span>
+                        <span className="text-[9px] text-amber-900/60 font-bold tracking-widest uppercase">Carteira Segura</span>
                     </div>
                   </div>
                   <button 
                     onClick={(e) => { e.stopPropagation(); setShowBalance(!showBalance); }}
-                    className="p-3 rounded-full bg-white/10 backdrop-blur-md border border-white/10 text-white hover:bg-white/20 transition-all active:scale-90"
+                    className="p-3 rounded-full bg-black/10 backdrop-blur-md border border-black/10 text-amber-950 hover:bg-black/20 transition-all active:scale-90"
                     aria-label={showBalance ? "Ocultar saldo" : "Mostrar saldo"}
                   >
                     {showBalance ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
@@ -502,14 +502,14 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
                     <div className="flex items-baseline gap-2">
                       {showBalance ? (
                           <>
-                            <span className="text-white text-3xl font-bold opacity-60">R$</span>
-                            <span className="text-5xl font-black text-white tracking-tighter leading-none text-shimmer">12,50</span>
+                            <span className="text-amber-950 text-3xl font-bold opacity-60">R$</span>
+                            <span className="text-5xl font-black text-amber-950 tracking-tighter leading-none">12,50</span>
                           </>
                       ) : (
-                          <span className="text-4xl font-black text-white/25 tracking-[0.3em] leading-none select-none">•••••</span>
+                          <span className="text-4xl font-black text-amber-900/25 tracking-[0.3em] leading-none select-none">•••••</span>
                       )}
                     </div>
-                    <div className="p-3 rounded-full bg-white text-emerald-700 shadow-xl group-hover:scale-110 transition-transform">
+                    <div className="p-3 rounded-full bg-amber-900 text-white shadow-xl group-hover:scale-110 transition-transform">
                       <ArrowUpRight className="w-5 h-5" strokeWidth={3} />
                     </div>
                 </div>
@@ -574,14 +574,14 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
       case 'roulette_banner':
         return (
           <div key="roulette_banner" className="px-5">
-            <button onClick={() => setIsSpinWheelOpen(true)} className="w-full bg-gradient-to-r from-purple-600 to-pink-600 rounded-3xl p-5 text-white flex items-center justify-between shadow-[0_8px_25px_rgba(147,51,234,0.2)] active:scale-[0.98] transition-all relative overflow-hidden group border border-white/10">
+            <button onClick={() => setIsSpinWheelOpen(true)} className="w-full bg-gradient-to-br from-green-500 to-emerald-600 rounded-3xl p-5 text-white flex items-center justify-between shadow-lg shadow-emerald-500/30 active:scale-[0.98] transition-all relative overflow-hidden group border border-white/10">
               <div className="flex items-center gap-4 relative z-10">
                 <div className="w-12 h-12 flex items-center justify-center animate-spin-and-stop">
                   <RouletteIcon className="w-full h-full drop-shadow-lg" />
                 </div>
                 <div className="text-left">
                   <h3 className="font-bold text-lg leading-none mb-1">Roleta da Sorte</h3>
-                  <p className="text-xs text-purple-100">Tente a sorte e ganhe prêmios!</p>
+                  <p className="text-xs text-emerald-100">Tente a sorte e ganhe prêmios!</p>
                 </div>
               </div>
               <ArrowRight className="w-6 h-6 text-white/50 group-hover:translate-x-1 transition-transform" />
