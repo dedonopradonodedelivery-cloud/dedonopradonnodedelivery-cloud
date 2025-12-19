@@ -405,9 +405,9 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
               </div>
             </div>
             <div className="px-5 mt-2">
-              <div className="w-full bg-gray-200/70 dark:bg-gray-700/50 rounded-full h-0.5 relative overflow-hidden">
+              <div className="w-full bg-gray-200/30 dark:bg-gray-700/20 rounded-full h-px relative overflow-hidden">
                 <div
-                  className="bg-blue-400 dark:bg-blue-500 h-0.5 rounded-full absolute"
+                  className="bg-blue-400 dark:bg-blue-500 h-px rounded-full absolute"
                   style={{
                     width: '25%',
                     left: `${categoryScrollProgress * 0.75}%`,
@@ -611,6 +611,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
               <div className="flex gap-4 overflow-x-auto pb-4 no-scrollbar snap-x px-5">
                   {themes.map((theme) => (
                       <div key={theme.id} className="snap-center min-w-[270px] w-[270px] h-[160px] rounded-3xl overflow-hidden relative cursor-pointer active:scale-[0.98] transition-all shadow-[0_8px_20px_rgba(0,0,0,0.1)] group border border-white/10" onClick={() => onSelectCollection(theme as any)}>
+                          {/* Fix: `theme.title` is a string property, not a function. */}
                           <img src={theme.image} className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000" alt={theme.title} />
                           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
                           <div className="absolute bottom-5 left-6 right-6">
