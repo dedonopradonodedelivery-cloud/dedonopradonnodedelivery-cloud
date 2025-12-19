@@ -682,8 +682,6 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
             {renderSection('master_sponsor')}
             {renderSection('filters')}
             {renderSection('list')}
-            {renderSection('editorial')}
-            {renderSection('bonus')}
 
             <div className="mt-12 mb-4 flex flex-col items-center justify-center text-center opacity-40">
               <Star className="w-4 h-4 text-gray-400 mb-2" />
