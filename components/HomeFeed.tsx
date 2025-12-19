@@ -26,7 +26,8 @@ import {
   History,
   ArrowUpRight,
   Eye,
-  EyeOff
+  EyeOff,
+  BarChart3
 } from 'lucide-react';
 import { LojasEServicosList } from './LojasEServicosList';
 import { User } from '@supabase/supabase-js';
@@ -62,6 +63,36 @@ interface BannerItem {
   ctaClass: string;
   iconAnimation?: string;
 }
+
+const RouletteIcon: React.FC<{ className?: string }> = ({ className }) => {
+  const colors = ['#10B981', '#3B82F6', '#8B5CF6', '#EC4899', '#F59E0B', '#F97316', '#EF4444', '#06B6D4'];
+  const sliceAngle = 45;
+  const center = 50;
+  const radius = 50;
+
+  const getPathD = (index: number) => {
+    const startAngle = index * sliceAngle;
+    const endAngle = startAngle + sliceAngle;
+    const startRad = (startAngle - 90) * Math.PI / 180;
+    const endRad = (endAngle - 90) * Math.PI / 180;
+    const x1 = center + radius * Math.cos(startRad);
+    const y1 = center + radius * Math.sin(startRad);
+    const x2 = center + radius * Math.cos(endRad);
+    const y2 = center + radius * Math.sin(endRad);
+    return `M ${center},${center} L ${x1},${y1} A ${radius},${radius} 0 0 1 ${x2},${y2} Z`;
+  };
+
+  return (
+    <svg viewBox="0 0 100 100" className={className}>
+      {colors.map((color, i) => (
+        <path key={i} d={getPathD(i)} fill={color} stroke="#FFFFFF" strokeWidth="1.5" />
+      ))}
+      <circle cx="50" cy="50" r="8" fill="white" />
+      <circle cx="50" cy="50" r="5" fill="#334155" />
+    </svg>
+  );
+};
+
 
 export const HomeFeed: React.FC<HomeFeedProps> = ({ 
   onNavigate, 
@@ -282,87 +313,103 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
           </div>
         );
       case 'wallet':
+        // --- NOVO BANNER DE CASHBACK REATORADO ---
         return (
           <div key="wallet" className="px-5 py-4">
+            {/* ESTADO 1: CONVIDADO (SEM LOGIN) */}
+            {!user && (
               <div 
-                className="bg-gradient-to-br from-emerald-600 to-teal-800 rounded-[28px] p-6 flex flex-col gap-4 active:scale-[0.99] transition-all cursor-pointer relative overflow-y-auto no-scrollbar group animate-balance-load border border-white/20 h-[190px]"
-                onClick={() => onNavigate('user_cashback_flow')}
+                onClick={onRequireLogin}
+                className="bg-gradient-to-br from-emerald-500 to-teal-600 rounded-[28px] p-6 flex items-center justify-between h-[190px] cursor-pointer group active:scale-[0.99] transition-transform"
               >
-                  {/* Decorative background icon */}
-                  <div className="absolute -right-12 top-1/2 -translate-y-1/2 text-white/5 pointer-events-none transform-gpu rotate-[-20deg]">
-                      <Coins size={240} strokeWidth={0.5} />
+                <div className="relative z-10">
+                  <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center text-white border border-white/10 mb-3">
+                    <Wallet className="w-6 h-6"/>
                   </div>
-                  
-                  {/* Top Bar: Labels + Controls */}
-                  <div className="flex justify-between items-center relative z-10">
-                      <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-2xl flex items-center justify-center text-white border border-white/10 shadow-inner group-hover:rotate-12 transition-transform duration-500">
-                            <Wallet className="w-5 h-5" />
-                          </div>
-                          <div>
-                            <p className="text-[10px] font-black text-emerald-100/60 uppercase tracking-[0.3em] mb-0.5">Meu Saldo</p>
-                            <div className="flex items-center gap-1.5">
-                                <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse"></span>
-                                <span className="text-[9px] text-emerald-100/50 font-bold tracking-widest uppercase">Carteira Segura</span>
-                            </div>
-                          </div>
-                      </div>
-
-                      <div className="flex items-center gap-2">
-                        <button 
-                          onClick={(e) => { e.stopPropagation(); setShowBalance(!showBalance); }}
-                          className="p-3 rounded-full bg-white/10 backdrop-blur-md border border-white/10 text-white hover:bg-white/20 transition-all active:scale-90"
-                          aria-label={showBalance ? "Ocultar saldo" : "Mostrar saldo"}
-                        >
-                          {showBalance ? <Eye className="w-4.5 h-4.5" /> : <EyeOff className="w-4.5 h-4.5" />}
-                        </button>
-                        <div className="p-3 rounded-full bg-white text-emerald-700 shadow-2xl group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform">
-                          <ArrowUpRight className="w-4.5 h-4.5" strokeWidth={3.5} />
-                        </div>
-                      </div>
-                  </div>
-
-                  {/* Main Value: Scaled to maximum prominence */}
-                  <div className="relative z-10 flex flex-col items-start mt-4">
-                      <div className="flex items-baseline gap-3 transition-all duration-500 group-hover:translate-x-1">
-                        {showBalance ? (
-                          <div className="flex items-baseline gap-3 animate-balance-load">
-                            <span className="text-white text-3xl font-bold opacity-60 mb-2">R$</span>
-                            <span className="text-[80px] font-black text-white tracking-tighter leading-none drop-shadow-[0_8px_20px_rgba(0,0,0,0.35)] text-shimmer">12,50</span>
-                          </div>
-                        ) : (
-                          <div className="py-7 animate-balance-load">
-                            <span className="text-6xl font-black text-white/25 tracking-[0.5em] leading-none select-none">•••••</span>
-                          </div>
-                        )}
-                      </div>
-                  </div>
-
-                  {/* Footer Stats & Progress */}
-                  <div className="relative z-10 mt-auto space-y-4">
-                    <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-black/30 backdrop-blur-sm border border-white/5 w-fit animate-in slide-in-from-left duration-700">
-                        <div className="w-4.5 h-4.5 bg-yellow-400 rounded-full flex items-center justify-center shadow-[0_0_10px_rgba(250,204,21,0.5)]">
-                            <Coins className="w-2.5 h-2.5 text-teal-900 fill-teal-900" />
-                        </div>
-                        <span className="text-[10px] font-black text-white uppercase tracking-[0.15em]">+ R$ 2,50 acumulados hoje</span>
-                    </div>
-
-                    <div className="space-y-3">
-                        <div className="flex justify-between items-center px-1">
-                            <span className="text-[11px] font-bold text-emerald-100/70 flex items-center gap-2">
-                                Próximo Resgate em Parceiros
-                                <TrendingUp className="w-3 h-3 text-green-400" />
-                            </span>
-                            <span className="text-[10px] font-black text-white bg-white/20 px-2.5 py-1 rounded-lg border border-white/10">25%</span>
-                        </div>
-                        <div className="h-3 w-full bg-black/20 rounded-full overflow-hidden border border-white/5 p-[1px] relative">
-                            <div className="h-full bg-gradient-to-r from-emerald-300 via-white to-emerald-200 w-[25%] rounded-full shadow-[0_0_20px_rgba(255,255,255,0.8)] relative overflow-hidden">
-                               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/60 to-transparent -translate-x-full animate-shimmer"></div>
-                            </div>
-                        </div>
-                    </div>
-                  </div>
+                  <h3 className="font-bold text-white text-lg leading-tight mb-1">Ganhe dinheiro de volta no bairro</h3>
+                  <p className="text-teal-100 text-sm">Crie sua conta e comece a economizar.</p>
+                </div>
+                <div className="p-3 rounded-full bg-white text-emerald-700 shadow-lg group-hover:scale-110 transition-transform">
+                  <ArrowRight className="w-5 h-5" strokeWidth={3} />
+                </div>
               </div>
+            )}
+
+            {/* ESTADO 2: LOJISTA LOGADO */}
+            {user && userRole === 'lojista' && (
+              <div 
+                onClick={() => onNavigate('store_area')}
+                className="bg-gradient-to-br from-teal-600 to-cyan-800 rounded-[28px] p-6 h-[190px] cursor-pointer group active:scale-[0.99] transition-transform flex flex-col justify-between"
+              >
+                <div>
+                  <div className="flex justify-between items-start">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-md flex items-center justify-center text-white border border-white/10">
+                        <BarChart3 className="w-5 h-5"/>
+                      </div>
+                      <div>
+                        <p className="text-sm font-bold text-white">Painel de Cashback</p>
+                        <p className="text-xs text-cyan-100">Performance do seu negócio</p>
+                      </div>
+                    </div>
+                    <div className="p-3 rounded-full bg-black/20 group-hover:bg-white/20 transition-colors">
+                      <ArrowUpRight className="w-4 h-4 text-white" strokeWidth={3} />
+                    </div>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4 text-white">
+                  <div>
+                    <p className="text-[10px] uppercase font-bold text-cyan-100 tracking-wider">Cashback Gerado</p>
+                    <p className="text-2xl font-bold">R$ 622,50</p>
+                  </div>
+                  <div>
+                    <p className="text-[10px] uppercase font-bold text-cyan-100 tracking-wider">Clientes Impactados</p>
+                    <p className="text-2xl font-bold">114</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* ESTADO 3: CLIENTE LOGADO */}
+            {user && userRole === 'cliente' && (
+              <div 
+                onClick={() => onNavigate('user_cashback_flow')}
+                className="bg-gradient-to-br from-emerald-600 to-teal-800 rounded-[28px] p-6 h-[190px] cursor-pointer group active:scale-[0.99] transition-transform flex flex-col justify-between"
+              >
+                <div className="flex justify-between items-start">
+                  <div>
+                    <p className="text-[10px] font-black text-emerald-100/60 uppercase tracking-[0.3em] mb-0.5">Meu Saldo</p>
+                    <div className="flex items-center gap-1.5">
+                        <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse"></span>
+                        <span className="text-[9px] text-emerald-100/50 font-bold tracking-widest uppercase">Carteira Segura</span>
+                    </div>
+                  </div>
+                  <button 
+                    onClick={(e) => { e.stopPropagation(); setShowBalance(!showBalance); }}
+                    className="p-3 rounded-full bg-white/10 backdrop-blur-md border border-white/10 text-white hover:bg-white/20 transition-all active:scale-90"
+                    aria-label={showBalance ? "Ocultar saldo" : "Mostrar saldo"}
+                  >
+                    {showBalance ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+                  </button>
+                </div>
+
+                <div className="flex items-center justify-between">
+                    <div className="flex items-baseline gap-2">
+                      {showBalance ? (
+                          <>
+                            <span className="text-white text-3xl font-bold opacity-60">R$</span>
+                            <span className="text-5xl font-black text-white tracking-tighter leading-none text-shimmer">12,50</span>
+                          </>
+                      ) : (
+                          <span className="text-4xl font-black text-white/25 tracking-[0.3em] leading-none select-none">•••••</span>
+                      )}
+                    </div>
+                    <div className="p-3 rounded-full bg-white text-emerald-700 shadow-xl group-hover:scale-110 transition-transform">
+                      <ArrowUpRight className="w-5 h-5" strokeWidth={3} />
+                    </div>
+                </div>
+              </div>
+            )}
           </div>
         );
       case 'master_sponsor':
@@ -424,8 +471,8 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
           <div key="roulette_banner" className="px-5">
             <button onClick={() => setIsSpinWheelOpen(true)} className="w-full bg-gradient-to-r from-purple-600 to-pink-600 rounded-3xl p-5 text-white flex items-center justify-between shadow-[0_8px_25px_rgba(147,51,234,0.2)] active:scale-[0.98] transition-all relative overflow-hidden group border border-white/10">
               <div className="flex items-center gap-4 relative z-10">
-                <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/10 animate-spin-slow">
-                  <Dices className="w-7 h-7 text-white" />
+                <div className="w-12 h-12 flex items-center justify-center animate-spin-slow">
+                  <RouletteIcon className="w-full h-full drop-shadow-lg" />
                 </div>
                 <div className="text-left">
                   <h3 className="font-bold text-lg leading-none mb-1">Roleta da Sorte</h3>
