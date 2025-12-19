@@ -328,7 +328,7 @@ export const ExploreView: React.FC<ExploreViewProps> = ({
         </section>
 
         <section className="pb-10">
-           <MasterSponsorBanner onClick={onViewMasterSponsor} className="bg-[#0F172A]" />
+           <MasterSponsorBanner onClick={onViewMasterSponsor} />
         </section>
       </div>
 

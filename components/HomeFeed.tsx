@@ -409,8 +409,8 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
                 <div
                   className="bg-blue-400 dark:bg-blue-500 h-px rounded-full absolute"
                   style={{
-                    width: '25%',
-                    left: `${categoryScrollProgress * 0.75}%`,
+                    width: '18%',
+                    left: `${categoryScrollProgress * 0.82}%`,
                   }}
                 ></div>
               </div>
@@ -425,16 +425,16 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
             {!user && (
               <div 
                 onClick={onRequireLogin}
-                className="bg-gradient-to-br from-emerald-500 to-teal-600 rounded-[28px] p-6 flex items-center justify-between h-[190px] cursor-pointer group active:scale-[0.99] transition-transform"
+                className="bg-gradient-to-br from-gray-900 to-black rounded-[28px] p-6 flex items-center justify-between h-[190px] cursor-pointer group active:scale-[0.99] transition-transform"
               >
                 <div className="relative z-10">
-                  <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center text-white border border-white/10 mb-3">
+                  <div className="w-12 h-12 rounded-2xl bg-amber-400/10 backdrop-blur-md flex items-center justify-center text-amber-400 border border-amber-400/20 mb-3">
                     <Wallet className="w-6 h-6"/>
                   </div>
-                  <h3 className="font-bold text-white text-lg leading-tight mb-1">Ganhe dinheiro de volta no bairro</h3>
-                  <p className="text-teal-100 text-sm">Crie sua conta e comece a economizar.</p>
+                  <h3 className="font-bold text-amber-300 text-lg leading-tight mb-1">Ganhe dinheiro de volta no bairro</h3>
+                  <p className="text-amber-200/80 text-sm">Crie sua conta e comece a economizar.</p>
                 </div>
-                <div className="p-3 rounded-full bg-white text-emerald-700 shadow-lg group-hover:scale-110 transition-transform">
+                <div className="p-3 rounded-full bg-amber-400 text-black shadow-lg group-hover:scale-110 transition-transform">
                   <ArrowRight className="w-5 h-5" strokeWidth={3} />
                 </div>
               </div>
@@ -444,32 +444,32 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
             {user && userRole === 'lojista' && (
               <div 
                 onClick={() => onNavigate('store_area')}
-                className="bg-gradient-to-br from-teal-600 to-cyan-800 rounded-[28px] p-6 h-[190px] cursor-pointer group active:scale-[0.99] transition-transform flex flex-col justify-between"
+                className="bg-gradient-to-br from-gray-900 to-black rounded-[28px] p-6 h-[190px] cursor-pointer group active:scale-[0.99] transition-transform flex flex-col justify-between"
               >
                 <div>
                   <div className="flex justify-between items-start">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-md flex items-center justify-center text-white border border-white/10">
+                      <div className="w-10 h-10 rounded-xl bg-amber-400/10 backdrop-blur-md flex items-center justify-center text-amber-400 border border-amber-400/20">
                         <BarChart3 className="w-5 h-5"/>
                       </div>
                       <div>
-                        <p className="text-sm font-bold text-white">Painel de Cashback</p>
-                        <p className="text-xs text-cyan-100">Performance do seu negócio</p>
+                        <p className="text-sm font-bold text-amber-300">Painel de Cashback</p>
+                        <p className="text-xs text-amber-200/80">Performance do seu negócio</p>
                       </div>
                     </div>
-                    <div className="p-3 rounded-full bg-black/20 group-hover:bg-white/20 transition-colors">
+                    <div className="p-3 rounded-full bg-white/10 group-hover:bg-white/20 transition-colors">
                       <ArrowUpRight className="w-4 h-4 text-white" strokeWidth={3} />
                     </div>
                   </div>
                 </div>
-                <div className="grid grid-cols-2 gap-4 text-white">
+                <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <p className="text-[10px] uppercase font-bold text-cyan-100 tracking-wider">Cashback Gerado</p>
-                    <p className="text-2xl font-bold">R$ 622,50</p>
+                    <p className="text-[10px] uppercase font-bold text-amber-200/70 tracking-wider">Cashback Gerado</p>
+                    <p className="text-2xl font-bold text-amber-300">R$ 622,50</p>
                   </div>
                   <div>
-                    <p className="text-[10px] uppercase font-bold text-cyan-100 tracking-wider">Clientes Impactados</p>
-                    <p className="text-2xl font-bold">114</p>
+                    <p className="text-[10px] uppercase font-bold text-amber-200/70 tracking-wider">Clientes Impactados</p>
+                    <p className="text-2xl font-bold text-amber-300">114</p>
                   </div>
                 </div>
               </div>
@@ -479,19 +479,19 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
             {user && userRole === 'cliente' && (
               <div 
                 onClick={() => onNavigate('user_cashback_flow')}
-                className="bg-gradient-to-br from-amber-400 to-yellow-500 rounded-[28px] p-6 h-[190px] cursor-pointer group active:scale-[0.99] transition-transform flex flex-col justify-between"
+                className="bg-gradient-to-br from-gray-900 to-black rounded-[28px] p-6 h-[190px] cursor-pointer group active:scale-[0.99] transition-transform flex flex-col justify-between"
               >
                 <div className="flex justify-between items-start">
                   <div>
-                    <p className="text-[10px] font-black text-amber-900/70 uppercase tracking-[0.3em] mb-0.5">Meu Saldo</p>
+                    <p className="text-[10px] font-black text-amber-200/80 uppercase tracking-[0.3em] mb-0.5">Meu Saldo</p>
                     <div className="flex items-center gap-1.5">
-                        <span className="w-1.5 h-1.5 rounded-full bg-green-600 animate-pulse"></span>
-                        <span className="text-[9px] text-amber-900/60 font-bold tracking-widest uppercase">Carteira Segura</span>
+                        <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
+                        <span className="text-[9px] text-amber-200/60 font-bold tracking-widest uppercase">Carteira Segura</span>
                     </div>
                   </div>
                   <button 
                     onClick={(e) => { e.stopPropagation(); setShowBalance(!showBalance); }}
-                    className="p-3 rounded-full bg-black/10 backdrop-blur-md border border-black/10 text-amber-950 hover:bg-black/20 transition-all active:scale-90"
+                    className="p-3 rounded-full bg-white/10 backdrop-blur-md border border-white/10 text-amber-300 hover:bg-white/20 transition-all active:scale-90"
                     aria-label={showBalance ? "Ocultar saldo" : "Mostrar saldo"}
                   >
                     {showBalance ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
@@ -502,14 +502,14 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
                     <div className="flex items-baseline gap-2">
                       {showBalance ? (
                           <>
-                            <span className="text-amber-950 text-3xl font-bold opacity-60">R$</span>
-                            <span className="text-5xl font-black text-amber-950 tracking-tighter leading-none">12,50</span>
+                            <span className="text-amber-300 text-3xl font-bold opacity-60">R$</span>
+                            <span className="text-5xl font-black text-amber-300 tracking-tighter leading-none">12,50</span>
                           </>
                       ) : (
-                          <span className="text-4xl font-black text-amber-900/25 tracking-[0.3em] leading-none select-none">•••••</span>
+                          <span className="text-4xl font-black text-amber-200/25 tracking-[0.3em] leading-none select-none">•••••</span>
                       )}
                     </div>
-                    <div className="p-3 rounded-full bg-amber-900 text-white shadow-xl group-hover:scale-110 transition-transform">
+                    <div className="p-3 rounded-full bg-amber-400 text-black shadow-xl group-hover:scale-110 transition-transform">
                       <ArrowUpRight className="w-5 h-5" strokeWidth={3} />
                     </div>
                 </div>
