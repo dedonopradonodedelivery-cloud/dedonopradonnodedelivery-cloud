@@ -18,7 +18,7 @@ import { PrizeHistoryView } from './components/PrizeHistoryView';
 import { FreguesiaConnectPublic } from './components/FreguesiaConnectPublic';
 import { FreguesiaConnectDashboard } from './components/FreguesiaConnectDashboard';
 import { FreguesiaConnectRestricted } from './components/FreguesiaConnectRestricted';
-import { MapPin, Crown, ShieldCheck } from 'lucide-react';
+import { MapPin, Crown } from 'lucide-react';
 import { useAuth } from './contexts/AuthContext';
 import { Category, Store, AdType, EditorialCollection } from './types';
 import { getStoreLogo } from './utils/mockLogos';
@@ -62,15 +62,25 @@ const MOCK_STORES: Store[] = [
 const App: React.FC = () => {
   const { user, userRole, loading: isAuthLoading } = useAuth();
   const [minSplashTimeElapsed, setMinSplashTimeElapsed] = useState(false);
+  const [splashProgress, setSplashProgress] = useState(0);
   const [activeTab, setActiveTab] = useState('home');
   const [isDarkMode, setIsDarkMode] = useState(false);
   
   useEffect(() => {
-    // Garante que o splash dure exatamente o tempo da animação (5s)
+    // 1. Inicia animação da barra de progresso imediatamente
+    const animationFrame = requestAnimationFrame(() => {
+      setSplashProgress(100);
+    });
+
+    // 2. Trava o splash por exatamente 5 segundos (Obrigatório)
     const timer = setTimeout(() => {
       setMinSplashTimeElapsed(true);
     }, 5000);
-    return () => clearTimeout(timer);
+
+    return () => {
+      clearTimeout(timer);
+      cancelAnimationFrame(animationFrame);
+    };
   }, []);
 
   const [isAuthOpen, setIsAuthOpen] = useState(false);
@@ -89,23 +99,21 @@ const App: React.FC = () => {
     else setIsAuthOpen(true);
   };
 
+  // O app só é liberado se o carregamento do Supabase terminou E o tempo mínimo de 5s passou
   const isAppReady = !isAuthLoading && minSplashTimeElapsed;
 
   if (!isAppReady) {
     return (
       <div className="fixed inset-0 bg-[#1E5BFF] flex flex-col items-center justify-center text-white z-[999] overflow-hidden">
-        {/* Background Animated Elements */}
-        <div className="absolute inset-0 bg-gradient-to-br from-[#1E5BFF] via-[#1E5BFF] to-[#0F359E]"></div>
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-white/5 rounded-full blur-[120px] animate-glow-pulse"></div>
-
+        {/* ELEMENTO CRÍTICO: LOGO PRINCIPAL */}
         <div className="relative flex flex-col items-center justify-center z-10">
           <div className="animate-float">
-            <div className="w-24 h-24 bg-white rounded-[2.5rem] flex items-center justify-center shadow-[0_20px_60px_rgba(0,0,0,0.2)] mb-6 animate-pop-in">
+            <div className="w-24 h-24 bg-white rounded-[2.5rem] flex items-center justify-center shadow-2xl mb-6 animate-pop-in">
               <MapPin className="w-12 h-12 text-[#1E5BFF] fill-[#1E5BFF]" />
             </div>
           </div>
           
-          <div className="animate-soft-pulse text-center">
+          <div className="text-center">
             <h1 className="text-5xl font-black font-display animate-slide-up tracking-tighter drop-shadow-md">
               Localizei
             </h1>
@@ -117,30 +125,31 @@ const App: React.FC = () => {
           </div>
         </div>
 
-        {/* Sponsor Block */}
-        <div className="absolute bottom-20 left-0 right-0 flex flex-col items-center px-10 z-10">
-          <div className="opacity-0 [animation-delay:1500ms] [animation-fill-mode:forwards] animate-sponsor-spin-in w-full max-w-[280px]">
-            <p className="text-[8px] font-black text-blue-300/60 uppercase tracking-[0.4em] mb-4 text-center animate-soft-pulse">
-              Patrocinador Master
-            </p>
-            <div className="animate-sponsor-float">
-              <div className="bg-white/10 backdrop-blur-2xl px-6 py-4 rounded-[2rem] border border-white/20 flex items-center gap-4 shadow-2xl relative overflow-hidden group">
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full animate-shimmer"></div>
-                <div className="w-10 h-10 bg-gradient-to-br from-yellow-300 to-orange-500 rounded-2xl flex items-center justify-center shadow-lg animate-sponsor-logo-pulse">
-                  <Crown className="w-6 h-6 text-white fill-white" />
-                </div>
-                <div className="flex flex-col text-left">
-                  <p className="font-black text-lg tracking-tight text-white leading-none">Grupo Esquematiza</p>
-                  <p className="text-[9px] font-bold text-blue-200 uppercase mt-1">Segurança & Facilities</p>
-                </div>
+        {/* ELEMENTO CRÍTICO DE MONETIZAÇÃO: PATROCINADOR MASTER NO SPLASH */}
+        <div className="absolute bottom-20 left-0 right-0 flex flex-col items-center px-10 z-10 opacity-0 [animation-delay:1200ms] [animation-fill-mode:forwards] animate-sponsor-spin-in">
+          <p className="text-[8px] font-black text-blue-100 uppercase tracking-[0.4em] mb-4 text-center animate-soft-pulse">
+            Patrocinador Master
+          </p>
+          <div className="animate-sponsor-float w-full max-w-[280px]">
+            <div className="bg-white/10 backdrop-blur-2xl px-6 py-5 rounded-[2.5rem] border-2 border-white/30 flex items-center gap-4 shadow-[0_20px_50px_rgba(0,0,0,0.3)] relative overflow-hidden group">
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full animate-shimmer"></div>
+              <div className="w-12 h-12 bg-gradient-to-br from-yellow-300 to-orange-500 rounded-2xl flex items-center justify-center shadow-lg animate-sponsor-logo-pulse shrink-0">
+                <Crown className="w-7 h-7 text-white fill-white" />
+              </div>
+              <div className="flex flex-col text-left">
+                <p className="font-black text-xl tracking-tight text-white leading-none">Grupo Esquematiza</p>
+                <p className="text-[10px] font-bold text-blue-100 uppercase mt-1 tracking-wider">Segurança & Facilities</p>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Progress Bar */}
+        {/* Barra de Progresso Real de 5 Segundos */}
         <div className="absolute bottom-0 left-0 right-0 h-1.5 bg-white/10">
-           <div className="h-full bg-white shadow-[0_0_15px_rgba(255,255,255,0.8)] transition-all duration-[5000ms] ease-linear" style={{ width: minSplashTimeElapsed ? '100%' : '0%' }} />
+           <div 
+             className="h-full bg-white shadow-[0_0_15px_rgba(255,255,255,0.8)] transition-all duration-[5000ms] ease-linear" 
+             style={{ width: `${splashProgress}%` }} 
+           />
         </div>
       </div>
     );

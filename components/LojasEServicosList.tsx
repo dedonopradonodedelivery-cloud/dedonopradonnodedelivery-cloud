@@ -43,20 +43,28 @@ const generateFakeStores = (): Store[] => {
   });
 };
 
+// ALGORITMO CRÍTICO: ORDENAÇÃO POR MONETIZAÇÃO
 const sortStores = (stores: Store[]) => {
   return stores.sort((a, b) => {
+    // 1. PRIORIDADE MÁXIMA: PREMIUM E PATROCINADOS (Obrigatório por contrato)
     const aSponsored = a.isSponsored || a.adType === AdType.PREMIUM;
     const bSponsored = b.isSponsored || b.adType === AdType.PREMIUM;
     if (aSponsored && !bSponsored) return -1;
     if (!aSponsored && bSponsored) return 1;
+
+    // 2. PRIORIDADE SECUNDÁRIA: LOCAL ADS (Ocupam a segunda camada)
+    const aLocal = a.adType === AdType.LOCAL;
+    const bLocal = b.adType === AdType.LOCAL;
+    if (aLocal && !bLocal) return -1;
+    if (!aLocal && bLocal) return 1;
+
+    // 3. PRIORIDADE TERCIÁRIA: ALTA REPUTAÇÃO + CASHBACK (Incentivo de uso)
     const aSmart = (a.rating >= 4.5 && (a.cashback || 0) > 0);
     const bSmart = (b.rating >= 4.5 && (b.cashback || 0) > 0);
     if (aSmart && !bSmart) return -1;
     if (!aSmart && bSmart) return 1;
-    const aHasCashback = !!a.cashback;
-    const bHasCashback = !!b.cashback;
-    if (aHasCashback && !bHasCashback) return -1;
-    if (!aHasCashback && bHasCashback) return 1;
+
+    // 4. ORDEM ORGÂNICA POR AVALIAÇÃO
     return (b.rating || 0) - (a.rating || 0);
   });
 };
@@ -120,9 +128,13 @@ export const LojasEServicosList: React.FC<LojasEServicosListProps> = ({ onStoreC
     } else if (activeFilter === 'open_now') {
         data = data.filter(s => s.isOpenNow);
     }
-    setFilteredStores(data);
-    setVisibleStores(data.slice(0, ITEMS_PER_PAGE));
-    setHasMore(data.length > ITEMS_PER_PAGE);
+    
+    // RE-APLICA ORDENAÇÃO DE MONETIZAÇÃO MESMO COM FILTROS (Critico)
+    const finalData = sortStores(data);
+
+    setFilteredStores(finalData);
+    setVisibleStores(finalData.slice(0, ITEMS_PER_PAGE));
+    setHasMore(finalData.length > ITEMS_PER_PAGE);
   }, [activeFilter]);
 
   const loadMore = useCallback(() => {
@@ -172,24 +184,24 @@ export const LojasEServicosList: React.FC<LojasEServicosListProps> = ({ onStoreC
         {visibleStores.map((store, index) => {
             const isLastElement = index === visibleStores.length - 1;
             const isFavorited = isFavorite(store.id);
+            const isSponsored = store.isSponsored || store.adType === AdType.PREMIUM;
             const { badge, copy, activityBadge } = getStoreExtras(index, store);
             return (
                 <div
                     key={store.id}
                     ref={isLastElement ? lastStoreElementRef : null}
                     onClick={() => onStoreClick && onStoreClick(store)}
-                    className="bg-white dark:bg-gray-800 rounded-2xl p-3 flex gap-3 cursor-pointer relative group transition-all duration-300 shadow-[0_4px_12px_rgba(0,0,0,0.05)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] active:scale-[0.99]"
+                    className={`bg-white dark:bg-gray-800 rounded-2xl p-3 flex gap-3 cursor-pointer relative group transition-all duration-300 shadow-[0_4px_12px_rgba(0,0,0,0.05)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] active:scale-[0.99] border-2 ${isSponsored ? 'border-[#1E5BFF]/20 dark:border-[#1E5BFF]/10' : 'border-transparent'}`}
                 >
                     <div className="absolute top-3 right-3 z-10 pointer-events-none flex flex-col items-end gap-1">
-                        {badge && (
-                            <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${badge.color}`}>
-                                {badge.text}
+                        {isSponsored && (
+                            <span className="text-[9px] font-black px-2 py-0.5 rounded-full bg-[#1E5BFF] text-white shadow-lg uppercase tracking-widest">
+                                Patrocinado
                             </span>
                         )}
-                        {activityBadge && (
-                            <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1 shadow-sm ${activityBadge.color}`}>
-                                <activityBadge.icon className="w-2.5 h-2.5" />
-                                {activityBadge.text}
+                        {badge && !isSponsored && (
+                            <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${badge.color}`}>
+                                {badge.text}
                             </span>
                         )}
                     </div>
@@ -209,7 +221,7 @@ export const LojasEServicosList: React.FC<LojasEServicosListProps> = ({ onStoreC
                                <h4 className="font-bold text-gray-900 dark:text-white text-sm leading-tight truncate">{store.name}</h4>
                                {store.verified && <BadgeCheck className="w-3.5 h-3.5 text-[#1E5BFF] fill-white shrink-0" />}
                              </div>
-                             <p className="text-[10px] font-medium text-gray-50 dark:text-gray-400 italic">{copy}</p>
+                             <p className="text-[10px] font-medium text-gray-400 dark:text-gray-500 italic">{copy}</p>
                         </div>
 
                         <div className="flex items-center gap-3 text-[11px] text-gray-500 dark:text-gray-400 mt-auto">
@@ -236,16 +248,6 @@ export const LojasEServicosList: React.FC<LojasEServicosListProps> = ({ onStoreC
             <div className="flex items-center gap-2 text-[#1E5BFF] bg-white dark:bg-gray-800 px-4 py-2 rounded-full shadow-md border border-blue-50 dark:border-gray-700">
                 <Loader2 className="w-4 h-4 animate-spin" />
                 <span className="text-xs font-bold">Buscando mais opções...</span>
-            </div>
-        </div>
-      )}
-
-      {error && (
-        <div className="w-full flex justify-center py-4">
-            <div className="flex items-center gap-2 text-red-500 bg-red-50 dark:bg-red-900/20 px-4 py-2 rounded-xl">
-                <AlertCircle className="w-4 h-4" />
-                <span className="text-xs font-bold">Erro ao carregar.</span>
-                <button onClick={() => { setHasMore(true); loadMore(); }} className="underline ml-1 font-bold">Tentar novamente</button>
             </div>
         </div>
       )}

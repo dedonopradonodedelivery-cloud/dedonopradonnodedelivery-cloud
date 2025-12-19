@@ -1,24 +1,9 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { GoogleGenAI } from "@google/genai";
 import { MessageCircle, X, Send, Sparkles, Loader2 } from 'lucide-react';
 import { ChatMessage } from '../types';
 import { STORES } from '../constants';
-
-// Initialize Gemini Client safely
-const initializeGemini = () => {
-  try {
-    if (!process.env.API_KEY) {
-      console.warn("API_KEY missing for Gemini.");
-      return null;
-    }
-    return new GoogleGenAI({ apiKey: process.env.API_KEY });
-  } catch (error) {
-    console.error("Failed to initialize Gemini:", error);
-    return null;
-  }
-};
-
-const aiClient = initializeGemini();
 
 export const GeminiAssistant: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -43,37 +28,30 @@ export const GeminiAssistant: React.FC = () => {
     setMessages(prev => [...prev, { role: 'user', text: userMsg }]);
     setIsThinking(true);
 
-    if (!aiClient) {
-        setIsThinking(false);
-        setMessages(prev => [...prev, { role: 'model', text: "Desculpe, a chave de API não está configurada neste ambiente de demonstração." }]);
-        return;
-    }
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
     try {
-      // FIX: Refactored to use systemInstruction and a simplified prompt, following @google/genai guidelines.
-      const systemInstruction = `Você é o assistente útil do app "Localizei Freguesia".
-Responda de forma curta, amigável e com emojis. Tente convencer o usuário a visitar as lojas ou anunciar se for lojista.`;
+      const systemInstruction = `Você é o assistente útil e amigável do app "Localizei Freguesia". 
+O app atende o bairro da Freguesia em Jacarepaguá, RJ.
+Lojistas: Planos de R$ 1,90/dia (Local) e R$ 3,90/dia (Premium). Podem comprar leads de serviços por R$ 3,90.
+Usuários: Ganham cashback em lojas parceiras e podem usar a Roleta da Sorte.
+Sempre seja curto, use emojis e convide o usuário a explorar as seções do app.`;
 
       const promptContext = `
-        DADOS DO APP:
-        - É um super-app local para o bairro Freguesia.
-        - Lojistas pagam barato (R$ 1,90/dia Local, R$ 3,90/dia Premium).
-        - Usuários ganham Cashback.
-        - Profissionais podem comprar leads por R$ 3,90.
-        
-        LOJAS DISPONÍVEIS (Exemplos):
-        ${STORES.map(s => `- ${s.name} (${s.category}): ${s.description}. Rating: ${s.rating}.`).join('\n')}
+        LOJAS DISPONÍVEIS:
+        ${STORES.slice(0, 5).map(s => `- ${s.name} (${s.category}): ${s.description}.`).join('\n')}
       `;
 
-      const response = await aiClient.models.generateContent({
-        model: 'gemini-2.5-flash',
-        contents: `${promptContext}\n\nUsuário disse: ${userMsg}`,
+      const response = await ai.models.generateContent({
+        model: 'gemini-3-flash-preview',
+        contents: `${promptContext}\n\nPergunta do usuário: ${userMsg}`,
         config: {
           systemInstruction,
+          temperature: 0.7,
         },
       });
 
-      const text = response.text || "Desculpe, não entendi.";
+      const text = response.text || "Desculpe, tive um problema para processar sua mensagem.";
       setMessages(prev => [...prev, { role: 'model', text }]);
 
     } catch (error) {

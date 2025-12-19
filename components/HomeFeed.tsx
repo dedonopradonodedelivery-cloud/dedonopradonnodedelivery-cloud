@@ -21,12 +21,17 @@ import {
   ShieldCheck,
   MessageCircle,
   Handshake,
-  Tag,
-  BadgePercent
+  MapPin,
+  Coins,
+  History,
+  ArrowUpRight,
+  Eye,
+  EyeOff
 } from 'lucide-react';
 import { LojasEServicosList } from './LojasEServicosList';
 import { User } from '@supabase/supabase-js';
 import { SpinWheelView } from './SpinWheelView';
+import { MasterSponsorBanner } from './MasterSponsorBanner';
 
 interface HomeFeedProps {
   onNavigate: (view: string) => void;
@@ -54,7 +59,6 @@ interface BannerItem {
   action: () => void;
   isSponsored?: boolean;
   gradient: string;
-  glowClass: string;
   ctaClass: string;
   iconAnimation?: string;
 }
@@ -76,6 +80,16 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
   const carouselRef = useRef<HTMLDivElement>(null);
   const autoplayTimerRef = useRef<any | null>(null);
 
+  // Funcionalidade de ocultar saldo com persistência na sessão
+  const [showBalance, setShowBalance] = useState(() => {
+    const saved = sessionStorage.getItem('localizei_show_balance');
+    return saved !== null ? saved === 'true' : true;
+  });
+
+  useEffect(() => {
+    sessionStorage.setItem('localizei_show_balance', String(showBalance));
+  }, [showBalance]);
+
   const activeSearchTerm = externalSearchTerm || '';
   const [listFilter, setListFilter] = useState<'all' | 'cashback' | 'top_rated' | 'open_now'>('all');
 
@@ -91,37 +105,45 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
       {
         id: 'cashback_promo',
         badge: 'CASHBACK',
-        icon: <BadgePercent className="w-24 h-24 text-white/20" />,
-        title: 'Ganha dinheiro\ncomprando na Freguesia',
-        subtitle: 'Cashback real nas lojas do seu bairro',
+        icon: <Coins className="w-24 h-24 text-white/20" />,
+        title: 'Dinheiro de volta em\ntodas as compras',
+        subtitle: 'Ative agora e economize no bairro',
         gradient: 'from-emerald-500 to-emerald-600',
-        glowClass: 'shadow-emerald-500/30',
-        cta: 'Ativar agora',
+        cta: 'Ativar Grátis',
         action: () => onNavigate('cashback_info'),
-        ctaClass: 'animate-pulse-soft animate-glow-pulse shadow-[0_0_15px_rgba(255,255,255,0.4)]'
+        ctaClass: 'animate-pulse-soft shadow-[0_0_15px_rgba(255,255,255,0.4)]'
       },
       {
         id: 'whatsapp_services',
-        badge: 'SERVIÇOS',
+        badge: 'ORÇAMENTOS',
         icon: <MessageCircle className="w-24 h-24 text-white/20" />,
-        title: 'Orçamentos rápidos\npelo WhatsApp',
-        subtitle: 'Encontre serviços locais e resolva em minutos',
+        title: 'Quanto custa o reparo?\nDescubra no WhatsApp',
+        subtitle: 'Orçamento rápido com técnicos locais',
         gradient: 'from-blue-500 to-blue-600',
-        glowClass: 'shadow-blue-500/30',
-        cta: 'Pedir cotação',
+        cta: 'Pedir agora',
         action: () => onNavigate('explore'),
-        ctaClass: '',
-        iconAnimation: 'animate-bounce-x-small'
+        ctaClass: 'animate-bounce-x-small',
+        iconAnimation: ''
+      },
+      {
+        id: 'institutional',
+        badge: 'SUPER-APP',
+        icon: <MapPin className="w-24 h-24 text-white/20" />,
+        title: 'O guia definitivo da\nnossa vizinhança',
+        subtitle: 'Tudo o que você precisa em um só lugar',
+        gradient: 'from-sky-500 to-blue-500',
+        cta: 'Conhecer mais',
+        action: () => onNavigate('about'),
+        ctaClass: ''
       },
       {
         id: 'freguesia_connect',
-        badge: 'BUSINESS',
+        badge: 'OPORTUNIDADE',
         icon: <Handshake className="w-24 h-24 text-white/20" />,
-        title: 'Seu negócio conectado\nà Freguesia',
-        subtitle: 'Networking, parcerias e novas oportunidades',
+        title: 'Sua loja em destaque e\nmais conexões no bairro',
+        subtitle: 'Networking real para lojistas locais',
         gradient: 'from-indigo-600 to-violet-700',
-        glowClass: 'shadow-indigo-500/30',
-        cta: 'Entrar agora',
+        cta: 'Fazer parte',
         action: () => onNavigate('freguesia_connect_public'),
         ctaClass: 'animate-bounce-y'
       }
@@ -138,11 +160,10 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
         subtitle: randomStore.description ? randomStore.description.substring(0, 45) + '...' : 'Confira ofertas exclusivas agora.',
         image: randomStore.logoUrl || randomStore.image,
         gradient: 'from-slate-900 to-slate-800',
-        glowClass: 'shadow-slate-500/30',
         cta: 'Visitar loja',
         action: () => onStoreClick?.(randomStore),
         isSponsored: true,
-        ctaClass: 'animate-soft-pulse'
+        ctaClass: 'relative overflow-hidden before:absolute before:inset-0 before:-translate-x-full before:animate-[shimmer_3s_infinite] before:bg-gradient-to-r before:from-transparent before:via-white/20 before:to-transparent'
       });
     }
 
@@ -158,7 +179,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
         carouselRef.current.scrollTo({ left: scrollAmount, behavior: 'smooth' });
         setActiveBannerIndex(nextIndex);
       }
-    }, 5000);
+    }, 6000);
     return () => clearInterval(autoplayTimerRef.current);
   }, [activeBannerIndex, banners.length]);
 
@@ -172,7 +193,6 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
   };
 
   const contextConfig = useMemo(() => {
-    const commonOrder = ['hero', 'highlights', 'tags', 'wallet', 'roulette_banner', 'filters', 'list', 'editorial', 'bonus'];
     switch (timeContext) {
       case 'morning':
         return {
@@ -181,7 +201,6 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
             { id: 1, title: 'Pão Quentinho', desc: 'Padaria Imperial • 8%', icon: <Coffee className="text-amber-900 w-6 h-6" />, bg: 'bg-[#FFD700] dark:bg-amber-600' },
             { id: 2, title: 'Energia', desc: 'Fit Studio Bombando', icon: <Zap className="text-white w-6 h-6" />, bg: 'bg-[#007FFF] dark:bg-blue-600' }
           ],
-          sectionOrder: commonOrder
         };
       case 'afternoon':
         return {
@@ -190,16 +209,14 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
             { id: 1, title: 'Prato do Dia', desc: 'Restaurante Sabor • 10%', icon: <Utensils className="text-orange-900 w-6 h-6" />, bg: 'bg-orange-400 dark:bg-orange-600' },
             { id: 2, title: 'Promoção', desc: 'Moda RJ: 20% OFF', icon: <ShoppingBag className="text-white w-6 h-6" />, bg: 'bg-pink-400 dark:bg-pink-600' }
           ],
-          sectionOrder: ['hero', 'tags', 'highlights', 'wallet', 'roulette_banner', 'filters', 'list', 'editorial', 'bonus']
         };
       default:
         return {
           tags: [{ id: 1, label: 'Sushi', icon: '🍣' }, { id: 2, label: 'Pizza', icon: '🍕' }, { id: 3, label: 'Burger', icon: '🍔' }, { id: 4, label: 'Açaí', icon: '🍧' }],
           highlights: [
             { id: 1, title: 'Delivery Grátis', desc: 'Pizza Place • 12% back', icon: <Moon className="text-indigo-900 w-6 h-6" />, bg: 'bg-indigo-400 dark:bg-indigo-600' },
-            { id: 2, title: 'Happy Hour', desc: 'Chopp em dobro no Zé', icon: <Flame className="text-white w-6 h-6" />, bg: 'bg-red-500 dark:bg-red-600' }
+            { id: 2, title: 'Happy Hour', desc: 'Chopp em dobro no Zé', icon: <Flame className="text-white w-6 h-6" />, bg: 'bg-red-50 dark:bg-red-600' }
           ],
-          sectionOrder: ['hero', 'highlights', 'roulette_banner', 'editorial', 'wallet', 'tags', 'filters', 'list', 'bonus']
         };
     }
   }, [timeContext]);
@@ -208,46 +225,53 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
     switch (key) {
       case 'hero':
         return (
-          <div key="hero" className="relative pt-4 pb-2 bg-white dark:bg-gray-900">
+          <div key="hero" className="relative pt-4 pb-0 bg-white dark:bg-gray-900">
             <div ref={carouselRef} onScroll={handleScroll} className="flex overflow-x-auto snap-x snap-mandatory no-scrollbar px-0 scroll-smooth">
               {banners.map((banner, index) => {
                 const isActive = activeBannerIndex === index;
                 return (
                   <div key={banner.id} className="min-w-full snap-center px-4">
-                    <div className={`w-full bg-gradient-to-br ${banner.gradient} rounded-[28px] overflow-hidden shadow-xl ${banner.glowClass} relative h-[160px] flex items-center transition-all duration-500`}>
+                    <div className={`w-full bg-gradient-to-br ${banner.gradient} rounded-[24px] overflow-hidden shadow-[0_8px_30px_rgba(0,0,0,0.12)] relative h-[190px] flex items-center transition-all duration-500 border border-white/10`}>
                       
-                      <div className="absolute right-[-10px] top-1/2 -translate-y-1/2 opacity-30 pointer-events-none transition-all duration-1000">
+                      <div className="absolute right-4 top-1/2 -translate-y-1/2 z-20 pointer-events-none transition-all duration-1000">
                          {banner.image ? (
-                           <div className="w-[140px] h-[140px] rounded-3xl overflow-hidden shadow-2xl mr-6 rotate-6 animate-float-slow">
-                              <img src={banner.image} alt="" className="w-full h-full object-cover" />
+                           <div className="w-[140px] h-[140px] rounded-[2.5rem] overflow-hidden shadow-[0_12px_35px_rgba(0,0,0,0.25)] rotate-3 animate-float bg-white p-1">
+                              <img src={banner.image} alt="" className="w-full h-full object-contain rounded-[2.3rem]" />
                            </div>
                          ) : (
-                           <div className="mr-10 scale-[2.2] rotate-[-12deg] animate-float-slow">
+                           <div className="mr-8 scale-[2.8] rotate-[-10deg] animate-float opacity-30">
                              {banner.icon}
                            </div>
                          )}
                       </div>
 
-                      <div className="relative z-10 px-6 py-6 flex flex-col justify-center h-full w-full max-w-[75%]">
-                        <div className="flex items-center gap-1.5 mb-1.5">
-                          <span className={`text-[8px] font-black uppercase tracking-[0.2em] px-2 py-0.5 rounded-full ${banner.isSponsored ? 'bg-blue-500/20 text-blue-300 border border-blue-400/30' : 'bg-white/15 text-white/90'}`}>
+                      <div className="relative z-10 px-7 py-6 flex flex-col justify-center h-full w-full max-w-[65%]">
+                        <div className="flex items-center gap-1.5 mb-2">
+                          <span className={`text-[9px] font-black uppercase tracking-[0.2em] px-2 py-0.5 rounded-md ${banner.isSponsored ? 'bg-black/20 text-white' : 'bg-white/20 text-white'}`}>
                             {banner.badge}
                           </span>
                         </div>
-                        <h1 className="text-lg font-bold text-white mb-1 leading-tight whitespace-pre-line tracking-tight drop-shadow-md">
+                        <h1 className="text-xl font-bold text-white mb-2 leading-tight whitespace-pre-line tracking-tight drop-shadow-[0_1px_2px_rgba(0,0,0,0.2)]">
                           {banner.title}
                         </h1>
-                        <p className="text-white/80 text-[10px] font-medium mb-3 leading-tight line-clamp-1">
+                        <p className="text-white/90 text-[11px] font-medium mb-5 leading-tight line-clamp-1">
                           {banner.subtitle}
                         </p>
-                        <button onClick={banner.action} className={`w-fit bg-white text-gray-900 text-[11px] font-bold px-5 py-2.5 rounded-full active:scale-95 transition-all flex items-center gap-2 shadow-xl ${isActive ? banner.ctaClass : ''}`}>
+                        <button onClick={banner.action} className={`w-fit bg-white text-gray-900 text-[12px] font-bold px-5 py-2.5 rounded-full active:scale-95 transition-all flex items-center gap-2 shadow-lg ${isActive ? banner.ctaClass : ''}`}>
                           {banner.cta} <ArrowRight className={`w-3.5 h-3.5 ${isActive && banner.iconAnimation ? banner.iconAnimation : ''}`} />
                         </button>
                       </div>
 
-                      <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-1.5 pointer-events-none">
+                      <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex justify-center gap-1.5 pointer-events-none z-30">
                         {banners.map((_, i) => (
-                          <div key={i} className={`h-1 rounded-full transition-all duration-500 ${activeBannerIndex === i ? 'w-4 bg-white shadow-sm' : 'w-1.5 bg-white/40'}`} />
+                          <div 
+                            key={i} 
+                            className={`h-1 rounded-full transition-all duration-500 ${
+                                activeBannerIndex === i 
+                                ? 'w-4 bg-white shadow-[0_0_8px_rgba(255,255,255,0.8)]' 
+                                : 'w-1 bg-white/40'
+                            }`} 
+                          />
                         ))}
                       </div>
                     </div>
@@ -255,6 +279,97 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
                 );
               })}
             </div>
+          </div>
+        );
+      case 'wallet':
+        return (
+          <div key="wallet" className="px-5 py-4">
+              <div 
+                className="premium-glass rounded-[28px] p-8 flex flex-col gap-5 active:scale-[0.99] transition-all cursor-pointer relative overflow-hidden group animate-balance-load border border-white/20" 
+                onClick={() => onNavigate('user_cashback_flow')}
+              >
+                  {/* Premium Background Elements */}
+                  <div className="absolute top-0 right-0 w-56 h-56 bg-white/15 rounded-full blur-[70px] -mr-24 -mt-24 group-hover:scale-110 transition-transform duration-1000"></div>
+                  <div className="absolute bottom-0 left-0 w-48 h-48 bg-blue-400/20 rounded-full blur-[60px] -ml-16 -mb-16 opacity-60"></div>
+                  
+                  {/* Top Bar: Labels + Controls */}
+                  <div className="flex justify-between items-center relative z-10">
+                      <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-2xl flex items-center justify-center text-white border border-white/10 shadow-inner group-hover:rotate-12 transition-transform duration-500">
+                            <Wallet className="w-5 h-5" />
+                          </div>
+                          <div>
+                            <p className="text-[10px] font-black text-blue-100/60 uppercase tracking-[0.3em] mb-0.5">Meu Saldo</p>
+                            <div className="flex items-center gap-1.5">
+                                <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse"></span>
+                                <span className="text-[9px] text-blue-100/50 font-bold tracking-widest uppercase">Carteira Segura</span>
+                            </div>
+                          </div>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <button 
+                          onClick={(e) => { e.stopPropagation(); setShowBalance(!showBalance); }}
+                          className="p-3 rounded-full bg-white/10 backdrop-blur-md border border-white/10 text-white hover:bg-white/20 transition-all active:scale-90"
+                          aria-label={showBalance ? "Ocultar saldo" : "Mostrar saldo"}
+                        >
+                          {showBalance ? <Eye className="w-4.5 h-4.5" /> : <EyeOff className="w-4.5 h-4.5" />}
+                        </button>
+                        <div className="p-3 rounded-full bg-white text-[#1E5BFF] shadow-2xl group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform">
+                          <ArrowUpRight className="w-4.5 h-4.5" strokeWidth={3.5} />
+                        </div>
+                      </div>
+                  </div>
+
+                  {/* Main Value: Scaled to maximum prominence */}
+                  <div className="relative z-10 flex flex-col items-start min-h-[90px]">
+                      <div className="flex items-baseline gap-3 transition-all duration-500 group-hover:translate-x-1">
+                        {showBalance ? (
+                          <div className="flex items-baseline gap-3 animate-balance-load">
+                            <span className="text-white text-3xl font-bold opacity-60 mb-2">R$</span>
+                            <span className="text-[80px] font-black text-white tracking-tighter leading-none drop-shadow-[0_8px_20px_rgba(0,0,0,0.35)] text-shimmer">12,50</span>
+                          </div>
+                        ) : (
+                          <div className="py-7 animate-balance-load">
+                            <span className="text-6xl font-black text-white/25 tracking-[0.5em] leading-none select-none">•••••</span>
+                          </div>
+                        )}
+                      </div>
+                  </div>
+
+                  {/* Footer Stats & Progress */}
+                  <div className="relative z-10 mt-2 space-y-4">
+                    <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-black/30 backdrop-blur-sm border border-white/5 w-fit animate-in slide-in-from-left duration-700">
+                        <div className="w-4.5 h-4.5 bg-yellow-400 rounded-full flex items-center justify-center shadow-[0_0_10px_rgba(250,204,21,0.5)]">
+                            <Coins className="w-2.5 h-2.5 text-blue-900 fill-blue-900" />
+                        </div>
+                        <span className="text-[10px] font-black text-white uppercase tracking-[0.15em]">+ R$ 2,50 acumulados hoje</span>
+                    </div>
+
+                    <div className="space-y-3">
+                        <div className="flex justify-between items-center px-1">
+                            <span className="text-[11px] font-bold text-blue-100/70 flex items-center gap-2">
+                                Próximo Resgate em Parceiros
+                                <TrendingUp className="w-3 h-3 text-green-400" />
+                            </span>
+                            <span className="text-[10px] font-black text-white bg-white/20 px-2.5 py-1 rounded-lg border border-white/10">25%</span>
+                        </div>
+                        <div className="h-3 w-full bg-black/20 rounded-full overflow-hidden border border-white/5 p-[1px] relative">
+                            <div className="h-full bg-gradient-to-r from-blue-300 via-white to-blue-200 w-[25%] rounded-full shadow-[0_0_20px_rgba(255,255,255,0.8)] relative overflow-hidden">
+                               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/60 to-transparent -translate-x-full animate-shimmer"></div>
+                            </div>
+                        </div>
+                    </div>
+                  </div>
+              </div>
+          </div>
+        );
+      case 'master_sponsor':
+        return (
+          <div key="master_sponsor" className="px-5">
+            <MasterSponsorBanner 
+                onClick={() => onNavigate('patrocinador_master')}
+            />
           </div>
         );
       case 'filters':
@@ -290,9 +405,9 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
             </div>
             <div className="flex gap-3.5 overflow-x-auto no-scrollbar px-5 snap-x">
               {contextConfig.highlights.map((item: any) => (
-                <div key={item.id} className={`snap-center flex-shrink-0 w-[190px] ${item.bg} p-5 rounded-[24px] flex flex-col gap-4 active:scale-95 transition-all cursor-pointer group shadow-sm`}>
+                <div key={item.id} className={`snap-center flex-shrink-0 w-[190px] ${item.bg} p-5 rounded-[24px] flex flex-col gap-4 active:scale-95 transition-all cursor-pointer group shadow-sm hover:shadow-md`}>
                   <div className="flex items-center justify-between">
-                    <div className="px-2.5 py-1 rounded-lg bg-white/30 dark:bg-black/20">
+                    <div className="px-2.5 py-1 rounded-lg bg-white/30 dark:bg-black/20 border border-white/20">
                       <span className="text-[9px] font-black uppercase tracking-wider text-gray-800 dark:text-white/90">{item.title}</span>
                     </div>
                     <div className="opacity-100 transition-transform group-hover:scale-110 duration-300 drop-shadow-sm">{item.icon}</div>
@@ -306,7 +421,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
       case 'roulette_banner':
         return (
           <div key="roulette_banner" className="px-5">
-            <button onClick={() => setIsSpinWheelOpen(true)} className="w-full bg-gradient-to-r from-purple-600 to-pink-600 rounded-2xl p-5 text-white flex items-center justify-between shadow-[0_8px_20px_rgba(147,51,234,0.15)] active:scale-[0.98] transition-all relative overflow-hidden group">
+            <button onClick={() => setIsSpinWheelOpen(true)} className="w-full bg-gradient-to-r from-purple-600 to-pink-600 rounded-3xl p-5 text-white flex items-center justify-between shadow-[0_8px_25px_rgba(147,51,234,0.2)] active:scale-[0.98] transition-all relative overflow-hidden group border border-white/10">
               <div className="flex items-center gap-4 relative z-10">
                 <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/10">
                   <Dices className="w-7 h-7 text-white" />
@@ -325,31 +440,11 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
           <div key="tags" className="py-2">
               <div className="flex gap-2.5 overflow-x-auto no-scrollbar px-5">
                   {contextConfig.tags.map((tag: any) => (
-                      <button key={tag.id} className="flex-shrink-0 flex items-center gap-2.5 bg-[#F0F5FF] dark:bg-slate-800 px-4 py-3 rounded-full shadow-none border border-transparent active:scale-95 transition-all">
+                      <button key={tag.id} className="flex-shrink-0 flex items-center gap-2.5 bg-[#F0F5FF] dark:bg-slate-800 px-4 py-3 rounded-full shadow-none border border-transparent active:scale-95 transition-all hover:bg-blue-100 dark:hover:bg-slate-700">
                           <span className="text-base grayscale-0">{tag.icon}</span>
                           <span className="text-xs font-bold text-slate-700 dark:text-slate-200">{tag.label}</span>
                       </button>
                   ))}
-              </div>
-          </div>
-        );
-      case 'wallet':
-        return (
-          <div key="wallet" className="px-5 py-2">
-              <div className="bg-white dark:bg-gray-800 rounded-3xl p-5 shadow-[0_8px_20px_rgba(0,0,0,0.06)] flex flex-col gap-4 active:scale-[0.98] transition-all cursor-pointer" onClick={() => onNavigate('user_cashback_flow')}>
-                  <div className="flex justify-between items-center">
-                      <div className="flex items-center gap-3.5">
-                          <div className="w-10 h-10 rounded-2xl bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center text-[#1E5BFF]"><Wallet className="w-5 h-5" /></div>
-                          <div>
-                              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-0.5">Meu Saldo</p>
-                              <p className="text-xl font-bold text-gray-900 dark:text-white leading-none">R$ 12,50</p>
-                          </div>
-                      </div>
-                      <ChevronRight className="w-5 h-5 text-gray-300" />
-                  </div>
-                  <div className="h-1.5 w-full bg-gray-100 dark:bg-gray-700/50 rounded-full overflow-hidden">
-                      <div className="h-full bg-[#1E5BFF] w-[25%] rounded-full"></div>
-                  </div>
               </div>
           </div>
         );
@@ -372,7 +467,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
           <div key="editorial" className="space-y-4 py-4">
               <div className="flex gap-4 overflow-x-auto pb-4 no-scrollbar snap-x px-5">
                   {themes.map((theme) => (
-                      <div key={theme.id} className="snap-center min-w-[270px] w-[270px] h-[160px] rounded-2xl overflow-hidden relative cursor-pointer active:scale-[0.98] transition-all shadow-[0_8px_20px_rgba(0,0,0,0.1)] group" onClick={() => onSelectCollection(theme as any)}>
+                      <div key={theme.id} className="snap-center min-w-[270px] w-[270px] h-[160px] rounded-3xl overflow-hidden relative cursor-pointer active:scale-[0.98] transition-all shadow-[0_8px_20px_rgba(0,0,0,0.1)] group border border-white/10" onClick={() => onSelectCollection(theme as any)}>
                           <img src={theme.image} className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000" alt={theme.title} />
                           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
                           <div className="absolute bottom-5 left-6 right-6">
@@ -392,15 +487,15 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
                  <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.25em]">Clube Localizei</h3>
               </div>
               <div className="grid grid-cols-2 gap-3.5">
-                  <button onClick={() => setIsSpinWheelOpen(true)} className="bg-white dark:bg-gray-800 p-5 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col items-center gap-3 active:scale-95 transition-transform">
+                  <button onClick={() => setIsSpinWheelOpen(true)} className="bg-white dark:bg-gray-800 p-5 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col items-center gap-3 active:scale-95 transition-transform hover:shadow-md">
                       <div className="w-10 h-10 bg-purple-50 dark:bg-purple-900/30 rounded-full flex items-center justify-center text-purple-600"><Dices className="w-5 h-5" /></div>
                       <div className="text-center">
                           <p className="text-xs font-bold text-gray-800 dark:text-white">Roleta</p>
                           <p className="text-[9px] text-gray-400 font-bold uppercase mt-1">Tente a Sorte</p>
                       </div>
                   </button>
-                  <button onClick={() => onNavigate('invite_friend')} className="bg-white dark:bg-gray-800 p-5 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col items-center gap-3 active:scale-95 transition-transform">
-                      <div className="w-10 h-10 bg-green-50 dark:bg-green-900/30 rounded-full flex items-center justify-center text-green-600"><Users className="w-5 h-5" /></div>
+                  <button onClick={() => onNavigate('invite_friend')} className="bg-white dark:bg-gray-800 p-5 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col items-center gap-3 active:scale-95 transition-transform hover:shadow-md">
+                      <div className="w-10 h-10 bg-green-50 dark:bg-green-900/20 rounded-full flex items-center justify-center text-green-600"><Users className="w-5 h-5" /></div>
                       <div className="text-center">
                           <p className="text-xs font-bold text-gray-800 dark:text-white">Indicar</p>
                           <p className="text-[9px] text-gray-400 font-bold uppercase mt-1">Ganhe R$ 5,00</p>
@@ -423,7 +518,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
              <div className="flex flex-col gap-3">
                 {stores.filter(s => s.name.toLowerCase().includes(activeSearchTerm.toLowerCase())).map((store) => (
                 <div key={store.id} onClick={() => onStoreClick && onStoreClick(store)} className="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-gray-700 flex gap-4 cursor-pointer active:scale-[0.98] transition-all">
-                    <div className="w-12 h-12 rounded-xl overflow-hidden flex-shrink-0 bg-gray-50"><img src={store.logoUrl} className="w-full h-full object-contain" alt={store.name} /></div>
+                    <div className="w-12 h-12 rounded-xl overflow-hidden flex-shrink-0 bg-gray-50 p-1"><img src={store.logoUrl} className="w-full h-full object-contain" alt={store.name} /></div>
                     <div className="flex-1 flex flex-col justify-center">
                         <h4 className="font-bold text-gray-800 dark:text-white text-sm truncate">{store.name}</h4>
                         <span className="text-[10px] text-[#1E5BFF] font-black uppercase tracking-tight">{store.category}</span>
@@ -435,10 +530,20 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
         </div>
       ) : (
         <div className="flex flex-col gap-4 w-full mt-0">
-            {contextConfig.sectionOrder.map((sectionKey: string) => renderSection(sectionKey))}
+            {renderSection('hero')}
+            {renderSection('wallet')}
+            {renderSection('roulette_banner')}
+            {renderSection('highlights')}
+            {renderSection('tags')}
+            {renderSection('master_sponsor')}
+            {renderSection('filters')}
+            {renderSection('list')}
+            {renderSection('editorial')}
+            {renderSection('bonus')}
+
             <div className="mt-12 mb-4 flex flex-col items-center justify-center text-center opacity-40">
               <Star className="w-4 h-4 text-gray-400 mb-2" />
-              <p className="text-[9px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-[0.5em]">Freguesia • Localizei v1.0.9</p>
+              <p className="text-[9px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-[0.5em]">Freguesia • Localizei v1.0.10</p>
             </div>
         </div>
       )}
