@@ -149,16 +149,26 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
   const autoplayTimerRef = useRef<any | null>(null);
 
   const [categoryScroll, setCategoryScroll] = useState({ canScrollLeft: false, canScrollRight: true });
+  const [categoryScrollProgress, setCategoryScrollProgress] = useState(0);
   const categoriesRef = useRef<HTMLDivElement>(null);
 
   const handleCategoryScroll = (e: React.UIEvent<HTMLDivElement>) => {
     const container = e.currentTarget;
     if (!container) return;
+    
+    const { scrollLeft, scrollWidth, clientWidth } = container;
 
     setCategoryScroll({
-        canScrollLeft: container.scrollLeft > 10,
-        canScrollRight: container.scrollLeft < container.scrollWidth - container.clientWidth - 10,
+        canScrollLeft: scrollLeft > 10,
+        canScrollRight: scrollLeft < scrollWidth - clientWidth - 10,
     });
+    
+    if (scrollWidth > clientWidth) {
+      const progress = scrollLeft / (scrollWidth - clientWidth);
+      setCategoryScrollProgress(progress);
+    } else {
+      setCategoryScrollProgress(0);
+    }
   };
 
   const scrollCategories = (direction: 'left' | 'right') => {
@@ -174,7 +184,11 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
   useEffect(() => {
     const container = categoriesRef.current;
     if (container) {
-      handleCategoryScroll({ currentTarget: container } as any);
+      const checkScroll = () => handleCategoryScroll({ currentTarget: container } as any);
+      checkScroll();
+      const observer = new ResizeObserver(checkScroll);
+      observer.observe(container);
+      return () => observer.disconnect();
     }
   }, []);
 
@@ -251,11 +265,11 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
         id: 'whatsapp_services',
         badge: 'ORÇAMENTOS',
         icon: <MessageCircle className="w-24 h-24 text-white/20" />,
-        title: 'Quanto custa o reparo?\nDescubra no WhatsApp',
-        subtitle: 'Orçamento rápido com técnicos locais',
-        gradient: 'from-blue-500 to-blue-600',
-        cta: 'Pedir agora',
-        action: () => onNavigate('explore'),
+        title: 'Precisa de conserto rápido?',
+        subtitle: 'Compare orçamentos no WhatsApp com profissionais do seu bairro.',
+        gradient: 'from-emerald-600 to-teal-700',
+        cta: 'Pedir orçamento agora',
+        action: () => onNavigate('services'),
         ctaClass: 'animate-bounce-x-small',
         iconAnimation: ''
       },
@@ -274,10 +288,10 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
         id: 'freguesia_connect',
         badge: 'OPORTUNIDADE',
         icon: <Handshake className="w-24 h-24 text-white/20" />,
-        title: 'Sua loja em destaque e\nmais conexões no bairro',
-        subtitle: 'Networking real para lojistas locais',
+        title: 'Mais visibilidade no seu bairro',
+        subtitle: 'Coloque sua loja em destaque e atraia novos clientes locais.',
         gradient: 'from-indigo-600 to-violet-700',
-        cta: 'Fazer parte',
+        cta: 'Quero participar',
         action: () => onNavigate('freguesia_connect_public'),
         ctaClass: 'animate-bounce-y'
       }
@@ -446,6 +460,14 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
                     </span>
                   </button>
                 ))}
+              </div>
+            </div>
+            <div className="flex justify-center mt-2">
+              <div className="w-24 h-1 bg-gray-200 dark:bg-gray-700 rounded-full relative">
+                <div 
+                  className="h-full bg-primary-500 rounded-full absolute top-0 left-0 w-8 transition-transform duration-100 ease-linear"
+                  style={{ transform: `translateX(${categoryScrollProgress * (96 - 32)}px)` }} // 96px track - 32px thumb = 64px travel
+                />
               </div>
             </div>
           </div>
