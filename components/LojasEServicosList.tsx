@@ -195,7 +195,7 @@ export const LojasEServicosList: React.FC<LojasEServicosListProps> = ({ onStoreC
                 >
                     <div className="absolute top-3 right-3 z-10 pointer-events-none flex flex-col items-end gap-1">
                         {isSponsored && (
-                            <span className="text-[9px] font-black px-2 py-0.5 rounded-full bg-[#1E5BFF] text-white shadow-lg uppercase tracking-widest">
+                            <span className="text-xs font-black px-3 py-1.5 rounded-full bg-[#1E5BFF] text-white shadow-xl shadow-blue-500/40 uppercase tracking-wider">
                                 Patrocinado
                             </span>
                         )}

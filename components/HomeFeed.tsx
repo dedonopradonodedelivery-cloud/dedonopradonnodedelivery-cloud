@@ -286,7 +286,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
         carouselRef.current.scrollTo({ left: scrollAmount, behavior: 'smooth' });
         setActiveBannerIndex(nextIndex);
       }
-    }, 6000);
+    }, 4000);
     return () => clearInterval(autoplayTimerRef.current);
   }, [activeBannerIndex, banners.length]);
 
@@ -320,15 +320,15 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
                 const isActive = activeBannerIndex === index;
                 return (
                   <div key={banner.id} className="min-w-full snap-center px-4">
-                    <div className={`w-full bg-gradient-to-br ${banner.gradient} rounded-[24px] overflow-hidden shadow-[0_8px_30px_rgba(0,0,0,0.12)] relative h-[290px] flex items-center transition-all duration-500 border border-white/10`}>
+                    <div className={`w-full bg-gradient-to-br ${banner.gradient} rounded-[24px] overflow-hidden shadow-[0_8px_30px_rgba(0,0,0,0.12)] relative h-[190px] flex items-center transition-all duration-500 border border-white/10`}>
                       
                       <div className="absolute right-4 top-1/2 -translate-y-1/2 z-20 pointer-events-none transition-all duration-1000">
                          {banner.image ? (
-                           <div className="w-[140px] h-[140px] rounded-[2.5rem] overflow-hidden shadow-[0_12px_35px_rgba(0,0,0,0.25)] rotate-3 animate-float bg-white p-1">
+                           <div className="w-[100px] h-[100px] rounded-[2.5rem] overflow-hidden shadow-[0_12px_35px_rgba(0,0,0,0.25)] rotate-3 animate-float bg-white p-1">
                               <img src={banner.image} alt="" className="w-full h-full object-contain rounded-[2.3rem]" />
                            </div>
                          ) : (
-                           <div className="mr-8 scale-[2.8] rotate-[-10deg] animate-float opacity-30">
+                           <div className="mr-8 scale-[2.2] rotate-[-10deg] animate-float opacity-30">
                              {banner.icon}
                            </div>
                          )}
@@ -519,7 +519,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
         );
       case 'master_sponsor':
         return (
-          <div key="master_sponsor" className="px-5">
+          <div key="master_sponsor" className="px-5 mt-6">
             <MasterSponsorBanner 
                 onClick={() => onNavigate('patrocinador_master')}
             />
@@ -574,6 +574,10 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
       case 'roulette_banner':
         return (
           <div key="roulette_banner" className="px-5">
+            <div className="flex items-center gap-1.5 mb-2 px-1">
+                <Dices className="w-3.5 h-3.5 text-gray-400" />
+                <h3 className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">Diversão do dia</h3>
+            </div>
             <button onClick={() => setIsSpinWheelOpen(true)} className="w-full bg-gradient-to-br from-green-500 to-emerald-600 rounded-3xl p-5 text-white flex items-center justify-between shadow-lg shadow-emerald-500/30 active:scale-[0.98] transition-all relative overflow-hidden group border border-white/10">
               <div className="flex items-center gap-4 relative z-10">
                 <div className="w-12 h-12 flex items-center justify-center animate-spin-and-stop">
