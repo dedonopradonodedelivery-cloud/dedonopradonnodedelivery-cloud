@@ -231,7 +231,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
                 const isActive = activeBannerIndex === index;
                 return (
                   <div key={banner.id} className="min-w-full snap-center px-4">
-                    <div className={`w-full bg-gradient-to-br ${banner.gradient} rounded-[24px] overflow-hidden shadow-[0_8px_30px_rgba(0,0,0,0.12)] relative h-[190px] flex items-center transition-all duration-500 border border-white/10`}>
+                    <div className={`w-full bg-gradient-to-br ${banner.gradient} rounded-[24px] overflow-hidden shadow-[0_8px_30px_rgba(0,0,0,0.12)] relative h-[290px] flex items-center transition-all duration-500 border border-white/10`}>
                       
                       <div className="absolute right-4 top-1/2 -translate-y-1/2 z-20 pointer-events-none transition-all duration-1000">
                          {banner.image ? (
@@ -285,7 +285,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
         return (
           <div key="wallet" className="px-5 py-4">
               <div 
-                className="bg-gradient-to-br from-emerald-600 to-teal-800 rounded-[28px] p-6 flex flex-col gap-4 active:scale-[0.99] transition-all cursor-pointer relative overflow-hidden group animate-balance-load border border-white/20 h-[290px]"
+                className="bg-gradient-to-br from-emerald-600 to-teal-800 rounded-[28px] p-6 flex flex-col gap-4 active:scale-[0.99] transition-all cursor-pointer relative overflow-y-auto no-scrollbar group animate-balance-load border border-white/20 h-[190px]"
                 onClick={() => onNavigate('user_cashback_flow')}
               >
                   {/* Decorative background icon */}
