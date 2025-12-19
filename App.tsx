@@ -30,6 +30,8 @@ import { MapPin, Crown } from 'lucide-react';
 import { useAuth } from './contexts/AuthContext';
 import { Category, Store, AdType, EditorialCollection } from './types';
 import { getStoreLogo } from './utils/mockLogos';
+import { CategoriaAlimentacao } from './components/CategoriaAlimentacao';
+import { CategoryView } from './components/CategoryView';
 
 const MOCK_STORES: Store[] = [
   {
@@ -259,6 +261,23 @@ const App: React.FC = () => {
               ) : (
                 <FreguesiaConnectRestricted onBack={() => setActiveTab('home')} />
               )
+            )}
+             {activeTab === 'category_detail' && selectedCategory && (
+              <CategoryView 
+                  category={selectedCategory} 
+                  onBack={() => { setActiveTab('home'); setSelectedCategory(null); }} 
+                  onStoreClick={handleSelectStore}
+                  stores={MOCK_STORES}
+              />
+            )}
+            {activeTab === 'food_category' && selectedCategory && (
+                <CategoriaAlimentacao 
+                    onBack={() => { setActiveTab('home'); setSelectedCategory(null); }}
+                    onSelectSubcategory={(sub) => {
+                        // Navega para uma lista de lojas filtrada pela subcategoria
+                        console.log("Subcategoria selecionada:", sub);
+                    }}
+                />
             )}
             {activeTab === 'service_subcategories' && selectedServiceMacro && (
               <SubcategoriesView 

@@ -153,19 +153,19 @@ const HIGHLIGHTS_DATA: BannerAd[] = [
   {
     id: 'ad-1',
     title: 'Ofertas em restaurantes',
-    image: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?q=80&w=800&auto=format=fit=crop',
+    image: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?q=80&w=800&auto=format&fit=crop',
     merchantName: 'Restaurante Saboroso',
   },
   {
     id: 'ad-2',
     title: 'Padarias da Freguesia',
-    image: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?q=80&w=800&auto=format=fit=crop',
+    image: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?q=80&w=800&auto=format&fit=crop',
     merchantName: 'Pão Dourado',
   },
   {
     id: 'ad-3',
     title: 'Experimente os melhores burgers',
-    image: 'https://images.unsplash.com/photo-1550547660-d9450f859349?q=80&w=800&auto=format=fit=crop', // Fixed broken link with generic burger
+    image: 'https://images.unsplash.com/photo-1550547660-d9450f859349?q=80&w=800&auto=format&fit=crop', // Fixed broken link with generic burger
   },
 ];
 
@@ -193,7 +193,7 @@ const generateFoodStores = (): Store[] => {
       name: `${names[i % names.length]} ${i + 1}`,
       category: 'Alimentação',
       subcategory: subcats[i % subcats.length],
-      image: `https://picsum.photos/400/300?random=${i + 600}`,
+      logoUrl: `https://picsum.photos/400/300?random=${i + 600}`,
       rating: Number((3.8 + Math.random() * 1.2).toFixed(1)),
       reviewsCount: Math.floor(Math.random() * 300) + 20,
       description: 'Delícias preparadas com carinho para você.',
@@ -365,7 +365,7 @@ export const CategoriaAlimentacao: React.FC<CategoriaAlimentacaoProps> = ({ onBa
                             {/* Imagem Esquerda */}
                             <div className="w-[88px] h-[72px] flex-shrink-0 relative rounded-lg overflow-hidden bg-gray-200 dark:bg-gray-700">
                                 <img 
-                                    src={store.image} 
+                                    src={store.logoUrl} 
                                     alt={store.name} 
                                     className="w-full h-full object-cover" 
                                     loading="lazy"

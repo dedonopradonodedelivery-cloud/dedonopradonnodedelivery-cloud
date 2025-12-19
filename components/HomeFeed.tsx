@@ -147,9 +147,36 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
   const [activeBannerIndex, setActiveBannerIndex] = useState(0);
   const carouselRef = useRef<HTMLDivElement>(null);
   const autoplayTimerRef = useRef<any | null>(null);
-  const categoryScrollRef = useRef<HTMLDivElement>(null);
-  const [indicatorOffset, setIndicatorOffset] = useState(0);
 
+  const [categoryScroll, setCategoryScroll] = useState({ canScrollLeft: false, canScrollRight: true });
+  const categoriesRef = useRef<HTMLDivElement>(null);
+
+  const handleCategoryScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    const container = e.currentTarget;
+    if (!container) return;
+
+    setCategoryScroll({
+        canScrollLeft: container.scrollLeft > 10,
+        canScrollRight: container.scrollLeft < container.scrollWidth - container.clientWidth - 10,
+    });
+  };
+
+  const scrollCategories = (direction: 'left' | 'right') => {
+    if (categoriesRef.current) {
+        const scrollAmount = categoriesRef.current.clientWidth * 0.7;
+        categoriesRef.current.scrollBy({
+            left: direction === 'left' ? -scrollAmount : scrollAmount,
+            behavior: 'smooth'
+        });
+    }
+  };
+
+  useEffect(() => {
+    const container = categoriesRef.current;
+    if (container) {
+      handleCategoryScroll({ currentTarget: container } as any);
+    }
+  }, []);
 
   // Funcionalidade de ocultar saldo com persistência na sessão
   const [showBalance, setShowBalance] = useState(() => {
@@ -327,18 +354,6 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
   };
 
 
-  const handleCategoryScroll = (e: React.UIEvent<HTMLDivElement>) => {
-    const { scrollLeft, scrollWidth, clientWidth } = e.currentTarget;
-    if (scrollWidth <= clientWidth) {
-      setIndicatorOffset(0);
-      return;
-    }
-    // Simplified ratio for subtle movement, not a 1:1 scrollbar mapping.
-    const scrollRatio = clientWidth / scrollWidth;
-    setIndicatorOffset(scrollLeft * scrollRatio);
-  };
-
-
   const renderSection = (key: string) => {
     switch (key) {
       case 'hero':
@@ -403,7 +418,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
         return (
           <div key="categories" className="pt-4">
             <div 
-              ref={categoryScrollRef}
+              ref={categoriesRef} 
               onScroll={handleCategoryScroll}
               className="flex overflow-x-auto no-scrollbar px-5 pb-2"
             >
@@ -431,17 +446,6 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
                     </span>
                   </button>
                 ))}
-              </div>
-            </div>
-            <div className="px-5 mt-2">
-              <div className="w-full bg-gray-200/30 dark:bg-gray-700/20 rounded-full h-px relative overflow-hidden">
-                <div
-                  className="bg-blue-400 dark:bg-blue-500 h-px rounded-full absolute"
-                  style={{
-                    width: '40px',
-                    transform: `translateX(${indicatorOffset}px)`,
-                  }}
-                ></div>
               </div>
             </div>
           </div>
@@ -609,14 +613,14 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
                 <Dices className="w-3.5 h-3.5 text-gray-400" />
                 <h3 className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">Diversão do dia</h3>
             </div>
-            <button onClick={() => setIsSpinWheelOpen(true)} className="w-full bg-gradient-to-br from-green-500 to-emerald-600 rounded-3xl p-5 text-white flex items-center justify-between shadow-lg shadow-emerald-500/30 active:scale-[0.98] transition-all relative overflow-hidden group border border-white/10">
+            <button onClick={() => setIsSpinWheelOpen(true)} className="w-full bg-gradient-to-br from-primary-500 to-primary-600 rounded-3xl p-5 text-white flex items-center justify-between shadow-lg shadow-blue-500/30 active:scale-[0.98] transition-all relative overflow-hidden group border border-white/10">
               <div className="flex items-center gap-4 relative z-10">
                 <div className="w-12 h-12 flex items-center justify-center animate-spin-and-stop">
                   <RouletteIcon className="w-full h-full drop-shadow-lg" />
                 </div>
                 <div className="text-left">
                   <h3 className="font-bold text-lg leading-none mb-1">Roleta da Sorte</h3>
-                  <p className="text-xs text-emerald-100">Tente a sorte e ganhe prêmios!</p>
+                  <p className="text-xs text-blue-100">Tente a sorte e ganhe prêmios!</p>
                 </div>
               </div>
               <ArrowRight className="w-6 h-6 text-white/50 group-hover:translate-x-1 transition-transform" />
