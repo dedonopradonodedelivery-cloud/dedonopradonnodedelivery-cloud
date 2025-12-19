@@ -622,7 +622,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
             <div key="trending" className="pl-5">
               <div className="flex items-center justify-between mb-3 pr-5">
                   <div>
-                      <h3 className="text-base font-bold text-gray-900 dark:text-white">Em alta no bairro</h3>
+                      <h3 className="text-base font-bold text-gray-400 dark:text-gray-500">Em alta no bairro</h3>
                       <p className="text-xs text-gray-500 dark:text-gray-400">O que seus vizinhos estão procurando.</p>
                   </div>
                   <button onClick={() => onNavigate('explore')} className="text-xs font-bold text-primary-500">Ver tudo</button>
@@ -776,7 +776,6 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
             {user && renderSection('wallet')}
             {renderSection('roulette_banner')}
             {renderSection('highlights')}
-            {renderSection('recommendations')}
             {renderSection('trending')}
             {renderSection('filters')}
             {renderSection('list')}
