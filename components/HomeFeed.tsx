@@ -40,7 +40,7 @@ import { LojasEServicosList } from './LojasEServicosList';
 import { User } from '@supabase/supabase-js';
 import { SpinWheelView } from './SpinWheelView';
 import { MasterSponsorBanner } from './MasterSponsorBanner';
-import { CATEGORIES } from '../constants';
+import { CATEGORIES, EDITORIAL_COLLECTIONS } from '../constants';
 
 interface HomeFeedProps {
   onNavigate: (view: string) => void;
@@ -577,87 +577,32 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
       case 'master_sponsor':
         return null;
         case 'recommendations':
+          return null; // This section is removed
+        case 'trending': // Replaced with Editorial Collections
           return (
-            <div key="recommendations" className="px-5">
-              <div className="flex items-center gap-1.5 mb-3 px-1">
-                <Users className="w-3.5 h-3.5 text-gray-400" />
-                <h3 className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">Decisões Rápidas</h3>
-              </div>
-              <div className="grid grid-cols-1 gap-3">
-                <button onClick={() => setListFilter('top_rated')} className="w-full bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-gray-700 flex items-center justify-between group active:scale-[0.99] transition-transform">
-                    <div className="flex items-center gap-4">
-                        <div className="w-10 h-10 rounded-xl bg-yellow-50 dark:bg-yellow-900/20 flex items-center justify-center text-yellow-500"><Award className="w-5 h-5" /></div>
-                        <div className="text-left">
-                            <h3 className="font-bold text-gray-800 dark:text-white text-sm">Favoritos da Vizinhança</h3>
-                            <p className="text-xs text-gray-500 dark:text-gray-400">Os mais bem avaliados do bairro.</p>
-                        </div>
-                    </div>
-                    <ChevronRight className="w-5 h-5 text-gray-300 group-hover:text-primary-500 transition-colors" />
-                </button>
-                <button onClick={() => setListFilter('cashback')} className="w-full bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-gray-700 flex items-center justify-between group active:scale-[0.99] transition-transform">
-                    <div className="flex items-center gap-4">
-                        <div className="w-10 h-10 rounded-xl bg-green-50 dark:bg-green-900/20 flex items-center justify-center text-green-600"><Coins className="w-5 h-5" /></div>
-                        <div className="text-left">
-                            <h3 className="font-bold text-gray-800 dark:text-white text-sm">Economize no Bairro</h3>
-                            <p className="text-xs text-gray-500 dark:text-gray-400">Encontre lojas com cashback.</p>
-                        </div>
-                    </div>
-                    <ChevronRight className="w-5 h-5 text-gray-300 group-hover:text-primary-500 transition-colors" />
-                </button>
-                <button onClick={() => onNavigate('explore')} className="w-full bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-gray-700 flex items-center justify-between group active:scale-[0.99] transition-transform">
-                    <div className="flex items-center gap-4">
-                        <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center text-blue-600"><Rocket className="w-5 h-5" /></div>
-                        <div className="text-left">
-                            <h3 className="font-bold text-gray-800 dark:text-white text-sm">Novidades na Área</h3>
-                            <p className="text-xs text-gray-500 dark:text-gray-400">Veja as novas lojas cadastradas.</p>
-                        </div>
-                    </div>
-                    <ChevronRight className="w-5 h-5 text-gray-300 group-hover:text-primary-500 transition-colors" />
-                </button>
-              </div>
-            </div>
-          );
-        case 'trending':
-          return (
-            <div key="trending" className="pl-5">
-              <div className="flex items-center justify-between mb-3 pr-5">
+            <div key="trending" className="px-5">
+              <div className="flex items-center justify-between mb-4">
                   <div>
-                      <h3 className="text-base font-bold text-gray-400 dark:text-gray-500">Em alta no bairro</h3>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">O que seus vizinhos estão procurando.</p>
+                      <h3 className="text-base font-bold text-gray-800 dark:text-gray-200">Guias da Vizinhança</h3>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">Seleções especiais para te ajudar a decidir.</p>
                   </div>
                   <button onClick={() => onNavigate('explore')} className="text-xs font-bold text-primary-500">Ver tudo</button>
               </div>
-              <div className="flex gap-3 overflow-x-auto no-scrollbar pb-2 pr-5">
+              <div className="grid grid-cols-1 gap-4">
+                {EDITORIAL_COLLECTIONS.map((collection) => (
                   <button
-                      onClick={() => onSelectCategory(CATEGORIES.find(c => c.slug === 'food')!)}
-                      className="snap-center flex-shrink-0 w-[150px] h-[180px] bg-gradient-to-br from-amber-500 to-orange-600 rounded-2xl p-4 flex flex-col justify-between text-white group shadow-lg"
+                    key={collection.id}
+                    onClick={() => onSelectCollection(collection)}
+                    className="w-full h-32 rounded-2xl overflow-hidden relative group active:scale-[0.98] transition-transform shadow-lg shadow-black/5"
                   >
-                      <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center"><Utensils className="w-5 h-5" /></div>
-                      <div>
-                          <p className="text-xs font-medium">Restaurantes</p>
-                          <h4 className="font-bold text-lg leading-tight">Onde Almoçar?</h4>
-                      </div>
+                    <img src={collection.image} alt={collection.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent"></div>
+                    <div className="absolute bottom-0 left-0 right-0 p-4 text-left">
+                      <h4 className="text-white font-bold text-lg leading-tight drop-shadow-md">{collection.title}</h4>
+                      <p className="text-white/90 text-xs drop-shadow-sm">{collection.subtitle}</p>
+                    </div>
                   </button>
-                  <button
-                      onClick={() => onNavigate('services')}
-                      className="snap-center flex-shrink-0 w-[150px] h-[180px] bg-gradient-to-br from-sky-500 to-blue-600 rounded-2xl p-4 flex flex-col justify-between text-white group shadow-lg"
-                  >
-                      <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center"><Wrench className="w-5 h-5" /></div>
-                      <div>
-                          <p className="text-xs font-medium">Serviços Rápidos</p>
-                          <h4 className="font-bold text-lg leading-tight">Resolver Pendências</h4>
-                      </div>
-                  </button>
-                  <button
-                      onClick={() => onSelectCategory(CATEGORIES.find(c => c.slug === 'beauty')!)}
-                      className="snap-center flex-shrink-0 w-[150px] h-[180px] bg-gradient-to-br from-pink-500 to-rose-600 rounded-2xl p-4 flex flex-col justify-between text-white group shadow-lg"
-                  >
-                      <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center"><Sparkles className="w-5 h-5" /></div>
-                      <div>
-                          <p className="text-xs font-medium">Cuidados Pessoais</p>
-                          <h4 className="font-bold text-lg leading-tight">Hora de se Cuidar</h4>
-                      </div>
-                  </button>
+                ))}
               </div>
             </div>
           );

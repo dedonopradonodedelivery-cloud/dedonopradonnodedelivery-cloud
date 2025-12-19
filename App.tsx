@@ -32,6 +32,7 @@ import { Category, Store, AdType, EditorialCollection } from './types';
 import { getStoreLogo } from './utils/mockLogos';
 import { CategoriaAlimentacao } from './components/CategoriaAlimentacao';
 import { CategoryView } from './components/CategoryView';
+import { EditorialListView } from './components/EditorialListView';
 
 const MOCK_STORES: Store[] = [
   {
@@ -175,6 +176,11 @@ const App: React.FC = () => {
     setSelectedCategory(category);
     setActiveTab(category.slug === 'food' ? 'food_category' : 'category_detail');
   };
+  
+  const handleSelectCollection = (collection: EditorialCollection) => {
+    setSelectedCollection(collection);
+    setActiveTab('editorial_list');
+  };
 
   const handleSelectStore = (store: Store) => {
     setSelectedStore(store);
@@ -182,7 +188,7 @@ const App: React.FC = () => {
   };
 
   const headerExclusionList = [
-    'store_area', 'merchant_qr',
+    'store_area', 'merchant_qr', 'editorial_list',
     'category_detail', 'food_category', 'store_detail', 'profile', 
     'patrocinador_master', 'prize_history', 'reward_details', 
     'freguesia_connect_public', 'freguesia_connect_dashboard', 'freguesia_connect_restricted',
@@ -212,7 +218,7 @@ const App: React.FC = () => {
               <HomeFeed
                 onNavigate={setActiveTab}
                 onSelectCategory={handleSelectCategory}
-                onSelectCollection={setSelectedCollection}
+                onSelectCollection={handleSelectCollection}
                 onStoreClick={handleSelectStore}
                 stores={MOCK_STORES}
                 searchTerm={globalSearch}
@@ -224,6 +230,14 @@ const App: React.FC = () => {
             )}
             {activeTab === 'explore' && (
               <ExploreView stores={MOCK_STORES} searchQuery={globalSearch} onStoreClick={handleSelectStore} onLocationClick={() => {}} onFilterClick={() => {}} onOpenPlans={() => {}} />
+            )}
+            {activeTab === 'editorial_list' && selectedCollection && (
+              <EditorialListView
+                collection={selectedCollection}
+                stores={MOCK_STORES}
+                onBack={() => { setActiveTab('home'); setSelectedCollection(null); }}
+                onStoreClick={handleSelectStore}
+              />
             )}
             {activeTab === 'services' && (
               <ServicesView 

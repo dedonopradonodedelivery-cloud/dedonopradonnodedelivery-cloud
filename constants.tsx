@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Utensils, Briefcase, PartyPopper, Shirt, Coffee, Home, Dog, Armchair, Scissors, Heart, GraduationCap, Settings, Dumbbell, CarFront, Wrench, Sun, ShoppingCart, Croissant, Leaf, Beef, Fish, Bike, Beer, Sandwich, ShoppingBag, Sparkles, MapPin, Hand, Feather, Eye, Stethoscope, Smile, Brain, Activity, Apple, FlaskConical, HelpingHand, School, Languages, BookOpen, Baby, Target, Zap, Droplet, BrickWall, PaintRoller, Hammer, Wind, Key, Plug, Scale, Calculator, Ruler, Megaphone, Camera, Printer, Bone, Footprints, Flame, Swords, Trophy, Waves, Music, UserCheck, Tv, Smartphone, Laptop, Cpu, Snowflake, FileText, CircleDashed, Lock, Wallet, Gem, Watch, Moon, ShieldCheck, Package, Building2, Pill, Lightbulb, Palette, TriangleAlert, ThumbsUp } from 'lucide-react';
-import { AdType, Category, Store, Story, ServiceLead, Channel, Transaction } from './types';
+import { AdType, Category, Store, Story, ServiceLead, Channel, Transaction, EditorialCollection } from './types';
 import { getStoreLogo } from './utils/mockLogos';
 
 export const CATEGORIES: Category[] = [
@@ -203,6 +203,31 @@ export const CHANNELS: Channel[] = [
   { id: '3', name: 'SOBREMESAS 🍰', image: 'https://picsum.photos/100/100?random=12', followers: '35 mil', verified: false },
   { id: '4', name: 'LATAM Airlines Ofert...', image: 'https://picsum.photos/100/100?random=13', followers: '47 mil', verified: true },
 ];
+
+export const EDITORIAL_COLLECTIONS: EditorialCollection[] = [
+  { 
+    id: 'top-rated', 
+    title: '⭐ Favoritos da Vizinhança', 
+    subtitle: 'Os locais com as melhores avaliações do bairro', 
+    image: 'https://images.unsplash.com/photo-1521017432531-fbd92d768814?q=80&w=800&auto=format=fit=crop', 
+    keywords: [] 
+  },
+  { 
+    id: 'almoço-semana', 
+    title: '🍛 Almoço durante a semana', 
+    subtitle: 'Opções rápidas e saborosas perto de você', 
+    image: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=800&auto=format=fit=crop', 
+    keywords: ['restaurante', 'almoço', 'executivo', 'prato feito', 'hamburgueria'] 
+  },
+  { 
+    id: 'happy-hour', 
+    title: '🍻 Happy Hour & Fim de Tarde', 
+    subtitle: 'Encontre os melhores bares e petiscos para relaxar', 
+    image: 'https://images.unsplash.com/photo-1514933651103-005eec06c04b?q=80&w=800&auto=format=fit=crop', 
+    keywords: ['bar', 'happy hour', 'petiscos', 'chopp'] 
+  },
+];
+
 
 // Contains a mix of Premium (Top), Local, and Organic stores
 export const STORES: Store[] = [
