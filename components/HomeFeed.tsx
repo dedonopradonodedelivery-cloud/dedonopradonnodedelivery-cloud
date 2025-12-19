@@ -314,7 +314,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
     switch (key) {
       case 'hero':
         return (
-          <div key="hero" className="relative pt-4 pb-0 bg-white dark:bg-gray-900">
+          <div key="hero" className="relative bg-white dark:bg-gray-900">
             <div ref={carouselRef} onScroll={handleScroll} className="flex overflow-x-auto snap-x snap-mandatory no-scrollbar px-0 scroll-smooth">
               {banners.map((banner, index) => {
                 const isActive = activeBannerIndex === index;
@@ -372,7 +372,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
         );
       case 'categories':
         return (
-          <div key="categories" className="py-2 pt-4">
+          <div key="categories" className="pt-4">
             <div 
               ref={categoryScrollRef}
               onScroll={handleCategoryScroll}
@@ -420,7 +420,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
       case 'wallet':
         // --- NOVO BANNER DE CASHBACK REATORADO ---
         return (
-          <div key="wallet" className="px-5 py-4">
+          <div key="wallet" className="px-5">
             {/* ESTADO 1: CONVIDADO (SEM LOGIN) */}
             {!user && (
               <div 
@@ -527,7 +527,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
         );
       case 'filters':
         return (
-          <div key="filters" className="px-5 py-2">
+          <div key="filters" className="px-5">
             <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
               {[
                 { id: 'all', label: 'Tudo', icon: Zap },
@@ -552,7 +552,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
         );
       case 'highlights':
         return (
-          <div key="highlights" className="space-y-4 py-2">
+          <div key="highlights" className="space-y-4">
             <div className="px-5">
               <h3 className="text-base font-bold text-gray-900 dark:text-white tracking-tight">Agora no seu bairro</h3>
             </div>
@@ -593,59 +593,12 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
         return null;
       case 'list':
         return (
-          <div key="list" className="px-5 py-2 min-h-[300px]">
+          <div key="list" className="px-5 min-h-[300px]">
               <div className="flex items-center gap-2 mb-4">
                  <ShieldCheck className="w-3.5 h-3.5 text-blue-500" />
                  <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Parceiros Verificados</span>
               </div>
               <LojasEServicosList onStoreClick={onStoreClick} onViewAll={() => onNavigate('explore')} activeFilter={listFilter} user={user} />
-          </div>
-        );
-      case 'editorial':
-        const themes = [
-          { id: 'coffee', title: 'Pausa para o Café', subtitle: 'Favoritos do bairro', image: 'https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?q=80&w=600&auto=format&fit=crop', keywords: ['café', 'padaria'], badge: 'Popular' },
-          { id: 'health', title: 'Viver Bem', subtitle: 'Saúde & Foco', image: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?q=80&w=600&auto=format&fit=crop', keywords: ['academia', 'clinica'], badge: 'Destaque' },
-        ];
-        return (
-          <div key="editorial" className="space-y-4 py-4">
-              <div className="flex gap-4 overflow-x-auto pb-4 no-scrollbar snap-x px-5">
-                  {themes.map((theme) => (
-                      <div key={theme.id} className="snap-center min-w-[270px] w-[270px] h-[160px] rounded-3xl overflow-hidden relative cursor-pointer active:scale-[0.98] transition-all shadow-[0_8px_20px_rgba(0,0,0,0.1)] group border border-white/10" onClick={() => onSelectCollection(theme as any)}>
-                          {/* Fix: `theme.title` is a string property, not a function. */}
-                          <img src={theme.image} className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000" alt={theme.title} />
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
-                          <div className="absolute bottom-5 left-6 right-6">
-                              <h4 className="text-white font-bold text-lg leading-tight mb-1">{theme.title}</h4>
-                              <p className="text-blue-200 text-[10px] font-bold opacity-80 uppercase tracking-widest">{theme.subtitle}</p>
-                          </div>
-                      </div>
-                  ))}
-              </div>
-          </div>
-        );
-      case 'bonus':
-        return (
-          <div key="bonus" className="px-5 py-4 space-y-4">
-              <div className="flex items-center gap-2 mb-2">
-                 <Award className="w-4 h-4 text-[#1E5BFF]" />
-                 <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.25em]">Clube Localizei</h3>
-              </div>
-              <div className="grid grid-cols-2 gap-3.5">
-                  <button onClick={() => setIsSpinWheelOpen(true)} className="bg-white dark:bg-gray-800 p-5 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col items-center gap-3 active:scale-95 transition-transform hover:shadow-md">
-                      <div className="w-10 h-10 bg-purple-50 dark:bg-purple-900/30 rounded-full flex items-center justify-center text-purple-600"><Dices className="w-5 h-5" /></div>
-                      <div className="text-center">
-                          <p className="text-xs font-bold text-gray-800 dark:text-white">Roleta</p>
-                          <p className="text-[9px] text-gray-400 font-bold uppercase mt-1">Tente a Sorte</p>
-                      </div>
-                  </button>
-                  <button onClick={() => onNavigate('invite_friend')} className="bg-white dark:bg-gray-800 p-5 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col items-center gap-3 active:scale-95 transition-transform hover:shadow-md">
-                      <div className="w-10 h-10 bg-green-50 dark:bg-green-900/20 rounded-full flex items-center justify-center text-green-600"><Users className="w-5 h-5" /></div>
-                      <div className="text-center">
-                          <p className="text-xs font-bold text-gray-800 dark:text-white">Indicar</p>
-                          <p className="text-[9px] text-gray-400 font-bold uppercase mt-1">Ganhe R$ 5,00</p>
-                      </div>
-                  </button>
-              </div>
           </div>
         );
       default: return null;
@@ -673,7 +626,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
              </div>
         </div>
       ) : (
-        <div className="flex flex-col gap-4 w-full mt-0">
+        <div className="flex flex-col gap-4 w-full">
             {renderSection('categories')}
             {renderSection('hero')}
             {user && renderSection('wallet')}
@@ -683,7 +636,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
             {renderSection('filters')}
             {renderSection('list')}
 
-            <div className="mt-12 mb-4 flex flex-col items-center justify-center text-center opacity-40">
+            <div className="mt-8 mb-4 flex flex-col items-center justify-center text-center opacity-40">
               <Star className="w-4 h-4 text-gray-400 mb-2" />
               <p className="text-[9px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-[0.5em]">Freguesia • Localizei v1.0.10</p>
             </div>
