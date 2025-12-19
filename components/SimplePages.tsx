@@ -19,7 +19,10 @@ import {
   TrendingUp,
   Users,
   Lightbulb,
-  Zap
+  Zap,
+  Award,
+  // FIX: Added 'Coins' to the import list from lucide-react.
+  Coins
 } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import { Store, AdType } from '../types';
@@ -123,116 +126,81 @@ export const InviteFriendView: React.FC<SimplePageProps> = ({ onBack }) => {
 };
 
 export const AboutView: React.FC<SimplePageProps> = ({ onBack }) => {
+  const benefits = [
+    {
+      icon: Compass,
+      title: "Encontre tudo perto de você",
+      description: "Lojas, restaurantes e serviços na palma da sua mão."
+    },
+    {
+      icon: Award,
+      title: "Descubra os favoritos do bairro",
+      description: "Veja os locais mais bem avaliados pelos seus vizinhos."
+    },
+    {
+      icon: Rocket,
+      title: "Fique por dentro das novidades",
+      description: "Saiba das inaugurações, eventos e promoções."
+    },
+    {
+      icon: Coins,
+      title: "Economize com cashback",
+      description: "Receba parte do seu dinheiro de volta (em breve)."
+    }
+  ];
+
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 font-sans animate-in slide-in-from-right duration-300 pb-20">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 font-sans animate-in slide-in-from-right duration-300 flex flex-col relative overflow-hidden">
       
-      {/* Header */}
-      <div className="sticky top-0 z-30 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md px-5 h-16 flex items-center gap-4 border-b border-gray-100 dark:border-gray-800">
-        <button onClick={onBack} className="p-2 -ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
-          <ChevronLeft className="w-6 h-6 text-gray-800 dark:text-white" />
+      {/* Hero section with integrated header */}
+      <div className="absolute top-0 left-0 right-0 h-[45vh] bg-gradient-to-br from-sky-500 to-blue-600 rounded-b-[40px] z-0 p-6 flex flex-col justify-center items-center text-center text-white">
+        <div className="w-20 h-20 bg-white/20 backdrop-blur-md rounded-2xl border border-white/20 flex items-center justify-center mb-6 shadow-2xl">
+          <MapPin className="w-10 h-10 text-white" />
+        </div>
+        <h1 className="text-3xl font-bold font-display leading-tight mb-3 drop-shadow-md">
+          O guia definitivo da nossa vizinhança
+        </h1>
+        <p className="text-blue-100 font-medium max-w-sm">
+          Conectamos você aos melhores comércios, serviços e oportunidades do bairro.
+        </p>
+      </div>
+
+       {/* Back Button */}
+       <div className="relative z-10 p-5 pt-6 flex items-center">
+        <button 
+            onClick={onBack}
+            className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md border border-white/20 flex items-center justify-center text-white hover:bg-white/30 transition-all"
+        >
+            <ChevronLeft className="w-6 h-6" />
         </button>
-        <h1 className="font-bold text-lg text-gray-900 dark:text-white">Institucional</h1>
+      </div>
+
+      {/* Content section */}
+      <div className="flex-1 relative z-10 mt-[8vh] px-5 pb-32">
+        <div className="bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-lg border border-gray-100 dark:border-gray-700 space-y-6">
+          {benefits.map((item, index) => (
+            <div key={index} className="flex items-start gap-4">
+              <div className="w-10 h-10 bg-blue-50 dark:bg-blue-900/20 rounded-xl flex items-center justify-center text-blue-600 dark:text-blue-400 shrink-0">
+                <item.icon className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="font-bold text-gray-900 dark:text-white text-sm">{item.title}</h3>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 leading-relaxed">{item.description}</p>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
       
-      <div className="p-5 space-y-8">
-        
-        {/* Hero Identity */}
-        <div className="flex flex-col items-center text-center mt-4">
-            <div className="w-20 h-20 bg-[#1E5BFF] rounded-2xl flex items-center justify-center mb-4 shadow-xl shadow-blue-500/20 transform rotate-3">
-                <MapPin className="w-10 h-10 text-white fill-white" />
-            </div>
-            <h2 className="text-2xl font-display font-bold text-gray-900 dark:text-white leading-tight">Localizei Freguesia</h2>
-            <p className="text-gray-500 dark:text-gray-400 text-sm mt-1 font-medium">O Ecossistema do Bairro</p>
-        </div>
-
-        {/* Missão & Visão (Cards) */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-3xl border border-gray-100 dark:border-gray-700 shadow-sm relative overflow-hidden group">
-                <div className="absolute top-0 right-0 w-24 h-24 bg-blue-50 dark:bg-blue-900/20 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110"></div>
-                <div className="relative z-10">
-                    <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center text-[#1E5BFF] dark:text-blue-400 mb-4">
-                        <Rocket className="w-5 h-5" />
-                    </div>
-                    <h3 className="font-bold text-gray-900 dark:text-white text-lg mb-2">Missão</h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
-                        Criar a infraestrutura digital que impulsiona o crescimento dos negócios locais, conecta moradores à melhor experiência de consumo da Freguesia e fortalece a economia do bairro através de tecnologia simples, acessível e inteligente.
-                    </p>
-                </div>
-            </div>
-
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-3xl border border-gray-100 dark:border-gray-700 shadow-sm relative overflow-hidden group">
-                <div className="absolute top-0 right-0 w-24 h-24 bg-indigo-50 dark:bg-indigo-900/20 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110"></div>
-                <div className="relative z-10">
-                    <div className="w-10 h-10 bg-indigo-100 dark:bg-indigo-900/30 rounded-xl flex items-center justify-center text-indigo-600 dark:text-indigo-400 mb-4">
-                        <Compass className="w-5 h-5" />
-                    </div>
-                    <h3 className="font-bold text-gray-900 dark:text-white text-lg mb-2">Visão</h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
-                        Ser a plataforma local mais confiável e indispensável da Freguesia — referência nacional em ecossistemas de bairro — oferecendo oportunidades reais para pequenos empreendedores prosperarem e para moradores viverem melhor.
-                    </p>
-                </div>
-            </div>
-        </div>
-
-        {/* Valores (List) */}
-        <div>
-            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-5 px-1 flex items-center gap-2">
-                <Star className="w-5 h-5 text-yellow-500 fill-yellow-500" /> Nossos Valores
-            </h3>
-            <div className="space-y-4">
-                {[
-                    { icon: Heart, color: 'text-red-500', bg: 'bg-red-50', title: "Impacto real", desc: "Decisões baseadas no que melhora a vida das pessoas." },
-                    { icon: ShieldCheck, color: 'text-green-500', bg: 'bg-green-50', title: "Transparência", desc: "Relações claras e honestas com lojistas e usuários." },
-                    { icon: TrendingUp, color: 'text-blue-500', bg: 'bg-blue-50', title: "Crescimento compartilhado", desc: "Quando o bairro cresce, todos ganham." },
-                    { icon: Users, color: 'text-purple-500', bg: 'bg-purple-50', title: "Proximidade", desc: "Construído por quem vive a Freguesia." },
-                    { icon: Zap, color: 'text-orange-500', bg: 'bg-orange-50', title: "Excelência simples", desc: "Tecnologia funcional, bonita e fácil de usar." }
-                ].map((item, i) => (
-                    <div key={i} className="flex gap-4 items-start">
-                        <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${item.bg} dark:bg-opacity-10`}>
-                            <item.icon className={`w-5 h-5 ${item.color}`} />
-                        </div>
-                        <div>
-                            <h4 className="text-sm font-bold text-gray-900 dark:text-white">{item.title}</h4>
-                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 leading-snug">{item.desc}</p>
-                        </div>
-                    </div>
-                ))}
-            </div>
-        </div>
-
-        {/* Manifesto (Highlight) */}
-        <div className="relative w-full rounded-[32px] bg-gradient-to-br from-[#1E5BFF] to-[#1749CC] p-8 text-white shadow-xl shadow-blue-500/20 overflow-hidden">
-            <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none"></div>
-            <div className="absolute bottom-0 left-0 w-48 h-48 bg-black/10 rounded-full blur-3xl -ml-10 -mb-10 pointer-events-none"></div>
-            
-            <div className="relative z-10 flex flex-col items-center text-center">
-                <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center mb-6 border border-white/20">
-                    <Lightbulb className="w-6 h-6 text-yellow-300 fill-yellow-300" />
-                </div>
-                
-                <h3 className="text-sm font-bold text-blue-200 uppercase tracking-widest mb-4">Manifesto</h3>
-                
-                <p className="text-lg font-medium leading-relaxed mb-6">
-                    "A Localizei nasce para iluminar o comércio da Freguesia, conectar pessoas ao que o bairro tem de melhor e fortalecer cada empreendedor que faz a economia local acontecer."
-                </p>
-                
-                <p className="text-sm text-blue-100 leading-relaxed font-light mb-6">
-                    Somos tecnologia com propósito, comunidade com força e a ponte entre quem vende e quem procura.
-                </p>
-
-                <div className="bg-white/10 px-6 py-3 rounded-full border border-white/20 backdrop-blur-sm">
-                    <p className="text-sm font-bold">O bairro é grande. Os negócios, maiores ainda.</p>
-                </div>
-            </div>
-        </div>
-
-        {/* Footer */}
-        <div className="text-center pt-4 pb-2">
-            <p className="text-xs text-gray-400 font-medium">
-                Feito com 💙 na Freguesia
-            </p>
-        </div>
-
+      {/* Fixed Footer CTA */}
+      <div className="fixed bottom-0 left-0 right-0 p-5 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-t border-gray-100 dark:border-gray-800 z-30 max-w-md mx-auto">
+        <button 
+          onClick={onBack}
+          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-2xl shadow-lg shadow-blue-500/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+        >
+          Começar a explorar
+          <ArrowRight className="w-5 h-5" />
+        </button>
       </div>
     </div>
   );

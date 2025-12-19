@@ -574,6 +574,61 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
         );
       case 'master_sponsor':
         return null;
+      case 'recommendations':
+        return (
+          <div key="recommendations" className="px-5">
+            <div className="flex items-center gap-1.5 mb-3 px-1">
+              <Users className="w-3.5 h-3.5 text-gray-400" />
+              <h3 className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">Recomendações</h3>
+            </div>
+            <div className="bg-white dark:bg-gray-800 rounded-3xl p-5 shadow-sm border border-gray-100 dark:border-gray-700">
+              <h3 className="font-bold text-gray-900 dark:text-white mb-1">Negócios que os moradores recomendam</h3>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mb-4">Encontre os favoritos do bairro com um clique.</p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <button onClick={() => setListFilter('top_rated')} className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                  <div className="w-8 h-8 rounded-full bg-yellow-100 text-yellow-600 flex items-center justify-center"><Star className="w-4 h-4" /></div>
+                  <span className="text-sm font-semibold text-gray-700 dark:text-gray-200">Melhores Avaliados</span>
+                </button>
+                <button onClick={() => setListFilter('cashback')} className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                  <div className="w-8 h-8 rounded-full bg-green-100 text-green-600 flex items-center justify-center"><TrendingUp className="w-4 h-4" /></div>
+                  <span className="text-sm font-semibold text-gray-700 dark:text-gray-200">Com Cashback</span>
+                </button>
+                 <button onClick={() => setListFilter('open_now')} className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors col-span-1 sm:col-span-2">
+                  <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center"><Clock className="w-4 h-4" /></div>
+                  <span className="text-sm font-semibold text-gray-700 dark:text-gray-200">Abertos Agora</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+      case 'trending':
+        return (
+          <div key="trending" className="px-5">
+            <div className="flex items-center gap-1.5 mb-3 px-1">
+              <TrendingUp className="w-3.5 h-3.5 text-gray-400" />
+              <h3 className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">Em alta perto de você</h3>
+            </div>
+            <button
+              onClick={() => setListFilter('top_rated')}
+              className="w-full bg-white dark:bg-gray-800 rounded-3xl p-5 shadow-sm border border-gray-100 dark:border-gray-700 flex items-center justify-between group active:scale-[0.99] transition-transform"
+            >
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-2xl bg-purple-100 dark:bg-purple-900/20 flex items-center justify-center text-purple-600 dark:text-purple-400">
+                  <Flame className="w-6 h-6" />
+                </div>
+                <div className="text-left">
+                  <h3 className="font-bold text-gray-900 dark:text-white text-base">Os mais procurados hoje</h3>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 leading-snug">
+                    Os serviços e lojas mais procurados hoje no seu bairro.
+                  </p>
+                </div>
+              </div>
+              <div className="p-2 rounded-full bg-gray-50 dark:bg-gray-700/50 group-hover:bg-gray-100 dark:group-hover:bg-gray-700 transition-colors">
+                <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-purple-600" />
+              </div>
+            </button>
+          </div>
+        );
       case 'filters':
         return (
           <div key="filters" className="px-5">
@@ -689,6 +744,8 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
             {user && renderSection('wallet')}
             {renderSection('roulette_banner')}
             {renderSection('highlights')}
+            {renderSection('recommendations')}
+            {renderSection('trending')}
             {renderSection('filters')}
             {renderSection('list')}
 
