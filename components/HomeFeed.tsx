@@ -27,7 +27,12 @@ import {
   ArrowUpRight,
   Eye,
   EyeOff,
-  BarChart3
+  BarChart3,
+  Sun,
+  Snowflake,
+  Wind,
+  Wrench,
+  Bike
 } from 'lucide-react';
 import { LojasEServicosList } from './LojasEServicosList';
 import { User } from '@supabase/supabase-js';
@@ -47,7 +52,38 @@ interface HomeFeedProps {
   onRequireLogin: () => void;
 }
 
-type TimeContext = 'morning' | 'afternoon' | 'night';
+type TimeContextTag = 'morning' | 'lunch_transition' | 'lunch' | 'afternoon' | 'evening' | 'late_night';
+
+interface Suggestion {
+  id: string;
+  title: string;
+  subtitle: string;
+  icon: React.ReactNode;
+  bg: string;
+  tags: string[]; // e.g., ['morning', 'breakfast', 'cold']
+}
+
+// --- NOVO SISTEMA DE SUGESTÕES DINÂMICAS ---
+const SUGGESTION_POOL: Suggestion[] = [
+  { id: 'sug-1', title: 'Pão quentinho na chapa', subtitle: 'Padarias abertas perto de você', icon: <Coffee size={24} className="text-amber-900/80" />, bg: 'bg-amber-400/80', tags: ['morning', 'breakfast', 'cold'] },
+  { id: 'sug-2', title: 'Aquele café pra viagem', subtitle: 'Cafeterias com retirada rápida', icon: <Zap size={24} className="text-gray-800" />, bg: 'bg-gray-300/80', tags: ['morning', 'lunch_transition', 'afternoon'] },
+  { id: 'sug-3', title: 'Almoço rápido e prático', subtitle: 'Restaurantes com prato do dia', icon: <Utensils size={24} className="text-red-900/80" />, bg: 'bg-red-400/80', tags: ['lunch', 'quick_meal'] },
+  { id: 'sug-4', title: 'Opções leves para hoje', subtitle: 'Saladas e bowls refrescantes', icon: <Wind size={24} className="text-green-900/80" />, bg: 'bg-green-400/80', tags: ['lunch', 'hot'] },
+  { id: 'sug-5', title: 'Treino matinal', subtitle: 'Academias abertas agora', icon: <TrendingUp size={24} className="text-blue-900/80" />, bg: 'bg-blue-400/80', tags: ['morning', 'fitness'] },
+  { id: 'sug-6', title: 'Jantar no bairro', subtitle: 'Restaurantes para fechar o dia', icon: <Moon size={24} className="text-indigo-900/80" />, bg: 'bg-indigo-400/80', tags: ['evening', 'dinner'] },
+  { id: 'sug-7', title: 'Conserto rápido', subtitle: 'Técnicos e assistências disponíveis', icon: <Wrench size={24} className="text-gray-800" />, bg: 'bg-slate-400/80', tags: ['afternoon', 'services'] },
+  { id: 'sug-8', title: 'Abertos até tarde', subtitle: 'Lanches e conveniência 24h', icon: <Clock size={24} className="text-purple-900/80" />, bg: 'bg-purple-400/80', tags: ['late_night', 'emergency'] },
+  { id: 'sug-9', title: 'Happy Hour começando', subtitle: 'Bares com petiscos e chopp', icon: <Flame size={24} className="text-orange-900/80" />, bg: 'bg-orange-400/80', tags: ['evening', 'happy_hour'] },
+  { id: 'sug-10', title: 'Pizza quentinha', subtitle: 'Pizzarias com delivery rápido', icon: <Bike size={24} className="text-red-900/80" />, bg: 'bg-red-500/80', tags: ['evening', 'late_night', 'cold', 'delivery'] },
+  { id: 'sug-11', title: 'Banho e tosa hoje', subtitle: 'Pet shops com horários livres', icon: <ShoppingBag size={24} className="text-cyan-900/80" />, bg: 'bg-cyan-400/80', tags: ['morning', 'afternoon', 'pet'] },
+  { id: 'sug-12', title: 'Açaí pra refrescar', subtitle: 'Opções geladas para o calor', icon: <Snowflake size={24} className="text-purple-900/80" />, bg: 'bg-purple-400/70', tags: ['lunch', 'afternoon', 'hot'] },
+];
+
+const getMockWeather = (hour: number) => {
+  if (hour >= 11 && hour < 17) return { temp: 30, condition: 'sunny' };
+  if (hour < 6 || hour > 20) return { temp: 18, condition: 'clear' };
+  return { temp: 22, condition: 'cloudy' };
+};
 
 interface BannerItem {
   id: string;
@@ -124,12 +160,40 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
   const activeSearchTerm = externalSearchTerm || '';
   const [listFilter, setListFilter] = useState<'all' | 'cashback' | 'top_rated' | 'open_now'>('all');
 
-  const timeContext = useMemo((): TimeContext => {
+  const dynamicSuggestions = useMemo((): Suggestion[] => {
     const hour = new Date().getHours();
-    if (hour >= 6 && hour < 12) return 'morning';
-    if (hour >= 12 && hour < 18) return 'afternoon';
-    return 'night';
+    const { temp } = getMockWeather(hour);
+    
+    const getTimeTag = (h: number): TimeContextTag => {
+      if (h >= 6 && h < 10.5) return 'morning';
+      if (h >= 10.5 && h < 12) return 'lunch_transition';
+      if (h >= 12 && h < 14.5) return 'lunch';
+      if (h >= 14.5 && h < 18) return 'afternoon';
+      if (h >= 18 && h < 22) return 'evening';
+      return 'late_night';
+    };
+
+    const getTempTag = (t: number) => {
+      if (t >= 28) return 'hot';
+      if (t <= 18) return 'cold';
+      return 'neutral';
+    };
+    
+    const timeTag = getTimeTag(hour);
+    const tempTag = getTempTag(temp);
+    
+    const suggestions = SUGGESTION_POOL
+      .filter(s => s.tags.includes(timeTag))
+      .map(s => ({
+        ...s,
+        // Pontuação: Base + Bônus de Temperatura + Aleatoriedade
+        score: 10 + (s.tags.includes(tempTag) ? 20 : 0) + (Math.random() * 5)
+      }))
+      .sort((a, b) => b.score - a.score);
+      
+    return suggestions.slice(0, 4);
   }, []);
+
 
   const banners = useMemo((): BannerItem[] => {
     const list: BannerItem[] = [
@@ -222,35 +286,6 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
       if (newIndex !== activeBannerIndex) setActiveBannerIndex(newIndex);
     }
   };
-
-  const contextConfig = useMemo(() => {
-    switch (timeContext) {
-      case 'morning':
-        return {
-          tags: [{ id: 1, label: 'Padaria', icon: '🥐' }, { id: 2, label: 'Café', icon: '☕' }, { id: 3, label: 'Hortifruti', icon: '🍎' }, { id: 4, label: 'Academia', icon: '💪' }],
-          highlights: [
-            { id: 1, title: 'Pão Quentinho', desc: 'Padaria Imperial • 8%', icon: <Coffee className="text-amber-900 w-6 h-6" />, bg: 'bg-[#FFD700] dark:bg-amber-600' },
-            { id: 2, title: 'Energia', desc: 'Fit Studio Bombando', icon: <Zap className="text-white w-6 h-6" />, bg: 'bg-[#007FFF] dark:bg-blue-600' }
-          ],
-        };
-      case 'afternoon':
-        return {
-          tags: [{ id: 1, label: 'Almoço', icon: '🍽️' }, { id: 2, label: 'Moda', icon: '👕' }, { id: 3, label: 'Serviços', icon: '🛠️' }, { id: 4, label: 'Saúde', icon: '🏥' }],
-          highlights: [
-            { id: 1, title: 'Prato do Dia', desc: 'Restaurante Sabor • 10%', icon: <Utensils className="text-orange-900 w-6 h-6" />, bg: 'bg-orange-400 dark:bg-orange-600' },
-            { id: 2, title: 'Promoção', desc: 'Moda RJ: 20% OFF', icon: <ShoppingBag className="text-white w-6 h-6" />, bg: 'bg-pink-400 dark:bg-pink-600' }
-          ],
-        };
-      default:
-        return {
-          tags: [{ id: 1, label: 'Sushi', icon: '🍣' }, { id: 2, label: 'Pizza', icon: '🍕' }, { id: 3, label: 'Burger', icon: '🍔' }, { id: 4, label: 'Açaí', icon: '🍧' }],
-          highlights: [
-            { id: 1, title: 'Delivery Grátis', desc: 'Pizza Place • 12% back', icon: <Moon className="text-indigo-900 w-6 h-6" />, bg: 'bg-indigo-400 dark:bg-indigo-600' },
-            { id: 2, title: 'Happy Hour', desc: 'Chopp em dobro no Zé', icon: <Flame className="text-white w-6 h-6" />, bg: 'bg-red-50 dark:bg-red-600' }
-          ],
-        };
-    }
-  }, [timeContext]);
 
   const renderSection = (key: string) => {
     switch (key) {
@@ -449,10 +484,10 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
         return (
           <div key="highlights" className="space-y-4 py-2">
             <div className="px-5">
-              <h3 className="text-base font-bold text-gray-900 dark:text-white tracking-tight">Hoje no seu bairro</h3>
+              <h3 className="text-base font-bold text-gray-900 dark:text-white tracking-tight">Agora no seu bairro</h3>
             </div>
             <div className="flex gap-3.5 overflow-x-auto no-scrollbar px-5 snap-x">
-              {contextConfig.highlights.map((item: any) => (
+              {dynamicSuggestions.map((item: Suggestion) => (
                 <div key={item.id} className={`snap-center flex-shrink-0 w-[190px] ${item.bg} p-5 rounded-[24px] flex flex-col gap-4 active:scale-95 transition-all cursor-pointer group shadow-sm hover:shadow-md`}>
                   <div className="flex items-center justify-between">
                     <div className="px-2.5 py-1 rounded-lg bg-white/30 dark:bg-black/20 border border-white/20">
@@ -460,7 +495,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
                     </div>
                     <div className="opacity-100 transition-transform group-hover:scale-110 duration-300 drop-shadow-sm">{item.icon}</div>
                   </div>
-                  <p className="text-[15px] font-bold text-gray-900 dark:text-white leading-tight">{item.desc}</p>
+                  <p className="text-[15px] font-bold text-gray-900 dark:text-white leading-tight">{item.subtitle}</p>
                 </div>
               ))}
             </div>
@@ -484,18 +519,8 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
           </div>
         );
       case 'tags':
-        return (
-          <div key="tags" className="py-2">
-              <div className="flex gap-2.5 overflow-x-auto no-scrollbar px-5">
-                  {contextConfig.tags.map((tag: any) => (
-                      <button key={tag.id} className="flex-shrink-0 flex items-center gap-2.5 bg-[#F0F5FF] dark:bg-slate-800 px-4 py-3 rounded-full shadow-none border border-transparent active:scale-95 transition-all hover:bg-blue-100 dark:hover:bg-slate-700">
-                          <span className="text-base grayscale-0">{tag.icon}</span>
-                          <span className="text-xs font-bold text-slate-700 dark:text-slate-200">{tag.label}</span>
-                      </button>
-                  ))}
-              </div>
-          </div>
-        );
+        // This section is now superseded by the dynamic suggestions
+        return null;
       case 'list':
         return (
           <div key="list" className="px-5 py-2 min-h-[300px]">
@@ -582,7 +607,6 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
             {user && renderSection('wallet')}
             {renderSection('roulette_banner')}
             {renderSection('highlights')}
-            {renderSection('tags')}
             {renderSection('master_sponsor')}
             {renderSection('filters')}
             {renderSection('list')}
