@@ -33,7 +33,7 @@ export const AuthCallbackPage: React.FC = () => {
           setTimeout(() => {
             window.close();
           }, 500);
-        } else if (event === 'SIGNED_OUT' || event === 'USER_DELETED') {
+        } else if (event === 'SIGNED_OUT') { // Only check for SIGNED_OUT here
             setStatus('error');
             setMessage('Login cancelado ou falhou.');
         } else { // Catch all other events or cases where session is null/undefined, indicating a failure

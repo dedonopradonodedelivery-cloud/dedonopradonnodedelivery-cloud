@@ -1,8 +1,7 @@
-
 import React, { useState, useEffect } from 'react';
 import { ChevronLeft, Wallet, Store, ArrowRight, Loader2, CheckCircle2, XCircle, CornerRightDown, Lock, BellRing, Smartphone, Send, Clock } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
-import { User } from 'firebase/auth';
+import { User } from '@supabase/supabase-js'; // Corrigido para Supabase User
 import { PayWithCashback } from '../../components/PayWithCashback';
 
 interface CashbackPaymentScreenProps {
@@ -150,7 +149,7 @@ export const CashbackPaymentScreen: React.FC<CashbackPaymentScreenProps> = ({
           const transactionPayload = {
             merchant_id: merchantId,
             store_id: storeId, // Assumindo mesmo ID para simplificação do mock
-            customer_id: user.uid,
+            customer_id: user.id, // Usando user.id do Supabase User
             total_amount_cents: Math.round(numericTotal * 100),
             cashback_used_cents: Math.round(numericCashbackUsed * 100),
             cashback_to_earn_cents: Math.round(cashbackToEarn * 100),
