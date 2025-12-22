@@ -202,6 +202,10 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
   const handleGoogleSignIn = async (e: React.MouseEvent) => {
     e.preventDefault(); // Prevents default button behavior
+    e.stopPropagation(); // NEW: Stop propagation to prevent any parent form/element from reacting
+    
+    console.log("GOOGLE_CLICK", { href: window.location.href }); // NEW: Add requested log
+    
     setIsLoading(true);
     setError('');
     setSuccessMsg('');
@@ -210,7 +214,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: window.location.origin, // Where the popup redirects after auth
+          // MODIFIED: Use standard callback path. Supabase will handle this route implicitly.
+          redirectTo: window.location.origin + '/auth/callback', 
           skipBrowserRedirect: true, // Crucial: tells Supabase to return the URL, not redirect the main window
         },
       });
@@ -220,7 +225,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       }
 
       if (data?.url) {
-        // Step 2: Open the URL in a new popup window
+        console.log("Supabase returned URL for window.open:", data.url); // NEW: Add requested log
+        // The returned URL should be Google's OAuth URL, which will then redirect to the redirectTo path in the popup.
         window.open(data.url, '_blank', 'width=500,height=600');
         // The AuthContext's onAuthStateChange listener will handle the session update
         // when the popup successfully authenticates and redirects.
