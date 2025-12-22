@@ -16,7 +16,9 @@ import {
   Target,
   ShieldCheck,
   TrendingUp,
-  Award
+  Award,
+  // Add ArrowRight to the import statement
+  ArrowRight
 } from 'lucide-react';
 
 interface StoreConnectModuleProps {
@@ -221,4 +223,89 @@ export const StoreConnectModule: React.FC<StoreConnectModuleProps> = ({ onBack }
                 onClick={(e) => e.stopPropagation()}
             >
                 {/* Modal Header */}
-                <div className="p-5 border-b border-gray-100 dark:border-gray-800 flex justify-between items-center bg-white dark:
+                <div className="p-5 border-b border-gray-100 dark:border-gray-800 flex justify-between items-center bg-white dark:bg-gray-900 sticky top-0 z-10">
+                    <h2 className="text-lg font-bold text-gray-900 dark:text-white">Freguesia Connect</h2>
+                    <button 
+                        onClick={() => setShowInfoModal(false)}
+                        className="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                    >
+                        <X className="w-5 h-5 text-gray-500" />
+                    </button>
+                </div>
+
+                {/* Modal Content */}
+                <div className="flex-1 overflow-y-auto p-6 text-gray-600 dark:text-gray-300 text-sm leading-relaxed space-y-6">
+                    <p>
+                        O <strong>Freguesia Connect</strong> é uma iniciativa do Localizei Freguesia para fortalecer o comércio local, criando uma rede exclusiva de lojistas e empreendedores do bairro. Nosso objetivo é facilitar parcerias, troca de conhecimentos e o crescimento mútuo.
+                    </p>
+                    
+                    <h3 className="font-bold text-gray-900 dark:text-white text-base">Vantagens de Participar:</h3>
+                    <ul className="list-disc list-inside space-y-2 pl-4">
+                        <li className="flex items-start gap-2">
+                            <CheckCircle2 className="w-4 h-4 text-green-500 shrink-0 mt-0.5" />
+                            <div>
+                                <span className="font-semibold text-gray-900 dark:text-white">Networking Estratégico:</span> Conecte-se diretamente com outros empresários, encontre fornecedores e clientes B2B.
+                            </div>
+                        </li>
+                        <li className="flex items-start gap-2">
+                            <CheckCircle2 className="w-4 h-4 text-green-500 shrink-0 mt-0.5" />
+                            <div>
+                                <span className="font-semibold text-gray-900 dark:text-white">Eventos Exclusivos:</span> Participe de cafés de negócios, workshops e palestras focados nas necessidades do comércio local.
+                            </div>
+                        </li>
+                        <li className="flex items-start gap-2">
+                            <CheckCircle2 className="w-4 h-4 text-green-500 shrink-0 mt-0.5" />
+                            <div>
+                                <span className="font-semibold text-gray-900 dark:text-white">Oportunidades de Negócio:</span> Divulgue suas ofertas, encontre parceiros para promoções conjuntas e descubra novas demandas no bairro.
+                            </div>
+                        </li>
+                        <li className="flex items-start gap-2">
+                            <CheckCircle2 className="w-4 h-4 text-green-500 shrink-0 mt-0.5" />
+                            <div>
+                                <span className="font-semibold text-gray-900 dark:text-white">Materiais e Conteúdo:</span> Tenha acesso a guias, calendários e dicas de marketing digital para impulsionar suas vendas.
+                            </div>
+                        </li>
+                    </ul>
+
+                    <h3 className="font-bold text-gray-900 dark:text-white text-base">Quem Pode Participar?</h3>
+                    <p>
+                        O Freguesia Connect é exclusivo para <strong>lojistas e prestadores de serviço com estabelecimentos físicos ou atuação regular na Freguesia.</strong> Nosso objetivo é garantir que todos os membros tenham um interesse genuíno no desenvolvimento do bairro.
+                    </p>
+
+                    <h3 className="font-bold text-gray-900 dark:text-white text-base">Como Funciona a Adesão?</h3>
+                    <p>
+                        Após sua solicitação, nossa equipe fará uma breve análise para confirmar a elegibilidade da sua loja. Garantimos que a entrada de novos membros seja estratégica para o grupo, visando a diversidade e a qualidade das conexões. Você será notificado sobre a aprovação.
+                    </p>
+
+                    <div className="bg-yellow-50 dark:bg-yellow-900/20 p-4 rounded-xl border border-yellow-100 dark:border-yellow-800 flex items-center gap-3">
+                        <Lock className="w-5 h-5 text-yellow-600 shrink-0" />
+                        <p className="text-xs text-yellow-700 dark:text-yellow-400">
+                            A exclusividade da rede é nossa prioridade para manter a qualidade das conexões.
+                        </p>
+                    </div>
+
+                </div>
+
+                {/* Modal Footer */}
+                <div className="p-5 border-t border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 sticky bottom-0 z-10 flex flex-col items-center">
+                    <button 
+                        onClick={handleJoinRequest}
+                        className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 rounded-xl shadow-lg shadow-indigo-500/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                    >
+                        Quero fazer parte
+                        <ArrowRight className="w-5 h-5" />
+                    </button>
+                    <button 
+                        onClick={() => setShowInfoModal(false)}
+                        className="mt-3 text-sm font-bold text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
+                    >
+                        Não, obrigado(a)
+                    </button>
+                </div>
+            </div>
+        </div>
+      )}
+
+    </div>
+  );
+};
