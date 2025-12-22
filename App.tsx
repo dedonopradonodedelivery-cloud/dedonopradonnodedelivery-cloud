@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Layout } from './components/Layout';
 import { Header } from './components/Header';
@@ -33,6 +32,7 @@ import { getStoreLogo } from './utils/mockLogos';
 import { CategoriaAlimentacao } from './components/CategoriaAlimentacao';
 import { CategoryView } from './components/CategoryView';
 import { EditorialListView } from './components/EditorialListView';
+import { AuthCallbackPage } from './components/AuthCallbackPage'; // Import the new callback page
 
 const MOCK_STORES: Store[] = [
   {
@@ -116,8 +116,17 @@ const App: React.FC = () => {
     else setIsAuthOpen(true);
   };
 
+  // NEW: Check if the current path is for the OAuth callback
+  const isOAuthCallback = window.location.pathname === '/auth/callback';
+
   // O app só é liberado se o carregamento do Supabase terminou E o tempo mínimo de 5s passou
-  const isAppReady = !isAuthLoading && minSplashTimeElapsed;
+  // E NÃO for a página de callback do OAuth
+  const isAppReady = !isAuthLoading && minSplashTimeElapsed && !isOAuthCallback;
+
+  // NEW: If it's the OAuth callback path, render the AuthCallbackPage immediately
+  if (isOAuthCallback) {
+    return <AuthCallbackPage />;
+  }
 
   if (!isAppReady) {
     return (
@@ -203,7 +212,7 @@ const App: React.FC = () => {
             <Header
               isDarkMode={isDarkMode}
               toggleTheme={toggleTheme}
-              onAuthClick={() => setActiveTab('profile')}
+              onAuthClick={() => setIsAuthOpen(true)} // Modified to always open AuthModal
               user={user}
               searchTerm={globalSearch}
               onSearchChange={setGlobalSearch}
@@ -258,7 +267,6 @@ const App: React.FC = () => {
             {activeTab === 'store_area' && (
               userRole === 'lojista' ? (
                 <StoreAreaView 
-                  user={user}
                   onBack={() => setActiveTab('home')} 
                   onNavigate={setActiveTab} 
                 />
