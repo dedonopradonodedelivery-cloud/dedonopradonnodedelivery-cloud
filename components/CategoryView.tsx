@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { ChevronLeft, Search, Star, BadgeCheck, ChevronRight, X, AlertCircle, Check } from 'lucide-react';
+import { ChevronLeft, Search, ImageIcon, Star, BadgeCheck, ChevronRight, X, AlertCircle, Check } from 'lucide-react';
 import { Category, Store, AdType } from '../types';
 import { SUBCATEGORIES } from '../constants';
 
@@ -142,14 +142,17 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
     let baseList: Store[] = [];
 
     if (selectedSubcategory) {
-      baseList = generateSubcategoryStores(selectedSubcategory, category.name);
+      baseList = stores.filter(s => s.subcategory === selectedSubcategory);
+      if (baseList.length === 0) { // Fallback if no real stores for subcategory
+         baseList = generateSubcategoryStores(selectedSubcategory, category.name);
+      }
     } else {
       baseList = stores.filter((store) => {
         const storeCat = store.category.toLowerCase();
         const currentCat = category.name.toLowerCase();
         return storeCat === currentCat || storeCat.includes(currentCat);
       });
-      if (baseList.length === 0) {
+      if (baseList.length === 0) { // Fallback if no real stores for main category
          baseList = generateSubcategoryStores(category.name, category.name);
       }
     }
@@ -317,7 +320,7 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
                                               {store.name}
                                            </h4>
                                            {store.verified && (
-                                             <BadgeCheck className="w-4 h-4 text-white fill-[#1E5BFF] flex-shrink-0" />
+                                             <BadgeCheck className="w-4 h-4 text-white fill-[#1E5BFF]" />
                                            )}
                                          </div>
                                          

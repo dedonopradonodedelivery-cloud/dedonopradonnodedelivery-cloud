@@ -1,7 +1,7 @@
 
 import React, { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom/client';
-import { supabase } from '../lib/supabaseClient'; // Adjust path as needed based on project root
+import { supabase } from './lib/supabaseClient'; // Adjust path as needed based on project root
 import { Loader2, CheckCircle2, XCircle } from 'lucide-react';
 
 /**

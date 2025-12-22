@@ -34,6 +34,8 @@ type ExploreViewProps = {
   onFilterClick: () => void;
   onOpenPlans: () => void;
   onViewAllVerified?: () => void;
+  // Fix: Added missing prop as it's passed from App.tsx
+  onViewMasterSponsor?: () => void;
 };
 
 // --- MOCK DATA FOR STORIES ---
@@ -333,6 +335,8 @@ export const ExploreView: React.FC<ExploreViewProps> = ({
   onFilterClick,
   onOpenPlans,
   onViewAllVerified,
+  // Fix: Added missing prop to destructuring list
+  onViewMasterSponsor,
 }) => {
   const { location, isLoading: isLoadingLocation } = useUserLocation();
   const [selectedFilter, setSelectedFilter] = useState<string | null>(null);

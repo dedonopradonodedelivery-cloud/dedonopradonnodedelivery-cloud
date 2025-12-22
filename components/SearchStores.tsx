@@ -1,6 +1,7 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { Search, MapPin, ChevronRight, Store as StoreIcon, Loader2, AlertCircle } from 'lucide-react';
-import { supabase } from '../lib/supabase';
+import { supabase } from '../lib/supabaseClient';
 import { Store, AdType } from '../types';
 
 interface SearchStoresProps {

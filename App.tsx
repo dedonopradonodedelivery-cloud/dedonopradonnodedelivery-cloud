@@ -1,57 +1,57 @@
 
 import React, { useState, useEffect } from 'react';
-import { Layout } from './components/Layout';
-import { Header } from './components/Header';
-import { HomeFeed } from './components/HomeFeed';
-import { ExploreView } from './components/ExploreView';
-import { StoreDetailView } from './components/StoreDetailView';
-import { CashbackView } from './components/CashbackView';
-import { CashbackInfoView } from './components/CashbackInfoView';
-import { RewardDetailsView } from './components/RewardDetailsView';
-import { AuthModal } from './components/AuthModal';
-import { MenuView } from './components/MenuView';
-import { PatrocinadorMasterScreen } from './components/PatrocinadorMasterScreen';
-import { CashbackScanScreen } from './components/CashbackScanScreen';
-import { ScanConfirmationScreen } from './components/ScanConfirmationScreen';
-import { CashbackPaymentScreen } from './components/CashbackPaymentScreen';
-import { PrizeHistoryView } from './components/PrizeHistoryView';
-import { FreguesiaConnectPublic } from './components/FreguesiaConnectPublic';
-import { FreguesiaConnectDashboard } from './components/FreguesiaConnectDashboard';
-import { FreguesiaConnectRestricted } from './components/FreguesiaConnectRestricted';
-import { ServicesView } from './components/ServicesView';
-import { SubcategoriesView } from './components/SubcategoriesView';
-import { SpecialtiesView } from './components/SpecialtiesView';
-import { ServiceSuccessView } from './components/ServiceSuccessView';
-import { ServiceTermsView } from './components/ServiceTermsView';
-import { QuoteRequestModal } from './components/QuoteRequestModal';
-import { StoreAreaView } from './components/StoreAreaView';
-import { MerchantQrScreen } from './components/MerchantQrScreen';
+import { Layout } from './Layout';
+import { Header } from './Header';
+import { HomeFeed } from './HomeFeed';
+import { ExploreView } from './ExploreView';
+import { StoreDetailView } from './StoreDetailView';
+import { CashbackView } from './CashbackView';
+import { CashbackInfoView } from './CashbackInfoView';
+import { RewardDetailsView } from './RewardDetailsView';
+import { AuthModal } from './AuthModal';
+import { MenuView } from './MenuView';
+import { PatrocinadorMasterScreen } from './PatrocinadorMasterScreen';
+import { CashbackScanScreen } from './CashbackScanScreen';
+import { ScanConfirmationScreen } from './ScanConfirmationScreen';
+import { CashbackPaymentScreen } from './CashbackPaymentScreen';
+import { PrizeHistoryView } from './PrizeHistoryView';
+import { FreguesiaConnectPublic } from './FreguesiaConnectPublic';
+import { FreguesiaConnectDashboard } from './FreguesiaConnectDashboard';
+import { FreguesiaConnectRestricted } from './FreguesiaConnectRestricted';
+import { ServicesView } from './ServicesView';
+import { SubcategoriesView } from './SubcategoriesView';
+import { SpecialtiesView } from './SpecialtiesView';
+import { ServiceSuccessView } from './ServiceSuccessView';
+import { ServiceTermsView } from './ServiceTermsView';
+import { QuoteRequestModal } from './QuoteRequestModal';
+import { StoreAreaView } from './StoreAreaView';
+import { MerchantQrScreen } from './MerchantQrScreen';
 import { MapPin, Crown, Info, TriangleAlert } from 'lucide-react';
-import { useAuth } from './contexts/AuthContext';
-import { Category, Store, AdType, EditorialCollection } from './types';
-import { getStoreLogo } from './utils/mockLogos';
-import { CategoriaAlimentacao } from './components/CategoriaAlimentacao';
-import { CategoryView } from './components/CategoryView';
-import { EditorialListView } from './components/EditorialListView';
-import { AuthCallbackPage } from './components/AuthCallbackPage'; 
-import { SpinWheelAdminDashboard } from './components/SpinWheelAdminDashboard'; 
-import { MerchantPayRoute } from './components/MerchantPayRoute'; // Import MerchantPayRoute
-import { MerchantPanel } from './components/MerchantPanel'; // Import MerchantPanel
-import { MerchantCashbackRequests } from './components/MerchantCashbackRequests'; // Import MerchantCashbackRequests
-import { StoreProfileEdit } from './components/StoreProfileEdit'; // Import StoreProfileEdit
-import { StoreFinanceModule } from './components/StoreFinanceModule'; // Import StoreFinanceModule
-import { StoreSupportModule } from './components/StoreSupportModule'; // Import StoreSupportModule
-import { StoreCashbackModule } from './components/StoreCashbackModule'; // Import StoreCashbackModule
-import { StoreAdsModule } from './components/StoreAdsModule'; // Import StoreAdsModule
-import { StoreHighlightsView } from './components/StoreHighlightsView'; // Import StoreHighlightsView
-import { SearchStores } from './components/SearchStores'; // Import SearchStores
-import { FavoritesView, AboutView, SupportView, InviteFriendView, SponsorInfoView } from './components/SimplePages'; // Import SimplePages
-import { EditProfileView } from './components/EditProfileView'; // Import EditProfileView
-import { BusinessRegistrationFlow } from './components/BusinessRegistrationFlow'; // Import BusinessRegistrationFlow
-import { CashbackLandingView } from './components/CashbackLandingView'; // Import CashbackLandingView
-import { UserCashbackFlow } from './components/UserCashbackFlow'; // Import UserCashbackFlow
-import { MarketplaceView } from './components/MarketplaceView'; // Import MarketplaceView
-import { StoreCategoryView } from './components/StoreCategoryView'; // Import StoreCategoryView
+import { useAuth } from '../contexts/AuthContext';
+import { Category, Store, AdType, EditorialCollection } from '../types';
+import { getStoreLogo } from '../utils/mockLogos';
+import { CategoriaAlimentacao } from './CategoriaAlimentacao';
+import { CategoryView } from './CategoryView';
+import { EditorialListView } from './EditorialListView';
+import { AuthCallbackPage } from './AuthCallbackPage'; 
+import { SpinWheelAdminDashboard } from './SpinWheelAdminDashboard'; 
+import { MerchantPayRoute } from './MerchantPayRoute'; 
+import { MerchantPanel } from './MerchantPanel'; 
+import { MerchantCashbackRequests } from './MerchantCashbackRequests'; 
+import { StoreProfileEdit } from './StoreProfileEdit'; 
+import { StoreFinanceModule } from './StoreFinanceModule'; 
+import { StoreSupportModule } from './StoreSupportModule'; 
+import { StoreCashbackModule } from './StoreCashbackModule'; 
+import { StoreAdsModule } from './StoreAdsModule'; 
+import { StoreHighlightsView } from './StoreHighlightsView'; 
+import { SearchStores } from './SearchStores'; 
+import { FavoritesView, AboutView, SupportView, InviteFriendView, SponsorInfoView } from './SimplePages'; 
+import { EditProfileView } from './EditProfileView'; 
+import { BusinessRegistrationFlow } from './BusinessRegistrationFlow'; 
+import { CashbackLandingView } from './CashbackLandingView'; 
+import { UserCashbackFlow } from './UserCashbackFlow'; 
+import { MarketplaceView } from './MarketplaceView'; 
+import { StoreCategoryView } from './StoreCategoryView'; 
 
 
 const MOCK_STORES: Store[] = [

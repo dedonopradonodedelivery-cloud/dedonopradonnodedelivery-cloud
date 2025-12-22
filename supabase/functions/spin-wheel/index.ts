@@ -366,7 +366,7 @@ serve(async (req) => {
     }
 
     // Se não foi um Super Giro ou se o orçamento do Super Giro foi excedido, usar a lógica da roleta normal/segura
-    if (!isSuperSpin) { // Renamed from serviceRoleSupabase
+    if (!isSuperSpin) {
       let isSafeModeActive = false;
       let safeModeReason = '';
       

@@ -1,6 +1,5 @@
-
 import React, { useEffect, useMemo, useState, useRef } from "react";
-import { Store } from "../types";
+import { Store } from "../../types";
 import {
   MapPin,
   Filter,
@@ -24,7 +23,7 @@ import {
 } from "lucide-react";
 import { useUserLocation } from "../hooks/useUserLocation";
 import { useMediaQuery } from "../hooks/useMediaQuery";
-import { quickFilters } from "../constants";
+import { quickFilters } from "../../constants";
 import { getStoreLogo } from "../utils/mockLogos";
 
 
@@ -36,6 +35,7 @@ type ExploreViewProps = {
   onFilterClick: () => void;
   onOpenPlans: () => void;
   onViewAllVerified?: () => void;
+  // Fix: Added missing prop as it's passed from App.tsx
   onViewMasterSponsor?: () => void;
 };
 
@@ -336,6 +336,7 @@ export const ExploreView: React.FC<ExploreViewProps> = ({
   onFilterClick,
   onOpenPlans,
   onViewAllVerified,
+  // Fix: Added missing prop to destructuring list
   onViewMasterSponsor,
 }) => {
   const { location, isLoading: isLoadingLocation } = useUserLocation();

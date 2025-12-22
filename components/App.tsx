@@ -1,40 +1,58 @@
 
 import React, { useState, useEffect } from 'react';
-import { Layout } from './components/Layout';
-import { Header } from './components/Header';
-import { HomeFeed } from './components/HomeFeed';
-import { ExploreView } from './components/ExploreView';
-import { StoreDetailView } from './components/StoreDetailView';
-import { CashbackView } from './components/CashbackView';
-import { CashbackInfoView } from './components/CashbackInfoView';
-import { RewardDetailsView } from './components/RewardDetailsView';
-import { AuthModal } from './components/AuthModal';
-import { MenuView } from './components/MenuView';
-import { PatrocinadorMasterScreen } from './components/PatrocinadorMasterScreen';
-import { CashbackScanScreen } from './components/CashbackScanScreen';
-import { ScanConfirmationScreen } from './components/ScanConfirmationScreen';
-import { CashbackPaymentScreen } from './components/CashbackPaymentScreen';
-import { PrizeHistoryView } from './components/PrizeHistoryView';
-import { FreguesiaConnectPublic } from './components/FreguesiaConnectPublic';
-import { FreguesiaConnectDashboard } from './components/FreguesiaConnectDashboard';
-import { FreguesiaConnectRestricted } from './components/FreguesiaConnectRestricted';
-import { ServicesView } from './components/ServicesView';
-import { SubcategoriesView } from './components/SubcategoriesView';
-import { SpecialtiesView } from './components/SpecialtiesView';
-import { ServiceSuccessView } from './components/ServiceSuccessView';
-import { ServiceTermsView } from './components/ServiceTermsView';
-import { QuoteRequestModal } from './components/QuoteRequestModal';
-import { StoreAreaView } from './components/StoreAreaView';
-import { MerchantQrScreen } from './components/MerchantQrScreen';
+import { Layout } from './Layout';
+import { Header } from './Header';
+import { HomeFeed } from './HomeFeed';
+import { ExploreView } from './ExploreView';
+import { StoreDetailView } from './StoreDetailView';
+import { CashbackView } from './CashbackView';
+import { CashbackInfoView } from './CashbackInfoView';
+import { RewardDetailsView } from './RewardDetailsView';
+import { AuthModal } from './AuthModal';
+import { MenuView } from './MenuView';
+import { PatrocinadorMasterScreen } from './PatrocinadorMasterScreen';
+import { CashbackScanScreen } from './CashbackScanScreen';
+import { ScanConfirmationScreen } from './ScanConfirmationScreen';
+import { CashbackPaymentScreen } from './CashbackPaymentScreen';
+import { PrizeHistoryView } from './PrizeHistoryView';
+import { FreguesiaConnectPublic } from './FreguesiaConnectPublic';
+import { FreguesiaConnectDashboard } from './FreguesiaConnectDashboard';
+import { FreguesiaConnectRestricted } from './FreguesiaConnectRestricted';
+import { ServicesView } from './ServicesView';
+import { SubcategoriesView } from './SubcategoriesView';
+import { SpecialtiesView } from './SpecialtiesView';
+import { ServiceSuccessView } from './ServiceSuccessView';
+import { ServiceTermsView } from './ServiceTermsView';
+import { QuoteRequestModal } from './QuoteRequestModal';
+import { StoreAreaView } from './StoreAreaView';
+import { MerchantQrScreen } from './MerchantQrScreen';
 import { MapPin, Crown, Info, TriangleAlert } from 'lucide-react';
-import { useAuth } from './contexts/AuthContext';
-import { Category, Store, AdType, EditorialCollection } from './types';
-import { getStoreLogo } from './utils/mockLogos';
-import { CategoriaAlimentacao } from './components/CategoriaAlimentacao';
-import { CategoryView } from './components/CategoryView';
-import { EditorialListView } from './components/EditorialListView';
-import { AuthCallbackPage } from './components/AuthCallbackPage'; 
-import { SpinWheelAdminDashboard } from './components/SpinWheelAdminDashboard'; 
+import { useAuth } from '../contexts/AuthContext';
+import { Category, Store, AdType, EditorialCollection } from '../types';
+import { getStoreLogo } from '../utils/mockLogos';
+import { CategoriaAlimentacao } from './CategoriaAlimentacao';
+import { CategoryView } from './CategoryView';
+import { EditorialListView } from './EditorialListView';
+import { AuthCallbackPage } from './AuthCallbackPage'; 
+import { SpinWheelAdminDashboard } from './SpinWheelAdminDashboard'; 
+import { MerchantPayRoute } from './MerchantPayRoute'; // Import MerchantPayRoute
+import { MerchantPanel } from './MerchantPanel'; // Import MerchantPanel
+import { MerchantCashbackRequests } from './MerchantCashbackRequests'; // Import MerchantCashbackRequests
+import { StoreProfileEdit } from './StoreProfileEdit'; // Import StoreProfileEdit
+import { StoreFinanceModule } from './StoreFinanceModule'; // Import StoreFinanceModule
+import { StoreSupportModule } from './StoreSupportModule'; // Import StoreSupportModule
+import { StoreCashbackModule } from './StoreCashbackModule'; // Import StoreCashbackModule
+import { StoreAdsModule } from './StoreAdsModule'; // Import StoreAdsModule
+import { StoreHighlightsView } from './StoreHighlightsView'; // Import StoreHighlightsView
+import { SearchStores } from './SearchStores'; // Import SearchStores
+import { FavoritesView, AboutView, SupportView, InviteFriendView, SponsorInfoView } from './SimplePages'; // Import SimplePages
+import { EditProfileView } from './EditProfileView'; // Import EditProfileView
+import { BusinessRegistrationFlow } from './BusinessRegistrationFlow'; // Import BusinessRegistrationFlow
+import { CashbackLandingView } from './CashbackLandingView'; // Import CashbackLandingView
+import { UserCashbackFlow } from './UserCashbackFlow'; // Import UserCashbackFlow
+import { MarketplaceView } from './MarketplaceView'; // Import MarketplaceView
+import { StoreCategoryView } from './StoreCategoryView'; // Import StoreCategoryView
+
 
 const MOCK_STORES: Store[] = [
   {
@@ -204,7 +222,10 @@ const App: React.FC = () => {
     'patrocinador_master', 'prize_history', 'reward_details', 
     'freguesia_connect_public', 'freguesia_connect_dashboard', 'freguesia_connect_restricted',
     'service_subcategories', 'service_specialties', 'service_terms', 'service_success',
-    'spin_wheel_admin_dashboard' 
+    'spin_wheel_admin_dashboard', 'edit_profile', 'merchant_panel', 'merchant_requests',
+    'store_profile', 'store_finance', 'store_support', 'store_cashback_module', 'store_ads_module',
+    'about', 'support', 'invite_friend', 'cashback_info', 'user_cashback_flow', 'merchant_pay_route',
+    'business_registration_flow', 'marketplace_view', 'store_highlights_view', 'search_stores',
   ];
 
   return (
@@ -242,7 +263,18 @@ const App: React.FC = () => {
               />
             )}
             {activeTab === 'explore' && (
-              <ExploreView stores={MOCK_STORES} searchQuery={globalSearch} onStoreClick={handleSelectStore} onLocationClick={() => {}} onFilterClick={() => {}} onOpenPlans={() => {}} />
+              <ExploreView 
+                stores={MOCK_STORES} 
+                searchQuery={globalSearch} 
+                onStoreClick={handleSelectStore} 
+                onLocationClick={() => {}} 
+                onFilterClick={() => {}} 
+                onOpenPlans={() => {}} 
+                onViewMasterSponsor={() => setActiveTab('patrocinador_master')}
+              />
+            )}
+            {activeTab === 'search_stores' && (
+                <SearchStores onStoreClick={handleSelectStore} />
             )}
             {activeTab === 'editorial_list' && selectedCollection && (
               <EditorialListView
@@ -340,7 +372,7 @@ const App: React.FC = () => {
                 <FreguesiaConnectPublic onBack={() => setActiveTab('home')} onLogin={() => setIsAuthOpen(true)} />
             )}
             {activeTab === 'freguesia_connect_dashboard' && (
-                <FreguesiaConnectDashboard onBack={() => setActiveTab('home')} />
+                userRole === 'lojista' ? <FreguesiaConnectDashboard onBack={() => setActiveTab('home')} /> : <FreguesiaConnectRestricted onBack={() => setActiveTab('home')} />
             )}
             {activeTab === 'freguesia_connect_restricted' && (
                 <FreguesiaConnectRestricted onBack={() => setActiveTab('home')} />
@@ -357,11 +389,20 @@ const App: React.FC = () => {
             {activeTab === 'profile' && (
               <MenuView user={user as any} userRole={userRole} onAuthClick={() => setIsAuthOpen(true)} onNavigate={setActiveTab} />
             )}
+            {activeTab === 'edit_profile' && user && (
+              <EditProfileView user={user} onBack={() => setActiveTab('profile')} />
+            )}
             {activeTab === 'patrocinador_master' && (
               <PatrocinadorMasterScreen onBack={() => setActiveTab('home')} />
             )}
             {activeTab === 'store_detail' && selectedStore && (
               <StoreDetailView store={selectedStore} onBack={() => setActiveTab('home')} />
+            )}
+            {activeTab === 'store_highlights_view' && selectedStore && (
+              <StoreHighlightsView store={selectedStore} onBack={() => setActiveTab('store_detail')} />
+            )}
+            {activeTab === 'store_category_view' && selectedCategory && (
+              <StoreCategoryView categoryName={selectedCategory.name} onBack={() => setActiveTab('store_detail')} />
             )}
             {activeTab === 'reward_details' && (
               <RewardDetailsView reward={selectedReward} onBack={() => setActiveTab('home')} onHome={() => setActiveTab('home')} />
@@ -369,10 +410,64 @@ const App: React.FC = () => {
             {activeTab === 'prize_history' && user && (
               <PrizeHistoryView userId={user.id} onBack={() => setActiveTab('home')} onGoToSpinWheel={() => setActiveTab('home')} />
             )}
-            {/* ROTA PARA O NOVO DASHBOARD ADMINISTRATIVO DA ROLETA */}
             {activeTab === 'spin_wheel_admin_dashboard' && userRole === 'lojista' && (
               <SpinWheelAdminDashboard onBack={() => setActiveTab('store_area')} />
             )}
+            {activeTab === 'merchant_panel' && userRole === 'lojista' && (
+              <MerchantPanel onBack={() => setActiveTab('store_area')} />
+            )}
+            {activeTab === 'merchant_requests' && userRole === 'lojista' && user && (
+              <MerchantCashbackRequests merchantId={user.id} onBack={() => setActiveTab('merchant_panel')} />
+            )}
+            {activeTab === 'store_profile' && userRole === 'lojista' && (
+              <StoreProfileEdit onBack={() => setActiveTab('store_area')} />
+            )}
+            {activeTab === 'store_finance' && userRole === 'lojista' && (
+              <StoreFinanceModule onBack={() => setActiveTab('store_area')} />
+            )}
+            {activeTab === 'store_support' && userRole === 'lojista' && (
+              <StoreSupportModule onBack={() => setActiveTab('store_area')} />
+            )}
+            {activeTab === 'store_cashback_module' && userRole === 'lojista' && (
+              <StoreCashbackModule onBack={() => setActiveTab('store_area')} />
+            )}
+            {activeTab === 'store_ads_module' && userRole === 'lojista' && (
+              <StoreAdsModule onBack={() => setActiveTab('store_area')} />
+            )}
+            {activeTab === 'about' && (
+              <AboutView onBack={() => setActiveTab('home')} />
+            )}
+            {activeTab === 'support' && (
+              <SupportView onBack={() => setActiveTab('profile')} />
+            )}
+            {activeTab === 'invite_friend' && (
+              <InviteFriendView onBack={() => setActiveTab('profile')} />
+            )}
+            {activeTab === 'cashback_info' && (
+              <CashbackInfoView onBack={() => setActiveTab('home')} />
+            )}
+            {activeTab === 'user_cashback_flow' && user && (
+              <UserCashbackFlow onBack={() => setActiveTab('profile')} />
+            )}
+            {activeTab === 'merchant_pay_route' && scannedData?.merchantId && user && (
+              <MerchantPayRoute 
+                merchantId={scannedData.merchantId} 
+                user={user} 
+                onLogin={() => setIsAuthOpen(true)} 
+                onBack={() => setActiveTab('home')} 
+                onComplete={() => setActiveTab('home')} 
+              />
+            )}
+            {activeTab === 'business_registration_flow' && (
+              <BusinessRegistrationFlow 
+                onBack={() => setActiveTab('home')} 
+                onComplete={() => setActiveTab('store_area')} 
+              />
+            )}
+            {activeTab === 'marketplace_view' && (
+              <MarketplaceView stores={MOCK_STORES} onBack={() => setActiveTab('home')} />
+            )}
+
           </main>
           <AuthModal isOpen={isAuthOpen} onClose={() => setIsAuthOpen(false)} user={user as any} signupContext={authContext} />
           {isQuoteModalOpen && (

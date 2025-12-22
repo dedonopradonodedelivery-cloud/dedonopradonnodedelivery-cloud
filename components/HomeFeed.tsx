@@ -41,8 +41,8 @@ import { User } from '@supabase/supabase-js';
 import { SpinWheelView } from './SpinWheelView';
 import { MasterSponsorBanner } from './MasterSponsorBanner';
 import { CATEGORIES, EDITORIAL_COLLECTIONS } from '../constants';
-// Fix: Import missing types from '../types'
 import { Category, EditorialCollection, Store, AdType } from '../types';
+import { getStoreLogo } from '../utils/mockLogos';
 
 interface HomeFeedProps {
   onNavigate: (view: string) => void;

@@ -1,6 +1,7 @@
 
 import React, { useState } from 'react';
 import { X, Send, Clock, MapPin, AlertCircle, CheckCircle2, Camera } from 'lucide-react';
+import { supabase } from '../lib/supabaseClient';
 
 interface QuoteRequestModalProps {
   isOpen: boolean;
@@ -37,12 +38,25 @@ export const QuoteRequestModal: React.FC<QuoteRequestModalProps> = ({ isOpen, on
     setImages(prev => prev.filter((_, i) => i !== index));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSending(true);
 
-    // Simulate API call
-    setTimeout(() => {
+    try {
+      if (supabase) {
+        const { error } = await supabase.from('service_requests').insert({
+          category: categoryName,
+          description: description,
+          urgency: urgency,
+          // TODO: Add image upload to storage and store URLs
+          // images_urls: images
+          created_at: new Date().toISOString()
+        });
+        if (error) throw error;
+      } else {
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      }
+
       setIsSending(false);
       setIsSent(true);
       
@@ -54,7 +68,11 @@ export const QuoteRequestModal: React.FC<QuoteRequestModalProps> = ({ isOpen, on
         onClose();
         if (onSuccess) onSuccess();
       }, 2000);
-    }, 1500);
+    } catch (err) {
+      console.error("Error submitting quote request:", err);
+      alert("Não foi possível enviar seu pedido. Tente novamente.");
+      setIsSending(false);
+    }
   };
 
   return (
