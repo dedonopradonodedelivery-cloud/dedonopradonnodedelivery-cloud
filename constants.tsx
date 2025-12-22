@@ -341,3 +341,8 @@ export const quickFilters = [
   { id: 'open_now', label: 'Aberto agora', icon: 'clock' },
   { id: 'cashback', label: 'Cashback', icon: 'percent' },
 ];
+
+export const ROULETTE_TRANSPARENCY_MESSAGES = {
+  DISCLAIMER_BOTTOM: 'Prêmios e probabilidades podem variar conforme campanhas e disponibilidade. Valores sujeitos a limite diário.',
+  DISCLAIMER_MODAL: 'Lembre-se: Prêmios e probabilidades podem variar. Valores sujeitos a limite diário. Consulte os termos no app.'
+};

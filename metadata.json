@@ -3,5 +3,6 @@
   "description": "O super-app da Freguesia. Conecte-se com comércios, serviços e profissionais locais. Ganhe cashback e fortaleça o ecossistema do bairro.",
   "requestFramePermissions": [
     "geolocation"
-  ]
+  ],
+  "version": "1.0.11"
 }

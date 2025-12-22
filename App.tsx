@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Layout } from './components/Layout';
 import { Header } from './components/Header';
@@ -25,14 +26,15 @@ import { ServiceTermsView } from './components/ServiceTermsView';
 import { QuoteRequestModal } from './components/QuoteRequestModal';
 import { StoreAreaView } from './components/StoreAreaView';
 import { MerchantQrScreen } from './components/MerchantQrScreen';
-import { MapPin, Crown } from 'lucide-react';
+import { MapPin, Crown, Info, TriangleAlert } from 'lucide-react';
 import { useAuth } from './contexts/AuthContext';
 import { Category, Store, AdType, EditorialCollection } from './types';
 import { getStoreLogo } from './utils/mockLogos';
 import { CategoriaAlimentacao } from './components/CategoriaAlimentacao';
 import { CategoryView } from './components/CategoryView';
 import { EditorialListView } from './components/EditorialListView';
-import { AuthCallbackPage } from './components/AuthCallbackPage'; // Import the new callback page
+import { AuthCallbackPage } from './components/AuthCallbackPage'; 
+import { SpinWheelAdminDashboard } from './components/SpinWheelAdminDashboard'; 
 
 const MOCK_STORES: Store[] = [
   {
@@ -201,7 +203,8 @@ const App: React.FC = () => {
     'category_detail', 'food_category', 'store_detail', 'profile', 
     'patrocinador_master', 'prize_history', 'reward_details', 
     'freguesia_connect_public', 'freguesia_connect_dashboard', 'freguesia_connect_restricted',
-    'service_subcategories', 'service_specialties', 'service_terms', 'service_success'
+    'service_subcategories', 'service_specialties', 'service_terms', 'service_success',
+    'spin_wheel_admin_dashboard' 
   ];
 
   return (
@@ -212,7 +215,7 @@ const App: React.FC = () => {
             <Header
               isDarkMode={isDarkMode}
               toggleTheme={toggleTheme}
-              onAuthClick={() => setIsAuthOpen(true)} // Modified to always open AuthModal
+              onAuthClick={() => setIsAuthOpen(true)} 
               user={user}
               searchTerm={globalSearch}
               onSearchChange={setGlobalSearch}
@@ -269,6 +272,7 @@ const App: React.FC = () => {
                 <StoreAreaView 
                   onBack={() => setActiveTab('home')} 
                   onNavigate={setActiveTab} 
+                  user={user}
                 />
               ) : (
                 <FreguesiaConnectRestricted onBack={() => setActiveTab('home')} />
@@ -363,6 +367,10 @@ const App: React.FC = () => {
             )}
             {activeTab === 'prize_history' && user && (
               <PrizeHistoryView userId={user.id} onBack={() => setActiveTab('home')} onGoToSpinWheel={() => setActiveTab('home')} />
+            )}
+            {/* ROTA PARA O NOVO DASHBOARD ADMINISTRATIVO DA ROLETA */}
+            {activeTab === 'spin_wheel_admin_dashboard' && userRole === 'lojista' && (
+              <SpinWheelAdminDashboard onBack={() => setActiveTab('store_area')} />
             )}
           </main>
           <AuthModal isOpen={isAuthOpen} onClose={() => setIsAuthOpen(false)} user={user as any} signupContext={authContext} />
