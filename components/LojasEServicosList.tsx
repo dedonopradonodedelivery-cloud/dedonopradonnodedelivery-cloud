@@ -1,6 +1,5 @@
 
-
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { Star, Loader2, AlertCircle, BadgeCheck, Heart, Award, Eye, Rocket, Crown } from 'lucide-react';
 import { Store, AdType } from '../types.ts';
 import { useFavorites } from '../hooks/useFavorites.ts';

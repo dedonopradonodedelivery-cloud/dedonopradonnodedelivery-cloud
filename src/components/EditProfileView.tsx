@@ -172,4 +172,66 @@ export const EditProfileView: React.FC<EditProfileViewProps> = ({ user, onBack }
             <div className="space-y-1.5">
                 <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide ml-1">Nascimento</label>
                 <div className="relative group">
-                <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-
+                <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-primary-500 transition-colors" />
+                <input 
+                    type="text" 
+                    value={birthDate}
+                    onChange={handleDateChange}
+                    className="w-full bg-white dark:bg-gray-800 text-gray-900 dark:text-white pl-12 pr-4 py-4 rounded-2xl border border-gray-200 dark:border-gray-700 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 outline-none transition-all font-medium"
+                    placeholder="DD/MM/AAAA"
+                    maxLength={10}
+                />
+                </div>
+            </div>
+
+            <div className="space-y-1.5">
+                <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide ml-1">Bairro</label>
+                <div className="relative group">
+                <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-primary-500 transition-colors" />
+                <input 
+                    type="text" 
+                    value={neighborhood}
+                    onChange={(e) => setNeighborhood(e.target.value)}
+                    className="w-full bg-white dark:bg-gray-800 text-gray-900 dark:text-white pl-12 pr-4 py-4 rounded-2xl border border-gray-200 dark:border-gray-700 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 outline-none transition-all font-medium"
+                    placeholder="Bairro"
+                />
+                </div>
+            </div>
+          </div>
+
+          <div className="pt-4">
+            <button 
+                type="submit"
+                disabled={isLoading}
+                className="w-full bg-gradient-to-r from-[#1E5BFF] to-[#4D7CFF] text-white font-bold text-lg py-4 rounded-2xl shadow-xl shadow-blue-500/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2 hover:brightness-110 disabled:opacity-70 disabled:cursor-not-allowed"
+            >
+                {isLoading ? (
+                    <>
+                        <Loader2 className="w-5 h-5 animate-spin" />
+                        Salvando...
+                    </>
+                ) : (
+                    <>
+                        <Save className="w-5 h-5" />
+                        Salvar Alterações
+                    </>
+                )}
+            </button>
+          </div>
+
+        </form>
+      </div>
+
+      {/* Success Toast */}
+      <div 
+        className={`fixed bottom-10 left-1/2 -translate-x-1/2 bg-gray-900 dark:bg-white text-white dark:text-gray-900 px-6 py-3 rounded-full shadow-2xl flex items-center gap-2 transition-all duration-500 z-50 ${
+            showSuccess ? 'translate-y-0 opacity-100' : 'translate-y-20 opacity-0'
+        }`}
+      >
+        <CheckCircle2 className="w-5 h-5 text-green-400 dark:text-green-600" />
+        <span className="font-bold text-sm">Perfil atualizado com sucesso!</span>
+      </div>
+
+    </div>
+  );
+};

@@ -7,8 +7,9 @@ import path from 'path' // Import path module
 export default defineConfig({
   plugins: [react()],
   resolve: {
+    // Replaced __dirname with process.cwd() for broader compatibility in Vite
     alias: {
-      '@': path.resolve(__dirname, './src'), // Map @/ to the src directory
+      '@': path.resolve(process.cwd(), './src'), // Map @/ to the src directory
     },
   },
   build: {
