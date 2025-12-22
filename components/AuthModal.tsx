@@ -192,24 +192,35 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     setSuccessMsg('');
   };
 
-  const handleGoogleSignIn = async () => {
+  const handleGoogleSignIn = async (e: React.MouseEvent) => {
+    e.preventDefault(); // Prevents default button behavior
     setIsLoading(true);
     setError('');
     setSuccessMsg('');
     try {
-      // Supabase will handle the redirect, so no need to call finishAuth here
-      const { error } = await supabase.auth.signInWithOAuth({
+      // Step 1: Get the OAuth URL with skipBrowserRedirect set to true
+      const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: window.location.origin, // Ensures it redirects back to the app
-          skipBrowserRedirect: true, // NEW: Avoids full page reload on the main window
+          redirectTo: window.location.origin, // Where the popup redirects after auth
+          skipBrowserRedirect: true, // Crucial: tells Supabase to return the URL, not redirect the main window
         },
       });
-      if (error) throw error;
-      // If using skipBrowserRedirect, the main window does not navigate.
-      // The session is handled by the onAuthStateChange listener in AuthContext.
-      // We can optimistically close the modal here or wait for AuthContext to update.
-      // For now, let's keep it simple and let AuthContext handle the closure implicitly.
+
+      if (error) {
+        throw error;
+      }
+
+      if (data?.url) {
+        // Step 2: Open the URL in a new popup window
+        window.open(data.url, '_blank', 'width=500,height=600');
+        // The AuthContext's onAuthStateChange listener will handle the session update
+        // when the popup successfully authenticates and redirects.
+        // We do NOT call finishAuth() here, as the main window is not redirecting.
+        // The modal will close when AuthContext detects the new session.
+      } else {
+        throw new Error('URL de autenticação do Google não recebida.');
+      }
     } catch (err: any) {
       console.error("Error signing in with Google:", err);
       setError(err.message || 'Erro ao entrar com Google. Tente novamente.');
@@ -352,7 +363,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         </div>
 
         <button
-            type="button"
+            type="button" // Ensures it's not a submit button
             onClick={handleGoogleSignIn}
             disabled={isLoading}
             className="w-full bg-white dark:bg-gray-800 text-gray-700 dark:text-white font-bold py-3.5 rounded-xl transition-all active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-3 border border-gray-200 dark:border-gray-700 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700"
