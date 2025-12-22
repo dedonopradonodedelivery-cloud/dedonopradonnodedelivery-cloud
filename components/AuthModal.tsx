@@ -52,6 +52,7 @@ const GoogleIcon: React.FC = () => (
 export const AuthModal: React.FC<AuthModalProps> = ({
   isOpen,
   onClose,
+  user, // Added user prop to dependencies
   signupContext = 'default',
   onLoginSuccess,
 }) => {
@@ -83,6 +84,13 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       }
     }
   }, [isOpen, signupContext]);
+
+  // NEW: Effect to close modal if user becomes logged in while modal is open
+  useEffect(() => {
+    if (user && isOpen) {
+      finishAuth();
+    }
+  }, [user, isOpen]); // Dependencies: user prop and isOpen state
 
   if (!isOpen) return null;
 
@@ -217,7 +225,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         // The AuthContext's onAuthStateChange listener will handle the session update
         // when the popup successfully authenticates and redirects.
         // We do NOT call finishAuth() here, as the main window is not redirecting.
-        // The modal will close when AuthContext detects the new session.
+        // The modal will close when AuthContext detects the new session (via the new useEffect).
       } else {
         throw new Error('URL de autenticação do Google não recebida.');
       }
