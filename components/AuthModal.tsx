@@ -202,9 +202,14 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         provider: 'google',
         options: {
           redirectTo: window.location.origin, // Ensures it redirects back to the app
+          skipBrowserRedirect: true, // NEW: Avoids full page reload on the main window
         },
       });
       if (error) throw error;
+      // If using skipBrowserRedirect, the main window does not navigate.
+      // The session is handled by the onAuthStateChange listener in AuthContext.
+      // We can optimistically close the modal here or wait for AuthContext to update.
+      // For now, let's keep it simple and let AuthContext handle the closure implicitly.
     } catch (err: any) {
       console.error("Error signing in with Google:", err);
       setError(err.message || 'Erro ao entrar com Google. Tente novamente.');
