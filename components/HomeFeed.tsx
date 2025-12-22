@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { 
   ChevronRight, 
@@ -464,10 +465,10 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
               </div>
             </div>
             <div className="flex justify-center mt-2">
-              <div className="w-20 h-1 bg-gray-200 dark:bg-gray-700 rounded-full relative"> {/* Adjusted from w-24 to w-20 */}
+              <div className="w-16 h-1 bg-gray-200 dark:bg-gray-700 rounded-full relative"> 
                 <div 
-                  className="h-full bg-primary-500 rounded-full absolute top-0 left-0 w-6 transition-transform duration-100 ease-linear" {/* Adjusted from w-8 to w-6 */}
-                  style={{ transform: `translateX(${categoryScrollProgress * (80 - 24)}px)` }} {/* Adjusted calculation (80-24) */}
+                  className="h-full bg-primary-500 rounded-full absolute top-0 left-0 w-4 transition-transform duration-100 ease-linear" 
+                  style={{ transform: `translateX(${categoryScrollProgress * (64 - 16)}px)` }} 
                 />
               </div>
             </div>

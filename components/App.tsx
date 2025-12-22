@@ -238,7 +238,7 @@ const App: React.FC = () => {
                 userRole={userRole}
                 onSpinWin={(reward) => { setSelectedReward(reward); setActiveTab('reward_details'); }}
                 onRequireLogin={() => setIsAuthOpen(true)}
-                merchantId={null} {/* NEW: Pass merchantId as null for home feed spins */}
+                merchantId={null} 
               />
             )}
             {activeTab === 'explore' && (

@@ -671,7 +671,7 @@ serve(async (req) => {
       }
 
       selectedPrize = potentialPrize;
-
+    } // <--- This closing brace was missing
 
     // --- Registrar Giro e Atualizar Orçamentos ---
     const { error: insertSpinError } = await userSupabaseClient
