@@ -201,10 +201,12 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   };
 
   const handleGoogleSignIn = async (e: React.MouseEvent) => {
+    // A) Provar a causa (obrigatório)
+    console.log("GOOGLE_BTN_ELEMENT", { tag: e?.currentTarget?.tagName, type: e?.currentTarget?.getAttribute?.("type"), href: e?.currentTarget?.getAttribute?.("href"), target: e?.currentTarget?.getAttribute?.("target") });
+    console.log("GOOGLE_CLICK_BEFORE", { location: window.location.href });
+    
     e.preventDefault(); // Prevents default button behavior
     e.stopPropagation(); // Stop propagation to prevent any parent form/element from reacting
-    
-    console.log("GOOGLE_CLICK", { href: window.location.href }); // Add requested log
     
     setIsLoading(true);
     setError('');
@@ -214,10 +216,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          // REMOVED: redirectTo. Rely on Supabase project configuration for redirect URLs.
-          // When skipBrowserRedirect is true, data.url *should* be the external provider's URL.
-          // If the pop-up opens to an internal app URL, the redirectTo might be causing
-          // the SDK to prematurely redirect, even with skipBrowserRedirect set.
+          // B) Corrigir: Use window.location.origin para o redirectTo no fluxo de pop-up
+          redirectTo: window.location.origin, 
           skipBrowserRedirect: true,
         },
       });
@@ -227,19 +227,21 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       }
 
       if (data?.url) {
-        console.log("Supabase returned URL for window.open:", data.url); // Add requested log
-        // The returned URL should be Google's OAuth URL, which will then redirect to the redirectTo path in the popup.
+        console.log("Supabase returned URL for window.open:", data.url);
+        // O `window.open` é o método correto para abrir a URL externa do Google em um pop-up.
+        // A correção garante que `data.url` seja de `accounts.google.com`.
         window.open(data.url, '_blank', 'width=500,height=600');
-        // The AuthContext's onAuthStateChange listener will handle the session update
-        // when the popup successfully authenticates and redirects.
-        // We do NOT call finishAuth() here, as the main window is not redirecting.
-        // The modal will close when AuthContext detects the new session (via the new useEffect).
       } else {
         throw new Error('URL de autenticação do Google não recebida.');
       }
     } catch (err: any) {
       console.error("Error signing in with Google:", err);
-      setError(err.message || 'Erro ao entrar com Google. Tente novamente.');
+      // Fallback para exibir erro se a configuração do Google Sign-In estiver ausente.
+      if (err.message && (err.message.includes('missing client_id') || err.message.includes('invalid_client_id'))) {
+        setError('Google Sign-In não configurado. Por favor, entre em contato com o suporte.');
+      } else {
+        setError(err.message || 'Erro ao entrar com Google. Tente novamente.');
+      }
     } finally {
       setIsLoading(false);
     }
