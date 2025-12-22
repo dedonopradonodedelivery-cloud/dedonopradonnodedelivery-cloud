@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { ChevronLeft, CheckCircle, XCircle, Clock, DollarSign, User, AlertCircle, Loader2, ArrowRight } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
@@ -299,7 +300,7 @@ export const MerchantCashbackRequests: React.FC<MerchantCashbackRequestsProps> =
                     <button 
                         onClick={() => handleReject(selectedRequest)}
                         disabled={!!processingId}
-                        className="flex-1 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 font-bold py-4 rounded-2xl flex items-center justify-center gap-2 active:scale-95 transition-all"
+                        className="flex-1 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 font-bold py-4 rounded-2xl flex items-center justify-center gap-2 active:scale-[0.95] transition-all"
                     >
                         {processingId === selectedRequest.id ? <Loader2 className="w-5 h-5 animate-spin" /> : <XCircle className="w-5 h-5" />}
                         Recusar
@@ -307,7 +308,7 @@ export const MerchantCashbackRequests: React.FC<MerchantCashbackRequestsProps> =
                     <button 
                         onClick={() => handleApprove(selectedRequest)}
                         disabled={!!processingId}
-                        className="flex-[2] bg-[#1E5BFF] hover:bg-[#1749CC] text-white font-bold py-4 rounded-2xl shadow-lg shadow-blue-500/20 active:scale-95 transition-all flex items-center justify-center gap-2"
+                        className="flex-[2] bg-[#1E5BFF] hover:bg-[#1749CC] text-white font-bold py-4 rounded-2xl shadow-lg shadow-blue-500/20 active:scale-[0.95] transition-all flex items-center justify-center gap-2"
                     >
                         {processingId === selectedRequest.id ? <Loader2 className="w-5 h-5 animate-spin" /> : <CheckCircle className="w-5 h-5" />}
                         Aprovar

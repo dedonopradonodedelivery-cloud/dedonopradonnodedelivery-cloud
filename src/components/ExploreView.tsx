@@ -1,6 +1,7 @@
 
+
 import React, { useEffect, useMemo, useState, useRef } from "react";
-import { Store } from "../../types";
+import { Store } from "../types";
 import {
   MapPin,
   Filter,
@@ -24,7 +25,9 @@ import {
 } from "lucide-react";
 import { useUserLocation } from "../hooks/useUserLocation";
 import { useMediaQuery } from "../hooks/useMediaQuery";
-import { quickFilters } from "../../constants";
+import { quickFilters } from "../constants";
+import { getStoreLogo } from "../utils/mockLogos";
+
 
 type ExploreViewProps = {
   stores: Store[];
@@ -224,7 +227,7 @@ const HorizontalStoreSection: React.FC<HorizontalStoreSectionProps> = ({
           >
             <div className="relative h-24 bg-gray-100 dark:bg-gray-800 overflow-hidden">
               <img
-                src={(store as any).coverImage || store.image || (store as any).imageUrl}
+                src={(store as any).coverImage || store.image || (store as any).imageUrl || getStoreLogo(store.id.charCodeAt(0))}
                 alt={store.name}
                 className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
               />
