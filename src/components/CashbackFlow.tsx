@@ -1,8 +1,8 @@
 
 import React, { useState } from 'react';
-import { CashbackScanScreen } from './CashbackScanScreen';
-import PayWithCashbackScreen from './PayWithCashbackScreen';
-import PaymentResultScreen from './PaymentResultScreen';
+import { CashbackScanScreen } from '@/components/CashbackScanScreen';
+import PayWithCashbackScreen from '@/components/PayWithCashbackScreen';
+import PaymentResultScreen from '@/components/PaymentResultScreen';
 import { Clock, Store } from 'lucide-react';
 
 // Tipos para controle do fluxo
@@ -90,8 +90,8 @@ export default function CashbackFlow(props: CashbackFlowProps) {
         {/* STEP 2: FORMULÁRIO DE PAGAMENTO */}
         {step === "pay" && (
           <PayWithCashback
-            storeName={storeName}
-            cashbackPercent={cashbackPercent}
+            merchantName={storeName}
+            merchantCashbackPercent={cashbackPercent}
             onPaymentSimulated={handlePaymentSimulated}
             onBack={() => setStep("scan")}
           />

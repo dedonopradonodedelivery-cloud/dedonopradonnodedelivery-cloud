@@ -2,8 +2,8 @@
 
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { ChevronLeft, Search, ImageIcon, Star, BadgeCheck, ChevronRight, X, AlertCircle, Check } from 'lucide-react';
-import { Category, Store, AdType } from '../types';
-import { SUBCATEGORIES } from '../constants';
+import { Category, Store, AdType } from '@/types.ts';
+import { SUBCATEGORIES } from '@/constants.tsx';
 
 interface CategoryViewProps {
   category: Category;

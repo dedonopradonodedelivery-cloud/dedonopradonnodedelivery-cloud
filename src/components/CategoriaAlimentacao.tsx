@@ -2,8 +2,8 @@
 
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { ChevronLeft, Search, ImageIcon, Star, BadgeCheck, ChevronRight, X, AlertCircle } from 'lucide-react';
-import { SUBCATEGORIES } from '../constants';
-import { Store, AdType } from '../types';
+import { SUBCATEGORIES } from '@/constants';
+import { Store, AdType } from '@/types';
 
 // --- Type Definition for Banner Ads ---
 interface BannerAd {
@@ -332,7 +332,7 @@ export const CategoriaAlimentacao: React.FC<CategoriaAlimentacaoProps> = ({ onBa
                   Subcategorias
                 </h2>
                 <div className="grid grid-cols-2 gap-x-4 gap-y-5">
-                  {subcategories.map((sub, i) => (
+                  {subcategories.map((sub: any, i: any) => (
                       <SubcategoryCard 
                         key={i} 
                         icon={sub.icon}

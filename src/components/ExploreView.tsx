@@ -1,7 +1,6 @@
 
-
 import React, { useEffect, useMemo, useState, useRef } from "react";
-import { Store } from "../types";
+import { Store } from '@/types.ts';
 import {
   MapPin,
   Filter,
@@ -23,10 +22,10 @@ import {
   Heart,
   Users
 } from "lucide-react";
-import { useUserLocation } from "../hooks/useUserLocation";
-import { useMediaQuery } from "../hooks/useMediaQuery";
-import { quickFilters } from "../constants";
-import { getStoreLogo } from "../utils/mockLogos";
+import { useUserLocation } from '@/hooks/useUserLocation.ts';
+import { useMediaQuery } from '@/hooks/useMediaQuery.ts';
+import { quickFilters } from '@/constants.tsx';
+import { getStoreLogo } from '@/utils/mockLogos.ts';
 
 
 type ExploreViewProps = {
@@ -719,7 +718,7 @@ export const ExploreView: React.FC<ExploreViewProps> = ({
                      <div 
                         className="h-full bg-white transition-all duration-100 ease-linear"
                         style={{ 
-                            width: i === activeStoryIndex ? `${storyProgress}%` : i < activeStoryIndex ? '100%' : '0%' 
+                            width: i === activeStoryIndex ? `${storyProgress}%` : i < (activeStoryIndex || 0) ? '100%' : '0%' 
                         }}
                      />
                  </div>

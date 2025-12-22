@@ -1,8 +1,8 @@
 
 import React from 'react';
 import { Utensils, Briefcase, PartyPopper, Shirt, Coffee, Home, Dog, Armchair, Scissors, Heart, GraduationCap, Settings, Dumbbell, CarFront, Wrench, Sun, ShoppingCart, Croissant, Leaf, Beef, Fish, Bike, Beer, Sandwich, ShoppingBag, Sparkles, MapPin, Hand, Feather, Eye, Stethoscope, Smile, Brain, Activity, Apple, FlaskConical, HelpingHand, School, Languages, BookOpen, Baby, Target, Zap, Droplet, BrickWall, PaintRoller, Hammer, Wind, Key, Plug, Scale, Calculator, Ruler, Megaphone, Camera, Printer, Bone, Footprints, Flame, Swords, Trophy, Waves, Music, UserCheck, Tv, Smartphone, Laptop, Cpu, Snowflake, FileText, CircleDashed, Lock, Wallet, Gem, Watch, Moon, ShieldCheck, Package, Building2, Pill, Lightbulb, Palette, TriangleAlert, ThumbsUp } from 'lucide-react';
-import { AdType, Category, Store, Story, ServiceLead, Channel, Transaction, EditorialCollection } from './types';
-import { getStoreLogo } from './utils/mockLogos';
+import { AdType, Category, Store, Story, ServiceLead, Channel, Transaction, EditorialCollection } from '@/types.ts';
+import { getStoreLogo } from '@/utils/mockLogos.ts';
 
 export const CATEGORIES: Category[] = [
   // Top 8 Categories ordered as requested
@@ -209,21 +209,21 @@ export const EDITORIAL_COLLECTIONS: EditorialCollection[] = [
     id: 'almoço-semana', 
     title: '🍛 Almoço durante a semana', 
     subtitle: 'Opções rápidas e saborosas perto de você', 
-    image: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=800&auto=format=fit=crop', 
+    image: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=800&auto=format&fit=crop', 
     keywords: ['restaurante', 'almoço', 'executivo', 'prato feito', 'hamburgueria'] 
   },
   { 
     id: 'top-rated', 
     title: '⭐ Favoritos da Vizinhança', 
     subtitle: 'Os locais mais bem avaliados pelos moradores.', 
-    image: 'https://images.unsplash.com/photo-1521017432531-fbd92d768814?q=80&w=800&auto=format=fit=crop', 
+    image: 'https://images.unsplash.com/photo-1521017432531-fbd92d768814?q=80&w=800&auto=format&fit=crop', 
     keywords: [] 
   },
   { 
     id: 'happy-hour', 
     title: '🍻 Happy Hour & Fim de Tarde', 
     subtitle: 'Bares e petiscos para relaxar depois do dia.', 
-    image: 'https://images.unsplash.com/photo-1514933651103-005eec06c04b?q=80&w=800&auto=format=fit=crop', 
+    image: 'https://images.unsplash.com/photo-1514933651103-005eec06c04b?q=80&w=800&auto=format&fit=crop', 
     keywords: ['bar', 'happy hour', 'petiscos', 'chopp'] 
   },
 ];

@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { supabase } from '../lib/supabaseClient.ts';
+import { supabase } from '@/lib/supabaseClient.ts';
 import {
   X,
   Mail,

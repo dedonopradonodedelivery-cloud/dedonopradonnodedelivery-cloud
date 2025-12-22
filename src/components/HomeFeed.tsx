@@ -1,4 +1,5 @@
 
+
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { 
   ChevronRight, 
@@ -36,13 +37,13 @@ import {
   Sparkles,
   Compass
 } from 'lucide-react';
-import { LojasEServicosList } from './LojasEServicosList';
+import { LojasEServicosList } from '@/components/LojasEServicosList.tsx';
 import { User } from '@supabase/supabase-js';
-import { SpinWheelView } from './SpinWheelView';
-import { MasterSponsorBanner } from './MasterSponsorBanner';
-import { CATEGORIES, EDITORIAL_COLLECTIONS } from '../constants';
-import { Category, EditorialCollection, Store, AdType } from '../types';
-import { getStoreLogo } from '../utils/mockLogos';
+import { SpinWheelView } from '@/components/SpinWheelView.tsx'; // Fix: Added .tsx extension
+import { MasterSponsorBanner } from '@/components/MasterSponsorBanner.tsx';
+import { CATEGORIES, EDITORIAL_COLLECTIONS, ROULETTE_TRANSPARENCY_MESSAGES } from '@/constants.tsx';
+import { Category, EditorialCollection, Store, AdType } from '@/types.ts';
+import { getStoreLogo } from '@/utils/mockLogos.ts';
 
 interface HomeFeedProps {
   onNavigate: (view: string) => void;
@@ -511,7 +512,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
         return (
           <div key="filters" className="px-5">
             <div className="flex items-center gap-1.5 mb-3 px-1">
-                 <ShieldCheck className="w-3.5 h-3.5 text-gray-400" />
+                 <ShieldCheck className="w-3.5 h-3.5 text-gray-400"/>
                  <div>
                     <h3 className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">Lojas & Serviços</h3>
                     <p className="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5">Filtre por categorias e serviços</p>

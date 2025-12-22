@@ -1,57 +1,57 @@
 
 import React, { useState, useEffect } from 'react';
-import { Layout } from './Layout';
-import { Header } from './Header';
-import { HomeFeed } from './HomeFeed';
-import { ExploreView } from './ExploreView';
-import { StoreDetailView } from './StoreDetailView';
-import { CashbackView } from './CashbackView';
-import { CashbackInfoView } from './CashbackInfoView';
-import { RewardDetailsView } from './RewardDetailsView';
-import { AuthModal } from './AuthModal';
-import { MenuView } from './MenuView';
-import { PatrocinadorMasterScreen } from './PatrocinadorMasterScreen';
-import { CashbackScanScreen } from './CashbackScanScreen';
-import { ScanConfirmationScreen } from './ScanConfirmationScreen';
-import { CashbackPaymentScreen } from './CashbackPaymentScreen';
-import { PrizeHistoryView } from './PrizeHistoryView';
-import { FreguesiaConnectPublic } from './FreguesiaConnectPublic';
-import { FreguesiaConnectDashboard } from './FreguesiaConnectDashboard';
-import { FreguesiaConnectRestricted } from './FreguesiaConnectRestricted';
-import { ServicesView } from './ServicesView';
-import { SubcategoriesView } from './SubcategoriesView';
-import { SpecialtiesView } from './SpecialtiesView';
-import { ServiceSuccessView } from './ServiceSuccessView';
-import { ServiceTermsView } from './ServiceTermsView';
-import { QuoteRequestModal } from './QuoteRequestModal';
-import { StoreAreaView } from './StoreAreaView';
-import { MerchantQrScreen } from './MerchantQrScreen';
+import { Layout } from '@/components/Layout.tsx';
+import { Header } from '@/components/Header.tsx';
+import { HomeFeed } from '@/components/HomeFeed.tsx';
+import { ExploreView } from '@/components/ExploreView.tsx';
+import { StoreDetailView } from '@/components/StoreDetailView.tsx';
+import { CashbackView } from '@/components/CashbackView.tsx';
+import { CashbackInfoView } from '@/components/CashbackInfoView.tsx';
+import { RewardDetailsView } from '@/components/RewardDetailsView.tsx';
+import { AuthModal } from '@/components/AuthModal.tsx';
+import { MenuView } from '@/components/MenuView.tsx';
+import { PatrocinadorMasterScreen } from '@/components/PatrocinadorMasterScreen.tsx';
+import { CashbackScanScreen } from '@/components/CashbackScanScreen.tsx';
+import { ScanConfirmationScreen } from '@/components/ScanConfirmationScreen.tsx';
+import { CashbackPaymentScreen } from '@/components/CashbackPaymentScreen.tsx';
+import { PrizeHistoryView } from '@/components/PrizeHistoryView.tsx';
+import { FreguesiaConnectPublic } from '@/components/FreguesiaConnectPublic.tsx';
+import { FreguesiaConnectDashboard } from '@/components/FreguesiaConnectDashboard.tsx';
+import { FreguesiaConnectRestricted } from '@/components/FreguesiaConnectRestricted.tsx';
+import { ServicesView } from '@/components/ServicesView.tsx';
+import { SubcategoriesView } from '@/components/SubcategoriesView.tsx';
+import { SpecialtiesView } from '@/components/SpecialtiesView.tsx';
+import { ServiceSuccessView } from '@/components/ServiceSuccessView.tsx';
+import { ServiceTermsView } from '@/components/ServiceTermsView.tsx';
+import { QuoteRequestModal } from '@/components/QuoteRequestModal.tsx';
+import { StoreAreaView } from '@/components/StoreAreaView.tsx';
+import { MerchantQrScreen } from '@/components/MerchantQrScreen.tsx';
 import { MapPin, Crown, Info, TriangleAlert } from 'lucide-react';
-import { useAuth } from '../contexts/AuthContext';
-import { Category, Store, AdType, EditorialCollection } from '../types';
-import { getStoreLogo } from '../utils/mockLogos';
-import { CategoriaAlimentacao } from './CategoriaAlimentacao';
-import { CategoryView } from './CategoryView';
-import { EditorialListView } from './EditorialListView';
-import { AuthCallbackPage } from './AuthCallbackPage'; 
-import { SpinWheelAdminDashboard } from './SpinWheelAdminDashboard'; 
-import { MerchantPayRoute } from './MerchantPayRoute'; // Import MerchantPayRoute
-import { MerchantPanel } from './MerchantPanel'; // Import MerchantPanel
-import { MerchantCashbackRequests } from './MerchantCashbackRequests'; // Import MerchantCashbackRequests
-import { StoreProfileEdit } from './StoreProfileEdit'; // Import StoreProfileEdit
-import { StoreFinanceModule } from './StoreFinanceModule'; // Import StoreFinanceModule
-import { StoreSupportModule } from './StoreSupportModule'; // Import StoreSupportModule
-import { StoreCashbackModule } from './StoreCashbackModule'; // Import StoreCashbackModule
-import { StoreAdsModule } from './StoreAdsModule'; // Import StoreAdsModule
-import { StoreHighlightsView } from './StoreHighlightsView'; // Import StoreHighlightsView
-import { SearchStores } from './SearchStores'; // Import SearchStores
-import { FavoritesView, AboutView, SupportView, InviteFriendView, SponsorInfoView } from './SimplePages'; // Import SimplePages
-import { EditProfileView } from './EditProfileView'; // Import EditProfileView
-import { BusinessRegistrationFlow } from './BusinessRegistrationFlow'; // Import BusinessRegistrationFlow
-import { CashbackLandingView } from './CashbackLandingView'; // Import CashbackLandingView
-import { UserCashbackFlow } from './UserCashbackFlow'; // Import UserCashbackFlow
-import { MarketplaceView } from './MarketplaceView'; // Import MarketplaceView
-import { StoreCategoryView } from './StoreCategoryView'; // Import StoreCategoryView
+import { useAuth } from '@/contexts/AuthContext.tsx';
+import { Category, Store, AdType, EditorialCollection } from '@/types.ts';
+import { getStoreLogo } from '@/utils/mockLogos.ts';
+import { CategoriaAlimentacao } from '@/components/CategoriaAlimentacao.tsx';
+import { CategoryView } from '@/components/CategoryView.tsx';
+import { EditorialListView } from '@/components/EditorialListView.tsx';
+import { AuthCallbackPage } from '@/components/AuthCallbackPage.tsx'; 
+import { SpinWheelAdminDashboard } from '@/components/SpinWheelAdminDashboard.tsx'; 
+import { MerchantPayRoute } from '@/components/MerchantPayRoute.tsx'; // Import MerchantPayRoute
+import { MerchantPanel } from '@/components/MerchantPanel.tsx'; // Import MerchantPanel
+import { MerchantCashbackRequests } from '@/components/MerchantCashbackRequests.tsx'; // Import MerchantCashbackRequests
+import { StoreProfileEdit } from '@/components/StoreProfileEdit.tsx'; // Import StoreProfileEdit
+import { StoreFinanceModule } from '@/components/StoreFinanceModule.tsx'; // Import StoreFinanceModule
+import { StoreSupportModule } from '@/components/StoreSupportModule.tsx'; // Import StoreSupportModule
+import { StoreCashbackModule } from '@/components/StoreCashbackModule.tsx'; // Import StoreCashbackModule
+import { StoreAdsModule } from '@/components/StoreAdsModule.tsx'; // Import StoreAdsModule
+import { StoreHighlightsView } from '@/components/StoreHighlightsView.tsx'; // Import StoreHighlightsView
+import { SearchStores } from '@/components/SearchStores.tsx'; // Import SearchStores
+import { FavoritesView, AboutView, SupportView, InviteFriendView, SponsorInfoView } from '@/components/SimplePages.tsx'; // Import SimplePages
+import { EditProfileView } from '@/components/EditProfileView.tsx'; // Import EditProfileView
+import { BusinessRegistrationFlow } from '@/components/BusinessRegistrationFlow.tsx'; // Import BusinessRegistrationFlow
+import { CashbackLandingView } from '@/components/CashbackLandingView.tsx'; // Import CashbackLandingView
+import { UserCashbackFlow } from '@/components/UserCashbackFlow.tsx'; // Import UserCashbackFlow
+import { MarketplaceView } from '@/components/MarketplaceView.tsx'; // Import MarketplaceView
+import { StoreCategoryView } from '@/components/StoreCategoryView.tsx'; // Import StoreCategoryView
 
 
 const MOCK_STORES: Store[] = [
@@ -257,7 +257,7 @@ const App: React.FC = () => {
                 searchTerm={globalSearch}
                 user={user as any}
                 userRole={userRole}
-                onSpinWin={(reward: any) => { setSelectedReward(reward); setActiveTab('reward_details'); }}
+                onSpinWin={(reward) => { setSelectedReward(reward); setActiveTab('reward_details'); }}
                 onRequireLogin={() => setIsAuthOpen(true)}
                 merchantId={null} 
               />
@@ -286,7 +286,7 @@ const App: React.FC = () => {
             )}
             {activeTab === 'services' && (
               <ServicesView 
-                onSelectMacro={(id: string, name: string) => {
+                onSelectMacro={(id, name) => {
                   setSelectedServiceMacro({id, name});
                   if (id === 'emergency') {
                     setQuoteCategory(name);
@@ -332,7 +332,7 @@ const App: React.FC = () => {
             {activeTab === 'food_category' && selectedCategory && (
                 <CategoriaAlimentacao 
                     onBack={() => { setActiveTab('home'); setSelectedCategory(null); }}
-                    onSelectSubcategory={(sub: string) => {
+                    onSelectSubcategory={(sub) => {
                         // Navega para uma lista de lojas filtrada pela subcategoria
                         console.log("Subcategoria selecionada:", sub);
                     }}
@@ -343,7 +343,7 @@ const App: React.FC = () => {
                 macroId={selectedServiceMacro.id}
                 macroName={selectedServiceMacro.name}
                 onBack={() => setActiveTab('services')}
-                onSelectSubcategory={(subName: string) => {
+                onSelectSubcategory={(subName) => {
                   setSelectedServiceSub(subName);
                   setActiveTab('service_specialties');
                 }}
@@ -353,7 +353,7 @@ const App: React.FC = () => {
               <SpecialtiesView 
                 subcategoryName={selectedServiceSub}
                 onBack={() => setActiveTab('service_subcategories')}
-                onSelectSpecialty={(specialty: string) => {
+                onSelectSpecialty={(specialty) => {
                   setQuoteCategory(`${selectedServiceSub} - ${specialty}`);
                   setIsQuoteModalOpen(true);
                 }}
@@ -378,7 +378,7 @@ const App: React.FC = () => {
                 <FreguesiaConnectRestricted onBack={() => setActiveTab('home')} />
             )}
             {activeTab === 'qrcode_scan' && (
-                <CashbackScanScreen onBack={() => setActiveTab('home')} onScanSuccess={(data: { merchantId: string; storeId: string }) => { setScannedData(data); setActiveTab('scan_confirmation'); }} />
+                <CashbackScanScreen onBack={() => setActiveTab('home')} onScanSuccess={(data) => { setScannedData(data); setActiveTab('scan_confirmation'); }} />
             )}
             {activeTab === 'scan_confirmation' && scannedData && (
                 <ScanConfirmationScreen storeId={scannedData.storeId} onConfirm={() => setActiveTab('cashback_payment')} onCancel={() => setActiveTab('home')} />

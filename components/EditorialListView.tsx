@@ -1,7 +1,8 @@
 
+
 import React, { useMemo } from 'react';
 import { ChevronLeft, Star, MapPin, BadgeCheck } from 'lucide-react';
-import { Store, AdType, EditorialCollection } from '../types';
+import { Store, AdType, EditorialCollection } from '../types.ts';
 
 interface EditorialListViewProps {
   collection: EditorialCollection;

@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from "react";
 import { Camera, QrCode, KeyRound, ArrowLeft, Loader2, ArrowRight, XCircle, AlertTriangle } from "lucide-react";
-import { useQrScanner } from "../hooks/useQrScanner";
+import { useQrScanner } from '@/hooks/useQrScanner';
 
 interface CashbackScanScreenProps {
   onBack: () => void;

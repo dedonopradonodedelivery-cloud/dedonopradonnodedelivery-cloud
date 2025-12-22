@@ -1,9 +1,9 @@
 
 
 import React from 'react';
-import { Store } from '../types.ts';
+import { Store } from '@/types.ts';
 import { ChevronLeft, Search, SlidersHorizontal, Coins, ShoppingCart } from 'lucide-react';
-import { getStoreLogo } from '../utils/mockLogos.ts';
+import { getStoreLogo } from '@/utils/mockLogos.ts';
 
 interface MarketplaceViewProps {
   onBack: () => void;

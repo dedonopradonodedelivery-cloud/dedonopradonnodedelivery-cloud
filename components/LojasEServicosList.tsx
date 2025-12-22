@@ -1,8 +1,9 @@
 
+
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Star, Loader2, AlertCircle, BadgeCheck, Heart, Award, Eye, Rocket, Crown } from 'lucide-react';
-import { Store, AdType } from '../types';
-import { useFavorites } from '../hooks/useFavorites';
+import { Store, AdType } from '../types.ts';
+import { useFavorites } from '../hooks/useFavorites.ts';
 import { User } from '@supabase/supabase-js';
 
 interface LojasEServicosListProps {
@@ -129,187 +130,175 @@ const getStoreExtras = (index: number, store: Store) => {
 
 export const LojasEServicosList: React.FC<LojasEServicosListProps> = ({ onStoreClick, onViewAll, activeFilter = 'all', user = null, onNavigate }) => {
   const [visibleStores, setVisibleStores] = useState<Store[]>([]);
-  const [filteredStores, setFilteredStores] = useState<Store[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(true);
-  const [error, setError] = useState(false);
-  
-  const { toggleFavorite, isFavorite } = useFavorites(user);
-  const observer = useRef<IntersectionObserver | null>(null);
+  const loaderRef = useRef<HTMLDivElement>(null);
+  const { isFavorite, toggleFavorite } = useFavorites(user);
 
-  useEffect(() => {
-    let data = [...ALL_SORTED_STORES];
+  const filteredStores = useMemo(() => {
+    let list = [...ALL_SORTED_STORES];
+
     if (activeFilter === 'cashback') {
-        data = data.filter(s => s.cashback && s.cashback > 0);
+      list = list.filter(store => !!store.cashback && (store.cashback > 0));
     } else if (activeFilter === 'top_rated') {
-        data.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+      list = list.filter(store => (store.rating || 0) >= 4.5);
     } else if (activeFilter === 'open_now') {
-        data = data.filter(s => s.isOpenNow);
+      list = list.filter(store => store.isOpenNow);
     }
-    
-    // RE-APLICA ORDENAÇÃO DE MONETIZAÇÃO MESMO COM FILTROS (Critico)
-    const finalData = sortStores(data);
+    // 'all' filter needs no additional filtering here as it's the base list
 
-    setFilteredStores(finalData);
-    setVisibleStores(finalData.slice(0, ITEMS_PER_PAGE));
-    setHasMore(finalData.length > ITEMS_PER_PAGE);
+    return list;
   }, [activeFilter]);
 
-  const loadMore = useCallback(() => {
-    if (loading || !hasMore) return;
-    setLoading(true);
-    setError(false);
+  const loadMoreStores = useCallback(() => {
+    if (loadingMore || !hasMore) return;
+    setLoadingMore(true);
+
     setTimeout(() => {
-      try {
-        setVisibleStores(prev => {
-          const currentLength = prev.length;
-          const nextSlice = filteredStores.slice(currentLength, currentLength + ITEMS_PER_PAGE);
-          if (currentLength + nextSlice.length >= filteredStores.length) setHasMore(false);
-          return [...prev, ...nextSlice];
-        });
-      } catch (err) { setError(true); } finally { setLoading(false); }
-    }, 800);
-  }, [loading, hasMore, filteredStores]);
+      const newStores = filteredStores.slice(page * ITEMS_PER_PAGE, (page + 1) * ITEMS_PER_PAGE);
+      setVisibleStores(prev => [...prev, ...newStores]);
+      setPage(prev => prev + 1);
+      setHasMore(newStores.length === ITEMS_PER_PAGE);
+      setLoadingMore(false);
+    }, 500); // Simulate network delay
+  }, [loadingMore, hasMore, page, filteredStores]);
 
-  const lastStoreElementRef = useCallback((node: HTMLDivElement) => {
-    if (loading) return;
-    if (observer.current) observer.current.disconnect();
-    observer.current = new IntersectionObserver(entries => {
-      if (entries[0].isIntersecting && hasMore) loadMore();
-    }, { rootMargin: '100px' });
-    if (node) observer.current.observe(node);
-  }, [loading, hasMore, loadMore]);
+  useEffect(() => {
+    // Reset list and pagination when filter changes
+    setVisibleStores([]);
+    setPage(0);
+    setHasMore(true);
+    loadMoreStores();
+  }, [activeFilter, filteredStores]); // Depend on activeFilter and filteredStores
 
-  const handleToggleFavorite = async (e: React.MouseEvent, id: string) => {
-    e.stopPropagation();
-    if (!user) { alert("Faça login para favoritar lojas!"); return; }
-    await toggleFavorite(id);
-  };
+  useEffect(() => {
+    const options = {
+      root: null, // viewport
+      rootMargin: '20px',
+      threshold: 1.0,
+    };
 
-  const isMasterSponsorFavorite = isFavorite(MASTER_SPONSOR_STORE.id);
+    const observer = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting && hasMore && !loadingMore) {
+        loadMoreStores();
+      }
+    }, options);
+
+    if (loaderRef.current) {
+      observer.observe(loaderRef.current);
+    }
+
+    return () => {
+      if (loaderRef.current) {
+        observer.unobserve(loaderRef.current);
+      }
+    };
+  }, [hasMore, loadingMore, loadMoreStores]);
 
   return (
-    <div className="flex flex-col w-full">
-      <div className="flex flex-col gap-4 pb-6">
-        
-        {/* Card do Patrocinador Master - Fixo no topo */}
-        <div
-          key={MASTER_SPONSOR_STORE.id}
-          onClick={() => onNavigate && onNavigate('patrocinador_master')}
-          className="bg-white dark:bg-gray-800 rounded-3xl p-4 flex gap-4 cursor-pointer relative group transition-all duration-300 shadow-[0_4px_12px_rgba(0,0,0,0.05)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] active:scale-[0.99] border-2 border-amber-500 mt-4 min-h-[150px]"
-        >
-          <div className="absolute top-0 right-4 -translate-y-1/2 z-10 pointer-events-none">
-            <span className="text-xs font-black px-4 py-2 rounded-full bg-amber-500 text-slate-900 shadow-lg uppercase tracking-wider flex items-center gap-1.5">
-              <Crown className="w-3.5 h-3.5" />
-              Patrocinador Master
-            </span>
-          </div>
-
-          <div className="w-24 h-full flex-shrink-0 relative rounded-2xl overflow-hidden bg-slate-900 flex items-center justify-center">
-            <Crown className="w-12 h-12 text-amber-500" />
-          </div>
-          
-          <div className="flex-1 flex flex-col justify-center min-w-0 pr-8">
-            <div className="flex flex-col gap-1.5">
-              <div className="flex items-center gap-1.5">
-                <h4 className="font-bold text-gray-900 dark:text-white text-base leading-tight truncate">{MASTER_SPONSOR_STORE.name}</h4>
-                <BadgeCheck className="w-4 h-4 text-[#1E5BFF] fill-white shrink-0" />
-              </div>
-              <p className="text-xs font-normal text-gray-500 dark:text-gray-400 not-italic line-clamp-2">{MASTER_SPONSOR_STORE.description}</p>
-              <div className="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400 pt-1">
-                <div className="flex items-center gap-1 bg-yellow-50 dark:bg-yellow-900/10 px-2 py-1 rounded-md text-yellow-700 dark:text-yellow-400 font-bold">
-                  <Star className="w-3 h-3 fill-current" />
-                  <span>{MASTER_SPONSOR_STORE.rating}</span>
+    <div className="flex flex-col gap-4">
+      {visibleStores.length > 0 ? (
+        visibleStores.map((store, index) => {
+          const { badge, copy, activityBadge } = getStoreExtras(index, store);
+          return (
+            <div
+              key={store.id}
+              onClick={() => onStoreClick && onStoreClick(store)}
+              className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-3 flex gap-4 cursor-pointer active:bg-gray-50 dark:active:bg-gray-700/50 transition-colors relative overflow-hidden"
+            >
+              {/* Top Right Badges */}
+              {badge && (
+                <div className="absolute top-2 right-2 z-10">
+                  <span className={`px-2 py-0.5 rounded-full text-[9px] font-black uppercase ${badge.color}`}>
+                    {badge.text}
+                  </span>
                 </div>
-                <span className="truncate max-w-[80px] font-medium">{MASTER_SPONSOR_STORE.category}</span>
+              )}
+              {activityBadge && (
+                <div className="absolute top-2 left-2 z-10">
+                  <span className={`px-2 py-0.5 rounded-full text-[9px] font-black uppercase flex items-center gap-1 ${activityBadge.color}`}>
+                    {React.cloneElement(activityBadge.icon, { className: 'w-3 h-3' })} {activityBadge.text}
+                  </span>
+                </div>
+              )}
+
+              {/* Store Content */}
+              <div className="w-24 h-20 flex-shrink-0 relative rounded-lg overflow-hidden bg-gray-50 dark:bg-gray-700">
+                <img
+                  src={store.logoUrl || '/assets/default-logo.png'}
+                  alt={store.name}
+                  className="w-full h-full object-cover"
+                />
+                {store.cashback && (
+                  <div className="absolute bottom-0 left-0 right-0 bg-green-600/90 text-white text-[9px] font-bold text-center py-0.5 backdrop-blur-sm">
+                    {store.cashback}% VOLTA
+                  </div>
+                )}
               </div>
-            </div>
-          </div>
-          
-          <button onClick={(e) => handleToggleFavorite(e, MASTER_SPONSOR_STORE.id)} className={`absolute top-1/2 -translate-y-1/2 right-4 w-9 h-9 rounded-full flex items-center justify-center transition-all duration-200 z-20 ${isMasterSponsorFavorite ? 'bg-red-100 dark:bg-red-900/20 text-red-500' : 'bg-gray-100 dark:bg-gray-700/50 text-gray-400 hover:text-red-400'}`}>
-            <Heart className={`w-5 h-5 transition-colors ${isMasterSponsorFavorite ? 'fill-current' : ''}`} />
-          </button>
-        </div>
-        
-        {/* Lista de Lojas normais */}
-        {visibleStores.map((store, index) => {
-            const isLastElement = index === visibleStores.length - 1;
-            const isFavorited = isFavorite(store.id);
-            const isSponsored = store.isSponsored || store.adType === AdType.PREMIUM;
-            const { badge, copy, activityBadge } = getStoreExtras(index, store);
-            return (
-                <div
-                    key={store.id}
-                    ref={isLastElement ? lastStoreElementRef : null}
-                    onClick={() => onStoreClick && onStoreClick(store)}
-                    className={`bg-white dark:bg-gray-800 rounded-2xl p-3 flex gap-3 cursor-pointer relative group transition-all duration-300 shadow-[0_4px_12px_rgba(0,0,0,0.05)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] active:scale-[0.99] border-2 ${isSponsored ? 'border-[#1E5BFF]/20 dark:border-[#1E5BFF]/10 mt-2' : 'border-transparent mt-2'}`}
-                >
-                    {(isSponsored || badge) && (
-                      <div className="absolute top-0 right-4 -translate-y-1/2 z-10 pointer-events-none flex flex-col items-end gap-1">
-                          {isSponsored && (
-                              <span className="text-xs font-black px-3 py-1.5 rounded-full bg-[#1E5BFF] text-white shadow-xl shadow-blue-500/40 uppercase tracking-wider">
-                                  Patrocinado
-                              </span>
-                          )}
-                          {badge && !isSponsored && (
-                              <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${badge.color}`}>
-                                  {badge.text}
-                              </span>
-                          )}
-                      </div>
+
+              <div className="flex-1 flex flex-col justify-center min-w-0">
+                <div className="flex justify-between items-start gap-1">
+                  <div className="flex items-center gap-1.5 min-w-0">
+                    <h3 className="font-bold text-gray-800 dark:text-white text-sm leading-tight truncate">
+                      {store.name}
+                    </h3>
+                    {store.verified && (
+                      <BadgeCheck className="w-4 h-4 text-white fill-[#1E5BFF]" />
                     )}
-
-                    <div className="w-[88px] h-[88px] flex-shrink-0 relative rounded-xl overflow-hidden bg-gray-50 dark:bg-gray-700">
-                        <img src={store.logoUrl || "/assets/default-logo.png"} alt={store.name} className="w-full h-full object-contain p-1" loading="lazy" />
-                        {store.cashback && (
-                            <div className="absolute bottom-0 left-0 right-0 bg-green-500 text-white text-[9px] font-bold text-center py-0.5">
-                                {store.cashback}% VOLTA
-                            </div>
-                        )}
-                    </div>
-
-                    <div className="flex-1 flex flex-col justify-center min-w-0 pr-1">
-                        <div className="flex flex-col gap-0.5 mb-1.5">
-                             <div className="flex items-center gap-1.5">
-                               <h4 className="font-bold text-gray-900 dark:text-white text-sm leading-tight truncate">{store.name}</h4>
-                               {store.verified && <BadgeCheck className="w-3.5 h-3.5 text-[#1E5BFF] fill-white shrink-0" />}
-                             </div>
-                             <p className="text-[10px] font-medium text-gray-400 dark:text-gray-500 italic">{copy}</p>
-                        </div>
-
-                        <div className="flex items-center gap-3 text-[11px] text-gray-500 dark:text-gray-400 mt-auto">
-                             <div className="flex items-center gap-1 bg-yellow-50 dark:bg-yellow-900/10 px-1.5 py-0.5 rounded text-yellow-700 dark:text-yellow-400 font-bold">
-                                <Star className="w-3 h-3 fill-current" />
-                                <span>{store.rating}</span>
-                             </div>
-                             <span className="truncate max-w-[80px] font-medium">{store.category}</span>
-                             <span className="w-1 h-1 bg-gray-200 rounded-full"></span>
-                             <span>{store.distance}</span>
-                        </div>
-                    </div>
-                    
-                    <button onClick={(e) => handleToggleFavorite(e, store.id)} className={`absolute bottom-3 right-3 w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200 z-20 ${isFavorited ? 'bg-red-50 dark:bg-red-900/20 text-red-500' : 'bg-gray-50 dark:bg-gray-700/50 text-gray-400 hover:text-red-400'}`}>
-                        <Heart className={`w-4 h-4 transition-colors ${isFavorited ? 'fill-current' : ''}`} />
-                    </button>
+                  </div>
                 </div>
-            );
-        })}
-      </div>
 
-      {loading && (
-        <div className="w-full flex justify-center py-6">
-            <div className="flex items-center gap-2 text-[#1E5BFF] bg-white dark:bg-gray-800 px-4 py-2 rounded-full shadow-md border border-blue-50 dark:border-gray-700">
-                <Loader2 className="w-4 h-4 animate-spin" />
-                <span className="text-xs font-bold">Buscando mais opções...</span>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 line-clamp-1">
+                  {copy}
+                </p>
+
+                <div className="flex items-center gap-2 text-[11px] text-gray-500 dark:text-gray-400 mt-1.5">
+                  <div className="flex items-center gap-0.5 text-[#1E5BFF] font-bold">
+                    <Star className="w-3 h-3 fill-current" />
+                    <span>{store.rating}</span>
+                  </div>
+                  <span className="w-0.5 h-0.5 bg-gray-300 rounded-full"></span>
+                  <span className="truncate">{store.subcategory || store.category}</span>
+                  <span className="w-0.5 h-0.5 bg-gray-300 rounded-full"></span>
+                  <span>{store.distance}</span>
+                </div>
+              </div>
+
+              {user && (
+                <button
+                  onClick={(e) => { e.stopPropagation(); toggleFavorite(store.id); }}
+                  className="absolute bottom-3 right-3 p-1 text-gray-400 hover:text-red-500 transition-colors active:scale-110"
+                >
+                  <Heart className={`w-5 h-5 ${isFavorite(store.id) ? 'fill-red-500 text-red-500' : 'fill-transparent text-gray-400'}`} />
+                </button>
+              )}
             </div>
+          );
+        })
+      ) : (
+        <div className="flex flex-col items-center justify-center py-10 bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700">
+          <div className="w-12 h-12 bg-gray-50 dark:bg-gray-700 rounded-full flex items-center justify-center mb-3">
+            <AlertCircle className="w-6 h-6 text-gray-400" />
+          </div>
+          <p className="text-gray-600 dark:text-gray-300 font-medium text-sm">Nenhum local encontrado.</p>
+          {onViewAll && (
+            <button
+              onClick={onViewAll}
+              className="mt-4 text-sm font-bold text-[#1E5BFF] hover:underline"
+            >
+              Ver todos os locais
+            </button>
+          )}
         </div>
       )}
 
-      {!hasMore && !loading && (
-        <div className="w-full text-center py-8">
-            <p className="text-[11px] text-gray-400 dark:text-gray-600 font-medium bg-gray-50 dark:bg-gray-800/50 inline-block px-4 py-1.5 rounded-full">Você viu todas as lojas disponíveis ✨</p>
+      {loadingMore && (
+        <div className="flex justify-center py-4">
+          <Loader2 className="w-6 h-6 text-[#1E5BFF] animate-spin" />
         </div>
       )}
+      {!loadingMore && hasMore && <div ref={loaderRef} className="h-1" />}
     </div>
   );
 };

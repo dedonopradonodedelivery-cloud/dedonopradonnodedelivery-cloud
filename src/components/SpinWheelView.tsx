@@ -1,8 +1,9 @@
 
+
 import React, { useState, useEffect, useRef } from 'react';
-import { supabase } from '../lib/supabaseClient';
+import { supabase } from '@/lib/supabaseClient';
 import { Gift, RefreshCw, ThumbsDown, History, Wallet, Volume2, VolumeX, Lock, ArrowRight, Dices, AlertTriangle, Loader2, Award } from 'lucide-react';
-import { ROULETTE_TRANSPARENCY_MESSAGES } from '../constants'; // Importa as novas mensagens de transparência
+import { ROULETTE_TRANSPARENCY_MESSAGES } from '@/constants'; // Importa as novas mensagens de transparência
 
 // --- Tipos e Constantes ---
 interface SpinWheelViewProps {
@@ -60,7 +61,7 @@ const SOUND_URLS = {
 
 type SpinStatus = 'loading' | 'ready' | 'limit_reached' | 'no_user' | 'error';
 
-const SpinWheelView: React.FC<SpinWheelViewProps> = ({ userId, userRole, onWin, onRequireLogin, onViewHistory, merchantId = null }) => {
+export const SpinWheelView: React.FC<SpinWheelViewProps> = ({ userId, userRole, onWin, onRequireLogin, onViewHistory, merchantId = null }) => {
   const [rotation, setRotation] = useState(0);
   const [isSpinning, setIsSpinning] = useState(false);
   const [spinStatus, setSpinStatus] = useState<SpinStatus>('loading');
@@ -381,8 +382,10 @@ const SpinWheelView: React.FC<SpinWheelViewProps> = ({ userId, userRole, onWin, 
     const angle = SEGMENT_ANGLE;
     const startAngle = index * angle;
     const endAngle = startAngle + angle;
-    const start = { x: 100 + 100 * Math.cos(startAngle * Math.PI / 180), y: 100 + 100 * Math.sin(startAngle * Math.PI / 180) };
-    const end = { x: 100 + 100 * Math.cos(endAngle * Math.PI / 180), y: 100 + 100 * Math.sin(endAngle * Math.PI / 180) };
+    const startRad = (startAngle * Math.PI) / 180; // Corrected calculation
+    const endRad = (endAngle * Math.PI) / 180; // Corrected calculation
+    const start = { x: 100 + 100 * Math.cos(startRad), y: 100 + 100 * Math.sin(startRad) };
+    const end = { x: 100 + 100 * Math.cos(endRad), y: 100 + 100 * Math.sin(endRad) };
     return `M100,100 L${start.x},${start.y} A100,100 0 0,1 ${end.x},${end.y} Z`;
   };
 
@@ -466,93 +469,13 @@ const SpinWheelView: React.FC<SpinWheelViewProps> = ({ userId, userRole, onWin, 
 
       <div className="mb-6">
         {userRole === 'lojista' ? (
-          <div className="text-center p-4 bg-red-50 dark:bg-red-900/10 rounded-2xl border border-red-100 dark:border-red-900/30">
-            <p className="text-xs font-bold text-red-600 dark:text-red-400">A Roleta é exclusiva para Clientes.</p>
-          </div>
-        ) : spinStatus === 'loading' ? (
-            <div className="text-center p-4 bg-gray-100 dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700">
-                <Loader2 className="w-5 h-5 text-indigo-500 animate-spin mx-auto mb-2" />
-                <p className="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest">Verificando giros...</p>
-            </div>
-        ) : (
-          <div className="text-center bg-gray-100 dark:bg-gray-800 p-4 rounded-2xl border border-gray-200 dark:border-gray-700">
-            {isSuperSpinActive ? (
-              <p className="text-[10px] font-black text-yellow-600 uppercase tracking-widest mb-1">
-                SUPER GIRO DISPONÍVEL!
-              </p>
-            ) : (
-              <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">
-                Giros restantes hoje: {spinsRemaining} / {userLevel.daily_spins}
-              </p>
-            )}
-            
-            <p className="text-sm font-bold text-gray-900 dark:text-white mb-2">
-                Nível: <span style={{ color: userLevel.label_color }}>{userLevel.name}</span>
-            </p>
-            {errorMessage && spinStatus !== 'limit_reached' && (
-              <div className="mt-3 p-2 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 text-xs rounded-xl flex items-center justify-center gap-2">
-                <AlertTriangle className="w-4 h-4" />
-                <span>{errorMessage}</span>
-              </div>
-            )}
-          </div>
-        )}
-        
-        <button 
-            onClick={handleSpin} 
-            disabled={isSpinning || spinStatus === 'loading' || spinStatus === 'error' || !deviceId || (!isSuperSpinActive && spinsRemaining <= 0)} 
-            className="w-full h-16 bg-gradient-to-r from-[#1E5BFF] to-[#4D7CFF] text-white font-black text-lg rounded-2xl shadow-xl shadow-blue-500/30 active:scale-[0.97] transition-all disabled:opacity-50 disabled:shadow-none flex items-center justify-center gap-3 mt-4"
-          >
-            {isSpinning ? <RefreshCw className="w-6 h-6 animate-spin" /> : 
-             spinStatus === 'loading' ? <Loader2 className="w-6 h-6 animate-spin" /> :
-             isSuperSpinActive ? `SUPER GIRAR AGORA! ${superEventName ? `(${superEventName})` : ''}` :
-             spinsRemaining <= 0 ? 'LIMITE DIÁRIO ATINGIDO' :
-             'GIRAR AGORA!'}
-          </button>
-        {errorMessage && spinsRemaining <= 0 && !isSuperSpinActive && (
-          <div className="mt-3 p-2 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 text-xs rounded-xl flex items-center justify-center gap-2">
-            <AlertTriangle className="w-4 h-4" />
-            <span>{errorMessage || `Você atingiu o limite diário de giros (${userLevel.daily_spins}).`}</span>
-          </div>
-        )}
-      </div>
+          <div className="text-center p-4 bg-red-50 dark:bg-red-900/10 rounded-2xl--- START OF FILE src/lib/supabaseClient.ts ---
 
-      {spinResult && (
-        <div className="absolute inset-0 bg-white/95 dark:bg-gray-950/95 backdrop-blur-md z-[100] flex items-center justify-center p-6 animate-in fade-in duration-500">
-           <div className="text-center flex flex-col items-center max-w-xs">
-               <div className="mb-8 p-8 rounded-full shadow-2xl animate-bounce-short border-4 border-white dark:border-gray-800" style={{ backgroundColor: spinResult.color }}>
-                    {spinResult.prize_type === 'nao_foi_dessa_vez' ? <ThumbsDown size={56} color="#FFF" /> : <Gift size={56} color={spinResult.textColor} />}
-               </div>
-               <h3 className="text-3xl font-black text-gray-900 dark:text-white mb-2 tracking-tight">
-                   {spinResult.prize_type === 'nao_foi_dessa_vez' ? 'Poxa!' : 'PARABÉNS!'}
-               </h3>
-               {isSuperSpinResult && superEventWonName ? (
-                 <p className="text-xl font-black mb-4 uppercase tracking-tight text-yellow-600">
-                   {spinResult.prize_label} <span className="text-lg">({superEventWonName})</span>
-                 </p>
-               ) : (
-                 <p className="text-xl font-black mb-4 uppercase tracking-tight" style={{ color: spinResult.color }}>
-                   {spinResult.prize_label}
-                 </p>
-               )}
-               <p className="text-sm text-gray-500 dark:text-gray-400 mb-10 leading-relaxed font-medium">
-                   {spinResult.description}
-               </p>
-               <p className="text-[10px] text-gray-400 dark:text-gray-500 text-center mb-4 leading-tight">
-                 {ROULETTE_TRANSPARENCY_MESSAGES.DISCLAIMER_MODAL}
-               </p>
-               <button 
-                 onClick={handleClaimReward}
-                 className="w-full bg-[#1E5BFF] hover:bg-[#1749CC] text-white font-black py-4 rounded-2xl shadow-xl shadow-blue-500/30 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
-               >
-                 {spinResult.prize_type === 'nao_foi_dessa_vez' ? 'Tentar amanhã' : 'Resgatar Prêmio'}
-                 <ArrowRight className="w-5 h-5" strokeWidth={3} />
-               </button>
-           </div>
-        </div>
-      )}
-    </div>
-  );
-};
-// Fix: Explicitly export SpinWheelView to ensure it's recognized as a named member.
-export { SpinWheelView };
+// Fix: Removed direct import of SUPABASE_URL and SUPABASE_ANON_KEY as they are imported via '@/lib/env.ts'
+import { createClient } from '@supabase/supabase-js';
+import { SUPABASE_URL, SUPABASE_ANON_KEY } from '@/lib/env.ts';
+
+export const supabase = createClient(
+  SUPABASE_URL,
+  SUPABASE_ANON_KEY
+);

@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { ChevronLeft, Coins, Clock, AlertCircle, TrendingUp, CheckCircle2, ShoppingBag } from 'lucide-react';
-import { LocalUserWallet } from '../types';
+import { LocalUserWallet } from '@/types';
 
 interface CashbackViewProps {
   onBack: () => void;
