@@ -17,8 +17,7 @@ import {
   LayoutDashboard,
   Calendar,
   Bell,
-  QrCode,
-  Dices 
+  QrCode
 } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import { User } from '@supabase/supabase-js'; 
@@ -105,7 +104,7 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
         case '15d': multiplier = 0.5; break;
         case '30d': multiplier = 1; break;
         case '90d': multiplier = 3; break;
-        case 'custom': multiplier = 1; break; 
+        case 'custom': multiplier = 1; break; // Default for demo
     }
 
     return {
@@ -114,7 +113,7 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
         newCustomers: Math.round(STORE_DATA.baseKpis.newCustomers * multiplier),
         recurringCustomers: Math.round(STORE_DATA.baseKpis.recurringCustomers * multiplier),
         cashbackGiven: STORE_DATA.baseKpis.cashbackGiven * multiplier,
-        adBalance: STORE_DATA.baseKpis.adBalance 
+        adBalance: STORE_DATA.baseKpis.adBalance // Balance doesn't typically scale with time range view
     };
   }, [dateRange]);
 
@@ -327,11 +326,6 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
                     icon={HelpCircle} 
                     label="Suporte ao Lojista" 
                     onClick={() => onNavigate && onNavigate('store_support')}
-                />
-                <MenuLink 
-                    icon={Dices} 
-                    label="Dashboard Roleta da Sorte" 
-                    onClick={() => onNavigate && onNavigate('spin_wheel_admin_dashboard')} 
                 />
             </div>
         </div>

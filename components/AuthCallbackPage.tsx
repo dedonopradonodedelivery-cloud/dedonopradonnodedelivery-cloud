@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom/client';
 import { supabase } from '../lib/supabaseClient'; // Adjust path as needed based on project root

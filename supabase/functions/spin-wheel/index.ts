@@ -1,3 +1,4 @@
+
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { serve } from 'https://deno.land/std@0.220.0/http/server.ts';
 
@@ -365,7 +366,7 @@ serve(async (req) => {
     }
 
     // Se não foi um Super Giro ou se o orçamento do Super Giro foi excedido, usar a lógica da roleta normal/segura
-    if (!isSuperSpin) {
+    if (!isSuperSpin) { // Renamed from serviceRoleSupabase
       let isSafeModeActive = false;
       let safeModeReason = '';
       
@@ -671,7 +672,7 @@ serve(async (req) => {
       }
 
       selectedPrize = potentialPrize;
-    } // <--- This closing brace was missing
+    } 
 
     // --- Registrar Giro e Atualizar Orçamentos ---
     const { error: insertSpinError } = await userSupabaseClient
