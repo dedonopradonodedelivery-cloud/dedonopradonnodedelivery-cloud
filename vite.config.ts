@@ -1,15 +1,18 @@
 
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
-import path from 'path' // Import path module
+import path from 'path' 
 
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: {
-      // Removed explicit NodeJS.Process type assertion.
-      '@': path.resolve(process.cwd(), './src'), // Map @/ to the src directory
+      // Fix: Ensure process.cwd() is correctly typed for Node.js context.
+      // Using a type assertion to `any` to bypass strict checks when `NodeJS.Process`
+      // is not implicitly available or explicitly removed. This assumes the runtime
+      // environment is indeed Node.js.
+      '@': path.resolve((process as any).cwd(), './src'), // Map @/ to the src directory
     },
   },
   build: {

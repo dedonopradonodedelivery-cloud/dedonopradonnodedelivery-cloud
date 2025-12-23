@@ -1,5 +1,4 @@
 
-
 import React from 'react';
 
 interface CashbackIconProps {
@@ -52,4 +51,14 @@ export const CashbackIcon: React.FC<CashbackIconProps> = ({ className = "w-24 h-
           <g transform="translate(125, 110) scale(1.2) translate(-12, -12)">
              {/* Pin Shape */}
              <path 
-               d="M12 0C7.58 0 4 3.58 4 8C4 14
+               d="M12 0C7.58 0 4 3.58 4 8C4 14 12 22 12 22C12 22 20 14 20 8C20 3.58 16.42 0 12 0ZM12 11C10.34 11 9 9.66 9 8C9 6.34 10.34 5 12 5C13.66 5 15 6.34 15 8C15 9.66 13.66 11 12 11Z" 
+               fill="white" 
+               fillOpacity="0.9"
+               filter="drop-shadow(0px 1px 1px rgba(0,0,0,0.1))"
+             />
+          </g>
+        </g>
+      </svg>
+    </div>
+  );
+};
