@@ -1,8 +1,6 @@
 
-
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-// Fix: Corrected import path for App.tsx
 import App from './components/App.tsx'; 
 import { AuthProvider } from './contexts/AuthContext.tsx'; 
 
