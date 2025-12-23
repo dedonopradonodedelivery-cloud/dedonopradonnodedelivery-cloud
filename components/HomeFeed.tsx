@@ -1,6 +1,6 @@
 
-
 import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { AdType, Category, Store, EditorialCollection } from '../types';
 import { 
   ChevronRight, 
   ArrowRight, 
@@ -37,13 +37,11 @@ import {
   Sparkles,
   Compass
 } from 'lucide-react';
-import { LojasEServicosList } from '@/components/LojasEServicosList';
+import { LojasEServicosList } from './LojasEServicosList';
 import { User } from '@supabase/supabase-js';
-import { SpinWheelView } from '@/components/SpinWheelView';
-import { MasterSponsorBanner } from '@/components/MasterSponsorBanner';
-import { CATEGORIES, EDITORIAL_COLLECTIONS, ROULETTE_TRANSPARENCY_MESSAGES } from '@/constants';
-import { Category, EditorialCollection, Store, AdType } from '@/types';
-import { getStoreLogo } from '@/utils/mockLogos';
+import { SpinWheelView } from './SpinWheelView';
+import { MasterSponsorBanner } from './MasterSponsorBanner';
+import { CATEGORIES, EDITORIAL_COLLECTIONS } from '../constants';
 
 interface HomeFeedProps {
   onNavigate: (view: string) => void;
@@ -56,7 +54,6 @@ interface HomeFeedProps {
   userRole?: 'cliente' | 'lojista' | null;
   onSpinWin: (reward: any) => void;
   onRequireLogin: () => void;
-  merchantId?: string | null;
 }
 
 type TimeContextTag = 'morning' | 'lunch_transition' | 'lunch' | 'afternoon' | 'evening' | 'late_night';
@@ -148,8 +145,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
   user,
   userRole,
   onSpinWin,
-  onRequireLogin,
-  merchantId
+  onRequireLogin
 }) => {
   const [isSpinWheelOpen, setIsSpinWheelOpen] = useState(false);
   const [activeBannerIndex, setActiveBannerIndex] = useState(0);
@@ -466,10 +462,10 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
               </div>
             </div>
             <div className="flex justify-center mt-2">
-              <div className="w-16 h-1 bg-gray-200 dark:bg-gray-700 rounded-full relative"> 
+              <div className="w-24 h-1 bg-gray-200 dark:bg-gray-700 rounded-full relative">
                 <div 
-                  className="h-full bg-primary-500 rounded-full absolute top-0 left-0 w-4 transition-transform duration-100 ease-linear" 
-                  style={{ transform: `translateX(${categoryScrollProgress * (64 - 16)}px)` }} 
+                  className="h-full bg-primary-500 rounded-full absolute top-0 left-0 w-8 transition-transform duration-100 ease-linear"
+                  style={{ transform: `translateX(${categoryScrollProgress * (96 - 32)}px)` }} // 96px track - 32px thumb = 64px travel
                 />
               </div>
             </div>
@@ -512,11 +508,8 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
         return (
           <div key="filters" className="px-5">
             <div className="flex items-center gap-1.5 mb-3 px-1">
-                 <ShieldCheck className="w-3.5 h-3.5 text-gray-400"/>
-                 <div>
-                    <h3 className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">Lojas & Serviços</h3>
-                    <p className="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5">Filtre por categorias e serviços</p>
-                 </div>
+                 <ShieldCheck className="w-3.5 h-3.5 text-gray-400" />
+                 <h3 className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">Lojas & Serviços</h3>
             </div>
             <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
               {[
@@ -642,7 +635,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
           <div className="bg-transparent w-full max-w-md relative" onClick={(e) => e.stopPropagation()}>
             <div className="absolute top-4 right-5 z-50"><button onClick={() => setIsSpinWheelOpen(false)} className="p-2.5 text-gray-200 hover:text-white bg-white/10 backdrop-blur-md rounded-full active:scale-90 transition-transform"><X className="w-5 h-5" /></button></div>
             <div className="animate-in slide-in-from-bottom duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]">
-                <SpinWheelView userId={user?.id || null} userRole={userRole || null} onWin={onSpinWin} onRequireLogin={onRequireLogin} onViewHistory={() => { setIsSpinWheelOpen(false); onNavigate('prize_history'); }} merchantId={merchantId} />
+                <SpinWheelView userId={user?.id || null} userRole={userRole || null} onWin={onSpinWin} onRequireLogin={onRequireLogin} onViewHistory={() => { setIsSpinWheelOpen(false); onNavigate('prize_history'); }} />
             </div>
           </div>
         </div>

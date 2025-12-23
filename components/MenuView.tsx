@@ -1,5 +1,3 @@
-
-
 import React, { useState } from 'react';
 import { 
   User as UserIcon, 
@@ -14,8 +12,8 @@ import {
   Users,
   Loader2
 } from 'lucide-react';
-import { useAuth } from '@/contexts/AuthContext';
-import { MasterSponsorBanner } from '@/components/MasterSponsorBanner';
+import { useAuth } from '../contexts/AuthContext';
+import { MasterSponsorBanner } from './MasterSponsorBanner';
 import { User } from '@supabase/supabase-js';
 
 interface MenuViewProps {
@@ -168,45 +166,103 @@ export const MenuView: React.FC<MenuViewProps> = ({ user, userRole, onAuthClick,
                 className="w-full bg-gradient-to-r from-indigo-600 to-indigo-700 text-white p-4 rounded-2xl shadow-md shadow-indigo-500/20 flex items-center justify-between group active:scale-[0.98] transition-transform mb-6"
             >
                 <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/10">
-                        <Store className="w-6 h-6 text-white" />
+                    <div className="p-2 rounded-xl bg-white/20 text-white">
+                        <Store className="w-6 h-6" />
                     </div>
                     <div className="text-left">
-                        <h3 className="font-bold text-white text-lg">Painel do Parceiro</h3>
-                        <p className="text-indigo-100 text-xs opacity-90">Gerencie sua loja e campanhas</p>
+                        <h3 className="font-bold text-white text-sm">Painel do Lojista</h3>
+                        <p className="text-xs text-indigo-100">Gerenciar minha loja</p>
                     </div>
                 </div>
-                <ChevronRight className="w-5 h-5 text-white/70 group-hover:translate-x-1 transition-transform" />
+                <ChevronRight className="w-5 h-5 text-indigo-200 group-hover:text-white transition-colors" />
             </button>
         )}
 
-        <SectionTitle title="Atalhos" />
-        <MenuItem icon={Heart} label="Minhas Lojas Favoritas" onClick={() => onNavigate('favorites')} colorClass="bg-red-100" />
-        <MenuItem icon={Coins} label="Meu Cashback" subLabel="Saldo, extrato e ofertas" onClick={() => onNavigate('user_cashback_flow')} colorClass="bg-green-100" />
-        <MenuItem icon={Share2} label="Indique um Amigo" onClick={() => onNavigate('invite_friend')} colorClass="bg-blue-100" />
+        {/* 4) Seção Minha Conta */}
+        <SectionTitle title="Minha Conta" />
+        <MenuItem 
+            icon={Heart} 
+            label="Favoritos" 
+            onClick={() => onNavigate('favorites')} 
+            colorClass="bg-red-500" 
+            subLabel="Lojas que você salvou"
+        />
+        <MenuItem 
+            icon={Coins} 
+            label="Cashback" 
+            onClick={() => onNavigate('user_cashback_flow')} 
+            colorClass="bg-[#1E5BFF]" 
+            subLabel="Acompanhe seu saldo e ganhos"
+        />
 
-        <SectionTitle title="Geral" />
-        <MenuItem icon={Info} label="Sobre o Localizei" onClick={() => onNavigate('about')} colorClass="bg-gray-100" />
-        <MenuItem icon={Headphones} label="Suporte" onClick={() => onNavigate('support')} colorClass="bg-yellow-100" />
+        {/* 5) Seção Comunidade & Suporte */}
+        <SectionTitle title="Comunidade & Suporte" />
         
-        <SectionTitle title="Sair" />
-        <button 
-            onClick={handleLogout}
-            disabled={isLoggingOut}
-            className="w-full bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-4 rounded-2xl shadow-sm border border-red-100 dark:border-red-800 flex items-center justify-center gap-3 font-bold text-sm hover:bg-red-100 dark:hover:bg-red-900/30 transition-all active:scale-[0.98]"
-        >
-            {isLoggingOut ? (
-                <>
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                    Saindo...
-                </>
-            ) : (
-                <>
-                    <LogOut className="w-5 h-5" />
-                    Sair da Conta
-                </>
-            )}
-        </button>
+        {/* Item Exclusivo para Lojistas */}
+        {isMerchant && (
+             <MenuItem 
+                icon={Users} 
+                label="Freguesia Connect" 
+                onClick={() => onNavigate('freguesia_connect_dashboard')} 
+                colorClass="bg-indigo-500" 
+                subLabel="Rede de negócios da Freguesia"
+            />
+        )}
+
+        <MenuItem 
+            icon={Share2} 
+            label="Indique um amigo" 
+            onClick={() => onNavigate('invite_friend')} 
+            colorClass="bg-green-500"
+            subLabel="Convide amigos para usar o Localizei"
+        />
+        <MenuItem 
+            icon={Headphones} 
+            label="Suporte" 
+            onClick={() => onNavigate('support')} 
+            colorClass="bg-blue-500" 
+            subLabel="Fale com a nossa equipe"
+        />
+
+        {/* 6) Seção Parceiros & Publicidade */}
+        <SectionTitle title="Parceiros & Publicidade" />
+        
+        {/* Patrocinador Master Banner */}
+        <MasterSponsorBanner 
+            onClick={() => onNavigate('patrocinador_master')}
+            className="mb-4"
+        />
+
+        {/* 7) Seção Institucional */}
+        <SectionTitle title="Institucional" />
+        <MenuItem 
+            icon={Info} 
+            label="Sobre a Localizei" 
+            onClick={() => onNavigate('about')} 
+            colorClass="bg-gray-500" 
+        />
+
+        {/* 8) Logout Button */}
+        <div className="mt-8">
+            <button 
+                onClick={handleLogout}
+                disabled={isLoggingOut}
+                className="w-full p-4 rounded-2xl bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 font-bold text-sm flex items-center justify-center gap-2 hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors border border-red-100 dark:border-red-900/30 active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed"
+            >
+                {isLoggingOut ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                    <LogOut className="w-4 h-4" />
+                )}
+                {isLoggingOut ? 'Saindo...' : 'Sair do aplicativo'}
+            </button>
+        </div>
+
+        {/* Version Info */}
+        <div className="text-center pt-8 pb-4">
+            <p className="text-[10px] text-gray-400">Localizei Freguesia v1.0.9</p>
+        </div>
+
       </div>
     </div>
   );

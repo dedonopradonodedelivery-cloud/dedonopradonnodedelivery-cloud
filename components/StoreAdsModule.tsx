@@ -112,7 +112,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack }) => {
     
     return (
       <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold uppercase border ${styles[status as keyof typeof styles]}`}>
-        {labels[status as keyof typeof styles]}
+        {labels[status as keyof typeof labels]}
       </span>
     );
   };
@@ -298,7 +298,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack }) => {
 
           <div>
             <div className="flex justify-between items-end mb-4">
-                <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase mb-2 ml-1">Duração</label>
+                <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase ml-1">Duração</label>
                 <span className="text-xl font-black text-purple-600">{duration} dias</span>
             </div>
             

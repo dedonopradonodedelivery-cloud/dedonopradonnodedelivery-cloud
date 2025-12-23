@@ -1,7 +1,6 @@
 
-
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { ChevronLeft, Search, ImageIcon, Star, BadgeCheck, ChevronRight, X, AlertCircle, Check } from 'lucide-react';
+import { ChevronLeft, Search, Star, BadgeCheck, ChevronRight, X, AlertCircle, Check } from 'lucide-react';
 import { Category, Store, AdType } from '../types';
 import { SUBCATEGORIES } from '../constants';
 
@@ -91,7 +90,7 @@ const generateSubcategoryStores = (subName: string, categoryName: string): Store
       distance: `${(0.5 + Math.random() * 3).toFixed(1)}km`,
       adType: isSponsored ? AdType.PREMIUM : AdType.ORGANIC,
       isSponsored: isSponsored,
-      verified: i % 3 === 0,
+      verified: isSponsored || i % 3 === 0,
       cashback: hasCashback ? Math.floor(Math.random() * 8) + 3 : undefined,
       address: 'Freguesia, Jacarepaguá',
       isOpenNow: i % 2 === 0
@@ -143,17 +142,14 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
     let baseList: Store[] = [];
 
     if (selectedSubcategory) {
-      baseList = stores.filter(s => s.subcategory === selectedSubcategory);
-      if (baseList.length === 0) { // Fallback if no real stores for subcategory
-         baseList = generateSubcategoryStores(selectedSubcategory, category.name);
-      }
+      baseList = generateSubcategoryStores(selectedSubcategory, category.name);
     } else {
       baseList = stores.filter((store) => {
         const storeCat = store.category.toLowerCase();
         const currentCat = category.name.toLowerCase();
         return storeCat === currentCat || storeCat.includes(currentCat);
       });
-      if (baseList.length === 0) { // Fallback if no real stores for main category
+      if (baseList.length === 0) {
          baseList = generateSubcategoryStores(category.name, category.name);
       }
     }
@@ -321,7 +317,7 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
                                               {store.name}
                                            </h4>
                                            {store.verified && (
-                                             <BadgeCheck className="w-4 h-4 text-white fill-[#1E5BFF]" />
+                                             <BadgeCheck className="w-4 h-4 text-white fill-[#1E5BFF] flex-shrink-0" />
                                            )}
                                          </div>
                                          

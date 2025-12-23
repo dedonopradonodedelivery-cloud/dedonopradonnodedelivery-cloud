@@ -1,7 +1,5 @@
-
 import React, { useState } from 'react';
 import { X, Store, CheckCircle2, ArrowRight, Loader2, AlertCircle } from 'lucide-react';
-import { supabase } from '../lib/supabaseClient'; // Corrected relative path
 
 interface MerchantLeadModalProps {
   isOpen: boolean;
@@ -24,42 +22,46 @@ export const MerchantLeadModal: React.FC<MerchantLeadModalProps> = ({ isOpen, on
     setIsLoading(true);
     setErrorMsg('');
 
-    // Assuming supabase is configured via lib/supabaseClient.ts and uses process.env.SUPABASE_ANON_KEY internally.
-    // If supabase is not configured, the client will be null.
-    if (!supabase) {
-      console.error("Supabase client is not available. Check environment configuration.");
-      setErrorMsg("Erro de configuração do sistema. O Supabase não está acessível.");
+    // Obtendo a chave anônima do ambiente (Vite)
+    // Usamos (import.meta as any) para compatibilidade com TypeScript caso a definição de tipos do Vite não esteja explícita
+    const anonKey = (import.meta as any).env.VITE_SUPABASE_ANON_KEY;
+
+    if (!anonKey) {
+      console.error("VITE_SUPABASE_ANON_KEY não configurada");
+      setErrorMsg("Erro de configuração do sistema.");
       setIsLoading(false);
       return;
     }
 
     try {
-      // Direct insertion to 'merchant_leads' table using the configured Supabase client
-      const { data, error } = await supabase
-        .from('merchant_leads')
-        .insert([
-          {
-            name: name,
-            phone: phone,
-            category: category,
-            source: 'app_modal', // Specify source of the lead
-            created_at: new Date().toISOString()
-          }
-        ]);
+      const response = await fetch('https://nyneuuvcdmtqjyaqrztz.supabase.co/functions/v1/merchant_leads', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${anonKey}`,
+          'apikey': anonKey
+        },
+        body: JSON.stringify({
+          nome: name,
+          telefone: phone,
+          categoria: category,
+          origem: 'site'
+        })
+      });
 
-      if (error) {
-        throw error;
+      if (response.ok) {
+        setIsSuccess(true);
+        // Fechar automaticamente após alguns segundos
+        setTimeout(() => {
+          handleClose();
+        }, 3000);
+      } else {
+        throw new Error('Erro na requisição');
       }
-
-      setIsSuccess(true);
-      // Fechar automaticamente após alguns segundos
-      setTimeout(() => {
-        handleClose();
-      }, 3000);
 
     } catch (err: any) {
       console.error("Erro ao enviar lead:", err);
-      setErrorMsg(err.message || "Erro ao enviar. Tente novamente.");
+      setErrorMsg("Erro ao enviar. Tente novamente.");
     } finally {
       setIsLoading(false);
     }

@@ -1,10 +1,8 @@
-
-
 import React, { useState, useRef, useEffect } from 'react';
 import { GoogleGenAI } from "@google/genai";
 import { MessageCircle, X, Send, Sparkles, Loader2 } from 'lucide-react';
-import { ChatMessage } from '@/types';
-import { STORES } from '@/constants';
+import { ChatMessage } from '../types';
+import { STORES } from '../constants';
 
 export const GeminiAssistant: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -40,7 +38,7 @@ Sempre seja curto, use emojis e convide o usuário a explorar as seções do app
 
       const promptContext = `
         LOJAS DISPONÍVEIS:
-        ${STORES.slice(0, 5).map((s: any) => `- ${s.name} (${s.category}): ${s.description}.`).join('\n')}
+        ${STORES.slice(0, 5).map(s => `- ${s.name} (${s.category}): ${s.description}.`).join('\n')}
       `;
 
       const response = await ai.models.generateContent({

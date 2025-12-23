@@ -1,5 +1,0 @@
-
-export const SUPABASE_URL = "https://nyneuuvcdmtqjyaqrztz.supabase.co";
-export const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im55bmV1dXZjZG10cWp5YXFyenR6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMxMzE5OTQsImV4cCI6MjA3ODcwNzk5NH0.myPZeiXk-0NQIlyvwgLlfIxei5sLoNpwexwDnxlJLUk";
-export const SUPABASE_SERVICE_ROLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im55bmV1dXZjZG10cWp5YXFyenR6Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTY2ODk4Mjg4MywiZXhwIjoyMjQ2NjMyODgzfQ.C60_V_R1c0Y8_Y1o_eK0_G5_J7_p7Xw_L7_R_4_L_Q8"; // Substitua com sua chave real de service_role
-export const WHEEL_ALERT_WEBHOOK_URL = ""; // Adicione a URL do seu webhook aqui para receber alertas.

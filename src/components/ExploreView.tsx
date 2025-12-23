@@ -1,7 +1,6 @@
 
-
 import React, { useEffect, useMemo, useState, useRef } from "react";
-import { Store } from '@/types';
+import { Store } from "../../types";
 import {
   MapPin,
   Filter,
@@ -23,11 +22,9 @@ import {
   Heart,
   Users
 } from "lucide-react";
-import { useUserLocation } from '@/hooks/useUserLocation';
-import { useMediaQuery } from '@/hooks/useMediaQuery';
-import { quickFilters } from '@/constants';
-import { getStoreLogo } from '@/utils/mockLogos';
-
+import { useUserLocation } from "../hooks/useUserLocation";
+import { useMediaQuery } from "../hooks/useMediaQuery";
+import { quickFilters } from "../../constants";
 
 type ExploreViewProps = {
   stores: Store[];
@@ -37,8 +34,6 @@ type ExploreViewProps = {
   onFilterClick: () => void;
   onOpenPlans: () => void;
   onViewAllVerified?: () => void;
-  // Fix: Added missing prop as it's passed from App.tsx
-  onViewMasterSponsor?: () => void;
 };
 
 // --- MOCK DATA FOR STORIES ---
@@ -227,7 +222,7 @@ const HorizontalStoreSection: React.FC<HorizontalStoreSectionProps> = ({
           >
             <div className="relative h-24 bg-gray-100 dark:bg-gray-800 overflow-hidden">
               <img
-                src={(store as any).coverImage || store.image || (store as any).imageUrl || getStoreLogo(store.id.charCodeAt(0))}
+                src={(store as any).coverImage || store.image || (store as any).imageUrl}
                 alt={store.name}
                 className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
               />
@@ -338,8 +333,6 @@ export const ExploreView: React.FC<ExploreViewProps> = ({
   onFilterClick,
   onOpenPlans,
   onViewAllVerified,
-  // Fix: Added missing prop as it's passed from App.tsx
-  onViewMasterSponsor,
 }) => {
   const { location, isLoading: isLoadingLocation } = useUserLocation();
   const [selectedFilter, setSelectedFilter] = useState<string | null>(null);
@@ -719,7 +712,7 @@ export const ExploreView: React.FC<ExploreViewProps> = ({
                      <div 
                         className="h-full bg-white transition-all duration-100 ease-linear"
                         style={{ 
-                            width: i === activeStoryIndex ? `${storyProgress}%` : i < (activeStoryIndex || 0) ? '100%' : '0%' 
+                            width: i === activeStoryIndex ? `${storyProgress}%` : i < activeStoryIndex ? '100%' : '0%' 
                         }}
                      />
                  </div>

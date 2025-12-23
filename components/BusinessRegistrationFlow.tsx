@@ -1,6 +1,7 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { ChevronLeft, Search, Building2, Smartphone, Mail, CheckCircle2, AlertTriangle, Upload, ArrowRight, ShieldCheck, MessageSquare } from 'lucide-react';
-import { supabase } from '../lib/supabaseClient';
+import { supabase } from '../lib/supabase';
 
 interface BusinessRegistrationFlowProps {
   onBack: () => void;
@@ -263,157 +264,164 @@ export const BusinessRegistrationFlow: React.FC<BusinessRegistrationFlowProps> =
                 <div className="w-10 h-10 bg-green-100 dark:bg-green-900/20 text-green-600 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
                     <MessageSquare className="w-5 h-5" />
                 </div>
-                <div>
+                <div className="text-left">
                     <p className="font-bold text-gray-900 dark:text-white text-sm">WhatsApp</p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">Enviar para {formData.phone}**</p>
+                    <p className="text-xs text-gray-500">Enviar código para (21) *****-9999</p>
                 </div>
             </button>
-            <button onClick={() => sendVerificationCode('email')} className="w-full bg-white dark:bg-gray-800 p-4 rounded-2xl border border-gray-200 dark:border-gray-700 flex items-center gap-4 hover:border-blue-500 transition-colors shadow-sm group">
-                <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/20 text-blue-600 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
+
+            <button onClick={() => sendVerificationCode('sms')} className="w-full bg-white dark:bg-gray-800 p-4 rounded-2xl border border-gray-200 dark:border-gray-700 flex items-center gap-4 hover:border-[#1E5BFF] transition-colors shadow-sm group">
+                <div className="w-10 h-10 bg-[#EAF0FF] dark:bg-blue-900/20 text-[#1E5BFF] rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <Smartphone className="w-5 h-5" />
+                </div>
+                <div className="text-left">
+                    <p className="font-bold text-gray-900 dark:text-white text-sm">SMS</p>
+                    <p className="text-xs text-gray-500">Enviar código para (21) *****-9999</p>
+                </div>
+            </button>
+
+            <button onClick={() => sendVerificationCode('email')} className="w-full bg-white dark:bg-gray-800 p-4 rounded-2xl border border-gray-200 dark:border-gray-700 flex items-center gap-4 hover:border-[#1E5BFF] transition-colors shadow-sm group">
+                <div className="w-10 h-10 bg-[#EAF0FF] dark:bg-blue-900/20 text-[#1E5BFF] rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
                     <Mail className="w-5 h-5" />
                 </div>
-                <div>
-                    <p className="font-bold text-gray-900 dark:text-white text-sm">E-mail</p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">Enviar para {formData.email}**</p>
+                <div className="text-left">
+                    <p className="font-bold text-gray-900 dark:text-white text-sm">E-mail Comercial</p>
+                    <p className="text-xs text-gray-500">Enviar para con***@loja.com.br</p>
                 </div>
             </button>
         </div>
-
-        <p className="text-xs text-gray-400 mt-6 text-center">
-            **Apenas os 2 últimos dígitos do número/e-mail cadastrado serão exibidos para sua segurança.
-        </p>
     </div>
   );
 
   const renderOtp = () => (
-    <div className="animate-in slide-in-from-right duration-300 pt-4">
-        <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2 text-center">Insira o Código</h2>
-        <p className="text-gray-500 text-sm mb-6 text-center max-w-xs mx-auto">
-            Enviamos um código de 6 dígitos para o seu {verificationMethod === 'whatsapp' ? 'WhatsApp' : 'e-mail'}.
+    <div className="animate-in slide-in-from-right duration-300 pt-8 flex flex-col items-center">
+        <div className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mb-6">
+            <ShieldCheck className="w-8 h-8 text-[#1E5BFF]" />
+        </div>
+        <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Digite o código</h2>
+        <p className="text-gray-500 text-sm mb-8 text-center max-w-[260px]">
+            Enviamos um código de 6 dígitos para o seu {verificationMethod === 'whatsapp' ? 'WhatsApp' : verificationMethod === 'sms' ? 'celular via SMS' : 'e-mail'}.
         </p>
 
-        <div className="flex justify-center gap-2 mb-6">
-            {otp.map((digit, index) => (
+        <div className="flex gap-2 mb-8">
+            {otp.map((digit, idx) => (
                 <input
-                    key={index}
-                    // Fix: Ensure ref callback returns void
-                    ref={(el) => { otpRefs.current[index] = el; }}
+                    key={idx}
+                    ref={(el) => {
+                        otpRefs.current[idx] = el;
+                    }}
                     type="tel"
                     maxLength={1}
                     value={digit}
-                    onChange={(e) => handleOtpChange(index, e.target.value)}
-                    onKeyDown={(e) => handleOtpKeyDown(index, e)}
-                    className="w-12 h-16 bg-gray-50 dark:bg-gray-800 rounded-xl text-center text-2xl font-bold text-gray-900 dark:text-white border border-gray-200 dark:border-gray-700 focus:border-[#1E5BFF] focus:ring-2 focus:ring-blue-500/10 outline-none transition-all"
+                    onChange={(e) => handleOtpChange(idx, e.target.value)}
+                    onKeyDown={(e) => handleOtpKeyDown(idx, e)}
+                    className="w-11 h-14 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-center text-xl font-bold focus:border-[#1E5BFF] focus:ring-2 focus:ring-blue-500/20 outline-none transition-all dark:text-white"
                 />
             ))}
         </div>
 
         <button 
             onClick={verifyOtp}
-            disabled={isLoading || otp.join('').length !== 6}
-            className="w-full bg-[#1E5BFF] hover:bg-[#1749CC] disabled:opacity-50 text-white font-bold py-4 rounded-2xl shadow-lg shadow-blue-500/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+            disabled={otp.some(d => !d) || isLoading}
+            className="w-full bg-[#1E5BFF] hover:bg-[#1749CC] text-white font-bold py-4 rounded-2xl shadow-lg shadow-blue-500/20 active:scale-[0.98] transition-all disabled:opacity-50"
         >
-            {isLoading ? 'Verificando...' : 'Verificar Código'}
+            {isLoading ? 'Verificando...' : 'Confirmar Código'}
         </button>
 
-        <p className="text-xs text-gray-500 dark:text-gray-400 mt-6 text-center">
-            Não recebeu? <button onClick={() => setStep('manual_verify')} className="text-[#1E5BFF] font-bold">Tentar verificação manual</button>
-        </p>
+        <div className="mt-6 flex flex-col gap-3 items-center">
+            <button className="text-xs font-bold text-[#1E5BFF]">Reenviar código</button>
+            <button onClick={() => setStep('manual_verify')} className="text-xs text-gray-400 underline">
+                Não recebi o código
+            </button>
+        </div>
     </div>
   );
 
   const renderManualVerify = () => (
     <div className="animate-in slide-in-from-right duration-300 pt-4">
         <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Verificação Manual</h2>
-        <p className="text-gray-500 text-sm mb-6 max-w-xs mx-auto text-center">
-            Ops, se a verificação automática falhou, vamos te ajudar por WhatsApp.
+        <p className="text-gray-500 text-sm mb-6">
+            Não conseguimos verificar automaticamente. Por favor, envie um documento que comprove a propriedade da loja (Ex: Contrato Social, Cartão CNPJ ou Conta de Luz).
         </p>
 
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col items-center text-center">
-            <div className="w-16 h-16 bg-green-100 dark:bg-green-900/20 rounded-full flex items-center justify-center mb-4 text-green-600">
-                <MessageSquare className="w-8 h-8" />
-            </div>
-            <h3 className="font-bold text-gray-900 dark:text-white text-lg mb-2">Fale com o Suporte</h3>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
-                Clique no botão para iniciar um chat com nossa equipe.
-            </p>
-            <button 
-                onClick={() => alert("Abrir WhatsApp com suporte.")}
-                className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-4 rounded-2xl shadow-lg shadow-green-500/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
-            >
-                Abrir WhatsApp
-            </button>
+        <div className="border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-2xl p-8 flex flex-col items-center justify-center mb-6 bg-gray-50 dark:bg-gray-800/50 hover:bg-gray-100 transition-colors cursor-pointer">
+            <Upload className="w-10 h-10 text-gray-400 mb-2" />
+            <p className="text-sm font-bold text-gray-600 dark:text-gray-300">Toque para enviar documento</p>
+            <p className="text-xs text-gray-400 mt-1">PDF ou Imagem (max 5MB)</p>
         </div>
-        <button onClick={() => setStep('search')} className="mt-6 text-sm text-gray-500 font-bold">
-            Voltar ao início
+
+        <button 
+            onClick={() => {
+                setIsLoading(true);
+                setTimeout(() => { setIsLoading(false); setStep('success'); }, 1500);
+            }}
+            className="w-full bg-gray-900 dark:bg-gray-700 text-white font-bold py-4 rounded-2xl shadow-sm active:scale-[0.98] transition-all"
+        >
+            Enviar para análise
         </button>
     </div>
   );
 
   const renderSuccess = () => (
-    <div className="animate-in zoom-in duration-300 flex flex-col items-center justify-center text-center h-full">
-        <div className="w-24 h-24 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mb-6 shadow-lg shadow-green-200">
-            <CheckCircle2 className="w-12 h-12 text-green-600 dark:text-green-400" />
+    <div className="animate-in zoom-in duration-500 flex flex-col items-center text-center pt-10 h-full justify-center pb-20">
+        <div className="w-24 h-24 bg-[#EAF0FF] dark:bg-blue-900/20 rounded-full flex items-center justify-center mb-6 shadow-lg shadow-blue-200 dark:shadow-none">
+            <CheckCircle2 className="w-12 h-12 text-[#1E5BFF]" />
         </div>
         <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Parabéns!</h2>
-        <p className="text-gray-500 dark:text-gray-400 text-sm max-w-xs mb-8">
-            Sua loja <strong>{EXISTING_STORE_MOCK.name}</strong> foi reivindicada com sucesso.
+        <p className="text-gray-600 dark:text-gray-300 text-sm mb-8 max-w-xs leading-relaxed">
+            Você agora é o administrador oficial desta loja no Localizei Freguesia.
         </p>
+
         <button 
             onClick={onComplete}
-            className="w-full bg-[#1E5BFF] hover:bg-[#1749CC] text-white font-bold py-4 rounded-2xl shadow-lg shadow-blue-500/20 active:scale-[0.98] transition-all"
+            className="w-full bg-[#1E5BFF] text-white font-bold py-4 rounded-2xl shadow-xl shadow-blue-500/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
         >
-            Acessar Painel do Lojista
+            Ir para o painel do lojista
+            <ArrowRight className="w-5 h-5 stroke-[3]" />
         </button>
     </div>
   );
 
-
-  // --- MAIN RENDER ---
-  const getHeaderTitle = () => {
-    switch (step) {
-      case 'search': return 'Cadastrar Negócio';
-      case 'found': return 'Loja Encontrada';
-      case 'not_found': return 'Ops!';
-      case 'select_method': return 'Confirmar Identidade';
-      case 'otp': return 'Verificar Código';
-      case 'manual_verify': return 'Verificação Manual';
-      case 'success': return 'Cadastro Concluído';
-      default: return 'Cadastro';
-    }
-  };
-
-  const showBackButton = step !== 'search' && step !== 'success';
-
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 font-sans flex flex-col animate-in fade-in duration-300">
-      
-      {/* Header */}
-      <div className="sticky top-0 z-30 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md px-5 h-16 flex items-center gap-4 border-b border-gray-100 dark:border-gray-800">
-        {showBackButton ? (
-          <button onClick={() => setStep('search')} className="p-2 -ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
-            <ChevronLeft className="w-6 h-6 text-gray-800 dark:text-white" />
-          </button>
-        ) : (
+    <div className="min-h-screen bg-white dark:bg-gray-900 font-sans">
+        {/* Header */}
+        <div className="sticky top-0 z-30 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md px-5 h-16 flex items-center gap-4 border-b border-gray-100 dark:border-gray-800">
             <button onClick={onBack} className="p-2 -ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
                 <ChevronLeft className="w-6 h-6 text-gray-800 dark:text-white" />
             </button>
-        )}
-        <h1 className="font-bold text-lg text-gray-900 dark:text-white">{getHeaderTitle()}</h1>
-        <div className="w-10"></div>
-      </div>
+            <div className="flex-1">
+                <div className="h-1.5 w-full bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
+                    <div 
+                        className="h-full bg-[#1E5BFF] transition-all duration-500"
+                        style={{ width: 
+                            step === 'search' ? '10%' : 
+                            step === 'found' ? '30%' : 
+                            step === 'not_found' ? '30%' :
+                            step === 'select_method' ? '50%' :
+                            step === 'otp' ? '70%' :
+                            step === 'manual_verify' ? '80%' :
+                            '100%' 
+                        }}
+                    ></div>
+                </div>
+            </div>
+        </div>
 
-      {/* Main Content Area */}
-      <div className="flex-1 p-5 pb-24 flex flex-col justify-center">
-        {step === 'search' && renderSearch()}
-        {step === 'found' && renderFound()}
-        {step === 'not_found' && renderNotFound()}
-        {step === 'select_method' && renderSelectMethod()}
-        {step === 'otp' && renderOtp()}
-        {step === 'manual_verify' && renderManualVerify()}
-        {step === 'success' && renderSuccess()}
-      </div>
-
+        {/* Content */}
+        <div className="p-6 pb-24 max-w-md mx-auto">
+            {step === 'search' && renderSearch()}
+            {/* 
+                Os steps abaixo ('found', 'not_found', etc.) permanecem no código caso
+                futuramente se queira reabilitar o fluxo de reivindicação de loja (Claim).
+                Atualmente, o fluxo termina em 'search' com a captura do lead.
+            */}
+            {step === 'found' && renderFound()}
+            {step === 'not_found' && renderNotFound()}
+            {step === 'select_method' && renderSelectMethod()}
+            {step === 'otp' && renderOtp()}
+            {step === 'manual_verify' && renderManualVerify()}
+            {step === 'success' && renderSuccess()}
+        </div>
     </div>
   );
 };

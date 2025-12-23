@@ -1,5 +1,4 @@
 
-
 import React from 'react';
 import { ChevronLeft, Calendar, MapPin, Clock, Users, CheckCircle, ExternalLink, Zap } from 'lucide-react';
 

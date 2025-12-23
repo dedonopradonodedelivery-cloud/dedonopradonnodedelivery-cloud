@@ -1,9 +1,7 @@
-
-
 import React, { useState, useEffect } from 'react';
 import { Plus, X, Camera, Video } from 'lucide-react';
-import { supabase } from '@/lib/supabaseClient';
-import { STORIES } from '@/constants';
+import { supabase } from '../lib/supabaseClient';
+import { STORIES } from '../constants';
 
 export const StatusView: React.FC = () => {
   const [activeStoryIndex, setActiveStoryIndex] = useState<number | null>(null);

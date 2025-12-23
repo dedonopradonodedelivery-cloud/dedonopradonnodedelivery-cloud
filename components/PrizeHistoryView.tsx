@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { supabase } from '../lib/supabaseClient';
+import { supabase } from '../lib/supabase';
 import { ChevronLeft, Wallet, Ticket, Meh, RefreshCw, Loader2, AlertTriangle, Dices, ArrowRight } from 'lucide-react';
 
 // --- Tipos ---

@@ -1,5 +1,4 @@
 
-
 import React from 'react';
 import { ChevronLeft, Users, Zap, Handshake, ArrowRight } from 'lucide-react';
 

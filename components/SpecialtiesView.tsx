@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { ChevronLeft, CheckCircle2, ArrowRight } from 'lucide-react';
 
@@ -48,4 +47,53 @@ export const SpecialtiesView: React.FC<SpecialtiesViewProps> = ({ subcategoryNam
           onClick={onBack}
           className="p-2 -ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
         >
-          <ChevronLeft className="w-6 h-6 text-gray-700
+          <ChevronLeft className="w-6 h-6 text-gray-700 dark:text-white" />
+        </button>
+        <div>
+            <h1 className="text-xl font-bold text-gray-900 dark:text-white font-display leading-tight">
+              {subcategoryName}
+            </h1>
+            <p className="text-xs text-gray-500 dark:text-gray-400">
+              Escolha a especialidade mais próxima do que você precisa
+            </p>
+        </div>
+      </div>
+
+      {/* Content List */}
+      <div className="p-5">
+        <div className="flex flex-col gap-3">
+          {items.map((specialty, idx) => (
+            <button 
+              key={idx}
+              onClick={() => onSelectSpecialty(specialty)}
+              className="bg-white dark:bg-gray-800 p-4 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 flex items-center justify-between hover:shadow-md transition-all active:scale-[0.99] group text-left"
+            >
+              <div className="flex items-center gap-4">
+                <div className="w-10 h-10 rounded-full bg-primary-50 dark:bg-primary-900/20 flex items-center justify-center text-primary-500 group-hover:bg-primary-100 dark:group-hover:bg-primary-900/40 transition-colors">
+                  <CheckCircle2 className="w-5 h-5" />
+                </div>
+                <span className="font-semibold text-gray-800 dark:text-gray-200 text-sm">
+                  {specialty}
+                </span>
+              </div>
+              <ArrowRight className="w-5 h-5 text-gray-300 group-hover:text-primary-500 transition-colors" />
+            </button>
+          ))}
+        </div>
+
+        <div className="mt-8 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-2xl border border-blue-100 dark:border-blue-800 text-center">
+            <p className="text-xs text-blue-700 dark:text-blue-300">
+                Não encontrou exatamente o que precisa?
+            </p>
+            <button 
+                onClick={() => onSelectSpecialty('Outro')}
+                className="mt-2 text-sm font-bold text-blue-600 dark:text-blue-400 hover:underline"
+            >
+                Descrever meu problema manualmente
+            </button>
+        </div>
+      </div>
+
+    </div>
+  );
+};

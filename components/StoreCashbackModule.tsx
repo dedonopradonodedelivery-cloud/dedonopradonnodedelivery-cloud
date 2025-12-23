@@ -16,7 +16,6 @@ import {
   X,
   Check
 } from 'lucide-react';
-import { supabase } from '../lib/supabaseClient';
 
 interface StoreCashbackModuleProps {
   onBack: () => void;
@@ -322,8 +321,7 @@ export const StoreCashbackModule: React.FC<StoreCashbackModuleProps> = ({ onBack
                 className="bg-white dark:bg-gray-900 w-full max-w-md rounded-t-3xl sm:rounded-3xl p-6 flex flex-col max-h-[90vh] animate-in slide-in-from-bottom duration-300"
                 onClick={(e) => e.stopPropagation()}
             >
-                {/* Modal Header */}
-                <div className="p-5 border-b border-gray-100 dark:border-gray-800 flex justify-between items-center bg-white dark:bg-gray-900 sticky top-0 z-10">
+                <div className="flex justify-between items-center mb-4">
                     <h2 className="text-lg font-bold text-gray-900 dark:text-white">Termos de Adesão</h2>
                     <button 
                         onClick={() => setShowTermsModal(false)}
@@ -333,7 +331,6 @@ export const StoreCashbackModule: React.FC<StoreCashbackModuleProps> = ({ onBack
                     </button>
                 </div>
 
-                {/* Modal Content */}
                 <div className="flex-1 overflow-y-auto bg-[#EAF0FF] dark:bg-gray-800 rounded-xl p-4 text-xs text-gray-600 dark:text-gray-300 mb-4 border border-blue-100 dark:border-gray-700 leading-relaxed">
                     <p className="font-bold mb-2">1. Programa de Cashback</p>
                     <p className="mb-2">Ao ativar o programa de cashback, o estabelecimento concorda em conceder o desconto percentual definido sobre o valor total da compra realizada pelo usuário do aplicativo Localizei Freguesia.</p>

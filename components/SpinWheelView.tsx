@@ -1,8 +1,8 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { supabase } from '../lib/supabaseClient';
-import { Gift, RefreshCw, ThumbsDown, History, Wallet, Volume2, VolumeX, Lock, ArrowRight, Dices, AlertTriangle, Loader2, Award } from 'lucide-react';
-import { ROULETTE_TRANSPARENCY_MESSAGES } from '../constants'; // Importa as novas mensagens de transparência
+import { Gift, RefreshCw, ThumbsDown, History, Wallet, Volume2, VolumeX, Lock, ArrowRight, Dices } from 'lucide-react';
+import { useCountdown } from '../hooks/useCountdown';
 
 // --- Tipos e Constantes ---
 interface SpinWheelViewProps {
@@ -11,7 +11,6 @@ interface SpinWheelViewProps {
   onWin: (reward: any) => void;
   onRequireLogin: () => void;
   onViewHistory: () => void;
-  merchantId?: string | null; // NEW: Optional merchantId prop
 }
 
 interface Prize {
@@ -20,7 +19,7 @@ interface Prize {
   line2: string;
   prize_label: string;
   prize_type: 'cashback' | 'cupom' | 'nao_foi_dessa_vez' | 'gire_de_novo';
-  prize_value?: number; // Numeric value (R$) or percentage
+  prize_value?: number;
   prize_code?: string; // For coupons
   status: 'creditado' | 'pendente' | 'nao_aplicavel';
   color: string;
@@ -28,27 +27,18 @@ interface Prize {
   description: string;
 }
 
-interface UserLevelInfo {
-  name: string;
-  daily_spins: number;
-  label_color: string;
-}
-
-// PRIZES: Array de prêmios da roleta (VISUAL - 8 segmentos)
-// Os prize_value agora correspondem aos valores fixos em R$ que o backend sorteia.
-// Ajustados os labels e o prize_key para corresponder aos prize_type do backend
 const PRIZES: Prize[] = [
-  { prize_key: 'cashback_2', line1: 'R$ 2', line2: 'de Volta', prize_label: 'R$ 2,00 de Volta', prize_type: 'cashback', prize_value: 2.00, status: 'creditado', color: '#00C853', textColor: '#FFFFFF', description: 'O valor foi creditado na sua carteira digital.' },
-  { prize_key: 'cashback_5', line1: 'R$ 5', line2: 'de Volta', prize_label: 'R$ 5,00 de Volta', prize_type: 'cashback', prize_value: 5.00, status: 'creditado', color: '#2962FF', textColor: '#FFFFFF', description: 'O valor foi creditado na sua carteira digital.' },
-  { prize_key: 'cashback_7', line1: 'R$ 7', line2: 'de Volta', prize_label: 'R$ 7,00 de Volta', prize_type: 'cashback', prize_value: 7.00, status: 'creditado', color: '#AA00FF', textColor: '#FFFFFF', description: 'O valor foi creditado na sua carteira digital.' },
-  { prize_key: 'cashback_10', line1: 'R$ 10', line2: 'de Volta', prize_label: 'R$ 10,00 de Volta', prize_type: 'cashback', prize_value: 10.00, status: 'creditado', color: '#00B8D4', textColor: '#FFFFFF', description: 'O valor foi creditado na sua carteira digital.' },
-  { prize_key: 'nao_foi_dessa_vez', line1: 'Não foi', line2: 'dessa vez', prize_label: 'Não foi dessa vez', prize_type: 'nao_foi_dessa_vez', prize_value: 0, status: 'nao_aplicavel', color: '#D50000', textColor: '#FFFFFF', description: 'Tente novamente amanhã para ganhar prêmios.' },
-  { prize_key: 'gire_de_novo', line1: 'Gire', line2: 'de Novo', prize_label: 'Gire de Novo', prize_type: 'gire_de_novo', prize_value: 0, status: 'nao_aplicavel', color: '#FF6D00', textColor: '#FFFFFF', description: 'Você ganhou uma nova chance! Gire a roleta novamente.' },
-  { prize_key: 'cashback_15', line1: 'R$ 15', line2: 'de Volta', prize_label: 'R$ 15,00 de Volta', prize_type: 'cashback', prize_value: 15.00, status: 'creditado', color: '#C51162', textColor: '#FFFFFF', description: 'O valor foi creditado na sua carteira digital.' },
-  { prize_key: 'cashback_50', line1: 'R$ 50', line2: 'de Volta', prize_label: 'R$ 50,00 de Volta', prize_type: 'cashback', prize_value: 50.00, status: 'creditado', color: '#4CAF50', textColor: '#FFFFFF', description: 'O valor foi creditado na sua carteira digital.' },
+  { prize_key: 'reais_5', line1: 'R$ 5', line2: 'de Volta', prize_label: 'R$ 5,00 de Volta', prize_type: 'cashback', prize_value: 5, status: 'creditado', color: '#00C853', textColor: '#FFFFFF', description: 'O valor foi creditado na sua carteira digital.' },
+  { prize_key: 'cashback_5', line1: '5%', line2: 'Cashback', prize_label: '5% Cashback', prize_type: 'cashback', prize_value: 5, status: 'creditado', color: '#2962FF', textColor: '#FFFFFF', description: '5% de cashback garantido na próxima compra.' },
+  { prize_key: 'lose', line1: 'Não foi', line2: 'dessa vez', prize_label: 'Não foi dessa vez', prize_type: 'nao_foi_dessa_vez', status: 'nao_aplicavel', color: '#D50000', textColor: '#FFFFFF', description: 'Tente novamente amanhã para ganhar prêmios.' },
+  { prize_key: 'cashback_10', line1: '10%', line2: 'Cashback', prize_label: '10% Cashback', prize_type: 'cashback', prize_value: 10, status: 'creditado', color: '#AA00FF', textColor: '#FFFFFF', description: '10% de cashback acumulado na sua carteira.' },
+  { prize_key: 'spin_again', line1: 'Gire', line2: 'de Novo', prize_label: 'Gire de Novo', prize_type: 'gire_de_novo', status: 'nao_aplicavel', color: '#FF6D00', textColor: '#FFFFFF', description: 'Você ganhou uma nova chance! Gire a roleta novamente.' },
+  { prize_key: 'reais_10', line1: 'Cupom', line2: 'R$ 10', prize_label: 'Cupom R$ 10,00', prize_type: 'cupom', prize_value: 10, prize_code: 'LOCAL10', status: 'pendente', color: '#00B8D4', textColor: '#FFFFFF', description: 'Cupom de R$ 10 para usar em parceiros locais.' },
+  { prize_key: 'gift_local', line1: 'Brinde', line2: 'Local', prize_label: 'Brinde Surpresa', prize_type: 'cupom', prize_code: 'BRINDE2024', status: 'pendente', color: '#C51162', textColor: '#FFFFFF', description: 'Você ganhou um brinde exclusivo em lojas participantes.' },
+  { prize_key: 'cashback_15', line1: '15%', line2: 'Cashback', prize_label: '15% Cashback', prize_type: 'cashback', prize_value: 15, status: 'creditado', color: '#FFD600', textColor: '#000000', description: 'Incríveis 15% de volta na sua próxima compra!' },
 ];
 
-const SEGMENT_COUNT = PRIZES.length; // Agora 8 segmentos
+const SEGMENT_COUNT = PRIZES.length;
 const SEGMENT_ANGLE = 360 / SEGMENT_COUNT;
 const SPIN_DURATION_MS = 4500;
 
@@ -58,43 +48,19 @@ const SOUND_URLS = {
   lose: "https://assets.mixkit.co/sfx/preview/mixkit-retro-arcade-lose-2027.mp3",
 };
 
-type SpinStatus = 'loading' | 'ready' | 'limit_reached' | 'no_user' | 'error';
+type SpinStatus = 'loading' | 'ready' | 'cooldown' | 'no_user' | 'error';
 
-export const SpinWheelView: React.FC<SpinWheelViewProps> = ({ userId, userRole, onWin, onRequireLogin, onViewHistory, merchantId = null }) => {
+export const SpinWheelView: React.FC<SpinWheelViewProps> = ({ userId, userRole, onWin, onRequireLogin, onViewHistory }) => {
   const [rotation, setRotation] = useState(0);
   const [isSpinning, setIsSpinning] = useState(false);
   const [spinStatus, setSpinStatus] = useState<SpinStatus>('loading');
-  // NOVO: Adiciona estados para resultado de Super Giro
   const [spinResult, setSpinResult] = useState<Prize | null>(null);
-  const [isSuperSpinResult, setIsSuperSpinResult] = useState(false);
-  const [superEventWonName, setSuperEventWonName] = useState<string | null>(null);
-
+  const [lastSpinDate, setLastSpinDate] = useState<Date | null>(null);
   const [isMuted, setIsMuted] = useState(() => localStorage.getItem('localizei_wheel_muted') === 'true');
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [deviceId, setDeviceId] = useState<string | null>(null);
-
-  // Novos estados para níveis de usuário
-  const [userLevel, setUserLevel] = useState<UserLevelInfo>({ name: 'Bronze', daily_spins: 1, label_color: '#CD7F32' });
-  const [spinsMadeToday, setSpinsMadeToday] = useState(0);
-  const spinsRemaining = userLevel.daily_spins - spinsMadeToday;
-
-  // NOVO: Estados para Super Giro (disponibilidade)
-  const [isSuperSpinActive, setIsSuperSpinActive] = useState(false);
-  const [superEventName, setSuperEventName] = useState<string | null>(null);
-
 
   const isMutedRef = useRef(isMuted);
   const audioRefs = useRef<Record<string, HTMLAudioElement | null>>({ spin: null, win: null, lose: null });
-
-  // Efeito para gerar ou carregar device_id do localStorage
-  useEffect(() => {
-    let currentDeviceId = localStorage.getItem('localizei_device_id');
-    if (!currentDeviceId) {
-      currentDeviceId = crypto.randomUUID();
-      localStorage.setItem('localizei_device_id', currentDeviceId);
-    }
-    setDeviceId(currentDeviceId);
-  }, []);
+  const timeUntilNextSpin = useCountdown(lastSpinDate);
 
   useEffect(() => {
     isMutedRef.current = isMuted;
@@ -142,224 +108,128 @@ export const SpinWheelView: React.FC<SpinWheelViewProps> = ({ userId, userRole, 
     }
   };
 
-  // Nova função para buscar o status de giros do usuário (nível, giros feitos hoje)
-  const fetchSpinLimits = async (currentUserId: string) => {
-    if (!currentUserId) {
-      setSpinStatus('no_user');
-      return;
+  useEffect(() => {
+    let isMounted = true;
+    const checkSpinAbility = async () => {
+      if (!userId) { 
+        if(isMounted) setSpinStatus('no_user'); 
+        return; 
+      }
+      const localLastSpin = localStorage.getItem(`last_spin_${userId}`);
+      if (localLastSpin) {
+        const lastDate = new Date(localLastSpin);
+        if (isSameDay(lastDate, new Date())) {
+          if(isMounted) {
+            setLastSpinDate(lastDate);
+            setSpinStatus('cooldown');
+          }
+        }
+      }
+      const setReadyFallback = () => {
+        if (isMounted) {
+           if (localLastSpin && isSameDay(new Date(localLastSpin), new Date())) setSpinStatus('cooldown');
+           else setSpinStatus('ready');
+        }
+      };
+      if (!supabase) { setReadyFallback(); return; }
+      try {
+        const { data, error } = await supabase.from('roulette_spins').select('spin_date').eq('user_id', userId).order('spin_date', { ascending: false }).limit(1).maybeSingle();
+        if (isMounted) {
+          if (data) {
+            const lastDate = new Date(data.spin_date);
+            if (isSameDay(lastDate, new Date())) {
+              setLastSpinDate(lastDate);
+              setSpinStatus('cooldown');
+            } else setSpinStatus('ready');
+          } else setSpinStatus('ready');
+        }
+      } catch (error) { setReadyFallback(); }
+    };
+    checkSpinAbility();
+    return () => { isMounted = false; };
+  }, [userId]);
+
+  const isSameDay = (d1: Date, d2: Date) => d1.getFullYear() === d2.getFullYear() && d1.getMonth() === d2.getMonth() && d1.getDate() === d2.getDate();
+
+  const saveSpinResult = async (result: Prize): Promise<boolean> => {
+    if (!userId) return false;
+
+    if (result.prize_type === 'gire_de_novo') {
+      return true; // Don't persist, but it's a "successful" flow.
     }
-    setErrorMessage(null);
-    setSpinStatus('loading');
-    setIsSuperSpinActive(false); // Reset Super Spin status
-    setSuperEventName(null);
 
     try {
-      const { data, error: edgeFunctionError } = await supabase.functions.invoke('spin-wheel', {
-        method: 'POST',
-        body: { device_id: deviceId, dry_run: true, merchant_id: merchantId }, // NEW: Pass merchantId
-      });
-
-      if (edgeFunctionError) {
-        throw edgeFunctionError;
-      }
-      
-      if (!data.ok) {
-        if (data.message === 'Limite diário de giros atingido.') {
-          setSpinsMadeToday(data.spinsMadeToday);
-          setUserLevel({
-            name: data.userLevelName,
-            daily_spins: data.maxDailySpins,
-            label_color: data.userLevelColor
-          });
-          setSpinStatus('limit_reached');
-        } else {
-          setErrorMessage(data.message || "Erro desconhecido ao verificar giros.");
-          setSpinStatus('error');
-        }
-      } else {
-        // Sucesso na dry_run
-        setSpinsMadeToday(data.spinsMadeToday || 0);
-        setUserLevel({
-          name: data.userLevelName || 'Bronze',
-          daily_spins: data.maxDailySpins || 1,
-          label_color: data.userLevelColor || '#CD7F32'
+      if (supabase) {
+        const { error } = await supabase.from('roulette_spins').insert({
+          user_id: userId,
+          prize_type: result.prize_type,
+          prize_label: result.prize_label,
+          prize_value: result.prize_value,
+          status: result.status,
+          spin_date: new Date().toISOString(),
         });
-        setSpinStatus('ready');
-
-        // NOVO: Atualiza o status do Super Giro
-        setIsSuperSpinActive(data.isSuperSpinActive || false);
-        setSuperEventName(data.superEventName || null);
+        if (error) throw error;
       }
-
-    } catch (err: any) {
-      console.error("Erro ao verificar limite de giros:", err);
-      setErrorMessage(err.message || "Erro ao carregar status dos giros.");
-      setSpinStatus('error');
+      // Only update local cooldown if DB write succeeds
+      localStorage.setItem(`last_spin_${userId}`, new Date().toISOString());
+      return true;
+    } catch (error) {
+      console.error("Erro ao salvar resultado do giro no backend:", error);
+      return false; // Critical: return false on failure.
     }
   };
 
-  useEffect(() => {
-    let isMounted = true;
-    if (userId) {
-      fetchSpinLimits(userId);
-    } else {
-      if (isMounted) setSpinStatus('no_user');
-    }
-    return () => { isMounted = false; };
-  }, [userId, deviceId, merchantId]); // Depende de userId, deviceId e merchantId
-
-  const handleSpin = async () => {
+  const handleSpin = () => {
     if (userRole === 'lojista') return;
-    if (isSpinning || spinStatus === 'loading' || spinStatus === 'error' || !deviceId) {
+    if (isSpinning || spinStatus !== 'ready') {
       if (spinStatus === 'no_user') onRequireLogin();
       return;
     }
-
-    // Se houver Super Giro ativo e o usuário ainda pode girar, ignora o limite diário normal
-    const canSpinNormal = spinsRemaining > 0;
-    const canSpinSuper = isSuperSpinActive;
-
-    if (!canSpinNormal && !canSpinSuper) {
-        setErrorMessage(`Você atingiu o limite de giros diários (${userLevel.daily_spins}).`);
-        setSpinStatus('limit_reached');
-        return;
-    }
-    
-    // Adiciona verificação para deviceId antes de girar
-    if (!deviceId) {
-        setErrorMessage("Erro: ID do dispositivo não identificado. Recarregue a página.");
-        setSpinStatus('error');
-        return;
-    }
-
     setIsSpinning(true);
     setSpinResult(null);
-    setIsSuperSpinResult(false); // Reset Super Spin result flag
-    setSuperEventWonName(null);
-    setErrorMessage(null);
     playSound('spin');
+    const winningSegmentIndex = Math.floor(Math.random() * SEGMENT_COUNT);
+    const segmentCenter = winningSegmentIndex * SEGMENT_ANGLE + SEGMENT_ANGLE / 2;
+    const baseRotation = 360 * 6;
+    const randomOffset = (Math.random() - 0.5) * (SEGMENT_ANGLE * 0.6);
+    const finalAngle = 270 - segmentCenter + randomOffset;
+    const targetRotation = rotation + baseRotation + (360 - (rotation % 360)) + finalAngle;
+    setRotation(targetRotation);
 
-    try {
-      const { data, error: edgeFunctionError } = await supabase.functions.invoke('spin-wheel', {
-        method: 'POST',
-        body: { device_id: deviceId, merchant_id: merchantId }, // NEW: Pass merchantId
-      });
-      
-      if (edgeFunctionError) {
-        throw new Error(edgeFunctionError.message || 'Erro ao chamar função de sorteio.');
-      }
-      
-      if (!data.ok) {
-        if (data.message === 'Limite diário de giros atingido.') {
-            setSpinsMadeToday(data.spinsMadeToday);
-            setUserLevel({
-              name: data.userLevelName,
-              daily_spins: data.maxDailySpins,
-              label_color: data.userLevelColor
-            });
-            setErrorMessage(`Você atingiu o limite diário de giros (${data.maxDailySpins}).`);
-            setSpinStatus('limit_reached');
-        } else {
-            setErrorMessage(data.message || 'Erro desconhecido no sorteio.');
-            setSpinStatus('error');
-        }
-        setIsSpinning(false);
-        stopSound('spin');
-        // Após um giro normal falhar por limite, re-fetch para atualizar o status do Super Giro se houver
-        if (!isSuperSpinActive) fetchSpinLimits(userId as string);
-        return;
-      }
-
-      const { prizeValue, prizeType, isSuperSpin: resultIsSuperSpin, superEventName: resultSuperEventName } = data;
-      
-      // Encontra o prêmio correspondente no array local do frontend, usando prizeType e prizeValue
-      let winningPrize: Prize | undefined;
-      if (prizeType === 'cashback') {
-        winningPrize = PRIZES.find(p => p.prize_type === 'cashback' && p.prize_value === prizeValue);
-      } else {
-        winningPrize = PRIZES.find(p => p.prize_type === prizeType);
-      }
-      
-      // Fallback para um prêmio genérico se o backend retornar algo inesperado
-      let finalWinningPrize = winningPrize;
-      if (!finalWinningPrize) {
-        if (resultIsSuperSpin) {
-          finalWinningPrize = {
-            prize_key: `super_reais_${prizeValue}`,
-            line1: `SUPER R$ ${prizeValue.toFixed(2).replace('.',',')}`,
-            line2: '!!!',
-            prize_label: `SUPER R$ ${prizeValue.toFixed(2).replace('.',',')} de Volta!`,
-            prize_type: 'cashback' as 'cashback',
-            prize_value: prizeValue,
-            status: 'creditado' as 'creditado',
-            color: '#FFD600', // Gold color for super prize
-            textColor: '#000000',
-            description: `Você ganhou R$ ${prizeValue.toFixed(2).replace('.',',')} de volta em um SUPER GIRO!`,
-          };
-        } else if (prizeType === 'gire_de_novo') {
-          finalWinningPrize = PRIZES.find(p => p.prize_type === 'gire_de_novo');
-        } else if (prizeType === 'nao_foi_dessa_vez') {
-          finalWinningPrize = PRIZES.find(p => p.prize_type === 'nao_foi_dessa_vez');
-        } else {
-          // Último recurso: prêmio monetário padrão
-          finalWinningPrize = PRIZES.find(p => p.prize_value === 2.00) || PRIZES[0]; 
-        }
-        if (!finalWinningPrize) throw new Error(`Backend retornou um prêmio desconhecido e sem fallback: ${prizeType} - ${prizeValue}`);
-      }
-
-      const winningSegmentIndex = PRIZES.indexOf(finalWinningPrize); 
-      if (winningSegmentIndex === -1) { 
-        throw new Error("Segmento do prêmio não encontrado na roleta visual.");
-      }
-
-      const segmentCenter = winningSegmentIndex * SEGMENT_ANGLE + SEGMENT_ANGLE / 2;
-      const baseRotation = 360 * 6; // Pelo menos 6 voltas
-      const randomOffset = (Math.random() - 0.5) * (SEGMENT_ANGLE * 0.6); // Pequeno offset para variar
-      const finalAngle = 270 - segmentCenter + randomOffset; // 270 para o topo da roleta
-      const targetRotation = rotation + baseRotation + (360 - (rotation % 360)) + finalAngle;
-
-      setRotation(targetRotation);
-
-      setTimeout(() => {
-        stopSound('spin');
-        playSound(finalWinningPrize?.prize_type === 'nao_foi_dessa_vez' ? 'lose' : 'win');
-        setSpinResult(finalWinningPrize);
-        setIsSuperSpinResult(resultIsSuperSpin); // Define a flag de Super Giro
-        setSuperEventWonName(resultSuperEventName);
-
-        // A contagem de spinsMadeToday já é tratada pelo backend (exclui 'gire_de_novo')
-        // Então o fetchSpinLimits vai sempre pegar o estado correto
-        if (!resultIsSuperSpin && finalWinningPrize?.prize_type !== 'gire_de_novo') {
-          setSpinsMadeToday(prev => prev + 1); // Apenas para giros que consomem o limite normal
-          if (spinsMadeToday + 1 >= userLevel.daily_spins) {
-              setSpinStatus('limit_reached');
-          } else {
-              setSpinStatus('ready');
-          }
-        } else if (finalWinningPrize?.prize_type === 'gire_de_novo') {
-          setSpinStatus('ready'); // Apenas libera o botão novamente
-        } else {
-          // Para Super Giro, o status do Super Giro passa a ser 'indisponível' (re-fetch vai lidar)
-          setIsSuperSpinActive(false); 
-          setSuperEventName(null);
-          setSpinStatus('ready'); // Mantém o status 'ready' para a roleta normal, se disponível
-        }
-        setIsSpinning(false);
-      }, SPIN_DURATION_MS);
-
-    } catch (err: any) {
-      console.error("Erro no giro da roleta:", err);
+    setTimeout(async () => {
       stopSound('spin');
-      setErrorMessage(err.message || "Ocorreu um erro ao girar a roleta. Tente novamente.");
-      setSpinStatus('error');
+      const result = PRIZES[winningSegmentIndex];
+      playSound(result.prize_type === 'nao_foi_dessa_vez' ? 'lose' : 'win');
+
+      const savedSuccessfully = await saveSpinResult(result);
+
+      if (!savedSuccessfully && result.prize_type !== 'nao_foi_dessa_vez' && result.prize_type !== 'gire_de_novo') {
+        setSpinResult({
+          ...result,
+          prize_label: `${result.prize_label} (Garantido)`,
+          description: "Seu prêmio foi garantido! Tivemos um problema para registrar, mas ele será processado em breve. Você pode conferir no seu histórico mais tarde.",
+          saveError: true,
+        } as any);
+      } else {
+        setSpinResult(result);
+      }
+      
       setIsSpinning(false);
-      // Re-fetch status se falha não foi por limite, para atualizar Super Giro status.
-      fetchSpinLimits(userId as string);
-    }
+      
+      if (result.prize_type !== 'gire_de_novo') {
+        setLastSpinDate(new Date());
+        setSpinStatus('cooldown');
+      }
+    }, SPIN_DURATION_MS);
   };
 
   const handleClaimReward = () => {
     if (!spinResult) return;
+
+    if ((spinResult as any).saveError) {
+        setSpinResult(null);
+        return;
+    }
 
     if (spinResult.prize_type === 'cashback') {
         onViewHistory(); 
@@ -367,13 +237,9 @@ export const SpinWheelView: React.FC<SpinWheelViewProps> = ({ userId, userRole, 
         onWin({ label: spinResult.prize_label, code: spinResult.prize_code || 'CODE123', value: spinResult.prize_value?.toString() || '0', description: spinResult.description });
     } else if (spinResult.prize_type === 'gire_de_novo') { 
         setSpinResult(null); 
-        // Não atualiza spinsMadeToday aqui, pois o backend já cuida disso e a UI será atualizada no fetchSpinLimits
-        // Força um re-fetch para garantir que o número de giros restantes esteja correto, especialmente após um "Gire de novo"
-        fetchSpinLimits(userId as string);
-    } else { // nao_foi_dessa_vez
+        setSpinStatus('ready'); 
+    } else {
         setSpinResult(null);
-        // Força um re-fetch para garantir que o número de giros restantes esteja correto
-        fetchSpinLimits(userId as string);
     }
   };
 
@@ -405,15 +271,7 @@ export const SpinWheelView: React.FC<SpinWheelViewProps> = ({ userId, userRole, 
         <button onClick={() => setIsMuted(!isMuted)} className="p-2.5 text-gray-400 hover:text-gray-600 bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
           {isMuted ? <VolumeX size={20} /> : <Volume2 size={20} />}
         </button>
-        <div className="flex flex-col items-center relative">
-          <h2 className="text-xl font-black text-gray-900 dark:text-white font-display uppercase tracking-tight">Tente a Sorte!</h2>
-          {isSuperSpinActive && (
-            <span className="mt-1 flex items-center gap-1.5 px-3 py-1 bg-yellow-500 text-white rounded-full text-xs font-bold shadow-md animate-pulse">
-              <Award className="w-4 h-4" />
-              SUPER GIRO!
-            </span>
-          )}
-        </div>
+        <h2 className="text-xl font-black text-gray-900 dark:text-white font-display uppercase tracking-tight">Tente a Sorte!</h2>
         <button onClick={onViewHistory} className="p-2.5 text-gray-400 hover:text-gray-600 bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
             <History size={20} />
         </button>
@@ -462,60 +320,24 @@ export const SpinWheelView: React.FC<SpinWheelViewProps> = ({ userId, userRole, 
         </div>
       </div>
 
-      <p className="text-[10px] text-gray-400 dark:text-gray-500 text-center mb-6 px-4 leading-tight">
-        {ROULETTE_TRANSPARENCY_MESSAGES.DISCLAIMER_BOTTOM}
-      </p>
-
       <div className="mb-6">
         {userRole === 'lojista' ? (
           <div className="text-center p-4 bg-red-50 dark:bg-red-900/10 rounded-2xl border border-red-100 dark:border-red-900/30">
             <p className="text-xs font-bold text-red-600 dark:text-red-400">A Roleta é exclusiva para Clientes.</p>
           </div>
-        ) : spinStatus === 'loading' ? (
-            <div className="text-center p-4 bg-gray-100 dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700">
-                <Loader2 className="w-5 h-5 text-indigo-500 animate-spin mx-auto mb-2" />
-                <p className="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest">Verificando giros...</p>
-            </div>
-        ) : (
+        ) : spinStatus === 'cooldown' ? (
           <div className="text-center bg-gray-100 dark:bg-gray-800 p-4 rounded-2xl border border-gray-200 dark:border-gray-700">
-            {isSuperSpinActive ? (
-              <p className="text-[10px] font-black text-yellow-600 uppercase tracking-widest mb-1">
-                SUPER GIRO DISPONÍVEL!
-              </p>
-            ) : (
-              <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">
-                Giros restantes hoje: {spinsRemaining} / {userLevel.daily_spins}
-              </p>
-            )}
-            
-            <p className="text-sm font-bold text-gray-900 dark:text-white mb-2">
-                Nível: <span style={{ color: userLevel.label_color }}>{userLevel.name}</span>
-            </p>
-            {errorMessage && spinStatus !== 'limit_reached' && (
-              <div className="mt-3 p-2 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 text-xs rounded-xl flex items-center justify-center gap-2">
-                <AlertTriangle className="w-4 h-4" />
-                <span>{errorMessage}</span>
-              </div>
-            )}
+            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Próximo giro em</p>
+            <p className="text-2xl font-black text-primary-600 dark:text-blue-400">{timeUntilNextSpin}</p>
           </div>
-        )}
-        
-        <button 
+        ) : (
+          <button 
             onClick={handleSpin} 
-            disabled={isSpinning || spinStatus === 'loading' || spinStatus === 'error' || !deviceId || (!isSuperSpinActive && spinsRemaining <= 0)} 
-            className="w-full h-16 bg-gradient-to-r from-[#1E5BFF] to-[#4D7CFF] text-white font-black text-lg rounded-2xl shadow-xl shadow-blue-500/30 active:scale-[0.97] transition-all disabled:opacity-50 disabled:shadow-none flex items-center justify-center gap-3 mt-4"
+            disabled={isSpinning || spinStatus === 'loading'} 
+            className="w-full h-16 bg-gradient-to-r from-[#1E5BFF] to-[#4D7CFF] text-white font-black text-lg rounded-2xl shadow-xl shadow-blue-500/30 active:scale-[0.97] transition-all disabled:opacity-50 disabled:shadow-none flex items-center justify-center gap-3"
           >
-            {isSpinning ? <RefreshCw className="w-6 h-6 animate-spin" /> : 
-             spinStatus === 'loading' ? <Loader2 className="w-6 h-6 animate-spin" /> :
-             isSuperSpinActive ? `SUPER GIRAR AGORA! ${superEventName ? `(${superEventName})` : ''}` :
-             spinsRemaining <= 0 ? 'LIMITE DIÁRIO ATINGIDO' :
-             'GIRAR AGORA!'}
+            {isSpinning ? <RefreshCw className="w-6 h-6 animate-spin" /> : 'GIRAR AGORA!'}
           </button>
-        {errorMessage && spinsRemaining <= 0 && !isSuperSpinActive && (
-          <div className="mt-3 p-2 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 text-xs rounded-xl flex items-center justify-center gap-2">
-            <AlertTriangle className="w-4 h-4" />
-            <span>{errorMessage || `Você atingiu o limite diário de giros (${userLevel.daily_spins}).`}</span>
-          </div>
         )}
       </div>
 
@@ -528,27 +350,18 @@ export const SpinWheelView: React.FC<SpinWheelViewProps> = ({ userId, userRole, 
                <h3 className="text-3xl font-black text-gray-900 dark:text-white mb-2 tracking-tight">
                    {spinResult.prize_type === 'nao_foi_dessa_vez' ? 'Poxa!' : 'PARABÉNS!'}
                </h3>
-               {isSuperSpinResult && superEventWonName ? (
-                 <p className="text-xl font-black mb-4 uppercase tracking-tight text-yellow-600">
-                   {spinResult.prize_label} <span className="text-lg">({superEventWonName})</span>
-                 </p>
-               ) : (
-                 <p className="text-xl font-black mb-4 uppercase tracking-tight" style={{ color: spinResult.color }}>
-                   {spinResult.prize_label}
-                 </p>
-               )}
+               <p className="text-xl font-black mb-4 uppercase tracking-tight" style={{ color: spinResult.color }}>
+                 {spinResult.prize_label}
+               </p>
                <p className="text-sm text-gray-500 dark:text-gray-400 mb-10 leading-relaxed font-medium">
                    {spinResult.description}
                </p>
-               <p className="text-[10px] text-gray-400 dark:text-gray-500 text-center mb-4 leading-tight">
-                 {ROULETTE_TRANSPARENCY_MESSAGES.DISCLAIMER_MODAL}
-               </p>
                <button 
                  onClick={handleClaimReward}
-                 className="w-full bg-[#1E5BFF] hover:bg-[#1749CC] text-white font-black py-4 rounded-2xl shadow-xl shadow-blue-500/30 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                 className="w-full bg-[#1E5BFF] hover:bg-[#1749CC] text-white font-black py-4 rounded-2xl shadow-xl shadow-blue-500/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
                >
-                 {spinResult.prize_type === 'nao_foi_dessa_vez' ? 'Tentar amanhã' : 'Resgatar Prêmio'}
-                 <ArrowRight className="w-5 h-5" strokeWidth={3} />
+                 {(spinResult as any).saveError ? 'Entendido' : spinResult.prize_type === 'nao_foi_dessa_vez' ? 'Tentar amanhã' : 'Resgatar Prêmio'}
+                 {!((spinResult as any).saveError) && <ArrowRight className="w-5 h-5" strokeWidth={3} />}
                </button>
            </div>
         </div>

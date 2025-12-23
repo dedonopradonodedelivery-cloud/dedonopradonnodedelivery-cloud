@@ -209,21 +209,21 @@ export const EDITORIAL_COLLECTIONS: EditorialCollection[] = [
     id: 'almoço-semana', 
     title: '🍛 Almoço durante a semana', 
     subtitle: 'Opções rápidas e saborosas perto de você', 
-    image: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=800&auto=format&fit=crop', 
+    image: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=800&auto=format=fit=crop', 
     keywords: ['restaurante', 'almoço', 'executivo', 'prato feito', 'hamburgueria'] 
   },
   { 
     id: 'top-rated', 
     title: '⭐ Favoritos da Vizinhança', 
     subtitle: 'Os locais mais bem avaliados pelos moradores.', 
-    image: 'https://images.unsplash.com/photo-1521017432531-fbd92d768814?q=80&w=800&auto=format&fit=crop', 
+    image: 'https://images.unsplash.com/photo-1521017432531-fbd92d768814?q=80&w=800&auto=format=fit=crop', 
     keywords: [] 
   },
   { 
     id: 'happy-hour', 
     title: '🍻 Happy Hour & Fim de Tarde', 
     subtitle: 'Bares e petiscos para relaxar depois do dia.', 
-    image: 'https://images.unsplash.com/photo-1514933651103-005eec06c04b?q=80&w=800&auto=format&fit=crop', 
+    image: 'https://images.unsplash.com/photo-1514933651103-005eec06c04b?q=80&w=800&auto=format=fit=crop', 
     keywords: ['bar', 'happy hour', 'petiscos', 'chopp'] 
   },
 ];
@@ -341,8 +341,3 @@ export const quickFilters = [
   { id: 'open_now', label: 'Aberto agora', icon: 'clock' },
   { id: 'cashback', label: 'Cashback', icon: 'percent' },
 ];
-
-export const ROULETTE_TRANSPARENCY_MESSAGES = {
-  DISCLAIMER_BOTTOM: 'Prêmios e probabilidades podem variar conforme campanhas e disponibilidade. Valores sujeitos a limite diário.',
-  DISCLAIMER_MODAL: 'Lembre-se: Prêmios e probabilidades podem variar. Valores sujeitos a limite diário. Consulte os termos no app.'
-};

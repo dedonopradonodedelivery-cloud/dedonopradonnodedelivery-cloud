@@ -16,9 +16,7 @@ import {
   Target,
   ShieldCheck,
   TrendingUp,
-  Award,
-  // Add ArrowRight to the import statement
-  ArrowRight
+  Award
 } from 'lucide-react';
 
 interface StoreConnectModuleProps {
@@ -224,83 +222,107 @@ export const StoreConnectModule: React.FC<StoreConnectModuleProps> = ({ onBack }
             >
                 {/* Modal Header */}
                 <div className="p-5 border-b border-gray-100 dark:border-gray-800 flex justify-between items-center bg-white dark:bg-gray-900 sticky top-0 z-10">
-                    <h2 className="text-lg font-bold text-gray-900 dark:text-white">Freguesia Connect</h2>
+                    <h2 className="text-lg font-bold text-gray-900 dark:text-white">Sobre o Programa</h2>
                     <button 
                         onClick={() => setShowInfoModal(false)}
-                        className="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                        className="p-2 bg-gray-100 dark:bg-gray-800 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
                     >
                         <X className="w-5 h-5 text-gray-500" />
                     </button>
                 </div>
 
                 {/* Modal Content */}
-                <div className="flex-1 overflow-y-auto p-6 text-gray-600 dark:text-gray-300 text-sm leading-relaxed space-y-6">
-                    <p>
-                        O <strong>Freguesia Connect</strong> é uma iniciativa do Localizei Freguesia para fortalecer o comércio local, criando uma rede exclusiva de lojistas e empreendedores do bairro. Nosso objetivo é facilitar parcerias, troca de conhecimentos e o crescimento mútuo.
-                    </p>
+                <div className="flex-1 overflow-y-auto p-5 pb-24 space-y-8">
                     
-                    <h3 className="font-bold text-gray-900 dark:text-white text-base">Vantagens de Participar:</h3>
-                    <ul className="list-disc list-inside space-y-2 pl-4">
-                        <li className="flex items-start gap-2">
-                            <CheckCircle2 className="w-4 h-4 text-green-500 shrink-0 mt-0.5" />
-                            <div>
-                                <span className="font-semibold text-gray-900 dark:text-white">Networking Estratégico:</span> Conecte-se diretamente com outros empresários, encontre fornecedores e clientes B2B.
-                            </div>
-                        </li>
-                        <li className="flex items-start gap-2">
-                            <CheckCircle2 className="w-4 h-4 text-green-500 shrink-0 mt-0.5" />
-                            <div>
-                                <span className="font-semibold text-gray-900 dark:text-white">Eventos Exclusivos:</span> Participe de cafés de negócios, workshops e palestras focados nas necessidades do comércio local.
-                            </div>
-                        </li>
-                        <li className="flex items-start gap-2">
-                            <CheckCircle2 className="w-4 h-4 text-green-500 shrink-0 mt-0.5" />
-                            <div>
-                                <span className="font-semibold text-gray-900 dark:text-white">Oportunidades de Negócio:</span> Divulgue suas ofertas, encontre parceiros para promoções conjuntas e descubra novas demandas no bairro.
-                            </div>
-                        </li>
-                        <li className="flex items-start gap-2">
-                            <CheckCircle2 className="w-4 h-4 text-green-500 shrink-0 mt-0.5" />
-                            <div>
-                                <span className="font-semibold text-gray-900 dark:text-white">Materiais e Conteúdo:</span> Tenha acesso a guias, calendários e dicas de marketing digital para impulsionar suas vendas.
-                            </div>
-                        </li>
-                    </ul>
-
-                    <h3 className="font-bold text-gray-900 dark:text-white text-base">Quem Pode Participar?</h3>
-                    <p>
-                        O Freguesia Connect é exclusivo para <strong>lojistas e prestadores de serviço com estabelecimentos físicos ou atuação regular na Freguesia.</strong> Nosso objetivo é garantir que todos os membros tenham um interesse genuíno no desenvolvimento do bairro.
-                    </p>
-
-                    <h3 className="font-bold text-gray-900 dark:text-white text-base">Como Funciona a Adesão?</h3>
-                    <p>
-                        Após sua solicitação, nossa equipe fará uma breve análise para confirmar a elegibilidade da sua loja. Garantimos que a entrada de novos membros seja estratégica para o grupo, visando a diversidade e a qualidade das conexões. Você será notificado sobre a aprovação.
-                    </p>
-
-                    <div className="bg-yellow-50 dark:bg-yellow-900/20 p-4 rounded-xl border border-yellow-100 dark:border-yellow-800 flex items-center gap-3">
-                        <Lock className="w-5 h-5 text-yellow-600 shrink-0" />
-                        <p className="text-xs text-yellow-700 dark:text-yellow-400">
-                            A exclusividade da rede é nossa prioridade para manter a qualidade das conexões.
+                    {/* Intro */}
+                    <div className="text-center">
+                        <div className="w-16 h-16 bg-indigo-100 dark:bg-indigo-900/30 rounded-full flex items-center justify-center mx-auto mb-4 text-indigo-600 dark:text-indigo-400">
+                            <Handshake className="w-8 h-8" />
+                        </div>
+                        <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2 font-display">
+                            Mais que um grupo.<br/>Uma aliança de crescimento.
+                        </h3>
+                        <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
+                            O Freguesia Connect foi criado para lojistas que querem ir além da venda balcão e construir relacionamentos duradouros no bairro.
                         </p>
+                    </div>
+
+                    {/* Regras de Ouro */}
+                    <div className="bg-gray-50 dark:bg-gray-800 p-5 rounded-2xl border border-gray-100 dark:border-gray-700">
+                        <h4 className="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wide mb-4 flex items-center gap-2">
+                            <ShieldCheck className="w-4 h-4 text-indigo-500" />
+                            Regras de Exclusividade
+                        </h4>
+                        <div className="space-y-4">
+                            <div className="flex gap-3">
+                                <div className="w-8 h-8 rounded-full bg-white dark:bg-gray-700 flex items-center justify-center font-bold text-sm text-indigo-600 dark:text-indigo-400 border border-gray-200 dark:border-gray-600 shrink-0">
+                                    25
+                                </div>
+                                <div>
+                                    <p className="font-bold text-gray-800 dark:text-white text-sm">Limite de Lojistas</p>
+                                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                                        Grupos pequenos para garantir que todos tenham voz e oportunidades reais.
+                                    </p>
+                                </div>
+                            </div>
+                            <div className="flex gap-3">
+                                <div className="w-8 h-8 rounded-full bg-white dark:bg-gray-700 flex items-center justify-center font-bold text-sm text-indigo-600 dark:text-indigo-400 border border-gray-200 dark:border-gray-600 shrink-0">
+                                    <Target className="w-4 h-4" />
+                                </div>
+                                <div>
+                                    <p className="font-bold text-gray-800 dark:text-white text-sm">Exclusividade de Nicho</p>
+                                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                                        Apenas 1 empresa por segmento por grupo. Se você é a "Hamburgueria" do Grupo A, nenhuma outra entra. Sem concorrência interna.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Real Use Cases */}
+                    <div>
+                        <h4 className="text-base font-bold text-gray-900 dark:text-white mb-4">O que acontece lá dentro?</h4>
+                        <div className="grid gap-3">
+                            <div className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
+                                <p className="text-xs text-gray-600 dark:text-gray-300 italic mb-2">"Fechei o fornecimento de café da manhã para 3 escritórios de contabilidade que conheci no evento presencial."</p>
+                                <p className="text-[10px] font-bold text-indigo-600 dark:text-indigo-400 uppercase">— Padaria Estrela</p>
+                            </div>
+                            <div className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
+                                <p className="text-xs text-gray-600 dark:text-gray-300 italic mb-2">"Consegui uma parceria com uma academia para dar descontos aos meus alunos de inglês. Win-win."</p>
+                                <p className="text-[10px] font-bold text-indigo-600 dark:text-indigo-400 uppercase">— Escola Talk</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Objection Handling */}
+                    <div className="bg-indigo-50 dark:bg-indigo-900/10 p-5 rounded-2xl border border-indigo-100 dark:border-indigo-800/30">
+                        <div className="flex items-center gap-2 mb-2">
+                            <TrendingUp className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+                            <h4 className="font-bold text-gray-900 dark:text-white text-sm">Vale o investimento?</h4>
+                        </div>
+                        <p className="text-xs text-gray-600 dark:text-gray-300 leading-relaxed mb-3">
+                            O valor para participar é simbólico comparado ao retorno de uma única parceria B2B bem-sucedida. Além disso, você ganha acesso a treinamentos que custariam muito mais fora daqui.
+                        </p>
+                        <div className="flex items-center gap-2 text-xs font-bold text-indigo-700 dark:text-indigo-300 bg-white dark:bg-indigo-900/20 px-3 py-2 rounded-lg w-fit">
+                            <Award className="w-3 h-3" />
+                            Retorno sobre investimento garantido
+                        </div>
                     </div>
 
                 </div>
 
-                {/* Modal Footer */}
-                <div className="p-5 border-t border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 sticky bottom-0 z-10 flex flex-col items-center">
+                {/* Modal Footer CTA */}
+                <div className="absolute bottom-0 left-0 right-0 p-5 bg-white dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800">
                     <button 
                         onClick={handleJoinRequest}
-                        className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 rounded-xl shadow-lg shadow-indigo-500/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                        className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 rounded-2xl shadow-lg shadow-indigo-500/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
                     >
-                        Quero fazer parte
-                        <ArrowRight className="w-5 h-5" />
+                        Solicitar minha vaga
+                        <ChevronLeft className="w-5 h-5 rotate-180" />
                     </button>
-                    <button 
-                        onClick={() => setShowInfoModal(false)}
-                        className="mt-3 text-sm font-bold text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
-                    >
-                        Não, obrigado(a)
-                    </button>
+                    <p className="text-[10px] text-center text-gray-400 mt-2">
+                        Sujeito a disponibilidade de vaga no seu nicho.
+                    </p>
                 </div>
             </div>
         </div>

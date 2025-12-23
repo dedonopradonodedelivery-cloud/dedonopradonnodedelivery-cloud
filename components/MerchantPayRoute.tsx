@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { User } from '@supabase/supabase-js';
 import { Loader2, AlertCircle, Lock } from 'lucide-react';
 import { CashbackPaymentScreen } from './CashbackPaymentScreen';
-import { supabase } from './lib/supabaseClient';
+import { supabase } from '../lib/supabaseClient';
 
 interface MerchantPayRouteProps {
   merchantId: string;

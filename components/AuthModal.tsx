@@ -1,7 +1,5 @@
-
-
-import React, { useState, useEffect, useRef } from 'react';
-import { supabase } from '@/lib/supabaseClient';
+import React, { useState, useEffect } from 'react';
+import { supabase } from '../lib/supabaseClient';
 import {
   X,
   Mail,
@@ -12,8 +10,7 @@ import {
   Eye,
   EyeOff,
   CheckCircle2,
-  Briefcase,
-  AlertTriangle
+  Briefcase
 } from 'lucide-react';
 import { User as SupabaseUser } from '@supabase/supabase-js';
 
@@ -55,7 +52,6 @@ const GoogleIcon: React.FC = () => (
 export const AuthModal: React.FC<AuthModalProps> = ({
   isOpen,
   onClose,
-  user,
   signupContext = 'default',
   onLoginSuccess,
 }) => {
@@ -71,53 +67,22 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   const [error, setError] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
 
-  const popupRef = useRef<Window | null>(null);
-  const popupCheckIntervalRef = useRef<number | null>(null);
-
   useEffect(() => {
     if (isOpen) {
       setError('');
       setSuccessMsg('');
       setWebsite('');
       setIsLoading(false);
+      // Se o contexto for cadastro de lead via QR, forçar modo registro de loja
       if (signupContext === 'merchant_lead_qr') {
         setMode('register');
         setProfileType('store');
       } else {
+        // Reset padrão
         setProfileType('cliente'); 
       }
     }
   }, [isOpen, signupContext]);
-
-  // Effect to close modal if user becomes logged in while modal is open
-  useEffect(() => {
-    if (user && isOpen) {
-      finishAuth();
-    }
-  }, [user, isOpen]);
-
-  // Listener for messages from the OAuth popup
-  useEffect(() => {
-    const handleMessage = (event: MessageEvent) => {
-      if (event.origin === window.location.origin && event.data?.type === 'SUPABASE_OAUTH_DONE') {
-        // AuthContext onAuthStateChange will handle the session update.
-        // The modal will close via the useEffect listening to the 'user' prop.
-        if (popupRef.current) {
-          popupRef.current.close(); // Ensure popup is closed
-        }
-        if (popupCheckIntervalRef.current) {
-          clearInterval(popupCheckIntervalRef.current);
-          popupCheckIntervalRef.current = null;
-        }
-        setIsLoading(false); // Stop loading indicator in main window
-      }
-    };
-
-    window.addEventListener('message', handleMessage);
-    return () => {
-      window.removeEventListener('message', handleMessage);
-    };
-  }, []); // Only run once on mount
 
   if (!isOpen) return null;
 
@@ -150,6 +115,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
     try {
       if (mode === 'login') {
+        // --- LOGIN FLOW ---
         const { error } = await Promise.race([
             supabase.auth.signInWithPassword({
                 email,
@@ -162,13 +128,15 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         finishAuth();
 
       } else {
+        // --- REGISTER FLOW ---
         const role = profileType === 'store' ? 'lojista' : 'cliente';
 
+        // 1. Criar usuário no Auth
         const { data, error } = await supabase.auth.signUp({
           email,
           password,
           options: {
-            data: { role },
+            data: { role }, // Salva metadata importante
           },
         });
 
@@ -177,11 +145,13 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         if (data.session) {
           const userId = data.user?.id;
           if (userId) {
+            // 2. Garantir criação do perfil na tabela 'profiles'
+            // Isso é crucial para o App.tsx decidir qual tela mostrar
             const { error: profileError } = await supabase.from('profiles').upsert(
               {
                 id: userId,
                 email,
-                role,
+                role, // 'cliente' ou 'lojista'
                 created_at: new Date().toISOString()
               },
               { onConflict: 'id' }
@@ -189,13 +159,16 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
             if (profileError) {
                 console.error("Erro ao criar perfil:", profileError);
+                // Não bloqueamos o fluxo, mas logamos. O App.tsx tentará corrigir/criar depois.
             }
           }
 
           setSuccessMsg(role === 'lojista' ? 'Conta de Lojista criada! Acessando painel...' : 'Conta criada! Entrando...');
           
+          // Pequeno delay para usuário ler a mensagem
           setTimeout(() => finishAuth(), 1000);
         } else {
+          // Caso de confirmação de email obrigatória (se ativado no Supabase)
           setMode('login');
           setSuccessMsg('Conta criada. Verifique seu e-mail para confirmar.');
         }
@@ -219,74 +192,23 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     setSuccessMsg('');
   };
 
-  const handleGoogleSignIn = async (e: React.MouseEvent) => {
-    // A) Provar a causa (obrigatório)
-    console.log("GOOGLE_BTN_ELEMENT", { tag: e?.currentTarget?.tagName, type: e?.currentTarget?.getAttribute?.("type"), href: e?.currentTarget?.getAttribute?.("href"), target: e?.currentTarget?.getAttribute?.("target") });
-    console.log("GOOGLE_CLICK_BEFORE", { location: window.location.href });
-    
-    e.preventDefault();
-    e.stopPropagation();
-    
+  const handleGoogleSignIn = async () => {
     setIsLoading(true);
     setError('');
     setSuccessMsg('');
-
-    // Clear previous popup monitoring
-    if (popupCheckIntervalRef.current) {
-      clearInterval(popupCheckIntervalRef.current);
-      popupCheckIntervalRef.current = null;
-    }
-
     try {
-      const { data, error } = await supabase.auth.signInWithOAuth({
+      // Supabase will handle the redirect, so no need to call finishAuth here
+      const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          // B) Corrigir: Redireciona para uma rota de callback dedicada.
-          redirectTo: window.location.origin + '/auth/callback', 
-          skipBrowserRedirect: true,
+          redirectTo: window.location.origin, // Ensures it redirects back to the app
         },
       });
-
-      if (error) {
-        throw error;
-      }
-
-      if (data?.url) {
-        console.log("Supabase returned URL for window.open:", data.url);
-        // Abre em um pop-up nomeado
-        const popup = window.open(data.url, 'google-oauth', 'width=500,height=650');
-        
-        if (!popup) {
-          throw new Error('Popup bloqueado pelo navegador. Por favor, permita pop-ups para continuar.');
-        }
-        popupRef.current = popup;
-
-        // Monitorar o fechamento do pop-up
-        popupCheckIntervalRef.current = window.setInterval(() => {
-          if (popup && popup.closed) {
-            clearInterval(popupCheckIntervalRef.current!);
-            popupCheckIntervalRef.current = null;
-            setIsLoading(false);
-            // Verifica se o usuário não logou antes de exibir erro de cancelamento
-            // (O useEffect principal vai fechar se 'user' for setado)
-            if (!user) { // Assuming 'user' prop hasn't updated yet
-              setError('Login com Google cancelado ou não concluído.');
-            }
-          }
-        }, 500);
-
-      } else {
-        throw new Error('URL de autenticação do Google não recebida.');
-      }
+      if (error) throw error;
     } catch (err: any) {
       console.error("Error signing in with Google:", err);
-      if (err.message.includes('Popup bloqueado')) {
-        setError(err.message);
-      } else if (err.message && (err.message.includes('missing client_id') || err.message.includes('invalid_client_id'))) {
-        setError('Google Sign-In não configurado. Por favor, entre em contato com o suporte.');
-      } else {
-        setError(err.message || 'Erro ao entrar com Google. Tente novamente.');
-      }
+      setError(err.message || 'Erro ao entrar com Google. Tente novamente.');
+    } finally {
       setIsLoading(false);
     }
   };

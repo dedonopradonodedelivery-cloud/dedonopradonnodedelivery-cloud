@@ -1,5 +1,4 @@
 
-
 import React, { useState, useMemo, useEffect } from 'react';
 import { 
   ChevronLeft, 
@@ -21,12 +20,10 @@ import {
   QrCode
 } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
-import { User } from '@supabase/supabase-js'; 
 
 interface StoreAreaViewProps {
   onBack: () => void;
   onNavigate?: (view: string) => void;
-  user?: User | null; 
 }
 
 // Mock Base Data (Reference for 30 days)
@@ -42,7 +39,7 @@ const STORE_DATA = {
     cashbackGiven: 622.50,
     adBalance: 45.00
   },
-  connectStatus: 'inactive' 
+  connectStatus: 'inactive' // 'active' | 'inactive'
 };
 
 type DateRange = '7d' | '15d' | '30d' | '90d' | 'custom';
@@ -92,7 +89,7 @@ const MenuLink: React.FC<{
   </button>
 );
 
-export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate, user }) => {
+export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate }) => {
   const [isCashbackEnabled, setIsCashbackEnabled] = useState(true);
   const [dateRange, setDateRange] = useState<DateRange>('30d');
   const [pendingRequestsCount, setPendingRequestsCount] = useState(0);
@@ -120,9 +117,9 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
 
   // Realtime Pending Requests Listener
   useEffect(() => {
-    if (!supabase || !user?.id) return;
+    if (!supabase) return;
     
-    const merchantId = user.id; 
+    const merchantId = 'merchant_123_uuid'; // Mock ID needs to match whatever we use in app state
 
     // 1. Initial count fetch
     const fetchCount = async () => {
@@ -136,7 +133,7 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
     fetchCount();
 
     // 2. Subscribe to Realtime updates for Badge Counter
-    const sub = supabase.channel(`store_area_badge_${merchantId}`) 
+    const sub = supabase.channel('store_area_badge')
         .on(
             'postgres_changes', 
             { 
@@ -146,13 +143,13 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
                 filter: `merchant_id=eq.${merchantId}` 
             }, 
             () => {
-                fetchCount(); 
+                fetchCount(); // Re-fetch count on any change (insert/update)
             }
         )
         .subscribe();
 
     return () => { supabase.removeChannel(sub); };
-  }, [user?.id]);
+  }, []);
 
   const formatCurrency = (val: number) => 
     val.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });

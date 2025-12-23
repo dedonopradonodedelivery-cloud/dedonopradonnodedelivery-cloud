@@ -1,9 +1,6 @@
 
-
 import React from 'react';
 import { Home, Search, QrCode, Heart, User, Store, Wrench } from 'lucide-react';
-import { useAuth } from '@/contexts/AuthContext'; 
-import { Layout } from '@/components/Layout'; 
 
 interface BottomNavProps {
   activeTab: string;
