@@ -12,6 +12,7 @@ import {
   AlertCircle,
   Copy
 } from 'lucide-react';
+import { supabase } from '@/lib/supabaseClient';
 
 interface StoreFinanceModuleProps {
   onBack: () => void;

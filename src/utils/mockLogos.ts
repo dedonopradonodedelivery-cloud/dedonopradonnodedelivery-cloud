@@ -1,4 +1,3 @@
-
 // Paleta de cores suaves (Flat Design)
 const COLORS = [
   '#FF6501', // Laranja (Brand)

@@ -2,8 +2,8 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { Search, Sun, Moon, QrCode } from 'lucide-react';
-import { Category } from '../types';
-import { CATEGORIES } from '../constants';
+import { Category } from '@/types';
+import { CATEGORIES } from '@/constants';
 
 interface HeaderProps {
   isDarkMode: boolean;

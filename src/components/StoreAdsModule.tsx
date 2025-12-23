@@ -16,7 +16,7 @@ import {
   Wallet,
   QrCode
 } from 'lucide-react';
-import { AdType } from '@/types.ts'; // Import AdType from types.ts
+import { AdType } from '@/types'; // Import AdType from types.ts
 
 interface StoreAdsModuleProps {
   onBack: () => void;

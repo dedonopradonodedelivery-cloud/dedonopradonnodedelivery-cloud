@@ -1,4 +1,5 @@
 
+
 import React, { useState, useMemo, useEffect } from 'react';
 import { 
   ChevronLeft, 
@@ -289,7 +290,7 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
                     icon={Repeat} 
                     label="Recorrentes" 
                     value={currentKpis.recurringCustomers.toString()} 
-                    color="bg-[#1E5BFF]" // Corrected truncated color
+                    color="bg-[#1E5BFF]"
                 />
                 <KPICard 
                     icon={TrendingUp} 

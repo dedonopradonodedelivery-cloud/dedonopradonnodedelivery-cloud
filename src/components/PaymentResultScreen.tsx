@@ -108,6 +108,7 @@ export default function PaymentResultScreen({
               <div className="flex justify-between items-center text-sm">
                 <span className="text-gray-500">Valor da Compra</span>
                 <span className="font-medium text-gray-900">
+                  {/* Fixed: Use the 'purchaseAmount' prop directly */}
                   {formatCurrencyBr(purchaseAmount)}
                 </span>
               </div>
@@ -158,3 +159,4 @@ export default function PaymentResultScreen({
     </div>
   );
 }
+    

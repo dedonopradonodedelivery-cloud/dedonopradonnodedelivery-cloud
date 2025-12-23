@@ -1,9 +1,10 @@
 
+
 import React, { useEffect } from 'react';
 import { User } from '@supabase/supabase-js';
 import { Lock } from 'lucide-react';
-import { CashbackPaymentScreen } from './CashbackPaymentScreen';
-import { supabase } from '../lib/supabaseClient'; // Added supabase import for consistency
+import { CashbackPaymentScreen } from '@/components/CashbackPaymentScreen';
+import { supabase } from '@/lib/supabaseClient'; // Added supabase import for consistency
 
 interface CashbackPayFromQrScreenProps {
   merchantId: string;

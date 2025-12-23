@@ -1,4 +1,5 @@
 
+
 import React, { useState, useEffect } from 'react';
 import { 
   ChevronLeft, 
@@ -24,8 +25,8 @@ import {
   // FIX: Added 'Coins' to the import list from lucide-react.
   Coins
 } from 'lucide-react';
-import { supabase } from '../lib/supabaseClient';
-import { Store, AdType } from '../types';
+import { supabase } from '@/lib/supabaseClient';
+import { Store, AdType } from '@/types';
 import { User } from '@supabase/supabase-js';
 
 interface SimplePageProps {
@@ -319,7 +320,7 @@ export const FavoritesView: React.FC<SimplePageProps> = ({ onBack, onNavigate, u
                             {store.image ? (
                                 <img src={store.image} alt={store.name} className="w-full h-full object-cover" />
                             ) : (
-                                <div className="w-full h-full flex items-center justify-center text-gray-300">
+                                <div className="w-full h-full flex items-center justify-center text-gray-400">
                                     <StoreIcon className="w-6 h-6" />
                                 </div>
                             )}

@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { ChevronLeft, Search, Building2, Smartphone, Mail, CheckCircle2, AlertTriangle, Upload, ArrowRight, ShieldCheck, MessageSquare } from 'lucide-react';
-import { supabase } from '../lib/supabaseClient';
+import { supabase } from '@/lib/supabaseClient';
 
 interface BusinessRegistrationFlowProps {
   onBack: () => void;

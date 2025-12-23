@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { ChevronLeft, Clock, Sparkles } from 'lucide-react';
-import { CashbackIcon } from '@/components/CashbackIcon.tsx';
+import { CashbackIcon } from '@/components/CashbackIcon';
 
 interface CashbackInfoViewProps {
   onBack: () => void;

@@ -642,7 +642,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
           <div className="bg-transparent w-full max-w-md relative" onClick={(e) => e.stopPropagation()}>
             <div className="absolute top-4 right-5 z-50"><button onClick={() => setIsSpinWheelOpen(false)} className="p-2.5 text-gray-200 hover:text-white bg-white/10 backdrop-blur-md rounded-full active:scale-90 transition-transform"><X className="w-5 h-5" /></button></div>
             <div className="animate-in slide-in-from-bottom duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]">
-                <SpinWheelView userId={user?.id || null} userRole={userRole || null} onWin={onSpinWin} onRequireLogin={onRequireLogin} onViewHistory={() => { setIsSpinWheelOpen(false); onNavigate('prize_history'); }} merchantId={merchantId} />
+                <SpinWheelView userId={user?.id || null} userRole={userRole || null} onWin={onWin} onRequireLogin={onRequireLogin} onViewHistory={() => { setIsSpinWheelOpen(false); onNavigate('prize_history'); }} merchantId={merchantId} />
             </div>
           </div>
         </div>

@@ -17,7 +17,7 @@ import {
   X,
   Check
 } from 'lucide-react';
-import { supabase } from '../lib/supabaseClient';
+import { supabase } from '@/lib/supabaseClient';
 
 interface StoreCashbackModuleProps {
   onBack: () => void;

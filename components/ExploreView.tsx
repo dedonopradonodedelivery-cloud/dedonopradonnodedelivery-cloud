@@ -338,7 +338,7 @@ export const ExploreView: React.FC<ExploreViewProps> = ({
   onFilterClick,
   onOpenPlans,
   onViewAllVerified,
-  // Fix: Added missing prop to destructuring list
+  // Fix: Added missing prop as it's passed from App.tsx
   onViewMasterSponsor,
 }) => {
   const { location, isLoading: isLoadingLocation } = useUserLocation();

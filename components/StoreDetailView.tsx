@@ -12,7 +12,7 @@ import {
   Instagram,
   MessageSquare,
 } from 'lucide-react';
-import { Store } from '../types';
+import { Store } from '@/types';
 
 const storeMock = {
   business: {
