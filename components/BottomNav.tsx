@@ -1,6 +1,9 @@
 
+
 import React from 'react';
 import { Home, Search, QrCode, Heart, User, Store, Wrench } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext'; // Import useAuth to potentially use userRole
+import { Layout } from '@/components/Layout'; // Import Layout to use its types if needed
 
 interface BottomNavProps {
   activeTab: string;

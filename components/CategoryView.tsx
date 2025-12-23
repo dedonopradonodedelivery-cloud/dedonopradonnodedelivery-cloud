@@ -2,8 +2,8 @@
 
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { ChevronLeft, Search, ImageIcon, Star, BadgeCheck, ChevronRight, X, AlertCircle, Check } from 'lucide-react';
-import { Category, Store, AdType } from '../types.ts';
-import { SUBCATEGORIES } from '../constants.tsx';
+import { Category, Store, AdType } from '../types';
+import { SUBCATEGORIES } from '../constants';
 
 interface CategoryViewProps {
   category: Category;
@@ -91,7 +91,7 @@ const generateSubcategoryStores = (subName: string, categoryName: string): Store
       distance: `${(0.5 + Math.random() * 3).toFixed(1)}km`,
       adType: isSponsored ? AdType.PREMIUM : AdType.ORGANIC,
       isSponsored: isSponsored,
-      verified: isSponsored || i % 3 === 0,
+      verified: i % 3 === 0,
       cashback: hasCashback ? Math.floor(Math.random() * 8) + 3 : undefined,
       address: 'Freguesia, Jacarepaguá',
       isOpenNow: i % 2 === 0
