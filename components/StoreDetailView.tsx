@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+
+
+import React, { useState, useEffect } from 'react';
 import {
   ChevronLeft,
   Share2,
@@ -11,6 +13,7 @@ import {
   MessageSquare,
 } from 'lucide-react';
 import { Store } from '../types';
+import { RecommendationPromptModal } from './RecommendationPromptModal'; // Importar o novo modal
 
 const storeMock = {
   business: {
@@ -57,8 +60,8 @@ function mapStoreToBusiness(store?: Store | null) {
 
     logo: s.logoUrl ?? s.image ?? s.image_url ?? storeMock.business.logo,
     banners:
-      s.banners && Array.isArray(s.banners) && s.banners.length > 0
-        ? s.banners
+      s.gallery && Array.isArray(s.gallery) && s.gallery.length > 0
+        ? s.gallery
         : s.image || s.image_url
         ? [s.image || s.image_url]
         : storeMock.business.banners,
@@ -150,28 +153,35 @@ interface StoreDetailViewProps {
   store?: Store | null;
   onBack: () => void;
   onOpenCashback?: () => void;
+  // Nova prop para lidar com o envio da recomendação para o App.tsx
+  onStoreRecommend?: (storeId: string, recommendationText: string, tags: string[]) => void;
 }
 
 export const StoreDetailView: React.FC<StoreDetailViewProps> = ({
   store,
   onBack,
+  onStoreRecommend,
 }) => {
-  const [isFavorite, setIsFavorite] = React.useState(false);
-  const [activeTab, setActiveTab] = React.useState<'Sobre' | 'Avaliações'>(
+  const [isFavorite, setIsFavorite] = useState(false);
+  const [activeTab, setActiveTab] = useState<'Sobre' | 'Avaliações'>(
     'Sobre',
   );
-  const [currentSlide, setCurrentSlide] = React.useState(0);
+  const [currentSlide, setCurrentSlide] = useState(0);
 
   const [reviewText, setReviewText] = useState('');
   const [isSubmittingReview, setIsSubmittingReview] = useState(false);
   const [reviewSuccess, setReviewSuccess] = useState(false);
+
+  const [showRecommendationPrompt, setShowRecommendationPrompt] = useState(false); // Novo estado
+  const [hasShownPrompt, setHasShownPrompt] = useState(false); // Para mostrar apenas uma vez por visita
 
   const business = mapStoreToBusiness(store);
   const photoGallery = business.banners || [];
 
   const hasSocials = business.social.instagram || business.social.whatsapp;
 
-  React.useEffect(() => {
+  useEffect(() => {
+    // Carrossel de imagens
     if (photoGallery.length > 1) {
       const interval = setInterval(() => {
         setCurrentSlide((prev) => (prev + 1) % photoGallery.length);
@@ -179,6 +189,40 @@ export const StoreDetailView: React.FC<StoreDetailViewProps> = ({
       return () => clearInterval(interval);
     }
   }, [photoGallery.length]);
+
+  useEffect(() => {
+    // Lógica para mostrar o prompt de recomendação ao sair da tela
+    // Simulate interaction by showing prompt after a delay or on unmount
+    const timer = setTimeout(() => {
+      if (!hasShownPrompt && store?.id) {
+        setShowRecommendationPrompt(true);
+        setHasShownPrompt(true); // Garante que o prompt não apareça novamente na mesma visita
+      }
+    }, 1500); // Mostra o prompt 1.5s depois de carregar a tela
+
+    return () => {
+      clearTimeout(timer);
+      // O prompt também poderia ser disparado no `onBack`
+    };
+  }, [store?.id, hasShownPrompt]);
+
+  const handlePromptClose = () => {
+    setShowRecommendationPrompt(false);
+  };
+
+  const handleRecommend = (recommendationText: string, tags: string[]) => {
+    if (store?.id && onStoreRecommend) {
+      onStoreRecommend(store.id, recommendationText, tags);
+      console.log(`Recomendação para ${store.name}: "${recommendationText}" com tags: ${tags.join(', ')}`);
+    }
+    handlePromptClose();
+  };
+
+  const handleDontRecommend = () => {
+    console.log(`Usuário não recomendou ${store?.name}`);
+    handlePromptClose();
+  };
+
 
   const handleSubmitReview = () => {
     if (!reviewText.trim()) return;
@@ -443,6 +487,15 @@ export const StoreDetailView: React.FC<StoreDetailViewProps> = ({
           </div>
         </div>
       </main>
+
+      {store?.id && ( // Só mostra o modal se tiver um store válido
+        <RecommendationPromptModal
+          isOpen={showRecommendationPrompt}
+          onClose={handlePromptClose}
+          storeName={business.name}
+          onRecommend={handleRecommend}
+          onDontRecommend={handleDontRecommend}
+        />
+      )}
     </div>
   );
-};

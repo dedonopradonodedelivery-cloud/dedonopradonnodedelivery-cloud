@@ -1,321 +1,255 @@
 
-import React, { useState, useEffect } from 'react';
-import { ChevronLeft, Wallet, Store, ArrowRight, Loader2, CheckCircle2, XCircle, CornerRightDown, Lock, BellRing, Smartphone, Send, Clock } from 'lucide-react';
-import { supabase } from '../lib/supabaseClient';
-import { User } from '@supabase/supabase-js';
-import { PayWithCashback } from './PayWithCashback';
+import React, { useState } from 'react';
+import { ChevronLeft, Store, Wallet, ArrowRight, Clock } from 'lucide-react';
 
-interface CashbackPaymentScreenProps {
-  user: User | null;
-  merchantId: string;
-  storeId: string;
-  onBack: () => void;
-  onComplete: (transactionData: any) => void;
-}
+export default function PayWithCashbackScreen() {
+  const [purchaseValue, setPurchaseValue] = useState<string>("");
+  const [walletBalance, setWalletBalance] = useState<number>(10.00); // Mock balance
+  const [cashbackToUse, setCashbackToUse] = useState<string>("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [step, setStep] = useState<"form" | "waiting">("form");
 
-// Mock Store info fetcher
-const fetchStoreInfo = async (storeId: string) => {
-  return {
-    name: 'Loja Parceira',
-    address: 'Freguesia',
-    cashbackPercent: 5
+  // --- Helpers ---
+
+  const parseCurrency = (value: string): number => {
+    if (!value) return 0;
+    const numericString = value.replace(/\D/g, "");
+    return Number(numericString) / 100;
   };
-};
 
-export const CashbackPaymentScreen: React.FC<CashbackPaymentScreenProps> = ({ 
-  user, 
-  merchantId, 
-  storeId, 
-  onBack, 
-  onComplete 
-}) => {
-  // States
-  const [step, setStep] = useState<'input' | 'sending_push' | 'waiting' | 'approved' | 'rejected'>('input');
-  const [storeInfo, setStoreInfo] = useState<any>(null);
-  
-  // Inputs (using text to handle comma/dot safely)
-  const [totalAmount, setTotalAmount] = useState('');
-  const [cashbackToUse, setCashbackToUse] = useState('');
-  
-  const [userBalance, setUserBalance] = useState(0); 
-  const [isLoading, setIsLoading] = useState(false);
-  const [transactionId, setTransactionId] = useState<string | null>(null);
+  const formatCurrencyBr = (value: number): string => {
+    return value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  };
 
-  // Load Initial Data
-  useEffect(() => {
-    const load = async () => {
-      const info = await fetchStoreInfo(storeId);
-      setStoreInfo(info);
-      // Mock balance
-      setUserBalance(10.00); 
-    };
-    load();
-  }, [storeId]);
+  // --- Handlers ---
 
-  // Calculations
-  const parseCurrency = (val: string) => parseFloat(val.replace(/\./g, '').replace(',', '.') || '0');
-  
-  const numericTotal = parseCurrency(totalAmount);
-  const numericCashbackUsed = parseCurrency(cashbackToUse);
-  
-  const payNow = Math.max(0, numericTotal - numericCashbackUsed);
-  const cashbackToEarn = (payNow * (storeInfo?.cashbackPercent || 5)) / 100;
+  const handlePurchaseChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const rawValue = e.target.value.replace(/\D/g, "");
+    const numberValue = Number(rawValue) / 100;
+    setPurchaseValue(formatCurrencyBr(numberValue));
 
-  // Realtime Listener for Transaction Status
-  useEffect(() => {
-    if (!transactionId || !supabase) return;
+    // If purchase value drops below currently used cashback, cap cashback
+    const currentCashback = parseCurrency(cashbackToUse);
+    if (currentCashback > numberValue) {
+      setCashbackToUse(formatCurrencyBr(numberValue));
+    }
+  };
 
-    // Escuta MUDANÇAS (UPDATE) especificamente na transação criada
-    const channel = supabase
-      .channel(`tx_${transactionId}`)
-      .on(
-        'postgres_changes',
-        {
-          event: 'UPDATE',
-          schema: 'public',
-          table: 'cashback_transactions',
-          filter: `id=eq.${transactionId}`,
-        },
-        (payload) => {
-          const newStatus = payload.new.status;
-          
-          if (newStatus === 'approved') {
-            triggerSuccessFlow();
-          } else if (newStatus === 'rejected') {
-            setStep('rejected');
-          }
-        }
-      )
-      .subscribe();
+  const handleCashbackChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const rawValue = e.target.value.replace(/\D/g, "");
+    const numberValue = Number(rawValue) / 100;
+    const purchaseNum = parseCurrency(purchaseValue);
 
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [transactionId]);
+    // Limit rules:
+    // 1. Cannot exceed wallet balance
+    // 2. Cannot exceed purchase value
+    let allowedValue = numberValue;
 
-  const triggerSuccessFlow = () => {
-    setStep('approved');
+    if (allowedValue > walletBalance) {
+      allowedValue = walletBalance;
+    }
+    if (allowedValue > purchaseNum) {
+      allowedValue = purchaseNum;
+    }
+
+    setCashbackToUse(formatCurrencyBr(allowedValue));
+  };
+
+  const handleUseMax = () => {
+    const purchaseNum = parseCurrency(purchaseValue);
+    if (purchaseNum <= 0) return;
+
+    const maxPossible = Math.min(walletBalance, purchaseNum);
+    setCashbackToUse(formatCurrencyBr(maxPossible));
+  };
+
+  const handleSubmit = () => {
+    setIsSubmitting(true);
+    // Simulate backend call
     setTimeout(() => {
-        onComplete({
-            amount: payNow,
-            store: storeInfo?.name || 'Loja',
-            earned: cashbackToEarn,
-            date: new Date().toISOString()
-        });
-    }, 2000);
+      setIsSubmitting(false);
+      setStep("waiting");
+    }, 1500);
   };
 
-  // Adapters for the new PayWithCashback component
-  const onPurchaseValueChange = (val: string) => {
-    // Allow only numbers and one comma
-    if (!/^\d*[,]?\d{0,2}$/.test(val)) return;
-    
-    setTotalAmount(val);
-    
-    // Auto-adjust cashback if total drops below used amount
-    const currentTotal = parseFloat(val.replace(',', '.') || '0');
-    const currentUsed = parseFloat(cashbackToUse.replace(',', '.') || '0');
-    if (currentTotal < currentUsed) {
-        setCashbackToUse(val);
-    }
-  };
+  // --- Computed Values ---
 
-  const onBalanceUseChange = (val: string) => {
-    if (!/^\d*[,]?\d{0,2}$/.test(val)) return;
+  const numericPurchase = parseCurrency(purchaseValue);
+  const numericCashbackToUse = parseCurrency(cashbackToUse);
+  const amountToPay = Math.max(numericPurchase - numericCashbackToUse, 0);
 
-    const numericVal = parseFloat(val.replace(',', '.') || '0');
-    
-    // Logic limits
-    if (numericVal > userBalance) return; // Cannot exceed balance
-    if (numericVal > numericTotal) return; // Cannot exceed total
+  const isValid = 
+    numericPurchase > 0 && 
+    numericCashbackToUse >= 0 && 
+    numericCashbackToUse <= walletBalance && 
+    numericCashbackToUse <= numericPurchase && 
+    !isSubmitting;
 
-    setCashbackToUse(val);
-  };
+  // --- Renders ---
 
-  const handleSubmit = async () => {
-    if (!user) {
-        alert("Faça login para continuar.");
-        return;
-    }
-    if (numericTotal <= 0) {
-        alert("Digite o valor da compra.");
-        return;
-    }
-
-    setIsLoading(true);
-
-    try {
-      if (supabase) {
-          const transactionPayload = {
-            merchant_id: merchantId,
-            store_id: storeId, // Assumindo mesmo ID para simplificação do mock
-            customer_id: user.id,
-            total_amount_cents: Math.round(numericTotal * 100),
-            cashback_used_cents: Math.round(numericCashbackUsed * 100),
-            cashback_to_earn_cents: Math.round(cashbackToEarn * 100),
-            amount_to_pay_now_cents: Math.round(payNow * 100),
-            status: 'pending',
-          };
-
-          const { data, error } = await supabase
-            .from('cashback_transactions')
-            .insert(transactionPayload)
-            .select()
-            .single();
-
-          if (error) throw error;
-
-          if (data) {
-              setTransactionId(data.id);
-              // Wait for realtime update now...
-          }
-      } 
-      
-      setStep('sending_push');
-      setTimeout(() => {
-          setStep('waiting');
-          setIsLoading(false);
-          
-          if (!supabase) {
-              // Fallback se sem supabase: simula aprovação após 3s
-              setTimeout(() => {
-                  triggerSuccessFlow();
-              }, 3000);
-          }
-      }, 1500);
-
-    } catch (err: any) {
-      console.error(err);
-      alert(`Erro: ${err.message}`);
-      setIsLoading(false);
-    }
-  };
-
-  // --- REJECTED SCREEN ---
-  if (step === 'rejected') {
+  if (step === "waiting") {
     return (
-      <div className="min-h-screen bg-red-600 flex flex-col items-center justify-center p-6 animate-in zoom-in duration-300 text-white">
-        <div className="w-24 h-24 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center mb-6 shadow-xl">
-            <XCircle className="w-12 h-12 text-white" />
+      <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-6 animate-in fade-in duration-300">
+        <div className="w-24 h-24 bg-yellow-100 rounded-full flex items-center justify-center mb-6 relative">
+          <div className="absolute inset-0 rounded-full border-4 border-yellow-200 animate-ping opacity-75"></div>
+          <Clock className="w-10 h-10 text-yellow-600" />
         </div>
-        <h2 className="text-2xl font-bold mb-2 text-center">Pagamento Recusado</h2>
-        <p className="text-red-100 text-center mb-10 max-w-xs font-medium">
-            O lojista não confirmou a transação. O saldo não foi descontado.
+
+        <h2 className="text-2xl font-bold text-gray-900 mb-2 text-center">Aguardando Lojista</h2>
+        <p className="text-gray-500 text-sm text-center max-w-xs mb-8">
+          O lojista recebeu uma notificação e precisa autorizar a transação.
         </p>
+
+        <div className="w-full max-w-sm bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+          <div className="flex items-center gap-2 mb-4 border-b border-gray-100 pb-4">
+            <Store className="w-5 h-5 text-gray-400" />
+            <span className="font-bold text-gray-900">Loja Parceira</span>
+          </div>
+          
+          <div className="space-y-3">
+            <div className="flex justify-between text-sm">
+              <span className="text-gray-500">Total da Compra</span>
+              <span className="font-medium text-gray-900">R$ {formatCurrencyBr(numericPurchase)}</span>
+            </div>
+            
+            {numericCashbackToUse > 0 && (
+              <div className="flex justify-between text-sm text-green-600 font-bold">
+                <span>Saldo Utilizado</span>
+                <span>- R$ {formatCurrencyBr(numericCashbackToUse)}</span>
+              </div>
+            )}
+
+            <div className="flex justify-between items-center pt-2 border-t border-gray-50 mt-2">
+              <span className="text-sm font-bold text-gray-700">A Pagar</span>
+              <span className="text-xl font-black text-blue-600">R$ {formatCurrencyBr(amountToPay)}</span>
+            </div>
+          </div>
+        </div>
+
         <button 
-            onClick={() => setStep('input')}
-            className="bg-white text-red-600 font-bold py-4 px-10 rounded-2xl shadow-lg active:scale-95 transition-transform"
+          onClick={() => setStep("form")}
+          className="mt-8 text-sm font-bold text-gray-400 hover:text-gray-600"
         >
-            Tentar Novamente
+          Cancelar (simulação)
         </button>
       </div>
     );
   }
 
-  // --- SENDING PUSH / WAITING / APPROVED SCREEN ---
-  if (step === 'sending_push' || step === 'waiting' || step === 'approved') {
-    return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col items-center justify-center p-6 animate-in fade-in duration-300">
-        
-        {/* ICON STATES */}
-        {step === 'sending_push' && (
-             <div className="mb-8 relative">
-                <div className="w-32 h-32 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center animate-pulse">
-                    <Smartphone className="w-16 h-16 text-blue-500" />
-                </div>
-                <div className="absolute top-0 right-0 animate-ping">
-                    <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center border-4 border-white">
-                        <Send className="w-4 h-4 text-white" />
-                    </div>
-                </div>
-             </div>
-        )}
-
-        {step === 'waiting' && (
-            <div className="w-32 h-32 bg-yellow-50 dark:bg-yellow-900/20 rounded-full flex items-center justify-center mb-8 relative shadow-lg shadow-yellow-100 dark:shadow-none">
-                <div className="absolute inset-0 rounded-full border-4 border-yellow-100 dark:border-yellow-800/50 animate-[spin_3s_linear_infinite]"></div>
-                <div className="absolute inset-0 rounded-full border-4 border-t-yellow-500 border-l-transparent border-r-transparent border-b-transparent animate-spin"></div>
-                <Clock className="w-12 h-12 text-yellow-500 animate-pulse" />
-            </div>
-        )}
-
-        {step === 'approved' && (
-             <div className="w-32 h-32 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mb-8 relative animate-bounce-short shadow-lg shadow-green-200 dark:shadow-none">
-                <CheckCircle2 className="w-16 h-16 text-green-600 dark:text-green-400" />
-             </div>
-        )}
-
-        {/* TITLE */}
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2 text-center">
-            {step === 'sending_push' ? 'Enviando Pedido...' : 
-             step === 'waiting' ? 'Aguardando Lojista' : 
-             'Pagamento Confirmado!'}
-        </h2>
-        
-        {/* SUBTITLE */}
-        <p className="text-gray-500 dark:text-gray-400 text-center mb-10 max-w-[280px] leading-relaxed text-sm font-medium">
-            {step === 'sending_push' ? 'Conectando com o caixa...' : 
-             step === 'waiting' ? 'O lojista recebeu uma notificação e precisa autorizar a transação.' : 
-             'Tudo certo! Seu cashback foi creditado.'}
-        </p>
-
-        {/* Transaction Summary Card */}
-        <div className="w-full max-w-sm bg-white dark:bg-gray-800 rounded-3xl p-6 border border-gray-100 dark:border-gray-700 shadow-sm mb-8 relative overflow-hidden">
-            <div className="flex justify-between items-center mb-4 pb-4 border-b border-gray-100 dark:border-gray-700 border-dashed">
-                <span className="text-sm text-gray-500 dark:text-gray-400 font-medium">Estabelecimento</span>
-                <span className="font-bold text-gray-900 dark:text-white flex items-center gap-1.5">
-                    <Store className="w-3.5 h-3.5 text-[#1E5BFF]" />
-                    {storeInfo?.name || 'Loja Parceira'}
-                </span>
-            </div>
-
-            <div className="flex justify-between items-center mb-2">
-                <span className="text-sm text-gray-500 dark:text-gray-400">Total da Compra</span>
-                <span className="font-bold text-gray-900 dark:text-white">R$ {numericTotal.toFixed(2).replace('.', ',')}</span>
-            </div>
-            
-            {numericCashbackUsed > 0 && (
-                <div className="flex justify-between items-center mb-2 text-green-600 dark:text-green-400">
-                    <span className="text-sm font-medium">Saldo Utilizado</span>
-                    <span className="font-bold">- R$ {numericCashbackUsed.toFixed(2).replace('.', ',')}</span>
-                </div>
-            )}
-            
-            <div className="bg-gray-50 dark:bg-gray-700/30 p-4 rounded-xl flex justify-between items-center mt-4">
-                <span className="text-sm font-bold text-gray-700 dark:text-gray-200">A Pagar</span>
-                <span className="text-xl font-black text-[#1E5BFF]">R$ {payNow.toFixed(2).replace('.', ',')}</span>
-            </div>
-        </div>
-        
-        {/* DEV ONLY: Simulate Approval Button (Only if no Supabase to avoid confusion) */}
-        {!supabase && step === 'waiting' && (
-            <div className="w-full max-w-sm animate-in fade-in slide-in-from-bottom-4 duration-700 delay-500 fill-mode-forwards opacity-0" style={{ animationDelay: '2s', animationFillMode: 'forwards' }}>
-                <button 
-                    onClick={triggerSuccessFlow}
-                    className="w-full bg-yellow-50 dark:bg-yellow-900/10 text-yellow-700 dark:text-yellow-400 py-3 rounded-2xl font-bold text-sm hover:bg-yellow-100 dark:hover:bg-yellow-900/20 transition-colors flex items-center justify-center gap-2 border border-yellow-200 dark:border-yellow-800"
-                >
-                    <Lock className="w-3 h-3" />
-                    Simular Aprovação (Mode Offline)
-                </button>
-            </div>
-        )}
-      </div>
-    );
-  }
-
-  // --- INPUT SCREEN (USING NEW COMPONENT) ---
   return (
-    <PayWithCashback 
-        merchantName={storeInfo?.name || 'Loja Parceira'}
-        merchantCashbackPercent={storeInfo?.cashbackPercent}
-        userBalance={userBalance}
-        purchaseValue={totalAmount}
-        balanceUse={cashbackToUse}
-        onBack={onBack}
-        onChangePurchaseValue={onPurchaseValueChange}
-        onChangeBalanceUse={onBalanceUseChange}
-        onConfirmPayment={handleSubmit}
-        isLoading={isLoading}
-    />
+    <div className="min-h-screen bg-gray-50 font-sans flex flex-col">
+      {/* Header */}
+      <div className="bg-white px-5 py-4 flex items-center gap-4 border-b border-gray-100 sticky top-0 z-10">
+        <button className="p-2 -ml-2 hover:bg-gray-100 rounded-full transition-colors text-gray-600">
+          <ChevronLeft className="w-6 h-6" />
+        </button>
+        <div className="flex-1">
+          <h1 className="text-lg font-bold text-gray-900 leading-tight">Pagar com Cashback</h1>
+          <div className="flex items-center gap-1 text-xs text-gray-500 mt-0.5">
+            <Store className="w-3 h-3" />
+            <span>Loja Parceira</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Content */}
+      <div className="flex-1 p-5 max-w-md mx-auto w-full overflow-y-auto pb-24">
+        
+        {/* Section 1: Purchase Value */}
+        <div className="mb-8">
+          <label className="block text-xs font-bold text-gray-500 uppercase mb-2 tracking-wide">
+            1. Qual o valor total da compra?
+          </label>
+          <div className="relative group">
+            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-lg font-bold group-focus-within:text-blue-600 transition-colors">
+              R$
+            </span>
+            <input 
+              type="tel"
+              value={purchaseValue}
+              onChange={handlePurchaseChange}
+              placeholder="0,00"
+              className="w-full bg-white border border-gray-200 rounded-xl py-4 pl-12 pr-4 text-2xl font-bold text-gray-900 focus:border-blue-600 focus:ring-4 focus:ring-blue-600/10 outline-none transition-all placeholder-gray-300"
+            />
+          </div>
+        </div>
+
+        {/* Section 2: Cashback Usage */}
+        <div className="mb-8">
+          <div className="flex justify-between items-end mb-2">
+            <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">
+              2. Quanto vai usar do saldo?
+            </label>
+            <div className="flex items-center gap-1.5 bg-gray-100 px-2 py-1 rounded-lg">
+              <Wallet className="w-3 h-3 text-blue-600" />
+              <span className="text-xs font-bold text-gray-600">
+                Saldo: R$ {formatCurrencyBr(walletBalance)}
+              </span>
+            </div>
+          </div>
+
+          <div className="relative group">
+            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-green-600 text-lg font-bold">
+              R$
+            </span>
+            <input 
+              type="tel"
+              value={cashbackToUse}
+              onChange={handleCashbackChange}
+              placeholder="0,00"
+              disabled={numericPurchase <= 0}
+              className="w-full bg-green-50 border border-green-200 rounded-xl py-4 pl-12 pr-24 text-2xl font-bold text-green-700 focus:border-green-500 focus:ring-4 focus:ring-green-500/20 outline-none transition-all placeholder-green-700/30 disabled:opacity-60 disabled:cursor-not-allowed"
+            />
+            <button 
+              onClick={handleUseMax}
+              disabled={numericPurchase <= 0}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-bold text-green-700 bg-white border border-green-200 px-3 py-1.5 rounded-full hover:bg-green-50 active:scale-95 transition-all disabled:opacity-50"
+            >
+              USAR MÁX
+            </button>
+          </div>
+        </div>
+
+        {/* Section 3: Summary */}
+        <div className="mb-6">
+          <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-3">
+            Resumo da Transação
+          </h3>
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 space-y-3">
+            <div className="flex justify-between items-center text-sm">
+              <span className="text-gray-500">Valor da Compra</span>
+              <span className="font-bold text-gray-900">R$ {formatCurrencyBr(numericPurchase)}</span>
+            </div>
+            
+            {numericCashbackToUse > 0 && (
+              <div className="flex justify-between items-center text-sm text-green-600">
+                <span className="font-bold">Desconto (Cashback)</span>
+                <span className="font-bold">- R$ {formatCurrencyBr(numericCashbackToUse)}</span>
+              </div>
+            )}
+
+            <div className="border-t border-gray-100 my-2 pt-2 flex justify-between items-center">
+              <span className="text-sm font-bold text-gray-600">Você paga ao lojista</span>
+              <span className="text-2xl font-black text-blue-600">
+                R$ {formatCurrencyBr(amountToPay)}
+              </span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      {/* Footer Button */}
+      <div className="p-5 bg-white border-t border-gray-100 sticky bottom-0 z-20">
+        <button 
+          onClick={handleSubmit}
+          disabled={!isValid}
+          className="w-full bg-blue-600 text-white font-bold py-4 rounded-xl shadow-lg shadow-blue-600/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:bg-gray-300 disabled:shadow-none disabled:cursor-not-allowed disabled:text-gray-500"
+        >
+          {isSubmitting ? 'Processando...' : 'Confirmar Pagamento'}
+          {!isSubmitting && <ArrowRight className="w-5 h-5" />}
+        </button>
+      </div>
+    </div>
   );
-};
+}

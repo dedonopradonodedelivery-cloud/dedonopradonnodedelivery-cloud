@@ -238,6 +238,7 @@ export const STORES: Store[] = [
     subcategory: 'Mercado',
     logoUrl: getStoreLogo(0),
     rating: 4.9,
+    reviewsCount: 150,
     distance: '0.5km',
     adType: AdType.PREMIUM,
     description: 'A maior variedade de grãos e especiarias da Freguesia.',
@@ -257,6 +258,19 @@ export const STORES: Store[] = [
     reviews: [
       { id: 'r1', user: 'Maria S.', rating: 5, text: 'Melhor loja de produtos naturais!', date: 'Há 2 dias' },
       { id: 'r2', user: 'João P.', rating: 4, text: 'Ótimo atendimento.', date: 'Há 1 semana' },
+    ],
+    recommendationsCount: 12,
+    latestRecommendation: { text: "Os produtos são sempre frescos e o atendimento é impecável.", date: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(), tag: "Bom atendimento" },
+    lastRecommendationDate: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(), // 5 days ago
+    mockRecommendations: [
+      { userId: 'u1', text: 'Bom atendimento', tags: ['Bom atendimento'], date: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString() },
+      { userId: 'u2', text: 'Preço justo', tags: ['Preço justo'], date: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString() },
+      { userId: 'u3', text: 'Confio', tags: ['Confio'], date: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString() },
+      { userId: 'u4', text: 'Entrega rápida', tags: ['Entrega rápida'], date: new Date(Date.now() - 12 * 24 * 60 * 60 * 1000).toISOString() },
+      { userId: 'u5', text: 'Resolveu meu problema', tags: ['Resolveu meu problema'], date: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString() },
+      { userId: 'u6', text: 'Produtos de qualidade', tags: ['Confio'], date: new Date(Date.now() - 18 * 24 * 60 * 60 * 1000).toISOString() },
+      { userId: 'u7', text: 'Ótimo lugar', tags: ['Bom atendimento'], date: new Date(Date.now() - 20 * 24 * 60 * 60 * 1000).toISOString() },
+      { userId: 'u8', text: 'Sempre compro aqui', tags: ['Confio'], date: new Date(Date.now() - 22 * 24 * 60 * 60 * 1000).toISOString() },
     ]
   },
   {
@@ -266,6 +280,7 @@ export const STORES: Store[] = [
     subcategory: 'Lanchonetes',
     logoUrl: getStoreLogo(1),
     rating: 4.8,
+    reviewsCount: 300,
     distance: '1.2km',
     adType: AdType.PREMIUM,
     description: 'O melhor burger artesanal do bairro.',
@@ -276,7 +291,20 @@ export const STORES: Store[] = [
     verified: true,
     address: "Rua Araguaia, 450",
     phone: "(21) 99999-8888",
-    hours: "Ter à Dom: 18h às 23h"
+    hours: "Ter à Dom: 18h às 23h",
+    recommendationsCount: 9,
+    latestRecommendation: { text: "O burger é muito saboroso e o ponto da carne é perfeito!", date: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000).toISOString(), tag: "Comida boa" },
+    lastRecommendationDate: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000).toISOString(), // 8 days ago
+    mockRecommendations: [
+      { userId: 'u10', text: 'Comida boa', tags: ['Comida boa'], date: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000).toISOString() },
+      { userId: 'u11', text: 'Preço justo', tags: ['Preço justo'], date: new Date(Date.now() - 11 * 24 * 60 * 60 * 1000).toISOString() },
+      { userId: 'u12', text: 'Ambiente agradável', tags: ['Ambiente agradável'], date: new Date(Date.now() - 13 * 24 * 60 * 60 * 1000).toISOString() },
+      { userId: 'u13', text: 'Entrega rápida', tags: ['Entrega rápida'], date: new Date(Date.now() - 16 * 24 * 60 * 60 * 1000).toISOString() },
+      { userId: 'u14', text: 'Melhor burger da região', tags: ['Comida boa'], date: new Date(Date.now() - 19 * 24 * 60 * 60 * 1000).toISOString() },
+      { userId: 'u15', text: 'Sempre peço aqui', tags: ['Confio'], date: new Date(Date.now() - 21 * 24 * 60 * 60 * 1000).toISOString() },
+      { userId: 'u16', text: 'Amei o molho', tags: ['Comida boa'], date: new Date(Date.now() - 23 * 24 * 60 * 60 * 1000).toISOString() },
+      { userId: 'u17', text: 'Ótima opção para o fim de semana', tags: ['Bom para família'], date: new Date(Date.now() - 25 * 24 * 60 * 60 * 1000).toISOString() },
+    ]
   },
   {
     id: 'local-1',
@@ -285,6 +313,7 @@ export const STORES: Store[] = [
     subcategory: 'Acessórios & Bijuterias',
     logoUrl: getStoreLogo(2),
     rating: 4.5,
+    reviewsCount: 80,
     distance: '0.3km',
     adType: AdType.LOCAL,
     description: 'Óculos de sol e grau com preço justo.',
@@ -292,7 +321,21 @@ export const STORES: Store[] = [
     isMarketplace: true,
     price_original: 220.00,
     price_current: 199.00,
-    address: "Estrada de Jacarepaguá, 7600"
+    address: "Estrada de Jacarepaguá, 7600",
+    recommendationsCount: 10,
+    latestRecommendation: { text: "Atendimento de qualidade e muitas opções de armações.", date: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString(), tag: "Bom atendimento" },
+    lastRecommendationDate: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString(), // 15 days ago
+    mockRecommendations: [
+      { userId: 'u20', text: 'Bom atendimento', tags: ['Bom atendimento'], date: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString() },
+      { userId: 'u21', text: 'Preço justo', tags: ['Preço justo'], date: new Date(Date.now() - 18 * 24 * 60 * 60 * 1000).toISOString() },
+      { userId: 'u22', text: 'Variedade de produtos', tags: ['Variedade'], date: new Date(Date.now() - 20 * 24 * 60 * 60 * 1000).toISOString() },
+      { userId: 'u23', text: 'Encontrei o que procurava', tags: ['Resolveu meu problema'], date: new Date(Date.now() - 23 * 24 * 60 * 60 * 1000).toISOString() },
+      { userId: 'u24', text: 'Qualidade boa', tags: ['Confio'], date: new Date(Date.now() - 25 * 24 * 60 * 60 * 1000).toISOString() },
+      { userId: 'u25', text: 'Recomendo a todos', tags: ['Bom atendimento'], date: new Date(Date.now() - 27 * 24 * 60 * 60 * 1000).toISOString() },
+      { userId: 'u26', text: 'Ótimas promoções', tags: ['Preço justo'], date: new Date(Date.now() - 28 * 24 * 60 * 60 * 1000).toISOString() },
+      { userId: 'u27', text: 'Excelente serviço', tags: ['Bom atendimento'], date: new Date(Date.now() - 29 * 24 * 60 * 60 * 1000).toISOString() },
+      { userId: 'u28', text: 'Loja de confiança', tags: ['Confio'], date: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString() },
+    ]
   },
   {
     id: 'organic-1',
@@ -301,10 +344,25 @@ export const STORES: Store[] = [
     subcategory: 'Banho & Tosa',
     logoUrl: getStoreLogo(3),
     rating: 4.2,
+    reviewsCount: 50,
     distance: '2.0km',
     adType: AdType.ORGANIC,
     description: 'Banho e tosa com carinho.',
-    isMarketplace: false
+    isMarketplace: false,
+    recommendationsCount: 15,
+    latestRecommendation: { text: "Meu pet adora o banho de lá, sempre sai cheiroso e feliz!", date: new Date(Date.now() - 20 * 24 * 60 * 60 * 1000).toISOString(), tag: "Bom atendimento" },
+    lastRecommendationDate: new Date(Date.now() - 20 * 24 * 60 * 60 * 1000).toISOString(), // 20 days ago
+    mockRecommendations: [
+      { userId: 'u30', text: 'Bom atendimento', tags: ['Bom atendimento'], date: new Date(Date.now() - 20 * 24 * 60 * 60 * 1000).toISOString() },
+      { userId: 'u31', text: 'Cuidado com os pets', tags: ['Confio'], date: new Date(Date.now() - 22 * 24 * 60 * 60 * 1000).toISOString() },
+      { userId: 'u32', text: 'Sempre volto', tags: ['Bom atendimento'], date: new Date(Date.now() - 25 * 24 * 60 * 60 * 1000).toISOString() },
+      { userId: 'u33', text: 'Preço justo', tags: ['Preço justo'], date: new Date(Date.now() - 28 * 24 * 60 * 60 * 1000).toISOString() },
+      { userId: 'u34', text: 'Meu cachorro ama', tags: ['Bom atendimento'], date: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString() },
+      { userId: 'u35', text: 'Profissionais excelentes', tags: ['Confio'], date: new Date(Date.now() - 32 * 24 * 60 * 60 * 1000).toISOString() },
+      { userId: 'u36', text: 'Melhor banho e tosa', tags: ['Bom atendimento'], date: new Date(Date.now() - 35 * 24 * 60 * 60 * 1000).toISOString() },
+      { userId: 'u37', text: 'Sempre sai feliz', tags: ['Bom atendimento'], date: new Date(Date.now() - 37 * 24 * 60 * 60 * 1000).toISOString() },
+      { userId: 'u38', text: 'Recomendo para todos os pets', tags: ['Confio'], date: new Date(Date.now() - 39 * 24 * 60 * 60 * 1000).toISOString() },
+    ]
   },
   {
     id: 'organic-2',
@@ -313,12 +371,21 @@ export const STORES: Store[] = [
     subcategory: 'Padaria',
     logoUrl: getStoreLogo(4),
     rating: 4.6,
+    reviewsCount: 200,
     distance: '0.8km',
     adType: AdType.ORGANIC,
     description: 'Pão quente toda hora.',
     isMarketplace: true,
     price_original: 12.00,
-    price_current: 12.00
+    price_current: 12.00,
+    recommendationsCount: 5, // Not enough to appear in "Recomendados por Moradores"
+    latestRecommendation: { text: "Pão fresquinho e café delicioso.", date: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(), tag: "Comida boa" },
+    lastRecommendationDate: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(), // 1 day ago
+    mockRecommendations: [
+      { userId: 'u40', text: 'Pão fresquinho', tags: ['Comida boa'], date: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString() },
+      { userId: 'u41', text: 'Café delicioso', tags: ['Comida boa'], date: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString() },
+      { userId: 'u42', text: 'Bom para café da manhã', tags: ['Bom atendimento'], date: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString() },
+    ]
   }
 ];
 

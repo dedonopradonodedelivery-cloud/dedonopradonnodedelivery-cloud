@@ -13,7 +13,8 @@ import { MenuView } from './components/MenuView';
 import { PatrocinadorMasterScreen } from './components/PatrocinadorMasterScreen';
 import { CashbackScanScreen } from './components/CashbackScanScreen';
 import { ScanConfirmationScreen } from './components/ScanConfirmationScreen';
-import { CashbackPaymentScreen } from './components/CashbackPaymentScreen';
+// Fix: CashbackPaymentScreen is a default export
+import CashbackPaymentScreen from './components/CashbackPaymentScreen'; 
 import { PrizeHistoryView } from './components/PrizeHistoryView';
 import { FreguesiaConnectPublic } from './components/FreguesiaConnectPublic';
 import { FreguesiaConnectDashboard } from './components/FreguesiaConnectDashboard';
@@ -28,47 +29,13 @@ import { StoreAreaView } from './components/StoreAreaView';
 import { MerchantQrScreen } from './components/MerchantQrScreen';
 import { MapPin, Crown } from 'lucide-react';
 import { useAuth } from './contexts/AuthContext';
-import { Category, Store, AdType, EditorialCollection } from './types';
+import { Category, Store, AdType, EditorialCollection } from './types'; // Correct path to types.ts
 import { getStoreLogo } from './utils/mockLogos';
 import { CategoriaAlimentacao } from './components/CategoriaAlimentacao';
 import { CategoryView } from './components/CategoryView';
 import { EditorialListView } from './components/EditorialListView';
-
-const MOCK_STORES: Store[] = [
-  {
-    id: '1',
-    name: 'Burger Freguesia',
-    category: 'Alimentação',
-    description: 'Hambúrgueres artesanais com sabor de bairro.',
-    logoUrl: getStoreLogo(1),
-    rating: 4.8,
-    reviewsCount: 124,
-    distance: 'Freguesia • RJ',
-    cashback: 5,
-    adType: AdType.ORGANIC,
-    subcategory: 'Hamburgueria',
-    address: 'Rua Tirol, 1245 - Freguesia',
-    phone: '(21) 99999-1111',
-    hours: 'Seg a Dom • 11h às 23h',
-    verified: true,
-  },
-  {
-    id: 'premium-test',
-    name: 'Padaria Imperial',
-    category: 'Alimentação',
-    description: 'O melhor pão quentinho e café artesanal da Freguesia. Venha conferir!',
-    logoUrl: getStoreLogo(8),
-    rating: 4.9,
-    reviewsCount: 450,
-    distance: 'Freguesia • RJ',
-    cashback: 10,
-    adType: AdType.PREMIUM,
-    subcategory: 'Padaria',
-    address: 'Estrada dos Três Rios, 1000',
-    phone: '(21) 98888-2222',
-    verified: true,
-  },
-];
+import { STORES as MOCK_CONSTANT_STORES } from './constants'; // Correct path to constants.tsx
+import { User } from '@supabase/supabase-js'; // Correct User type import
 
 const App: React.FC = () => {
   const { user, userRole, loading: isAuthLoading } = useAuth();
@@ -77,6 +44,9 @@ const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState('home');
   const [isDarkMode, setIsDarkMode] = useState(false);
   
+  // Estado mutável para as lojas para permitir atualizações de recomendação
+  const [mutableStores, setMutableStores] = useState<Store[]>(MOCK_CONSTANT_STORES);
+
   useEffect(() => {
     // 1. Inicia animação da barra de progresso imediatamente
     const animationFrame = requestAnimationFrame(() => {
@@ -115,6 +85,40 @@ const App: React.FC = () => {
     if (user) setActiveTab('qrcode_scan');
     else setIsAuthOpen(true);
   };
+
+  // Handler para quando o usuário recomenda uma loja
+  const handleStoreRecommend = (storeId: string, recommendationText: string, tags: string[]) => {
+    setMutableStores(prevStores => prevStores.map(store => {
+      if (store.id === storeId) {
+        // Lógica de mock: incrementa o contador e atualiza a recomendação mais recente
+        const newCount = (store.recommendationsCount || 0) + 1;
+        return {
+          ...store,
+          recommendationsCount: newCount,
+          latestRecommendation: {
+            text: recommendationText || tags[0] || "Recomendado por um morador!",
+            date: new Date().toISOString(),
+            tag: tags[0]
+          },
+          lastRecommendationDate: new Date().toISOString(),
+          // Se tiver um mockRecommendations, adiciona uma nova
+          mockRecommendations: store.mockRecommendations ? [...store.mockRecommendations, {
+            userId: user?.id || 'guest-user', // Usar ID real ou mock
+            text: recommendationText || tags[0] || "Recomendado por um morador!",
+            tags: tags,
+            date: new Date().toISOString()
+          }] : [{
+            userId: user?.id || 'guest-user',
+            text: recommendationText || tags[0] || "Recomendado por um morador!",
+            tags: tags,
+            date: new Date().toISOString()
+          }],
+        };
+      }
+      return store;
+    }));
+  };
+
 
   // O app só é liberado se o carregamento do Supabase terminou E o tempo mínimo de 5s passou
   const isAppReady = !isAuthLoading && minSplashTimeElapsed;
@@ -220,7 +224,7 @@ const App: React.FC = () => {
                 onSelectCategory={handleSelectCategory}
                 onSelectCollection={handleSelectCollection}
                 onStoreClick={handleSelectStore}
-                stores={MOCK_STORES}
+                stores={mutableStores} {/* Passa o estado mutável */}
                 searchTerm={globalSearch}
                 user={user as any}
                 userRole={userRole}
@@ -229,12 +233,12 @@ const App: React.FC = () => {
               />
             )}
             {activeTab === 'explore' && (
-              <ExploreView stores={MOCK_STORES} searchQuery={globalSearch} onStoreClick={handleSelectStore} onLocationClick={() => {}} onFilterClick={() => {}} onOpenPlans={() => {}} />
+              <ExploreView stores={mutableStores} searchQuery={globalSearch} onStoreClick={handleSelectStore} onLocationClick={() => {}} onFilterClick={() => {}} onOpenPlans={() => {}} />
             )}
             {activeTab === 'editorial_list' && selectedCollection && (
               <EditorialListView
                 collection={selectedCollection}
-                stores={MOCK_STORES}
+                stores={mutableStores}
                 onBack={() => { setActiveTab('home'); setSelectedCollection(null); }}
                 onStoreClick={handleSelectStore}
               />
@@ -281,7 +285,7 @@ const App: React.FC = () => {
                   category={selectedCategory} 
                   onBack={() => { setActiveTab('home'); setSelectedCategory(null); }} 
                   onStoreClick={handleSelectStore}
-                  stores={MOCK_STORES}
+                  stores={mutableStores}
               />
             )}
             {activeTab === 'food_category' && selectedCategory && (
@@ -339,16 +343,16 @@ const App: React.FC = () => {
                 <ScanConfirmationScreen storeId={scannedData.storeId} onConfirm={() => setActiveTab('cashback_payment')} onCancel={() => setActiveTab('home')} />
             )}
             {activeTab === 'cashback_payment' && scannedData && (
-              <CashbackPaymentScreen user={user as any} merchantId={scannedData.merchantId} storeId={scannedData.storeId} onBack={() => setActiveTab('home')} onComplete={() => setActiveTab('home')} />
+              <CashbackPaymentScreen user={user as User} merchantId={scannedData.merchantId} storeId={scannedData.storeId} onBack={() => setActiveTab('home')} onComplete={() => setActiveTab('home')} />
             )}
             {activeTab === 'profile' && (
-              <MenuView user={user as any} userRole={userRole} onAuthClick={() => setIsAuthOpen(true)} onNavigate={setActiveTab} />
+              <MenuView user={user as User} userRole={userRole} onAuthClick={() => setIsAuthOpen(true)} onNavigate={setActiveTab} />
             )}
             {activeTab === 'patrocinador_master' && (
               <PatrocinadorMasterScreen onBack={() => setActiveTab('home')} />
             )}
             {activeTab === 'store_detail' && selectedStore && (
-              <StoreDetailView store={selectedStore} onBack={() => setActiveTab('home')} />
+              <StoreDetailView store={selectedStore} onBack={() => setActiveTab('home')} onStoreRecommend={handleStoreRecommend} />
             )}
             {activeTab === 'reward_details' && (
               <RewardDetailsView reward={selectedReward} onBack={() => setActiveTab('home')} onHome={() => setActiveTab('home')} />
@@ -357,13 +361,14 @@ const App: React.FC = () => {
               <PrizeHistoryView userId={user.id} onBack={() => setActiveTab('home')} onGoToSpinWheel={() => setActiveTab('home')} />
             )}
           </main>
-          <AuthModal isOpen={isAuthOpen} onClose={() => setIsAuthOpen(false)} user={user as any} signupContext={authContext} />
+          <AuthModal isOpen={isAuthOpen} onClose={() => setIsAuthOpen(false)} user={user as User} signupContext={authContext} />
           {isQuoteModalOpen && (
               <QuoteRequestModal 
                   isOpen={isQuoteModalOpen}
                   onClose={() => setIsQuoteModalOpen(false)}
                   categoryName={quoteCategory}
                   onSuccess={() => {
+                      // Fix: Corrected typo from setIsQuoteModalScreen to setIsQuoteModalOpen
                       setIsQuoteModalOpen(false);
                       setActiveTab('service_success');
                   }}
