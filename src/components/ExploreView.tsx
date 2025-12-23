@@ -1,6 +1,7 @@
 
+
 import React, { useEffect, useMemo, useState, useRef } from "react";
-import { Store } from '@/types.ts';
+import { Store } from '@/types';
 import {
   MapPin,
   Filter,
@@ -22,10 +23,10 @@ import {
   Heart,
   Users
 } from "lucide-react";
-import { useUserLocation } from '@/hooks/useUserLocation.ts';
-import { useMediaQuery } from '@/hooks/useMediaQuery.ts';
-import { quickFilters } from '@/constants.tsx';
-import { getStoreLogo } from '@/utils/mockLogos.ts';
+import { useUserLocation } from '@/hooks/useUserLocation';
+import { useMediaQuery } from '@/hooks/useMediaQuery';
+import { quickFilters } from '@/constants';
+import { getStoreLogo } from '@/utils/mockLogos';
 
 
 type ExploreViewProps = {

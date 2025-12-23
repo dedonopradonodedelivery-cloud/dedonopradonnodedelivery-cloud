@@ -1,57 +1,58 @@
 
+
 import React, { useState, useEffect } from 'react';
-import { Layout } from '@/components/Layout.tsx';
-import { Header } from '@/components/Header.tsx';
-import { HomeFeed } from '@/components/HomeFeed.tsx';
-import { ExploreView } from '@/components/ExploreView.tsx';
-import { StoreDetailView } from '@/components/StoreDetailView.tsx';
-import { CashbackView } from '@/components/CashbackView.tsx';
-import { CashbackInfoView } from '@/components/CashbackInfoView.tsx';
-import { RewardDetailsView } from '@/components/RewardDetailsView.tsx';
-import { AuthModal } from '@/components/AuthModal.tsx';
-import { MenuView } from '@/components/MenuView.tsx';
-import { PatrocinadorMasterScreen } from '@/components/PatrocinadorMasterScreen.tsx';
-import { CashbackScanScreen } from '@/components/CashbackScanScreen.tsx';
-import { ScanConfirmationScreen } from '@/components/ScanConfirmationScreen.tsx';
-import { CashbackPaymentScreen } from '@/components/CashbackPaymentScreen.tsx';
-import { PrizeHistoryView } from '@/components/PrizeHistoryView.tsx';
-import { FreguesiaConnectPublic } from '@/components/FreguesiaConnectPublic.tsx';
-import { FreguesiaConnectDashboard } from '@/components/FreguesiaConnectDashboard.tsx';
-import { FreguesiaConnectRestricted } from '@/components/FreguesiaConnectRestricted.tsx';
-import { ServicesView } from '@/components/ServicesView.tsx';
-import { SubcategoriesView } from '@/components/SubcategoriesView.tsx';
-import { SpecialtiesView } from '@/components/SpecialtiesView.tsx';
-import { ServiceSuccessView } from '@/components/ServiceSuccessView.tsx';
-import { ServiceTermsView } from '@/components/ServiceTermsView.tsx';
-import { QuoteRequestModal } from '@/components/QuoteRequestModal.tsx';
-import { StoreAreaView } from '@/components/StoreAreaView.tsx';
-import { MerchantQrScreen } from '@/components/MerchantQrScreen.tsx';
+import { Layout } from '@/components/Layout';
+import { Header } from '@/components/Header';
+import { HomeFeed } from '@/components/HomeFeed';
+import { ExploreView } from '@/components/ExploreView';
+import { StoreDetailView } from '@/components/StoreDetailView';
+import { CashbackView } from '@/components/CashbackView';
+import { CashbackInfoView } from '@/components/CashbackInfoView';
+import { RewardDetailsView } from '@/components/RewardDetailsView';
+import { AuthModal } from '@/components/AuthModal';
+import { MenuView } from '@/components/MenuView';
+import { PatrocinadorMasterScreen } from '@/components/PatrocinadorMasterScreen';
+import { CashbackScanScreen } from '@/components/CashbackScanScreen';
+import { ScanConfirmationScreen } from '@/components/ScanConfirmationScreen';
+import { CashbackPaymentScreen } from '@/components/CashbackPaymentScreen';
+import { PrizeHistoryView } from '@/components/PrizeHistoryView';
+import { FreguesiaConnectPublic } from '@/components/FreguesiaConnectPublic';
+import { FreguesiaConnectDashboard } from '@/components/FreguesiaConnectDashboard';
+import { FreguesiaConnectRestricted } from '@/components/FreguesiaConnectRestricted';
+import { ServicesView } from '@/components/ServicesView';
+import { SubcategoriesView } from '@/components/SubcategoriesView';
+import { SpecialtiesView } from '@/components/SpecialtiesView';
+import { ServiceSuccessView } from '@/components/ServiceSuccessView';
+import { ServiceTermsView } from '@/components/ServiceTermsView';
+import { QuoteRequestModal } from '@/components/QuoteRequestModal';
+import { StoreAreaView } from '@/components/StoreAreaView';
+import { MerchantQrScreen } from '@/components/MerchantQrScreen';
 import { MapPin, Crown, Info, TriangleAlert } from 'lucide-react';
-import { useAuth } from '@/contexts/AuthContext.tsx';
-import { Category, Store, AdType, EditorialCollection } from '@/types.ts';
-import { getStoreLogo } from '@/utils/mockLogos.ts';
-import { CategoriaAlimentacao } from '@/components/CategoriaAlimentacao.tsx';
-import { CategoryView } from '@/components/CategoryView.tsx';
-import { EditorialListView } from '@/components/EditorialListView.tsx';
-import { AuthCallbackPage } from '@/components/AuthCallbackPage.tsx'; 
-import { SpinWheelAdminDashboard } from '@/components/SpinWheelAdminDashboard.tsx'; 
-import { MerchantPayRoute } from '@/components/MerchantPayRoute.tsx'; // Import MerchantPayRoute
-import { MerchantPanel } from '@/components/MerchantPanel.tsx'; // Import MerchantPanel
-import { MerchantCashbackRequests } from '@/components/MerchantCashbackRequests.tsx'; // Import MerchantCashbackRequests
-import { StoreProfileEdit } from '@/components/StoreProfileEdit.tsx'; // Import StoreProfileEdit
-import { StoreFinanceModule } from '@/components/StoreFinanceModule.tsx'; // Import StoreFinanceModule
-import { StoreSupportModule } from '@/components/StoreSupportModule.tsx'; // Import StoreSupportModule
-import { StoreCashbackModule } from '@/components/StoreCashbackModule.tsx'; // Import StoreCashbackModule
-import { StoreAdsModule } from '@/components/StoreAdsModule.tsx'; // Import StoreAdsModule
-import { StoreHighlightsView } from '@/components/StoreHighlightsView.tsx'; // Import StoreHighlightsView
-import { SearchStores } from '@/components/SearchStores.tsx'; // Import SearchStores
-import { FavoritesView, AboutView, SupportView, InviteFriendView, SponsorInfoView } from '@/components/SimplePages.tsx'; // Import SimplePages
-import { EditProfileView } from '@/components/EditProfileView.tsx'; // Import EditProfileView
-import { BusinessRegistrationFlow } from '@/components/BusinessRegistrationFlow.tsx'; // Import BusinessRegistrationFlow
-import { CashbackLandingView } from '@/components/CashbackLandingView.tsx'; // Import CashbackLandingView
-import { UserCashbackFlow } from '@/components/UserCashbackFlow.tsx'; // Import UserCashbackFlow
-import { MarketplaceView } from '@/components/MarketplaceView.tsx'; // Import MarketplaceView
-import { StoreCategoryView } from '@/components/StoreCategoryView.tsx'; // Import StoreCategoryView
+import { useAuth } from '@/contexts/AuthContext';
+import { Category, Store, AdType, EditorialCollection } from '@/types';
+import { getStoreLogo } from '@/utils/mockLogos';
+import { CategoriaAlimentacao } from '@/components/CategoriaAlimentacao';
+import { CategoryView } from '@/components/CategoryView';
+import { EditorialListView } from '@/components/EditorialListView';
+import { AuthCallbackPage } from '@/components/AuthCallbackPage'; 
+import { SpinWheelAdminDashboard } from '@/components/SpinWheelAdminDashboard'; 
+import { MerchantPayRoute } from '@/components/MerchantPayRoute'; 
+import { MerchantPanel } from '@/components/MerchantPanel'; 
+import { MerchantCashbackRequests } from '@/components/MerchantCashbackRequests'; 
+import { StoreProfileEdit } from '@/components/StoreProfileEdit'; 
+import { StoreFinanceModule } from '@/components/StoreFinanceModule'; 
+import { StoreSupportModule } from '@/components/StoreSupportModule'; 
+import { StoreCashbackModule } from '@/components/StoreCashbackModule'; 
+import { StoreAdsModule } from '@/components/StoreAdsModule'; 
+import { StoreHighlightsView } from '@/components/StoreHighlightsView'; 
+import { SearchStores } from '@/components/SearchStores'; 
+import { FavoritesView, AboutView, SupportView, InviteFriendView, SponsorInfoView } from '@/components/SimplePages'; 
+import { EditProfileView } from '@/components/EditProfileView'; 
+import { BusinessRegistrationFlow } from '@/components/BusinessRegistrationFlow'; 
+import { CashbackLandingView } from '@/components/CashbackLandingView'; 
+import { UserCashbackFlow } from '@/components/UserCashbackFlow'; 
+import { MarketplaceView } from '@/components/MarketplaceView'; 
+import { StoreCategoryView } from '@/components/StoreCategoryView'; 
 
 
 const MOCK_STORES: Store[] = [
@@ -286,7 +287,7 @@ const App: React.FC = () => {
             )}
             {activeTab === 'services' && (
               <ServicesView 
-                onSelectMacro={(id, name) => {
+                onSelectMacro={(id: string, name: string) => { // Fixed implicit any types here
                   setSelectedServiceMacro({id, name});
                   if (id === 'emergency') {
                     setQuoteCategory(name);
@@ -332,7 +333,7 @@ const App: React.FC = () => {
             {activeTab === 'food_category' && selectedCategory && (
                 <CategoriaAlimentacao 
                     onBack={() => { setActiveTab('home'); setSelectedCategory(null); }}
-                    onSelectSubcategory={(sub) => {
+                    onSelectSubcategory={(sub: string) => { // Fixed implicit any types here
                         // Navega para uma lista de lojas filtrada pela subcategoria
                         console.log("Subcategoria selecionada:", sub);
                     }}
@@ -343,7 +344,7 @@ const App: React.FC = () => {
                 macroId={selectedServiceMacro.id}
                 macroName={selectedServiceMacro.name}
                 onBack={() => setActiveTab('services')}
-                onSelectSubcategory={(subName) => {
+                onSelectSubcategory={(subName: string) => { // Fixed implicit any types here
                   setSelectedServiceSub(subName);
                   setActiveTab('service_specialties');
                 }}
@@ -353,7 +354,7 @@ const App: React.FC = () => {
               <SpecialtiesView 
                 subcategoryName={selectedServiceSub}
                 onBack={() => setActiveTab('service_subcategories')}
-                onSelectSpecialty={(specialty) => {
+                onSelectSpecialty={(specialty: string) => { // Fixed implicit any types here
                   setQuoteCategory(`${selectedServiceSub} - ${specialty}`);
                   setIsQuoteModalOpen(true);
                 }}

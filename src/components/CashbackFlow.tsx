@@ -1,4 +1,5 @@
 
+
 import React, { useState } from 'react';
 import { CashbackScanScreen } from '@/components/CashbackScanScreen';
 import PayWithCashbackScreen from '@/components/PayWithCashbackScreen';
@@ -14,8 +15,8 @@ type CashbackFlowProps = {
   initialCashbackPercent?: number;
 };
 
-// Casting do componente PayWithCashbackScreen para aceitar props futuras sem erro de TS agora
-const PayWithCashback = PayWithCashbackScreen as React.ComponentType<any>;
+// Renomeado para evitar conflito de nome com o componente importado PayWithCashback
+const PayWithCashbackForm = PayWithCashbackScreen as React.ComponentType<any>;
 
 export default function CashbackFlow(props: CashbackFlowProps) {
   // Estados internos
@@ -89,7 +90,7 @@ export default function CashbackFlow(props: CashbackFlowProps) {
 
         {/* STEP 2: FORMULÁRIO DE PAGAMENTO */}
         {step === "pay" && (
-          <PayWithCashback
+          <PayWithCashbackForm
             merchantName={storeName}
             merchantCashbackPercent={cashbackPercent}
             onPaymentSimulated={handlePaymentSimulated}

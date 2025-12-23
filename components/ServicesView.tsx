@@ -19,12 +19,18 @@ import {
   MessageSquare,
   MessageCircle,
   Phone,
-  BarChart3
+  BarChart3,
+  MoreHorizontal, // Import MoreHorizontal as it's used in the component
+  FileText, // Import FileText
+  Search // Import Search
 } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 
 interface ServicesViewProps {
-  onSelectMacro: (id: string, name: string)
+  onSelectMacro: (id: string, name: string) => void; // Added return type void
+  onOpenTerms: () => void;
+  onNavigate: (view: string) => void;
+  searchTerm?: string;
 }
 
 // Fixed: Export the ServicesView component

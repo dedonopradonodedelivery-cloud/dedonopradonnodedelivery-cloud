@@ -1,4 +1,5 @@
 
+
 import React, { useState, useEffect } from "react";
 import { Camera, QrCode, KeyRound, ArrowLeft, Loader2, ArrowRight, XCircle, AlertTriangle } from "lucide-react";
 import { useQrScanner } from '@/hooks/useQrScanner';

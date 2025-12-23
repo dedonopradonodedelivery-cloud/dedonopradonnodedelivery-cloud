@@ -1,4 +1,5 @@
 
+
 import React, { useState, useEffect, useRef } from 'react';
 import { 
   TriangleAlert, 
@@ -20,7 +21,9 @@ import {
   MessageCircle,
   Phone,
   BarChart3,
-  MoreHorizontal // Import MoreHorizontal as it's used in the component
+  MoreHorizontal, // Import MoreHorizontal as it's used in the component
+  FileText, // Import FileText
+  Search // Import Search
 } from 'lucide-react';
 import { supabase } from '@/lib/supabaseClient';
 

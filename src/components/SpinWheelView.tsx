@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 import { Gift, RefreshCw, ThumbsDown, History, Wallet, Volume2, VolumeX, Lock, ArrowRight, Dices, AlertTriangle, Loader2, Award } from 'lucide-react';
-import { ROULETTE_TRANSPARENCY_MESSAGES } from '@/constants.tsx'; // Importa as novas mensagens de transparência
+import { ROULETTE_TRANSPARENCY_MESSAGES } from '@/constants'; // Importa as novas mensagens de transparência
 
 // --- Tipos e Constantes ---
 interface SpinWheelViewProps {

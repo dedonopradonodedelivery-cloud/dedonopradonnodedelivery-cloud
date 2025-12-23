@@ -37,13 +37,13 @@ import {
   Sparkles,
   Compass
 } from 'lucide-react';
-import { LojasEServicosList } from '@/components/LojasEServicosList.tsx';
+import { LojasEServicosList } from '@/components/LojasEServicosList';
 import { User } from '@supabase/supabase-js';
-import { SpinWheelView } from '@/components/SpinWheelView.tsx'; // Fix: Added .tsx extension
-import { MasterSponsorBanner } from '@/components/MasterSponsorBanner.tsx';
-import { CATEGORIES, EDITORIAL_COLLECTIONS, ROULETTE_TRANSPARENCY_MESSAGES } from '@/constants.tsx';
-import { Category, EditorialCollection, Store, AdType } from '@/types.ts';
-import { getStoreLogo } from '@/utils/mockLogos.ts';
+import { SpinWheelView } from '@/components/SpinWheelView';
+import { MasterSponsorBanner } from '@/components/MasterSponsorBanner';
+import { CATEGORIES, EDITORIAL_COLLECTIONS, ROULETTE_TRANSPARENCY_MESSAGES } from '@/constants';
+import { Category, EditorialCollection, Store, AdType } from '@/types';
+import { getStoreLogo } from '@/utils/mockLogos';
 
 interface HomeFeedProps {
   onNavigate: (view: string) => void;

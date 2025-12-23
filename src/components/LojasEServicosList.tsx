@@ -2,8 +2,8 @@
 
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { Star, Loader2, AlertCircle, BadgeCheck, Heart, Award, Eye, Rocket, Crown } from 'lucide-react';
-import { Store, AdType } from '../types.ts';
-import { useFavorites } from '../hooks/useFavorites.ts';
+import { Store, AdType } from '../types';
+import { useFavorites } from '../hooks/useFavorites';
 import { User } from '@supabase/supabase-js';
 
 interface LojasEServicosListProps {
@@ -218,7 +218,8 @@ export const LojasEServicosList: React.FC<LojasEServicosListProps> = ({ onStoreC
               {activityBadge && (
                 <div className="absolute top-2 left-2 z-10">
                   <span className={`px-2 py-0.5 rounded-full text-[9px] font-black uppercase flex items-center gap-1 ${activityBadge.color}`}>
-                    {React.cloneElement(activityBadge.icon, { className: 'w-3 h-3' })} {activityBadge.text}
+                    {/* Fixed: Use React.createElement for component types */}
+                    {activityBadge.icon ? React.createElement(activityBadge.icon as React.ElementType, { className: 'w-3 h-3' }) : null} {activityBadge.text}
                   </span>
                 </div>
               )}
