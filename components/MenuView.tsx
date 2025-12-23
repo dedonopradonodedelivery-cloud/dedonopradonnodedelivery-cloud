@@ -14,8 +14,8 @@ import {
   Users,
   Loader2
 } from 'lucide-react';
-import { useAuth } from '../contexts/AuthContext';
-import { MasterSponsorBanner } from './MasterSponsorBanner';
+import { useAuth } from '@/contexts/AuthContext';
+import { MasterSponsorBanner } from '@/components/MasterSponsorBanner';
 import { User } from '@supabase/supabase-js';
 
 interface MenuViewProps {

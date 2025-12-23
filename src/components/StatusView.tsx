@@ -1,13 +1,14 @@
 
+
 import React, { useState, useEffect } from 'react';
 import { Plus, X, Camera, Video } from 'lucide-react';
-import { supabase } from '@/lib/supabaseClient.ts';
-import { STORIES } from '@/constants.tsx';
+import { supabase } from '@/lib/supabaseClient';
+import { STORIES } from '@/constants';
 
 export const StatusView: React.FC = () => {
   const [activeStoryIndex, setActiveStoryIndex] = useState<number | null>(null);
   const [progress, setProgress] = useState(0);
-  const [isCreationMenuOpen, setIsCreationMenuOpen] = useState(false);
+  const [isCreationMenuOpen, setIsCreationMenuMenuOpen] = useState(false);
 
   const activeStory = activeStoryIndex !== null ? STORIES[activeStoryIndex] : null;
 
@@ -76,7 +77,7 @@ export const StatusView: React.FC = () => {
     }
 
     alert('Story enviado com sucesso!');
-    setIsCreationMenuOpen(false);
+    setIsCreationMenuMenuOpen(false);
   };
 
   // ===============================
@@ -113,7 +114,7 @@ export const StatusView: React.FC = () => {
 
         {/* MEU STATUS */}
         <div
-          onClick={() => setIsCreationMenuOpen(true)}
+          onClick={() => setIsCreationMenuMenuOpen(true)}
           className="flex items-center gap-4 mb-8 cursor-pointer"
         >
           <div className="relative">
@@ -172,7 +173,7 @@ export const StatusView: React.FC = () => {
       {isCreationMenuOpen && (
         <div
           className="fixed inset-0 z-50 bg-black/60 flex items-end"
-          onClick={() => setIsCreationMenuOpen(false)}
+          onClick={() => setIsCreationMenuMenuOpen(false)}
         >
           <div
             className="bg-white w-full rounded-t-3xl p-6"
@@ -207,7 +208,7 @@ export const StatusView: React.FC = () => {
             </div>
 
             <button
-              onClick={() => setIsCreationMenuOpen(false)}
+              onClick={() => setIsCreationMenuMenuOpen(false)}
               className="mt-6 w-full py-3 bg-gray-100 rounded-xl font-bold"
             >
               Cancelar
