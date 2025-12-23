@@ -13,7 +13,7 @@ import { MenuView } from './components/MenuView';
 import { PatrocinadorMasterScreen } from './components/PatrocinadorMasterScreen';
 import { CashbackScanScreen } from './components/CashbackScanScreen';
 import { ScanConfirmationScreen } from './components/ScanConfirmationScreen';
-// Fix: CashbackPaymentScreen is a default export
+// Fix: CashbackPaymentScreen is now a default export from its canonical path
 import CashbackPaymentScreen from './components/CashbackPaymentScreen'; 
 import { PrizeHistoryView } from './components/PrizeHistoryView';
 import { FreguesiaConnectPublic } from './components/FreguesiaConnectPublic';
@@ -368,7 +368,6 @@ const App: React.FC = () => {
                   onClose={() => setIsQuoteModalOpen(false)}
                   categoryName={quoteCategory}
                   onSuccess={() => {
-                      // Fix: Corrected typo from setIsQuoteModalScreen to setIsQuoteModalOpen
                       setIsQuoteModalOpen(false);
                       setActiveTab('service_success');
                   }}

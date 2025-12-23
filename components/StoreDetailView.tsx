@@ -1,5 +1,4 @@
 
-
 import React, { useState, useEffect } from 'react';
 import {
   ChevronLeft,
@@ -499,3 +498,4 @@ export const StoreDetailView: React.FC<StoreDetailViewProps> = ({
       )}
     </div>
   );
+};
