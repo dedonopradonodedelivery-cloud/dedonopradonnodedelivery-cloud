@@ -9,6 +9,7 @@ import {
   Eye, 
   TrendingUp,
   Rocket,
+  Wallet,
   Target,
   Clock,
   ShieldCheck,
@@ -416,6 +417,27 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack }) => {
                     <p className="text-[10px] font-medium leading-tight">Pagamento 100% seguro. Sem cobranças recorrentes surpresas.</p>
                 </div>
             </div>
+
+            {/* BOTÃO PRIMÁRIO IN-PAGE PARA FINALIZAR COMPRA */}
+            <div className="space-y-3">
+              <button 
+                onClick={handleActivateCampaign}
+                disabled={isActivating}
+                className={`w-full py-4 rounded-2xl bg-[#1E5BFF] text-white font-black text-sm uppercase tracking-widest transition-all shadow-xl flex items-center justify-center gap-2 active:scale-[0.98] disabled:opacity-50`}
+              >
+                {isActivating ? (
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                ) : (
+                  <>
+                    Finalizar compra
+                    <ChevronRight className="w-5 h-5" />
+                  </>
+                )}
+              </button>
+              <p className="text-center text-[10px] text-gray-400 font-bold uppercase tracking-widest">
+                Pagamento único. Sem cobranças recorrentes.
+              </p>
+            </div>
           </div>
         )}
       </div>
@@ -445,7 +467,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack }) => {
               <Loader2 className="w-5 h-5 animate-spin" />
             ) : (
               <>
-                {createStep === 2 ? 'Finalizar campanha' : 'Pagar e ativar campanha'}
+                {createStep === 2 ? 'Finalizar campanha' : 'Finalizar compra'}
                 <ChevronRight className="w-4 h-4" strokeWidth={3} />
               </>
             )}
@@ -516,7 +538,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack }) => {
 
   return (
     <div className="min-h-screen bg-white dark:bg-slate-950 font-sans flex flex-col transition-colors duration-300">
-      <div className="sticky top-0 z-30 bg-white/95 dark:bg-slate-950/90 backdrop-blur-md px-5 h-16 flex items-center gap-4 border-b border-gray-100 dark:border-white/5 shrink-0">
+      <div className="sticky top-0 z-30 bg-white/95 dark:bg-slate-950/90 backdrop-blur-md px-5 h-16 flex items-center gap-4 border-b border-gray-100 dark:border-gray-100 shrink-0">
         <button 
           onClick={view === 'list' ? onBack : () => setView('list')} 
           className="p-2 -ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-white/5 transition-colors"
