@@ -535,12 +535,14 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
           </div>
         );
       case 'cashback_banner':
-        if (!user) return null;
+        if (!user || !userRole) return null;
         return (
           <div key="cashback_banner" className="px-5 pt-2">
             <UserCashbackBanner 
-              balance={12.40} // Mock balance, in real app would come from a state or context
-              onClick={() => onNavigate('user_cashback_flow')} 
+              role={userRole}
+              balance={12.40} 
+              totalGenerated={320.00}
+              onClick={() => onNavigate(userRole === 'lojista' ? 'store_area' : 'user_cashback_flow')} 
             />
           </div>
         );
