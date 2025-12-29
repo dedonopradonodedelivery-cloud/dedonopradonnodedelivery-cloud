@@ -35,14 +35,17 @@ import {
   Bike,
   Rocket,
   Sparkles,
-  Compass
+  Compass,
+  ArrowRightLeft,
+  Hammer,
+  CheckCircle2
 } from 'lucide-react';
 import { LojasEServicosList } from './LojasEServicosList';
 import { User } from '@supabase/supabase-js';
 import { SpinWheelView } from './SpinWheelView';
 import { MasterSponsorBanner } from './MasterSponsorBanner';
 import { CATEGORIES, EDITORIAL_COLLECTIONS } from '../constants';
-import { RecomendadosPorMoradores } from './RecomendadosPorMoradores'; // NEW IMPORT
+import { RecomendadosPorMoradores } from './RecomendadosPorMoradores';
 
 interface HomeFeedProps {
   onNavigate: (view: string) => void;
@@ -65,17 +68,16 @@ interface Suggestion {
   subtitle: string;
   icon: React.ReactNode;
   bg: string;
-  tags: string[]; // e.g., ['morning', 'breakfast', 'cold']
+  tags: string[];
   score?: number;
 }
 
-// --- NEW MOCK DATA FOR RECOMENDADOS POR MORADORES ---
-interface RecomendacaoItem { // Changed from RecommendedItem to RecomendacaoItem
-  id: string; // Added id
-  nome: string; // Changed from storeName to nome
-  categoria: string; // Changed from category to categoria
-  texto: string; // Changed from recommendationText to texto
-  totalRecomendacoes: number; // Changed from recommendersCount to totalRecomendacoes
+interface RecomendacaoItem {
+  id: string;
+  nome: string;
+  categoria: string;
+  texto: string;
+  totalRecomendacoes: number;
 }
 
 const mockRecomendados: RecomendacaoItem[] = [
@@ -100,7 +102,6 @@ const mockRecomendados: RecomendacaoItem[] = [
     texto: 'Eletricista de confiança, resolveu meu problema em minutos.',
     totalRecomendacoes: 12,
   },
-  // Item extra para garantir que só 3 são exibidos, conforme a lógica do componente RecomendadosPorMoradores
   { 
     id: 'rec-4',
     nome: 'Doceria da Vovó',
@@ -109,10 +110,7 @@ const mockRecomendados: RecomendacaoItem[] = [
     totalRecomendacoes: 30,
   },
 ];
-// --- END NEW MOCK DATA ---
 
-
-// --- NOVO SISTEMA DE SUGESTÕES DINÂMICAS ---
 const SUGGESTION_POOL: Suggestion[] = [
   { id: 'sug-1', title: 'Pão quentinho na chapa', subtitle: 'Padarias abertas perto de você', icon: <Coffee size={24} className="text-amber-900/80" />, bg: 'bg-amber-400/80', tags: ['morning', 'breakfast', 'cold'] },
   { id: 'sug-2', title: 'Aquele café pra viagem', subtitle: 'Cafeterias com retirada rápida', icon: <Zap size={24} className="text-gray-800" />, bg: 'bg-gray-300/80', tags: ['morning', 'lunch_transition', 'afternoon'] },
@@ -137,10 +135,11 @@ const getMockWeather = (hour: number) => {
 interface BannerItem {
   id: string;
   badge: string;
-  icon: React.ReactNode;
+  icon?: React.ReactNode;
   title: string;
   subtitle: string;
   image?: string;
+  backgroundImage?: string;
   cta: string;
   action: () => void;
   isSponsored?: boolean;
@@ -219,16 +218,6 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
     }
   };
 
-  const scrollCategories = (direction: 'left' | 'right') => {
-    if (categoriesRef.current) {
-        const scrollAmount = categoriesRef.current.clientWidth * 0.7;
-        categoriesRef.current.scrollBy({
-            left: direction === 'left' ? -scrollAmount : scrollAmount,
-            behavior: 'smooth'
-        });
-    }
-  };
-
   useEffect(() => {
     const container = categoriesRef.current;
     if (container) {
@@ -283,10 +272,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
     
     const contextualSuggestions = scoredSuggestions.filter(s => (s.score || 0) >= 100);
 
-    if (contextualSuggestions.length === 0) {
-      return [];
-    }
-      
+    if (contextualSuggestions.length === 0) return [];
     return contextualSuggestions.slice(0, TARGET_SUGGESTION_COUNT);
   }, []);
 
@@ -294,30 +280,54 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
   const banners = useMemo((): BannerItem[] => {
     const list: BannerItem[] = [
       {
-        id: 'cashback_promo',
-        badge: 'CASHBACK',
-        icon: <Coins className="w-24 h-24 text-white/20" />,
-        title: 'Dinheiro de volta em\ntodas as compras',
-        subtitle: 'Ative agora e economize no bairro',
-        gradient: 'from-emerald-500 to-emerald-600',
-        cta: 'Ativar Grátis',
+        id: 'cashback_neighborhood_main',
+        badge: 'OFERTA',
+        title: 'O cashback que vale no bairro inteiro.',
+        subtitle: 'Você compra em uma, ganha e usa em outra. Vantagem real pra você.',
+        // URL da imagem enviada pelo usuário (simulação)
+        backgroundImage: 'https://nyneuuvcdmtqjyaqrztz.supabase.co/storage/v1/object/public/system_assets/cashback_promo_full.png', 
+        gradient: 'from-[#064e3b] to-[#14532d]', // Backup color
+        cta: 'Entenda como funciona',
         action: () => onNavigate('cashback_info'),
-        ctaClass: 'animate-pulse-soft shadow-[0_0_15px_rgba(255,255,255,0.4)]'
+        ctaClass: 'bg-gradient-to-r from-emerald-600 to-green-700 text-white shadow-[0_8px_25px_rgba(20,83,45,0.4)] border-none'
       },
       {
-        id: 'whatsapp_services',
-        badge: 'ORÇAMENTOS',
-        icon: <MessageCircle className="w-24 h-24 text-white/20" />,
-        title: 'Precisa de conserto rápido?',
-        subtitle: 'Compare orçamentos no WhatsApp com profissionais do seu bairro.',
-        gradient: 'from-emerald-600 to-teal-700',
-        cta: 'Pedir orçamento agora',
+        id: 'freguesia_connect_exclusive_final',
+        badge: 'EXCLUSIVO LOJISTAS',
+        icon: (
+          <div className="relative flex items-center justify-center">
+            <Handshake className="w-24 h-24 text-white/20" />
+            <TrendingUp className="w-12 h-12 text-white/40 absolute -top-4 -right-4 rotate-12 animate-pulse" />
+          </div>
+        ),
+        title: 'Freguesia Connect',
+        subtitle: 'Um grupo de networking entre lojistas da freguesia.\nConexões reais, parcerias locais e novas oportunidades.',
+        gradient: 'from-[#1e1b4b] via-[#312e81] to-[#1e3a8a]',
+        cta: 'Saiba como participar',
+        action: () => onNavigate('freguesia_connect_public'),
+        ctaClass: 'bg-white text-[#312e81] shadow-[0_8px_20px_rgba(49,46,129,0.4)] hover:scale-105'
+      },
+      {
+        id: 'services_resolve_hero',
+        badge: 'RESOLVA AGORA',
+        icon: (
+          <div className="relative flex items-center justify-center">
+            <Wrench className="w-24 h-24 text-white/20" />
+            <div className="absolute -top-4 -right-4 bg-white/20 p-2 rounded-full backdrop-blur-md">
+                <CheckCircle2 className="w-8 h-8 text-white animate-pulse" />
+            </div>
+          </div>
+        ),
+        title: 'Precisa de um serviço?\nA gente resolve.',
+        subtitle: 'Peça um serviço e receba até 5 orçamentos direto no seu WhatsApp. Rápido, fácil e sem complicação.',
+        gradient: 'from-emerald-500 via-teal-600 to-cyan-700',
+        cta: 'Solicitar serviço',
         action: () => onNavigate('services'),
-        ctaClass: 'animate-bounce-x-small',
+        ctaClass: 'bg-white text-teal-700 shadow-[0_8px_20px_rgba(13,148,136,0.3)] hover:scale-105',
         iconAnimation: ''
       },
       {
-        id: 'institutional',
+        id: 'institutional_guide',
         badge: 'SUPER-APP',
         icon: <MapPin className="w-24 h-24 text-white/20" />,
         title: 'O guia definitivo da\nnossa vizinhança',
@@ -326,17 +336,6 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
         cta: 'Explorar o Guia',
         action: () => onNavigate('about'),
         ctaClass: ''
-      },
-      {
-        id: 'freguesia_connect',
-        badge: 'OPORTUNIDADE',
-        icon: <Handshake className="w-24 h-24 text-white/20" />,
-        title: 'Mais visibilidade no seu bairro',
-        subtitle: 'Coloque sua loja em destaque e atraia novos clientes locais.',
-        gradient: 'from-indigo-600 to-violet-700',
-        cta: 'Quero participar',
-        action: () => onNavigate('freguesia_connect_public'),
-        ctaClass: 'animate-bounce-y'
       }
     ];
 
@@ -365,7 +364,6 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
     return banners.length > 1 ? [...banners, banners[0]] : banners;
   }, [banners]);
 
-  // Autoplay and infinite loop logic
   useEffect(() => {
     if (banners.length <= 1) return;
   
@@ -390,8 +388,6 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
     if (!target) return;
   
     const { scrollLeft, clientWidth, scrollWidth } = target;
-    
-    // Update the indicator dots based on the current slide
     const newIndex = Math.round(scrollLeft / clientWidth);
     const newActiveDotIndex = newIndex % banners.length;
     
@@ -399,11 +395,8 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
         setActiveBannerIndex(newActiveDotIndex);
     }
 
-    // Check if we're at the very end (the cloned slide)
     const isAtEnd = scrollLeft + clientWidth >= scrollWidth - 1;
-
     if (isAtEnd) {
-      // We have scrolled to the cloned slide. Instantly jump back to the start without animation.
       target.style.scrollBehavior = 'auto';
       target.scrollLeft = 0;
       target.style.scrollBehavior = 'smooth';
@@ -419,35 +412,65 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
             <div ref={carouselRef} onScroll={handleScroll} className="flex overflow-x-auto snap-x snap-mandatory no-scrollbar px-0 scroll-smooth">
               {carouselBanners.map((banner, index) => {
                 const isActive = activeBannerIndex === (index % banners.length);
+                const hasFullBg = !!banner.backgroundImage;
+
                 return (
                   <div key={`${banner.id}-${index}`} className="min-w-full snap-center px-4">
                     <div className={`w-full bg-gradient-to-br ${banner.gradient} rounded-[24px] overflow-hidden shadow-[0_8px_30px_rgba(0,0,0,0.12)] relative h-[190px] flex items-center transition-all duration-500 border border-white/10`}>
                       
-                      <div className="absolute right-4 top-1/2 -translate-y-1/2 z-20 pointer-events-none transition-all duration-1000">
-                         {banner.image ? (
-                           <div className="w-[100px] h-[100px] rounded-[2.5rem] overflow-hidden shadow-[0_12px_35px_rgba(0,0,0,0.25)] rotate-3 animate-float bg-white p-1">
-                              <img src={banner.image} alt="" className="w-full h-full object-contain rounded-[2.3rem]" />
-                           </div>
-                         ) : (
-                           <div className="mr-8 scale-[2.2] rotate-[-10deg] animate-float opacity-30">
-                             {banner.icon}
-                           </div>
-                         )}
-                      </div>
-
-                      <div className="relative z-10 px-7 py-6 flex flex-col justify-center h-full w-full max-w-[65%]">
-                        <div className="flex items-center gap-1.5 mb-2">
-                          <span className={`text-[9px] font-black uppercase tracking-[0.2em] px-2 py-0.5 rounded-md ${banner.isSponsored ? 'bg-black/20 text-white' : 'bg-white/20 text-white'}`}>
-                            {banner.badge}
-                          </span>
+                      {/* Full Background Image Layer */}
+                      {hasFullBg && (
+                        <div className="absolute inset-0 z-0">
+                          <img 
+                            src={banner.backgroundImage} 
+                            alt="" 
+                            className="w-full h-full object-cover"
+                            onError={(e) => {
+                                // Fallback em caso de erro na imagem
+                                e.currentTarget.style.display = 'none';
+                            }}
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-r from-black/20 via-transparent to-transparent"></div>
                         </div>
-                        <h1 className="text-xl font-bold text-white mb-2 leading-tight whitespace-pre-line tracking-tight drop-shadow-[0_1px_2px_rgba(0,0,0,0.2)]">
-                          {banner.title}
-                        </h1>
-                        <p className="text-white/90 text-[11px] font-medium mb-5 leading-tight line-clamp-1">
-                          {banner.subtitle}
-                        </p>
-                        <button onClick={banner.action} className={`w-fit bg-white text-gray-900 text-[12px] font-bold px-5 py-2.5 rounded-full active:scale-95 transition-all flex items-center gap-2 shadow-lg ${isActive ? banner.ctaClass : ''}`}>
+                      )}
+
+                      {/* Content Layer */}
+                      {!hasFullBg && (
+                         <div className="absolute right-4 top-1/2 -translate-y-1/2 z-20 pointer-events-none transition-all duration-1000">
+                            {banner.image ? (
+                              <div className="w-[100px] h-[100px] rounded-[2.5rem] overflow-hidden shadow-[0_12px_35px_rgba(0,0,0,0.25)] rotate-3 animate-float bg-white p-1">
+                                 <img src={banner.image} alt="" className="w-full h-full object-contain rounded-[2.3rem]" />
+                              </div>
+                            ) : banner.icon ? (
+                              <div className="mr-8 scale-[2.2] rotate-[-10deg] animate-float opacity-30">
+                                {banner.icon}
+                              </div>
+                            ) : null}
+                         </div>
+                      )}
+
+                      <div className={`relative z-10 px-7 py-6 flex flex-col justify-center h-full w-full ${hasFullBg ? 'items-center text-center' : 'max-w-[72%] items-start'}`}>
+                        {/* Se houver imagem de fundo, mostramos apenas o botão se ele já estiver na arte, ou ajustamos o conteúdo */}
+                        {!hasFullBg ? (
+                          <>
+                            <div className="flex items-center gap-1.5 mb-2">
+                              <span className={`text-[9px] font-black uppercase tracking-[0.2em] px-2 py-0.5 rounded-md ${banner.isSponsored ? 'bg-black/20 text-white' : 'bg-white/20 text-white'}`}>
+                                {banner.badge}
+                              </span>
+                            </div>
+                            <h1 className="text-xl font-bold text-white mb-2 leading-tight whitespace-pre-line tracking-tight drop-shadow-[0_1px_2px_rgba(0,0,0,0.2)]">
+                              {banner.title}
+                            </h1>
+                            <p className="text-white/90 text-[11px] font-medium mb-5 leading-tight line-clamp-2">
+                              {banner.subtitle}
+                            </p>
+                          </>
+                        ) : (
+                          // Espaçador para o botão alinhar com a arte enviada (geralmente embaixo)
+                          <div className="mt-auto mb-2"></div>
+                        )}
+                        
+                        <button onClick={banner.action} className={`w-fit bg-white text-gray-900 text-[12px] font-bold px-5 py-2.5 rounded-full active:scale-95 transition-all flex items-center justify-center gap-2 shadow-lg ${isActive ? banner.ctaClass : ''}`}>
                           {banner.cta} <ArrowRight className={`w-3.5 h-3.5 ${isActive && banner.iconAnimation ? banner.iconAnimation : ''}`} />
                         </button>
                       </div>
@@ -509,15 +532,15 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
               <div className="w-24 h-1 bg-gray-200 dark:bg-gray-700 rounded-full relative">
                 <div 
                   className="h-full bg-primary-500 rounded-full absolute top-0 left-0 w-8 transition-transform duration-100 ease-linear"
-                  style={{ transform: `translateX(${categoryScrollProgress * (96 - 32)}px)` }} // 96px track - 32px thumb = 64px travel
+                  style={{ transform: `translateX(${categoryScrollProgress * (96 - 32)}px)` }}
                 />
               </div>
             </div>
           </div>
         );
       case 'recommendations':
-        return null; // This section is removed
-      case 'trending': // Replaced with Editorial Collections
+        return null;
+      case 'trending':
         return (
           <div key="trending" className="px-5">
             <div className="flex items-center justify-between mb-4">
@@ -548,7 +571,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
             </div>
           </div>
         );
-      case 'community_recommendations': // NEW SECTION
+      case 'community_recommendations':
         return (
           <div key="community_recommendations" className="px-5">
             <div className="flex items-center justify-between mb-4">
@@ -674,12 +697,11 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
         </div>
       ) : (
         <div className="flex flex-col gap-6 w-full">
-            {/* 1. Ordem Final dos Blocos */}
             {renderSection('categories')}
             {renderSection('hero')}
             {renderSection('roulette_banner')}
             {renderSection('highlights')}
-            {renderSection('community_recommendations')} {/* NEW SECTION */}
+            {renderSection('community_recommendations')}
             {renderSection('trending')}
             {renderSection('filters')}
             {renderSection('list')}
