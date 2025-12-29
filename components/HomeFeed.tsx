@@ -549,7 +549,6 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
                 <button onClick={() => onNavigate('explore')} className="text-xs font-bold text-primary-500">Ver tudo</button>
             </div>
             
-            {/* NOVO CARROSSEL HORIZONTAL DE GUIAS */}
             <div className="flex gap-4 overflow-x-auto no-scrollbar snap-x -mx-5 px-5 pb-4">
               {EDITORIAL_COLLECTIONS.map((collection) => (
                 <button
@@ -562,7 +561,6 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
                     alt={collection.title} 
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" 
                   />
-                  {/* Overlay Gradiente Urbano */}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent"></div>
                   
                   <div className="absolute bottom-0 left-0 right-0 p-6 text-left">
@@ -636,23 +634,32 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
         if (dynamicSuggestions.length === 0) return null;
         return (
           <div key="highlights" className="px-5">
-            <div className="flex items-center gap-1.5 mb-2 px-1">
-              <Flame className="w-3.5 h-3.5 text-gray-400" />
-              <h3 className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">Agora no seu bairro</h3>
+            <div className="flex items-center gap-1.5 mb-3 px-1">
+              <TrendingUp className="w-3.5 h-3.5 text-blue-500" />
+              <h3 className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">Atividade Recente</h3>
             </div>
-            <div className="flex gap-3.5 overflow-x-auto no-scrollbar snap-x pt-2">
+            <div className="flex gap-4 overflow-x-auto no-scrollbar snap-x -mx-5 px-5 pb-2">
               {dynamicSuggestions.map((item: Suggestion) => (
-                <div key={item.id} className={`snap-center flex-shrink-0 w-[190px] bg-[#EAF2FF] dark:bg-gray-800 border border-[#DBEAFE] dark:border-gray-700 p-5 rounded-[24px] flex flex-col gap-4 active:scale-95 transition-all cursor-pointer group shadow-sm hover:shadow-md`}>
-                  <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">{item.title}</span>
-                    <div className="opacity-100 transition-transform group-hover:scale-110 duration-300 drop-shadow-sm">
-                      {React.cloneElement(item.icon as React.ReactElement<any>, { 
-                          className: 'text-[#2D6DF6] dark:text-blue-400',
-                          size: 24
-                      })}
+                <div key={item.id} className="snap-center flex-shrink-0 w-[240px] bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 p-5 rounded-[28px] shadow-[0_4px_20px_rgba(0,0,0,0.04)] flex flex-col gap-4 active:scale-95 transition-all cursor-pointer group hover:shadow-lg">
+                  <div className="flex items-start justify-between">
+                    <div className="flex flex-col">
+                        <span className="text-[10px] font-black uppercase tracking-[0.15em] text-[#1E5BFF] mb-1">Agora no seu bairro</span>
+                        <h4 className="text-[15px] font-bold text-gray-900 dark:text-white leading-tight">Em destaque perto de você</h4>
+                    </div>
+                    <div className="bg-blue-50 dark:bg-blue-900/30 p-2 rounded-xl text-[#1E5BFF] shadow-sm animate-pulse">
+                        <Zap size={18} className="fill-current" />
                     </div>
                   </div>
-                  <p className="text-[15px] font-bold text-gray-900 dark:text-white leading-tight">{item.subtitle}</p>
+                  
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-gray-50 dark:bg-gray-700 rounded-xl flex items-center justify-center text-gray-600 dark:text-gray-300">
+                        {item.icon}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                        <p className="text-[13px] font-bold text-gray-800 dark:text-gray-200 truncate">{item.title}</p>
+                        <p className="text-[11px] text-gray-500 dark:text-gray-400 truncate">O que os moradores estão acessando agora</p>
+                    </div>
+                  </div>
                 </div>
               ))}
             </div>
