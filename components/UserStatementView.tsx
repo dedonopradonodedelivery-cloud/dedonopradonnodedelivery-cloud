@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { ChevronLeft, ArrowUpRight, ArrowDownLeft, Info, Coins, ArrowRight, Store } from 'lucide-react';
+import { ChevronLeft, ArrowUpRight, ArrowDownLeft, Info, Coins, ArrowRight } from 'lucide-react';
 import { InstitutionalSponsorBanner } from './InstitutionalSponsorBanner';
 
 interface Transaction {
@@ -30,9 +30,10 @@ export const UserStatementView: React.FC<UserStatementViewProps> = ({
   balance = 12.40 
 }) => {
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 font-sans animate-in slide-in-from-right duration-300">
-      {/* Header */}
-      <div className="sticky top-0 z-30 bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800 px-5 h-16 flex items-center gap-4">
+    /* Root container garantindo fundo contínuo em toda a altura da tela */
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 font-sans animate-in slide-in-from-right duration-300 flex flex-col">
+      {/* Header - Sticky */}
+      <div className="sticky top-0 z-30 bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800 px-5 h-16 flex items-center gap-4 shrink-0">
         <button 
           onClick={onBack}
           className="p-2 -ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
@@ -42,7 +43,7 @@ export const UserStatementView: React.FC<UserStatementViewProps> = ({
         <h2 className="text-lg font-bold text-gray-900 dark:text-white font-display">Seu Cashback</h2>
       </div>
 
-      <div className="p-5 pb-32">
+      <div className="flex-1 p-5 pb-32 bg-gray-50 dark:bg-gray-950">
         {/* Main Balance Card */}
         <div className="bg-[#1E5BFF] rounded-[32px] p-8 text-white shadow-xl shadow-blue-500/20 relative overflow-hidden mb-8 border border-white/10">
           <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none"></div>
@@ -102,7 +103,6 @@ export const UserStatementView: React.FC<UserStatementViewProps> = ({
               </div>
             )) : (
               <div className="p-10 text-center">
-                <Info className="w-8 h-8 text-gray-300 mx-auto mb-3" />
                 <p className="text-gray-400 text-sm font-medium">Nenhuma movimentação ainda.</p>
               </div>
             )}
@@ -118,21 +118,21 @@ export const UserStatementView: React.FC<UserStatementViewProps> = ({
             <div>
               <h4 className="font-bold text-gray-900 dark:text-white text-sm">Onde posso usar?</h4>
               <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 leading-relaxed">
-                Seu saldo de cashback é aceito como pagamento em centenas de lojas parceiras na Freguesia. Economize nas próximas compras!
+                Seu saldo de cashback é aceito como pagamento em centenas de lojas parceiras na Freguesia.
               </p>
             </div>
           </div>
           
           <button 
             onClick={onExploreStores}
-            className="w-full mt-6 bg-[#1E5BFF] text-white font-bold text-sm py-4 rounded-2xl shadow-lg shadow-blue-500/30 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+            className="w-full mt-6 bg-[#1E5BFF] text-white font-bold text-sm py-4 rounded-2xl shadow-lg shadow-blue-500/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
           >
             Ver lojas com cashback
             <ArrowRight className="w-4 h-4" />
           </button>
         </div>
 
-        {/* Institutional Sponsor Banner */}
+        {/* Banner Patrocinador Master */}
         <InstitutionalSponsorBanner type="client" />
       </div>
     </div>
