@@ -38,7 +38,8 @@ import {
   Compass,
   ArrowRightLeft,
   Hammer,
-  CheckCircle2
+  CheckCircle2,
+  Heart
 } from 'lucide-react';
 import { LojasEServicosList } from './LojasEServicosList';
 import { User } from '@supabase/supabase-js';
@@ -106,7 +107,7 @@ const mockRecomendados: RecomendacaoItem[] = [
     id: 'rec-4',
     nome: 'Doceria da Vovó',
     categoria: 'Alimentação',
-    texto: 'Os melhores bolos e doces caseiros da região. Imperdível!',
+    texto: 'Os melhores bolos caseiros. O de cenoura é divino!',
     totalRecomendacoes: 30,
   },
 ];
@@ -280,16 +281,15 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
   const banners = useMemo((): BannerItem[] => {
     const list: BannerItem[] = [
       {
-        id: 'cashback_neighborhood_main',
-        badge: 'OFERTA',
+        id: 'cashback_neighborhood_custom_image',
+        badge: 'OFERTA DO BAIRRO',
         title: 'O cashback que vale no bairro inteiro.',
-        subtitle: 'Você compra em uma, ganha e usa em outra. Vantagem real pra você.',
-        // URL da imagem enviada pelo usuário (simulação)
-        backgroundImage: 'https://nyneuuvcdmtqjyaqrztz.supabase.co/storage/v1/object/public/system_assets/cashback_promo_full.png', 
-        gradient: 'from-[#064e3b] to-[#14532d]', // Backup color
+        subtitle: 'Você compra em uma, ganha e usa em outra. Dinheiro girando no bairro. Vantagem real pra você.',
+        backgroundImage: 'https://nyneuuvcdmtqjyaqrztz.supabase.co/storage/v1/object/public/system_assets/cashback_user_banner.png', 
+        gradient: 'from-[#14532d] to-[#064e3b]', 
         cta: 'Entenda como funciona',
         action: () => onNavigate('cashback_info'),
-        ctaClass: 'bg-gradient-to-r from-emerald-600 to-green-700 text-white shadow-[0_8px_25px_rgba(20,83,45,0.4)] border-none'
+        ctaClass: 'bg-gradient-to-r from-[#14532d] to-[#166534] text-white border border-[#fbbf24]/30 shadow-[0_8px_25px_rgba(20,83,45,0.4)]'
       },
       {
         id: 'freguesia_connect_exclusive_final',
@@ -418,7 +418,6 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
                   <div key={`${banner.id}-${index}`} className="min-w-full snap-center px-4">
                     <div className={`w-full bg-gradient-to-br ${banner.gradient} rounded-[24px] overflow-hidden shadow-[0_8px_30px_rgba(0,0,0,0.12)] relative h-[190px] flex items-center transition-all duration-500 border border-white/10`}>
                       
-                      {/* Full Background Image Layer */}
                       {hasFullBg && (
                         <div className="absolute inset-0 z-0">
                           <img 
@@ -426,15 +425,13 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
                             alt="" 
                             className="w-full h-full object-cover"
                             onError={(e) => {
-                                // Fallback em caso de erro na imagem
                                 e.currentTarget.style.display = 'none';
                             }}
                           />
-                          <div className="absolute inset-0 bg-gradient-to-r from-black/20 via-transparent to-transparent"></div>
+                          <div className="absolute inset-0 bg-black/10"></div>
                         </div>
                       )}
 
-                      {/* Content Layer */}
                       {!hasFullBg && (
                          <div className="absolute right-4 top-1/2 -translate-y-1/2 z-20 pointer-events-none transition-all duration-1000">
                             {banner.image ? (
@@ -450,7 +447,6 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
                       )}
 
                       <div className={`relative z-10 px-7 py-6 flex flex-col justify-center h-full w-full ${hasFullBg ? 'items-center text-center' : 'max-w-[72%] items-start'}`}>
-                        {/* Se houver imagem de fundo, mostramos apenas o botão se ele já estiver na arte, ou ajustamos o conteúdo */}
                         {!hasFullBg ? (
                           <>
                             <div className="flex items-center gap-1.5 mb-2">
@@ -466,12 +462,11 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
                             </p>
                           </>
                         ) : (
-                          // Espaçador para o botão alinhar com a arte enviada (geralmente embaixo)
                           <div className="mt-auto mb-2"></div>
                         )}
                         
-                        <button onClick={banner.action} className={`w-fit bg-white text-gray-900 text-[12px] font-bold px-5 py-2.5 rounded-full active:scale-95 transition-all flex items-center justify-center gap-2 shadow-lg ${isActive ? banner.ctaClass : ''}`}>
-                          {banner.cta} <ArrowRight className={`w-3.5 h-3.5 ${isActive && banner.iconAnimation ? banner.iconAnimation : ''}`} />
+                        <button onClick={banner.action} className={`w-fit bg-white text-gray-900 text-[12px] font-bold px-6 py-3 rounded-full active:scale-95 transition-all flex items-center justify-center gap-2 shadow-xl ${isActive ? banner.ctaClass : ''}`}>
+                          {banner.cta} <ChevronRight className={`w-4 h-4 ${isActive && banner.iconAnimation ? banner.iconAnimation : ''}`} />
                         </button>
                       </div>
 
@@ -553,18 +548,37 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
                 </div>
                 <button onClick={() => onNavigate('explore')} className="text-xs font-bold text-primary-500">Ver tudo</button>
             </div>
-            <div className="grid grid-cols-1 gap-4">
+            
+            {/* NOVO CARROSSEL HORIZONTAL DE GUIAS */}
+            <div className="flex gap-4 overflow-x-auto no-scrollbar snap-x -mx-5 px-5 pb-4">
               {EDITORIAL_COLLECTIONS.map((collection) => (
                 <button
                   key={collection.id}
                   onClick={() => onSelectCollection(collection)}
-                  className="w-full h-32 rounded-2xl overflow-hidden relative group active:scale-[0.98] transition-transform shadow-lg shadow-black/5"
+                  className="min-w-[280px] max-w-[280px] h-44 rounded-[32px] overflow-hidden relative group active:scale-[0.98] transition-all shadow-xl shadow-black/10 snap-center"
                 >
-                  <img src={collection.image} alt={collection.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent"></div>
-                  <div className="absolute bottom-0 left-0 right-0 p-4 text-left">
-                    <h4 className="text-white font-bold text-lg leading-tight drop-shadow-md">{collection.title}</h4>
-                    <p className="text-white/90 text-xs drop-shadow-sm">{collection.subtitle}</p>
+                  <img 
+                    src={collection.image} 
+                    alt={collection.title} 
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" 
+                  />
+                  {/* Overlay Gradiente Urbano */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent"></div>
+                  
+                  <div className="absolute bottom-0 left-0 right-0 p-6 text-left">
+                    <div className="flex items-end justify-between">
+                        <div className="flex-1">
+                            <h4 className="text-white font-black text-xl leading-tight font-display mb-1 drop-shadow-lg uppercase tracking-tight">
+                                {collection.title}
+                            </h4>
+                            <p className="text-white/80 text-[11px] font-semibold leading-none drop-shadow-sm truncate">
+                                {collection.subtitle}
+                            </p>
+                        </div>
+                        <div className="w-10 h-10 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center text-white border border-white/20 group-hover:bg-white group-hover:text-gray-900 transition-all">
+                            <ArrowUpRight className="w-5 h-5" />
+                        </div>
+                    </div>
                   </div>
                 </button>
               ))}
@@ -576,10 +590,10 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
           <div key="community_recommendations" className="px-5">
             <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
-                    <Users className="w-3.5 h-3.5 text-gray-400"/>
+                    <Heart className="w-3.5 h-3.5 text-rose-400"/>
                     <div>
-                        <h3 className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">Recomendados por Moradores</h3>
-                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">O que a vizinhança está amando e indicando.</p>
+                        <h3 className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">Amados pela Vizinhança</h3>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Dicas reais de quem mora e vive no bairro.</p>
                     </div>
                 </div>
             </div>
