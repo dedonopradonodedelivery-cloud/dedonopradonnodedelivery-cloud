@@ -55,7 +55,8 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack }) => {
   const [createStep, setCreateStep] = useState(1);
   const [newCampaignType, setNewCampaignType] = useState<AdType | null>(null);
   const [campaignName, setCampaignName] = useState('');
-  // Duration: 15 a 180 dias (padrão 15)
+  
+  // Duração: 15 a 180 dias. Usamos o estado inteiro para atualizar tudo em tempo real.
   const [duration, setDuration] = useState<number>(15); 
   const [isActivating, setIsActivating] = useState(false);
 
@@ -64,7 +65,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack }) => {
   const getPricePerDay = (type: AdType) => type === 'local' ? 0.89 : 3.90;
   const currentPrice = newCampaignType ? getPricePerDay(newCampaignType) : 0;
   
-  const displayDuration = Math.round(duration);
+  const displayDuration = duration;
   const totalCost = currentPrice * displayDuration;
   const hasSufficientBalance = STORE_BALANCE >= totalCost;
 
@@ -83,15 +84,14 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack }) => {
 
   const handleActivateCampaign = () => {
     setIsActivating(true);
-    // Simulando processamento de pagamento único
     setTimeout(() => {
       const newCampaign: Campaign = {
         id: Math.random().toString(36).substr(2, 9),
         name: campaignName || 'Nova Campanha',
         type: newCampaignType || 'local',
-        status: 'active', // Ativa imediatamente após pagamento
+        status: 'active',
         startDate: new Date().toLocaleDateString('pt-BR'),
-        endDate: new Date(Date.now() + displayDuration * 86400000).toLocaleDateString('pt-BR'),
+        endDate: new Date(Date.now() + duration * 86400000).toLocaleDateString('pt-BR'),
         budget: totalCost,
         metrics: { impressions: 0, clicks: 0, ctr: 0, reach: 0 },
         history: [0, 0, 0, 0, 0, 0, 0]
@@ -206,7 +206,6 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack }) => {
 
   const CreateView = () => (
     <div className="flex flex-col min-h-screen bg-white dark:bg-slate-950 transition-colors duration-300">
-      {/* Stepper */}
       <div className="p-5 flex justify-between mb-2 px-8 relative shrink-0">
         <div className="absolute top-9 left-0 right-0 h-0.5 bg-gray-100 dark:bg-slate-800 -z-0 mx-12"></div>
         {[1, 2, 3].map(step => (
@@ -226,7 +225,6 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack }) => {
       </div>
 
       <div className="flex-1 p-5 pb-40 overflow-y-auto no-scrollbar w-full">
-        {/* PASSO 1: SELEÇÃO DE PLANO */}
         {createStep === 1 && (
           <div className="space-y-4 animate-in slide-in-from-right duration-300">
             <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2 text-center font-display">Escolha seu Ads</h3>
@@ -281,7 +279,6 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack }) => {
           </div>
         )}
 
-        {/* PASSO 2: DADOS DA CAMPANHA */}
         {createStep === 2 && (
           <div className="space-y-6 animate-in slide-in-from-right duration-300 w-full">
             <div className="bg-gray-50 dark:bg-slate-900 p-5 rounded-2xl border border-gray-100 dark:border-white/5 flex justify-between items-center w-full">
@@ -306,49 +303,47 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack }) => {
               />
             </div>
 
-            {/* SLIDER DE DURAÇÃO - 15 a 180 DIAS */}
-            <div className="bg-gray-50 dark:bg-slate-900 p-6 rounded-3xl border border-gray-100 dark:border-white/5 w-full relative overflow-hidden">
+            <div className="bg-gray-50 dark:bg-slate-900 p-6 rounded-3xl border border-gray-100 dark:border-white/5 w-full relative overflow-visible">
               <div className="flex justify-between items-center mb-8 relative z-10">
                 <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-2">
                     <Clock className="w-3.5 h-3.5" /> Duração da campanha
                 </label>
                 <span className="text-xl font-black text-[#1E5BFF] dark:text-purple-500 px-4 py-1.5 bg-blue-500/10 rounded-2xl border border-blue-500/20 shadow-inner">
-                  {displayDuration} dias
+                  {duration} dias
                 </span>
               </div>
               
               <div className="px-2 relative mb-6">
-                {/* Linha de progresso visual de fundo */}
                 <div className="absolute left-2 right-2 h-2 top-1/2 -translate-y-1/2 bg-gray-200 dark:bg-slate-800 rounded-full overflow-hidden pointer-events-none">
                     <div 
-                        className="h-full bg-gradient-to-r from-[#1E5BFF] to-indigo-600 transition-all duration-75"
+                        className="h-full bg-gradient-to-r from-[#1E5BFF] to-indigo-600 transition-none"
                         style={{ width: `${((duration - 15) / 165) * 100}%` }}
                     />
                 </div>
 
-                {/* Marcadores 15 e 180 */}
                 <div className="absolute left-2 right-2 h-1 top-1/2 -translate-y-1/2 flex justify-between pointer-events-none">
                     <div className="w-1.5 h-1.5 bg-white dark:bg-slate-600 rounded-full -translate-x-1/2 shadow-sm"></div>
                     <div className="w-1.5 h-1.5 bg-white dark:bg-slate-600 rounded-full translate-x-1/2 shadow-sm"></div>
                 </div>
                 
+                {/* Input de Range Nativo: Oculto visualmente, mas funcional para drag */}
                 <input 
                   type="range" 
                   min="15" 
                   max="180" 
-                  step="0.1" 
+                  step="1" 
                   value={duration}
-                  onChange={(e) => setDuration(parseFloat(e.target.value))}
+                  onChange={(e) => setDuration(parseInt(e.target.value))}
                   className="w-full h-10 opacity-0 relative z-20 cursor-pointer touch-none"
                 />
 
-                {/* Thumb Visual Customizado */}
+                {/* Thumb Visual: Sem transição (duration-0) para seguir o dedo instantaneamente */}
                 <div 
-                    className="absolute top-1/2 -translate-y-1/2 pointer-events-none z-30 transition-all duration-75"
-                    style={{ left: `calc(${((duration - 15) / 165) * 100}% - 2px)` }}
+                    className="absolute top-1/2 -translate-y-1/2 pointer-events-none z-30 transition-none"
+                    style={{ left: `calc(${((duration - 15) / 165) * 100}% - 0px)` }}
                 >
-                    <div className="w-8 h-8 bg-white rounded-full shadow-[0_5px_15px_rgba(30,91,255,0.4)] border-4 border-[#1E5BFF] flex items-center justify-center transform -translate-x-1/2 active:scale-110 transition-transform">
-                        <div className="w-1 h-3 bg-[#1E5BFF]/20 rounded-full" />
+                    <div className="w-9 h-9 bg-white rounded-full shadow-[0_5px_15px_rgba(30,91,255,0.4)] border-[5px] border-[#1E5BFF] flex items-center justify-center transform -translate-x-1/2">
+                        <div className="w-1 h-3 bg-[#1E5BFF]/30 rounded-full" />
                     </div>
                 </div>
               </div>
@@ -359,21 +354,20 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack }) => {
               </div>
               
               <p className="text-center text-[10px] text-gray-400 dark:text-slate-500 font-bold mt-6 italic uppercase tracking-[0.2em] animate-pulse">
-                Deslize para ajustar o período
+                Arraste para selecionar
               </p>
             </div>
 
             <div className="bg-gradient-to-r from-blue-600/10 to-indigo-600/10 dark:from-purple-600/20 dark:to-indigo-600/20 p-6 rounded-3xl flex justify-between items-center border border-blue-500/20 dark:border-white/10 shadow-sm w-full">
                <div>
                     <span className="text-[10px] font-black text-[#1E5BFF] dark:text-purple-300 uppercase tracking-widest block mb-1">Investimento Total Hoje</span>
-                    <span className="text-xs text-gray-500 dark:text-slate-500 font-bold">{displayDuration} dias × R$ {currentPrice.toFixed(2).replace('.', ',')}/dia</span>
+                    <span className="text-xs text-gray-500 dark:text-slate-500 font-bold">{duration} dias × R$ {currentPrice.toFixed(2).replace('.', ',')}/dia</span>
                </div>
                <span className="text-2xl font-black text-gray-900 dark:text-white">R$ {totalCost.toFixed(2).replace('.', ',')}</span>
             </div>
           </div>
         )}
 
-        {/* PASSO 3: PAGAMENTO PRÉ-PAGO */}
         {createStep === 3 && (
           <div className="space-y-6 animate-in slide-in-from-right duration-300 w-full">
             <div className="bg-gray-50 dark:bg-slate-900 p-8 rounded-[32px] border border-gray-100 dark:border-white/5 shadow-2xl relative overflow-hidden">
@@ -400,7 +394,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack }) => {
                     </div>
                     <div className="flex justify-between items-center border-b border-gray-200 dark:border-white/5 pb-4">
                         <span className="text-slate-500 font-bold uppercase text-[10px] tracking-wider">Período</span>
-                        <span className="font-bold text-gray-900 dark:text-white">{displayDuration} dias</span>
+                        <span className="font-bold text-gray-900 dark:text-white">{duration} dias</span>
                     </div>
                     <div className="flex justify-between items-center pt-2">
                         <span className="font-black text-slate-400 uppercase text-[10px] tracking-widest">Total à Pagar</span>
@@ -417,7 +411,6 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack }) => {
         )}
       </div>
 
-      {/* FOOTER NAVEGAÇÃO */}
       <div className="fixed bottom-0 left-0 right-0 p-5 bg-white/95 dark:bg-slate-950/90 backdrop-blur-xl border-t border-gray-100 dark:border-white/5 z-30 flex gap-3 w-full max-w-md mx-auto">
         <button 
           onClick={() => createStep === 1 ? setView('list') : setCreateStep(prev => prev - 1)}
@@ -450,44 +443,16 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack }) => {
         )}
       </div>
 
-      {/* OVERLAY DE ATIVAÇÃO */}
       {isActivating && (
         <div className="fixed inset-0 z-[100] bg-white/95 dark:bg-slate-950/95 backdrop-blur-sm flex flex-col items-center justify-center text-center p-8 animate-in fade-in duration-300">
             <div className="w-24 h-24 bg-blue-600/10 rounded-[2.5rem] flex items-center justify-center mb-8 relative">
-                <div className="absolute inset-0 rounded-[2.5rem] border-4 border-blue-500/30 animate-ping"></div>
+                <div className="absolute inset-0 rounded-[2.5rem] border-4 border-purple-500/30 animate-ping"></div>
                 <Rocket className="w-10 h-10 text-[#1E5BFF] animate-bounce" />
             </div>
             <h2 className="text-2xl font-black text-gray-900 dark:text-white mb-2 font-display">Processando Pagamento</h2>
-            <p className="text-gray-500 dark:text-slate-500 text-sm max-w-[240px]">Confirmando sua campanha pré-paga de {displayDuration} dias...</p>
+            <p className="text-gray-500 dark:text-slate-500 text-sm max-w-[240px]">Confirmando sua campanha pré-paga de {duration} dias...</p>
         </div>
       )}
-
-      <style>{`
-        .custom-slider::-webkit-slider-thumb {
-          -webkit-appearance: none;
-          appearance: none;
-          width: 24px;
-          height: 24px;
-          background: #1E5BFF;
-          border-radius: 50%;
-          cursor: pointer;
-          border: 4px solid #fff;
-          box-shadow: 0 4px 10px rgba(30, 91, 255, 0.4);
-          transition: transform 0.1s ease;
-        }
-        .custom-slider::-moz-range-thumb {
-          width: 24px;
-          height: 24px;
-          background: #1E5BFF;
-          border-radius: 50%;
-          cursor: pointer;
-          border: 4px solid #fff;
-          box-shadow: 0 4px 10px rgba(30, 91, 255, 0.4);
-        }
-        .custom-slider:active::-webkit-slider-thumb {
-          transform: scale(1.1);
-        }
-      `}</style>
     </div>
   );
 
