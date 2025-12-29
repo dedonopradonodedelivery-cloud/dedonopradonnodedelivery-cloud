@@ -5,20 +5,15 @@ import {
   ChevronRight,
   Megaphone, 
   Plus, 
-  Calendar, 
   MousePointer, 
   Eye, 
-  ShoppingBag, 
-  PauseCircle, 
-  PlayCircle, 
-  CheckCircle2,
   TrendingUp,
-  Target,
   Rocket,
   Wallet,
-  QrCode,
-  FileText,
-  AlertCircle
+  CheckCircle2,
+  AlertCircle,
+  Users,
+  Target
 } from 'lucide-react';
 
 interface StoreAdsModuleProps {
@@ -40,15 +35,26 @@ interface Campaign {
     impressions: number;
     clicks: number;
     ctr: number;
-    orders: number;
-    cpa: number;
+    reach: number;
   };
   history: number[]; 
 }
 
-// Mock Data - Simulando sem campanhas para mostrar onboarding primeiro
-// Mude para o array abaixo para testar lista ativa
-const MOCK_CAMPAIGNS: Campaign[] = []; 
+// Mock Data - Simulação de campanha ativa para exibir o painel de métricas
+// Se o array estiver vazio [], exibirá apenas a tela educativa inicial
+const MOCK_CAMPAIGNS: Campaign[] = [
+  {
+    id: '1',
+    name: 'Campanha de Verão',
+    type: 'premium',
+    status: 'active',
+    startDate: '01/03/2024',
+    endDate: '31/03/2024',
+    budget: 120.90,
+    metrics: { impressions: 4850, clicks: 124, ctr: 2.5, reach: 3200 },
+    history: [45, 60, 55, 80, 70, 90, 50]
+  }
+];
 
 const STORE_BALANCE = 45.00; 
 
@@ -61,45 +67,38 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack }) => {
   const [newCampaignType, setNewCampaignType] = useState<AdType>('local');
   
   const [campaignName, setCampaignName] = useState('');
-  const [campaignDesc, setCampaignDesc] = useState('');
   const [duration, setDuration] = useState(7);
 
-  const getPricePerDay = (type: AdType) => type === 'local' ? 1.90 : 3.90;
+  const getPricePerDay = (type: AdType) => type === 'local' ? 0.89 : 3.90;
   const totalCost = getPricePerDay(newCampaignType) * duration;
   const hasSufficientBalance = STORE_BALANCE >= totalCost;
 
   const handleCreateClick = () => {
     setCreateStep(1);
     setCampaignName('');
-    setCampaignDesc('');
     setDuration(7);
     setView('create');
   };
 
-  const handleCampaignClick = (campaign: Campaign) => {
-    setSelectedCampaign(campaign);
-    setView('details');
-  };
-
   const renderStatusBadge = (status: string) => {
     const styles = {
-      active: 'bg-green-100 text-green-700 border-green-200',
-      paused: 'bg-yellow-100 text-yellow-700 border-yellow-200',
-      ended: 'bg-gray-100 text-gray-600 border-gray-200'
+      active: 'bg-green-500/20 text-green-400 border-green-500/30',
+      paused: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30',
+      ended: 'bg-gray-500/20 text-gray-400 border-gray-500/30'
     };
     const labels = { active: 'Ativa', paused: 'Pausada', ended: 'Encerrada' };
     return (
-      <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold uppercase border ${styles[status as keyof typeof styles]}`}>
+      <span className={`px-2 py-0.5 rounded text-[9px] font-black uppercase border ${styles[status as keyof typeof styles]}`}>
         {labels[status as keyof typeof labels]}
       </span>
     );
   };
 
   const ListView = () => (
-    <div className="flex-1 flex flex-col min-h-screen bg-gray-50 dark:bg-gray-950">
+    <div className="flex-1 flex flex-col min-h-screen bg-slate-950">
       <div className="p-5 pb-32 w-full max-w-md mx-auto space-y-6">
         
-        {/* Onboarding / Highlight Card */}
+        {/* Banner Principal (Sempre Visível) */}
         <div className="bg-gradient-to-br from-indigo-700 to-purple-800 rounded-[32px] p-8 text-white shadow-xl shadow-purple-900/20 relative overflow-hidden">
           <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none"></div>
           <div className="relative z-10 flex flex-col items-center text-center">
@@ -112,7 +111,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack }) => {
               </p>
               <button 
                 onClick={handleCreateClick}
-                className="w-full bg-white text-purple-700 font-black py-4 rounded-2xl shadow-lg flex items-center justify-center gap-2 active:scale-[0.98] transition-all hover:bg-yellow-400 hover:text-black"
+                className="w-full bg-white text-purple-700 font-black py-4 rounded-2xl shadow-lg flex items-center justify-center gap-2 active:scale-[0.98] transition-all"
               >
                 <Plus className="w-5 h-5" strokeWidth={3} />
                 CRIAR PRIMEIRA CAMPANHA
@@ -120,53 +119,79 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack }) => {
           </div>
         </div>
 
-        {campaigns.length > 0 ? (
-          <div className="animate-in fade-in slide-in-from-bottom duration-500">
+        {/* Painel de Métricas (Visível apenas se houver campanhas ativas) */}
+        {campaigns.length > 0 && (
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <h3 className="text-xs font-black text-slate-500 uppercase tracking-[0.2em] mb-4 ml-1">
+              Desempenho da Campanha
+            </h3>
+            
+            <div className="grid grid-cols-2 gap-3 mb-6">
+              <div className="bg-slate-900 p-4 rounded-2xl border border-white/5">
+                <div className="flex items-center gap-2 text-slate-400 mb-1">
+                  <Eye className="w-3.5 h-3.5" />
+                  <span className="text-[10px] font-bold uppercase tracking-wider">Visualizações</span>
+                </div>
+                <p className="text-xl font-black text-white">{campaigns[0].metrics.impressions.toLocaleString()}</p>
+              </div>
+              
+              <div className="bg-slate-900 p-4 rounded-2xl border border-white/5">
+                <div className="flex items-center gap-2 text-slate-400 mb-1">
+                  <MousePointer className="w-3.5 h-3.5" />
+                  <span className="text-[10px] font-bold uppercase tracking-wider">Cliques no Perfil</span>
+                </div>
+                <p className="text-xl font-black text-white">{campaigns[0].metrics.clicks}</p>
+              </div>
+
+              <div className="bg-slate-900 p-4 rounded-2xl border border-white/5">
+                <div className="flex items-center gap-2 text-slate-400 mb-1">
+                  <Target className="w-3.5 h-3.5" />
+                  <span className="text-[10px] font-bold uppercase tracking-wider">Alcance Patrocinado</span>
+                </div>
+                <p className="text-xl font-black text-white">{campaigns[0].metrics.reach.toLocaleString()}</p>
+              </div>
+
+              <div className="bg-slate-900 p-4 rounded-2xl border border-white/5">
+                <div className="flex items-center gap-2 text-slate-400 mb-1">
+                  <TrendingUp className="w-3.5 h-3.5" />
+                  <span className="text-[10px] font-bold uppercase tracking-wider">Status</span>
+                </div>
+                <div className="mt-1">{renderStatusBadge(campaigns[0].status)}</div>
+              </div>
+            </div>
+
             <div className="flex items-center justify-between mb-4 px-1">
-              <h3 className="font-bold text-gray-900 dark:text-white uppercase text-xs tracking-widest">Minhas Campanhas</h3>
-              <span className="text-[10px] text-purple-600 dark:text-purple-400 font-black bg-purple-50 dark:bg-purple-900/20 px-3 py-1 rounded-full border border-purple-100 dark:border-purple-800">
+              <h3 className="text-xs font-black text-slate-500 uppercase tracking-[0.2em]">Minhas Campanhas</h3>
+              <span className="text-[10px] text-purple-400 font-black bg-purple-500/10 px-3 py-1 rounded-full border border-purple-500/20">
                   Saldo: R$ {STORE_BALANCE.toFixed(2).replace('.', ',')}
               </span>
             </div>
             
-            <div className="space-y-4">
+            <div className="space-y-3">
               {campaigns.map((campaign) => (
                 <div 
                   key={campaign.id}
-                  onClick={() => handleCampaignClick(campaign)}
-                  className="bg-white dark:bg-gray-800 p-5 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-700 hover:border-purple-200 dark:hover:border-purple-900 transition-all cursor-pointer group active:scale-[0.99]"
+                  onClick={() => { setSelectedCampaign(campaign); setView('details'); }}
+                  className="bg-slate-900 p-4 rounded-2xl shadow-sm border border-white/5 hover:border-purple-500/30 transition-all cursor-pointer group active:scale-[0.99] flex items-center justify-between"
                 >
-                  <div className="flex justify-between items-start mb-4">
-                    <div>
-                      <h4 className="font-bold text-gray-900 dark:text-white text-base leading-tight group-hover:text-purple-600 transition-colors">{campaign.name}</h4>
-                      <p className="text-xs text-gray-400 font-medium mt-1 uppercase tracking-tighter">
-                          {campaign.type === 'premium' ? 'Destaque Premium' : 'ADS Local Freguesia'}
-                      </p>
-                    </div>
-                    {renderStatusBadge(campaign.status)}
+                  <div className="min-w-0">
+                    <h4 className="font-bold text-white text-sm truncate">{campaign.name}</h4>
+                    <p className="text-[10px] text-slate-500 font-medium uppercase tracking-tight mt-0.5">
+                        {campaign.type === 'premium' ? 'ADS Premium' : 'ADS Básico'}
+                    </p>
                   </div>
-                  <div className="flex items-center justify-between pt-4 border-t border-gray-50 dark:border-gray-700">
-                      <div className="flex gap-6">
-                          <div className="flex items-center gap-2 text-xs font-bold text-gray-500">
-                              <Eye className="w-4 h-4 text-purple-400" />
-                              {campaign.metrics.impressions.toLocaleString()}
-                          </div>
-                          <div className="flex items-center gap-2 text-xs font-bold text-gray-500">
-                              <MousePointer className="w-4 h-4 text-blue-400" />
-                              {campaign.metrics.clicks}
-                          </div>
-                      </div>
-                      <ChevronRight className="w-5 h-5 text-gray-300 group-hover:translate-x-1 transition-transform" />
-                  </div>
+                  <ChevronRight className="w-4 h-4 text-slate-600 group-hover:text-purple-400 transition-colors" />
                 </div>
               ))}
             </div>
           </div>
-        ) : (
+        )}
+
+        {campaigns.length === 0 && (
           <div className="flex flex-col items-center justify-center py-16 text-center opacity-40 grayscale">
-              <Megaphone className="w-16 h-16 text-gray-400 mb-4" />
-              <p className="text-sm font-bold text-gray-500 uppercase tracking-widest leading-none">Comece a Anunciar</p>
-              <p className="text-xs text-gray-400 mt-2">Suas campanhas aparecerão aqui.</p>
+              <Megaphone className="w-16 h-16 text-slate-500 mb-4" />
+              <p className="text-sm font-black text-slate-500 uppercase tracking-widest leading-none">Comece a Anunciar</p>
+              <p className="text-xs text-slate-600 mt-2">Suas campanhas aparecerão aqui.</p>
           </div>
         )}
       </div>
@@ -174,17 +199,17 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack }) => {
   );
 
   const CreateView = () => (
-    <div className="p-5 pb-40 bg-gray-50 dark:bg-gray-950 min-h-screen">
+    <div className="p-5 pb-40 bg-slate-950 min-h-screen">
       <div className="flex justify-between mb-8 px-4 relative">
-        <div className="absolute top-4 left-0 right-0 h-0.5 bg-gray-200 dark:bg-gray-700 -z-10 mx-8"></div>
+        <div className="absolute top-4 left-0 right-0 h-0.5 bg-slate-800 -z-10 mx-8"></div>
         {[1, 2, 3].map(step => (
-          <div key={step} className="flex flex-col items-center gap-2 bg-gray-50 dark:bg-gray-950 px-2">
+          <div key={step} className="flex flex-col items-center gap-2 bg-slate-950 px-2">
             <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-colors shadow-sm ${
-              createStep >= step ? 'bg-purple-600 text-white' : 'bg-white dark:bg-gray-800 text-gray-400 border border-gray-200 dark:border-gray-700'
+              createStep >= step ? 'bg-purple-600 text-white' : 'bg-slate-800 text-slate-500 border border-white/5'
             }`}>
               {step}
             </div>
-            <span className={`text-[10px] font-bold ${createStep >= step ? 'text-purple-600' : 'text-gray-400'}`}>
+            <span className={`text-[10px] font-bold ${createStep >= step ? 'text-purple-600' : 'text-slate-500'}`}>
               {step === 1 ? 'Plano' : step === 2 ? 'Dados' : 'Pagar'}
             </span>
           </div>
@@ -193,43 +218,43 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack }) => {
 
       {createStep === 1 && (
         <div className="space-y-4 animate-in slide-in-from-right duration-300">
-          <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2 text-center font-display">Escolha sua visibilidade</h3>
+          <h3 className="text-xl font-bold text-white mb-2 text-center font-display">Escolha sua visibilidade</h3>
           
           <button 
             onClick={() => setNewCampaignType('local')}
-            className={`w-full p-5 rounded-3xl border-2 text-left transition-all ${
+            className={`w-full p-6 rounded-3xl border-2 text-left transition-all ${
               newCampaignType === 'local' 
-                ? 'border-purple-600 bg-purple-50 dark:bg-purple-900/20' 
-                : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800'
+                ? 'border-purple-600 bg-purple-600/10' 
+                : 'border-white/5 bg-slate-900'
             }`}
           >
             <div className="flex justify-between items-start mb-2">
-              <span className="font-bold text-gray-900 dark:text-white text-lg">ADS Local</span>
-              <span className="text-purple-700 dark:text-purple-300 font-bold bg-purple-100 dark:bg-purple-900/40 px-3 py-1 rounded-lg text-xs">
-                R$ 1,90/dia
+              <span className="font-black text-white text-lg">ADS Básico</span>
+              <span className="text-purple-400 font-black bg-purple-500/10 px-3 py-1 rounded-lg text-xs border border-purple-500/20">
+                R$ 0,89/dia
               </span>
             </div>
-            <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
-              Destaque nas listas de categoria e resultados de busca local na Freguesia.
+            <p className="text-xs text-slate-400 leading-relaxed font-medium">
+              Destaque sua loja nas listas de categoria e nos resultados de busca local da freguesia.
             </p>
           </button>
 
           <button 
             onClick={() => setNewCampaignType('premium')}
-            className={`w-full p-5 rounded-3xl border-2 text-left transition-all relative overflow-hidden ${
+            className={`w-full p-6 rounded-3xl border-2 text-left transition-all relative overflow-hidden ${
               newCampaignType === 'premium' 
-                ? 'border-purple-600 bg-purple-50 dark:bg-purple-900/20' 
-                : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800'
+                ? 'border-purple-600 bg-purple-600/10' 
+                : 'border-white/5 bg-slate-900'
             }`}
           >
             <div className="flex justify-between items-start mb-2">
-              <span className="font-bold text-gray-900 dark:text-white text-lg">ADS Premium</span>
-              <span className="text-purple-700 dark:text-purple-300 font-bold bg-purple-100 dark:bg-purple-900/40 px-3 py-1 rounded-lg text-xs">
+              <span className="font-black text-white text-lg">ADS Premium</span>
+              <span className="text-purple-400 font-black bg-purple-500/10 px-3 py-1 rounded-lg text-xs border border-purple-500/20">
                 R$ 3,90/dia
               </span>
             </div>
-            <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
-              Banner rotativo na Home, prioridade máxima e badge especial de patrocínio.
+            <p className="text-xs text-slate-400 leading-relaxed font-medium">
+              Inclui todos os benefícios do ADS Básico, além de aparição cruzada em todas as categorias, prioridade máxima nos resultados e destaque no banner rotativo da Home.
             </p>
           </button>
         </div>
@@ -238,60 +263,60 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack }) => {
       {createStep === 2 && (
         <div className="space-y-6 animate-in slide-in-from-right duration-300">
           <div>
-            <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase mb-2 ml-1">Nome da Campanha</label>
+            <label className="block text-[10px] font-black text-slate-500 uppercase mb-2 ml-1 tracking-widest">Nome da Campanha</label>
             <input 
                 type="text"
-                placeholder="Ex: Promoção de Natal"
+                placeholder="Ex: Promoção de Inverno"
                 value={campaignName}
                 onChange={(e) => setCampaignName(e.target.value)}
-                className="w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-4 text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-purple-500"
+                className="w-full bg-slate-900 border border-white/5 rounded-xl px-4 py-4 text-white outline-none focus:ring-2 focus:ring-purple-600"
             />
           </div>
 
           <div>
             <div className="flex justify-between items-end mb-4">
-                <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase ml-1">Duração (dias)</label>
-                <span className="text-xl font-black text-purple-600">{duration} dias</span>
+                <label className="text-[10px] font-black text-slate-500 uppercase ml-1 tracking-widest">Duração (dias)</label>
+                <span className="text-xl font-black text-purple-500">{duration} dias</span>
             </div>
             <input 
                 type="range" min="7" max="90" step="1" value={duration}
                 onChange={(e) => setDuration(parseInt(e.target.value))}
-                className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-purple-600"
+                className="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-purple-600"
             />
           </div>
 
-          <div className="bg-purple-50 dark:bg-purple-900/20 p-5 rounded-2xl flex justify-between items-center border border-purple-100 dark:border-purple-800/30">
-             <span className="text-sm font-bold text-gray-600 dark:text-purple-200">Investimento Estimado</span>
-             <span className="text-2xl font-black text-purple-700 dark:text-purple-300">R$ {totalCost.toFixed(2).replace('.', ',')}</span>
+          <div className="bg-purple-600/10 p-6 rounded-2xl flex justify-between items-center border border-purple-500/20">
+             <span className="text-sm font-bold text-slate-300">Investimento Total</span>
+             <span className="text-2xl font-black text-purple-400">R$ {totalCost.toFixed(2).replace('.', ',')}</span>
           </div>
         </div>
       )}
 
       {createStep === 3 && (
         <div className="space-y-6 animate-in slide-in-from-right duration-300">
-          <div className="bg-white dark:bg-gray-800 p-6 rounded-3xl border border-gray-200 dark:border-gray-700">
-            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-6">Revisão do Pedido</h3>
+          <div className="bg-slate-900 p-6 rounded-3xl border border-white/5">
+            <h3 className="text-lg font-bold text-white mb-6">Revisão do Pedido</h3>
             <div className="space-y-3 mb-6">
                 <div className="flex justify-between text-sm">
-                    <span className="text-gray-500">Duração</span>
-                    <span className="font-bold text-gray-900 dark:text-white">{duration} dias</span>
+                    <span className="text-slate-500 font-medium">Duração</span>
+                    <span className="font-bold text-white">{duration} dias</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                    <span className="text-gray-500">Plano</span>
-                    <span className="font-bold text-gray-900 dark:text-white">{newCampaignType.toUpperCase()}</span>
+                    <span className="text-slate-500 font-medium">Plano</span>
+                    <span className="font-bold text-white">{newCampaignType === 'local' ? 'ADS BÁSICO' : 'ADS PREMIUM'}</span>
                 </div>
-                <div className="border-t border-gray-100 dark:border-gray-700 my-2"></div>
+                <div className="border-t border-white/5 my-2"></div>
                 <div className="flex justify-between text-base">
-                    <span className="font-bold text-gray-900 dark:text-white">Valor Final</span>
-                    <span className="font-black text-purple-600 text-lg">R$ {totalCost.toFixed(2).replace('.', ',')}</span>
+                    <span className="font-bold text-slate-300">Valor Final</span>
+                    <span className="font-black text-purple-500 text-lg">R$ {totalCost.toFixed(2).replace('.', ',')}</span>
                 </div>
             </div>
 
-            <div className={`p-4 rounded-xl border ${hasSufficientBalance ? 'bg-green-50 border-green-200' : 'bg-orange-50 border-orange-200'}`}>
-                <div className="flex items-center gap-2 mb-1 text-sm font-bold">
-                    <Wallet className="w-4 h-4" /> {hasSufficientBalance ? 'Pagar com Saldo' : 'Pagar com Pix'}
+            <div className={`p-4 rounded-xl border ${hasSufficientBalance ? 'bg-green-500/10 border-green-500/20' : 'bg-orange-500/10 border-orange-500/20'}`}>
+                <div className="flex items-center gap-2 mb-1 text-sm font-bold text-white">
+                    <Wallet className="w-4 h-4 text-purple-400" /> {hasSufficientBalance ? 'Pagar com Saldo' : 'Pagar com Pix'}
                 </div>
-                <p className="text-xs opacity-70">
+                <p className="text-xs text-slate-400 font-medium">
                     {hasSufficientBalance 
                         ? 'O valor será debitado do seu saldo atual da loja.' 
                         : 'Saldo insuficiente. Gere um código Pix para ativar agora.'}
@@ -301,10 +326,10 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack }) => {
         </div>
       )}
 
-      <div className="fixed bottom-0 left-0 right-0 p-5 bg-white dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800 z-30 flex gap-3 max-w-md mx-auto">
+      <div className="fixed bottom-0 left-0 right-0 p-5 bg-slate-950 border-t border-white/5 z-30 flex gap-3 max-w-md mx-auto">
         <button 
           onClick={() => createStep === 1 ? setView('list') : setCreateStep(prev => prev - 1)}
-          className="flex-1 py-4 rounded-2xl border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 font-bold text-sm"
+          className="flex-1 py-4 rounded-2xl border border-white/5 text-slate-400 font-bold text-sm"
         >
           {createStep === 1 ? 'Cancelar' : 'Voltar'}
         </button>
@@ -322,31 +347,31 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack }) => {
   const DetailsView = () => {
     if (!selectedCampaign) return null;
     return (
-      <div className="p-5 pb-32 animate-in slide-in-from-right duration-300 bg-gray-50 dark:bg-gray-950 min-h-screen">
-        <div className="bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-sm border border-gray-100 dark:border-gray-700 mb-6">
+      <div className="p-5 pb-32 animate-in slide-in-from-right duration-300 bg-slate-950 min-h-screen">
+        <div className="bg-slate-900 rounded-3xl p-6 shadow-sm border border-white/5 mb-6">
             <div className="flex justify-between items-start mb-4">
                 <div>
-                    <h2 className="text-xl font-bold text-gray-900 dark:text-white">{selectedCampaign.name}</h2>
-                    <p className="text-xs text-gray-500 mt-1">{selectedCampaign.startDate} - {selectedCampaign.endDate}</p>
+                    <h2 className="text-xl font-bold text-white">{selectedCampaign.name}</h2>
+                    <p className="text-xs text-slate-500 mt-1">{selectedCampaign.startDate} - {selectedCampaign.endDate}</p>
                 </div>
                 {renderStatusBadge(selectedCampaign.status)}
             </div>
             <div className="grid grid-cols-2 gap-4">
-                <div className="bg-gray-50 dark:bg-gray-900/50 p-4 rounded-2xl">
-                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Cliques</p>
+                <div className="bg-slate-950 p-4 rounded-2xl border border-white/5">
+                    <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Cliques</p>
                     <p className="text-2xl font-black text-[#1E5BFF]">{selectedCampaign.metrics.clicks}</p>
                 </div>
-                <div className="bg-gray-50 dark:bg-gray-900/50 p-4 rounded-2xl">
-                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">CTR Médio</p>
+                <div className="bg-slate-950 p-4 rounded-2xl border border-white/5">
+                    <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">CTR Médio</p>
                     <p className="text-2xl font-black text-purple-600">{selectedCampaign.metrics.ctr}%</p>
                 </div>
             </div>
         </div>
 
-        <h3 className="font-bold text-gray-900 dark:text-white mb-4 px-1 flex items-center gap-2">
+        <h3 className="font-bold text-white mb-4 px-1 flex items-center gap-2 uppercase text-xs tracking-widest">
             <TrendingUp className="w-4 h-4 text-[#1E5BFF]" /> Desempenho Diário
         </h3>
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-3xl border border-gray-100 dark:border-gray-700">
+        <div className="bg-slate-900 p-6 rounded-3xl border border-white/5">
             <div className="flex items-end justify-between h-32 gap-3">
                 {selectedCampaign.history.map((val, i) => (
                     <div key={i} className="flex-1 flex flex-col justify-end items-center gap-2">
@@ -354,7 +379,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack }) => {
                             className="w-full bg-[#1E5BFF] rounded-t-lg transition-all duration-700"
                             style={{ height: `${(val / 90) * 100}%`, opacity: 0.2 + (val / 90) }}
                         ></div>
-                        <span className="text-[10px] text-gray-400 font-bold uppercase">{['D', 'S', 'T', 'Q', 'Q', 'S', 'S'][i]}</span>
+                        <span className="text-[10px] text-slate-600 font-bold uppercase">{['D', 'S', 'T', 'Q', 'Q', 'S', 'S'][i]}</span>
                     </div>
                 ))}
             </div>
@@ -364,19 +389,19 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack }) => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 font-sans flex flex-col">
-      <div className="sticky top-0 z-30 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md px-5 h-16 flex items-center gap-4 border-b border-gray-100 dark:border-gray-800">
+    <div className="min-h-screen bg-slate-950 font-sans flex flex-col">
+      <div className="sticky top-0 z-30 bg-slate-950/90 backdrop-blur-md px-5 h-16 flex items-center gap-4 border-b border-white/5">
         <button 
           onClick={view === 'list' ? onBack : () => setView('list')} 
-          className="p-2 -ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+          className="p-2 -ml-2 rounded-full hover:bg-white/5 transition-colors"
         >
-          <ChevronLeft className="w-6 h-6 text-gray-800 dark:text-white" />
+          <ChevronLeft className="w-6 h-6 text-white" />
         </button>
-        <h1 className="font-bold text-lg text-gray-900 dark:text-white">
+        <h1 className="font-bold text-lg text-white">
           {view === 'list' ? 'Anúncios e Destaques' : view === 'create' ? 'Nova Campanha' : 'Detalhes do Anúncio'}
         </h1>
       </div>
-      <div className="flex-1 flex flex-col w-full bg-gray-50 dark:bg-gray-950">
+      <div className="flex-1 flex flex-col w-full bg-slate-950">
         {view === 'list' && <ListView />}
         {view === 'create' && <CreateView />}
         {view === 'details' && <DetailsView />}
