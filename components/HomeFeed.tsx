@@ -544,6 +544,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
               totalGenerated={320.00}
               onClick={() => {
                 if (userRole === 'lojista') {
+                    // Decisão inteligente de fluxo: se já ativo, vai pro dashboard, senão onboarding
                     onNavigate('merchant_cashback_dashboard');
                 } else {
                     onNavigate('user_statement');

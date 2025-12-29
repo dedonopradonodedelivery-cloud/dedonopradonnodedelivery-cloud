@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { ChevronLeft, ArrowUpRight, ArrowDownLeft, Store, ShoppingBag, Info, Coins, ArrowRight } from 'lucide-react';
+import { ChevronLeft, ArrowUpRight, ArrowDownLeft, Info, Coins, ArrowRight, Store } from 'lucide-react';
 
 interface Transaction {
   id: string;
@@ -43,7 +43,7 @@ export const UserStatementView: React.FC<UserStatementViewProps> = ({
 
       <div className="p-5 pb-32">
         {/* Main Balance Card */}
-        <div className="bg-[#1E5BFF] rounded-[32px] p-8 text-white shadow-xl shadow-blue-500/20 relative overflow-hidden mb-8">
+        <div className="bg-[#1E5BFF] rounded-[32px] p-8 text-white shadow-xl shadow-blue-500/20 relative overflow-hidden mb-8 border border-white/10">
           <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none"></div>
           <div className="relative z-10">
             <span className="text-blue-100 text-[10px] font-black uppercase tracking-[0.2em] mb-2 block">
@@ -55,7 +55,7 @@ export const UserStatementView: React.FC<UserStatementViewProps> = ({
                 {balance.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
               </h1>
             </div>
-            <div className="mt-6 flex items-center gap-2 bg-white/10 w-fit px-3 py-1.5 rounded-full border border-white/10">
+            <div className="mt-6 flex items-center gap-2 bg-white/10 w-fit px-3 py-1.5 rounded-full border border-white/10 shadow-inner">
               <Coins className="w-3.5 h-3.5 text-yellow-300" />
               <p className="text-[11px] font-bold text-white">Pronto para usar no bairro</p>
             </div>
@@ -69,7 +69,7 @@ export const UserStatementView: React.FC<UserStatementViewProps> = ({
           </h3>
           
           <div className="bg-white dark:bg-gray-800 rounded-[28px] border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden">
-            {MOCK_TRANSACTIONS.map((tx, idx) => (
+            {MOCK_TRANSACTIONS.length > 0 ? MOCK_TRANSACTIONS.map((tx, idx) => (
               <div 
                 key={tx.id} 
                 className={`p-5 flex items-center justify-between transition-colors hover:bg-gray-50 dark:hover:bg-gray-700/50 ${
@@ -80,7 +80,7 @@ export const UserStatementView: React.FC<UserStatementViewProps> = ({
                   <div className={`w-11 h-11 rounded-2xl flex items-center justify-center shrink-0 ${
                     tx.type === 'earn' 
                       ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-900/20 dark:text-emerald-400' 
-                      : 'bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-400'
+                      : 'bg-rose-50 text-rose-600 dark:bg-rose-900/20 dark:text-rose-400'
                   }`}>
                     {tx.type === 'earn' ? <ArrowDownLeft className="w-5 h-5" /> : <ArrowUpRight className="w-5 h-5" />}
                   </div>
@@ -99,30 +99,35 @@ export const UserStatementView: React.FC<UserStatementViewProps> = ({
                   </p>
                 </div>
               </div>
-            ))}
+            )) : (
+              <div className="p-10 text-center">
+                <Info className="w-8 h-8 text-gray-300 mx-auto mb-3" />
+                <p className="text-gray-400 text-sm font-medium">Nenhuma movimentação ainda.</p>
+              </div>
+            )}
           </div>
         </div>
 
-        {/* Educational/Incentive Section */}
+        {/* Educational Section */}
         <div className="mt-8 bg-blue-50/50 dark:bg-blue-900/10 rounded-3xl p-6 border border-blue-100/50 dark:border-blue-800/30">
           <div className="flex items-start gap-4">
-            <div className="p-2 bg-white dark:bg-gray-800 rounded-xl shadow-sm">
+            <div className="p-2 bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-blue-100 dark:border-blue-900">
               <Info className="w-5 h-5 text-[#1E5BFF]" />
             </div>
             <div>
               <h4 className="font-bold text-gray-900 dark:text-white text-sm">Onde posso usar?</h4>
               <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 leading-relaxed">
-                Seu saldo de cashback é aceito como pagamento em centenas de lojas parceiras na Freguesia. Economize nas suas próximas compras!
+                Seu saldo de cashback é aceito como pagamento em centenas de lojas parceiras na Freguesia. Economize nas próximas compras!
               </p>
             </div>
           </div>
           
           <button 
             onClick={onExploreStores}
-            className="w-full mt-6 bg-white dark:bg-gray-800 text-[#1E5BFF] dark:text-blue-400 font-bold text-xs py-4 rounded-2xl border border-blue-100 dark:border-gray-700 shadow-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+            className="w-full mt-6 bg-[#1E5BFF] text-white font-bold text-sm py-4 rounded-2xl shadow-lg shadow-blue-500/30 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
           >
             Ver lojas com cashback
-            <ArrowRight className="w-3.5 h-3.5" />
+            <ArrowRight className="w-4 h-4" />
           </button>
         </div>
       </div>
