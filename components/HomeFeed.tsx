@@ -124,7 +124,7 @@ const SUGGESTION_POOL: Suggestion[] = [
   { id: 'sug-8', title: 'Abertos até tarde', subtitle: 'Lanches e conveniência 24h', icon: <Clock size={24} className="text-purple-900/80" />, bg: 'bg-purple-400/80', tags: ['late_night', 'emergency'] },
   { id: 'sug-9', title: 'Happy Hour começando', subtitle: 'Bares com petiscos e chopp', icon: <Flame size={24} className="text-orange-900/80" />, bg: 'bg-orange-400/80', tags: ['evening', 'happy_hour'] },
   { id: 'sug-10', title: 'Pizza quentinha', subtitle: 'Pizzarias com delivery rápido', icon: <Bike size={24} className="text-red-900/80" />, bg: 'bg-red-500/80', tags: ['evening', 'late_night', 'cold', 'delivery'] },
-  { id: 'sug-11', title: 'Banho e tosa hoje', subtitle: 'Pet shops com horários livres', icon: <ShoppingBag size={24} className="text-cyan-900/80" />, bg: 'bg-cyan-400/80', tags: ['morning', 'afternoon', 'pet'] },
+  { id: 'sug-11', title: 'Banho e tosa hoje', subtitle: 'Pet shops com horários locais', icon: <ShoppingBag size={24} className="text-cyan-900/80" />, bg: 'bg-cyan-400/80', tags: ['morning', 'afternoon', 'pet'] },
   { id: 'sug-12', title: 'Açaí pra refrescar', subtitle: 'Opções geladas para o calor', icon: <Snowflake size={24} className="text-purple-900/80" />, bg: 'bg-purple-400/70', tags: ['lunch', 'afternoon', 'hot'] },
 ];
 
@@ -542,7 +542,13 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
               role={userRole}
               balance={12.40} 
               totalGenerated={320.00}
-              onClick={() => onNavigate(userRole === 'lojista' ? 'store_area' : 'user_cashback_flow')} 
+              onClick={() => {
+                if (userRole === 'lojista') {
+                    onNavigate('merchant_cashback_dashboard');
+                } else {
+                    onNavigate('user_statement');
+                }
+              }} 
             />
           </div>
         );
@@ -732,8 +738,8 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
       ) : (
         <div className="flex flex-col gap-6 w-full">
             {renderSection('categories')}
-            {renderSection('cashback_banner')}
             {renderSection('hero')}
+            {renderSection('cashback_banner')}
             {renderSection('roulette_banner')}
             {renderSection('highlights')}
             {renderSection('community_recommendations')}

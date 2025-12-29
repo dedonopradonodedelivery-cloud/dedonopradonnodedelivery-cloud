@@ -33,6 +33,10 @@ import { getStoreLogo } from './utils/mockLogos';
 import { CategoriaAlimentacao } from './components/CategoriaAlimentacao';
 import { CategoryView } from './components/CategoryView';
 import { EditorialListView } from './components/EditorialListView';
+import { UserStatementView } from './components/UserStatementView';
+import { MerchantCashbackDashboard } from './components/MerchantCashbackDashboard';
+import { MerchantCashbackOnboarding } from './components/MerchantCashbackOnboarding';
+import { StoreCashbackModule } from './components/StoreCashbackModule';
 
 const MOCK_STORES: Store[] = [
   {
@@ -71,21 +75,20 @@ const MOCK_STORES: Store[] = [
 ];
 
 const App: React.FC = () => {
-  const { user, userRole, loading: isAuthLoading } = useAuth();
+  const { user, userRole, loading: isAuthLoading, signOut } = useAuth();
   const [minSplashTimeElapsed, setMinSplashTimeElapsed] = useState(false);
   const [splashProgress, setSplashProgress] = useState(0);
   const [activeTab, setActiveTab] = useState('home');
   const [isDarkMode, setIsDarkMode] = useState(false);
 
   useEffect(() => {
-    // Progresso da barra inferior (5 segundos exatos)
     const animationFrame = requestAnimationFrame(() => {
       setSplashProgress(100);
     });
 
     const timer = setTimeout(() => {
       setMinSplashTimeElapsed(true);
-    }, 5200); // 5.2s para garantir o 1s de parada final do patrocinador
+    }, 5200);
 
     return () => {
       clearTimeout(timer);
@@ -119,9 +122,7 @@ const App: React.FC = () => {
   if (!isAppReady) {
     return (
       <div className="fixed inset-0 bg-[#1E5BFF] flex flex-col items-center justify-center text-white z-[999] overflow-hidden">
-        {/* LOGO CENTRALIZADA */}
         <div className="relative flex flex-col items-center justify-center z-10">
-          
           <div className="animate-float-slow">
             <div className="w-28 h-28 bg-white rounded-[2.8rem] flex items-center justify-center shadow-[0_25px_60px_rgba(0,0,0,0.3)] mb-8 animate-pop-in">
               <MapPin className="w-14 h-14 text-[#1E5BFF] fill-[#1E5BFF]" />
@@ -138,17 +139,12 @@ const App: React.FC = () => {
               <div className="h-[1.5px] w-6 bg-white/40"></div>
             </div>
 
-            {/* PATROCINADOR MASTER CENTRALIZADO */}
-            {/* Surge após 2 segundos, gira por 2 segundos e para 1 segundo antes do fim */}
             <div className="absolute top-1/2 left-1/2 w-[320px] flex flex-col items-center pointer-events-none opacity-0 [animation-delay:2000ms] [animation-fill-mode:forwards] animate-sponsor-spin-in">
               <div className="glass-premium px-6 py-4 rounded-[2rem] flex items-center gap-4 relative overflow-hidden group border-white/30">
-                {/* Efeito Shimmer sutil */}
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full animate-shimmer"></div>
-                
                 <div className="w-14 h-14 bg-gradient-to-br from-amber-300 via-amber-400 to-orange-500 rounded-2xl flex items-center justify-center shadow-xl shrink-0">
                   <Crown className="w-8 h-8 text-white fill-white" />
                 </div>
-                
                 <div className="flex flex-col text-left">
                   <div className="flex items-center gap-1.5">
                     <span className="text-[8px] font-black text-white/70 uppercase tracking-[0.25em]">Patrocinador Master</span>
@@ -162,7 +158,6 @@ const App: React.FC = () => {
           </div>
         </div>
 
-        {/* Barra de Progresso Real (5000ms) */}
         <div className="absolute bottom-0 left-0 right-0 h-1.5 bg-white/5">
            <div 
              className="h-full bg-white shadow-[0_0_25px_rgba(255,255,255,1)] transition-all duration-[5000ms] ease-linear" 
@@ -193,7 +188,9 @@ const App: React.FC = () => {
     'category_detail', 'food_category', 'store_detail', 'profile', 
     'patrocinador_master', 'prize_history', 'reward_details', 
     'freguesia_connect_public', 'freguesia_connect_dashboard', 'freguesia_connect_restricted',
-    'service_subcategories', 'service_specialties', 'service_terms', 'service_success'
+    'service_subcategories', 'service_specialties', 'service_terms', 'service_success',
+    'user_statement', 'merchant_cashback_dashboard', 'merchant_cashback_onboarding',
+    'store_cashback_module'
   ];
 
   return (
@@ -232,6 +229,28 @@ const App: React.FC = () => {
             {activeTab === 'explore' && (
               <ExploreView stores={MOCK_STORES} searchQuery={globalSearch} onStoreClick={handleSelectStore} onLocationClick={() => {}} onFilterClick={() => {}} onOpenPlans={() => {}} />
             )}
+            {activeTab === 'user_statement' && (
+              <UserStatementView 
+                onBack={() => setActiveTab('home')} 
+                onExploreStores={() => setActiveTab('explore')}
+                balance={12.40}
+              />
+            )}
+            {activeTab === 'merchant_cashback_onboarding' && (
+              <MerchantCashbackOnboarding 
+                onBack={() => setActiveTab('home')} 
+                onActivate={() => setActiveTab('store_cashback_module')}
+              />
+            )}
+            {activeTab === 'merchant_cashback_dashboard' && (
+              <MerchantCashbackDashboard 
+                onBack={() => setActiveTab('home')} 
+                onNavigate={setActiveTab}
+              />
+            )}
+            {activeTab === 'store_cashback_module' && (
+              <StoreCashbackModule onBack={() => setActiveTab('home')} />
+            )}
             {activeTab === 'editorial_list' && selectedCollection && (
               <EditorialListView
                 collection={selectedCollection}
@@ -259,7 +278,6 @@ const App: React.FC = () => {
             {activeTab === 'store_area' && (
               userRole === 'lojista' ? (
                 <StoreAreaView 
-                  user={user}
                   onBack={() => setActiveTab('home')} 
                   onNavigate={setActiveTab} 
                 />
