@@ -1,0 +1,22 @@
+/* index.css */
+body {
+  padding-bottom: calc(96px + env(safe-area-inset-bottom));
+  box-sizing: border-box;
+}
+
+#root {
+  min-height: 100vh;
+  padding-bottom: calc(96px + env(safe-area-inset-bottom));
+  box-sizing: border-box;
+}
+
+/* Esconder barra de rolagem para Chrome, Safari e Opera */
+*::-webkit-scrollbar {
+  display: none;
+}
+
+/* Esconder barra de rolagem para IE, Edge e Firefox */
+* {
+  -ms-overflow-style: none;  /* IE e Edge */
+  scrollbar-width: none;  /* Firefox */
+}

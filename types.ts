@@ -1,5 +1,4 @@
 
-
 import React from 'react';
 
 export enum AdType {
@@ -49,12 +48,6 @@ export interface Store {
   isOpenNow?: boolean;
   closingTime?: string;
   isSponsored?: boolean;
-
-  // New fields for Recommendation Block
-  recommendationsCount?: number; // Number of unique user recommendations
-  latestRecommendation?: { text: string; date: string; tag?: string; }; // A rotating recommendation text
-  lastRecommendationDate?: string; // ISO string for recency
-  mockRecommendations?: { userId: string; text: string; tags: string[]; date: string }[]; // For mock data
 }
 
 export interface Category {

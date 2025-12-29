@@ -1,9 +1,8 @@
 
-
 import React, { useState, useEffect } from 'react';
 import { ChevronLeft, CheckCircle, XCircle, Clock, DollarSign, User, AlertCircle, Loader2, ArrowRight } from 'lucide-react';
-import { supabase } from '../lib/supabaseClient'; // Path corrected
-import { CashbackTransaction } from '../types'; // Path corrected
+import { supabase } from '../lib/supabase';
+import { CashbackTransaction } from '../types';
 
 interface MerchantCashbackRequestsProps {
   merchantId: string; // ID do lojista logado
@@ -27,7 +26,6 @@ export const MerchantCashbackRequests: React.FC<MerchantCashbackRequestsProps> =
     if (!supabase) return;
 
     // Listener para MUDANÇAS em tempo real
-    // Escuta INSERT (nova compra) e UPDATE (aprovada/rejeitada) na tabela
     const channel = supabase
       .channel('merchant_transactions_channel')
       .on(
@@ -38,9 +36,7 @@ export const MerchantCashbackRequests: React.FC<MerchantCashbackRequestsProps> =
           table: 'cashback_transactions',
           filter: `merchant_id=eq.${merchantId}`,
         },
-        (payload) => {
-          // Recarrega a lista para garantir consistência e ordenação
-          // Em um cenário de altíssimo volume, faríamos manipulação otimista do state array
+        () => {
           fetchPendingRequests();
         }
       )
@@ -53,14 +49,14 @@ export const MerchantCashbackRequests: React.FC<MerchantCashbackRequestsProps> =
 
   const fetchPendingRequests = async () => {
     if (!supabase) {
-        // Mock data if no supabase configured in env
+        // Mock data if no supabase
         setRequests([
             {
                 id: 'mock-1',
                 merchant_id: merchantId,
                 store_id: 'store-1',
                 customer_id: 'cust-1',
-                customer_name: 'Maria Silva (Simulação)',
+                customer_name: 'Maria Silva',
                 total_amount_cents: 15000,
                 cashback_used_cents: 500,
                 cashback_to_earn_cents: 725,
@@ -76,7 +72,7 @@ export const MerchantCashbackRequests: React.FC<MerchantCashbackRequestsProps> =
     try {
       const { data, error } = await supabase
         .from('cashback_transactions')
-        .select('*') 
+        .select('*') // In real app, join with profiles to get name
         .eq('merchant_id', merchantId)
         .eq('status', 'pending')
         .order('created_at', { ascending: false });
@@ -97,8 +93,6 @@ export const MerchantCashbackRequests: React.FC<MerchantCashbackRequestsProps> =
 
     try {
       if (supabase) {
-          // Atualiza status no banco.
-          // O Trigger do banco (definido na Parte 3) cuidará de atualizar o saldo do usuário.
           const { error: updateError } = await supabase
             .from('cashback_transactions')
             .update({ 
@@ -109,11 +103,10 @@ export const MerchantCashbackRequests: React.FC<MerchantCashbackRequestsProps> =
 
           if (updateError) throw updateError;
       } else {
-          // Simulation delay
+          // Simulation
           await new Promise(r => setTimeout(r, 1000));
       }
 
-      // Atualização otimista da UI (remove da lista)
       setRequests((prev) => prev.filter((r) => r.id !== tx.id));
       setSelectedRequest(null); 
 
@@ -134,13 +127,12 @@ export const MerchantCashbackRequests: React.FC<MerchantCashbackRequestsProps> =
             .from('cashback_transactions')
             .update({ 
                 status: 'rejected',
-                rejected_at: new Date().toISOString()
             })
             .eq('id', tx.id);
 
           if (error) throw error;
       } else {
-          // Simulation delay
+          // Simulation
           await new Promise(r => setTimeout(r, 1000));
       }
 
@@ -176,12 +168,6 @@ export const MerchantCashbackRequests: React.FC<MerchantCashbackRequestsProps> =
       </div>
 
       <div className="p-5 pb-24">
-        {!supabase && (
-            <div className="mb-4 bg-yellow-50 text-yellow-800 text-xs p-3 rounded-xl border border-yellow-200">
-                Modo Demonstração (Supabase não configurado). Dados são simulados.
-            </div>
-        )}
-
         {loading ? (
             <div className="flex justify-center pt-10">
                 <Loader2 className="w-8 h-8 text-[#1E5BFF] animate-spin" />
@@ -193,7 +179,6 @@ export const MerchantCashbackRequests: React.FC<MerchantCashbackRequestsProps> =
                 </div>
                 <h2 className="text-lg font-bold text-gray-900 dark:text-white">Tudo limpo!</h2>
                 <p className="text-gray-500 text-sm mt-1">Nenhuma solicitação pendente no momento.</p>
-                <p className="text-xs text-gray-400 mt-4 animate-pulse">Aguardando novas transações em tempo real...</p>
             </div>
         ) : (
             <div className="space-y-4">
@@ -204,7 +189,7 @@ export const MerchantCashbackRequests: React.FC<MerchantCashbackRequestsProps> =
                         className="bg-white dark:bg-gray-800 rounded-2xl p-5 shadow-sm border border-gray-100 dark:border-gray-700 relative overflow-hidden cursor-pointer hover:shadow-md transition-all active:scale-[0.98]"
                     >
                         {/* Indicador de Novo */}
-                        <div className="absolute top-0 right-0 w-3 h-3 bg-red-500 rounded-bl-lg animate-pulse"></div>
+                        <div className="absolute top-0 right-0 w-3 h-3 bg-red-500 rounded-bl-lg"></div>
 
                         {/* Top Info */}
                         <div className="flex justify-between items-start mb-4">

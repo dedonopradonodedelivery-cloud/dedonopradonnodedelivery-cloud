@@ -2,8 +2,7 @@
 import React, { useEffect } from 'react';
 import { User } from '@supabase/supabase-js';
 import { Lock } from 'lucide-react';
-// Fix: CashbackPaymentScreen is a default export
-import CashbackPaymentScreen from './CashbackPaymentScreen';
+import { CashbackPaymentScreen } from './CashbackPaymentScreen';
 
 interface CashbackPayFromQrScreenProps {
   merchantId: string;

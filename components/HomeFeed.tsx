@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { AdType, Category, Store, EditorialCollection } from '../types';
 import { 
   ChevronRight, 
   ArrowRight, 
@@ -41,9 +42,7 @@ import { User } from '@supabase/supabase-js';
 import { SpinWheelView } from './SpinWheelView';
 import { MasterSponsorBanner } from './MasterSponsorBanner';
 import { CATEGORIES, EDITORIAL_COLLECTIONS } from '../constants';
-import { RecommendedByLocals } from './RecommendedByLocals'; // Importar o novo componente
-// Added missing imports for AdType, Category, Store, and EditorialCollection
-import { AdType, Category, Store, EditorialCollection } from '../types';
+import { RecomendadosPorMoradores } from './RecomendadosPorMoradores'; // NEW IMPORT
 
 interface HomeFeedProps {
   onNavigate: (view: string) => void;
@@ -69,6 +68,49 @@ interface Suggestion {
   tags: string[]; // e.g., ['morning', 'breakfast', 'cold']
   score?: number;
 }
+
+// --- NEW MOCK DATA FOR RECOMENDADOS POR MORADORES ---
+interface RecomendacaoItem { // Changed from RecommendedItem to RecomendacaoItem
+  id: string; // Added id
+  nome: string; // Changed from storeName to nome
+  categoria: string; // Changed from category to categoria
+  texto: string; // Changed from recommendationText to texto
+  totalRecomendacoes: number; // Changed from recommendersCount to totalRecomendacoes
+}
+
+const mockRecomendados: RecomendacaoItem[] = [
+  {
+    id: 'rec-1',
+    nome: 'Açougue do Zé',
+    categoria: 'Alimentação',
+    texto: 'Carnes frescas e o melhor churrasco para o fim de semana!',
+    totalRecomendacoes: 25,
+  },
+  {
+    id: 'rec-2',
+    nome: 'Salão Beleza Pura',
+    categoria: 'Beleza',
+    texto: 'Corte e hidratação perfeitos! Atendimento excelente da Ana.',
+    totalRecomendacoes: 18,
+  },
+  {
+    id: 'rec-3',
+    nome: 'Consertos Rápidos',
+    categoria: 'Serviços',
+    texto: 'Eletricista de confiança, resolveu meu problema em minutos.',
+    totalRecomendacoes: 12,
+  },
+  // Item extra para garantir que só 3 são exibidos, conforme a lógica do componente RecomendadosPorMoradores
+  { 
+    id: 'rec-4',
+    nome: 'Doceria da Vovó',
+    categoria: 'Alimentação',
+    texto: 'Os melhores bolos e doces caseiros da região. Imperdível!',
+    totalRecomendacoes: 30,
+  },
+];
+// --- END NEW MOCK DATA ---
+
 
 // --- NOVO SISTEMA DE SUGESTÕES DINÂMICAS ---
 const SUGGESTION_POOL: Suggestion[] = [
@@ -473,8 +515,6 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
             </div>
           </div>
         );
-      case 'recommendations_block': // Novo bloco
-        return <RecommendedByLocals key="recommended_by_locals" stores={stores} onStoreClick={onStoreClick} />;
       case 'recommendations':
         return null; // This section is removed
       case 'trending': // Replaced with Editorial Collections
@@ -508,6 +548,21 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
             </div>
           </div>
         );
+      case 'community_recommendations': // NEW SECTION
+        return (
+          <div key="community_recommendations" className="px-5">
+            <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                    <Users className="w-3.5 h-3.5 text-gray-400"/>
+                    <div>
+                        <h3 className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">Recomendados por Moradores</h3>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">O que a vizinhança está amando e indicando.</p>
+                    </div>
+                </div>
+            </div>
+            <RecomendadosPorMoradores items={mockRecomendados} />
+          </div>
+        );
       case 'filters':
         return (
           <div key="filters" className="px-5">
@@ -515,7 +570,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
                  <ShieldCheck className="w-3.5 h-3.5 text-gray-400" />
                  <div>
                     <h3 className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">Lojas & Serviços</h3>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Explore as melhores opções do bairro</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Encontre os melhores estabelecimentos</p>
                  </div>
             </div>
             <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
@@ -622,9 +677,9 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
             {/* 1. Ordem Final dos Blocos */}
             {renderSection('categories')}
             {renderSection('hero')}
-            {renderSection('recommendations_block')} {/* NOVO BLOCO */}
             {renderSection('roulette_banner')}
             {renderSection('highlights')}
+            {renderSection('community_recommendations')} {/* NEW SECTION */}
             {renderSection('trending')}
             {renderSection('filters')}
             {renderSection('list')}

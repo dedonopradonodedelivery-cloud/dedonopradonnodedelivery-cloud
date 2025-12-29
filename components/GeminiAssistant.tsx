@@ -1,9 +1,8 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { GoogleGenAI } from "@google/genai";
 import { MessageCircle, X, Send, Sparkles, Loader2 } from 'lucide-react';
-import { ChatMessage } from '../types'; // Path corrected
-import { STORES } from '../constants'; // Path corrected
+import { ChatMessage } from '../types';
+import { STORES } from '../constants';
 
 export const GeminiAssistant: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
