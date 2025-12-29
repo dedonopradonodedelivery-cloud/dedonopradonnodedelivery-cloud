@@ -12,6 +12,7 @@ import {
   ShoppingBag,
   ArrowRight
 } from 'lucide-react';
+import { InstitutionalSponsorBanner } from './InstitutionalSponsorBanner';
 
 interface MerchantCashbackDashboardProps {
   onBack: () => void;
@@ -85,7 +86,7 @@ export const MerchantCashbackDashboard: React.FC<MerchantCashbackDashboardProps>
             </span>
             
             <div className="flex flex-col mb-8">
-              <h1 className="text-5xl font-black font-display tracking-tighter text-white">
+              <h1 className="text-4xl font-black font-display tracking-tighter text-white">
                 R$ {data.impacto.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
               </h1>
               <p className="text-gray-400 text-sm mt-2 font-medium italic">
@@ -188,6 +189,9 @@ export const MerchantCashbackDashboard: React.FC<MerchantCashbackDashboardProps>
             <ChevronRight className="w-4 h-4" strokeWidth={3} />
           </button>
         </div>
+
+        {/* Institutional Sponsor Banner */}
+        <InstitutionalSponsorBanner type="merchant" />
 
         {/* Discreet Footer */}
         <div className="pt-4 flex items-center justify-center gap-2 opacity-30">

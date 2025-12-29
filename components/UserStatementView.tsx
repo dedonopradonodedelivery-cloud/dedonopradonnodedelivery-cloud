@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { ChevronLeft, ArrowUpRight, ArrowDownLeft, Info, Coins, ArrowRight, Store } from 'lucide-react';
+import { InstitutionalSponsorBanner } from './InstitutionalSponsorBanner';
 
 interface Transaction {
   id: string;
@@ -130,6 +131,9 @@ export const UserStatementView: React.FC<UserStatementViewProps> = ({
             <ArrowRight className="w-4 h-4" />
           </button>
         </div>
+
+        {/* Institutional Sponsor Banner */}
+        <InstitutionalSponsorBanner type="client" />
       </div>
     </div>
   );
