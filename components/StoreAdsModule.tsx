@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   ChevronLeft, 
   ChevronRight,
@@ -10,15 +10,10 @@ import {
   TrendingUp,
   Rocket,
   Wallet,
-  CheckCircle2,
-  AlertCircle,
   Target,
   Clock,
   ShieldCheck,
-  LayoutDashboard,
   Loader2,
-  Sparkles,
-  MapPin,
   Crown,
   CreditCard
 } from 'lucide-react';
@@ -56,18 +51,15 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack }) => {
   const [newCampaignType, setNewCampaignType] = useState<AdType | null>(null);
   const [campaignName, setCampaignName] = useState('');
   
-  // Duração: 15 a 180 dias. Usamos o estado inteiro para atualizar tudo em tempo real.
+  // Duração: 15 a 180 dias (padrão 15)
   const [duration, setDuration] = useState<number>(15); 
   const [isActivating, setIsActivating] = useState(false);
-
-  const STORE_BALANCE = 45.00; 
 
   const getPricePerDay = (type: AdType) => type === 'local' ? 0.89 : 3.90;
   const currentPrice = newCampaignType ? getPricePerDay(newCampaignType) : 0;
   
-  const displayDuration = duration;
+  const displayDuration = Math.round(duration);
   const totalCost = currentPrice * displayDuration;
-  const hasSufficientBalance = STORE_BALANCE >= totalCost;
 
   const handleCreateStart = () => {
     setCreateStep(1);
@@ -84,14 +76,15 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack }) => {
 
   const handleActivateCampaign = () => {
     setIsActivating(true);
+    // Simulação de processamento de pagamento pré-pago
     setTimeout(() => {
       const newCampaign: Campaign = {
         id: Math.random().toString(36).substr(2, 9),
         name: campaignName || 'Nova Campanha',
         type: newCampaignType || 'local',
-        status: 'active',
+        status: 'active', // Fica ativa após aprovação do pagamento
         startDate: new Date().toLocaleDateString('pt-BR'),
-        endDate: new Date(Date.now() + duration * 86400000).toLocaleDateString('pt-BR'),
+        endDate: new Date(Date.now() + displayDuration * 86400000).toLocaleDateString('pt-BR'),
         budget: totalCost,
         metrics: { impressions: 0, clicks: 0, ctr: 0, reach: 0 },
         history: [0, 0, 0, 0, 0, 0, 0]
@@ -206,6 +199,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack }) => {
 
   const CreateView = () => (
     <div className="flex flex-col min-h-screen bg-white dark:bg-slate-950 transition-colors duration-300">
+      {/* Stepper */}
       <div className="p-5 flex justify-between mb-2 px-8 relative shrink-0">
         <div className="absolute top-9 left-0 right-0 h-0.5 bg-gray-100 dark:bg-slate-800 -z-0 mx-12"></div>
         {[1, 2, 3].map(step => (
@@ -227,7 +221,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack }) => {
       <div className="flex-1 p-5 pb-40 overflow-y-auto no-scrollbar w-full">
         {createStep === 1 && (
           <div className="space-y-4 animate-in slide-in-from-right duration-300">
-            <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2 text-center font-display">Escolha seu Ads</h3>
+            <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2 text-center font-display">Escolha sua visibilidade</h3>
             
             <button 
               onClick={() => handleSelectPlan('local')}
@@ -303,17 +297,19 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack }) => {
               />
             </div>
 
+            {/* SLIDER DE DURAÇÃO - 15 a 180 DIAS COM ARRASTE REAL */}
             <div className="bg-gray-50 dark:bg-slate-900 p-6 rounded-3xl border border-gray-100 dark:border-white/5 w-full relative overflow-visible">
               <div className="flex justify-between items-center mb-8 relative z-10">
                 <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-2">
                     <Clock className="w-3.5 h-3.5" /> Duração da campanha
                 </label>
                 <span className="text-xl font-black text-[#1E5BFF] dark:text-purple-500 px-4 py-1.5 bg-blue-500/10 rounded-2xl border border-blue-500/20 shadow-inner">
-                  {duration} dias
+                  {displayDuration} dias
                 </span>
               </div>
               
               <div className="px-2 relative mb-6">
+                {/* Linha de progresso visual de fundo */}
                 <div className="absolute left-2 right-2 h-2 top-1/2 -translate-y-1/2 bg-gray-200 dark:bg-slate-800 rounded-full overflow-hidden pointer-events-none">
                     <div 
                         className="h-full bg-gradient-to-r from-[#1E5BFF] to-indigo-600 transition-none"
@@ -321,12 +317,13 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack }) => {
                     />
                 </div>
 
+                {/* Marcadores 15 e 180 */}
                 <div className="absolute left-2 right-2 h-1 top-1/2 -translate-y-1/2 flex justify-between pointer-events-none">
                     <div className="w-1.5 h-1.5 bg-white dark:bg-slate-600 rounded-full -translate-x-1/2 shadow-sm"></div>
                     <div className="w-1.5 h-1.5 bg-white dark:bg-slate-600 rounded-full translate-x-1/2 shadow-sm"></div>
                 </div>
                 
-                {/* Input de Range Nativo: Oculto visualmente, mas funcional para drag */}
+                {/* Input de Range Nativo: Funcional para drag e perfeitamente fluido */}
                 <input 
                   type="range" 
                   min="15" 
@@ -337,7 +334,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack }) => {
                   className="w-full h-10 opacity-0 relative z-20 cursor-pointer touch-none"
                 />
 
-                {/* Thumb Visual: Sem transição (duration-0) para seguir o dedo instantaneamente */}
+                {/* Thumb Visual customizado que segue o dedo instantaneamente */}
                 <div 
                     className="absolute top-1/2 -translate-y-1/2 pointer-events-none z-30 transition-none"
                     style={{ left: `calc(${((duration - 15) / 165) * 100}% - 0px)` }}
@@ -354,14 +351,14 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack }) => {
               </div>
               
               <p className="text-center text-[10px] text-gray-400 dark:text-slate-500 font-bold mt-6 italic uppercase tracking-[0.2em] animate-pulse">
-                Arraste para selecionar
+                Arraste para ajustar o período
               </p>
             </div>
 
             <div className="bg-gradient-to-r from-blue-600/10 to-indigo-600/10 dark:from-purple-600/20 dark:to-indigo-600/20 p-6 rounded-3xl flex justify-between items-center border border-blue-500/20 dark:border-white/10 shadow-sm w-full">
                <div>
                     <span className="text-[10px] font-black text-[#1E5BFF] dark:text-purple-300 uppercase tracking-widest block mb-1">Investimento Total Hoje</span>
-                    <span className="text-xs text-gray-500 dark:text-slate-500 font-bold">{duration} dias × R$ {currentPrice.toFixed(2).replace('.', ',')}/dia</span>
+                    <span className="text-xs text-gray-500 dark:text-slate-500 font-bold">Total: {displayDuration} dias × R$ {currentPrice.toFixed(2).replace('.', ',')}/dia</span>
                </div>
                <span className="text-2xl font-black text-gray-900 dark:text-white">R$ {totalCost.toFixed(2).replace('.', ',')}</span>
             </div>
@@ -374,7 +371,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack }) => {
                 <div className="absolute top-0 right-0 w-32 h-32 bg-[#1E5BFF]/5 rounded-full blur-3xl"></div>
                 <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-8 flex items-center gap-2 font-display">
                     <ShieldCheck className="w-6 h-6 text-[#1E5BFF]" />
-                    Ativação Imediata
+                    Resumo do Investimento
                 </h3>
                 
                 <div className="bg-blue-50 dark:bg-blue-900/10 p-4 rounded-2xl mb-6 border border-blue-100 dark:border-blue-800/40">
@@ -383,7 +380,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack }) => {
                     <p className="font-bold text-sm text-[#1E5BFF]">Cobrança única no cartão</p>
                   </div>
                   <p className="text-xs text-blue-700 dark:text-blue-300 leading-relaxed">
-                    Este é um plano <strong>pré-pago</strong>. Você paga hoje pelo período completo e sua loja fica em destaque imediatamente, sem cobranças recorrentes surpresas.
+                    Este é um plano <strong>pré-pago</strong>. Você paga hoje pelo período completo e sua loja fica em destaque imediatamente após o processamento.
                   </p>
                 </div>
 
@@ -394,17 +391,17 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack }) => {
                     </div>
                     <div className="flex justify-between items-center border-b border-gray-200 dark:border-white/5 pb-4">
                         <span className="text-slate-500 font-bold uppercase text-[10px] tracking-wider">Período</span>
-                        <span className="font-bold text-gray-900 dark:text-white">{duration} dias</span>
+                        <span className="font-bold text-gray-900 dark:text-white">{displayDuration} dias</span>
                     </div>
                     <div className="flex justify-between items-center pt-2">
-                        <span className="font-black text-slate-400 uppercase text-[10px] tracking-widest">Total à Pagar</span>
+                        <span className="font-black text-slate-400 uppercase text-[10px] tracking-widest">Total à Pagar Hoje</span>
                         <span className="text-3xl font-black text-[#1E5BFF]">R$ {totalCost.toFixed(2).replace('.', ',')}</span>
                     </div>
                 </div>
 
                 <div className="p-4 rounded-xl bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 flex items-center gap-3 text-gray-500 dark:text-gray-400">
                     <ShieldCheck className="w-4 h-4 shrink-0" />
-                    <p className="text-[10px] font-medium leading-tight">Pagamento 100% seguro via Localizei Checkout.</p>
+                    <p className="text-[10px] font-medium leading-tight">Pagamento 100% seguro. Sem cobranças recorrentes surpresas.</p>
                 </div>
             </div>
           </div>
@@ -450,7 +447,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack }) => {
                 <Rocket className="w-10 h-10 text-[#1E5BFF] animate-bounce" />
             </div>
             <h2 className="text-2xl font-black text-gray-900 dark:text-white mb-2 font-display">Processando Pagamento</h2>
-            <p className="text-gray-500 dark:text-slate-500 text-sm max-w-[240px]">Confirmando sua campanha pré-paga de {duration} dias...</p>
+            <p className="text-gray-500 dark:text-slate-500 text-sm max-w-[240px]">Confirmando sua campanha pré-paga de {displayDuration} dias...</p>
         </div>
       )}
     </div>
