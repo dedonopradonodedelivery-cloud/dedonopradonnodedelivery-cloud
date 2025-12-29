@@ -7,7 +7,8 @@ import {
   ArrowUpRight, 
   BarChart3, 
   ChevronRight, 
-  Target
+  Target,
+  CheckCircle2
 } from 'lucide-react';
 import { InstitutionalSponsorBanner } from './InstitutionalSponsorBanner';
 
@@ -20,6 +21,10 @@ type Period = '7D' | '30D';
 
 export const MerchantCashbackDashboard: React.FC<MerchantCashbackDashboardProps> = ({ onBack, onNavigate }) => {
   const [period, setPeriod] = useState<Period>('30D');
+  
+  // Simulação de status do lojista (isso viria do perfil ou banco de dados)
+  // Altere para true para testar o estado de "loja impulsionada"
+  const [hasActiveAds] = useState(false);
 
   // Dados simulados baseados no período
   const data = period === '30D' ? {
@@ -39,10 +44,9 @@ export const MerchantCashbackDashboard: React.FC<MerchantCashbackDashboardProps>
   };
 
   return (
-    /* Root container garantindo 100% de altura com fundo escuro sólido */
     <div className="min-h-screen bg-slate-950 text-white font-sans animate-in slide-in-from-right duration-300 flex flex-col">
       
-      {/* Header - Sticky com blur e fundo escuro */}
+      {/* Header - Sticky com fundo escuro */}
       <div className="sticky top-0 z-30 bg-slate-950/90 backdrop-blur-md border-b border-white/5 px-5 h-20 flex items-center justify-between shrink-0">
         <div className="flex items-center gap-4">
           <button 
@@ -72,7 +76,6 @@ export const MerchantCashbackDashboard: React.FC<MerchantCashbackDashboardProps>
         </div>
       </div>
 
-      {/* Main Content Area - Expande para ocupar o espaço disponível */}
       <div className="flex-1 p-5 space-y-6 pb-20 bg-slate-950">
         
         {/* Main Highlight Card - Impacto */}
@@ -166,7 +169,7 @@ export const MerchantCashbackDashboard: React.FC<MerchantCashbackDashboardProps>
           </div>
         </div>
 
-        {/* Reinforcement Card + CTA */}
+        {/* Reinforcement Card + CTA Conditional */}
         <div className="bg-indigo-950/20 rounded-[32px] p-8 border border-indigo-500/20 text-center relative overflow-hidden group shadow-xl">
           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
           <div className="w-14 h-14 bg-indigo-500/10 rounded-full flex items-center justify-center mx-auto mb-5 border border-indigo-500/30">
@@ -179,21 +182,28 @@ export const MerchantCashbackDashboard: React.FC<MerchantCashbackDashboardProps>
             Clientes Localizei preferem lojas que oferecem benefícios reais no bairro.
           </p>
           
-          <button 
-            onClick={() => onNavigate('store_ads_module')}
-            className="w-full bg-white text-slate-950 font-black text-xs py-4 rounded-2xl active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-2xl hover:bg-amber-500"
-          >
-            IMPULSIONAR MINHA LOJA
-            <ChevronRight className="w-4 h-4" strokeWidth={3} />
-          </button>
+          {!hasActiveAds ? (
+            <button 
+              onClick={() => onNavigate('store_ads_module')}
+              className="w-full bg-white text-slate-950 font-black text-xs py-4 rounded-2xl active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-2xl hover:bg-amber-500"
+            >
+              IMPULSIONAR MINHA LOJA
+              <ChevronRight className="w-4 h-4" strokeWidth={3} />
+            </button>
+          ) : (
+            <div className="flex items-center justify-center gap-2 py-4 text-emerald-400 font-bold text-sm bg-emerald-500/5 rounded-2xl border border-emerald-500/20">
+              <CheckCircle2 className="w-4 h-4" />
+              Sua loja já está sendo impulsionada.
+            </div>
+          )}
         </div>
 
-        {/* Institutional Sponsor Banner - Integrado ao fluxo do scroll escuro */}
+        {/* Institutional Sponsor Banner */}
         <div className="mt-4">
           <InstitutionalSponsorBanner type="merchant" />
         </div>
 
-        {/* Discreet Footer - Mantido sobre o fundo dark contínuo */}
+        {/* Discreet Footer */}
         <div className="pt-8 pb-12 flex items-center justify-center gap-2 opacity-30 bg-slate-950">
           <Target className="w-3 h-3" />
           <p className="text-[9px] font-black uppercase tracking-[0.3em]">Painel do Parceiro Localizei</p>
