@@ -6,11 +6,8 @@ import {
   Users, 
   ArrowUpRight, 
   BarChart3, 
-  Zap, 
   ChevronRight, 
-  Target,
-  ShoppingBag,
-  ArrowRight
+  Target
 } from 'lucide-react';
 import { InstitutionalSponsorBanner } from './InstitutionalSponsorBanner';
 
@@ -42,9 +39,11 @@ export const MerchantCashbackDashboard: React.FC<MerchantCashbackDashboardProps>
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white font-sans animate-in slide-in-from-right duration-300">
-      {/* Header */}
-      <div className="sticky top-0 z-30 bg-slate-950/80 backdrop-blur-md border-b border-white/5 px-5 h-20 flex items-center justify-between">
+    /* Root container garantindo 100% de altura com fundo escuro sólido */
+    <div className="min-h-screen bg-slate-950 text-white font-sans animate-in slide-in-from-right duration-300 flex flex-col">
+      
+      {/* Header - Sticky com blur e fundo escuro */}
+      <div className="sticky top-0 z-30 bg-slate-950/90 backdrop-blur-md border-b border-white/5 px-5 h-20 flex items-center justify-between shrink-0">
         <div className="flex items-center gap-4">
           <button 
             onClick={onBack}
@@ -73,11 +72,11 @@ export const MerchantCashbackDashboard: React.FC<MerchantCashbackDashboardProps>
         </div>
       </div>
 
-      <div className="p-5 pb-32 space-y-6">
+      {/* Main Content Area - Expande para ocupar o espaço disponível */}
+      <div className="flex-1 p-5 space-y-6 pb-12">
         
         {/* Main Highlight Card - Impacto */}
         <div className="bg-gradient-to-br from-slate-900 to-indigo-950 rounded-[32px] p-8 border border-white/10 shadow-2xl relative overflow-hidden">
-          {/* Subtle Glow */}
           <div className="absolute top-0 right-0 w-48 h-48 bg-amber-500/10 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none"></div>
           
           <div className="relative z-10">
@@ -86,7 +85,7 @@ export const MerchantCashbackDashboard: React.FC<MerchantCashbackDashboardProps>
             </span>
             
             <div className="flex flex-col mb-8">
-              <h1 className="text-4xl font-black font-display tracking-tighter text-white">
+              <h1 className="text-5xl font-black font-display tracking-tighter text-white">
                 R$ {data.impacto.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
               </h1>
               <p className="text-gray-400 text-sm mt-2 font-medium italic">
@@ -152,7 +151,6 @@ export const MerchantCashbackDashboard: React.FC<MerchantCashbackDashboardProps>
                   }`}
                   style={{ height: `${h}%` }}
                 ></div>
-                {/* Simulated Label */}
                 <span className="absolute -bottom-5 left-1/2 -translate-x-1/2 text-[8px] font-bold text-gray-600 uppercase">
                     {['S1', 'S2', 'S3', 'S4', 'S5', 'S6', 'Hoje'][i]}
                 </span>
@@ -190,11 +188,13 @@ export const MerchantCashbackDashboard: React.FC<MerchantCashbackDashboardProps>
           </button>
         </div>
 
-        {/* Institutional Sponsor Banner */}
-        <InstitutionalSponsorBanner type="merchant" />
+        {/* Institutional Sponsor Banner - Integrado ao fluxo do scroll escuro */}
+        <div className="mt-4">
+          <InstitutionalSponsorBanner type="merchant" />
+        </div>
 
-        {/* Discreet Footer */}
-        <div className="pt-4 flex items-center justify-center gap-2 opacity-30">
+        {/* Discreet Footer - Mantido sobre o fundo dark */}
+        <div className="py-8 flex items-center justify-center gap-2 opacity-30">
           <Target className="w-3 h-3" />
           <p className="text-[9px] font-black uppercase tracking-[0.3em]">Painel do Parceiro Localizei</p>
         </div>
