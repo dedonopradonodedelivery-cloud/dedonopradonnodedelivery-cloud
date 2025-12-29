@@ -54,27 +54,27 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack }) => {
   const [createStep, setCreateStep] = useState(1);
   const [newCampaignType, setNewCampaignType] = useState<AdType | null>(null);
   const [campaignName, setCampaignName] = useState('');
-  const [duration, setDuration] = useState<number | 'monthly'>(7);
+  const [duration, setDuration] = useState<number>(15); // Default agora é 15 dias
   const [isActivating, setIsActivating] = useState(false);
 
   const STORE_BALANCE = 45.00; 
 
   const getPricePerDay = (type: AdType) => type === 'local' ? 0.89 : 3.90;
   const currentPrice = newCampaignType ? getPricePerDay(newCampaignType) : 0;
-  const totalCost = duration === 'monthly' ? currentPrice * 30 : currentPrice * (duration as number);
+  const totalCost = currentPrice * duration;
   const hasSufficientBalance = STORE_BALANCE >= totalCost;
 
   const handleCreateStart = () => {
     setCreateStep(1);
     setNewCampaignType(null);
     setCampaignName('');
-    setDuration(7);
+    setDuration(15);
     setView('create');
   };
 
   const handleSelectPlan = (type: AdType) => {
     setNewCampaignType(type);
-    setCreateStep(2); // Navegação automática conforme regra #1
+    setCreateStep(2); // Navegação automática
   };
 
   const handleActivateCampaign = () => {
@@ -86,7 +86,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack }) => {
         type: newCampaignType || 'local',
         status: 'starting',
         startDate: new Date().toLocaleDateString('pt-BR'),
-        endDate: duration === 'monthly' ? 'Recorrente' : new Date(Date.now() + (duration as number) * 86400000).toLocaleDateString('pt-BR'),
+        endDate: new Date(Date.now() + duration * 86400000).toLocaleDateString('pt-BR'),
         budget: totalCost,
         metrics: { impressions: 0, clicks: 0, ctr: 0, reach: 0 },
         history: [0, 0, 0, 0, 0, 0, 0]
@@ -299,29 +299,46 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack }) => {
               />
             </div>
 
-            <div>
-              <label className="block text-[10px] font-black text-slate-500 uppercase mb-3 ml-1 tracking-widest">Duração da Campanha</label>
-              <div className="grid grid-cols-2 gap-3">
-                {[7, 15, 30, 'monthly'].map((opt) => (
-                    <button
-                        key={opt}
-                        onClick={() => setDuration(opt as any)}
-                        className={`py-4 rounded-2xl border-2 font-bold text-xs transition-all ${
-                            duration === opt 
-                            ? 'border-purple-600 bg-purple-600/10 text-white' 
-                            : 'border-white/5 bg-slate-900 text-slate-500'
-                        }`}
-                    >
-                        {opt === 'monthly' ? 'Indeterminado' : `${opt} dias`}
-                    </button>
-                ))}
+            <div className="bg-slate-900 p-6 rounded-3xl border border-white/5">
+              <div className="flex justify-between items-center mb-6">
+                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Duração da campanha</label>
+                <span className="text-lg font-black text-purple-500 px-3 py-1 bg-purple-500/10 rounded-xl border border-purple-500/20">
+                  {duration} dias
+                </span>
               </div>
+              
+              <div className="px-2 relative mb-2">
+                {/* Discrete marking lines */}
+                <div className="absolute left-0 right-0 h-1 top-1/2 -translate-y-1/2 flex justify-between pointer-events-none px-1">
+                    <div className="w-1 h-3 bg-slate-700 rounded-full"></div>
+                    <div className="w-1 h-3 bg-slate-700 rounded-full"></div>
+                </div>
+                
+                <input 
+                  type="range" 
+                  min="15" 
+                  max="30" 
+                  step="1" 
+                  value={duration}
+                  onChange={(e) => setDuration(parseInt(e.target.value))}
+                  className="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-purple-600 relative z-10"
+                />
+              </div>
+              
+              <div className="flex justify-between px-1 text-[10px] font-bold text-slate-600 uppercase tracking-tighter">
+                <span>15 dias</span>
+                <span>30 dias</span>
+              </div>
+              
+              <p className="text-center text-[10px] text-slate-500 font-medium mt-4 italic uppercase tracking-widest">
+                Arraste para escolher a duração
+              </p>
             </div>
 
             <div className="bg-gradient-to-r from-purple-600/20 to-indigo-600/20 p-6 rounded-3xl flex justify-between items-center border border-white/10 shadow-xl">
                <div>
                     <span className="text-[10px] font-black text-purple-300 uppercase tracking-widest block mb-1">Investimento Estimado</span>
-                    <span className="text-xs text-slate-500 font-bold">Total: R$ {totalCost.toFixed(2).replace('.', ',')}</span>
+                    <span className="text-xs text-slate-500 font-bold">Total: {duration} dias × R$ {currentPrice.toFixed(2).replace('.', ',')}</span>
                </div>
                <span className="text-2xl font-black text-white">R$ {totalCost.toFixed(2).replace('.', ',')}</span>
             </div>
@@ -343,11 +360,11 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack }) => {
                     </div>
                     <div className="flex justify-between items-center border-b border-white/5 pb-4">
                         <span className="text-slate-500 text-sm font-medium">Duração</span>
-                        <span className="font-bold text-white">{duration === 'monthly' ? 'Assinatura Mensal' : `${duration} dias`}</span>
+                        <span className="font-bold text-white">{duration} dias</span>
                     </div>
                     <div className="flex justify-between items-center border-b border-white/5 pb-4">
                         <span className="text-slate-500 text-sm font-medium">Valor Diário</span>
-                        <span className="font-bold text-white">R$ {currentPrice.toFixed(2).replace('.', ',')}</span>
+                        <span className="font-bold">R$ {currentPrice.toFixed(2).replace('.', ',')}</span>
                     </div>
                     <div className="flex justify-between items-center pt-2">
                         <span className="font-black text-slate-300">Total a Pagar</span>
@@ -381,7 +398,6 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack }) => {
         >
           {createStep === 1 ? 'Cancelar' : 'Voltar'}
         </button>
-        {/* O botão "Continuar" no passo 1 é removido/desativado para privilegiar a navegação automática do toque no plano */}
         {createStep > 1 && (
           <button 
             onClick={() => {
