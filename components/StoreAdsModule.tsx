@@ -9,7 +9,6 @@ import {
   Eye, 
   TrendingUp,
   Rocket,
-  Wallet,
   Target,
   Clock,
   ShieldCheck,
@@ -299,9 +298,9 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack }) => {
               />
             </div>
 
-            {/* SLIDER DE DURAÇÃO - 15 a 180 DIAS COM ARRASTE REAL */}
+            {/* SLIDER DE DURAÇÃO - STEP DE 5 DIAS */}
             <div className="bg-gray-50 dark:bg-slate-900 p-6 rounded-3xl border border-gray-100 dark:border-white/5 w-full relative overflow-visible">
-              <div className="flex justify-between items-center mb-8 relative z-10">
+              <div className="flex justify-between items-center mb-6 relative z-10">
                 <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-2">
                     <Clock className="w-3.5 h-3.5" /> Duração da campanha
                 </label>
@@ -310,7 +309,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack }) => {
                 </span>
               </div>
               
-              <div className="px-2 relative mb-6">
+              <div className="px-2 relative mb-10">
                 <div className="absolute left-2 right-2 h-2 top-1/2 -translate-y-1/2 bg-gray-200 dark:bg-slate-800 rounded-full overflow-hidden pointer-events-none">
                     <div 
                         className="h-full bg-gradient-to-r from-[#1E5BFF] to-indigo-600 transition-none"
@@ -327,7 +326,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack }) => {
                   type="range" 
                   min="15" 
                   max="180" 
-                  step="1" 
+                  step="5" 
                   value={duration}
                   onChange={(e) => setDuration(parseInt(e.target.value))}
                   className="w-full h-10 opacity-0 relative z-20 cursor-pointer touch-none"
@@ -342,14 +341,29 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack }) => {
                     </div>
                 </div>
               </div>
-              
-              <div className="flex justify-between px-1 text-[10px] font-black text-gray-400 dark:text-slate-600 uppercase tracking-widest">
-                <span>15 dias</span>
-                <span>180 dias</span>
+
+              {/* BOTÕES DE SELEÇÃO RÁPIDA */}
+              <div className="space-y-3">
+                <p className="text-[10px] font-black text-gray-400 dark:text-slate-600 uppercase tracking-widest text-center mb-2">Seleção rápida</p>
+                <div className="flex flex-wrap justify-center gap-2">
+                  {[15, 30, 60, 90, 180].map((val) => (
+                    <button
+                      key={val}
+                      onClick={() => setDuration(val)}
+                      className={`px-4 py-2 rounded-xl text-xs font-black transition-all border ${
+                        duration === val
+                        ? 'bg-[#1E5BFF] text-white border-[#1E5BFF] shadow-lg shadow-blue-500/20'
+                        : 'bg-white dark:bg-slate-800 text-gray-500 dark:text-slate-400 border-gray-200 dark:border-white/5 hover:border-blue-300'
+                      }`}
+                    >
+                      {val} dias
+                    </button>
+                  ))}
+                </div>
               </div>
               
-              <p className="text-center text-[10px] text-gray-400 dark:text-slate-500 font-bold mt-6 italic uppercase tracking-[0.2em] animate-pulse">
-                Arraste para ajustar o período
+              <p className="text-center text-[9px] text-gray-400 dark:text-slate-500 font-bold mt-6 italic uppercase tracking-[0.2em] animate-pulse">
+                Arraste o slider para ajuste fino (step 5d)
               </p>
             </div>
 
