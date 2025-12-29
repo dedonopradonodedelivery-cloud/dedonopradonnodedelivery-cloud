@@ -9,13 +9,13 @@ import {
   Eye, 
   TrendingUp,
   Rocket,
-  Wallet,
   Target,
   Clock,
   ShieldCheck,
   Loader2,
   Crown,
-  CreditCard
+  CreditCard,
+  CheckCircle2
 } from 'lucide-react';
 
 interface StoreAdsModuleProps {
@@ -50,8 +50,6 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack }) => {
   const [createStep, setCreateStep] = useState(1);
   const [newCampaignType, setNewCampaignType] = useState<AdType | null>(null);
   const [campaignName, setCampaignName] = useState('');
-  
-  // Duração: 15 a 180 dias (padrão 15)
   const [duration, setDuration] = useState<number>(15); 
   const [isActivating, setIsActivating] = useState(false);
 
@@ -76,13 +74,12 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack }) => {
 
   const handleActivateCampaign = () => {
     setIsActivating(true);
-    // Simulação de processamento de pagamento pré-pago
     setTimeout(() => {
       const newCampaign: Campaign = {
         id: Math.random().toString(36).substr(2, 9),
         name: campaignName || 'Nova Campanha',
         type: newCampaignType || 'local',
-        status: 'active', // Fica ativa após aprovação do pagamento
+        status: 'active',
         startDate: new Date().toLocaleDateString('pt-BR'),
         endDate: new Date(Date.now() + displayDuration * 86400000).toLocaleDateString('pt-BR'),
         budget: totalCost,
@@ -96,6 +93,8 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack }) => {
       setCreateStep(1);
     }, 2500);
   };
+
+  const isDataStepValid = campaignName.trim().length > 0;
 
   const renderStatusBadge = (status: string) => {
     const styles = {
@@ -219,6 +218,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack }) => {
       </div>
 
       <div className="flex-1 p-5 pb-40 overflow-y-auto no-scrollbar w-full">
+        {/* PASSO 1: SELEÇÃO DE PLANO */}
         {createStep === 1 && (
           <div className="space-y-4 animate-in slide-in-from-right duration-300">
             <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2 text-center font-display">Escolha sua visibilidade</h3>
@@ -273,6 +273,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack }) => {
           </div>
         )}
 
+        {/* PASSO 2: DADOS DA CAMPANHA */}
         {createStep === 2 && (
           <div className="space-y-6 animate-in slide-in-from-right duration-300 w-full">
             <div className="bg-gray-50 dark:bg-slate-900 p-5 rounded-2xl border border-gray-100 dark:border-white/5 flex justify-between items-center w-full">
@@ -309,7 +310,6 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack }) => {
               </div>
               
               <div className="px-2 relative mb-6">
-                {/* Linha de progresso visual de fundo */}
                 <div className="absolute left-2 right-2 h-2 top-1/2 -translate-y-1/2 bg-gray-200 dark:bg-slate-800 rounded-full overflow-hidden pointer-events-none">
                     <div 
                         className="h-full bg-gradient-to-r from-[#1E5BFF] to-indigo-600 transition-none"
@@ -317,13 +317,11 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack }) => {
                     />
                 </div>
 
-                {/* Marcadores 15 e 180 */}
                 <div className="absolute left-2 right-2 h-1 top-1/2 -translate-y-1/2 flex justify-between pointer-events-none">
                     <div className="w-1.5 h-1.5 bg-white dark:bg-slate-600 rounded-full -translate-x-1/2 shadow-sm"></div>
                     <div className="w-1.5 h-1.5 bg-white dark:bg-slate-600 rounded-full translate-x-1/2 shadow-sm"></div>
                 </div>
                 
-                {/* Input de Range Nativo: Funcional para drag e perfeitamente fluido */}
                 <input 
                   type="range" 
                   min="15" 
@@ -334,7 +332,6 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack }) => {
                   className="w-full h-10 opacity-0 relative z-20 cursor-pointer touch-none"
                 />
 
-                {/* Thumb Visual customizado que segue o dedo instantaneamente */}
                 <div 
                     className="absolute top-1/2 -translate-y-1/2 pointer-events-none z-30 transition-none"
                     style={{ left: `calc(${((duration - 15) / 165) * 100}% - 0px)` }}
@@ -362,9 +359,24 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack }) => {
                </div>
                <span className="text-2xl font-black text-gray-900 dark:text-white">R$ {totalCost.toFixed(2).replace('.', ',')}</span>
             </div>
+
+            {/* BOTÃO PRIMÁRIO IN-PAGE PARA FINALIZAR */}
+            <button 
+              onClick={() => setCreateStep(3)}
+              disabled={!isDataStepValid}
+              className={`w-full py-4 rounded-2xl font-black text-sm uppercase tracking-widest transition-all shadow-xl flex items-center justify-center gap-2 mb-4 ${
+                isDataStepValid 
+                ? 'bg-[#1E5BFF] text-white active:scale-[0.98] shadow-blue-500/20' 
+                : 'bg-gray-200 dark:bg-gray-800 text-gray-400 cursor-not-allowed shadow-none'
+              }`}
+            >
+              Finalizar campanha
+              <ChevronRight className="w-5 h-5" />
+            </button>
           </div>
         )}
 
+        {/* PASSO 3: PAGAMENTO PRÉ-PAGO */}
         {createStep === 3 && (
           <div className="space-y-6 animate-in slide-in-from-right duration-300 w-full">
             <div className="bg-gray-50 dark:bg-slate-900 p-8 rounded-[32px] border border-gray-100 dark:border-white/5 shadow-2xl relative overflow-hidden">
@@ -408,6 +420,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack }) => {
         )}
       </div>
 
+      {/* FOOTER FIXO NAVEGAÇÃO */}
       <div className="fixed bottom-0 left-0 right-0 p-5 bg-white/95 dark:bg-slate-950/90 backdrop-blur-xl border-t border-gray-100 dark:border-white/5 z-30 flex gap-3 w-full max-w-md mx-auto">
         <button 
           onClick={() => createStep === 1 ? setView('list') : setCreateStep(prev => prev - 1)}
@@ -419,20 +432,20 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack }) => {
           <button 
             onClick={() => {
               if (createStep === 2) {
-                  if (campaignName.trim()) setCreateStep(3);
+                  if (isDataStepValid) setCreateStep(3);
                   else alert("Por favor, dê um nome para sua campanha.");
               } else if (createStep === 3) {
                   handleActivateCampaign();
               }
             }}
-            disabled={isActivating}
+            disabled={isActivating || (createStep === 2 && !isDataStepValid)}
             className={`flex-[2] bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-black text-[10px] uppercase tracking-[0.2em] py-4 rounded-2xl shadow-xl active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-30 disabled:grayscale`}
           >
             {isActivating ? (
               <Loader2 className="w-5 h-5 animate-spin" />
             ) : (
               <>
-                {createStep === 2 ? 'Ir para pagamento' : 'Pagar e ativar campanha'}
+                {createStep === 2 ? 'Finalizar campanha' : 'Pagar e ativar campanha'}
                 <ChevronRight className="w-4 h-4" strokeWidth={3} />
               </>
             )}
@@ -440,6 +453,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack }) => {
         )}
       </div>
 
+      {/* OVERLAY DE ATIVAÇÃO */}
       {isActivating && (
         <div className="fixed inset-0 z-[100] bg-white/95 dark:bg-slate-950/95 backdrop-blur-sm flex flex-col items-center justify-center text-center p-8 animate-in fade-in duration-300">
             <div className="w-24 h-24 bg-blue-600/10 rounded-[2.5rem] flex items-center justify-center mb-8 relative">
