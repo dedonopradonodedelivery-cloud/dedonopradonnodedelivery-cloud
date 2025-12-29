@@ -92,29 +92,7 @@ const ALL_SORTED_STORES = sortStores([...RAW_STORES]);
 const ITEMS_PER_PAGE = 12;
 
 const getStoreExtras = (index: number, store: Store) => {
-  let badge = null;
-  let activityBadge = null;
-  
-  if (store.cashback && store.cashback > 8) {
-     badge = { text: '💸 Cashback Alto', color: 'bg-green-50 dark:bg-green-900/40 text-green-700 dark:text-green-300' };
-  } else if (store.rating >= 4.9) {
-     badge = { text: '⭐ Favorita da Freguesia', color: 'bg-yellow-50 dark:bg-yellow-900/40 text-yellow-700 dark:text-yellow-300' };
-  } else if ((store.reviewsCount || 0) > 300) {
-     badge = { text: '🔥 Mais visitada', color: 'bg-orange-50 dark:bg-orange-900/40 text-orange-700 dark:text-orange-300' };
-  } else if (store.isSponsored) {
-     badge = { text: '💎 Destaque Premium', color: 'bg-purple-50 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300' };
-  } else if (index % 5 === 0) {
-     badge = { text: '⚡ Responde rápido', color: 'bg-blue-50 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300' };
-  }
-
-  if (Math.random() > 0.8) {
-      if (Math.random() > 0.5) {
-          activityBadge = { text: '👀 3 pessoas vendo', icon: Eye, color: 'text-gray-500 bg-gray-50 dark:bg-gray-700' };
-      } else {
-          activityBadge = { text: '🚀 Em alta agora', icon: Rocket, color: 'text-green-600 bg-green-50 dark:bg-green-900/20' };
-      }
-  }
-
+  // Activity badge removed to maintain clean layout as requested
   const copies = [
     "Muito elogiada pelos moradores",
     "Clientes voltam sempre",
@@ -124,7 +102,7 @@ const getStoreExtras = (index: number, store: Store) => {
     "Qualidade garantida"
   ];
   const copy = copies[index % copies.length];
-  return { badge, copy, activityBadge };
+  return { copy };
 };
 
 export const LojasEServicosList: React.FC<LojasEServicosListProps> = ({ onStoreClick, onViewAll, activeFilter = 'all', user = null, onNavigate }) => {
@@ -236,7 +214,7 @@ export const LojasEServicosList: React.FC<LojasEServicosListProps> = ({ onStoreC
             const isLastElement = index === visibleStores.length - 1;
             const isFavorited = isFavorite(store.id);
             const isSponsored = store.isSponsored || store.adType === AdType.PREMIUM;
-            const { badge, copy, activityBadge } = getStoreExtras(index, store);
+            const { copy } = getStoreExtras(index, store);
             return (
                 <div
                     key={store.id}
@@ -244,18 +222,11 @@ export const LojasEServicosList: React.FC<LojasEServicosListProps> = ({ onStoreC
                     onClick={() => onStoreClick && onStoreClick(store)}
                     className={`bg-white dark:bg-gray-800 rounded-2xl p-3 flex gap-3 cursor-pointer relative group transition-all duration-300 shadow-[0_4px_12px_rgba(0,0,0,0.05)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] active:scale-[0.99] border-2 ${isSponsored ? 'border-[#1E5BFF]/20 dark:border-[#1E5BFF]/10 mt-2' : 'border-transparent mt-2'}`}
                 >
-                    {(isSponsored || badge) && (
+                    {isSponsored && (
                       <div className="absolute top-0 right-4 -translate-y-1/2 z-10 pointer-events-none flex flex-col items-end gap-1">
-                          {isSponsored && (
-                              <span className="text-xs font-black px-3 py-1.5 rounded-full bg-[#1E5BFF] text-white shadow-xl shadow-blue-500/40 uppercase tracking-wider">
-                                  Patrocinado
-                              </span>
-                          )}
-                          {badge && !isSponsored && (
-                              <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${badge.color}`}>
-                                  {badge.text}
-                              </span>
-                          )}
+                          <span className="text-xs font-black px-3 py-1.5 rounded-full bg-[#1E5BFF] text-white shadow-xl shadow-blue-500/40 uppercase tracking-wider">
+                              Patrocinado
+                          </span>
                       </div>
                     )}
 
