@@ -19,7 +19,6 @@ import {
   Loader2,
   Sparkles,
   MapPin,
-  // Added Crown icon to fix the error "Cannot find name 'Crown'"
   Crown
 } from 'lucide-react';
 
@@ -50,9 +49,8 @@ interface Campaign {
 export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack }) => {
   const [view, setView] = useState<ViewState>('list');
   const [selectedCampaign, setSelectedCampaign] = useState<Campaign | null>(null);
-  const [campaigns, setCampaigns] = useState<Campaign[]>([]); // Começa vazio para mostrar onboarding
+  const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   
-  // Create Flow States
   const [createStep, setCreateStep] = useState(1);
   const [newCampaignType, setNewCampaignType] = useState<AdType | null>(null);
   const [campaignName, setCampaignName] = useState('');
@@ -74,10 +72,13 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack }) => {
     setView('create');
   };
 
+  const handleSelectPlan = (type: AdType) => {
+    setNewCampaignType(type);
+    setCreateStep(2); // Navegação automática conforme regra #1
+  };
+
   const handleActivateCampaign = () => {
     setIsActivating(true);
-    
-    // Simulação de criação no backend
     setTimeout(() => {
       const newCampaign: Campaign = {
         id: Math.random().toString(36).substr(2, 9),
@@ -116,8 +117,6 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack }) => {
   const ListView = () => (
     <div className="flex-1 flex flex-col min-h-screen bg-slate-950">
       <div className="p-5 pb-32 w-full max-w-md mx-auto space-y-6">
-        
-        {/* Banner de Onboarding/Incentivo */}
         <div className="bg-gradient-to-br from-indigo-700 to-purple-800 rounded-[32px] p-8 text-white shadow-xl shadow-purple-900/20 relative overflow-hidden">
           <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none"></div>
           <div className="relative z-10 flex flex-col items-center text-center">
@@ -138,13 +137,11 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack }) => {
           </div>
         </div>
 
-        {/* Lista de Campanhas Ativas */}
         {campaigns.length > 0 && (
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
             <h3 className="text-xs font-black text-slate-500 uppercase tracking-[0.2em] mb-4 ml-1">
               Desempenho Geral
             </h3>
-            
             <div className="grid grid-cols-2 gap-3 mb-8">
               <div className="bg-slate-900 p-4 rounded-2xl border border-white/5">
                 <div className="flex items-center gap-2 text-slate-400 mb-1">
@@ -165,14 +162,12 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack }) => {
                 </p>
               </div>
             </div>
-
             <div className="flex items-center justify-between mb-4 px-1">
               <h3 className="text-xs font-black text-slate-500 uppercase tracking-[0.2em]">Minhas Campanhas</h3>
               <span className="text-[10px] text-purple-400 font-black bg-purple-500/10 px-3 py-1 rounded-full border border-purple-500/20">
                   Saldo ADS: R$ {STORE_BALANCE.toFixed(2).replace('.', ',')}
               </span>
             </div>
-            
             <div className="space-y-3">
               {campaigns.map((campaign) => (
                 <div 
@@ -209,7 +204,6 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack }) => {
 
   const CreateView = () => (
     <div className="flex flex-col min-h-screen bg-slate-950">
-      {/* Stepper */}
       <div className="p-5 flex justify-between mb-4 px-8 relative">
         <div className="absolute top-9 left-0 right-0 h-0.5 bg-slate-800 -z-0 mx-12"></div>
         {[1, 2, 3].map(step => (
@@ -227,13 +221,12 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack }) => {
       </div>
 
       <div className="flex-1 p-5 pb-40 overflow-y-auto no-scrollbar">
-        {/* PASSO 1: SELEÇÃO DE PLANO */}
         {createStep === 1 && (
           <div className="space-y-4 animate-in slide-in-from-right duration-300">
             <h3 className="text-xl font-bold text-white mb-2 text-center font-display">Escolha sua visibilidade</h3>
             
             <button 
-              onClick={() => setNewCampaignType('local')}
+              onClick={() => handleSelectPlan('local')}
               className={`w-full p-6 rounded-3xl border-2 text-left transition-all group ${
                 newCampaignType === 'local' 
                   ? 'border-purple-600 bg-purple-600/10 shadow-[0_10px_30px_rgba(147,51,234,0.1)]' 
@@ -257,7 +250,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack }) => {
             </button>
 
             <button 
-              onClick={() => setNewCampaignType('premium')}
+              onClick={() => handleSelectPlan('premium')}
               className={`w-full p-6 rounded-3xl border-2 text-left transition-all group ${
                 newCampaignType === 'premium' 
                   ? 'border-purple-600 bg-purple-600/10 shadow-[0_10px_30_rgba(147,51,234,0.1)]' 
@@ -282,9 +275,19 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack }) => {
           </div>
         )}
 
-        {/* PASSO 2: DADOS DA CAMPANHA */}
         {createStep === 2 && (
           <div className="space-y-6 animate-in slide-in-from-right duration-300">
+            <div className="bg-slate-900 p-5 rounded-2xl border border-white/5 flex justify-between items-center">
+              <div>
+                <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Plano Selecionado</p>
+                <p className="text-sm font-bold text-white uppercase">{newCampaignType === 'local' ? 'ADS Básico' : 'ADS Premium'}</p>
+              </div>
+              <div className="text-right">
+                <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Valor por dia</p>
+                <p className="text-sm font-bold text-purple-400">R$ {currentPrice.toFixed(2).replace('.', ',')}</p>
+              </div>
+            </div>
+
             <div>
               <label className="block text-[10px] font-black text-slate-500 uppercase mb-2 ml-1 tracking-widest">Nome da Campanha</label>
               <input 
@@ -315,56 +318,24 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack }) => {
               </div>
             </div>
 
-            {/* Prévia de Posicionamento */}
-            <div className="bg-slate-900 rounded-[28px] p-6 border border-white/5 shadow-inner">
-                <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-4 flex items-center gap-2">
-                    <Eye className="w-3 h-3" /> Prévia de onde você aparece
-                </h4>
-                <div className="space-y-3">
-                    <div className="flex items-center gap-3 bg-slate-950 p-3 rounded-xl border border-white/5">
-                        <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-                        <span className="text-xs text-slate-300">Listas de Categorias do Bairro</span>
-                    </div>
-                    <div className="flex items-center gap-3 bg-slate-950 p-3 rounded-xl border border-white/5">
-                        <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-                        <span className="text-xs text-slate-300">Resultados de busca na Freguesia</span>
-                    </div>
-                    {newCampaignType === 'premium' && (
-                        <>
-                            <div className="flex items-center gap-3 bg-slate-950 p-3 rounded-xl border border-purple-500/20 animate-in fade-in slide-in-from-left-2">
-                                <Sparkles className="w-4 h-4 text-purple-400" />
-                                <span className="text-xs text-purple-200 font-bold">Banner Rotativo na Home</span>
-                            </div>
-                            <div className="flex items-center gap-3 bg-slate-950 p-3 rounded-xl border border-purple-500/20 animate-in fade-in slide-in-from-left-2">
-                                <TrendingUp className="w-4 h-4 text-purple-400" />
-                                <span className="text-xs text-purple-200 font-bold">Prioridade Máxima de Ranking</span>
-                            </div>
-                        </>
-                    )}
-                </div>
-            </div>
-
             <div className="bg-gradient-to-r from-purple-600/20 to-indigo-600/20 p-6 rounded-3xl flex justify-between items-center border border-white/10 shadow-xl">
                <div>
                     <span className="text-[10px] font-black text-purple-300 uppercase tracking-widest block mb-1">Investimento Estimado</span>
-                    <span className="text-xs text-slate-500 font-bold">Base: R$ {currentPrice.toFixed(2).replace('.', ',')} / dia</span>
+                    <span className="text-xs text-slate-500 font-bold">Total: R$ {totalCost.toFixed(2).replace('.', ',')}</span>
                </div>
                <span className="text-2xl font-black text-white">R$ {totalCost.toFixed(2).replace('.', ',')}</span>
             </div>
           </div>
         )}
 
-        {/* PASSO 3: REVISÃO E PAGAMENTO */}
         {createStep === 3 && (
           <div className="space-y-6 animate-in slide-in-from-right duration-300">
             <div className="bg-slate-900 p-8 rounded-[32px] border border-white/5 shadow-2xl relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-purple-600/5 rounded-full blur-3xl"></div>
-                
                 <h3 className="text-xl font-bold text-white mb-8 flex items-center gap-2">
                     <ShieldCheck className="w-5 h-5 text-purple-500" />
                     Resumo do Pedido
                 </h3>
-                
                 <div className="space-y-4 mb-8">
                     <div className="flex justify-between items-center border-b border-white/5 pb-4">
                         <span className="text-slate-500 text-sm font-medium">Plano</span>
@@ -383,7 +354,6 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack }) => {
                         <span className="text-3xl font-black text-purple-500">R$ {totalCost.toFixed(2).replace('.', ',')}</span>
                     </div>
                 </div>
-
                 <div className={`p-5 rounded-2xl border flex items-start gap-4 transition-all ${hasSufficientBalance ? 'bg-emerald-500/10 border-emerald-500/20' : 'bg-orange-500/10 border-orange-500/20'}`}>
                     <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${hasSufficientBalance ? 'bg-emerald-500/20 text-emerald-400' : 'bg-orange-500/20 text-orange-400'}`}>
                         <Wallet className="w-5 h-5" />
@@ -404,7 +374,6 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack }) => {
         )}
       </div>
 
-      {/* Footer Navigation - Fixo */}
       <div className="fixed bottom-0 left-0 right-0 p-5 bg-slate-950/80 backdrop-blur-xl border-t border-white/5 z-30 flex gap-3 max-w-md mx-auto">
         <button 
           onClick={() => createStep === 1 ? setView('list') : setCreateStep(prev => prev - 1)}
@@ -412,32 +381,31 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack }) => {
         >
           {createStep === 1 ? 'Cancelar' : 'Voltar'}
         </button>
-        <button 
-          onClick={() => {
-            if (createStep === 1) {
-                if (newCampaignType) setCreateStep(2);
-            } else if (createStep === 2) {
-                if (campaignName) setCreateStep(3);
-                else alert("Por favor, dê um nome para sua campanha.");
-            } else {
-                handleActivateCampaign();
-            }
-          }}
-          disabled={createStep === 1 && !newCampaignType || isActivating}
-          className={`flex-[2] bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-black text-xs uppercase tracking-widest py-4 rounded-2xl shadow-xl active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-30 disabled:grayscale`}
-        >
-          {isActivating ? (
-            <Loader2 className="w-5 h-5 animate-spin" />
-          ) : (
-            <>
-              {createStep === 1 ? 'Continuar' : createStep === 2 ? 'Ir para pagamento' : 'Ativar campanha'}
-              {createStep < 3 && <ChevronRight className="w-4 h-4" strokeWidth={3} />}
-            </>
-          )}
-        </button>
+        {/* O botão "Continuar" no passo 1 é removido/desativado para privilegiar a navegação automática do toque no plano */}
+        {createStep > 1 && (
+          <button 
+            onClick={() => {
+              if (createStep === 2) {
+                  if (campaignName.trim()) setCreateStep(3);
+                  else alert("Por favor, dê um nome para sua campanha.");
+              } else if (createStep === 3) {
+                  handleActivateCampaign();
+              }
+            }}
+            disabled={isActivating}
+            className={`flex-[2] bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-black text-xs uppercase tracking-widest py-4 rounded-2xl shadow-xl active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-30 disabled:grayscale`}
+          >
+            {isActivating ? (
+              <Loader2 className="w-5 h-5 animate-spin" />
+            ) : (
+              <>
+                {createStep === 2 ? 'Ir para pagamento' : 'Ativar campanha'}
+              </>
+            )}
+          </button>
+        )}
       </div>
 
-      {/* Loading Overlay Global para Ativação */}
       {isActivating && (
         <div className="fixed inset-0 z-[100] bg-slate-950/90 backdrop-blur-sm flex flex-col items-center justify-center text-center p-8 animate-in fade-in duration-300">
             <div className="w-24 h-24 bg-purple-600/20 rounded-[2.5rem] flex items-center justify-center mb-8 relative">
