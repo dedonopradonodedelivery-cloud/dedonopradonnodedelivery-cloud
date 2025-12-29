@@ -94,10 +94,10 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 pb-32 font-sans animate-in fade-in duration-300">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 pb-32 font-sans animate-in fade-in duration-300 flex flex-col">
       
       {/* HEADER - 100% Width */}
-      <div className="bg-white dark:bg-gray-900 px-5 pt-12 pb-6 border-b border-gray-100 dark:border-gray-800 sticky top-0 z-20 shadow-sm">
+      <div className="bg-white dark:bg-gray-900 px-5 pt-12 pb-6 border-b border-gray-100 dark:border-gray-800 sticky top-0 z-20 shadow-sm shrink-0 w-full">
         <div className="flex items-center gap-3 mb-1">
           <button 
             onClick={onBack}
@@ -129,7 +129,7 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
         </div>
       </div>
 
-      <div className="flex flex-col w-full">
+      <div className="flex-1 flex flex-col w-full bg-gray-50 dark:bg-gray-950">
         
         {/* 1. TERMINAL DE CAIXA - 100% Width */}
         <section className="w-full border-b border-gray-100 dark:border-gray-800">
@@ -228,7 +228,7 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
             </button>
         </section>
 
-        {/* 4. AÇÕES (Minha Loja / Financeiro / Suporte) - 100% Width, No rounded corners on top/bottom to stay flat */}
+        {/* 4. AÇÕES (Minha Loja / Financeiro / Suporte) - 100% Width */}
         <section className="w-full mt-6">
             <div className="px-5 mb-3">
               <h3 className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest ml-1">
@@ -254,8 +254,8 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
             </div>
         </section>
 
-        {/* Footer Area */}
-        <div className="py-12 flex flex-col items-center justify-center opacity-30">
+        {/* Footer Area - Fundo contínuo bg-gray-50 ou dark:bg-gray-950 */}
+        <div className="py-12 flex flex-col items-center justify-center opacity-30 mt-auto">
           <LayoutDashboard className="w-4 h-4 mb-2" />
           <p className="text-[10px] font-black uppercase tracking-[0.4em]">Localizei Business v1.2</p>
         </div>

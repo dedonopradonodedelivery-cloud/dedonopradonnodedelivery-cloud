@@ -2,7 +2,6 @@
 import React, { useState } from 'react';
 import { 
   ChevronLeft, 
-  // FIX: Added 'ChevronRight' to the import list from lucide-react.
   ChevronRight,
   Megaphone, 
   Plus, 
@@ -47,31 +46,9 @@ interface Campaign {
   history: number[]; 
 }
 
-// Mock Data - Empty state check can be done by changing this to []
-const MOCK_CAMPAIGNS: Campaign[] = [
-  {
-    id: '1',
-    name: 'Promoção Fim de Semana',
-    type: 'premium',
-    status: 'active',
-    startDate: '10/11/2023',
-    endDate: '17/11/2023',
-    budget: 58.50,
-    metrics: { impressions: 12500, clicks: 450, ctr: 3.6, orders: 42, cpa: 1.39 },
-    history: [45, 60, 55, 80, 70, 90, 50]
-  },
-  {
-    id: '2',
-    name: 'Oferta de Almoço',
-    type: 'local',
-    status: 'paused',
-    startDate: '01/11/2023',
-    endDate: '30/11/2023',
-    budget: 57.00,
-    metrics: { impressions: 5600, clicks: 120, ctr: 2.1, orders: 8, cpa: 7.12 },
-    history: [10, 15, 12, 18, 20, 15, 30]
-  }
-];
+// Mock Data - Simulando sem campanhas para mostrar onboarding primeiro
+// Mude para o array abaixo para testar lista ativa
+const MOCK_CAMPAIGNS: Campaign[] = []; 
 
 const STORE_BALANCE = 45.00; 
 
@@ -119,75 +96,80 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack }) => {
   };
 
   const ListView = () => (
-    <div className="p-5 pb-32 bg-gray-50 dark:bg-gray-950 min-h-screen">
-      <div className="bg-gradient-to-br from-indigo-700 to-purple-800 rounded-3xl p-6 text-white mb-8 shadow-xl shadow-purple-900/20 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none"></div>
-        <div className="relative z-10">
-            <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center mb-4 border border-white/10">
-                <Rocket className="w-6 h-6 text-yellow-300 fill-yellow-300" />
-            </div>
-            <h2 className="text-xl font-bold mb-2 font-display">Apareça para quem quer comprar</h2>
-            <p className="text-indigo-100 text-sm mb-6 leading-relaxed">
-              Lojas anunciantes recebem até <strong>3x mais cliques</strong>. Destaque sua loja nas buscas e listas da Freguesia.
-            </p>
-            <button 
-              onClick={handleCreateClick}
-              className="w-full bg-white text-purple-700 font-bold py-4 rounded-2xl shadow-sm flex items-center justify-center gap-2 active:scale-95 transition-transform"
-            >
-              <Plus className="w-4 h-4" />
-              Criar primeira campanha
-            </button>
-        </div>
-      </div>
-
-      {campaigns.length > 0 ? (
-        <>
-          <div className="flex items-center justify-between mb-4 px-1">
-            <h3 className="font-bold text-gray-900 dark:text-white">Campanhas Ativas</h3>
-            <span className="text-xs text-purple-600 dark:text-purple-400 font-bold bg-purple-50 dark:bg-purple-900/20 px-2 py-1 rounded-md">
-                Saldo: R$ {STORE_BALANCE.toFixed(2).replace('.', ',')}
-            </span>
-          </div>
-          
-          <div className="space-y-4">
-            {campaigns.map((campaign) => (
-              <div 
-                key={campaign.id}
-                onClick={() => handleCampaignClick(campaign)}
-                className="bg-white dark:bg-gray-800 p-4 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 hover:border-purple-200 dark:hover:border-purple-900 transition-colors cursor-pointer"
-              >
-                <div className="flex justify-between items-start mb-3">
-                  <div>
-                    <h4 className="font-bold text-gray-900 dark:text-white text-sm">{campaign.name}</h4>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                        {campaign.type === 'premium' ? 'ADS Premium' : 'ADS Local'}
-                    </p>
-                  </div>
-                  {renderStatusBadge(campaign.status)}
-                </div>
-                <div className="flex items-center justify-between pt-3 border-t border-gray-50 dark:border-gray-700">
-                    <div className="flex gap-4">
-                        <div className="flex items-center gap-1.5 text-xs text-gray-500">
-                            <Eye className="w-3.5 h-3.5" />
-                            {campaign.metrics.impressions.toLocaleString()}
-                        </div>
-                        <div className="flex items-center gap-1.5 text-xs text-gray-500">
-                            <MousePointer className="w-3.5 h-3.5" />
-                            {campaign.metrics.clicks}
-                        </div>
-                    </div>
-                    <ChevronRight className="w-4 h-4 text-gray-300" />
-                </div>
+    <div className="flex-1 flex flex-col min-h-screen bg-gray-50 dark:bg-gray-950">
+      <div className="p-5 pb-32 w-full max-w-md mx-auto space-y-6">
+        
+        {/* Onboarding / Highlight Card */}
+        <div className="bg-gradient-to-br from-indigo-700 to-purple-800 rounded-[32px] p-8 text-white shadow-xl shadow-purple-900/20 relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none"></div>
+          <div className="relative z-10 flex flex-col items-center text-center">
+              <div className="w-16 h-16 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center mb-6 border border-white/10">
+                  <Rocket className="w-8 h-8 text-yellow-300 fill-yellow-300" />
               </div>
-            ))}
+              <h2 className="text-2xl font-black mb-3 font-display tracking-tight leading-tight">Impulsione sua loja</h2>
+              <p className="text-indigo-100 text-sm mb-8 leading-relaxed font-medium">
+                Apareça para mais clientes da freguesia e receba até <strong>3x mais cliques</strong> no seu perfil.
+              </p>
+              <button 
+                onClick={handleCreateClick}
+                className="w-full bg-white text-purple-700 font-black py-4 rounded-2xl shadow-lg flex items-center justify-center gap-2 active:scale-[0.98] transition-all hover:bg-yellow-400 hover:text-black"
+              >
+                <Plus className="w-5 h-5" strokeWidth={3} />
+                CRIAR PRIMEIRA CAMPANHA
+              </button>
           </div>
-        </>
-      ) : (
-        <div className="flex flex-col items-center justify-center py-12 text-center opacity-60">
-            <AlertCircle className="w-12 h-12 text-gray-400 mb-4" />
-            <p className="text-sm font-medium text-gray-500">Você ainda não tem campanhas criadas.</p>
         </div>
-      )}
+
+        {campaigns.length > 0 ? (
+          <div className="animate-in fade-in slide-in-from-bottom duration-500">
+            <div className="flex items-center justify-between mb-4 px-1">
+              <h3 className="font-bold text-gray-900 dark:text-white uppercase text-xs tracking-widest">Minhas Campanhas</h3>
+              <span className="text-[10px] text-purple-600 dark:text-purple-400 font-black bg-purple-50 dark:bg-purple-900/20 px-3 py-1 rounded-full border border-purple-100 dark:border-purple-800">
+                  Saldo: R$ {STORE_BALANCE.toFixed(2).replace('.', ',')}
+              </span>
+            </div>
+            
+            <div className="space-y-4">
+              {campaigns.map((campaign) => (
+                <div 
+                  key={campaign.id}
+                  onClick={() => handleCampaignClick(campaign)}
+                  className="bg-white dark:bg-gray-800 p-5 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-700 hover:border-purple-200 dark:hover:border-purple-900 transition-all cursor-pointer group active:scale-[0.99]"
+                >
+                  <div className="flex justify-between items-start mb-4">
+                    <div>
+                      <h4 className="font-bold text-gray-900 dark:text-white text-base leading-tight group-hover:text-purple-600 transition-colors">{campaign.name}</h4>
+                      <p className="text-xs text-gray-400 font-medium mt-1 uppercase tracking-tighter">
+                          {campaign.type === 'premium' ? 'Destaque Premium' : 'ADS Local Freguesia'}
+                      </p>
+                    </div>
+                    {renderStatusBadge(campaign.status)}
+                  </div>
+                  <div className="flex items-center justify-between pt-4 border-t border-gray-50 dark:border-gray-700">
+                      <div className="flex gap-6">
+                          <div className="flex items-center gap-2 text-xs font-bold text-gray-500">
+                              <Eye className="w-4 h-4 text-purple-400" />
+                              {campaign.metrics.impressions.toLocaleString()}
+                          </div>
+                          <div className="flex items-center gap-2 text-xs font-bold text-gray-500">
+                              <MousePointer className="w-4 h-4 text-blue-400" />
+                              {campaign.metrics.clicks}
+                          </div>
+                      </div>
+                      <ChevronRight className="w-5 h-5 text-gray-300 group-hover:translate-x-1 transition-transform" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : (
+          <div className="flex flex-col items-center justify-center py-16 text-center opacity-40 grayscale">
+              <Megaphone className="w-16 h-16 text-gray-400 mb-4" />
+              <p className="text-sm font-bold text-gray-500 uppercase tracking-widest leading-none">Comece a Anunciar</p>
+              <p className="text-xs text-gray-400 mt-2">Suas campanhas aparecerão aqui.</p>
+          </div>
+        )}
+      </div>
     </div>
   );
 
@@ -382,7 +364,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack }) => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 font-sans">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 font-sans flex flex-col">
       <div className="sticky top-0 z-30 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md px-5 h-16 flex items-center gap-4 border-b border-gray-100 dark:border-gray-800">
         <button 
           onClick={view === 'list' ? onBack : () => setView('list')} 
@@ -394,9 +376,11 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack }) => {
           {view === 'list' ? 'Anúncios e Destaques' : view === 'create' ? 'Nova Campanha' : 'Detalhes do Anúncio'}
         </h1>
       </div>
-      {view === 'list' && <ListView />}
-      {view === 'create' && <CreateView />}
-      {view === 'details' && <DetailsView />}
+      <div className="flex-1 flex flex-col w-full bg-gray-50 dark:bg-gray-950">
+        {view === 'list' && <ListView />}
+        {view === 'create' && <CreateView />}
+        {view === 'details' && <DetailsView />}
+      </div>
     </div>
   );
 };

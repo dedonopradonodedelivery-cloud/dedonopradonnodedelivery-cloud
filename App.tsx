@@ -37,6 +37,7 @@ import { UserStatementView } from './components/UserStatementView';
 import { MerchantCashbackDashboard } from './components/MerchantCashbackDashboard';
 import { MerchantCashbackOnboarding } from './components/MerchantCashbackOnboarding';
 import { StoreCashbackModule } from './components/StoreCashbackModule';
+import { StoreAdsModule } from './components/StoreAdsModule';
 
 const MOCK_STORES: Store[] = [
   {
@@ -190,7 +191,7 @@ const App: React.FC = () => {
     'freguesia_connect_public', 'freguesia_connect_dashboard', 'freguesia_connect_restricted',
     'service_subcategories', 'service_specialties', 'service_terms', 'service_success',
     'user_statement', 'merchant_cashback_dashboard', 'merchant_cashback_onboarding',
-    'store_cashback_module'
+    'store_cashback_module', 'store_ads_module'
   ];
 
   return (
@@ -251,6 +252,9 @@ const App: React.FC = () => {
             {activeTab === 'store_cashback_module' && (
               <StoreCashbackModule onBack={() => setActiveTab('home')} />
             )}
+            {activeTab === 'store_ads_module' && (
+              <StoreAdsModule onBack={() => setActiveTab('store_area')} />
+            )}
             {activeTab === 'editorial_list' && selectedCollection && (
               <EditorialListView
                 collection={selectedCollection}
@@ -280,6 +284,7 @@ const App: React.FC = () => {
                 <StoreAreaView 
                   onBack={() => setActiveTab('home')} 
                   onNavigate={setActiveTab} 
+                  user={user as any}
                 />
               ) : (
                 <FreguesiaConnectRestricted onBack={() => setActiveTab('home')} />
