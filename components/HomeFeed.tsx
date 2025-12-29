@@ -47,6 +47,7 @@ import { SpinWheelView } from './SpinWheelView';
 import { MasterSponsorBanner } from './MasterSponsorBanner';
 import { CATEGORIES, EDITORIAL_COLLECTIONS } from '../constants';
 import { RecomendadosPorMoradores } from './RecomendadosPorMoradores';
+import { UserCashbackBanner } from './UserCashbackBanner';
 
 interface HomeFeedProps {
   onNavigate: (view: string) => void;
@@ -533,6 +534,16 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
             </div>
           </div>
         );
+      case 'cashback_banner':
+        if (!user) return null;
+        return (
+          <div key="cashback_banner" className="px-5 pt-2">
+            <UserCashbackBanner 
+              balance={12.40} // Mock balance, in real app would come from a state or context
+              onClick={() => onNavigate('user_cashback_flow')} 
+            />
+          </div>
+        );
       case 'recommendations':
         return null;
       case 'trending':
@@ -640,7 +651,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
             </div>
             <div className="flex gap-4 overflow-x-auto no-scrollbar snap-x -mx-5 px-5 pb-2">
               {dynamicSuggestions.map((item: Suggestion) => (
-                <div key={item.id} className="snap-center flex-shrink-0 w-[240px] bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 p-5 rounded-[28px] shadow-[0_4px_20px_rgba(0,0,0,0.04)] flex flex-col gap-4 active:scale-95 transition-all cursor-pointer group hover:shadow-lg">
+                <div key={item.id} className="snap-center flex-shrink-0 w-[240px] bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 p-5 rounded-[28px] shadow-[0_4px_20px_rgba(0,0,0,0.04)] flex flex-col gap-4 active:scale-[0.95] transition-all cursor-pointer group hover:shadow-lg">
                   <div className="flex items-start justify-between">
                     <div className="flex flex-col">
                         <span className="text-[10px] font-black uppercase tracking-[0.15em] text-[#1E5BFF] mb-1">Agora no seu bairro</span>
@@ -719,6 +730,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
       ) : (
         <div className="flex flex-col gap-6 w-full">
             {renderSection('categories')}
+            {renderSection('cashback_banner')}
             {renderSection('hero')}
             {renderSection('roulette_banner')}
             {renderSection('highlights')}
