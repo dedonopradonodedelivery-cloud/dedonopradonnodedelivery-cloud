@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Layout } from './components/Layout';
 import { Header } from './components/Header';
@@ -25,15 +26,13 @@ import { ServiceTermsView } from './components/ServiceTermsView';
 import { QuoteRequestModal } from './components/QuoteRequestModal';
 import { StoreAreaView } from './components/StoreAreaView';
 import { MerchantQrScreen } from './components/MerchantQrScreen';
-// Fix: Added 'X' to the import list from lucide-react.
-import { MapPin, Crown, X } from 'lucide-react';
+import { MapPin, Crown, X, Star } from 'lucide-react';
 import { useAuth } from './contexts/AuthContext';
 import { Category, Store, AdType, EditorialCollection } from './types';
 import { getStoreLogo } from './utils/mockLogos';
 import { CategoriaAlimentacao } from './components/CategoriaAlimentacao';
 import { CategoryView } from './components/CategoryView';
 import { EditorialListView } from './components/EditorialListView';
-import { RecomendadosPorMoradores } from './components/RecomendadosPorMoradores'; // Importar o componente
 
 const MOCK_STORES: Store[] = [
   {
@@ -79,15 +78,14 @@ const App: React.FC = () => {
   const [isDarkMode, setIsDarkMode] = useState(false);
 
   useEffect(() => {
-    // 1. Inicia animação da barra de progresso imediatamente
+    // Progresso da barra inferior (5 segundos exatos)
     const animationFrame = requestAnimationFrame(() => {
       setSplashProgress(100);
     });
 
-    // 2. Trava o splash por exatamente 5 segundos (Obrigatório)
     const timer = setTimeout(() => {
       setMinSplashTimeElapsed(true);
-    }, 5000);
+    }, 5200); // 5.2s para garantir o 1s de parada final do patrocinador
 
     return () => {
       clearTimeout(timer);
@@ -104,7 +102,6 @@ const App: React.FC = () => {
   const [selectedReward, setSelectedReward] = useState<any>(null);
   const [scannedData, setScannedData] = useState<{ merchantId: string; storeId: string } | null>(null);
 
-  // States for Services Flow
   const [selectedServiceMacro, setSelectedServiceMacro] = useState<{id: string, name: string} | null>(null);
   const [selectedServiceSub, setSelectedServiceSub] = useState<string | null>(null);
   const [isQuoteModalOpen, setIsQuoteModalOpen] = useState(false);
@@ -117,55 +114,58 @@ const App: React.FC = () => {
     else setIsAuthOpen(true);
   };
 
-  // O app só é liberado se o carregamento do Supabase terminou E o tempo mínimo de 5s passou
   const isAppReady = !isAuthLoading && minSplashTimeElapsed;
 
   if (!isAppReady) {
     return (
       <div className="fixed inset-0 bg-[#1E5BFF] flex flex-col items-center justify-center text-white z-[999] overflow-hidden">
-        {/* ELEMENTO CRÍTICO: LOGO PRINCIPAL */}
+        {/* LOGO CENTRALIZADA */}
         <div className="relative flex flex-col items-center justify-center z-10">
-          <div className="animate-float">
-            <div className="w-24 h-24 bg-white rounded-[2.5rem] flex items-center justify-center shadow-2xl mb-6 animate-pop-in">
-              <MapPin className="w-12 h-12 text-[#1E5BFF] fill-[#1E5BFF]" />
+          
+          <div className="animate-float-slow">
+            <div className="w-28 h-28 bg-white rounded-[2.8rem] flex items-center justify-center shadow-[0_25px_60px_rgba(0,0,0,0.3)] mb-8 animate-pop-in">
+              <MapPin className="w-14 h-14 text-[#1E5BFF] fill-[#1E5BFF]" />
             </div>
           </div>
           
-          <div className="text-center">
-            <h1 className="text-5xl font-black font-display animate-slide-up tracking-tighter drop-shadow-md">
+          <div className="text-center relative">
+            <h1 className="text-6xl font-black font-display animate-slide-up tracking-tighter drop-shadow-2xl">
               Localizei
             </h1>
-            <div className="flex items-center justify-center gap-2 mt-2 animate-tracking-expand opacity-0 [animation-delay:800ms] [animation-fill-mode:forwards]">
-              <div className="h-[1px] w-4 bg-blue-300"></div>
-              <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-blue-200">Freguesia</span>
-              <div className="h-[1px] w-4 bg-blue-300"></div>
+            <div className="flex items-center justify-center gap-3 mt-3 animate-tracking-expand opacity-0 [animation-delay:800ms] [animation-fill-mode:forwards]">
+              <div className="h-[1.5px] w-6 bg-white/40"></div>
+              <span className="text-xs font-bold uppercase tracking-[0.4em] text-white/80">Freguesia</span>
+              <div className="h-[1.5px] w-6 bg-white/40"></div>
+            </div>
+
+            {/* PATROCINADOR MASTER CENTRALIZADO */}
+            {/* Surge após 2 segundos, gira por 2 segundos e para 1 segundo antes do fim */}
+            <div className="absolute top-1/2 left-1/2 w-[320px] flex flex-col items-center pointer-events-none opacity-0 [animation-delay:2000ms] [animation-fill-mode:forwards] animate-sponsor-spin-in">
+              <div className="glass-premium px-6 py-4 rounded-[2rem] flex items-center gap-4 relative overflow-hidden group border-white/30">
+                {/* Efeito Shimmer sutil */}
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full animate-shimmer"></div>
+                
+                <div className="w-14 h-14 bg-gradient-to-br from-amber-300 via-amber-400 to-orange-500 rounded-2xl flex items-center justify-center shadow-xl shrink-0">
+                  <Crown className="w-8 h-8 text-white fill-white" />
+                </div>
+                
+                <div className="flex flex-col text-left">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-[8px] font-black text-white/70 uppercase tracking-[0.25em]">Patrocinador Master</span>
+                    <Star className="w-3 h-3 text-amber-300 fill-amber-300" />
+                  </div>
+                  <p className="font-black text-xl tracking-tight text-white leading-tight">Grupo Esquematiza</p>
+                  <p className="text-[10px] font-bold text-white/50 uppercase mt-0.5 tracking-tight">Segurança & Facilities</p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* ELEMENTO CRÍTICO DE MONETIZAÇÃO: PATROCINADOR MASTER NO SPLASH */}
-        <div className="absolute bottom-20 left-0 right-0 flex flex-col items-center px-10 z-10 opacity-0 [animation-delay:1200ms] [animation-fill-mode:forwards] animate-sponsor-spin-in">
-          <p className="text-[8px] font-black text-blue-100 uppercase tracking-[0.4em] mb-4 text-center animate-soft-pulse">
-            Patrocinador Master
-          </p>
-          <div className="animate-sponsor-float w-full max-w-[280px]">
-            <div className="bg-white/10 backdrop-blur-2xl px-6 py-5 rounded-[2.5rem] border-2 border-white/30 flex items-center gap-4 shadow-[0_20px_50px_rgba(0,0,0,0.3)] relative overflow-hidden group">
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full animate-shimmer"></div>
-              <div className="w-12 h-12 bg-gradient-to-br from-yellow-300 to-orange-500 rounded-2xl flex items-center justify-center shadow-lg animate-sponsor-logo-pulse shrink-0">
-                <Crown className="w-7 h-7 text-white fill-white" />
-              </div>
-              <div className="flex flex-col text-left">
-                <p className="font-black text-xl tracking-tight text-white leading-none">Grupo Esquematiza</p>
-                <p className="text-[10px] font-bold text-blue-100 uppercase mt-1 tracking-wider">Segurança & Facilities</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Barra de Progresso Real de 5 Segundos */}
-        <div className="absolute bottom-0 left-0 right-0 h-1.5 bg-white/10">
+        {/* Barra de Progresso Real (5000ms) */}
+        <div className="absolute bottom-0 left-0 right-0 h-1.5 bg-white/5">
            <div 
-             className="h-full bg-white shadow-[0_0_15px_rgba(255,255,255,0.8)] transition-all duration-[5000ms] ease-linear" 
+             className="h-full bg-white shadow-[0_0_25px_rgba(255,255,255,1)] transition-all duration-[5000ms] ease-linear" 
              style={{ width: `${splashProgress}%` }} 
            />
         </div>
@@ -289,7 +289,6 @@ const App: React.FC = () => {
                 <CategoriaAlimentacao 
                     onBack={() => { setActiveTab('home'); setSelectedCategory(null); }}
                     onSelectSubcategory={(sub) => {
-                        // Navega para uma lista de lojas filtrada pela subcategoria
                         console.log("Subcategoria selecionada:", sub);
                     }}
                 />
@@ -313,12 +312,6 @@ const App: React.FC = () => {
                   setQuoteCategory(`${selectedServiceSub} - ${specialty}`);
                   setIsQuoteModalOpen(true);
                 }}
-              />
-            )}
-            {activeTab === 'service_success' && (
-              <ServiceSuccessView
-                onViewRequests={() => alert('Navegar para Meus Pedidos')}
-                onHome={() => setActiveTab('home')}
               />
             )}
             {activeTab === 'service_success' && (
