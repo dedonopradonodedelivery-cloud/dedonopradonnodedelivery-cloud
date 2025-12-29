@@ -73,7 +73,7 @@ export const MerchantCashbackDashboard: React.FC<MerchantCashbackDashboardProps>
       </div>
 
       {/* Main Content Area - Expande para ocupar o espaço disponível */}
-      <div className="flex-1 p-5 space-y-6 pb-12">
+      <div className="flex-1 p-5 space-y-6 pb-20 bg-slate-950">
         
         {/* Main Highlight Card - Impacto */}
         <div className="bg-gradient-to-br from-slate-900 to-indigo-950 rounded-[32px] p-8 border border-white/10 shadow-2xl relative overflow-hidden">
@@ -193,8 +193,8 @@ export const MerchantCashbackDashboard: React.FC<MerchantCashbackDashboardProps>
           <InstitutionalSponsorBanner type="merchant" />
         </div>
 
-        {/* Discreet Footer - Mantido sobre o fundo dark */}
-        <div className="py-8 flex items-center justify-center gap-2 opacity-30">
+        {/* Discreet Footer - Mantido sobre o fundo dark contínuo */}
+        <div className="pt-8 pb-12 flex items-center justify-center gap-2 opacity-30 bg-slate-950">
           <Target className="w-3 h-3" />
           <p className="text-[9px] font-black uppercase tracking-[0.3em]">Painel do Parceiro Localizei</p>
         </div>
