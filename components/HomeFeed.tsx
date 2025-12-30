@@ -20,7 +20,12 @@ import {
   CheckCircle2,
   Heart,
   Tag,
-  Timer
+  Timer,
+  Activity,
+  Eye,
+  Rocket,
+  // Fix: Renamed Store to StoreIcon to avoid conflict with Store interface
+  Store as StoreIcon
 } from 'lucide-react';
 import { LojasEServicosList } from './LojasEServicosList';
 import { User } from '@supabase/supabase-js';
@@ -188,39 +193,45 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
           </div>
         );
 
-      case 'achados_semana':
+      case 'bairro_on':
         return (
-          <div key="achados_semana" className="px-4">
+          <div key="bairro_on" className="px-4">
             <div className="flex items-center justify-between mb-4 px-1">
               <div className="flex items-center gap-2">
-                <Tag className="w-4 h-4 text-rose-500" />
-                <h3 className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em]">Achados da Semana</h3>
+                <div className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                </div>
+                <h3 className="text-[11px] font-black text-gray-900 dark:text-white uppercase tracking-[0.15em]">O Bairro Tá On</h3>
               </div>
-              <div className="flex items-center gap-1 text-[9px] font-black text-rose-600 dark:text-rose-400 uppercase bg-rose-50 dark:bg-rose-900/20 px-2.5 py-1 rounded-full border border-rose-100 dark:border-rose-900/30">
-                <Timer className="w-3.5 h-3.5" />
-                <span>Oferta da semana</span>
-              </div>
+              <p className="text-[10px] font-bold text-gray-400 uppercase">O que tá bombando perto de você</p>
             </div>
-            <div className="flex gap-4 overflow-x-auto no-scrollbar -mx-4 px-4 pb-2">
+            
+            <div className="flex gap-3 overflow-x-auto no-scrollbar -mx-4 px-4 pb-2">
               {[
-                { id: 1, title: 'Barca de Sushi (30 pçs)', store: 'Sushi House', oldPrice: 89.90, newPrice: 59.90, discount: '-33%', image: 'https://images.unsplash.com/photo-1579871494447-9811cf80d66c?q=80&w=400&auto=format&fit=crop' },
-                { id: 2, title: 'Limpeza de Pele Prof.', store: 'Clínica BioEstética', oldPrice: 180.00, newPrice: 119.00, discount: '-34%', image: 'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?q=80&w=400&auto=format&fit=crop' },
-                { id: 3, title: 'Combo Smash Double', store: 'Burger Freguesia', oldPrice: 42.00, newPrice: 28.00, discount: '-33%', image: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?q=80&w=400&auto=format&fit=crop' }
+                { id: 'on-1', name: 'Padaria Imperial', category: 'Padaria', status: '🔥 Bombando hoje', microcopy: 'Movimento intenso agora', icon: <Flame className="w-3 h-3 text-orange-500" />, color: 'bg-orange-50 dark:bg-orange-900/10' },
+                { id: 'on-2', name: 'Hambúrgueria Brasa', category: 'Lanches', status: '📈 Em alta agora', microcopy: 'Muitos vizinhos visitando', icon: <TrendingUp className="w-3 h-3 text-emerald-500" />, color: 'bg-emerald-50 dark:bg-emerald-900/10' },
+                { id: 'on-3', name: 'Pet Shop Amigo', category: 'Pets', status: '🚀 Tendência do dia', microcopy: 'Bombando nas últimas horas', icon: <Rocket className="w-3 h-3 text-blue-500" />, color: 'bg-blue-50 dark:bg-blue-900/10' },
+                { id: 'on-4', name: 'Academia Fit', category: 'Esportes', status: '👀 Movimento intenso', microcopy: 'Vizinhança ativa aqui', icon: <Eye className="w-3 h-3 text-purple-500" />, color: 'bg-purple-50 dark:bg-purple-900/10' }
               ].map((item) => (
-                <div key={item.id} className="min-w-[240px] bg-white dark:bg-gray-800 rounded-[28px] shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col overflow-hidden group active:scale-[0.98] transition-transform">
-                  <div className="h-32 relative overflow-hidden">
-                    <img src={item.image} alt={item.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
-                    <div className="absolute top-3 left-3 bg-rose-500 text-white text-[10px] font-black px-2 py-1 rounded-lg shadow-lg">
-                      {item.discount}
+                <div key={item.id} className="min-w-[190px] bg-white dark:bg-gray-800 rounded-[24px] p-4 shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col gap-3 group active:scale-[0.98] transition-all">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-gray-100 dark:bg-gray-700 flex items-center justify-center shrink-0">
+                      {/* Fix: Use StoreIcon instead of Store to resolve type vs value conflict */}
+                      <StoreIcon className="w-5 h-5 text-gray-400" />
+                    </div>
+                    <div className="min-w-0">
+                      <h4 className="font-bold text-gray-900 dark:text-white text-sm truncate leading-tight">{item.name}</h4>
+                      <p className="text-[10px] text-gray-400 font-bold uppercase">{item.category}</p>
                     </div>
                   </div>
-                  <div className="p-4 flex flex-col gap-1">
-                    <h4 className="font-bold text-gray-900 dark:text-white text-sm leading-tight truncate">{item.title}</h4>
-                    <p className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">{item.store}</p>
-                    <div className="flex items-center gap-2 mt-2">
-                      <span className="text-gray-400 line-through text-[11px] font-medium">R$ {item.oldPrice.toFixed(2)}</span>
-                      <span className="text-rose-600 dark:text-rose-400 font-black text-base">R$ {item.newPrice.toFixed(2)}</span>
+                  
+                  <div className={`p-2.5 rounded-2xl ${item.color} flex flex-col gap-1`}>
+                    <div className="flex items-center gap-1.5">
+                      {item.icon}
+                      <span className="text-[10px] font-black uppercase text-gray-800 dark:text-gray-100 tracking-tight">{item.status}</span>
                     </div>
+                    <p className="text-[10px] font-medium text-gray-500 dark:text-gray-400 leading-none">{item.microcopy}</p>
                   </div>
                 </div>
               ))}
@@ -288,9 +299,9 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
 
   const homeStructure = useMemo(() => {
     if (user) {
-      return ['cashback', 'categories', 'hero', 'roulette', 'achados_semana', 'community', 'list'];
+      return ['cashback', 'categories', 'hero', 'roulette', 'bairro_on', 'community', 'list'];
     }
-    return ['categories', 'hero', 'roulette', 'achados_semana', 'community', 'list'];
+    return ['categories', 'hero', 'roulette', 'bairro_on', 'community', 'list'];
   }, [user]);
 
   return (
@@ -340,6 +351,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
                 <SpinWheelView 
                     userId={user?.id || null} 
                     userRole={userRole || null} 
+                    // Fix: Changed onWin to use the onSpinWin prop from HomeFeedProps
                     onWin={onSpinWin} 
                     onRequireLogin={onRequireLogin} 
                     onViewHistory={() => { setIsSpinWheelOpen(false); onNavigate('prize_history'); }} 
