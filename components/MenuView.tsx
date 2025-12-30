@@ -228,18 +228,18 @@ export const MenuView: React.FC<MenuViewProps> = ({ user, userRole, onAuthClick,
             subLabel="Fale com a nossa equipe"
         />
 
-        <SectionTitle title="Parceiros & Publicidade" />
-        <MasterSponsorBanner 
-            onClick={() => onNavigate('patrocinador_master')}
-            className="mb-4"
-        />
-
         <SectionTitle title="Institucional" />
         <MenuItem 
             icon={Info} 
             label="Sobre a Localizei" 
             onClick={() => onNavigate('about')} 
             colorClass="bg-gray-500" 
+        />
+
+        <SectionTitle title="Parceiros & Publicidade" />
+        <MasterSponsorBanner 
+            onClick={() => onNavigate('patrocinador_master')}
+            className="mb-4"
         />
 
         <div className="mt-8">

@@ -122,7 +122,7 @@ const MenuLink: React.FC<{
     className="w-full bg-white dark:bg-gray-800 p-5 border-b last:border-b-0 border-gray-100 dark:border-gray-700 flex items-center justify-between group active:bg-gray-50 dark:active:bg-gray-700/50 transition-colors"
   >
     <div className="flex items-center gap-4">
-      <div className="text-gray-400 group-hover:text-[#2D6DF6] transition-colors relative">
+      <div className={`text-gray-400 group-hover:text-[#2D6DF6] transition-colors relative`}>
         <Icon className="w-5 h-5" />
       </div>
       <span className="text-sm font-bold text-gray-700 dark:text-gray-200">{label}</span>
@@ -141,11 +141,12 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
   const [isConnectActive, setIsConnectActive] = useState(false);
   const [pendingRequestsCount, setPendingRequestsCount] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [hasCampaigns, setHasCampaigns] = useState(false);
   const [activeVideo, setActiveVideo] = useState<{url: string, title: string} | null>(null);
   
-  // Gate Control
-  const [isCashbackVideoFinished, setIsCashbackVideoFinished] = useState(false);
+  // Gate Control with Persistence
+  const [isCashbackVideoFinished, setIsCashbackVideoFinished] = useState(() => 
+    localStorage.getItem('cashback_tutorial_finished') === 'true'
+  );
   
   // Onboarding Control
   const [cashbackFirstSeen] = useState<string | null>(localStorage.getItem('cashback_onboarding_start'));
@@ -171,7 +172,8 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
     return (new Date().getTime() - new Date(dateStr).getTime()) < sevenDaysInMs;
   };
 
-  const shouldShowCashbackVideo = !isCashbackEnabled && isWithin7Days(cashbackFirstSeen);
+  // Se já estiver habilitado, não mostramos mais o tutorial explicativo
+  const shouldShowCashbackTutorial = !isCashbackEnabled;
   const shouldShowConnectVideo = !isConnectActive && isWithin7Days(connectFirstSeen);
 
   useEffect(() => {
@@ -191,6 +193,11 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
 
   const handleSendQuestion = async (text: string) => {
     await new Promise(resolve => setTimeout(resolve, 1000));
+  };
+
+  const handleFinishCashbackVideo = () => {
+    setIsCashbackVideoFinished(true);
+    localStorage.setItem('cashback_tutorial_finished', 'true');
   };
 
   if (loading) {
@@ -255,10 +262,15 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
                 </div>
                 <button 
                     onClick={() => {
-                        if (!isCashbackVideoFinished && !isCashbackEnabled) {
-                            setActiveVideo({url: CASHBACK_TUTORIAL_VIDEO, title: "Como funciona o Cashback Localizei"});
+                        // Se estiver tentando desligar, ok. Se estiver tentando ligar sem ver o video, trava.
+                        if (isCashbackEnabled) {
+                            setIsCashbackEnabled(false);
                         } else {
-                            setIsCashbackEnabled(!isCashbackEnabled);
+                            if (isCashbackVideoFinished) {
+                                setIsCashbackEnabled(true);
+                            } else {
+                                setActiveVideo({url: CASHBACK_TUTORIAL_VIDEO, title: "Como funciona o Cashback Localizei"});
+                            }
                         }
                     }}
                     className={`w-12 h-6 rounded-full p-1 transition-colors duration-300 ${isCashbackEnabled ? 'bg-green-500' : 'bg-gray-300 dark:bg-gray-600'}`}
@@ -267,7 +279,7 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
                 </button>
             </div>
 
-            {shouldShowCashbackVideo ? (
+            {shouldShowCashbackTutorial ? (
               <div className="mb-6 animate-in fade-in slide-in-from-top-4 duration-500">
                 <div 
                     onClick={() => setActiveVideo({url: CASHBACK_TUTORIAL_VIDEO, title: "Como funciona o Cashback Localizei"})}
@@ -279,14 +291,14 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
                             <Play className="w-8 h-8 text-[#1E5BFF] fill-[#1E5BFF] ml-1" />
                         </div>
                         <span className="text-[10px] font-black text-white uppercase tracking-widest bg-black/40 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/10">
-                            Tutorial: Entenda em 1 min
+                            Tutorial Obrigatório
                         </span>
                     </div>
                 </div>
 
                 <div className="bg-blue-50 dark:bg-blue-900/10 rounded-2xl p-5 mb-4 border border-blue-100 dark:border-blue-800/30">
                     <p className="text-xs text-blue-700 dark:text-blue-400 leading-relaxed font-medium">
-                        Lojas com cashback ativo recebem até <strong>40% mais visitas</strong> no app.
+                        Lojas com cashback ativo recebem até <strong>40% mais visitas</strong> no app. Assista ao vídeo para habilitar.
                     </p>
                 </div>
 
@@ -556,9 +568,10 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
                     autoPlay
                     onTimeUpdate={(e) => {
                         const video = e.currentTarget;
+                        // Regra: Considerar vídeo concluído quando ≥ 95% for assistido
                         if (video.duration > 0 && (video.currentTime / video.duration) >= 0.95) {
                             if (activeVideo.url === CASHBACK_TUTORIAL_VIDEO) {
-                                setIsCashbackVideoFinished(true);
+                                handleFinishCashbackVideo();
                             }
                         }
                     }}
