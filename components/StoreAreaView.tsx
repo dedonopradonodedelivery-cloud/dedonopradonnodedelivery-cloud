@@ -22,10 +22,12 @@ import {
   Star
 } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
+import { User } from '@supabase/supabase-js';
 
 interface StoreAreaViewProps {
   onBack: () => void;
   onNavigate?: (view: string) => void;
+  user?: User | null;
 }
 
 // Mock Base Data (Reference for 30 days)
@@ -98,7 +100,7 @@ const MenuLink: React.FC<{
   </button>
 );
 
-export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate }) => {
+export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate, user }) => {
   const [isCashbackEnabled, setIsCashbackEnabled] = useState(true);
   const [dateRange, setDateRange] = useState<DateRange>('30d');
   const [pendingRequestsCount, setPendingRequestsCount] = useState(0);
@@ -126,9 +128,9 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
 
   // Realtime Pending Requests Listener
   useEffect(() => {
-    if (!supabase) return;
+    if (!supabase || !user) return;
     
-    const merchantId = 'merchant_123_uuid'; 
+    const merchantId = user.id; 
 
     const fetchCount = async () => {
         const { count } = await supabase
@@ -156,7 +158,7 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
         .subscribe();
 
     return () => { supabase.removeChannel(sub); };
-  }, []);
+  }, [user]);
 
   const formatCurrency = (val: number) => 
     val.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
