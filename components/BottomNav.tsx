@@ -10,12 +10,14 @@ interface BottomNavProps {
 }
 
 export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, userRole, onCashbackClick }) => {
-  // UX: Arquitetura de Informação Fixa. 
-  // O Login altera permissões e estados, mas nunca a estrutura das abas principais.
+  // UX: Microcopy contextual baseado no estado de login.
+  // Usuário deslogado entende posse ("meu"), usuário logado foca na ação ("ler").
+  const qrLabel = userRole ? 'Ler QR Code' : 'Meu QR';
+
   const navItems = [
     { id: 'home', icon: Home, label: 'Início' },
     { id: 'explore', icon: Search, label: 'Explorar' },
-    { id: 'qrcode_scan', icon: QrCode, label: 'Meu QR', isCenter: true },
+    { id: 'qrcode_scan', icon: QrCode, label: qrLabel, isCenter: true },
     { id: 'services', icon: Wrench, label: 'Serviços' },
     { id: 'profile', icon: User, label: 'Perfil' },
   ];
@@ -30,7 +32,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
 
           if (tab.isCenter) {
             return (
-              <div key={tab.id} className="relative w-20 flex justify-center -top-6">
+              <div key={tab.id} className="relative w-24 flex justify-center -top-6">
                  <button
                     onClick={onCashbackClick}
                     className="flex flex-col items-center group outline-none"
@@ -38,7 +40,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
                     <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-xl shadow-black/20 border-[6px] border-[#1E5BFF] active:scale-95 transition-transform duration-200">
                         <Icon className="w-7 h-7 text-[#1E5BFF]" strokeWidth={2.5} />
                     </div>
-                    <span className="text-[11px] font-bold text-white mt-1 tracking-tight">
+                    <span className="text-[11px] font-bold text-white mt-1 tracking-tight whitespace-nowrap">
                         {tab.label}
                     </span>
                  </button>

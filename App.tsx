@@ -49,29 +49,34 @@ import {
   SponsorInfoView 
 } from './components/SimplePages';
 
+// UX: Variável global para rastrear se o boot inicial já ocorreu.
+// Isso evita que o Splash reapareça se o componente App for remontado durante o Auth.
+let isFirstBootDone = false;
+
 const App: React.FC = () => {
   const { user, userRole, loading: isAuthLoading, signOut } = useAuth();
-  const [minSplashTimeElapsed, setMinSplashTimeElapsed] = useState(false);
+  const [minSplashTimeElapsed, setMinSplashTimeElapsed] = useState(isFirstBootDone);
   const [splashProgress, setSplashProgress] = useState(0);
   
-  // UX: Inicializa a aba a partir do localStorage ou 'home' para manter persistência na atualização
   const [activeTab, setActiveTab] = useState(() => {
     return localStorage.getItem('localizei_active_tab') || 'home';
   });
 
   const [isDarkMode, setIsDarkMode] = useState(false);
 
-  // UX: Persiste a aba selecionada sempre que houver mudança
   useEffect(() => {
     localStorage.setItem('localizei_active_tab', activeTab);
   }, [activeTab]);
 
   useEffect(() => {
+    if (isFirstBootDone) return;
+
     const animationFrame = requestAnimationFrame(() => {
       setSplashProgress(100);
     });
 
     const timer = setTimeout(() => {
+      isFirstBootDone = true;
       setMinSplashTimeElapsed(true);
     }, 5200);
 
@@ -102,7 +107,8 @@ const App: React.FC = () => {
     else setIsAuthOpen(true);
   };
 
-  // UX: O Splash só deve ser exibido na carga inicial técnica. O login não reinicia este estado.
+  // UX: O Splash Screen só bloqueia o app no boot frio (carregamento inicial da página).
+  // Mudanças de login (AuthContext) não resetam este booleano.
   const isAppReady = minSplashTimeElapsed;
 
   if (!isAppReady) {
