@@ -11,8 +11,8 @@ interface BottomNavProps {
 
 export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, userRole, onCashbackClick }) => {
   // UX: Microcopy contextual baseado no estado de login.
-  // Usuário deslogado entende posse ("meu"), usuário logado foca na ação ("ler").
-  const qrLabel = userRole ? 'Ler QR Code' : 'Meu QR';
+  // Usuário deslogado vê o benefício ("Cashback"), usuário logado foca na ação ("Ler QR Code").
+  const qrLabel = userRole ? 'Ler QR Code' : 'Cashback';
 
   const navItems = [
     { id: 'home', icon: Home, label: 'Início' },
