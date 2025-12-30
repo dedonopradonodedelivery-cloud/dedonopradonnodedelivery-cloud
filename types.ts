@@ -55,6 +55,7 @@ export interface Category {
   id: string;
   name: string;
   icon: React.ReactNode;
+  illustrationUrl?: string; // URL para a ilustração estilo iFood (flat/colorida)
   image?: string; 
   color: string; // Nova propriedade para o sistema de cores
   slug: string;

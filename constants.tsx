@@ -6,116 +6,132 @@ import { getStoreLogo } from './utils/mockLogos';
 
 export const CATEGORIES: Category[] = [
   { 
-    id: 'cat-health', 
-    name: 'Saúde', 
-    slug: 'health', 
-    icon: <Heart fill="currentColor" />, 
-    color: '#EF4444' // Red 500
-  },
-  { 
-    id: 'cat-pros', 
-    name: 'Profissionais', 
-    slug: 'pros', 
-    icon: <Briefcase fill="currentColor" />, 
-    color: '#3B82F6' // Blue 500
-  },
-  { 
-    id: 'cat-beauty', 
-    name: 'Beleza', 
-    slug: 'beauty', 
-    icon: <Scissors fill="currentColor" />, 
-    color: '#EC4899' // Pink 500
-  },
-  { 
-    id: 'cat-autos', 
-    name: 'Autos', 
-    slug: 'autos', 
-    icon: <CarFront fill="currentColor" />, 
-    color: '#64748B' // Slate 500
-  },
-  { 
-    id: 'cat-pets', 
-    name: 'Pets', 
-    slug: 'pets', 
-    icon: <Dog fill="currentColor" />, 
-    color: '#F97316' // Orange 500
-  },
-  { 
-    id: 'cat-home', 
-    name: 'Casa', 
-    slug: 'home-decor', 
-    icon: <Home fill="currentColor" />, 
-    color: '#8B5CF6' // Violet 500
-  },
-  { 
-    id: 'cat-sports', 
-    name: 'Esportes', 
-    slug: 'sports', 
-    icon: <Dumbbell fill="currentColor" />, 
-    color: '#10B981' // Emerald 500
-  },
-  { 
-    id: 'cat-assistance', 
-    name: 'Assistências', 
-    slug: 'assistance', 
-    icon: <Wrench fill="currentColor" />, 
-    color: '#06B6D4' // Cyan 500
-  },
-  { 
     id: 'cat-food', 
     name: 'Alimentação', 
     slug: 'food', 
-    icon: <Utensils fill="currentColor" />, 
-    color: '#F43F5E' // Rose 500
-  },
-  { 
-    id: 'cat-education', 
-    name: 'Educação', 
-    slug: 'education', 
-    icon: <GraduationCap fill="currentColor" />, 
-    color: '#6366F1' // Indigo 500
-  },
-  { 
-    id: 'cat-services', 
-    name: 'Serviços', 
-    slug: 'services', 
-    icon: <Settings fill="currentColor" />, 
-    color: '#71717A' // Zinc 500
-  },
-  { 
-    id: 'cat-wellness', 
-    name: 'Bem-estar', 
-    slug: 'wellness', 
-    icon: <Sun fill="currentColor" />, 
-    color: '#EAB308' // Yellow 500
-  },
-  { 
-    id: 'cat-party', 
-    name: 'Festas', 
-    slug: 'party', 
-    icon: <PartyPopper fill="currentColor" />, 
-    color: '#D946EF' // Fuchsia 500
-  },
-  { 
-    id: 'cat-fashion', 
-    name: 'Moda', 
-    slug: 'fashion', 
-    icon: <Shirt fill="currentColor" />, 
-    color: '#0EA5E9' // Sky 500
+    icon: <Utensils />, 
+    illustrationUrl: 'https://cdn-icons-png.flaticon.com/512/1046/1046784.png',
+    color: '#EA1D2C' // iFood Red style
   },
   { 
     id: 'cat-grocery', 
     name: 'Mercados', 
     slug: 'grocery', 
-    icon: <ShoppingCart fill="currentColor" />, 
-    color: '#16A34A' // Green 600
+    icon: <ShoppingCart />, 
+    illustrationUrl: 'https://cdn-icons-png.flaticon.com/512/3724/3724720.png',
+    color: '#16A34A' 
+  },
+  { 
+    id: 'cat-beauty', 
+    name: 'Beleza', 
+    slug: 'beauty', 
+    icon: <Scissors />, 
+    illustrationUrl: 'https://cdn-icons-png.flaticon.com/512/2707/2707142.png',
+    color: '#EC4899' 
+  },
+  { 
+    id: 'cat-health', 
+    name: 'Saúde', 
+    slug: 'health', 
+    icon: <Heart />, 
+    illustrationUrl: 'https://cdn-icons-png.flaticon.com/512/2966/2966327.png',
+    color: '#EF4444' 
+  },
+  { 
+    id: 'cat-pets', 
+    name: 'Pets', 
+    slug: 'pets', 
+    icon: <Dog />, 
+    illustrationUrl: 'https://cdn-icons-png.flaticon.com/512/616/616408.png',
+    color: '#F97316' 
+  },
+  { 
+    id: 'cat-home', 
+    name: 'Casa', 
+    slug: 'home-decor', 
+    icon: <Home />, 
+    illustrationUrl: 'https://cdn-icons-png.flaticon.com/512/619/619153.png',
+    color: '#8B5CF6' 
+  },
+  { 
+    id: 'cat-autos', 
+    name: 'Autos', 
+    slug: 'autos', 
+    icon: <CarFront />, 
+    illustrationUrl: 'https://cdn-icons-png.flaticon.com/512/743/743241.png',
+    color: '#64748B' 
+  },
+  { 
+    id: 'cat-services', 
+    name: 'Serviços', 
+    slug: 'services', 
+    icon: <Settings />, 
+    illustrationUrl: 'https://cdn-icons-png.flaticon.com/512/2092/2092143.png',
+    color: '#71717A' 
+  },
+  { 
+    id: 'cat-pros', 
+    name: 'Profissionais', 
+    slug: 'pros', 
+    icon: <Briefcase />, 
+    illustrationUrl: 'https://cdn-icons-png.flaticon.com/512/1063/1063376.png',
+    color: '#3B82F6' 
+  },
+  { 
+    id: 'cat-sports', 
+    name: 'Esportes', 
+    slug: 'sports', 
+    icon: <Dumbbell />, 
+    illustrationUrl: 'https://cdn-icons-png.flaticon.com/512/2871/2871612.png',
+    color: '#10B981' 
+  },
+  { 
+    id: 'cat-assistance', 
+    name: 'Assistências', 
+    slug: 'assistance', 
+    icon: <Wrench />, 
+    illustrationUrl: 'https://cdn-icons-png.flaticon.com/512/4233/4233830.png',
+    color: '#06B6D4' 
+  },
+  { 
+    id: 'cat-education', 
+    name: 'Educação', 
+    slug: 'education', 
+    icon: <GraduationCap />, 
+    illustrationUrl: 'https://cdn-icons-png.flaticon.com/512/2997/2997314.png',
+    color: '#6366F1' 
+  },
+  { 
+    id: 'cat-wellness', 
+    name: 'Bem-estar', 
+    slug: 'wellness', 
+    icon: <Sun />, 
+    illustrationUrl: 'https://cdn-icons-png.flaticon.com/512/2906/2906496.png',
+    color: '#EAB308' 
+  },
+  { 
+    id: 'cat-party', 
+    name: 'Festas', 
+    slug: 'party', 
+    icon: <PartyPopper />, 
+    illustrationUrl: 'https://cdn-icons-png.flaticon.com/512/2219/2219812.png',
+    color: '#D946EF' 
+  },
+  { 
+    id: 'cat-fashion', 
+    name: 'Moda', 
+    slug: 'fashion', 
+    icon: <Shirt />, 
+    illustrationUrl: 'https://cdn-icons-png.flaticon.com/512/3050/3050225.png',
+    color: '#0EA5E9' 
   },
   { 
     id: 'cat-condos', 
     name: 'Condomínios', 
     slug: 'condos', 
-    icon: <Building2 fill="currentColor" />, 
-    color: '#1E293B' // Slate 800
+    icon: <Building2 />, 
+    illustrationUrl: 'https://cdn-icons-png.flaticon.com/512/2311/2311514.png',
+    color: '#1E293B' 
   },
 ];
 
