@@ -312,7 +312,15 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
                 <h3 className="text-[10px] font-black text-gray-900 dark:text-white uppercase tracking-[0.15em]">Amados pela Vizinhança</h3>
             </div>
             <RecomendadosPorMoradores items={[
-              { id: '1', nome: 'Açougue Bom Corte', categoria: 'Comida', texto: 'A melhor carne da região, fresquinha e com preço justo!', totalRecomendacoes: 42 }
+              { id: 'f1', nome: 'Padaria da Vila', categoria: 'Comida', texto: 'O melhor pãozinho da região! Atendimento nota 10 sempre.', totalRecomendacoes: 124 },
+              { id: 'f2', nome: 'Cantinho do Sabor', categoria: 'Restaurante', texto: 'Comida caseira de verdade. O tempero da dona Maria é imbatível!', totalRecomendacoes: 89 },
+              { id: 'f3', nome: 'Pet & Cia', categoria: 'Pets', texto: 'Cuidam muito bem dos nossos bichinhos. Confiança total no banho e tosa.', totalRecomendacoes: 56 },
+              { id: 'f4', nome: 'Mercado Popular', categoria: 'Mercado', texto: 'Preço justo e sempre tem tudo fresquinho. Adoro os hortifruti.', totalRecomendacoes: 210 },
+              { id: 'f5', nome: 'Café do Bairro', categoria: 'Cafeteria', texto: 'Lugar aconchegante para trabalhar e tomar um espresso perfeito.', totalRecomendacoes: 45 },
+              { id: 'f6', nome: 'Floricultura Primavera', categoria: 'Casa', texto: 'Sempre flores frescas e lindas. Montam arranjos maravilhosos.', totalRecomendacoes: 32 },
+              { id: 'f7', nome: 'Lanchonete Dois Irmãos', categoria: 'Lanches', texto: 'O melhor hambúrguer do bairro. Rápido e delicioso!', totalRecomendacoes: 167 },
+              { id: 'f8', nome: 'Mecânica do Seu João', categoria: 'Serviços', texto: 'Confiança total, nunca me deixou na mão. Preço honesto sempre.', totalRecomendacoes: 78 },
+              { id: 'f9', nome: 'Salão Espaço Vip', categoria: 'Beleza', texto: 'As melhores manicures da Freguesia. Ambiente muito agradável.', totalRecomendacoes: 92 }
             ]} />
           </div>
         );
