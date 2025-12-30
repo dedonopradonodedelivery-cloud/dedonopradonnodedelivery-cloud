@@ -23,7 +23,8 @@ import {
   Maximize2,
   Plus,
   Rocket,
-  Target
+  Target,
+  Info
 } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import { User } from '@supabase/supabase-js';
@@ -38,6 +39,8 @@ const STORE_DATA = {
   name: "Minha Loja",
   logo: "https://images.unsplash.com/photo-1594212699903-ec8a3eca50f5?q=80&w=200&auto=format&fit=crop",
 };
+
+const INSTITUTIONAL_ADS_VIDEO = "https://videos.pexels.com/video-files/4434242/4434242-sd_540_960_25fps.mp4";
 
 const MenuLink: React.FC<{ 
   icon: React.ElementType; 
@@ -68,22 +71,20 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
   const [isCashbackEnabled, setIsCashbackEnabled] = useState(true);
   const [pendingRequestsCount, setPendingRequestsCount] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [hasCampaigns, setHasCampaigns] = useState(false); // New state for dynamic CTA
+  const [hasCampaigns, setHasCampaigns] = useState(false);
   
   // Video States
-  const [videoUrl, setVideoUrl] = useState<string | null>(null);
+  const [cashbackVideoUrl, setCashbackVideoUrl] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
-  const [showVideoPlayer, setShowVideoPlayer] = useState(false);
+  const [activeVideo, setActiveVideo] = useState<{url: string, title: string} | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const isVerified = !!user;
 
   useEffect(() => {
-    // Simulating loading and campaign check
     const timer = setTimeout(() => {
       setLoading(false);
-      // Mocking check: in a real app, this would query a campaigns table
       setHasCampaigns(false); 
     }, 800);
     return () => clearTimeout(timer);
@@ -111,24 +112,20 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Validation
     const isVideo = file.type.startsWith('video/');
     if (!isVideo) {
       alert("Por favor, selecione um arquivo de vídeo (mp4, mov).");
       return;
     }
 
-    // Load video to check duration
     const videoObj = document.createElement('video');
     videoObj.preload = 'metadata';
     videoObj.onloadedmetadata = () => {
       window.URL.revokeObjectURL(videoObj.src);
-      if (videoObj.duration > 300) { // 5 minutes
+      if (videoObj.duration > 300) {
         alert("O vídeo deve ter no máximo 5 minutos.");
         return;
       }
-      
-      // Simulate Upload
       simulateUpload(file);
     };
     videoObj.src = URL.createObjectURL(file);
@@ -147,7 +144,7 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
         clearInterval(interval);
         setTimeout(() => {
           setIsUploading(false);
-          setVideoUrl(URL.createObjectURL(file));
+          setCashbackVideoUrl(URL.createObjectURL(file));
         }, 500);
       } else {
         setUploadProgress(progress);
@@ -157,7 +154,7 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
 
   const removeVideo = () => {
     if (window.confirm("Deseja remover o vídeo explicativo?")) {
-      setVideoUrl(null);
+      setCashbackVideoUrl(null);
       if (fileInputRef.current) fileInputRef.current.value = '';
     }
   };
@@ -257,9 +254,9 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
                 </button>
             </div>
 
-            {/* Espaço do Vídeo Explicativo */}
+            {/* Espaço do Vídeo Explicativo do Lojista */}
             <div className="mb-8 group">
-                {!videoUrl && !isUploading ? (
+                {!cashbackVideoUrl && !isUploading ? (
                   <div 
                     onClick={() => fileInputRef.current?.click()}
                     className="w-full aspect-video bg-gray-50 dark:bg-gray-900/50 rounded-3xl border-2 border-dashed border-gray-200 dark:border-gray-700 flex flex-col items-center justify-center p-6 text-center cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
@@ -287,13 +284,12 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
                 ) : (
                   <div className="w-full aspect-video rounded-3xl overflow-hidden bg-black relative group shadow-lg border border-gray-100 dark:border-gray-700">
                     <video 
-                        src={videoUrl || ''} 
+                        src={cashbackVideoUrl || ''} 
                         className="w-full h-full object-cover opacity-80"
-                        onPlay={() => {}}
                     />
                     <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors flex items-center justify-center">
                         <button 
-                            onClick={() => setShowVideoPlayer(true)}
+                            onClick={() => setActiveVideo({url: cashbackVideoUrl!, title: "Explicativo: Cashback da Loja"})}
                             className="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-xl transform group-hover:scale-110 transition-transform active:scale-95"
                         >
                             <Play className="w-8 h-8 text-[#1E5BFF] fill-[#1E5BFF] ml-1" />
@@ -345,7 +341,7 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
             </button>
         </section>
 
-        {/* 3. ANÚNCIOS PATROCINADOS E DESTAQUES (Dinamizado conforme solicitação) */}
+        {/* 3. ANÚNCIOS PATROCINADOS E DESTAQUES */}
         <section className="w-full bg-white dark:bg-gray-800 p-6 border-b border-gray-100 dark:border-gray-800 relative overflow-hidden">
             <div className="flex items-center gap-3 mb-6">
                 <div className="p-2.5 bg-purple-50 dark:bg-purple-900/30 rounded-xl text-purple-600 dark:text-purple-400">
@@ -356,6 +352,30 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
                   <p className="text-xs text-gray-500 mt-0.5">
                     {hasCampaigns ? "Aumente sua visibilidade no app" : "Alcance novos clientes hoje"}
                   </p>
+                </div>
+            </div>
+
+            {/* Vídeo Institucional: Como funcionam os anúncios */}
+            <div className="mb-6 group">
+                <div 
+                    onClick={() => setActiveVideo({url: INSTITUTIONAL_ADS_VIDEO, title: "Como funcionam os Anúncios Patrocinados"})}
+                    className="w-full aspect-video rounded-[2rem] overflow-hidden bg-slate-900 relative group shadow-lg border border-gray-100 dark:border-gray-700 cursor-pointer"
+                >
+                    <div className="absolute inset-0 bg-gradient-to-br from-indigo-600/20 to-purple-600/20 mix-blend-overlay"></div>
+                    <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="flex flex-col items-center gap-3">
+                            <div className="w-14 h-14 bg-white rounded-full flex items-center justify-center shadow-xl transform group-hover:scale-110 transition-transform active:scale-95">
+                                <Play className="w-6 h-6 text-[#1E5BFF] fill-[#1E5BFF] ml-1" />
+                            </div>
+                            <span className="text-[10px] font-black text-white uppercase tracking-[0.2em] bg-black/40 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/10">
+                                Como funciona
+                            </span>
+                        </div>
+                    </div>
+                    {/* Placeholder content overlay to look like a real thumbnail */}
+                    <div className="absolute bottom-4 left-6 right-6">
+                         <p className="text-xs font-bold text-white leading-tight">Veja como destacar sua loja no topo das buscas da Freguesia</p>
+                    </div>
                 </div>
             </div>
 
@@ -429,12 +449,15 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
       </div>
 
       {/* Fullscreen Video Player Modal */}
-      {showVideoPlayer && videoUrl && (
+      {activeVideo && (
         <div className="fixed inset-0 z-[100] bg-black flex flex-col animate-in fade-in duration-300">
             <div className="p-6 flex justify-between items-center bg-gradient-to-b from-black/80 to-transparent absolute top-0 left-0 right-0 z-10">
-                <h3 className="text-white font-bold text-sm">Vídeo explicativo: Cashback</h3>
+                <div className="flex items-center gap-3">
+                    <Info className="w-4 h-4 text-[#1E5BFF]" />
+                    <h3 className="text-white font-bold text-sm">{activeVideo.title}</h3>
+                </div>
                 <button 
-                    onClick={() => setShowVideoPlayer(false)}
+                    onClick={() => setActiveVideo(null)}
                     className="p-2 bg-white/10 rounded-full text-white hover:bg-white/20 transition-colors"
                 >
                     <X className="w-6 h-6" />
@@ -442,15 +465,15 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
             </div>
             <div className="flex-1 flex items-center justify-center">
                 <video 
-                    src={videoUrl} 
+                    src={activeVideo.url} 
                     className="w-full max-h-screen" 
                     controls 
                     autoPlay
                 />
             </div>
-            <div className="p-6 pb-12 bg-gradient-to-t from-black/80 to-transparent absolute bottom-0 left-0 right-0 flex items-center justify-center gap-4">
-                <p className="text-white/60 text-xs text-center font-medium max-w-[240px]">
-                    Este vídeo será exibido para seus clientes quando eles clicarem em "Como funciona" na sua loja.
+            <div className="p-6 pb-12 bg-gradient-to-t from-black/80 to-transparent absolute bottom-0 left-0 right-0 flex items-center justify-center">
+                <p className="text-white/60 text-[10px] text-center font-bold uppercase tracking-widest max-w-[240px]">
+                    Localizei Business • Treinamento do Parceiro
                 </p>
             </div>
         </div>
