@@ -40,7 +40,6 @@ import { StoreCashbackModule } from './components/StoreCashbackModule';
 import { StoreAdsModule } from './components/StoreAdsModule';
 import { StoreProfileEdit } from './components/StoreProfileEdit';
 import { StoreFinanceModule } from './components/StoreFinanceModule';
-// Fix: Import STORES from constants
 import { STORES } from './constants';
 import { 
   AboutView, 
@@ -54,11 +53,18 @@ const App: React.FC = () => {
   const { user, userRole, loading: isAuthLoading, signOut } = useAuth();
   const [minSplashTimeElapsed, setMinSplashTimeElapsed] = useState(false);
   const [splashProgress, setSplashProgress] = useState(0);
-  const [activeTab, setActiveTab] = useState('home');
-  const [isDarkMode, setIsDarkMode] = useState(false);
   
-  // Controle rigoroso de inicialização por usuário para evitar redirecionamentos indesejados
-  const userHandledRef = useRef<string | null>(null);
+  // UX: Inicializa a aba a partir do localStorage ou 'home' para manter persistência na atualização
+  const [activeTab, setActiveTab] = useState(() => {
+    return localStorage.getItem('localizei_active_tab') || 'home';
+  });
+
+  const [isDarkMode, setIsDarkMode] = useState(false);
+
+  // UX: Persiste a aba selecionada sempre que houver mudança
+  useEffect(() => {
+    localStorage.setItem('localizei_active_tab', activeTab);
+  }, [activeTab]);
 
   useEffect(() => {
     const animationFrame = requestAnimationFrame(() => {
@@ -74,53 +80,6 @@ const App: React.FC = () => {
       cancelAnimationFrame(animationFrame);
     };
   }, []);
-
-  // LÓGICA DE ABA INICIAL (REVISADA)
-  useEffect(() => {
-    // Só agimos quando o Auth terminou de carregar e temos uma role definida
-    if (!isAuthLoading && user && userRole) {
-      const userId = user.id;
-      
-      // Se este usuário ainda não foi inicializado nesta sessão do app
-      if (userHandledRef.current !== userId) {
-        if (userRole === 'lojista') {
-          // Para lojista, tentamos restaurar a última aba, mas se for Minha Loja ou nulo, forçamos Serviços
-          const savedTab = localStorage.getItem('last_active_tab_lojista');
-          const forbiddenDefaults = ['store_area', 'merchant_qr', 'home'];
-          
-          if (!savedTab || forbiddenDefaults.includes(savedTab)) {
-            setActiveTab('services');
-          } else {
-            setActiveTab(savedTab);
-          }
-        } else {
-          // Para cliente, sempre home por padrão
-          setActiveTab('home');
-        }
-        
-        // Marca como processado para este usuário
-        userHandledRef.current = userId;
-      }
-    } else if (!isAuthLoading && !user) {
-      // Se deslogar, reseta a ref para o próximo login
-      userHandledRef.current = null;
-    }
-  }, [user, userRole, isAuthLoading]);
-
-  // PERSISTÊNCIA DE ABA PARA LOJISTA (Somente abas permitidas como retorno)
-  useEffect(() => {
-    if (userRole === 'lojista' && userHandledRef.current === user?.id) {
-      const persistableTabs = ['services', 'profile', 'explore'];
-      if (persistableTabs.includes(activeTab)) {
-        localStorage.setItem('last_active_tab_lojista', activeTab);
-      }
-      // Se ele clicou manualmente em 'Minha Loja' ou 'QR', não salvamos como retorno padrão
-      // para garantir que em um novo login ele volte para 'Serviços'
-      if (activeTab === 'store_area' || activeTab === 'merchant_qr') {
-        localStorage.setItem('last_active_tab_lojista', 'services');
-      }
-    }
-  }, [activeTab, userRole, user]);
 
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [authContext, setAuthContext] = useState<'default' | 'merchant_lead_qr'>('default');
@@ -143,7 +102,8 @@ const App: React.FC = () => {
     else setIsAuthOpen(true);
   };
 
-  const isAppReady = !isAuthLoading && minSplashTimeElapsed;
+  // UX: O Splash só deve ser exibido na carga inicial técnica. O login não reinicia este estado.
+  const isAppReady = minSplashTimeElapsed;
 
   if (!isAppReady) {
     return (
@@ -174,7 +134,7 @@ const App: React.FC = () => {
                 <div className="flex flex-col text-left">
                   <div className="flex items-center gap-1.5">
                     <span className="text-[8px] font-black text-white/70 uppercase tracking-[0.25em]">Patrocinador Master</span>
-                    <Star className="w-3 h-3 text-amber-300 fill-amber-300" />
+                    <span className="w-3 h-3 text-amber-300 fill-amber-300"><Star className="w-full h-full" /></span>
                   </div>
                   <p className="font-black text-xl tracking-tight text-white leading-tight">Grupo Esquematiza</p>
                   <p className="text-[10px] font-bold text-white/50 uppercase mt-0.5 tracking-tight">Segurança & Facilities</p>
@@ -244,7 +204,6 @@ const App: React.FC = () => {
                 onSelectCategory={handleSelectCategory}
                 onSelectCollection={handleSelectCollection}
                 onStoreClick={handleSelectStore}
-                // Fix: Using STORES imported from constants
                 stores={STORES}
                 searchTerm={globalSearch}
                 user={user as any}
@@ -254,7 +213,6 @@ const App: React.FC = () => {
               />
             )}
             {activeTab === 'explore' && (
-              // Fix: Using STORES imported from constants
               <ExploreView stores={STORES} searchQuery={globalSearch} onStoreClick={handleSelectStore} onLocationClick={() => {}} onFilterClick={() => {}} onOpenPlans={() => {}} />
             )}
             {activeTab === 'user_statement' && (
@@ -303,7 +261,6 @@ const App: React.FC = () => {
             {activeTab === 'editorial_list' && selectedCollection && (
               <EditorialListView
                 collection={selectedCollection}
-                // Fix: Using STORES imported from constants
                 stores={STORES}
                 onBack={() => { setActiveTab('home'); setSelectedCollection(null); }}
                 onStoreClick={handleSelectStore}
@@ -328,7 +285,7 @@ const App: React.FC = () => {
             {activeTab === 'store_area' && (
               userRole === 'lojista' ? (
                 <StoreAreaView 
-                  onBack={() => setActiveTab('services')} 
+                  onBack={() => setActiveTab('home')} 
                   onNavigate={setActiveTab} 
                   user={user as any}
                 />
@@ -340,7 +297,7 @@ const App: React.FC = () => {
               userRole === 'lojista' ? (
                 <MerchantQrScreen 
                   user={user} 
-                  onBack={() => setActiveTab('services')} 
+                  onBack={() => setActiveTab('home')} 
                 />
               ) : (
                 <FreguesiaConnectRestricted onBack={() => setActiveTab('home')} />
@@ -351,7 +308,6 @@ const App: React.FC = () => {
                   category={selectedCategory} 
                   onBack={() => { setActiveTab('home'); setSelectedCategory(null); }} 
                   onStoreClick={handleSelectStore}
-                  // Fix: Using STORES imported from constants
                   stores={STORES}
               />
             )}

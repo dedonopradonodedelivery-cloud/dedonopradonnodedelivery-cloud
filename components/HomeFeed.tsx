@@ -187,17 +187,20 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
         );
 
       case 'cashback':
-        if (!user || !userRole) return null;
+        // UX: Banner de cashback renderiza em diferentes posições baseado no login, mas sempre mantém o visual.
         return (
           <div key="cashback" className="px-4">
             <div className="flex items-center justify-between mb-3 px-1">
                 <h3 className="text-[11px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.2em]">Cashback no seu negócio</h3>
             </div>
             <UserCashbackBanner 
-              role={userRole}
-              balance={12.40} 
-              totalGenerated={320.00}
-              onClick={() => userRole === 'lojista' ? onNavigate('merchant_cashback_dashboard') : onNavigate('user_statement')} 
+              role={userRole || 'cliente'}
+              balance={user ? 12.40 : 0} 
+              totalGenerated={user ? 320.00 : 0}
+              onClick={() => {
+                if (!user) return onRequireLogin();
+                userRole === 'lojista' ? onNavigate('merchant_cashback_dashboard') : onNavigate('user_statement');
+              }} 
             />
           </div>
         );
@@ -270,15 +273,30 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
     }
   };
 
-  const HOME_STRUCTURE = [
-    'categories',
-    'hero',
-    'roulette',
-    'cashback',
-    'highlights',
-    'community',
-    'list'
-  ];
+  // UX: Prioridade contextuall. Se logado, o cashback vem em primeiro lugar.
+  // Se deslogado, segue a ordem original de descoberta.
+  const homeStructure = useMemo(() => {
+    if (user) {
+      return [
+        'cashback',    // Posição 1 (Logado)
+        'categories',
+        'hero',
+        'roulette',
+        'highlights',
+        'community',
+        'list'
+      ];
+    }
+    return [
+      'categories',
+      'hero',
+      'roulette',
+      'cashback',     // Posição 4 (Deslogado)
+      'highlights',
+      'community',
+      'list'
+    ];
+  }, [user]);
 
   return (
     <div className="flex flex-col gap-10 pb-32 bg-white dark:bg-gray-900 w-full max-w-md mx-auto animate-in fade-in duration-500 overflow-x-hidden">
@@ -302,7 +320,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
         </div>
       ) : (
         <div className="flex flex-col gap-10 w-full">
-            {HOME_STRUCTURE.map(section => renderSection(section))}
+            {homeStructure.map(section => renderSection(section))}
             
             <div className="px-4">
               <MasterSponsorBanner onClick={() => onNavigate('patrocinador_master')} />
@@ -310,7 +328,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
 
             <div className="mt-4 mb-4 flex flex-col items-center justify-center text-center opacity-30">
               <Star className="w-4 h-4 text-gray-400 mb-2" />
-              <p className="text-[9px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-[0.5em]">Freguesia • Localizei v1.3.0</p>
+              <p className="text-[9px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-[0.5em]">Freguesia • Localizei v1.3.1</p>
             </div>
         </div>
       )}

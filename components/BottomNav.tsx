@@ -12,11 +12,11 @@ interface BottomNavProps {
 export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, userRole, onCashbackClick }) => {
   const isMerchant = userRole === 'lojista';
 
-  // Configuração para LOJISTA: Início, Serviços, Meu QR (Centro), Minha Loja, Perfil
+  // Configuração para LOJISTA: Início e Explorar preservados. Meu QR ao centro. Minha Loja no lugar de Serviços.
   if (isMerchant) {
     const merchantNavItems = [
       { id: 'home', icon: Home, label: 'Início' },
-      { id: 'services', icon: Wrench, label: 'Serviços' },
+      { id: 'explore', icon: Search, label: 'Explorar' },
       { id: 'merchant_qr', icon: QrCode, label: 'Meu QR', isSpecial: true },
       { id: 'store_area', icon: Store, label: 'Minha Loja' },
       { id: 'profile', icon: User, label: 'Perfil' },
@@ -26,7 +26,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
       <div className="fixed bottom-0 left-0 right-0 mx-auto w-full max-w-md bg-[#1E5BFF] z-50 h-[80px] rounded-t-[24px] shadow-[0_-5px_30px_rgba(0,0,0,0.2)] border-t border-white/10">
         <div className="flex items-end justify-between h-full w-full px-2 pb-2">
           {merchantNavItems.map((tab) => {
-            const isActive = activeTab === tab.id || (tab.id === 'services' && activeTab.startsWith('service_'));
+            const isActive = activeTab === tab.id;
             const Icon = tab.icon;
             
             if ((tab as any).isSpecial) {
@@ -89,7 +89,6 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
           const isActive = activeTab === tab.id || (tab.id === 'services' && activeTab.startsWith('service_'));
           const Icon = tab.icon;
 
-          // BOTÃO CENTRAL (CASHBACK)
           if ((tab as any).isCenter) {
             return (
               <div key={tab.id} className="relative w-20 flex justify-center -top-6">
@@ -108,7 +107,6 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
             );
           }
 
-          // BOTÕES NORMAIS
           return (
             <button
               key={tab.id}
