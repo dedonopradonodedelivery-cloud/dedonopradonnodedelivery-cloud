@@ -25,8 +25,10 @@ import {
   Target,
   Eye,
   Shield,
-  // Fix: Add missing Sparkles import
-  Sparkles
+  Sparkles,
+  HeartHandshake,
+  CheckCircle2,
+  Flag
 } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import { Store, AdType } from '../types';
@@ -102,7 +104,7 @@ export const SupportView: React.FC<SimplePageProps> = ({ onBack }) => {
 export const AboutView: React.FC<SimplePageProps> = ({ onBack }) => {
   return (
     <div className="min-h-screen bg-white dark:bg-gray-900 font-sans animate-in slide-in-from-right duration-300 pb-20">
-      {/* Integrated Sticky Header */}
+      {/* Sticky Header */}
       <div className="sticky top-0 z-30 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md px-5 h-16 flex items-center gap-4 border-b border-gray-100 dark:border-gray-800">
         <button onClick={onBack} className="p-2 -ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
           <ChevronLeft className="w-6 h-6 text-gray-800 dark:text-white" />
@@ -110,106 +112,105 @@ export const AboutView: React.FC<SimplePageProps> = ({ onBack }) => {
         <h1 className="font-bold text-lg text-gray-900 dark:text-white">Sobre a Localizei</h1>
       </div>
 
-      <div className="overflow-y-auto">
-        {/* Visual Identity Section */}
-        <div className="p-8 flex flex-col items-center bg-gradient-to-b from-blue-50 to-white dark:from-blue-900/10 dark:to-gray-900">
-          <div className="w-24 h-24 bg-[#1E5BFF] rounded-[2rem] flex items-center justify-center mb-6 shadow-xl shadow-blue-500/20 transform -rotate-3 group-hover:rotate-0 transition-transform duration-500">
+      <div className="overflow-y-auto no-scrollbar h-[calc(100vh-64px)]">
+        {/* Identity & Visual Section */}
+        <div className="p-10 flex flex-col items-center bg-gradient-to-b from-blue-50 to-white dark:from-blue-900/10 dark:to-gray-900">
+          <div className="w-24 h-24 bg-[#1E5BFF] rounded-[2.5rem] flex items-center justify-center mb-6 shadow-2xl shadow-blue-500/30 transform -rotate-2">
             <MapPin className="w-12 h-12 text-white fill-white" />
           </div>
           <h2 className="text-3xl font-black text-gray-900 dark:text-white font-display text-center leading-tight">
             Localizei <br/> <span className="text-[#1E5BFF]">Freguesia</span>
           </h2>
-          <p className="mt-4 text-sm text-gray-500 dark:text-gray-400 font-bold uppercase tracking-[0.3em]">
-            Versão 1.0.12
-          </p>
+          <div className="mt-4 flex items-center gap-2">
+            <div className="h-[1px] w-4 bg-gray-300 dark:bg-gray-700"></div>
+            <p className="text-[10px] text-gray-400 dark:text-gray-500 font-black uppercase tracking-[0.4em]">
+              Sua Vizinhança Inteligente
+            </p>
+            <div className="h-[1px] w-4 bg-gray-300 dark:bg-gray-700"></div>
+          </div>
         </div>
 
-        <div className="px-6 space-y-12 pb-12">
+        <div className="px-6 space-y-10 pb-16">
+          
           {/* Manifesto Section */}
-          <section className="animate-in fade-in slide-in-from-bottom-4 duration-700">
+          <section className="animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div className="flex items-center gap-2 mb-4">
-              {/* Fix: Sparkles component used here */}
-              <Sparkles className="w-5 h-5 text-amber-500" />
-              <h3 className="text-xs font-black text-amber-500 uppercase tracking-widest">Nosso Manifesto</h3>
+              <Sparkles className="w-5 h-5 text-amber-500 fill-amber-500/20" />
+              <h3 className="text-xs font-black text-amber-600 dark:text-amber-500 uppercase tracking-[0.2em]">Manifesto</h3>
             </div>
-            <div className="bg-gray-50 dark:bg-gray-800/50 p-6 rounded-3xl border border-gray-100 dark:border-gray-800 shadow-inner">
-                <p className="text-gray-700 dark:text-gray-300 text-base leading-relaxed italic font-serif">
-                  "Acreditamos que o bairro é o coração da nossa rotina. Que o pequeno comerciante é quem traz alma para as ruas e que a vizinhança é a nossa maior rede social. O Localizei nasceu para quebrar as barreiras entre o físico e o digital, transformando a Freguesia em um ecossistema inteligente, onde cada compra fortalece quem vive aqui."
+            <div className="bg-gray-50 dark:bg-gray-800/40 p-6 rounded-[2rem] border border-gray-100 dark:border-gray-800 shadow-sm">
+                <p className="text-gray-700 dark:text-gray-300 text-base leading-relaxed font-medium">
+                  Acreditamos que a vida acontece perto. <br/><br/>
+                  Nos bairros, nas ruas, nas lojas de confiança e nos serviços que fazem parte do dia a dia das pessoas. <br/><br/>
+                  A Localizei nasceu para aproximar quem procura de quem faz. Para fortalecer negócios locais, simplificar escolhas e criar conexões reais entre pessoas e serviços. <br/><br/>
+                  Queremos que encontrar um bom serviço seja simples, rápido e confiável. E que empreender localmente seja mais justo, visível e sustentável. <br/><br/>
+                  A Localizei é sobre comunidade, proximidade e impacto real.
                 </p>
             </div>
           </section>
 
-          {/* Core Pillars (Mission, Vision, Values) */}
+          {/* Mission, Vision, Values Grid */}
           <section className="space-y-4">
             {/* Missão */}
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-3xl border border-gray-100 dark:border-gray-700 shadow-sm flex items-start gap-5">
-              <div className="w-12 h-12 rounded-2xl bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center shrink-0">
+            <div className="bg-white dark:bg-gray-800 p-6 rounded-3xl border border-gray-100 dark:border-gray-700 shadow-sm flex items-start gap-5 group hover:border-[#1E5BFF]/30 transition-colors">
+              <div className="w-12 h-12 rounded-2xl bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
                 <Target className="w-6 h-6 text-[#1E5BFF]" />
               </div>
               <div>
-                <h4 className="font-black text-gray-900 dark:text-white uppercase text-xs tracking-widest mb-1">Missão</h4>
-                <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
-                  Conectar moradores, lojistas e profissionais através de uma plataforma intuitiva que incentive o consumo local e gere benefícios reais para toda a comunidade da Freguesia.
+                <h4 className="font-black text-gray-900 dark:text-white uppercase text-xs tracking-widest mb-1.5">Missão</h4>
+                <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed font-medium">
+                  Conectar pessoas a serviços e negócios locais de forma simples, transparente e confiável, fortalecendo a economia local.
                 </p>
               </div>
             </div>
 
             {/* Visão */}
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-3xl border border-gray-100 dark:border-gray-700 shadow-sm flex items-start gap-5">
-              <div className="w-12 h-12 rounded-2xl bg-amber-50 dark:bg-amber-900/30 flex items-center justify-center shrink-0">
+            <div className="bg-white dark:bg-gray-800 p-6 rounded-3xl border border-gray-100 dark:border-gray-700 shadow-sm flex items-start gap-5 group hover:border-amber-500/30 transition-colors">
+              <div className="w-12 h-12 rounded-2xl bg-amber-50 dark:bg-amber-900/20 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
                 <Eye className="w-6 h-6 text-amber-600" />
               </div>
               <div>
-                <h4 className="font-black text-gray-900 dark:text-white uppercase text-xs tracking-widest mb-1">Visão</h4>
-                <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
-                  Ser o super-app indispensável para cada habitante da região, tornando-se o principal motor de aceleração econômica e conexão social do bairro.
+                <h4 className="font-black text-gray-900 dark:text-white uppercase text-xs tracking-widest mb-1.5">Visão</h4>
+                <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed font-medium">
+                  Ser a principal plataforma de conexão entre pessoas e negócios locais, promovendo crescimento sustentável e experiências positivas para todos.
                 </p>
               </div>
             </div>
 
             {/* Valores */}
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-3xl border border-gray-100 dark:border-gray-700 shadow-sm flex items-start gap-5">
-              <div className="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-900/30 flex items-center justify-center shrink-0">
-                <Shield className="w-6 h-6 text-indigo-600" />
-              </div>
-              <div>
-                <h4 className="font-black text-gray-900 dark:text-white uppercase text-xs tracking-widest mb-1">Nossos Valores</h4>
-                <div className="grid grid-cols-2 gap-y-2 gap-x-4 mt-2">
-                  <div className="flex items-center gap-2">
-                    <div className="w-1.5 h-1.5 rounded-full bg-indigo-500"></div>
-                    <span className="text-xs font-bold text-gray-600 dark:text-gray-400">Comunidade</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-1.5 h-1.5 rounded-full bg-indigo-500"></div>
-                    <span className="text-xs font-bold text-gray-600 dark:text-gray-400">Transparência</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-1.5 h-1.5 rounded-full bg-indigo-500"></div>
-                    <span className="text-xs font-bold text-gray-600 dark:text-gray-400">Inovação</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-1.5 h-1.5 rounded-full bg-indigo-500"></div>
-                    <span className="text-xs font-bold text-gray-600 dark:text-gray-400">Impacto Local</span>
-                  </div>
+            <div className="bg-white dark:bg-gray-800 p-6 rounded-3xl border border-gray-100 dark:border-gray-700 shadow-sm flex flex-col gap-4 group">
+              <div className="flex items-center gap-5">
+                <div className="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                  <HeartHandshake className="w-6 h-6 text-indigo-600" />
                 </div>
+                <h4 className="font-black text-gray-900 dark:text-white uppercase text-xs tracking-widest">Nossos Valores</h4>
+              </div>
+              
+              <div className="grid grid-cols-1 gap-3 mt-1">
+                {[
+                  { label: "Foco no local", icon: MapPin },
+                  { label: "Transparência", icon: ShieldCheck },
+                  { label: "Simplicidade", icon: Zap },
+                  { label: "Confiança", icon: CheckCircle2 },
+                  { label: "Impacto real", icon: Flag }
+                ].map((item, idx) => (
+                  <div key={idx} className="flex items-center gap-3 bg-gray-50 dark:bg-gray-900/50 p-3 rounded-2xl border border-gray-100 dark:border-gray-800 transition-all hover:bg-white dark:hover:bg-gray-800">
+                    <item.icon className="w-4 h-4 text-indigo-500" />
+                    <span className="text-sm font-bold text-gray-700 dark:text-gray-300">{item.label}</span>
+                  </div>
+                ))}
               </div>
             </div>
           </section>
 
-          {/* Future Section (Roadmap) */}
-          <div className="bg-[#1E5BFF] p-8 rounded-[2rem] text-white relative overflow-hidden shadow-xl shadow-blue-500/20">
-            <div className="absolute -right-10 -bottom-10 w-40 h-40 bg-white/10 rounded-full blur-3xl pointer-events-none"></div>
-            <div className="relative z-10 flex flex-col items-center text-center">
-              <Rocket className="w-8 h-8 text-amber-300 mb-4 animate-bounce-short" />
-              <h4 className="font-bold text-xl mb-2">O amanhã da Freguesia</h4>
-              <p className="text-sm text-blue-100 opacity-90 leading-relaxed">
-                Estamos apenas começando. Em breve: pagamentos integrados, sorteios exclusivos e uma rede social própria do bairro.
-              </p>
-            </div>
-          </div>
-
-          <div className="text-center opacity-30 py-4">
-             <p className="text-[10px] font-black uppercase tracking-[0.5em]">Freguesia • Localizei © 2024</p>
+          {/* Institutional Closing */}
+          <div className="text-center pt-8 border-t border-gray-100 dark:border-gray-800">
+             <p className="text-[10px] font-black text-gray-400 dark:text-gray-600 uppercase tracking-[0.5em]">
+               Localizei Freguesia © 2024
+             </p>
+             <p className="text-[9px] text-gray-400 mt-2 font-medium">
+               CNPJ: 12.345.678/0001-00 • Freguesia, Rio de Janeiro
+             </p>
           </div>
         </div>
       </div>
@@ -251,7 +252,6 @@ export const FavoritesView: React.FC<SimplePageProps> = ({ onBack, onNavigate, u
   const [favorites, setFavorites] = useState<Store[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Fix: useEffect used here
   useEffect(() => {
     const fetchFavorites = async () => {
       if (!user || !supabase) {
@@ -267,7 +267,6 @@ export const FavoritesView: React.FC<SimplePageProps> = ({ onBack, onNavigate, u
 
         if (error) throw error;
 
-        // Mapear a resposta para o formato Store
         const mappedStores: Store[] = (data || []).map((item: any) => {
           const b = item.businesses;
           return {
@@ -278,10 +277,10 @@ export const FavoritesView: React.FC<SimplePageProps> = ({ onBack, onNavigate, u
             image: b.imageUrl || 'https://via.placeholder.com/100',
             rating: b.rating || 0,
             description: b.description || '',
-            distance: 'Freguesia • RJ', // Campo calculado/fictício por enquanto
+            distance: 'Freguesia • RJ',
             adType: AdType.ORGANIC,
             reviewsCount: 0,
-            verified: true // Assumindo verificado por padrão na lista de favoritos
+            verified: true 
           };
         });
 
@@ -296,11 +295,9 @@ export const FavoritesView: React.FC<SimplePageProps> = ({ onBack, onNavigate, u
     fetchFavorites();
   }, [user]);
 
-  // Função para remover da lista local imediatamente ao desfavoritar
   const handleRemove = async (storeId: string) => {
     if (!user || !supabase) return;
     
-    // Optimistic update
     setFavorites(prev => prev.filter(s => s.id !== storeId));
 
     try {
@@ -312,7 +309,6 @@ export const FavoritesView: React.FC<SimplePageProps> = ({ onBack, onNavigate, u
         if (error) throw error;
     } catch(err) {
         console.error(err);
-        // Em um app real, reverteríamos o estado aqui
     }
   };
 
