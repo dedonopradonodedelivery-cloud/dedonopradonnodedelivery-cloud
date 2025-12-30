@@ -24,7 +24,10 @@ import {
   Plus,
   Rocket,
   Target,
-  Info
+  Info,
+  Send,
+  MessageSquare,
+  Clock
 } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import { User } from '@supabase/supabase-js';
@@ -41,6 +44,87 @@ const STORE_DATA = {
 };
 
 const INSTITUTIONAL_ADS_VIDEO = "https://videos.pexels.com/video-files/4434242/4434242-sd_540_960_25fps.mp4";
+
+// --- Subcomponente de Dúvidas ---
+const SupportQuestion: React.FC<{ 
+  context: 'cashback' | 'ads';
+  onSend: (text: string) => Promise<void>;
+}> = ({ context, onSend }) => {
+  const [text, setText] = useState('');
+  const [isSending, setIsSending] = useState(false);
+  const [history, setHistory] = useState<{question: string, answer?: string, status: 'sent' | 'answered'} | null>(null);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!text.trim() || text.length > 500) return;
+    
+    setIsSending(true);
+    await onSend(text);
+    setHistory({ question: text, status: 'sent' });
+    setText('');
+    setIsSending(false);
+  };
+
+  return (
+    <div className="mt-4 border-t border-gray-100 dark:border-gray-700/50 pt-4 animate-in fade-in duration-500">
+      {!history ? (
+        <form onSubmit={handleSubmit} className="space-y-3">
+          <div className="relative">
+            <textarea 
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+              placeholder="Ficou alguma dúvida sobre este recurso? Escreva aqui."
+              maxLength={500}
+              className="w-full p-4 bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 rounded-2xl text-xs font-medium dark:text-white outline-none focus:border-[#1E5BFF] transition-all resize-none h-20"
+            />
+            <span className="absolute bottom-2 right-3 text-[9px] font-bold text-gray-400">
+              {text.length}/500
+            </span>
+          </div>
+          <button 
+            type="submit"
+            disabled={isSending || !text.trim()}
+            className="w-full bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2 active:scale-95 transition-all disabled:opacity-50"
+          >
+            {isSending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
+            Enviar dúvida
+          </button>
+        </form>
+      ) : (
+        <div className="space-y-3">
+          <div className="bg-gray-50 dark:bg-gray-900/50 p-3 rounded-2xl border border-gray-100 dark:border-gray-700">
+            <div className="flex items-center gap-2 mb-1.5">
+              <MessageSquare className="w-3 h-3 text-gray-400" />
+              <span className="text-[10px] font-black text-gray-400 uppercase tracking-wider">Sua Pergunta</span>
+            </div>
+            <p className="text-xs text-gray-600 dark:text-gray-300 font-medium leading-relaxed">{history.question}</p>
+          </div>
+          
+          {history.answer ? (
+            <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-2xl border border-blue-100 dark:border-blue-800 animate-in slide-in-from-left-2 duration-500">
+              <div className="flex items-center gap-2 mb-1.5">
+                <CheckCircle2 className="w-3 h-3 text-blue-500" />
+                <span className="text-[10px] font-black text-blue-500 uppercase tracking-wider">Resposta Localizei</span>
+              </div>
+              <p className="text-xs text-blue-700 dark:text-blue-300 font-bold leading-relaxed">{history.answer}</p>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2 px-1">
+              <Clock className="w-3 h-3 text-amber-500 animate-pulse" />
+              <span className="text-[9px] font-black text-amber-500 uppercase tracking-widest">Aguardando resposta da equipe</span>
+            </div>
+          )}
+          <button 
+            onClick={() => setHistory(null)}
+            className="text-[9px] font-black text-gray-400 uppercase tracking-widest hover:text-gray-600 transition-colors"
+          >
+            Nova dúvida
+          </button>
+        </div>
+      )}
+    </div>
+  );
+};
 
 const MenuLink: React.FC<{ 
   icon: React.ElementType; 
@@ -157,6 +241,12 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
       setCashbackVideoUrl(null);
       if (fileInputRef.current) fileInputRef.current.value = '';
     }
+  };
+
+  const handleSendQuestion = async (text: string) => {
+    // Simulação de salvamento da dúvida no banco
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    console.log("Dúvida enviada:", text);
   };
 
   if (loading) {
@@ -316,9 +406,12 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
                     accept="video/mp4,video/mov,video/quicktime" 
                     onChange={handleVideoUpload}
                 />
-                <p className="text-center text-[10px] text-gray-400 mt-4 font-medium italic">
+                <p className="text-center text-[10px] text-gray-400 mt-4 font-medium italic leading-relaxed">
                     "Clientes entendem melhor quando você explica com suas próprias palavras."
                 </p>
+
+                {/* Campo de Dúvidas Cashback */}
+                <SupportQuestion context="cashback" onSend={handleSendQuestion} />
             </div>
 
             <div className="grid grid-cols-2 gap-4 mb-6">
@@ -372,11 +465,13 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
                             </span>
                         </div>
                     </div>
-                    {/* Placeholder content overlay to look like a real thumbnail */}
                     <div className="absolute bottom-4 left-6 right-6">
-                         <p className="text-xs font-bold text-white leading-tight">Veja como destacar sua loja no topo das buscas da Freguesia</p>
+                         <p className="text-xs font-bold text-white leading-tight shadow-black drop-shadow-md">Veja como destacar sua loja no topo das buscas da Freguesia</p>
                     </div>
                 </div>
+
+                {/* Campo de Dúvidas Anúncios */}
+                <SupportQuestion context="ads" onSend={handleSendQuestion} />
             </div>
 
             <div className="bg-purple-50 dark:bg-purple-900/10 rounded-2xl p-5 mb-6 border border-purple-100 dark:border-purple-800/30">
@@ -423,7 +518,7 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
                   Administrativo
               </h3>
             </div>
-            <div className="bg-white dark:bg-gray-800 border-y border-gray-100 dark:border-gray-700">
+            <div className="bg-white dark:bg-gray-800 border-y border-gray-100 dark:border-gray-800">
                 <MenuLink 
                     icon={Settings} 
                     label="Perfil Público da Loja" 
