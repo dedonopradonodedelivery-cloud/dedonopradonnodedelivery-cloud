@@ -13,7 +13,8 @@ import {
   Users,
   Loader2,
   BadgeCheck,
-  Zap
+  Zap,
+  LayoutDashboard
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { MasterSponsorBanner } from './MasterSponsorBanner';
@@ -143,7 +144,7 @@ export const MenuView: React.FC<MenuViewProps> = ({ user, userRole, onAuthClick,
           </div>
         </div>
 
-        {/* 3) Merchant Hero Banner (High Highlight for Merchants) */}
+        {/* UX: Para Lojistas, o painel de gestão é o primeiro item de destaque no Menu */}
         {isMerchant && (
             <button 
                 onClick={() => onNavigate('store_area')}
@@ -151,16 +152,15 @@ export const MenuView: React.FC<MenuViewProps> = ({ user, userRole, onAuthClick,
             >
                 {/* Background Decor */}
                 <div className="absolute top-0 right-0 w-48 h-48 bg-indigo-500/10 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none group-hover:bg-indigo-500/20 transition-all duration-700"></div>
-                <div className="absolute bottom-0 left-0 w-32 h-32 bg-blue-500/5 rounded-full blur-2xl -ml-8 -mb-8 pointer-events-none"></div>
-
+                
                 <div className="flex justify-between items-start relative z-10">
                     <div className="flex flex-col gap-1">
                         <div className="flex items-center gap-2">
-                          <span className="text-[10px] font-black text-indigo-300 uppercase tracking-[0.25em]">Área Restrita</span>
+                          <span className="text-[10px] font-black text-indigo-300 uppercase tracking-[0.25em]">Área do Lojista</span>
                           <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_#10b981]"></div>
                         </div>
-                        <h3 className="font-black text-2xl tracking-tighter font-display">Painel do Lojista</h3>
-                        <p className="text-xs text-indigo-200 font-medium">Gerencie sua loja e suas vendas agora</p>
+                        <h3 className="font-black text-2xl tracking-tighter font-display">Minha Loja</h3>
+                        <p className="text-xs text-indigo-200 font-medium">Gerencie vendas, anúncios e cashback</p>
                     </div>
                     <div className="w-16 h-16 bg-white/10 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/10 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500 shadow-xl">
                         <Store className="w-8 h-8 text-white" strokeWidth={1.5} />
@@ -170,14 +170,11 @@ export const MenuView: React.FC<MenuViewProps> = ({ user, userRole, onAuthClick,
                 <div className="mt-2 p-5 bg-white/5 backdrop-blur-sm rounded-3xl border border-white/10 flex items-center justify-between relative z-10">
                     <div className="flex items-center gap-4">
                         <div className="w-12 h-12 rounded-xl bg-indigo-500/20 flex items-center justify-center border border-indigo-500/30">
-                            <Zap className="w-6 h-6 text-amber-400 fill-amber-400" />
+                            <LayoutDashboard className="w-6 h-6 text-amber-400" />
                         </div>
                         <div className="text-left">
-                            <p className="font-bold text-white text-sm line-clamp-1">Hamburgueria Brasa</p>
-                            <div className="flex items-center gap-1.5 mt-0.5">
-                                <BadgeCheck className="w-3 h-3 text-blue-400" />
-                                <span className="text-[10px] font-black text-blue-100 uppercase tracking-wider">Operação ativa</span>
-                            </div>
+                            <p className="font-bold text-white text-sm">Acessar Painel</p>
+                            <span className="text-[10px] font-black text-blue-100 uppercase tracking-wider">Ver desempenho hoje</span>
                         </div>
                     </div>
                     <div className="w-10 h-10 rounded-full bg-white text-indigo-900 flex items-center justify-center shadow-lg transform group-hover:translate-x-1 transition-transform">
@@ -198,7 +195,7 @@ export const MenuView: React.FC<MenuViewProps> = ({ user, userRole, onAuthClick,
         <MenuItem 
             icon={Coins} 
             label="Cashback" 
-            onClick={() => onNavigate('user_cashback_flow')} 
+            onClick={() => onNavigate('user_statement')} 
             colorClass="bg-[#1E5BFF]" 
             subLabel="Acompanhe seu saldo e ganhos"
         />
@@ -258,7 +255,7 @@ export const MenuView: React.FC<MenuViewProps> = ({ user, userRole, onAuthClick,
         </div>
 
         <div className="text-center pt-8 pb-4">
-            <p className="text-[10px] text-gray-400">Localizei Freguesia v1.0.9</p>
+            <p className="text-[10px] text-gray-400">Localizei Freguesia v1.3.4</p>
         </div>
       </div>
     </div>

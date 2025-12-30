@@ -187,15 +187,9 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
         );
 
       case 'cashback':
-        // UX: No estado logado, o título redundante foi removido para uma UI mais limpa.
-        // A seção mantém o espaçamento padrão do layout principal.
+        // UX: Cashback é um benefício exclusivo de conta. Só renderiza quando há usuário.
         return (
           <div key="cashback" className="px-4">
-            {!user && (
-              <div className="flex items-center justify-between mb-3 px-1">
-                  <h3 className="text-[11px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.2em]">Cashback no seu negócio</h3>
-              </div>
-            )}
             <UserCashbackBanner 
               role={userRole || 'cliente'}
               balance={user ? 12.40 : 0} 
@@ -276,11 +270,13 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
     }
   };
 
-  // UX: Prioridade contextual. Ritmo XL (gap-8) padronizado entre todos os blocos principais.
+  // UX: Visibilidade Condicional do Cashback.
+  // Usuário Logado: Cashback é prioridade financeira no topo.
+  // Usuário Deslogado: Cashback é oculto para focar na descoberta pura do bairro.
   const homeStructure = useMemo(() => {
     if (user) {
       return [
-        'cashback',    // Agora sem título externo, mais limpo no topo.
+        'cashback', 
         'categories',
         'hero',
         'roulette',
@@ -293,7 +289,6 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
       'categories',
       'hero',
       'roulette',
-      'cashback',
       'highlights',
       'community',
       'list'
@@ -330,7 +325,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
 
             <div className="mt-4 mb-4 flex flex-col items-center justify-center text-center opacity-30">
               <Star className="w-4 h-4 text-gray-400 mb-2" />
-              <p className="text-[9px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-[0.5em]">Freguesia • Localizei v1.3.2</p>
+              <p className="text-[9px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-[0.5em]">Freguesia • Localizei v1.3.3</p>
             </div>
         </div>
       )}
