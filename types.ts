@@ -54,6 +54,7 @@ export interface Category {
   id: string;
   name: string;
   icon: React.ReactNode;
+  image?: string; // Nova propriedade para imagens realistas
   slug: string;
 }
 

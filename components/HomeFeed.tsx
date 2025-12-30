@@ -503,23 +503,20 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
                   <button 
                     key={cat.id} 
                     onClick={() => onSelectCategory(cat)}
-                    className="flex flex-col w-[76px] h-[72px] p-2 gap-1 rounded-2xl bg-[#EAF2FF] dark:bg-gray-800 items-center justify-center cursor-pointer flex-shrink-0 group snap-start border border-[#DBEAFE] dark:border-gray-700 shadow-sm hover:shadow-md active:scale-95 transition-all duration-300 ease-in-out"
+                    className="relative w-[92px] h-[92px] rounded-[24px] overflow-hidden flex-shrink-0 group snap-start shadow-md hover:shadow-xl active:scale-95 transition-all duration-300 ease-in-out border border-gray-100 dark:border-gray-800"
                   >
-                    <div 
-                      className="flex items-center justify-center text-[#2D6DF6] dark:text-blue-400 w-7 h-7 group-hover:scale-110 transition-transform duration-300 ease-in-out"
-                    >
-                      {React.isValidElement(cat.icon) 
-                        ? React.cloneElement(cat.icon as React.ReactElement<any>, { 
-                            className: `w-7 h-7 text-[#2D6DF6] dark:text-blue-400`, 
-                            strokeWidth: 2 
-                          }) 
-                        : cat.icon}
+                    <img 
+                      src={cat.image || 'https://via.placeholder.com/200'} 
+                      alt={cat.name} 
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" 
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent transition-opacity group-hover:opacity-70" />
+                    
+                    <div className="absolute bottom-2.5 left-2 right-2 flex flex-col items-center">
+                        <span className="font-black text-white text-[10px] uppercase tracking-wider text-center drop-shadow-md leading-tight">
+                        {cat.name}
+                        </span>
                     </div>
-                    <span 
-                      className="font-bold text-gray-600 dark:text-gray-300 text-[10px] text-center line-clamp-1 w-full"
-                    >
-                      {cat.name}
-                    </span>
                   </button>
                 ))}
               </div>

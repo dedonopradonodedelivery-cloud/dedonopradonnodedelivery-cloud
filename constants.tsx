@@ -5,25 +5,118 @@ import { AdType, Category, Store, Story, ServiceLead, Channel, Transaction, Edit
 import { getStoreLogo } from './utils/mockLogos';
 
 export const CATEGORIES: Category[] = [
-  // Top 8 Categories ordered as requested
-  { id: 'new-2', name: 'Saúde', slug: 'health', icon: <Heart className="w-6 h-6 text-[#2D6DF6]" /> },
-  { id: '2', name: 'Profissionais', slug: 'pros', icon: <Briefcase className="w-6 h-6 text-[#2D6DF6]" /> },
-  { id: 'new-1', name: 'Beleza', slug: 'beauty', icon: <Scissors className="w-6 h-6 text-[#2D6DF6]" /> },
-  { id: 'new-6', name: 'Autos', slug: 'autos', icon: <CarFront className="w-6 h-6 text-[#2D6DF6]" /> },
-  { id: '7', name: 'Pets', slug: 'pets', icon: <Dog className="w-6 h-6 text-[#2D6DF6]" /> },
-  { id: '8', name: 'Casa', slug: 'home-decor', icon: <Armchair className="w-6 h-6 text-[#2D6DF6]" /> },
-  { id: 'new-5', name: 'Esportes', slug: 'sports', icon: <Dumbbell className="w-6 h-6 text-[#2D6DF6]" /> },
-  { id: 'new-7', name: 'Assistências', slug: 'assistance', icon: <Wrench className="w-6 h-6 text-[#2D6DF6]" /> },
-  
-  // Remaining categories
-  { id: '1', name: 'Alimentação', slug: 'food', icon: <Utensils className="w-6 h-6 text-[#2D6DF6]" /> },
-  { id: 'new-3', name: 'Educação', slug: 'education', icon: <GraduationCap className="w-6 h-6 text-[#2D6DF6]" /> },
-  { id: 'new-4', name: 'Serviços', slug: 'services', icon: <Settings className="w-6 h-6 text-[#2D6DF6]" /> },
-  { id: 'new-8', name: 'Bem-estar', slug: 'wellness', icon: <Sun className="w-6 h-6 text-[#2D6DF6]" /> },
-  { id: '3', name: 'Festas', slug: 'party', icon: <PartyPopper className="w-6 h-6 text-[#2D6DF6]" /> },
-  { id: '4', name: 'Moda', slug: 'fashion', icon: <Shirt className="w-6 h-6 text-[#2D6DF6]" /> },
-  { id: '5', name: 'Mercados', slug: 'grocery', icon: <Coffee className="w-6 h-6 text-[#2D6DF6]" /> },
-  { id: '6', name: 'Condomínios', slug: 'condos', icon: <Building2 className="w-6 h-6 text-[#2D6DF6]" /> },
+  { 
+    id: 'new-2', 
+    name: 'Saúde', 
+    slug: 'health', 
+    icon: <Heart />, 
+    image: 'https://images.unsplash.com/photo-1505751172107-573225a9470e?q=80&w=300&auto=format&fit=crop' 
+  },
+  { 
+    id: '2', 
+    name: 'Profissionais', 
+    slug: 'pros', 
+    icon: <Briefcase />, 
+    image: 'https://images.unsplash.com/photo-1454165833767-027ffea7028c?q=80&w=300&auto=format&fit=crop' 
+  },
+  { 
+    id: 'new-1', 
+    name: 'Beleza', 
+    slug: 'beauty', 
+    icon: <Scissors />, 
+    image: 'https://images.unsplash.com/photo-1560066984-138dadb4c035?q=80&w=300&auto=format&fit=crop' 
+  },
+  { 
+    id: 'new-6', 
+    name: 'Autos', 
+    slug: 'autos', 
+    icon: <CarFront />, 
+    image: 'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?q=80&w=300&auto=format&fit=crop' 
+  },
+  { 
+    id: '7', 
+    name: 'Pets', 
+    slug: 'pets', 
+    icon: <Dog />, 
+    image: 'https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?q=80&w=300&auto=format&fit=crop' 
+  },
+  { 
+    id: '8', 
+    name: 'Casa', 
+    slug: 'home-decor', 
+    icon: <Armchair />, 
+    image: 'https://images.unsplash.com/photo-1581539250439-c96689b516dd?q=80&w=300&auto=format&fit=crop' 
+  },
+  { 
+    id: 'new-5', 
+    name: 'Esportes', 
+    slug: 'sports', 
+    icon: <Dumbbell />, 
+    image: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=300&auto=format&fit=crop' 
+  },
+  { 
+    id: 'new-7', 
+    name: 'Assistências', 
+    slug: 'assistance', 
+    icon: <Wrench />, 
+    image: 'https://images.unsplash.com/photo-1581092160562-40aa08e78837?q=80&w=300&auto=format&fit=crop' 
+  },
+  { 
+    id: '1', 
+    name: 'Alimentação', 
+    slug: 'food', 
+    icon: <Utensils />, 
+    image: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=300&auto=format&fit=crop' 
+  },
+  { 
+    id: 'new-3', 
+    name: 'Educação', 
+    slug: 'education', 
+    icon: <GraduationCap />, 
+    image: 'https://images.unsplash.com/photo-1497633762265-9d179a990aa6?q=80&w=300&auto=format&fit=crop' 
+  },
+  { 
+    id: 'new-4', 
+    name: 'Serviços', 
+    slug: 'services', 
+    icon: <Settings />, 
+    image: 'https://images.unsplash.com/photo-1581578731548-c64695ce6958?q=80&w=300&auto=format&fit=crop' 
+  },
+  { 
+    id: 'new-8', 
+    name: 'Bem-estar', 
+    slug: 'wellness', 
+    icon: <Sun />, 
+    image: 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?q=80&w=300&auto=format&fit=crop' 
+  },
+  { 
+    id: '3', 
+    name: 'Festas', 
+    slug: 'party', 
+    icon: <PartyPopper />, 
+    image: 'https://images.unsplash.com/photo-1464349095431-e9a21285b5f3?q=80&w=300&auto=format&fit=crop' 
+  },
+  { 
+    id: '4', 
+    name: 'Moda', 
+    slug: 'fashion', 
+    icon: <Shirt />, 
+    image: 'https://images.unsplash.com/photo-1445205170230-053b83016050?q=80&w=300&auto=format&fit=crop' 
+  },
+  { 
+    id: '5', 
+    name: 'Mercados', 
+    slug: 'grocery', 
+    icon: <Coffee />, 
+    image: 'https://images.unsplash.com/photo-1542838132-92c53300491e?q=80&w=300&auto=format&fit=crop' 
+  },
+  { 
+    id: '6', 
+    name: 'Condomínios', 
+    slug: 'condos', 
+    icon: <Building2 />, 
+    image: 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?q=80&w=300&auto=format&fit=crop' 
+  },
 ];
 
 // Subcategories Map for the Detail View
@@ -209,21 +302,21 @@ export const EDITORIAL_COLLECTIONS: EditorialCollection[] = [
     id: 'almoço-semana', 
     title: '🍛 Almoço durante a semana', 
     subtitle: 'Opções rápidas e saborosas perto de você', 
-    image: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=800&auto=format=fit=crop', 
+    image: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=800&auto=format&fit=crop', 
     keywords: ['restaurante', 'almoço', 'executivo', 'prato feito', 'hamburgueria'] 
   },
   { 
     id: 'top-rated', 
     title: '⭐ Favoritos da Vizinhança', 
     subtitle: 'Os locais mais bem avaliados pelos moradores.', 
-    image: 'https://images.unsplash.com/photo-1521017432531-fbd92d768814?q=80&w=800&auto=format=fit=crop', 
+    image: 'https://images.unsplash.com/photo-1521017432531-fbd92d768814?q=80&w=800&auto=format&fit=crop', 
     keywords: [] 
   },
   { 
     id: 'happy-hour', 
     title: '🍻 Happy Hour & Fim de Tarde', 
     subtitle: 'Bares e petiscos para relaxar depois do dia.', 
-    image: 'https://images.unsplash.com/photo-1514933651103-005eec06c04b?q=80&w=800&auto=format=fit=crop', 
+    image: 'https://images.unsplash.com/photo-1514933651103-005eec06c04b?q=80&w=800&auto=format&fit=crop', 
     keywords: ['bar', 'happy hour', 'petiscos', 'chopp'] 
   },
 ];
