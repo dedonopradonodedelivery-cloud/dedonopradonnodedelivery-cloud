@@ -48,6 +48,19 @@ interface HomeFeedProps {
   onRequireLogin: () => void;
 }
 
+// Componente Interno para Padronização de Títulos de Seção
+const SectionHeader: React.FC<{ icon: React.ElementType; title: string; subtitle?: string }> = ({ icon: Icon, title, subtitle }) => (
+  <div className="flex items-center justify-between mb-5 px-1">
+    <div className="flex items-center gap-2.5">
+      <Icon className="w-4 h-4 text-gray-400 dark:text-gray-500" strokeWidth={2.5} />
+      <h3 className="text-[13px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest leading-none">
+        {title}
+      </h3>
+    </div>
+    {subtitle && <span className="text-[9px] font-black text-gray-300 dark:text-gray-600 uppercase tracking-tighter">{subtitle}</span>}
+  </div>
+);
+
 const RouletteIcon: React.FC<{ className?: string }> = ({ className }) => {
   const colors = ['#10B981', '#3B82F6', '#8B5CF6', '#EC4899', '#F59E0B', '#F97316', '#EF4444', '#06B6D4'];
   const sliceAngle = 45;
@@ -173,15 +186,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
       case 'promo_semana':
         return (
           <div key="promo_semana" className="px-4">
-            <div className="flex items-center justify-between mb-4 px-1">
-              <div className="flex items-center gap-2">
-                <div className="p-1.5 bg-rose-50 dark:bg-rose-900/20 rounded-lg">
-                  <Tag className="w-4 h-4 text-rose-500" />
-                </div>
-                <h3 className="text-[11px] font-black text-gray-900 dark:text-white uppercase tracking-[0.15em]">Promoção da Semana</h3>
-              </div>
-              <p className="text-[9px] font-bold text-gray-400 uppercase">Ofertas 20% OFF+</p>
-            </div>
+            <SectionHeader icon={Tag} title="Promoção da Semana" subtitle="Ofertas 20% OFF+" />
             
             <div className="flex gap-4 overflow-x-auto no-scrollbar -mx-4 px-4 pb-2 snap-x">
               {[
@@ -191,33 +196,24 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
                 { id: 'p4', store: 'Padaria Central', product: 'Combo Café da Manhã', old: '22,00', new: '15,40', off: '30', image: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?q=80&w=400&auto=format&fit=crop' }
               ].map((promo) => (
                 <div key={promo.id} className="min-w-[280px] snap-center bg-white dark:bg-gray-800 rounded-[32px] overflow-hidden shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col group active:scale-[0.98] transition-all">
-                  {/* HIERARQUIA 1: Imagem do Produto */}
                   <div className="h-40 relative overflow-hidden">
                     <img src={promo.image} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt={promo.product} />
-                    
-                    {/* HIERARQUIA 2: Badge de Desconto */}
                     <div className="absolute top-4 left-4 bg-rose-500 text-white text-[11px] font-black px-3 py-1.5 rounded-xl shadow-lg animate-pulse">
                       -{promo.off}% OFF
                     </div>
-
-                    {/* HIERARQUIA 6: Validade */}
                     <div className="absolute bottom-4 right-4 bg-white/90 backdrop-blur-md text-gray-900 text-[9px] font-black px-2.5 py-1.5 rounded-xl border border-white/20 flex items-center gap-1.5 shadow-sm">
                       <Timer className="w-3.5 h-3.5 text-rose-500" />
                       7 DIAS
                     </div>
                   </div>
-
                   <div className="p-5 flex flex-col gap-1">
                     <div className="flex justify-between items-start">
                       <div className="flex-1 pr-2">
-                        {/* HIERARQUIA 3: Nome do Produto */}
                         <h4 className="font-bold text-gray-900 dark:text-white text-[15px] leading-tight line-clamp-1 mb-0.5">{promo.product}</h4>
                         <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">{promo.store}</p>
                       </div>
                       <div className="text-right">
-                        {/* HIERARQUIA 4: Preço Original */}
                         <p className="text-[11px] text-gray-400 line-through font-bold leading-none mb-1">R$ {promo.old}</p>
-                        {/* HIERARQUIA 5: Preço Promocional */}
                         <p className="text-xl font-black text-[#1E5BFF] leading-none">R$ {promo.new}</p>
                       </div>
                     </div>
@@ -231,9 +227,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
       case 'roulette':
         return (
           <div key="roulette" className="px-4">
-            <div className="flex items-center justify-between mb-4 px-1">
-                <h3 className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em]">Diversão do Dia</h3>
-            </div>
+            <SectionHeader icon={Dices} title="Diversão do Dia" />
             <button onClick={() => setIsSpinWheelOpen(true)} className="w-full bg-gradient-to-br from-primary-600 to-blue-700 rounded-[28px] p-6 text-white flex items-center justify-between shadow-xl active:scale-[0.98] transition-all relative overflow-hidden group border border-white/10">
               <div className="flex items-center gap-5 relative z-10">
                 <div className="w-16 h-16 flex items-center justify-center animate-spin-slow">
@@ -254,16 +248,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
       case 'bairro_on':
         return (
           <div key="bairro_on" className="px-4">
-            <div className="flex items-center justify-between mb-4 px-1">
-              <div className="flex items-center gap-2">
-                <div className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-                </div>
-                <h3 className="text-[11px] font-black text-gray-900 dark:text-white uppercase tracking-[0.15em]">O Bairro Tá On</h3>
-              </div>
-              <p className="text-[10px] font-bold text-gray-400 uppercase">O que tá bombando perto de você</p>
-            </div>
+            <SectionHeader icon={Flame} title="O Bairro Tá On" subtitle="Bombando perto de você" />
             
             <div className="flex gap-3 overflow-x-auto no-scrollbar -mx-4 px-4 pb-2">
               {[
@@ -314,12 +299,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
       case 'community':
         return (
           <div key="community" className="px-4">
-            <div className="flex items-center gap-2 mb-4 px-1">
-                <div className="p-1 bg-rose-50 dark:bg-rose-900/20 rounded-lg">
-                    <Heart className="w-3.5 h-3.5 text-rose-500 fill-rose-500"/>
-                </div>
-                <h3 className="text-[10px] font-black text-gray-900 dark:text-white uppercase tracking-[0.15em]">Amados pela Vizinhança</h3>
-            </div>
+            <SectionHeader icon={Heart} title="Amados pela Vizinhança" />
             <RecomendadosPorMoradores items={[
               { id: 'f1', nome: 'Padaria da Vila', categoria: 'Comida', texto: 'O melhor pãozinho da região! Atendimento nota 10 sempre.', totalRecomendacoes: 124 },
               { id: 'f2', nome: 'Cantinho do Sabor', categoria: 'Restaurante', texto: 'Comida caseira de verdade. O tempero da dona Maria é imbatível!', totalRecomendacoes: 89 },
@@ -338,9 +318,9 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
         return (
           <div key="list" className="px-4 min-h-[400px]">
               <div className="flex items-center justify-between mb-5 px-1">
-                 <div className="flex items-center gap-2">
-                    <ShieldCheck className="w-4 h-4 text-gray-400" />
-                    <h3 className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em]">Guia de Lojas</h3>
+                 <div className="flex items-center gap-2.5">
+                    <ShieldCheck className="w-4 h-4 text-gray-400 dark:text-gray-500" strokeWidth={2.5} />
+                    <h3 className="text-[13px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest leading-none">Guia de Lojas</h3>
                  </div>
                  <div className="flex gap-2">
                     {['all', 'cashback', 'top_rated'].map((f) => (
