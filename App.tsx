@@ -26,6 +26,7 @@ import { ServiceTermsView } from './components/ServiceTermsView';
 import { QuoteRequestModal } from './components/QuoteRequestModal';
 import { StoreAreaView } from './components/StoreAreaView';
 import { MerchantQrScreen } from './components/MerchantQrScreen';
+import { WeeklyPromoModule } from './components/WeeklyPromoModule';
 import { MapPin, Crown, X, Star } from 'lucide-react';
 import { useAuth } from './contexts/AuthContext';
 import { Category, Store, AdType, EditorialCollection } from './types';
@@ -124,7 +125,8 @@ const App: React.FC = () => {
     'freguesia_connect_public', 'freguesia_connect_dashboard', 'freguesia_connect_restricted',
     'service_subcategories', 'service_specialties', 'service_terms', 'service_success',
     'user_statement', 'merchant_cashback_dashboard', 'merchant_cashback_onboarding',
-    'store_cashback_module', 'store_ads_module', 'about', 'support', 'invite_friend', 'favorites'
+    'store_cashback_module', 'store_ads_module', 'about', 'support', 'invite_friend', 'favorites',
+    'weekly_promo'
   ];
 
   return (
@@ -178,6 +180,7 @@ const App: React.FC = () => {
             {activeTab === 'store_ads_module' && <StoreAdsModule onBack={() => setActiveTab('store_area')} />}
             {activeTab === 'store_profile' && <StoreProfileEdit onBack={() => setActiveTab('store_area')} />}
             {activeTab === 'store_finance' && <StoreFinanceModule onBack={() => setActiveTab('store_area')} />}
+            {activeTab === 'weekly_promo' && <WeeklyPromoModule onBack={() => setActiveTab('store_area')} />}
             {activeTab === 'about' && <AboutView onBack={() => setActiveTab('profile')} />}
             {activeTab === 'support' && <SupportView onBack={() => setActiveTab('profile')} />}
             {activeTab === 'invite_friend' && <InviteFriendView onBack={() => setActiveTab('profile')} />}

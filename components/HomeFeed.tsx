@@ -18,7 +18,9 @@ import {
   Wrench,
   Compass,
   CheckCircle2,
-  Heart
+  Heart,
+  Tag,
+  Timer
 } from 'lucide-react';
 import { LojasEServicosList } from './LojasEServicosList';
 import { User } from '@supabase/supabase-js';
@@ -186,6 +188,46 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
           </div>
         );
 
+      case 'achados_semana':
+        return (
+          <div key="achados_semana" className="px-4">
+            <div className="flex items-center justify-between mb-4 px-1">
+              <div className="flex items-center gap-2">
+                <Tag className="w-4 h-4 text-rose-500" />
+                <h3 className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em]">Achados da Semana</h3>
+              </div>
+              <div className="flex items-center gap-1 text-[9px] font-black text-rose-600 dark:text-rose-400 uppercase bg-rose-50 dark:bg-rose-900/20 px-2.5 py-1 rounded-full border border-rose-100 dark:border-rose-900/30">
+                <Timer className="w-3.5 h-3.5" />
+                <span>Oferta da semana</span>
+              </div>
+            </div>
+            <div className="flex gap-4 overflow-x-auto no-scrollbar -mx-4 px-4 pb-2">
+              {[
+                { id: 1, title: 'Barca de Sushi (30 pçs)', store: 'Sushi House', oldPrice: 89.90, newPrice: 59.90, discount: '-33%', image: 'https://images.unsplash.com/photo-1579871494447-9811cf80d66c?q=80&w=400&auto=format&fit=crop' },
+                { id: 2, title: 'Limpeza de Pele Prof.', store: 'Clínica BioEstética', oldPrice: 180.00, newPrice: 119.00, discount: '-34%', image: 'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?q=80&w=400&auto=format&fit=crop' },
+                { id: 3, title: 'Combo Smash Double', store: 'Burger Freguesia', oldPrice: 42.00, newPrice: 28.00, discount: '-33%', image: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?q=80&w=400&auto=format&fit=crop' }
+              ].map((item) => (
+                <div key={item.id} className="min-w-[240px] bg-white dark:bg-gray-800 rounded-[28px] shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col overflow-hidden group active:scale-[0.98] transition-transform">
+                  <div className="h-32 relative overflow-hidden">
+                    <img src={item.image} alt={item.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                    <div className="absolute top-3 left-3 bg-rose-500 text-white text-[10px] font-black px-2 py-1 rounded-lg shadow-lg">
+                      {item.discount}
+                    </div>
+                  </div>
+                  <div className="p-4 flex flex-col gap-1">
+                    <h4 className="font-bold text-gray-900 dark:text-white text-sm leading-tight truncate">{item.title}</h4>
+                    <p className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">{item.store}</p>
+                    <div className="flex items-center gap-2 mt-2">
+                      <span className="text-gray-400 line-through text-[11px] font-medium">R$ {item.oldPrice.toFixed(2)}</span>
+                      <span className="text-rose-600 dark:text-rose-400 font-black text-base">R$ {item.newPrice.toFixed(2)}</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+
       case 'cashback':
         return (
           <div key="cashback" className="px-4">
@@ -198,33 +240,6 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
                 userRole === 'lojista' ? onNavigate('merchant_cashback_dashboard') : onNavigate('user_statement');
               }} 
             />
-          </div>
-        );
-
-      case 'highlights':
-        return (
-          <div key="highlights" className="px-4">
-            <div className="flex items-center gap-2 mb-4 px-1">
-              <TrendingUp className="w-4 h-4 text-[#1E5BFF]" />
-              <h3 className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em]">Atividade Recente</h3>
-            </div>
-            <div className="flex gap-4 overflow-x-auto no-scrollbar -mx-4 px-4 pb-2">
-              {[
-                { id: 1, title: 'Novas Pizzarias', icon: <Zap className="text-amber-500" />, desc: '3 novos locais no bairro' },
-                { id: 2, title: 'Dicas de Beleza', icon: <Heart className="text-rose-500" />, desc: 'Salões mais avaliados hoje' },
-                { id: 3, title: 'Mercados 24h', icon: <Clock className="text-blue-500" />, desc: 'Abertos agora perto de você' }
-              ].map((item) => (
-                <div key={item.id} className="min-w-[210px] bg-white dark:bg-gray-800 p-6 rounded-[28px] shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col gap-4 active:scale-[0.98] transition-transform">
-                  <div className="w-12 h-12 rounded-2xl bg-gray-50 dark:bg-gray-700 flex items-center justify-center shadow-inner">
-                    {item.icon}
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-gray-900 dark:text-white text-[15px] leading-tight mb-1">{item.title}</h4>
-                    <p className="text-[11px] text-gray-500 font-medium">{item.desc}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
           </div>
         );
 
@@ -273,9 +288,9 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
 
   const homeStructure = useMemo(() => {
     if (user) {
-      return ['cashback', 'categories', 'hero', 'roulette', 'highlights', 'community', 'list'];
+      return ['cashback', 'categories', 'hero', 'roulette', 'achados_semana', 'community', 'list'];
     }
-    return ['categories', 'hero', 'roulette', 'highlights', 'community', 'list'];
+    return ['categories', 'hero', 'roulette', 'achados_semana', 'community', 'list'];
   }, [user]);
 
   return (
