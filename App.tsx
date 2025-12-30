@@ -38,6 +38,13 @@ import { MerchantCashbackDashboard } from './components/MerchantCashbackDashboar
 import { MerchantCashbackOnboarding } from './components/MerchantCashbackOnboarding';
 import { StoreCashbackModule } from './components/StoreCashbackModule';
 import { StoreAdsModule } from './components/StoreAdsModule';
+import { 
+  AboutView, 
+  SupportView, 
+  InviteFriendView, 
+  FavoritesView, 
+  SponsorInfoView 
+} from './components/SimplePages';
 
 const MOCK_STORES: Store[] = [
   {
@@ -241,7 +248,7 @@ const App: React.FC = () => {
     'freguesia_connect_public', 'freguesia_connect_dashboard', 'freguesia_connect_restricted',
     'service_subcategories', 'service_specialties', 'service_terms', 'service_success',
     'user_statement', 'merchant_cashback_dashboard', 'merchant_cashback_onboarding',
-    'store_cashback_module', 'store_ads_module'
+    'store_cashback_module', 'store_ads_module', 'about', 'support', 'invite_friend', 'favorites'
   ];
 
   return (
@@ -304,6 +311,18 @@ const App: React.FC = () => {
             )}
             {activeTab === 'store_ads_module' && (
               <StoreAdsModule onBack={() => setActiveTab('store_area')} />
+            )}
+            {activeTab === 'about' && (
+              <AboutView onBack={() => setActiveTab('profile')} />
+            )}
+            {activeTab === 'support' && (
+              <SupportView onBack={() => setActiveTab('profile')} />
+            )}
+            {activeTab === 'invite_friend' && (
+              <InviteFriendView onBack={() => setActiveTab('profile')} />
+            )}
+            {activeTab === 'favorites' && (
+              <FavoritesView user={user as any} onBack={() => setActiveTab('profile')} onNavigate={setActiveTab} />
             )}
             {activeTab === 'editorial_list' && selectedCollection && (
               <EditorialListView

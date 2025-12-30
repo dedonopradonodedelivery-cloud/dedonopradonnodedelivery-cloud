@@ -21,8 +21,12 @@ import {
   Lightbulb,
   Zap,
   Award,
-  // FIX: Added 'Coins' to the import list from lucide-react.
-  Coins
+  Coins,
+  Target,
+  Eye,
+  Shield,
+  // Fix: Add missing Sparkles import
+  Sparkles
 } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import { Store, AdType } from '../types';
@@ -47,7 +51,7 @@ export const SupportView: React.FC<SimplePageProps> = ({ onBack }) => {
   return (
     <div className="min-h-screen bg-white dark:bg-gray-900 font-sans animate-in slide-in-from-right duration-300">
       <div className="sticky top-0 z-30 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md px-5 h-16 flex items-center gap-4 border-b border-gray-100 dark:border-gray-800">
-        <button onClick={onBack} className="p-2 -ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800">
+        <button onClick={onBack} className="p-2 -ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
           <ChevronLeft className="w-6 h-6 text-gray-800 dark:text-white" />
         </button>
         <h1 className="font-bold text-lg text-gray-900 dark:text-white">Suporte</h1>
@@ -95,11 +99,129 @@ export const SupportView: React.FC<SimplePageProps> = ({ onBack }) => {
   );
 };
 
+export const AboutView: React.FC<SimplePageProps> = ({ onBack }) => {
+  return (
+    <div className="min-h-screen bg-white dark:bg-gray-900 font-sans animate-in slide-in-from-right duration-300 pb-20">
+      {/* Integrated Sticky Header */}
+      <div className="sticky top-0 z-30 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md px-5 h-16 flex items-center gap-4 border-b border-gray-100 dark:border-gray-800">
+        <button onClick={onBack} className="p-2 -ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+          <ChevronLeft className="w-6 h-6 text-gray-800 dark:text-white" />
+        </button>
+        <h1 className="font-bold text-lg text-gray-900 dark:text-white">Sobre a Localizei</h1>
+      </div>
+
+      <div className="overflow-y-auto">
+        {/* Visual Identity Section */}
+        <div className="p-8 flex flex-col items-center bg-gradient-to-b from-blue-50 to-white dark:from-blue-900/10 dark:to-gray-900">
+          <div className="w-24 h-24 bg-[#1E5BFF] rounded-[2rem] flex items-center justify-center mb-6 shadow-xl shadow-blue-500/20 transform -rotate-3 group-hover:rotate-0 transition-transform duration-500">
+            <MapPin className="w-12 h-12 text-white fill-white" />
+          </div>
+          <h2 className="text-3xl font-black text-gray-900 dark:text-white font-display text-center leading-tight">
+            Localizei <br/> <span className="text-[#1E5BFF]">Freguesia</span>
+          </h2>
+          <p className="mt-4 text-sm text-gray-500 dark:text-gray-400 font-bold uppercase tracking-[0.3em]">
+            Versão 1.0.12
+          </p>
+        </div>
+
+        <div className="px-6 space-y-12 pb-12">
+          {/* Manifesto Section */}
+          <section className="animate-in fade-in slide-in-from-bottom-4 duration-700">
+            <div className="flex items-center gap-2 mb-4">
+              {/* Fix: Sparkles component used here */}
+              <Sparkles className="w-5 h-5 text-amber-500" />
+              <h3 className="text-xs font-black text-amber-500 uppercase tracking-widest">Nosso Manifesto</h3>
+            </div>
+            <div className="bg-gray-50 dark:bg-gray-800/50 p-6 rounded-3xl border border-gray-100 dark:border-gray-800 shadow-inner">
+                <p className="text-gray-700 dark:text-gray-300 text-base leading-relaxed italic font-serif">
+                  "Acreditamos que o bairro é o coração da nossa rotina. Que o pequeno comerciante é quem traz alma para as ruas e que a vizinhança é a nossa maior rede social. O Localizei nasceu para quebrar as barreiras entre o físico e o digital, transformando a Freguesia em um ecossistema inteligente, onde cada compra fortalece quem vive aqui."
+                </p>
+            </div>
+          </section>
+
+          {/* Core Pillars (Mission, Vision, Values) */}
+          <section className="space-y-4">
+            {/* Missão */}
+            <div className="bg-white dark:bg-gray-800 p-6 rounded-3xl border border-gray-100 dark:border-gray-700 shadow-sm flex items-start gap-5">
+              <div className="w-12 h-12 rounded-2xl bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center shrink-0">
+                <Target className="w-6 h-6 text-[#1E5BFF]" />
+              </div>
+              <div>
+                <h4 className="font-black text-gray-900 dark:text-white uppercase text-xs tracking-widest mb-1">Missão</h4>
+                <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+                  Conectar moradores, lojistas e profissionais através de uma plataforma intuitiva que incentive o consumo local e gere benefícios reais para toda a comunidade da Freguesia.
+                </p>
+              </div>
+            </div>
+
+            {/* Visão */}
+            <div className="bg-white dark:bg-gray-800 p-6 rounded-3xl border border-gray-100 dark:border-gray-700 shadow-sm flex items-start gap-5">
+              <div className="w-12 h-12 rounded-2xl bg-amber-50 dark:bg-amber-900/30 flex items-center justify-center shrink-0">
+                <Eye className="w-6 h-6 text-amber-600" />
+              </div>
+              <div>
+                <h4 className="font-black text-gray-900 dark:text-white uppercase text-xs tracking-widest mb-1">Visão</h4>
+                <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+                  Ser o super-app indispensável para cada habitante da região, tornando-se o principal motor de aceleração econômica e conexão social do bairro.
+                </p>
+              </div>
+            </div>
+
+            {/* Valores */}
+            <div className="bg-white dark:bg-gray-800 p-6 rounded-3xl border border-gray-100 dark:border-gray-700 shadow-sm flex items-start gap-5">
+              <div className="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-900/30 flex items-center justify-center shrink-0">
+                <Shield className="w-6 h-6 text-indigo-600" />
+              </div>
+              <div>
+                <h4 className="font-black text-gray-900 dark:text-white uppercase text-xs tracking-widest mb-1">Nossos Valores</h4>
+                <div className="grid grid-cols-2 gap-y-2 gap-x-4 mt-2">
+                  <div className="flex items-center gap-2">
+                    <div className="w-1.5 h-1.5 rounded-full bg-indigo-500"></div>
+                    <span className="text-xs font-bold text-gray-600 dark:text-gray-400">Comunidade</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-1.5 h-1.5 rounded-full bg-indigo-500"></div>
+                    <span className="text-xs font-bold text-gray-600 dark:text-gray-400">Transparência</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-1.5 h-1.5 rounded-full bg-indigo-500"></div>
+                    <span className="text-xs font-bold text-gray-600 dark:text-gray-400">Inovação</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-1.5 h-1.5 rounded-full bg-indigo-500"></div>
+                    <span className="text-xs font-bold text-gray-600 dark:text-gray-400">Impacto Local</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* Future Section (Roadmap) */}
+          <div className="bg-[#1E5BFF] p-8 rounded-[2rem] text-white relative overflow-hidden shadow-xl shadow-blue-500/20">
+            <div className="absolute -right-10 -bottom-10 w-40 h-40 bg-white/10 rounded-full blur-3xl pointer-events-none"></div>
+            <div className="relative z-10 flex flex-col items-center text-center">
+              <Rocket className="w-8 h-8 text-amber-300 mb-4 animate-bounce-short" />
+              <h4 className="font-bold text-xl mb-2">O amanhã da Freguesia</h4>
+              <p className="text-sm text-blue-100 opacity-90 leading-relaxed">
+                Estamos apenas começando. Em breve: pagamentos integrados, sorteios exclusivos e uma rede social própria do bairro.
+              </p>
+            </div>
+          </div>
+
+          <div className="text-center opacity-30 py-4">
+             <p className="text-[10px] font-black uppercase tracking-[0.5em]">Freguesia • Localizei © 2024</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 export const InviteFriendView: React.FC<SimplePageProps> = ({ onBack }) => {
   return (
     <div className="min-h-screen bg-white dark:bg-gray-900 font-sans animate-in slide-in-from-right duration-300">
       <div className="sticky top-0 z-30 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md px-5 h-16 flex items-center gap-4 border-b border-gray-100 dark:border-gray-800">
-        <button onClick={onBack} className="p-2 -ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800">
+        <button onClick={onBack} className="p-2 -ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
           <ChevronLeft className="w-6 h-6 text-gray-800 dark:text-white" />
         </button>
         <h1 className="font-bold text-lg text-gray-900 dark:text-white">Indique um Amigo</h1>
@@ -125,91 +247,11 @@ export const InviteFriendView: React.FC<SimplePageProps> = ({ onBack }) => {
   );
 };
 
-export const AboutView: React.FC<SimplePageProps> = ({ onBack }) => {
-  const benefits = [
-    {
-      icon: Compass,
-      title: "Encontre tudo perto de você",
-      description: "Lojas, restaurantes e serviços na palma da sua mão."
-    },
-    {
-      icon: Award,
-      title: "Descubra os favoritos do bairro",
-      description: "Veja os locais mais bem avaliados pelos seus vizinhos."
-    },
-    {
-      icon: Rocket,
-      title: "Fique por dentro das novidades",
-      description: "Saiba das inaugurações, eventos e promoções."
-    },
-    {
-      icon: Coins,
-      title: "Economize com cashback",
-      description: "Receba parte do seu dinheiro de volta (em breve)."
-    }
-  ];
-
-  return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 font-sans animate-in slide-in-from-right duration-300 flex flex-col relative overflow-hidden">
-      
-      {/* Hero section with integrated header */}
-      <div className="absolute top-0 left-0 right-0 h-[45vh] bg-gradient-to-br from-sky-500 to-blue-600 rounded-b-[40px] z-0 p-6 flex flex-col justify-center items-center text-center text-white">
-        <div className="w-20 h-20 bg-white/20 backdrop-blur-md rounded-2xl border border-white/20 flex items-center justify-center mb-6 shadow-2xl">
-          <MapPin className="w-10 h-10 text-white" />
-        </div>
-        <h1 className="text-3xl font-bold font-display leading-tight mb-3 drop-shadow-md">
-          O guia definitivo da nossa vizinhança
-        </h1>
-        <p className="text-blue-100 font-medium max-w-sm">
-          Conectamos você aos melhores comércios, serviços e oportunidades do bairro.
-        </p>
-      </div>
-
-       {/* Back Button */}
-       <div className="relative z-10 p-5 pt-6 flex items-center">
-        <button 
-            onClick={onBack}
-            className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md border border-white/20 flex items-center justify-center text-white hover:bg-white/30 transition-all"
-        >
-            <ChevronLeft className="w-6 h-6" />
-        </button>
-      </div>
-
-      {/* Content section */}
-      <div className="flex-1 relative z-10 mt-[8vh] px-5 pb-32">
-        <div className="bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-lg border border-gray-100 dark:border-gray-700 space-y-6">
-          {benefits.map((item, index) => (
-            <div key={index} className="flex items-start gap-4">
-              <div className="w-10 h-10 bg-blue-50 dark:bg-blue-900/20 rounded-xl flex items-center justify-center text-blue-600 dark:text-blue-400 shrink-0">
-                <item.icon className="w-5 h-5" />
-              </div>
-              <div>
-                <h3 className="font-bold text-gray-900 dark:text-white text-sm">{item.title}</h3>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 leading-relaxed">{item.description}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-      
-      {/* Fixed Footer CTA */}
-      <div className="fixed bottom-0 left-0 right-0 p-5 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-t border-gray-100 dark:border-gray-800 z-30 max-w-md mx-auto">
-        <button 
-          onClick={onBack}
-          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-2xl shadow-lg shadow-blue-500/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
-        >
-          Começar a explorar
-          <ArrowRight className="w-5 h-5" />
-        </button>
-      </div>
-    </div>
-  );
-};
-
 export const FavoritesView: React.FC<SimplePageProps> = ({ onBack, onNavigate, user }) => {
   const [favorites, setFavorites] = useState<Store[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // Fix: useEffect used here
   useEffect(() => {
     const fetchFavorites = async () => {
       if (!user || !supabase) {
@@ -302,7 +344,7 @@ export const FavoritesView: React.FC<SimplePageProps> = ({ onBack, onNavigate, u
                 {onNavigate && (
                     <button 
                         onClick={() => onNavigate('explore')}
-                        className="bg-[#1E5BFF] text-white font-bold py-3 px-8 rounded-full shadow-lg shadow-blue-500/30 flex items-center gap-2 active:scale-95 transition-transform"
+                        className="bg-[#1E5BFF] text-white font-bold py-3 px-8 rounded-full shadow-lg shadow-blue-500/20 flex items-center gap-2 active:scale-95 transition-transform"
                     >
                         Explorar Lojas
                         <ArrowRight className="w-4 h-4" />
