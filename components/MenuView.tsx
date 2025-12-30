@@ -87,17 +87,18 @@ export const MenuView: React.FC<MenuViewProps> = ({ user, userRole, onAuthClick,
   if (!user) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 font-sans animate-in slide-in-from-right duration-300 flex flex-col">
-        <div className="bg-white dark:bg-gray-900 px-5 pt-10 pb-4 border-b border-gray-100 dark:border-gray-800 sticky top-0 z-50">
+        {/* Padronizado para px-4 como na Home */}
+        <div className="bg-white dark:bg-gray-900 px-4 pt-10 pb-4 border-b border-gray-100 dark:border-gray-800 sticky top-0 z-50">
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white font-display">Perfil</h2>
         </div>
-        <div className="flex-1 flex flex-col items-center justify-center p-6 pb-28 text-center">
+        <div className="flex-1 flex flex-col items-center justify-center px-4 pb-28 text-center">
           <div className="w-24 h-24 bg-white dark:bg-gray-800 rounded-[2rem] flex items-center justify-center mb-6 shadow-sm border border-gray-100 dark:border-gray-700 transform -rotate-6">
              <UserIcon className="w-10 h-10 text-[#1E5BFF]" />
           </div>
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">
             Entre na sua conta
           </h2>
-          <p className="text-gray-500 dark:text-gray-400 text-sm mb-10 max-w-[260px] leading-relaxed font-medium">
+          <p className="text-gray-500 dark:text-gray-400 text-sm mb-10 max-w-[280px] leading-relaxed font-medium">
             Faça login para acessar seus favoritos, cashback e acompanhar sua experiência no Localizei Freguesia.
           </p>
           <div className="w-full space-y-4">
@@ -116,12 +117,13 @@ export const MenuView: React.FC<MenuViewProps> = ({ user, userRole, onAuthClick,
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-24 animate-in fade-in duration-300">
-      <div className="bg-white dark:bg-gray-900 px-5 pt-10 pb-4 border-b border-gray-100 dark:border-gray-800 sticky top-0 z-50">
+      {/* Padronizado para px-4 */}
+      <div className="bg-white dark:bg-gray-900 px-4 pt-10 pb-4 border-b border-gray-100 dark:border-gray-800 sticky top-0 z-50">
         <h2 className="text-2xl font-bold text-gray-900 dark:text-white font-display mb-0.5">Menu</h2>
         <p className="text-sm text-gray-500 dark:text-gray-400">Configurações e Atalhos</p>
       </div>
 
-      <div className="px-5 pb-5">
+      <div className="px-4 pb-5">
         <div 
           onClick={() => onNavigate('edit_profile')}
           className="mt-6 bg-white dark:bg-gray-800 p-4 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 flex items-center gap-4 cursor-pointer active:scale-[0.98] transition-transform mb-6"
@@ -144,13 +146,11 @@ export const MenuView: React.FC<MenuViewProps> = ({ user, userRole, onAuthClick,
           </div>
         </div>
 
-        {/* UX: Para Lojistas, o painel de gestão é o primeiro item de destaque no Menu */}
         {isMerchant && (
             <button 
                 onClick={() => onNavigate('store_area')}
                 className="w-full bg-gradient-to-br from-[#1e1b4b] via-[#312e81] to-[#1e3a8a] text-white p-8 rounded-[2.5rem] shadow-2xl shadow-indigo-900/30 flex flex-col gap-6 relative overflow-hidden group active:scale-[0.98] transition-all mb-8 border border-white/10"
             >
-                {/* Background Decor */}
                 <div className="absolute top-0 right-0 w-48 h-48 bg-indigo-500/10 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none group-hover:bg-indigo-500/20 transition-all duration-700"></div>
                 
                 <div className="flex justify-between items-start relative z-10">

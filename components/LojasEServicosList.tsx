@@ -92,7 +92,6 @@ const ALL_SORTED_STORES = sortStores([...RAW_STORES]);
 const ITEMS_PER_PAGE = 12;
 
 const getStoreExtras = (index: number, store: Store) => {
-  // Activity badge removed to maintain clean layout as requested
   const copies = [
     "Muito elogiada pelos moradores",
     "Clientes voltam sempre",
@@ -168,13 +167,13 @@ export const LojasEServicosList: React.FC<LojasEServicosListProps> = ({ onStoreC
 
   return (
     <div className="flex flex-col w-full">
-      <div className="flex flex-col gap-4 pb-6">
+      <div className="flex flex-col gap-3 pb-6">
         
         {/* Card do Patrocinador Master - Fixo no topo */}
         <div
           key={MASTER_SPONSOR_STORE.id}
           onClick={() => onNavigate && onNavigate('patrocinador_master')}
-          className="bg-white dark:bg-gray-800 rounded-3xl p-4 flex gap-4 cursor-pointer relative group transition-all duration-300 shadow-[0_4px_12px_rgba(0,0,0,0.05)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] active:scale-[0.99] border-2 border-amber-500 mt-4 min-h-[150px]"
+          className="bg-white dark:bg-gray-800 rounded-3xl p-4 flex gap-4 cursor-pointer relative group transition-all duration-300 shadow-[0_4px_12px_rgba(0,0,0,0.05)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] active:scale-[0.99] border-2 border-amber-500 mt-2 min-h-[150px]"
         >
           <div className="absolute top-0 right-4 -translate-y-1/2 z-10 pointer-events-none">
             <span className="text-xs font-black px-4 py-2 rounded-full bg-amber-500 text-slate-900 shadow-lg uppercase tracking-wider flex items-center gap-1.5">
@@ -209,31 +208,33 @@ export const LojasEServicosList: React.FC<LojasEServicosListProps> = ({ onStoreC
           </button>
         </div>
         
-        {/* Lista de Lojas normais */}
+        {/* Lista de Lojas normais com variação sutil de zebra-striping */}
         {visibleStores.map((store, index) => {
             const isLastElement = index === visibleStores.length - 1;
             const isFavorited = isFavorite(store.id);
             const isSponsored = store.isSponsored || store.adType === AdType.PREMIUM;
             const { copy } = getStoreExtras(index, store);
+            const isAlternate = index % 2 !== 0;
+
             return (
                 <div
                     key={store.id}
                     ref={isLastElement ? lastStoreElementRef : null}
                     onClick={() => onStoreClick && onStoreClick(store)}
-                    className={`bg-white dark:bg-gray-800 rounded-2xl p-3 flex gap-3 cursor-pointer relative group transition-all duration-300 shadow-[0_4px_12px_rgba(0,0,0,0.05)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] active:scale-[0.99] border-2 ${isSponsored ? 'border-[#1E5BFF]/20 dark:border-[#1E5BFF]/10 mt-2' : 'border-transparent mt-2'}`}
+                    className={`rounded-2xl p-3 flex gap-3 cursor-pointer relative group transition-all duration-300 shadow-[0_2px_8px_rgba(0,0,0,0.03)] hover:shadow-[0_8px_20px_rgba(0,0,0,0.06)] active:scale-[0.99] border ${isSponsored ? 'border-[#1E5BFF]/30 bg-white dark:bg-gray-800' : isAlternate ? 'bg-gray-50/50 dark:bg-gray-800/40 border-gray-100/50 dark:border-gray-700/30' : 'bg-white dark:bg-gray-800 border-transparent'}`}
                 >
                     {isSponsored && (
                       <div className="absolute top-0 right-4 -translate-y-1/2 z-10 pointer-events-none flex flex-col items-end gap-1">
-                          <span className="text-xs font-black px-3 py-1.5 rounded-full bg-[#1E5BFF] text-white shadow-xl shadow-blue-500/40 uppercase tracking-wider">
+                          <span className="text-[10px] font-black px-2.5 py-1 rounded-lg bg-[#1E5BFF] text-white shadow-xl shadow-blue-500/30 uppercase tracking-wider">
                               Patrocinado
                           </span>
                       </div>
                     )}
 
-                    <div className="w-[88px] h-[88px] flex-shrink-0 relative rounded-xl overflow-hidden bg-gray-50 dark:bg-gray-700">
+                    <div className="w-[88px] h-[88px] flex-shrink-0 relative rounded-xl overflow-hidden bg-white dark:bg-gray-700 border border-gray-100 dark:border-gray-600">
                         <img src={store.logoUrl || "/assets/default-logo.png"} alt={store.name} className="w-full h-full object-contain p-1" loading="lazy" />
                         {store.cashback && (
-                            <div className="absolute bottom-0 left-0 right-0 bg-green-500 text-white text-[9px] font-bold text-center py-0.5">
+                            <div className="absolute bottom-0 left-0 right-0 bg-green-500/95 text-white text-[9px] font-bold text-center py-0.5 backdrop-blur-sm">
                                 {store.cashback}% VOLTA
                             </div>
                         )}
@@ -245,7 +246,7 @@ export const LojasEServicosList: React.FC<LojasEServicosListProps> = ({ onStoreC
                                <h4 className="font-bold text-gray-900 dark:text-white text-sm leading-tight truncate">{store.name}</h4>
                                {store.verified && <BadgeCheck className="w-3.5 h-3.5 text-[#1E5BFF] fill-white shrink-0" />}
                              </div>
-                             <p className="text-[10px] font-medium text-gray-400 dark:text-gray-500 italic">{copy}</p>
+                             <p className="text-[10px] font-medium text-gray-400 dark:text-gray-500 italic truncate pr-4">{copy}</p>
                         </div>
 
                         <div className="flex items-center gap-3 text-[11px] text-gray-500 dark:text-gray-400 mt-auto">
@@ -259,7 +260,7 @@ export const LojasEServicosList: React.FC<LojasEServicosListProps> = ({ onStoreC
                         </div>
                     </div>
                     
-                    <button onClick={(e) => handleToggleFavorite(e, store.id)} className={`absolute bottom-3 right-3 w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200 z-20 ${isFavorited ? 'bg-red-50 dark:bg-red-900/20 text-red-500' : 'bg-gray-50 dark:bg-gray-700/50 text-gray-400 hover:text-red-400'}`}>
+                    <button onClick={(e) => handleToggleFavorite(e, store.id)} className={`absolute bottom-3 right-3 w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200 z-20 ${isFavorited ? 'bg-red-50 dark:bg-red-900/20 text-red-500 shadow-sm' : 'bg-gray-50 dark:bg-gray-700/50 text-gray-400 hover:text-red-400'}`}>
                         <Heart className={`w-4 h-4 transition-colors ${isFavorited ? 'fill-current' : ''}`} />
                     </button>
                 </div>
@@ -278,7 +279,7 @@ export const LojasEServicosList: React.FC<LojasEServicosListProps> = ({ onStoreC
 
       {!hasMore && !loading && (
         <div className="w-full text-center py-8">
-            <p className="text-[11px] text-gray-400 dark:text-gray-600 font-medium bg-gray-50 dark:bg-gray-800/50 inline-block px-4 py-1.5 rounded-full">Você viu todas as lojas disponíveis ✨</p>
+            <p className="text-[11px] text-gray-400 dark:text-gray-600 font-medium bg-gray-50 dark:bg-gray-800/50 inline-block px-4 py-1.5 rounded-full uppercase tracking-widest opacity-60">Fim dos resultados ✨</p>
         </div>
       )}
     </div>

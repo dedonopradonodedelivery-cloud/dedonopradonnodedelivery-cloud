@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { Search, Sun, Moon, QrCode } from 'lucide-react';
 import { Category } from '../types';
@@ -38,7 +39,8 @@ export const Header: React.FC<HeaderProps> = ({
       <div className="max-w-md mx-auto flex flex-col">
         
         {/* Top Row: Search + Theme + (Merchant QR) */}
-        <div className={`flex items-center gap-3 px-5 py-3 transition-all duration-300 ease-in-out`}>
+        {/* Padronizado para px-4 */}
+        <div className={`flex items-center gap-3 px-4 py-3 transition-all duration-300 ease-in-out`}>
           <div className="relative flex-1 group">
             <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
               <Search className="h-4 w-4 text-white/70 group-focus-within:text-white transition-colors" />

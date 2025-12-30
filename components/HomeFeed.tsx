@@ -166,8 +166,8 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
       case 'roulette':
         return (
           <div key="roulette" className="px-4">
-            <div className="flex items-center justify-between mb-3 px-1">
-                <h3 className="text-[11px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.2em]">Diversão do Dia</h3>
+            <div className="flex items-center justify-between mb-4 px-1">
+                <h3 className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em]">Diversão do Dia</h3>
             </div>
             <button onClick={() => setIsSpinWheelOpen(true)} className="w-full bg-gradient-to-br from-primary-600 to-blue-700 rounded-[28px] p-6 text-white flex items-center justify-between shadow-xl active:scale-[0.98] transition-all relative overflow-hidden group border border-white/10">
               <div className="flex items-center gap-5 relative z-10">
@@ -175,7 +175,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
                   <RouletteIcon className="w-full h-full drop-shadow-2xl" />
                 </div>
                 <div className="text-left">
-                  <h3 className="font-black text-xl leading-none mb-1 tracking-tight uppercase">Roleta da Sorte</h3>
+                  <h3 className="font-black text-xl leading-none mb-1 tracking-tight uppercase">Roleta da Localizei Freguesia</h3>
                   <p className="text-xs text-blue-100/80 font-bold italic opacity-90">Tente a sorte e ganhe agora!</p>
                 </div>
               </div>
@@ -187,7 +187,6 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
         );
 
       case 'cashback':
-        // UX: Cashback é um benefício exclusivo de conta. Só renderiza quando há usuário.
         return (
           <div key="cashback" className="px-4">
             <UserCashbackBanner 
@@ -207,7 +206,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
           <div key="highlights" className="px-4">
             <div className="flex items-center gap-2 mb-4 px-1">
               <TrendingUp className="w-4 h-4 text-[#1E5BFF]" />
-              <h3 className="text-[11px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.2em]">Atividade Recente</h3>
+              <h3 className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em]">Atividade Recente</h3>
             </div>
             <div className="flex gap-4 overflow-x-auto no-scrollbar -mx-4 px-4 pb-2">
               {[
@@ -233,8 +232,10 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
         return (
           <div key="community" className="px-4">
             <div className="flex items-center gap-2 mb-4 px-1">
-                <Heart className="w-4 h-4 text-rose-500 fill-rose-500"/>
-                <h3 className="text-[11px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.2em]">Amados pela Vizinhança</h3>
+                <div className="p-1 bg-rose-50 dark:bg-rose-900/20 rounded-lg">
+                    <Heart className="w-3.5 h-3.5 text-rose-500 fill-rose-500"/>
+                </div>
+                <h3 className="text-[10px] font-black text-gray-900 dark:text-white uppercase tracking-[0.15em]">Amados pela Vizinhança</h3>
             </div>
             <RecomendadosPorMoradores items={[
               { id: '1', nome: 'Padaria Imperial', categoria: 'Comida', texto: 'Melhor pão na chapa que já comi, o atendimento é impecável sempre!', totalRecomendacoes: 42 }
@@ -245,17 +246,17 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
       case 'list':
         return (
           <div key="list" className="px-4 min-h-[400px]">
-              <div className="flex items-center justify-between mb-4 px-1">
+              <div className="flex items-center justify-between mb-5 px-1">
                  <div className="flex items-center gap-2">
                     <ShieldCheck className="w-4 h-4 text-gray-400" />
-                    <h3 className="text-[11px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.2em]">Guia de Lojas</h3>
+                    <h3 className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em]">Guia de Lojas</h3>
                  </div>
                  <div className="flex gap-2">
                     {['all', 'cashback', 'top_rated'].map((f) => (
                         <button 
                             key={f} 
                             onClick={() => setListFilter(f as any)}
-                            className={`text-[9px] font-black uppercase px-2 py-1 rounded-md transition-all ${listFilter === f ? 'bg-[#1E5BFF] text-white' : 'text-gray-400'}`}
+                            className={`text-[9px] font-black uppercase px-2.5 py-1.5 rounded-lg transition-all ${listFilter === f ? 'bg-[#1E5BFF] text-white shadow-lg shadow-blue-500/20' : 'text-gray-400 bg-gray-50 dark:bg-gray-800'}`}
                         >
                             {f === 'all' ? 'Tudo' : f === 'cashback' ? 'Cashback' : 'Top'}
                         </button>
@@ -270,35 +271,17 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
     }
   };
 
-  // UX: Visibilidade Condicional do Cashback.
-  // Usuário Logado: Cashback é prioridade financeira no topo.
-  // Usuário Deslogado: Cashback é oculto para focar na descoberta pura do bairro.
   const homeStructure = useMemo(() => {
     if (user) {
-      return [
-        'cashback', 
-        'categories',
-        'hero',
-        'roulette',
-        'highlights',
-        'community',
-        'list'
-      ];
+      return ['cashback', 'categories', 'hero', 'roulette', 'highlights', 'community', 'list'];
     }
-    return [
-      'categories',
-      'hero',
-      'roulette',
-      'highlights',
-      'community',
-      'list'
-    ];
+    return ['categories', 'hero', 'roulette', 'highlights', 'community', 'list'];
   }, [user]);
 
   return (
-    <div className="flex flex-col gap-8 pt-8 pb-32 bg-white dark:bg-gray-900 w-full max-w-md mx-auto animate-in fade-in duration-500 overflow-x-hidden">
+    <div className="flex flex-col gap-10 pt-8 pb-32 bg-white dark:bg-gray-900 w-full max-w-md mx-auto animate-in fade-in duration-500 overflow-x-hidden">
       {activeSearchTerm ? (
-        <div className="px-5 mt-4 min-h-[50vh]">
+        <div className="px-4 mt-4 min-h-[50vh]">
              <h3 className="font-bold text-sm text-gray-500 uppercase tracking-wider mb-4 px-1">Resultados para "{activeSearchTerm}"</h3>
              <div className="flex flex-col gap-3">
                 {stores.filter(s => s.name.toLowerCase().includes(activeSearchTerm.toLowerCase())).map((store) => (
@@ -316,7 +299,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
              </div>
         </div>
       ) : (
-        <div className="flex flex-col gap-8 w-full">
+        <div className="flex flex-col gap-10 w-full">
             {homeStructure.map(section => renderSection(section))}
             
             <div className="px-4">
