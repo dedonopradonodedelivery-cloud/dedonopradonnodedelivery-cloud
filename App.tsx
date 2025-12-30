@@ -40,6 +40,8 @@ import { StoreCashbackModule } from './components/StoreCashbackModule';
 import { StoreAdsModule } from './components/StoreAdsModule';
 import { StoreProfileEdit } from './components/StoreProfileEdit';
 import { StoreFinanceModule } from './components/StoreFinanceModule';
+// Fix: Import STORES from constants
+import { STORES } from './constants';
 import { 
   AboutView, 
   SupportView, 
@@ -47,42 +49,6 @@ import {
   FavoritesView, 
   SponsorInfoView 
 } from './components/SimplePages';
-
-const MOCK_STORES: Store[] = [
-  {
-    id: '1',
-    name: 'Burger Freguesia',
-    category: 'Alimentação',
-    description: 'Hambúrgueres artesanais com sabor de bairro.',
-    logoUrl: getStoreLogo(1),
-    rating: 4.8,
-    reviewsCount: 124,
-    distance: 'Freguesia • RJ',
-    cashback: 5,
-    adType: AdType.ORGANIC,
-    subcategory: 'Hamburgueria',
-    address: 'Rua Tirol, 1245 - Freguesia',
-    phone: '(21) 99999-1111',
-    hours: 'Seg a Dom • 11h às 23h',
-    verified: true,
-  },
-  {
-    id: 'premium-test',
-    name: 'Padaria Imperial',
-    category: 'Alimentação',
-    description: 'O melhor pão quentinho e café artesanal da Freguesia. Venha conferir!',
-    logoUrl: getStoreLogo(8),
-    rating: 4.9,
-    reviewsCount: 450,
-    distance: 'Freguesia • RJ',
-    cashback: 10,
-    adType: AdType.PREMIUM,
-    subcategory: 'Padaria',
-    address: 'Estrada dos Três Rios, 1000',
-    phone: '(21) 98888-2222',
-    verified: true,
-  },
-];
 
 const App: React.FC = () => {
   const { user, userRole, loading: isAuthLoading, signOut } = useAuth();
@@ -278,7 +244,8 @@ const App: React.FC = () => {
                 onSelectCategory={handleSelectCategory}
                 onSelectCollection={handleSelectCollection}
                 onStoreClick={handleSelectStore}
-                stores={MOCK_STORES}
+                // Fix: Using STORES imported from constants
+                stores={STORES}
                 searchTerm={globalSearch}
                 user={user as any}
                 userRole={userRole}
@@ -287,7 +254,8 @@ const App: React.FC = () => {
               />
             )}
             {activeTab === 'explore' && (
-              <ExploreView stores={MOCK_STORES} searchQuery={globalSearch} onStoreClick={handleSelectStore} onLocationClick={() => {}} onFilterClick={() => {}} onOpenPlans={() => {}} />
+              // Fix: Using STORES imported from constants
+              <ExploreView stores={STORES} searchQuery={globalSearch} onStoreClick={handleSelectStore} onLocationClick={() => {}} onFilterClick={() => {}} onOpenPlans={() => {}} />
             )}
             {activeTab === 'user_statement' && (
               <UserStatementView 
@@ -335,7 +303,8 @@ const App: React.FC = () => {
             {activeTab === 'editorial_list' && selectedCollection && (
               <EditorialListView
                 collection={selectedCollection}
-                stores={MOCK_STORES}
+                // Fix: Using STORES imported from constants
+                stores={STORES}
                 onBack={() => { setActiveTab('home'); setSelectedCollection(null); }}
                 onStoreClick={handleSelectStore}
               />
@@ -382,7 +351,8 @@ const App: React.FC = () => {
                   category={selectedCategory} 
                   onBack={() => { setActiveTab('home'); setSelectedCategory(null); }} 
                   onStoreClick={handleSelectStore}
-                  stores={MOCK_STORES}
+                  // Fix: Using STORES imported from constants
+                  stores={STORES}
               />
             )}
             {activeTab === 'food_category' && selectedCategory && (

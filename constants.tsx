@@ -1,17 +1,17 @@
 
 import React from 'react';
-import { Utensils, Briefcase, PartyPopper, Shirt, Coffee, Home, Dog, Armchair, Scissors, Heart, GraduationCap, Settings, Dumbbell, CarFront, Wrench, Sun, ShoppingCart, Croissant, Leaf, Beef, Fish, Bike, Beer, Sandwich, ShoppingBag, Sparkles, MapPin, Hand, Feather, Eye, Stethoscope, Smile, Brain, Activity, Apple, FlaskConical, HelpingHand, School, Languages, BookOpen, Baby, Target, Zap, Droplet, BrickWall, PaintRoller, Hammer, Wind, Key, Plug, Scale, Calculator, Ruler, Megaphone, Camera, Printer, Bone, Footprints, Flame, Swords, Trophy, Waves, Music, UserCheck, Tv, Smartphone, Laptop, Cpu, Snowflake, FileText, CircleDashed, Lock, Wallet, Gem, Watch, Moon, ShieldCheck, Package, Building2, Pill, Lightbulb, Palette, TriangleAlert, ThumbsUp, LayoutGrid, Ticket, BriefcaseBusiness, Monitor, Footprints as PawPrint, Map as MapIcon } from 'lucide-react';
-import { AdType, Category, Store, Story, ServiceLead, Channel, Transaction, EditorialCollection } from './types';
+import { Utensils, ShoppingCart, Scissors, Heart, PawPrint, Home, Wrench, Dumbbell, CarFront, BookOpen, Monitor, Shirt, Ticket, Map as MapIcon, LayoutGrid } from 'lucide-react';
+import { AdType, Category, Store, Story, EditorialCollection } from './types';
 import { getStoreLogo } from './utils/mockLogos';
 
 export const CATEGORIES: Category[] = [
   { 
     id: 'cat-food', 
-    name: 'Alimentação', 
+    name: 'Comida', 
     slug: 'food', 
     icon: <Utensils />, 
     illustrationUrl: 'https://cdn-icons-png.flaticon.com/512/3170/3170733.png',
-    color: '#FF3B30' // iOS Red
+    color: 'from-red-500 to-rose-600' 
   },
   { 
     id: 'cat-grocery', 
@@ -19,7 +19,7 @@ export const CATEGORIES: Category[] = [
     slug: 'grocery', 
     icon: <ShoppingCart />, 
     illustrationUrl: 'https://cdn-icons-png.flaticon.com/512/3081/3081840.png',
-    color: '#34C759' // iOS Green
+    color: 'from-emerald-500 to-teal-600'
   },
   { 
     id: 'cat-beauty', 
@@ -27,15 +27,7 @@ export const CATEGORIES: Category[] = [
     slug: 'beauty', 
     icon: <Scissors />, 
     illustrationUrl: 'https://cdn-icons-png.flaticon.com/512/2707/2707142.png',
-    color: '#FF2D55' // iOS Pink
-  },
-  { 
-    id: 'cat-health', 
-    name: 'Saúde', 
-    slug: 'health', 
-    icon: <Heart />, 
-    illustrationUrl: 'https://cdn-icons-png.flaticon.com/512/3004/3004458.png',
-    color: '#FF9500' // iOS Orange
+    color: 'from-pink-500 to-fuchsia-600'
   },
   { 
     id: 'cat-pets', 
@@ -43,7 +35,15 @@ export const CATEGORIES: Category[] = [
     slug: 'pets', 
     icon: <PawPrint />, 
     illustrationUrl: 'https://cdn-icons-png.flaticon.com/512/107/107831.png',
-    color: '#AF52DE' // iOS Purple
+    color: 'from-purple-500 to-indigo-600'
+  },
+  { 
+    id: 'cat-health', 
+    name: 'Saúde', 
+    slug: 'health', 
+    icon: <Heart />, 
+    illustrationUrl: 'https://cdn-icons-png.flaticon.com/512/3004/3004458.png',
+    color: 'from-orange-500 to-amber-600'
   },
   { 
     id: 'cat-home', 
@@ -51,15 +51,7 @@ export const CATEGORIES: Category[] = [
     slug: 'home-decor', 
     icon: <Home />, 
     illustrationUrl: 'https://cdn-icons-png.flaticon.com/512/619/619153.png',
-    color: '#5856D6' // iOS Indigo
-  },
-  { 
-    id: 'cat-autos', 
-    name: 'Autos', 
-    slug: 'autos', 
-    icon: <CarFront />, 
-    illustrationUrl: 'https://cdn-icons-png.flaticon.com/512/743/743241.png',
-    color: '#8E8E93' // iOS Grey
+    color: 'from-blue-600 to-indigo-700'
   },
   { 
     id: 'cat-services', 
@@ -67,15 +59,7 @@ export const CATEGORIES: Category[] = [
     slug: 'services', 
     icon: <Wrench />, 
     illustrationUrl: 'https://cdn-icons-png.flaticon.com/512/4233/4233830.png',
-    color: '#007AFF' // iOS Blue
-  },
-  { 
-    id: 'cat-pros', 
-    name: 'Profissionais', 
-    slug: 'pros', 
-    icon: <BriefcaseBusiness />, 
-    illustrationUrl: 'https://cdn-icons-png.flaticon.com/512/1063/1063376.png',
-    color: '#5AC8FA' // iOS Sky
+    color: 'from-sky-500 to-blue-600'
   },
   { 
     id: 'cat-sports', 
@@ -83,310 +67,143 @@ export const CATEGORIES: Category[] = [
     slug: 'sports', 
     icon: <Dumbbell />, 
     illustrationUrl: 'https://cdn-icons-png.flaticon.com/512/2871/2871612.png',
-    color: '#4CD964' // iOS Light Green
+    color: 'from-green-500 to-emerald-600'
   },
   { 
-    id: 'cat-education', 
-    name: 'Educação', 
-    slug: 'education', 
-    icon: <BookOpen />, 
-    illustrationUrl: 'https://cdn-icons-png.flaticon.com/512/3389/3389081.png',
-    color: '#5856D6' 
-  },
-  { 
-    id: 'cat-tech', 
-    name: 'Tecnologia', 
-    slug: 'tech', 
-    icon: <Monitor />, 
-    illustrationUrl: 'https://cdn-icons-png.flaticon.com/512/606/606203.png',
-    color: '#32ADE6' // iOS Teal
-  },
-  { 
-    id: 'cat-fashion', 
-    name: 'Moda', 
-    slug: 'fashion', 
-    icon: <Shirt />, 
-    illustrationUrl: 'https://cdn-icons-png.flaticon.com/512/3050/3050225.png',
-    color: '#007AFF' 
-  },
-  { 
-    id: 'cat-leisure', 
-    name: 'Lazer', 
-    slug: 'leisure', 
-    icon: <Ticket />, 
-    illustrationUrl: 'https://cdn-icons-png.flaticon.com/512/3063/3063822.png',
-    color: '#FFCC00' // iOS Yellow
-  },
-  { 
-    id: 'cat-tourism', 
-    name: 'Turismo', 
-    slug: 'tourism', 
-    icon: <MapIcon />, 
-    illustrationUrl: 'https://cdn-icons-png.flaticon.com/512/290/290445.png',
-    color: '#FF2D55' 
-  },
-  { 
-    id: 'cat-others', 
-    name: 'Outros', 
-    slug: 'others', 
-    icon: <LayoutGrid />, 
-    illustrationUrl: 'https://cdn-icons-png.flaticon.com/512/660/660485.png',
-    color: '#1C1C1E' // iOS Dark
-  },
-];
-
-// Subcategories Map for the Detail View
-export const SUBCATEGORIES: Record<string, { name: string; icon: React.ReactNode }[]> = {
-  'Alimentação': [
-    { name: 'Restaurantes', icon: <Utensils className="w-8 h-8 text-[#1B54D9]" /> },
-    { name: 'Mercado', icon: <ShoppingCart className="w-8 h-8 text-[#1B54D9]" /> },
-    { name: 'Padaria', icon: <Croissant className="w-8 h-8 text-[#1B54D9]" /> },
-    { name: 'Hortifruti', icon: <Leaf className="w-8 h-8 text-[#1B54D9]" /> },
-    { name: 'Cafés', icon: <Coffee className="w-8 h-8 text-[#1B54D9]" /> },
-    { name: 'Açougue', icon: <Beef className="w-8 h-8 text-[#1B54D9]" /> },
-    { name: 'Peixaria', icon: <Fish className="w-8 h-8 text-[#1B54D9]" /> },
-    { name: 'Delivery', icon: <Bike className="w-8 h-8 text-[#1B54D9]" /> },
-    { name: 'Depósito de Bebidas', icon: <Beer className="w-8 h-8 text-[#1B54D9]" /> },
-    { name: 'Lanchonetes', icon: <Sandwich className="w-8 h-8 text-[#1B54D9]" /> },
-  ],
-  'Beleza': [
-    { name: 'Salões', icon: <Scissors className="w-8 h-8 text-[#1B54D9]" /> },
-    { name: 'Barbearias', icon: <Scissors className="w-8 h-8 text-[#1B54D9]" /> },
-    { name: 'Manicure', icon: <Hand className="w-8 h-8 text-[#1B54D9]" /> },
-    { name: 'Depilação', icon: <Feather className="w-8 h-8 text-[#1B54D9]" /> },
-    { name: 'Estética', icon: <Sparkles className="w-8 h-8 text-[#1B54D9]" /> },
-    { name: 'Massoterapeuta', icon: <Heart className="w-8 h-8 text-[#1B54D9]" /> },
-    { name: 'Sobrancelha', icon: <Eye className="w-8 h-8 text-[#1B54D9]" /> },
-    { name: 'Bronzeamento', icon: <Sun className="w-8 h-8 text-[#1B54D9]" /> },
-  ],
-  'Saúde': [
-    { name: 'Clínicas médicas', icon: <Stethoscope className="w-8 h-8 text-[#1B54D9]" /> },
-    { name: 'Dentistas', icon: <Smile className="w-8 h-8 text-[#1B54D9]" /> },
-    { name: 'Psicólogos', icon: <Brain className="w-8 h-8 text-[#1B54D9]" /> },
-    { name: 'Fisioterapeutas', icon: <Activity className="w-8 h-8 text-[#1B54D9]" /> },
-    { name: 'Nutricionistas', icon: <Apple className="w-8 h-8 text-[#1B54D9]" /> },
-    { name: 'Pilates', icon: <Activity className="w-8 h-8 text-[#1B54D9]" /> },
-    { name: 'Laboratório', icon: <FlaskConical className="w-8 h-8 text-[#1B54D9]" /> },
-    { name: 'Quiropraxia', icon: <HelpingHand className="w-8 h-8 text-[#1B54D9]" /> },
-  ],
-  'Educação': [
-    { name: 'Escolas', icon: <School className="w-8 h-8 text-[#1B54D9]" /> },
-    { name: 'Idiomas', icon: <Languages className="w-8 h-8 text-[#1B54D9]" /> },
-    { name: 'Reforço escolar', icon: <BookOpen className="w-8 h-8 text-[#1B54D9]" /> },
-    { name: 'Creches', icon: <Baby className="w-8 h-8 text-[#1B54D9]" /> },
-    { name: 'Curso profissionalizantes', icon: <Briefcase className="w-8 h-8 text-[#1B54D9]" /> },
-    { name: 'Preparatórios', icon: <Target className="w-8 h-8 text-[#1B54D9]" /> },
-  ],
-  'Serviços': [
-    { name: 'Eletricistas', icon: <Zap className="w-8 h-8 text-[#1B54D9]" /> },
-    { name: 'Encanadores', icon: <Droplet className="w-8 h-8 text-[#1B54D9]" /> },
-    { name: 'Pedreiros', icon: <BrickWall className="w-8 h-8 text-[#1B54D9]" /> },
-    { name: 'Pintores', icon: <PaintRoller className="w-8 h-8 text-[#1B54D9]" /> },
-    { name: 'Marceneiro', icon: <Hammer className="w-8 h-8 text-[#1B54D9]" /> },
-    { name: 'Serralheiros', icon: <Key className="w-8 h-8 text-[#1B54D9]" /> },
-    { name: 'Diaristas', icon: <Sparkles className="w-8 h-8 text-[#1B54D9]" /> },
-    { name: 'Eletro domestico', icon: <Plug className="w-8 h-8 text-[#1B54D9]" /> },
-  ],
-  'Esportes': [
-    { name: 'Academias', icon: <Dumbbell className="w-8 h-8 text-[#1B54D9]" /> },
-    { name: 'Crossfit', icon: <Flame className="w-8 h-8 text-[#1B54D9]" /> },
-    { name: 'Funcional', icon: <Activity className="w-8 h-8 text-[#1B54D9]" /> },
-    { name: 'Artes marciais', icon: <Swords className="w-8 h-8 text-[#1B54D9]" /> },
-    { name: 'Quadras', icon: <Trophy className="w-8 h-8 text-[#1B54D9]" /> },
-    { name: 'Natação', icon: <Waves className="w-8 h-8 text-[#1B54D9]" /> },
-    { name: 'Dança', icon: <Music className="w-8 h-8 text-[#1B54D9]" /> },
-    { name: 'Personal', icon: <UserCheck className="w-8 h-8 text-[#1B54D9]" /> },
-  ],
-  'Autos': [
-    { name: 'Oficina Mecânica & Autoelétrica', icon: <Wrench className="w-8 h-8 text-[#1B54D9]" /> },
-    { name: 'Funilaria & Pintura', icon: <PaintRoller className="w-8 h-8 text-[#1B54D9]" /> },
-    { name: 'Lava-Jato & Estética Automotiva', icon: <Sparkles className="w-8 h-8 text-[#1B54D9]" /> },
-    { name: 'Pneus', icon: <CircleDashed className="w-8 h-8 text-[#1B54D9]" /> },
-    { name: 'Alinhamento & Suspensão', icon: <Activity className="w-8 h-8 text-[#1B54D9]" /> },
-    { name: 'Autopeças & Acessórios', icon: <Settings className="w-8 h-8 text-[#1B54D9]" /> },
-    { name: 'Vidro, Películas & Insulfilm', icon: <Sun className="w-8 h-8 text-[#1B54D9]" /> },
-    { name: 'Chaveiro automotivo', icon: <Key className="w-8 h-8 text-[#1B54D9]" /> },
-    { name: 'Documentão & Despachantes', icon: <FileText className="w-8 h-8 text-[#1B54D9]" /> },
-  ],
-  'Profissionais': [
-    { name: 'Advogados', icon: <Scale className="w-8 h-8 text-[#1B54D9]" /> },
-    { name: 'Contadores', icon: <Calculator className="w-8 h-8 text-[#1B54D9]" /> },
-    { name: 'Corretores', icon: <Key className="w-8 h-8 text-[#1B54D9]" /> },
-    { name: 'Consultores', icon: <Briefcase className="w-8 h-8 text-[#1B54D9]" /> },
-    { name: 'Arquitetos', icon: <Ruler className="w-8 h-8 text-[#1B54D9]" /> },
-    { name: 'Marketing', icon: <Megaphone className="w-8 h-8 text-[#1B54D9]" /> },
-    { name: 'Fotógrafo', icon: <Camera className="w-8 h-8 text-[#1B54D9]" /> },
-    { name: 'Gráfica', icon: <Printer className="w-8 h-8 text-[#1B54D9]" /> },
-  ],
-  'Pets': [
-    { name: 'Pet Shop & Acessórios', icon: <ShoppingBag className="w-8 h-8 text-[#1B54D9]" /> },
-    { name: 'Banho & Tosa', icon: <Scissors className="w-8 h-8 text-[#1B54D9]" /> },
-    { name: 'Veterinários & Clínicas', icon: <Stethoscope className="w-8 h-8 text-[#1B54D9]" /> },
-    { name: 'Hospedagem & Daycare', icon: <Home className="w-8 h-8 text-[#1B54D9]" /> },
-    { name: 'Adestramento', icon: <GraduationCap className="w-8 h-8 text-[#1B54D9]" /> },
-    { name: 'Farmácia Pet & Suplementos', icon: <Pill className="w-8 h-8 text-[#1B54D9]" /> },
-    { name: 'Alimentação Pet', icon: <Bone className="w-8 h-8 text-[#1B54D9]" /> },
-    { name: 'Serviços Especias', icon: <Sparkles className="w-8 h-8 text-[#1B54D9]" /> },
-  ],
-  // Fallback for others (generic)
-  'default': [
-    { name: 'Geral', icon: <Briefcase className="w-8 h-8 text-[#1B54D9]" /> },
-    { name: 'Ofertas', icon: <ShoppingBag className="w-8 h-8 text-[#1B54D9]" /> },
-    { name: 'Novidades', icon: <Sparkles className="w-8 h-8 text-[#1B54D9]" /> },
-    { name: 'Próximos', icon: <MapPin className="w-8 h-8 text-[#1B54D9]" /> },
-  ]
-};
-
-export const STORIES: Story[] = [
-  { id: '1', name: 'Mercado ...', image: 'https://picsum.photos/100/100?random=1' },
-  { id: '2', name: 'Empório d...', image: 'https://picsum.photos/100/100?random=2', isMarketplace: true },
-  { id: '3', name: 'Padaria P...', image: 'https://picsum.photos/100/100?random=3' },
-  { id: '4', name: 'Açougue ...', image: 'https://picsum.photos/100/100?random=4' },
-  { id: '5', name: 'Hortifru...', image: 'https://picsum.photos/100/100?random=5' },
-  { id: '6', name: 'Farmácia...', image: 'https://picsum.photos/100/100?random=6' },
-];
-
-export const CHANNELS: Channel[] = [
-  { id: '1', name: 'ME COZINHA...', image: 'https://picsum.photos/100/100?random=10', followers: '14 mil', verified: false },
-  { id: '2', name: 'PENTEADOS 🇧🇷', image: 'https://picsum.photos/100/100?random=11', followers: '134 mil', verified: false },
-  { id: '3', name: 'SOBREMESAS 🍰', image: 'https://picsum.photos/100/100?random=12', followers: '35 mil', verified: false },
-  { id: '4', name: 'LATAM Airlines Ofert...', image: 'https://picsum.photos/100/100?random=13', followers: '47 mil', verified: true },
-];
-
-export const EDITORIAL_COLLECTIONS: EditorialCollection[] = [
-  { 
-    id: 'almoço-semana', 
-    title: '🍛 Almoço durante a semana', 
-    subtitle: 'Opções rápidas e saborosas perto de você', 
-    image: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=800&auto=format&fit=crop', 
-    keywords: ['restaurante', 'almoço', 'executivo', 'prato feito', 'hamburgueria'] 
-  },
-  { 
-    id: 'top-rated', 
-    title: '⭐ Favoritos da Vizinhança', 
-    subtitle: 'Os locais mais bem avaliados pelos moradores.', 
-    image: 'https://images.unsplash.com/photo-1521017432531-fbd92d768814?q=80&w=800&auto=format&fit=crop', 
-    keywords: [] 
-  },
-  { 
-    id: 'happy-hour', 
-    title: '🍻 Happy Hour & Fim de Tarde', 
-    subtitle: 'Bares e petiscos para relaxar depois do dia.', 
-    image: 'https://images.unsplash.com/photo-1514933651103-005eec06c04b?q=80&w=800&auto=format&fit=crop', 
-    keywords: ['bar', 'happy hour', 'petiscos', 'chopp'] 
-  },
-];
-
-
-// Contains a mix of Premium (Top), Local, and Organic stores
-export const STORES: Store[] = [
-  {
-    id: 'premium-1',
-    name: 'Casas Pedro',
-    category: 'Alimentação',
-    subcategory: 'Mercado',
-    logoUrl: getStoreLogo(0),
-    rating: 4.9,
-    distance: '0.5km',
-    adType: AdType.PREMIUM,
-    description: 'A maior variedade de grãos e especiarias da Freguesia.',
-    cashback: 5,
-    isMarketplace: true,
-    price_original: 55.00,
-    price_current: 49.90,
-    verified: true,
-    address: "Estrada dos Três Rios, 1200 - Freguesia",
-    phone: "(21) 2444-5555",
-    hours: "Seg à Sáb: 08h às 20h",
-    gallery: [
-      'https://picsum.photos/600/400?random=100',
-      'https://picsum.photos/600/400?random=101',
-      'https://picsum.photos/600/400?random=102',
-    ],
-    reviews: [
-      { id: 'r1', user: 'Maria S.', rating: 5, text: 'Melhor loja de produtos naturais!', date: 'Há 2 dias' },
-      { id: 'r2', user: 'João P.', rating: 4, text: 'Ótimo atendimento.', date: 'Há 1 semana' },
-    ]
-  },
-  {
-    id: 'premium-2',
-    name: 'Hamburgueria Brasa',
-    category: 'Alimentação',
-    subcategory: 'Lanchonetes',
-    logoUrl: getStoreLogo(1),
-    rating: 4.8,
-    distance: '1.2km',
-    adType: AdType.PREMIUM,
-    description: 'O melhor burger artesanal do bairro.',
-    cashback: 3,
-    isMarketplace: true,
-    price_original: 32.50,
-    price_current: 32.50,
-    verified: true,
-    address: "Rua Araguaia, 450",
-    phone: "(21) 99999-8888",
-    hours: "Ter à Dom: 18h às 23h"
-  },
-  {
-    id: 'local-1',
-    name: 'Ótica Visão',
-    category: 'Moda',
-    subcategory: 'Acessórios & Bijuterias',
-    logoUrl: getStoreLogo(2),
-    rating: 4.5,
-    distance: '0.3km',
-    adType: AdType.LOCAL,
-    description: 'Óculos de sol e grau com preço justo.',
-    cashback: 2,
-    isMarketplace: true,
-    price_original: 220.00,
-    price_current: 199.00,
-    address: "Estrada de Jacarepaguá, 7600"
-  },
-  {
-    id: 'organic-1',
-    name: 'PetShop Amigo Fiel',
-    category: 'Pets',
-    subcategory: 'Banho & Tosa',
-    logoUrl: getStoreLogo(3),
-    rating: 4.2,
-    distance: '2.0km',
-    adType: AdType.ORGANIC,
-    description: 'Banho e tosa com carinho.',
-    isMarketplace: false
-  },
-  {
-    id: 'organic-2',
-    name: 'Padaria Estrela',
-    category: 'Alimentação',
-    subcategory: 'Padaria',
-    logoUrl: getStoreLogo(4),
-    rating: 4.6,
-    distance: '0.8km',
-    adType: AdType.ORGANIC,
-    description: 'Pão quente toda hora.',
-    isMarketplace: true,
-    price_original: 12.00,
-    price_current: 12.00
+    id: 'cat-autos', 
+    name: 'Autos', 
+    slug: 'autos', 
+    icon: <CarFront />, 
+    illustrationUrl: 'https://cdn-icons-png.flaticon.com/512/743/743241.png',
+    color: 'from-slate-600 to-slate-800'
   }
 ];
 
-export const LEADS: ServiceLead[] = [
-  { id: '1', title: 'Instalação de Ar Condicionado', category: 'Climatização', urgency: 'Alta', priceToUnlock: 3.90, maskedName: 'Carlos M.', district: 'Freguesia' },
-  { id: '2', title: 'Bolo de Aniversário (3kg)', category: 'Festas', urgency: 'Média', priceToUnlock: 3.90, maskedName: 'Ana P.', district: 'Pechincha' },
-  { id: '3', title: 'Troca de Fiação Elétrica', category: 'Eletricista', urgency: 'Alta', priceToUnlock: 3.90, maskedName: 'Roberto S.', district: 'Freguesia' },
-];
+// Added SUBCATEGORIES to resolve import errors in components
+export const SUBCATEGORIES: Record<string, { name: string; icon: React.ReactNode }[]> = {
+  'Comida': [
+    { name: 'Restaurantes', icon: <Utensils /> },
+    { name: 'Lanches', icon: <Utensils /> },
+    { name: 'Pizzarias', icon: <Utensils /> },
+    { name: 'Hambúrguerias', icon: <Utensils /> },
+    { name: 'Japonês', icon: <Utensils /> },
+    { name: 'Docerias', icon: <Utensils /> },
+  ],
+  'Alimentação': [ // Specifically for CategoriaAlimentacao.tsx
+    { name: 'Restaurantes', icon: <Utensils /> },
+    { name: 'Lanches', icon: <Utensils /> },
+    { name: 'Pizzarias', icon: <Utensils /> },
+    { name: 'Hambúrguerias', icon: <Utensils /> },
+    { name: 'Japonês', icon: <Utensils /> },
+    { name: 'Docerias', icon: <Utensils /> },
+  ],
+  'Mercado': [
+    { name: 'Supermercado', icon: <ShoppingCart /> },
+    { name: 'Padaria', icon: <Utensils /> },
+    { name: 'Hortifruti', icon: <ShoppingCart /> },
+  ],
+  'Beleza': [
+    { name: 'Salão de Beleza', icon: <Scissors /> },
+    { name: 'Barbearia', icon: <Scissors /> },
+    { name: 'Estética', icon: <Heart /> },
+  ],
+  'Pets': [
+    { name: 'Pet Shop', icon: <PawPrint /> },
+    { name: 'Veterinário', icon: <Heart /> },
+    { name: 'Banho e Tosa', icon: <Scissors /> },
+  ],
+  'Saúde': [
+    { name: 'Clínica Médica', icon: <Heart /> },
+    { name: 'Dentista', icon: <Heart /> },
+    { name: 'Psicologia', icon: <Heart /> },
+    { name: 'Farmácia', icon: <ShoppingCart /> },
+  ],
+  'Casa': [
+    { name: 'Decoração', icon: <Home /> },
+    { name: 'Móveis', icon: <Home /> },
+    { name: 'Utilidades', icon: <ShoppingCart /> },
+  ],
+  'Serviços': [
+    { name: 'Eletricista', icon: <Wrench /> },
+    { name: 'Encanador', icon: <Wrench /> },
+    { name: 'Ar Condicionado', icon: <Wrench /> },
+  ],
+  'Esportes': [
+    { name: 'Academia', icon: <Dumbbell /> },
+    { name: 'Suplementos', icon: <ShoppingCart /> },
+    { name: 'Artigos Esportivos', icon: <Dumbbell /> },
+  ],
+  'Autos': [
+    { name: 'Oficina', icon: <Wrench /> },
+    { name: 'Lavajato', icon: <CarFront /> },
+    { name: 'Estética Automotiva', icon: <CarFront /> },
+  ],
+  'default': [
+    { name: 'Geral', icon: <LayoutGrid /> },
+  ]
+};
 
-export const TRANSACTIONS: Transaction[] = [
-  { id: 't1', storeName: 'Casas Pedro', date: '20 Out 2023', amount: 150.00, cashbackAmount: 7.50, status: 'completed' },
-  { id: 't2', storeName: 'Hamburgueria Brasa', date: '18 Out 2023', amount: 85.00, cashbackAmount: 2.55, status: 'completed' },
-  { id: 't3', storeName: 'Ótica Visão', date: '10 Out 2023', amount: 400.00, cashbackAmount: 8.00, status: 'pending' },
-  { id: 't4', storeName: 'Padaria Estrela', date: '05 Out 2023', amount: 25.00, cashbackAmount: 0.00, status: 'completed' }, 
+export const EDITORIAL_COLLECTIONS: EditorialCollection[] = [
+  {
+    id: 'novo-bairro',
+    title: 'Novo no Bairro',
+    subtitle: 'Lugares que acabaram de chegar',
+    image: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?q=80&w=800&auto=format&fit=crop',
+    keywords: ['novo', 'lançamento', 'estreia']
+  },
+  {
+    id: 'top-rated',
+    title: 'Melhores Avaliados',
+    subtitle: 'Favoritos dos moradores',
+    image: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=800&auto=format&fit=crop',
+    keywords: ['melhor', 'top', 'favorito']
+  }
 ];
 
 export const quickFilters = [
-  { id: 'nearby', label: 'Perto de mim', icon: 'zap' },
-  { id: 'top_rated', label: 'Bem avaliados', icon: 'star' },
-  { id: 'open_now', label: 'Aberto agora', icon: 'clock' },
   { id: 'cashback', label: 'Cashback', icon: 'percent' },
+  { id: 'top_rated', label: 'Melhores', icon: 'star' },
+  { id: 'open_now', label: 'Abertos', icon: 'clock' },
+  { id: 'nearby', label: 'Perto', icon: 'zap' }
+];
+
+export const STORIES: Story[] = [
+  { id: '1', name: 'Burger Freguesia', image: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?q=80&w=200&auto=format&fit=crop' },
+  { id: '2', name: 'Padaria Imperial', image: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?q=80&w=200&auto=format&fit=crop' },
+];
+
+export const STORES: Store[] = [
+  {
+    id: '1',
+    name: 'Burger Freguesia',
+    category: 'Alimentação',
+    subcategory: 'Hamburgueria',
+    description: 'Hambúrgueres artesanais com sabor de bairro.',
+    logoUrl: getStoreLogo(1),
+    rating: 4.8,
+    reviewsCount: 124,
+    distance: 'Freguesia • RJ',
+    cashback: 5,
+    adType: AdType.ORGANIC,
+    address: 'Rua Tirol, 1245 - Freguesia',
+    phone: '(21) 99999-1111',
+    hours: 'Seg a Dom • 11h às 23h',
+    verified: true,
+  },
+  {
+    id: 'premium-test',
+    name: 'Padaria Imperial',
+    category: 'Alimentação',
+    subcategory: 'Padaria',
+    description: 'O melhor pão quentinho e café artesanal da Freguesia.',
+    logoUrl: getStoreLogo(8),
+    rating: 4.9,
+    reviewsCount: 450,
+    distance: 'Freguesia • RJ',
+    cashback: 10,
+    adType: AdType.PREMIUM,
+    address: 'Estrada dos Três Rios, 1000',
+    phone: '(21) 98888-2222',
+    verified: true,
+  },
 ];

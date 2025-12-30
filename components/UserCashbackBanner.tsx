@@ -34,7 +34,7 @@ export const UserCashbackBanner: React.FC<UserCashbackBannerProps> = ({
       : 'Comece a fidelizar',
     subtext: totalGenerated > 0 
       ? 'Mais clientes comprando na sua loja'
-      : 'Ative o cashback para atrair mais clientes',
+      : 'Ative o cashback para atrair clientes',
     cta: 'Ver desempenho',
     Icon: BarChart3
   } : {
@@ -46,7 +46,7 @@ export const UserCashbackBanner: React.FC<UserCashbackBannerProps> = ({
       ? `R$ ${balance.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} disponíveis`
       : 'Ganhe dinheiro de volta',
     subtext: hasBalance 
-      ? 'Use para pagar em lojas da freguesia'
+      ? 'Aproveite seu saldo na Freguesia'
       : 'Compre no bairro e acumule saldo',
     cta: hasBalance ? 'Ver extrato' : 'Como ganhar',
     Icon: Coins
@@ -59,7 +59,6 @@ export const UserCashbackBanner: React.FC<UserCashbackBannerProps> = ({
     >
       {/* Glossy overlay effect for premium feel */}
       <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-white/5 to-transparent pointer-events-none"></div>
-      <div className="absolute -right-4 -top-4 w-24 h-24 bg-amber-400/5 rounded-full blur-2xl pointer-events-none"></div>
       
       <div className="flex items-center gap-4 relative z-10">
         <div className={`w-12 h-12 rounded-2xl ${config.iconBg} flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform duration-500`}>
@@ -82,8 +81,6 @@ export const UserCashbackBanner: React.FC<UserCashbackBannerProps> = ({
           
           {loading ? (
             <div className="h-7 w-32 bg-gray-800 animate-pulse rounded-lg mt-1"></div>
-          ) : error ? (
-            <p className="text-sm font-bold text-gray-500 italic">Dados indisponíveis</p>
           ) : (
             <div className="flex flex-col">
               <h2 className="text-[18px] font-black text-white leading-tight tracking-tight">
