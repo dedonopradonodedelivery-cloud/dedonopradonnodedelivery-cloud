@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabaseClient';
@@ -23,14 +24,13 @@ export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [userRole, setUserRole] = useState<'cliente' | 'lojista' | null>(null);
   
-  // ESTADO DE SEGURANÇA: authResolved
-  // true = O sistema já verificou se há ou não usuário (logado ou deslogado).
-  // false = Ainda não sabemos nada (Splash Screen).
+  // UX: authResolved controla o Cold Start (boot inicial)
+  // Uma vez resolvido (true), ele NUNCA mais volta a ser false durante a sessão do browser.
   const [authResolved, setAuthResolved] = useState(false);
 
   const fetchUserRole = async (userId: string) => {
     try {
-      const { data, error } = await supabase
+      const { data } = await supabase
         .from('profiles')
         .select('role')
         .eq('id', userId)
@@ -42,7 +42,7 @@ export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
         setUserRole('cliente'); 
       }
     } catch (error) {
-      console.error('Erro ao buscar role:', error);
+      console.warn('Erro ao buscar role em background:', error);
       setUserRole('cliente');
     }
   };
@@ -50,20 +50,10 @@ export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
   useEffect(() => {
     let mounted = true;
 
-    // 1. Verificação Inicial Rápida com Timeout de Segurança
     const initAuth = async () => {
-      // Cria uma promessa que "falha" (ou resolve como guest) após 3 segundos
-      // Isso impede que o app fique travado no Splash se o Supabase não responder
-      const timeoutPromise = new Promise((resolve) => 
-        setTimeout(() => resolve({ data: { session: null }, error: 'timeout' }), 3000)
-      );
-
       try {
-        // Corrida: Quem responder primeiro (Supabase ou Timeout) ganha
-        const { data } = await Promise.race([
-          supabase.auth.getSession(),
-          timeoutPromise
-        ]) as any;
+        // Busca sessão atual sem bloquear o app por muito tempo
+        const { data } = await supabase.auth.getSession();
         
         if (mounted) {
           const currentSession = data?.session ?? null;
@@ -71,26 +61,26 @@ export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
           setUser(currentSession?.user ?? null);
           
           if (currentSession?.user) {
-            // Busca role em background - NÃO bloqueia o splash
-            fetchUserRole(currentSession.user.id);
+            await fetchUserRole(currentSession.user.id);
           }
         }
       } catch (err) {
-        console.error("Erro no getSession:", err);
+        console.error("Erro na inicialização do Auth:", err);
       } finally {
-        // REGRA DE OURO: Sempre libera o app após a checagem inicial
         if (mounted) setAuthResolved(true);
       }
     };
 
     initAuth();
 
-    // 2. Listener para mudanças futuras (Login/Logout em tempo real)
+    // Listener para eventos de login/logout
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, currentSession) => {
       if (!mounted) return;
 
-      setSession(currentSession);
+      // Importante: Apenas atualizamos os objetos de estado.
+      // O React cuida de re-renderizar apenas o que depende desses objetos.
       setUser(currentSession?.user ?? null);
+      setSession(currentSession);
 
       if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'INITIAL_SESSION') {
         if (currentSession?.user) {
@@ -98,11 +88,9 @@ export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
         }
       } else if (event === 'SIGNED_OUT') {
         setUserRole(null);
-        setUser(null);
-        setSession(null);
       }
       
-      // Garante liberação caso o listener dispare antes ou depois do initAuth
+      // Se por algum motivo o initAuth falhou, o primeiro evento do listener garante a liberação do Splash
       setAuthResolved(true);
     });
 
@@ -115,15 +103,13 @@ export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
   const signOut = async () => {
     try {
       await supabase.auth.signOut();
-      setUser(null);
-      setSession(null);
-      setUserRole(null);
+      // O listener onAuthStateChange cuidará de limpar os estados.
     } catch (error) {
-      console.error("Erro ao fazer logout:", error);
+      console.error("Erro ao realizar logout:", error);
     }
   };
 
-  // Se authResolved for true, loading é false (app liberado)
+  // loading é true apenas durante o primeiro check de sessão (Cold Start)
   const loading = !authResolved;
 
   return (
