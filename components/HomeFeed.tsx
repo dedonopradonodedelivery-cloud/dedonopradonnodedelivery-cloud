@@ -50,8 +50,6 @@ interface HomeFeedProps {
 
 /**
  * Componente de Título Padronizado conforme Design System
- * Icone: Linha, 20px, stroke-2
- * Fonte: Base (16px), Semibold, Neutra
  */
 const SectionHeader: React.FC<{ icon: React.ElementType; title: string; rightElement?: React.ReactNode }> = ({ icon: Icon, title, rightElement }) => (
   <div className="flex items-center justify-between mb-6 px-1">
@@ -142,7 +140,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
                       
                       <div className="flex-1 flex items-center justify-center w-full mt-0.5">
                         {React.isValidElement(cat.icon) ? React.cloneElement(cat.icon as any, { 
-                          className: "w-7 h-7 text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.3)]",
+                          className: "w-7 h-7 text-white drop-shadow-[0_2px_4_rgba(0,0,0,0.3)]",
                           strokeWidth: 2.5
                         }) : null}
                       </div>
@@ -199,15 +197,16 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
             <div className="flex gap-4 overflow-x-auto no-scrollbar -mx-4 px-4 pb-2 snap-x">
               {[
                 { id: 'p1', store: 'Açougue Bom Corte', product: 'Picanha Premium KG', old: '89,90', new: '62,93', off: '30', image: 'https://images.unsplash.com/photo-1544022613-e879a7998d0f?q=80&w=600&auto=format&fit=crop' },
-                { id: 'p2', store: 'Imperial Bakery', product: 'Pão Italiano Artesanal', old: '18,00', new: '12,60', off: '30', image: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?q=80&w=600&auto=format&fit=crop' },
+                { id: 'p2', store: 'Imperial Bakery', product: 'Pão Italiano Artesanal', old: '18,00', new: '12,60', off: '30', image: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?q=80&w=200&auto=format&fit=crop' },
                 { id: 'p3', store: 'Beleza & Arte', product: 'Manicure + Pedicure', old: '60,00', new: '42,00', off: '30', image: 'https://images.unsplash.com/photo-1610992015732-2449b0c26670?q=80&w=600&auto=format&fit=crop' },
                 { id: 'p4', store: 'Pet Mundo', product: 'Ração Golden 15kg', old: '189,00', new: '151,20', off: '20', image: 'https://images.unsplash.com/photo-1589924691995-400dc9ecc119?q=80&w=600&auto=format&fit=crop' },
                 { id: 'p5', store: 'Drogaria Freguesia', product: 'Vitamina C (2 Tubos)', old: '45,00', new: '31,50', off: '30', image: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?q=80&w=600&auto=format&fit=crop' }
               ].map((promo) => (
-                <div key={promo.id} className="min-w-[240px] snap-center bg-white dark:bg-gray-800 rounded-[32px] overflow-hidden shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col group active:scale-[0.98] transition-all">
+                <div key={promo.id} className="min-w-[240px] snap-center bg-white dark:bg-gray-800 rounded-[32px] overflow-hidden shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col gap-1">
                   <div className="h-44 relative overflow-hidden">
-                    <img src={promo.image} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt={promo.product} />
-                    <div className="absolute top-4 left-4 bg-rose-500 text-white text-[11px] font-black px-3 py-1.5 rounded-xl shadow-lg animate-pulse">
+                    <img src={promo.image} className="w-full h-full object-cover" alt={promo.product} />
+                    {/* Badge Animado: animate-badge-pop */}
+                    <div className="absolute top-4 left-4 bg-rose-600 text-white text-[11px] font-black px-3 py-1.5 rounded-xl shadow-[0_4px_12px_rgba(225,29,72,0.4)] animate-badge-pop">
                       -{promo.off}% OFF
                     </div>
                     <div className="absolute bottom-4 right-4 bg-white/80 backdrop-blur-md text-gray-900 text-[9px] font-black px-2.5 py-1.5 rounded-xl border border-white/20 flex items-center gap-1.5 shadow-sm">
@@ -265,10 +264,10 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
             
             <div className="flex gap-3 overflow-x-auto no-scrollbar -mx-4 px-4 pb-2">
               {[
-                { id: 'on-1', name: 'Padaria Central', category: 'Padaria', status: '🔥 Bombando hoje', microcopy: 'Vizinhança tomando café agora', icon: <Flame className="w-3 h-3 text-orange-500" />, color: 'bg-orange-50 dark:bg-orange-900/10' },
-                { id: 'on-2', name: 'Hambúrguer do Zé', category: 'Lanches', status: '📈 Em alta agora', microcopy: 'Pico de pedidos detectado', icon: <TrendingUp className="w-3 h-3 text-emerald-500" />, color: 'bg-emerald-50 dark:bg-emerald-900/10' },
-                { id: 'on-3', name: 'Café da Praça', category: 'Cafeteria', status: '🚀 Tendência do dia', microcopy: 'Muitos vizinhos visitando', icon: <Rocket className="w-3 h-3 text-blue-500" />, color: 'bg-blue-50 dark:bg-blue-900/10' },
-                { id: 'on-4', name: 'Pet Shop Amigo', category: 'Pets', status: '👀 Movimento intenso', microcopy: 'Vizinhança ativa aqui', icon: <Eye className="w-3 h-3 text-purple-500" />, color: 'bg-purple-50 dark:bg-purple-900/10' }
+                { id: 'on-1', name: 'Padaria Central', category: 'Padaria', status: '🔥 Bombando hoje', microcopy: 'Vizinhança tomando café agora', icon: <Flame className="w-3 h-3 text-orange-500" />, color: 'bg-orange-50 dark:bg-orange-900/10', anim: 'animate-badge-shake' },
+                { id: 'on-2', name: 'Hambúrguer do Zé', category: 'Lanches', status: '📈 Em alta agora', microcopy: 'Pico de pedidos detectado', icon: <TrendingUp className="w-3 h-3 text-emerald-500" />, color: 'bg-emerald-50 dark:bg-emerald-900/10', anim: 'animate-badge-float-up' },
+                { id: 'on-3', name: 'Café da Praça', category: 'Cafeteria', status: '🚀 Tendência do dia', microcopy: 'Muitos vizinhos visitando', icon: <Rocket className="w-3 h-3 text-blue-500" />, color: 'bg-blue-50 dark:bg-blue-900/10', anim: 'animate-badge-glow' },
+                { id: 'on-4', name: 'Pet Shop Amigo', category: 'Pets', status: '👀 Movimento intenso', microcopy: 'Vizinhança ativa aqui', icon: <Eye className="w-3 h-3 text-purple-500" />, color: 'bg-purple-50 dark:bg-purple-900/10', anim: 'animate-badge-pop' }
               ].map((item) => (
                 <div key={item.id} className="min-w-[190px] bg-white dark:bg-gray-800 rounded-[24px] p-4 shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col gap-3 group active:scale-[0.98] transition-all">
                   <div className="flex items-center gap-3">
@@ -282,7 +281,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
                   </div>
                   
                   <div className={`p-2.5 rounded-2xl ${item.color} flex flex-col gap-1`}>
-                    <div className="flex items-center gap-1.5">
+                    <div className={`flex items-center gap-1.5 ${item.anim}`}>
                       {item.icon}
                       <span className="text-[10px] font-black uppercase text-gray-800 dark:text-gray-100 tracking-tight">{item.status}</span>
                     </div>
@@ -410,6 +409,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
                 <SpinWheelView 
                     userId={user?.id || null} 
                     userRole={userRole || null} 
+                    /* Fix: Changed onWin to onSpinWin to match component props */
                     onWin={onSpinWin} 
                     onRequireLogin={onRequireLogin} 
                     onViewHistory={() => { setIsSpinWheelOpen(false); onNavigate('prize_history'); }} 

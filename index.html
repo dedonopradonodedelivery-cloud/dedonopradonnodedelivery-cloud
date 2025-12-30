@@ -35,6 +35,10 @@
               'float-slow': 'floatSlow 6s ease-in-out infinite',
               'sponsor-spin-in': 'sponsorSpinIn 2s cubic-bezier(0.34, 1.56, 0.64, 1) forwards',
               'shimmer': 'shimmer 3s infinite linear',
+              'badge-pop': 'badgePop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards',
+              'badge-shake': 'badgeShake 0.5s ease-in-out 3',
+              'badge-float-up': 'badgeFloatUp 0.8s ease-out forwards',
+              'badge-glow': 'badgeGlow 1.5s ease-out forwards',
             },
             keyframes: {
               popIn: {
@@ -66,6 +70,24 @@
                   opacity: '1', 
                   transform: 'translateX(-50%) translateY(115px) rotate(0deg) scale(1)' 
                 }
+              },
+              badgePop: {
+                '0%': { opacity: '0', transform: 'scale(0.5)' },
+                '100%': { opacity: '1', transform: 'scale(1)' },
+              },
+              badgeShake: {
+                '0%, 100%': { transform: 'translateX(0)' },
+                '25%': { transform: 'translateX(-2px) rotate(-1deg)' },
+                '75%': { transform: 'translateX(2px) rotate(1deg)' },
+              },
+              badgeFloatUp: {
+                '0%': { opacity: '0', transform: 'translateY(8px)' },
+                '100%': { opacity: '1', transform: 'translateY(0)' },
+              },
+              badgeGlow: {
+                '0%': { opacity: '0', boxShadow: '0 0 0 0 rgba(30, 91, 255, 0)' },
+                '50%': { opacity: '1', boxShadow: '0 0 15px 4px rgba(30, 91, 255, 0.4)' },
+                '100%': { opacity: '1', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' },
               }
             }
           }

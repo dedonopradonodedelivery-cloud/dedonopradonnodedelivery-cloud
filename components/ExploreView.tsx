@@ -43,7 +43,7 @@ const BlockHeader: React.FC<{ title: string; icon: React.ElementType }> = ({ tit
 
 // Card de Exploração Padrão
 const ExploreCard: React.FC<{ 
-  store: Partial<Store> & { mockImage?: string; customBadge?: string; customBadgeColor?: string; subText?: string }; 
+  store: Partial<Store> & { mockImage?: string; customBadge?: string; customBadgeColor?: string; subText?: string; animType?: string }; 
   onClick: () => void;
   showStatus?: boolean;
 }> = ({ store, onClick, showStatus }) => (
@@ -58,7 +58,7 @@ const ExploreCard: React.FC<{
         alt={store.name} 
       />
       {store.customBadge && (
-        <div className={`absolute top-3 left-3 ${store.customBadgeColor || 'bg-[#1E5BFF]'} text-white text-[9px] font-black px-2 py-1 rounded-lg shadow-lg uppercase`}>
+        <div className={`absolute top-3 left-3 ${store.customBadgeColor || 'bg-[#1E5BFF]'} text-white text-[9px] font-black px-2 py-1 rounded-lg shadow-[0_4px_12px_rgba(0,0,0,0.2)] uppercase ${store.animType}`}>
           {store.customBadge}
         </div>
       )}
@@ -78,7 +78,7 @@ const ExploreCard: React.FC<{
       )}
 
       {showStatus && (
-        <div className="mt-2 flex items-center gap-1.5">
+        <div className="mt-2 flex items-center gap-1.5 animate-badge-float-up">
           <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_5px_#10b981]"></div>
           <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400">ABERTO AGORA</span>
         </div>
@@ -92,16 +92,16 @@ export const ExploreView: React.FC<ExploreViewProps> = ({
   onStoreClick,
 }) => {
   
-  // Estrutura curada de 6 blocos focada em Descoberta e Intenção
+  // Estrutura curada com tipos de animação específicos para cada categoria de badge
   const sections = useMemo(() => [
     {
       id: 'perto',
       title: 'Perto de Você',
       icon: Navigation,
       items: [
-        { ...stores[0], name: 'Pet Shop Araguaia', category: 'Pets', subText: 'A 200m de você', mockImage: 'https://images.unsplash.com/photo-1583337130417-3346a1be7dee?q=80&w=400&auto=format&fit=crop', customBadge: 'Muito Perto' },
-        { ...stores[1], name: 'Mercado Freguesia', category: 'Mercado', subText: 'A 450m de você', mockImage: 'https://images.unsplash.com/photo-1578916171728-46686eac8d58?q=80&w=400&auto=format&fit=crop', customBadge: 'Muito Perto' },
-        { ...stores[0], name: 'Banca do Nelson', category: 'Serviços', subText: 'A 600m de você', mockImage: 'https://images.unsplash.com/photo-1581338834647-b0fb40704e21?q=80&w=400&auto=format&fit=crop', customBadge: 'Muito Perto' }
+        { ...stores[0], name: 'Pet Shop Araguaia', category: 'Pets', subText: 'A 200m de você', mockImage: 'https://images.unsplash.com/photo-1583337130417-3346a1be7dee?q=80&w=400&auto=format&fit=crop', customBadge: 'Muito Perto', animType: 'animate-badge-pop' },
+        { ...stores[1], name: 'Mercado Freguesia', category: 'Mercado', subText: 'A 450m de você', mockImage: 'https://images.unsplash.com/photo-1578916171728-46686eac8d58?q=80&w=400&auto=format&fit=crop', customBadge: 'Muito Perto', animType: 'animate-badge-pop' },
+        { ...stores[0], name: 'Banca do Nelson', category: 'Serviços', subText: 'A 600m de você', mockImage: 'https://images.unsplash.com/photo-1581338834647-b0fb40704e21?q=80&w=400&auto=format&fit=crop', customBadge: 'Muito Perto', animType: 'animate-badge-pop' }
       ]
     },
     {
@@ -109,9 +109,9 @@ export const ExploreView: React.FC<ExploreViewProps> = ({
       title: 'Mais Bem Avaliados',
       icon: ThumbsUp,
       items: [
-        { ...stores[1], name: 'Espaço VIP Beleza', category: 'Beleza', subText: '1.2k avaliações 5★', mockImage: 'https://images.unsplash.com/photo-1560066984-138dadb4c035?q=80&w=400&auto=format&fit=crop', customBadge: 'Favorito', customBadgeColor: 'bg-amber-500' },
-        { ...stores[0], name: 'Clínica Sorriso', category: 'Saúde', subText: '850 avaliações 5★', mockImage: 'https://images.unsplash.com/photo-1629909613654-28e377c37b09?q=80&w=400&auto=format&fit=crop', customBadge: 'Excelência', customBadgeColor: 'bg-amber-500' },
-        { ...stores[1], name: 'Auto Center Pro', category: 'Serviços', subText: '500 avaliações 5★', mockImage: 'https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?q=80&w=400&auto=format&fit=crop', customBadge: 'Top Rated', customBadgeColor: 'bg-amber-500' }
+        { ...stores[1], name: 'Espaço VIP Beleza', category: 'Beleza', subText: '1.2k avaliações 5★', mockImage: 'https://images.unsplash.com/photo-1560066984-138dadb4c035?q=80&w=400&auto=format&fit=crop', customBadge: 'Favorito', customBadgeColor: 'bg-amber-600', animType: 'animate-badge-glow' },
+        { ...stores[0], name: 'Clínica Sorriso', category: 'Saúde', subText: '850 avaliações 5★', mockImage: 'https://images.unsplash.com/photo-1629909613654-28e377c37b09?q=80&w=400&auto=format&fit=crop', customBadge: 'Excelência', customBadgeColor: 'bg-amber-600', animType: 'animate-badge-glow' },
+        { ...stores[1], name: 'Auto Center Pro', category: 'Serviços', subText: '500 avaliações 5★', mockImage: 'https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?q=80&w=400&auto=format&fit=crop', customBadge: 'Top Rated', customBadgeColor: 'bg-amber-600', animType: 'animate-badge-glow' }
       ]
     },
     {
@@ -119,9 +119,9 @@ export const ExploreView: React.FC<ExploreViewProps> = ({
       title: 'Vale a Visita Hoje',
       icon: Award,
       items: [
-        { ...stores[0], name: 'Terraço Gastrô', category: 'Restaurante', subText: 'Ambiente externo incrível', mockImage: 'https://images.unsplash.com/photo-1550966842-2849a224ef52?q=80&w=400&auto=format&fit=crop', customBadge: 'Curadoria' },
-        { ...stores[1], name: 'Café com Arte', category: 'Cafeteria', subText: 'O melhor grão da região', mockImage: 'https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?q=80&w=400&auto=format&fit=crop', customBadge: 'Curadoria' },
-        { ...stores[0], name: 'Vinhos & Cia', category: 'Boutique', subText: 'Degustação exclusiva', mockImage: 'https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?q=80&w=400&auto=format&fit=crop', customBadge: 'Curadoria' }
+        { ...stores[0], name: 'Terraço Gastrô', category: 'Restaurante', subText: 'Ambiente externo incrível', mockImage: 'https://images.unsplash.com/photo-1550966842-2849a224ef52?q=80&w=400&auto=format&fit=crop', customBadge: 'Curadoria', animType: 'animate-badge-float-up' },
+        { ...stores[1], name: 'Café com Arte', category: 'Cafeteria', subText: 'O melhor grão da região', mockImage: 'https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?q=80&w=400&auto=format&fit=crop', customBadge: 'Curadoria', animType: 'animate-badge-float-up' },
+        { ...stores[0], name: 'Vinhos & Cia', category: 'Boutique', subText: 'Degustação exclusiva', mockImage: 'https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?q=80&w=400&auto=format&fit=crop', customBadge: 'Curadoria', animType: 'animate-badge-float-up' }
       ]
     },
     {
@@ -139,9 +139,9 @@ export const ExploreView: React.FC<ExploreViewProps> = ({
       title: 'Novidades da Semana',
       icon: Sparkles,
       items: [
-        { ...stores[0], name: 'Loja Geek Freguesia', category: 'Lazer', subText: 'Inaugurado há 2 dias', mockImage: 'https://images.unsplash.com/photo-1612036782180-6f0b6cd846fe?q=80&w=400&auto=format&fit=crop', customBadge: 'Estreia', customBadgeColor: 'bg-indigo-500' },
-        { ...stores[1], name: 'CrossFit Vila', category: 'Fitness', subText: 'Novo espaço de treino', mockImage: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=400&auto=format&fit=crop', customBadge: 'Estreia', customBadgeColor: 'bg-indigo-500' },
-        { ...stores[0], name: 'Burger & Beer', category: 'Lanches', subText: 'Novo cardápio artesanal', mockImage: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?q=80&w=400&auto=format&fit=crop', customBadge: 'Estreia', customBadgeColor: 'bg-indigo-500' }
+        { ...stores[0], name: 'Loja Geek Freguesia', category: 'Lazer', subText: 'Inaugurado há 2 dias', mockImage: 'https://images.unsplash.com/photo-1612036782180-6f0b6cd846fe?q=80&w=400&auto=format&fit=crop', customBadge: 'Estreia', customBadgeColor: 'bg-indigo-600', animType: 'animate-badge-pop' },
+        { ...stores[1], name: 'CrossFit Vila', category: 'Fitness', subText: 'Novo espaço de treino', mockImage: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=400&auto=format&fit=crop', customBadge: 'Estreia', customBadgeColor: 'bg-indigo-600', animType: 'animate-badge-pop' },
+        { ...stores[0], name: 'Burger & Beer', category: 'Lanches', subText: 'Novo cardápio artesanal', mockImage: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?q=80&w=400&auto=format&fit=crop', customBadge: 'Estreia', customBadgeColor: 'bg-indigo-600', animType: 'animate-badge-pop' }
       ]
     },
     {
