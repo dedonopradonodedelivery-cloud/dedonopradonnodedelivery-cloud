@@ -49,16 +49,21 @@ import {
   SponsorInfoView 
 } from './components/SimplePages';
 
-// Global para persistência entre hot-reloads se necessário (não reseta no login)
+// Global para persistência entre ciclos de vida se necessário
 let isFirstBootAttempted = false;
 
 const App: React.FC = () => {
   const { user, userRole, loading: isAuthInitialLoading, signOut } = useAuth();
-  const [minSplashTimeElapsed, setMinSplashTimeElapsed] = useState(isFirstBootAttempted);
-  const [splashProgress, setSplashProgress] = useState(0);
+  
+  // UX ENGINEER: Detecta se estamos voltando de um login com Google (OAuth)
+  // Se a URL contém tokens de acesso, nós pulamos o Splash para não interromper o fluxo do usuário.
+  const isAuthReturn = window.location.hash.includes('access_token') || window.location.search.includes('code=');
+  
+  const [minSplashTimeElapsed, setMinSplashTimeElapsed] = useState(isFirstBootAttempted || isAuthReturn);
+  const [splashProgress, setSplashProgress] = useState(isAuthReturn ? 100 : 0);
   const [isDarkMode, setIsDarkMode] = useState(false);
 
-  // Estados de Navegação - Devem persistir durante todo o ciclo de vida do app
+  // Estados de Navegação - Persistência via LocalStorage garantida
   const [activeTab, setActiveTab] = useState(() => localStorage.getItem('localizei_active_tab') || 'home');
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
   const [selectedStore, setSelectedStore] = useState<Store | null>(null);
@@ -73,14 +78,13 @@ const App: React.FC = () => {
   const [isQuoteModalOpen, setIsQuoteModalOpen] = useState(false);
   const [quoteCategory, setQuoteCategory] = useState('');
 
-  // Sincronização de persistência simples
   useEffect(() => {
     localStorage.setItem('localizei_active_tab', activeTab);
   }, [activeTab]);
 
   // Ciclo de vida do Splash (Cold Start Only)
   useEffect(() => {
-    if (isFirstBootAttempted) return;
+    if (isFirstBootAttempted || isAuthReturn) return;
 
     setSplashProgress(100);
     const timer = setTimeout(() => {
@@ -89,7 +93,7 @@ const App: React.FC = () => {
     }, 5200);
 
     return () => clearTimeout(timer);
-  }, []);
+  }, [isAuthReturn]);
 
   const toggleTheme = () => setIsDarkMode(!isDarkMode);
   
@@ -123,14 +127,11 @@ const App: React.FC = () => {
     'store_cashback_module', 'store_ads_module', 'about', 'support', 'invite_friend', 'favorites'
   ];
 
-  // UX ENGINEER NOTE: O Splash agora é um overlay condicional.
-  // O aplicativo "real" (Layout + Routes) é montado IMEDIATAMENTE.
-  // Isso garante que o estado do App nunca seja perdido quando o Splash desaparece.
   return (
     <div className={isDarkMode ? 'dark' : ''}>
       <div className="min-h-screen bg-white dark:bg-gray-900 flex justify-center transition-colors duration-300 relative">
         
-        {/* APP CORE: Sempre montado */}
+        {/* APP CORE: Mantido montado para preservar estado */}
         <Layout activeTab={activeTab} setActiveTab={setActiveTab} userRole={userRole} onCashbackClick={handleCashbackClick}>
           {!headerExclusionList.includes(activeTab) && (
             <Header
@@ -218,7 +219,7 @@ const App: React.FC = () => {
           {isQuoteModalOpen && <QuoteRequestModal isOpen={isQuoteModalOpen} onClose={() => setIsQuoteModalOpen(false)} categoryName={quoteCategory} onSuccess={() => { setIsQuoteModalOpen(false); setActiveTab('service_success'); }} />}
         </Layout>
 
-        {/* OVERLAY SPLASH: Bloqueia apenas no Cold Start real */}
+        {/* OVERLAY SPLASH: Aparece apenas no Cold Start real e nunca em retornos de Auth */}
         {!minSplashTimeElapsed && (
           <div className="fixed inset-0 bg-[#1E5BFF] flex flex-col items-center justify-center text-white z-[999] overflow-hidden animate-out fade-out duration-700 fill-mode-forwards">
             <div className="relative flex flex-col items-center justify-center z-10">
