@@ -48,13 +48,15 @@ export interface Store {
   isOpenNow?: boolean;
   closingTime?: string;
   isSponsored?: boolean;
+  paymentMethods?: string[]; // Novos meios de pagamento aceitos
 }
 
 export interface Category {
   id: string;
   name: string;
   icon: React.ReactNode;
-  image?: string; // Nova propriedade para imagens realistas
+  image?: string; 
+  color: string; // Nova propriedade para o sistema de cores
   slug: string;
 }
 

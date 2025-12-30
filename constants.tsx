@@ -6,116 +6,116 @@ import { getStoreLogo } from './utils/mockLogos';
 
 export const CATEGORIES: Category[] = [
   { 
-    id: 'new-2', 
+    id: 'cat-health', 
     name: 'Saúde', 
     slug: 'health', 
-    icon: <Heart />, 
-    image: 'https://images.unsplash.com/photo-1505751172107-573225a9470e?q=80&w=300&auto=format&fit=crop' 
+    icon: <Heart fill="currentColor" />, 
+    color: '#EF4444' // Red 500
   },
   { 
-    id: '2', 
+    id: 'cat-pros', 
     name: 'Profissionais', 
     slug: 'pros', 
-    icon: <Briefcase />, 
-    image: 'https://images.unsplash.com/photo-1454165833767-027ffea7028c?q=80&w=300&auto=format&fit=crop' 
+    icon: <Briefcase fill="currentColor" />, 
+    color: '#3B82F6' // Blue 500
   },
   { 
-    id: 'new-1', 
+    id: 'cat-beauty', 
     name: 'Beleza', 
     slug: 'beauty', 
-    icon: <Scissors />, 
-    image: 'https://images.unsplash.com/photo-1560066984-138dadb4c035?q=80&w=300&auto=format&fit=crop' 
+    icon: <Scissors fill="currentColor" />, 
+    color: '#EC4899' // Pink 500
   },
   { 
-    id: 'new-6', 
+    id: 'cat-autos', 
     name: 'Autos', 
     slug: 'autos', 
-    icon: <CarFront />, 
-    image: 'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?q=80&w=300&auto=format&fit=crop' 
+    icon: <CarFront fill="currentColor" />, 
+    color: '#64748B' // Slate 500
   },
   { 
-    id: '7', 
+    id: 'cat-pets', 
     name: 'Pets', 
     slug: 'pets', 
-    icon: <Dog />, 
-    image: 'https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?q=80&w=300&auto=format&fit=crop' 
+    icon: <Dog fill="currentColor" />, 
+    color: '#F97316' // Orange 500
   },
   { 
-    id: '8', 
+    id: 'cat-home', 
     name: 'Casa', 
     slug: 'home-decor', 
-    icon: <Armchair />, 
-    image: 'https://images.unsplash.com/photo-1581539250439-c96689b516dd?q=80&w=300&auto=format&fit=crop' 
+    icon: <Home fill="currentColor" />, 
+    color: '#8B5CF6' // Violet 500
   },
   { 
-    id: 'new-5', 
+    id: 'cat-sports', 
     name: 'Esportes', 
     slug: 'sports', 
-    icon: <Dumbbell />, 
-    image: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=300&auto=format&fit=crop' 
+    icon: <Dumbbell fill="currentColor" />, 
+    color: '#10B981' // Emerald 500
   },
   { 
-    id: 'new-7', 
+    id: 'cat-assistance', 
     name: 'Assistências', 
     slug: 'assistance', 
-    icon: <Wrench />, 
-    image: 'https://images.unsplash.com/photo-1581092160562-40aa08e78837?q=80&w=300&auto=format&fit=crop' 
+    icon: <Wrench fill="currentColor" />, 
+    color: '#06B6D4' // Cyan 500
   },
   { 
-    id: '1', 
+    id: 'cat-food', 
     name: 'Alimentação', 
     slug: 'food', 
-    icon: <Utensils />, 
-    image: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=300&auto=format&fit=crop' 
+    icon: <Utensils fill="currentColor" />, 
+    color: '#F43F5E' // Rose 500
   },
   { 
-    id: 'new-3', 
+    id: 'cat-education', 
     name: 'Educação', 
     slug: 'education', 
-    icon: <GraduationCap />, 
-    image: 'https://images.unsplash.com/photo-1497633762265-9d179a990aa6?q=80&w=300&auto=format&fit=crop' 
+    icon: <GraduationCap fill="currentColor" />, 
+    color: '#6366F1' // Indigo 500
   },
   { 
-    id: 'new-4', 
+    id: 'cat-services', 
     name: 'Serviços', 
     slug: 'services', 
-    icon: <Settings />, 
-    image: 'https://images.unsplash.com/photo-1581578731548-c64695ce6958?q=80&w=300&auto=format&fit=crop' 
+    icon: <Settings fill="currentColor" />, 
+    color: '#71717A' // Zinc 500
   },
   { 
-    id: 'new-8', 
+    id: 'cat-wellness', 
     name: 'Bem-estar', 
     slug: 'wellness', 
-    icon: <Sun />, 
-    image: 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?q=80&w=300&auto=format&fit=crop' 
+    icon: <Sun fill="currentColor" />, 
+    color: '#EAB308' // Yellow 500
   },
   { 
-    id: '3', 
+    id: 'cat-party', 
     name: 'Festas', 
     slug: 'party', 
-    icon: <PartyPopper />, 
-    image: 'https://images.unsplash.com/photo-1464349095431-e9a21285b5f3?q=80&w=300&auto=format&fit=crop' 
+    icon: <PartyPopper fill="currentColor" />, 
+    color: '#D946EF' // Fuchsia 500
   },
   { 
-    id: '4', 
+    id: 'cat-fashion', 
     name: 'Moda', 
     slug: 'fashion', 
-    icon: <Shirt />, 
-    image: 'https://images.unsplash.com/photo-1445205170230-053b83016050?q=80&w=300&auto=format&fit=crop' 
+    icon: <Shirt fill="currentColor" />, 
+    color: '#0EA5E9' // Sky 500
   },
   { 
-    id: '5', 
+    id: 'cat-grocery', 
     name: 'Mercados', 
     slug: 'grocery', 
-    icon: <Coffee />, 
-    image: 'https://images.unsplash.com/photo-1542838132-92c53300491e?q=80&w=300&auto=format&fit=crop' 
+    icon: <ShoppingCart fill="currentColor" />, 
+    color: '#16A34A' // Green 600
   },
   { 
-    id: '6', 
+    id: 'cat-condos', 
     name: 'Condomínios', 
     slug: 'condos', 
-    icon: <Building2 />, 
-    image: 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?q=80&w=300&auto=format&fit=crop' 
+    icon: <Building2 fill="currentColor" />, 
+    color: '#1E293B' // Slate 800
   },
 ];
 

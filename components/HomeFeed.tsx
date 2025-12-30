@@ -498,25 +498,30 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
               onScroll={handleCategoryScroll}
               className="flex overflow-x-auto no-scrollbar px-5 pb-2"
             >
-              <div className="grid grid-flow-col grid-rows-2 gap-3">
+              <div className="grid grid-flow-col grid-rows-2 gap-3 pb-2">
                 {CATEGORIES.map((cat) => (
                   <button 
                     key={cat.id} 
                     onClick={() => onSelectCategory(cat)}
-                    className="relative w-[92px] h-[92px] rounded-[24px] overflow-hidden flex-shrink-0 group snap-start shadow-md hover:shadow-xl active:scale-95 transition-all duration-300 ease-in-out border border-gray-100 dark:border-gray-800"
+                    className="flex flex-col items-center gap-1.5 flex-shrink-0 group active:scale-95 transition-all duration-200"
                   >
-                    <img 
-                      src={cat.image || 'https://via.placeholder.com/200'} 
-                      alt={cat.name} 
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" 
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent transition-opacity group-hover:opacity-70" />
-                    
-                    <div className="absolute bottom-2.5 left-2 right-2 flex flex-col items-center">
-                        <span className="font-black text-white text-[10px] uppercase tracking-wider text-center drop-shadow-md leading-tight">
-                        {cat.name}
-                        </span>
+                    <div 
+                      className="w-[82px] h-[82px] rounded-[24px] shadow-sm flex items-center justify-center relative overflow-hidden transition-all duration-300 group-hover:shadow-md group-hover:-translate-y-0.5"
+                      style={{ backgroundColor: `${cat.color}15` }} // Light background using transparency
+                    >
+                      {/* Decorative colored dot */}
+                      <div 
+                        className="absolute top-2 right-2 w-1.5 h-1.5 rounded-full opacity-40"
+                        style={{ backgroundColor: cat.color }}
+                      ></div>
+                      
+                      <div className="text-[32px] transition-transform duration-300 group-hover:scale-110" style={{ color: cat.color }}>
+                        {React.cloneElement(cat.icon as React.ReactElement, { size: 36, strokeWidth: 1.5 })}
+                      </div>
                     </div>
+                    <span className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest text-center px-1 leading-tight transition-colors group-hover:text-slate-900 dark:group-hover:text-white">
+                      {cat.name}
+                    </span>
                   </button>
                 ))}
               </div>

@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import {
   ChevronLeft,
@@ -9,6 +10,12 @@ import {
   Phone,
   Instagram,
   MessageSquare,
+  QrCode,
+  Banknote,
+  CreditCard,
+  Ticket,
+  Landmark,
+  ShieldCheck
 } from 'lucide-react';
 import { Store } from '../types';
 
@@ -37,7 +44,17 @@ const storeMock = {
       lat: -22.936,
       lng: -43.355,
     },
+    paymentMethods: [] as string[]
   },
+};
+
+const PAYMENT_METHOD_MAP: Record<string, { label: string; icon: React.ElementType }> = {
+  pix: { label: 'Pix', icon: QrCode },
+  dinheiro: { label: 'Dinheiro', icon: Banknote },
+  credito: { label: 'Cartão de Crédito', icon: CreditCard },
+  debito: { label: 'Cartão de Débito', icon: CreditCard },
+  vale: { label: 'VR / VA', icon: Ticket },
+  transferencia: { label: 'Transferência', icon: Landmark },
 };
 
 function mapStoreToBusiness(store?: Store | null) {
@@ -54,6 +71,7 @@ function mapStoreToBusiness(store?: Store | null) {
     rating: s.rating ?? storeMock.business.rating,
     ratingCount: s.reviewsCount ?? s.total_reviews ?? s.ratingCount ?? storeMock.business.ratingCount,
     description: s.descricao ?? s.description ?? storeMock.business.description,
+    paymentMethods: s.paymentMethods ?? ['pix', 'dinheiro', 'credito', 'debito'], // Mock para demo se vazio
 
     logo: s.logoUrl ?? s.image ?? s.image_url ?? storeMock.business.logo,
     banners:
@@ -334,6 +352,34 @@ export const StoreDetailView: React.FC<StoreDetailViewProps> = ({
                       )}
                     </div>
                   )}
+
+                  {/* NOVAS FORMAS DE PAGAMENTO */}
+                  <div>
+                    <h3 className="text-lg font-bold text-[#141414] dark:text-white mb-4">
+                      Formas de Pagamento
+                    </h3>
+                    {business.paymentMethods && business.paymentMethods.length > 0 ? (
+                      <div className="grid grid-cols-2 gap-3">
+                        {business.paymentMethods.map((methodId: string) => {
+                          const method = PAYMENT_METHOD_MAP[methodId];
+                          if (!method) return null;
+                          const Icon = method.icon;
+                          return (
+                            <div key={methodId} className="flex items-center gap-3 bg-white dark:bg-gray-800 p-3 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm">
+                              <div className="w-8 h-8 rounded-lg bg-gray-50 dark:bg-gray-700 flex items-center justify-center text-gray-500 dark:text-gray-400">
+                                <Icon className="w-4 h-4" />
+                              </div>
+                              <span className="text-xs font-bold text-gray-700 dark:text-gray-200">{method.label}</span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    ) : (
+                      <div className="p-4 bg-gray-100 dark:bg-gray-800/50 rounded-xl border border-dashed border-gray-200 dark:border-gray-700 text-center">
+                        <p className="text-xs text-gray-500 italic">Formas de pagamento não informadas</p>
+                      </div>
+                    )}
+                  </div>
 
                   <div className="space-y-4">
                     {business.contact.address && (

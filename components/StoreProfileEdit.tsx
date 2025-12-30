@@ -18,12 +18,27 @@ import {
   EyeOff,
   AlertCircle,
   Instagram,
-  Store
+  Store,
+  CreditCard,
+  Banknote,
+  QrCode,
+  Landmark,
+  Ticket,
+  Check
 } from 'lucide-react';
 
 interface StoreProfileEditProps {
   onBack: () => void;
 }
+
+const PAYMENT_OPTIONS = [
+  { id: 'pix', label: 'Pix', icon: QrCode },
+  { id: 'dinheiro', label: 'Dinheiro', icon: Banknote },
+  { id: 'credito', label: 'Cartão de Crédito', icon: CreditCard },
+  { id: 'debito', label: 'Cartão de Débito', icon: CreditCard },
+  { id: 'vale', label: 'VR / VA', icon: Ticket },
+  { id: 'transferencia', label: 'Transferência', icon: Landmark },
+];
 
 export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) => {
   const [isLoading, setIsLoading] = useState(true);
@@ -44,6 +59,8 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
     description: 'O melhor burger artesanal do bairro. Ingredientes selecionados, carne fresca e um ambiente familiar pensado para você.',
   });
 
+  const [paymentMethods, setPaymentMethods] = useState<string[]>(['pix', 'dinheiro', 'credito', 'debito']);
+
   const [hours, setHours] = useState([
     { day: 'Segunda', open: false, start: '00:00', end: '00:00' },
     { day: 'Terça', open: true, start: '18:00', end: '23:00' },
@@ -63,6 +80,12 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const togglePaymentMethod = (id: string) => {
+    setPaymentMethods(prev => 
+      prev.includes(id) ? prev.filter(p => p !== id) : [...prev, id]
+    );
   };
 
   const handleSave = () => {
@@ -199,7 +222,42 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
             </div>
         </section>
 
-        {/* 4. CONTATO E REDES */}
+        {/* 4. FORMAS DE PAGAMENTO (NOVA SEÇÃO) */}
+        <section className="bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-sm border border-gray-100 dark:border-gray-700 space-y-5">
+            <div className="flex items-center gap-2 mb-2">
+                <CreditCard className="w-4 h-4 text-[#1E5BFF]" />
+                <h3 className="font-bold text-gray-900 dark:text-white">Formas de Pagamento</h3>
+            </div>
+            
+            <p className="text-xs text-gray-500 dark:text-gray-400 -mt-2">Selecione quais meios de pagamento você aceita no local.</p>
+
+            <div className="grid grid-cols-2 gap-3">
+                {PAYMENT_OPTIONS.map((option) => {
+                    const isSelected = paymentMethods.includes(option.id);
+                    return (
+                        <button
+                            key={option.id}
+                            onClick={() => togglePaymentMethod(option.id)}
+                            className={`flex items-center gap-3 p-4 rounded-2xl border transition-all active:scale-[0.95] text-left relative overflow-hidden ${
+                                isSelected 
+                                ? 'bg-blue-50 dark:bg-blue-900/10 border-blue-200 dark:border-blue-800 text-[#1E5BFF] dark:text-blue-300' 
+                                : 'bg-gray-50 dark:bg-gray-900/50 border-gray-100 dark:border-gray-700 text-gray-500 dark:text-gray-400'
+                            }`}
+                        >
+                            <option.icon className={`w-5 h-5 ${isSelected ? 'text-[#1E5BFF]' : 'text-gray-400'}`} />
+                            <span className="text-xs font-bold leading-tight">{option.label}</span>
+                            {isSelected && (
+                                <div className="absolute top-1 right-1 bg-blue-500 rounded-full p-0.5 shadow-sm">
+                                    <Check className="w-2 h-2 text-white" strokeWidth={4} />
+                                </div>
+                            )}
+                        </button>
+                    );
+                })}
+            </div>
+        </section>
+
+        {/* 5. CONTATO E REDES */}
         <section className="bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-sm border border-gray-100 dark:border-gray-700 space-y-5">
             <div className="flex items-center gap-2 mb-2">
                 <Phone className="w-4 h-4 text-[#1E5BFF]" />
@@ -232,7 +290,7 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
             </div>
         </section>
 
-        {/* 5. HORÁRIOS */}
+        {/* 6. HORÁRIOS */}
         <section className="bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-sm border border-gray-100 dark:border-gray-700 space-y-4">
             <div className="flex items-center gap-2 mb-2">
                 <Clock className="w-4 h-4 text-[#1E5BFF]" />
