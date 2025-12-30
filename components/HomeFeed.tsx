@@ -48,16 +48,20 @@ interface HomeFeedProps {
   onRequireLogin: () => void;
 }
 
-// Componente Interno para Padronização de Títulos de Seção
-const SectionHeader: React.FC<{ icon: React.ElementType; title: string; subtitle?: string }> = ({ icon: Icon, title, subtitle }) => (
-  <div className="flex items-center justify-between mb-5 px-1">
-    <div className="flex items-center gap-2.5">
-      <Icon className="w-4 h-4 text-gray-400 dark:text-gray-500" strokeWidth={2.5} />
-      <h3 className="text-[13px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest leading-none">
+/**
+ * Componente de Título Padronizado conforme Design System
+ * Icone: Linha, 20px, stroke-2
+ * Fonte: Base (16px), Semibold, Neutra
+ */
+const SectionHeader: React.FC<{ icon: React.ElementType; title: string; rightElement?: React.ReactNode }> = ({ icon: Icon, title, rightElement }) => (
+  <div className="flex items-center justify-between mb-6 px-1">
+    <div className="flex items-center gap-3">
+      <Icon className="w-5 h-5 text-gray-400 dark:text-gray-500" strokeWidth={2} />
+      <h3 className="text-base font-semibold text-gray-700 dark:text-gray-200 tracking-tight leading-none">
         {title}
       </h3>
     </div>
-    {subtitle && <span className="text-[9px] font-black text-gray-300 dark:text-gray-600 uppercase tracking-tighter">{subtitle}</span>}
+    {rightElement}
   </div>
 );
 
@@ -186,22 +190,27 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
       case 'promo_semana':
         return (
           <div key="promo_semana" className="px-4">
-            <SectionHeader icon={Tag} title="Promoção da Semana" subtitle="Ofertas 20% OFF+" />
+            <SectionHeader 
+              icon={Tag} 
+              title="Promoção da Semana" 
+              rightElement={<p className="text-[10px] font-bold text-gray-400 uppercase">20% OFF+</p>}
+            />
             
             <div className="flex gap-4 overflow-x-auto no-scrollbar -mx-4 px-4 pb-2 snap-x">
               {[
-                { id: 'p1', store: 'Açougue Bom Corte', product: 'Picanha Premium KG', old: '89,90', new: '62,93', off: '30', image: 'https://images.unsplash.com/photo-1544022613-e879a7998d0f?q=80&w=400&auto=format&fit=crop' },
-                { id: 'p2', store: 'Beleza Real', product: 'Escova + Hidratação', old: '120,00', new: '84,00', off: '30', image: 'https://images.unsplash.com/photo-1560869713-7d0a294308ed?q=80&w=400&auto=format&fit=crop' },
-                { id: 'p3', store: 'Mercado da Esquina', product: 'Cerveja Artesanal (Pack)', old: '54,00', new: '37,80', off: '30', image: 'https://images.unsplash.com/photo-1550341298-58879f9f38df?q=80&w=400&auto=format&fit=crop' },
-                { id: 'p4', store: 'Padaria Central', product: 'Combo Café da Manhã', old: '22,00', new: '15,40', off: '30', image: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?q=80&w=400&auto=format&fit=crop' }
+                { id: 'p1', store: 'Açougue Bom Corte', product: 'Picanha Premium KG', old: '89,90', new: '62,93', off: '30', image: 'https://images.unsplash.com/photo-1544022613-e879a7998d0f?q=80&w=600&auto=format&fit=crop' },
+                { id: 'p2', store: 'Imperial Bakery', product: 'Pão Italiano Artesanal', old: '18,00', new: '12,60', off: '30', image: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?q=80&w=600&auto=format&fit=crop' },
+                { id: 'p3', store: 'Beleza & Arte', product: 'Manicure + Pedicure', old: '60,00', new: '42,00', off: '30', image: 'https://images.unsplash.com/photo-1610992015732-2449b0c26670?q=80&w=600&auto=format&fit=crop' },
+                { id: 'p4', store: 'Pet Mundo', product: 'Ração Golden 15kg', old: '189,00', new: '151,20', off: '20', image: 'https://images.unsplash.com/photo-1589924691995-400dc9ecc119?q=80&w=600&auto=format&fit=crop' },
+                { id: 'p5', store: 'Drogaria Freguesia', product: 'Vitamina C (2 Tubos)', old: '45,00', new: '31,50', off: '30', image: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?q=80&w=600&auto=format&fit=crop' }
               ].map((promo) => (
-                <div key={promo.id} className="min-w-[280px] snap-center bg-white dark:bg-gray-800 rounded-[32px] overflow-hidden shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col group active:scale-[0.98] transition-all">
-                  <div className="h-40 relative overflow-hidden">
-                    <img src={promo.image} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt={promo.product} />
+                <div key={promo.id} className="min-w-[240px] snap-center bg-white dark:bg-gray-800 rounded-[32px] overflow-hidden shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col group active:scale-[0.98] transition-all">
+                  <div className="h-44 relative overflow-hidden">
+                    <img src={promo.image} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt={promo.product} />
                     <div className="absolute top-4 left-4 bg-rose-500 text-white text-[11px] font-black px-3 py-1.5 rounded-xl shadow-lg animate-pulse">
                       -{promo.off}% OFF
                     </div>
-                    <div className="absolute bottom-4 right-4 bg-white/90 backdrop-blur-md text-gray-900 text-[9px] font-black px-2.5 py-1.5 rounded-xl border border-white/20 flex items-center gap-1.5 shadow-sm">
+                    <div className="absolute bottom-4 right-4 bg-white/80 backdrop-blur-md text-gray-900 text-[9px] font-black px-2.5 py-1.5 rounded-xl border border-white/20 flex items-center gap-1.5 shadow-sm">
                       <Timer className="w-3.5 h-3.5 text-rose-500" />
                       7 DIAS
                     </div>
@@ -209,12 +218,12 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
                   <div className="p-5 flex flex-col gap-1">
                     <div className="flex justify-between items-start">
                       <div className="flex-1 pr-2">
-                        <h4 className="font-bold text-gray-900 dark:text-white text-[15px] leading-tight line-clamp-1 mb-0.5">{promo.product}</h4>
-                        <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">{promo.store}</p>
+                        <h4 className="font-bold text-gray-900 dark:text-white text-[14px] leading-tight line-clamp-1 mb-0.5">{promo.product}</h4>
+                        <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest">{promo.store}</p>
                       </div>
                       <div className="text-right">
-                        <p className="text-[11px] text-gray-400 line-through font-bold leading-none mb-1">R$ {promo.old}</p>
-                        <p className="text-xl font-black text-[#1E5BFF] leading-none">R$ {promo.new}</p>
+                        <p className="text-[10px] text-gray-400 line-through font-bold leading-none mb-1">R$ {promo.old}</p>
+                        <p className="text-lg font-black text-[#1E5BFF] leading-none">R$ {promo.new}</p>
                       </div>
                     </div>
                   </div>
@@ -248,7 +257,11 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
       case 'bairro_on':
         return (
           <div key="bairro_on" className="px-4">
-            <SectionHeader icon={Flame} title="O Bairro Tá On" subtitle="Bombando perto de você" />
+            <SectionHeader 
+              icon={Flame} 
+              title="O Bairro Tá On" 
+              rightElement={<p className="text-[10px] font-bold text-gray-400 uppercase tracking-tight">Bombando agora</p>}
+            />
             
             <div className="flex gap-3 overflow-x-auto no-scrollbar -mx-4 px-4 pb-2">
               {[
@@ -317,23 +330,23 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
       case 'list':
         return (
           <div key="list" className="px-4 min-h-[400px]">
-              <div className="flex items-center justify-between mb-5 px-1">
-                 <div className="flex items-center gap-2.5">
-                    <ShieldCheck className="w-4 h-4 text-gray-400 dark:text-gray-500" strokeWidth={2.5} />
-                    <h3 className="text-[13px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest leading-none">Guia de Lojas</h3>
-                 </div>
-                 <div className="flex gap-2">
+              <SectionHeader 
+                icon={ShoppingBag} 
+                title="Guia de Lojas" 
+                rightElement={
+                  <div className="flex gap-1.5">
                     {['all', 'cashback', 'top_rated'].map((f) => (
                         <button 
                             key={f} 
                             onClick={() => setListFilter(f as any)}
-                            className={`text-[9px] font-black uppercase px-2.5 py-1.5 rounded-lg transition-all ${listFilter === f ? 'bg-[#1E5BFF] text-white shadow-lg shadow-blue-500/20' : 'text-gray-400 bg-gray-50 dark:bg-gray-800'}`}
+                            className={`text-[10px] font-bold uppercase px-2 py-1 rounded-md transition-all ${listFilter === f ? 'bg-[#1E5BFF] text-white' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-200'}`}
                         >
-                            {f === 'all' ? 'Tudo' : f === 'cashback' ? 'Cashback' : 'Top'}
+                            {f === 'all' ? 'Tudo' : f === 'cashback' ? 'Cash' : 'Top'}
                         </button>
                     ))}
-                 </div>
-              </div>
+                  </div>
+                }
+              />
               <LojasEServicosList onStoreClick={onStoreClick} onViewAll={() => onNavigate('explore')} activeFilter={listFilter} user={user} onNavigate={onNavigate} />
           </div>
         );
