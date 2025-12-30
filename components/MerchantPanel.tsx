@@ -10,366 +10,311 @@ import {
   TrendingUp, 
   History, 
   RefreshCw,
-  Copy,
-  Wallet,
+  Plus,
+  CreditCard,
+  CircleDollarSign,
   ArrowRight,
-  MoreHorizontal
+  Loader2,
+  AlertCircle,
+  WifiOff,
+  Calendar,
+  MoreHorizontal,
+  ReceiptText
 } from 'lucide-react';
 
 interface MerchantPanelProps {
   onBack: () => void;
 }
 
-type Screen = 'dashboard' | 'qr_gen' | 'pin_gen' | 'pending' | 'approved';
+type TerminalTab = 'terminal' | 'history';
 
-// --- MOCK DATA ---
-const MOCK_PENDING = [
-  { id: 1, client: 'Fernanda Souza', time: '14:32', amount: 150.00, cashback: 7.50 },
-  { id: 2, client: 'Ricardo Alves', time: '14:45', amount: 45.90, cashback: 2.30 },
-  { id: 3, client: 'Mariana Lima', time: '14:48', amount: 320.00, cashback: 16.00 },
-];
-
-const MOCK_APPROVED = [
-  { id: 10, client: 'João Silva', time: '10:15', amount: 89.90, cashback: 4.50 },
-  { id: 11, client: 'Beatriz Costa', time: '11:20', amount: 12.50, cashback: 0.62 },
-  { id: 12, client: 'Carlos Pereira', time: '12:05', amount: 250.00, cashback: 12.50 },
-  { id: 13, client: 'Ana Clara', time: '13:30', amount: 60.00, cashback: 3.00 },
-];
+interface Transaction {
+  id: string;
+  date: string;
+  amount: number;
+  method: 'pix' | 'card';
+  status: 'paid' | 'pending' | 'cancelled';
+  description?: string;
+}
 
 export const MerchantPanel: React.FC<MerchantPanelProps> = ({ onBack }) => {
-  const [currentScreen, setCurrentScreen] = useState<Screen>('dashboard');
+  const [activeTab, setActiveTab] = useState<TerminalTab>('terminal');
+  const [loading, setLoading] = useState(true);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [offline] = useState(false);
+  
+  // Form State
+  const [amount, setAmount] = useState('');
+  const [description, setDescription] = useState('');
+  const [paymentMethod, setPaymentMethod] = useState<'pix' | 'card'>('pix');
 
-  // --- SUB-COMPONENTS ---
+  // Mock Data
+  const [history, setHistory] = useState<Transaction[]>([
+    { id: '1', date: 'Hoje, 14:20', amount: 89.90, method: 'pix', status: 'paid', description: 'Combo Burger Familia' },
+    { id: '2', date: 'Hoje, 11:15', amount: 45.00, method: 'card', status: 'pending', description: '2x Cheeseburger' },
+    { id: '3', date: 'Ontem, 20:45', amount: 120.00, method: 'pix', status: 'cancelled', description: 'Entrega pendente' },
+  ]);
 
-  const Dashboard = () => (
-    <div className="p-5 space-y-6 animate-in fade-in duration-300">
+  useEffect(() => {
+    // Simulate initial loading
+    const timer = setTimeout(() => setLoading(false), 800);
+    return () => clearTimeout(timer);
+  }, []);
+
+  const handleGenerateCharge = () => {
+    if (!amount || parseFloat(amount.replace(',', '.')) <= 0) return;
+    
+    setIsGenerating(true);
+    // Simulate API call to Asaas/Gateway
+    setTimeout(() => {
+      setIsGenerating(false);
+      alert('Cobrança gerada! Em uma integração real, aqui abriria o QR Code do Pix ou o Checkout do Cartão.');
       
-      {/* Daily Stats Card */}
-      <div className="bg-gradient-to-br from-[#1E5BFF] to-[#1749CC] rounded-3xl p-6 text-white shadow-lg shadow-blue-500/30 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none"></div>
-        <div className="relative z-10">
-          <div className="flex justify-between items-start mb-4">
-            <div>
-              <p className="text-blue-100 text-xs font-medium uppercase tracking-wider">Cashback Hoje</p>
-              <h2 className="text-3xl font-bold mt-1">R$ 45,90</h2>
-            </div>
-            <div className="bg-white/20 p-2 rounded-xl backdrop-blur-md">
-              <TrendingUp className="w-5 h-5 text-white" />
-            </div>
-          </div>
-          <div className="flex items-center gap-2 text-sm font-medium text-blue-50">
-            <span className="bg-white/20 px-2 py-0.5 rounded text-xs">8 transações</span>
-            <span>realizadas hoje</span>
-          </div>
-        </div>
-      </div>
+      // Add to mock history
+      const newTx: Transaction = {
+        id: Math.random().toString(36).substr(2, 9),
+        date: 'Agora',
+        amount: parseFloat(amount.replace(',', '.')),
+        method: paymentMethod,
+        status: 'pending',
+        description: description || 'Venda Terminal'
+      };
+      setHistory([newTx, ...history]);
+      setAmount('');
+      setDescription('');
+    }, 1500);
+  };
 
-      {/* Main Actions */}
-      <div className="grid grid-cols-2 gap-4">
-        <button 
-          onClick={() => setCurrentScreen('qr_gen')}
-          className="bg-white dark:bg-gray-800 p-5 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col items-center justify-center gap-3 active:scale-95 transition-all group"
-        >
-          <div className="w-14 h-14 bg-blue-50 dark:bg-blue-900/20 rounded-full flex items-center justify-center group-hover:bg-blue-100 dark:group-hover:bg-blue-900/40 transition-colors">
-            <QrCode className="w-7 h-7 text-[#1E5BFF]" />
-          </div>
-          <span className="font-bold text-gray-800 dark:text-white text-sm">Gerar QR</span>
-        </button>
+  const formatBRL = (val: number) => 
+    val.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
-        <button 
-          onClick={() => setCurrentScreen('pin_gen')}
-          className="bg-white dark:bg-gray-800 p-5 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col items-center justify-center gap-3 active:scale-95 transition-all group"
-        >
-          <div className="w-14 h-14 bg-purple-50 dark:bg-purple-900/20 rounded-full flex items-center justify-center group-hover:bg-purple-100 dark:group-hover:bg-purple-900/40 transition-colors">
-            <KeyRound className="w-7 h-7 text-purple-600" />
-          </div>
-          <span className="font-bold text-gray-800 dark:text-white text-sm">Gerar PIN</span>
-        </button>
-      </div>
-
-      {/* Secondary Actions */}
-      <div className="space-y-3">
-        <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wide ml-1">Gestão</h3>
-        
-        <button 
-          onClick={() => setCurrentScreen('pending')}
-          className="w-full bg-white dark:bg-gray-800 p-4 rounded-2xl border border-gray-100 dark:border-gray-700 flex items-center justify-between shadow-sm active:bg-gray-50 dark:active:bg-gray-700"
-        >
-          <div className="flex items-center gap-4">
-            <div className="w-10 h-10 bg-yellow-100 dark:bg-yellow-900/20 rounded-xl flex items-center justify-center text-yellow-600">
-              <Clock className="w-5 h-5" />
-            </div>
-            <div className="text-left">
-              <p className="font-bold text-gray-900 dark:text-white text-sm">Transações Pendentes</p>
-              <p className="text-xs text-gray-500">Aguardando aprovação</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">3</span>
-            <ChevronLeft className="w-5 h-5 text-gray-300 rotate-180" />
-          </div>
-        </button>
-
-        <button 
-          onClick={() => setCurrentScreen('approved')}
-          className="w-full bg-white dark:bg-gray-800 p-4 rounded-2xl border border-gray-100 dark:border-gray-700 flex items-center justify-between shadow-sm active:bg-gray-50 dark:active:bg-gray-700"
-        >
-          <div className="flex items-center gap-4">
-            <div className="w-10 h-10 bg-green-100 dark:bg-green-900/20 rounded-xl flex items-center justify-center text-green-600">
-              <History className="w-5 h-5" />
-            </div>
-            <div className="text-left">
-              <p className="font-bold text-gray-900 dark:text-white text-sm">Histórico de Hoje</p>
-              <p className="text-xs text-gray-500">Ver aprovados</p>
-            </div>
-          </div>
-          <ChevronLeft className="w-5 h-5 text-gray-300 rotate-180" />
-        </button>
-      </div>
-    </div>
-  );
-
-  const QRGenerator = () => {
-    const [timeLeft, setTimeLeft] = useState(60);
-    const [sessionKey, setSessionKey] = useState(Date.now());
-
-    useEffect(() => {
-      const timer = setInterval(() => {
-        setTimeLeft((prev) => {
-          if (prev <= 1) {
-            setSessionKey(Date.now()); // Regenerate
-            return 60;
-          }
-          return prev - 1;
-        });
-      }, 1000);
-      return () => clearInterval(timer);
-    }, []);
-
-    // Construct URL Params Mock
-    const qrData = `https://localizei.app/checkout?merchant_id=123&session_id=${sessionKey}&sig=xyz`;
-    const qrImg = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(qrData)}&color=1E5BFF`;
-
+  if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center p-6 h-full text-center animate-in zoom-in-95 duration-300">
-        <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">QR Code de Compra</h2>
-        <p className="text-sm text-gray-500 mb-8 max-w-[250px]">
-          Mostre este código para o cliente escanear e pagar com cashback.
-        </p>
-
-        <div className="relative p-4 bg-white rounded-3xl shadow-lg border border-gray-100 mb-8">
-          <img src={qrImg} alt="QR Code Dinâmico" className="w-64 h-64 object-contain rounded-xl" />
-          
-          {/* Timer Overlay */}
-          <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 bg-gray-900 text-white px-4 py-1.5 rounded-full text-sm font-mono font-bold shadow-lg flex items-center gap-2">
-            <Clock className="w-3.5 h-3.5 text-yellow-400" />
-            {timeLeft}s
-          </div>
-        </div>
-
-        <div className="w-full max-w-xs bg-blue-50 dark:bg-blue-900/10 p-4 rounded-xl border border-blue-100 dark:border-blue-800">
-          <div className="flex items-center justify-between text-xs text-blue-700 dark:text-blue-300 mb-2">
-            <span>Tempo restante</span>
-            <span className="font-bold">{Math.round((timeLeft / 60) * 100)}%</span>
-          </div>
-          <div className="h-2 w-full bg-blue-200 dark:bg-blue-900 rounded-full overflow-hidden">
-            <div 
-              className="h-full bg-[#1E5BFF] transition-all duration-1000 ease-linear"
-              style={{ width: `${(timeLeft / 60) * 100}%` }}
-            ></div>
-          </div>
-          <p className="text-[10px] text-blue-400 mt-2 text-center">O código atualiza automaticamente.</p>
-        </div>
+      <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-6">
+        <Loader2 className="w-10 h-10 text-[#1E5BFF] animate-spin mb-4" />
+        <p className="text-slate-400 font-medium animate-pulse uppercase text-[10px] tracking-widest">Iniciando Terminal...</p>
       </div>
     );
-  };
+  }
 
-  const PingGenerator = () => {
-    const [timeLeft, setTimeLeft] = useState(60);
-    const [pin, setPin] = useState('482 910');
-
-    const generateNewPin = () => {
-      const newPin = Math.floor(100000 + Math.random() * 900000).toString();
-      setPin(`${newPin.slice(0,3)} ${newPin.slice(3)}`);
-      setTimeLeft(60);
-    };
-
-    useEffect(() => {
-      const timer = setInterval(() => {
-        setTimeLeft((prev) => {
-          if (prev <= 1) {
-            generateNewPin();
-            return 60;
-          }
-          return prev - 1;
-        });
-      }, 1000);
-      return () => clearInterval(timer);
-    }, []);
-
+  if (offline) {
     return (
-      <div className="flex flex-col items-center justify-center p-6 h-full text-center animate-in zoom-in-95 duration-300">
-        <div className="w-16 h-16 bg-purple-100 dark:bg-purple-900/20 rounded-full flex items-center justify-center mb-6 text-purple-600">
-          <KeyRound className="w-8 h-8" />
+      <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-8 text-center">
+        <div className="w-20 h-20 bg-slate-900 rounded-full flex items-center justify-center mb-6 border border-white/5">
+          <WifiOff className="w-10 h-10 text-slate-500" />
         </div>
-
-        <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">PIN Temporário</h2>
-        <p className="text-sm text-gray-500 mb-8 max-w-[250px]">
-          Se o cliente não puder escanear, forneça este código.
-        </p>
-
-        <div className="bg-white dark:bg-gray-800 border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-3xl py-8 px-12 mb-8 relative">
-          <span className="text-5xl font-black text-gray-900 dark:text-white tracking-widest font-mono">
-            {pin}
-          </span>
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide border border-purple-200 dark:border-purple-800">
-            Válido por {timeLeft}s
-          </div>
-        </div>
-
-        <div className="grid grid-cols-2 gap-4 w-full max-w-xs text-left mb-8">
-          <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded-xl border border-gray-100 dark:border-gray-700">
-            <p className="text-[10px] text-gray-400 uppercase font-bold">Loja</p>
-            <p className="text-sm font-bold text-gray-800 dark:text-white truncate">Hamburgueria Brasa</p>
-          </div>
-          <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded-xl border border-gray-100 dark:border-gray-700">
-            <p className="text-[10px] text-gray-400 uppercase font-bold">Cashback</p>
-            <p className="text-sm font-bold text-green-600">5% Ativo</p>
-          </div>
-        </div>
-
-        <button 
-          onClick={generateNewPin}
-          className="flex items-center gap-2 text-purple-600 font-bold text-sm hover:bg-purple-50 dark:hover:bg-purple-900/20 px-4 py-2 rounded-full transition-colors"
-        >
-          <RefreshCw className="w-4 h-4" />
-          Gerar novo PIN agora
-        </button>
+        <h2 className="text-xl font-bold text-white mb-2">Sem conexão</h2>
+        <p className="text-slate-400 text-sm mb-8">O terminal precisa de internet para validar transações em tempo real.</p>
+        <button onClick={() => window.location.reload()} className="bg-[#1E5BFF] text-white font-bold py-3 px-8 rounded-2xl shadow-lg active:scale-95 transition-all">Tentar novamente</button>
       </div>
     );
-  };
-
-  const PendingTransactions = () => (
-    <div className="p-5 animate-in slide-in-from-right duration-300">
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-lg font-bold text-gray-900 dark:text-white">Aguardando Aprovação</h2>
-        <span className="bg-yellow-100 text-yellow-700 text-xs font-bold px-2 py-1 rounded-full">
-          {MOCK_PENDING.length}
-        </span>
-      </div>
-
-      <div className="space-y-4">
-        {MOCK_PENDING.map((item) => (
-          <div key={item.id} className="bg-white dark:bg-gray-800 rounded-2xl p-5 shadow-sm border border-gray-100 dark:border-gray-700 relative overflow-hidden">
-            <div className="flex justify-between items-start mb-4">
-              <div>
-                <h3 className="font-bold text-gray-900 dark:text-white text-base">{item.client}</h3>
-                <p className="text-xs text-gray-500 flex items-center gap-1 mt-1">
-                  <Clock className="w-3 h-3" /> {item.time}
-                </p>
-              </div>
-              <div className="text-right">
-                <p className="text-sm font-bold text-gray-900 dark:text-white">R$ {item.amount.toFixed(2).replace('.', ',')}</p>
-                <p className="text-xs font-bold text-[#1E5BFF]">+ R$ {item.cashback.toFixed(2)} back</p>
-              </div>
-            </div>
-
-            <div className="flex gap-3 pt-2 border-t border-gray-100 dark:border-gray-700 mt-2">
-              <button className="flex-1 bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-300 font-bold py-3 rounded-xl text-sm flex items-center justify-center gap-2 hover:bg-red-50 hover:text-red-600 transition-colors">
-                <XCircle className="w-4 h-4" /> Recusar
-              </button>
-              <button className="flex-1 bg-[#1E5BFF] text-white font-bold py-3 rounded-xl text-sm flex items-center justify-center gap-2 shadow-lg shadow-blue-500/20 active:scale-95 transition-all">
-                <CheckCircle2 className="w-4 h-4" /> Aprovar
-              </button>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-
-  const ApprovedTransactions = () => {
-    const totalDay = MOCK_APPROVED.reduce((acc, curr) => acc + curr.amount, 0);
-    const totalCashback = MOCK_APPROVED.reduce((acc, curr) => acc + curr.cashback, 0);
-
-    return (
-      <div className="p-5 animate-in slide-in-from-right duration-300">
-        <div className="bg-gray-900 dark:bg-gray-800 rounded-2xl p-5 text-white mb-6 flex justify-between items-center shadow-lg">
-          <div>
-            <p className="text-gray-400 text-xs uppercase font-bold mb-1">Total Vendido Hoje</p>
-            <h2 className="text-2xl font-bold">R$ {totalDay.toFixed(2).replace('.', ',')}</h2>
-          </div>
-          <div className="text-right">
-            <p className="text-gray-400 text-xs uppercase font-bold mb-1">Cashback</p>
-            <p className="text-xl font-bold text-[#1E5BFF]">R$ {totalCashback.toFixed(2).replace('.', ',')}</p>
-          </div>
-        </div>
-
-        <h3 className="font-bold text-gray-900 dark:text-white mb-4 px-1">Histórico do Dia</h3>
-
-        <div className="space-y-3">
-          {MOCK_APPROVED.map((item) => (
-            <div key={item.id} className="bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-100 dark:border-gray-700 flex justify-between items-center">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-green-100 dark:bg-green-900/20 rounded-full flex items-center justify-center text-green-600">
-                  <CheckCircle2 className="w-5 h-5" />
-                </div>
-                <div>
-                  <p className="font-bold text-gray-900 dark:text-white text-sm">{item.client}</p>
-                  <p className="text-xs text-gray-500">{item.time}</p>
-                </div>
-              </div>
-              <div className="text-right">
-                <p className="font-bold text-gray-900 dark:text-white text-sm">R$ {item.amount.toFixed(2).replace('.', ',')}</p>
-                <p className="text-[10px] text-green-600 font-bold">Aprovado</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-  };
-
-  // --- HEADER RENDER ---
-  const getHeaderTitle = () => {
-    switch (currentScreen) {
-      case 'dashboard': return 'Painel do Lojista';
-      case 'qr_gen': return 'QR Code da Compra';
-      case 'pin_gen': return 'PIN Temporário';
-      case 'pending': return 'Aprovações';
-      case 'approved': return 'Histórico do Dia';
-      default: return '';
-    }
-  };
+  }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 font-sans pb-20">
+    <div className="min-h-screen bg-slate-950 text-white font-sans flex flex-col animate-in fade-in duration-300">
       
-      {/* Dynamic Header */}
-      <div className="sticky top-0 z-30 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md px-5 h-16 flex items-center justify-between border-b border-gray-100 dark:border-gray-800 transition-all">
-        <div className="flex items-center gap-4">
-          <button 
-            onClick={() => currentScreen === 'dashboard' ? onBack() : setCurrentScreen('dashboard')} 
-            className="p-2 -ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-          >
-            <ChevronLeft className="w-6 h-6 text-gray-800 dark:text-white" />
-          </button>
-          <h1 className="font-bold text-lg text-gray-900 dark:text-white">{getHeaderTitle()}</h1>
+      {/* Header Sticky */}
+      <header className="sticky top-0 z-40 bg-slate-950/90 backdrop-blur-md border-b border-white/5 px-5 h-20 flex items-center gap-4">
+        <button onClick={onBack} className="p-2 -ml-2 rounded-full hover:bg-white/5 transition-colors">
+          <ChevronLeft className="w-6 h-6 text-gray-400" />
+        </button>
+        <div className="flex-1">
+            <h1 className="font-bold text-lg font-display tracking-tight">Terminal do Caixa</h1>
+            <p className="text-[10px] text-emerald-400 font-black uppercase tracking-widest flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Sistema Online
+            </p>
         </div>
-        {currentScreen === 'dashboard' && (
-          <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center text-[#1E5BFF]">
-            <Wallet className="w-4 h-4" />
-          </div>
-        )}
-      </div>
+        <button className="p-2 rounded-full bg-slate-900 border border-white/5">
+            <History className="w-5 h-5 text-slate-400" onClick={() => setActiveTab('history')} />
+        </button>
+      </header>
 
-      {/* Screen Content */}
-      <div className="h-full">
-        {currentScreen === 'dashboard' && <Dashboard />}
-        {currentScreen === 'qr_gen' && <QRGenerator />}
-        {currentScreen === 'pin_gen' && <PingGenerator />}
-        {currentScreen === 'pending' && <PendingTransactions />}
-        {currentScreen === 'approved' && <ApprovedTransactions />}
+      <main className="flex-1 overflow-y-auto no-scrollbar pb-32">
+        
+        {/* Resumo do Dia - Cards Horizontais */}
+        <section className="p-5 pt-6 grid grid-cols-2 gap-3">
+            <div className="bg-slate-900 p-4 rounded-3xl border border-white/5 shadow-lg col-span-2">
+                <div className="flex justify-between items-start mb-4">
+                    <div className="p-2 bg-emerald-500/10 rounded-xl">
+                        <TrendingUp className="w-5 h-5 text-emerald-400" />
+                    </div>
+                    <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Hoje</span>
+                </div>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Vendas Localizei</p>
+                <h2 className="text-3xl font-black tracking-tighter">{formatBRL(450.90)}</h2>
+            </div>
+            
+            <div className="bg-slate-900 p-4 rounded-3xl border border-white/5 shadow-lg">
+                <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest mb-1">Total Recebido</p>
+                <p className="text-lg font-bold text-white">{formatBRL(380.00)}</p>
+            </div>
+            <div className="bg-slate-900 p-4 rounded-3xl border border-white/5 shadow-lg">
+                <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest mb-1">Pendentes</p>
+                <p className="text-lg font-bold text-amber-400">{formatBRL(70.90)}</p>
+            </div>
+        </section>
+
+        {/* Tabs Quick Selection */}
+        <div className="px-5 mb-6">
+            <div className="bg-slate-900 p-1 rounded-2xl border border-white/5 flex gap-1">
+                <button 
+                    onClick={() => setActiveTab('terminal')}
+                    className={`flex-1 py-3 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${activeTab === 'terminal' ? 'bg-[#1E5BFF] text-white shadow-lg shadow-blue-500/20' : 'text-slate-500'}`}
+                >
+                    Nova Cobrança
+                </button>
+                <button 
+                    onClick={() => setActiveTab('history')}
+                    className={`flex-1 py-3 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${activeTab === 'history' ? 'bg-[#1E5BFF] text-white shadow-lg shadow-blue-500/20' : 'text-slate-500'}`}
+                >
+                    Histórico
+                </button>
+            </div>
+        </div>
+
+        {activeTab === 'terminal' ? (
+            <section className="px-5 space-y-6 animate-in slide-in-from-bottom-4 duration-500">
+                
+                {/* Nova Cobrança Form */}
+                <div className="bg-slate-900 p-6 rounded-[32px] border border-white/5 shadow-2xl relative overflow-hidden">
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-[#1E5BFF]/5 rounded-full blur-3xl"></div>
+                    
+                    <h3 className="text-sm font-black text-slate-300 uppercase tracking-[0.2em] mb-8 flex items-center gap-2">
+                        <Plus className="w-4 h-4 text-[#1E5BFF]" strokeWidth={3} /> Gerar Cobrança
+                    </h3>
+
+                    <div className="space-y-6">
+                        <div>
+                            <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1 mb-2 block">Valor da Venda</label>
+                            <div className="relative group">
+                                <span className="absolute left-5 top-1/2 -translate-y-1/2 text-2xl font-black text-slate-600 group-focus-within:text-[#1E5BFF] transition-colors">R$</span>
+                                <input 
+                                    type="text" 
+                                    inputMode="decimal"
+                                    value={amount}
+                                    onChange={(e) => setAmount(e.target.value)}
+                                    placeholder="0,00"
+                                    className="w-full bg-slate-950 border border-white/5 rounded-2xl py-5 pl-16 pr-5 text-3xl font-black text-white outline-none focus:border-[#1E5BFF] focus:ring-4 focus:ring-blue-500/10 transition-all placeholder-slate-800"
+                                />
+                            </div>
+                        </div>
+
+                        <div>
+                            <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1 mb-2 block">Descrição (Opcional)</label>
+                            <input 
+                                type="text" 
+                                value={description}
+                                onChange={(e) => setDescription(e.target.value)}
+                                placeholder="Ex: Almoço Executivo"
+                                className="w-full bg-slate-950 border border-white/5 rounded-2xl py-4 px-5 text-sm font-bold text-white outline-none focus:border-[#1E5BFF] transition-all placeholder-slate-800"
+                            />
+                        </div>
+
+                        <div>
+                            <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1 mb-2 block">Forma de Recebimento</label>
+                            <div className="grid grid-cols-2 gap-3">
+                                <button 
+                                    onClick={() => setPaymentMethod('pix')}
+                                    className={`py-4 rounded-2xl border-2 flex flex-col items-center gap-2 transition-all ${paymentMethod === 'pix' ? 'bg-blue-500/10 border-[#1E5BFF] text-white' : 'bg-slate-950 border-white/5 text-slate-500'}`}
+                                >
+                                    <QrCode className={`w-6 h-6 ${paymentMethod === 'pix' ? 'text-[#1E5BFF]' : 'text-slate-700'}`} />
+                                    <span className="text-[10px] font-black uppercase tracking-widest">PIX Imadiato</span>
+                                </button>
+                                <button 
+                                    onClick={() => setPaymentMethod('card')}
+                                    className={`py-4 rounded-2xl border-2 flex flex-col items-center gap-2 transition-all ${paymentMethod === 'card' ? 'bg-blue-500/10 border-[#1E5BFF] text-white' : 'bg-slate-950 border-white/5 text-slate-500'}`}
+                                >
+                                    <CreditCard className={`w-6 h-6 ${paymentMethod === 'card' ? 'text-[#1E5BFF]' : 'text-slate-700'}`} />
+                                    <span className="text-[10px] font-black uppercase tracking-widest">Cartão (Link)</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <button 
+                            onClick={handleGenerateCharge}
+                            disabled={isGenerating || !amount}
+                            className="w-full bg-[#1E5BFF] text-white font-black py-5 rounded-2xl shadow-xl shadow-blue-500/20 flex items-center justify-center gap-3 active:scale-[0.98] transition-all disabled:opacity-50 disabled:grayscale"
+                        >
+                            {isGenerating ? (
+                                <Loader2 className="w-6 h-6 animate-spin" />
+                            ) : (
+                                <>
+                                    GERAR COBRANÇA
+                                    <ArrowRight className="w-5 h-5" strokeWidth={3} />
+                                </>
+                            )}
+                        </button>
+                    </div>
+                </div>
+
+                {/* Dica de Segurança */}
+                <div className="p-4 bg-slate-900/50 border border-white/5 rounded-2xl flex items-start gap-4">
+                    <div className="p-2 bg-blue-500/10 rounded-lg">
+                        <AlertCircle className="w-4 h-4 text-[#1E5BFF]" />
+                    </div>
+                    <p className="text-[10px] text-slate-500 font-medium leading-relaxed">
+                        A cobrança será validada automaticamente pelo sistema Localizei e o cashback creditado na hora para o cliente.
+                    </p>
+                </div>
+            </section>
+        ) : (
+            <section className="px-5 space-y-4 animate-in slide-in-from-right duration-500">
+                <div className="flex items-center justify-between px-1">
+                    <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Últimas 24 horas</h3>
+                    <button className="text-[10px] font-black text-[#1E5BFF] uppercase tracking-widest">Exportar CSV</button>
+                </div>
+
+                {history.length === 0 ? (
+                    <div className="bg-slate-900/50 border border-white/5 border-dashed rounded-[32px] p-12 text-center">
+                        <ReceiptText className="w-12 h-12 text-slate-800 mx-auto mb-4" />
+                        <p className="text-slate-500 font-bold text-sm">Nenhuma cobrança hoje.</p>
+                        <p className="text-slate-600 text-[10px] mt-1 uppercase tracking-widest">Vendas via terminal aparecerão aqui.</p>
+                    </div>
+                ) : (
+                    <div className="space-y-3">
+                        {history.map((tx) => (
+                            <div key={tx.id} className="bg-slate-900 p-4 rounded-2xl border border-white/5 flex items-center justify-between group">
+                                <div className="flex items-center gap-4">
+                                    <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                                        tx.status === 'paid' ? 'bg-emerald-500/10 text-emerald-400' :
+                                        tx.status === 'pending' ? 'bg-amber-500/10 text-amber-400' :
+                                        'bg-slate-800 text-slate-500'
+                                    }`}>
+                                        {tx.method === 'pix' ? <QrCode className="w-5 h-5" /> : <CreditCard className="w-5 h-5" />}
+                                    </div>
+                                    <div>
+                                        <p className="text-sm font-bold text-white leading-none mb-1">{formatBRL(tx.amount)}</p>
+                                        <p className="text-[10px] text-slate-500 font-medium uppercase tracking-tighter">
+                                            {tx.date} • {tx.method.toUpperCase()}
+                                        </p>
+                                    </div>
+                                </div>
+                                <div className="text-right">
+                                    <span className={`text-[8px] font-black uppercase px-2 py-1 rounded-md border ${
+                                        tx.status === 'paid' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' :
+                                        tx.status === 'pending' ? 'bg-amber-500/10 text-amber-400 border-amber-500/20 animate-pulse' :
+                                        'bg-slate-800 text-slate-600 border-white/5'
+                                    }`}>
+                                        {tx.status === 'paid' ? 'Pago' : tx.status === 'pending' ? 'Pendente' : 'Cancelado'}
+                                    </span>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                )}
+                
+                <button className="w-full py-4 text-slate-600 font-black text-[10px] uppercase tracking-[0.3em] hover:text-slate-400 transition-colors">
+                    Ver relatório mensal completo
+                </button>
+            </section>
+        )}
+
+      </main>
+
+      {/* Footer Branding */}
+      <div className="fixed bottom-0 left-0 right-0 p-8 flex flex-col items-center justify-center opacity-30 bg-slate-950 pointer-events-none">
+        <CircleDollarSign className="w-4 h-4 mb-2 text-slate-500" />
+        <p className="text-[8px] font-black uppercase tracking-[0.5em] text-slate-500">Localizei Pay Terminal v1.0</p>
       </div>
 
     </div>
