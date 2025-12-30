@@ -27,7 +27,8 @@ import {
   Clock,
   PlayCircle,
   Users,
-  Handshake
+  Handshake,
+  Lock
 } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import { User } from '@supabase/supabase-js';
@@ -143,12 +144,14 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
   const [hasCampaigns, setHasCampaigns] = useState(false);
   const [activeVideo, setActiveVideo] = useState<{url: string, title: string} | null>(null);
   
+  // Gate Control
+  const [isCashbackVideoFinished, setIsCashbackVideoFinished] = useState(false);
+  
   // Onboarding Control
   const [cashbackFirstSeen] = useState<string | null>(localStorage.getItem('cashback_onboarding_start'));
   const [connectFirstSeen] = useState<string | null>(localStorage.getItem('connect_onboarding_start'));
 
   useEffect(() => {
-    // Inicializa datas de onboarding se for o primeiro acesso
     if (!cashbackFirstSeen) {
       localStorage.setItem('cashback_onboarding_start', new Date().toISOString());
     }
@@ -251,7 +254,13 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
                     </div>
                 </div>
                 <button 
-                    onClick={() => setIsCashbackEnabled(!isCashbackEnabled)}
+                    onClick={() => {
+                        if (!isCashbackVideoFinished && !isCashbackEnabled) {
+                            setActiveVideo({url: CASHBACK_TUTORIAL_VIDEO, title: "Como funciona o Cashback Localizei"});
+                        } else {
+                            setIsCashbackEnabled(!isCashbackEnabled);
+                        }
+                    }}
                     className={`w-12 h-6 rounded-full p-1 transition-colors duration-300 ${isCashbackEnabled ? 'bg-green-500' : 'bg-gray-300 dark:bg-gray-600'}`}
                 >
                     <div className={`w-4 h-4 bg-white rounded-full shadow-sm transition-transform duration-300 ${isCashbackEnabled ? 'translate-x-6' : 'translate-x-0'}`}></div>
@@ -274,19 +283,43 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
                         </span>
                     </div>
                 </div>
+
                 <div className="bg-blue-50 dark:bg-blue-900/10 rounded-2xl p-5 mb-4 border border-blue-100 dark:border-blue-800/30">
                     <p className="text-xs text-blue-700 dark:text-blue-400 leading-relaxed font-medium">
                         Lojas com cashback ativo recebem até <strong>40% mais visitas</strong> no app.
                     </p>
                 </div>
+
                 <SupportQuestion context="cashback" onSend={handleSendQuestion} />
-                <button 
-                    onClick={() => setIsCashbackEnabled(true)}
-                    className="w-full bg-[#1E5BFF] text-white py-4 rounded-2xl text-sm font-black uppercase tracking-widest shadow-lg shadow-blue-500/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2 mt-6"
-                >
-                    <CheckCircle2 className="w-5 h-5" />
-                    Habilitar cashback agora
-                </button>
+                
+                <div className="mt-6">
+                    {!isCashbackVideoFinished ? (
+                        <div className="flex items-start gap-3 bg-amber-50 dark:bg-amber-900/10 p-4 rounded-2xl border border-amber-100 dark:border-amber-800/30 mb-4 animate-in slide-in-from-bottom-2 duration-500">
+                            <Lock className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
+                            <p className="text-[11px] text-amber-700 dark:text-amber-400 font-bold leading-tight">
+                                Para habilitar o cashback, assista ao vídeo explicativo até o final.
+                            </p>
+                        </div>
+                    ) : (
+                        <div className="flex items-center gap-2 px-2 mb-4 animate-in zoom-in duration-300">
+                            <CheckCircle2 className="w-4 h-4 text-green-500" />
+                            <span className="text-[11px] font-black text-green-600 uppercase tracking-widest">Vídeo concluído. Recurso liberado!</span>
+                        </div>
+                    )}
+
+                    <button 
+                        disabled={!isCashbackVideoFinished}
+                        onClick={() => setIsCashbackEnabled(true)}
+                        className={`w-full py-4 rounded-2xl text-sm font-black uppercase tracking-widest shadow-lg active:scale-[0.98] transition-all flex items-center justify-center gap-2 ${
+                            isCashbackVideoFinished 
+                            ? 'bg-[#1E5BFF] text-white shadow-blue-500/20' 
+                            : 'bg-gray-200 text-gray-400 dark:bg-gray-800 dark:text-gray-600 shadow-none grayscale'
+                        }`}
+                    >
+                        {isCashbackVideoFinished ? <CheckCircle2 className="w-5 h-5" /> : <Lock className="w-4 h-4" />}
+                        Habilitar cashback agora
+                    </button>
+                </div>
               </div>
             ) : (
               <div className="animate-in fade-in duration-500">
@@ -394,7 +427,7 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
             </div>
         </section>
 
-        {/* 4. FREGUESIA CONNECT (NOVO BLOCO) */}
+        {/* 4. FREGUESIA CONNECT */}
         <section className="w-full bg-white dark:bg-gray-800 p-6 border-b border-gray-100 dark:border-gray-800 relative overflow-hidden">
             <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/5 rounded-bl-full -mr-8 -mt-8 pointer-events-none"></div>
             
@@ -521,6 +554,14 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
                     className="w-full max-h-screen" 
                     controls 
                     autoPlay
+                    onTimeUpdate={(e) => {
+                        const video = e.currentTarget;
+                        if (video.duration > 0 && (video.currentTime / video.duration) >= 0.95) {
+                            if (activeVideo.url === CASHBACK_TUTORIAL_VIDEO) {
+                                setIsCashbackVideoFinished(true);
+                            }
+                        }
+                    }}
                 />
             </div>
             <div className="p-6 pb-12 bg-gradient-to-t from-black/80 to-transparent absolute bottom-0 left-0 right-0 flex items-center justify-center">
