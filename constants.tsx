@@ -3,7 +3,10 @@ import React from 'react';
 import { 
   Utensils, ShoppingCart, Scissors, Heart, PawPrint, Home, Wrench, 
   Dumbbell, CarFront, BookOpen, Monitor, Shirt, Ticket, Map as MapIcon, 
-  LayoutGrid, Pill, Briefcase, Plane, Zap
+  LayoutGrid, Pill, Briefcase, Plane, Zap,
+  Beef, Coffee, Pizza, Croissant, Soup, Cake, Sandwich, 
+  Stethoscope, Package, Clock, Target, Settings, Dog,
+  Star, Tag, Award, TrendingUp, ChevronRight
 } from 'lucide-react';
 import { AdType, Category, Store, Story, EditorialCollection } from './types';
 import { getStoreLogo } from './utils/mockLogos';
@@ -61,7 +64,7 @@ export const STORES: Store[] = [
     id: '1',
     name: 'Burger Freguesia',
     category: 'Alimentação',
-    subcategory: 'Hamburgueria',
+    subcategory: 'Hambúrguerias',
     description: 'Hambúrgueres artesanais com sabor de bairro.',
     logoUrl: getStoreLogo(1),
     rating: 4.8,
@@ -78,7 +81,7 @@ export const STORES: Store[] = [
     id: 'premium-test',
     name: 'Padaria Imperial',
     category: 'Alimentação',
-    subcategory: 'Padaria',
+    subcategory: 'Padarias',
     description: 'O melhor pão quentinho e café artesanal da Freguesia.',
     logoUrl: getStoreLogo(8),
     rating: 4.9,
@@ -93,15 +96,44 @@ export const STORES: Store[] = [
 ];
 
 export const SUBCATEGORIES: Record<string, { name: string; icon: React.ReactNode }[]> = {
+  'Alimentação': [
+    { name: 'Restaurantes', icon: <Utensils /> },
+    { name: 'Padarias', icon: <Croissant /> },
+    { name: 'Lanches', icon: <Sandwich /> },
+    { name: 'Pizzarias', icon: <Pizza /> },
+    { name: 'Cafeterias', icon: <Coffee /> },
+    { name: 'Japonês / Oriental', icon: <Soup /> },
+    { name: 'Churrascarias', icon: <Beef /> },
+    { name: 'Doces & Sobremesas', icon: <Cake /> },
+  ],
+  'Pets': [
+    { name: 'Pet Shop', icon: <Dog /> },
+    { name: 'Veterinária', icon: <Stethoscope /> },
+    { name: 'Banho & Tosa', icon: <Scissors /> },
+    { name: 'Ração & Acessórios', icon: <Package /> },
+    { name: 'Clínica 24h', icon: <Clock /> },
+    { name: 'Adestramento', icon: <Target /> },
+    { name: 'Pet Hotel', icon: <Home /> },
+    { name: 'Serviços Pet', icon: <Settings /> },
+  ],
   'Comida': [
     { name: 'Restaurantes', icon: <Utensils /> },
-    { name: 'Lanches', icon: <Utensils /> },
-    { name: 'Pizzarias', icon: <Utensils /> },
-    { name: 'Hambúrguerias', icon: <Utensils /> },
-    { name: 'Japonês', icon: <Utensils /> },
-    { name: 'Docerias', icon: <Utensils /> },
+    { name: 'Padarias', icon: <Croissant /> },
+    { name: 'Lanches', icon: <Sandwich /> },
+    { name: 'Pizzarias', icon: <Pizza /> },
+    { name: 'Cafeterias', icon: <Coffee /> },
+    { name: 'Japonês / Oriental', icon: <Soup /> },
+    { name: 'Churrascarias', icon: <Beef /> },
+    { name: 'Doces & Sobremesas', icon: <Cake /> },
   ],
   'default': [
     { name: 'Geral', icon: <LayoutGrid /> },
+    { name: 'Novidades', icon: <Zap /> },
+    { name: 'Mais Procurados', icon: <Star /> },
+    { name: 'Promoções', icon: <Tag /> },
+    { name: 'Próximos', icon: <MapIcon /> },
+    { name: 'Premium', icon: <Award /> },
+    { name: 'Destaque', icon: <TrendingUp /> },
+    { name: 'Ver Todos', icon: <ChevronRight /> }
   ]
 };
