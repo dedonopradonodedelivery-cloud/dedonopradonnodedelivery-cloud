@@ -9,7 +9,8 @@ import {
   Heart, 
   Award,
   Navigation,
-  ThumbsUp
+  ThumbsUp,
+  ArrowUpRight
 } from 'lucide-react';
 import { Store } from '../types';
 
@@ -24,6 +25,56 @@ interface ExploreViewProps {
   onViewMasterSponsor?: () => void;
 }
 
+// Banner Editorial para Monetização (Posição Topo)
+const EditorialSponsoredBanner: React.FC<{ store: Store; onClick: () => void }> = ({ store, onClick }) => (
+  <div className="px-4 mb-10">
+    <button 
+      onClick={onClick}
+      className="w-full relative aspect-[21/10] rounded-[32px] overflow-hidden shadow-2xl shadow-blue-900/10 group active:scale-[0.98] transition-all border border-gray-100 dark:border-gray-800"
+    >
+      {/* Background Image com Zoom no Hover */}
+      <img 
+        src="https://images.unsplash.com/photo-1554118811-1e0d58224f24?q=80&w=800&auto=format&fit=crop" 
+        className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000"
+        alt={store.name}
+      />
+      
+      {/* Overlay de Degradê Editorial */}
+      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+      
+      {/* Selo Discreto de Patrocínio */}
+      <div className="absolute top-4 right-4 bg-white/20 backdrop-blur-md border border-white/30 px-2.5 py-1 rounded-lg animate-badge-glow">
+        <span className="text-[9px] font-black text-white uppercase tracking-[0.15em]">Destaque Patrocinado</span>
+      </div>
+
+      {/* Conteúdo Informativo */}
+      <div className="absolute bottom-0 left-0 right-0 p-6 text-left flex justify-between items-end">
+        <div className="flex-1 pr-4">
+          <div className="flex items-center gap-2 mb-1">
+            <span className="text-[10px] font-black text-blue-400 uppercase tracking-widest">{store.category}</span>
+            <div className="w-1 h-1 rounded-full bg-white/40"></div>
+            <div className="flex items-center gap-1">
+               <Star className="w-2.5 h-2.5 text-yellow-400 fill-yellow-400" />
+               <span className="text-[10px] font-bold text-white">4.9</span>
+            </div>
+          </div>
+          <h3 className="text-xl font-black text-white leading-tight font-display tracking-tight mb-1">
+            Terraço Gastronomia
+          </h3>
+          <p className="text-xs text-gray-300 font-medium line-clamp-1">
+            A melhor vista e o cardápio mais premiado da região.
+          </p>
+        </div>
+        
+        {/* CTA Leve */}
+        <div className="bg-white text-gray-900 px-4 py-2 rounded-2xl text-[11px] font-black uppercase tracking-wider flex items-center gap-2 shadow-xl group-hover:bg-primary-500 group-hover:text-white transition-colors">
+          Explorar <ArrowUpRight className="w-3.5 h-3.5" />
+        </div>
+      </div>
+    </button>
+  </div>
+);
+
 // Componente de Título de Bloco Padronizado com Hierarquia Reforçada
 const BlockHeader: React.FC<{ title: string; icon: React.ElementType }> = ({ title, icon: Icon }) => (
   <div className="flex items-center justify-between mb-4 px-1">
@@ -31,7 +82,7 @@ const BlockHeader: React.FC<{ title: string; icon: React.ElementType }> = ({ tit
       <div className="w-8 h-8 rounded-xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
         <Icon className="w-4 h-4 text-gray-500 dark:text-gray-400" strokeWidth={2.5} />
       </div>
-      <h2 className="text-[17px] font-black text-gray-900 dark:text-gray-100 tracking-tight">
+      <h2 className="text-[17px] font-black text-gray-900 dark:text-white tracking-tight">
         {title}
       </h2>
     </div>
@@ -43,7 +94,7 @@ const BlockHeader: React.FC<{ title: string; icon: React.ElementType }> = ({ tit
 
 // Card de Exploração Padrão
 const ExploreCard: React.FC<{ 
-  store: Partial<Store> & { mockImage?: string; customBadge?: string; customBadgeColor?: string; subText?: string; animType?: string }; 
+  store: Partial<Store> & { mockImage?: string; customBadge?: string; customBadgeColor?: string; subText?: string; animType?: string; glowColor?: string }; 
   onClick: () => void;
   showStatus?: boolean;
 }> = ({ store, onClick, showStatus }) => (
@@ -58,7 +109,7 @@ const ExploreCard: React.FC<{
         alt={store.name} 
       />
       {store.customBadge && (
-        <div className={`absolute top-3 left-3 ${store.customBadgeColor || 'bg-[#1E5BFF]'} text-white text-[9px] font-black px-2 py-1 rounded-lg shadow-[0_4px_12px_rgba(0,0,0,0.2)] uppercase ${store.animType}`}>
+        <div className={`absolute top-3 left-3 ${store.customBadgeColor || 'bg-[#1E5BFF]'} text-white text-[9px] font-black px-2 py-1 rounded-lg ${store.glowColor || 'shadow-[0_4px_12px_rgba(0,0,0,0.2)]'} uppercase ${store.animType} border border-white/20`}>
           {store.customBadge}
         </div>
       )}
@@ -79,7 +130,7 @@ const ExploreCard: React.FC<{
 
       {showStatus && (
         <div className="mt-2 flex items-center gap-1.5 animate-badge-float-up">
-          <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_5px_#10b981]"></div>
+          <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_#10b981]"></div>
           <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400">ABERTO AGORA</span>
         </div>
       )}
@@ -92,16 +143,15 @@ export const ExploreView: React.FC<ExploreViewProps> = ({
   onStoreClick,
 }) => {
   
-  // Estrutura curada com tipos de animação específicos para cada categoria de badge
   const sections = useMemo(() => [
     {
       id: 'perto',
       title: 'Perto de Você',
       icon: Navigation,
       items: [
-        { ...stores[0], name: 'Pet Shop Araguaia', category: 'Pets', subText: 'A 200m de você', mockImage: 'https://images.unsplash.com/photo-1583337130417-3346a1be7dee?q=80&w=400&auto=format&fit=crop', customBadge: 'Muito Perto', animType: 'animate-badge-pop' },
-        { ...stores[1], name: 'Mercado Freguesia', category: 'Mercado', subText: 'A 450m de você', mockImage: 'https://images.unsplash.com/photo-1578916171728-46686eac8d58?q=80&w=400&auto=format&fit=crop', customBadge: 'Muito Perto', animType: 'animate-badge-pop' },
-        { ...stores[0], name: 'Banca do Nelson', category: 'Serviços', subText: 'A 600m de você', mockImage: 'https://images.unsplash.com/photo-1581338834647-b0fb40704e21?q=80&w=400&auto=format&fit=crop', customBadge: 'Muito Perto', animType: 'animate-badge-pop' }
+        { ...stores[0], name: 'Pet Shop Araguaia', category: 'Pets', subText: 'A 200m de você', mockImage: 'https://images.unsplash.com/photo-1583337130417-3346a1be7dee?q=80&w=400&auto=format&fit=crop', customBadge: 'Muito Perto', animType: 'animate-badge-pop', customBadgeColor: 'bg-gradient-to-r from-blue-600 to-blue-500', glowColor: 'shadow-[0_4px_12px_rgba(30,91,255,0.4)]' },
+        { ...stores[1], name: 'Mercado Freguesia', category: 'Mercado', subText: 'A 450m de você', mockImage: 'https://images.unsplash.com/photo-1578916171728-46686eac8d58?q=80&w=400&auto=format&fit=crop', customBadge: 'Muito Perto', animType: 'animate-badge-pop', customBadgeColor: 'bg-gradient-to-r from-blue-600 to-blue-500' },
+        { ...stores[0], name: 'Banca do Nelson', category: 'Serviços', subText: 'A 600m de você', mockImage: 'https://images.unsplash.com/photo-1581338834647-b0fb40704e21?q=80&w=400&auto=format&fit=crop', customBadge: 'Muito Perto', animType: 'animate-badge-pop', customBadgeColor: 'bg-gradient-to-r from-blue-600 to-blue-500' }
       ]
     },
     {
@@ -109,9 +159,9 @@ export const ExploreView: React.FC<ExploreViewProps> = ({
       title: 'Mais Bem Avaliados',
       icon: ThumbsUp,
       items: [
-        { ...stores[1], name: 'Espaço VIP Beleza', category: 'Beleza', subText: '1.2k avaliações 5★', mockImage: 'https://images.unsplash.com/photo-1560066984-138dadb4c035?q=80&w=400&auto=format&fit=crop', customBadge: 'Favorito', customBadgeColor: 'bg-amber-600', animType: 'animate-badge-glow' },
-        { ...stores[0], name: 'Clínica Sorriso', category: 'Saúde', subText: '850 avaliações 5★', mockImage: 'https://images.unsplash.com/photo-1629909613654-28e377c37b09?q=80&w=400&auto=format&fit=crop', customBadge: 'Excelência', customBadgeColor: 'bg-amber-600', animType: 'animate-badge-glow' },
-        { ...stores[1], name: 'Auto Center Pro', category: 'Serviços', subText: '500 avaliações 5★', mockImage: 'https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?q=80&w=400&auto=format&fit=crop', customBadge: 'Top Rated', customBadgeColor: 'bg-amber-600', animType: 'animate-badge-glow' }
+        { ...stores[1], name: 'Espaço VIP Beleza', category: 'Beleza', subText: '1.2k avaliações 5★', mockImage: 'https://images.unsplash.com/photo-1560066984-138dadb4c035?q=80&w=400&auto=format&fit=crop', customBadge: 'Favorito', customBadgeColor: 'bg-gradient-to-r from-amber-600 to-orange-500', animType: 'animate-badge-glow', glowColor: 'shadow-[0_4px_12px_rgba(245,158,11,0.5)]' },
+        { ...stores[0], name: 'Clínica Sorriso', category: 'Saúde', subText: '850 avaliações 5★', mockImage: 'https://images.unsplash.com/photo-1629909613654-28e377c37b09?q=80&w=400&auto=format&fit=crop', customBadge: 'Excelência', customBadgeColor: 'bg-gradient-to-r from-amber-600 to-orange-500', animType: 'animate-badge-glow' },
+        { ...stores[1], name: 'Auto Center Pro', category: 'Serviços', subText: '500 avaliações 5★', mockImage: 'https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?q=80&w=400&auto=format&fit=crop', customBadge: 'Top Rated', customBadgeColor: 'bg-gradient-to-r from-amber-600 to-orange-500', animType: 'animate-badge-glow' }
       ]
     },
     {
@@ -119,9 +169,9 @@ export const ExploreView: React.FC<ExploreViewProps> = ({
       title: 'Vale a Visita Hoje',
       icon: Award,
       items: [
-        { ...stores[0], name: 'Terraço Gastrô', category: 'Restaurante', subText: 'Ambiente externo incrível', mockImage: 'https://images.unsplash.com/photo-1550966842-2849a224ef52?q=80&w=400&auto=format&fit=crop', customBadge: 'Curadoria', animType: 'animate-badge-float-up' },
-        { ...stores[1], name: 'Café com Arte', category: 'Cafeteria', subText: 'O melhor grão da região', mockImage: 'https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?q=80&w=400&auto=format&fit=crop', customBadge: 'Curadoria', animType: 'animate-badge-float-up' },
-        { ...stores[0], name: 'Vinhos & Cia', category: 'Boutique', subText: 'Degustação exclusiva', mockImage: 'https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?q=80&w=400&auto=format&fit=crop', customBadge: 'Curadoria', animType: 'animate-badge-float-up' }
+        { ...stores[0], name: 'Terraço Gastrô', category: 'Restaurante', subText: 'Ambiente externo incrível', mockImage: 'https://images.unsplash.com/photo-1550966842-2849a224ef52?q=80&w=400&auto=format&fit=crop', customBadge: 'Curadoria', animType: 'animate-badge-float-up', customBadgeColor: 'bg-gradient-to-r from-violet-600 to-indigo-500', glowColor: 'shadow-[0_4px_12px_rgba(124,58,237,0.4)]' },
+        { ...stores[1], name: 'Café com Arte', category: 'Cafeteria', subText: 'O melhor grão da região', mockImage: 'https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?q=80&w=400&auto=format&fit=crop', customBadge: 'Curadoria', animType: 'animate-badge-float-up', customBadgeColor: 'bg-gradient-to-r from-violet-600 to-indigo-500' },
+        { ...stores[0], name: 'Vinhos & Cia', category: 'Boutique', subText: 'Degustação exclusiva', mockImage: 'https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?q=80&w=400&auto=format&fit=crop', customBadge: 'Curadoria', animType: 'animate-badge-float-up', customBadgeColor: 'bg-gradient-to-r from-violet-600 to-indigo-500' }
       ]
     },
     {
@@ -139,9 +189,9 @@ export const ExploreView: React.FC<ExploreViewProps> = ({
       title: 'Novidades da Semana',
       icon: Sparkles,
       items: [
-        { ...stores[0], name: 'Loja Geek Freguesia', category: 'Lazer', subText: 'Inaugurado há 2 dias', mockImage: 'https://images.unsplash.com/photo-1612036782180-6f0b6cd846fe?q=80&w=400&auto=format&fit=crop', customBadge: 'Estreia', customBadgeColor: 'bg-indigo-600', animType: 'animate-badge-pop' },
-        { ...stores[1], name: 'CrossFit Vila', category: 'Fitness', subText: 'Novo espaço de treino', mockImage: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=400&auto=format&fit=crop', customBadge: 'Estreia', customBadgeColor: 'bg-indigo-600', animType: 'animate-badge-pop' },
-        { ...stores[0], name: 'Burger & Beer', category: 'Lanches', subText: 'Novo cardápio artesanal', mockImage: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?q=80&w=400&auto=format&fit=crop', customBadge: 'Estreia', customBadgeColor: 'bg-indigo-600', animType: 'animate-badge-pop' }
+        { ...stores[0], name: 'Loja Geek Freguesia', category: 'Lazer', subText: 'Inaugurado há 2 dias', mockImage: 'https://images.unsplash.com/photo-1612036782180-6f0b6cd846fe?q=80&w=400&auto=format&fit=crop', customBadge: 'Estreia', customBadgeColor: 'bg-gradient-to-r from-emerald-600 to-teal-500', animType: 'animate-badge-pop', glowColor: 'shadow-[0_4px_12px_rgba(16,185,129,0.4)]' },
+        { ...stores[1], name: 'CrossFit Vila', category: 'Fitness', subText: 'Novo espaço de treino', mockImage: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=400&auto=format&fit=crop', customBadge: 'Estreia', customBadgeColor: 'bg-gradient-to-r from-emerald-600 to-teal-500', animType: 'animate-badge-pop' },
+        { ...stores[0], name: 'Burger & Beer', category: 'Lanches', subText: 'Novo cardápio artesanal', mockImage: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?q=80&w=400&auto=format&fit=crop', customBadge: 'Estreia', customBadgeColor: 'bg-gradient-to-r from-emerald-600 to-teal-500', animType: 'animate-badge-pop' }
       ]
     },
     {
@@ -159,7 +209,7 @@ export const ExploreView: React.FC<ExploreViewProps> = ({
   return (
     <div className="flex flex-col bg-white dark:bg-gray-900 min-h-screen animate-in fade-in duration-500">
       
-      {/* Header do Hub de Descoberta com Título Atualizado */}
+      {/* Header do Hub de Descoberta */}
       <div className="px-5 pt-8 pb-4">
         <h1 className="text-2xl font-black text-gray-900 dark:text-white font-display tracking-tight leading-tight">
           Explorar <br/> <span className="text-primary-500">a Freguesia</span>
@@ -168,6 +218,12 @@ export const ExploreView: React.FC<ExploreViewProps> = ({
           Curadoria exclusiva do que há de melhor no bairro.
         </p>
       </div>
+
+      {/* Editorial Sponsored Banner (Top Position) */}
+      <EditorialSponsoredBanner 
+        store={stores[0]} 
+        onClick={() => onStoreClick(stores[0])} 
+      />
 
       <div className="flex flex-col gap-10 pb-32">
         {sections.map((section) => (
@@ -184,7 +240,6 @@ export const ExploreView: React.FC<ExploreViewProps> = ({
                 />
               ))}
               
-              {/* Card de "Ver Todos" no final de cada scroll horizontal */}
               <button className="min-w-[140px] snap-center bg-gray-50 dark:bg-gray-800/50 rounded-[28px] border border-dashed border-gray-200 dark:border-gray-700 flex flex-col items-center justify-center gap-3 group active:bg-gray-100 transition-colors">
                 <div className="w-10 h-10 rounded-full bg-white dark:bg-gray-700 shadow-sm flex items-center justify-center text-gray-400 group-hover:text-primary-500 transition-colors">
                     <ChevronRight className="w-5 h-5" strokeWidth={3} />
@@ -195,7 +250,6 @@ export const ExploreView: React.FC<ExploreViewProps> = ({
           </section>
         ))}
 
-        {/* Call-to-Action Institucional ao final da navegação de descoberta */}
         <div className="px-4 mt-4">
             <div className="bg-slate-900 rounded-[32px] p-8 text-white relative overflow-hidden shadow-2xl">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-primary-500/10 rounded-full blur-3xl -mr-10 -mt-10"></div>

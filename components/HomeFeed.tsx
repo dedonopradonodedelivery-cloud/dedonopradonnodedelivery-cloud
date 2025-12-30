@@ -48,9 +48,6 @@ interface HomeFeedProps {
   onRequireLogin: () => void;
 }
 
-/**
- * Componente de Título Padronizado conforme Design System
- */
 const SectionHeader: React.FC<{ icon: React.ElementType; title: string; rightElement?: React.ReactNode }> = ({ icon: Icon, title, rightElement }) => (
   <div className="flex items-center justify-between mb-6 px-1">
     <div className="flex items-center gap-3">
@@ -137,14 +134,12 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
                       className={`w-[78px] h-[78px] rounded-[22px] shadow-lg flex flex-col items-center justify-between p-2 relative overflow-hidden transition-all duration-300 group-hover:shadow-2xl group-hover:-translate-y-1 bg-gradient-to-br ${cat.color} border border-white/20`}
                     >
                       <div className="absolute top-0 left-0 w-full h-[50%] bg-gradient-to-b from-white/25 to-transparent pointer-events-none"></div>
-                      
                       <div className="flex-1 flex items-center justify-center w-full mt-0.5">
                         {React.isValidElement(cat.icon) ? React.cloneElement(cat.icon as any, { 
                           className: "w-7 h-7 text-white drop-shadow-[0_2px_4_rgba(0,0,0,0.3)]",
                           strokeWidth: 2.5
                         }) : null}
                       </div>
-                      
                       <div className="w-full bg-black/10 backdrop-blur-[2px] py-1 rounded-b-[20px] -mx-2 -mb-2 border-t border-white/5">
                         <span className="block w-full text-[9px] font-black text-white leading-none tracking-tight text-center uppercase drop-shadow-md">
                           {cat.name}
@@ -205,8 +200,8 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
                 <div key={promo.id} className="min-w-[240px] snap-center bg-white dark:bg-gray-800 rounded-[32px] overflow-hidden shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col gap-1">
                   <div className="h-44 relative overflow-hidden">
                     <img src={promo.image} className="w-full h-full object-cover" alt={promo.product} />
-                    {/* Badge Animado: animate-badge-pop */}
-                    <div className="absolute top-4 left-4 bg-rose-600 text-white text-[11px] font-black px-3 py-1.5 rounded-xl shadow-[0_4px_12px_rgba(225,29,72,0.4)] animate-badge-pop">
+                    {/* BADGE OFF: Pulsante, Glow Intenso, Gradiente Vivo */}
+                    <div className="absolute top-4 left-4 bg-gradient-to-r from-rose-600 to-pink-500 text-white text-[11px] font-black px-3 py-1.5 rounded-xl shadow-[0_4px_12px_rgba(225,29,72,0.6)] animate-badge-pop">
                       -{promo.off}% OFF
                     </div>
                     <div className="absolute bottom-4 right-4 bg-white/80 backdrop-blur-md text-gray-900 text-[9px] font-black px-2.5 py-1.5 rounded-xl border border-white/20 flex items-center gap-1.5 shadow-sm">
@@ -264,10 +259,10 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
             
             <div className="flex gap-3 overflow-x-auto no-scrollbar -mx-4 px-4 pb-2">
               {[
-                { id: 'on-1', name: 'Padaria Central', category: 'Padaria', status: '🔥 Bombando hoje', microcopy: 'Vizinhança tomando café agora', icon: <Flame className="w-3 h-3 text-orange-500" />, color: 'bg-orange-50 dark:bg-orange-900/10', anim: 'animate-badge-shake' },
-                { id: 'on-2', name: 'Hambúrguer do Zé', category: 'Lanches', status: '📈 Em alta agora', microcopy: 'Pico de pedidos detectado', icon: <TrendingUp className="w-3 h-3 text-emerald-500" />, color: 'bg-emerald-50 dark:bg-emerald-900/10', anim: 'animate-badge-float-up' },
-                { id: 'on-3', name: 'Café da Praça', category: 'Cafeteria', status: '🚀 Tendência do dia', microcopy: 'Muitos vizinhos visitando', icon: <Rocket className="w-3 h-3 text-blue-500" />, color: 'bg-blue-50 dark:bg-blue-900/10', anim: 'animate-badge-glow' },
-                { id: 'on-4', name: 'Pet Shop Amigo', category: 'Pets', status: '👀 Movimento intenso', microcopy: 'Vizinhança ativa aqui', icon: <Eye className="w-3 h-3 text-purple-500" />, color: 'bg-purple-50 dark:bg-purple-900/10', anim: 'animate-badge-pop' }
+                { id: 'on-1', name: 'Padaria Central', category: 'Padaria', status: '🔥 Bombando hoje', microcopy: 'Vizinhança tomando café agora', icon: <Flame className="w-3 h-3 text-white" />, color: 'bg-gradient-to-r from-orange-600 to-orange-500', glow: 'shadow-[0_0_15px_rgba(249,115,22,0.5)]', anim: 'animate-badge-shake' },
+                { id: 'on-2', name: 'Hambúrguer do Zé', category: 'Lanches', status: '📈 Em alta agora', microcopy: 'Pico de pedidos detectado', icon: <TrendingUp className="w-3 h-3 text-white" />, color: 'bg-gradient-to-r from-emerald-600 to-emerald-500', glow: 'shadow-[0_0_15px_rgba(16,185,129,0.5)]', anim: 'animate-badge-float-up' },
+                { id: 'on-3', name: 'Café da Praça', category: 'Cafeteria', status: '🚀 Tendência do dia', microcopy: 'Muitos vizinhos visitando', icon: <Rocket className="w-3 h-3 text-white" />, color: 'bg-gradient-to-r from-blue-600 to-blue-500', glow: 'shadow-[0_0_15px_rgba(30,91,255,0.5)]', anim: 'animate-badge-glow' },
+                { id: 'on-4', name: 'Pet Shop Amigo', category: 'Pets', status: '👀 Movimento intenso', microcopy: 'Vizinhança ativa aqui', icon: <Eye className="w-3 h-3 text-white" />, color: 'bg-gradient-to-r from-purple-600 to-purple-500', glow: 'shadow-[0_0_15px_rgba(168,85,247,0.5)]', anim: 'animate-badge-pop' }
               ].map((item) => (
                 <div key={item.id} className="min-w-[190px] bg-white dark:bg-gray-800 rounded-[24px] p-4 shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col gap-3 group active:scale-[0.98] transition-all">
                   <div className="flex items-center gap-3">
@@ -280,12 +275,13 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
                     </div>
                   </div>
                   
-                  <div className={`p-2.5 rounded-2xl ${item.color} flex flex-col gap-1`}>
+                  {/* BADGES COM GLOW E GRADIENTE PARA SIMULAR ANIMAÇÃO */}
+                  <div className={`p-2.5 rounded-2xl ${item.color} ${item.glow} flex flex-col gap-1 overflow-hidden`}>
                     <div className={`flex items-center gap-1.5 ${item.anim}`}>
                       {item.icon}
-                      <span className="text-[10px] font-black uppercase text-gray-800 dark:text-gray-100 tracking-tight">{item.status}</span>
+                      <span className="text-[10px] font-black uppercase text-white tracking-tight">{item.status}</span>
                     </div>
-                    <p className="text-[10px] font-medium text-gray-500 dark:text-gray-400 leading-none">{item.microcopy}</p>
+                    <p className="text-[9px] font-bold text-white/80 leading-none">{item.microcopy}</p>
                   </div>
                 </div>
               ))}
@@ -409,7 +405,6 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
                 <SpinWheelView 
                     userId={user?.id || null} 
                     userRole={userRole || null} 
-                    /* Fix: Changed onWin to onSpinWin to match component props */
                     onWin={onSpinWin} 
                     onRequireLogin={onRequireLogin} 
                     onViewHistory={() => { setIsSpinWheelOpen(false); onNavigate('prize_history'); }} 
