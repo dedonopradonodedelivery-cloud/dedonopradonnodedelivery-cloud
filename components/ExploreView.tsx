@@ -24,14 +24,14 @@ interface ExploreViewProps {
   onViewMasterSponsor?: () => void;
 }
 
-// Componente de Título de Bloco Padronizado
+// Componente de Título de Bloco Padronizado com Hierarquia Reforçada
 const BlockHeader: React.FC<{ title: string; icon: React.ElementType }> = ({ title, icon: Icon }) => (
   <div className="flex items-center justify-between mb-4 px-1">
-    <div className="flex items-center gap-2.5">
+    <div className="flex items-center gap-3">
       <div className="w-8 h-8 rounded-xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
         <Icon className="w-4 h-4 text-gray-500 dark:text-gray-400" strokeWidth={2.5} />
       </div>
-      <h2 className="text-[15px] font-bold text-gray-800 dark:text-gray-100 tracking-tight">
+      <h2 className="text-[17px] font-black text-gray-900 dark:text-gray-100 tracking-tight">
         {title}
       </h2>
     </div>
@@ -159,13 +159,13 @@ export const ExploreView: React.FC<ExploreViewProps> = ({
   return (
     <div className="flex flex-col bg-white dark:bg-gray-900 min-h-screen animate-in fade-in duration-500">
       
-      {/* Header do Hub de Descoberta */}
+      {/* Header do Hub de Descoberta com Título Atualizado */}
       <div className="px-5 pt-8 pb-4">
         <h1 className="text-2xl font-black text-gray-900 dark:text-white font-display tracking-tight leading-tight">
           Explorar <br/> <span className="text-primary-500">a Freguesia</span>
         </h1>
         <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 font-medium">
-          Tudo o que você precisa, onde você estiver.
+          Curadoria exclusiva do que há de melhor no bairro.
         </p>
       </div>
 
