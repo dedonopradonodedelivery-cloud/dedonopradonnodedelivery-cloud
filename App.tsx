@@ -82,8 +82,8 @@ const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState('home');
   const [isDarkMode, setIsDarkMode] = useState(false);
   
-  // Ref para controlar que o redirecionamento inicial ocorra apenas uma vez por login
-  const roleHandledRef = useRef<string | null>(null);
+  // Controle rigoroso de inicialização por usuário para evitar redirecionamentos indesejados
+  const userHandledRef = useRef<string | null>(null);
 
   useEffect(() => {
     const animationFrame = requestAnimationFrame(() => {
@@ -100,26 +100,52 @@ const App: React.FC = () => {
     };
   }, []);
 
-  // Lógica de definição de Aba Inicial Baseada no Perfil
+  // LÓGICA DE ABA INICIAL (REVISADA)
   useEffect(() => {
-    if (!isAuthLoading && user) {
-      const currentUserId = user.id;
+    // Só agimos quando o Auth terminou de carregar e temos uma role definida
+    if (!isAuthLoading && user && userRole) {
+      const userId = user.id;
       
-      // Se detectado lojista e ainda não processamos este login específico
-      if (userRole === 'lojista' && roleHandledRef.current !== currentUserId) {
-        setActiveTab('services'); // Força aba Serviços como padrão inicial
-        roleHandledRef.current = currentUserId;
-      } 
-      // Se detectado cliente e ainda não processamos
-      else if (userRole === 'cliente' && roleHandledRef.current !== currentUserId) {
-        setActiveTab('home');
-        roleHandledRef.current = currentUserId;
+      // Se este usuário ainda não foi inicializado nesta sessão do app
+      if (userHandledRef.current !== userId) {
+        if (userRole === 'lojista') {
+          // Para lojista, tentamos restaurar a última aba, mas se for Minha Loja ou nulo, forçamos Serviços
+          const savedTab = localStorage.getItem('last_active_tab_lojista');
+          const forbiddenDefaults = ['store_area', 'merchant_qr', 'home'];
+          
+          if (!savedTab || forbiddenDefaults.includes(savedTab)) {
+            setActiveTab('services');
+          } else {
+            setActiveTab(savedTab);
+          }
+        } else {
+          // Para cliente, sempre home por padrão
+          setActiveTab('home');
+        }
+        
+        // Marca como processado para este usuário
+        userHandledRef.current = userId;
       }
     } else if (!isAuthLoading && !user) {
-      // Se deslogado, reseta a ref para o próximo login
-      roleHandledRef.current = null;
+      // Se deslogar, reseta a ref para o próximo login
+      userHandledRef.current = null;
     }
   }, [user, userRole, isAuthLoading]);
+
+  // PERSISTÊNCIA DE ABA PARA LOJISTA (Somente abas permitidas como retorno)
+  useEffect(() => {
+    if (userRole === 'lojista' && userHandledRef.current === user?.id) {
+      const persistableTabs = ['services', 'profile', 'explore'];
+      if (persistableTabs.includes(activeTab)) {
+        localStorage.setItem('last_active_tab_lojista', activeTab);
+      }
+      // Se ele clicou manualmente em 'Minha Loja' ou 'QR', não salvamos como retorno padrão
+      // para garantir que em um novo login ele volte para 'Serviços'
+      if (activeTab === 'store_area' || activeTab === 'merchant_qr') {
+        localStorage.setItem('last_active_tab_lojista', 'services');
+      }
+    }
+  }, [activeTab, userRole, user]);
 
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [authContext, setAuthContext] = useState<'default' | 'merchant_lead_qr'>('default');
@@ -306,7 +332,7 @@ const App: React.FC = () => {
             {activeTab === 'store_area' && (
               userRole === 'lojista' ? (
                 <StoreAreaView 
-                  onBack={() => setActiveTab('home')} 
+                  onBack={() => setActiveTab('services')} 
                   onNavigate={setActiveTab} 
                   user={user as any}
                 />
@@ -318,7 +344,7 @@ const App: React.FC = () => {
               userRole === 'lojista' ? (
                 <MerchantQrScreen 
                   user={user} 
-                  onBack={() => setActiveTab('home')} 
+                  onBack={() => setActiveTab('services')} 
                 />
               ) : (
                 <FreguesiaConnectRestricted onBack={() => setActiveTab('home')} />
