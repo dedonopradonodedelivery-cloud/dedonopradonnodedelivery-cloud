@@ -10,7 +10,9 @@ import {
   Award,
   Navigation,
   ThumbsUp,
-  ArrowUpRight
+  ArrowUpRight,
+  Crown,
+  ShieldCheck
 } from 'lucide-react';
 import { Store } from '../types';
 
@@ -25,50 +27,51 @@ interface ExploreViewProps {
   onViewMasterSponsor?: () => void;
 }
 
-// Banner Editorial para Monetização (Posição Topo)
-const EditorialSponsoredBanner: React.FC<{ store: Store; onClick: () => void }> = ({ store, onClick }) => (
+// Banner Exclusivo: Patrocinador Master
+const MasterSponsorExploreBanner: React.FC<{ onClick: () => void }> = ({ onClick }) => (
   <div className="px-4 mb-10">
     <button 
       onClick={onClick}
-      className="w-full relative aspect-[21/10] rounded-[32px] overflow-hidden shadow-2xl shadow-blue-900/10 group active:scale-[0.98] transition-all border border-gray-100 dark:border-gray-800"
+      className="w-full relative aspect-[21/10] rounded-[32px] overflow-hidden shadow-2xl shadow-blue-900/10 group active:scale-[0.98] transition-all border border-gray-100 dark:border-gray-800 bg-slate-900"
     >
-      {/* Background Image com Zoom no Hover */}
+      {/* Background Image: Ambiente Profissional/Serviços */}
       <img 
-        src="https://images.unsplash.com/photo-1554118811-1e0d58224f24?q=80&w=800&auto=format&fit=crop" 
-        className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000"
-        alt={store.name}
+        src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=800&auto=format&fit=crop" 
+        className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000 opacity-60"
+        alt="Grupo Esquematiza"
       />
       
-      {/* Overlay de Degradê Editorial */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+      {/* Overlay de Gradiente Dark Editorial */}
+      <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent"></div>
       
-      {/* Selo Discreto de Patrocínio */}
-      <div className="absolute top-4 right-4 bg-white/20 backdrop-blur-md border border-white/30 px-2.5 py-1 rounded-lg animate-badge-glow">
-        <span className="text-[9px] font-black text-white uppercase tracking-[0.15em]">Destaque Patrocinado</span>
+      {/* Selo Exclusivo Patrocinador Master */}
+      <div className="absolute top-4 right-4 bg-amber-500/90 backdrop-blur-md border border-amber-400 px-3 py-1.5 rounded-xl shadow-lg flex items-center gap-2 animate-badge-pop">
+        <Crown className="w-3.5 h-3.5 text-slate-950 fill-slate-950" />
+        <span className="text-[10px] font-black text-slate-950 uppercase tracking-[0.1em]">Patrocinador Master</span>
       </div>
 
-      {/* Conteúdo Informativo */}
+      {/* Conteúdo Institucional de Alta Confiança */}
       <div className="absolute bottom-0 left-0 right-0 p-6 text-left flex justify-between items-end">
         <div className="flex-1 pr-4">
-          <div className="flex items-center gap-2 mb-1">
-            <span className="text-[10px] font-black text-blue-400 uppercase tracking-widest">{store.category}</span>
+          <div className="flex items-center gap-2 mb-1.5">
+            <span className="text-[10px] font-black text-amber-400 uppercase tracking-widest">Segurança & Serviços</span>
             <div className="w-1 h-1 rounded-full bg-white/40"></div>
             <div className="flex items-center gap-1">
-               <Star className="w-2.5 h-2.5 text-yellow-400 fill-yellow-400" />
-               <span className="text-[10px] font-bold text-white">4.9</span>
+               <ShieldCheck className="w-3 h-3 text-blue-400" />
+               <span className="text-[10px] font-bold text-white">Líder no Bairro</span>
             </div>
           </div>
-          <h3 className="text-xl font-black text-white leading-tight font-display tracking-tight mb-1">
-            Terraço Gastronomia
+          <h3 className="text-2xl font-black text-white leading-tight font-display tracking-tight mb-1">
+            Grupo Esquematiza
           </h3>
-          <p className="text-xs text-gray-300 font-medium line-clamp-1">
-            A melhor vista e o cardápio mais premiado da região.
+          <p className="text-xs text-slate-300 font-medium line-clamp-1 max-w-[240px]">
+            Referência em excelência e confiança na Freguesia.
           </p>
         </div>
         
-        {/* CTA Leve */}
-        <div className="bg-white text-gray-900 px-4 py-2 rounded-2xl text-[11px] font-black uppercase tracking-wider flex items-center gap-2 shadow-xl group-hover:bg-primary-500 group-hover:text-white transition-colors">
-          Explorar <ArrowUpRight className="w-3.5 h-3.5" />
+        {/* CTA Institucional */}
+        <div className="bg-white text-slate-950 px-5 py-2.5 rounded-2xl text-[11px] font-black uppercase tracking-wider flex items-center gap-2 shadow-xl group-hover:bg-amber-400 transition-colors">
+          Ver serviços <ArrowUpRight className="w-3.5 h-3.5" />
         </div>
       </div>
     </button>
@@ -141,6 +144,7 @@ const ExploreCard: React.FC<{
 export const ExploreView: React.FC<ExploreViewProps> = ({
   stores,
   onStoreClick,
+  onViewMasterSponsor,
 }) => {
   
   const sections = useMemo(() => [
@@ -219,10 +223,9 @@ export const ExploreView: React.FC<ExploreViewProps> = ({
         </p>
       </div>
 
-      {/* Editorial Sponsored Banner (Top Position) */}
-      <EditorialSponsoredBanner 
-        store={stores[0]} 
-        onClick={() => onStoreClick(stores[0])} 
+      {/* POSIÇÃO DE DESTAQUE: PATROCINADOR MASTER EXCLUSIVO */}
+      <MasterSponsorExploreBanner 
+        onClick={() => onViewMasterSponsor?.()} 
       />
 
       <div className="flex flex-col gap-10 pb-32">
