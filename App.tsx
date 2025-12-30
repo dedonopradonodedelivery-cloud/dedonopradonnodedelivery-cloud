@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Layout } from './components/Layout';
 import { Header } from './components/Header';
 import { HomeFeed } from './components/HomeFeed';
@@ -81,6 +81,7 @@ const App: React.FC = () => {
   const [splashProgress, setSplashProgress] = useState(0);
   const [activeTab, setActiveTab] = useState('home');
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const roleHandledRef = useRef(false);
 
   useEffect(() => {
     const animationFrame = requestAnimationFrame(() => {
@@ -96,6 +97,33 @@ const App: React.FC = () => {
       cancelAnimationFrame(animationFrame);
     };
   }, []);
+
+  // Handle Default Tab for Merchant Profile
+  useEffect(() => {
+    if (!isAuthLoading && userRole) {
+      if (userRole === 'lojista' && !roleHandledRef.current) {
+        const savedTab = localStorage.getItem('last_merchant_tab');
+        if (savedTab) {
+          setActiveTab(savedTab);
+        } else {
+          setActiveTab('services'); // Standard tab for merchants as requested
+        }
+        roleHandledRef.current = true;
+      } else if (userRole === 'cliente') {
+        roleHandledRef.current = true;
+      }
+    } else if (!isAuthLoading && !userRole) {
+        roleHandledRef.current = false;
+    }
+  }, [userRole, isAuthLoading]);
+
+  // Persist Tab for Lojista
+  useEffect(() => {
+    const mainTabs = ['home', 'services', 'merchant_qr', 'store_area', 'profile', 'explore'];
+    if (userRole === 'lojista' && mainTabs.includes(activeTab)) {
+      localStorage.setItem('last_merchant_tab', activeTab);
+    }
+  }, [activeTab, userRole]);
 
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [authContext, setAuthContext] = useState<'default' | 'merchant_lead_qr'>('default');

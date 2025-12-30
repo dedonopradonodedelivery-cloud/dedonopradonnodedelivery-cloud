@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Home, Search, QrCode, Heart, User, Store, Wrench } from 'lucide-react';
 
@@ -15,7 +16,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
   if (isMerchant) {
     const merchantNavItems = [
       { id: 'home', icon: Home, label: 'Início' },
-      { id: 'explore', icon: Search, label: 'Descobrir' },
+      { id: 'services', icon: Wrench, label: 'Serviços' },
       { id: 'merchant_qr', icon: QrCode, label: 'Meu QR', isSpecial: true },
       { id: 'store_area', icon: Store, label: 'Minha Loja' },
       { id: 'profile', icon: User, label: 'Menu' },
@@ -25,7 +26,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
       <div className="fixed bottom-0 left-0 right-0 mx-auto w-full max-w-md bg-[#1E5BFF] z-50 h-[70px] shadow-[0_-4px_20px_rgba(0,0,0,0.15)] border-t border-white/10">
         <div className="flex items-center justify-between h-full w-full px-4">
           {merchantNavItems.map((tab) => {
-            const isActive = activeTab === tab.id;
+            const isActive = activeTab === tab.id || (tab.id === 'services' && activeTab.startsWith('service_'));
             const Icon = tab.icon;
             
             if ((tab as any).isSpecial) {
@@ -79,7 +80,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
     <div className="fixed bottom-0 left-0 right-0 mx-auto w-full max-w-md bg-[#1E5BFF] z-50 h-[80px] rounded-t-[24px] shadow-[0_-5px_30px_rgba(0,0,0,0.2)] border-t border-white/10">
       <div className="flex items-end justify-between w-full px-2 h-full pb-2">
         {clientNavItems.map((tab) => {
-          const isActive = activeTab === tab.id;
+          const isActive = activeTab === tab.id || (tab.id === 'services' && activeTab.startsWith('service_'));
           const Icon = tab.icon;
 
           // BOTÃO CENTRAL (CASHBACK)
