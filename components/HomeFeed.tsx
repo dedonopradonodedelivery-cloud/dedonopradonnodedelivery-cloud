@@ -11,16 +11,11 @@ import {
   Zap,
   Dices,
   Clock,
-  Coffee,
-  ShoppingBag,
-  Moon,
   Utensils,
   ShieldCheck,
-  Handshake,
   MapPin,
   ArrowUpRight,
   Wrench,
-  Bike,
   Compass,
   CheckCircle2,
   Heart
@@ -51,7 +46,6 @@ const RouletteIcon: React.FC<{ className?: string }> = ({ className }) => {
   const sliceAngle = 45;
   const center = 50;
   const radius = 50;
-
   const getPathD = (index: number) => {
     const startAngle = index * sliceAngle;
     const endAngle = startAngle + sliceAngle;
@@ -63,7 +57,6 @@ const RouletteIcon: React.FC<{ className?: string }> = ({ className }) => {
     const y2 = center + radius * Math.sin(endRad);
     return `M ${center},${center} L ${x1},${y1} A ${radius},${radius} 0 0 1 ${x2},${y2} Z`;
   };
-
   return (
     <svg viewBox="0 0 100 100" className={className}>
       {colors.map((color, i) => (
@@ -88,13 +81,11 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
   onRequireLogin
 }) => {
   const [isSpinWheelOpen, setIsSpinWheelOpen] = useState(false);
-  const [activeBannerIndex, setActiveBannerIndex] = useState(0);
+  const [listFilter, setListFilter] = useState<'all' | 'cashback' | 'top_rated' | 'open_now'>('all');
   const [categoryScrollProgress, setCategoryScrollProgress] = useState(0);
-  const carouselRef = useRef<HTMLDivElement>(null);
   const categoriesRef = useRef<HTMLDivElement>(null);
 
   const activeSearchTerm = externalSearchTerm || '';
-  const [listFilter, setListFilter] = useState<'all' | 'cashback' | 'top_rated' | 'open_now'>('all');
 
   const handleCategoryScroll = (e: React.UIEvent<HTMLDivElement>) => {
     const container = e.currentTarget;
@@ -103,40 +94,17 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
     }
   };
 
-  const banners = useMemo(() => [
-    {
-      id: 'cashback_neighborhood',
-      badge: 'OFERTA DO BAIRRO',
-      title: 'O cashback que vale no bairro inteiro.',
-      subtitle: 'Você compra em uma, ganha e usa em outra. Dinheiro girando na vizinhança.',
-      gradient: 'from-[#14532d] to-[#064e3b]',
-      cta: 'Ver como funciona',
-      action: () => onNavigate('cashback_info'),
-      ctaClass: 'bg-white text-emerald-900 shadow-lg'
-    },
-    {
-      id: 'freguesia_connect',
-      badge: 'EXCLUSIVO LOJISTAS',
-      title: 'Freguesia Connect',
-      subtitle: 'Networking real entre os lojistas do bairro. Conexões que geram lucro.',
-      gradient: 'from-[#1e1b4b] to-[#312e81]',
-      cta: 'Saiba mais',
-      action: () => onNavigate('freguesia_connect_public'),
-      ctaClass: 'bg-white text-[#1e1b4b] shadow-lg'
-    }
-  ], [onNavigate]);
-
   const renderSection = (key: string) => {
     switch (key) {
       case 'categories':
         return (
-          <div key="categories" className="pt-6">
+          <div key="categories" className="pt-4">
             <div 
               ref={categoriesRef} 
               onScroll={handleCategoryScroll}
-              className="flex overflow-x-auto no-scrollbar px-5 pb-4"
+              className="flex overflow-x-auto no-scrollbar px-4 pb-2"
             >
-              <div className="grid grid-flow-col grid-rows-2 gap-x-4 gap-y-4">
+              <div className="grid grid-flow-col grid-rows-2 gap-x-3 gap-y-3">
                 {CATEGORIES.map((cat) => (
                   <button 
                     key={cat.id} 
@@ -144,32 +112,28 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
                     className="flex flex-col items-center group active:scale-95 transition-all duration-200"
                   >
                     <div 
-                      className={`w-[84px] h-[84px] rounded-[24px] shadow-lg flex flex-col items-center justify-between p-2.5 relative overflow-hidden transition-all duration-300 group-hover:shadow-2xl group-hover:-translate-y-1 bg-gradient-to-br ${cat.color} border border-white/20`}
+                      className={`w-[78px] h-[78px] rounded-[22px] shadow-lg flex flex-col items-center justify-between p-2 relative overflow-hidden transition-all duration-300 group-hover:shadow-2xl group-hover:-translate-y-1 bg-gradient-to-br ${cat.color} border border-white/20`}
                     >
-                      {/* macOS Gloss Effect */}
-                      <div className="absolute top-0 left-0 w-full h-[50%] bg-gradient-to-b from-white/20 to-transparent pointer-events-none"></div>
-                      <div className="absolute inset-0 shadow-[inset_0_1px_1px_rgba(255,255,255,0.4)] rounded-[24px] pointer-events-none"></div>
+                      <div className="absolute top-0 left-0 w-full h-[50%] bg-gradient-to-b from-white/25 to-transparent pointer-events-none"></div>
                       
-                      {/* Icon */}
-                      <div className="flex-1 flex items-center justify-center w-full mt-1">
-                        <img 
-                          src={cat.illustrationUrl} 
-                          alt={cat.name} 
-                          className="w-[32px] h-[32px] object-contain filter brightness-0 invert drop-shadow-[0_2px_4px_rgba(0,0,0,0.3)] transition-transform duration-500 group-hover:scale-110" 
-                        />
+                      <div className="flex-1 flex items-center justify-center w-full mt-0.5">
+                        {React.isValidElement(cat.icon) ? React.cloneElement(cat.icon as any, { 
+                          className: "w-7 h-7 text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.3)]",
+                          strokeWidth: 2.5
+                        }) : null}
                       </div>
                       
-                      {/* Text Inside Card */}
-                      <span className="w-full text-[10px] font-black text-white leading-none tracking-tight text-center drop-shadow-[0_1px_2px_rgba(0,0,0,0.4)] pb-0.5">
-                        {cat.name}
-                      </span>
+                      <div className="w-full bg-black/10 backdrop-blur-[2px] py-1 rounded-b-[20px] -mx-2 -mb-2 border-t border-white/5">
+                        <span className="block w-full text-[9px] font-black text-white leading-none tracking-tight text-center uppercase drop-shadow-md">
+                          {cat.name}
+                        </span>
+                      </div>
                     </div>
                   </button>
                 ))}
               </div>
             </div>
-            {/* Scroll Indicator */}
-            <div className="flex justify-center mt-1 opacity-20">
+            <div className="flex justify-center mt-2 opacity-20">
               <div className="w-12 h-1 bg-gray-300 dark:bg-gray-700 rounded-full relative overflow-hidden">
                 <div 
                   className="h-full bg-primary-500 rounded-full absolute top-0 left-0 w-4 transition-transform duration-100 ease-linear"
@@ -179,27 +143,51 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
             </div>
           </div>
         );
+
       case 'hero':
         return (
-          <div key="hero" className="px-4">
-             {/* Simples Hero Section para manter o fluxo do app */}
-             <div className="w-full bg-gradient-to-br from-slate-900 to-slate-800 rounded-[24px] p-6 text-white relative overflow-hidden border border-white/5">
-                <span className="text-[9px] font-black uppercase tracking-widest bg-white/10 px-2 py-0.5 rounded-md border border-white/10 mb-3 inline-block">Localizei Freguesia</span>
-                <h1 className="text-xl font-bold mb-1 leading-tight">O que você precisa hoje?</h1>
-                <p className="text-xs text-gray-400 mb-5">Encontre os melhores do seu bairro.</p>
-                <button onClick={() => onNavigate('explore')} className="bg-primary-500 text-white text-xs font-bold px-5 py-2.5 rounded-full flex items-center gap-2 active:scale-95 transition-all">
-                    Explorar agora <ArrowRight className="w-4 h-4" />
-                </button>
-                <div className="absolute -right-4 -bottom-4 opacity-10">
-                    <MapPin className="w-32 h-32" />
+          <div key="hero" className="px-4 mt-2">
+             <div className="w-full bg-gradient-to-br from-indigo-900 to-blue-800 rounded-[28px] p-6 text-white relative overflow-hidden shadow-xl border border-white/10">
+                <div className="absolute -right-4 -bottom-4 opacity-10 rotate-12">
+                    <MapPin className="w-40 h-40" />
+                </div>
+                <div className="relative z-10">
+                  <span className="text-[9px] font-black uppercase tracking-[0.3em] bg-white/10 px-2.5 py-1 rounded-full border border-white/10 mb-4 inline-block">Guia Oficial Freguesia</span>
+                  <h1 className="text-2xl font-black mb-1 leading-tight tracking-tight">O melhor do bairro,<br/>na sua mão.</h1>
+                  <p className="text-xs text-blue-100/80 mb-6 font-medium">Explore lojas, serviços e promoções agora.</p>
+                  <button onClick={() => onNavigate('explore')} className="bg-white text-blue-900 text-xs font-black px-6 py-3 rounded-2xl flex items-center gap-2 active:scale-95 transition-all shadow-xl">
+                      EXPLORAR GUIA <ArrowRight className="w-4 h-4" strokeWidth={3} />
+                  </button>
                 </div>
              </div>
           </div>
         );
-      case 'cashback_banner':
+
+      case 'roulette':
+        return (
+          <div key="roulette" className="px-4">
+            <button onClick={() => setIsSpinWheelOpen(true)} className="w-full bg-gradient-to-br from-primary-600 to-blue-700 rounded-[28px] p-5 text-white flex items-center justify-between shadow-xl active:scale-[0.98] transition-all relative overflow-hidden group border border-white/10">
+              <div className="flex items-center gap-4 relative z-10">
+                <div className="w-14 h-14 flex items-center justify-center animate-spin-slow">
+                  <RouletteIcon className="w-full h-full drop-shadow-2xl" />
+                </div>
+                <div className="text-left">
+                  <span className="text-[9px] font-black uppercase tracking-widest text-blue-100 opacity-70">Diversão do Dia</span>
+                  <h3 className="font-black text-xl leading-none mb-1 tracking-tight">Roleta da Sorte</h3>
+                  <p className="text-xs text-blue-100/80 font-medium">Ganhe prêmios e cashback agora!</p>
+                </div>
+              </div>
+              <div className="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center">
+                 <ArrowRight className="w-5 h-5 text-white" strokeWidth={3} />
+              </div>
+            </button>
+          </div>
+        );
+
+      case 'cashback':
         if (!user || !userRole) return null;
         return (
-          <div key="cashback_banner" className="px-5 pt-2">
+          <div key="cashback" className="px-4">
             <UserCashbackBanner 
               role={userRole}
               balance={12.40} 
@@ -208,21 +196,124 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
             />
           </div>
         );
+
+      case 'highlights':
+        return (
+          <div key="highlights" className="px-4">
+            <div className="flex items-center gap-2 mb-4 px-1">
+              <TrendingUp className="w-4 h-4 text-blue-500" />
+              <h3 className="text-xs font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.2em]">Atividade Recente</h3>
+            </div>
+            <div className="flex gap-4 overflow-x-auto no-scrollbar -mx-4 px-4 pb-2">
+              {[
+                { id: 1, title: 'Novas Pizzarias', icon: <Zap className="text-amber-500" />, desc: '3 novos locais no bairro' },
+                { id: 2, title: 'Dicas de Beleza', icon: <Heart className="text-rose-500" />, desc: 'Salões mais avaliados hoje' },
+                { id: 3, title: 'Mercados 24h', icon: <Clock className="text-blue-500" />, desc: 'Abertos agora perto de você' }
+              ].map((item) => (
+                <div key={item.id} className="min-w-[200px] bg-white dark:bg-gray-800 p-5 rounded-[24px] shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-gray-50 dark:bg-gray-700 flex items-center justify-center shadow-inner">
+                    {item.icon}
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-gray-900 dark:text-white text-sm">{item.title}</h4>
+                    <p className="text-[11px] text-gray-500 mt-0.5">{item.desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+
+      case 'community':
+        return (
+          <div key="community" className="px-4">
+            <div className="flex items-center justify-between mb-4 px-1">
+                <div className="flex items-center gap-2">
+                    <Heart className="w-4 h-4 text-rose-400 fill-rose-400"/>
+                    <h3 className="text-xs font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.2em]">Dicas de Moradores</h3>
+                </div>
+            </div>
+            <RecomendadosPorMoradores items={[
+              { id: '1', nome: 'Padaria Imperial', categoria: 'Comida', texto: 'Melhor pão na chapa!', totalRecomendacoes: 42 }
+            ]} />
+          </div>
+        );
+
+      case 'trending':
+        return (
+          <div key="trending" className="px-4">
+            <div className="flex items-center justify-between mb-4 px-1">
+                <div className="flex items-center gap-2">
+                    <Compass className="w-4 h-4 text-blue-500"/>
+                    <h3 className="text-xs font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.2em]">Coleções</h3>
+                </div>
+            </div>
+            <div className="flex gap-4 overflow-x-auto no-scrollbar -mx-4 px-4 pb-2">
+              {EDITORIAL_COLLECTIONS.map((col) => (
+                <div key={col.id} onClick={() => onSelectCollection(col)} className="min-w-[240px] h-32 rounded-[24px] bg-gray-900 relative overflow-hidden shadow-lg cursor-pointer active:scale-95 transition-all">
+                  <img src={col.image} alt="" className="w-full h-full object-cover opacity-60" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent p-4 flex flex-col justify-end">
+                    <h4 className="text-white font-bold text-sm uppercase tracking-wider">{col.title}</h4>
+                    <p className="text-[10px] text-gray-300 font-medium">{col.subtitle}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+
+      case 'filters':
+        return (
+          <div key="filters" className="px-4">
+            <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
+              {[
+                { id: 'all', label: 'Tudo', icon: Zap },
+                { id: 'cashback', label: 'Cashback', icon: TrendingUp },
+                { id: 'top_rated', label: 'Melhores', icon: Star },
+                { id: 'open_now', label: 'Abertos', icon: Clock }
+              ].map((btn) => (
+                <button 
+                  key={btn.id} 
+                  onClick={() => setListFilter(btn.id as any)} 
+                  className={`flex items-center gap-2 px-5 py-3 rounded-2xl border text-[11px] font-black transition-all active:scale-95 whitespace-nowrap uppercase tracking-wider
+                    ${listFilter === btn.id 
+                      ? 'bg-[#1E5BFF] text-white border-[#1E5BFF] shadow-lg shadow-blue-500/20' 
+                      : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-gray-100 dark:border-gray-700'}`}
+                >
+                  <btn.icon className="w-3.5 h-3.5" />
+                  {btn.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        );
+
       case 'list':
         return (
-          <div key="list" className="px-5 min-h-[300px]">
+          <div key="list" className="px-4 min-h-[400px]">
               <div className="flex items-center gap-2 mb-4 px-1">
-                 <ShieldCheck className="w-3.5 h-3.5 text-gray-400" />
-                 <div>
-                    <h3 className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest leading-none">Guia de Lojas</h3>
-                 </div>
+                 <ShieldCheck className="w-4 h-4 text-gray-400" />
+                 <h3 className="text-xs font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.2em]">Guia de Lojas</h3>
               </div>
               <LojasEServicosList onStoreClick={onStoreClick} onViewAll={() => onNavigate('explore')} activeFilter={listFilter} user={user} onNavigate={onNavigate} />
           </div>
         );
+
       default: return null;
     }
   };
+
+  const HOME_STRUCTURE = [
+    'categories',
+    'hero',
+    'roulette',
+    'cashback',
+    'highlights',
+    'community',
+    'trending',
+    'filters',
+    'list'
+  ];
 
   return (
     <div className="flex flex-col gap-6 pb-32 bg-white dark:bg-gray-900 w-full max-w-md mx-auto animate-in fade-in duration-500 overflow-x-hidden">
@@ -244,16 +335,13 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
         </div>
       ) : (
         <div className="flex flex-col gap-6 w-full">
-            {renderSection('categories')}
-            {renderSection('hero')}
-            {renderSection('cashback_banner')}
-            {renderSection('list')}
-            <div className="px-5">
+            {HOME_STRUCTURE.map(section => renderSection(section))}
+            <div className="px-4">
               <MasterSponsorBanner onClick={() => onNavigate('patrocinador_master')} />
             </div>
             <div className="mt-8 mb-4 flex flex-col items-center justify-center text-center opacity-40">
               <Star className="w-4 h-4 text-gray-400 mb-2" />
-              <p className="text-[9px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-[0.5em]">Freguesia • Localizei v1.1.0</p>
+              <p className="text-[9px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-[0.5em]">Freguesia • Localizei v1.2.0</p>
             </div>
         </div>
       )}

@@ -1,147 +1,31 @@
 
 import React from 'react';
-import { Utensils, ShoppingCart, Scissors, Heart, PawPrint, Home, Wrench, Dumbbell, CarFront, BookOpen, Monitor, Shirt, Ticket, Map as MapIcon, LayoutGrid } from 'lucide-react';
+import { 
+  Utensils, ShoppingCart, Scissors, Heart, PawPrint, Home, Wrench, 
+  Dumbbell, CarFront, BookOpen, Monitor, Shirt, Ticket, Map as MapIcon, 
+  LayoutGrid, Pill, Briefcase, Plane, Zap
+} from 'lucide-react';
 import { AdType, Category, Store, Story, EditorialCollection } from './types';
 import { getStoreLogo } from './utils/mockLogos';
 
 export const CATEGORIES: Category[] = [
-  { 
-    id: 'cat-food', 
-    name: 'Comida', 
-    slug: 'food', 
-    icon: <Utensils />, 
-    illustrationUrl: 'https://cdn-icons-png.flaticon.com/512/3170/3170733.png',
-    color: 'from-red-500 to-rose-600' 
-  },
-  { 
-    id: 'cat-grocery', 
-    name: 'Mercado', 
-    slug: 'grocery', 
-    icon: <ShoppingCart />, 
-    illustrationUrl: 'https://cdn-icons-png.flaticon.com/512/3081/3081840.png',
-    color: 'from-emerald-500 to-teal-600'
-  },
-  { 
-    id: 'cat-beauty', 
-    name: 'Beleza', 
-    slug: 'beauty', 
-    icon: <Scissors />, 
-    illustrationUrl: 'https://cdn-icons-png.flaticon.com/512/2707/2707142.png',
-    color: 'from-pink-500 to-fuchsia-600'
-  },
-  { 
-    id: 'cat-pets', 
-    name: 'Pets', 
-    slug: 'pets', 
-    icon: <PawPrint />, 
-    illustrationUrl: 'https://cdn-icons-png.flaticon.com/512/107/107831.png',
-    color: 'from-purple-500 to-indigo-600'
-  },
-  { 
-    id: 'cat-health', 
-    name: 'Saúde', 
-    slug: 'health', 
-    icon: <Heart />, 
-    illustrationUrl: 'https://cdn-icons-png.flaticon.com/512/3004/3004458.png',
-    color: 'from-orange-500 to-amber-600'
-  },
-  { 
-    id: 'cat-home', 
-    name: 'Casa', 
-    slug: 'home-decor', 
-    icon: <Home />, 
-    illustrationUrl: 'https://cdn-icons-png.flaticon.com/512/619/619153.png',
-    color: 'from-blue-600 to-indigo-700'
-  },
-  { 
-    id: 'cat-services', 
-    name: 'Serviços', 
-    slug: 'services', 
-    icon: <Wrench />, 
-    illustrationUrl: 'https://cdn-icons-png.flaticon.com/512/4233/4233830.png',
-    color: 'from-sky-500 to-blue-600'
-  },
-  { 
-    id: 'cat-sports', 
-    name: 'Esportes', 
-    slug: 'sports', 
-    icon: <Dumbbell />, 
-    illustrationUrl: 'https://cdn-icons-png.flaticon.com/512/2871/2871612.png',
-    color: 'from-green-500 to-emerald-600'
-  },
-  { 
-    id: 'cat-autos', 
-    name: 'Autos', 
-    slug: 'autos', 
-    icon: <CarFront />, 
-    illustrationUrl: 'https://cdn-icons-png.flaticon.com/512/743/743241.png',
-    color: 'from-slate-600 to-slate-800'
-  }
+  { id: 'cat-food', name: 'Comida', slug: 'food', icon: <Utensils />, color: 'from-orange-500 to-red-600', illustrationUrl: 'https://cdn-icons-png.flaticon.com/512/3170/3170733.png' },
+  { id: 'cat-beauty', name: 'Beleza', slug: 'beauty', icon: <Scissors />, color: 'from-pink-500 to-rose-600', illustrationUrl: 'https://cdn-icons-png.flaticon.com/512/2707/2707142.png' },
+  { id: 'cat-pets', name: 'Pets', slug: 'pets', icon: <PawPrint />, color: 'from-purple-500 to-indigo-600', illustrationUrl: 'https://cdn-icons-png.flaticon.com/512/107/107831.png' },
+  { id: 'cat-autos', name: 'Autos', slug: 'autos', icon: <CarFront />, color: 'from-slate-600 to-slate-800', illustrationUrl: 'https://cdn-icons-png.flaticon.com/512/743/743241.png' },
+  { id: 'cat-pro', name: 'Pro', slug: 'pro', icon: <Briefcase />, color: 'from-blue-700 to-indigo-800', illustrationUrl: 'https://cdn-icons-png.flaticon.com/512/1063/1063376.png' },
+  { id: 'cat-grocery', name: 'Mercado', slug: 'grocery', icon: <ShoppingCart />, color: 'from-emerald-500 to-teal-600', illustrationUrl: 'https://cdn-icons-png.flaticon.com/512/3081/3081840.png' },
+  { id: 'cat-health', name: 'Saúde', slug: 'health', icon: <Heart />, color: 'from-red-500 to-orange-600', illustrationUrl: 'https://cdn-icons-png.flaticon.com/512/3004/3004458.png' },
+  { id: 'cat-home', name: 'Casa', slug: 'home', icon: <Home />, color: 'from-sky-500 to-blue-600', illustrationUrl: 'https://cdn-icons-png.flaticon.com/512/619/619153.png' },
+  { id: 'cat-services', name: 'Serviços', slug: 'services', icon: <Wrench />, color: 'from-amber-500 to-orange-600', illustrationUrl: 'https://cdn-icons-png.flaticon.com/512/4233/4233830.png' },
+  { id: 'cat-sports', name: 'Esportes', slug: 'sports', icon: <Dumbbell />, color: 'from-green-500 to-emerald-600', illustrationUrl: 'https://cdn-icons-png.flaticon.com/512/2871/2871612.png' },
+  { id: 'cat-leisure', name: 'Lazer', slug: 'leisure', icon: <Ticket />, color: 'from-yellow-400 to-orange-500', illustrationUrl: 'https://cdn-icons-png.flaticon.com/512/3063/3063822.png' },
+  { id: 'cat-edu', name: 'Educação', slug: 'education', icon: <BookOpen />, color: 'from-blue-500 to-indigo-600', illustrationUrl: 'https://cdn-icons-png.flaticon.com/512/3389/3389081.png' },
+  { id: 'cat-pharmacy', name: 'Farmácia', slug: 'pharmacy', icon: <Pill />, color: 'from-rose-500 to-red-600', illustrationUrl: 'https://cdn-icons-png.flaticon.com/512/883/883356.png' },
+  { id: 'cat-fashion', name: 'Moda', slug: 'fashion', icon: <Shirt />, color: 'from-fuchsia-500 to-purple-600', illustrationUrl: 'https://cdn-icons-png.flaticon.com/512/3050/3050225.png' },
+  { id: 'cat-tech', name: 'Tecnologia', slug: 'tech', icon: <Monitor />, color: 'from-cyan-500 to-blue-600', illustrationUrl: 'https://cdn-icons-png.flaticon.com/512/606/606203.png' },
+  { id: 'cat-tourism', name: 'Viagem', slug: 'tourism', icon: <Plane />, color: 'from-sky-400 to-blue-500', illustrationUrl: 'https://cdn-icons-png.flaticon.com/512/290/290445.png' },
 ];
-
-// Added SUBCATEGORIES to resolve import errors in components
-export const SUBCATEGORIES: Record<string, { name: string; icon: React.ReactNode }[]> = {
-  'Comida': [
-    { name: 'Restaurantes', icon: <Utensils /> },
-    { name: 'Lanches', icon: <Utensils /> },
-    { name: 'Pizzarias', icon: <Utensils /> },
-    { name: 'Hambúrguerias', icon: <Utensils /> },
-    { name: 'Japonês', icon: <Utensils /> },
-    { name: 'Docerias', icon: <Utensils /> },
-  ],
-  'Alimentação': [ // Specifically for CategoriaAlimentacao.tsx
-    { name: 'Restaurantes', icon: <Utensils /> },
-    { name: 'Lanches', icon: <Utensils /> },
-    { name: 'Pizzarias', icon: <Utensils /> },
-    { name: 'Hambúrguerias', icon: <Utensils /> },
-    { name: 'Japonês', icon: <Utensils /> },
-    { name: 'Docerias', icon: <Utensils /> },
-  ],
-  'Mercado': [
-    { name: 'Supermercado', icon: <ShoppingCart /> },
-    { name: 'Padaria', icon: <Utensils /> },
-    { name: 'Hortifruti', icon: <ShoppingCart /> },
-  ],
-  'Beleza': [
-    { name: 'Salão de Beleza', icon: <Scissors /> },
-    { name: 'Barbearia', icon: <Scissors /> },
-    { name: 'Estética', icon: <Heart /> },
-  ],
-  'Pets': [
-    { name: 'Pet Shop', icon: <PawPrint /> },
-    { name: 'Veterinário', icon: <Heart /> },
-    { name: 'Banho e Tosa', icon: <Scissors /> },
-  ],
-  'Saúde': [
-    { name: 'Clínica Médica', icon: <Heart /> },
-    { name: 'Dentista', icon: <Heart /> },
-    { name: 'Psicologia', icon: <Heart /> },
-    { name: 'Farmácia', icon: <ShoppingCart /> },
-  ],
-  'Casa': [
-    { name: 'Decoração', icon: <Home /> },
-    { name: 'Móveis', icon: <Home /> },
-    { name: 'Utilidades', icon: <ShoppingCart /> },
-  ],
-  'Serviços': [
-    { name: 'Eletricista', icon: <Wrench /> },
-    { name: 'Encanador', icon: <Wrench /> },
-    { name: 'Ar Condicionado', icon: <Wrench /> },
-  ],
-  'Esportes': [
-    { name: 'Academia', icon: <Dumbbell /> },
-    { name: 'Suplementos', icon: <ShoppingCart /> },
-    { name: 'Artigos Esportivos', icon: <Dumbbell /> },
-  ],
-  'Autos': [
-    { name: 'Oficina', icon: <Wrench /> },
-    { name: 'Lavajato', icon: <CarFront /> },
-    { name: 'Estética Automotiva', icon: <CarFront /> },
-  ],
-  'default': [
-    { name: 'Geral', icon: <LayoutGrid /> },
-  ]
-};
 
 export const EDITORIAL_COLLECTIONS: EditorialCollection[] = [
   {
@@ -207,3 +91,17 @@ export const STORES: Store[] = [
     verified: true,
   },
 ];
+
+export const SUBCATEGORIES: Record<string, { name: string; icon: React.ReactNode }[]> = {
+  'Comida': [
+    { name: 'Restaurantes', icon: <Utensils /> },
+    { name: 'Lanches', icon: <Utensils /> },
+    { name: 'Pizzarias', icon: <Utensils /> },
+    { name: 'Hambúrguerias', icon: <Utensils /> },
+    { name: 'Japonês', icon: <Utensils /> },
+    { name: 'Docerias', icon: <Utensils /> },
+  ],
+  'default': [
+    { name: 'Geral', icon: <LayoutGrid /> },
+  ]
+};
