@@ -191,25 +191,34 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
                 { id: 'p4', store: 'Padaria Central', product: 'Combo Café da Manhã', old: '22,00', new: '15,40', off: '30', image: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?q=80&w=400&auto=format&fit=crop' }
               ].map((promo) => (
                 <div key={promo.id} className="min-w-[280px] snap-center bg-white dark:bg-gray-800 rounded-[32px] overflow-hidden shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col group active:scale-[0.98] transition-all">
-                  <div className="h-32 relative overflow-hidden">
+                  {/* HIERARQUIA 1: Imagem do Produto */}
+                  <div className="h-40 relative overflow-hidden">
                     <img src={promo.image} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt={promo.product} />
-                    <div className="absolute top-3 left-3 bg-rose-500 text-white text-[10px] font-black px-2 py-1 rounded-lg shadow-lg">
+                    
+                    {/* HIERARQUIA 2: Badge de Desconto */}
+                    <div className="absolute top-4 left-4 bg-rose-500 text-white text-[11px] font-black px-3 py-1.5 rounded-xl shadow-lg animate-pulse">
                       -{promo.off}% OFF
                     </div>
-                    <div className="absolute bottom-3 right-3 bg-white/90 backdrop-blur-md text-gray-900 text-[9px] font-black px-2 py-1 rounded-lg border border-white/20 flex items-center gap-1">
-                      <Timer className="w-3 h-3 text-rose-500" />
+
+                    {/* HIERARQUIA 6: Validade */}
+                    <div className="absolute bottom-4 right-4 bg-white/90 backdrop-blur-md text-gray-900 text-[9px] font-black px-2.5 py-1.5 rounded-xl border border-white/20 flex items-center gap-1.5 shadow-sm">
+                      <Timer className="w-3.5 h-3.5 text-rose-500" />
                       7 DIAS
                     </div>
                   </div>
-                  <div className="p-4 flex flex-col gap-1">
+
+                  <div className="p-5 flex flex-col gap-1">
                     <div className="flex justify-between items-start">
-                      <div>
-                        <h4 className="font-bold text-gray-900 dark:text-white text-sm leading-tight line-clamp-1">{promo.product}</h4>
-                        <p className="text-[10px] text-gray-400 font-bold uppercase">{promo.store}</p>
+                      <div className="flex-1 pr-2">
+                        {/* HIERARQUIA 3: Nome do Produto */}
+                        <h4 className="font-bold text-gray-900 dark:text-white text-[15px] leading-tight line-clamp-1 mb-0.5">{promo.product}</h4>
+                        <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">{promo.store}</p>
                       </div>
                       <div className="text-right">
-                        <p className="text-[10px] text-gray-400 line-through font-bold">R$ {promo.old}</p>
-                        <p className="text-lg font-black text-[#1E5BFF]">R$ {promo.new}</p>
+                        {/* HIERARQUIA 4: Preço Original */}
+                        <p className="text-[11px] text-gray-400 line-through font-bold leading-none mb-1">R$ {promo.old}</p>
+                        {/* HIERARQUIA 5: Preço Promocional */}
+                        <p className="text-xl font-black text-[#1E5BFF] leading-none">R$ {promo.new}</p>
                       </div>
                     </div>
                   </div>
