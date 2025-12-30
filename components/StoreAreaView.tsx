@@ -25,7 +25,9 @@ import {
   Send,
   MessageSquare,
   Clock,
-  PlayCircle
+  PlayCircle,
+  Users,
+  Handshake
 } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import { User } from '@supabase/supabase-js';
@@ -43,9 +45,10 @@ const STORE_DATA = {
 
 const INSTITUTIONAL_ADS_VIDEO = "https://videos.pexels.com/video-files/4434242/4434242-sd_540_960_25fps.mp4";
 const CASHBACK_TUTORIAL_VIDEO = "https://videos.pexels.com/video-files/4434246/4434246-sd_540_960_25fps.mp4";
+const CONNECT_TUTORIAL_VIDEO = "https://videos.pexels.com/video-files/3201416/3201416-sd_540_960_25fps.mp4";
 
 const SupportQuestion: React.FC<{ 
-  context: 'cashback' | 'ads';
+  context: 'cashback' | 'ads' | 'connect';
   onSend: (text: string) => Promise<void>;
 }> = ({ context, onSend }) => {
   const [text, setText] = useState('');
@@ -63,15 +66,21 @@ const SupportQuestion: React.FC<{
     setIsSending(false);
   };
 
+  const placeholders = {
+    cashback: "Ficou alguma dúvida sobre o cashback? Escreva aqui.",
+    ads: "Dúvida sobre anúncios? Escreva aqui.",
+    connect: "Ficou alguma dúvida sobre o Freguesia Connect? Escreva aqui."
+  };
+
   return (
-    <div className="mt-4 border-t border-gray-100 dark:border-gray-700/50 pt-4">
+    <div className="mt-4 border-t border-gray-100 dark:border-gray-700/50 pt-4 animate-in fade-in duration-500">
       {!history ? (
         <form onSubmit={handleSubmit} className="space-y-3">
           <div className="relative">
             <textarea 
               value={text}
               onChange={(e) => setText(e.target.value)}
-              placeholder="Ficou alguma dúvida? Escreva aqui."
+              placeholder={placeholders[context]}
               maxLength={500}
               className="w-full p-4 bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 rounded-2xl text-xs font-medium dark:text-white outline-none focus:border-[#1E5BFF] transition-all resize-none h-16"
             />
@@ -92,8 +101,9 @@ const SupportQuestion: React.FC<{
           </div>
           <div className="flex items-center gap-2 px-1">
             <Clock className="w-3 h-3 text-amber-500 animate-pulse" />
-            <span className="text-[9px] font-black text-amber-500 uppercase tracking-widest">Aguardando resposta</span>
+            <span className="text-[9px] font-black text-amber-500 uppercase tracking-widest">Aguardando resposta da equipe</span>
           </div>
+          <button onClick={() => setHistory(null)} className="text-[9px] font-bold text-blue-500 px-1">Fazer outra pergunta</button>
         </div>
       )}
     </div>
@@ -127,34 +137,39 @@ const MenuLink: React.FC<{
 
 export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate, user }) => {
   const [isCashbackEnabled, setIsCashbackEnabled] = useState(false);
+  const [isConnectActive, setIsConnectActive] = useState(false);
   const [pendingRequestsCount, setPendingRequestsCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [hasCampaigns, setHasCampaigns] = useState(false);
   const [activeVideo, setActiveVideo] = useState<{url: string, title: string} | null>(null);
   
   // Onboarding Control
-  const [firstSeenDate] = useState<string | null>(localStorage.getItem('cashback_onboarding_start'));
+  const [cashbackFirstSeen] = useState<string | null>(localStorage.getItem('cashback_onboarding_start'));
+  const [connectFirstSeen] = useState<string | null>(localStorage.getItem('connect_onboarding_start'));
 
   useEffect(() => {
-    if (!firstSeenDate) {
-      const now = new Date().toISOString();
-      localStorage.setItem('cashback_onboarding_start', now);
+    // Inicializa datas de onboarding se for o primeiro acesso
+    if (!cashbackFirstSeen) {
+      localStorage.setItem('cashback_onboarding_start', new Date().toISOString());
+    }
+    if (!connectFirstSeen) {
+      localStorage.setItem('connect_onboarding_start', new Date().toISOString());
     }
     
     const timer = setTimeout(() => {
       setLoading(false);
-      setHasCampaigns(false); 
     }, 800);
     return () => clearTimeout(timer);
-  }, [firstSeenDate]);
+  }, []);
 
-  const isWithin7Days = useMemo(() => {
-    if (!firstSeenDate) return true;
+  const isWithin7Days = (dateStr: string | null) => {
+    if (!dateStr) return true;
     const sevenDaysInMs = 7 * 24 * 60 * 60 * 1000;
-    return (new Date().getTime() - new Date(firstSeenDate).getTime()) < sevenDaysInMs;
-  }, [firstSeenDate]);
+    return (new Date().getTime() - new Date(dateStr).getTime()) < sevenDaysInMs;
+  };
 
-  const shouldShowCashbackVideo = !isCashbackEnabled && isWithin7Days;
+  const shouldShowCashbackVideo = !isCashbackEnabled && isWithin7Days(cashbackFirstSeen);
+  const shouldShowConnectVideo = !isConnectActive && isWithin7Days(connectFirstSeen);
 
   useEffect(() => {
     if (!supabase || !user) return;
@@ -168,19 +183,11 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
         setPendingRequestsCount(count || 0);
     };
     fetchCount();
-    const sub = supabase.channel('store_area_badge')
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'cashback_transactions', filter: `merchant_id=eq.${merchantId}` }, () => fetchCount())
-        .subscribe();
-    return () => { supabase.removeChannel(sub); };
+    return () => {};
   }, [user]);
 
   const handleSendQuestion = async (text: string) => {
     await new Promise(resolve => setTimeout(resolve, 1000));
-  };
-
-  const handleEnableCashback = () => {
-    setIsCashbackEnabled(true);
-    // Em um cenário real, aqui salvaríamos no banco de dados a ativação
   };
 
   if (loading) {
@@ -213,7 +220,7 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
             <div>
                 <div className="flex items-center gap-1.5">
                     <h1 className="text-2xl font-bold text-gray-900 dark:text-white font-display leading-tight">
-                        {user?.user_metadata?.full_name || STORE_DATA.name}
+                        {user?.user_metadata?.full_name || "Minha Loja"}
                     </h1>
                     {user && <BadgeCheck className="w-5 h-5 text-white fill-[#1E5BFF]" />}
                 </div>
@@ -229,7 +236,7 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
 
       <div className="flex-1 flex flex-col w-full bg-gray-50 dark:bg-gray-950">
         
-        {/* 1. CASHBACK DA LOJA (Ocupando o topo agora) */}
+        {/* 1. CASHBACK DA LOJA */}
         <section className="w-full bg-white dark:bg-gray-800 p-6 border-b border-gray-100 dark:border-gray-800 relative overflow-hidden">
             <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 rounded-bl-full -mr-8 -mt-8 pointer-events-none"></div>
             
@@ -243,7 +250,6 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
                       <p className="text-xs text-gray-500">Fidelize seus clientes do bairro</p>
                     </div>
                 </div>
-                
                 <button 
                     onClick={() => setIsCashbackEnabled(!isCashbackEnabled)}
                     className={`w-12 h-6 rounded-full p-1 transition-colors duration-300 ${isCashbackEnabled ? 'bg-green-500' : 'bg-gray-300 dark:bg-gray-600'}`}
@@ -268,25 +274,22 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
                         </span>
                     </div>
                 </div>
-                
                 <div className="bg-blue-50 dark:bg-blue-900/10 rounded-2xl p-5 mb-4 border border-blue-100 dark:border-blue-800/30">
                     <p className="text-xs text-blue-700 dark:text-blue-400 leading-relaxed font-medium">
-                        Lojas com cashback ativo recebem até <strong>40% mais visitas</strong> no app Localizei Freguesia.
+                        Lojas com cashback ativo recebem até <strong>40% mais visitas</strong> no app.
                     </p>
                 </div>
-
+                <SupportQuestion context="cashback" onSend={handleSendQuestion} />
                 <button 
-                    onClick={handleEnableCashback}
-                    className="w-full bg-[#1E5BFF] text-white py-4 rounded-2xl text-sm font-black uppercase tracking-widest shadow-lg shadow-blue-500/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2 mb-4"
+                    onClick={() => setIsCashbackEnabled(true)}
+                    className="w-full bg-[#1E5BFF] text-white py-4 rounded-2xl text-sm font-black uppercase tracking-widest shadow-lg shadow-blue-500/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2 mt-6"
                 >
                     <CheckCircle2 className="w-5 h-5" />
                     Habilitar cashback agora
                 </button>
-
-                <SupportQuestion context="cashback" onSend={handleSendQuestion} />
               </div>
             ) : (
-              <div className="animate-in fade-in zoom-in-95 duration-500">
+              <div className="animate-in fade-in duration-500">
                 <div className="grid grid-cols-2 gap-4 mb-6">
                     <div className="bg-gray-50 dark:bg-gray-900/50 p-4 rounded-2xl border border-gray-100 dark:border-gray-700">
                         <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Taxa atual</p>
@@ -297,7 +300,6 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
                         <p className="font-black text-green-600 text-xl">R$ 0,00</p>
                     </div>
                 </div>
-
                 <div className="flex gap-2">
                   <button 
                       onClick={() => onNavigate && onNavigate('store_cashback_module')}
@@ -308,7 +310,6 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
                   <button 
                       onClick={() => setActiveVideo({url: CASHBACK_TUTORIAL_VIDEO, title: "Como funciona o Cashback Localizei"})}
                       className="w-14 h-14 rounded-2xl bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center text-blue-600 dark:text-blue-400 hover:bg-blue-100 transition-colors"
-                      title="Ver tutorial novamente"
                   >
                       <PlayCircle className="w-6 h-6" />
                   </button>
@@ -317,7 +318,7 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
             )}
         </section>
 
-        {/* 2. TERMINAL DE CAIXA (Só aparece se o cashback estiver habilitado) */}
+        {/* 2. TERMINAL DE CAIXA */}
         {isCashbackEnabled && (
           <section className="w-full border-b border-gray-100 dark:border-gray-800 animate-in slide-in-from-top-4 duration-700">
             <button
@@ -352,17 +353,15 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
                     <Megaphone className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="font-bold text-gray-900 dark:text-white leading-tight">Anúncios Patrocinados e Destaques</h3>
-                  <p className="text-xs text-gray-500 mt-0.5">
-                    {hasCampaigns ? "Aumente sua visibilidade no app" : "Alcance novos clientes hoje"}
-                  </p>
+                  <h3 className="font-bold text-gray-900 dark:text-white leading-tight">Anúncios Patrocinados</h3>
+                  <p className="text-xs text-gray-500 mt-0.5">Aumente sua visibilidade na Freguesia</p>
                 </div>
             </div>
 
             <div className="mb-6 group">
                 <div 
                     onClick={() => setActiveVideo({url: INSTITUTIONAL_ADS_VIDEO, title: "Como funcionam os Anúncios Patrocinados"})}
-                    className="w-full aspect-video rounded-[2rem] overflow-hidden bg-slate-900 relative group shadow-lg border border-gray-100 dark:border-gray-700 cursor-pointer"
+                    className="w-full aspect-video rounded-3xl overflow-hidden bg-slate-900 relative group shadow-lg border border-gray-100 dark:border-gray-700 cursor-pointer"
                 >
                     <div className="absolute inset-0 bg-gradient-to-br from-indigo-600/20 to-purple-600/20 mix-blend-overlay"></div>
                     <div className="absolute inset-0 flex items-center justify-center">
@@ -375,59 +374,108 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
                             </span>
                         </div>
                     </div>
-                    <div className="absolute bottom-4 left-6 right-6">
-                         <p className="text-xs font-bold text-white leading-tight shadow-black drop-shadow-md">Veja como destacar sua loja no topo das buscas da Freguesia</p>
-                    </div>
+                </div>
+
+                <div className="bg-purple-50 dark:bg-purple-900/10 rounded-2xl p-5 mb-4 border border-purple-100 dark:border-purple-800/30 mt-4">
+                    <p className="text-xs text-purple-700 dark:text-purple-400 leading-relaxed font-medium">
+                      Apareça no topo das buscas e destaque sua loja para novos clientes.
+                    </p>
                 </div>
 
                 <SupportQuestion context="ads" onSend={handleSendQuestion} />
-            </div>
 
-            <div className="bg-purple-50 dark:bg-purple-900/10 rounded-2xl p-5 mb-6 border border-purple-100 dark:border-purple-800/30">
-                <div className="flex items-center gap-2 mb-1.5">
-                  {hasCampaigns ? (
-                    <TrendingUp className="w-4 h-4 text-purple-600" />
-                  ) : (
-                    <Rocket className="w-4 h-4 text-purple-600" />
-                  )}
-                  <p className="text-sm font-bold text-purple-900 dark:text-purple-200">
-                    {hasCampaigns ? "Gerencie seus impulsos" : "Impulsione suas vendas"}
-                  </p>
-                </div>
-                <p className="text-xs text-purple-700 dark:text-purple-400 leading-relaxed font-medium">
-                  {hasCampaigns 
-                    ? "Acompanhe o desempenho das suas campanhas e otimize seus resultados." 
-                    : "Apareça no topo das buscas e destaque sua loja para novos clientes."
-                  }
-                </p>
+                <button 
+                    onClick={() => onNavigate && onNavigate('store_ads_module')}
+                    className="w-full bg-[#1E5BFF] text-white py-4 rounded-2xl text-sm font-bold shadow-lg shadow-blue-500/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2 mt-6"
+                >
+                    <Rocket className="w-4 h-4" />
+                    Impulsionar minha loja
+                </button>
             </div>
-
-            <button 
-                onClick={() => onNavigate && onNavigate('store_ads_module')}
-                className="w-full bg-[#1E5BFF] text-white py-4 rounded-2xl text-sm font-bold shadow-lg shadow-blue-500/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
-            >
-                {hasCampaigns ? (
-                  <>
-                    Gerenciar campanhas
-                    <ChevronRight className="w-4 h-4" />
-                  </>
-                ) : (
-                  <>
-                    <Plus className="w-4 h-4" />
-                    Criar campanha
-                  </>
-                )}
-            </button>
         </section>
 
-        {/* 4. ADMINISTRATIVO */}
+        {/* 4. FREGUESIA CONNECT (NOVO BLOCO) */}
+        <section className="w-full bg-white dark:bg-gray-800 p-6 border-b border-gray-100 dark:border-gray-800 relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/5 rounded-bl-full -mr-8 -mt-8 pointer-events-none"></div>
+            
+            <div className="flex items-center gap-3 mb-6 relative z-10">
+                <div className="p-2.5 bg-indigo-50 dark:bg-indigo-900/30 rounded-xl text-indigo-600 dark:text-indigo-400">
+                    <Handshake className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-gray-900 dark:text-white leading-tight">Freguesia Connect</h3>
+                  <p className="text-xs text-gray-500 mt-0.5">Networking e Parcerias B2B</p>
+                </div>
+            </div>
+
+            {shouldShowConnectVideo ? (
+              <div className="mb-6 animate-in fade-in slide-in-from-top-4 duration-500">
+                <div 
+                    onClick={() => setActiveVideo({url: CONNECT_TUTORIAL_VIDEO, title: "O que é o Freguesia Connect?"})}
+                    className="w-full aspect-video rounded-3xl overflow-hidden bg-slate-900 relative group shadow-lg border border-gray-100 dark:border-gray-700 cursor-pointer mb-4"
+                >
+                    <div className="absolute inset-0 bg-gradient-to-br from-indigo-600/20 to-purple-600/20 mix-blend-overlay"></div>
+                    <div className="absolute inset-0 flex flex-col items-center justify-center">
+                        <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-xl transform group-hover:scale-110 transition-transform active:scale-95 mb-3">
+                            <Play className="w-8 h-8 text-indigo-600 fill-indigo-600 ml-1" />
+                        </div>
+                        <span className="text-[10px] font-black text-white uppercase tracking-widest bg-black/40 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/10">
+                            Entenda em 1 min
+                        </span>
+                    </div>
+                </div>
+                
+                <div className="bg-indigo-50 dark:bg-indigo-900/10 rounded-2xl p-5 mb-4 border border-indigo-100 dark:border-indigo-800/30">
+                    <p className="text-xs text-indigo-700 dark:text-indigo-400 leading-relaxed font-medium">
+                        Participe do grupo oficial de lojistas, troque experiências e feche parcerias locais.
+                    </p>
+                </div>
+
+                <SupportQuestion context="connect" onSend={handleSendQuestion} />
+
+                <button 
+                    onClick={() => { setIsConnectActive(true); onNavigate && onNavigate('freguesia_connect_dashboard'); }}
+                    className="w-full bg-indigo-600 text-white py-4 rounded-2xl text-sm font-black uppercase tracking-widest shadow-lg shadow-indigo-500/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2 mt-6"
+                >
+                    <Users className="w-5 h-5" />
+                    Solicitar minha vaga no grupo
+                </button>
+              </div>
+            ) : (
+              <div className="animate-in fade-in duration-500">
+                <div className="bg-gray-50 dark:bg-gray-900/50 p-4 rounded-2xl border border-gray-100 dark:border-gray-700 mb-6 flex items-center justify-between">
+                    <div>
+                      <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Status</p>
+                      <p className="font-black text-indigo-600 text-sm uppercase">Membro Ativo</p>
+                    </div>
+                    <CheckCircle2 className="w-6 h-6 text-green-500" />
+                </div>
+                <div className="flex gap-2">
+                  <button 
+                      onClick={() => onNavigate && onNavigate('freguesia_connect_dashboard')}
+                      className="flex-1 py-4 rounded-2xl bg-gray-100 dark:bg-gray-700 text-sm font-bold text-gray-700 dark:text-gray-200 hover:bg-gray-200 transition-colors flex items-center justify-center gap-2"
+                  >
+                      Acessar Rede
+                  </button>
+                  <button 
+                      onClick={() => setActiveVideo({url: CONNECT_TUTORIAL_VIDEO, title: "O que é o Freguesia Connect?"})}
+                      className="w-14 h-14 rounded-2xl bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 transition-colors"
+                  >
+                      <PlayCircle className="w-6 h-6" />
+                  </button>
+                </div>
+              </div>
+            )}
+        </section>
+
+        {/* 5. ADMINISTRATIVO */}
         <section className="w-full mt-6">
             <div className="px-5 mb-3">
               <h3 className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest ml-1">
                   Administrativo
               </h3>
             </div>
-            <div className="bg-white dark:bg-gray-800 border-y border-gray-100 dark:border-gray-700">
+            <div className="bg-white dark:bg-gray-800 border-y border-gray-100 dark:border-gray-800">
                 <MenuLink 
                     icon={Settings} 
                     label="Perfil Público da Loja" 
