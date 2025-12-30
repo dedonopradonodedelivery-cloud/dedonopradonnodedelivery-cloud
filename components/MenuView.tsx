@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { 
   User as UserIcon, 
@@ -10,7 +11,9 @@ import {
   LogOut, 
   Store, 
   Users,
-  Loader2
+  Loader2,
+  BadgeCheck,
+  Zap
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { MasterSponsorBanner } from './MasterSponsorBanner';
@@ -60,7 +63,6 @@ export const MenuView: React.FC<MenuViewProps> = ({ user, userRole, onAuthClick,
   const isMerchant = userRole === 'lojista';
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   
-  // Decide o título do perfil: Nome > Email > Fallback Genérico
   const profileTitle = user?.user_metadata?.full_name 
     ? user.user_metadata.full_name 
     : user?.email 
@@ -72,11 +74,7 @@ export const MenuView: React.FC<MenuViewProps> = ({ user, userRole, onAuthClick,
   const handleLogout = async () => {
     if (isLoggingOut) return;
     setIsLoggingOut(true);
-
     try {
-      // Chama o signOut do contexto
-      // O contexto atualizará o estado 'user' para null
-      // A App.tsx reagirá e renderizará a UI apropriada (Guest ou Home)
       await signOut();
     } catch (error) {
       console.warn("Erro ao realizar logout:", error);
@@ -85,30 +83,22 @@ export const MenuView: React.FC<MenuViewProps> = ({ user, userRole, onAuthClick,
     }
   };
 
-  // --- GUEST VIEW (Not Authenticated) ---
   if (!user) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 font-sans animate-in slide-in-from-right duration-300 flex flex-col">
-        
-        {/* Header Simples */}
         <div className="bg-white dark:bg-gray-900 px-5 pt-10 pb-4 border-b border-gray-100 dark:border-gray-800 sticky top-0 z-50">
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white font-display">Perfil</h2>
         </div>
-
         <div className="flex-1 flex flex-col items-center justify-center p-6 pb-28 text-center">
-          
           <div className="w-24 h-24 bg-white dark:bg-gray-800 rounded-[2rem] flex items-center justify-center mb-6 shadow-sm border border-gray-100 dark:border-gray-700 transform -rotate-6">
              <UserIcon className="w-10 h-10 text-[#1E5BFF]" />
           </div>
-
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">
             Entre na sua conta
           </h2>
-          
           <p className="text-gray-500 dark:text-gray-400 text-sm mb-10 max-w-[260px] leading-relaxed font-medium">
             Faça login para acessar seus favoritos, cashback e acompanhar sua experiência no Localizei Freguesia.
           </p>
-
           <div className="w-full space-y-4">
             <button 
                 onClick={onAuthClick}
@@ -118,25 +108,19 @@ export const MenuView: React.FC<MenuViewProps> = ({ user, userRole, onAuthClick,
                 <ChevronRight className="w-5 h-5 opacity-80" />
             </button>
           </div>
-
         </div>
       </div>
     );
   }
 
-  // --- LOGGED IN VIEW ---
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-24 animate-in fade-in duration-300">
-      
-      {/* 1) Header - Fixo (Sticky) */}
       <div className="bg-white dark:bg-gray-900 px-5 pt-10 pb-4 border-b border-gray-100 dark:border-gray-800 sticky top-0 z-50">
         <h2 className="text-2xl font-bold text-gray-900 dark:text-white font-display mb-0.5">Menu</h2>
         <p className="text-sm text-gray-500 dark:text-gray-400">Configurações e Atalhos</p>
       </div>
 
       <div className="px-5 pb-5">
-        
-        {/* 2) Card de Perfil do Usuário (Cabeçalho) */}
         <div 
           onClick={() => onNavigate('edit_profile')}
           className="mt-6 bg-white dark:bg-gray-800 p-4 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 flex items-center gap-4 cursor-pointer active:scale-[0.98] transition-transform mb-6"
@@ -159,26 +143,50 @@ export const MenuView: React.FC<MenuViewProps> = ({ user, userRole, onAuthClick,
           </div>
         </div>
 
-        {/* 3) Merchant Area (Only if Merchant) */}
+        {/* 3) Merchant Hero Banner (High Highlight for Merchants) */}
         {isMerchant && (
             <button 
                 onClick={() => onNavigate('store_area')}
-                className="w-full bg-gradient-to-r from-indigo-600 to-indigo-700 text-white p-4 rounded-2xl shadow-md shadow-indigo-500/20 flex items-center justify-between group active:scale-[0.98] transition-transform mb-6"
+                className="w-full bg-gradient-to-br from-[#1e1b4b] via-[#312e81] to-[#1e3a8a] text-white p-8 rounded-[2.5rem] shadow-2xl shadow-indigo-900/30 flex flex-col gap-6 relative overflow-hidden group active:scale-[0.98] transition-all mb-8 border border-white/10"
             >
-                <div className="flex items-center gap-4">
-                    <div className="p-2 rounded-xl bg-white/20 text-white">
-                        <Store className="w-6 h-6" />
+                {/* Background Decor */}
+                <div className="absolute top-0 right-0 w-48 h-48 bg-indigo-500/10 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none group-hover:bg-indigo-500/20 transition-all duration-700"></div>
+                <div className="absolute bottom-0 left-0 w-32 h-32 bg-blue-500/5 rounded-full blur-2xl -ml-8 -mb-8 pointer-events-none"></div>
+
+                <div className="flex justify-between items-start relative z-10">
+                    <div className="flex flex-col gap-1">
+                        <div className="flex items-center gap-2">
+                          <span className="text-[10px] font-black text-indigo-300 uppercase tracking-[0.25em]">Área Restrita</span>
+                          <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_#10b981]"></div>
+                        </div>
+                        <h3 className="font-black text-2xl tracking-tighter font-display">Painel do Lojista</h3>
+                        <p className="text-xs text-indigo-200 font-medium">Gerencie sua loja e suas vendas agora</p>
                     </div>
-                    <div className="text-left">
-                        <h3 className="font-bold text-white text-sm">Painel do Lojista</h3>
-                        <p className="text-xs text-indigo-100">Gerenciar minha loja</p>
+                    <div className="w-16 h-16 bg-white/10 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/10 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500 shadow-xl">
+                        <Store className="w-8 h-8 text-white" strokeWidth={1.5} />
                     </div>
                 </div>
-                <ChevronRight className="w-5 h-5 text-indigo-200 group-hover:text-white transition-colors" />
+
+                <div className="mt-2 p-5 bg-white/5 backdrop-blur-sm rounded-3xl border border-white/10 flex items-center justify-between relative z-10">
+                    <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 rounded-xl bg-indigo-500/20 flex items-center justify-center border border-indigo-500/30">
+                            <Zap className="w-6 h-6 text-amber-400 fill-amber-400" />
+                        </div>
+                        <div className="text-left">
+                            <p className="font-bold text-white text-sm line-clamp-1">Hamburgueria Brasa</p>
+                            <div className="flex items-center gap-1.5 mt-0.5">
+                                <BadgeCheck className="w-3 h-3 text-blue-400" />
+                                <span className="text-[10px] font-black text-blue-100 uppercase tracking-wider">Operação ativa</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="w-10 h-10 rounded-full bg-white text-indigo-900 flex items-center justify-center shadow-lg transform group-hover:translate-x-1 transition-transform">
+                        <ChevronRight className="w-6 h-6" strokeWidth={3} />
+                    </div>
+                </div>
             </button>
         )}
 
-        {/* 4) Seção Minha Conta */}
         <SectionTitle title="Minha Conta" />
         <MenuItem 
             icon={Heart} 
@@ -195,10 +203,7 @@ export const MenuView: React.FC<MenuViewProps> = ({ user, userRole, onAuthClick,
             subLabel="Acompanhe seu saldo e ganhos"
         />
 
-        {/* 5) Seção Comunidade & Suporte */}
         <SectionTitle title="Comunidade & Suporte" />
-        
-        {/* Item Exclusivo para Lojistas */}
         {isMerchant && (
              <MenuItem 
                 icon={Users} 
@@ -208,7 +213,6 @@ export const MenuView: React.FC<MenuViewProps> = ({ user, userRole, onAuthClick,
                 subLabel="Rede de negócios da Freguesia"
             />
         )}
-
         <MenuItem 
             icon={Share2} 
             label="Indique um amigo" 
@@ -224,16 +228,12 @@ export const MenuView: React.FC<MenuViewProps> = ({ user, userRole, onAuthClick,
             subLabel="Fale com a nossa equipe"
         />
 
-        {/* 6) Seção Parceiros & Publicidade */}
         <SectionTitle title="Parceiros & Publicidade" />
-        
-        {/* Patrocinador Master Banner */}
         <MasterSponsorBanner 
             onClick={() => onNavigate('patrocinador_master')}
             className="mb-4"
         />
 
-        {/* 7) Seção Institucional */}
         <SectionTitle title="Institucional" />
         <MenuItem 
             icon={Info} 
@@ -242,7 +242,6 @@ export const MenuView: React.FC<MenuViewProps> = ({ user, userRole, onAuthClick,
             colorClass="bg-gray-500" 
         />
 
-        {/* 8) Logout Button */}
         <div className="mt-8">
             <button 
                 onClick={handleLogout}
@@ -258,11 +257,9 @@ export const MenuView: React.FC<MenuViewProps> = ({ user, userRole, onAuthClick,
             </button>
         </div>
 
-        {/* Version Info */}
         <div className="text-center pt-8 pb-4">
             <p className="text-[10px] text-gray-400">Localizei Freguesia v1.0.9</p>
         </div>
-
       </div>
     </div>
   );

@@ -1,6 +1,24 @@
 
-import React, { useState, useRef, useEffect } from 'react';
-import { ChevronLeft, Search, Building2, Smartphone, Mail, CheckCircle2, AlertTriangle, Upload, ArrowRight, ShieldCheck, MessageSquare } from 'lucide-react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
+import { 
+  ChevronLeft, 
+  Search, 
+  Building2, 
+  Smartphone, 
+  Mail, 
+  CheckCircle2, 
+  AlertTriangle, 
+  Upload, 
+  ArrowRight, 
+  ShieldCheck, 
+  MessageSquare,
+  Play,
+  Info,
+  X,
+  Clock,
+  Send,
+  Loader2
+} from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
 interface BusinessRegistrationFlowProps {
@@ -10,16 +28,60 @@ interface BusinessRegistrationFlowProps {
 
 type Step = 'search' | 'found' | 'not_found' | 'select_method' | 'otp' | 'success' | 'manual_verify';
 
-// Mock Data for "Existing Store" simulation
-const EXISTING_STORE_MOCK = {
-  cnpj: '12345678000199', // Trigger for existing store flow
-  name: 'Padaria Estrela da Freguesia',
-  address: 'Estrada dos Três Rios, 1200 - Freguesia',
-  category: 'Alimentação'
+const CLAIM_TUTORIAL_VIDEO = "https://videos.pexels.com/video-files/3129957/3129957-sd_540_960_30fps.mp4";
+
+const SupportQuestion: React.FC<{ 
+  onSend: (text: string) => Promise<void>;
+}> = ({ onSend }) => {
+  const [text, setText] = useState('');
+  const [isSending, setIsSending] = useState(false);
+  const [history, setHistory] = useState<{question: string, status: 'sent' | 'answered'} | null>(null);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!text.trim()) return;
+    setIsSending(true);
+    await onSend(text);
+    setHistory({ question: text, status: 'sent' });
+    setText('');
+    setIsSending(false);
+  };
+
+  return (
+    <div className="mt-6 border-t border-gray-100 dark:border-gray-800 pt-6">
+      {!history ? (
+        <form onSubmit={handleSubmit} className="space-y-3">
+          <textarea 
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            placeholder="Dúvida sobre a reivindicação? Escreva aqui."
+            className="w-full p-4 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl text-xs font-medium dark:text-white outline-none focus:border-[#1E5BFF] transition-all resize-none h-20"
+          />
+          <button 
+            type="submit"
+            disabled={isSending || !text.trim()}
+            className="w-full bg-gray-100 dark:bg-gray-800 text-gray-500 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2 active:scale-95 transition-all"
+          >
+            {isSending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
+            Enviar pergunta
+          </button>
+        </form>
+      ) : (
+        <div className="bg-blue-50 dark:bg-blue-900/10 p-4 rounded-2xl border border-blue-100 dark:border-blue-800/30 flex items-center gap-3">
+          <Clock className="w-4 h-4 text-blue-500 animate-pulse" />
+          <p className="text-[10px] font-bold text-blue-700 dark:text-blue-300 uppercase tracking-wider">Recebemos sua dúvida. Responderemos em breve.</p>
+        </div>
+      )}
+    </div>
+  );
 };
 
 export const BusinessRegistrationFlow: React.FC<BusinessRegistrationFlowProps> = ({ onBack, onComplete }) => {
   const [step, setStep] = useState<Step>('search');
+  const [showVideoModal, setShowVideoModal] = useState(false);
+  const [isClaimed, setIsClaimed] = useState(false);
+  const [hasSeenVideo, setHasSeenVideo] = useState(() => localStorage.getItem('claim_onboarding_seen') === 'true');
+  
   const [formData, setFormData] = useState({
     cnpj: '',
     name: '',
@@ -31,7 +93,7 @@ export const BusinessRegistrationFlow: React.FC<BusinessRegistrationFlowProps> =
   const [isLoading, setIsLoading] = useState(false);
   const [verificationMethod, setVerificationMethod] = useState<'whatsapp' | 'sms' | 'email' | null>(null);
 
-  // --- Handlers ---
+  const shouldShowVideo = !hasSeenVideo && !isClaimed;
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -42,139 +104,116 @@ export const BusinessRegistrationFlow: React.FC<BusinessRegistrationFlowProps> =
     e.preventDefault();
     setIsLoading(true);
     
-    // NOVO FLUXO: Apenas capturar o lead, sem criar usuário ou avançar etapas de OTP.
     try {
       if (supabase) {
-        const { error } = await supabase.from('merchant_leads').insert({
+        await supabase.from('merchant_leads').insert({
           email: formData.email,
           phone: formData.phone,
-          name: formData.name, // Nome do responsável ou da loja
+          name: formData.name,
           cnpj: formData.cnpj,
-          source: 'qr_code', // Identificador da origem
+          source: 'claim_flow',
           created_at: new Date().toISOString()
         });
-
-        if (error) throw error;
-      } else {
-        // Simulação caso Supabase não esteja configurado no ambiente
-        console.log("Modo Demo: Lead capturado", formData);
-        await new Promise(resolve => setTimeout(resolve, 1000));
       }
-
-      // Sucesso
-      alert("Pronto! Recebemos seu e-mail e vamos entrar em contato em breve.");
       
-      // Limpar formulário
-      setFormData({
-        cnpj: '',
-        name: '',
-        phone: '',
-        email: ''
-      });
-
-      // NÃO avançamos para setStep('found') ou 'otp'. O fluxo encerra aqui como captura de lead.
-
+      // Simulação: se o CNPJ for o do mock, vai para "encontrado"
+      if (formData.cnpj.replace(/\D/g, '') === '12345678000199') {
+          setStep('found');
+      } else {
+          setStep('not_found');
+      }
     } catch (err) {
-      console.error("Erro ao salvar lead:", err);
-      alert("Não conseguimos salvar seu e-mail agora, tente novamente em alguns minutos.");
+      console.error(err);
+      alert("Erro ao processar dados.");
     } finally {
       setIsLoading(false);
     }
   };
 
-  const sendVerificationCode = (method: 'whatsapp' | 'sms' | 'email') => {
-    setVerificationMethod(method);
-    setIsLoading(true);
-    setTimeout(() => {
-        setIsLoading(false);
-        setStep('otp');
-    }, 1000);
+  const handleSuccess = () => {
+    setIsClaimed(true);
+    localStorage.setItem('claim_onboarding_seen', 'true');
+    setStep('success');
   };
-
-  const handleOtpChange = (index: number, value: string) => {
-    if (value.length > 1) return; // Prevent multi-char paste for simplicity
-    const newOtp = [...otp];
-    newOtp[index] = value;
-    setOtp(newOtp);
-
-    // Auto-focus next input
-    if (value && index < 5) {
-      otpRefs.current[index + 1]?.focus();
-    }
-  };
-
-  const handleOtpKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Backspace' && !otp[index] && index > 0) {
-      otpRefs.current[index - 1]?.focus();
-    }
-  };
-
-  const verifyOtp = () => {
-    setIsLoading(true);
-    setTimeout(() => {
-        setIsLoading(false);
-        // Simulate success for "123456", fail for anything else to show manual flow
-        if (otp.join('') === '123456') {
-            setStep('success');
-        } else {
-            alert("Código incorreto (use 123456 para testar). Se falhar novamente, iremos para verificação manual.");
-            // In a real app, track attempts. Here we redirect to manual for demo if user wants
-        }
-    }, 1500);
-  };
-
-  // --- Render Steps ---
 
   const renderSearch = () => (
     <div className="animate-in slide-in-from-right duration-300">
       <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2 font-display">Cadastrar meu negócio</h2>
-      <p className="text-gray-500 text-sm mb-8">Preencha os dados abaixo para entrarmos em contato.</p>
+      <p className="text-gray-500 text-sm mb-6">Comece informando os dados básicos da sua loja.</p>
+
+      {shouldShowVideo && (
+        <div className="mb-8">
+            <div 
+                onClick={() => setShowVideoModal(true)}
+                className="w-full aspect-video rounded-3xl overflow-hidden bg-slate-900 relative group shadow-lg border border-gray-100 dark:border-gray-800 cursor-pointer"
+            >
+                <div className="absolute inset-0 bg-gradient-to-br from-indigo-600/30 to-purple-600/30 mix-blend-overlay"></div>
+                <div className="absolute inset-0 flex flex-col items-center justify-center">
+                    <div className="w-14 h-14 bg-white rounded-full flex items-center justify-center shadow-xl transform group-hover:scale-110 transition-transform active:scale-95 mb-3">
+                        <Play className="w-6 h-6 text-indigo-600 fill-indigo-600 ml-1" />
+                    </div>
+                    <span className="text-[10px] font-black text-white uppercase tracking-widest bg-black/40 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/10">
+                        Como reivindicar sua loja
+                    </span>
+                </div>
+            </div>
+            <div className="mt-4 flex items-start gap-3 bg-indigo-50 dark:bg-indigo-900/10 p-4 rounded-2xl border border-indigo-100 dark:border-indigo-800/30">
+                <ShieldCheck className="w-5 h-5 text-indigo-600 shrink-0 mt-0.5" />
+                <p className="text-xs text-indigo-700 dark:text-indigo-300 leading-relaxed font-medium">
+                    A verificação garante que apenas o dono legítimo gerencie o perfil e receba os pagamentos.
+                </p>
+            </div>
+        </div>
+      )}
 
       <form onSubmit={handleSearchSubmit} className="space-y-5">
         <div>
-            <label className="block text-xs font-bold text-gray-500 uppercase mb-1">CNPJ</label>
+            <label className="block text-xs font-bold text-gray-500 uppercase mb-1.5 ml-1">CNPJ</label>
             <input 
                 name="cnpj"
                 value={formData.cnpj}
                 onChange={handleInputChange}
                 placeholder="00.000.000/0001-00"
-                className="w-full p-4 bg-gray-50 dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 outline-none focus:border-[#1E5BFF] transition-colors"
+                className="w-full p-4 bg-gray-50 dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 outline-none focus:border-[#1E5BFF] transition-all dark:text-white"
                 required
             />
         </div>
         <div>
-            <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Nome da Loja</label>
+            <label className="block text-xs font-bold text-gray-500 uppercase mb-1.5 ml-1">Nome da Loja</label>
             <input 
                 name="name"
                 value={formData.name}
                 onChange={handleInputChange}
                 placeholder="Ex: Padaria do Bairro"
-                className="w-full p-4 bg-gray-50 dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 outline-none focus:border-[#1E5BFF] transition-colors"
+                className="w-full p-4 bg-gray-50 dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 outline-none focus:border-[#1E5BFF] transition-all dark:text-white"
                 required
             />
         </div>
-        <div>
-            <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Telefone (WhatsApp)</label>
-            <input 
-                name="phone"
-                value={formData.phone}
-                onChange={handleInputChange}
-                placeholder="(21) 99999-9999"
-                className="w-full p-4 bg-gray-50 dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 outline-none focus:border-[#1E5BFF] transition-colors"
-                required
-            />
-        </div>
-        <div>
-            <label className="block text-xs font-bold text-gray-500 uppercase mb-1">E-mail Comercial</label>
-            <input 
-                name="email"
-                type="email"
-                value={formData.email}
-                onChange={handleInputChange}
-                placeholder="contato@loja.com.br"
-                className="w-full p-4 bg-gray-50 dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 outline-none focus:border-[#1E5BFF] transition-colors"
-                required
-            />
+        
+        <div className="grid grid-cols-1 gap-5">
+            <div>
+                <label className="block text-xs font-bold text-gray-500 uppercase mb-1.5 ml-1">WhatsApp</label>
+                <input 
+                    name="phone"
+                    value={formData.phone}
+                    onChange={handleInputChange}
+                    placeholder="(21) 99999-9999"
+                    className="w-full p-4 bg-gray-50 dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 outline-none focus:border-[#1E5BFF] transition-all dark:text-white"
+                    required
+                />
+            </div>
+            <div>
+                <label className="block text-xs font-bold text-gray-500 uppercase mb-1.5 ml-1">E-mail</label>
+                <input 
+                    name="email"
+                    type="email"
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    placeholder="contato@sualoja.com"
+                    className="w-full p-4 bg-gray-50 dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 outline-none focus:border-[#1E5BFF] transition-all dark:text-white"
+                    required
+                />
+            </div>
         </div>
 
         <button 
@@ -182,246 +221,254 @@ export const BusinessRegistrationFlow: React.FC<BusinessRegistrationFlowProps> =
             disabled={isLoading}
             className="w-full bg-[#1E5BFF] hover:bg-[#1749CC] text-white font-bold py-4 rounded-2xl shadow-lg shadow-blue-500/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2 mt-4"
         >
-            {isLoading ? 'Enviando...' : 'Cadastrar interesse'}
+            {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Continuar cadastro'}
             {!isLoading && <ArrowRight className="w-5 h-5" />}
         </button>
-        
-        <p className="text-center text-xs text-gray-400 mt-4">
-            Ao clicar em cadastrar, você concorda em receber nosso contato comercial.
-        </p>
       </form>
-    </div>
-  );
 
-  // Manteve-se os renders abaixo caso a lógica de "Claim" (Reivindicar) precise ser reativada no futuro, 
-  // mas o step inicial 'search' agora encerra o fluxo sem transitar para eles.
-
-  const renderNotFound = () => (
-    <div className="animate-in slide-in-from-right duration-300 flex flex-col items-center text-center pt-8">
-        <div className="w-20 h-20 bg-[#EAF0FF] dark:bg-blue-900/20 rounded-full flex items-center justify-center mb-6 text-[#1E5BFF]">
-            <Building2 className="w-10 h-10" />
-        </div>
-        <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Não encontramos sua loja</h2>
-        <p className="text-gray-500 dark:text-gray-400 text-sm mb-8 max-w-xs">
-            O CNPJ informado não consta na nossa base. Vamos criar um novo cadastro do zero para você.
-        </p>
-        <button 
-            onClick={() => onComplete()} // For demo purposes, just finish
-            className="w-full bg-[#1E5BFF] text-white font-bold py-4 rounded-2xl shadow-lg shadow-blue-500/20"
-        >
-            Criar novo cadastro
-        </button>
-        <button onClick={() => setStep('search')} className="mt-4 text-sm text-gray-500 font-bold">
-            Voltar e corrigir dados
-        </button>
+      <SupportQuestion onSend={async () => {}} />
     </div>
   );
 
   const renderFound = () => (
     <div className="animate-in slide-in-from-right duration-300 pt-4">
-        <div className="bg-[#EAF0FF] dark:bg-blue-900/10 border border-blue-200 dark:border-blue-800 rounded-2xl p-4 flex gap-3 items-start mb-6">
+        <div className="bg-[#EAF0FF] dark:bg-blue-900/10 border border-blue-200 dark:border-blue-800 rounded-2xl p-5 flex gap-4 items-start mb-8 shadow-sm">
             <AlertTriangle className="w-6 h-6 text-[#1E5BFF] shrink-0 mt-0.5" />
-            <p className="text-xs text-blue-800 dark:text-blue-200 leading-relaxed">
-                Esta loja já está cadastrada no Localizei Freguesia. Para administrar o perfil, você precisa reivindicar a propriedade.
+            <p className="text-xs text-blue-800 dark:text-blue-200 leading-relaxed font-medium">
+                Esta loja já possui um registro básico. Para ativar as vendas e o cashback, você precisa confirmar que é o proprietário.
             </p>
         </div>
 
         <div className="bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-sm border border-gray-100 dark:border-gray-700 mb-8">
             <div className="flex items-center gap-4 mb-4 border-b border-gray-100 dark:border-gray-700 pb-4">
-                <div className="w-14 h-14 bg-gray-200 dark:bg-gray-700 rounded-xl flex items-center justify-center">
+                <div className="w-14 h-14 bg-gray-100 dark:bg-gray-700 rounded-xl flex items-center justify-center">
                     <Building2 className="w-7 h-7 text-gray-400" />
                 </div>
                 <div>
-                    <h3 className="font-bold text-gray-900 dark:text-white">{EXISTING_STORE_MOCK.name}</h3>
-                    <p className="text-xs text-gray-500">{EXISTING_STORE_MOCK.category}</p>
+                    <h3 className="font-bold text-gray-900 dark:text-white">Padaria Estrela da Freguesia</h3>
+                    <p className="text-xs text-gray-500 uppercase font-bold tracking-wider">Alimentação</p>
                 </div>
             </div>
-            <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
-                <div className="w-2 h-2 rounded-full bg-green-500"></div>
-                <p>Perfil Ativo</p>
+            <div className="flex items-center gap-2 text-xs text-green-600 font-bold bg-green-50 dark:bg-green-900/20 px-2 py-1 rounded-lg w-fit">
+                <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></div>
+                <p>Perfil disponível para reivindicação</p>
             </div>
-            <p className="text-xs text-gray-400 mt-2">{EXISTING_STORE_MOCK.address}</p>
+            <p className="text-[10px] text-gray-400 mt-4 leading-tight">
+                Estrada dos Três Rios, 1200 - Freguesia, Rio de Janeiro - RJ
+            </p>
         </div>
 
         <button 
             onClick={() => setStep('select_method')}
-            className="w-full bg-[#1E5BFF] hover:bg-[#1749CC] text-white font-bold py-4 rounded-2xl shadow-lg shadow-blue-500/20 active:scale-[0.98] transition-all"
+            className="w-full bg-[#1E5BFF] hover:bg-[#1749CC] text-white font-bold py-4 rounded-2xl shadow-lg shadow-blue-500/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
         >
-            Reivindicar esta loja
+            Reivindicar esta loja agora
+            <ArrowRight className="w-5 h-5" />
+        </button>
+    </div>
+  );
+
+  const renderNotFound = () => (
+    <div className="animate-in slide-in-from-right duration-300 flex flex-col items-center text-center pt-8">
+        <div className="w-20 h-20 bg-[#EAF0FF] dark:bg-blue-900/20 rounded-full flex items-center justify-center mb-6 text-[#1E5BFF] shadow-inner">
+            <Building2 className="w-10 h-10" />
+        </div>
+        <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Não encontramos seu negócio</h2>
+        <p className="text-gray-500 dark:text-gray-400 text-sm mb-10 max-w-xs leading-relaxed">
+            O CNPJ informado não consta na nossa base de parceiros. Vamos criar um novo cadastro exclusivo para você.
+        </p>
+        <button 
+            onClick={handleSuccess}
+            className="w-full bg-[#1E5BFF] text-white font-bold py-4 rounded-2xl shadow-lg shadow-blue-500/20 active:scale-[0.98] transition-all"
+        >
+            Criar novo perfil de lojista
+        </button>
+        <button onClick={() => setStep('search')} className="mt-6 text-sm text-gray-400 font-bold hover:text-gray-600 transition-colors">
+            Corrigir dados informados
         </button>
     </div>
   );
 
   const renderSelectMethod = () => (
     <div className="animate-in slide-in-from-right duration-300 pt-4">
-        <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Confirmação de Identidade</h2>
-        <p className="text-gray-500 text-sm mb-6">
-            Precisamos garantir que você é o proprietário. Escolha como deseja receber o código de verificação:
+        <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Verificar Identidade</h2>
+        <p className="text-gray-500 text-sm mb-8">
+            Escolha como deseja receber o código de segurança para validar sua propriedade:
         </p>
 
-        <div className="space-y-3">
-            <button onClick={() => sendVerificationCode('whatsapp')} className="w-full bg-white dark:bg-gray-800 p-4 rounded-2xl border border-gray-200 dark:border-gray-700 flex items-center gap-4 hover:border-green-500 transition-colors shadow-sm group">
-                <div className="w-10 h-10 bg-green-100 dark:bg-green-900/20 text-green-600 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
-                    <MessageSquare className="w-5 h-5" />
+        <div className="space-y-4">
+            <button onClick={() => { setVerificationMethod('whatsapp'); setStep('otp'); }} className="w-full bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700 flex items-center gap-4 hover:border-green-500 transition-all shadow-sm group active:scale-[0.98]">
+                <div className="w-12 h-12 bg-green-50 dark:bg-green-900/20 text-green-600 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <MessageSquare className="w-6 h-6" />
                 </div>
                 <div className="text-left">
                     <p className="font-bold text-gray-900 dark:text-white text-sm">WhatsApp</p>
-                    <p className="text-xs text-gray-500">Enviar código para (21) *****-9999</p>
+                    <p className="text-[10px] text-gray-400 uppercase font-black tracking-widest mt-0.5">(21) •••••-9999</p>
                 </div>
             </button>
 
-            <button onClick={() => sendVerificationCode('sms')} className="w-full bg-white dark:bg-gray-800 p-4 rounded-2xl border border-gray-200 dark:border-gray-700 flex items-center gap-4 hover:border-[#1E5BFF] transition-colors shadow-sm group">
-                <div className="w-10 h-10 bg-[#EAF0FF] dark:bg-blue-900/20 text-[#1E5BFF] rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
-                    <Smartphone className="w-5 h-5" />
+            <button onClick={() => { setVerificationMethod('email'); setStep('otp'); }} className="w-full bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700 flex items-center gap-4 hover:border-[#1E5BFF] transition-all shadow-sm group active:scale-[0.98]">
+                <div className="w-12 h-12 bg-blue-50 dark:bg-blue-900/20 text-[#1E5BFF] rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <Mail className="w-6 h-6" />
                 </div>
                 <div className="text-left">
-                    <p className="font-bold text-gray-900 dark:text-white text-sm">SMS</p>
-                    <p className="text-xs text-gray-500">Enviar código para (21) *****-9999</p>
-                </div>
-            </button>
-
-            <button onClick={() => sendVerificationCode('email')} className="w-full bg-white dark:bg-gray-800 p-4 rounded-2xl border border-gray-200 dark:border-gray-700 flex items-center gap-4 hover:border-[#1E5BFF] transition-colors shadow-sm group">
-                <div className="w-10 h-10 bg-[#EAF0FF] dark:bg-blue-900/20 text-[#1E5BFF] rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
-                    <Mail className="w-5 h-5" />
-                </div>
-                <div className="text-left">
-                    <p className="font-bold text-gray-900 dark:text-white text-sm">E-mail Comercial</p>
-                    <p className="text-xs text-gray-500">Enviar para con***@loja.com.br</p>
+                    <p className="font-bold text-gray-900 dark:text-white text-sm">E-mail de Cadastro</p>
+                    <p className="text-[10px] text-gray-400 uppercase font-black tracking-widest mt-0.5">co•••••@sualoja.com</p>
                 </div>
             </button>
         </div>
-    </div>
-  );
 
-  const renderOtp = () => (
-    <div className="animate-in slide-in-from-right duration-300 pt-8 flex flex-col items-center">
-        <div className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mb-6">
-            <ShieldCheck className="w-8 h-8 text-[#1E5BFF]" />
-        </div>
-        <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Digite o código</h2>
-        <p className="text-gray-500 text-sm mb-8 text-center max-w-[260px]">
-            Enviamos um código de 6 dígitos para o seu {verificationMethod === 'whatsapp' ? 'WhatsApp' : verificationMethod === 'sms' ? 'celular via SMS' : 'e-mail'}.
-        </p>
-
-        <div className="flex gap-2 mb-8">
-            {otp.map((digit, idx) => (
-                <input
-                    key={idx}
-                    ref={(el) => {
-                        otpRefs.current[idx] = el;
-                    }}
-                    type="tel"
-                    maxLength={1}
-                    value={digit}
-                    onChange={(e) => handleOtpChange(idx, e.target.value)}
-                    onKeyDown={(e) => handleOtpKeyDown(idx, e)}
-                    className="w-11 h-14 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-center text-xl font-bold focus:border-[#1E5BFF] focus:ring-2 focus:ring-blue-500/20 outline-none transition-all dark:text-white"
-                />
-            ))}
-        </div>
-
-        <button 
-            onClick={verifyOtp}
-            disabled={otp.some(d => !d) || isLoading}
-            className="w-full bg-[#1E5BFF] hover:bg-[#1749CC] text-white font-bold py-4 rounded-2xl shadow-lg shadow-blue-500/20 active:scale-[0.98] transition-all disabled:opacity-50"
-        >
-            {isLoading ? 'Verificando...' : 'Confirmar Código'}
-        </button>
-
-        <div className="mt-6 flex flex-col gap-3 items-center">
-            <button className="text-xs font-bold text-[#1E5BFF]">Reenviar código</button>
-            <button onClick={() => setStep('manual_verify')} className="text-xs text-gray-400 underline">
-                Não recebi o código
-            </button>
-        </div>
-    </div>
-  );
-
-  const renderManualVerify = () => (
-    <div className="animate-in slide-in-from-right duration-300 pt-4">
-        <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Verificação Manual</h2>
-        <p className="text-gray-500 text-sm mb-6">
-            Não conseguimos verificar automaticamente. Por favor, envie um documento que comprove a propriedade da loja (Ex: Contrato Social, Cartão CNPJ ou Conta de Luz).
-        </p>
-
-        <div className="border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-2xl p-8 flex flex-col items-center justify-center mb-6 bg-gray-50 dark:bg-gray-800/50 hover:bg-gray-100 transition-colors cursor-pointer">
-            <Upload className="w-10 h-10 text-gray-400 mb-2" />
-            <p className="text-sm font-bold text-gray-600 dark:text-gray-300">Toque para enviar documento</p>
-            <p className="text-xs text-gray-400 mt-1">PDF ou Imagem (max 5MB)</p>
-        </div>
-
-        <button 
-            onClick={() => {
-                setIsLoading(true);
-                setTimeout(() => { setIsLoading(false); setStep('success'); }, 1500);
-            }}
-            className="w-full bg-gray-900 dark:bg-gray-700 text-white font-bold py-4 rounded-2xl shadow-sm active:scale-[0.98] transition-all"
-        >
-            Enviar para análise
+        <button onClick={() => setStep('manual_verify')} className="w-full mt-10 text-xs font-bold text-gray-400 text-center hover:underline">
+            Não tenho acesso a esses canais
         </button>
     </div>
   );
 
   const renderSuccess = () => (
     <div className="animate-in zoom-in duration-500 flex flex-col items-center text-center pt-10 h-full justify-center pb-20">
-        <div className="w-24 h-24 bg-[#EAF0FF] dark:bg-blue-900/20 rounded-full flex items-center justify-center mb-6 shadow-lg shadow-blue-200 dark:shadow-none">
+        <div className="w-24 h-24 bg-[#EAF0FF] dark:bg-blue-900/20 rounded-[2.5rem] flex items-center justify-center mb-8 shadow-xl shadow-blue-200 dark:shadow-none">
             <CheckCircle2 className="w-12 h-12 text-[#1E5BFF]" />
         </div>
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Parabéns!</h2>
-        <p className="text-gray-600 dark:text-gray-300 text-sm mb-8 max-w-xs leading-relaxed">
-            Você agora é o administrador oficial desta loja no Localizei Freguesia.
+        <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2 font-display tracking-tight">Sucesso!</h2>
+        <p className="text-gray-500 dark:text-gray-400 text-sm mb-10 max-w-[260px] leading-relaxed font-medium">
+            Sua loja foi reivindicada e em breve você terá acesso total ao Painel do Parceiro.
         </p>
 
         <button 
             onClick={onComplete}
-            className="w-full bg-[#1E5BFF] text-white font-bold py-4 rounded-2xl shadow-xl shadow-blue-500/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+            className="w-full bg-gray-900 dark:bg-white dark:text-black text-white font-bold py-4 rounded-2xl shadow-xl active:scale-[0.98] transition-all flex items-center justify-center gap-2"
         >
-            Ir para o painel do lojista
-            <ArrowRight className="w-5 h-5 stroke-[3]" />
+            Acessar meu painel
+            <ArrowRight className="w-5 h-5" />
         </button>
     </div>
   );
 
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-900 font-sans">
-        {/* Header */}
-        <div className="sticky top-0 z-30 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md px-5 h-16 flex items-center gap-4 border-b border-gray-100 dark:border-gray-800">
-            <button onClick={onBack} className="p-2 -ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
-                <ChevronLeft className="w-6 h-6 text-gray-800 dark:text-white" />
+    <div className="min-h-screen bg-white dark:bg-gray-950 font-sans flex flex-col">
+        {/* Header com Progresso */}
+        <div className="sticky top-0 z-40 bg-white/95 dark:bg-gray-950/95 backdrop-blur-md px-5 h-16 flex items-center gap-4 border-b border-gray-100 dark:border-gray-800">
+            <button onClick={onBack} className="w-10 h-10 -ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center justify-center text-gray-500">
+                <ChevronLeft className="w-6 h-6" />
             </button>
-            <div className="flex-1">
+            <div className="flex-1 px-4">
                 <div className="h-1.5 w-full bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
                     <div 
-                        className="h-full bg-[#1E5BFF] transition-all duration-500"
+                        className="h-full bg-[#1E5BFF] transition-all duration-700 ease-out"
                         style={{ width: 
-                            step === 'search' ? '10%' : 
-                            step === 'found' ? '30%' : 
-                            step === 'not_found' ? '30%' :
-                            step === 'select_method' ? '50%' :
-                            step === 'otp' ? '70%' :
-                            step === 'manual_verify' ? '80%' :
+                            step === 'search' ? '15%' : 
+                            step === 'found' ? '40%' : 
+                            step === 'not_found' ? '40%' :
+                            step === 'select_method' ? '60%' :
+                            step === 'otp' ? '80%' :
+                            step === 'manual_verify' ? '85%' :
                             '100%' 
                         }}
                     ></div>
                 </div>
             </div>
+            <div className="w-10"></div>
         </div>
 
-        {/* Content */}
-        <div className="p-6 pb-24 max-w-md mx-auto">
+        {/* Conteúdo Principal */}
+        <div className="flex-1 p-6 pb-24 max-w-md mx-auto w-full">
             {step === 'search' && renderSearch()}
-            {/* 
-                Os steps abaixo ('found', 'not_found', etc.) permanecem no código caso
-                futuramente se queira reabilitar o fluxo de reivindicação de loja (Claim).
-                Atualmente, o fluxo termina em 'search' com a captura do lead.
-            */}
             {step === 'found' && renderFound()}
             {step === 'not_found' && renderNotFound()}
             {step === 'select_method' && renderSelectMethod()}
-            {step === 'otp' && renderOtp()}
-            {step === 'manual_verify' && renderManualVerify()}
+            {step === 'otp' && (
+                <div className="animate-in slide-in-from-right duration-300 pt-8 flex flex-col items-center">
+                    <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Digite o código</h2>
+                    <p className="text-gray-500 text-sm mb-10 text-center max-w-[260px] leading-relaxed">
+                        Enviamos um código de 6 dígitos para seu {verificationMethod}.
+                    </p>
+                    <div className="flex gap-2 mb-10">
+                        {otp.map((digit, idx) => (
+                            <input
+                                key={idx}
+                                ref={(el) => { otpRefs.current[idx] = el; }}
+                                type="tel"
+                                maxLength={1}
+                                value={digit}
+                                onChange={(e) => {
+                                    const val = e.target.value.replace(/\D/g, '');
+                                    const newOtp = [...otp];
+                                    newOtp[idx] = val;
+                                    setOtp(newOtp);
+                                    if (val && idx < 5) otpRefs.current[idx + 1]?.focus();
+                                }}
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Backspace' && !otp[idx] && idx > 0) otpRefs.current[idx - 1]?.focus();
+                                }}
+                                className="w-12 h-14 rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-center text-xl font-bold focus:border-[#1E5BFF] focus:ring-4 focus:ring-blue-500/10 outline-none transition-all dark:text-white shadow-sm"
+                            />
+                        ))}
+                    </div>
+                    <button 
+                        onClick={handleSuccess}
+                        disabled={otp.some(d => !d) || isLoading}
+                        className="w-full bg-[#1E5BFF] text-white font-bold py-4 rounded-2xl shadow-lg shadow-blue-500/20 active:scale-[0.98] transition-all disabled:opacity-50"
+                    >
+                        Validar código
+                    </button>
+                    <button className="mt-8 text-xs font-bold text-[#1E5BFF] uppercase tracking-widest">Reenviar código em 45s</button>
+                </div>
+            )}
+            {step === 'manual_verify' && (
+                <div className="animate-in slide-in-from-right duration-300 pt-4">
+                    <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Verificação Manual</h2>
+                    <p className="text-gray-500 text-sm mb-8 leading-relaxed">
+                        Envie um documento que comprove sua relação com o CNPJ (ex: Conta de luz da loja ou Contrato Social).
+                    </p>
+                    <div className="border-2 border-dashed border-gray-200 dark:border-gray-800 rounded-[2rem] p-10 flex flex-col items-center justify-center mb-8 bg-gray-50 dark:bg-gray-900/50 hover:bg-gray-100 transition-colors cursor-pointer group">
+                        <Upload className="w-10 h-10 text-gray-300 group-hover:text-indigo-500 transition-colors mb-3" />
+                        <p className="text-sm font-bold text-gray-600 dark:text-gray-300">Toque para selecionar arquivo</p>
+                        <p className="text-[10px] text-gray-400 mt-2 uppercase font-black">PDF, JPG ou PNG (Máx 10MB)</p>
+                    </div>
+                    <button 
+                        onClick={handleSuccess}
+                        className="w-full bg-indigo-600 text-white font-bold py-4 rounded-2xl shadow-lg active:scale-[0.98] transition-all"
+                    >
+                        Enviar para análise humana
+                    </button>
+                    <p className="text-center text-[10px] text-gray-400 mt-6 leading-relaxed">
+                        Nossa equipe revisa solicitações manuais em até 48h úteis.
+                    </p>
+                </div>
+            )}
             {step === 'success' && renderSuccess()}
         </div>
+
+        {/* Fullscreen Video Player Modal */}
+        {showVideoModal && (
+            <div className="fixed inset-0 z-[100] bg-black flex flex-col animate-in fade-in duration-300">
+                <div className="p-6 flex justify-between items-center bg-gradient-to-b from-black/80 to-transparent absolute top-0 left-0 right-0 z-10">
+                    <div className="flex items-center gap-3">
+                        <Info className="w-4 h-4 text-[#1E5BFF]" />
+                        <h3 className="text-white font-bold text-sm">Como reivindicar sua loja</h3>
+                    </div>
+                    <button 
+                        onClick={() => { setShowVideoModal(false); setHasSeenVideo(true); localStorage.setItem('claim_onboarding_seen', 'true'); }}
+                        className="p-2 bg-white/10 rounded-full text-white hover:bg-white/20 transition-colors"
+                    >
+                        <X className="w-6 h-6" />
+                    </button>
+                </div>
+                <div className="flex-1 flex items-center justify-center">
+                    <video 
+                        src={CLAIM_TUTORIAL_VIDEO} 
+                        className="w-full max-h-screen" 
+                        controls 
+                        autoPlay
+                    />
+                </div>
+                <div className="p-6 pb-12 bg-gradient-to-t from-black/80 to-transparent absolute bottom-0 left-0 right-0 flex items-center justify-center">
+                    <p className="text-white/60 text-[10px] text-center font-bold uppercase tracking-widest max-w-[240px]">
+                        Localizei Parceiro • Verificação de Segurança
+                    </p>
+                </div>
+            </div>
+        )}
     </div>
   );
 };
