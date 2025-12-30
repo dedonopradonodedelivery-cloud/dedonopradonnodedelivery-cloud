@@ -496,40 +496,40 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
             <div 
               ref={categoriesRef} 
               onScroll={handleCategoryScroll}
-              className="flex overflow-x-auto no-scrollbar px-5 pb-4"
+              className="flex overflow-x-auto no-scrollbar px-5 pb-2"
             >
-              <div className="grid grid-flow-col grid-rows-2 gap-x-5 gap-y-7">
+              <div className="grid grid-flow-col grid-rows-2 gap-x-5 gap-y-6">
                 {CATEGORIES.map((cat) => (
                   <button 
                     key={cat.id} 
                     onClick={() => onSelectCategory(cat)}
-                    className="flex flex-col items-center group active:scale-95 transition-all duration-200"
+                    className="flex flex-col items-center group active:scale-90 transition-transform duration-200"
                   >
                     <div 
-                      className="w-[84px] h-[84px] rounded-[28px] shadow-sm flex items-center justify-center relative overflow-hidden transition-all duration-300 group-hover:shadow-md group-hover:-translate-y-1"
-                      style={{ backgroundColor: `${cat.color}10` }} // Fundo pastel suavizado
+                      className="w-[72px] h-[72px] rounded-[22px] shadow-md flex items-center justify-center relative overflow-hidden transition-all duration-300 group-hover:shadow-xl group-hover:-translate-y-0.5"
+                      style={{ backgroundColor: cat.color }} 
                     >
-                      {/* Efeito de brilho sutil */}
-                      <div className="absolute inset-0 bg-gradient-to-tr from-white/10 to-transparent pointer-events-none"></div>
+                      {/* Subtle Gloss Overlay */}
+                      <div className="absolute inset-0 bg-gradient-to-tr from-black/5 to-white/10 pointer-events-none"></div>
                       
                       <img 
                         src={cat.illustrationUrl} 
                         alt={cat.name} 
-                        className="w-[60%] h-[60%] object-contain transition-transform duration-500 group-hover:scale-110" 
+                        className="w-[60%] h-[60%] object-contain filter brightness-0 invert transition-transform duration-500 group-hover:scale-110" 
                       />
                     </div>
-                    <span className="mt-2.5 text-[11px] font-bold text-slate-600 dark:text-slate-400 text-center px-1 leading-tight transition-colors group-hover:text-slate-950 dark:group-hover:text-white uppercase tracking-tight">
+                    <span className="mt-2 text-[11px] font-bold text-slate-700 dark:text-slate-400 text-center px-1 leading-tight transition-colors group-hover:text-black dark:group-hover:text-white">
                       {cat.name}
                     </span>
                   </button>
                 ))}
               </div>
             </div>
-            <div className="flex justify-center mt-1">
-              <div className="w-24 h-1 bg-gray-200 dark:bg-gray-700 rounded-full relative">
+            <div className="flex justify-center mt-2 opacity-30">
+              <div className="w-16 h-1 bg-gray-200 dark:bg-gray-700 rounded-full relative overflow-hidden">
                 <div 
-                  className="h-full bg-primary-500 rounded-full absolute top-0 left-0 w-8 transition-transform duration-100 ease-linear"
-                  style={{ transform: `translateX(${categoryScrollProgress * (96 - 32)}px)` }}
+                  className="h-full bg-primary-500 rounded-full absolute top-0 left-0 w-6 transition-transform duration-100 ease-linear"
+                  style={{ transform: `translateX(${categoryScrollProgress * (64 - 24)}px)` }}
                 />
               </div>
             </div>

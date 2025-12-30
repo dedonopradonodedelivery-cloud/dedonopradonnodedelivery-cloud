@@ -7,27 +7,35 @@ import { getStoreLogo } from './utils/mockLogos';
 export const CATEGORIES: Category[] = [
   { 
     id: 'cat-food', 
-    name: 'Alimentação', 
+    name: 'Comida', 
     slug: 'food', 
     icon: <Utensils />, 
-    illustrationUrl: 'https://cdn-icons-png.flaticon.com/512/3448/3448609.png',
-    color: '#FF4B3A' 
+    illustrationUrl: 'https://cdn-icons-png.flaticon.com/512/3170/3170733.png',
+    color: '#FF3B30' // iOS Red
   },
   { 
     id: 'cat-grocery', 
-    name: 'Mercados', 
+    name: 'Mercado', 
     slug: 'grocery', 
     icon: <ShoppingCart />, 
-    illustrationUrl: 'https://cdn-icons-png.flaticon.com/512/3724/3724720.png',
-    color: '#00A86B' 
+    illustrationUrl: 'https://cdn-icons-png.flaticon.com/512/3081/3081840.png',
+    color: '#34C759' // iOS Green
+  },
+  { 
+    id: 'cat-beauty', 
+    name: 'Beleza', 
+    slug: 'beauty', 
+    icon: <Scissors />, 
+    illustrationUrl: 'https://cdn-icons-png.flaticon.com/512/2821/2821360.png',
+    color: '#FF2D55' // iOS Pink
   },
   { 
     id: 'cat-health', 
     name: 'Saúde', 
     slug: 'health', 
     icon: <Heart />, 
-    illustrationUrl: 'https://cdn-icons-png.flaticon.com/512/2966/2966327.png',
-    color: '#FF2D55' 
+    illustrationUrl: 'https://cdn-icons-png.flaticon.com/512/3004/3004458.png',
+    color: '#FF9500' // iOS Orange
   },
   { 
     id: 'cat-pets', 
@@ -35,7 +43,7 @@ export const CATEGORIES: Category[] = [
     slug: 'pets', 
     icon: <Dog />, 
     illustrationUrl: 'https://cdn-icons-png.flaticon.com/512/616/616408.png',
-    color: '#FF9500' 
+    color: '#AF52DE' // iOS Purple
   },
   { 
     id: 'cat-home', 
@@ -43,39 +51,7 @@ export const CATEGORIES: Category[] = [
     slug: 'home-decor', 
     icon: <Home />, 
     illustrationUrl: 'https://cdn-icons-png.flaticon.com/512/619/619153.png',
-    color: '#5856D6' 
-  },
-  { 
-    id: 'cat-services', 
-    name: 'Serviços', 
-    slug: 'services', 
-    icon: <Settings />, 
-    illustrationUrl: 'https://cdn-icons-png.flaticon.com/512/2092/2092143.png',
-    color: '#8E8E93' 
-  },
-  { 
-    id: 'cat-beauty', 
-    name: 'Beleza', 
-    slug: 'beauty', 
-    icon: <Scissors />, 
-    illustrationUrl: 'https://cdn-icons-png.flaticon.com/512/2707/2707142.png',
-    color: '#FF2D85' 
-  },
-  { 
-    id: 'cat-pros', 
-    name: 'Profissionais', 
-    slug: 'pros', 
-    icon: <Briefcase />, 
-    illustrationUrl: 'https://cdn-icons-png.flaticon.com/512/1063/1063376.png',
-    color: '#007AFF' 
-  },
-  { 
-    id: 'cat-sports', 
-    name: 'Esportes', 
-    slug: 'sports', 
-    icon: <Dumbbell />, 
-    illustrationUrl: 'https://cdn-icons-png.flaticon.com/512/2871/2871612.png',
-    color: '#4CD964' 
+    color: '#5856D6' // iOS Indigo
   },
   { 
     id: 'cat-autos', 
@@ -83,15 +59,39 @@ export const CATEGORIES: Category[] = [
     slug: 'autos', 
     icon: <CarFront />, 
     illustrationUrl: 'https://cdn-icons-png.flaticon.com/512/743/743241.png',
-    color: '#1C1C1E' 
+    color: '#8E8E93' // iOS Grey
+  },
+  { 
+    id: 'cat-services', 
+    name: 'Serviços', 
+    slug: 'services', 
+    icon: <Settings />, 
+    illustrationUrl: 'https://cdn-icons-png.flaticon.com/512/2092/2092143.png',
+    color: '#007AFF' // iOS Blue
+  },
+  { 
+    id: 'cat-pros', 
+    name: 'Pro', 
+    slug: 'pros', 
+    icon: <Briefcase />, 
+    illustrationUrl: 'https://cdn-icons-png.flaticon.com/512/1063/1063376.png',
+    color: '#5AC8FA' // iOS Sky
+  },
+  { 
+    id: 'cat-sports', 
+    name: 'Esportes', 
+    slug: 'sports', 
+    icon: <Dumbbell />, 
+    illustrationUrl: 'https://cdn-icons-png.flaticon.com/512/2871/2871612.png',
+    color: '#4CD964' // iOS Light Green
   },
   { 
     id: 'cat-assistance', 
-    name: 'Assistências', 
+    name: 'Técnico', 
     slug: 'assistance', 
     icon: <Wrench />, 
     illustrationUrl: 'https://cdn-icons-png.flaticon.com/512/4233/4233830.png',
-    color: '#32ADE6' 
+    color: '#32ADE6' // iOS Teal
   },
   { 
     id: 'cat-education', 
@@ -99,15 +99,15 @@ export const CATEGORIES: Category[] = [
     slug: 'education', 
     icon: <GraduationCap />, 
     illustrationUrl: 'https://cdn-icons-png.flaticon.com/512/2997/2997314.png',
-    color: '#AF52DE' 
+    color: '#5856D6' 
   },
   { 
     id: 'cat-wellness', 
-    name: 'Bem-estar', 
+    name: 'Wellness', 
     slug: 'wellness', 
     icon: <Sun />, 
     illustrationUrl: 'https://cdn-icons-png.flaticon.com/512/2906/2906496.png',
-    color: '#FFCC00' 
+    color: '#FFCC00' // iOS Yellow
   },
   { 
     id: 'cat-party', 
@@ -115,7 +115,7 @@ export const CATEGORIES: Category[] = [
     slug: 'party', 
     icon: <PartyPopper />, 
     illustrationUrl: 'https://cdn-icons-png.flaticon.com/512/2219/2219812.png',
-    color: '#FF3B30' 
+    color: '#FF2D55' 
   },
   { 
     id: 'cat-fashion', 
@@ -123,15 +123,15 @@ export const CATEGORIES: Category[] = [
     slug: 'fashion', 
     icon: <Shirt />, 
     illustrationUrl: 'https://cdn-icons-png.flaticon.com/512/3050/3050225.png',
-    color: '#5AC8FA' 
+    color: '#007AFF' 
   },
   { 
     id: 'cat-condos', 
-    name: 'Condomínios', 
+    name: 'Predial', 
     slug: 'condos', 
     icon: <Building2 />, 
     illustrationUrl: 'https://cdn-icons-png.flaticon.com/512/2311/2311514.png',
-    color: '#003A66' 
+    color: '#1C1C1E' // iOS Dark
   },
 ];
 
