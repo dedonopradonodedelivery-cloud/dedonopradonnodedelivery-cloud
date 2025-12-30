@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { 
   ChevronLeft, 
   BadgeCheck, 
@@ -15,19 +15,17 @@ import {
   LayoutDashboard,
   Play,
   Video,
-  Upload,
   X,
   Trash2,
   AlertCircle,
   CheckCircle2,
-  Maximize2,
   Plus,
   Rocket,
-  Target,
   Info,
   Send,
   MessageSquare,
-  Clock
+  Clock,
+  PlayCircle
 } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import { User } from '@supabase/supabase-js';
@@ -44,8 +42,8 @@ const STORE_DATA = {
 };
 
 const INSTITUTIONAL_ADS_VIDEO = "https://videos.pexels.com/video-files/4434242/4434242-sd_540_960_25fps.mp4";
+const CASHBACK_TUTORIAL_VIDEO = "https://videos.pexels.com/video-files/4434246/4434246-sd_540_960_25fps.mp4";
 
-// --- Subcomponente de Dúvidas ---
 const SupportQuestion: React.FC<{ 
   context: 'cashback' | 'ads';
   onSend: (text: string) => Promise<void>;
@@ -66,25 +64,22 @@ const SupportQuestion: React.FC<{
   };
 
   return (
-    <div className="mt-4 border-t border-gray-100 dark:border-gray-700/50 pt-4 animate-in fade-in duration-500">
+    <div className="mt-4 border-t border-gray-100 dark:border-gray-700/50 pt-4">
       {!history ? (
         <form onSubmit={handleSubmit} className="space-y-3">
           <div className="relative">
             <textarea 
               value={text}
               onChange={(e) => setText(e.target.value)}
-              placeholder="Ficou alguma dúvida sobre este recurso? Escreva aqui."
+              placeholder="Ficou alguma dúvida? Escreva aqui."
               maxLength={500}
-              className="w-full p-4 bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 rounded-2xl text-xs font-medium dark:text-white outline-none focus:border-[#1E5BFF] transition-all resize-none h-20"
+              className="w-full p-4 bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 rounded-2xl text-xs font-medium dark:text-white outline-none focus:border-[#1E5BFF] transition-all resize-none h-16"
             />
-            <span className="absolute bottom-2 right-3 text-[9px] font-bold text-gray-400">
-              {text.length}/500
-            </span>
           </div>
           <button 
             type="submit"
             disabled={isSending || !text.trim()}
-            className="w-full bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2 active:scale-95 transition-all disabled:opacity-50"
+            className="w-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2 active:scale-95 transition-all"
           >
             {isSending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
             Enviar dúvida
@@ -93,33 +88,12 @@ const SupportQuestion: React.FC<{
       ) : (
         <div className="space-y-3">
           <div className="bg-gray-50 dark:bg-gray-900/50 p-3 rounded-2xl border border-gray-100 dark:border-gray-700">
-            <div className="flex items-center gap-2 mb-1.5">
-              <MessageSquare className="w-3 h-3 text-gray-400" />
-              <span className="text-[10px] font-black text-gray-400 uppercase tracking-wider">Sua Pergunta</span>
-            </div>
             <p className="text-xs text-gray-600 dark:text-gray-300 font-medium leading-relaxed">{history.question}</p>
           </div>
-          
-          {history.answer ? (
-            <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-2xl border border-blue-100 dark:border-blue-800 animate-in slide-in-from-left-2 duration-500">
-              <div className="flex items-center gap-2 mb-1.5">
-                <CheckCircle2 className="w-3 h-3 text-blue-500" />
-                <span className="text-[10px] font-black text-blue-500 uppercase tracking-wider">Resposta Localizei</span>
-              </div>
-              <p className="text-xs text-blue-700 dark:text-blue-300 font-bold leading-relaxed">{history.answer}</p>
-            </div>
-          ) : (
-            <div className="flex items-center gap-2 px-1">
-              <Clock className="w-3 h-3 text-amber-500 animate-pulse" />
-              <span className="text-[9px] font-black text-amber-500 uppercase tracking-widest">Aguardando resposta da equipe</span>
-            </div>
-          )}
-          <button 
-            onClick={() => setHistory(null)}
-            className="text-[9px] font-black text-gray-400 uppercase tracking-widest hover:text-gray-600 transition-colors"
-          >
-            Nova dúvida
-          </button>
+          <div className="flex items-center gap-2 px-1">
+            <Clock className="w-3 h-3 text-amber-500 animate-pulse" />
+            <span className="text-[9px] font-black text-amber-500 uppercase tracking-widest">Aguardando resposta</span>
+          </div>
         </div>
       )}
     </div>
@@ -152,27 +126,35 @@ const MenuLink: React.FC<{
 );
 
 export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate, user }) => {
-  const [isCashbackEnabled, setIsCashbackEnabled] = useState(true);
+  const [isCashbackEnabled, setIsCashbackEnabled] = useState(false);
   const [pendingRequestsCount, setPendingRequestsCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [hasCampaigns, setHasCampaigns] = useState(false);
-  
-  // Video States
-  const [cashbackVideoUrl, setCashbackVideoUrl] = useState<string | null>(null);
-  const [isUploading, setIsUploading] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(0);
   const [activeVideo, setActiveVideo] = useState<{url: string, title: string} | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const isVerified = !!user;
+  
+  // Onboarding Control
+  const [firstSeenDate] = useState<string | null>(localStorage.getItem('cashback_onboarding_start'));
 
   useEffect(() => {
+    if (!firstSeenDate) {
+      const now = new Date().toISOString();
+      localStorage.setItem('cashback_onboarding_start', now);
+    }
+    
     const timer = setTimeout(() => {
       setLoading(false);
       setHasCampaigns(false); 
     }, 800);
     return () => clearTimeout(timer);
-  }, []);
+  }, [firstSeenDate]);
+
+  const isWithin7Days = useMemo(() => {
+    if (!firstSeenDate) return true;
+    const sevenDaysInMs = 7 * 24 * 60 * 60 * 1000;
+    return (new Date().getTime() - new Date(firstSeenDate).getTime()) < sevenDaysInMs;
+  }, [firstSeenDate]);
+
+  const shouldShowCashbackVideo = !isCashbackEnabled && isWithin7Days;
 
   useEffect(() => {
     if (!supabase || !user) return;
@@ -192,61 +174,13 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
     return () => { supabase.removeChannel(sub); };
   }, [user]);
 
-  const handleVideoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    const isVideo = file.type.startsWith('video/');
-    if (!isVideo) {
-      alert("Por favor, selecione um arquivo de vídeo (mp4, mov).");
-      return;
-    }
-
-    const videoObj = document.createElement('video');
-    videoObj.preload = 'metadata';
-    videoObj.onloadedmetadata = () => {
-      window.URL.revokeObjectURL(videoObj.src);
-      if (videoObj.duration > 300) {
-        alert("O vídeo deve ter no máximo 5 minutos.");
-        return;
-      }
-      simulateUpload(file);
-    };
-    videoObj.src = URL.createObjectURL(file);
-  };
-
-  const simulateUpload = (file: File) => {
-    setIsUploading(true);
-    setUploadProgress(0);
-    
-    let progress = 0;
-    const interval = setInterval(() => {
-      progress += Math.random() * 15;
-      if (progress >= 100) {
-        progress = 100;
-        setUploadProgress(100);
-        clearInterval(interval);
-        setTimeout(() => {
-          setIsUploading(false);
-          setCashbackVideoUrl(URL.createObjectURL(file));
-        }, 500);
-      } else {
-        setUploadProgress(progress);
-      }
-    }, 300);
-  };
-
-  const removeVideo = () => {
-    if (window.confirm("Deseja remover o vídeo explicativo?")) {
-      setCashbackVideoUrl(null);
-      if (fileInputRef.current) fileInputRef.current.value = '';
-    }
-  };
-
   const handleSendQuestion = async (text: string) => {
-    // Simulação de salvamento da dúvida no banco
     await new Promise(resolve => setTimeout(resolve, 1000));
-    console.log("Dúvida enviada:", text);
+  };
+
+  const handleEnableCashback = () => {
+    setIsCashbackEnabled(true);
+    // Em um cenário real, aqui salvaríamos no banco de dados a ativação
   };
 
   if (loading) {
@@ -281,12 +215,12 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
                     <h1 className="text-2xl font-bold text-gray-900 dark:text-white font-display leading-tight">
                         {user?.user_metadata?.full_name || STORE_DATA.name}
                     </h1>
-                    {isVerified && <BadgeCheck className="w-5 h-5 text-white fill-[#1E5BFF]" />}
+                    {user && <BadgeCheck className="w-5 h-5 text-white fill-[#1E5BFF]" />}
                 </div>
                 <div className="flex items-center gap-2 mt-1">
-                    <span className={`relative flex h-2 w-2 rounded-full ${isVerified ? 'bg-green-500' : 'bg-yellow-500'}`}></span>
+                    <span className={`relative flex h-2 w-2 rounded-full ${user ? 'bg-green-500' : 'bg-yellow-500'}`}></span>
                     <p className="text-xs font-medium text-gray-500 dark:text-gray-400">
-                        {isVerified ? 'Operação Ativa' : 'Aguardando Aprovação'}
+                        {user ? 'Operação Ativa' : 'Aguardando Aprovação'}
                     </p>
                 </div>
             </div>
@@ -295,33 +229,7 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
 
       <div className="flex-1 flex flex-col w-full bg-gray-50 dark:bg-gray-950">
         
-        {/* 1. TERMINAL DE CAIXA */}
-        <section className="w-full border-b border-gray-100 dark:border-gray-800">
-          <button
-              onClick={() => onNavigate && onNavigate('merchant_panel')}
-              className="w-full bg-gradient-to-r from-[#1E5BFF] to-[#1749CC] text-white p-6 flex items-center justify-between active:brightness-90 transition-all"
-          >
-              <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/10">
-                      <QrCode className="w-6 h-6 text-white" />
-                  </div>
-                  <div className="text-left">
-                      <h3 className="font-bold text-lg leading-none mb-1">Terminal de Caixa</h3>
-                      <p className="text-xs text-blue-100">Gerar QR, PIN e validar compras</p>
-                  </div>
-              </div>
-              <div className="flex items-center gap-3">
-                {pendingRequestsCount > 0 && (
-                   <span className="bg-red-500 text-white text-[10px] font-black px-2 py-1 rounded-lg animate-pulse">
-                     {pendingRequestsCount} PENDENTES
-                   </span>
-                )}
-                <ChevronRight className="w-5 h-5 text-white/70" />
-              </div>
-          </button>
-        </section>
-
-        {/* 2. CASHBACK DA LOJA (COM VÍDEO EXPLICATIVO) */}
+        {/* 1. CASHBACK DA LOJA (Ocupando o topo agora) */}
         <section className="w-full bg-white dark:bg-gray-800 p-6 border-b border-gray-100 dark:border-gray-800 relative overflow-hidden">
             <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 rounded-bl-full -mr-8 -mt-8 pointer-events-none"></div>
             
@@ -344,95 +252,98 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
                 </button>
             </div>
 
-            {/* Espaço do Vídeo Explicativo do Lojista */}
-            <div className="mb-8 group">
-                {!cashbackVideoUrl && !isUploading ? (
-                  <div 
-                    onClick={() => fileInputRef.current?.click()}
-                    className="w-full aspect-video bg-gray-50 dark:bg-gray-900/50 rounded-3xl border-2 border-dashed border-gray-200 dark:border-gray-700 flex flex-col items-center justify-center p-6 text-center cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-                  >
-                    <div className="w-12 h-12 bg-white dark:bg-gray-800 rounded-full shadow-sm flex items-center justify-center text-gray-400 mb-3">
-                        <Video className="w-6 h-6" />
-                    </div>
-                    <p className="text-sm font-bold text-gray-700 dark:text-gray-300">Vídeo explicativo</p>
-                    <p className="text-xs text-gray-400 mt-1 max-w-[200px]">Explique aos clientes como funciona o cashback da sua loja</p>
-                    <button className="mt-4 px-4 py-2 bg-[#1E5BFF] text-white text-[10px] font-black uppercase tracking-widest rounded-xl flex items-center gap-2">
-                        <Plus className="w-3.5 h-3.5" /> Adicionar Vídeo
-                    </button>
-                  </div>
-                ) : isUploading ? (
-                  <div className="w-full aspect-video bg-gray-50 dark:bg-gray-900/50 rounded-3xl border border-gray-100 dark:border-gray-700 flex flex-col items-center justify-center p-6">
-                    <Loader2 className="w-8 h-8 text-[#1E5BFF] animate-spin mb-4" />
-                    <div className="w-full max-w-[200px] h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                        <div 
-                            className="h-full bg-[#1E5BFF] transition-all duration-300"
-                            style={{ width: `${uploadProgress}%` }}
-                        ></div>
-                    </div>
-                    <p className="text-[10px] font-bold text-gray-400 uppercase mt-3 tracking-widest">Enviando vídeo... {Math.round(uploadProgress)}%</p>
-                  </div>
-                ) : (
-                  <div className="w-full aspect-video rounded-3xl overflow-hidden bg-black relative group shadow-lg border border-gray-100 dark:border-gray-700">
-                    <video 
-                        src={cashbackVideoUrl || ''} 
-                        className="w-full h-full object-cover opacity-80"
-                    />
-                    <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors flex items-center justify-center">
-                        <button 
-                            onClick={() => setActiveVideo({url: cashbackVideoUrl!, title: "Explicativo: Cashback da Loja"})}
-                            className="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-xl transform group-hover:scale-110 transition-transform active:scale-95"
-                        >
+            {shouldShowCashbackVideo ? (
+              <div className="mb-6 animate-in fade-in slide-in-from-top-4 duration-500">
+                <div 
+                    onClick={() => setActiveVideo({url: CASHBACK_TUTORIAL_VIDEO, title: "Como funciona o Cashback Localizei"})}
+                    className="w-full aspect-video rounded-3xl overflow-hidden bg-slate-900 relative group shadow-lg border border-gray-100 dark:border-gray-700 cursor-pointer mb-4"
+                >
+                    <div className="absolute inset-0 bg-gradient-to-br from-blue-600/20 to-emerald-600/20 mix-blend-overlay"></div>
+                    <div className="absolute inset-0 flex flex-col items-center justify-center">
+                        <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-xl transform group-hover:scale-110 transition-transform active:scale-95 mb-3">
                             <Play className="w-8 h-8 text-[#1E5BFF] fill-[#1E5BFF] ml-1" />
-                        </button>
-                    </div>
-                    <div className="absolute bottom-4 left-4 right-4 flex justify-between items-center z-10">
-                        <span className="text-[10px] font-black text-white bg-black/40 backdrop-blur-md px-3 py-1.5 rounded-lg flex items-center gap-2 border border-white/10 uppercase tracking-widest">
-                            <CheckCircle2 className="w-3.5 h-3.5 text-green-400" />
-                            Vídeo Ativo
+                        </div>
+                        <span className="text-[10px] font-black text-white uppercase tracking-widest bg-black/40 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/10">
+                            Tutorial: Entenda em 1 min
                         </span>
-                        <button 
-                            onClick={removeVideo}
-                            className="p-2.5 bg-red-500/20 hover:bg-red-500/40 backdrop-blur-md text-red-500 rounded-xl transition-colors border border-red-500/20"
-                        >
-                            <Trash2 className="w-4 h-4" />
-                        </button>
                     </div>
-                  </div>
-                )}
-                <input 
-                    type="file" 
-                    ref={fileInputRef} 
-                    hidden 
-                    accept="video/mp4,video/mov,video/quicktime" 
-                    onChange={handleVideoUpload}
-                />
-                <p className="text-center text-[10px] text-gray-400 mt-4 font-medium italic leading-relaxed">
-                    "Clientes entendem melhor quando você explica com suas próprias palavras."
-                </p>
+                </div>
+                
+                <div className="bg-blue-50 dark:bg-blue-900/10 rounded-2xl p-5 mb-4 border border-blue-100 dark:border-blue-800/30">
+                    <p className="text-xs text-blue-700 dark:text-blue-400 leading-relaxed font-medium">
+                        Lojas com cashback ativo recebem até <strong>40% mais visitas</strong> no app Localizei Freguesia.
+                    </p>
+                </div>
 
-                {/* Campo de Dúvidas Cashback */}
+                <button 
+                    onClick={handleEnableCashback}
+                    className="w-full bg-[#1E5BFF] text-white py-4 rounded-2xl text-sm font-black uppercase tracking-widest shadow-lg shadow-blue-500/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2 mb-4"
+                >
+                    <CheckCircle2 className="w-5 h-5" />
+                    Habilitar cashback agora
+                </button>
+
                 <SupportQuestion context="cashback" onSend={handleSendQuestion} />
-            </div>
-
-            <div className="grid grid-cols-2 gap-4 mb-6">
-                <div className="bg-gray-50 dark:bg-gray-900/50 p-4 rounded-2xl border border-gray-100 dark:border-gray-700">
-                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Taxa atual</p>
-                    <p className="font-black text-gray-900 dark:text-white text-xl">5%</p>
+              </div>
+            ) : (
+              <div className="animate-in fade-in zoom-in-95 duration-500">
+                <div className="grid grid-cols-2 gap-4 mb-6">
+                    <div className="bg-gray-50 dark:bg-gray-900/50 p-4 rounded-2xl border border-gray-100 dark:border-gray-700">
+                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Taxa atual</p>
+                        <p className="font-black text-gray-900 dark:text-white text-xl">5%</p>
+                    </div>
+                    <div className="bg-gray-50 dark:bg-gray-900/50 p-4 rounded-2xl border border-gray-100 dark:border-gray-700">
+                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Retorno total</p>
+                        <p className="font-black text-green-600 text-xl">R$ 0,00</p>
+                    </div>
                 </div>
-                <div className="bg-gray-50 dark:bg-gray-900/50 p-4 rounded-2xl border border-gray-100 dark:border-gray-700">
-                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Retorno total</p>
-                    <p className="font-black text-green-600 text-xl">R$ 0,00</p>
-                </div>
-            </div>
 
-            <button 
-                onClick={() => onNavigate && onNavigate('store_cashback_module')}
-                className="w-full py-4 rounded-2xl bg-gray-100 dark:bg-gray-700 text-sm font-bold text-gray-700 dark:text-gray-200 hover:bg-gray-200 transition-colors flex items-center justify-center gap-2"
-            >
-                Configurar programa de fidelidade
-                <ChevronRight className="w-4 h-4 opacity-50" />
-            </button>
+                <div className="flex gap-2">
+                  <button 
+                      onClick={() => onNavigate && onNavigate('store_cashback_module')}
+                      className="flex-1 py-4 rounded-2xl bg-gray-100 dark:bg-gray-700 text-sm font-bold text-gray-700 dark:text-gray-200 hover:bg-gray-200 transition-colors flex items-center justify-center gap-2"
+                  >
+                      Configurar regras
+                  </button>
+                  <button 
+                      onClick={() => setActiveVideo({url: CASHBACK_TUTORIAL_VIDEO, title: "Como funciona o Cashback Localizei"})}
+                      className="w-14 h-14 rounded-2xl bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center text-blue-600 dark:text-blue-400 hover:bg-blue-100 transition-colors"
+                      title="Ver tutorial novamente"
+                  >
+                      <PlayCircle className="w-6 h-6" />
+                  </button>
+                </div>
+              </div>
+            )}
         </section>
+
+        {/* 2. TERMINAL DE CAIXA (Só aparece se o cashback estiver habilitado) */}
+        {isCashbackEnabled && (
+          <section className="w-full border-b border-gray-100 dark:border-gray-800 animate-in slide-in-from-top-4 duration-700">
+            <button
+                onClick={() => onNavigate && onNavigate('merchant_panel')}
+                className="w-full bg-gradient-to-r from-[#1E5BFF] to-[#1749CC] text-white p-6 flex items-center justify-between active:brightness-95 transition-all"
+            >
+                <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/10">
+                        <QrCode className="w-6 h-6 text-white" />
+                    </div>
+                    <div className="text-left">
+                        <h3 className="font-bold text-lg leading-none mb-1">Terminal de Caixa</h3>
+                        <p className="text-xs text-blue-100">Validar compras e gerar QR do cliente</p>
+                    </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  {pendingRequestsCount > 0 && (
+                    <span className="bg-red-500 text-white text-[10px] font-black px-2 py-1 rounded-lg animate-pulse">
+                      {pendingRequestsCount} PENDENTES
+                    </span>
+                  )}
+                  <ChevronRight className="w-5 h-5 text-white/70" />
+                </div>
+            </button>
+          </section>
+        )}
 
         {/* 3. ANÚNCIOS PATROCINADOS E DESTAQUES */}
         <section className="w-full bg-white dark:bg-gray-800 p-6 border-b border-gray-100 dark:border-gray-800 relative overflow-hidden">
@@ -448,7 +359,6 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
                 </div>
             </div>
 
-            {/* Vídeo Institucional: Como funcionam os anúncios */}
             <div className="mb-6 group">
                 <div 
                     onClick={() => setActiveVideo({url: INSTITUTIONAL_ADS_VIDEO, title: "Como funcionam os Anúncios Patrocinados"})}
@@ -470,7 +380,6 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
                     </div>
                 </div>
 
-                {/* Campo de Dúvidas Anúncios */}
                 <SupportQuestion context="ads" onSend={handleSendQuestion} />
             </div>
 
@@ -518,7 +427,7 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
                   Administrativo
               </h3>
             </div>
-            <div className="bg-white dark:bg-gray-800 border-y border-gray-100 dark:border-gray-800">
+            <div className="bg-white dark:bg-gray-800 border-y border-gray-100 dark:border-gray-700">
                 <MenuLink 
                     icon={Settings} 
                     label="Perfil Público da Loja" 
@@ -539,7 +448,7 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
 
         <div className="py-12 flex flex-col items-center justify-center opacity-30 mt-auto">
           <LayoutDashboard className="w-4 h-4 mb-2" />
-          <p className="text-[10px] font-black uppercase tracking-[0.4em]">Localizei Business v1.2</p>
+          <p className="text-[10px] font-black uppercase tracking-[0.4em]">Localizei Business v1.3</p>
         </div>
       </div>
 
