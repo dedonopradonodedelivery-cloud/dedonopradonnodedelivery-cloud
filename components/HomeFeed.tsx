@@ -118,7 +118,7 @@ const EducationalCarousel: React.FC<{ onNavigate: (v: string) => void }> = ({ on
   const currentBanner = EDUCATIONAL_BANNERS[currentIndex];
 
   return (
-    <div className="px-4 mb-2">
+    <div className="px-4">
       <div className="w-full relative aspect-[21/10] rounded-[32px] overflow-hidden shadow-xl shadow-blue-900/10 border border-gray-100 dark:border-gray-800 animate-in fade-in duration-500">
         
         {/* Background Image com Fade Transition */}
@@ -135,8 +135,8 @@ const EducationalCarousel: React.FC<{ onNavigate: (v: string) => void }> = ({ on
         <div className={`absolute inset-0 bg-gradient-to-t ${currentBanner.gradient} opacity-40 mix-blend-multiply`}></div>
         <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent"></div>
 
-        {/* INDICADOR DE PROGRESSO SEGMENTADO (Estilo Stories) */}
-        <div className="absolute top-4 left-6 right-6 flex gap-2 z-30">
+        {/* INDICADOR DE PROGRESSO SEGMENTADO - AGORA NA PARTE INFERIOR */}
+        <div className="absolute bottom-4 left-6 right-6 flex gap-2 z-30">
           {EDUCATIONAL_BANNERS.map((_, idx) => (
             <div key={idx} className="h-1 flex-1 bg-white/20 rounded-full overflow-hidden">
               <div 
@@ -149,7 +149,7 @@ const EducationalCarousel: React.FC<{ onNavigate: (v: string) => void }> = ({ on
         </div>
 
         {/* Selo Tipo de Conteúdo */}
-        <div className="absolute top-8 right-6 z-20 flex items-center gap-1.5 bg-white/10 backdrop-blur-md px-2.5 py-1 rounded-lg border border-white/20">
+        <div className="absolute top-6 right-6 z-20 flex items-center gap-1.5 bg-white/10 backdrop-blur-md px-2.5 py-1 rounded-lg border border-white/20">
           {currentBanner.isSponsored ? (
             <span className="text-[9px] font-black text-amber-400 uppercase tracking-widest">Patrocinado</span>
           ) : (
@@ -157,8 +157,8 @@ const EducationalCarousel: React.FC<{ onNavigate: (v: string) => void }> = ({ on
           )}
         </div>
 
-        {/* Conteúdo do Banner */}
-        <div className="absolute bottom-0 left-0 right-0 p-6 flex justify-between items-end z-20">
+        {/* Conteúdo do Banner (Ajustado pb para não cobrir a barra) */}
+        <div className="absolute bottom-0 left-0 right-0 p-6 pb-8 flex justify-between items-end z-20">
           <div className="flex-1 pr-4 animate-in slide-in-from-bottom-2 duration-500">
             <div className="flex items-center gap-2 mb-2">
               <div className="p-1.5 bg-white/10 rounded-lg backdrop-blur-sm border border-white/10">
@@ -203,7 +203,7 @@ const EducationalCarousel: React.FC<{ onNavigate: (v: string) => void }> = ({ on
 
 // --- POOL DE PROMOÇÕES RESERVA (SUBSTITUIÇÃO AUTOMÁTICA) ---
 const FALLBACK_PROMO_POOL = [
-  { id: 'f-p1', store: 'Parrilla Freguesia', product: 'Churrasco Misto (2 pessoas)', old: '120,00', new: '84,00', off: '30', image: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?q=80&w=600&auto=format&fit=crop' },
+  { id: 'f-p1', store: 'Parrilla Freguesia', product: 'Churrasco Misto (2 pessoas)', old: '120,00', new: '84,00', off: '30', image: 'https://images.unsplash.com/photo-1544022613-e879a7998d0f?q=80&w=600&auto=format&fit=crop' },
   { id: 'f-p2', store: 'Doceria da Vila', product: 'Combo 6 Cupcakes Gourmet', old: '48,00', new: '33,60', off: '30', image: 'https://images.unsplash.com/photo-1576618148400-f54bed99fcfd?q=80&w=600&auto=format&fit=crop' },
   { id: 'f-p3', store: 'Studio Clean', product: 'Limpeza Facial Profunda', old: '150,00', new: '105,00', off: '30', image: 'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?q=80&w=600&auto=format&fit=crop' },
   { id: 'f-p4', store: 'Pet Style', product: 'Banho + Tosa Higiênica', old: '80,00', new: '60,00', off: '25', image: 'https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?q=80&w=600&auto=format&fit=crop' },
@@ -326,25 +326,6 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
           </div>
         );
 
-      case 'hero':
-        return (
-          <div key="hero" className="px-4">
-             <div className="w-full bg-gradient-to-br from-indigo-900 via-blue-800 to-blue-900 rounded-[28px] p-8 text-white relative overflow-hidden shadow-2xl border border-white/10 group cursor-pointer active:scale-[0.99] transition-all">
-                <div className="absolute -right-10 -bottom-10 opacity-10 rotate-12 transition-transform duration-700 group-hover:rotate-0">
-                    <MapPin className="w-56 h-56" />
-                </div>
-                <div className="relative z-10">
-                  <span className="text-[9px] font-black uppercase tracking-[0.4em] bg-white/10 px-3 py-1 rounded-full border border-white/10 mb-5 inline-block">App Oficial da Freguesia</span>
-                  <h1 className="text-2xl font-black mb-2 leading-tight tracking-tight drop-shadow-lg">O guia definitivo da<br/>nossa vizinhança</h1>
-                  <p className="text-sm text-blue-100/70 mb-8 font-medium max-w-[220px]">Explore o melhor do bairro com um clique.</p>
-                  <button onClick={() => onNavigate('explore')} className="bg-white text-blue-900 text-xs font-black px-7 py-3.5 rounded-2xl flex items-center gap-2 active:scale-95 transition-all shadow-xl hover:bg-blue-50">
-                      EXPLORAR O GUIA <ArrowRight className="w-4 h-4" strokeWidth={3} />
-                  </button>
-                </div>
-             </div>
-          </div>
-        );
-
       case 'promo_semana':
         return (
           <div key="promo_semana" className="px-4">
@@ -357,10 +338,11 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
             <div className="flex gap-4 overflow-x-auto no-scrollbar -mx-4 px-4 pb-2 snap-x">
               {(() => {
                 const rawPromos = [
-                  { id: 'p1', store: 'Açougue Bom Corte', product: 'Picanha Premium KG', old: '89,90', new: '62,93', off: '30', image: 'https://images.unsplash.com/photo-1544022613-e879a7998d0f?q=80&w=600&auto=format&fit=crop' },
-                  { id: 'p2', store: 'Imperial Bakery', product: 'Pão Italiano Artesanal', old: '18,00', new: '12,60', off: '30', image: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?q=80&w=200&auto=format&fit=crop' },
-                  { id: 'p3', store: 'Beleza & Arte', product: 'Manicure + Pedicure', old: '60,00', new: '42,00', off: '30', image: 'https://images.unsplash.com/photo-1610992015732-2449b0c26670?q=80&w=600&auto=format&fit=crop' },
-                  { id: 'p5', store: 'Drogaria Freguesia', product: 'Vitamina C (2 Tubos)', old: '45,00', new: '31,50', off: '30', image: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?q=80&w=600&auto=format&fit=crop' }
+                  { id: 'p1', store: 'Parrilla Freguesia', product: 'Churrasco Misto (2 pessoas)', old: '110,00', new: '77,00', off: '30', image: 'https://images.unsplash.com/photo-1544022613-e879a7998d0f?q=80&w=600&auto=format&fit=crop' },
+                  { id: 'p2', store: 'Imperial Bakery', product: 'Combo Café + Croissant', old: '28,00', new: '19,60', off: '30', image: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?q=80&w=600&auto=format&fit=crop' },
+                  { id: 'p3', store: 'Hamburgueria Brasa', product: 'Burger Duplo + Batata', old: '45,00', new: '31,50', off: '30', image: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?q=80&w=600&auto=format&fit=crop' },
+                  { id: 'p4', store: 'Beleza & Arte', product: 'Escova + Hidratação', old: '120,00', new: '84,00', off: '30', image: 'https://images.unsplash.com/photo-1610992015732-2449b0c26670?q=80&w=600&auto=format&fit=crop' },
+                  { id: 'p5', store: 'Pet Shop Amigo', product: 'Banho G porte médio', old: '65,00', new: '45,50', off: '30', image: 'https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?q=80&w=600&auto=format&fit=crop' }
                 ];
 
                 const filteredPromos = rawPromos.filter(p => p.image && p.image.trim() !== '');
@@ -508,9 +490,8 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
   };
 
   const homeStructure = useMemo(() => {
-    // Carrossel Onboarding é agora o primeiro elemento fixo após o cabeçalho.
-    // Removido o banner de cashback isolado conforme solicitado.
-    return ['onboarding', 'categories', 'hero', 'promo_semana', 'roulette', 'bairro_on', 'community', 'list'];
+    // Removido o item 'hero' para despoluir a Home e focar em conteúdo direto.
+    return ['categories', 'onboarding', 'promo_semana', 'roulette', 'bairro_on', 'community', 'list'];
   }, []);
 
   return (
