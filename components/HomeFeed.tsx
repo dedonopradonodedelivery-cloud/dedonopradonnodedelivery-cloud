@@ -498,7 +498,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
               onScroll={handleCategoryScroll}
               className="flex overflow-x-auto no-scrollbar px-5 pb-4"
             >
-              <div className="grid grid-flow-col grid-rows-2 gap-x-5 gap-y-6">
+              <div className="grid grid-flow-col grid-rows-2 gap-x-5 gap-y-7">
                 {CATEGORIES.map((cat) => (
                   <button 
                     key={cat.id} 
@@ -507,15 +507,18 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
                   >
                     <div 
                       className="w-[84px] h-[84px] rounded-[28px] shadow-sm flex items-center justify-center relative overflow-hidden transition-all duration-300 group-hover:shadow-md group-hover:-translate-y-1"
-                      style={{ backgroundColor: `${cat.color}15` }} // Fondo tonal suave (15% opacidad)
+                      style={{ backgroundColor: `${cat.color}10` }} // Fundo pastel suavizado
                     >
+                      {/* Efeito de brilho sutil */}
+                      <div className="absolute inset-0 bg-gradient-to-tr from-white/10 to-transparent pointer-events-none"></div>
+                      
                       <img 
                         src={cat.illustrationUrl} 
                         alt={cat.name} 
-                        className="w-[65%] h-[65%] object-contain transition-transform duration-500 group-hover:scale-110" 
+                        className="w-[60%] h-[60%] object-contain transition-transform duration-500 group-hover:scale-110" 
                       />
                     </div>
-                    <span className="mt-2 text-[11px] font-bold text-slate-600 dark:text-slate-400 text-center px-1 leading-tight transition-colors group-hover:text-slate-950 dark:group-hover:text-white">
+                    <span className="mt-2.5 text-[11px] font-bold text-slate-600 dark:text-slate-400 text-center px-1 leading-tight transition-colors group-hover:text-slate-950 dark:group-hover:text-white uppercase tracking-tight">
                       {cat.name}
                     </span>
                   </button>

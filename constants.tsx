@@ -10,8 +10,8 @@ export const CATEGORIES: Category[] = [
     name: 'Alimentação', 
     slug: 'food', 
     icon: <Utensils />, 
-    illustrationUrl: 'https://cdn-icons-png.flaticon.com/512/1046/1046784.png',
-    color: '#EA1D2C' // iFood Red style
+    illustrationUrl: 'https://cdn-icons-png.flaticon.com/512/3448/3448609.png',
+    color: '#FF4B3A' 
   },
   { 
     id: 'cat-grocery', 
@@ -19,15 +19,7 @@ export const CATEGORIES: Category[] = [
     slug: 'grocery', 
     icon: <ShoppingCart />, 
     illustrationUrl: 'https://cdn-icons-png.flaticon.com/512/3724/3724720.png',
-    color: '#16A34A' 
-  },
-  { 
-    id: 'cat-beauty', 
-    name: 'Beleza', 
-    slug: 'beauty', 
-    icon: <Scissors />, 
-    illustrationUrl: 'https://cdn-icons-png.flaticon.com/512/2707/2707142.png',
-    color: '#EC4899' 
+    color: '#00A86B' 
   },
   { 
     id: 'cat-health', 
@@ -35,7 +27,7 @@ export const CATEGORIES: Category[] = [
     slug: 'health', 
     icon: <Heart />, 
     illustrationUrl: 'https://cdn-icons-png.flaticon.com/512/2966/2966327.png',
-    color: '#EF4444' 
+    color: '#FF2D55' 
   },
   { 
     id: 'cat-pets', 
@@ -43,7 +35,7 @@ export const CATEGORIES: Category[] = [
     slug: 'pets', 
     icon: <Dog />, 
     illustrationUrl: 'https://cdn-icons-png.flaticon.com/512/616/616408.png',
-    color: '#F97316' 
+    color: '#FF9500' 
   },
   { 
     id: 'cat-home', 
@@ -51,15 +43,7 @@ export const CATEGORIES: Category[] = [
     slug: 'home-decor', 
     icon: <Home />, 
     illustrationUrl: 'https://cdn-icons-png.flaticon.com/512/619/619153.png',
-    color: '#8B5CF6' 
-  },
-  { 
-    id: 'cat-autos', 
-    name: 'Autos', 
-    slug: 'autos', 
-    icon: <CarFront />, 
-    illustrationUrl: 'https://cdn-icons-png.flaticon.com/512/743/743241.png',
-    color: '#64748B' 
+    color: '#5856D6' 
   },
   { 
     id: 'cat-services', 
@@ -67,7 +51,15 @@ export const CATEGORIES: Category[] = [
     slug: 'services', 
     icon: <Settings />, 
     illustrationUrl: 'https://cdn-icons-png.flaticon.com/512/2092/2092143.png',
-    color: '#71717A' 
+    color: '#8E8E93' 
+  },
+  { 
+    id: 'cat-beauty', 
+    name: 'Beleza', 
+    slug: 'beauty', 
+    icon: <Scissors />, 
+    illustrationUrl: 'https://cdn-icons-png.flaticon.com/512/2707/2707142.png',
+    color: '#FF2D85' 
   },
   { 
     id: 'cat-pros', 
@@ -75,7 +67,7 @@ export const CATEGORIES: Category[] = [
     slug: 'pros', 
     icon: <Briefcase />, 
     illustrationUrl: 'https://cdn-icons-png.flaticon.com/512/1063/1063376.png',
-    color: '#3B82F6' 
+    color: '#007AFF' 
   },
   { 
     id: 'cat-sports', 
@@ -83,7 +75,15 @@ export const CATEGORIES: Category[] = [
     slug: 'sports', 
     icon: <Dumbbell />, 
     illustrationUrl: 'https://cdn-icons-png.flaticon.com/512/2871/2871612.png',
-    color: '#10B981' 
+    color: '#4CD964' 
+  },
+  { 
+    id: 'cat-autos', 
+    name: 'Autos', 
+    slug: 'autos', 
+    icon: <CarFront />, 
+    illustrationUrl: 'https://cdn-icons-png.flaticon.com/512/743/743241.png',
+    color: '#1C1C1E' 
   },
   { 
     id: 'cat-assistance', 
@@ -91,7 +91,7 @@ export const CATEGORIES: Category[] = [
     slug: 'assistance', 
     icon: <Wrench />, 
     illustrationUrl: 'https://cdn-icons-png.flaticon.com/512/4233/4233830.png',
-    color: '#06B6D4' 
+    color: '#32ADE6' 
   },
   { 
     id: 'cat-education', 
@@ -99,7 +99,7 @@ export const CATEGORIES: Category[] = [
     slug: 'education', 
     icon: <GraduationCap />, 
     illustrationUrl: 'https://cdn-icons-png.flaticon.com/512/2997/2997314.png',
-    color: '#6366F1' 
+    color: '#AF52DE' 
   },
   { 
     id: 'cat-wellness', 
@@ -107,7 +107,7 @@ export const CATEGORIES: Category[] = [
     slug: 'wellness', 
     icon: <Sun />, 
     illustrationUrl: 'https://cdn-icons-png.flaticon.com/512/2906/2906496.png',
-    color: '#EAB308' 
+    color: '#FFCC00' 
   },
   { 
     id: 'cat-party', 
@@ -115,7 +115,7 @@ export const CATEGORIES: Category[] = [
     slug: 'party', 
     icon: <PartyPopper />, 
     illustrationUrl: 'https://cdn-icons-png.flaticon.com/512/2219/2219812.png',
-    color: '#D946EF' 
+    color: '#FF3B30' 
   },
   { 
     id: 'cat-fashion', 
@@ -123,7 +123,7 @@ export const CATEGORIES: Category[] = [
     slug: 'fashion', 
     icon: <Shirt />, 
     illustrationUrl: 'https://cdn-icons-png.flaticon.com/512/3050/3050225.png',
-    color: '#0EA5E9' 
+    color: '#5AC8FA' 
   },
   { 
     id: 'cat-condos', 
@@ -131,7 +131,7 @@ export const CATEGORIES: Category[] = [
     slug: 'condos', 
     icon: <Building2 />, 
     illustrationUrl: 'https://cdn-icons-png.flaticon.com/512/2311/2311514.png',
-    color: '#1E293B' 
+    color: '#003A66' 
   },
 ];
 
