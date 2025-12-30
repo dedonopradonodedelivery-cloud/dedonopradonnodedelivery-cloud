@@ -36,7 +36,6 @@ import { SpinWheelView } from './SpinWheelView';
 import { MasterSponsorBanner } from './MasterSponsorBanner';
 import { CATEGORIES, EDITORIAL_COLLECTIONS } from '../constants';
 import { RecomendadosPorMoradores } from './RecomendadosPorMoradores';
-import { UserCashbackBanner } from './UserCashbackBanner';
 
 interface HomeFeedProps {
   onNavigate: (view: string) => void;
@@ -176,7 +175,7 @@ const EducationalCarousel: React.FC<{ onNavigate: (v: string) => void }> = ({ on
           
           <button 
             onClick={() => onNavigate(currentBanner.id === 'services' ? 'services' : currentBanner.id === 'cashback' ? 'user_statement' : 'explore')}
-            className="bg-white text-slate-900 px-5 py-2.5 rounded-2xl text-[11px] font-black uppercase tracking-wider flex items-center gap-2 shadow-xl active:scale-95 transition-all hover:bg-primary-500 hover:text-white"
+            className="bg-white text-slate-900 px-5 py-2.5 rounded-2xl text-[11px] font-black uppercase tracking-wider flex items-center gap-2 shadow-xl active:scale-[0.95] transition-all hover:bg-primary-500 hover:text-white"
           >
             {currentBanner.cta} <ArrowUpRight className="w-3.5 h-3.5" />
           </button>
@@ -359,7 +358,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
               {(() => {
                 const rawPromos = [
                   { id: 'p1', store: 'Açougue Bom Corte', product: 'Picanha Premium KG', old: '89,90', new: '62,93', off: '30', image: 'https://images.unsplash.com/photo-1544022613-e879a7998d0f?q=80&w=600&auto=format&fit=crop' },
-                  { id: 'p2', store: 'Imperial Bakery', product: 'Pão Italiano Artesanal', old: '18,00', new: '12,60', off: '30', image: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?q=80&w=600&auto=format&fit=crop' },
+                  { id: 'p2', store: 'Imperial Bakery', product: 'Pão Italiano Artesanal', old: '18,00', new: '12,60', off: '30', image: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?q=80&w=200&auto=format&fit=crop' },
                   { id: 'p3', store: 'Beleza & Arte', product: 'Manicure + Pedicure', old: '60,00', new: '42,00', off: '30', image: 'https://images.unsplash.com/photo-1610992015732-2449b0c26670?q=80&w=600&auto=format&fit=crop' },
                   { id: 'p5', store: 'Drogaria Freguesia', product: 'Vitamina C (2 Tubos)', old: '45,00', new: '31,50', off: '30', image: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?q=80&w=600&auto=format&fit=crop' }
                 ];
@@ -462,21 +461,6 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
           </div>
         );
 
-      case 'cashback':
-        return (
-          <div key="cashback" className="px-4">
-            <UserCashbackBanner 
-              role={userRole || 'cliente'}
-              balance={user ? 12.40 : 0} 
-              totalGenerated={user ? 320.00 : 0}
-              onClick={() => {
-                if (!user) return onRequireLogin();
-                userRole === 'lojista' ? onNavigate('merchant_cashback_dashboard') : onNavigate('user_statement');
-              }} 
-            />
-          </div>
-        );
-
       case 'community':
         return (
           <div key="community" className="px-4">
@@ -525,12 +509,9 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
 
   const homeStructure = useMemo(() => {
     // Carrossel Onboarding é agora o primeiro elemento fixo após o cabeçalho.
-    const base = ['onboarding', 'categories', 'hero', 'promo_semana', 'roulette', 'bairro_on', 'community', 'list'];
-    if (user) {
-      return ['cashback', ...base];
-    }
-    return base;
-  }, [user]);
+    // Removido o banner de cashback isolado conforme solicitado.
+    return ['onboarding', 'categories', 'hero', 'promo_semana', 'roulette', 'bairro_on', 'community', 'list'];
+  }, []);
 
   return (
     <div className="flex flex-col gap-10 pt-8 pb-32 bg-white dark:bg-gray-900 w-full max-w-md mx-auto animate-in fade-in duration-500 overflow-x-hidden">
