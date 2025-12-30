@@ -55,7 +55,7 @@ export const UserCashbackBanner: React.FC<UserCashbackBannerProps> = ({
   return (
     <button 
       onClick={onClick}
-      className={`w-full ${config.bg} border rounded-[28px] p-5 shadow-xl hover:shadow-2xl active:scale-[0.98] transition-all flex items-center justify-between group overflow-hidden relative`}
+      className={`w-full ${config.bg} border rounded-[28px] p-5 shadow-2xl hover:shadow-black/50 active:scale-[0.98] transition-all flex items-center justify-between group overflow-hidden relative`}
     >
       {/* Glossy overlay effect for premium feel */}
       <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-white/5 to-transparent pointer-events-none"></div>

@@ -49,8 +49,8 @@ const RouletteIcon: React.FC<{ className?: string }> = ({ className }) => {
   const getPathD = (index: number) => {
     const startAngle = index * sliceAngle;
     const endAngle = startAngle + sliceAngle;
-    const startRad = (startAngle - 90) * Math.PI / 180;
-    const endRad = (endAngle - 90) * Math.PI / 180;
+    const startRad = (startAngle - -90) * Math.PI / 180;
+    const endRad = (endAngle - -90) * Math.PI / 180;
     const x1 = center + radius * Math.cos(startRad);
     const y1 = center + radius * Math.sin(startRad);
     const x2 = center + radius * Math.cos(endRad);
@@ -98,7 +98,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
     switch (key) {
       case 'categories':
         return (
-          <div key="categories" className="pt-4">
+          <div key="categories" className="w-full">
             <div 
               ref={categoriesRef} 
               onScroll={handleCategoryScroll}
@@ -187,12 +187,15 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
         );
 
       case 'cashback':
-        // UX: Banner de cashback renderiza em diferentes posições baseado no login, mas sempre mantém o visual.
+        // UX: No estado logado, o título redundante foi removido para uma UI mais limpa.
+        // A seção mantém o espaçamento padrão do layout principal.
         return (
           <div key="cashback" className="px-4">
-            <div className="flex items-center justify-between mb-3 px-1">
-                <h3 className="text-[11px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.2em]">Cashback no seu negócio</h3>
-            </div>
+            {!user && (
+              <div className="flex items-center justify-between mb-3 px-1">
+                  <h3 className="text-[11px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.2em]">Cashback no seu negócio</h3>
+              </div>
+            )}
             <UserCashbackBanner 
               role={userRole || 'cliente'}
               balance={user ? 12.40 : 0} 
@@ -273,12 +276,11 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
     }
   };
 
-  // UX: Prioridade contextuall. Se logado, o cashback vem em primeiro lugar.
-  // Se deslogado, segue a ordem original de descoberta.
+  // UX: Prioridade contextual. Ritmo XL (gap-8) padronizado entre todos os blocos principais.
   const homeStructure = useMemo(() => {
     if (user) {
       return [
-        'cashback',    // Posição 1 (Logado)
+        'cashback',    // Agora sem título externo, mais limpo no topo.
         'categories',
         'hero',
         'roulette',
@@ -291,7 +293,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
       'categories',
       'hero',
       'roulette',
-      'cashback',     // Posição 4 (Deslogado)
+      'cashback',
       'highlights',
       'community',
       'list'
@@ -299,7 +301,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
   }, [user]);
 
   return (
-    <div className="flex flex-col gap-10 pb-32 bg-white dark:bg-gray-900 w-full max-w-md mx-auto animate-in fade-in duration-500 overflow-x-hidden">
+    <div className="flex flex-col gap-8 pt-8 pb-32 bg-white dark:bg-gray-900 w-full max-w-md mx-auto animate-in fade-in duration-500 overflow-x-hidden">
       {activeSearchTerm ? (
         <div className="px-5 mt-4 min-h-[50vh]">
              <h3 className="font-bold text-sm text-gray-500 uppercase tracking-wider mb-4 px-1">Resultados para "{activeSearchTerm}"</h3>
@@ -319,7 +321,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
              </div>
         </div>
       ) : (
-        <div className="flex flex-col gap-10 w-full">
+        <div className="flex flex-col gap-8 w-full">
             {homeStructure.map(section => renderSection(section))}
             
             <div className="px-4">
@@ -328,7 +330,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
 
             <div className="mt-4 mb-4 flex flex-col items-center justify-center text-center opacity-30">
               <Star className="w-4 h-4 text-gray-400 mb-2" />
-              <p className="text-[9px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-[0.5em]">Freguesia • Localizei v1.3.1</p>
+              <p className="text-[9px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-[0.5em]">Freguesia • Localizei v1.3.2</p>
             </div>
         </div>
       )}
