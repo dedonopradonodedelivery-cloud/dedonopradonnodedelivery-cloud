@@ -21,8 +21,9 @@ import {
   AlertCircle,
   CheckCircle2,
   Maximize2,
-  /* Added Plus to fix line 266 error */
-  Plus
+  Plus,
+  Rocket,
+  Target
 } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import { User } from '@supabase/supabase-js';
@@ -67,6 +68,7 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
   const [isCashbackEnabled, setIsCashbackEnabled] = useState(true);
   const [pendingRequestsCount, setPendingRequestsCount] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [hasCampaigns, setHasCampaigns] = useState(false); // New state for dynamic CTA
   
   // Video States
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
@@ -78,8 +80,11 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
   const isVerified = !!user;
 
   useEffect(() => {
+    // Simulating loading and campaign check
     const timer = setTimeout(() => {
       setLoading(false);
+      // Mocking check: in a real app, this would query a campaigns table
+      setHasCampaigns(false); 
     }, 800);
     return () => clearTimeout(timer);
   }, []);
@@ -340,22 +345,36 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
             </button>
         </section>
 
-        {/* 3. ANÚNCIOS E DESTAQUES */}
+        {/* 3. ANÚNCIOS PATROCINADOS E DESTAQUES (Dinamizado conforme solicitação) */}
         <section className="w-full bg-white dark:bg-gray-800 p-6 border-b border-gray-100 dark:border-gray-800 relative overflow-hidden">
             <div className="flex items-center gap-3 mb-6">
                 <div className="p-2.5 bg-purple-50 dark:bg-purple-900/30 rounded-xl text-purple-600 dark:text-purple-400">
                     <Megaphone className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="font-bold text-gray-900 dark:text-white">Anúncios e Destaques</h3>
-                  <p className="text-xs text-gray-500">Aumente sua visibilidade no app</p>
+                  <h3 className="font-bold text-gray-900 dark:text-white leading-tight">Anúncios Patrocinados e Destaques</h3>
+                  <p className="text-xs text-gray-500 mt-0.5">
+                    {hasCampaigns ? "Aumente sua visibilidade no app" : "Alcance novos clientes hoje"}
+                  </p>
                 </div>
             </div>
 
             <div className="bg-purple-50 dark:bg-purple-900/10 rounded-2xl p-5 mb-6 border border-purple-100 dark:border-purple-800/30">
-                <p className="text-sm font-bold text-purple-900 dark:text-purple-200 mb-1">Impulsione suas vendas</p>
-                <p className="text-xs text-purple-700 dark:text-purple-400 leading-relaxed">
-                  Apareça no topo das buscas e no banner principal da Freguesia.
+                <div className="flex items-center gap-2 mb-1.5">
+                  {hasCampaigns ? (
+                    <TrendingUp className="w-4 h-4 text-purple-600" />
+                  ) : (
+                    <Rocket className="w-4 h-4 text-purple-600" />
+                  )}
+                  <p className="text-sm font-bold text-purple-900 dark:text-purple-200">
+                    {hasCampaigns ? "Gerencie seus impulsos" : "Impulsione suas vendas"}
+                  </p>
+                </div>
+                <p className="text-xs text-purple-700 dark:text-purple-400 leading-relaxed font-medium">
+                  {hasCampaigns 
+                    ? "Acompanhe o desempenho das suas campanhas e otimize seus resultados." 
+                    : "Apareça no topo das buscas e destaque sua loja para novos clientes."
+                  }
                 </p>
             </div>
 
@@ -363,8 +382,17 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
                 onClick={() => onNavigate && onNavigate('store_ads_module')}
                 className="w-full bg-[#1E5BFF] text-white py-4 rounded-2xl text-sm font-bold shadow-lg shadow-blue-500/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
             >
-                Gerenciar campanhas
-                <ChevronRight className="w-4 h-4" />
+                {hasCampaigns ? (
+                  <>
+                    Gerenciar campanhas
+                    <ChevronRight className="w-4 h-4" />
+                  </>
+                ) : (
+                  <>
+                    <Plus className="w-4 h-4" />
+                    Criar campanha
+                  </>
+                )}
             </button>
         </section>
 
