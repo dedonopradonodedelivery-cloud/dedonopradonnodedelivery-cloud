@@ -24,8 +24,8 @@ import {
   Activity,
   Eye,
   Rocket,
-  // Fix: Renamed Store to StoreIcon to avoid conflict with Store interface
-  Store as StoreIcon
+  Store as StoreIcon,
+  ShoppingBag
 } from 'lucide-react';
 import { LojasEServicosList } from './LojasEServicosList';
 import { User } from '@supabase/supabase-js';
@@ -170,6 +170,55 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
           </div>
         );
 
+      case 'promo_semana':
+        return (
+          <div key="promo_semana" className="px-4">
+            <div className="flex items-center justify-between mb-4 px-1">
+              <div className="flex items-center gap-2">
+                <div className="p-1.5 bg-rose-50 dark:bg-rose-900/20 rounded-lg">
+                  <Tag className="w-4 h-4 text-rose-500" />
+                </div>
+                <h3 className="text-[11px] font-black text-gray-900 dark:text-white uppercase tracking-[0.15em]">Promoção da Semana</h3>
+              </div>
+              <p className="text-[9px] font-bold text-gray-400 uppercase">Ofertas 20% OFF+</p>
+            </div>
+            
+            <div className="flex gap-4 overflow-x-auto no-scrollbar -mx-4 px-4 pb-2 snap-x">
+              {[
+                { id: 'p1', store: 'Açougue Bom Corte', product: 'Picanha Premium KG', old: '89,90', new: '62,93', off: '30', image: 'https://images.unsplash.com/photo-1544022613-e879a7998d0f?q=80&w=400&auto=format&fit=crop' },
+                { id: 'p2', store: 'Beleza Real', product: 'Escova + Hidratação', old: '120,00', new: '84,00', off: '30', image: 'https://images.unsplash.com/photo-1560869713-7d0a294308ed?q=80&w=400&auto=format&fit=crop' },
+                { id: 'p3', store: 'Mercado da Esquina', product: 'Cerveja Artesanal (Pack)', old: '54,00', new: '37,80', off: '30', image: 'https://images.unsplash.com/photo-1550341298-58879f9f38df?q=80&w=400&auto=format&fit=crop' },
+                { id: 'p4', store: 'Padaria Central', product: 'Combo Café da Manhã', old: '22,00', new: '15,40', off: '30', image: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?q=80&w=400&auto=format&fit=crop' }
+              ].map((promo) => (
+                <div key={promo.id} className="min-w-[280px] snap-center bg-white dark:bg-gray-800 rounded-[32px] overflow-hidden shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col group active:scale-[0.98] transition-all">
+                  <div className="h-32 relative overflow-hidden">
+                    <img src={promo.image} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt={promo.product} />
+                    <div className="absolute top-3 left-3 bg-rose-500 text-white text-[10px] font-black px-2 py-1 rounded-lg shadow-lg">
+                      -{promo.off}% OFF
+                    </div>
+                    <div className="absolute bottom-3 right-3 bg-white/90 backdrop-blur-md text-gray-900 text-[9px] font-black px-2 py-1 rounded-lg border border-white/20 flex items-center gap-1">
+                      <Timer className="w-3 h-3 text-rose-500" />
+                      7 DIAS
+                    </div>
+                  </div>
+                  <div className="p-4 flex flex-col gap-1">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <h4 className="font-bold text-gray-900 dark:text-white text-sm leading-tight line-clamp-1">{promo.product}</h4>
+                        <p className="text-[10px] text-gray-400 font-bold uppercase">{promo.store}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-[10px] text-gray-400 line-through font-bold">R$ {promo.old}</p>
+                        <p className="text-lg font-black text-[#1E5BFF]">R$ {promo.new}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+
       case 'roulette':
         return (
           <div key="roulette" className="px-4">
@@ -209,15 +258,14 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
             
             <div className="flex gap-3 overflow-x-auto no-scrollbar -mx-4 px-4 pb-2">
               {[
-                { id: 'on-1', name: 'Padaria Imperial', category: 'Padaria', status: '🔥 Bombando hoje', microcopy: 'Movimento intenso agora', icon: <Flame className="w-3 h-3 text-orange-500" />, color: 'bg-orange-50 dark:bg-orange-900/10' },
-                { id: 'on-2', name: 'Hambúrgueria Brasa', category: 'Lanches', status: '📈 Em alta agora', microcopy: 'Muitos vizinhos visitando', icon: <TrendingUp className="w-3 h-3 text-emerald-500" />, color: 'bg-emerald-50 dark:bg-emerald-900/10' },
-                { id: 'on-3', name: 'Pet Shop Amigo', category: 'Pets', status: '🚀 Tendência do dia', microcopy: 'Bombando nas últimas horas', icon: <Rocket className="w-3 h-3 text-blue-500" />, color: 'bg-blue-50 dark:bg-blue-900/10' },
-                { id: 'on-4', name: 'Academia Fit', category: 'Esportes', status: '👀 Movimento intenso', microcopy: 'Vizinhança ativa aqui', icon: <Eye className="w-3 h-3 text-purple-500" />, color: 'bg-purple-50 dark:bg-purple-900/10' }
+                { id: 'on-1', name: 'Padaria Central', category: 'Padaria', status: '🔥 Bombando hoje', microcopy: 'Vizinhança tomando café agora', icon: <Flame className="w-3 h-3 text-orange-500" />, color: 'bg-orange-50 dark:bg-orange-900/10' },
+                { id: 'on-2', name: 'Hambúrguer do Zé', category: 'Lanches', status: '📈 Em alta agora', microcopy: 'Pico de pedidos detectado', icon: <TrendingUp className="w-3 h-3 text-emerald-500" />, color: 'bg-emerald-50 dark:bg-emerald-900/10' },
+                { id: 'on-3', name: 'Café da Praça', category: 'Cafeteria', status: '🚀 Tendência do dia', microcopy: 'Muitos vizinhos visitando', icon: <Rocket className="w-3 h-3 text-blue-500" />, color: 'bg-blue-50 dark:bg-blue-900/10' },
+                { id: 'on-4', name: 'Pet Shop Amigo', category: 'Pets', status: '👀 Movimento intenso', microcopy: 'Vizinhança ativa aqui', icon: <Eye className="w-3 h-3 text-purple-500" />, color: 'bg-purple-50 dark:bg-purple-900/10' }
               ].map((item) => (
                 <div key={item.id} className="min-w-[190px] bg-white dark:bg-gray-800 rounded-[24px] p-4 shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col gap-3 group active:scale-[0.98] transition-all">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-xl bg-gray-100 dark:bg-gray-700 flex items-center justify-center shrink-0">
-                      {/* Fix: Use StoreIcon instead of Store to resolve type vs value conflict */}
                       <StoreIcon className="w-5 h-5 text-gray-400" />
                     </div>
                     <div className="min-w-0">
@@ -264,7 +312,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
                 <h3 className="text-[10px] font-black text-gray-900 dark:text-white uppercase tracking-[0.15em]">Amados pela Vizinhança</h3>
             </div>
             <RecomendadosPorMoradores items={[
-              { id: '1', nome: 'Padaria Imperial', categoria: 'Comida', texto: 'Melhor pão na chapa que já comi, o atendimento é impecável sempre!', totalRecomendacoes: 42 }
+              { id: '1', nome: 'Açougue Bom Corte', categoria: 'Comida', texto: 'A melhor carne da região, fresquinha e com preço justo!', totalRecomendacoes: 42 }
             ]} />
           </div>
         );
@@ -298,10 +346,11 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
   };
 
   const homeStructure = useMemo(() => {
+    const base = ['categories', 'hero', 'promo_semana', 'roulette', 'bairro_on', 'community', 'list'];
     if (user) {
-      return ['cashback', 'categories', 'hero', 'roulette', 'bairro_on', 'community', 'list'];
+      return ['cashback', ...base];
     }
-    return ['categories', 'hero', 'roulette', 'bairro_on', 'community', 'list'];
+    return base;
   }, [user]);
 
   return (
@@ -334,7 +383,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
 
             <div className="mt-4 mb-4 flex flex-col items-center justify-center text-center opacity-30">
               <Star className="w-4 h-4 text-gray-400 mb-2" />
-              <p className="text-[9px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-[0.5em]">Freguesia • Localizei v1.3.3</p>
+              <p className="text-[9px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-[0.5em]">Freguesia • Localizei v1.3.4</p>
             </div>
         </div>
       )}
@@ -351,7 +400,6 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
                 <SpinWheelView 
                     userId={user?.id || null} 
                     userRole={userRole || null} 
-                    // Fix: Changed onWin to use the onSpinWin prop from HomeFeedProps
                     onWin={onSpinWin} 
                     onRequireLogin={onRequireLogin} 
                     onViewHistory={() => { setIsSpinWheelOpen(false); onNavigate('prize_history'); }} 
