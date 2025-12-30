@@ -1,13 +1,13 @@
 
 import React from 'react';
-import { Utensils, Briefcase, PartyPopper, Shirt, Coffee, Home, Dog, Armchair, Scissors, Heart, GraduationCap, Settings, Dumbbell, CarFront, Wrench, Sun, ShoppingCart, Croissant, Leaf, Beef, Fish, Bike, Beer, Sandwich, ShoppingBag, Sparkles, MapPin, Hand, Feather, Eye, Stethoscope, Smile, Brain, Activity, Apple, FlaskConical, HelpingHand, School, Languages, BookOpen, Baby, Target, Zap, Droplet, BrickWall, PaintRoller, Hammer, Wind, Key, Plug, Scale, Calculator, Ruler, Megaphone, Camera, Printer, Bone, Footprints, Flame, Swords, Trophy, Waves, Music, UserCheck, Tv, Smartphone, Laptop, Cpu, Snowflake, FileText, CircleDashed, Lock, Wallet, Gem, Watch, Moon, ShieldCheck, Package, Building2, Pill, Lightbulb, Palette, TriangleAlert, ThumbsUp } from 'lucide-react';
+import { Utensils, Briefcase, PartyPopper, Shirt, Coffee, Home, Dog, Armchair, Scissors, Heart, GraduationCap, Settings, Dumbbell, CarFront, Wrench, Sun, ShoppingCart, Croissant, Leaf, Beef, Fish, Bike, Beer, Sandwich, ShoppingBag, Sparkles, MapPin, Hand, Feather, Eye, Stethoscope, Smile, Brain, Activity, Apple, FlaskConical, HelpingHand, School, Languages, BookOpen, Baby, Target, Zap, Droplet, BrickWall, PaintRoller, Hammer, Wind, Key, Plug, Scale, Calculator, Ruler, Megaphone, Camera, Printer, Bone, Footprints, Flame, Swords, Trophy, Waves, Music, UserCheck, Tv, Smartphone, Laptop, Cpu, Snowflake, FileText, CircleDashed, Lock, Wallet, Gem, Watch, Moon, ShieldCheck, Package, Building2, Pill, Lightbulb, Palette, TriangleAlert, ThumbsUp, LayoutGrid, Ticket, BriefcaseBusiness, Monitor, Footprints as PawPrint, Map as MapIcon } from 'lucide-react';
 import { AdType, Category, Store, Story, ServiceLead, Channel, Transaction, EditorialCollection } from './types';
 import { getStoreLogo } from './utils/mockLogos';
 
 export const CATEGORIES: Category[] = [
   { 
     id: 'cat-food', 
-    name: 'Comida', 
+    name: 'Alimentação', 
     slug: 'food', 
     icon: <Utensils />, 
     illustrationUrl: 'https://cdn-icons-png.flaticon.com/512/3170/3170733.png',
@@ -26,7 +26,7 @@ export const CATEGORIES: Category[] = [
     name: 'Beleza', 
     slug: 'beauty', 
     icon: <Scissors />, 
-    illustrationUrl: 'https://cdn-icons-png.flaticon.com/512/2821/2821360.png',
+    illustrationUrl: 'https://cdn-icons-png.flaticon.com/512/2707/2707142.png',
     color: '#FF2D55' // iOS Pink
   },
   { 
@@ -41,8 +41,8 @@ export const CATEGORIES: Category[] = [
     id: 'cat-pets', 
     name: 'Pets', 
     slug: 'pets', 
-    icon: <Dog />, 
-    illustrationUrl: 'https://cdn-icons-png.flaticon.com/512/616/616408.png',
+    icon: <PawPrint />, 
+    illustrationUrl: 'https://cdn-icons-png.flaticon.com/512/107/107831.png',
     color: '#AF52DE' // iOS Purple
   },
   { 
@@ -65,15 +65,15 @@ export const CATEGORIES: Category[] = [
     id: 'cat-services', 
     name: 'Serviços', 
     slug: 'services', 
-    icon: <Settings />, 
-    illustrationUrl: 'https://cdn-icons-png.flaticon.com/512/2092/2092143.png',
+    icon: <Wrench />, 
+    illustrationUrl: 'https://cdn-icons-png.flaticon.com/512/4233/4233830.png',
     color: '#007AFF' // iOS Blue
   },
   { 
     id: 'cat-pros', 
-    name: 'Pro', 
+    name: 'Profissionais', 
     slug: 'pros', 
-    icon: <Briefcase />, 
+    icon: <BriefcaseBusiness />, 
     illustrationUrl: 'https://cdn-icons-png.flaticon.com/512/1063/1063376.png',
     color: '#5AC8FA' // iOS Sky
   },
@@ -86,36 +86,20 @@ export const CATEGORIES: Category[] = [
     color: '#4CD964' // iOS Light Green
   },
   { 
-    id: 'cat-assistance', 
-    name: 'Técnico', 
-    slug: 'assistance', 
-    icon: <Wrench />, 
-    illustrationUrl: 'https://cdn-icons-png.flaticon.com/512/4233/4233830.png',
-    color: '#32ADE6' // iOS Teal
-  },
-  { 
     id: 'cat-education', 
     name: 'Educação', 
     slug: 'education', 
-    icon: <GraduationCap />, 
-    illustrationUrl: 'https://cdn-icons-png.flaticon.com/512/2997/2997314.png',
+    icon: <BookOpen />, 
+    illustrationUrl: 'https://cdn-icons-png.flaticon.com/512/3389/3389081.png',
     color: '#5856D6' 
   },
   { 
-    id: 'cat-wellness', 
-    name: 'Wellness', 
-    slug: 'wellness', 
-    icon: <Sun />, 
-    illustrationUrl: 'https://cdn-icons-png.flaticon.com/512/2906/2906496.png',
-    color: '#FFCC00' // iOS Yellow
-  },
-  { 
-    id: 'cat-party', 
-    name: 'Festas', 
-    slug: 'party', 
-    icon: <PartyPopper />, 
-    illustrationUrl: 'https://cdn-icons-png.flaticon.com/512/2219/2219812.png',
-    color: '#FF2D55' 
+    id: 'cat-tech', 
+    name: 'Tecnologia', 
+    slug: 'tech', 
+    icon: <Monitor />, 
+    illustrationUrl: 'https://cdn-icons-png.flaticon.com/512/606/606203.png',
+    color: '#32ADE6' // iOS Teal
   },
   { 
     id: 'cat-fashion', 
@@ -126,11 +110,27 @@ export const CATEGORIES: Category[] = [
     color: '#007AFF' 
   },
   { 
-    id: 'cat-condos', 
-    name: 'Predial', 
-    slug: 'condos', 
-    icon: <Building2 />, 
-    illustrationUrl: 'https://cdn-icons-png.flaticon.com/512/2311/2311514.png',
+    id: 'cat-leisure', 
+    name: 'Lazer', 
+    slug: 'leisure', 
+    icon: <Ticket />, 
+    illustrationUrl: 'https://cdn-icons-png.flaticon.com/512/3063/3063822.png',
+    color: '#FFCC00' // iOS Yellow
+  },
+  { 
+    id: 'cat-tourism', 
+    name: 'Turismo', 
+    slug: 'tourism', 
+    icon: <MapIcon />, 
+    illustrationUrl: 'https://cdn-icons-png.flaticon.com/512/290/290445.png',
+    color: '#FF2D55' 
+  },
+  { 
+    id: 'cat-others', 
+    name: 'Outros', 
+    slug: 'others', 
+    icon: <LayoutGrid />, 
+    illustrationUrl: 'https://cdn-icons-png.flaticon.com/512/660/660485.png',
     color: '#1C1C1E' // iOS Dark
   },
 ];
@@ -228,66 +228,6 @@ export const SUBCATEGORIES: Record<string, { name: string; icon: React.ReactNode
     { name: 'Alimentação Pet', icon: <Bone className="w-8 h-8 text-[#1B54D9]" /> },
     { name: 'Serviços Especias', icon: <Sparkles className="w-8 h-8 text-[#1B54D9]" /> },
   ],
-  'Assistências': [
-    { name: 'TVs', icon: <Tv className="w-8 h-8 text-[#1B54D9]" /> },
-    { name: 'Celulares', icon: <Smartphone className="w-8 h-8 text-[#1B54D9]" /> },
-    { name: 'Informática', icon: <Laptop className="w-8 h-8 text-[#1B54D9]" /> },
-    { name: 'Eletrônicos', icon: <Cpu className="w-8 h-8 text-[#1B54D9]" /> },
-    { name: 'Ar-condicionado', icon: <Wind className="w-8 h-8 text-[#1B54D9]" /> },
-    { name: 'Geladeira', icon: <Snowflake className="w-8 h-8 text-[#1B54D9]" /> },
-    { name: 'Micro-ondas', icon: <Zap className="w-8 h-8 text-[#1B54D9]" /> },
-    { name: 'Máquina de lavar', icon: <Waves className="w-8 h-8 text-[#1B54D9]" /> },
-  ],
-  'Bem-estar': [
-    { name: 'Massoterapia & Relaxamento', icon: <Heart className="w-8 h-8 text-[#1B54D9]" /> },
-    { name: 'Fisioterapia & Reabilitação', icon: <Activity className="w-8 h-8 text-[#1B54D9]" /> },
-    { name: 'Estúdios de Pilates', icon: <Activity className="w-8 h-8 text-[#1B54D9]" /> },
-    { name: 'Clinicas de Estéticas', icon: <Sparkles className="w-8 h-8 text-[#1B54D9]" /> },
-    { name: 'Psicologia & Terapia', icon: <Brain className="w-8 h-8 text-[#1B54D9]" /> },
-    { name: 'Nutrição & Vida Saudável', icon: <Apple className="w-8 h-8 text-[#1B54D9]" /> },
-    { name: 'Yoga & meditação', icon: <Sun className="w-8 h-8 text-[#1B54D9]" /> },
-    { name: 'Spa, Day Spa & Terapia', icon: <Droplet className="w-8 h-8 text-[#1B54D9]" /> },
-  ],
-  'Festas': [
-    { name: 'Decoração & Ambientação', icon: <Sparkles className="w-8 h-8 text-[#1B54D9]" /> },
-    { name: 'Buffet & Gastronomia', icon: <Utensils className="w-8 h-8 text-[#1B54D9]" /> },
-    { name: 'Salões & Espaços', icon: <Home className="w-8 h-8 text-[#1B54D9]" /> },
-    { name: 'Dj, Músicas & entretenimento', icon: <Music className="w-8 h-8 text-[#1B54D9]" /> },
-    { name: 'Aluguel de Equipamentos', icon: <Tv className="w-8 h-8 text-[#1B54D9]" /> },
-    { name: 'Fotografia & Filmagem', icon: <Camera className="w-8 h-8 text-[#1B54D9]" /> },
-    { name: 'Bolos, Doces & Personalizados', icon: <Croissant className="w-8 h-8 text-[#1B54D9]" /> },
-    { name: 'Personagens & animação', icon: <Smile className="w-8 h-8 text-[#1B54D9]" /> },
-  ],
-  'Moda': [
-    { name: 'Moda Feminina', icon: <ShoppingBag className="w-8 h-8 text-[#1B54D9]" /> },
-    { name: 'Moda Masculina', icon: <Shirt className="w-8 h-8 text-[#1B54D9]" /> },
-    { name: 'Moda Infantil & Bebê', icon: <Baby className="w-8 h-8 text-[#1B54D9]" /> },
-    { name: 'Moda Praia & fitness', icon: <Sun className="w-8 h-8 text-[#1B54D9]" /> },
-    { name: 'Calçados', icon: <Footprints className="w-8 h-8 text-[#1B54D9]" /> },
-    { name: 'Acessórios & Bijuterias', icon: <Gem className="w-8 h-8 text-[#1B54D9]" /> },
-    { name: 'Joias & Relógios', icon: <Watch className="w-8 h-8 text-[#1B54D9]" /> },
-    { name: 'Moda Íntima & Sleepwear', icon: <Moon className="w-8 h-8 text-[#1B54D9]" /> },
-  ],
-  'Condomínios': [
-    { name: 'Segurança Patrimonial', icon: <ShieldCheck className="w-8 h-8 text-[#1B54D9]" /> },
-    { name: 'Limpeza & conservação', icon: <Sparkles className="w-8 h-8 text-[#1B54D9]" /> },
-    { name: 'Manutenção Predial', icon: <Hammer className="w-8 h-8 text-[#1B54D9]" /> },
-    { name: 'Piscina & Guardião', icon: <Waves className="w-8 h-8 text-[#1B54D9]" /> },
-    { name: 'Jardinagem & Paisagismo', icon: <Leaf className="w-8 h-8 text-[#1B54D9]" /> },
-    { name: 'Fornecedores & Suprimentos', icon: <Package className="w-8 h-8 text-[#1B54D9]" /> },
-    { name: 'Administração de Condomínios', icon: <Building2 className="w-8 h-8 text-[#1B54D9]" /> },
-    { name: 'Portaria & controle de Acesso', icon: <UserCheck className="w-8 h-8 text-[#1B54D9]" /> },
-  ],
-  'Casa': [
-    { name: 'Decoração & Design de Interiores', icon: <Palette className="w-8 h-8 text-[#1B54D9]" /> },
-    { name: 'Móveis & Planejados', icon: <Armchair className="w-8 h-8 text-[#1B54D9]" /> },
-    { name: 'Iluminação & elétrica', icon: <Lightbulb className="w-8 h-8 text-[#1B54D9]" /> },
-    { name: 'Hidráulica & Encanamento', icon: <Droplet className="w-8 h-8 text-[#1B54D9]" /> },
-    { name: 'Reforma & Construção', icon: <BrickWall className="w-8 h-8 text-[#1B54D9]" /> },
-    { name: 'Pintura & Acabamentos', icon: <PaintRoller className="w-8 h-8 text-[#1B54D9]" /> },
-    { name: 'Chaveiro Residencial', icon: <Key className="w-8 h-8 text-[#1B54D9]" /> },
-    { name: 'Limpeza Residencial & Diaristas', icon: <Sparkles className="w-8 h-8 text-[#1B54D9]" /> },
-  ],
   // Fallback for others (generic)
   'default': [
     { name: 'Geral', icon: <Briefcase className="w-8 h-8 text-[#1B54D9]" /> },
@@ -299,7 +239,7 @@ export const SUBCATEGORIES: Record<string, { name: string; icon: React.ReactNode
 
 export const STORIES: Story[] = [
   { id: '1', name: 'Mercado ...', image: 'https://picsum.photos/100/100?random=1' },
-  { id: '2', name: 'Empório d...', image: 'https://picsum.photos/100/100?random=2', isLive: true },
+  { id: '2', name: 'Empório d...', image: 'https://picsum.photos/100/100?random=2', isMarketplace: true },
   { id: '3', name: 'Padaria P...', image: 'https://picsum.photos/100/100?random=3' },
   { id: '4', name: 'Açougue ...', image: 'https://picsum.photos/100/100?random=4' },
   { id: '5', name: 'Hortifru...', image: 'https://picsum.photos/100/100?random=5' },
@@ -441,7 +381,7 @@ export const TRANSACTIONS: Transaction[] = [
   { id: 't1', storeName: 'Casas Pedro', date: '20 Out 2023', amount: 150.00, cashbackAmount: 7.50, status: 'completed' },
   { id: 't2', storeName: 'Hamburgueria Brasa', date: '18 Out 2023', amount: 85.00, cashbackAmount: 2.55, status: 'completed' },
   { id: 't3', storeName: 'Ótica Visão', date: '10 Out 2023', amount: 400.00, cashbackAmount: 8.00, status: 'pending' },
-  { id: 't4', storeName: 'Padaria Estrela', date: '05 Out 2023', amount: 25.00, cashbackAmount: 0.00, status: 'completed' }, // No cashback example
+  { id: 't4', storeName: 'Padaria Estrela', date: '05 Out 2023', amount: 25.00, cashbackAmount: 0.00, status: 'completed' }, 
 ];
 
 export const quickFilters = [

@@ -66,6 +66,8 @@ export interface Story {
   name: string;
   image: string;
   isLive?: boolean;
+  // Fix: Added isMarketplace property to Story interface to resolve TypeScript error in constants.tsx
+  isMarketplace?: boolean;
 }
 
 export interface Channel {

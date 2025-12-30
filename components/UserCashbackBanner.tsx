@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Wallet, ChevronRight, TrendingUp, AlertCircle, Loader2, BarChart3, Coins, Crown } from 'lucide-react';
+import { ChevronRight, BarChart3, Coins, Crown, Loader2, AlertCircle } from 'lucide-react';
 
 interface UserCashbackBannerProps {
   role: 'cliente' | 'lojista';
@@ -13,23 +13,28 @@ interface UserCashbackBannerProps {
 
 export const UserCashbackBanner: React.FC<UserCashbackBannerProps> = ({ 
   role,
-  balance = 12.40, 
-  totalGenerated = 320.00,
+  balance = 0, 
+  totalGenerated = 0,
   loading = false, 
   error = false, 
   onClick 
 }) => {
   
   const isMerchant = role === 'lojista';
+  const hasBalance = balance > 0;
 
-  // Configurações visuais por papel
+  // Configurações visuais e de texto adaptativas
   const config = isMerchant ? {
     bg: 'bg-slate-900 border-indigo-500/30 shadow-indigo-900/20',
     accentColor: 'text-amber-400',
     iconBg: 'bg-indigo-500/10 text-amber-400',
     title: 'CASHBACK NO SEU NEGÓCIO',
-    highlightLabel: `R$ ${totalGenerated.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} gerados`,
-    subtext: 'Mais clientes comprando na sua loja',
+    highlightLabel: totalGenerated > 0 
+      ? `R$ ${totalGenerated.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} gerados`
+      : 'Comece a fidelizar',
+    subtext: totalGenerated > 0 
+      ? 'Mais clientes comprando na sua loja'
+      : 'Ative o cashback para atrair mais clientes',
     cta: 'Ver desempenho',
     Icon: BarChart3
   } : {
@@ -37,9 +42,13 @@ export const UserCashbackBanner: React.FC<UserCashbackBannerProps> = ({
     accentColor: 'text-amber-400',
     iconBg: 'bg-amber-400/10 text-amber-400',
     title: 'SEU CASHBACK',
-    highlightLabel: `R$ ${balance.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} disponíveis`,
-    subtext: 'Use em lojas da freguesia',
-    cta: 'Ver extrato',
+    highlightLabel: hasBalance 
+      ? `R$ ${balance.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} disponíveis`
+      : 'Ganhe dinheiro de volta',
+    subtext: hasBalance 
+      ? 'Use para pagar em lojas da freguesia'
+      : 'Compre no bairro e acumule saldo',
+    cta: hasBalance ? 'Ver extrato' : 'Como ganhar',
     Icon: Coins
   };
 
@@ -68,7 +77,7 @@ export const UserCashbackBanner: React.FC<UserCashbackBannerProps> = ({
             <span className="block text-[9px] font-black text-gray-500 uppercase tracking-[0.2em]">
                 {config.title}
             </span>
-            {!isMerchant && <Crown className="w-2.5 h-2.5 text-amber-500" />}
+            {!isMerchant && hasBalance && <Crown className="w-2.5 h-2.5 text-amber-500" />}
           </div>
           
           {loading ? (
@@ -77,7 +86,7 @@ export const UserCashbackBanner: React.FC<UserCashbackBannerProps> = ({
             <p className="text-sm font-bold text-gray-500 italic">Dados indisponíveis</p>
           ) : (
             <div className="flex flex-col">
-              <h2 className={`text-[18px] font-black text-white leading-tight tracking-tight`}>
+              <h2 className="text-[18px] font-black text-white leading-tight tracking-tight">
                 <span className={`${config.accentColor} bg-gradient-to-r from-amber-200 to-amber-500 bg-clip-text text-transparent`}>
                     {config.highlightLabel}
                 </span>
@@ -90,7 +99,7 @@ export const UserCashbackBanner: React.FC<UserCashbackBannerProps> = ({
         </div>
       </div>
 
-      <div className={`flex items-center gap-1.5 bg-white/5 border border-white/10 px-3 py-2 rounded-xl text-white font-bold text-[10px] uppercase tracking-wider group-hover:bg-amber-500 group-hover:text-black group-hover:border-amber-500 transition-all duration-300 relative z-10`}>
+      <div className="flex items-center gap-1.5 bg-white/5 border border-white/10 px-3 py-2 rounded-xl text-white font-bold text-[10px] uppercase tracking-wider group-hover:bg-amber-500 group-hover:text-black group-hover:border-amber-500 transition-all duration-300 relative z-10">
         {config.cta}
         <ChevronRight className="w-3 h-3" strokeWidth={3} />
       </div>

@@ -492,13 +492,13 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
         );
       case 'categories':
         return (
-          <div key="categories" className="pt-4">
+          <div key="categories" className="pt-6">
             <div 
               ref={categoriesRef} 
               onScroll={handleCategoryScroll}
-              className="flex overflow-x-auto no-scrollbar px-5 pb-2"
+              className="flex overflow-x-auto no-scrollbar px-5 pb-3"
             >
-              <div className="grid grid-flow-col grid-rows-2 gap-x-5 gap-y-6">
+              <div className="grid grid-flow-col grid-rows-2 gap-x-5 gap-y-7">
                 {CATEGORIES.map((cat) => (
                   <button 
                     key={cat.id} 
@@ -506,30 +506,30 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
                     className="flex flex-col items-center group active:scale-90 transition-transform duration-200"
                   >
                     <div 
-                      className="w-[72px] h-[72px] rounded-[22px] shadow-md flex items-center justify-center relative overflow-hidden transition-all duration-300 group-hover:shadow-xl group-hover:-translate-y-0.5"
+                      className="w-[72px] h-[72px] rounded-[24px] shadow-sm flex items-center justify-center relative overflow-hidden transition-all duration-300 group-hover:shadow-xl group-hover:-translate-y-0.5"
                       style={{ backgroundColor: cat.color }} 
                     >
-                      {/* Subtle Gloss Overlay */}
-                      <div className="absolute inset-0 bg-gradient-to-tr from-black/5 to-white/10 pointer-events-none"></div>
+                      {/* Subtle Gloss Overlay for iOS premium feel */}
+                      <div className="absolute inset-0 bg-gradient-to-tr from-black/5 to-white/15 pointer-events-none"></div>
                       
                       <img 
                         src={cat.illustrationUrl} 
                         alt={cat.name} 
-                        className="w-[60%] h-[60%] object-contain filter brightness-0 invert transition-transform duration-500 group-hover:scale-110" 
+                        className="w-[55%] h-[55%] object-contain filter brightness-0 invert transition-transform duration-500 group-hover:scale-110" 
                       />
                     </div>
-                    <span className="mt-2 text-[11px] font-bold text-slate-700 dark:text-slate-400 text-center px-1 leading-tight transition-colors group-hover:text-black dark:group-hover:text-white">
+                    <span className="mt-2 text-[11px] font-bold text-slate-700 dark:text-slate-400 text-center px-1 leading-tight transition-colors group-hover:text-black dark:group-hover:text-white truncate w-[72px]">
                       {cat.name}
                     </span>
                   </button>
                 ))}
               </div>
             </div>
-            <div className="flex justify-center mt-2 opacity-30">
-              <div className="w-16 h-1 bg-gray-200 dark:bg-gray-700 rounded-full relative overflow-hidden">
+            <div className="flex justify-center mt-1 opacity-20">
+              <div className="w-12 h-1 bg-gray-300 dark:bg-gray-700 rounded-full relative overflow-hidden">
                 <div 
-                  className="h-full bg-primary-500 rounded-full absolute top-0 left-0 w-6 transition-transform duration-100 ease-linear"
-                  style={{ transform: `translateX(${categoryScrollProgress * (64 - 24)}px)` }}
+                  className="h-full bg-primary-500 rounded-full absolute top-0 left-0 w-4 transition-transform duration-100 ease-linear"
+                  style={{ transform: `translateX(${categoryScrollProgress * (48 - 16)}px)` }}
                 />
               </div>
             </div>
