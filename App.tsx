@@ -165,7 +165,15 @@ const App: React.FC = () => {
               />
             )}
             {activeTab === 'explore' && (
-              <ExploreView stores={STORES} searchQuery={globalSearch} onStoreClick={handleSelectStore} onLocationClick={() => {}} onFilterClick={() => {}} onOpenPlans={() => {}} />
+              <ExploreView 
+                stores={STORES} 
+                searchQuery={globalSearch} 
+                onStoreClick={handleSelectStore} 
+                onLocationClick={() => {}} 
+                onFilterClick={() => {}} 
+                onOpenPlans={() => {}}
+                onNavigate={setActiveTab}
+              />
             )}
             {activeTab === 'user_statement' && (
               <UserStatementView onBack={() => setActiveTab('home')} onExploreStores={() => setActiveTab('explore')} balance={12.40} />

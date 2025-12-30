@@ -92,39 +92,6 @@ const MACRO_SERVICES = [
   },
 ];
 
-const LIVE_STORIES = [
-  { 
-    id: 1, 
-    name: 'Refrigeração Polar', 
-    role: 'Técnico de Ar', 
-    status: 'Em atendimento', 
-    badge: '🔴 Agora', 
-    badgeColor: 'bg-red-500',
-    responseTime: 'Responde em ~5 min',
-    image: 'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?q=80&w=400&auto=format=fit=crop' 
-  },
-  { 
-    id: 2, 
-    name: 'SOS Elétrica', 
-    role: 'Eletricista', 
-    status: 'Resposta rápida', 
-    badge: '🟢 Online', 
-    badgeColor: 'bg-green-500',
-    responseTime: 'Online agora',
-    image: 'https://images.unsplash.com/photo-1621905252507-b35492cc74b4?q=80&w=400&auto=format=fit=crop' 
-  },
-  { 
-    id: 3, 
-    name: 'Mudanças Ágil', 
-    role: 'Fretes', 
-    status: 'Caminhão livre', 
-    badge: '🟢 Livre', 
-    badgeColor: 'bg-green-500',
-    responseTime: '~10 min',
-    image: 'https://images.unsplash.com/photo-1600585152220-90363fe7e115?q=80&w=400&auto=format=fit=crop' 
-  },
-];
-
 const NEIGHBORHOOD_ACTIVITY = [
   "Maria pediu um Eletricista há 5 min",
   "João avaliou a Padaria Imperial",
@@ -424,57 +391,6 @@ export const ServicesView: React.FC<ServicesViewProps> = ({ onSelectMacro, onOpe
                   <p className="text-[10px] font-bold text-gray-600 dark:text-gray-300 leading-tight">Negocie<br/>direto</p>
                 </div>
               </div>
-            </div>
-          </div>
-        )}
-
-        {/* 4. AGORA NA FREGUESIA (LIVE ACTIVITY) */}
-        {!searchTerm && (
-          <div className="pl-5 pt-2">
-            <div className="flex items-center gap-2 mb-3 pr-5">
-              <h3 className="text-base font-bold text-gray-900 dark:text-white leading-none flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></div>
-                Agora na Freguesia
-              </h3>
-              <span className="text-[10px] text-gray-400 font-medium ml-auto">
-                Profissionais online
-              </span>
-            </div>
-
-            <div className="flex gap-3 overflow-x-auto pb-4 pr-5 no-scrollbar snap-x">
-              {LIVE_STORIES.map((item) => (
-                <div 
-                  key={item.id}
-                  onClick={() => onSelectMacro('home', item.name)}
-                  className="snap-center relative flex-shrink-0 w-[120px] h-[200px] rounded-2xl overflow-hidden group active:scale-95 transition-all shadow-md cursor-pointer border border-gray-100 dark:border-gray-800"
-                >
-                  <img src={item.image} alt={item.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-black/10"></div>
-                  
-                  {/* Badge Topo */}
-                  <div className="absolute top-2 left-2 right-2 flex justify-between items-start">
-                    <span className={`text-[8px] font-bold text-white px-2 py-0.5 rounded-full flex items-center gap-1 shadow-sm backdrop-blur-md ${item.badgeColor} bg-opacity-90`}>
-                      {item.badge}
-                    </span>
-                  </div>
-
-                  {/* Info Bottom */}
-                  <div className="absolute bottom-3 left-2 right-2 text-left">
-                    <div className="flex flex-col gap-0.5 mb-2">
-                      <div className="flex items-center gap-1 mb-1">
-                         <Clock className="w-2.5 h-2.5 text-green-400" />
-                         <span className="text-[9px] text-green-300 font-bold">{item.responseTime}</span>
-                      </div>
-                      <h4 className="text-white font-bold text-xs leading-tight shadow-black drop-shadow-md">{item.name}</h4>
-                      <p className="text-[10px] text-gray-300 font-medium">{item.role}</p>
-                    </div>
-                    {/* PRIMARY ACTION: Quote */}
-                    <div className="text-[9px] font-bold text-white bg-white/20 backdrop-blur-md px-2 py-1.5 rounded-lg text-center border border-white/20 hover:bg-white/30 transition-colors">
-                      Pedir orçamento
-                    </div>
-                  </div>
-                </div>
-              ))}
             </div>
           </div>
         )}

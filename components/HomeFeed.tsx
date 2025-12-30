@@ -12,12 +12,9 @@ import {
   Dices,
   Clock,
   Utensils,
-  ShieldCheck,
   MapPin,
   ArrowUpRight,
   Wrench,
-  Compass,
-  CheckCircle2,
   Heart,
   Tag,
   Timer,
@@ -27,8 +24,11 @@ import {
   Store as StoreIcon,
   ShoppingBag,
   Coins,
-  Users,
-  Crown
+  Crown,
+  ShieldCheck,
+  Building2,
+  Compass,
+  Users
 } from 'lucide-react';
 import { LojasEServicosList } from './LojasEServicosList';
 import { User } from '@supabase/supabase-js';
@@ -50,50 +50,57 @@ interface HomeFeedProps {
   onRequireLogin: () => void;
 }
 
-// --- CONFIGURAÇÃO DO CARROSSEL EDUCACIONAL ---
-const AD_DURATION = 3000; 
+// --- CONFIGURAÇÃO DO CARROSSEL DA HOME ---
+const HOME_CAROUSEL_DURATION = 4000; 
 
-const EDUCATIONAL_BANNERS = [
+const HOME_CAROUSEL_BANNERS = [
   {
     id: 'cashback',
     title: 'Cashback Localizei',
-    subtitle: 'Ganhe parte do seu dinheiro de volta comprando no bairro.',
-    cta: 'Entender',
-    icon: <Coins className="w-6 h-6 text-emerald-400" />,
-    gradient: 'from-emerald-900 via-emerald-800 to-teal-900',
-    image: 'https://images.unsplash.com/photo-1556742049-139422cb096c?q=80&w=600'
+    subtitle: 'Ganhe dinheiro de volta comprando nos seus lugares favoritos da Freguesia.',
+    cta: 'Ver Meu Saldo',
+    icon: <Coins className="w-6 h-6 text-emerald-300" />,
+    gradient: 'from-slate-900 via-emerald-950 to-slate-950',
+    image: 'https://images.unsplash.com/photo-1579621970795-87f54c3038a8?q=80&w=600',
+    isSponsored: false,
+    navigationTarget: 'user_statement',
   },
   {
-    id: 'services',
-    title: 'Serviços & Reparos',
-    subtitle: 'De eletricistas a diaristas. Encontre profissionais qualificados.',
-    cta: 'Explorar',
-    icon: <Wrench className="w-6 h-6 text-blue-400" />,
-    gradient: 'from-blue-900 via-indigo-800 to-blue-900',
-    image: 'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?q=80&w=600'
+    id: 'servicos',
+    title: 'Serviços Profissionais',
+    subtitle: 'Encontre eletricistas, pintores e mais. Peça orçamentos grátis e sem compromisso.',
+    cta: 'Pedir Orçamento',
+    icon: <Wrench className="w-6 h-6 text-sky-300" />,
+    gradient: 'from-slate-900 via-sky-950 to-slate-950',
+    image: 'https://images.unsplash.com/photo-1581833971358-2c8b550f87b3?q=80&w=600',
+    isSponsored: false,
+    navigationTarget: 'services',
   },
   {
     id: 'connect',
     title: 'Freguesia Connect',
-    subtitle: 'A maior rede de networking e negócios da nossa região.',
-    cta: 'Ver mais',
-    icon: <Users className="w-6 h-6 text-indigo-400" />,
-    gradient: 'from-indigo-900 via-purple-900 to-indigo-950',
-    image: 'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?q=80&w=600'
+    subtitle: 'A rede de networking exclusiva para lojistas e empreendedores do nosso bairro.',
+    cta: 'Conhecer Grupo',
+    icon: <Users className="w-6 h-6 text-purple-300" />,
+    gradient: 'from-slate-900 via-purple-950 to-slate-950',
+    image: 'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?q=80&w=600',
+    isSponsored: false,
+    navigationTarget: 'freguesia_connect_public',
   },
   {
-    id: 'premium_ads',
-    title: 'Destaque Premium',
-    subtitle: 'Conheça os estabelecimentos que estão bombando hoje.',
-    cta: 'Ver loja',
+    id: 'premium_ad',
+    title: 'Segurança Patrimonial',
+    subtitle: 'Proteção completa para seu condomínio ou empresa com o Grupo Esquematiza.',
+    cta: 'Ver Soluções',
+    icon: <ShieldCheck className="w-6 h-6 text-blue-300" />,
+    gradient: 'from-slate-900 via-blue-950 to-slate-950',
+    image: 'https://images.unsplash.com/photo-1558403194-604543a470a7?q=80&w=600',
     isSponsored: true,
-    icon: <Crown className="w-6 h-6 text-amber-400" />,
-    gradient: 'from-slate-900 via-slate-800 to-slate-950',
-    image: 'https://images.unsplash.com/photo-1554118811-1e0d58224f24?q=80&w=600'
+    navigationTarget: 'patrocinador_master',
   }
 ];
 
-const EducationalCarousel: React.FC<{ onNavigate: (v: string) => void }> = ({ onNavigate }) => {
+const HomeCarousel: React.FC<{ onNavigate: (v: string) => void }> = ({ onNavigate }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [progress, setProgress] = useState(0);
 
@@ -101,10 +108,10 @@ const EducationalCarousel: React.FC<{ onNavigate: (v: string) => void }> = ({ on
     const startTime = Date.now();
     const interval = setInterval(() => {
       const elapsed = Date.now() - startTime;
-      const newProgress = (elapsed / AD_DURATION) * 100;
+      const newProgress = (elapsed / HOME_CAROUSEL_DURATION) * 100;
       
       if (newProgress >= 100) {
-        setCurrentIndex((prev) => (prev + 1) % EDUCATIONAL_BANNERS.length);
+        setCurrentIndex((prev) => (prev + 1) % HOME_CAROUSEL_BANNERS.length);
         setProgress(0);
         clearInterval(interval);
       } else {
@@ -115,13 +122,12 @@ const EducationalCarousel: React.FC<{ onNavigate: (v: string) => void }> = ({ on
     return () => clearInterval(interval);
   }, [currentIndex]);
 
-  const currentBanner = EDUCATIONAL_BANNERS[currentIndex];
+  const currentBanner = HOME_CAROUSEL_BANNERS[currentIndex];
 
   return (
     <div className="px-4">
       <div className="w-full relative aspect-[21/10] rounded-[32px] overflow-hidden shadow-xl shadow-blue-900/10 border border-gray-100 dark:border-gray-800 animate-in fade-in duration-500">
         
-        {/* Background Image com Fade Transition */}
         <div className="absolute inset-0 bg-slate-900">
           <img 
             key={currentBanner.image}
@@ -131,33 +137,28 @@ const EducationalCarousel: React.FC<{ onNavigate: (v: string) => void }> = ({ on
           />
         </div>
 
-        {/* Overlay Gradient */}
         <div className={`absolute inset-0 bg-gradient-to-t ${currentBanner.gradient} opacity-40 mix-blend-multiply`}></div>
         <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent"></div>
 
-        {/* INDICADOR DE PROGRESSO SEGMENTADO - AGORA NA PARTE INFERIOR */}
         <div className="absolute bottom-4 left-6 right-6 flex gap-2 z-30">
-          {EDUCATIONAL_BANNERS.map((_, idx) => (
+          {HOME_CAROUSEL_BANNERS.map((_, idx) => (
             <div key={idx} className="h-1 flex-1 bg-white/20 rounded-full overflow-hidden">
               <div 
-                className={`h-full bg-white transition-all duration-100 ease-linear ${idx === currentIndex ? 'opacity-100' : 'opacity-0'}`}
-                style={{ width: idx === currentIndex ? `${progress}%` : idx < currentIndex ? '100%' : '0%' }}
+                className="h-full bg-white transition-all duration-100 ease-linear"
+                style={{ width: idx === currentIndex ? `${progress}%` : '0%' }}
               />
-              {idx < currentIndex && <div className="absolute inset-0 bg-white opacity-40" />}
             </div>
           ))}
         </div>
 
-        {/* Selo Tipo de Conteúdo */}
         <div className="absolute top-6 right-6 z-20 flex items-center gap-1.5 bg-white/10 backdrop-blur-md px-2.5 py-1 rounded-lg border border-white/20">
           {currentBanner.isSponsored ? (
-            <span className="text-[9px] font-black text-amber-400 uppercase tracking-widest">Patrocinado</span>
+            <span className="text-[9px] font-black text-amber-400 uppercase tracking-widest">Anúncio Premium</span>
           ) : (
             <span className="text-[9px] font-black text-blue-200 uppercase tracking-widest">Dica Localizei</span>
           )}
         </div>
 
-        {/* Conteúdo do Banner (Ajustado pb para não cobrir a barra) */}
         <div className="absolute bottom-0 left-0 right-0 p-6 pb-8 flex justify-between items-end z-20">
           <div className="flex-1 pr-4 animate-in slide-in-from-bottom-2 duration-500">
             <div className="flex items-center gap-2 mb-2">
@@ -174,25 +175,24 @@ const EducationalCarousel: React.FC<{ onNavigate: (v: string) => void }> = ({ on
           </div>
           
           <button 
-            onClick={() => onNavigate(currentBanner.id === 'services' ? 'services' : currentBanner.id === 'cashback' ? 'user_statement' : 'explore')}
+            onClick={() => onNavigate(currentBanner.navigationTarget)}
             className="bg-white text-slate-900 px-5 py-2.5 rounded-2xl text-[11px] font-black uppercase tracking-wider flex items-center gap-2 shadow-xl active:scale-[0.95] transition-all hover:bg-primary-500 hover:text-white"
           >
             {currentBanner.cta} <ArrowUpRight className="w-3.5 h-3.5" />
           </button>
         </div>
 
-        {/* Swipe zones (Invisible) */}
         <div 
           className="absolute inset-y-0 left-0 w-1/4 z-40 cursor-pointer" 
           onClick={() => {
-            setCurrentIndex(prev => prev === 0 ? EDUCATIONAL_BANNERS.length - 1 : prev - 1);
+            setCurrentIndex(prev => prev === 0 ? HOME_CAROUSEL_BANNERS.length - 1 : prev - 1);
             setProgress(0);
           }}
         />
         <div 
           className="absolute inset-y-0 right-0 w-1/4 z-40 cursor-pointer" 
           onClick={() => {
-            setCurrentIndex(prev => (prev + 1) % EDUCATIONAL_BANNERS.length);
+            setCurrentIndex(prev => (prev + 1) % HOME_CAROUSEL_BANNERS.length);
             setProgress(0);
           }}
         />
@@ -203,7 +203,6 @@ const EducationalCarousel: React.FC<{ onNavigate: (v: string) => void }> = ({ on
 
 // --- POOL DE PROMOÇÕES RESERVA (SUBSTITUIÇÃO AUTOMÁTICA) ---
 const FALLBACK_PROMO_POOL = [
-  { id: 'f-p1', store: 'Parrilla Freguesia', product: 'Churrasco Misto (2 pessoas)', old: '120,00', new: '84,00', off: '30', image: 'https://images.unsplash.com/photo-1544022613-e879a7998d0f?q=80&w=600&auto=format&fit=crop' },
   { id: 'f-p2', store: 'Doceria da Vila', product: 'Combo 6 Cupcakes Gourmet', old: '48,00', new: '33,60', off: '30', image: 'https://images.unsplash.com/photo-1576618148400-f54bed99fcfd?q=80&w=600&auto=format&fit=crop' },
   { id: 'f-p3', store: 'Studio Clean', product: 'Limpeza Facial Profunda', old: '150,00', new: '105,00', off: '30', image: 'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?q=80&w=600&auto=format&fit=crop' },
   { id: 'f-p4', store: 'Pet Style', product: 'Banho + Tosa Higiênica', old: '80,00', new: '60,00', off: '25', image: 'https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?q=80&w=600&auto=format&fit=crop' },
@@ -277,8 +276,8 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
 
   const renderSection = (key: string) => {
     switch (key) {
-      case 'onboarding':
-        return <EducationalCarousel key="onboarding" onNavigate={onNavigate} />;
+      case 'home_carousel':
+        return <HomeCarousel key="home_carousel" onNavigate={onNavigate} />;
 
       case 'categories':
         return (
@@ -338,10 +337,8 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
             <div className="flex gap-4 overflow-x-auto no-scrollbar -mx-4 px-4 pb-2 snap-x">
               {(() => {
                 const rawPromos = [
-                  { id: 'p1', store: 'Parrilla Freguesia', product: 'Churrasco Misto (2 pessoas)', old: '110,00', new: '77,00', off: '30', image: 'https://images.unsplash.com/photo-1544022613-e879a7998d0f?q=80&w=600&auto=format&fit=crop' },
                   { id: 'p2', store: 'Imperial Bakery', product: 'Combo Café + Croissant', old: '28,00', new: '19,60', off: '30', image: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?q=80&w=600&auto=format&fit=crop' },
                   { id: 'p3', store: 'Hamburgueria Brasa', product: 'Burger Duplo + Batata', old: '45,00', new: '31,50', off: '30', image: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?q=80&w=600&auto=format&fit=crop' },
-                  { id: 'p4', store: 'Beleza & Arte', product: 'Escova + Hidratação', old: '120,00', new: '84,00', off: '30', image: 'https://images.unsplash.com/photo-1610992015732-2449b0c26670?q=80&w=600&auto=format&fit=crop' },
                   { id: 'p5', store: 'Pet Shop Amigo', product: 'Banho G porte médio', old: '65,00', new: '45,50', off: '30', image: 'https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?q=80&w=600&auto=format&fit=crop' }
                 ];
 
@@ -466,7 +463,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
           <div key="list" className="px-4 min-h-[400px]">
               <SectionHeader 
                 icon={ShoppingBag} 
-                title="Guia de Lojas" 
+                title="Lojas & Serviços" 
                 rightElement={
                   <div className="flex gap-1.5">
                     {['all', 'cashback', 'top_rated'].map((f) => (
@@ -490,8 +487,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
   };
 
   const homeStructure = useMemo(() => {
-    // Removido o item 'hero' para despoluir a Home e focar em conteúdo direto.
-    return ['categories', 'onboarding', 'promo_semana', 'roulette', 'bairro_on', 'community', 'list'];
+    return ['categories', 'home_carousel', 'promo_semana', 'roulette', 'bairro_on', 'community', 'list'];
   }, []);
 
   return (

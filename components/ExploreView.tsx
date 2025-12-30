@@ -16,7 +16,9 @@ import {
   Coins,
   Wrench,
   Users,
-  Zap
+  Zap,
+  Building2,
+  Compass
 } from 'lucide-react';
 import { Store } from '../types';
 
@@ -28,66 +30,59 @@ interface ExploreViewProps {
   onFilterClick: () => void;
   onOpenPlans: () => void;
   onViewAllVerified?: () => void;
-  onViewMasterSponsor?: () => void;
+  onNavigate: (view: string) => void;
 }
 
 // --- CONFIGURAÇÃO DO CARROSSEL EDUCACIONAL ---
-
-const AD_DURATION = 3000; // 3 segundos por banner
-
-const PREMIUM_MOCK_STORES = [
-  { name: 'Terraço Gastronomia', category: 'Restaurante', image: 'https://images.unsplash.com/photo-1554118811-1e0d58224f24?q=80&w=600' },
-  { name: 'Clínica Sorriso', category: 'Saúde', image: 'https://images.unsplash.com/photo-1629909613654-28e377c37b09?q=80&w=600' },
-  { name: 'Espaço VIP Beleza', category: 'Beleza', image: 'https://images.unsplash.com/photo-1560066984-138dadb4c035?q=80&w=600' }
-];
+const AD_DURATION = 4000; 
 
 const EDUCATIONAL_BANNERS = [
   {
-    id: 'cashback',
-    title: 'Cashback Localizei',
-    subtitle: 'Ganhe parte do seu dinheiro de volta comprando no bairro.',
-    cta: 'Entender',
-    icon: <Coins className="w-6 h-6 text-emerald-400" />,
-    gradient: 'from-emerald-900 via-emerald-800 to-teal-900',
-    image: 'https://images.unsplash.com/photo-1556742049-139422cb096c?q=80&w=600'
-  },
-  {
-    id: 'services',
-    title: 'Serviços & Reparos',
-    subtitle: 'De eletricistas a diaristas. Encontre profissionais qualificados.',
-    cta: 'Explorar',
-    icon: <Wrench className="w-6 h-6 text-blue-400" />,
-    gradient: 'from-blue-900 via-indigo-800 to-blue-900',
-    image: 'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?q=80&w=600'
-  },
-  {
-    id: 'connect',
-    title: 'Freguesia Connect',
-    subtitle: 'A maior rede de networking e negócios da nossa região.',
-    cta: 'Ver mais',
-    icon: <Users className="w-6 h-6 text-indigo-400" />,
-    gradient: 'from-indigo-900 via-purple-900 to-indigo-950',
-    image: 'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?q=80&w=600'
-  },
-  {
-    id: 'premium_ads',
-    title: 'Destaque Premium',
-    subtitle: 'Conheça os estabelecimentos que estão bombando hoje.',
-    cta: 'Ver loja',
+    id: 'seguranca',
+    title: 'Segurança Patrimonial',
+    subtitle: 'Proteção completa para seu condomínio ou empresa. Vigilância, escolta e mais.',
+    cta: 'Conhecer Soluções',
+    icon: <ShieldCheck className="w-6 h-6 text-blue-300" />,
+    gradient: 'from-slate-900 via-blue-950 to-slate-950',
+    image: 'https://images.unsplash.com/photo-1558403194-604543a470a7?q=80&w=600',
     isSponsored: true,
-    icon: <Crown className="w-6 h-6 text-amber-400" />,
-    gradient: 'from-slate-900 via-slate-800 to-slate-950',
-    image: '' // Definido dinamicamente
+  },
+  {
+    id: 'facilities',
+    title: 'Serviços de Facilities',
+    subtitle: 'Gestão completa de portaria, limpeza, jardinagem e recepção com excelência.',
+    cta: 'Conhecer Soluções',
+    icon: <Building2 className="w-6 h-6 text-teal-300" />,
+    gradient: 'from-slate-900 via-teal-950 to-slate-950',
+    image: 'https://images.unsplash.com/photo-1542327897-41415358272c?q=80&w=600',
+    isSponsored: true,
+  },
+  {
+    id: 'solucoes',
+    title: 'Soluções Tecnológicas',
+    subtitle: 'Monitoramento 24h, câmeras inteligentes e sistemas de alarme de ponta.',
+    cta: 'Conhecer Soluções',
+    icon: <Compass className="w-6 h-6 text-indigo-300" />,
+    gradient: 'from-slate-900 via-indigo-950 to-slate-950',
+    image: 'https://images.unsplash.com/photo-1581093450021-4a7360b6a287?q=80&w=600',
+    isSponsored: true,
+  },
+  {
+    id: 'eventos',
+    title: 'Segurança para Eventos',
+    subtitle: 'Equipe especializada para garantir a tranquilidade do seu evento, de pequeno a grande porte.',
+    cta: 'Conhecer Soluções',
+    icon: <Users className="w-6 h-6 text-rose-300" />,
+    gradient: 'from-slate-900 via-rose-950 to-slate-950',
+    image: 'https://images.unsplash.com/photo-1523580494863-6f3031224c94?q=80&w=600',
+    isSponsored: true,
   }
 ];
 
-const EducationalCarousel: React.FC<{ onStoreClick: (store: Store) => void }> = ({ onStoreClick }) => {
+const EducationalCarousel: React.FC<{ onNavigate: (v: string) => void }> = ({ onNavigate }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [progress, setProgress] = useState(0);
-  const [premiumStoreIndex, setPremiumStoreIndex] = useState(0);
-  const scrollRef = useRef<HTMLDivElement>(null);
 
-  // Lógica de Autoplay e Progresso
   useEffect(() => {
     const startTime = Date.now();
     const interval = setInterval(() => {
@@ -95,13 +90,8 @@ const EducationalCarousel: React.FC<{ onStoreClick: (store: Store) => void }> = 
       const newProgress = (elapsed / AD_DURATION) * 100;
       
       if (newProgress >= 100) {
-        const nextIndex = (currentIndex + 1) % EDUCATIONAL_BANNERS.length;
-        setCurrentIndex(nextIndex);
+        setCurrentIndex((prev) => (prev + 1) % EDUCATIONAL_BANNERS.length);
         setProgress(0);
-        // Se for para o banner de ads, rotaciona a loja premium
-        if (nextIndex === 3) {
-          setPremiumStoreIndex(prev => (prev + 1) % PREMIUM_MOCK_STORES.length);
-        }
         clearInterval(interval);
       } else {
         setProgress(newProgress);
@@ -112,11 +102,6 @@ const EducationalCarousel: React.FC<{ onStoreClick: (store: Store) => void }> = 
   }, [currentIndex]);
 
   const currentBanner = EDUCATIONAL_BANNERS[currentIndex];
-  const premiumStore = PREMIUM_MOCK_STORES[premiumStoreIndex];
-  
-  // Imagem final (educacional ou patrocinada)
-  const displayImage = currentIndex === 3 ? premiumStore.image : currentBanner.image;
-  const displayTitle = currentIndex === 3 ? premiumStore.name : currentBanner.title;
 
   return (
     <div className="px-4 mb-10">
@@ -125,10 +110,10 @@ const EducationalCarousel: React.FC<{ onStoreClick: (store: Store) => void }> = 
         {/* Background Image com Fade Transition */}
         <div className="absolute inset-0 bg-slate-900">
           <img 
-            key={displayImage}
-            src={displayImage} 
+            key={currentBanner.image}
+            src={currentBanner.image} 
             className="w-full h-full object-cover opacity-60 animate-in fade-in duration-700"
-            alt={displayTitle}
+            alt={currentBanner.title}
           />
         </div>
 
@@ -137,45 +122,46 @@ const EducationalCarousel: React.FC<{ onStoreClick: (store: Store) => void }> = 
         <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent"></div>
 
         {/* INDICADOR DE PROGRESSO SEGMENTADO (Estilo Stories) */}
-        <div className="absolute top-4 left-6 right-6 flex gap-2 z-30">
+        <div className="absolute bottom-4 left-6 right-6 flex gap-2 z-30">
           {EDUCATIONAL_BANNERS.map((_, idx) => (
             <div key={idx} className="h-1 flex-1 bg-white/20 rounded-full overflow-hidden">
               <div 
-                className={`h-full bg-white transition-all duration-100 ease-linear ${idx === currentIndex ? 'opacity-100' : 'opacity-0'}`}
-                style={{ width: idx === currentIndex ? `${progress}%` : idx < currentIndex ? '100%' : '0%' }}
+                className="h-full bg-white transition-all duration-100 ease-linear"
+                style={{ width: idx === currentIndex ? `${progress}%` : '0%' }}
               />
-              {/* Mantém a barra cheia para os anteriores */}
-              {idx < currentIndex && <div className="absolute inset-0 bg-white opacity-40" />}
             </div>
           ))}
         </div>
 
         {/* Selo Tipo de Conteúdo */}
-        <div className="absolute top-8 right-6 z-20 flex items-center gap-1.5 bg-white/10 backdrop-blur-md px-2.5 py-1 rounded-lg border border-white/20">
+        <div className="absolute top-6 right-6 z-20 flex items-center gap-1.5 bg-white/10 backdrop-blur-md px-2.5 py-1 rounded-lg border border-white/20">
           {currentBanner.isSponsored ? (
-            <span className="text-[9px] font-black text-amber-400 uppercase tracking-widest">Patrocinado</span>
+            <span className="text-[9px] font-black text-amber-400 uppercase tracking-widest">Grupo Esquematiza</span>
           ) : (
-            <span className="text-[9px] font-black text-blue-200 uppercase tracking-widest">Guia Rápido</span>
+            <span className="text-[9px] font-black text-blue-200 uppercase tracking-widest">Dica Localizei</span>
           )}
         </div>
 
-        {/* Conteúdo do Banner */}
-        <div className="absolute bottom-0 left-0 right-0 p-6 flex justify-between items-end z-20">
+        {/* Conteúdo do Banner (Ajustado pb para não cobrir a barra) */}
+        <div className="absolute bottom-0 left-0 right-0 p-6 pb-8 flex justify-between items-end z-20">
           <div className="flex-1 pr-4 animate-in slide-in-from-bottom-2 duration-500">
             <div className="flex items-center gap-2 mb-2">
               <div className="p-1.5 bg-white/10 rounded-lg backdrop-blur-sm border border-white/10">
                 {currentBanner.icon}
               </div>
               <h3 className="text-xl font-black text-white leading-tight font-display tracking-tight">
-                {displayTitle}
+                {currentBanner.title}
               </h3>
             </div>
-            <p className="text-xs text-gray-300 font-medium line-clamp-2 max-w-[280px]">
+            <p className="text-[11px] text-gray-300 font-medium line-clamp-2 max-w-[280px]">
               {currentBanner.subtitle}
             </p>
           </div>
           
-          <button className="bg-white text-slate-900 px-5 py-2.5 rounded-2xl text-[11px] font-black uppercase tracking-wider flex items-center gap-2 shadow-xl active:scale-95 transition-all hover:bg-primary-500 hover:text-white">
+          <button 
+            onClick={() => onNavigate('patrocinador_master')}
+            className="bg-white text-slate-900 px-5 py-2.5 rounded-2xl text-[11px] font-black uppercase tracking-wider flex items-center gap-2 shadow-xl active:scale-[0.95] transition-all hover:bg-primary-500 hover:text-white"
+          >
             {currentBanner.cta} <ArrowUpRight className="w-3.5 h-3.5" />
           </button>
         </div>
@@ -200,48 +186,8 @@ const EducationalCarousel: React.FC<{ onStoreClick: (store: Store) => void }> = 
   );
 };
 
-// --- RESTO DOS COMPONENTES ---
 
-const MasterSponsorExploreBanner: React.FC<{ onClick: () => void }> = ({ onClick }) => (
-  <div className="px-4 mb-10">
-    <button 
-      onClick={onClick}
-      className="w-full relative aspect-[21/10] rounded-[32px] overflow-hidden shadow-2xl shadow-blue-900/10 group active:scale-[0.98] transition-all border border-gray-100 dark:border-gray-800 bg-slate-900"
-    >
-      <img 
-        src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=800&auto=format&fit=crop" 
-        className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000 opacity-60"
-        alt="Grupo Esquematiza"
-      />
-      <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent"></div>
-      <div className="absolute top-4 right-4 bg-amber-500/90 backdrop-blur-md border border-amber-400 px-3 py-1.5 rounded-xl shadow-lg flex items-center gap-2 animate-badge-pop">
-        <Crown className="w-3.5 h-3.5 text-slate-950 fill-slate-950" />
-        <span className="text-[10px] font-black text-slate-950 uppercase tracking-[0.1em]">Patrocinador Master</span>
-      </div>
-      <div className="absolute bottom-0 left-0 right-0 p-6 text-left flex justify-between items-end">
-        <div className="flex-1 pr-4">
-          <div className="flex items-center gap-2 mb-1.5">
-            <span className="text-[10px] font-black text-amber-400 uppercase tracking-widest">Segurança & Serviços</span>
-            <div className="w-1 h-1 rounded-full bg-white/40"></div>
-            <div className="flex items-center gap-1">
-               <ShieldCheck className="w-3 h-3 text-blue-400" />
-               <span className="text-[10px] font-bold text-white">Líder no Bairro</span>
-            </div>
-          </div>
-          <h3 className="text-2xl font-black text-white leading-tight font-display tracking-tight mb-1">
-            Grupo Esquematiza
-          </h3>
-          <p className="text-xs text-slate-300 font-medium line-clamp-1 max-w-[240px]">
-            Referência em excelência e confiança na Freguesia.
-          </p>
-        </div>
-        <div className="bg-white text-slate-950 px-5 py-2.5 rounded-2xl text-[11px] font-black uppercase tracking-wider flex items-center gap-2 shadow-xl group-hover:bg-amber-400 transition-colors">
-          Ver serviços <ArrowUpRight className="w-3.5 h-3.5" />
-        </div>
-      </div>
-    </button>
-  </div>
-);
+// --- RESTO DOS COMPONENTES ---
 
 const BlockHeader: React.FC<{ title: string; icon: React.ElementType }> = ({ title, icon: Icon }) => (
   <div className="flex items-center justify-between mb-4 px-1">
@@ -307,7 +253,7 @@ const ExploreCard: React.FC<{
 export const ExploreView: React.FC<ExploreViewProps> = ({
   stores,
   onStoreClick,
-  onViewMasterSponsor,
+  onNavigate,
 }) => {
   
   const sections = useMemo(() => [
@@ -386,13 +332,8 @@ export const ExploreView: React.FC<ExploreViewProps> = ({
         </p>
       </div>
 
-      {/* CARROSSEL EDUCACIONAL (ONBOARDING LEVE) */}
-      <EducationalCarousel onStoreClick={(store) => onStoreClick(store)} />
-
-      {/* POSIÇÃO DE DESTAQUE: PATROCINADOR MASTER EXCLUSIVO */}
-      <MasterSponsorExploreBanner 
-        onClick={() => onViewMasterSponsor?.()} 
-      />
+      {/* CARROSSEL PATROCINADOR MASTER */}
+      <EducationalCarousel onNavigate={onNavigate} />
 
       <div className="flex flex-col gap-10 pb-32">
         {sections.map((section) => (
