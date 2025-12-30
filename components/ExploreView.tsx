@@ -13,7 +13,8 @@ import {
   Heart,
   Store as StoreIcon,
   BadgeCheck,
-  Play
+  Play,
+  Award
 } from 'lucide-react';
 import { Store } from '../types';
 
@@ -47,7 +48,7 @@ const BlockHeader: React.FC<{ title: string; icon: React.ElementType }> = ({ tit
 
 // Card de Exploração Padrão
 const ExploreCard: React.FC<{ 
-  store: Partial<Store>; 
+  store: Partial<Store> & { mockImage?: string }; 
   onClick: () => void;
   badge?: string;
   badgeColor?: string;
@@ -59,7 +60,7 @@ const ExploreCard: React.FC<{
   >
     <div className="h-32 relative overflow-hidden bg-gray-100 dark:bg-gray-700">
       <img 
-        src={store.logoUrl || store.image || "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?q=80&w=400&auto=format&fit=crop"} 
+        src={store.mockImage || store.logoUrl || store.image || "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?q=80&w=400&auto=format&fit=crop"} 
         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" 
         alt={store.name} 
       />
@@ -70,7 +71,7 @@ const ExploreCard: React.FC<{
       )}
       <div className="absolute bottom-3 right-3 bg-white/90 backdrop-blur-md px-2 py-0.5 rounded-lg flex items-center gap-1">
         <Star className="w-2.5 h-2.5 text-yellow-500 fill-yellow-500" />
-        <span className="text-[10px] font-bold text-gray-900">{store.rating?.toFixed(1)}</span>
+        <span className="text-[10px] font-bold text-gray-900">{store.rating?.toFixed(1) || '4.5'}</span>
       </div>
     </div>
     <div className="p-4 flex flex-col items-start text-left">
@@ -90,46 +91,69 @@ const ExploreCard: React.FC<{
 export const ExploreView: React.FC<ExploreViewProps> = ({
   stores,
   onStoreClick,
-  onViewMasterSponsor,
 }) => {
   
-  // Mock de dados segmentados para os blocos conforme especificação estratégica
+  // Banco de Imagens Fictícias curado por categoria para prototipagem
   const sections = useMemo(() => [
     {
       id: 'visita',
       title: 'Vale a Visita Hoje',
       icon: Award,
-      items: stores.slice(0, 5).map(s => ({ ...s, badge: 'Destaque' })),
+      items: [
+        { ...stores[0], name: 'Bistrô do Vale', category: 'Restaurante', mockImage: 'https://images.unsplash.com/photo-1550966842-2849a224ef52?q=80&w=400&auto=format&fit=crop', badge: 'Destaque' },
+        { ...stores[1], name: 'Artisan Café', category: 'Cafeteria', mockImage: 'https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?q=80&w=400&auto=format&fit=crop', badge: 'Destaque' },
+        { ...stores[0], name: 'Vila Gastrô', category: 'Gourmet', mockImage: 'https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?q=80&w=400&auto=format&fit=crop', badge: 'Destaque' }
+      ]
     },
     {
       id: 'agora',
       title: 'Agora na Freguesia',
       icon: Clock,
-      items: stores.slice(5, 10).map(s => ({ ...s, showStatus: true })),
+      items: [
+        { ...stores[1], name: 'Panificadora Central', category: 'Padaria', mockImage: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?q=80&w=400&auto=format&fit=crop', showStatus: true },
+        { ...stores[0], name: 'Mercado do Bairro', category: 'Mercado', mockImage: 'https://images.unsplash.com/photo-1578916171728-46686eac8d58?q=80&w=400&auto=format&fit=crop', showStatus: true },
+        { ...stores[1], name: 'Drogaria Freguesia', category: 'Farmácia', mockImage: 'https://images.unsplash.com/photo-1586015555751-63bb77f4322a?q=80&w=400&auto=format&fit=crop', showStatus: true }
+      ]
     },
     {
       id: 'promo',
       title: 'Promoção da Semana',
       icon: Tag,
-      items: stores.slice(2, 7).map(s => ({ ...s, badge: '20% OFF', badgeColor: 'bg-rose-500' })),
+      items: [
+        { ...stores[0], name: 'Burger Station', category: 'Lanches', mockImage: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?q=80&w=400&auto=format&fit=crop', badge: '30% OFF', badgeColor: 'bg-rose-500' },
+        { ...stores[1], name: 'Pizza & Cia', category: 'Pizzaria', mockImage: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?q=80&w=400&auto=format&fit=crop', badge: '2x1 HOJE', badgeColor: 'bg-rose-500' },
+        { ...stores[0], name: 'Açaí do Porto', category: 'Sobremesas', mockImage: 'https://images.unsplash.com/photo-1590301157890-4810ed352733?q=80&w=400&auto=format&fit=crop', badge: 'GANHE BRINDE', badgeColor: 'bg-rose-500' }
+      ]
     },
     {
       id: 'on',
       title: 'O Bairro Tá On',
       icon: Flame,
-      items: stores.slice(8, 13).map(s => ({ ...s, badge: 'Bombando', badgeColor: 'bg-orange-500' })),
+      items: [
+        { ...stores[1], name: 'CrossFit Freguesia', category: 'Fitness', mockImage: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=400&auto=format&fit=crop', badge: 'Bombando', badgeColor: 'bg-orange-500' },
+        { ...stores[0], name: 'Barber Shop Club', category: 'Beleza', mockImage: 'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?q=80&w=400&auto=format&fit=crop', badge: 'Muitos vizinhos', badgeColor: 'bg-orange-500' },
+        { ...stores[1], name: 'Churrascaria Gaúcha', category: 'Restaurante', mockImage: 'https://images.unsplash.com/photo-1544022613-e879a7998d0f?q=80&w=400&auto=format&fit=crop', badge: 'Fila de espera', badgeColor: 'bg-orange-500' }
+      ]
     },
     {
       id: 'novidades',
       title: 'Novidades da Semana',
       icon: Sparkles,
-      items: stores.slice(1, 6).map(s => ({ ...s, badge: 'Novo' })),
+      items: [
+        { ...stores[0], name: 'Estúdio de Pilates', category: 'Saúde', mockImage: 'https://images.unsplash.com/photo-1518459031867-a89b944bffe4?q=80&w=400&auto=format&fit=crop', badge: 'Inauguração' },
+        { ...stores[1], name: 'Loja de Pets Amigo', category: 'Pet Shop', mockImage: 'https://images.unsplash.com/photo-1583337130417-3346a1be7dee?q=80&w=400&auto=format&fit=crop', badge: 'Novo no bairro' },
+        { ...stores[0], name: 'Moda Intima Shop', category: 'Moda', mockImage: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=400&auto=format&fit=crop', badge: 'Aberta recentemente' }
+      ]
     },
     {
       id: 'recomendado',
       title: 'Recomendado Pra Você',
       icon: Heart,
-      items: stores.slice(4, 9),
+      items: [
+        { ...stores[1], name: 'Floricultura Jardim', category: 'Casa', mockImage: 'https://images.unsplash.com/photo-1487070183336-b863922373d4?q=80&w=400&auto=format&fit=crop' },
+        { ...stores[0], name: 'Auto Center Freguesia', category: 'Serviços', mockImage: 'https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?q=80&w=400&auto=format&fit=crop' },
+        { ...stores[1], name: 'Escola de Idiomas', category: 'Educação', mockImage: 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?q=80&w=400&auto=format&fit=crop' }
+      ]
     }
   ], [stores]);
 
@@ -152,9 +176,9 @@ export const ExploreView: React.FC<ExploreViewProps> = ({
             <BlockHeader title={section.title} icon={section.icon} />
             
             <div className="flex gap-4 overflow-x-auto no-scrollbar -mx-4 px-4 pb-2 snap-x">
-              {section.items.map((store) => (
+              {section.items.map((store, idx) => (
                 <ExploreCard 
-                  key={store.id} 
+                  key={`${section.id}-${idx}`} 
                   store={store} 
                   onClick={() => onStoreClick(store as Store)}
                   badge={store.badge}
@@ -193,6 +217,3 @@ export const ExploreView: React.FC<ExploreViewProps> = ({
     </div>
   );
 };
-
-// Componentes extras não utilizados nesta reestruturação mas mantidos para compatibilidade se necessário
-const Award = (props: any) => <Star {...props} />;
