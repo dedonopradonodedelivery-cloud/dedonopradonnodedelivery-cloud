@@ -12,37 +12,38 @@ interface BottomNavProps {
 export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, userRole, onCashbackClick }) => {
   const isMerchant = userRole === 'lojista';
 
-  // Configuração para LOJISTA
+  // Configuração para LOJISTA: Início, Serviços, Meu QR (Centro), Minha Loja, Perfil
   if (isMerchant) {
     const merchantNavItems = [
       { id: 'home', icon: Home, label: 'Início' },
       { id: 'services', icon: Wrench, label: 'Serviços' },
       { id: 'merchant_qr', icon: QrCode, label: 'Meu QR', isSpecial: true },
       { id: 'store_area', icon: Store, label: 'Minha Loja' },
-      { id: 'profile', icon: User, label: 'Menu' },
+      { id: 'profile', icon: User, label: 'Perfil' },
     ];
 
     return (
-      <div className="fixed bottom-0 left-0 right-0 mx-auto w-full max-w-md bg-[#1E5BFF] z-50 h-[70px] shadow-[0_-4px_20px_rgba(0,0,0,0.15)] border-t border-white/10">
-        <div className="flex items-center justify-between h-full w-full px-4">
+      <div className="fixed bottom-0 left-0 right-0 mx-auto w-full max-w-md bg-[#1E5BFF] z-50 h-[80px] rounded-t-[24px] shadow-[0_-5px_30px_rgba(0,0,0,0.2)] border-t border-white/10">
+        <div className="flex items-end justify-between h-full w-full px-2 pb-2">
           {merchantNavItems.map((tab) => {
             const isActive = activeTab === tab.id || (tab.id === 'services' && activeTab.startsWith('service_'));
             const Icon = tab.icon;
             
             if ((tab as any).isSpecial) {
                return (
-                 <button
-                    key={tab.id}
-                    onClick={() => setActiveTab(tab.id)}
-                    className="relative -top-6 group"
-                 >
-                    <div className="w-14 h-14 bg-white rounded-full flex items-center justify-center shadow-lg shadow-black/20 border-4 border-[#1E5BFF] active:scale-95 transition-transform">
-                        <Icon className="w-6 h-6 text-[#1E5BFF]" />
-                    </div>
-                    <span className="text-[10px] font-bold text-white absolute -bottom-5 left-1/2 -translate-x-1/2 whitespace-nowrap">
-                        {tab.label}
-                    </span>
-                 </button>
+                 <div key={tab.id} className="relative w-20 flex justify-center -top-6">
+                    <button
+                        onClick={() => setActiveTab(tab.id)}
+                        className="flex flex-col items-center group outline-none"
+                    >
+                        <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-xl shadow-black/20 border-[6px] border-[#1E5BFF] active:scale-95 transition-transform duration-200">
+                            <Icon className="w-7 h-7 text-[#1E5BFF]" strokeWidth={2.5} />
+                        </div>
+                        <span className="text-[11px] font-bold text-white mt-1 tracking-tight">
+                            {tab.label}
+                        </span>
+                    </button>
+                 </div>
                );
             }
 
@@ -50,13 +51,18 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className="flex-1 flex flex-col items-center justify-center gap-1 active:scale-95 transition-transform"
+                className="flex-1 h-[60px] flex flex-col items-center justify-center gap-1 active:scale-95 transition-transform outline-none"
               >
-                <Icon 
-                  className={`w-6 h-6 transition-colors ${isActive ? 'text-white' : 'text-white/60'}`} 
-                  strokeWidth={isActive ? 2.5 : 2}
-                />
-                <span className={`text-[10px] font-medium ${isActive ? 'text-white' : 'text-white/60'}`}>
+                <div className={`
+                    p-1.5 rounded-xl transition-all duration-300
+                    ${isActive ? 'bg-white/20' : 'bg-transparent'}
+                `}>
+                    <Icon 
+                    className={`w-5 h-5 transition-colors ${isActive ? 'text-white fill-white' : 'text-white/60'}`} 
+                    strokeWidth={isActive ? 0 : 2}
+                    />
+                </div>
+                <span className={`text-[10px] font-bold transition-colors ${isActive ? 'text-white' : 'text-white/60'}`}>
                   {tab.label}
                 </span>
               </button>

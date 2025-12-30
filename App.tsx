@@ -81,7 +81,9 @@ const App: React.FC = () => {
   const [splashProgress, setSplashProgress] = useState(0);
   const [activeTab, setActiveTab] = useState('home');
   const [isDarkMode, setIsDarkMode] = useState(false);
-  const roleHandledRef = useRef(false);
+  
+  // Ref para controlar que o redirecionamento inicial ocorra apenas uma vez por login
+  const roleHandledRef = useRef<string | null>(null);
 
   useEffect(() => {
     const animationFrame = requestAnimationFrame(() => {
@@ -98,32 +100,26 @@ const App: React.FC = () => {
     };
   }, []);
 
-  // Handle Default Tab for Merchant Profile
+  // Lógica de definição de Aba Inicial Baseada no Perfil
   useEffect(() => {
-    if (!isAuthLoading && userRole) {
-      if (userRole === 'lojista' && !roleHandledRef.current) {
-        const savedTab = localStorage.getItem('last_merchant_tab');
-        if (savedTab) {
-          setActiveTab(savedTab);
-        } else {
-          setActiveTab('services'); // Standard tab for merchants as requested
-        }
-        roleHandledRef.current = true;
-      } else if (userRole === 'cliente') {
-        roleHandledRef.current = true;
+    if (!isAuthLoading && user) {
+      const currentUserId = user.id;
+      
+      // Se detectado lojista e ainda não processamos este login específico
+      if (userRole === 'lojista' && roleHandledRef.current !== currentUserId) {
+        setActiveTab('services'); // Força aba Serviços como padrão inicial
+        roleHandledRef.current = currentUserId;
+      } 
+      // Se detectado cliente e ainda não processamos
+      else if (userRole === 'cliente' && roleHandledRef.current !== currentUserId) {
+        setActiveTab('home');
+        roleHandledRef.current = currentUserId;
       }
-    } else if (!isAuthLoading && !userRole) {
-        roleHandledRef.current = false;
+    } else if (!isAuthLoading && !user) {
+      // Se deslogado, reseta a ref para o próximo login
+      roleHandledRef.current = null;
     }
-  }, [userRole, isAuthLoading]);
-
-  // Persist Tab for Lojista
-  useEffect(() => {
-    const mainTabs = ['home', 'services', 'merchant_qr', 'store_area', 'profile', 'explore'];
-    if (userRole === 'lojista' && mainTabs.includes(activeTab)) {
-      localStorage.setItem('last_merchant_tab', activeTab);
-    }
-  }, [activeTab, userRole]);
+  }, [user, userRole, isAuthLoading]);
 
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [authContext, setAuthContext] = useState<'default' | 'merchant_lead_qr'>('default');
