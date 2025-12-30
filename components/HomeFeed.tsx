@@ -25,7 +25,10 @@ import {
   Eye,
   Rocket,
   Store as StoreIcon,
-  ShoppingBag
+  ShoppingBag,
+  Coins,
+  Users,
+  Crown
 } from 'lucide-react';
 import { LojasEServicosList } from './LojasEServicosList';
 import { User } from '@supabase/supabase-js';
@@ -47,6 +50,166 @@ interface HomeFeedProps {
   onSpinWin: (reward: any) => void;
   onRequireLogin: () => void;
 }
+
+// --- CONFIGURAÇÃO DO CARROSSEL EDUCACIONAL ---
+const AD_DURATION = 3000; 
+
+const EDUCATIONAL_BANNERS = [
+  {
+    id: 'cashback',
+    title: 'Cashback Localizei',
+    subtitle: 'Ganhe parte do seu dinheiro de volta comprando no bairro.',
+    cta: 'Entender',
+    icon: <Coins className="w-6 h-6 text-emerald-400" />,
+    gradient: 'from-emerald-900 via-emerald-800 to-teal-900',
+    image: 'https://images.unsplash.com/photo-1556742049-139422cb096c?q=80&w=600'
+  },
+  {
+    id: 'services',
+    title: 'Serviços & Reparos',
+    subtitle: 'De eletricistas a diaristas. Encontre profissionais qualificados.',
+    cta: 'Explorar',
+    icon: <Wrench className="w-6 h-6 text-blue-400" />,
+    gradient: 'from-blue-900 via-indigo-800 to-blue-900',
+    image: 'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?q=80&w=600'
+  },
+  {
+    id: 'connect',
+    title: 'Freguesia Connect',
+    subtitle: 'A maior rede de networking e negócios da nossa região.',
+    cta: 'Ver mais',
+    icon: <Users className="w-6 h-6 text-indigo-400" />,
+    gradient: 'from-indigo-900 via-purple-900 to-indigo-950',
+    image: 'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?q=80&w=600'
+  },
+  {
+    id: 'premium_ads',
+    title: 'Destaque Premium',
+    subtitle: 'Conheça os estabelecimentos que estão bombando hoje.',
+    cta: 'Ver loja',
+    isSponsored: true,
+    icon: <Crown className="w-6 h-6 text-amber-400" />,
+    gradient: 'from-slate-900 via-slate-800 to-slate-950',
+    image: 'https://images.unsplash.com/photo-1554118811-1e0d58224f24?q=80&w=600'
+  }
+];
+
+const EducationalCarousel: React.FC<{ onNavigate: (v: string) => void }> = ({ onNavigate }) => {
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [progress, setProgress] = useState(0);
+
+  useEffect(() => {
+    const startTime = Date.now();
+    const interval = setInterval(() => {
+      const elapsed = Date.now() - startTime;
+      const newProgress = (elapsed / AD_DURATION) * 100;
+      
+      if (newProgress >= 100) {
+        setCurrentIndex((prev) => (prev + 1) % EDUCATIONAL_BANNERS.length);
+        setProgress(0);
+        clearInterval(interval);
+      } else {
+        setProgress(newProgress);
+      }
+    }, 30);
+
+    return () => clearInterval(interval);
+  }, [currentIndex]);
+
+  const currentBanner = EDUCATIONAL_BANNERS[currentIndex];
+
+  return (
+    <div className="px-4 mb-2">
+      <div className="w-full relative aspect-[21/10] rounded-[32px] overflow-hidden shadow-xl shadow-blue-900/10 border border-gray-100 dark:border-gray-800 animate-in fade-in duration-500">
+        
+        {/* Background Image com Fade Transition */}
+        <div className="absolute inset-0 bg-slate-900">
+          <img 
+            key={currentBanner.image}
+            src={currentBanner.image} 
+            className="w-full h-full object-cover opacity-60 animate-in fade-in duration-700"
+            alt={currentBanner.title}
+          />
+        </div>
+
+        {/* Overlay Gradient */}
+        <div className={`absolute inset-0 bg-gradient-to-t ${currentBanner.gradient} opacity-40 mix-blend-multiply`}></div>
+        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent"></div>
+
+        {/* INDICADOR DE PROGRESSO SEGMENTADO (Estilo Stories) */}
+        <div className="absolute top-4 left-6 right-6 flex gap-2 z-30">
+          {EDUCATIONAL_BANNERS.map((_, idx) => (
+            <div key={idx} className="h-1 flex-1 bg-white/20 rounded-full overflow-hidden">
+              <div 
+                className={`h-full bg-white transition-all duration-100 ease-linear ${idx === currentIndex ? 'opacity-100' : 'opacity-0'}`}
+                style={{ width: idx === currentIndex ? `${progress}%` : idx < currentIndex ? '100%' : '0%' }}
+              />
+              {idx < currentIndex && <div className="absolute inset-0 bg-white opacity-40" />}
+            </div>
+          ))}
+        </div>
+
+        {/* Selo Tipo de Conteúdo */}
+        <div className="absolute top-8 right-6 z-20 flex items-center gap-1.5 bg-white/10 backdrop-blur-md px-2.5 py-1 rounded-lg border border-white/20">
+          {currentBanner.isSponsored ? (
+            <span className="text-[9px] font-black text-amber-400 uppercase tracking-widest">Patrocinado</span>
+          ) : (
+            <span className="text-[9px] font-black text-blue-200 uppercase tracking-widest">Dica Localizei</span>
+          )}
+        </div>
+
+        {/* Conteúdo do Banner */}
+        <div className="absolute bottom-0 left-0 right-0 p-6 flex justify-between items-end z-20">
+          <div className="flex-1 pr-4 animate-in slide-in-from-bottom-2 duration-500">
+            <div className="flex items-center gap-2 mb-2">
+              <div className="p-1.5 bg-white/10 rounded-lg backdrop-blur-sm border border-white/10">
+                {currentBanner.icon}
+              </div>
+              <h3 className="text-xl font-black text-white leading-tight font-display tracking-tight">
+                {currentBanner.title}
+              </h3>
+            </div>
+            <p className="text-[11px] text-gray-300 font-medium line-clamp-2 max-w-[280px]">
+              {currentBanner.subtitle}
+            </p>
+          </div>
+          
+          <button 
+            onClick={() => onNavigate(currentBanner.id === 'services' ? 'services' : currentBanner.id === 'cashback' ? 'user_statement' : 'explore')}
+            className="bg-white text-slate-900 px-5 py-2.5 rounded-2xl text-[11px] font-black uppercase tracking-wider flex items-center gap-2 shadow-xl active:scale-95 transition-all hover:bg-primary-500 hover:text-white"
+          >
+            {currentBanner.cta} <ArrowUpRight className="w-3.5 h-3.5" />
+          </button>
+        </div>
+
+        {/* Swipe zones (Invisible) */}
+        <div 
+          className="absolute inset-y-0 left-0 w-1/4 z-40 cursor-pointer" 
+          onClick={() => {
+            setCurrentIndex(prev => prev === 0 ? EDUCATIONAL_BANNERS.length - 1 : prev - 1);
+            setProgress(0);
+          }}
+        />
+        <div 
+          className="absolute inset-y-0 right-0 w-1/4 z-40 cursor-pointer" 
+          onClick={() => {
+            setCurrentIndex(prev => (prev + 1) % EDUCATIONAL_BANNERS.length);
+            setProgress(0);
+          }}
+        />
+      </div>
+    </div>
+  );
+};
+
+// --- POOL DE PROMOÇÕES RESERVA (SUBSTITUIÇÃO AUTOMÁTICA) ---
+const FALLBACK_PROMO_POOL = [
+  { id: 'f-p1', store: 'Parrilla Freguesia', product: 'Churrasco Misto (2 pessoas)', old: '120,00', new: '84,00', off: '30', image: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?q=80&w=600&auto=format&fit=crop' },
+  { id: 'f-p2', store: 'Doceria da Vila', product: 'Combo 6 Cupcakes Gourmet', old: '48,00', new: '33,60', off: '30', image: 'https://images.unsplash.com/photo-1576618148400-f54bed99fcfd?q=80&w=600&auto=format&fit=crop' },
+  { id: 'f-p3', store: 'Studio Clean', product: 'Limpeza Facial Profunda', old: '150,00', new: '105,00', off: '30', image: 'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?q=80&w=600&auto=format&fit=crop' },
+  { id: 'f-p4', store: 'Pet Style', product: 'Banho + Tosa Higiênica', old: '80,00', new: '60,00', off: '25', image: 'https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?q=80&w=600&auto=format&fit=crop' },
+  { id: 'f-p5', store: 'Massa Nostra', product: 'Lasanha Bolonhesa GG', old: '65,00', new: '45,50', off: '30', image: 'https://images.unsplash.com/photo-1551183053-bf91a1d81141?q=80&w=600&auto=format&fit=crop' }
+];
 
 const SectionHeader: React.FC<{ icon: React.ElementType; title: string; rightElement?: React.ReactNode }> = ({ icon: Icon, title, rightElement }) => (
   <div className="flex items-center justify-between mb-6 px-1">
@@ -115,6 +278,9 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
 
   const renderSection = (key: string) => {
     switch (key) {
+      case 'onboarding':
+        return <EducationalCarousel key="onboarding" onNavigate={onNavigate} />;
+
       case 'categories':
         return (
           <div key="categories" className="w-full">
@@ -190,39 +356,47 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
             />
             
             <div className="flex gap-4 overflow-x-auto no-scrollbar -mx-4 px-4 pb-2 snap-x">
-              {[
-                { id: 'p1', store: 'Açougue Bom Corte', product: 'Picanha Premium KG', old: '89,90', new: '62,93', off: '30', image: 'https://images.unsplash.com/photo-1544022613-e879a7998d0f?q=80&w=600&auto=format&fit=crop' },
-                { id: 'p2', store: 'Imperial Bakery', product: 'Pão Italiano Artesanal', old: '18,00', new: '12,60', off: '30', image: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?q=80&w=200&auto=format&fit=crop' },
-                { id: 'p3', store: 'Beleza & Arte', product: 'Manicure + Pedicure', old: '60,00', new: '42,00', off: '30', image: 'https://images.unsplash.com/photo-1610992015732-2449b0c26670?q=80&w=600&auto=format&fit=crop' },
-                { id: 'p4', store: 'Pet Mundo', product: 'Ração Golden 15kg', old: '189,00', new: '151,20', off: '20', image: 'https://images.unsplash.com/photo-1589924691995-400dc9ecc119?q=80&w=600&auto=format&fit=crop' },
-                { id: 'p5', store: 'Drogaria Freguesia', product: 'Vitamina C (2 Tubos)', old: '45,00', new: '31,50', off: '30', image: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?q=80&w=600&auto=format&fit=crop' }
-              ].map((promo) => (
-                <div key={promo.id} className="min-w-[240px] snap-center bg-white dark:bg-gray-800 rounded-[32px] overflow-hidden shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col gap-1">
-                  <div className="h-44 relative overflow-hidden">
-                    <img src={promo.image} className="w-full h-full object-cover" alt={promo.product} />
-                    {/* BADGE OFF: Pulsante, Glow Intenso, Gradiente Vivo */}
-                    <div className="absolute top-4 left-4 bg-gradient-to-r from-rose-600 to-pink-500 text-white text-[11px] font-black px-3 py-1.5 rounded-xl shadow-[0_4px_12px_rgba(225,29,72,0.6)] animate-badge-pop">
-                      -{promo.off}% OFF
-                    </div>
-                    <div className="absolute bottom-4 right-4 bg-white/80 backdrop-blur-md text-gray-900 text-[9px] font-black px-2.5 py-1.5 rounded-xl border border-white/20 flex items-center gap-1.5 shadow-sm">
-                      <Timer className="w-3.5 h-3.5 text-rose-500" />
-                      7 DIAS
-                    </div>
-                  </div>
-                  <div className="p-5 flex flex-col gap-1">
-                    <div className="flex justify-between items-start">
-                      <div className="flex-1 pr-2">
-                        <h4 className="font-bold text-gray-900 dark:text-white text-[14px] leading-tight line-clamp-1 mb-0.5">{promo.product}</h4>
-                        <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest">{promo.store}</p>
+              {(() => {
+                const rawPromos = [
+                  { id: 'p1', store: 'Açougue Bom Corte', product: 'Picanha Premium KG', old: '89,90', new: '62,93', off: '30', image: 'https://images.unsplash.com/photo-1544022613-e879a7998d0f?q=80&w=600&auto=format&fit=crop' },
+                  { id: 'p2', store: 'Imperial Bakery', product: 'Pão Italiano Artesanal', old: '18,00', new: '12,60', off: '30', image: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?q=80&w=600&auto=format&fit=crop' },
+                  { id: 'p3', store: 'Beleza & Arte', product: 'Manicure + Pedicure', old: '60,00', new: '42,00', off: '30', image: 'https://images.unsplash.com/photo-1610992015732-2449b0c26670?q=80&w=600&auto=format&fit=crop' },
+                  { id: 'p5', store: 'Drogaria Freguesia', product: 'Vitamina C (2 Tubos)', old: '45,00', new: '31,50', off: '30', image: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?q=80&w=600&auto=format&fit=crop' }
+                ];
+
+                const filteredPromos = rawPromos.filter(p => p.image && p.image.trim() !== '');
+
+                const finalPromos = filteredPromos.length < 5 
+                  ? [...filteredPromos, ...FALLBACK_PROMO_POOL.slice(0, 5 - filteredPromos.length)]
+                  : filteredPromos;
+
+                return finalPromos.map((promo) => (
+                  <div key={promo.id} className="min-w-[240px] snap-center bg-white dark:bg-gray-800 rounded-[32px] overflow-hidden shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col gap-1 transition-all hover:shadow-md">
+                    <div className="h-44 relative overflow-hidden bg-gray-100 dark:bg-gray-900">
+                      <img src={promo.image} className="w-full h-full object-cover animate-in fade-in duration-700" alt={promo.product} />
+                      <div className="absolute top-4 left-4 bg-gradient-to-r from-rose-600 to-pink-500 text-white text-[11px] font-black px-3 py-1.5 rounded-xl shadow-[0_4px_12px_rgba(225,29,72,0.6)] animate-badge-pop">
+                        -{promo.off}% OFF
                       </div>
-                      <div className="text-right">
-                        <p className="text-[10px] text-gray-400 line-through font-bold leading-none mb-1">R$ {promo.old}</p>
-                        <p className="text-lg font-black text-[#1E5BFF] leading-none">R$ {promo.new}</p>
+                      <div className="absolute bottom-4 right-4 bg-white/80 backdrop-blur-md text-gray-900 text-[9px] font-black px-2.5 py-1.5 rounded-xl border border-white/20 flex items-center gap-1.5 shadow-sm">
+                        <Timer className="w-3.5 h-3.5 text-rose-500" />
+                        7 DIAS
                       </div>
                     </div>
+                    <div className="p-5 flex flex-col gap-1">
+                      <div className="flex justify-between items-start">
+                        <div className="flex-1 pr-2">
+                          <h4 className="font-bold text-gray-900 dark:text-white text-[14px] leading-tight line-clamp-1 mb-0.5">{promo.product}</h4>
+                          <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest">{promo.store}</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-[10px] text-gray-400 line-through font-bold leading-none mb-1">R$ {promo.old}</p>
+                          <p className="text-lg font-black text-[#1E5BFF] leading-none">R$ {promo.new}</p>
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                </div>
-              ))}
+                ));
+              })()}
             </div>
           </div>
         );
@@ -275,7 +449,6 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
                     </div>
                   </div>
                   
-                  {/* BADGES COM GLOW E GRADIENTE PARA SIMULAR ANIMAÇÃO */}
                   <div className={`p-2.5 rounded-2xl ${item.color} ${item.glow} flex flex-col gap-1 overflow-hidden`}>
                     <div className={`flex items-center gap-1.5 ${item.anim}`}>
                       {item.icon}
@@ -351,7 +524,8 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
   };
 
   const homeStructure = useMemo(() => {
-    const base = ['categories', 'hero', 'promo_semana', 'roulette', 'bairro_on', 'community', 'list'];
+    // Carrossel Onboarding é agora o primeiro elemento fixo após o cabeçalho.
+    const base = ['onboarding', 'categories', 'hero', 'promo_semana', 'roulette', 'bairro_on', 'community', 'list'];
     if (user) {
       return ['cashback', ...base];
     }
