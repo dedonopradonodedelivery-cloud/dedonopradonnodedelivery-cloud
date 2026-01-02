@@ -243,7 +243,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack }) => {
   );
 
   const SummaryView = () => (
-    <div className="flex-1 flex flex-col bg-slate-950 min-h-screen">
+    <div className="flex-1 flex flex-col bg-slate-950 min-h-screen relative">
       <div className="p-5 flex items-center gap-4 border-b border-white/5 sticky top-0 bg-slate-950 z-20 h-20">
         <button onClick={() => setView('create')} className="p-2 -ml-2 rounded-full hover:bg-white/5 transition-colors">
           <ChevronLeft className="w-6 h-6 text-gray-400" />
@@ -251,7 +251,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack }) => {
         <h2 className="font-bold text-lg text-white font-display">Revisão</h2>
       </div>
 
-      <div className="p-6 space-y-8 overflow-y-auto no-scrollbar pb-32">
+      <div className="p-6 space-y-8 overflow-y-auto no-scrollbar pb-48">
         <div className="text-center">
             <h3 className="text-2xl font-black text-white font-display tracking-tight">Quase pronto para brilhar</h3>
             <p className="text-slate-500 text-xs mt-1">Confira os detalhes do seu investimento.</p>
@@ -287,34 +287,48 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack }) => {
         <div className="bg-gradient-to-br from-indigo-900/20 to-slate-900/20 p-6 rounded-3xl border border-indigo-500/20">
           <div className="flex items-center gap-3 mb-4">
             <ShieldCheck className="w-5 h-5 text-indigo-400" />
-            <h4 className="font-bold text-white text-sm">Você está no controle</h4>
+            <h4 className="font-bold text-white text-sm">Sua Segurança</h4>
           </div>
           <div className="space-y-4 text-xs text-slate-400 leading-relaxed">
             <p className="flex items-center gap-3">
               <PauseCircle className="w-4 h-4 text-slate-500" /> 
-              <span>Sua campanha pode ser <span className="text-white font-bold">pausada</span> a qualquer momento.</span>
+              <span>Sua campanha pode ser <span className="text-white font-bold">pausada</span> a qualquer momento no seu painel.</span>
             </p>
             <p className="flex items-center gap-3">
               <ShieldCheck className="w-4 h-4 text-slate-500" /> 
-              <span>Pagamento único via carteira. <span className="text-white font-bold">Sem renovações automáticas</span>.</span>
+              <span>Pagamento único. <span className="text-white font-bold">Sem renovações automáticas</span> ou surpresas.</span>
             </p>
           </div>
         </div>
       </div>
 
-      <div className="fixed bottom-0 left-0 right-0 p-6 bg-slate-950/80 backdrop-blur-md border-t border-white/5 z-30 max-w-md mx-auto">
-        <button 
-          onClick={handleActivate}
-          disabled={isActivating}
-          className="w-full bg-[#1E5BFF] hover:bg-blue-500 text-white font-black py-5 rounded-2xl shadow-xl flex items-center justify-center gap-3 active:scale-[0.98] transition-all disabled:opacity-50 uppercase tracking-[0.15em] text-xs"
-        >
-          {isActivating ? <Loader2 className="w-5 h-5 animate-spin" /> : (
-            <>
-              CONFIRMAR E ATIVAR
-              <ArrowRight className="w-5 h-5" strokeWidth={3} />
-            </>
-          )}
-        </button>
+      {/* FOOTER FIXO - UX REFINADA SEM TAB BAR */}
+      <div className="fixed bottom-0 left-0 right-0 p-6 bg-slate-950/90 backdrop-blur-lg border-t border-white/5 z-50 max-w-md mx-auto">
+        <div className="flex flex-col gap-4">
+          <div className="flex items-center justify-center gap-2 text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+            <ShieldCheck className="w-3 h-3" />
+            Conexão segura e pagamento verificado
+          </div>
+          
+          <button 
+            onClick={handleActivate}
+            disabled={isActivating}
+            className="w-full bg-gradient-to-r from-[#1E5BFF] to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-black py-5 rounded-2xl shadow-[0_10px_40px_rgba(30,91,255,0.3)] flex items-center justify-center gap-3 active:scale-[0.98] transition-all disabled:opacity-50 uppercase tracking-[0.15em] text-xs"
+          >
+            {isActivating ? <Loader2 className="w-6 h-6 animate-spin" /> : (
+              <>
+                CONCORDAR E ATIVAR DESTAQUE
+                <ArrowRight className="w-5 h-5" strokeWidth={3} />
+              </>
+            )}
+          </button>
+          
+          <p className="text-center text-[9px] text-slate-500 font-medium px-4 leading-tight">
+            Ao ativar, seu anúncio entra em vigor imediatamente após a confirmação.
+          </p>
+        </div>
+        {/* Espaçamento para Home Indicator do iOS */}
+        <div className="h-4"></div>
       </div>
     </div>
   );

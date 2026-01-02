@@ -57,7 +57,6 @@ const App: React.FC = () => {
   const { user, userRole, loading: isAuthInitialLoading, signOut } = useAuth();
   
   // UX ENGINEER: Detecta se estamos voltando de um login com Google (OAuth)
-  // Se a URL contém tokens de acesso, nós pulamos o Splash para não interromper o fluxo do usuário.
   const isAuthReturn = window.location.hash.includes('access_token') || window.location.search.includes('code=');
   
   const [minSplashTimeElapsed, setMinSplashTimeElapsed] = useState(isFirstBootAttempted || isAuthReturn);
@@ -129,12 +128,21 @@ const App: React.FC = () => {
     'weekly_promo'
   ];
 
+  // UX ENGINEER: Escondemos a Tab Bar em fluxos críticos de lojista ou transações
+  // Isso evita distrações e garante que botões de ação fiquem sempre visíveis na base.
+  const hideBottomNav = ['store_ads_module', 'weekly_promo', 'store_cashback_module', 'merchant_cashback_onboarding'].includes(activeTab);
+
   return (
     <div className={isDarkMode ? 'dark' : ''}>
       <div className="min-h-screen bg-white dark:bg-gray-900 flex justify-center transition-colors duration-300 relative">
         
-        {/* APP CORE: Mantido montado para preservar estado */}
-        <Layout activeTab={activeTab} setActiveTab={setActiveTab} userRole={userRole} onCashbackClick={handleCashbackClick}>
+        <Layout 
+          activeTab={activeTab} 
+          setActiveTab={setActiveTab} 
+          userRole={userRole} 
+          onCashbackClick={handleCashbackClick}
+          hideNav={hideBottomNav}
+        >
           {!headerExclusionList.includes(activeTab) && (
             <Header
               isDarkMode={isDarkMode}
@@ -230,7 +238,7 @@ const App: React.FC = () => {
           {isQuoteModalOpen && <QuoteRequestModal isOpen={isQuoteModalOpen} onClose={() => setIsQuoteModalOpen(false)} categoryName={quoteCategory} onSuccess={() => { setIsQuoteModalOpen(false); setActiveTab('service_success'); }} />}
         </Layout>
 
-        {/* OVERLAY SPLASH: Aparece apenas no Cold Start real e nunca em retornos de Auth */}
+        {/* OVERLAY SPLASH */}
         {!minSplashTimeElapsed && (
           <div className="fixed inset-0 bg-[#1E5BFF] flex flex-col items-center justify-center text-white z-[999] overflow-hidden animate-out fade-out duration-700 fill-mode-forwards">
             <div className="relative flex flex-col items-center justify-center z-10">
@@ -245,16 +253,6 @@ const App: React.FC = () => {
                   <div className="h-[1.5px] w-6 bg-white/40"></div>
                   <span className="text-xs font-bold uppercase tracking-[0.4em] text-white/80">Freguesia</span>
                   <div className="h-[1.5px] w-6 bg-white/40"></div>
-                </div>
-                <div className="absolute top-1/2 left-1/2 w-[320px] flex flex-col items-center pointer-events-none opacity-0 [animation-delay:2000ms] [animation-fill-mode:forwards] animate-sponsor-spin-in">
-                  <div className="glass-premium px-6 py-4 rounded-[2rem] flex items-center gap-4 relative overflow-hidden group border-white/30">
-                    <div className="w-14 h-14 bg-gradient-to-br from-amber-300 via-amber-400 to-orange-500 rounded-2xl flex items-center justify-center shadow-xl shrink-0"><Crown className="w-8 h-8 text-white fill-white" /></div>
-                    <div className="flex flex-col text-left">
-                      <div className="flex items-center gap-1.5"><span className="text-[8px] font-black text-white/70 uppercase tracking-[0.25em]">Patrocinador Master</span><span className="w-3 h-3 text-amber-300 fill-amber-300"><Star className="w-full h-full" /></span></div>
-                      <p className="font-black text-xl tracking-tight text-white leading-tight">Grupo Esquematiza</p>
-                      <p className="text-[10px] font-bold text-white/50 uppercase mt-0.5 tracking-tight">Segurança & Facilities</p>
-                    </div>
-                  </div>
                 </div>
               </div>
             </div>
