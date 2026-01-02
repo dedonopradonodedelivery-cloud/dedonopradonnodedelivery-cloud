@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo, useEffect } from 'react';
 import { 
   ChevronLeft, 
@@ -17,7 +18,9 @@ import {
   Calendar,
   Bell,
   QrCode,
-  Tag
+  Tag,
+  Rocket,
+  ArrowRight
 } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import { User } from '@supabase/supabase-js';
@@ -104,7 +107,6 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
   const [dateRange, setDateRange] = useState<DateRange>('30d');
   const [pendingRequestsCount, setPendingRequestsCount] = useState(0);
 
-  // Lógica para recalcular KPIs baseado no filtro selecionado
   const currentKpis = useMemo(() => {
     let multiplier = 1;
     switch (dateRange) {
@@ -125,7 +127,6 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
     };
   }, [dateRange]);
 
-  // Listener para Solicitações Pendentes Realtime
   useEffect(() => {
     if (!supabase || !user) return;
     
@@ -173,7 +174,6 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-24 font-sans animate-in slide-in-from-right duration-300">
       
-      {/* HEADER */}
       <div className="bg-white dark:bg-gray-900 px-5 pt-12 pb-6 border-b border-gray-100 dark:border-gray-800 sticky top-0 z-20 shadow-sm">
         <div className="flex items-center gap-3 mb-1">
           <button 
@@ -186,7 +186,7 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
         </div>
 
         <div className="flex items-center gap-4">
-            <div className="w-14 h-14 rounded-2xl bg-gray-200 dark:bg-gray-700 overflow-hidden border-2 border-gray-100 dark:border-gray-600 shadow-sm">
+            <div className="w-14 h-14 rounded-2xl bg-gray-200 dark:bg-gray-700 overflow-hidden border-2 border-gray-100 dark:border-gray-700 overflow-hidden border-2 border-gray-100 dark:border-gray-600 shadow-sm">
                 <img src={STORE_DATA.logo} alt="Logo" className="w-full h-full object-cover" />
             </div>
             <div>
@@ -243,7 +243,6 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
             <ChevronRight className="w-5 h-5 text-white/70" />
         </button>
 
-        {/* VISÃO GERAL */}
         <div>
             <div className="flex items-center justify-between mb-4 px-1">
                 <h2 className="text-base font-bold text-gray-800 dark:text-gray-200 flex items-center gap-2">
@@ -279,7 +278,6 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
             </div>
         </div>
 
-        {/* GESTÃO */}
         <div>
             <h3 className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-3 ml-2">
                 Gestão da Loja
@@ -297,7 +295,6 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
             </div>
         </div>
 
-        {/* CASHBACK */}
         <div className="bg-white dark:bg-gray-800 rounded-3xl p-5 shadow-sm border border-gray-100 dark:border-gray-700 relative overflow-hidden">
             <div className="absolute top-0 right-0 w-24 h-24 bg-blue-500/10 rounded-bl-full -mr-4 -mt-4"></div>
             <div className="flex justify-between items-start mb-4 relative z-10">
@@ -323,20 +320,30 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
             </button>
         </div>
 
-        {/* ADS */}
-        <div className="bg-white dark:bg-gray-800 rounded-3xl p-5 shadow-sm border border-gray-100 dark:border-gray-700">
-            <div className="flex items-center gap-2 mb-4">
-                <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg text-purple-600 dark:text-purple-400">
-                    <Megaphone className="w-5 h-5" />
+        {/* CARD DE DESTAQUE ATUALIZADO */}
+        <div className="bg-slate-900 rounded-[2.5rem] p-8 shadow-2xl border border-white/10 relative overflow-hidden group">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 rounded-full blur-3xl -mr-10 -mt-10"></div>
+            
+            <div className="flex items-center gap-4 mb-6 relative z-10">
+                <div className="w-14 h-14 bg-blue-500/10 rounded-2xl flex items-center justify-center border border-blue-500/20 shadow-lg">
+                    <Rocket className="w-8 h-8 text-[#1E5BFF]" />
                 </div>
-                <h3 className="font-bold text-gray-900 dark:text-white">Anúncios e Destaques</h3>
+                <div>
+                    <h3 className="font-black text-xl text-white font-display">Destaque sua loja</h3>
+                    <p className="text-[10px] text-blue-400 font-bold uppercase tracking-widest">Seja visto pelos vizinhos</p>
+                </div>
             </div>
-            <div className="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-3 mb-4 flex items-center justify-between">
-                <div><p className="text-xs font-bold text-gray-800 dark:text-white">Campanha "Fim de Semana"</p><p className="text-[10px] text-green-600 font-bold flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-green-500"></span> Ativa agora</p></div>
-                <div className="text-right"><p className="text-xs text-gray-500 dark:text-gray-400">Cliques</p><p className="text-sm font-bold text-gray-900 dark:text-white">84</p></div>
-            </div>
-            <button onClick={() => onNavigate && onNavigate('store_ads_module')} className="w-full bg-[#1E5BFF] text-white py-3 rounded-xl text-sm font-bold shadow-lg shadow-blue-500/20 active:scale-[0.98] transition-all">
-                Gerenciar campanhas
+
+            <p className="text-sm text-slate-400 mb-8 leading-relaxed font-medium">
+              Apareça primeiro para quem busca seu serviço por apenas <span className="text-white font-bold">R$ 0,99 por dia</span>. Sem letras miúdas, você escolhe o tempo e brilha no bairro.
+            </p>
+
+            <button 
+              onClick={() => onNavigate && onNavigate('store_ads_module')} 
+              className="w-full bg-[#1E5BFF] hover:bg-blue-500 text-white py-5 rounded-2xl text-sm font-black shadow-xl shadow-blue-500/20 active:scale-[0.98] transition-all flex items-center justify-center gap-3"
+            >
+                COMEÇAR AGORA
+                <ArrowRight className="w-5 h-5" strokeWidth={3} />
             </button>
         </div>
 
