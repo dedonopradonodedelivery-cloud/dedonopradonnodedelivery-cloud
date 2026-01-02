@@ -128,9 +128,9 @@ const App: React.FC = () => {
     'weekly_promo'
   ];
 
-  // UX ENGINEER: Escondemos a Tab Bar em fluxos críticos de lojista ou transações
-  // Isso evita distrações e garante que botões de ação fiquem sempre visíveis na base.
-  const hideBottomNav = ['store_ads_module', 'weekly_promo', 'store_cashback_module', 'merchant_cashback_onboarding'].includes(activeTab);
+  // UX ENGINEER: Ocultamos a barra de navegação no fluxo de anúncios para evitar 
+  // distrações e garantir que o botão de ação fique visível.
+  const hideBottomNav = ['store_ads_module'].includes(activeTab);
 
   return (
     <div className={isDarkMode ? 'dark' : ''}>
