@@ -7,9 +7,7 @@ import {
   X,
   Dices,
   ArrowUpRight,
-  Wrench,
   Heart,
-  Tag,
   Wallet,
   Leaf,
   Coffee,
@@ -18,14 +16,8 @@ import {
   Sparkles,
   Beer,
   HeartHandshake,
-  Moon,
-  Utensils,
   ShoppingBag,
-  Coins,
-  Crown,
-  Zap,
-  BadgeCheck,
-  Users
+  Zap
 } from 'lucide-react';
 import { LojasEServicosList } from './LojasEServicosList';
 import { User } from '@supabase/supabase-js';
@@ -57,6 +49,87 @@ const MINI_TRIBOS = [
   { id: 't-love', name: 'Jantar a Dois', subtitle: 'Clima romântico', icon: Heart, color: 'bg-pink-50 text-pink-600 border-pink-100' },
   { id: 't-run', name: 'Na Correria', subtitle: 'Rápido e prático', icon: Zap, color: 'bg-amber-50 text-amber-700 border-amber-100' }
 ];
+
+const HomeCarousel: React.FC<{ onNavigate: (v: string) => void }> = ({ onNavigate }) => {
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [progress, setProgress] = useState(0);
+
+  const banners = [
+    {
+      id: 'b1',
+      title: 'Ganhe Cashback Real',
+      subtitle: 'Compre no bairro e receba parte do seu dinheiro de volta na carteira.',
+      cta: 'Ver Lojas',
+      image: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?q=80&w=800&auto=format&fit=crop',
+      target: 'explore'
+    },
+    {
+      id: 'b2',
+      title: 'Destaques da Semana',
+      subtitle: 'Os lugares que estão bombando na Freguesia agora.',
+      cta: 'Explorar',
+      image: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=800&auto=format&fit=crop',
+      target: 'explore'
+    }
+  ];
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setProgress((prev) => {
+        if (prev >= 100) {
+          setCurrentIndex((current) => (current + 1) % banners.length);
+          return 0;
+        }
+        return prev + 0.5;
+      });
+    }, 20);
+    return () => clearInterval(interval);
+  }, [banners.length]);
+
+  const current = banners[currentIndex];
+
+  return (
+    <div className="px-4">
+      <div 
+        onClick={() => onNavigate(current.target)}
+        className="w-full relative aspect-[21/10] rounded-[32px] overflow-hidden shadow-xl border border-gray-100 dark:border-white/5 bg-slate-900 cursor-pointer active:scale-[0.98] transition-all"
+      >
+        <img 
+          key={current.image}
+          src={current.image} 
+          className="absolute inset-0 w-full h-full object-cover opacity-60 animate-in fade-in duration-700"
+          alt={current.title}
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent"></div>
+        
+        <div className="absolute top-4 left-6 right-6 flex gap-2 z-30">
+          {banners.map((_, idx) => (
+            <div key={idx} className="h-1 flex-1 bg-white/20 rounded-full overflow-hidden">
+              <div 
+                className="h-full bg-white transition-all duration-100 ease-linear"
+                style={{ width: idx === currentIndex ? `${progress}%` : idx < currentIndex ? '100%' : '0%' }}
+              />
+            </div>
+          ))}
+        </div>
+
+        <div className="absolute bottom-0 left-0 right-0 p-6 pb-8 flex justify-between items-end z-20">
+          <div className="flex-1 pr-4">
+            <h3 className="text-xl font-black text-white leading-tight font-display tracking-tight mb-1">
+              {current.title}
+            </h3>
+            <p className="text-[11px] text-gray-300 font-medium line-clamp-1">
+              {current.subtitle}
+            </p>
+          </div>
+          <button className="bg-white text-slate-950 h-10 px-5 rounded-2xl text-[10px] font-black uppercase tracking-wider flex items-center gap-2 shadow-xl shrink-0">
+            {current.cta} <ArrowUpRight className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const SectionHeader: React.FC<{ icon: React.ElementType; title: string; subtitle?: string; rightElement?: React.ReactNode }> = ({ icon: Icon, title, subtitle, rightElement }) => (
   <div className="flex items-center justify-between mb-5 px-1">
@@ -120,9 +193,12 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
           </div>
         );
 
+      case 'home_carousel':
+        return <HomeCarousel key="home_carousel" onNavigate={onNavigate} />;
+
       case 'cashback_stores':
         return (
-          <div key="cashback_stores" className="w-full">
+          <div key="cashback_stores" className="w-full bg-gray-50/50 dark:bg-gray-900/30 py-8">
             <div className="px-4">
               <SectionHeader icon={Wallet} title="Economize no Bairro" subtitle="Lojas que devolvem parte do dinheiro na sua carteira." />
             </div>
@@ -134,7 +210,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
                     <div className="absolute -top-2 -right-3 bg-emerald-500 text-white text-[10px] font-black px-2 py-1 rounded-xl shadow-lg">{store.cashback}%</div>
                   </div>
                   <h4 className="font-bold text-[11px] text-gray-800 dark:text-white truncate w-full mb-1">{store.name}</h4>
-                  <div className="flex items-center gap-1 text-gray-400 mb-4">
+                  <div className="flex items-center gap-1 text-gray-400">
                     <Star className="w-2.5 h-2.5 fill-current text-yellow-500" />
                     <span className="text-[10px] font-bold">{store.rating}</span>
                   </div>
@@ -165,11 +241,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
       case 'recommended':
         return (
           <div key="recommended" className="px-4">
-            <SectionHeader 
-              icon={Heart} 
-              title="Indicações dos Vizinhos" 
-              subtitle="O que o pessoal da Freguesia ama e indica por experiência real."
-            />
+            <SectionHeader icon={Heart} title="Indicações dos Vizinhos" subtitle="O que o pessoal da Freguesia indica por experiência real." />
             <RecomendadosPorMoradores items={communityRecommendations} />
           </div>
         );
@@ -196,13 +268,13 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
 
       case 'mini_tribes':
         return (
-          <div key="mini_tribes" className="w-full bg-gray-50 dark:bg-gray-900/50 py-10">
+          <div key="mini_tribes" className="w-full bg-gray-50 dark:bg-gray-900/50 py-12">
             <div className="px-4">
               <div className="flex items-center gap-2 mb-1">
                 <span className="bg-[#1E5BFF] text-white text-[8px] font-black px-1.5 py-0.5 rounded-md uppercase tracking-widest">Editorial</span>
                 <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Curadoria Localizei</p>
               </div>
-              <SectionHeader icon={Sparkles} title="Sua Tribo na Freguesia" subtitle="Lugares selecionados a dedo pelo estilo e vibe que entregam." />
+              <SectionHeader icon={Sparkles} title="Sua Tribo na Freguesia" subtitle="Descubra lugares selecionados pelo estilo e vibe que entregam." />
             </div>
             <div className="grid grid-cols-2 gap-3 px-4">
               {MINI_TRIBOS.map((tribo) => (
@@ -217,11 +289,6 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
                 </button>
               ))}
             </div>
-            <div className="mt-8 px-8 text-center">
-              <p className="text-[10px] text-gray-400 font-medium leading-relaxed italic">
-                “Nossa equipe visita e valida pessoalmente o clima de cada um desses locais para garantir que você encontre sua vibe.”
-              </p>
-            </div>
           </div>
         );
 
@@ -229,14 +296,23 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
     }
   };
 
+  // UX ENGINEER: Nova ordem otimizada para hierarquia e retenção
   const homeStructure = useMemo(() => {
-    return ['categories', 'cashback_stores', 'roulette', 'recommended', 'list', 'mini_tribes'];
+    return [
+      'categories',      // 1. Entrada rápida
+      'home_carousel',   // 2. Impacto visual
+      'cashback_stores', // 3. Valor imediato
+      'roulette',        // 4. Gamificação
+      'recommended',     // 5. Confiança/Social
+      'list',            // 6. Discovery vertical
+      'mini_tribes'      // 7. Lifestyle/Filtro final
+    ];
   }, []);
 
   return (
-    <div className="flex flex-col gap-12 pt-6 pb-32 bg-white dark:bg-gray-950 w-full max-w-md mx-auto animate-in fade-in duration-500 overflow-x-hidden">
+    <div className="flex flex-col gap-14 pt-6 pb-32 bg-white dark:bg-gray-950 w-full max-w-md mx-auto animate-in fade-in duration-500 overflow-x-hidden">
       {!activeSearchTerm ? (
-        <div className="flex flex-col gap-12 w-full">
+        <div className="flex flex-col gap-14 w-full">
             {homeStructure.map(section => renderSection(section))}
             <div className="px-4">
               <MasterSponsorBanner onClick={() => onNavigate('patrocinador_master')} />
