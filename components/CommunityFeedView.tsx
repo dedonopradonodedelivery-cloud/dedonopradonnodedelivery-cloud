@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { 
   ChevronLeft, 
@@ -25,7 +24,9 @@ import {
   BadgeCheck,
   ShoppingBag,
   User,
-  MessageCircle
+  MessageCircle,
+  Copy,
+  Trash2
 } from 'lucide-react';
 import { CommunityPost, Store } from '../types';
 import { MOCK_COMMUNITY_POSTS, STORES } from '../constants';
@@ -123,6 +124,60 @@ const FeedVideoPlayer: React.FC<{ src: string }> = ({ src }) => {
   );
 };
 
+// --- COMPONENT: IMAGE CAROUSEL ---
+const ImageCarousel: React.FC<{ images: string[] }> = ({ images }) => {
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  const handleScroll = () => {
+    if (scrollRef.current) {
+      const { scrollLeft, clientWidth } = scrollRef.current;
+      const newIndex = Math.round(scrollLeft / clientWidth);
+      setCurrentIndex(newIndex);
+    }
+  };
+
+  return (
+    <div className="relative w-full aspect-[4/5] bg-gray-100 dark:bg-gray-800">
+      <div 
+        ref={scrollRef}
+        className="w-full h-full overflow-x-auto flex snap-x snap-mandatory no-scrollbar"
+        onScroll={handleScroll}
+      >
+        {images.map((img, idx) => (
+          <img 
+            key={idx}
+            src={img} 
+            alt={`Slide ${idx + 1}`} 
+            className="w-full h-full object-cover snap-center flex-shrink-0" 
+          />
+        ))}
+      </div>
+      
+      {/* Dots Indicator */}
+      {images.length > 1 && (
+        <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-1.5 z-10">
+          {images.map((_, idx) => (
+            <div 
+              key={idx} 
+              className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${
+                idx === currentIndex ? 'bg-white scale-110' : 'bg-white/50'
+              }`}
+            />
+          ))}
+        </div>
+      )}
+      
+      {/* Index Badge */}
+      {images.length > 1 && (
+        <div className="absolute top-4 right-4 bg-black/60 text-white text-[10px] font-bold px-2 py-1 rounded-full backdrop-blur-sm">
+          {currentIndex + 1}/{images.length}
+        </div>
+      )}
+    </div>
+  );
+};
+
 // --- COMPONENT: CREATE POST MODAL ---
 const CreatePostModal: React.FC<{
   onClose: () => void;
@@ -131,54 +186,249 @@ const CreatePostModal: React.FC<{
 }> = ({ onClose, onSubmit, userRole }) => {
   const [content, setContent] = useState('');
   const [type, setType] = useState('recommendation');
+  const [selectedStoreId, setSelectedStoreId] = useState('');
+  
+  // Media State
+  const [mediaFiles, setMediaFiles] = useState<File[]>([]);
+  const [mediaPreviews, setMediaPreviews] = useState<string[]>([]);
+  const [mediaType, setMediaType] = useState<'image' | 'video' | null>(null);
+  
+  const videoInputRef = useRef<HTMLInputElement>(null);
+  const imageInputRef = useRef<HTMLInputElement>(null);
+
+  const isMerchant = userRole === 'lojista';
+
+  const handleVideoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (mediaType === 'image' && mediaPreviews.length > 0) {
+        alert("Não é possível misturar vídeo com imagens.");
+        return;
+    }
+
+    const video = document.createElement('video');
+    video.preload = 'metadata';
+    video.onloadedmetadata = function() {
+      window.URL.revokeObjectURL(video.src);
+      if (video.duration > 30) {
+        alert("O vídeo deve ter no máximo 30 segundos.");
+        return;
+      }
+      setMediaFiles([file]);
+      setMediaPreviews([URL.createObjectURL(file)]);
+      setMediaType('video');
+    }
+    video.src = URL.createObjectURL(file);
+  };
+
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (mediaType === 'video') {
+        alert("Não é possível misturar vídeo com imagens.");
+        return;
+    }
+
+    const files = Array.from(e.target.files || []) as File[];
+    if (files.length === 0) return;
+
+    const remainingSlots = 4 - mediaPreviews.length;
+    if (files.length > remainingSlots) {
+        alert(`Você pode adicionar no máximo 4 fotos. Restam ${remainingSlots} vaga(s).`);
+        // Slice to fit
+        const allowedFiles = files.slice(0, remainingSlots);
+        const newPreviews = allowedFiles.map(f => URL.createObjectURL(f));
+        setMediaFiles(prev => [...prev, ...allowedFiles]);
+        setMediaPreviews(prev => [...prev, ...newPreviews]);
+    } else {
+        const newPreviews = files.map(f => URL.createObjectURL(f));
+        setMediaFiles(prev => [...prev, ...files]);
+        setMediaPreviews(prev => [...prev, ...newPreviews]);
+    }
+    
+    setMediaType('image');
+    
+    // Reset input to allow selecting same file again if deleted
+    if (imageInputRef.current) imageInputRef.current.value = '';
+  };
+
+  const removeMedia = (index: number) => {
+    const newFiles = [...mediaFiles];
+    const newPreviews = [...mediaPreviews];
+    
+    newFiles.splice(index, 1);
+    newPreviews.splice(index, 1);
+    
+    setMediaFiles(newFiles);
+    setMediaPreviews(newPreviews);
+    
+    if (newFiles.length === 0) {
+        setMediaType(null);
+    }
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!content.trim()) return;
+    if (mediaPreviews.length === 0) return; // Mandatório
     
-    onSubmit({
-        content,
-        type,
-        authorRole: userRole === 'lojista' ? 'merchant' : 'resident'
-    });
+    const store = STORES.find(s => s.id === selectedStoreId);
+
+    const postData = {
+      content,
+      type: isMerchant && !['news', 'promo', 'tip'].includes(type) ? 'news' : type,
+      relatedStoreId: selectedStoreId,
+      relatedStoreName: data => store?.name,
+      authorRole: isMerchant ? 'merchant' : 'resident',
+      // If it's a video, pass single URL. If images, pass array.
+      videoUrl: mediaType === 'video' ? mediaPreviews[0] : undefined,
+      imageUrls: mediaType === 'image' ? mediaPreviews : undefined,
+      imageUrl: mediaType === 'image' ? mediaPreviews[0] : undefined // Legacy fallback
+    };
+
+    onSubmit(postData);
     onClose();
   };
 
   return (
-    <div className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center animate-in fade-in duration-300" onClick={onClose}>
-        <div className="bg-white dark:bg-gray-900 w-full max-w-md rounded-t-2xl sm:rounded-2xl p-6 shadow-2xl" onClick={e => e.stopPropagation()}>
-            <div className="flex justify-between items-center mb-4">
-                <h3 className="font-bold text-gray-900 dark:text-white text-lg">Criar Publicação</h3>
-                <button onClick={onClose}><X className="w-6 h-6 text-gray-500" /></button>
-            </div>
-            <form onSubmit={handleSubmit} className="space-y-4">
-                <textarea 
-                    value={content}
-                    onChange={(e) => setContent(e.target.value)}
-                    placeholder="O que está acontecendo no bairro?"
-                    className="w-full h-32 p-4 bg-gray-50 dark:bg-gray-800 rounded-xl resize-none border-none focus:ring-2 focus:ring-[#1E5BFF] dark:text-white placeholder-gray-400 text-sm"
-                    autoFocus
-                />
-                
-                <div>
-                    <label className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 block">Tipo de post</label>
-                    <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar">
-                        {['recommendation', 'alert', 'tip', 'news'].map(t => (
-                            <button
-                                key={t}
-                                type="button"
-                                onClick={() => setType(t)}
-                                className={`px-4 py-2 rounded-full text-xs font-bold border transition-colors whitespace-nowrap ${type === t ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-500 text-blue-600 dark:text-blue-400' : 'border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400'}`}
-                            >
-                                {t === 'recommendation' ? 'Recomendação' : t === 'alert' ? 'Alerta' : t === 'tip' ? 'Dica' : 'Novidade'}
-                            </button>
-                        ))}
-                    </div>
-                </div>
-
-                <button type="submit" disabled={!content.trim()} className="w-full bg-[#1E5BFF] text-white font-bold py-3.5 rounded-xl shadow-lg shadow-blue-500/20 active:scale-[0.98] transition-all disabled:opacity-50">Publicar</button>
-            </form>
+    <div className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center animate-in fade-in duration-300">
+      <div className="bg-white dark:bg-gray-900 w-full max-w-md rounded-t-[2rem] sm:rounded-3xl p-6 shadow-2xl animate-in slide-in-from-bottom duration-300 max-h-[90vh] overflow-y-auto">
+        <div className="flex justify-between items-center mb-6">
+          <h3 className="text-lg font-bold text-gray-900 dark:text-white">
+            {isMerchant ? 'Publicar como Loja' : 'Criar Postagem'}
+          </h3>
+          <button onClick={onClose} className="text-gray-500 hover:text-gray-700">Cancelar</button>
         </div>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          
+          {/* Media Preview Area */}
+          {mediaPreviews.length > 0 ? (
+            <div className="w-full">
+                {mediaType === 'video' ? (
+                    <div className="relative w-full rounded-2xl overflow-hidden bg-black border border-gray-200 dark:border-gray-700 shadow-md">
+                        <button 
+                            type="button" 
+                            onClick={() => removeMedia(0)}
+                            className="absolute top-2 right-2 p-1.5 bg-black/50 rounded-full text-white hover:bg-black/70 z-10"
+                        >
+                            <X className="w-4 h-4" />
+                        </button>
+                        <video src={mediaPreviews[0]} className="w-full h-48 object-cover" controls />
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-2 gap-2">
+                        {mediaPreviews.map((preview, idx) => (
+                            <div key={idx} className="relative aspect-square rounded-xl overflow-hidden bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+                                <img src={preview} alt={`Upload ${idx}`} className="w-full h-full object-cover" />
+                                <button 
+                                    type="button" 
+                                    onClick={() => removeMedia(idx)}
+                                    className="absolute top-1 right-1 p-1 bg-black/50 rounded-full text-white hover:bg-red-500 transition-colors"
+                                >
+                                    <X className="w-3 h-3" />
+                                </button>
+                            </div>
+                        ))}
+                        {/* Add More Button if < 4 */}
+                        {mediaPreviews.length < 4 && (
+                            <button 
+                                type="button"
+                                onClick={() => imageInputRef.current?.click()}
+                                className="aspect-square rounded-xl border-2 border-dashed border-gray-300 dark:border-gray-700 flex flex-col items-center justify-center text-gray-400 hover:text-[#1E5BFF] hover:border-[#1E5BFF] transition-colors gap-1"
+                            >
+                                <Plus className="w-6 h-6" />
+                                <span className="text-[10px] font-bold">Adicionar</span>
+                            </button>
+                        )}
+                    </div>
+                )}
+            </div>
+          ) : (
+            <div className="w-full h-48 rounded-2xl border-2 border-dashed border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 flex flex-col items-center justify-center gap-3">
+               <p className="text-gray-400 text-sm font-bold uppercase tracking-wide">Mídia Obrigatória</p>
+               <div className="flex gap-4">
+                  <button 
+                      type="button"
+                      onClick={() => imageInputRef.current?.click()}
+                      className="flex flex-col items-center gap-2 p-3 hover:bg-white dark:hover:bg-gray-700 rounded-xl transition-colors group"
+                  >
+                      <div className="w-12 h-12 bg-blue-50 dark:bg-blue-900/20 rounded-full flex items-center justify-center text-[#1E5BFF] group-hover:scale-110 transition-transform">
+                          <ImageIcon className="w-6 h-6" />
+                      </div>
+                      <span className="text-xs font-medium text-gray-500">Fotos (Até 4)</span>
+                  </button>
+                  
+                  <div className="w-[1px] h-16 bg-gray-200 dark:bg-gray-700 self-center"></div>
+
+                  <button 
+                      type="button"
+                      onClick={() => videoInputRef.current?.click()}
+                      className="flex flex-col items-center gap-2 p-3 hover:bg-white dark:hover:bg-gray-700 rounded-xl transition-colors group"
+                  >
+                      <div className="w-12 h-12 bg-purple-50 dark:bg-purple-900/20 rounded-full flex items-center justify-center text-purple-600 group-hover:scale-110 transition-transform">
+                          <Video className="w-6 h-6" />
+                      </div>
+                      <span className="text-xs font-medium text-gray-500">Vídeo (30s)</span>
+                  </button>
+               </div>
+            </div>
+          )}
+
+          <input 
+              type="file" 
+              accept="image/*" 
+              multiple
+              className="hidden" 
+              ref={imageInputRef} 
+              onChange={handleImageSelect}
+          />
+          <input 
+              type="file" 
+              accept="video/*" 
+              className="hidden" 
+              ref={videoInputRef} 
+              onChange={handleVideoSelect}
+          />
+
+          <div>
+            <textarea 
+              value={content}
+              onChange={(e) => setContent(e.target.value)}
+              placeholder="Escreva uma legenda..."
+              className="w-full h-24 p-4 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl resize-none outline-none focus:ring-2 focus:ring-[#1E5BFF] dark:text-white text-sm"
+            />
+          </div>
+
+          {!isMerchant && (
+            <div>
+                <select 
+                value={selectedStoreId}
+                onChange={(e) => setSelectedStoreId(e.target.value)}
+                className="w-full p-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm dark:text-white outline-none"
+                >
+                <option value="">Vincular Loja (Opcional)</option>
+                {STORES.map(store => (
+                    <option key={store.id} value={store.id}>{store.name}</option>
+                ))}
+                </select>
+            </div>
+          )}
+
+          <button 
+            type="submit"
+            disabled={mediaPreviews.length === 0}
+            className="w-full bg-[#1E5BFF] text-white px-6 py-4 rounded-xl font-bold text-sm shadow-lg shadow-blue-500/20 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+          >
+            Publicar
+          </button>
+          
+          {mediaPreviews.length === 0 && (
+             <div className="flex items-center justify-center gap-2 text-amber-500 text-xs font-bold bg-amber-50 dark:bg-amber-900/10 py-2 rounded-lg">
+                <AlertTriangle className="w-3 h-3" />
+                Adicione mídia para publicar
+             </div>
+          )}
+        </form>
+      </div>
     </div>
   );
 };
@@ -469,7 +719,8 @@ export const CommunityFeedView: React.FC<CommunityFeedViewProps> = ({ onBack, on
       authorRole: data.authorRole,
       relatedStoreId: data.relatedStoreId,
       relatedStoreName: data.relatedStoreName,
-      imageUrl: data.imageUrl,
+      imageUrl: data.imageUrl, // Legacy support
+      imageUrls: data.imageUrls, // New support
       videoUrl: data.videoUrl,
       timestamp: 'Agora',
       likes: 0,
@@ -646,7 +897,12 @@ export const CommunityFeedView: React.FC<CommunityFeedViewProps> = ({ onBack, on
             </div>
         ) : (
             displayedPosts.map(post => {
-              const hasMedia = post.imageUrl || post.videoUrl;
+              const hasVideo = !!post.videoUrl;
+              const hasImages = (post.imageUrls && post.imageUrls.length > 0) || !!post.imageUrl;
+              
+              // Normalize images to array for carousel
+              const images = post.imageUrls || (post.imageUrl ? [post.imageUrl] : []);
+
               return (
                 <div key={post.id} className="bg-white dark:bg-gray-800 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden mb-4">
                     
@@ -685,12 +941,14 @@ export const CommunityFeedView: React.FC<CommunityFeedViewProps> = ({ onBack, on
 
                     {/* Media Content (Visual First) */}
                     <div className="w-full bg-black/5 dark:bg-black/20">
-                        {post.videoUrl ? (
-                            <FeedVideoPlayer src={post.videoUrl} />
-                        ) : post.imageUrl ? (
-                            <img src={post.imageUrl} alt="Post media" className="w-full h-auto object-cover max-h-[500px]" />
+                        {hasVideo ? (
+                            <FeedVideoPlayer src={post.videoUrl!} />
+                        ) : images.length > 1 ? (
+                            <ImageCarousel images={images} />
+                        ) : images.length === 1 ? (
+                            <img src={images[0]} alt="Post media" className="w-full h-auto object-cover max-h-[500px]" />
                         ) : (
-                            // Fallback for legacy text-only posts
+                            // Fallback for legacy text-only posts (gradient)
                             <div className="w-full aspect-[4/3] bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center p-8 text-center">
                                 <p className="text-white font-bold text-xl drop-shadow-md leading-relaxed line-clamp-6">{post.content}</p>
                             </div>
@@ -738,7 +996,7 @@ export const CommunityFeedView: React.FC<CommunityFeedViewProps> = ({ onBack, on
                     </div>
 
                     {/* Caption (Only if there was media, otherwise text was shown in gradient block) */}
-                    {hasMedia && post.content && (
+                    {(hasVideo || hasImages) && post.content && (
                         <div className="px-4 pb-4 text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
                             <span className="font-bold mr-2 text-gray-900 dark:text-white">{post.userName}</span>
                             {post.content}

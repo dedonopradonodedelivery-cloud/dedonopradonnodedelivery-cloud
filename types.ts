@@ -68,6 +68,7 @@ export interface CommunityPost {
   authorRole: 'resident' | 'merchant'; // Novo campo para distinguir origem
   content: string;
   imageUrl?: string;
+  imageUrls?: string[]; // Support for Carousel (Max 4)
   videoUrl?: string; // Suporte a vídeo curto
   relatedStoreId?: string; // ID da loja se houver
   relatedStoreName?: string; // Nome da loja para display rápido
