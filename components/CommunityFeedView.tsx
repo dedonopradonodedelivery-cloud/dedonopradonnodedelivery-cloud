@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Search, Store as StoreIcon, MoreHorizontal, Send, Heart, Share2, MessageCircle, ChevronLeft, BadgeCheck, User as UserIcon, Home, Plus, X, Video, Image as ImageIcon, Film, Loader2, Grid, Camera, Play } from 'lucide-react';
+import { Search, Store as StoreIcon, MoreHorizontal, Send, Heart, Share2, MessageCircle, ChevronLeft, BadgeCheck, User as UserIcon, Home, Plus, X, Video, Image as ImageIcon, Film, Loader2, Grid, Camera, Play, Check, ChevronRight } from 'lucide-react';
 import { Store, CommunityPost } from '../types';
 import { MOCK_COMMUNITY_POSTS } from '../constants';
 
@@ -65,6 +65,13 @@ const MOCK_CHATS = [
   { id: 2, user: 'Suporte Localizei', username: 'suporte', avatar: 'https://ui-avatars.com/api/?name=Suporte&background=0D8ABC&color=fff', lastMsg: 'Como podemos ajudar?', time: 'Ontem', unread: false, isMerchant: false },
 ];
 
+const MOCK_NOTIFICATIONS = [
+  { id: 1, type: 'like', user: 'marcelo.rj', userAvatar: 'https://i.pravatar.cc/150?u=m', content: 'curtiu sua publicação.', time: '2 min', postImage: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?q=80&w=100&auto=format&fit=crop', isUnread: true },
+  { id: 2, type: 'follow', user: 'padariaimperial', userAvatar: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?q=80&w=200&auto=format&fit=crop', content: 'começou a seguir você.', time: '1h', isUnread: true },
+  { id: 3, type: 'comment', user: 'ana.paula', userAvatar: 'https://i.pravatar.cc/150?u=a', content: 'comentou: "Que delícia! Onde fica?"', time: '3h', postImage: 'https://images.unsplash.com/photo-1555507036-ab1f4038808a?q=80&w=100&auto=format&fit=crop', isUnread: false },
+  { id: 4, type: 'mention', user: 'carlos.silva', userAvatar: 'https://i.pravatar.cc/150?u=c', content: 'mencionou você em um comentário.', time: '1d', postImage: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=100&auto=format&fit=crop', isUnread: false },
+];
+
 const MOCK_MESSAGES_HISTORY: Record<number, { id: number; text: string; sender: 'me' | 'them'; time: string }[]> = {
   1: [
     { id: 1, text: "Olá, bom dia! Têm pão de queijo quentinho?", sender: "me", time: "09:00" },
@@ -81,63 +88,60 @@ const MOCK_MESSAGES_HISTORY: Record<number, { id: number; text: string; sender: 
 
 // --- SUB-COMPONENTS ---
 
-// 0. Create Post Modal (Replaces CreatePostWidget)
-const CreatePostModal: React.FC<{ isOpen: boolean; onClose: () => void; user: any }> = ({ isOpen, onClose, user }) => {
+// CREATE POST SCREEN (Replaces Modal)
+const CreatePostScreen: React.FC<{ 
+  onClose: () => void; 
+  onSuccess: () => void;
+  user: any; 
+}> = ({ onClose, onSuccess, user }) => {
+  const [step, setStep] = useState<1 | 2>(1); // 1: Select Media, 2: Caption/Publish
   const [caption, setCaption] = useState('');
-  const [mediaFiles, setMediaFiles] = useState<{ url: string; type: 'image' | 'video' }[]>([]);
+  const [mediaFiles, setMediaFiles] = useState<{ url: string; type: 'image' | 'video'; file?: File }[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const videoInputRef = useRef<HTMLInputElement>(null);
-  const imageInputRef = useRef<HTMLInputElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  if (!isOpen) return null;
-
-  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       const files = Array.from(e.target.files);
-      const remainingSlots = 4 - mediaFiles.length;
-      
-      if (mediaFiles.some(m => m.type === 'video')) {
-        alert('Você não pode misturar fotos e vídeos.');
-        return;
-      }
+      const newMedia: { url: string; type: 'image' | 'video'; file: File }[] = [];
+      let videoCount = mediaFiles.filter(m => m.type === 'video').length;
+      let imageCount = mediaFiles.filter(m => m.type === 'image').length;
 
-      if (remainingSlots <= 0) {
-        alert('Máximo de 4 fotos permitido.');
-        return;
-      }
-
-      const newImages = files.slice(0, remainingSlots).map(file => ({
-        url: URL.createObjectURL(file as Blob),
-        type: 'image' as const
-      }));
-
-      setMediaFiles(prev => [...prev, ...newImages]);
-    }
-  };
-
-  const handleVideoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      if (mediaFiles.length > 0) {
-        alert('Você não pode misturar fotos e vídeos. Remova as fotos primeiro.');
-        return;
-      }
-
-      // Check duration (Mock check - in real app needs loadedmetadata)
-      const video = document.createElement('video');
-      video.preload = 'metadata';
-      video.onloadedmetadata = function() {
-        window.URL.revokeObjectURL(video.src);
-        if (video.duration > 30) {
-          alert("O vídeo deve ter no máximo 30 segundos.");
+      for (const file of files) {
+        const isVideo = file.type.startsWith('video/');
+        
+        // Validation Rules
+        if (isVideo) {
+          if (videoCount > 0 || imageCount > 0) {
+            alert("Vídeo deve ser postado sozinho.");
+            continue;
+          }
+          // Mock duration check (would need async video element loading in real app)
+          if (file.size > 50 * 1024 * 1024) { // 50MB Limit mock
+             alert("Vídeo muito grande.");
+             continue;
+          }
+          videoCount++;
         } else {
-          setMediaFiles([{
-            url: URL.createObjectURL(file),
-            type: 'video'
-          }]);
+          if (videoCount > 0) {
+             alert("Não é possível misturar foto e vídeo.");
+             continue;
+          }
+          if (imageCount >= 4) {
+             alert("Máximo de 4 fotos.");
+             continue;
+          }
+          imageCount++;
         }
+
+        newMedia.push({
+          url: URL.createObjectURL(file),
+          type: isVideo ? 'video' : 'image',
+          file
+        });
       }
-      video.src = URL.createObjectURL(file);
+
+      setMediaFiles(prev => [...prev, ...newMedia]);
     }
   };
 
@@ -145,127 +149,197 @@ const CreatePostModal: React.FC<{ isOpen: boolean; onClose: () => void; user: an
     setMediaFiles(prev => prev.filter((_, i) => i !== index));
   };
 
-  const handleSubmit = () => {
-    if (mediaFiles.length === 0) {
-      alert("Adicione uma foto ou vídeo (até 30s) para publicar no Feed.");
-      return;
-    }
-
+  const handlePublish = () => {
     setIsSubmitting(true);
-    // Simulate API call
+    // Simulate API
     setTimeout(() => {
       setIsSubmitting(false);
-      setCaption('');
-      setMediaFiles([]);
-      onClose();
-      alert("Publicado com sucesso!");
+      onSuccess();
     }, 1500);
   };
 
-  return (
-    <div className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center animate-in fade-in duration-300">
-      <div 
-        className="bg-white dark:bg-gray-900 w-full max-w-md rounded-t-[2rem] sm:rounded-3xl p-6 shadow-2xl relative animate-in slide-in-from-bottom duration-300"
-        onClick={(e) => e.stopPropagation()}
+  // HEADER FOR CREATE FLOW
+  const CreateHeader = () => (
+    <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 sticky top-0 z-50">
+      <button onClick={() => step === 1 ? onClose() : setStep(1)} className="p-2 -ml-2 text-gray-900 dark:text-white">
+        {step === 1 ? <X className="w-6 h-6" /> : <ChevronLeft className="w-6 h-6" />}
+      </button>
+      <h2 className="font-bold text-base text-gray-900 dark:text-white">
+        {step === 1 ? 'Nova Publicação' : 'Nova Publicação'}
+      </h2>
+      <button 
+        onClick={() => step === 1 ? setStep(2) : handlePublish()}
+        disabled={(step === 1 && mediaFiles.length === 0) || (step === 2 && isSubmitting)}
+        className={`text-sm font-bold px-3 py-1.5 rounded-full transition-colors ${
+          (step === 1 && mediaFiles.length === 0) || isSubmitting
+            ? 'text-gray-300 dark:text-gray-600 cursor-not-allowed' 
+            : 'text-[#1E5BFF] hover:bg-blue-50 dark:hover:bg-blue-900/20'
+        }`}
       >
-        <div className="flex justify-between items-center mb-6">
-            <h2 className="text-lg font-bold text-gray-900 dark:text-white">Criar Publicação</h2>
-            <button onClick={onClose} className="p-2 bg-gray-100 dark:bg-gray-800 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
-                <X className="w-5 h-5 text-gray-500" />
-            </button>
-        </div>
+        {step === 1 ? 'Avançar' : isSubmitting ? 'Publicando...' : 'Compartilhar'}
+      </button>
+    </div>
+  );
 
-        <div className="flex gap-4 mb-4">
-            <div className="w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden shrink-0">
-                {user?.user_metadata?.avatar_url ? (
-                    <img src={user.user_metadata.avatar_url} alt="User" className="w-full h-full object-cover" />
+  return (
+    <div className="fixed inset-0 z-[100] bg-white dark:bg-gray-900 flex flex-col animate-in slide-in-from-bottom duration-300">
+      <CreateHeader />
+
+      <div className="flex-1 overflow-y-auto">
+        {step === 1 ? (
+          // STEP 1: GALLERY SELECTOR
+          <div className="flex flex-col h-full">
+            {/* Preview Area (Large) */}
+            <div className="w-full aspect-square bg-gray-100 dark:bg-black flex items-center justify-center relative overflow-hidden">
+              {mediaFiles.length > 0 ? (
+                mediaFiles[0].type === 'video' ? (
+                  <video src={mediaFiles[0].url} controls className="w-full h-full object-contain" />
                 ) : (
-                    <div className="w-full h-full flex items-center justify-center text-gray-400">
-                        <UserIcon className="w-5 h-5" />
+                  <img src={mediaFiles[mediaFiles.length - 1].url} alt="Preview" className="w-full h-full object-cover" />
+                )
+              ) : (
+                <div className="text-gray-400 flex flex-col items-center">
+                  <ImageIcon className="w-12 h-12 mb-2" />
+                  <span className="text-sm">Selecione uma mídia</span>
+                </div>
+              )}
+            </div>
+
+            {/* Selected Thumbnails Strip */}
+            {mediaFiles.length > 0 && (
+               <div className="flex gap-2 p-4 overflow-x-auto bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800">
+                  {mediaFiles.map((m, i) => (
+                    <div key={i} className="w-16 h-16 relative flex-shrink-0 rounded-md overflow-hidden group">
+                       {m.type === 'video' ? (
+                         <video src={m.url} className="w-full h-full object-cover" />
+                       ) : (
+                         <img src={m.url} className="w-full h-full object-cover" />
+                       )}
+                       <button 
+                         onClick={() => removeMedia(i)}
+                         className="absolute top-0.5 right-0.5 bg-black/50 text-white rounded-full p-0.5"
+                       >
+                         <X className="w-3 h-3" />
+                       </button>
                     </div>
-                )}
-            </div>
-            <div className="flex-1">
-                <textarea 
-                    value={caption}
-                    onChange={(e) => setCaption(e.target.value)}
-                    placeholder="O que está acontecendo no bairro?" 
-                    className="w-full bg-transparent outline-none text-sm text-gray-700 dark:text-gray-200 placeholder-gray-400 min-h-[80px] resize-none"
-                    maxLength={2200}
-                />
-                <div className={`text-right text-xs mt-1 ${caption.length >= 2200 ? 'text-red-500 font-bold' : 'text-gray-400'}`}>
-                    {caption.length} / 2200
-                </div>
-            </div>
-        </div>
+                  ))}
+               </div>
+            )}
 
-        {/* Media Preview */}
-        {mediaFiles.length > 0 && (
-            <div className={`mb-6 grid gap-2 ${mediaFiles.length === 1 ? 'grid-cols-1' : 'grid-cols-2'}`}>
-                {mediaFiles.map((media, idx) => (
-                <div key={idx} className="relative rounded-xl overflow-hidden bg-black aspect-[4/3] group">
-                    {media.type === 'image' ? (
-                    <img src={media.url} alt="Preview" className="w-full h-full object-cover" />
-                    ) : (
-                    <video src={media.url} className="w-full h-full object-cover" controls />
-                    )}
-                    <button 
-                    onClick={() => removeMedia(idx)}
-                    className="absolute top-1 right-1 bg-black/60 text-white rounded-full p-1 hover:bg-red-500 transition-colors"
-                    >
-                    <X className="w-3 h-3" />
-                    </button>
-                </div>
-                ))}
-            </div>
-        )}
-
-        <div className="flex items-center justify-between pt-4 border-t border-gray-100 dark:border-gray-800">
-            <div className="flex gap-3">
-                <button 
-                    onClick={() => imageInputRef.current?.click()}
-                    className={`p-2.5 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors ${mediaFiles.some(m => m.type === 'video') ? 'opacity-50 cursor-not-allowed' : 'text-[#1E5BFF]'}`}
-                    disabled={mediaFiles.some(m => m.type === 'video')}
-                >
-                    <ImageIcon className="w-6 h-6" />
-                </button>
-                <input 
+            {/* Gallery Grid Mock (Trigger Input) */}
+            <div className="flex-1 p-1">
+               <div className="flex justify-between items-center px-3 py-2">
+                  <span className="font-bold text-sm dark:text-white">Galeria</span>
+                  <button 
+                    onClick={() => fileInputRef.current?.click()}
+                    className="p-2 bg-gray-100 dark:bg-gray-800 rounded-full"
+                  >
+                    <Plus className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+                  </button>
+                  <input 
                     type="file" 
-                    ref={imageInputRef} 
-                    accept="image/*" 
+                    ref={fileInputRef} 
                     multiple 
+                    accept="image/*,video/*" 
                     className="hidden" 
-                    onChange={handleImageSelect}
-                />
-
-                <button 
-                    onClick={() => videoInputRef.current?.click()}
-                    className={`p-2.5 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors ${mediaFiles.length > 0 ? 'opacity-50 cursor-not-allowed' : 'text-red-500'}`}
-                    disabled={mediaFiles.length > 0}
-                >
-                    <Film className="w-6 h-6" />
-                </button>
-                <input 
-                    type="file" 
-                    ref={videoInputRef} 
-                    accept="video/*" 
-                    className="hidden" 
-                    onChange={handleVideoSelect}
-                />
+                    onChange={handleFileSelect}
+                  />
+               </div>
+               
+               {/* Mock Grid to look like gallery */}
+               <div className="grid grid-cols-4 gap-0.5" onClick={() => fileInputRef.current?.click()}>
+                  {Array.from({length: 12}).map((_, i) => (
+                    <div key={i} className="aspect-square bg-gray-200 dark:bg-gray-800 cursor-pointer hover:opacity-80 transition-opacity relative">
+                        {/* Just visual placeholders */}
+                        <ImageIcon className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-6 h-6 text-gray-300 dark:text-gray-600" />
+                    </div>
+                  ))}
+               </div>
             </div>
+          </div>
+        ) : (
+          // STEP 2: CAPTION & DETAILS
+          <div className="flex flex-col h-full">
+             <div className="flex gap-4 p-4 border-b border-gray-100 dark:border-gray-800">
+                <div className="w-16 h-16 bg-gray-200 dark:bg-gray-800 rounded-md overflow-hidden flex-shrink-0">
+                   {mediaFiles[0].type === 'video' ? (
+                     <video src={mediaFiles[0].url} className="w-full h-full object-cover" />
+                   ) : (
+                     <img src={mediaFiles[0].url} className="w-full h-full object-cover" />
+                   )}
+                </div>
+                <div className="flex-1">
+                   <textarea 
+                      value={caption}
+                      onChange={(e) => setCaption(e.target.value)}
+                      placeholder="Escreva uma legenda..."
+                      className="w-full h-24 bg-transparent resize-none outline-none text-sm text-gray-900 dark:text-white placeholder-gray-400"
+                      maxLength={2200}
+                   />
+                   <div className="text-right text-[10px] text-gray-400">
+                      {caption.length}/2200
+                   </div>
+                </div>
+             </div>
+             
+             {/* Mock Options */}
+             <div className="p-4 space-y-4">
+                <div className="flex justify-between items-center py-2 border-b border-gray-100 dark:border-gray-800">
+                   <span className="text-sm text-gray-900 dark:text-white">Adicionar localização</span>
+                   <ChevronRight className="w-5 h-5 text-gray-400" />
+                </div>
+                <div className="flex justify-between items-center py-2 border-b border-gray-100 dark:border-gray-800">
+                   <span className="text-sm text-gray-900 dark:text-white">Marcar pessoas</span>
+                   <ChevronRight className="w-5 h-5 text-gray-400" />
+                </div>
+             </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
 
-            <button 
-                onClick={handleSubmit}
-                disabled={isSubmitting || mediaFiles.length === 0}
-                className={`py-2.5 px-6 rounded-full text-white font-bold text-sm transition-all flex items-center gap-2 shadow-lg ${
-                    mediaFiles.length === 0 
-                    ? 'bg-gray-300 dark:bg-gray-700 cursor-not-allowed text-gray-500 shadow-none' 
-                    : 'bg-[#1E5BFF] hover:bg-blue-600 active:scale-95 shadow-blue-500/30'
-                }`}
-            >
-                {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-                Publicar
-            </button>
+// ACTIVITY / NOTIFICATIONS SCREEN
+const ActivityScreen: React.FC<{ onClose: () => void }> = ({ onClose }) => {
+  return (
+    <div className="fixed inset-0 z-[100] bg-white dark:bg-gray-900 flex flex-col animate-in slide-in-from-right duration-300">
+      <div className="flex items-center gap-4 px-4 py-3 border-b border-gray-100 dark:border-gray-800 sticky top-0 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md z-10">
+        <button onClick={onClose} className="p-2 -ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+          <ChevronLeft className="w-6 h-6 text-gray-900 dark:text-white" />
+        </button>
+        <h2 className="font-bold text-lg text-gray-900 dark:text-white">Atividades</h2>
+      </div>
+
+      <div className="flex-1 overflow-y-auto p-0">
+        <div className="px-4 py-3">
+           <h3 className="font-bold text-base text-gray-900 dark:text-white mb-4">Hoje</h3>
+           <div className="space-y-5">
+              {MOCK_NOTIFICATIONS.map((item) => (
+                 <div key={item.id} className="flex items-center justify-between gap-3 group cursor-pointer">
+                    <div className="flex items-center gap-3 flex-1">
+                       <div className="relative">
+                          <img src={item.userAvatar} className="w-11 h-11 rounded-full object-cover border border-gray-100 dark:border-gray-700" />
+                          {item.type === 'like' && <div className="absolute -bottom-1 -right-1 bg-red-500 rounded-full p-0.5 border-2 border-white dark:border-gray-900"><Heart className="w-3 h-3 text-white fill-white" /></div>}
+                          {item.type === 'comment' && <div className="absolute -bottom-1 -right-1 bg-blue-500 rounded-full p-0.5 border-2 border-white dark:border-gray-900"><MessageCircle className="w-3 h-3 text-white fill-white" /></div>}
+                          {item.type === 'mention' && <div className="absolute -bottom-1 -right-1 bg-green-500 rounded-full p-0.5 border-2 border-white dark:border-gray-900"><div className="w-3 h-3 text-white font-bold text-[8px] flex items-center justify-center">@</div></div>}
+                       </div>
+                       <div className="text-sm">
+                          <span className="font-bold text-gray-900 dark:text-white mr-1">{item.user}</span>
+                          <span className="text-gray-600 dark:text-gray-300">{item.content}</span>
+                          <span className="text-gray-400 text-xs ml-1.5">{item.time}</span>
+                       </div>
+                    </div>
+                    {item.type === 'follow' ? (
+                       <button className="px-4 py-1.5 bg-[#1E5BFF] text-white text-xs font-bold rounded-lg active:scale-95 transition-transform">
+                          Seguir
+                       </button>
+                    ) : item.postImage && (
+                       <img src={item.postImage} className="w-11 h-11 rounded-lg object-cover" />
+                    )}
+                 </div>
+              ))}
+           </div>
         </div>
       </div>
     </div>
@@ -353,136 +427,33 @@ const FeedPost: React.FC<{ post: CommunityPost; onLike: () => void }> = ({ post,
   );
 };
 
-// Full Screen Viewer for Explore items
-const FullScreenPostViewer: React.FC<{ item: any; onClose: () => void }> = ({ item, onClose }) => {
-  if (!item) return null;
-
-  return (
-    <div className="fixed inset-0 z-[300] bg-black flex flex-col animate-in fade-in zoom-in-95 duration-200">
-      <div className="absolute top-4 left-0 right-0 z-20 flex justify-between items-center px-4">
-        <button onClick={onClose} className="p-2 bg-black/40 backdrop-blur-md rounded-full text-white">
-          <ChevronLeft className="w-6 h-6" />
-        </button>
-        <span className="text-white font-bold text-sm drop-shadow-md">Explorar</span>
-        <div className="w-10"></div>
-      </div>
-
-      <div className="flex-1 flex items-center justify-center bg-black relative">
-        {item.type === 'video' ? (
-          <video 
-            src={item.url} 
-            className="max-h-full max-w-full w-full object-contain" 
-            autoPlay 
-            loop 
-            controls={false}
-            playsInline
-          />
-        ) : (
-          <img src={item.url} className="max-h-full max-w-full w-full object-contain" alt="Post" />
-        )}
-      </div>
-
-      <div className="bg-gradient-to-t from-black via-black/80 to-transparent pt-12 pb-8 px-5 absolute bottom-0 left-0 right-0 z-20">
-        <div className="flex items-center gap-3 mb-3">
-          <img src={item.userAvatar} alt={item.userName} className="w-10 h-10 rounded-full border border-white/20 bg-gray-800 object-cover" />
-          <div>
-            <h4 className="font-bold text-white text-sm flex items-center gap-1">
-              {item.userName}
-              {item.isMerchant && <BadgeCheck className="w-3.5 h-3.5 text-[#1E5BFF] fill-white" />}
-            </h4>
-            <p className="text-white/70 text-xs">Freguesia • Seguir</p>
-          </div>
-        </div>
-        <p className="text-white text-sm leading-relaxed line-clamp-2 mb-4">
-          {item.caption}
-        </p>
-        <div className="flex items-center justify-between">
-          <div className="flex gap-6">
-            <button className="flex flex-col items-center gap-1 text-white">
-              <Heart className="w-7 h-7" />
-              <span className="text-xs font-bold">{item.likes}</span>
-            </button>
-            <button className="flex flex-col items-center gap-1 text-white">
-              <MessageCircle className="w-7 h-7" />
-              <span className="text-xs font-bold">{item.comments}</span>
-            </button>
-            <button className="flex flex-col items-center gap-1 text-white">
-              <Share2 className="w-7 h-7" />
-              <span className="text-xs font-bold">Enviar</span>
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
 const CommunityExploreScreen: React.FC = () => {
-  const [selectedPost, setSelectedPost] = useState<any | null>(null);
-
-  // Generate dense mock data for grid
-  const exploreItems = Array.from({ length: 30 }).map((_, i) => ({
-    id: i,
-    type: i % 5 === 0 ? 'video' : 'image',
-    url: i % 5 === 0 
-      ? 'https://videos.pexels.com/video-files/4434246/4434246-sd_540_960_25fps.mp4' 
-      : `https://picsum.photos/400/400?random=${i + 100}`,
-    userName: i % 3 === 0 ? 'Burger Freguesia' : `Usuario ${i}`,
-    userAvatar: `https://i.pravatar.cc/100?u=${i}`,
-    isMerchant: i % 3 === 0,
-    caption: 'Explorando o melhor da Freguesia! 🌳 #local #gastronomia',
-    likes: 120 + i * 5,
-    comments: 12 + i
-  }));
-
-  const getGridClass = (index: number) => {
-    // Pattern: 3 columns. Every 12 items, index 2 spans 2x2.
-    // 0 1 2(BIG)
-    // 3 4 
-    // 5 6 7
-    // This creates a mosaic feel using grid-auto-flow: dense
-    if (index % 12 === 2) return "col-span-2 row-span-2";
-    return "col-span-1 row-span-1";
-  };
-
   return (
-    <div className="pb-20 bg-white dark:bg-gray-950 min-h-screen">
-      <div className="px-4 pt-2 mb-2">
-        <div className="relative">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-          <input 
-            type="text" 
-            placeholder="Buscar pessoas, lojas e posts..." 
-            className="w-full bg-gray-100 dark:bg-gray-900 rounded-xl py-2.5 pl-10 pr-4 text-sm outline-none focus:ring-1 focus:ring-[#1E5BFF] dark:text-white border border-transparent focus:border-[#1E5BFF]"
-          />
-        </div>
+    <div className="p-5 pb-20">
+      <div className="relative mb-6">
+        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+        <input 
+          type="text" 
+          placeholder="Buscar pessoas, lojas e posts..." 
+          className="w-full bg-white dark:bg-gray-800 rounded-2xl py-3.5 pl-12 pr-4 text-sm outline-none focus:ring-2 focus:ring-[#1E5BFF] dark:text-white shadow-sm border border-gray-100 dark:border-gray-700"
+        />
       </div>
 
-      <div className="grid grid-cols-3 gap-0.5 auto-rows-[120px] sm:auto-rows-[150px] grid-flow-dense">
-         {exploreItems.map((item, index) => (
-           <div 
-             key={item.id} 
-             className={`relative bg-gray-200 dark:bg-gray-800 overflow-hidden cursor-pointer group ${getGridClass(index)}`}
-             onClick={() => setSelectedPost(item)}
-           >
-             {item.type === 'video' ? (
-                <>
-                  <video src={item.url} className="w-full h-full object-cover" muted loop playsInline />
-                  <div className="absolute top-2 right-2">
-                    <Play className="w-5 h-5 text-white drop-shadow-md fill-white/50" />
-                  </div>
-                </>
-             ) : (
-                <img src={item.url} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" loading="lazy" />
-             )}
-             <div className="absolute inset-0 bg-black/20 group-hover:bg-black/0 transition-colors"></div>
-           </div>
-         ))}
+      <h3 className="font-bold text-gray-900 dark:text-white mb-4 text-lg">Descobrir</h3>
+      <div className="grid grid-cols-2 gap-4">
+         <div className="bg-gradient-to-br from-purple-500 to-indigo-600 rounded-2xl p-4 text-white h-32 flex flex-col justify-end shadow-lg">
+            <span className="font-bold">Eventos</span>
+         </div>
+         <div className="bg-gradient-to-br from-orange-400 to-red-500 rounded-2xl p-4 text-white h-32 flex flex-col justify-end shadow-lg">
+            <span className="font-bold">Promoções</span>
+         </div>
+         <div className="bg-gradient-to-br from-blue-400 to-cyan-500 rounded-2xl p-4 text-white h-32 flex flex-col justify-end shadow-lg">
+            <span className="font-bold">Notícias</span>
+         </div>
+         <div className="bg-gradient-to-br from-emerald-400 to-green-600 rounded-2xl p-4 text-white h-32 flex flex-col justify-end shadow-lg">
+            <span className="font-bold">Dicas</span>
+         </div>
       </div>
-
-      {selectedPost && (
-        <FullScreenPostViewer item={selectedPost} onClose={() => setSelectedPost(null)} />
-      )}
     </div>
   );
 };
@@ -935,10 +906,10 @@ const CommunityNavBar: React.FC<{
 // --- MAIN COMPONENT ---
 
 export const CommunityFeedView: React.FC<CommunityFeedViewProps> = ({ onStoreClick, user, onRequireLogin }) => {
-  const [internalView, setInternalView] = useState<'home' | 'direct' | 'explore' | 'profile'>('home');
+  const [internalView, setInternalView] = useState<'home' | 'direct' | 'explore' | 'profile' | 'create_post' | 'notifications'>('home');
   const [selectedChatId, setSelectedChatId] = useState<number | null>(null);
   const [viewingStoryIndex, setViewingStoryIndex] = useState<number | null>(null);
-  const [isCreatePostOpen, setIsCreatePostOpen] = useState(false);
+  const [showSuccessToast, setShowSuccessToast] = useState(false);
 
   const handleViewChange = (view: 'home' | 'direct' | 'explore' | 'profile') => {
     if ((view === 'direct' || view === 'profile') && !user) {
@@ -951,17 +922,28 @@ export const CommunityFeedView: React.FC<CommunityFeedViewProps> = ({ onStoreCli
     if (view !== 'direct') setSelectedChatId(null);
   };
 
-  const handleOpenCreatePost = () => {
+  const handleCreatePost = () => {
     if (!user) {
       onRequireLogin();
       return;
     }
-    setIsCreatePostOpen(true);
+    setInternalView('create_post');
   };
 
-  const getHeaderTitle = () => {
-    if (internalView === 'explore') return "Explorar a Freguesia";
-    return "Feed da Freguesia";
+  const handleNotifications = () => {
+    if (!user) {
+      onRequireLogin();
+      return;
+    }
+    setInternalView('notifications');
+  };
+
+  const handlePostSuccess = () => {
+    setInternalView('home');
+    setShowSuccessToast(true);
+    setTimeout(() => setShowSuccessToast(false), 3000);
+    // Scroll to top would ideally happen here
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const renderContent = () => {
@@ -980,30 +962,12 @@ export const CommunityFeedView: React.FC<CommunityFeedViewProps> = ({ onStoreCli
 
             {/* Posts Feed */}
             <div className="p-5 pt-4">
-              {/* Removed inline CreatePostWidget here as requested */}
-
-              {/* Posts */}
               <div className="space-y-4">
                 {MOCK_COMMUNITY_POSTS.map(post => (
                   <FeedPost key={post.id} post={post} onLike={() => !user && onRequireLogin()} />
                 ))}
               </div>
             </div>
-
-            {/* Floating Action Button for Creating Post */}
-            <button
-              onClick={handleOpenCreatePost}
-              className="fixed bottom-24 right-5 z-40 bg-[#1E5BFF] text-white p-4 rounded-full shadow-lg shadow-blue-500/40 hover:bg-blue-600 transition-transform active:scale-95 flex items-center justify-center"
-            >
-              <Plus className="w-7 h-7" />
-            </button>
-
-            {/* Create Post Modal */}
-            <CreatePostModal 
-              isOpen={isCreatePostOpen} 
-              onClose={() => setIsCreatePostOpen(false)} 
-              user={user} 
-            />
           </div>
         );
 
@@ -1012,6 +976,18 @@ export const CommunityFeedView: React.FC<CommunityFeedViewProps> = ({ onStoreCli
 
       case 'profile':
         return <UserProfileScreen user={user} />;
+
+      case 'notifications':
+        return <ActivityScreen onClose={() => setInternalView('home')} />;
+
+      case 'create_post':
+        return (
+          <CreatePostScreen 
+            onClose={() => setInternalView('home')} 
+            onSuccess={handlePostSuccess} 
+            user={user} 
+          />
+        );
 
       case 'direct':
         if (!user) {
@@ -1097,20 +1073,39 @@ export const CommunityFeedView: React.FC<CommunityFeedViewProps> = ({ onStoreCli
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950 font-sans pb-24 animate-in slide-in-from-right duration-300 relative">
-      {/* Header */}
-      <div className="sticky top-0 z-30 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md px-5 h-16 flex items-center justify-between border-b border-gray-100 dark:border-gray-800">
-        <h1 className="font-bold text-lg text-gray-900 dark:text-white font-display">{getHeaderTitle()}</h1>
-        {/* The old toggle is removed, replaced by the NavBar below */}
-        <div className="w-8"></div> {/* Spacer for visual balance if needed */}
-      </div>
+      {/* Dynamic Header */}
+      {internalView === 'home' && (
+        <div className="sticky top-0 z-30 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md h-16 flex items-center justify-between border-b border-gray-100 dark:border-gray-800 px-4">
+          <button 
+            onClick={handleCreatePost}
+            className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+          >
+            <Plus className="w-6 h-6 text-gray-900 dark:text-white" />
+          </button>
+          
+          <h1 className="font-bold text-lg text-gray-900 dark:text-white font-display flex-1 text-center">
+            Feed da Freguesia
+          </h1>
+          
+          <button 
+            onClick={handleNotifications}
+            className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors relative"
+          >
+            <Heart className="w-6 h-6 text-gray-900 dark:text-white" />
+            <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border border-white dark:border-gray-900"></span>
+          </button>
+        </div>
+      )}
 
-      {/* Internal Navigation Bar */}
-      <CommunityNavBar 
-        currentView={internalView} 
-        onChangeView={handleViewChange} 
-        userAvatar={user?.user_metadata?.avatar_url}
-        hasUnreadMessages={true} // Mock state
-      />
+      {/* Internal Navigation Bar - Only show when NOT in full screen flows */}
+      {internalView !== 'create_post' && internalView !== 'notifications' && (
+        <CommunityNavBar 
+          currentView={internalView} 
+          onChangeView={handleViewChange} 
+          userAvatar={user?.user_metadata?.avatar_url}
+          hasUnreadMessages={true} 
+        />
+      )}
 
       <div className="p-0 relative w-full">
         {renderContent()}
@@ -1122,6 +1117,14 @@ export const CommunityFeedView: React.FC<CommunityFeedViewProps> = ({ onStoreCli
           initialStoryIndex={viewingStoryIndex} 
           onClose={() => setViewingStoryIndex(null)} 
         />
+      )}
+
+      {/* Success Toast */}
+      {showSuccessToast && (
+        <div className="fixed top-20 left-1/2 -translate-x-1/2 bg-black/80 backdrop-blur-md text-white px-6 py-3 rounded-full shadow-lg z-[100] animate-in fade-in slide-in-from-top-4 flex items-center gap-2">
+          <Check className="w-4 h-4" />
+          <span className="text-sm font-bold">Publicado com sucesso!</span>
+        </div>
       )}
     </div>
   );
