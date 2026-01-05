@@ -10,9 +10,9 @@ import {
   Calendar, 
   MapPin, 
   CheckCircle2, 
-  Loader2,
-  Save,
-  AtSign,
+  Loader2, 
+  Save, 
+  AtSign, 
   AlertCircle
 } from 'lucide-react';
 
@@ -131,12 +131,16 @@ export const EditProfileView: React.FC<EditProfileViewProps> = ({ user, onBack }
     return () => clearTimeout(timer);
   };
 
+  // Define status variables in component scope so they are available in render
+  const isStatusValid = usernameStatus === 'available' || usernameStatus === 'idle';
+  const isUsernameUnchanged = username === user.user_metadata?.username;
+
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (usernameStatus !== 'available' && usernameStatus !== 'idle') {
-        // Allow saving if idle (no change) or available.
-        // If user didn't change username, status might be idle, assuming it was already theirs.
-        if (username !== user.user_metadata?.username && usernameStatus !== 'available') return;
+    
+    // Explicitly define valid states to avoid TS overlap errors
+    if (!isStatusValid && !isUsernameUnchanged) {
+        return;
     }
 
     setIsLoading(true);
@@ -334,7 +338,7 @@ export const EditProfileView: React.FC<EditProfileViewProps> = ({ user, onBack }
           <div className="pt-4">
             <button 
                 type="submit"
-                disabled={isLoading || (usernameStatus !== 'available' && usernameStatus !== 'idle')}
+                disabled={isLoading || (!isStatusValid && !isUsernameUnchanged)}
                 className="w-full bg-gradient-to-r from-[#1E5BFF] to-[#4D7CFF] text-white font-bold text-lg py-4 rounded-2xl shadow-xl shadow-blue-500/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2 hover:brightness-110 disabled:opacity-70 disabled:cursor-not-allowed"
             >
                 {isLoading ? (

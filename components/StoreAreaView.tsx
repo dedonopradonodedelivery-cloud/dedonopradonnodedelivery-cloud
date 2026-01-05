@@ -20,8 +20,8 @@ import {
   QrCode,
   Tag,
   Rocket,
-  ArrowRight,
-  Briefcase
+  Briefcase,
+  ArrowRight
 } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import { User } from '@supabase/supabase-js';
