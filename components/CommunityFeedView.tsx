@@ -435,16 +435,13 @@ export const CommunityFeedView: React.FC<CommunityFeedViewProps> = ({ onStoreCli
     }
   };
 
-  // Chips List for Neighborhood Filter
-  const NEIGHBORHOOD_FILTERS = ['Jacarepaguá (todos)', ...NEIGHBORHOODS];
-
   const renderContent = () => {
     switch (internalView) {
       case 'home':
         return (
           <div 
             ref={feedRef}
-            className="pb-20 relative"
+            className="pb-20 relative pt-2"
             onTouchStart={handleTouchStart}
             onTouchMove={handleTouchMove}
             onTouchEnd={handleTouchEnd}
@@ -477,23 +474,6 @@ export const CommunityFeedView: React.FC<CommunityFeedViewProps> = ({ onStoreCli
                 className="transition-transform duration-200 ease-out will-change-transform"
                 style={{ transform: `translateY(${pullY}px)` }}
             >
-                {/* Neighborhood Filter Chips */}
-                <div className="flex gap-2 overflow-x-auto no-scrollbar px-4 pt-4 pb-2 border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-950">
-                    {NEIGHBORHOOD_FILTERS.map((hood) => (
-                        <button
-                            key={hood}
-                            onClick={() => setNeighborhood(hood)}
-                            className={`whitespace-nowrap px-4 py-1.5 rounded-full text-xs font-bold transition-all border ${
-                                currentNeighborhood === hood
-                                ? 'bg-[#1E5BFF] text-white border-[#1E5BFF] shadow-sm'
-                                : 'bg-gray-50 dark:bg-gray-800 text-gray-500 dark:text-gray-400 border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700'
-                            }`}
-                        >
-                            {hood === 'Jacarepaguá (todos)' ? 'Todos' : hood}
-                        </button>
-                    ))}
-                </div>
-
                 <StoriesRail user={user} onRequireLogin={onRequireLogin} onOpenStory={(idx) => setViewingStoryIndex(idx)} stories={filteredStories} />
                 <div className="flex flex-col mt-2">
                 {posts.length > 0 ? (

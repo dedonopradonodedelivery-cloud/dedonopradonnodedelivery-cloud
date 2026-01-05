@@ -71,12 +71,16 @@ export const Header: React.FC<HeaderProps> = ({
   user,
   searchTerm,
   onSearchChange,
+  activeTab,
   userRole,
   onOpenMerchantQr,
   customPlaceholder,
 }) => {
   const isMerchant = userRole === 'lojista';
-  const { currentNeighborhood, toggleSelector } = useNeighborhood();
+  const { currentNeighborhood, setNeighborhood, toggleSelector } = useNeighborhood();
+
+  // Filtro deve aparecer apenas nas abas principais: Home, Explorar e Serviços
+  const showNeighborhoodFilter = ['home', 'explore', 'services'].includes(activeTab);
 
   return (
     <>
@@ -127,32 +131,61 @@ export const Header: React.FC<HeaderProps> = ({
             </div>
 
             {/* Bottom Row: Search Bar */}
-            <div className={`flex items-center gap-3 px-4 pb-3 pt-2 transition-all duration-300 ease-in-out`}>
+            <div className={`flex items-center gap-3 px-4 ${showNeighborhoodFilter ? 'pt-2 pb-2' : 'pt-2 pb-3'} transition-all duration-300 ease-in-out`}>
             
-            <div className="relative flex-1 group">
-                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                <Search className="h-4 w-4 text-gray-400 group-focus-within:text-[#1E5BFF] transition-colors" />
+                <div className="relative flex-1 group">
+                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                    <Search className="h-4 w-4 text-gray-400 group-focus-within:text-[#1E5BFF] transition-colors" />
+                    </div>
+                    <input
+                    type="text"
+                    value={searchTerm}
+                    onChange={(e) => onSearchChange(e.target.value)}
+                    placeholder={customPlaceholder || `Buscar em ${currentNeighborhood === "Jacarepaguá (todos)" ? "JPA" : currentNeighborhood}...`}
+                    className={`block w-full pl-10 pr-4 bg-gray-100 dark:bg-gray-800 border-none rounded-2xl text-sm font-medium text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1E5BFF]/50 transition-all shadow-inner py-3`}
+                    />
                 </div>
-                <input
-                type="text"
-                value={searchTerm}
-                onChange={(e) => onSearchChange(e.target.value)}
-                placeholder={customPlaceholder || `Buscar em ${currentNeighborhood === "Jacarepaguá (todos)" ? "JPA" : currentNeighborhood}...`}
-                className={`block w-full pl-10 pr-4 bg-gray-100 dark:bg-gray-800 border-none rounded-2xl text-sm font-medium text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1E5BFF]/50 transition-all shadow-inner py-3`}
-                />
+
+                {/* Exibe QR Code no header APENAS para lojistas (atalho rápido) */}
+                {isMerchant && onOpenMerchantQr && (
+                    <button 
+                        onClick={onOpenMerchantQr}
+                        className={`w-11 h-11 rounded-2xl bg-[#1E5BFF] flex items-center justify-center text-white hover:bg-blue-600 transition-all active:scale-95 shadow-lg shadow-blue-500/30`}
+                    >
+                        <QrCode className="w-5 h-5" />
+                    </button>
+                )}
+
             </div>
 
-            {/* Exibe QR Code no header APENAS para lojistas (atalho rápido) */}
-            {isMerchant && onOpenMerchantQr && (
-                <button 
-                    onClick={onOpenMerchantQr}
-                    className={`w-11 h-11 rounded-2xl bg-[#1E5BFF] flex items-center justify-center text-white hover:bg-blue-600 transition-all active:scale-95 shadow-lg shadow-blue-500/30`}
-                >
-                    <QrCode className="w-5 h-5" />
-                </button>
+            {/* Neighborhood Filter Row */}
+            {showNeighborhoodFilter && (
+                <div className="flex items-center gap-2 overflow-x-auto no-scrollbar px-4 pb-3 pt-1">
+                    <button
+                        onClick={() => setNeighborhood("Jacarepaguá (todos)")}
+                        className={`flex-shrink-0 px-4 py-1.5 rounded-full text-xs font-bold transition-all border ${
+                            currentNeighborhood === "Jacarepaguá (todos)"
+                            ? "bg-[#1E5BFF] text-white border-[#1E5BFF] shadow-sm shadow-blue-500/30"
+                            : "bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-300 border-gray-100 dark:border-gray-700 hover:bg-gray-100"
+                        }`}
+                    >
+                        Todos
+                    </button>
+                    {NEIGHBORHOODS.map(hood => (
+                        <button
+                            key={hood}
+                            onClick={() => setNeighborhood(hood)}
+                            className={`flex-shrink-0 px-4 py-1.5 rounded-full text-xs font-bold transition-all border ${
+                                currentNeighborhood === hood
+                                ? "bg-[#1E5BFF] text-white border-[#1E5BFF] shadow-sm shadow-blue-500/30"
+                                : "bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-300 border-gray-100 dark:border-gray-700 hover:bg-gray-100"
+                            }`}
+                        >
+                            {hood}
+                        </button>
+                    ))}
+                </div>
             )}
-
-            </div>
         </div>
         </div>
         

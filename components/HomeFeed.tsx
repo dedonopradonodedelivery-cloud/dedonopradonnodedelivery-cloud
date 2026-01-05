@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { Store, Category, EditorialCollection, AdType, CommunityPost } from '../types';
 import { 
   ChevronRight, 
@@ -627,6 +627,19 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
   const [listFilter, setListFilter] = useState<'all' | 'cashback' | 'top_rated' | 'open_now'>('all');
   const activeSearchTerm = externalSearchTerm || '';
   const { currentNeighborhood, isAll } = useNeighborhood();
+  
+  // State for horizontal scroll progress bar
+  const categoriesRef = useRef<HTMLDivElement>(null);
+  const [scrollProgress, setScrollProgress] = useState(0);
+
+  const handleScrollCategories = () => {
+    if (categoriesRef.current) {
+        const { scrollLeft, scrollWidth, clientWidth } = categoriesRef.current;
+        const maxScroll = scrollWidth - clientWidth;
+        const progress = maxScroll > 0 ? (scrollLeft / maxScroll) : 0;
+        setScrollProgress(progress);
+    }
+  };
 
   // Filter & Sort stores: Local First > Then Others
   const sortedStores = useMemo(() => {
@@ -651,8 +664,12 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
     switch (key) {
       case 'categories':
         return (
-          <div key="categories" className="w-full bg-white dark:bg-gray-950 pt-6 pb-4">
-            <div className="flex overflow-x-auto no-scrollbar px-4 pb-2">
+          <div key="categories" className="w-full bg-white dark:bg-gray-950 pt-6 pb-2">
+            <div 
+                ref={categoriesRef}
+                onScroll={handleScrollCategories}
+                className="flex overflow-x-auto no-scrollbar px-4 pb-2 snap-x"
+            >
               <div className="grid grid-flow-col grid-rows-2 gap-x-3 gap-y-3">
                 {CATEGORIES.map((cat) => (
                   <button key={cat.id} onClick={() => onSelectCategory(cat)} className="flex flex-col items-center group active:scale-95 transition-all">
@@ -667,6 +684,18 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
                   </button>
                 ))}
               </div>
+            </div>
+            
+            {/* MINI BARRA DE PROGRESSO - HOME EXCLUSIVE */}
+            <div className="flex justify-center w-full mt-1 mb-1">
+                <div className="w-12 h-[3px] bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden relative">
+                    <div 
+                        className="absolute top-0 bottom-0 left-0 bg-[#1E5BFF] rounded-full transition-transform duration-100 ease-out w-4"
+                        style={{ 
+                            transform: `translateX(${scrollProgress * 200}%)` 
+                        }}
+                    />
+                </div>
             </div>
           </div>
         );
@@ -811,7 +840,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
 
       case 'list':
         return (
-          <div key="list" className="w-full bg-white dark:bg-gray-950 py-8">
+          <div key="list" className="w-full bg-white dark:bg-gray-900 py-8">
             <div className="px-5">
               <SectionHeader 
                 title={`Explorar ${currentNeighborhood === 'Jacarepaguá (todos)' ? 'Jacarepaguá' : currentNeighborhood}`} 
