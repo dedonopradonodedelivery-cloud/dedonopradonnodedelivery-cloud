@@ -588,9 +588,9 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
       'categories',
       'home_carousel',
       'weekly_promos',
-      'recommended',
-      'roulette',
       'cashback_stores',
+      'roulette',
+      'recommended',
       'list',
       'mini_tribes'
     ];
