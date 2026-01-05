@@ -1,5 +1,6 @@
+
 import React, { useState } from 'react';
-import { ChevronLeft, Store, Wallet, ArrowRight, Clock } from 'lucide-react';
+import { ChevronLeft, Store, Wallet, ArrowRight, Clock, Info } from 'lucide-react';
 
 export default function PayWithCashbackScreen() {
   const [purchaseValue, setPurchaseValue] = useState<string>("");
@@ -27,10 +28,14 @@ export default function PayWithCashbackScreen() {
     const numberValue = Number(rawValue) / 100;
     setPurchaseValue(formatCurrencyBr(numberValue));
 
-    // If purchase value drops below currently used cashback, cap cashback
+    // Calculate new limits based on new total
+    const limit30Percent = numberValue * 0.30;
+    const maxAllowed = Math.min(walletBalance, limit30Percent);
+
+    // If current cashback usage exceeds new max allowed, cap it
     const currentCashback = parseCurrency(cashbackToUse);
-    if (currentCashback > numberValue) {
-      setCashbackToUse(formatCurrencyBr(numberValue));
+    if (currentCashback > maxAllowed) {
+      setCashbackToUse(formatCurrencyBr(maxAllowed));
     }
   };
 
@@ -41,14 +46,15 @@ export default function PayWithCashbackScreen() {
 
     // Limit rules:
     // 1. Cannot exceed wallet balance
-    // 2. Cannot exceed purchase value
+    // 2. Cannot exceed purchase value (implied by 30% rule, but good for sanity)
+    // 3. NEW: Cannot exceed 30% of purchase value
+    const limit30Percent = purchaseNum * 0.30;
+    const maxAllowed = Math.min(walletBalance, limit30Percent);
+
     let allowedValue = numberValue;
 
-    if (allowedValue > walletBalance) {
-      allowedValue = walletBalance;
-    }
-    if (allowedValue > purchaseNum) {
-      allowedValue = purchaseNum;
+    if (allowedValue > maxAllowed) {
+      allowedValue = maxAllowed;
     }
 
     setCashbackToUse(formatCurrencyBr(allowedValue));
@@ -58,7 +64,10 @@ export default function PayWithCashbackScreen() {
     const purchaseNum = parseCurrency(purchaseValue);
     if (purchaseNum <= 0) return;
 
-    const maxPossible = Math.min(walletBalance, purchaseNum);
+    // Rule: Max 30% of purchase or Balance, whichever is smaller
+    const limit30Percent = purchaseNum * 0.30;
+    const maxPossible = Math.min(walletBalance, limit30Percent);
+    
     setCashbackToUse(formatCurrencyBr(maxPossible));
   };
 
@@ -76,6 +85,7 @@ export default function PayWithCashbackScreen() {
   const numericPurchase = parseCurrency(purchaseValue);
   const numericCashbackToUse = parseCurrency(cashbackToUse);
   const amountToPay = Math.max(numericPurchase - numericCashbackToUse, 0);
+  const limit30Percent = numericPurchase * 0.30;
 
   const isValid = 
     numericPurchase > 0 && 
@@ -207,6 +217,17 @@ export default function PayWithCashbackScreen() {
               USAR MÁX
             </button>
           </div>
+
+          {/* Info about Max Usage - Positive Copy */}
+          {numericPurchase > 0 && (
+            <div className="flex items-start gap-1.5 mt-2 ml-1 text-[10px] text-gray-500">
+                <Info className="w-3 h-3 flex-shrink-0 mt-0.5 text-blue-600" />
+                <p>
+                    Use até <strong className="text-blue-600">R$ {formatCurrencyBr(limit30Percent)}</strong> agora (30%) e acumule novos ganhos!
+                    {walletBalance < limit30Percent && <span className="block text-gray-400 mt-0.5">Limitado ao seu saldo atual. Continue comprando para aumentar seu poder de uso!</span>}
+                </p>
+            </div>
+          )}
         </div>
 
         {/* Section 3: Summary */}

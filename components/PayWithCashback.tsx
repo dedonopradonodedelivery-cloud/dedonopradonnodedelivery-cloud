@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { ChevronLeft, Store, Wallet, CornerRightDown, ArrowRight, Loader2 } from 'lucide-react';
+import { ChevronLeft, Store, Wallet, CornerRightDown, ArrowRight, Loader2, Info } from 'lucide-react';
 
 interface PayWithCashbackProps {
   merchantName: string;
@@ -34,12 +34,16 @@ export const PayWithCashback: React.FC<PayWithCashbackProps> = ({
   const numericCashbackUsed = parseCurrency(balanceUse);
   const payNow = Math.max(0, numericTotal - numericCashbackUsed);
 
+  // Regra de Negócio: Máximo 30% do valor da compra
+  const limit30Percent = numericTotal * 0.30;
+  // O usuário pode usar o menor valor entre: Saldo Disponível, 30% da Compra
+  const maxAllowed = Math.min(userBalance, limit30Percent);
+
   // Logic for "Use Max" button
   const handleUseMax = () => {
     if (numericTotal <= 0) return;
-    const maxPossible = Math.min(userBalance, numericTotal);
     // Format back to string with comma
-    onChangeBalanceUse(maxPossible.toFixed(2).replace('.', ','));
+    onChangeBalanceUse(maxAllowed.toFixed(2).replace('.', ','));
   };
 
   return (
@@ -111,19 +115,22 @@ export const PayWithCashback: React.FC<PayWithCashbackProps> = ({
                 {/* Max Button inside input */}
                 <button 
                     onClick={handleUseMax}
-                    disabled={numericTotal <= 0 || userBalance <= 0}
+                    disabled={numericTotal <= 0 || userBalance <= 0 || maxAllowed <= 0}
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-bold text-green-700 dark:text-green-300 bg-white dark:bg-gray-800 border border-green-200 dark:border-green-700 px-3 py-1.5 rounded-lg shadow-sm active:scale-95 hover:bg-green-50 dark:hover:bg-gray-700 transition-all disabled:opacity-50"
                 >
                     USAR MÁX
                 </button>
             </div>
             
-            {/* Contextual warning if limited */}
-            {numericTotal > 0 && numericTotal < userBalance && (
-                <p className="text-[10px] text-gray-400 mt-1.5 ml-1 flex items-center gap-1">
-                    <CornerRightDown className="w-3 h-3" />
-                    Limitado ao valor da compra
-                </p>
+            {/* Info about Max Usage - Updated Copy */}
+            {numericTotal > 0 && (
+                <div className="flex items-start gap-1.5 mt-2 ml-1 text-[10px] text-gray-500 dark:text-gray-400">
+                    <Info className="w-3 h-3 flex-shrink-0 mt-0.5 text-[#1E5BFF]" />
+                    <p>
+                        Aproveite até <strong className="text-[#1E5BFF]">R$ {limit30Percent.toFixed(2).replace('.', ',')}</strong> (30%) nesta compra e ganhe cashback de novo sobre o restante!
+                        {userBalance < limit30Percent && <span className="block text-gray-400 mt-0.5">Saldo disponível para uso imediato.</span>}
+                    </p>
+                </div>
             )}
         </div>
 

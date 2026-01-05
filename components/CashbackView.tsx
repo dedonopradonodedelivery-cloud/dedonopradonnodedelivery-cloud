@@ -91,7 +91,7 @@ export const CashbackView: React.FC<CashbackViewProps> = ({ onBack, newTransacti
                     <span className="text-4xl font-bold font-display">{totalBalance.toFixed(2).replace('.', ',')}</span>
                 </div>
                 <p className="text-xs text-gray-400">
-                    Use para pagar em qualquer loja parceira.
+                    Use até 30% deste valor a cada nova compra e continue ganhando!
                 </p>
             </div>
         </div>

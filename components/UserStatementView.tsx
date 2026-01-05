@@ -109,16 +109,16 @@ export const UserStatementView: React.FC<UserStatementViewProps> = ({
           </div>
         </div>
 
-        {/* Educational Section */}
+        {/* Educational Section - Improved Copy */}
         <div className="mt-8 bg-blue-50/50 dark:bg-blue-900/10 rounded-3xl p-6 border border-blue-100/50 dark:border-blue-800/30">
           <div className="flex items-start gap-4">
             <div className="p-2 bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-blue-100 dark:border-blue-900">
               <Info className="w-5 h-5 text-[#1E5BFF]" />
             </div>
             <div>
-              <h4 className="font-bold text-gray-900 dark:text-white text-sm">Onde posso usar?</h4>
+              <h4 className="font-bold text-gray-900 dark:text-white text-sm">Como multiplicar seu ganho?</h4>
               <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 leading-relaxed">
-                Seu saldo de cashback é aceito como pagamento em centenas de lojas parceiras na Freguesia.
+                Use seu saldo para pagar até 30% da conta e receba novo cashback sobre o restante. É economia circular!
               </p>
             </div>
           </div>

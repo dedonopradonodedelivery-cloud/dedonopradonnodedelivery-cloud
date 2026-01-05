@@ -110,13 +110,18 @@ export const CashbackPaymentScreen: React.FC<CashbackPaymentScreenProps> = ({
     // Allow only numbers and one comma
     if (!/^\d*[,]?\d{0,2}$/.test(val)) return;
     
+    const newTotal = parseFloat(val.replace(',', '.') || '0');
     setTotalAmount(val);
     
-    // Auto-adjust cashback if total drops below used amount
-    const currentTotal = parseFloat(val.replace(',', '.') || '0');
+    // Auto-adjust cashback if usage exceeds new limits
     const currentUsed = parseFloat(cashbackToUse.replace(',', '.') || '0');
-    if (currentTotal < currentUsed) {
-        setCashbackToUse(val);
+    
+    // Recalculate rules
+    const limit30Percent = newTotal * 0.30;
+    const maxAllowed = Math.min(userBalance, limit30Percent);
+
+    if (currentUsed > maxAllowed) {
+        setCashbackToUse(maxAllowed.toFixed(2).replace('.', ','));
     }
   };
 
@@ -127,7 +132,10 @@ export const CashbackPaymentScreen: React.FC<CashbackPaymentScreenProps> = ({
     
     // Logic limits
     if (numericVal > userBalance) return; // Cannot exceed balance
-    if (numericVal > numericTotal) return; // Cannot exceed total
+    
+    // NEW RULE: 30% Limit
+    const limit30Percent = numericTotal * 0.30;
+    if (numericVal > limit30Percent && numericVal > 0) return; // Cannot exceed 30% of total
 
     setCashbackToUse(val);
   };
@@ -249,14 +257,14 @@ export const CashbackPaymentScreen: React.FC<CashbackPaymentScreenProps> = ({
         <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2 text-center">
             {step === 'sending_push' ? 'Enviando Pedido...' : 
              step === 'waiting' ? 'Aguardando Lojista' : 
-             'Pagamento Confirmado!'}
+             'Pagamento & Economia!'}
         </h2>
         
         {/* SUBTITLE */}
         <p className="text-gray-500 dark:text-gray-400 text-center mb-10 max-w-[280px] leading-relaxed text-sm font-medium">
             {step === 'sending_push' ? 'Conectando com o caixa...' : 
              step === 'waiting' ? 'O lojista recebeu uma notificação e precisa autorizar a transação.' : 
-             'Tudo certo! Seu cashback foi creditado.'}
+             'Tudo certo! Saldo utilizado com sucesso e novo cashback garantido.'}
         </p>
 
         {/* Transaction Summary Card */}

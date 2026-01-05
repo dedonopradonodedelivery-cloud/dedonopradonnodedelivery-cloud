@@ -31,7 +31,7 @@ import { MapPin, Crown, X, Star } from 'lucide-react';
 import { useAuth } from './contexts/AuthContext';
 import { Category, Store, AdType, EditorialCollection } from './types';
 import { getStoreLogo } from './utils/mockLogos';
-import { CategoriaAlimentacao } from './components/CategoriaAlimentacao';
+// import { CategoriaAlimentacao } from './components/CategoriaAlimentacao'; // Removed specific component
 import { CategoryView } from './components/CategoryView';
 import { EditorialListView } from './components/EditorialListView';
 import { UserStatementView } from './components/UserStatementView';
@@ -104,7 +104,8 @@ const App: React.FC = () => {
 
   const handleSelectCategory = (category: Category) => {
     setSelectedCategory(category);
-    setActiveTab(category.slug === 'food' ? 'food_category' : 'category_detail');
+    // Unified navigation to generic category view for ALL categories
+    setActiveTab('category_detail'); 
   };
   
   const handleSelectCollection = (collection: EditorialCollection) => {
@@ -215,8 +216,17 @@ const App: React.FC = () => {
             )}
             {activeTab === 'store_area' && (userRole === 'lojista' ? <StoreAreaView onBack={() => setActiveTab('home')} onNavigate={setActiveTab} user={user as any} /> : <FreguesiaConnectRestricted onBack={() => setActiveTab('home')} />)}
             {activeTab === 'merchant_qr' && (userRole === 'lojista' ? <MerchantQrScreen user={user} onBack={() => setActiveTab('home')} /> : <FreguesiaConnectRestricted onBack={() => setActiveTab('home')} />)}
-            {activeTab === 'category_detail' && selectedCategory && <CategoryView category={selectedCategory} onBack={() => { setActiveTab('home'); setSelectedCategory(null); }} onStoreClick={handleSelectStore} stores={STORES} />}
-            {activeTab === 'food_category' && selectedCategory && <CategoriaAlimentacao onBack={() => { setActiveTab('home'); setSelectedCategory(null); }} onSelectSubcategory={(sub) => console.log(sub)} />}
+            
+            {/* Unified Category View for ALL categories */}
+            {activeTab === 'category_detail' && selectedCategory && (
+                <CategoryView 
+                    category={selectedCategory} 
+                    onBack={() => { setActiveTab('home'); setSelectedCategory(null); }} 
+                    onStoreClick={handleSelectStore} 
+                    stores={STORES} 
+                />
+            )}
+            
             {activeTab === 'service_subcategories' && selectedServiceMacro && <SubcategoriesView macroId={selectedServiceMacro.id} macroName={selectedServiceMacro.name} onBack={() => setActiveTab('services')} onSelectSubcategory={(subName) => { setSelectedServiceSub(subName); setActiveTab('service_specialties'); }} />}
             {activeTab === 'service_specialties' && selectedServiceSub && <SpecialtiesView subcategoryName={selectedServiceSub} onBack={() => setActiveTab('service_subcategories')} onSelectSpecialty={(specialty) => { setQuoteCategory(`${selectedServiceSub} - ${specialty}`); setIsQuoteModalOpen(true); }} />}
             {activeTab === 'service_success' && <ServiceSuccessView onViewRequests={() => alert('Meus Pedidos')} onHome={() => setActiveTab('home')} />}
