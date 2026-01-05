@@ -1,8 +1,8 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Search, Store as StoreIcon, MoreHorizontal, Send, Heart, Share2, MessageCircle, ChevronLeft, BadgeCheck, User as UserIcon, Home, Plus, X, Video, Image as ImageIcon, Film, Loader2, Grid, Camera, Play, Check, ChevronRight } from 'lucide-react';
-import { Store, CommunityPost } from '../types';
-import { MOCK_COMMUNITY_POSTS } from '../constants';
+import { Search, Store as StoreIcon, MoreHorizontal, Send, Heart, Share2, MessageCircle, ChevronLeft, BadgeCheck, User as UserIcon, Home, Plus, X, Video, Image as ImageIcon, Film, Loader2, Grid, Camera, Play, Check, ChevronRight, Briefcase, MapPin, Clock, DollarSign, ExternalLink, AlertCircle, Building2 } from 'lucide-react';
+import { Store, CommunityPost, Job } from '../types';
+import { MOCK_COMMUNITY_POSTS, MOCK_JOBS } from '../constants';
 
 interface CommunityFeedViewProps {
   onStoreClick: (store: Store) => void;
@@ -86,6 +86,148 @@ const MOCK_MESSAGES_HISTORY: Record<number, { id: number; text: string; sender: 
   ]
 };
 
+// --- MISSING COMPONENTS IMPLEMENTATION ---
+
+const StoriesRail: React.FC<{
+  user: any;
+  onRequireLogin: () => void;
+  onOpenStory: (index: number) => void;
+}> = ({ user, onRequireLogin, onOpenStory }) => (
+  <div className="flex gap-4 overflow-x-auto px-5 no-scrollbar pb-2">
+    {/* User's Add Story Button */}
+    <div className="flex flex-col items-center gap-1 cursor-pointer" onClick={() => user ? alert("Câmera de stories (Mock)") : onRequireLogin()}>
+      <div className="w-[62px] h-[62px] rounded-full p-[2px] bg-gray-200 dark:bg-gray-800 relative">
+         <div className="w-full h-full rounded-full bg-gray-100 dark:bg-gray-700 overflow-hidden border-2 border-white dark:border-black">
+            {user?.user_metadata?.avatar_url ? <img src={user.user_metadata.avatar_url} className="w-full h-full object-cover" /> : <UserIcon className="w-full h-full p-3 text-gray-400" />}
+         </div>
+         <div className="absolute bottom-0 right-0 bg-blue-500 rounded-full p-0.5 border-2 border-white dark:border-black text-white">
+            <Plus className="w-3 h-3" />
+         </div>
+      </div>
+      <span className="text-[10px] text-gray-600 dark:text-gray-300">Seu story</span>
+    </div>
+
+    {MOCK_STORIES.map((story, i) => (
+      <div key={story.id} className="flex flex-col items-center gap-1 cursor-pointer" onClick={() => onOpenStory(i)}>
+        <div className={`w-[62px] h-[62px] rounded-full p-[2px] ${story.hasUnread ? 'bg-gradient-to-tr from-yellow-400 to-fuchsia-600' : 'bg-gray-200 dark:bg-gray-700'}`}>
+           <div className="w-full h-full rounded-full overflow-hidden border-2 border-white dark:border-black">
+              <img src={story.avatar} alt={story.user} className="w-full h-full object-cover" />
+           </div>
+        </div>
+        <span className="text-[10px] text-gray-600 dark:text-gray-300 truncate w-16 text-center">{story.user}</span>
+      </div>
+    ))}
+  </div>
+);
+
+const StoryViewer: React.FC<{
+  initialStoryIndex: number;
+  onClose: () => void;
+}> = ({ initialStoryIndex, onClose }) => {
+   const [currentIndex, setCurrentIndex] = useState(initialStoryIndex);
+   const story = MOCK_STORIES[currentIndex];
+
+   return (
+     <div className="fixed inset-0 z-[120] bg-black flex flex-col animate-in zoom-in-95 duration-200">
+        <div className="absolute top-4 right-4 z-20">
+           <button onClick={onClose}><X className="text-white w-8 h-8" /></button>
+        </div>
+        <div className="flex-1 flex items-center justify-center relative">
+           <img src={story.items[0].url} className="w-full h-full object-cover opacity-80" />
+           <div className="absolute bottom-10 left-0 right-0 text-white text-center">
+              <h3 className="font-bold text-lg">{story.user}</h3>
+              <p className="text-sm">Story Mock</p>
+           </div>
+        </div>
+     </div>
+   );
+};
+
+const CommunityExploreScreen: React.FC = () => (
+   <div className="p-1 grid grid-cols-3 gap-1 pb-20">
+      {Array.from({length: 15}).map((_, i) => (
+         <div key={i} className="aspect-square bg-gray-200 dark:bg-gray-800 relative">
+            <img src={`https://picsum.photos/300/300?random=${i}`} className="w-full h-full object-cover" />
+         </div>
+      ))}
+   </div>
+);
+
+const UserProfileScreen: React.FC<{ user: any }> = ({ user }) => (
+   <div className="pb-20">
+      <div className="flex flex-col items-center pt-8 pb-6 px-4">
+         <div className="w-20 h-20 rounded-full bg-gray-200 overflow-hidden mb-3">
+            {user?.user_metadata?.avatar_url ? <img src={user.user_metadata.avatar_url} className="w-full h-full object-cover" /> : <UserIcon className="w-full h-full p-4 text-gray-400" />}
+         </div>
+         <h2 className="font-bold text-lg text-gray-900 dark:text-white">{user?.user_metadata?.full_name || 'Usuário'}</h2>
+         <p className="text-gray-500 text-sm">@{user?.user_metadata?.username || 'usuario'}</p>
+         
+         <div className="flex gap-8 mt-6">
+            <div className="text-center">
+               <div className="font-bold text-lg text-gray-900 dark:text-white">0</div>
+               <div className="text-xs text-gray-500">Publicações</div>
+            </div>
+            <div className="text-center">
+               <div className="font-bold text-lg text-gray-900 dark:text-white">0</div>
+               <div className="text-xs text-gray-500">Seguidores</div>
+            </div>
+            <div className="text-center">
+               <div className="font-bold text-lg text-gray-900 dark:text-white">0</div>
+               <div className="text-xs text-gray-500">Seguindo</div>
+            </div>
+         </div>
+      </div>
+      <div className="border-t border-gray-100 dark:border-gray-800">
+         <div className="p-10 text-center text-gray-400 text-sm">Ainda sem publicações</div>
+      </div>
+   </div>
+);
+
+const ChatScreen: React.FC<{
+  chatId: number;
+  onBack: () => void;
+  user: any;
+}> = ({ chatId, onBack, user }) => {
+    const messages = MOCK_MESSAGES_HISTORY[chatId] || [];
+    const [inputText, setInputText] = useState("");
+    const [msgs, setMsgs] = useState(messages);
+
+    const handleSend = () => {
+        if(!inputText.trim()) return;
+        setMsgs([...msgs, { id: Date.now(), text: inputText, sender: 'me', time: 'Agora' }]);
+        setInputText("");
+    };
+
+    return (
+        <div className="fixed inset-0 z-[110] bg-white dark:bg-gray-900 flex flex-col">
+            <div className="flex items-center gap-3 px-4 py-3 border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900">
+                <button onClick={onBack}><ChevronLeft className="w-6 h-6 text-gray-900 dark:text-white" /></button>
+                <div className="flex-1">
+                    <h3 className="font-bold text-sm text-gray-900 dark:text-white">Chat</h3>
+                </div>
+            </div>
+            <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-50 dark:bg-gray-950">
+                {msgs.map(m => (
+                    <div key={m.id} className={`flex ${m.sender === 'me' ? 'justify-end' : 'justify-start'}`}>
+                        <div className={`max-w-[75%] p-3 rounded-2xl text-sm ${m.sender === 'me' ? 'bg-blue-600 text-white rounded-br-sm' : 'bg-white dark:bg-gray-800 text-gray-800 dark:text-white rounded-bl-sm shadow-sm'}`}>
+                            {m.text}
+                        </div>
+                    </div>
+                ))}
+            </div>
+            <div className="p-3 bg-white dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800 flex gap-2">
+                <input 
+                    value={inputText}
+                    onChange={e => setInputText(e.target.value)}
+                    className="flex-1 bg-gray-100 dark:bg-gray-800 rounded-full px-4 py-2 text-sm outline-none dark:text-white"
+                    placeholder="Mensagem..."
+                />
+                <button onClick={handleSend} className="p-2 bg-blue-600 text-white rounded-full"><Send className="w-4 h-4" /></button>
+            </div>
+        </div>
+    );
+};
+
 // --- SUB-COMPONENTS ---
 
 // CREATE POST SCREEN (Replaces Modal)
@@ -102,7 +244,7 @@ const CreatePostScreen: React.FC<{
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
-      const files = Array.from(e.target.files);
+      const files: File[] = Array.from(e.target.files);
       const newMedia: { url: string; type: 'image' | 'video'; file: File }[] = [];
       let videoCount = mediaFiles.filter(m => m.type === 'video').length;
       let imageCount = mediaFiles.filter(m => m.type === 'image').length;
@@ -149,6 +291,14 @@ const CreatePostScreen: React.FC<{
     setMediaFiles(prev => prev.filter((_, i) => i !== index));
   };
 
+  const handleNextStep = () => {
+    if (mediaFiles.length === 0) {
+        alert("Adicione uma foto ou vídeo (até 30s) para publicar.");
+        return;
+    }
+    setStep(2);
+  };
+
   const handlePublish = () => {
     setIsSubmitting(true);
     // Simulate API
@@ -168,7 +318,7 @@ const CreatePostScreen: React.FC<{
         {step === 1 ? 'Nova Publicação' : 'Nova Publicação'}
       </h2>
       <button 
-        onClick={() => step === 1 ? setStep(2) : handlePublish()}
+        onClick={() => step === 1 ? handleNextStep() : handlePublish()}
         disabled={(step === 1 && mediaFiles.length === 0) || (step === 2 && isSubmitting)}
         className={`text-sm font-bold px-3 py-1.5 rounded-full transition-colors ${
           (step === 1 && mediaFiles.length === 0) || isSubmitting
@@ -346,7 +496,291 @@ const ActivityScreen: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   );
 };
 
-const FeedPost: React.FC<{ post: CommunityPost; onLike: () => void }> = ({ post, onLike }) => {
+// POST OPTIONS MODAL
+const PostOptionsModal: React.FC<{ 
+  post: CommunityPost; 
+  user: any; 
+  onClose: () => void; 
+  onDelete: (postId: string) => void;
+}> = ({ post, user, onClose, onDelete }) => {
+  const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
+  const isOwner = user?.id === post.userId;
+
+  const handleAction = () => {
+    if (isOwner) {
+      setIsConfirmingDelete(true);
+    } else {
+      // Simulate Report
+      onClose();
+      alert("Denúncia enviada. Analisaremos em breve.");
+    }
+  };
+
+  const handleDelete = () => {
+    onDelete(post.id);
+    onClose();
+  };
+
+  if (isConfirmingDelete) {
+    return (
+        <div className="fixed inset-0 z-[110] bg-black/60 backdrop-blur-sm flex items-center justify-center animate-in fade-in duration-200 p-6">
+            <div className="bg-white dark:bg-gray-800 w-full max-w-xs rounded-2xl p-6 shadow-2xl animate-in zoom-in-95 duration-200">
+                <h3 className="font-bold text-lg text-gray-900 dark:text-white mb-2 text-center">Excluir esta postagem?</h3>
+                <p className="text-sm text-gray-500 dark:text-gray-400 text-center mb-6">Essa ação não pode ser desfeita.</p>
+                <div className="flex gap-3">
+                    <button 
+                        onClick={() => setIsConfirmingDelete(false)}
+                        className="flex-1 py-3 text-sm font-bold text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-xl"
+                    >
+                        Cancelar
+                    </button>
+                    <button 
+                        onClick={handleDelete}
+                        className="flex-1 py-3 text-sm font-bold text-white bg-red-500 rounded-xl"
+                    >
+                        Excluir
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+  }
+
+  return (
+    <div className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm flex items-end justify-center animate-in fade-in duration-200" onClick={onClose}>
+      <div 
+        className="bg-white dark:bg-gray-900 w-full max-w-md rounded-t-[2rem] p-4 pb-8 animate-in slide-in-from-bottom duration-300"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="w-12 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full mx-auto mb-6"></div>
+        
+        <button 
+            onClick={handleAction}
+            className={`w-full p-4 rounded-xl flex items-center gap-3 font-bold text-sm active:bg-gray-100 dark:active:bg-gray-800 transition-colors ${isOwner ? 'text-red-500' : 'text-red-500'}`}
+        >
+            {isOwner ? (
+                <>
+                    <X className="w-5 h-5" />
+                    Excluir publicação
+                </>
+            ) : (
+                <>
+                    <AlertCircle className="w-5 h-5" />
+                    Denunciar
+                </>
+            )}
+        </button>
+      </div>
+    </div>
+  );
+};
+
+// JOB DETAIL / APPLICATION MODAL
+const JobApplicationModal: React.FC<{ 
+  job: Job; 
+  onClose: () => void; 
+  user: any;
+  onRequireLogin: () => void;
+}> = ({ job, onClose, user, onRequireLogin }) => {
+  const handleApply = (method: 'whatsapp' | 'direct') => {
+    if (!user) {
+        onRequireLogin();
+        return;
+    }
+
+    if (method === 'whatsapp') {
+        const text = `Olá! Vi a vaga de *${job.role}* no app Localizei Freguesia e gostaria de me candidatar.`;
+        const url = `https://wa.me/${job.contactWhatsapp}?text=${encodeURIComponent(text)}`;
+        window.open(url, '_blank');
+        onClose();
+    } else {
+        // Direct flow mock
+        alert(`Mensagem enviada para ${job.company} via Direct!`);
+        onClose();
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm flex items-end justify-center animate-in fade-in duration-300" onClick={onClose}>
+      <div 
+        className="bg-white dark:bg-gray-900 w-full max-w-md rounded-t-[2rem] p-6 pb-10 animate-in slide-in-from-bottom duration-300 max-h-[85vh] overflow-y-auto"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="w-12 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full mx-auto mb-6"></div>
+
+        <div className="mb-6">
+            <div className="flex items-start justify-between mb-2">
+                <span className="inline-block px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-[10px] font-bold uppercase tracking-wider rounded-full">
+                    {job.type}
+                </span>
+                <span className="text-xs text-gray-400 font-medium">{job.postedAt}</span>
+            </div>
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white leading-tight mb-1">
+                {job.role}
+            </h2>
+            <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400 font-medium text-sm">
+                <Building2 className="w-4 h-4" />
+                {job.company}
+            </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-3 mb-6">
+            <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded-xl border border-gray-100 dark:border-gray-700">
+                <div className="flex items-center gap-2 text-gray-400 mb-1">
+                    <MapPin className="w-3.5 h-3.5" />
+                    <span className="text-[10px] font-bold uppercase tracking-wider">Local</span>
+                </div>
+                <p className="text-sm font-semibold text-gray-800 dark:text-gray-200">{job.neighborhood}</p>
+            </div>
+            <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded-xl border border-gray-100 dark:border-gray-700">
+                <div className="flex items-center gap-2 text-gray-400 mb-1">
+                    <Clock className="w-3.5 h-3.5" />
+                    <span className="text-[10px] font-bold uppercase tracking-wider">Horário</span>
+                </div>
+                <p className="text-sm font-semibold text-gray-800 dark:text-gray-200">{job.schedule}</p>
+            </div>
+            {job.salary && (
+                <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded-xl border border-gray-100 dark:border-gray-700 col-span-2">
+                    <div className="flex items-center gap-2 text-gray-400 mb-1">
+                        <DollarSign className="w-3.5 h-3.5" />
+                        <span className="text-[10px] font-bold uppercase tracking-wider">Salário / Remuneração</span>
+                    </div>
+                    <p className="text-sm font-semibold text-gray-800 dark:text-gray-200">{job.salary}</p>
+                </div>
+            )}
+        </div>
+
+        <div className="space-y-6 mb-8">
+            <div>
+                <h3 className="font-bold text-gray-900 dark:text-white mb-2 text-sm">Descrição</h3>
+                <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
+                    {job.description}
+                </p>
+            </div>
+
+            <div>
+                <h3 className="font-bold text-gray-900 dark:text-white mb-2 text-sm">Requisitos</h3>
+                <ul className="space-y-2">
+                    {job.requirements.map((req, idx) => (
+                        <li key={idx} className="flex items-start gap-2 text-sm text-gray-600 dark:text-gray-300">
+                            <Check className="w-4 h-4 text-green-500 mt-0.5 shrink-0" />
+                            {req}
+                        </li>
+                    ))}
+                </ul>
+            </div>
+        </div>
+
+        <div className="space-y-3">
+            <button 
+                onClick={() => handleApply('whatsapp')}
+                className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-green-600/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+            >
+                <MessageCircle className="w-5 h-5" />
+                Candidatar-se via WhatsApp
+            </button>
+            <button 
+                onClick={() => handleApply('direct')}
+                className="w-full bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white font-bold py-3.5 rounded-xl active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+            >
+                <Send className="w-4 h-4" />
+                Enviar Direct
+            </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// JOBS SCREEN
+const JobsFeedScreen: React.FC<{ 
+  user: any;
+  onRequireLogin: () => void;
+}> = ({ user, onRequireLogin }) => {
+  const [selectedJob, setSelectedJob] = useState<Job | null>(null);
+
+  const isMerchant = user?.user_metadata?.role === 'lojista';
+
+  return (
+    <div className="pb-20">
+        <div className="p-5">
+            <div className="flex items-center justify-between mb-4">
+                <h3 className="font-bold text-gray-900 dark:text-white text-lg flex items-center gap-2">
+                    Vagas da Freguesia
+                    <span className="text-[10px] font-black bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full uppercase tracking-wider">Recentes</span>
+                </h3>
+            </div>
+
+            <div className="space-y-4">
+                {MOCK_JOBS.map((job) => (
+                    <div 
+                        key={job.id}
+                        onClick={() => setSelectedJob(job)}
+                        className="bg-white dark:bg-gray-800 p-5 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 active:scale-[0.98] transition-all cursor-pointer group relative overflow-hidden"
+                    >
+                        {job.isUrgent && (
+                            <div className="absolute top-0 right-0 bg-red-500 text-white text-[9px] font-black px-2 py-1 rounded-bl-xl uppercase tracking-wider">
+                                Urgente
+                            </div>
+                        )}
+                        
+                        <div className="flex justify-between items-start mb-3">
+                            <div>
+                                <h3 className="font-bold text-gray-900 dark:text-white text-lg leading-tight">{job.role}</h3>
+                                <div className="flex items-center gap-1.5 mt-1">
+                                    <Building2 className="w-3.5 h-3.5 text-gray-400" />
+                                    <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">{job.company}</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="flex flex-wrap gap-2 mb-4">
+                            <span className="px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 text-[10px] font-bold uppercase rounded-md border border-gray-200 dark:border-gray-600">
+                                {job.type}
+                            </span>
+                            <span className="px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 text-[10px] font-bold uppercase rounded-md border border-gray-200 dark:border-gray-600">
+                                {job.neighborhood}
+                            </span>
+                            <span className="px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 text-[10px] font-bold uppercase rounded-md border border-gray-200 dark:border-gray-600 flex items-center gap-1">
+                                <Clock className="w-3 h-3" />
+                                {job.postedAt}
+                            </span>
+                        </div>
+
+                        <button className="w-full py-2.5 bg-[#1E5BFF] hover:bg-[#1749CC] text-white font-bold text-sm rounded-xl transition-colors">
+                            Candidatar-se
+                        </button>
+                    </div>
+                ))}
+            </div>
+        </div>
+
+        {/* Merchant FAB to post jobs */}
+        {isMerchant && (
+            <div className="fixed bottom-24 right-5 z-40">
+                <button 
+                    onClick={() => alert("Redirecionar para Painel do Lojista > Minhas Vagas")}
+                    className="bg-black dark:bg-white text-white dark:text-black font-bold py-3 px-5 rounded-full shadow-lg flex items-center gap-2 active:scale-95 transition-transform"
+                >
+                    <Plus className="w-5 h-5" />
+                    Anunciar Vaga
+                </button>
+            </div>
+        )}
+
+        {selectedJob && (
+            <JobApplicationModal 
+                job={selectedJob} 
+                onClose={() => setSelectedJob(null)} 
+                user={user}
+                onRequireLogin={onRequireLogin}
+            />
+        )}
+    </div>
+  );
+};
+
+const FeedPost: React.FC<{ post: CommunityPost; onLike: () => void; onOptions: () => void }> = ({ post, onLike, onOptions }) => {
   const [liked, setLiked] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -371,7 +805,7 @@ const FeedPost: React.FC<{ post: CommunityPost; onLike: () => void }> = ({ post,
             <span className="text-xs text-gray-500 dark:text-gray-400">{post.timestamp}</span>
           </div>
         </div>
-        <button className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
+        <button onClick={onOptions} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 p-1 rounded-full active:bg-gray-100 dark:active:bg-gray-700 transition-colors">
           <MoreHorizontal className="w-5 h-5" />
         </button>
       </div>
@@ -427,444 +861,15 @@ const FeedPost: React.FC<{ post: CommunityPost; onLike: () => void }> = ({ post,
   );
 };
 
-const CommunityExploreScreen: React.FC = () => {
-  return (
-    <div className="p-5 pb-20">
-      <div className="relative mb-6">
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-        <input 
-          type="text" 
-          placeholder="Buscar pessoas, lojas e posts..." 
-          className="w-full bg-white dark:bg-gray-800 rounded-2xl py-3.5 pl-12 pr-4 text-sm outline-none focus:ring-2 focus:ring-[#1E5BFF] dark:text-white shadow-sm border border-gray-100 dark:border-gray-700"
-        />
-      </div>
-
-      <h3 className="font-bold text-gray-900 dark:text-white mb-4 text-lg">Descobrir</h3>
-      <div className="grid grid-cols-2 gap-4">
-         <div className="bg-gradient-to-br from-purple-500 to-indigo-600 rounded-2xl p-4 text-white h-32 flex flex-col justify-end shadow-lg">
-            <span className="font-bold">Eventos</span>
-         </div>
-         <div className="bg-gradient-to-br from-orange-400 to-red-500 rounded-2xl p-4 text-white h-32 flex flex-col justify-end shadow-lg">
-            <span className="font-bold">Promoções</span>
-         </div>
-         <div className="bg-gradient-to-br from-blue-400 to-cyan-500 rounded-2xl p-4 text-white h-32 flex flex-col justify-end shadow-lg">
-            <span className="font-bold">Notícias</span>
-         </div>
-         <div className="bg-gradient-to-br from-emerald-400 to-green-600 rounded-2xl p-4 text-white h-32 flex flex-col justify-end shadow-lg">
-            <span className="font-bold">Dicas</span>
-         </div>
-      </div>
-    </div>
-  );
-};
-
-const UserProfileScreen: React.FC<{ user: any }> = ({ user }) => {
-  if (!user) return null;
-
-  const isOwnProfile = true; // Assuming own profile for now in this view
-  const postsCount = 0;
-  const followersCount = 120;
-  const followingCount = 45;
-  const bio = "Apaixonado pela Freguesia! 🌳\nComendo bem e vivendo melhor.";
-
-  return (
-    <div className="w-full bg-white dark:bg-gray-900 min-h-screen pb-24">
-       {/* Header Row */}
-       <div className="flex items-center px-4 pt-4">
-          {/* Avatar */}
-          <div className="w-20 h-20 rounded-full p-[2px] bg-gradient-to-tr from-yellow-400 to-fuchsia-600 mr-6 shrink-0">
-             <div className="w-full h-full rounded-full border-2 border-white dark:border-gray-900 bg-gray-100 overflow-hidden">
-                <img 
-                    src={user.user_metadata?.avatar_url || "https://i.pravatar.cc/150"} 
-                    alt="Profile" 
-                    className="w-full h-full object-cover" 
-                />
-             </div>
-          </div>
-
-          {/* Stats */}
-          <div className="flex-1 flex justify-around items-center text-center">
-             <div className="flex flex-col">
-                <span className="font-bold text-lg text-gray-900 dark:text-white">{postsCount}</span>
-                <span className="text-xs text-gray-500 dark:text-gray-400">Posts</span>
-             </div>
-             <div className="flex flex-col">
-                <span className="font-bold text-lg text-gray-900 dark:text-white">{followersCount}</span>
-                <span className="text-xs text-gray-500 dark:text-gray-400">Seguidores</span>
-             </div>
-             <div className="flex flex-col">
-                <span className="font-bold text-lg text-gray-900 dark:text-white">{followingCount}</span>
-                <span className="text-xs text-gray-500 dark:text-gray-400">Seguindo</span>
-             </div>
-          </div>
-       </div>
-
-       {/* Bio Section */}
-       <div className="px-4 py-3">
-          <h1 className="font-bold text-sm text-gray-900 dark:text-white">{user.user_metadata?.full_name || 'Usuário'}</h1>
-          <p className="text-sm text-gray-800 dark:text-gray-200 whitespace-pre-line mt-1">{bio}</p>
-       </div>
-
-       {/* Buttons */}
-       <div className="px-4 flex gap-2 mb-6">
-          {isOwnProfile ? (
-            <>
-              <button className="flex-1 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white text-sm font-semibold py-1.5 rounded-lg border border-transparent active:scale-95 transition-transform">
-                Editar perfil
-              </button>
-              <button className="flex-1 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white text-sm font-semibold py-1.5 rounded-lg border border-transparent active:scale-95 transition-transform">
-                Compartilhar perfil
-              </button>
-            </>
-          ) : (
-             <>
-              <button className="flex-1 bg-[#1E5BFF] text-white text-sm font-semibold py-1.5 rounded-lg active:scale-95 transition-transform">
-                Seguir
-              </button>
-              <button className="flex-1 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white text-sm font-semibold py-1.5 rounded-lg active:scale-95 transition-transform">
-                Mensagem
-              </button>
-             </>
-          )}
-       </div>
-
-       {/* Content Grid */}
-       <div className="border-t border-gray-100 dark:border-gray-800">
-          <div className="flex justify-around border-b border-gray-100 dark:border-gray-800">
-             <button className="py-3 border-b-px border-black dark:border-white w-full flex justify-center text-black dark:text-white">
-                <Grid className="w-5 h-5" />
-             </button>
-          </div>
-
-          <div className="grid grid-cols-3 gap-0.5">
-             {postsCount === 0 ? (
-                <div className="col-span-3 py-20 flex flex-col items-center justify-center text-center px-6">
-                   <div className="w-16 h-16 rounded-full border-2 border-gray-300 dark:border-gray-700 flex items-center justify-center mb-4">
-                      <Camera className="w-8 h-8 text-gray-300 dark:text-gray-600" />
-                   </div>
-                   <h3 className="font-bold text-lg text-gray-900 dark:text-white">Você ainda não publicou nada.</h3>
-                </div>
-             ) : (
-                // Map posts here
-                null
-             )}
-          </div>
-       </div>
-    </div>
-  );
-};
-
-const ChatScreen: React.FC<{ 
-  chatId: number; 
-  onBack: () => void; 
-  user: any;
-}> = ({ chatId, onBack, user }) => {
-  const [messages, setMessages] = useState(MOCK_MESSAGES_HISTORY[chatId] || []);
-  const [input, setInput] = useState('');
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
-
-  useEffect(scrollToBottom, [messages]);
-
-  const handleSend = () => {
-    if (!input.trim()) return;
-    
-    const newMsg = {
-        id: Date.now(),
-        text: input,
-        sender: 'me' as const,
-        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-    };
-    
-    setMessages([...messages, newMsg]);
-    setInput('');
-    
-    // Simulate reply
-    setTimeout(() => {
-        setMessages(prev => [...prev, {
-            id: Date.now() + 1,
-            text: "Obrigado pela mensagem! Responderemos em breve.",
-            sender: 'them',
-            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-        }]);
-    }, 1000);
-  };
-
-  const chatInfo = MOCK_CHATS.find(c => c.id === chatId);
-
-  return (
-    <div className="fixed inset-0 z-[200] bg-gray-50 dark:bg-gray-900 flex flex-col w-full h-full animate-in slide-in-from-right duration-300">
-        {/* Header */}
-        <div className="bg-white dark:bg-gray-800 px-4 py-3 flex items-center gap-3 border-b border-gray-100 dark:border-gray-700 shadow-sm">
-            <button onClick={onBack} className="p-2 -ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-                <ChevronLeft className="w-6 h-6 text-gray-600 dark:text-gray-300" />
-            </button>
-            <div className="w-10 h-10 rounded-full overflow-hidden border border-gray-200 dark:border-gray-600">
-                <img src={chatInfo?.avatar} alt={chatInfo?.user} className="w-full h-full object-cover" />
-            </div>
-            <div>
-                <h3 className="font-bold text-gray-900 dark:text-white text-sm flex items-center gap-1">
-                    {chatInfo?.user}
-                    {chatInfo?.isMerchant && <BadgeCheck className="w-3.5 h-3.5 text-[#1E5BFF] fill-blue-50 dark:fill-transparent" />}
-                </h3>
-                <span className="text-xs text-green-500 font-medium">Online</span>
-            </div>
-        </div>
-
-        {/* Messages */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-4">
-            {messages.map((msg) => (
-                <div key={msg.id} className={`flex ${msg.sender === 'me' ? 'justify-end' : 'justify-start'}`}>
-                    <div className={`max-w-[75%] p-3 rounded-2xl text-sm shadow-sm ${
-                        msg.sender === 'me' 
-                        ? 'bg-[#1E5BFF] text-white rounded-br-none' 
-                        : 'bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 rounded-bl-none border border-gray-100 dark:border-gray-700'
-                    }`}>
-                        <p>{msg.text}</p>
-                        <span className={`text-[10px] block text-right mt-1 ${msg.sender === 'me' ? 'text-blue-100' : 'text-gray-400'}`}>
-                            {msg.time}
-                        </span>
-                    </div>
-                </div>
-            ))}
-            <div ref={messagesEndRef} />
-        </div>
-
-        {/* Input */}
-        <div className="p-4 bg-white dark:bg-gray-800 border-t border-gray-100 dark:border-gray-700 pb-8 sm:pb-4">
-            <form 
-                onSubmit={(e) => { e.preventDefault(); handleSend(); }}
-                className="flex items-center gap-3"
-            >
-                <input 
-                    type="text" 
-                    value={input}
-                    onChange={(e) => setInput(e.target.value)}
-                    placeholder="Escreva uma mensagem..."
-                    className="flex-1 bg-gray-100 dark:bg-gray-700/50 rounded-full px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#1E5BFF]/50 dark:text-white"
-                />
-                <button 
-                    type="submit"
-                    disabled={!input.trim()}
-                    className="p-3 bg-[#1E5BFF] rounded-full text-white shadow-lg shadow-blue-500/30 disabled:opacity-50 disabled:shadow-none hover:bg-blue-600 transition-all active:scale-95"
-                >
-                    <Send className="w-5 h-5" />
-                </button>
-            </form>
-        </div>
-    </div>
-  );
-};
-
-// 1. Stories Rail
-const StoriesRail: React.FC<{ 
-  user: any; 
-  onRequireLogin: () => void;
-  onOpenStory: (index: number) => void;
-}> = ({ user, onRequireLogin, onOpenStory }) => {
-  return (
-    <div className="flex gap-4 overflow-x-auto no-scrollbar px-4 pt-2 pb-4 border-b border-gray-100 dark:border-gray-800">
-      {/* My Story Button */}
-      <button 
-        onClick={() => user ? alert("Em breve: Postar Story") : onRequireLogin()}
-        className="flex flex-col items-center gap-1.5 min-w-[72px] cursor-pointer group"
-      >
-        <div className="relative w-[68px] h-[68px]">
-          <div className="w-full h-full rounded-full p-[2px] bg-transparent border-2 border-gray-200 dark:border-gray-700">
-             <div className="w-full h-full rounded-full bg-gray-100 dark:bg-gray-800 overflow-hidden">
-                {user?.user_metadata?.avatar_url ? (
-                  <img src={user.user_metadata.avatar_url} alt="Me" className="w-full h-full object-cover" />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center text-gray-400">
-                    <UserIcon className="w-8 h-8" />
-                  </div>
-                )}
-             </div>
-          </div>
-          <div className="absolute bottom-0 right-0 bg-[#1E5BFF] rounded-full p-1 border-2 border-white dark:border-gray-900">
-            <Plus className="w-3.5 h-3.5 text-white" />
-          </div>
-        </div>
-        <span className="text-xs text-gray-500 dark:text-gray-400 font-medium truncate max-w-[70px]">Seu story</span>
-      </button>
-
-      {/* Stories List */}
-      {MOCK_STORIES.map((story, index) => (
-        <button 
-          key={story.id} 
-          onClick={() => onOpenStory(index)}
-          className="flex flex-col items-center gap-1.5 min-w-[72px] cursor-pointer group"
-        >
-          <div className={`w-[68px] h-[68px] rounded-full p-[2px] ${story.hasUnread ? 'bg-gradient-to-tr from-yellow-400 via-red-500 to-purple-600' : 'bg-gray-200 dark:bg-gray-700'}`}>
-            <div className="w-full h-full rounded-full border-2 border-white dark:border-gray-950 overflow-hidden relative">
-              <img src={story.avatar} alt={story.user} className="w-full h-full object-cover group-active:scale-95 transition-transform" />
-            </div>
-          </div>
-          <div className="flex items-center gap-1 max-w-[74px]">
-            <span className={`text-xs ${story.hasUnread ? 'text-gray-900 dark:text-white font-medium' : 'text-gray-500 dark:text-gray-400'} truncate`}>
-              {story.user}
-            </span>
-            {story.isMerchant && <BadgeCheck className="w-3 h-3 text-[#1E5BFF] fill-white dark:fill-gray-900 shrink-0" />}
-          </div>
-        </button>
-      ))}
-    </div>
-  );
-};
-
-// 2. Full Screen Story Viewer
-const StoryViewer: React.FC<{
-  initialStoryIndex: number;
-  onClose: () => void;
-}> = ({ initialStoryIndex, onClose }) => {
-  const [currentStoryIdx, setCurrentStoryIdx] = useState(initialStoryIndex);
-  const [currentItemIdx, setCurrentItemIdx] = useState(0);
-  const [progress, setProgress] = useState(0);
-  const [isPaused, setIsPaused] = useState(false);
-
-  const currentStory = MOCK_STORIES[currentStoryIdx];
-  const currentItem = currentStory.items[currentItemIdx];
-
-  // Auto-advance logic
-  useEffect(() => {
-    if (isPaused) return;
-
-    const intervalTime = 50; // Update every 50ms
-    const step = 100 / (currentItem.duration / intervalTime);
-
-    const timer = setInterval(() => {
-      setProgress((prev) => {
-        if (prev >= 100) {
-          handleNext();
-          return 0;
-        }
-        return prev + step;
-      });
-    }, intervalTime);
-
-    return () => clearInterval(timer);
-  }, [currentItemIdx, currentStoryIdx, isPaused]);
-
-  const handleNext = () => {
-    if (currentItemIdx < currentStory.items.length - 1) {
-      // Next item in same story
-      setCurrentItemIdx(prev => prev + 1);
-      setProgress(0);
-    } else {
-      // Next story
-      if (currentStoryIdx < MOCK_STORIES.length - 1) {
-        setCurrentStoryIdx(prev => prev + 1);
-        setCurrentItemIdx(0);
-        setProgress(0);
-      } else {
-        // End of all stories
-        onClose();
-      }
-    }
-  };
-
-  const handlePrev = () => {
-    if (currentItemIdx > 0) {
-      setCurrentItemIdx(prev => prev - 1);
-      setProgress(0);
-    } else {
-      if (currentStoryIdx > 0) {
-        setCurrentStoryIdx(prev => prev - 1);
-        setCurrentItemIdx(MOCK_STORIES[currentStoryIdx - 1].items.length - 1); // Last item of prev story
-        setProgress(0);
-      }
-    }
-  };
-
-  return (
-    <div className="fixed inset-0 z-[100] bg-black text-white flex flex-col animate-in fade-in duration-200">
-      {/* Progress Bars */}
-      <div className="absolute top-0 left-0 right-0 z-20 flex gap-1 p-2 pt-3">
-        {currentStory.items.map((item, idx) => (
-          <div key={item.id} className="h-0.5 flex-1 bg-white/30 rounded-full overflow-hidden">
-            <div 
-              className="h-full bg-white transition-all duration-75 ease-linear"
-              style={{ 
-                width: idx === currentItemIdx ? `${progress}%` : idx < currentItemIdx ? '100%' : '0%' 
-              }}
-            />
-          </div>
-        ))}
-      </div>
-
-      {/* Header */}
-      <div className="absolute top-5 left-0 right-0 z-20 px-4 py-3 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <img src={currentStory.avatar} alt="" className="w-9 h-9 rounded-full border border-white/20" />
-          <div className="flex flex-col">
-             <div className="flex items-center gap-1">
-                <span className="font-bold text-sm shadow-sm">{currentStory.user}</span>
-                {currentStory.isMerchant && <BadgeCheck className="w-3.5 h-3.5 text-[#1E5BFF] fill-white" />}
-             </div>
-             <span className="text-[10px] opacity-80">2h</span>
-          </div>
-        </div>
-        <div className="flex items-center gap-4">
-           <button onClick={onClose} className="p-1">
-             <X className="w-6 h-6 drop-shadow-md" />
-           </button>
-        </div>
-      </div>
-
-      {/* Content */}
-      <div 
-        className="flex-1 relative flex items-center justify-center bg-gray-900"
-        onTouchStart={() => setIsPaused(true)}
-        onTouchEnd={() => setIsPaused(false)}
-        onMouseDown={() => setIsPaused(true)}
-        onMouseUp={() => setIsPaused(false)}
-      >
-        {currentItem.type === 'image' ? (
-          <img src={currentItem.url} className="w-full h-full object-cover" />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center bg-gray-800">
-             <Video className="w-12 h-12 text-gray-500" />
-             {/* Use HTML5 Video here in production with autoPlay muted playsInline */}
-          </div>
-        )}
-
-        {/* Tap Areas */}
-        <div className="absolute inset-y-0 left-0 w-1/3 z-10" onClick={(e) => { e.stopPropagation(); handlePrev(); }}></div>
-        <div className="absolute inset-y-0 right-0 w-1/3 z-10" onClick={(e) => { e.stopPropagation(); handleNext(); }}></div>
-      </div>
-
-      {/* Footer / Reply */}
-      <div className="absolute bottom-0 left-0 right-0 p-4 z-20 bg-gradient-to-t from-black/80 to-transparent pt-10">
-         <div className="flex items-center gap-3">
-            <input 
-              type="text" 
-              placeholder="Enviar mensagem..." 
-              className="flex-1 bg-transparent border border-white/40 rounded-full px-4 py-2.5 text-sm text-white placeholder-white/70 focus:border-white outline-none backdrop-blur-sm"
-            />
-            <button className="p-2">
-               <Heart className="w-7 h-7 text-white" />
-            </button>
-            <button className="p-2">
-               <Send className="w-6 h-6 text-white rotate-[15deg]" />
-            </button>
-         </div>
-      </div>
-    </div>
-  );
-};
-
 // 3. Internal Navigation Bar
 const CommunityNavBar: React.FC<{ 
   currentView: string; 
-  onChangeView: (view: 'home' | 'direct' | 'explore' | 'profile') => void;
+  onChangeView: (view: 'home' | 'direct' | 'explore' | 'profile' | 'jobs') => void;
   userAvatar?: string;
   hasUnreadMessages?: boolean;
 }> = ({ currentView, onChangeView, userAvatar, hasUnreadMessages }) => (
   <div className="sticky top-[70px] z-20 flex justify-center mb-0 px-3 pointer-events-none w-full">
-    <div className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-md rounded-full shadow-sm border border-gray-100 dark:border-gray-700 w-full flex items-center justify-between px-8 py-2.5 pointer-events-auto transition-all">
+    <div className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-md rounded-full shadow-sm border border-gray-100 dark:border-gray-700 w-full flex items-center justify-between px-6 py-2.5 pointer-events-auto transition-all">
       <button 
         onClick={() => onChangeView('home')}
         className={`transition-colors ${currentView === 'home' ? 'text-black dark:text-white' : 'text-gray-400 hover:text-gray-600'}`}
@@ -899,6 +904,13 @@ const CommunityNavBar: React.FC<{
           <UserIcon className={`w-6 h-6 ${currentView === 'profile' ? 'text-black dark:text-white fill-black dark:fill-white' : 'text-gray-400'}`} />
         )}
       </button>
+
+      <button 
+        onClick={() => onChangeView('jobs')}
+        className={`transition-colors ${currentView === 'jobs' ? 'text-black dark:text-white' : 'text-gray-400 hover:text-gray-600'}`}
+      >
+        <Briefcase className={`w-6 h-6 ${currentView === 'jobs' ? 'fill-black dark:fill-white' : ''}`} strokeWidth={2} />
+      </button>
     </div>
   </div>
 );
@@ -906,12 +918,16 @@ const CommunityNavBar: React.FC<{
 // --- MAIN COMPONENT ---
 
 export const CommunityFeedView: React.FC<CommunityFeedViewProps> = ({ onStoreClick, user, onRequireLogin }) => {
-  const [internalView, setInternalView] = useState<'home' | 'direct' | 'explore' | 'profile' | 'create_post' | 'notifications'>('home');
+  const [internalView, setInternalView] = useState<'home' | 'direct' | 'explore' | 'profile' | 'create_post' | 'notifications' | 'jobs'>('home');
   const [selectedChatId, setSelectedChatId] = useState<number | null>(null);
   const [viewingStoryIndex, setViewingStoryIndex] = useState<number | null>(null);
   const [showSuccessToast, setShowSuccessToast] = useState(false);
+  
+  // State for posts to handle optimistic delete
+  const [posts, setPosts] = useState<CommunityPost[]>(MOCK_COMMUNITY_POSTS);
+  const [postOptions, setPostOptions] = useState<CommunityPost | null>(null);
 
-  const handleViewChange = (view: 'home' | 'direct' | 'explore' | 'profile') => {
+  const handleViewChange = (view: 'home' | 'direct' | 'explore' | 'profile' | 'jobs') => {
     if ((view === 'direct' || view === 'profile') && !user) {
       onRequireLogin();
       return;
@@ -942,8 +958,20 @@ export const CommunityFeedView: React.FC<CommunityFeedViewProps> = ({ onStoreCli
     setInternalView('home');
     setShowSuccessToast(true);
     setTimeout(() => setShowSuccessToast(false), 3000);
-    // Scroll to top would ideally happen here
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleDeletePost = (postId: string) => {
+    // In a real app, call API here
+    setPosts(prev => prev.filter(p => p.id !== postId));
+    setShowSuccessToast(true); // Reusing toast for "Deleted" feedback
+    setTimeout(() => setShowSuccessToast(false), 2000);
+  };
+
+  const getHeaderTitle = () => {
+    if (internalView === 'explore') return "Explorar a Freguesia";
+    if (internalView === 'jobs') return "Vagas da Freguesia";
+    return "Feed da Freguesia";
   };
 
   const renderContent = () => {
@@ -951,7 +979,6 @@ export const CommunityFeedView: React.FC<CommunityFeedViewProps> = ({ onStoreCli
       case 'home':
         return (
           <div className="pb-20">
-            {/* Added visual spacing between nav bar and stories */}
             <div className="pt-6">
               <StoriesRail 
                 user={user} 
@@ -960,11 +987,18 @@ export const CommunityFeedView: React.FC<CommunityFeedViewProps> = ({ onStoreCli
               />
             </div>
 
-            {/* Posts Feed */}
             <div className="p-5 pt-4">
               <div className="space-y-4">
-                {MOCK_COMMUNITY_POSTS.map(post => (
-                  <FeedPost key={post.id} post={post} onLike={() => !user && onRequireLogin()} />
+                {posts.map(post => (
+                  <FeedPost 
+                    key={post.id} 
+                    post={post} 
+                    onLike={() => !user && onRequireLogin()} 
+                    onOptions={() => {
+                        if(!user) onRequireLogin();
+                        else setPostOptions(post);
+                    }}
+                  />
                 ))}
               </div>
             </div>
@@ -973,6 +1007,9 @@ export const CommunityFeedView: React.FC<CommunityFeedViewProps> = ({ onStoreCli
 
       case 'explore':
         return <CommunityExploreScreen />;
+
+      case 'jobs':
+        return <JobsFeedScreen user={user} onRequireLogin={onRequireLogin} />;
 
       case 'profile':
         return <UserProfileScreen user={user} />;
@@ -1074,7 +1111,7 @@ export const CommunityFeedView: React.FC<CommunityFeedViewProps> = ({ onStoreCli
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950 font-sans pb-24 animate-in slide-in-from-right duration-300 relative">
       {/* Dynamic Header */}
-      {internalView === 'home' && (
+      {(internalView === 'home' || internalView === 'jobs' || internalView === 'explore') && (
         <div className="sticky top-0 z-30 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md h-16 flex items-center justify-between border-b border-gray-100 dark:border-gray-800 px-4">
           <button 
             onClick={handleCreatePost}
@@ -1084,7 +1121,7 @@ export const CommunityFeedView: React.FC<CommunityFeedViewProps> = ({ onStoreCli
           </button>
           
           <h1 className="font-bold text-lg text-gray-900 dark:text-white font-display flex-1 text-center">
-            Feed da Freguesia
+            {getHeaderTitle()}
           </h1>
           
           <button 
@@ -1097,7 +1134,7 @@ export const CommunityFeedView: React.FC<CommunityFeedViewProps> = ({ onStoreCli
         </div>
       )}
 
-      {/* Internal Navigation Bar - Only show when NOT in full screen flows */}
+      {/* Internal Navigation Bar */}
       {internalView !== 'create_post' && internalView !== 'notifications' && (
         <CommunityNavBar 
           currentView={internalView} 
@@ -1119,11 +1156,24 @@ export const CommunityFeedView: React.FC<CommunityFeedViewProps> = ({ onStoreCli
         />
       )}
 
+      {/* Action Modals */}
+      {postOptions && (
+        <PostOptionsModal 
+            post={postOptions} 
+            user={user} 
+            onClose={() => setPostOptions(null)}
+            onDelete={handleDeletePost}
+        />
+      )}
+
       {/* Success Toast */}
       {showSuccessToast && (
         <div className="fixed top-20 left-1/2 -translate-x-1/2 bg-black/80 backdrop-blur-md text-white px-6 py-3 rounded-full shadow-lg z-[100] animate-in fade-in slide-in-from-top-4 flex items-center gap-2">
           <Check className="w-4 h-4" />
-          <span className="text-sm font-bold">Publicado com sucesso!</span>
+          <span className="text-sm font-bold">
+             {/* Simple logic: if in home view it was likely a post creation, else deletion */}
+             {internalView === 'home' && posts.length === MOCK_COMMUNITY_POSTS.length + 1 ? 'Publicado com sucesso!' : 'Ação realizada!'}
+          </span>
         </div>
       )}
     </div>
