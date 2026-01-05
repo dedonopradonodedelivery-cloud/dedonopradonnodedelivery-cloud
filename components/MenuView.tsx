@@ -14,7 +14,8 @@ import {
   Loader2,
   BadgeCheck,
   Zap,
-  LayoutDashboard
+  LayoutDashboard,
+  MessageCircle
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { MasterSponsorBanner } from './MasterSponsorBanner';
@@ -201,6 +202,13 @@ export const MenuView: React.FC<MenuViewProps> = ({ user, userRole, onAuthClick,
         />
 
         <SectionTitle title="Comunidade & Suporte" />
+        <MenuItem 
+            icon={MessageCircle} 
+            label="Feed da Comunidade" 
+            onClick={() => onNavigate('community_feed')} 
+            colorClass="bg-yellow-500" 
+            subLabel="Veja o que os vizinhos recomendam"
+        />
         {isMerchant && (
              <MenuItem 
                 icon={Users} 

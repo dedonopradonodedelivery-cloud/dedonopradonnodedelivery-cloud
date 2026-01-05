@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { Store, Category, EditorialCollection, AdType } from '../types';
+import { Store, Category, EditorialCollection, AdType, CommunityPost } from '../types';
 import { 
   ChevronRight, 
   Dices,
@@ -21,14 +21,16 @@ import {
   Coins,
   Repeat,
   Quote,
-  Zap
+  Zap,
+  ThumbsUp,
+  AlertTriangle,
+  Lightbulb
 } from 'lucide-react';
 import { LojasEServicosList } from './LojasEServicosList';
 import { User } from '@supabase/supabase-js';
 import { SpinWheelView } from './SpinWheelView';
 import { MasterSponsorBanner } from './MasterSponsorBanner';
-import { CATEGORIES, STORES, MOCK_JOBS } from '../constants';
-import { RecomendadosPorMoradores } from './RecomendadosPorMoradores';
+import { CATEGORIES, STORES, MOCK_JOBS, MOCK_COMMUNITY_POSTS } from '../constants';
 
 interface HomeFeedProps {
   onNavigate: (view: string) => void;
@@ -51,7 +53,6 @@ const MINI_TRIBOS = [
 ];
 
 // --- DADOS MOCKADOS PARA PROMOÇÕES DA SEMANA ---
-// Regra: Mínimo 15% de desconto. Lojistas selecionados.
 const WEEKLY_PROMOS = [
   {
     id: 'promo-1',
@@ -111,12 +112,10 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void }> = ({ onNavigat
   const [currentIndex, setCurrentIndex] = useState(0);
   const [progress, setProgress] = useState(0);
 
-  // 1. Filtrar lojas premium para o Banner (fallback se não tiver vagas)
   const premiumStores = useMemo(() => {
     return STORES.filter(s => s.adType === AdType.PREMIUM).slice(0, 6); 
   }, []);
 
-  // 2. Construir lista de banners
   const banners: BannerItem[] = useMemo(() => {
     const list: BannerItem[] = [
       {
@@ -151,7 +150,6 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void }> = ({ onNavigat
       }
     ];
 
-    // Banner 4: Jobs se houver, senão Premium
     if (MOCK_JOBS.length > 0) {
       list.push({
         id: 'b4-jobs',
@@ -210,7 +208,6 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void }> = ({ onNavigat
         className="w-full relative aspect-[2/1] rounded-[32px] overflow-hidden shadow-xl shadow-slate-200 dark:shadow-none border border-gray-100 dark:border-white/5 bg-slate-900 cursor-pointer active:scale-[0.98] transition-all group"
       >
         
-        {/* --- CONTEÚDO CONDICIONAL --- */}
         {current.type === 'standard' || current.type === 'jobs' ? (
           <>
             <img 
@@ -236,7 +233,6 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void }> = ({ onNavigat
             </div>
           </>
         ) : (
-          /* --- LAYOUT PREMIUM GRID (FALLBACK) --- */
           <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-slate-800 to-black flex flex-col items-center justify-center p-6 animate-in fade-in duration-500">
              <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 rounded-full blur-3xl pointer-events-none"></div>
              <div className="absolute bottom-0 left-0 w-32 h-32 bg-blue-500/10 rounded-full blur-3xl pointer-events-none"></div>
@@ -258,7 +254,6 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void }> = ({ onNavigat
           </div>
         )}
 
-        {/* Progress Bar Indicator */}
         <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 z-30 w-1/3 justify-center">
           {banners.map((_, idx) => (
             <div key={idx} className="h-1 flex-1 bg-white/20 rounded-full overflow-hidden backdrop-blur-sm cursor-pointer" onClick={(e) => { e.stopPropagation(); setCurrentIndex(idx); setProgress(0); }}>
@@ -270,7 +265,6 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void }> = ({ onNavigat
           ))}
         </div>
 
-        {/* Invisible Click Areas */}
         <div className="absolute inset-y-0 left-0 w-1/6 z-20" onClick={handlePrev}></div>
         <div className="absolute inset-y-0 right-0 w-1/6 z-20" onClick={handleNext}></div>
       </div>
@@ -306,10 +300,9 @@ const WeeklyPromosSection: React.FC<{ onNavigate: (v: string) => void }> = ({ on
         {validPromos.map((promo) => (
           <button 
             key={promo.id}
-            onClick={() => onNavigate('weekly_promo')} // Em produção, levaria para a loja específica
+            onClick={() => onNavigate('weekly_promo')} 
             className="snap-center min-w-[160px] max-w-[160px] flex flex-col bg-white dark:bg-gray-800 rounded-[20px] shadow-[0_2px_8px_rgba(0,0,0,0.06)] dark:shadow-none border border-gray-100 dark:border-gray-700 overflow-hidden group active:scale-[0.98] transition-all"
           >
-            {/* Image Area */}
             <div className="relative h-[110px] w-full overflow-hidden">
               <img 
                 src={promo.image} 
@@ -318,7 +311,6 @@ const WeeklyPromosSection: React.FC<{ onNavigate: (v: string) => void }> = ({ on
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
               
-              {/* Badge 7 Dias */}
               <div className="absolute top-2 right-2 bg-black/60 backdrop-blur-md px-2 py-0.5 rounded-md border border-white/10">
                 <span className="text-[8px] font-bold text-white uppercase tracking-wider flex items-center gap-1">
                   <Timer className="w-2.5 h-2.5 text-yellow-400" />
@@ -326,7 +318,6 @@ const WeeklyPromosSection: React.FC<{ onNavigate: (v: string) => void }> = ({ on
                 </span>
               </div>
 
-              {/* Discount Badge - Big & Impactful */}
               <div className="absolute bottom-2 left-2">
                 <div className="bg-red-600 text-white px-2 py-1 rounded-lg shadow-lg flex items-center gap-0.5">
                   <span className="text-[14px] font-black tracking-tighter">-{promo.discount}%</span>
@@ -334,7 +325,6 @@ const WeeklyPromosSection: React.FC<{ onNavigate: (v: string) => void }> = ({ on
               </div>
             </div>
 
-            {/* Content Area */}
             <div className="p-3 flex flex-col flex-1 justify-between text-left">
               <div>
                 <h4 className="font-bold text-gray-900 dark:text-white text-xs leading-tight line-clamp-2 mb-1">
@@ -435,6 +425,88 @@ const CommunityTrustCarousel: React.FC<{ stores: Store[], onStoreClick: (store: 
   );
 };
 
+// --- COMPONENTE FEED DE COMUNIDADE (Substituto do Recomendados) ---
+const CommunityFeedBlock: React.FC<{ 
+  onNavigate: (view: string) => void;
+  onStoreClick?: (store: Store) => void;
+}> = ({ onNavigate, onStoreClick }) => {
+  if (MOCK_COMMUNITY_POSTS.length === 0) return null;
+
+  const getTypeIcon = (type: string) => {
+    switch (type) {
+      case 'alert': return <AlertTriangle className="w-3 h-3 text-red-500" />;
+      case 'tip': return <Lightbulb className="w-3 h-3 text-yellow-500" />;
+      default: return <ThumbsUp className="w-3 h-3 text-blue-500" />;
+    }
+  };
+
+  return (
+    <div className="w-full bg-gray-50/80 dark:bg-slate-900/30 py-10 border-y border-gray-100 dark:border-gray-800">
+      <div className="px-5">
+        <SectionHeader 
+          title="Comunidade" 
+          subtitle="Recomendado pelos vizinhos"
+          rightElement={
+            <button onClick={() => onNavigate('community_feed')} className="text-xs font-bold text-[#1E5BFF]">
+              Ver tudo
+            </button>
+          }
+        />
+        
+        <div className="flex gap-3 overflow-x-auto no-scrollbar snap-x -mx-5 px-5 pb-2">
+          {MOCK_COMMUNITY_POSTS.slice(0, 5).map((post) => (
+            <div 
+              key={post.id} 
+              className="bg-white dark:bg-gray-800 rounded-[24px] p-4 shadow-sm border border-gray-100 dark:border-gray-700 min-w-[260px] max-w-[260px] snap-center flex flex-col justify-between active:scale-[0.98] transition-transform cursor-pointer"
+              onClick={() => onNavigate('community_feed')}
+            >
+              <div>
+                <div className="flex items-center gap-3 mb-3">
+                  <img src={post.userAvatar} alt={post.userName} className="w-8 h-8 rounded-full bg-gray-200" />
+                  <div>
+                    <p className="text-xs font-bold text-gray-900 dark:text-white">{post.userName}</p>
+                    <div className="flex items-center gap-1.5">
+                      {getTypeIcon(post.type)}
+                      <span className="text-[10px] text-gray-500 dark:text-gray-400 capitalize">{post.type === 'recommendation' ? 'Recomendou' : post.type === 'tip' ? 'Dica' : 'Alerta'}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <p className="text-sm text-gray-600 dark:text-gray-300 italic leading-relaxed line-clamp-2 mb-3">
+                  "{post.content}"
+                </p>
+                
+                {post.relatedStoreName && (
+                  <div 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      const store = STORES.find(s => s.id === post.relatedStoreId);
+                      if (store && onStoreClick) onStoreClick(store);
+                    }}
+                    className="flex items-center gap-2 bg-gray-50 dark:bg-gray-900/50 p-2 rounded-xl border border-gray-100 dark:border-gray-700 hover:bg-blue-50 dark:hover:bg-blue-900/10 transition-colors"
+                  >
+                    <div className="w-6 h-6 bg-white dark:bg-gray-800 rounded-lg flex items-center justify-center shadow-sm">
+                      <StoreIcon className="w-3 h-3 text-[#1E5BFF]" />
+                    </div>
+                    <span className="text-xs font-bold text-gray-800 dark:text-white truncate">{post.relatedStoreName}</span>
+                  </div>
+                )}
+              </div>
+
+              <div className="pt-3 mt-3 border-t border-gray-50 dark:border-gray-700 flex items-center justify-between">
+                <div className="flex items-center gap-1 bg-blue-50 dark:bg-blue-900/20 px-2 py-0.5 rounded-full border border-blue-100 dark:border-blue-800">
+                  <span className="text-[9px] font-bold text-[#1E5BFF]">Vizinho Recomendou</span>
+                </div>
+                <span className="text-[10px] text-gray-400">{post.timestamp}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
 export const HomeFeed: React.FC<HomeFeedProps> = ({ 
   onNavigate, 
   onSelectCategory, 
@@ -449,11 +521,6 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
   const [isSpinWheelOpen, setIsSpinWheelOpen] = useState(false);
   const [listFilter, setListFilter] = useState<'all' | 'cashback' | 'top_rated' | 'open_now'>('all');
   const activeSearchTerm = externalSearchTerm || '';
-
-  const communityRecommendations = [
-    { id: 'rec-1', nome: 'Cantinho do Café', categoria: 'Cafeterias', texto: 'Melhor lugar pra trabalhar de tarde, o café coado é incrível.', totalRecomendacoes: 142 },
-    { id: 'rec-2', nome: 'Pet Shop Araguaia', categoria: 'Pets', texto: 'Tratam os cachorros com um carinho que nunca vi antes.', totalRecomendacoes: 98 },
-  ];
 
   const getCategoryCover = (category: string) => {
     switch (category) {
@@ -500,14 +567,9 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
       case 'weekly_promos':
         return <WeeklyPromosSection key="weekly_promos" onNavigate={onNavigate} />;
 
-      case 'recommended':
+      case 'community_feed':
         return (
-          <div key="recommended" className="w-full bg-gray-50/80 dark:bg-slate-900/30 py-10 border-y border-gray-100 dark:border-gray-800">
-            <div className="px-5">
-              <SectionHeader title="Comunidade" subtitle="Recomendados pelos vizinhos" />
-              <RecomendadosPorMoradores items={communityRecommendations} />
-            </div>
-          </div>
+          <CommunityFeedBlock key="community_feed" onNavigate={onNavigate} onStoreClick={onStoreClick} />
         );
 
       case 'roulette':
@@ -553,7 +615,6 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
                   onClick={() => onStoreClick?.(store)}
                   className="snap-center min-w-[160px] max-w-[160px] flex flex-col bg-white dark:bg-gray-800 rounded-[20px] shadow-[0_2px_8px_rgba(0,0,0,0.06)] dark:shadow-none border border-gray-100 dark:border-gray-700 overflow-hidden group active:scale-[0.98] transition-all"
                 >
-                  {/* Image Area */}
                   <div className="relative h-[110px] w-full overflow-hidden">
                     <img
                       src={store.image || getCategoryCover(store.category)}
@@ -562,7 +623,6 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-90"></div>
 
-                    {/* Top Badge: Cashback Label */}
                     <div className="absolute top-2 right-2 bg-black/40 backdrop-blur-md px-2 py-0.5 rounded-md border border-white/10">
                       <span className="text-[8px] font-bold text-white uppercase tracking-wider flex items-center gap-1">
                         <Coins className="w-2.5 h-2.5 text-emerald-400" />
@@ -570,7 +630,6 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
                       </span>
                     </div>
 
-                    {/* Bottom Badge: Percentage */}
                     <div className="absolute bottom-2 left-2">
                       <div className="bg-emerald-600 text-white px-2 py-1 rounded-lg shadow-lg flex items-center gap-0.5 border border-emerald-500/50">
                         <span className="text-[14px] font-black tracking-tighter">{store.cashback}% de volta</span>
@@ -578,7 +637,6 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
                     </div>
                   </div>
 
-                  {/* Info Area */}
                   <div className="p-3 flex flex-col flex-1 justify-between text-left h-full">
                     <div>
                       <h4 className="font-bold text-gray-900 dark:text-white text-xs leading-tight line-clamp-2 mb-1">
@@ -657,9 +715,9 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
       'home_carousel',
       'weekly_promos',
       'cashback_stores',
-      'trust_feed', // NEW: Confiança no Bairro
+      'trust_feed', 
+      'community_feed', // NEW: Feed da Comunidade
       'roulette',
-      'recommended',
       'list',
       'mini_tribes'
     ];

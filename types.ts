@@ -54,6 +54,24 @@ export interface Store {
   recentComments?: string[];
 }
 
+export type CommunityPostType = 'tip' | 'recommendation' | 'alert';
+
+export interface CommunityPost {
+  id: string;
+  userId: string;
+  userName: string;
+  userAvatar: string;
+  content: string;
+  imageUrl?: string;
+  relatedStoreId?: string; // ID da loja se houver
+  relatedStoreName?: string; // Nome da loja para display rápido
+  likes: number;
+  comments: number;
+  type: CommunityPostType;
+  timestamp: string;
+  isLiked?: boolean;
+}
+
 export interface Category {
   id: string;
   name: string;

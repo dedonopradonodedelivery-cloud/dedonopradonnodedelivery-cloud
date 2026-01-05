@@ -42,6 +42,7 @@ import { StoreCashbackModule } from './components/StoreCashbackModule';
 import { StoreAdsModule } from './components/StoreAdsModule';
 import { StoreProfileEdit } from './components/StoreProfileEdit';
 import { StoreFinanceModule } from './components/StoreFinanceModule';
+import { CommunityFeedView } from './components/CommunityFeedView';
 import { STORES } from './constants';
 import { 
   AboutView, 
@@ -126,7 +127,7 @@ const App: React.FC = () => {
     'service_subcategories', 'service_specialties', 'service_terms', 'service_success',
     'user_statement', 'merchant_cashback_dashboard', 'merchant_cashback_onboarding',
     'store_cashback_module', 'store_ads_module', 'about', 'support', 'invite_friend', 'favorites',
-    'weekly_promo', 'jobs_list', 'merchant_jobs'
+    'weekly_promo', 'jobs_list', 'merchant_jobs', 'community_feed'
   ];
 
   // UX ENGINEER: Ocultamos a barra de navegação no fluxo de anúncios para evitar 
@@ -200,6 +201,7 @@ const App: React.FC = () => {
             {activeTab === 'weekly_promo' && <WeeklyPromoModule onBack={() => setActiveTab('store_area')} />}
             {activeTab === 'merchant_jobs' && <MerchantJobsModule onBack={() => setActiveTab('store_area')} />}
             {activeTab === 'jobs_list' && <JobsView onBack={() => setActiveTab('home')} />}
+            {activeTab === 'community_feed' && <CommunityFeedView onBack={() => setActiveTab('home')} onStoreClick={handleSelectStore} />}
             {activeTab === 'about' && <AboutView onBack={() => setActiveTab('profile')} />}
             {activeTab === 'support' && <SupportView onBack={() => setActiveTab('profile')} />}
             {activeTab === 'invite_friend' && <InviteFriendView onBack={() => setActiveTab('profile')} />}

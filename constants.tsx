@@ -8,7 +8,7 @@ import {
   Stethoscope, Package, Clock, Target, Settings, Dog,
   Star, Tag, Award, TrendingUp, ChevronRight
 } from 'lucide-react';
-import { AdType, Category, Store, Story, EditorialCollection, Job } from './types';
+import { AdType, Category, Store, Story, EditorialCollection, Job, CommunityPost } from './types';
 import { getStoreLogo } from './utils/mockLogos';
 
 export const CATEGORIES: Category[] = [
@@ -145,6 +145,58 @@ export const MOCK_JOBS: Job[] = [
     contactWhatsapp: '5521977777777',
     postedAt: 'Há 2 dias',
     isUrgent: true
+  }
+];
+
+export const MOCK_COMMUNITY_POSTS: CommunityPost[] = [
+  {
+    id: 'post-1',
+    userId: 'u1',
+    userName: 'Ana Paula',
+    userAvatar: 'https://i.pravatar.cc/100?u=a',
+    content: 'O pão da Padaria Imperial tá saindo agora! Quentinho demais 🍞😋',
+    type: 'recommendation',
+    relatedStoreId: 'premium-test',
+    relatedStoreName: 'Padaria Imperial',
+    timestamp: '5 min atrás',
+    likes: 12,
+    comments: 2
+  },
+  {
+    id: 'post-2',
+    userId: 'u2',
+    userName: 'Carlos Silva',
+    userAvatar: 'https://i.pravatar.cc/100?u=c',
+    content: 'Alguém sabe se a farmácia da Três Rios está de plantão hoje?',
+    type: 'tip',
+    timestamp: '20 min atrás',
+    likes: 3,
+    comments: 5
+  },
+  {
+    id: 'post-3',
+    userId: 'u3',
+    userName: 'Mariana Costa',
+    userAvatar: 'https://i.pravatar.cc/100?u=m',
+    content: 'Gente, o trânsito na Geremigem tá parado. Evitem!',
+    type: 'alert',
+    timestamp: '1h atrás',
+    likes: 45,
+    comments: 12
+  },
+  {
+    id: 'post-4',
+    userId: 'u4',
+    userName: 'Lucas Pereira',
+    userAvatar: 'https://i.pravatar.cc/100?u=l',
+    content: 'O Burger Freguesia nunca decepciona no cheddar. Top demais!',
+    imageUrl: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?q=80&w=600&auto=format&fit=crop',
+    type: 'recommendation',
+    relatedStoreId: '1',
+    relatedStoreName: 'Burger Freguesia',
+    timestamp: '2h atrás',
+    likes: 28,
+    comments: 4
   }
 ];
 
