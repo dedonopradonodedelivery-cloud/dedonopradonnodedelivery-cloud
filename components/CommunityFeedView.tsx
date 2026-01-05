@@ -1,5 +1,5 @@
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { 
   ChevronLeft, 
   MessageSquare, 
@@ -15,7 +15,12 @@ import {
   Megaphone,
   User,
   ShoppingBag,
-  BadgeCheck
+  BadgeCheck,
+  Plus,
+  Search,
+  X,
+  CheckCircle2,
+  Loader2
 } from 'lucide-react';
 import { CommunityPost, Store } from '../types';
 import { MOCK_COMMUNITY_POSTS, STORES } from '../constants';
@@ -26,6 +31,141 @@ interface CommunityFeedViewProps {
   onStoreClick: (store: Store) => void;
   user: SupabaseUser | null;
   onRequireLogin: () => void;
+}
+
+// --- MOCK USERS FOR SHARE SHEET ---
+const MOCK_SHARE_USERS = [
+  { id: 'u1', name: 'Ana Paula', avatar: 'https://i.pravatar.cc/100?u=a', role: 'resident' },
+  { id: 's1', name: 'Burger Freguesia', avatar: '/assets/default-logo.png', role: 'merchant' },
+  { id: 'u2', name: 'Carlos Silva', avatar: 'https://i.pravatar.cc/100?u=c', role: 'resident' },
+  { id: 'u3', name: 'Mariana Costa', avatar: 'https://i.pravatar.cc/100?u=m', role: 'resident' },
+  { id: 's2', name: 'Padaria Imperial', avatar: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?q=80&w=200', role: 'merchant' },
+  { id: 'u4', name: 'Lucas Pereira', avatar: 'https://i.pravatar.cc/100?u=l', role: 'resident' },
+  { id: 'u5', name: 'Fernanda Lima', avatar: 'https://i.pravatar.cc/100?u=f', role: 'resident' },
+  { id: 'u6', name: 'João Souza', avatar: 'https://i.pravatar.cc/100?u=j', role: 'resident' },
+];
+
+const SharePostModal: React.FC<{
+  isOpen: boolean;
+  onClose: () => void;
+}> = ({ isOpen, onClose }) => {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [isSending, setIsSending] = useState(false);
+  const [sentSuccess, setSentSuccess] = useState(false);
+
+  const filteredUsers = MOCK_SHARE_USERS.filter(u => 
+    u.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const toggleSelection = (id: string) => {
+    const newSet = new Set(selectedIds);
+    if (newSet.has(id)) {
+      newSet.delete(id);
+    } else {
+      newSet.add(id);
+    }
+    setSelectedIds(newSet);
+  };
+
+  const handleSend = () => {
+    setIsSending(true);
+    // Simulate API call
+    setTimeout(() => {
+      setIsSending(false);
+      setSentSuccess(true);
+      setTimeout(() => {
+        setSentSuccess(false);
+        setSelectedIds(new Set());
+        setSearchTerm('');
+        onClose();
+      }, 1500);
+    }, 1000);
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm flex items-end justify-center animate-in fade-in duration-200" onClick={onClose}>
+      <div 
+        className="bg-white dark:bg-gray-900 w-full max-w-md rounded-t-[2rem] p-5 pb-8 shadow-2xl animate-in slide-in-from-bottom duration-300 relative"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Handle */}
+        <div className="w-12 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full mx-auto mb-6"></div>
+
+        {sentSuccess ? (
+          <div className="flex flex-col items-center justify-center py-10 text-green-500 animate-in zoom-in duration-300">
+            <CheckCircle2 className="w-16 h-16 mb-4" />
+            <h3 className="text-lg font-bold text-gray-900 dark:text-white">Enviado!</h3>
+          </div>
+        ) : (
+          <>
+            {/* Header Search */}
+            <div className="relative mb-6">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <input 
+                type="text"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Buscar perfis..."
+                className="w-full bg-gray-100 dark:bg-gray-800 rounded-xl py-3 pl-10 pr-4 text-sm font-medium outline-none focus:ring-2 focus:ring-[#1E5BFF] dark:text-white placeholder-gray-400"
+                autoFocus
+              />
+            </div>
+
+            {/* Horizontal List */}
+            <div className="flex gap-4 overflow-x-auto pb-4 no-scrollbar -mx-5 px-5">
+              {filteredUsers.map((user) => {
+                const isSelected = selectedIds.has(user.id);
+                return (
+                  <button 
+                    key={user.id} 
+                    onClick={() => toggleSelection(user.id)}
+                    className="flex flex-col items-center gap-2 min-w-[72px] group"
+                  >
+                    <div className={`relative w-16 h-16 rounded-full p-0.5 transition-all duration-200 ${isSelected ? 'bg-[#1E5BFF]' : 'bg-transparent'}`}>
+                      <img 
+                        src={user.avatar} 
+                        alt={user.name} 
+                        className={`w-full h-full rounded-full object-cover border-2 transition-all ${isSelected ? 'border-white dark:border-gray-900' : 'border-gray-200 dark:border-gray-700'}`}
+                      />
+                      {isSelected && (
+                        <div className="absolute bottom-0 right-0 bg-[#1E5BFF] text-white rounded-full p-0.5 border-2 border-white dark:border-gray-900 animate-in zoom-in duration-200">
+                          <CheckCircle2 className="w-3 h-3" />
+                        </div>
+                      )}
+                      {user.role === 'merchant' && !isSelected && (
+                        <div className="absolute bottom-0 right-0 bg-white dark:bg-gray-800 text-[#1E5BFF] rounded-full p-0.5 border border-gray-100 dark:border-gray-700 shadow-sm">
+                          <StoreIcon className="w-3 h-3" />
+                        </div>
+                      )}
+                    </div>
+                    <span className="text-[10px] font-medium text-gray-700 dark:text-gray-300 text-center truncate w-full leading-tight">
+                      {user.name.split(' ')[0]}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Send Button */}
+            {selectedIds.size > 0 && (
+              <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-800 animate-in slide-in-from-bottom-2 fade-in">
+                <button 
+                  onClick={handleSend}
+                  disabled={isSending}
+                  className="w-full bg-[#1E5BFF] hover:bg-[#1749CC] text-white font-bold py-3.5 rounded-xl shadow-lg active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                >
+                  {isSending ? <Loader2 className="w-5 h-5 animate-spin" /> : `Enviar para ${selectedIds.size} ${selectedIds.size === 1 ? 'pessoa' : 'pessoas'}`}
+                </button>
+              </div>
+            )}
+          </>
+        )}
+      </div>
+    </div>
+  );
 }
 
 const CreatePostModal: React.FC<{ 
@@ -140,6 +280,7 @@ export const CommunityFeedView: React.FC<CommunityFeedViewProps> = ({ onBack, on
   const [posts, setPosts] = useState<CommunityPost[]>(MOCK_COMMUNITY_POSTS);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [activeTab, setActiveTab] = useState<'residents' | 'merchants'>('residents');
+  const [showShareModal, setShowShareModal] = useState(false);
 
   // Detect user role from metadata or context (simplified here)
   const userRole = (user?.user_metadata?.role === 'lojista' ? 'lojista' : 'cliente') as 'cliente' | 'lojista';
@@ -160,6 +301,7 @@ export const CommunityFeedView: React.FC<CommunityFeedViewProps> = ({ onBack, on
       id: `new-${Date.now()}`,
       userId: user.id,
       userName: userRole === 'lojista' ? (user.user_metadata?.full_name || 'Minha Loja') : (user.user_metadata?.full_name || 'Usuário'),
+      userUsername: user.user_metadata?.username || (userRole === 'lojista' ? 'minhaloja' : 'novo_usuario'),
       userAvatar: user.user_metadata?.avatar_url || 'https://ui-avatars.com/api/?name=User&background=random',
       content: data.content,
       type: data.type,
@@ -186,6 +328,10 @@ export const CommunityFeedView: React.FC<CommunityFeedViewProps> = ({ onBack, on
       }
       return p;
     }));
+  };
+
+  const handleShareClick = () => {
+    setShowShareModal(true);
   };
 
   const displayedPosts = useMemo(() => {
@@ -235,7 +381,7 @@ export const CommunityFeedView: React.FC<CommunityFeedViewProps> = ({ onBack, on
           onClick={() => handleAuthRequired(() => setShowCreateModal(true))}
           className="bg-[#1E5BFF] text-white p-2 rounded-full shadow-lg shadow-blue-500/20 active:scale-90 transition-transform"
         >
-          <Send className="w-5 h-5" />
+          <Plus className="w-5 h-5" />
         </button>
       </div>
 
@@ -285,13 +431,16 @@ export const CommunityFeedView: React.FC<CommunityFeedViewProps> = ({ onBack, on
                         )}
                     </div>
                     <div>
-                        <div className="flex items-center gap-1.5">
+                        <div className="flex items-center gap-1.5 flex-wrap">
                             <h4 className="font-bold text-sm text-gray-900 dark:text-white leading-tight">
                                 {post.userName}
                             </h4>
                             {post.authorRole === 'merchant' && (
                                 <BadgeCheck className="w-3.5 h-3.5 text-[#1E5BFF] fill-blue-50 dark:fill-transparent" />
                             )}
+                            <span className="text-xs text-gray-400 font-medium">
+                                @{post.userUsername || (post.authorRole === 'merchant' ? 'loja' : 'morador')}
+                            </span>
                         </div>
                         <div className="flex items-center gap-2 mt-0.5">
                             <span className="text-[10px] text-gray-400">{post.timestamp}</span>
@@ -356,6 +505,12 @@ export const CommunityFeedView: React.FC<CommunityFeedViewProps> = ({ onBack, on
                     <MessageSquare className="w-4 h-4" />
                     {post.comments}
                     </button>
+                    <button 
+                    onClick={() => handleAuthRequired(handleShareClick)}
+                    className="flex items-center gap-1.5 text-xs font-bold text-gray-400 hover:text-[#1E5BFF] transition-colors"
+                    >
+                    <Send className="w-4 h-4" />
+                    </button>
                 </div>
                 <button className="text-gray-300 hover:text-gray-500">
                     <Flag className="w-4 h-4" />
@@ -372,6 +527,13 @@ export const CommunityFeedView: React.FC<CommunityFeedViewProps> = ({ onBack, on
           onClose={() => setShowCreateModal(false)} 
           onSubmit={handleCreatePost}
           userRole={userRole}
+        />
+      )}
+
+      {showShareModal && (
+        <SharePostModal 
+          isOpen={showShareModal}
+          onClose={() => setShowShareModal(false)}
         />
       )}
     </div>

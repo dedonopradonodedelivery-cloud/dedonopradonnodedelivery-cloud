@@ -24,12 +24,15 @@ import {
   QrCode,
   Landmark,
   Ticket,
-  Check
+  Check,
+  AtSign
 } from 'lucide-react';
 
 interface StoreProfileEditProps {
   onBack: () => void;
 }
+
+const RESERVED_USERNAMES = ['admin', 'suporte', 'freguesia', 'localizei', 'oficial', 'moderacao', 'staff'];
 
 const PAYMENT_OPTIONS = [
   { id: 'pix', label: 'Pix', icon: QrCode },
@@ -47,6 +50,7 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
   
   // Form State
   const [isPublic, setIsPublic] = useState(true);
+  const [username, setUsername] = useState('hamburgueriabrasa');
   const [formData, setFormData] = useState({
     name: 'Hamburgueria Brasa',
     category: 'Alimentação',
@@ -58,6 +62,11 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
     site: 'www.brasa.com.br',
     description: 'O melhor burger artesanal do bairro. Ingredientes selecionados, carne fresca e um ambiente familiar pensado para você.',
   });
+
+  // Username validation states
+  const [usernameStatus, setUsernameStatus] = useState<'idle' | 'checking' | 'available' | 'taken' | 'invalid'>('idle');
+  const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [usernameError, setUsernameError] = useState('');
 
   const [paymentMethods, setPaymentMethods] = useState<string[]>(['pix', 'dinheiro', 'credito', 'debito']);
 
@@ -82,6 +91,60 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
+  // --- USERNAME LOGIC (Shared logic concept) ---
+  const validateUsername = (val: string) => {
+    const regex = /^[a-z0-9._]{3,20}$/;
+    if (!val) return 'Obrigatório';
+    if (val.length < 3) return 'Mínimo 3 caracteres';
+    if (val.length > 20) return 'Máximo 20 caracteres';
+    if (!regex.test(val)) return 'Apenas letras minúsculas, números, ponto e underline.';
+    if (RESERVED_USERNAMES.includes(val)) return '@ Indisponível (Reservado)';
+    return '';
+  };
+
+  const generateSuggestions = (base: string) => {
+    const cleanBase = base.replace(/[^a-z0-9]/g, '');
+    return [
+      `${cleanBase}_oficial`,
+      `${cleanBase}.freguesia`,
+      `${cleanBase}_loja`
+    ];
+  };
+
+  const checkAvailability = async (val: string) => {
+    setUsernameStatus('checking');
+    await new Promise(r => setTimeout(r, 600));
+
+    // Mock Taken Usernames
+    const mockTaken = ['admin', 'padaria', 'farmacia', 'loja'];
+    
+    if (mockTaken.includes(val)) {
+      setUsernameStatus('taken');
+      setSuggestions(generateSuggestions(val));
+      setUsernameError('Esse @ já existe');
+    } else {
+      setUsernameStatus('available');
+      setUsernameError('');
+      setSuggestions([]);
+    }
+  };
+
+  const handleUsernameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value.toLowerCase().replace(/\s/g, '');
+    setUsername(val);
+    
+    const error = validateUsername(val);
+    if (error) {
+      setUsernameStatus('invalid');
+      setUsernameError(error);
+      return;
+    }
+
+    setUsernameStatus('checking');
+    const timer = setTimeout(() => checkAvailability(val), 800);
+    return () => clearTimeout(timer);
+  };
+
   const togglePaymentMethod = (id: string) => {
     setPaymentMethods(prev => 
       prev.includes(id) ? prev.filter(p => p !== id) : [...prev, id]
@@ -89,6 +152,8 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
   };
 
   const handleSave = () => {
+    if (usernameStatus === 'taken' || usernameStatus === 'invalid') return;
+
     setIsSaving(true);
     // Simula API
     setTimeout(() => {
@@ -185,6 +250,66 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
                 <h3 className="font-bold text-gray-900 dark:text-white">Dados da Loja</h3>
             </div>
             
+            {/* USERNAME FIELD */}
+            <div className="space-y-1.5">
+                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">@ da loja (Username)</label>
+                <div className="relative group">
+                    <AtSign className={`absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 transition-colors ${usernameStatus === 'available' ? 'text-green-500' : 'text-gray-400'}`} />
+                    <input 
+                        type="text" 
+                        value={username}
+                        onChange={handleUsernameChange}
+                        className={`w-full bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white pl-12 pr-10 py-4 rounded-2xl border outline-none transition-all font-bold lowercase ${
+                            usernameStatus === 'invalid' || usernameStatus === 'taken' 
+                            ? 'border-red-300 focus:border-red-500 focus:ring-2 focus:ring-red-500/20' 
+                            : usernameStatus === 'available' 
+                                ? 'border-green-300 focus:border-green-500 focus:ring-2 focus:ring-green-500/20'
+                                : 'border-gray-100 dark:border-gray-700 focus:border-[#1E5BFF]'
+                        }`}
+                        placeholder="nome.da.loja"
+                        autoComplete="off"
+                        autoCapitalize="none"
+                    />
+                    <div className="absolute right-4 top-1/2 -translate-y-1/2">
+                        {usernameStatus === 'checking' && <Loader2 className="w-5 h-5 text-[#1E5BFF] animate-spin" />}
+                        {usernameStatus === 'available' && <CheckCircle2 className="w-5 h-5 text-green-500" />}
+                        {(usernameStatus === 'taken' || usernameStatus === 'invalid') && <AlertCircle className="w-5 h-5 text-red-500" />}
+                    </div>
+                </div>
+                
+                {/* Feedback & Suggestions */}
+                <div className="min-h-[20px] ml-1">
+                    {usernameStatus === 'available' && (
+                        <p className="text-xs text-green-600 font-bold">@ disponível ✅</p>
+                    )}
+                    {(usernameStatus === 'taken' || usernameStatus === 'invalid') && (
+                        <p className="text-xs text-red-500 font-bold">{usernameError}</p>
+                    )}
+                    {usernameStatus === 'taken' && suggestions.length > 0 && (
+                        <div className="mt-3">
+                            <p className="text-xs text-gray-500 mb-2">Sugestões disponíveis:</p>
+                            <div className="flex flex-wrap gap-2">
+                                {suggestions.map(sug => (
+                                    <button 
+                                        key={sug}
+                                        type="button"
+                                        onClick={() => {
+                                            setUsername(sug);
+                                            setUsernameStatus('available');
+                                            setUsernameError('');
+                                            setSuggestions([]);
+                                        }}
+                                        className="bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-300 text-xs px-3 py-1.5 rounded-lg border border-blue-100 dark:border-blue-800 font-bold hover:bg-blue-100 dark:hover:bg-blue-800/40 transition-colors"
+                                    >
+                                        @{sug}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                </div>
+            </div>
+
             <div className="space-y-1.5">
                 <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Nome Comercial</label>
                 <input 
@@ -222,7 +347,7 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
             </div>
         </section>
 
-        {/* 4. FORMAS DE PAGAMENTO (NOVA SEÇÃO) */}
+        {/* 4. FORMAS DE PAGAMENTO */}
         <section className="bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-sm border border-gray-100 dark:border-gray-700 space-y-5">
             <div className="flex items-center gap-2 mb-2">
                 <CreditCard className="w-4 h-4 text-[#1E5BFF]" />
@@ -333,13 +458,13 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
       <div className="fixed bottom-0 left-0 right-0 p-5 bg-white dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800 z-40 flex flex-col gap-2 max-w-md mx-auto">
         {showSuccess && (
             <div className="flex items-center justify-center gap-2 text-green-600 font-bold text-sm mb-2 animate-in slide-in-from-bottom-2">
-                <CheckCircle2 className="w-4 h-4" /> Alterações salvas com sucesso!
+                <CheckCircle2 className="w-4 h-4" /> Dados atualizados com sucesso!
             </div>
         )}
         <button 
             onClick={handleSave}
-            disabled={isSaving}
-            className="w-full bg-[#1E5BFF] hover:bg-[#1749CC] text-white font-bold py-4 rounded-2xl shadow-xl shadow-blue-500/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-70"
+            disabled={isSaving || (usernameStatus !== 'available' && usernameStatus !== 'idle')}
+            className="w-full bg-[#1E5BFF] hover:bg-[#1749CC] text-white font-bold py-4 rounded-2xl shadow-xl shadow-blue-500/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
         >
             {isSaving ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
             Salvar alterações

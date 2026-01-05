@@ -11,7 +11,9 @@ import {
   MapPin, 
   CheckCircle2, 
   Loader2,
-  Save
+  Save,
+  AtSign,
+  AlertCircle
 } from 'lucide-react';
 
 interface EditProfileViewProps {
@@ -19,8 +21,11 @@ interface EditProfileViewProps {
   onBack: () => void;
 }
 
+const RESERVED_USERNAMES = ['admin', 'suporte', 'freguesia', 'localizei', 'oficial', 'moderacao', 'staff'];
+
 export const EditProfileView: React.FC<EditProfileViewProps> = ({ user, onBack }) => {
   const [name, setName] = useState(user.user_metadata?.full_name || '');
+  const [username, setUsername] = useState(user.user_metadata?.username || '');
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState(user.email || '');
   const [birthDate, setBirthDate] = useState('');
@@ -28,6 +33,11 @@ export const EditProfileView: React.FC<EditProfileViewProps> = ({ user, onBack }
   
   const [isLoading, setIsLoading] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+
+  // Username validation states
+  const [usernameStatus, setUsernameStatus] = useState<'idle' | 'checking' | 'available' | 'taken' | 'invalid'>('idle');
+  const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [usernameError, setUsernameError] = useState('');
 
   // Mock initial data load (simulate fetching from DB)
   useEffect(() => {
@@ -64,8 +74,71 @@ export const EditProfileView: React.FC<EditProfileViewProps> = ({ user, onBack }
     setBirthDate(value);
   };
 
+  // --- USERNAME LOGIC ---
+  const validateUsername = (val: string) => {
+    // Regex: 3-20 chars, a-z, 0-9, ., _
+    const regex = /^[a-z0-9._]{3,20}$/;
+    if (!val) return 'Obrigatório';
+    if (val.length < 3) return 'Mínimo 3 caracteres';
+    if (val.length > 20) return 'Máximo 20 caracteres';
+    if (!regex.test(val)) return 'Apenas letras minúsculas, números, ponto e underline.';
+    if (RESERVED_USERNAMES.includes(val)) return '@ Indisponível (Reservado)';
+    return '';
+  };
+
+  const generateSuggestions = (base: string) => {
+    const cleanBase = base.replace(/[^a-z0-9]/g, '');
+    return [
+      `${cleanBase}.${Math.floor(Math.random() * 99)}`,
+      `${cleanBase}_rj`,
+      `${cleanBase}${Math.floor(Math.random() * 999)}`
+    ];
+  };
+
+  const checkAvailability = async (val: string) => {
+    setUsernameStatus('checking');
+    // Simulate API delay
+    await new Promise(r => setTimeout(r, 600));
+
+    // Mock Taken Usernames for Demo
+    const mockTaken = ['admin', 'teste', 'joao', 'maria', 'localizei'];
+    
+    if (mockTaken.includes(val)) {
+      setUsernameStatus('taken');
+      setSuggestions(generateSuggestions(val));
+      setUsernameError('Esse @ já existe');
+    } else {
+      setUsernameStatus('available');
+      setUsernameError('');
+      setSuggestions([]);
+    }
+  };
+
+  const handleUsernameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value.toLowerCase().replace(/\s/g, '');
+    setUsername(val);
+    
+    const error = validateUsername(val);
+    if (error) {
+      setUsernameStatus('invalid');
+      setUsernameError(error);
+      return;
+    }
+
+    // Debounce check
+    setUsernameStatus('checking');
+    const timer = setTimeout(() => checkAvailability(val), 800);
+    return () => clearTimeout(timer);
+  };
+
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (usernameStatus !== 'available' && usernameStatus !== 'idle') {
+        // Allow saving if idle (no change) or available.
+        // If user didn't change username, status might be idle, assuming it was already theirs.
+        if (username !== user.user_metadata?.username && usernameStatus !== 'available') return;
+    }
+
     setIsLoading(true);
 
     // Simulate API call
@@ -117,13 +190,73 @@ export const EditProfileView: React.FC<EditProfileViewProps> = ({ user, onBack }
         {/* Intro Text */}
         <div className="mb-8 bg-blue-50 dark:bg-blue-900/10 p-4 rounded-2xl border border-blue-100 dark:border-blue-800/30">
           <p className="text-xs text-blue-700 dark:text-blue-300 leading-relaxed text-center">
-            Esses dados ajudam a personalizar a sua experiência no Localizei Freguesia e facilitam seu contato com lojistas.
+            Seu <strong>@username</strong> é sua identidade única na Freguesia. Ele aparecerá em seus posts e comentários.
           </p>
         </div>
 
         {/* Form */}
         <form onSubmit={handleSave} className="space-y-5">
           
+          {/* USERNAME FIELD */}
+          <div className="space-y-1.5">
+            <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide ml-1">@ do bairro (Username)</label>
+            <div className="relative group">
+              <AtSign className={`absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 transition-colors ${usernameStatus === 'available' ? 'text-green-500' : 'text-gray-400'}`} />
+              <input 
+                type="text" 
+                value={username}
+                onChange={handleUsernameChange}
+                className={`w-full bg-white dark:bg-gray-800 text-gray-900 dark:text-white pl-12 pr-10 py-4 rounded-2xl border outline-none transition-all font-bold lowercase ${
+                    usernameStatus === 'invalid' || usernameStatus === 'taken' 
+                    ? 'border-red-300 focus:border-red-500 focus:ring-2 focus:ring-red-500/20' 
+                    : usernameStatus === 'available' 
+                        ? 'border-green-300 focus:border-green-500 focus:ring-2 focus:ring-green-500/20'
+                        : 'border-gray-200 dark:border-gray-700 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20'
+                }`}
+                placeholder="seu.nome"
+                autoComplete="off"
+                autoCapitalize="none"
+              />
+              <div className="absolute right-4 top-1/2 -translate-y-1/2">
+                {usernameStatus === 'checking' && <Loader2 className="w-5 h-5 text-primary-500 animate-spin" />}
+                {usernameStatus === 'available' && <CheckCircle2 className="w-5 h-5 text-green-500" />}
+                {(usernameStatus === 'taken' || usernameStatus === 'invalid') && <AlertCircle className="w-5 h-5 text-red-500" />}
+              </div>
+            </div>
+            
+            {/* Feedback & Suggestions */}
+            <div className="min-h-[20px] ml-1">
+                {usernameStatus === 'available' && (
+                    <p className="text-xs text-green-600 font-bold">@ disponível ✅</p>
+                )}
+                {(usernameStatus === 'taken' || usernameStatus === 'invalid') && (
+                    <p className="text-xs text-red-500 font-bold">{usernameError}</p>
+                )}
+                {usernameStatus === 'taken' && suggestions.length > 0 && (
+                    <div className="mt-3">
+                        <p className="text-xs text-gray-500 mb-2">Sugestões disponíveis:</p>
+                        <div className="flex flex-wrap gap-2">
+                            {suggestions.map(sug => (
+                                <button 
+                                    key={sug}
+                                    type="button"
+                                    onClick={() => {
+                                        setUsername(sug);
+                                        setUsernameStatus('available');
+                                        setUsernameError('');
+                                        setSuggestions([]);
+                                    }}
+                                    className="bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-300 text-xs px-3 py-1.5 rounded-lg border border-blue-100 dark:border-blue-800 font-bold hover:bg-blue-100 dark:hover:bg-blue-800/40 transition-colors"
+                                >
+                                    @{sug}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                )}
+            </div>
+          </div>
+
           <div className="space-y-1.5">
             <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide ml-1">Nome Completo</label>
             <div className="relative group">
@@ -201,7 +334,7 @@ export const EditProfileView: React.FC<EditProfileViewProps> = ({ user, onBack }
           <div className="pt-4">
             <button 
                 type="submit"
-                disabled={isLoading}
+                disabled={isLoading || (usernameStatus !== 'available' && usernameStatus !== 'idle')}
                 className="w-full bg-gradient-to-r from-[#1E5BFF] to-[#4D7CFF] text-white font-bold text-lg py-4 rounded-2xl shadow-xl shadow-blue-500/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2 hover:brightness-110 disabled:opacity-70 disabled:cursor-not-allowed"
             >
                 {isLoading ? (

@@ -20,6 +20,7 @@ export interface StoreReview {
 export interface Store {
   id: string;
   name: string;
+  username?: string; // Novo campo @ da loja
   category: string;
   subcategory: string;
   
@@ -62,6 +63,7 @@ export interface CommunityPost {
   id: string;
   userId: string;
   userName: string;
+  userUsername?: string; // Novo campo @ do usuário
   userAvatar: string;
   authorRole: 'resident' | 'merchant'; // Novo campo para distinguir origem
   content: string;
