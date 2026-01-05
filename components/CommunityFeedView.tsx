@@ -81,16 +81,17 @@ const MOCK_MESSAGES_HISTORY: Record<number, { id: number; text: string; sender: 
 
 // --- SUB-COMPONENTS ---
 
-// 0. Create Post Widget (Replaces simple input)
-const CreatePostWidget: React.FC<{ user: any; onRequireLogin: () => void }> = ({ user, onRequireLogin }) => {
+// 0. Create Post Modal (Replaces CreatePostWidget)
+const CreatePostModal: React.FC<{ isOpen: boolean; onClose: () => void; user: any }> = ({ isOpen, onClose, user }) => {
   const [caption, setCaption] = useState('');
   const [mediaFiles, setMediaFiles] = useState<{ url: string; type: 'image' | 'video' }[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const videoInputRef = useRef<HTMLInputElement>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
 
+  if (!isOpen) return null;
+
   const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!user) { onRequireLogin(); return; }
     if (e.target.files && e.target.files.length > 0) {
       const files = Array.from(e.target.files);
       const remainingSlots = 4 - mediaFiles.length;
@@ -115,7 +116,6 @@ const CreatePostWidget: React.FC<{ user: any; onRequireLogin: () => void }> = ({
   };
 
   const handleVideoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!user) { onRequireLogin(); return; }
     const file = e.target.files?.[0];
     if (file) {
       if (mediaFiles.length > 0) {
@@ -146,8 +146,6 @@ const CreatePostWidget: React.FC<{ user: any; onRequireLogin: () => void }> = ({
   };
 
   const handleSubmit = () => {
-    if (!user) { onRequireLogin(); return; }
-    
     if (mediaFiles.length === 0) {
       alert("Adicione uma foto ou vídeo (até 30s) para publicar no Feed.");
       return;
@@ -159,100 +157,115 @@ const CreatePostWidget: React.FC<{ user: any; onRequireLogin: () => void }> = ({
       setIsSubmitting(false);
       setCaption('');
       setMediaFiles([]);
+      onClose();
       alert("Publicado com sucesso!");
     }, 1500);
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 p-4 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 mb-6">
-      <div className="flex gap-3">
-        <div className="w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden shrink-0">
-           {user?.user_metadata?.avatar_url ? (
-             <img src={user.user_metadata.avatar_url} alt="User" className="w-full h-full object-cover" />
-           ) : (
-             <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs">?</div>
-           )}
+    <div className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center animate-in fade-in duration-300">
+      <div 
+        className="bg-white dark:bg-gray-900 w-full max-w-md rounded-t-[2rem] sm:rounded-3xl p-6 shadow-2xl relative animate-in slide-in-from-bottom duration-300"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex justify-between items-center mb-6">
+            <h2 className="text-lg font-bold text-gray-900 dark:text-white">Criar Publicação</h2>
+            <button onClick={onClose} className="p-2 bg-gray-100 dark:bg-gray-800 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+                <X className="w-5 h-5 text-gray-500" />
+            </button>
         </div>
-        <div className="flex-1">
-          <input 
-            type="text" 
-            value={caption}
-            onChange={(e) => setCaption(e.target.value)}
-            placeholder="O que está acontecendo no bairro?" 
-            className="w-full bg-transparent outline-none text-sm text-gray-700 dark:text-gray-200 placeholder-gray-400 min-h-[40px]"
-            onClick={() => !user && onRequireLogin()}
-          />
-          
-          {/* Media Preview */}
-          {mediaFiles.length > 0 && (
-            <div className={`mt-3 grid gap-2 ${mediaFiles.length === 1 ? 'grid-cols-1' : 'grid-cols-2'}`}>
-              {mediaFiles.map((media, idx) => (
+
+        <div className="flex gap-4 mb-4">
+            <div className="w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden shrink-0">
+                {user?.user_metadata?.avatar_url ? (
+                    <img src={user.user_metadata.avatar_url} alt="User" className="w-full h-full object-cover" />
+                ) : (
+                    <div className="w-full h-full flex items-center justify-center text-gray-400">
+                        <UserIcon className="w-5 h-5" />
+                    </div>
+                )}
+            </div>
+            <div className="flex-1">
+                <textarea 
+                    value={caption}
+                    onChange={(e) => setCaption(e.target.value)}
+                    placeholder="O que está acontecendo no bairro?" 
+                    className="w-full bg-transparent outline-none text-sm text-gray-700 dark:text-gray-200 placeholder-gray-400 min-h-[80px] resize-none"
+                    maxLength={2200}
+                />
+                <div className={`text-right text-xs mt-1 ${caption.length >= 2200 ? 'text-red-500 font-bold' : 'text-gray-400'}`}>
+                    {caption.length} / 2200
+                </div>
+            </div>
+        </div>
+
+        {/* Media Preview */}
+        {mediaFiles.length > 0 && (
+            <div className={`mb-6 grid gap-2 ${mediaFiles.length === 1 ? 'grid-cols-1' : 'grid-cols-2'}`}>
+                {mediaFiles.map((media, idx) => (
                 <div key={idx} className="relative rounded-xl overflow-hidden bg-black aspect-[4/3] group">
-                  {media.type === 'image' ? (
+                    {media.type === 'image' ? (
                     <img src={media.url} alt="Preview" className="w-full h-full object-cover" />
-                  ) : (
+                    ) : (
                     <video src={media.url} className="w-full h-full object-cover" controls />
-                  )}
-                  <button 
+                    )}
+                    <button 
                     onClick={() => removeMedia(idx)}
                     className="absolute top-1 right-1 bg-black/60 text-white rounded-full p-1 hover:bg-red-500 transition-colors"
-                  >
+                    >
                     <X className="w-3 h-3" />
-                  </button>
+                    </button>
                 </div>
-              ))}
+                ))}
             </div>
-          )}
+        )}
 
-          <div className="flex items-center justify-between mt-3 pt-2 border-t border-gray-100 dark:border-gray-700">
-            <div className="flex gap-2">
-              <button 
-                onClick={() => imageInputRef.current?.click()}
-                className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 text-[#1E5BFF] transition-colors flex items-center gap-1"
-                disabled={mediaFiles.some(m => m.type === 'video')}
-              >
-                <ImageIcon className="w-5 h-5" />
-                <span className="text-[10px] font-bold hidden sm:inline">Foto</span>
-              </button>
-              <input 
-                type="file" 
-                ref={imageInputRef} 
-                accept="image/*" 
-                multiple 
-                className="hidden" 
-                onChange={handleImageSelect}
-              />
+        <div className="flex items-center justify-between pt-4 border-t border-gray-100 dark:border-gray-800">
+            <div className="flex gap-3">
+                <button 
+                    onClick={() => imageInputRef.current?.click()}
+                    className={`p-2.5 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors ${mediaFiles.some(m => m.type === 'video') ? 'opacity-50 cursor-not-allowed' : 'text-[#1E5BFF]'}`}
+                    disabled={mediaFiles.some(m => m.type === 'video')}
+                >
+                    <ImageIcon className="w-6 h-6" />
+                </button>
+                <input 
+                    type="file" 
+                    ref={imageInputRef} 
+                    accept="image/*" 
+                    multiple 
+                    className="hidden" 
+                    onChange={handleImageSelect}
+                />
 
-              <button 
-                onClick={() => videoInputRef.current?.click()}
-                className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 text-red-500 transition-colors flex items-center gap-1"
-                disabled={mediaFiles.length > 0}
-              >
-                <Film className="w-5 h-5" />
-                <span className="text-[10px] font-bold hidden sm:inline">Vídeo 30s</span>
-              </button>
-              <input 
-                type="file" 
-                ref={videoInputRef} 
-                accept="video/*" 
-                className="hidden" 
-                onChange={handleVideoSelect}
-              />
+                <button 
+                    onClick={() => videoInputRef.current?.click()}
+                    className={`p-2.5 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors ${mediaFiles.length > 0 ? 'opacity-50 cursor-not-allowed' : 'text-red-500'}`}
+                    disabled={mediaFiles.length > 0}
+                >
+                    <Film className="w-6 h-6" />
+                </button>
+                <input 
+                    type="file" 
+                    ref={videoInputRef} 
+                    accept="video/*" 
+                    className="hidden" 
+                    onChange={handleVideoSelect}
+                />
             </div>
 
             <button 
-              onClick={handleSubmit}
-              disabled={isSubmitting || mediaFiles.length === 0}
-              className={`p-2 px-4 rounded-full text-white transition-all flex items-center gap-2 ${
-                mediaFiles.length === 0 
-                  ? 'bg-gray-300 dark:bg-gray-700 cursor-not-allowed text-gray-500' 
-                  : 'bg-[#1E5BFF] hover:bg-blue-600 shadow-md active:scale-95'
-              }`}
+                onClick={handleSubmit}
+                disabled={isSubmitting || mediaFiles.length === 0}
+                className={`py-2.5 px-6 rounded-full text-white font-bold text-sm transition-all flex items-center gap-2 shadow-lg ${
+                    mediaFiles.length === 0 
+                    ? 'bg-gray-300 dark:bg-gray-700 cursor-not-allowed text-gray-500 shadow-none' 
+                    : 'bg-[#1E5BFF] hover:bg-blue-600 active:scale-95 shadow-blue-500/30'
+                }`}
             >
-              {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-              <span className="text-xs font-bold">Publicar</span>
+                {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+                Publicar
             </button>
-          </div>
         </div>
       </div>
     </div>
@@ -261,11 +274,15 @@ const CreatePostWidget: React.FC<{ user: any; onRequireLogin: () => void }> = ({
 
 const FeedPost: React.FC<{ post: CommunityPost; onLike: () => void }> = ({ post, onLike }) => {
   const [liked, setLiked] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
 
   const handleLike = () => {
     onLike();
     setLiked(!liked);
   };
+
+  const MAX_PREVIEW_LENGTH = 180;
+  const shouldTruncate = post.content.length > MAX_PREVIEW_LENGTH;
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-gray-700">
@@ -285,9 +302,22 @@ const FeedPost: React.FC<{ post: CommunityPost; onLike: () => void }> = ({ post,
         </button>
       </div>
 
-      <p className="text-sm text-gray-800 dark:text-gray-200 mb-3 leading-relaxed">
-        {post.content}
-      </p>
+      <div className="mb-3">
+        <p className="text-sm text-gray-800 dark:text-gray-200 leading-relaxed whitespace-pre-wrap inline">
+            {shouldTruncate && !isExpanded 
+                ? post.content.slice(0, MAX_PREVIEW_LENGTH).trim() + "... " 
+                : post.content + " "
+            }
+        </p>
+        {shouldTruncate && (
+            <button 
+                onClick={() => setIsExpanded(!isExpanded)}
+                className="text-sm font-bold text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
+            >
+                {isExpanded ? "ver menos" : "ver mais"}
+            </button>
+        )}
+      </div>
 
       {post.imageUrl && (
         <div className="mb-3 rounded-xl overflow-hidden">
@@ -753,6 +783,7 @@ export const CommunityFeedView: React.FC<CommunityFeedViewProps> = ({ onStoreCli
   const [internalView, setInternalView] = useState<'home' | 'direct' | 'explore' | 'profile'>('home');
   const [selectedChatId, setSelectedChatId] = useState<number | null>(null);
   const [viewingStoryIndex, setViewingStoryIndex] = useState<number | null>(null);
+  const [isCreatePostOpen, setIsCreatePostOpen] = useState(false);
 
   const handleViewChange = (view: 'home' | 'direct' | 'explore' | 'profile') => {
     if ((view === 'direct' || view === 'profile') && !user) {
@@ -763,6 +794,14 @@ export const CommunityFeedView: React.FC<CommunityFeedViewProps> = ({ onStoreCli
     
     // Reset specific states when leaving views
     if (view !== 'direct') setSelectedChatId(null);
+  };
+
+  const handleOpenCreatePost = () => {
+    if (!user) {
+      onRequireLogin();
+      return;
+    }
+    setIsCreatePostOpen(true);
   };
 
   const renderContent = () => {
@@ -781,7 +820,7 @@ export const CommunityFeedView: React.FC<CommunityFeedViewProps> = ({ onStoreCli
 
             {/* Posts Feed */}
             <div className="p-5 pt-4">
-              <CreatePostWidget user={user} onRequireLogin={onRequireLogin} />
+              {/* Removed inline CreatePostWidget here as requested */}
 
               {/* Posts */}
               <div className="space-y-4">
@@ -790,6 +829,21 @@ export const CommunityFeedView: React.FC<CommunityFeedViewProps> = ({ onStoreCli
                 ))}
               </div>
             </div>
+
+            {/* Floating Action Button for Creating Post */}
+            <button
+              onClick={handleOpenCreatePost}
+              className="fixed bottom-24 right-5 z-40 bg-[#1E5BFF] text-white p-4 rounded-full shadow-lg shadow-blue-500/40 hover:bg-blue-600 transition-transform active:scale-95 flex items-center justify-center"
+            >
+              <Plus className="w-7 h-7" />
+            </button>
+
+            {/* Create Post Modal */}
+            <CreatePostModal 
+              isOpen={isCreatePostOpen} 
+              onClose={() => setIsCreatePostOpen(false)} 
+              user={user} 
+            />
           </div>
         );
 
