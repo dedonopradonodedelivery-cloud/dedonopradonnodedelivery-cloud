@@ -42,7 +42,7 @@ export const CashbackLandingView: React.FC<CashbackLandingViewProps> = ({ onBack
         >
             <ChevronLeft className="w-6 h-6" />
         </button>
-        <span className="text-white/80 font-medium text-sm">Freguesia</span>
+        <span className="text-white/80 font-medium text-sm">Localizei JPA</span>
         <div className="w-10"></div>
       </div>
 
@@ -59,7 +59,7 @@ export const CashbackLandingView: React.FC<CashbackLandingViewProps> = ({ onBack
                 Cashback Localizei
             </h1>
             <p className="text-blue-100 text-sm leading-relaxed max-w-xs mx-auto font-medium">
-                Ganhe parte do seu dinheiro de volta ao comprar em estabelecimentos parceiros da Freguesia.
+                Ganhe parte do seu dinheiro de volta ao comprar no comércio local de Jacarepaguá.
             </p>
         </div>
 
@@ -140,7 +140,7 @@ export const CashbackLandingView: React.FC<CashbackLandingViewProps> = ({ onBack
                 <div className="h-full bg-gradient-to-r from-blue-400 to-[#1E5BFF] w-[70%] rounded-full animate-pulse"></div>
             </div>
             <p className="text-center text-[10px] text-gray-400 mt-2 relative z-10">
-                Cashback acumulado em compras locais (exemplo)
+                Cashback acumulado em compras locais
             </p>
         </div>
       </div>

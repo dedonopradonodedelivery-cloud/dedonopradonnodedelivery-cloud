@@ -42,7 +42,7 @@ export const StoreConnectModule: React.FC<StoreConnectModuleProps> = ({ onBack }
         <button onClick={onBack} className="p-2 -ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
           <ChevronLeft className="w-6 h-6 text-gray-800 dark:text-white" />
         </button>
-        <h1 className="font-bold text-lg text-gray-900 dark:text-white">Freguesia Connect</h1>
+        <h1 className="font-bold text-lg text-gray-900 dark:text-white">JPA Connect</h1>
       </div>
 
       <div className="p-5 space-y-6">
@@ -111,7 +111,7 @@ export const StoreConnectModule: React.FC<StoreConnectModuleProps> = ({ onBack }
             </div>
             <div>
               <h3 className="font-bold text-gray-900 dark:text-white text-base">Membro Ativo</h3>
-              <p className="text-xs text-gray-600 dark:text-gray-400">Você tem acesso total à rede Freguesia Connect.</p>
+              <p className="text-xs text-gray-600 dark:text-gray-400">Você tem acesso total à rede JPA Connect.</p>
             </div>
           </div>
         )}
@@ -243,7 +243,7 @@ export const StoreConnectModule: React.FC<StoreConnectModuleProps> = ({ onBack }
                             Mais que um grupo.<br/>Uma aliança de crescimento.
                         </h3>
                         <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
-                            O Freguesia Connect foi criado para lojistas que querem ir além da venda balcão e construir relacionamentos duradouros no bairro.
+                            O JPA Connect foi criado para lojistas que querem ir além da venda balcão e construir relacionamentos duradouros no bairro.
                         </p>
                     </div>
 

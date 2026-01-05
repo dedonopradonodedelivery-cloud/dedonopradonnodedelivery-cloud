@@ -96,7 +96,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack }) => {
             <Sparkles className="w-7 h-7 text-amber-300" />
           </div>
           <h2 className="text-2xl font-black mb-4 font-display tracking-tight leading-tight">
-            Destaque sua loja <br/> para a Freguesia
+            Destaque sua loja <br/> em Jacarepaguá
           </h2>
           <p className="text-indigo-100 text-sm mb-8 font-medium leading-relaxed">
             Seja encontrado primeiro por quem mora e busca serviços perto de você.
@@ -254,7 +254,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack }) => {
         <button onClick={() => setView('create')} className="p-2 -ml-2 rounded-full hover:bg-white/5 transition-colors">
           <ChevronLeft className="w-6 h-6 text-gray-400" />
         </button>
-        <h2 className="font-bold text-lg text-white font-display">Resumo da Ativação</h2>
+        <h2 className="text-lg font-bold text-white font-display">Resumo da Ativação</h2>
       </div>
 
       <div className="p-6 space-y-8 overflow-y-auto no-scrollbar pb-48">

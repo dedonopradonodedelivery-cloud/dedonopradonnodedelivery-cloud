@@ -1,6 +1,6 @@
 {
-  "name": "V18 - Localizei Freguesia",
-  "description": "O super-app da Freguesia. Conecte-se com comércios, serviços e profissionais locais. Ganhe cashback e fortaleça o ecossistema do bairro.",
+  "name": "Localizei JPA",
+  "description": "O super-app de Jacarepaguá. Conecte-se com comércios, serviços e profissionais locais. Ganhe cashback e fortaleça o ecossistema do bairro.",
   "requestFramePermissions": [
     "geolocation",
     "camera",

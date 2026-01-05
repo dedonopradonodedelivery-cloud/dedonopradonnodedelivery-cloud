@@ -10,7 +10,7 @@ interface JobsViewProps {
 
 const JobDetailModal: React.FC<{ job: Job; onClose: () => void }> = ({ job, onClose }) => {
   const handleApply = () => {
-    const text = `Olá! Vi a vaga de *${job.role}* no app Localizei Freguesia e gostaria de me candidatar.`;
+    const text = `Olá! Vi a vaga de *${job.role}* no app Localizei JPA e gostaria de me candidatar.`;
     const url = `https://wa.me/${job.contactWhatsapp}?text=${encodeURIComponent(text)}`;
     window.open(url, '_blank');
   };
@@ -115,10 +115,13 @@ export const JobsView: React.FC<JobsViewProps> = ({ onBack }) => {
         <button onClick={onBack} className="p-2 -ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
           <ChevronLeft className="w-6 h-6 text-gray-800 dark:text-white" />
         </button>
-        <h1 className="font-bold text-lg text-gray-900 dark:text-white flex items-center gap-2">
-          <Briefcase className="w-5 h-5 text-[#1E5BFF]" />
-          Vagas na Freguesia
-        </h1>
+        <div>
+            <h1 className="font-bold text-lg text-gray-900 dark:text-white flex items-center gap-2">
+            <Briefcase className="w-5 h-5 text-[#1E5BFF]" />
+            Vagas em Jacarepaguá
+            </h1>
+            <p className="text-xs text-gray-500 dark:text-gray-400">filtradas por bairro</p>
+        </div>
       </div>
 
       <div className="p-5">
@@ -129,7 +132,7 @@ export const JobsView: React.FC<JobsViewProps> = ({ onBack }) => {
             </div>
             <h3 className="font-bold text-gray-900 dark:text-white">Nenhuma vaga no momento</h3>
             <p className="text-sm text-gray-500 dark:text-gray-400 max-w-xs mt-2">
-              As empresas do bairro ainda não publicaram oportunidades hoje. Volte em breve!
+              As empresas de Jacarepaguá ainda não publicaram oportunidades hoje. Volte em breve!
             </p>
           </div>
         ) : (

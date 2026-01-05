@@ -42,7 +42,7 @@ interface SimplePageProps {
 
 export const SupportView: React.FC<SimplePageProps> = ({ onBack }) => {
   const [copied, setCopied] = useState(false);
-  const email = "contato.localizeifreguesia@gmail.com";
+  const email = "contato.localizeijpa@gmail.com";
 
   const handleCopy = () => {
     navigator.clipboard.writeText(email);
@@ -119,7 +119,7 @@ export const AboutView: React.FC<SimplePageProps> = ({ onBack }) => {
             <MapPin className="w-12 h-12 text-white fill-white" />
           </div>
           <h2 className="text-3xl font-black text-gray-900 dark:text-white font-display text-center leading-tight">
-            Localizei <br/> <span className="text-[#1E5BFF]">Freguesia</span>
+            Localizei <br/> <span className="text-[#1E5BFF]">JPA</span>
           </h2>
           <div className="mt-4 flex items-center gap-2">
             <div className="h-[1px] w-4 bg-gray-300 dark:bg-gray-700"></div>
@@ -142,7 +142,7 @@ export const AboutView: React.FC<SimplePageProps> = ({ onBack }) => {
                 <p className="text-gray-700 dark:text-gray-300 text-base leading-relaxed font-medium">
                   Acreditamos que a vida acontece perto. <br/><br/>
                   Nos bairros, nas ruas, nas lojas de confiança e nos serviços que fazem parte do dia a dia das pessoas. <br/><br/>
-                  A Localizei nasceu para aproximar quem procura de quem faz. Para fortalecer negócios locais, simplificar escolhas e criar conexões reais entre pessoas e serviços. <br/><br/>
+                  A Localizei JPA nasceu para aproximar quem procura de quem faz em Jacarepaguá. Para fortalecer negócios locais, simplificar escolhas e criar conexões reais entre pessoas e serviços. <br/><br/>
                   Queremos que encontrar um bom serviço seja simples, rápido e confiável. E que empreender localmente seja mais justo, visível e sustentável. <br/><br/>
                   A Localizei é sobre comunidade, proximidade e impacto real.
                 </p>
@@ -159,7 +159,7 @@ export const AboutView: React.FC<SimplePageProps> = ({ onBack }) => {
               <div>
                 <h4 className="font-black text-gray-900 dark:text-white uppercase text-xs tracking-widest mb-1.5">Missão</h4>
                 <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed font-medium">
-                  Conectar pessoas a serviços e negócios locais de forma simples, transparente e confiável, fortalecendo a economia local.
+                  Conectar pessoas a serviços e negócios locais de forma simples, transparente e confiável, fortalecendo a economia de Jacarepaguá.
                 </p>
               </div>
             </div>
@@ -206,10 +206,10 @@ export const AboutView: React.FC<SimplePageProps> = ({ onBack }) => {
           {/* Institutional Closing */}
           <div className="text-center pt-8 border-t border-gray-100 dark:border-gray-800">
              <p className="text-[10px] font-black text-gray-400 dark:text-gray-600 uppercase tracking-[0.5em]">
-               Localizei Freguesia © 2024
+               Localizei JPA © 2024
              </p>
              <p className="text-[9px] text-gray-400 mt-2 font-medium">
-               CNPJ: 12.345.678/0001-00 • Freguesia, Rio de Janeiro
+               Jacarepaguá, Rio de Janeiro
              </p>
           </div>
         </div>
@@ -277,7 +277,7 @@ export const FavoritesView: React.FC<SimplePageProps> = ({ onBack, onNavigate, u
             image: b.imageUrl || 'https://via.placeholder.com/100',
             rating: b.rating || 0,
             description: b.description || '',
-            distance: 'Freguesia • RJ',
+            distance: 'Jacarepaguá • RJ',
             adType: AdType.ORGANIC,
             reviewsCount: 0,
             verified: true 
@@ -400,7 +400,7 @@ export const SponsorInfoView: React.FC<SimplePageProps> = ({ onBack }) => {
         
         <h2 className="text-2xl font-bold mb-4 font-display text-white">Seja um Destaque</h2>
         <p className="text-gray-300 text-sm mb-8 leading-relaxed max-w-sm">
-            O <strong>Patrocinador Master</strong> é uma posição exclusiva para marcas que desejam visibilidade máxima e autoridade na Freguesia.
+            O <strong>Patrocinador Master</strong> é uma posição exclusiva para marcas que desejam visibilidade máxima e autoridade em Jacarepaguá.
         </p>
 
         <div className="w-full bg-gray-800/50 rounded-2xl p-6 border border-gray-700 text-left space-y-5 mb-8">

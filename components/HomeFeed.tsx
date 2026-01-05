@@ -134,7 +134,7 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void }> = ({ onNavigat
         id: 'b1-cashback',
         type: 'standard',
         title: 'Cashback real entre lojas do seu bairro',
-        subtitle: 'Compre no comércio local e receba dinheiro de volta na hora. Algo nunca visto antes.',
+        subtitle: 'Compre no comércio local de Jacarepaguá e receba dinheiro de volta na hora.',
         image: 'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?q=80&w=800&auto=format&fit=crop',
         target: 'explore', 
         tag: 'Exclusivo',
@@ -144,7 +144,7 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void }> = ({ onNavigat
         id: 'b2-services',
         type: 'standard',
         title: 'Encontre serviços e receba até 5 orçamentos',
-        subtitle: 'Fale direto com profissionais pelo WhatsApp, sem ligações e sem complicação.',
+        subtitle: 'Fale direto com profissionais de JPA pelo WhatsApp.',
         image: 'https://images.unsplash.com/photo-1581578731117-10d52143b0e8?q=80&w=800&auto=format&fit=crop',
         target: 'services',
         tag: 'WhatsApp Direto',
@@ -153,7 +153,7 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void }> = ({ onNavigat
       {
         id: 'b3-merchant',
         type: 'standard',
-        title: 'Freguesia Connect para lojistas',
+        title: 'JPA Connect para lojistas',
         subtitle: 'Venda mais, atraia clientes do bairro e participe do cashback local.',
         image: 'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?q=80&w=800&auto=format&fit=crop',
         target: 'freguesia_connect_public',
@@ -167,7 +167,7 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void }> = ({ onNavigat
         id: 'b4-jobs',
         type: 'jobs',
         title: 'Vagas de emprego no seu bairro',
-        subtitle: 'Lojas e serviços contratando perto de você',
+        subtitle: 'Lojas e serviços contratando em Jacarepaguá',
         target: 'jobs_list',
         image: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?q=80&w=800&auto=format&fit=crop',
         tag: 'Oportunidade',
@@ -464,7 +464,7 @@ const CommunityFeedBlock: React.FC<{
     <div className="w-full bg-white dark:bg-gray-950 py-6 border-b border-gray-100 dark:border-gray-800">
       <div className="px-5">
         <SectionHeader 
-          title="Agora no bairro" 
+          title="Novidades dos bairros de Jacarepaguá" 
           rightElement={
             <button onClick={() => onNavigate('community_feed')} className="text-xs font-bold text-[#1E5BFF] hover:underline">
               Ver tudo no Feed
@@ -574,7 +574,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
         return <WeeklyPromosSection key="weekly_promos" onNavigate={onNavigate} />;
 
       case 'community_feed':
-        // Agora "Agora no bairro"
+        // Agora "Novidades dos bairros"
         return (
           <CommunityFeedBlock key="community_feed" onNavigate={onNavigate} />
         );
@@ -613,7 +613,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
                 Cashback no seu bairro
               </h2>
               <p className="text-xs text-gray-500 dark:text-gray-400 font-medium mt-1.5">
-                Veja onde você recebe cashback no bairro
+                Veja onde você recebe cashback em Jacarepaguá
               </p>
             </div>
             
@@ -679,7 +679,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
           <div key="list" className="w-full bg-white dark:bg-gray-950 py-8">
             <div className="px-5">
               <SectionHeader 
-                title="Explorar" 
+                title="Explorar Jacarepaguá" 
                 subtitle="O que há de melhor no bairro" 
                 rightElement={
                   <div className="flex gap-1 bg-gray-100 dark:bg-gray-800 p-1 rounded-xl">
@@ -727,7 +727,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
       'home_carousel',
       'weekly_promos',
       'cashback_stores',
-      'community_feed', // Agora "Agora no bairro" (texto)
+      'community_feed', // Agora "Novidades dos bairros de Jacarepaguá"
       'trust_feed',     // Confiança no Bairro (cards verticais)
       'roulette',       // Sorte do Dia
       'list',           // Explorar (imediatamente após Sorte do Dia)

@@ -289,7 +289,7 @@ export const ExploreView: React.FC<ExploreViewProps> = ({
     },
     {
       id: 'agora',
-      title: 'Agora na Freguesia',
+      title: 'Agora em JPA',
       icon: Clock,
       items: [
         { ...stores[1], name: 'Padaria 24h', category: 'Padaria', subText: 'Sempre aberta para você', mockImage: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?q=80&w=400&auto=format&fit=crop', showStatus: true },
@@ -325,7 +325,7 @@ export const ExploreView: React.FC<ExploreViewProps> = ({
       {/* Header do Hub de Descoberta */}
       <div className="px-5 pt-8 pb-4">
         <h1 className="text-2xl font-black text-gray-900 dark:text-white font-display tracking-tight leading-tight">
-          Explorar <br/> <span className="text-primary-500">a Freguesia</span>
+          Explorar <br/> <span className="text-primary-500">Jacarepaguá</span>
         </h1>
         <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 font-medium">
           Curadoria exclusiva do que há de melhor no bairro.

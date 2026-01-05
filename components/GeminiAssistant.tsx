@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { GoogleGenAI } from "@google/genai";
 import { MessageCircle, X, Send, Sparkles, Loader2 } from 'lucide-react';
@@ -7,7 +8,7 @@ import { STORES } from '../constants';
 export const GeminiAssistant: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([
-    { role: 'model', text: 'Olá! Sou o assistente virtual do Localizei Freguesia. Posso te ajudar a encontrar lojas, explicar como funciona o cashback ou como anunciar sua empresa!' }
+    { role: 'model', text: 'Olá! Sou o assistente virtual do Localizei JPA. Posso te ajudar a encontrar lojas em Jacarepaguá, explicar como funciona o cashback ou como anunciar sua empresa!' }
   ]);
   const [input, setInput] = useState('');
   const [isThinking, setIsThinking] = useState(false);
@@ -30,10 +31,10 @@ export const GeminiAssistant: React.FC = () => {
     const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
     try {
-      const systemInstruction = `Você é o assistente útil e amigável do app "Localizei Freguesia". 
-O app atende o bairro da Freguesia em Jacarepaguá, RJ.
+      const systemInstruction = `Você é o assistente útil e amigável do app "Localizei JPA". 
+O app atende a região de Jacarepaguá, no Rio de Janeiro.
 Lojistas: Planos de R$ 1,90/dia (Local) e R$ 3,90/dia (Premium). Podem comprar leads de serviços por R$ 3,90.
-Usuários: Ganham cashback em lojas parceiras e podem usar a Roleta da Sorte.
+Usuários: Ganham cashback em lojas parceiras de Jacarepaguá e podem usar a Roleta da Sorte.
 Sempre seja curto, use emojis e convide o usuário a explorar as seções do app.`;
 
       const promptContext = `
@@ -86,7 +87,7 @@ Sempre seja curto, use emojis e convide o usuário a explorar as seções do app
                 <Sparkles className="w-5 h-5" />
                 <div>
                   <h3 className="font-bold text-lg">Assistente Localizei</h3>
-                  <p className="text-xs text-blue-100">IA Inteligente da Freguesia</p>
+                  <p className="text-xs text-blue-100">IA Inteligente de JPA</p>
                 </div>
               </div>
               <button onClick={() => setIsOpen(false)} className="text-white/80 hover:text-white">

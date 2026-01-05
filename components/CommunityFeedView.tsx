@@ -885,9 +885,14 @@ export const CommunityFeedView: React.FC<CommunityFeedViewProps> = ({ onStoreCli
             <Plus className="w-6 h-6 text-gray-900 dark:text-white" />
           </button>
           
-          <h1 className="font-bold text-lg text-gray-900 dark:text-white font-display flex-1 text-center">
-            Feed – Localizei Freguesia
-          </h1>
+          <div className="flex flex-col items-center">
+            <h1 className="font-bold text-lg text-gray-900 dark:text-white font-display flex-1 text-center">
+              Feed – Localizei JPA
+            </h1>
+            <p className="text-[10px] text-gray-500 dark:text-gray-400 -mt-1">
+              Novidades dos bairros de Jacarepaguá
+            </p>
+          </div>
           
           <button 
             onClick={handleNotifications}
