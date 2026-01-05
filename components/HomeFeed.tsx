@@ -612,6 +612,75 @@ const CommunityFeedBlock: React.FC<{
   );
 };
 
+// --- NOVA VERSÃO DO BANNER DE ROLETA ---
+const WheelBanner: React.FC<{ onClick: () => void }> = ({ onClick }) => {
+  const [rotation, setRotation] = useState(0);
+
+  useEffect(() => {
+    // Trigger animation after mount: Spin 5 full rotations (1800deg) + random landing
+    const timer = setTimeout(() => {
+        setRotation(1800 + Math.floor(Math.random() * 360));
+    }, 100);
+    return () => clearTimeout(timer);
+  }, []);
+
+  return (
+    <div className="px-5">
+      <button 
+        onClick={onClick}
+        className="w-full bg-gradient-to-r from-slate-900 to-slate-800 rounded-[24px] p-1 pr-4 shadow-xl border border-white/10 relative overflow-hidden group active:scale-[0.98] transition-all flex items-center justify-between"
+      >
+        <div className="flex items-center gap-4">
+            {/* Wheel Container */}
+            <div className="relative w-20 h-20 bg-slate-800 rounded-2xl flex items-center justify-center shrink-0 ml-1">
+                {/* Marker */}
+                <div className="absolute -top-1 left-1/2 -translate-x-1/2 z-20 w-3 h-3 text-white drop-shadow-md">
+                    ▼
+                </div>
+                
+                {/* The Wheel */}
+                <div 
+                    className="w-16 h-16 rounded-full border-2 border-white/20 shadow-inner relative z-10"
+                    style={{
+                        background: `conic-gradient(
+                            #FF3B30 0% 12.5%,
+                            #FF9500 12.5% 25%,
+                            #FFCC00 25% 37.5%,
+                            #34C759 37.5% 50%,
+                            #30B0C7 50% 62.5%,
+                            #007AFF 62.5% 75%,
+                            #5856D6 75% 87.5%,
+                            #FF2D55 87.5% 100%
+                        )`,
+                        transform: `rotate(${rotation}deg)`,
+                        transition: 'transform 4s cubic-bezier(0.1, 0.7, 0.1, 1)'
+                    }}
+                >
+                    {/* Inner Hub */}
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-4 h-4 bg-white rounded-full shadow-sm flex items-center justify-center">
+                        <div className="w-1.5 h-1.5 bg-slate-300 rounded-full"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div className="text-left py-4">
+                <h3 className="text-base font-black text-white leading-tight mb-1 font-display">
+                    Roleta da <br/> <span className="text-[#1E5BFF]">Localizei JPA</span>
+                </h3>
+                <p className="text-[10px] text-gray-400 font-medium">
+                    Gire e ganhe vantagens
+                </p>
+            </div>
+        </div>
+
+        <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center group-hover:bg-white/20 transition-colors">
+            <ChevronRight className="w-5 h-5 text-white" />
+        </div>
+      </button>
+    </div>
+  );
+};
+
 export const HomeFeed: React.FC<HomeFeedProps> = ({ 
   onNavigate, 
   onSelectCategory, 
@@ -719,26 +788,14 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
       case 'roulette':
         return (
           <div key="roulette" className="w-full bg-white dark:bg-gray-950 py-8">
-            <div className="px-5">
-              <div className="flex items-center gap-2 mb-2">
+            <div className="px-5 mb-2">
+              <div className="flex items-center gap-2">
                  <span className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">
                     🎁 Interaja e ganhe vantagens
                  </span>
               </div>
-              <button onClick={() => setIsSpinWheelOpen(true)} className="w-full bg-slate-950 rounded-[32px] p-8 text-white flex items-center justify-between shadow-2xl active:scale-[0.98] transition-all border border-white/5 overflow-hidden group">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 rounded-full blur-3xl pointer-events-none group-hover:bg-amber-500/20 transition-all"></div>
-                <div className="flex items-center gap-5 relative z-10">
-                  <div className="w-12 h-12 bg-white/5 rounded-xl flex items-center justify-center border border-white/10 group-hover:rotate-12 transition-transform">
-                      <Dices className="w-7 h-7 text-amber-400" />
-                  </div>
-                  <div className="text-left">
-                    <h3 className="font-black text-base uppercase tracking-widest leading-none">Sorte do Dia</h3>
-                    <p className="text-[9px] text-gray-500 font-bold uppercase tracking-[0.2em] mt-1.5">Clique para girar</p>
-                  </div>
-                </div>
-                <ChevronRight className="w-5 h-5 text-gray-700" strokeWidth={3} />
-              </button>
             </div>
+            <WheelBanner onClick={() => setIsSpinWheelOpen(true)} />
           </div>
         );
 
