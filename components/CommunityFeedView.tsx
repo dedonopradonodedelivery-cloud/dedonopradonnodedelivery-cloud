@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { 
   ChevronLeft, 
@@ -26,7 +27,11 @@ import {
   User,
   MessageCircle,
   Copy,
-  Trash2
+  Trash2,
+  Home,
+  Compass,
+  Grid,
+  Settings
 } from 'lucide-react';
 import { CommunityPost, Store } from '../types';
 import { MOCK_COMMUNITY_POSTS, STORES } from '../constants';
@@ -50,7 +55,7 @@ interface UserStory {
   items: StoryItem[];
 }
 
-// --- MOCK STORIES ---
+// --- MOCK DATA ---
 const MOCK_STORIES: UserStory[] = [
   {
     userId: 's1',
@@ -73,12 +78,238 @@ const MOCK_STORIES: UserStory[] = [
   }
 ];
 
+const MOCK_CHATS = [
+  { id: 1, user: 'Padaria Imperial', avatar: '/assets/default-logo.png', lastMsg: 'Seu pedido saiu para entrega!', time: '2m', unread: true },
+  { id: 2, user: 'Carlos Silva', avatar: 'https://i.pravatar.cc/100?u=c', lastMsg: 'Viu o post do buraco na rua?', time: '1h', unread: false },
+  { id: 3, user: 'Fernanda Lima', avatar: 'https://i.pravatar.cc/100?u=f', lastMsg: 'Combinado então.', time: '1d', unread: false },
+];
+
+// --- INTERNAL NAVIGATION TYPES ---
+type InternalView = 'home' | 'direct' | 'explore' | 'profile';
+
 interface CommunityFeedViewProps {
   onBack?: () => void;
   onStoreClick: (store: Store) => void;
   user: SupabaseUser | null;
   onRequireLogin: () => void;
 }
+
+// --- SUB-COMPONENT: FEED INTERNAL NAVBAR ---
+const FeedInternalNav: React.FC<{
+  currentView: InternalView;
+  onChangeView: (view: InternalView) => void;
+  unreadCount?: number;
+}> = ({ currentView, onChangeView, unreadCount = 0 }) => {
+  return (
+    <div className="sticky top-16 z-20 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm border-b border-gray-100 dark:border-gray-800 flex justify-between items-center px-8 py-3 shadow-sm">
+      <button 
+        onClick={() => onChangeView('home')}
+        className={`transition-colors active:scale-90 ${currentView === 'home' ? 'text-[#1E5BFF]' : 'text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300'}`}
+      >
+        <Home className={`w-6 h-6 ${currentView === 'home' ? 'fill-current' : ''}`} />
+      </button>
+
+      <button 
+        onClick={() => onChangeView('direct')}
+        className={`relative transition-colors active:scale-90 ${currentView === 'direct' ? 'text-[#1E5BFF]' : 'text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300'}`}
+      >
+        <MessageCircle className={`w-6 h-6 ${currentView === 'direct' ? 'fill-current' : ''}`} />
+        {unreadCount > 0 && (
+          <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[9px] font-bold w-3.5 h-3.5 flex items-center justify-center rounded-full border border-white dark:border-gray-900">
+            {unreadCount}
+          </span>
+        )}
+      </button>
+
+      <button 
+        onClick={() => onChangeView('explore')}
+        className={`transition-colors active:scale-90 ${currentView === 'explore' ? 'text-[#1E5BFF]' : 'text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300'}`}
+      >
+        <Compass className={`w-6 h-6 ${currentView === 'explore' ? 'fill-current' : ''}`} />
+      </button>
+
+      <button 
+        onClick={() => onChangeView('profile')}
+        className={`transition-colors active:scale-90 ${currentView === 'profile' ? 'text-[#1E5BFF]' : 'text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300'}`}
+      >
+        <User className={`w-6 h-6 ${currentView === 'profile' ? 'fill-current' : ''}`} />
+      </button>
+    </div>
+  );
+};
+
+// --- SUB-COMPONENT: INSTAGRAM STYLE PROFILE ---
+const InstagramProfile: React.FC<{ user: SupabaseUser; posts: CommunityPost[] }> = ({ user, posts }) => {
+  const userPosts = posts.filter(p => p.userId === user.id);
+  const isMerchant = user.user_metadata?.role === 'lojista';
+
+  return (
+    <div className="bg-white dark:bg-gray-900 min-h-full pb-20 animate-in fade-in slide-in-from-bottom-2 duration-300">
+      {/* Header Info */}
+      <div className="px-5 pt-6 pb-6">
+        <div className="flex items-center justify-between mb-4">
+          {/* Avatar */}
+          <div className="relative">
+            <div className="w-20 h-20 rounded-full p-[2px] bg-gradient-to-tr from-yellow-400 via-red-500 to-purple-600">
+              <div className="w-full h-full rounded-full border-2 border-white dark:border-gray-900 overflow-hidden bg-gray-100 dark:bg-gray-800">
+                <img src={user.user_metadata?.avatar_url || 'https://ui-avatars.com/api/?name=User'} alt="Profile" className="w-full h-full object-cover" />
+              </div>
+            </div>
+            {isMerchant && (
+              <div className="absolute bottom-0 right-0 bg-blue-500 text-white p-1 rounded-full border-2 border-white dark:border-gray-900">
+                <StoreIcon className="w-3 h-3" />
+              </div>
+            )}
+          </div>
+
+          {/* Stats */}
+          <div className="flex-1 flex justify-around ml-4">
+            <div className="flex flex-col items-center">
+              <span className="font-bold text-lg text-gray-900 dark:text-white">{userPosts.length}</span>
+              <span className="text-xs text-gray-500 dark:text-gray-400">Posts</span>
+            </div>
+            <div className="flex flex-col items-center">
+              <span className="font-bold text-lg text-gray-900 dark:text-white">1.2k</span>
+              <span className="text-xs text-gray-500 dark:text-gray-400">Seguidores</span>
+            </div>
+            <div className="flex flex-col items-center">
+              <span className="font-bold text-lg text-gray-900 dark:text-white">450</span>
+              <span className="text-xs text-gray-500 dark:text-gray-400">Seguindo</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Bio */}
+        <div className="mb-4">
+          <h3 className="font-bold text-gray-900 dark:text-white text-sm">
+            {user.user_metadata?.full_name || 'Usuário Localizei'}
+          </h3>
+          <p className="text-xs text-gray-500 dark:text-gray-400 font-medium mb-1">
+            @{user.user_metadata?.username || 'usuario_novo'}
+          </p>
+          <p className="text-sm text-gray-700 dark:text-gray-300 leading-tight">
+            Apaixonado pela Freguesia! 🌳<br/>
+            Sempre em busca das melhores novidades do bairro.
+          </p>
+        </div>
+
+        {/* Actions */}
+        <div className="flex gap-2">
+          <button className="flex-1 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white font-bold text-xs py-2 rounded-lg border border-gray-200 dark:border-gray-700 active:scale-95 transition-transform">
+            Editar Perfil
+          </button>
+          <button className="flex-1 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white font-bold text-xs py-2 rounded-lg border border-gray-200 dark:border-gray-700 active:scale-95 transition-transform">
+            Compartilhar
+          </button>
+          <button className="p-2 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white rounded-lg border border-gray-200 dark:border-gray-700 active:scale-95 transition-transform">
+            <Settings className="w-4 h-4" />
+          </button>
+        </div>
+      </div>
+
+      {/* Tabs */}
+      <div className="flex border-t border-gray-200 dark:border-gray-800">
+        <button className="flex-1 py-3 flex justify-center border-b-2 border-black dark:border-white">
+          <Grid className="w-5 h-5 text-black dark:text-white" />
+        </button>
+        <button className="flex-1 py-3 flex justify-center border-b-2 border-transparent">
+          <Heart className="w-5 h-5 text-gray-400" />
+        </button>
+      </div>
+
+      {/* Grid Posts */}
+      <div className="grid grid-cols-3 gap-0.5">
+        {userPosts.map((post, i) => (
+          <div key={i} className="aspect-square bg-gray-100 dark:bg-gray-800 relative group cursor-pointer">
+            {post.imageUrl ? (
+              <img src={post.imageUrl} alt="" className="w-full h-full object-cover" />
+            ) : post.videoUrl ? (
+              <video src={post.videoUrl} className="w-full h-full object-cover" />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-indigo-500 to-purple-600 p-2">
+                <p className="text-[8px] text-white text-center font-medium line-clamp-3">{post.content}</p>
+              </div>
+            )}
+          </div>
+        ))}
+        {/* Fillers for empty state */}
+        {userPosts.length === 0 && (
+          <div className="col-span-3 py-10 text-center text-gray-400 text-xs">
+            Ainda não há publicações.
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+// --- SUB-COMPONENT: DIRECT MESSAGES ---
+const DirectInbox: React.FC = () => (
+  <div className="bg-white dark:bg-gray-900 min-h-full p-5 animate-in fade-in slide-in-from-right duration-300">
+    <div className="relative mb-6">
+      <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+      <input 
+        type="text"
+        placeholder="Buscar conversa..."
+        className="w-full bg-gray-100 dark:bg-gray-800 rounded-xl py-2.5 pl-10 pr-4 text-sm outline-none focus:ring-2 focus:ring-[#1E5BFF] dark:text-white"
+      />
+    </div>
+
+    <h3 className="font-bold text-gray-900 dark:text-white mb-4 text-sm">Mensagens</h3>
+    
+    <div className="space-y-4">
+      {MOCK_CHATS.map(chat => (
+        <div key={chat.id} className="flex items-center gap-3 cursor-pointer active:opacity-70">
+          <div className="relative">
+            <img src={chat.avatar} alt={chat.user} className="w-12 h-12 rounded-full object-cover bg-gray-200" />
+            {chat.unread && <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white dark:border-gray-900 rounded-full"></div>}
+          </div>
+          <div className="flex-1 border-b border-gray-100 dark:border-gray-800 pb-3">
+            <div className="flex justify-between items-center mb-0.5">
+              <h4 className={`text-sm ${chat.unread ? 'font-bold text-gray-900 dark:text-white' : 'font-medium text-gray-700 dark:text-gray-300'}`}>
+                {chat.user}
+              </h4>
+              <span className="text-[10px] text-gray-400">{chat.time}</span>
+            </div>
+            <p className={`text-xs truncate ${chat.unread ? 'font-bold text-gray-900 dark:text-white' : 'text-gray-500'}`}>
+              {chat.lastMsg}
+            </p>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+);
+
+// --- SUB-COMPONENT: EXPLORE FEED ---
+const ExploreFeed: React.FC<{ onSearch: (val: string) => void }> = ({ onSearch }) => (
+  <div className="bg-white dark:bg-gray-900 min-h-full animate-in fade-in slide-in-from-right duration-300">
+    <div className="p-4 sticky top-0 bg-white dark:bg-gray-900 z-10">
+      <div className="relative">
+        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+        <input 
+          type="text"
+          placeholder="Buscar @usuarios ou lojas..."
+          onChange={(e) => onSearch(e.target.value)}
+          className="w-full bg-gray-100 dark:bg-gray-800 rounded-xl py-3 pl-10 pr-4 text-sm outline-none focus:ring-2 focus:ring-[#1E5BFF] dark:text-white"
+        />
+      </div>
+    </div>
+
+    <div className="grid grid-cols-3 gap-0.5 pb-20">
+      {/* Mock Grid for Explore */}
+      {Array.from({ length: 15 }).map((_, i) => (
+        <div key={i} className={`bg-gray-200 dark:bg-gray-800 relative aspect-square ${i % 3 === 0 ? 'row-span-2 col-span-2' : ''}`}>
+          <img 
+            src={`https://picsum.photos/400/400?random=${i}`} 
+            alt="Explore" 
+            className="w-full h-full object-cover"
+          />
+        </div>
+      ))}
+    </div>
+  </div>
+);
 
 // --- COMPONENT: FEED VIDEO PLAYER ---
 const FeedVideoPlayer: React.FC<{ src: string }> = ({ src }) => {
@@ -617,6 +848,7 @@ const StoryViewer: React.FC<{
 
 export const CommunityFeedView: React.FC<CommunityFeedViewProps> = ({ onBack, onStoreClick, user, onRequireLogin }) => {
   const [posts, setPosts] = useState<CommunityPost[]>(MOCK_COMMUNITY_POSTS);
+  const [internalView, setInternalView] = useState<InternalView>('home'); // State for internal nav
   const [activeTab, setActiveTab] = useState<'residents' | 'merchants'>('residents');
   
   // Stories State
@@ -775,10 +1007,22 @@ export const CommunityFeedView: React.FC<CommunityFeedViewProps> = ({ onBack, on
   const myStory = stories.find(s => s.userId === user?.id);
   const otherStories = stories.filter(s => s.userId !== user?.id);
 
+  // --- INTERNAL NAV HANDLING ---
+  const handleChangeInternalView = (view: InternalView) => {
+    // Auth check for protected views
+    if (view === 'profile' || view === 'direct') {
+      if (!user) {
+        onRequireLogin();
+        return;
+      }
+    }
+    setInternalView(view);
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 font-sans animate-in slide-in-from-right duration-300 flex flex-col">
       
-      {/* Header */}
+      {/* 1. Main Header */}
       <div className="sticky top-0 z-30 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md px-5 h-16 flex items-center justify-between border-b border-gray-100 dark:border-gray-800 shrink-0">
         <div className="flex items-center gap-4">
           {onBack && (
@@ -791,230 +1035,261 @@ export const CommunityFeedView: React.FC<CommunityFeedViewProps> = ({ onBack, on
             <p className="text-xs text-gray-500 dark:text-gray-400">Conversas e novidades locais</p>
           </div>
         </div>
-        <button 
-          onClick={() => handleAuthRequired(() => setShowCreateModal(true))}
-          className="bg-[#1E5BFF] text-white p-2 rounded-full shadow-lg shadow-blue-500/20 active:scale-90 transition-transform"
-        >
-          <Plus className="w-5 h-5" />
-        </button>
-      </div>
-
-      {/* --- STORIES RAIL --- */}
-      <div className="pt-4 pb-2 border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900">
-        <div className="flex gap-4 overflow-x-auto no-scrollbar px-5 pb-2">
-          
-          {/* My Story Button */}
-          <div className="flex flex-col items-center gap-1.5 min-w-[70px]">
-            <div className="relative">
-              <button 
-                onClick={() => handleAuthRequired(() => storyInputRef.current?.click())}
-                className={`w-[68px] h-[68px] rounded-full p-[2px] ${myStory && hasUnseenStories(myStory) ? 'bg-gradient-to-tr from-yellow-400 via-orange-500 to-red-500' : 'bg-gray-200 dark:bg-gray-700'}`}
-              >
-                <div className="w-full h-full rounded-full border-2 border-white dark:border-gray-900 overflow-hidden bg-gray-100 dark:bg-gray-800 relative">
-                  {user?.user_metadata?.avatar_url ? (
-                    <img src={user.user_metadata.avatar_url} alt="Eu" className="w-full h-full object-cover" />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center">
-                        <User className="w-6 h-6 text-gray-400" />
-                    </div>
-                  )}
-                  {/* Add Icon Overlay if no story or just to act as add button */}
-                  <div className="absolute inset-0 bg-black/10 flex items-center justify-center"></div>
-                </div>
-              </button>
-              <div 
-                className="absolute bottom-0 right-0 bg-blue-500 text-white rounded-full p-1 border-2 border-white dark:border-gray-900 pointer-events-none"
-              >
-                <Plus className="w-3 h-3" strokeWidth={3} />
-              </div>
-              <input 
-                type="file" 
-                accept="image/*,video/*" 
-                className="hidden" 
-                ref={storyInputRef} 
-                onChange={handleAddStory} 
-              />
-            </div>
-            <span className="text-[10px] text-gray-600 dark:text-gray-300 font-medium truncate w-full text-center">Seu Story</span>
-          </div>
-
-          {/* Other Stories */}
-          {otherStories.map((story, index) => {
-            const isUnseen = hasUnseenStories(story);
-            // We need to adjust index because we filtered out 'myStory'
-            // To find the original index in the 'stories' array for the viewer:
-            const originalIndex = stories.findIndex(s => s.userId === story.userId);
-
-            return (
-              <button 
-                key={story.userId}
-                onClick={() => setActiveStoryViewer(originalIndex)}
-                className="flex flex-col items-center gap-1.5 min-w-[70px] group"
-              >
-                <div className={`w-[68px] h-[68px] rounded-full p-[2px] ${isUnseen ? 'bg-gradient-to-tr from-yellow-400 via-orange-500 to-red-500' : 'bg-gray-300 dark:bg-gray-700'}`}>
-                  <div className="w-full h-full rounded-full border-2 border-white dark:border-gray-900 overflow-hidden bg-white dark:bg-gray-800 relative">
-                    <img src={story.userAvatar} alt={story.userName} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
-                  </div>
-                </div>
-                <div className="flex items-center gap-1">
-                    <span className="text-[10px] text-gray-600 dark:text-gray-300 font-medium truncate max-w-[64px] text-center">{story.userName.split(' ')[0]}</span>
-                    {story.isMerchant && <BadgeCheck className="w-3 h-3 text-[#1E5BFF] fill-transparent" />}
-                </div>
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Tabs */}
-      <div className="px-5 pt-4 pb-2 bg-gray-50 dark:bg-gray-900">
-        <div className="flex p-1 bg-gray-200 dark:bg-gray-800 rounded-xl relative">
-            <div 
-                className="absolute top-1 bottom-1 w-[calc(50%-4px)] bg-white dark:bg-gray-700 rounded-lg shadow-sm transition-all duration-300 ease-out"
-                style={{ left: activeTab === 'residents' ? '4px' : 'calc(50%)' }}
-            ></div>
-
-            <button 
-                onClick={() => setActiveTab('residents')}
-                className={`flex-1 relative z-10 py-2 text-xs font-bold text-center transition-colors ${activeTab === 'residents' ? 'text-gray-900 dark:text-white' : 'text-gray-500'}`}
-            >
-                Moradores
-            </button>
-            <button 
-                onClick={() => setActiveTab('merchants')}
-                className={`flex-1 relative z-10 py-2 text-xs font-bold text-center transition-colors ${activeTab === 'merchants' ? 'text-gray-900 dark:text-white' : 'text-gray-500'}`}
-            >
-                Lojistas
-            </button>
-        </div>
-      </div>
-
-      {/* Feed List */}
-      <div className="p-5 pb-24 space-y-6 flex-1 overflow-y-auto no-scrollbar">
-        {displayedPosts.length === 0 ? (
-            <div className="text-center py-10 opacity-50">
-                <p className="text-sm">Nenhuma postagem nesta categoria ainda.</p>
-            </div>
-        ) : (
-            displayedPosts.map(post => {
-              const hasVideo = !!post.videoUrl;
-              const hasImages = (post.imageUrls && post.imageUrls.length > 0) || !!post.imageUrl;
-              
-              // Normalize images to array for carousel
-              const images = post.imageUrls || (post.imageUrl ? [post.imageUrl] : []);
-
-              return (
-                <div key={post.id} className="bg-white dark:bg-gray-800 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden mb-4">
-                    
-                    {/* Header Post */}
-                    <div className="flex justify-between items-center p-4">
-                        <div className="flex items-center gap-3">
-                            <div className="relative">
-                                <img src={post.userAvatar} alt={post.userName} className="w-10 h-10 rounded-full bg-gray-200 object-cover border border-gray-100 dark:border-gray-600" />
-                                {post.authorRole === 'merchant' && (
-                                    <div className="absolute -bottom-1 -right-1 bg-[#1E5BFF] text-white p-0.5 rounded-full border-2 border-white dark:border-gray-800">
-                                        <StoreIcon className="w-2.5 h-2.5" />
-                                    </div>
-                                )}
-                            </div>
-                            <div>
-                                <div className="flex items-center gap-1.5 flex-wrap">
-                                    <h4 className="font-bold text-sm text-gray-900 dark:text-white leading-tight">
-                                        {post.userName}
-                                    </h4>
-                                    {post.authorRole === 'merchant' && (
-                                        <BadgeCheck className="w-3.5 h-3.5 text-[#1E5BFF] fill-blue-50 dark:fill-transparent" />
-                                    )}
-                                </div>
-                                <span className="text-xs text-gray-400 font-medium block">
-                                    @{post.userUsername || (post.authorRole === 'merchant' ? 'loja' : 'morador')}
-                                </span>
-                            </div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <span className="text-[10px] text-gray-400">{post.timestamp}</span>
-                            <button className="text-gray-300 hover:text-gray-500">
-                                <MoreHorizontal className="w-5 h-5" />
-                            </button>
-                        </div>
-                    </div>
-
-                    {/* Media Content (Visual First) */}
-                    <div className="w-full bg-black/5 dark:bg-black/20">
-                        {hasVideo ? (
-                            <FeedVideoPlayer src={post.videoUrl!} />
-                        ) : images.length > 1 ? (
-                            <ImageCarousel images={images} />
-                        ) : images.length === 1 ? (
-                            <img src={images[0]} alt="Post media" className="w-full h-auto object-cover max-h-[500px]" />
-                        ) : (
-                            // Fallback for legacy text-only posts (gradient)
-                            <div className="w-full aspect-[4/3] bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center p-8 text-center">
-                                <p className="text-white font-bold text-xl drop-shadow-md leading-relaxed line-clamp-6">{post.content}</p>
-                            </div>
-                        )}
-                    </div>
-
-                    {/* Actions */}
-                    <div className="flex items-center justify-between px-4 pt-3 pb-2">
-                        <div className="flex gap-4">
-                            <button 
-                                onClick={() => handleAuthRequired(() => handleLike(post.id))}
-                                className={`flex items-center gap-1.5 text-xs font-bold transition-colors ${post.isLiked ? 'text-red-500' : 'text-gray-400 hover:text-red-500'}`}
-                            >
-                                <Heart className={`w-5 h-5 ${post.isLiked ? 'fill-current' : ''}`} />
-                                {post.likes}
-                            </button>
-                            <button 
-                                onClick={() => handleAuthRequired(() => {})}
-                                className="flex items-center gap-1.5 text-xs font-bold text-gray-400 hover:text-[#1E5BFF] transition-colors"
-                            >
-                                <MessageSquare className="w-5 h-5" />
-                                {post.comments}
-                            </button>
-                            <button 
-                                onClick={() => handleAuthRequired(handleShareClick)}
-                                className="flex items-center gap-1.5 text-xs font-bold text-gray-400 hover:text-[#1E5BFF] transition-colors"
-                            >
-                                <Send className="w-5 h-5" />
-                            </button>
-                        </div>
-                        
-                        {/* Store Link if available */}
-                        {post.relatedStoreId && (
-                            <button 
-                                onClick={() => {
-                                    const store = STORES.find(s => s.id === post.relatedStoreId);
-                                    if (store) onStoreClick(store);
-                                }}
-                                className="flex items-center gap-1 text-[10px] font-bold text-[#1E5BFF] bg-blue-50 dark:bg-blue-900/20 px-2 py-1 rounded-lg"
-                            >
-                                <StoreIcon className="w-3 h-3" />
-                                Visitar Loja
-                            </button>
-                        )}
-                    </div>
-
-                    {/* Caption (Only if there was media, otherwise text was shown in gradient block) */}
-                    {(hasVideo || hasImages) && post.content && (
-                        <div className="px-4 pb-4 text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
-                            <span className="font-bold mr-2 text-gray-900 dark:text-white">{post.userName}</span>
-                            {post.content}
-                        </div>
-                    )}
-                    
-                    {/* Tags or Type */}
-                    <div className="px-4 pb-4">
-                        <span className="inline-flex items-center gap-1 text-[10px] uppercase font-bold text-gray-500 tracking-wide bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded">
-                            {getTypeIcon(post.type)} {getTypeLabel(post.type)}
-                        </span>
-                    </div>
-
-                </div>
-              );
-            })
+        {internalView === 'home' && (
+          <button 
+            onClick={() => handleAuthRequired(() => setShowCreateModal(true))}
+            className="bg-[#1E5BFF] text-white p-2 rounded-full shadow-lg shadow-blue-500/20 active:scale-90 transition-transform"
+          >
+            <Plus className="w-5 h-5" />
+          </button>
         )}
       </div>
+
+      {/* 2. Internal Navigation Bar */}
+      <FeedInternalNav 
+        currentView={internalView} 
+        onChangeView={handleChangeInternalView} 
+        unreadCount={1} // Mock
+      />
+
+      {/* 3. Content Views Switcher */}
+      
+      {/* PROFILE VIEW */}
+      {internalView === 'profile' && user && (
+        <InstagramProfile user={user} posts={posts} />
+      )}
+
+      {/* DIRECT VIEW */}
+      {internalView === 'direct' && (
+        <DirectInbox />
+      )}
+
+      {/* EXPLORE VIEW */}
+      {internalView === 'explore' && (
+        <ExploreFeed onSearch={() => {}} />
+      )}
+
+      {/* HOME FEED VIEW */}
+      {internalView === 'home' && (
+        <>
+          {/* --- STORIES RAIL --- */}
+          <div className="pt-4 pb-2 border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900">
+            <div className="flex gap-4 overflow-x-auto no-scrollbar px-5 pb-2">
+              
+              {/* My Story Button */}
+              <div className="flex flex-col items-center gap-1.5 min-w-[70px]">
+                <div className="relative">
+                  <button 
+                    onClick={() => handleAuthRequired(() => storyInputRef.current?.click())}
+                    className={`w-[68px] h-[68px] rounded-full p-[2px] ${myStory && hasUnseenStories(myStory) ? 'bg-gradient-to-tr from-yellow-400 via-orange-500 to-red-500' : 'bg-gray-200 dark:bg-gray-700'}`}
+                  >
+                    <div className="w-full h-full rounded-full border-2 border-white dark:border-gray-900 overflow-hidden bg-gray-100 dark:bg-gray-800 relative">
+                      {user?.user_metadata?.avatar_url ? (
+                        <img src={user.user_metadata.avatar_url} alt="Eu" className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                            <User className="w-6 h-6 text-gray-400" />
+                        </div>
+                      )}
+                      {/* Add Icon Overlay if no story or just to act as add button */}
+                      <div className="absolute inset-0 bg-black/10 flex items-center justify-center"></div>
+                    </div>
+                  </button>
+                  <div 
+                    className="absolute bottom-0 right-0 bg-blue-500 text-white rounded-full p-1 border-2 border-white dark:border-gray-900 pointer-events-none"
+                  >
+                    <Plus className="w-3 h-3" strokeWidth={3} />
+                  </div>
+                  <input 
+                    type="file" 
+                    accept="image/*,video/*" 
+                    className="hidden" 
+                    ref={storyInputRef} 
+                    onChange={handleAddStory} 
+                  />
+                </div>
+                <span className="text-[10px] text-gray-600 dark:text-gray-300 font-medium truncate w-full text-center">Seu Story</span>
+              </div>
+
+              {/* Other Stories */}
+              {otherStories.map((story, index) => {
+                const isUnseen = hasUnseenStories(story);
+                // We need to adjust index because we filtered out 'myStory'
+                // To find the original index in the 'stories' array for the viewer:
+                const originalIndex = stories.findIndex(s => s.userId === story.userId);
+
+                return (
+                  <button 
+                    key={story.userId}
+                    onClick={() => setActiveStoryViewer(originalIndex)}
+                    className="flex flex-col items-center gap-1.5 min-w-[70px] group"
+                  >
+                    <div className={`w-[68px] h-[68px] rounded-full p-[2px] ${isUnseen ? 'bg-gradient-to-tr from-yellow-400 via-orange-500 to-red-500' : 'bg-gray-300 dark:bg-gray-700'}`}>
+                      <div className="w-full h-full rounded-full border-2 border-white dark:border-gray-900 overflow-hidden bg-white dark:bg-gray-800 relative">
+                        <img src={story.userAvatar} alt={story.userName} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1">
+                        <span className="text-[10px] text-gray-600 dark:text-gray-300 font-medium truncate max-w-[64px] text-center">{story.userName.split(' ')[0]}</span>
+                        {story.isMerchant && <BadgeCheck className="w-3 h-3 text-[#1E5BFF] fill-transparent" />}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Tabs */}
+          <div className="px-5 pt-4 pb-2 bg-gray-50 dark:bg-gray-900">
+            <div className="flex p-1 bg-gray-200 dark:bg-gray-800 rounded-xl relative">
+                <div 
+                    className="absolute top-1 bottom-1 w-[calc(50%-4px)] bg-white dark:bg-gray-700 rounded-lg shadow-sm transition-all duration-300 ease-out"
+                    style={{ left: activeTab === 'residents' ? '4px' : 'calc(50%)' }}
+                ></div>
+
+                <button 
+                    onClick={() => setActiveTab('residents')}
+                    className={`flex-1 relative z-10 py-2 text-xs font-bold text-center transition-colors ${activeTab === 'residents' ? 'text-gray-900 dark:text-white' : 'text-gray-500'}`}
+                >
+                    Moradores
+                </button>
+                <button 
+                    onClick={() => setActiveTab('merchants')}
+                    className={`flex-1 relative z-10 py-2 text-xs font-bold text-center transition-colors ${activeTab === 'merchants' ? 'text-gray-900 dark:text-white' : 'text-gray-500'}`}
+                >
+                    Lojistas
+                </button>
+            </div>
+          </div>
+
+          {/* Feed List */}
+          <div className="p-5 pb-24 space-y-6 flex-1 overflow-y-auto no-scrollbar">
+            {displayedPosts.length === 0 ? (
+                <div className="text-center py-10 opacity-50">
+                    <p className="text-sm">Nenhuma postagem nesta categoria ainda.</p>
+                </div>
+            ) : (
+                displayedPosts.map(post => {
+                  const hasVideo = !!post.videoUrl;
+                  const hasImages = (post.imageUrls && post.imageUrls.length > 0) || !!post.imageUrl;
+                  
+                  // Normalize images to array for carousel
+                  const images = post.imageUrls || (post.imageUrl ? [post.imageUrl] : []);
+
+                  return (
+                    <div key={post.id} className="bg-white dark:bg-gray-800 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden mb-4">
+                        
+                        {/* Header Post */}
+                        <div className="flex justify-between items-center p-4">
+                            <div className="flex items-center gap-3">
+                                <div className="relative">
+                                    <img src={post.userAvatar} alt={post.userName} className="w-10 h-10 rounded-full bg-gray-200 object-cover border border-gray-100 dark:border-gray-600" />
+                                    {post.authorRole === 'merchant' && (
+                                        <div className="absolute -bottom-1 -right-1 bg-[#1E5BFF] text-white p-0.5 rounded-full border-2 border-white dark:border-gray-800">
+                                            <StoreIcon className="w-2.5 h-2.5" />
+                                        </div>
+                                    )}
+                                </div>
+                                <div>
+                                    <div className="flex items-center gap-1.5 flex-wrap">
+                                        <h4 className="font-bold text-sm text-gray-900 dark:text-white leading-tight">
+                                            {post.userName}
+                                        </h4>
+                                        {post.authorRole === 'merchant' && (
+                                            <BadgeCheck className="w-3.5 h-3.5 text-[#1E5BFF] fill-blue-50 dark:fill-transparent" />
+                                        )}
+                                    </div>
+                                    <span className="text-xs text-gray-400 font-medium block">
+                                        @{post.userUsername || (post.authorRole === 'merchant' ? 'loja' : 'morador')}
+                                    </span>
+                                </div>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <span className="text-[10px] text-gray-400">{post.timestamp}</span>
+                                <button className="text-gray-300 hover:text-gray-500">
+                                    <MoreHorizontal className="w-5 h-5" />
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Media Content (Visual First) */}
+                        <div className="w-full bg-black/5 dark:bg-black/20">
+                            {hasVideo ? (
+                                <FeedVideoPlayer src={post.videoUrl!} />
+                            ) : images.length > 1 ? (
+                                <ImageCarousel images={images} />
+                            ) : images.length === 1 ? (
+                                <img src={images[0]} alt="Post media" className="w-full h-auto object-cover max-h-[500px]" />
+                            ) : (
+                                // Fallback for legacy text-only posts (gradient)
+                                <div className="w-full aspect-[4/3] bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center p-8 text-center">
+                                    <p className="text-white font-bold text-xl drop-shadow-md leading-relaxed line-clamp-6">{post.content}</p>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Actions */}
+                        <div className="flex items-center justify-between px-4 pt-3 pb-2">
+                            <div className="flex gap-4">
+                                <button 
+                                    onClick={() => handleAuthRequired(() => handleLike(post.id))}
+                                    className={`flex items-center gap-1.5 text-xs font-bold transition-colors ${post.isLiked ? 'text-red-500' : 'text-gray-400 hover:text-red-500'}`}
+                                >
+                                    <Heart className={`w-5 h-5 ${post.isLiked ? 'fill-current' : ''}`} />
+                                    {post.likes}
+                                </button>
+                                <button 
+                                    onClick={() => handleAuthRequired(() => {})}
+                                    className="flex items-center gap-1.5 text-xs font-bold text-gray-400 hover:text-[#1E5BFF] transition-colors"
+                                >
+                                    <MessageSquare className="w-5 h-5" />
+                                    {post.comments}
+                                </button>
+                                <button 
+                                    onClick={() => handleAuthRequired(handleShareClick)}
+                                    className="flex items-center gap-1.5 text-xs font-bold text-gray-400 hover:text-[#1E5BFF] transition-colors"
+                                >
+                                    <Send className="w-5 h-5" />
+                                </button>
+                            </div>
+                            
+                            {/* Store Link if available */}
+                            {post.relatedStoreId && (
+                                <button 
+                                    onClick={() => {
+                                        const store = STORES.find(s => s.id === post.relatedStoreId);
+                                        if (store) onStoreClick(store);
+                                    }}
+                                    className="flex items-center gap-1 text-[10px] font-bold text-[#1E5BFF] bg-blue-50 dark:bg-blue-900/20 px-2 py-1 rounded-lg"
+                                >
+                                    <StoreIcon className="w-3 h-3" />
+                                    Visitar Loja
+                                </button>
+                            )}
+                        </div>
+
+                        {/* Caption (Only if there was media, otherwise text was shown in gradient block) */}
+                        {(hasVideo || hasImages) && post.content && (
+                            <div className="px-4 pb-4 text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
+                                <span className="font-bold mr-2 text-gray-900 dark:text-white">{post.userName}</span>
+                                {post.content}
+                            </div>
+                        )}
+                        
+                        {/* Tags or Type */}
+                        <div className="px-4 pb-4">
+                            <span className="inline-flex items-center gap-1 text-[10px] uppercase font-bold text-gray-500 tracking-wide bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded">
+                                {getTypeIcon(post.type)} {getTypeLabel(post.type)}
+                            </span>
+                        </div>
+
+                    </div>
+                  );
+                })
+            )}
+          </div>
+        </>
+      )}
 
       {showCreateModal && (
         <CreatePostModal 
