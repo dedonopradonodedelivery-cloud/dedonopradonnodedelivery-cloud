@@ -8,7 +8,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script>
       tailwind.config = {
         darkMode: 'class',
@@ -39,6 +39,7 @@
               'badge-shake': 'badgeShake 0.5s ease-in-out 3',
               'badge-float-up': 'badgeFloatUp 0.8s ease-out forwards',
               'badge-glow': 'badgeGlow 1.5s ease-out forwards',
+              'fade-in-up': 'fadeInUp 0.8s ease-out forwards',
             },
             keyframes: {
               popIn: {
@@ -58,8 +59,12 @@
                 '50%': { transform: 'translateY(-12px)' },
               },
               shimmer: {
-                '0%': { transform: 'translateX(-100%)' },
-                '100%': { transform: 'translateX(100%)' },
+                '0%': { backgroundPosition: '-200% 0' },
+                '100%': { backgroundPosition: '200% 0' },
+              },
+              fadeInUp: {
+                '0%': { opacity: '0', transform: 'translateY(20px)' },
+                '100%': { opacity: '1', transform: 'translateY(0)' },
               },
               sponsorSpinIn: {
                 '0%': { 
@@ -104,6 +109,14 @@
         -webkit-backdrop-filter: blur(24px);
         border: 1px solid rgba(255, 255, 255, 0.2);
         box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+      }
+      
+      .text-shimmer {
+        background: linear-gradient(to right, rgba(255,255,255,0.7) 0%, #ffffff 50%, rgba(255,255,255,0.7) 100%);
+        background-size: 200% auto;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        animation: shimmer 3s infinite linear;
       }
     </style>
   <script type="importmap">

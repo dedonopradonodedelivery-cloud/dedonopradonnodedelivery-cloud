@@ -29,7 +29,7 @@ import { MerchantQrScreen } from './components/MerchantQrScreen';
 import { WeeklyPromoModule } from './components/WeeklyPromoModule';
 import { JobsView } from './components/JobsView';
 import { MerchantJobsModule } from './components/MerchantJobsModule';
-import { MapPin, Crown, X, Star } from 'lucide-react';
+import { MapPin, Crown, X, Star, Shield } from 'lucide-react';
 import { useAuth } from './contexts/AuthContext';
 import { Category, Store, AdType, EditorialCollection, ThemeMode } from './types';
 import { getStoreLogo } from './utils/mockLogos';
@@ -63,6 +63,7 @@ const App: React.FC = () => {
   
   const [minSplashTimeElapsed, setMinSplashTimeElapsed] = useState(isFirstBootAttempted || isAuthReturn);
   const [splashProgress, setSplashProgress] = useState(isAuthReturn ? 100 : 0);
+  const [showSponsor, setShowSponsor] = useState(false);
   
   // Theme Management - DEFAULT IS LIGHT
   const [themeMode, setThemeMode] = useState<ThemeMode>(() => (localStorage.getItem('localizei_theme_mode') as ThemeMode) || 'light');
@@ -91,13 +92,35 @@ const App: React.FC = () => {
   useEffect(() => {
     if (isFirstBootAttempted || isAuthReturn) return;
 
-    setSplashProgress(100);
-    const timer = setTimeout(() => {
-      isFirstBootAttempted = true;
-      setMinSplashTimeElapsed(true);
-    }, 5200);
+    // Sequência de animação da Splash
+    // 0ms: Início
+    // 1000ms: Mostra Patrocinador Master
+    // 3500ms: Finaliza Splash
 
-    return () => clearTimeout(timer);
+    const sponsorTimer = setTimeout(() => {
+      setShowSponsor(true);
+    }, 1000);
+
+    const finishTimer = setTimeout(() => {
+      setSplashProgress(100);
+      isFirstBootAttempted = true;
+      // Pequeno delay visual para a barra encher
+      setTimeout(() => setMinSplashTimeElapsed(true), 300);
+    }, 3500);
+
+    // Barra de progresso visual (Fake loading)
+    const progressInterval = setInterval(() => {
+      setSplashProgress(prev => {
+        if (prev >= 90) return prev;
+        return prev + 1;
+      });
+    }, 30);
+
+    return () => {
+      clearTimeout(sponsorTimer);
+      clearTimeout(finishTimer);
+      clearInterval(progressInterval);
+    };
   }, [isAuthReturn]);
 
   // Theme Logic
@@ -310,10 +333,12 @@ const App: React.FC = () => {
           {isQuoteModalOpen && <QuoteRequestModal isOpen={isQuoteModalOpen} onClose={() => setIsQuoteModalOpen(false)} categoryName={quoteCategory} onSuccess={() => { setIsQuoteModalOpen(false); setActiveTab('service_success'); }} />}
         </Layout>
 
-        {/* OVERLAY SPLASH */}
+        {/* OVERLAY SPLASH - PREMIUM */}
         {!minSplashTimeElapsed && (
-          <div className="fixed inset-0 bg-[#1E5BFF] flex flex-col items-center justify-center text-white z-[999] overflow-hidden animate-out fade-out duration-700 fill-mode-forwards">
-            <div className="relative flex flex-col items-center justify-center z-10">
+          <div className="fixed inset-0 bg-[#1E5BFF] flex flex-col items-center justify-between text-white z-[999] overflow-hidden animate-out fade-out duration-700 fill-mode-forwards pb-10">
+            
+            {/* Main Logo Container */}
+            <div className={`flex flex-col items-center justify-center flex-1 transition-transform duration-1000 ${showSponsor ? '-translate-y-8 scale-90' : 'translate-y-0'}`}>
               <div className="animate-float-slow">
                 <div className="w-28 h-28 bg-white rounded-[2.8rem] flex items-center justify-center shadow-[0_25px_60px_rgba(0,0,0,0.3)] mb-8 animate-pop-in">
                   <MapPin className="w-14 h-14 text-[#1E5BFF] fill-[#1E5BFF]" />
@@ -328,8 +353,25 @@ const App: React.FC = () => {
                 </div>
               </div>
             </div>
+
+            {/* Master Sponsor Container */}
+            <div className={`flex flex-col items-center transition-all duration-1000 ease-out ${showSponsor ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+                <p className="text-[10px] uppercase tracking-[0.3em] font-medium text-white/60 mb-3">
+                    Patrocinador Master
+                </p>
+                <div className="flex items-center gap-3 bg-white/10 backdrop-blur-md px-6 py-3 rounded-2xl border border-white/10 shadow-xl">
+                    <Shield className="w-8 h-8 text-white fill-white" />
+                    <div className="flex flex-col items-start">
+                        <span className="text-2xl font-black font-display tracking-tight text-shimmer leading-none">
+                            Grupo Esquematiza
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            {/* Progress Bar */}
             <div className="absolute bottom-0 left-0 right-0 h-1.5 bg-white/5">
-              <div className="h-full bg-white shadow-[0_0_25px_rgba(255,255,255,1)] transition-all duration-[5000ms] ease-linear" style={{ width: `${splashProgress}%` }} />
+              <div className="h-full bg-white shadow-[0_0_25px_rgba(255,255,255,1)] transition-all duration-[100ms] ease-linear" style={{ width: `${splashProgress}%` }} />
             </div>
           </div>
         )}
