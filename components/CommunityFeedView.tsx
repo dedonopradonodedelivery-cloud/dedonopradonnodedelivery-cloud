@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Search, Store as StoreIcon, MoreHorizontal, Send, Heart, Share2, MessageCircle, ChevronLeft, BadgeCheck, User as UserIcon, Home, Plus, X, Video, Image as ImageIcon, Film, Loader2, Grid, Camera, Play, Check, ChevronRight, Briefcase, MapPin, Clock, DollarSign, ExternalLink, AlertCircle, Building2 } from 'lucide-react';
+import { Search, Store as StoreIcon, MoreHorizontal, Send, Heart, Share2, MessageCircle, ChevronLeft, BadgeCheck, User as UserIcon, Home, Plus, X, Video, Image as ImageIcon, Film, Loader2, Grid, Camera, Play, Check, ChevronRight, Briefcase, MapPin, Clock, DollarSign, ExternalLink, AlertCircle, Building2, Trash2, Flag } from 'lucide-react';
 import { Store, CommunityPost, Job } from '../types';
 import { MOCK_COMMUNITY_POSTS, MOCK_JOBS } from '../constants';
 
@@ -496,81 +496,31 @@ const ActivityScreen: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   );
 };
 
-// POST OPTIONS MODAL
-const PostOptionsModal: React.FC<{ 
-  post: CommunityPost; 
-  user: any; 
-  onClose: () => void; 
-  onDelete: (postId: string) => void;
-}> = ({ post, user, onClose, onDelete }) => {
-  const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
-  const isOwner = user?.id === post.userId;
-
-  const handleAction = () => {
-    if (isOwner) {
-      setIsConfirmingDelete(true);
-    } else {
-      // Simulate Report
-      onClose();
-      alert("Denúncia enviada. Analisaremos em breve.");
-    }
-  };
-
-  const handleDelete = () => {
-    onDelete(post.id);
-    onClose();
-  };
-
-  if (isConfirmingDelete) {
-    return (
-        <div className="fixed inset-0 z-[110] bg-black/60 backdrop-blur-sm flex items-center justify-center animate-in fade-in duration-200 p-6">
-            <div className="bg-white dark:bg-gray-800 w-full max-w-xs rounded-2xl p-6 shadow-2xl animate-in zoom-in-95 duration-200">
-                <h3 className="font-bold text-lg text-gray-900 dark:text-white mb-2 text-center">Excluir esta postagem?</h3>
-                <p className="text-sm text-gray-500 dark:text-gray-400 text-center mb-6">Essa ação não pode ser desfeita.</p>
-                <div className="flex gap-3">
-                    <button 
-                        onClick={() => setIsConfirmingDelete(false)}
-                        className="flex-1 py-3 text-sm font-bold text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-xl"
-                    >
-                        Cancelar
-                    </button>
-                    <button 
-                        onClick={handleDelete}
-                        className="flex-1 py-3 text-sm font-bold text-white bg-red-500 rounded-xl"
-                    >
-                        Excluir
-                    </button>
-                </div>
+// DELETE CONFIRMATION MODAL
+const DeleteConfirmationModal: React.FC<{ 
+  onConfirm: () => void;
+  onCancel: () => void;
+}> = ({ onConfirm, onCancel }) => {
+  return (
+    <div className="fixed inset-0 z-[120] bg-black/60 backdrop-blur-sm flex items-center justify-center animate-in fade-in duration-200 p-6">
+        <div className="bg-white dark:bg-gray-800 w-full max-w-xs rounded-2xl p-6 shadow-2xl animate-in zoom-in-95 duration-200">
+            <h3 className="font-bold text-lg text-gray-900 dark:text-white mb-2 text-center">Excluir esta postagem?</h3>
+            <p className="text-sm text-gray-500 dark:text-gray-400 text-center mb-6">Essa ação não pode ser desfeita.</p>
+            <div className="flex gap-3">
+                <button 
+                    onClick={onCancel}
+                    className="flex-1 py-3 text-sm font-bold text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-xl"
+                >
+                    Cancelar
+                </button>
+                <button 
+                    onClick={onConfirm}
+                    className="flex-1 py-3 text-sm font-bold text-white bg-red-500 rounded-xl"
+                >
+                    Excluir
+                </button>
             </div>
         </div>
-    );
-  }
-
-  return (
-    <div className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm flex items-end justify-center animate-in fade-in duration-200" onClick={onClose}>
-      <div 
-        className="bg-white dark:bg-gray-900 w-full max-w-md rounded-t-[2rem] p-4 pb-8 animate-in slide-in-from-bottom duration-300"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="w-12 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full mx-auto mb-6"></div>
-        
-        <button 
-            onClick={handleAction}
-            className={`w-full p-4 rounded-xl flex items-center gap-3 font-bold text-sm active:bg-gray-100 dark:active:bg-gray-800 transition-colors ${isOwner ? 'text-red-500' : 'text-red-500'}`}
-        >
-            {isOwner ? (
-                <>
-                    <X className="w-5 h-5" />
-                    Excluir publicação
-                </>
-            ) : (
-                <>
-                    <AlertCircle className="w-5 h-5" />
-                    Denunciar
-                </>
-            )}
-        </button>
-      </div>
     </div>
   );
 };
@@ -780,21 +730,49 @@ const JobsFeedScreen: React.FC<{
   );
 };
 
-const FeedPost: React.FC<{ post: CommunityPost; onLike: () => void; onOptions: () => void }> = ({ post, onLike, onOptions }) => {
+const FeedPost: React.FC<{ 
+    post: CommunityPost; 
+    onLike: () => void; 
+    activeMenuId: string | null;
+    setActiveMenuId: (id: string | null) => void;
+    currentUserId?: string;
+    onDeleteRequest: (postId: string) => void;
+    onReport: () => void;
+}> = ({ post, onLike, activeMenuId, setActiveMenuId, currentUserId, onDeleteRequest, onReport }) => {
   const [liked, setLiked] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
+  const isMenuOpen = activeMenuId === post.id;
+  const isOwner = currentUserId === post.userId;
 
   const handleLike = () => {
     onLike();
     setLiked(!liked);
   };
 
+  const handleToggleMenu = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (isMenuOpen) {
+        setActiveMenuId(null);
+    } else {
+        setActiveMenuId(post.id);
+    }
+  };
+
   const MAX_PREVIEW_LENGTH = 180;
   const shouldTruncate = post.content.length > MAX_PREVIEW_LENGTH;
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-gray-700">
-      <div className="flex items-center justify-between mb-3">
+    <div className="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-gray-700 relative">
+      
+      {/* Invisible Overlay for Menu Click-Outside */}
+      {isMenuOpen && (
+        <div 
+            className="fixed inset-0 z-10" 
+            onClick={() => setActiveMenuId(null)}
+        ></div>
+      )}
+
+      <div className="flex items-center justify-between mb-3 relative z-0">
         <div className="flex items-center gap-3">
           <img src={post.userAvatar} alt={post.userName} className="w-10 h-10 rounded-full object-cover bg-gray-200" />
           <div>
@@ -805,9 +783,44 @@ const FeedPost: React.FC<{ post: CommunityPost; onLike: () => void; onOptions: (
             <span className="text-xs text-gray-500 dark:text-gray-400">{post.timestamp}</span>
           </div>
         </div>
-        <button onClick={onOptions} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 p-1 rounded-full active:bg-gray-100 dark:active:bg-gray-700 transition-colors">
-          <MoreHorizontal className="w-5 h-5" />
-        </button>
+        
+        {/* Context Menu Container */}
+        <div className="relative">
+            <button onClick={handleToggleMenu} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 p-1 rounded-full active:bg-gray-100 dark:active:bg-gray-700 transition-colors">
+              <MoreHorizontal className="w-5 h-5" />
+            </button>
+
+            {/* Dropdown Menu */}
+            {isMenuOpen && (
+                <div className="absolute right-0 top-full mt-1 w-40 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-100 dark:border-gray-700 z-20 overflow-hidden animate-in fade-in zoom-in-95 duration-200 origin-top-right">
+                    {isOwner ? (
+                        <button 
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                setActiveMenuId(null);
+                                onDeleteRequest(post.id);
+                            }}
+                            className="w-full text-left px-4 py-3 text-xs font-bold text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2 transition-colors"
+                        >
+                            <Trash2 className="w-3.5 h-3.5" />
+                            Excluir
+                        </button>
+                    ) : (
+                        <button 
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                setActiveMenuId(null);
+                                onReport();
+                            }}
+                            className="w-full text-left px-4 py-3 text-xs font-bold text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2 transition-colors"
+                        >
+                            <Flag className="w-3.5 h-3.5" />
+                            Denunciar
+                        </button>
+                    )}
+                </div>
+            )}
+        </div>
       </div>
 
       <div className="mb-3">
@@ -922,10 +935,14 @@ export const CommunityFeedView: React.FC<CommunityFeedViewProps> = ({ onStoreCli
   const [selectedChatId, setSelectedChatId] = useState<number | null>(null);
   const [viewingStoryIndex, setViewingStoryIndex] = useState<number | null>(null);
   const [showSuccessToast, setShowSuccessToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
   
   // State for posts to handle optimistic delete
   const [posts, setPosts] = useState<CommunityPost[]>(MOCK_COMMUNITY_POSTS);
-  const [postOptions, setPostOptions] = useState<CommunityPost | null>(null);
+  
+  // Menu & Modal Logic
+  const [activeMenuPostId, setActiveMenuPostId] = useState<string | null>(null);
+  const [postToDelete, setPostToDelete] = useState<string | null>(null);
 
   const handleViewChange = (view: 'home' | 'direct' | 'explore' | 'profile' | 'jobs') => {
     if ((view === 'direct' || view === 'profile') && !user) {
@@ -956,16 +973,31 @@ export const CommunityFeedView: React.FC<CommunityFeedViewProps> = ({ onStoreCli
 
   const handlePostSuccess = () => {
     setInternalView('home');
+    setToastMessage('Publicado com sucesso!');
     setShowSuccessToast(true);
     setTimeout(() => setShowSuccessToast(false), 3000);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleDeletePost = (postId: string) => {
-    // In a real app, call API here
-    setPosts(prev => prev.filter(p => p.id !== postId));
-    setShowSuccessToast(true); // Reusing toast for "Deleted" feedback
-    setTimeout(() => setShowSuccessToast(false), 2000);
+  // Triggered by "Excluir" in the context menu
+  const handleRequestDelete = (postId: string) => {
+    setPostToDelete(postId);
+  };
+
+  // Triggered by "Confirmar" in the confirmation modal
+  const handleConfirmDelete = () => {
+    if (postToDelete) {
+        setPosts(prev => prev.filter(p => p.id !== postToDelete));
+        setPostToDelete(null);
+        setToastMessage('Post excluído');
+        setShowSuccessToast(true); 
+        setTimeout(() => setShowSuccessToast(false), 2000);
+    }
+  };
+
+  // Triggered by "Denunciar" in the context menu
+  const handleReport = () => {
+    alert("Denúncia enviada com sucesso.");
   };
 
   const getHeaderTitle = () => {
@@ -994,10 +1026,11 @@ export const CommunityFeedView: React.FC<CommunityFeedViewProps> = ({ onStoreCli
                     key={post.id} 
                     post={post} 
                     onLike={() => !user && onRequireLogin()} 
-                    onOptions={() => {
-                        if(!user) onRequireLogin();
-                        else setPostOptions(post);
-                    }}
+                    activeMenuId={activeMenuPostId}
+                    setActiveMenuId={setActiveMenuPostId}
+                    currentUserId={user?.id}
+                    onDeleteRequest={handleRequestDelete}
+                    onReport={handleReport}
                   />
                 ))}
               </div>
@@ -1156,13 +1189,11 @@ export const CommunityFeedView: React.FC<CommunityFeedViewProps> = ({ onStoreCli
         />
       )}
 
-      {/* Action Modals */}
-      {postOptions && (
-        <PostOptionsModal 
-            post={postOptions} 
-            user={user} 
-            onClose={() => setPostOptions(null)}
-            onDelete={handleDeletePost}
+      {/* Delete Confirmation Modal */}
+      {postToDelete && (
+        <DeleteConfirmationModal
+            onConfirm={handleConfirmDelete}
+            onCancel={() => setPostToDelete(null)}
         />
       )}
 
@@ -1171,8 +1202,7 @@ export const CommunityFeedView: React.FC<CommunityFeedViewProps> = ({ onStoreCli
         <div className="fixed top-20 left-1/2 -translate-x-1/2 bg-black/80 backdrop-blur-md text-white px-6 py-3 rounded-full shadow-lg z-[100] animate-in fade-in slide-in-from-top-4 flex items-center gap-2">
           <Check className="w-4 h-4" />
           <span className="text-sm font-bold">
-             {/* Simple logic: if in home view it was likely a post creation, else deletion */}
-             {internalView === 'home' && posts.length === MOCK_COMMUNITY_POSTS.length + 1 ? 'Publicado com sucesso!' : 'Ação realizada!'}
+             {toastMessage}
           </span>
         </div>
       )}
