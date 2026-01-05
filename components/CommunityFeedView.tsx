@@ -330,7 +330,7 @@ const StoriesRail: React.FC<{
   onRequireLogin: () => void;
   onOpenStory: (index: number) => void;
 }> = ({ user, onRequireLogin, onOpenStory }) => (
-  <div className="flex gap-4 overflow-x-auto px-4 pt-3 pb-2 no-scrollbar bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800">
+  <div className="flex gap-4 overflow-x-auto px-4 pt-5 pb-2 no-scrollbar bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800">
     {/* User's Add Story Button */}
     <div className="flex flex-col items-center gap-1 cursor-pointer flex-shrink-0" onClick={() => user ? alert("Câmera de stories (Mock)") : onRequireLogin()}>
       <div className="w-[64px] h-[64px] rounded-full p-[2px] bg-white dark:bg-gray-900 relative">
@@ -516,10 +516,10 @@ const FeedPost: React.FC<{
         </div>
       </div>
 
-      <div className="w-full relative bg-gray-100 dark:bg-gray-800 overflow-hidden aspect-square">
+      <div className={`w-full relative bg-gray-100 dark:bg-gray-800 overflow-hidden ${post.videoUrl ? 'aspect-[9/16]' : 'aspect-square'}`}>
          {post.videoUrl ? (
             <div className="w-full h-full flex items-center justify-center bg-black">
-                <video src={post.videoUrl} controls className="w-full h-full object-contain" />
+                <video src={post.videoUrl} controls className="w-full h-full object-cover" />
             </div>
          ) : images.length > 0 ? (
             <>
@@ -758,7 +758,7 @@ export const CommunityFeedView: React.FC<CommunityFeedViewProps> = ({ onStoreCli
                   key={post.id} 
                   post={post} 
                   onLike={() => !user && onRequireLogin()} 
-                  activeMenuId={activeMenuPostId}
+                  activeMenuId={activeMenuPostId} 
                   setActiveMenuId={setActiveMenuPostId}
                   currentUserId={user?.id}
                   onDeleteRequest={handleRequestDelete}
