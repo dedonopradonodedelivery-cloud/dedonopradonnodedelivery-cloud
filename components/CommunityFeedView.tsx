@@ -1,6 +1,5 @@
-
 import React, { useState, useEffect, useRef } from 'react';
-import { Search, Store as StoreIcon, MoreHorizontal, Send, Heart, Share2, MessageCircle, ChevronLeft, BadgeCheck, User as UserIcon, Home, Plus, X, Video, Image as ImageIcon, Film, Loader2 } from 'lucide-react';
+import { Search, Store as StoreIcon, MoreHorizontal, Send, Heart, Share2, MessageCircle, ChevronLeft, BadgeCheck, User as UserIcon, Home, Plus, X, Video, Image as ImageIcon, Film, Loader2, Grid, Camera } from 'lucide-react';
 import { Store, CommunityPost } from '../types';
 import { MOCK_COMMUNITY_POSTS } from '../constants';
 
@@ -387,43 +386,95 @@ const CommunityExploreScreen: React.FC = () => {
 const UserProfileScreen: React.FC<{ user: any }> = ({ user }) => {
   if (!user) return null;
 
-  return (
-    <div className="pb-20">
-        <div className="bg-white dark:bg-gray-800 pb-6 rounded-b-[32px] shadow-sm border-b border-gray-100 dark:border-gray-700 pt-6 px-6 flex flex-col items-center">
-            <div className="w-24 h-24 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden border-4 border-white dark:border-gray-900 shadow-lg mb-4">
-                {user.user_metadata?.avatar_url ? (
-                    <img src={user.user_metadata.avatar_url} alt="Profile" className="w-full h-full object-cover" />
-                ) : (
-                    <div className="w-full h-full flex items-center justify-center text-gray-400">
-                        <UserIcon className="w-10 h-10" />
-                    </div>
-                )}
-            </div>
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white">{user.user_metadata?.full_name || 'Usuário'}</h2>
-            <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">@{user.user_metadata?.username || 'usuario'}</p>
-            
-            <div className="flex gap-6 mt-6 w-full max-w-xs justify-center">
-                <div className="text-center">
-                    <span className="block font-bold text-gray-900 dark:text-white text-lg">0</span>
-                    <span className="text-xs text-gray-500 uppercase tracking-wide">Posts</span>
-                </div>
-                <div className="text-center">
-                    <span className="block font-bold text-gray-900 dark:text-white text-lg">0</span>
-                    <span className="text-xs text-gray-500 uppercase tracking-wide">Seguidores</span>
-                </div>
-                <div className="text-center">
-                    <span className="block font-bold text-gray-900 dark:text-white text-lg">0</span>
-                    <span className="text-xs text-gray-500 uppercase tracking-wide">Seguindo</span>
-                </div>
-            </div>
-        </div>
+  const isOwnProfile = true; // Assuming own profile for now in this view
+  const postsCount = 0;
+  const followersCount = 120;
+  const followingCount = 45;
+  const bio = "Apaixonado pela Freguesia! 🌳\nComendo bem e vivendo melhor.";
 
-        <div className="p-5">
-            <h3 className="font-bold text-gray-900 dark:text-white mb-4">Minhas Atividades</h3>
-            <div className="text-center py-10 bg-gray-50 dark:bg-gray-800/50 rounded-2xl border border-dashed border-gray-200 dark:border-gray-700">
-                <p className="text-gray-400 text-sm">Você ainda não publicou nada.</p>
-            </div>
-        </div>
+  return (
+    <div className="w-full bg-white dark:bg-gray-900 min-h-screen pb-24">
+       {/* Header Row */}
+       <div className="flex items-center px-4 pt-4">
+          {/* Avatar */}
+          <div className="w-20 h-20 rounded-full p-[2px] bg-gradient-to-tr from-yellow-400 to-fuchsia-600 mr-6 shrink-0">
+             <div className="w-full h-full rounded-full border-2 border-white dark:border-gray-900 bg-gray-100 overflow-hidden">
+                <img 
+                    src={user.user_metadata?.avatar_url || "https://i.pravatar.cc/150"} 
+                    alt="Profile" 
+                    className="w-full h-full object-cover" 
+                />
+             </div>
+          </div>
+
+          {/* Stats */}
+          <div className="flex-1 flex justify-around items-center text-center">
+             <div className="flex flex-col">
+                <span className="font-bold text-lg text-gray-900 dark:text-white">{postsCount}</span>
+                <span className="text-xs text-gray-500 dark:text-gray-400">Posts</span>
+             </div>
+             <div className="flex flex-col">
+                <span className="font-bold text-lg text-gray-900 dark:text-white">{followersCount}</span>
+                <span className="text-xs text-gray-500 dark:text-gray-400">Seguidores</span>
+             </div>
+             <div className="flex flex-col">
+                <span className="font-bold text-lg text-gray-900 dark:text-white">{followingCount}</span>
+                <span className="text-xs text-gray-500 dark:text-gray-400">Seguindo</span>
+             </div>
+          </div>
+       </div>
+
+       {/* Bio Section */}
+       <div className="px-4 py-3">
+          <h1 className="font-bold text-sm text-gray-900 dark:text-white">{user.user_metadata?.full_name || 'Usuário'}</h1>
+          <p className="text-sm text-gray-800 dark:text-gray-200 whitespace-pre-line mt-1">{bio}</p>
+       </div>
+
+       {/* Buttons */}
+       <div className="px-4 flex gap-2 mb-6">
+          {isOwnProfile ? (
+            <>
+              <button className="flex-1 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white text-sm font-semibold py-1.5 rounded-lg border border-transparent active:scale-95 transition-transform">
+                Editar perfil
+              </button>
+              <button className="flex-1 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white text-sm font-semibold py-1.5 rounded-lg border border-transparent active:scale-95 transition-transform">
+                Compartilhar perfil
+              </button>
+            </>
+          ) : (
+             <>
+              <button className="flex-1 bg-[#1E5BFF] text-white text-sm font-semibold py-1.5 rounded-lg active:scale-95 transition-transform">
+                Seguir
+              </button>
+              <button className="flex-1 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white text-sm font-semibold py-1.5 rounded-lg active:scale-95 transition-transform">
+                Mensagem
+              </button>
+             </>
+          )}
+       </div>
+
+       {/* Content Grid */}
+       <div className="border-t border-gray-100 dark:border-gray-800">
+          <div className="flex justify-around border-b border-gray-100 dark:border-gray-800">
+             <button className="py-3 border-b-px border-black dark:border-white w-full flex justify-center text-black dark:text-white">
+                <Grid className="w-5 h-5" />
+             </button>
+          </div>
+
+          <div className="grid grid-cols-3 gap-0.5">
+             {postsCount === 0 ? (
+                <div className="col-span-3 py-20 flex flex-col items-center justify-center text-center px-6">
+                   <div className="w-16 h-16 rounded-full border-2 border-gray-300 dark:border-gray-700 flex items-center justify-center mb-4">
+                      <Camera className="w-8 h-8 text-gray-300 dark:text-gray-600" />
+                   </div>
+                   <h3 className="font-bold text-lg text-gray-900 dark:text-white">Você ainda não publicou nada.</h3>
+                </div>
+             ) : (
+                // Map posts here
+                null
+             )}
+          </div>
+       </div>
     </div>
   );
 };
