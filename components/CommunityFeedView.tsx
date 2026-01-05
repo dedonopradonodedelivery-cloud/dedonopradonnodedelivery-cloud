@@ -34,10 +34,27 @@ const FeedPost: React.FC<{ post: CommunityPost; onLike: () => void }> = ({ post,
   <div className="bg-white dark:bg-gray-800 p-4 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm mb-4">
     <div className="flex items-start justify-between mb-3">
       <div className="flex items-center gap-3">
-        <img src={post.userAvatar} alt={post.userName} className="w-10 h-10 rounded-full object-cover bg-gray-200" />
+        <div className="relative">
+            <img src={post.userAvatar} alt={post.userName} className="w-10 h-10 rounded-full object-cover bg-gray-200 border border-gray-100 dark:border-gray-700" />
+            {post.authorRole === 'merchant' && (
+                <div className="absolute -bottom-1 -right-1 bg-blue-500 text-white p-0.5 rounded-full border-2 border-white dark:border-gray-800">
+                    <StoreIcon className="w-2.5 h-2.5" />
+                </div>
+            )}
+        </div>
         <div>
-          <h4 className="font-bold text-gray-900 dark:text-white text-sm">{post.userName}</h4>
-          <p className="text-xs text-gray-500 dark:text-gray-400">{post.timestamp}</p>
+          <div className="flex items-center gap-1.5">
+              <h4 className="font-bold text-gray-900 dark:text-white text-sm leading-tight">{post.userName}</h4>
+              {post.authorRole === 'merchant' && (
+                  <span className="bg-blue-50 dark:bg-blue-900/30 text-[#1E5BFF] text-[9px] font-bold px-1.5 py-0.5 rounded border border-blue-100 dark:border-blue-800">
+                      Lojista
+                  </span>
+              )}
+          </div>
+          <div className="flex items-center text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+              {post.userUsername && <span className="mr-1">@{post.userUsername}</span>}
+              <span>• {post.timestamp}</span>
+          </div>
         </div>
       </div>
       <button className="text-gray-400">
@@ -52,6 +69,12 @@ const FeedPost: React.FC<{ post: CommunityPost; onLike: () => void }> = ({ post,
     {post.imageUrl && (
       <div className="w-full h-48 rounded-xl overflow-hidden mb-3 bg-gray-100">
         <img src={post.imageUrl} alt="Post content" className="w-full h-full object-cover" />
+      </div>
+    )}
+
+    {post.videoUrl && (
+      <div className="w-full h-64 rounded-xl overflow-hidden mb-3 bg-black">
+        <video src={post.videoUrl} controls className="w-full h-full object-cover" />
       </div>
     )}
 
@@ -256,7 +279,7 @@ export const CommunityFeedView: React.FC<CommunityFeedViewProps> = ({ onStoreCli
               </button>
             </div>
 
-            {/* Posts */}
+            {/* Posts - Unified Feed (Residents & Merchants Mixed) */}
             <div className="space-y-4">
               {MOCK_COMMUNITY_POSTS.map(post => (
                 <FeedPost key={post.id} post={post} onLike={() => !user && onRequireLogin()} />
