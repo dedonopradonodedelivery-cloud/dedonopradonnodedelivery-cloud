@@ -1,6 +1,8 @@
 
 import React from 'react';
 
+export type ThemeMode = 'light' | 'dark' | 'auto';
+
 export enum AdType {
   ORGANIC = 'ORGANIC',
   LOCAL = 'LOCAL',   // R$ 1.90/dia

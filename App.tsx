@@ -31,7 +31,7 @@ import { JobsView } from './components/JobsView';
 import { MerchantJobsModule } from './components/MerchantJobsModule';
 import { MapPin, Crown, X, Star } from 'lucide-react';
 import { useAuth } from './contexts/AuthContext';
-import { Category, Store, AdType, EditorialCollection } from './types';
+import { Category, Store, AdType, EditorialCollection, ThemeMode } from './types';
 import { getStoreLogo } from './utils/mockLogos';
 import { CategoryView } from './components/CategoryView';
 import { EditorialListView } from './components/EditorialListView';
@@ -63,6 +63,9 @@ const App: React.FC = () => {
   
   const [minSplashTimeElapsed, setMinSplashTimeElapsed] = useState(isFirstBootAttempted || isAuthReturn);
   const [splashProgress, setSplashProgress] = useState(isAuthReturn ? 100 : 0);
+  
+  // Theme Management - DEFAULT IS LIGHT
+  const [themeMode, setThemeMode] = useState<ThemeMode>(() => (localStorage.getItem('localizei_theme_mode') as ThemeMode) || 'light');
   const [isDarkMode, setIsDarkMode] = useState(false);
 
   // Estados de Navegação - Persistência via LocalStorage garantida
@@ -97,7 +100,40 @@ const App: React.FC = () => {
     return () => clearTimeout(timer);
   }, [isAuthReturn]);
 
-  const toggleTheme = () => setIsDarkMode(!isDarkMode);
+  // Theme Logic
+  useEffect(() => {
+    const applyTheme = () => {
+      let isDark = false;
+      if (themeMode === 'auto') {
+        isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      } else {
+        isDark = themeMode === 'dark';
+      }
+      setIsDarkMode(isDark);
+      if (isDark) {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+    };
+
+    applyTheme();
+    localStorage.setItem('localizei_theme_mode', themeMode);
+
+    // Listener for system changes if in auto mode
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const handleChange = () => {
+      if (themeMode === 'auto') applyTheme();
+    };
+    mediaQuery.addEventListener('change', handleChange);
+    
+    return () => mediaQuery.removeEventListener('change', handleChange);
+  }, [themeMode]);
+
+  // Toggle Function (Legacy, now just cycles or sets specific)
+  const toggleTheme = () => {
+    setThemeMode(prev => prev === 'light' ? 'dark' : 'light');
+  };
   
   const handleCashbackClick = () => {
     if (user) setActiveTab('qrcode_scan');
@@ -127,7 +163,7 @@ const App: React.FC = () => {
     'service_subcategories', 'service_specialties', 'service_terms', 'service_success',
     'user_statement', 'merchant_cashback_dashboard', 'merchant_cashback_onboarding',
     'store_cashback_module', 'store_ads_module', 'about', 'support', 'invite_friend', 'favorites',
-    'weekly_promo', 'jobs_list', 'merchant_jobs', 'community_feed' // Added community_feed to exclude default header
+    'weekly_promo', 'jobs_list', 'merchant_jobs', 'community_feed' 
   ];
 
   // UX ENGINEER: Ocultamos a barra de navegação no fluxo de anúncios para evitar 
@@ -249,7 +285,20 @@ const App: React.FC = () => {
             {activeTab === 'qrcode_scan' && <CashbackScanScreen onBack={() => setActiveTab('home')} onScanSuccess={(data) => { setScannedData(data); setActiveTab('scan_confirmation'); }} />}
             {activeTab === 'scan_confirmation' && scannedData && <ScanConfirmationScreen storeId={scannedData.storeId} onConfirm={() => setActiveTab('cashback_payment')} onCancel={() => setActiveTab('home')} />}
             {activeTab === 'cashback_payment' && scannedData && <CashbackPaymentScreen user={user as any} merchantId={scannedData.merchantId} storeId={scannedData.storeId} onBack={() => setActiveTab('home')} onComplete={() => setActiveTab('home')} />}
-            {activeTab === 'profile' && <MenuView user={user as any} userRole={userRole} onAuthClick={() => setIsAuthOpen(true)} onNavigate={setActiveTab} onBack={() => setActiveTab('home')} />}
+            
+            {/* MenuView now receives Theme Props */}
+            {activeTab === 'profile' && 
+                <MenuView 
+                    user={user as any} 
+                    userRole={userRole} 
+                    onAuthClick={() => setIsAuthOpen(true)} 
+                    onNavigate={setActiveTab} 
+                    onBack={() => setActiveTab('home')}
+                    currentTheme={themeMode}
+                    onThemeChange={setThemeMode}
+                />
+            }
+            
             {activeTab === 'patrocinador_master' && <PatrocinadorMasterScreen onBack={() => setActiveTab('home')} />}
             {activeTab === 'store_detail' && selectedStore && <StoreDetailView store={selectedStore} onBack={() => setActiveTab('home')} />}
             {activeTab === 'reward_details' && <RewardDetailsView reward={selectedReward} onBack={() => setActiveTab('home')} onHome={() => setActiveTab('home')} />}

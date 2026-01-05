@@ -205,7 +205,7 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void }> = ({ onNavigat
     <div className="px-5">
       <div 
         onClick={() => onNavigate(current.target)}
-        className="w-full relative aspect-[2/1] rounded-[32px] overflow-hidden shadow-xl shadow-slate-200 dark:shadow-none border border-gray-100 dark:border-white/5 bg-slate-900 cursor-pointer active:scale-[0.98] transition-all group"
+        className="w-full relative aspect-[2/1] rounded-[32px] overflow-hidden shadow-xl shadow-slate-200 dark:shadow-none border border-gray-100 dark:border-white/5 bg-gray-100 dark:bg-slate-900 cursor-pointer active:scale-[0.98] transition-all group"
       >
         
         {current.type === 'standard' || current.type === 'jobs' ? (

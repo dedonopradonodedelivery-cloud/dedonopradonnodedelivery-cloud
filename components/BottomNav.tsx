@@ -19,7 +19,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
     { id: 'explore', icon: Search, label: 'Explorar' },
     { id: 'qrcode_scan', icon: QrCode, label: qrLabel, isCenter: true },
     { id: 'services', icon: Wrench, label: 'Serviços' },
-    { id: 'community_feed', icon: Users, label: 'Comunidade' }, // Nova aba fixa
+    { id: 'community_feed', icon: Users, label: 'Feed' }, // Renomeado para Feed
   ];
 
   return (

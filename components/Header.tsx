@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Search, Sun, Moon, QrCode, User as UserIcon } from 'lucide-react';
+import { Search, QrCode, User as UserIcon } from 'lucide-react';
 
 interface HeaderProps {
   isDarkMode: boolean;
@@ -19,7 +19,7 @@ interface HeaderProps {
 export const Header: React.FC<HeaderProps> = ({
   isDarkMode,
   toggleTheme,
-  onAuthClick, // Agora usado para abrir o Menu/Perfil
+  onAuthClick, 
   user,
   searchTerm,
   onSearchChange,
@@ -37,11 +37,10 @@ export const Header: React.FC<HeaderProps> = ({
     >
       <div className="max-w-md mx-auto flex flex-col">
         
-        {/* Top Row: Search + Theme + Profile/Menu */}
+        {/* Top Row: Search + Profile/Menu */}
         <div className={`flex items-center gap-3 px-4 py-3 transition-all duration-300 ease-in-out`}>
           
-          {/* Avatar / Menu Button (Left or Right? Right matches typical profile placement) */}
-          
+          {/* Search Bar */}
           <div className="relative flex-1 group">
             <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
               <Search className="h-4 w-4 text-white/70 group-focus-within:text-white transition-colors" />
@@ -55,28 +54,6 @@ export const Header: React.FC<HeaderProps> = ({
             />
           </div>
 
-          {/* Theme Toggle */}
-          <button 
-            onClick={toggleTheme}
-            className={`w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white hover:bg-white/20 transition-all active:scale-95 border border-white/10`}
-          >
-            {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-          </button>
-
-          {/* Profile / Menu Button (Replaces Tab) */}
-          <button 
-            onClick={onAuthClick}
-            className={`w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white hover:bg-white/20 transition-all active:scale-95 border border-white/10 overflow-hidden relative`}
-          >
-             {user?.user_metadata?.avatar_url ? (
-               <img src={user.user_metadata.avatar_url} alt="Perfil" className="w-full h-full object-cover" />
-             ) : (
-               <UserIcon className="w-5 h-5" />
-             )}
-             {/* Indicador de notificação (opcional) */}
-             {!user && <div className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border border-[#1E5BFF]"></div>}
-          </button>
-
           {/* Exibe QR Code no header APENAS para lojistas (atalho rápido) */}
           {isMerchant && onOpenMerchantQr && (
              <button 
@@ -86,6 +63,24 @@ export const Header: React.FC<HeaderProps> = ({
                 <QrCode className="w-5 h-5" />
              </button>
           )}
+
+          {/* Profile / Menu Button with Label */}
+          <button 
+            onClick={onAuthClick}
+            className="flex flex-col items-center gap-0.5 outline-none group active:scale-95 transition-transform"
+          >
+             <div className="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center text-white hover:bg-white/20 transition-all border border-white/10 overflow-hidden relative">
+               {user?.user_metadata?.avatar_url ? (
+                 <img src={user.user_metadata.avatar_url} alt="Perfil" className="w-full h-full object-cover" />
+               ) : (
+                 <UserIcon className="w-5 h-5" />
+               )}
+               {/* Indicador de notificação (opcional) */}
+               {!user && <div className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border border-[#1E5BFF]"></div>}
+             </div>
+             <span className="text-[10px] font-bold text-white/90 group-hover:text-white leading-none tracking-tight">Perfil</span>
+          </button>
+
         </div>
       </div>
     </div>

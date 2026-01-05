@@ -14,18 +14,24 @@ import {
   Loader2,
   LayoutDashboard,
   MessageCircle,
-  X
+  X,
+  Sun,
+  Moon,
+  Monitor
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { MasterSponsorBanner } from './MasterSponsorBanner';
 import { User } from '@supabase/supabase-js';
+import { ThemeMode } from '../types';
 
 interface MenuViewProps {
   user: User | null;
   userRole: 'cliente' | 'lojista' | null;
   onAuthClick: () => void;
   onNavigate: (view: string) => void;
-  onBack?: () => void; // Nova prop para fechar o menu se acessado via header
+  onBack?: () => void;
+  currentTheme?: ThemeMode;
+  onThemeChange?: (theme: ThemeMode) => void;
 }
 
 interface MenuItemProps {
@@ -60,7 +66,15 @@ const SectionTitle: React.FC<{ title: string }> = ({ title }) => (
   </h3>
 );
 
-export const MenuView: React.FC<MenuViewProps> = ({ user, userRole, onAuthClick, onNavigate, onBack }) => {
+export const MenuView: React.FC<MenuViewProps> = ({ 
+  user, 
+  userRole, 
+  onAuthClick, 
+  onNavigate, 
+  onBack, 
+  currentTheme, 
+  onThemeChange 
+}) => {
   const { signOut } = useAuth();
   const isMerchant = userRole === 'lojista';
   const [isLoggingOut, setIsLoggingOut] = useState(false);
@@ -196,6 +210,31 @@ export const MenuView: React.FC<MenuViewProps> = ({ user, userRole, onAuthClick,
             </button>
         )}
 
+        <SectionTitle title="Aparência" />
+        <div className="bg-white dark:bg-gray-800 p-2 rounded-2xl border border-gray-100 dark:border-gray-700 flex gap-1 mb-4">
+            <button 
+                onClick={() => onThemeChange && onThemeChange('auto')}
+                className={`flex-1 flex flex-col items-center justify-center py-3 rounded-xl transition-all ${currentTheme === 'auto' ? 'bg-[#1E5BFF] text-white shadow-md' : 'text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700'}`}
+            >
+                <Monitor className="w-5 h-5 mb-1" />
+                <span className="text-[10px] font-bold">Auto</span>
+            </button>
+            <button 
+                onClick={() => onThemeChange && onThemeChange('light')}
+                className={`flex-1 flex flex-col items-center justify-center py-3 rounded-xl transition-all ${currentTheme === 'light' ? 'bg-[#1E5BFF] text-white shadow-md' : 'text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700'}`}
+            >
+                <Sun className="w-5 h-5 mb-1" />
+                <span className="text-[10px] font-bold">Claro</span>
+            </button>
+            <button 
+                onClick={() => onThemeChange && onThemeChange('dark')}
+                className={`flex-1 flex flex-col items-center justify-center py-3 rounded-xl transition-all ${currentTheme === 'dark' ? 'bg-[#1E5BFF] text-white shadow-md' : 'text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700'}`}
+            >
+                <Moon className="w-5 h-5 mb-1" />
+                <span className="text-[10px] font-bold">Escuro</span>
+            </button>
+        </div>
+
         <SectionTitle title="Minha Conta" />
         <MenuItem 
             icon={Heart} 
@@ -213,14 +252,6 @@ export const MenuView: React.FC<MenuViewProps> = ({ user, userRole, onAuthClick,
         />
 
         <SectionTitle title="Comunidade & Suporte" />
-        {/* Community moved to bottom nav, removed from here to reduce redundancy, or can keep as shortcut? */}
-        {/* <MenuItem 
-            icon={MessageCircle} 
-            label="Feed da Comunidade" 
-            onClick={() => onNavigate('community_feed')} 
-            colorClass="bg-yellow-500" 
-            subLabel="Veja o que os vizinhos recomendam"
-        /> */}
         {isMerchant && (
              <MenuItem 
                 icon={Users} 
