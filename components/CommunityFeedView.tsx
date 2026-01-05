@@ -1,5 +1,6 @@
+
 import React, { useState, useEffect, useRef } from 'react';
-import { Search, Store as StoreIcon, MoreHorizontal, Send, Heart, Share2, MessageCircle, ChevronLeft, BadgeCheck, User as UserIcon, Home, Plus, X, Video, Image as ImageIcon, Film, Loader2, Grid, Camera } from 'lucide-react';
+import { Search, Store as StoreIcon, MoreHorizontal, Send, Heart, Share2, MessageCircle, ChevronLeft, BadgeCheck, User as UserIcon, Home, Plus, X, Video, Image as ImageIcon, Film, Loader2, Grid, Camera, Play } from 'lucide-react';
 import { Store, CommunityPost } from '../types';
 import { MOCK_COMMUNITY_POSTS } from '../constants';
 
@@ -352,33 +353,136 @@ const FeedPost: React.FC<{ post: CommunityPost; onLike: () => void }> = ({ post,
   );
 };
 
-const CommunityExploreScreen: React.FC = () => {
+// Full Screen Viewer for Explore items
+const FullScreenPostViewer: React.FC<{ item: any; onClose: () => void }> = ({ item, onClose }) => {
+  if (!item) return null;
+
   return (
-    <div className="p-5 pb-20">
-      <div className="relative mb-6">
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-        <input 
-          type="text" 
-          placeholder="Buscar pessoas, lojas e posts..." 
-          className="w-full bg-white dark:bg-gray-800 rounded-2xl py-3.5 pl-12 pr-4 text-sm outline-none focus:ring-2 focus:ring-[#1E5BFF] dark:text-white shadow-sm border border-gray-100 dark:border-gray-700"
-        />
+    <div className="fixed inset-0 z-[300] bg-black flex flex-col animate-in fade-in zoom-in-95 duration-200">
+      <div className="absolute top-4 left-0 right-0 z-20 flex justify-between items-center px-4">
+        <button onClick={onClose} className="p-2 bg-black/40 backdrop-blur-md rounded-full text-white">
+          <ChevronLeft className="w-6 h-6" />
+        </button>
+        <span className="text-white font-bold text-sm drop-shadow-md">Explorar</span>
+        <div className="w-10"></div>
       </div>
 
-      <h3 className="font-bold text-gray-900 dark:text-white mb-4 text-lg">Descobrir</h3>
-      <div className="grid grid-cols-2 gap-4">
-         <div className="bg-gradient-to-br from-purple-500 to-indigo-600 rounded-2xl p-4 text-white h-32 flex flex-col justify-end shadow-lg">
-            <span className="font-bold">Eventos</span>
-         </div>
-         <div className="bg-gradient-to-br from-orange-400 to-red-500 rounded-2xl p-4 text-white h-32 flex flex-col justify-end shadow-lg">
-            <span className="font-bold">Promoções</span>
-         </div>
-         <div className="bg-gradient-to-br from-blue-400 to-cyan-500 rounded-2xl p-4 text-white h-32 flex flex-col justify-end shadow-lg">
-            <span className="font-bold">Notícias</span>
-         </div>
-         <div className="bg-gradient-to-br from-emerald-400 to-green-600 rounded-2xl p-4 text-white h-32 flex flex-col justify-end shadow-lg">
-            <span className="font-bold">Dicas</span>
-         </div>
+      <div className="flex-1 flex items-center justify-center bg-black relative">
+        {item.type === 'video' ? (
+          <video 
+            src={item.url} 
+            className="max-h-full max-w-full w-full object-contain" 
+            autoPlay 
+            loop 
+            controls={false}
+            playsInline
+          />
+        ) : (
+          <img src={item.url} className="max-h-full max-w-full w-full object-contain" alt="Post" />
+        )}
       </div>
+
+      <div className="bg-gradient-to-t from-black via-black/80 to-transparent pt-12 pb-8 px-5 absolute bottom-0 left-0 right-0 z-20">
+        <div className="flex items-center gap-3 mb-3">
+          <img src={item.userAvatar} alt={item.userName} className="w-10 h-10 rounded-full border border-white/20 bg-gray-800 object-cover" />
+          <div>
+            <h4 className="font-bold text-white text-sm flex items-center gap-1">
+              {item.userName}
+              {item.isMerchant && <BadgeCheck className="w-3.5 h-3.5 text-[#1E5BFF] fill-white" />}
+            </h4>
+            <p className="text-white/70 text-xs">Freguesia • Seguir</p>
+          </div>
+        </div>
+        <p className="text-white text-sm leading-relaxed line-clamp-2 mb-4">
+          {item.caption}
+        </p>
+        <div className="flex items-center justify-between">
+          <div className="flex gap-6">
+            <button className="flex flex-col items-center gap-1 text-white">
+              <Heart className="w-7 h-7" />
+              <span className="text-xs font-bold">{item.likes}</span>
+            </button>
+            <button className="flex flex-col items-center gap-1 text-white">
+              <MessageCircle className="w-7 h-7" />
+              <span className="text-xs font-bold">{item.comments}</span>
+            </button>
+            <button className="flex flex-col items-center gap-1 text-white">
+              <Share2 className="w-7 h-7" />
+              <span className="text-xs font-bold">Enviar</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const CommunityExploreScreen: React.FC = () => {
+  const [selectedPost, setSelectedPost] = useState<any | null>(null);
+
+  // Generate dense mock data for grid
+  const exploreItems = Array.from({ length: 30 }).map((_, i) => ({
+    id: i,
+    type: i % 5 === 0 ? 'video' : 'image',
+    url: i % 5 === 0 
+      ? 'https://videos.pexels.com/video-files/4434246/4434246-sd_540_960_25fps.mp4' 
+      : `https://picsum.photos/400/400?random=${i + 100}`,
+    userName: i % 3 === 0 ? 'Burger Freguesia' : `Usuario ${i}`,
+    userAvatar: `https://i.pravatar.cc/100?u=${i}`,
+    isMerchant: i % 3 === 0,
+    caption: 'Explorando o melhor da Freguesia! 🌳 #local #gastronomia',
+    likes: 120 + i * 5,
+    comments: 12 + i
+  }));
+
+  const getGridClass = (index: number) => {
+    // Pattern: 3 columns. Every 12 items, index 2 spans 2x2.
+    // 0 1 2(BIG)
+    // 3 4 
+    // 5 6 7
+    // This creates a mosaic feel using grid-auto-flow: dense
+    if (index % 12 === 2) return "col-span-2 row-span-2";
+    return "col-span-1 row-span-1";
+  };
+
+  return (
+    <div className="pb-20 bg-white dark:bg-gray-950 min-h-screen">
+      <div className="px-4 pt-2 mb-2">
+        <div className="relative">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+          <input 
+            type="text" 
+            placeholder="Buscar pessoas, lojas e posts..." 
+            className="w-full bg-gray-100 dark:bg-gray-900 rounded-xl py-2.5 pl-10 pr-4 text-sm outline-none focus:ring-1 focus:ring-[#1E5BFF] dark:text-white border border-transparent focus:border-[#1E5BFF]"
+          />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-3 gap-0.5 auto-rows-[120px] sm:auto-rows-[150px] grid-flow-dense">
+         {exploreItems.map((item, index) => (
+           <div 
+             key={item.id} 
+             className={`relative bg-gray-200 dark:bg-gray-800 overflow-hidden cursor-pointer group ${getGridClass(index)}`}
+             onClick={() => setSelectedPost(item)}
+           >
+             {item.type === 'video' ? (
+                <>
+                  <video src={item.url} className="w-full h-full object-cover" muted loop playsInline />
+                  <div className="absolute top-2 right-2">
+                    <Play className="w-5 h-5 text-white drop-shadow-md fill-white/50" />
+                  </div>
+                </>
+             ) : (
+                <img src={item.url} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" loading="lazy" />
+             )}
+             <div className="absolute inset-0 bg-black/20 group-hover:bg-black/0 transition-colors"></div>
+           </div>
+         ))}
+      </div>
+
+      {selectedPost && (
+        <FullScreenPostViewer item={selectedPost} onClose={() => setSelectedPost(null)} />
+      )}
     </div>
   );
 };
@@ -855,6 +959,11 @@ export const CommunityFeedView: React.FC<CommunityFeedViewProps> = ({ onStoreCli
     setIsCreatePostOpen(true);
   };
 
+  const getHeaderTitle = () => {
+    if (internalView === 'explore') return "Explorar a Freguesia";
+    return "Feed da Freguesia";
+  };
+
   const renderContent = () => {
     switch (internalView) {
       case 'home':
@@ -990,7 +1099,7 @@ export const CommunityFeedView: React.FC<CommunityFeedViewProps> = ({ onStoreCli
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950 font-sans pb-24 animate-in slide-in-from-right duration-300 relative">
       {/* Header */}
       <div className="sticky top-0 z-30 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md px-5 h-16 flex items-center justify-between border-b border-gray-100 dark:border-gray-800">
-        <h1 className="font-bold text-lg text-gray-900 dark:text-white font-display">Feed da Freguesia</h1>
+        <h1 className="font-bold text-lg text-gray-900 dark:text-white font-display">{getHeaderTitle()}</h1>
         {/* The old toggle is removed, replaced by the NavBar below */}
         <div className="w-8"></div> {/* Spacer for visual balance if needed */}
       </div>
