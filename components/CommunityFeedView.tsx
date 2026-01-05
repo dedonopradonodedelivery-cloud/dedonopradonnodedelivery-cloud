@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { Search, Store as StoreIcon, MoreHorizontal, Send, Heart, Share2, MessageCircle, ChevronLeft, BadgeCheck, User as UserIcon, Home, Plus, X, Video, Image as ImageIcon, Film, Loader2, Grid, Camera, Play, Check, ChevronRight, Briefcase, MapPin, Clock, DollarSign, ExternalLink, AlertCircle, Building2, Trash2, Flag, Bookmark, ChevronDown } from 'lucide-react';
+import { Search, Store as StoreIcon, MoreHorizontal, Send, Heart, Share2, MessageCircle, ChevronLeft, BadgeCheck, User as UserIcon, Home, Plus, X, Video, Image as ImageIcon, Film, Loader2, Grid, Camera, Play, Check, ChevronRight, Briefcase, MapPin, Clock, DollarSign, ExternalLink, AlertCircle, Building2, Trash2, Flag, Bookmark, ChevronDown, ArrowUp } from 'lucide-react';
 import { Store, CommunityPost, Job, ReportReason } from '../types';
 import { MOCK_COMMUNITY_POSTS, MOCK_JOBS } from '../constants';
 import { useNeighborhood, NEIGHBORHOODS } from '../contexts/NeighborhoodContext';
@@ -13,8 +13,6 @@ interface CommunityFeedViewProps {
 }
 
 // ... (KEEP EXISTING MOCK DATA) ...
-// For brevity, assuming MOCK_STORIES, MOCK_CHATS, etc. are available from constants or defined here same as before.
-// Re-declaring for self-contained file correctness in this XML block context.
 const MOCK_STORIES = [
   { id: 1, user: 'Padaria Imperial', username: 'padariaimperial', avatar: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?q=80&w=200&auto=format&fit=crop', isMerchant: true, hasUnread: true, items: [{ id: 's1', type: 'image', url: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?q=80&w=600&auto=format&fit=crop', duration: 5000 }] },
   { id: 2, user: 'Ana Paula', username: 'anapaula', avatar: 'https://i.pravatar.cc/150?u=a', isMerchant: false, hasUnread: true, items: [{ id: 's3', type: 'image', url: 'https://images.unsplash.com/photo-1526488807855-3096a6a23732?q=80&w=600&auto=format&fit=crop', duration: 5000 }] }
@@ -26,24 +24,26 @@ const MOCK_CHATS = [
 const MOCK_NOTIFICATIONS = [
   { id: 1, type: 'like', user: 'marcelo.rj', userAvatar: 'https://i.pravatar.cc/150?u=m', content: 'curtiu sua publicação.', time: '2 min', postImage: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?q=80&w=100&auto=format&fit=crop', isUnread: true },
 ];
-const MOCK_MESSAGES_HISTORY: Record<number, { id: number; text: string; sender: 'me' | 'them'; time: string }[]> = {
-  1: [{ id: 1, text: "Olá", sender: "me", time: "09:00" }]
-};
-
-// ... (KEEP SUB-COMPONENTS: StoryViewer, DeleteConfirmationModal, ChatScreen, CreatePostScreen, ActivityScreen, UserProfileScreen, JobsFeedScreen, CommunityExploreScreen, StoriesRail, CommentsModal) ...
-// Since the prompt asks for specific logic changes, I will implement the FeedPost component logic here and the main component logic.
-// I will include the full functional components to ensure no breaks.
 
 const StoryViewer: React.FC<{ initialStoryIndex: number; onClose: () => void }> = ({ initialStoryIndex, onClose }) => {
-   // Simplified for brevity, assume full logic
-   return <div onClick={onClose} className="fixed inset-0 z-[100] bg-black"></div>;
+   return <div onClick={onClose} className="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center text-white">Story Viewer Mock (Click to close)</div>;
 };
 
 const DeleteConfirmationModal: React.FC<{ onConfirm: () => void; onCancel: () => void }> = ({ onConfirm, onCancel }) => (
-  <div className="fixed inset-0 z-[150] flex items-center justify-center bg-black/60 backdrop-blur-sm p-6"><div className="bg-white p-6 rounded-xl"><button onClick={onConfirm}>Confirm</button></div></div>
+  <div className="fixed inset-0 z-[150] flex items-center justify-center bg-black/60 backdrop-blur-sm p-6">
+      <div className="bg-white dark:bg-gray-800 p-6 rounded-xl w-full max-w-sm">
+          <h3 className="font-bold text-lg dark:text-white mb-2">Excluir publicação?</h3>
+          <p className="text-gray-500 text-sm mb-6">Essa ação não pode ser desfeita.</p>
+          <div className="flex gap-3">
+              <button onClick={onCancel} className="flex-1 py-3 text-gray-600 font-bold bg-gray-100 dark:bg-gray-700 dark:text-gray-300 rounded-lg">Cancelar</button>
+              <button onClick={onConfirm} className="flex-1 py-3 text-white font-bold bg-red-500 rounded-lg">Excluir</button>
+          </div>
+      </div>
+  </div>
 );
 
-const ChatScreen: React.FC<{ chatId: number; onBack: () => void; user: any }> = ({ onBack }) => <div onClick={onBack}>Chat (Click to back)</div>;
+const ChatScreen: React.FC<{ chatId: number; onBack: () => void; user: any }> = ({ onBack }) => <div onClick={onBack} className="p-4 bg-white h-full">Chat Mock (Click to back)</div>;
+
 const CreatePostScreen: React.FC<{ onClose: () => void; onSuccess: () => void; user: any }> = ({ onClose, onSuccess }) => (
     <div className="flex flex-col h-full bg-white dark:bg-gray-900">
         <div className="p-4 flex justify-between items-center border-b border-gray-100 dark:border-gray-800">
@@ -51,25 +51,23 @@ const CreatePostScreen: React.FC<{ onClose: () => void; onSuccess: () => void; u
             <h3 className="font-bold dark:text-white">Nova Publicação</h3>
             <button onClick={onSuccess} className="text-[#1E5BFF] font-bold">Publicar</button>
         </div>
-        <div className="p-4"><textarea placeholder="Escreva algo..." className="w-full h-32 outline-none dark:bg-gray-900 dark:text-white" /></div>
+        <div className="p-4"><textarea placeholder="Escreva algo..." className="w-full h-32 outline-none dark:bg-gray-900 dark:text-white resize-none" /></div>
     </div>
 );
-const ActivityScreen: React.FC<{ onClose: () => void }> = ({ onClose }) => <div onClick={onClose}>Activity</div>;
-const UserProfileScreen: React.FC<{ user: any }> = () => <div>Profile</div>;
-const CommunityExploreScreen: React.FC = () => <div>Explore</div>;
+
+const ActivityScreen: React.FC<{ onClose: () => void }> = ({ onClose }) => <div onClick={onClose} className="p-4 bg-white h-full">Activity Mock (Click to close)</div>;
+const UserProfileScreen: React.FC<{ user: any }> = () => <div className="p-4">Profile Mock</div>;
+const CommunityExploreScreen: React.FC = () => <div className="p-4">Explore Mock</div>;
 
 const JobsFeedScreen: React.FC<{ user: any; onRequireLogin: () => void }> = ({ user, onRequireLogin }) => {
     const { currentNeighborhood, isAll } = useNeighborhood();
     
-    // PRIORITY SORT: Local Jobs First > Then Others
     const filteredJobs = useMemo(() => {
         let jobs = [...MOCK_JOBS];
         jobs.sort((a, b) => {
-            if (isAll) return 0; // Default sort if "All"
-            
+            if (isAll) return 0;
             const aIsLocal = a.neighborhood === currentNeighborhood;
             const bIsLocal = b.neighborhood === currentNeighborhood;
-            
             if (aIsLocal && !bIsLocal) return -1;
             if (!aIsLocal && bIsLocal) return 1;
             return 0;
@@ -96,7 +94,6 @@ const JobsFeedScreen: React.FC<{ user: any; onRequireLogin: () => void }> = ({ u
                                 <span className="text-[10px] font-bold bg-blue-100 text-blue-700 px-2 py-1 rounded-md">{job.type}</span>
                             </div>
                             <div className="flex gap-3 text-xs text-gray-500 dark:text-gray-400 mt-2">
-                                {/* Badge Logic: Show neighborhood if it's NOT the current one OR if "All" is selected */}
                                 {(isAll || job.neighborhood !== currentNeighborhood) && (
                                     <span className="flex items-center gap-1 font-bold text-gray-700 dark:text-gray-300">
                                         <MapPin className="w-3 h-3" /> {job.neighborhood}
@@ -140,7 +137,7 @@ const StoriesRail: React.FC<{ user: any; onRequireLogin: () => void; onOpenStory
   </div>
 );
 
-const CommentsModal: React.FC<{ postId: string; onClose: () => void; user: any; }> = ({ onClose }) => <div onClick={onClose}>Comments</div>;
+const CommentsModal: React.FC<{ postId: string; onClose: () => void; user: any; }> = ({ onClose }) => <div onClick={onClose} className="fixed inset-0 z-[100] bg-black/50 flex items-end"><div className="bg-white w-full h-1/2 rounded-t-3xl p-4">Comentários</div></div>;
 
 const FeedPost: React.FC<{ 
     post: CommunityPost; 
@@ -193,8 +190,6 @@ const FeedPost: React.FC<{
             </h4>
             <div className="flex items-center gap-1">
                 {post.authorRole === 'merchant' && <span className="text-[10px] text-gray-500 dark:text-gray-400">Patrocinado</span>}
-                
-                {/* Badge Logic: Visible if "All" is active OR if post is from another neighborhood */}
                 {(isAll || post.neighborhood !== currentNeighborhood) && post.neighborhood && (
                     <>
                         {post.authorRole === 'merchant' && <span className="text-[10px] text-gray-300">•</span>}
@@ -286,7 +281,23 @@ const CommunityNavBar: React.FC<{ currentView: string; onChangeView: (view: 'hom
   </div>
 );
 
-// --- MAIN COMPONENT ---
+// Helper function for demo purposes
+const generateRandomPost = (currentNeighborhood: string): CommunityPost => {
+    return {
+        id: `new-post-${Date.now()}`,
+        userId: 'u_new',
+        userName: 'Visitante Recente',
+        userAvatar: 'https://i.pravatar.cc/150?u=new',
+        authorRole: 'resident',
+        content: 'Acabei de ver uma novidade incrível aqui no bairro! Alguém já conferiu?',
+        type: 'news',
+        neighborhood: currentNeighborhood,
+        timestamp: 'Agora',
+        likes: 0,
+        comments: 0
+    };
+};
+
 export const CommunityFeedView: React.FC<CommunityFeedViewProps> = ({ onStoreClick, user, onRequireLogin }) => {
   const [internalView, setInternalView] = useState<'home' | 'direct' | 'explore' | 'profile' | 'create_post' | 'notifications' | 'jobs'>('home');
   const [selectedChatId, setSelectedChatId] = useState<number | null>(null);
@@ -296,38 +307,88 @@ export const CommunityFeedView: React.FC<CommunityFeedViewProps> = ({ onStoreCli
   
   const { currentNeighborhood, isAll, toggleSelector } = useNeighborhood();
   
-  // Sorting Logic: Priority to active neighborhood, then others
-  const sortedPosts = useMemo(() => {
+  // --- INSTAGRAM-STYLE PULL TO REFRESH LOGIC ---
+  const [posts, setPosts] = useState<CommunityPost[]>([]);
+  const [incomingPosts, setIncomingPosts] = useState<CommunityPost[]>([]);
+  const [pullY, setPullY] = useState(0);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isPulling, setIsPulling] = useState(false);
+  const touchStart = useRef(0);
+  const feedRef = useRef<HTMLDivElement>(null);
+
+  // Initial Data Load
+  useEffect(() => {
+    // Basic sorting for initial load
     let list = [...MOCK_COMMUNITY_POSTS];
-    
     list.sort((a, b) => {
-        if (isAll) return 0; // If All, default sorting (recency/id usually)
-        
+        if (isAll) return 0;
         const aIsLocal = a.neighborhood === currentNeighborhood;
         const bIsLocal = b.neighborhood === currentNeighborhood;
-        
-        // Priority 1: Local content first
         if (aIsLocal && !bIsLocal) return -1;
         if (!aIsLocal && bIsLocal) return 1;
-        
-        // Priority 2: Recency/Original order
         return 0; 
     });
-    
-    return list;
+    setPosts(list);
   }, [currentNeighborhood, isAll]);
-  
-  const [posts, setPosts] = useState<CommunityPost[]>([]);
-  
-  useEffect(() => {
-      setPosts(sortedPosts);
-  }, [sortedPosts]);
-  
+
+  // Touch Handlers for Pull-to-Refresh
+  const handleTouchStart = (e: React.TouchEvent) => {
+    // Only enable pull if at the very top of the scrollable area
+    // Note: Assuming `window.scrollY` works or relying on user being at top visually
+    // If inside a scrollable div, we'd check feedRef.current.scrollTop
+    if (window.scrollY === 0) {
+        touchStart.current = e.touches[0].clientY;
+        setIsPulling(true);
+    }
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!isPulling || isRefreshing) return;
+    
+    const y = e.touches[0].clientY;
+    const delta = y - touchStart.current;
+
+    // Only allow pulling down if we started at top and are moving down
+    if (delta > 0 && window.scrollY === 0) {
+        // Resistance curve
+        setPullY(delta * 0.4);
+    }
+  };
+
+  const handleTouchEnd = async () => {
+    setIsPulling(false);
+    if (!isRefreshing && pullY > 60) {
+        // Trigger Refresh
+        setIsRefreshing(true);
+        setPullY(60); // Snap to loading height
+        
+        // Simulate API call
+        setTimeout(() => {
+            setIsRefreshing(false);
+            setPullY(0);
+            
+            // Logic: 50% chance to find a new post
+            if (Math.random() > 0.5) {
+                const newPost = generateRandomPost(currentNeighborhood);
+                setIncomingPosts(prev => [newPost, ...prev]);
+            }
+        }, 1500);
+    } else {
+        // Cancel pull
+        setPullY(0);
+    }
+  };
+
+  const handleShowNewPosts = () => {
+      setPosts(prev => [...incomingPosts, ...prev]);
+      setIncomingPosts([]);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // --- EXISTING LOGIC ---
   const [activeMenuPostId, setActiveMenuPostId] = useState<string | null>(null);
   const [postToDelete, setPostToDelete] = useState<string | null>(null);
   const [commentPostId, setCommentPostId] = useState<string | null>(null);
-  
-  // Reporting State
   const [reportPostId, setReportPostId] = useState<string | null>(null);
   const [reportedPosts, setReportedPosts] = useState<Set<string>>(new Set());
 
@@ -342,18 +403,13 @@ export const CommunityFeedView: React.FC<CommunityFeedViewProps> = ({ onStoreCli
   const handleRequestDelete = (postId: string) => { setPostToDelete(postId); };
   const handleConfirmDelete = () => { if (postToDelete) { setPosts(prev => prev.filter(p => p.id !== postToDelete)); setPostToDelete(null); setToastMessage('Post excluído'); setShowSuccessToast(true); setTimeout(() => setShowSuccessToast(false), 2000); } };
   
-  // MODERATION LOGIC
   const handleReportClick = (postId: string) => {
-    if (reportedPosts.has(postId)) {
-      alert("Você já denunciou esta publicação.");
-      return;
-    }
+    if (reportedPosts.has(postId)) { alert("Você já denunciou esta publicação."); return; }
     setReportPostId(postId);
   };
 
   const handleReportSubmit = (reason: ReportReason) => {
     if (reportPostId) {
-      // In a real app: await api.reportPost({ postId: reportPostId, reason, ... })
       setReportedPosts(prev => new Set(prev).add(reportPostId));
       setReportPostId(null);
       setToastMessage('Denúncia enviada. Obrigado!');
@@ -366,22 +422,57 @@ export const CommunityFeedView: React.FC<CommunityFeedViewProps> = ({ onStoreCli
     switch (internalView) {
       case 'home':
         return (
-          <div className="pb-20">
-            <StoriesRail user={user} onRequireLogin={onRequireLogin} onOpenStory={(idx) => setViewingStoryIndex(idx)} />
-            <div className="flex flex-col mt-2">
-              {posts.length > 0 ? (
-                  posts.map(post => (
-                    <FeedPost 
-                      key={post.id} post={post} onLike={() => !user && onRequireLogin()} 
-                      activeMenuId={activeMenuPostId} setActiveMenuId={setActiveMenuPostId}
-                      currentUserId={user?.id} onDeleteRequest={handleRequestDelete}
-                      onReport={() => handleReportClick(post.id)} 
-                      onOpenComments={() => user ? setCommentPostId(post.id) : onRequireLogin()}
-                    />
-                  ))
-              ) : (
-                  <div className="text-center py-12 px-4"><p className="text-gray-400">Nenhum post no momento.</p></div>
-              )}
+          <div 
+            ref={feedRef}
+            className="pb-20 relative"
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+          >
+            {/* Loading Spinner / Pull Indicator */}
+            <div 
+                className="absolute left-0 right-0 flex justify-center -top-10 transition-transform duration-200 z-0"
+                style={{ transform: `translateY(${pullY}px)` }}
+            >
+                <div className="bg-white dark:bg-gray-800 rounded-full p-2 shadow-md border border-gray-100 dark:border-gray-700">
+                    <Loader2 className={`w-5 h-5 text-[#1E5BFF] ${isRefreshing ? 'animate-spin' : ''}`} style={{ transform: `rotate(${pullY * 2}deg)` }} />
+                </div>
+            </div>
+
+            {/* "New Posts" Badge */}
+            {incomingPosts.length > 0 && !isRefreshing && (
+                <div className="absolute top-4 left-0 right-0 z-20 flex justify-center animate-in fade-in slide-in-from-top-2">
+                    <button 
+                        onClick={handleShowNewPosts}
+                        className="bg-[#1E5BFF] text-white text-xs font-bold px-4 py-2 rounded-full shadow-lg flex items-center gap-2 active:scale-95 transition-transform"
+                    >
+                        <ArrowUp className="w-3 h-3" />
+                        Novas publicações
+                    </button>
+                </div>
+            )}
+
+            {/* Content Container with Push Effect */}
+            <div 
+                className="transition-transform duration-200 ease-out will-change-transform"
+                style={{ transform: `translateY(${pullY}px)` }}
+            >
+                <StoriesRail user={user} onRequireLogin={onRequireLogin} onOpenStory={(idx) => setViewingStoryIndex(idx)} />
+                <div className="flex flex-col mt-2">
+                {posts.length > 0 ? (
+                    posts.map(post => (
+                        <FeedPost 
+                        key={post.id} post={post} onLike={() => !user && onRequireLogin()} 
+                        activeMenuId={activeMenuPostId} setActiveMenuId={setActiveMenuPostId}
+                        currentUserId={user?.id} onDeleteRequest={handleRequestDelete}
+                        onReport={() => handleReportClick(post.id)} 
+                        onOpenComments={() => user ? setCommentPostId(post.id) : onRequireLogin()}
+                        />
+                    ))
+                ) : (
+                    <div className="text-center py-12 px-4"><p className="text-gray-400">Nenhum post no momento.</p></div>
+                )}
+                </div>
             </div>
           </div>
         );
@@ -418,12 +509,7 @@ export const CommunityFeedView: React.FC<CommunityFeedViewProps> = ({ onStoreCli
       
       {commentPostId && <CommentsModal postId={commentPostId} onClose={() => setCommentPostId(null)} user={user} />}
       
-      {/* Report Modal */}
-      <ReportModal 
-        isOpen={!!reportPostId} 
-        onClose={() => setReportPostId(null)} 
-        onSubmit={handleReportSubmit} 
-      />
+      <ReportModal isOpen={!!reportPostId} onClose={() => setReportPostId(null)} onSubmit={handleReportSubmit} />
 
       {showSuccessToast && <div className="fixed top-20 left-1/2 -translate-x-1/2 bg-black/80 backdrop-blur-md text-white px-6 py-3 rounded-full shadow-lg z-[100] animate-in fade-in slide-in-from-top-4 flex items-center gap-2"><Check className="w-4 h-4" /><span className="text-sm font-bold">{toastMessage}</span></div>}
     </div>
