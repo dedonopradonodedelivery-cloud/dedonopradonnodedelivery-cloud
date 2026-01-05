@@ -45,6 +45,7 @@ import { StoreProfileEdit } from './components/StoreProfileEdit';
 import { StoreFinanceModule } from './components/StoreFinanceModule';
 import { CommunityFeedView } from './components/CommunityFeedView';
 import { STORES } from './constants';
+import { AdminModerationPanel } from './components/AdminModerationPanel';
 import { 
   AboutView, 
   SupportView, 
@@ -261,10 +262,10 @@ const App: React.FC = () => {
     'service_subcategories', 'service_specialties', 'service_terms', 'service_success',
     'user_statement', 'merchant_cashback_dashboard', 'merchant_cashback_onboarding',
     'store_cashback_module', 'store_ads_module', 'about', 'support', 'invite_friend', 'favorites',
-    'weekly_promo', 'jobs_list', 'merchant_jobs', 'community_feed' 
+    'weekly_promo', 'jobs_list', 'merchant_jobs', 'community_feed', 'admin_moderation' 
   ];
 
-  const hideBottomNav = ['store_ads_module', 'profile', 'store_detail'].includes(activeTab);
+  const hideBottomNav = ['store_ads_module', 'profile', 'store_detail', 'admin_moderation'].includes(activeTab);
 
   return (
     <div className={isDarkMode ? 'dark' : ''}>
@@ -274,32 +275,31 @@ const App: React.FC = () => {
           onTouchStart={onTouchStart}
           onTouchEnd={onTouchEnd}
         >
-          
           <Layout 
-            activeTab={activeTab} 
-            setActiveTab={setActiveTab} 
-            userRole={userRole} 
-            onCashbackClick={handleCashbackClick}
-            hideNav={hideBottomNav}
+              activeTab={activeTab} 
+              setActiveTab={setActiveTab} 
+              userRole={userRole} 
+              onCashbackClick={handleCashbackClick}
+              hideNav={hideBottomNav}
           >
-            {/* Header is shown for main tabs except when excluded */}
-            {!headerExclusionList.includes(activeTab) && (
+              {/* Header is shown for main tabs except when excluded */}
+              {!headerExclusionList.includes(activeTab) && (
               <Header
-                isDarkMode={isDarkMode}
-                toggleTheme={toggleTheme}
-                onAuthClick={() => setActiveTab('profile')} 
-                user={user}
-                searchTerm={globalSearch}
-                onSearchChange={setGlobalSearch}
-                onNavigate={setActiveTab}
-                activeTab={activeTab}
-                userRole={userRole}
-                onOpenMerchantQr={() => setActiveTab('merchant_qr')}
+                  isDarkMode={isDarkMode}
+                  toggleTheme={toggleTheme}
+                  onAuthClick={() => setActiveTab('profile')} 
+                  user={user}
+                  searchTerm={globalSearch}
+                  onSearchChange={setGlobalSearch}
+                  onNavigate={setActiveTab}
+                  activeTab={activeTab}
+                  userRole={userRole}
+                  onOpenMerchantQr={() => setActiveTab('merchant_qr')}
               />
-            )}
-            <main className="animate-in fade-in duration-500 w-full max-w-md mx-auto">
+              )}
+              <main className="animate-in fade-in duration-500 w-full max-w-md mx-auto">
               {activeTab === 'home' && (
-                <HomeFeed
+                  <HomeFeed
                   onNavigate={setActiveTab}
                   onSelectCategory={handleSelectCategory}
                   onSelectCollection={handleSelectCollection}
@@ -310,10 +310,10 @@ const App: React.FC = () => {
                   userRole={userRole}
                   onSpinWin={(reward) => { setSelectedReward(reward); setActiveTab('reward_details'); }}
                   onRequireLogin={() => setIsAuthOpen(true)}
-                />
+                  />
               )}
               {activeTab === 'explore' && (
-                <ExploreView 
+                  <ExploreView 
                   stores={STORES} 
                   searchQuery={globalSearch} 
                   onStoreClick={handleSelectStore} 
@@ -321,16 +321,16 @@ const App: React.FC = () => {
                   onFilterClick={() => {}} 
                   onOpenPlans={() => {}}
                   onNavigate={setActiveTab}
-                />
+                  />
               )}
               {activeTab === 'user_statement' && (
-                <UserStatementView onBack={() => setActiveTab('home')} onExploreStores={() => setActiveTab('explore')} balance={12.40} />
+                  <UserStatementView onBack={() => setActiveTab('home')} onExploreStores={() => setActiveTab('explore')} balance={12.40} />
               )}
               {activeTab === 'merchant_cashback_onboarding' && (
-                <MerchantCashbackOnboarding onBack={() => setActiveTab('home')} onActivate={() => setActiveTab('store_cashback_module')} />
+                  <MerchantCashbackOnboarding onBack={() => setActiveTab('home')} onActivate={() => setActiveTab('store_cashback_module')} />
               )}
               {activeTab === 'merchant_cashback_dashboard' && (
-                <MerchantCashbackDashboard onBack={() => setActiveTab('home')} onNavigate={setActiveTab} />
+                  <MerchantCashbackDashboard onBack={() => setActiveTab('home')} onNavigate={setActiveTab} />
               )}
               {activeTab === 'store_cashback_module' && <StoreCashbackModule onBack={() => setActiveTab('home')} />}
               {activeTab === 'store_ads_module' && <StoreAdsModule onBack={() => setActiveTab('store_area')} />}
@@ -353,19 +353,20 @@ const App: React.FC = () => {
               {activeTab === 'invite_friend' && <InviteFriendView onBack={() => setActiveTab('profile')} />}
               {activeTab === 'favorites' && <FavoritesView user={user as any} onBack={() => setActiveTab('profile')} onNavigate={setActiveTab} />}
               {activeTab === 'editorial_list' && selectedCollection && (
-                <EditorialListView collection={selectedCollection} stores={STORES} onBack={() => { setActiveTab('home'); setSelectedCollection(null); }} onStoreClick={handleSelectStore} />
+                  <EditorialListView collection={selectedCollection} stores={STORES} onBack={() => { setActiveTab('home'); setSelectedCollection(null); }} onStoreClick={handleSelectStore} />
               )}
               {activeTab === 'services' && (
-                <ServicesView onSelectMacro={(id, name) => {
-                    setSelectedServiceMacro({id, name});
-                    if (id === 'emergency') { setQuoteCategory(name); setIsQuoteModalOpen(true); } 
-                    else { setActiveTab('service_subcategories'); }
+                  <ServicesView onSelectMacro={(id, name) => {
+                      setSelectedServiceMacro({id, name});
+                      if (id === 'emergency') { setQuoteCategory(name); setIsQuoteModalOpen(true); } 
+                      else { setActiveTab('service_subcategories'); }
                   }} 
                   onOpenTerms={() => setActiveTab('service_terms')} onNavigate={setActiveTab} searchTerm={globalSearch}
-                />
+                  />
               )}
               {activeTab === 'store_area' && (userRole === 'lojista' ? <StoreAreaView onBack={() => setActiveTab('home')} onNavigate={setActiveTab} user={user as any} /> : <FreguesiaConnectRestricted onBack={() => setActiveTab('home')} />)}
               {activeTab === 'merchant_qr' && (userRole === 'lojista' ? <MerchantQrScreen user={user} onBack={() => setActiveTab('home')} /> : <FreguesiaConnectRestricted onBack={() => setActiveTab('home')} />)}
+              {activeTab === 'admin_moderation' && <AdminModerationPanel onBack={() => setActiveTab('profile')} />}
               
               {activeTab === 'category_detail' && selectedCategory && (
                   <CategoryView 
@@ -403,10 +404,10 @@ const App: React.FC = () => {
               {activeTab === 'store_detail' && selectedStore && <StoreDetailView store={selectedStore} onBack={() => setActiveTab('home')} />}
               {activeTab === 'reward_details' && <RewardDetailsView reward={selectedReward} onBack={() => setActiveTab('home')} onHome={() => setActiveTab('home')} />}
               {activeTab === 'prize_history' && user && <PrizeHistoryView userId={user.id} onBack={() => setActiveTab('home')} onGoToSpinWheel={() => setActiveTab('home')} />}
-            </main>
+              </main>
 
-            <AuthModal isOpen={isAuthOpen} onClose={() => setIsAuthOpen(false)} user={user as any} />
-            {isQuoteModalOpen && <QuoteRequestModal isOpen={isQuoteModalOpen} onClose={() => setIsQuoteModalOpen(false)} categoryName={quoteCategory} onSuccess={() => { setIsQuoteModalOpen(false); setActiveTab('service_success'); }} />}
+              <AuthModal isOpen={isAuthOpen} onClose={() => setIsAuthOpen(false)} user={user as any} />
+              {isQuoteModalOpen && <QuoteRequestModal isOpen={isQuoteModalOpen} onClose={() => setIsQuoteModalOpen(false)} categoryName={quoteCategory} onSuccess={() => { setIsQuoteModalOpen(false); setActiveTab('service_success'); }} />}
           </Layout>
 
           {/* OVERLAY SPLASH - PREMIUM */}

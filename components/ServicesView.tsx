@@ -310,8 +310,6 @@ export const ServicesView: React.FC<ServicesViewProps> = ({ onSelectMacro, onOpe
     return service.name.toLowerCase().includes(term) || service.keywords.some(k => k.toLowerCase().includes(term));
   });
 
-  const hasJobs = MOCK_JOBS.length > 0;
-
   return (
     <div className="min-h-screen bg-[#F7F8FA] dark:bg-gray-900 font-sans animate-in fade-in duration-500 pb-36">
       
@@ -405,29 +403,7 @@ export const ServicesView: React.FC<ServicesViewProps> = ({ onSelectMacro, onOpe
           </h3>
           
           <div className="grid grid-cols-2 gap-3">
-            {/* JOBS ENTRY POINT (Conditional) */}
-            {hasJobs && (
-                <button
-                  onClick={() => onNavigate('jobs_list')}
-                  className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 text-gray-900 dark:text-white border border-blue-100 dark:border-blue-800/30 relative overflow-hidden rounded-[20px] p-4 text-left shadow-sm hover:shadow-md transition-all active:scale-[0.98] group min-h-[130px] flex flex-col justify-between"
-                >
-                  <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-3 bg-white dark:bg-gray-800 text-blue-600 dark:text-blue-400 shadow-sm">
-                    <Briefcase className="w-5 h-5" strokeWidth={2} />
-                  </div>
-                  
-                  <div>
-                    <span className="block font-bold text-base leading-tight mb-1">
-                      Empregos
-                    </span>
-                    <span className="block text-[10px] text-gray-500 dark:text-gray-400 mb-2 font-medium">
-                        Vagas no bairro
-                    </span>
-                    <span className="text-[10px] font-bold flex items-center gap-1 mt-auto text-blue-600 dark:text-blue-400">
-                      Ver vagas <ArrowRight className="w-3 h-3 transition-transform group-hover:translate-x-1" />
-                    </span>
-                  </div>
-                </button>
-            )}
+            {/* JOBS CARD REMOVED HERE AS REQUESTED */}
 
             {filteredServices.map((item) => {
               const Icon = item.icon;

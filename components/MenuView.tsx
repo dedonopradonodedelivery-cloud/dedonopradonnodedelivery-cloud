@@ -17,7 +17,8 @@ import {
   X,
   Sun,
   Moon,
-  Monitor
+  Monitor,
+  ShieldAlert
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { MasterSponsorBanner } from './MasterSponsorBanner';
@@ -79,6 +80,9 @@ export const MenuView: React.FC<MenuViewProps> = ({
   const isMerchant = userRole === 'lojista';
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   
+  // MOCK ADMIN CHECK - In real app, check role/claim
+  const isAdmin = user?.email?.includes('admin'); 
+
   const profileTitle = user?.user_metadata?.full_name 
     ? user.user_metadata.full_name 
     : user?.email 
@@ -193,6 +197,19 @@ export const MenuView: React.FC<MenuViewProps> = ({
                     <p className="text-indigo-200 text-sm font-medium">Gerencie vendas, cashback e anúncios.</p>
                 </div>
             </button>
+        )}
+
+        {isAdmin && (
+            <div className="mb-6">
+                <SectionTitle title="Administração" />
+                <MenuItem 
+                    icon={ShieldAlert} 
+                    label="Moderação" 
+                    onClick={() => onNavigate('admin_moderation')} 
+                    colorClass="bg-red-500 text-white dark:bg-red-600"
+                    subLabel="Gerenciar denúncias"
+                />
+            </div>
         )}
 
         <SectionTitle title="Minha Conta" />

@@ -182,3 +182,26 @@ export interface Job {
   postedAt: string;
   isUrgent?: boolean;
 }
+
+// --- MODERATION TYPES ---
+
+export type ReportReason = 'spam' | 'offensive' | 'fraud' | 'wrong_neighborhood' | 'other';
+export type ReportStatus = 'open' | 'in_review' | 'resolved' | 'dismissed';
+export type ReportPriority = 'high' | 'medium' | 'low';
+
+export interface PostReport {
+  id: string;
+  postId: string;
+  postAuthorId: string;
+  reporterUserId: string;
+  postNeighborhood: string;
+  reporterNeighborhood: string;
+  reason: ReportReason;
+  status: ReportStatus;
+  priority: ReportPriority;
+  timestamp: string;
+  // Mock fields for Admin UI
+  postThumbnail?: string;
+  postContentSnippet?: string;
+  authorUsername?: string;
+}

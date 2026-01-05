@@ -1,9 +1,10 @@
 
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Search, Store as StoreIcon, MoreHorizontal, Send, Heart, Share2, MessageCircle, ChevronLeft, BadgeCheck, User as UserIcon, Home, Plus, X, Video, Image as ImageIcon, Film, Loader2, Grid, Camera, Play, Check, ChevronRight, Briefcase, MapPin, Clock, DollarSign, ExternalLink, AlertCircle, Building2, Trash2, Flag, Bookmark, ChevronDown } from 'lucide-react';
-import { Store, CommunityPost, Job } from '../types';
+import { Store, CommunityPost, Job, ReportReason } from '../types';
 import { MOCK_COMMUNITY_POSTS, MOCK_JOBS } from '../constants';
 import { useNeighborhood, NEIGHBORHOODS } from '../contexts/NeighborhoodContext';
+import { ReportModal } from './ReportModal';
 
 interface CommunityFeedViewProps {
   onStoreClick: (store: Store) => void;
@@ -43,7 +44,16 @@ const DeleteConfirmationModal: React.FC<{ onConfirm: () => void; onCancel: () =>
 );
 
 const ChatScreen: React.FC<{ chatId: number; onBack: () => void; user: any }> = ({ onBack }) => <div onClick={onBack}>Chat (Click to back)</div>;
-const CreatePostScreen: React.FC<{ onClose: () => void; onSuccess: () => void; user: any }> = ({ onClose }) => <div onClick={onClose}>Create Post</div>;
+const CreatePostScreen: React.FC<{ onClose: () => void; onSuccess: () => void; user: any }> = ({ onClose, onSuccess }) => (
+    <div className="flex flex-col h-full bg-white dark:bg-gray-900">
+        <div className="p-4 flex justify-between items-center border-b border-gray-100 dark:border-gray-800">
+            <button onClick={onClose}><X className="w-6 h-6 dark:text-white" /></button>
+            <h3 className="font-bold dark:text-white">Nova Publicação</h3>
+            <button onClick={onSuccess} className="text-[#1E5BFF] font-bold">Publicar</button>
+        </div>
+        <div className="p-4"><textarea placeholder="Escreva algo..." className="w-full h-32 outline-none dark:bg-gray-900 dark:text-white" /></div>
+    </div>
+);
 const ActivityScreen: React.FC<{ onClose: () => void }> = ({ onClose }) => <div onClick={onClose}>Activity</div>;
 const UserProfileScreen: React.FC<{ user: any }> = () => <div>Profile</div>;
 const CommunityExploreScreen: React.FC = () => <div>Explore</div>;
@@ -316,6 +326,10 @@ export const CommunityFeedView: React.FC<CommunityFeedViewProps> = ({ onStoreCli
   const [activeMenuPostId, setActiveMenuPostId] = useState<string | null>(null);
   const [postToDelete, setPostToDelete] = useState<string | null>(null);
   const [commentPostId, setCommentPostId] = useState<string | null>(null);
+  
+  // Reporting State
+  const [reportPostId, setReportPostId] = useState<string | null>(null);
+  const [reportedPosts, setReportedPosts] = useState<Set<string>>(new Set());
 
   const handleViewChange = (view: 'home' | 'direct' | 'explore' | 'profile' | 'jobs') => {
     if ((view === 'direct' || view === 'profile') && !user) { onRequireLogin(); return; }
@@ -327,7 +341,26 @@ export const CommunityFeedView: React.FC<CommunityFeedViewProps> = ({ onStoreCli
   const handlePostSuccess = () => { setInternalView('home'); setToastMessage('Publicado com sucesso!'); setShowSuccessToast(true); setTimeout(() => setShowSuccessToast(false), 3000); window.scrollTo({ top: 0, behavior: 'smooth' }); };
   const handleRequestDelete = (postId: string) => { setPostToDelete(postId); };
   const handleConfirmDelete = () => { if (postToDelete) { setPosts(prev => prev.filter(p => p.id !== postToDelete)); setPostToDelete(null); setToastMessage('Post excluído'); setShowSuccessToast(true); setTimeout(() => setShowSuccessToast(false), 2000); } };
-  const handleReport = () => { alert("Denúncia enviada com sucesso."); };
+  
+  // MODERATION LOGIC
+  const handleReportClick = (postId: string) => {
+    if (reportedPosts.has(postId)) {
+      alert("Você já denunciou esta publicação.");
+      return;
+    }
+    setReportPostId(postId);
+  };
+
+  const handleReportSubmit = (reason: ReportReason) => {
+    if (reportPostId) {
+      // In a real app: await api.reportPost({ postId: reportPostId, reason, ... })
+      setReportedPosts(prev => new Set(prev).add(reportPostId));
+      setReportPostId(null);
+      setToastMessage('Denúncia enviada. Obrigado!');
+      setShowSuccessToast(true);
+      setTimeout(() => setShowSuccessToast(false), 3000);
+    }
+  };
 
   const renderContent = () => {
     switch (internalView) {
@@ -342,7 +375,8 @@ export const CommunityFeedView: React.FC<CommunityFeedViewProps> = ({ onStoreCli
                       key={post.id} post={post} onLike={() => !user && onRequireLogin()} 
                       activeMenuId={activeMenuPostId} setActiveMenuId={setActiveMenuPostId}
                       currentUserId={user?.id} onDeleteRequest={handleRequestDelete}
-                      onReport={handleReport} onOpenComments={() => user ? setCommentPostId(post.id) : onRequireLogin()}
+                      onReport={() => handleReportClick(post.id)} 
+                      onOpenComments={() => user ? setCommentPostId(post.id) : onRequireLogin()}
                     />
                   ))
               ) : (
@@ -377,9 +411,20 @@ export const CommunityFeedView: React.FC<CommunityFeedViewProps> = ({ onStoreCli
         <CommunityNavBar currentView={internalView} onChangeView={handleViewChange} userAvatar={user?.user_metadata?.avatar_url} hasUnreadMessages={true} />
       )}
       <div className="p-0 relative w-full">{renderContent()}</div>
+      
       {viewingStoryIndex !== null && <StoryViewer initialStoryIndex={viewingStoryIndex} onClose={() => setViewingStoryIndex(null)} />}
+      
       {postToDelete && <DeleteConfirmationModal onConfirm={handleConfirmDelete} onCancel={() => setPostToDelete(null)} />}
+      
       {commentPostId && <CommentsModal postId={commentPostId} onClose={() => setCommentPostId(null)} user={user} />}
+      
+      {/* Report Modal */}
+      <ReportModal 
+        isOpen={!!reportPostId} 
+        onClose={() => setReportPostId(null)} 
+        onSubmit={handleReportSubmit} 
+      />
+
       {showSuccessToast && <div className="fixed top-20 left-1/2 -translate-x-1/2 bg-black/80 backdrop-blur-md text-white px-6 py-3 rounded-full shadow-lg z-[100] animate-in fade-in slide-in-from-top-4 flex items-center gap-2"><Check className="w-4 h-4" /><span className="text-sm font-bold">{toastMessage}</span></div>}
     </div>
   );
