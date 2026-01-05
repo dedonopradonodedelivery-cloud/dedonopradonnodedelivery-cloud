@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { ChevronLeft, Briefcase, MapPin, Clock, DollarSign, MessageCircle, AlertCircle, Building2, CheckCircle2, ChevronDown } from 'lucide-react';
 import { MOCK_JOBS } from '../constants';
 import { Job } from '../types';
@@ -111,7 +111,23 @@ export const JobsView: React.FC<JobsViewProps> = ({ onBack }) => {
   const { currentNeighborhood, isAll, toggleSelector } = useNeighborhood();
 
   // Filter jobs by neighborhood
-  const filteredJobs = MOCK_JOBS.filter(job => isAll || job.neighborhood === currentNeighborhood);
+  const sortedJobs = useMemo(() => {
+    let list = [...MOCK_JOBS];
+    
+    // Sort Priority: Local > Others
+    list.sort((a, b) => {
+        if (isAll) return 0; // Default order for All
+        
+        const aIsLocal = a.neighborhood === currentNeighborhood;
+        const bIsLocal = b.neighborhood === currentNeighborhood;
+        
+        if (aIsLocal && !bIsLocal) return -1;
+        if (!aIsLocal && bIsLocal) return 1;
+        return 0;
+    });
+
+    return list;
+  }, [currentNeighborhood, isAll]);
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 font-sans animate-in slide-in-from-right duration-300 pb-10">
@@ -137,23 +153,15 @@ export const JobsView: React.FC<JobsViewProps> = ({ onBack }) => {
       </div>
 
       <div className="p-5">
-        {filteredJobs.length === 0 ? (
+        {sortedJobs.length === 0 ? (
           <div className="flex flex-col items-center justify-center pt-20 text-center">
             <div className="w-20 h-20 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mb-4">
               <Briefcase className="w-8 h-8 text-gray-400" />
             </div>
-            <h3 className="font-bold text-gray-900 dark:text-white">Nenhuma vaga nesta região</h3>
+            <h3 className="font-bold text-gray-900 dark:text-white">Nenhuma vaga encontrada</h3>
             <p className="text-sm text-gray-500 dark:text-gray-400 max-w-xs mt-2">
-              Não encontramos vagas em {currentNeighborhood} no momento. Tente expandir para todo Jacarepaguá.
+              Não encontramos vagas no momento.
             </p>
-            {!isAll && (
-               <button 
-                  onClick={toggleSelector}
-                  className="mt-4 text-[#1E5BFF] text-sm font-bold"
-               >
-                 Mudar Região
-               </button>
-            )}
           </div>
         ) : (
           <div className="space-y-4">
@@ -164,7 +172,7 @@ export const JobsView: React.FC<JobsViewProps> = ({ onBack }) => {
                 </p>
             </div>
 
-            {filteredJobs.map((job) => (
+            {sortedJobs.map((job) => (
               <div 
                 key={job.id}
                 onClick={() => setSelectedJob(job)}
