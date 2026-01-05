@@ -76,6 +76,11 @@ export const STORES: Store[] = [
     phone: '(21) 99999-1111',
     hours: 'Seg a Dom • 11h às 23h',
     verified: true,
+    recentComments: [
+      "O melhor cheddar da Freguesia, sem dúvidas!",
+      "Entrega super rápida, chegou quentinho.",
+      "Sempre peço no fim de semana, nunca decepciona."
+    ]
   },
   {
     id: 'premium-test',
@@ -92,6 +97,11 @@ export const STORES: Store[] = [
     address: 'Estrada dos Três Rios, 1000',
     phone: '(21) 98888-2222',
     verified: true,
+    recentComments: [
+      "Pão quentinho toda hora, atendimento nota 10.",
+      "O café da manhã colonial deles é imperdível.",
+      "Melhor padaria do bairro, limpa e organizada."
+    ]
   },
 ];
 

@@ -49,6 +49,9 @@ export interface Store {
   closingTime?: string;
   isSponsored?: boolean;
   paymentMethods?: string[]; // Novos meios de pagamento aceitos
+  
+  // Community Block
+  recentComments?: string[];
 }
 
 export interface Category {

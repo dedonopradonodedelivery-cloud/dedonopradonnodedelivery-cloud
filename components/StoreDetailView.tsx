@@ -18,6 +18,7 @@ import {
   ShieldCheck
 } from 'lucide-react';
 import { Store } from '../types';
+import { TrustBlock } from './TrustBlock';
 
 const storeMock = {
   business: {
@@ -317,6 +318,8 @@ export const StoreDetailView: React.FC<StoreDetailViewProps> = ({
 
               {activeTab === 'Sobre' ? (
                 <section className="animate-in fade-in duration-500 space-y-8">
+                  {store && <TrustBlock store={store} />}
+
                   {business.description && (
                     <div>
                       <h3 className="text-lg font-bold text-[#141414] dark:text-white mb-3">

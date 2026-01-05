@@ -18,7 +18,10 @@ import {
   Timer,
   Tag,
   Briefcase,
-  Coins
+  Coins,
+  Repeat,
+  Quote,
+  Zap
 } from 'lucide-react';
 import { LojasEServicosList } from './LojasEServicosList';
 import { User } from '@supabase/supabase-js';
@@ -370,6 +373,68 @@ const SectionHeader: React.FC<{ title: string; subtitle?: string; rightElement?:
   </div>
 );
 
+// --- COMPONENTE CONFIANÇA NO BAIRRO ---
+const CommunityTrustCarousel: React.FC<{ stores: Store[], onStoreClick: (store: Store) => void }> = ({ stores, onStoreClick }) => {
+  const trustedStores = useMemo(() => {
+    return stores.filter(s => s.recentComments && s.recentComments.length > 0).slice(0, 5);
+  }, [stores]);
+
+  if (trustedStores.length === 0) return null;
+
+  return (
+    <div className="w-full bg-white dark:bg-gray-950 py-6">
+      <div className="px-5 mb-4">
+        <h2 className="text-lg font-black text-gray-900 dark:text-white tracking-tight leading-none flex items-center gap-2">
+          Confiança no Bairro
+          <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
+        </h2>
+        <p className="text-xs text-gray-500 dark:text-gray-400 font-medium mt-1.5">
+          O que os moradores realmente dizem e fazem
+        </p>
+      </div>
+
+      <div className="flex gap-4 overflow-x-auto no-scrollbar px-5 pb-6 snap-x">
+        {trustedStores.map((store) => (
+          <button
+            key={store.id}
+            onClick={() => onStoreClick(store)}
+            className="snap-center min-w-[260px] max-w-[260px] bg-white dark:bg-gray-800 rounded-[20px] p-4 shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col gap-3 group active:scale-[0.98] transition-all"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-gray-100 dark:bg-gray-700 overflow-hidden border border-gray-100 dark:border-gray-600">
+                <img src={store.logoUrl || "/assets/default-logo.png"} alt={store.name} className="w-full h-full object-contain p-1" />
+              </div>
+              <div className="text-left flex-1 min-w-0">
+                <h4 className="font-bold text-gray-900 dark:text-white text-sm truncate">{store.name}</h4>
+                <div className="flex items-center gap-2 text-[10px] text-gray-500 dark:text-gray-400">
+                  <span className="flex items-center gap-0.5">
+                    <Repeat className="w-3 h-3 text-green-500" />
+                    Clientes voltam
+                  </span>
+                  {store.cashback && (
+                    <span className="flex items-center gap-0.5 text-blue-500 font-bold">
+                      • {store.cashback}% volta
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {store.recentComments && store.recentComments[0] && (
+              <div className="bg-gray-50 dark:bg-gray-900/50 p-3 rounded-xl border border-gray-100 dark:border-gray-700 relative">
+                <Quote className="w-3 h-3 text-gray-400 absolute top-2 left-2" />
+                <p className="text-xs text-gray-600 dark:text-gray-300 italic pl-4 leading-relaxed line-clamp-2">
+                  "{store.recentComments[0]}"
+                </p>
+              </div>
+            )}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+};
+
 export const HomeFeed: React.FC<HomeFeedProps> = ({ 
   onNavigate, 
   onSelectCategory, 
@@ -536,6 +601,9 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
           </div>
         );
 
+      case 'trust_feed':
+        return <CommunityTrustCarousel key="trust_feed" stores={stores} onStoreClick={(s) => onStoreClick && onStoreClick(s)} />;
+
       case 'list':
         return (
           <div key="list" className="w-full bg-white dark:bg-gray-950 py-8">
@@ -589,6 +657,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
       'home_carousel',
       'weekly_promos',
       'cashback_stores',
+      'trust_feed', // NEW: Confiança no Bairro
       'roulette',
       'recommended',
       'list',
