@@ -1,5 +1,5 @@
 
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { 
   ChevronLeft, 
   MessageSquare, 
@@ -20,7 +20,10 @@ import {
   Search,
   X,
   CheckCircle2,
-  Loader2
+  Loader2,
+  Video,
+  Volume2,
+  VolumeX
 } from 'lucide-react';
 import { CommunityPost, Store } from '../types';
 import { MOCK_COMMUNITY_POSTS, STORES } from '../constants';
@@ -44,6 +47,53 @@ const MOCK_SHARE_USERS = [
   { id: 'u5', name: 'Fernanda Lima', avatar: 'https://i.pravatar.cc/100?u=f', role: 'resident' },
   { id: 'u6', name: 'João Souza', avatar: 'https://i.pravatar.cc/100?u=j', role: 'resident' },
 ];
+
+const FeedVideoPlayer: React.FC<{ src: string }> = ({ src }) => {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [isMuted, setIsMuted] = useState(true);
+  const [isPlaying, setIsPlaying] = useState(false);
+
+  useEffect(() => {
+    // Tenta iniciar o autoplay (mudo) quando o componente monta
+    if (videoRef.current) {
+      videoRef.current.play().then(() => setIsPlaying(true)).catch(() => setIsPlaying(false));
+    }
+  }, []);
+
+  const toggleMute = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIsMuted(!isMuted);
+  };
+
+  return (
+    <div className="relative w-full rounded-2xl overflow-hidden bg-black aspect-[9/16] max-h-[500px]">
+      <video
+        ref={videoRef}
+        src={src}
+        className="w-full h-full object-cover"
+        loop
+        muted={isMuted}
+        playsInline
+        autoPlay
+        onClick={toggleMute}
+      />
+      
+      {/* Botão de Volume */}
+      <button 
+        onClick={toggleMute}
+        className="absolute bottom-3 right-3 p-2 bg-black/50 backdrop-blur-sm rounded-full text-white hover:bg-black/70 transition-colors z-10"
+      >
+        {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+      </button>
+
+      {/* Badge de Vídeo */}
+      <div className="absolute top-3 left-3 bg-black/50 backdrop-blur-sm text-white text-[10px] font-bold px-2 py-1 rounded-lg flex items-center gap-1">
+        <Video className="w-3 h-3" />
+        <span>Vídeo</span>
+      </div>
+    </div>
+  );
+};
 
 const SharePostModal: React.FC<{
   isOpen: boolean;
@@ -176,6 +226,12 @@ const CreatePostModal: React.FC<{
   const [content, setContent] = useState('');
   const [type, setType] = useState<'tip' | 'recommendation' | 'alert' | 'news' | 'promo'>('recommendation');
   const [selectedStoreId, setSelectedStoreId] = useState('');
+  const [mediaFile, setMediaFile] = useState<File | null>(null);
+  const [mediaPreview, setMediaPreview] = useState<string | null>(null);
+  const [mediaType, setMediaType] = useState<'image' | 'video' | null>(null);
+  
+  const videoInputRef = useRef<HTMLInputElement>(null);
+  const imageInputRef = useRef<HTMLInputElement>(null);
 
   const isMerchant = userRole === 'lojista';
 
@@ -192,19 +248,61 @@ const CreatePostModal: React.FC<{
         { id: 'alert', label: 'Alerta', icon: <AlertTriangle className="w-3 h-3" />, color: 'bg-red-50 text-red-600 border-red-200' },
       ];
 
+  const handleVideoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Check duration
+    const video = document.createElement('video');
+    video.preload = 'metadata';
+    video.onloadedmetadata = function() {
+      window.URL.revokeObjectURL(video.src);
+      if (video.duration > 30) {
+        alert("O vídeo deve ter no máximo 30 segundos.");
+        return;
+      }
+      setMediaFile(file);
+      setMediaPreview(URL.createObjectURL(file));
+      setMediaType('video');
+    }
+    video.src = URL.createObjectURL(file);
+  };
+
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setMediaFile(file);
+    setMediaPreview(URL.createObjectURL(file));
+    setMediaType('image');
+  };
+
+  const clearMedia = () => {
+    setMediaFile(null);
+    setMediaPreview(null);
+    setMediaType(null);
+    if (videoInputRef.current) videoInputRef.current.value = '';
+    if (imageInputRef.current) imageInputRef.current.value = '';
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!content.trim()) return;
     
     const store = STORES.find(s => s.id === selectedStoreId);
 
-    onSubmit({
+    // Prepare data (simulation of upload)
+    const postData = {
       content,
-      type: isMerchant && !['news', 'promo', 'tip'].includes(type) ? 'news' : type, // Fallback safe
+      type: isMerchant && !['news', 'promo', 'tip'].includes(type) ? 'news' : type,
       relatedStoreId: selectedStoreId,
       relatedStoreName: store?.name,
-      authorRole: isMerchant ? 'merchant' : 'resident'
-    });
+      authorRole: isMerchant ? 'merchant' : 'resident',
+      // Simulate URL generation
+      imageUrl: mediaType === 'image' && mediaPreview ? mediaPreview : undefined,
+      videoUrl: mediaType === 'video' && mediaPreview ? mediaPreview : undefined
+    };
+
+    onSubmit(postData);
     onClose();
   };
 
@@ -228,6 +326,24 @@ const CreatePostModal: React.FC<{
               autoFocus
             />
           </div>
+
+          {/* Media Preview */}
+          {mediaPreview && (
+            <div className="relative w-full rounded-xl overflow-hidden bg-black border border-gray-200 dark:border-gray-700">
+                <button 
+                    type="button" 
+                    onClick={clearMedia}
+                    className="absolute top-2 right-2 p-1 bg-black/50 rounded-full text-white hover:bg-black/70 z-10"
+                >
+                    <X className="w-4 h-4" />
+                </button>
+                {mediaType === 'video' ? (
+                    <video src={mediaPreview} className="w-full h-40 object-cover" controls />
+                ) : (
+                    <img src={mediaPreview} alt="Preview" className="w-full h-40 object-cover" />
+                )}
+            </div>
+          )}
 
           <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar">
             {postTypes.map((t) => (
@@ -259,9 +375,40 @@ const CreatePostModal: React.FC<{
           )}
 
           <div className="flex justify-between items-center pt-2">
-            <button type="button" className="p-2 text-gray-400 hover:text-[#1E5BFF]">
-              <ImageIcon className="w-6 h-6" />
-            </button>
+            <div className="flex gap-2">
+                <input 
+                    type="file" 
+                    accept="image/*" 
+                    className="hidden" 
+                    ref={imageInputRef} 
+                    onChange={handleImageSelect}
+                />
+                <button 
+                    type="button" 
+                    onClick={() => imageInputRef.current?.click()}
+                    className="p-2 text-gray-400 hover:text-[#1E5BFF] transition-colors rounded-full hover:bg-gray-100 dark:hover:bg-gray-800"
+                    title="Adicionar Foto"
+                >
+                    <ImageIcon className="w-6 h-6" />
+                </button>
+
+                <input 
+                    type="file" 
+                    accept="video/*" 
+                    className="hidden" 
+                    ref={videoInputRef} 
+                    onChange={handleVideoSelect}
+                />
+                <button 
+                    type="button" 
+                    onClick={() => videoInputRef.current?.click()}
+                    className="p-2 text-gray-400 hover:text-[#1E5BFF] transition-colors rounded-full hover:bg-gray-100 dark:hover:bg-gray-800"
+                    title="Adicionar Vídeo (Max 30s)"
+                >
+                    <Video className="w-6 h-6" />
+                </button>
+            </div>
+
             <button 
               type="submit"
               disabled={!content.trim()}
@@ -308,6 +455,8 @@ export const CommunityFeedView: React.FC<CommunityFeedViewProps> = ({ onBack, on
       authorRole: data.authorRole,
       relatedStoreId: data.relatedStoreId,
       relatedStoreName: data.relatedStoreName,
+      imageUrl: data.imageUrl,
+      videoUrl: data.videoUrl,
       timestamp: 'Agora',
       likes: 0,
       comments: 0
@@ -461,11 +610,15 @@ export const CommunityFeedView: React.FC<CommunityFeedViewProps> = ({ onBack, on
                 {post.content}
                 </p>
 
-                {/* Optional Image */}
-                {post.imageUrl && (
-                <div className="mb-4 rounded-2xl overflow-hidden border border-gray-100 dark:border-gray-700">
-                    <img src={post.imageUrl} alt="Post content" className="w-full h-auto object-cover max-h-[300px]" />
-                </div>
+                {/* Optional Media (Image or Video) */}
+                {post.videoUrl ? (
+                    <div className="mb-4">
+                        <FeedVideoPlayer src={post.videoUrl} />
+                    </div>
+                ) : post.imageUrl && (
+                    <div className="mb-4 rounded-2xl overflow-hidden border border-gray-100 dark:border-gray-700">
+                        <img src={post.imageUrl} alt="Post content" className="w-full h-auto object-cover max-h-[300px]" />
+                    </div>
                 )}
 
                 {/* Related Store Card */}

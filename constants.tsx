@@ -181,6 +181,20 @@ export const MOCK_COMMUNITY_POSTS: CommunityPost[] = [
     comments: 8
   },
   {
+    id: 'post-video-1',
+    userId: 'u5',
+    userName: 'Fernanda Lima',
+    userUsername: 'fernandalima',
+    userAvatar: 'https://i.pravatar.cc/100?u=f',
+    authorRole: 'resident',
+    content: 'Gente, olha que incrível o ambiente do novo bistrô na Araguaia! Super recomendo 🍷',
+    type: 'recommendation',
+    videoUrl: 'https://videos.pexels.com/video-files/3196236/3196236-sd_540_960_25fps.mp4',
+    timestamp: '20 min atrás',
+    likes: 89,
+    comments: 14
+  },
+  {
     id: 'post-2',
     userId: 'u2',
     userName: 'Carlos Silva',
@@ -189,7 +203,7 @@ export const MOCK_COMMUNITY_POSTS: CommunityPost[] = [
     authorRole: 'resident',
     content: 'Alguém sabe se a farmácia da Três Rios está de plantão hoje?',
     type: 'tip',
-    timestamp: '20 min atrás',
+    timestamp: '30 min atrás',
     likes: 3,
     comments: 5
   },
