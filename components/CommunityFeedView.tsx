@@ -39,8 +39,8 @@ const CommunityNavBar: React.FC<{
   userAvatar?: string;
   hasUnreadMessages?: boolean;
 }> = ({ currentView, onChangeView, userAvatar, hasUnreadMessages }) => (
-  <div className="sticky top-[70px] z-20 flex justify-center mb-4 px-4 pointer-events-none">
-    <div className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-md rounded-full shadow-sm border border-gray-100 dark:border-gray-700 px-6 py-2.5 flex items-center gap-8 pointer-events-auto transition-all">
+  <div className="sticky top-[70px] z-20 flex justify-center mb-4 px-3 pointer-events-none w-full">
+    <div className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-md rounded-full shadow-sm border border-gray-100 dark:border-gray-700 w-full flex items-center justify-between px-8 py-2.5 pointer-events-auto transition-all">
       <button 
         onClick={() => onChangeView('home')}
         className={`transition-colors ${currentView === 'home' ? 'text-black dark:text-white' : 'text-gray-400 hover:text-gray-600'}`}
@@ -510,7 +510,7 @@ export const CommunityFeedView: React.FC<CommunityFeedViewProps> = ({ onStoreCli
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950 font-sans pb-24 animate-in slide-in-from-right duration-300 relative">
       {/* Header */}
       <div className="sticky top-0 z-30 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md px-5 h-16 flex items-center justify-between border-b border-gray-100 dark:border-gray-800">
-        <h1 className="font-bold text-lg text-gray-900 dark:text-white font-display">Comunidade</h1>
+        <h1 className="font-bold text-lg text-gray-900 dark:text-white font-display">Feed da Freguesia</h1>
         {/* The old toggle is removed, replaced by the NavBar below */}
         <div className="w-8"></div> {/* Spacer for visual balance if needed */}
       </div>
