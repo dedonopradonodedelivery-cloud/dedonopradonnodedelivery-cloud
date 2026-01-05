@@ -12,11 +12,14 @@ interface CommunityFeedViewProps {
   onRequireLogin: () => void;
 }
 
-// ... (KEEP EXISTING MOCK DATA) ...
+// Update Mock Stories with Neighborhood data for filtering
 const MOCK_STORIES = [
-  { id: 1, user: 'Padaria Imperial', username: 'padariaimperial', avatar: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?q=80&w=200&auto=format&fit=crop', isMerchant: true, hasUnread: true, items: [{ id: 's1', type: 'image', url: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?q=80&w=600&auto=format&fit=crop', duration: 5000 }] },
-  { id: 2, user: 'Ana Paula', username: 'anapaula', avatar: 'https://i.pravatar.cc/150?u=a', isMerchant: false, hasUnread: true, items: [{ id: 's3', type: 'image', url: 'https://images.unsplash.com/photo-1526488807855-3096a6a23732?q=80&w=600&auto=format&fit=crop', duration: 5000 }] }
+  { id: 1, user: 'Padaria Imperial', username: 'padariaimperial', avatar: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?q=80&w=200&auto=format&fit=crop', isMerchant: true, hasUnread: true, neighborhood: 'Freguesia', items: [{ id: 's1', type: 'image', url: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?q=80&w=600&auto=format&fit=crop', duration: 5000 }] },
+  { id: 2, user: 'Ana Paula', username: 'anapaula', avatar: 'https://i.pravatar.cc/150?u=a', isMerchant: false, hasUnread: true, neighborhood: 'Taquara', items: [{ id: 's3', type: 'image', url: 'https://images.unsplash.com/photo-1526488807855-3096a6a23732?q=80&w=600&auto=format&fit=crop', duration: 5000 }] },
+  { id: 3, user: 'Bistrô Freguesia', username: 'bistrofreguesia', avatar: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=200&auto=format&fit=crop', isMerchant: true, hasUnread: false, neighborhood: 'Freguesia', items: [] },
+  { id: 4, user: 'Pet Shop Anil', username: 'petanil', avatar: 'https://images.unsplash.com/photo-1583337130417-3346a1be7dee?q=80&w=200&auto=format&fit=crop', isMerchant: true, hasUnread: true, neighborhood: 'Anil', items: [] }
 ];
+
 const MOCK_CHATS = [
   { id: 1, user: 'Padaria Imperial', username: 'padariaimperial', avatar: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?q=80&w=200&auto=format&fit=crop', lastMsg: 'Seu pedido saiu para entrega!', time: '10:30', unread: true, isMerchant: true },
   { id: 2, user: 'Suporte Localizei', username: 'suporte', avatar: 'https://ui-avatars.com/api/?name=Suporte&background=0D8ABC&color=fff', lastMsg: 'Como podemos ajudar?', time: 'Ontem', unread: false, isMerchant: false },
@@ -72,6 +75,12 @@ const JobsFeedScreen: React.FC<{ user: any; onRequireLogin: () => void }> = ({ u
             if (!aIsLocal && bIsLocal) return 1;
             return 0;
         });
+        
+        // Se não for "Todos", filtra estritamente
+        if (!isAll) {
+            jobs = jobs.filter(j => j.neighborhood === currentNeighborhood);
+        }
+        
         return jobs;
     }, [currentNeighborhood, isAll]);
 
@@ -107,7 +116,7 @@ const JobsFeedScreen: React.FC<{ user: any; onRequireLogin: () => void }> = ({ u
                 ) : (
                     <div className="text-center py-10 text-gray-500 dark:text-gray-400">
                         <Briefcase className="w-10 h-10 mx-auto mb-2 opacity-50" />
-                        <p>Nenhuma vaga encontrada.</p>
+                        <p>Nenhuma vaga encontrada para {currentNeighborhood}.</p>
                     </div>
                 )}
             </div>
@@ -115,8 +124,8 @@ const JobsFeedScreen: React.FC<{ user: any; onRequireLogin: () => void }> = ({ u
     );
 };
 
-const StoriesRail: React.FC<{ user: any; onRequireLogin: () => void; onOpenStory: (index: number) => void; }> = ({ user, onRequireLogin, onOpenStory }) => (
-  <div className="flex gap-4 overflow-x-auto px-4 pt-5 pb-2 no-scrollbar bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800">
+const StoriesRail: React.FC<{ user: any; onRequireLogin: () => void; onOpenStory: (index: number) => void; stories: any[] }> = ({ user, onRequireLogin, onOpenStory, stories }) => (
+  <div className="flex gap-4 overflow-x-auto px-4 pt-2 pb-2 no-scrollbar bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800">
     <div className="flex flex-col items-center gap-1 cursor-pointer flex-shrink-0" onClick={() => user ? alert("Câmera de stories (Mock)") : onRequireLogin()}>
       <div className="w-[64px] h-[64px] rounded-full p-[2px] bg-white dark:bg-gray-900 relative">
          <div className="w-full h-full rounded-full bg-gray-100 dark:bg-gray-700 overflow-hidden border border-gray-200 dark:border-gray-600">
@@ -126,7 +135,7 @@ const StoriesRail: React.FC<{ user: any; onRequireLogin: () => void; onOpenStory
       </div>
       <span className="text-[11px] text-gray-900 dark:text-white font-medium">Seu story</span>
     </div>
-    {MOCK_STORIES.map((story, i) => (
+    {stories.map((story, i) => (
       <div key={story.id} className="flex flex-col items-center gap-1 cursor-pointer flex-shrink-0" onClick={() => onOpenStory(i)}>
         <div className={`w-[66px] h-[66px] rounded-full p-[2px] ${story.hasUnread ? 'bg-gradient-to-tr from-yellow-400 via-red-500 to-fuchsia-600' : 'bg-gray-200 dark:bg-gray-700'}`}>
            <div className="w-full h-full rounded-full overflow-hidden border-2 border-white dark:border-black"><img src={story.avatar} alt={story.user} className="w-full h-full object-cover" /></div>
@@ -305,10 +314,11 @@ export const CommunityFeedView: React.FC<CommunityFeedViewProps> = ({ onStoreCli
   const [showSuccessToast, setShowSuccessToast] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
   
-  const { currentNeighborhood, isAll, toggleSelector } = useNeighborhood();
+  const { currentNeighborhood, isAll, setNeighborhood, toggleSelector } = useNeighborhood();
   
   // --- INSTAGRAM-STYLE PULL TO REFRESH LOGIC ---
   const [posts, setPosts] = useState<CommunityPost[]>([]);
+  const [filteredStories, setFilteredStories] = useState(MOCK_STORIES);
   const [incomingPosts, setIncomingPosts] = useState<CommunityPost[]>([]);
   const [pullY, setPullY] = useState(0);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -316,26 +326,33 @@ export const CommunityFeedView: React.FC<CommunityFeedViewProps> = ({ onStoreCli
   const touchStart = useRef(0);
   const feedRef = useRef<HTMLDivElement>(null);
 
-  // Initial Data Load
+  // Initial Data Load & Filter
   useEffect(() => {
-    // Basic sorting for initial load
+    // 1. Filter Posts
     let list = [...MOCK_COMMUNITY_POSTS];
+    if (!isAll) {
+        list = list.filter(p => p.neighborhood === currentNeighborhood);
+    }
+    
+    // Sort Priority: Local > Others (if All) or just recency
     list.sort((a, b) => {
         if (isAll) return 0;
-        const aIsLocal = a.neighborhood === currentNeighborhood;
-        const bIsLocal = b.neighborhood === currentNeighborhood;
-        if (aIsLocal && !bIsLocal) return -1;
-        if (!aIsLocal && bIsLocal) return 1;
-        return 0; 
+        return 0; // Maintain order
     });
     setPosts(list);
+
+    // 2. Filter Stories
+    let stories = [...MOCK_STORIES];
+    if (!isAll) {
+        stories = stories.filter(s => s.neighborhood === currentNeighborhood);
+    }
+    setFilteredStories(stories);
+
   }, [currentNeighborhood, isAll]);
 
   // Touch Handlers for Pull-to-Refresh
   const handleTouchStart = (e: React.TouchEvent) => {
     // Only enable pull if at the very top of the scrollable area
-    // Note: Assuming `window.scrollY` works or relying on user being at top visually
-    // If inside a scrollable div, we'd check feedRef.current.scrollTop
     if (window.scrollY === 0) {
         touchStart.current = e.touches[0].clientY;
         setIsPulling(true);
@@ -418,6 +435,9 @@ export const CommunityFeedView: React.FC<CommunityFeedViewProps> = ({ onStoreCli
     }
   };
 
+  // Chips List for Neighborhood Filter
+  const NEIGHBORHOOD_FILTERS = ['Jacarepaguá (todos)', ...NEIGHBORHOODS];
+
   const renderContent = () => {
     switch (internalView) {
       case 'home':
@@ -457,7 +477,24 @@ export const CommunityFeedView: React.FC<CommunityFeedViewProps> = ({ onStoreCli
                 className="transition-transform duration-200 ease-out will-change-transform"
                 style={{ transform: `translateY(${pullY}px)` }}
             >
-                <StoriesRail user={user} onRequireLogin={onRequireLogin} onOpenStory={(idx) => setViewingStoryIndex(idx)} />
+                {/* Neighborhood Filter Chips */}
+                <div className="flex gap-2 overflow-x-auto no-scrollbar px-4 pt-4 pb-2 border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-950">
+                    {NEIGHBORHOOD_FILTERS.map((hood) => (
+                        <button
+                            key={hood}
+                            onClick={() => setNeighborhood(hood)}
+                            className={`whitespace-nowrap px-4 py-1.5 rounded-full text-xs font-bold transition-all border ${
+                                currentNeighborhood === hood
+                                ? 'bg-[#1E5BFF] text-white border-[#1E5BFF] shadow-sm'
+                                : 'bg-gray-50 dark:bg-gray-800 text-gray-500 dark:text-gray-400 border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700'
+                            }`}
+                        >
+                            {hood === 'Jacarepaguá (todos)' ? 'Todos' : hood}
+                        </button>
+                    ))}
+                </div>
+
+                <StoriesRail user={user} onRequireLogin={onRequireLogin} onOpenStory={(idx) => setViewingStoryIndex(idx)} stories={filteredStories} />
                 <div className="flex flex-col mt-2">
                 {posts.length > 0 ? (
                     posts.map(post => (
@@ -470,7 +507,7 @@ export const CommunityFeedView: React.FC<CommunityFeedViewProps> = ({ onStoreCli
                         />
                     ))
                 ) : (
-                    <div className="text-center py-12 px-4"><p className="text-gray-400">Nenhum post no momento.</p></div>
+                    <div className="text-center py-12 px-4"><p className="text-gray-400">Nenhum post no momento em {currentNeighborhood === 'Jacarepaguá (todos)' ? 'Jacarepaguá' : currentNeighborhood}.</p></div>
                 )}
                 </div>
             </div>
