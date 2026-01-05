@@ -396,24 +396,24 @@ const FeedPost: React.FC<{
 };
 
 const CommunityNavBar: React.FC<{ currentView: string; onChangeView: (view: 'home' | 'direct' | 'explore' | 'profile' | 'jobs') => void; userAvatar?: string; hasUnreadMessages?: boolean; }> = ({ currentView, onChangeView, userAvatar, hasUnreadMessages }) => (
-  <div className="sticky top-[70px] z-20 flex justify-center mb-0 px-2 pointer-events-none w-full">
-    <div className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-md rounded-full shadow-sm border border-gray-100 dark:border-gray-700 w-full grid grid-cols-5 items-center px-2 py-2.5 pointer-events-auto transition-all">
-      <button onClick={() => onChangeView('home')} className={`flex justify-center transition-colors ${currentView === 'home' ? 'text-black dark:text-white' : 'text-gray-400 hover:text-gray-600'}`}>
+  <div className="sticky top-[70px] z-20 flex justify-center mb-0 px-4 pointer-events-none w-full">
+    <div className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-md rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 w-full grid grid-cols-5 items-center px-1 py-2 pointer-events-auto transition-all">
+      <button onClick={() => onChangeView('home')} className={`flex justify-center py-2 transition-colors ${currentView === 'home' ? 'text-black dark:text-white' : 'text-gray-400 hover:text-gray-600'}`}>
         <Home className={`w-6 h-6 ${currentView === 'home' ? 'fill-black dark:fill-white' : ''}`} strokeWidth={2} />
       </button>
-      <button onClick={() => onChangeView('direct')} className={`flex justify-center transition-colors relative ${currentView === 'direct' ? 'text-black dark:text-white' : 'text-gray-400 hover:text-gray-600'}`}>
+      <button onClick={() => onChangeView('direct')} className={`flex justify-center py-2 transition-colors relative ${currentView === 'direct' ? 'text-black dark:text-white' : 'text-gray-400 hover:text-gray-600'}`}>
         <Send className={`w-6 h-6 ${currentView === 'direct' ? 'fill-black dark:fill-white' : ''}`} strokeWidth={2} transform="rotate(-15)" />
-        {hasUnreadMessages && <span className="absolute top-0 right-3 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white dark:border-gray-800"></span>}
+        {hasUnreadMessages && <span className="absolute top-1.5 right-3 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white dark:border-gray-800"></span>}
       </button>
-      <button onClick={() => onChangeView('explore')} className={`flex justify-center transition-colors ${currentView === 'explore' ? 'text-black dark:text-white' : 'text-gray-400 hover:text-gray-600'}`}>
+      <button onClick={() => onChangeView('explore')} className={`flex justify-center py-2 transition-colors ${currentView === 'explore' ? 'text-black dark:text-white' : 'text-gray-400 hover:text-gray-600'}`}>
         <Search className="w-6 h-6" strokeWidth={currentView === 'explore' ? 3 : 2} />
       </button>
-      <button onClick={() => onChangeView('profile')} className={`flex justify-center transition-all`}>
+      <button onClick={() => onChangeView('profile')} className={`flex justify-center py-2 transition-all`}>
         <div className={`rounded-full overflow-hidden border-2 ${currentView === 'profile' ? 'border-black dark:border-white' : 'border-transparent'}`}>
            {userAvatar ? <img src={userAvatar} alt="Profile" className="w-6 h-6 object-cover" /> : <UserIcon className={`w-6 h-6 ${currentView === 'profile' ? 'text-black dark:text-white fill-black dark:fill-white' : 'text-gray-400'}`} />}
         </div>
       </button>
-      <button onClick={() => onChangeView('jobs')} className={`flex justify-center transition-colors ${currentView === 'jobs' ? 'text-black dark:text-white' : 'text-gray-400 hover:text-gray-600'}`}>
+      <button onClick={() => onChangeView('jobs')} className={`flex justify-center py-2 transition-colors ${currentView === 'jobs' ? 'text-black dark:text-white' : 'text-gray-400 hover:text-gray-600'}`}>
         <Briefcase className={`w-6 h-6 ${currentView === 'jobs' ? 'fill-black dark:fill-white' : ''}`} strokeWidth={2} />
       </button>
     </div>
