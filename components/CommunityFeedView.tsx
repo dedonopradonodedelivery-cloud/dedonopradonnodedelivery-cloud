@@ -280,12 +280,25 @@ const FeedPost: React.FC<{
 
 const CommunityNavBar: React.FC<{ currentView: string; onChangeView: (view: 'home' | 'direct' | 'explore' | 'profile' | 'jobs') => void; userAvatar?: string; hasUnreadMessages?: boolean; }> = ({ currentView, onChangeView, userAvatar, hasUnreadMessages }) => (
   <div className="sticky top-[70px] z-20 flex justify-center mb-0 px-2 pointer-events-none w-full">
-    <div className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-md rounded-full shadow-sm border border-gray-100 dark:border-gray-700 w-full flex items-center justify-between px-4 py-2.5 pointer-events-auto transition-all">
-      <button onClick={() => onChangeView('home')} className={`transition-colors ${currentView === 'home' ? 'text-black dark:text-white' : 'text-gray-400 hover:text-gray-600'}`}><Home className={`w-6 h-6 ${currentView === 'home' ? 'fill-black dark:fill-white' : ''}`} strokeWidth={2} /></button>
-      <button onClick={() => onChangeView('direct')} className={`transition-colors relative ${currentView === 'direct' ? 'text-black dark:text-white' : 'text-gray-400 hover:text-gray-600'}`}><Send className={`w-6 h-6 ${currentView === 'direct' ? 'fill-black dark:fill-white' : ''}`} strokeWidth={2} transform="rotate(-15)" />{hasUnreadMessages && <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white dark:border-gray-800"></span>}</button>
-      <button onClick={() => onChangeView('explore')} className={`transition-colors ${currentView === 'explore' ? 'text-black dark:text-white' : 'text-gray-400 hover:text-gray-600'}`}><Search className="w-6 h-6" strokeWidth={currentView === 'explore' ? 3 : 2} /></button>
-      <button onClick={() => onChangeView('profile')} className={`transition-all rounded-full overflow-hidden border-2 ${currentView === 'profile' ? 'border-black dark:border-white' : 'border-transparent'}`}>{userAvatar ? <img src={userAvatar} alt="Profile" className="w-6 h-6 object-cover" /> : <UserIcon className={`w-6 h-6 ${currentView === 'profile' ? 'text-black dark:text-white fill-black dark:fill-white' : 'text-gray-400'}`} />}</button>
-      <button onClick={() => onChangeView('jobs')} className={`transition-colors ${currentView === 'jobs' ? 'text-black dark:text-white' : 'text-gray-400 hover:text-gray-600'}`}><Briefcase className={`w-6 h-6 ${currentView === 'jobs' ? 'fill-black dark:fill-white' : ''}`} strokeWidth={2} /></button>
+    <div className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-md rounded-full shadow-sm border border-gray-100 dark:border-gray-700 w-full grid grid-cols-5 items-center px-2 py-2.5 pointer-events-auto transition-all">
+      <button onClick={() => onChangeView('home')} className={`flex justify-center transition-colors ${currentView === 'home' ? 'text-black dark:text-white' : 'text-gray-400 hover:text-gray-600'}`}>
+        <Home className={`w-6 h-6 ${currentView === 'home' ? 'fill-black dark:fill-white' : ''}`} strokeWidth={2} />
+      </button>
+      <button onClick={() => onChangeView('direct')} className={`flex justify-center transition-colors relative ${currentView === 'direct' ? 'text-black dark:text-white' : 'text-gray-400 hover:text-gray-600'}`}>
+        <Send className={`w-6 h-6 ${currentView === 'direct' ? 'fill-black dark:fill-white' : ''}`} strokeWidth={2} transform="rotate(-15)" />
+        {hasUnreadMessages && <span className="absolute top-0 right-3 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white dark:border-gray-800"></span>}
+      </button>
+      <button onClick={() => onChangeView('explore')} className={`flex justify-center transition-colors ${currentView === 'explore' ? 'text-black dark:text-white' : 'text-gray-400 hover:text-gray-600'}`}>
+        <Search className="w-6 h-6" strokeWidth={currentView === 'explore' ? 3 : 2} />
+      </button>
+      <button onClick={() => onChangeView('profile')} className={`flex justify-center transition-all`}>
+        <div className={`rounded-full overflow-hidden border-2 ${currentView === 'profile' ? 'border-black dark:border-white' : 'border-transparent'}`}>
+           {userAvatar ? <img src={userAvatar} alt="Profile" className="w-6 h-6 object-cover" /> : <UserIcon className={`w-6 h-6 ${currentView === 'profile' ? 'text-black dark:text-white fill-black dark:fill-white' : 'text-gray-400'}`} />}
+        </div>
+      </button>
+      <button onClick={() => onChangeView('jobs')} className={`flex justify-center transition-colors ${currentView === 'jobs' ? 'text-black dark:text-white' : 'text-gray-400 hover:text-gray-600'}`}>
+        <Briefcase className={`w-6 h-6 ${currentView === 'jobs' ? 'fill-black dark:fill-white' : ''}`} strokeWidth={2} />
+      </button>
     </div>
   </div>
 );
@@ -441,7 +454,7 @@ export const CommunityFeedView: React.FC<CommunityFeedViewProps> = ({ onStoreCli
         return (
           <div 
             ref={feedRef}
-            className="pb-20 relative pt-2"
+            className="pb-20 relative pt-5"
             onTouchStart={handleTouchStart}
             onTouchMove={handleTouchMove}
             onTouchEnd={handleTouchEnd}
@@ -511,7 +524,14 @@ export const CommunityFeedView: React.FC<CommunityFeedViewProps> = ({ onStoreCli
       {(internalView === 'home' || internalView === 'jobs' || internalView === 'explore') && (
         <div className="sticky top-0 z-30 bg-white/95 dark:bg-gray-950/95 backdrop-blur-md h-14 flex items-center justify-between border-b border-gray-100 dark:border-gray-800 px-4">
           <button onClick={handleCreatePost} className="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"><Plus className="w-6 h-6 text-gray-900 dark:text-white" /></button>
-          <button onClick={toggleSelector} className="flex flex-col items-center"><h1 className="font-bold text-lg text-gray-900 dark:text-white font-display flex items-center gap-1">Feed – Localizei JPA</h1><div className="flex items-center gap-1 text-[10px] text-gray-500 dark:text-gray-400 -mt-1"><MapPin className="w-2.5 h-2.5" /><span>{currentNeighborhood === 'Jacarepaguá (todos)' ? 'Todo Bairro' : currentNeighborhood}</span><ChevronDown className="w-2.5 h-2.5" /></div></button>
+          <button onClick={toggleSelector} className="flex flex-col items-center flex-1">
+            <h1 className="font-bold text-lg text-gray-900 dark:text-white font-display flex items-center gap-1 text-center">Feed da Localizei JPA</h1>
+            <div className="flex items-center gap-1 text-[10px] text-gray-500 dark:text-gray-400 -mt-1">
+                <MapPin className="w-2.5 h-2.5" />
+                <span>{currentNeighborhood === 'Jacarepaguá (todos)' ? 'Todo Bairro' : currentNeighborhood}</span>
+                <ChevronDown className="w-2.5 h-2.5" />
+            </div>
+          </button>
           <button onClick={handleNotifications} className="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors relative"><Heart className="w-6 h-6 text-gray-900 dark:text-white" /><span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border border-white dark:border-gray-900"></span></button>
         </div>
       )}

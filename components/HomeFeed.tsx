@@ -905,8 +905,8 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
       'home_carousel',
       'weekly_promos',
       'cashback_stores',
-      'community_feed', 
-      'trust_feed',     
+      'trust_feed', // Moved here (Step 3)
+      'community_feed', // Moved here (Step 4)
       'roulette',       
       'list',           
       'mini_tribes'
