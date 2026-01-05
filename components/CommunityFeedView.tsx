@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Search, Store as StoreIcon, MoreHorizontal, Send, Heart, Share2, MessageCircle, ChevronLeft, BadgeCheck, User as UserIcon, Home, Plus, X, Video, Image as ImageIcon, Film, Loader2, Grid, Camera, Play, Check, ChevronRight, Briefcase, MapPin, Clock, DollarSign, ExternalLink, AlertCircle, Building2, Trash2, Flag } from 'lucide-react';
+import { Search, Store as StoreIcon, MoreHorizontal, Send, Heart, Share2, MessageCircle, ChevronLeft, BadgeCheck, User as UserIcon, Home, Plus, X, Video, Image as ImageIcon, Film, Loader2, Grid, Camera, Play, Check, ChevronRight, Briefcase, MapPin, Clock, DollarSign, ExternalLink, AlertCircle, Building2, Trash2, Flag, Settings } from 'lucide-react';
 import { Store, CommunityPost, Job } from '../types';
 import { MOCK_COMMUNITY_POSTS, MOCK_JOBS } from '../constants';
 
@@ -153,35 +153,105 @@ const CommunityExploreScreen: React.FC = () => (
    </div>
 );
 
-const UserProfileScreen: React.FC<{ user: any }> = ({ user }) => (
-   <div className="pb-20">
-      <div className="flex flex-col items-center pt-8 pb-6 px-4">
-         <div className="w-20 h-20 rounded-full bg-gray-200 overflow-hidden mb-3">
-            {user?.user_metadata?.avatar_url ? <img src={user.user_metadata.avatar_url} className="w-full h-full object-cover" /> : <UserIcon className="w-full h-full p-4 text-gray-400" />}
-         </div>
-         <h2 className="font-bold text-lg text-gray-900 dark:text-white">{user?.user_metadata?.full_name || 'Usuário'}</h2>
-         <p className="text-gray-500 text-sm">@{user?.user_metadata?.username || 'usuario'}</p>
-         
-         <div className="flex gap-8 mt-6">
-            <div className="text-center">
-               <div className="font-bold text-lg text-gray-900 dark:text-white">0</div>
-               <div className="text-xs text-gray-500">Publicações</div>
-            </div>
-            <div className="text-center">
-               <div className="font-bold text-lg text-gray-900 dark:text-white">0</div>
-               <div className="text-xs text-gray-500">Seguidores</div>
-            </div>
-            <div className="text-center">
-               <div className="font-bold text-lg text-gray-900 dark:text-white">0</div>
-               <div className="text-xs text-gray-500">Seguindo</div>
-            </div>
-         </div>
-      </div>
-      <div className="border-t border-gray-100 dark:border-gray-800">
-         <div className="p-10 text-center text-gray-400 text-sm">Ainda sem publicações</div>
-      </div>
-   </div>
-);
+const UserProfileScreen: React.FC<{ user: any; isOwnProfile?: boolean }> = ({ user, isOwnProfile = true }) => {
+  // Mock posts for the grid
+  const userPosts = []; 
+  // const userPosts = [1, 2, 3, 4, 5]; // Uncomment to test with posts
+
+  return (
+    <div className="bg-white dark:bg-gray-900 min-h-screen w-full pb-24">
+       {/* Top Row: Avatar + Stats */}
+       <div className="flex items-center px-4 py-4 pt-6">
+          {/* Avatar */}
+          <div className="w-[86px] h-[86px] rounded-full border border-gray-200 dark:border-gray-700 p-[2px] mr-8 flex-shrink-0">
+             <div className="w-full h-full rounded-full overflow-hidden bg-gray-100 dark:bg-gray-800">
+                {user?.user_metadata?.avatar_url ? (
+                    <img src={user.user_metadata.avatar_url} className="w-full h-full object-cover" alt="Perfil" />
+                ) : (
+                    <UserIcon className="w-full h-full p-4 text-gray-400" />
+                )}
+             </div>
+          </div>
+
+          {/* Stats */}
+          <div className="flex-1 flex justify-between text-center pr-2">
+             <div className="flex flex-col items-center">
+                <div className="font-bold text-lg text-gray-900 dark:text-white leading-tight">{userPosts.length}</div>
+                <div className="text-xs text-gray-900 dark:text-white leading-tight">Publicações</div>
+             </div>
+             <div className="flex flex-col items-center">
+                <div className="font-bold text-lg text-gray-900 dark:text-white leading-tight">1.2M</div>
+                <div className="text-xs text-gray-900 dark:text-white leading-tight">Seguidores</div>
+             </div>
+             <div className="flex flex-col items-center">
+                <div className="font-bold text-lg text-gray-900 dark:text-white leading-tight">450</div>
+                <div className="text-xs text-gray-900 dark:text-white leading-tight">Seguindo</div>
+             </div>
+          </div>
+       </div>
+
+       {/* Bio Section */}
+       <div className="px-4 pb-4">
+          <div className="font-bold text-sm text-gray-900 dark:text-white">{user?.user_metadata?.full_name || 'Usuário'}</div>
+          <div className="text-sm text-gray-900 dark:text-gray-100 mt-0.5 whitespace-pre-wrap leading-tight">
+             Apaixonado pela Freguesia 💙 <br/>
+             Explorando o melhor do bairro.
+          </div>
+       </div>
+
+       {/* Buttons */}
+       <div className="px-4 flex gap-2 mb-6">
+          {isOwnProfile ? (
+             <>
+               <button className="flex-1 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-sm font-bold py-1.5 rounded-lg text-gray-900 dark:text-white transition-colors">
+                 Editar perfil
+               </button>
+               <button className="flex-1 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-sm font-bold py-1.5 rounded-lg text-gray-900 dark:text-white transition-colors">
+                 Compartilhar perfil
+               </button>
+             </>
+          ) : (
+             <>
+               <button className="flex-1 bg-[#1E5BFF] text-white text-sm font-bold py-1.5 rounded-lg active:scale-95 transition-transform">
+                 Seguir
+               </button>
+               <button className="flex-1 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white text-sm font-bold py-1.5 rounded-lg active:scale-95 transition-transform">
+                 Mensagem
+               </button>
+             </>
+          )}
+       </div>
+
+       {/* Tabs / Divider */}
+       <div className="border-t border-gray-100 dark:border-gray-800 flex justify-around">
+          <div className="flex-1 flex justify-center py-2.5 border-b-2 border-black dark:border-white">
+             <Grid className="w-5 h-5 text-black dark:text-white" />
+          </div>
+          <div className="flex-1 flex justify-center py-2.5">
+             <Briefcase className="w-5 h-5 text-gray-400" />
+          </div>
+       </div>
+
+       {/* Grid */}
+       <div className="grid grid-cols-3 gap-0.5">
+          {userPosts.length > 0 ? (
+             userPosts.map((post, i) => (
+                <div key={i} className="aspect-square bg-gray-100 dark:bg-gray-800 relative">
+                   <img src={`https://picsum.photos/400/400?random=${i}`} className="w-full h-full object-cover" />
+                </div>
+             ))
+          ) : (
+             <div className="col-span-3 py-16 flex flex-col items-center justify-center text-center">
+                <div className="w-16 h-16 rounded-full border-2 border-gray-800 dark:border-gray-600 flex items-center justify-center mb-4">
+                   <Camera className="w-8 h-8 text-gray-800 dark:text-gray-600" strokeWidth={1.5} />
+                </div>
+                <h3 className="font-bold text-xl text-gray-900 dark:text-white">Ainda sem publicações</h3>
+             </div>
+          )}
+       </div>
+    </div>
+  );
+};
 
 const ChatScreen: React.FC<{
   chatId: number;
@@ -885,8 +955,8 @@ const CommunityNavBar: React.FC<{
   userAvatar?: string;
   hasUnreadMessages?: boolean;
 }> = ({ currentView, onChangeView, userAvatar, hasUnreadMessages }) => (
-  <div className="sticky top-[70px] z-20 flex justify-center mb-0 px-3 pointer-events-none w-full">
-    <div className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-md rounded-full shadow-sm border border-gray-100 dark:border-gray-700 w-full flex items-center justify-between px-6 py-2.5 pointer-events-auto transition-all">
+  <div className="sticky top-[70px] z-20 flex justify-center mb-0 px-2 pointer-events-none w-full">
+    <div className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-md rounded-full shadow-sm border border-gray-100 dark:border-gray-700 w-full flex items-center justify-between px-4 py-2.5 pointer-events-auto transition-all">
       <button 
         onClick={() => onChangeView('home')}
         className={`transition-colors ${currentView === 'home' ? 'text-black dark:text-white' : 'text-gray-400 hover:text-gray-600'}`}
@@ -1095,28 +1165,28 @@ export const CommunityFeedView: React.FC<CommunityFeedViewProps> = ({ onStoreCli
         }
 
         return (
-          <div className="w-full min-h-screen bg-white dark:bg-gray-900 flex flex-col animate-in fade-in slide-in-from-right duration-300 pb-24">
-            <div className="px-5 pt-4 pb-2">
+          <div className="w-full bg-white dark:bg-gray-900 flex flex-col animate-in fade-in slide-in-from-right duration-300 pb-24 min-h-[calc(100vh-140px)]">
+            <div className="px-4 pt-4 pb-2">
               <div className="relative">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                 <input 
                   type="text"
                   placeholder="Buscar conversa..."
-                  className="w-full bg-gray-100 dark:bg-gray-800 rounded-xl py-2.5 pl-10 pr-4 text-sm outline-none focus:ring-2 focus:ring-[#1E5BFF] dark:text-white transition-all"
+                  className="w-full bg-gray-100 dark:bg-gray-800 rounded-xl py-3 pl-10 pr-4 text-sm outline-none focus:ring-2 focus:ring-[#1E5BFF] dark:text-white transition-all"
                 />
               </div>
             </div>
 
-            <div className="px-5 py-2">
+            <div className="px-4 py-2">
                 <h3 className="font-bold text-gray-900 dark:text-white text-sm">Mensagens</h3>
             </div>
             
-            <div className="w-full">
+            <div className="w-full flex-1">
               {MOCK_CHATS.map(chat => (
                 <div 
                   key={chat.id} 
                   onClick={() => setSelectedChatId(chat.id)}
-                  className="flex items-center gap-4 px-5 py-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors active:bg-gray-100 dark:active:bg-gray-800 border-b border-gray-50 dark:border-gray-800/50 last:border-0 w-full"
+                  className="w-full flex items-center gap-4 px-4 py-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors active:bg-gray-100 dark:active:bg-gray-800 border-b border-gray-50 dark:border-gray-800/50 last:border-0"
                 >
                   <div className="relative flex-shrink-0">
                     <img src={chat.avatar} alt={chat.user} className="w-12 h-12 rounded-full object-cover bg-gray-200 border border-gray-100 dark:border-gray-700" />
