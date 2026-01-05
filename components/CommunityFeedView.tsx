@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Search, Store as StoreIcon, MoreHorizontal, Send, Heart, Share2, MessageCircle, ChevronLeft, BadgeCheck, User as UserIcon, Home, Plus, X, Video } from 'lucide-react';
+import { Search, Store as StoreIcon, MoreHorizontal, Send, Heart, Share2, MessageCircle, ChevronLeft, BadgeCheck, User as UserIcon, Home, Plus, X, Video, Image as ImageIcon, Film, Loader2 } from 'lucide-react';
 import { Store, CommunityPost } from '../types';
 import { MOCK_COMMUNITY_POSTS } from '../constants';
 
@@ -80,6 +80,184 @@ const MOCK_MESSAGES_HISTORY: Record<number, { id: number; text: string; sender: 
 };
 
 // --- SUB-COMPONENTS ---
+
+// 0. Create Post Widget (Replaces simple input)
+const CreatePostWidget: React.FC<{ user: any; onRequireLogin: () => void }> = ({ user, onRequireLogin }) => {
+  const [caption, setCaption] = useState('');
+  const [mediaFiles, setMediaFiles] = useState<{ url: string; type: 'image' | 'video' }[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const videoInputRef = useRef<HTMLInputElement>(null);
+  const imageInputRef = useRef<HTMLInputElement>(null);
+
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!user) { onRequireLogin(); return; }
+    if (e.target.files && e.target.files.length > 0) {
+      const files = Array.from(e.target.files);
+      const remainingSlots = 4 - mediaFiles.length;
+      
+      if (mediaFiles.some(m => m.type === 'video')) {
+        alert('Você não pode misturar fotos e vídeos.');
+        return;
+      }
+
+      if (remainingSlots <= 0) {
+        alert('Máximo de 4 fotos permitido.');
+        return;
+      }
+
+      const newImages = files.slice(0, remainingSlots).map(file => ({
+        url: URL.createObjectURL(file as Blob),
+        type: 'image' as const
+      }));
+
+      setMediaFiles(prev => [...prev, ...newImages]);
+    }
+  };
+
+  const handleVideoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!user) { onRequireLogin(); return; }
+    const file = e.target.files?.[0];
+    if (file) {
+      if (mediaFiles.length > 0) {
+        alert('Você não pode misturar fotos e vídeos. Remova as fotos primeiro.');
+        return;
+      }
+
+      // Check duration (Mock check - in real app needs loadedmetadata)
+      const video = document.createElement('video');
+      video.preload = 'metadata';
+      video.onloadedmetadata = function() {
+        window.URL.revokeObjectURL(video.src);
+        if (video.duration > 30) {
+          alert("O vídeo deve ter no máximo 30 segundos.");
+        } else {
+          setMediaFiles([{
+            url: URL.createObjectURL(file),
+            type: 'video'
+          }]);
+        }
+      }
+      video.src = URL.createObjectURL(file);
+    }
+  };
+
+  const removeMedia = (index: number) => {
+    setMediaFiles(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const handleSubmit = () => {
+    if (!user) { onRequireLogin(); return; }
+    
+    if (mediaFiles.length === 0) {
+      alert("Adicione uma foto ou vídeo (até 30s) para publicar no Feed.");
+      return;
+    }
+
+    setIsSubmitting(true);
+    // Simulate API call
+    setTimeout(() => {
+      setIsSubmitting(false);
+      setCaption('');
+      setMediaFiles([]);
+      alert("Publicado com sucesso!");
+    }, 1500);
+  };
+
+  return (
+    <div className="bg-white dark:bg-gray-800 p-4 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 mb-6">
+      <div className="flex gap-3">
+        <div className="w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden shrink-0">
+           {user?.user_metadata?.avatar_url ? (
+             <img src={user.user_metadata.avatar_url} alt="User" className="w-full h-full object-cover" />
+           ) : (
+             <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs">?</div>
+           )}
+        </div>
+        <div className="flex-1">
+          <input 
+            type="text" 
+            value={caption}
+            onChange={(e) => setCaption(e.target.value)}
+            placeholder="O que está acontecendo no bairro?" 
+            className="w-full bg-transparent outline-none text-sm text-gray-700 dark:text-gray-200 placeholder-gray-400 min-h-[40px]"
+            onClick={() => !user && onRequireLogin()}
+          />
+          
+          {/* Media Preview */}
+          {mediaFiles.length > 0 && (
+            <div className={`mt-3 grid gap-2 ${mediaFiles.length === 1 ? 'grid-cols-1' : 'grid-cols-2'}`}>
+              {mediaFiles.map((media, idx) => (
+                <div key={idx} className="relative rounded-xl overflow-hidden bg-black aspect-[4/3] group">
+                  {media.type === 'image' ? (
+                    <img src={media.url} alt="Preview" className="w-full h-full object-cover" />
+                  ) : (
+                    <video src={media.url} className="w-full h-full object-cover" controls />
+                  )}
+                  <button 
+                    onClick={() => removeMedia(idx)}
+                    className="absolute top-1 right-1 bg-black/60 text-white rounded-full p-1 hover:bg-red-500 transition-colors"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+
+          <div className="flex items-center justify-between mt-3 pt-2 border-t border-gray-100 dark:border-gray-700">
+            <div className="flex gap-2">
+              <button 
+                onClick={() => imageInputRef.current?.click()}
+                className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 text-[#1E5BFF] transition-colors flex items-center gap-1"
+                disabled={mediaFiles.some(m => m.type === 'video')}
+              >
+                <ImageIcon className="w-5 h-5" />
+                <span className="text-[10px] font-bold hidden sm:inline">Foto</span>
+              </button>
+              <input 
+                type="file" 
+                ref={imageInputRef} 
+                accept="image/*" 
+                multiple 
+                className="hidden" 
+                onChange={handleImageSelect}
+              />
+
+              <button 
+                onClick={() => videoInputRef.current?.click()}
+                className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 text-red-500 transition-colors flex items-center gap-1"
+                disabled={mediaFiles.length > 0}
+              >
+                <Film className="w-5 h-5" />
+                <span className="text-[10px] font-bold hidden sm:inline">Vídeo 30s</span>
+              </button>
+              <input 
+                type="file" 
+                ref={videoInputRef} 
+                accept="video/*" 
+                className="hidden" 
+                onChange={handleVideoSelect}
+              />
+            </div>
+
+            <button 
+              onClick={handleSubmit}
+              disabled={isSubmitting || mediaFiles.length === 0}
+              className={`p-2 px-4 rounded-full text-white transition-all flex items-center gap-2 ${
+                mediaFiles.length === 0 
+                  ? 'bg-gray-300 dark:bg-gray-700 cursor-not-allowed text-gray-500' 
+                  : 'bg-[#1E5BFF] hover:bg-blue-600 shadow-md active:scale-95'
+              }`}
+            >
+              {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+              <span className="text-xs font-bold">Publicar</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const FeedPost: React.FC<{ post: CommunityPost; onLike: () => void }> = ({ post, onLike }) => {
   const [liked, setLiked] = useState(false);
@@ -262,7 +440,7 @@ const ChatScreen: React.FC<{
   const chatInfo = MOCK_CHATS.find(c => c.id === chatId);
 
   return (
-    <div className="fixed inset-0 z-50 bg-gray-50 dark:bg-gray-900 flex flex-col w-full max-w-md mx-auto animate-in slide-in-from-right duration-300">
+    <div className="fixed inset-0 z-[200] bg-gray-50 dark:bg-gray-900 flex flex-col w-full h-full animate-in slide-in-from-right duration-300">
         {/* Header */}
         <div className="bg-white dark:bg-gray-800 px-4 py-3 flex items-center gap-3 border-b border-gray-100 dark:border-gray-700 shadow-sm">
             <button onClick={onBack} className="p-2 -ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
@@ -300,7 +478,7 @@ const ChatScreen: React.FC<{
         </div>
 
         {/* Input */}
-        <div className="p-4 bg-white dark:bg-gray-800 border-t border-gray-100 dark:border-gray-700">
+        <div className="p-4 bg-white dark:bg-gray-800 border-t border-gray-100 dark:border-gray-700 pb-8 sm:pb-4">
             <form 
                 onSubmit={(e) => { e.preventDefault(); handleSend(); }}
                 className="flex items-center gap-3"
@@ -592,36 +770,18 @@ export const CommunityFeedView: React.FC<CommunityFeedViewProps> = ({ onStoreCli
       case 'home':
         return (
           <div className="pb-20">
-            {/* Stories Rail */}
-            <StoriesRail 
-              user={user} 
-              onRequireLogin={onRequireLogin} 
-              onOpenStory={(idx) => setViewingStoryIndex(idx)}
-            />
+            {/* Added visual spacing between nav bar and stories */}
+            <div className="pt-6">
+              <StoriesRail 
+                user={user} 
+                onRequireLogin={onRequireLogin} 
+                onOpenStory={(idx) => setViewingStoryIndex(idx)}
+              />
+            </div>
 
             {/* Posts Feed */}
             <div className="p-5 pt-4">
-              <div className="bg-white dark:bg-gray-800 p-4 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 mb-6 flex gap-4 items-center">
-                <div className="w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden shrink-0">
-                   {user?.user_metadata?.avatar_url ? (
-                     <img src={user.user_metadata.avatar_url} alt="User" className="w-full h-full object-cover" />
-                   ) : (
-                     <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs">?</div>
-                   )}
-                </div>
-                <input 
-                  type="text" 
-                  placeholder="O que está acontecendo no bairro?" 
-                  className="flex-1 bg-transparent outline-none text-sm text-gray-700 dark:text-gray-200 placeholder-gray-400"
-                  onClick={() => !user && onRequireLogin()}
-                />
-                <button 
-                  className="p-2 bg-blue-600 rounded-full text-white hover:bg-blue-700 transition-colors"
-                  onClick={() => !user && onRequireLogin()}
-                >
-                  <Send className="w-4 h-4" />
-                </button>
-              </div>
+              <CreatePostWidget user={user} onRequireLogin={onRequireLogin} />
 
               {/* Posts */}
               <div className="space-y-4">
@@ -671,7 +831,7 @@ export const CommunityFeedView: React.FC<CommunityFeedViewProps> = ({ onStoreCli
         }
 
         return (
-          <div className="w-full bg-white dark:bg-gray-900 flex flex-col animate-in fade-in slide-in-from-right duration-300 pb-20">
+          <div className="w-full min-h-screen bg-white dark:bg-gray-900 flex flex-col animate-in fade-in slide-in-from-right duration-300 pb-24">
             <div className="px-5 pt-4 pb-2">
               <div className="relative">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
