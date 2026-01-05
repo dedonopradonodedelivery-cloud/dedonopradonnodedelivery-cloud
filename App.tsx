@@ -55,6 +55,9 @@ import {
 // Global para persistência entre ciclos de vida se necessário
 let isFirstBootAttempted = false;
 
+// Tabs that support horizontal swipe navigation (Main Bottom Bar Tabs)
+const MAIN_TABS = ['home', 'explore', 'qrcode_scan', 'services', 'community_feed'];
+
 const App: React.FC = () => {
   const { user, userRole, loading: isAuthInitialLoading, signOut } = useAuth();
   
@@ -84,6 +87,10 @@ const App: React.FC = () => {
   const [isQuoteModalOpen, setIsQuoteModalOpen] = useState(false);
   const [quoteCategory, setQuoteCategory] = useState('');
 
+  // --- SWIPE LOGIC STATE ---
+  const touchStart = useRef<{ x: number, y: number, target: EventTarget | null } | null>(null);
+  const minSwipeDistance = 60; // Increased slightly to avoid accidental swipes
+
   useEffect(() => {
     localStorage.setItem('localizei_active_tab', activeTab);
   }, [activeTab]);
@@ -93,10 +100,6 @@ const App: React.FC = () => {
     if (isFirstBootAttempted || isAuthReturn) return;
 
     // Sequência de animação da Splash
-    // 0ms: Início
-    // 1000ms: Mostra Patrocinador Master
-    // 3500ms: Finaliza Splash
-
     const sponsorTimer = setTimeout(() => {
       setShowSponsor(true);
     }, 1000);
@@ -104,11 +107,9 @@ const App: React.FC = () => {
     const finishTimer = setTimeout(() => {
       setSplashProgress(100);
       isFirstBootAttempted = true;
-      // Pequeno delay visual para a barra encher
       setTimeout(() => setMinSplashTimeElapsed(true), 300);
     }, 3500);
 
-    // Barra de progresso visual (Fake loading)
     const progressInterval = setInterval(() => {
       setSplashProgress(prev => {
         if (prev >= 90) return prev;
@@ -143,7 +144,6 @@ const App: React.FC = () => {
     applyTheme();
     localStorage.setItem('localizei_theme_mode', themeMode);
 
-    // Listener for system changes if in auto mode
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
     const handleChange = () => {
       if (themeMode === 'auto') applyTheme();
@@ -153,7 +153,6 @@ const App: React.FC = () => {
     return () => mediaQuery.removeEventListener('change', handleChange);
   }, [themeMode]);
 
-  // Toggle Function (Legacy, now just cycles or sets specific)
   const toggleTheme = () => {
     setThemeMode(prev => prev === 'light' ? 'dark' : 'light');
   };
@@ -178,6 +177,81 @@ const App: React.FC = () => {
     setActiveTab('store_detail');
   };
 
+  // --- SWIPE HANDLERS ---
+  const isHorizontalScroll = (target: Element | null): boolean => {
+    if (!target) return false;
+    // Don't traverse up past the app root
+    if (target.id === 'root') return false;
+
+    const style = window.getComputedStyle(target);
+    const overflowX = style.getPropertyValue('overflow-x');
+    
+    // Check if element handles horizontal scroll AND has content overflowing
+    if ((overflowX === 'auto' || overflowX === 'scroll') && target.scrollWidth > target.clientWidth) {
+      return true;
+    }
+
+    return isHorizontalScroll(target.parentElement);
+  };
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    touchStart.current = { x: e.touches[0].clientX, y: e.touches[0].clientY, target: e.target };
+  };
+
+  const onTouchEnd = (e: React.TouchEvent) => {
+    if (!touchStart.current) return;
+
+    // 1. Check if we are on a main tab
+    if (!MAIN_TABS.includes(activeTab)) return;
+
+    // 2. Check if user is typing (keyboard open usually focuses input)
+    if (['INPUT', 'TEXTAREA'].includes((document.activeElement as Element)?.tagName)) return;
+
+    const touchEndX = e.changedTouches[0].clientX;
+    const touchEndY = e.changedTouches[0].clientY;
+    
+    const deltaX = touchStart.current.x - touchEndX;
+    const deltaY = touchStart.current.y - touchEndY;
+
+    // 3. Check for horizontal intent (ignore vertical scrolls)
+    if (Math.abs(deltaY) > Math.abs(deltaX)) return;
+
+    // 4. Check for minimum distance
+    if (Math.abs(deltaX) < minSwipeDistance) return;
+
+    // 5. CRITICAL: Check if user touched a carousel or scrollable area
+    if (isHorizontalScroll(touchStart.current.target as Element)) {
+      // User is scrolling a carousel, do not switch tabs
+      return;
+    }
+
+    const currentIndex = MAIN_TABS.indexOf(activeTab);
+    
+    if (deltaX > 0) {
+      // Swiped Left -> Go to Next Tab
+      if (currentIndex < MAIN_TABS.length - 1) {
+        const nextTab = MAIN_TABS[currentIndex + 1];
+        if (nextTab === 'qrcode_scan') {
+            // Special handling for QR Tab
+            handleCashbackClick();
+        } else {
+            setActiveTab(nextTab);
+        }
+      }
+    } else {
+      // Swiped Right -> Go to Prev Tab
+      if (currentIndex > 0) {
+        const prevTab = MAIN_TABS[currentIndex - 1];
+        if (prevTab === 'qrcode_scan') {
+            // Special handling for QR Tab
+            handleCashbackClick();
+        } else {
+            setActiveTab(prevTab);
+        }
+      }
+    }
+  };
+
   const headerExclusionList = [
     'store_area', 'merchant_qr', 'editorial_list', 'store_profile', 'store_finance',
     'category_detail', 'food_category', 'store_detail', 'profile', 
@@ -189,13 +263,15 @@ const App: React.FC = () => {
     'weekly_promo', 'jobs_list', 'merchant_jobs', 'community_feed' 
   ];
 
-  // UX ENGINEER: Ocultamos a barra de navegação no fluxo de anúncios para evitar 
-  // distrações e garantir que o botão de ação fique visível.
   const hideBottomNav = ['store_ads_module', 'profile', 'store_detail'].includes(activeTab);
 
   return (
     <div className={isDarkMode ? 'dark' : ''}>
-      <div className="min-h-screen bg-white dark:bg-gray-900 flex justify-center transition-colors duration-300 relative">
+      <div 
+        className="min-h-screen bg-white dark:bg-gray-900 flex justify-center transition-colors duration-300 relative"
+        onTouchStart={onTouchStart}
+        onTouchEnd={onTouchEnd}
+      >
         
         <Layout 
           activeTab={activeTab} 
@@ -209,7 +285,7 @@ const App: React.FC = () => {
             <Header
               isDarkMode={isDarkMode}
               toggleTheme={toggleTheme}
-              onAuthClick={() => setActiveTab('profile')} // Agora abre o perfil/menu
+              onAuthClick={() => setActiveTab('profile')} 
               user={user}
               searchTerm={globalSearch}
               onSearchChange={setGlobalSearch}
@@ -262,7 +338,6 @@ const App: React.FC = () => {
             {activeTab === 'merchant_jobs' && <MerchantJobsModule onBack={() => setActiveTab('store_area')} />}
             {activeTab === 'jobs_list' && <JobsView onBack={() => setActiveTab('home')} />}
             
-            {/* Community Feed now as a main tab */}
             {activeTab === 'community_feed' && (
                 <CommunityFeedView 
                     onStoreClick={handleSelectStore} 
@@ -310,7 +385,6 @@ const App: React.FC = () => {
             {activeTab === 'scan_confirmation' && scannedData && <ScanConfirmationScreen storeId={scannedData.storeId} onConfirm={() => setActiveTab('cashback_payment')} onCancel={() => setActiveTab('home')} />}
             {activeTab === 'cashback_payment' && scannedData && <CashbackPaymentScreen user={user as any} merchantId={scannedData.merchantId} storeId={scannedData.storeId} onBack={() => setActiveTab('home')} onComplete={() => setActiveTab('home')} />}
             
-            {/* MenuView now receives Theme Props */}
             {activeTab === 'profile' && 
                 <MenuView 
                     user={user as any} 
@@ -336,8 +410,6 @@ const App: React.FC = () => {
         {/* OVERLAY SPLASH - PREMIUM */}
         {!minSplashTimeElapsed && (
           <div className="fixed inset-0 bg-[#1E5BFF] flex flex-col items-center justify-between text-white z-[999] overflow-hidden animate-out fade-out duration-700 fill-mode-forwards pb-10">
-            
-            {/* Main Logo Container */}
             <div className={`flex flex-col items-center justify-center flex-1 transition-transform duration-1000 ${showSponsor ? '-translate-y-8 scale-90' : 'translate-y-0'}`}>
               <div className="animate-float-slow">
                 <div className="w-28 h-28 bg-white rounded-[2.8rem] flex items-center justify-center shadow-[0_25px_60px_rgba(0,0,0,0.3)] mb-8 animate-pop-in">
@@ -354,7 +426,6 @@ const App: React.FC = () => {
               </div>
             </div>
 
-            {/* Master Sponsor Container */}
             <div className={`flex flex-col items-center transition-all duration-1000 ease-out ${showSponsor ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
                 <p className="text-[10px] uppercase tracking-[0.3em] font-medium text-white/60 mb-3">
                     Patrocinador Master
@@ -369,7 +440,6 @@ const App: React.FC = () => {
                 </div>
             </div>
 
-            {/* Progress Bar */}
             <div className="absolute bottom-0 left-0 right-0 h-1.5 bg-white/5">
               <div className="h-full bg-white shadow-[0_0_25px_rgba(255,255,255,1)] transition-all duration-[100ms] ease-linear" style={{ width: `${splashProgress}%` }} />
             </div>
