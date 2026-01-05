@@ -15,10 +15,13 @@ import {
 } from 'lucide-react';
 import { CommunityPost, Store } from '../types';
 import { MOCK_COMMUNITY_POSTS, STORES } from '../constants';
+import { User } from '@supabase/supabase-js';
 
 interface CommunityFeedViewProps {
-  onBack?: () => void; // Tornou-se opcional pois é aba principal agora
+  onBack?: () => void;
   onStoreClick: (store: Store) => void;
+  user: User | null;
+  onRequireLogin: () => void;
 }
 
 const CreatePostModal: React.FC<{ onClose: () => void; onSubmit: (data: any) => void }> = ({ onClose, onSubmit }) => {
@@ -117,16 +120,27 @@ const CreatePostModal: React.FC<{ onClose: () => void; onSubmit: (data: any) => 
   );
 };
 
-export const CommunityFeedView: React.FC<CommunityFeedViewProps> = ({ onBack, onStoreClick }) => {
+export const CommunityFeedView: React.FC<CommunityFeedViewProps> = ({ onBack, onStoreClick, user, onRequireLogin }) => {
   const [posts, setPosts] = useState<CommunityPost[]>(MOCK_COMMUNITY_POSTS);
   const [showCreateModal, setShowCreateModal] = useState(false);
 
+  // Helper para verificar autenticação antes de ação
+  const handleAuthRequired = (action: () => void) => {
+    if (!user) {
+      onRequireLogin();
+    } else {
+      action();
+    }
+  };
+
   const handleCreatePost = (data: any) => {
+    if (!user) return; // Segurança extra
+
     const newPost: CommunityPost = {
       id: `new-${Date.now()}`,
-      userId: 'me',
-      userName: 'Você',
-      userAvatar: 'https://ui-avatars.com/api/?name=Eu&background=0D8ABC&color=fff',
+      userId: user.id,
+      userName: user.user_metadata?.full_name || 'Usuário',
+      userAvatar: user.user_metadata?.avatar_url || 'https://ui-avatars.com/api/?name=User&background=random',
       content: data.content,
       type: data.type,
       relatedStoreId: data.relatedStoreId,
@@ -181,7 +195,7 @@ export const CommunityFeedView: React.FC<CommunityFeedViewProps> = ({ onBack, on
           </div>
         </div>
         <button 
-          onClick={() => setShowCreateModal(true)}
+          onClick={() => handleAuthRequired(() => setShowCreateModal(true))}
           className="bg-[#1E5BFF] text-white p-2 rounded-full shadow-lg shadow-blue-500/20 active:scale-90 transition-transform"
         >
           <Send className="w-5 h-5" />
@@ -249,13 +263,16 @@ export const CommunityFeedView: React.FC<CommunityFeedViewProps> = ({ onBack, on
             <div className="flex items-center justify-between pt-3 border-t border-gray-100 dark:border-gray-700">
               <div className="flex gap-4">
                 <button 
-                  onClick={() => handleLike(post.id)}
+                  onClick={() => handleAuthRequired(() => handleLike(post.id))}
                   className={`flex items-center gap-1.5 text-xs font-bold transition-colors ${post.isLiked ? 'text-red-500' : 'text-gray-400 hover:text-red-500'}`}
                 >
                   <Heart className={`w-4 h-4 ${post.isLiked ? 'fill-current' : ''}`} />
                   {post.likes}
                 </button>
-                <button className="flex items-center gap-1.5 text-xs font-bold text-gray-400 hover:text-[#1E5BFF] transition-colors">
+                <button 
+                  onClick={() => handleAuthRequired(() => {})}
+                  className="flex items-center gap-1.5 text-xs font-bold text-gray-400 hover:text-[#1E5BFF] transition-colors"
+                >
                   <MessageSquare className="w-4 h-4" />
                   {post.comments}
                 </button>

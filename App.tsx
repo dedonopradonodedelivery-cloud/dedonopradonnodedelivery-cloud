@@ -243,7 +243,8 @@ const App: React.FC = () => {
             {activeTab === 'community_feed' && (
                 <CommunityFeedView 
                     onStoreClick={handleSelectStore} 
-                    // No onBack needed for main tab navigation
+                    user={user as any}
+                    onRequireLogin={() => setIsAuthOpen(true)}
                 />
             )}
 

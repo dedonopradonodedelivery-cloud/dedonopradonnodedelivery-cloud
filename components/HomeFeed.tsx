@@ -24,7 +24,8 @@ import {
   Zap,
   ThumbsUp,
   AlertTriangle,
-  Lightbulb
+  Lightbulb,
+  MessageSquare
 } from 'lucide-react';
 import { LojasEServicosList } from './LojasEServicosList';
 import { User } from '@supabase/supabase-js';
@@ -91,6 +92,17 @@ const WEEKLY_PROMOS = [
     storeId: 'mock-4'
   }
 ];
+
+const getCategoryCover = (category: string) => {
+  switch (category) {
+    case 'Alimentação': return 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=400&auto=format&fit=crop';
+    case 'Pets': return 'https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?q=80&w=400&auto=format&fit=crop';
+    case 'Beleza': return 'https://images.unsplash.com/photo-1560066984-138dadb4c035?q=80&w=400&auto=format&fit=crop';
+    case 'Saúde': return 'https://images.unsplash.com/photo-1505751172876-fa1923c5c528?q=80&w=400&auto=format&fit=crop';
+    case 'Mercado': return 'https://images.unsplash.com/photo-1542838132-92c53300491e?q=80&w=400&auto=format&fit=crop';
+    default: return 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=400&auto=format&fit=crop';
+  }
+};
 
 // --- LOGICA DO CARROSSEL ---
 
@@ -383,122 +395,126 @@ const CommunityTrustCarousel: React.FC<{ stores: Store[], onStoreClick: (store: 
         </p>
       </div>
 
-      <div className="flex gap-4 overflow-x-auto no-scrollbar px-5 pb-6 snap-x">
-        {trustedStores.map((store) => (
-          <button
-            key={store.id}
-            onClick={() => onStoreClick(store)}
-            className="snap-center min-w-[260px] max-w-[260px] bg-white dark:bg-gray-800 rounded-[20px] p-4 shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col gap-3 group active:scale-[0.98] transition-all"
-          >
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-gray-100 dark:bg-gray-700 overflow-hidden border border-gray-100 dark:border-gray-600">
-                <img src={store.logoUrl || "/assets/default-logo.png"} alt={store.name} className="w-full h-full object-contain p-1" />
-              </div>
-              <div className="text-left flex-1 min-w-0">
-                <h4 className="font-bold text-gray-900 dark:text-white text-sm truncate">{store.name}</h4>
-                <div className="flex items-center gap-2 text-[10px] text-gray-500 dark:text-gray-400">
-                  <span className="flex items-center gap-0.5">
-                    <Repeat className="w-3 h-3 text-green-500" />
-                    Clientes voltam
-                  </span>
-                  {store.cashback && (
-                    <span className="flex items-center gap-0.5 text-blue-500 font-bold">
-                      • {store.cashback}% volta
+      <div className="flex gap-3 overflow-x-auto no-scrollbar px-5 pb-6 snap-x">
+        {trustedStores.map((store) => {
+            const comment = store.recentComments ? store.recentComments[0] : '';
+            // Clean comment for short display
+            const shortComment = comment.length > 40 ? comment.substring(0, 40) + '...' : comment;
+
+            return (
+              <button
+                key={store.id}
+                onClick={() => onStoreClick(store)}
+                className="snap-center min-w-[160px] max-w-[160px] flex flex-col bg-white dark:bg-gray-800 rounded-[20px] shadow-[0_2px_8px_rgba(0,0,0,0.06)] dark:shadow-none border border-gray-100 dark:border-gray-700 overflow-hidden group active:scale-[0.98] transition-all"
+              >
+                <div className="relative h-[110px] w-full overflow-hidden">
+                  <img
+                    src={store.image || getCategoryCover(store.category)}
+                    alt={store.name}
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent opacity-90"></div>
+
+                  <div className="absolute top-2 right-2 bg-black/40 backdrop-blur-md px-2 py-0.5 rounded-md border border-white/10">
+                    <span className="text-[8px] font-bold text-white uppercase tracking-wider flex items-center gap-1">
+                      <Repeat className="w-2.5 h-2.5 text-green-400" />
+                      Clientes Voltam
                     </span>
+                  </div>
+                </div>
+
+                <div className="p-3 flex flex-col flex-1 justify-between text-left h-full">
+                  <div>
+                    <h4 className="font-bold text-gray-900 dark:text-white text-xs leading-tight line-clamp-2 mb-1">
+                      {store.name}
+                    </h4>
+                    <p className="text-[10px] text-gray-500 dark:text-gray-400 font-medium truncate">
+                      {store.category}
+                    </p>
+                  </div>
+
+                  {comment && (
+                    <div className="mt-2 pt-2 border-t border-gray-100 dark:border-gray-700 flex items-center">
+                        <Quote className="w-3 h-3 text-gray-300 mr-1 shrink-0" />
+                        <p className="text-[9px] font-medium text-gray-400 dark:text-gray-500 leading-tight line-clamp-1 italic">
+                            "{shortComment}"
+                        </p>
+                    </div>
                   )}
                 </div>
-              </div>
-            </div>
-
-            {store.recentComments && store.recentComments[0] && (
-              <div className="bg-gray-50 dark:bg-gray-900/50 p-3 rounded-xl border border-gray-100 dark:border-gray-700 relative">
-                <Quote className="w-3 h-3 text-gray-400 absolute top-2 left-2" />
-                <p className="text-xs text-gray-600 dark:text-gray-300 italic pl-4 leading-relaxed line-clamp-2">
-                  "{store.recentComments[0]}"
-                </p>
-              </div>
-            )}
-          </button>
-        ))}
+              </button>
+            );
+        })}
       </div>
     </div>
   );
 };
 
-// --- COMPONENTE FEED DE COMUNIDADE (Substituto do Recomendados) ---
+// --- COMPONENTE FEED DE COMUNIDADE (Teaser/Preview) ---
 const CommunityFeedBlock: React.FC<{ 
   onNavigate: (view: string) => void;
-  onStoreClick?: (store: Store) => void;
-}> = ({ onNavigate, onStoreClick }) => {
-  if (MOCK_COMMUNITY_POSTS.length === 0) return null;
+}> = ({ onNavigate }) => {
+  // Regra: Máximo 2 posts, Priorizar recentes
+  const previewPosts = MOCK_COMMUNITY_POSTS.slice(0, 2);
 
-  const getTypeIcon = (type: string) => {
-    switch (type) {
-      case 'alert': return <AlertTriangle className="w-3 h-3 text-red-500" />;
-      case 'tip': return <Lightbulb className="w-3 h-3 text-yellow-500" />;
-      default: return <ThumbsUp className="w-3 h-3 text-blue-500" />;
-    }
-  };
+  // Regra: Se não houver posts, o bloco não aparece
+  if (previewPosts.length === 0) return null;
 
   return (
-    <div className="w-full bg-gray-50/80 dark:bg-slate-900/30 py-10 border-y border-gray-100 dark:border-gray-800">
+    <div className="w-full bg-white dark:bg-gray-950 py-6 border-b border-gray-100 dark:border-gray-800">
       <div className="px-5">
         <SectionHeader 
-          title="Comunidade" 
-          subtitle="Recomendado pelos vizinhos"
+          title="O que os vizinhos estão falando" 
           rightElement={
-            <button onClick={() => onNavigate('community_feed')} className="text-xs font-bold text-[#1E5BFF]">
-              Ver tudo
+            <button onClick={() => onNavigate('community_feed')} className="text-xs font-bold text-[#1E5BFF] hover:underline">
+              Ver tudo no Feed
             </button>
           }
         />
         
-        <div className="flex gap-3 overflow-x-auto no-scrollbar snap-x -mx-5 px-5 pb-2">
-          {MOCK_COMMUNITY_POSTS.slice(0, 5).map((post) => (
+        {/* Layout simplificado vertical para Preview */}
+        <div className="flex flex-col gap-3">
+          {previewPosts.map((post) => (
             <div 
               key={post.id} 
-              className="bg-white dark:bg-gray-800 rounded-[24px] p-4 shadow-sm border border-gray-100 dark:border-gray-700 min-w-[260px] max-w-[260px] snap-center flex flex-col justify-between active:scale-[0.98] transition-transform cursor-pointer"
+              className="bg-gray-50 dark:bg-gray-800/50 rounded-2xl p-4 border border-gray-100 dark:border-gray-700 flex flex-col gap-2 active:scale-[0.99] transition-transform cursor-pointer"
               onClick={() => onNavigate('community_feed')}
             >
-              <div>
-                <div className="flex items-center gap-3 mb-3">
-                  <img src={post.userAvatar} alt={post.userName} className="w-8 h-8 rounded-full bg-gray-200" />
-                  <div>
-                    <p className="text-xs font-bold text-gray-900 dark:text-white">{post.userName}</p>
-                    <div className="flex items-center gap-1.5">
-                      {getTypeIcon(post.type)}
-                      <span className="text-[10px] text-gray-500 dark:text-gray-400 capitalize">{post.type === 'recommendation' ? 'Recomendou' : post.type === 'tip' ? 'Dica' : 'Alerta'}</span>
-                    </div>
+              <div className="flex items-center gap-3">
+                <img src={post.userAvatar} alt={post.userName} className="w-8 h-8 rounded-full bg-gray-200 object-cover" />
+                <div className="flex-1 min-w-0">
+                  <div className="flex justify-between items-start">
+                    <p className="text-xs font-bold text-gray-900 dark:text-white truncate">{post.userName}</p>
+                    <span className="text-[10px] text-gray-400 whitespace-nowrap">{post.timestamp}</span>
                   </div>
-                </div>
-
-                <p className="text-sm text-gray-600 dark:text-gray-300 italic leading-relaxed line-clamp-2 mb-3">
-                  "{post.content}"
-                </p>
-                
-                {post.relatedStoreName && (
-                  <div 
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      const store = STORES.find(s => s.id === post.relatedStoreId);
-                      if (store && onStoreClick) onStoreClick(store);
-                    }}
-                    className="flex items-center gap-2 bg-gray-50 dark:bg-gray-900/50 p-2 rounded-xl border border-gray-100 dark:border-gray-700 hover:bg-blue-50 dark:hover:bg-blue-900/10 transition-colors"
-                  >
-                    <div className="w-6 h-6 bg-white dark:bg-gray-800 rounded-lg flex items-center justify-center shadow-sm">
+                  {post.relatedStoreName && (
+                    <div className="flex items-center gap-1 text-[10px] text-gray-500 dark:text-gray-400 mt-0.5">
                       <StoreIcon className="w-3 h-3 text-[#1E5BFF]" />
+                      <span className="truncate">Sobre: {post.relatedStoreName}</span>
                     </div>
-                    <span className="text-xs font-bold text-gray-800 dark:text-white truncate">{post.relatedStoreName}</span>
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
 
-              <div className="pt-3 mt-3 border-t border-gray-50 dark:border-gray-700 flex items-center justify-between">
-                <div className="flex items-center gap-1 bg-blue-50 dark:bg-blue-900/20 px-2 py-0.5 rounded-full border border-blue-100 dark:border-blue-800">
-                  <span className="text-[9px] font-bold text-[#1E5BFF]">Vizinho Recomendou</span>
+              <p className="text-sm text-gray-600 dark:text-gray-300 italic leading-relaxed line-clamp-2 pl-11">
+                "{post.content}"
+              </p>
+              
+              {/* Footer discreto apenas com contagem se houver likes/comments */}
+              {(post.likes > 0 || post.comments > 0) && (
+                <div className="flex items-center gap-3 pl-11 mt-1">
+                    {post.likes > 0 && (
+                        <div className="flex items-center gap-1 text-[10px] text-gray-400">
+                            <ThumbsUp className="w-3 h-3" /> {post.likes}
+                        </div>
+                    )}
+                    {post.comments > 0 && (
+                        <div className="flex items-center gap-1 text-[10px] text-gray-400">
+                            <MessageSquare className="w-3 h-3" /> {post.comments}
+                        </div>
+                    )}
                 </div>
-                <span className="text-[10px] text-gray-400">{post.timestamp}</span>
-              </div>
+              )}
             </div>
           ))}
         </div>
@@ -521,17 +537,6 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
   const [isSpinWheelOpen, setIsSpinWheelOpen] = useState(false);
   const [listFilter, setListFilter] = useState<'all' | 'cashback' | 'top_rated' | 'open_now'>('all');
   const activeSearchTerm = externalSearchTerm || '';
-
-  const getCategoryCover = (category: string) => {
-    switch (category) {
-      case 'Alimentação': return 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=400&auto=format&fit=crop';
-      case 'Pets': return 'https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?q=80&w=400&auto=format&fit=crop';
-      case 'Beleza': return 'https://images.unsplash.com/photo-1560066984-138dadb4c035?q=80&w=400&auto=format&fit=crop';
-      case 'Saúde': return 'https://images.unsplash.com/photo-1505751172876-fa1923c5c528?q=80&w=400&auto=format&fit=crop';
-      case 'Mercado': return 'https://images.unsplash.com/photo-1542838132-92c53300491e?q=80&w=400&auto=format&fit=crop';
-      default: return 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=400&auto=format&fit=crop';
-    }
-  };
 
   const renderSection = (key: string) => {
     switch (key) {
@@ -568,8 +573,9 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
         return <WeeklyPromosSection key="weekly_promos" onNavigate={onNavigate} />;
 
       case 'community_feed':
+        // Renomeado para Preview
         return (
-          <CommunityFeedBlock key="community_feed" onNavigate={onNavigate} onStoreClick={onStoreClick} />
+          <CommunityFeedBlock key="community_feed" onNavigate={onNavigate} />
         );
 
       case 'roulette':
@@ -715,8 +721,8 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
       'home_carousel',
       'weekly_promos',
       'cashback_stores',
+      'community_feed', // Posicionado APÓS cashback_stores e ANTES de trust_feed
       'trust_feed', 
-      'community_feed', // NEW: Feed da Comunidade
       'roulette',
       'list',
       'mini_tribes'
