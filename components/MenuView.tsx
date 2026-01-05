@@ -12,10 +12,9 @@ import {
   Store, 
   Users,
   Loader2,
-  BadgeCheck,
-  Zap,
   LayoutDashboard,
-  MessageCircle
+  MessageCircle,
+  X
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { MasterSponsorBanner } from './MasterSponsorBanner';
@@ -26,6 +25,7 @@ interface MenuViewProps {
   userRole: 'cliente' | 'lojista' | null;
   onAuthClick: () => void;
   onNavigate: (view: string) => void;
+  onBack?: () => void; // Nova prop para fechar o menu se acessado via header
 }
 
 interface MenuItemProps {
@@ -60,7 +60,7 @@ const SectionTitle: React.FC<{ title: string }> = ({ title }) => (
   </h3>
 );
 
-export const MenuView: React.FC<MenuViewProps> = ({ user, userRole, onAuthClick, onNavigate }) => {
+export const MenuView: React.FC<MenuViewProps> = ({ user, userRole, onAuthClick, onNavigate, onBack }) => {
   const { signOut } = useAuth();
   const isMerchant = userRole === 'lojista';
   const [isLoggingOut, setIsLoggingOut] = useState(false);
@@ -88,9 +88,13 @@ export const MenuView: React.FC<MenuViewProps> = ({ user, userRole, onAuthClick,
   if (!user) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 font-sans animate-in slide-in-from-right duration-300 flex flex-col">
-        {/* Padronizado para px-4 como na Home */}
-        <div className="bg-white dark:bg-gray-900 px-4 pt-10 pb-4 border-b border-gray-100 dark:border-gray-800 sticky top-0 z-50">
+        <div className="bg-white dark:bg-gray-900 px-4 pt-10 pb-4 border-b border-gray-100 dark:border-gray-800 sticky top-0 z-50 flex justify-between items-center">
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white font-display">Perfil</h2>
+          {onBack && (
+            <button onClick={onBack} className="p-2 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-500">
+                <X className="w-5 h-5" />
+            </button>
+          )}
         </div>
         <div className="flex-1 flex flex-col items-center justify-center px-4 pb-28 text-center">
           <div className="w-24 h-24 bg-white dark:bg-gray-800 rounded-[2rem] flex items-center justify-center mb-6 shadow-sm border border-gray-100 dark:border-gray-700 transform -rotate-6">
@@ -118,10 +122,17 @@ export const MenuView: React.FC<MenuViewProps> = ({ user, userRole, onAuthClick,
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-24 animate-in fade-in duration-300">
-      {/* Padronizado para px-4 */}
-      <div className="bg-white dark:bg-gray-900 px-4 pt-10 pb-4 border-b border-gray-100 dark:border-gray-800 sticky top-0 z-50">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white font-display mb-0.5">Menu</h2>
-        <p className="text-sm text-gray-500 dark:text-gray-400">Configurações e Atalhos</p>
+      {/* Header */}
+      <div className="bg-white dark:bg-gray-900 px-4 pt-10 pb-4 border-b border-gray-100 dark:border-gray-800 sticky top-0 z-50 flex items-center justify-between">
+        <div>
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white font-display mb-0.5">Menu</h2>
+            <p className="text-sm text-gray-500 dark:text-gray-400">Configurações e Atalhos</p>
+        </div>
+        {onBack && (
+            <button onClick={onBack} className="p-2 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-500 hover:text-gray-700 dark:hover:text-white transition-colors">
+                <X className="w-6 h-6" />
+            </button>
+        )}
       </div>
 
       <div className="px-4 pb-5">
@@ -202,13 +213,14 @@ export const MenuView: React.FC<MenuViewProps> = ({ user, userRole, onAuthClick,
         />
 
         <SectionTitle title="Comunidade & Suporte" />
-        <MenuItem 
+        {/* Community moved to bottom nav, removed from here to reduce redundancy, or can keep as shortcut? */}
+        {/* <MenuItem 
             icon={MessageCircle} 
             label="Feed da Comunidade" 
             onClick={() => onNavigate('community_feed')} 
             colorClass="bg-yellow-500" 
             subLabel="Veja o que os vizinhos recomendam"
-        />
+        /> */}
         {isMerchant && (
              <MenuItem 
                 icon={Users} 

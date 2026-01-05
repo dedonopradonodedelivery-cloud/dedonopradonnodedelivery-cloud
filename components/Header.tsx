@@ -1,8 +1,6 @@
 
-import React, { useState, useEffect, useRef } from 'react';
-import { Search, Sun, Moon, QrCode } from 'lucide-react';
-import { Category } from '../types';
-import { CATEGORIES } from '../constants';
+import React from 'react';
+import { Search, Sun, Moon, QrCode, User as UserIcon } from 'lucide-react';
 
 interface HeaderProps {
   isDarkMode: boolean;
@@ -21,9 +19,10 @@ interface HeaderProps {
 export const Header: React.FC<HeaderProps> = ({
   isDarkMode,
   toggleTheme,
+  onAuthClick, // Agora usado para abrir o Menu/Perfil
+  user,
   searchTerm,
   onSearchChange,
-  activeTab,
   userRole,
   onOpenMerchantQr,
   customPlaceholder,
@@ -38,9 +37,11 @@ export const Header: React.FC<HeaderProps> = ({
     >
       <div className="max-w-md mx-auto flex flex-col">
         
-        {/* Top Row: Search + Theme + (Merchant QR) */}
-        {/* Padronizado para px-4 */}
+        {/* Top Row: Search + Theme + Profile/Menu */}
         <div className={`flex items-center gap-3 px-4 py-3 transition-all duration-300 ease-in-out`}>
+          
+          {/* Avatar / Menu Button (Left or Right? Right matches typical profile placement) */}
+          
           <div className="relative flex-1 group">
             <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
               <Search className="h-4 w-4 text-white/70 group-focus-within:text-white transition-colors" />
@@ -54,11 +55,26 @@ export const Header: React.FC<HeaderProps> = ({
             />
           </div>
 
+          {/* Theme Toggle */}
           <button 
             onClick={toggleTheme}
             className={`w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white hover:bg-white/20 transition-all active:scale-95 border border-white/10`}
           >
             {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+          </button>
+
+          {/* Profile / Menu Button (Replaces Tab) */}
+          <button 
+            onClick={onAuthClick}
+            className={`w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white hover:bg-white/20 transition-all active:scale-95 border border-white/10 overflow-hidden relative`}
+          >
+             {user?.user_metadata?.avatar_url ? (
+               <img src={user.user_metadata.avatar_url} alt="Perfil" className="w-full h-full object-cover" />
+             ) : (
+               <UserIcon className="w-5 h-5" />
+             )}
+             {/* Indicador de notificação (opcional) */}
+             {!user && <div className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border border-[#1E5BFF]"></div>}
           </button>
 
           {/* Exibe QR Code no header APENAS para lojistas (atalho rápido) */}

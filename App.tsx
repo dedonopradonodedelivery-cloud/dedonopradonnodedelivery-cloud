@@ -127,12 +127,12 @@ const App: React.FC = () => {
     'service_subcategories', 'service_specialties', 'service_terms', 'service_success',
     'user_statement', 'merchant_cashback_dashboard', 'merchant_cashback_onboarding',
     'store_cashback_module', 'store_ads_module', 'about', 'support', 'invite_friend', 'favorites',
-    'weekly_promo', 'jobs_list', 'merchant_jobs', 'community_feed'
+    'weekly_promo', 'jobs_list', 'merchant_jobs', 'community_feed' // Added community_feed to exclude default header
   ];
 
   // UX ENGINEER: Ocultamos a barra de navegação no fluxo de anúncios para evitar 
   // distrações e garantir que o botão de ação fique visível.
-  const hideBottomNav = ['store_ads_module'].includes(activeTab);
+  const hideBottomNav = ['store_ads_module', 'profile', 'store_detail'].includes(activeTab);
 
   return (
     <div className={isDarkMode ? 'dark' : ''}>
@@ -145,11 +145,12 @@ const App: React.FC = () => {
           onCashbackClick={handleCashbackClick}
           hideNav={hideBottomNav}
         >
+          {/* Header is shown for main tabs except when excluded */}
           {!headerExclusionList.includes(activeTab) && (
             <Header
               isDarkMode={isDarkMode}
               toggleTheme={toggleTheme}
-              onAuthClick={() => setActiveTab('profile')}
+              onAuthClick={() => setActiveTab('profile')} // Agora abre o perfil/menu
               user={user}
               searchTerm={globalSearch}
               onSearchChange={setGlobalSearch}
@@ -201,7 +202,15 @@ const App: React.FC = () => {
             {activeTab === 'weekly_promo' && <WeeklyPromoModule onBack={() => setActiveTab('store_area')} />}
             {activeTab === 'merchant_jobs' && <MerchantJobsModule onBack={() => setActiveTab('store_area')} />}
             {activeTab === 'jobs_list' && <JobsView onBack={() => setActiveTab('home')} />}
-            {activeTab === 'community_feed' && <CommunityFeedView onBack={() => setActiveTab('home')} onStoreClick={handleSelectStore} />}
+            
+            {/* Community Feed now as a main tab */}
+            {activeTab === 'community_feed' && (
+                <CommunityFeedView 
+                    onStoreClick={handleSelectStore} 
+                    // No onBack needed for main tab navigation
+                />
+            )}
+
             {activeTab === 'about' && <AboutView onBack={() => setActiveTab('profile')} />}
             {activeTab === 'support' && <SupportView onBack={() => setActiveTab('profile')} />}
             {activeTab === 'invite_friend' && <InviteFriendView onBack={() => setActiveTab('profile')} />}
@@ -240,7 +249,7 @@ const App: React.FC = () => {
             {activeTab === 'qrcode_scan' && <CashbackScanScreen onBack={() => setActiveTab('home')} onScanSuccess={(data) => { setScannedData(data); setActiveTab('scan_confirmation'); }} />}
             {activeTab === 'scan_confirmation' && scannedData && <ScanConfirmationScreen storeId={scannedData.storeId} onConfirm={() => setActiveTab('cashback_payment')} onCancel={() => setActiveTab('home')} />}
             {activeTab === 'cashback_payment' && scannedData && <CashbackPaymentScreen user={user as any} merchantId={scannedData.merchantId} storeId={scannedData.storeId} onBack={() => setActiveTab('home')} onComplete={() => setActiveTab('home')} />}
-            {activeTab === 'profile' && <MenuView user={user as any} userRole={userRole} onAuthClick={() => setIsAuthOpen(true)} onNavigate={setActiveTab} />}
+            {activeTab === 'profile' && <MenuView user={user as any} userRole={userRole} onAuthClick={() => setIsAuthOpen(true)} onNavigate={setActiveTab} onBack={() => setActiveTab('home')} />}
             {activeTab === 'patrocinador_master' && <PatrocinadorMasterScreen onBack={() => setActiveTab('home')} />}
             {activeTab === 'store_detail' && selectedStore && <StoreDetailView store={selectedStore} onBack={() => setActiveTab('home')} />}
             {activeTab === 'reward_details' && <RewardDetailsView reward={selectedReward} onBack={() => setActiveTab('home')} onHome={() => setActiveTab('home')} />}

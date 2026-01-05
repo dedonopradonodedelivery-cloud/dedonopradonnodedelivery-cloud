@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Home, Search, QrCode, User, Wrench } from 'lucide-react';
+import { Home, Search, QrCode, Wrench, Users } from 'lucide-react';
 
 interface BottomNavProps {
   activeTab: string;
@@ -19,7 +19,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
     { id: 'explore', icon: Search, label: 'Explorar' },
     { id: 'qrcode_scan', icon: QrCode, label: qrLabel, isCenter: true },
     { id: 'services', icon: Wrench, label: 'Serviços' },
-    { id: 'profile', icon: User, label: 'Perfil' },
+    { id: 'community_feed', icon: Users, label: 'Comunidade' }, // Nova aba fixa
   ];
 
   return (
@@ -27,7 +27,10 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
       <div className="flex items-end justify-between w-full px-2 h-full pb-2">
         {navItems.map((tab) => {
           // Lógica de ativação: Serviços engloba sub-rotas de serviço
-          const isActive = activeTab === tab.id || (tab.id === 'services' && activeTab.startsWith('service_'));
+          const isActive = activeTab === tab.id || 
+                           (tab.id === 'services' && activeTab.startsWith('service_')) ||
+                           (tab.id === 'community_feed' && activeTab === 'community_feed');
+                           
           const Icon = tab.icon;
 
           if (tab.isCenter) {
