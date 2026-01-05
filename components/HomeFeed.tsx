@@ -617,30 +617,45 @@ const WheelBanner: React.FC<{ onClick: () => void }> = ({ onClick }) => {
   const [rotation, setRotation] = useState(0);
 
   useEffect(() => {
-    // Trigger animation after mount: Spin 5 full rotations (1800deg) + random landing
-    const timer = setTimeout(() => {
-        setRotation(1800 + Math.floor(Math.random() * 360));
-    }, 100);
-    return () => clearTimeout(timer);
+    // Trigger animation loop
+    const spin = () => {
+        setRotation(prev => prev + 1800); // +5 voltas completas
+    };
+
+    // Primeira execução rapida
+    const initialTimer = setTimeout(spin, 100);
+    
+    // Loop infinito a cada 5s
+    const interval = setInterval(spin, 5000);
+
+    return () => {
+        clearTimeout(initialTimer);
+        clearInterval(interval);
+    };
   }, []);
 
   return (
     <div className="px-5">
       <button 
         onClick={onClick}
-        className="w-full bg-gradient-to-r from-slate-900 to-slate-800 rounded-[24px] p-1 pr-4 shadow-xl border border-white/10 relative overflow-hidden group active:scale-[0.98] transition-all flex items-center justify-between"
+        className="w-full bg-gradient-to-r from-[#6366F1] via-[#8B5CF6] to-[#EC4899] rounded-[24px] p-1 shadow-2xl relative overflow-hidden group active:scale-[0.98] transition-all flex items-center justify-between"
       >
-        <div className="flex items-center gap-4">
-            {/* Wheel Container */}
-            <div className="relative w-20 h-20 bg-slate-800 rounded-2xl flex items-center justify-center shrink-0 ml-1">
+        {/* Background Shapes for vibrancy */}
+        <div className="absolute top-0 left-0 w-full h-full bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+        <div className="absolute -top-10 -right-10 w-32 h-32 bg-yellow-300/30 rounded-full blur-3xl pointer-events-none"></div>
+        <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-blue-500/30 rounded-full blur-3xl pointer-events-none"></div>
+
+        <div className="flex items-center gap-5 w-full p-4">
+            {/* Wheel Container - Floating Free */}
+            <div className="relative w-20 h-20 flex items-center justify-center shrink-0">
                 {/* Marker */}
-                <div className="absolute -top-1 left-1/2 -translate-x-1/2 z-20 w-3 h-3 text-white drop-shadow-md">
+                <div className="absolute -top-1.5 left-1/2 -translate-x-1/2 z-20 text-white drop-shadow-md">
                     ▼
                 </div>
                 
-                {/* The Wheel */}
+                {/* The Wheel - No Borders */}
                 <div 
-                    className="w-16 h-16 rounded-full border-2 border-white/20 shadow-inner relative z-10"
+                    className="w-20 h-20 rounded-full shadow-[0_8px_16px_rgba(0,0,0,0.3)] relative z-10"
                     style={{
                         background: `conic-gradient(
                             #FF3B30 0% 12.5%,
@@ -653,28 +668,22 @@ const WheelBanner: React.FC<{ onClick: () => void }> = ({ onClick }) => {
                             #FF2D55 87.5% 100%
                         )`,
                         transform: `rotate(${rotation}deg)`,
-                        transition: 'transform 4s cubic-bezier(0.1, 0.7, 0.1, 1)'
+                        transition: 'transform 4.5s cubic-bezier(0.2, 0.8, 0.2, 1)'
                     }}
                 >
-                    {/* Inner Hub */}
-                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-4 h-4 bg-white rounded-full shadow-sm flex items-center justify-center">
-                        <div className="w-1.5 h-1.5 bg-slate-300 rounded-full"></div>
-                    </div>
+                    {/* Center Hub */}
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-2.5 h-2.5 bg-white rounded-full shadow-sm"></div>
                 </div>
             </div>
 
-            <div className="text-left py-4">
-                <h3 className="text-base font-black text-white leading-tight mb-1 font-display">
-                    Roleta da <br/> <span className="text-[#1E5BFF]">Localizei JPA</span>
+            <div className="text-left flex-1">
+                <h3 className="text-lg font-black text-white leading-tight mb-1 font-display drop-shadow-sm">
+                    Roleta da <br/> Localizei JPA
                 </h3>
-                <p className="text-[10px] text-gray-400 font-medium">
+                <p className="text-[11px] text-white/90 font-bold uppercase tracking-wider bg-white/20 px-2 py-0.5 rounded-md w-fit backdrop-blur-sm">
                     Gire e ganhe vantagens
                 </p>
             </div>
-        </div>
-
-        <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center group-hover:bg-white/20 transition-colors">
-            <ChevronRight className="w-5 h-5 text-white" />
         </div>
       </button>
     </div>
