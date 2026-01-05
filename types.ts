@@ -56,13 +56,14 @@ export interface Store {
   recentComments?: string[];
 }
 
-export type CommunityPostType = 'tip' | 'recommendation' | 'alert';
+export type CommunityPostType = 'tip' | 'recommendation' | 'alert' | 'news' | 'promo';
 
 export interface CommunityPost {
   id: string;
   userId: string;
   userName: string;
   userAvatar: string;
+  authorRole: 'resident' | 'merchant'; // Novo campo para distinguir origem
   content: string;
   imageUrl?: string;
   relatedStoreId?: string; // ID da loja se houver

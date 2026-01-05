@@ -464,7 +464,7 @@ const CommunityFeedBlock: React.FC<{
     <div className="w-full bg-white dark:bg-gray-950 py-6 border-b border-gray-100 dark:border-gray-800">
       <div className="px-5">
         <SectionHeader 
-          title="O que os vizinhos estão falando" 
+          title="Agora no bairro" 
           rightElement={
             <button onClick={() => onNavigate('community_feed')} className="text-xs font-bold text-[#1E5BFF] hover:underline">
               Ver tudo no Feed
@@ -472,7 +472,7 @@ const CommunityFeedBlock: React.FC<{
           }
         />
         
-        {/* Layout simplificado vertical para Preview */}
+        {/* Layout simplificado vertical para Preview - Foco em Texto */}
         <div className="flex flex-col gap-3">
           {previewPosts.map((post) => (
             <div 
@@ -496,6 +496,7 @@ const CommunityFeedBlock: React.FC<{
                 </div>
               </div>
 
+              {/* Texto principal - sem imagem grande no preview para diferenciar do bloco de Confiança */}
               <p className="text-sm text-gray-600 dark:text-gray-300 italic leading-relaxed line-clamp-2 pl-11">
                 "{post.content}"
               </p>
@@ -573,7 +574,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
         return <WeeklyPromosSection key="weekly_promos" onNavigate={onNavigate} />;
 
       case 'community_feed':
-        // Renomeado para Preview
+        // Agora "Agora no bairro"
         return (
           <CommunityFeedBlock key="community_feed" onNavigate={onNavigate} />
         );
@@ -582,6 +583,11 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
         return (
           <div key="roulette" className="w-full bg-white dark:bg-gray-950 py-8">
             <div className="px-5">
+              <div className="flex items-center gap-2 mb-2">
+                 <span className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">
+                    🎁 Interaja e ganhe vantagens
+                 </span>
+              </div>
               <button onClick={() => setIsSpinWheelOpen(true)} className="w-full bg-slate-950 rounded-[32px] p-8 text-white flex items-center justify-between shadow-2xl active:scale-[0.98] transition-all border border-white/5 overflow-hidden group">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 rounded-full blur-3xl pointer-events-none group-hover:bg-amber-500/20 transition-all"></div>
                 <div className="flex items-center gap-5 relative z-10">
@@ -604,7 +610,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
           <div key="cashback_stores" className="w-full bg-white dark:bg-gray-950 py-6">
             <div className="px-5 mb-4">
               <h2 className="text-lg font-black text-gray-900 dark:text-white tracking-tight leading-none">
-                Dinheiro de volta para você
+                Cashback no seu bairro
               </h2>
               <p className="text-xs text-gray-500 dark:text-gray-400 font-medium mt-1.5">
                 Veja onde você recebe cashback no bairro
@@ -721,10 +727,10 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
       'home_carousel',
       'weekly_promos',
       'cashback_stores',
-      'community_feed', // Posicionado APÓS cashback_stores e ANTES de trust_feed
-      'trust_feed', 
-      'roulette',
-      'list',
+      'community_feed', // Agora "Agora no bairro" (texto)
+      'trust_feed',     // Confiança no Bairro (cards verticais)
+      'roulette',       // Sorte do Dia
+      'list',           // Explorar (imediatamente após Sorte do Dia)
       'mini_tribes'
     ];
   }, []);
