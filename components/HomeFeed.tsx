@@ -14,7 +14,9 @@ import {
   TrendingUp,
   Store as StoreIcon,
   X,
-  Sparkles
+  Sparkles,
+  Timer,
+  Tag
 } from 'lucide-react';
 import { LojasEServicosList } from './LojasEServicosList';
 import { User } from '@supabase/supabase-js';
@@ -41,6 +43,47 @@ const MINI_TRIBOS = [
   { id: 't-pet', name: 'Amigo do Pet', subtitle: 'Eles são bem-vindos', icon: DogIcon, color: 'bg-white text-purple-600 border-gray-100 shadow-sm' },
   { id: 't-kids', name: 'Espaço Kids', subtitle: 'Lazer pros pequenos', icon: Baby, color: 'bg-white text-orange-600 border-gray-100 shadow-sm' },
   { id: 't-health', name: 'Vibe Saúde', subtitle: 'Foco no bem-estar', icon: Leaf, color: 'bg-white text-emerald-600 border-gray-100 shadow-sm' },
+];
+
+// --- DADOS MOCKADOS PARA PROMOÇÕES DA SEMANA ---
+// Regra: Mínimo 15% de desconto. Lojistas selecionados.
+const WEEKLY_PROMOS = [
+  {
+    id: 'promo-1',
+    storeName: 'Espaço VIP Beleza',
+    productName: 'Hidratação Profunda',
+    discount: 30,
+    image: 'https://images.unsplash.com/photo-1560066984-138dadb4c035?q=80&w=400&auto=format&fit=crop',
+    validity: 'Até domingo',
+    storeId: 'mock-1'
+  },
+  {
+    id: 'promo-2',
+    storeName: 'Hamburgueria Brasa',
+    productName: 'Combo Duplo Cheddar',
+    discount: 25,
+    image: 'https://images.unsplash.com/photo-1594212699903-ec8a3eca50f5?q=80&w=400&auto=format&fit=crop',
+    validity: 'Até domingo',
+    storeId: 'mock-2'
+  },
+  {
+    id: 'promo-3',
+    storeName: 'Pet Shop Araguaia',
+    productName: 'Banho & Tosa Premium',
+    discount: 20,
+    image: 'https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?q=80&w=400&auto=format&fit=crop',
+    validity: 'Até sábado',
+    storeId: 'mock-3'
+  },
+  {
+    id: 'promo-4',
+    storeName: 'Academia Force',
+    productName: 'Plano Trimestral',
+    discount: 15,
+    image: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=400&auto=format&fit=crop',
+    validity: 'Só hoje',
+    storeId: 'mock-4'
+  }
 ];
 
 // --- LOGICA DO CARROSSEL ---
@@ -222,6 +265,90 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void }> = ({ onNavigat
   );
 };
 
+// --- COMPONENTE PROMOÇÕES DA SEMANA ---
+const WeeklyPromosSection: React.FC<{ onNavigate: (v: string) => void }> = ({ onNavigate }) => {
+  // Filtrar e Ordenar: Apenas > 15%, ordenar por maior desconto
+  const validPromos = useMemo(() => {
+    return WEEKLY_PROMOS
+      .filter(p => p.discount >= 15)
+      .sort((a, b) => b.discount - a.discount);
+  }, []);
+
+  if (validPromos.length === 0) return null;
+
+  return (
+    <div className="w-full bg-[#FAFAFA] dark:bg-[#0B0F19] py-6 border-b border-gray-100 dark:border-gray-800">
+      <div className="px-5 mb-4">
+        <div className="flex items-center gap-2 mb-1">
+          <Tag className="w-4 h-4 text-red-500 fill-red-500/20" />
+          <h2 className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-wider">
+            Promoções da Semana
+          </h2>
+        </div>
+        <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">
+          Descontos reais por tempo limitado no seu bairro
+        </p>
+      </div>
+
+      <div className="flex gap-3 overflow-x-auto no-scrollbar px-5 pb-2 snap-x">
+        {validPromos.map((promo) => (
+          <button 
+            key={promo.id}
+            onClick={() => onNavigate('weekly_promo')} // Em produção, levaria para a loja específica
+            className="snap-center min-w-[160px] max-w-[160px] flex flex-col bg-white dark:bg-gray-800 rounded-[20px] shadow-[0_2px_8px_rgba(0,0,0,0.06)] dark:shadow-none border border-gray-100 dark:border-gray-700 overflow-hidden group active:scale-[0.98] transition-all"
+          >
+            {/* Image Area */}
+            <div className="relative h-[110px] w-full overflow-hidden">
+              <img 
+                src={promo.image} 
+                alt={promo.productName} 
+                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" 
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+              
+              {/* Badge 7 Dias */}
+              <div className="absolute top-2 right-2 bg-black/60 backdrop-blur-md px-2 py-0.5 rounded-md border border-white/10">
+                <span className="text-[8px] font-bold text-white uppercase tracking-wider flex items-center gap-1">
+                  <Timer className="w-2.5 h-2.5 text-yellow-400" />
+                  7 Dias
+                </span>
+              </div>
+
+              {/* Discount Badge - Big & Impactful */}
+              <div className="absolute bottom-2 left-2">
+                <div className="bg-red-600 text-white px-2 py-1 rounded-lg shadow-lg flex items-center gap-0.5">
+                  <span className="text-[14px] font-black tracking-tighter">-{promo.discount}%</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Content Area */}
+            <div className="p-3 flex flex-col flex-1 justify-between text-left">
+              <div>
+                <h4 className="font-bold text-gray-900 dark:text-white text-xs leading-tight line-clamp-2 mb-1">
+                  {promo.productName}
+                </h4>
+                <p className="text-[10px] text-gray-500 dark:text-gray-400 font-medium truncate">
+                  {promo.storeName}
+                </p>
+              </div>
+              
+              <div className="mt-2 pt-2 border-t border-gray-100 dark:border-gray-700 flex items-center justify-between">
+                <span className="text-[9px] font-bold text-red-500 bg-red-50 dark:bg-red-900/10 px-1.5 py-0.5 rounded uppercase">
+                  Oferta
+                </span>
+                <span className="text-[9px] font-medium text-gray-400">
+                  {promo.validity}
+                </span>
+              </div>
+            </div>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+};
+
 const SectionHeader: React.FC<{ title: string; subtitle?: string; rightElement?: React.ReactNode }> = ({ title, subtitle, rightElement }) => (
   <div className="flex items-center justify-between mb-5 px-1">
     <div className="flex flex-col">
@@ -284,6 +411,9 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
             <HomeCarousel onNavigate={onNavigate} />
           </div>
         );
+
+      case 'weekly_promos':
+        return <WeeklyPromosSection key="weekly_promos" onNavigate={onNavigate} />;
 
       case 'recommended':
         return (
@@ -410,6 +540,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
     return [
       'categories',
       'home_carousel',
+      'weekly_promos',
       'recommended',
       'roulette',
       'cashback_stores',
