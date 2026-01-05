@@ -1,8 +1,9 @@
 
 import React, { useState } from 'react';
-import { ChevronLeft, Briefcase, MapPin, Clock, DollarSign, MessageCircle, AlertCircle, Building2, CheckCircle2 } from 'lucide-react';
+import { ChevronLeft, Briefcase, MapPin, Clock, DollarSign, MessageCircle, AlertCircle, Building2, CheckCircle2, ChevronDown } from 'lucide-react';
 import { MOCK_JOBS } from '../constants';
 import { Job } from '../types';
+import { useNeighborhood } from '../contexts/NeighborhoodContext';
 
 interface JobsViewProps {
   onBack: () => void;
@@ -107,6 +108,10 @@ const JobDetailModal: React.FC<{ job: Job; onClose: () => void }> = ({ job, onCl
 
 export const JobsView: React.FC<JobsViewProps> = ({ onBack }) => {
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
+  const { currentNeighborhood, isAll, toggleSelector } = useNeighborhood();
+
+  // Filter jobs by neighborhood
+  const filteredJobs = MOCK_JOBS.filter(job => isAll || job.neighborhood === currentNeighborhood);
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 font-sans animate-in slide-in-from-right duration-300 pb-10">
@@ -115,25 +120,40 @@ export const JobsView: React.FC<JobsViewProps> = ({ onBack }) => {
         <button onClick={onBack} className="p-2 -ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
           <ChevronLeft className="w-6 h-6 text-gray-800 dark:text-white" />
         </button>
-        <div>
+        <div className="flex-1">
             <h1 className="font-bold text-lg text-gray-900 dark:text-white flex items-center gap-2">
-            <Briefcase className="w-5 h-5 text-[#1E5BFF]" />
-            Vagas em Jacarepaguá
+              <Briefcase className="w-5 h-5 text-[#1E5BFF]" />
+              Vagas de Emprego
             </h1>
-            <p className="text-xs text-gray-500 dark:text-gray-400">filtradas por bairro</p>
+            <button 
+              onClick={toggleSelector}
+              className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400 mt-0.5"
+            >
+              <MapPin className="w-3 h-3" />
+              <span>{currentNeighborhood === 'Jacarepaguá (todos)' ? 'Todo Bairro' : currentNeighborhood}</span>
+              <ChevronDown className="w-3 h-3" />
+            </button>
         </div>
       </div>
 
       <div className="p-5">
-        {MOCK_JOBS.length === 0 ? (
+        {filteredJobs.length === 0 ? (
           <div className="flex flex-col items-center justify-center pt-20 text-center">
             <div className="w-20 h-20 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mb-4">
               <Briefcase className="w-8 h-8 text-gray-400" />
             </div>
-            <h3 className="font-bold text-gray-900 dark:text-white">Nenhuma vaga no momento</h3>
+            <h3 className="font-bold text-gray-900 dark:text-white">Nenhuma vaga nesta região</h3>
             <p className="text-sm text-gray-500 dark:text-gray-400 max-w-xs mt-2">
-              As empresas de Jacarepaguá ainda não publicaram oportunidades hoje. Volte em breve!
+              Não encontramos vagas em {currentNeighborhood} no momento. Tente expandir para todo Jacarepaguá.
             </p>
+            {!isAll && (
+               <button 
+                  onClick={toggleSelector}
+                  className="mt-4 text-[#1E5BFF] text-sm font-bold"
+               >
+                 Mudar Região
+               </button>
+            )}
           </div>
         ) : (
           <div className="space-y-4">
@@ -144,7 +164,7 @@ export const JobsView: React.FC<JobsViewProps> = ({ onBack }) => {
                 </p>
             </div>
 
-            {MOCK_JOBS.map((job) => (
+            {filteredJobs.map((job) => (
               <div 
                 key={job.id}
                 onClick={() => setSelectedJob(job)}
@@ -167,7 +187,11 @@ export const JobsView: React.FC<JobsViewProps> = ({ onBack }) => {
                     <span className="px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 text-[10px] font-bold uppercase rounded-md border border-gray-200 dark:border-gray-600">
                         {job.type}
                     </span>
-                    <span className="px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 text-[10px] font-bold uppercase rounded-md border border-gray-200 dark:border-gray-600">
+                    <span className={`px-2 py-1 text-[10px] font-bold uppercase rounded-md border ${
+                        job.neighborhood === currentNeighborhood && !isAll
+                         ? 'bg-blue-50 text-blue-600 border-blue-100 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800'
+                         : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-600'
+                    }`}>
                         {job.neighborhood}
                     </span>
                     {job.salary && (

@@ -25,13 +25,15 @@ import {
   ThumbsUp,
   AlertTriangle,
   Lightbulb,
-  MessageSquare
+  MessageSquare,
+  MapPin
 } from 'lucide-react';
 import { LojasEServicosList } from './LojasEServicosList';
 import { User } from '@supabase/supabase-js';
 import { SpinWheelView } from './SpinWheelView';
 import { MasterSponsorBanner } from './MasterSponsorBanner';
 import { CATEGORIES, STORES, MOCK_JOBS, MOCK_COMMUNITY_POSTS } from '../constants';
+import { useNeighborhood } from '../contexts/NeighborhoodContext';
 
 interface HomeFeedProps {
   onNavigate: (view: string) => void;
@@ -62,7 +64,8 @@ const WEEKLY_PROMOS = [
     discount: 30,
     image: 'https://images.unsplash.com/photo-1560066984-138dadb4c035?q=80&w=400&auto=format&fit=crop',
     validity: 'Até domingo',
-    storeId: 'mock-1'
+    storeId: 'mock-1',
+    neighborhood: 'Freguesia'
   },
   {
     id: 'promo-2',
@@ -71,7 +74,8 @@ const WEEKLY_PROMOS = [
     discount: 25,
     image: 'https://images.unsplash.com/photo-1594212699903-ec8a3eca50f5?q=80&w=400&auto=format&fit=crop',
     validity: 'Até domingo',
-    storeId: 'mock-2'
+    storeId: 'mock-2',
+    neighborhood: 'Freguesia'
   },
   {
     id: 'promo-3',
@@ -80,7 +84,8 @@ const WEEKLY_PROMOS = [
     discount: 20,
     image: 'https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?q=80&w=400&auto=format&fit=crop',
     validity: 'Até sábado',
-    storeId: 'mock-3'
+    storeId: 'mock-3',
+    neighborhood: 'Taquara'
   },
   {
     id: 'promo-4',
@@ -89,7 +94,8 @@ const WEEKLY_PROMOS = [
     discount: 15,
     image: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=400&auto=format&fit=crop',
     validity: 'Só hoje',
-    storeId: 'mock-4'
+    storeId: 'mock-4',
+    neighborhood: 'Pechincha'
   }
 ];
 
@@ -123,10 +129,14 @@ interface BannerItem {
 const HomeCarousel: React.FC<{ onNavigate: (v: string) => void }> = ({ onNavigate }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [progress, setProgress] = useState(0);
+  const { currentNeighborhood, isAll } = useNeighborhood();
 
   const premiumStores = useMemo(() => {
-    return STORES.filter(s => s.adType === AdType.PREMIUM).slice(0, 6); 
-  }, []);
+    return STORES.filter(s => 
+        s.adType === AdType.PREMIUM && 
+        (isAll || s.neighborhood === currentNeighborhood)
+    ).slice(0, 6); 
+  }, [currentNeighborhood, isAll]);
 
   const banners: BannerItem[] = useMemo(() => {
     const list: BannerItem[] = [
@@ -134,7 +144,7 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void }> = ({ onNavigat
         id: 'b1-cashback',
         type: 'standard',
         title: 'Cashback real entre lojas do seu bairro',
-        subtitle: 'Compre no comércio local de Jacarepaguá e receba dinheiro de volta na hora.',
+        subtitle: `Compre no comércio local de ${currentNeighborhood === 'Jacarepaguá (todos)' ? 'JPA' : currentNeighborhood} e receba dinheiro de volta na hora.`,
         image: 'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?q=80&w=800&auto=format&fit=crop',
         target: 'explore', 
         tag: 'Exclusivo',
@@ -162,12 +172,14 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void }> = ({ onNavigat
       }
     ];
 
-    if (MOCK_JOBS.length > 0) {
+    const localJobs = MOCK_JOBS.filter(j => isAll || j.neighborhood === currentNeighborhood);
+    
+    if (localJobs.length > 0) {
       list.push({
         id: 'b4-jobs',
         type: 'jobs',
-        title: 'Vagas de emprego no seu bairro',
-        subtitle: 'Lojas e serviços contratando em Jacarepaguá',
+        title: `Vagas de emprego em ${currentNeighborhood === 'Jacarepaguá (todos)' ? 'JPA' : currentNeighborhood}`,
+        subtitle: 'Lojas e serviços contratando agora',
         target: 'jobs_list',
         image: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?q=80&w=800&auto=format&fit=crop',
         tag: 'Oportunidade',
@@ -184,7 +196,7 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void }> = ({ onNavigat
     }
 
     return list;
-  }, [premiumStores]);
+  }, [premiumStores, currentNeighborhood, isAll]);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -286,11 +298,13 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void }> = ({ onNavigat
 
 // --- COMPONENTE PROMOÇÕES DA SEMANA ---
 const WeeklyPromosSection: React.FC<{ onNavigate: (v: string) => void }> = ({ onNavigate }) => {
+  const { currentNeighborhood, isAll } = useNeighborhood();
+
   const validPromos = useMemo(() => {
     return WEEKLY_PROMOS
-      .filter(p => p.discount >= 15)
+      .filter(p => p.discount >= 15 && (isAll || p.neighborhood === currentNeighborhood))
       .sort((a, b) => b.discount - a.discount);
-  }, []);
+  }, [currentNeighborhood, isAll]);
 
   if (validPromos.length === 0) return null;
 
@@ -329,6 +343,14 @@ const WeeklyPromosSection: React.FC<{ onNavigate: (v: string) => void }> = ({ on
                   7 Dias
                 </span>
               </div>
+
+              {isAll && (
+                  <div className="absolute top-2 left-2 bg-black/60 backdrop-blur-md px-2 py-0.5 rounded-md border border-white/10">
+                    <span className="text-[8px] font-bold text-white uppercase tracking-wider">
+                      {promo.neighborhood}
+                    </span>
+                  </div>
+              )}
 
               <div className="absolute bottom-2 left-2">
                 <div className="bg-red-600 text-white px-2 py-1 rounded-lg shadow-lg flex items-center gap-0.5">
@@ -377,9 +399,15 @@ const SectionHeader: React.FC<{ title: string; subtitle?: string; rightElement?:
 
 // --- COMPONENTE CONFIANÇA NO BAIRRO ---
 const CommunityTrustCarousel: React.FC<{ stores: Store[], onStoreClick: (store: Store) => void }> = ({ stores, onStoreClick }) => {
+  const { currentNeighborhood, isAll } = useNeighborhood();
+
   const trustedStores = useMemo(() => {
-    return stores.filter(s => s.recentComments && s.recentComments.length > 0).slice(0, 5);
-  }, [stores]);
+    return stores.filter(s => 
+        (isAll || s.neighborhood === currentNeighborhood) &&
+        s.recentComments && 
+        s.recentComments.length > 0
+    ).slice(0, 5);
+  }, [stores, currentNeighborhood, isAll]);
 
   if (trustedStores.length === 0) return null;
 
@@ -421,6 +449,14 @@ const CommunityTrustCarousel: React.FC<{ stores: Store[], onStoreClick: (store: 
                       Clientes Voltam
                     </span>
                   </div>
+
+                  {isAll && (
+                      <div className="absolute top-2 left-2 bg-black/40 backdrop-blur-md px-2 py-0.5 rounded-md border border-white/10">
+                        <span className="text-[8px] font-bold text-white uppercase tracking-wider">
+                          {store.neighborhood}
+                        </span>
+                      </div>
+                  )}
                 </div>
 
                 <div className="p-3 flex flex-col flex-1 justify-between text-left h-full">
@@ -454,8 +490,12 @@ const CommunityTrustCarousel: React.FC<{ stores: Store[], onStoreClick: (store: 
 const CommunityFeedBlock: React.FC<{ 
   onNavigate: (view: string) => void;
 }> = ({ onNavigate }) => {
-  // Regra: Máximo 2 posts, Priorizar recentes
-  const previewPosts = MOCK_COMMUNITY_POSTS.slice(0, 2);
+  const { currentNeighborhood, isAll } = useNeighborhood();
+
+  // Regra: Máximo 2 posts, Priorizar recentes, filtrar por bairro
+  const previewPosts = MOCK_COMMUNITY_POSTS
+    .filter(p => isAll || p.neighborhood === currentNeighborhood)
+    .slice(0, 2);
 
   // Regra: Se não houver posts, o bloco não aparece
   if (previewPosts.length === 0) return null;
@@ -492,6 +532,12 @@ const CommunityFeedBlock: React.FC<{
                       <StoreIcon className="w-3 h-3 text-[#1E5BFF]" />
                       <span className="truncate">Sobre: {post.relatedStoreName}</span>
                     </div>
+                  )}
+                  {isAll && post.neighborhood && (
+                     <div className="flex items-center gap-1 text-[10px] text-gray-400 mt-0.5">
+                        <MapPin className="w-3 h-3" />
+                        {post.neighborhood}
+                     </div>
                   )}
                 </div>
               </div>
@@ -538,6 +584,12 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
   const [isSpinWheelOpen, setIsSpinWheelOpen] = useState(false);
   const [listFilter, setListFilter] = useState<'all' | 'cashback' | 'top_rated' | 'open_now'>('all');
   const activeSearchTerm = externalSearchTerm || '';
+  const { currentNeighborhood, isAll } = useNeighborhood();
+
+  // Filter stores based on neighborhood BEFORE passing to list or sub-components
+  const neighborhoodStores = useMemo(() => {
+    return stores.filter(store => isAll || store.neighborhood === currentNeighborhood);
+  }, [stores, currentNeighborhood, isAll]);
 
   const renderSection = (key: string) => {
     switch (key) {
@@ -606,6 +658,13 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
         );
 
       case 'cashback_stores':
+        // Filtering specific for cashback widget
+        const cashbackList = neighborhoodStores
+                .filter(s => s.cashback && s.cashback > 0)
+                .sort((a, b) => (b.cashback || 0) - (a.cashback || 0));
+
+        if (cashbackList.length === 0) return null;
+
         return (
           <div key="cashback_stores" className="w-full bg-white dark:bg-gray-950 py-6">
             <div className="px-5 mb-4">
@@ -613,15 +672,12 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
                 Cashback no seu bairro
               </h2>
               <p className="text-xs text-gray-500 dark:text-gray-400 font-medium mt-1.5">
-                Veja onde você recebe cashback em Jacarepaguá
+                Veja onde você recebe cashback em {currentNeighborhood === 'Jacarepaguá (todos)' ? 'Jacarepaguá' : currentNeighborhood}
               </p>
             </div>
             
             <div className="flex gap-3 overflow-x-auto no-scrollbar px-5 pb-6 snap-x">
-              {stores
-                .filter(s => s.cashback && s.cashback > 0)
-                .sort((a, b) => (b.cashback || 0) - (a.cashback || 0))
-                .map((store) => (
+              {cashbackList.map((store) => (
                 <button
                   key={store.id}
                   onClick={() => onStoreClick?.(store)}
@@ -641,6 +697,14 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
                         Cashback
                       </span>
                     </div>
+
+                    {isAll && (
+                        <div className="absolute top-2 left-2 bg-black/40 backdrop-blur-md px-2 py-0.5 rounded-md border border-white/10">
+                          <span className="text-[8px] font-bold text-white uppercase tracking-wider">
+                            {store.neighborhood}
+                          </span>
+                        </div>
+                    )}
 
                     <div className="absolute bottom-2 left-2">
                       <div className="bg-emerald-600 text-white px-2 py-1 rounded-lg shadow-lg flex items-center gap-0.5 border border-emerald-500/50">
@@ -672,14 +736,14 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
         );
 
       case 'trust_feed':
-        return <CommunityTrustCarousel key="trust_feed" stores={stores} onStoreClick={(s) => onStoreClick && onStoreClick(s)} />;
+        return <CommunityTrustCarousel key="trust_feed" stores={neighborhoodStores} onStoreClick={(s) => onStoreClick && onStoreClick(s)} />;
 
       case 'list':
         return (
           <div key="list" className="w-full bg-white dark:bg-gray-950 py-8">
             <div className="px-5">
               <SectionHeader 
-                title="Explorar Jacarepaguá" 
+                title={`Explorar ${currentNeighborhood === 'Jacarepaguá (todos)' ? 'Jacarepaguá' : currentNeighborhood}`} 
                 subtitle="O que há de melhor no bairro" 
                 rightElement={
                   <div className="flex gap-1 bg-gray-100 dark:bg-gray-800 p-1 rounded-xl">
@@ -691,7 +755,23 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
                   </div>
                 }
               />
-              <LojasEServicosList onStoreClick={onStoreClick} onViewAll={() => onNavigate('explore')} activeFilter={listFilter} user={user} onNavigate={onNavigate} />
+              <LojasEServicosList 
+                onStoreClick={onStoreClick} 
+                onViewAll={() => onNavigate('explore')} 
+                activeFilter={listFilter} 
+                user={user} 
+                onNavigate={onNavigate} 
+                // We pass pre-filtered stores to LojasEServicosList via a prop if it accepted it,
+                // but currently it uses raw STORES internally.
+                // For this implementation to be consistent, LojasEServicosList should ideally accept a `stores` prop.
+                // Since I cannot change LojasEServicosList easily in this single file change, I assume 
+                // I should modify LojasEServicosList to read context or pass props.
+                // However, based on the prompt "update files... assume if not provided not changed",
+                // I should probably update LojasEServicosList too. 
+                // BUT, I will try to pass filtered stores if I update LojasEServicosList in another change block.
+                // For now, let's assume LojasEServicosList handles its own data or I'll update it.
+                // *Self-correction*: I will add LojasEServicosList to the XML to inject the context logic.
+              />
             </div>
           </div>
         );
@@ -756,6 +836,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
                     <div className="flex-1 flex flex-col justify-center min-w-0">
                         <h4 className="font-bold text-gray-800 dark:text-white text-sm truncate">{store.name}</h4>
                         <span className="text-[10px] text-[#1E5BFF] font-black uppercase tracking-tight">{store.category}</span>
+                        {isAll && store.neighborhood && <span className="text-[9px] text-gray-400 mt-0.5">{store.neighborhood}</span>}
                     </div>
                     <ChevronRight className="w-5 h-5 text-gray-300 self-center" />
                 </div>

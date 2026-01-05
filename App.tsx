@@ -31,6 +31,7 @@ import { JobsView } from './components/JobsView';
 import { MerchantJobsModule } from './components/MerchantJobsModule';
 import { MapPin, Crown, X, Star, Shield } from 'lucide-react';
 import { useAuth } from './contexts/AuthContext';
+import { NeighborhoodProvider } from './contexts/NeighborhoodContext';
 import { Category, Store, AdType, EditorialCollection, ThemeMode } from './types';
 import { getStoreLogo } from './utils/mockLogos';
 import { CategoryView } from './components/CategoryView';
@@ -267,185 +268,187 @@ const App: React.FC = () => {
 
   return (
     <div className={isDarkMode ? 'dark' : ''}>
-      <div 
-        className="min-h-screen bg-white dark:bg-gray-900 flex justify-center transition-colors duration-300 relative"
-        onTouchStart={onTouchStart}
-        onTouchEnd={onTouchEnd}
-      >
-        
-        <Layout 
-          activeTab={activeTab} 
-          setActiveTab={setActiveTab} 
-          userRole={userRole} 
-          onCashbackClick={handleCashbackClick}
-          hideNav={hideBottomNav}
+      <NeighborhoodProvider>
+        <div 
+          className="min-h-screen bg-white dark:bg-gray-900 flex justify-center transition-colors duration-300 relative"
+          onTouchStart={onTouchStart}
+          onTouchEnd={onTouchEnd}
         >
-          {/* Header is shown for main tabs except when excluded */}
-          {!headerExclusionList.includes(activeTab) && (
-            <Header
-              isDarkMode={isDarkMode}
-              toggleTheme={toggleTheme}
-              onAuthClick={() => setActiveTab('profile')} 
-              user={user}
-              searchTerm={globalSearch}
-              onSearchChange={setGlobalSearch}
-              onNavigate={setActiveTab}
-              activeTab={activeTab}
-              userRole={userRole}
-              onOpenMerchantQr={() => setActiveTab('merchant_qr')}
-            />
-          )}
-          <main className="animate-in fade-in duration-500 w-full max-w-md mx-auto">
-            {activeTab === 'home' && (
-              <HomeFeed
-                onNavigate={setActiveTab}
-                onSelectCategory={handleSelectCategory}
-                onSelectCollection={handleSelectCollection}
-                onStoreClick={handleSelectStore}
-                stores={STORES}
+          
+          <Layout 
+            activeTab={activeTab} 
+            setActiveTab={setActiveTab} 
+            userRole={userRole} 
+            onCashbackClick={handleCashbackClick}
+            hideNav={hideBottomNav}
+          >
+            {/* Header is shown for main tabs except when excluded */}
+            {!headerExclusionList.includes(activeTab) && (
+              <Header
+                isDarkMode={isDarkMode}
+                toggleTheme={toggleTheme}
+                onAuthClick={() => setActiveTab('profile')} 
+                user={user}
                 searchTerm={globalSearch}
-                user={user as any}
-                userRole={userRole}
-                onSpinWin={(reward) => { setSelectedReward(reward); setActiveTab('reward_details'); }}
-                onRequireLogin={() => setIsAuthOpen(true)}
-              />
-            )}
-            {activeTab === 'explore' && (
-              <ExploreView 
-                stores={STORES} 
-                searchQuery={globalSearch} 
-                onStoreClick={handleSelectStore} 
-                onLocationClick={() => {}} 
-                onFilterClick={() => {}} 
-                onOpenPlans={() => {}}
+                onSearchChange={setGlobalSearch}
                 onNavigate={setActiveTab}
+                activeTab={activeTab}
+                userRole={userRole}
+                onOpenMerchantQr={() => setActiveTab('merchant_qr')}
               />
             )}
-            {activeTab === 'user_statement' && (
-              <UserStatementView onBack={() => setActiveTab('home')} onExploreStores={() => setActiveTab('explore')} balance={12.40} />
-            )}
-            {activeTab === 'merchant_cashback_onboarding' && (
-              <MerchantCashbackOnboarding onBack={() => setActiveTab('home')} onActivate={() => setActiveTab('store_cashback_module')} />
-            )}
-            {activeTab === 'merchant_cashback_dashboard' && (
-              <MerchantCashbackDashboard onBack={() => setActiveTab('home')} onNavigate={setActiveTab} />
-            )}
-            {activeTab === 'store_cashback_module' && <StoreCashbackModule onBack={() => setActiveTab('home')} />}
-            {activeTab === 'store_ads_module' && <StoreAdsModule onBack={() => setActiveTab('store_area')} />}
-            {activeTab === 'store_profile' && <StoreProfileEdit onBack={() => setActiveTab('store_area')} />}
-            {activeTab === 'store_finance' && <StoreFinanceModule onBack={() => setActiveTab('store_area')} />}
-            {activeTab === 'weekly_promo' && <WeeklyPromoModule onBack={() => setActiveTab('store_area')} />}
-            {activeTab === 'merchant_jobs' && <MerchantJobsModule onBack={() => setActiveTab('store_area')} />}
-            {activeTab === 'jobs_list' && <JobsView onBack={() => setActiveTab('home')} />}
-            
-            {activeTab === 'community_feed' && (
-                <CommunityFeedView 
-                    onStoreClick={handleSelectStore} 
-                    user={user as any}
-                    onRequireLogin={() => setIsAuthOpen(true)}
+            <main className="animate-in fade-in duration-500 w-full max-w-md mx-auto">
+              {activeTab === 'home' && (
+                <HomeFeed
+                  onNavigate={setActiveTab}
+                  onSelectCategory={handleSelectCategory}
+                  onSelectCollection={handleSelectCollection}
+                  onStoreClick={handleSelectStore}
+                  stores={STORES}
+                  searchTerm={globalSearch}
+                  user={user as any}
+                  userRole={userRole}
+                  onSpinWin={(reward) => { setSelectedReward(reward); setActiveTab('reward_details'); }}
+                  onRequireLogin={() => setIsAuthOpen(true)}
                 />
-            )}
-
-            {activeTab === 'about' && <AboutView onBack={() => setActiveTab('profile')} />}
-            {activeTab === 'support' && <SupportView onBack={() => setActiveTab('profile')} />}
-            {activeTab === 'invite_friend' && <InviteFriendView onBack={() => setActiveTab('profile')} />}
-            {activeTab === 'favorites' && <FavoritesView user={user as any} onBack={() => setActiveTab('profile')} onNavigate={setActiveTab} />}
-            {activeTab === 'editorial_list' && selectedCollection && (
-              <EditorialListView collection={selectedCollection} stores={STORES} onBack={() => { setActiveTab('home'); setSelectedCollection(null); }} onStoreClick={handleSelectStore} />
-            )}
-            {activeTab === 'services' && (
-              <ServicesView onSelectMacro={(id, name) => {
-                  setSelectedServiceMacro({id, name});
-                  if (id === 'emergency') { setQuoteCategory(name); setIsQuoteModalOpen(true); } 
-                  else { setActiveTab('service_subcategories'); }
-                }} 
-                onOpenTerms={() => setActiveTab('service_terms')} onNavigate={setActiveTab} searchTerm={globalSearch}
-              />
-            )}
-            {activeTab === 'store_area' && (userRole === 'lojista' ? <StoreAreaView onBack={() => setActiveTab('home')} onNavigate={setActiveTab} user={user as any} /> : <FreguesiaConnectRestricted onBack={() => setActiveTab('home')} />)}
-            {activeTab === 'merchant_qr' && (userRole === 'lojista' ? <MerchantQrScreen user={user} onBack={() => setActiveTab('home')} /> : <FreguesiaConnectRestricted onBack={() => setActiveTab('home')} />)}
-            
-            {activeTab === 'category_detail' && selectedCategory && (
-                <CategoryView 
-                    category={selectedCategory} 
-                    onBack={() => { setActiveTab('home'); setSelectedCategory(null); }} 
-                    onStoreClick={handleSelectStore} 
-                    stores={STORES} 
+              )}
+              {activeTab === 'explore' && (
+                <ExploreView 
+                  stores={STORES} 
+                  searchQuery={globalSearch} 
+                  onStoreClick={handleSelectStore} 
+                  onLocationClick={() => {}} 
+                  onFilterClick={() => {}} 
+                  onOpenPlans={() => {}}
+                  onNavigate={setActiveTab}
                 />
-            )}
-            
-            {activeTab === 'service_subcategories' && selectedServiceMacro && <SubcategoriesView macroId={selectedServiceMacro.id} macroName={selectedServiceMacro.name} onBack={() => setActiveTab('services')} onSelectSubcategory={(subName) => { setSelectedServiceSub(subName); setActiveTab('service_specialties'); }} />}
-            {activeTab === 'service_specialties' && selectedServiceSub && <SpecialtiesView subcategoryName={selectedServiceSub} onBack={() => setActiveTab('service_subcategories')} onSelectSpecialty={(specialty) => { setQuoteCategory(`${selectedServiceSub} - ${specialty}`); setIsQuoteModalOpen(true); }} />}
-            {activeTab === 'service_success' && <ServiceSuccessView onViewRequests={() => alert('Meus Pedidos')} onHome={() => setActiveTab('home')} />}
-            {activeTab === 'service_terms' && <ServiceTermsView onBack={() => setActiveTab('services')} />}
-            {activeTab === 'freguesia_connect_public' && <FreguesiaConnectPublic onBack={() => setActiveTab('home')} onLogin={() => setIsAuthOpen(true)} />}
-            {activeTab === 'freguesia_connect_dashboard' && <FreguesiaConnectDashboard onBack={() => setActiveTab('home')} />}
-            {activeTab === 'freguesia_connect_restricted' && <FreguesiaConnectRestricted onBack={() => setActiveTab('home')} />}
-            {activeTab === 'qrcode_scan' && <CashbackScanScreen onBack={() => setActiveTab('home')} onScanSuccess={(data) => { setScannedData(data); setActiveTab('scan_confirmation'); }} />}
-            {activeTab === 'scan_confirmation' && scannedData && <ScanConfirmationScreen storeId={scannedData.storeId} onConfirm={() => setActiveTab('cashback_payment')} onCancel={() => setActiveTab('home')} />}
-            {activeTab === 'cashback_payment' && scannedData && <CashbackPaymentScreen user={user as any} merchantId={scannedData.merchantId} storeId={scannedData.storeId} onBack={() => setActiveTab('home')} onComplete={() => setActiveTab('home')} />}
-            
-            {activeTab === 'profile' && 
-                <MenuView 
-                    user={user as any} 
-                    userRole={userRole} 
-                    onAuthClick={() => setIsAuthOpen(true)} 
-                    onNavigate={setActiveTab} 
-                    onBack={() => setActiveTab('home')}
-                    currentTheme={themeMode}
-                    onThemeChange={setThemeMode}
+              )}
+              {activeTab === 'user_statement' && (
+                <UserStatementView onBack={() => setActiveTab('home')} onExploreStores={() => setActiveTab('explore')} balance={12.40} />
+              )}
+              {activeTab === 'merchant_cashback_onboarding' && (
+                <MerchantCashbackOnboarding onBack={() => setActiveTab('home')} onActivate={() => setActiveTab('store_cashback_module')} />
+              )}
+              {activeTab === 'merchant_cashback_dashboard' && (
+                <MerchantCashbackDashboard onBack={() => setActiveTab('home')} onNavigate={setActiveTab} />
+              )}
+              {activeTab === 'store_cashback_module' && <StoreCashbackModule onBack={() => setActiveTab('home')} />}
+              {activeTab === 'store_ads_module' && <StoreAdsModule onBack={() => setActiveTab('store_area')} />}
+              {activeTab === 'store_profile' && <StoreProfileEdit onBack={() => setActiveTab('store_area')} />}
+              {activeTab === 'store_finance' && <StoreFinanceModule onBack={() => setActiveTab('store_area')} />}
+              {activeTab === 'weekly_promo' && <WeeklyPromoModule onBack={() => setActiveTab('store_area')} />}
+              {activeTab === 'merchant_jobs' && <MerchantJobsModule onBack={() => setActiveTab('store_area')} />}
+              {activeTab === 'jobs_list' && <JobsView onBack={() => setActiveTab('home')} />}
+              
+              {activeTab === 'community_feed' && (
+                  <CommunityFeedView 
+                      onStoreClick={handleSelectStore} 
+                      user={user as any}
+                      onRequireLogin={() => setIsAuthOpen(true)}
+                  />
+              )}
+
+              {activeTab === 'about' && <AboutView onBack={() => setActiveTab('profile')} />}
+              {activeTab === 'support' && <SupportView onBack={() => setActiveTab('profile')} />}
+              {activeTab === 'invite_friend' && <InviteFriendView onBack={() => setActiveTab('profile')} />}
+              {activeTab === 'favorites' && <FavoritesView user={user as any} onBack={() => setActiveTab('profile')} onNavigate={setActiveTab} />}
+              {activeTab === 'editorial_list' && selectedCollection && (
+                <EditorialListView collection={selectedCollection} stores={STORES} onBack={() => { setActiveTab('home'); setSelectedCollection(null); }} onStoreClick={handleSelectStore} />
+              )}
+              {activeTab === 'services' && (
+                <ServicesView onSelectMacro={(id, name) => {
+                    setSelectedServiceMacro({id, name});
+                    if (id === 'emergency') { setQuoteCategory(name); setIsQuoteModalOpen(true); } 
+                    else { setActiveTab('service_subcategories'); }
+                  }} 
+                  onOpenTerms={() => setActiveTab('service_terms')} onNavigate={setActiveTab} searchTerm={globalSearch}
                 />
-            }
-            
-            {activeTab === 'patrocinador_master' && <PatrocinadorMasterScreen onBack={() => setActiveTab('home')} />}
-            {activeTab === 'store_detail' && selectedStore && <StoreDetailView store={selectedStore} onBack={() => setActiveTab('home')} />}
-            {activeTab === 'reward_details' && <RewardDetailsView reward={selectedReward} onBack={() => setActiveTab('home')} onHome={() => setActiveTab('home')} />}
-            {activeTab === 'prize_history' && user && <PrizeHistoryView userId={user.id} onBack={() => setActiveTab('home')} onGoToSpinWheel={() => setActiveTab('home')} />}
-          </main>
+              )}
+              {activeTab === 'store_area' && (userRole === 'lojista' ? <StoreAreaView onBack={() => setActiveTab('home')} onNavigate={setActiveTab} user={user as any} /> : <FreguesiaConnectRestricted onBack={() => setActiveTab('home')} />)}
+              {activeTab === 'merchant_qr' && (userRole === 'lojista' ? <MerchantQrScreen user={user} onBack={() => setActiveTab('home')} /> : <FreguesiaConnectRestricted onBack={() => setActiveTab('home')} />)}
+              
+              {activeTab === 'category_detail' && selectedCategory && (
+                  <CategoryView 
+                      category={selectedCategory} 
+                      onBack={() => { setActiveTab('home'); setSelectedCategory(null); }} 
+                      onStoreClick={handleSelectStore} 
+                      stores={STORES} 
+                  />
+              )}
+              
+              {activeTab === 'service_subcategories' && selectedServiceMacro && <SubcategoriesView macroId={selectedServiceMacro.id} macroName={selectedServiceMacro.name} onBack={() => setActiveTab('services')} onSelectSubcategory={(subName) => { setSelectedServiceSub(subName); setActiveTab('service_specialties'); }} />}
+              {activeTab === 'service_specialties' && selectedServiceSub && <SpecialtiesView subcategoryName={selectedServiceSub} onBack={() => setActiveTab('service_subcategories')} onSelectSpecialty={(specialty) => { setQuoteCategory(`${selectedServiceSub} - ${specialty}`); setIsQuoteModalOpen(true); }} />}
+              {activeTab === 'service_success' && <ServiceSuccessView onViewRequests={() => alert('Meus Pedidos')} onHome={() => setActiveTab('home')} />}
+              {activeTab === 'service_terms' && <ServiceTermsView onBack={() => setActiveTab('services')} />}
+              {activeTab === 'freguesia_connect_public' && <FreguesiaConnectPublic onBack={() => setActiveTab('home')} onLogin={() => setIsAuthOpen(true)} />}
+              {activeTab === 'freguesia_connect_dashboard' && <FreguesiaConnectDashboard onBack={() => setActiveTab('home')} />}
+              {activeTab === 'freguesia_connect_restricted' && <FreguesiaConnectRestricted onBack={() => setActiveTab('home')} />}
+              {activeTab === 'qrcode_scan' && <CashbackScanScreen onBack={() => setActiveTab('home')} onScanSuccess={(data) => { setScannedData(data); setActiveTab('scan_confirmation'); }} />}
+              {activeTab === 'scan_confirmation' && scannedData && <ScanConfirmationScreen storeId={scannedData.storeId} onConfirm={() => setActiveTab('cashback_payment')} onCancel={() => setActiveTab('home')} />}
+              {activeTab === 'cashback_payment' && scannedData && <CashbackPaymentScreen user={user as any} merchantId={scannedData.merchantId} storeId={scannedData.storeId} onBack={() => setActiveTab('home')} onComplete={() => setActiveTab('home')} />}
+              
+              {activeTab === 'profile' && 
+                  <MenuView 
+                      user={user as any} 
+                      userRole={userRole} 
+                      onAuthClick={() => setIsAuthOpen(true)} 
+                      onNavigate={setActiveTab} 
+                      onBack={() => setActiveTab('home')}
+                      currentTheme={themeMode}
+                      onThemeChange={setThemeMode}
+                  />
+              }
+              
+              {activeTab === 'patrocinador_master' && <PatrocinadorMasterScreen onBack={() => setActiveTab('home')} />}
+              {activeTab === 'store_detail' && selectedStore && <StoreDetailView store={selectedStore} onBack={() => setActiveTab('home')} />}
+              {activeTab === 'reward_details' && <RewardDetailsView reward={selectedReward} onBack={() => setActiveTab('home')} onHome={() => setActiveTab('home')} />}
+              {activeTab === 'prize_history' && user && <PrizeHistoryView userId={user.id} onBack={() => setActiveTab('home')} onGoToSpinWheel={() => setActiveTab('home')} />}
+            </main>
 
-          <AuthModal isOpen={isAuthOpen} onClose={() => setIsAuthOpen(false)} user={user as any} />
-          {isQuoteModalOpen && <QuoteRequestModal isOpen={isQuoteModalOpen} onClose={() => setIsQuoteModalOpen(false)} categoryName={quoteCategory} onSuccess={() => { setIsQuoteModalOpen(false); setActiveTab('service_success'); }} />}
-        </Layout>
+            <AuthModal isOpen={isAuthOpen} onClose={() => setIsAuthOpen(false)} user={user as any} />
+            {isQuoteModalOpen && <QuoteRequestModal isOpen={isQuoteModalOpen} onClose={() => setIsQuoteModalOpen(false)} categoryName={quoteCategory} onSuccess={() => { setIsQuoteModalOpen(false); setActiveTab('service_success'); }} />}
+          </Layout>
 
-        {/* OVERLAY SPLASH - PREMIUM */}
-        {!minSplashTimeElapsed && (
-          <div className="fixed inset-0 bg-[#1E5BFF] flex flex-col items-center justify-between text-white z-[999] overflow-hidden animate-out fade-out duration-700 fill-mode-forwards pb-10">
-            <div className={`flex flex-col items-center justify-center flex-1 transition-transform duration-1000 ${showSponsor ? '-translate-y-8 scale-90' : 'translate-y-0'}`}>
-              <div className="animate-float-slow">
-                <div className="w-28 h-28 bg-white rounded-[2.8rem] flex items-center justify-center shadow-[0_25px_60px_rgba(0,0,0,0.3)] mb-8 animate-pop-in">
-                  <MapPin className="w-14 h-14 text-[#1E5BFF] fill-[#1E5BFF]" />
+          {/* OVERLAY SPLASH - PREMIUM */}
+          {!minSplashTimeElapsed && (
+            <div className="fixed inset-0 bg-[#1E5BFF] flex flex-col items-center justify-between text-white z-[999] overflow-hidden animate-out fade-out duration-700 fill-mode-forwards pb-10">
+              <div className={`flex flex-col items-center justify-center flex-1 transition-transform duration-1000 ${showSponsor ? '-translate-y-8 scale-90' : 'translate-y-0'}`}>
+                <div className="animate-float-slow">
+                  <div className="w-28 h-28 bg-white rounded-[2.8rem] flex items-center justify-center shadow-[0_25px_60px_rgba(0,0,0,0.3)] mb-8 animate-pop-in">
+                    <MapPin className="w-14 h-14 text-[#1E5BFF] fill-[#1E5BFF]" />
+                  </div>
+                </div>
+                <div className="text-center relative">
+                  <h1 className="text-6xl font-black font-display animate-slide-up tracking-tighter drop-shadow-2xl">Localizei</h1>
+                  <div className="flex items-center justify-center gap-3 mt-3 animate-tracking-expand opacity-0 [animation-delay:800ms] [animation-fill-mode:forwards]">
+                    <div className="h-[1.5px] w-6 bg-white/40"></div>
+                    <span className="text-xs font-bold uppercase tracking-[0.4em] text-white/80">JPA</span>
+                    <div className="h-[1.5px] w-6 bg-white/40"></div>
+                  </div>
                 </div>
               </div>
-              <div className="text-center relative">
-                <h1 className="text-6xl font-black font-display animate-slide-up tracking-tighter drop-shadow-2xl">Localizei</h1>
-                <div className="flex items-center justify-center gap-3 mt-3 animate-tracking-expand opacity-0 [animation-delay:800ms] [animation-fill-mode:forwards]">
-                  <div className="h-[1.5px] w-6 bg-white/40"></div>
-                  <span className="text-xs font-bold uppercase tracking-[0.4em] text-white/80">Freguesia</span>
-                  <div className="h-[1.5px] w-6 bg-white/40"></div>
-                </div>
+
+              <div className={`flex flex-col items-center transition-all duration-1000 ease-out ${showSponsor ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+                  <p className="text-[10px] uppercase tracking-[0.3em] font-medium text-white/60 mb-3">
+                      Patrocinador Master
+                  </p>
+                  <div className="flex items-center gap-3 bg-white/10 backdrop-blur-md px-6 py-3 rounded-2xl border border-white/10 shadow-xl">
+                      <Shield className="w-8 h-8 text-white fill-white" />
+                      <div className="flex flex-col items-start">
+                          <span className="text-2xl font-black font-display tracking-tight text-shimmer leading-none">
+                              Grupo Esquematiza
+                          </span>
+                      </div>
+                  </div>
+              </div>
+
+              <div className="absolute bottom-0 left-0 right-0 h-1.5 bg-white/5">
+                <div className="h-full bg-white shadow-[0_0_25px_rgba(255,255,255,1)] transition-all duration-[100ms] ease-linear" style={{ width: `${splashProgress}%` }} />
               </div>
             </div>
-
-            <div className={`flex flex-col items-center transition-all duration-1000 ease-out ${showSponsor ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-                <p className="text-[10px] uppercase tracking-[0.3em] font-medium text-white/60 mb-3">
-                    Patrocinador Master
-                </p>
-                <div className="flex items-center gap-3 bg-white/10 backdrop-blur-md px-6 py-3 rounded-2xl border border-white/10 shadow-xl">
-                    <Shield className="w-8 h-8 text-white fill-white" />
-                    <div className="flex flex-col items-start">
-                        <span className="text-2xl font-black font-display tracking-tight text-shimmer leading-none">
-                            Grupo Esquematiza
-                        </span>
-                    </div>
-                </div>
-            </div>
-
-            <div className="absolute bottom-0 left-0 right-0 h-1.5 bg-white/5">
-              <div className="h-full bg-white shadow-[0_0_25px_rgba(255,255,255,1)] transition-all duration-[100ms] ease-linear" style={{ width: `${splashProgress}%` }} />
-            </div>
-          </div>
-        )}
-      </div>
+          )}
+        </div>
+      </NeighborhoodProvider>
     </div>
   );
 };

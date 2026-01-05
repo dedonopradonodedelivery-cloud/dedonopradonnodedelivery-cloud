@@ -177,4 +177,106 @@ export const MenuView: React.FC<MenuViewProps> = ({
                 onClick={() => onNavigate('store_area')}
                 className="w-full bg-gradient-to-br from-[#1e1b4b] via-[#312e81] to-[#1e3a8a] text-white p-8 rounded-[2.5rem] shadow-2xl shadow-indigo-900/30 flex flex-col gap-6 relative overflow-hidden group active:scale-[0.98] transition-all mb-8 border border-white/10"
             >
-                <div className="absolute top-0 right-0 w-48 h-48 bg-indigo-500/10 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none group-
+                <div className="absolute top-0 right-0 w-48 h-48 bg-indigo-500/10 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none group-hover:bg-indigo-400/20 transition-all duration-700"></div>
+                
+                <div className="relative z-10 flex items-start justify-between">
+                    <div className="bg-white/10 p-3 rounded-2xl border border-white/10 backdrop-blur-md">
+                        <Store className="w-8 h-8 text-indigo-300" />
+                    </div>
+                    <div className="bg-[#1E5BFF] px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider shadow-lg border border-white/10">
+                        Painel Parceiro
+                    </div>
+                </div>
+
+                <div className="relative z-10 text-left">
+                    <h3 className="text-2xl font-bold mb-1 font-display">Minha Loja</h3>
+                    <p className="text-indigo-200 text-sm font-medium">Gerencie vendas, cashback e anúncios.</p>
+                </div>
+            </button>
+        )}
+
+        <SectionTitle title="Minha Conta" />
+        <div className="space-y-3 mt-2">
+            <MenuItem 
+                icon={Heart} 
+                label="Favoritos" 
+                onClick={() => onNavigate('favorites')} 
+                colorClass="bg-red-100 text-red-600 dark:bg-red-900/20 dark:text-red-400"
+            />
+             <MenuItem 
+                icon={Coins} 
+                label="Meus Prêmios" 
+                onClick={() => onNavigate('prize_history')} 
+                colorClass="bg-yellow-100 text-yellow-600 dark:bg-yellow-900/20 dark:text-yellow-400"
+            />
+             <MenuItem 
+                icon={Share2} 
+                label="Indique e Ganhe" 
+                onClick={() => onNavigate('invite_friend')} 
+                colorClass="bg-green-100 text-green-600 dark:bg-green-900/20 dark:text-green-400"
+                subLabel="Em breve"
+            />
+        </div>
+
+        <SectionTitle title="Suporte & Sobre" />
+        <div className="space-y-3 mt-2">
+            <MenuItem 
+                icon={Headphones} 
+                label="Suporte" 
+                onClick={() => onNavigate('support')} 
+                colorClass="bg-blue-100 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400"
+            />
+            <MenuItem 
+                icon={Info} 
+                label="Sobre o App" 
+                onClick={() => onNavigate('about')} 
+                colorClass="bg-purple-100 text-purple-600 dark:bg-purple-900/20 dark:text-purple-400"
+            />
+        </div>
+
+        <SectionTitle title="Configurações" />
+        <div className="space-y-3 mt-2">
+            <button 
+                onClick={() => onThemeChange && onThemeChange(currentTheme === 'dark' ? 'light' : 'dark')}
+                className="w-full bg-white dark:bg-gray-800 p-4 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 flex items-center justify-between group active:scale-[0.98] transition-transform"
+            >
+                <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300">
+                        {currentTheme === 'dark' ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
+                    </div>
+                    <div className="text-left">
+                        <span className="block font-semibold text-gray-800 dark:text-gray-100 text-sm">Tema</span>
+                        <span className="block text-xs text-gray-400 mt-0.5">
+                            {currentTheme === 'dark' ? 'Escuro' : 'Claro'}
+                        </span>
+                    </div>
+                </div>
+            </button>
+
+             <button 
+                onClick={handleLogout}
+                disabled={isLoggingOut}
+                className="w-full bg-red-50 dark:bg-red-900/10 p-4 rounded-2xl border border-red-100 dark:border-red-900/30 flex items-center gap-4 active:scale-[0.98] transition-transform"
+             >
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400">
+                    {isLoggingOut ? <Loader2 className="w-5 h-5 animate-spin" /> : <LogOut className="w-5 h-5" />}
+                </div>
+                <span className="font-bold text-red-600 dark:text-red-400 text-sm">Sair da conta</span>
+            </button>
+        </div>
+
+        {/* Master Sponsor in Menu */}
+        <div className="mt-8">
+            <MasterSponsorBanner onClick={() => onNavigate('patrocinador_master')} />
+        </div>
+
+        <div className="mt-8 text-center pb-8">
+            <p className="text-[10px] font-black text-gray-300 dark:text-gray-600 uppercase tracking-[0.3em]">
+                Localizei JPA v1.0.4
+            </p>
+        </div>
+
+      </div>
+    </div>
+  );
+};

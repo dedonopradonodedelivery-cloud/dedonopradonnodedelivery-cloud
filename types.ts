@@ -30,6 +30,7 @@ export interface Store {
 
   rating: number;
   distance: string; // Legacy distance string
+  neighborhood?: string; // New field for filtering
   adType: AdType;
   description: string;
   cashback?: number; // Percentage
@@ -72,6 +73,7 @@ export interface CommunityPost {
   videoUrl?: string; // Suporte a vídeo curto
   relatedStoreId?: string; // ID da loja se houver
   relatedStoreName?: string; // Nome da loja para display rápido
+  neighborhood?: string; // New field for filtering
   likes: number;
   comments: number;
   type: CommunityPostType;

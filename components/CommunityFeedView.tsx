@@ -1,14 +1,19 @@
 
-import React, { useState, useEffect, useRef } from 'react';
-import { Search, Store as StoreIcon, MoreHorizontal, Send, Heart, Share2, MessageCircle, ChevronLeft, BadgeCheck, User as UserIcon, Home, Plus, X, Video, Image as ImageIcon, Film, Loader2, Grid, Camera, Play, Check, ChevronRight, Briefcase, MapPin, Clock, DollarSign, ExternalLink, AlertCircle, Building2, Trash2, Flag, Bookmark } from 'lucide-react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
+import { Search, Store as StoreIcon, MoreHorizontal, Send, Heart, Share2, MessageCircle, ChevronLeft, BadgeCheck, User as UserIcon, Home, Plus, X, Video, Image as ImageIcon, Film, Loader2, Grid, Camera, Play, Check, ChevronRight, Briefcase, MapPin, Clock, DollarSign, ExternalLink, AlertCircle, Building2, Trash2, Flag, Bookmark, ChevronDown } from 'lucide-react';
 import { Store, CommunityPost, Job } from '../types';
 import { MOCK_COMMUNITY_POSTS, MOCK_JOBS } from '../constants';
+import { useNeighborhood, NEIGHBORHOODS } from '../contexts/NeighborhoodContext';
 
 interface CommunityFeedViewProps {
   onStoreClick: (store: Store) => void;
   user: any;
   onRequireLogin: () => void;
 }
+
+// ... (KEEP EXISTING MOCK DATA: MOCK_STORIES, MOCK_CHATS, MOCK_NOTIFICATIONS, MOCK_MESSAGES_HISTORY) ...
+// Reuse the existing mock data from the file provided in context to avoid duplication in this response.
+// Assuming the user handles the full file replacement, I will include the full file with modifications.
 
 // --- MOCK DATA ---
 
@@ -86,7 +91,8 @@ const MOCK_MESSAGES_HISTORY: Record<number, { id: number; text: string; sender: 
   ]
 };
 
-// --- SUB-COMPONENTS ---
+// ... (KEEP SUB-COMPONENTS: StoryViewer, DeleteConfirmationModal, ChatScreen, CreatePostScreen, ActivityScreen, UserProfileScreen, JobsFeedScreen, CommunityExploreScreen, StoriesRail, CommentsModal) ...
+// For brevity, I'll include the necessary parts and the `FeedPost` which needs updating.
 
 const StoryViewer: React.FC<{ initialStoryIndex: number; onClose: () => void }> = ({ initialStoryIndex, onClose }) => {
   const [currentIndex, setCurrentIndex] = useState(initialStoryIndex);
@@ -281,31 +287,45 @@ const UserProfileScreen: React.FC<{ user: any }> = ({ user }) => (
     </div>
 );
 
-const JobsFeedScreen: React.FC<{ user: any; onRequireLogin: () => void }> = ({ user, onRequireLogin }) => (
-    <div className="bg-gray-50 dark:bg-gray-900 min-h-full pb-20">
-        <div className="p-4 bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800">
-            <h2 className="font-bold text-lg dark:text-white">Vagas na Freguesia</h2>
-        </div>
-        <div className="p-4 space-y-4">
-            {MOCK_JOBS.map(job => (
-                <div key={job.id} className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
-                    <div className="flex justify-between items-start mb-2">
-                        <div>
-                            <h3 className="font-bold text-gray-900 dark:text-white">{job.role}</h3>
-                            <p className="text-sm text-gray-500">{job.company}</p>
+const JobsFeedScreen: React.FC<{ user: any; onRequireLogin: () => void }> = ({ user, onRequireLogin }) => {
+    const { currentNeighborhood, isAll } = useNeighborhood();
+    const filteredJobs = MOCK_JOBS.filter(job => isAll || job.neighborhood === currentNeighborhood);
+
+    return (
+        <div className="bg-gray-50 dark:bg-gray-900 min-h-full pb-20">
+            <div className="p-4 bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800">
+                <h2 className="font-bold text-lg dark:text-white">
+                    Vagas em {currentNeighborhood === 'Jacarepaguá (todos)' ? 'Jacarepaguá' : currentNeighborhood}
+                </h2>
+            </div>
+            <div className="p-4 space-y-4">
+                {filteredJobs.length > 0 ? (
+                    filteredJobs.map(job => (
+                        <div key={job.id} className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
+                            <div className="flex justify-between items-start mb-2">
+                                <div>
+                                    <h3 className="font-bold text-gray-900 dark:text-white">{job.role}</h3>
+                                    <p className="text-sm text-gray-500">{job.company}</p>
+                                </div>
+                                <span className="text-[10px] font-bold bg-blue-100 text-blue-700 px-2 py-1 rounded-md">{job.type}</span>
+                            </div>
+                            <div className="flex gap-3 text-xs text-gray-500 dark:text-gray-400 mt-2">
+                                <span className="flex items-center gap-1"><MapPin className="w-3 h-3" /> {job.neighborhood}</span>
+                                <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> {job.postedAt}</span>
+                            </div>
+                            <button onClick={() => alert("Detalhes da vaga")} className="mt-3 w-full py-2 border border-gray-200 dark:border-gray-700 rounded-lg text-sm font-bold text-gray-700 dark:text-gray-200">Ver detalhes</button>
                         </div>
-                        <span className="text-[10px] font-bold bg-blue-100 text-blue-700 px-2 py-1 rounded-md">{job.type}</span>
+                    ))
+                ) : (
+                    <div className="text-center py-10 text-gray-500 dark:text-gray-400">
+                        <Briefcase className="w-10 h-10 mx-auto mb-2 opacity-50" />
+                        <p>Nenhuma vaga encontrada em {currentNeighborhood}.</p>
                     </div>
-                    <div className="flex gap-3 text-xs text-gray-500 dark:text-gray-400 mt-2">
-                        <span className="flex items-center gap-1"><MapPin className="w-3 h-3" /> {job.neighborhood}</span>
-                        <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> {job.postedAt}</span>
-                    </div>
-                    <button onClick={() => alert("Detalhes da vaga")} className="mt-3 w-full py-2 border border-gray-200 dark:border-gray-700 rounded-lg text-sm font-bold text-gray-700 dark:text-gray-200">Ver detalhes</button>
-                </div>
-            ))}
+                )}
+            </div>
         </div>
-    </div>
-);
+    );
+};
 
 const CommunityExploreScreen: React.FC = () => (
     <div className="bg-white dark:bg-gray-900 min-h-full pb-20">
@@ -449,6 +469,7 @@ const FeedPost: React.FC<{
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const isMenuOpen = activeMenuId === post.id;
   const isOwner = currentUserId === post.userId;
+  const { isAll } = useNeighborhood();
 
   const handleLike = () => {
     onLike();
@@ -482,7 +503,18 @@ const FeedPost: React.FC<{
               {post.userUsername || post.userName.toLowerCase().replace(' ', '')}
               {post.authorRole === 'merchant' && <BadgeCheck className="w-3 h-3 text-[#1E5BFF] fill-white" />}
             </h4>
-            {post.authorRole === 'merchant' && <span className="text-[10px] text-gray-500 dark:text-gray-400">Patrocinado</span>}
+            <div className="flex items-center gap-1">
+                {post.authorRole === 'merchant' && <span className="text-[10px] text-gray-500 dark:text-gray-400">Patrocinado</span>}
+                {isAll && post.neighborhood && (
+                    <>
+                        {post.authorRole === 'merchant' && <span className="text-[10px] text-gray-300">•</span>}
+                        <span className="text-[10px] text-gray-400 flex items-center gap-0.5">
+                            <MapPin className="w-2.5 h-2.5" />
+                            {post.neighborhood}
+                        </span>
+                    </>
+                )}
+            </div>
           </div>
         </div>
         
@@ -576,7 +608,7 @@ const FeedPost: React.FC<{
             <MessageCircle className="w-6 h-6 text-gray-900 dark:text-white flip-horizontal" style={{ transform: 'scaleX(-1)' }} />
           </button>
           <button className="active:scale-90 transition-transform">
-            <Send className="w-6 h-6 text-gray-900 dark:text-white -rotate-12" />
+            <Send className="w-6 h-6 text-gray-900 dark:text-white -rotate-12 -mt-1" />
           </button>
         </div>
         <button className="active:scale-90 transition-transform">
@@ -684,7 +716,18 @@ export const CommunityFeedView: React.FC<CommunityFeedViewProps> = ({ onStoreCli
   const [showSuccessToast, setShowSuccessToast] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
   
-  const [posts, setPosts] = useState<CommunityPost[]>(MOCK_COMMUNITY_POSTS);
+  const { currentNeighborhood, isAll, toggleSelector } = useNeighborhood();
+  
+  // Filter posts based on selected neighborhood
+  const filteredPosts = useMemo(() => {
+    return MOCK_COMMUNITY_POSTS.filter(post => isAll || post.neighborhood === currentNeighborhood);
+  }, [currentNeighborhood, isAll]);
+  
+  const [posts, setPosts] = useState<CommunityPost[]>([]);
+  
+  useEffect(() => {
+      setPosts(filteredPosts);
+  }, [filteredPosts]);
   
   const [activeMenuPostId, setActiveMenuPostId] = useState<string | null>(null);
   const [postToDelete, setPostToDelete] = useState<string | null>(null);
@@ -753,19 +796,26 @@ export const CommunityFeedView: React.FC<CommunityFeedViewProps> = ({ onStoreCli
             />
 
             <div className="flex flex-col mt-2">
-              {posts.map(post => (
-                <FeedPost 
-                  key={post.id} 
-                  post={post} 
-                  onLike={() => !user && onRequireLogin()} 
-                  activeMenuId={activeMenuPostId} 
-                  setActiveMenuId={setActiveMenuPostId}
-                  currentUserId={user?.id}
-                  onDeleteRequest={handleRequestDelete}
-                  onReport={handleReport}
-                  onOpenComments={() => user ? setCommentPostId(post.id) : onRequireLogin()}
-                />
-              ))}
+              {posts.length > 0 ? (
+                  posts.map(post => (
+                    <FeedPost 
+                      key={post.id} 
+                      post={post} 
+                      onLike={() => !user && onRequireLogin()} 
+                      activeMenuId={activeMenuPostId} 
+                      setActiveMenuId={setActiveMenuPostId}
+                      currentUserId={user?.id}
+                      onDeleteRequest={handleRequestDelete}
+                      onReport={handleReport}
+                      onOpenComments={() => user ? setCommentPostId(post.id) : onRequireLogin()}
+                    />
+                  ))
+              ) : (
+                  <div className="text-center py-12 px-4">
+                      <p className="text-gray-400">Nenhum post em {currentNeighborhood} ainda.</p>
+                      <button onClick={handleCreatePost} className="mt-4 text-[#1E5BFF] font-bold">Seja o primeiro a postar!</button>
+                  </div>
+              )}
             </div>
           </div>
         );
@@ -885,14 +935,19 @@ export const CommunityFeedView: React.FC<CommunityFeedViewProps> = ({ onStoreCli
             <Plus className="w-6 h-6 text-gray-900 dark:text-white" />
           </button>
           
-          <div className="flex flex-col items-center">
-            <h1 className="font-bold text-lg text-gray-900 dark:text-white font-display flex-1 text-center">
+          <button 
+            onClick={toggleSelector}
+            className="flex flex-col items-center"
+          >
+            <h1 className="font-bold text-lg text-gray-900 dark:text-white font-display flex items-center gap-1">
               Feed – Localizei JPA
             </h1>
-            <p className="text-[10px] text-gray-500 dark:text-gray-400 -mt-1">
-              Novidades dos bairros de Jacarepaguá
-            </p>
-          </div>
+            <div className="flex items-center gap-1 text-[10px] text-gray-500 dark:text-gray-400 -mt-1">
+              <MapPin className="w-2.5 h-2.5" />
+              <span>{currentNeighborhood === 'Jacarepaguá (todos)' ? 'Todo Bairro' : currentNeighborhood}</span>
+              <ChevronDown className="w-2.5 h-2.5" />
+            </div>
+          </button>
           
           <button 
             onClick={handleNotifications}
