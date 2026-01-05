@@ -22,6 +22,7 @@ import {
   BarChart3
 } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
+import { MOCK_JOBS } from '../constants';
 
 interface ServicesViewProps {
   onSelectMacro: (id: string, name: string) => void;
@@ -309,6 +310,8 @@ export const ServicesView: React.FC<ServicesViewProps> = ({ onSelectMacro, onOpe
     return service.name.toLowerCase().includes(term) || service.keywords.some(k => k.toLowerCase().includes(term));
   });
 
+  const hasJobs = MOCK_JOBS.length > 0;
+
   return (
     <div className="min-h-screen bg-[#F7F8FA] dark:bg-gray-900 font-sans animate-in fade-in duration-500 pb-36">
       
@@ -402,6 +405,30 @@ export const ServicesView: React.FC<ServicesViewProps> = ({ onSelectMacro, onOpe
           </h3>
           
           <div className="grid grid-cols-2 gap-3">
+            {/* JOBS ENTRY POINT (Conditional) */}
+            {hasJobs && (
+                <button
+                  onClick={() => onNavigate('jobs_list')}
+                  className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 text-gray-900 dark:text-white border border-blue-100 dark:border-blue-800/30 relative overflow-hidden rounded-[20px] p-4 text-left shadow-sm hover:shadow-md transition-all active:scale-[0.98] group min-h-[130px] flex flex-col justify-between"
+                >
+                  <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-3 bg-white dark:bg-gray-800 text-blue-600 dark:text-blue-400 shadow-sm">
+                    <Briefcase className="w-5 h-5" strokeWidth={2} />
+                  </div>
+                  
+                  <div>
+                    <span className="block font-bold text-base leading-tight mb-1">
+                      Empregos
+                    </span>
+                    <span className="block text-[10px] text-gray-500 dark:text-gray-400 mb-2 font-medium">
+                        Vagas no bairro
+                    </span>
+                    <span className="text-[10px] font-bold flex items-center gap-1 mt-auto text-blue-600 dark:text-blue-400">
+                      Ver vagas <ArrowRight className="w-3 h-3 transition-transform group-hover:translate-x-1" />
+                    </span>
+                  </div>
+                </button>
+            )}
+
             {filteredServices.map((item) => {
               const Icon = item.icon;
               const isEmergency = item.id === 'emergency';
@@ -497,16 +524,14 @@ export const ServicesView: React.FC<ServicesViewProps> = ({ onSelectMacro, onOpe
                         : 'bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700'
                     }
                 `}
-                onClick={() => trackAdMetric('impression', item.id)} // Log impression visually (in code logic it's done on load)
+                onClick={() => trackAdMetric('impression', item.id)} 
               >
-                {/* Premium Badge */}
                 {item.isPremium && (
                     <div className="absolute top-0 right-0 bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 text-[9px] font-bold px-2 py-1 rounded-bl-xl rounded-tr-xl border-l border-b border-blue-200 dark:border-blue-800/50 uppercase tracking-wide flex items-center gap-1">
                         <BarChart3 className="w-3 h-3" /> Patrocinado
                     </div>
                 )}
 
-                {/* Header Row */}
                 <div className="flex gap-3 items-start mt-1">
                   <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 text-lg font-bold ${item.isPremium ? 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' : 'bg-gray-100 text-gray-400 dark:bg-gray-700'}`}>
                     {item.name.charAt(0)}
@@ -525,7 +550,6 @@ export const ServicesView: React.FC<ServicesViewProps> = ({ onSelectMacro, onOpe
                   </div>
                 </div>
 
-                {/* Badges Row */}
                 <div className="flex flex-wrap gap-2">
                    <div className="flex items-center gap-1 text-[10px] font-bold text-green-600 bg-green-50 dark:bg-green-900/20 px-2 py-1 rounded-md border border-green-100 dark:border-green-800">
                       <Clock className="w-3 h-3" />
@@ -538,7 +562,6 @@ export const ServicesView: React.FC<ServicesViewProps> = ({ onSelectMacro, onOpe
                    ))}
                 </div>
 
-                {/* CTAs Row - Strict Hierarchy */}
                 <div className="flex flex-col gap-2 mt-1">
                   <button 
                     onClick={() => {
@@ -561,7 +584,6 @@ export const ServicesView: React.FC<ServicesViewProps> = ({ onSelectMacro, onOpe
                   )}
                 </div>
 
-                {/* Trust Micro-copy */}
                 <div className="flex justify-center">
                   <p className="text-[9px] text-gray-400 font-medium flex items-center gap-1">
                     <ShieldCheck className="w-2.5 h-2.5" /> Contato direto, sem compromisso
@@ -619,7 +641,6 @@ export const ServicesView: React.FC<ServicesViewProps> = ({ onSelectMacro, onOpe
               </button>
             </div>
             
-            {/* Decorative Shield */}
             <div className="absolute -right-6 -bottom-6 opacity-[0.05] pointer-events-none rotate-12">
                <Shield className="w-48 h-48 text-white" />
             </div>

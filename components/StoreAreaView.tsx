@@ -20,7 +20,8 @@ import {
   QrCode,
   Tag,
   Rocket,
-  ArrowRight
+  ArrowRight,
+  Briefcase
 } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import { User } from '@supabase/supabase-js';
@@ -288,6 +289,12 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
                     label="Promoção da Semana" 
                     highlight={true}
                     onClick={() => onNavigate && onNavigate('weekly_promo')}
+                />
+                <MenuLink 
+                    icon={Briefcase} 
+                    label="Vagas de Emprego" 
+                    highlight={true}
+                    onClick={() => onNavigate && onNavigate('merchant_jobs')}
                 />
                 <MenuLink icon={Settings} label="Minha Loja (Perfil Público)" onClick={() => onNavigate && onNavigate('store_profile')} />
                 <MenuLink icon={CreditCard} label="Minha conta / Financeiro" onClick={() => onNavigate && onNavigate('store_finance')} />

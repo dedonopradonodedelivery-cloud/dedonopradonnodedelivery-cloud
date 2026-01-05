@@ -16,13 +16,15 @@ import {
   X,
   Sparkles,
   Timer,
-  Tag
+  Tag,
+  Briefcase,
+  Coins
 } from 'lucide-react';
 import { LojasEServicosList } from './LojasEServicosList';
 import { User } from '@supabase/supabase-js';
 import { SpinWheelView } from './SpinWheelView';
 import { MasterSponsorBanner } from './MasterSponsorBanner';
-import { CATEGORIES, STORES } from '../constants';
+import { CATEGORIES, STORES, MOCK_JOBS } from '../constants';
 import { RecomendadosPorMoradores } from './RecomendadosPorMoradores';
 
 interface HomeFeedProps {
@@ -88,7 +90,7 @@ const WEEKLY_PROMOS = [
 
 // --- LOGICA DO CARROSSEL ---
 
-type BannerType = 'standard' | 'premium_grid';
+type BannerType = 'standard' | 'premium_grid' | 'jobs';
 
 interface BannerItem {
   id: string;
@@ -106,9 +108,9 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void }> = ({ onNavigat
   const [currentIndex, setCurrentIndex] = useState(0);
   const [progress, setProgress] = useState(0);
 
-  // 1. Filtrar lojas premium para o Banner 4
+  // 1. Filtrar lojas premium para o Banner (fallback se não tiver vagas)
   const premiumStores = useMemo(() => {
-    return STORES.filter(s => s.adType === AdType.PREMIUM).slice(0, 6); // Max 6 logos
+    return STORES.filter(s => s.adType === AdType.PREMIUM).slice(0, 6); 
   }, []);
 
   // 2. Construir lista de banners
@@ -146,8 +148,19 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void }> = ({ onNavigat
       }
     ];
 
-    // Adiciona Banner 4 somente se houver lojas premium
-    if (premiumStores.length > 0) {
+    // Banner 4: Jobs se houver, senão Premium
+    if (MOCK_JOBS.length > 0) {
+      list.push({
+        id: 'b4-jobs',
+        type: 'jobs',
+        title: 'Vagas de emprego no seu bairro',
+        subtitle: 'Lojas e serviços contratando perto de você',
+        target: 'jobs_list',
+        image: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?q=80&w=800&auto=format&fit=crop',
+        tag: 'Oportunidade',
+        tagColor: 'bg-blue-600'
+      });
+    } else if (premiumStores.length > 0) {
       list.push({
         id: 'b4-premium',
         type: 'premium_grid',
@@ -167,7 +180,7 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void }> = ({ onNavigat
           setCurrentIndex((current) => (current + 1) % banners.length);
           return 0;
         }
-        return prev + 0.4; // ~8 seconds duration (slower)
+        return prev + 0.4; 
       });
     }, 30);
     return () => clearInterval(interval);
@@ -195,7 +208,7 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void }> = ({ onNavigat
       >
         
         {/* --- CONTEÚDO CONDICIONAL --- */}
-        {current.type === 'standard' ? (
+        {current.type === 'standard' || current.type === 'jobs' ? (
           <>
             <img 
               key={current.image}
@@ -203,7 +216,7 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void }> = ({ onNavigat
               className="absolute inset-0 w-full h-full object-cover opacity-80 animate-in fade-in zoom-in-50 duration-[1500ms]"
               alt={current.title}
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-900/50 to-transparent opacity-90"></div>
+            <div className={`absolute inset-0 bg-gradient-to-t ${current.type === 'jobs' ? 'from-blue-950 via-blue-900/50' : 'from-slate-950 via-slate-900/50'} to-transparent opacity-90`}></div>
             
             <div className="absolute inset-0 p-6 flex flex-col justify-end z-20 pb-10">
               <div className="flex items-center gap-2 mb-2">
@@ -220,13 +233,11 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void }> = ({ onNavigat
             </div>
           </>
         ) : (
-          /* --- LAYOUT PREMIUM GRID (BANNER 4) --- */
+          /* --- LAYOUT PREMIUM GRID (FALLBACK) --- */
           <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-slate-800 to-black flex flex-col items-center justify-center p-6 animate-in fade-in duration-500">
-             {/* Background Effects */}
              <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 rounded-full blur-3xl pointer-events-none"></div>
              <div className="absolute bottom-0 left-0 w-32 h-32 bg-blue-500/10 rounded-full blur-3xl pointer-events-none"></div>
 
-             {/* Tag Patrocinado */}
              <div className="absolute top-4 right-4 bg-white/10 backdrop-blur-md px-2.5 py-1 rounded-lg border border-white/10">
                 <p className="text-[8px] font-black text-white/70 uppercase tracking-widest flex items-center gap-1">
                    <Crown className="w-2.5 h-2.5 text-amber-400 fill-amber-400" />
@@ -234,7 +245,6 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void }> = ({ onNavigat
                 </p>
              </div>
 
-             {/* Grid de Logos */}
              <div className="w-full grid grid-cols-4 gap-3 items-center justify-center">
                 {current.premiumStores?.map((store, idx) => (
                    <div key={idx} className="aspect-square bg-white rounded-xl flex items-center justify-center p-2 shadow-lg opacity-90 group-hover:opacity-100 transition-opacity">
@@ -245,7 +255,7 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void }> = ({ onNavigat
           </div>
         )}
 
-        {/* Progress Bar Indicator - Bottom Position */}
+        {/* Progress Bar Indicator */}
         <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 z-30 w-1/3 justify-center">
           {banners.map((_, idx) => (
             <div key={idx} className="h-1 flex-1 bg-white/20 rounded-full overflow-hidden backdrop-blur-sm cursor-pointer" onClick={(e) => { e.stopPropagation(); setCurrentIndex(idx); setProgress(0); }}>
@@ -257,7 +267,7 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void }> = ({ onNavigat
           ))}
         </div>
 
-        {/* Invisible Click Areas for Navigation */}
+        {/* Invisible Click Areas */}
         <div className="absolute inset-y-0 left-0 w-1/6 z-20" onClick={handlePrev}></div>
         <div className="absolute inset-y-0 right-0 w-1/6 z-20" onClick={handleNext}></div>
       </div>
@@ -267,7 +277,6 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void }> = ({ onNavigat
 
 // --- COMPONENTE PROMOÇÕES DA SEMANA ---
 const WeeklyPromosSection: React.FC<{ onNavigate: (v: string) => void }> = ({ onNavigate }) => {
-  // Filtrar e Ordenar: Apenas > 15%, ordenar por maior desconto
   const validPromos = useMemo(() => {
     return WEEKLY_PROMOS
       .filter(p => p.discount >= 15)
@@ -381,6 +390,17 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
     { id: 'rec-2', nome: 'Pet Shop Araguaia', categoria: 'Pets', texto: 'Tratam os cachorros com um carinho que nunca vi antes.', totalRecomendacoes: 98 },
   ];
 
+  const getCategoryCover = (category: string) => {
+    switch (category) {
+      case 'Alimentação': return 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=400&auto=format&fit=crop';
+      case 'Pets': return 'https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?q=80&w=400&auto=format&fit=crop';
+      case 'Beleza': return 'https://images.unsplash.com/photo-1560066984-138dadb4c035?q=80&w=400&auto=format&fit=crop';
+      case 'Saúde': return 'https://images.unsplash.com/photo-1505751172876-fa1923c5c528?q=80&w=400&auto=format&fit=crop';
+      case 'Mercado': return 'https://images.unsplash.com/photo-1542838132-92c53300491e?q=80&w=400&auto=format&fit=crop';
+      default: return 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=400&auto=format&fit=crop';
+    }
+  };
+
   const renderSection = (key: string) => {
     switch (key) {
       case 'categories':
@@ -459,30 +479,57 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
             </div>
             
             <div className="flex gap-3 overflow-x-auto no-scrollbar px-5 pb-6 snap-x">
-              {stores.filter(s => s.cashback && s.cashback > 0).map((store) => (
+              {stores
+                .filter(s => s.cashback && s.cashback > 0)
+                .sort((a, b) => (b.cashback || 0) - (a.cashback || 0))
+                .map((store) => (
                 <button
                   key={store.id}
                   onClick={() => onStoreClick?.(store)}
-                  className="flex flex-col items-center justify-between p-3 min-w-[120px] max-w-[120px] bg-white dark:bg-gray-800 rounded-2xl shadow-[0_4px_12px_-2px_rgba(0,0,0,0.08)] border border-gray-100 dark:border-gray-700 active:scale-95 transition-all duration-300 group snap-center"
+                  className="snap-center min-w-[160px] max-w-[160px] flex flex-col bg-white dark:bg-gray-800 rounded-[20px] shadow-[0_2px_8px_rgba(0,0,0,0.06)] dark:shadow-none border border-gray-100 dark:border-gray-700 overflow-hidden group active:scale-[0.98] transition-all"
                 >
-                   {/* Logo Area with Squircle Shape */}
-                   <div className="w-14 h-14 rounded-2xl bg-gray-50 dark:bg-gray-900/50 p-1 mb-2 group-hover:scale-105 transition-transform duration-300 shadow-inner">
-                      <img src={store.logoUrl} className="w-full h-full object-contain rounded-xl" alt={store.name} />
-                   </div>
+                  {/* Image Area */}
+                  <div className="relative h-[110px] w-full overflow-hidden">
+                    <img
+                      src={store.image || getCategoryCover(store.category)}
+                      alt={store.name}
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-90"></div>
 
-                   {/* Content */}
-                   <div className="flex flex-col items-center w-full">
-                      <h4 className="text-xs font-bold text-gray-900 dark:text-gray-100 truncate w-full text-center leading-tight">
+                    {/* Top Badge: Cashback Label */}
+                    <div className="absolute top-2 right-2 bg-black/40 backdrop-blur-md px-2 py-0.5 rounded-md border border-white/10">
+                      <span className="text-[8px] font-bold text-white uppercase tracking-wider flex items-center gap-1">
+                        <Coins className="w-2.5 h-2.5 text-emerald-400" />
+                        Cashback
+                      </span>
+                    </div>
+
+                    {/* Bottom Badge: Percentage */}
+                    <div className="absolute bottom-2 left-2">
+                      <div className="bg-emerald-600 text-white px-2 py-1 rounded-lg shadow-lg flex items-center gap-0.5 border border-emerald-500/50">
+                        <span className="text-[14px] font-black tracking-tighter">{store.cashback}% de volta</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Info Area */}
+                  <div className="p-3 flex flex-col flex-1 justify-between text-left h-full">
+                    <div>
+                      <h4 className="font-bold text-gray-900 dark:text-white text-xs leading-tight line-clamp-2 mb-1">
                         {store.name}
                       </h4>
-                      
-                      {/* Elegant Badge (Pill) */}
-                      <div className="mt-2 flex items-center gap-1 bg-emerald-50 dark:bg-emerald-900/20 px-2.5 py-1 rounded-lg border border-emerald-100 dark:border-emerald-800/50">
-                         <span className="text-[10px] font-black text-emerald-600 dark:text-emerald-400 whitespace-nowrap tracking-wide">
-                           {store.cashback}% de volta
-                         </span>
-                      </div>
-                   </div>
+                      <p className="text-[10px] text-gray-500 dark:text-gray-400 font-medium truncate">
+                        {store.category}
+                      </p>
+                    </div>
+
+                    <div className="mt-2 pt-2 border-t border-gray-100 dark:border-gray-700 flex items-center">
+                      <p className="text-[9px] font-medium text-gray-400 dark:text-gray-500 leading-tight">
+                        Receba {store.cashback}% de volta ao comprar aqui
+                      </p>
+                    </div>
+                  </div>
                 </button>
               ))}
             </div>

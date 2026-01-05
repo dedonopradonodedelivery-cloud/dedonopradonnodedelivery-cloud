@@ -27,11 +27,12 @@ import { QuoteRequestModal } from './components/QuoteRequestModal';
 import { StoreAreaView } from './components/StoreAreaView';
 import { MerchantQrScreen } from './components/MerchantQrScreen';
 import { WeeklyPromoModule } from './components/WeeklyPromoModule';
+import { JobsView } from './components/JobsView';
+import { MerchantJobsModule } from './components/MerchantJobsModule';
 import { MapPin, Crown, X, Star } from 'lucide-react';
 import { useAuth } from './contexts/AuthContext';
 import { Category, Store, AdType, EditorialCollection } from './types';
 import { getStoreLogo } from './utils/mockLogos';
-// import { CategoriaAlimentacao } from './components/CategoriaAlimentacao'; // Removed specific component
 import { CategoryView } from './components/CategoryView';
 import { EditorialListView } from './components/EditorialListView';
 import { UserStatementView } from './components/UserStatementView';
@@ -104,7 +105,6 @@ const App: React.FC = () => {
 
   const handleSelectCategory = (category: Category) => {
     setSelectedCategory(category);
-    // Unified navigation to generic category view for ALL categories
     setActiveTab('category_detail'); 
   };
   
@@ -126,7 +126,7 @@ const App: React.FC = () => {
     'service_subcategories', 'service_specialties', 'service_terms', 'service_success',
     'user_statement', 'merchant_cashback_dashboard', 'merchant_cashback_onboarding',
     'store_cashback_module', 'store_ads_module', 'about', 'support', 'invite_friend', 'favorites',
-    'weekly_promo'
+    'weekly_promo', 'jobs_list', 'merchant_jobs'
   ];
 
   // UX ENGINEER: Ocultamos a barra de navegação no fluxo de anúncios para evitar 
@@ -198,6 +198,8 @@ const App: React.FC = () => {
             {activeTab === 'store_profile' && <StoreProfileEdit onBack={() => setActiveTab('store_area')} />}
             {activeTab === 'store_finance' && <StoreFinanceModule onBack={() => setActiveTab('store_area')} />}
             {activeTab === 'weekly_promo' && <WeeklyPromoModule onBack={() => setActiveTab('store_area')} />}
+            {activeTab === 'merchant_jobs' && <MerchantJobsModule onBack={() => setActiveTab('store_area')} />}
+            {activeTab === 'jobs_list' && <JobsView onBack={() => setActiveTab('home')} />}
             {activeTab === 'about' && <AboutView onBack={() => setActiveTab('profile')} />}
             {activeTab === 'support' && <SupportView onBack={() => setActiveTab('profile')} />}
             {activeTab === 'invite_friend' && <InviteFriendView onBack={() => setActiveTab('profile')} />}
@@ -217,7 +219,6 @@ const App: React.FC = () => {
             {activeTab === 'store_area' && (userRole === 'lojista' ? <StoreAreaView onBack={() => setActiveTab('home')} onNavigate={setActiveTab} user={user as any} /> : <FreguesiaConnectRestricted onBack={() => setActiveTab('home')} />)}
             {activeTab === 'merchant_qr' && (userRole === 'lojista' ? <MerchantQrScreen user={user} onBack={() => setActiveTab('home')} /> : <FreguesiaConnectRestricted onBack={() => setActiveTab('home')} />)}
             
-            {/* Unified Category View for ALL categories */}
             {activeTab === 'category_detail' && selectedCategory && (
                 <CategoryView 
                     category={selectedCategory} 

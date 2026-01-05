@@ -8,7 +8,7 @@ import {
   Stethoscope, Package, Clock, Target, Settings, Dog,
   Star, Tag, Award, TrendingUp, ChevronRight
 } from 'lucide-react';
-import { AdType, Category, Store, Story, EditorialCollection } from './types';
+import { AdType, Category, Store, Story, EditorialCollection, Job } from './types';
 import { getStoreLogo } from './utils/mockLogos';
 
 export const CATEGORIES: Category[] = [
@@ -93,6 +93,49 @@ export const STORES: Store[] = [
     phone: '(21) 98888-2222',
     verified: true,
   },
+];
+
+export const MOCK_JOBS: Job[] = [
+  {
+    id: 'job-1',
+    role: 'Atendente de Balcão',
+    company: 'Padaria Imperial',
+    neighborhood: 'Freguesia',
+    type: 'CLT',
+    salary: 'R$ 1.600,00',
+    description: 'Buscamos pessoa comunicativa e ágil para atendimento ao cliente e organização do balcão.',
+    requirements: ['Experiência anterior', 'Disponibilidade tarde/noite', 'Simpatia'],
+    schedule: '14h às 22h (Escala 6x1)',
+    contactWhatsapp: '5521999999999',
+    postedAt: 'Hoje',
+    isUrgent: true
+  },
+  {
+    id: 'job-2',
+    role: 'Manicure e Pedicure',
+    company: 'Studio Belleza',
+    neighborhood: 'Freguesia',
+    type: 'PJ',
+    description: 'Parceria com salão movimentado. Ótimo ambiente e clientela fidelizada.',
+    requirements: ['MEI ativo', 'Material próprio', 'Experiência em unhas de gel'],
+    schedule: 'Horário comercial',
+    contactWhatsapp: '5521988888888',
+    postedAt: 'Ontem',
+  },
+  {
+    id: 'job-3',
+    role: 'Entregador Moto',
+    company: 'Burger Freguesia',
+    neighborhood: 'Freguesia',
+    type: 'Freelancer',
+    salary: 'Taxa + Produtividade',
+    description: 'Entregas na região da Freguesia e Pechincha.',
+    requirements: ['Moto própria', 'CNH A', 'Conhecer a região'],
+    schedule: 'Noite (18h às 23h)',
+    contactWhatsapp: '5521977777777',
+    postedAt: 'Há 2 dias',
+    isUrgent: true
+  }
 ];
 
 export const SUBCATEGORIES: Record<string, { name: string; icon: React.ReactNode }[]> = {

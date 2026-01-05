@@ -137,3 +137,18 @@ export interface EditorialCollection {
   image: string;
   keywords: string[]; 
 }
+
+export interface Job {
+  id: string;
+  role: string;
+  company: string;
+  neighborhood: string;
+  type: 'CLT' | 'PJ' | 'Freelancer' | 'Temporário';
+  salary?: string;
+  description: string;
+  requirements: string[];
+  schedule: string;
+  contactWhatsapp: string;
+  postedAt: string;
+  isUrgent?: boolean;
+}
