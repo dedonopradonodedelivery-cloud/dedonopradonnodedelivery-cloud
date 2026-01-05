@@ -551,77 +551,81 @@ const JobApplicationModal: React.FC<{
   };
 
   return (
-    <div className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm flex items-end justify-center animate-in fade-in duration-300" onClick={onClose}>
+    <div className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200" onClick={onClose}>
       <div 
-        className="bg-white dark:bg-gray-900 w-full max-w-md rounded-t-[2rem] p-6 pb-10 animate-in slide-in-from-bottom duration-300 max-h-[85vh] overflow-y-auto"
+        className="bg-white dark:bg-gray-900 w-full max-w-sm rounded-3xl p-6 shadow-2xl relative animate-in zoom-in-95 duration-200 max-h-[85vh] overflow-hidden flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="w-12 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full mx-auto mb-6"></div>
+        <button 
+          onClick={onClose}
+          className="absolute top-4 right-4 p-2 bg-gray-100 dark:bg-gray-800 rounded-full text-gray-500 hover:text-gray-700 dark:hover:text-white transition-colors z-10"
+        >
+          <X className="w-5 h-5" />
+        </button>
 
-        <div className="mb-6">
-            <div className="flex items-start justify-between mb-2">
-                <span className="inline-block px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-[10px] font-bold uppercase tracking-wider rounded-full">
+        <div className="overflow-y-auto no-scrollbar pb-4 pt-2">
+            <div className="mb-6">
+                <span className="inline-block px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-[10px] font-bold uppercase tracking-wider rounded-full mb-3">
                     {job.type}
                 </span>
-                <span className="text-xs text-gray-400 font-medium">{job.postedAt}</span>
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-white leading-tight mb-1 pr-8">
+                    {job.role}
+                </h2>
+                <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400 font-medium text-sm">
+                    <Building2 className="w-4 h-4" />
+                    {job.company}
+                </div>
             </div>
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white leading-tight mb-1">
-                {job.role}
-            </h2>
-            <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400 font-medium text-sm">
-                <Building2 className="w-4 h-4" />
-                {job.company}
-            </div>
-        </div>
 
-        <div className="grid grid-cols-2 gap-3 mb-6">
-            <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded-xl border border-gray-100 dark:border-gray-700">
-                <div className="flex items-center gap-2 text-gray-400 mb-1">
-                    <MapPin className="w-3.5 h-3.5" />
-                    <span className="text-[10px] font-bold uppercase tracking-wider">Local</span>
-                </div>
-                <p className="text-sm font-semibold text-gray-800 dark:text-gray-200">{job.neighborhood}</p>
-            </div>
-            <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded-xl border border-gray-100 dark:border-gray-700">
-                <div className="flex items-center gap-2 text-gray-400 mb-1">
-                    <Clock className="w-3.5 h-3.5" />
-                    <span className="text-[10px] font-bold uppercase tracking-wider">Horário</span>
-                </div>
-                <p className="text-sm font-semibold text-gray-800 dark:text-gray-200">{job.schedule}</p>
-            </div>
-            {job.salary && (
-                <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded-xl border border-gray-100 dark:border-gray-700 col-span-2">
+            <div className="grid grid-cols-2 gap-3 mb-6">
+                <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded-xl border border-gray-100 dark:border-gray-700">
                     <div className="flex items-center gap-2 text-gray-400 mb-1">
-                        <DollarSign className="w-3.5 h-3.5" />
-                        <span className="text-[10px] font-bold uppercase tracking-wider">Salário / Remuneração</span>
+                        <MapPin className="w-3.5 h-3.5" />
+                        <span className="text-[10px] font-bold uppercase tracking-wider">Local</span>
                     </div>
-                    <p className="text-sm font-semibold text-gray-800 dark:text-gray-200">{job.salary}</p>
+                    <p className="text-sm font-semibold text-gray-800 dark:text-gray-200">{job.neighborhood}</p>
                 </div>
-            )}
-        </div>
-
-        <div className="space-y-6 mb-8">
-            <div>
-                <h3 className="font-bold text-gray-900 dark:text-white mb-2 text-sm">Descrição</h3>
-                <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
-                    {job.description}
-                </p>
+                <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded-xl border border-gray-100 dark:border-gray-700">
+                    <div className="flex items-center gap-2 text-gray-400 mb-1">
+                        <Clock className="w-3.5 h-3.5" />
+                        <span className="text-[10px] font-bold uppercase tracking-wider">Horário</span>
+                    </div>
+                    <p className="text-sm font-semibold text-gray-800 dark:text-gray-200">{job.schedule}</p>
+                </div>
+                {job.salary && (
+                    <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded-xl border border-gray-100 dark:border-gray-700 col-span-2">
+                        <div className="flex items-center gap-2 text-gray-400 mb-1">
+                            <DollarSign className="w-3.5 h-3.5" />
+                            <span className="text-[10px] font-bold uppercase tracking-wider">Salário / Remuneração</span>
+                        </div>
+                        <p className="text-sm font-semibold text-gray-800 dark:text-gray-200">{job.salary}</p>
+                    </div>
+                )}
             </div>
 
-            <div>
-                <h3 className="font-bold text-gray-900 dark:text-white mb-2 text-sm">Requisitos</h3>
-                <ul className="space-y-2">
-                    {job.requirements.map((req, idx) => (
-                        <li key={idx} className="flex items-start gap-2 text-sm text-gray-600 dark:text-gray-300">
-                            <Check className="w-4 h-4 text-green-500 mt-0.5 shrink-0" />
-                            {req}
-                        </li>
-                    ))}
-                </ul>
+            <div className="space-y-6 mb-2">
+                <div>
+                    <h3 className="font-bold text-gray-900 dark:text-white mb-2 text-sm">Descrição</h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
+                        {job.description}
+                    </p>
+                </div>
+
+                <div>
+                    <h3 className="font-bold text-gray-900 dark:text-white mb-2 text-sm">Requisitos</h3>
+                    <ul className="space-y-2">
+                        {job.requirements.map((req, idx) => (
+                            <li key={idx} className="flex items-start gap-2 text-sm text-gray-600 dark:text-gray-300">
+                                <Check className="w-4 h-4 text-green-500 mt-0.5 shrink-0" />
+                                {req}
+                            </li>
+                        ))}
+                    </ul>
+                </div>
             </div>
         </div>
 
-        <div className="space-y-3">
+        <div className="pt-4 border-t border-gray-100 dark:border-gray-800 space-y-3 mt-auto">
             <button 
                 onClick={() => handleApply('whatsapp')}
                 className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-green-600/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
@@ -631,7 +635,7 @@ const JobApplicationModal: React.FC<{
             </button>
             <button 
                 onClick={() => handleApply('direct')}
-                className="w-full bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white font-bold py-3.5 rounded-xl active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                className="w-full bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white font-bold py-3.5 rounded-xl active:scale-[0.98] transition-all flex items-center justify-center gap-2 hover:bg-gray-200 dark:hover:bg-gray-700"
             >
                 <Send className="w-4 h-4" />
                 Enviar Direct
