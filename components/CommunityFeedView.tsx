@@ -396,8 +396,8 @@ const FeedPost: React.FC<{
 };
 
 const CommunityNavBar: React.FC<{ currentView: string; onChangeView: (view: 'home' | 'direct' | 'explore' | 'profile' | 'jobs') => void; userAvatar?: string; hasUnreadMessages?: boolean; }> = ({ currentView, onChangeView, userAvatar, hasUnreadMessages }) => (
-  <div className="sticky top-[70px] z-20 flex justify-center mb-0 px-4 pointer-events-none w-full">
-    <div className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-md rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 w-full grid grid-cols-5 gap-1 items-center py-1 pointer-events-auto transition-all">
+  <div className="sticky top-[70px] z-20 flex justify-center mb-0 w-full"> {/* px-4 removido daqui */}
+    <div className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-md rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 w-full grid grid-cols-5 gap-1 items-center py-1 px-4 pointer-events-auto transition-all"> {/* px-4 adicionado aqui */}
       <button onClick={() => onChangeView('home')} className={`flex justify-center items-center py-2.5 rounded-xl transition-all w-full ${currentView === 'home' ? 'bg-gray-100 dark:bg-gray-700 text-black dark:text-white' : 'text-gray-400 hover:text-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700/50'}`}>
         <Home className={`w-6 h-6 ${currentView === 'home' ? 'fill-black dark:fill-white' : ''}`} strokeWidth={2} />
       </button>
