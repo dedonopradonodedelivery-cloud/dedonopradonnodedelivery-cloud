@@ -1,7 +1,6 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
 import { 
-  ChevronLeft, 
   BadgeCheck, 
   DollarSign, 
   ShoppingBag, 
@@ -18,7 +17,10 @@ import {
   Tag,
   Briefcase,
   PlayCircle,
-  Megaphone
+  Megaphone,
+  User as UserIcon,
+  Menu,
+  MoreHorizontal
 } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import { User } from '@supabase/supabase-js';
@@ -26,7 +28,7 @@ import { MasterSponsorshipCard } from './MasterSponsorshipCard';
 import { ExplanatoryVideoModal } from './ExplanatoryVideoModal';
 
 interface StoreAreaViewProps {
-  onBack: () => void;
+  onBack: () => void; // Agora funciona como "Open Menu"
   onNavigate?: (view: string) => void;
   user?: User | null;
 }
@@ -49,20 +51,20 @@ const STORE_DATA = {
 
 type DateRange = '7d' | '15d' | '30d' | '90d' | 'custom';
 
-// --- COMPONENTES VISUAIS INTERNOS ---
+// --- COMPONENTES VISUAIS INTERNOS (ATOMICOS) ---
 
-const KPICard: React.FC<{ 
+const StatBlock: React.FC<{ 
   label: string; 
   value: string; 
   trend?: string;
   isPositive?: boolean;
 }> = ({ label, value, trend, isPositive }) => (
-  <div className="bg-white dark:bg-gray-800 p-4 rounded-2xl border border-gray-100 dark:border-gray-700 flex flex-col justify-center h-24 shadow-sm">
+  <div className="flex flex-col px-4 py-3 bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700">
     <p className="text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-wider truncate mb-1">{label}</p>
-    <div className="flex items-end justify-between mt-1">
-        <p className="text-xl font-bold text-gray-900 dark:text-white leading-none tracking-tight">{value}</p>
+    <div className="flex items-baseline gap-2">
+        <p className="text-lg font-black text-gray-900 dark:text-white leading-none tracking-tight">{value}</p>
         {trend && (
-            <span className={`text-[10px] font-bold ${isPositive ? 'text-emerald-500' : 'text-rose-500'} bg-gray-50 dark:bg-gray-700/50 px-1.5 py-0.5 rounded`}>
+            <span className={`text-[9px] font-bold ${isPositive ? 'text-emerald-500' : 'text-rose-500'}`}>
                 {trend}
             </span>
         )}
@@ -70,59 +72,63 @@ const KPICard: React.FC<{
   </div>
 );
 
-const ToolListItem: React.FC<{ 
+const SettingsItem: React.FC<{ 
   icon: React.ElementType; 
   label: string; 
-  subLabel?: string;
   onClick?: () => void;
-  iconColor?: string;
-  hasBorder?: boolean;
-}> = ({ icon: Icon, label, subLabel, onClick, iconColor = "text-gray-400", hasBorder = true }) => (
+  isLast?: boolean;
+  alert?: boolean;
+}> = ({ icon: Icon, label, onClick, isLast, alert }) => (
   <button 
     onClick={onClick}
-    className={`w-full flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors active:scale-[0.99] group ${hasBorder ? 'border-b border-gray-50 dark:border-gray-700' : ''}`}
+    className={`w-full flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors active:scale-[0.99] group ${!isLast ? 'border-b border-gray-100 dark:border-gray-700' : ''}`}
   >
     <div className="flex items-center gap-4">
-      <div className={`w-10 h-10 rounded-xl bg-gray-50 dark:bg-gray-700 flex items-center justify-center ${iconColor}`}>
-        <Icon className="w-5 h-5" />
+      <div className={`w-8 h-8 rounded-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-gray-500 dark:text-gray-400 group-hover:text-[#1E5BFF] transition-colors`}>
+        <Icon className="w-4 h-4" />
       </div>
-      <div className="text-left">
-        <span className="block text-sm font-semibold text-gray-700 dark:text-gray-200">{label}</span>
-        {subLabel && <span className="block text-[10px] text-gray-400 font-medium mt-0.5">{subLabel}</span>}
-      </div>
+      <span className="text-sm font-medium text-gray-700 dark:text-gray-200">{label}</span>
     </div>
-    <ChevronRight className="w-4 h-4 text-gray-300 group-hover:text-blue-500 transition-colors" />
+    <div className="flex items-center gap-2">
+        {alert && <div className="w-2 h-2 rounded-full bg-red-500"></div>}
+        <ChevronRight className="w-4 h-4 text-gray-300 group-hover:text-gray-500 transition-colors" />
+    </div>
   </button>
 );
 
-const GrowthCard: React.FC<{
+const GrowthItem: React.FC<{
     title: string;
-    description: string;
+    subtitle: string;
     icon: React.ElementType;
     onClick: () => void;
     onVideoClick: (e: React.MouseEvent) => void;
-    colorClass: string;
-}> = ({ title, description, icon: Icon, onClick, onVideoClick, colorClass }) => (
-    <div 
-        onClick={onClick}
-        className="w-full bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm flex items-center gap-4 hover:shadow-md transition-all active:scale-[0.99] group cursor-pointer relative overflow-hidden"
-    >
-        <div className={`w-12 h-12 rounded-full flex items-center justify-center shrink-0 ${colorClass}`}>
-            <Icon className="w-6 h-6" />
-        </div>
-        <div className="text-left flex-1 min-w-0">
-            <h4 className="font-bold text-gray-900 dark:text-white text-sm truncate">{title}</h4>
-            <p className="text-[11px] text-gray-500 mt-0.5 leading-tight line-clamp-2">{description}</p>
+    accentColor: string;
+}> = ({ title, subtitle, icon: Icon, onClick, onVideoClick, accentColor }) => (
+    <div className="bg-white dark:bg-gray-800 rounded-2xl p-1 border border-gray-100 dark:border-gray-700 shadow-sm flex flex-col">
+        <div 
+            onClick={onClick}
+            className="flex items-center gap-4 p-4 cursor-pointer active:opacity-80 transition-opacity"
+        >
+            <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${accentColor} bg-opacity-10 text-opacity-100`}>
+                <Icon className={`w-5 h-5 ${accentColor.replace('bg-', 'text-')}`} />
+            </div>
+            <div className="flex-1 min-w-0">
+                <h4 className="font-bold text-gray-900 dark:text-white text-sm">{title}</h4>
+                <p className="text-[11px] text-gray-500 leading-tight">{subtitle}</p>
+            </div>
+            <ChevronRight className="w-4 h-4 text-gray-300" />
         </div>
         
-        {/* Botão de Vídeo Discreto */}
-        <button 
-            onClick={onVideoClick}
-            className="p-2 text-gray-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-full transition-colors z-10"
-            title="Ver vídeo explicativo"
-        >
-            <PlayCircle className="w-5 h-5" />
-        </button>
+        {/* Botão de Vídeo Discreto na base do card */}
+        <div className="px-4 pb-3 pt-0">
+            <button 
+                onClick={onVideoClick}
+                className="flex items-center gap-1.5 text-[10px] font-bold text-gray-400 hover:text-[#1E5BFF] transition-colors w-fit"
+            >
+                <PlayCircle className="w-3 h-3" />
+                Ver como funciona
+            </button>
+        </div>
     </div>
 );
 
@@ -182,46 +188,46 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
   }, [user]);
 
   const formatCurrency = (val: number) => val.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+  const handleMenuClick = onBack;
 
   return (
     <div className="min-h-screen bg-[#F8F9FC] dark:bg-gray-950 font-sans animate-in slide-in-from-right duration-300">
       
-      {/* 1) HEADER */}
+      {/* SEÇÃO 1: HEADER & IDENTIDADE */}
       <div className="bg-white dark:bg-gray-900 px-5 pt-12 pb-6 sticky top-0 z-20 shadow-sm border-b border-gray-100 dark:border-gray-800">
         <div className="flex items-center justify-between mb-4">
-            <button onClick={onBack} className="w-10 h-10 -ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center justify-center text-gray-500 transition-colors">
-                <ChevronLeft className="w-6 h-6" />
+            <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-gray-200 dark:bg-gray-700 overflow-hidden border border-gray-100 dark:border-gray-600 shadow-sm shrink-0">
+                    <img src={STORE_DATA.logo} alt="Logo" className="w-full h-full object-cover" />
+                </div>
+                <div>
+                    <h1 className="text-base font-bold text-gray-900 dark:text-white leading-tight flex items-center gap-1">
+                        {STORE_DATA.name}
+                        {STORE_DATA.isVerified && <BadgeCheck className="w-3.5 h-3.5 text-[#1E5BFF] fill-white" />}
+                    </h1>
+                    <div className="flex items-center gap-1.5 mt-0.5">
+                        <span className="w-1.5 h-1.5 rounded-full bg-green-500"></span>
+                        <span className="text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Loja Online</span>
+                    </div>
+                </div>
+            </div>
+            
+            <button 
+                onClick={handleMenuClick} 
+                className="w-10 h-10 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center justify-center text-gray-500 transition-colors"
+            >
+                <Menu className="w-6 h-6" />
             </button>
-            <div className="flex items-center gap-2">
-                <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-                </span>
-                <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wide">Loja Online</span>
-            </div>
-        </div>
-
-        <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-gray-200 dark:bg-gray-700 overflow-hidden border border-gray-100 dark:border-gray-600 shadow-sm shrink-0">
-                <img src={STORE_DATA.logo} alt="Logo" className="w-full h-full object-cover" />
-            </div>
-            <div>
-                <h1 className="text-xl font-bold text-gray-900 dark:text-white font-display leading-tight flex items-center gap-1">
-                    {STORE_DATA.name}
-                    {STORE_DATA.isVerified && <BadgeCheck className="w-4 h-4 text-[#1E5BFF] fill-white" />}
-                </h1>
-                <p className="text-xs text-gray-500 dark:text-gray-400">Painel do Parceiro</p>
-            </div>
         </div>
       </div>
 
-      <div className="p-5 pb-32 space-y-8">
+      <div className="p-5 pb-32 space-y-10"> {/* Espaçamento vertical aumentado para 40px (space-y-10) */}
         
-        {/* ALERTAS */}
+        {/* ALERTAS (Condicional) */}
         {pendingRequestsCount > 0 && (
             <button 
                 onClick={() => onNavigate && onNavigate('merchant_requests')}
-                className="w-full bg-rose-500 text-white p-4 rounded-2xl shadow-lg shadow-rose-500/20 flex items-center justify-between animate-pulse active:scale-95 transition-transform"
+                className="w-full bg-rose-500 text-white p-4 rounded-2xl shadow-lg shadow-rose-500/20 flex items-center justify-between animate-pulse active:scale-95 transition-transform -mt-4"
             >
                 <div className="flex items-center gap-3">
                     <div className="bg-white/20 p-2 rounded-full"><Bell className="w-5 h-5 text-white" /></div>
@@ -236,31 +242,27 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
             </button>
         )}
 
-        {/* 2) AÇÃO PRINCIPAL: TERMINAL */}
-        <button
-            onClick={() => onNavigate && onNavigate('merchant_panel')}
-            className="w-full bg-gradient-to-r from-[#1E5BFF] to-[#0047FF] text-white p-6 rounded-3xl shadow-xl shadow-blue-500/20 flex items-center justify-between active:scale-[0.98] transition-transform group relative overflow-hidden"
-        >
-            <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-10 -mt-10 blur-2xl pointer-events-none"></div>
-            <div className="flex items-center gap-4 relative z-10">
-                <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/10 shadow-inner">
-                    <QrCode className="w-6 h-6 text-white" />
-                </div>
-                <div className="text-left">
-                    <h3 className="font-bold text-lg leading-none mb-1">Terminal de Caixa</h3>
-                    <p className="text-xs text-blue-100 font-medium">Validar compras e QR Codes</p>
-                </div>
-            </div>
-            <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center group-hover:bg-white/20 transition-colors">
-                <ChevronRight className="w-5 h-5 text-white" />
-            </div>
-        </button>
-
-        {/* 3) KPIs */}
+        {/* SEÇÃO 2: AÇÃO PRINCIPAL (TERMINAL) */}
         <section>
-            <div className="flex items-center justify-between mb-3 px-1">
+            <button
+                onClick={() => onNavigate && onNavigate('merchant_panel')}
+                className="w-full h-32 bg-gradient-to-r from-[#1E5BFF] to-[#0047FF] text-white rounded-[28px] shadow-xl shadow-blue-500/20 flex flex-col justify-center items-center relative overflow-hidden group active:scale-[0.98] transition-all"
+            >
+                <div className="absolute top-0 right-0 w-48 h-48 bg-white/10 rounded-full -mr-16 -mt-16 blur-3xl pointer-events-none"></div>
+                
+                <div className="bg-white/20 p-3 rounded-2xl mb-3 backdrop-blur-sm border border-white/10">
+                    <QrCode className="w-8 h-8 text-white" />
+                </div>
+                <h3 className="font-black text-xl leading-none mb-1 font-display tracking-tight">Terminal de Caixa</h3>
+                <p className="text-xs text-blue-100 font-medium opacity-90">Validar compras e QR Codes</p>
+            </button>
+        </section>
+
+        {/* SEÇÃO 3: VISÃO GERAL (Clean Grid) */}
+        <section>
+            <div className="flex items-center justify-between mb-4 px-1">
                 <h3 className="text-xs font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest flex items-center gap-2">
-                    <LayoutDashboard className="w-3.5 h-3.5" /> Visão Geral
+                    Visão Geral
                 </h3>
                 <div className="flex bg-gray-200 dark:bg-gray-800 p-0.5 rounded-lg">
                     {['7d', '30d'].map((d) => (
@@ -276,75 +278,68 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
             </div>
 
             <div className="grid grid-cols-2 gap-3">
-                <KPICard label="Vendas" value={formatCurrency(currentKpis.sales)} trend="+12%" isPositive />
-                <KPICard label="Cashback Gerado" value={formatCurrency(currentKpis.cashback)} />
-                <KPICard label="Pedidos" value={currentKpis.orders.toString()} />
-                <KPICard label="Novos Clientes" value={`+${currentKpis.customers}`} trend="+5%" isPositive />
+                <StatBlock label="Vendas" value={formatCurrency(currentKpis.sales)} trend="+12%" isPositive />
+                <StatBlock label="Pedidos" value={currentKpis.orders.toString()} />
+                <StatBlock label="Cashback" value={formatCurrency(currentKpis.cashback)} />
+                <StatBlock label="Novos Clientes" value={`+${currentKpis.customers}`} trend="+5%" isPositive />
             </div>
         </section>
 
-        {/* 4) FERRAMENTAS (LISTA) */}
+        {/* SEÇÃO 4: FERRAMENTAS (Lista Limpa) */}
         <section>
-            <h3 className="text-xs font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest ml-1 mb-3">
-                Ferramentas da Loja
+            <h3 className="text-xs font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest ml-1 mb-4">
+                Configurações da Loja
             </h3>
             
-            <div className="rounded-3xl overflow-hidden shadow-sm border border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800">
-                <ToolListItem 
+            <div className="bg-white dark:bg-gray-800 rounded-3xl overflow-hidden shadow-sm border border-gray-100 dark:border-gray-700">
+                <SettingsItem 
                     icon={Tag} 
                     label="Promoção da Semana" 
-                    subLabel="Gerencie ofertas e descontos"
-                    iconColor="text-purple-500"
                     onClick={() => onNavigate && onNavigate('weekly_promo')}
                 />
-                <ToolListItem 
+                <SettingsItem 
                     icon={Briefcase} 
                     label="Vagas de Emprego" 
-                    subLabel="Anuncie oportunidades no bairro"
-                    iconColor="text-amber-500"
                     onClick={() => onNavigate && onNavigate('merchant_jobs')}
                 />
-                <ToolListItem 
+                <SettingsItem 
                     icon={Settings} 
-                    label="Minha Loja (Perfil)" 
-                    subLabel="Fotos, horários e informações"
+                    label="Perfil Público" 
                     onClick={() => onNavigate && onNavigate('store_profile')}
                 />
-                <ToolListItem 
+                <SettingsItem 
                     icon={CreditCard} 
                     label="Financeiro" 
-                    subLabel="Conta bancária e repasses"
                     onClick={() => onNavigate && onNavigate('store_finance')}
                 />
-                <ToolListItem 
+                <SettingsItem 
                     icon={HelpCircle} 
-                    label="Suporte ao Lojista" 
+                    label="Suporte" 
                     onClick={() => onNavigate && onNavigate('store_support')}
-                    hasBorder={false}
+                    isLast
                 />
             </div>
         </section>
 
-        {/* 5) FIDELIZAÇÃO (CASHBACK) */}
+        {/* SEÇÃO 5: FIDELIZAÇÃO (Destaque) */}
         <section>
-            <h3 className="text-xs font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest ml-1 mb-3">
-                Fidelização
-            </h3>
+            <div className="flex items-center justify-between mb-4 px-1">
+                <h3 className="text-xs font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">
+                    Fidelização
+                </h3>
+            </div>
             
-            <div className="bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-sm border border-gray-100 dark:border-gray-700 relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-blue-50 dark:bg-blue-900/10 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none"></div>
-
-                <div className="flex justify-between items-start mb-4 relative z-10">
+            <div className="bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
+                <div className="flex justify-between items-center mb-6">
                     <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-[#1E5BFF]">
+                        <div className="w-10 h-10 rounded-full bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center text-[#1E5BFF]">
                             <TrendingUp className="w-5 h-5" />
                         </div>
                         <div>
-                            <h4 className="font-bold text-gray-900 dark:text-white text-base">Cashback da Loja</h4>
-                            <p className="text-xs text-gray-500 font-medium">Status: {isCashbackEnabled ? <span className="text-green-500 font-bold">Ativo</span> : <span className="text-gray-400">Pausado</span>}</p>
+                            <h4 className="font-bold text-gray-900 dark:text-white text-sm">Cashback Ativo</h4>
+                            <p className="text-xs text-gray-500">Taxa atual: <span className="font-bold text-gray-700 dark:text-gray-300">5%</span></p>
                         </div>
                     </div>
-                    
                     <button 
                         onClick={() => setIsCashbackEnabled(!isCashbackEnabled)}
                         className={`w-12 h-6 rounded-full p-1 transition-colors duration-300 ${isCashbackEnabled ? 'bg-green-500' : 'bg-gray-300 dark:bg-gray-600'}`}
@@ -353,27 +348,16 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
                     </button>
                 </div>
 
-                <div className="flex gap-8 mb-6 relative z-10 pl-2">
-                    <div>
-                        <p className="text-[10px] text-gray-400 uppercase font-bold tracking-wider">Taxa Atual</p>
-                        <p className="font-black text-gray-900 dark:text-white text-2xl">5%</p>
-                    </div>
-                    <div>
-                        <p className="text-[10px] text-gray-400 uppercase font-bold tracking-wider">Retorno Gerado</p>
-                        <p className="font-black text-green-600 text-2xl">R$ 4,5k</p>
-                    </div>
-                </div>
-
-                <div className="flex gap-3 relative z-10">
+                <div className="flex gap-3">
                     <button 
                         onClick={() => onNavigate && onNavigate('store_cashback_module')}
-                        className="flex-1 py-3 rounded-xl bg-blue-600 text-white text-sm font-bold shadow-lg shadow-blue-500/20 active:scale-95 transition-transform"
+                        className="flex-1 bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-white font-bold py-3 rounded-xl text-xs hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
                     >
-                        Gerenciar
+                        Gerenciar Regras
                     </button>
                     <button 
                         onClick={(e) => handleOpenVideo(e, 'cashback')}
-                        className="px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-600 text-gray-500 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                        className="px-4 py-3 rounded-xl border border-gray-100 dark:border-gray-600 text-gray-400 hover:text-[#1E5BFF] transition-colors"
                         title="Ver vídeo explicativo"
                     >
                         <PlayCircle className="w-5 h-5" />
@@ -382,32 +366,31 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
             </div>
         </section>
 
-        {/* 6) CRESCIMENTO (AGRUPADO) */}
+        {/* SEÇÃO 6: CRESCIMENTO (Cards Separados) */}
         <section className="space-y-4">
-            <h3 className="text-xs font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest ml-1 mb-1">
-                Crescimento & Visibilidade
+            <h3 className="text-xs font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest ml-1">
+                Acelerar Crescimento
             </h3>
 
-            <div className="flex flex-col gap-3">
-                <GrowthCard 
+            <div className="grid grid-cols-1 gap-4">
+                <GrowthItem 
                     title="JPA Connect" 
-                    description="Networking exclusivo para lojistas." 
+                    subtitle="Networking exclusivo para lojistas." 
                     icon={Users} 
-                    colorClass="bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400"
+                    accentColor="bg-indigo-600"
                     onClick={() => onNavigate && onNavigate('freguesia_connect_public')}
                     onVideoClick={(e) => handleOpenVideo(e, 'connect')}
                 />
                 
-                <GrowthCard 
+                <GrowthItem 
                     title="Anúncios Patrocinados" 
-                    description="Apareça no topo das buscas." 
+                    subtitle="Apareça no topo das buscas." 
                     icon={Megaphone} 
-                    colorClass="bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400"
+                    accentColor="bg-amber-500"
                     onClick={() => onNavigate && onNavigate('store_ads_module')}
                     onVideoClick={(e) => handleOpenVideo(e, 'ads')}
                 />
 
-                {/* Patrocinador Master */}
                 <div className="pt-2">
                     <MasterSponsorshipCard isAvailable={true} />
                 </div>

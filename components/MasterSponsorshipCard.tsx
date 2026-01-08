@@ -15,7 +15,7 @@ import {
 import { ExplanatoryVideoModal } from './ExplanatoryVideoModal';
 
 interface MasterSponsorshipCardProps {
-  isAvailable?: boolean; // Toggle to test "Occupied" state
+  isAvailable?: boolean; 
 }
 
 export const MasterSponsorshipCard: React.FC<MasterSponsorshipCardProps> = ({ isAvailable = true }) => {
@@ -65,69 +65,56 @@ export const MasterSponsorshipCard: React.FC<MasterSponsorshipCardProps> = ({ is
 
   return (
     <>
-      <div className="bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-sm border border-gray-100 dark:border-gray-700 relative overflow-hidden group hover:border-amber-200 dark:hover:border-amber-900/50 transition-colors">
+      <div className="bg-gradient-to-br from-gray-900 to-black rounded-3xl p-6 shadow-xl border border-gray-800 relative overflow-hidden group">
         
-        {/* Badge Discreto */}
-        <div className="inline-flex items-center gap-1.5 bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 px-2.5 py-1 rounded-md mb-3 border border-amber-100 dark:border-amber-800/30">
-            <Crown className="w-3 h-3" strokeWidth={3} />
-            <span className="text-[9px] font-black uppercase tracking-widest">Exclusivo</span>
-        </div>
+        {/* Shine Effect */}
+        <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none group-hover:bg-amber-500/10 transition-colors duration-700"></div>
 
-        {/* Títulos */}
-        <h3 className="text-lg font-black text-gray-900 dark:text-white font-display leading-tight mb-1">
-            Patrocinador Master – Jacarepaguá
-        </h3>
-        <p className="text-xs text-gray-500 dark:text-gray-400 font-medium mb-5">
-            Sua marca em destaque para toda a região.
-        </p>
-
-        {/* 3 Bullets Curtos */}
-        <ul className="space-y-2 mb-6">
-            {[
-                "Logo no topo do app (Menu & Home)",
-                "Banner fixo na tela Explorar",
-                "Exclusividade no seu segmento"
-            ].map((item, idx) => (
-                <li key={idx} className="flex items-start gap-2.5 text-xs text-gray-600 dark:text-gray-300 font-medium">
-                    <div className="mt-0.5 w-3.5 h-3.5 bg-green-50 dark:bg-green-900/20 rounded-full flex items-center justify-center shrink-0">
-                        <Check className="w-2.5 h-2.5 text-green-600 dark:text-green-400" strokeWidth={3} />
-                    </div>
-                    {item}
-                </li>
-            ))}
-        </ul>
-
-        {/* Bloco de Investimento */}
-        {isAvailable && (
-            <div className="bg-gray-50 dark:bg-gray-900/50 rounded-xl p-4 mb-6 border border-gray-100 dark:border-gray-800">
-                <div className="flex items-baseline gap-1.5">
-                    <span className="text-xs text-gray-500 dark:text-gray-400 font-bold">A partir de</span>
-                    <span className="text-xl font-black text-gray-900 dark:text-white">R$ 2.000</span>
-                    <span className="text-xs text-gray-500 font-bold">/ mês</span>
+        <div className="relative z-10">
+            <div className="flex justify-between items-start mb-4">
+                <div>
+                    <h3 className="text-lg font-black text-white font-display leading-tight mb-1">
+                        Patrocinador Master
+                    </h3>
+                    <p className="text-xs text-gray-400 font-medium">
+                        Destaque máximo em toda a região.
+                    </p>
                 </div>
-                <p className="text-[10px] text-green-600 dark:text-green-400 font-black uppercase tracking-wide mt-1">
-                    Condição de fundador disponível
-                </p>
+                <div className="bg-amber-500/20 p-2 rounded-xl border border-amber-500/30">
+                    <Crown className="w-6 h-6 text-amber-500" />
+                </div>
             </div>
-        )}
 
-        {/* Ações */}
-        <div className="flex flex-col gap-3">
-            <button
-                onClick={() => setIsModalOpen(true)}
-                className="w-full bg-slate-900 hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-gray-100 text-white font-bold py-3.5 rounded-xl shadow-lg active:scale-[0.98] transition-all flex items-center justify-center gap-2 text-sm"
-            >
-                Tenho interesse
-                <ArrowRight className="w-4 h-4" />
-            </button>
-            
-            <button 
-                onClick={() => setShowVideo(true)}
-                className="w-full flex items-center justify-center gap-2 text-xs font-bold text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors py-2"
-            >
-                <PlayCircle className="w-4 h-4" />
-                Ver como funciona
-            </button>
+            <ul className="space-y-2 mb-6">
+                {[
+                    "Logo no topo do app (Menu & Home)",
+                    "Banner fixo na tela Explorar",
+                    "Exclusividade no seu segmento"
+                ].map((item, idx) => (
+                    <li key={idx} className="flex items-start gap-2.5 text-xs text-gray-300 font-medium">
+                        <Check className="w-3.5 h-3.5 text-green-500 mt-0.5" strokeWidth={3} />
+                        {item}
+                    </li>
+                ))}
+            </ul>
+
+            <div className="flex gap-3">
+                <button
+                    onClick={() => setIsModalOpen(true)}
+                    className="flex-1 bg-white hover:bg-gray-100 text-black font-bold py-3 rounded-xl shadow-lg active:scale-[0.98] transition-all flex items-center justify-center gap-2 text-xs uppercase tracking-wide"
+                >
+                    Tenho interesse
+                    <ArrowRight className="w-3.5 h-3.5" />
+                </button>
+                
+                <button 
+                    onClick={() => setShowVideo(true)}
+                    className="px-3 py-3 rounded-xl border border-white/10 text-gray-400 hover:text-white hover:border-white/30 transition-colors flex items-center justify-center"
+                    title="Ver como funciona"
+                >
+                    <PlayCircle className="w-5 h-5" />
+                </button>
+            </div>
         </div>
       </div>
 

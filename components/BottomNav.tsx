@@ -26,10 +26,17 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
     <div className="fixed bottom-0 left-0 right-0 mx-auto w-full max-w-md bg-[#1E5BFF] z-50 h-[80px] rounded-t-[24px] shadow-[0_-5px_30px_rgba(0,0,0,0.2)] border-t border-white/10">
       <div className="flex items-end justify-between w-full px-2 h-full pb-2">
         {navItems.map((tab) => {
-          // Lógica de ativação: Serviços engloba sub-rotas de serviço
-          const isActive = activeTab === tab.id || 
-                           (tab.id === 'services' && activeTab.startsWith('service_')) ||
-                           (tab.id === 'community_feed' && activeTab === 'community_feed');
+          // Lógica de ativação ajustada para Lojistas
+          let isActive = activeTab === tab.id;
+
+          // Se for lojista, a aba 'home' deve ser ativa se estivermos em 'store_area'
+          if (userRole === 'lojista' && tab.id === 'home' && activeTab === 'store_area') {
+            isActive = true;
+          }
+
+          // Lógica de sub-rotas
+          if (tab.id === 'services' && activeTab.startsWith('service_')) isActive = true;
+          if (tab.id === 'community_feed' && activeTab === 'community_feed') isActive = true;
                            
           const Icon = tab.icon;
 
