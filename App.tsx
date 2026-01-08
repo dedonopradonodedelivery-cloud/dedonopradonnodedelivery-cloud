@@ -255,7 +255,7 @@ const App: React.FC = () => {
   };
 
   const headerExclusionList = [
-    'store_area', 'merchant_qr', 'editorial_list', 'store_profile', 'store_finance',
+    'explore', 'store_area', 'merchant_qr', 'editorial_list', 'store_profile', 'store_finance',
     'category_detail', 'food_category', 'store_detail', 'profile', 
     'patrocinador_master', 'prize_history', 'reward_details', 
     'freguesia_connect_public', 'freguesia_connect_dashboard', 'freguesia_connect_restricted',
