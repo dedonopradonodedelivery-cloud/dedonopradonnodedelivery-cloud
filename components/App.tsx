@@ -29,7 +29,7 @@ import { MerchantQrScreen } from './MerchantQrScreen';
 import { WeeklyPromoModule } from './WeeklyPromoModule';
 import { JobsView } from './JobsView';
 import { MerchantJobsModule } from './MerchantJobsModule';
-import { MapPin, Crown, X, Star, Shield, Loader2 } from 'lucide-react';
+import { MapPin, Crown, X, Star, Shield, Loader2, AlertCircle } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { NeighborhoodProvider } from '../contexts/NeighborhoodContext';
 import { Category, Store, AdType, EditorialCollection, ThemeMode } from '../types';
@@ -61,7 +61,7 @@ let isFirstBootAttempted = false;
 const MAIN_TABS = ['home', 'explore', 'qrcode_scan', 'services', 'community_feed', 'store_area'];
 
 const App: React.FC = () => {
-  const { user, userRole, loading: isAuthInitialLoading, signOut } = useAuth();
+  const { user, userRole, loading: isAuthInitialLoading, error: authError, retryAuth, signOut } = useAuth();
   
   // UX ENGINEER: Detecta se estamos voltando de um login com Google (OAuth)
   const isAuthReturn = window.location.hash.includes('access_token') || window.location.search.includes('code=');
@@ -100,10 +100,10 @@ const App: React.FC = () => {
   // --- LÓGICA DE DIRECIONAMENTO DO LOJISTA ---
   useEffect(() => {
     // Só executa essa lógica se a autenticação estiver resolvida e o usuário for lojista
-    if (!isAuthInitialLoading && userRole === 'lojista' && activeTab === 'home') {
+    if (!isAuthInitialLoading && !authError && userRole === 'lojista' && activeTab === 'home') {
       setActiveTab('store_area');
     }
-  }, [userRole, activeTab, isAuthInitialLoading]);
+  }, [userRole, activeTab, isAuthInitialLoading, authError]);
 
   // Ciclo de vida do Splash (Cold Start Only)
   useEffect(() => {
@@ -290,20 +290,34 @@ const App: React.FC = () => {
 
   const hideBottomNav = ['store_ads_module', 'profile', 'store_detail', 'admin_moderation'].includes(activeTab);
 
-  // --- GLOBAL LOADING GUARD ---
-  // Impede renderização da UI principal até que o AuthContext tenha resolvido a sessão e a ROLE do usuário.
-  // Isso previne redirects errados para lojistas.
-  if (isAuthInitialLoading && !minSplashTimeElapsed) {
-    // Se o Splash ainda está rodando, deixamos o Splash lidar.
-    // Mas se o splash acabar e ainda estiver carregando auth, mostramos um loader.
+  // --- ERROR STATE UI ---
+  if (authError && minSplashTimeElapsed) {
+    return (
+      <div className={`min-h-screen flex flex-col items-center justify-center bg-white dark:bg-gray-900 transition-colors duration-300 ${isDarkMode ? 'dark' : ''} p-6 text-center animate-in fade-in`}>
+        <div className="w-16 h-16 bg-red-100 dark:bg-red-900/20 rounded-full flex items-center justify-center mb-4 shadow-sm">
+          <AlertCircle className="w-8 h-8 text-red-500" />
+        </div>
+        <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Erro de Conexão</h2>
+        <p className="text-gray-500 dark:text-gray-400 mb-8 max-w-xs text-sm leading-relaxed">
+          Não foi possível carregar seu perfil. Verifique sua internet e tente novamente.
+        </p>
+        <button 
+          onClick={retryAuth}
+          className="bg-[#1E5BFF] text-white font-bold py-3 px-8 rounded-full shadow-lg shadow-blue-500/20 active:scale-95 transition-transform hover:bg-blue-700"
+        >
+          Tentar Novamente
+        </button>
+      </div>
+    );
   }
-  
+
+  // --- LOADING STATE UI ---
   if (isAuthInitialLoading && minSplashTimeElapsed) {
     return (
         <div className={`min-h-screen flex items-center justify-center bg-white dark:bg-gray-900 transition-colors duration-300 ${isDarkMode ? 'dark' : ''}`}>
             <div className="flex flex-col items-center gap-3">
                 <Loader2 className="w-8 h-8 text-[#1E5BFF] animate-spin" />
-                <p className="text-gray-400 text-xs font-medium animate-pulse">Carregando perfil...</p>
+                <p className="text-gray-400 text-xs font-medium animate-pulse">Carregando...</p>
             </div>
         </div>
     );

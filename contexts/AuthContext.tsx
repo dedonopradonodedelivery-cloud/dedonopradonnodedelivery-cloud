@@ -1,5 +1,5 @@
 
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabaseClient';
 
@@ -8,7 +8,9 @@ interface AuthContextType {
   session: Session | null;
   userRole: 'cliente' | 'lojista' | null;
   loading: boolean;
+  error: Error | null;
   signOut: () => Promise<void>;
+  retryAuth: () => void;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -16,7 +18,9 @@ const AuthContext = createContext<AuthContextType>({
   session: null,
   userRole: null,
   loading: true,
+  error: null,
   signOut: async () => {},
+  retryAuth: () => {},
 });
 
 export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
@@ -24,16 +28,25 @@ export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [userRole, setUserRole] = useState<'cliente' | 'lojista' | null>(null);
   
-  // UX: authResolved controla o Cold Start (boot inicial)
+  // Controls the loading state exposed to the app
   const [authResolved, setAuthResolved] = useState(false);
+  // Controls critical failures that require user retry
+  const [authError, setAuthError] = useState<Error | null>(null);
 
   const fetchUserRole = async (userId: string) => {
     try {
-      const { data } = await supabase
+      const fetchPromise = supabase
         .from('profiles')
         .select('role')
         .eq('id', userId)
         .maybeSingle();
+        
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Profile fetch timeout')), 5000)
+      );
+
+      const result = await Promise.race([fetchPromise, timeoutPromise]) as any;
+      const data = result?.data;
       
       if (data) {
         setUserRole(data.role === 'lojista' ? 'lojista' : 'cliente');
@@ -41,39 +54,73 @@ export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
         setUserRole('cliente'); 
       }
     } catch (error) {
-      console.warn('Erro ao buscar role em background:', error);
-      setUserRole('cliente');
+      console.warn('Erro ou timeout ao buscar role. Usando fallback:', error);
+      setUserRole('cliente'); // Soft fail: let user in as client
     }
   };
 
-  useEffect(() => {
+  const initAuth = useCallback(async () => {
+    setAuthResolved(false);
+    setAuthError(null);
     let mounted = true;
 
-    // Listener para eventos de login/logout
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, currentSession) => {
-      if (!mounted) return;
+    // Failsafe Global: 8 seconds max for the whole process
+    const safetyTimeout = setTimeout(() => {
+      if (mounted && !authResolved) {
+        console.warn("⚠️ Auth initialization timed out. Triggering failsafe.");
+        // If we have no session by now, assumes error/offline
+        setAuthError(new Error("O carregamento demorou muito. Verifique sua conexão."));
+        setAuthResolved(true);
+      }
+    }, 8000);
 
-      // 1. Atualiza estado base da sessão
+    try {
+      const { data, error } = await supabase.auth.getSession();
+      
+      if (error) throw error;
+
+      if (mounted) {
+        setSession(data.session);
+        setUser(data.session?.user ?? null);
+
+        if (data.session?.user) {
+          await fetchUserRole(data.session.user.id);
+        }
+      }
+    } catch (err: any) {
+      console.error("Critical Auth Error:", err);
+      if (mounted) {
+        setAuthError(err);
+      }
+    } finally {
+      if (mounted) {
+        clearTimeout(safetyTimeout);
+        setAuthResolved(true);
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    initAuth();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, currentSession) => {
       setSession(currentSession);
       setUser(currentSession?.user ?? null);
 
-      // 2. Se houver usuário, BUSCA A ROLE E ESPERA
-      if (currentSession?.user) {
-        // Importante: await aqui garante que userRole esteja setado antes de authResolved virar true
+      if (event === 'SIGNED_IN' && currentSession?.user) {
+        setAuthResolved(false); // Briefly lock to fetch role
         await fetchUserRole(currentSession.user.id);
-      } else {
+        setAuthResolved(true);
+      } else if (event === 'SIGNED_OUT') {
         setUserRole(null);
+        setAuthResolved(true);
       }
-      
-      // 3. Só agora libera a UI
-      setAuthResolved(true);
     });
 
     return () => {
-      mounted = false;
       subscription.unsubscribe();
     };
-  }, []);
+  }, [initAuth]);
 
   const signOut = async () => {
     try {
@@ -86,11 +133,10 @@ export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
     }
   };
 
-  // loading é true apenas durante o primeiro check de sessão (Cold Start)
   const loading = !authResolved;
 
   return (
-    <AuthContext.Provider value={{ user, session, userRole, loading, signOut }}>
+    <AuthContext.Provider value={{ user, session, userRole, loading, error: authError, signOut, retryAuth: initAuth }}>
       {children}
     </AuthContext.Provider>
   );
