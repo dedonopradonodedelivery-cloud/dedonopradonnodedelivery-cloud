@@ -980,7 +980,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
   }, []);
 
   return (
-    <div className="flex flex-col bg-white dark:bg-gray-950 w-full max-w-md mx-auto animate-in fade-in duration-500 overflow-x-hidden pb-32">
+    <div className="flex flex-col bg-white dark:bg-gray-950 w-full animate-in fade-in duration-500 overflow-x-hidden pb-32">
       {!activeSearchTerm ? (
         <div className="flex flex-col w-full">
             {homeStructure.map(section => renderSection(section))}
