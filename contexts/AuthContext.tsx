@@ -25,7 +25,6 @@ export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
   const [userRole, setUserRole] = useState<'cliente' | 'lojista' | null>(null);
   
   // UX: authResolved controla o Cold Start (boot inicial)
-  // Uma vez resolvido (true), ele NUNCA mais volta a ser false durante a sessão do browser.
   const [authResolved, setAuthResolved] = useState(false);
 
   const fetchUserRole = async (userId: string) => {
@@ -50,47 +49,23 @@ export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
   useEffect(() => {
     let mounted = true;
 
-    const initAuth = async () => {
-      try {
-        // Busca sessão atual sem bloquear o app por muito tempo
-        const { data } = await supabase.auth.getSession();
-        
-        if (mounted) {
-          const currentSession = data?.session ?? null;
-          setSession(currentSession);
-          setUser(currentSession?.user ?? null);
-          
-          if (currentSession?.user) {
-            await fetchUserRole(currentSession.user.id);
-          }
-        }
-      } catch (err) {
-        console.error("Erro na inicialização do Auth:", err);
-      } finally {
-        if (mounted) setAuthResolved(true);
-      }
-    };
-
-    initAuth();
-
     // Listener para eventos de login/logout
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, currentSession) => {
       if (!mounted) return;
 
-      // Importante: Apenas atualizamos os objetos de estado.
-      // O React cuida de re-renderizar apenas o que depende desses objetos.
-      setUser(currentSession?.user ?? null);
+      // 1. Atualiza estado base da sessão
       setSession(currentSession);
+      setUser(currentSession?.user ?? null);
 
-      if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'INITIAL_SESSION') {
-        if (currentSession?.user) {
-          fetchUserRole(currentSession.user.id);
-        }
-      } else if (event === 'SIGNED_OUT') {
+      // 2. Se houver usuário, BUSCA A ROLE E ESPERA
+      if (currentSession?.user) {
+        // Importante: await aqui garante que userRole esteja setado antes de authResolved virar true
+        await fetchUserRole(currentSession.user.id);
+      } else {
         setUserRole(null);
       }
       
-      // Se por algum motivo o initAuth falhou, o primeiro evento do listener garante a liberação do Splash
+      // 3. Só agora libera a UI
       setAuthResolved(true);
     });
 
@@ -103,7 +78,9 @@ export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
   const signOut = async () => {
     try {
       await supabase.auth.signOut();
-      // O listener onAuthStateChange cuidará de limpar os estados.
+      setUserRole(null);
+      setUser(null);
+      setSession(null);
     } catch (error) {
       console.error("Erro ao realizar logout:", error);
     }

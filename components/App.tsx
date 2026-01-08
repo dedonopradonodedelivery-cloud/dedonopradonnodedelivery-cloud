@@ -29,7 +29,7 @@ import { MerchantQrScreen } from './MerchantQrScreen';
 import { WeeklyPromoModule } from './WeeklyPromoModule';
 import { JobsView } from './JobsView';
 import { MerchantJobsModule } from './MerchantJobsModule';
-import { MapPin, Crown, X, Star, Shield } from 'lucide-react';
+import { MapPin, Crown, X, Star, Shield, Loader2 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { NeighborhoodProvider } from '../contexts/NeighborhoodContext';
 import { Category, Store, AdType, EditorialCollection, ThemeMode } from '../types';
@@ -99,12 +99,11 @@ const App: React.FC = () => {
 
   // --- LÓGICA DE DIRECIONAMENTO DO LOJISTA ---
   useEffect(() => {
-    // Se o usuário for lojista e estiver na Home padrão ou acabou de logar,
-    // redireciona para o Painel do Parceiro (store_area)
-    if (userRole === 'lojista' && activeTab === 'home') {
+    // Só executa essa lógica se a autenticação estiver resolvida e o usuário for lojista
+    if (!isAuthInitialLoading && userRole === 'lojista' && activeTab === 'home') {
       setActiveTab('store_area');
     }
-  }, [userRole, activeTab]);
+  }, [userRole, activeTab, isAuthInitialLoading]);
 
   // Ciclo de vida do Splash (Cold Start Only)
   useEffect(() => {
@@ -290,6 +289,25 @@ const App: React.FC = () => {
   ];
 
   const hideBottomNav = ['store_ads_module', 'profile', 'store_detail', 'admin_moderation'].includes(activeTab);
+
+  // --- GLOBAL LOADING GUARD ---
+  // Impede renderização da UI principal até que o AuthContext tenha resolvido a sessão e a ROLE do usuário.
+  // Isso previne redirects errados para lojistas.
+  if (isAuthInitialLoading && !minSplashTimeElapsed) {
+    // Se o Splash ainda está rodando, deixamos o Splash lidar.
+    // Mas se o splash acabar e ainda estiver carregando auth, mostramos um loader.
+  }
+  
+  if (isAuthInitialLoading && minSplashTimeElapsed) {
+    return (
+        <div className={`min-h-screen flex items-center justify-center bg-white dark:bg-gray-900 transition-colors duration-300 ${isDarkMode ? 'dark' : ''}`}>
+            <div className="flex flex-col items-center gap-3">
+                <Loader2 className="w-8 h-8 text-[#1E5BFF] animate-spin" />
+                <p className="text-gray-400 text-xs font-medium animate-pulse">Carregando perfil...</p>
+            </div>
+        </div>
+    );
+  }
 
   return (
     <div className={isDarkMode ? 'dark' : ''}>
