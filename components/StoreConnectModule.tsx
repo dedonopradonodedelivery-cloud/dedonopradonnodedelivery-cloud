@@ -7,17 +7,17 @@ import {
   Handshake, 
   CheckCircle2, 
   Clock, 
+  Calendar, 
   Download, 
   ExternalLink,
+  Lock,
   Info,
   X,
   Target,
   ShieldCheck,
   TrendingUp,
-  Award,
-  PlayCircle
+  Award
 } from 'lucide-react';
-import { ExplanatoryVideoModal } from './ExplanatoryVideoModal';
 
 interface StoreConnectModuleProps {
   onBack: () => void;
@@ -28,7 +28,6 @@ type MemberStatus = 'inactive' | 'pending' | 'active';
 export const StoreConnectModule: React.FC<StoreConnectModuleProps> = ({ onBack }) => {
   const [status, setStatus] = useState<MemberStatus>('inactive');
   const [showInfoModal, setShowInfoModal] = useState(false);
-  const [showVideo, setShowVideo] = useState(false);
 
   const handleJoinRequest = () => {
     setShowInfoModal(false);
@@ -79,22 +78,13 @@ export const StoreConnectModule: React.FC<StoreConnectModuleProps> = ({ onBack }
                 </li>
               </ul>
 
-              <div className="flex gap-3">
-                <button 
-                    onClick={() => setShowInfoModal(true)}
-                    className="flex-1 bg-white text-indigo-700 font-bold py-3.5 rounded-xl shadow-sm hover:bg-indigo-50 transition-colors flex items-center justify-center gap-2 active:scale-95"
-                >
-                    <Info className="w-4 h-4" />
-                    Entenda como funciona
-                </button>
-                <button
-                    onClick={() => setShowVideo(true)}
-                    className="px-4 bg-white/10 text-white font-bold py-3.5 rounded-xl border border-white/20 hover:bg-white/20 transition-colors flex items-center justify-center"
-                    title="Ver vídeo"
-                >
-                    <PlayCircle className="w-5 h-5" />
-                </button>
-              </div>
+              <button 
+                onClick={() => setShowInfoModal(true)}
+                className="w-full bg-white text-indigo-700 font-bold py-3.5 rounded-xl shadow-sm hover:bg-indigo-50 transition-colors flex items-center justify-center gap-2 active:scale-95"
+              >
+                <Info className="w-4 h-4" />
+                Entenda como funciona
+              </button>
             </div>
           </div>
         )}
@@ -337,14 +327,6 @@ export const StoreConnectModule: React.FC<StoreConnectModuleProps> = ({ onBack }
             </div>
         </div>
       )}
-
-      {/* Video Modal */}
-      <ExplanatoryVideoModal 
-        isOpen={showVideo}
-        onClose={() => setShowVideo(false)}
-        videoUrl="https://videos.pexels.com/video-files/3196024/3196024-sd_640_360_25fps.mp4"
-        title="JPA Connect na prática"
-      />
 
     </div>
   );

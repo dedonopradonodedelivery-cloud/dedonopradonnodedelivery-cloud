@@ -1,5 +1,5 @@
 
-import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
+import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabaseClient';
 
@@ -8,9 +8,7 @@ interface AuthContextType {
   session: Session | null;
   userRole: 'cliente' | 'lojista' | null;
   loading: boolean;
-  error: Error | null;
   signOut: () => Promise<void>;
-  retryAuth: () => void;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -18,9 +16,7 @@ const AuthContext = createContext<AuthContextType>({
   session: null,
   userRole: null,
   loading: true,
-  error: null,
   signOut: async () => {},
-  retryAuth: () => {},
 });
 
 export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
@@ -28,25 +24,17 @@ export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [userRole, setUserRole] = useState<'cliente' | 'lojista' | null>(null);
   
-  // Controls the loading state exposed to the app
+  // UX: authResolved controla o Cold Start (boot inicial)
+  // Uma vez resolvido (true), ele NUNCA mais volta a ser false durante a sessão do browser.
   const [authResolved, setAuthResolved] = useState(false);
-  // Controls critical failures that require user retry
-  const [authError, setAuthError] = useState<Error | null>(null);
 
   const fetchUserRole = async (userId: string) => {
     try {
-      const fetchPromise = supabase
+      const { data } = await supabase
         .from('profiles')
         .select('role')
         .eq('id', userId)
         .maybeSingle();
-        
-      const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Profile fetch timeout')), 5000)
-      );
-
-      const result = await Promise.race([fetchPromise, timeoutPromise]) as any;
-      const data = result?.data;
       
       if (data) {
         setUserRole(data.role === 'lojista' ? 'lojista' : 'cliente');
@@ -54,89 +42,78 @@ export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
         setUserRole('cliente'); 
       }
     } catch (error) {
-      console.warn('Erro ou timeout ao buscar role. Usando fallback:', error);
-      setUserRole('cliente'); // Soft fail: let user in as client
+      console.warn('Erro ao buscar role em background:', error);
+      setUserRole('cliente');
     }
   };
 
-  const initAuth = useCallback(async () => {
-    setAuthResolved(false);
-    setAuthError(null);
+  useEffect(() => {
     let mounted = true;
 
-    // Failsafe Global: 8 seconds max for the whole process
-    const safetyTimeout = setTimeout(() => {
-      if (mounted && !authResolved) {
-        console.warn("⚠️ Auth initialization timed out. Triggering failsafe.");
-        // If we have no session by now, assumes error/offline
-        setAuthError(new Error("O carregamento demorou muito. Verifique sua conexão."));
-        setAuthResolved(true);
-      }
-    }, 8000);
-
-    try {
-      const { data, error } = await supabase.auth.getSession();
-      
-      if (error) throw error;
-
-      if (mounted) {
-        setSession(data.session);
-        setUser(data.session?.user ?? null);
-
-        if (data.session?.user) {
-          await fetchUserRole(data.session.user.id);
+    const initAuth = async () => {
+      try {
+        // Busca sessão atual sem bloquear o app por muito tempo
+        const { data } = await supabase.auth.getSession();
+        
+        if (mounted) {
+          const currentSession = data?.session ?? null;
+          setSession(currentSession);
+          setUser(currentSession?.user ?? null);
+          
+          if (currentSession?.user) {
+            await fetchUserRole(currentSession.user.id);
+          }
         }
+      } catch (err) {
+        console.error("Erro na inicialização do Auth:", err);
+      } finally {
+        if (mounted) setAuthResolved(true);
       }
-    } catch (err: any) {
-      console.error("Critical Auth Error:", err);
-      if (mounted) {
-        setAuthError(err);
-      }
-    } finally {
-      if (mounted) {
-        clearTimeout(safetyTimeout);
-        setAuthResolved(true);
-      }
-    }
-  }, []);
+    };
 
-  useEffect(() => {
     initAuth();
 
+    // Listener para eventos de login/logout
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, currentSession) => {
-      setSession(currentSession);
-      setUser(currentSession?.user ?? null);
+      if (!mounted) return;
 
-      if (event === 'SIGNED_IN' && currentSession?.user) {
-        setAuthResolved(false); // Briefly lock to fetch role
-        await fetchUserRole(currentSession.user.id);
-        setAuthResolved(true);
+      // Importante: Apenas atualizamos os objetos de estado.
+      // O React cuida de re-renderizar apenas o que depende desses objetos.
+      setUser(currentSession?.user ?? null);
+      setSession(currentSession);
+
+      if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'INITIAL_SESSION') {
+        if (currentSession?.user) {
+          fetchUserRole(currentSession.user.id);
+        }
       } else if (event === 'SIGNED_OUT') {
         setUserRole(null);
-        setAuthResolved(true);
       }
+      
+      // Se por algum motivo o initAuth falhou, o primeiro evento do listener garante a liberação do Splash
+      setAuthResolved(true);
     });
 
     return () => {
+      mounted = false;
       subscription.unsubscribe();
     };
-  }, [initAuth]);
+  }, []);
 
   const signOut = async () => {
     try {
       await supabase.auth.signOut();
-      setUserRole(null);
-      setUser(null);
-      setSession(null);
+      // O listener onAuthStateChange cuidará de limpar os estados.
     } catch (error) {
       console.error("Erro ao realizar logout:", error);
     }
   };
 
+  // loading é true apenas durante o primeiro check de sessão (Cold Start)
   const loading = !authResolved;
 
   return (
-    <AuthContext.Provider value={{ user, session, userRole, loading, error: authError, signOut, retryAuth: initAuth }}>
+    <AuthContext.Provider value={{ user, session, userRole, loading, signOut }}>
       {children}
     </AuthContext.Provider>
   );

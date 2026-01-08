@@ -1,39 +1,39 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
 import { 
+  ChevronLeft, 
   BadgeCheck, 
   DollarSign, 
   ShoppingBag, 
   Users, 
   Repeat, 
   TrendingUp, 
+  Wallet, 
+  Megaphone, 
   ChevronRight,
   Settings,
   HelpCircle,
   CreditCard,
   LayoutDashboard,
+  Calendar,
   Bell,
   QrCode,
   Tag,
+  Rocket,
   Briefcase,
-  PlayCircle,
-  Megaphone,
-  User as UserIcon,
-  Menu,
-  MoreHorizontal
+  ArrowRight
 } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import { User } from '@supabase/supabase-js';
-import { MasterSponsorshipCard } from './MasterSponsorshipCard';
-import { ExplanatoryVideoModal } from './ExplanatoryVideoModal';
 
+// Definição da interface sincronizada com o App.tsx
 interface StoreAreaViewProps {
-  onBack: () => void; // Agora funciona como "Open Menu"
+  onBack: () => void;
   onNavigate?: (view: string) => void;
   user?: User | null;
 }
 
-// Mock Base Data
+// Mock Base Data (Referência para 30 dias)
 const STORE_DATA = {
   name: "Hamburgueria Brasa",
   isVerified: true,
@@ -46,128 +46,91 @@ const STORE_DATA = {
     cashbackGiven: 622.50,
     adBalance: 45.00
   },
-  connectStatus: 'inactive'
+  connectStatus: 'inactive' // 'active' | 'inactive'
 };
 
 type DateRange = '7d' | '15d' | '30d' | '90d' | 'custom';
 
-// --- COMPONENTES VISUAIS INTERNOS (ATOMICOS) ---
-
-const StatBlock: React.FC<{ 
+const KPICard: React.FC<{ 
+  icon: React.ElementType; 
   label: string; 
   value: string; 
-  trend?: string;
-  isPositive?: boolean;
-}> = ({ label, value, trend, isPositive }) => (
-  <div className="flex flex-col px-4 py-3 bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700">
-    <p className="text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-wider truncate mb-1">{label}</p>
-    <div className="flex items-baseline gap-2">
-        <p className="text-lg font-black text-gray-900 dark:text-white leading-none tracking-tight">{value}</p>
-        {trend && (
-            <span className={`text-[9px] font-bold ${isPositive ? 'text-emerald-500' : 'text-rose-500'}`}>
-                {trend}
-            </span>
-        )}
+  color: string 
+}> = ({ icon: Icon, label, value, color }) => (
+  <div className="bg-white dark:bg-gray-800 p-3 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm flex flex-col justify-between h-24 transition-all duration-300 animate-in fade-in">
+    <div className={`w-8 h-8 rounded-full flex items-center justify-center ${color} bg-opacity-10 dark:bg-opacity-20`}>
+      <Icon className={`w-4 h-4 ${color.replace('bg-', 'text-')}`} />
+    </div>
+    <div>
+      <p className="text-[10px] text-gray-500 dark:text-gray-400 font-medium uppercase tracking-wide truncate">{label}</p>
+      <p className="text-lg font-bold text-gray-900 dark:text-white leading-tight">{value}</p>
     </div>
   </div>
 );
 
-const SettingsItem: React.FC<{ 
+const MenuLink: React.FC<{ 
   icon: React.ElementType; 
   label: string; 
   onClick?: () => void;
-  isLast?: boolean;
-  alert?: boolean;
-}> = ({ icon: Icon, label, onClick, isLast, alert }) => (
+  badge?: number;
+  highlight?: boolean;
+}> = ({ icon: Icon, label, onClick, badge, highlight }) => (
   <button 
     onClick={onClick}
-    className={`w-full flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors active:scale-[0.99] group ${!isLast ? 'border-b border-gray-100 dark:border-gray-700' : ''}`}
+    className={`w-full bg-white dark:bg-gray-800 p-4 border-b last:border-b-0 border-gray-100 dark:border-gray-700 flex items-center justify-between group active:bg-gray-50 dark:active:bg-gray-700/50 transition-colors ${highlight ? 'relative overflow-hidden' : ''}`}
   >
-    <div className="flex items-center gap-4">
-      <div className={`w-8 h-8 rounded-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-gray-500 dark:text-gray-400 group-hover:text-[#1E5BFF] transition-colors`}>
-        <Icon className="w-4 h-4" />
+    {highlight && <div className="absolute left-0 top-0 bottom-0 w-1 bg-[#1E5BFF]"></div>}
+    <div className="flex items-center gap-3">
+      <div className={`${highlight ? 'text-[#1E5BFF]' : 'text-gray-400'} group-hover:text-[#2D6DF6] transition-colors relative`}>
+        <Icon className="w-5 h-5" />
+        {badge ? (
+            <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white dark:border-gray-800"></span>
+        ) : null}
       </div>
-      <span className="text-sm font-medium text-gray-700 dark:text-gray-200">{label}</span>
+      <div className="flex flex-col items-start">
+        <span className={`text-sm font-semibold ${highlight ? 'text-gray-900 dark:text-white' : 'text-gray-700 dark:text-gray-200'}`}>{label}</span>
+        {highlight && <span className="text-[9px] font-black text-[#1E5BFF] uppercase tracking-widest">Aparece na Home</span>}
+      </div>
     </div>
     <div className="flex items-center gap-2">
-        {alert && <div className="w-2 h-2 rounded-full bg-red-500"></div>}
-        <ChevronRight className="w-4 h-4 text-gray-300 group-hover:text-gray-500 transition-colors" />
+        {badge ? (
+            <span className="bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">{badge}</span>
+        ) : highlight ? (
+            <span className="bg-blue-50 dark:bg-blue-900/30 text-[#1E5BFF] text-[9px] font-black px-2 py-1 rounded-lg border border-blue-100 dark:border-blue-800">NOVO</span>
+        ) : null}
+        <ChevronRight className="w-4 h-4 text-gray-300" />
     </div>
   </button>
 );
 
-const GrowthItem: React.FC<{
-    title: string;
-    subtitle: string;
-    icon: React.ElementType;
-    onClick: () => void;
-    onVideoClick: (e: React.MouseEvent) => void;
-    accentColor: string;
-}> = ({ title, subtitle, icon: Icon, onClick, onVideoClick, accentColor }) => (
-    <div className="bg-white dark:bg-gray-800 rounded-2xl p-1 border border-gray-100 dark:border-gray-700 shadow-sm flex flex-col">
-        <div 
-            onClick={onClick}
-            className="flex items-center gap-4 p-4 cursor-pointer active:opacity-80 transition-opacity"
-        >
-            <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${accentColor} bg-opacity-10 text-opacity-100`}>
-                <Icon className={`w-5 h-5 ${accentColor.replace('bg-', 'text-')}`} />
-            </div>
-            <div className="flex-1 min-w-0">
-                <h4 className="font-bold text-gray-900 dark:text-white text-sm">{title}</h4>
-                <p className="text-[11px] text-gray-500 leading-tight">{subtitle}</p>
-            </div>
-            <ChevronRight className="w-4 h-4 text-gray-300" />
-        </div>
-        
-        {/* Botão de Vídeo Discreto na base do card */}
-        <div className="px-4 pb-3 pt-0">
-            <button 
-                onClick={onVideoClick}
-                className="flex items-center gap-1.5 text-[10px] font-bold text-gray-400 hover:text-[#1E5BFF] transition-colors w-fit"
-            >
-                <PlayCircle className="w-3 h-3" />
-                Ver como funciona
-            </button>
-        </div>
-    </div>
-);
-
 export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate, user }) => {
+  const [isCashbackEnabled, setIsCashbackEnabled] = useState(true);
   const [dateRange, setDateRange] = useState<DateRange>('30d');
   const [pendingRequestsCount, setPendingRequestsCount] = useState(0);
-  const [isCashbackEnabled, setIsCashbackEnabled] = useState(true);
-  
-  // Video State
-  const [videoModal, setVideoModal] = useState<{isOpen: boolean, url: string, title: string}>({
-    isOpen: false, url: '', title: ''
-  });
-
-  const handleOpenVideo = (e: React.MouseEvent, type: 'cashback' | 'connect' | 'ads') => {
-    e.stopPropagation();
-    const videos = {
-        cashback: { url: "https://videos.pexels.com/video-files/4388636/4388636-sd_540_960_25fps.mp4", title: "Como funciona o Cashback" },
-        connect: { url: "https://videos.pexels.com/video-files/3196024/3196024-sd_640_360_25fps.mp4", title: "JPA Connect" },
-        ads: { url: "https://videos.pexels.com/video-files/1118330/1118330-sd_640_360_25fps.mp4", title: "Anúncios Patrocinados" }
-    };
-    setVideoModal({ isOpen: true, ...videos[type] });
-  };
 
   const currentKpis = useMemo(() => {
     let multiplier = 1;
-    if (dateRange === '7d') multiplier = 0.25;
-    if (dateRange === '90d') multiplier = 3;
+    switch (dateRange) {
+        case '7d': multiplier = 0.25; break;
+        case '15d': multiplier = 0.5; break;
+        case '30d': multiplier = 1; break;
+        case '90d': multiplier = 3; break;
+        case 'custom': multiplier = 1; break;
+    }
 
     return {
         sales: STORE_DATA.baseKpis.sales * multiplier,
         orders: Math.round(STORE_DATA.baseKpis.orders * multiplier),
-        customers: Math.round(STORE_DATA.baseKpis.newCustomers * multiplier),
-        cashback: STORE_DATA.baseKpis.cashbackGiven * multiplier,
+        newCustomers: Math.round(STORE_DATA.baseKpis.newCustomers * multiplier),
+        recurringCustomers: Math.round(STORE_DATA.baseKpis.recurringCustomers * multiplier),
+        cashbackGiven: STORE_DATA.baseKpis.cashbackGiven * multiplier,
+        adBalance: STORE_DATA.baseKpis.adBalance
     };
   }, [dateRange]);
 
-  // Realtime Requests Listener
   useEffect(() => {
     if (!supabase || !user) return;
+    
     const merchantId = user.id; 
 
     const fetchCount = async () => {
@@ -181,230 +144,217 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
     fetchCount();
 
     const sub = supabase.channel('store_area_badge')
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'cashback_transactions', filter: `merchant_id=eq.${merchantId}` }, () => fetchCount())
+        .on(
+            'postgres_changes', 
+            { 
+                event: '*', 
+                schema: 'public', 
+                table: 'cashback_transactions', 
+                filter: `merchant_id=eq.${merchantId}` 
+            }, 
+            () => {
+                fetchCount(); 
+            }
+        )
         .subscribe();
 
     return () => { supabase.removeChannel(sub); };
   }, [user]);
 
-  const formatCurrency = (val: number) => val.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-  const handleMenuClick = onBack;
+  const formatCurrency = (val: number) => 
+    val.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
+  const filterOptions: { id: DateRange; label: string }[] = [
+      { id: '7d', label: '7 dias' },
+      { id: '15d', label: '15 dias' },
+      { id: '30d', label: '30 dias' },
+      { id: '90d', label: '90 dias' },
+      { id: 'custom', label: 'Personalizado' },
+  ];
 
   return (
-    <div className="min-h-screen bg-[#F8F9FC] dark:bg-gray-950 font-sans animate-in slide-in-from-right duration-300">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-24 font-sans animate-in slide-in-from-right duration-300">
       
-      {/* SEÇÃO 1: HEADER & IDENTIDADE */}
-      <div className="bg-white dark:bg-gray-900 px-5 pt-12 pb-6 sticky top-0 z-20 shadow-sm border-b border-gray-100 dark:border-gray-800">
-        <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-gray-200 dark:bg-gray-700 overflow-hidden border border-gray-100 dark:border-gray-600 shadow-sm shrink-0">
-                    <img src={STORE_DATA.logo} alt="Logo" className="w-full h-full object-cover" />
-                </div>
-                <div>
-                    <h1 className="text-base font-bold text-gray-900 dark:text-white leading-tight flex items-center gap-1">
+      <div className="bg-white dark:bg-gray-900 px-5 pt-12 pb-6 border-b border-gray-100 dark:border-gray-800 sticky top-0 z-20 shadow-sm">
+        <div className="flex items-center gap-3 mb-1">
+          <button 
+            onClick={onBack}
+            className="w-10 h-10 -ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center justify-center text-gray-500 transition-colors"
+          >
+            <ChevronLeft className="w-6 h-6" />
+          </button>
+          <span className="text-sm font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Painel do Parceiro</span>
+        </div>
+
+        <div className="flex items-center gap-4">
+            <div className="w-14 h-14 rounded-2xl bg-gray-200 dark:bg-gray-700 overflow-hidden border-2 border-gray-100 dark:border-gray-700 overflow-hidden border-2 border-gray-100 dark:border-gray-600 shadow-sm">
+                <img src={STORE_DATA.logo} alt="Logo" className="w-full h-full object-cover" />
+            </div>
+            <div>
+                <div className="flex items-center gap-1.5">
+                    <h1 className="text-2xl font-bold text-gray-900 dark:text-white font-display leading-tight">
                         {STORE_DATA.name}
-                        {STORE_DATA.isVerified && <BadgeCheck className="w-3.5 h-3.5 text-[#1E5BFF] fill-white" />}
                     </h1>
-                    <div className="flex items-center gap-1.5 mt-0.5">
-                        <span className="w-1.5 h-1.5 rounded-full bg-green-500"></span>
-                        <span className="text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Loja Online</span>
-                    </div>
+                    {STORE_DATA.isVerified && <BadgeCheck className="w-5 h-5 text-white fill-[#1E5BFF]" />}
+                </div>
+                <div className="flex items-center gap-2 mt-1">
+                    <span className="flex h-2 w-2 relative">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                    </span>
+                    <p className="text-xs font-medium text-gray-500 dark:text-gray-400">Operação Ativa</p>
                 </div>
             </div>
-            
-            <button 
-                onClick={handleMenuClick} 
-                className="w-10 h-10 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center justify-center text-gray-500 transition-colors"
-            >
-                <Menu className="w-6 h-6" />
-            </button>
         </div>
       </div>
 
-      <div className="p-5 pb-32 space-y-10"> {/* Espaçamento vertical aumentado para 40px (space-y-10) */}
+      <div className="p-5 space-y-8">
         
-        {/* ALERTAS (Condicional) */}
         {pendingRequestsCount > 0 && (
             <button 
                 onClick={() => onNavigate && onNavigate('merchant_requests')}
-                className="w-full bg-rose-500 text-white p-4 rounded-2xl shadow-lg shadow-rose-500/20 flex items-center justify-between animate-pulse active:scale-95 transition-transform -mt-4"
+                className="w-full bg-red-500 text-white p-4 rounded-2xl shadow-lg shadow-red-500/30 flex items-center justify-between animate-pulse active:scale-95 transition-transform"
             >
                 <div className="flex items-center gap-3">
-                    <div className="bg-white/20 p-2 rounded-full"><Bell className="w-5 h-5 text-white" /></div>
+                    <Bell className="w-6 h-6 fill-white" />
                     <div className="text-left">
                         <p className="font-bold text-sm">Solicitações Pendentes</p>
-                        <p className="text-[10px] text-rose-100 opacity-90">Clientes aguardando liberação</p>
+                        <p className="text-xs text-red-100">Clientes aguardando aprovação</p>
                     </div>
                 </div>
-                <div className="w-8 h-8 bg-white text-rose-600 rounded-full flex items-center justify-center font-bold text-sm shadow-sm">
+                <div className="w-8 h-8 bg-white text-red-600 rounded-full flex items-center justify-center font-bold text-sm">
                     {pendingRequestsCount}
                 </div>
             </button>
         )}
 
-        {/* SEÇÃO 2: AÇÃO PRINCIPAL (TERMINAL) */}
-        <section>
-            <button
-                onClick={() => onNavigate && onNavigate('merchant_panel')}
-                className="w-full h-32 bg-gradient-to-r from-[#1E5BFF] to-[#0047FF] text-white rounded-[28px] shadow-xl shadow-blue-500/20 flex flex-col justify-center items-center relative overflow-hidden group active:scale-[0.98] transition-all"
-            >
-                <div className="absolute top-0 right-0 w-48 h-48 bg-white/10 rounded-full -mr-16 -mt-16 blur-3xl pointer-events-none"></div>
-                
-                <div className="bg-white/20 p-3 rounded-2xl mb-3 backdrop-blur-sm border border-white/10">
-                    <QrCode className="w-8 h-8 text-white" />
+        <button
+            onClick={() => onNavigate && onNavigate('merchant_panel')}
+            className="w-full bg-gradient-to-r from-[#1E5BFF] to-[#1749CC] text-white p-5 rounded-3xl shadow-lg shadow-blue-500/20 flex items-center justify-between active:scale-[0.98] transition-transform"
+        >
+            <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/10">
+                    <QrCode className="w-6 h-6 text-white" />
                 </div>
-                <h3 className="font-black text-xl leading-none mb-1 font-display tracking-tight">Terminal de Caixa</h3>
-                <p className="text-xs text-blue-100 font-medium opacity-90">Validar compras e QR Codes</p>
-            </button>
-        </section>
+                <div className="text-left">
+                    <h3 className="font-bold text-lg leading-none mb-1">Terminal de Caixa</h3>
+                    <p className="text-xs text-blue-100">Gerar QR, PIN e validar compras</p>
+                </div>
+            </div>
+            <ChevronRight className="w-5 h-5 text-white/70" />
+        </button>
 
-        {/* SEÇÃO 3: VISÃO GERAL (Clean Grid) */}
-        <section>
+        <div>
             <div className="flex items-center justify-between mb-4 px-1">
-                <h3 className="text-xs font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest flex items-center gap-2">
+                <h2 className="text-base font-bold text-gray-800 dark:text-gray-200 flex items-center gap-2">
+                    <LayoutDashboard className="w-4 h-4 text-[#2D6DF6]" />
                     Visão Geral
-                </h3>
-                <div className="flex bg-gray-200 dark:bg-gray-800 p-0.5 rounded-lg">
-                    {['7d', '30d'].map((d) => (
-                        <button 
-                            key={d}
-                            onClick={() => setDateRange(d as DateRange)}
-                            className={`px-3 py-1 text-[10px] font-bold rounded-md transition-all ${dateRange === d ? 'bg-white dark:bg-gray-600 text-black dark:text-white shadow-sm' : 'text-gray-500'}`}
-                        >
-                            {d.toUpperCase()}
-                        </button>
-                    ))}
-                </div>
+                </h2>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
-                <StatBlock label="Vendas" value={formatCurrency(currentKpis.sales)} trend="+12%" isPositive />
-                <StatBlock label="Pedidos" value={currentKpis.orders.toString()} />
-                <StatBlock label="Cashback" value={formatCurrency(currentKpis.cashback)} />
-                <StatBlock label="Novos Clientes" value={`+${currentKpis.customers}`} trend="+5%" isPositive />
+            <div className="flex gap-2 overflow-x-auto no-scrollbar mb-6 pb-2 -mx-5 px-5">
+                {filterOptions.map((opt) => (
+                    <button
+                        key={opt.id}
+                        onClick={() => setDateRange(opt.id)}
+                        className={`flex-shrink-0 px-4 py-2 rounded-full text-xs font-bold transition-all border ${
+                            dateRange === opt.id
+                            ? 'bg-[#1E5BFF] text-white border-[#1E5BFF] shadow-md shadow-blue-500/20'
+                            : 'bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 border-gray-200 dark:border-gray-700 hover:border-blue-200 dark:hover:border-gray-600'
+                        }`}
+                    >
+                        {opt.id === 'custom' && <Calendar className="w-3 h-3 inline-block mr-1.5 -mt-0.5" />}
+                        {opt.label}
+                    </button>
+                ))}
             </div>
-        </section>
 
-        {/* SEÇÃO 4: FERRAMENTAS (Lista Limpa) */}
-        <section>
-            <h3 className="text-xs font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest ml-1 mb-4">
-                Configurações da Loja
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                <KPICard icon={DollarSign} label="Vendas Localizei" value={formatCurrency(currentKpis.sales)} color="bg-green-500" />
+                <KPICard icon={ShoppingBag} label="Pedidos" value={currentKpis.orders.toString()} color="bg-blue-500" />
+                <KPICard icon={Users} label="Novos Clientes" value={`+${currentKpis.newCustomers}`} color="bg-purple-500" />
+                <KPICard icon={Repeat} label="Recorrentes" value={currentKpis.recurringCustomers.toString()} color="bg-[#1E5BFF]" />
+                <KPICard icon={TrendingUp} label="Cashback Gerado" value={formatCurrency(currentKpis.cashbackGiven)} color="bg-[#1E5BFF]" />
+                <KPICard icon={Wallet} label="Saldo Anúncios" value={formatCurrency(currentKpis.adBalance)} color="bg-gray-500" />
+            </div>
+        </div>
+
+        <div>
+            <h3 className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-3 ml-2">
+                Gestão da Loja
             </h3>
-            
-            <div className="bg-white dark:bg-gray-800 rounded-3xl overflow-hidden shadow-sm border border-gray-100 dark:border-gray-700">
-                <SettingsItem 
+            <div className="rounded-2xl overflow-hidden shadow-sm border border-gray-100 dark:border-gray-700">
+                <MenuLink 
                     icon={Tag} 
                     label="Promoção da Semana" 
+                    highlight={true}
                     onClick={() => onNavigate && onNavigate('weekly_promo')}
                 />
-                <SettingsItem 
+                <MenuLink 
                     icon={Briefcase} 
                     label="Vagas de Emprego" 
+                    highlight={true}
                     onClick={() => onNavigate && onNavigate('merchant_jobs')}
                 />
-                <SettingsItem 
-                    icon={Settings} 
-                    label="Perfil Público" 
-                    onClick={() => onNavigate && onNavigate('store_profile')}
-                />
-                <SettingsItem 
-                    icon={CreditCard} 
-                    label="Financeiro" 
-                    onClick={() => onNavigate && onNavigate('store_finance')}
-                />
-                <SettingsItem 
-                    icon={HelpCircle} 
-                    label="Suporte" 
-                    onClick={() => onNavigate && onNavigate('store_support')}
-                    isLast
-                />
+                <MenuLink icon={Settings} label="Minha Loja (Perfil Público)" onClick={() => onNavigate && onNavigate('store_profile')} />
+                <MenuLink icon={CreditCard} label="Minha conta / Financeiro" onClick={() => onNavigate && onNavigate('store_finance')} />
+                <MenuLink icon={HelpCircle} label="Suporte ao Lojista" onClick={() => onNavigate && onNavigate('store_support')} />
             </div>
-        </section>
+        </div>
 
-        {/* SEÇÃO 5: FIDELIZAÇÃO (Destaque) */}
-        <section>
-            <div className="flex items-center justify-between mb-4 px-1">
-                <h3 className="text-xs font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">
-                    Fidelização
-                </h3>
-            </div>
-            
-            <div className="bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
-                <div className="flex justify-between items-center mb-6">
-                    <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center text-[#1E5BFF]">
-                            <TrendingUp className="w-5 h-5" />
-                        </div>
-                        <div>
-                            <h4 className="font-bold text-gray-900 dark:text-white text-sm">Cashback Ativo</h4>
-                            <p className="text-xs text-gray-500">Taxa atual: <span className="font-bold text-gray-700 dark:text-gray-300">5%</span></p>
-                        </div>
+        <div className="bg-white dark:bg-gray-800 rounded-3xl p-5 shadow-sm border border-gray-100 dark:border-gray-700 relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-24 h-24 bg-blue-500/10 rounded-bl-full -mr-4 -mt-4"></div>
+            <div className="flex justify-between items-start mb-4 relative z-10">
+                <div className="flex items-center gap-2">
+                    <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg text-blue-600 dark:text-blue-400">
+                        <TrendingUp className="w-5 h-5" />
                     </div>
-                    <button 
-                        onClick={() => setIsCashbackEnabled(!isCashbackEnabled)}
-                        className={`w-12 h-6 rounded-full p-1 transition-colors duration-300 ${isCashbackEnabled ? 'bg-green-500' : 'bg-gray-300 dark:bg-gray-600'}`}
-                    >
-                        <div className={`w-4 h-4 bg-white rounded-full shadow-sm transition-transform duration-300 ${isCashbackEnabled ? 'translate-x-6' : 'translate-x-0'}`}></div>
-                    </button>
+                    <h3 className="font-bold text-gray-900 dark:text-white">Cashback da Loja</h3>
                 </div>
+                <button 
+                    onClick={() => setIsCashbackEnabled(!isCashbackEnabled)}
+                    className={`w-12 h-6 rounded-full p-1 transition-colors duration-300 ${isCashbackEnabled ? 'bg-green-500' : 'bg-gray-300 dark:bg-gray-600'}`}
+                >
+                    <div className={`w-4 h-4 bg-white rounded-full shadow-sm transition-transform duration-300 ${isCashbackEnabled ? 'translate-x-6' : 'translate-x-0'}`}></div>
+                </button>
+            </div>
+            <div className="flex gap-4 mb-4">
+                <div><p className="text-xs text-gray-500 dark:text-gray-400">Taxa atual</p><p className="font-bold text-gray-900 dark:text-white text-xl">5%</p></div>
+                <div><p className="text-xs text-gray-500 dark:text-gray-400">Retorno</p><p className="font-bold text-green-600 text-xl">R$ 4,5k</p></div>
+            </div>
+            <button onClick={() => onNavigate && onNavigate('store_cashback_module')} className="w-full py-2.5 rounded-xl border border-gray-200 dark:border-gray-600 text-sm font-bold text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                Ver painel completo de fidelidade
+            </button>
+        </div>
 
-                <div className="flex gap-3">
-                    <button 
-                        onClick={() => onNavigate && onNavigate('store_cashback_module')}
-                        className="flex-1 bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-white font-bold py-3 rounded-xl text-xs hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
-                    >
-                        Gerenciar Regras
-                    </button>
-                    <button 
-                        onClick={(e) => handleOpenVideo(e, 'cashback')}
-                        className="px-4 py-3 rounded-xl border border-gray-100 dark:border-gray-600 text-gray-400 hover:text-[#1E5BFF] transition-colors"
-                        title="Ver vídeo explicativo"
-                    >
-                        <PlayCircle className="w-5 h-5" />
-                    </button>
+        {/* CARD DE DESTAQUE ATUALIZADO */}
+        <div className="bg-slate-900 rounded-[2.5rem] p-8 shadow-2xl border border-white/10 relative overflow-hidden group">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 rounded-full blur-3xl -mr-10 -mt-10"></div>
+            
+            <div className="flex items-center gap-4 mb-6 relative z-10">
+                <div className="w-14 h-14 bg-blue-500/10 rounded-2xl flex items-center justify-center border border-blue-500/20 shadow-lg">
+                    <Rocket className="w-8 h-8 text-[#1E5BFF]" />
+                </div>
+                <div>
+                    <h3 className="font-black text-xl text-white font-display">Destaque sua loja</h3>
+                    <p className="text-[10px] text-blue-400 font-bold uppercase tracking-widest">Seja visto pelos vizinhos</p>
                 </div>
             </div>
-        </section>
 
-        {/* SEÇÃO 6: CRESCIMENTO (Cards Separados) */}
-        <section className="space-y-4">
-            <h3 className="text-xs font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest ml-1">
-                Acelerar Crescimento
-            </h3>
+            <p className="text-sm text-slate-400 mb-8 leading-relaxed font-medium">
+              Apareça primeiro para quem busca seu serviço por apenas <span className="text-white font-bold">R$ 0,99 por dia</span>. Sem letras miúdas, você escolhe o tempo e brilha no bairro.
+            </p>
 
-            <div className="grid grid-cols-1 gap-4">
-                <GrowthItem 
-                    title="JPA Connect" 
-                    subtitle="Networking exclusivo para lojistas." 
-                    icon={Users} 
-                    accentColor="bg-indigo-600"
-                    onClick={() => onNavigate && onNavigate('freguesia_connect_public')}
-                    onVideoClick={(e) => handleOpenVideo(e, 'connect')}
-                />
-                
-                <GrowthItem 
-                    title="Anúncios Patrocinados" 
-                    subtitle="Apareça no topo das buscas." 
-                    icon={Megaphone} 
-                    accentColor="bg-amber-500"
-                    onClick={() => onNavigate && onNavigate('store_ads_module')}
-                    onVideoClick={(e) => handleOpenVideo(e, 'ads')}
-                />
-
-                <div className="pt-2">
-                    <MasterSponsorshipCard isAvailable={true} />
-                </div>
-            </div>
-        </section>
+            <button 
+              onClick={() => onNavigate && onNavigate('store_ads_module')} 
+              className="w-full bg-[#1E5BFF] hover:bg-blue-500 text-white py-5 rounded-2xl text-sm font-black shadow-xl shadow-blue-500/20 active:scale-[0.98] transition-all flex items-center justify-center gap-3"
+            >
+                COMEÇAR AGORA
+                <ArrowRight className="w-5 h-5" strokeWidth={3} />
+            </button>
+        </div>
 
       </div>
-
-      <ExplanatoryVideoModal 
-        isOpen={videoModal.isOpen}
-        onClose={() => setVideoModal(prev => ({ ...prev, isOpen: false }))}
-        videoUrl={videoModal.url}
-        title={videoModal.title}
-      />
     </div>
   );
 };

@@ -11,8 +11,6 @@ import {
 import { AdType, Category, Store, Story, EditorialCollection, Job, CommunityPost } from './types';
 import { getStoreLogo } from './utils/mockLogos';
 
-export const APP_VERSION = '1.1.0-production-fix';
-
 export const CATEGORIES: Category[] = [
   { id: 'cat-food', name: 'Comida', slug: 'food', icon: <Utensils />, color: 'from-orange-500 to-red-600', illustrationUrl: 'https://cdn-icons-png.flaticon.com/512/3170/3170733.png' },
   { id: 'cat-beauty', name: 'Beleza', slug: 'beauty', icon: <Scissors />, color: 'from-pink-500 to-rose-600', illustrationUrl: 'https://cdn-icons-png.flaticon.com/512/2707/2707142.png' },

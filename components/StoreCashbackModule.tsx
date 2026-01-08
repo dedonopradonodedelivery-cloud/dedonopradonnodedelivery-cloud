@@ -14,10 +14,8 @@ import {
   AlertCircle,
   FileText,
   X,
-  Check,
-  PlayCircle
+  Check
 } from 'lucide-react';
-import { ExplanatoryVideoModal } from './ExplanatoryVideoModal';
 
 interface StoreCashbackModuleProps {
   onBack: () => void;
@@ -36,7 +34,6 @@ export const StoreCashbackModule: React.FC<StoreCashbackModuleProps> = ({ onBack
   const [hasAcceptedTerms, setHasAcceptedTerms] = useState(false);
   const [showTermsModal, setShowTermsModal] = useState(false);
   const [termsCheck, setTermsCheck] = useState(false);
-  const [showVideo, setShowVideo] = useState(false);
 
   const [percent, setPercent] = useState<number>(5);
   const [maxValue, setMaxValue] = useState('50');
@@ -55,14 +52,17 @@ export const StoreCashbackModule: React.FC<StoreCashbackModuleProps> = ({ onBack
   }, [isActive]);
 
   const generateStoreQRCode = (storeId: string) => {
+    // Using a public API for demo purposes to generate a real QR visual
     const url = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=localizei-cashback-${storeId}`;
     setQrCodeUrl(url);
   };
 
   const handleToggleClick = () => {
     if (isActive) {
+      // Turning OFF is always allowed
       setIsActive(false);
     } else {
+      // Turning ON requires terms
       if (hasAcceptedTerms) {
         setIsActive(true);
       } else {
@@ -115,8 +115,7 @@ export const StoreCashbackModule: React.FC<StoreCashbackModuleProps> = ({ onBack
       <div className="p-5 space-y-6">
         
         {/* Status & QR Code Section */}
-        <div className={`rounded-3xl p-6 transition-all duration-300 relative ${isActive ? 'bg-gradient-to-br from-indigo-600 to-indigo-800 text-white shadow-xl shadow-indigo-500/20' : 'bg-white dark:bg-gray-800 text-gray-500 border border-gray-200 dark:border-gray-700'}`}>
-            
+        <div className={`rounded-3xl p-6 transition-all duration-300 ${isActive ? 'bg-gradient-to-br from-indigo-600 to-indigo-800 text-white shadow-xl shadow-indigo-500/20' : 'bg-white dark:bg-gray-800 text-gray-500 border border-gray-200 dark:border-gray-700'}`}>
             <div className="flex items-center justify-between mb-2">
                 <span className={`font-bold text-lg ${isActive ? 'text-white' : 'text-gray-700 dark:text-gray-200'}`}>
                     {isActive ? 'Cashback Ativado' : 'Cashback Desativado'}
@@ -129,17 +128,8 @@ export const StoreCashbackModule: React.FC<StoreCashbackModuleProps> = ({ onBack
                 </button>
             </div>
 
-            {/* Video Button - Discreet */}
-            <button 
-                onClick={() => setShowVideo(true)}
-                className={`flex items-center gap-1.5 text-xs font-bold mt-1 mb-3 hover:underline ${isActive ? 'text-indigo-200' : 'text-[#1E5BFF]'}`}
-            >
-                <PlayCircle className="w-3.5 h-3.5" />
-                Ver vídeo explicativo
-            </button>
-
             {!isActive && (
-                <div className="mt-2 flex gap-3 items-start bg-orange-50 dark:bg-orange-900/10 p-3 rounded-xl border border-orange-100 dark:border-orange-800/30">
+                <div className="mt-4 flex gap-3 items-start bg-orange-50 dark:bg-orange-900/10 p-3 rounded-xl border border-orange-100 dark:border-orange-800/30">
                     <AlertCircle className="w-5 h-5 text-orange-500 shrink-0 mt-0.5" />
                     <p className="text-xs text-orange-700 dark:text-orange-300 leading-relaxed">
                         Sua loja não aparece nos filtros de "Cashback" e "Destaques" enquanto essa função estiver desativada.
@@ -298,7 +288,7 @@ export const StoreCashbackModule: React.FC<StoreCashbackModuleProps> = ({ onBack
                 <h4 className="font-bold text-sm text-gray-700 dark:text-gray-200 mb-3 px-1">Últimas Transações</h4>
                 <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 overflow-hidden shadow-sm">
                     {TRANSACTIONS.map((t, i) => (
-                        <div key={t.id} className={`p-4 flex items-center justify-between ${i !== TRANSACTIONS.length - 1 ? 'border-b border-gray-50 dark:border-gray-700' : ''}`}>
+                        <div key={t.id} className={`p-4 flex items-center justify-between ${i !== TRANSACTIONS.length - 1 ? 'border-b border-gray-100 dark:border-gray-700' : ''}`}>
                             <div>
                                 <p className="font-bold text-sm text-gray-900 dark:text-white">{t.client}</p>
                                 <p className="text-xs text-gray-400">{t.date}</p>
@@ -374,14 +364,6 @@ export const StoreCashbackModule: React.FC<StoreCashbackModuleProps> = ({ onBack
             </div>
         </div>
       )}
-
-      {/* Explanatory Video Modal */}
-      <ExplanatoryVideoModal 
-        isOpen={showVideo}
-        onClose={() => setShowVideo(false)}
-        videoUrl="https://videos.pexels.com/video-files/4388636/4388636-sd_540_960_25fps.mp4"
-        title="Como funciona o Cashback"
-      />
 
     </div>
   );

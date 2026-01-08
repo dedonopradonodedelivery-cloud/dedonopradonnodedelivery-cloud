@@ -176,6 +176,29 @@ export const MenuView: React.FC<MenuViewProps> = ({
           </div>
         </div>
 
+        {isMerchant && (
+            <button 
+                onClick={() => onNavigate('store_area')}
+                className="w-full bg-gradient-to-br from-[#1e1b4b] via-[#312e81] to-[#1e3a8a] text-white p-8 rounded-[2.5rem] shadow-2xl shadow-indigo-900/30 flex flex-col gap-6 relative overflow-hidden group active:scale-[0.98] transition-all mb-8 border border-white/10"
+            >
+                <div className="absolute top-0 right-0 w-48 h-48 bg-indigo-500/10 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none group-hover:bg-indigo-400/20 transition-all duration-700"></div>
+                
+                <div className="relative z-10 flex items-start justify-between">
+                    <div className="bg-white/10 p-3 rounded-2xl border border-white/10 backdrop-blur-md">
+                        <Store className="w-8 h-8 text-indigo-300" />
+                    </div>
+                    <div className="bg-[#1E5BFF] px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider shadow-lg border border-white/10">
+                        Painel Parceiro
+                    </div>
+                </div>
+
+                <div className="relative z-10 text-left">
+                    <h3 className="text-2xl font-bold mb-1 font-display">Minha Loja</h3>
+                    <p className="text-indigo-200 text-sm font-medium">Gerencie vendas, cashback e anúncios.</p>
+                </div>
+            </button>
+        )}
+
         {isAdmin && (
             <div className="mb-6">
                 <SectionTitle title="Administração" />

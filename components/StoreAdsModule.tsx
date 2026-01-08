@@ -3,31 +3,29 @@ import React, { useState } from 'react';
 import { 
   ChevronLeft, 
   Plus, 
-  TrendingUp, 
-  Target, 
-  ShieldCheck, 
-  Loader2, 
-  ArrowRight, 
-  Rocket, 
-  Zap, 
-  Star, 
-  CheckCircle2, 
-  Sparkles, 
-  Flame, 
-  Award, 
-  Users, 
-  Info, 
-  PauseCircle, 
-  Clock, 
-  LayoutDashboard, 
-  BarChart3, 
-  Lightbulb, 
-  ShieldAlert, 
-  Settings2, 
-  MousePointer2, 
-  PlayCircle
+  TrendingUp,
+  Target,
+  ShieldCheck,
+  Loader2,
+  ArrowRight,
+  Rocket,
+  Zap,
+  Star,
+  CheckCircle2,
+  Sparkles,
+  Flame,
+  Award,
+  Users,
+  Info,
+  PauseCircle,
+  Clock,
+  LayoutDashboard,
+  BarChart3,
+  Lightbulb,
+  ShieldAlert,
+  Settings2,
+  MousePointer2
 } from 'lucide-react';
-import { ExplanatoryVideoModal } from './ExplanatoryVideoModal';
 
 interface StoreAdsModuleProps {
   onBack: () => void;
@@ -56,7 +54,6 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack }) => {
   const [levelIndex, setLevelIndex] = useState(2); 
   const [duration, setDuration] = useState<number>(7); 
   const [isActivating, setIsActivating] = useState(false);
-  const [showVideo, setShowVideo] = useState(false);
   const [campaigns, setCampaigns] = useState<Campaign[]>([
     {
       id: 'prev-1',
@@ -105,21 +102,12 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack }) => {
             Seja encontrado primeiro por quem mora e busca serviços perto de você.
           </p>
           
-          <div className="flex gap-3">
-            <button 
-                onClick={() => setView('create')}
-                className="flex-1 bg-white text-slate-950 font-black py-4 rounded-2xl shadow-lg flex items-center justify-center gap-2 active:scale-[0.98] transition-all hover:bg-amber-400 uppercase tracking-widest text-xs"
-            >
-                CRIAR DESTAQUE
-            </button>
-            <button 
-                onClick={() => setShowVideo(true)}
-                className="w-12 bg-white/10 text-white font-black py-4 rounded-2xl border border-white/20 hover:bg-white/20 flex items-center justify-center transition-all"
-                title="Ver como funciona"
-            >
-                <PlayCircle className="w-5 h-5" />
-            </button>
-          </div>
+          <button 
+            onClick={() => setView('create')}
+            className="w-full bg-white text-slate-950 font-black py-4 rounded-2xl shadow-lg flex items-center justify-center gap-2 active:scale-[0.98] transition-all hover:bg-amber-400 uppercase tracking-widest text-xs"
+          >
+            CRIAR NOVO DESTAQUE
+          </button>
         </div>
       </div>
 
@@ -421,13 +409,6 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack }) => {
       {view === 'create' && <CreateView />}
       {view === 'summary' && <SummaryView />}
       {view === 'success' && <SuccessView />}
-
-      <ExplanatoryVideoModal 
-        isOpen={showVideo}
-        onClose={() => setShowVideo(false)}
-        videoUrl="https://videos.pexels.com/video-files/1118330/1118330-sd_640_360_25fps.mp4"
-        title="Como funcionam os anúncios"
-      />
     </div>
   );
 };
