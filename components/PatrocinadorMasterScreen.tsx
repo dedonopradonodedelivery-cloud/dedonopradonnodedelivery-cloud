@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   ChevronLeft, 
   Shield, 
@@ -14,14 +14,17 @@ import {
   Monitor, 
   Heart, 
   Quote,
-  Calendar
+  Calendar,
+  Play
 } from 'lucide-react';
+import { ExplanatoryVideoModal } from './ExplanatoryVideoModal';
 
 interface PatrocinadorMasterScreenProps {
   onBack: () => void;
 }
 
 export const PatrocinadorMasterScreen: React.FC<PatrocinadorMasterScreenProps> = ({ onBack }) => {
+  const [showVideo, setShowVideo] = useState(false);
   
   const companies = [
     "Esquematiza Serviços",
@@ -84,12 +87,23 @@ export const PatrocinadorMasterScreen: React.FC<PatrocinadorMasterScreenProps> =
         <div className="absolute bottom-0 left-0 w-48 h-48 bg-blue-500/10 rounded-full blur-2xl -ml-10 -mb-10 pointer-events-none"></div>
         
         <div className="relative z-10 flex flex-col items-center text-center">
-          <div className="w-24 h-24 bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 flex items-center justify-center mb-6 shadow-2xl">
-             <svg viewBox="0 0 24 24" className="w-12 h-12 text-yellow-400" fill="none" xmlns="http://www.w3.org/2000/svg">
-               <path d="M12 2L21 7V17L12 22L3 17V7L12 2Z" fill="currentColor"/>
-               <path d="M8 8H16V10H10V11H15V13H10V14H16V16H8V8Z" fill="white"/>
-             </svg>
+          <div className="relative">
+            <div className="w-24 h-24 bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 flex items-center justify-center mb-6 shadow-2xl">
+               <svg viewBox="0 0 24 24" className="w-12 h-12 text-yellow-400" fill="none" xmlns="http://www.w3.org/2000/svg">
+                 <path d="M12 2L21 7V17L12 22L3 17V7L12 2Z" fill="currentColor"/>
+                 <path d="M8 8H16V10H10V11H15V13H10V14H16V16H8V8Z" fill="white"/>
+               </svg>
+            </div>
+            
+            {/* Play Button Overlay */}
+            <button 
+                onClick={() => setShowVideo(true)}
+                className="absolute -bottom-3 -right-3 bg-white text-indigo-600 rounded-full p-2 shadow-lg hover:scale-110 transition-transform active:scale-95"
+            >
+                <Play className="w-5 h-5 fill-current" />
+            </button>
           </div>
+
           <h2 className="text-blue-400 font-bold tracking-widest text-xs uppercase mb-2">Grupo Esquematiza</h2>
           <h1 className="text-3xl font-bold font-display leading-tight mb-4">
             Segurança e Serviços com Excelência
@@ -288,6 +302,14 @@ export const PatrocinadorMasterScreen: React.FC<PatrocinadorMasterScreenProps> =
         </div>
 
       </div>
+
+      <ExplanatoryVideoModal 
+        isOpen={showVideo}
+        onClose={() => setShowVideo(false)}
+        videoUrl="https://videos.pexels.com/video-files/853835/853835-sd_640_360_25fps.mp4"
+        title="Conheça o Grupo Esquematiza"
+      />
+
     </div>
   );
 };

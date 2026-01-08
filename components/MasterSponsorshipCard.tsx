@@ -2,16 +2,17 @@
 import React, { useState } from 'react';
 import { 
   Crown, 
-  CheckCircle2, 
+  Check, 
   ArrowRight, 
   X, 
   Loader2, 
-  Lock, 
-  Clock, 
   Building2, 
   User, 
-  Smartphone 
+  Smartphone,
+  PlayCircle,
+  CheckCircle2
 } from 'lucide-react';
+import { ExplanatoryVideoModal } from './ExplanatoryVideoModal';
 
 interface MasterSponsorshipCardProps {
   isAvailable?: boolean; // Toggle to test "Occupied" state
@@ -19,10 +20,10 @@ interface MasterSponsorshipCardProps {
 
 export const MasterSponsorshipCard: React.FC<MasterSponsorshipCardProps> = ({ isAvailable = true }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [showVideo, setShowVideo] = useState(false);
   const [formStep, setFormStep] = useState<'form' | 'success'>('form');
   const [isLoading, setIsLoading] = useState(false);
 
-  // Form State
   const [formData, setFormData] = useState({
     name: '',
     company: '',
@@ -48,8 +49,6 @@ export const MasterSponsorshipCard: React.FC<MasterSponsorshipCardProps> = ({ is
     if (!formData.name || !formData.company || formData.whatsapp.length < 14) return;
 
     setIsLoading(true);
-    
-    // Simulate API Call
     setTimeout(() => {
       setIsLoading(false);
       setFormStep('success');
@@ -58,7 +57,6 @@ export const MasterSponsorshipCard: React.FC<MasterSponsorshipCardProps> = ({ is
 
   const handleClose = () => {
     setIsModalOpen(false);
-    // Reset form after closing (optional delay)
     setTimeout(() => {
       setFormStep('form');
       setFormData({ name: '', company: '', whatsapp: '' });
@@ -67,89 +65,69 @@ export const MasterSponsorshipCard: React.FC<MasterSponsorshipCardProps> = ({ is
 
   return (
     <>
-      {/* --- CARD DISPLAY --- */}
-      <div className="bg-white dark:bg-gray-800 rounded-[2.5rem] p-1 shadow-sm border border-amber-500/30 relative overflow-hidden group">
-        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-amber-300 via-yellow-500 to-amber-600"></div>
+      <div className="bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-sm border border-gray-100 dark:border-gray-700 relative overflow-hidden group hover:border-amber-200 dark:hover:border-amber-900/50 transition-colors">
         
-        <div className="p-7">
-          {/* Header */}
-          <div className="flex justify-between items-start mb-6">
-            <div>
-              <div className="flex items-center gap-2 mb-2">
-                <Crown className="w-5 h-5 text-amber-500 fill-amber-500" />
-                <span className="text-[10px] font-black text-amber-600 dark:text-amber-400 uppercase tracking-widest">
-                  Exclusivo
-                </span>
-              </div>
-              <h3 className="text-xl font-black text-gray-900 dark:text-white leading-tight font-display">
-                Patrocinador Master <br/> Jacarepaguá
-              </h3>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 font-medium">
-                Sua marca em destaque para toda a região.
-              </p>
-            </div>
-          </div>
+        {/* Badge Discreto */}
+        <div className="inline-flex items-center gap-1.5 bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 px-2.5 py-1 rounded-md mb-3 border border-amber-100 dark:border-amber-800/30">
+            <Crown className="w-3 h-3" strokeWidth={3} />
+            <span className="text-[9px] font-black uppercase tracking-widest">Exclusivo</span>
+        </div>
 
-          {/* Benefits */}
-          <div className="space-y-3 mb-8">
+        {/* Títulos */}
+        <h3 className="text-lg font-black text-gray-900 dark:text-white font-display leading-tight mb-1">
+            Patrocinador Master – Jacarepaguá
+        </h3>
+        <p className="text-xs text-gray-500 dark:text-gray-400 font-medium mb-5">
+            Sua marca em destaque para toda a região.
+        </p>
+
+        {/* 3 Bullets Curtos */}
+        <ul className="space-y-2 mb-6">
             {[
-              "Visibilidade fixa no app (Menu & Home)",
-              "Destaque institucional (Branding)",
-              "Exclusividade por região"
-            ].map((benefit, idx) => (
-              <div key={idx} className="flex items-center gap-3">
-                <div className="w-5 h-5 rounded-full bg-amber-50 dark:bg-amber-900/20 flex items-center justify-center shrink-0">
-                  <CheckCircle2 className="w-3 h-3 text-amber-600 dark:text-amber-400" />
-                </div>
-                <span className="text-sm text-gray-600 dark:text-gray-300 font-medium">
-                  {benefit}
-                </span>
-              </div>
+                "Logo no topo do app (Menu & Home)",
+                "Banner fixo na tela Explorar",
+                "Exclusividade no seu segmento"
+            ].map((item, idx) => (
+                <li key={idx} className="flex items-start gap-2.5 text-xs text-gray-600 dark:text-gray-300 font-medium">
+                    <div className="mt-0.5 w-3.5 h-3.5 bg-green-50 dark:bg-green-900/20 rounded-full flex items-center justify-center shrink-0">
+                        <Check className="w-2.5 h-2.5 text-green-600 dark:text-green-400" strokeWidth={3} />
+                    </div>
+                    {item}
+                </li>
             ))}
-          </div>
+        </ul>
 
-          {/* Price / Status Area */}
-          <div className="bg-gray-50 dark:bg-gray-900/50 rounded-2xl p-5 border border-gray-100 dark:border-gray-700/50">
-            {isAvailable ? (
-              <div className="flex flex-col">
-                <span className="text-xs text-gray-500 dark:text-gray-400 mb-1">Investimento</span>
-                <div className="flex items-baseline gap-1">
-                  <span className="text-sm font-bold text-gray-900 dark:text-white">A partir de</span>
-                  <span className="text-2xl font-black text-gray-900 dark:text-white">R$ 2.000</span>
-                  <span className="text-sm font-bold text-gray-500">/mês</span>
+        {/* Bloco de Investimento */}
+        {isAvailable && (
+            <div className="bg-gray-50 dark:bg-gray-900/50 rounded-xl p-4 mb-6 border border-gray-100 dark:border-gray-800">
+                <div className="flex items-baseline gap-1.5">
+                    <span className="text-xs text-gray-500 dark:text-gray-400 font-bold">A partir de</span>
+                    <span className="text-xl font-black text-gray-900 dark:text-white">R$ 2.000</span>
+                    <span className="text-xs text-gray-500 font-bold">/ mês</span>
                 </div>
-                <div className="mt-2 inline-flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
-                  <span className="text-[10px] font-bold text-green-600 dark:text-green-400 uppercase tracking-wide">
+                <p className="text-[10px] text-green-600 dark:text-green-400 font-black uppercase tracking-wide mt-1">
                     Condição de fundador disponível
-                  </span>
-                </div>
-              </div>
-            ) : (
-              <div className="flex items-center gap-4">
-                <div className="w-10 h-10 bg-gray-200 dark:bg-gray-700 rounded-full flex items-center justify-center text-gray-400">
-                  <Lock className="w-5 h-5" />
-                </div>
-                <div>
-                  <p className="text-sm font-bold text-gray-900 dark:text-white">Cota Master ocupada</p>
-                  <p className="text-xs text-gray-500">Entre na lista de espera para a próxima abertura.</p>
-                </div>
-              </div>
-            )}
-          </div>
+                </p>
+            </div>
+        )}
 
-          {/* CTA Button */}
-          <button
-            onClick={() => setIsModalOpen(true)}
-            className={`w-full mt-6 py-4 rounded-xl font-bold text-sm flex items-center justify-center gap-2 shadow-lg active:scale-[0.98] transition-all
-              ${isAvailable 
-                ? 'bg-gradient-to-r from-amber-400 to-amber-500 text-white shadow-amber-500/20 hover:brightness-110' 
-                : 'bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600'
-              }`}
-          >
-            {isAvailable ? 'TENHO INTERESSE' : 'ENTRAR NA LISTA DE ESPERA'}
-            <ArrowRight className="w-4 h-4" strokeWidth={3} />
-          </button>
+        {/* Ações */}
+        <div className="flex flex-col gap-3">
+            <button
+                onClick={() => setIsModalOpen(true)}
+                className="w-full bg-slate-900 hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-gray-100 text-white font-bold py-3.5 rounded-xl shadow-lg active:scale-[0.98] transition-all flex items-center justify-center gap-2 text-sm"
+            >
+                Tenho interesse
+                <ArrowRight className="w-4 h-4" />
+            </button>
+            
+            <button 
+                onClick={() => setShowVideo(true)}
+                className="w-full flex items-center justify-center gap-2 text-xs font-bold text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors py-2"
+            >
+                <PlayCircle className="w-4 h-4" />
+                Ver como funciona
+            </button>
         </div>
       </div>
 
@@ -160,7 +138,6 @@ export const MasterSponsorshipCard: React.FC<MasterSponsorshipCardProps> = ({ is
             className="bg-white dark:bg-gray-900 w-full max-w-md rounded-t-[2rem] sm:rounded-[2rem] p-6 shadow-2xl relative flex flex-col overflow-hidden animate-in slide-in-from-bottom duration-300"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Close Button */}
             <button 
               onClick={handleClose}
               className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600 dark:hover:text-white transition-colors z-10"
@@ -172,15 +149,13 @@ export const MasterSponsorshipCard: React.FC<MasterSponsorshipCardProps> = ({ is
               <>
                 <div className="text-center mb-8 pt-4">
                   <div className="w-16 h-16 bg-amber-50 dark:bg-amber-900/20 rounded-full flex items-center justify-center mx-auto mb-4 border border-amber-100 dark:border-amber-800/50">
-                    {isAvailable ? <Crown className="w-8 h-8 text-amber-500" /> : <Clock className="w-8 h-8 text-amber-500" />}
+                    <Crown className="w-8 h-8 text-amber-500" />
                   </div>
                   <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2 font-display">
-                    {isAvailable ? 'Patrocínio Master' : 'Lista de Espera'}
+                    Patrocínio Master
                   </h2>
                   <p className="text-sm text-gray-500 dark:text-gray-400 max-w-[280px] mx-auto leading-relaxed">
-                    {isAvailable 
-                      ? 'Vamos te chamar no WhatsApp para apresentar as condições e verificar disponibilidade.' 
-                      : 'Avise-me quando a cota Master estiver disponível novamente.'}
+                    Vamos te chamar no WhatsApp para apresentar as condições e verificar disponibilidade.
                   </p>
                 </div>
 
@@ -233,7 +208,7 @@ export const MasterSponsorshipCard: React.FC<MasterSponsorshipCardProps> = ({ is
                   <button 
                     type="submit"
                     disabled={isLoading}
-                    className="w-full bg-gray-900 dark:bg-white text-white dark:text-black font-bold py-4 rounded-2xl shadow-xl active:scale-[0.98] transition-all flex items-center justify-center gap-2 mt-6"
+                    className="w-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-bold py-4 rounded-2xl shadow-xl active:scale-[0.98] transition-all flex items-center justify-center gap-2 mt-6"
                   >
                     {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Enviar Interesse'}
                   </button>
@@ -247,7 +222,7 @@ export const MasterSponsorshipCard: React.FC<MasterSponsorshipCardProps> = ({ is
                 <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Recebido!</h2>
                 <p className="text-gray-500 dark:text-gray-400 text-sm max-w-xs leading-relaxed mb-8">
                   Obrigado, {formData.name.split(' ')[0]}. <br/>
-                  Nossa equipe entrará em contato pelo WhatsApp em breve.
+                  Nossa equipe comercial entrará em contato pelo WhatsApp em breve.
                 </p>
                 <button 
                   onClick={handleClose}
@@ -260,6 +235,13 @@ export const MasterSponsorshipCard: React.FC<MasterSponsorshipCardProps> = ({ is
           </div>
         </div>
       )}
+
+      <ExplanatoryVideoModal 
+        isOpen={showVideo}
+        onClose={() => setShowVideo(false)}
+        videoUrl="https://videos.pexels.com/video-files/853835/853835-sd_640_360_25fps.mp4"
+        title="Benefícios do Patrocinador Master"
+      />
     </>
   );
 };
