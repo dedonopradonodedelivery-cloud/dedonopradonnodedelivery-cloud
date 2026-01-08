@@ -44,7 +44,7 @@ import { StoreAdsModule } from './StoreAdsModule';
 import { StoreProfileEdit } from './StoreProfileEdit';
 import { StoreFinanceModule } from './StoreFinanceModule';
 import { CommunityFeedView } from './CommunityFeedView';
-import { STORES } from '../constants';
+import { STORES, APP_VERSION } from '../constants';
 import { AdminModerationPanel } from './AdminModerationPanel';
 import { 
   AboutView, 
@@ -92,6 +92,32 @@ const App: React.FC = () => {
   // --- SWIPE LOGIC STATE ---
   const touchStart = useRef<{ x: number, y: number, target: EventTarget | null } | null>(null);
   const minSwipeDistance = 60; // Increased slightly to avoid accidental swipes
+
+  // VERSION CHECK FOR CACHE BUSTING
+  useEffect(() => {
+    // Debugging info
+    console.log(`[App] Version: ${APP_VERSION}`);
+    // Safe access to environment variable
+    try {
+        console.log(`[App] Mode: ${(import.meta as any).env?.MODE || 'unknown'}`);
+    } catch (e) {
+        console.warn('Could not read environment mode');
+    }
+
+    const storedVersion = localStorage.getItem('localizei_app_version');
+    if (storedVersion !== APP_VERSION) {
+        console.warn(`[App] Version mismatch: stored ${storedVersion} vs current ${APP_VERSION}. Cleaning stale state.`);
+        
+        // Remove potentially stale navigation state
+        localStorage.removeItem('localizei_active_tab');
+        
+        // Update version in storage
+        localStorage.setItem('localizei_app_version', APP_VERSION);
+        
+        // Force reset active tab to ensure correct Home rendering
+        setActiveTab('home');
+    }
+  }, []);
 
   useEffect(() => {
     localStorage.setItem('localizei_active_tab', activeTab);
