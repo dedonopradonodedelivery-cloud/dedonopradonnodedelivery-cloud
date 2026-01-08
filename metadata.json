@@ -1,5 +1,5 @@
 {
-  "name": "Localizei JPA",
+  "name": "V1 - Localizei JPA",
   "description": "O super-app de Jacarepaguá. Conecte-se com comércios, serviços e profissionais locais. Ganhe cashback e fortaleça o ecossistema do bairro.",
   "requestFramePermissions": [
     "geolocation",
