@@ -25,6 +25,7 @@ import {
 } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import { User } from '@supabase/supabase-js';
+import { MasterSponsorshipCard } from './MasterSponsorshipCard';
 
 // Definição da interface sincronizada com o App.tsx
 interface StoreAreaViewProps {
@@ -326,6 +327,9 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
                 Ver painel completo de fidelidade
             </button>
         </div>
+
+        {/* --- NOVO BLOCO PATROCINADOR MASTER --- */}
+        <MasterSponsorshipCard isAvailable={true} />
 
         {/* CARD DE DESTAQUE ATUALIZADO */}
         <div className="bg-slate-900 rounded-[2.5rem] p-8 shadow-2xl border border-white/10 relative overflow-hidden group">
