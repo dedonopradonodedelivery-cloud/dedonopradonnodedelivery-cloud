@@ -60,9 +60,10 @@ const WEEKLY_PROMOS = [
   {
     id: 'promo-1',
     storeName: 'Espaço VIP Beleza',
-    productName: 'Hidratação Profunda',
+    productName: 'Botox Capilar',
     discount: 30,
-    image: 'https://images.unsplash.com/photo-1560066984-138dadb4c035?q=80&w=400&auto=format&fit=crop',
+    // Imagem premium realista: Profissional cuidando de cabelo em salão (foco no tratamento/brilho)
+    image: 'https://images.unsplash.com/photo-1560869713-7d0a29430803?q=80&w=800&auto=format&fit=crop',
     validity: 'Até domingo',
     storeId: 'mock-1',
     neighborhood: 'Freguesia'

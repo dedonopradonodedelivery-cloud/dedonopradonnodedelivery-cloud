@@ -11,7 +11,7 @@ import {
 import { AdType, Category, Store, Story, EditorialCollection, Job, CommunityPost } from './types';
 
 // --- LOGO GENERATOR HELPER ---
-// Cria logotipos SVG vetoriais leves e nítidos simulando branding real
+// Mantido para fallbacks, mas as stores principais usarão fotos reais
 const createBrandLogo = (bgColor: string, fgColor: string, iconPath: string, text?: string) => {
   const svg = `
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400">
@@ -24,20 +24,13 @@ const createBrandLogo = (bgColor: string, fgColor: string, iconPath: string, tex
   return `data:image/svg+xml;base64,${btoa(svg)}`;
 };
 
-// Paths simplificados para os ícones das marcas
 const PATHS = {
-  burger: '<path d="M6.667 15.333h10.666a1.333 1.333 0 0 0 1.334-1.333v-1.333a1.333 1.333 0 0 0-1.334-1.334H6.667a1.333 1.333 0 0 0-1.334 1.334V14c0 .736.597 1.333 1.334 1.333Z"/><path d="M4 8.667h16"/><path d="M12 4c3.5 0 6.5 2 7.5 4.667H4.5C5.5 6 8.5 4 12 4Z"/>',
-  sunWheat: '<path d="M12 2v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="M20 12h2"/><path d="m19.07 4.93-1.41 1.41"/><path d="M15.947 12.65a2.8 2.8 0 0 1 1.666-1.503L12 4l-5.613 7.147a2.8 2.8 0 0 1 1.667 1.503"/><path d="M12 22v-9"/>',
-  pizza: '<path d="M12 2 4.5 13.5a4.8 4.8 0 0 0 2.2 6.5h10.6a4.8 4.8 0 0 0 2.2-6.5L12 2Z"/><circle cx="12" cy="13" r="1"/><circle cx="10" cy="16" r="1"/><circle cx="14" cy="16" r="1"/>',
-  basket: '<path d="m15 11-1 9"/><path d="m19 11-4-7"/><path d="M2 11h20"/><path d="m3.5 11 1.6 7.4a2 2 0 0 0 2 1.6h9.8a2 2 0 0 0 2-1.6l1.7-7.4"/><path d="M4.5 15.5h15"/><path d="m5 11 4-7"/><path d="m9 11 1 9"/>',
   cross: '<path d="M11 2a2 2 0 0 0-2 2v5H4a2 2 0 0 0-2 2v2c0 1.1.9 2 2 2h5v5c0 1.1.9 2 2 2h2a2 2 0 0 0 2-2v-5h5a2 2 0 0 0 2-2v-2a2 2 0 0 0-2-2h-5V4a2 2 0 0 0-2-2h-2Z"/>'
 };
 
-// Logos Gerados (Mantidos para uso em outros contextos se necessário, mas STORES usará fotos)
 const LOGOS = {
   farmacia: createBrandLogo('#EF4444', '#FFFFFF', PATHS.cross, 'SAÚDE'),
   oficina: createBrandLogo('#1E293B', '#FFFFFF', '<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>', 'OFICINA'),
-  pet: createBrandLogo('#8B5CF6', '#FFFFFF', '<path d="M10 5.172C10 3.782 8.423 2.679 6.5 3c-2.823.47-4.113 4.916-2.1 7 .66.686 1.6 1 2.6 1 1.93 0 3-1.446 3-2.828 0-1.434-1.07-2.672-3-3-1.974-.336-3.3 1.05-3 3 .15.976.995 2 2 2 .856 0 1.5-.536 1.5-1.172"/>', 'ANIL PET'),
 };
 
 export const CATEGORIES: Category[] = [
@@ -88,15 +81,19 @@ export const STORIES: Story[] = [
   { id: '2', name: 'Padaria Aurora', image: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?q=80&w=200&auto=format&fit=crop' },
 ];
 
+// --- STORES DATA ---
+// Atualizado com imagens conceituais realistas e comentários para o bloco "Confiança"
 export const STORES: Store[] = [
   {
     id: '1',
-    name: 'Burger Nova',
-    username: 'burgernova',
-    category: 'Alimentação',
-    subcategory: 'Hambúrguerias',
-    description: 'Hambúrgueres artesanais com sabor de bairro.',
-    logoUrl: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?q=80&w=800&auto=format&fit=crop', // Imagem Realista
+    name: 'Bella Boutique',
+    username: 'bellaboutique',
+    category: 'Moda',
+    subcategory: 'Roupas Femininas',
+    description: 'Moda feminina com estilo e elegância.',
+    // Imagem Conceitual: Araras de roupas organizadas, ambiente boutique clean
+    logoUrl: 'https://images.unsplash.com/photo-1567401893414-76b7b1e5a7a5?q=80&w=800&auto=format&fit=crop',
+    image: 'https://images.unsplash.com/photo-1567401893414-76b7b1e5a7a5?q=80&w=800&auto=format&fit=crop',
     rating: 4.8,
     reviewsCount: 124,
     distance: 'Freguesia • RJ',
@@ -105,22 +102,24 @@ export const STORES: Store[] = [
     adType: AdType.ORGANIC,
     address: 'Rua Tirol, 1245 - Freguesia',
     phone: '(21) 99999-1111',
-    hours: 'Seg a Dom • 11h às 23h',
+    hours: 'Seg a Sáb • 10h às 20h',
     verified: true,
     recentComments: [
-      "O melhor cheddar da Freguesia, sem dúvidas!",
-      "Entrega super rápida, chegou quentinho.",
-      "Sempre peço no fim de semana, nunca decepciona."
+      "Peças lindas e de ótima qualidade!",
+      "Atendimento maravilhoso, amei meu vestido.",
+      "A loja é super aconchegante."
     ]
   },
   {
     id: 'premium-test',
-    name: 'Padaria Aurora',
-    username: 'padariaaurora',
-    category: 'Alimentação',
-    subcategory: 'Padarias',
-    description: 'O melhor pão quentinho e café artesanal da Freguesia.',
-    logoUrl: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?q=80&w=800&auto=format&fit=crop', // Imagem Realista
+    name: 'Pet Love',
+    username: 'petlovejpa',
+    category: 'Pets',
+    subcategory: 'Pet Shop',
+    description: 'Tudo para o seu melhor amigo.',
+    // Imagem Conceitual: Filhote fofo olhando para a câmera
+    logoUrl: 'https://images.unsplash.com/photo-1591769225440-811ad7d6eca6?q=80&w=800&auto=format&fit=crop',
+    image: 'https://images.unsplash.com/photo-1591769225440-811ad7d6eca6?q=80&w=800&auto=format&fit=crop',
     rating: 4.9,
     reviewsCount: 450,
     distance: 'Freguesia • RJ',
@@ -131,28 +130,80 @@ export const STORES: Store[] = [
     phone: '(21) 98888-2222',
     verified: true,
     recentComments: [
-      "Pão quentinho toda hora, atendimento nota 10.",
-      "O café da manhã colonial deles é imperdível.",
-      "Melhor padaria do bairro, limpa e organizada."
+      "Melhor pet shop do bairro, super atenciosos.",
+      "Meu cachorro volta cheiroso e feliz.",
+      "A veterinária é excelente!"
     ]
   },
   {
-    id: 'taquara-1',
-    name: 'Pizzaria Central',
-    username: 'pizzariacentral',
+    id: 'sushi-zen',
+    name: 'Sushi Zen',
+    username: 'sushizenjpa',
     category: 'Alimentação',
-    subcategory: 'Pizzarias',
-    description: 'A pizza mais recheada da região.',
-    logoUrl: 'https://images.unsplash.com/photo-1574071318508-1cdbab80d002?q=80&w=800&auto=format&fit=crop', // Imagem Realista
-    rating: 4.7,
-    reviewsCount: 89,
-    distance: 'Taquara • RJ',
-    neighborhood: 'Taquara',
+    subcategory: 'Japonês',
+    description: 'Culinária japonesa autêntica.',
+    // Imagem Conceitual: Sushi em prato de cerâmica, ambiente clean
+    logoUrl: 'https://images.unsplash.com/photo-1579871494447-9811cf80d66c?q=80&w=800&auto=format&fit=crop',
+    image: 'https://images.unsplash.com/photo-1579871494447-9811cf80d66c?q=80&w=800&auto=format&fit=crop',
+    rating: 4.8,
+    reviewsCount: 310,
+    distance: 'Freguesia • RJ',
+    neighborhood: 'Freguesia',
     cashback: 8,
+    adType: AdType.PREMIUM,
+    verified: true,
+    recentComments: [
+      "Peixe muito fresco, apresentação impecável.",
+      "O combinado do chef é surreal de bom.",
+      "Ambiente super agradável para jantar."
+    ]
+  },
+  {
+    id: 'curicica-1',
+    name: 'Mercado Vale',
+    username: 'mercadovale',
+    category: 'Mercado',
+    subcategory: 'Hortifruti',
+    description: 'Frutas e verduras selecionadas.',
+    // Imagem Conceitual: Banca de frutas frescas organizada
+    logoUrl: 'https://images.unsplash.com/photo-1610832958506-aa56368176cf?q=80&w=800&auto=format&fit=crop',
+    image: 'https://images.unsplash.com/photo-1610832958506-aa56368176cf?q=80&w=800&auto=format&fit=crop',
+    rating: 4.6,
+    reviewsCount: 85,
+    distance: 'Curicica • RJ',
+    neighborhood: 'Curicica',
     adType: AdType.LOCAL,
-    address: 'Estrada do Tindiba, 500',
-    phone: '(21) 97777-1111',
-    verified: true
+    address: 'Rua da Ventura, 50',
+    verified: true,
+    cashback: 2,
+    recentComments: [
+      "Tudo fresquinho, chego cedo pra pegar as melhores frutas.",
+      "Preço justo e muita variedade de legumes.",
+      "Atendimento familiar que faz a diferença."
+    ]
+  },
+  {
+    id: 'anil-1',
+    name: 'Anil Pet Care',
+    username: 'anilpet',
+    category: 'Pets',
+    subcategory: 'Serviços Pet',
+    description: 'Cuidado e carinho para seu melhor amigo.',
+    // Imagem Conceitual: Cão feliz sendo cuidado (fundo neutro/clean)
+    logoUrl: 'https://images.unsplash.com/photo-1583337130417-3346a1be7dee?q=80&w=800&auto=format&fit=crop',
+    image: 'https://images.unsplash.com/photo-1583337130417-3346a1be7dee?q=80&w=800&auto=format&fit=crop',
+    rating: 4.9,
+    reviewsCount: 42,
+    distance: 'Anil • RJ',
+    neighborhood: 'Anil',
+    adType: AdType.ORGANIC,
+    address: 'Estrada de Jacarepaguá, 4500',
+    verified: true,
+    recentComments: [
+      "O banho e tosa é excelente, meu cachorro volta cheiroso.",
+      "Confio de olhos fechados, tratam os animais como filhos.",
+      "A veterinária é muito atenciosa."
+    ]
   },
   {
     id: 'pechincha-1',
@@ -162,6 +213,7 @@ export const STORES: Store[] = [
     subcategory: 'Farmácias',
     description: 'Preços baixos e entrega rápida.',
     logoUrl: LOGOS.farmacia,
+    image: LOGOS.farmacia,
     rating: 4.5,
     reviewsCount: 200,
     distance: 'Pechincha • RJ',
@@ -169,7 +221,6 @@ export const STORES: Store[] = [
     cashback: 3,
     adType: AdType.ORGANIC,
     address: 'Av. Geremário Dantas, 1200',
-    phone: '(21) 96666-2222',
     verified: true
   },
   {
@@ -180,49 +231,14 @@ export const STORES: Store[] = [
     subcategory: 'Mecânica',
     description: 'Mecânica geral e elétrica.',
     logoUrl: LOGOS.oficina,
+    image: LOGOS.oficina,
     rating: 4.8,
     reviewsCount: 56,
     distance: 'Tanque • RJ',
     neighborhood: 'Tanque',
     adType: AdType.ORGANIC,
     address: 'Rua Cândido Benício, 2000',
-    phone: '(21) 95555-3333',
     verified: true
-  },
-  {
-    id: 'anil-1',
-    name: 'Anil Pet Shop',
-    username: 'anilpet',
-    category: 'Pets',
-    subcategory: 'Pet Shop',
-    description: 'Tudo para o seu bichinho.',
-    logoUrl: LOGOS.pet,
-    rating: 4.9,
-    reviewsCount: 15,
-    distance: 'Anil • RJ',
-    neighborhood: 'Anil',
-    adType: AdType.ORGANIC,
-    address: 'Estrada de Jacarepaguá, 4500',
-    phone: '(21) 94444-4444',
-    verified: true
-  },
-  {
-    id: 'curicica-1',
-    name: 'Mercado Vale',
-    username: 'mercadovale',
-    category: 'Mercado',
-    subcategory: 'Mercearia',
-    description: 'Frutas e verduras frescas todo dia.',
-    logoUrl: 'https://images.unsplash.com/photo-1542838132-92c53300491e?q=80&w=800&auto=format&fit=crop', // Imagem Realista
-    rating: 4.4,
-    reviewsCount: 32,
-    distance: 'Curicica • RJ',
-    neighborhood: 'Curicica',
-    adType: AdType.LOCAL,
-    address: 'Rua da Ventura, 50',
-    phone: '(21) 93333-3333',
-    verified: true,
-    cashback: 2
   }
 ];
 
