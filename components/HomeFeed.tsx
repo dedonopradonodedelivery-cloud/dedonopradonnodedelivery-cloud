@@ -62,8 +62,8 @@ const WEEKLY_PROMOS = [
     storeName: 'Espaço VIP Beleza',
     productName: 'Botox Capilar',
     discount: 30,
-    // Imagem premium realista: Profissional cuidando de cabelo em salão (foco no tratamento/brilho)
-    image: 'https://images.unsplash.com/photo-1560869713-7d0a29430803?q=80&w=800&auto=format&fit=crop',
+    // Imagem premium realista: Mulher elegante com cabelo saudável em salão moderno
+    image: 'https://images.unsplash.com/photo-1562322140-8baeececf3df?q=80&w=800&auto=format&fit=crop',
     validity: 'Até domingo',
     storeId: 'mock-1',
     neighborhood: 'Freguesia'
@@ -154,9 +154,9 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void }> = ({ onNavigat
       {
         id: 'b1-cashback',
         type: 'standard',
-        title: 'Cashback real entre lojas do seu bairro',
-        subtitle: `Compre no comércio local de ${currentNeighborhood === 'Jacarepaguá (todos)' ? 'JPA' : currentNeighborhood} e receba dinheiro de volta na hora.`,
-        image: 'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?q=80&w=800&auto=format&fit=crop',
+        title: 'Cashback no seu bairro',
+        // subtitle removed for cleaner look
+        image: 'https://images.unsplash.com/photo-1556742049-0cfed4f7a07d?q=80&w=800&auto=format&fit=crop',
         target: 'explore', 
         tag: 'Exclusivo',
         tagColor: 'bg-emerald-500'
@@ -164,8 +164,8 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void }> = ({ onNavigat
       {
         id: 'b2-services',
         type: 'standard',
-        title: 'Encontre serviços e receba até 5 orçamentos',
-        subtitle: 'Fale direto com profissionais de JPA pelo WhatsApp.',
+        title: 'Orçamentos de Serviços',
+        // subtitle removed for cleaner look
         image: 'https://images.unsplash.com/photo-1581578731117-10d52143b0e8?q=80&w=800&auto=format&fit=crop',
         target: 'services',
         tag: 'WhatsApp Direto',
@@ -174,9 +174,9 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void }> = ({ onNavigat
       {
         id: 'b3-merchant',
         type: 'standard',
-        title: 'JPA Connect para lojistas',
-        subtitle: 'Venda mais, atraia clientes do bairro e participe do cashback local.',
-        image: 'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?q=80&w=800&auto=format&fit=crop',
+        title: 'Networking para Lojistas',
+        // subtitle removed for cleaner look
+        image: 'https://images.unsplash.com/photo-1600880292203-757bb62b4baf?q=80&w=800&auto=format&fit=crop',
         target: 'freguesia_connect_public',
         tag: 'Para Negócios',
         tagColor: 'bg-indigo-600'
@@ -187,10 +187,10 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void }> = ({ onNavigat
       list.push({
         id: 'b4-jobs',
         type: 'jobs',
-        title: `Vagas de emprego em ${currentNeighborhood === 'Jacarepaguá (todos)' ? 'JPA' : currentNeighborhood}`,
-        subtitle: 'Lojas e serviços contratando agora',
+        title: 'Vagas de Emprego Locais',
+        // subtitle removed for cleaner look
         target: 'jobs_list',
-        image: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?q=80&w=800&auto=format&fit=crop',
+        image: 'https://images.unsplash.com/photo-1497215728101-856f4ea42174?q=80&w=800&auto=format&fit=crop',
         tag: 'Oportunidade',
         tagColor: 'bg-blue-600'
       });
@@ -251,18 +251,16 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void }> = ({ onNavigat
             />
             <div className={`absolute inset-0 bg-gradient-to-t ${current.type === 'jobs' ? 'from-blue-950 via-blue-900/50' : 'from-slate-950 via-slate-900/50'} to-transparent opacity-90`}></div>
             
-            <div className="absolute inset-0 p-6 flex flex-col justify-end z-20 pb-10">
+            <div className="absolute inset-0 p-6 flex flex-col justify-end z-20 pb-8">
               <div className="flex items-center gap-2 mb-2">
                   <span className={`${current.tagColor || 'bg-blue-600'} text-white text-[9px] font-black px-2 py-0.5 rounded text-xs uppercase tracking-widest shadow-sm animate-in fade-in slide-in-from-left-2`}>
                     {current.tag}
                   </span>
               </div>
-              <h3 className="text-xl font-black text-white leading-[1.1] font-display tracking-tight mb-2 drop-shadow-sm max-w-[90%]">
+              <h3 className="text-xl font-black text-white leading-[1.1] font-display tracking-tight drop-shadow-sm max-w-[90%]">
                 {current.title}
               </h3>
-              <p className="text-xs text-gray-200 font-medium line-clamp-2 leading-relaxed opacity-90 max-w-[95%]">
-                {current.subtitle}
-              </p>
+              {/* Subtitle removed for cleaner look */}
             </div>
           </>
         ) : (

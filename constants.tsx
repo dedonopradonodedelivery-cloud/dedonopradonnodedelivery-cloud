@@ -118,8 +118,8 @@ export const STORES: Store[] = [
     subcategory: 'Pet Shop',
     description: 'Tudo para o seu melhor amigo.',
     // Imagem Conceitual: Filhote fofo olhando para a câmera
-    logoUrl: 'https://images.unsplash.com/photo-1591769225440-811ad7d6eca6?q=80&w=800&auto=format&fit=crop',
-    image: 'https://images.unsplash.com/photo-1591769225440-811ad7d6eca6?q=80&w=800&auto=format&fit=crop',
+    logoUrl: 'https://images.unsplash.com/photo-1583511655826-05700442b31b?q=80&w=800&auto=format&fit=crop',
+    image: 'https://images.unsplash.com/photo-1583511655826-05700442b31b?q=80&w=800&auto=format&fit=crop',
     rating: 4.9,
     reviewsCount: 450,
     distance: 'Freguesia • RJ',
