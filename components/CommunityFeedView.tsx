@@ -396,25 +396,32 @@ const FeedPost: React.FC<{
 };
 
 const CommunityNavBar: React.FC<{ currentView: string; onChangeView: (view: 'home' | 'direct' | 'explore' | 'profile' | 'jobs') => void; userAvatar?: string; hasUnreadMessages?: boolean; }> = ({ currentView, onChangeView, userAvatar, hasUnreadMessages }) => (
-  <div className="sticky top-[70px] z-20 flex justify-center mb-0 px-4 pointer-events-none w-full">
-    <div className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-md rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 w-full max-w-md mx-auto grid grid-cols-5 gap-1 items-center p-1.5 pointer-events-auto transition-all">
-      <button onClick={() => onChangeView('home')} className={`flex justify-center items-center py-2.5 rounded-xl transition-all w-full ${currentView === 'home' ? 'bg-gray-100 dark:bg-gray-700 text-black dark:text-white' : 'text-gray-400 hover:text-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700/50'}`}>
+  <div className="sticky top-14 z-20 w-full bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border-b border-gray-100 dark:border-gray-800 shadow-sm transition-all">
+    <div className="w-full grid grid-cols-5 items-center">
+      <button onClick={() => onChangeView('home')} className={`flex justify-center items-center h-12 transition-all w-full relative active:bg-gray-50 dark:active:bg-gray-800 ${currentView === 'home' ? 'text-black dark:text-white' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300'}`}>
         <Home className={`w-6 h-6 ${currentView === 'home' ? 'fill-black dark:fill-white' : ''}`} strokeWidth={2} />
+        {currentView === 'home' && <div className="absolute bottom-0 h-0.5 w-8 bg-black dark:bg-white rounded-t-full"></div>}
       </button>
-      <button onClick={() => onChangeView('direct')} className={`flex justify-center items-center py-2.5 rounded-xl transition-all w-full relative ${currentView === 'direct' ? 'bg-gray-100 dark:bg-gray-700 text-black dark:text-white' : 'text-gray-400 hover:text-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700/50'}`}>
-        <Send className={`w-6 h-6 ${currentView === 'direct' ? 'fill-black dark:fill-white' : ''}`} strokeWidth={2} transform="rotate(-15)" />
-        {hasUnreadMessages && <span className="absolute top-2 right-1/4 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white dark:border-gray-800"></span>}
+      <button onClick={() => onChangeView('direct')} className={`flex justify-center items-center h-12 transition-all w-full relative active:bg-gray-50 dark:active:bg-gray-800 ${currentView === 'direct' ? 'text-black dark:text-white' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300'}`}>
+        <div className="relative">
+            <Send className={`w-6 h-6 ${currentView === 'direct' ? 'fill-black dark:fill-white' : ''}`} strokeWidth={2} transform="rotate(-15)" />
+            {hasUnreadMessages && <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white dark:border-gray-900"></span>}
+        </div>
+        {currentView === 'direct' && <div className="absolute bottom-0 h-0.5 w-8 bg-black dark:bg-white rounded-t-full"></div>}
       </button>
-      <button onClick={() => onChangeView('explore')} className={`flex justify-center items-center py-2.5 rounded-xl transition-all w-full ${currentView === 'explore' ? 'bg-gray-100 dark:bg-gray-700 text-black dark:text-white' : 'text-gray-400 hover:text-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700/50'}`}>
+      <button onClick={() => onChangeView('explore')} className={`flex justify-center items-center h-12 transition-all w-full relative active:bg-gray-50 dark:active:bg-gray-800 ${currentView === 'explore' ? 'text-black dark:text-white' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300'}`}>
         <Search className="w-6 h-6" strokeWidth={currentView === 'explore' ? 3 : 2} />
+        {currentView === 'explore' && <div className="absolute bottom-0 h-0.5 w-8 bg-black dark:bg-white rounded-t-full"></div>}
       </button>
-      <button onClick={() => onChangeView('profile')} className={`flex justify-center items-center py-2.5 rounded-xl transition-all w-full ${currentView === 'profile' ? 'bg-gray-100 dark:bg-gray-700' : 'hover:bg-gray-50 dark:hover:bg-gray-700/50'}`}>
-        <div className={`rounded-full overflow-hidden border-2 w-6 h-6 ${currentView === 'profile' ? 'border-black dark:border-white' : 'border-transparent'}`}>
+      <button onClick={() => onChangeView('profile')} className={`flex justify-center items-center h-12 transition-all w-full relative active:bg-gray-50 dark:active:bg-gray-800 ${currentView === 'profile' ? '' : 'opacity-70 hover:opacity-100'}`}>
+        <div className={`rounded-full overflow-hidden border-2 w-7 h-7 ${currentView === 'profile' ? 'border-black dark:border-white' : 'border-transparent'}`}>
            {userAvatar ? <img src={userAvatar} alt="Profile" className="w-full h-full object-cover" /> : <UserIcon className={`w-full h-full ${currentView === 'profile' ? 'text-black dark:text-white fill-black dark:fill-white' : 'text-gray-400'}`} />}
         </div>
+        {currentView === 'profile' && <div className="absolute bottom-0 h-0.5 w-8 bg-black dark:bg-white rounded-t-full"></div>}
       </button>
-      <button onClick={() => onChangeView('jobs')} className={`flex justify-center items-center py-2.5 rounded-xl transition-all w-full ${currentView === 'jobs' ? 'bg-gray-100 dark:bg-gray-700 text-black dark:text-white' : 'text-gray-400 hover:text-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700/50'}`}>
+      <button onClick={() => onChangeView('jobs')} className={`flex justify-center items-center h-12 transition-all w-full relative active:bg-gray-50 dark:active:bg-gray-800 ${currentView === 'jobs' ? 'text-black dark:text-white' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300'}`}>
         <Briefcase className={`w-6 h-6 ${currentView === 'jobs' ? 'fill-black dark:fill-white' : ''}`} strokeWidth={2} />
+        {currentView === 'jobs' && <div className="absolute bottom-0 h-0.5 w-8 bg-black dark:bg-white rounded-t-full"></div>}
       </button>
     </div>
   </div>
