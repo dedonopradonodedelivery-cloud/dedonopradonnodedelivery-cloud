@@ -69,7 +69,7 @@ const WEEKLY_PROMOS = [
   },
   {
     id: 'promo-2',
-    storeName: 'Hamburgueria Brasa',
+    storeName: 'Burger Nova',
     productName: 'Combo Duplo Cheddar',
     discount: 25,
     image: 'https://images.unsplash.com/photo-1594212699903-ec8a3eca50f5?q=80&w=400&auto=format&fit=crop',
@@ -848,24 +848,24 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
                   onClick={() => onStoreClick?.(store)}
                   className="snap-center min-w-[160px] max-w-[160px] flex flex-col bg-white dark:bg-gray-800 rounded-[20px] shadow-[0_2px_8px_rgba(0,0,0,0.06)] dark:shadow-none border border-gray-100 dark:border-gray-700 overflow-hidden group active:scale-[0.98] transition-all"
                 >
-                  <div className="relative h-[110px] w-full overflow-hidden">
+                  {/* Updated Visual: Photo Cover (Standard Delivery App Style) */}
+                  <div className="relative h-[110px] w-full overflow-hidden bg-gray-100 dark:bg-gray-800">
                     <img
-                      src={store.image || getCategoryCover(store.category)}
+                      src={store.logoUrl || store.image || getCategoryCover(store.category)}
                       alt={store.name}
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-90"></div>
-
-                    <div className="absolute top-2 right-2 bg-black/40 backdrop-blur-md px-2 py-0.5 rounded-md border border-white/10">
-                      <span className="text-[8px] font-bold text-white uppercase tracking-wider flex items-center gap-1">
-                        <Coins className="w-2.5 h-2.5 text-emerald-400" />
+                    
+                    <div className="absolute top-2 right-2 bg-white/90 dark:bg-black/60 backdrop-blur-md px-2 py-0.5 rounded-md border border-gray-200 dark:border-white/10 shadow-sm">
+                      <span className="text-[8px] font-bold text-gray-700 dark:text-white uppercase tracking-wider flex items-center gap-1">
+                        <Coins className="w-2.5 h-2.5 text-emerald-500" />
                         Cashback
                       </span>
                     </div>
 
                     {/* Badge Visibility Rule */}
                     {(isAll || store.neighborhood !== currentNeighborhood) && store.neighborhood && (
-                        <div className="absolute top-2 left-2 bg-black/40 backdrop-blur-md px-2 py-0.5 rounded-md border border-white/10">
+                        <div className="absolute top-2 left-2 bg-black/60 backdrop-blur-md px-2 py-0.5 rounded-md border border-white/10">
                           <span className="text-[8px] font-bold text-white uppercase tracking-wider">
                             {store.neighborhood}
                           </span>

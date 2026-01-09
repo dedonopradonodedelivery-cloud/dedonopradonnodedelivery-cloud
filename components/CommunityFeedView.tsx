@@ -196,10 +196,10 @@ const JobsFeedScreen: React.FC<{ user: any; onRequireLogin: () => void }> = ({ u
                     Vagas em {currentNeighborhood === 'Jacarepaguá (todos)' ? 'Jacarepaguá' : currentNeighborhood}
                 </h2>
             </div>
-            <div className="p-4 space-y-4">
+            <div className="pb-20">
                 {filteredJobs.length > 0 ? (
                     filteredJobs.map(job => (
-                        <div key={job.id} className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
+                        <div key={job.id} className="bg-white dark:bg-gray-800 p-4 border-b border-gray-100 dark:border-gray-800">
                             <div className="flex justify-between items-start mb-2">
                                 <div>
                                     <h3 className="font-bold text-gray-900 dark:text-white">{job.role}</h3>

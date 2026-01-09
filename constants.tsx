@@ -9,7 +9,36 @@ import {
   Star, Tag, Award, TrendingUp, ChevronRight
 } from 'lucide-react';
 import { AdType, Category, Store, Story, EditorialCollection, Job, CommunityPost } from './types';
-import { getStoreLogo } from './utils/mockLogos';
+
+// --- LOGO GENERATOR HELPER ---
+// Cria logotipos SVG vetoriais leves e nítidos simulando branding real
+const createBrandLogo = (bgColor: string, fgColor: string, iconPath: string, text?: string) => {
+  const svg = `
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400">
+    <rect width="400" height="400" fill="${bgColor}"/>
+    <g transform="translate(100, 80) scale(8)" fill="none" stroke="${fgColor}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      ${iconPath}
+    </g>
+    ${text ? `<text x="50%" y="340" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-weight="900" font-size="50" fill="${fgColor}" letter-spacing="-1">${text}</text>` : ''}
+  </svg>`;
+  return `data:image/svg+xml;base64,${btoa(svg)}`;
+};
+
+// Paths simplificados para os ícones das marcas
+const PATHS = {
+  burger: '<path d="M6.667 15.333h10.666a1.333 1.333 0 0 0 1.334-1.333v-1.333a1.333 1.333 0 0 0-1.334-1.334H6.667a1.333 1.333 0 0 0-1.334 1.334V14c0 .736.597 1.333 1.334 1.333Z"/><path d="M4 8.667h16"/><path d="M12 4c3.5 0 6.5 2 7.5 4.667H4.5C5.5 6 8.5 4 12 4Z"/>',
+  sunWheat: '<path d="M12 2v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="M20 12h2"/><path d="m19.07 4.93-1.41 1.41"/><path d="M15.947 12.65a2.8 2.8 0 0 1 1.666-1.503L12 4l-5.613 7.147a2.8 2.8 0 0 1 1.667 1.503"/><path d="M12 22v-9"/>',
+  pizza: '<path d="M12 2 4.5 13.5a4.8 4.8 0 0 0 2.2 6.5h10.6a4.8 4.8 0 0 0 2.2-6.5L12 2Z"/><circle cx="12" cy="13" r="1"/><circle cx="10" cy="16" r="1"/><circle cx="14" cy="16" r="1"/>',
+  basket: '<path d="m15 11-1 9"/><path d="m19 11-4-7"/><path d="M2 11h20"/><path d="m3.5 11 1.6 7.4a2 2 0 0 0 2 1.6h9.8a2 2 0 0 0 2-1.6l1.7-7.4"/><path d="M4.5 15.5h15"/><path d="m5 11 4-7"/><path d="m9 11 1 9"/>',
+  cross: '<path d="M11 2a2 2 0 0 0-2 2v5H4a2 2 0 0 0-2 2v2c0 1.1.9 2 2 2h5v5c0 1.1.9 2 2 2h2a2 2 0 0 0 2-2v-5h5a2 2 0 0 0 2-2v-2a2 2 0 0 0-2-2h-5V4a2 2 0 0 0-2-2h-2Z"/>'
+};
+
+// Logos Gerados (Mantidos para uso em outros contextos se necessário, mas STORES usará fotos)
+const LOGOS = {
+  farmacia: createBrandLogo('#EF4444', '#FFFFFF', PATHS.cross, 'SAÚDE'),
+  oficina: createBrandLogo('#1E293B', '#FFFFFF', '<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>', 'OFICINA'),
+  pet: createBrandLogo('#8B5CF6', '#FFFFFF', '<path d="M10 5.172C10 3.782 8.423 2.679 6.5 3c-2.823.47-4.113 4.916-2.1 7 .66.686 1.6 1 2.6 1 1.93 0 3-1.446 3-2.828 0-1.434-1.07-2.672-3-3-1.974-.336-3.3 1.05-3 3 .15.976.995 2 2 2 .856 0 1.5-.536 1.5-1.172"/>', 'ANIL PET'),
+};
 
 export const CATEGORIES: Category[] = [
   { id: 'cat-food', name: 'Comida', slug: 'food', icon: <Utensils />, color: 'from-orange-500 to-red-600', illustrationUrl: 'https://cdn-icons-png.flaticon.com/512/3170/3170733.png' },
@@ -55,19 +84,19 @@ export const quickFilters = [
 ];
 
 export const STORIES: Story[] = [
-  { id: '1', name: 'Burger Freguesia', image: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?q=80&w=200&auto=format&fit=crop' },
-  { id: '2', name: 'Padaria Imperial', image: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?q=80&w=200&auto=format&fit=crop' },
+  { id: '1', name: 'Burger Nova', image: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?q=80&w=200&auto=format&fit=crop' },
+  { id: '2', name: 'Padaria Aurora', image: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?q=80&w=200&auto=format&fit=crop' },
 ];
 
 export const STORES: Store[] = [
   {
     id: '1',
-    name: 'Burger Freguesia',
-    username: 'burgerfreguesia',
+    name: 'Burger Nova',
+    username: 'burgernova',
     category: 'Alimentação',
     subcategory: 'Hambúrguerias',
     description: 'Hambúrgueres artesanais com sabor de bairro.',
-    logoUrl: getStoreLogo(1),
+    logoUrl: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?q=80&w=800&auto=format&fit=crop', // Imagem Realista
     rating: 4.8,
     reviewsCount: 124,
     distance: 'Freguesia • RJ',
@@ -86,12 +115,12 @@ export const STORES: Store[] = [
   },
   {
     id: 'premium-test',
-    name: 'Padaria Imperial',
-    username: 'padariaimperial',
+    name: 'Padaria Aurora',
+    username: 'padariaaurora',
     category: 'Alimentação',
     subcategory: 'Padarias',
     description: 'O melhor pão quentinho e café artesanal da Freguesia.',
-    logoUrl: getStoreLogo(8),
+    logoUrl: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?q=80&w=800&auto=format&fit=crop', // Imagem Realista
     rating: 4.9,
     reviewsCount: 450,
     distance: 'Freguesia • RJ',
@@ -109,12 +138,12 @@ export const STORES: Store[] = [
   },
   {
     id: 'taquara-1',
-    name: 'Pizzaria Taquara',
-    username: 'pizzataquara',
+    name: 'Pizzaria Central',
+    username: 'pizzariacentral',
     category: 'Alimentação',
     subcategory: 'Pizzarias',
     description: 'A pizza mais recheada da região.',
-    logoUrl: getStoreLogo(3),
+    logoUrl: 'https://images.unsplash.com/photo-1574071318508-1cdbab80d002?q=80&w=800&auto=format&fit=crop', // Imagem Realista
     rating: 4.7,
     reviewsCount: 89,
     distance: 'Taquara • RJ',
@@ -127,12 +156,12 @@ export const STORES: Store[] = [
   },
   {
     id: 'pechincha-1',
-    name: 'Farmácia Pechincha',
-    username: 'farmapechincha',
+    name: 'Farmácia Saúde',
+    username: 'farmasaude',
     category: 'Saúde',
     subcategory: 'Farmácias',
     description: 'Preços baixos e entrega rápida.',
-    logoUrl: getStoreLogo(4),
+    logoUrl: LOGOS.farmacia,
     rating: 4.5,
     reviewsCount: 200,
     distance: 'Pechincha • RJ',
@@ -150,7 +179,7 @@ export const STORES: Store[] = [
     category: 'Autos',
     subcategory: 'Mecânica',
     description: 'Mecânica geral e elétrica.',
-    logoUrl: getStoreLogo(5),
+    logoUrl: LOGOS.oficina,
     rating: 4.8,
     reviewsCount: 56,
     distance: 'Tanque • RJ',
@@ -167,7 +196,7 @@ export const STORES: Store[] = [
     category: 'Pets',
     subcategory: 'Pet Shop',
     description: 'Tudo para o seu bichinho.',
-    logoUrl: getStoreLogo(6),
+    logoUrl: LOGOS.pet,
     rating: 4.9,
     reviewsCount: 15,
     distance: 'Anil • RJ',
@@ -179,12 +208,12 @@ export const STORES: Store[] = [
   },
   {
     id: 'curicica-1',
-    name: 'Mercadinho Curicica',
-    username: 'mercadocuricica',
+    name: 'Mercado Vale',
+    username: 'mercadovale',
     category: 'Mercado',
     subcategory: 'Mercearia',
     description: 'Frutas e verduras frescas todo dia.',
-    logoUrl: getStoreLogo(7),
+    logoUrl: 'https://images.unsplash.com/photo-1542838132-92c53300491e?q=80&w=800&auto=format&fit=crop', // Imagem Realista
     rating: 4.4,
     reviewsCount: 32,
     distance: 'Curicica • RJ',
@@ -201,7 +230,7 @@ export const MOCK_JOBS: Job[] = [
   {
     id: 'job-1',
     role: 'Atendente de Balcão',
-    company: 'Padaria Imperial',
+    company: 'Padaria Aurora',
     neighborhood: 'Freguesia',
     type: 'CLT',
     salary: 'R$ 1.600,00',
@@ -227,7 +256,7 @@ export const MOCK_JOBS: Job[] = [
   {
     id: 'job-3',
     role: 'Entregador Moto',
-    company: 'Burger Freguesia',
+    company: 'Burger Nova',
     neighborhood: 'Freguesia',
     type: 'Freelancer',
     salary: 'Taxa + Produtividade',
@@ -261,10 +290,10 @@ export const MOCK_COMMUNITY_POSTS: CommunityPost[] = [
     userUsername: 'anapaula',
     userAvatar: 'https://i.pravatar.cc/100?u=a',
     authorRole: 'resident',
-    content: 'O pão da Padaria Imperial tá saindo agora! Quentinho demais 🍞😋',
+    content: 'O pão da Padaria Aurora tá saindo agora! Quentinho demais 🍞😋',
     type: 'recommendation',
     relatedStoreId: 'premium-test',
-    relatedStoreName: 'Padaria Imperial',
+    relatedStoreName: 'Padaria Aurora',
     neighborhood: 'Freguesia',
     timestamp: '5 min atrás',
     likes: 12,
@@ -273,9 +302,9 @@ export const MOCK_COMMUNITY_POSTS: CommunityPost[] = [
   {
     id: 'post-merchant-1',
     userId: 'store-1',
-    userName: 'Burger Freguesia',
-    userUsername: 'burgerfreguesia',
-    userAvatar: getStoreLogo(1),
+    userName: 'Burger Nova',
+    userUsername: 'burgernova',
+    userAvatar: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?q=80&w=800&auto=format&fit=crop',
     authorRole: 'merchant',
     content: 'Hoje tem promoção de combo duplo! Compre um e leve outro pela metade do preço. Vem aproveitar! 🍔🍔',
     type: 'promo',
