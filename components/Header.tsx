@@ -89,7 +89,7 @@ export const Header: React.FC<HeaderProps> = ({
             sticky top-0 z-40 w-full bg-white/95 dark:bg-gray-900/95 backdrop-blur-md transition-all duration-300 ease-in-out shadow-sm border-b border-gray-100 dark:border-gray-800
         `}
         >
-        <div className="w-full flex flex-col">
+        <div className="max-w-md mx-auto flex flex-col">
             
             {/* Top Row: Location & Profile */}
             <div className="flex items-center justify-between px-4 pt-3 pb-1">
