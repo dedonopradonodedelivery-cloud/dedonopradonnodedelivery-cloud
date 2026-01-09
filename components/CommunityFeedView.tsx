@@ -395,9 +395,10 @@ const FeedPost: React.FC<{
   );
 };
 
+// FIX: New Flat Design NavBar (Full Width, No Margins)
 const CommunityNavBar: React.FC<{ currentView: string; onChangeView: (view: 'home' | 'direct' | 'explore' | 'profile' | 'jobs') => void; userAvatar?: string; hasUnreadMessages?: boolean; }> = ({ currentView, onChangeView, userAvatar, hasUnreadMessages }) => (
-  <div className="sticky top-14 z-20 w-full bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800 shadow-sm transition-all">
-    <div className="grid grid-cols-5 w-full h-12">
+  <div className="sticky top-14 z-20 w-full bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border-b border-gray-100 dark:border-gray-700 shadow-sm transition-all">
+    <div className="grid grid-cols-5 w-full h-12 items-center">
       <button onClick={() => onChangeView('home')} className={`flex justify-center items-center h-full w-full relative active:bg-gray-50 dark:active:bg-gray-800 ${currentView === 'home' ? 'text-black dark:text-white' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300'}`}>
         <Home className={`w-6 h-6 ${currentView === 'home' ? 'fill-black dark:fill-white' : ''}`} strokeWidth={2} />
         {currentView === 'home' && <div className="absolute bottom-0 h-0.5 w-full bg-black dark:bg-white"></div>}

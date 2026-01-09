@@ -271,7 +271,7 @@ const App: React.FC = () => {
     <div className={isDarkMode ? 'dark' : ''}>
       <NeighborhoodProvider>
         <div 
-          className="min-h-screen bg-white dark:bg-gray-900 transition-colors duration-300 relative"
+          className="min-h-screen bg-white dark:bg-gray-900 flex justify-center transition-colors duration-300 relative"
           onTouchStart={onTouchStart}
           onTouchEnd={onTouchEnd}
         >
@@ -297,7 +297,7 @@ const App: React.FC = () => {
                   onOpenMerchantQr={() => setActiveTab('merchant_qr')}
               />
               )}
-              <main className="animate-in fade-in duration-500 w-full">
+              <main className="animate-in fade-in duration-500 w-full max-w-md mx-auto">
               {activeTab === 'home' && (
                   <HomeFeed
                   onNavigate={setActiveTab}

@@ -23,7 +23,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
   ];
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 w-full bg-[#1E5BFF] z-50 h-[80px] rounded-t-[24px] shadow-[0_-5px_30px_rgba(0,0,0,0.2)] border-t border-white/10">
+    <div className="fixed bottom-0 left-0 right-0 mx-auto w-full max-w-md bg-[#1E5BFF] z-50 h-[80px] rounded-t-[24px] shadow-[0_-5px_30px_rgba(0,0,0,0.2)] border-t border-white/10">
       <div className="flex items-end justify-between w-full px-2 h-full pb-2">
         {navItems.map((tab) => {
           // Lógica de ativação: Serviços engloba sub-rotas de serviço
