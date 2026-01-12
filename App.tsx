@@ -69,7 +69,7 @@ const App: React.FC = () => {
   // Splash Screen States (5 segundos total)
   // 0: 0.0s - 1.6s: Logo App Entra (Scale Up Suave)
   // 1: 1.6s - 2.2s: Logo App Respira (Micro-movimento)
-  // 2: 2.2s - 4.6s: Patrocinador Entra (Tech Bounce) e Fica Estável junto com o App
+  // 2: 2.2s - 4.6s: Patrocinador Entra (Tech Bounce) logo abaixo do logo principal
   // 3: 4.6s - 5.0s: Fade Out Total (Conjunto)
   // 4: 5.0s: App Render
   const [splashStage, setSplashStage] = useState(isFirstBootAttempted || isAuthReturn ? 4 : 0);
@@ -409,7 +409,7 @@ const App: React.FC = () => {
           {splashStage < 4 && (
             <div className={`fixed inset-0 z-[999] bg-brand-blue flex items-center justify-center transition-opacity duration-500 ${splashStage === 3 ? 'animate-app-exit' : ''}`}>
               
-              {/* CAMADA 1: LOGO DO APP (PROTAGONISTA) - Micro Interações */}
+              {/* CAMADA 1: LOGO DO APP (PROTAGONISTA) */}
               <div 
                 className={`flex flex-col items-center justify-center z-10 transition-all duration-700 
                 ${splashStage === 0 ? 'animate-logo-enter' : 'opacity-100'} 
@@ -424,19 +424,18 @@ const App: React.FC = () => {
                   <span className="text-sm font-bold text-white/90 tracking-[0.5em] uppercase mt-1">
                     JPA
                   </span>
-              </div>
-
-              {/* CAMADA 2: PATROCINADOR (APOIO SUTIL) - Entra Vivo (Bounce) e FICA ATÉ O FIM */}
-              <div className={`absolute bottom-12 flex flex-col items-center gap-3 transition-opacity duration-500 z-20 
-                ${splashStage >= 2 ? 'animate-sponsor-tech-bounce' : 'opacity-0'}`}>
-                 <p className="text-[10px] text-white/70 uppercase tracking-[0.2em] font-medium">
-                    Patrocinador Master
-                 </p>
-                 {/* Box branco com opacidade para manter o azul puro, sem misturar cores */}
-                 <div className="flex items-center gap-2 bg-white/10 px-6 py-3 rounded-full backdrop-blur-md border border-white/10">
-                    <ShieldCheck className="w-5 h-5 text-white" />
-                    <span className="text-sm font-bold text-white tracking-wide">Grupo Esquematiza</span>
-                 </div>
+                  
+                  {/* CAMADA 2: PATROCINADOR - Integrado Verticalmente (Sem posição absoluta) */}
+                  <div className={`mt-10 flex flex-col items-center gap-3 transition-all duration-500
+                    ${splashStage >= 2 ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+                     <p className="text-[10px] text-white/70 uppercase tracking-[0.2em] font-medium">
+                        Patrocinador Master
+                     </p>
+                     <div className={`flex items-center gap-2 bg-white/10 px-6 py-3 rounded-full backdrop-blur-md border border-white/10 ${splashStage >= 2 ? 'animate-sponsor-tech-bounce' : ''}`}>
+                        <ShieldCheck className="w-5 h-5 text-white" />
+                        <span className="text-sm font-bold text-white tracking-wide">Grupo Esquematiza</span>
+                     </div>
+                  </div>
               </div>
 
             </div>
