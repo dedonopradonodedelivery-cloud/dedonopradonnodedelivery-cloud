@@ -111,6 +111,48 @@ export const STORES: Store[] = [
     ]
   },
   {
+    id: 'beleza-1',
+    name: 'Studio Glamour',
+    username: 'studioglamour',
+    category: 'Beleza',
+    subcategory: 'Salão de Beleza',
+    description: 'Cabelo, unhas e estética.',
+    logoUrl: getStoreLogo(20),
+    image: 'https://images.unsplash.com/photo-1560066984-138dadb4c035?q=80&w=800&auto=format&fit=crop',
+    rating: 5.0,
+    reviewsCount: 42,
+    distance: 'Pechincha • RJ',
+    neighborhood: 'Pechincha',
+    adType: AdType.ORGANIC,
+    verified: true,
+    recentComments: [
+      "A Gabi é maravilhosa, minhas unhas duram o mês todo!",
+      "Ambiente super agradável e cafézinho delicioso.",
+      "Recomendo o tratamento capilar, salvou meu cabelo."
+    ]
+  },
+  {
+    id: 'academia-1',
+    name: 'Academia Iron Tech',
+    username: 'irontech',
+    category: 'Esportes',
+    subcategory: 'Academia',
+    description: 'Musculação e aulas coletivas.',
+    logoUrl: getStoreLogo(33),
+    image: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=800&auto=format&fit=crop',
+    rating: 4.7,
+    reviewsCount: 110,
+    distance: 'Freguesia • RJ',
+    neighborhood: 'Freguesia',
+    adType: AdType.ORGANIC,
+    verified: true,
+    recentComments: [
+      "Equipamentos novos e ar condicionado gelando. Top!",
+      "Os professores são muito atenciosos, montaram meu treino certinho.",
+      "Melhor custo benefício da região."
+    ]
+  },
+  {
     id: 'premium-test',
     name: 'Padaria Imperial',
     username: 'padariaimperial',
@@ -127,7 +169,6 @@ export const STORES: Store[] = [
     address: 'Estrada dos Três Rios, 1000',
     phone: '(21) 98888-2222',
     verified: true,
-    // Comentários removidos para focar nos 2 exemplos acima no carrossel de confiança
     recentComments: [] 
   },
   {
