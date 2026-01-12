@@ -60,17 +60,16 @@ const WEEKLY_PROMOS = [
   {
     id: 'promo-1',
     storeName: 'Espaço VIP Beleza',
-    productName: 'Botox Capilar',
+    productName: 'Hidratação Profunda',
     discount: 30,
-    // Imagem premium realista: Mulher elegante com cabelo saudável em salão moderno
-    image: 'https://images.unsplash.com/photo-1562322140-8baeececf3df?q=80&w=800&auto=format&fit=crop',
+    image: 'https://images.unsplash.com/photo-1560066984-138dadb4c035?q=80&w=400&auto=format&fit=crop',
     validity: 'Até domingo',
     storeId: 'mock-1',
     neighborhood: 'Freguesia'
   },
   {
     id: 'promo-2',
-    storeName: 'Burger Nova',
+    storeName: 'Hamburgueria Brasa',
     productName: 'Combo Duplo Cheddar',
     discount: 25,
     image: 'https://images.unsplash.com/photo-1594212699903-ec8a3eca50f5?q=80&w=400&auto=format&fit=crop',
@@ -154,9 +153,9 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void }> = ({ onNavigat
       {
         id: 'b1-cashback',
         type: 'standard',
-        title: 'Cashback no seu bairro',
-        // subtitle removed for cleaner look
-        image: 'https://images.unsplash.com/photo-1556742049-0cfed4f7a07d?q=80&w=800&auto=format&fit=crop',
+        title: 'Cashback real entre lojas do seu bairro',
+        subtitle: `Compre no comércio local de ${currentNeighborhood === 'Jacarepaguá (todos)' ? 'JPA' : currentNeighborhood} e receba dinheiro de volta na hora.`,
+        image: 'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?q=80&w=800&auto=format&fit=crop',
         target: 'explore', 
         tag: 'Exclusivo',
         tagColor: 'bg-emerald-500'
@@ -164,8 +163,8 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void }> = ({ onNavigat
       {
         id: 'b2-services',
         type: 'standard',
-        title: 'Orçamentos de Serviços',
-        // subtitle removed for cleaner look
+        title: 'Encontre serviços e receba até 5 orçamentos',
+        subtitle: 'Fale direto com profissionais de JPA pelo WhatsApp.',
         image: 'https://images.unsplash.com/photo-1581578731117-10d52143b0e8?q=80&w=800&auto=format&fit=crop',
         target: 'services',
         tag: 'WhatsApp Direto',
@@ -174,9 +173,9 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void }> = ({ onNavigat
       {
         id: 'b3-merchant',
         type: 'standard',
-        title: 'Networking para Lojistas',
-        // subtitle removed for cleaner look
-        image: 'https://images.unsplash.com/photo-1600880292203-757bb62b4baf?q=80&w=800&auto=format&fit=crop',
+        title: 'JPA Connect para lojistas',
+        subtitle: 'Venda mais, atraia clientes do bairro e participe do cashback local.',
+        image: 'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?q=80&w=800&auto=format&fit=crop',
         target: 'freguesia_connect_public',
         tag: 'Para Negócios',
         tagColor: 'bg-indigo-600'
@@ -187,10 +186,10 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void }> = ({ onNavigat
       list.push({
         id: 'b4-jobs',
         type: 'jobs',
-        title: 'Vagas de Emprego Locais',
-        // subtitle removed for cleaner look
+        title: `Vagas de emprego em ${currentNeighborhood === 'Jacarepaguá (todos)' ? 'JPA' : currentNeighborhood}`,
+        subtitle: 'Lojas e serviços contratando agora',
         target: 'jobs_list',
-        image: 'https://images.unsplash.com/photo-1497215728101-856f4ea42174?q=80&w=800&auto=format&fit=crop',
+        image: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?q=80&w=800&auto=format&fit=crop',
         tag: 'Oportunidade',
         tagColor: 'bg-blue-600'
       });
@@ -251,16 +250,18 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void }> = ({ onNavigat
             />
             <div className={`absolute inset-0 bg-gradient-to-t ${current.type === 'jobs' ? 'from-blue-950 via-blue-900/50' : 'from-slate-950 via-slate-900/50'} to-transparent opacity-90`}></div>
             
-            <div className="absolute inset-0 p-6 flex flex-col justify-end z-20 pb-8">
+            <div className="absolute inset-0 p-6 flex flex-col justify-end z-20 pb-10">
               <div className="flex items-center gap-2 mb-2">
                   <span className={`${current.tagColor || 'bg-blue-600'} text-white text-[9px] font-black px-2 py-0.5 rounded text-xs uppercase tracking-widest shadow-sm animate-in fade-in slide-in-from-left-2`}>
                     {current.tag}
                   </span>
               </div>
-              <h3 className="text-xl font-black text-white leading-[1.1] font-display tracking-tight drop-shadow-sm max-w-[90%]">
+              <h3 className="text-xl font-black text-white leading-[1.1] font-display tracking-tight mb-2 drop-shadow-sm max-w-[90%]">
                 {current.title}
               </h3>
-              {/* Subtitle removed for cleaner look */}
+              <p className="text-xs text-gray-200 font-medium line-clamp-2 leading-relaxed opacity-90 max-w-[95%]">
+                {current.subtitle}
+              </p>
             </div>
           </>
         ) : (
@@ -847,24 +848,24 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
                   onClick={() => onStoreClick?.(store)}
                   className="snap-center min-w-[160px] max-w-[160px] flex flex-col bg-white dark:bg-gray-800 rounded-[20px] shadow-[0_2px_8px_rgba(0,0,0,0.06)] dark:shadow-none border border-gray-100 dark:border-gray-700 overflow-hidden group active:scale-[0.98] transition-all"
                 >
-                  {/* Updated Visual: Photo Cover (Standard Delivery App Style) */}
-                  <div className="relative h-[110px] w-full overflow-hidden bg-gray-100 dark:bg-gray-800">
+                  <div className="relative h-[110px] w-full overflow-hidden">
                     <img
-                      src={store.logoUrl || store.image || getCategoryCover(store.category)}
+                      src={store.image || getCategoryCover(store.category)}
                       alt={store.name}
-                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                     />
-                    
-                    <div className="absolute top-2 right-2 bg-white/90 dark:bg-black/60 backdrop-blur-md px-2 py-0.5 rounded-md border border-gray-200 dark:border-white/10 shadow-sm">
-                      <span className="text-[8px] font-bold text-gray-700 dark:text-white uppercase tracking-wider flex items-center gap-1">
-                        <Coins className="w-2.5 h-2.5 text-emerald-500" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-90"></div>
+
+                    <div className="absolute top-2 right-2 bg-black/40 backdrop-blur-md px-2 py-0.5 rounded-md border border-white/10">
+                      <span className="text-[8px] font-bold text-white uppercase tracking-wider flex items-center gap-1">
+                        <Coins className="w-2.5 h-2.5 text-emerald-400" />
                         Cashback
                       </span>
                     </div>
 
                     {/* Badge Visibility Rule */}
                     {(isAll || store.neighborhood !== currentNeighborhood) && store.neighborhood && (
-                        <div className="absolute top-2 left-2 bg-black/60 backdrop-blur-md px-2 py-0.5 rounded-md border border-white/10">
+                        <div className="absolute top-2 left-2 bg-black/40 backdrop-blur-md px-2 py-0.5 rounded-md border border-white/10">
                           <span className="text-[8px] font-bold text-white uppercase tracking-wider">
                             {store.neighborhood}
                           </span>

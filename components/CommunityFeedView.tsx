@@ -196,10 +196,10 @@ const JobsFeedScreen: React.FC<{ user: any; onRequireLogin: () => void }> = ({ u
                     Vagas em {currentNeighborhood === 'Jacarepaguá (todos)' ? 'Jacarepaguá' : currentNeighborhood}
                 </h2>
             </div>
-            <div className="pb-20">
+            <div className="p-4 space-y-4">
                 {filteredJobs.length > 0 ? (
                     filteredJobs.map(job => (
-                        <div key={job.id} className="bg-white dark:bg-gray-800 p-4 border-b border-gray-100 dark:border-gray-800">
+                        <div key={job.id} className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
                             <div className="flex justify-between items-start mb-2">
                                 <div>
                                     <h3 className="font-bold text-gray-900 dark:text-white">{job.role}</h3>
@@ -242,7 +242,7 @@ const JobsFeedScreen: React.FC<{ user: any; onRequireLogin: () => void }> = ({ u
 };
 
 const StoriesRail: React.FC<{ user: any; onRequireLogin: () => void; onOpenStory: (index: number) => void; stories: any[] }> = ({ user, onRequireLogin, onOpenStory, stories }) => (
-  <div className="flex gap-4 overflow-x-auto px-5 pt-4 pb-4 no-scrollbar bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800">
+  <div className="flex gap-4 overflow-x-auto px-4 pt-2 pb-2 no-scrollbar bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800">
     <div className="flex flex-col items-center gap-1 cursor-pointer flex-shrink-0" onClick={() => user ? alert("Câmera de stories (Mock)") : onRequireLogin()}>
       <div className="w-[64px] h-[64px] rounded-full p-[2px] bg-white dark:bg-gray-900 relative">
          <div className="w-full h-full rounded-full bg-gray-100 dark:bg-gray-700 overflow-hidden border border-gray-200 dark:border-gray-600">
@@ -300,11 +300,11 @@ const FeedPost: React.FC<{
   const shouldTruncate = post.content.length > MAX_CAPTION_LENGTH;
 
   return (
-    <div className="bg-white dark:bg-gray-900 rounded-[24px] shadow-sm border border-gray-100 dark:border-gray-800 relative overflow-hidden">
+    <div className="bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800 pb-1 mb-2 last:border-0 relative">
       
-      <div className="flex items-center justify-between px-4 py-3">
+      <div className="flex items-center justify-between px-3 py-3">
         <div className="flex items-center gap-2.5">
-          <div className="w-9 h-9 rounded-full p-[1.5px] bg-gradient-to-tr from-yellow-400 via-red-500 to-fuchsia-600">
+          <div className="w-8 h-8 rounded-full p-[1.5px] bg-gradient-to-tr from-yellow-400 via-red-500 to-fuchsia-600">
              <div className="w-full h-full rounded-full border border-white dark:border-black overflow-hidden bg-gray-100">
                 <img src={post.userAvatar} alt={post.userName} className="w-full h-full object-cover" />
              </div>
@@ -319,7 +319,7 @@ const FeedPost: React.FC<{
                 {(isAll || post.neighborhood !== currentNeighborhood) && post.neighborhood && (
                     <>
                         {post.authorRole === 'merchant' && <span className="text-[10px] text-gray-300">•</span>}
-                        <span className="text-[10px] text-gray-500 dark:text-gray-400 flex items-center gap-0.5">
+                        <span className="text-[10px] text-gray-500 dark:text-gray-400 flex items-center gap-0.5 bg-gray-100 dark:bg-gray-800 px-1.5 rounded-full">
                             <MapPin className="w-2.5 h-2.5" />
                             {post.neighborhood}
                         </span>
@@ -372,7 +372,7 @@ const FeedPost: React.FC<{
          )}
       </div>
 
-      <div className="flex items-center justify-between px-4 pt-3 pb-2">
+      <div className="flex items-center justify-between px-3 pt-3 pb-2">
         <div className="flex items-center gap-4">
           <button onClick={handleLike} className="active:scale-90 transition-transform"><Heart className={`w-6 h-6 ${liked ? 'fill-red-500 text-red-500' : 'text-gray-900 dark:text-white'}`} /></button>
           <button onClick={onOpenComments} className="active:scale-90 transition-transform"><MessageCircle className="w-6 h-6 text-gray-900 dark:text-white flip-horizontal" style={{ transform: 'scaleX(-1)' }} /></button>
@@ -381,7 +381,7 @@ const FeedPost: React.FC<{
         <button className="active:scale-90 transition-transform"><Bookmark className="w-6 h-6 text-gray-900 dark:text-white" /></button>
       </div>
 
-      <div className="px-4 pb-4">
+      <div className="px-3 pb-3">
         <div className="font-bold text-sm text-gray-900 dark:text-white mb-1">{post.likes + (liked ? 1 : 0)} curtidas</div>
         <div className="text-sm text-gray-900 dark:text-white leading-tight">
             <span className="font-bold mr-2">{post.userUsername || post.userName.toLowerCase().replace(' ', '')}</span>
@@ -613,7 +613,7 @@ export const CommunityFeedView: React.FC<CommunityFeedViewProps> = ({ onStoreCli
                 style={{ transform: `translateY(${pullY}px)` }}
             >
                 <StoriesRail user={user} onRequireLogin={onRequireLogin} onOpenStory={(idx) => setViewingStoryIndex(idx)} stories={filteredStories} />
-                <div className="flex flex-col mt-4 gap-4 px-5">
+                <div className="flex flex-col mt-2">
                 {posts.length > 0 ? (
                     posts.map(post => (
                         <FeedPost 
@@ -645,7 +645,7 @@ export const CommunityFeedView: React.FC<CommunityFeedViewProps> = ({ onStoreCli
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 font-sans pb-24 animate-in slide-in-from-right duration-300 relative">
+    <div className="min-h-screen bg-white dark:bg-gray-950 font-sans pb-24 animate-in slide-in-from-right duration-300 relative">
       {(internalView === 'home' || internalView === 'jobs' || internalView === 'explore') && (
         <div className="sticky top-0 z-30 bg-white/95 dark:bg-gray-950/95 backdrop-blur-md h-14 flex items-center justify-between border-b border-gray-100 dark:border-gray-800 px-4">
           <button onClick={handleCreatePost} className="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"><Plus className="w-6 h-6 text-gray-900 dark:text-white" /></button>

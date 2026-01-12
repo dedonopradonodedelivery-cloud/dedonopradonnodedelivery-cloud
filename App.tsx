@@ -29,7 +29,7 @@ import { MerchantQrScreen } from './components/MerchantQrScreen';
 import { WeeklyPromoModule } from './components/WeeklyPromoModule';
 import { JobsView } from './components/JobsView';
 import { MerchantJobsModule } from './components/MerchantJobsModule';
-import { MapPin, Crown, X, Star, Shield } from 'lucide-react';
+import { MapPin, ShieldCheck } from 'lucide-react';
 import { useAuth } from './contexts/AuthContext';
 import { NeighborhoodProvider } from './contexts/NeighborhoodContext';
 import { Category, Store, AdType, EditorialCollection, ThemeMode } from './types';
@@ -66,9 +66,13 @@ const App: React.FC = () => {
   // UX ENGINEER: Detecta se estamos voltando de um login com Google (OAuth)
   const isAuthReturn = window.location.hash.includes('access_token') || window.location.search.includes('code=');
   
-  const [minSplashTimeElapsed, setMinSplashTimeElapsed] = useState(isFirstBootAttempted || isAuthReturn);
-  const [splashProgress, setSplashProgress] = useState(isAuthReturn ? 100 : 0);
-  const [showSponsor, setShowSponsor] = useState(false);
+  // Splash Screen States (5 segundos total)
+  // 0: 0.0s - 1.6s: Logo App Entra (Scale Up Suave)
+  // 1: 1.6s - 2.2s: Logo App Respira (Micro-movimento)
+  // 2: 2.2s - 4.6s: Patrocinador Entra (Tech Bounce) e Fica Estável junto com o App
+  // 3: 4.6s - 5.0s: Fade Out Total (Conjunto)
+  // 4: 5.0s: App Render
+  const [splashStage, setSplashStage] = useState(isFirstBootAttempted || isAuthReturn ? 4 : 0);
   
   // Theme Management - DEFAULT IS LIGHT
   const [themeMode, setThemeMode] = useState<ThemeMode>(() => (localStorage.getItem('localizei_theme_mode') as ThemeMode) || 'light');
@@ -97,34 +101,25 @@ const App: React.FC = () => {
     localStorage.setItem('localizei_active_tab', activeTab);
   }, [activeTab]);
 
-  // Ciclo de vida do Splash (Cold Start Only)
+  // --- SPLASH SCREEN ANIMATION ORCHESTRATION ---
   useEffect(() => {
-    if (isFirstBootAttempted || isAuthReturn) return;
+    if (splashStage === 4) return; // Skip if already done
 
-    // Sequência de animação da Splash
-    const sponsorTimer = setTimeout(() => {
-      setShowSponsor(true);
-    }, 1000);
-
-    const finishTimer = setTimeout(() => {
-      setSplashProgress(100);
-      isFirstBootAttempted = true;
-      setTimeout(() => setMinSplashTimeElapsed(true), 300);
-    }, 3500);
-
-    const progressInterval = setInterval(() => {
-      setSplashProgress(prev => {
-        if (prev >= 90) return prev;
-        return prev + 1;
-      });
-    }, 30);
+    const t1 = setTimeout(() => setSplashStage(1), 1600); // 1.6s (Logo settled)
+    const t2 = setTimeout(() => setSplashStage(2), 2200); // 2.2s (Sponsor enters)
+    const t3 = setTimeout(() => setSplashStage(3), 4600); // 4.6s (Start Fade Out)
+    const t4 = setTimeout(() => {
+        setSplashStage(4); // 5.0s (App Render)
+        isFirstBootAttempted = true;
+    }, 5000);
 
     return () => {
-      clearTimeout(sponsorTimer);
-      clearTimeout(finishTimer);
-      clearInterval(progressInterval);
+        clearTimeout(t1);
+        clearTimeout(t2);
+        clearTimeout(t3);
+        clearTimeout(t4);
     };
-  }, [isAuthReturn]);
+  }, []);
 
   // Theme Logic
   useEffect(() => {
@@ -410,42 +405,40 @@ const App: React.FC = () => {
               {isQuoteModalOpen && <QuoteRequestModal isOpen={isQuoteModalOpen} onClose={() => setIsQuoteModalOpen(false)} categoryName={quoteCategory} onSuccess={() => { setIsQuoteModalOpen(false); setActiveTab('service_success'); }} />}
           </Layout>
 
-          {/* OVERLAY SPLASH - PREMIUM */}
-          {!minSplashTimeElapsed && (
-            <div className="fixed inset-0 bg-[#1E5BFF] flex flex-col items-center justify-between text-white z-[999] overflow-hidden animate-out fade-out duration-700 fill-mode-forwards pb-10">
-              <div className={`flex flex-col items-center justify-center flex-1 transition-transform duration-1000 ${showSponsor ? '-translate-y-8 scale-90' : 'translate-y-0'}`}>
-                <div className="animate-float-slow">
-                  <div className="w-28 h-28 bg-white rounded-[2.8rem] flex items-center justify-center shadow-[0_25px_60px_rgba(0,0,0,0.3)] mb-8 animate-pop-in">
-                    <MapPin className="w-14 h-14 text-[#1E5BFF] fill-[#1E5BFF]" />
+          {/* SPLASH SCREEN MINIMALISTA & PREMIUM (5s) */}
+          {splashStage < 4 && (
+            <div className={`fixed inset-0 z-[999] bg-brand-blue flex items-center justify-center transition-opacity duration-500 ${splashStage === 3 ? 'animate-app-exit' : ''}`}>
+              
+              {/* CAMADA 1: LOGO DO APP (PROTAGONISTA) - Micro Interações */}
+              <div 
+                className={`flex flex-col items-center justify-center z-10 transition-all duration-700 
+                ${splashStage === 0 ? 'animate-logo-enter' : 'opacity-100'} 
+                ${splashStage >= 1 ? 'animate-logo-micro-move' : ''}`}
+              >
+                  <div className="relative w-32 h-32 bg-white rounded-[2.5rem] flex items-center justify-center shadow-2xl mb-6">
+                    <MapPin className="w-16 h-16 text-brand-blue fill-brand-blue" />
                   </div>
-                </div>
-                <div className="text-center relative">
-                  <h1 className="text-6xl font-black font-display animate-slide-up tracking-tighter drop-shadow-2xl">Localizei</h1>
-                  <div className="flex items-center justify-center gap-3 mt-3 animate-tracking-expand opacity-0 [animation-delay:800ms] [animation-fill-mode:forwards]">
-                    <div className="h-[1.5px] w-6 bg-white/40"></div>
-                    <span className="text-xs font-bold uppercase tracking-[0.4em] text-white/80">JPA</span>
-                    <div className="h-[1.5px] w-6 bg-white/40"></div>
-                  </div>
-                </div>
+                  <h1 className="text-5xl font-black font-display text-white tracking-tighter drop-shadow-md">
+                    Localizei
+                  </h1>
+                  <span className="text-sm font-bold text-white/90 tracking-[0.5em] uppercase mt-1">
+                    JPA
+                  </span>
               </div>
 
-              <div className={`flex flex-col items-center transition-all duration-1000 ease-out ${showSponsor ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-                  <p className="text-[10px] uppercase tracking-[0.3em] font-medium text-white/60 mb-3">
-                      Patrocinador Master
-                  </p>
-                  <div className="flex items-center gap-3 bg-white/10 backdrop-blur-md px-6 py-3 rounded-2xl border border-white/10 shadow-xl">
-                      <Shield className="w-8 h-8 text-white fill-white" />
-                      <div className="flex flex-col items-start">
-                          <span className="text-2xl font-black font-display tracking-tight text-shimmer leading-none">
-                              Grupo Esquematiza
-                          </span>
-                      </div>
-                  </div>
+              {/* CAMADA 2: PATROCINADOR (APOIO SUTIL) - Entra Vivo (Bounce) e FICA ATÉ O FIM */}
+              <div className={`absolute bottom-12 flex flex-col items-center gap-3 transition-opacity duration-500 z-20 
+                ${splashStage >= 2 ? 'animate-sponsor-tech-bounce' : 'opacity-0'}`}>
+                 <p className="text-[10px] text-white/70 uppercase tracking-[0.2em] font-medium">
+                    Patrocinador Master
+                 </p>
+                 {/* Box branco com opacidade para manter o azul puro, sem misturar cores */}
+                 <div className="flex items-center gap-2 bg-white/10 px-6 py-3 rounded-full backdrop-blur-md border border-white/10">
+                    <ShieldCheck className="w-5 h-5 text-white" />
+                    <span className="text-sm font-bold text-white tracking-wide">Grupo Esquematiza</span>
+                 </div>
               </div>
 
-              <div className="absolute bottom-0 left-0 right-0 h-1.5 bg-white/5">
-                <div className="h-full bg-white shadow-[0_0_25px_rgba(255,255,255,1)] transition-all duration-[100ms] ease-linear" style={{ width: `${splashProgress}%` }} />
-              </div>
             </div>
           )}
         </div>

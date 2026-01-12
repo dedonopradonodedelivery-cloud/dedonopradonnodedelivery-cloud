@@ -9,29 +9,7 @@ import {
   Star, Tag, Award, TrendingUp, ChevronRight
 } from 'lucide-react';
 import { AdType, Category, Store, Story, EditorialCollection, Job, CommunityPost } from './types';
-
-// --- LOGO GENERATOR HELPER ---
-// Mantido para fallbacks, mas as stores principais usarão fotos reais
-const createBrandLogo = (bgColor: string, fgColor: string, iconPath: string, text?: string) => {
-  const svg = `
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400">
-    <rect width="400" height="400" fill="${bgColor}"/>
-    <g transform="translate(100, 80) scale(8)" fill="none" stroke="${fgColor}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      ${iconPath}
-    </g>
-    ${text ? `<text x="50%" y="340" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-weight="900" font-size="50" fill="${fgColor}" letter-spacing="-1">${text}</text>` : ''}
-  </svg>`;
-  return `data:image/svg+xml;base64,${btoa(svg)}`;
-};
-
-const PATHS = {
-  cross: '<path d="M11 2a2 2 0 0 0-2 2v5H4a2 2 0 0 0-2 2v2c0 1.1.9 2 2 2h5v5c0 1.1.9 2 2 2h2a2 2 0 0 0 2-2v-5h5a2 2 0 0 0 2-2v-2a2 2 0 0 0-2-2h-5V4a2 2 0 0 0-2-2h-2Z"/>'
-};
-
-const LOGOS = {
-  farmacia: createBrandLogo('#EF4444', '#FFFFFF', PATHS.cross, 'SAÚDE'),
-  oficina: createBrandLogo('#1E293B', '#FFFFFF', '<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>', 'OFICINA'),
-};
+import { getStoreLogo } from './utils/mockLogos';
 
 export const CATEGORIES: Category[] = [
   { id: 'cat-food', name: 'Comida', slug: 'food', icon: <Utensils />, color: 'from-orange-500 to-red-600', illustrationUrl: 'https://cdn-icons-png.flaticon.com/512/3170/3170733.png' },
@@ -77,23 +55,19 @@ export const quickFilters = [
 ];
 
 export const STORIES: Story[] = [
-  { id: '1', name: 'Burger Nova', image: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?q=80&w=200&auto=format&fit=crop' },
-  { id: '2', name: 'Padaria Aurora', image: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?q=80&w=200&auto=format&fit=crop' },
+  { id: '1', name: 'Burger Freguesia', image: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?q=80&w=200&auto=format&fit=crop' },
+  { id: '2', name: 'Padaria Imperial', image: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?q=80&w=200&auto=format&fit=crop' },
 ];
 
-// --- STORES DATA ---
-// Atualizado com imagens conceituais realistas e comentários para o bloco "Confiança"
 export const STORES: Store[] = [
   {
     id: '1',
-    name: 'Bella Boutique',
-    username: 'bellaboutique',
-    category: 'Moda',
-    subcategory: 'Roupas Femininas',
-    description: 'Moda feminina com estilo e elegância.',
-    // Imagem Conceitual: Araras de roupas organizadas, ambiente boutique clean
-    logoUrl: 'https://images.unsplash.com/photo-1567401893414-76b7b1e5a7a5?q=80&w=800&auto=format&fit=crop',
-    image: 'https://images.unsplash.com/photo-1567401893414-76b7b1e5a7a5?q=80&w=800&auto=format&fit=crop',
+    name: 'Burger Freguesia',
+    username: 'burgerfreguesia',
+    category: 'Alimentação',
+    subcategory: 'Hambúrguerias',
+    description: 'Hambúrgueres artesanais com sabor de bairro.',
+    logoUrl: getStoreLogo(1),
     rating: 4.8,
     reviewsCount: 124,
     distance: 'Freguesia • RJ',
@@ -102,24 +76,22 @@ export const STORES: Store[] = [
     adType: AdType.ORGANIC,
     address: 'Rua Tirol, 1245 - Freguesia',
     phone: '(21) 99999-1111',
-    hours: 'Seg a Sáb • 10h às 20h',
+    hours: 'Seg a Dom • 11h às 23h',
     verified: true,
     recentComments: [
-      "Peças lindas e de ótima qualidade!",
-      "Atendimento maravilhoso, amei meu vestido.",
-      "A loja é super aconchegante."
+      "O melhor cheddar da Freguesia, sem dúvidas!",
+      "Entrega super rápida, chegou quentinho.",
+      "Sempre peço no fim de semana, nunca decepciona."
     ]
   },
   {
     id: 'premium-test',
-    name: 'Pet Love',
-    username: 'petlovejpa',
-    category: 'Pets',
-    subcategory: 'Pet Shop',
-    description: 'Tudo para o seu melhor amigo.',
-    // Imagem Conceitual: Filhote fofo olhando para a câmera
-    logoUrl: 'https://images.unsplash.com/photo-1583511655826-05700442b31b?q=80&w=800&auto=format&fit=crop',
-    image: 'https://images.unsplash.com/photo-1583511655826-05700442b31b?q=80&w=800&auto=format&fit=crop',
+    name: 'Padaria Imperial',
+    username: 'padariaimperial',
+    category: 'Alimentação',
+    subcategory: 'Padarias',
+    description: 'O melhor pão quentinho e café artesanal da Freguesia.',
+    logoUrl: getStoreLogo(8),
     rating: 4.9,
     reviewsCount: 450,
     distance: 'Freguesia • RJ',
@@ -130,90 +102,37 @@ export const STORES: Store[] = [
     phone: '(21) 98888-2222',
     verified: true,
     recentComments: [
-      "Melhor pet shop do bairro, super atenciosos.",
-      "Meu cachorro volta cheiroso e feliz.",
-      "A veterinária é excelente!"
+      "Pão quentinho toda hora, atendimento nota 10.",
+      "O café da manhã colonial deles é imperdível.",
+      "Melhor padaria do bairro, limpa e organizada."
     ]
   },
   {
-    id: 'sushi-zen',
-    name: 'Sushi Zen',
-    username: 'sushizenjpa',
+    id: 'taquara-1',
+    name: 'Pizzaria Taquara',
+    username: 'pizzataquara',
     category: 'Alimentação',
-    subcategory: 'Japonês',
-    description: 'Culinária japonesa autêntica.',
-    // Imagem Conceitual: Sushi em prato de cerâmica, ambiente clean
-    logoUrl: 'https://images.unsplash.com/photo-1579871494447-9811cf80d66c?q=80&w=800&auto=format&fit=crop',
-    image: 'https://images.unsplash.com/photo-1579871494447-9811cf80d66c?q=80&w=800&auto=format&fit=crop',
-    rating: 4.8,
-    reviewsCount: 310,
-    distance: 'Freguesia • RJ',
-    neighborhood: 'Freguesia',
+    subcategory: 'Pizzarias',
+    description: 'A pizza mais recheada da região.',
+    logoUrl: getStoreLogo(3),
+    rating: 4.7,
+    reviewsCount: 89,
+    distance: 'Taquara • RJ',
+    neighborhood: 'Taquara',
     cashback: 8,
-    adType: AdType.PREMIUM,
-    verified: true,
-    recentComments: [
-      "Peixe muito fresco, apresentação impecável.",
-      "O combinado do chef é surreal de bom.",
-      "Ambiente super agradável para jantar."
-    ]
-  },
-  {
-    id: 'curicica-1',
-    name: 'Mercado Vale',
-    username: 'mercadovale',
-    category: 'Mercado',
-    subcategory: 'Hortifruti',
-    description: 'Frutas e verduras selecionadas.',
-    // Imagem Conceitual: Banca de frutas frescas organizada
-    logoUrl: 'https://images.unsplash.com/photo-1610832958506-aa56368176cf?q=80&w=800&auto=format&fit=crop',
-    image: 'https://images.unsplash.com/photo-1610832958506-aa56368176cf?q=80&w=800&auto=format&fit=crop',
-    rating: 4.6,
-    reviewsCount: 85,
-    distance: 'Curicica • RJ',
-    neighborhood: 'Curicica',
     adType: AdType.LOCAL,
-    address: 'Rua da Ventura, 50',
-    verified: true,
-    cashback: 2,
-    recentComments: [
-      "Tudo fresquinho, chego cedo pra pegar as melhores frutas.",
-      "Preço justo e muita variedade de legumes.",
-      "Atendimento familiar que faz a diferença."
-    ]
-  },
-  {
-    id: 'anil-1',
-    name: 'Anil Pet Care',
-    username: 'anilpet',
-    category: 'Pets',
-    subcategory: 'Serviços Pet',
-    description: 'Cuidado e carinho para seu melhor amigo.',
-    // Imagem Conceitual: Cão feliz sendo cuidado (fundo neutro/clean)
-    logoUrl: 'https://images.unsplash.com/photo-1583337130417-3346a1be7dee?q=80&w=800&auto=format&fit=crop',
-    image: 'https://images.unsplash.com/photo-1583337130417-3346a1be7dee?q=80&w=800&auto=format&fit=crop',
-    rating: 4.9,
-    reviewsCount: 42,
-    distance: 'Anil • RJ',
-    neighborhood: 'Anil',
-    adType: AdType.ORGANIC,
-    address: 'Estrada de Jacarepaguá, 4500',
-    verified: true,
-    recentComments: [
-      "O banho e tosa é excelente, meu cachorro volta cheiroso.",
-      "Confio de olhos fechados, tratam os animais como filhos.",
-      "A veterinária é muito atenciosa."
-    ]
+    address: 'Estrada do Tindiba, 500',
+    phone: '(21) 97777-1111',
+    verified: true
   },
   {
     id: 'pechincha-1',
-    name: 'Farmácia Saúde',
-    username: 'farmasaude',
+    name: 'Farmácia Pechincha',
+    username: 'farmapechincha',
     category: 'Saúde',
     subcategory: 'Farmácias',
     description: 'Preços baixos e entrega rápida.',
-    logoUrl: LOGOS.farmacia,
-    image: LOGOS.farmacia,
+    logoUrl: getStoreLogo(4),
     rating: 4.5,
     reviewsCount: 200,
     distance: 'Pechincha • RJ',
@@ -221,6 +140,7 @@ export const STORES: Store[] = [
     cashback: 3,
     adType: AdType.ORGANIC,
     address: 'Av. Geremário Dantas, 1200',
+    phone: '(21) 96666-2222',
     verified: true
   },
   {
@@ -230,15 +150,50 @@ export const STORES: Store[] = [
     category: 'Autos',
     subcategory: 'Mecânica',
     description: 'Mecânica geral e elétrica.',
-    logoUrl: LOGOS.oficina,
-    image: LOGOS.oficina,
+    logoUrl: getStoreLogo(5),
     rating: 4.8,
     reviewsCount: 56,
     distance: 'Tanque • RJ',
     neighborhood: 'Tanque',
     adType: AdType.ORGANIC,
     address: 'Rua Cândido Benício, 2000',
+    phone: '(21) 95555-3333',
     verified: true
+  },
+  {
+    id: 'anil-1',
+    name: 'Anil Pet Shop',
+    username: 'anilpet',
+    category: 'Pets',
+    subcategory: 'Pet Shop',
+    description: 'Tudo para o seu bichinho.',
+    logoUrl: getStoreLogo(6),
+    rating: 4.9,
+    reviewsCount: 15,
+    distance: 'Anil • RJ',
+    neighborhood: 'Anil',
+    adType: AdType.ORGANIC,
+    address: 'Estrada de Jacarepaguá, 4500',
+    phone: '(21) 94444-4444',
+    verified: true
+  },
+  {
+    id: 'curicica-1',
+    name: 'Mercadinho Curicica',
+    username: 'mercadocuricica',
+    category: 'Mercado',
+    subcategory: 'Mercearia',
+    description: 'Frutas e verduras frescas todo dia.',
+    logoUrl: getStoreLogo(7),
+    rating: 4.4,
+    reviewsCount: 32,
+    distance: 'Curicica • RJ',
+    neighborhood: 'Curicica',
+    adType: AdType.LOCAL,
+    address: 'Rua da Ventura, 50',
+    phone: '(21) 93333-3333',
+    verified: true,
+    cashback: 2
   }
 ];
 
@@ -246,7 +201,7 @@ export const MOCK_JOBS: Job[] = [
   {
     id: 'job-1',
     role: 'Atendente de Balcão',
-    company: 'Padaria Aurora',
+    company: 'Padaria Imperial',
     neighborhood: 'Freguesia',
     type: 'CLT',
     salary: 'R$ 1.600,00',
@@ -272,7 +227,7 @@ export const MOCK_JOBS: Job[] = [
   {
     id: 'job-3',
     role: 'Entregador Moto',
-    company: 'Burger Nova',
+    company: 'Burger Freguesia',
     neighborhood: 'Freguesia',
     type: 'Freelancer',
     salary: 'Taxa + Produtividade',
@@ -306,10 +261,10 @@ export const MOCK_COMMUNITY_POSTS: CommunityPost[] = [
     userUsername: 'anapaula',
     userAvatar: 'https://i.pravatar.cc/100?u=a',
     authorRole: 'resident',
-    content: 'O pão da Padaria Aurora tá saindo agora! Quentinho demais 🍞😋',
+    content: 'O pão da Padaria Imperial tá saindo agora! Quentinho demais 🍞😋',
     type: 'recommendation',
     relatedStoreId: 'premium-test',
-    relatedStoreName: 'Padaria Aurora',
+    relatedStoreName: 'Padaria Imperial',
     neighborhood: 'Freguesia',
     timestamp: '5 min atrás',
     likes: 12,
@@ -318,9 +273,9 @@ export const MOCK_COMMUNITY_POSTS: CommunityPost[] = [
   {
     id: 'post-merchant-1',
     userId: 'store-1',
-    userName: 'Burger Nova',
-    userUsername: 'burgernova',
-    userAvatar: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?q=80&w=800&auto=format&fit=crop',
+    userName: 'Burger Freguesia',
+    userUsername: 'burgerfreguesia',
+    userAvatar: getStoreLogo(1),
     authorRole: 'merchant',
     content: 'Hoje tem promoção de combo duplo! Compre um e leve outro pela metade do preço. Vem aproveitar! 🍔🍔',
     type: 'promo',
