@@ -66,10 +66,10 @@ const App: React.FC = () => {
   // UX ENGINEER: Detecta se estamos voltando de um login com Google (OAuth)
   const isAuthReturn = window.location.hash.includes('access_token') || window.location.search.includes('code=');
   
-  // Splash Screen States (5 segundos total)
-  // 0: 0.0s - 1.6s: Logo App Entra (Scale Up Suave)
-  // 1: 1.6s - 2.2s: Logo App Respira (Micro-movimento)
-  // 2: 2.2s - 4.6s: Patrocinador Entra (Tech Bounce) logo abaixo do logo principal
+  // Splash Screen States (5 segundos total - Otimizado para 0s delay)
+  // 0: 0.0s - 1.2s: Logo Pop-in (Rápido)
+  // 1: 1.2s - 1.5s: Logo Estabelece
+  // 2: 1.5s - 4.6s: Patrocinador Entra (Ícone Pop + Texto "Typewriter")
   // 3: 4.6s - 5.0s: Fade Out Total (Conjunto)
   // 4: 5.0s: App Render
   const [splashStage, setSplashStage] = useState(isFirstBootAttempted || isAuthReturn ? 4 : 0);
@@ -105,11 +105,11 @@ const App: React.FC = () => {
   useEffect(() => {
     if (splashStage === 4) return; // Skip if already done
 
-    const t1 = setTimeout(() => setSplashStage(1), 1600); // 1.6s (Logo settled)
-    const t2 = setTimeout(() => setSplashStage(2), 2200); // 2.2s (Sponsor enters)
-    const t3 = setTimeout(() => setSplashStage(3), 4600); // 4.6s (Start Fade Out)
+    const t1 = setTimeout(() => setSplashStage(1), 1200); // 1.2s (Logo pronto)
+    const t2 = setTimeout(() => setSplashStage(2), 1500); // 1.5s (Entrada Patrocinador)
+    const t3 = setTimeout(() => setSplashStage(3), 4600); // 4.6s (Início saída)
     const t4 = setTimeout(() => {
-        setSplashStage(4); // 5.0s (App Render)
+        setSplashStage(4); // 5.0s (Fim)
         isFirstBootAttempted = true;
     }, 5000);
 
@@ -407,7 +407,10 @@ const App: React.FC = () => {
 
           {/* SPLASH SCREEN MINIMALISTA & PREMIUM (5s) */}
           {splashStage < 4 && (
-            <div className={`fixed inset-0 z-[999] bg-brand-blue flex items-center justify-center transition-opacity duration-500 ${splashStage === 3 ? 'animate-app-exit' : ''}`}>
+            <div 
+                className={`fixed inset-0 z-[999] flex items-center justify-center transition-opacity duration-500 ${splashStage === 3 ? 'animate-app-exit' : ''}`}
+                style={{ backgroundColor: '#1E5BFF' }} // Force background color inline to prevent flash
+            >
               
               {/* CAMADA 1: LOGO DO APP (PROTAGONISTA) */}
               <div 
@@ -425,15 +428,35 @@ const App: React.FC = () => {
                     JPA
                   </span>
                   
-                  {/* CAMADA 2: PATROCINADOR - Integrado Verticalmente (Sem posição absoluta) */}
-                  <div className={`mt-10 flex flex-col items-center gap-3 transition-all duration-500
+                  {/* CAMADA 2: PATROCINADOR - COREOGRAFIA GOOGLE-STYLE (TYPEWRITER) */}
+                  {/* Container visível a partir do estágio 2 */}
+                  <div className={`mt-12 flex flex-col items-center gap-2 transition-all duration-300
                     ${splashStage >= 2 ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
-                     <p className="text-[10px] text-white/70 uppercase tracking-[0.2em] font-medium">
+                     
+                     {/* 1. Label: Fade simples */}
+                     <p className="text-[10px] text-white/70 uppercase tracking-[0.2em] font-medium animate-sponsor-label-fade" style={{ animationDelay: '0ms' }}>
                         Patrocinador Master
                      </p>
-                     <div className={`flex items-center gap-2 bg-white/10 px-6 py-3 rounded-full backdrop-blur-md border border-white/10 ${splashStage >= 2 ? 'animate-sponsor-tech-bounce' : ''}`}>
-                        <ShieldCheck className="w-5 h-5 text-white" />
-                        <span className="text-sm font-bold text-white tracking-wide">Grupo Esquematiza</span>
+                     
+                     {/* 2. Conteúdo Flex com Ícone + Texto Digitado */}
+                     <div className="flex items-center gap-3 bg-white/10 px-5 py-3 rounded-full backdrop-blur-md border border-white/10 overflow-hidden min-h-[48px]">
+                        
+                        {/* Ícone: Elastic Pop/Bounce (atraso de 100ms) */}
+                        <div className="animate-sponsor-icon-elastic" style={{ animationDelay: '100ms' }}>
+                           <ShieldCheck className="w-5 h-5 text-white" />
+                        </div>
+                        
+                        {/* Texto: Efeito de Máquina de Escrever (Typewriter) */}
+                        {/* Wrapper necessário para width funcionar bem com flex */}
+                        <div className="flex overflow-hidden relative">
+                            <span 
+                                className={`text-sm font-bold text-white tracking-wide whitespace-nowrap border-r-2 border-white pr-1 overflow-hidden w-0 
+                                ${splashStage >= 2 ? 'animate-typewriter' : 'opacity-0'}`}
+                                style={{ animationDelay: '400ms' }}
+                            >
+                                Grupo Esquematiza
+                            </span>
+                        </div>
                      </div>
                   </div>
               </div>
