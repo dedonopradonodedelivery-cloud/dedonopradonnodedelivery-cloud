@@ -68,7 +68,9 @@ export const STORES: Store[] = [
     subcategory: 'Hambúrguerias',
     description: 'Hambúrgueres artesanais com sabor de bairro.',
     logoUrl: getStoreLogo(1),
-    rating: 4.8,
+    // Foto real do produto para o card
+    image: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?q=80&w=800&auto=format&fit=crop',
+    rating: 4.9,
     reviewsCount: 124,
     distance: 'Freguesia • RJ',
     neighborhood: 'Freguesia',
@@ -79,9 +81,33 @@ export const STORES: Store[] = [
     hours: 'Seg a Dom • 11h às 23h',
     verified: true,
     recentComments: [
-      "O melhor cheddar da Freguesia, sem dúvidas!",
+      "O melhor cheddar da Freguesia! O molho secreto é viciante.",
       "Entrega super rápida, chegou quentinho.",
       "Sempre peço no fim de semana, nunca decepciona."
+    ]
+  },
+  {
+    id: 'tanque-1',
+    name: 'Oficina do Tanque',
+    username: 'oficinatanque',
+    category: 'Autos',
+    subcategory: 'Mecânica',
+    description: 'Mecânica geral e elétrica.',
+    logoUrl: getStoreLogo(5),
+    // Foto real do serviço para o card
+    image: 'https://images.unsplash.com/photo-1619642751034-765dfdf7c58e?q=80&w=800&auto=format&fit=crop',
+    rating: 4.8,
+    reviewsCount: 56,
+    distance: 'Tanque • RJ',
+    neighborhood: 'Tanque',
+    adType: AdType.ORGANIC,
+    address: 'Rua Cândido Benício, 2000',
+    phone: '(21) 95555-3333',
+    verified: true,
+    recentComments: [
+      "Profissionais honestos, resolveram o barulho do meu carro rápido.",
+      "Preço justo e não inventam defeito.",
+      "Melhor mecânica da região do Tanque."
     ]
   },
   {
@@ -101,11 +127,8 @@ export const STORES: Store[] = [
     address: 'Estrada dos Três Rios, 1000',
     phone: '(21) 98888-2222',
     verified: true,
-    recentComments: [
-      "Pão quentinho toda hora, atendimento nota 10.",
-      "O café da manhã colonial deles é imperdível.",
-      "Melhor padaria do bairro, limpa e organizada."
-    ]
+    // Comentários removidos para focar nos 2 exemplos acima no carrossel de confiança
+    recentComments: [] 
   },
   {
     id: 'taquara-1',
@@ -141,23 +164,6 @@ export const STORES: Store[] = [
     adType: AdType.ORGANIC,
     address: 'Av. Geremário Dantas, 1200',
     phone: '(21) 96666-2222',
-    verified: true
-  },
-  {
-    id: 'tanque-1',
-    name: 'Oficina do Tanque',
-    username: 'oficinatanque',
-    category: 'Autos',
-    subcategory: 'Mecânica',
-    description: 'Mecânica geral e elétrica.',
-    logoUrl: getStoreLogo(5),
-    rating: 4.8,
-    reviewsCount: 56,
-    distance: 'Tanque • RJ',
-    neighborhood: 'Tanque',
-    adType: AdType.ORGANIC,
-    address: 'Rua Cândido Benício, 2000',
-    phone: '(21) 95555-3333',
     verified: true
   },
   {
