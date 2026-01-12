@@ -27,7 +27,8 @@ import {
   Lightbulb,
   MessageSquare,
   MapPin,
-  Star
+  Star,
+  Users
 } from 'lucide-react';
 import { LojasEServicosList } from './LojasEServicosList';
 import { User } from '@supabase/supabase-js';
@@ -521,7 +522,7 @@ const CommunityTrustCarousel: React.FC<{ stores: Store[], onStoreClick: (store: 
   );
 };
 
-// --- COMPONENTE FEED DE COMUNIDADE (Teaser/Preview) ---
+// --- COMPONENTE FEED DE COMUNIDADE (REFORMULADO) ---
 const CommunityFeedBlock: React.FC<{ 
   onNavigate: (view: string) => void;
 }> = ({ onNavigate }) => {
@@ -531,85 +532,86 @@ const CommunityFeedBlock: React.FC<{
   const previewPosts = useMemo(() => {
      const allPosts = [...MOCK_COMMUNITY_POSTS];
      allPosts.sort((a, b) => {
-         if (isAll) return 0; // Recency is default for All (assuming mocks are ordered by recency)
+         if (isAll) return 0; 
          const aIsLocal = a.neighborhood === currentNeighborhood;
          const bIsLocal = b.neighborhood === currentNeighborhood;
          if (aIsLocal && !bIsLocal) return -1;
          if (!aIsLocal && bIsLocal) return 1;
          return 0;
      });
-     return allPosts.slice(0, 2);
+     return allPosts.slice(0, 4); // Mostra mais posts no carrossel horizontal
   }, [currentNeighborhood, isAll]);
 
-  // Always show feed if there are posts in JPA, prioritize local
   if (previewPosts.length === 0) return null;
 
   return (
-    <div className="w-full bg-white dark:bg-gray-950 py-6 border-b border-gray-100 dark:border-gray-800">
-      <div className="px-5">
-        <SectionHeader 
-          title="Novidades dos bairros de Jacarepaguá" 
-          rightElement={
+    <div className="w-full bg-[#FAFAFA] dark:bg-gray-950 py-6 border-b border-gray-100 dark:border-gray-800">
+      <div className="px-5 mb-4">
+        <div className="flex justify-between items-center">
+            <div>
+                <h2 className="text-lg font-black text-gray-900 dark:text-white tracking-tight leading-none flex items-center gap-2">
+                    Novidades dos bairros
+                    <div className="px-2 py-0.5 bg-red-100 text-red-600 text-[9px] font-bold rounded-full uppercase tracking-wide">
+                        Ao Vivo
+                    </div>
+                </h2>
+                <p className="text-xs text-gray-500 dark:text-gray-400 font-medium mt-1.5">
+                    O que está acontecendo agora em Jacarepaguá
+                </p>
+            </div>
             <button onClick={() => onNavigate('community_feed')} className="text-xs font-bold text-[#1E5BFF] hover:underline">
-              Ver tudo no Feed
+              Ver tudo
             </button>
-          }
-        />
-        
-        {/* Layout simplificado vertical para Preview - Foco em Texto */}
-        <div className="flex flex-col gap-3">
-          {previewPosts.map((post) => (
+        </div>
+      </div>
+
+      <div className="flex gap-4 overflow-x-auto no-scrollbar px-5 pb-4 snap-x">
+        {previewPosts.map((post) => (
             <div 
               key={post.id} 
-              className="bg-gray-50 dark:bg-gray-800/50 rounded-2xl p-4 border border-gray-100 dark:border-gray-700 flex flex-col gap-2 active:scale-[0.99] transition-transform cursor-pointer"
+              className="snap-center min-w-[280px] max-w-[280px] bg-white dark:bg-gray-800 p-4 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col justify-between active:scale-[0.99] transition-transform cursor-pointer relative"
               onClick={() => onNavigate('community_feed')}
             >
-              <div className="flex items-center gap-3">
-                <img src={post.userAvatar} alt={post.userName} className="w-8 h-8 rounded-full bg-gray-200 object-cover" />
-                <div className="flex-1 min-w-0">
-                  <div className="flex justify-between items-start">
-                    <p className="text-xs font-bold text-gray-900 dark:text-white truncate">{post.userName}</p>
-                    <span className="text-[10px] text-gray-400 whitespace-nowrap">{post.timestamp}</span>
-                  </div>
-                  {post.relatedStoreName && (
-                    <div className="flex items-center gap-1 text-[10px] text-gray-500 dark:text-gray-400 mt-0.5">
-                      <StoreIcon className="w-3 h-3 text-[#1E5BFF]" />
-                      <span className="truncate">Sobre: {post.relatedStoreName}</span>
+                {/* Header: User & Time */}
+                <div className="flex items-center gap-3 mb-3">
+                    <div className="relative">
+                        <img src={post.userAvatar} alt={post.userName} className="w-10 h-10 rounded-full bg-gray-100 object-cover border border-gray-100 dark:border-gray-700" />
+                        <div className="absolute -bottom-1 -right-1 bg-green-500 w-3 h-3 rounded-full border-2 border-white dark:border-gray-800 animate-pulse"></div>
                     </div>
-                  )}
-                  {/* Badge Visibility Rule */}
-                  {(isAll || post.neighborhood !== currentNeighborhood) && post.neighborhood && (
-                     <div className="flex items-center gap-1 text-[10px] text-gray-400 mt-0.5">
-                        <MapPin className="w-3 h-3" />
-                        {post.neighborhood}
-                     </div>
-                  )}
+                    <div className="flex-1 min-w-0">
+                        <div className="flex justify-between items-center">
+                            <p className="text-xs font-bold text-gray-900 dark:text-white truncate">{post.userName}</p>
+                            <span className="text-[9px] text-gray-400 font-medium">{post.timestamp}</span>
+                        </div>
+                        {post.neighborhood && (
+                            <p className="text-[10px] font-bold text-[#1E5BFF] bg-blue-50 dark:bg-blue-900/20 px-1.5 py-0.5 rounded w-fit mt-0.5 flex items-center gap-1">
+                                <MapPin className="w-2.5 h-2.5" />
+                                {post.neighborhood}
+                            </p>
+                        )}
+                    </div>
                 </div>
-              </div>
 
-              {/* Texto principal - sem imagem grande no preview para diferenciar do bloco de Confiança */}
-              <p className="text-sm text-gray-600 dark:text-gray-300 italic leading-relaxed line-clamp-2 pl-11">
-                "{post.content}"
-              </p>
-              
-              {/* Footer discreto apenas com contagem se houver likes/comments */}
-              {(post.likes > 0 || post.comments > 0) && (
-                <div className="flex items-center gap-3 pl-11 mt-1">
-                    {post.likes > 0 && (
-                        <div className="flex items-center gap-1 text-[10px] text-gray-400">
-                            <ThumbsUp className="w-3 h-3" /> {post.likes}
-                        </div>
-                    )}
-                    {post.comments > 0 && (
-                        <div className="flex items-center gap-1 text-[10px] text-gray-400">
-                            <MessageSquare className="w-3 h-3" /> {post.comments}
-                        </div>
-                    )}
+                {/* Content */}
+                <div className="flex-1 mb-3">
+                    <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed line-clamp-3 font-medium">
+                        "{post.content}"
+                    </p>
                 </div>
-              )}
+
+                {/* Footer: Likes/Comments */}
+                <div className="flex items-center gap-4 text-gray-400 border-t border-gray-50 dark:border-gray-700 pt-3">
+                    <div className="flex items-center gap-1.5 text-xs font-medium">
+                        <ThumbsUp className="w-3.5 h-3.5" />
+                        {post.likes > 0 ? post.likes : 'Curtir'}
+                    </div>
+                    <div className="flex items-center gap-1.5 text-xs font-medium">
+                        <MessageSquare className="w-3.5 h-3.5" />
+                        {post.comments > 0 ? `${post.comments} coments` : 'Comentar'}
+                    </div>
+                </div>
             </div>
-          ))}
-        </div>
+        ))}
       </div>
     </div>
   );
@@ -792,7 +794,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
         return <WeeklyPromosSection key="weekly_promos" onNavigate={onNavigate} />;
 
       case 'community_feed':
-        // Agora "Novidades dos bairros"
+        // Agora "Novidades dos bairros" - NEW DESIGN
         return (
           <CommunityFeedBlock key="community_feed" onNavigate={onNavigate} />
         );
@@ -975,7 +977,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
       'weekly_promos',
       'cashback_stores',
       'trust_feed', // Moved here (Step 3)
-      'community_feed', // Moved here (Step 4)
+      'community_feed', // Moved here (Step 4) - REDESIGNED
       'roulette',       
       'list',           
       'mini_tribes'
