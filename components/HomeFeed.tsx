@@ -26,7 +26,8 @@ import {
   AlertTriangle,
   Lightbulb,
   MessageSquare,
-  MapPin
+  MapPin,
+  Star
 } from 'lucide-react';
 import { LojasEServicosList } from './LojasEServicosList';
 import { User } from '@supabase/supabase-js';
@@ -420,11 +421,10 @@ const SectionHeader: React.FC<{ title: string; subtitle?: string; rightElement?:
   </div>
 );
 
-// --- COMPONENTE CONFIANÇA NO BAIRRO ---
+// --- COMPONENTE CONFIANÇA NO BAIRRO (NOVO LAYOUT) ---
 const CommunityTrustCarousel: React.FC<{ stores: Store[], onStoreClick: (store: Store) => void }> = ({ stores, onStoreClick }) => {
   const { currentNeighborhood, isAll } = useNeighborhood();
 
-  // Sort Priority: Local > Others
   const trustedStores = useMemo(() => {
     let list = stores.filter(s => s.recentComments && s.recentComments.length > 0);
     
@@ -447,7 +447,7 @@ const CommunityTrustCarousel: React.FC<{ stores: Store[], onStoreClick: (store: 
       <div className="px-5 mb-4">
         <h2 className="text-lg font-black text-gray-900 dark:text-white tracking-tight leading-none flex items-center gap-2">
           Confiança no Bairro
-          <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
+          <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></div>
         </h2>
         <p className="text-xs text-gray-500 dark:text-gray-400 font-medium mt-1.5">
           O que os moradores realmente dizem e fazem
@@ -457,58 +457,61 @@ const CommunityTrustCarousel: React.FC<{ stores: Store[], onStoreClick: (store: 
       <div className="flex gap-3 overflow-x-auto no-scrollbar px-5 pb-6 snap-x">
         {trustedStores.map((store) => {
             const comment = store.recentComments ? store.recentComments[0] : '';
-            // Clean comment for short display
-            const shortComment = comment.length > 40 ? comment.substring(0, 40) + '...' : comment;
+            const shortComment = comment.length > 70 ? comment.substring(0, 70) + '...' : comment;
 
             return (
               <button
                 key={store.id}
                 onClick={() => onStoreClick(store)}
-                className="snap-center min-w-[160px] max-w-[160px] flex flex-col bg-white dark:bg-gray-800 rounded-[20px] shadow-[0_2px_8px_rgba(0,0,0,0.06)] dark:shadow-none border border-gray-100 dark:border-gray-700 overflow-hidden group active:scale-[0.98] transition-all"
+                className="snap-center min-w-[160px] max-w-[160px] flex flex-col bg-white dark:bg-gray-800 rounded-[20px] shadow-[0_2px_8px_rgba(0,0,0,0.06)] dark:shadow-none border border-gray-100 dark:border-gray-700 overflow-hidden group active:scale-[0.98] transition-all relative"
               >
-                <div className="relative h-[110px] w-full overflow-hidden">
-                  <img
+                {/* Store Image - Top */}
+                <div className="h-24 w-full bg-gray-100 dark:bg-gray-700 relative overflow-hidden">
+                   <img
                     src={store.image || getCategoryCover(store.category)}
                     alt={store.name}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-90"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent opacity-90"></div>
-
-                  <div className="absolute top-2 right-2 bg-black/40 backdrop-blur-md px-2 py-0.5 rounded-md border border-white/10">
-                    <span className="text-[8px] font-bold text-white uppercase tracking-wider flex items-center gap-1">
-                      <Repeat className="w-2.5 h-2.5 text-green-400" />
-                      Clientes Voltam
-                    </span>
+                  {/* Gradient Overlay for Text Visibility if needed, mostly clean here */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
+                  
+                  {/* Floating Rating Badge */}
+                  <div className="absolute -bottom-3 right-3 bg-white dark:bg-gray-700 shadow-md border border-gray-100 dark:border-gray-600 px-2 py-1 rounded-lg flex items-center gap-1 z-10">
+                     <Star className="w-2.5 h-2.5 fill-yellow-400 text-yellow-400" />
+                     <span className="text-[10px] font-bold text-gray-900 dark:text-white">{store.rating?.toFixed(1)}</span>
                   </div>
-
-                  {/* Badge Visibility Rule */}
-                  {(isAll || store.neighborhood !== currentNeighborhood) && store.neighborhood && (
-                      <div className="absolute top-2 left-2 bg-black/40 backdrop-blur-md px-2 py-0.5 rounded-md border border-white/10">
-                        <span className="text-[8px] font-bold text-white uppercase tracking-wider">
-                          {store.neighborhood}
-                        </span>
-                      </div>
-                  )}
                 </div>
 
-                <div className="p-3 flex flex-col flex-1 justify-between text-left h-full">
-                  <div>
-                    <h4 className="font-bold text-gray-900 dark:text-white text-xs leading-tight line-clamp-2 mb-1">
-                      {store.name}
-                    </h4>
-                    <p className="text-[10px] text-gray-500 dark:text-gray-400 font-medium truncate">
-                      {store.category}
-                    </p>
-                  </div>
+                {/* Content - Bottom */}
+                <div className="p-3 pt-5 flex flex-col h-full bg-white dark:bg-gray-800 relative">
+                   {/* Visual Quote Icon */}
+                   <div className="absolute -top-3 left-3 w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center border-2 border-white dark:border-gray-800 shadow-sm z-10">
+                      <Quote className="w-3 h-3 text-white fill-white" />
+                   </div>
 
-                  {comment && (
-                    <div className="mt-2 pt-2 border-t border-gray-100 dark:border-gray-700 flex items-center">
-                        <Quote className="w-3 h-3 text-gray-300 mr-1 shrink-0" />
-                        <p className="text-[9px] font-medium text-gray-400 dark:text-gray-500 leading-tight line-clamp-1 italic">
-                            "{shortComment}"
-                        </p>
-                    </div>
-                  )}
+                   {/* Comment */}
+                   <div className="mb-3 flex-1">
+                      <p className="text-[10px] text-gray-600 dark:text-gray-300 font-medium italic leading-relaxed line-clamp-3">
+                        "{shortComment}"
+                      </p>
+                   </div>
+
+                   {/* Footer Info */}
+                   <div className="flex flex-col border-t border-gray-50 dark:border-gray-700 pt-2 mt-auto">
+                      <h4 className="font-bold text-gray-900 dark:text-white text-xs leading-tight line-clamp-1">
+                        {store.name}
+                      </h4>
+                      <div className="flex items-center justify-between mt-1">
+                         <span className="text-[9px] text-gray-400 dark:text-gray-500 truncate max-w-[80px]">
+                            {store.category}
+                         </span>
+                         {(isAll || store.neighborhood !== currentNeighborhood) && store.neighborhood && (
+                            <span className="text-[8px] font-bold text-gray-400 bg-gray-50 dark:bg-gray-700 px-1.5 py-0.5 rounded">
+                               {store.neighborhood}
+                            </span>
+                         )}
+                      </div>
+                   </div>
                 </div>
               </button>
             );
@@ -846,54 +849,54 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
                 <button
                   key={store.id}
                   onClick={() => onStoreClick?.(store)}
-                  className="snap-center min-w-[160px] max-w-[160px] flex flex-col bg-white dark:bg-gray-800 rounded-[20px] shadow-[0_2px_8px_rgba(0,0,0,0.06)] dark:shadow-none border border-gray-100 dark:border-gray-700 overflow-hidden group active:scale-[0.98] transition-all"
+                  className="snap-center relative w-[140px] h-[190px] rounded-[24px] overflow-hidden group active:scale-[0.98] transition-all flex-shrink-0 shadow-lg"
                 >
-                  <div className="relative h-[110px] w-full overflow-hidden">
-                    <img
-                      src={store.image || getCategoryCover(store.category)}
-                      alt={store.name}
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-90"></div>
+                  {/* Background Image with Dark Overlay */}
+                  <img
+                    src={store.image || getCategoryCover(store.category)}
+                    alt={store.name}
+                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                  />
+                  {/* Heavy gradient for text legibility */}
+                  <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/60 to-black/95 group-hover:via-black/70 transition-colors"></div>
 
-                    <div className="absolute top-2 right-2 bg-black/40 backdrop-blur-md px-2 py-0.5 rounded-md border border-white/10">
-                      <span className="text-[8px] font-bold text-white uppercase tracking-wider flex items-center gap-1">
-                        <Coins className="w-2.5 h-2.5 text-emerald-400" />
-                        Cashback
-                      </span>
-                    </div>
+                  {/* Badge & Content */}
+                  <div className="absolute inset-0 p-4 flex flex-col justify-between items-start text-left z-10">
+                     
+                     {/* Top Tag: Coin Icon */}
+                     <div className="bg-emerald-500/20 backdrop-blur-md border border-emerald-500/30 px-2.5 py-1.5 rounded-xl shadow-sm">
+                        <Coins className="w-4 h-4 text-emerald-400 fill-emerald-400/20" />
+                     </div>
 
-                    {/* Badge Visibility Rule */}
-                    {(isAll || store.neighborhood !== currentNeighborhood) && store.neighborhood && (
-                        <div className="absolute top-2 left-2 bg-black/40 backdrop-blur-md px-2 py-0.5 rounded-md border border-white/10">
-                          <span className="text-[8px] font-bold text-white uppercase tracking-wider">
-                            {store.neighborhood}
-                          </span>
+                     {/* Center/Bottom Info */}
+                     <div className="w-full">
+                        <div className="flex flex-col mb-3">
+                            <span className="text-4xl font-black text-white tracking-tighter leading-none drop-shadow-xl filter">
+                                {store.cashback}%
+                            </span>
+                            <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest leading-none mt-1">
+                                de volta
+                            </span>
                         </div>
-                    )}
+                        
+                        <div className="h-[2px] w-8 bg-white/20 mb-3 rounded-full"></div>
 
-                    <div className="absolute bottom-2 left-2">
-                      <div className="bg-emerald-600 text-white px-2 py-1 rounded-lg shadow-lg flex items-center gap-0.5 border border-emerald-500/50">
-                        <span className="text-[14px] font-black tracking-tighter">{store.cashback}% de volta</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="p-3 flex flex-col flex-1 justify-between text-left h-full">
-                    <div>
-                      <h4 className="font-bold text-gray-900 dark:text-white text-xs leading-tight line-clamp-2 mb-1">
-                        {store.name}
-                      </h4>
-                      <p className="text-[10px] text-gray-500 dark:text-gray-400 font-medium truncate">
-                        {store.category}
-                      </p>
-                    </div>
-
-                    <div className="mt-2 pt-2 border-t border-gray-100 dark:border-gray-700 flex items-center">
-                      <p className="text-[9px] font-medium text-gray-400 dark:text-gray-500 leading-tight">
-                        Receba {store.cashback}% de volta ao comprar aqui
-                      </p>
-                    </div>
+                        <h4 className="font-bold text-white text-sm leading-tight line-clamp-2 drop-shadow-md mb-1">
+                            {store.name}
+                        </h4>
+                        
+                        {/* Neighborhood Badge Rule */}
+                        {(isAll || store.neighborhood !== currentNeighborhood) && store.neighborhood ? (
+                            <p className="text-[9px] text-gray-300 font-medium truncate opacity-90 flex items-center gap-1">
+                                <MapPin className="w-2.5 h-2.5" />
+                                {store.neighborhood}
+                            </p>
+                        ) : (
+                            <p className="text-[9px] text-gray-400 mt-0.5 truncate max-w-full opacity-80 font-medium">
+                                {store.category}
+                            </p>
+                        )}
+                     </div>
                   </div>
                 </button>
               ))}
