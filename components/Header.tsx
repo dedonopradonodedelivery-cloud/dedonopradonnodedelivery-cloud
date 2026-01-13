@@ -84,10 +84,9 @@ export const Header: React.FC<HeaderProps> = ({
   const isMerchant = userRole === 'lojista';
   const { currentNeighborhood, setNeighborhood, toggleSelector, isAll } = useNeighborhood();
 
-  // Filtro deve aparecer apenas nas abas principais: Home, Explorar e Serviços
   const showNeighborhoodFilter = ['home', 'explore', 'services'].includes(activeTab);
 
-  // --- LÓGICA DE BUSCA NO HEADER ---
+  // --- MOTOR DE BUSCA OTIMIZADO ---
   const normalize = (text: any) => 
     (String(text || "")).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
 
@@ -97,11 +96,26 @@ export const Header: React.FC<HeaderProps> = ({
     
     return stores.filter(s => {
         if (!s) return false;
-        return normalize(s.name).includes(term) || 
-               normalize(s.category).includes(term) || 
-               normalize(s.subcategory).includes(term) ||
-               normalize(s.neighborhood || "").includes(term);
-    }).slice(0, 8); // Limita para não ocupar a tela toda
+
+        // Regra: Somente estabelecimentos ativos
+        const isActive = (s as any).status === undefined || (s as any).status === 'active';
+        if (!isActive) return false;
+
+        // Unifica todos os campos para busca textual parcial agressiva
+        const searchableFields = [
+            s.name,
+            s.category,
+            s.subcategory,
+            s.description,
+            s.neighborhood || "",
+            ...((s as any).tags || [])
+        ];
+
+        const unifiedString = searchableFields.map(field => normalize(field)).join(' ');
+        
+        // Verifica se o termo está contido na string unificada
+        return unifiedString.includes(term);
+    }).slice(0, 8); // Limite de resultados no dropdown
   }, [stores, searchTerm, activeTab]);
 
   return (
@@ -133,7 +147,6 @@ export const Header: React.FC<HeaderProps> = ({
                     </div>
                 </button>
 
-                {/* Profile / Menu Button */}
                 <button 
                     onClick={onAuthClick}
                     className="flex items-center gap-2 outline-none group active:scale-95 transition-transform bg-gray-50 dark:bg-gray-800 p-1 pl-3 rounded-full border border-gray-100 dark:border-gray-700"
@@ -163,23 +176,23 @@ export const Header: React.FC<HeaderProps> = ({
                         type="text"
                         value={searchTerm}
                         onChange={(e) => onSearchChange(e.target.value)}
-                        placeholder={customPlaceholder || `Buscar em ${currentNeighborhood === "Jacarepaguá (todos)" ? "JPA" : currentNeighborhood}...`}
+                        placeholder={customPlaceholder || `Buscar lojas, serviços, produtos...`}
                         className={`block w-full pl-10 pr-4 bg-gray-100 dark:bg-gray-800 border-none rounded-2xl text-sm font-medium text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1E5BFF]/50 transition-all shadow-inner py-3`}
                     />
 
-                    {/* --- EXPANSÃO DA BARRA DE BUSCA (DROPDOWN) --- */}
+                    {/* EXPANSÃO DA BARRA DE BUSCA (DROPDOWN) */}
                     {searchTerm.trim().length > 0 && activeTab === 'home' && (
                         <div className="absolute top-[calc(100%+8px)] left-0 right-0 bg-white dark:bg-gray-900 rounded-[24px] shadow-[0_20px_50px_rgba(0,0,0,0.15)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.5)] border border-gray-100 dark:border-gray-800 z-[100] overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
                             <div className="p-2 max-h-[60vh] overflow-y-auto no-scrollbar">
                                 {filteredResults.length > 0 ? (
                                     <div className="flex flex-col">
-                                        <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-3 py-2">Resultados encontrados</p>
+                                        <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-3 py-2">Melhores resultados</p>
                                         {filteredResults.map(store => (
                                             <button 
                                                 key={store.id} 
                                                 onClick={() => {
                                                     onStoreClick?.(store);
-                                                    onSearchChange(''); // Limpa busca ao clicar
+                                                    onSearchChange(''); 
                                                 }} 
                                                 className="flex items-center gap-3 p-3 hover:bg-gray-50 dark:hover:bg-gray-800/50 rounded-xl transition-colors text-left group"
                                             >
@@ -190,8 +203,8 @@ export const Header: React.FC<HeaderProps> = ({
                                                     <p className="text-sm font-bold text-gray-900 dark:text-white truncate">{store.name}</p>
                                                     <div className="flex items-center gap-2">
                                                         <span className="text-[9px] font-black text-[#1E5BFF] uppercase tracking-tighter">{store.category}</span>
-                                                        {(isAll || store.neighborhood !== currentNeighborhood) && store.neighborhood && (
-                                                            <span className="text-[9px] text-gray-400 font-medium truncate italic">• {store.neighborhood}</span>
+                                                        {store.neighborhood && (
+                                                            <span className="text-[9px] text-gray-400 font-medium truncate">• {store.neighborhood}</span>
                                                         )}
                                                     </div>
                                                 </div>
@@ -204,7 +217,7 @@ export const Header: React.FC<HeaderProps> = ({
                                         <div className="w-12 h-12 bg-gray-50 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-3">
                                             <SearchX className="w-6 h-6 text-gray-300" />
                                         </div>
-                                        <p className="text-sm font-bold text-gray-900 dark:text-white">Nenhum resultado</p>
+                                        <p className="text-sm font-bold text-gray-900 dark:text-white">Nenhum estabelecimento</p>
                                         <p className="text-xs text-gray-500">Não encontramos nada para "{searchTerm}"</p>
                                     </div>
                                 )}
@@ -213,7 +226,6 @@ export const Header: React.FC<HeaderProps> = ({
                     )}
                 </div>
 
-                {/* Exibe QR Code no header APENAS para lojistas (atalho rápido) */}
                 {isMerchant && onOpenMerchantQr && (
                     <button 
                         onClick={onOpenMerchantQr}
@@ -225,7 +237,6 @@ export const Header: React.FC<HeaderProps> = ({
 
             </div>
 
-            {/* Neighborhood Filter Row */}
             {showNeighborhoodFilter && (
                 <div className="flex items-center gap-2 overflow-x-auto no-scrollbar px-4 pb-3 pt-1">
                     <button
@@ -233,7 +244,7 @@ export const Header: React.FC<HeaderProps> = ({
                         className={`flex-shrink-0 px-4 py-1.5 rounded-full text-xs font-bold transition-all border ${
                             currentNeighborhood === "Jacarepaguá (todos)"
                             ? "bg-[#1E5BFF] text-white border-[#1E5BFF] shadow-sm shadow-blue-500/30"
-                            : "bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-300 border-gray-100 dark:border-gray-700 hover:bg-gray-100"
+                            : "bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-300 border-gray-100 dark:border-gray-800 hover:bg-gray-100"
                         }`}
                     >
                         Todos
@@ -245,7 +256,7 @@ export const Header: React.FC<HeaderProps> = ({
                             className={`flex-shrink-0 px-4 py-1.5 rounded-full text-xs font-bold transition-all border ${
                                 currentNeighborhood === hood
                                 ? "bg-[#1E5BFF] text-white border-[#1E5BFF] shadow-sm shadow-blue-500/30"
-                                : "bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-300 border-gray-100 dark:border-gray-700 hover:bg-gray-100"
+                                : "bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-300 border-gray-100 dark:border-gray-800 hover:bg-gray-100"
                             }`}
                         >
                             {hood}
