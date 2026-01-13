@@ -24,9 +24,6 @@ const MOCK_CHATS = [
   { id: 1, user: 'Padaria Imperial', username: 'padariaimperial', avatar: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?q=80&w=200&auto=format&fit=crop', lastMsg: 'Seu pedido saiu para entrega!', time: '10:30', unread: true, isMerchant: true },
   { id: 2, user: 'Suporte Localizei', username: 'suporte', avatar: 'https://ui-avatars.com/api/?name=Suporte&background=0D8ABC&color=fff', lastMsg: 'Como podemos ajudar?', time: 'Ontem', unread: false, isMerchant: false },
 ];
-const MOCK_NOTIFICATIONS = [
-  { id: 1, type: 'like', user: 'marcelo.rj', userAvatar: 'https://i.pravatar.cc/150?u=m', content: 'curtiu sua publicação.', time: '2 min', postImage: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?q=80&w=100&auto=format&fit=crop', isUnread: true },
-];
 
 const StoryViewer: React.FC<{ initialStoryIndex: number; onClose: () => void }> = ({ initialStoryIndex, onClose }) => {
    return <div onClick={onClose} className="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center text-white">Story Viewer Mock (Click to close)</div>;
@@ -60,9 +57,9 @@ const CreatePostScreen: React.FC<{ onClose: () => void; onSuccess: () => void; u
 
 const ActivityScreen: React.FC<{ onClose: () => void }> = ({ onClose }) => <div onClick={onClose} className="p-4 bg-white h-full w-full">Activity Mock (Click to close)</div>;
 
-// Componentes Full Width Corrigidos
+// Componentes Full Width Corrigidos (Edge-to-Edge)
 const UserProfileScreen: React.FC<{ user: any }> = () => (
-    <div className="w-full h-full bg-white dark:bg-gray-900 flex flex-col items-center justify-center p-8">
+    <div className="w-full h-full min-h-[calc(100vh-140px)] bg-white dark:bg-gray-900 flex flex-col items-center justify-center p-8">
         <div className="w-20 h-20 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mb-4">
             <UserIcon className="w-10 h-10 text-gray-400" />
         </div>
@@ -72,8 +69,8 @@ const UserProfileScreen: React.FC<{ user: any }> = () => (
 );
 
 const CommunityExploreScreen: React.FC = () => (
-    <div className="w-full h-full bg-white dark:bg-gray-900 p-4">
-        <div className="bg-gray-50 dark:bg-gray-800 rounded-2xl p-8 text-center">
+    <div className="w-full h-full min-h-[calc(100vh-140px)] bg-white dark:bg-gray-900 p-4">
+        <div className="bg-gray-50 dark:bg-gray-800 rounded-2xl p-8 text-center mt-4">
             <Grid className="w-10 h-10 text-gray-400 mx-auto mb-2" />
             <h3 className="font-bold text-gray-900 dark:text-white">Explorar Comunidade</h3>
             <p className="text-sm text-gray-500">Descubra novos posts e pessoas</p>
@@ -84,7 +81,7 @@ const CommunityExploreScreen: React.FC = () => (
 const DirectMessagesScreen: React.FC<{ user: any; onRequireLogin: () => void; chats: typeof MOCK_CHATS; onSelectChat: (id: number) => void }> = ({ user, onRequireLogin, chats, onSelectChat }) => {
     if (!user) {
         return (
-            <div className="flex flex-col items-center justify-center h-[60vh] text-center px-6 w-full">
+            <div className="flex flex-col items-center justify-center h-[60vh] text-center px-6 w-full bg-white dark:bg-gray-900">
                 <div className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mb-4">
                     <UserIcon className="w-8 h-8 text-gray-400" />
                 </div>
@@ -705,7 +702,7 @@ export const CommunityFeedView: React.FC<CommunityFeedViewProps> = ({ onStoreCli
       case 'notifications': return <ActivityScreen onClose={() => setInternalView('home')} />;
       case 'create_post': return <CreatePostScreen onClose={() => setInternalView('home')} onSuccess={handlePostSuccess} user={user} />;
       case 'direct':
-        if (!user) return <div className="flex flex-col items-center justify-center h-[60vh] text-center px-6 w-full"><div className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mb-4"><UserIcon className="w-8 h-8 text-gray-400" /></div><h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">Faça login</h3><button onClick={onRequireLogin} className="bg-[#1E5BFF] text-white font-bold py-3 px-8 rounded-full shadow-lg">Entrar</button></div>;
+        if (!user) return <div className="flex flex-col items-center justify-center h-[60vh] text-center px-6 w-full bg-white dark:bg-gray-900"><div className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mb-4"><UserIcon className="w-8 h-8 text-gray-400" /></div><h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">Faça login</h3><button onClick={onRequireLogin} className="bg-[#1E5BFF] text-white font-bold py-3 px-8 rounded-full shadow-lg">Entrar</button></div>;
         if (selectedChatId) return <ChatScreen chatId={selectedChatId} onBack={() => setSelectedChatId(null)} user={user} />;
         return <DirectMessagesScreen user={user} onRequireLogin={onRequireLogin} chats={MOCK_CHATS} onSelectChat={setSelectedChatId} />;
       default: return null;
