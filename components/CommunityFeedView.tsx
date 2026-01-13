@@ -12,7 +12,7 @@ interface CommunityFeedViewProps {
   onRequireLogin: () => void;
 }
 
-// Update Mock Stories with Neighborhood data for filtering
+// ... (Outros Mocks omitidos para brevidade, mantidos os originais do arquivo)
 const MOCK_STORIES = [
   { id: 1, user: 'Padaria Imperial', username: 'padariaimperial', avatar: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?q=80&w=200&auto=format&fit=crop', isMerchant: true, hasUnread: true, neighborhood: 'Freguesia', items: [{ id: 's1', type: 'image', url: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?q=80&w=600&auto=format&fit=crop', duration: 5000 }] },
   { id: 2, user: 'Ana Paula', username: 'anapaula', avatar: 'https://i.pravatar.cc/150?u=a', isMerchant: false, hasUnread: true, neighborhood: 'Taquara', items: [{ id: 's3', type: 'image', url: 'https://images.unsplash.com/photo-1526488807855-3096a6a23732?q=80&w=600&auto=format&fit=crop', duration: 5000 }] },
@@ -57,8 +57,6 @@ const CreatePostScreen: React.FC<{ onClose: () => void; onSuccess: () => void; u
 
 const ActivityScreen: React.FC<{ onClose: () => void }> = ({ onClose }) => <div onClick={onClose} className="p-4 bg-white h-full w-full">Activity Mock (Click to close)</div>;
 
-// --- COMPONENTES DA BARRA SUPERIOR (FIXED EDGE-TO-EDGE) ---
-
 const UserProfileScreen: React.FC<{ user: any }> = () => (
     <div className="w-full h-full min-h-[60vh] bg-white dark:bg-gray-900 flex flex-col items-center justify-center p-0">
         <div className="w-full flex flex-col items-center p-8">
@@ -87,7 +85,6 @@ const CommunityExploreScreen: React.FC = () => (
     </div>
 );
 
-// --- TELA DE MENSAGENS (DIRECT) AJUSTADA PARA 100% WIDTH ---
 const DirectMessagesScreen: React.FC<{ user: any; onRequireLogin: () => void; chats: typeof MOCK_CHATS; onSelectChat: (id: number) => void }> = ({ user, onRequireLogin, chats, onSelectChat }) => {
     if (!user) {
         return (
@@ -103,7 +100,6 @@ const DirectMessagesScreen: React.FC<{ user: any; onRequireLogin: () => void; ch
     }
     return (
         <div className="w-full bg-white dark:bg-gray-900 min-h-screen pb-20">
-            {/* Search Header - Sticky & Full Width */}
             <div className="w-full px-4 py-3 border-b border-gray-100 dark:border-gray-800 sticky top-0 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm z-10">
                 <div className="relative w-full">
                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -138,31 +134,29 @@ const DirectMessagesScreen: React.FC<{ user: any; onRequireLogin: () => void; ch
     );
 };
 
-// --- TELA DE VAGAS (JOBS) AJUSTADA PARA 100% WIDTH COM PATROCÍNIO ---
+// --- TELA DE VAGAS (JOBS) INTEGRADA AO FEED ---
 const JobsFeedScreen: React.FC<{ user: any; onRequireLogin: () => void }> = ({ user, onRequireLogin }) => {
     const { currentNeighborhood, isAll } = useNeighborhood();
     const [selectedJob, setSelectedJob] = useState<Job | null>(null);
     
     const filteredJobs = useMemo(() => {
         const today = new Date().toISOString().split('T')[0];
-        // Filtragem por bairro
+        
+        // 1. Filtro Bairro
         const neighborhoodFiltered = MOCK_JOBS.filter(j => isAll || j.neighborhood === currentNeighborhood);
 
-        // Helper para verificar patrocínio válido
-        const isSpon = (j: Job) => j.isSponsored && j.sponsoredUntil && j.sponsoredUntil >= today;
+        // 2. Helper Patrocinada Válida
+        const isSpon = (j: Job) => !!(j.isSponsored && j.sponsoredUntil && j.sponsoredUntil >= today);
 
-        // Ordenação:
-        // 1. Patrocinados Válidos (Topo)
-        // 2. Ordem padrão (Chronológica/Existente) para o resto
-        neighborhoodFiltered.sort((a, b) => {
-            const sA = isSpon(a);
-            const sB = isSpon(b);
-            if (sA && !sB) return -1;
-            if (!sA && sB) return 1;
-            return 0; // Mantém ordem original
-        });
-        
-        return neighborhoodFiltered;
+        // 3. Separação
+        const sponsored = neighborhoodFiltered.filter(isSpon);
+        const regular = neighborhoodFiltered.filter(j => !isSpon(j));
+
+        // 4. Ordenação Patrocinadas
+        sponsored.sort((a, b) => (b.sponsoredUntil || '').localeCompare(a.sponsoredUntil || ''));
+
+        // 5. Concatenação (Top 2)
+        return [...sponsored.slice(0, 2), ...sponsored.slice(2), ...regular];
     }, [currentNeighborhood, isAll]);
 
     return (
@@ -178,8 +172,7 @@ const JobsFeedScreen: React.FC<{ user: any; onRequireLogin: () => void }> = ({ u
                 {filteredJobs.length > 0 ? (
                     filteredJobs.map((job, index) => {
                         const today = new Date().toISOString().split('T')[0];
-                        const isSponsoredActive = job.isSponsored && job.sponsoredUntil && job.sponsoredUntil >= today;
-                        // Regra: Máximo 2 no topo com destaque visual
+                        const isSponsoredActive = !!(job.isSponsored && job.sponsoredUntil && job.sponsoredUntil >= today);
                         const showSponsoredBadge = isSponsoredActive && index < 2;
 
                         return (
@@ -256,8 +249,7 @@ const JobsFeedScreen: React.FC<{ user: any; onRequireLogin: () => void }> = ({ u
     );
 };
 
-// ... (Rest of modal components: FeedJobDetailModal, etc. - kept as is)
-
+// ... (Restante mantido exatamente igual ao original)
 const FeedJobDetailModal: React.FC<{ job: Job; onClose: () => void }> = ({ job, onClose }) => {
   const handleApply = () => {
     const text = `Olá! Vi a vaga de *${job.role}* no app Localizei JPA e gostaria de me candidatar.`;
@@ -425,7 +417,7 @@ const FeedPost: React.FC<{
           <div className="flex flex-col justify-center">
             <h4 className="font-bold text-sm text-gray-900 dark:text-white flex items-center gap-1 leading-none">
               {post.userUsername || post.userName.toLowerCase().replace(' ', '')}
-              {post.authorRole === 'merchant' && <BadgeCheck className="w-3 h-3 text-[#1E5BFF] fill-white" />}
+              {post.authorRole === 'merchant' && <BadgeCheck className="w-3.5 h-3.5 text-[#1E5BFF] fill-white" />}
             </h4>
             <div className="flex items-center gap-1">
                 {post.authorRole === 'merchant' && <span className="text-[10px] text-gray-500 dark:text-gray-400">Patrocinado</span>}
@@ -508,7 +500,7 @@ const FeedPost: React.FC<{
   );
 };
 
-// Navbar atualizada para suportar sticky dinâmico
+// ... (Restante do código mantido sem alterações)
 const CommunityNavBar: React.FC<{ currentView: string; onChangeView: (view: 'home' | 'direct' | 'explore' | 'profile' | 'jobs') => void; userAvatar?: string; hasUnreadMessages?: boolean; topClass?: string; }> = ({ currentView, onChangeView, userAvatar, hasUnreadMessages, topClass = 'top-14' }) => (
   <div className={`sticky ${topClass} z-20 w-full bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border-b border-gray-100 dark:border-gray-700 shadow-sm transition-all`}>
     <div className="grid grid-cols-5 w-full h-12 items-center">
@@ -567,7 +559,6 @@ export const CommunityFeedView: React.FC<CommunityFeedViewProps> = ({ onStoreCli
   
   const { currentNeighborhood, isAll, setNeighborhood, toggleSelector } = useNeighborhood();
   
-  // --- INSTAGRAM-STYLE PULL TO REFRESH LOGIC ---
   const [posts, setPosts] = useState<CommunityPost[]>([]);
   const [filteredStories, setFilteredStories] = useState(MOCK_STORIES);
   const [incomingPosts, setIncomingPosts] = useState<CommunityPost[]>([]);
@@ -577,33 +568,21 @@ export const CommunityFeedView: React.FC<CommunityFeedViewProps> = ({ onStoreCli
   const touchStart = useRef(0);
   const feedRef = useRef<HTMLDivElement>(null);
 
-  // Initial Data Load & Filter
   useEffect(() => {
-    // 1. Filter Posts
     let list = [...MOCK_COMMUNITY_POSTS];
     if (!isAll) {
         list = list.filter(p => p.neighborhood === currentNeighborhood);
     }
-    
-    // Sort Priority: Local > Others (if All) or just recency
-    list.sort((a, b) => {
-        if (isAll) return 0;
-        return 0; // Maintain order
-    });
     setPosts(list);
 
-    // 2. Filter Stories
     let stories = [...MOCK_STORIES];
     if (!isAll) {
         stories = stories.filter(s => s.neighborhood === currentNeighborhood);
     }
     setFilteredStories(stories);
-
   }, [currentNeighborhood, isAll]);
 
-  // Touch Handlers for Pull-to-Refresh
   const handleTouchStart = (e: React.TouchEvent) => {
-    // Only enable pull if at the very top of the scrollable area
     if (window.scrollY === 0) {
         touchStart.current = e.touches[0].clientY;
         setIsPulling(true);
@@ -612,13 +591,9 @@ export const CommunityFeedView: React.FC<CommunityFeedViewProps> = ({ onStoreCli
 
   const handleTouchMove = (e: React.TouchEvent) => {
     if (!isPulling || isRefreshing) return;
-    
     const y = e.touches[0].clientY;
     const delta = y - touchStart.current;
-
-    // Only allow pulling down if we started at top and are moving down
     if (delta > 0 && window.scrollY === 0) {
-        // Resistance curve
         setPullY(delta * 0.4);
     }
   };
@@ -626,23 +601,17 @@ export const CommunityFeedView: React.FC<CommunityFeedViewProps> = ({ onStoreCli
   const handleTouchEnd = async () => {
     setIsPulling(false);
     if (!isRefreshing && pullY > 60) {
-        // Trigger Refresh
         setIsRefreshing(true);
-        setPullY(60); // Snap to loading height
-        
-        // Simulate API call
+        setPullY(60);
         setTimeout(() => {
             setIsRefreshing(false);
             setPullY(0);
-            
-            // Logic: 50% chance to find a new post
             if (Math.random() > 0.5) {
                 const newPost = generateRandomPost(currentNeighborhood);
                 setIncomingPosts(prev => [newPost, ...prev]);
             }
         }, 1500);
     } else {
-        // Cancel pull
         setPullY(0);
     }
   };
@@ -653,7 +622,6 @@ export const CommunityFeedView: React.FC<CommunityFeedViewProps> = ({ onStoreCli
       window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // --- EXISTING LOGIC ---
   const [activeMenuPostId, setActiveMenuPostId] = useState<string | null>(null);
   const [postToDelete, setPostToDelete] = useState<string | null>(null);
   const [commentPostId, setCommentPostId] = useState<string | null>(null);
@@ -670,76 +638,28 @@ export const CommunityFeedView: React.FC<CommunityFeedViewProps> = ({ onStoreCli
   const handlePostSuccess = () => { setInternalView('home'); setToastMessage('Publicado com sucesso!'); setShowSuccessToast(true); setTimeout(() => setShowSuccessToast(false), 3000); window.scrollTo({ top: 0, behavior: 'smooth' }); };
   const handleRequestDelete = (postId: string) => { setPostToDelete(postId); };
   const handleConfirmDelete = () => { if (postToDelete) { setPosts(prev => prev.filter(p => p.id !== postToDelete)); setPostToDelete(null); setToastMessage('Post excluído'); setShowSuccessToast(true); setTimeout(() => setShowSuccessToast(false), 2000); } };
-  
-  const handleReportClick = (postId: string) => {
-    if (reportedPosts.has(postId)) { alert("Você já denunciou esta publicação."); return; }
-    setReportPostId(postId);
-  };
-
-  const handleReportSubmit = (reason: ReportReason) => {
-    if (reportPostId) {
-      setReportedPosts(prev => new Set(prev).add(reportPostId));
-      setReportPostId(null);
-      setToastMessage('Denúncia enviada. Obrigado!');
-      setShowSuccessToast(true);
-      setTimeout(() => setShowSuccessToast(false), 3000);
-    }
-  };
+  const handleReportClick = (postId: string) => { if (reportedPosts.has(postId)) { alert("Você já denunciou esta publicação."); return; } setReportPostId(postId); };
+  const handleReportSubmit = (reason: ReportReason) => { if (reportPostId) { setReportedPosts(prev => new Set(prev).add(reportPostId)); setReportPostId(null); setToastMessage('Denúncia enviada. Obrigado!'); setShowSuccessToast(true); setTimeout(() => setShowSuccessToast(false), 3000); } };
 
   const renderContent = () => {
     switch (internalView) {
       case 'home':
         return (
-          <div 
-            ref={feedRef}
-            className="pb-20 relative pt-5 w-full"
-            onTouchStart={handleTouchStart}
-            onTouchMove={handleTouchMove}
-            onTouchEnd={handleTouchEnd}
-          >
-            {/* Loading Spinner / Pull Indicator */}
-            <div 
-                className="absolute left-0 right-0 flex justify-center -top-10 transition-transform duration-200 z-0"
-                style={{ transform: `translateY(${pullY}px)` }}
-            >
+          <div ref={feedRef} className="pb-20 relative pt-5 w-full" onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd}>
+            <div className="absolute left-0 right-0 flex justify-center -top-10 transition-transform duration-200 z-0" style={{ transform: `translateY(${pullY}px)` }}>
                 <div className="bg-white dark:bg-gray-800 rounded-full p-2 shadow-md border border-gray-100 dark:border-gray-700">
                     <Loader2 className={`w-5 h-5 text-[#1E5BFF] ${isRefreshing ? 'animate-spin' : ''}`} style={{ transform: `rotate(${pullY * 2}deg)` }} />
                 </div>
             </div>
-
-            {/* "New Posts" Badge */}
             {incomingPosts.length > 0 && !isRefreshing && (
                 <div className="absolute top-4 left-0 right-0 z-20 flex justify-center animate-in fade-in slide-in-from-top-2">
-                    <button 
-                        onClick={handleShowNewPosts}
-                        className="bg-[#1E5BFF] text-white text-xs font-bold px-4 py-2 rounded-full shadow-lg flex items-center gap-2 active:scale-95 transition-transform"
-                    >
-                        <ArrowUp className="w-3 h-3" />
-                        Novas publicações
-                    </button>
+                    <button onClick={handleShowNewPosts} className="bg-[#1E5BFF] text-white text-xs font-bold px-4 py-2 rounded-full shadow-lg flex items-center gap-2 active:scale-95 transition-transform"><ArrowUp className="w-3 h-3" />Novas publicações</button>
                 </div>
             )}
-
-            {/* Content Container with Push Effect */}
-            <div 
-                className="transition-transform duration-200 ease-out will-change-transform w-full"
-                style={{ transform: `translateY(${pullY}px)` }}
-            >
+            <div className="transition-transform duration-200 ease-out will-change-transform w-full" style={{ transform: `translateY(${pullY}px)` }}>
                 <StoriesRail user={user} onRequireLogin={onRequireLogin} onOpenStory={(idx) => setViewingStoryIndex(idx)} stories={filteredStories} />
                 <div className="flex flex-col mt-2 w-full">
-                {posts.length > 0 ? (
-                    posts.map(post => (
-                        <FeedPost 
-                        key={post.id} post={post} onLike={() => !user && onRequireLogin()} 
-                        activeMenuId={activeMenuPostId} setActiveMenuId={setActiveMenuPostId}
-                        currentUserId={user?.id} onDeleteRequest={handleRequestDelete}
-                        onReport={() => handleReportClick(post.id)} 
-                        onOpenComments={() => user ? setCommentPostId(post.id) : onRequireLogin()}
-                        />
-                    ))
-                ) : (
-                    <div className="text-center py-12 px-4"><p className="text-gray-400">Nenhum post no momento em {currentNeighborhood === 'Jacarepaguá (todos)' ? 'Jacarepaguá' : currentNeighborhood}.</p></div>
-                )}
+                {posts.length > 0 ? posts.map(post => (<FeedPost key={post.id} post={post} onLike={() => !user && onRequireLogin()} activeMenuId={activeMenuPostId} setActiveMenuId={setActiveMenuPostId} currentUserId={user?.id} onDeleteRequest={handleRequestDelete} onReport={() => handleReportClick(post.id)} onOpenComments={() => user ? setCommentPostId(post.id) : onRequireLogin()} />)) : (<div className="text-center py-12 px-4"><p className="text-gray-400">Nenhum post no momento em {currentNeighborhood === 'Jacarepaguá (todos)' ? 'Jacarepaguá' : currentNeighborhood}.</p></div>)}
                 </div>
             </div>
           </div>
@@ -787,13 +707,9 @@ export const CommunityFeedView: React.FC<CommunityFeedViewProps> = ({ onStoreCli
       <div className="p-0 relative w-full">{renderContent()}</div>
       
       {viewingStoryIndex !== null && <StoryViewer initialStoryIndex={viewingStoryIndex} onClose={() => setViewingStoryIndex(null)} />}
-      
       {postToDelete && <DeleteConfirmationModal onConfirm={handleConfirmDelete} onCancel={() => setPostToDelete(null)} />}
-      
       {commentPostId && <CommentsModal postId={commentPostId} onClose={() => setCommentPostId(null)} user={user} />}
-      
       <ReportModal isOpen={!!reportPostId} onClose={() => setReportPostId(null)} onSubmit={handleReportSubmit} />
-
       {showSuccessToast && <div className="fixed top-20 left-1/2 -translate-x-1/2 bg-black/80 backdrop-blur-md text-white px-6 py-3 rounded-full shadow-lg z-[100] animate-in fade-in slide-in-from-top-4 flex items-center gap-2"><Check className="w-4 h-4" /><span className="text-sm font-bold">{toastMessage}</span></div>}
     </div>
   );

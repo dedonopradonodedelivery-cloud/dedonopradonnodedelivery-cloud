@@ -17,7 +17,7 @@ const JobDetailModal: React.FC<{ job: Job; onClose: () => void }> = ({ job, onCl
   };
 
   return (
-    <div className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center animate-in fade-in duration-300">
+    <div className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center animate-in fade-in duration-200">
       <div 
         className="bg-white dark:bg-gray-900 w-full max-w-md h-[85vh] sm:h-auto sm:max-h-[85vh] rounded-t-[2rem] sm:rounded-3xl p-6 flex flex-col relative animate-in slide-in-from-bottom duration-300 shadow-2xl"
         onClick={(e) => e.stopPropagation()}
@@ -106,6 +106,13 @@ const JobDetailModal: React.FC<{ job: Job; onClose: () => void }> = ({ job, onCl
   );
 };
 
+/**
+ * Função utilitária para calcular se a vaga está patrocinada e ativa.
+ */
+const isJobSponsored = (job: Job, today: string): boolean => {
+  return !!(job.isSponsored && job.sponsoredUntil && job.sponsoredUntil >= today);
+};
+
 export const JobsView: React.FC<JobsViewProps> = ({ onBack }) => {
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
   const { currentNeighborhood, isAll, toggleSelector } = useNeighborhood();
@@ -116,20 +123,22 @@ export const JobsView: React.FC<JobsViewProps> = ({ onBack }) => {
     // 1. Filtra por Bairro
     const neighborhoodFiltered = MOCK_JOBS.filter(j => isAll || j.neighborhood === currentNeighborhood);
 
-    // 2. Separa Patrocinadas Válidas vs Normais
-    const isSpon = (j: Job) => j.isSponsored && j.sponsoredUntil && j.sponsoredUntil >= today;
-    
-    const sponsoredCandidates = neighborhoodFiltered.filter(isSpon);
-    const regularCandidates = neighborhoodFiltered.filter(j => !isSpon(j));
+    // 2. Separa Patrocinadas Válidas vs Normais (Incluindo as patrocinadas expiradas)
+    const sponsoredCandidates = neighborhoodFiltered.filter(j => isJobSponsored(j, today));
+    const regularCandidates = neighborhoodFiltered.filter(j => !isJobSponsored(j, today));
 
-    // 3. Aplica regra de limite (Max 2 no topo)
+    // 3. Ordena Patrocinadas por data de expiração (mais distante primeiro = contrato mais longo/novo primeiro)
+    sponsoredCandidates.sort((a, b) => {
+      return (b.sponsoredUntil || '').localeCompare(a.sponsoredUntil || '');
+    });
+
+    // 4. Aplica regra de limite (Max 2 no topo)
     const topSponsored = sponsoredCandidates.slice(0, 2);
-    // As patrocinadas excedentes voltam para o fluxo normal (ordenadas por data junto com as outras se necessário, ou logo abaixo)
     const overflowSponsored = sponsoredCandidates.slice(2);
     
+    // 5. Concatena os restantes (as excedentes do limite voltam para a lista normal preservando a ordem original)
     const rest = [...overflowSponsored, ...regularCandidates];
     
-    // 4. Retorna lista combinada
     return [...topSponsored, ...rest];
   }, [currentNeighborhood, isAll]);
 
@@ -178,9 +187,8 @@ export const JobsView: React.FC<JobsViewProps> = ({ onBack }) => {
 
             {sortedJobs.map((job, index) => {
               const today = new Date().toISOString().split('T')[0];
-              const isSponsoredActive = job.isSponsored && job.sponsoredUntil && job.sponsoredUntil >= today;
-              // Regra de Exibição: Apenas as 2 primeiras da lista recebem o destaque visual de patrocínio
-              const showSponsoredBadge = isSponsoredActive && index < 2;
+              // Uma vaga só mostra o badge se for patrocinada E ativa E estiver entre as top 2
+              const showSponsoredBadge = isJobSponsored(job, today) && index < 2;
 
               return (
                 <div 

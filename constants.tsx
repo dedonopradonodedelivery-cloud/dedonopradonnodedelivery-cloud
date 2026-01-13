@@ -244,9 +244,15 @@ export const STORES: Store[] = [
   }
 ];
 
+// --- VAGAS COM DADOS DE TESTE PARA PATROCÍNIO ---
+const now = new Date();
+const d7 = new Date(); d7.setDate(now.getDate() + 7);
+const d15 = new Date(); d15.setDate(now.getDate() + 15);
+const dPrev = new Date(); dPrev.setDate(now.getDate() - 1);
+
 export const MOCK_JOBS: Job[] = [
   {
-    id: 'job-spon-1',
+    id: 'job-spon-valid-1',
     role: 'Gerente Comercial',
     company: 'Shopping Freguesia',
     neighborhood: 'Freguesia',
@@ -258,10 +264,10 @@ export const MOCK_JOBS: Job[] = [
     contactWhatsapp: '5521999998888',
     postedAt: 'Hoje',
     isSponsored: true,
-    sponsoredUntil: '2025-12-31'
+    sponsoredUntil: d7.toISOString().split('T')[0] // Expira em 7 dias
   },
   {
-    id: 'job-spon-2',
+    id: 'job-spon-valid-2',
     role: 'Recepcionista Bilíngue',
     company: 'Hotel Quality',
     neighborhood: 'Pechincha',
@@ -273,7 +279,22 @@ export const MOCK_JOBS: Job[] = [
     contactWhatsapp: '5521977776666',
     postedAt: 'Há 1 hora',
     isSponsored: true,
-    sponsoredUntil: '2025-12-31'
+    sponsoredUntil: d15.toISOString().split('T')[0] // Expira em 15 dias (Deveria estar no topo se ordenado por distância de expiração)
+  },
+  {
+    id: 'job-spon-expired',
+    role: 'Vendedor Externo',
+    company: 'Distribuidora JPA',
+    neighborhood: 'Taquara',
+    type: 'CLT',
+    salary: 'Fixo + Comissão',
+    description: 'Venda de produtos alimentícios.',
+    requirements: ['Cofre CNH A/B', 'Gostar de rua'],
+    schedule: 'Comercial',
+    contactWhatsapp: '5521955554444',
+    postedAt: 'Há 3 dias',
+    isSponsored: true,
+    sponsoredUntil: dPrev.toISOString().split('T')[0] // EXPIRADA (ontem)
   },
   {
     id: 'job-1',
