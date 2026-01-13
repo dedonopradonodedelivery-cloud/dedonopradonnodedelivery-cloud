@@ -34,6 +34,7 @@ export interface Profile {
   fcmTokens?: string[];
   lastJobPushAt?: string; // ISO Date String
   hasSeenJobsVideo?: boolean; // Flag para vídeo explicativo de vagas
+  hasSeenCashbackVideo?: boolean; // Flag para vídeo explicativo de cashback
 }
 
 export interface Store {

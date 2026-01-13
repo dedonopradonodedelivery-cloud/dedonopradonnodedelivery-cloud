@@ -7,19 +7,22 @@ import {
   Bell,
   Check,
   PlayCircle,
-  ShoppingBag,
   MapPin,
   Heart,
   Wallet,
   HelpCircle,
-  Settings,
   LogOut,
-  Loader2
+  Loader2,
+  Info,
+  BadgeCheck,
+  Zap,
+  Crown
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { User } from '@supabase/supabase-js';
 import { ThemeMode } from '../types';
 import { supabase } from '../lib/supabaseClient';
+import { MasterSponsorBanner } from './MasterSponsorBanner';
 
 interface MenuViewProps {
   user: User | null;
@@ -33,6 +36,7 @@ interface MenuViewProps {
 
 const CATEGORIES_JOBS = ['Alimentação', 'Beleza', 'Serviços', 'Pets', 'Moda', 'Saúde', 'Educação', 'Tecnologia'];
 const JOBS_EXPLAINER_VIDEO = "https://videos.pexels.com/video-files/3129957/3129957-sd_540_960_30fps.mp4";
+const CASHBACK_EXPLAINER_VIDEO = "https://videos.pexels.com/video-files/3129957/3129957-sd_540_960_30fps.mp4"; // Placeholder
 
 export const MenuView: React.FC<MenuViewProps> = ({ 
   user, 
@@ -47,56 +51,34 @@ export const MenuView: React.FC<MenuViewProps> = ({
   const isMerchant = userRole === 'lojista';
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   
-  // --- ESTADOS DE VAGAS ---
+  // --- ESTADOS ---
   const [jobsAlerts, setJobsAlerts] = useState(false);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-  const [hasSeenVideo, setHasSeenVideo] = useState(false);
-  const [showVideoModal, setShowVideoModal] = useState(false);
-
-  // --- ESTADOS DA LOJA (PARA LOJISTAS - HIDDEN IN USER VIEW) ---
-  const [pendingRequestsCount, setPendingRequestsCount] = useState(0);
+  const [hasSeenJobsVideo, setHasSeenJobsVideo] = useState(false);
+  const [hasSeenCashbackVideo, setHasSeenCashbackVideo] = useState(false);
+  const [showVideoModal, setShowVideoModal] = useState<{show: boolean, type: 'jobs' | 'cashback'}>({show: false, type: 'jobs'});
 
   useEffect(() => {
     if (user) {
       loadPreferences();
-      if (isMerchant) {
-        loadMerchantRealtime();
-      }
     }
-  }, [user, isMerchant]);
+  }, [user]);
 
   const loadPreferences = async () => {
     try {
-      const { data } = await supabase.from('profiles').select('jobsAlertsEnabled, jobCategories, hasSeenJobsVideo').eq('id', user?.id).single();
+      const { data } = await supabase.from('profiles').select('jobsAlertsEnabled, jobCategories, hasSeenJobsVideo, hasSeenCashbackVideo').eq('id', user?.id).single();
       if (data) {
         setJobsAlerts(!!data.jobsAlertsEnabled);
         setSelectedCategories(data.jobCategories || []);
-        setHasSeenVideo(!!data.hasSeenJobsVideo);
+        setHasSeenJobsVideo(!!data.hasSeenJobsVideo);
+        setHasSeenCashbackVideo(!!data.hasSeenCashbackVideo);
       }
     } catch (e) {
-      console.warn("Could not load job preferences", e);
+      console.warn("Could not load preferences", e);
     }
   };
 
-  const loadMerchantRealtime = async () => {
-    if (!supabase || !user) return;
-    const fetchCount = async () => {
-        const { count } = await supabase
-            .from('cashback_transactions')
-            .select('*', { count: 'exact', head: true })
-            .eq('merchant_id', user.id)
-            .eq('status', 'pending');
-        setPendingRequestsCount(count || 0);
-    };
-    fetchCount();
-    const sub = supabase.channel('menu_merchant_badge')
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'cashback_transactions', filter: `merchant_id=eq.${user.id}` }, 
-        () => fetchCount())
-        .subscribe();
-    return () => { supabase.removeChannel(sub); };
-  };
-
-  const updatePreferences = async (updates: any) => {
+  const updateProfile = async (updates: any) => {
     if (!user) return;
     await supabase.from('profiles').update(updates).eq('id', user?.id);
   };
@@ -106,19 +88,29 @@ export const MenuView: React.FC<MenuViewProps> = ({
       ? selectedCategories.filter(c => c !== cat)
       : [...selectedCategories, cat];
     setSelectedCategories(newCats);
-    updatePreferences({ jobCategories: newCats });
+    updateProfile({ jobCategories: newCats });
   };
 
   const handleToggleAlerts = () => {
     const newState = !jobsAlerts;
     setJobsAlerts(newState);
     const updates: any = { jobsAlertsEnabled: newState };
-    if (newState && !hasSeenVideo) {
-      setShowVideoModal(true);
-      setHasSeenVideo(true);
+    if (newState && !hasSeenJobsVideo) {
+      setShowVideoModal({ show: true, type: 'jobs' });
+      setHasSeenJobsVideo(true);
       updates.hasSeenJobsVideo = true;
     }
-    updatePreferences(updates);
+    updateProfile(updates);
+  };
+
+  const handleOpenWallet = () => {
+    if (!hasSeenCashbackVideo) {
+      setShowVideoModal({ show: true, type: 'cashback' });
+      setHasSeenCashbackVideo(true);
+      updateProfile({ hasSeenCashbackVideo: true });
+    } else {
+      onNavigate('user_statement');
+    }
   };
 
   const handleLogout = async () => {
@@ -145,10 +137,6 @@ export const MenuView: React.FC<MenuViewProps> = ({
       </div>
     );
   }
-
-  // Se o usuário for Lojista, podemos usar o StoreAreaView ou manter o MenuView anterior.
-  // Como o escopo pede para reconstruir o menu de USUÁRIO logado, manteremos a lógica aqui
-  // apenas apresentando os itens de lojista se o role for lojista, mas o foco é o role cliente.
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-24 animate-in fade-in duration-300">
@@ -179,7 +167,32 @@ export const MenuView: React.FC<MenuViewProps> = ({
           </div>
         </div>
 
-        {/* (C) Seção de Preferências: Notificações de Vagas */}
+        {/* (A) BANNER CARTEIRA & CASHBACK (PRIMEIRO) */}
+        <div className="bg-gradient-to-br from-[#1E5BFF] to-[#1749CC] rounded-[2rem] p-6 text-white shadow-xl shadow-blue-500/20 mb-6 relative overflow-hidden group cursor-pointer" onClick={handleOpenWallet}>
+            <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl -mr-10 -mt-10"></div>
+            <div className="relative z-10 flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/10 group-hover:scale-110 transition-transform">
+                        <Wallet className="w-6 h-6 text-white" />
+                    </div>
+                    <div>
+                        <h3 className="font-bold text-lg">Carteira & Cashback</h3>
+                        <p className="text-xs text-blue-100 font-medium">Veja seu saldo e benefícios.</p>
+                    </div>
+                </div>
+                <ChevronRight className="w-6 h-6 opacity-50" />
+            </div>
+            <div className="mt-6 flex justify-end relative z-10">
+                <button 
+                  onClick={(e) => { e.stopPropagation(); setShowVideoModal({show: true, type: 'cashback'}); }}
+                  className="text-[10px] font-black uppercase tracking-widest bg-black/20 px-3 py-1.5 rounded-lg flex items-center gap-2 border border-white/10 hover:bg-black/30"
+                >
+                    <PlayCircle className="w-3.5 h-3.5 text-amber-400" /> Como funciona (30s)
+                </button>
+            </div>
+        </div>
+
+        {/* (B) Card "Notificações de Vagas" */}
         <div className="bg-white dark:bg-gray-800 rounded-[2rem] p-6 border border-gray-100 dark:border-gray-700 mb-6 shadow-sm">
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-3">
@@ -198,7 +211,7 @@ export const MenuView: React.FC<MenuViewProps> = ({
 
           <div className="flex justify-between items-center mb-4">
               <p className="text-[10px] text-gray-500 dark:text-gray-400 font-medium">Receba alertas de empresas do bairro.</p>
-              <button onClick={() => setShowVideoModal(true)} className="text-[10px] font-bold text-orange-600 flex items-center gap-1 hover:underline">
+              <button onClick={() => setShowVideoModal({show: true, type: 'jobs'})} className="text-[10px] font-bold text-orange-600 flex items-center gap-1 hover:underline">
                 <PlayCircle className="w-3 h-3" /> Como funciona (30s)
               </button>
           </div>
@@ -218,7 +231,7 @@ export const MenuView: React.FC<MenuViewProps> = ({
           )}
         </div>
 
-        {/* --- ÁREA EXCLUSIVA LOJISTA (SOMENTE SE ROLE === LOJISTA) --- */}
+        {/* --- ÁREA EXCLUSIVA LOJISTA --- */}
         {isMerchant && (
             <div className="mb-6">
                <h3 className="text-xs font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.2em] mb-3 ml-2">Painel Parceiro</h3>
@@ -237,37 +250,17 @@ export const MenuView: React.FC<MenuViewProps> = ({
             </div>
         )}
 
-        {/* (D) Seção de Atalhos do Usuário */}
+        {/* (C) Seção de Atalhos do Usuário */}
         <div className="space-y-4 mb-8">
             <h3 className="text-xs font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.2em] mb-2 ml-2">Minha Conta</h3>
             
             <div className="bg-white dark:bg-gray-800 rounded-[2rem] overflow-hidden border border-gray-100 dark:border-gray-700 shadow-sm">
-                <button onClick={() => alert('Meus Pedidos - Em breve')} className="w-full p-4 flex items-center justify-between border-b border-gray-50 dark:border-gray-700 active:bg-gray-50 dark:active:bg-gray-700 transition-colors">
-                    <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-xl bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center text-[#1E5BFF]">
-                            <ShoppingBag className="w-4 h-4" />
-                        </div>
-                        <span className="text-sm font-bold text-gray-700 dark:text-gray-200">Meus Pedidos</span>
-                    </div>
-                    <ChevronRight className="w-4 h-4 text-gray-300" />
-                </button>
-
                 <button onClick={() => onNavigate('favorites')} className="w-full p-4 flex items-center justify-between border-b border-gray-50 dark:border-gray-700 active:bg-gray-50 dark:active:bg-gray-700 transition-colors">
                     <div className="flex items-center gap-3">
                         <div className="w-9 h-9 rounded-xl bg-pink-50 dark:bg-pink-900/20 flex items-center justify-center text-pink-500">
                             <Heart className="w-4 h-4" />
                         </div>
                         <span className="text-sm font-bold text-gray-700 dark:text-gray-200">Favoritos</span>
-                    </div>
-                    <ChevronRight className="w-4 h-4 text-gray-300" />
-                </button>
-
-                <button onClick={() => onNavigate('user_statement')} className="w-full p-4 flex items-center justify-between border-b border-gray-50 dark:border-gray-700 active:bg-gray-50 dark:active:bg-gray-700 transition-colors">
-                    <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-xl bg-emerald-50 dark:bg-emerald-900/20 flex items-center justify-center text-emerald-600">
-                            <Wallet className="w-4 h-4" />
-                        </div>
-                        <span className="text-sm font-bold text-gray-700 dark:text-gray-200">Carteira & Cashback</span>
                     </div>
                     <ChevronRight className="w-4 h-4 text-gray-300" />
                 </button>
@@ -282,7 +275,17 @@ export const MenuView: React.FC<MenuViewProps> = ({
                     <ChevronRight className="w-4 h-4 text-gray-300" />
                 </button>
 
-                <button onClick={() => onNavigate('support')} className="w-full p-4 flex items-center justify-between border-b border-gray-50 dark:border-gray-700 active:bg-gray-50 dark:active:bg-gray-700 transition-colors">
+                <button onClick={() => onNavigate('about')} className="w-full p-4 flex items-center justify-between border-b border-gray-50 dark:border-gray-700 active:bg-gray-50 dark:active:bg-gray-700 transition-colors">
+                    <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-xl bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center text-[#1E5BFF]">
+                            <Info className="w-4 h-4" />
+                        </div>
+                        <span className="text-sm font-bold text-gray-700 dark:text-gray-200">Quem Somos</span>
+                    </div>
+                    <ChevronRight className="w-4 h-4 text-gray-300" />
+                </button>
+
+                <button onClick={() => onNavigate('support')} className="w-full p-4 flex items-center justify-between active:bg-gray-50 dark:active:bg-gray-700 transition-colors">
                     <div className="flex items-center gap-3">
                         <div className="w-9 h-9 rounded-xl bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center text-indigo-600">
                             <HelpCircle className="w-4 h-4" />
@@ -291,18 +294,11 @@ export const MenuView: React.FC<MenuViewProps> = ({
                     </div>
                     <ChevronRight className="w-4 h-4 text-gray-300" />
                 </button>
-
-                <button onClick={() => alert('Configurações - Em breve')} className="w-full p-4 flex items-center justify-between active:bg-gray-50 dark:active:bg-gray-700 transition-colors">
-                    <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-xl bg-gray-50 dark:bg-gray-900 flex items-center justify-center text-gray-500">
-                            <Settings className="w-4 h-4" />
-                        </div>
-                        <span className="text-sm font-bold text-gray-700 dark:text-gray-200">Configurações</span>
-                    </div>
-                    <ChevronRight className="w-4 h-4 text-gray-300" />
-                </button>
             </div>
         </div>
+
+        {/* (E) Banner Patrocinador Master */}
+        <MasterSponsorBanner onClick={() => onNavigate('patrocinador_master')} className="mb-8" />
 
         {/* (E) Sair da conta */}
         <button 
@@ -319,22 +315,45 @@ export const MenuView: React.FC<MenuViewProps> = ({
         </button>
 
         <div className="mt-8 text-center px-4">
-            <p className="text-[10px] font-black text-gray-300 dark:text-gray-600 uppercase tracking-[0.4em]">Localizei JPA v14.0</p>
+            <p className="text-[10px] font-black text-gray-300 dark:text-gray-600 uppercase tracking-[0.4em]">Localizei JPA v14.2</p>
         </div>
       </div>
 
       {/* MODAL DO VÍDEO EXPLICATIVO */}
-      {showVideoModal && (
+      {showVideoModal.show && (
         <div className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-300">
            <div className="bg-white dark:bg-gray-900 w-full max-w-sm rounded-[2rem] overflow-hidden shadow-2xl relative border border-gray-100 dark:border-gray-800">
-              <button onClick={() => setShowVideoModal(false)} className="absolute top-4 right-4 z-20 p-2 bg-black/20 hover:bg-black/40 rounded-full text-white transition-colors">
+              <button onClick={() => setShowVideoModal({show: false, type: 'jobs'})} className="absolute top-4 right-4 z-20 p-2 bg-black/20 hover:bg-black/40 rounded-full text-white transition-colors">
                 <X className="w-5 h-5" />
               </button>
-              <div className="aspect-[9/16] bg-black relative"><video src={JOBS_EXPLAINER_VIDEO} className="w-full h-full object-cover" autoPlay controls playsInline /></div>
+              <div className="aspect-[9/16] bg-black relative">
+                <video 
+                    src={showVideoModal.type === 'jobs' ? JOBS_EXPLAINER_VIDEO : CASHBACK_EXPLAINER_VIDEO} 
+                    className="w-full h-full object-cover" 
+                    autoPlay 
+                    controls 
+                    playsInline 
+                />
+              </div>
               <div className="p-6 text-center">
-                 <h3 className="font-bold text-gray-900 dark:text-white mb-2">Entenda os alertas</h3>
-                 <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">Você só recebe notificações de vagas que combinam com as categorias que você escolheu. Sem spam, apenas oportunidades reais.</p>
-                 <button onClick={() => setShowVideoModal(false)} className="mt-6 w-full py-3.5 bg-[#1E5BFF] text-white font-bold rounded-xl active:scale-95 transition-transform">Entendido!</button>
+                 <h3 className="font-bold text-gray-900 dark:text-white mb-2">
+                    {showVideoModal.type === 'jobs' ? 'Entenda os alertas' : 'Economize com Cashback'}
+                 </h3>
+                 <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
+                    {showVideoModal.type === 'jobs' 
+                        ? 'Você só recebe notificações de vagas que combinam com as categorias que você escolheu. Sem spam, apenas oportunidades reais.' 
+                        : 'Ganhe parte do seu dinheiro de volta em todas as compras nas lojas parceiras do bairro. Use seu saldo para pagar contas futuras!'}
+                 </p>
+                 <button 
+                   onClick={() => {
+                       const type = showVideoModal.type;
+                       setShowVideoModal({show: false, type: 'jobs'});
+                       if (type === 'cashback') onNavigate('user_statement');
+                   }}
+                   className="mt-6 w-full py-3.5 bg-[#1E5BFF] text-white font-bold rounded-xl active:scale-95 transition-transform"
+                 >
+                   Entendido!
+                 </button>
               </div>
            </div>
         </div>
