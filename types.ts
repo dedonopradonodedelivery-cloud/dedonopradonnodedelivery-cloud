@@ -33,6 +33,7 @@ export interface Profile {
   jobRegions?: string[];
   fcmTokens?: string[];
   lastJobPushAt?: string; // ISO Date String
+  hasSeenJobsVideo?: boolean; // Flag para vídeo explicativo de vagas
 }
 
 export interface Store {

@@ -20,7 +20,8 @@ import {
   Monitor,
   ShieldAlert,
   Bell,
-  Check
+  Check,
+  PlayCircle
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { MasterSponsorBanner } from './MasterSponsorBanner';
@@ -39,6 +40,7 @@ interface MenuViewProps {
 }
 
 const CATEGORIES_JOBS = ['Alimentação', 'Beleza', 'Serviços', 'Pets', 'Moda', 'Saúde', 'Educação', 'Tecnologia'];
+const JOBS_EXPLAINER_VIDEO = "https://videos.pexels.com/video-files/3129957/3129957-sd_540_960_30fps.mp4"; // Placeholder explicativo
 
 export const MenuView: React.FC<MenuViewProps> = ({ 
   user, 
@@ -56,6 +58,8 @@ export const MenuView: React.FC<MenuViewProps> = ({
   // Preferências de Vagas
   const [jobsAlerts, setJobsAlerts] = useState(false);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [hasSeenVideo, setHasSeenVideo] = useState(false);
+  const [showVideoModal, setShowVideoModal] = useState(false);
   const [isUpdatingAlerts, setIsUpdatingAlerts] = useState(false);
 
   useEffect(() => {
@@ -66,23 +70,21 @@ export const MenuView: React.FC<MenuViewProps> = ({
 
   const loadPreferences = async () => {
     try {
-      const { data } = await supabase.from('profiles').select('jobsAlertsEnabled, jobCategories').eq('id', user?.id).single();
+      const { data } = await supabase.from('profiles').select('jobsAlertsEnabled, jobCategories, hasSeenJobsVideo').eq('id', user?.id).single();
       if (data) {
         setJobsAlerts(!!data.jobsAlertsEnabled);
         setSelectedCategories(data.jobCategories || []);
+        setHasSeenVideo(!!data.hasSeenJobsVideo);
       }
     } catch (e) {
       console.warn("Could not load job preferences", e);
     }
   };
 
-  const updatePreferences = async (enabled: boolean, cats: string[]) => {
+  const updatePreferences = async (updates: any) => {
     if (!user) return;
     setIsUpdatingAlerts(true);
-    await supabase.from('profiles').update({
-      jobsAlertsEnabled: enabled,
-      jobCategories: cats
-    }).eq('id', user?.id);
+    await supabase.from('profiles').update(updates).eq('id', user?.id);
     setIsUpdatingAlerts(false);
   };
 
@@ -91,13 +93,23 @@ export const MenuView: React.FC<MenuViewProps> = ({
       ? selectedCategories.filter(c => c !== cat)
       : [...selectedCategories, cat];
     setSelectedCategories(newCats);
-    updatePreferences(jobsAlerts, newCats);
+    updatePreferences({ jobCategories: newCats });
   };
 
   const handleToggleAlerts = () => {
     const newState = !jobsAlerts;
     setJobsAlerts(newState);
-    updatePreferences(newState, selectedCategories);
+    
+    const updates: any = { jobsAlertsEnabled: newState };
+
+    // Regra: Primeira ativação mostra vídeo automaticamente
+    if (newState && !hasSeenVideo) {
+      setShowVideoModal(true);
+      setHasSeenVideo(true);
+      updates.hasSeenJobsVideo = true;
+    }
+
+    updatePreferences(updates);
   };
 
   const handleLogout = async () => {
@@ -150,12 +162,12 @@ export const MenuView: React.FC<MenuViewProps> = ({
 
         {/* BLOCO NOTIFICAÇÕES DE VAGAS */}
         <div className="bg-white dark:bg-gray-800 rounded-3xl p-6 border border-gray-100 dark:border-gray-700 mb-6 shadow-sm">
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-orange-100 dark:bg-orange-900/20 flex items-center justify-center text-orange-600">
                 <Bell className="w-5 h-5" />
               </div>
-              <h3 className="font-bold text-gray-900 dark:text-white">Alertas de Vagas</h3>
+              <h3 className="font-bold text-gray-900 dark:text-white text-sm sm:text-base">Notificações de Vagas</h3>
             </div>
             <button 
               onClick={handleToggleAlerts}
@@ -165,8 +177,18 @@ export const MenuView: React.FC<MenuViewProps> = ({
             </button>
           </div>
 
+          <div className="flex justify-between items-center mb-4">
+              <p className="text-[10px] text-gray-500 dark:text-gray-400">Receba alertas de empresas do bairro.</p>
+              <button 
+                onClick={() => setShowVideoModal(true)}
+                className="text-[10px] font-bold text-orange-600 flex items-center gap-1 hover:underline"
+              >
+                <PlayCircle className="w-3 h-3" /> Como funciona (30s)
+              </button>
+          </div>
+
           {jobsAlerts && (
-            <div className="space-y-4 animate-in fade-in duration-300">
+            <div className="space-y-4 animate-in fade-in duration-300 border-t border-gray-50 dark:border-gray-700 pt-4">
               <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Categorias de interesse</p>
               <div className="flex flex-wrap gap-2">
                 {CATEGORIES_JOBS.map(cat => (
@@ -184,7 +206,7 @@ export const MenuView: React.FC<MenuViewProps> = ({
                   </button>
                 ))}
               </div>
-              <p className="text-[9px] text-gray-400 italic">Push enviado apenas para vagas urgentes.</p>
+              <p className="text-[9px] text-gray-400 italic">Push enviado apenas para vagas que dão "match" com seu interesse.</p>
             </div>
           )}
         </div>
@@ -207,6 +229,43 @@ export const MenuView: React.FC<MenuViewProps> = ({
             <span className="font-bold text-red-600 text-sm">Sair da conta</span>
         </button>
       </div>
+
+      {/* MODAL DO VÍDEO EXPLICATIVO */}
+      {showVideoModal && (
+        <div className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-300">
+           <div className="bg-white dark:bg-gray-900 w-full max-w-sm rounded-[2rem] overflow-hidden shadow-2xl relative border border-gray-100 dark:border-gray-800">
+              <button 
+                onClick={() => setShowVideoModal(false)}
+                className="absolute top-4 right-4 z-20 p-2 bg-black/20 hover:bg-black/40 rounded-full text-white transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+
+              <div className="aspect-[9/16] bg-black relative">
+                 <video 
+                    src={JOBS_EXPLAINER_VIDEO} 
+                    className="w-full h-full object-cover"
+                    autoPlay
+                    controls
+                    playsInline
+                 />
+              </div>
+
+              <div className="p-6 text-center">
+                 <h3 className="font-bold text-gray-900 dark:text-white mb-2">Entenda os alertas</h3>
+                 <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
+                    Você só recebe notificações de vagas que combinam com as categorias que você escolheu. Sem spam, apenas oportunidades reais.
+                 </p>
+                 <button 
+                   onClick={() => setShowVideoModal(false)}
+                   className="mt-6 w-full py-3.5 bg-[#1E5BFF] text-white font-bold rounded-xl active:scale-95 transition-transform"
+                 >
+                   Entendido!
+                 </button>
+              </div>
+           </div>
+        </div>
+      )}
     </div>
   );
 };
