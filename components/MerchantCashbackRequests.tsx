@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { ChevronLeft, CheckCircle, XCircle, Clock, DollarSign, User, AlertCircle, Loader2, ArrowRight } from 'lucide-react';
-import { supabase } from '../lib/supabase';
+import { supabase } from '../lib/supabaseClient';
 import { CashbackTransaction } from '../types';
 
 interface MerchantCashbackRequestsProps {
@@ -9,8 +9,9 @@ interface MerchantCashbackRequestsProps {
   onBack: () => void;
 }
 
+// Fix: Use imported CashbackTransaction and ensure ID exists
 interface ExtendedCashbackTransaction extends CashbackTransaction {
-  customer_name?: string; // For mock or if we join tables
+  customer_name?: string; 
 }
 
 export const MerchantCashbackRequests: React.FC<MerchantCashbackRequestsProps> = ({ merchantId, onBack }) => {
@@ -49,14 +50,14 @@ export const MerchantCashbackRequests: React.FC<MerchantCashbackRequestsProps> =
 
   const fetchPendingRequests = async () => {
     if (!supabase) {
-        // Mock data if no supabase
+        // Mock data if no supabase configured
         setRequests([
             {
                 id: 'mock-1',
                 merchant_id: merchantId,
                 store_id: 'store-1',
                 customer_id: 'cust-1',
-                customer_name: 'Maria Silva',
+                customer_name: 'Maria Silva (Simulação)',
                 total_amount_cents: 15000,
                 cashback_used_cents: 500,
                 cashback_to_earn_cents: 725,
@@ -72,7 +73,7 @@ export const MerchantCashbackRequests: React.FC<MerchantCashbackRequestsProps> =
     try {
       const { data, error } = await supabase
         .from('cashback_transactions')
-        .select('*') // In real app, join with profiles to get name
+        .select('*') 
         .eq('merchant_id', merchantId)
         .eq('status', 'pending')
         .order('created_at', { ascending: false });
@@ -89,7 +90,8 @@ export const MerchantCashbackRequests: React.FC<MerchantCashbackRequestsProps> =
   // --- Actions ---
 
   const handleApprove = async (tx: ExtendedCashbackTransaction) => {
-    setProcessingId(tx.id || '');
+    // Fix: Access id safely
+    setProcessingId(tx.id);
 
     try {
       if (supabase) {
@@ -103,7 +105,6 @@ export const MerchantCashbackRequests: React.FC<MerchantCashbackRequestsProps> =
 
           if (updateError) throw updateError;
       } else {
-          // Simulation
           await new Promise(r => setTimeout(r, 1000));
       }
 
@@ -119,7 +120,8 @@ export const MerchantCashbackRequests: React.FC<MerchantCashbackRequestsProps> =
   };
 
   const handleReject = async (tx: ExtendedCashbackTransaction) => {
-    setProcessingId(tx.id || '');
+    // Fix: Access id safely
+    setProcessingId(tx.id);
 
     try {
       if (supabase) {
@@ -127,12 +129,12 @@ export const MerchantCashbackRequests: React.FC<MerchantCashbackRequestsProps> =
             .from('cashback_transactions')
             .update({ 
                 status: 'rejected',
+                rejected_at: new Date().toISOString()
             })
             .eq('id', tx.id);
 
           if (error) throw error;
       } else {
-          // Simulation
           await new Promise(r => setTimeout(r, 1000));
       }
 
@@ -246,7 +248,7 @@ export const MerchantCashbackRequests: React.FC<MerchantCashbackRequestsProps> =
                 </div>
 
                 {/* Info Box */}
-                <div className="bg-gray-50 dark:bg-gray-800 rounded-2xl p-5 border border-gray-200 dark:border-gray-700 mb-8 space-y-4">
+                <div className="bg-gray-50 dark:bg-gray-800 rounded-2xl p-5 border border-gray-100 dark:border-gray-700 mb-8 space-y-4">
                     <div className="flex justify-between border-b border-gray-200 dark:border-gray-700 pb-3">
                         <span className="text-gray-500 text-sm">Cliente</span>
                         <span className="font-bold text-gray-900 dark:text-white">{selectedRequest.customer_name || 'Cliente'}</span>

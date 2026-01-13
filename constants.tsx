@@ -256,6 +256,7 @@ export const MOCK_JOBS: Job[] = [
     role: 'Gerente Comercial',
     company: 'Shopping Freguesia',
     neighborhood: 'Freguesia',
+    category: 'Moda', // Fix: Added missing category
     type: 'CLT',
     salary: 'R$ 4.500,00',
     description: 'Gerenciamento de equipe e metas. Experiência em varejo de moda.',
@@ -271,6 +272,7 @@ export const MOCK_JOBS: Job[] = [
     role: 'Recepcionista Bilíngue',
     company: 'Hotel Quality',
     neighborhood: 'Pechincha',
+    category: 'Serviços', // Fix: Added missing category
     type: 'CLT',
     salary: 'R$ 2.200,00',
     description: 'Atendimento a hóspedes, check-in/out. Inglês fluente obrigatório.',
@@ -286,6 +288,7 @@ export const MOCK_JOBS: Job[] = [
     role: 'Vendedor Externo',
     company: 'Distribuidora JPA',
     neighborhood: 'Taquara',
+    category: 'Varejo', // Fix: Added missing category
     type: 'CLT',
     salary: 'Fixo + Comissão',
     description: 'Venda de produtos alimentícios.',
@@ -301,6 +304,7 @@ export const MOCK_JOBS: Job[] = [
     role: 'Atendente de Balcão',
     company: 'Padaria Imperial',
     neighborhood: 'Freguesia',
+    category: 'Alimentação', // Fix: Added missing category
     type: 'CLT',
     salary: 'R$ 1.600,00',
     description: 'Buscamos pessoa comunicativa e ágil para atendimento ao cliente e organização do balcão.',
@@ -315,6 +319,7 @@ export const MOCK_JOBS: Job[] = [
     role: 'Manicure e Pedicure',
     company: 'Studio Belleza',
     neighborhood: 'Taquara',
+    category: 'Beleza', // Fix: Added missing category
     type: 'PJ',
     description: 'Parceria com salão movimentado. Ótimo ambiente e clientela fidelizada.',
     requirements: ['MEI ativo', 'Material próprio', 'Experiência em unhas de gel'],
@@ -327,6 +332,7 @@ export const MOCK_JOBS: Job[] = [
     role: 'Entregador Moto',
     company: 'Burger Freguesia',
     neighborhood: 'Freguesia',
+    category: 'Alimentação', // Fix: Added missing category
     type: 'Freelancer',
     salary: 'Taxa + Produtividade',
     description: 'Entregas na região da Freguesia e Pechincha.',
@@ -341,6 +347,7 @@ export const MOCK_JOBS: Job[] = [
     role: 'Vendedor',
     company: 'Moda Pechincha',
     neighborhood: 'Pechincha',
+    category: 'Moda', // Fix: Added missing category
     type: 'CLT',
     salary: 'Comissão',
     description: 'Vendas de roupas femininas.',
