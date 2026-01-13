@@ -16,17 +16,20 @@ import {
   Info,
   BadgeCheck,
   Zap,
-  Crown
+  Crown,
+  Settings,
+  ShieldCheck
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { User } from '@supabase/supabase-js';
 import { ThemeMode } from '../types';
 import { supabase } from '../lib/supabaseClient';
 import { MasterSponsorBanner } from './MasterSponsorBanner';
+import { useConfig } from '../contexts/ConfigContext';
 
 interface MenuViewProps {
   user: User | null;
-  userRole: 'cliente' | 'lojista' | null;
+  userRole: 'cliente' | 'lojista' | 'admin' | null;
   onAuthClick: () => void;
   onNavigate: (view: string) => void;
   onBack?: () => void;
@@ -36,7 +39,7 @@ interface MenuViewProps {
 
 const CATEGORIES_JOBS = ['Alimentação', 'Beleza', 'Serviços', 'Pets', 'Moda', 'Saúde', 'Educação', 'Tecnologia'];
 const JOBS_EXPLAINER_VIDEO = "https://videos.pexels.com/video-files/3129957/3129957-sd_540_960_30fps.mp4";
-const CASHBACK_EXPLAINER_VIDEO = "https://videos.pexels.com/video-files/3129957/3129957-sd_540_960_30fps.mp4"; // Placeholder
+const CASHBACK_EXPLAINER_VIDEO = "https://videos.pexels.com/video-files/3129957/3129957-sd_540_960_30fps.mp4"; 
 
 export const MenuView: React.FC<MenuViewProps> = ({ 
   user, 
@@ -47,11 +50,12 @@ export const MenuView: React.FC<MenuViewProps> = ({
   currentTheme, 
   onThemeChange 
 }) => {
-  const { signOut } = useAuth();
+  const { signOut, isAdmin } = useAuth();
+  const { features } = useConfig();
   const isMerchant = userRole === 'lojista';
+  const isAdministrator = isAdmin();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   
-  // --- ESTADOS ---
   const [jobsAlerts, setJobsAlerts] = useState(false);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [hasSeenJobsVideo, setHasSeenJobsVideo] = useState(false);
@@ -92,6 +96,7 @@ export const MenuView: React.FC<MenuViewProps> = ({
   };
 
   const handleToggleAlerts = () => {
+    if (!features.jobsEnabled) return;
     const newState = !jobsAlerts;
     setJobsAlerts(newState);
     const updates: any = { jobsAlertsEnabled: newState };
@@ -104,6 +109,7 @@ export const MenuView: React.FC<MenuViewProps> = ({
   };
 
   const handleOpenWallet = () => {
+    if (!features.cashbackEnabled) return;
     if (!hasSeenCashbackVideo) {
       setShowVideoModal({ show: true, type: 'cashback' });
       setHasSeenCashbackVideo(true);
@@ -141,7 +147,6 @@ export const MenuView: React.FC<MenuViewProps> = ({
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-24 animate-in fade-in duration-300">
       
-      {/* (A) Cabeçalho */}
       <div className="bg-white dark:bg-gray-900 px-5 pt-12 pb-5 border-b border-gray-100 dark:border-gray-800 sticky top-0 z-50 flex items-center justify-between">
         <div>
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white font-display mb-0.5">Menu</h2>
@@ -156,7 +161,6 @@ export const MenuView: React.FC<MenuViewProps> = ({
 
       <div className="px-4 pb-5">
         
-        {/* (B) Card do Usuário */}
         <div onClick={() => onNavigate('edit_profile')} className="mt-6 bg-white dark:bg-gray-800 p-4 rounded-[2rem] shadow-sm border border-gray-100 dark:border-gray-700 flex items-center gap-4 cursor-pointer active:scale-[0.98] mb-6">
           <div className="w-14 h-14 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center overflow-hidden border-2 border-white dark:border-gray-600 shadow-sm">
             {user?.user_metadata?.avatar_url ? <img src={user.user_metadata.avatar_url} className="w-full h-full object-cover" /> : <UserIcon className="w-6 h-6 text-gray-400" />}
@@ -167,196 +171,161 @@ export const MenuView: React.FC<MenuViewProps> = ({
           </div>
         </div>
 
-        {/* (A) BANNER CARTEIRA & CASHBACK (PRIMEIRO) */}
-        <div className="bg-gradient-to-br from-[#1E5BFF] to-[#1749CC] rounded-[2rem] p-6 text-white shadow-xl shadow-blue-500/20 mb-6 relative overflow-hidden group cursor-pointer" onClick={handleOpenWallet}>
-            <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl -mr-10 -mt-10"></div>
-            <div className="relative z-10 flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/10 group-hover:scale-110 transition-transform">
-                        <Wallet className="w-6 h-6 text-white" />
-                    </div>
-                    <div>
-                        <h3 className="font-bold text-lg">Carteira & Cashback</h3>
-                        <p className="text-xs text-blue-100 font-medium">Veja seu saldo e benefícios.</p>
-                    </div>
+        {/* --- ADMIN SECTION --- */}
+        {isAdministrator && (
+          <div className="mb-6 space-y-3">
+             <h3 className="text-xs font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.2em] ml-2">Administração</h3>
+             <button 
+                onClick={() => onNavigate('admin_config')}
+                className="w-full bg-white dark:bg-gray-800 p-5 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-700 flex items-center gap-4 group active:scale-[0.98] transition-transform"
+             >
+                <div className="w-12 h-12 bg-[#1E5BFF]/10 rounded-2xl flex items-center justify-center text-[#1E5BFF]">
+                    <ShieldCheck className="w-6 h-6" />
                 </div>
-                <ChevronRight className="w-6 h-6 opacity-50" />
-            </div>
-            <div className="mt-6 flex justify-end relative z-10">
-                <button 
-                  onClick={(e) => { e.stopPropagation(); setShowVideoModal({show: true, type: 'cashback'}); }}
-                  className="text-[10px] font-black uppercase tracking-widest bg-black/20 px-3 py-1.5 rounded-lg flex items-center gap-2 border border-white/10 hover:bg-black/30"
-                >
-                    <PlayCircle className="w-3.5 h-3.5 text-amber-400" /> Como funciona (30s)
-                </button>
-            </div>
-        </div>
-
-        {/* (B) Card "Notificações de Vagas" */}
-        <div className="bg-white dark:bg-gray-800 rounded-[2rem] p-6 border border-gray-100 dark:border-gray-700 mb-6 shadow-sm">
-          <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-orange-50 dark:bg-orange-900/20 flex items-center justify-center text-orange-600">
-                <Bell className="w-5 h-5" />
-              </div>
-              <h3 className="font-bold text-gray-900 dark:text-white text-base">Notificações de Vagas</h3>
-            </div>
-            <button 
-              onClick={handleToggleAlerts}
-              className={`w-12 h-6 rounded-full p-1 transition-colors ${jobsAlerts ? 'bg-green-500' : 'bg-gray-300 dark:bg-gray-600'}`}
-            >
-              <div className={`w-4 h-4 bg-white rounded-full transition-transform ${jobsAlerts ? 'translate-x-6' : 'translate-x-0'}`}></div>
-            </button>
+                <div className="text-left flex-1">
+                    <h3 className="text-base font-bold text-gray-900 dark:text-white">Configuração Remota</h3>
+                    <p className="text-[10px] text-gray-400 uppercase font-black tracking-widest">Feature Flags</p>
+                </div>
+                <ChevronRight className="w-5 h-5 text-gray-300 group-hover:text-[#1E5BFF] transition-colors" />
+             </button>
+             <button 
+                onClick={() => onNavigate('admin_moderation')}
+                className="w-full bg-white dark:bg-gray-800 p-5 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-700 flex items-center gap-4 group active:scale-[0.98] transition-transform"
+             >
+                <div className="w-12 h-12 bg-red-50 dark:bg-red-900/20 rounded-2xl flex items-center justify-center text-red-500">
+                    <Bell className="w-6 h-6" />
+                </div>
+                <div className="text-left flex-1">
+                    <h3 className="text-base font-bold text-gray-900 dark:text-white">Moderação</h3>
+                    <p className="text-[10px] text-gray-400 uppercase font-black tracking-widest">Posts e Denúncias</p>
+                </div>
+                <ChevronRight className="w-5 h-5 text-gray-300 group-hover:text-red-500 transition-colors" />
+             </button>
           </div>
+        )}
 
-          <div className="flex justify-between items-center mb-4">
-              <p className="text-[10px] text-gray-500 dark:text-gray-400 font-medium">Receba alertas de empresas do bairro.</p>
-              <button onClick={() => setShowVideoModal({show: true, type: 'jobs'})} className="text-[10px] font-bold text-orange-600 flex items-center gap-1 hover:underline">
-                <PlayCircle className="w-3 h-3" /> Como funciona (30s)
-              </button>
-          </div>
-
-          {jobsAlerts && (
-            <div className="space-y-4 animate-in fade-in duration-300 border-t border-gray-50 dark:border-gray-700 pt-4">
-              <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Categorias de interesse</p>
-              <div className="flex flex-wrap gap-2">
-                {CATEGORIES_JOBS.map(cat => (
-                  <button key={cat} onClick={() => toggleCategory(cat)} className={`px-3 py-1.5 rounded-full text-xs font-bold border transition-all flex items-center gap-1.5 ${selectedCategories.includes(cat) ? 'bg-orange-500 text-white border-orange-500 shadow-sm' : 'bg-gray-50 dark:bg-gray-700 text-gray-500 border-gray-200 dark:border-gray-600'}`}>
-                    {selectedCategories.includes(cat) && <Check className="w-3 h-3" />}
-                    {cat}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* --- ÁREA EXCLUSIVA LOJISTA --- */}
+        {/* --- MERCHANT SECTION --- */}
         {isMerchant && (
-            <div className="mb-6">
-               <h3 className="text-xs font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.2em] mb-3 ml-2">Painel Parceiro</h3>
-               <button onClick={() => onNavigate('store_area')} className="w-full bg-gradient-to-r from-slate-900 to-slate-800 text-white p-5 rounded-[2rem] shadow-lg flex items-center justify-between active:scale-[0.98] transition-transform">
-                   <div className="flex items-center gap-4">
-                       <div className="w-11 h-11 bg-white/10 rounded-xl flex items-center justify-center border border-white/10">
-                           <UserIcon className="w-5 h-5 text-indigo-300" />
-                       </div>
-                       <div className="text-left">
-                           <h3 className="font-bold text-base">Minha Loja</h3>
-                           <p className="text-[10px] text-indigo-200 uppercase tracking-wider font-bold">Gestão de Vendas e Cashback</p>
-                       </div>
-                   </div>
-                   <ChevronRight className="w-5 h-5 text-white/40" />
+            <div className="mb-6 space-y-3">
+               <h3 className="text-xs font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.2em] ml-2">Painel do Lojista</h3>
+               <button 
+                  onClick={() => onNavigate('store_area')}
+                  className="w-full bg-slate-900 p-5 rounded-3xl shadow-xl border border-white/5 flex items-center gap-4 group active:scale-[0.98] transition-transform relative overflow-hidden"
+               >
+                  <div className="absolute top-0 right-0 w-24 h-24 bg-blue-500/5 rounded-bl-full pointer-events-none"></div>
+                  <div className="w-12 h-12 bg-blue-500/10 rounded-2xl flex items-center justify-center text-[#1E5BFF] relative z-10">
+                    <Zap className="w-6 h-6 fill-[#1E5BFF]" />
+                  </div>
+                  <div className="text-left flex-1 relative z-10">
+                    <h3 className="text-base font-bold text-white">Central do Parceiro</h3>
+                    <p className="text-[10px] text-blue-400 uppercase font-black tracking-widest">Gestão e Vendas</p>
+                  </div>
+                  <ChevronRight className="w-5 h-5 text-gray-600 group-hover:text-white transition-colors" />
                </button>
             </div>
         )}
 
-        {/* (C) Seção de Atalhos do Usuário */}
-        <div className="space-y-4 mb-8">
-            <h3 className="text-xs font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.2em] mb-2 ml-2">Minha Conta</h3>
-            
-            <div className="bg-white dark:bg-gray-800 rounded-[2rem] overflow-hidden border border-gray-100 dark:border-gray-700 shadow-sm">
-                <button onClick={() => onNavigate('favorites')} className="w-full p-4 flex items-center justify-between border-b border-gray-50 dark:border-gray-700 active:bg-gray-50 dark:active:bg-gray-700 transition-colors">
-                    <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-xl bg-pink-50 dark:bg-pink-900/20 flex items-center justify-center text-pink-500">
-                            <Heart className="w-4 h-4" />
-                        </div>
-                        <span className="text-sm font-bold text-gray-700 dark:text-gray-200">Favoritos</span>
-                    </div>
-                    <ChevronRight className="w-4 h-4 text-gray-300" />
-                </button>
+        {features.cashbackEnabled && (
+          <div className="bg-gradient-to-br from-[#1E5BFF] to-[#1749CC] rounded-[2rem] p-6 text-white shadow-xl shadow-blue-500/20 mb-6 relative overflow-hidden group cursor-pointer" onClick={handleOpenWallet}>
+              <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl -mr-10 -mt-10"></div>
+              <div className="flex justify-between items-start relative z-10">
+                  <div>
+                      <p className="text-xs font-bold text-blue-100 uppercase tracking-widest mb-1 flex items-center gap-1.5"><Wallet className="w-3.5 h-3.5" /> Meu Saldo</p>
+                      <h4 className="text-3xl font-black">R$ 12,40</h4>
+                  </div>
+                  <div className="bg-white/20 p-2 rounded-xl backdrop-blur-md border border-white/10 group-hover:bg-white group-hover:text-[#1E5BFF] transition-all">
+                      <ChevronRight className="w-5 h-5" />
+                  </div>
+              </div>
+              <p className="mt-4 text-[10px] text-blue-100 opacity-80 font-medium leading-relaxed italic">"Economize nas lojas do bairro usando seu cashback."</p>
+          </div>
+        )}
 
-                <button onClick={() => alert('Endereços - Em breve')} className="w-full p-4 flex items-center justify-between border-b border-gray-50 dark:border-gray-700 active:bg-gray-50 dark:active:bg-gray-700 transition-colors">
-                    <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-xl bg-amber-50 dark:bg-amber-900/20 flex items-center justify-center text-amber-600">
-                            <MapPin className="w-4 h-4" />
-                        </div>
-                        <span className="text-sm font-bold text-gray-700 dark:text-gray-200">Meus Endereços</span>
-                    </div>
-                    <ChevronRight className="w-4 h-4 text-gray-300" />
-                </button>
+        {features.jobsEnabled && (
+          <div className="bg-white dark:bg-gray-800 rounded-[2.5rem] p-6 shadow-sm border border-gray-100 dark:border-gray-700 mb-6">
+              <div className="flex items-center justify-between mb-6">
+                  <div className="flex items-center gap-3">
+                      <div className="p-2 bg-blue-50 dark:bg-blue-900/20 rounded-xl text-[#1E5BFF] dark:text-blue-400"><Bell className="w-5 h-5" /></div>
+                      <div>
+                          <h4 className="text-sm font-bold text-gray-900 dark:text-white">Alertas de Vagas</h4>
+                          <p className="text-[10px] text-gray-500 font-medium">Não perca oportunidades locais</p>
+                      </div>
+                  </div>
+                  <button onClick={handleToggleAlerts} className={`w-12 h-6 rounded-full p-1 transition-colors duration-300 ${jobsAlerts ? 'bg-[#1E5BFF]' : 'bg-gray-200 dark:bg-gray-700'}`}>
+                      <div className={`w-4 h-4 bg-white rounded-full shadow-sm transform transition-transform duration-300 ${jobsAlerts ? 'translate-x-6' : 'translate-x-0'}`}></div>
+                  </button>
+              </div>
 
-                <button onClick={() => onNavigate('about')} className="w-full p-4 flex items-center justify-between border-b border-gray-50 dark:border-gray-700 active:bg-gray-50 dark:active:bg-gray-700 transition-colors">
-                    <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-xl bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center text-[#1E5BFF]">
-                            <Info className="w-4 h-4" />
-                        </div>
-                        <span className="text-sm font-bold text-gray-700 dark:text-gray-200">Quem Somos</span>
-                    </div>
-                    <ChevronRight className="w-4 h-4 text-gray-300" />
-                </button>
+              {jobsAlerts && (
+                  <div className="animate-in slide-in-from-top-2 duration-300">
+                      <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 ml-1">Áreas de interesse</p>
+                      <div className="flex flex-wrap gap-2">
+                          {CATEGORIES_JOBS.map(cat => {
+                              const isSelected = selectedCategories.includes(cat);
+                              return (
+                                  <button key={cat} onClick={() => toggleCategory(cat)} className={`px-3 py-1.5 rounded-full text-[10px] font-bold transition-all border ${isSelected ? 'bg-[#1E5BFF] text-white border-[#1E5BFF] shadow-md shadow-blue-500/20' : 'bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-400 border-gray-200 dark:border-gray-700'}`}>{cat}</button>
+                              );
+                          })}
+                      </div>
+                      <div className="mt-5 p-3 bg-gray-50 dark:bg-gray-900/50 rounded-xl border border-gray-100 dark:border-gray-700 flex items-start gap-3">
+                          <Info className="w-4 h-4 text-gray-400 mt-0.5 shrink-0" />
+                          <p className="text-[10px] text-gray-500 dark:text-gray-400 leading-relaxed font-medium">Você receberá notificações PUSH quando novas vagas urgentes forem publicadas nestas categorias.</p>
+                      </div>
+                  </div>
+              )}
+          </div>
+        )}
 
-                <button onClick={() => onNavigate('support')} className="w-full p-4 flex items-center justify-between active:bg-gray-50 dark:active:bg-gray-700 transition-colors">
-                    <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-xl bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center text-indigo-600">
-                            <HelpCircle className="w-4 h-4" />
-                        </div>
-                        <span className="text-sm font-bold text-gray-700 dark:text-gray-200">Ajuda / Suporte</span>
-                    </div>
-                    <ChevronRight className="w-4 h-4 text-gray-300" />
-                </button>
+        <div className="space-y-2 mb-8">
+            <h3 className="text-xs font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.2em] ml-2 mb-3">Links Úteis</h3>
+            <div className="bg-white dark:bg-gray-800 rounded-3xl overflow-hidden border border-gray-100 dark:border-gray-700 shadow-sm">
+                <button onClick={() => onNavigate('favorites')} className="w-full p-4 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors border-b border-gray-50 dark:border-gray-700 group"><div className="flex items-center gap-3"><Heart className="w-5 h-5 text-gray-400 group-hover:text-red-500 transition-colors" /><span className="text-sm font-semibold text-gray-700 dark:text-gray-200">Meus Favoritos</span></div><ChevronRight className="w-4 h-4 text-gray-300" /></button>
+                <button onClick={() => onNavigate('support')} className="w-full p-4 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors border-b border-gray-50 dark:border-gray-700 group"><div className="flex items-center gap-3"><HelpCircle className="w-5 h-5 text-gray-400 group-hover:text-blue-500 transition-colors" /><span className="text-sm font-semibold text-gray-700 dark:text-gray-200">Suporte</span></div><ChevronRight className="w-4 h-4 text-gray-300" /></button>
+                <button onClick={() => onNavigate('about')} className="w-full p-4 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors group"><div className="flex items-center gap-3"><Info className="w-5 h-5 text-gray-400 group-hover:text-[#1E5BFF] transition-colors" /><span className="text-sm font-semibold text-gray-700 dark:text-gray-200">Sobre o Localizei JPA</span></div><ChevronRight className="w-4 h-4 text-gray-300" /></button>
             </div>
         </div>
 
-        {/* (E) Banner Patrocinador Master */}
-        <MasterSponsorBanner onClick={() => onNavigate('patrocinador_master')} className="mb-8" />
+        <div className="bg-gray-100 dark:bg-gray-800 p-1 rounded-2xl flex gap-1 mb-8">
+            {(['light', 'dark', 'auto'] as ThemeMode[]).map(m => (
+                <button key={m} onClick={() => onThemeChange?.(m)} className={`flex-1 py-2 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all ${currentTheme === m ? 'bg-white dark:bg-gray-700 text-[#1E5BFF] shadow-sm' : 'text-gray-400 dark:text-gray-500'}`}>{m === 'light' ? 'Claro' : m === 'dark' ? 'Escuro' : 'Auto'}</button>
+            ))}
+        </div>
 
-        {/* (E) Sair da conta */}
-        <button 
-          onClick={handleLogout} 
-          disabled={isLoggingOut} 
-          className="w-full bg-red-50 dark:bg-red-900/10 p-5 rounded-[2rem] border border-red-100 dark:border-red-900/30 flex items-center justify-center gap-3 active:scale-[0.98] transition-all group"
-        >
-            {isLoggingOut ? (
-                <Loader2 className="w-5 h-5 animate-spin text-red-600" />
-            ) : (
-                <LogOut className="w-5 h-5 text-red-600 group-hover:translate-x-1 transition-transform" />
-            )}
-            <span className="font-bold text-red-600 text-sm">Sair da conta</span>
+        <button onClick={handleLogout} disabled={isLoggingOut} className="w-full py-4 text-red-500 dark:text-red-400 font-black text-xs uppercase tracking-[0.3em] flex items-center justify-center gap-2 border border-red-50 dark:border-red-900/20 rounded-2xl hover:bg-red-50 dark:hover:bg-red-900/10 transition-all active:scale-[0.98]">
+            {isLoggingOut ? <Loader2 className="w-4 h-4 animate-spin" /> : <LogOut className="w-4 h-4" />} {isLoggingOut ? 'Saindo...' : 'Sair da conta'}
         </button>
 
-        <div className="mt-8 text-center px-4">
-            <p className="text-[10px] font-black text-gray-300 dark:text-gray-600 uppercase tracking-[0.4em]">Localizei JPA v14.2</p>
+        {features.sponsorMasterBannerEnabled && (
+          <div className="mt-8 mb-4">
+             <MasterSponsorBanner onClick={() => onNavigate('patrocinador_master')} />
+          </div>
+        )}
+
+        <div className="mt-12 mb-10 opacity-30 text-center flex flex-col items-center">
+            <div className="w-10 h-10 bg-gray-200 dark:bg-gray-700 rounded-2xl flex items-center justify-center mb-3 grayscale"><MapPin className="w-5 h-5" /></div>
+            <p className="text-[10px] font-black uppercase tracking-[0.5em] text-gray-500 dark:text-gray-400">Localizei JPA v14.0</p>
         </div>
+
       </div>
 
-      {/* MODAL DO VÍDEO EXPLICATIVO */}
       {showVideoModal.show && (
-        <div className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-300">
-           <div className="bg-white dark:bg-gray-900 w-full max-w-sm rounded-[2rem] overflow-hidden shadow-2xl relative border border-gray-100 dark:border-gray-800">
-              <button onClick={() => setShowVideoModal({show: false, type: 'jobs'})} className="absolute top-4 right-4 z-20 p-2 bg-black/20 hover:bg-black/40 rounded-full text-white transition-colors">
-                <X className="w-5 h-5" />
-              </button>
-              <div className="aspect-[9/16] bg-black relative">
-                <video 
-                    src={showVideoModal.type === 'jobs' ? JOBS_EXPLAINER_VIDEO : CASHBACK_EXPLAINER_VIDEO} 
-                    className="w-full h-full object-cover" 
-                    autoPlay 
-                    controls 
-                    playsInline 
-                />
+          <div className="fixed inset-0 z-[200] bg-black flex flex-col animate-in fade-in duration-300">
+              <div className="p-6 flex justify-between items-center bg-gradient-to-b from-black/80 to-transparent absolute top-0 left-0 right-0 z-10">
+                  <div className="flex items-center gap-3">
+                      <PlayCircle className="w-5 h-5 text-[#1E5BFF]" />
+                      <h3 className="text-white font-bold text-sm">
+                          {showVideoModal.type === 'jobs' ? 'Como funcionam os Alertas' : 'O que é o Cashback?'}
+                      </h3>
+                  </div>
+                  <button onClick={() => setShowVideoModal({...showVideoModal, show: false})} className="p-2 bg-white/10 rounded-full text-white"><X className="w-6 h-6" /></button>
               </div>
-              <div className="p-6 text-center">
-                 <h3 className="font-bold text-gray-900 dark:text-white mb-2">
-                    {showVideoModal.type === 'jobs' ? 'Entenda os alertas' : 'Economize com Cashback'}
-                 </h3>
-                 <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
-                    {showVideoModal.type === 'jobs' 
-                        ? 'Você só recebe notificações de vagas que combinam com as categorias que você escolheu. Sem spam, apenas oportunidades reais.' 
-                        : 'Ganhe parte do seu dinheiro de volta em todas as compras nas lojas parceiras do bairro. Use seu saldo para pagar contas futuras!'}
-                 </p>
-                 <button 
-                   onClick={() => {
-                       const type = showVideoModal.type;
-                       setShowVideoModal({show: false, type: 'jobs'});
-                       if (type === 'cashback') onNavigate('user_statement');
-                   }}
-                   className="mt-6 w-full py-3.5 bg-[#1E5BFF] text-white font-bold rounded-xl active:scale-95 transition-transform"
-                 >
-                   Entendido!
-                 </button>
+              <div className="flex-1 flex items-center justify-center bg-gray-900">
+                  <video src={showVideoModal.type === 'jobs' ? JOBS_EXPLAINER_VIDEO : CASHBACK_EXPLAINER_VIDEO} className="w-full max-h-screen" controls autoPlay />
               </div>
-           </div>
-        </div>
+              <div className="p-8 bg-black">
+                  <button onClick={() => setShowVideoModal({...showVideoModal, show: false})} className="w-full bg-[#1E5BFF] text-white font-bold py-4 rounded-2xl text-base shadow-lg active:scale-95 transition-all">Entendido!</button>
+              </div>
+          </div>
       )}
     </div>
   );

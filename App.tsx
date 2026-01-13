@@ -29,9 +29,10 @@ import { MerchantQrScreen } from './components/MerchantQrScreen';
 import { WeeklyPromoModule } from './components/WeeklyPromoModule';
 import { JobsView } from './components/JobsView';
 import { MerchantJobsModule } from './components/MerchantJobsModule';
-import { MapPin, ShieldCheck } from 'lucide-react';
+import { MapPin, ShieldCheck, ShieldAlert, AlertCircle } from 'lucide-react';
 import { useAuth } from './contexts/AuthContext';
 import { NeighborhoodProvider } from './contexts/NeighborhoodContext';
+import { ConfigProvider, useConfig } from './contexts/ConfigContext';
 import { Category, Store, AdType, EditorialCollection, ThemeMode } from './types';
 import { getStoreLogo } from './utils/mockLogos';
 import { CategoryView } from './components/CategoryView';
@@ -46,6 +47,7 @@ import { StoreFinanceModule } from './components/StoreFinanceModule';
 import { CommunityFeedView } from './components/CommunityFeedView';
 import { STORES } from './constants';
 import { AdminModerationPanel } from './components/AdminModerationPanel';
+import { AdminConfigPanel } from './components/AdminConfigPanel';
 import { 
   AboutView, 
   SupportView, 
@@ -60,8 +62,24 @@ let isFirstBootAttempted = false;
 // Tabs that support horizontal swipe navigation (Main Bottom Bar Tabs)
 const MAIN_TABS = ['home', 'explore', 'qrcode_scan', 'services', 'community_feed'];
 
-const App: React.FC = () => {
+const FeatureUnavailable: React.FC<{ onBack: () => void; title: string }> = ({ onBack, title }) => (
+  <div className="min-h-screen flex flex-col items-center justify-center p-6 text-center bg-white dark:bg-gray-900 animate-in fade-in duration-300">
+    <div className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mb-4 text-gray-400">
+      <AlertCircle className="w-8 h-8" />
+    </div>
+    <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">{title} indisponível</h2>
+    <p className="text-gray-500 dark:text-gray-400 text-sm mb-8 max-w-xs font-medium">
+      Esta funcionalidade foi desativada temporariamente. Tente novamente mais tarde.
+    </p>
+    <button onClick={onBack} className="bg-[#1E5BFF] text-white font-bold py-3 px-8 rounded-full shadow-lg active:scale-95 transition-transform">
+      Voltar ao início
+    </button>
+  </div>
+);
+
+const AppContent: React.FC = () => {
   const { user, userRole, loading: isAuthInitialLoading, signOut } = useAuth();
+  const { features } = useConfig();
   
   // UX ENGINEER: Detecta se estamos voltando de um login com Google (OAuth)
   const isAuthReturn = window.location.hash.includes('access_token') || window.location.search.includes('code=');
@@ -136,6 +154,10 @@ const App: React.FC = () => {
   };
   
   const handleCashbackClick = () => {
+    if (!features.cashbackEnabled) {
+      setActiveTab('cashback_unavailable');
+      return;
+    }
     if (user) setActiveTab('qrcode_scan');
     else setIsAuthOpen(true);
   };
@@ -205,200 +227,231 @@ const App: React.FC = () => {
     'service_subcategories', 'service_specialties', 'service_terms', 'service_success',
     'user_statement', 'merchant_cashback_dashboard', 'merchant_cashback_onboarding',
     'store_cashback_module', 'store_ads_module', 'about', 'support', 'invite_friend', 'favorites',
-    'weekly_promo', 'jobs_list', 'merchant_jobs', 'community_feed', 'admin_moderation' 
+    'weekly_promo', 'jobs_list', 'merchant_jobs', 'community_feed', 'admin_moderation', 'admin_config',
+    'cashback_unavailable', 'jobs_unavailable', 'promo_unavailable', 'agency_unavailable'
   ];
 
   // A aba 'profile' (Menu) foi removida desta lista para garantir que a BottomBar continue visível
-  const hideBottomNav = ['store_ads_module', 'store_detail', 'admin_moderation'].includes(activeTab);
+  const hideBottomNav = [
+    'store_ads_module', 'store_detail', 'admin_moderation', 'admin_config',
+    'cashback_unavailable', 'jobs_unavailable', 'promo_unavailable', 'agency_unavailable'
+  ].includes(activeTab);
 
   return (
-    <div className={isDarkMode ? 'dark' : ''}>
-      <NeighborhoodProvider>
-        <div 
-          className="min-h-screen bg-white dark:bg-gray-900 flex justify-center transition-colors duration-300 relative"
-          onTouchStart={onTouchStart}
-          onTouchEnd={onTouchEnd}
-        >
-          <Layout 
-              activeTab={activeTab} 
-              setActiveTab={setActiveTab} 
-              userRole={userRole} 
-              onCashbackClick={handleCashbackClick}
-              hideNav={hideBottomNav}
-          >
-              {!headerExclusionList.includes(activeTab) && (
-              <Header
-                  isDarkMode={isDarkMode}
-                  toggleTheme={toggleTheme}
-                  onAuthClick={() => setActiveTab('profile')} 
-                  user={user}
-                  searchTerm={globalSearch}
-                  onSearchChange={setGlobalSearch}
-                  onNavigate={setActiveTab}
-                  activeTab={activeTab}
-                  userRole={userRole}
-                  onOpenMerchantQr={() => setActiveTab('merchant_qr')}
-              />
-              )}
-              <main className="animate-in fade-in duration-500 w-full max-w-md mx-auto">
-              {activeTab === 'home' && (
-                  <HomeFeed
-                  onNavigate={setActiveTab}
-                  onSelectCategory={handleSelectCategory}
-                  onSelectCollection={handleSelectCollection}
-                  onStoreClick={handleSelectStore}
-                  stores={STORES}
-                  searchTerm={globalSearch}
-                  user={user as any}
-                  userRole={userRole}
-                  onSpinWin={(reward) => { setSelectedReward(reward); setActiveTab('reward_details'); }}
-                  onRequireLogin={() => setIsAuthOpen(true)}
-                  />
-              )}
-              {activeTab === 'explore' && (
-                  <ExploreView 
-                  stores={STORES} 
-                  searchQuery={globalSearch} 
-                  onStoreClick={handleSelectStore} 
-                  onLocationClick={() => {}} 
-                  onFilterClick={() => {}} 
-                  onOpenPlans={() => {}}
-                  onNavigate={setActiveTab}
-                  />
-              )}
-              {activeTab === 'user_statement' && (
-                  <UserStatementView onBack={() => setActiveTab('profile')} onExploreStores={() => setActiveTab('explore')} balance={12.40} />
-              )}
-              {activeTab === 'merchant_cashback_onboarding' && (
-                  <MerchantCashbackOnboarding onBack={() => setActiveTab('home')} onActivate={() => setActiveTab('store_cashback_module')} />
-              )}
-              {activeTab === 'merchant_cashback_dashboard' && (
-                  <MerchantCashbackDashboard onBack={() => setActiveTab('home')} onNavigate={setActiveTab} />
-              )}
-              {activeTab === 'store_cashback_module' && <StoreCashbackModule onBack={() => setActiveTab('home')} />}
-              {activeTab === 'store_ads_module' && <StoreAdsModule onBack={() => setActiveTab('store_area')} />}
-              {activeTab === 'store_profile' && <StoreProfileEdit onBack={() => setActiveTab('store_area')} />}
-              {activeTab === 'store_finance' && <StoreFinanceModule onBack={() => setActiveTab('store_area')} />}
-              {activeTab === 'weekly_promo' && <WeeklyPromoModule onBack={() => setActiveTab('store_area')} />}
-              {activeTab === 'merchant_jobs' && <MerchantJobsModule onBack={() => setActiveTab('store_area')} />}
-              {activeTab === 'jobs_list' && <JobsView onBack={() => setActiveTab('home')} />}
-              
-              {activeTab === 'community_feed' && (
-                  <CommunityFeedView 
-                      onStoreClick={handleSelectStore} 
-                      user={user as any}
-                      onRequireLogin={() => setIsAuthOpen(true)}
-                  />
-              )}
-
-              {activeTab === 'about' && <AboutView onBack={() => setActiveTab('profile')} />}
-              {activeTab === 'support' && <SupportView onBack={() => setActiveTab('profile')} />}
-              {activeTab === 'invite_friend' && <InviteFriendView onBack={() => setActiveTab('profile')} />}
-              {activeTab === 'favorites' && <FavoritesView user={user as any} onBack={() => setActiveTab('profile')} onNavigate={setActiveTab} />}
-              {activeTab === 'editorial_list' && selectedCollection && (
-                  <EditorialListView collection={selectedCollection} stores={STORES} onBack={() => { setActiveTab('home'); setSelectedCollection(null); }} onStoreClick={handleSelectStore} />
-              )}
-              {activeTab === 'services' && (
-                  <ServicesView onSelectMacro={(id, name) => {
-                      setSelectedServiceMacro({id, name});
-                      if (id === 'emergency') { setQuoteCategory(name); setIsQuoteModalOpen(true); } 
-                      else { setActiveTab('service_subcategories'); }
-                  }} 
-                  onOpenTerms={() => setActiveTab('service_terms')} onNavigate={setActiveTab} searchTerm={globalSearch}
-                  />
-              )}
-              {activeTab === 'store_area' && (userRole === 'lojista' ? <StoreAreaView onBack={() => setActiveTab('home')} onNavigate={setActiveTab} user={user as any} /> : <FreguesiaConnectRestricted onBack={() => setActiveTab('home')} />)}
-              {activeTab === 'merchant_qr' && (userRole === 'lojista' ? <MerchantQrScreen user={user} onBack={() => setActiveTab('home')} /> : <FreguesiaConnectRestricted onBack={() => setActiveTab('home')} />)}
-              {activeTab === 'admin_moderation' && <AdminModerationPanel onBack={() => setActiveTab('profile')} />}
-              
-              {activeTab === 'category_detail' && selectedCategory && (
-                  <CategoryView 
-                      category={selectedCategory} 
-                      onBack={() => { setActiveTab('home'); setSelectedCategory(null); }} 
-                      onStoreClick={handleSelectStore} 
-                      stores={STORES} 
-                  />
-              )}
-              
-              {activeTab === 'service_subcategories' && selectedServiceMacro && <SubcategoriesView macroId={selectedServiceMacro.id} macroName={selectedServiceMacro.name} onBack={() => setActiveTab('services')} onSelectSubcategory={(subName) => { setSelectedServiceSub(subName); setActiveTab('service_specialties'); }} />}
-              {activeTab === 'service_specialties' && selectedServiceSub && <SpecialtiesView subcategoryName={selectedServiceSub} onBack={() => setActiveTab('service_subcategories')} onSelectSpecialty={(specialty) => { setQuoteCategory(`${selectedServiceSub} - ${specialty}`); setIsQuoteModalOpen(true); }} />}
-              {activeTab === 'service_success' && <ServiceSuccessView onViewRequests={() => alert('Meus Pedidos')} onHome={() => setActiveTab('home')} />}
-              {activeTab === 'service_terms' && <ServiceTermsView onBack={() => setActiveTab('services')} />}
-              {activeTab === 'freguesia_connect_public' && <FreguesiaConnectPublic onBack={() => setActiveTab('home')} onLogin={() => setIsAuthOpen(true)} />}
-              {activeTab === 'freguesia_connect_dashboard' && <FreguesiaConnectDashboard onBack={() => setActiveTab('home')} />}
-              {activeTab === 'freguesia_connect_restricted' && <FreguesiaConnectRestricted onBack={() => setActiveTab('home')} />}
-              {activeTab === 'qrcode_scan' && <CashbackScanScreen onBack={() => setActiveTab('home')} onScanSuccess={(data) => { setScannedData(data); setActiveTab('scan_confirmation'); }} />}
-              {activeTab === 'scan_confirmation' && scannedData && <ScanConfirmationScreen storeId={scannedData.storeId} onConfirm={() => setActiveTab('cashback_payment')} onCancel={() => setActiveTab('home')} />}
-              {activeTab === 'cashback_payment' && scannedData && <CashbackPaymentScreen user={user as any} merchantId={scannedData.merchantId} storeId={scannedData.storeId} onBack={() => setActiveTab('home')} onComplete={() => setActiveTab('home')} />}
-              
-              {activeTab === 'profile' && 
-                  <MenuView 
-                      user={user as any} 
-                      userRole={userRole} 
-                      onAuthClick={() => setIsAuthOpen(true)} 
-                      onNavigate={setActiveTab} 
-                      onBack={() => setActiveTab('home')}
-                      currentTheme={themeMode}
-                      onThemeChange={setThemeMode}
-                  />
-              }
-              
-              {activeTab === 'patrocinador_master' && <PatrocinadorMasterScreen onBack={() => setActiveTab('home')} />}
-              {activeTab === 'store_detail' && selectedStore && <StoreDetailView store={selectedStore} onBack={() => setActiveTab('home')} />}
-              {activeTab === 'reward_details' && <RewardDetailsView reward={selectedReward} onBack={() => setActiveTab('home')} onHome={() => setActiveTab('home')} />}
-              {activeTab === 'prize_history' && user && <PrizeHistoryView userId={user.id} onBack={() => setActiveTab('home')} onGoToSpinWheel={() => setActiveTab('home')} />}
-              </main>
-
-              <AuthModal isOpen={isAuthOpen} onClose={() => setIsAuthOpen(false)} user={user as any} />
-              {isQuoteModalOpen && <QuoteRequestModal isOpen={isQuoteModalOpen} onClose={() => setIsQuoteModalOpen(false)} categoryName={quoteCategory} onSuccess={() => { setIsQuoteModalOpen(false); setActiveTab('service_success'); }} />}
-          </Layout>
-
-          {splashStage < 4 && (
-            <div 
-                className={`fixed inset-0 z-[999] flex items-center justify-center transition-opacity duration-500 ${splashStage === 3 ? 'animate-app-exit' : ''}`}
-                style={{ backgroundColor: '#1E5BFF' }} 
-            >
-              <div 
-                className={`flex flex-col items-center justify-center z-10 transition-all duration-700 
-                ${splashStage === 0 ? 'animate-logo-enter' : 'opacity-100'} 
-                ${splashStage >= 1 ? 'animate-logo-micro-move' : ''}`}
-              >
-                  <div className="relative w-32 h-32 bg-white rounded-[2.5rem] flex items-center justify-center shadow-2xl mb-6">
-                    <MapPin className="w-16 h-16 text-brand-blue fill-brand-blue" />
-                  </div>
-                  <h1 className="text-5xl font-black font-display text-white tracking-tighter drop-shadow-md">
-                    Localizei
-                  </h1>
-                  <span className="text-sm font-bold text-white/90 tracking-[0.5em] uppercase mt-1">
-                    JPA
-                  </span>
-                  
-                  <div className={`mt-12 flex flex-col items-center gap-2 transition-all duration-300
-                    ${splashStage >= 2 ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
-                     <p className="text-[10px] text-white/70 uppercase tracking-[0.2em] font-medium animate-sponsor-label-fade" style={{ animationDelay: '0ms' }}>
-                        Patrocinador Master
-                     </p>
-                     <div className="flex items-center gap-3 bg-white/10 px-5 py-3 rounded-full backdrop-blur-md border border-white/10 overflow-hidden min-h-[48px]">
-                        <div className="animate-sponsor-icon-elastic" style={{ animationDelay: '100ms' }}>
-                           <ShieldCheck className="w-5 h-5 text-white" />
-                        </div>
-                        <div className="flex overflow-hidden relative">
-                            <span 
-                                className={`text-sm font-bold text-white tracking-wide whitespace-nowrap border-r-2 border-white pr-1 overflow-hidden w-0 
-                                ${splashStage >= 2 ? 'animate-typewriter' : 'opacity-0'}`}
-                                style={{ animationDelay: '400ms' }}
-                            >
-                                Grupo Esquematiza
-                            </span>
-                        </div>
-                     </div>
-                  </div>
-              </div>
-            </div>
+    <div 
+      className="min-h-screen bg-white dark:bg-gray-900 flex justify-center transition-colors duration-300 relative"
+      onTouchStart={onTouchStart}
+      onTouchEnd={onTouchEnd}
+    >
+      <Layout 
+          activeTab={activeTab} 
+          setActiveTab={setActiveTab} 
+          userRole={userRole} 
+          onCashbackClick={handleCashbackClick}
+          hideNav={hideBottomNav}
+      >
+          {!headerExclusionList.includes(activeTab) && (
+          <Header
+              isDarkMode={isDarkMode}
+              toggleTheme={toggleTheme}
+              onAuthClick={() => setActiveTab('profile')} 
+              user={user}
+              searchTerm={globalSearch}
+              onSearchChange={setGlobalSearch}
+              onNavigate={setActiveTab}
+              activeTab={activeTab}
+              userRole={userRole}
+              onOpenMerchantQr={() => setActiveTab('merchant_qr')}
+          />
           )}
+          <main className="animate-in fade-in duration-500 w-full max-w-md mx-auto">
+          {activeTab === 'home' && (
+              <HomeFeed
+              onNavigate={setActiveTab}
+              onSelectCategory={handleSelectCategory}
+              onSelectCollection={handleSelectCollection}
+              onStoreClick={handleSelectStore}
+              stores={STORES}
+              searchTerm={globalSearch}
+              user={user as any}
+              userRole={userRole}
+              onSpinWin={(reward) => { setSelectedReward(reward); setActiveTab('reward_details'); }}
+              onRequireLogin={() => setIsAuthOpen(true)}
+              />
+          )}
+          {activeTab === 'explore' && (
+              <ExploreView 
+              stores={STORES} 
+              searchQuery={globalSearch} 
+              onStoreClick={handleSelectStore} 
+              onLocationClick={() => {}} 
+              onFilterClick={() => {}} 
+              onOpenPlans={() => {}}
+              onNavigate={setActiveTab}
+              />
+          )}
+          
+          {/* GUARDS FOR FEATURE FLAGS */}
+          {activeTab === 'cashback_unavailable' && <FeatureUnavailable onBack={() => setActiveTab('home')} title="Cashback" />}
+          {activeTab === 'jobs_unavailable' && <FeatureUnavailable onBack={() => setActiveTab('home')} title="Mural de Vagas" />}
+          {activeTab === 'promo_unavailable' && <FeatureUnavailable onBack={() => setActiveTab('home')} title="Promoções" />}
+          {activeTab === 'agency_unavailable' && <FeatureUnavailable onBack={() => setActiveTab('home')} title="Agência" />}
+
+          {activeTab === 'user_statement' && (
+              features.cashbackEnabled ? 
+                <UserStatementView onBack={() => setActiveTab('profile')} onExploreStores={() => setActiveTab('explore')} balance={12.40} /> :
+                <FeatureUnavailable onBack={() => setActiveTab('home')} title="Cashback" />
+          )}
+          
+          {activeTab === 'weekly_promo' && (
+              features.couponsEnabled ? 
+                <WeeklyPromoModule onBack={() => setActiveTab('store_area')} /> :
+                <FeatureUnavailable onBack={() => setActiveTab('store_area')} title="Promoções" />
+          )}
+
+          {activeTab === 'jobs_list' && (
+              features.jobsEnabled ? 
+                <JobsView onBack={() => setActiveTab('home')} /> :
+                <FeatureUnavailable onBack={() => setActiveTab('home')} title="Vagas" />
+          )}
+
+          {activeTab === 'merchant_jobs' && (
+              features.jobsEnabled ? 
+                <MerchantJobsModule onBack={() => setActiveTab('store_area')} /> :
+                <FeatureUnavailable onBack={() => setActiveTab('store_area')} title="Vagas" />
+          )}
+
+          {activeTab === 'merchant_cashback_onboarding' && (
+              features.cashbackEnabled ? 
+                <MerchantCashbackOnboarding onBack={() => setActiveTab('home')} onActivate={() => setActiveTab('store_cashback_module')} /> :
+                <FeatureUnavailable onBack={() => setActiveTab('home')} title="Cashback" />
+          )}
+          
+          {activeTab === 'merchant_cashback_dashboard' && (
+               features.cashbackEnabled ? 
+                <MerchantCashbackDashboard onBack={() => setActiveTab('home')} onNavigate={setActiveTab} /> :
+                <FeatureUnavailable onBack={() => setActiveTab('home')} title="Cashback" />
+          )}
+          
+          {activeTab === 'store_cashback_module' && (
+              features.cashbackEnabled ? 
+                <StoreCashbackModule onBack={() => setActiveTab('home')} /> :
+                <FeatureUnavailable onBack={() => setActiveTab('home')} title="Cashback" />
+          )}
+
+          {activeTab === 'store_ads_module' && <StoreAdsModule onBack={() => setActiveTab('store_area')} />}
+          {activeTab === 'store_profile' && <StoreProfileEdit onBack={() => setActiveTab('store_area')} />}
+          {activeTab === 'store_finance' && <StoreFinanceModule onBack={() => setActiveTab('store_area')} />}
+          
+          {activeTab === 'community_feed' && (
+              <CommunityFeedView 
+                  onStoreClick={handleSelectStore} 
+                  user={user as any}
+                  onRequireLogin={() => setIsAuthOpen(true)}
+              />
+          )}
+
+          {activeTab === 'about' && <AboutView onBack={() => setActiveTab('profile')} />}
+          {activeTab === 'support' && <SupportView onBack={() => setActiveTab('profile')} />}
+          {activeTab === 'invite_friend' && <InviteFriendView onBack={() => setActiveTab('profile')} />}
+          {activeTab === 'favorites' && <FavoritesView user={user as any} onBack={() => setActiveTab('profile')} onNavigate={setActiveTab} />}
+          {activeTab === 'editorial_list' && selectedCollection && (
+              <EditorialListView collection={selectedCollection} stores={STORES} onBack={() => { setActiveTab('home'); setSelectedCollection(null); }} onStoreClick={handleSelectStore} />
+          )}
+          {activeTab === 'services' && (
+              <ServicesView onSelectMacro={(id, name) => {
+                  setSelectedServiceMacro({id, name});
+                  if (id === 'emergency') { setQuoteCategory(name); setIsQuoteModalOpen(true); } 
+                  else { setActiveTab('service_subcategories'); }
+              }} 
+              onOpenTerms={() => setActiveTab('service_terms')} onNavigate={setActiveTab} searchTerm={globalSearch}
+              />
+          )}
+          {activeTab === 'store_area' && (userRole === 'lojista' ? <StoreAreaView onBack={() => setActiveTab('home')} onNavigate={setActiveTab} user={user as any} /> : <FreguesiaConnectRestricted onBack={() => setActiveTab('home')} />)}
+          {activeTab === 'merchant_qr' && (userRole === 'lojista' ? <MerchantQrScreen user={user} onBack={() => setActiveTab('home')} /> : <FreguesiaConnectRestricted onBack={() => setActiveTab('home')} />)}
+          {activeTab === 'admin_moderation' && <AdminModerationPanel onBack={() => setActiveTab('profile')} />}
+          
+          {activeTab === 'admin_config' && (
+              userRole === 'admin' ? 
+                <AdminConfigPanel onBack={() => setActiveTab('profile')} /> : 
+                <div className="min-h-screen flex flex-col items-center justify-center p-6 text-center animate-in fade-in duration-300">
+                    <div className="w-16 h-16 bg-red-50 dark:bg-red-900/20 rounded-full flex items-center justify-center mb-4">
+                        <ShieldAlert className="w-8 h-8 text-red-500" />
+                    </div>
+                    <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Acesso Restrito</h2>
+                    <p className="text-gray-500 dark:text-gray-400 mb-8 max-w-xs text-sm font-medium">
+                        Você não tem permissão para acessar as configurações remotas do sistema.
+                    </p>
+                    <button onClick={() => setActiveTab('home')} className="bg-[#1E5BFF] text-white font-bold py-3 px-8 rounded-full shadow-lg active:scale-95 transition-transform">Voltar ao início</button>
+                </div>
+          )}
+
+          {activeTab === 'category_detail' && selectedCategory && (
+              <CategoryView 
+                  category={selectedCategory} 
+                  onBack={() => { setActiveTab('home'); setSelectedCategory(null); }} 
+                  onStoreClick={handleSelectStore} 
+                  stores={STORES} 
+              />
+          )}
+          
+          {activeTab === 'service_subcategories' && selectedServiceMacro && <SubcategoriesView macroId={selectedServiceMacro.id} macroName={selectedServiceMacro.name} onBack={() => setActiveTab('services')} onSelectSubcategory={(subName) => { setSelectedServiceSub(subName); setActiveTab('service_specialties'); }} />}
+          {activeTab === 'service_specialties' && selectedServiceSub && <SpecialtiesView subcategoryName={selectedServiceSub} onBack={() => setActiveTab('service_subcategories')} onSelectSpecialty={(specialty) => { setQuoteCategory(`${selectedServiceSub} - ${specialty}`); setIsQuoteModalOpen(true); }} />}
+          {activeTab === 'service_success' && <ServiceSuccessView onViewRequests={() => alert('Meus Pedidos')} onHome={() => setActiveTab('home')} />}
+          {activeTab === 'service_terms' && <ServiceTermsView onBack={() => setActiveTab('services')} />}
+          {activeTab === 'freguesia_connect_public' && <FreguesiaConnectPublic onBack={() => setActiveTab('home')} onLogin={() => setIsAuthOpen(true)} />}
+          {activeTab === 'freguesia_connect_dashboard' && <FreguesiaConnectDashboard onBack={() => setActiveTab('home')} />}
+          {activeTab === 'freguesia_connect_restricted' && <FreguesiaConnectRestricted onBack={() => setActiveTab('home')} />}
+          
+          {activeTab === 'qrcode_scan' && (
+              features.cashbackEnabled ? 
+                <CashbackScanScreen onBack={() => setActiveTab('home')} onScanSuccess={(data) => { setScannedData(data); setActiveTab('scan_confirmation'); }} /> :
+                <FeatureUnavailable onBack={() => setActiveTab('home')} title="Cashback" />
+          )}
+
+          {activeTab === 'scan_confirmation' && scannedData && <ScanConfirmationScreen storeId={scannedData.storeId} onConfirm={() => setActiveTab('cashback_payment')} onCancel={() => setActiveTab('home')} />}
+          {activeTab === 'cashback_payment' && scannedData && <CashbackPaymentScreen user={user as any} merchantId={scannedData.merchantId} storeId={scannedData.storeId} onBack={() => setActiveTab('home')} onComplete={() => setActiveTab('home')} />}
+          
+          {activeTab === 'profile' && 
+              <MenuView 
+                  user={user as any} 
+                  userRole={userRole} 
+                  onAuthClick={() => setIsAuthOpen(true)} 
+                  onNavigate={setActiveTab} 
+                  onBack={() => setActiveTab('home')}
+                  currentTheme={themeMode}
+                  onThemeChange={setThemeMode}
+              />
+          }
+          
+          {activeTab === 'patrocinador_master' && <PatrocinadorMasterScreen onBack={() => setActiveTab('home')} />}
+          {activeTab === 'store_detail' && selectedStore && <StoreDetailView store={selectedStore} onBack={() => setActiveTab('home')} />}
+          {activeTab === 'reward_details' && <RewardDetailsView reward={selectedReward} onBack={() => setActiveTab('home')} onHome={() => setActiveTab('home')} />}
+          {activeTab === 'prize_history' && user && <PrizeHistoryView userId={user.id} onBack={() => setActiveTab('home')} onGoToSpinWheel={() => setActiveTab('home')} />}
+          </main>
+
+          <AuthModal isOpen={isAuthOpen} onClose={() => setIsAuthOpen(false)} user={user as any} />
+          {isQuoteModalOpen && <QuoteRequestModal isOpen={isQuoteModalOpen} onClose={() => setIsQuoteModalOpen(false)} categoryName={quoteCategory} onSuccess={() => { setIsQuoteModalOpen(false); setActiveTab('service_success'); }} />}
+      </Layout>
+
+      {splashStage < 4 && (
+        <div 
+            className={`fixed inset-0 z-[999] flex items-center justify-center transition-opacity duration-500 ${splashStage === 3 ? 'animate-app-exit' : ''}`}
+            style={{ backgroundColor: '#1E5BFF' }} 
+        >
         </div>
-      </NeighborhoodProvider>
+      )}
     </div>
+  );
+};
+
+const App: React.FC = () => {
+  return (
+    <NeighborhoodProvider>
+      <ConfigProvider>
+        <AppContent />
+      </ConfigProvider>
+    </NeighborhoodProvider>
   );
 };
 

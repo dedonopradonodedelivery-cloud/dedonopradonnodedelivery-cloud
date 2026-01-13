@@ -36,6 +36,7 @@ import { SpinWheelView } from './SpinWheelView';
 import { MasterSponsorBanner } from './MasterSponsorBanner';
 import { CATEGORIES, STORES, MOCK_JOBS, MOCK_COMMUNITY_POSTS } from '../constants';
 import { useNeighborhood } from '../contexts/NeighborhoodContext';
+import { useConfig } from '../contexts/ConfigContext';
 
 interface HomeFeedProps {
   onNavigate: (view: string) => void;
@@ -132,6 +133,7 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void }> = ({ onNavigat
   const [currentIndex, setCurrentIndex] = useState(0);
   const [progress, setProgress] = useState(0);
   const { currentNeighborhood, isAll } = useNeighborhood();
+  const { features } = useConfig();
 
   // Sort Premium Stores: Local first, then others
   const premiumStores = useMemo(() => {
@@ -151,8 +153,10 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void }> = ({ onNavigat
   }, [currentNeighborhood, isAll]);
 
   const banners: BannerItem[] = useMemo(() => {
-    const list: BannerItem[] = [
-      {
+    const list: BannerItem[] = [];
+
+    if (features.cashbackEnabled) {
+      list.push({
         id: 'b1-cashback',
         type: 'standard',
         title: 'Cashback real entre lojas do seu bairro',
@@ -161,30 +165,32 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void }> = ({ onNavigat
         target: 'explore', 
         tag: 'Exclusivo',
         tagColor: 'bg-emerald-500'
-      },
-      {
-        id: 'b2-services',
-        type: 'standard',
-        title: 'Encontre serviços e receba até 5 orçamentos',
-        subtitle: 'Fale direto com profissionais de JPA pelo WhatsApp.',
-        image: 'https://images.unsplash.com/photo-1581578731117-10d52143b0e8?q=80&w=800&auto=format&fit=crop',
-        target: 'services',
-        tag: 'WhatsApp Direto',
-        tagColor: 'bg-green-600'
-      },
-      {
-        id: 'b3-merchant',
-        type: 'standard',
-        title: 'JPA Connect para lojistas',
-        subtitle: 'Venda mais, atraia clientes do bairro e participe do cashback local.',
-        image: 'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?q=80&w=800&auto=format&fit=crop',
-        target: 'freguesia_connect_public',
-        tag: 'Para Negócios',
-        tagColor: 'bg-indigo-600'
-      }
-    ];
+      });
+    }
 
-    if (MOCK_JOBS.length > 0) {
+    list.push({
+      id: 'b2-services',
+      type: 'standard',
+      title: 'Encontre serviços e receba até 5 orçamentos',
+      subtitle: 'Fale direto com profissionais de JPA pelo WhatsApp.',
+      image: 'https://images.unsplash.com/photo-1581578731117-10d52143b0e8?q=80&w=800&auto=format&fit=crop',
+      target: 'services',
+      tag: 'WhatsApp Direto',
+      tagColor: 'bg-green-600'
+    });
+
+    list.push({
+      id: 'b3-merchant',
+      type: 'standard',
+      title: 'JPA Connect para lojistas',
+      subtitle: 'Venda mais, atraia clientes do bairro e participe do cashback local.',
+      image: 'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?q=80&w=800&auto=format&fit=crop',
+      target: 'freguesia_connect_public',
+      tag: 'Para Negócios',
+      tagColor: 'bg-indigo-600'
+    });
+
+    if (features.jobsEnabled && MOCK_JOBS.length > 0) {
       list.push({
         id: 'b4-jobs',
         type: 'jobs',
@@ -206,9 +212,10 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void }> = ({ onNavigat
     }
 
     return list;
-  }, [premiumStores, currentNeighborhood, isAll]);
+  }, [premiumStores, currentNeighborhood, isAll, features]);
 
   useEffect(() => {
+    if (banners.length === 0) return;
     const interval = setInterval(() => {
       setProgress((prev) => {
         if (prev >= 100) {
@@ -221,6 +228,7 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void }> = ({ onNavigat
     return () => clearInterval(interval);
   }, [banners.length]);
 
+  if (banners.length === 0) return null;
   const current = banners[currentIndex];
 
   const handleNext = (e: React.MouseEvent) => {
@@ -309,6 +317,7 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void }> = ({ onNavigat
 // --- COMPONENTE PROMOÇÕES DA SEMANA ---
 const WeeklyPromosSection: React.FC<{ onNavigate: (v: string) => void }> = ({ onNavigate }) => {
   const { currentNeighborhood, isAll } = useNeighborhood();
+  const { features } = useConfig();
 
   // Priority: 1. Active Neighborhood, 2. Others. Sort by discount.
   const validPromos = useMemo(() => {
@@ -329,7 +338,7 @@ const WeeklyPromosSection: React.FC<{ onNavigate: (v: string) => void }> = ({ on
     return promos;
   }, [currentNeighborhood, isAll]);
 
-  if (validPromos.length === 0) return null;
+  if (!features.couponsEnabled || validPromos.length === 0) return null;
 
   return (
     <div className="w-full bg-[#FAFAFA] dark:bg-[#0B0F19] py-6 border-b border-gray-100 dark:border-gray-800">
@@ -710,6 +719,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
   const [listFilter, setListFilter] = useState<'all' | 'cashback' | 'top_rated' | 'open_now'>('all');
   const activeSearchTerm = externalSearchTerm || '';
   const { currentNeighborhood, isAll } = useNeighborhood();
+  const { features } = useConfig();
   
   // State for horizontal scroll progress bar
   const categoriesRef = useRef<HTMLDivElement>(null);
@@ -791,7 +801,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
         );
 
       case 'weekly_promos':
-        return <WeeklyPromosSection key="weekly_promos" onNavigate={onNavigate} />;
+        return features.couponsEnabled ? <WeeklyPromosSection key="weekly_promos" onNavigate={onNavigate} /> : null;
 
       case 'community_feed':
         // Agora "Novidades dos bairros" - NEW DESIGN
@@ -814,6 +824,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
         );
 
       case 'cashback_stores':
+        if (!features.cashbackEnabled) return null;
         // Filtering specific for cashback widget: Must have cashback AND sorted by priority
         const cashbackList = useMemo(() => {
              const list = sortedStores.filter(s => s.cashback && s.cashback > 0);
@@ -918,11 +929,14 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
                 subtitle="O que há de melhor no bairro" 
                 rightElement={
                   <div className="flex gap-1 bg-gray-100 dark:bg-gray-800 p-1 rounded-xl">
-                    {['all', 'cashback', 'top_rated'].map((f) => (
-                        <button key={f} onClick={() => setListFilter(f as any)} className={`text-[8px] font-black uppercase px-2.5 py-1.5 rounded-lg transition-all ${listFilter === f ? 'bg-white dark:bg-gray-700 text-[#1E5BFF] shadow-sm' : 'text-gray-400'}`}>
-                            {f === 'all' ? 'Tudo' : f === 'cashback' ? '%' : 'Top'}
-                        </button>
-                    ))}
+                    {['all', 'cashback', 'top_rated'].map((f) => {
+                        if (f === 'cashback' && !features.cashbackEnabled) return null;
+                        return (
+                          <button key={f} onClick={() => setListFilter(f as any)} className={`text-[8px] font-black uppercase px-2.5 py-1.5 rounded-lg transition-all ${listFilter === f ? 'bg-white dark:bg-gray-700 text-[#1E5BFF] shadow-sm' : 'text-gray-400'}`}>
+                              {f === 'all' ? 'Tudo' : f === 'cashback' ? '%' : 'Top'}
+                          </button>
+                        );
+                    })}
                   </div>
                 }
               />
@@ -932,14 +946,6 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
                 activeFilter={listFilter} 
                 user={user} 
                 onNavigate={onNavigate} 
-                // Passing context-aware sorted stores to the list component is essential
-                // However, LojasEServicosList currently generates fake stores internally.
-                // In a real app, we would pass `sortedStores` here.
-                // For now, the LojasEServicosList will use its own internal logic 
-                // but ideally it should accept a prop to respect the global filter.
-                // I will update LojasEServicosList in the XML to handle this context implicitly if needed, 
-                // but since it's a separate component file not requested to change logic deeply, 
-                // we rely on it handling "Jacarepaguá" generally.
               />
             </div>
           </div>
@@ -976,8 +982,8 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
       'home_carousel',
       'weekly_promos',
       'cashback_stores',
-      'trust_feed', // Moved here (Step 3)
-      'community_feed', // Moved here (Step 4) - REDESIGNED
+      'trust_feed', 
+      'community_feed', 
       'roulette',       
       'list',           
       'mini_tribes'
@@ -1025,6 +1031,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
             <SpinWheelView 
                 userId={user?.id || null} 
                 userRole={userRole || null} 
+                // Fix: Change onWin to onSpinWin which is available in props to avoid undefined variable error
                 onWin={onSpinWin} 
                 onRequireLogin={onRequireLogin} 
                 onViewHistory={() => { setIsSpinWheelOpen(false); onNavigate('prize_history'); }} 

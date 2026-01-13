@@ -3,12 +3,15 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabaseClient';
 
+export type UserRole = 'cliente' | 'lojista' | 'admin';
+
 interface AuthContextType {
   user: User | null;
   session: Session | null;
-  userRole: 'cliente' | 'lojista' | null;
+  userRole: UserRole | null;
   loading: boolean;
   signOut: () => Promise<void>;
+  isAdmin: () => boolean;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -17,12 +20,13 @@ const AuthContext = createContext<AuthContextType>({
   userRole: null,
   loading: true,
   signOut: async () => {},
+  isAdmin: () => false,
 });
 
 export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
-  const [userRole, setUserRole] = useState<'cliente' | 'lojista' | null>(null);
+  const [userRole, setUserRole] = useState<UserRole | null>(null);
   
   // UX: authResolved controla o Cold Start (boot inicial)
   // Uma vez resolvido (true), ele NUNCA mais volta a ser false durante a sessão do browser.
@@ -37,7 +41,13 @@ export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
         .maybeSingle();
       
       if (data) {
-        setUserRole(data.role === 'lojista' ? 'lojista' : 'cliente');
+        // Suporta estritamente 'admin', 'lojista' ou 'cliente'
+        const role = data.role as UserRole;
+        if (['admin', 'lojista', 'cliente'].includes(role)) {
+          setUserRole(role);
+        } else {
+          setUserRole('cliente');
+        }
       } else {
         setUserRole('cliente'); 
       }
@@ -84,7 +94,7 @@ export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
 
       if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'INITIAL_SESSION') {
         if (currentSession?.user) {
-          fetchUserRole(currentSession.user.id);
+          await fetchUserRole(currentSession.user.id);
         }
       } else if (event === 'SIGNED_OUT') {
         setUserRole(null);
@@ -109,11 +119,13 @@ export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
     }
   };
 
+  const isAdmin = () => userRole === 'admin';
+
   // loading é true apenas durante o primeiro check de sessão (Cold Start)
   const loading = !authResolved;
 
   return (
-    <AuthContext.Provider value={{ user, session, userRole, loading, signOut }}>
+    <AuthContext.Provider value={{ user, session, userRole, loading, signOut, isAdmin }}>
       {children}
     </AuthContext.Provider>
   );

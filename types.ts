@@ -9,6 +9,15 @@ export enum AdType {
   PREMIUM = 'PREMIUM' // R$ 3.90/dia - Top of list
 }
 
+// Remote Config / Feature Flags
+export interface FeatureFlags {
+  cashbackEnabled: boolean;
+  couponsEnabled: boolean;
+  jobsEnabled: boolean;
+  agencyEnabled: boolean;
+  sponsorMasterBannerEnabled: boolean;
+}
+
 // Add ChatMessage for Gemini Assistant
 export interface ChatMessage {
   role: 'user' | 'model';
@@ -26,7 +35,7 @@ export interface StoreReview {
 export interface Profile {
   id: string;
   email: string;
-  role: 'cliente' | 'lojista';
+  role: 'cliente' | 'lojista' | 'admin';
   jobsAlertsEnabled?: boolean;
   jobCategories?: string[];
   jobTypes?: string[];
