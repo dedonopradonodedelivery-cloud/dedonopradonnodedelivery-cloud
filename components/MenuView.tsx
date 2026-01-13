@@ -1,41 +1,22 @@
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   User as UserIcon, 
   ChevronRight, 
-  Heart, 
-  Coins, 
-  Share2, 
-  Headphones, 
-  Info, 
-  LogOut, 
-  Store, 
-  Users,
-  Loader2,
-  LayoutDashboard,
-  MessageCircle,
   X,
-  Sun,
-  Moon,
-  Monitor,
-  ShieldAlert,
   Bell,
   Check,
   PlayCircle,
-  QrCode,
-  DollarSign,
   ShoppingBag,
-  Repeat,
-  TrendingUp,
-  Tag,
-  Briefcase,
-  Settings,
-  CreditCard,
+  MapPin,
+  Heart,
+  Wallet,
   HelpCircle,
-  Rocket
+  Settings,
+  LogOut,
+  Loader2
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
-import { MasterSponsorBanner } from './MasterSponsorBanner';
 import { User } from '@supabase/supabase-js';
 import { ThemeMode } from '../types';
 import { supabase } from '../lib/supabaseClient';
@@ -52,13 +33,6 @@ interface MenuViewProps {
 
 const CATEGORIES_JOBS = ['Alimentação', 'Beleza', 'Serviços', 'Pets', 'Moda', 'Saúde', 'Educação', 'Tecnologia'];
 const JOBS_EXPLAINER_VIDEO = "https://videos.pexels.com/video-files/3129957/3129957-sd_540_960_30fps.mp4";
-
-// Mock para KPIs da loja
-const STORE_MOCK_DATA = {
-  sales: 12450.00,
-  orders: 142,
-  newCustomers: 28
-};
 
 export const MenuView: React.FC<MenuViewProps> = ({ 
   user, 
@@ -79,9 +53,8 @@ export const MenuView: React.FC<MenuViewProps> = ({
   const [hasSeenVideo, setHasSeenVideo] = useState(false);
   const [showVideoModal, setShowVideoModal] = useState(false);
 
-  // --- ESTADOS DA LOJA (PARA LOJISTAS) ---
+  // --- ESTADOS DA LOJA (PARA LOJISTAS - HIDDEN IN USER VIEW) ---
   const [pendingRequestsCount, setPendingRequestsCount] = useState(0);
-  const [isCashbackEnabled, setIsCashbackEnabled] = useState(true);
 
   useEffect(() => {
     if (user) {
@@ -107,7 +80,6 @@ export const MenuView: React.FC<MenuViewProps> = ({
 
   const loadMerchantRealtime = async () => {
     if (!supabase || !user) return;
-    
     const fetchCount = async () => {
         const { count } = await supabase
             .from('cashback_transactions')
@@ -117,12 +89,10 @@ export const MenuView: React.FC<MenuViewProps> = ({
         setPendingRequestsCount(count || 0);
     };
     fetchCount();
-
     const sub = supabase.channel('menu_merchant_badge')
         .on('postgres_changes', { event: '*', schema: 'public', table: 'cashback_transactions', filter: `merchant_id=eq.${user.id}` }, 
         () => fetchCount())
         .subscribe();
-
     return () => { supabase.removeChannel(sub); };
   };
 
@@ -154,7 +124,7 @@ export const MenuView: React.FC<MenuViewProps> = ({
   const handleLogout = async () => {
     if (isLoggingOut) return;
     setIsLoggingOut(true);
-    try { await signOut(); } catch (error) { console.warn(error); } finally { setIsLoggingOut(false); }
+    try { await signOut(); onNavigate('home'); } catch (error) { console.warn(error); } finally { setIsLoggingOut(false); }
   };
 
   if (!user) {
@@ -176,38 +146,47 @@ export const MenuView: React.FC<MenuViewProps> = ({
     );
   }
 
+  // Se o usuário for Lojista, podemos usar o StoreAreaView ou manter o MenuView anterior.
+  // Como o escopo pede para reconstruir o menu de USUÁRIO logado, manteremos a lógica aqui
+  // apenas apresentando os itens de lojista se o role for lojista, mas o foco é o role cliente.
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-24 animate-in fade-in duration-300">
-      <div className="bg-white dark:bg-gray-900 px-4 pt-10 pb-4 border-b border-gray-100 dark:border-gray-800 sticky top-0 z-50 flex items-center justify-between">
+      
+      {/* (A) Cabeçalho */}
+      <div className="bg-white dark:bg-gray-900 px-5 pt-12 pb-5 border-b border-gray-100 dark:border-gray-800 sticky top-0 z-50 flex items-center justify-between">
         <div>
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white font-display mb-0.5">Menu</h2>
-            <p className="text-sm text-gray-500 dark:text-gray-400">Configurações e Atalhos</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">Configurações e Atalhos</p>
         </div>
         {onBack && (
-            <button onClick={onBack} className="p-2 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-500 hover:text-gray-700 dark:hover:text-white"><X className="w-6 h-6" /></button>
+            <button onClick={onBack} className="p-2.5 rounded-full bg-gray-50 dark:bg-gray-800 text-gray-400 hover:text-gray-600 dark:hover:text-white transition-colors">
+              <X className="w-6 h-6" />
+            </button>
         )}
       </div>
 
       <div className="px-4 pb-5">
-        {/* Card de Identidade */}
-        <div onClick={() => onNavigate('edit_profile')} className="mt-6 bg-white dark:bg-gray-800 p-4 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 flex items-center gap-4 cursor-pointer active:scale-[0.98] mb-6">
+        
+        {/* (B) Card do Usuário */}
+        <div onClick={() => onNavigate('edit_profile')} className="mt-6 bg-white dark:bg-gray-800 p-4 rounded-[2rem] shadow-sm border border-gray-100 dark:border-gray-700 flex items-center gap-4 cursor-pointer active:scale-[0.98] mb-6">
           <div className="w-14 h-14 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center overflow-hidden border-2 border-white dark:border-gray-600 shadow-sm">
             {user?.user_metadata?.avatar_url ? <img src={user.user_metadata.avatar_url} className="w-full h-full object-cover" /> : <UserIcon className="w-6 h-6 text-gray-400" />}
           </div>
           <div className="flex-1 overflow-hidden">
             <h3 className="font-bold text-gray-900 dark:text-white text-base truncate">{user?.user_metadata?.full_name || user?.email}</h3>
-            <p className="text-xs text-primary-500 font-bold mt-0.5 flex items-center gap-1">Ver perfil completo <ChevronRight className="w-3 h-3" /></p>
+            <p className="text-xs text-[#1E5BFF] font-bold mt-0.5 flex items-center gap-1">Ver perfil completo <ChevronRight className="w-3 h-3" /></p>
           </div>
         </div>
 
-        {/* --- BLOCO NOTIFICAÇÕES DE VAGAS --- */}
-        <div className="bg-white dark:bg-gray-800 rounded-3xl p-6 border border-gray-100 dark:border-gray-700 mb-6 shadow-sm">
+        {/* (C) Seção de Preferências: Notificações de Vagas */}
+        <div className="bg-white dark:bg-gray-800 rounded-[2rem] p-6 border border-gray-100 dark:border-gray-700 mb-6 shadow-sm">
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-orange-100 dark:bg-orange-900/20 flex items-center justify-center text-orange-600">
+              <div className="w-10 h-10 rounded-xl bg-orange-50 dark:bg-orange-900/20 flex items-center justify-center text-orange-600">
                 <Bell className="w-5 h-5" />
               </div>
-              <h3 className="font-bold text-gray-900 dark:text-white text-sm sm:text-base">Notificações de Vagas</h3>
+              <h3 className="font-bold text-gray-900 dark:text-white text-base">Notificações de Vagas</h3>
             </div>
             <button 
               onClick={handleToggleAlerts}
@@ -218,7 +197,7 @@ export const MenuView: React.FC<MenuViewProps> = ({
           </div>
 
           <div className="flex justify-between items-center mb-4">
-              <p className="text-[10px] text-gray-500 dark:text-gray-400">Receba alertas de empresas do bairro.</p>
+              <p className="text-[10px] text-gray-500 dark:text-gray-400 font-medium">Receba alertas de empresas do bairro.</p>
               <button onClick={() => setShowVideoModal(true)} className="text-[10px] font-bold text-orange-600 flex items-center gap-1 hover:underline">
                 <PlayCircle className="w-3 h-3" /> Como funciona (30s)
               </button>
@@ -229,7 +208,7 @@ export const MenuView: React.FC<MenuViewProps> = ({
               <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Categorias de interesse</p>
               <div className="flex flex-wrap gap-2">
                 {CATEGORIES_JOBS.map(cat => (
-                  <button key={cat} onClick={() => toggleCategory(cat)} className={`px-3 py-1.5 rounded-full text-xs font-bold border transition-all flex items-center gap-1.5 ${selectedCategories.includes(cat) ? 'bg-orange-500 text-white border-orange-500' : 'bg-gray-50 dark:bg-gray-700 text-gray-500 border-gray-200 dark:border-gray-600'}`}>
+                  <button key={cat} onClick={() => toggleCategory(cat)} className={`px-3 py-1.5 rounded-full text-xs font-bold border transition-all flex items-center gap-1.5 ${selectedCategories.includes(cat) ? 'bg-orange-500 text-white border-orange-500 shadow-sm' : 'bg-gray-50 dark:bg-gray-700 text-gray-500 border-gray-200 dark:border-gray-600'}`}>
                     {selectedCategories.includes(cat) && <Check className="w-3 h-3" />}
                     {cat}
                   </button>
@@ -239,107 +218,118 @@ export const MenuView: React.FC<MenuViewProps> = ({
           )}
         </div>
 
-        {/* --- ÁREA MINHA LOJA (EXCLUSIVO LOJISTA) --- */}
+        {/* --- ÁREA EXCLUSIVA LOJISTA (SOMENTE SE ROLE === LOJISTA) --- */}
         {isMerchant && (
-            <div className="space-y-6 mb-8 animate-in fade-in slide-in-from-bottom-2 duration-500">
-                <div className="flex items-center justify-between px-1">
-                    <h3 className="text-xs font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.2em]">Minha Loja</h3>
-                    <div className="flex items-center gap-1.5 bg-green-50 dark:bg-green-900/20 px-2 py-0.5 rounded-full border border-green-100 dark:border-green-800">
-                        <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
-                        <span className="text-[9px] font-bold text-green-700 dark:text-green-400 uppercase">Operação Ativa</span>
-                    </div>
-                </div>
-
-                {/* Alerta de Pendências */}
-                {pendingRequestsCount > 0 && (
-                    <button onClick={() => onNavigate('merchant_requests')} className="w-full bg-red-500 text-white p-4 rounded-2xl shadow-lg flex items-center justify-between animate-pulse">
-                        <div className="flex items-center gap-3 text-left">
-                            <Bell className="w-5 h-5 fill-white" />
-                            <div><p className="font-bold text-sm">Solicitações Pendentes</p><p className="text-[10px] opacity-80">Clientes aguardando no caixa</p></div>
-                        </div>
-                        <div className="w-8 h-8 bg-white text-red-600 rounded-full flex items-center justify-center font-bold text-sm">{pendingRequestsCount}</div>
-                    </button>
-                )}
-
-                {/* Terminal de Caixa */}
-                <button onClick={() => onNavigate('merchant_panel')} className="w-full bg-gradient-to-r from-[#1E5BFF] to-[#1749CC] text-white p-5 rounded-3xl shadow-lg flex items-center justify-between group active:scale-[0.98] transition-all">
-                    <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/10 group-hover:scale-110 transition-transform">
-                            <QrCode className="w-6 h-6" />
-                        </div>
-                        <div className="text-left">
-                            <h3 className="font-bold text-lg leading-none mb-1">Terminal de Caixa</h3>
-                            <p className="text-xs text-blue-100">Lançar vendas e gerar cashback</p>
-                        </div>
-                    </div>
-                    <ChevronRight className="w-5 h-5 text-white/70" />
-                </button>
-
-                {/* KPIs Resumo */}
-                <div className="grid grid-cols-3 gap-3">
-                    <div className="bg-white dark:bg-gray-800 p-3 rounded-2xl border border-gray-100 dark:border-gray-700 text-center">
-                        <p className="text-[9px] font-bold text-gray-400 uppercase mb-1">Vendas Hoje</p>
-                        <p className="font-bold text-gray-900 dark:text-white truncate">R$ {STORE_MOCK_DATA.sales.toLocaleString('pt-BR')}</p>
-                    </div>
-                    <div className="bg-white dark:bg-gray-800 p-3 rounded-2xl border border-gray-100 dark:border-gray-700 text-center">
-                        <p className="text-[9px] font-bold text-gray-400 uppercase mb-1">Pedidos</p>
-                        <p className="font-bold text-gray-900 dark:text-white">{STORE_MOCK_DATA.orders}</p>
-                    </div>
-                    <div className="bg-white dark:bg-gray-800 p-3 rounded-2xl border border-gray-100 dark:border-gray-700 text-center">
-                        <p className="text-[9px] font-bold text-gray-400 uppercase mb-1">Novos Clientes</p>
-                        <p className="font-bold text-green-600">+{STORE_MOCK_DATA.newCustomers}</p>
-                    </div>
-                </div>
-
-                {/* Lista de Atalhos de Gestão */}
-                <div className="bg-white dark:bg-gray-800 rounded-3xl overflow-hidden border border-gray-100 dark:border-gray-700 shadow-sm">
-                    <button onClick={() => onNavigate('weekly_promo')} className="w-full p-4 flex items-center justify-between border-b border-gray-50 dark:border-gray-700 active:bg-gray-50">
-                        <div className="flex items-center gap-3"><Tag className="w-5 h-5 text-orange-500" /><span className="text-sm font-bold text-gray-700 dark:text-gray-200">Promoção da Semana</span></div>
-                        <span className="bg-blue-50 text-[#1E5BFF] text-[9px] font-black px-2 py-1 rounded">DESTAQUE HOME</span>
-                    </button>
-                    <button onClick={() => onNavigate('merchant_jobs')} className="w-full p-4 flex items-center justify-between border-b border-gray-50 dark:border-gray-700 active:bg-gray-50">
-                        <div className="flex items-center gap-3"><Briefcase className="w-5 h-5 text-blue-500" /><span className="text-sm font-bold text-gray-700 dark:text-gray-200">Vagas de Emprego</span></div>
-                        <ChevronRight className="w-4 h-4 text-gray-300" />
-                    </button>
-                    <button onClick={() => onNavigate('store_profile')} className="w-full p-4 flex items-center justify-between border-b border-gray-50 dark:border-gray-700 active:bg-gray-50">
-                        <div className="flex items-center gap-3"><Settings className="w-5 h-5 text-gray-400" /><span className="text-sm font-bold text-gray-700 dark:text-gray-200">Configurar Loja (Perfil Público)</span></div>
-                        <ChevronRight className="w-4 h-4 text-gray-300" />
-                    </button>
-                    <button onClick={() => onNavigate('store_finance')} className="w-full p-4 flex items-center justify-between border-b border-gray-50 dark:border-gray-700 active:bg-gray-50">
-                        <div className="flex items-center gap-3"><CreditCard className="w-5 h-5 text-emerald-500" /><span className="text-sm font-bold text-gray-700 dark:text-gray-200">Financeiro / Faturamento</span></div>
-                        <ChevronRight className="w-4 h-4 text-gray-300" />
-                    </button>
-                    <button onClick={() => onNavigate('store_cashback_module')} className="w-full p-4 flex items-center justify-between active:bg-gray-50">
-                        <div className="flex items-center gap-3"><TrendingUp className="w-5 h-5 text-indigo-500" /><span className="text-sm font-bold text-gray-700 dark:text-gray-200">Configurar Regras de Cashback</span></div>
-                        <div className={`w-8 h-4 rounded-full p-0.5 ${isCashbackEnabled ? 'bg-green-500' : 'bg-gray-300'}`}><div className={`w-3 h-3 bg-white rounded-full transition-transform ${isCashbackEnabled ? 'translate-x-4' : ''}`}></div></div>
-                    </button>
-                </div>
-
-                {/* Card Impulso (Anúncios) */}
-                <div className="bg-slate-900 rounded-[2rem] p-6 border border-white/5 relative overflow-hidden group">
-                    <div className="absolute top-0 right-0 w-24 h-24 bg-blue-500/10 rounded-bl-full -mr-4 -mt-4"></div>
-                    <div className="relative z-10">
-                        <div className="flex items-center gap-3 mb-4">
-                            <div className="w-10 h-10 bg-blue-500/20 rounded-xl flex items-center justify-center border border-blue-500/30"><Rocket className="w-5 h-5 text-blue-400" /></div>
-                            <div><h4 className="font-bold text-white text-sm">Impulsionar Loja</h4><p className="text-[10px] text-blue-400 font-bold uppercase tracking-widest">Apareça no topo das buscas</p></div>
-                        </div>
-                        <button onClick={() => onNavigate('store_ads_module')} className="w-full bg-[#1E5BFF] text-white py-3 rounded-xl text-xs font-black uppercase tracking-widest shadow-lg shadow-blue-500/20 group-hover:bg-blue-500 transition-all">Começar destaque (R$ 0,99/dia)</button>
-                    </div>
-                </div>
+            <div className="mb-6">
+               <h3 className="text-xs font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.2em] mb-3 ml-2">Painel Parceiro</h3>
+               <button onClick={() => onNavigate('store_area')} className="w-full bg-gradient-to-r from-slate-900 to-slate-800 text-white p-5 rounded-[2rem] shadow-lg flex items-center justify-between active:scale-[0.98] transition-transform">
+                   <div className="flex items-center gap-4">
+                       <div className="w-11 h-11 bg-white/10 rounded-xl flex items-center justify-center border border-white/10">
+                           <UserIcon className="w-5 h-5 text-indigo-300" />
+                       </div>
+                       <div className="text-left">
+                           <h3 className="font-bold text-base">Minha Loja</h3>
+                           <p className="text-[10px] text-indigo-200 uppercase tracking-wider font-bold">Gestão de Vendas e Cashback</p>
+                       </div>
+                   </div>
+                   <ChevronRight className="w-5 h-5 text-white/40" />
+               </button>
             </div>
         )}
 
-        <button onClick={handleLogout} disabled={isLoggingOut} className="w-full bg-red-50 dark:bg-red-900/10 p-4 rounded-2xl border border-red-100 dark:border-red-900/30 flex items-center gap-4 active:scale-[0.98]">
-            <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-red-100 dark:bg-red-900/30 text-red-600">{isLoggingOut ? <Loader2 className="w-5 h-5 animate-spin" /> : <LogOut className="w-5 h-5" />}</div>
+        {/* (D) Seção de Atalhos do Usuário */}
+        <div className="space-y-4 mb-8">
+            <h3 className="text-xs font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.2em] mb-2 ml-2">Minha Conta</h3>
+            
+            <div className="bg-white dark:bg-gray-800 rounded-[2rem] overflow-hidden border border-gray-100 dark:border-gray-700 shadow-sm">
+                <button onClick={() => alert('Meus Pedidos - Em breve')} className="w-full p-4 flex items-center justify-between border-b border-gray-50 dark:border-gray-700 active:bg-gray-50 dark:active:bg-gray-700 transition-colors">
+                    <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-xl bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center text-[#1E5BFF]">
+                            <ShoppingBag className="w-4 h-4" />
+                        </div>
+                        <span className="text-sm font-bold text-gray-700 dark:text-gray-200">Meus Pedidos</span>
+                    </div>
+                    <ChevronRight className="w-4 h-4 text-gray-300" />
+                </button>
+
+                <button onClick={() => onNavigate('favorites')} className="w-full p-4 flex items-center justify-between border-b border-gray-50 dark:border-gray-700 active:bg-gray-50 dark:active:bg-gray-700 transition-colors">
+                    <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-xl bg-pink-50 dark:bg-pink-900/20 flex items-center justify-center text-pink-500">
+                            <Heart className="w-4 h-4" />
+                        </div>
+                        <span className="text-sm font-bold text-gray-700 dark:text-gray-200">Favoritos</span>
+                    </div>
+                    <ChevronRight className="w-4 h-4 text-gray-300" />
+                </button>
+
+                <button onClick={() => onNavigate('user_statement')} className="w-full p-4 flex items-center justify-between border-b border-gray-50 dark:border-gray-700 active:bg-gray-50 dark:active:bg-gray-700 transition-colors">
+                    <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-xl bg-emerald-50 dark:bg-emerald-900/20 flex items-center justify-center text-emerald-600">
+                            <Wallet className="w-4 h-4" />
+                        </div>
+                        <span className="text-sm font-bold text-gray-700 dark:text-gray-200">Carteira & Cashback</span>
+                    </div>
+                    <ChevronRight className="w-4 h-4 text-gray-300" />
+                </button>
+
+                <button onClick={() => alert('Endereços - Em breve')} className="w-full p-4 flex items-center justify-between border-b border-gray-50 dark:border-gray-700 active:bg-gray-50 dark:active:bg-gray-700 transition-colors">
+                    <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-xl bg-amber-50 dark:bg-amber-900/20 flex items-center justify-center text-amber-600">
+                            <MapPin className="w-4 h-4" />
+                        </div>
+                        <span className="text-sm font-bold text-gray-700 dark:text-gray-200">Meus Endereços</span>
+                    </div>
+                    <ChevronRight className="w-4 h-4 text-gray-300" />
+                </button>
+
+                <button onClick={() => onNavigate('support')} className="w-full p-4 flex items-center justify-between border-b border-gray-50 dark:border-gray-700 active:bg-gray-50 dark:active:bg-gray-700 transition-colors">
+                    <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-xl bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center text-indigo-600">
+                            <HelpCircle className="w-4 h-4" />
+                        </div>
+                        <span className="text-sm font-bold text-gray-700 dark:text-gray-200">Ajuda / Suporte</span>
+                    </div>
+                    <ChevronRight className="w-4 h-4 text-gray-300" />
+                </button>
+
+                <button onClick={() => alert('Configurações - Em breve')} className="w-full p-4 flex items-center justify-between active:bg-gray-50 dark:active:bg-gray-700 transition-colors">
+                    <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-xl bg-gray-50 dark:bg-gray-900 flex items-center justify-center text-gray-500">
+                            <Settings className="w-4 h-4" />
+                        </div>
+                        <span className="text-sm font-bold text-gray-700 dark:text-gray-200">Configurações</span>
+                    </div>
+                    <ChevronRight className="w-4 h-4 text-gray-300" />
+                </button>
+            </div>
+        </div>
+
+        {/* (E) Sair da conta */}
+        <button 
+          onClick={handleLogout} 
+          disabled={isLoggingOut} 
+          className="w-full bg-red-50 dark:bg-red-900/10 p-5 rounded-[2rem] border border-red-100 dark:border-red-900/30 flex items-center justify-center gap-3 active:scale-[0.98] transition-all group"
+        >
+            {isLoggingOut ? (
+                <Loader2 className="w-5 h-5 animate-spin text-red-600" />
+            ) : (
+                <LogOut className="w-5 h-5 text-red-600 group-hover:translate-x-1 transition-transform" />
+            )}
             <span className="font-bold text-red-600 text-sm">Sair da conta</span>
         </button>
+
+        <div className="mt-8 text-center px-4">
+            <p className="text-[10px] font-black text-gray-300 dark:text-gray-600 uppercase tracking-[0.4em]">Localizei JPA v14.0</p>
+        </div>
       </div>
 
       {/* MODAL DO VÍDEO EXPLICATIVO */}
       {showVideoModal && (
         <div className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-300">
            <div className="bg-white dark:bg-gray-900 w-full max-w-sm rounded-[2rem] overflow-hidden shadow-2xl relative border border-gray-100 dark:border-gray-800">
-              <button onClick={() => setShowVideoModal(false)} className="absolute top-4 right-4 z-20 p-2 bg-black/20 hover:bg-black/40 rounded-full text-white transition-colors"><X className="w-5 h-5" /></button>
+              <button onClick={() => setShowVideoModal(false)} className="absolute top-4 right-4 z-20 p-2 bg-black/20 hover:bg-black/40 rounded-full text-white transition-colors">
+                <X className="w-5 h-5" />
+              </button>
               <div className="aspect-[9/16] bg-black relative"><video src={JOBS_EXPLAINER_VIDEO} className="w-full h-full object-cover" autoPlay controls playsInline /></div>
               <div className="p-6 text-center">
                  <h3 className="font-bold text-gray-900 dark:text-white mb-2">Entenda os alertas</h3>

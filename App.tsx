@@ -66,19 +66,11 @@ const App: React.FC = () => {
   // UX ENGINEER: Detecta se estamos voltando de um login com Google (OAuth)
   const isAuthReturn = window.location.hash.includes('access_token') || window.location.search.includes('code=');
   
-  // Splash Screen States (5 segundos total - Otimizado para 0s delay)
-  // 0: 0.0s - 1.2s: Logo Pop-in (Rápido)
-  // 1: 1.2s - 1.5s: Logo Estabelece
-  // 2: 1.5s - 4.6s: Patrocinador Entra (Ícone Pop + Texto "Typewriter")
-  // 3: 4.6s - 5.0s: Fade Out Total (Conjunto)
-  // 4: 5.0s: App Render
   const [splashStage, setSplashStage] = useState(isFirstBootAttempted || isAuthReturn ? 4 : 0);
   
-  // Theme Management - DEFAULT IS LIGHT
   const [themeMode, setThemeMode] = useState<ThemeMode>(() => (localStorage.getItem('localizei_theme_mode') as ThemeMode) || 'light');
   const [isDarkMode, setIsDarkMode] = useState(false);
 
-  // Estados de Navegação - Persistência via LocalStorage garantida
   const [activeTab, setActiveTab] = useState(() => localStorage.getItem('localizei_active_tab') || 'home');
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
   const [selectedStore, setSelectedStore] = useState<Store | null>(null);
@@ -93,35 +85,27 @@ const App: React.FC = () => {
   const [isQuoteModalOpen, setIsQuoteModalOpen] = useState(false);
   const [quoteCategory, setQuoteCategory] = useState('');
 
-  // --- SWIPE LOGIC STATE ---
   const touchStart = useRef<{ x: number, y: number, target: EventTarget | null } | null>(null);
-  const minSwipeDistance = 60; // Increased slightly to avoid accidental swipes
+  const minSwipeDistance = 60;
 
   useEffect(() => {
     localStorage.setItem('localizei_active_tab', activeTab);
   }, [activeTab]);
 
-  // --- SPLASH SCREEN ANIMATION ORCHESTRATION ---
   useEffect(() => {
-    if (splashStage === 4) return; // Skip if already done
-
-    const t1 = setTimeout(() => setSplashStage(1), 1200); // 1.2s (Logo pronto)
-    const t2 = setTimeout(() => setSplashStage(2), 1500); // 1.5s (Entrada Patrocinador)
-    const t3 = setTimeout(() => setSplashStage(3), 4600); // 4.6s (Início saída)
+    if (splashStage === 4) return;
+    const t1 = setTimeout(() => setSplashStage(1), 1200);
+    const t2 = setTimeout(() => setSplashStage(2), 1500);
+    const t3 = setTimeout(() => setSplashStage(3), 4600);
     const t4 = setTimeout(() => {
-        setSplashStage(4); // 5.0s (Fim)
+        setSplashStage(4);
         isFirstBootAttempted = true;
     }, 5000);
-
     return () => {
-        clearTimeout(t1);
-        clearTimeout(t2);
-        clearTimeout(t3);
-        clearTimeout(t4);
+        clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); clearTimeout(t4);
     };
   }, []);
 
-  // Theme Logic
   useEffect(() => {
     const applyTheme = () => {
       let isDark = false;
@@ -137,16 +121,13 @@ const App: React.FC = () => {
         document.documentElement.classList.remove('dark');
       }
     };
-
     applyTheme();
     localStorage.setItem('localizei_theme_mode', themeMode);
-
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
     const handleChange = () => {
       if (themeMode === 'auto') applyTheme();
     };
     mediaQuery.addEventListener('change', handleChange);
-    
     return () => mediaQuery.removeEventListener('change', handleChange);
   }, [themeMode]);
 
@@ -174,20 +155,14 @@ const App: React.FC = () => {
     setActiveTab('store_detail');
   };
 
-  // --- SWIPE HANDLERS ---
   const isHorizontalScroll = (target: Element | null): boolean => {
     if (!target) return false;
-    // Don't traverse up past the app root
     if (target.id === 'root') return false;
-
     const style = window.getComputedStyle(target);
     const overflowX = style.getPropertyValue('overflow-x');
-    
-    // Check if element handles horizontal scroll AND has content overflowing
     if ((overflowX === 'auto' || overflowX === 'scroll') && target.scrollWidth > target.clientWidth) {
       return true;
     }
-
     return isHorizontalScroll(target.parentElement);
   };
 
@@ -197,54 +172,27 @@ const App: React.FC = () => {
 
   const onTouchEnd = (e: React.TouchEvent) => {
     if (!touchStart.current) return;
-
-    // 1. Check if we are on a main tab
     if (!MAIN_TABS.includes(activeTab)) return;
-
-    // 2. Check if user is typing (keyboard open usually focuses input)
     if (['INPUT', 'TEXTAREA'].includes((document.activeElement as Element)?.tagName)) return;
-
     const touchEndX = e.changedTouches[0].clientX;
     const touchEndY = e.changedTouches[0].clientY;
-    
     const deltaX = touchStart.current.x - touchEndX;
     const deltaY = touchStart.current.y - touchEndY;
-
-    // 3. Check for horizontal intent (ignore vertical scrolls)
     if (Math.abs(deltaY) > Math.abs(deltaX)) return;
-
-    // 4. Check for minimum distance
     if (Math.abs(deltaX) < minSwipeDistance) return;
-
-    // 5. CRITICAL: Check if user touched a carousel or scrollable area
-    if (isHorizontalScroll(touchStart.current.target as Element)) {
-      // User is scrolling a carousel, do not switch tabs
-      return;
-    }
-
+    if (isHorizontalScroll(touchStart.current.target as Element)) return;
     const currentIndex = MAIN_TABS.indexOf(activeTab);
-    
     if (deltaX > 0) {
-      // Swiped Left -> Go to Next Tab
       if (currentIndex < MAIN_TABS.length - 1) {
         const nextTab = MAIN_TABS[currentIndex + 1];
-        if (nextTab === 'qrcode_scan') {
-            // Special handling for QR Tab
-            handleCashbackClick();
-        } else {
-            setActiveTab(nextTab);
-        }
+        if (nextTab === 'qrcode_scan') handleCashbackClick();
+        else setActiveTab(nextTab);
       }
     } else {
-      // Swiped Right -> Go to Prev Tab
       if (currentIndex > 0) {
         const prevTab = MAIN_TABS[currentIndex - 1];
-        if (prevTab === 'qrcode_scan') {
-            // Special handling for QR Tab
-            handleCashbackClick();
-        } else {
-            setActiveTab(prevTab);
-        }
+        if (prevTab === 'qrcode_scan') handleCashbackClick();
+        else setActiveTab(prevTab);
       }
     }
   };
@@ -260,7 +208,8 @@ const App: React.FC = () => {
     'weekly_promo', 'jobs_list', 'merchant_jobs', 'community_feed', 'admin_moderation' 
   ];
 
-  const hideBottomNav = ['store_ads_module', 'profile', 'store_detail', 'admin_moderation'].includes(activeTab);
+  // A aba 'profile' (Menu) foi removida desta lista para garantir que a BottomBar continue visível
+  const hideBottomNav = ['store_ads_module', 'store_detail', 'admin_moderation'].includes(activeTab);
 
   return (
     <div className={isDarkMode ? 'dark' : ''}>
@@ -277,7 +226,6 @@ const App: React.FC = () => {
               onCashbackClick={handleCashbackClick}
               hideNav={hideBottomNav}
           >
-              {/* Header is shown for main tabs except when excluded */}
               {!headerExclusionList.includes(activeTab) && (
               <Header
                   isDarkMode={isDarkMode}
@@ -319,7 +267,7 @@ const App: React.FC = () => {
                   />
               )}
               {activeTab === 'user_statement' && (
-                  <UserStatementView onBack={() => setActiveTab('home')} onExploreStores={() => setActiveTab('explore')} balance={12.40} />
+                  <UserStatementView onBack={() => setActiveTab('profile')} onExploreStores={() => setActiveTab('explore')} balance={12.40} />
               )}
               {activeTab === 'merchant_cashback_onboarding' && (
                   <MerchantCashbackOnboarding onBack={() => setActiveTab('home')} onActivate={() => setActiveTab('store_cashback_module')} />
@@ -405,14 +353,11 @@ const App: React.FC = () => {
               {isQuoteModalOpen && <QuoteRequestModal isOpen={isQuoteModalOpen} onClose={() => setIsQuoteModalOpen(false)} categoryName={quoteCategory} onSuccess={() => { setIsQuoteModalOpen(false); setActiveTab('service_success'); }} />}
           </Layout>
 
-          {/* SPLASH SCREEN MINIMALISTA & PREMIUM (5s) */}
           {splashStage < 4 && (
             <div 
                 className={`fixed inset-0 z-[999] flex items-center justify-center transition-opacity duration-500 ${splashStage === 3 ? 'animate-app-exit' : ''}`}
-                style={{ backgroundColor: '#1E5BFF' }} // Force background color inline to prevent flash
+                style={{ backgroundColor: '#1E5BFF' }} 
             >
-              
-              {/* CAMADA 1: LOGO DO APP (PROTAGONISTA) */}
               <div 
                 className={`flex flex-col items-center justify-center z-10 transition-all duration-700 
                 ${splashStage === 0 ? 'animate-logo-enter' : 'opacity-100'} 
@@ -428,26 +373,15 @@ const App: React.FC = () => {
                     JPA
                   </span>
                   
-                  {/* CAMADA 2: PATROCINADOR - COREOGRAFIA GOOGLE-STYLE (TYPEWRITER) */}
-                  {/* Container visível a partir do estágio 2 */}
                   <div className={`mt-12 flex flex-col items-center gap-2 transition-all duration-300
                     ${splashStage >= 2 ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
-                     
-                     {/* 1. Label: Fade simples */}
                      <p className="text-[10px] text-white/70 uppercase tracking-[0.2em] font-medium animate-sponsor-label-fade" style={{ animationDelay: '0ms' }}>
                         Patrocinador Master
                      </p>
-                     
-                     {/* 2. Conteúdo Flex com Ícone + Texto Digitado */}
                      <div className="flex items-center gap-3 bg-white/10 px-5 py-3 rounded-full backdrop-blur-md border border-white/10 overflow-hidden min-h-[48px]">
-                        
-                        {/* Ícone: Elastic Pop/Bounce (atraso de 100ms) */}
                         <div className="animate-sponsor-icon-elastic" style={{ animationDelay: '100ms' }}>
                            <ShieldCheck className="w-5 h-5 text-white" />
                         </div>
-                        
-                        {/* Texto: Efeito de Máquina de Escrever (Typewriter) */}
-                        {/* Wrapper necessário para width funcionar bem com flex */}
                         <div className="flex overflow-hidden relative">
                             <span 
                                 className={`text-sm font-bold text-white tracking-wide whitespace-nowrap border-r-2 border-white pr-1 overflow-hidden w-0 
@@ -460,7 +394,6 @@ const App: React.FC = () => {
                      </div>
                   </div>
               </div>
-
             </div>
           )}
         </div>
