@@ -57,23 +57,30 @@ const CreatePostScreen: React.FC<{ onClose: () => void; onSuccess: () => void; u
 
 const ActivityScreen: React.FC<{ onClose: () => void }> = ({ onClose }) => <div onClick={onClose} className="p-4 bg-white h-full w-full">Activity Mock (Click to close)</div>;
 
-// Componentes Full Width Corrigidos (Edge-to-Edge)
+// --- COMPONENTES DA BARRA SUPERIOR (FIXED EDGE-TO-EDGE) ---
+
 const UserProfileScreen: React.FC<{ user: any }> = () => (
-    <div className="w-full h-full min-h-[calc(100vh-140px)] bg-white dark:bg-gray-900 flex flex-col items-center justify-center p-8">
-        <div className="w-20 h-20 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mb-4">
-            <UserIcon className="w-10 h-10 text-gray-400" />
+    // Wrapper w-full sem padding
+    <div className="w-full h-full min-h-[calc(100vh-140px)] bg-white dark:bg-gray-900 flex flex-col items-center justify-center">
+        <div className="w-full p-8 flex flex-col items-center">
+            <div className="w-20 h-20 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mb-4">
+                <UserIcon className="w-10 h-10 text-gray-400" />
+            </div>
+            <h3 className="font-bold text-gray-900 dark:text-white">Perfil do Usuário</h3>
+            <p className="text-sm text-gray-500">Funcionalidade em desenvolvimento</p>
         </div>
-        <h3 className="font-bold text-gray-900 dark:text-white">Perfil do Usuário</h3>
-        <p className="text-sm text-gray-500">Funcionalidade em desenvolvimento</p>
     </div>
 );
 
 const CommunityExploreScreen: React.FC = () => (
-    <div className="w-full h-full min-h-[calc(100vh-140px)] bg-white dark:bg-gray-900 p-4">
-        <div className="bg-gray-50 dark:bg-gray-800 rounded-2xl p-8 text-center mt-4">
-            <Grid className="w-10 h-10 text-gray-400 mx-auto mb-2" />
-            <h3 className="font-bold text-gray-900 dark:text-white">Explorar Comunidade</h3>
-            <p className="text-sm text-gray-500">Descubra novos posts e pessoas</p>
+    // Wrapper w-full sem padding na raiz
+    <div className="w-full h-full min-h-[calc(100vh-140px)] bg-white dark:bg-gray-900">
+        <div className="p-4 w-full">
+            <div className="bg-gray-50 dark:bg-gray-800 rounded-2xl p-8 text-center mt-4 w-full">
+                <Grid className="w-10 h-10 text-gray-400 mx-auto mb-2" />
+                <h3 className="font-bold text-gray-900 dark:text-white">Explorar Comunidade</h3>
+                <p className="text-sm text-gray-500">Descubra novos posts e pessoas</p>
+            </div>
         </div>
     </div>
 );
