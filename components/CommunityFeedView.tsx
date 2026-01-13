@@ -57,7 +57,7 @@ const CreatePostScreen: React.FC<{ onClose: () => void; onSuccess: () => void; u
 
 const ActivityScreen: React.FC<{ onClose: () => void }> = ({ onClose }) => <div onClick={onClose} className="p-4 bg-white h-full w-full">Activity Mock (Click to close)</div>;
 
-// --- COMPONENTES INTERNOS REDESENHADOS PARA 100% WIDTH ---
+// --- COMPONENTES DA BARRA SUPERIOR (FIXED EDGE-TO-EDGE) ---
 
 const UserProfileScreen: React.FC<{ user: any }> = () => (
     <div className="w-full h-full min-h-[60vh] bg-white dark:bg-gray-900 flex flex-col items-center justify-center p-0">
@@ -87,10 +87,11 @@ const CommunityExploreScreen: React.FC = () => (
     </div>
 );
 
+// --- TELA DE MENSAGENS (DIRECT) AJUSTADA PARA 100% WIDTH ---
 const DirectMessagesScreen: React.FC<{ user: any; onRequireLogin: () => void; chats: typeof MOCK_CHATS; onSelectChat: (id: number) => void }> = ({ user, onRequireLogin, chats, onSelectChat }) => {
     if (!user) {
         return (
-            <div className="w-full h-[60vh] flex flex-col items-center justify-center bg-white dark:bg-gray-900 px-6">
+            <div className="w-full h-[60vh] flex flex-col items-center justify-center bg-white dark:bg-gray-900 px-0">
                 <div className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mb-4">
                     <UserIcon className="w-8 h-8 text-gray-400" />
                 </div>
@@ -101,9 +102,9 @@ const DirectMessagesScreen: React.FC<{ user: any; onRequireLogin: () => void; ch
         );
     }
     return (
-        <div className="w-full bg-white dark:bg-gray-900 min-h-full">
-            {/* Search Header */}
-            <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-800 sticky top-0 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm z-10">
+        <div className="w-full bg-white dark:bg-gray-900 min-h-screen pb-20">
+            {/* Search Header - Sticky & Full Width */}
+            <div className="w-full px-4 py-3 border-b border-gray-100 dark:border-gray-800 sticky top-0 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm z-10">
                 <div className="relative w-full">
                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                     <input type="text" placeholder="Buscar conversa..." className="w-full bg-gray-100 dark:bg-gray-800 rounded-xl py-3 pl-10 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#1E5BFF]/20 dark:text-white transition-all" />
@@ -111,7 +112,7 @@ const DirectMessagesScreen: React.FC<{ user: any; onRequireLogin: () => void; ch
             </div>
             
             <div className="w-full">
-                <h3 className="font-bold text-gray-900 dark:text-white text-xs uppercase tracking-wider px-4 py-3 bg-gray-50 dark:bg-gray-800/50">
+                <h3 className="font-bold text-gray-900 dark:text-white text-xs uppercase tracking-wider px-4 py-3 bg-gray-50 dark:bg-gray-800/50 w-full">
                     Mensagens
                 </h3>
                 {chats.map(chat => (
@@ -137,7 +138,94 @@ const DirectMessagesScreen: React.FC<{ user: any; onRequireLogin: () => void; ch
     );
 };
 
-// --- JOBS FEED (EDGE TO EDGE) ---
+// --- TELA DE VAGAS (JOBS) AJUSTADA PARA 100% WIDTH ---
+const JobsFeedScreen: React.FC<{ user: any; onRequireLogin: () => void }> = ({ user, onRequireLogin }) => {
+    const { currentNeighborhood, isAll } = useNeighborhood();
+    const [selectedJob, setSelectedJob] = useState<Job | null>(null);
+    
+    const filteredJobs = useMemo(() => {
+        let jobs = [...MOCK_JOBS];
+        jobs.sort((a, b) => {
+            if (isAll) return 0;
+            const aIsLocal = a.neighborhood === currentNeighborhood;
+            const bIsLocal = b.neighborhood === currentNeighborhood;
+            if (aIsLocal && !bIsLocal) return -1;
+            if (!aIsLocal && bIsLocal) return 1;
+            return 0;
+        });
+        
+        if (!isAll) {
+            jobs = jobs.filter(j => j.neighborhood === currentNeighborhood);
+        }
+        
+        return jobs;
+    }, [currentNeighborhood, isAll]);
+
+    return (
+        <div className="w-full bg-white dark:bg-gray-900 min-h-screen">
+            <div className="w-full px-4 py-3 bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800 sticky top-0 z-10">
+                <h2 className="font-bold text-lg dark:text-white flex items-center gap-2">
+                    <Briefcase className="w-5 h-5 text-[#1E5BFF]" />
+                    Vagas em {currentNeighborhood === 'Jacarepaguá (todos)' ? 'JPA' : currentNeighborhood}
+                </h2>
+            </div>
+            
+            <div className="w-full">
+                {filteredJobs.length > 0 ? (
+                    filteredJobs.map(job => (
+                        <div key={job.id} className="w-full bg-white dark:bg-gray-900 p-4 border-b border-gray-100 dark:border-gray-800 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer" onClick={() => setSelectedJob(job)}>
+                            <div className="flex justify-between items-start mb-2">
+                                <div>
+                                    <h3 className="font-bold text-gray-900 dark:text-white text-base leading-tight">{job.role}</h3>
+                                    <p className="text-sm text-gray-500 mt-0.5">{job.company}</p>
+                                </div>
+                                <span className="text-[10px] font-bold bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-300 px-2 py-1 rounded-md whitespace-nowrap">
+                                    {job.type}
+                                </span>
+                            </div>
+                            
+                            <div className="flex flex-wrap gap-2 text-xs text-gray-500 dark:text-gray-400 mt-3">
+                                {(isAll || job.neighborhood !== currentNeighborhood) && (
+                                    <span className="flex items-center gap-1 font-medium bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded-md">
+                                        <MapPin className="w-3 h-3" /> {job.neighborhood}
+                                    </span>
+                                )}
+                                <span className="flex items-center gap-1 font-medium bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded-md">
+                                    <Clock className="w-3 h-3" /> {job.postedAt}
+                                </span>
+                                {job.salary && (
+                                    <span className="flex items-center gap-1 font-medium bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 px-2 py-1 rounded-md">
+                                        <DollarSign className="w-3 h-3" /> {job.salary}
+                                    </span>
+                                )}
+                            </div>
+                            
+                            <button className="mt-3 w-full py-2.5 border border-gray-200 dark:border-gray-700 rounded-xl text-sm font-bold text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                                Ver detalhes
+                            </button>
+                        </div>
+                    ))
+                ) : (
+                    <div className="w-full flex flex-col items-center justify-center py-16 px-4 text-center">
+                        <div className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mb-4 text-gray-400">
+                            <Briefcase className="w-8 h-8" />
+                        </div>
+                        <p className="text-gray-500 dark:text-gray-400 font-medium">Nenhuma vaga encontrada nesta região.</p>
+                    </div>
+                )}
+            </div>
+
+            {selectedJob && (
+                <FeedJobDetailModal 
+                    job={selectedJob} 
+                    onClose={() => setSelectedJob(null)} 
+                />
+            )}
+        </div>
+    );
+};
+
+// ... (Rest of modal components: FeedJobDetailModal, etc. - kept as is)
 
 const FeedJobDetailModal: React.FC<{ job: Job; onClose: () => void }> = ({ job, onClose }) => {
   const handleApply = () => {
@@ -234,94 +322,6 @@ const FeedJobDetailModal: React.FC<{ job: Job; onClose: () => void }> = ({ job, 
     </div>
   );
 };
-
-const JobsFeedScreen: React.FC<{ user: any; onRequireLogin: () => void }> = ({ user, onRequireLogin }) => {
-    const { currentNeighborhood, isAll } = useNeighborhood();
-    const [selectedJob, setSelectedJob] = useState<Job | null>(null);
-    
-    const filteredJobs = useMemo(() => {
-        let jobs = [...MOCK_JOBS];
-        jobs.sort((a, b) => {
-            if (isAll) return 0;
-            const aIsLocal = a.neighborhood === currentNeighborhood;
-            const bIsLocal = b.neighborhood === currentNeighborhood;
-            if (aIsLocal && !bIsLocal) return -1;
-            if (!aIsLocal && bIsLocal) return 1;
-            return 0;
-        });
-        
-        if (!isAll) {
-            jobs = jobs.filter(j => j.neighborhood === currentNeighborhood);
-        }
-        
-        return jobs;
-    }, [currentNeighborhood, isAll]);
-
-    return (
-        <div className="bg-white dark:bg-gray-900 min-h-full w-full">
-            <div className="px-4 py-3 bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800 w-full sticky top-0 z-10">
-                <h2 className="font-bold text-lg dark:text-white flex items-center gap-2">
-                    <Briefcase className="w-5 h-5 text-[#1E5BFF]" />
-                    Vagas em {currentNeighborhood === 'Jacarepaguá (todos)' ? 'JPA' : currentNeighborhood}
-                </h2>
-            </div>
-            
-            <div className="w-full">
-                {filteredJobs.length > 0 ? (
-                    filteredJobs.map(job => (
-                        <div key={job.id} className="w-full bg-white dark:bg-gray-900 p-4 border-b border-gray-100 dark:border-gray-800 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer" onClick={() => setSelectedJob(job)}>
-                            <div className="flex justify-between items-start mb-2">
-                                <div>
-                                    <h3 className="font-bold text-gray-900 dark:text-white text-base leading-tight">{job.role}</h3>
-                                    <p className="text-sm text-gray-500 mt-0.5">{job.company}</p>
-                                </div>
-                                <span className="text-[10px] font-bold bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-300 px-2 py-1 rounded-md whitespace-nowrap">
-                                    {job.type}
-                                </span>
-                            </div>
-                            
-                            <div className="flex flex-wrap gap-2 text-xs text-gray-500 dark:text-gray-400 mt-3">
-                                {(isAll || job.neighborhood !== currentNeighborhood) && (
-                                    <span className="flex items-center gap-1 font-medium bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded-md">
-                                        <MapPin className="w-3 h-3" /> {job.neighborhood}
-                                    </span>
-                                )}
-                                <span className="flex items-center gap-1 font-medium bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded-md">
-                                    <Clock className="w-3 h-3" /> {job.postedAt}
-                                </span>
-                                {job.salary && (
-                                    <span className="flex items-center gap-1 font-medium bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 px-2 py-1 rounded-md">
-                                        <DollarSign className="w-3 h-3" /> {job.salary}
-                                    </span>
-                                )}
-                            </div>
-                            
-                            <button className="mt-3 w-full py-2.5 border border-gray-200 dark:border-gray-700 rounded-xl text-sm font-bold text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-                                Ver detalhes
-                            </button>
-                        </div>
-                    ))
-                ) : (
-                    <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
-                        <div className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mb-4 text-gray-400">
-                            <Briefcase className="w-8 h-8" />
-                        </div>
-                        <p className="text-gray-500 dark:text-gray-400 font-medium">Nenhuma vaga encontrada nesta região.</p>
-                    </div>
-                )}
-            </div>
-
-            {selectedJob && (
-                <FeedJobDetailModal 
-                    job={selectedJob} 
-                    onClose={() => setSelectedJob(null)} 
-                />
-            )}
-        </div>
-    );
-};
-
-// ... (Rest of modal components: FeedJobDetailModal, etc. - kept as is)
 
 const StoriesRail: React.FC<{ user: any; onRequireLogin: () => void; onOpenStory: (index: number) => void; stories: any[] }> = ({ user, onRequireLogin, onOpenStory, stories }) => (
   <div className="flex gap-4 overflow-x-auto px-4 pt-2 pb-2 no-scrollbar bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800 w-full">
