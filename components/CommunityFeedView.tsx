@@ -45,10 +45,10 @@ const DeleteConfirmationModal: React.FC<{ onConfirm: () => void; onCancel: () =>
   </div>
 );
 
-const ChatScreen: React.FC<{ chatId: number; onBack: () => void; user: any }> = ({ onBack }) => <div onClick={onBack} className="p-4 bg-white h-full">Chat Mock (Click to back)</div>;
+const ChatScreen: React.FC<{ chatId: number; onBack: () => void; user: any }> = ({ onBack }) => <div onClick={onBack} className="p-4 bg-white h-full w-full">Chat Mock (Click to back)</div>;
 
 const CreatePostScreen: React.FC<{ onClose: () => void; onSuccess: () => void; user: any }> = ({ onClose, onSuccess }) => (
-    <div className="flex flex-col h-full bg-white dark:bg-gray-900">
+    <div className="flex flex-col h-full bg-white dark:bg-gray-900 w-full">
         <div className="p-4 flex justify-between items-center border-b border-gray-100 dark:border-gray-800">
             <button onClick={onClose}><X className="w-6 h-6 dark:text-white" /></button>
             <h3 className="font-bold dark:text-white">Nova Publicação</h3>
@@ -58,9 +58,75 @@ const CreatePostScreen: React.FC<{ onClose: () => void; onSuccess: () => void; u
     </div>
 );
 
-const ActivityScreen: React.FC<{ onClose: () => void }> = ({ onClose }) => <div onClick={onClose} className="p-4 bg-white h-full">Activity Mock (Click to close)</div>;
-const UserProfileScreen: React.FC<{ user: any }> = () => <div className="p-4">Profile Mock</div>;
-const CommunityExploreScreen: React.FC = () => <div className="p-4">Explore Mock</div>;
+const ActivityScreen: React.FC<{ onClose: () => void }> = ({ onClose }) => <div onClick={onClose} className="p-4 bg-white h-full w-full">Activity Mock (Click to close)</div>;
+
+// Componentes Full Width Corrigidos
+const UserProfileScreen: React.FC<{ user: any }> = () => (
+    <div className="w-full h-full bg-white dark:bg-gray-900 flex flex-col items-center justify-center p-8">
+        <div className="w-20 h-20 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mb-4">
+            <UserIcon className="w-10 h-10 text-gray-400" />
+        </div>
+        <h3 className="font-bold text-gray-900 dark:text-white">Perfil do Usuário</h3>
+        <p className="text-sm text-gray-500">Funcionalidade em desenvolvimento</p>
+    </div>
+);
+
+const CommunityExploreScreen: React.FC = () => (
+    <div className="w-full h-full bg-white dark:bg-gray-900 p-4">
+        <div className="bg-gray-50 dark:bg-gray-800 rounded-2xl p-8 text-center">
+            <Grid className="w-10 h-10 text-gray-400 mx-auto mb-2" />
+            <h3 className="font-bold text-gray-900 dark:text-white">Explorar Comunidade</h3>
+            <p className="text-sm text-gray-500">Descubra novos posts e pessoas</p>
+        </div>
+    </div>
+);
+
+const DirectMessagesScreen: React.FC<{ user: any; onRequireLogin: () => void; chats: typeof MOCK_CHATS; onSelectChat: (id: number) => void }> = ({ user, onRequireLogin, chats, onSelectChat }) => {
+    if (!user) {
+        return (
+            <div className="flex flex-col items-center justify-center h-[60vh] text-center px-6 w-full">
+                <div className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mb-4">
+                    <UserIcon className="w-8 h-8 text-gray-400" />
+                </div>
+                <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">Faça login</h3>
+                <button onClick={onRequireLogin} className="bg-[#1E5BFF] text-white font-bold py-3 px-8 rounded-full shadow-lg active:scale-95 transition-transform">Entrar</button>
+            </div>
+        );
+    }
+    return (
+        <div className="w-full bg-white dark:bg-gray-900 pb-24 min-h-full">
+            <div className="px-4 pt-4 pb-2 w-full">
+                <div className="relative w-full">
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                    <input type="text" placeholder="Buscar conversa..." className="w-full bg-gray-100 dark:bg-gray-800 rounded-xl py-3 pl-10 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#1E5BFF]/20 dark:text-white" />
+                </div>
+            </div>
+            <div className="px-4 py-2 w-full">
+                <h3 className="font-bold text-gray-900 dark:text-white text-sm">Mensagens</h3>
+            </div>
+            <div className="w-full">
+                {chats.map(chat => (
+                    <div key={chat.id} onClick={() => onSelectChat(chat.id)} className="w-full flex items-center gap-4 px-4 py-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800/50 border-b border-gray-50 dark:border-gray-800 last:border-0">
+                        <div className="relative flex-shrink-0">
+                            <img src={chat.avatar} className="w-12 h-12 rounded-full object-cover" />
+                            {chat.unread && <div className="absolute top-0 right-0 w-3 h-3 bg-[#1E5BFF] border-2 border-white dark:border-gray-900 rounded-full"></div>}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                            <div className="flex justify-between items-center mb-0.5">
+                                <h4 className={`text-sm truncate pr-2 flex items-center gap-1 ${chat.unread ? 'font-bold text-gray-900 dark:text-white' : 'text-gray-700 dark:text-gray-300'}`}>
+                                    {chat.user}
+                                    {chat.isMerchant && <BadgeCheck className="w-3 h-3 text-[#1E5BFF] fill-white" />}
+                                </h4>
+                                <span className="text-[10px] whitespace-nowrap text-gray-400">{chat.time}</span>
+                            </div>
+                            <p className={`text-xs truncate ${chat.unread ? 'font-semibold text-gray-800 dark:text-gray-200' : 'text-gray-500'}`}>{chat.lastMsg}</p>
+                        </div>
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+};
 
 // --- MODAL DE DETALHES DA VAGA ---
 const FeedJobDetailModal: React.FC<{ job: Job; onClose: () => void }> = ({ job, onClose }) => {
@@ -166,6 +232,7 @@ const FeedJobDetailModal: React.FC<{ job: Job; onClose: () => void }> = ({ job, 
   );
 };
 
+// Jobs Feed Screen Ajustado (Edge to Edge)
 const JobsFeedScreen: React.FC<{ user: any; onRequireLogin: () => void }> = ({ user, onRequireLogin }) => {
     const { currentNeighborhood, isAll } = useNeighborhood();
     const [selectedJob, setSelectedJob] = useState<Job | null>(null);
@@ -181,7 +248,6 @@ const JobsFeedScreen: React.FC<{ user: any; onRequireLogin: () => void }> = ({ u
             return 0;
         });
         
-        // Se não for "Todos", filtra estritamente
         if (!isAll) {
             jobs = jobs.filter(j => j.neighborhood === currentNeighborhood);
         }
@@ -190,19 +256,21 @@ const JobsFeedScreen: React.FC<{ user: any; onRequireLogin: () => void }> = ({ u
     }, [currentNeighborhood, isAll]);
 
     return (
-        <div className="bg-gray-50 dark:bg-gray-900 min-h-full pb-20">
-            <div className="p-4 bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800">
+        <div className="bg-white dark:bg-gray-900 min-h-full pb-20 w-full">
+            <div className="p-4 bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800 w-full">
                 <h2 className="font-bold text-lg dark:text-white">
                     Vagas em {currentNeighborhood === 'Jacarepaguá (todos)' ? 'Jacarepaguá' : currentNeighborhood}
                 </h2>
             </div>
-            <div className="p-4 space-y-4">
+            
+            {/* Lista Edge-to-Edge sem container padding */}
+            <div className="w-full">
                 {filteredJobs.length > 0 ? (
                     filteredJobs.map(job => (
-                        <div key={job.id} className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
+                        <div key={job.id} className="bg-white dark:bg-gray-900 p-4 border-b border-gray-100 dark:border-gray-800 last:border-0 w-full">
                             <div className="flex justify-between items-start mb-2">
                                 <div>
-                                    <h3 className="font-bold text-gray-900 dark:text-white">{job.role}</h3>
+                                    <h3 className="font-bold text-gray-900 dark:text-white text-base">{job.role}</h3>
                                     <p className="text-sm text-gray-500">{job.company}</p>
                                 </div>
                                 <span className="text-[10px] font-bold bg-blue-100 text-blue-700 px-2 py-1 rounded-md">{job.type}</span>
@@ -217,14 +285,14 @@ const JobsFeedScreen: React.FC<{ user: any; onRequireLogin: () => void }> = ({ u
                             </div>
                             <button 
                                 onClick={() => setSelectedJob(job)} 
-                                className="mt-3 w-full py-2 border border-gray-200 dark:border-gray-700 rounded-lg text-sm font-bold text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 active:scale-95 transition-all"
+                                className="mt-3 w-full py-2 border border-gray-200 dark:border-gray-700 rounded-lg text-sm font-bold text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 active:scale-95 transition-all"
                             >
                                 Ver detalhes
                             </button>
                         </div>
                     ))
                 ) : (
-                    <div className="text-center py-10 text-gray-500 dark:text-gray-400">
+                    <div className="text-center py-12 text-gray-500 dark:text-gray-400 w-full">
                         <Briefcase className="w-10 h-10 mx-auto mb-2 opacity-50" />
                         <p>Nenhuma vaga encontrada para {currentNeighborhood}.</p>
                     </div>
@@ -242,7 +310,7 @@ const JobsFeedScreen: React.FC<{ user: any; onRequireLogin: () => void }> = ({ u
 };
 
 const StoriesRail: React.FC<{ user: any; onRequireLogin: () => void; onOpenStory: (index: number) => void; stories: any[] }> = ({ user, onRequireLogin, onOpenStory, stories }) => (
-  <div className="flex gap-4 overflow-x-auto px-4 pt-2 pb-2 no-scrollbar bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800">
+  <div className="flex gap-4 overflow-x-auto px-4 pt-2 pb-2 no-scrollbar bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800 w-full">
     <div className="flex flex-col items-center gap-1 cursor-pointer flex-shrink-0" onClick={() => user ? alert("Câmera de stories (Mock)") : onRequireLogin()}>
       <div className="w-[64px] h-[64px] rounded-full p-[2px] bg-white dark:bg-gray-900 relative">
          <div className="w-full h-full rounded-full bg-gray-100 dark:bg-gray-700 overflow-hidden border border-gray-200 dark:border-gray-600">
@@ -300,9 +368,9 @@ const FeedPost: React.FC<{
   const shouldTruncate = post.content.length > MAX_CAPTION_LENGTH;
 
   return (
-    <div className="bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800 pb-1 mb-2 last:border-0 relative">
+    <div className="bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800 pb-1 mb-2 last:border-0 relative w-full">
       
-      <div className="flex items-center justify-between px-3 py-3">
+      <div className="flex items-center justify-between px-3 py-3 w-full">
         <div className="flex items-center gap-2.5">
           <div className="w-8 h-8 rounded-full p-[1.5px] bg-gradient-to-tr from-yellow-400 via-red-500 to-fuchsia-600">
              <div className="w-full h-full rounded-full border border-white dark:border-black overflow-hidden bg-gray-100">
@@ -372,7 +440,7 @@ const FeedPost: React.FC<{
          )}
       </div>
 
-      <div className="flex items-center justify-between px-3 pt-3 pb-2">
+      <div className="flex items-center justify-between px-3 pt-3 pb-2 w-full">
         <div className="flex items-center gap-4">
           <button onClick={handleLike} className="active:scale-90 transition-transform"><Heart className={`w-6 h-6 ${liked ? 'fill-red-500 text-red-500' : 'text-gray-900 dark:text-white'}`} /></button>
           <button onClick={onOpenComments} className="active:scale-90 transition-transform"><MessageCircle className="w-6 h-6 text-gray-900 dark:text-white flip-horizontal" style={{ transform: 'scaleX(-1)' }} /></button>
@@ -381,7 +449,7 @@ const FeedPost: React.FC<{
         <button className="active:scale-90 transition-transform"><Bookmark className="w-6 h-6 text-gray-900 dark:text-white" /></button>
       </div>
 
-      <div className="px-3 pb-3">
+      <div className="px-3 pb-3 w-full">
         <div className="font-bold text-sm text-gray-900 dark:text-white mb-1">{post.likes + (liked ? 1 : 0)} curtidas</div>
         <div className="text-sm text-gray-900 dark:text-white leading-tight">
             <span className="font-bold mr-2">{post.userUsername || post.userName.toLowerCase().replace(' ', '')}</span>
@@ -395,9 +463,9 @@ const FeedPost: React.FC<{
   );
 };
 
-// FIX: New Flat Design NavBar (Full Width, No Margins)
-const CommunityNavBar: React.FC<{ currentView: string; onChangeView: (view: 'home' | 'direct' | 'explore' | 'profile' | 'jobs') => void; userAvatar?: string; hasUnreadMessages?: boolean; }> = ({ currentView, onChangeView, userAvatar, hasUnreadMessages }) => (
-  <div className="sticky top-14 z-20 w-full bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border-b border-gray-100 dark:border-gray-700 shadow-sm transition-all">
+// Navbar atualizada para suportar sticky dinâmico
+const CommunityNavBar: React.FC<{ currentView: string; onChangeView: (view: 'home' | 'direct' | 'explore' | 'profile' | 'jobs') => void; userAvatar?: string; hasUnreadMessages?: boolean; topClass?: string; }> = ({ currentView, onChangeView, userAvatar, hasUnreadMessages, topClass = 'top-14' }) => (
+  <div className={`sticky ${topClass} z-20 w-full bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border-b border-gray-100 dark:border-gray-700 shadow-sm transition-all`}>
     <div className="grid grid-cols-5 w-full h-12 items-center">
       <button onClick={() => onChangeView('home')} className={`flex justify-center items-center h-full w-full relative active:bg-gray-50 dark:active:bg-gray-800 ${currentView === 'home' ? 'text-black dark:text-white' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300'}`}>
         <Home className={`w-6 h-6 ${currentView === 'home' ? 'fill-black dark:fill-white' : ''}`} strokeWidth={2} />
@@ -579,7 +647,7 @@ export const CommunityFeedView: React.FC<CommunityFeedViewProps> = ({ onStoreCli
         return (
           <div 
             ref={feedRef}
-            className="pb-20 relative pt-5"
+            className="pb-20 relative pt-5 w-full"
             onTouchStart={handleTouchStart}
             onTouchMove={handleTouchMove}
             onTouchEnd={handleTouchEnd}
@@ -609,11 +677,11 @@ export const CommunityFeedView: React.FC<CommunityFeedViewProps> = ({ onStoreCli
 
             {/* Content Container with Push Effect */}
             <div 
-                className="transition-transform duration-200 ease-out will-change-transform"
+                className="transition-transform duration-200 ease-out will-change-transform w-full"
                 style={{ transform: `translateY(${pullY}px)` }}
             >
                 <StoriesRail user={user} onRequireLogin={onRequireLogin} onOpenStory={(idx) => setViewingStoryIndex(idx)} stories={filteredStories} />
-                <div className="flex flex-col mt-2">
+                <div className="flex flex-col mt-2 w-full">
                 {posts.length > 0 ? (
                     posts.map(post => (
                         <FeedPost 
@@ -637,17 +705,19 @@ export const CommunityFeedView: React.FC<CommunityFeedViewProps> = ({ onStoreCli
       case 'notifications': return <ActivityScreen onClose={() => setInternalView('home')} />;
       case 'create_post': return <CreatePostScreen onClose={() => setInternalView('home')} onSuccess={handlePostSuccess} user={user} />;
       case 'direct':
-        if (!user) return <div className="flex flex-col items-center justify-center h-[60vh] text-center px-6"><div className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mb-4"><UserIcon className="w-8 h-8 text-gray-400" /></div><h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">Faça login</h3><button onClick={onRequireLogin} className="bg-[#1E5BFF] text-white font-bold py-3 px-8 rounded-full shadow-lg">Entrar</button></div>;
+        if (!user) return <div className="flex flex-col items-center justify-center h-[60vh] text-center px-6 w-full"><div className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mb-4"><UserIcon className="w-8 h-8 text-gray-400" /></div><h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">Faça login</h3><button onClick={onRequireLogin} className="bg-[#1E5BFF] text-white font-bold py-3 px-8 rounded-full shadow-lg">Entrar</button></div>;
         if (selectedChatId) return <ChatScreen chatId={selectedChatId} onBack={() => setSelectedChatId(null)} user={user} />;
-        return <div className="w-full bg-white dark:bg-gray-900 pb-24"><div className="px-4 pt-4 pb-2"><div className="relative"><Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" /><input type="text" placeholder="Buscar conversa..." className="w-full bg-gray-100 dark:bg-gray-800 rounded-xl py-3 pl-10 pr-4 text-sm" /></div></div><div className="px-4 py-2"><h3 className="font-bold text-gray-900 dark:text-white text-sm">Mensagens</h3></div><div className="w-full flex-1">{MOCK_CHATS.map(chat => (<div key={chat.id} onClick={() => setSelectedChatId(chat.id)} className="w-full flex items-center gap-4 px-4 py-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800/50"><div className="relative flex-shrink-0"><img src={chat.avatar} className="w-12 h-12 rounded-full object-cover" /></div><div className="flex-1 min-w-0"><div className="flex justify-between items-center mb-0.5"><h4 className={`text-sm truncate pr-2 flex items-center gap-1 ${chat.unread ? 'font-bold' : ''}`}>{chat.user}</h4><span className="text-[10px] whitespace-nowrap text-gray-400">{chat.time}</span></div><p className="text-xs truncate">{chat.lastMsg}</p></div></div>))}</div></div>;
+        return <DirectMessagesScreen user={user} onRequireLogin={onRequireLogin} chats={MOCK_CHATS} onSelectChat={setSelectedChatId} />;
       default: return null;
     }
   };
 
+  const isHeaderVisible = internalView === 'home' || internalView === 'jobs' || internalView === 'explore';
+
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-950 font-sans pb-24 animate-in slide-in-from-right duration-300 relative">
-      {(internalView === 'home' || internalView === 'jobs' || internalView === 'explore') && (
-        <div className="sticky top-0 z-30 bg-white/95 dark:bg-gray-950/95 backdrop-blur-md h-14 flex items-center justify-between border-b border-gray-100 dark:border-gray-800 px-4">
+    <div className="min-h-screen bg-white dark:bg-gray-950 font-sans pb-24 animate-in slide-in-from-right duration-300 relative w-full">
+      {isHeaderVisible && (
+        <div className="sticky top-0 z-30 bg-white/95 dark:bg-gray-950/95 backdrop-blur-md h-14 flex items-center justify-between border-b border-gray-100 dark:border-gray-800 px-4 w-full">
           <button onClick={handleCreatePost} className="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"><Plus className="w-6 h-6 text-gray-900 dark:text-white" /></button>
           <button onClick={toggleSelector} className="flex flex-col items-center flex-1">
             <h1 className="font-bold text-lg text-gray-900 dark:text-white font-display flex items-center gap-1 text-center">Feed da Localizei JPA</h1>
@@ -661,7 +731,13 @@ export const CommunityFeedView: React.FC<CommunityFeedViewProps> = ({ onStoreCli
         </div>
       )}
       {internalView !== 'create_post' && internalView !== 'notifications' && (
-        <CommunityNavBar currentView={internalView} onChangeView={handleViewChange} userAvatar={user?.user_metadata?.avatar_url} hasUnreadMessages={true} />
+        <CommunityNavBar 
+            currentView={internalView} 
+            onChangeView={handleViewChange} 
+            userAvatar={user?.user_metadata?.avatar_url} 
+            hasUnreadMessages={true} 
+            topClass={isHeaderVisible ? 'top-14' : 'top-0'}
+        />
       )}
       <div className="p-0 relative w-full">{renderContent()}</div>
       
