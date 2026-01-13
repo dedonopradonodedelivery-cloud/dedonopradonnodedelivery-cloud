@@ -181,6 +181,9 @@ export interface Job {
   contactWhatsapp: string;
   postedAt: string;
   isUrgent?: boolean;
+  // Campos para Vaga Patrocinada
+  isSponsored?: boolean;
+  sponsoredUntil?: string; // ISO Date String (YYYY-MM-DD)
 }
 
 // --- MODERATION TYPES ---

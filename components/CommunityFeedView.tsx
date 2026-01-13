@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { Search, Store as StoreIcon, MoreHorizontal, Send, Heart, Share2, MessageCircle, ChevronLeft, BadgeCheck, User as UserIcon, Home, Plus, X, Video, Image as ImageIcon, Film, Loader2, Grid, Camera, Play, Check, ChevronRight, Briefcase, MapPin, Clock, DollarSign, ExternalLink, AlertCircle, Building2, Trash2, Flag, Bookmark, ChevronDown, ArrowUp, CheckCircle2 } from 'lucide-react';
+import { Search, Store as StoreIcon, MoreHorizontal, Send, Heart, Share2, MessageCircle, ChevronLeft, BadgeCheck, User as UserIcon, Home, Plus, X, Video, Image as ImageIcon, Film, Loader2, Grid, Camera, Play, Check, ChevronRight, Briefcase, MapPin, Clock, DollarSign, ExternalLink, AlertCircle, Building2, Trash2, Flag, Bookmark, ChevronDown, ArrowUp, CheckCircle2, Zap } from 'lucide-react';
 import { Store, CommunityPost, Job, ReportReason } from '../types';
 import { MOCK_COMMUNITY_POSTS, MOCK_JOBS } from '../constants';
 import { useNeighborhood, NEIGHBORHOODS } from '../contexts/NeighborhoodContext';
@@ -138,27 +138,31 @@ const DirectMessagesScreen: React.FC<{ user: any; onRequireLogin: () => void; ch
     );
 };
 
-// --- TELA DE VAGAS (JOBS) AJUSTADA PARA 100% WIDTH ---
+// --- TELA DE VAGAS (JOBS) AJUSTADA PARA 100% WIDTH COM PATROCÍNIO ---
 const JobsFeedScreen: React.FC<{ user: any; onRequireLogin: () => void }> = ({ user, onRequireLogin }) => {
     const { currentNeighborhood, isAll } = useNeighborhood();
     const [selectedJob, setSelectedJob] = useState<Job | null>(null);
     
     const filteredJobs = useMemo(() => {
-        let jobs = [...MOCK_JOBS];
-        jobs.sort((a, b) => {
-            if (isAll) return 0;
-            const aIsLocal = a.neighborhood === currentNeighborhood;
-            const bIsLocal = b.neighborhood === currentNeighborhood;
-            if (aIsLocal && !bIsLocal) return -1;
-            if (!aIsLocal && bIsLocal) return 1;
-            return 0;
+        const today = new Date().toISOString().split('T')[0];
+        // Filtragem por bairro
+        const neighborhoodFiltered = MOCK_JOBS.filter(j => isAll || j.neighborhood === currentNeighborhood);
+
+        // Helper para verificar patrocínio válido
+        const isSpon = (j: Job) => j.isSponsored && j.sponsoredUntil && j.sponsoredUntil >= today;
+
+        // Ordenação:
+        // 1. Patrocinados Válidos (Topo)
+        // 2. Ordem padrão (Chronológica/Existente) para o resto
+        neighborhoodFiltered.sort((a, b) => {
+            const sA = isSpon(a);
+            const sB = isSpon(b);
+            if (sA && !sB) return -1;
+            if (!sA && sB) return 1;
+            return 0; // Mantém ordem original
         });
         
-        if (!isAll) {
-            jobs = jobs.filter(j => j.neighborhood === currentNeighborhood);
-        }
-        
-        return jobs;
+        return neighborhoodFiltered;
     }, [currentNeighborhood, isAll]);
 
     return (
@@ -172,39 +176,66 @@ const JobsFeedScreen: React.FC<{ user: any; onRequireLogin: () => void }> = ({ u
             
             <div className="w-full">
                 {filteredJobs.length > 0 ? (
-                    filteredJobs.map(job => (
-                        <div key={job.id} className="w-full bg-white dark:bg-gray-900 p-4 border-b border-gray-100 dark:border-gray-800 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer" onClick={() => setSelectedJob(job)}>
-                            <div className="flex justify-between items-start mb-2">
-                                <div>
-                                    <h3 className="font-bold text-gray-900 dark:text-white text-base leading-tight">{job.role}</h3>
-                                    <p className="text-sm text-gray-500 mt-0.5">{job.company}</p>
+                    filteredJobs.map((job, index) => {
+                        const today = new Date().toISOString().split('T')[0];
+                        const isSponsoredActive = job.isSponsored && job.sponsoredUntil && job.sponsoredUntil >= today;
+                        // Regra: Máximo 2 no topo com destaque visual
+                        const showSponsoredBadge = isSponsoredActive && index < 2;
+
+                        return (
+                            <div 
+                                key={job.id} 
+                                className={`w-full p-4 border-b last:border-0 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer relative overflow-hidden
+                                    ${showSponsoredBadge 
+                                        ? 'bg-amber-50/40 dark:bg-amber-900/10 border-l-4 border-l-amber-400 dark:border-l-amber-500 border-gray-100 dark:border-gray-800' 
+                                        : 'bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800'
+                                    }`} 
+                                onClick={() => setSelectedJob(job)}
+                            >
+                                {showSponsoredBadge && (
+                                    <div className="mb-2">
+                                        <span className="text-[9px] font-bold text-amber-600 dark:text-amber-400 bg-amber-100 dark:bg-amber-900/40 px-2 py-0.5 rounded border border-amber-200 dark:border-amber-700/50 uppercase tracking-wide flex items-center w-fit gap-1">
+                                            <Zap className="w-3 h-3 fill-amber-500 text-amber-500" /> Patrocinada
+                                        </span>
+                                    </div>
+                                )}
+
+                                <div className="flex justify-between items-start mb-2">
+                                    <div>
+                                        <h3 className="font-bold text-gray-900 dark:text-white text-base leading-tight">{job.role}</h3>
+                                        <p className="text-sm text-gray-500 mt-0.5">{job.company}</p>
+                                    </div>
+                                    <span className="text-[10px] font-bold bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-300 px-2 py-1 rounded-md whitespace-nowrap">
+                                        {job.type}
+                                    </span>
                                 </div>
-                                <span className="text-[10px] font-bold bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-300 px-2 py-1 rounded-md whitespace-nowrap">
-                                    {job.type}
-                                </span>
-                            </div>
-                            
-                            <div className="flex flex-wrap gap-2 text-xs text-gray-500 dark:text-gray-400 mt-3">
-                                {(isAll || job.neighborhood !== currentNeighborhood) && (
+                                
+                                <div className="flex flex-wrap gap-2 text-xs text-gray-500 dark:text-gray-400 mt-3">
+                                    {(isAll || job.neighborhood !== currentNeighborhood) && (
+                                        <span className="flex items-center gap-1 font-medium bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded-md">
+                                            <MapPin className="w-3 h-3" /> {job.neighborhood}
+                                        </span>
+                                    )}
                                     <span className="flex items-center gap-1 font-medium bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded-md">
-                                        <MapPin className="w-3 h-3" /> {job.neighborhood}
+                                        <Clock className="w-3 h-3" /> {job.postedAt}
                                     </span>
-                                )}
-                                <span className="flex items-center gap-1 font-medium bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded-md">
-                                    <Clock className="w-3 h-3" /> {job.postedAt}
-                                </span>
-                                {job.salary && (
-                                    <span className="flex items-center gap-1 font-medium bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 px-2 py-1 rounded-md">
-                                        <DollarSign className="w-3 h-3" /> {job.salary}
-                                    </span>
-                                )}
+                                    {job.salary && (
+                                        <span className="flex items-center gap-1 font-medium bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 px-2 py-1 rounded-md">
+                                            <DollarSign className="w-3 h-3" /> {job.salary}
+                                        </span>
+                                    )}
+                                </div>
+                                
+                                <button className={`mt-3 w-full py-2.5 border rounded-xl text-sm font-bold transition-colors
+                                    ${showSponsoredBadge 
+                                        ? 'border-amber-200 dark:border-amber-800/50 text-amber-700 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-900/30' 
+                                        : 'border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                                    }`}>
+                                    Ver detalhes
+                                </button>
                             </div>
-                            
-                            <button className="mt-3 w-full py-2.5 border border-gray-200 dark:border-gray-700 rounded-xl text-sm font-bold text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-                                Ver detalhes
-                            </button>
-                        </div>
-                    ))
+                        );
+                    })
                 ) : (
                     <div className="w-full flex flex-col items-center justify-center py-16 px-4 text-center">
                         <div className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mb-4 text-gray-400">
@@ -729,41 +760,4 @@ export const CommunityFeedView: React.FC<CommunityFeedViewProps> = ({ onStoreCli
   const isHeaderVisible = internalView === 'home' || internalView === 'jobs' || internalView === 'explore';
 
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-950 font-sans pb-24 animate-in slide-in-from-right duration-300 relative w-full">
-      {isHeaderVisible && (
-        <div className="sticky top-0 z-30 bg-white/95 dark:bg-gray-950/95 backdrop-blur-md h-14 flex items-center justify-between border-b border-gray-100 dark:border-gray-800 px-4 w-full">
-          <button onClick={handleCreatePost} className="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"><Plus className="w-6 h-6 text-gray-900 dark:text-white" /></button>
-          <button onClick={toggleSelector} className="flex flex-col items-center flex-1">
-            <h1 className="font-bold text-lg text-gray-900 dark:text-white font-display flex items-center gap-1 text-center">Feed da Localizei JPA</h1>
-            <div className="flex items-center gap-1 text-[10px] text-gray-500 dark:text-gray-400 -mt-1">
-                <MapPin className="w-2.5 h-2.5" />
-                <span>{currentNeighborhood === 'Jacarepaguá (todos)' ? 'Todo Bairro' : currentNeighborhood}</span>
-                <ChevronDown className="w-2.5 h-2.5" />
-            </div>
-          </button>
-          <button onClick={handleNotifications} className="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors relative"><Heart className="w-6 h-6 text-gray-900 dark:text-white" /><span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border border-white dark:border-gray-900"></span></button>
-        </div>
-      )}
-      {internalView !== 'create_post' && internalView !== 'notifications' && (
-        <CommunityNavBar 
-            currentView={internalView} 
-            onChangeView={handleViewChange} 
-            userAvatar={user?.user_metadata?.avatar_url} 
-            hasUnreadMessages={true} 
-            topClass={isHeaderVisible ? 'top-14' : 'top-0'}
-        />
-      )}
-      <div className="p-0 relative w-full">{renderContent()}</div>
-      
-      {viewingStoryIndex !== null && <StoryViewer initialStoryIndex={viewingStoryIndex} onClose={() => setViewingStoryIndex(null)} />}
-      
-      {postToDelete && <DeleteConfirmationModal onConfirm={handleConfirmDelete} onCancel={() => setPostToDelete(null)} />}
-      
-      {commentPostId && <CommentsModal postId={commentPostId} onClose={() => setCommentPostId(null)} user={user} />}
-      
-      <ReportModal isOpen={!!reportPostId} onClose={() => setReportPostId(null)} onSubmit={handleReportSubmit} />
-
-      {showSuccessToast && <div className="fixed top-20 left-1/2 -translate-x-1/2 bg-black/80 backdrop-blur-md text-white px-6 py-3 rounded-full shadow-lg z-[100] animate-in fade-in slide-in-from-top-4 flex items-center gap-2"><Check className="w-4 h-4" /><span className="text-sm font-bold">{toastMessage}</span></div>}
-    </div>
-  );
-};
+    <div className="min-h-screen bg-white dark:bg-gray

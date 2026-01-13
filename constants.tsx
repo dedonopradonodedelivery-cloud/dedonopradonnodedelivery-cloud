@@ -246,6 +246,36 @@ export const STORES: Store[] = [
 
 export const MOCK_JOBS: Job[] = [
   {
+    id: 'job-spon-1',
+    role: 'Gerente Comercial',
+    company: 'Shopping Freguesia',
+    neighborhood: 'Freguesia',
+    type: 'CLT',
+    salary: 'R$ 4.500,00',
+    description: 'Gerenciamento de equipe e metas. Experiência em varejo de moda.',
+    requirements: ['Experiência 2 anos', 'Superior Completo', 'Liderança'],
+    schedule: 'Comercial',
+    contactWhatsapp: '5521999998888',
+    postedAt: 'Hoje',
+    isSponsored: true,
+    sponsoredUntil: '2025-12-31'
+  },
+  {
+    id: 'job-spon-2',
+    role: 'Recepcionista Bilíngue',
+    company: 'Hotel Quality',
+    neighborhood: 'Pechincha',
+    type: 'CLT',
+    salary: 'R$ 2.200,00',
+    description: 'Atendimento a hóspedes, check-in/out. Inglês fluente obrigatório.',
+    requirements: ['Inglês fluente', 'Simpatia', 'Disponibilidade fds'],
+    schedule: 'Escala 6x1',
+    contactWhatsapp: '5521977776666',
+    postedAt: 'Há 1 hora',
+    isSponsored: true,
+    sponsoredUntil: '2025-12-31'
+  },
+  {
     id: 'job-1',
     role: 'Atendente de Balcão',
     company: 'Padaria Imperial',

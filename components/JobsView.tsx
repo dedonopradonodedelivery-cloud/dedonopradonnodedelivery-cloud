@@ -1,6 +1,6 @@
 
 import React, { useState, useMemo } from 'react';
-import { ChevronLeft, Briefcase, MapPin, Clock, DollarSign, MessageCircle, AlertCircle, Building2, CheckCircle2, ChevronDown } from 'lucide-react';
+import { ChevronLeft, Briefcase, MapPin, Clock, DollarSign, MessageCircle, AlertCircle, Building2, CheckCircle2, ChevronDown, Zap } from 'lucide-react';
 import { MOCK_JOBS } from '../constants';
 import { Job } from '../types';
 import { useNeighborhood } from '../contexts/NeighborhoodContext';
@@ -110,23 +110,27 @@ export const JobsView: React.FC<JobsViewProps> = ({ onBack }) => {
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
   const { currentNeighborhood, isAll, toggleSelector } = useNeighborhood();
 
-  // Filter jobs by neighborhood
   const sortedJobs = useMemo(() => {
-    let list = [...MOCK_JOBS];
+    const today = new Date().toISOString().split('T')[0];
     
-    // Sort Priority: Local > Others
-    list.sort((a, b) => {
-        if (isAll) return 0; // Default order for All
-        
-        const aIsLocal = a.neighborhood === currentNeighborhood;
-        const bIsLocal = b.neighborhood === currentNeighborhood;
-        
-        if (aIsLocal && !bIsLocal) return -1;
-        if (!aIsLocal && bIsLocal) return 1;
-        return 0;
-    });
+    // 1. Filtra por Bairro
+    const neighborhoodFiltered = MOCK_JOBS.filter(j => isAll || j.neighborhood === currentNeighborhood);
 
-    return list;
+    // 2. Separa Patrocinadas Válidas vs Normais
+    const isSpon = (j: Job) => j.isSponsored && j.sponsoredUntil && j.sponsoredUntil >= today;
+    
+    const sponsoredCandidates = neighborhoodFiltered.filter(isSpon);
+    const regularCandidates = neighborhoodFiltered.filter(j => !isSpon(j));
+
+    // 3. Aplica regra de limite (Max 2 no topo)
+    const topSponsored = sponsoredCandidates.slice(0, 2);
+    // As patrocinadas excedentes voltam para o fluxo normal (ordenadas por data junto com as outras se necessário, ou logo abaixo)
+    const overflowSponsored = sponsoredCandidates.slice(2);
+    
+    const rest = [...overflowSponsored, ...regularCandidates];
+    
+    // 4. Retorna lista combinada
+    return [...topSponsored, ...rest];
   }, [currentNeighborhood, isAll]);
 
   return (
@@ -172,49 +176,70 @@ export const JobsView: React.FC<JobsViewProps> = ({ onBack }) => {
                 </p>
             </div>
 
-            {sortedJobs.map((job) => (
-              <div 
-                key={job.id}
-                onClick={() => setSelectedJob(job)}
-                className="bg-white dark:bg-gray-800 p-5 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 active:scale-[0.98] transition-all cursor-pointer group relative overflow-hidden"
-              >
-                {job.isUrgent && (
-                    <div className="absolute top-0 right-0 bg-red-500 text-white text-[9px] font-black px-2 py-1 rounded-bl-xl uppercase tracking-wider">
-                        Urgente
-                    </div>
-                )}
-                
-                <div className="flex justify-between items-start mb-3">
-                    <div>
-                        <h3 className="font-bold text-gray-900 dark:text-white text-lg leading-tight">{job.role}</h3>
-                        <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">{job.company}</p>
-                    </div>
-                </div>
+            {sortedJobs.map((job, index) => {
+              const today = new Date().toISOString().split('T')[0];
+              const isSponsoredActive = job.isSponsored && job.sponsoredUntil && job.sponsoredUntil >= today;
+              // Regra de Exibição: Apenas as 2 primeiras da lista recebem o destaque visual de patrocínio
+              const showSponsoredBadge = isSponsoredActive && index < 2;
 
-                <div className="flex flex-wrap gap-2 mb-4">
-                    <span className="px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 text-[10px] font-bold uppercase rounded-md border border-gray-200 dark:border-gray-600">
-                        {job.type}
-                    </span>
-                    <span className={`px-2 py-1 text-[10px] font-bold uppercase rounded-md border ${
-                        job.neighborhood === currentNeighborhood && !isAll
-                         ? 'bg-blue-50 text-blue-600 border-blue-100 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800'
-                         : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-600'
-                    }`}>
-                        {job.neighborhood}
-                    </span>
-                    {job.salary && (
-                        <span className="px-2 py-1 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 text-[10px] font-bold uppercase rounded-md border border-green-100 dark:border-green-800">
-                            {job.salary}
-                        </span>
-                    )}
-                </div>
+              return (
+                <div 
+                  key={job.id}
+                  onClick={() => setSelectedJob(job)}
+                  className={`p-5 rounded-2xl shadow-sm active:scale-[0.98] transition-all cursor-pointer group relative overflow-hidden
+                    ${showSponsoredBadge 
+                        ? 'bg-amber-50/40 dark:bg-amber-900/10 border-l-4 border-l-amber-400 dark:border-l-amber-500 border border-gray-100 dark:border-gray-800' 
+                        : 'bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700'
+                    }`}
+                >
+                  {showSponsoredBadge && (
+                      <div className="absolute top-0 right-0 bg-amber-100 dark:bg-amber-900/40 px-2 py-1 rounded-bl-xl border-b border-l border-amber-200 dark:border-amber-800/50">
+                          <span className="text-[9px] font-bold text-amber-700 dark:text-amber-400 uppercase tracking-wider flex items-center gap-1">
+                              <Zap className="w-3 h-3 fill-amber-500 text-amber-500" /> Patrocinada
+                          </span>
+                      </div>
+                  )}
 
-                <div className="flex items-center justify-between pt-3 border-t border-gray-100 dark:border-gray-700">
-                    <span className="text-xs text-gray-400 font-medium">Publicado {job.postedAt}</span>
-                    <span className="text-xs font-bold text-[#1E5BFF] group-hover:underline">Ver detalhes</span>
+                  {job.isUrgent && !showSponsoredBadge && (
+                      <div className="absolute top-0 right-0 bg-red-500 text-white text-[9px] font-black px-2 py-1 rounded-bl-xl uppercase tracking-wider">
+                          Urgente
+                      </div>
+                  )}
+                  
+                  <div className="flex justify-between items-start mb-3 pr-16">
+                      <div>
+                          <h3 className="font-bold text-gray-900 dark:text-white text-lg leading-tight">{job.role}</h3>
+                          <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">{job.company}</p>
+                      </div>
+                  </div>
+
+                  <div className="flex flex-wrap gap-2 mb-4">
+                      <span className="px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 text-[10px] font-bold uppercase rounded-md border border-gray-200 dark:border-gray-600">
+                          {job.type}
+                      </span>
+                      <span className={`px-2 py-1 text-[10px] font-bold uppercase rounded-md border ${
+                          job.neighborhood === currentNeighborhood && !isAll
+                           ? 'bg-blue-50 text-blue-600 border-blue-100 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800'
+                           : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-600'
+                      }`}>
+                          {job.neighborhood}
+                      </span>
+                      {job.salary && (
+                          <span className="px-2 py-1 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 text-[10px] font-bold uppercase rounded-md border border-green-100 dark:border-green-800">
+                              {job.salary}
+                          </span>
+                      )}
+                  </div>
+
+                  <div className="flex items-center justify-between pt-3 border-t border-gray-100 dark:border-gray-700">
+                      <span className="text-xs text-gray-400 font-medium">Publicado {job.postedAt}</span>
+                      <span className={`text-xs font-bold group-hover:underline ${showSponsoredBadge ? 'text-amber-600 dark:text-amber-400' : 'text-[#1E5BFF]'}`}>
+                          Ver detalhes
+                      </span>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>
