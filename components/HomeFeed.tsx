@@ -174,7 +174,7 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void }> = ({ onNavigat
           setCurrentIndex((current) => (current + 1) % banners.length);
           return 0;
         }
-        return prev + 0.4; 
+        return prev + 0.75; 
       });
     }, 30);
     return () => clearInterval(interval);
@@ -205,24 +205,31 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void }> = ({ onNavigat
         <div className="absolute -top-24 -right-24 w-64 h-64 bg-white/10 rounded-full blur-3xl pointer-events-none"></div>
         <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-black/10 rounded-full blur-3xl pointer-events-none"></div>
 
-        {/* Central Icon */}
-        <div className="absolute inset-0 flex flex-col items-center justify-center p-6 pb-20">
-           <div className="p-6 bg-white/10 backdrop-blur-md rounded-[2.5rem] border border-white/20 shadow-2xl animate-in zoom-in duration-700">
-              <current.Icon className="w-16 h-16 text-white drop-shadow-xl" strokeWidth={2} />
+        {/* --- REESTRUTURAÇÃO DO CONTEÚDO PARA EVITAR SOBREPOSIÇÃO --- */}
+        <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center z-10">
+           
+           {/* 1. Ícone Superior Centralizado */}
+           <div className="p-5 bg-white/10 backdrop-blur-md rounded-[2.5rem] border border-white/20 shadow-2xl animate-in zoom-in duration-700 mb-6 group-hover:scale-105 transition-transform">
+              <current.Icon className="w-14 h-14 text-white drop-shadow-xl" strokeWidth={2} />
            </div>
-        </div>
 
-        {/* Content Info */}
-        <div className="absolute inset-x-0 bottom-0 p-6 pt-10 flex flex-col items-center text-center z-20 bg-gradient-to-t from-black/20 to-transparent">
-          <span className="bg-white/20 text-white text-[9px] font-black px-2.5 py-1 rounded-lg uppercase tracking-[0.2em] shadow-sm mb-3 border border-white/20 backdrop-blur-sm">
-            {current.tag}
-          </span>
-          <h3 className="text-2xl font-black text-white leading-tight font-display tracking-tight mb-2 drop-shadow-md">
+           {/* 2. Selo (Tag) abaixo do ícone com espaçamento seguro */}
+           <div className="animate-in slide-in-from-bottom-2 duration-500 delay-100 fill-mode-both">
+              <span className="bg-white/20 text-white text-[8px] font-black px-2.5 py-1 rounded-lg uppercase tracking-[0.2em] shadow-sm border border-white/20 backdrop-blur-sm">
+                {current.tag}
+              </span>
+           </div>
+
+           {/* 3. Título Principal */}
+           <h3 className="text-2xl font-[900] text-white leading-tight font-display tracking-tight mt-4 mb-2 drop-shadow-md animate-in slide-in-from-bottom-3 duration-500 delay-200 fill-mode-both">
             {current.title}
-          </h3>
-          <p className="text-xs text-white/90 font-medium line-clamp-2 leading-relaxed opacity-90 max-w-[280px]">
+           </h3>
+
+           {/* 4. Subtítulo */}
+           <p className="text-xs text-white/85 font-medium line-clamp-2 leading-relaxed max-w-[280px] animate-in slide-in-from-bottom-4 duration-500 delay-300 fill-mode-both">
             {current.subtitle}
-          </p>
+           </p>
+
         </div>
 
         {/* Progress Indicators */}
