@@ -1,12 +1,11 @@
 
 import React from 'react';
 import { Home, Search, QrCode, Wrench, Users } from 'lucide-react';
-import { UserRole } from '../types';
 
 interface BottomNavProps {
   activeTab: string;
   setActiveTab: (tab: string) => void;
-  userRole?: UserRole | null;
+  userRole?: 'cliente' | 'lojista' | null;
   onCashbackClick?: () => void;
 }
 

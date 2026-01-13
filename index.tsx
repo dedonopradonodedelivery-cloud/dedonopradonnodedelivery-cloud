@@ -3,6 +3,8 @@ import React, { useEffect } from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App'; 
 import { AuthProvider, useAuth } from './contexts/AuthContext'; 
+import { ConfigProvider } from './contexts/ConfigContext';
+import { NeighborhoodProvider } from './contexts/NeighborhoodContext';
 import { supabase } from './lib/supabaseClient';
 import './index.css';
 
@@ -19,7 +21,6 @@ const AuthSync: React.FC = () => {
 
   const registerFcmToken = async (userId: string) => {
     try {
-      // Busca perfil atual para ver se token já existe
       const { data } = await supabase.from('profiles').select('fcmTokens').eq('id', userId).single();
       if (data) {
         const tokens = data.fcmTokens || [];
@@ -42,9 +43,13 @@ if (rootElement) {
   const root = ReactDOM.createRoot(rootElement);
   root.render(
     <React.StrictMode>
-      <AuthProvider>
-        <AuthSync />
-      </AuthProvider>
+      <ConfigProvider>
+        <NeighborhoodProvider>
+          <AuthProvider>
+            <AuthSync />
+          </AuthProvider>
+        </NeighborhoodProvider>
+      </ConfigProvider>
     </React.StrictMode>
   );
 }

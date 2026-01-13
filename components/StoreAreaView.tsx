@@ -25,7 +25,6 @@ import {
 } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import { User } from '@supabase/supabase-js';
-import { useConfig } from '../contexts/ConfigContext';
 
 // Definição da interface sincronizada com o App.tsx
 interface StoreAreaViewProps {
@@ -105,7 +104,6 @@ const MenuLink: React.FC<{
 );
 
 export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate, user }) => {
-  const { features } = useConfig();
   const [isCashbackEnabled, setIsCashbackEnabled] = useState(true);
   const [dateRange, setDateRange] = useState<DateRange>('30d');
   const [pendingRequestsCount, setPendingRequestsCount] = useState(0);
@@ -189,7 +187,7 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
         </div>
 
         <div className="flex items-center gap-4">
-            <div className="w-14 h-14 rounded-2xl bg-gray-200 dark:bg-gray-700 overflow-hidden border-2 border-gray-100 dark:border-gray-600 shadow-sm">
+            <div className="w-14 h-14 rounded-2xl bg-gray-200 dark:bg-gray-700 overflow-hidden border-2 border-gray-100 dark:border-gray-700 overflow-hidden border-2 border-gray-100 dark:border-gray-600 shadow-sm">
                 <img src={STORE_DATA.logo} alt="Logo" className="w-full h-full object-cover" />
             </div>
             <div>
@@ -212,7 +210,7 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
 
       <div className="p-5 space-y-8">
         
-        {features.cashbackEnabled && pendingRequestsCount > 0 && (
+        {pendingRequestsCount > 0 && (
             <button 
                 onClick={() => onNavigate && onNavigate('merchant_requests')}
                 className="w-full bg-red-500 text-white p-4 rounded-2xl shadow-lg shadow-red-500/30 flex items-center justify-between animate-pulse active:scale-95 transition-transform"
@@ -276,7 +274,7 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
                 <KPICard icon={ShoppingBag} label="Pedidos" value={currentKpis.orders.toString()} color="bg-blue-500" />
                 <KPICard icon={Users} label="Novos Clientes" value={`+${currentKpis.newCustomers}`} color="bg-purple-500" />
                 <KPICard icon={Repeat} label="Recorrentes" value={currentKpis.recurringCustomers.toString()} color="bg-[#1E5BFF]" />
-                {features.cashbackEnabled && <KPICard icon={TrendingUp} label="Cashback Gerado" value={formatCurrency(currentKpis.cashbackGiven)} color="bg-[#1E5BFF]" />}
+                <KPICard icon={TrendingUp} label="Cashback Gerado" value={formatCurrency(currentKpis.cashbackGiven)} color="bg-[#1E5BFF]" />
                 <KPICard icon={Wallet} label="Saldo Anúncios" value={formatCurrency(currentKpis.adBalance)} color="bg-gray-500" />
             </div>
         </div>
@@ -286,54 +284,48 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
                 Gestão da Loja
             </h3>
             <div className="rounded-2xl overflow-hidden shadow-sm border border-gray-100 dark:border-gray-700">
-                {features.couponsEnabled && (
-                  <MenuLink 
-                      icon={Tag} 
-                      label="Promoção da Semana" 
-                      highlight={true}
-                      onClick={() => onNavigate && onNavigate('weekly_promo')}
-                  />
-                )}
-                {features.jobsEnabled && (
-                  <MenuLink 
-                      icon={Briefcase} 
-                      label="Vagas de Emprego" 
-                      highlight={true}
-                      onClick={() => onNavigate && onNavigate('merchant_jobs')}
-                  />
-                )}
+                <MenuLink 
+                    icon={Tag} 
+                    label="Promoção da Semana" 
+                    highlight={true}
+                    onClick={() => onNavigate && onNavigate('weekly_promo')}
+                />
+                <MenuLink 
+                    icon={Briefcase} 
+                    label="Vagas de Emprego" 
+                    highlight={true}
+                    onClick={() => onNavigate && onNavigate('merchant_jobs')}
+                />
                 <MenuLink icon={Settings} label="Minha Loja (Perfil Público)" onClick={() => onNavigate && onNavigate('store_profile')} />
                 <MenuLink icon={CreditCard} label="Minha conta / Financeiro" onClick={() => onNavigate && onNavigate('store_finance')} />
                 <MenuLink icon={HelpCircle} label="Suporte ao Lojista" onClick={() => onNavigate && onNavigate('store_support')} />
             </div>
         </div>
 
-        {features.cashbackEnabled && (
-          <div className="bg-white dark:bg-gray-800 rounded-3xl p-5 shadow-sm border border-gray-100 dark:border-gray-700 relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-24 h-24 bg-blue-500/10 rounded-bl-full -mr-4 -mt-4"></div>
-              <div className="flex justify-between items-start mb-4 relative z-10">
-                  <div className="flex items-center gap-2">
-                      <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg text-blue-600 dark:text-blue-400">
-                          <TrendingUp className="w-5 h-5" />
-                      </div>
-                      <h3 className="font-bold text-gray-900 dark:text-white">Cashback da Loja</h3>
-                  </div>
-                  <button 
-                      onClick={() => setIsCashbackEnabled(!isCashbackEnabled)}
-                      className={`w-12 h-6 rounded-full p-1 transition-colors duration-300 ${isCashbackEnabled ? 'bg-green-500' : 'bg-gray-300 dark:bg-gray-600'}`}
-                  >
-                      <div className={`w-4 h-4 bg-white rounded-full shadow-sm transition-transform duration-300 ${isCashbackEnabled ? 'translate-x-6' : 'translate-x-0'}`}></div>
-                  </button>
-              </div>
-              <div className="flex gap-4 mb-4">
-                  <div><p className="text-xs text-gray-500 dark:text-gray-400">Taxa atual</p><p className="font-bold text-gray-900 dark:text-white text-xl">5%</p></div>
-                  <div><p className="text-xs text-gray-500 dark:text-gray-400">Retorno</p><p className="font-bold text-green-600 text-xl">R$ 4,5k</p></div>
-              </div>
-              <button onClick={() => onNavigate && onNavigate('store_cashback_module')} className="w-full py-2.5 rounded-xl border border-gray-200 dark:border-gray-600 text-sm font-bold text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                  Ver painel completo de fidelidade
-              </button>
-          </div>
-        )}
+        <div className="bg-white dark:bg-gray-800 rounded-3xl p-5 shadow-sm border border-gray-100 dark:border-gray-700 relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-24 h-24 bg-blue-500/10 rounded-bl-full -mr-4 -mt-4"></div>
+            <div className="flex justify-between items-start mb-4 relative z-10">
+                <div className="flex items-center gap-2">
+                    <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg text-blue-600 dark:text-blue-400">
+                        <TrendingUp className="w-5 h-5" />
+                    </div>
+                    <h3 className="font-bold text-gray-900 dark:text-white">Cashback da Loja</h3>
+                </div>
+                <button 
+                    onClick={() => setIsCashbackEnabled(!isCashbackEnabled)}
+                    className={`w-12 h-6 rounded-full p-1 transition-colors duration-300 ${isCashbackEnabled ? 'bg-green-500' : 'bg-gray-300 dark:bg-gray-600'}`}
+                >
+                    <div className={`w-4 h-4 bg-white rounded-full shadow-sm transition-transform duration-300 ${isCashbackEnabled ? 'translate-x-6' : 'translate-x-0'}`}></div>
+                </button>
+            </div>
+            <div className="flex gap-4 mb-4">
+                <div><p className="text-xs text-gray-500 dark:text-gray-400">Taxa atual</p><p className="font-bold text-gray-900 dark:text-white text-xl">5%</p></div>
+                <div><p className="text-xs text-gray-500 dark:text-gray-400">Retorno</p><p className="font-bold text-green-600 text-xl">R$ 4,5k</p></div>
+            </div>
+            <button onClick={() => onNavigate && onNavigate('store_cashback_module')} className="w-full py-2.5 rounded-xl border border-gray-200 dark:border-gray-600 text-sm font-bold text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                Ver painel completo de fidelidade
+            </button>
+        </div>
 
         {/* CARD DE DESTAQUE ATUALIZADO */}
         <div className="bg-slate-900 rounded-[2.5rem] p-8 shadow-2xl border border-white/10 relative overflow-hidden group">

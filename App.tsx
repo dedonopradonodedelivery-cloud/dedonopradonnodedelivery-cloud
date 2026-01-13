@@ -29,10 +29,9 @@ import { MerchantQrScreen } from './components/MerchantQrScreen';
 import { WeeklyPromoModule } from './components/WeeklyPromoModule';
 import { JobsView } from './components/JobsView';
 import { MerchantJobsModule } from './components/MerchantJobsModule';
-import { MapPin, ShieldCheck, ShieldAlert, AlertCircle } from 'lucide-react';
+import { MapPin, ShieldCheck, AlertCircle } from 'lucide-react';
 import { useAuth } from './contexts/AuthContext';
-import { NeighborhoodProvider } from './contexts/NeighborhoodContext';
-import { ConfigProvider, useConfig } from './contexts/ConfigContext';
+import { useConfig } from './contexts/ConfigContext';
 import { Category, Store, AdType, EditorialCollection, ThemeMode } from './types';
 import { getStoreLogo } from './utils/mockLogos';
 import { CategoryView } from './components/CategoryView';
@@ -47,7 +46,6 @@ import { StoreFinanceModule } from './components/StoreFinanceModule';
 import { CommunityFeedView } from './components/CommunityFeedView';
 import { STORES } from './constants';
 import { AdminModerationPanel } from './components/AdminModerationPanel';
-import { AdminConfigPanel } from './components/AdminConfigPanel';
 import { 
   AboutView, 
   SupportView, 
@@ -56,39 +54,29 @@ import {
   SponsorInfoView 
 } from './components/SimplePages';
 
-// Global para persistência entre ciclos de vida se necessário
 let isFirstBootAttempted = false;
 
-// Tabs that support horizontal swipe navigation (Main Bottom Bar Tabs)
 const MAIN_TABS = ['home', 'explore', 'qrcode_scan', 'services', 'community_feed'];
 
 const FeatureUnavailable: React.FC<{ onBack: () => void; title: string }> = ({ onBack, title }) => (
-  <div className="min-h-screen flex flex-col items-center justify-center p-6 text-center bg-white dark:bg-gray-900 animate-in fade-in duration-300">
+  <div className="min-h-screen flex flex-col items-center justify-center p-6 text-center bg-white dark:bg-gray-900">
     <div className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mb-4 text-gray-400">
       <AlertCircle className="w-8 h-8" />
     </div>
     <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">{title} indisponível</h2>
-    <p className="text-gray-500 dark:text-gray-400 text-sm mb-8 max-w-xs font-medium">
-      Esta funcionalidade foi desativada temporariamente. Tente novamente mais tarde.
-    </p>
-    <button onClick={onBack} className="bg-[#1E5BFF] text-white font-bold py-3 px-8 rounded-full shadow-lg active:scale-95 transition-transform">
-      Voltar ao início
-    </button>
+    <p className="text-gray-500 dark:text-gray-400 text-sm mb-8">Esta funcionalidade foi desativada temporariamente.</p>
+    <button onClick={onBack} className="bg-[#1E5BFF] text-white font-bold py-3 px-8 rounded-full">Voltar ao início</button>
   </div>
 );
 
 const AppContent: React.FC = () => {
   const { user, userRole, loading: isAuthInitialLoading, signOut } = useAuth();
   const { features } = useConfig();
-  
-  // UX ENGINEER: Detecta se estamos voltando de um login com Google (OAuth)
   const isAuthReturn = window.location.hash.includes('access_token') || window.location.search.includes('code=');
   
   const [splashStage, setSplashStage] = useState(isFirstBootAttempted || isAuthReturn ? 4 : 0);
-  
   const [themeMode, setThemeMode] = useState<ThemeMode>(() => (localStorage.getItem('localizei_theme_mode') as ThemeMode) || 'light');
   const [isDarkMode, setIsDarkMode] = useState(false);
-
   const [activeTab, setActiveTab] = useState(() => localStorage.getItem('localizei_active_tab') || 'home');
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
   const [selectedStore, setSelectedStore] = useState<Store | null>(null);
@@ -97,7 +85,6 @@ const AppContent: React.FC = () => {
   const [scannedData, setScannedData] = useState<{ merchantId: string; storeId: string } | null>(null);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [globalSearch, setGlobalSearch] = useState('');
-
   const [selectedServiceMacro, setSelectedServiceMacro] = useState<{id: string, name: string} | null>(null);
   const [selectedServiceSub, setSelectedServiceSub] = useState<string | null>(null);
   const [isQuoteModalOpen, setIsQuoteModalOpen] = useState(false);
@@ -112,13 +99,13 @@ const AppContent: React.FC = () => {
 
   useEffect(() => {
     if (splashStage === 4) return;
-    const t1 = setTimeout(() => setSplashStage(1), 1200);
-    const t2 = setTimeout(() => setSplashStage(2), 1500);
-    const t3 = setTimeout(() => setSplashStage(3), 4600);
+    const t1 = setTimeout(() => setSplashStage(1), 400);
+    const t2 = setTimeout(() => setSplashStage(2), 1000);
+    const t3 = setTimeout(() => setSplashStage(3), 3500);
     const t4 = setTimeout(() => {
         setSplashStage(4);
         isFirstBootAttempted = true;
-    }, 5000);
+    }, 4000);
     return () => {
         clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); clearTimeout(t4);
     };
@@ -126,66 +113,19 @@ const AppContent: React.FC = () => {
 
   useEffect(() => {
     const applyTheme = () => {
-      let isDark = false;
-      if (themeMode === 'auto') {
-        isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      } else {
-        isDark = themeMode === 'dark';
-      }
+      let isDark = themeMode === 'auto' ? window.matchMedia('(prefers-color-scheme: dark)').matches : themeMode === 'dark';
       setIsDarkMode(isDark);
-      if (isDark) {
-        document.documentElement.classList.add('dark');
-      } else {
-        document.documentElement.classList.remove('dark');
-      }
+      if (isDark) document.documentElement.classList.add('dark');
+      else document.documentElement.classList.remove('dark');
     };
     applyTheme();
     localStorage.setItem('localizei_theme_mode', themeMode);
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    const handleChange = () => {
-      if (themeMode === 'auto') applyTheme();
-    };
-    mediaQuery.addEventListener('change', handleChange);
-    return () => mediaQuery.removeEventListener('change', handleChange);
   }, [themeMode]);
 
-  const toggleTheme = () => {
-    setThemeMode(prev => prev === 'light' ? 'dark' : 'light');
-  };
-  
   const handleCashbackClick = () => {
-    if (!features.cashbackEnabled) {
-      setActiveTab('cashback_unavailable');
-      return;
-    }
+    if (!features.cashbackEnabled) { setActiveTab('cashback_unavailable'); return; }
     if (user) setActiveTab('qrcode_scan');
     else setIsAuthOpen(true);
-  };
-
-  const handleSelectCategory = (category: Category) => {
-    setSelectedCategory(category);
-    setActiveTab('category_detail'); 
-  };
-  
-  const handleSelectCollection = (collection: EditorialCollection) => {
-    setSelectedCollection(collection);
-    setActiveTab('editorial_list');
-  };
-
-  const handleSelectStore = (store: Store) => {
-    setSelectedStore(store);
-    setActiveTab('store_detail');
-  };
-
-  const isHorizontalScroll = (target: Element | null): boolean => {
-    if (!target) return false;
-    if (target.id === 'root') return false;
-    const style = window.getComputedStyle(target);
-    const overflowX = style.getPropertyValue('overflow-x');
-    if ((overflowX === 'auto' || overflowX === 'scroll') && target.scrollWidth > target.clientWidth) {
-      return true;
-    }
-    return isHorizontalScroll(target.parentElement);
   };
 
   const onTouchStart = (e: React.TouchEvent) => {
@@ -193,30 +133,13 @@ const AppContent: React.FC = () => {
   };
 
   const onTouchEnd = (e: React.TouchEvent) => {
-    if (!touchStart.current) return;
-    if (!MAIN_TABS.includes(activeTab)) return;
-    if (['INPUT', 'TEXTAREA'].includes((document.activeElement as Element)?.tagName)) return;
+    if (!touchStart.current || !MAIN_TABS.includes(activeTab)) return;
     const touchEndX = e.changedTouches[0].clientX;
-    const touchEndY = e.changedTouches[0].clientY;
     const deltaX = touchStart.current.x - touchEndX;
-    const deltaY = touchStart.current.y - touchEndY;
-    if (Math.abs(deltaY) > Math.abs(deltaX)) return;
     if (Math.abs(deltaX) < minSwipeDistance) return;
-    if (isHorizontalScroll(touchStart.current.target as Element)) return;
     const currentIndex = MAIN_TABS.indexOf(activeTab);
-    if (deltaX > 0) {
-      if (currentIndex < MAIN_TABS.length - 1) {
-        const nextTab = MAIN_TABS[currentIndex + 1];
-        if (nextTab === 'qrcode_scan') handleCashbackClick();
-        else setActiveTab(nextTab);
-      }
-    } else {
-      if (currentIndex > 0) {
-        const prevTab = MAIN_TABS[currentIndex - 1];
-        if (prevTab === 'qrcode_scan') handleCashbackClick();
-        else setActiveTab(prevTab);
-      }
-    }
+    if (deltaX > 0 && currentIndex < MAIN_TABS.length - 1) setActiveTab(MAIN_TABS[currentIndex + 1]);
+    else if (deltaX < 0 && currentIndex > 0) setActiveTab(MAIN_TABS[currentIndex - 1]);
   };
 
   const headerExclusionList = [
@@ -227,232 +150,62 @@ const AppContent: React.FC = () => {
     'service_subcategories', 'service_specialties', 'service_terms', 'service_success',
     'user_statement', 'merchant_cashback_dashboard', 'merchant_cashback_onboarding',
     'store_cashback_module', 'store_ads_module', 'about', 'support', 'invite_friend', 'favorites',
-    'weekly_promo', 'jobs_list', 'merchant_jobs', 'community_feed', 'admin_moderation', 'admin_config',
-    'cashback_unavailable', 'jobs_unavailable', 'promo_unavailable', 'agency_unavailable'
+    'weekly_promo', 'jobs_list', 'merchant_jobs', 'community_feed', 'admin_moderation',
+    'cashback_unavailable'
   ];
 
-  // A aba 'profile' (Menu) foi removida desta lista para garantir que a BottomBar continue visível
-  const hideBottomNav = [
-    'store_ads_module', 'store_detail', 'admin_moderation', 'admin_config',
-    'cashback_unavailable', 'jobs_unavailable', 'promo_unavailable', 'agency_unavailable'
-  ].includes(activeTab);
+  const hideBottomNav = ['store_ads_module', 'store_detail', 'admin_moderation', 'cashback_unavailable'].includes(activeTab);
 
   return (
-    <div 
-      className="min-h-screen bg-white dark:bg-gray-900 flex justify-center transition-colors duration-300 relative"
-      onTouchStart={onTouchStart}
-      onTouchEnd={onTouchEnd}
-    >
-      <Layout 
-          activeTab={activeTab} 
-          setActiveTab={setActiveTab} 
-          userRole={userRole} 
-          onCashbackClick={handleCashbackClick}
-          hideNav={hideBottomNav}
-      >
+    <div className="min-h-screen bg-white dark:bg-gray-900 flex justify-center transition-colors duration-300 relative" onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
+      <Layout activeTab={activeTab} setActiveTab={setActiveTab} userRole={userRole} onCashbackClick={handleCashbackClick} hideNav={hideBottomNav}>
           {!headerExclusionList.includes(activeTab) && (
-          <Header
-              isDarkMode={isDarkMode}
-              toggleTheme={toggleTheme}
-              onAuthClick={() => setActiveTab('profile')} 
-              user={user}
-              searchTerm={globalSearch}
-              onSearchChange={setGlobalSearch}
-              onNavigate={setActiveTab}
-              activeTab={activeTab}
-              userRole={userRole}
-              onOpenMerchantQr={() => setActiveTab('merchant_qr')}
-          />
+          <Header isDarkMode={isDarkMode} toggleTheme={() => setThemeMode(prev => prev === 'light' ? 'dark' : 'light')} onAuthClick={() => setActiveTab('profile')} user={user} searchTerm={globalSearch} onSearchChange={setGlobalSearch} onNavigate={setActiveTab} activeTab={activeTab} userRole={userRole} onOpenMerchantQr={() => setActiveTab('merchant_qr')} />
           )}
           <main className="animate-in fade-in duration-500 w-full max-w-md mx-auto">
           {activeTab === 'home' && (
-              <HomeFeed
-              onNavigate={setActiveTab}
-              onSelectCategory={handleSelectCategory}
-              onSelectCollection={handleSelectCollection}
-              onStoreClick={handleSelectStore}
-              stores={STORES}
-              searchTerm={globalSearch}
-              user={user as any}
-              userRole={userRole}
-              onSpinWin={(reward) => { setSelectedReward(reward); setActiveTab('reward_details'); }}
-              onRequireLogin={() => setIsAuthOpen(true)}
-              />
+              <HomeFeed onNavigate={setActiveTab} onSelectCategory={(cat) => { setSelectedCategory(cat); setActiveTab('category_detail'); }} onSelectCollection={(col) => { setSelectedCollection(col); setActiveTab('editorial_list'); }} onStoreClick={(store) => { setSelectedStore(store); setActiveTab('store_detail'); }} stores={STORES} searchTerm={globalSearch} user={user as any} userRole={userRole} onSpinWin={(reward) => { setSelectedReward(reward); setActiveTab('reward_details'); }} onRequireLogin={() => setIsAuthOpen(true)} />
           )}
-          {activeTab === 'explore' && (
-              <ExploreView 
-              stores={STORES} 
-              searchQuery={globalSearch} 
-              onStoreClick={handleSelectStore} 
-              onLocationClick={() => {}} 
-              onFilterClick={() => {}} 
-              onOpenPlans={() => {}}
-              onNavigate={setActiveTab}
-              />
-          )}
-          
-          {/* GUARDS FOR FEATURE FLAGS */}
+          {activeTab === 'explore' && <ExploreView stores={STORES} searchQuery={globalSearch} onStoreClick={(s) => { setSelectedStore(s); setActiveTab('store_detail'); }} onLocationClick={() => {}} onFilterClick={() => {}} onOpenPlans={() => {}} onNavigate={setActiveTab} />}
           {activeTab === 'cashback_unavailable' && <FeatureUnavailable onBack={() => setActiveTab('home')} title="Cashback" />}
-          {activeTab === 'jobs_unavailable' && <FeatureUnavailable onBack={() => setActiveTab('home')} title="Mural de Vagas" />}
-          {activeTab === 'promo_unavailable' && <FeatureUnavailable onBack={() => setActiveTab('home')} title="Promoções" />}
-          {activeTab === 'agency_unavailable' && <FeatureUnavailable onBack={() => setActiveTab('home')} title="Agência" />}
-
-          {activeTab === 'user_statement' && (
-              features.cashbackEnabled ? 
-                <UserStatementView onBack={() => setActiveTab('profile')} onExploreStores={() => setActiveTab('explore')} balance={12.40} /> :
-                <FeatureUnavailable onBack={() => setActiveTab('home')} title="Cashback" />
-          )}
-          
-          {activeTab === 'weekly_promo' && (
-              features.couponsEnabled ? 
-                <WeeklyPromoModule onBack={() => setActiveTab('store_area')} /> :
-                <FeatureUnavailable onBack={() => setActiveTab('store_area')} title="Promoções" />
-          )}
-
-          {activeTab === 'jobs_list' && (
-              features.jobsEnabled ? 
-                <JobsView onBack={() => setActiveTab('home')} /> :
-                <FeatureUnavailable onBack={() => setActiveTab('home')} title="Vagas" />
-          )}
-
-          {activeTab === 'merchant_jobs' && (
-              features.jobsEnabled ? 
-                <MerchantJobsModule onBack={() => setActiveTab('store_area')} /> :
-                <FeatureUnavailable onBack={() => setActiveTab('store_area')} title="Vagas" />
-          )}
-
-          {activeTab === 'merchant_cashback_onboarding' && (
-              features.cashbackEnabled ? 
-                <MerchantCashbackOnboarding onBack={() => setActiveTab('home')} onActivate={() => setActiveTab('store_cashback_module')} /> :
-                <FeatureUnavailable onBack={() => setActiveTab('home')} title="Cashback" />
-          )}
-          
-          {activeTab === 'merchant_cashback_dashboard' && (
-               features.cashbackEnabled ? 
-                <MerchantCashbackDashboard onBack={() => setActiveTab('home')} onNavigate={setActiveTab} /> :
-                <FeatureUnavailable onBack={() => setActiveTab('home')} title="Cashback" />
-          )}
-          
-          {activeTab === 'store_cashback_module' && (
-              features.cashbackEnabled ? 
-                <StoreCashbackModule onBack={() => setActiveTab('home')} /> :
-                <FeatureUnavailable onBack={() => setActiveTab('home')} title="Cashback" />
-          )}
-
-          {activeTab === 'store_ads_module' && <StoreAdsModule onBack={() => setActiveTab('store_area')} />}
-          {activeTab === 'store_profile' && <StoreProfileEdit onBack={() => setActiveTab('store_area')} />}
-          {activeTab === 'store_finance' && <StoreFinanceModule onBack={() => setActiveTab('store_area')} />}
-          
-          {activeTab === 'community_feed' && (
-              <CommunityFeedView 
-                  onStoreClick={handleSelectStore} 
-                  user={user as any}
-                  onRequireLogin={() => setIsAuthOpen(true)}
-              />
-          )}
-
+          {activeTab === 'community_feed' && <CommunityFeedView onStoreClick={(s) => { setSelectedStore(s); setActiveTab('store_detail'); }} user={user as any} onRequireLogin={() => setIsAuthOpen(true)} />}
+          {activeTab === 'profile' && <MenuView user={user as any} userRole={userRole} onAuthClick={() => setIsAuthOpen(true)} onNavigate={setActiveTab} onBack={() => setActiveTab('home')} currentTheme={themeMode} onThemeChange={setThemeMode} />}
+          {activeTab === 'store_area' && (userRole === 'lojista' ? <StoreAreaView onBack={() => setActiveTab('home')} onNavigate={setActiveTab} user={user as any} /> : <FreguesiaConnectRestricted onBack={() => setActiveTab('home')} />)}
+          {activeTab === 'category_detail' && selectedCategory && <CategoryView category={selectedCategory} onBack={() => { setActiveTab('home'); setSelectedCategory(null); }} onStoreClick={(s) => { setSelectedStore(s); setActiveTab('store_detail'); }} stores={STORES} />}
+          {activeTab === 'services' && <ServicesView onSelectMacro={(id, name) => { setSelectedServiceMacro({id, name}); if (id === 'emergency') { setQuoteCategory(name); setIsQuoteModalOpen(true); } else { setActiveTab('service_subcategories'); } }} onOpenTerms={() => setActiveTab('service_terms')} onNavigate={setActiveTab} searchTerm={globalSearch} />}
+          {activeTab === 'qrcode_scan' && (features.cashbackEnabled ? <CashbackScanScreen onBack={() => setActiveTab('home')} onScanSuccess={(data) => { setScannedData(data); setActiveTab('scan_confirmation'); }} /> : <FeatureUnavailable onBack={() => setActiveTab('home')} title="Cashback" />)}
+          {activeTab === 'scan_confirmation' && scannedData && <ScanConfirmationScreen storeId={scannedData.storeId} onConfirm={() => setActiveTab('cashback_payment')} onCancel={() => setActiveTab('home')} />}
+          {activeTab === 'cashback_payment' && scannedData && <CashbackPaymentScreen user={user as any} merchantId={scannedData.merchantId} storeId={scannedData.storeId} onBack={() => setActiveTab('home')} onComplete={() => setActiveTab('home')} />}
+          {activeTab === 'store_detail' && selectedStore && <StoreDetailView store={selectedStore} onBack={() => setActiveTab('home')} />}
+          {activeTab === 'patrocinador_master' && <PatrocinadorMasterScreen onBack={() => setActiveTab('home')} />}
           {activeTab === 'about' && <AboutView onBack={() => setActiveTab('profile')} />}
           {activeTab === 'support' && <SupportView onBack={() => setActiveTab('profile')} />}
           {activeTab === 'invite_friend' && <InviteFriendView onBack={() => setActiveTab('profile')} />}
           {activeTab === 'favorites' && <FavoritesView user={user as any} onBack={() => setActiveTab('profile')} onNavigate={setActiveTab} />}
-          {activeTab === 'editorial_list' && selectedCollection && (
-              <EditorialListView collection={selectedCollection} stores={STORES} onBack={() => { setActiveTab('home'); setSelectedCollection(null); }} onStoreClick={handleSelectStore} />
-          )}
-          {activeTab === 'services' && (
-              <ServicesView onSelectMacro={(id, name) => {
-                  setSelectedServiceMacro({id, name});
-                  if (id === 'emergency') { setQuoteCategory(name); setIsQuoteModalOpen(true); } 
-                  else { setActiveTab('service_subcategories'); }
-              }} 
-              onOpenTerms={() => setActiveTab('service_terms')} onNavigate={setActiveTab} searchTerm={globalSearch}
-              />
-          )}
-          {activeTab === 'store_area' && (userRole === 'lojista' ? <StoreAreaView onBack={() => setActiveTab('home')} onNavigate={setActiveTab} user={user as any} /> : <FreguesiaConnectRestricted onBack={() => setActiveTab('home')} />)}
-          {activeTab === 'merchant_qr' && (userRole === 'lojista' ? <MerchantQrScreen user={user} onBack={() => setActiveTab('home')} /> : <FreguesiaConnectRestricted onBack={() => setActiveTab('home')} />)}
-          {activeTab === 'admin_moderation' && <AdminModerationPanel onBack={() => setActiveTab('profile')} />}
-          
-          {activeTab === 'admin_config' && (
-              userRole === 'admin' ? 
-                <AdminConfigPanel onBack={() => setActiveTab('profile')} /> : 
-                <div className="min-h-screen flex flex-col items-center justify-center p-6 text-center animate-in fade-in duration-300">
-                    <div className="w-16 h-16 bg-red-50 dark:bg-red-900/20 rounded-full flex items-center justify-center mb-4">
-                        <ShieldAlert className="w-8 h-8 text-red-500" />
-                    </div>
-                    <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Acesso Restrito</h2>
-                    <p className="text-gray-500 dark:text-gray-400 mb-8 max-w-xs text-sm font-medium">
-                        Você não tem permissão para acessar as configurações remotas do sistema.
-                    </p>
-                    <button onClick={() => setActiveTab('home')} className="bg-[#1E5BFF] text-white font-bold py-3 px-8 rounded-full shadow-lg active:scale-95 transition-transform">Voltar ao início</button>
-                </div>
-          )}
-
-          {activeTab === 'category_detail' && selectedCategory && (
-              <CategoryView 
-                  category={selectedCategory} 
-                  onBack={() => { setActiveTab('home'); setSelectedCategory(null); }} 
-                  onStoreClick={handleSelectStore} 
-                  stores={STORES} 
-              />
-          )}
-          
-          {activeTab === 'service_subcategories' && selectedServiceMacro && <SubcategoriesView macroId={selectedServiceMacro.id} macroName={selectedServiceMacro.name} onBack={() => setActiveTab('services')} onSelectSubcategory={(subName) => { setSelectedServiceSub(subName); setActiveTab('service_specialties'); }} />}
-          {activeTab === 'service_specialties' && selectedServiceSub && <SpecialtiesView subcategoryName={selectedServiceSub} onBack={() => setActiveTab('service_subcategories')} onSelectSpecialty={(specialty) => { setQuoteCategory(`${selectedServiceSub} - ${specialty}`); setIsQuoteModalOpen(true); }} />}
-          {activeTab === 'service_success' && <ServiceSuccessView onViewRequests={() => alert('Meus Pedidos')} onHome={() => setActiveTab('home')} />}
-          {activeTab === 'service_terms' && <ServiceTermsView onBack={() => setActiveTab('services')} />}
-          {activeTab === 'freguesia_connect_public' && <FreguesiaConnectPublic onBack={() => setActiveTab('home')} onLogin={() => setIsAuthOpen(true)} />}
-          {activeTab === 'freguesia_connect_dashboard' && <FreguesiaConnectDashboard onBack={() => setActiveTab('home')} />}
-          {activeTab === 'freguesia_connect_restricted' && <FreguesiaConnectRestricted onBack={() => setActiveTab('home')} />}
-          
-          {activeTab === 'qrcode_scan' && (
-              features.cashbackEnabled ? 
-                <CashbackScanScreen onBack={() => setActiveTab('home')} onScanSuccess={(data) => { setScannedData(data); setActiveTab('scan_confirmation'); }} /> :
-                <FeatureUnavailable onBack={() => setActiveTab('home')} title="Cashback" />
-          )}
-
-          {activeTab === 'scan_confirmation' && scannedData && <ScanConfirmationScreen storeId={scannedData.storeId} onConfirm={() => setActiveTab('cashback_payment')} onCancel={() => setActiveTab('home')} />}
-          {activeTab === 'cashback_payment' && scannedData && <CashbackPaymentScreen user={user as any} merchantId={scannedData.merchantId} storeId={scannedData.storeId} onBack={() => setActiveTab('home')} onComplete={() => setActiveTab('home')} />}
-          
-          {activeTab === 'profile' && 
-              <MenuView 
-                  user={user as any} 
-                  userRole={userRole} 
-                  onAuthClick={() => setIsAuthOpen(true)} 
-                  onNavigate={setActiveTab} 
-                  onBack={() => setActiveTab('home')}
-                  currentTheme={themeMode}
-                  onThemeChange={setThemeMode}
-              />
-          }
-          
-          {activeTab === 'patrocinador_master' && <PatrocinadorMasterScreen onBack={() => setActiveTab('home')} />}
-          {activeTab === 'store_detail' && selectedStore && <StoreDetailView store={selectedStore} onBack={() => setActiveTab('home')} />}
-          {activeTab === 'reward_details' && <RewardDetailsView reward={selectedReward} onBack={() => setActiveTab('home')} onHome={() => setActiveTab('home')} />}
-          {activeTab === 'prize_history' && user && <PrizeHistoryView userId={user.id} onBack={() => setActiveTab('home')} onGoToSpinWheel={() => setActiveTab('home')} />}
           </main>
-
           <AuthModal isOpen={isAuthOpen} onClose={() => setIsAuthOpen(false)} user={user as any} />
           {isQuoteModalOpen && <QuoteRequestModal isOpen={isQuoteModalOpen} onClose={() => setIsQuoteModalOpen(false)} categoryName={quoteCategory} onSuccess={() => { setIsQuoteModalOpen(false); setActiveTab('service_success'); }} />}
       </Layout>
 
       {splashStage < 4 && (
-        <div 
-            className={`fixed inset-0 z-[999] flex items-center justify-center transition-opacity duration-500 ${splashStage === 3 ? 'animate-app-exit' : ''}`}
-            style={{ backgroundColor: '#1E5BFF' }} 
-        >
+        <div className={`fixed inset-0 z-[999] flex flex-col items-center justify-center transition-opacity duration-500 ${splashStage === 3 ? 'animate-app-exit' : ''}`} style={{ backgroundColor: '#1E5BFF' }}>
+            <div className="flex flex-col items-center w-full">
+                <div className={`w-24 h-24 bg-white rounded-[2.5rem] flex items-center justify-center shadow-2xl mb-6 transition-all duration-700 ${splashStage >= 1 ? 'animate-logo-enter opacity-100 scale-100' : 'opacity-0 scale-50'}`}>
+                    <div className="animate-logo-micro-move"><MapPin className="w-12 h-12 text-[#1E5BFF]" fill="#1E5BFF" /></div>
+                </div>
+                <div className="relative h-10 flex items-center justify-center w-full px-10">
+                   <h1 className={`text-white text-3xl font-black font-display tracking-tight overflow-hidden whitespace-nowrap ${splashStage >= 2 ? 'animate-typewriter border-r-2 border-white' : 'w-0 opacity-0'}`}>
+                     Localizei <span className="opacity-80">JPA</span>
+                   </h1>
+                </div>
+                <div className={`mt-12 w-48 h-1 bg-white/20 rounded-full overflow-hidden transition-opacity duration-500 ${splashStage >= 2 ? 'opacity-100' : 'opacity-0'}`}>
+                    <div className="h-full bg-white transition-all duration-[3000ms] ease-out" style={{ width: splashStage >= 2 ? '100%' : '0%' }}></div>
+                </div>
+            </div>
         </div>
       )}
     </div>
   );
 };
 
-const App: React.FC = () => {
-  return (
-    <NeighborhoodProvider>
-      <ConfigProvider>
-        <AppContent />
-      </ConfigProvider>
-    </NeighborhoodProvider>
-  );
-};
-
-export default App;
+export default AppContent;

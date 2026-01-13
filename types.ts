@@ -3,21 +3,13 @@ import React from 'react';
 
 export type ThemeMode = 'light' | 'dark' | 'auto';
 
-export type UserRole = 'cliente' | 'lojista' | 'admin';
+// Export UserRole type for consistency across the app and to fix import error in HomeFeed.tsx
+export type UserRole = 'cliente' | 'lojista';
 
 export enum AdType {
   ORGANIC = 'ORGANIC',
   LOCAL = 'LOCAL',   // R$ 1.90/dia
   PREMIUM = 'PREMIUM' // R$ 3.90/dia - Top of list
-}
-
-// Remote Config / Feature Flags
-export interface FeatureFlags {
-  cashbackEnabled: boolean;
-  couponsEnabled: boolean;
-  jobsEnabled: boolean;
-  agencyEnabled: boolean;
-  sponsorMasterBannerEnabled: boolean;
 }
 
 // Add ChatMessage for Gemini Assistant

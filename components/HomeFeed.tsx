@@ -16,12 +16,15 @@ import {
   Sparkles,
   Timer,
   Crown,
-  AlertCircle
+  AlertCircle,
+  Ticket,
+  ArrowRight
 } from 'lucide-react';
 import { LojasEServicosList } from './LojasEServicosList';
 import { User } from '@supabase/supabase-js';
 import { SpinWheelView } from './SpinWheelView';
 import { MasterSponsorBanner } from './MasterSponsorBanner';
+import { UserCashbackBanner } from './UserCashbackBanner';
 import { CATEGORIES, STORES, MOCK_JOBS, MOCK_COMMUNITY_POSTS } from '../constants';
 import { useNeighborhood } from '../contexts/NeighborhoodContext';
 import { useConfig } from '../contexts/ConfigContext';
@@ -39,37 +42,67 @@ interface HomeFeedProps {
   onRequireLogin: () => void;
 }
 
-// Utilitário para normalizar texto (remover acentos e lowercase)
-const normalizeText = (text: string): string => {
-  return (text || "")
+/**
+ * Normaliza texto para busca: minúsculas, sem acentos e seguro para valores nulos/indefinidos.
+ */
+const normalizeText = (text: any): string => {
+  if (typeof text !== 'string') return "";
+  return text
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase();
+    .toLowerCase()
+    .trim();
 };
-
-const MINI_TRIBOS = [
-  { id: 't-work', name: 'Home Office', subtitle: 'Wi-Fi e silêncio', icon: Sparkles, color: 'bg-white text-blue-600 border-gray-100 shadow-sm' },
-  { id: 't-pet', name: 'Amigo do Pet', subtitle: 'Eles são bem-vindos', icon: Tag, color: 'bg-white text-purple-600 border-gray-100 shadow-sm' },
-];
 
 const WEEKLY_PROMOS = [
   { id: 'promo-1', storeName: 'Espaço VIP Beleza', productName: 'Hidratação Profunda', discount: 30, image: 'https://images.unsplash.com/photo-1560066984-138dadb4c035?q=80&w=400&auto=format&fit=crop', validity: 'Até domingo', storeId: 'mock-1', neighborhood: 'Freguesia' },
   { id: 'promo-2', storeName: 'Hamburgueria Brasa', productName: 'Combo Duplo Cheddar', discount: 25, image: 'https://images.unsplash.com/photo-1594212699903-ec8a3eca50f5?q=80&w=400&auto=format&fit=crop', validity: 'Até domingo', storeId: 'mock-2', neighborhood: 'Freguesia' },
 ];
 
-const getCategoryCover = (category: string) => {
-  switch (category) {
-    case 'Alimentação': return 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=400&auto=format&fit=crop';
-    case 'Pets': return 'https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?q=80&w=400&auto=format&fit=crop';
-    case 'Beleza': return 'https://images.unsplash.com/photo-1560066984-138dadb4c035?q=80&w=400&auto=format&fit=crop';
-    default: return 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=400&auto=format&fit=crop';
-  }
+const PromotionsBlock: React.FC<{ promos: typeof WEEKLY_PROMOS; onNavigate: (v: string) => void }> = ({ promos, onNavigate }) => {
+  return (
+    <div className="w-full bg-white dark:bg-gray-950 py-6 border-b border-gray-100 dark:border-gray-800">
+      <div className="px-5 mb-4 flex justify-between items-center">
+        <div>
+          <h2 className="text-lg font-black text-gray-900 dark:text-white tracking-tight flex items-center gap-2">
+            Promoções da Semana <Ticket className="w-4 h-4 text-rose-500 fill-rose-500/20" />
+          </h2>
+          <p className="text-xs text-gray-500 dark:text-gray-400 font-medium mt-1">Economia real nos melhores locais</p>
+        </div>
+        <button onClick={() => onNavigate('explore')} className="text-xs font-bold text-[#1E5BFF]">Ver todas</button>
+      </div>
+
+      <div className="flex gap-4 overflow-x-auto no-scrollbar px-5 pb-2 snap-x">
+        {promos.length > 0 ? promos.map((promo) => (
+          <div key={promo.id} className="snap-center min-w-[200px] max-w-[200px] bg-gray-50 dark:bg-gray-900 rounded-3xl overflow-hidden border border-gray-100 dark:border-gray-800 shadow-sm group active:scale-95 transition-transform cursor-pointer">
+            <div className="h-28 relative">
+              <img src={promo.image} className="w-full h-full object-cover" alt="" />
+              <div className="absolute top-2 left-2 bg-rose-500 text-white text-[10px] font-black px-2 py-1 rounded-lg shadow-lg">
+                {promo.discount}% OFF
+              </div>
+            </div>
+            <div className="p-3">
+              <h4 className="font-bold text-gray-900 dark:text-white text-xs truncate">{promo.productName}</h4>
+              <p className="text-[10px] text-gray-500 mt-0.5 truncate">{promo.storeName}</p>
+              <div className="mt-2 flex items-center gap-1.5 text-[9px] font-black text-amber-600 uppercase tracking-wider">
+                <Timer className="w-3 h-3" /> {promo.validity}
+              </div>
+            </div>
+          </div>
+        )) : (
+          <div className="w-full py-10 flex flex-col items-center justify-center bg-gray-50 dark:bg-gray-900/50 rounded-3xl border-2 border-dashed border-gray-200 dark:border-gray-800">
+             <Ticket className="w-8 h-8 text-gray-300 mb-2" />
+             <p className="text-xs text-gray-400 font-bold uppercase tracking-widest">Novas ofertas em breve</p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
 };
 
 const HomeCarousel: React.FC<{ onNavigate: (v: string) => void }> = ({ onNavigate }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [progress, setProgress] = useState(0);
-  const { currentNeighborhood, isAll } = useNeighborhood();
   const { features } = useConfig();
 
   const banners = useMemo(() => {
@@ -178,27 +211,35 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
   const { features } = useConfig();
   const categoriesRef = useRef<HTMLDivElement>(null);
 
-  // LOGICA DE FILTRO SEGURA (V1)
+  /**
+   * Lógica de busca refinada: filtra por nome, categoria, subcategoria e tags.
+   * Utiliza memoização para performance e normalização segura de caracteres.
+   */
   const searchResults = useMemo(() => {
-    if (!activeSearchTerm) return [];
-
+    if (!activeSearchTerm.trim()) return [];
+    
     const termNormalized = normalizeText(activeSearchTerm);
     
-    return stores.filter(store => {
+    return (stores || []).filter(store => {
+      if (!store) return false;
+
       const name = normalizeText(store.name);
       const cat = normalizeText(store.category);
       const sub = normalizeText(store.subcategory);
+      const desc = normalizeText(store.description);
       
-      // Concatena tags de forma segura
-      const tags = (store as any).tags ? (store as any).tags.map((t: string) => normalizeText(t)).join(' ') : "";
-      const description = normalizeText(store.description);
+      // Tratamento seguro de tags (Array ou String)
+      const rawTags = (store as any).tags;
+      const tags = Array.isArray(rawTags) 
+        ? rawTags.map(t => normalizeText(t)).join(' ') 
+        : normalizeText(rawTags);
 
       return (
         name.includes(termNormalized) ||
         cat.includes(termNormalized) ||
         sub.includes(termNormalized) ||
         tags.includes(termNormalized) ||
-        description.includes(termNormalized)
+        desc.includes(termNormalized)
       );
     });
   }, [stores, activeSearchTerm]);
@@ -227,6 +268,21 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
           </div>
         );
       case 'home_carousel': return <div key="home_carousel" className="w-full bg-white dark:bg-gray-950 pb-8"><HomeCarousel onNavigate={onNavigate} /></div>;
+      case 'promotions':
+        if (!features.couponsEnabled) return null;
+        return <PromotionsBlock key="promotions" promos={WEEKLY_PROMOS} onNavigate={onNavigate} />;
+      case 'cashback_banner':
+        if (!features.cashbackEnabled) return null;
+        return (
+          <div key="cashback_banner" className="px-5 py-4 bg-white dark:bg-gray-950">
+            <UserCashbackBanner 
+              role={userRole === 'lojista' ? 'lojista' : 'cliente'} 
+              balance={12.40} 
+              totalGenerated={320.00}
+              onClick={() => user ? onNavigate(userRole === 'lojista' ? 'merchant_cashback_dashboard' : 'user_statement') : onRequireLogin()} 
+            />
+          </div>
+        );
       case 'community_feed': return <CommunityFeedBlock key="community_feed" onNavigate={onNavigate} />;
       case 'list':
         return (
@@ -244,9 +300,9 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
 
   return (
     <div className="flex flex-col bg-white dark:bg-gray-950 w-full max-w-md mx-auto animate-in fade-in duration-500 overflow-x-hidden pb-32">
-      {!activeSearchTerm ? (
+      {!activeSearchTerm.trim() ? (
         <div className="flex flex-col w-full">
-            {['categories', 'home_carousel', 'community_feed', 'list'].map(section => renderSection(section))}
+            {['categories', 'home_carousel', 'promotions', 'cashback_banner', 'community_feed', 'list'].map(section => renderSection(section))}
             <div className="px-5 pb-8 pt-4 bg-gray-50 dark:bg-gray-900">
               <MasterSponsorBanner onClick={() => onNavigate('patrocinador_master')} />
             </div>
@@ -261,7 +317,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
              </div>
 
              {searchResults.length > 0 ? (
-               <div className="flex flex-col gap-3">
+               <div className="flex flex-col gap-3 pb-20">
                   {searchResults.map((store) => (
                   <div key={store.id} onClick={() => onStoreClick?.(store)} className="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-gray-700 flex gap-4 cursor-pointer active:scale-[0.98] transition-all">
                       <div className="w-14 h-14 rounded-xl overflow-hidden bg-gray-50 dark:bg-gray-700 p-1 flex-shrink-0 border border-gray-100 dark:border-gray-600">
@@ -286,6 +342,12 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
                   </div>
                   <h4 className="text-gray-900 dark:text-white font-bold">Ops! Não encontramos nada</h4>
                   <p className="text-gray-500 text-sm mt-1 max-w-[240px]">Tente buscar por termos mais genéricos como "pizza" ou "mecânico".</p>
+                  <button 
+                    onClick={() => onNavigate('home')} 
+                    className="mt-8 text-[#1E5BFF] font-bold text-sm"
+                  >
+                    Ver todas as lojas
+                  </button>
                </div>
              )}
         </div>
