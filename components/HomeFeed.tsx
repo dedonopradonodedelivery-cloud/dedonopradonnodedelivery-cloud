@@ -29,7 +29,8 @@ import {
   MapPin,
   Star,
   Users,
-  Search
+  Search,
+  Wrench
 } from 'lucide-react';
 import { LojasEServicosList } from './LojasEServicosList';
 import { User } from '@supabase/supabase-js';
@@ -112,95 +113,59 @@ const getCategoryCover = (category: string) => {
   }
 };
 
-type BannerType = 'standard' | 'premium_grid' | 'jobs';
-
 interface BannerItem {
   id: string;
-  type: BannerType;
   title: string;
   subtitle?: string;
-  image?: string;
   target: string;
   tag?: string;
-  tagColor?: string;
-  premiumStores?: Store[];
+  bgColor: string;
+  Icon: React.ElementType;
 }
 
 const HomeCarousel: React.FC<{ onNavigate: (v: string) => void }> = ({ onNavigate }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [progress, setProgress] = useState(0);
-  const { currentNeighborhood, isAll } = useNeighborhood();
+  const { currentNeighborhood } = useNeighborhood();
 
-  const premiumStores = useMemo(() => {
-    const list = STORES.filter(s => s.adType === AdType.PREMIUM);
-    list.sort((a, b) => {
-        if (isAll) return 0;
-        const aIsLocal = (a.neighborhood === currentNeighborhood);
-        const bIsLocal = (b.neighborhood === currentNeighborhood);
-        if (aIsLocal && !bIsLocal) return -1;
-        if (!aIsLocal && bIsLocal) return 1;
-        return 0;
-    });
-    return list.slice(0, 6); 
-  }, [currentNeighborhood, isAll]);
-
-  const banners: BannerItem[] = useMemo(() => {
-    const list: BannerItem[] = [
-      {
-        id: 'b1-cashback',
-        type: 'standard',
-        title: 'Cashback real entre lojas do seu bairro',
-        subtitle: `Compre no comércio local de ${currentNeighborhood === 'Jacarepaguá (todos)' ? 'JPA' : currentNeighborhood} e receba dinheiro de volta na hora.`,
-        image: 'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?q=80&w=800&auto=format&fit=crop',
-        target: 'explore', 
-        tag: 'Exclusivo',
-        tagColor: 'bg-emerald-500'
-      },
-      {
-        id: 'b2-services',
-        type: 'standard',
-        title: 'Encontre serviços e receba até 5 orçamentos',
-        subtitle: 'Fale direto com profissionais de JPA pelo WhatsApp.',
-        image: 'https://images.unsplash.com/photo-1581578731117-10d52143b0e8?q=80&w=800&auto=format&fit=crop',
-        target: 'services',
-        tag: 'WhatsApp Direto',
-        tagColor: 'bg-green-600'
-      },
-      {
-        id: 'b3-merchant',
-        type: 'standard',
-        title: 'JPA Connect para lojistas',
-        subtitle: 'Venda mais, atraia clientes do bairro e participe do cashback local.',
-        image: 'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?q=80&w=800&auto=format&fit=crop',
-        target: 'freguesia_connect_public',
-        tag: 'Para Negócios',
-        tagColor: 'bg-indigo-600'
-      }
-    ];
-
-    if (MOCK_JOBS.length > 0) {
-      list.push({
-        id: 'b4-jobs',
-        type: 'jobs',
-        title: `Vagas de emprego em ${currentNeighborhood === 'Jacarepaguá (todos)' ? 'JPA' : currentNeighborhood}`,
-        subtitle: 'Lojas e serviços contratando agora',
-        target: 'jobs_list',
-        image: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?q=80&w=800&auto=format&fit=crop',
-        tag: 'Oportunidade',
-        tagColor: 'bg-blue-600'
-      });
-    } else if (premiumStores.length > 0) {
-      list.push({
-        id: 'b4-premium',
-        type: 'premium_grid',
-        title: 'Lojas Patrocinadas',
-        target: 'explore',
-        premiumStores: premiumStores
-      });
+  const banners: BannerItem[] = useMemo(() => [
+    {
+      id: 'b1-cashback',
+      title: 'Cashback em JPA',
+      subtitle: `Compre no bairro e receba dinheiro de volta na hora.`,
+      target: 'explore', 
+      tag: 'Exclusivo',
+      bgColor: 'bg-[#1E5BFF]',
+      Icon: Coins
+    },
+    {
+      id: 'b2-services',
+      title: 'Serviços & Orçamentos',
+      subtitle: 'Encontre profissionais de JPA pelo WhatsApp.',
+      target: 'services',
+      tag: 'WhatsApp Direto',
+      bgColor: 'bg-emerald-500',
+      Icon: Wrench
+    },
+    {
+      id: 'b3-merchant',
+      title: 'Sua loja no mapa',
+      subtitle: 'Venda mais e atraia novos clientes em Jacarepaguá.',
+      target: 'freguesia_connect_public',
+      tag: 'Para Negócios',
+      bgColor: 'bg-indigo-600',
+      Icon: StoreIcon
+    },
+    {
+      id: 'b4-jobs',
+      title: `Vagas em ${currentNeighborhood === 'Jacarepaguá (todos)' ? 'JPA' : currentNeighborhood}`,
+      subtitle: 'Lojas contratando agora no seu bairro.',
+      target: 'jobs_list',
+      tag: 'Oportunidade',
+      bgColor: 'bg-orange-500',
+      Icon: Briefcase
     }
-
-    return list;
-  }, [premiumStores, currentNeighborhood, isAll]);
+  ], [currentNeighborhood]);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -233,51 +198,35 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void }> = ({ onNavigat
     <div className="px-5">
       <div 
         onClick={() => onNavigate(current.target)}
-        className="w-full relative aspect-[2/1] rounded-[32px] overflow-hidden shadow-xl shadow-slate-200 dark:shadow-none border border-gray-100 dark:border-white/5 bg-gray-100 dark:bg-slate-900 cursor-pointer active:scale-[0.98] transition-all group"
+        className={`w-full relative aspect-[5/3] rounded-[32px] overflow-hidden shadow-xl shadow-slate-200 dark:shadow-none border border-gray-100 dark:border-white/5 ${current.bgColor} cursor-pointer active:scale-[0.98] transition-all group`}
       >
-        {current.type === 'standard' || current.type === 'jobs' ? (
-          <>
-            <img 
-              key={current.image}
-              src={current.image} 
-              className="absolute inset-0 w-full h-full object-cover opacity-80 animate-in fade-in zoom-in-50 duration-[1500ms]"
-              alt={current.title}
-            />
-            <div className={`absolute inset-0 bg-gradient-to-t ${current.type === 'jobs' ? 'from-blue-950 via-blue-900/50' : 'from-slate-950 via-slate-900/50'} to-transparent opacity-90`}></div>
-            <div className="absolute inset-0 p-6 flex flex-col justify-end z-20 pb-10">
-              <div className="flex items-center gap-2 mb-2">
-                  <span className={`${current.tagColor || 'bg-blue-600'} text-white text-[9px] font-black px-2 py-0.5 rounded text-xs uppercase tracking-widest shadow-sm animate-in fade-in slide-in-from-left-2`}>
-                    {current.tag}
-                  </span>
-              </div>
-              <h3 className="text-xl font-black text-white leading-[1.1] font-display tracking-tight mb-2 drop-shadow-sm max-w-[90%]">
-                {current.title}
-              </h3>
-              <p className="text-xs text-gray-200 font-medium line-clamp-2 leading-relaxed opacity-90 max-w-[95%]">
-                {current.subtitle}
-              </p>
-            </div>
-          </>
-        ) : (
-          <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-slate-800 to-black flex flex-col items-center justify-center p-6 animate-in fade-in duration-500">
-             <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 rounded-full blur-3xl pointer-events-none"></div>
-             <div className="absolute bottom-0 left-0 w-32 h-32 bg-blue-500/10 rounded-full blur-3xl pointer-events-none"></div>
-             <div className="absolute top-4 right-4 bg-white/10 backdrop-blur-md px-2.5 py-1 rounded-lg border border-white/10">
-                <p className="text-[8px] font-black text-white/70 uppercase tracking-widest flex items-center gap-1">
-                   <Crown className="w-2.5 h-2.5 text-amber-400 fill-amber-400" />
-                   Patrocinado
-                </p>
-             </div>
-             <div className="w-full grid grid-cols-4 gap-3 items-center justify-center">
-                {current.premiumStores?.map((store, idx) => (
-                   <div key={idx} className="aspect-square bg-white rounded-xl flex items-center justify-center p-2 shadow-lg opacity-90 group-hover:opacity-100 transition-opacity">
-                      <img src={store.logoUrl || "/assets/default-logo.png"} alt={store.name} className="w-full h-full object-contain" />
-                   </div>
-                ))}
-             </div>
-          </div>
-        )}
-        <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 z-30 w-1/3 justify-center">
+        {/* Background Effects */}
+        <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-white/10 to-transparent pointer-events-none"></div>
+        <div className="absolute -top-24 -right-24 w-64 h-64 bg-white/10 rounded-full blur-3xl pointer-events-none"></div>
+        <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-black/10 rounded-full blur-3xl pointer-events-none"></div>
+
+        {/* Central Icon */}
+        <div className="absolute inset-0 flex flex-col items-center justify-center p-6 pb-20">
+           <div className="p-6 bg-white/10 backdrop-blur-md rounded-[2.5rem] border border-white/20 shadow-2xl animate-in zoom-in duration-700">
+              <current.Icon className="w-16 h-16 text-white drop-shadow-xl" strokeWidth={2} />
+           </div>
+        </div>
+
+        {/* Content Info */}
+        <div className="absolute inset-x-0 bottom-0 p-6 pt-10 flex flex-col items-center text-center z-20 bg-gradient-to-t from-black/20 to-transparent">
+          <span className="bg-white/20 text-white text-[9px] font-black px-2.5 py-1 rounded-lg uppercase tracking-[0.2em] shadow-sm mb-3 border border-white/20 backdrop-blur-sm">
+            {current.tag}
+          </span>
+          <h3 className="text-2xl font-black text-white leading-tight font-display tracking-tight mb-2 drop-shadow-md">
+            {current.title}
+          </h3>
+          <p className="text-xs text-white/90 font-medium line-clamp-2 leading-relaxed opacity-90 max-w-[280px]">
+            {current.subtitle}
+          </p>
+        </div>
+
+        {/* Progress Indicators */}
+        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-1.5 z-30 w-1/3 justify-center">
           {banners.map((_, idx) => (
             <div key={idx} className="h-1 flex-1 bg-white/20 rounded-full overflow-hidden backdrop-blur-sm cursor-pointer" onClick={(e) => { e.stopPropagation(); setCurrentIndex(idx); setProgress(0); }}>
               <div 
@@ -287,6 +236,8 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void }> = ({ onNavigat
             </div>
           ))}
         </div>
+
+        {/* Click Zones */}
         <div className="absolute inset-y-0 left-0 w-1/6 z-20" onClick={handlePrev}></div>
         <div className="absolute inset-y-0 right-0 w-1/6 z-20" onClick={handleNext}></div>
       </div>
