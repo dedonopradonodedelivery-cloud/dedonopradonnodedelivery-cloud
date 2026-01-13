@@ -29,8 +29,7 @@ import {
   MapPin,
   Star,
   Users,
-  Search,
-  SearchX
+  Search
 } from 'lucide-react';
 import { LojasEServicosList } from './LojasEServicosList';
 import { User } from '@supabase/supabase-js';
@@ -560,26 +559,32 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
   const [scrollProgress, setScrollProgress] = useState(0);
 
   // --- BUSCA E FILTRO SEGURO ---
-  const normalize = (text: string) => 
-    (text || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  const normalize = (text: any) => 
+    (String(text || "")).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
 
   const filteredSearchResults = useMemo(() => {
-    if (!activeSearchTerm.trim()) return [];
-    const term = normalize(activeSearchTerm);
-    
-    return stores.filter(s => {
-        const name = normalize(s.name);
-        const cat = normalize(s.category);
-        const sub = normalize(s.subcategory);
-        const desc = normalize(s.description);
-        const hood = normalize(s.neighborhood || "");
+    try {
+        const term = normalize(activeSearchTerm);
+        if (!term) return [];
         
-        return name.includes(term) || 
-               cat.includes(term) || 
-               sub.includes(term) || 
-               desc.includes(term) || 
-               hood.includes(term);
-    });
+        return (stores || []).filter(s => {
+            if (!s) return false;
+            const name = normalize(s.name);
+            const cat = normalize(s.category);
+            const sub = normalize(s.subcategory);
+            const desc = normalize(s.description);
+            const hood = normalize(s.neighborhood);
+            
+            return name.includes(term) || 
+                   cat.includes(term) || 
+                   sub.includes(term) || 
+                   desc.includes(term) || 
+                   hood.includes(term);
+        });
+    } catch (error) {
+        console.error("Erro no processamento da busca:", error);
+        return [];
+    }
   }, [stores, activeSearchTerm]);
 
   const handleScrollCategories = () => {
@@ -591,11 +596,11 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
   };
 
   const sortedStores = useMemo(() => {
-    let list = [...stores];
+    let list = [...(stores || [])];
     list.sort((a, b) => {
         if (isAll) return 0; 
-        const aIsLocal = a.neighborhood === currentNeighborhood;
-        const bIsLocal = b.neighborhood === currentNeighborhood;
+        const aIsLocal = (a.neighborhood === currentNeighborhood);
+        const bIsLocal = (b.neighborhood === currentNeighborhood);
         if (aIsLocal && !bIsLocal) return -1;
         if (!aIsLocal && bIsLocal) return 1;
         return 0; 
@@ -635,8 +640,8 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
                  </button>
                )) : (
                  <div className="py-10 text-center flex flex-col items-center bg-gray-50 dark:bg-gray-800/50 rounded-3xl border border-dashed border-gray-200 dark:border-gray-700">
-                    <SearchX className="w-10 h-10 text-gray-300 mb-3" />
-                    <p className="text-gray-400 text-sm font-medium">Nenhum resultado encontrado.</p>
+                    <Search className="w-10 h-10 text-gray-300 mb-3 opacity-50" />
+                    <p className="text-gray-400 text-sm font-medium">Nenhum resultado encontrado para "{activeSearchTerm}".</p>
                  </div>
                )}
             </div>
@@ -649,7 +654,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
           <div key="categories" className="w-full bg-white dark:bg-gray-950 pt-6 pb-2">
             <div ref={categoriesRef} onScroll={handleScrollCategories} className="flex overflow-x-auto no-scrollbar px-4 pb-2 snap-x">
               <div className="grid grid-flow-col grid-rows-2 gap-x-3 gap-y-3">
-                {CATEGORIES.map((cat) => (
+                {(CATEGORIES || []).map((cat) => (
                   <button key={cat.id} onClick={() => onSelectCategory(cat)} className="flex flex-col items-center group active:scale-95 transition-all">
                     <div className={`w-[78px] h-[78px] rounded-[22px] shadow-lg flex flex-col items-center justify-between p-2 relative overflow-hidden bg-gradient-to-br ${cat.color} border border-white/20`}>
                       <div className="flex-1 flex items-center justify-center w-full">{React.isValidElement(cat.icon) ? React.cloneElement(cat.icon as any, { className: "w-7 h-7 text-white drop-shadow-md", strokeWidth: 2.5 }) : null}</div>
@@ -683,20 +688,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
         );
 
       case 'cashback_stores':
-        const cashbackList = useMemo(() => {
-             const list = sortedStores.filter(s => s.cashback && s.cashback > 0);
-             list.sort((a, b) => {
-                 if (!isAll) {
-                     const aIsLocal = a.neighborhood === currentNeighborhood;
-                     const bIsLocal = b.neighborhood === currentNeighborhood;
-                     if (aIsLocal && !bIsLocal) return -1;
-                     if (!aIsLocal && bIsLocal) return 1;
-                 }
-                 return ((b.cashback || 0) - (a.cashback || 0));
-             });
-             return list;
-        }, [sortedStores, currentNeighborhood, isAll]);
-
+        const cashbackList = (sortedStores || []).filter(s => s.cashback && s.cashback > 0);
         if (cashbackList.length === 0) return null;
         return (
           <div key="cashback_stores" className="w-full bg-white dark:bg-gray-950 py-6">
@@ -750,7 +742,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
 
   const homeStructure = useMemo(() => [
     'categories',
-    'search_results', // Nova seção inserida no fluxo
+    'search_results',
     'home_carousel',
     'weekly_promos',
     'cashback_stores',
