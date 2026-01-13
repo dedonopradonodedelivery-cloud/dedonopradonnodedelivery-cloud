@@ -2,13 +2,11 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabaseClient';
-// Import UserRole from central types file
-import { UserRole } from '../types';
 
 interface AuthContextType {
   user: User | null;
   session: Session | null;
-  userRole: UserRole | null;
+  userRole: 'cliente' | 'lojista' | null;
   loading: boolean;
   signOut: () => Promise<void>;
 }
@@ -24,8 +22,7 @@ const AuthContext = createContext<AuthContextType>({
 export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
-  // Type the userRole state using the exported UserRole type
-  const [userRole, setUserRole] = useState<UserRole | null>(null);
+  const [userRole, setUserRole] = useState<'cliente' | 'lojista' | null>(null);
   
   // UX: authResolved controla o Cold Start (boot inicial)
   // Uma vez resolvido (true), ele NUNCA mais volta a ser false durante a sessão do browser.

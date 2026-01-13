@@ -3,9 +3,6 @@ import React from 'react';
 
 export type ThemeMode = 'light' | 'dark' | 'auto';
 
-// Export UserRole type for consistency across the app and to fix import error in HomeFeed.tsx
-export type UserRole = 'cliente' | 'lojista';
-
 export enum AdType {
   ORGANIC = 'ORGANIC',
   LOCAL = 'LOCAL',   // R$ 1.90/dia
@@ -29,7 +26,7 @@ export interface StoreReview {
 export interface Profile {
   id: string;
   email: string;
-  role: UserRole;
+  role: 'cliente' | 'lojista';
   jobsAlertsEnabled?: boolean;
   jobCategories?: string[];
   jobTypes?: string[];
