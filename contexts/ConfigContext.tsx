@@ -92,14 +92,16 @@ export const ConfigProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         'postgres_changes',
         { event: 'UPDATE', schema: 'public', table: 'app_config', filter: 'id=eq.features' },
         (payload) => {
-          const updated = payload.new;
-          setFeatures({
-            cashbackEnabled: updated.cashback_enabled,
-            couponsEnabled: updated.coupons_enabled,
-            jobsEnabled: updated.jobs_enabled,
-            agency_enabled: updated.agency_enabled,
-            sponsorMasterBannerEnabled: updated.sponsor_master_banner_enabled,
-          });
+          const updated = payload.new as any;
+          if (updated) {
+              setFeatures({
+                cashbackEnabled: updated.cashback_enabled,
+                couponsEnabled: updated.coupons_enabled,
+                jobsEnabled: updated.jobs_enabled,
+                agencyEnabled: updated.agency_enabled, // Fix: Use property name from FeatureFlags interface
+                sponsorMasterBannerEnabled: updated.sponsor_master_banner_enabled,
+              });
+          }
         }
       )
       .subscribe();

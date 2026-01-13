@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { Store, Category, EditorialCollection, AdType, CommunityPost } from '../types';
+import { Store, Category, EditorialCollection, AdType, UserRole } from '../types';
 import { 
   ChevronRight, 
   Dices,
@@ -10,9 +10,6 @@ import {
   Baby,
   Dog as DogIcon,
   Crown,
-  MessageCircle,
-  TrendingUp,
-  Store as StoreIcon,
   X,
   Sparkles,
   Timer,
@@ -23,12 +20,9 @@ import {
   Quote,
   Zap,
   ThumbsUp,
-  AlertTriangle,
-  Lightbulb,
   MessageSquare,
   MapPin,
-  Star,
-  Users
+  Star
 } from 'lucide-react';
 import { LojasEServicosList } from './LojasEServicosList';
 import { User } from '@supabase/supabase-js';
@@ -46,7 +40,7 @@ interface HomeFeedProps {
   searchTerm?: string;
   stores: Store[];
   user: User | null;
-  userRole?: 'cliente' | 'lojista' | null;
+  userRole?: UserRole | null;
   onSpinWin: (reward: any) => void;
   onRequireLogin: () => void;
 }
@@ -478,7 +472,7 @@ const CommunityTrustCarousel: React.FC<{ stores: Store[], onStoreClick: (store: 
                 {/* Store Image - Top */}
                 <div className="h-24 w-full bg-gray-100 dark:bg-gray-700 relative overflow-hidden">
                    <img
-                    src={store.image || getCategoryCover(store.category)}
+                    src={store.image || "/assets/default-logo.png"}
                     alt={store.name}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-90"
                   />
@@ -866,7 +860,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
                 >
                   {/* Background Image with Dark Overlay */}
                   <img
-                    src={store.image || getCategoryCover(store.category)}
+                    src={store.image || "/assets/default-logo.png"}
                     alt={store.name}
                     className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                   />

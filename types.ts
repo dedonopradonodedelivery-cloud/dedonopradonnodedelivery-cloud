@@ -3,6 +3,8 @@ import React from 'react';
 
 export type ThemeMode = 'light' | 'dark' | 'auto';
 
+export type UserRole = 'cliente' | 'lojista' | 'admin';
+
 export enum AdType {
   ORGANIC = 'ORGANIC',
   LOCAL = 'LOCAL',   // R$ 1.90/dia
@@ -35,7 +37,7 @@ export interface StoreReview {
 export interface Profile {
   id: string;
   email: string;
-  role: 'cliente' | 'lojista' | 'admin';
+  role: UserRole;
   jobsAlertsEnabled?: boolean;
   jobCategories?: string[];
   jobTypes?: string[];

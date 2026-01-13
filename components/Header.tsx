@@ -2,6 +2,7 @@
 import React from 'react';
 import { Search, QrCode, User as UserIcon, MapPin, ChevronDown, Check } from 'lucide-react';
 import { useNeighborhood, NEIGHBORHOODS } from '../contexts/NeighborhoodContext';
+import { UserRole } from '../types';
 
 interface HeaderProps {
   isDarkMode: boolean;
@@ -12,7 +13,7 @@ interface HeaderProps {
   onSearchChange: (value: string) => void;
   onNavigate: (tab: string) => void;
   activeTab: string;
-  userRole: "cliente" | "lojista" | null;
+  userRole: UserRole | null;
   onOpenMerchantQr?: () => void;
   customPlaceholder?: string;
 }
@@ -77,6 +78,7 @@ export const Header: React.FC<HeaderProps> = ({
   customPlaceholder,
 }) => {
   const isMerchant = userRole === 'lojista';
+  // Added setNeighborhood to destructuring from useNeighborhood to fix errors on lines 166 and 178
   const { currentNeighborhood, setNeighborhood, toggleSelector } = useNeighborhood();
 
   // Filtro deve aparecer apenas nas abas principais: Home, Explorar e Serviços

@@ -1,12 +1,13 @@
 
 import React, { ReactNode, useEffect, useRef } from 'react';
 import { BottomNav } from './BottomNav';
+import { UserRole } from '../types';
 
 interface LayoutProps {
   children: ReactNode;
   activeTab: string;
   setActiveTab: (tab: string) => void;
-  userRole?: 'cliente' | 'lojista' | null;
+  userRole?: UserRole | null;
   onCashbackClick?: () => void;
   hideNav?: boolean;
 }
