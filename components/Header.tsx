@@ -1,7 +1,8 @@
 
-import React from 'react';
-import { Search, QrCode, User as UserIcon, MapPin, ChevronDown, Check } from 'lucide-react';
+import React, { useMemo, useState, useEffect } from 'react';
+import { Search, QrCode, User as UserIcon, MapPin, ChevronDown, Check, ChevronRight, SearchX } from 'lucide-react';
 import { useNeighborhood, NEIGHBORHOODS } from '../contexts/NeighborhoodContext';
+import { Store } from '../types';
 
 interface HeaderProps {
   isDarkMode: boolean;
@@ -15,6 +16,8 @@ interface HeaderProps {
   userRole: "cliente" | "lojista" | null;
   onOpenMerchantQr?: () => void;
   customPlaceholder?: string;
+  stores?: Store[];
+  onStoreClick?: (store: Store) => void;
 }
 
 const NeighborhoodSelectorModal: React.FC = () => {
@@ -75,12 +78,31 @@ export const Header: React.FC<HeaderProps> = ({
   userRole,
   onOpenMerchantQr,
   customPlaceholder,
+  stores = [],
+  onStoreClick
 }) => {
   const isMerchant = userRole === 'lojista';
-  const { currentNeighborhood, setNeighborhood, toggleSelector } = useNeighborhood();
+  const { currentNeighborhood, setNeighborhood, toggleSelector, isAll } = useNeighborhood();
 
   // Filtro deve aparecer apenas nas abas principais: Home, Explorar e Serviços
   const showNeighborhoodFilter = ['home', 'explore', 'services'].includes(activeTab);
+
+  // --- LÓGICA DE BUSCA NO HEADER ---
+  const normalize = (text: any) => 
+    (String(text || "")).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+
+  const filteredResults = useMemo(() => {
+    const term = normalize(searchTerm);
+    if (!term || activeTab !== 'home') return [];
+    
+    return stores.filter(s => {
+        if (!s) return false;
+        return normalize(s.name).includes(term) || 
+               normalize(s.category).includes(term) || 
+               normalize(s.subcategory).includes(term) ||
+               normalize(s.neighborhood || "").includes(term);
+    }).slice(0, 8); // Limita para não ocupar a tela toda
+  }, [stores, searchTerm, activeTab]);
 
   return (
     <>
@@ -89,7 +111,7 @@ export const Header: React.FC<HeaderProps> = ({
             sticky top-0 z-40 w-full bg-white/95 dark:bg-gray-900/95 backdrop-blur-md transition-all duration-300 ease-in-out shadow-sm border-b border-gray-100 dark:border-gray-800
         `}
         >
-        <div className="max-w-md mx-auto flex flex-col">
+        <div className="max-w-md mx-auto flex flex-col relative">
             
             {/* Top Row: Location & Profile */}
             <div className="flex items-center justify-between px-4 pt-3 pb-1">
@@ -135,15 +157,60 @@ export const Header: React.FC<HeaderProps> = ({
             
                 <div className="relative flex-1 group">
                     <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                    <Search className="h-4 w-4 text-gray-400 group-focus-within:text-[#1E5BFF] transition-colors" />
+                        <Search className="h-4 w-4 text-gray-400 group-focus-within:text-[#1E5BFF] transition-colors" />
                     </div>
                     <input
-                    type="text"
-                    value={searchTerm}
-                    onChange={(e) => onSearchChange(e.target.value)}
-                    placeholder={customPlaceholder || `Buscar em ${currentNeighborhood === "Jacarepaguá (todos)" ? "JPA" : currentNeighborhood}...`}
-                    className={`block w-full pl-10 pr-4 bg-gray-100 dark:bg-gray-800 border-none rounded-2xl text-sm font-medium text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1E5BFF]/50 transition-all shadow-inner py-3`}
+                        type="text"
+                        value={searchTerm}
+                        onChange={(e) => onSearchChange(e.target.value)}
+                        placeholder={customPlaceholder || `Buscar em ${currentNeighborhood === "Jacarepaguá (todos)" ? "JPA" : currentNeighborhood}...`}
+                        className={`block w-full pl-10 pr-4 bg-gray-100 dark:bg-gray-800 border-none rounded-2xl text-sm font-medium text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1E5BFF]/50 transition-all shadow-inner py-3`}
                     />
+
+                    {/* --- EXPANSÃO DA BARRA DE BUSCA (DROPDOWN) --- */}
+                    {searchTerm.trim().length > 0 && activeTab === 'home' && (
+                        <div className="absolute top-[calc(100%+8px)] left-0 right-0 bg-white dark:bg-gray-900 rounded-[24px] shadow-[0_20px_50px_rgba(0,0,0,0.15)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.5)] border border-gray-100 dark:border-gray-800 z-[100] overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+                            <div className="p-2 max-h-[60vh] overflow-y-auto no-scrollbar">
+                                {filteredResults.length > 0 ? (
+                                    <div className="flex flex-col">
+                                        <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-3 py-2">Resultados encontrados</p>
+                                        {filteredResults.map(store => (
+                                            <button 
+                                                key={store.id} 
+                                                onClick={() => {
+                                                    onStoreClick?.(store);
+                                                    onSearchChange(''); // Limpa busca ao clicar
+                                                }} 
+                                                className="flex items-center gap-3 p-3 hover:bg-gray-50 dark:hover:bg-gray-800/50 rounded-xl transition-colors text-left group"
+                                            >
+                                                <div className="w-10 h-10 rounded-lg bg-gray-100 dark:bg-gray-800 overflow-hidden border border-gray-100 dark:border-gray-700 flex-shrink-0">
+                                                    <img src={store.logoUrl || "/assets/default-logo.png"} className="w-full h-full object-contain" />
+                                                </div>
+                                                <div className="flex-1 min-w-0">
+                                                    <p className="text-sm font-bold text-gray-900 dark:text-white truncate">{store.name}</p>
+                                                    <div className="flex items-center gap-2">
+                                                        <span className="text-[9px] font-black text-[#1E5BFF] uppercase tracking-tighter">{store.category}</span>
+                                                        {(isAll || store.neighborhood !== currentNeighborhood) && store.neighborhood && (
+                                                            <span className="text-[9px] text-gray-400 font-medium truncate italic">• {store.neighborhood}</span>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                                <ChevronRight className="w-4 h-4 text-gray-300 group-hover:text-[#1E5BFF] transition-colors" />
+                                            </button>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <div className="py-8 px-4 text-center">
+                                        <div className="w-12 h-12 bg-gray-50 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-3">
+                                            <SearchX className="w-6 h-6 text-gray-300" />
+                                        </div>
+                                        <p className="text-sm font-bold text-gray-900 dark:text-white">Nenhum resultado</p>
+                                        <p className="text-xs text-gray-500">Não encontramos nada para "{searchTerm}"</p>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    )}
                 </div>
 
                 {/* Exibe QR Code no header APENAS para lojistas (atalho rápido) */}

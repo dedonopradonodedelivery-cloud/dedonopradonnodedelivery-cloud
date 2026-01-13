@@ -238,6 +238,8 @@ const App: React.FC = () => {
                   activeTab={activeTab}
                   userRole={userRole}
                   onOpenMerchantQr={() => setActiveTab('merchant_qr')}
+                  stores={STORES}
+                  onStoreClick={handleSelectStore}
               />
               )}
               <main className="animate-in fade-in duration-500 w-full max-w-md mx-auto">
