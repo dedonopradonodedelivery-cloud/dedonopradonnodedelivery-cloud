@@ -3,11 +3,12 @@ import React, { useState, useEffect, useRef } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { Gift, RefreshCw, ThumbsDown, History, Wallet, Volume2, VolumeX, Lock, ArrowRight, Dices } from 'lucide-react';
 import { useCountdown } from '../hooks/useCountdown';
+import { UserRole } from '../types';
 
 // --- Tipos e Constantes ---
 interface SpinWheelViewProps {
   userId: string | null;
-  userRole: 'cliente' | 'lojista' | null;
+  userRole: UserRole | null;
   onWin: (reward: any) => void;
   onRequireLogin: () => void;
   onViewHistory: () => void;
@@ -128,9 +129,14 @@ export const SpinWheelView: React.FC<SpinWheelViewProps> = ({ userId, userRole, 
       const setReadyFallback = () => {
         if (isMounted) {
            if (localLastSpin && isSameDay(new Date(localLastSpin), new Date())) setSpinStatus('cooldown');
-           else setSpinStatus('ready');
+           else setReadyFallbackForNoUser();
         }
       };
+      
+      const setReadyFallbackForNoUser = () => {
+        if (isMounted) setSpinStatus('ready');
+      };
+
       if (!supabase) { setReadyFallback(); return; }
       try {
         const { data, error } = await supabase.from('roulette_spins').select('spin_date').eq('user_id', userId).order('spin_date', { ascending: false }).limit(1).maybeSingle();
@@ -180,6 +186,7 @@ export const SpinWheelView: React.FC<SpinWheelViewProps> = ({ userId, userRole, 
   };
 
   const handleSpin = () => {
+    // Agora o admin também pode girar para teste se desejar, ou mantemos restrição se necessário
     if (userRole === 'lojista') return;
     if (isSpinning || spinStatus !== 'ready') {
       if (spinStatus === 'no_user') onRequireLogin();

@@ -22,14 +22,14 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { User } from '@supabase/supabase-js';
-import { ThemeMode } from '../types';
+import { ThemeMode, UserRole } from '../types';
 import { supabase } from '../lib/supabaseClient';
 import { MasterSponsorBanner } from './MasterSponsorBanner';
 import { useConfig } from '../contexts/ConfigContext';
 
 interface MenuViewProps {
   user: User | null;
-  userRole: 'cliente' | 'lojista' | 'admin' | null;
+  userRole: UserRole | null;
   onAuthClick: () => void;
   onNavigate: (view: string) => void;
   onBack?: () => void;
@@ -279,8 +279,8 @@ export const MenuView: React.FC<MenuViewProps> = ({
         <div className="space-y-2 mb-8">
             <h3 className="text-xs font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.2em] ml-2 mb-3">Links Úteis</h3>
             <div className="bg-white dark:bg-gray-800 rounded-3xl overflow-hidden border border-gray-100 dark:border-gray-700 shadow-sm">
-                <button onClick={() => onNavigate('favorites')} className="w-full p-4 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors border-b border-gray-50 dark:border-gray-700 group"><div className="flex items-center gap-3"><Heart className="w-5 h-5 text-gray-400 group-hover:text-red-500 transition-colors" /><span className="text-sm font-semibold text-gray-700 dark:text-gray-200">Meus Favoritos</span></div><ChevronRight className="w-4 h-4 text-gray-300" /></button>
-                <button onClick={() => onNavigate('support')} className="w-full p-4 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors border-b border-gray-50 dark:border-gray-700 group"><div className="flex items-center gap-3"><HelpCircle className="w-5 h-5 text-gray-400 group-hover:text-blue-500 transition-colors" /><span className="text-sm font-semibold text-gray-700 dark:text-gray-200">Suporte</span></div><ChevronRight className="w-4 h-4 text-gray-300" /></button>
+                <button onClick={() => onNavigate('favorites')} className="w-full p-4 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors border-b border-gray-50 dark:border-gray-800 group"><div className="flex items-center gap-3"><Heart className="w-5 h-5 text-gray-400 group-hover:text-red-500 transition-colors" /><span className="text-sm font-semibold text-gray-700 dark:text-gray-200">Meus Favoritos</span></div><ChevronRight className="w-4 h-4 text-gray-300" /></button>
+                <button onClick={() => onNavigate('support')} className="w-full p-4 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors border-b border-gray-50 dark:border-gray-800 group"><div className="flex items-center gap-3"><HelpCircle className="w-5 h-5 text-gray-400 group-hover:text-blue-500 transition-colors" /><span className="text-sm font-semibold text-gray-700 dark:text-gray-200">Suporte</span></div><ChevronRight className="w-4 h-4 text-gray-300" /></button>
                 <button onClick={() => onNavigate('about')} className="w-full p-4 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors group"><div className="flex items-center gap-3"><Info className="w-5 h-5 text-gray-400 group-hover:text-[#1E5BFF] transition-colors" /><span className="text-sm font-semibold text-gray-700 dark:text-gray-200">Sobre o Localizei JPA</span></div><ChevronRight className="w-4 h-4 text-gray-300" /></button>
             </div>
         </div>
