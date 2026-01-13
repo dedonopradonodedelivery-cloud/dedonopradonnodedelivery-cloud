@@ -185,10 +185,10 @@ const JobsFeedScreen: React.FC<{ user: any; onRequireLogin: () => void }> = ({ u
                         return (
                             <div 
                                 key={job.id} 
-                                className={`w-full p-4 border-b last:border-0 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer relative overflow-hidden
+                                className={`w-full p-4 border-b border-gray-100 dark:border-gray-800 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer relative overflow-hidden
                                     ${showSponsoredBadge 
-                                        ? 'bg-amber-50/40 dark:bg-amber-900/10 border-l-4 border-l-amber-400 dark:border-l-amber-500 border-gray-100 dark:border-gray-800' 
-                                        : 'bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800'
+                                        ? 'bg-amber-50/40 dark:bg-amber-900/10 border-l-4 border-l-amber-400 dark:border-l-amber-500' 
+                                        : 'bg-white dark:bg-gray-900'
                                     }`} 
                                 onClick={() => setSelectedJob(job)}
                             >
@@ -760,4 +760,41 @@ export const CommunityFeedView: React.FC<CommunityFeedViewProps> = ({ onStoreCli
   const isHeaderVisible = internalView === 'home' || internalView === 'jobs' || internalView === 'explore';
 
   return (
-    <div className="min-h-screen bg-white dark:bg-gray
+    <div className="min-h-screen bg-white dark:bg-gray-950 font-sans pb-24 animate-in slide-in-from-right duration-300 relative w-full">
+      {isHeaderVisible && (
+        <div className="sticky top-0 z-30 bg-white/95 dark:bg-gray-950/95 backdrop-blur-md h-14 flex items-center justify-between border-b border-gray-100 dark:border-gray-800 px-4 w-full">
+          <button onClick={handleCreatePost} className="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"><Plus className="w-6 h-6 text-gray-900 dark:text-white" /></button>
+          <button onClick={toggleSelector} className="flex flex-col items-center flex-1">
+            <h1 className="font-bold text-lg text-gray-900 dark:text-white font-display flex items-center gap-1 text-center">Feed da Localizei JPA</h1>
+            <div className="flex items-center gap-1 text-[10px] text-gray-500 dark:text-gray-400 -mt-1">
+                <MapPin className="w-2.5 h-2.5" />
+                <span>{currentNeighborhood === 'Jacarepaguá (todos)' ? 'Todo Bairro' : currentNeighborhood}</span>
+                <ChevronDown className="w-2.5 h-2.5" />
+            </div>
+          </button>
+          <button onClick={handleNotifications} className="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors relative"><Heart className="w-6 h-6 text-gray-900 dark:text-white" /><span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border border-white dark:border-gray-900"></span></button>
+        </div>
+      )}
+      {internalView !== 'create_post' && internalView !== 'notifications' && (
+        <CommunityNavBar 
+            currentView={internalView} 
+            onChangeView={handleViewChange} 
+            userAvatar={user?.user_metadata?.avatar_url} 
+            hasUnreadMessages={true} 
+            topClass={isHeaderVisible ? 'top-14' : 'top-0'}
+        />
+      )}
+      <div className="p-0 relative w-full">{renderContent()}</div>
+      
+      {viewingStoryIndex !== null && <StoryViewer initialStoryIndex={viewingStoryIndex} onClose={() => setViewingStoryIndex(null)} />}
+      
+      {postToDelete && <DeleteConfirmationModal onConfirm={handleConfirmDelete} onCancel={() => setPostToDelete(null)} />}
+      
+      {commentPostId && <CommentsModal postId={commentPostId} onClose={() => setCommentPostId(null)} user={user} />}
+      
+      <ReportModal isOpen={!!reportPostId} onClose={() => setReportPostId(null)} onSubmit={handleReportSubmit} />
+
+      {showSuccessToast && <div className="fixed top-20 left-1/2 -translate-x-1/2 bg-black/80 backdrop-blur-md text-white px-6 py-3 rounded-full shadow-lg z-[100] animate-in fade-in slide-in-from-top-4 flex items-center gap-2"><Check className="w-4 h-4" /><span className="text-sm font-bold">{toastMessage}</span></div>}
+    </div>
+  );
+};
