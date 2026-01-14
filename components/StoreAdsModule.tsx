@@ -1,17 +1,15 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { 
   ChevronLeft, 
   Target, 
   Rocket, 
   CheckCircle2, 
-  MessageCircle, 
   TrendingUp, 
   ShieldCheck, 
   Layout, 
   Crown, 
   MapPin, 
-  Smartphone, 
   Star, 
   Zap, 
   Paintbrush, 
@@ -25,12 +23,6 @@ import { MasterSponsorBanner } from './MasterSponsorBanner';
 interface StoreAdsModuleProps {
   onBack: () => void;
 }
-
-const MOCK_BANNERS = [
-  { id: 1, title: 'Sua Loja Aqui', color: 'from-blue-600 to-blue-800', icon: <Rocket className="w-8 h-8 text-white" /> },
-  { id: 2, title: 'Oferta Exclusiva', color: 'from-purple-600 to-indigo-800', icon: <Crown className="w-8 h-8 text-white" /> },
-  { id: 3, title: 'Destaque no Bairro', color: 'from-emerald-500 to-teal-700', icon: <MapPin className="w-8 h-8 text-white" /> },
-];
 
 const IPhoneMock = () => {
   return (
@@ -132,52 +124,6 @@ const IPhoneMock = () => {
   );
 };
 
-const SimulatedCarousel = () => {
-  const [current, setCurrent] = useState(0);
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrent((prev) => (prev + 1) % MOCK_BANNERS.length);
-    }, 3000);
-    return () => clearInterval(timer);
-  }, []);
-
-  return (
-    <div className="relative w-full aspect-[5/3] bg-white/10 rounded-3xl border border-white/20 shadow-inner overflow-hidden backdrop-blur-sm">
-      {/* Mock Interface Header */}
-      <div className="absolute top-0 left-0 right-0 h-12 bg-white/10 backdrop-blur-md z-20 flex items-center px-4 gap-2 border-b border-white/10">
-         <div className="w-2 h-2 rounded-full bg-red-400"></div>
-         <div className="w-2 h-2 rounded-full bg-yellow-400"></div>
-         <div className="w-20 h-2 rounded-full bg-white/20 ml-2"></div>
-      </div>
-
-      {/* Slides */}
-      {MOCK_BANNERS.map((banner, index) => (
-        <div 
-          key={banner.id}
-          className={`absolute inset-0 transition-opacity duration-700 ease-in-out flex items-center justify-center ${index === current ? 'opacity-100' : 'opacity-0'}`}
-        >
-          <div className={`w-[85%] h-[60%] rounded-2xl bg-gradient-to-br ${banner.color} shadow-2xl flex flex-col items-center justify-center text-white relative overflow-hidden transform transition-transform duration-700 ${index === current ? 'scale-100 translate-y-0' : 'scale-95 translate-y-2'}`}>
-             <div className="absolute inset-0 bg-white/10 opacity-50" style={{ backgroundImage: 'radial-gradient(circle, #fff 1px, transparent 1px)', backgroundSize: '10px 10px' }}></div>
-             <div className="relative z-10 mb-2 p-3 bg-white/20 rounded-full backdrop-blur-md">
-                {banner.icon}
-             </div>
-             <h3 className="relative z-10 font-black text-xl tracking-tight uppercase">{banner.title}</h3>
-             <div className="absolute bottom-3 right-3 bg-white text-black text-[6px] font-bold px-1.5 py-0.5 rounded">PATROCINADO</div>
-          </div>
-        </div>
-      ))}
-
-      {/* Indicators */}
-      <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-1.5 z-20">
-        {MOCK_BANNERS.map((_, idx) => (
-          <div key={idx} className={`h-1 rounded-full transition-all duration-300 ${idx === current ? 'w-4 bg-white' : 'w-1.5 bg-white/40'}`} />
-        ))}
-      </div>
-    </div>
-  );
-};
-
 export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack }) => {
   const [isInterested, setIsInterested] = useState(false);
 
@@ -239,17 +185,6 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack }) => {
             <p className="text-xs text-blue-200 leading-relaxed max-w-sm mx-auto font-medium">
                 Enquanto outros negócios disputam atenção nas redes sociais, sua marca ganha destaque imediato dentro do app local mais relevante da região — visível para quem já mora, trabalha e consome em Jacarepaguá.
             </p>
-        </div>
-
-        {/* VISUAL CAROUSEL */}
-        <div className="relative w-full">
-            <SimulatedCarousel />
-            <div className="text-center mt-3">
-                <p className="text-[10px] text-blue-200 uppercase tracking-[0.2em] font-bold flex items-center justify-center gap-2">
-                    <Smartphone className="w-3 h-3" />
-                    Simulação em tempo real
-                </p>
-            </div>
         </div>
 
         {/* BENEFITS - CARDS BRANCOS */}
