@@ -90,10 +90,7 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void }> = ({ onNavigat
   const [progress, setProgress] = useState(0);
   const { currentNeighborhood } = useNeighborhood();
 
-  // --- LÓGICA DE EXIBIÇÃO DE BANNERS ---
   const banners: BannerItem[] = useMemo(() => {
-    
-    // 1. BANNER PATROCINADOR MASTER (SEMPRE FIXO NA POSIÇÃO 1)
     const masterBanner: BannerItem = {
       id: 'master-sponsor',
       title: 'Grupo Esquematiza',
@@ -104,7 +101,6 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void }> = ({ onNavigat
       Icon: Crown
     };
 
-    // 2. LISTA DE BANNERS VENDIDOS (RIO PHONE STORE)
     const soldBanners: BannerItem[] = [
        {
           id: 'rio-phone-store',
@@ -117,7 +113,6 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void }> = ({ onNavigat
        }
     ];
 
-    // 3. BANNER INSTITUCIONAL DE VENDAS (SEMPRE VISÍVEL AGORA)
     const advertiseBanner: BannerItem = {
       id: 'advertise-home',
       title: 'Anuncie aqui',
@@ -128,10 +123,7 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void }> = ({ onNavigat
       Icon: Megaphone
     };
 
-    // --- REGRAS DE COMPOSIÇÃO: Master + Vendidos + Anuncie Aqui ---
-    // O banner "Anuncie aqui" agora aparece SEMPRE no final da fila para incentivar novos anunciantes.
     return [masterBanner, ...soldBanners, advertiseBanner].slice(0, 5);
-
   }, [currentNeighborhood]);
 
   useEffect(() => {
@@ -167,39 +159,27 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void }> = ({ onNavigat
         onClick={() => onNavigate(current.target)}
         className={`w-full relative aspect-[5/3] rounded-[32px] overflow-hidden shadow-xl shadow-slate-200 dark:shadow-none border border-gray-100 dark:border-white/5 ${current.bgColor} cursor-pointer active:scale-[0.98] transition-all group`}
       >
-        {/* Background Effects */}
         <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-white/10 to-transparent pointer-events-none"></div>
         <div className="absolute -top-24 -right-24 w-64 h-64 bg-white/10 rounded-full blur-3xl pointer-events-none"></div>
         <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-black/10 rounded-full blur-3xl pointer-events-none"></div>
 
-        {/* --- REESTRUTURAÇÃO DO CONTEÚDO PARA EVITAR SOBREPOSIÇÃO --- */}
         <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center z-10">
-           
-           {/* 1. Ícone Superior Centralizado */}
            <div className="p-5 bg-white/10 backdrop-blur-md rounded-[2.5rem] border border-white/20 shadow-2xl animate-in zoom-in duration-700 mb-6 group-hover:scale-105 transition-transform">
               <current.Icon className="w-14 h-14 text-white drop-shadow-xl" strokeWidth={2} />
            </div>
-
-           {/* 2. Selo (Tag) abaixo do ícone com espaçamento seguro */}
            <div className="animate-in slide-in-from-bottom-2 duration-500 delay-100 fill-mode-both">
               <span className="bg-white/20 text-white text-[8px] font-black px-2.5 py-1 rounded-lg uppercase tracking-[0.2em] shadow-sm border border-white/20 backdrop-blur-sm">
                 {current.tag}
               </span>
            </div>
-
-           {/* 3. Título Principal */}
            <h3 className="text-2xl font-[900] text-white leading-tight font-display tracking-tight mt-4 mb-2 drop-shadow-md animate-in slide-in-from-bottom-3 duration-500 delay-200 fill-mode-both">
             {current.title}
            </h3>
-
-           {/* 4. Subtítulo */}
            <p className="text-xs text-white/85 font-medium line-clamp-2 leading-relaxed max-w-[280px] animate-in slide-in-from-bottom-4 duration-500 delay-300 fill-mode-both">
             {current.subtitle}
            </p>
-
         </div>
 
-        {/* Progress Indicators */}
         <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-1.5 z-30 w-1/3 justify-center">
           {banners.map((_, idx) => (
             <div key={idx} className="h-1 flex-1 bg-white/20 rounded-full overflow-hidden backdrop-blur-sm cursor-pointer" onClick={(e) => { e.stopPropagation(); setCurrentIndex(idx); setProgress(0); }}>
@@ -211,7 +191,6 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void }> = ({ onNavigat
           ))}
         </div>
 
-        {/* Click Zones */}
         <div className="absolute inset-y-0 left-0 w-1/6 z-20" onClick={handlePrev}></div>
         <div className="absolute inset-y-0 right-0 w-1/6 z-20" onClick={handleNext}></div>
       </div>
@@ -219,25 +198,16 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void }> = ({ onNavigat
   );
 };
 
-// --- BLOCO REESTILIZADO: CASHBACK ATIVO NO BAIRRO ---
 const NeighborhoodCouponsBlock: React.FC<{ stores: Store[], onStoreClick: (store: Store) => void }> = ({ stores, onStoreClick }) => {
   const { currentNeighborhood, isAll } = useNeighborhood();
 
   const couponStores = useMemo(() => {
-    // FILTRO RELAXADO: Exibe qualquer loja com cashback > 0
-    // ORDENAÇÃO: Premium > Local > Organic
     let list = stores.filter(s => s.cashback && s.cashback > 0);
-    
     list.sort((a, b) => {
-        // 1. Premium first
         if (a.adType === AdType.PREMIUM && b.adType !== AdType.PREMIUM) return -1;
         if (a.adType !== AdType.PREMIUM && b.adType === AdType.PREMIUM) return 1;
-        
-        // 2. Local second
         if (a.adType === AdType.LOCAL && b.adType !== AdType.LOCAL) return -1;
         if (a.adType !== AdType.LOCAL && b.adType === AdType.LOCAL) return 1;
-
-        // 3. Geolocation Logic
         if (isAll) return 0;
         const aIsLocal = (a.neighborhood === currentNeighborhood);
         const bIsLocal = (b.neighborhood === currentNeighborhood);
@@ -273,7 +243,6 @@ const NeighborhoodCouponsBlock: React.FC<{ stores: Store[], onStoreClick: (store
             <div className="relative h-[110px] w-full overflow-hidden">
                <img src={store.image || store.logoUrl || '/assets/default-logo.png'} alt={store.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
-
                {(isAll || store.neighborhood !== currentNeighborhood) && store.neighborhood && (
                   <div className="absolute top-2 right-2 bg-black/60 backdrop-blur-md px-2 py-0.5 rounded-md border border-white/10">
                     <span className="text-[8px] font-bold text-white uppercase tracking-wider flex items-center gap-1">
@@ -281,14 +250,12 @@ const NeighborhoodCouponsBlock: React.FC<{ stores: Store[], onStoreClick: (store
                     </span>
                   </div>
                )}
-
                <div className="absolute bottom-2 left-2">
                 <div className="bg-emerald-500 text-white px-2 py-1 rounded-lg shadow-lg flex items-center gap-0.5">
                   <span className="text-[14px] font-black tracking-tighter">{store.cashback}% OFF</span>
                 </div>
               </div>
             </div>
-
             <div className="p-3 flex flex-col flex-1 justify-between text-left">
               <div>
                 <h4 className="font-bold text-gray-900 dark:text-white text-xs leading-tight line-clamp-2 mb-1">{store.name}</h4>
@@ -306,208 +273,133 @@ const NeighborhoodCouponsBlock: React.FC<{ stores: Store[], onStoreClick: (store
   );
 };
 
-// --- NOVO BLOCO: VAGAS EM DESTAQUE (GARANTIDO) ---
-const FeaturedJobsBlock: React.FC<{ onNavigate: (view: string) => void }> = ({ onNavigate }) => {
-  const { currentNeighborhood, isAll } = useNeighborhood();
-
-  const jobsList = useMemo(() => {
-    // 1. Filtrar por Bairro
-    let filtered = MOCK_JOBS.filter(job => isAll || job.neighborhood === currentNeighborhood);
-    
-    // 2. Ordenar: Patrocinadas/Urgentes primeiro
-    filtered.sort((a, b) => {
-        if (a.isSponsored && !b.isSponsored) return -1;
-        if (!a.isSponsored && b.isSponsored) return 1;
-        if (a.isUrgent && !b.isUrgent) return -1;
-        if (!a.isUrgent && b.isUrgent) return 1;
-        return 0;
-    });
-
-    return filtered.slice(0, 6); // Max 6 no carrossel
-  }, [currentNeighborhood, isAll]);
-
-  const getJobGradient = (index: number) => {
-    const gradients = [
-      'from-orange-500 to-red-600',
-      'from-blue-500 to-indigo-600',
-      'from-emerald-500 to-teal-600',
-      'from-purple-500 to-fuchsia-600',
-      'from-pink-500 to-rose-600'
-    ];
-    return gradients[index % gradients.length];
-  };
-
-  if (jobsList.length === 0) return null;
-
-  return (
-    <div className="w-full bg-white dark:bg-gray-950 py-6 border-t border-gray-50 dark:border-gray-800">
-      <div className="px-5 mb-4 flex justify-between items-end">
-        <div>
-          <div className="flex items-center gap-2 mb-1">
-            <Briefcase className="w-4 h-4 text-orange-500 fill-orange-500/20" />
-            <h2 className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-wider">
-              Vagas em Destaque
-            </h2>
-          </div>
-          <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">
-            Oportunidades de emprego perto de você
-          </p>
-        </div>
-        <button onClick={() => onNavigate('jobs_list')} className="text-[10px] font-bold text-[#1E5BFF] hover:underline">
-            Ver todas
-        </button>
-      </div>
-
-      <div className="flex gap-3 overflow-x-auto no-scrollbar px-5 pb-4 snap-x">
-        {jobsList.map((job, index) => (
-          <button
-            key={job.id}
-            onClick={() => onNavigate('jobs_list')}
-            className={`snap-center min-w-[128px] w-[128px] bg-gradient-to-br ${getJobGradient(index)} rounded-2xl p-3 shadow-md flex flex-col text-left group active:scale-[0.98] transition-all relative overflow-hidden h-[160px] justify-between border-0`}
-          >
-            {/* Background Texture */}
-            <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none"></div>
-            
-            <div className="relative z-10 w-full">
-               <div className="flex justify-between items-start mb-2">
-                  <div className="w-8 h-8 rounded-lg bg-white/20 backdrop-blur-sm flex items-center justify-center text-white border border-white/10">
-                      <Building2 className="w-4 h-4" />
-                  </div>
-                  {(job.isUrgent || job.isSponsored) && (
-                    <span className="bg-white text-red-600 text-[8px] font-black px-1.5 py-0.5 rounded uppercase tracking-wider shadow-sm">
-                        {job.isSponsored ? 'Top' : 'Urgente'}
-                    </span>
-                  )}
-               </div>
-
-               <h4 className="font-bold text-white text-xs leading-tight line-clamp-2 mb-1 drop-shadow-sm">
-                 {job.role}
-               </h4>
-               <p className="text-[10px] text-white/80 truncate font-medium">
-                 {job.company}
-               </p>
-            </div>
-
-            <div className="relative z-10 w-full mt-2">
-                {job.salary ? (
-                    <div className="inline-flex items-center gap-1 bg-black/20 backdrop-blur-sm px-2 py-1 rounded-lg border border-white/10 mb-2">
-                        <DollarSign className="w-2.5 h-2.5 text-green-300" />
-                        <span className="text-[9px] font-bold text-white truncate">{job.salary.split(' ')[1] || 'Salário'}</span>
-                    </div>
-                ) : (
-                    <div className="inline-flex items-center gap-1 bg-black/20 backdrop-blur-sm px-2 py-1 rounded-lg border border-white/10 mb-2">
-                        <Briefcase className="w-2.5 h-2.5 text-white" />
-                        <span className="text-[9px] font-bold text-white">{job.type}</span>
-                    </div>
-                )}
-
-                <div className="flex items-center justify-between border-t border-white/20 pt-2 w-full">
-                    <span className="text-[9px] font-bold text-white">Ver detalhes</span>
-                    <ChevronRight className="w-3 h-3 text-white" />
-                </div>
-            </div>
-          </button>
-        ))}
-      </div>
-    </div>
-  );
-};
-
-// --- BLOCO: SERVIÇOS EM DESTAQUE (GARANTIDO) ---
+// --- BLOCO REDESENHADO: SERVIÇOS EM DESTAQUE (9:16 Stories/Reels - Bordas Retas) ---
 const FeaturedServicesBlock: React.FC<{ stores: Store[], onStoreClick: (store: Store) => void }> = ({ stores, onStoreClick }) => {
-  const { currentNeighborhood, isAll } = useNeighborhood();
-
-  const serviceStores = useMemo(() => {
-    // 1. Filtrar Categoria Serviços e Status Ativo
-    let list = stores.filter(s => 
-      s.category === 'Serviços' && 
-      (s as any).status === 'active'
-    );
-
-    // 2. Ordenação Híbrida: Premium > Rating > Outros
-    list.sort((a, b) => {
-        if (a.adType === AdType.PREMIUM && b.adType !== AdType.PREMIUM) return -1;
-        if (a.adType !== AdType.PREMIUM && b.adType === AdType.PREMIUM) return 1;
-        return b.rating - a.rating;
-    });
-    
-    // 3. Filtro Geográfico
-    if (!isAll) {
-       list = list.filter(s => s.neighborhood === currentNeighborhood);
+  const EDITORIAL_SERVICES = [
+    { 
+      id: 'srv-tech', 
+      name: 'TechFix Pro', 
+      category: 'Assistência Técnica', 
+      image: 'https://images.unsplash.com/photo-1597872250449-66ca64d2558a?q=80&w=600&auto=format&fit=crop',
+      rating: 4.9,
+      location: 'Freguesia'
+    },
+    { 
+      id: 'srv-paper', 
+      name: 'Papelaria Criativa', 
+      category: 'Papelaria', 
+      image: 'https://images.unsplash.com/photo-1531346878377-a5be20888e57?q=80&w=600&auto=format&fit=crop',
+      rating: 4.8,
+      location: 'Taquara'
+    },
+    { 
+      id: 'srv-beauty', 
+      name: 'Studio Glamour', 
+      category: 'Salão de Beleza', 
+      image: 'https://images.unsplash.com/photo-1560066984-138dadb4c035?q=80&w=600&auto=format&fit=crop',
+      rating: 5.0,
+      location: 'Pechincha'
+    },
+    { 
+      id: 'srv-lock', 
+      name: 'Chaveiro 24h', 
+      category: 'Chaveiro', 
+      image: 'https://images.unsplash.com/photo-1582139329536-e7284fece509?q=80&w=600&auto=format&fit=crop',
+      rating: 4.7,
+      location: 'Anil'
+    },
+    { 
+      id: 'srv-eletric', 
+      name: 'Elétrica Rápida', 
+      category: 'Eletricista', 
+      image: 'https://images.unsplash.com/photo-1621905476438-5f09f22d556c?q=80&w=600&auto=format&fit=crop',
+      rating: 4.9,
+      location: 'Freguesia'
+    },
+    { 
+      id: 'srv-print', 
+      name: 'Gráfica Express', 
+      category: 'Gráfica Rápida', 
+      image: 'https://images.unsplash.com/photo-1562564025-51dc11516a0b?q=80&w=600&auto=format&fit=crop',
+      rating: 4.6,
+      location: 'Tanque'
+    },
+    { 
+      id: 'srv-pet', 
+      name: 'Pet Shop Amigo', 
+      category: 'Pet Shop', 
+      image: 'https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?q=80&w=600&auto=format&fit=crop',
+      rating: 4.8,
+      location: 'Curicica'
+    },
+    { 
+      id: 'srv-info', 
+      name: 'InfoTech Soluções', 
+      category: 'Informática', 
+      image: 'https://images.unsplash.com/photo-1587620962725-abab7fe55159?q=80&w=600&auto=format&fit=crop',
+      rating: 4.9,
+      location: 'Freguesia'
     }
-
-    return list.slice(0, 6); // Limite
-  }, [stores, currentNeighborhood, isAll]);
-
-  if (serviceStores.length === 0) return null;
+  ];
 
   return (
-    <div className="w-full bg-white dark:bg-gray-950 py-6 border-t border-gray-50 dark:border-gray-800">
-      <div className="px-5 mb-4 flex justify-between items-end">
-        <div>
-          <div className="flex items-center gap-2 mb-1">
-            <BadgeCheck className="w-4 h-4 text-amber-500 fill-amber-500/20" />
-            <h2 className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-wider">
-              Serviços Recomendados
-            </h2>
-          </div>
-          <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">
-            Profissionais verificados e bem avaliados
-          </p>
+    <div className="w-full bg-white dark:bg-gray-950 py-8 border-t border-gray-50 dark:border-gray-800">
+      <div className="px-5 mb-5">
+        <div className="flex items-center gap-2 mb-1">
+          <BadgeCheck className="w-4 h-4 text-amber-500 fill-amber-500/20" />
+          <h2 className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-wider">
+            Serviços Recomendados
+          </h2>
         </div>
+        <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">
+          Profissionais verificados e bem avaliados
+        </p>
       </div>
 
       <div className="flex gap-4 overflow-x-auto no-scrollbar px-5 pb-4 snap-x">
-        {serviceStores.map(service => (
+        {EDITORIAL_SERVICES.map(service => (
           <button
             key={service.id}
-            onClick={() => onStoreClick(service)}
-            className="snap-center min-w-[150px] max-w-[150px] h-[260px] relative rounded-[24px] overflow-hidden group active:scale-[0.98] transition-all bg-gray-200 dark:bg-gray-800"
+            onClick={() => {
+                const mockStore: any = {
+                    id: service.id,
+                    name: service.name,
+                    category: 'Serviços',
+                    subcategory: service.category,
+                    image: service.image,
+                    rating: service.rating,
+                    distance: service.location,
+                    adType: AdType.ORGANIC
+                };
+                onStoreClick(mockStore);
+            }}
+            className="snap-center w-[160px] shrink-0 aspect-[9/16] relative overflow-hidden group active:scale-[0.98] transition-all bg-gray-200 dark:bg-gray-800 shadow-md rounded-none"
           >
-            {/* Imagem de Fundo Cheia */}
+            {/* Imagem Vertical Cheia */}
             <img 
-                src={service.image || service.logoUrl || '/assets/default-logo.png'} 
+                src={service.image} 
                 alt={service.name} 
-                className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" 
+                className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" 
             />
             
-            {/* Gradiente para Legibilidade */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent"></div>
+            {/* Overlay Escuro Sutil na Base */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-transparent to-transparent"></div>
 
-            {/* Badges Superiores */}
-            <div className="absolute top-3 right-3 z-10 flex flex-col items-end gap-1">
-                <div className="flex items-center gap-1 text-[10px] font-bold bg-black/40 backdrop-blur-md px-1.5 py-0.5 rounded-md border border-white/10 text-white">
-                    <Star className="w-2.5 h-2.5 text-yellow-400 fill-yellow-400" />
+            {/* Badge de Avaliação ⭐ no Topo */}
+            <div className="absolute top-3 left-3 z-10">
+                <div className="flex items-center gap-1 text-[10px] font-bold bg-white/90 backdrop-blur-md px-2 py-0.5 shadow-sm text-gray-900 rounded-none">
+                    <Star className="w-2.5 h-2.5 text-yellow-500 fill-yellow-500" />
                     {service.rating.toFixed(1)}
                 </div>
             </div>
 
-            {service.adType === AdType.PREMIUM && (
-                <div className="absolute top-3 left-3 z-10">
-                    <div className="bg-amber-400 text-slate-900 text-[8px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider flex items-center gap-1 shadow-sm">
-                        <Crown className="w-2 h-2 fill-slate-900" />
-                        Top
-                    </div>
-                </div>
-            )}
-
-            {/* Informações Inferiores */}
+            {/* Categoria, Nome e Localização na Base */}
             <div className="absolute bottom-0 left-0 right-0 p-4 text-left z-10">
-                <h4 className="font-bold text-white text-sm leading-tight line-clamp-2 mb-1 drop-shadow-md">
-                    {service.name}
-                </h4>
-                <p className="text-[10px] text-gray-300 font-medium truncate mb-2">
-                    {service.subcategory}
-                </p>
-                
-                <div className="flex items-center justify-between border-t border-white/10 pt-2 mt-1">
-                    <div className="flex items-center gap-1 text-[9px] text-gray-300 font-medium">
-                        <MapPin className="w-2.5 h-2.5" />
-                        {service.distance || 'Local'}
-                    </div>
-                    <div className="w-5 h-5 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center text-white">
-                        <ArrowUpRight className="w-3 h-3" />
-                    </div>
+                <p className="text-[8px] text-amber-400 font-black uppercase tracking-widest mb-1">{service.category}</p>
+                <h4 className="font-bold text-white text-sm leading-tight mb-1 drop-shadow-md">{service.name}</h4>
+                <div className="flex items-center gap-1 text-[9px] text-gray-300 font-medium">
+                    <MapPin className="w-2.5 h-2.5" />
+                    {service.location}
                 </div>
             </div>
           </button>
@@ -532,7 +424,6 @@ const SectionHeader: React.FC<{ title: string; subtitle?: string; rightElement?:
 const CommunityTrustCarousel: React.FC<{ stores: Store[], onStoreClick: (store: Store) => void }> = ({ stores, onStoreClick }) => {
   const { currentNeighborhood, isAll } = useNeighborhood();
   const trustedStores = useMemo(() => {
-    // FILTRO RIGOROSO: Apenas PREMIUM e COM REVIEWS
     let list = (stores || []).filter(s => 
         s && 
         s.recentComments && 
@@ -663,6 +554,104 @@ const CommunityFeedBlock: React.FC<{ onNavigate: (view: string) => void; }> = ({
   );
 };
 
+// --- NOVO BLOCO: VAGAS EM DESTAQUE (GARANTIDO) ---
+const FeaturedJobsBlock: React.FC<{ onNavigate: (view: string) => void }> = ({ onNavigate }) => {
+  const { currentNeighborhood, isAll } = useNeighborhood();
+
+  const jobsList = useMemo(() => {
+    let filtered = MOCK_JOBS.filter(job => isAll || job.neighborhood === currentNeighborhood);
+    filtered.sort((a, b) => {
+        if (a.isSponsored && !b.isSponsored) return -1;
+        if (!a.isSponsored && b.isSponsored) return 1;
+        if (a.isUrgent && !b.isUrgent) return -1;
+        if (!a.isUrgent && b.isUrgent) return 1;
+        return 0;
+    });
+    return filtered.slice(0, 6);
+  }, [currentNeighborhood, isAll]);
+
+  const getJobGradient = (index: number) => {
+    const gradients = [
+      'from-orange-500 to-red-600',
+      'from-blue-500 to-indigo-600',
+      'from-emerald-500 to-teal-600',
+      'from-purple-500 to-fuchsia-600',
+      'from-pink-500 to-rose-600'
+    ];
+    return gradients[index % gradients.length];
+  };
+
+  if (jobsList.length === 0) return null;
+
+  return (
+    <div className="w-full bg-white dark:bg-gray-950 py-6 border-t border-gray-50 dark:border-gray-800">
+      <div className="px-5 mb-4 flex justify-between items-end">
+        <div>
+          <div className="flex items-center gap-2 mb-1">
+            <Briefcase className="w-4 h-4 text-orange-500 fill-orange-500/20" />
+            <h2 className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-wider">
+              Vagas em Destaque
+            </h2>
+          </div>
+          <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">
+            Oportunidades de emprego perto de você
+          </p>
+        </div>
+        <button onClick={() => onNavigate('jobs_list')} className="text-[10px] font-bold text-[#1E5BFF] hover:underline">
+            Ver todas
+        </button>
+      </div>
+
+      <div className="flex gap-3 overflow-x-auto no-scrollbar px-5 pb-4 snap-x">
+        {jobsList.map((job, index) => (
+          <button
+            key={job.id}
+            onClick={() => onNavigate('jobs_list')}
+            className={`snap-center min-w-[128px] w-[128px] bg-gradient-to-br ${getJobGradient(index)} rounded-2xl p-3 shadow-md flex flex-col text-left group active:scale-[0.98] transition-all relative overflow-hidden h-[160px] justify-between border-0`}
+          >
+            <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none"></div>
+            <div className="relative z-10 w-full">
+               <div className="flex justify-between items-start mb-2">
+                  <div className="w-8 h-8 rounded-lg bg-white/20 backdrop-blur-sm flex items-center justify-center text-white border border-white/10">
+                      <Building2 className="w-4 h-4" />
+                  </div>
+                  {(job.isUrgent || job.isSponsored) && (
+                    <span className="bg-white text-red-600 text-[8px] font-black px-1.5 py-0.5 rounded uppercase tracking-wider shadow-sm">
+                        {job.isSponsored ? 'Top' : 'Urgente'}
+                    </span>
+                  )}
+               </div>
+               <h4 className="font-bold text-white text-xs leading-tight line-clamp-2 mb-1 drop-shadow-sm">
+                 {job.role}
+               </h4>
+               <p className="text-[10px] text-white/80 truncate font-medium">
+                 {job.company}
+               </p>
+            </div>
+            <div className="relative z-10 w-full mt-2">
+                {job.salary ? (
+                    <div className="inline-flex items-center gap-1 bg-black/20 backdrop-blur-sm px-2 py-1 rounded-lg border border-white/10 mb-2">
+                        <DollarSign className="w-2.5 h-2.5 text-green-300" />
+                        <span className="text-[9px] font-bold text-white truncate">{job.salary.split(' ')[1] || 'Salário'}</span>
+                    </div>
+                ) : (
+                    <div className="inline-flex items-center gap-1 bg-black/20 backdrop-blur-sm px-2 py-1 rounded-lg border border-white/10 mb-2">
+                        <Briefcase className="w-2.5 h-2.5 text-white" />
+                        <span className="text-[9px] font-bold text-white">{job.type}</span>
+                    </div>
+                )}
+                <div className="flex items-center justify-between border-t border-white/20 pt-2 w-full">
+                    <span className="text-[9px] font-bold text-white">Ver detalhes</span>
+                    <ChevronRight className="w-3 h-3 text-white" />
+                </div>
+            </div>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+};
+
 export const HomeFeed: React.FC<HomeFeedProps> = ({ 
   onNavigate, 
   onSelectCategory, 
@@ -725,34 +714,25 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
             </div>
           </div>
         );
-
       case 'home_carousel':
         return <div key="home_carousel" className="w-full bg-white dark:bg-gray-950 pb-8"><HomeCarousel onNavigate={onNavigate} /></div>;
-
       case 'neighborhood_coupons':
         return <NeighborhoodCouponsBlock key="neighborhood_coupons" stores={stores} onStoreClick={(s) => onStoreClick && onStoreClick(s)} />;
-
       case 'featured_services':
         return <FeaturedServicesBlock key="featured_services" stores={stores} onStoreClick={(s) => onStoreClick && onStoreClick(s)} />;
-
       case 'featured_jobs':
         return <FeaturedJobsBlock key="featured_jobs" onNavigate={onNavigate} />;
-
       case 'community_feed': return <CommunityFeedBlock key="community_feed" onNavigate={onNavigate} />;
-
       case 'trust_feed': return <CommunityTrustCarousel key="trust_feed" stores={sortedStores} onStoreClick={(s) => onStoreClick && onStoreClick(s)} />;
-
       case 'list':
         return (
           <div key="list" className="w-full bg-white dark:bg-gray-900 py-8">
             <div className="px-5">
               <SectionHeader title={`Parceiros Premium em ${currentNeighborhood === 'Jacarepaguá (todos)' ? 'Jacarepaguá' : currentNeighborhood}`} subtitle="O que há de melhor no bairro" rightElement={<div className="flex gap-1 bg-gray-100 dark:bg-gray-800 p-1 rounded-xl">{['all', 'cashback', 'top_rated'].map((f) => (<button key={f} onClick={() => setListFilter(f as any)} className={`text-[8px] font-black uppercase px-2.5 py-1.5 rounded-lg transition-all ${listFilter === f ? 'bg-white dark:bg-gray-700 text-[#1E5BFF] shadow-sm' : 'text-gray-400'}`}>{f === 'all' ? 'Tudo' : f === 'cashback' ? '%' : 'Top'}</button>))}</div>} />
-              {/* FILTRAGEM PREMIUM ATIVADA */}
               <LojasEServicosList onStoreClick={onStoreClick} onViewAll={() => onNavigate('explore')} activeFilter={listFilter} user={user} onNavigate={onNavigate} premiumOnly={true} />
             </div>
           </div>
         );
-
       case 'mini_tribes':
         return (
           <div key="mini_tribes" className="w-full py-12 bg-white dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800">
@@ -771,11 +751,11 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
   const homeStructure = useMemo(() => [
     'categories',
     'home_carousel',
-    'neighborhood_coupons', // 1. Prioridade
-    'featured_services',    // 2. Prioridade
-    'featured_jobs',        // 3. Prioridade
+    'neighborhood_coupons',
+    'featured_services',    
+    'featured_jobs',        
     'trust_feed',
-    'community_feed',       // 4. Retenção
+    'community_feed',       
     'list',
     'mini_tribes'
   ], []);

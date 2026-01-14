@@ -30,6 +30,7 @@ import { MerchantQrScreen } from './components/MerchantQrScreen';
 import { WeeklyPromoModule } from './components/WeeklyPromoModule';
 import { JobsView } from './components/JobsView';
 import { MerchantJobsModule } from './components/MerchantJobsModule';
+import { AdminPanel } from './components/AdminPanel'; // Importação do Painel ADM
 import { MapPin, ShieldCheck, Lock, LogIn } from 'lucide-react';
 import { useAuth } from './contexts/AuthContext';
 import { NeighborhoodProvider } from './contexts/NeighborhoodContext';
@@ -59,6 +60,9 @@ import {
 
 // Global para persistência entre ciclos de vida se necessário
 let isFirstBootAttempted = false;
+
+// E-mail Administrativo Privilegiado
+const ADMIN_EMAIL = 'dedonopradonodedelivery@gmail.com';
 
 // Tabs that support horizontal swipe navigation (Main Bottom Bar Tabs)
 const MAIN_TABS = ['home', 'explore', 'user_cupom', 'qrcode_scan', 'services', 'community_feed'];
@@ -97,6 +101,9 @@ const App: React.FC = () => {
   
   // Estado para controlar redirecionamento pós-login
   const [pendingRoute, setPendingRoute] = useState<string | null>(null);
+  
+  // Estado para controlar qual categoria está sendo anunciada (Ads Flow)
+  const [adCategoryTarget, setAdCategoryTarget] = useState<string | null>(null);
 
   const touchStart = useRef<{ x: number, y: number, target: EventTarget | null } | null>(null);
   const minSwipeDistance = 60;
@@ -144,46 +151,56 @@ const App: React.FC = () => {
     return () => mediaQuery.removeEventListener('change', handleChange);
   }, [themeMode]);
 
+  // --- REDIRECIONAMENTO AUTOMÁTICO ADM (REGRA OBRIGATÓRIA) ---
+  useEffect(() => {
+    if (user && user.email === ADMIN_EMAIL && activeTab !== 'admin_panel') {
+      setActiveTab('admin_panel');
+      // Fecha modais se abertos
+      setIsAuthOpen(false);
+    }
+  }, [user, activeTab]);
+
   // --- BLOQUEIOS DE SEGURANÇA E PERMISSÕES ---
   useEffect(() => {
     // Regra 1: Usuário NÃO pode acessar validação
     if (userRole === 'cliente' && activeTab === 'qrcode_scan') {
-        console.warn("Bloqueio: Cliente tentou acessar validação.");
         setActiveTab('home');
     }
 
     // Regra 2: Lojista NÃO pode gerar QR Code (Consumo)
     if (userRole === 'lojista' && activeTab === 'user_cupom') {
-        console.warn("Bloqueio: Lojista tentou gerar cupom de consumo.");
         setActiveTab('home');
     }
-  }, [activeTab, userRole]);
+
+    // Regra 3: Proteção de acesso ao Admin (Segunda camada)
+    if (activeTab === 'admin_panel' && (!user || user.email !== ADMIN_EMAIL)) {
+        setActiveTab('home');
+    }
+  }, [activeTab, userRole, user]);
 
   // --- REDIRECIONAMENTO AUTOMÁTICO PÓS-LOGIN ---
   useEffect(() => {
     if (user && pendingRoute === 'cupom') {
-        // Redireciona para a tela correta baseada no perfil
+        // Ignora se for admin, pois o useEffect de admin tem precedência
+        if (user.email === ADMIN_EMAIL) return;
+
         if (userRole === 'lojista') {
             setActiveTab('qrcode_scan');
         } else {
             setActiveTab('user_cupom');
         }
-        setPendingRoute(null); // Limpa o estado pendente
+        setPendingRoute(null); 
     }
   }, [user, userRole, pendingRoute]);
   
   // --- LÓGICA DO BOTÃO "CUPOM" ---
   const handleCupomClick = () => {
     if (!user) {
-      // Regra 1: Bloqueio Total para Visitante
-      // Armazena intenção e abre login imediatamente
       setPendingRoute('cupom');
       setIsAuthOpen(true);
     } else if (userRole === 'lojista') {
-      // Lojista: Abrir Scanner para Validar
       setActiveTab('qrcode_scan');
     } else {
-      // Usuário: Gerar QR Code/Token
       setActiveTab('user_cupom');
     }
   };
@@ -201,6 +218,20 @@ const App: React.FC = () => {
   const handleSelectStore = (store: Store) => {
     setSelectedStore(store);
     setActiveTab('store_detail');
+  };
+
+  const handleAdvertiseInCategory = (categoryName: string) => {
+    setAdCategoryTarget(categoryName);
+    setActiveTab('store_ads_module');
+  };
+
+  const handleAdsBack = () => {
+    setAdCategoryTarget(null);
+    if (activeTab === 'store_ads_module' && selectedCategory) {
+        setActiveTab('category_detail');
+    } else {
+        setActiveTab('store_area'); 
+    }
   };
 
   const isHorizontalScroll = (target: Element | null): boolean => {
@@ -254,10 +285,11 @@ const App: React.FC = () => {
     'user_statement', 'merchant_cashback_dashboard', 'merchant_cashback_onboarding',
     'store_cashback_module', 'store_ads_module', 'about', 'support', 'invite_friend', 'favorites',
     'weekly_promo', 'jobs_list', 'merchant_jobs', 'community_feed', 'admin_moderation',
-    'user_cupom', 'cashback_landing', 'advertise_home_banner', 'user_coupons_history'
+    'user_cupom', 'cashback_landing', 'advertise_home_banner', 'user_coupons_history',
+    'admin_panel' // Exclui header normal no Admin
   ];
 
-  const hideBottomNav = ['store_ads_module', 'store_detail', 'admin_moderation', 'advertise_home_banner'].includes(activeTab);
+  const hideBottomNav = ['store_ads_module', 'store_detail', 'admin_moderation', 'advertise_home_banner', 'admin_panel'].includes(activeTab);
 
   return (
     <div className={isDarkMode ? 'dark' : ''}>
@@ -291,6 +323,16 @@ const App: React.FC = () => {
               />
               )}
               <main className="animate-in fade-in duration-500 w-full max-w-md mx-auto">
+              
+              {/* PAINEL ADMINISTRATIVO (MVP) */}
+              {activeTab === 'admin_panel' && (
+                  <AdminPanel 
+                    user={user as any} 
+                    onNavigateToApp={() => setActiveTab('home')}
+                    onLogout={signOut}
+                  />
+              )}
+
               {activeTab === 'home' && (
                   <HomeFeed
                   onNavigate={setActiveTab}
@@ -330,7 +372,6 @@ const App: React.FC = () => {
               )}
               {activeTab === 'store_cashback_module' && <StoreCashbackModule onBack={() => setActiveTab('home')} />}
               
-              {/* Guarda de Rota para Anuncie Aqui */}
               {activeTab === 'advertise_home_banner' && (
                 !user ? (
                   <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col items-center justify-center p-6 text-center animate-in fade-in">
@@ -373,11 +414,17 @@ const App: React.FC = () => {
                     </button>
                   </div>
                 ) : (
-                  <StoreAdsModule onBack={() => setActiveTab('home')} />
+                  <StoreAdsModule onBack={() => setActiveTab('home')} onNavigate={setActiveTab} />
                 )
               )}
 
-              {activeTab === 'store_ads_module' && <StoreAdsModule onBack={() => setActiveTab('store_area')} />}
+              {activeTab === 'store_ads_module' && (
+                <StoreAdsModule 
+                    onBack={handleAdsBack} 
+                    onNavigate={setActiveTab}
+                    categoryName={adCategoryTarget || undefined}
+                />
+              )}
               {activeTab === 'store_profile' && <StoreProfileEdit onBack={() => setActiveTab('store_area')} />}
               {activeTab === 'store_finance' && <StoreFinanceModule onBack={() => setActiveTab('store_area')} />}
               {activeTab === 'weekly_promo' && <WeeklyPromoModule onBack={() => setActiveTab('store_area')} />}
@@ -417,7 +464,9 @@ const App: React.FC = () => {
                       category={selectedCategory} 
                       onBack={() => { setActiveTab('home'); setSelectedCategory(null); }} 
                       onStoreClick={handleSelectStore} 
-                      stores={STORES} 
+                      stores={STORES}
+                      userRole={userRole}
+                      onAdvertiseInCategory={handleAdvertiseInCategory}
                   />
               )}
               
@@ -444,7 +493,6 @@ const App: React.FC = () => {
                   />
               }
               
-              {/* NOVAS ROTAS DO CUPOM */}
               {activeTab === 'user_cupom' && <UserCupomScreen user={user as any} onBack={() => setActiveTab('home')} />}
               {activeTab === 'cashback_landing' && <CashbackLandingView onBack={() => setActiveTab('home')} onLogin={() => setIsAuthOpen(true)} />}
 
@@ -458,11 +506,9 @@ const App: React.FC = () => {
                 isOpen={isAuthOpen} 
                 onClose={() => {
                     setIsAuthOpen(false);
-                    // Se cancelou login, remove intenção pendente
                     setPendingRoute(null);
                 }} 
                 user={user as any}
-                // O redirecionamento real acontece via useEffect quando o user muda
                 onLoginSuccess={() => { setIsAuthOpen(false); }}
               />
               {isQuoteModalOpen && <QuoteRequestModal isOpen={isQuoteModalOpen} onClose={() => setIsQuoteModalOpen(false)} categoryName={quoteCategory} onSuccess={() => { setIsQuoteModalOpen(false); setActiveTab('service_success'); }} />}
