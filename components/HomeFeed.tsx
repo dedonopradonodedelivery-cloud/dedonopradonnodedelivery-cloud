@@ -323,8 +323,19 @@ const FeaturedJobsBlock: React.FC<{ onNavigate: (view: string) => void }> = ({ o
         return 0;
     });
 
-    return filtered.slice(0, 5); // Max 5 no carrossel
+    return filtered.slice(0, 6); // Max 6 no carrossel
   }, [currentNeighborhood, isAll]);
+
+  const getJobGradient = (index: number) => {
+    const gradients = [
+      'from-orange-500 to-red-600',
+      'from-blue-500 to-indigo-600',
+      'from-emerald-500 to-teal-600',
+      'from-purple-500 to-fuchsia-600',
+      'from-pink-500 to-rose-600'
+    ];
+    return gradients[index % gradients.length];
+  };
 
   if (jobsList.length === 0) return null;
 
@@ -348,46 +359,52 @@ const FeaturedJobsBlock: React.FC<{ onNavigate: (view: string) => void }> = ({ o
       </div>
 
       <div className="flex gap-3 overflow-x-auto no-scrollbar px-5 pb-4 snap-x">
-        {jobsList.map(job => (
+        {jobsList.map((job, index) => (
           <button
             key={job.id}
             onClick={() => onNavigate('jobs_list')}
-            className="snap-center min-w-[240px] max-w-[240px] bg-gradient-to-br from-white to-orange-50 dark:from-gray-900 dark:to-gray-800 rounded-2xl p-4 shadow-sm border border-orange-100 dark:border-gray-700 flex flex-col text-left group active:scale-[0.98] transition-all relative overflow-hidden"
+            className={`snap-center min-w-[128px] w-[128px] bg-gradient-to-br ${getJobGradient(index)} rounded-2xl p-3 shadow-md flex flex-col text-left group active:scale-[0.98] transition-all relative overflow-hidden h-[160px] justify-between border-0`}
           >
-            {(job.isUrgent || job.isSponsored) && (
-                <div className="absolute top-0 right-0 bg-red-500 text-white text-[8px] font-black px-2 py-1 rounded-bl-xl uppercase tracking-wider">
-                    {job.isSponsored ? 'Patrocinada' : 'Urgente'}
-                </div>
-            )}
+            {/* Background Texture */}
+            <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none"></div>
             
-            <div className="flex items-center gap-3 mb-3">
-                <div className="w-10 h-10 rounded-xl bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center text-orange-600 dark:text-orange-400 border border-orange-200 dark:border-orange-800">
-                    <Building2 className="w-5 h-5" />
-                </div>
-                <div className="flex-1 min-w-0">
-                    <h4 className="font-bold text-gray-900 dark:text-white text-sm truncate leading-tight">{job.role}</h4>
-                    <p className="text-[10px] text-gray-500 dark:text-gray-400 truncate">{job.company}</p>
-                </div>
-            </div>
-
-            <div className="flex items-center gap-2 mb-3">
-                <span className="text-[9px] font-bold text-gray-500 bg-white dark:bg-gray-700 border border-gray-100 dark:border-gray-600 px-1.5 py-0.5 rounded">
-                    {job.type}
-                </span>
-                {job.salary && (
-                    <span className="text-[9px] font-bold text-green-600 bg-green-50 dark:bg-green-900/20 px-1.5 py-0.5 rounded flex items-center gap-0.5">
-                        <DollarSign className="w-2.5 h-2.5" /> {job.salary}
+            <div className="relative z-10 w-full">
+               <div className="flex justify-between items-start mb-2">
+                  <div className="w-8 h-8 rounded-lg bg-white/20 backdrop-blur-sm flex items-center justify-center text-white border border-white/10">
+                      <Building2 className="w-4 h-4" />
+                  </div>
+                  {(job.isUrgent || job.isSponsored) && (
+                    <span className="bg-white text-red-600 text-[8px] font-black px-1.5 py-0.5 rounded uppercase tracking-wider shadow-sm">
+                        {job.isSponsored ? 'Top' : 'Urgente'}
                     </span>
-                )}
+                  )}
+               </div>
+
+               <h4 className="font-bold text-white text-xs leading-tight line-clamp-2 mb-1 drop-shadow-sm">
+                 {job.role}
+               </h4>
+               <p className="text-[10px] text-white/80 truncate font-medium">
+                 {job.company}
+               </p>
             </div>
 
-            <div className="mt-auto pt-3 border-t border-orange-100 dark:border-gray-700 flex items-center justify-between w-full">
-                <div className="flex items-center gap-1 text-[9px] text-gray-400 font-medium">
-                    <MapPin className="w-2.5 h-2.5" /> {job.neighborhood}
+            <div className="relative z-10 w-full mt-2">
+                {job.salary ? (
+                    <div className="inline-flex items-center gap-1 bg-black/20 backdrop-blur-sm px-2 py-1 rounded-lg border border-white/10 mb-2">
+                        <DollarSign className="w-2.5 h-2.5 text-green-300" />
+                        <span className="text-[9px] font-bold text-white truncate">{job.salary.split(' ')[1] || 'Salário'}</span>
+                    </div>
+                ) : (
+                    <div className="inline-flex items-center gap-1 bg-black/20 backdrop-blur-sm px-2 py-1 rounded-lg border border-white/10 mb-2">
+                        <Briefcase className="w-2.5 h-2.5 text-white" />
+                        <span className="text-[9px] font-bold text-white">{job.type}</span>
+                    </div>
+                )}
+
+                <div className="flex items-center justify-between border-t border-white/20 pt-2 w-full">
+                    <span className="text-[9px] font-bold text-white">Ver detalhes</span>
+                    <ChevronRight className="w-3 h-3 text-white" />
                 </div>
-                <span className="text-[9px] font-bold text-[#1E5BFF] flex items-center gap-0.5 group-hover:underline">
-                    Ver detalhes <ChevronRight className="w-2.5 h-2.5" />
-                </span>
             </div>
           </button>
         ))}
