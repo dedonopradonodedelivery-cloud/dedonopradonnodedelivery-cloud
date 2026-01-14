@@ -90,7 +90,7 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void }> = ({ onNavigat
   const [progress, setProgress] = useState(0);
   const { currentNeighborhood } = useNeighborhood();
 
-  // --- LÓGICA DE EXIBIÇÃO DE BANNERS (LANÇAMENTO) ---
+  // --- LÓGICA DE EXIBIÇÃO DE BANNERS ---
   const banners: BannerItem[] = useMemo(() => {
     
     // 1. BANNER PATROCINADOR MASTER (SEMPRE FIXO NA POSIÇÃO 1)
@@ -100,23 +100,11 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void }> = ({ onNavigat
       subtitle: 'Segurança e Facilities com excelência para seu condomínio e empresa.',
       target: 'patrocinador_master',
       tag: 'Patrocinador Master',
-      bgColor: 'bg-slate-900', // Identidade Visual Dark Premium
+      bgColor: 'bg-slate-900',
       Icon: Crown
     };
 
-    // 2. BANNER INSTITUCIONAL (PREENCHIMENTO)
-    // Este banner só aparece se não houver banners vendidos suficientes
-    const institutionalBanner: BannerItem = {
-      id: 'institutional-ads',
-      title: 'Anuncie aqui',
-      subtitle: 'Aproveite as condições especiais de inauguração.',
-      target: 'store_ads_module', 
-      tag: 'Oportunidade',
-      bgColor: 'bg-[#1E5BFF]', // Azul Institucional
-      Icon: Megaphone
-    };
-
-    // 3. LISTA DE BANNERS VENDIDOS
+    // 2. LISTA DE BANNERS VENDIDOS (RIO PHONE STORE)
     const soldBanners: BannerItem[] = [
        {
           id: 'rio-phone-store',
@@ -124,25 +112,25 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void }> = ({ onNavigat
           subtitle: 'Especialista Apple: iPhone, iPad, Mac e Watch. Técnicos de confiança.',
           target: 'explore', 
           tag: 'Assistência Apple',
-          bgColor: 'bg-zinc-900', // Visual limpo e tecnológico
+          bgColor: 'bg-zinc-900',
           Icon: Smartphone
        }
     ];
 
-    // --- REGRAS DE COMPOSIÇÃO ---
-    let displayList = [masterBanner];
+    // 3. BANNER INSTITUCIONAL DE VENDAS (SEMPRE VISÍVEL AGORA)
+    const advertiseBanner: BannerItem = {
+      id: 'advertise-home',
+      title: 'Anuncie aqui',
+      subtitle: 'Destaque sua marca para todo o bairro. Condições especiais de inauguração.',
+      target: 'advertise_home_banner', 
+      tag: 'Oportunidade',
+      bgColor: 'bg-[#1E5BFF]', 
+      Icon: Megaphone
+    };
 
-    if (soldBanners.length > 0) {
-        // Se houver banners vendidos, eles entram logo após o Master.
-        // O banner Institucional NÃO é exibido neste caso (Regra: Remover quando slot for vendido).
-        displayList = [...displayList, ...soldBanners];
-    } else {
-        // Se não houver banners vendidos, exibimos o Institucional para não deixar buraco (Regra: Não exibir espaços vazios).
-        displayList.push(institutionalBanner);
-    }
-
-    // Regra: Limite máximo de 5 banners no carrossel
-    return displayList.slice(0, 5);
+    // --- REGRAS DE COMPOSIÇÃO: Master + Vendidos + Anuncie Aqui ---
+    // O banner "Anuncie aqui" agora aparece SEMPRE no final da fila para incentivar novos anunciantes.
+    return [masterBanner, ...soldBanners, advertiseBanner].slice(0, 5);
 
   }, [currentNeighborhood]);
 

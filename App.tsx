@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { Layout } from './components/Layout';
 import { Header } from './components/Header';
@@ -252,10 +253,10 @@ const App: React.FC = () => {
     'user_statement', 'merchant_cashback_dashboard', 'merchant_cashback_onboarding',
     'store_cashback_module', 'store_ads_module', 'about', 'support', 'invite_friend', 'favorites',
     'weekly_promo', 'jobs_list', 'merchant_jobs', 'community_feed', 'admin_moderation',
-    'user_cupom', 'cashback_landing'
+    'user_cupom', 'cashback_landing', 'advertise_home_banner'
   ];
 
-  const hideBottomNav = ['store_ads_module', 'store_detail', 'admin_moderation'].includes(activeTab);
+  const hideBottomNav = ['store_ads_module', 'store_detail', 'admin_moderation', 'advertise_home_banner'].includes(activeTab);
 
   return (
     <div className={isDarkMode ? 'dark' : ''}>
@@ -325,6 +326,10 @@ const App: React.FC = () => {
               )}
               {activeTab === 'store_cashback_module' && <StoreCashbackModule onBack={() => setActiveTab('home')} />}
               {activeTab === 'store_ads_module' && <StoreAdsModule onBack={() => setActiveTab('store_area')} />}
+              
+              {/* Rota Específica para Banner da Home - Volta para Home */}
+              {activeTab === 'advertise_home_banner' && <StoreAdsModule onBack={() => setActiveTab('home')} />}
+
               {activeTab === 'store_profile' && <StoreProfileEdit onBack={() => setActiveTab('store_area')} />}
               {activeTab === 'store_finance' && <StoreFinanceModule onBack={() => setActiveTab('store_area')} />}
               {activeTab === 'weekly_promo' && <WeeklyPromoModule onBack={() => setActiveTab('store_area')} />}
