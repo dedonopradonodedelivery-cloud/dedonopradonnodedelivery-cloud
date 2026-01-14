@@ -22,7 +22,8 @@ import {
   Briefcase,
   Store,
   CreditCard,
-  PlusCircle
+  PlusCircle,
+  Ticket
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { User } from '@supabase/supabase-js';
@@ -42,7 +43,6 @@ interface MenuViewProps {
 
 const CATEGORIES_JOBS = ['Alimentação', 'Beleza', 'Serviços', 'Pets', 'Moda', 'Saúde', 'Educação', 'Tecnologia'];
 const JOBS_EXPLAINER_VIDEO = "https://videos.pexels.com/video-files/3129957/3129957-sd_540_960_30fps.mp4";
-const CASHBACK_EXPLAINER_VIDEO = "https://videos.pexels.com/video-files/3129957/3129957-sd_540_960_30fps.mp4"; // Placeholder
 const MERCHANT_JOBS_VIDEO = "https://videos.pexels.com/video-files/3196344/3196344-sd_540_960_25fps.mp4"; // Placeholder para vídeo de recrutamento
 
 export const MenuView: React.FC<MenuViewProps> = ({ 
@@ -62,11 +62,10 @@ export const MenuView: React.FC<MenuViewProps> = ({
   const [jobsAlerts, setJobsAlerts] = useState(false);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [hasSeenJobsVideo, setHasSeenJobsVideo] = useState(false);
-  const [hasSeenCashbackVideo, setHasSeenCashbackVideo] = useState(false);
   const [hasSeenMerchantJobsVideo, setHasSeenMerchantJobsVideo] = useState(false);
   
   // Type agora aceita 'merchant_jobs'
-  const [showVideoModal, setShowVideoModal] = useState<{show: boolean, type: 'jobs' | 'cashback' | 'merchant_jobs'}>({show: false, type: 'jobs'});
+  const [showVideoModal, setShowVideoModal] = useState<{show: boolean, type: 'jobs' | 'merchant_jobs'}>({show: false, type: 'jobs'});
 
   useEffect(() => {
     if (user) {
@@ -76,12 +75,11 @@ export const MenuView: React.FC<MenuViewProps> = ({
 
   const loadPreferences = async () => {
     try {
-      const { data } = await supabase.from('profiles').select('jobsAlertsEnabled, jobCategories, hasSeenJobsVideo, hasSeenCashbackVideo, hasSeenMerchantJobsVideo').eq('id', user?.id).single();
+      const { data } = await supabase.from('profiles').select('jobsAlertsEnabled, jobCategories, hasSeenJobsVideo, hasSeenMerchantJobsVideo').eq('id', user?.id).single();
       if (data) {
         setJobsAlerts(!!data.jobsAlertsEnabled);
         setSelectedCategories(data.jobCategories || []);
         setHasSeenJobsVideo(!!data.hasSeenJobsVideo);
-        setHasSeenCashbackVideo(!!data.hasSeenCashbackVideo);
         setHasSeenMerchantJobsVideo(!!data.hasSeenMerchantJobsVideo);
       }
     } catch (e) {
@@ -114,16 +112,6 @@ export const MenuView: React.FC<MenuViewProps> = ({
     updateProfile(updates);
   };
 
-  const handleOpenWallet = () => {
-    if (!hasSeenCashbackVideo) {
-      setShowVideoModal({ show: true, type: 'cashback' });
-      setHasSeenCashbackVideo(true);
-      updateProfile({ hasSeenCashbackVideo: true });
-    } else {
-      onNavigate('user_statement');
-    }
-  };
-
   const handleCreateJob = () => {
     if (!hasSeenMerchantJobsVideo) {
       setShowVideoModal({ show: true, type: 'merchant_jobs' });
@@ -152,7 +140,7 @@ export const MenuView: React.FC<MenuViewProps> = ({
         <div className="flex-1 flex flex-col items-center justify-center px-4 pb-28 text-center">
           <div className="w-24 h-24 bg-white dark:bg-gray-800 rounded-[2rem] flex items-center justify-center mb-6 shadow-sm border border-gray-100 dark:border-gray-700 transform -rotate-6"><UserIcon className="w-10 h-10 text-[#1E5BFF]" /></div>
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">Entre na sua conta</h2>
-          <p className="text-gray-500 dark:text-gray-400 text-sm mb-10 max-w-[280px]">Faça login para acessar favoritos, cashback e alertas de vagas.</p>
+          <p className="text-gray-500 dark:text-gray-400 text-sm mb-10 max-w-[280px]">Faça login para acessar favoritos e alertas de vagas.</p>
           <button onClick={onAuthClick} className="w-full bg-[#1E5BFF] text-white font-bold py-4 rounded-2xl shadow-xl">Entrar ou criar conta</button>
         </div>
       </div>
@@ -188,29 +176,24 @@ export const MenuView: React.FC<MenuViewProps> = ({
           </div>
         </div>
 
-        {/* (A) BANNER CARTEIRA & CASHBACK (PRIMEIRO) - APENAS PARA CLIENTES (NÃO LOJISTAS) */}
+        {/* (A) BANNER DE CUPONS (SUBSTITUINDO CASHBACK) - APENAS PARA CLIENTES */}
         {!isMerchant && (
-          <div className="bg-gradient-to-br from-[#1E5BFF] to-[#1749CC] rounded-[2rem] p-6 text-white shadow-xl shadow-blue-500/20 mb-6 relative overflow-hidden group cursor-pointer" onClick={handleOpenWallet}>
+          <div 
+            onClick={() => onNavigate('user_coupons_history')}
+            className="bg-gradient-to-br from-emerald-500 to-teal-600 rounded-[2rem] p-6 text-white shadow-xl shadow-emerald-500/20 mb-6 relative overflow-hidden group cursor-pointer" 
+          >
               <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl -mr-10 -mt-10"></div>
               <div className="relative z-10 flex items-center justify-between">
                   <div className="flex items-center gap-4">
                       <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/10 group-hover:scale-110 transition-transform">
-                          <Wallet className="w-6 h-6 text-white" />
+                          <Ticket className="w-6 h-6 text-white" />
                       </div>
                       <div>
-                          <h3 className="font-bold text-lg">Carteira & Cashback</h3>
-                          <p className="text-xs text-blue-100 font-medium">Veja seu saldo e benefícios.</p>
+                          <h3 className="font-bold text-lg">Meu histórico de cupons</h3>
+                          <p className="text-xs text-emerald-100 font-medium">Veja quanto você já economizou no bairro</p>
                       </div>
                   </div>
                   <ChevronRight className="w-6 h-6 opacity-50" />
-              </div>
-              <div className="mt-6 flex justify-end relative z-10">
-                  <button 
-                    onClick={(e) => { e.stopPropagation(); setShowVideoModal({show: true, type: 'cashback'}); }}
-                    className="text-[10px] font-black uppercase tracking-widest bg-black/20 px-3 py-1.5 rounded-lg flex items-center gap-2 border border-white/10 hover:bg-black/30"
-                  >
-                      <PlayCircle className="w-3.5 h-3.5 text-amber-400" /> Como funciona (30s)
-                  </button>
               </div>
           </div>
         )}
@@ -432,7 +415,7 @@ export const MenuView: React.FC<MenuViewProps> = ({
                     src={
                       showVideoModal.type === 'merchant_jobs' ? MERCHANT_JOBS_VIDEO :
                       showVideoModal.type === 'jobs' ? JOBS_EXPLAINER_VIDEO : 
-                      CASHBACK_EXPLAINER_VIDEO
+                      '' // Removed cashback video ref
                     } 
                     className="w-full h-full object-cover" 
                     autoPlay 
@@ -456,7 +439,6 @@ export const MenuView: React.FC<MenuViewProps> = ({
                    onClick={() => {
                        const type = showVideoModal.type;
                        setShowVideoModal({show: false, type: 'jobs'});
-                       if (type === 'cashback') onNavigate('user_statement');
                        if (type === 'merchant_jobs') onNavigate('merchant_jobs');
                    }}
                    className="mt-6 w-full py-3.5 bg-[#1E5BFF] text-white font-bold rounded-xl active:scale-95 transition-transform"

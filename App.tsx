@@ -48,6 +48,7 @@ import { CommunityFeedView } from './components/CommunityFeedView';
 import { UserCupomScreen } from './components/UserCupomScreen';
 import { STORES } from './constants';
 import { AdminModerationPanel } from './components/AdminModerationPanel';
+import { UserCouponsHistoryView } from './components/UserCouponsHistoryView';
 import { 
   AboutView, 
   SupportView, 
@@ -253,7 +254,7 @@ const App: React.FC = () => {
     'user_statement', 'merchant_cashback_dashboard', 'merchant_cashback_onboarding',
     'store_cashback_module', 'store_ads_module', 'about', 'support', 'invite_friend', 'favorites',
     'weekly_promo', 'jobs_list', 'merchant_jobs', 'community_feed', 'admin_moderation',
-    'user_cupom', 'cashback_landing', 'advertise_home_banner'
+    'user_cupom', 'cashback_landing', 'advertise_home_banner', 'user_coupons_history'
   ];
 
   const hideBottomNav = ['store_ads_module', 'store_detail', 'admin_moderation', 'advertise_home_banner'].includes(activeTab);
@@ -317,6 +318,9 @@ const App: React.FC = () => {
               )}
               {activeTab === 'user_statement' && (
                   <UserStatementView onBack={() => setActiveTab('profile')} onExploreStores={() => setActiveTab('explore')} balance={12.40} />
+              )}
+              {activeTab === 'user_coupons_history' && (
+                  <UserCouponsHistoryView onBack={() => setActiveTab('profile')} />
               )}
               {activeTab === 'merchant_cashback_onboarding' && (
                   <MerchantCashbackOnboarding onBack={() => setActiveTab('home')} onActivate={() => setActiveTab('store_cashback_module')} />
