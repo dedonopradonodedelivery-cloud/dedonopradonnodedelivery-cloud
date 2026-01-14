@@ -273,11 +273,11 @@ const NeighborhoodCouponsBlock: React.FC<{ stores: Store[], onStoreClick: (store
   if (couponStores.length === 0) return null;
 
   return (
-    <div className="w-full bg-white dark:bg-gray-950 py-6 border-b border-gray-50 dark:border-gray-800">
+    <div className="w-full bg-white dark:bg-gray-950 py-6">
       <div className="px-5 mb-4 flex items-center justify-between">
         <div>
           <h2 className="text-base font-black text-gray-900 dark:text-white tracking-tight leading-none flex items-center gap-2">
-            <Coins className="w-5 h-5 text-emerald-500" />
+            <Ticket className="w-5 h-5 text-emerald-500" />
             Cupons Ativos no Bairro
           </h2>
           <p className="text-xs text-gray-500 font-medium mt-1">Economize agora nas lojas perto de você</p>
@@ -328,7 +328,7 @@ const WeeklyPromosSection: React.FC<{ onNavigate: (v: string) => void }> = ({ on
   if (validPromos.length === 0) return null;
 
   return (
-    <div className="w-full bg-white dark:bg-[#0B0F19] py-6 border-b border-gray-100 dark:border-gray-800">
+    <div className="w-full bg-white dark:bg-[#0B0F19] py-6">
       <div className="px-5 mb-4">
         <div className="flex items-center gap-2 mb-1">
           <Tag className="w-4 h-4 text-red-500 fill-red-500/20" />
@@ -479,7 +479,7 @@ const CommunityFeedBlock: React.FC<{ onNavigate: (view: string) => void; }> = ({
   if (previewPosts.length === 0) return null;
 
   return (
-    <div className="w-full bg-white dark:bg-gray-950 py-6 border-b border-gray-100 dark:border-gray-800">
+    <div className="w-full bg-white dark:bg-gray-950 py-6">
       <div className="px-5 mb-4">
         <div className="flex justify-between items-center">
             <div>
@@ -653,7 +653,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
 
       case 'mini_tribes':
         return (
-          <div key="mini_tribes" className="w-full py-12 bg-white dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800">
+          <div key="mini_tribes" className="w-full py-12 bg-white dark:bg-gray-900">
             <div className="px-5"><SectionHeader title="Estilo de Vida" subtitle="Lugares pela sua vibe" /></div>
             <div className="grid grid-cols-2 gap-3 px-5">
               {MINI_TRIBOS.map((tribo) => (
