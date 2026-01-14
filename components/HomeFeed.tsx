@@ -253,7 +253,7 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void }> = ({ onNavigat
   );
 };
 
-// --- NOVO BLOCO: CUPONS DO BAIRRO ---
+// --- NOVO BLOCO: VANTAGENS ATIVAS NO BAIRRO (Layout Melhorado) ---
 const NeighborhoodCouponsBlock: React.FC<{ stores: Store[], onStoreClick: (store: Store) => void }> = ({ stores, onStoreClick }) => {
   const { currentNeighborhood, isAll } = useNeighborhood();
 
@@ -273,28 +273,35 @@ const NeighborhoodCouponsBlock: React.FC<{ stores: Store[], onStoreClick: (store
   if (couponStores.length === 0) return null;
 
   return (
-    <div className="w-full bg-white dark:bg-gray-950 py-4 border-b border-gray-50 dark:border-gray-800">
-      <div className="px-5 mb-3">
-        <h2 className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
-          <Ticket className="w-4 h-4 text-[#1E5BFF]" />
-          Cupons do bairro
-        </h2>
+    <div className="w-full bg-white dark:bg-gray-950 py-6 border-b border-gray-50 dark:border-gray-800">
+      <div className="px-5 mb-4 flex items-center justify-between">
+        <div>
+          <h2 className="text-base font-black text-gray-900 dark:text-white tracking-tight leading-none flex items-center gap-2">
+            <Ticket className="w-5 h-5 text-[#1E5BFF] -rotate-12" />
+            Vantagens Ativas no Bairro
+          </h2>
+          <p className="text-xs text-gray-500 font-medium mt-1">Oportunidades exclusivas perto de você</p>
+        </div>
       </div>
       <div className="flex gap-3 overflow-x-auto no-scrollbar px-5 pb-2 snap-x">
         {couponStores.map(store => (
           <button
             key={store.id}
             onClick={() => onStoreClick(store)}
-            className="snap-center flex items-center gap-3 p-3 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 min-w-[200px] active:scale-95 transition-transform"
+            className="snap-center min-w-[240px] bg-white dark:bg-gray-900 p-3 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-lg shadow-gray-100/50 dark:shadow-none flex items-center gap-3 group active:scale-95 transition-all hover:border-[#1E5BFF]/30"
           >
-            <div className="w-10 h-10 rounded-lg bg-white dark:bg-gray-700 overflow-hidden shrink-0 shadow-sm">
+            <div className="w-12 h-12 rounded-xl bg-gray-50 dark:bg-gray-800 flex items-center justify-center p-1 border border-gray-100 dark:border-gray-700 relative shrink-0">
                <img src={store.logoUrl || '/assets/default-logo.png'} className="w-full h-full object-contain" alt={store.name} />
+               {/* Status Indicator */}
+               <div className="absolute -bottom-1 -right-1 bg-green-500 w-3 h-3 rounded-full border-2 border-white dark:border-gray-900 shadow-sm"></div>
             </div>
-            <div className="text-left min-w-0">
-               <h4 className="font-bold text-gray-900 dark:text-white text-xs truncate">{store.name}</h4>
-               <p className="text-[10px] font-bold text-green-600 dark:text-green-400 mt-0.5">
-                 {store.cashback}% de volta
-               </p>
+            <div className="flex-1 text-left min-w-0">
+               <h4 className="font-bold text-gray-900 dark:text-white text-sm truncate leading-tight group-hover:text-[#1E5BFF] transition-colors">{store.name}</h4>
+               <p className="text-[10px] text-gray-400 dark:text-gray-500 truncate font-medium mt-0.5">{store.category} • {store.neighborhood}</p>
+               <div className="mt-1.5 inline-flex items-center gap-1.5 bg-[#1E5BFF]/10 px-2 py-0.5 rounded-md border border-[#1E5BFF]/20">
+                 <Zap className="w-2.5 h-2.5 text-[#1E5BFF] fill-[#1E5BFF]" />
+                 <span className="text-[10px] font-black text-[#1E5BFF] tracking-tight">{store.cashback}% Vantagem</span>
+               </div>
             </div>
           </button>
         ))}
@@ -321,7 +328,7 @@ const WeeklyPromosSection: React.FC<{ onNavigate: (v: string) => void }> = ({ on
   if (validPromos.length === 0) return null;
 
   return (
-    <div className="w-full bg-[#FAFAFA] dark:bg-[#0B0F19] py-6 border-b border-gray-100 dark:border-gray-800">
+    <div className="w-full bg-white dark:bg-[#0B0F19] py-6 border-b border-gray-100 dark:border-gray-800">
       <div className="px-5 mb-4">
         <div className="flex items-center gap-2 mb-1">
           <Tag className="w-4 h-4 text-red-500 fill-red-500/20" />
@@ -472,7 +479,7 @@ const CommunityFeedBlock: React.FC<{ onNavigate: (view: string) => void; }> = ({
   if (previewPosts.length === 0) return null;
 
   return (
-    <div className="w-full bg-[#FAFAFA] dark:bg-gray-950 py-6 border-b border-gray-100 dark:border-gray-800">
+    <div className="w-full bg-white dark:bg-gray-950 py-6 border-b border-gray-100 dark:border-gray-800">
       <div className="px-5 mb-4">
         <div className="flex justify-between items-center">
             <div>
@@ -616,7 +623,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
       case 'home_carousel':
         return <div key="home_carousel" className="w-full bg-white dark:bg-gray-950 pb-8"><HomeCarousel onNavigate={onNavigate} /></div>;
 
-      // NOVO BLOCO INSERIDO AQUI
+      // BLOCO ATUALIZADO: VANTAGENS ATIVAS NO BAIRRO
       case 'neighborhood_coupons':
         return <NeighborhoodCouponsBlock key="neighborhood_coupons" stores={stores} onStoreClick={(s) => onStoreClick && onStoreClick(s)} />;
 
@@ -646,7 +653,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
 
       case 'mini_tribes':
         return (
-          <div key="mini_tribes" className="w-full py-12 bg-gray-50 dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800">
+          <div key="mini_tribes" className="w-full py-12 bg-white dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800">
             <div className="px-5"><SectionHeader title="Estilo de Vida" subtitle="Lugares pela sua vibe" /></div>
             <div className="grid grid-cols-2 gap-3 px-5">
               {MINI_TRIBOS.map((tribo) => (
@@ -662,9 +669,9 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
   const homeStructure = useMemo(() => [
     'categories',
     'home_carousel',
-    'neighborhood_coupons', // Inserção controlada conforme solicitado
+    'neighborhood_coupons', // Atualizado para o novo design visual
     'weekly_promos',
-    // 'cashback_stores', // REMOVE
+    // 'cashback_stores', // REMOVIDO EM ETAPA ANTERIOR
     'trust_feed',
     'community_feed',
     'roulette',       
@@ -676,7 +683,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
     <div className="flex flex-col bg-white dark:bg-gray-950 w-full max-w-md mx-auto animate-in fade-in duration-500 overflow-x-hidden pb-32">
       <div className="flex flex-col w-full">
           {homeStructure.map(section => renderSection(section))}
-          <div className="px-5 pb-8 pt-4 bg-gray-50 dark:bg-gray-900">
+          <div className="px-5 pb-8 pt-4 bg-white dark:bg-gray-900">
             <MasterSponsorBanner onClick={() => onNavigate('patrocinador_master')} />
           </div>
       </div>
