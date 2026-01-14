@@ -19,7 +19,6 @@ import {
   DollarSign,
   ArrowLeft,
   PieChart,
-  FileText,
   Presentation,
   Target,
   Layers,
@@ -66,7 +65,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ user, onNavigateToApp, o
   }
 
   const renderInvestorModel = () => (
-    <div className="animate-in slide-in-from-right duration-500 space-y-10 bg-white dark:bg-gray-900 min-h-screen p-1">
+    <div className="animate-in slide-in-from-right duration-500 space-y-10 bg-white dark:bg-gray-900 min-h-screen p-1 pb-20">
       {/* Executive Header */}
       <div className="flex items-center justify-between border-b border-gray-100 dark:border-gray-800 pb-6 mb-8">
         <div className="flex items-center gap-4">
@@ -77,7 +76,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ user, onNavigateToApp, o
             <ArrowLeft size={24} />
           </button>
           <div>
-            <h2 className="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tight">Modelo de Monetização</h2>
+            <h2 className="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tight font-display">Modelo de Monetização</h2>
             <p className="text-xs text-gray-400 font-bold uppercase tracking-widest mt-1">Apresentação Estratégica para Investidores</p>
           </div>
         </div>
@@ -93,166 +92,171 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ user, onNavigateToApp, o
             <h3 className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-wider">Visão Geral do Ecossistema</h3>
         </div>
         <div className="bg-gray-50 dark:bg-gray-800/50 p-6 border-l-4 border-[#1E5BFF]">
-          <p className="text-gray-600 dark:text-gray-300 text-sm leading-relaxed">
-            O Localizei JPA é um marketplace hiper-local estruturado por bairro e categoria. Focamos em visibilidade, geração de demanda e relacionamento B2C. Nosso modelo de receita é diversificado, recorrente e escalável, combinando mídia local, performance (leads) e networking corporativo.
+          <p className="text-gray-600 dark:text-gray-300 text-sm leading-relaxed font-medium">
+            O Localizei JPA é um marketplace local estruturado por bairro e categoria, com foco em visibilidade, geração de demanda e relacionamento entre lojistas e consumidores. Nosso modelo de monetização é diversificado, recorrente e escalável.
           </p>
         </div>
       </section>
 
-      {/* Grid de Canais de Receita */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+      {/* Canais de Receita Principais */}
+      <div className="grid grid-cols-1 gap-8">
         
         {/* 1. Patrocinador Master */}
-        <div className="border border-gray-100 dark:border-gray-800 p-6 space-y-4">
+        <div className="border border-gray-100 dark:border-gray-800 p-8 space-y-4">
           <div className="flex justify-between items-start">
             <h4 className="font-black text-xs text-gray-400 uppercase tracking-widest">1. Patrocinador Master</h4>
-            <span className="bg-blue-50 text-[#1E5BFF] text-[9px] font-black px-2 py-0.5 uppercase">Exclusividade</span>
+            <span className="bg-amber-100 text-amber-700 text-[9px] font-black px-2 py-0.5 uppercase">Cota Exclusiva</span>
           </div>
-          <p className="text-sm font-bold text-gray-800 dark:text-white">Cota fixa com presença em 100% das sessões da Home.</p>
-          <div className="flex gap-4 items-baseline">
-            <span className="text-xl font-black text-[#1E5BFF]">R$ 4.000,00<span className="text-[10px] font-medium text-gray-400">/mês</span></span>
-            <span className="text-xs text-gray-400 font-bold">Inauguração: R$ 2.500</span>
+          <p className="text-base font-bold text-gray-900 dark:text-white">Cota exclusiva com presença fixa e autoridade máxima na home do app.</p>
+          <div className="flex gap-6 items-baseline pt-2">
+            <div>
+                <p className="text-[10px] font-bold text-gray-400 uppercase">Valor Padrão</p>
+                <p className="text-2xl font-black text-[#1E5BFF]">R$ 4.000<span className="text-sm">/mês</span></p>
+            </div>
+            <div>
+                <p className="text-[10px] font-bold text-gray-400 uppercase">Inauguração</p>
+                <p className="text-xl font-bold text-gray-400">R$ 2.500</p>
+            </div>
           </div>
         </div>
 
         {/* 2. Banners Home */}
-        <div className="border border-gray-100 dark:border-gray-800 p-6 space-y-4">
-          <h4 className="font-black text-xs text-gray-400 uppercase tracking-widest">2. Banners Home (por bairro)</h4>
-          <p className="text-sm text-gray-600 dark:text-gray-400">4 espaços vendidos exclusivamente por bairro (9 bairros totais).</p>
-          <div className="grid grid-cols-2 gap-4 pt-2">
+        <div className="border border-gray-100 dark:border-gray-800 p-8 space-y-5">
+          <h4 className="font-black text-xs text-gray-400 uppercase tracking-widest">2. Banners da Home (Inventário por Bairro)</h4>
+          <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+            Total de 5 banners na home, sendo 1 master e 4 espaços vendidos comercialmente por bairro. 
+            O lojista escolhe em qual bairro deseja focar sua visibilidade.
+          </p>
+          <div className="grid grid-cols-3 gap-4 py-4 bg-gray-50 dark:bg-gray-800/50 p-6">
             <div>
-              <p className="text-[9px] font-bold text-gray-400 uppercase">Inventário Mensal</p>
-              <p className="text-sm font-black">36 Posições</p>
+              <p className="text-[9px] font-bold text-gray-400 uppercase">Espaços x Bairros</p>
+              <p className="text-lg font-black">4 × 9</p>
+              <p className="text-[8px] font-bold text-gray-400">36 posições</p>
             </div>
             <div>
-              <p className="text-[9px] font-bold text-gray-400 uppercase">Ticket Médio</p>
-              <p className="text-sm font-black">R$ 297/mês</p>
+              <p className="text-[9px] font-bold text-gray-400 uppercase">Valor Un.</p>
+              <p className="text-lg font-black text-[#1E5BFF]">R$ 297</p>
             </div>
-          </div>
-          <div className="pt-2 border-t border-gray-50 flex justify-between items-center">
-            <span className="text-[10px] font-black uppercase text-gray-400">Faturamento Máx.</span>
-            <span className="text-lg font-black text-emerald-600">R$ 10.692,00</span>
+            <div className="text-right">
+              <p className="text-[9px] font-bold text-gray-400 uppercase">Potencial Máx.</p>
+              <p className="text-lg font-black text-emerald-600 uppercase">R$ 10.692</p>
+            </div>
           </div>
         </div>
 
         {/* 3. Banners Categorias */}
-        <div className="border border-gray-100 dark:border-gray-800 p-6 space-y-4">
-          <h4 className="font-black text-xs text-gray-400 uppercase tracking-widest">3. Banners Categorias</h4>
-          <p className="text-sm text-gray-600 dark:text-gray-400">Segmentação direta: 16 categorias × 9 bairros (144 posições).</p>
-          <div className="grid grid-cols-2 gap-4 pt-2">
+        <div className="border border-gray-100 dark:border-gray-800 p-8 space-y-5">
+          <h4 className="font-black text-xs text-gray-400 uppercase tracking-widest">3. Banners das Categorias (Nicho + Local)</h4>
+          <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+            Segmentação cirúrgica: o lojista escolhe a categoria e o bairro exato. 
+            Ex: "Pizzaria" na "Freguesia". Total de 16 categorias em 9 bairros.
+          </p>
+          <div className="grid grid-cols-3 gap-4 py-4 bg-gray-50 dark:bg-gray-800/50 p-6">
             <div>
-              <p className="text-[9px] font-bold text-gray-400 uppercase">Unidades</p>
-              <p className="text-sm font-black">144 Slots</p>
+              <p className="text-[9px] font-bold text-gray-400 uppercase">Cat. x Bairros</p>
+              <p className="text-lg font-black">16 × 9</p>
+              <p className="text-[8px] font-bold text-gray-400">144 posições</p>
             </div>
             <div>
-              <p className="text-[9px] font-bold text-gray-400 uppercase">Ticket Médio</p>
-              <p className="text-sm font-black">R$ 197/mês</p>
-            </div>
-          </div>
-          <div className="pt-2 border-t border-gray-50 flex justify-between items-center">
-            <span className="text-[10px] font-black uppercase text-gray-400">Faturamento Máx.</span>
-            <span className="text-lg font-black text-emerald-600">R$ 28.368,00</span>
-          </div>
-        </div>
-
-        {/* 4. JPA Connect */}
-        <div className="border border-gray-100 dark:border-gray-800 p-6 space-y-4">
-          <h4 className="font-black text-xs text-gray-400 uppercase tracking-widest">4. JPA Connect (Networking)</h4>
-          <p className="text-sm text-gray-600 dark:text-gray-400">Grupo de elite para lojistas. Networking e parcerias estratégicas.</p>
-          <div className="flex justify-between items-end">
-            <div>
-              <p className="text-[9px] font-bold text-gray-400 uppercase">Capacidade</p>
-              <p className="text-sm font-black">30 membros</p>
+              <p className="text-[9px] font-bold text-gray-400 uppercase">Valor Un.</p>
+              <p className="text-lg font-black text-[#1E5BFF]">R$ 197</p>
             </div>
             <div className="text-right">
-              <p className="text-[9px] font-bold text-gray-400 uppercase">Mensalidade</p>
-              <p className="text-lg font-black text-indigo-600">R$ 200,00</p>
+              <p className="text-[9px] font-bold text-gray-400 uppercase">Potencial Máx.</p>
+              <p className="text-lg font-black text-emerald-600 uppercase">R$ 28.368</p>
             </div>
           </div>
-          <div className="pt-2 border-t border-gray-50 flex justify-between items-center">
-            <span className="text-[10px] font-black uppercase text-gray-400">Receita Grupo Cheio</span>
-            <span className="text-lg font-black text-gray-900">R$ 6.000,00</span>
-          </div>
         </div>
-
       </div>
 
-      {/* Ads & Micro-receitas */}
+      {/* Ads e Micro-receitas */}
       <section className="space-y-6">
-        <h3 className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-wider">Anúncios Diários e Performance</h3>
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+        <div className="flex items-center gap-2 mb-2">
+            <Zap size={18} className="text-[#1E5BFF]" />
+            <h3 className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-wider">Mídia de Performance e Serviços</h3>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {[
-            { label: 'Ads Básico', val: 'R$ 0,99', sub: 'Pequeno varejo' },
-            { label: 'Ads Premium', val: 'R$ 3,99', sub: 'Destaque topo' },
-            { label: 'Ads Serviços', val: 'R$ 3,99', sub: 'Prestadores' },
-            { label: 'Vagas Emprego', val: 'R$ 1,90', sub: 'Recrutamento' },
-            { label: 'Cupons', val: 'R$ 9,90', sub: 'Semanal' }
+            { label: 'Ads Básico', price: 'R$ 0,99/dia', desc: 'Plano de entrada para pequenos lojistas (R$ 29,70/mês)' },
+            { label: 'Ads Premium / Serviços', price: 'R$ 3,99/dia', desc: 'Destaque no topo das listas (R$ 119,70/mês)' },
+            { label: 'Ads Vagas de Emprego', price: 'R$ 1,90/dia', desc: 'Recrutamento ágil no bairro (R$ 57,00/mês)' },
+            { label: 'Cupons', price: 'R$ 9,90/semana', desc: 'Promoções de curta duração (15 a 90 dias)' }
           ].map((item, i) => (
-            <div key={i} className="bg-gray-50 dark:bg-gray-800 p-4 border border-gray-100 dark:border-gray-700">
-               <p className="text-[9px] font-black text-gray-400 uppercase mb-1">{item.label}</p>
-               <p className="text-lg font-black text-gray-900 dark:text-white">{item.val}<span className="text-[8px] opacity-40">/dia</span></p>
-               <p className="text-[9px] text-gray-400 mt-1">{item.sub}</p>
+            <div key={i} className="p-5 border border-gray-100 dark:border-gray-800 flex justify-between items-center group hover:bg-gray-50 transition-colors">
+               <div>
+                  <h5 className="font-bold text-sm text-gray-900 dark:text-white">{item.label}</h5>
+                  <p className="text-[10px] text-gray-400 font-medium uppercase mt-0.5">{item.desc}</p>
+               </div>
+               <p className="font-black text-[#1E5BFF] text-sm whitespace-nowrap">{item.price}</p>
             </div>
           ))}
         </div>
       </section>
 
-      {/* Performance Leads */}
-      <div className="bg-slate-900 text-white p-8 border border-white/5 flex flex-col md:flex-row justify-between items-center gap-6">
-          <div className="flex items-center gap-5">
-            <div className="w-14 h-14 bg-blue-500/20 flex items-center justify-center border border-blue-500/30">
-              <Zap size={28} className="text-blue-400" />
-            </div>
+      {/* Networking e Leads */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="bg-slate-900 text-white p-8 rounded-none flex flex-col justify-between">
             <div>
-               <h4 className="text-lg font-black uppercase">Leads via WhatsApp</h4>
-               <p className="text-sm text-slate-400">Modelo de performance para cotações diretas.</p>
+                <h4 className="font-black text-xs text-blue-400 uppercase tracking-widest mb-4">Leads de Orçamento (WhatsApp)</h4>
+                <p className="text-sm text-slate-300 mb-6">Modelo baseado em performance. Cobrança por lead entregue para até 5 profissionais simultâneos.</p>
             </div>
-          </div>
-          <div className="text-center md:text-right">
-            <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Custo por Lead</p>
-            <p className="text-3xl font-black text-blue-400">R$ 3,90</p>
-          </div>
+            <div className="flex justify-between items-end">
+                <span className="text-[10px] font-bold text-slate-500 uppercase">Custo por Lead</span>
+                <span className="text-3xl font-black text-white">R$ 3,90</span>
+            </div>
+        </div>
+
+        <div className="bg-indigo-600 text-white p-8 rounded-none flex flex-col justify-between">
+            <div>
+                <h4 className="font-black text-xs text-indigo-200 uppercase tracking-widest mb-4">JPA Connect (Networking VIP)</h4>
+                <p className="text-sm text-indigo-100 mb-6">Grupo fechado de relacionamento e negócios. Máximo de 30 participantes por grupo.</p>
+            </div>
+            <div className="flex justify-between items-end">
+                <span className="text-[10px] font-bold text-indigo-200 uppercase">Receita Grupo Cheio</span>
+                <span className="text-3xl font-black text-white">R$ 6.000<span className="text-xs">/mês</span></span>
+            </div>
+        </div>
       </div>
 
-      {/* Resumo de Potencial Final */}
-      <section className="bg-[#1E5BFF] p-10 text-white relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -mr-32 -mt-32"></div>
-        <div className="relative z-10 grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
-            <div>
-               <h3 className="text-2xl font-black uppercase tracking-tight mb-4">Resumo - Potencial Mensal</h3>
-               <div className="space-y-2 opacity-80 text-sm font-medium">
-                  <p className="flex justify-between">Patrocinador Master: <span>R$ 4.000</span></p>
-                  <p className="flex justify-between">Banners Home: <span>R$ 10.692</span></p>
-                  <p className="flex justify-between border-b border-white/20 pb-2">Banners Categorias: <span>R$ 28.368</span></p>
-               </div>
+      {/* Resumo - Potencial de Mídia */}
+      <section className="bg-gray-900 p-10 text-white">
+        <h3 className="text-2xl font-black uppercase tracking-tight mb-8 font-display">Resumo: Potencial Mensal de Mídia</h3>
+        <div className="space-y-4 mb-10">
+            <div className="flex justify-between items-center border-b border-white/10 pb-4">
+                <span className="text-sm font-medium text-gray-400 uppercase">Patrocinador Master</span>
+                <span className="text-lg font-bold">R$ 4.000</span>
             </div>
-            <div className="text-center md:text-right">
-                <p className="text-[10px] font-black text-blue-200 uppercase tracking-[0.3em] mb-2">Potencial Médio de Mídia</p>
-                <h2 className="text-6xl font-black tracking-tighter">R$ 43.060<span className="text-2xl">,00</span></h2>
-                <p className="text-xs text-blue-100 mt-4 italic font-medium">Cálculo baseado em ocupação de inventário 100%.</p>
+            <div className="flex justify-between items-center border-b border-white/10 pb-4">
+                <span className="text-sm font-medium text-gray-400 uppercase">Banners Home (9 Bairros)</span>
+                <span className="text-lg font-bold">R$ 10.692</span>
             </div>
+            <div className="flex justify-between items-center border-b border-white/10 pb-4">
+                <span className="text-sm font-medium text-gray-400 uppercase">Banners Categorias (16 x 9)</span>
+                <span className="text-lg font-bold">R$ 28.368</span>
+            </div>
+        </div>
+        <div className="text-center md:text-right">
+            <p className="text-[10px] font-black text-emerald-400 uppercase tracking-[0.3em] mb-2">Total Potencial (Somente Mídia)</p>
+            <h2 className="text-7xl font-black tracking-tighter text-emerald-400">R$ 43.060<span className="text-2xl">,00</span></h2>
+            <p className="text-xs text-gray-500 mt-4 italic font-medium">*Não inclui receitas de Ads diários, leads ou networking.</p>
         </div>
       </section>
 
-      {/* Strategic Footer */}
-      <footer className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-10 border-t border-gray-100 dark:border-gray-800 opacity-60">
-        <div className="flex items-center gap-3">
-          <Repeat size={18} className="text-[#1E5BFF]" />
-          <p className="text-[10px] font-black uppercase tracking-widest">Receita Recorrente</p>
+      {/* Observação Estratégica */}
+      <footer className="grid grid-cols-1 md:grid-cols-3 gap-10 pt-12 border-t border-gray-100 opacity-60 pb-20">
+        <div className="space-y-2">
+          <div className="flex items-center gap-2 text-gray-900"><Repeat size={18} /><span className="font-black text-[10px] uppercase">Recorrência</span></div>
+          <p className="text-xs leading-relaxed">Modelo baseado em assinaturas e créditos, garantindo previsibilidade de caixa.</p>
         </div>
-        <div className="flex items-center gap-3">
-          <Layers size={18} className="text-[#1E5BFF]" />
-          <p className="text-[10px] font-black uppercase tracking-widest">Escala Linear por Região</p>
+        <div className="space-y-2">
+          <div className="flex items-center gap-2 text-gray-900"><Layers size={18} /><span className="font-black text-[10px] uppercase">Escalabilidade</span></div>
+          <p className="text-xs leading-relaxed">Crescimento linear conforme abertura de novas categorias ou bairros.</p>
         </div>
-        <div className="flex items-center gap-3">
-          <Target size={18} className="text-[#1E5BFF]" />
-          <p className="text-[10px] font-black uppercase tracking-widest">Baixo Custo Marginal</p>
+        <div className="space-y-2">
+          <div className="flex items-center gap-2 text-gray-900"><Target size={18} /><span className="font-black text-[10px] uppercase">Asset Light</span></div>
+          <p className="text-xs leading-relaxed">Baixo custo marginal por novo lojista. Modelo altamente replicável.</p>
         </div>
       </footer>
-      
-      <div className="py-20 text-center">
-         <p className="text-[9px] font-bold text-gray-300 uppercase tracking-[0.5em]">Localizei JPA Platform Strategy v1.0</p>
-      </div>
     </div>
   );
 
@@ -293,17 +297,17 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ user, onNavigateToApp, o
             <section className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <KPICard icon={Users} label="Usuários" value="2.842" color="bg-blue-500" />
                 <KPICard icon={Store} label="Lojistas" value="156" color="bg-purple-500" />
-                <KPICard icon={DollarSign} label="Monetização" value="R$ 28k" color="bg-amber-500" />
+                <KPICard icon={DollarSign} label="Monetização" value="R$ 43k" color="bg-amber-500" />
                 <KPICard icon={TrendingUp} label="Novos/Mês" value="+412" color="bg-emerald-500" />
             </section>
 
             {/* Listas de Gestão */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 
-                {/* NOVO: Atalho para Apresentação Investidor */}
+                {/* Atalho para Modelo de Monetização (Apresentação Investidor) */}
                 <button 
                   onClick={() => setActiveView('monetization_model')}
-                  className="bg-white text-gray-900 border border-gray-100 rounded-none p-8 flex flex-col items-center text-center gap-4 shadow-xl active:scale-[0.98] transition-all group overflow-hidden relative"
+                  className="bg-white dark:bg-gray-900 text-gray-900 dark:text-white border border-gray-100 dark:border-gray-800 rounded-none p-8 flex flex-col items-center text-center gap-4 shadow-xl active:scale-[0.98] transition-all group overflow-hidden relative"
                 >
                     <div className="absolute top-0 right-0 w-32 h-32 bg-[#1E5BFF]/5 rounded-full -mr-10 -mt-10 group-hover:scale-110 transition-transform"></div>
                     <div className="w-16 h-16 bg-[#1E5BFF] rounded-none flex items-center justify-center text-white shadow-lg">
