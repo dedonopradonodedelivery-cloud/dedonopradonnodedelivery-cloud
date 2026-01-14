@@ -445,54 +445,53 @@ const FeaturedServicesBlock: React.FC<{ stores: Store[], onStoreClick: (store: S
           <button
             key={service.id}
             onClick={() => onStoreClick(service)}
-            className="snap-center min-w-[200px] max-w-[200px] bg-white dark:bg-gray-900 rounded-[24px] shadow-lg shadow-gray-200/50 dark:shadow-none border border-gray-100 dark:border-gray-800 p-1.5 flex flex-col group active:scale-[0.98] transition-all relative overflow-hidden"
+            className="snap-center min-w-[150px] max-w-[150px] h-[260px] relative rounded-[24px] overflow-hidden group active:scale-[0.98] transition-all bg-gray-200 dark:bg-gray-800"
           >
-            {/* Faixa Premium Decorativa (apenas se for premium) */}
-            {service.adType === AdType.PREMIUM && (
-                <div className="absolute top-0 right-0 w-16 h-16 bg-gradient-to-bl from-amber-400/20 to-transparent rounded-tr-[24px] pointer-events-none"></div>
-            )}
+            {/* Imagem de Fundo Cheia */}
+            <img 
+                src={service.image || service.logoUrl || '/assets/default-logo.png'} 
+                alt={service.name} 
+                className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" 
+            />
+            
+            {/* Gradiente para Legibilidade */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent"></div>
 
-            <div className="h-28 w-full rounded-[20px] overflow-hidden relative bg-gray-100 dark:bg-gray-800">
-               <img 
-                 src={service.image || service.logoUrl || '/assets/default-logo.png'} 
-                 alt={service.name} 
-                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
-               />
-               <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
-               
-               {/* Selo Destaque */}
-               {service.adType === AdType.PREMIUM && (
-                   <div className="absolute top-2 right-2 bg-amber-400 text-white text-[8px] font-black px-2 py-0.5 rounded shadow-sm border border-amber-300 uppercase tracking-wider flex items-center gap-1">
-                      <Crown className="w-2 h-2 fill-white" />
-                      Premium
-                   </div>
-               )}
-
-               <div className="absolute bottom-2 left-3 text-white">
-                  <div className="flex items-center gap-1 text-[10px] font-bold bg-black/40 backdrop-blur-md px-1.5 py-0.5 rounded-md border border-white/10 w-fit">
-                     <Star className="w-2.5 h-2.5 text-yellow-400 fill-yellow-400" />
-                     {service.rating.toFixed(1)}
-                  </div>
-               </div>
+            {/* Badges Superiores */}
+            <div className="absolute top-3 right-3 z-10 flex flex-col items-end gap-1">
+                <div className="flex items-center gap-1 text-[10px] font-bold bg-black/40 backdrop-blur-md px-1.5 py-0.5 rounded-md border border-white/10 text-white">
+                    <Star className="w-2.5 h-2.5 text-yellow-400 fill-yellow-400" />
+                    {service.rating.toFixed(1)}
+                </div>
             </div>
 
-            <div className="p-3 pt-3 flex flex-col text-left">
-               <h4 className="font-bold text-gray-900 dark:text-white text-sm leading-tight truncate mb-1">
-                 {service.name}
-               </h4>
-               <p className="text-[10px] text-gray-500 dark:text-gray-400 font-medium truncate mb-3">
-                 {service.subcategory}
-               </p>
-               
-               <div className="mt-auto flex items-center justify-between">
-                  <div className="flex items-center gap-1 text-[9px] text-gray-400 font-medium">
-                     <MapPin className="w-2.5 h-2.5" />
-                     {service.distance || 'Local'}
-                  </div>
-                  <div className="w-6 h-6 rounded-full bg-indigo-50 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-600 dark:text-indigo-400 group-hover:bg-indigo-600 group-hover:text-white transition-colors">
-                     <ArrowUpRight className="w-3 h-3" />
-                  </div>
-               </div>
+            {service.adType === AdType.PREMIUM && (
+                <div className="absolute top-3 left-3 z-10">
+                    <div className="bg-amber-400 text-slate-900 text-[8px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider flex items-center gap-1 shadow-sm">
+                        <Crown className="w-2 h-2 fill-slate-900" />
+                        Top
+                    </div>
+                </div>
+            )}
+
+            {/* Informações Inferiores */}
+            <div className="absolute bottom-0 left-0 right-0 p-4 text-left z-10">
+                <h4 className="font-bold text-white text-sm leading-tight line-clamp-2 mb-1 drop-shadow-md">
+                    {service.name}
+                </h4>
+                <p className="text-[10px] text-gray-300 font-medium truncate mb-2">
+                    {service.subcategory}
+                </p>
+                
+                <div className="flex items-center justify-between border-t border-white/10 pt-2 mt-1">
+                    <div className="flex items-center gap-1 text-[9px] text-gray-300 font-medium">
+                        <MapPin className="w-2.5 h-2.5" />
+                        {service.distance || 'Local'}
+                    </div>
+                    <div className="w-5 h-5 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center text-white">
+                        <ArrowUpRight className="w-3 h-3" />
+                    </div>
+                </div>
             </div>
           </button>
         ))}

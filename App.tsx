@@ -30,7 +30,7 @@ import { MerchantQrScreen } from './components/MerchantQrScreen';
 import { WeeklyPromoModule } from './components/WeeklyPromoModule';
 import { JobsView } from './components/JobsView';
 import { MerchantJobsModule } from './components/MerchantJobsModule';
-import { MapPin, ShieldCheck } from 'lucide-react';
+import { MapPin, ShieldCheck, Lock, LogIn } from 'lucide-react';
 import { useAuth } from './contexts/AuthContext';
 import { NeighborhoodProvider } from './contexts/NeighborhoodContext';
 import { Category, Store, AdType, EditorialCollection, ThemeMode } from './types';
@@ -329,11 +329,55 @@ const App: React.FC = () => {
                   <MerchantCashbackDashboard onBack={() => setActiveTab('home')} onNavigate={setActiveTab} />
               )}
               {activeTab === 'store_cashback_module' && <StoreCashbackModule onBack={() => setActiveTab('home')} />}
-              {activeTab === 'store_ads_module' && <StoreAdsModule onBack={() => setActiveTab('store_area')} />}
               
-              {/* Rota Específica para Banner da Home - Volta para Home */}
-              {activeTab === 'advertise_home_banner' && <StoreAdsModule onBack={() => setActiveTab('home')} />}
+              {/* Guarda de Rota para Anuncie Aqui */}
+              {activeTab === 'advertise_home_banner' && (
+                !user ? (
+                  <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col items-center justify-center p-6 text-center animate-in fade-in">
+                    <div className="w-16 h-16 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center mb-6">
+                      <LogIn className="w-8 h-8 text-[#1E5BFF]" />
+                    </div>
+                    <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Login Necessário</h2>
+                    <p className="text-gray-500 dark:text-gray-400 mb-8 max-w-xs text-sm font-medium">
+                      Para acessar as opções de publicidade, você precisa entrar na sua conta.
+                    </p>
+                    <div className="flex flex-col gap-3 w-full max-w-xs">
+                      <button 
+                        onClick={() => setIsAuthOpen(true)}
+                        className="bg-[#1E5BFF] hover:bg-blue-700 text-white font-bold py-3.5 rounded-xl shadow-lg transition-all active:scale-95"
+                      >
+                        Fazer Login
+                      </button>
+                      <button 
+                        onClick={() => setActiveTab('home')}
+                        className="text-gray-500 font-bold py-3 hover:text-gray-700 dark:hover:text-white transition-colors"
+                      >
+                        Voltar
+                      </button>
+                    </div>
+                  </div>
+                ) : userRole !== 'lojista' ? (
+                  <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col items-center justify-center p-6 text-center animate-in fade-in">
+                    <div className="w-16 h-16 bg-gray-200 dark:bg-gray-800 rounded-full flex items-center justify-center mb-6 border-2 border-white dark:border-gray-700 shadow-sm">
+                      <Lock className="w-8 h-8 text-gray-400" />
+                    </div>
+                    <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Acesso Restrito</h2>
+                    <p className="text-gray-500 dark:text-gray-400 mb-8 max-w-xs text-sm font-medium">
+                      Área exclusiva para lojistas. Cadastre seu negócio para anunciar.
+                    </p>
+                    <button 
+                      onClick={() => setActiveTab('home')}
+                      className="bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 font-bold py-3.5 px-8 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 active:scale-95 transition-all"
+                    >
+                      Voltar para o início
+                    </button>
+                  </div>
+                ) : (
+                  <StoreAdsModule onBack={() => setActiveTab('home')} />
+                )
+              )}
 
+              {activeTab === 'store_ads_module' && <StoreAdsModule onBack={() => setActiveTab('store_area')} />}
               {activeTab === 'store_profile' && <StoreProfileEdit onBack={() => setActiveTab('store_area')} />}
               {activeTab === 'store_finance' && <StoreFinanceModule onBack={() => setActiveTab('store_area')} />}
               {activeTab === 'weekly_promo' && <WeeklyPromoModule onBack={() => setActiveTab('store_area')} />}
