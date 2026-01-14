@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { 
   Utensils, ShoppingCart, Scissors, Heart, PawPrint, Home, Wrench, 
@@ -183,5 +184,5 @@ export const quickFilters = [
   { id: 'nearby', label: 'Perto de mim', icon: 'zap' },
   { id: 'top_rated', label: 'Melhores avaliados', icon: 'star' },
   { id: 'open_now', label: 'Aberto agora', icon: 'clock' },
-  { id: 'cashback', label: 'Cashback', icon: 'percent' },
+  { id: 'cashback', label: 'Cupom', icon: 'percent' },
 ];

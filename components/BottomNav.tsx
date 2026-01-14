@@ -10,16 +10,16 @@ interface BottomNavProps {
 }
 
 export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, userRole, onCashbackClick }) => {
-  // UX: Microcopy contextual baseado no estado de login.
-  // Usuário deslogado vê o benefício ("Cashback"), usuário logado foca na ação ("Ler QR Code").
-  const qrLabel = userRole ? 'Ler QR Code' : 'Cashback';
+  // UX: Botão central padronizado como "Cupom" para todos os perfis.
+  // A lógica de ação (Login / Gerar / Ler) é tratada no handler onCashbackClick.
+  const qrLabel = 'Cupom';
 
   const navItems = [
     { id: 'home', icon: Home, label: 'Início' },
     { id: 'explore', icon: Search, label: 'Explorar' },
-    { id: 'qrcode_scan', icon: QrCode, label: qrLabel, isCenter: true },
+    { id: 'cupom_action', icon: QrCode, label: qrLabel, isCenter: true },
     { id: 'services', icon: Wrench, label: 'Serviços' },
-    { id: 'community_feed', icon: Users, label: 'Feed' }, // Renomeado para Feed
+    { id: 'community_feed', icon: Users, label: 'Feed' },
   ];
 
   return (
@@ -29,7 +29,8 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
           // Lógica de ativação: Serviços engloba sub-rotas de serviço
           const isActive = activeTab === tab.id || 
                            (tab.id === 'services' && activeTab.startsWith('service_')) ||
-                           (tab.id === 'community_feed' && activeTab === 'community_feed');
+                           (tab.id === 'community_feed' && activeTab === 'community_feed') ||
+                           (tab.isCenter && (activeTab === 'user_cupom' || activeTab === 'qrcode_scan' || activeTab === 'cashback_landing'));
                            
           const Icon = tab.icon;
 

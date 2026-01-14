@@ -7,6 +7,7 @@ import { ExploreView } from './components/ExploreView';
 import { StoreDetailView } from './components/StoreDetailView';
 import { CashbackView } from './components/CashbackView';
 import { CashbackInfoView } from './components/CashbackInfoView';
+import { CashbackLandingView } from './components/CashbackLandingView';
 import { RewardDetailsView } from './components/RewardDetailsView';
 import { AuthModal } from './components/AuthModal';
 import { MenuView } from './components/MenuView';
@@ -44,6 +45,7 @@ import { StoreAdsModule } from './components/StoreAdsModule';
 import { StoreProfileEdit } from './components/StoreProfileEdit';
 import { StoreFinanceModule } from './components/StoreFinanceModule';
 import { CommunityFeedView } from './components/CommunityFeedView';
+import { UserCupomScreen } from './components/UserCupomScreen';
 import { STORES } from './constants';
 import { AdminModerationPanel } from './components/AdminModerationPanel';
 import { 
@@ -58,7 +60,7 @@ import {
 let isFirstBootAttempted = false;
 
 // Tabs that support horizontal swipe navigation (Main Bottom Bar Tabs)
-const MAIN_TABS = ['home', 'explore', 'qrcode_scan', 'services', 'community_feed'];
+const MAIN_TABS = ['home', 'explore', 'user_cupom', 'qrcode_scan', 'services', 'community_feed'];
 
 const App: React.FC = () => {
   const { user, userRole, loading: isAuthInitialLoading, signOut } = useAuth();
@@ -134,10 +136,34 @@ const App: React.FC = () => {
   const toggleTheme = () => {
     setThemeMode(prev => prev === 'light' ? 'dark' : 'light');
   };
+
+  // --- BLOQUEIOS DE SEGURANÇA E PERMISSÕES ---
+  useEffect(() => {
+    // Regra 1: Usuário NÃO pode acessar validação
+    if (userRole === 'cliente' && activeTab === 'qrcode_scan') {
+        console.warn("Bloqueio: Cliente tentou acessar validação.");
+        setActiveTab('home');
+    }
+
+    // Regra 2: Lojista NÃO pode gerar QR Code (Consumo)
+    if (userRole === 'lojista' && activeTab === 'user_cupom') {
+        console.warn("Bloqueio: Lojista tentou gerar cupom de consumo.");
+        setActiveTab('home');
+    }
+  }, [activeTab, userRole]);
   
-  const handleCashbackClick = () => {
-    if (user) setActiveTab('qrcode_scan');
-    else setIsAuthOpen(true);
+  // --- LÓGICA DO BOTÃO "CUPOM" ---
+  const handleCupomClick = () => {
+    if (!user) {
+      // Visitante: Info + Login
+      setActiveTab('cashback_landing');
+    } else if (userRole === 'lojista') {
+      // Lojista: Abrir Scanner para Validar
+      setActiveTab('qrcode_scan');
+    } else {
+      // Usuário: Gerar QR Code/Token
+      setActiveTab('user_cupom');
+    }
   };
 
   const handleSelectCategory = (category: Category) => {
@@ -185,13 +211,13 @@ const App: React.FC = () => {
     if (deltaX > 0) {
       if (currentIndex < MAIN_TABS.length - 1) {
         const nextTab = MAIN_TABS[currentIndex + 1];
-        if (nextTab === 'qrcode_scan') handleCashbackClick();
+        if (nextTab === 'user_cupom' || nextTab === 'qrcode_scan') handleCupomClick();
         else setActiveTab(nextTab);
       }
     } else {
       if (currentIndex > 0) {
         const prevTab = MAIN_TABS[currentIndex - 1];
-        if (prevTab === 'qrcode_scan') handleCashbackClick();
+        if (prevTab === 'user_cupom' || prevTab === 'qrcode_scan') handleCupomClick();
         else setActiveTab(prevTab);
       }
     }
@@ -205,10 +231,10 @@ const App: React.FC = () => {
     'service_subcategories', 'service_specialties', 'service_terms', 'service_success',
     'user_statement', 'merchant_cashback_dashboard', 'merchant_cashback_onboarding',
     'store_cashback_module', 'store_ads_module', 'about', 'support', 'invite_friend', 'favorites',
-    'weekly_promo', 'jobs_list', 'merchant_jobs', 'community_feed', 'admin_moderation' 
+    'weekly_promo', 'jobs_list', 'merchant_jobs', 'community_feed', 'admin_moderation',
+    'user_cupom', 'cashback_landing'
   ];
 
-  // A aba 'profile' (Menu) foi removida desta lista para garantir que a BottomBar continue visível
   const hideBottomNav = ['store_ads_module', 'store_detail', 'admin_moderation'].includes(activeTab);
 
   return (
@@ -223,7 +249,7 @@ const App: React.FC = () => {
               activeTab={activeTab} 
               setActiveTab={setActiveTab} 
               userRole={userRole} 
-              onCashbackClick={handleCashbackClick}
+              onCashbackClick={handleCupomClick}
               hideNav={hideBottomNav}
           >
               {!headerExclusionList.includes(activeTab) && (
@@ -309,7 +335,7 @@ const App: React.FC = () => {
                   onOpenTerms={() => setActiveTab('service_terms')} onNavigate={setActiveTab} searchTerm={globalSearch}
                   />
               )}
-              {activeTab === 'store_area' && (userRole === 'lojista' ? <StoreAreaView onBack={() => setActiveTab('home')} onNavigate={setActiveTab} user={user as any} /> : <FreguesiaConnectRestricted onBack={() => setActiveTab('home')} />)}
+              {activeTab === 'store_area' && (userRole === 'lojista' ? <StoreAreaView onBack={() => setActiveTab('home')} onNavigate={setActiveTab} /> : <FreguesiaConnectRestricted onBack={() => setActiveTab('home')} />)}
               {activeTab === 'merchant_qr' && (userRole === 'lojista' ? <MerchantQrScreen user={user} onBack={() => setActiveTab('home')} /> : <FreguesiaConnectRestricted onBack={() => setActiveTab('home')} />)}
               {activeTab === 'admin_moderation' && <AdminModerationPanel onBack={() => setActiveTab('profile')} />}
               
@@ -345,6 +371,10 @@ const App: React.FC = () => {
                   />
               }
               
+              {/* NOVAS ROTAS DO CUPOM */}
+              {activeTab === 'user_cupom' && <UserCupomScreen user={user as any} onBack={() => setActiveTab('home')} />}
+              {activeTab === 'cashback_landing' && <CashbackLandingView onBack={() => setActiveTab('home')} onLogin={() => setIsAuthOpen(true)} />}
+
               {activeTab === 'patrocinador_master' && <PatrocinadorMasterScreen onBack={() => setActiveTab('home')} />}
               {activeTab === 'store_detail' && selectedStore && <StoreDetailView store={selectedStore} onBack={() => setActiveTab('home')} />}
               {activeTab === 'reward_details' && <RewardDetailsView reward={selectedReward} onBack={() => setActiveTab('home')} onHome={() => setActiveTab('home')} />}
