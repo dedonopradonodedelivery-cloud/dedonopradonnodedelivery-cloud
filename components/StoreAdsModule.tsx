@@ -286,7 +286,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack }) => {
         </div>
 
         {/* MASTER SPONSOR BANNER (INSTITUTIONAL) */}
-        <MasterSponsorBanner type="merchant" />
+        <MasterSponsorBanner />
 
       </div>
     </div>
