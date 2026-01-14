@@ -5,16 +5,16 @@ import {
   Target, 
   Rocket, 
   CheckCircle2, 
-  MessageCircle,
-  TrendingUp,
-  ShieldCheck,
-  Layout,
-  Crown,
-  MapPin,
-  Smartphone,
-  Star,
-  Zap,
-  Paintbrush,
+  MessageCircle, 
+  TrendingUp, 
+  ShieldCheck, 
+  Layout, 
+  Crown, 
+  MapPin, 
+  Smartphone, 
+  Star, 
+  Zap, 
+  Paintbrush, 
   Image as ImageIcon
 } from 'lucide-react';
 import { MasterSponsorBanner } from './MasterSponsorBanner';
@@ -120,6 +120,18 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack }) => {
             <h1 className="text-3xl md:text-4xl font-black text-white leading-[1.1] mb-4 font-display tracking-tight">
                 Sua marca no topo de Jacarepaguá, <span className="text-white decoration-4 decoration-yellow-400/50 underline-offset-4">todos os dias.</span>
             </h1>
+
+            {/* --- IMAGEM ILUSTRATIVA (SOLICITADA) --- */}
+            <div className="my-8 flex flex-col items-center animate-in fade-in zoom-in duration-700">
+                <img 
+                    src="https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?q=80&w=400&auto=format&fit=crop" 
+                    alt="Simulação da Home do App" 
+                    className="w-[220px] h-auto rounded-[30px] border-[6px] border-black/20 shadow-2xl"
+                />
+                <p className="text-[10px] text-blue-200 mt-4 font-medium uppercase tracking-widest opacity-80 text-center max-w-xs">
+                    Visualização ilustrativa de como sua marca aparece na home do app.
+                </p>
+            </div>
             
             <h2 className="text-sm md:text-base font-bold text-blue-100 mb-4 leading-relaxed">
                 Apareça automaticamente para milhares de moradores exatamente no momento em que eles abrem o app para consumir no bairro.
