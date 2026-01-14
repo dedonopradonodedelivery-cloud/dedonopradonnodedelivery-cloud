@@ -11,6 +11,7 @@ interface LojasEServicosListProps {
   activeFilter?: 'all' | 'cashback' | 'top_rated' | 'open_now';
   user?: User | null;
   onNavigate?: (view: string) => void;
+  premiumOnly?: boolean; // Nova prop para bloqueio de orgânicos
 }
 
 const CATEGORIES_MOCK = ['Alimentação', 'Beleza', 'Serviços', 'Pets', 'Moda', 'Saúde'];
@@ -104,7 +105,7 @@ const getStoreExtras = (index: number, store: Store) => {
   return { copy };
 };
 
-export const LojasEServicosList: React.FC<LojasEServicosListProps> = ({ onStoreClick, onViewAll, activeFilter = 'all', user = null, onNavigate }) => {
+export const LojasEServicosList: React.FC<LojasEServicosListProps> = ({ onStoreClick, onViewAll, activeFilter = 'all', user = null, onNavigate, premiumOnly = false }) => {
   const [visibleStores, setVisibleStores] = useState<Store[]>([]);
   const [filteredStores, setFilteredStores] = useState<Store[]>([]);
   const [loading, setLoading] = useState(false);
@@ -116,6 +117,12 @@ export const LojasEServicosList: React.FC<LojasEServicosListProps> = ({ onStoreC
 
   useEffect(() => {
     let data = [...ALL_SORTED_STORES];
+    
+    // BLOQUEIO DE CONTEÚDO GRATUITO NA HOME
+    if (premiumOnly) {
+      data = data.filter(s => s.adType === AdType.PREMIUM || s.isSponsored);
+    }
+
     if (activeFilter === 'cashback') {
         data = data.filter(s => s.cashback && s.cashback > 0);
     } else if (activeFilter === 'top_rated') {
@@ -130,7 +137,7 @@ export const LojasEServicosList: React.FC<LojasEServicosListProps> = ({ onStoreC
     setFilteredStores(finalData);
     setVisibleStores(finalData.slice(0, ITEMS_PER_PAGE));
     setHasMore(finalData.length > ITEMS_PER_PAGE);
-  }, [activeFilter]);
+  }, [activeFilter, premiumOnly]);
 
   const loadMore = useCallback(() => {
     if (loading || !hasMore) return;
@@ -164,6 +171,16 @@ export const LojasEServicosList: React.FC<LojasEServicosListProps> = ({ onStoreC
   };
 
   const isMasterSponsorFavorite = isFavorite(MASTER_SPONSOR_STORE.id);
+
+  if (visibleStores.length === 0 && !loading) {
+    return (
+      <div className="w-full text-center py-10 bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700">
+        <p className="text-gray-400 dark:text-gray-500 font-medium text-sm">
+          Nenhum parceiro premium encontrado nesta categoria.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col w-full">
@@ -208,7 +225,7 @@ export const LojasEServicosList: React.FC<LojasEServicosListProps> = ({ onStoreC
           </button>
         </div>
         
-        {/* Lista de Lojas - Fundo Branco Uniforme (Sem Zebra) */}
+        {/* Lista de Lojas */}
         {visibleStores.map((store, index) => {
             const isLastElement = index === visibleStores.length - 1;
             const isFavorited = isFavorite(store.id);
@@ -271,14 +288,14 @@ export const LojasEServicosList: React.FC<LojasEServicosListProps> = ({ onStoreC
         <div className="w-full flex justify-center py-6">
             <div className="flex items-center gap-2 text-[#1E5BFF] bg-white dark:bg-gray-800 px-4 py-2 rounded-full shadow-md border border-blue-50 dark:border-gray-700">
                 <Loader2 className="w-4 h-4 animate-spin" />
-                <span className="text-xs font-bold">Buscando mais opções...</span>
+                <span className="text-xs font-bold">Buscando mais parceiros...</span>
             </div>
         </div>
       )}
 
       {!hasMore && !loading && (
         <div className="w-full text-center py-8">
-            <p className="text-[11px] text-gray-400 dark:text-gray-600 font-medium bg-gray-50 dark:bg-gray-800/50 inline-block px-4 py-1.5 rounded-full uppercase tracking-widest opacity-60">Fim dos resultados ✨</p>
+            <p className="text-[11px] text-gray-400 dark:text-gray-600 font-medium bg-gray-50 dark:bg-gray-800/50 inline-block px-4 py-1.5 rounded-full uppercase tracking-widest opacity-60">Fim da lista ✨</p>
         </div>
       )}
     </div>

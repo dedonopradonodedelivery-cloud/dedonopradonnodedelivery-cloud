@@ -44,7 +44,7 @@ export const STORES: Store[] = [
     distance: 'Freguesia • RJ',
     neighborhood: 'Freguesia',
     cashback: 10,
-    adType: AdType.ORGANIC,
+    adType: AdType.PREMIUM, // Atualizado para aparecer no bloco
     address: 'Rua Tirol, 100',
     phone: '(21) 99999-0001',
     hours: 'Seg a Sáb • 09h às 19h',
@@ -67,7 +67,7 @@ export const STORES: Store[] = [
     distance: 'Freguesia • RJ',
     neighborhood: 'Freguesia',
     cashback: 5,
-    adType: AdType.ORGANIC,
+    adType: AdType.LOCAL, // Atualizado para aparecer no bloco
     address: 'Estrada dos Três Rios, 500',
     phone: '(21) 99999-0002',
     hours: 'Seg a Dom • 08h às 20h',
@@ -90,7 +90,7 @@ export const STORES: Store[] = [
     distance: 'Freguesia • RJ',
     neighborhood: 'Freguesia',
     cashback: 10,
-    adType: AdType.ORGANIC,
+    adType: AdType.PREMIUM, // Atualizado para aparecer no bloco
     address: 'Rua Geminiano Gois, 300',
     phone: '(21) 99999-0003',
     hours: 'Seg a Sáb • 10h às 20h',
@@ -136,7 +136,7 @@ export const STORES: Store[] = [
     distance: 'Freguesia • RJ',
     neighborhood: 'Freguesia',
     cashback: 5,
-    adType: AdType.ORGANIC,
+    adType: AdType.LOCAL,
     address: 'Estrada do Bananal, 150',
     phone: '(21) 99999-0005',
     hours: 'Seg a Dom • 07h às 21h',

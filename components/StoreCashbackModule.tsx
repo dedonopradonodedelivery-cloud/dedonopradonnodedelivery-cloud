@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   ChevronLeft, 
   QrCode, 
@@ -14,7 +14,9 @@ import {
   AlertCircle,
   FileText,
   X,
-  Check
+  Check,
+  Lock,
+  Play
 } from 'lucide-react';
 
 interface StoreCashbackModuleProps {
@@ -30,7 +32,15 @@ const TRANSACTIONS = [
 ];
 
 export const StoreCashbackModule: React.FC<StoreCashbackModuleProps> = ({ onBack }) => {
-  const [isActive, setIsActive] = useState(false); // Default to false to force terms acceptance
+  // Mock Store ID
+  const STORE_ID = 'store_123_freguesia';
+  
+  // Tutorial State
+  const [isTutorialCompleted, setIsTutorialCompleted] = useState(() => {
+    return localStorage.getItem(`tutorial_completed_${STORE_ID}`) === 'true';
+  });
+  
+  const [isActive, setIsActive] = useState(false); 
   const [hasAcceptedTerms, setHasAcceptedTerms] = useState(false);
   const [showTermsModal, setShowTermsModal] = useState(false);
   const [termsCheck, setTermsCheck] = useState(false);
@@ -42,27 +52,26 @@ export const StoreCashbackModule: React.FC<StoreCashbackModuleProps> = ({ onBack
   const [isSaving, setIsSaving] = useState(false);
   const [qrCodeUrl, setQrCodeUrl] = useState('');
 
-  // Mock Store ID
-  const STORE_ID = 'store_123_freguesia';
-
   useEffect(() => {
     if (isActive) {
       generateStoreQRCode(STORE_ID);
     }
   }, [isActive]);
 
+  const handleTutorialEnd = () => {
+    localStorage.setItem(`tutorial_completed_${STORE_ID}`, 'true');
+    setIsTutorialCompleted(true);
+  };
+
   const generateStoreQRCode = (storeId: string) => {
-    // Using a public API for demo purposes to generate a real QR visual
     const url = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=localizei-cashback-${storeId}`;
     setQrCodeUrl(url);
   };
 
   const handleToggleClick = () => {
     if (isActive) {
-      // Turning OFF is always allowed
       setIsActive(false);
     } else {
-      // Turning ON requires terms
       if (hasAcceptedTerms) {
         setIsActive(true);
       } else {
@@ -100,6 +109,49 @@ export const StoreCashbackModule: React.FC<StoreCashbackModuleProps> = ({ onBack
     setIsSaving(true);
     setTimeout(() => setIsSaving(false), 1500);
   };
+
+  // --- BLOQUEIO POR VÍDEO ---
+  if (!isTutorialCompleted) {
+    return (
+      <div className="fixed inset-0 z-[100] bg-slate-950 flex flex-col items-center justify-center p-6 animate-in fade-in duration-500">
+        <div className="text-center mb-8">
+            <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg shadow-blue-500/30">
+                <Play className="w-8 h-8 text-white fill-white ml-1" />
+            </div>
+            <h2 className="text-2xl font-black text-white font-display uppercase tracking-tight mb-2">
+                Treinamento Obrigatório
+            </h2>
+            <p className="text-slate-400 text-sm max-w-xs mx-auto leading-relaxed">
+                Para garantir o sucesso da sua campanha, assista ao vídeo explicativo sobre como o cashback funciona.
+            </p>
+        </div>
+
+        <div className="w-full max-w-md aspect-video bg-black rounded-2xl overflow-hidden shadow-2xl border border-slate-800 relative group">
+            <video
+                src="https://videos.pexels.com/video-files/3129957/3129957-sd_540_960_30fps.mp4" 
+                className="w-full h-full object-cover"
+                autoPlay
+                playsInline
+                onEnded={handleTutorialEnd}
+                controls={false} // CONTROLES DESABILITADOS (Regra 5)
+                onContextMenu={(e) => e.preventDefault()} // BLOQUEIO DE MENU (Regra 5)
+                disablePictureInPicture
+                controlsList="nodownload noplaybackrate"
+            />
+            
+            {/* Overlay de Bloqueio Visual */}
+            <div className="absolute inset-0 bg-transparent pointer-events-none border-2 border-slate-800/50 rounded-2xl"></div>
+        </div>
+
+        <div className="mt-8 flex items-center gap-2 px-4 py-2 bg-yellow-500/10 rounded-full border border-yellow-500/20 animate-pulse">
+            <Lock className="w-4 h-4 text-yellow-500" />
+            <span className="text-[10px] font-black text-yellow-500 uppercase tracking-widest">
+                Painel bloqueado até o fim do vídeo
+            </span>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 font-sans animate-in slide-in-from-right duration-300 pb-20 relative">
@@ -178,12 +230,12 @@ export const StoreCashbackModule: React.FC<StoreCashbackModuleProps> = ({ onBack
                     <div className="relative h-2 bg-gray-200 dark:bg-gray-700 rounded-full mb-2">
                         <div 
                             className="absolute top-0 left-0 h-full bg-indigo-500 rounded-full transition-all"
-                            style={{ width: `${((percent - 3) / 12) * 100}%` }}
+                            style={{ width: `${((percent - 3) / 47) * 100}%` }}
                         ></div>
                         <input 
                             type="range" 
                             min="3" 
-                            max="15" 
+                            max="50" 
                             step="1"
                             value={percent}
                             onChange={(e) => setPercent(parseInt(e.target.value))}
@@ -191,12 +243,12 @@ export const StoreCashbackModule: React.FC<StoreCashbackModuleProps> = ({ onBack
                         />
                         <div 
                             className="absolute top-1/2 -translate-y-1/2 w-5 h-5 bg-white border-2 border-indigo-500 rounded-full shadow-md pointer-events-none transition-all"
-                            style={{ left: `calc(${((percent - 3) / 12) * 100}% - 10px)` }}
+                            style={{ left: `calc(${((percent - 3) / 47) * 100}% - 10px)` }}
                         ></div>
                     </div>
                     <div className="flex justify-between text-[10px] text-gray-400 font-medium px-1">
                         <span>3%</span>
-                        <span>15%</span>
+                        <span>50%</span>
                     </div>
                 </div>
 

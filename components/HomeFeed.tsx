@@ -31,11 +31,13 @@ import {
   Users,
   Search,
   Wrench,
-  Ticket // Importado para ícone do novo bloco
+  Ticket,
+  BadgeCheck,
+  Building2,
+  DollarSign
 } from 'lucide-react';
 import { LojasEServicosList } from './LojasEServicosList';
 import { User } from '@supabase/supabase-js';
-import { SpinWheelView } from './SpinWheelView';
 import { MasterSponsorBanner } from './MasterSponsorBanner';
 import { CATEGORIES, STORES, MOCK_JOBS, MOCK_COMMUNITY_POSTS } from '../constants';
 import { useNeighborhood } from '../contexts/NeighborhoodContext';
@@ -58,49 +60,6 @@ const MINI_TRIBOS = [
   { id: 't-pet', name: 'Amigo do Pet', subtitle: 'Eles são bem-vindos', icon: DogIcon, color: 'bg-white text-purple-600 border-gray-100 shadow-sm' },
   { id: 't-kids', name: 'Espaço Kids', subtitle: 'Lazer pros pequenos', icon: Baby, color: 'bg-white text-orange-600 border-gray-100 shadow-sm' },
   { id: 't-health', name: 'Vibe Saúde', subtitle: 'Foco no bem-estar', icon: Leaf, color: 'bg-white text-emerald-600 border-gray-100 shadow-sm' },
-];
-
-const WEEKLY_PROMOS = [
-  {
-    id: 'promo-1',
-    storeName: 'Espaço VIP Beleza',
-    productName: 'Hidratação Profunda',
-    discount: 30,
-    image: 'https://images.unsplash.com/photo-1560066984-138dadb4c035?q=80&w=400&auto=format&fit=crop',
-    validity: 'Até domingo',
-    storeId: 'mock-1',
-    neighborhood: 'Freguesia'
-  },
-  {
-    id: 'promo-2',
-    storeName: 'Hamburgueria Brasa',
-    productName: 'Combo Duplo Cheddar',
-    discount: 25,
-    image: 'https://images.unsplash.com/photo-1594212699903-ec8a3eca50f5?q=80&w=400&auto=format&fit=crop',
-    validity: 'Até domingo',
-    storeId: 'mock-2',
-    neighborhood: 'Freguesia'
-  },
-  {
-    id: 'promo-3',
-    storeName: 'Pet Shop Araguaia',
-    productName: 'Banho & Tosa Premium',
-    discount: 20,
-    image: 'https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?q=80&w=400&auto=format&fit=crop',
-    validity: 'Até sábado',
-    storeId: 'mock-3',
-    neighborhood: 'Taquara'
-  },
-  {
-    id: 'promo-4',
-    storeName: 'Academia Force',
-    productName: 'Plano Trimestral',
-    discount: 15,
-    image: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=400&auto=format&fit=crop',
-    validity: 'Só hoje',
-    storeId: 'mock-4',
-    neighborhood: 'Pechincha'
-  }
 ];
 
 const getCategoryCover = (category: string) => {
@@ -258,8 +217,20 @@ const NeighborhoodCouponsBlock: React.FC<{ stores: Store[], onStoreClick: (store
   const { currentNeighborhood, isAll } = useNeighborhood();
 
   const couponStores = useMemo(() => {
+    // FILTRO RELAXADO: Exibe qualquer loja com cashback > 0
+    // ORDENAÇÃO: Premium > Local > Organic
     let list = stores.filter(s => s.cashback && s.cashback > 0);
+    
     list.sort((a, b) => {
+        // 1. Premium first
+        if (a.adType === AdType.PREMIUM && b.adType !== AdType.PREMIUM) return -1;
+        if (a.adType !== AdType.PREMIUM && b.adType === AdType.PREMIUM) return 1;
+        
+        // 2. Local second
+        if (a.adType === AdType.LOCAL && b.adType !== AdType.LOCAL) return -1;
+        if (a.adType !== AdType.LOCAL && b.adType === AdType.LOCAL) return 1;
+
+        // 3. Geolocation Logic
         if (isAll) return 0;
         const aIsLocal = (a.neighborhood === currentNeighborhood);
         const bIsLocal = (b.neighborhood === currentNeighborhood);
@@ -274,34 +245,52 @@ const NeighborhoodCouponsBlock: React.FC<{ stores: Store[], onStoreClick: (store
 
   return (
     <div className="w-full bg-white dark:bg-gray-950 py-6">
-      <div className="px-5 mb-4 flex items-center justify-between">
-        <div>
-          <h2 className="text-base font-black text-gray-900 dark:text-white tracking-tight leading-none flex items-center gap-2">
-            <Ticket className="w-5 h-5 text-emerald-500" />
+      <div className="px-5 mb-4">
+        <div className="flex items-center gap-2 mb-1">
+          <Ticket className="w-4 h-4 text-emerald-500 fill-emerald-500/20" />
+          <h2 className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-wider">
             Cupons Ativos no Bairro
           </h2>
-          <p className="text-xs text-gray-500 font-medium mt-1">Economize agora nas lojas perto de você</p>
         </div>
+        <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">
+          Economize agora nas lojas perto de você
+        </p>
       </div>
       <div className="flex gap-3 overflow-x-auto no-scrollbar px-5 pb-2 snap-x">
         {couponStores.map(store => (
           <button
             key={store.id}
             onClick={() => onStoreClick(store)}
-            className="snap-center min-w-[140px] flex flex-col items-center bg-white dark:bg-gray-900 p-3 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm hover:shadow-md transition-all group active:scale-95"
+            className="snap-center min-w-[160px] max-w-[160px] flex flex-col bg-white dark:bg-gray-800 rounded-[20px] shadow-[0_2px_8px_rgba(0,0,0,0.06)] dark:shadow-none border border-gray-100 dark:border-gray-700 overflow-hidden group active:scale-[0.98] transition-all"
           >
-            <div className="w-14 h-14 rounded-full bg-gray-50 dark:bg-gray-800 flex items-center justify-center p-1 border border-gray-100 dark:border-gray-700 shrink-0 mb-3 relative">
-               <img src={store.logoUrl || '/assets/default-logo.png'} className="w-full h-full object-contain rounded-full" alt={store.name} />
-               <div className="absolute -bottom-1 -right-1 bg-emerald-500 text-white text-[9px] font-black px-1.5 py-0.5 rounded-full border-2 border-white dark:border-gray-900 shadow-sm">
-                 {store.cashback}%
-               </div>
+            <div className="relative h-[110px] w-full overflow-hidden">
+               <img src={store.image || store.logoUrl || '/assets/default-logo.png'} alt={store.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+               <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+
+               {(isAll || store.neighborhood !== currentNeighborhood) && store.neighborhood && (
+                  <div className="absolute top-2 right-2 bg-black/60 backdrop-blur-md px-2 py-0.5 rounded-md border border-white/10">
+                    <span className="text-[8px] font-bold text-white uppercase tracking-wider flex items-center gap-1">
+                      <MapPin className="w-2.5 h-2.5" /> {store.neighborhood}
+                    </span>
+                  </div>
+               )}
+
+               <div className="absolute bottom-2 left-2">
+                <div className="bg-emerald-500 text-white px-2 py-1 rounded-lg shadow-lg flex items-center gap-0.5">
+                  <span className="text-[14px] font-black tracking-tighter">{store.cashback}% OFF</span>
+                </div>
+              </div>
             </div>
-            
-            <h4 className="font-bold text-gray-900 dark:text-white text-xs text-center truncate w-full leading-tight">{store.name}</h4>
-            <p className="text-[9px] text-gray-400 dark:text-gray-500 font-medium mt-0.5 mb-2 truncate w-full text-center">{store.category}</p>
-            
-            <div className="w-full bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 text-[10px] font-bold py-1.5 rounded-lg text-center border border-emerald-100 dark:border-emerald-800/50">
-               Ganhe {store.cashback}%
+
+            <div className="p-3 flex flex-col flex-1 justify-between text-left">
+              <div>
+                <h4 className="font-bold text-gray-900 dark:text-white text-xs leading-tight line-clamp-2 mb-1">{store.name}</h4>
+                <p className="text-[10px] text-gray-500 dark:text-gray-400 font-medium truncate">{store.category}</p>
+              </div>
+              <div className="mt-2 pt-2 border-t border-gray-100 dark:border-gray-700 flex items-center justify-between">
+                <span className="text-[9px] font-bold text-emerald-600 bg-emerald-50 dark:bg-emerald-900/20 px-1.5 py-0.5 rounded uppercase">Ativo</span>
+                <span className="text-[9px] font-medium text-gray-400">Resgatar</span>
+              </div>
             </div>
           </button>
         ))}
@@ -310,73 +299,182 @@ const NeighborhoodCouponsBlock: React.FC<{ stores: Store[], onStoreClick: (store
   );
 };
 
-const WeeklyPromosSection: React.FC<{ onNavigate: (v: string) => void }> = ({ onNavigate }) => {
+// --- NOVO BLOCO: VAGAS EM DESTAQUE (PREMIUM JOB ADS ONLY) ---
+const FeaturedJobsBlock: React.FC<{ onNavigate: (view: string) => void }> = ({ onNavigate }) => {
   const { currentNeighborhood, isAll } = useNeighborhood();
-  const validPromos = useMemo(() => {
-    let promos = [...WEEKLY_PROMOS].filter(p => p.discount >= 15);
-    promos.sort((a, b) => {
-        if (isAll) return b.discount - a.discount;
-        const aIsLocal = a.neighborhood === currentNeighborhood;
-        const bIsLocal = b.neighborhood === currentNeighborhood;
-        if (aIsLocal && !bIsLocal) return -1;
-        if (!aIsLocal && bIsLocal) return 1;
-        return b.discount - a.discount;
-    });
-    return promos;
+
+  // Filtra apenas vagas PREMIUM ativas
+  const premiumJobs = useMemo(() => {
+    const today = new Date().toISOString().split('T')[0];
+    
+    return MOCK_JOBS.filter(job => 
+      job.isSponsored === true && 
+      (job.sponsoredUntil && job.sponsoredUntil >= today) &&
+      (isAll || job.neighborhood === currentNeighborhood)
+    );
   }, [currentNeighborhood, isAll]);
 
-  if (validPromos.length === 0) return null;
+  if (premiumJobs.length === 0) return null;
 
   return (
-    <div className="w-full bg-white dark:bg-[#0B0F19] py-6">
-      <div className="px-5 mb-4">
-        <div className="flex items-center gap-2 mb-1">
-          <Tag className="w-4 h-4 text-red-500 fill-red-500/20" />
-          <h2 className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-wider">
-            Promoções da Semana
-          </h2>
+    <div className="w-full bg-white dark:bg-gray-950 py-6 border-t border-gray-50 dark:border-gray-800">
+      <div className="px-5 mb-4 flex justify-between items-end">
+        <div>
+          <div className="flex items-center gap-2 mb-1">
+            <Briefcase className="w-4 h-4 text-orange-500 fill-orange-500/20" />
+            <h2 className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-wider">
+              Vagas em Destaque
+            </h2>
+          </div>
+          <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">
+            Oportunidades exclusivas perto de você
+          </p>
         </div>
-        <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">
-          Descontos reais por tempo limitado no seu bairro
-        </p>
+        <button onClick={() => onNavigate('jobs_list')} className="text-[10px] font-bold text-[#1E5BFF] hover:underline">
+            Ver todas
+        </button>
       </div>
-      <div className="flex gap-3 overflow-x-auto no-scrollbar px-5 pb-2 snap-x">
-        {validPromos.map((promo) => (
-          <button 
-            key={promo.id}
-            onClick={() => onNavigate('weekly_promo')} 
-            className="snap-center min-w-[160px] max-w-[160px] flex flex-col bg-white dark:bg-gray-800 rounded-[20px] shadow-[0_2px_8px_rgba(0,0,0,0.06)] dark:shadow-none border border-gray-100 dark:border-gray-700 overflow-hidden group active:scale-[0.98] transition-all"
+
+      <div className="flex gap-3 overflow-x-auto no-scrollbar px-5 pb-4 snap-x">
+        {premiumJobs.map(job => (
+          <button
+            key={job.id}
+            onClick={() => onNavigate('jobs_list')}
+            className="snap-center min-w-[240px] max-w-[240px] bg-gradient-to-br from-white to-orange-50 dark:from-gray-900 dark:to-gray-800 rounded-2xl p-4 shadow-sm border border-orange-100 dark:border-gray-700 flex flex-col text-left group active:scale-[0.98] transition-all relative overflow-hidden"
           >
-            <div className="relative h-[110px] w-full overflow-hidden">
-              <img src={promo.image} alt={promo.productName} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
-              <div className="absolute top-2 right-2 bg-black/60 backdrop-blur-md px-2 py-0.5 rounded-md border border-white/10">
-                <span className="text-[8px] font-bold text-white uppercase tracking-wider flex items-center gap-1">
-                  <Timer className="w-2.5 h-2.5 text-yellow-400" /> 7 Dias
-                </span>
-              </div>
-              {(isAll || promo.neighborhood !== currentNeighborhood) && (
-                  <div className="absolute top-2 left-2 bg-black/60 backdrop-blur-md px-2 py-0.5 rounded-md border border-white/10">
-                    <span className="text-[8px] font-bold text-white uppercase tracking-wider flex items-center gap-1">
-                      <MapPin className="w-2.5 h-2.5" /> {promo.neighborhood}
-                    </span>
-                  </div>
-              )}
-              <div className="absolute bottom-2 left-2">
-                <div className="bg-red-600 text-white px-2 py-1 rounded-lg shadow-lg flex items-center gap-0.5">
-                  <span className="text-[14px] font-black tracking-tighter">-{promo.discount}%</span>
+            {job.isUrgent && (
+                <div className="absolute top-0 right-0 bg-red-500 text-white text-[8px] font-black px-2 py-1 rounded-bl-xl uppercase tracking-wider">
+                    Urgente
                 </div>
-              </div>
+            )}
+            
+            <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 rounded-xl bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center text-orange-600 dark:text-orange-400 border border-orange-200 dark:border-orange-800">
+                    <Building2 className="w-5 h-5" />
+                </div>
+                <div className="flex-1 min-w-0">
+                    <h4 className="font-bold text-gray-900 dark:text-white text-sm truncate leading-tight">{job.role}</h4>
+                    <p className="text-[10px] text-gray-500 dark:text-gray-400 truncate">{job.company}</p>
+                </div>
             </div>
-            <div className="p-3 flex flex-col flex-1 justify-between text-left">
-              <div>
-                <h4 className="font-bold text-gray-900 dark:text-white text-xs leading-tight line-clamp-2 mb-1">{promo.productName}</h4>
-                <p className="text-[10px] text-gray-500 dark:text-gray-400 font-medium truncate">{promo.storeName}</p>
-              </div>
-              <div className="mt-2 pt-2 border-t border-gray-100 dark:border-gray-700 flex items-center justify-between">
-                <span className="text-[9px] font-bold text-red-500 bg-red-50 dark:bg-red-900/10 px-1.5 py-0.5 rounded uppercase">Oferta</span>
-                <span className="text-[9px] font-medium text-gray-400">{promo.validity}</span>
-              </div>
+
+            <div className="flex items-center gap-2 mb-3">
+                <span className="text-[9px] font-bold text-gray-500 bg-white dark:bg-gray-700 border border-gray-100 dark:border-gray-600 px-1.5 py-0.5 rounded">
+                    {job.type}
+                </span>
+                {job.salary && (
+                    <span className="text-[9px] font-bold text-green-600 bg-green-50 dark:bg-green-900/20 px-1.5 py-0.5 rounded flex items-center gap-0.5">
+                        <DollarSign className="w-2.5 h-2.5" /> {job.salary}
+                    </span>
+                )}
+            </div>
+
+            <div className="mt-auto pt-3 border-t border-orange-100 dark:border-gray-700 flex items-center justify-between w-full">
+                <div className="flex items-center gap-1 text-[9px] text-gray-400 font-medium">
+                    <MapPin className="w-2.5 h-2.5" /> {job.neighborhood}
+                </div>
+                <span className="text-[9px] font-bold text-[#1E5BFF] flex items-center gap-0.5 group-hover:underline">
+                    Ver detalhes <ChevronRight className="w-2.5 h-2.5" />
+                </span>
+            </div>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+// --- BLOCO: SERVIÇOS EM DESTAQUE (PREMIUM ADS ONLY) ---
+const FeaturedServicesBlock: React.FC<{ stores: Store[], onStoreClick: (store: Store) => void }> = ({ stores, onStoreClick }) => {
+  const { currentNeighborhood, isAll } = useNeighborhood();
+
+  // Filtra apenas serviços PREMIUM ativos
+  // Se for uma lista vazia, o componente não renderiza
+  const premiumServices = useMemo(() => {
+    let list = stores.filter(s => 
+      s.category === 'Serviços' && 
+      s.adType === AdType.PREMIUM && 
+      (s as any).status === 'active' // Garante que apenas ativos apareçam
+    );
+
+    // Ordenação básica por rating, mas mantendo a lógica de Premium no topo
+    list.sort((a, b) => b.rating - a.rating);
+    
+    // Filtro geográfico se necessário
+    if (!isAll) {
+       list = list.filter(s => s.neighborhood === currentNeighborhood);
+    }
+
+    return list;
+  }, [stores, currentNeighborhood, isAll]);
+
+  if (premiumServices.length === 0) return null;
+
+  return (
+    <div className="w-full bg-white dark:bg-gray-950 py-6 border-t border-gray-50 dark:border-gray-800">
+      <div className="px-5 mb-4 flex justify-between items-end">
+        <div>
+          <div className="flex items-center gap-2 mb-1">
+            <BadgeCheck className="w-4 h-4 text-amber-500 fill-amber-500/20" />
+            <h2 className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-wider">
+              Serviços em Destaque
+            </h2>
+          </div>
+          <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">
+            Profissionais verificados e recomendados
+          </p>
+        </div>
+      </div>
+
+      <div className="flex gap-4 overflow-x-auto no-scrollbar px-5 pb-4 snap-x">
+        {premiumServices.map(service => (
+          <button
+            key={service.id}
+            onClick={() => onStoreClick(service)}
+            className="snap-center min-w-[200px] max-w-[200px] bg-white dark:bg-gray-900 rounded-[24px] shadow-lg shadow-gray-200/50 dark:shadow-none border border-gray-100 dark:border-gray-800 p-1.5 flex flex-col group active:scale-[0.98] transition-all relative overflow-hidden"
+          >
+            {/* Faixa Premium Decorativa */}
+            <div className="absolute top-0 right-0 w-16 h-16 bg-gradient-to-bl from-amber-400/20 to-transparent rounded-tr-[24px] pointer-events-none"></div>
+
+            <div className="h-28 w-full rounded-[20px] overflow-hidden relative bg-gray-100 dark:bg-gray-800">
+               <img 
+                 src={service.image || service.logoUrl || '/assets/default-logo.png'} 
+                 alt={service.name} 
+                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
+               />
+               <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+               
+               {/* Selo Destaque */}
+               <div className="absolute top-2 right-2 bg-amber-400 text-white text-[8px] font-black px-2 py-0.5 rounded shadow-sm border border-amber-300 uppercase tracking-wider flex items-center gap-1">
+                  <Crown className="w-2 h-2 fill-white" />
+                  Premium
+               </div>
+
+               <div className="absolute bottom-2 left-3 text-white">
+                  <div className="flex items-center gap-1 text-[10px] font-bold bg-black/40 backdrop-blur-md px-1.5 py-0.5 rounded-md border border-white/10 w-fit">
+                     <Star className="w-2.5 h-2.5 text-yellow-400 fill-yellow-400" />
+                     {service.rating.toFixed(1)}
+                  </div>
+               </div>
+            </div>
+
+            <div className="p-3 pt-3 flex flex-col text-left">
+               <h4 className="font-bold text-gray-900 dark:text-white text-sm leading-tight truncate mb-1">
+                 {service.name}
+               </h4>
+               <p className="text-[10px] text-gray-500 dark:text-gray-400 font-medium truncate mb-3">
+                 {service.subcategory}
+               </p>
+               
+               <div className="mt-auto flex items-center justify-between">
+                  <div className="flex items-center gap-1 text-[9px] text-gray-400 font-medium">
+                     <MapPin className="w-2.5 h-2.5" />
+                     {service.distance || 'Local'}
+                  </div>
+                  <div className="w-6 h-6 rounded-full bg-indigo-50 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-600 dark:text-indigo-400 group-hover:bg-indigo-600 group-hover:text-white transition-colors">
+                     <ArrowUpRight className="w-3 h-3" />
+                  </div>
+               </div>
             </div>
           </button>
         ))}
@@ -400,7 +498,13 @@ const SectionHeader: React.FC<{ title: string; subtitle?: string; rightElement?:
 const CommunityTrustCarousel: React.FC<{ stores: Store[], onStoreClick: (store: Store) => void }> = ({ stores, onStoreClick }) => {
   const { currentNeighborhood, isAll } = useNeighborhood();
   const trustedStores = useMemo(() => {
-    let list = (stores || []).filter(s => s && s.recentComments && s.recentComments.length > 0);
+    // FILTRO RIGOROSO: Apenas PREMIUM e COM REVIEWS
+    let list = (stores || []).filter(s => 
+        s && 
+        s.recentComments && 
+        s.recentComments.length > 0 &&
+        s.adType === AdType.PREMIUM
+    );
     list.sort((a, b) => {
         if (isAll) return 0;
         const aIsLocal = (a.neighborhood === currentNeighborhood);
@@ -525,37 +629,6 @@ const CommunityFeedBlock: React.FC<{ onNavigate: (view: string) => void; }> = ({
   );
 };
 
-const WheelBanner: React.FC<{ onClick: () => void }> = ({ onClick }) => {
-  const [rotation, setRotation] = useState(0);
-  useEffect(() => {
-    const spin = () => setRotation(prev => prev + 1800);
-    const initialTimer = setTimeout(spin, 100);
-    const interval = setInterval(spin, 5000);
-    return () => { clearTimeout(initialTimer); clearInterval(interval); };
-  }, []);
-  return (
-    <div className="px-5">
-      <button onClick={onClick} className="w-full bg-gradient-to-r from-[#6366F1] via-[#8B5CF6] to-[#EC4899] rounded-[24px] p-1 shadow-2xl relative overflow-hidden group active:scale-[0.98] transition-all flex items-center justify-between">
-        <div className="absolute top-0 left-0 w-full h-full bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-        <div className="absolute -top-10 -right-10 w-32 h-32 bg-yellow-300/30 rounded-full blur-3xl pointer-events-none"></div>
-        <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-blue-500/30 rounded-full blur-3xl pointer-events-none"></div>
-        <div className="flex items-center gap-5 w-full p-4">
-            <div className="relative w-20 h-20 flex items-center justify-center shrink-0">
-                <div className="absolute -top-1.5 left-1/2 -translate-x-1/2 z-20 text-white drop-shadow-md">▼</div>
-                <div className="w-20 h-20 rounded-full shadow-[0_8px_16px_rgba(0,0,0,0.3)] relative z-10" style={{ background: `conic-gradient(#FF3B30 0% 12.5%, #FF9500 12.5% 25%, #FFCC00 25% 37.5%, #34C759 37.5% 50%, #30B0C7 50% 62.5%, #007AFF 62.5% 75%, #5856D6 75% 87.5%, #FF2D55 87.5% 100%)`, transform: `rotate(${rotation}deg)`, transition: 'transform 4.5s cubic-bezier(0.2, 0.8, 0.2, 1)' }}>
-                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-2.5 h-2.5 bg-white rounded-full shadow-sm"></div>
-                </div>
-            </div>
-            <div className="text-left flex-1">
-                <h3 className="text-lg font-black text-white leading-tight mb-1 font-display drop-shadow-sm">Roleta da <br/> Localizei JPA</h3>
-                <p className="text-[11px] text-white/90 font-bold uppercase tracking-wider bg-white/20 px-2 py-0.5 rounded-md w-fit backdrop-blur-sm">Gire e ganhe vantagens</p>
-            </div>
-        </div>
-      </button>
-    </div>
-  );
-};
-
 export const HomeFeed: React.FC<HomeFeedProps> = ({ 
   onNavigate, 
   onSelectCategory, 
@@ -567,7 +640,6 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
   onSpinWin,
   onRequireLogin
 }) => {
-  const [isSpinWheelOpen, setIsSpinWheelOpen] = useState(false);
   const [listFilter, setListFilter] = useState<'all' | 'cashback' | 'top_rated' | 'open_now'>('all');
   const activeSearchTerm = externalSearchTerm || '';
   const { currentNeighborhood, isAll } = useNeighborhood();
@@ -623,21 +695,16 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
       case 'home_carousel':
         return <div key="home_carousel" className="w-full bg-white dark:bg-gray-950 pb-8"><HomeCarousel onNavigate={onNavigate} /></div>;
 
-      // BLOCO ATUALIZADO: CUPONS ATIVOS NO BAIRRO
       case 'neighborhood_coupons':
         return <NeighborhoodCouponsBlock key="neighborhood_coupons" stores={stores} onStoreClick={(s) => onStoreClick && onStoreClick(s)} />;
 
-      case 'weekly_promos': return <WeeklyPromosSection key="weekly_promos" onNavigate={onNavigate} />;
+      case 'featured_services':
+        return <FeaturedServicesBlock key="featured_services" stores={stores} onStoreClick={(s) => onStoreClick && onStoreClick(s)} />;
+
+      case 'featured_jobs':
+        return <FeaturedJobsBlock key="featured_jobs" onNavigate={onNavigate} />;
 
       case 'community_feed': return <CommunityFeedBlock key="community_feed" onNavigate={onNavigate} />;
-
-      case 'roulette':
-        return (
-          <div key="roulette" className="w-full bg-white dark:bg-gray-950 py-8">
-            <div className="px-5 mb-2"><div className="flex items-center gap-2"><span className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">🎁 Interaja e ganhe vantagens</span></div></div>
-            <WheelBanner onClick={() => setIsSpinWheelOpen(true)} />
-          </div>
-        );
 
       case 'trust_feed': return <CommunityTrustCarousel key="trust_feed" stores={sortedStores} onStoreClick={(s) => onStoreClick && onStoreClick(s)} />;
 
@@ -645,15 +712,16 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
         return (
           <div key="list" className="w-full bg-white dark:bg-gray-900 py-8">
             <div className="px-5">
-              <SectionHeader title={`Explorar ${currentNeighborhood === 'Jacarepaguá (todos)' ? 'Jacarepaguá' : currentNeighborhood}`} subtitle="O que há de melhor no bairro" rightElement={<div className="flex gap-1 bg-gray-100 dark:bg-gray-800 p-1 rounded-xl">{['all', 'cashback', 'top_rated'].map((f) => (<button key={f} onClick={() => setListFilter(f as any)} className={`text-[8px] font-black uppercase px-2.5 py-1.5 rounded-lg transition-all ${listFilter === f ? 'bg-white dark:bg-gray-700 text-[#1E5BFF] shadow-sm' : 'text-gray-400'}`}>{f === 'all' ? 'Tudo' : f === 'cashback' ? '%' : 'Top'}</button>))}</div>} />
-              <LojasEServicosList onStoreClick={onStoreClick} onViewAll={() => onNavigate('explore')} activeFilter={listFilter} user={user} onNavigate={onNavigate} />
+              <SectionHeader title={`Parceiros Premium em ${currentNeighborhood === 'Jacarepaguá (todos)' ? 'Jacarepaguá' : currentNeighborhood}`} subtitle="O que há de melhor no bairro" rightElement={<div className="flex gap-1 bg-gray-100 dark:bg-gray-800 p-1 rounded-xl">{['all', 'cashback', 'top_rated'].map((f) => (<button key={f} onClick={() => setListFilter(f as any)} className={`text-[8px] font-black uppercase px-2.5 py-1.5 rounded-lg transition-all ${listFilter === f ? 'bg-white dark:bg-gray-700 text-[#1E5BFF] shadow-sm' : 'text-gray-400'}`}>{f === 'all' ? 'Tudo' : f === 'cashback' ? '%' : 'Top'}</button>))}</div>} />
+              {/* FILTRAGEM PREMIUM ATIVADA */}
+              <LojasEServicosList onStoreClick={onStoreClick} onViewAll={() => onNavigate('explore')} activeFilter={listFilter} user={user} onNavigate={onNavigate} premiumOnly={true} />
             </div>
           </div>
         );
 
       case 'mini_tribes':
         return (
-          <div key="mini_tribes" className="w-full py-12 bg-white dark:bg-gray-900">
+          <div key="mini_tribes" className="w-full py-12 bg-white dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800">
             <div className="px-5"><SectionHeader title="Estilo de Vida" subtitle="Lugares pela sua vibe" /></div>
             <div className="grid grid-cols-2 gap-3 px-5">
               {MINI_TRIBOS.map((tribo) => (
@@ -669,13 +737,12 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
   const homeStructure = useMemo(() => [
     'categories',
     'home_carousel',
-    'neighborhood_coupons', // Atualizado para o novo design visual
-    'weekly_promos',
-    // 'cashback_stores', // REMOVIDO EM ETAPA ANTERIOR
+    'neighborhood_coupons', // 1. Prioridade
+    'featured_services',    // 2. Prioridade
+    'featured_jobs',        // 3. Prioridade
     'trust_feed',
-    'community_feed',
-    'roulette',       
-    'list',           
+    'community_feed',       // 4. Retenção
+    'list',
     'mini_tribes'
   ], []);
 
@@ -687,15 +754,6 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
             <MasterSponsorBanner onClick={() => onNavigate('patrocinador_master')} />
           </div>
       </div>
-
-      {isSpinWheelOpen && (
-        <div className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-md flex items-end justify-center animate-in fade-in duration-300" onClick={() => setIsSpinWheelOpen(false)}>
-          <div className="bg-transparent w-full max-w-md relative" onClick={(e) => e.stopPropagation()}>
-            <div className="absolute top-4 right-5 z-50"><button onClick={() => setIsSpinWheelOpen(false)} className="p-2.5 text-gray-200 hover:text-white bg-white/10 backdrop-blur-md rounded-full active:scale-90 transition-transform"><X className="w-5 h-5" /></button></div>
-            <SpinWheelView userId={user?.id || null} userRole={userRole || null} onWin={onSpinWin} onRequireLogin={onRequireLogin} onViewHistory={() => { setIsSpinWheelOpen(false); onNavigate('prize_history'); }} />
-          </div>
-        </div>
-      )}
     </div>
   );
 };

@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { supabase } from '../lib/supabaseClient';
-import { Gift, RefreshCw, ThumbsDown, History, Wallet, Volume2, VolumeX, Lock, ArrowRight, Dices } from 'lucide-react';
+import { Gift, RefreshCw, ThumbsDown, History, Wallet, Volume2, VolumeX, Lock, ArrowRight, Dices, Ticket } from 'lucide-react';
 import { useCountdown } from '../hooks/useCountdown';
 
 // --- Tipos e Constantes ---
@@ -18,9 +18,9 @@ interface Prize {
   line1: string;
   line2: string;
   prize_label: string;
-  prize_type: 'cashback' | 'cupom' | 'nao_foi_dessa_vez' | 'gire_de_novo';
-  prize_value?: number;
-  prize_code?: string; // For coupons
+  prize_type: 'cupom' | 'nao_foi_dessa_vez' | 'gire_de_novo';
+  prize_value?: number; // Representa % do cupom
+  prize_code?: string; // Código do cupom
   status: 'creditado' | 'pendente' | 'nao_aplicavel';
   color: string;
   textColor: string;
@@ -28,14 +28,14 @@ interface Prize {
 }
 
 const PRIZES: Prize[] = [
-  { prize_key: 'reais_5', line1: 'R$ 5', line2: 'de Volta', prize_label: 'R$ 5,00 de Volta', prize_type: 'cashback', prize_value: 5, status: 'creditado', color: '#00C853', textColor: '#FFFFFF', description: 'O valor foi creditado na sua carteira digital.' },
-  { prize_key: 'cashback_5', line1: '5%', line2: 'Cashback', prize_label: '5% Cashback', prize_type: 'cashback', prize_value: 5, status: 'creditado', color: '#2962FF', textColor: '#FFFFFF', description: '5% de cashback garantido na próxima compra.' },
-  { prize_key: 'lose', line1: 'Não foi', line2: 'dessa vez', prize_label: 'Não foi dessa vez', prize_type: 'nao_foi_dessa_vez', status: 'nao_aplicavel', color: '#D50000', textColor: '#FFFFFF', description: 'Tente novamente amanhã para ganhar prêmios.' },
-  { prize_key: 'cashback_10', line1: '10%', line2: 'Cashback', prize_label: '10% Cashback', prize_type: 'cashback', prize_value: 10, status: 'creditado', color: '#AA00FF', textColor: '#FFFFFF', description: '10% de cashback acumulado na sua carteira.' },
-  { prize_key: 'spin_again', line1: 'Gire', line2: 'de Novo', prize_label: 'Gire de Novo', prize_type: 'gire_de_novo', status: 'nao_aplicavel', color: '#FF6D00', textColor: '#FFFFFF', description: 'Você ganhou uma nova chance! Gire a roleta novamente.' },
-  { prize_key: 'reais_10', line1: 'Cupom', line2: 'R$ 10', prize_label: 'Cupom R$ 10,00', prize_type: 'cupom', prize_value: 10, prize_code: 'LOCAL10', status: 'pendente', color: '#00B8D4', textColor: '#FFFFFF', description: 'Cupom de R$ 10 para usar em parceiros locais.' },
-  { prize_key: 'gift_local', line1: 'Brinde', line2: 'Local', prize_label: 'Brinde Surpresa', prize_type: 'cupom', prize_code: 'BRINDE2024', status: 'pendente', color: '#C51162', textColor: '#FFFFFF', description: 'Você ganhou um brinde exclusivo em lojas participantes.' },
-  { prize_key: 'cashback_15', line1: '15%', line2: 'Cashback', prize_label: '15% Cashback', prize_type: 'cashback', prize_value: 15, status: 'creditado', color: '#FFD600', textColor: '#000000', description: 'Incríveis 15% de volta na sua próxima compra!' },
+  { prize_key: 'cupom_5', line1: 'Cupom', line2: '5%', prize_label: 'Cupom de 5%', prize_type: 'cupom', prize_value: 5, prize_code: 'LOCAL5', status: 'pendente', color: '#2563EB', textColor: '#FFFFFF', description: 'Você ganhou 5% de desconto em parceiros selecionados.' },
+  { prize_key: 'tente_amanha_1', line1: 'Tente', line2: 'Amanhã', prize_label: 'Tente Amanhã', prize_type: 'nao_foi_dessa_vez', status: 'nao_aplicavel', color: '#EF4444', textColor: '#FFFFFF', description: 'Não foi dessa vez. Volte amanhã para girar novamente!' },
+  { prize_key: 'cupom_10', line1: 'Cupom', line2: '10%', prize_label: 'Cupom de 10%', prize_type: 'cupom', prize_value: 10, prize_code: 'LOCAL10', status: 'pendente', color: '#EAB308', textColor: '#FFFFFF', description: 'Parabéns! Desconto de 10% para sua próxima compra.' },
+  { prize_key: 'cupom_surpresa', line1: 'Cupom', line2: 'Surpresa', prize_label: 'Cupom Surpresa', prize_type: 'cupom', prize_code: 'SURPRESA2024', status: 'pendente', color: '#9333EA', textColor: '#FFFFFF', description: 'Um presente especial para você! Confira na sua carteira.' },
+  { prize_key: 'tente_amanha_2', line1: 'Volte', line2: 'Amanhã', prize_label: 'Volte Amanhã', prize_type: 'nao_foi_dessa_vez', status: 'nao_aplicavel', color: '#EF4444', textColor: '#FFFFFF', description: 'Hoje não deu sorte. Tente novamente em 24h.' },
+  { prize_key: 'cupom_5_b', line1: 'Cupom', line2: '5%', prize_label: 'Cupom de 5%', prize_type: 'cupom', prize_value: 5, prize_code: 'LOCAL5', status: 'pendente', color: '#2563EB', textColor: '#FFFFFF', description: 'Ganhou 5% de desconto! Aproveite no bairro.' },
+  { prize_key: 'tente_amanha_3', line1: 'Não foi', line2: 'Agora', prize_label: 'Não foi Agora', prize_type: 'nao_foi_dessa_vez', status: 'nao_aplicavel', color: '#EF4444', textColor: '#FFFFFF', description: 'Sem prêmio hoje. Mas amanhã tem mais tentativas!' },
+  { prize_key: 'cupom_10_b', line1: 'Cupom', line2: '10%', prize_label: 'Cupom de 10%', prize_type: 'cupom', prize_value: 10, prize_code: 'LOCAL10', status: 'pendente', color: '#EAB308', textColor: '#FFFFFF', description: 'Incrível! 10% de desconto garantido.' },
 ];
 
 const SEGMENT_COUNT = PRIZES.length;
@@ -206,8 +206,8 @@ export const SpinWheelView: React.FC<SpinWheelViewProps> = ({ userId, userRole, 
       if (!savedSuccessfully && result.prize_type !== 'nao_foi_dessa_vez' && result.prize_type !== 'gire_de_novo') {
         setSpinResult({
           ...result,
-          prize_label: `${result.prize_label} (Garantido)`,
-          description: "Seu prêmio foi garantido! Tivemos um problema para registrar, mas ele será processado em breve. Você pode conferir no seu histórico mais tarde.",
+          prize_label: `${result.prize_label} (Salvo)`,
+          description: "Seu cupom foi registrado! Tivemos um problema de conexão momentâneo, mas ele aparecerá no histórico em breve.",
           saveError: true,
         } as any);
       } else {
@@ -231,9 +231,7 @@ export const SpinWheelView: React.FC<SpinWheelViewProps> = ({ userId, userRole, 
         return;
     }
 
-    if (spinResult.prize_type === 'cashback') {
-        onViewHistory(); 
-    } else if (spinResult.prize_type === 'cupom') {
+    if (spinResult.prize_type === 'cupom') {
         onWin({ label: spinResult.prize_label, code: spinResult.prize_code || 'CODE123', value: spinResult.prize_value?.toString() || '0', description: spinResult.description });
     } else if (spinResult.prize_type === 'gire_de_novo') { 
         setSpinResult(null); 
@@ -271,7 +269,7 @@ export const SpinWheelView: React.FC<SpinWheelViewProps> = ({ userId, userRole, 
         <button onClick={() => setIsMuted(!isMuted)} className="p-2.5 text-gray-400 hover:text-gray-600 bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
           {isMuted ? <VolumeX size={20} /> : <Volume2 size={20} />}
         </button>
-        <h2 className="text-xl font-black text-gray-900 dark:text-white font-display uppercase tracking-tight">Tente a Sorte!</h2>
+        <h2 className="text-xl font-black text-gray-900 dark:text-white font-display uppercase tracking-tight">Roleta de Cupons</h2>
         <button onClick={onViewHistory} className="p-2.5 text-gray-400 hover:text-gray-600 bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
             <History size={20} />
         </button>
@@ -315,7 +313,7 @@ export const SpinWheelView: React.FC<SpinWheelViewProps> = ({ userId, userRole, 
 
         <div className="absolute w-16 h-16 bg-white dark:bg-gray-800 rounded-full border-4 border-gray-100 dark:border-gray-700 shadow-2xl z-20 flex items-center justify-center">
             <div className="w-12 h-12 bg-gradient-to-br from-[#1E5BFF] to-[#0039A6] rounded-full flex items-center justify-center shadow-inner">
-                <Dices className="w-6 h-6 text-white" />
+                <Ticket className="w-6 h-6 text-white" />
             </div>
         </div>
       </div>
@@ -336,7 +334,7 @@ export const SpinWheelView: React.FC<SpinWheelViewProps> = ({ userId, userRole, 
             disabled={isSpinning || spinStatus === 'loading'} 
             className="w-full h-16 bg-gradient-to-r from-[#1E5BFF] to-[#4D7CFF] text-white font-black text-lg rounded-2xl shadow-xl shadow-blue-500/30 active:scale-[0.97] transition-all disabled:opacity-50 disabled:shadow-none flex items-center justify-center gap-3"
           >
-            {isSpinning ? <RefreshCw className="w-6 h-6 animate-spin" /> : 'GIRAR AGORA!'}
+            {isSpinning ? <RefreshCw className="w-6 h-6 animate-spin" /> : 'GIRAR E GANHAR'}
           </button>
         )}
       </div>
@@ -360,7 +358,7 @@ export const SpinWheelView: React.FC<SpinWheelViewProps> = ({ userId, userRole, 
                  onClick={handleClaimReward}
                  className="w-full bg-[#1E5BFF] hover:bg-[#1749CC] text-white font-black py-4 rounded-2xl shadow-xl shadow-blue-500/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
                >
-                 {(spinResult as any).saveError ? 'Entendido' : spinResult.prize_type === 'nao_foi_dessa_vez' ? 'Tentar amanhã' : 'Resgatar Prêmio'}
+                 {(spinResult as any).saveError ? 'Entendido' : spinResult.prize_type === 'nao_foi_dessa_vez' ? 'Tentar amanhã' : 'Ver Cupom'}
                  {!((spinResult as any).saveError) && <ArrowRight className="w-5 h-5" strokeWidth={3} />}
                </button>
            </div>
