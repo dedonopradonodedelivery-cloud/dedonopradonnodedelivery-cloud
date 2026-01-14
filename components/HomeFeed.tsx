@@ -632,32 +632,6 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
           </div>
         );
 
-      case 'cashback_stores':
-        const cashbackList = (sortedStores || []).filter(s => s.cashback && s.cashback > 0);
-        if (cashbackList.length === 0) return null;
-        return (
-          <div key="cashback_stores" className="w-full bg-white dark:bg-gray-950 py-6">
-            <div className="px-5 mb-4"><h2 className="text-lg font-black text-gray-900 dark:text-white tracking-tight leading-none">Cashback no seu bairro</h2><p className="text-xs text-gray-500 dark:text-gray-400 font-medium mt-1.5">Veja onde você recebe cashback em {currentNeighborhood === 'Jacarepaguá (todos)' ? 'Jacarepaguá' : currentNeighborhood}</p></div>
-            <div className="flex gap-3 overflow-x-auto no-scrollbar px-5 pb-6 snap-x">
-              {cashbackList.map((store) => (
-                <button key={store.id} onClick={() => onStoreClick?.(store)} className="snap-center relative w-[140px] h-[190px] rounded-[24px] overflow-hidden group active:scale-[0.98] transition-all flex-shrink-0 shadow-lg">
-                  <img src={store.image || getCategoryCover(store.category)} alt={store.name} className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
-                  <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/60 to-black/95 group-hover:via-black/70 transition-colors"></div>
-                  <div className="absolute inset-0 p-4 flex flex-col justify-between items-start text-left z-10">
-                     <div className="bg-emerald-500/20 backdrop-blur-md border border-emerald-500/30 px-2.5 py-1.5 rounded-xl shadow-sm"><Coins className="w-4 h-4 text-emerald-400 fill-emerald-400/20" /></div>
-                     <div className="w-full">
-                        <div className="flex flex-col mb-3"><span className="text-4xl font-black text-white tracking-tighter leading-none drop-shadow-xl filter">{store.cashback}%</span><span className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest leading-none mt-1">de volta</span></div>
-                        <div className="h-[2px] w-8 bg-white/20 mb-3 rounded-full"></div>
-                        <h4 className="font-bold text-white text-sm leading-tight line-clamp-2 drop-shadow-md mb-1">{store.name}</h4>
-                        {(isAll || store.neighborhood !== currentNeighborhood) && store.neighborhood ? <p className="text-[9px] text-gray-300 font-medium truncate opacity-90 flex items-center gap-1"><MapPin className="w-2.5 h-2.5" />{store.neighborhood}</p> : <p className="text-[9px] text-gray-400 mt-0.5 truncate max-w-full opacity-80 font-medium">{store.category}</p>}
-                     </div>
-                  </div>
-                </button>
-              ))}
-            </div>
-          </div>
-        );
-
       case 'trust_feed': return <CommunityTrustCarousel key="trust_feed" stores={sortedStores} onStoreClick={(s) => onStoreClick && onStoreClick(s)} />;
 
       case 'list':
@@ -690,7 +664,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
     'home_carousel',
     'neighborhood_coupons', // Inserção controlada conforme solicitado
     'weekly_promos',
-    'cashback_stores',
+    // 'cashback_stores', // REMOVE
     'trust_feed',
     'community_feed',
     'roulette',       
