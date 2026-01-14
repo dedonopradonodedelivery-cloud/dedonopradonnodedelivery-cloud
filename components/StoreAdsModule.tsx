@@ -15,7 +15,10 @@ import {
   Star, 
   Zap, 
   Paintbrush, 
-  Image as ImageIcon
+  Image as ImageIcon,
+  Search,
+  User as UserIcon,
+  ChevronDown
 } from 'lucide-react';
 import { MasterSponsorBanner } from './MasterSponsorBanner';
 
@@ -28,6 +31,106 @@ const MOCK_BANNERS = [
   { id: 2, title: 'Oferta Exclusiva', color: 'from-purple-600 to-indigo-800', icon: <Crown className="w-8 h-8 text-white" /> },
   { id: 3, title: 'Destaque no Bairro', color: 'from-emerald-500 to-teal-700', icon: <MapPin className="w-8 h-8 text-white" /> },
 ];
+
+const IPhoneMock = () => {
+  return (
+    <div className="relative mx-auto w-[240px] h-[480px] bg-zinc-900 rounded-[45px] shadow-[0_25px_60px_-15px_rgba(0,0,0,0.5)] border-[6px] border-[#3a3a3a] overflow-hidden ring-1 ring-white/20">
+      {/* Botões Laterais */}
+      <div className="absolute top-24 -left-[8px] w-[2px] h-8 bg-[#2a2a2a] rounded-l-md"></div>
+      <div className="absolute top-36 -left-[8px] w-[2px] h-12 bg-[#2a2a2a] rounded-l-md"></div>
+      <div className="absolute top-28 -right-[8px] w-[2px] h-16 bg-[#2a2a2a] rounded-r-md"></div>
+
+      {/* Tela */}
+      <div className="w-full h-full bg-white relative overflow-hidden flex flex-col">
+        {/* Dynamic Island */}
+        <div className="absolute top-3 left-1/2 -translate-x-1/2 w-20 h-6 bg-black rounded-full z-30"></div>
+        
+        {/* Status Bar Mock */}
+        <div className="w-full h-10 bg-white z-20 flex justify-between px-6 pt-3.5 items-start">
+            <span className="text-[8px] font-bold">9:41</span>
+            <div className="flex gap-1">
+                <div className="w-3 h-1.5 bg-black rounded-sm"></div>
+                <div className="w-0.5 h-1.5 bg-black rounded-sm"></div>
+            </div>
+        </div>
+
+        {/* --- SIMULAÇÃO DA HOME DO APP --- */}
+        
+        {/* Header */}
+        <div className="bg-white px-4 pb-2 border-b border-gray-100">
+            <div className="flex justify-between items-center mb-2">
+                <div className="flex items-center gap-1 bg-[#1E5BFF]/10 px-2 py-1 rounded-full w-fit">
+                    <MapPin className="w-2.5 h-2.5 text-[#1E5BFF]" fill="currentColor" />
+                    <span className="text-[8px] font-bold text-gray-800">Freguesia</span>
+                    <ChevronDown className="w-2.5 h-2.5 text-gray-400" />
+                </div>
+                <div className="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center">
+                    <UserIcon className="w-3 h-3 text-gray-400" />
+                </div>
+            </div>
+            
+            <div className="relative">
+                <div className="absolute left-2.5 top-1/2 -translate-y-1/2">
+                    <Search className="w-3 h-3 text-gray-400" />
+                </div>
+                <div className="w-full bg-gray-100 h-8 rounded-xl flex items-center pl-8 text-[9px] text-gray-400">
+                    Buscar em Jacarepaguá...
+                </div>
+            </div>
+        </div>
+
+        {/* Conteúdo Scrollável */}
+        <div className="flex-1 bg-gray-50 overflow-hidden relative">
+            {/* Categorias */}
+            <div className="flex gap-2 px-3 pt-3 overflow-hidden opacity-50">
+                {[1,2,3,4].map(i => (
+                    <div key={i} className="w-14 h-14 rounded-xl bg-white shadow-sm shrink-0"></div>
+                ))}
+            </div>
+
+            {/* --- O BANNER (DESTAQUE) --- */}
+            <div className="px-3 mt-3 relative z-10">
+                <div className="w-full aspect-[2/1] rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 shadow-lg shadow-blue-500/20 flex flex-col items-center justify-center text-center relative overflow-hidden animate-pulse-slow">
+                    {/* Brilho */}
+                    <div className="absolute top-0 right-0 w-20 h-20 bg-white/20 blur-xl rounded-full -mr-5 -mt-5"></div>
+                    
+                    <div className="relative z-10 p-2">
+                        <div className="bg-white/20 w-8 h-8 rounded-full flex items-center justify-center mx-auto mb-1 backdrop-blur-sm">
+                            <Rocket className="w-4 h-4 text-white" />
+                        </div>
+                        <h3 className="text-white font-black text-sm leading-tight mb-0.5">SUA MARCA AQUI</h3>
+                        <p className="text-[8px] text-blue-100 font-medium">Alcance milhares de vizinhos</p>
+                    </div>
+
+                    <div className="absolute top-2 right-2 bg-white text-black text-[6px] font-bold px-1.5 py-0.5 rounded shadow-sm">
+                        PATROCINADO
+                    </div>
+                </div>
+            </div>
+
+            {/* Listagem Abaixo (Blur) */}
+            <div className="px-3 mt-3 space-y-2 opacity-40 blur-[1px]">
+                <div className="w-full h-16 bg-white rounded-xl"></div>
+                <div className="w-full h-16 bg-white rounded-xl"></div>
+                <div className="w-full h-16 bg-white rounded-xl"></div>
+            </div>
+        </div>
+
+        {/* Bottom Nav Mock */}
+        <div className="h-12 bg-white border-t border-gray-100 flex justify-around items-center px-4">
+            <div className="w-8 h-1 bg-gray-200 rounded-full"></div>
+            <div className="w-8 h-1 bg-gray-200 rounded-full"></div>
+            <div className="w-8 h-8 -mt-6 bg-[#1E5BFF] rounded-full border-4 border-white shadow-sm"></div>
+            <div className="w-8 h-1 bg-gray-200 rounded-full"></div>
+            <div className="w-8 h-1 bg-gray-200 rounded-full"></div>
+        </div>
+
+        {/* Home Indicator */}
+        <div className="absolute bottom-1 left-1/2 -translate-x-1/2 w-24 h-1 bg-black rounded-full"></div>
+      </div>
+    </div>
+  );
+};
 
 const SimulatedCarousel = () => {
   const [current, setCurrent] = useState(0);
@@ -121,14 +224,10 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack }) => {
                 Sua marca no topo de Jacarepaguá, <span className="text-white decoration-4 decoration-yellow-400/50 underline-offset-4">todos os dias.</span>
             </h1>
 
-            {/* --- IMAGEM ILUSTRATIVA (SOLICITADA) --- */}
-            <div className="my-8 flex flex-col items-center animate-in fade-in zoom-in duration-700">
-                <img 
-                    src="https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?q=80&w=400&auto=format&fit=crop" 
-                    alt="Simulação da Home do App" 
-                    className="w-[220px] h-auto rounded-[30px] border-[6px] border-black/20 shadow-2xl"
-                />
-                <p className="text-[10px] text-blue-200 mt-4 font-medium uppercase tracking-widest opacity-80 text-center max-w-xs">
+            {/* --- IPHONE 16 PRO MAX MOCK (OBRIGATÓRIO) --- */}
+            <div className="my-10 animate-in fade-in zoom-in duration-700">
+                <IPhoneMock />
+                <p className="text-[10px] text-blue-200 mt-4 font-medium uppercase tracking-widest opacity-80 text-center max-w-xs mx-auto">
                     Visualização ilustrativa de como sua marca aparece na home do app.
                 </p>
             </div>
@@ -298,7 +397,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack }) => {
         </div>
 
         {/* MASTER SPONSOR BANNER (INSTITUTIONAL) */}
-        <MasterSponsorBanner />
+        <MasterSponsorBanner variant="light" />
 
       </div>
     </div>
