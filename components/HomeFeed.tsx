@@ -30,7 +30,8 @@ import {
   Star,
   Users,
   Search,
-  Wrench
+  Wrench,
+  Ticket // Importado para ícone do novo bloco
 } from 'lucide-react';
 import { LojasEServicosList } from './LojasEServicosList';
 import { User } from '@supabase/supabase-js';
@@ -247,6 +248,56 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void }> = ({ onNavigat
         {/* Click Zones */}
         <div className="absolute inset-y-0 left-0 w-1/6 z-20" onClick={handlePrev}></div>
         <div className="absolute inset-y-0 right-0 w-1/6 z-20" onClick={handleNext}></div>
+      </div>
+    </div>
+  );
+};
+
+// --- NOVO BLOCO: CUPONS DO BAIRRO ---
+const NeighborhoodCouponsBlock: React.FC<{ stores: Store[], onStoreClick: (store: Store) => void }> = ({ stores, onStoreClick }) => {
+  const { currentNeighborhood, isAll } = useNeighborhood();
+
+  const couponStores = useMemo(() => {
+    let list = stores.filter(s => s.cashback && s.cashback > 0);
+    list.sort((a, b) => {
+        if (isAll) return 0;
+        const aIsLocal = (a.neighborhood === currentNeighborhood);
+        const bIsLocal = (b.neighborhood === currentNeighborhood);
+        if (aIsLocal && !bIsLocal) return -1;
+        if (!aIsLocal && bIsLocal) return 1;
+        return 0;
+    });
+    return list;
+  }, [stores, currentNeighborhood, isAll]);
+
+  if (couponStores.length === 0) return null;
+
+  return (
+    <div className="w-full bg-white dark:bg-gray-950 py-4 border-b border-gray-50 dark:border-gray-800">
+      <div className="px-5 mb-3">
+        <h2 className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
+          <Ticket className="w-4 h-4 text-[#1E5BFF]" />
+          Cupons do bairro
+        </h2>
+      </div>
+      <div className="flex gap-3 overflow-x-auto no-scrollbar px-5 pb-2 snap-x">
+        {couponStores.map(store => (
+          <button
+            key={store.id}
+            onClick={() => onStoreClick(store)}
+            className="snap-center flex items-center gap-3 p-3 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 min-w-[200px] active:scale-95 transition-transform"
+          >
+            <div className="w-10 h-10 rounded-lg bg-white dark:bg-gray-700 overflow-hidden shrink-0 shadow-sm">
+               <img src={store.logoUrl || '/assets/default-logo.png'} className="w-full h-full object-contain" alt={store.name} />
+            </div>
+            <div className="text-left min-w-0">
+               <h4 className="font-bold text-gray-900 dark:text-white text-xs truncate">{store.name}</h4>
+               <p className="text-[10px] font-bold text-green-600 dark:text-green-400 mt-0.5">
+                 {store.cashback}% de volta
+               </p>
+            </div>
+          </button>
+        ))}
       </div>
     </div>
   );
@@ -565,6 +616,10 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
       case 'home_carousel':
         return <div key="home_carousel" className="w-full bg-white dark:bg-gray-950 pb-8"><HomeCarousel onNavigate={onNavigate} /></div>;
 
+      // NOVO BLOCO INSERIDO AQUI
+      case 'neighborhood_coupons':
+        return <NeighborhoodCouponsBlock key="neighborhood_coupons" stores={stores} onStoreClick={(s) => onStoreClick && onStoreClick(s)} />;
+
       case 'weekly_promos': return <WeeklyPromosSection key="weekly_promos" onNavigate={onNavigate} />;
 
       case 'community_feed': return <CommunityFeedBlock key="community_feed" onNavigate={onNavigate} />;
@@ -633,6 +688,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
   const homeStructure = useMemo(() => [
     'categories',
     'home_carousel',
+    'neighborhood_coupons', // Inserção controlada conforme solicitado
     'weekly_promos',
     'cashback_stores',
     'trust_feed',

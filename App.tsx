@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { Layout } from './components/Layout';
 import { Header } from './components/Header';
@@ -73,6 +72,13 @@ const App: React.FC = () => {
   const [themeMode, setThemeMode] = useState<ThemeMode>(() => (localStorage.getItem('localizei_theme_mode') as ThemeMode) || 'light');
   const [isDarkMode, setIsDarkMode] = useState(false);
 
+  const toggleTheme = () => {
+    setThemeMode((prev) => {
+      if (prev === 'auto') return isDarkMode ? 'light' : 'dark';
+      return prev === 'dark' ? 'light' : 'dark';
+    });
+  };
+
   const [activeTab, setActiveTab] = useState(() => localStorage.getItem('localizei_active_tab') || 'home');
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
   const [selectedStore, setSelectedStore] = useState<Store | null>(null);
@@ -86,6 +92,9 @@ const App: React.FC = () => {
   const [selectedServiceSub, setSelectedServiceSub] = useState<string | null>(null);
   const [isQuoteModalOpen, setIsQuoteModalOpen] = useState(false);
   const [quoteCategory, setQuoteCategory] = useState('');
+  
+  // Estado para controlar redirecionamento pós-login
+  const [pendingRoute, setPendingRoute] = useState<string | null>(null);
 
   const touchStart = useRef<{ x: number, y: number, target: EventTarget | null } | null>(null);
   const minSwipeDistance = 60;
@@ -133,10 +142,6 @@ const App: React.FC = () => {
     return () => mediaQuery.removeEventListener('change', handleChange);
   }, [themeMode]);
 
-  const toggleTheme = () => {
-    setThemeMode(prev => prev === 'light' ? 'dark' : 'light');
-  };
-
   // --- BLOQUEIOS DE SEGURANÇA E PERMISSÕES ---
   useEffect(() => {
     // Regra 1: Usuário NÃO pode acessar validação
@@ -151,12 +156,27 @@ const App: React.FC = () => {
         setActiveTab('home');
     }
   }, [activeTab, userRole]);
+
+  // --- REDIRECIONAMENTO AUTOMÁTICO PÓS-LOGIN ---
+  useEffect(() => {
+    if (user && pendingRoute === 'cupom') {
+        // Redireciona para a tela correta baseada no perfil
+        if (userRole === 'lojista') {
+            setActiveTab('qrcode_scan');
+        } else {
+            setActiveTab('user_cupom');
+        }
+        setPendingRoute(null); // Limpa o estado pendente
+    }
+  }, [user, userRole, pendingRoute]);
   
   // --- LÓGICA DO BOTÃO "CUPOM" ---
   const handleCupomClick = () => {
     if (!user) {
-      // Visitante: Info + Login
-      setActiveTab('cashback_landing');
+      // Regra 1: Bloqueio Total para Visitante
+      // Armazena intenção e abre login imediatamente
+      setPendingRoute('cupom');
+      setIsAuthOpen(true);
     } else if (userRole === 'lojista') {
       // Lojista: Abrir Scanner para Validar
       setActiveTab('qrcode_scan');
@@ -381,7 +401,17 @@ const App: React.FC = () => {
               {activeTab === 'prize_history' && user && <PrizeHistoryView userId={user.id} onBack={() => setActiveTab('home')} onGoToSpinWheel={() => setActiveTab('home')} />}
               </main>
 
-              <AuthModal isOpen={isAuthOpen} onClose={() => setIsAuthOpen(false)} user={user as any} />
+              <AuthModal 
+                isOpen={isAuthOpen} 
+                onClose={() => {
+                    setIsAuthOpen(false);
+                    // Se cancelou login, remove intenção pendente
+                    setPendingRoute(null);
+                }} 
+                user={user as any}
+                // O redirecionamento real acontece via useEffect quando o user muda
+                onLoginSuccess={() => { setIsAuthOpen(false); }}
+              />
               {isQuoteModalOpen && <QuoteRequestModal isOpen={isQuoteModalOpen} onClose={() => setIsQuoteModalOpen(false)} categoryName={quoteCategory} onSuccess={() => { setIsQuoteModalOpen(false); setActiveTab('service_success'); }} />}
           </Layout>
 

@@ -87,6 +87,9 @@ export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
           fetchUserRole(currentSession.user.id);
         }
       } else if (event === 'SIGNED_OUT') {
+        // Garantia redundante de limpeza via Listener
+        setUser(null);
+        setSession(null);
         setUserRole(null);
       }
       
@@ -101,11 +104,20 @@ export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
   }, []);
 
   const signOut = async () => {
+    // 1. Limpeza Imediata de Estado (Memória)
+    // Isso garante que a UI reaja instantaneamente, removendo o acesso e voltando para "Visitante"
+    setUser(null);
+    setSession(null);
+    setUserRole(null);
+
     try {
+      // 2. Invalidação de Sessão (Backend + LocalStorage do Client)
+      // O Supabase remove o token do localStorage e invalida a sessão no servidor
       await supabase.auth.signOut();
-      // O listener onAuthStateChange cuidará de limpar os estados.
     } catch (error) {
       console.error("Erro ao realizar logout:", error);
+      // Mesmo com erro de rede, o estado local já foi limpo (passo 1), 
+      // impedindo que o usuário continue navegando como logado.
     }
   };
 
