@@ -19,9 +19,9 @@ import {
   Bell,
   QrCode,
   Tag,
-  Rocket,
   Briefcase,
-  ArrowRight
+  ArrowRight,
+  Rocket
 } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import { User } from '@supabase/supabase-js';
@@ -311,6 +311,7 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
                     </div>
                     <h3 className="font-bold text-gray-900 dark:text-white">Cashback da Loja</h3>
                 </div>
+                
                 <button 
                     onClick={() => setIsCashbackEnabled(!isCashbackEnabled)}
                     className={`w-12 h-6 rounded-full p-1 transition-colors duration-300 ${isCashbackEnabled ? 'bg-green-500' : 'bg-gray-300 dark:bg-gray-600'}`}
@@ -327,7 +328,7 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
             </button>
         </div>
 
-        {/* CARD DE DESTAQUE ATUALIZADO */}
+        {/* CARD COMERCIAL ATUALIZADO */}
         <div className="bg-slate-900 rounded-[2.5rem] p-8 shadow-2xl border border-white/10 relative overflow-hidden group">
             <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 rounded-full blur-3xl -mr-10 -mt-10"></div>
             
@@ -336,20 +337,20 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
                     <Rocket className="w-8 h-8 text-[#1E5BFF]" />
                 </div>
                 <div>
-                    <h3 className="font-black text-xl text-white font-display">Destaque sua loja</h3>
-                    <p className="text-[10px] text-blue-400 font-bold uppercase tracking-widest">Seja visto pelos vizinhos</p>
+                    <h3 className="font-black text-xl text-white font-display">Anuncie sua marca no app</h3>
+                    <p className="text-[10px] text-blue-400 font-bold uppercase tracking-widest">Destaque seu negócio</p>
                 </div>
             </div>
 
             <p className="text-sm text-slate-400 mb-8 leading-relaxed font-medium">
-              Apareça primeiro para quem busca seu serviço por apenas <span className="text-white font-bold">R$ 0,99 por dia</span>. Sem letras miúdas, você escolhe o tempo e brilha no bairro.
+              Apareça com destaque para todo o bairro e atraia novos clientes agora mesmo.
             </p>
 
             <button 
               onClick={() => onNavigate && onNavigate('store_ads_module')} 
-              className="w-full bg-[#1E5BFF] hover:bg-blue-500 text-white py-5 rounded-2xl text-sm font-black shadow-xl shadow-blue-500/20 active:scale-[0.98] transition-all flex items-center justify-center gap-3"
+              className="w-full bg-[#1E5BFF] hover:bg-blue-500 text-white py-5 rounded-2xl text-sm font-black shadow-xl shadow-blue-500/20 active:scale-[0.98] transition-all flex items-center justify-center gap-3 uppercase tracking-wider"
             >
-                COMEÇAR AGORA
+                EU QUERO ANUNCIAR
                 <ArrowRight className="w-5 h-5" strokeWidth={3} />
             </button>
         </div>

@@ -34,7 +34,9 @@ import {
   Ticket,
   BadgeCheck,
   Building2,
-  DollarSign
+  DollarSign,
+  Megaphone,
+  Smartphone
 } from 'lucide-react';
 import { LojasEServicosList } from './LojasEServicosList';
 import { User } from '@supabase/supabase-js';
@@ -88,44 +90,61 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void }> = ({ onNavigat
   const [progress, setProgress] = useState(0);
   const { currentNeighborhood } = useNeighborhood();
 
-  const banners: BannerItem[] = useMemo(() => [
-    {
-      id: 'b1-cashback',
-      title: 'Cashback em JPA',
-      subtitle: `Compre no bairro e receba dinheiro de volta na hora.`,
-      target: 'explore', 
-      tag: 'Exclusivo',
-      bgColor: 'bg-[#1E5BFF]',
-      Icon: Coins
-    },
-    {
-      id: 'b2-services',
-      title: 'Serviços & Orçamentos',
-      subtitle: 'Encontre profissionais de JPA pelo WhatsApp.',
-      target: 'services',
-      tag: 'WhatsApp Direto',
-      bgColor: 'bg-emerald-500',
-      Icon: Wrench
-    },
-    {
-      id: 'b3-merchant',
-      title: 'Sua loja no mapa',
-      subtitle: 'Venda mais e atraia novos clientes em Jacarepaguá.',
-      target: 'freguesia_connect_public',
-      tag: 'Para Negócios',
-      bgColor: 'bg-indigo-600',
-      Icon: StoreIcon
-    },
-    {
-      id: 'b4-jobs',
-      title: `Vagas em ${currentNeighborhood === 'Jacarepaguá (todos)' ? 'JPA' : currentNeighborhood}`,
-      subtitle: 'Lojas contratando agora no seu bairro.',
-      target: 'jobs_list',
+  // --- LÓGICA DE EXIBIÇÃO DE BANNERS (LANÇAMENTO) ---
+  const banners: BannerItem[] = useMemo(() => {
+    
+    // 1. BANNER PATROCINADOR MASTER (SEMPRE FIXO NA POSIÇÃO 1)
+    const masterBanner: BannerItem = {
+      id: 'master-sponsor',
+      title: 'Grupo Esquematiza',
+      subtitle: 'Segurança e Facilities com excelência para seu condomínio e empresa.',
+      target: 'patrocinador_master',
+      tag: 'Patrocinador Master',
+      bgColor: 'bg-slate-900', // Identidade Visual Dark Premium
+      Icon: Crown
+    };
+
+    // 2. BANNER INSTITUCIONAL (PREENCHIMENTO)
+    // Este banner só aparece se não houver banners vendidos suficientes
+    const institutionalBanner: BannerItem = {
+      id: 'institutional-ads',
+      title: 'Anuncie aqui',
+      subtitle: 'Aproveite as condições especiais de inauguração.',
+      target: 'store_ads_module', 
       tag: 'Oportunidade',
-      bgColor: 'bg-orange-500',
-      Icon: Briefcase
+      bgColor: 'bg-[#1E5BFF]', // Azul Institucional
+      Icon: Megaphone
+    };
+
+    // 3. LISTA DE BANNERS VENDIDOS
+    const soldBanners: BannerItem[] = [
+       {
+          id: 'rio-phone-store',
+          title: 'Rio Phone Store',
+          subtitle: 'Especialista Apple: iPhone, iPad, Mac e Watch. Técnicos de confiança.',
+          target: 'explore', 
+          tag: 'Assistência Apple',
+          bgColor: 'bg-zinc-900', // Visual limpo e tecnológico
+          Icon: Smartphone
+       }
+    ];
+
+    // --- REGRAS DE COMPOSIÇÃO ---
+    let displayList = [masterBanner];
+
+    if (soldBanners.length > 0) {
+        // Se houver banners vendidos, eles entram logo após o Master.
+        // O banner Institucional NÃO é exibido neste caso (Regra: Remover quando slot for vendido).
+        displayList = [...displayList, ...soldBanners];
+    } else {
+        // Se não houver banners vendidos, exibimos o Institucional para não deixar buraco (Regra: Não exibir espaços vazios).
+        displayList.push(institutionalBanner);
     }
-  ], [currentNeighborhood]);
+
+    // Regra: Limite máximo de 5 banners no carrossel
+    return displayList.slice(0, 5);
+
+  }, [currentNeighborhood]);
 
   useEffect(() => {
     const interval = setInterval(() => {
