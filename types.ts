@@ -1,4 +1,3 @@
-
 import React from 'react';
 
 export type ThemeMode = 'light' | 'dark' | 'auto';
@@ -125,7 +124,7 @@ export interface Job {
   company: string;
   neighborhood: string;
   category: string; 
-  type: 'CLT' | 'PJ' | 'Freelancer' | 'Temporário';
+  type: 'CLT' | 'PJ' | 'Freelancer' | 'Temporário' | 'Estágio';
   salary?: string;
   description: string;
   requirements: string[];

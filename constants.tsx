@@ -44,7 +44,7 @@ export const STORES: Store[] = [
     distance: 'Freguesia • RJ',
     neighborhood: 'Freguesia',
     cashback: 10,
-    adType: AdType.PREMIUM, // Atualizado para aparecer no bloco
+    adType: AdType.PREMIUM,
     address: 'Rua Tirol, 100',
     phone: '(21) 99999-0001',
     hours: 'Seg a Sáb • 09h às 19h',
@@ -67,7 +67,7 @@ export const STORES: Store[] = [
     distance: 'Freguesia • RJ',
     neighborhood: 'Freguesia',
     cashback: 5,
-    adType: AdType.LOCAL, // Atualizado para aparecer no bloco
+    adType: AdType.LOCAL,
     address: 'Estrada dos Três Rios, 500',
     phone: '(21) 99999-0002',
     hours: 'Seg a Dom • 08h às 20h',
@@ -90,7 +90,7 @@ export const STORES: Store[] = [
     distance: 'Freguesia • RJ',
     neighborhood: 'Freguesia',
     cashback: 10,
-    adType: AdType.PREMIUM, // Atualizado para aparecer no bloco
+    adType: AdType.PREMIUM,
     address: 'Rua Geminiano Gois, 300',
     phone: '(21) 99999-0003',
     hours: 'Seg a Sáb • 10h às 20h',
@@ -102,7 +102,7 @@ export const STORES: Store[] = [
   },
   {
     id: 'demo-papelaria',
-    name: 'Papelaria',
+    name: 'Papelaria & Co.',
     category: 'Serviços',
     subcategory: 'Papelaria',
     description: 'Material escolar, escritório e presentes.',
@@ -124,54 +124,30 @@ export const STORES: Store[] = [
     tags: ['papelaria', 'material', 'escritorio']
   },
   {
-    id: 'demo-hortifruti',
-    name: 'Hortifruti',
-    category: 'Mercado',
-    subcategory: 'Hortifruti',
-    description: 'Frutas, legumes e verduras fresquinhos.',
-    logoUrl: getStoreLogo(205),
-    image: 'https://images.unsplash.com/photo-1610832958506-aa56368176cf?q=80&w=800&auto=format&fit=crop',
-    rating: 4.8,
-    reviewsCount: 110,
-    distance: 'Freguesia • RJ',
-    neighborhood: 'Freguesia',
-    cashback: 5,
-    adType: AdType.LOCAL,
-    address: 'Estrada do Bananal, 150',
-    phone: '(21) 99999-0005',
-    hours: 'Seg a Dom • 07h às 21h',
-    verified: true,
-    isOpenNow: true,
-    // @ts-ignore
-    status: 'active',
-    tags: ['mercado', 'frutas', 'verduras']
-  },
-  {
-    id: 'demo-floricultura',
-    name: 'Floricultura',
-    category: 'Casa',
-    subcategory: 'Flores',
-    description: 'Arranjos, buquês e plantas ornamentais.',
-    logoUrl: getStoreLogo(206),
-    image: 'https://images.unsplash.com/photo-1563241527-3004b7be025e?q=80&w=800&auto=format&fit=crop',
+    id: 'demo-tech-fix',
+    name: 'Tech Fix Freguesia',
+    category: 'Serviços',
+    subcategory: 'Assistência Técnica',
+    description: 'Conserto de celulares, notebooks e tablets na hora.',
+    logoUrl: getStoreLogo(207),
+    image: 'https://images.unsplash.com/photo-1597872250449-66ca64d2558a?q=80&w=800&auto=format&fit=crop',
     rating: 4.9,
-    reviewsCount: 75,
+    reviewsCount: 215,
     distance: 'Freguesia • RJ',
     neighborhood: 'Freguesia',
-    cashback: 10,
-    adType: AdType.ORGANIC,
-    address: 'Rua Tirol, 400',
-    phone: '(21) 99999-0006',
-    hours: 'Seg a Sáb • 08h às 19h',
+    cashback: 0,
+    adType: AdType.PREMIUM, // Premium para aparecer no bloco
+    address: 'Estrada dos Três Rios, 200 - Shopping',
+    phone: '(21) 98888-7777',
+    hours: 'Seg a Sáb • 10h às 22h',
     verified: true,
     isOpenNow: true,
     // @ts-ignore
     status: 'active',
-    tags: ['flores', 'plantas', 'presente']
+    tags: ['celular', 'conserto', 'notebook']
   }
 ];
 
-// Fix: Added missing STORIES export for StatusView
 export const STORIES: Story[] = [
   { id: '1', name: 'Moda Feminina', image: 'https://images.unsplash.com/photo-1483985988355-763728e1935b?q=80&w=200&auto=format&fit=crop' },
   { id: '2', name: 'Ana Paula', image: 'https://i.pravatar.cc/150?u=a' },
@@ -192,7 +168,41 @@ export const MOCK_JOBS: Job[] = [
     schedule: '14h às 22h (Escala 6x1)',
     contactWhatsapp: '5521999999999',
     postedAt: 'Hoje',
-    isUrgent: true
+    isUrgent: true,
+    isSponsored: true,
+    sponsoredUntil: '2099-12-31'
+  },
+  {
+    id: 'job-2',
+    role: 'Vendedor(a) de Loja',
+    company: 'Moda Feminina Store',
+    neighborhood: 'Freguesia',
+    category: 'Vendas',
+    type: 'CLT',
+    salary: 'R$ 1.800,00 + Comissão',
+    description: 'Vaga para vendedor com experiência em moda feminina. Foco em resultados e bom atendimento.',
+    requirements: ['Experiência em vendas', 'Gostar de moda', 'Proatividade'],
+    schedule: 'Horário de Shopping',
+    contactWhatsapp: '5521999998888',
+    postedAt: 'Ontem',
+    isUrgent: false,
+    isSponsored: true,
+    sponsoredUntil: '2099-12-31'
+  },
+  {
+    id: 'job-3',
+    role: 'Estágio em Marketing',
+    company: 'Agência Criativa',
+    neighborhood: 'Taquara',
+    category: 'Marketing',
+    type: 'Estágio',
+    salary: 'R$ 1.200,00',
+    description: 'Auxiliar na criação de conteúdo para redes sociais e gestão de tráfego.',
+    requirements: ['Cursando Marketing ou Publicidade', 'Noções de Canva/Photoshop'],
+    schedule: '6h diárias (Flexível)',
+    contactWhatsapp: '5521999997777',
+    postedAt: '2 dias atrás',
+    isUrgent: false
   }
 ];
 
@@ -233,7 +243,6 @@ export const SUBCATEGORIES: Record<string, { name: string; icon: React.ReactNode
   ]
 };
 
-// Fix: Added missing quickFilters export for ExploreView
 export const quickFilters = [
   { id: 'nearby', label: 'Perto de mim', icon: 'zap' },
   { id: 'top_rated', label: 'Melhores avaliados', icon: 'star' },

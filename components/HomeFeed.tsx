@@ -299,22 +299,27 @@ const NeighborhoodCouponsBlock: React.FC<{ stores: Store[], onStoreClick: (store
   );
 };
 
-// --- NOVO BLOCO: VAGAS EM DESTAQUE (PREMIUM JOB ADS ONLY) ---
+// --- NOVO BLOCO: VAGAS EM DESTAQUE (GARANTIDO) ---
 const FeaturedJobsBlock: React.FC<{ onNavigate: (view: string) => void }> = ({ onNavigate }) => {
   const { currentNeighborhood, isAll } = useNeighborhood();
 
-  // Filtra apenas vagas PREMIUM ativas
-  const premiumJobs = useMemo(() => {
-    const today = new Date().toISOString().split('T')[0];
+  const jobsList = useMemo(() => {
+    // 1. Filtrar por Bairro
+    let filtered = MOCK_JOBS.filter(job => isAll || job.neighborhood === currentNeighborhood);
     
-    return MOCK_JOBS.filter(job => 
-      job.isSponsored === true && 
-      (job.sponsoredUntil && job.sponsoredUntil >= today) &&
-      (isAll || job.neighborhood === currentNeighborhood)
-    );
+    // 2. Ordenar: Patrocinadas/Urgentes primeiro
+    filtered.sort((a, b) => {
+        if (a.isSponsored && !b.isSponsored) return -1;
+        if (!a.isSponsored && b.isSponsored) return 1;
+        if (a.isUrgent && !b.isUrgent) return -1;
+        if (!a.isUrgent && b.isUrgent) return 1;
+        return 0;
+    });
+
+    return filtered.slice(0, 5); // Max 5 no carrossel
   }, [currentNeighborhood, isAll]);
 
-  if (premiumJobs.length === 0) return null;
+  if (jobsList.length === 0) return null;
 
   return (
     <div className="w-full bg-white dark:bg-gray-950 py-6 border-t border-gray-50 dark:border-gray-800">
@@ -327,7 +332,7 @@ const FeaturedJobsBlock: React.FC<{ onNavigate: (view: string) => void }> = ({ o
             </h2>
           </div>
           <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">
-            Oportunidades exclusivas perto de você
+            Oportunidades de emprego perto de você
           </p>
         </div>
         <button onClick={() => onNavigate('jobs_list')} className="text-[10px] font-bold text-[#1E5BFF] hover:underline">
@@ -336,15 +341,15 @@ const FeaturedJobsBlock: React.FC<{ onNavigate: (view: string) => void }> = ({ o
       </div>
 
       <div className="flex gap-3 overflow-x-auto no-scrollbar px-5 pb-4 snap-x">
-        {premiumJobs.map(job => (
+        {jobsList.map(job => (
           <button
             key={job.id}
             onClick={() => onNavigate('jobs_list')}
             className="snap-center min-w-[240px] max-w-[240px] bg-gradient-to-br from-white to-orange-50 dark:from-gray-900 dark:to-gray-800 rounded-2xl p-4 shadow-sm border border-orange-100 dark:border-gray-700 flex flex-col text-left group active:scale-[0.98] transition-all relative overflow-hidden"
           >
-            {job.isUrgent && (
+            {(job.isUrgent || job.isSponsored) && (
                 <div className="absolute top-0 right-0 bg-red-500 text-white text-[8px] font-black px-2 py-1 rounded-bl-xl uppercase tracking-wider">
-                    Urgente
+                    {job.isSponsored ? 'Patrocinada' : 'Urgente'}
                 </div>
             )}
             
@@ -384,31 +389,33 @@ const FeaturedJobsBlock: React.FC<{ onNavigate: (view: string) => void }> = ({ o
   );
 };
 
-// --- BLOCO: SERVIÇOS EM DESTAQUE (PREMIUM ADS ONLY) ---
+// --- BLOCO: SERVIÇOS EM DESTAQUE (GARANTIDO) ---
 const FeaturedServicesBlock: React.FC<{ stores: Store[], onStoreClick: (store: Store) => void }> = ({ stores, onStoreClick }) => {
   const { currentNeighborhood, isAll } = useNeighborhood();
 
-  // Filtra apenas serviços PREMIUM ativos
-  // Se for uma lista vazia, o componente não renderiza
-  const premiumServices = useMemo(() => {
+  const serviceStores = useMemo(() => {
+    // 1. Filtrar Categoria Serviços e Status Ativo
     let list = stores.filter(s => 
       s.category === 'Serviços' && 
-      s.adType === AdType.PREMIUM && 
-      (s as any).status === 'active' // Garante que apenas ativos apareçam
+      (s as any).status === 'active'
     );
 
-    // Ordenação básica por rating, mas mantendo a lógica de Premium no topo
-    list.sort((a, b) => b.rating - a.rating);
+    // 2. Ordenação Híbrida: Premium > Rating > Outros
+    list.sort((a, b) => {
+        if (a.adType === AdType.PREMIUM && b.adType !== AdType.PREMIUM) return -1;
+        if (a.adType !== AdType.PREMIUM && b.adType === AdType.PREMIUM) return 1;
+        return b.rating - a.rating;
+    });
     
-    // Filtro geográfico se necessário
+    // 3. Filtro Geográfico
     if (!isAll) {
        list = list.filter(s => s.neighborhood === currentNeighborhood);
     }
 
-    return list;
+    return list.slice(0, 6); // Limite
   }, [stores, currentNeighborhood, isAll]);
 
-  if (premiumServices.length === 0) return null;
+  if (serviceStores.length === 0) return null;
 
   return (
     <div className="w-full bg-white dark:bg-gray-950 py-6 border-t border-gray-50 dark:border-gray-800">
@@ -417,24 +424,26 @@ const FeaturedServicesBlock: React.FC<{ stores: Store[], onStoreClick: (store: S
           <div className="flex items-center gap-2 mb-1">
             <BadgeCheck className="w-4 h-4 text-amber-500 fill-amber-500/20" />
             <h2 className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-wider">
-              Serviços em Destaque
+              Serviços Recomendados
             </h2>
           </div>
           <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">
-            Profissionais verificados e recomendados
+            Profissionais verificados e bem avaliados
           </p>
         </div>
       </div>
 
       <div className="flex gap-4 overflow-x-auto no-scrollbar px-5 pb-4 snap-x">
-        {premiumServices.map(service => (
+        {serviceStores.map(service => (
           <button
             key={service.id}
             onClick={() => onStoreClick(service)}
             className="snap-center min-w-[200px] max-w-[200px] bg-white dark:bg-gray-900 rounded-[24px] shadow-lg shadow-gray-200/50 dark:shadow-none border border-gray-100 dark:border-gray-800 p-1.5 flex flex-col group active:scale-[0.98] transition-all relative overflow-hidden"
           >
-            {/* Faixa Premium Decorativa */}
-            <div className="absolute top-0 right-0 w-16 h-16 bg-gradient-to-bl from-amber-400/20 to-transparent rounded-tr-[24px] pointer-events-none"></div>
+            {/* Faixa Premium Decorativa (apenas se for premium) */}
+            {service.adType === AdType.PREMIUM && (
+                <div className="absolute top-0 right-0 w-16 h-16 bg-gradient-to-bl from-amber-400/20 to-transparent rounded-tr-[24px] pointer-events-none"></div>
+            )}
 
             <div className="h-28 w-full rounded-[20px] overflow-hidden relative bg-gray-100 dark:bg-gray-800">
                <img 
@@ -445,10 +454,12 @@ const FeaturedServicesBlock: React.FC<{ stores: Store[], onStoreClick: (store: S
                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
                
                {/* Selo Destaque */}
-               <div className="absolute top-2 right-2 bg-amber-400 text-white text-[8px] font-black px-2 py-0.5 rounded shadow-sm border border-amber-300 uppercase tracking-wider flex items-center gap-1">
-                  <Crown className="w-2 h-2 fill-white" />
-                  Premium
-               </div>
+               {service.adType === AdType.PREMIUM && (
+                   <div className="absolute top-2 right-2 bg-amber-400 text-white text-[8px] font-black px-2 py-0.5 rounded shadow-sm border border-amber-300 uppercase tracking-wider flex items-center gap-1">
+                      <Crown className="w-2 h-2 fill-white" />
+                      Premium
+                   </div>
+               )}
 
                <div className="absolute bottom-2 left-3 text-white">
                   <div className="flex items-center gap-1 text-[10px] font-bold bg-black/40 backdrop-blur-md px-1.5 py-0.5 rounded-md border border-white/10 w-fit">
