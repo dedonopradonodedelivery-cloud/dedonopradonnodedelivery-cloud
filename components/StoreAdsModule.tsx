@@ -24,14 +24,18 @@ import {
   Lightbulb,
   ShieldAlert,
   Settings2,
-  MousePointer2
+  MousePointer2,
+  Crown,
+  Instagram,
+  MessageCircle,
+  CalendarCheck
 } from 'lucide-react';
 
 interface StoreAdsModuleProps {
   onBack: () => void;
 }
 
-type ViewState = 'list' | 'create' | 'summary' | 'success';
+type ViewState = 'list' | 'create' | 'summary' | 'success' | 'master_details';
 
 const BUDGET_LEVELS = [
   { value: 0.99, label: "Presença", reach: "80 a 150", desc: "Sua loja entra na lista de destaques rotativos do bairro.", icon: Zap },
@@ -87,8 +91,16 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack }) => {
     }, 2000);
   };
 
+  const handleContactMaster = () => {
+    const text = "Olá! Tenho interesse no pacote Patrocinador Master do Localizei JPA. Gostaria de verificar a disponibilidade.";
+    const url = `https://wa.me/5521999999999?text=${encodeURIComponent(text)}`;
+    window.open(url, '_blank');
+  };
+
   const ListView = () => (
     <div className="flex-1 flex flex-col bg-slate-950 p-5 space-y-8">
+      
+      {/* HEADER DESTAQUE */}
       <div className="bg-gradient-to-br from-[#1E5BFF] to-indigo-900 rounded-[32px] p-8 text-white shadow-2xl relative overflow-hidden">
         <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none"></div>
         <div className="relative z-10">
@@ -111,6 +123,39 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack }) => {
         </div>
       </div>
 
+      {/* CARD PATROCINADOR MASTER */}
+      <div 
+        onClick={() => setView('master_details')}
+        className="bg-gradient-to-r from-slate-900 to-slate-800 p-1 rounded-[32px] cursor-pointer active:scale-[0.98] transition-transform shadow-xl relative group"
+      >
+        <div className="absolute inset-0 bg-gradient-to-r from-amber-500/20 to-transparent rounded-[32px] animate-pulse"></div>
+        <div className="bg-slate-950 rounded-[28px] p-6 relative z-10 border border-amber-500/30">
+            <div className="flex justify-between items-start mb-4">
+                <div className="flex items-center gap-2 bg-amber-500/10 px-3 py-1.5 rounded-lg border border-amber-500/20">
+                    <Crown className="w-4 h-4 text-amber-500 fill-amber-500" />
+                    <span className="text-[10px] font-black text-amber-500 uppercase tracking-widest">Master</span>
+                </div>
+                <span className="text-[9px] font-bold text-slate-500 bg-slate-900 px-2 py-1 rounded border border-slate-800">1 VAGA/MÊS</span>
+            </div>
+            
+            <h3 className="text-xl font-black text-white font-display mb-2">Domine o App e o Insta</h3>
+            <p className="text-xs text-slate-400 leading-relaxed mb-6">
+                O pacote mais completo de visibilidade. Banner fixo no app + Collabs no Instagram.
+            </p>
+
+            <div className="flex items-center justify-between">
+                <div>
+                    <span className="text-[10px] text-slate-500 line-through font-bold">R$ 4.000</span>
+                    <p className="text-lg font-black text-white">R$ 2.500<span className="text-xs font-normal text-slate-500">/mês</span></p>
+                </div>
+                <div className="w-10 h-10 rounded-full bg-amber-500 flex items-center justify-center text-slate-950 shadow-lg shadow-amber-500/20 group-hover:scale-110 transition-transform">
+                    <ArrowRight className="w-5 h-5" strokeWidth={3} />
+                </div>
+            </div>
+        </div>
+      </div>
+
+      {/* CAMPANHAS ATIVAS */}
       <div className="space-y-4">
         <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.25em] ml-1">Campanhas em andamento</h3>
         {campaigns.map((c) => (
@@ -147,18 +192,125 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack }) => {
           </div>
         ))}
       </div>
+    </div>
+  );
 
-      <div className="bg-indigo-950/30 border border-indigo-500/20 rounded-[2rem] p-6 flex flex-col gap-4">
-        <div className="flex items-center gap-3">
-          <div className="p-2 bg-indigo-500/20 rounded-lg">
-            <Lightbulb className="w-4 h-4 text-indigo-400" />
-          </div>
-          <h4 className="text-xs font-black text-white uppercase tracking-wider">Transparência Localizei</h4>
+  const MasterDetailsView = () => (
+    <div className="flex-1 flex flex-col bg-slate-950 min-h-screen relative overflow-hidden">
+        {/* Background Effects */}
+        <div className="absolute top-0 inset-x-0 h-96 bg-gradient-to-b from-amber-900/20 to-slate-950 pointer-events-none"></div>
+        <div className="absolute top-20 right-[-100px] w-64 h-64 bg-amber-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+        {/* Header */}
+        <div className="p-5 flex items-center gap-4 border-b border-white/5 sticky top-0 bg-slate-950/80 backdrop-blur-md z-20 h-20">
+            <button onClick={() => setView('list')} className="p-2 -ml-2 rounded-full hover:bg-white/5 transition-colors">
+                <ChevronLeft className="w-6 h-6 text-gray-400" />
+            </button>
+            <h2 className="font-bold text-lg text-white font-display flex items-center gap-2">
+                Patrocinador Master <Crown className="w-4 h-4 text-amber-500 fill-amber-500" />
+            </h2>
         </div>
-        <p className="text-[11px] text-indigo-200/70 leading-relaxed">
-          O destaque coloca sua loja no topo das buscas do bairro. O alcance real varia conforme a quantidade de vizinhos procurando pelo seu serviço a cada dia.
-        </p>
-      </div>
+
+        <div className="p-6 pb-32 overflow-y-auto no-scrollbar space-y-8 relative z-10">
+            
+            {/* Intro */}
+            <div className="text-center">
+                <span className="inline-block px-3 py-1 rounded-full bg-amber-500/10 text-amber-500 border border-amber-500/20 text-[10px] font-black uppercase tracking-[0.2em] mb-4">
+                    OFERTA EXCLUSIVA
+                </span>
+                <h1 className="text-3xl font-black text-white leading-tight mb-4">
+                    Domine a Freguesia <br/> <span className="text-amber-500">dentro e fora do App</span>
+                </h1>
+                <p className="text-sm text-slate-400 leading-relaxed max-w-xs mx-auto">
+                    Apenas 1 marca por vez. Visibilidade máxima para consolidar sua autoridade no bairro.
+                </p>
+            </div>
+
+            {/* Pricing Card */}
+            <div className="bg-slate-900 rounded-[2.5rem] p-8 border border-amber-500/20 shadow-2xl relative overflow-hidden text-center">
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 bg-amber-500 text-slate-950 text-[10px] font-black px-4 py-1.5 rounded-b-xl uppercase tracking-widest shadow-lg">
+                    Valor Promocional
+                </div>
+                <div className="mt-4">
+                    <p className="text-sm text-slate-500 line-through font-bold mb-1">R$ 4.000/mês</p>
+                    <p className="text-5xl font-black text-white tracking-tighter">R$ 2.500</p>
+                    <p className="text-xs text-amber-500 font-bold uppercase tracking-widest mt-2">Mensais / Plano Trimestral</p>
+                </div>
+            </div>
+
+            {/* Deliverables List */}
+            <div className="space-y-4">
+                <h3 className="text-xs font-black text-slate-500 uppercase tracking-[0.2em] ml-2">Entregas do Pacote</h3>
+                
+                <div className="bg-slate-900/50 p-5 rounded-3xl border border-white/5 flex gap-4 items-center">
+                    <div className="w-12 h-12 rounded-2xl bg-blue-500/10 flex items-center justify-center shrink-0">
+                        <Rocket className="w-6 h-6 text-blue-500" />
+                    </div>
+                    <div>
+                        <h4 className="font-bold text-white text-sm">Destaque Institucional no App</h4>
+                        <p className="text-xs text-slate-400 mt-0.5">Sua marca na tela inicial e menus principais.</p>
+                    </div>
+                </div>
+
+                <div className="bg-slate-900/50 p-5 rounded-3xl border border-white/5 flex gap-4 items-center">
+                    <div className="w-12 h-12 rounded-2xl bg-pink-500/10 flex items-center justify-center shrink-0">
+                        <Instagram className="w-6 h-6 text-pink-500" />
+                    </div>
+                    <div>
+                        <h4 className="font-bold text-white text-sm">4 Posts no Feed (Collab)</h4>
+                        <p className="text-xs text-slate-400 mt-0.5">Conteúdo compartilhado no Instagram oficial.</p>
+                    </div>
+                </div>
+
+                <div className="bg-slate-900/50 p-5 rounded-3xl border border-white/5 flex gap-4 items-center">
+                    <div className="w-12 h-12 rounded-2xl bg-purple-500/10 flex items-center justify-center shrink-0">
+                        <Zap className="w-6 h-6 text-purple-500" />
+                    </div>
+                    <div>
+                        <h4 className="font-bold text-white text-sm">2 Stories Semanais</h4>
+                        <p className="text-xs text-slate-400 mt-0.5">Frequência constante para engajar.</p>
+                    </div>
+                </div>
+
+                <div className="bg-slate-900/50 p-5 rounded-3xl border border-white/5 flex gap-4 items-center">
+                    <div className="w-12 h-12 rounded-2xl bg-amber-500/10 flex items-center justify-center shrink-0">
+                        <Star className="w-6 h-6 text-amber-500" />
+                    </div>
+                    <div>
+                        <h4 className="font-bold text-white text-sm">Destaque nos Highlights</h4>
+                        <p className="text-xs text-slate-400 mt-0.5">Fixado no perfil do Instagram.</p>
+                    </div>
+                </div>
+            </div>
+
+            {/* Conditions */}
+            <div className="bg-slate-900 p-6 rounded-3xl border border-white/5 space-y-3">
+                <div className="flex items-center gap-3">
+                    <CalendarCheck className="w-4 h-4 text-slate-400" />
+                    <p className="text-xs text-slate-400 font-medium">Contrato mínimo de 3 meses.</p>
+                </div>
+                <div className="flex items-center gap-3">
+                    <ShieldCheck className="w-4 h-4 text-slate-400" />
+                    <p className="text-xs text-slate-400 font-medium">Pagamento antecipado (PIX/Boleto).</p>
+                </div>
+                <div className="flex items-center gap-3">
+                    <Crown className="w-4 h-4 text-slate-400" />
+                    <p className="text-xs text-slate-400 font-medium">Apenas 1 vaga disponível por período.</p>
+                </div>
+            </div>
+
+        </div>
+
+        {/* Footer CTA */}
+        <div className="fixed bottom-0 left-0 right-0 p-6 bg-slate-950 border-t border-white/10 z-50">
+            <button 
+                onClick={handleContactMaster}
+                className="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-black py-4 rounded-2xl shadow-xl shadow-amber-500/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2 uppercase tracking-wider text-sm"
+            >
+                <MessageCircle className="w-5 h-5" />
+                Tenho Interesse
+            </button>
+        </div>
     </div>
   );
 
@@ -409,6 +561,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack }) => {
       {view === 'create' && <CreateView />}
       {view === 'summary' && <SummaryView />}
       {view === 'success' && <SuccessView />}
+      {view === 'master_details' && <MasterDetailsView />}
     </div>
   );
 };
