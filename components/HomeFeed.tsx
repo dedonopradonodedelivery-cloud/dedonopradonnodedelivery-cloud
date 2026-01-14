@@ -253,7 +253,7 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void }> = ({ onNavigat
   );
 };
 
-// --- NOVO BLOCO: VANTAGENS ATIVAS NO BAIRRO (Layout Melhorado) ---
+// --- BLOCO REESTILIZADO: CASHBACK ATIVO NO BAIRRO ---
 const NeighborhoodCouponsBlock: React.FC<{ stores: Store[], onStoreClick: (store: Store) => void }> = ({ stores, onStoreClick }) => {
   const { currentNeighborhood, isAll } = useNeighborhood();
 
@@ -277,10 +277,10 @@ const NeighborhoodCouponsBlock: React.FC<{ stores: Store[], onStoreClick: (store
       <div className="px-5 mb-4 flex items-center justify-between">
         <div>
           <h2 className="text-base font-black text-gray-900 dark:text-white tracking-tight leading-none flex items-center gap-2">
-            <Ticket className="w-5 h-5 text-[#1E5BFF] -rotate-12" />
-            Vantagens Ativas no Bairro
+            <Coins className="w-5 h-5 text-emerald-500" />
+            Cupons Ativos no Bairro
           </h2>
-          <p className="text-xs text-gray-500 font-medium mt-1">Oportunidades exclusivas perto de você</p>
+          <p className="text-xs text-gray-500 font-medium mt-1">Economize agora nas lojas perto de você</p>
         </div>
       </div>
       <div className="flex gap-3 overflow-x-auto no-scrollbar px-5 pb-2 snap-x">
@@ -288,20 +288,20 @@ const NeighborhoodCouponsBlock: React.FC<{ stores: Store[], onStoreClick: (store
           <button
             key={store.id}
             onClick={() => onStoreClick(store)}
-            className="snap-center min-w-[240px] bg-white dark:bg-gray-900 p-3 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-lg shadow-gray-100/50 dark:shadow-none flex items-center gap-3 group active:scale-95 transition-all hover:border-[#1E5BFF]/30"
+            className="snap-center min-w-[140px] flex flex-col items-center bg-white dark:bg-gray-900 p-3 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm hover:shadow-md transition-all group active:scale-95"
           >
-            <div className="w-12 h-12 rounded-xl bg-gray-50 dark:bg-gray-800 flex items-center justify-center p-1 border border-gray-100 dark:border-gray-700 relative shrink-0">
-               <img src={store.logoUrl || '/assets/default-logo.png'} className="w-full h-full object-contain" alt={store.name} />
-               {/* Status Indicator */}
-               <div className="absolute -bottom-1 -right-1 bg-green-500 w-3 h-3 rounded-full border-2 border-white dark:border-gray-900 shadow-sm"></div>
-            </div>
-            <div className="flex-1 text-left min-w-0">
-               <h4 className="font-bold text-gray-900 dark:text-white text-sm truncate leading-tight group-hover:text-[#1E5BFF] transition-colors">{store.name}</h4>
-               <p className="text-[10px] text-gray-400 dark:text-gray-500 truncate font-medium mt-0.5">{store.category} • {store.neighborhood}</p>
-               <div className="mt-1.5 inline-flex items-center gap-1.5 bg-[#1E5BFF]/10 px-2 py-0.5 rounded-md border border-[#1E5BFF]/20">
-                 <Zap className="w-2.5 h-2.5 text-[#1E5BFF] fill-[#1E5BFF]" />
-                 <span className="text-[10px] font-black text-[#1E5BFF] tracking-tight">{store.cashback}% Vantagem</span>
+            <div className="w-14 h-14 rounded-full bg-gray-50 dark:bg-gray-800 flex items-center justify-center p-1 border border-gray-100 dark:border-gray-700 shrink-0 mb-3 relative">
+               <img src={store.logoUrl || '/assets/default-logo.png'} className="w-full h-full object-contain rounded-full" alt={store.name} />
+               <div className="absolute -bottom-1 -right-1 bg-emerald-500 text-white text-[9px] font-black px-1.5 py-0.5 rounded-full border-2 border-white dark:border-gray-900 shadow-sm">
+                 {store.cashback}%
                </div>
+            </div>
+            
+            <h4 className="font-bold text-gray-900 dark:text-white text-xs text-center truncate w-full leading-tight">{store.name}</h4>
+            <p className="text-[9px] text-gray-400 dark:text-gray-500 font-medium mt-0.5 mb-2 truncate w-full text-center">{store.category}</p>
+            
+            <div className="w-full bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 text-[10px] font-bold py-1.5 rounded-lg text-center border border-emerald-100 dark:border-emerald-800/50">
+               Ganhe {store.cashback}%
             </div>
           </button>
         ))}
@@ -484,9 +484,9 @@ const CommunityFeedBlock: React.FC<{ onNavigate: (view: string) => void; }> = ({
         <div className="flex justify-between items-center">
             <div>
                 <h2 className="text-lg font-black text-gray-900 dark:text-white tracking-tight leading-none flex items-center gap-2">
-                    Novidades dos bairros <div className="px-2 py-0.5 bg-red-100 text-red-600 text-[9px] font-bold rounded-full uppercase tracking-wide">Ao Vivo</div>
+                    O que está bombando no bairro agora <div className="px-2 py-0.5 bg-red-100 text-red-600 text-[9px] font-bold rounded-full uppercase tracking-wide">Ao Vivo</div>
                 </h2>
-                <p className="text-xs text-gray-500 dark:text-gray-400 font-medium mt-1.5">O que está acontecendo agora em Jacarepaguá</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 font-medium mt-1.5">Atividade real acontecendo perto de você</p>
             </div>
             <button onClick={() => onNavigate('community_feed')} className="text-xs font-bold text-[#1E5BFF] hover:underline">Ver tudo</button>
         </div>
@@ -623,7 +623,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
       case 'home_carousel':
         return <div key="home_carousel" className="w-full bg-white dark:bg-gray-950 pb-8"><HomeCarousel onNavigate={onNavigate} /></div>;
 
-      // BLOCO ATUALIZADO: VANTAGENS ATIVAS NO BAIRRO
+      // BLOCO ATUALIZADO: CUPONS ATIVOS NO BAIRRO
       case 'neighborhood_coupons':
         return <NeighborhoodCouponsBlock key="neighborhood_coupons" stores={stores} onStoreClick={(s) => onStoreClick && onStoreClick(s)} />;
 

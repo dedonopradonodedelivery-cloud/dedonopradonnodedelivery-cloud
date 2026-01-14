@@ -208,20 +208,19 @@ export const LojasEServicosList: React.FC<LojasEServicosListProps> = ({ onStoreC
           </button>
         </div>
         
-        {/* Lista de Lojas normais com variação sutil de zebra-striping */}
+        {/* Lista de Lojas - Fundo Branco Uniforme (Sem Zebra) */}
         {visibleStores.map((store, index) => {
             const isLastElement = index === visibleStores.length - 1;
             const isFavorited = isFavorite(store.id);
             const isSponsored = store.isSponsored || store.adType === AdType.PREMIUM;
             const { copy } = getStoreExtras(index, store);
-            const isAlternate = index % 2 !== 0;
 
             return (
                 <div
                     key={store.id}
                     ref={isLastElement ? lastStoreElementRef : null}
                     onClick={() => onStoreClick && onStoreClick(store)}
-                    className={`rounded-2xl p-3 flex gap-3 cursor-pointer relative group transition-all duration-300 shadow-[0_2px_8px_rgba(0,0,0,0.03)] hover:shadow-[0_8px_20px_rgba(0,0,0,0.06)] active:scale-[0.99] border ${isSponsored ? 'border-[#1E5BFF]/30 bg-white dark:bg-gray-800' : isAlternate ? 'bg-gray-50/50 dark:bg-gray-800/40 border-gray-100/50 dark:border-gray-700/30' : 'bg-white dark:bg-gray-800 border-transparent'}`}
+                    className={`rounded-2xl p-3 flex gap-3 cursor-pointer relative group transition-all duration-300 shadow-[0_2px_8px_rgba(0,0,0,0.03)] hover:shadow-[0_8px_20px_rgba(0,0,0,0.06)] active:scale-[0.99] border ${isSponsored ? 'border-[#1E5BFF]/30 bg-white dark:bg-gray-800' : 'bg-white dark:bg-gray-800 border-transparent'}`}
                 >
                     {isSponsored && (
                       <div className="absolute top-0 right-4 -translate-y-1/2 z-10 pointer-events-none flex flex-col items-end gap-1">
