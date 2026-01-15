@@ -51,7 +51,13 @@ import {
   Globe2,
   Mic,
   Building2,
-  Info
+  Info,
+  Scale,
+  Megaphone,
+  Image as ImageIcon,
+  Flame,
+  Milestone,
+  History
 } from 'lucide-react';
 import { User as SupabaseUser } from '@supabase/supabase-js';
 
@@ -423,6 +429,447 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ user, onLogout, viewMode
            </div>
         </section>
 
+        {/* --- INVESTIMENTO MÍNIMO RECOMENDADO (CENÁRIO 1) --- */}
+        <section className="pt-8">
+           <div className="bg-white rounded-[2.5rem] border border-slate-200 p-10 shadow-sm relative overflow-hidden">
+              <div className="absolute top-0 left-0 w-full h-1 bg-indigo-500 opacity-20"></div>
+              
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-8 mb-12">
+                 <div>
+                    <div className="flex items-center gap-2 mb-3">
+                       <Coins className="text-indigo-600" size={20} />
+                       <h2 className="text-sm font-black text-slate-900 uppercase tracking-widest">Aporte Mínimo Recomendado — Cenário 1</h2>
+                    </div>
+                    <p className="text-sm text-slate-500 font-medium max-w-xl leading-relaxed">
+                       Recursos estratégicos necessários para o lançamento estruturado, validação de mercado e tração inicial da operação Localizei JPA.
+                    </p>
+                 </div>
+                 <div className="bg-indigo-600 px-8 py-6 rounded-3xl shadow-xl shadow-indigo-200 shrink-0 text-center">
+                    <span className="text-[10px] font-black text-indigo-100 uppercase tracking-widest block mb-1 opacity-70">Investimento Mínimo</span>
+                    <div className="flex items-baseline gap-2 justify-center">
+                       <span className="text-xl font-black text-white">R$</span>
+                       <h1 className="text-5xl font-black text-white tracking-tighter">80.000</h1>
+                    </div>
+                 </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+                 {/* Marketing & Growth */}
+                 <div className="space-y-4">
+                    <div className="flex items-center gap-3">
+                       <div className="w-10 h-10 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center">
+                          <Megaphone size={20} />
+                       </div>
+                       <h4 className="text-sm font-black text-slate-900 uppercase">Marketing e Growth</h4>
+                    </div>
+                    <ul className="space-y-2 text-xs text-slate-500 font-medium ml-2">
+                       <li className="flex items-center gap-2">
+                          <div className="w-1 h-1 rounded-full bg-slate-300"></div>
+                          Contratação de agência de marketing especializada
+                       </li>
+                       <li className="flex items-center gap-2">
+                          <div className="w-1 h-1 rounded-full bg-slate-300"></div>
+                          Estratégia multicanal (Google, Meta, mídia local)
+                       </li>
+                       <li className="flex items-center gap-2">
+                          <div className="w-1 h-1 rounded-full bg-slate-300"></div>
+                          Produção de conteúdo e ativações de lançamento
+                       </li>
+                    </ul>
+                 </div>
+
+                 {/* Anúncios Online */}
+                 <div className="space-y-4">
+                    <div className="flex items-center gap-3">
+                       <div className="w-10 h-10 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center">
+                          <Target size={20} />
+                       </div>
+                       <h4 className="text-sm font-black text-slate-900 uppercase">Anúncios Online</h4>
+                    </div>
+                    <ul className="space-y-2 text-xs text-slate-500 font-medium ml-2">
+                       <li className="flex items-center gap-2">
+                          <div className="w-1 h-1 rounded-full bg-slate-300"></div>
+                          Aquisição de base de usuários qualificada
+                       </li>
+                       <li className="flex items-center gap-2">
+                          <div className="w-1 h-1 rounded-full bg-slate-300"></div>
+                          Captação ativa e qualificação de lojistas
+                       </li>
+                       <li className="flex items-center gap-2">
+                          <div className="w-1 h-1 rounded-full bg-slate-300"></div>
+                          Otimização de CAC e testes de escala
+                       </li>
+                    </ul>
+                 </div>
+
+                 {/* Jurídico & Contratual */}
+                 <div className="space-y-4">
+                    <div className="flex items-center gap-3">
+                       <div className="w-10 h-10 bg-slate-50 text-slate-600 rounded-xl flex items-center justify-center border border-slate-100">
+                          <Scale size={20} />
+                       </div>
+                       <h4 className="text-sm font-black text-slate-900 uppercase">Jurídico e Contratual</h4>
+                    </div>
+                    <ul className="space-y-2 text-xs text-slate-500 font-medium ml-2">
+                       <li className="flex items-center gap-2">
+                          <div className="w-1 h-1 rounded-full bg-slate-300"></div>
+                          Alterações contratuais e ajustes societários
+                       </li>
+                       <li className="flex items-center gap-2">
+                          <div className="w-1 h-1 rounded-full bg-slate-300"></div>
+                          Compliance básico e termos de uso
+                       </li>
+                       <li className="flex items-center gap-2">
+                          <div className="w-1 h-1 rounded-full bg-slate-300"></div>
+                          Estruturação para rodadas futuras de aporte
+                       </li>
+                    </ul>
+                 </div>
+
+                 {/* Operacional */}
+                 <div className="space-y-4">
+                    <div className="flex items-center gap-3">
+                       <div className="w-10 h-10 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center">
+                          <Server size={20} />
+                       </div>
+                       <h4 className="text-sm font-black text-slate-900 uppercase">Estrutura Operacional</h4>
+                    </div>
+                    <ul className="space-y-2 text-xs text-slate-500 font-medium ml-2">
+                       <li className="flex items-center gap-2">
+                          <div className="w-1 h-1 rounded-full bg-slate-300"></div>
+                          Custos iniciais de infraestrutura Cloud
+                       </li>
+                       <li className="flex items-center gap-2">
+                          <div className="w-1 h-1 rounded-full bg-slate-300"></div>
+                          Assinaturas de SaaS e ferramentas de gestão
+                       </li>
+                       <li className="flex items-center gap-2">
+                          <div className="w-1 h-1 rounded-full bg-slate-300"></div>
+                          Suporte operacional nos primeiros 3 meses
+                       </li>
+                    </ul>
+                 </div>
+              </div>
+
+              <div className="bg-slate-900 rounded-2xl p-8 flex flex-col md:flex-row items-center gap-8 border border-slate-800">
+                 <div className="w-14 h-14 bg-indigo-500/10 rounded-2xl flex items-center justify-center shrink-0">
+                    <CheckCircle2 className="text-indigo-400" size={28} />
+                 </div>
+                 <div className="text-center md:text-left">
+                    <h4 className="text-white font-black text-sm uppercase tracking-widest mb-1">Resultado Esperado (Mínimo)</h4>
+                    <p className="text-slate-400 text-xs font-medium leading-relaxed">
+                       Lançamento oficial, ativação de lojistas-âncora, validação real do modelo de cashback e início do faturamento recorrente estruturado.
+                    </p>
+                 </div>
+              </div>
+           </div>
+        </section>
+
+        {/* --- INVESTIMENTO IDEAL RECOMENDADO (CENÁRIO 2) --- */}
+        <section className="pt-8 animate-in slide-in-from-bottom duration-700">
+           <div className="bg-white rounded-[2.5rem] border border-indigo-100 p-10 shadow-2xl shadow-indigo-100 relative overflow-hidden">
+              <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-indigo-500 via-purple-500 to-blue-500"></div>
+              
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-8 mb-12">
+                 <div>
+                    <div className="flex items-center gap-2 mb-3">
+                       <Rocket className="text-indigo-600" size={20} />
+                       <h2 className="text-sm font-black text-slate-900 uppercase tracking-widest">Investimento Ideal — Escala Saudável</h2>
+                    </div>
+                    <p className="text-sm text-slate-500 font-medium max-w-xl leading-relaxed">
+                       Aceleração agressiva de mercado para garantir dominância regional, visibilidade multicanal e ocupação imediata de inventário publicitário.
+                    </p>
+                 </div>
+                 <div className="bg-slate-900 px-8 py-6 rounded-3xl shadow-2xl shrink-0 text-center relative overflow-hidden group">
+                    <div className="absolute inset-0 bg-gradient-to-br from-indigo-600/20 to-transparent pointer-events-none"></div>
+                    <span className="text-[10px] font-black text-indigo-400 uppercase tracking-widest block mb-1">Aporte de Escala</span>
+                    <div className="flex items-baseline gap-2 justify-center">
+                       <span className="text-xl font-black text-white">R$</span>
+                       <h1 className="text-5xl font-black text-white tracking-tighter">200.000</h1>
+                    </div>
+                 </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+                 {/* Marketing & Growth (Expandido) */}
+                 <div className="space-y-4">
+                    <div className="flex items-center gap-3">
+                       <div className="w-10 h-10 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center">
+                          <Megaphone size={20} />
+                       </div>
+                       <h4 className="text-sm font-black text-slate-900 uppercase leading-none">Marketing & Growth <br/><span className="text-[9px] text-indigo-400">EXPANDIDO</span></h4>
+                    </div>
+                    <ul className="space-y-2 text-xs text-slate-500 font-medium ml-2">
+                       <li className="flex items-center gap-2">
+                          <div className="w-1 h-1 rounded-full bg-slate-300"></div>
+                          Agência de marketing com escopo ampliado
+                       </li>
+                       <li className="flex items-center gap-2">
+                          <div className="w-1 h-1 rounded-full bg-slate-300"></div>
+                          Maior volume de tráfego pago (Google e Meta)
+                       </li>
+                       <li className="flex items-center gap-2">
+                          <div className="w-1 h-1 rounded-full bg-slate-300"></div>
+                          Campanhas contínuas de awareness e performance
+                       </li>
+                    </ul>
+                 </div>
+
+                 {/* Influenciadores Locais */}
+                 <div className="space-y-4">
+                    <div className="flex items-center gap-3">
+                       <div className="w-10 h-10 bg-rose-50 text-rose-600 rounded-xl flex items-center justify-center">
+                          <Users size={20} />
+                       </div>
+                       <h4 className="text-sm font-black text-slate-900 uppercase leading-none">Influenciadores <br/><span className="text-[9px] text-rose-400">REGIONAIS (JPA)</span></h4>
+                    </div>
+                    <ul className="space-y-2 text-xs text-slate-500 font-medium ml-2">
+                       <li className="flex items-center gap-2">
+                          <div className="w-1 h-1 rounded-full bg-slate-300"></div>
+                          Parcerias com micro-influenciadores locais
+                       </li>
+                       <li className="flex items-center gap-2">
+                          <div className="w-1 h-1 rounded-full bg-slate-300"></div>
+                          Conteúdo recorrente mostrando uso do app
+                       </li>
+                       <li className="flex items-center gap-2">
+                          <div className="w-1 h-1 rounded-full bg-slate-300"></div>
+                          Alcance orgânico e confiança regional
+                       </li>
+                    </ul>
+                 </div>
+
+                 {/* Anúncios Online (Intensificado) */}
+                 <div className="space-y-4">
+                    <div className="flex items-center gap-3">
+                       <div className="w-10 h-10 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center">
+                          <Flame size={20} />
+                       </div>
+                       <h4 className="text-sm font-black text-slate-900 uppercase leading-none">Anúncios Online <br/><span className="text-[9px] text-blue-400">INTENSIFICADO</span></h4>
+                    </div>
+                    <ul className="space-y-2 text-xs text-slate-500 font-medium ml-2">
+                       <li className="flex items-center gap-2">
+                          <div className="w-1 h-1 rounded-full bg-slate-300"></div>
+                          Orçamento ampliado para aquisição massiva
+                       </li>
+                       <li className="flex items-center gap-2">
+                          <div className="w-1 h-1 rounded-full bg-slate-300"></div>
+                          Testes agressivos de criativos e públicos
+                       </li>
+                       <li className="flex items-center gap-2">
+                          <div className="w-1 h-1 rounded-full bg-slate-300"></div>
+                          Otimização acelerada de CAC (Custo por Cliente)
+                       </li>
+                    </ul>
+                 </div>
+
+                 {/* Ativações Físicas */}
+                 <div className="space-y-4">
+                    <div className="flex items-center gap-3">
+                       <div className="w-10 h-10 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center">
+                          <MapPin size={20} />
+                       </div>
+                       <h4 className="text-sm font-black text-slate-900 uppercase leading-none">Ativações Físicas <br/><span className="text-[9px] text-emerald-400">NO TERRITÓRIO</span></h4>
+                    </div>
+                    <ul className="space-y-2 text-xs text-slate-500 font-medium ml-2">
+                       <li className="flex items-center gap-2">
+                          <div className="w-1 h-1 rounded-full bg-slate-300"></div>
+                          Adesivagem massiva em comércios parceiros
+                       </li>
+                       <li className="flex items-center gap-2">
+                          <div className="w-1 h-1 rounded-full bg-slate-300"></div>
+                          Materiais físicos de divulgação (totens/flyers)
+                       </li>
+                       <li className="flex items-center gap-2">
+                          <div className="w-1 h-1 rounded-full bg-slate-300"></div>
+                          Presença visual constante no dia a dia do bairro
+                       </li>
+                    </ul>
+                 </div>
+
+                 {/* Outdoors Estratégicos */}
+                 <div className="space-y-4">
+                    <div className="flex items-center gap-3">
+                       <div className="w-10 h-10 bg-amber-50 text-amber-600 rounded-xl flex items-center justify-center">
+                          <ImageIcon size={20} />
+                       </div>
+                       <h4 className="text-sm font-black text-slate-900 uppercase leading-none">Mídia Exterior <br/><span className="text-[9px] text-amber-400">OUTDOORS E PAINÉIS</span></h4>
+                    </div>
+                    <ul className="space-y-2 text-xs text-slate-500 font-medium ml-2">
+                       <li className="flex items-center gap-2">
+                          <div className="w-1 h-1 rounded-full bg-slate-300"></div>
+                          Pontos selecionados em áreas de alto fluxo
+                       </li>
+                       <li className="flex items-center gap-2">
+                          <div className="w-1 h-1 rounded-full bg-slate-300"></div>
+                          Campanhas de impacto para o lançamento
+                       </li>
+                       <li className="flex items-center gap-2">
+                          <div className="w-1 h-1 rounded-full bg-slate-300"></div>
+                          Consolidação visual da marca no imaginário local
+                       </li>
+                    </ul>
+                 </div>
+
+                 {/* Operacional & Jurídico */}
+                 <div className="space-y-4">
+                    <div className="flex items-center gap-3">
+                       <div className="w-10 h-10 bg-slate-100 text-slate-600 rounded-xl flex items-center justify-center">
+                          <Server size={20} />
+                       </div>
+                       <h4 className="text-sm font-black text-slate-900 uppercase leading-none">Estrutura <br/><span className="text-[9px] text-slate-400">PRONTA PARA ESCALAR</span></h4>
+                    </div>
+                    <ul className="space-y-2 text-xs text-slate-500 font-medium ml-2">
+                       <li className="flex items-center gap-2">
+                          <div className="w-1 h-1 rounded-full bg-slate-300"></div>
+                          Mesmas despesas de conformidade (Compliance)
+                       </li>
+                       <li className="flex items-center gap-2">
+                          <div className="w-1 h-1 rounded-full bg-slate-300"></div>
+                          Infraestrutura Cloud preparada para alto volume
+                       </li>
+                       <li className="flex items-center gap-2">
+                          <div className="w-1 h-1 rounded-full bg-slate-300"></div>
+                          Suporte operacional reforçado (Atendimento VIP)
+                       </li>
+                    </ul>
+                 </div>
+              </div>
+
+              <div className="bg-indigo-600 rounded-2xl p-8 flex flex-col md:flex-row items-center gap-8 shadow-xl shadow-indigo-200">
+                 <div className="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center shrink-0 border border-white/30 backdrop-blur-md">
+                    <CheckCircle2 className="text-white" size={28} />
+                 </div>
+                 <div className="text-center md:text-left">
+                    <h4 className="text-white font-black text-sm uppercase tracking-widest mb-1">Resultado Esperado (Ideal)</h4>
+                    <p className="text-indigo-100 text-xs font-medium leading-relaxed">
+                       Forte reconhecimento de marca em Jacarepaguá, aquisição acelerada de base crítica, maior ocupação de slots publicitários desde o Mês 1 e base consolidada para expansão imediata para novos bairros (Recreio/Barra).
+                    </p>
+                 </div>
+              </div>
+           </div>
+        </section>
+
+        {/* ESTRUTURA DE APORTE EM FASES */}
+        <section className="pt-8">
+           <div className="bg-white rounded-[2.5rem] border border-slate-200 p-10 shadow-sm relative overflow-hidden">
+              <div className="absolute top-0 left-0 w-full h-1 bg-slate-900 opacity-5"></div>
+              
+              <div className="flex items-center gap-3 mb-10">
+                 <div className="w-10 h-10 bg-slate-900 text-white rounded-xl flex items-center justify-center">
+                    <Milestone size={20} />
+                 </div>
+                 <div>
+                    <h2 className="text-sm font-black text-slate-900 uppercase tracking-widest">Estrutura de Aporte — 3 Momentos</h2>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mt-0.5">Flexibilidade financeira e gestão de risco</p>
+                 </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
+                 {/* Timeline Line (Desktop) */}
+                 <div className="hidden md:block absolute top-[52px] left-10 right-10 h-0.5 border-t-2 border-dashed border-slate-100 -z-0"></div>
+
+                 {/* MOMENTO 1: T0 */}
+                 <div className="relative z-10 flex flex-col items-center md:items-start text-center md:text-left">
+                    <div className="w-14 h-14 bg-indigo-600 rounded-2xl flex items-center justify-center text-white shadow-xl shadow-indigo-100 mb-6 border-4 border-white">
+                       <span className="font-black text-sm">T0</span>
+                    </div>
+                    <h3 className="font-black text-slate-900 text-xs uppercase tracking-wider mb-2">Aporte Inicial</h3>
+                    <ul className="space-y-2 text-[11px] text-slate-500 font-medium">
+                       <li className="flex items-start gap-2">
+                          <div className="w-1 h-1 rounded-full bg-indigo-400 mt-1 shrink-0"></div>
+                          Ajustes contratuais e pontapé inicial
+                       </li>
+                       <li className="flex items-start gap-2">
+                          <div className="w-1 h-1 rounded-full bg-indigo-400 mt-1 shrink-0"></div>
+                          Início imediato das ações de marketing
+                       </li>
+                    </ul>
+                 </div>
+
+                 {/* MOMENTO 2: +30 DIAS */}
+                 <div className="relative z-10 flex flex-col items-center md:items-start text-center md:text-left">
+                    <div className="w-14 h-14 bg-white border-2 border-slate-200 rounded-2xl flex items-center justify-center text-slate-400 shadow-sm mb-6">
+                       <span className="font-black text-sm">+30d</span>
+                    </div>
+                    <h3 className="font-black text-slate-900 text-xs uppercase tracking-wider mb-2">Segundo Aporte</h3>
+                    <ul className="space-y-2 text-[11px] text-slate-500 font-medium">
+                       <li className="flex items-start gap-2">
+                          <div className="w-1 h-1 rounded-full bg-slate-300 mt-1 shrink-0"></div>
+                          Intensificar aquisição de base crítica
+                       </li>
+                       <li className="flex items-start gap-2">
+                          <div className="w-1 h-1 rounded-full bg-slate-300 mt-1 shrink-0"></div>
+                          Expansão das campanhas de awareness
+                       </li>
+                    </ul>
+                 </div>
+
+                 {/* MOMENTO 3: +60 DIAS */}
+                 <div className="relative z-10 flex flex-col items-center md:items-start text-center md:text-left">
+                    <div className="w-14 h-14 bg-white border-2 border-slate-200 rounded-2xl flex items-center justify-center text-slate-400 shadow-sm mb-6">
+                       <span className="font-black text-sm">+60d</span>
+                    </div>
+                    <h3 className="font-black text-slate-900 text-xs uppercase tracking-wider mb-2">Terceiro Aporte</h3>
+                    <ul className="space-y-2 text-[11px] text-slate-500 font-medium">
+                       <li className="flex items-start gap-2">
+                          <div className="w-1 h-1 rounded-full bg-slate-300 mt-1 shrink-0"></div>
+                          Reforço de escala e consolidação
+                       </li>
+                       <li className="flex items-start gap-2">
+                          <div className="w-1 h-1 rounded-full bg-slate-300 mt-1 shrink-0"></div>
+                          Ajustes finais para crescimento sustentável
+                       </li>
+                    </ul>
+                 </div>
+              </div>
+
+              <div className="mt-12 bg-slate-900 rounded-2xl p-6 flex items-start gap-4">
+                 <div className="w-10 h-10 bg-indigo-500/10 rounded-xl flex items-center justify-center border border-indigo-500/20 shrink-0">
+                    <Target className="text-indigo-400" size={20} />
+                 </div>
+                 <div>
+                    <h4 className="text-white font-black text-[10px] uppercase tracking-widest mb-1">Visão Estratégica</h4>
+                    <p className="text-slate-400 text-xs leading-relaxed font-medium">
+                       O modelo de aporte em fases permite maior <strong>controle de risco</strong> e melhor alocação de capital, alinhando o desembolso financeiro à evolução real dos indicadores de tração da operação.
+                    </p>
+                 </div>
+              </div>
+           </div>
+        </section>
+
+        {/* BLOCO DE ENCERRAMENTO (CALL TO ACTION) */}
+        <section className="pt-12 pb-20 animate-in fade-in slide-in-from-bottom-10 duration-1000 delay-500">
+           <div className="flex flex-col items-center text-center">
+              <div className="w-20 h-20 bg-indigo-600 rounded-full flex items-center justify-center mb-8 shadow-2xl shadow-indigo-200 animate-bounce">
+                 <Handshake className="text-white" size={40} />
+              </div>
+              
+              <h2 className="text-3xl md:text-4xl font-black text-slate-900 leading-tight mb-10 font-display">
+                “E aí Jabinha, está dentro com a gente?”
+              </h2>
+
+              <div className="flex gap-4 w-full max-w-sm">
+                <button 
+                  onClick={() => alert("Decisão confirmada! Vamos juntos mudar Jacarepaguá. 🚀")}
+                  className="flex-1 bg-slate-900 text-white font-black py-5 rounded-2xl shadow-xl active:scale-95 transition-all uppercase tracking-widest text-sm hover:bg-slate-800"
+                >
+                  SIM
+                </button>
+                <button 
+                  onClick={() => alert("Decisão confirmada! Vamos juntos mudar Jacarepaguá. 🚀")}
+                  className="flex-1 bg-indigo-600 text-white font-black py-5 rounded-2xl shadow-xl active:scale-95 transition-all uppercase tracking-widest text-sm hover:bg-indigo-700"
+                >
+                  SIM
+                </button>
+              </div>
+              
+              <p className="mt-8 text-[10px] font-black text-slate-400 uppercase tracking-[0.4em]">
+                A maior oportunidade da Freguesia espera por você
+              </p>
+           </div>
+        </section>
+
       </main>
 
       <footer className="py-12 border-t border-slate-200 mt-auto text-center bg-white/50">
@@ -549,7 +996,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ user, onLogout, viewMode
             { label: 'Push Gateway', value: 'Operational', status: 'healthy', icon: Zap }
           ].map((sys, i) => (
             <div key={i} className="bg-[#111827] p-6 border border-white/[0.04] rounded-2xl flex items-center gap-5">
-               <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${sys.status === 'healthy' ? 'bg-[#059669]/10 text-[#059669]' : 'bg-red-500/10 text-red-500'}`}>
+               <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${sys.status === 'healthy' ? 'bg-[#059669]/10 text-[#059669]' : 'bg-red-50/10 text-red-500'}`}>
                   <sys.icon size={24} />
                </div>
                <div>
