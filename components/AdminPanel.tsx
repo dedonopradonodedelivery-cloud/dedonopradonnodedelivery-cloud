@@ -317,10 +317,13 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ user, onLogout, viewMode
                        Modelo de interoperabilidade: 1,99% de taxa de resgate sobre o valor transacionado no ecossistema.
                     </p>
                     <div className="space-y-2 bg-slate-50 p-4 rounded-xl mb-6">
-                       <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Premissas</p>
-                       <p className="text-[11px] text-slate-600 font-medium">• Base potencial: 25.000 negócios</p>
-                       <p className="text-[11px] text-slate-600 font-medium">• Adoção conservadora: 5%</p>
-                       <p className="text-[11px] text-slate-600 font-medium">• Ticket médio: R$ 2.000/mês</p>
+                       <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">PREMISSAS DE CÁLCULO</p>
+                       <p className="text-[11px] text-slate-600 font-medium">• Base total estimada: 25.000 negócios na região</p>
+                       <p className="text-[11px] text-slate-600 font-medium">• Adoção conservadora: 5% da base (≈ 1.250 lojistas ativos)</p>
+                       <p className="text-[11px] text-slate-600 font-medium">• Faturamento médio por lojista: R$ 2.000 / mês</p>
+                       <p className="text-[11px] text-slate-600 font-medium">• Volume transacionado mensal: 1.250 × R$ 2.000 = R$ 2.500.000</p>
+                       <div className="h-px bg-slate-200 my-1"></div>
+                       <p className="text-[11px] text-slate-700 font-bold">• Taxa de resgate do cashback: 1,99% sobre o valor transacionado</p>
                     </div>
                  </div>
                  <div className="pt-4 border-t border-slate-100 flex items-baseline justify-between">
@@ -375,6 +378,29 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ user, onLogout, viewMode
                  </div>
               </div>
 
+              {/* Marketplace de Imóveis Comerciais */}
+              <div className="w-full bg-white p-6 rounded-3xl border border-slate-200 shadow-sm flex flex-col justify-between hover:border-indigo-300 transition-all group">
+                 <div>
+                    <div className="w-12 h-12 bg-slate-50 text-slate-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                       <Building2 size={24} />
+                    </div>
+                    <h3 className="text-lg font-bold text-slate-900 mb-3 leading-tight">Marketplace de Imóveis Comerciais</h3>
+                    <p className="text-xs text-slate-500 leading-relaxed mb-6">
+                       Plataforma proprietária para compra, venda e locação de salas e lojas, com busca segmentada por polos empresariais locais.
+                    </p>
+                    <div className="space-y-2 bg-slate-50 p-4 rounded-xl mb-6">
+                       <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Diferenciais</p>
+                       <p className="text-[11px] text-slate-600 font-medium">• Foco 100% não-residencial (B2B)</p>
+                       <p className="text-[11px] text-slate-600 font-medium">• Público qualificado (Lojistas/Investidores)</p>
+                       <p className="text-[11px] text-slate-600 font-medium">• Hub completo do comércio local</p>
+                    </div>
+                 </div>
+                 <div className="pt-4 border-t border-slate-100 flex items-baseline justify-between">
+                    <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Receita Est.</span>
+                    <p className="text-lg font-black text-slate-400 italic">Em validação</p>
+                 </div>
+              </div>
+
               {/* Podcast */}
               <div className="w-full bg-white p-6 rounded-3xl border border-slate-200 shadow-sm flex flex-col justify-between hover:border-indigo-300 transition-all group">
                  <div>
@@ -418,6 +444,79 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ user, onLogout, viewMode
                  <span className="text-sm sm:text-lg font-black text-emerald-400">R$</span>
                  <span className="text-3xl sm:text-4xl md:text-5xl font-black text-emerald-400 tracking-tighter tabular-nums">84.740</span>
                  <span className="text-[8px] sm:text-[10px] font-black text-emerald-400/60 uppercase ml-1 sm:ml-2 tracking-widest whitespace-nowrap text-right">/mês</span>
+              </div>
+           </div>
+        </section>
+
+        {/* POTENCIAL DE EXPANSÃO GEOGRÁFICA */}
+        <section className="pt-8 space-y-10 animate-in fade-in duration-700">
+           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-slate-200 pb-6 w-full">
+              <div>
+                 <div className="flex items-center gap-3 mb-2">
+                    <Globe2 className="text-indigo-600" size={24} />
+                    <h2 className="text-lg font-black text-slate-900 uppercase tracking-tight">Potencial de Expansão Geográfica</h2>
+                 </div>
+                 <p className="text-sm text-slate-500 font-medium max-w-3xl leading-relaxed">
+                    O modelo do Localizei JPA é altamente replicável por CEP, com baixa dependência de custo fixo e rápida maturação operacional. Cada nova praça segue a mesma lógica de monetização e ativação local.
+                 </p>
+              </div>
+           </div>
+
+           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+              <div className="space-y-6">
+                 <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm">
+                    <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-4">Premissa de Referência (Conservadora)</h3>
+                    <div className="flex items-baseline gap-2">
+                       <span className="text-xs font-bold text-slate-400">R$</span>
+                       <span className="text-3xl font-black text-slate-900">85.000</span>
+                       <span className="text-[10px] font-black text-slate-400 uppercase ml-2 tracking-widest">/ mês por praça</span>
+                    </div>
+                    <p className="text-[10px] text-slate-400 font-medium mt-2 italic">Estimativa após 12 meses de operação em base consolidada.</p>
+                 </div>
+
+                 <div className="bg-indigo-50 p-6 rounded-3xl border border-indigo-100">
+                    <h4 className="text-xs font-black text-indigo-600 uppercase tracking-widest mb-3">Mensagem para Investidor</h4>
+                    <p className="text-xs text-indigo-900/70 leading-relaxed font-medium">
+                       A expansão geográfica representa um crescimento previsível e escalável, sem aumento proporcional de estrutura central, permitindo multiplicar receita com o mesmo modelo operacional.
+                    </p>
+                 </div>
+              </div>
+
+              <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
+                 <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2">
+                    <MapPin size={14} className="text-rose-500" />
+                    Praças Estratégicas Mapeadas (14 praças)
+                 </h3>
+                 <div className="flex flex-wrap gap-2">
+                    {[
+                      "Barra da Tijuca", "Recreio", "Zona Sul", "Centro", "Tijuca", "Méier",
+                      "Ilha do Governador", "Niterói", "Duque de Caxias", "Nova Iguaçu",
+                      "São João de Meriti", "Região dos Lagos", "Região Serrana", "Região Metropolitana"
+                    ].map((praca, idx) => (
+                      <span key={idx} className="px-3 py-1.5 bg-slate-50 border border-slate-100 rounded-lg text-[10px] font-bold text-slate-600 hover:bg-indigo-50 hover:text-indigo-600 hover:border-indigo-100 transition-colors cursor-default">
+                        {praca}
+                      </span>
+                    ))}
+                 </div>
+              </div>
+           </div>
+
+           {/* TOTAL POTENCIAL CONSOLIDADO */}
+           <div className="bg-slate-900 rounded-[2.5rem] p-8 sm:p-10 flex flex-col md:flex-row md:items-center justify-between gap-8 border border-white/5 shadow-2xl relative overflow-hidden">
+              <div className="absolute top-0 left-0 w-full h-1 bg-emerald-500/30"></div>
+              <div className="flex items-center gap-5 w-full">
+                 <div className="w-14 h-14 sm:w-16 sm:h-16 bg-emerald-500/10 rounded-2xl flex items-center justify-center border border-emerald-500/20 shrink-0">
+                    <TrendingUp className="text-emerald-400" size={32} />
+                 </div>
+                 <div className="min-w-0">
+                    <h3 className="text-white font-black text-xs sm:text-sm uppercase tracking-[0.3em] mb-2">Faturamento Potencial Consolidado</h3>
+                    <p className="text-emerald-400/60 text-[10px] sm:text-xs font-bold uppercase tracking-widest">Baseado na ativação simultânea das 14 praças</p>
+                 </div>
+              </div>
+              <div className="flex flex-wrap items-baseline justify-end gap-2 max-w-full w-full md:w-auto self-end md:self-auto px-1">
+                 <span className="text-lg sm:text-xl font-black text-emerald-400">R$</span>
+                 <span className="text-4xl sm:text-5xl md:text-6xl font-black text-emerald-400 tracking-tighter tabular-nums">1.190.000</span>
+                 <span className="text-[10px] sm:text-xs font-black text-emerald-400/60 uppercase ml-2 tracking-widest whitespace-nowrap">/ mês</span>
               </div>
            </div>
         </section>
