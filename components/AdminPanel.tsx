@@ -89,7 +89,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ user, onLogout, viewMode
   if (!user || user.email !== ADMIN_EMAIL) {
     return (
       <div className="min-h-screen bg-[#0F172A] flex flex-col items-center justify-center p-6 text-center font-sans">
-        <div className="w-16 h-16 bg-[#111827] border border-white/[0.04] flex items-center justify-center mb-4 rounded-xl">
+        <div className="w-16 h-16 bg-gradient-to-br from-[#111827] to-[#1e293b] border border-white/[0.04] flex items-center justify-center mb-4 rounded-xl">
           <Lock className="w-8 h-8 text-[#9CA3AF]" />
         </div>
         <h1 className="text-xl font-black text-white mb-1 uppercase tracking-tighter">403 - Negado</h1>
@@ -104,38 +104,38 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ user, onLogout, viewMode
   const renderMonetizationModel = () => (
     <div className="min-h-screen bg-[#F8FAFC] text-slate-900 font-sans animate-in fade-in duration-500 flex flex-col">
       {/* INVESTOR HEADER */}
-      <header className="bg-white border-b border-slate-200 px-8 py-4 sticky top-0 z-50 shadow-sm flex items-center justify-between">
-        <div className="flex items-center gap-5">
+      <header className="bg-white border-b border-slate-200 px-4 sm:px-8 py-4 sticky top-0 z-50 shadow-sm flex items-center justify-between">
+        <div className="flex items-center gap-3 sm:gap-5">
           <button 
             onClick={() => setActiveView('dashboard')}
             className="p-2 bg-slate-50 text-slate-400 hover:text-indigo-600 hover:bg-slate-100 rounded-lg transition-all active:scale-90 border border-slate-200"
           >
             <ArrowLeft size={18} />
           </button>
-          <div className="h-8 w-px bg-slate-200"></div>
+          <div className="h-8 w-px bg-slate-200 hidden sm:block"></div>
           <div>
-            <div className="flex items-center gap-3">
-              <h1 className="text-xl font-black tracking-tight text-slate-900 leading-none uppercase">Projeção Financeira</h1>
-              <span className="bg-slate-900 text-white text-[8px] font-black px-2 py-0.5 rounded uppercase tracking-[0.2em]">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <h1 className="text-sm sm:text-xl font-black tracking-tight text-slate-900 leading-none uppercase">Projeção Financeira</h1>
+              <span className="bg-slate-900 text-white text-[7px] sm:text-[8px] font-black px-1.5 sm:px-2 py-0.5 rounded uppercase tracking-[0.2em] whitespace-nowrap">
                 Investor Access
               </span>
             </div>
-            <p className="text-[10px] font-bold text-slate-400 mt-1 uppercase tracking-widest">
+            <p className="text-[8px] sm:text-[10px] font-bold text-slate-400 mt-1 uppercase tracking-widest">
               Evolução e Expansão • Jacarepaguá v1.1.2
             </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-4">
-          <div className="px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg flex items-center gap-2">
-            <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Visualização</span>
-            <span className="text-[10px] font-black text-slate-900 uppercase">ADM</span>
+        <div className="flex items-center gap-2 sm:gap-4">
+          <div className="px-2 sm:px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg flex items-center gap-2">
+            <span className="text-[7px] sm:text-[8px] font-black text-slate-400 uppercase tracking-widest hidden xs:inline">Visualização</span>
+            <span className="text-[9px] sm:text-[10px] font-black text-slate-900 uppercase">{viewMode === 'ADM' ? 'ADM' : 'INVEST'}</span>
             <ShieldCheck size={14} className="text-indigo-600" />
           </div>
         </div>
       </header>
 
-      <main className="p-8 max-w-5xl mx-auto w-full space-y-20 pb-48">
+      <main className="px-4 py-8 sm:p-8 max-w-5xl mx-auto w-full space-y-16 sm:space-y-20 pb-48">
         
         {/* CENÁRIO 1: INAUGURAÇÃO (RESUMO) */}
         <section className="animate-in slide-in-from-bottom-2 duration-500">
@@ -145,7 +145,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ user, onLogout, viewMode
            </div>
            
            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-              <div className="p-6 bg-slate-50 border-b border-slate-200 grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="p-6 bg-slate-50 border-b border-slate-200 grid grid-cols-1 md:grid-cols-3 gap-6 text-center sm:text-left">
                  <div>
                     <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Ocupação Média</span>
                     <p className="text-sm font-bold text-slate-700">30% dos Slots</p>
@@ -160,7 +160,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ user, onLogout, viewMode
                  </div>
               </div>
 
-              <div className="p-0">
+              <div className="p-0 overflow-x-hidden">
                  {[
                    { label: 'Patrocinador Master (Promo)', desc: 'Cota de impacto institucional', value: '2.500', icon: Crown, color: 'text-amber-500' },
                    { label: 'Banners Home', desc: '11 slots ativos (30% ocupação)', value: '1.639', icon: LayoutGrid, color: 'text-blue-500' },
@@ -170,32 +170,32 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ user, onLogout, viewMode
                    { label: 'Cupons Promocionais', desc: 'Adoção inicial: 20 lojistas ativos', value: '792', icon: Percent, color: 'text-emerald-600' },
                    { label: 'JPA Connect', desc: '1 grupo de networking empresarial', value: '3.000', icon: Users, color: 'text-indigo-600' }
                  ].map((item, i) => (
-                   <div key={i} className="px-6 py-4 flex items-center justify-between border-b border-slate-100 last:border-0 hover:bg-slate-50 transition-colors">
-                      <div className="flex items-center gap-4">
-                        <div className={`w-8 h-8 rounded-lg bg-white border border-slate-100 flex items-center justify-center ${item.color}`}>
+                   <div key={i} className="px-4 sm:px-6 py-4 flex items-center justify-between border-b border-slate-100 last:border-0 hover:bg-slate-50 transition-colors gap-4">
+                      <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+                        <div className={`w-8 h-8 rounded-lg bg-white border border-slate-100 flex items-center justify-center shrink-0 ${item.color}`}>
                           <item.icon size={16} strokeWidth={2.5} />
                         </div>
-                        <div>
-                          <p className="text-sm font-bold text-slate-900">{item.label}</p>
-                          <p className="text-[10px] text-slate-400 font-medium">{item.desc}</p>
+                        <div className="min-w-0">
+                          <p className="text-xs sm:text-sm font-bold text-slate-900 truncate">{item.label}</p>
+                          <p className="text-[9px] sm:text-[10px] text-slate-400 font-medium truncate">{item.desc}</p>
                         </div>
                       </div>
-                      <div className="text-right">
-                        <span className="text-xs font-bold text-slate-400 mr-1">R$</span>
-                        <span className="text-sm font-black text-[#059669]">{item.value}</span>
+                      <div className="text-right shrink-0">
+                        <span className="text-[10px] sm:text-xs font-bold text-slate-400 mr-1">R$</span>
+                        <span className="text-sm sm:text-sm font-black text-[#059669]">{item.value}</span>
                       </div>
                    </div>
                  ))}
               </div>
 
-              <div className="p-8 bg-slate-900 flex flex-col md:flex-row items-center justify-between gap-4">
+              <div className="p-6 sm:p-8 bg-slate-900 flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
                  <div>
                     <h3 className="text-white/40 text-[10px] font-black uppercase tracking-[0.3em]">Total Faturamento Mensal (Inauguração)</h3>
                     <p className="text-white text-xs font-medium opacity-60">Maturação inicial de Jacarepaguá</p>
                  </div>
                  <div className="flex items-baseline gap-2">
                     <span className="text-lg font-black text-[#059669]">R$</span>
-                    <span className="text-5xl font-black text-[#059669] tracking-tighter tabular-nums">17.473</span>
+                    <span className="text-4xl sm:text-5xl font-black text-[#059669] tracking-tighter tabular-nums">17.473</span>
                  </div>
               </div>
            </div>
@@ -263,7 +263,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ user, onLogout, viewMode
                     Alavancas estratégicas de crescimento escalável para maximizar o LTV (Life Time Value) dos parceiros e a eficiência do ecossistema.
                  </p>
               </div>
-              <div className="bg-indigo-50 px-4 py-2 rounded-xl border border-indigo-100 shrink-0">
+              <div className="bg-indigo-50 px-4 py-2 rounded-xl border border-indigo-100 shrink-0 self-start md:self-end">
                  <span className="text-[10px] font-black text-indigo-600 uppercase tracking-widest">Expansion Mode</span>
               </div>
            </div>
@@ -338,23 +338,6 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ user, onLogout, viewMode
                  </div>
               </div>
 
-              {/* Espaço Físico */}
-              <div className="w-full bg-white p-6 rounded-3xl border border-slate-200 shadow-sm flex flex-col justify-between hover:border-indigo-300 transition-all group">
-                 <div>
-                    <div className="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                       <Building2 size={24} />
-                    </div>
-                    <h3 className="text-lg font-bold text-slate-900 mb-3 leading-tight">Freguesia Connect Space</h3>
-                    <p className="text-xs text-slate-500 leading-relaxed mb-6">
-                       Base física para produção de conteúdo, eventos de networking e venda de espaços publicitários offline.
-                    </p>
-                 </div>
-                 <div className="pt-4 border-t border-slate-100 flex items-baseline justify-between">
-                    <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Receita Est.</span>
-                    <p className="text-lg font-black text-slate-300 italic">Upside Estratégico</p>
-                 </div>
-              </div>
-
               {/* Podcast */}
               <div className="w-full bg-white p-6 rounded-3xl border border-slate-200 shadow-sm flex flex-col justify-between hover:border-indigo-300 transition-all group">
                  <div>
@@ -372,10 +355,10 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ user, onLogout, viewMode
                  </div>
               </div>
 
-              {/* Note about XXXX */}
-              <div className="w-full bg-indigo-600 p-8 rounded-3xl shadow-xl flex flex-col justify-center items-center text-center text-white relative overflow-hidden">
+              {/* Note about Strategic Advice */}
+              <div className="w-full bg-indigo-600 p-6 sm:p-8 rounded-3xl shadow-xl flex flex-col justify-center items-center text-center text-white relative overflow-hidden">
                  <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl -mr-16 -mt-16"></div>
-                 <Info className="mb-4 opacity-50" size={24} />
+                 <Info className="mb-4 opacity-50 shrink-0" size={24} />
                  <h4 className="text-sm font-black uppercase tracking-widest mb-3">Nota Estratégica</h4>
                  <p className="text-xs leading-relaxed font-medium">
                     Os itens marcados como upside representam alavancas a serem precificadas após validação de audiência e demanda orgânica do ecossistema.
@@ -384,20 +367,20 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ user, onLogout, viewMode
            </div>
 
            {/* TOTAL POTENCIAL V2 */}
-           <div className="bg-slate-900 rounded-3xl p-8 flex flex-col md:flex-row items-center justify-between gap-6 border border-white/5 shadow-2xl">
-              <div className="flex items-center gap-4">
-                 <div className="w-14 h-14 bg-indigo-500/20 rounded-2xl flex items-center justify-center border border-indigo-500/20">
+           <div className="bg-slate-900 rounded-3xl p-6 sm:p-8 flex flex-col md:flex-row md:items-center justify-between gap-6 border border-white/5 shadow-2xl overflow-hidden">
+              <div className="flex items-center gap-4 w-full">
+                 <div className="w-12 h-12 sm:w-14 sm:h-14 bg-indigo-500/20 rounded-2xl flex items-center justify-center border border-indigo-500/20 shrink-0">
                     <TrendingUp className="text-indigo-400" size={28} />
                  </div>
-                 <div>
-                    <h3 className="text-white font-black text-sm uppercase tracking-[0.2em] mb-1">Total Adicional Estimado V2</h3>
-                    <p className="text-slate-400 text-xs font-medium">Somatório das frentes de serviço e transacionais</p>
+                 <div className="min-w-0">
+                    <h3 className="text-white font-black text-xs sm:text-sm uppercase tracking-[0.2em] mb-1">Total Adicional Estimado V2</h3>
+                    <p className="text-slate-400 text-[10px] sm:text-xs font-medium">Somatório das frentes de serviço e transacionais</p>
                  </div>
               </div>
-              <div className="flex items-baseline gap-2">
-                 <span className="text-lg font-black text-emerald-400">R$</span>
-                 <span className="text-5xl font-black text-emerald-400 tracking-tighter tabular-nums">84.740</span>
-                 <span className="text-[10px] font-black text-emerald-400/60 uppercase ml-2 tracking-widest">/mês</span>
+              <div className="flex flex-wrap items-baseline justify-end gap-1 sm:gap-2 max-w-full w-full md:w-auto self-end md:self-auto px-1">
+                 <span className="text-sm sm:text-lg font-black text-emerald-400">R$</span>
+                 <span className="text-3xl sm:text-4xl md:text-5xl font-black text-emerald-400 tracking-tighter tabular-nums">84.740</span>
+                 <span className="text-[8px] sm:text-[10px] font-black text-emerald-400/60 uppercase ml-1 sm:ml-2 tracking-widest whitespace-nowrap">/mês</span>
               </div>
            </div>
         </section>
@@ -423,19 +406,19 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ user, onLogout, viewMode
               </div>
            </div>
 
-           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
               {[
                 { icon: Megaphone, title: 'Marketing', desc: 'Agência de tráfego e estratégia regional.', color: 'text-blue-600', bg: 'bg-blue-50' },
                 { icon: Target, title: 'Anúncios', desc: 'Aquisição de usuários e lojistas-âncora.', color: 'text-indigo-600', bg: 'bg-indigo-50' },
                 { icon: Scale, title: 'Jurídico', desc: 'Compliance, termos de uso e contratos.', color: 'text-slate-600', bg: 'bg-slate-100' },
                 { icon: Server, title: 'Estrutura', desc: 'Infra Cloud e assinaturas operacionais.', color: 'text-emerald-600', bg: 'bg-emerald-50' }
               ].map((item, i) => (
-                <div key={i} className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm flex flex-col items-center text-center group hover:border-indigo-100 transition-all">
-                   <div className={`w-12 h-12 rounded-2xl flex items-center justify-center mb-4 ${item.bg} ${item.color}`}>
+                <div key={i} className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm flex flex-col items-center text-center group hover:border-indigo-100 transition-all w-full max-w-full overflow-hidden">
+                   <div className={`w-12 h-12 rounded-2xl flex items-center justify-center mb-4 shrink-0 ${item.bg} ${item.color}`}>
                       <item.icon size={22} />
                    </div>
-                   <h4 className="text-xs font-black text-slate-900 uppercase tracking-widest mb-2">{item.title}</h4>
-                   <p className="text-[11px] text-slate-500 font-medium leading-tight">{item.desc}</p>
+                   <h4 className="text-xs font-black text-slate-900 uppercase tracking-widest mb-2 break-words w-full">{item.title}</h4>
+                   <p className="text-[11px] text-slate-500 font-medium leading-tight break-words w-full">{item.desc}</p>
                 </div>
               ))}
            </div>
@@ -481,42 +464,42 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ user, onLogout, viewMode
                    <div className="w-1.5 h-1.5 rounded-full bg-indigo-500"></div>
                    <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.25em]">Ações Digitais</h3>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-5">
                     {[
                       { icon: Megaphone, title: 'Marketing Full', desc: 'Estratégia multicanal agressiva.', color: 'text-indigo-600', bg: 'bg-indigo-50' },
                       { icon: Users, title: 'Influencers', desc: 'Parcerias locais recorrentes.', color: 'text-rose-600', bg: 'bg-rose-50' },
                       { icon: Flame, title: 'Anúncios Massivos', desc: 'Aquisição em escala de usuários.', color: 'text-blue-600', bg: 'bg-blue-50' }
                     ].map((item, i) => (
-                      <div key={i} className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm flex flex-col items-center text-center group hover:border-indigo-100 transition-all">
-                        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center mb-4 ${item.bg} ${item.color}`}>
+                      <div key={i} className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm flex flex-col items-center text-center group hover:border-indigo-100 transition-all w-full max-w-full overflow-hidden">
+                        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center mb-4 shrink-0 ${item.bg} ${item.color}`}>
                             <item.icon size={22} />
                         </div>
-                        <h4 className="text-xs font-black text-slate-900 uppercase tracking-widest mb-2">{item.title}</h4>
-                        <p className="text-[11px] text-slate-500 font-medium leading-tight">{item.desc}</p>
+                        <h4 className="text-xs font-black text-slate-900 uppercase tracking-widest mb-2 break-words w-full">{item.title}</h4>
+                        <p className="text-[11px] text-slate-500 font-medium leading-tight break-words w-full">{item.desc}</p>
                       </div>
                     ))}
                 </div>
               </div>
 
               {/* Ações Territoriais */}
-              <div className="space-y-6">
+              <div className="space-y-6 w-full">
                 <div className="flex items-center gap-2 ml-1">
                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
                    <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.25em]">Ações Territoriais</h3>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 w-full">
                     {[
                       { icon: MapPin, title: 'Ativações', desc: 'Adesivagem e presença em PDV.', color: 'text-emerald-600', bg: 'bg-emerald-50' },
                       { icon: ImageIcon, title: 'Outdoors', desc: 'Branding visual no bairro.', color: 'text-amber-600', bg: 'bg-amber-50' },
                       { icon: Building2, title: 'Sala Comercial', desc: 'Base fixa e estúdio próprio.', color: 'text-blue-600', bg: 'bg-blue-50' },
                       { icon: Server, title: 'Cloud VIP', desc: 'Infra preparada para alta escala.', color: 'text-slate-600', bg: 'bg-slate-100' }
                     ].map((item, i) => (
-                      <div key={i} className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm flex flex-col items-center text-center group hover:border-emerald-100 transition-all">
-                        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center mb-4 ${item.bg} ${item.color}`}>
+                      <div key={i} className="bg-white p-5 sm:p-6 rounded-[2rem] border border-slate-100 shadow-sm flex flex-col items-center text-center group hover:border-emerald-100 transition-all w-full max-w-full overflow-hidden h-auto">
+                        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center mb-4 shrink-0 ${item.bg} ${item.color}`}>
                             <item.icon size={22} />
                         </div>
-                        <h4 className="text-xs font-black text-slate-900 uppercase tracking-widest mb-2">{item.title}</h4>
-                        <p className="text-[11px] text-slate-500 font-medium leading-tight">{item.desc}</p>
+                        <h4 className="text-xs font-black text-slate-900 uppercase tracking-widest mb-2 whitespace-normal break-words w-full">{item.title}</h4>
+                        <p className="text-[11px] text-slate-500 font-medium leading-tight whitespace-normal break-words w-full">{item.desc}</p>
                       </div>
                     ))}
                 </div>
@@ -538,11 +521,11 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ user, onLogout, viewMode
 
         {/* ESTRUTURA DE APORTE EM FASES */}
         <section className="pt-8">
-           <div className="bg-white rounded-[2.5rem] border border-slate-200 p-10 shadow-sm relative overflow-hidden">
+           <div className="bg-white rounded-[2.5rem] border border-slate-200 p-6 sm:p-10 shadow-sm relative overflow-hidden">
               <div className="absolute top-0 left-0 w-full h-1 bg-slate-900 opacity-5"></div>
               
               <div className="flex items-center gap-3 mb-10">
-                 <div className="w-10 h-10 bg-slate-900 text-white rounded-xl flex items-center justify-center">
+                 <div className="w-10 h-10 bg-slate-900 text-white rounded-xl flex items-center justify-center shrink-0">
                     <Milestone size={20} />
                  </div>
                  <div>
@@ -625,7 +608,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ user, onLogout, viewMode
         </section>
 
         {/* BLOCO DE ENCERRAMENTO (CALL TO ACTION) */}
-        <section className="pt-12 pb-20 animate-in fade-in slide-in-from-bottom-10 duration-1000 delay-500">
+        <section className="pt-12 pb-20 animate-in fade-in slide-in-from-bottom-10 duration-1000 delay-500 px-4">
            <div className="flex flex-col items-center text-center">
               <div className="w-20 h-20 bg-indigo-600 rounded-full flex items-center justify-center mb-8 shadow-2xl shadow-indigo-200 animate-bounce">
                  <Handshake className="text-white" size={40} />
@@ -635,7 +618,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ user, onLogout, viewMode
                 “E aí Jabinha, está dentro com a gente?”
               </h2>
 
-              <div className="flex gap-4 w-full max-w-sm">
+              <div className="flex flex-col sm:flex-row gap-4 w-full max-w-sm">
                 <button 
                   onClick={() => alert("Decisão confirmada! Vamos juntos mudar Jacarepaguá. 🚀")}
                   className="flex-1 bg-slate-900 text-white font-black py-5 rounded-2xl shadow-xl active:scale-95 transition-all uppercase tracking-widest text-sm hover:bg-slate-800"
@@ -650,7 +633,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ user, onLogout, viewMode
                 </button>
               </div>
               
-              <p className="mt-8 text-[10px] font-black text-slate-400 uppercase tracking-[0.4em]">
+              <p className="mt-8 text-[10px] font-black text-slate-400 uppercase tracking-[0.4em] px-4">
                 A maior oportunidade da Freguesia espera por você
               </p>
            </div>
