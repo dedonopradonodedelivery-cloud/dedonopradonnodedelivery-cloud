@@ -19,9 +19,8 @@ import {
   Target,
   Layers,
   Repeat,
-  CheckCircle2,
-  TrendingDown,
-  BarChart3
+  BarChart3,
+  TrendingUp as TrendingIcon
 } from 'lucide-react';
 import { User as SupabaseUser } from '@supabase/supabase-js';
 
@@ -34,14 +33,12 @@ interface AdminPanelProps {
 const ADMIN_EMAIL = 'dedonopradonodedelivery@gmail.com';
 
 const KPICard: React.FC<{ icon: any, label: string, value: string }> = ({ icon: Icon, label, value }) => (
-  <div className="bg-[#111827] p-5 flex flex-col gap-2">
-    <div className="w-10 h-10 flex items-center justify-center bg-white/5 text-white rounded-none">
+  <div className="bg-[#111827] p-6 flex flex-col items-center justify-center text-center h-36 border border-white/5">
+    <div className="w-10 h-10 flex items-center justify-center bg-white/5 text-white mb-4">
       <Icon size={20} />
     </div>
-    <div>
-      <p className="text-[9px] font-black text-[#9CA3AF] uppercase tracking-[0.15em]">{label}</p>
-      <p className="text-2xl font-black text-white leading-tight mt-0.5 tracking-tighter">{value}</p>
-    </div>
+    <p className="text-[9px] font-black text-[#9CA3AF] uppercase tracking-[0.2em] mb-1.5">{label}</p>
+    <p className="text-2xl font-black text-white leading-none tracking-tighter">{value}</p>
   </div>
 );
 
@@ -64,185 +61,190 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ user, onNavigateToApp, o
   }
 
   const renderInvestorModel = () => (
-    <div className="animate-in slide-in-from-right duration-500 space-y-10 bg-[#0F172A] min-h-screen pb-24 text-white">
-      {/* Executive Header - Investor Palette */}
-      <div className="flex items-center justify-between px-6 pt-6">
+    <div className="animate-in slide-in-from-right duration-500 space-y-12 bg-[#0F172A] min-h-screen pb-32 text-white">
+      {/* Executive Header */}
+      <div className="flex items-center justify-between px-2 pt-8">
         <div className="flex items-center gap-5">
           <button 
             onClick={() => setActiveView('dashboard')}
-            className="p-1 text-[#9CA3AF] hover:text-[#059669] transition-colors"
+            className="p-2.5 bg-[#111827] text-[#9CA3AF] hover:text-[#059669] transition-colors border border-white/5"
           >
-            <ArrowLeft size={24} />
+            <ArrowLeft size={20} />
           </button>
           <div>
-            <h2 className="text-2xl font-black text-white uppercase tracking-tighter font-display">Modelo de Monetização</h2>
-            <p className="text-[10px] text-[#059669] font-black uppercase tracking-[0.2em] mt-1">Plano de Expansão e Receita JPA v1.1.2</p>
+            <h2 className="text-2xl font-black text-white uppercase tracking-tighter leading-none">Apresentação Executiva</h2>
+            <p className="text-[10px] text-[#059669] font-black uppercase tracking-[0.25em] mt-2">Modelo de Negócio e Monetização v1.1.2</p>
           </div>
         </div>
         <div className="hidden md:block">
-           <span className="px-4 py-1.5 bg-[#111827] text-[#9CA3AF] text-[9px] font-black uppercase tracking-[0.3em] border border-white/5">IP Protected</span>
+           <span className="px-5 py-2.5 bg-[#111827] text-[#9CA3AF] text-[10px] font-black uppercase tracking-[0.3em] border border-white/5">Strictly Confidential</span>
         </div>
       </div>
 
-      {/* Visão Geral */}
-      <section className="max-w-xl px-6">
-        <div className="flex items-center gap-2 mb-3">
-            <Globe size={14} className="text-[#059669]" />
-            <h3 className="text-[10px] font-black text-white uppercase tracking-[0.15em]">Visão Estratégica</h3>
-        </div>
-        <p className="text-[#9CA3AF] text-base leading-relaxed font-medium">
-          O Localizei JPA opera como um ecossistema de micro-ads geolocalizados. O modelo é focado em alta densidade por bairro, garantindo escalabilidade via replicação de inventário digital com custo marginal zero.
-        </p>
-      </section>
-
-      {/* Canais de Receita - Emerald Highlights */}
-      <div className="space-y-10 px-6">
-        
-        {/* 1. Patrocinador Master */}
-        <div className="space-y-4">
-          <div className="flex justify-between items-center max-w-lg">
-            <h4 className="font-black text-[10px] text-[#9CA3AF] uppercase tracking-[0.15em]">01. Patrocinador Master</h4>
-            <span className="text-white text-[8px] font-black uppercase tracking-widest bg-[#059669] px-2 py-0.5 shadow-lg shadow-[#059669]/20">Cota Única</span>
-          </div>
-          <p className="text-lg font-bold text-white max-w-lg">Posicionamento institucional fixo em todas as páginas do ecossistema.</p>
-          <div className="flex gap-8 items-baseline">
-            <div>
-                <p className="text-[8px] font-black text-[#9CA3AF] uppercase tracking-widest mb-1">Fee Mensal</p>
-                <p className="text-3xl font-black text-[#059669] tracking-tighter">R$ 4.000</p>
+      {/* Visão Estratégica - Reduzida para foco */}
+      <section className="px-2">
+        <div className="bg-[#111827] p-8 border border-white/5 relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-[#059669]/5 rounded-full blur-3xl pointer-events-none"></div>
+            <div className="flex items-center gap-3 mb-5">
+                <Globe size={16} className="text-[#059669]" />
+                <h3 className="text-[11px] font-black text-white uppercase tracking-[0.2em]">Visão Estratégica do Marketplace</h3>
             </div>
-            <div>
-                <p className="text-[8px] font-black text-[#9CA3AF]/40 uppercase tracking-widest mb-1">Mínimo Anual</p>
-                <p className="text-xl font-black text-white/20">R$ 48k</p>
-            </div>
-          </div>
-        </div>
-
-        {/* 2. Banners Home */}
-        <div className="space-y-5">
-          <h4 className="font-black text-[10px] text-[#9CA3AF] uppercase tracking-[0.15em]">02. Banners Home (9 Micro-regiões)</h4>
-          <p className="text-base text-[#9CA3AF] leading-relaxed max-w-lg">
-            Impacto visual no funil de entrada, segmentado por bairro do morador.
-          </p>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 py-6 bg-[#111827] px-8 border-l-2 border-[#059669]">
-            <div>
-              <p className="text-[9px] font-black text-[#9CA3AF] uppercase tracking-widest mb-1.5">Slots</p>
-              <p className="text-xl font-black text-white">36 Vagas</p>
-            </div>
-            <div>
-              <p className="text-[9px] font-black text-[#9CA3AF] uppercase tracking-widest mb-1.5">Ticket Médio</p>
-              <p className="text-xl font-black text-[#059669]">R$ 297</p>
-            </div>
-            <div className="text-right">
-              <p className="text-[9px] font-black text-[#9CA3AF] uppercase tracking-widest mb-1.5">Potencial/Mês</p>
-              <p className="text-xl font-black text-[#059669]">R$ 10.692</p>
-            </div>
-          </div>
-        </div>
-
-        {/* 3. Banners Categorias */}
-        <div className="space-y-5">
-          <h4 className="font-black text-[10px] text-[#9CA3AF] uppercase tracking-[0.15em]">03. Inventário de Categorias</h4>
-          <p className="text-base text-[#9CA3AF] leading-relaxed max-w-lg">
-            Ads por nicho (ex: Pet, Comida, Saúde) com alta intenção de compra.
-          </p>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 py-6 bg-[#111827] px-8 border-l-2 border-[#059669]">
-            <div>
-              <p className="text-[9px] font-black text-[#9CA3AF] uppercase tracking-widest mb-1.5">Capacidade</p>
-              <p className="text-xl font-black text-white">144 Slots</p>
-            </div>
-            <div>
-              <p className="text-[9px] font-black text-[#9CA3AF] uppercase tracking-widest mb-1.5">Ticket Médio</p>
-              <p className="text-xl font-black text-[#059669]">R$ 197</p>
-            </div>
-            <div className="text-right">
-              <p className="text-[9px] font-black text-[#9CA3AF] uppercase tracking-widest mb-1.5">Potencial/Mês</p>
-              <p className="text-xl font-black text-[#059669]">R$ 28.368</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Ads e Performance */}
-      <section className="space-y-6 px-6">
-        <div className="flex items-center gap-2">
-            <TrendingUp size={14} className="text-[#059669]" />
-            <h3 className="text-[10px] font-black text-white uppercase tracking-[0.15em]">Receita Recorrente (Micro-Ads)</h3>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-1">
-          {[
-            { label: 'Merchant Ads Básico', price: 'R$ 29/mês', desc: 'Presença garantida' },
-            { label: 'Merchant Ads Premium', price: 'R$ 117/mês', desc: 'Prioridade no topo' },
-            { label: 'HR Portal Jobs', price: 'R$ 57/vaga', desc: 'Recrutamento local' },
-            { label: 'Coupon Packs', price: 'R$ 39/sem', desc: 'Incentivo de fluxo' }
-          ].map((item, i) => (
-            <div key={i} className="flex justify-between items-center py-3 border-b border-white/5 last:border-0">
-               <div>
-                  <h5 className="font-black text-sm text-white uppercase tracking-tight">{item.label}</h5>
-                  <p className="text-[9px] text-[#9CA3AF] font-black uppercase mt-0.5 tracking-widest">{item.desc}</p>
-               </div>
-               <p className="font-black text-[#059669] text-sm">{item.price}</p>
-            </div>
-          ))}
+            <p className="text-[#9CA3AF] text-lg leading-relaxed font-medium max-w-2xl">
+              Plataforma hyperlocal projetada para Jacarepaguá. O modelo combina <span className="text-white">mídia programática de bairro</span> com ferramentas de performance B2B, escalando receitas com custo marginal próximo de zero.
+            </p>
         </div>
       </section>
 
-      {/* Performance Leads - Emerald CTA Style */}
-      <div className="bg-[#111827] mx-6 p-8 flex flex-col md:flex-row justify-between items-center gap-6 border border-[#059669]/20">
+      {/* BLOCO 01 - Patrocinador Master */}
+      <section className="px-2">
+        <div className="bg-[#111827] p-8 border border-white/5 space-y-6">
+          <div className="flex justify-between items-start">
+            <div>
+              <h4 className="font-black text-[11px] text-[#9CA3AF] uppercase tracking-[0.2em] mb-2">01. Patrocinador Master (Cota Global)</h4>
+              <p className="text-xl font-bold text-white max-w-md leading-snug">Exposição fixa e exclusiva em 100% dos pontos de contato do app.</p>
+            </div>
+            <span className="text-white text-[9px] font-black uppercase tracking-widest bg-[#059669] px-3 py-1 shadow-lg shadow-[#059669]/20">Inventory Sold Out</span>
+          </div>
+          
+          <div className="flex gap-12 items-end pt-4 border-t border-white/5">
+            <div>
+                <p className="text-[9px] font-black text-[#9CA3AF] uppercase tracking-[0.2em] mb-1.5">Recorrência Mensal</p>
+                <p className="text-5xl font-black text-[#059669] tracking-tighter tabular-nums">R$ 4.000</p>
+            </div>
+            <div className="pb-1">
+                <p className="text-[9px] font-black text-[#9CA3AF]/40 uppercase tracking-[0.2em] mb-1.5">Projeção Anual</p>
+                <p className="text-2xl font-black text-white/20 tabular-nums">R$ 48.000</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* BLOCOS 02 E 03 - Mídia de Display */}
+      <section className="px-2 space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Bloco 02 */}
+            <div className="bg-[#111827] p-8 border border-white/5 flex flex-col justify-between">
+                <div>
+                  <h4 className="font-black text-[11px] text-[#9CA3AF] uppercase tracking-[0.2em] mb-3">02. Banners Home (Microrregiões)</h4>
+                  <p className="text-sm text-[#9CA3AF] leading-relaxed mb-8">Segmentação geográfica por bairro para alta relevância local.</p>
+                </div>
+                <div className="space-y-4">
+                    <div className="flex justify-between items-end border-b border-white/5 pb-3">
+                        <span className="text-[10px] font-bold text-gray-500 uppercase">Capacidade</span>
+                        <span className="text-lg font-black text-white">36 Slots</span>
+                    </div>
+                    <div className="flex justify-between items-end">
+                        <span className="text-[10px] font-bold text-gray-500 uppercase">Teto de Receita</span>
+                        <span className="text-2xl font-black text-[#059669] tabular-nums">R$ 10.692</span>
+                    </div>
+                </div>
+            </div>
+
+            {/* Bloco 03 */}
+            <div className="bg-[#111827] p-8 border border-white/5 flex flex-col justify-between">
+                <div>
+                  <h4 className="font-black text-[11px] text-[#9CA3AF] uppercase tracking-[0.2em] mb-3">03. Banners Categorias (Nicho)</h4>
+                  <p className="text-sm text-[#9CA3AF] leading-relaxed mb-8">Segmentação por intenção de compra imediata por segmento.</p>
+                </div>
+                <div className="space-y-4">
+                    <div className="flex justify-between items-end border-b border-white/5 pb-3">
+                        <span className="text-[10px] font-bold text-gray-500 uppercase">Capacidade</span>
+                        <span className="text-lg font-black text-white">144 Slots</span>
+                    </div>
+                    <div className="flex justify-between items-end">
+                        <span className="text-[10px] font-bold text-gray-500 uppercase">Teto de Receita</span>
+                        <span className="text-2xl font-black text-[#059669] tabular-nums">R$ 28.368</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+      </section>
+
+      {/* PERFORMANCE ADS - LISTA ESTRUTURADA */}
+      <section className="px-2">
+        <div className="bg-[#111827] p-8 border border-white/5">
+            <div className="flex items-center gap-3 mb-10">
+                <TrendingIcon size={16} className="text-[#059669]" />
+                <h3 className="text-[11px] font-black text-white uppercase tracking-[0.2em]">Micro-Ads e Performance (PME)</h3>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-16 gap-y-2">
+              {[
+                { label: 'Ads Merchant Básico', price: 'R$ 29/mês', desc: 'Presença digital garantida no bairro' },
+                { label: 'Ads Merchant Premium', price: 'R$ 117/mês', desc: 'Algoritmo de prioridade no topo da lista' },
+                { label: 'Portal de Vagas JPA', price: 'R$ 57/vaga', desc: 'Recrutamento local de alta conversão' },
+                { label: 'Pack de Cupons Semanal', price: 'R$ 39/sem', desc: 'Ações de fluxo rápido de clientes' }
+              ].map((item, i) => (
+                <div key={i} className="flex justify-between items-center py-4 border-b border-white/5 last:md:border-b-0">
+                   <div className="max-w-[70%]">
+                      <h5 className="font-bold text-sm text-white uppercase tracking-tight mb-1">{item.label}</h5>
+                      <p className="text-[10px] text-[#9CA3AF] font-medium leading-relaxed">{item.desc}</p>
+                   </div>
+                   <p className="font-black text-[#059669] text-base tabular-nums whitespace-nowrap">{item.price}</p>
+                </div>
+              ))}
+            </div>
+        </div>
+      </section>
+
+      {/* LEADS MODEL - IMPACT BLOCK */}
+      <section className="px-2">
+        <div className="bg-[#111827] p-8 border border-[#059669]/30 flex flex-col md:flex-row justify-between items-center gap-8 relative overflow-hidden">
+          <div className="absolute top-0 left-0 w-2 h-full bg-[#059669]"></div>
           <div className="flex items-center gap-6">
-            <Zap size={28} className="text-[#059669]" fill="currentColor" />
-            <div>
-               <h4 className="text-xl font-black uppercase tracking-tighter leading-none text-white">Service Lead Model</h4>
-               <p className="text-[#9CA3AF] text-[10px] font-medium mt-1 uppercase tracking-widest">Cotações diretas em tempo real.</p>
+            <div className="w-16 h-16 bg-[#059669]/10 rounded-2xl flex items-center justify-center text-[#059669] border border-[#059669]/20">
+               <Zap size={32} fill="currentColor" className="animate-pulse" />
+            </div>
+            <div className="max-w-xs text-center md:text-left">
+               <h4 className="text-xl font-black uppercase tracking-tighter text-white">Modelo de Leads Diretos</h4>
+               <p className="text-[#9CA3AF] text-sm font-medium mt-1.5 leading-relaxed">Monetização por cotação gerada para prestadores de serviço em tempo real.</p>
             </div>
           </div>
           <div className="text-center md:text-right">
-            <p className="text-[8px] font-black text-[#9CA3AF] uppercase tracking-[0.2em] mb-1">CPA (Custo por Aquisição)</p>
-            <p className="text-4xl font-black text-[#059669] tracking-tighter leading-none">R$ 3,90</p>
+            <p className="text-[10px] font-black text-[#9CA3AF] uppercase tracking-[0.25em] mb-2">Custo Fixo por Lead</p>
+            <p className="text-5xl font-black text-[#059669] tracking-tighter tabular-nums">R$ 3,90</p>
           </div>
-      </div>
-
-      {/* Resumo Financeiro Final - Credibility Section */}
-      <section className="bg-[#111827] mx-6 p-10 border border-white/5 shadow-2xl">
-        <div className="flex items-center gap-3 mb-8">
-            <BarChart3 size={20} className="text-[#059669]" />
-            <h3 className="text-xl font-black uppercase tracking-tighter font-display text-white">Projeção Bruta Mensal</h3>
-        </div>
-        <div className="space-y-4 mb-10">
-            <div className="flex justify-between items-center opacity-80">
-                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[#9CA3AF]">Mídia Fixa (Master)</span>
-                <span className="text-base font-bold text-white">R$ 4.000</span>
-            </div>
-            <div className="flex justify-between items-center opacity-80">
-                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[#9CA3AF]">Display Geolocalizado (Home)</span>
-                <span className="text-base font-bold text-white">R$ 10.692</span>
-            </div>
-            <div className="flex justify-between items-center opacity-80">
-                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[#9CA3AF]">Display Segmentado (Categorias)</span>
-                <span className="text-base font-bold text-white">R$ 28.368</span>
-            </div>
-            <div className="h-px bg-white/5 mt-4"></div>
-        </div>
-        <div className="text-center md:text-right">
-            <p className="text-[10px] font-black text-[#059669] uppercase tracking-[0.3em] mb-2">Total Estimado de Mídia Estática</p>
-            <h2 className="text-7xl font-black tracking-tighter text-[#059669] leading-none">R$ 43.060<span className="text-2xl">,00</span></h2>
-            <p className="text-[9px] text-[#9CA3AF] mt-6 italic font-bold uppercase tracking-widest">Exclui comissões de transação e leads.</p>
         </div>
       </section>
 
-      {/* Strategic Values */}
-      <footer className="grid grid-cols-1 md:grid-cols-3 gap-8 px-6 pt-8 pb-16 opacity-60">
-        <div className="space-y-1.5">
-          <div className="flex items-center gap-2 text-[#059669]"><Repeat size={16} /><span className="font-black text-[9px] uppercase tracking-widest">Recorrência</span></div>
-          <p className="text-[11px] font-bold text-[#9CA3AF] leading-tight">Fluxo de caixa garantido por assinatura.</p>
-        </div>
-        <div className="space-y-1.5">
-          <div className="flex items-center gap-2 text-[#059669]"><Layers size={16} /><span className="font-black text-[9px] uppercase tracking-widest">Escalabilidade</span></div>
-          <p className="text-[11px] font-bold text-[#9CA3AF] leading-tight">Modelo replicável para qualquer bairro.</p>
-        </div>
-        <div className="space-y-1.5">
-          <div className="flex items-center gap-2 text-[#059669]"><Target size={16} /><span className="font-black text-[9px] uppercase tracking-widest">Atividade</span></div>
-          <p className="text-[11px] font-bold text-[#9CA3AF] leading-tight">Foco em ROAS para o lojista local.</p>
-        </div>
+      {/* FINAL FINANCIAL SUMMARY */}
+      <section className="px-2">
+          <div className="bg-white p-12 shadow-[0_35px_60px_-15px_rgba(0,0,0,0.5)] flex flex-col md:flex-row justify-between items-center gap-10">
+            <div className="text-center md:text-left space-y-2">
+                <div className="flex items-center gap-2 justify-center md:justify-start text-[#0F172A] opacity-30 mb-2">
+                    <BarChart3 size={16} />
+                    <span className="text-[10px] font-black uppercase tracking-[0.4em]">Finance Projection</span>
+                </div>
+                <h3 className="text-3xl font-black uppercase tracking-tighter text-[#0F172A]">Faturamento Potencial Mensal</h3>
+                <p className="text-gray-400 text-xs font-bold uppercase tracking-[0.2em]">Cenário Jacarepaguá Base v1.1.2</p>
+            </div>
+            <div className="text-center md:text-right">
+                <p className="text-[10px] font-black text-[#059669] uppercase tracking-[0.3em] mb-3">Total Bruto Estimado (Mídia Estática)</p>
+                <div className="flex items-baseline justify-center md:justify-end gap-1">
+                    <span className="text-2xl font-black text-[#059669]">R$</span>
+                    <h2 className="text-8xl font-black tracking-tighter text-[#059669] leading-none tabular-nums">43.060</h2>
+                </div>
+            </div>
+          </div>
+      </section>
+
+      {/* Strategic Footer */}
+      <footer className="grid grid-cols-1 md:grid-cols-3 gap-6 px-2 pt-6">
+        {[
+          { icon: Repeat, label: 'Recorrência', text: 'Cashflow baseado em assinaturas e créditos pré-pagos.' },
+          { icon: Layers, label: 'Escala Modular', text: 'Infraestrutura pronta para replicação em novas regiões.' },
+          { icon: Target, label: 'Atividade Real', text: 'Foco total em ROI e geração de valor para o lojista.' }
+        ].map((v, i) => (
+          <div key={i} className="bg-[#111827] p-6 border border-white/5 flex flex-col gap-4">
+            <div className="w-10 h-10 rounded-xl bg-[#059669]/5 flex items-center justify-center">
+                <v.icon size={20} className="text-[#059669]" />
+            </div>
+            <div>
+              <p className="font-black text-[10px] uppercase tracking-[0.25em] text-white mb-2">{v.label}</p>
+              <p className="text-xs font-medium text-[#9CA3AF] leading-relaxed">{v.text}</p>
+            </div>
+          </div>
+        ))}
       </footer>
     </div>
   );
@@ -250,110 +252,114 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ user, onNavigateToApp, o
   return (
     <div className="min-h-screen bg-[#0F172A] font-sans animate-in fade-in duration-500 flex flex-col overflow-x-hidden text-white">
       {/* Header Admin */}
-      <header className="bg-[#111827] text-white px-6 py-6 flex items-center justify-between shrink-0">
-        <div className="flex items-center gap-4">
-          <div className="w-10 h-10 bg-white text-[#0F172A] flex items-center justify-center">
-            <ShieldCheck size={24} strokeWidth={2.5} />
+      <header className="bg-[#111827] text-white px-6 py-8 flex items-center justify-between shrink-0 border-b border-white/5">
+        <div className="flex items-center gap-5">
+          <div className="w-14 h-14 bg-white text-[#0F172A] flex items-center justify-center shadow-lg">
+            <ShieldCheck size={32} strokeWidth={2.5} />
           </div>
           <div>
-            <h1 className="font-black text-lg uppercase tracking-tighter leading-none text-white">Painel ADM</h1>
-            <p className="text-[9px] font-black text-[#9CA3AF] uppercase tracking-[0.2em] mt-1.5">Localizei JPA Business</p>
+            <h1 className="font-black text-xl uppercase tracking-tighter leading-none text-white">Centro de Operações</h1>
+            <p className="text-[10px] font-black text-[#9CA3AF] uppercase tracking-[0.25em] mt-2.5">Painel Gestor Localizei v2.4</p>
           </div>
         </div>
         
         <div className="flex items-center gap-8">
           <button 
               onClick={onNavigateToApp}
-              className="text-[#9CA3AF] hover:text-white text-[9px] font-black uppercase tracking-widest transition-colors flex items-center gap-2"
+              className="hidden md:flex text-[#9CA3AF] hover:text-white text-[11px] font-black uppercase tracking-widest transition-colors items-center gap-2.5"
           >
-              <Eye size={16} /> Modo Usuário
+              <Eye size={18} /> Modo Usuário
           </button>
-          <button onClick={onLogout} className="text-[#9CA3AF] hover:text-red-500 transition-colors">
-            <LogOut size={20} />
+          <button onClick={onLogout} className="p-3 text-[#9CA3AF] hover:text-red-500 transition-colors bg-white/5 border border-white/5">
+            <LogOut size={22} />
           </button>
         </div>
       </header>
 
-      <main className="p-6 space-y-10 max-w-4xl mx-auto w-full bg-[#0F172A]">
+      <main className="p-6 max-w-5xl mx-auto w-full space-y-10">
         
         {activeView === 'dashboard' ? (
           <>
-            {/* KPIs */}
+            {/* Grid de KPIs Uniforme */}
             <section className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <KPICard icon={Users} label="Base Usuários" value="2.842" />
-                <KPICard icon={Store} label="Parceiros" value="156" />
-                <KPICard icon={DollarSign} label="Vendas Potenciais" value="R$ 43k" />
+                <KPICard icon={Users} label="Base Ativa" value="2.842" />
+                <KPICard icon={Store} label="Lojistas" value="156" />
+                <KPICard icon={DollarSign} label="Projeção" value="R$ 43k" />
                 <KPICard icon={TrendingUp} label="Crescimento" value="+412" />
             </section>
 
-            {/* Gestão Central */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {/* Gestão Central - Duas Colunas Equilibradas */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
                 
                 {/* Botão Monetização */}
                 <button 
                   onClick={() => setActiveView('monetization_model')}
-                  className="bg-[#111827] text-white p-8 flex flex-col items-center text-center gap-5 active:scale-[0.99] transition-all group"
+                  className="bg-white text-[#0F172A] p-10 flex flex-col items-center justify-center text-center gap-8 active:scale-[0.99] transition-all group border-0 shadow-[0_20px_50px_rgba(0,0,0,0.3)]"
                 >
-                    <div className="w-14 h-14 bg-white/5 flex items-center justify-center text-white">
-                        <Presentation size={28} />
+                    <div className="w-20 h-20 bg-[#0F172A] flex items-center justify-center text-white rounded-none">
+                        <Presentation size={40} />
                     </div>
                     <div>
-                      <h3 className="font-black text-2xl uppercase tracking-tighter">Modelo de Monetização</h3>
-                      <p className="text-xs text-[#9CA3AF] mt-2 font-bold leading-tight">Projeções, métricas e inventário detalhado para investidores.</p>
+                      <h3 className="font-black text-2xl uppercase tracking-tighter mb-3">Apresentação para Investidor</h3>
+                      <p className="text-sm text-gray-500 font-bold leading-relaxed max-w-[240px] mx-auto">Relatório analítico de monetização, teto de faturamento e inventário digital.</p>
                     </div>
-                    <div className="flex items-center gap-2 text-white text-[10px] font-black uppercase tracking-widest mt-1 group-hover:gap-4 transition-all">
-                        Abrir Relatório <ChevronRight size={14} />
+                    <div className="flex items-center gap-3 text-[#1E5BFF] text-[12px] font-black uppercase tracking-widest group-hover:gap-6 transition-all border-b-2 border-[#1E5BFF] pb-1">
+                        Acessar Estratégia <ChevronRight size={16} strokeWidth={3} />
                     </div>
                 </button>
 
                 {/* Lista de Novas Lojas */}
-                <div className="bg-[#111827] p-6 flex flex-col">
-                    <div className="flex justify-between items-center mb-4 px-1">
-                        <h3 className="text-[10px] font-black text-white uppercase tracking-[0.15em]">Solicitações</h3>
-                        <span className="text-amber-500 text-[9px] font-black uppercase tracking-widest animate-pulse">Pendente</span>
+                <div className="bg-[#111827] p-8 flex flex-col border border-white/5">
+                    <div className="flex justify-between items-center mb-8 px-1">
+                        <div>
+                          <h3 className="text-[11px] font-black text-white uppercase tracking-[0.2em] leading-none">Aguardando Ativação</h3>
+                          <p className="text-[10px] text-[#9CA3AF] mt-2 font-bold uppercase tracking-wider">Solicitações de novos lojistas</p>
+                        </div>
+                        <span className="text-amber-500 text-[10px] font-black uppercase tracking-widest animate-pulse flex items-center gap-2">
+                          <div className="w-2 h-2 rounded-full bg-amber-500"></div> 3 Novos
+                        </span>
                     </div>
-                    <div className="space-y-3">
+                    
+                    <div className="space-y-1 flex-1">
                         {[
                             { name: 'Sushi Taquara', cat: 'Alimentação' },
                             { name: 'Dra. Ana Pet', cat: 'Saúde' },
                             { name: 'Mecânica JPA', cat: 'Autos' }
                         ].map((item, i) => (
-                            <div key={i} className="px-2 py-3.5 flex items-center justify-between hover:bg-white/5 transition-colors cursor-pointer group">
-                                <div className="flex items-center gap-4">
-                                    <div className="w-9 h-9 bg-white/5 flex items-center justify-center text-[#9CA3AF] group-hover:bg-white group-hover:text-[#0F172A] transition-colors">
-                                        <Store size={18} />
+                            <div key={i} className="px-4 py-5 flex items-center justify-between hover:bg-white/5 transition-colors cursor-pointer group border-b border-white/5 last:border-0">
+                                <div className="flex items-center gap-5">
+                                    <div className="w-12 h-12 bg-white/5 flex items-center justify-center text-[#9CA3AF] group-hover:bg-white group-hover:text-[#0F172A] transition-colors shadow-inner">
+                                        <Store size={22} />
                                     </div>
                                     <div>
-                                        <p className="text-sm font-black text-white tracking-tight leading-none mb-1">{item.name}</p>
-                                        <p className="text-[9px] text-[#9CA3AF] uppercase font-black tracking-widest">{item.cat}</p>
+                                        <p className="text-base font-bold text-white tracking-tight leading-none mb-2">{item.name}</p>
+                                        <p className="text-[10px] text-[#9CA3AF] uppercase font-black tracking-[0.15em]">{item.cat}</p>
                                     </div>
                                 </div>
-                                <ChevronRight className="text-white/20 group-hover:text-white transition-colors" size={20} />
+                                <ChevronRight className="text-white/10 group-hover:text-[#1E5BFF] transition-colors" size={24} />
                             </div>
                         ))}
                     </div>
-                    <button className="mt-6 text-[9px] font-black text-[#9CA3AF] uppercase tracking-[0.3em] text-center hover:text-white transition-colors">Ver todas</button>
+                    
+                    <button className="mt-10 py-5 text-[11px] font-black text-[#9CA3AF] uppercase tracking-[0.4em] text-center hover:text-white transition-colors border-t border-white/5">
+                        Gerenciar todos os pedidos
+                    </button>
                 </div>
             </div>
 
-            {/* Quick Actions Bar */}
+            {/* Ações Rápidas - Grid 4 Colunas */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <button className="bg-[#111827] p-5 flex flex-col items-center gap-2 active:bg-white active:text-[#0F172A] transition-all group">
-                    <Zap className="text-white group-active:text-[#0F172A]" size={20} />
-                    <span className="text-[9px] font-black uppercase tracking-[0.15em] text-[#9CA3AF] group-active:text-[#0F172A]">Push Global</span>
-                </button>
-                <button className="bg-[#111827] p-5 flex flex-col items-center gap-2 active:bg-white active:text-[#0F172A] transition-all group">
-                    <Globe className="text-white group-active:text-[#0F172A]" size={20} />
-                    <span className="text-[9px] font-black uppercase tracking-[0.15em] text-[#9CA3AF] group-active:text-[#0F172A]">Broadcast</span>
-                </button>
-                <button className="bg-[#111827] p-5 flex flex-col items-center gap-2 active:bg-white active:text-[#0F172A] transition-all group">
-                    <Mail className="text-white group-active:text-[#0F172A]" size={20} />
-                    <span className="text-[9px] font-black uppercase tracking-[0.15em] text-[#9CA3AF] group-active:text-[#0F172A]">Newsletter</span>
-                </button>
-                <button className="bg-[#111827] p-5 flex flex-col items-center gap-2 active:bg-white active:text-[#0F172A] transition-all group">
-                    <Search className="text-white group-active:text-[#0F172A]" size={20} />
-                    <span className="text-[9px] font-black uppercase tracking-[0.15em] text-[#9CA3AF] group-active:text-[#0F172A]">Audit Logs</span>
-                </button>
+                {[
+                  { icon: Zap, label: 'Push Global' },
+                  { icon: Globe, label: 'Broadcast' },
+                  { icon: Mail, label: 'Newsletter' },
+                  { icon: Search, label: 'Audit Logs' }
+                ].map((act, i) => (
+                  <button key={i} className="bg-[#111827] p-8 flex flex-col items-center gap-4 border border-white/5 active:bg-white active:text-[#0F172A] transition-all group shadow-lg">
+                      <act.icon className="text-[#9CA3AF] group-active:text-[#0F172A]" size={24} />
+                      <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[#9CA3AF] group-active:text-[#0F172A]">{act.label}</span>
+                  </button>
+                ))}
             </div>
           </>
         ) : (
@@ -362,8 +368,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ user, onNavigateToApp, o
 
       </main>
 
-      <footer className="mt-auto py-10 text-center opacity-40">
-        <p className="text-[9px] font-black uppercase tracking-[0.7em] text-[#9CA3AF]">Localizei JPA Core 1.1.2</p>
+      <footer className="mt-auto py-12 text-center opacity-40">
+        <p className="text-[10px] font-black uppercase tracking-[0.8em] text-[#9CA3AF]">Localizei JPA Core Enterprise 1.1.2</p>
       </footer>
     </div>
   );
