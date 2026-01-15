@@ -1,6 +1,5 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-/* Added Store as StoreIcon to imports from lucide-react to fix "Cannot find name 'StoreIcon'" error */
 import { Star, Loader2, AlertCircle, BadgeCheck, Heart, Award, Eye, Rocket, Crown, Store as StoreIcon } from 'lucide-react';
 import { Store, AdType } from '../types';
 import { useFavorites } from '../hooks/useFavorites';
@@ -35,7 +34,7 @@ const generateFakeStores = (count: number): Store[] => {
       name: `${CATEGORIES_MOCK[catIndex]} ${['da Vila', 'Express', 'Premium', 'do Bairro', 'Center', 'Point'][i % 6]}`,
       category: CATEGORIES_MOCK[catIndex],
       subcategory: 'Geral',
-      logoUrl: '', // Gerado pelo utilitário mockLogos se disponível ou placeholder
+      logoUrl: '', 
       rating: Number((4.0 + Math.random() * 1.0).toFixed(1)),
       reviewsCount: Math.floor(Math.random() * 300) + 5,
       description: 'O melhor atendimento da região, venha conferir nossas ofertas.',
@@ -96,7 +95,6 @@ export const LojasEServicosList: React.FC<LojasEServicosListProps> = ({ onStoreC
     const initialPool = generateFakeStores(TOTAL_MOCK_COUNT);
     setPool(initialPool);
     
-    // Filtro inicial e ordenação
     let filtered = [...initialPool];
     if (premiumOnly) {
       filtered = filtered.filter(s => s.adType === AdType.PREMIUM || s.isSponsored);
@@ -115,16 +113,12 @@ export const LojasEServicosList: React.FC<LojasEServicosListProps> = ({ onStoreC
     if (loading) return;
     setLoading(true);
     
-    // Simula delay de rede
     setTimeout(() => {
       setVisibleStores(prev => {
-        // Se chegarmos perto do fim do pool, geramos mais ou re-embaralhamos
         const nextBatchSize = ITEMS_PER_PAGE;
         const currentCount = prev.length;
-        
         let moreItems: Store[] = [];
         
-        // Lógica de loop infinito: se o pool acabar, gera um novo re-embaralhado
         if (currentCount + nextBatchSize > pool.length) {
             const extra = generateFakeStores(TOTAL_MOCK_COUNT).sort(() => Math.random() - 0.5);
             setPool(currentPool => [...currentPool, ...extra]);
@@ -132,11 +126,10 @@ export const LojasEServicosList: React.FC<LojasEServicosListProps> = ({ onStoreC
         } else {
             moreItems = pool.slice(currentCount, currentCount + nextBatchSize);
         }
-        
         return [...prev, ...moreItems];
       });
       setLoading(false);
-    }, 1000);
+    }, 800);
   }, [loading, pool]);
 
   const lastElementRef = useCallback((node: HTMLDivElement) => {
@@ -159,8 +152,6 @@ export const LojasEServicosList: React.FC<LojasEServicosListProps> = ({ onStoreC
   return (
     <div className="flex flex-col w-full">
       <div className="flex flex-col gap-4 pb-6">
-        
-        {/* Card Fixo do Patrocinador Master no topo apenas se não estiver filtrando drasticamente */}
         {activeFilter === 'all' && (
           <div
             onClick={() => onNavigate && onNavigate('patrocinador_master')}
@@ -187,7 +178,6 @@ export const LojasEServicosList: React.FC<LojasEServicosListProps> = ({ onStoreC
           </div>
         )}
         
-        {/* Lista Infinita */}
         {visibleStores.map((store, index) => {
             const isLast = index === visibleStores.length - 1;
             const isFavorited = isFavorite(store.id);
@@ -205,10 +195,8 @@ export const LojasEServicosList: React.FC<LojasEServicosListProps> = ({ onStoreC
                           <span className="text-[9px] font-black px-2 py-0.5 rounded bg-[#1E5BFF] text-white shadow-md uppercase tracking-widest">Ads</span>
                       </div>
                     )}
-
                     <div className="w-20 h-20 flex-shrink-0 relative rounded-xl overflow-hidden bg-gray-50 dark:bg-gray-700 border border-gray-100 dark:border-gray-600">
                         <div className="w-full h-full flex items-center justify-center text-gray-300">
-                            {/* Placeholder robusto */}
                             <StoreIcon className="w-8 h-8 opacity-20" />
                         </div>
                         {store.cashback && (
@@ -217,14 +205,12 @@ export const LojasEServicosList: React.FC<LojasEServicosListProps> = ({ onStoreC
                             </div>
                         )}
                     </div>
-
                     <div className="flex-1 flex flex-col justify-center min-w-0">
                         <div className="flex items-center gap-1.5 mb-0.5">
                             <h4 className="font-bold text-gray-900 dark:text-white text-sm truncate">{store.name}</h4>
                             {store.verified && <BadgeCheck className="w-3.5 h-3.5 text-[#1E5BFF] fill-white shrink-0" />}
                         </div>
                         <p className="text-[11px] text-gray-500 dark:text-gray-400 truncate">{store.category} • {store.neighborhood}</p>
-
                         <div className="flex items-center gap-3 text-[10px] text-gray-400 mt-2">
                              <div className="flex items-center gap-0.5 text-yellow-600 font-bold">
                                 <Star className="w-3 h-3 fill-current" />
@@ -232,12 +218,9 @@ export const LojasEServicosList: React.FC<LojasEServicosListProps> = ({ onStoreC
                              </div>
                              <span className="w-1 h-1 bg-gray-200 rounded-full"></span>
                              <span>{store.distance}</span>
-                             {store.isOpenNow && (
-                                <span className="text-emerald-500 font-bold">Aberto</span>
-                             )}
+                             {store.isOpenNow && <span className="text-emerald-500 font-bold">Aberto</span>}
                         </div>
                     </div>
-                    
                     <button onClick={(e) => handleToggleFavorite(e, store.id)} className={`absolute bottom-3 right-3 w-8 h-8 rounded-full flex items-center justify-center transition-all ${isFavorited ? 'text-red-500' : 'text-gray-300 hover:text-red-400'}`}>
                         <Heart className={`w-4 h-4 ${isFavorited ? 'fill-current' : ''}`} />
                     </button>
@@ -245,8 +228,6 @@ export const LojasEServicosList: React.FC<LojasEServicosListProps> = ({ onStoreC
             );
         })}
       </div>
-
-      {/* Loading Indicator */}
       <div className="w-full flex justify-center py-10">
         <div className="flex flex-col items-center gap-2">
             <Loader2 className="w-6 h-6 text-[#1E5BFF] animate-spin" />

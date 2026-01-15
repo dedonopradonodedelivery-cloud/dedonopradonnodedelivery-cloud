@@ -58,7 +58,9 @@ import {
   SponsorInfoView 
 } from './components/SimplePages';
 
-let isFirstBootAttempted = false;
+// Global flag to prevent splash reload in the same session
+let splashWasShownInSession = false;
+
 const ADMIN_EMAIL = 'dedonopradonodedelivery@gmail.com';
 const MAIN_TABS = ['home', 'explore', 'user_cupom', 'qrcode_scan', 'services', 'community_feed'];
 
@@ -68,8 +70,8 @@ const App: React.FC = () => {
   const { user, userRole, loading: isAuthInitialLoading, signOut } = useAuth();
   const isAuthReturn = window.location.hash.includes('access_token') || window.location.search.includes('code=');
   
-  // 0: Logo fade-in, 1: Typewriter starts, 2: Animation running, 3: Fade-out, 4: Gone
-  const [splashStage, setSplashStage] = useState(isFirstBootAttempted || isAuthReturn ? 4 : 0);
+  // 0: Logo fade-in, 1: Typewriter starts, 3: Fade-out, 4: Gone
+  const [splashStage, setSplashStage] = useState(splashWasShownInSession || isAuthReturn ? 4 : 0);
   const [themeMode, setThemeMode] = useState<ThemeMode>(() => (localStorage.getItem('localizei_theme_mode') as ThemeMode) || 'light');
   const [isDarkMode, setIsDarkMode] = useState(false);
 
@@ -107,26 +109,29 @@ const App: React.FC = () => {
     localStorage.setItem('localizei_active_tab', activeTab);
   }, [activeTab]);
 
+  // FIXED SPLASH LOGIC: Runs only once on mount
   useEffect(() => {
     if (splashStage === 4) return;
     
-    // 0s -> 0.5s: Fade in Logo
-    // 0.5s -> 2.5s: Typewriter Sponsor
-    // 4.0s -> 5.0s: App Fade Out
+    // Stage logic:
+    // 0s: Logo appears (CSS animation)
+    // 0.5s: Typewriter text starts
+    // 4.0s: Fade out starts
+    // 5.0s: Splash is gone
     
-    const tStartTypewriter = setTimeout(() => setSplashStage(1), 500);
-    const tStartFadeOut = setTimeout(() => setSplashStage(3), 4000);
-    const tFinished = setTimeout(() => {
+    const t1 = setTimeout(() => setSplashStage(1), 500);
+    const t2 = setTimeout(() => setSplashStage(3), 4000);
+    const t3 = setTimeout(() => {
         setSplashStage(4);
-        isFirstBootAttempted = true;
+        splashWasShownInSession = true;
     }, 5000);
 
     return () => {
-        clearTimeout(tStartTypewriter);
-        clearTimeout(tStartFadeOut);
-        clearTimeout(tFinished);
+        clearTimeout(t1);
+        clearTimeout(t2);
+        clearTimeout(t3);
     };
-  }, [splashStage]);
+  }, []); // Dependencies empty to prevent looping on state changes
 
   useEffect(() => {
     const applyTheme = () => {
