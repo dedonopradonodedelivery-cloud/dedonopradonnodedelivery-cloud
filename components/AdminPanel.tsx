@@ -54,7 +54,7 @@ import {
   Info,
   Scale,
   Megaphone,
-  Image as ImageIcon,
+  ImageIcon,
   Flame,
   Milestone,
   History
@@ -252,8 +252,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ user, onLogout, viewMode
         </section>
 
         {/* FASE V2 — NOVAS FRENTES DE MONETIZAÇÃO */}
-        <section className="pt-8 space-y-10 animate-in fade-in duration-700">
-           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-slate-200 pb-6">
+        <section className="pt-8 space-y-10 animate-in fade-in duration-700 w-full">
+           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-slate-200 pb-6 w-full">
               <div>
                  <div className="flex items-center gap-2 mb-2">
                     <Sparkles className="text-indigo-600" size={22} />
@@ -268,9 +268,9 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ user, onLogout, viewMode
               </div>
            </div>
 
-           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+           <div className="flex flex-col gap-6 w-full">
               {/* Cashback entre Lojas */}
-              <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm flex flex-col justify-between hover:border-indigo-300 transition-all group">
+              <div className="w-full bg-white p-6 rounded-3xl border border-slate-200 shadow-sm flex flex-col justify-between hover:border-indigo-300 transition-all group">
                  <div>
                     <div className="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                        <Handshake size={24} />
@@ -293,7 +293,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ user, onLogout, viewMode
               </div>
 
               {/* Agência Localizei */}
-              <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm flex flex-col justify-between hover:border-indigo-300 transition-all group">
+              <div className="w-full bg-white p-6 rounded-3xl border border-slate-200 shadow-sm flex flex-col justify-between hover:border-indigo-300 transition-all group">
                  <div>
                     <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                        <BarChart3 size={24} />
@@ -316,7 +316,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ user, onLogout, viewMode
               </div>
 
               {/* Plano Pet */}
-              <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm flex flex-col justify-between hover:border-indigo-300 transition-all group">
+              <div className="w-full bg-white p-6 rounded-3xl border border-slate-200 shadow-sm flex flex-col justify-between hover:border-indigo-300 transition-all group">
                  <div>
                     <div className="w-12 h-12 bg-amber-50 text-amber-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                        <Percent size={24} />
@@ -339,7 +339,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ user, onLogout, viewMode
               </div>
 
               {/* Espaço Físico */}
-              <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm flex flex-col justify-between hover:border-indigo-300 transition-all group">
+              <div className="w-full bg-white p-6 rounded-3xl border border-slate-200 shadow-sm flex flex-col justify-between hover:border-indigo-300 transition-all group">
                  <div>
                     <div className="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                        <Building2 size={24} />
@@ -356,7 +356,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ user, onLogout, viewMode
               </div>
 
               {/* Podcast */}
-              <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm flex flex-col justify-between hover:border-indigo-300 transition-all group">
+              <div className="w-full bg-white p-6 rounded-3xl border border-slate-200 shadow-sm flex flex-col justify-between hover:border-indigo-300 transition-all group">
                  <div>
                     <div className="w-12 h-12 bg-rose-50 text-rose-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                        <Mic size={24} />
@@ -373,7 +373,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ user, onLogout, viewMode
               </div>
 
               {/* Note about XXXX */}
-              <div className="bg-indigo-600 p-8 rounded-3xl shadow-xl flex flex-col justify-center items-center text-center text-white relative overflow-hidden">
+              <div className="w-full bg-indigo-600 p-8 rounded-3xl shadow-xl flex flex-col justify-center items-center text-center text-white relative overflow-hidden">
                  <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl -mr-16 -mt-16"></div>
                  <Info className="mb-4 opacity-50" size={24} />
                  <h4 className="text-sm font-black uppercase tracking-widest mb-3">Nota Estratégica</h4>
