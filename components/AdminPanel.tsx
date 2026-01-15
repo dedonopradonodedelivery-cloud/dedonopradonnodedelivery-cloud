@@ -42,7 +42,11 @@ import {
   Calendar,
   Rocket,
   LineChart,
-  ArrowUp
+  ArrowUp,
+  Coins,
+  Handshake,
+  Dices,
+  Sparkles
 } from 'lucide-react';
 import { User as SupabaseUser } from '@supabase/supabase-js';
 
@@ -106,7 +110,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ user, onLogout, viewMode
               </span>
             </div>
             <p className="text-[10px] font-bold text-slate-400 mt-1 uppercase tracking-widest">
-              Evolução do Faturamento • Jacarepaguá v1.1.2
+              Evolução e Expansão • Jacarepaguá v1.1.2
             </p>
           </div>
         </div>
@@ -120,7 +124,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ user, onLogout, viewMode
         </div>
       </header>
 
-      <main className="p-8 max-w-5xl mx-auto w-full space-y-12 pb-32">
+      <main className="p-8 max-w-5xl mx-auto w-full space-y-12 pb-48">
         
         {/* CENÁRIO 1: INAUGURAÇÃO (DETALHADO) */}
         <section className="animate-in slide-in-from-bottom-2 duration-500">
@@ -186,7 +190,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ user, onLogout, viewMode
            </div>
         </section>
 
-        {/* ROADMAP DE CRESCIMENTO */}
+        {/* ROADMAP DE ESCALABILIDADE (EXISTENTE) */}
         <section className="space-y-6">
            <div className="flex items-center gap-2 mb-2">
               <LineChart className="text-indigo-600" size={20} />
@@ -194,7 +198,6 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ user, onLogout, viewMode
            </div>
 
            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* CENÁRIO 2 */}
               <div className="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm relative overflow-hidden group hover:border-indigo-200 transition-all">
                  <div className="flex justify-between items-start mb-6">
                     <div>
@@ -215,44 +218,122 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ user, onLogout, viewMode
                  </div>
               </div>
 
-              {/* CENÁRIO 3 - HIGHLIGHTED */}
-              <div className="bg-slate-900 p-8 rounded-2xl border border-slate-800 shadow-lg relative overflow-hidden group">
-                 <div className="absolute top-0 right-0 w-32 h-32 bg-[#059669]/10 rounded-full blur-3xl pointer-events-none"></div>
+              <div className="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm relative overflow-hidden group hover:border-indigo-200 transition-all">
                  <div className="flex justify-between items-start mb-6">
                     <div>
-                       <span className="text-[10px] font-black text-[#059669] uppercase tracking-widest bg-[#059669]/10 px-2 py-1 rounded">Cenário 3</span>
-                       <h3 className="text-lg font-black text-white mt-3 uppercase tracking-tight">1 Ano de Operação</h3>
+                       <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest bg-slate-100 px-2 py-1 rounded">Cenário 3</span>
+                       <h3 className="text-lg font-black text-slate-900 mt-3 uppercase tracking-tight">1 Ano de Operação</h3>
                     </div>
-                    <div className="w-10 h-10 bg-white/5 rounded-xl flex items-center justify-center text-[#059669]">
+                    <div className="w-10 h-10 bg-slate-50 rounded-xl flex items-center justify-center text-slate-400">
                        <TrendingUp size={20} />
                     </div>
                  </div>
-                 <p className="text-xs text-slate-400 leading-relaxed mb-8">
-                    Base consolidada com 70% de ocupação média e crescimento orgânico através de parcerias B2B.
+                 <p className="text-xs text-slate-500 leading-relaxed mb-8">
+                    Base consolidada com 70% de ocupação média e crescimento orgânico conservador.
                  </p>
-                 <div className="flex items-baseline gap-2 pt-6 border-t border-white/5">
-                    <span className="text-xs font-bold text-[#059669]">R$</span>
-                    <span className="text-4xl font-black text-[#059669] tabular-nums">85.000<span className="text-lg ml-1 opacity-60">+</span></span>
-                    <span className="text-[10px] font-bold text-[#059669]/60 uppercase ml-2 tracking-widest">/mês</span>
+                 <div className="flex items-baseline gap-2 pt-6 border-t border-slate-100">
+                    <span className="text-xs font-bold text-slate-400">R$</span>
+                    <span className="text-3xl font-black text-slate-900 tabular-nums">85.000<span className="text-lg ml-1 opacity-60">+</span></span>
+                    <span className="text-[10px] font-bold text-slate-400 uppercase ml-2 tracking-widest">/mês</span>
                  </div>
               </div>
            </div>
         </section>
 
-        {/* THE BOTTOM LINE (INVESTOR MESSAGE) */}
-        <section className="pt-6">
-           <div className="bg-indigo-50 border border-indigo-100 p-8 rounded-2xl">
-              <div className="flex items-center gap-3 mb-4">
-                 <CheckCircle2 className="text-indigo-600" size={20} />
-                 <h3 className="text-sm font-bold text-slate-900 uppercase">Mensagem para o Investidor</h3>
+        {/* --- NOVO BLOCO: FASE V2 --- */}
+        <section className="pt-8 space-y-6">
+           <div className="flex items-center gap-2 mb-2">
+              <Sparkles className="text-indigo-600" size={20} />
+              <h2 className="text-sm font-black text-slate-900 uppercase tracking-wider">Fase V2 — Novas Frentes de Monetização</h2>
+           </div>
+
+           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {/* 1. CASHBACK ENTRE LOJAS */}
+              <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between hover:border-indigo-200 transition-all">
+                <div>
+                   <div className="w-10 h-10 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center mb-5">
+                      <Handshake size={20} />
+                   </div>
+                   <h3 className="text-base font-bold text-slate-900 mb-2 leading-tight">Cashback entre Lojas</h3>
+                   <p className="text-[11px] text-gray-500 leading-relaxed mb-6">Taxa de resgate de 1,99% sobre vendas via ecossistema. Simulação com 5% de adoção da base total.</p>
+                </div>
+                <div className="pt-4 border-t border-slate-50">
+                    <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-1">Potencial Mensal</span>
+                    <p className="text-lg font-black text-[#059669]">R$ 49.750,00</p>
+                </div>
               </div>
-              <p className="text-sm text-slate-600 leading-relaxed">
-                O Localizei JPA apresenta um roadmap financeiro sustentável: inicia com <strong>R$ 17 mil/mês</strong> em fase promocional, escala para <strong>R$ 49 mil/mês</strong> com a maturidade comercial e atinge o teto de <strong>R$ 85 mil/mês</strong> ao completar 1 ano. É um modelo de alta margem, low-asset e extremamente replicável para novos CEPs.
-              </p>
-              <div className="mt-8 flex flex-wrap gap-6 text-[10px] font-black text-indigo-400 uppercase tracking-widest">
-                 <div className="flex items-center gap-1.5"><ArrowUp size={14} /> Receita Recorrente</div>
-                 <div className="flex items-center gap-1.5"><Layers size={14} /> Escalabilidade Regional</div>
-                 <div className="flex items-center gap-1.5"><Briefcase size={14} /> Modelo B2B/B2C</div>
+
+              {/* 2. AGÊNCIA LOCALIZEI */}
+              <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between hover:border-indigo-200 transition-all">
+                <div>
+                   <div className="w-10 h-10 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center mb-5">
+                      <BarChart3 size={20} />
+                   </div>
+                   <h3 className="text-base font-bold text-slate-900 mb-2 leading-tight">Agência Localizei</h3>
+                   <p className="text-[11px] text-gray-500 leading-relaxed mb-6">Performance e tráfego pago para lojistas. 30 clientes ativos com ticket de R$ 1.000/mês.</p>
+                </div>
+                <div className="pt-4 border-t border-slate-50">
+                    <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-1">Potencial Mensal</span>
+                    <p className="text-lg font-black text-[#059669]">R$ 30.000,00</p>
+                </div>
+              </div>
+
+              {/* 3. PLANO PET */}
+              <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between hover:border-indigo-200 transition-all">
+                <div>
+                   <div className="w-10 h-10 bg-amber-50 text-amber-600 rounded-xl flex items-center justify-center mb-5">
+                      <Briefcase size={20} />
+                   </div>
+                   <h3 className="text-base font-bold text-slate-900 mb-2 leading-tight">Plano Pet (Ads)</h3>
+                   <p className="text-[11px] text-gray-500 leading-relaxed mb-6">Assinatura mensal para acesso a audiência segmentada. 100 lojistas (20% do nicho).</p>
+                </div>
+                <div className="pt-4 border-t border-slate-50">
+                    <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-1">Potencial Mensal</span>
+                    <p className="text-lg font-black text-[#059669]">R$ 4.990,00</p>
+                </div>
+              </div>
+           </div>
+
+           <div className="bg-indigo-50 border border-indigo-100 p-6 rounded-2xl flex flex-col md:flex-row items-center justify-between gap-4">
+              <div>
+                 <h4 className="text-xs font-black text-indigo-600 uppercase tracking-widest mb-1">Total Adicional Fase V2</h4>
+                 <p className="text-xs text-indigo-400 font-medium italic">Novas frentes de volume e margem</p>
+              </div>
+              <div className="flex items-baseline gap-2">
+                 <span className="text-lg font-black text-[#059669]">R$</span>
+                 <span className="text-4xl font-black text-[#059669] tracking-tighter">84.740</span>
+              </div>
+           </div>
+        </section>
+
+        {/* --- CONSOLIDAÇÃO FINAL --- */}
+        <section className="pt-12">
+           <div className="bg-slate-900 p-12 rounded-[2rem] border border-white/10 shadow-2xl relative overflow-hidden text-center">
+              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[#059669] to-transparent opacity-40"></div>
+              
+              <div className="relative z-10 flex flex-col items-center">
+                 <div className="flex items-center gap-2 mb-6">
+                    <Target className="text-[#059669]" size={20} />
+                    <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.4em]">Faturamento Mensal Consolidado</span>
+                 </div>
+                 
+                 <div className="flex items-baseline justify-center gap-3 mb-4">
+                   <span className="text-3xl font-black text-[#059669]">R$</span>
+                   <h1 className="text-8xl font-black tracking-tighter text-[#059669] leading-none tabular-nums">133.740</h1>
+                 </div>
+                 
+                 <p className="text-slate-400 font-bold uppercase tracking-[0.25em] text-xs mb-10">
+                   Cenário Operação Core + Fases de Expansão V2
+                 </p>
+
+                 <div className="w-full max-w-2xl bg-white/5 border border-white/5 rounded-2xl p-6 text-left">
+                    <h4 className="text-xs font-bold text-white uppercase mb-4 flex items-center gap-2">
+                       <CheckCircle2 size={16} className="text-[#059669]" /> Mensagem Final para o Investidor
+                    </h4>
+                    <p className="text-sm text-slate-400 leading-relaxed font-medium">
+                       Após a fase de maturação comercial (3 meses) e a ativação sequencial das frentes de monetização da Fase V2, o ecossistema Localizei JPA atinge aproximadamente <strong>R$ 134.000,00</strong> em faturamento recorrente. Este modelo preserva premissas conservadoras de adoção, capitalizando sobre o efeito de rede e dados proprietários do bairro com baixa dependência de custos operacionais fixos.
+                    </p>
+                 </div>
               </div>
            </div>
         </section>
@@ -308,7 +389,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ user, onLogout, viewMode
       <section className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <KPICard icon={Users} label="Base Ativa" value="2.842" />
           <KPICard icon={Store} label="Lojistas" value="156" />
-          <KPICard icon={DollarSign} label="Projeção" value="R$ 85k" isPositive />
+          <KPICard icon={DollarSign} label="Projeção" value="R$ 134k" isPositive />
           <KPICard icon={TrendingUp} label="Crescimento" value="+412" isPositive />
       </section>
 
@@ -326,7 +407,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ user, onLogout, viewMode
                 <p className="text-xs text-[#9CA3AF] font-bold leading-relaxed max-w-[240px] mx-auto">Relatório analítico de teto de faturamento e evolução de receita.</p>
               </div>
               <div className="flex items-center gap-3 text-[#059669] text-[10px] font-black uppercase tracking-widest group-hover:gap-6 transition-all border-b border-[#059669]/30 pb-1">
-                  Ver Evolução <ArrowUpRight size={14} strokeWidth={3} />
+                  Ver Projeções <ArrowUpRight size={14} strokeWidth={3} />
               </div>
           </button>
 
