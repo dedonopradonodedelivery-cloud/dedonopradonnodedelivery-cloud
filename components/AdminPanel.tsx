@@ -513,54 +513,62 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ user, onLogout, viewMode
            </div>
         </section>
 
-        {/* --- APORTE MÍNIMO RECOMENDADO (CENÁRIO 1) --- */}
-        <section className="space-y-10">
-           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 px-1">
-              <div>
-                 <div className="flex items-center gap-2 mb-3">
-                    <Coins className="text-indigo-600" size={22} />
-                    <h2 className="text-lg font-black text-slate-900 uppercase tracking-tighter">Aporte Mínimo Recomendado — Cenário 1</h2>
+        {/* APORTE MÍNIMO RECOMENDADO — CENÁRIO 1 */}
+        <section className="w-full pt-8">
+           <div className="max-w-[420px] mx-auto w-full px-4 space-y-8 flex flex-col items-center">
+              
+              {/* Título com ícone acima */}
+              <div className="flex flex-col items-center text-center">
+                 <div className="w-12 h-12 bg-indigo-50 rounded-2xl flex items-center justify-center mb-4 border border-indigo-100">
+                    <Coins className="text-indigo-600" size={24} />
                  </div>
-                 <p className="text-sm text-slate-500 font-medium max-w-lg leading-relaxed">
-                    Recursos estratégicos para ativação operacional e validação de tração da marca Localizei JPA.
-                 </p>
+                 <h2 className="text-xl font-black text-slate-900 uppercase tracking-tight leading-tight">
+                    APORTE MÍNIMO<br/>
+                    RECOMENDADO — CENÁRIO 1
+                 </h2>
               </div>
-              <div className="bg-white border-2 border-indigo-600 px-8 py-4 rounded-3xl shadow-xl shadow-indigo-100 shrink-0 text-center">
-                 <span className="text-[9px] font-black text-indigo-600 uppercase tracking-[0.2em] block mb-1">Aporte Necessário</span>
-                 <div className="flex items-baseline gap-2 justify-center">
+
+              {/* Texto explicativo centralizado */}
+              <p className="text-xs text-slate-500 font-medium text-center leading-relaxed max-w-[280px]">
+                 “Recursos estratégicos para ativação operacional e validação de tração inicial da marca Localizei JPA.”
+              </p>
+
+              {/* Card — Aporte Necessário */}
+              <div className="w-full max-w-[280px] bg-white border-2 border-indigo-600 rounded-[2rem] p-6 text-center shadow-xl shadow-indigo-100 flex flex-col items-center">
+                 <span className="text-[10px] font-black text-indigo-600 uppercase tracking-[0.2em] mb-2">Aporte Necessário</span>
+                 <div className="flex items-baseline gap-2">
                     <span className="text-sm font-black text-indigo-600">R$</span>
-                    <h1 className="text-4xl font-black text-indigo-600 tracking-tighter">80.000</h1>
+                    <h3 className="text-4xl font-black text-indigo-600 tracking-tighter">80.000</h3>
                  </div>
               </div>
-           </div>
 
-           <div className="grid grid-cols-2 gap-4 sm:gap-6">
-              {[
-                { icon: Megaphone, title: 'Marketing', desc: 'Agência de tráfego e estratégia regional.', color: 'text-blue-600', bg: 'bg-blue-50' },
-                { icon: Target, title: 'Anúncios', desc: 'Aquisição de usuários e lojistas-âncora.', color: 'text-indigo-600', bg: 'bg-indigo-50' },
-                { icon: Scale, title: 'Jurídico', desc: 'Compliance, termos de uso e contratos.', color: 'text-slate-600', bg: 'bg-slate-100' },
-                { icon: Server, title: 'Estrutura', desc: 'Infra Cloud e assinaturas operacionais.', color: 'text-emerald-600', bg: 'bg-emerald-50' }
-              ].map((item, i) => (
-                <div key={i} className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm flex flex-col items-center text-center group hover:border-indigo-100 transition-all w-full max-w-full overflow-hidden">
-                   <div className={`w-12 h-12 rounded-2xl flex items-center justify-center mb-4 shrink-0 ${item.bg} ${item.color}`}>
-                      <item.icon size={22} />
+              {/* Bloco de Aplicação dos Recursos (Grid 2x2) */}
+              <div className="grid grid-cols-2 gap-3 w-full">
+                 {[
+                   { title: 'Marketing & Growth', desc: 'Agência de tráfego e estratégia regional.' },
+                   { title: 'Anúncios Online', desc: 'Aquisição e ativação de lojistas.' },
+                   { title: 'Jurídico & Compliance', desc: 'Ajustes contratuais e estrutura legal.' },
+                   { title: 'Estrutura de Apoio', desc: 'Infra cloud e ferramentas operacionais.' }
+                 ].map((item, i) => (
+                   <div key={i} className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex flex-col justify-center min-h-[100px] text-center">
+                      <h4 className="text-[11px] font-black text-slate-900 uppercase leading-tight mb-1">{item.title}</h4>
+                      <p className="text-[10px] text-slate-500 font-medium leading-tight">{item.desc}</p>
                    </div>
-                   <h4 className="text-xs font-black text-slate-900 uppercase tracking-widest mb-2 break-words w-full">{item.title}</h4>
-                   <p className="text-[11px] text-slate-500 font-medium leading-tight break-words w-full">{item.desc}</p>
-                </div>
-              ))}
-           </div>
-
-           <div className="bg-slate-900 rounded-[2.5rem] p-8 flex flex-col md:flex-row items-center justify-center gap-8 border border-white/5 shadow-2xl">
-              <div className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center shrink-0">
-                 <CheckCircle2 className="text-emerald-400" size={24} />
+                 ))}
               </div>
-              <div className="text-center md:text-left">
-                 <h4 className="text-white font-black text-sm uppercase tracking-[0.2em] mb-1">Resultado Esperado (Mínimo)</h4>
-                 <p className="text-slate-400 text-xs font-medium max-w-xl">
-                    Lançamento estruturado, validação do modelo e início do faturamento recorrente.
+
+              {/* Card Final — Resultado Esperado */}
+              <div className="bg-slate-900 text-white rounded-[2.5rem] p-8 w-full text-center relative overflow-hidden shadow-2xl">
+                 <div className="absolute top-0 left-0 w-full h-1 bg-emerald-500 opacity-50"></div>
+                 <div className="flex items-center justify-center gap-2 mb-3">
+                    <CheckCircle2 className="text-emerald-400" size={18} />
+                    <h4 className="text-[11px] font-black uppercase tracking-[0.2em]">RESULTADO ESPERADO</h4>
+                 </div>
+                 <p className="text-sm text-slate-300 font-medium leading-relaxed">
+                    “Lançamento estruturado, validação do modelo de negócio e início do faturamento recorrente.”
                  </p>
               </div>
+
            </div>
         </section>
 
