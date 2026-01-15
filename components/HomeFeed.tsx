@@ -221,8 +221,8 @@ const NeighborhoodCouponsBlock: React.FC<{ stores: Store[], onStoreClick: (store
   if (couponStores.length === 0) return null;
 
   return (
-    <div className="w-full bg-white dark:bg-gray-950 py-6">
-      <div className="px-5 mb-8">
+    <div className="w-full bg-white dark:bg-gray-950 pt-2 pb-4">
+      <div className="px-5 mb-4">
         <div className="relative h-14 w-full flex items-center justify-center filter drop-shadow-md overflow-visible">
           {/* SVG Ticket Shape Background */}
           <svg className="absolute inset-0 w-full h-full" preserveAspectRatio="none" viewBox="0 0 100 40" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -366,8 +366,8 @@ const FeaturedServicesBlock: React.FC<{ stores: Store[], onStoreClick: (store: S
   ];
 
   return (
-    <div className="w-full bg-white dark:bg-gray-950 py-8 border-t border-gray-50 dark:border-gray-800">
-      <div className="px-5 mb-5">
+    <div className="w-full bg-white dark:bg-gray-950 py-4 border-t border-gray-50 dark:border-gray-800">
+      <div className="px-5 mb-3">
         <div className="flex items-center gap-2 mb-1">
           <BadgeCheck className="w-4 h-4 text-amber-500 fill-amber-500/20" />
           <h2 className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-wider">
@@ -379,7 +379,7 @@ const FeaturedServicesBlock: React.FC<{ stores: Store[], onStoreClick: (store: S
         </p>
       </div>
 
-      <div className="flex gap-4 overflow-x-auto no-scrollbar px-5 pb-4 snap-x">
+      <div className="flex gap-4 overflow-x-auto no-scrollbar px-5 pb-2 snap-x">
         {EDITORIAL_SERVICES.map(service => (
           <button
             key={service.id}
@@ -433,7 +433,7 @@ const FeaturedServicesBlock: React.FC<{ stores: Store[], onStoreClick: (store: S
 };
 
 const SectionHeader: React.FC<{ title: string; subtitle?: string; rightElement?: React.ReactNode }> = ({ title, subtitle, rightElement }) => (
-  <div className="flex items-center justify-between mb-5 px-1">
+  <div className="flex items-center justify-between mb-3 px-1">
     <div className="flex flex-col">
       <h3 className="text-[11px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.2em] mb-1">
         {title}
@@ -467,14 +467,14 @@ const CommunityTrustCarousel: React.FC<{ stores: Store[], onStoreClick: (store: 
   if (trustedStores.length === 0) return null;
 
   return (
-    <div className="w-full bg-white dark:bg-gray-950 py-6">
-      <div className="px-5 mb-4">
+    <div className="w-full bg-white dark:bg-gray-950 py-4">
+      <div className="px-5 mb-3">
         <h2 className="text-lg font-black text-gray-900 dark:text-white tracking-tight leading-none flex items-center gap-2">
           Confiança no Bairro <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></div>
         </h2>
         <p className="text-xs text-gray-500 dark:text-gray-400 font-medium mt-1.5">O que os moradores realmente dizem e fazem</p>
       </div>
-      <div className="flex gap-3 overflow-x-auto no-scrollbar px-5 pb-6 snap-x">
+      <div className="flex gap-3 overflow-x-auto no-scrollbar px-5 pb-2 snap-x">
         {trustedStores.map((store) => {
             const comment = store.recentComments ? store.recentComments[0] : '';
             const shortComment = comment.length > 70 ? comment.substring(0, 70) + '...' : comment;
@@ -531,8 +531,8 @@ const CommunityFeedBlock: React.FC<{ onNavigate: (view: string) => void; }> = ({
   if (previewPosts.length === 0) return null;
 
   return (
-    <div className="w-full bg-white dark:bg-gray-950 py-6">
-      <div className="px-5 mb-4">
+    <div className="w-full bg-white dark:bg-gray-950 py-4">
+      <div className="px-5 mb-3">
         <div className="flex justify-between items-center">
             <div>
                 <h2 className="text-lg font-black text-gray-900 dark:text-white tracking-tight leading-none flex items-center gap-2">
@@ -543,7 +543,7 @@ const CommunityFeedBlock: React.FC<{ onNavigate: (view: string) => void; }> = ({
             <button onClick={() => onNavigate('community_feed')} className="text-xs font-bold text-[#1E5BFF] hover:underline">Ver tudo</button>
         </div>
       </div>
-      <div className="flex gap-4 overflow-x-auto no-scrollbar px-5 pb-4 snap-x">
+      <div className="flex gap-4 overflow-x-auto no-scrollbar px-5 pb-2 snap-x">
         {previewPosts.map((post) => (
             <div key={post.id} className="snap-center min-w-[280px] max-w-[280px] bg-white dark:bg-gray-800 p-4 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col justify-between active:scale-[0.99] transition-transform cursor-pointer relative" onClick={() => onNavigate('community_feed')}>
                 <div className="flex items-center gap-3 mb-3">
@@ -554,7 +554,7 @@ const CommunityFeedBlock: React.FC<{ onNavigate: (view: string) => void; }> = ({
                     <div className="flex-1 min-w-0">
                         <div className="flex justify-between items-center">
                             <p className="text-xs font-bold text-gray-900 dark:text-white truncate">{post.userName}</p>
-                            <span className="text-[9px] text-gray-400 font-medium">{post.timestamp}</span>
+                            <span className="text-[10px] whitespace-nowrap text-gray-400 font-medium">{post.timestamp}</span>
                         </div>
                         {post.neighborhood && (
                             <p className="text-[10px] font-bold text-[#1E5BFF] bg-blue-50 dark:bg-blue-900/20 px-1.5 py-0.5 rounded w-fit mt-0.5 flex items-center gap-1">
@@ -607,8 +607,8 @@ const FeaturedJobsBlock: React.FC<{ onNavigate: (view: string) => void }> = ({ o
   if (jobsList.length === 0) return null;
 
   return (
-    <div className="w-full bg-white dark:bg-gray-950 py-6 border-t border-gray-50 dark:border-gray-800">
-      <div className="px-5 mb-4 flex justify-between items-end">
+    <div className="w-full bg-white dark:bg-gray-950 py-4 border-t border-gray-50 dark:border-gray-800">
+      <div className="px-5 mb-3 flex justify-between items-end">
         <div>
           <div className="flex items-center gap-2 mb-1">
             <Briefcase className="w-4 h-4 text-orange-500 fill-orange-500/20" />
@@ -625,7 +625,7 @@ const FeaturedJobsBlock: React.FC<{ onNavigate: (view: string) => void }> = ({ o
         </button>
       </div>
 
-      <div className="flex gap-3 overflow-x-auto no-scrollbar px-5 pb-4 snap-x">
+      <div className="flex gap-3 overflow-x-auto no-scrollbar px-5 pb-2 snap-x">
         {jobsList.map((job, index) => (
           <button
             key={job.id}
@@ -717,7 +717,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
     switch (key) {
       case 'categories':
         return (
-          <div key="categories" className="w-full bg-white dark:bg-gray-950 pt-6 pb-2">
+          <div key="categories" className="w-full bg-white dark:bg-gray-950 pt-4 pb-0">
             <div ref={categoriesRef} onScroll={handleScrollCategories} className="flex overflow-x-auto no-scrollbar px-4 pb-2 snap-x">
               <div className="grid grid-flow-col grid-rows-2 gap-x-3 gap-y-3">
                 {(CATEGORIES || []).map((cat) => (
@@ -738,7 +738,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
           </div>
         );
       case 'home_carousel':
-        return <div key="home_carousel" className="w-full bg-white dark:bg-gray-950 pb-8"><HomeCarousel onNavigate={onNavigate} /></div>;
+        return <div key="home_carousel" className="w-full bg-white dark:bg-gray-950 pb-4"><HomeCarousel onNavigate={onNavigate} /></div>;
       case 'neighborhood_coupons':
         return <NeighborhoodCouponsBlock key="neighborhood_coupons" stores={stores} onStoreClick={(s) => onStoreClick && onStoreClick(s)} />;
       case 'featured_services':
@@ -749,7 +749,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
       case 'trust_feed': return <CommunityTrustCarousel key="trust_feed" stores={sortedStores} onStoreClick={(s) => onStoreClick && onStoreClick(s)} />;
       case 'list':
         return (
-          <div key="list" className="w-full bg-white dark:bg-gray-900 py-8">
+          <div key="list" className="w-full bg-white dark:bg-gray-900 pt-4 pb-6">
             <div className="px-5">
               <SectionHeader title={`Parceiros Premium em ${currentNeighborhood === 'Jacarepaguá (todos)' ? 'Jacarepaguá' : currentNeighborhood}`} subtitle="O que há de melhor no bairro" rightElement={<div className="flex gap-1 bg-gray-100 dark:bg-gray-800 p-1 rounded-xl">{['all', 'cashback', 'top_rated'].map((f) => (<button key={f} onClick={() => setListFilter(f as any)} className={`text-[8px] font-black uppercase px-2.5 py-1.5 rounded-lg transition-all ${listFilter === f ? 'bg-white dark:bg-gray-700 text-[#1E5BFF] shadow-sm' : 'text-gray-400'}`}>{f === 'all' ? 'Tudo' : f === 'cashback' ? '%' : 'Top'}</button>))}</div>} />
               <LojasEServicosList onStoreClick={onStoreClick} onViewAll={() => onNavigate('explore')} activeFilter={listFilter} user={user} onNavigate={onNavigate} premiumOnly={true} />
@@ -758,7 +758,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
         );
       case 'mini_tribes':
         return (
-          <div key="mini_tribes" className="w-full py-12 bg-white dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800">
+          <div key="mini_tribes" className="w-full py-6 bg-white dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800">
             <div className="px-5"><SectionHeader title="Estilo de Vida" subtitle="Lugares pela sua vibe" /></div>
             <div className="grid grid-cols-2 gap-3 px-5">
               {MINI_TRIBOS.map((tribo) => (
@@ -787,7 +787,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
     <div className="flex flex-col bg-white dark:bg-gray-950 w-full max-w-md mx-auto animate-in fade-in duration-500 overflow-x-hidden pb-32">
       <div className="flex flex-col w-full">
           {homeStructure.map(section => renderSection(section))}
-          <div className="px-5 pb-8 pt-4 bg-white dark:bg-gray-900">
+          <div className="px-5 pb-6 pt-2 bg-white dark:bg-gray-900">
             <MasterSponsorBanner onClick={() => onNavigate('patrocinador_master')} />
           </div>
       </div>
