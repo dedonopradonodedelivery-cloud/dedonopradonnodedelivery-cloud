@@ -36,7 +36,8 @@ import {
   Building2,
   DollarSign,
   Megaphone,
-  Smartphone
+  Smartphone,
+  QrCode
 } from 'lucide-react';
 import { LojasEServicosList } from './LojasEServicosList';
 import { User } from '@supabase/supabase-js';
@@ -191,8 +192,15 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void }> = ({ onNavigat
   );
 };
 
-const NeighborhoodCouponsBlock: React.FC<{ stores: Store[], onStoreClick: (store: Store) => void }> = ({ stores, onStoreClick }) => {
+const NeighborhoodCouponsBlock: React.FC<{ 
+  stores: Store[], 
+  onStoreClick: (store: Store) => void,
+  onNavigate: (view: string) => void,
+  user: User | null,
+  onRequireLogin: () => void
+}> = ({ stores, onStoreClick, onNavigate, user, onRequireLogin }) => {
   const { currentNeighborhood, isAll } = useNeighborhood();
+  const [isSelectorOpen, setIsSelectorOpen] = useState(false);
 
   const couponStores = useMemo(() => {
     let list = stores.filter(s => s.cashback && s.cashback > 0);
@@ -200,7 +208,7 @@ const NeighborhoodCouponsBlock: React.FC<{ stores: Store[], onStoreClick: (store
         if (a.adType === AdType.PREMIUM && b.adType !== AdType.PREMIUM) return -1;
         if (a.adType !== AdType.PREMIUM && b.adType === AdType.PREMIUM) return 1;
         if (a.adType === AdType.LOCAL && b.adType !== AdType.LOCAL) return -1;
-        if (a.adType !== AdType.LOCAL && b.adType === AdType.LOCAL) return 1;
+        if (a.adType === AdType.LOCAL && b.adType === AdType.LOCAL) return 1;
         if (isAll) return 0;
         const aIsLocal = (a.neighborhood === currentNeighborhood);
         const bIsLocal = (b.neighborhood === currentNeighborhood);
@@ -213,22 +221,94 @@ const NeighborhoodCouponsBlock: React.FC<{ stores: Store[], onStoreClick: (store
 
   if (couponStores.length === 0) return null;
 
+  const handleUserQrClick = () => {
+    setIsSelectorOpen(false);
+    if (!user) {
+      onRequireLogin();
+    } else {
+      onNavigate('user_cupom');
+    }
+  };
+
+  const handleMerchantQrClick = () => {
+    setIsSelectorOpen(false);
+    onNavigate('merchant_qr');
+  };
+
   return (
     <div className="w-full bg-white dark:bg-gray-950 pt-3 pb-3">
+      {/* SELETOR DE QR CODE MODAL (BOTTOM SHEET) */}
+      {isSelectorOpen && (
+        <div className="fixed inset-0 z-[110] flex items-end justify-center animate-in fade-in duration-300">
+           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsSelectorOpen(false)}></div>
+           <div className="relative w-full max-w-md bg-white dark:bg-gray-900 rounded-t-[2.5rem] p-8 shadow-2xl animate-in slide-in-from-bottom duration-300">
+              <div className="w-12 h-1.5 bg-gray-200 dark:bg-gray-800 rounded-full mx-auto mb-6"></div>
+              
+              <h3 className="text-xl font-black text-gray-900 dark:text-white uppercase tracking-tighter mb-2 text-center">Opções de QR Code</h3>
+              <p className="text-xs text-gray-500 text-center mb-8 font-medium">Escolha como deseja prosseguir no bairro</p>
+
+              <div className="space-y-4">
+                  <button 
+                    onClick={handleUserQrClick}
+                    className="w-full flex items-center gap-5 p-5 bg-orange-50 dark:bg-orange-950/20 border border-orange-100 dark:border-orange-900/30 rounded-2xl transition-all active:scale-[0.98] group"
+                  >
+                      <div className="w-14 h-14 bg-orange-500 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-orange-500/30">
+                          <Ticket size={28} />
+                      </div>
+                      <div className="text-left">
+                          <p className="font-black text-gray-900 dark:text-white text-sm uppercase tracking-tight">Meu QR Code</p>
+                          <p className="text-[10px] text-orange-700 dark:text-orange-400 font-bold uppercase tracking-widest mt-1">Sou Consumidor</p>
+                      </div>
+                  </button>
+
+                  <button 
+                    onClick={handleMerchantQrClick}
+                    className="w-full flex items-center gap-5 p-5 bg-blue-50 dark:bg-blue-950/20 border border-blue-100 dark:border-blue-900/30 rounded-2xl transition-all active:scale-[0.98] group"
+                  >
+                      <div className="w-14 h-14 bg-[#1E5BFF] rounded-2xl flex items-center justify-center text-white shadow-lg shadow-blue-500/30">
+                          <QrCode size={28} />
+                      </div>
+                      <div className="text-left">
+                          <p className="font-black text-gray-900 dark:text-white text-sm uppercase tracking-tight">Terminal de Recebimento</p>
+                          <p className="text-[10px] text-blue-700 dark:text-blue-400 font-bold uppercase tracking-widest mt-1">Sou Lojista</p>
+                      </div>
+                  </button>
+              </div>
+
+              <button 
+                onClick={() => setIsSelectorOpen(false)}
+                className="w-full mt-6 py-4 text-xs font-black text-gray-400 dark:text-gray-600 uppercase tracking-[0.2em] active:opacity-50"
+              >
+                Fechar
+              </button>
+           </div>
+        </div>
+      )}
+
       <div className="px-5 mb-3">
-        <div className="relative h-14 w-full flex items-center justify-center filter drop-shadow-md overflow-visible">
-          <svg className="absolute inset-0 w-full h-full" preserveAspectRatio="none" viewBox="0 0 100 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <button 
+          onClick={() => setIsSelectorOpen(true)}
+          className="relative h-14 w-full flex items-center justify-center filter drop-shadow-md overflow-visible cursor-pointer active:scale-[0.98] active:opacity-90 transition-all group"
+        >
+          {/* SVG Ticket Shape Background */}
+          <svg className="absolute inset-0 w-full h-full transition-transform group-hover:scale-[1.01]" preserveAspectRatio="none" viewBox="0 0 100 40" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M4 0C1.79086 0 0 1.79086 0 4V15C1.65685 15 3 16.3431 3 18C3 19.6569 1.65685 21 0 21V36C0 38.2091 1.79086 40 4 40H96C98.2091 40 100 38.2091 100 36V21C98.3431 21 97 19.6569 97 18C97 16.3431 98.3431 15 100 15V4C100 1.79086 98.2091 0 96 0H4Z" fill="#F97316"/>
           </svg>
+          
           <div className="relative z-10 flex items-center gap-4 px-6">
+            {/* Dotted Line Detail */}
             <div className="h-6 border-l border-dashed border-white/40"></div>
+            
             <h2 className="text-[13px] font-black text-white uppercase tracking-[0.18em] whitespace-nowrap drop-shadow-sm text-center leading-none">
               CUPONS ATIVOS NO BAIRRO
             </h2>
+            
+            {/* Dotted Line Detail */}
             <div className="h-6 border-l border-dashed border-white/40"></div>
           </div>
-        </div>
+        </button>
       </div>
+      
       <div className="flex gap-3 overflow-x-auto no-scrollbar px-5 pb-2 snap-x">
         {couponStores.map(store => (
           <button
@@ -246,12 +326,17 @@ const NeighborhoodCouponsBlock: React.FC<{ stores: Store[], onStoreClick: (store
                     </span>
                   </div>
                )}
+               
+               {/* TICKET STYLE BADGE (Individual Card) */}
                <div className="absolute bottom-2 left-1.5 drop-shadow-md">
                  <div className="relative flex items-center h-8 px-1">
+                    {/* SVG Ticket Shape with circular cutouts */}
                     <svg className="absolute inset-0 w-full h-full" preserveAspectRatio="none" viewBox="0 0 100 40" fill="none" xmlns="http://www.w3.org/2000/svg">
                       <path d="M5 0C2.23858 0 0 2.23858 0 5V14C2.20914 14 4 15.7909 4 18C4 20.2091 2.20914 22 0 22V35C0 37.7614 2.23858 40 5 40H95C97.7614 40 100 37.7614 100 35V22C97.7909 22 96 20.2091 96 18C96 15.7909 97.7909 14 100 14V5C100 2.23858 97.7614 0 95 0H5Z" fill="#F97316"/>
                     </svg>
+                    
                     <div className="relative flex items-center gap-1.5 px-2.5 z-10">
+                      {/* Dotted Line */}
                       <div className="h-4 border-l border-dashed border-white/40 mr-1"></div>
                       <span className="text-[12px] font-black text-white whitespace-nowrap tracking-tighter">
                         {store.cashback}% OFF
@@ -609,7 +694,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
       case 'home_carousel':
         return <div key="home_carousel" className="w-full bg-white dark:bg-gray-950 pb-3"><HomeCarousel onNavigate={onNavigate} /></div>;
       case 'neighborhood_coupons':
-        return <NeighborhoodCouponsBlock key="neighborhood_coupons" stores={stores} onStoreClick={(s) => onStoreClick && onStoreClick(s)} />;
+        return <NeighborhoodCouponsBlock key="neighborhood_coupons" stores={stores} onStoreClick={(s) => onStoreClick && onStoreClick(s)} onNavigate={onNavigate} user={user} onRequireLogin={onRequireLogin} />;
       case 'featured_services':
         return <FeaturedServicesBlock key="featured_services" stores={stores} onStoreClick={(s) => onStoreClick && onStoreClick(s)} />;
       case 'featured_jobs':
