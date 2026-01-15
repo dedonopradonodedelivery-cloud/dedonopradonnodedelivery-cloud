@@ -529,14 +529,14 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ user, onLogout, viewMode
                     <Milestone size={20} />
                  </div>
                  <div>
-                    <h2 className="text-sm font-black text-slate-900 uppercase tracking-widest">Estrutura de Aporte — 2 Momentos</h2>
+                    <h2 className="text-sm font-black text-slate-900 uppercase tracking-widest tracking-tighter">ESTRUTURA DE APORTE — 2 MOMENTOS</h2>
                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mt-0.5">Flexibilidade financeira e gestão de risco</p>
                  </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8 relative max-w-2xl mx-auto">
                  {/* Timeline Line (Desktop) */}
-                 <div className="hidden md:block absolute top-[52px] left-20 right-20 h-0.5 border-t-2 border-dashed border-slate-100 -z-0"></div>
+                 <div className="hidden md:block absolute top-[52px] left-24 right-24 h-0.5 border-t-2 border-dashed border-slate-100 -z-0"></div>
 
                  {/* MOMENTO 1: T0 */}
                  <div className="relative z-10 flex flex-col items-center text-center">
@@ -616,7 +616,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ user, onLogout, viewMode
                 </button>
               </div>
 
-              <div className="mt-8 text-3xl">😄</div>
+              <div className="mt-8 text-3xl animate-in zoom-in duration-500">😄</div>
               
               <p className="mt-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.4em] px-4">
                 A maior oportunidade da Freguesia espera por você
