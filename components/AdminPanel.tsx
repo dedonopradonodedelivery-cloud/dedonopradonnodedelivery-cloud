@@ -48,7 +48,10 @@ import {
   Dices,
   Sparkles,
   MapPin,
-  Globe2
+  Globe2,
+  Mic,
+  Building2,
+  Info
 } from 'lucide-react';
 import { User as SupabaseUser } from '@supabase/supabase-js';
 
@@ -246,10 +249,11 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ user, onLogout, viewMode
         <section className="pt-8 space-y-6">
            <div className="flex items-center gap-2 mb-2">
               <Sparkles className="text-indigo-600" size={20} />
-              <h2 className="text-sm font-black text-slate-900 uppercase tracking-wider">Fase V2 — Novas Frentes de Monetização</h2>
+              <h2 className="text-sm font-black text-slate-900 uppercase tracking-wider">Fase V2 — Expansão do Modelo de Receita</h2>
            </div>
 
-           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {/* 1. CASHBACK ENTRE LOJAS */}
               <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between hover:border-indigo-200 transition-all">
                 <div>
                    <div className="w-10 h-10 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center mb-5">
@@ -264,6 +268,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ user, onLogout, viewMode
                 </div>
               </div>
 
+              {/* 2. AGÊNCIA LOCALIZEI */}
               <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between hover:border-indigo-200 transition-all">
                 <div>
                    <div className="w-10 h-10 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center mb-5">
@@ -278,25 +283,69 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ user, onLogout, viewMode
                 </div>
               </div>
 
+              {/* 3. PLANO PET */}
               <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between hover:border-indigo-200 transition-all">
                 <div>
                    <div className="w-10 h-10 bg-amber-50 text-amber-600 rounded-xl flex items-center justify-center mb-5">
-                      <Briefcase size={20} />
+                      <Percent size={20} />
                    </div>
-                   <h3 className="text-base font-bold text-slate-900 mb-2 leading-tight">Plano Pet (Ads)</h3>
-                   <p className="text-[11px] text-gray-500 leading-relaxed mb-6">Assinatura mensal para acesso a audiência segmentada. 100 lojistas (20% do nicho).</p>
+                   <h3 className="text-base font-bold text-slate-900 mb-2 leading-tight">Plano Pet (Leads)</h3>
+                   <p className="text-[11px] text-gray-500 leading-relaxed mb-6">Assinatura para acesso a audiência segmentada. 100 lojistas ativos (20% de adoção inicial).</p>
                 </div>
                 <div className="pt-4 border-t border-slate-50">
                     <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-1">Potencial Mensal</span>
                     <p className="text-lg font-black text-[#059669]">R$ 4.990,00</p>
                 </div>
               </div>
+
+              {/* 4. AUDITÓRIO (UPSIDE) */}
+              <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between hover:border-indigo-200 transition-all border-dashed">
+                <div>
+                   <div className="w-10 h-10 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center mb-5">
+                      <Building2 size={20} />
+                   </div>
+                   <h3 className="text-base font-bold text-slate-900 mb-2 leading-tight">Espaço Físico / Auditório</h3>
+                   <p className="text-[11px] text-gray-500 leading-relaxed mb-6">Venda de ad-space em ambiente físico (backdrop, telão, ativações) para patrocinadores locais.</p>
+                </div>
+                <div className="pt-4 border-t border-slate-50">
+                    <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-1">Faturamento Estimado</span>
+                    <p className="text-lg font-black text-slate-300 italic">R$ XXXX / mês</p>
+                </div>
+              </div>
+
+              {/* 5. PODCAST (UPSIDE) */}
+              <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between hover:border-indigo-200 transition-all border-dashed">
+                <div>
+                   <div className="w-10 h-10 bg-rose-50 text-rose-600 rounded-xl flex items-center justify-center mb-5">
+                      <Mic size={20} />
+                   </div>
+                   <h3 className="text-base font-bold text-slate-900 mb-2 leading-tight">PodLocalizar</h3>
+                   <p className="text-[11px] text-gray-500 leading-relaxed mb-6">Cotas de patrocínio e presença de marca em podcast proprietário integrado ao ecossistema do app.</p>
+                </div>
+                <div className="pt-4 border-t border-slate-50">
+                    <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-1">Faturamento Estimado</span>
+                    <p className="text-lg font-black text-slate-300 italic">R$ XXXX / mês</p>
+                </div>
+              </div>
+           </div>
+
+           {/* NOTA ESTRATÉGICA V2 */}
+           <div className="bg-slate-50 border border-slate-200 p-6 rounded-2xl flex items-start gap-4">
+              <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center border border-slate-100 shrink-0">
+                <Info size={16} className="text-indigo-600" />
+              </div>
+              <div>
+                <h4 className="text-xs font-bold text-slate-900 uppercase mb-1">Observação Estratégica</h4>
+                <p className="text-xs text-slate-500 leading-relaxed">
+                  Os valores do Auditório e Podcast serão definidos após a validação de audiência e engajamento real. Estas frentes representam um <strong>upside estratégico</strong> adicional de receita proprietária, ampliando a margem líquida sem impacto no core transacional do produto.
+                </p>
+              </div>
            </div>
 
            <div className="bg-indigo-50 border border-indigo-100 p-6 rounded-2xl flex flex-col md:flex-row items-center justify-between gap-4">
               <div>
-                 <h4 className="text-xs font-black text-indigo-600 uppercase tracking-widest mb-1">Total Adicional Fase V2</h4>
-                 <p className="text-xs text-indigo-400 font-medium italic">Novas frentes de volume e margem</p>
+                 <h4 className="text-xs font-black text-indigo-600 uppercase tracking-widest mb-1">Total Adicional Fase V2 (Frentes 1, 2 e 3)</h4>
+                 <p className="text-xs text-indigo-400 font-medium italic">Baseado em simulações conservadoras de adoção</p>
               </div>
               <div className="flex items-baseline gap-2">
                  <span className="text-lg font-black text-[#059669]">R$</span>
@@ -318,53 +367,57 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ user, onLogout, viewMode
                    <span className="text-3xl font-black text-[#059669]">R$</span>
                    <h1 className="text-8xl font-black tracking-tighter text-[#059669] leading-none tabular-nums">133.740</h1>
                  </div>
-                 <p className="text-slate-400 font-bold uppercase tracking-[0.25em] text-xs mb-10">Cenário Operação Core + Expansão V2</p>
+                 <p className="text-slate-400 font-bold uppercase tracking-[0.25em] text-xs mb-10">Cenário Operação Core (C2) + Expansão V2</p>
               </div>
            </div>
         </section>
 
-        {/* NOVO: POTENCIAL DE EXPANSÃO GEOGRÁFICA */}
-        <section className="pt-8 space-y-6">
-           <div className="bg-white rounded-3xl border border-slate-200 p-8 shadow-sm overflow-hidden relative group">
-              <div className="absolute top-0 right-0 w-48 h-48 bg-blue-50/50 rounded-full blur-3xl group-hover:bg-blue-100/40 transition-colors pointer-events-none"></div>
+        {/* POTENCIAL DE EXPANSÃO GEOGRÁFICA */}
+        <section className="pt-8">
+           <div className="bg-white rounded-[2.5rem] border border-slate-200 p-10 shadow-sm overflow-hidden relative group">
+              <div className="absolute top-0 right-0 w-64 h-64 bg-blue-50/30 rounded-full blur-3xl pointer-events-none"></div>
               
               <div className="relative z-10">
-                 <div className="flex items-center gap-2 mb-6">
-                    <Globe2 className="text-indigo-600" size={20} />
-                    <h2 className="text-sm font-black text-slate-900 uppercase tracking-wider">Potencial de Expansão — Visão Consolidada</h2>
+                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
+                    <div>
+                       <div className="flex items-center gap-2 mb-3">
+                          <Globe2 className="text-indigo-600" size={18} />
+                          <h2 className="text-xs font-black text-slate-900 uppercase tracking-[0.2em]">Potencial de Expansão Geográfica</h2>
+                       </div>
+                       <p className="text-sm text-slate-500 leading-relaxed font-medium max-w-xl">
+                         Modelo operacional replicável para novos CEPs com baixa dependência de custo fixo e alta escalabilidade regional.
+                       </p>
+                    </div>
+                    <div className="bg-slate-900 px-6 py-4 rounded-2xl border border-slate-800 shrink-0">
+                       <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-1">Referência por Praça (Ano 1)</span>
+                       <p className="text-xl font-black text-white tracking-tight">R$ 85.000 <span className="text-xs text-slate-500 font-bold">/mês</span></p>
+                    </div>
                  </div>
 
-                 <p className="text-sm text-slate-500 leading-relaxed mb-8 max-w-2xl font-medium">
-                   Modelo replicável para novos CEPs com baixa dependência de custo fixo. <br/>
-                   Referência conservadora de maturação (Ano 1): <strong>≈ R$ 85.000 / mês por praça.</strong>
-                 </p>
-
-                 <div className="mb-10">
-                    <h3 className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4">14 Praças Estratégicas Mapeadas</h3>
-                    <div className="flex flex-wrap gap-2">
+                 <div className="mb-12">
+                    <h3 className="text-[9px] font-black text-slate-400 uppercase tracking-[0.3em] mb-5 px-1">14 Praças Estratégicas Mapeadas</h3>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2">
                        {[
                          'Barra da Tijuca', 'Recreio', 'Zona Sul', 'Centro', 'Tijuca', 'Méier', 
                          'Ilha do Governador', 'Niterói', 'Duque de Caxias', 'Nova Iguaçu', 
                          'São João de Meriti', 'Região dos Lagos', 'Região Serrana', 'Metropolitana'
                        ].map((praca, idx) => (
-                         <div key={idx} className="bg-slate-50 border border-slate-100 px-3 py-1.5 rounded-lg flex items-center gap-2 group-hover:border-indigo-100 transition-colors">
-                            <MapPin size={10} className="text-indigo-400" />
-                            <span className="text-[11px] font-bold text-slate-600">{praca}</span>
+                         <div key={idx} className="bg-slate-50/50 border border-slate-100 px-2.5 py-1.5 rounded-lg flex items-center gap-1.5">
+                            <MapPin size={10} className="text-indigo-300" />
+                            <span className="text-[10px] font-bold text-slate-500 whitespace-nowrap">{praca}</span>
                          </div>
                        ))}
                     </div>
                  </div>
 
-                 <div className="bg-slate-900 rounded-2xl p-8 flex flex-col md:flex-row items-center justify-between gap-6 border border-slate-800">
-                    <div className="text-center md:text-left">
-                       <h4 className="text-white font-black text-sm uppercase tracking-widest mb-1">Faturamento Potencial Consolidado</h4>
-                       <p className="text-slate-400 text-xs font-medium italic">Sinergia total das 14 praças operacionais</p>
-                    </div>
+                 <div className="bg-white border-2 border-slate-900 rounded-[2rem] p-10 flex flex-col items-center justify-center relative overflow-hidden">
+                    <div className="absolute top-0 left-0 w-full h-1 bg-slate-900 opacity-10"></div>
+                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.5em] mb-4">Faturamento Potencial Consolidado</span>
                     <div className="flex items-baseline gap-3">
-                       <span className="text-xl font-black text-[#059669]">R$</span>
-                       <h1 className="text-5xl font-black text-[#059669] tracking-tighter tabular-nums">1.190.000</h1>
-                       <span className="text-xs font-black text-slate-500 uppercase ml-1">/mês</span>
+                       <span className="text-2xl font-black text-slate-900">R$</span>
+                       <h1 className="text-7xl md:text-8xl font-black text-slate-900 tracking-tighter tabular-nums">1.190.000</h1>
                     </div>
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-4">Potencial Mensal (14 Praças Ativas)</p>
                  </div>
               </div>
            </div>
@@ -399,7 +452,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ user, onLogout, viewMode
         <div className="flex items-center gap-4">
           <button 
               onClick={onOpenViewSwitcher}
-              className="px-4 py-2 rounded-xl flex items-center gap-3 border border-white/10 bg-white/5 hover:bg-white/10 text-white transition-all active:scale-95 group"
+              className="px-4 py-2 rounded-xl flex items-center gap-3 border border-white/10 bg-white/10 text-white transition-all active:scale-95 group"
           >
               <div className="flex flex-col items-end">
                 <span className="text-[8px] font-black uppercase tracking-widest leading-none mb-0.5 text-white/50">Visualização</span>
