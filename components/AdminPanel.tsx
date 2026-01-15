@@ -127,7 +127,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ user, onLogout, viewMode
         </div>
 
         <div className="flex items-center gap-2 sm:gap-4">
-          <div className="px-2 sm:px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg flex items-center gap-2">
+          <div className="px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg flex items-center gap-2">
             <span className="text-[7px] sm:text-[8px] font-black text-slate-400 uppercase tracking-widest hidden xs:inline">Visualização</span>
             <span className="text-[9px] sm:text-[10px] font-black text-slate-900 uppercase">{viewMode === 'ADM' ? 'ADM' : 'INVEST'}</span>
             <ShieldCheck size={14} className="text-indigo-600" />
@@ -380,7 +380,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ user, onLogout, viewMode
               <div className="flex flex-wrap items-baseline justify-end gap-1 sm:gap-2 max-w-full w-full md:w-auto self-end md:self-auto px-1">
                  <span className="text-sm sm:text-lg font-black text-emerald-400">R$</span>
                  <span className="text-3xl sm:text-4xl md:text-5xl font-black text-emerald-400 tracking-tighter tabular-nums">84.740</span>
-                 <span className="text-[8px] sm:text-[10px] font-black text-emerald-400/60 uppercase ml-1 sm:ml-2 tracking-widest whitespace-nowrap">/mês</span>
+                 <span className="text-[8px] sm:text-[10px] font-black text-emerald-400/60 uppercase ml-1 sm:ml-2 tracking-widest whitespace-nowrap text-right">/mês</span>
               </div>
            </div>
         </section>
@@ -406,7 +406,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ user, onLogout, viewMode
               </div>
            </div>
 
-           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+           <div className="grid grid-cols-2 gap-4 sm:gap-6">
               {[
                 { icon: Megaphone, title: 'Marketing', desc: 'Agência de tráfego e estratégia regional.', color: 'text-blue-600', bg: 'bg-blue-50' },
                 { icon: Target, title: 'Anúncios', desc: 'Aquisição de usuários e lojistas-âncora.', color: 'text-indigo-600', bg: 'bg-indigo-50' },
@@ -487,7 +487,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ user, onLogout, viewMode
                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
                    <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.25em]">Ações Territoriais</h3>
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 w-full">
+                <div className="grid grid-cols-2 gap-4 sm:gap-6 w-full">
                     {[
                       { icon: MapPin, title: 'Ativações', desc: 'Adesivagem e presença em PDV.', color: 'text-emerald-600', bg: 'bg-emerald-50' },
                       { icon: ImageIcon, title: 'Outdoors', desc: 'Branding visual no bairro.', color: 'text-amber-600', bg: 'bg-amber-50' },
@@ -717,7 +717,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ user, onLogout, viewMode
             className="bg-[#111827] text-white p-10 flex flex-col items-center justify-center text-center gap-8 active:scale-[0.99] transition-all group border border-white/[0.04] shadow-2xl relative overflow-hidden rounded-[2.5rem] hover:bg-[#0B3A53]/20"
           >
               <div className="absolute top-0 left-0 w-32 h-32 bg-[#0B3A53]/10 rounded-full blur-3xl"></div>
-              <div className="w-20 h-20 bg-[#0B3A53]/20 border border-white/[0.04] flex items-center justify-center text-white group-hover:border-[#0B3A53]/50 transition-colors rounded-[2rem]">
+              <div className="w-20 h-20 bg-[#0B3A53]/20 border border-white/[0.04] flex items-center justify-center text-white group-hover:border-[#059669]/50 transition-colors rounded-[2rem]">
                   <Activity size={36} className="group-hover:text-[#9CA3AF] transition-colors" />
               </div>
               <div>

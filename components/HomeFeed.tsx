@@ -250,11 +250,24 @@ const NeighborhoodCouponsBlock: React.FC<{ stores: Store[], onStoreClick: (store
                     </span>
                   </div>
                )}
-               <div className="absolute bottom-2 left-2">
-                <div className="bg-emerald-500 text-white px-2 py-1 rounded-lg shadow-lg flex items-center gap-0.5">
-                  <span className="text-[14px] font-black tracking-tighter">{store.cashback}% OFF</span>
-                </div>
-              </div>
+               
+               {/* TICKET STYLE BADGE */}
+               <div className="absolute bottom-2 left-1.5 drop-shadow-md">
+                 <div className="relative flex items-center h-8 px-1">
+                    {/* SVG Ticket Shape with circular cutouts */}
+                    <svg className="absolute inset-0 w-full h-full" preserveAspectRatio="none" viewBox="0 0 100 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M5 0C2.23858 0 0 2.23858 0 5V14C2.20914 14 4 15.7909 4 18C4 20.2091 2.20914 22 0 22V35C0 37.7614 2.23858 40 5 40H95C97.7614 40 100 37.7614 100 35V22C97.7909 22 96 20.2091 96 18C96 15.7909 97.7909 14 100 14V5C100 2.23858 97.7614 0 95 0H5Z" fill="#10B981"/>
+                    </svg>
+                    
+                    <div className="relative flex items-center gap-1.5 px-2.5 z-10">
+                      {/* Dotted Line */}
+                      <div className="h-4 border-l border-dashed border-white/40 mr-1"></div>
+                      <span className="text-[12px] font-black text-white whitespace-nowrap tracking-tighter">
+                        {store.cashback}% OFF
+                      </span>
+                    </div>
+                 </div>
+               </div>
             </div>
             <div className="p-3 flex flex-col flex-1 justify-between text-left">
               <div>
