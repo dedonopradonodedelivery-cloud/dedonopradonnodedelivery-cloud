@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { ChevronLeft, Search, Star, BadgeCheck, ChevronRight, X, AlertCircle, Grid, Filter } from 'lucide-react';
+import { ChevronLeft, Search, Star, BadgeCheck, ChevronRight, X, AlertCircle, Grid, Filter, Megaphone, ArrowUpRight } from 'lucide-react';
 import { Category, Store, AdType } from '../types';
 import { SUBCATEGORIES } from '../constants';
 
@@ -9,45 +9,53 @@ interface CategoryViewProps {
   onBack: () => void;
   onStoreClick: (store: Store) => void;
   stores: Store[];
+  userRole?: 'cliente' | 'lojista' | null;
+  onAdvertiseInCategory?: (categoryName: string) => void;
 }
 
-// --- Componente de Card Padronizado (Estilo macOS Big Sur) ---
+// --- Componente de Card Padronizado (Estilo macOS Big Sur - Colorido) ---
 const BigSurCard: React.FC<{ 
   icon: React.ReactNode; 
   name: string; 
   isSelected: boolean; 
   onClick: () => void; 
   isMoreButton?: boolean;
-}> = ({ icon, name, isSelected, onClick, isMoreButton }) => {
+  categoryColor?: string;
+}> = ({ icon, name, isSelected, onClick, isMoreButton, categoryColor }) => {
   
   const baseClasses = `
-    relative w-full aspect-square rounded-[20px] flex flex-col items-center justify-center gap-2 
-    transition-all duration-300 active:scale-90 cursor-pointer overflow-hidden border
+    relative w-full aspect-square rounded-[24px] flex flex-col items-center justify-center gap-2 
+    transition-all duration-300 cursor-pointer overflow-hidden border
   `;
 
-  const selectedClasses = isSelected
-    ? "bg-gradient-to-br from-[#1E5BFF] to-[#0040DD] border-blue-500/20 shadow-lg shadow-blue-500/30 text-white ring-2 ring-offset-2 ring-[#1E5BFF] dark:ring-offset-gray-900"
-    : isMoreButton
-      ? "bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
-      : "bg-white dark:bg-gray-800 border-gray-100 dark:border-gray-700 text-gray-600 dark:text-gray-300 shadow-[0_4px_20px_-12px_rgba(0,0,0,0.1)] hover:shadow-md hover:-translate-y-0.5";
+  const backgroundClass = isMoreButton 
+    ? "bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700" 
+    : `bg-gradient-to-br ${categoryColor || 'from-blue-500 to-blue-600'} border-transparent shadow-md`;
+
+  const textClass = isMoreButton 
+    ? "text-gray-500 dark:text-gray-400" 
+    : "text-white drop-shadow-sm";
+
+  const iconContainerClass = isMoreButton
+    ? "bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400"
+    : "bg-white/20 text-white backdrop-blur-md border border-white/20";
+
+  const selectionEffects = isSelected
+    ? "ring-4 ring-black/10 dark:ring-white/20 scale-[0.96] brightness-110 shadow-inner" 
+    : "hover:shadow-lg hover:-translate-y-1 hover:brightness-105";
 
   return (
-    <button onClick={onClick} className={`${baseClasses} ${selectedClasses}`}>
+    <button onClick={onClick} className={`${baseClasses} ${backgroundClass} ${selectionEffects}`}>
       <div className={`
-        w-8 h-8 rounded-full flex items-center justify-center transition-colors
-        ${isSelected 
-          ? 'bg-white/20 text-white' 
-          : isMoreButton 
-            ? 'bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400'
-            : 'bg-blue-50 dark:bg-blue-900/20 text-[#1E5BFF] dark:text-blue-400'
-        }
+        w-10 h-10 rounded-2xl flex items-center justify-center transition-colors
+        ${iconContainerClass}
       `}>
         {React.isValidElement(icon) ? React.cloneElement(icon as React.ReactElement<any>, { 
-          className: `w-4 h-4`, 
+          className: `w-5 h-5`, 
           strokeWidth: 2.5 
         }) : null}
       </div>
-      <span className="text-[10px] font-bold leading-tight px-1 truncate w-full text-center tracking-tight">
+      <span className={`text-[10px] font-bold leading-tight px-1 truncate w-full text-center tracking-tight ${textClass}`}>
         {name}
       </span>
     </button>
@@ -109,10 +117,8 @@ const StoreListItem: React.FC<{ store: Store; onClick: () => void }> = ({ store,
 const FALLBACK_ADS = [
   'https://images.unsplash.com/photo-1666214280557-f1b5022eb634?q=80&w=800&auto=format&fit=crop', 
   'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?q=80&w=800&auto=format&fit=crop', 
-  'https://images.unsplash.com/photo-1579684385127-1ef15d508118?q=80&w=800&auto=format&fit=crop', 
 ];
 
-// Gerador de dados falsos para popular categorias vazias (apenas para demo)
 const generateMockStoresForCategory = (categoryName: string, subcategoryName?: string): Store[] => {
   return Array.from({ length: 8 }).map((_, i) => ({
     id: `mock-${categoryName}-${i}`,
@@ -130,60 +136,90 @@ const generateMockStoresForCategory = (categoryName: string, subcategoryName?: s
   }));
 };
 
-export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, onStoreClick, stores }) => {
-  const [currentBanner, setCurrentBanner] = useState(0);
+const CategoryAdsCarousel: React.FC<{ 
+  userRole?: 'cliente' | 'lojista' | null; 
+  onAdvertise: () => void;
+}> = ({ userRole, onAdvertise }) => {
+  const occupiedSlots = [
+    { 
+      id: 'ad1', 
+      image: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?q=80&w=600&auto=format&fit=crop', 
+      title: 'Melhores Ofertas', 
+      merchant: 'Supermercado Central' 
+    },
+  ];
+
+  const showAdvertiseSlot = userRole === 'lojista';
+  const activeSlot = occupiedSlots.length > 0 ? occupiedSlots[0] : null;
+
+  return (
+    <div className="px-5 pb-6">
+      {activeSlot ? (
+        <div className="w-full relative aspect-[5/3] rounded-[32px] overflow-hidden shadow-xl shadow-slate-200 dark:shadow-none border border-gray-100 dark:border-white/5 group cursor-pointer active:scale-[0.98] transition-all">
+           <img src={activeSlot.image} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent p-6 flex flex-col justify-end">
+              <span className="text-[10px] font-bold text-white/90 bg-black/40 px-3 py-1 rounded-full w-fit mb-2 uppercase tracking-widest backdrop-blur-md border border-white/10">Patrocinado</span>
+              <h4 className="text-white font-black text-2xl leading-tight mb-1 drop-shadow-md">{activeSlot.title}</h4>
+              <p className="text-white/80 text-sm font-medium truncate">{activeSlot.merchant}</p>
+           </div>
+        </div>
+      ) : showAdvertiseSlot ? (
+        <button 
+          onClick={onAdvertise}
+          className="w-full relative aspect-[5/3] rounded-[32px] overflow-hidden shadow-xl shadow-indigo-500/20 flex flex-col items-center justify-center text-center p-6 bg-gradient-to-br from-indigo-600 to-purple-700 group active:scale-[0.98] transition-all"
+        >
+           <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
+           <div className="w-14 h-14 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform shadow-lg border border-white/10">
+              <Megaphone className="w-7 h-7 text-white" />
+           </div>
+           <h3 className="text-white font-black text-xl uppercase tracking-wide mb-2 drop-shadow-md">
+              Anuncie nesta categoria
+           </h3>
+           <p className="text-white/80 text-xs font-medium max-w-[200px] leading-relaxed mb-4">
+              Apareça no topo para quem já está procurando pelo seu serviço.
+           </p>
+           <div className="bg-white text-indigo-700 text-xs font-bold px-5 py-2.5 rounded-full shadow-sm flex items-center gap-1.5 group-hover:bg-indigo-50 transition-colors">
+              Ver planos <ArrowUpRight className="w-3.5 h-3.5" />
+           </div>
+        </button>
+      ) : null}
+    </div>
+  );
+}
+
+export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, onStoreClick, stores, userRole, onAdvertiseInCategory }) => {
   const [selectedSubcategory, setSelectedSubcategory] = useState<string | null>(null);
   const [isAnimatingList, setIsAnimatingList] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
-  // 1. Obter Subcategorias
   const subcategories = useMemo(() => {
-    // Tenta encontrar a chave exata, ou 'Alimentação' para 'Comida', ou usa default
     const key = category.name === 'Comida' ? 'Alimentação' : category.name;
     return SUBCATEGORIES[key] || SUBCATEGORIES['default'];
   }, [category.name]);
 
-  // 2. Lógica da Grade 4x2 (Máximo 8 itens visíveis)
   const MAX_VISIBLE = 8;
   const shouldShowMore = subcategories.length > MAX_VISIBLE;
   
   const visibleSubcategories = useMemo(() => {
       if (shouldShowMore) {
-          // Mostra 7 e o 8º vira botão
           return subcategories.slice(0, MAX_VISIBLE - 1);
       }
       return subcategories.slice(0, MAX_VISIBLE);
   }, [subcategories, shouldShowMore]);
 
-  // 3. Banner Rotation
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentBanner((prev) => (prev + 1) % FALLBACK_ADS.length);
-    }, 5000);
-    return () => clearInterval(interval);
-  }, []);
-
-  // 4. Filtragem de Lojas
   const displayStores = useMemo(() => {
     let filtered = stores.filter(s => {
-       // Match category loosely
        return s.category.toLowerCase().includes(category.name.toLowerCase()) || 
               category.name.toLowerCase().includes(s.category.toLowerCase());
     });
 
-    // Se estiver vazio (para fins de demo), gera mocks
     if (filtered.length === 0) {
         filtered = generateMockStoresForCategory(category.name, selectedSubcategory || undefined);
     }
 
-    // Filtra por subcategoria
     if (selectedSubcategory) {
-        // Para mock data, o filtro pode ser restrito demais se os mocks não tiverem a subcategoria exata
-        // Em produção, isso seria um filtro exato.
         filtered = filtered.filter(s => s.subcategory === selectedSubcategory || s.subcategory.includes(selectedSubcategory));
-        
-        // Se após filtro ficar vazio (e for demo), gera mocks específicos
         if (filtered.length === 0) {
              filtered = generateMockStoresForCategory(category.name, selectedSubcategory);
         }
@@ -196,17 +232,16 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
     return filtered;
   }, [stores, category.name, selectedSubcategory, searchQuery]);
 
-  // Handler de Clique na Subcategoria
   const handleSubcategoryClick = (subName: string) => {
     setIsAnimatingList(true);
     setTimeout(() => {
         if (selectedSubcategory === subName) {
-            setSelectedSubcategory(null); // Remove filtro
+            setSelectedSubcategory(null);
         } else {
-            setSelectedSubcategory(subName); // Aplica filtro
+            setSelectedSubcategory(subName);
         }
         setIsAnimatingList(false);
-    }, 200); // Delay para animação
+    }, 200);
   };
 
   const handleSeeAll = () => {
@@ -215,8 +250,6 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
 
   return (
     <div className="min-h-screen bg-[#FAFAFA] dark:bg-gray-950 font-sans pb-24 animate-in slide-in-from-right duration-300">
-      
-      {/* Header Fixo */}
       <header className="fixed top-0 left-0 right-0 w-full max-w-md mx-auto h-16 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md shadow-sm z-30 flex items-center justify-between px-4 border-b border-gray-100 dark:border-gray-800 transition-all">
         <button onClick={onBack} className="p-2 -ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
           <ChevronLeft className="w-6 h-6 text-gray-800 dark:text-white" />
@@ -246,33 +279,25 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
       </header>
 
       <main className="pt-20 space-y-6">
-        
-        {/* Banner (Opcional, só aparece se não estiver buscando) */}
         {!isSearchOpen && (
-            <section className="px-5">
-                <div className="w-full aspect-[21/9] rounded-3xl overflow-hidden relative shadow-md bg-gray-200 dark:bg-gray-800">
-                    {FALLBACK_ADS.map((img, index) => (
-                        <div key={index} className={`absolute inset-0 transition-opacity duration-1000 ${index === currentBanner ? 'opacity-100' : 'opacity-0'}`}>
-                            <img src={img} alt="Destaque" className="w-full h-full object-cover" />
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
-                            <div className="absolute bottom-4 left-4 text-white">
-                                <p className="text-[10px] font-bold uppercase tracking-widest bg-black/30 backdrop-blur-md px-2 py-1 rounded-lg w-fit mb-1">Destaque</p>
-                                <p className="font-bold text-lg leading-tight">Melhores de {category.name}</p>
-                            </div>
-                        </div>
-                    ))}
+            <section className="animate-in fade-in slide-in-from-top-4 duration-500">
+                <div className="flex items-center gap-2 mb-3 px-5">
+                    <Star className="w-4 h-4 text-amber-400 fill-amber-400" />
+                    <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest">Em Destaque</h3>
                 </div>
+                <CategoryAdsCarousel 
+                    userRole={userRole} 
+                    onAdvertise={() => onAdvertiseInCategory && onAdvertiseInCategory(category.name)} 
+                />
             </section>
         )}
 
-        {/* Grade de Subcategorias (4x2 Fixa) */}
         {!isSearchOpen && (
             <section className="px-5">
               <div className="flex flex-col mb-4">
                 <h2 className="text-xl font-black text-gray-900 dark:text-white leading-none tracking-tight">O que você procura?</h2>
                 <p className="text-xs text-gray-500 font-medium mt-1">Categorias de {category.name}</p>
               </div>
-              
               <div className="grid grid-cols-4 gap-3">
                 {visibleSubcategories.map((sub, i) => (
                     <BigSurCard 
@@ -281,9 +306,9 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
                       name={sub.name}
                       isSelected={selectedSubcategory === sub.name}
                       onClick={() => handleSubcategoryClick(sub.name)}
+                      categoryColor={category.color}
                     />
                 ))}
-                
                 {shouldShowMore && (
                     <BigSurCard 
                         icon={<Grid />} 
@@ -297,7 +322,6 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
             </section>
         )}
 
-        {/* Lista Dinâmica de Lojas */}
         <section className="px-5 min-h-[400px] bg-white dark:bg-gray-900 rounded-t-[32px] pt-6 pb-10 shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.05)] border-t border-gray-100 dark:border-gray-800">
             <div className="flex items-center justify-between mb-6 px-2">
                 <h3 className="font-bold text-gray-900 dark:text-white text-lg flex items-center gap-2">
@@ -313,30 +337,21 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
                     <span>{displayStores.length} locais</span>
                 </div>
             </div>
-
             <div className={`flex flex-col gap-2 transition-opacity duration-300 ${isAnimatingList ? 'opacity-0 translate-y-4' : 'opacity-100 translate-y-0'}`}>
                 {displayStores.map((store) => (
-                    <StoreListItem 
-                        key={store.id} 
-                        store={store} 
-                        onClick={() => onStoreClick(store)} 
-                    />
+                    <StoreListItem key={store.id} store={store} onClick={() => onStoreClick(store)} />
                 ))}
-                
                 {displayStores.length === 0 && (
                     <div className="text-center py-12">
                         <div className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4 text-gray-400">
                             <AlertCircle className="w-8 h-8" />
                         </div>
                         <p className="text-gray-500 font-medium text-sm">Nenhum local encontrado.</p>
-                        <button onClick={() => setSelectedSubcategory(null)} className="mt-4 text-[#1E5BFF] font-bold text-sm">
-                            Ver todas as opções
-                        </button>
+                        <button onClick={() => setSelectedSubcategory(null)} className="mt-4 text-[#1E5BFF] font-bold text-sm">Ver todas as opções</button>
                     </div>
                 )}
             </div>
         </section>
-
       </main>
     </div>
   );
