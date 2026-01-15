@@ -221,8 +221,8 @@ const NeighborhoodCouponsBlock: React.FC<{ stores: Store[], onStoreClick: (store
   if (couponStores.length === 0) return null;
 
   return (
-    <div className="w-full bg-white dark:bg-gray-950 pt-2 pb-4">
-      <div className="px-5 mb-4">
+    <div className="w-full bg-white dark:bg-gray-950 pt-3 pb-3">
+      <div className="px-5 mb-3">
         <div className="relative h-14 w-full flex items-center justify-center filter drop-shadow-md overflow-visible">
           {/* SVG Ticket Shape Background */}
           <svg className="absolute inset-0 w-full h-full" preserveAspectRatio="none" viewBox="0 0 100 40" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -266,7 +266,7 @@ const NeighborhoodCouponsBlock: React.FC<{ stores: Store[], onStoreClick: (store
                  <div className="relative flex items-center h-8 px-1">
                     {/* SVG Ticket Shape with circular cutouts */}
                     <svg className="absolute inset-0 w-full h-full" preserveAspectRatio="none" viewBox="0 0 100 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M5 0C2.23858 0 0 2.23858 0 5V14C2.20914 14 4 15.7909 4 18C4 20.2091 2.20914 22 0 22V35C0 37.7614 2.23858 40 5 40H95C97.7614 40 100 37.7614 100 35V22C97.7909 22 96 20.2091 96 18C96 15.7909 97.7909 14 100 14V5C100 2.23858 97.7614 0 95 0H5Z" fill="#10B981"/>
+                      <path d="M5 0C2.23858 0 0 2.23858 0 5V14C2.20914 14 4 15.7909 4 18C4 20.2091 2.20914 22 0 22V35C0 37.7614 2.23858 40 5 40H95C97.7614 40 100 37.7614 100 35V22C97.7909 22 96 20.2091 96 18C96 15.7909 97.7909 14 100 14V5C100 2.23858 97.7614 0 95 0H5Z" fill="#F97316"/>
                     </svg>
                     
                     <div className="relative flex items-center gap-1.5 px-2.5 z-10">
@@ -285,7 +285,7 @@ const NeighborhoodCouponsBlock: React.FC<{ stores: Store[], onStoreClick: (store
                 <p className="text-[10px] text-gray-500 dark:text-gray-400 font-medium truncate">{store.category}</p>
               </div>
               <div className="mt-2 pt-2 border-t border-gray-100 dark:border-gray-700 flex items-center justify-between">
-                <span className="text-[9px] font-bold text-emerald-600 bg-emerald-50 dark:bg-emerald-900/20 px-1.5 py-0.5 rounded uppercase">Ativo</span>
+                <span className="text-[9px] font-bold text-orange-600 bg-orange-50 dark:bg-orange-900/20 px-1.5 py-0.5 rounded uppercase">Ativo</span>
                 <span className="text-[9px] font-medium text-gray-400">Resgatar</span>
               </div>
             </div>
@@ -319,7 +319,7 @@ const FeaturedServicesBlock: React.FC<{ stores: Store[], onStoreClick: (store: S
       id: 'srv-beauty', 
       name: 'Studio Glamour', 
       category: 'Salão de Beleza', 
-      image: 'https://images.unsplash.com/photo-1560066984-138dadb4c035?q=80&w=600&auto=format&fit=crop',
+      image: 'https://images.unsplash.com/photo-1560066984-138dadb4c035?q=80&w=400&auto=format&fit=crop',
       rating: 5.0,
       location: 'Pechincha'
     },
@@ -366,7 +366,7 @@ const FeaturedServicesBlock: React.FC<{ stores: Store[], onStoreClick: (store: S
   ];
 
   return (
-    <div className="w-full bg-white dark:bg-gray-950 py-4 border-t border-gray-50 dark:border-gray-800">
+    <div className="w-full bg-white dark:bg-gray-950 py-3 border-t border-gray-50 dark:border-gray-800">
       <div className="px-5 mb-3">
         <div className="flex items-center gap-2 mb-1">
           <BadgeCheck className="w-4 h-4 text-amber-500 fill-amber-500/20" />
@@ -467,7 +467,7 @@ const CommunityTrustCarousel: React.FC<{ stores: Store[], onStoreClick: (store: 
   if (trustedStores.length === 0) return null;
 
   return (
-    <div className="w-full bg-white dark:bg-gray-950 py-4">
+    <div className="w-full bg-white dark:bg-gray-950 py-3">
       <div className="px-5 mb-3">
         <h2 className="text-lg font-black text-gray-900 dark:text-white tracking-tight leading-none flex items-center gap-2">
           Confiança no Bairro <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></div>
@@ -531,7 +531,7 @@ const CommunityFeedBlock: React.FC<{ onNavigate: (view: string) => void; }> = ({
   if (previewPosts.length === 0) return null;
 
   return (
-    <div className="w-full bg-white dark:bg-gray-950 py-4">
+    <div className="w-full bg-white dark:bg-gray-950 py-3">
       <div className="px-5 mb-3">
         <div className="flex justify-between items-center">
             <div>
@@ -607,7 +607,7 @@ const FeaturedJobsBlock: React.FC<{ onNavigate: (view: string) => void }> = ({ o
   if (jobsList.length === 0) return null;
 
   return (
-    <div className="w-full bg-white dark:bg-gray-950 py-4 border-t border-gray-50 dark:border-gray-800">
+    <div className="w-full bg-white dark:bg-gray-950 py-3 border-t border-gray-50 dark:border-gray-800">
       <div className="px-5 mb-3 flex justify-between items-end">
         <div>
           <div className="flex items-center gap-2 mb-1">
@@ -738,7 +738,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
           </div>
         );
       case 'home_carousel':
-        return <div key="home_carousel" className="w-full bg-white dark:bg-gray-950 pb-4"><HomeCarousel onNavigate={onNavigate} /></div>;
+        return <div key="home_carousel" className="w-full bg-white dark:bg-gray-950 pb-3"><HomeCarousel onNavigate={onNavigate} /></div>;
       case 'neighborhood_coupons':
         return <NeighborhoodCouponsBlock key="neighborhood_coupons" stores={stores} onStoreClick={(s) => onStoreClick && onStoreClick(s)} />;
       case 'featured_services':
@@ -749,7 +749,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
       case 'trust_feed': return <CommunityTrustCarousel key="trust_feed" stores={sortedStores} onStoreClick={(s) => onStoreClick && onStoreClick(s)} />;
       case 'list':
         return (
-          <div key="list" className="w-full bg-white dark:bg-gray-900 pt-4 pb-6">
+          <div key="list" className="w-full bg-white dark:bg-gray-900 pt-3 pb-6">
             <div className="px-5">
               <SectionHeader title={`Parceiros Premium em ${currentNeighborhood === 'Jacarepaguá (todos)' ? 'Jacarepaguá' : currentNeighborhood}`} subtitle="O que há de melhor no bairro" rightElement={<div className="flex gap-1 bg-gray-100 dark:bg-gray-800 p-1 rounded-xl">{['all', 'cashback', 'top_rated'].map((f) => (<button key={f} onClick={() => setListFilter(f as any)} className={`text-[8px] font-black uppercase px-2.5 py-1.5 rounded-lg transition-all ${listFilter === f ? 'bg-white dark:bg-gray-700 text-[#1E5BFF] shadow-sm' : 'text-gray-400'}`}>{f === 'all' ? 'Tudo' : f === 'cashback' ? '%' : 'Top'}</button>))}</div>} />
               <LojasEServicosList onStoreClick={onStoreClick} onViewAll={() => onNavigate('explore')} activeFilter={listFilter} user={user} onNavigate={onNavigate} premiumOnly={true} />

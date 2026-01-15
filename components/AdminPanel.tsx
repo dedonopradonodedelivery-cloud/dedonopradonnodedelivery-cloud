@@ -429,21 +429,26 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ user, onLogout, viewMode
               </div>
            </div>
 
-           {/* TOTAL POTENCIAL V2 */}
-           <div className="bg-slate-900 rounded-3xl p-6 sm:p-8 flex flex-col md:flex-row md:items-center justify-between gap-6 border border-white/5 shadow-2xl overflow-hidden">
-              <div className="flex items-center gap-4 w-full">
-                 <div className="w-12 h-12 sm:w-14 sm:h-14 bg-indigo-500/20 rounded-2xl flex items-center justify-center border border-indigo-500/20 shrink-0">
-                    <TrendingUp className="text-indigo-400" size={28} />
+           {/* TOTAL ADICIONAL ESTIMADO V2 */}
+           <div className="bg-slate-900 rounded-[2rem] p-5 border border-white/5 shadow-2xl overflow-hidden grid grid-cols-[1fr_auto] items-center gap-4">
+              <div className="flex items-center gap-4 min-w-0">
+                 <div className="w-12 h-12 bg-indigo-500/10 rounded-2xl flex items-center justify-center border border-indigo-500/20 shrink-0">
+                    <TrendingUp className="text-indigo-400" size={24} />
                  </div>
                  <div className="min-w-0">
-                    <h3 className="text-white font-black text-xs sm:text-sm uppercase tracking-[0.2em] mb-1">Total Adicional Estimado V2</h3>
-                    <p className="text-slate-400 text-[10px] sm:text-xs font-medium">Somatório das frentes de serviço e transacionais</p>
+                    <div className="flex items-center gap-2 mb-0.5">
+                       <h3 className="text-white/40 text-[9px] font-black uppercase tracking-[0.2em]">Total Adicional Estimado</h3>
+                       <span className="bg-indigo-500/20 text-indigo-300 text-[8px] font-black px-1.5 py-0.5 rounded uppercase">V2</span>
+                    </div>
+                    <p className="text-slate-500 text-[10px] font-medium leading-tight">Somatório das frentes de serviço e transacionais</p>
                  </div>
               </div>
-              <div className="flex flex-wrap items-baseline justify-end gap-1 sm:gap-2 max-w-full w-full md:w-auto self-end md:self-auto px-1">
-                 <span className="text-sm sm:text-lg font-black text-emerald-400">R$</span>
-                 <span className="text-3xl sm:text-4xl md:text-5xl font-black text-emerald-400 tracking-tighter tabular-nums">84.740</span>
-                 <span className="text-[8px] sm:text-[10px] font-black text-emerald-400/60 uppercase ml-1 sm:ml-2 tracking-widest whitespace-nowrap text-right">/mês</span>
+              <div className="text-right shrink-0 pr-1">
+                 <div className="flex items-baseline justify-end gap-1">
+                    <span className="text-sm font-black text-emerald-400/60">R$</span>
+                    <span className="text-3xl font-black text-emerald-400 tracking-tighter tabular-nums">84.740</span>
+                 </div>
+                 <p className="text-[9px] font-black text-emerald-500/40 uppercase tracking-widest mt-0.5">/ mês</p>
               </div>
            </div>
         </section>
@@ -649,76 +654,6 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ user, onLogout, viewMode
                  </p>
               </div>
 
-           </div>
-        </section>
-
-        {/* ESTRUTURA DE APORTE EM FASES */}
-        <section className="pt-8">
-           <div className="bg-white rounded-[2.5rem] border border-slate-200 p-6 sm:p-10 shadow-sm relative overflow-hidden">
-              <div className="absolute top-0 left-0 w-full h-1 bg-slate-900 opacity-5"></div>
-              
-              <div className="flex items-center gap-3 mb-10">
-                 <div className="w-10 h-10 bg-slate-900 text-white rounded-xl flex items-center justify-center shrink-0">
-                    <Milestone size={20} />
-                 </div>
-                 <div>
-                    <h2 className="text-sm font-black text-slate-900 uppercase tracking-widest">ESTRUTURA DE APORTE — 2 MOMENTOS</h2>
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mt-0.5">Flexibilidade financeira e gestão de risco</p>
-                 </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 relative max-w-2xl mx-auto">
-                 {/* Timeline Line (Desktop) */}
-                 <div className="hidden md:block absolute top-[52px] left-24 right-24 h-0.5 border-t-2 border-dashed border-slate-100 -z-0"></div>
-
-                 {/* MOMENTO 1: T0 */}
-                 <div className="relative z-10 flex flex-col items-center text-center">
-                    <div className="w-14 h-14 bg-indigo-600 rounded-2xl flex items-center justify-center text-white shadow-xl shadow-indigo-100 mb-6 border-4 border-white">
-                       <span className="font-black text-sm">T0</span>
-                    </div>
-                    <h3 className="font-black text-slate-900 text-xs uppercase tracking-wider mb-2">Aporte Inicial</h3>
-                    <ul className="space-y-2 text-[11px] text-slate-500 font-medium">
-                       <li className="flex items-start gap-2 justify-center">
-                          <div className="w-1 h-1 rounded-full bg-indigo-400 mt-1 shrink-0"></div>
-                          Ajustes contratuais e pontapé inicial
-                       </li>
-                       <li className="flex items-start gap-2 justify-center">
-                          <div className="w-1 h-1 rounded-full bg-indigo-400 mt-1 shrink-0"></div>
-                          Início imediato das ações de marketing
-                       </li>
-                    </ul>
-                 </div>
-
-                 {/* MOMENTO 2: +30 DIAS */}
-                 <div className="relative z-10 flex flex-col items-center text-center">
-                    <div className="w-14 h-14 bg-white border-2 border-slate-200 rounded-2xl flex items-center justify-center text-slate-400 shadow-sm mb-6">
-                       <span className="font-black text-sm">+30d</span>
-                    </div>
-                    <h3 className="font-black text-slate-900 text-xs uppercase tracking-wider mb-2">Segundo Aporte</h3>
-                    <ul className="space-y-2 text-[11px] text-slate-500 font-medium">
-                       <li className="flex items-start gap-2 justify-center">
-                          <div className="w-1 h-1 rounded-full bg-slate-300 mt-1 shrink-0"></div>
-                          Intensificar aquisição de base crítica
-                       </li>
-                       <li className="flex items-start gap-2 justify-center">
-                          <div className="w-1 h-1 rounded-full bg-slate-300 mt-1 shrink-0"></div>
-                          Expansão das campanhas de awareness
-                       </li>
-                    </ul>
-                 </div>
-              </div>
-
-              <div className="mt-12 bg-slate-900 rounded-2xl p-6 flex items-start gap-4">
-                 <div className="w-10 h-10 bg-indigo-500/10 rounded-xl flex items-center justify-center border border-indigo-500/20 shrink-0">
-                    <Target className="text-indigo-400" size={20} />
-                 </div>
-                 <div>
-                    <h4 className="text-white font-black text-[10px] uppercase tracking-widest mb-1">Visão Estratégica</h4>
-                    <p className="text-slate-400 text-xs leading-relaxed font-medium">
-                       O modelo de aporte em fases permite maior <strong>controle de risco</strong> e melhor alocação de capital, alinhando o desembolso financeiro à evolução real dos indicadores de tração da operação.
-                    </p>
-                 </div>
-              </div>
            </div>
         </section>
 
