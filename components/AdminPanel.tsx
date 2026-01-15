@@ -207,8 +207,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ user, onLogout, viewMode
                    { label: 'Cupons Promocionais', desc: 'Adoção inicial: 20 lojistas ativos', value: '792', icon: Percent, color: 'text-emerald-600' },
                    { label: 'JPA Connect', desc: '1 grupo de networking empresarial', value: '3.000', icon: Users, color: 'text-indigo-600' }
                  ].map((item, i) => (
-                   <div key={i} className="px-4 sm:px-6 py-4 flex items-center justify-between border-b border-slate-100 last:border-0 hover:bg-slate-50 transition-colors gap-4">
-                      <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+                   <div key={i} className="px-4 sm:px-6 py-4 flex items-center gap-4 border-b border-slate-100 last:border-0 hover:bg-slate-50 transition-colors">
+                      <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
                         <div className={`w-8 h-8 rounded-lg bg-white border border-slate-100 flex items-center justify-center shrink-0 ${item.color}`}>
                           <item.icon size={16} strokeWidth={2.5} />
                         </div>
@@ -289,19 +289,19 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ user, onLogout, viewMode
         </section>
 
         {/* FASE V2 — NOVAS FRENTES DE MONETIZAÇÃO */}
-        <section className="pt-8 space-y-10 animate-in fade-in duration-700 w-full">
-           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-slate-200 pb-6 w-full">
-              <div>
-                 <div className="flex items-center gap-2 mb-2">
-                    <Sparkles className="text-indigo-600" size={22} />
-                    <h2 className="text-lg font-black text-slate-900 uppercase tracking-tight">Fase V2 — Novas Frentes de Monetização</h2>
+        <section className="pt-8 space-y-12 animate-in fade-in duration-700 w-full">
+           <div className="flex flex-col items-center text-center gap-6 border-b border-slate-200 pb-10 w-full">
+              <div className="max-w-xl mx-auto flex flex-col items-center">
+                 <div className="flex items-center justify-center gap-3 mb-4">
+                    <Sparkles className="text-indigo-600" size={24} />
+                    <h2 className="text-xl font-black text-slate-900 uppercase tracking-tight">Fase V2 — Novas Frentes de Monetização</h2>
                  </div>
-                 <p className="text-sm text-slate-500 font-medium max-w-2xl leading-relaxed">
+                 <p className="text-sm text-slate-500 font-medium leading-relaxed">
                     Alavancas estratégicas de crescimento escalável para maximizar o LTV (Life Time Value) dos parceiros e a eficiência do ecossistema.
                  </p>
               </div>
-              <div className="bg-indigo-50 px-4 py-2 rounded-xl border border-indigo-100 shrink-0 self-start md:self-end">
-                 <span className="text-[10px] font-black text-indigo-600 uppercase tracking-widest">Expansion Mode</span>
+              <div className="bg-indigo-50 px-5 py-2 rounded-full border border-indigo-100 shadow-sm shadow-indigo-100/50">
+                 <span className="text-[10px] font-black text-indigo-600 uppercase tracking-[0.25em]">Expansion Mode</span>
               </div>
            </div>
 
@@ -449,51 +449,55 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ user, onLogout, viewMode
         </section>
 
         {/* POTENCIAL DE EXPANSÃO GEOGRÁFICA */}
-        <section className="pt-8 space-y-10 animate-in fade-in duration-700">
-           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-slate-200 pb-6 w-full">
-              <div>
-                 <div className="flex items-center gap-3 mb-2">
-                    <Globe2 className="text-indigo-600" size={24} />
-                    <h2 className="text-lg font-black text-slate-900 uppercase tracking-tight">Potencial de Expansão Geográfica</h2>
-                 </div>
-                 <p className="text-sm text-slate-500 font-medium max-w-3xl leading-relaxed">
-                    O modelo do Localizei JPA é altamente replicável por CEP, com baixa dependência de custo fixo e rápida maturação operacional. Cada nova praça segue a mesma lógica de monetização e ativação local.
-                 </p>
+        <section className="pt-12 space-y-12 animate-in fade-in duration-700 w-full max-w-5xl mx-auto overflow-x-hidden">
+           <div className="flex flex-col items-center text-center gap-4 px-4">
+              <div className="flex items-center gap-3">
+                 <Globe2 className="text-indigo-600 shrink-0" size={28} />
+                 <h2 className="text-xl sm:text-2xl font-black text-slate-900 uppercase tracking-tight">Potencial de Expansão Geográfica</h2>
               </div>
+              <p className="text-sm text-slate-500 font-medium max-w-2xl leading-relaxed">
+                 O modelo do Localizei JPA é altamente replicável por CEP, com baixa dependência de custo fixo e rápida maturação operacional.
+              </p>
            </div>
 
-           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
-              <div className="space-y-6">
-                 <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm">
-                    <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-4">Premissa de Referência (Conservadora)</h3>
-                    <div className="flex items-baseline gap-2">
-                       <span className="text-xs font-bold text-slate-400">R$</span>
-                       <span className="text-3xl font-black text-slate-900">85.000</span>
-                       <span className="text-[10px] font-black text-slate-400 uppercase ml-2 tracking-widest">/ mês por praça</span>
+           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-stretch px-4">
+              {/* Premissa de Referência */}
+              <div className="bg-white p-6 sm:p-8 rounded-[2rem] border border-slate-200 shadow-sm flex flex-col justify-between hover:border-indigo-200 transition-all">
+                 <div>
+                    <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-6">Premissa de Referência (Conservadora)</h3>
+                    <div className="flex items-baseline gap-2 mb-4">
+                       <span className="text-sm font-black text-slate-400">R$</span>
+                       <span className="text-4xl font-black text-slate-900 tracking-tighter">85.000</span>
+                       <span className="text-xs font-bold text-slate-400 uppercase ml-2 tracking-widest">/ mês por praça</span>
                     </div>
-                    <p className="text-[10px] text-slate-400 font-medium mt-2 italic">Estimativa após 12 meses de operação em base consolidada.</p>
+                    <p className="text-[10px] text-slate-400 font-medium italic">Estimativa após 12 meses de operação em base consolidada.</p>
                  </div>
-
-                 <div className="bg-indigo-50 p-6 rounded-3xl border border-indigo-100">
-                    <h4 className="text-xs font-black text-indigo-600 uppercase tracking-widest mb-3">Mensagem para Investidor</h4>
-                    <p className="text-xs text-indigo-900/70 leading-relaxed font-medium">
-                       A expansão geográfica representa um crescimento previsível e escalável, sem aumento proporcional de estrutura central, permitindo multiplicar receita com o mesmo modelo operacional.
-                    </p>
+                 
+                 <div className="mt-8 pt-6 border-t border-slate-50">
+                    <div className="flex items-start gap-3 bg-indigo-50 p-4 rounded-2xl border border-indigo-100/50">
+                       <div className="shrink-0 p-1.5 bg-white rounded-lg text-indigo-600 shadow-sm">
+                          <Target size={14} />
+                       </div>
+                       <p className="text-[11px] text-indigo-900/70 leading-relaxed font-medium">
+                          <strong>Mensagem para Investidor:</strong> Crescimento previsível e escalável sem aumento proporcional de estrutura central.
+                       </p>
+                    </div>
                  </div>
               </div>
 
-              <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
-                 <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2">
+              {/* Praças Estratégicas */}
+              <div className="bg-white p-6 sm:p-8 rounded-[2rem] border border-slate-200 shadow-sm flex flex-col hover:border-rose-100 transition-all">
+                 <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-6 flex items-center gap-2">
                     <MapPin size={14} className="text-rose-500" />
                     Praças Estratégicas Mapeadas (14 praças)
                  </h3>
-                 <div className="flex flex-wrap gap-2">
+                 <div className="flex flex-wrap gap-1.5 sm:gap-2">
                     {[
                       "Barra da Tijuca", "Recreio", "Zona Sul", "Centro", "Tijuca", "Méier",
                       "Ilha do Governador", "Niterói", "Duque de Caxias", "Nova Iguaçu",
                       "São João de Meriti", "Região dos Lagos", "Região Serrana", "Região Metropolitana"
                     ].map((praca, idx) => (
-                      <span key={idx} className="px-3 py-1.5 bg-slate-50 border border-slate-100 rounded-lg text-[10px] font-bold text-slate-600 hover:bg-indigo-50 hover:text-indigo-600 hover:border-indigo-100 transition-colors cursor-default">
+                      <span key={idx} className="px-2.5 py-1 bg-slate-50 border border-slate-100 rounded-lg text-[9px] sm:text-[10px] font-bold text-slate-600 hover:bg-rose-50 hover:text-rose-600 hover:border-rose-100 transition-colors cursor-default whitespace-nowrap">
                         {praca}
                       </span>
                     ))}
@@ -502,21 +506,27 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ user, onLogout, viewMode
            </div>
 
            {/* TOTAL POTENCIAL CONSOLIDADO */}
-           <div className="bg-slate-900 rounded-[2.5rem] p-8 sm:p-10 flex flex-col md:flex-row md:items-center justify-between gap-8 border border-white/5 shadow-2xl relative overflow-hidden">
-              <div className="absolute top-0 left-0 w-full h-1 bg-emerald-500/30"></div>
-              <div className="flex items-center gap-5 w-full">
-                 <div className="w-14 h-14 sm:w-16 sm:h-16 bg-emerald-500/10 rounded-2xl flex items-center justify-center border border-emerald-500/20 shrink-0">
-                    <TrendingUp className="text-emerald-400" size={32} />
+           <div className="px-4">
+              <div className="bg-slate-900 rounded-[2.5rem] p-8 sm:p-10 flex flex-col md:flex-row md:items-center justify-between gap-8 border border-white/5 shadow-xl relative overflow-hidden text-center md:text-left">
+                 <div className="absolute top-0 left-0 w-full h-1 bg-emerald-500 opacity-20"></div>
+                 
+                 <div className="flex flex-col md:flex-row items-center gap-5">
+                    <div className="w-14 h-14 sm:w-16 sm:h-16 bg-emerald-500/10 rounded-2xl flex items-center justify-center border border-emerald-500/20 shrink-0 shadow-lg">
+                       <TrendingUp className="text-emerald-400" size={32} />
+                    </div>
+                    <div className="space-y-1">
+                       <h3 className="text-white font-black text-sm sm:text-base uppercase tracking-[0.2em]">Faturamento Potencial Consolidado</h3>
+                       <p className="text-emerald-400/60 text-[10px] font-bold uppercase tracking-widest">Baseado na ativação simultânea das 14 praças</p>
+                    </div>
                  </div>
-                 <div className="min-w-0">
-                    <h3 className="text-white font-black text-xs sm:text-sm uppercase tracking-[0.3em] mb-2">Faturamento Potencial Consolidado</h3>
-                    <p className="text-emerald-400/60 text-[10px] sm:text-xs font-bold uppercase tracking-widest">Baseado na ativação simultânea das 14 praças</p>
+
+                 <div className="flex flex-col items-center md:items-end justify-center">
+                    <div className="flex items-baseline gap-2">
+                       <span className="text-xl font-black text-emerald-400">R$</span>
+                       <span className="text-4xl sm:text-5xl lg:text-6xl font-black text-emerald-400 tracking-tighter tabular-nums leading-none">1.190.000</span>
+                    </div>
+                    <span className="text-[10px] font-black text-emerald-400/60 uppercase tracking-widest mt-1">/ mês</span>
                  </div>
-              </div>
-              <div className="flex flex-wrap items-baseline justify-end gap-2 max-w-full w-full md:w-auto self-end md:self-auto px-1">
-                 <span className="text-lg sm:text-xl font-black text-emerald-400">R$</span>
-                 <span className="text-4xl sm:text-5xl md:text-6xl font-black text-emerald-400 tracking-tighter tabular-nums">1.190.000</span>
-                 <span className="text-[10px] sm:text-xs font-black text-emerald-400/60 uppercase ml-2 tracking-widest whitespace-nowrap">/ mês</span>
               </div>
            </div>
         </section>
