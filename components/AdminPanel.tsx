@@ -35,7 +35,10 @@ import {
   Briefcase,
   PieChart,
   LayoutGrid,
-  Crown
+  Crown,
+  TrendingDown,
+  Percent,
+  CheckCircle2
 } from 'lucide-react';
 import { User as SupabaseUser } from '@supabase/supabase-js';
 
@@ -81,7 +84,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ user, onLogout, viewMode
 
   const renderMonetizationModel = () => (
     <div className="min-h-screen bg-[#F8FAFC] text-slate-900 font-sans animate-in fade-in duration-500 flex flex-col">
-      {/* INVESTOR HEADER - CLEAN & SOPHISTICATED */}
+      {/* EXECUTIVE INVESTOR HEADER */}
       <header className="bg-white border-b border-slate-200 px-8 py-4 sticky top-0 z-50 shadow-sm flex items-center justify-between">
         <div className="flex items-center gap-5">
           <button 
@@ -94,12 +97,12 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ user, onLogout, viewMode
           <div>
             <div className="flex items-center gap-3">
               <h1 className="text-xl font-black tracking-tight text-slate-900 leading-none uppercase">Projeção Financeira</h1>
-              <span className="bg-slate-900 text-white text-[8px] font-black px-2 py-0.5 rounded uppercase tracking-[0.2em]">
-                Investor Access
+              <span className="bg-emerald-600 text-white text-[8px] font-black px-2 py-0.5 rounded uppercase tracking-[0.2em]">
+                Year 1 Snapshot
               </span>
             </div>
             <p className="text-[10px] font-bold text-slate-400 mt-1 uppercase tracking-widest">
-              Modelo de Receita • Jacarepaguá v1.1.2
+              Estado Atual • 12 Meses de Operação • v1.1.2
             </p>
           </div>
         </div>
@@ -113,9 +116,9 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ user, onLogout, viewMode
         </div>
       </header>
 
-      <main className="p-8 max-w-5xl mx-auto w-full space-y-8 pb-24">
+      <main className="p-8 max-w-5xl mx-auto w-full space-y-8 pb-32">
         
-        {/* BLOCO: VISÃO ESTRATÉGICA - COMPACT & HIGH CONTRAST */}
+        {/* VISÃO ESTRATÉGICA */}
         <section className="animate-in slide-in-from-bottom-2 duration-500">
            <div className="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm relative overflow-hidden">
               <div className="absolute top-0 right-0 w-48 h-48 bg-indigo-50/50 rounded-full blur-3xl pointer-events-none"></div>
@@ -125,145 +128,164 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ user, onLogout, viewMode
                   <h2 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">Visão Estratégica</h2>
                 </div>
                 <p className="text-xl font-semibold text-slate-800 leading-relaxed max-w-4xl tracking-tight">
-                  Marketplace hiperlocal escalável. Modelo baseado em <span className="text-slate-950 font-black border-b-2 border-indigo-200">densidade de micro-ads</span> por bairro, gerando alta visibilidade, CAC otimizado e margens crescentes com infraestrutura técnica de baixo custo fixo.
+                  Marketplace hiperlocal escalável com monetização baseada em <span className="text-slate-950 font-black border-b-2 border-indigo-200">densidade de micro-ads</span> por bairro. Modelo validado com infraestrutura de baixo custo fixo e crescimento orgânico controlado através de redes de networking B2B.
                 </p>
               </div>
            </div>
         </section>
 
-        {/* BLOCO: MODELOS DE RECEITA - UNIFORM CARDS */}
-        <section className="grid grid-cols-1 md:grid-cols-2 gap-6">
-           {/* MICRO-ADS */}
-           <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between hover:border-slate-300 transition-all">
+        {/* FONTES DE RECEITA - GRID ANALÍTICO */}
+        <section className="space-y-4">
+          <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] ml-1">Fluxos de Receita Mensal</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            
+            {/* 1. PATROCINADOR MASTER */}
+            <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
               <div>
-                <div className="w-10 h-10 bg-slate-50 text-slate-900 border border-slate-100 rounded-xl flex items-center justify-center mb-5">
-                  <LayoutGrid size={20} />
-                </div>
-                <h3 className="text-lg font-black text-slate-900 mb-2 uppercase tracking-tight">Micro-Ads de Bairro</h3>
-                <p className="text-xs text-slate-500 leading-relaxed mb-6 font-medium">
-                  Monetização via espaços publicitários segmentados por geolocalização e comportamento de consumo regional.
-                </p>
-              </div>
-              <div className="grid grid-cols-2 gap-4 border-t border-slate-100 pt-5">
-                 <div>
-                   <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Capacidade</span>
-                   <p className="text-base font-black text-slate-900">36 Slots</p>
-                 </div>
-                 <div className="text-right">
-                   <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Receita Bruta Est.</span>
-                   <p className="text-base font-black text-[#059669]">R$ 14.200,00</p>
-                 </div>
-              </div>
-           </div>
-
-           {/* LEAD GENERATION */}
-           <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between hover:border-slate-300 transition-all">
-              <div>
-                <div className="w-10 h-10 bg-emerald-50 text-[#059669] border border-emerald-100 rounded-xl flex items-center justify-center mb-5">
-                  <Zap size={20} />
-                </div>
-                <h3 className="text-lg font-black text-slate-900 mb-2 uppercase tracking-tight">Lead Generation</h3>
-                <p className="text-xs text-slate-500 leading-relaxed mb-6 font-medium">
-                  Conversão direta de intenção de compra: receita por conexão entre solicitante e prestador verificado.
-                </p>
-              </div>
-              <div className="grid grid-cols-2 gap-4 border-t border-slate-100 pt-5">
-                 <div>
-                   <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Custo por Lead</span>
-                   <p className="text-base font-black text-slate-900">R$ 3,90</p>
-                 </div>
-                 <div className="text-right">
-                   <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Volume Mensal</span>
-                   <p className="text-base font-black text-[#059669]">R$ 8.500,00</p>
-                 </div>
-              </div>
-           </div>
-        </section>
-
-        {/* BLOCO: PATROCINADOR MASTER - PREMIUM DARK REFINED */}
-        <section>
-           <div className="bg-slate-900 rounded-2xl p-8 text-white relative overflow-hidden border border-slate-800 shadow-lg">
-              <div className="absolute top-0 right-0 w-64 h-64 bg-amber-500/5 rounded-full blur-[80px] -mr-10 -mt-10"></div>
-              <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8">
-                 <div className="max-w-md">
-                    <div className="flex items-center gap-2 mb-4">
-                      <Crown size={18} className="text-amber-400" />
-                      <span className="text-[9px] font-black uppercase tracking-[0.4em] text-amber-400/80">Premium Placement</span>
-                    </div>
-                    <h2 className="text-2xl font-black tracking-tight mb-2 uppercase leading-none">Patrocinador Master</h2>
-                    <p className="text-slate-400 text-xs leading-relaxed font-medium">
-                      Exclusividade institucional com visibilidade nativa em todas as camadas da jornada do usuário.
-                    </p>
-                    <div className="mt-6 flex items-center gap-2">
-                        <div className="px-3 py-1 bg-amber-400/10 rounded border border-amber-400/20 text-[9px] font-black text-amber-400 uppercase tracking-widest">
-                        Cota Única
-                        </div>
-                        <div className="px-3 py-1 bg-emerald-400/10 rounded border border-emerald-400/20 text-[9px] font-black text-emerald-400 uppercase tracking-widest">
-                        Disponível
-                        </div>
-                    </div>
-                 </div>
-                 <div className="flex items-center gap-8 bg-black/30 p-6 rounded-xl border border-white/5 backdrop-blur-md">
-                    <div className="text-center md:text-left">
-                      <span className="text-[8px] font-black text-slate-500 uppercase tracking-widest block mb-1">Recorrência</span>
-                      <p className="text-xl font-black text-white">R$ 4.000</p>
-                    </div>
-                    <div className="h-8 w-px bg-white/10"></div>
-                    <div className="text-center md:text-left">
-                      <span className="text-[8px] font-black text-slate-500 uppercase tracking-widest block mb-1">LTV Est. 12m</span>
-                      <p className="text-xl font-black text-[#059669]">R$ 48.000</p>
-                    </div>
-                 </div>
-              </div>
-           </div>
-        </section>
-
-        {/* BLOCO: INVENTÁRIO DE CATEGORIAS - COMPACT LIST */}
-        <section>
-          <div className="flex items-center justify-between mb-4 px-1">
-             <div className="flex items-center gap-2">
-                <PieChart size={18} className="text-slate-400" />
-                <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">Inventário por Nicho</h3>
-             </div>
-             <div className="text-[9px] font-black text-slate-400 uppercase tracking-widest bg-slate-100 px-2 py-0.5 rounded">Capacidade: 144 slots</div>
-          </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-             {[
-               { label: 'Food & Delivery', rev: '4.8k' },
-               { label: 'Saúde & Wellness', rev: '3.2k' },
-               { label: 'Serviços Pro', rev: '5.1k' },
-               { label: 'Moda & Varejo', rev: '3.1k' }
-             ].map((cat, i) => (
-               <div key={i} className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm transition-hover hover:border-slate-300">
-                  <p className="text-[9px] font-black text-slate-400 uppercase mb-2 truncate tracking-tight">{cat.label}</p>
-                  <p className="text-lg font-black text-slate-900 leading-none">R$ {cat.rev}</p>
-                  <div className="mt-3 w-full bg-slate-100 h-1 rounded-full overflow-hidden">
-                    <div className="bg-indigo-500 h-full w-[65%]" style={{ width: `${40 + (i * 15)}%` }}></div>
+                <div className="flex items-center justify-between mb-4">
+                  <div className="w-10 h-10 bg-amber-50 text-amber-600 rounded-xl flex items-center justify-center">
+                    <Crown size={20} />
                   </div>
-               </div>
-             ))}
+                  <span className="text-[9px] font-black bg-amber-100 text-amber-700 px-2 py-0.5 rounded uppercase tracking-wider">Cota Única</span>
+                </div>
+                <h4 className="text-base font-bold text-slate-900 mb-1">Patrocinador Master</h4>
+                <p className="text-xs text-slate-500 leading-relaxed mb-6">Exclusividade institucional em todas as interfaces. Valor pós-inauguração.</p>
+              </div>
+              <div className="pt-4 border-t border-slate-50 flex justify-between items-end">
+                <div className="text-[9px] text-slate-400 font-bold uppercase tracking-widest">1 Unidade Ativa</div>
+                <div className="text-xl font-black text-[#059669]">R$ 4.000,00</div>
+              </div>
+            </div>
+
+            {/* 2. BANNERS HOME */}
+            <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
+              <div>
+                <div className="flex items-center justify-between mb-4">
+                  <div className="w-10 h-10 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center">
+                    <LayoutGrid size={20} />
+                  </div>
+                  <span className="text-[9px] font-black bg-blue-100 text-blue-700 px-2 py-0.5 rounded uppercase tracking-wider">Ocupação 70%</span>
+                </div>
+                <h4 className="text-base font-bold text-slate-900 mb-1">Banners Home (Bairro)</h4>
+                <p className="text-xs text-slate-500 leading-relaxed mb-6">36 slots totais (4 por bairro x 9 bairros). Visibilidade máxima rotativa.</p>
+              </div>
+              <div className="pt-4 border-t border-slate-50 flex justify-between items-end">
+                <div className="text-[9px] text-slate-400 font-bold uppercase tracking-widest">25 Slots × R$ 297</div>
+                <div className="text-xl font-black text-[#059669]">R$ 7.425,00</div>
+              </div>
+            </div>
+
+            {/* 3. BANNERS CATEGORIAS */}
+            <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
+              <div>
+                <div className="flex items-center justify-between mb-4">
+                  <div className="w-10 h-10 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center">
+                    <PieChart size={20} />
+                  </div>
+                  <span className="text-[9px] font-black bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded uppercase tracking-wider">Ocupação 70%</span>
+                </div>
+                <h4 className="text-base font-bold text-slate-900 mb-1">Banners de Categorias</h4>
+                <p className="text-xs text-slate-500 leading-relaxed mb-6">144 slots totais (16 por bairro). Segmentação por nicho de consumo.</p>
+              </div>
+              <div className="pt-4 border-t border-slate-50 flex justify-between items-end">
+                <div className="text-[9px] text-slate-400 font-bold uppercase tracking-widest">101 Slots × R$ 297</div>
+                <div className="text-xl font-black text-[#059669]">R$ 29.997,00</div>
+              </div>
+            </div>
+
+            {/* 4. ADS RECORRENTES */}
+            <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
+              <div>
+                <div className="flex items-center justify-between mb-4">
+                  <div className="w-10 h-10 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center">
+                    <Zap size={20} />
+                  </div>
+                  <span className="text-[9px] font-black bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded uppercase tracking-wider">80 Lojistas</span>
+                </div>
+                <h4 className="text-base font-bold text-slate-900 mb-1">Ads Diários (Premium/Jobs)</h4>
+                <p className="text-xs text-slate-500 leading-relaxed mb-6">Modelo freemium com upgrades diários. Ticket médio de R$ 120/mês.</p>
+              </div>
+              <div className="pt-4 border-t border-slate-50 flex justify-between items-end">
+                <div className="text-[9px] text-slate-400 font-bold uppercase tracking-widest">Base Ativa Est.</div>
+                <div className="text-xl font-black text-[#059669]">R$ 9.600,00</div>
+              </div>
+            </div>
+
+            {/* 5. JPA CONNECT */}
+            <div className="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-lg flex flex-col justify-between md:col-span-2">
+              <div className="flex flex-col md:row items-start md:flex-row md:items-center justify-between gap-6">
+                <div className="max-w-md">
+                    <div className="flex items-center gap-2 mb-4 text-amber-400">
+                      <Users size={20} />
+                      <span className="text-[10px] font-black uppercase tracking-[0.3em]">Networking Corporativo</span>
+                    </div>
+                    <h4 className="text-xl font-bold text-white mb-2">JPA Connect (Year 1)</h4>
+                    <p className="text-slate-400 text-xs leading-relaxed">
+                      Grupos de networking empresarial com 30 empresários cada. Fonte de receita de alta fidelidade e baixo churn.
+                    </p>
+                </div>
+                <div className="bg-white/5 p-6 rounded-xl border border-white/10 w-full md:w-auto">
+                    <div className="text-center md:text-right">
+                      <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest block mb-1">10 Grupos × R$ 3.000</span>
+                      <p className="text-3xl font-black text-[#059669]">R$ 30.000,00</p>
+                    </div>
+                </div>
+              </div>
+            </div>
+
+            {/* 6. OUTROS (LEADS E CUPONS) */}
+            <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
+              <div>
+                <h4 className="text-sm font-bold text-slate-900 mb-1">Leads de Serviços</h4>
+                <p className="text-[10px] text-slate-500 mb-4">Custo por lead: R$ 4,90. Média de 5 prestadores/dia.</p>
+              </div>
+              <div className="text-right">
+                <span className="text-lg font-black text-[#059669]">R$ 735,00</span>
+              </div>
+            </div>
+
+            <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
+              <div>
+                <h4 className="text-sm font-bold text-slate-900 mb-1">Cupons Promocionais</h4>
+                <p className="text-[10px] text-slate-500 mb-4">Adoção de 60 lojistas. R$ 39,60/mês por base.</p>
+              </div>
+              <div className="text-right">
+                <span className="text-lg font-black text-[#059669]">R$ 2.376,00</span>
+              </div>
+            </div>
+
           </div>
         </section>
 
-        {/* BLOCO FINAL: PROJEÇÃO BRUTA - CLEAN & BOLD */}
-        <section className="pt-4">
-           <div className="bg-white p-10 rounded-2xl shadow-sm text-center relative overflow-hidden border border-slate-200">
-              <div className="relative z-10 flex flex-col items-center">
-                 <div className="w-12 h-12 bg-emerald-50 rounded-xl flex items-center justify-center mb-6 border border-emerald-100">
-                    <BarChart3 size={24} className="text-[#059669]" />
+        {/* RESUMO CONSOLIDADO - THE BOTTOM LINE */}
+        <section className="pt-10">
+           <div className="bg-white p-1 rounded-2xl border border-slate-200 shadow-xl overflow-hidden">
+              <div className="bg-slate-900 p-10 text-center relative">
+                 <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[#059669] to-transparent opacity-40"></div>
+                 <div className="relative z-10 flex flex-col items-center">
+                    <h2 className="text-white/40 text-[10px] font-black uppercase tracking-[0.5em] mb-4">Total Projetado (Mensal)</h2>
+                    <div className="flex items-baseline justify-center gap-2 mb-2">
+                      <span className="text-2xl font-black text-[#059669]">R$</span>
+                      <h1 className="text-7xl font-black tracking-tighter text-[#059669] leading-none tabular-nums">84.133</h1>
+                    </div>
+                    <p className="text-slate-500 font-bold uppercase tracking-[0.2em] text-[10px]">
+                      Cenário Conservador • Ano 1 Consolidado
+                    </p>
                  </div>
-                 <h2 className="text-slate-900 text-lg font-black uppercase tracking-[0.3em] mb-4">Projeção Bruta Mensal</h2>
-                 <div className="flex items-baseline justify-center gap-2 mb-2">
-                   <span className="text-2xl font-black text-[#059669]">R$</span>
-                   <h1 className="text-7xl font-black tracking-tighter text-[#059669] leading-none tabular-nums">43.060</h1>
+              </div>
+              
+              <div className="bg-white p-8">
+                 <div className="flex items-center gap-3 mb-6">
+                    <CheckCircle2 className="text-[#059669]" size={20} />
+                    <h3 className="text-sm font-bold text-slate-900 uppercase">Mensagem para o Investidor</h3>
                  </div>
-                 <p className="text-slate-400 font-bold uppercase tracking-[0.2em] text-[10px]">
-                   Cenário Consolidado • Jacarepaguá
+                 <p className="text-sm text-slate-600 leading-relaxed max-w-3xl">
+                   Com 12 meses de operação e taxas de ocupação médias (70%), o Localizei JPA atinge a marca de aproximadamente <strong>R$ 85.000,00</strong> em faturamento recorrente. O modelo é altamente escalável para qualquer bairro, mantendo uma estrutura técnica centralizada de baixo custo fixo, o que garante margens líquidas robustas desde os primeiros estágios.
                  </p>
-                 <div className="mt-10 flex flex-wrap justify-center gap-6 text-slate-400 text-[10px] font-black uppercase tracking-widest border-t border-slate-50 pt-8 w-full max-w-lg">
-                    <div className="flex items-center gap-1.5"><Check size={14} className="text-[#059669]" /> Margem Alta</div>
-                    <div className="flex items-center gap-1.5"><Check size={14} className="text-[#059669]" /> Escalabilidade</div>
-                    <div className="flex items-center gap-1.5"><Check size={14} className="text-[#059669]" /> Hiperlocal</div>
+                 <div className="mt-8 flex flex-wrap gap-4 text-slate-400 text-[10px] font-black uppercase tracking-widest border-t border-slate-50 pt-8">
+                    <div className="flex items-center gap-1.5"><Check size={14} className="text-[#059669]" /> Sem renovação automática</div>
+                    <div className="flex items-center gap-1.5"><Check size={14} className="text-[#059669]" /> Pagamento Antecipado</div>
+                    <div className="flex items-center gap-1.5"><Check size={14} className="text-[#059669]" /> Modelo Low-Asset</div>
                  </div>
               </div>
            </div>
