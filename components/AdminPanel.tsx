@@ -449,84 +449,66 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ user, onLogout, viewMode
         </section>
 
         {/* POTENCIAL DE EXPANSÃO GEOGRÁFICA */}
-        <section className="pt-12 space-y-12 animate-in fade-in duration-700 w-full max-w-5xl mx-auto overflow-x-hidden">
-           <div className="flex flex-col items-center text-center gap-4 px-4">
-              <div className="flex items-center gap-3">
-                 <Globe2 className="text-indigo-600 shrink-0" size={28} />
-                 <h2 className="text-xl sm:text-2xl font-black text-slate-900 uppercase tracking-tight">Potencial de Expansão Geográfica</h2>
-              </div>
-              <p className="text-sm text-slate-500 font-medium max-w-2xl leading-relaxed">
-                 O modelo do Localizei JPA é altamente replicável por CEP, com baixa dependência de custo fixo e rápida maturação operacional.
-              </p>
-           </div>
-
-           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-stretch px-4">
-              {/* Premissa de Referência */}
-              <div className="bg-white p-6 sm:p-8 rounded-[2rem] border border-slate-200 shadow-sm flex flex-col justify-between hover:border-indigo-200 transition-all">
-                 <div>
-                    <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-6">Premissa de Referência (Conservadora)</h3>
-                    <div className="flex items-baseline gap-2 mb-4">
-                       <span className="text-sm font-black text-slate-400">R$</span>
-                       <span className="text-4xl font-black text-slate-900 tracking-tighter">85.000</span>
-                       <span className="text-xs font-bold text-slate-400 uppercase ml-2 tracking-widest">/ mês por praça</span>
-                    </div>
-                    <p className="text-[10px] text-slate-400 font-medium italic">Estimativa após 12 meses de operação em base consolidada.</p>
+        <section className="pt-12 w-full">
+           <div className="max-w-[420px] mx-auto w-full px-4 space-y-6">
+              {/* Cabeçalho Seção */}
+              <div className="text-center space-y-2">
+                 <div className="w-12 h-12 bg-indigo-50 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-indigo-100">
+                    <span className="text-2xl" role="img" aria-label="world">🌍</span>
                  </div>
-                 
-                 <div className="mt-8 pt-6 border-t border-slate-50">
-                    <div className="flex items-start gap-3 bg-indigo-50 p-4 rounded-2xl border border-indigo-100/50">
-                       <div className="shrink-0 p-1.5 bg-white rounded-lg text-indigo-600 shadow-sm">
-                          <Target size={14} />
-                       </div>
-                       <p className="text-[11px] text-indigo-900/70 leading-relaxed font-medium">
-                          <strong>Mensagem para Investidor:</strong> Crescimento previsível e escalável sem aumento proporcional de estrutura central.
-                       </p>
-                    </div>
-                 </div>
+                 <h2 className="text-sm font-black text-slate-900 uppercase tracking-widest">POTENCIAL DE EXPANSÃO GEOGRÁFICA</h2>
+                 <p className="text-[11px] text-slate-500 font-medium leading-relaxed max-w-[280px] mx-auto">
+                    Modelo replicável por CEP, com baixa dependência de custo fixo e rápida maturação operacional.
+                 </p>
               </div>
 
-              {/* Praças Estratégicas */}
-              <div className="bg-white p-6 sm:p-8 rounded-[2rem] border border-slate-200 shadow-sm flex flex-col hover:border-rose-100 transition-all">
-                 <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-6 flex items-center gap-2">
-                    <MapPin size={14} className="text-rose-500" />
-                    Praças Estratégicas Mapeadas (14 praças)
-                 </h3>
-                 <div className="flex flex-wrap gap-1.5 sm:gap-2">
+              {/* Card 1: Premissa */}
+              <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm text-center">
+                 <div className="flex items-baseline justify-center gap-1.5">
+                    <span className="text-xs font-bold text-slate-400">R$</span>
+                    <h3 className="text-3xl font-black text-slate-900 tracking-tighter">85.000</h3>
+                    <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">/ mês</span>
+                 </div>
+                 <p className="text-[10px] text-slate-400 font-bold uppercase mt-3 tracking-wider">
+                    Premissa conservadora após 12 meses de operação por praça ativa.
+                 </p>
+              </div>
+
+              {/* Card 2: Praças */}
+              <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm">
+                 <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4 text-center">14 Praças Estratégicas Mapeadas</h3>
+                 <div className="grid grid-cols-2 gap-2">
                     {[
                       "Barra da Tijuca", "Recreio", "Zona Sul", "Centro", "Tijuca", "Méier",
                       "Ilha do Governador", "Niterói", "Duque de Caxias", "Nova Iguaçu",
                       "São João de Meriti", "Região dos Lagos", "Região Serrana", "Região Metropolitana"
                     ].map((praca, idx) => (
-                      <span key={idx} className="px-2.5 py-1 bg-slate-50 border border-slate-100 rounded-lg text-[9px] sm:text-[10px] font-bold text-slate-600 hover:bg-rose-50 hover:text-rose-600 hover:border-rose-100 transition-colors cursor-default whitespace-nowrap">
-                        {praca}
-                      </span>
+                      <div key={idx} className="bg-slate-50 border border-slate-100 px-2 py-2 rounded-xl text-[9px] font-bold text-slate-600 text-center truncate">
+                         {praca}
+                      </div>
                     ))}
                  </div>
               </div>
-           </div>
 
-           {/* TOTAL POTENCIAL CONSOLIDADO */}
-           <div className="px-4">
-              <div className="bg-slate-900 rounded-[2.5rem] p-8 sm:p-10 flex flex-col md:flex-row md:items-center justify-between gap-8 border border-white/5 shadow-xl relative overflow-hidden text-center md:text-left">
-                 <div className="absolute top-0 left-0 w-full h-1 bg-emerald-500 opacity-20"></div>
-                 
-                 <div className="flex flex-col md:flex-row items-center gap-5">
-                    <div className="w-14 h-14 sm:w-16 sm:h-16 bg-emerald-500/10 rounded-2xl flex items-center justify-center border border-emerald-500/20 shrink-0 shadow-lg">
-                       <TrendingUp className="text-emerald-400" size={32} />
-                    </div>
-                    <div className="space-y-1">
-                       <h3 className="text-white font-black text-sm sm:text-base uppercase tracking-[0.2em]">Faturamento Potencial Consolidado</h3>
-                       <p className="text-emerald-400/60 text-[10px] font-bold uppercase tracking-widest">Baseado na ativação simultânea das 14 praças</p>
-                    </div>
-                 </div>
+              {/* Faixa Informativa Inline */}
+              <div className="bg-indigo-50/50 border-y border-indigo-100/50 py-4 px-2 text-center">
+                 <p className="text-[10px] text-indigo-700 font-black leading-tight uppercase tracking-widest">
+                    “Crescimento previsível e escalável, sem aumento proporcional da estrutura central.”
+                 </p>
+              </div>
 
-                 <div className="flex flex-col items-center md:items-end justify-center">
-                    <div className="flex items-baseline gap-2">
-                       <span className="text-xl font-black text-emerald-400">R$</span>
-                       <span className="text-4xl sm:text-5xl lg:text-6xl font-black text-emerald-400 tracking-tighter tabular-nums leading-none">1.190.000</span>
+              {/* Card Final: Consolidado */}
+              <div className="bg-slate-900 p-8 rounded-[2.5rem] shadow-xl text-center relative overflow-hidden">
+                 <div className="absolute top-0 left-0 w-full h-1 bg-emerald-500"></div>
+                 <p className="text-[9px] font-black text-white/40 uppercase tracking-[0.3em] mb-4">FATURAMENTO POTENCIAL CONSOLIDADO</p>
+                 <div className="flex flex-col items-center gap-1 mb-4">
+                    <div className="flex items-baseline justify-center gap-1.5">
+                       <span className="text-sm font-black text-emerald-400">R$</span>
+                       <h2 className="text-5xl font-black text-emerald-400 tracking-tighter tabular-nums leading-none">1.190.000</h2>
                     </div>
-                    <span className="text-[10px] font-black text-emerald-400/60 uppercase tracking-widest mt-1">/ mês</span>
+                    <span className="text-[10px] font-black text-emerald-400/60 uppercase tracking-[0.2em]">/ mês</span>
                  </div>
+                 <p className="text-[10px] text-slate-400 font-medium">Baseado na ativação simultânea das 14 praças mapeadas.</p>
               </div>
            </div>
         </section>
@@ -583,85 +565,79 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ user, onLogout, viewMode
         </section>
 
         {/* --- INVESTIMENTO IDEAL — ESCALA SAUDÁVEL (CENÁRIO 2) --- */}
-        <section className="space-y-12">
-           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 px-1">
-              <div>
-                 <div className="flex items-center gap-2 mb-3">
-                    <Rocket className="text-indigo-600" size={22} />
-                    <h2 className="text-lg font-black text-slate-900 uppercase tracking-tighter">Investimento Ideal — Escala Saudável</h2>
-                 </div>
-                 <p className="text-sm text-slate-500 font-medium max-w-lg leading-relaxed">
-                    Aceleração massiva para garantir dominância regional e ocupação imediata de mercado.
+        <section className="w-full">
+           <div className="max-w-[420px] mx-auto w-full px-4 space-y-6 animate-in fade-in duration-700">
+              
+              {/* Cabeçalho da Seção */}
+              <div className="text-left space-y-2">
+                 <TrendingUp className="text-indigo-600 w-6 h-6" strokeWidth={3} />
+                 <h2 className="text-xl font-black text-slate-900 uppercase leading-tight tracking-tight">
+                    INVESTIMENTO IDEAL<br/>
+                    <span className="text-indigo-600">ESCALA SAUDÁVEL</span>
+                 </h2>
+                 <p className="text-xs text-slate-500 font-medium leading-relaxed">
+                    “Aceleração massiva para garantir dominância regional e ocupação imediata de mercado.”
                  </p>
               </div>
-              <div className="bg-indigo-600 px-8 py-5 rounded-[2.5rem] shadow-2xl shadow-indigo-200 shrink-0 text-center">
-                 <span className="text-[9px] font-black text-white/70 uppercase tracking-[0.2em] block mb-1">Aporte Recomendado</span>
-                 <div className="flex items-baseline gap-2 justify-center">
-                    <span className="text-sm font-black text-white">R$</span>
-                    <h1 className="text-4xl font-black text-white tracking-tighter">200.000</h1>
-                 </div>
-              </div>
-           </div>
 
-           <div className="space-y-12">
-              {/* Ações Digitais */}
-              <div className="space-y-6">
-                <div className="flex items-center gap-2 ml-1">
-                   <div className="w-1.5 h-1.5 rounded-full bg-indigo-500"></div>
-                   <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.25em]">Ações Digitais</h3>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-5">
-                    {[
-                      { icon: Megaphone, title: 'Marketing Full', desc: 'Estratégia multicanal agressiva.', color: 'text-indigo-600', bg: 'bg-indigo-50' },
-                      { icon: Users, title: 'Influencers', desc: 'Parcerias locais recorrentes.', color: 'text-rose-600', bg: 'bg-rose-50' },
-                      { icon: Flame, title: 'Anúncios Massivos', desc: 'Aquisição em escala de usuários.', color: 'text-blue-600', bg: 'bg-blue-50' }
-                    ].map((item, i) => (
-                      <div key={i} className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm flex flex-col items-center text-center group hover:border-indigo-100 transition-all w-full max-w-full overflow-hidden">
-                        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center mb-4 shrink-0 ${item.bg} ${item.color}`}>
-                            <item.icon size={22} />
-                        </div>
-                        <h4 className="text-xs font-black text-slate-900 uppercase tracking-widest mb-2 break-words w-full">{item.title}</h4>
-                        <p className="text-[11px] text-slate-500 font-medium leading-tight break-words w-full">{item.desc}</p>
-                      </div>
-                    ))}
-                </div>
-              </div>
-
-              {/* Ações Territoriais */}
-              <div className="space-y-6 w-full">
-                <div className="flex items-center gap-2 ml-1">
-                   <div className="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
-                   <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.25em]">Ações Territoriais</h3>
-                </div>
-                <div className="grid grid-cols-2 gap-4 sm:gap-6 w-full">
-                    {[
-                      { icon: MapPin, title: 'Ativações', desc: 'Adesivagem e presença em PDV.', color: 'text-emerald-600', bg: 'bg-emerald-50' },
-                      { icon: ImageIcon, title: 'Outdoors', desc: 'Branding visual no bairro.', color: 'text-amber-600', bg: 'bg-amber-50' },
-                      { icon: Building2, title: 'Sala Comercial', desc: 'Base fixa e estúdio próprio.', color: 'text-blue-600', bg: 'bg-blue-50' },
-                      { icon: Server, title: 'Cloud VIP', desc: 'Infra preparada para alta escala.', color: 'text-slate-600', bg: 'bg-slate-100' }
-                    ].map((item, i) => (
-                      <div key={i} className="bg-white p-5 sm:p-6 rounded-[2rem] border border-slate-100 shadow-sm flex flex-col items-center text-center group hover:border-emerald-100 transition-all w-full max-w-full overflow-hidden h-auto">
-                        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center mb-4 shrink-0 ${item.bg} ${item.color}`}>
-                            <item.icon size={22} />
-                        </div>
-                        <h4 className="text-xs font-black text-slate-900 uppercase tracking-widest mb-2 whitespace-normal break-words w-full">{item.title}</h4>
-                        <p className="text-[11px] text-slate-500 font-medium leading-tight whitespace-normal break-words w-full">{item.desc}</p>
-                      </div>
-                    ))}
-                </div>
-              </div>
-           </div>
-
-           <div className="bg-indigo-600 rounded-[3rem] p-10 flex flex-col md:flex-row items-center justify-center gap-10 border border-white/20 shadow-2xl shadow-indigo-100">
-              <div className="w-16 h-16 bg-white/20 rounded-[1.5rem] flex items-center justify-center shrink-0 border border-white/30 backdrop-blur-md">
-                 <CheckCircle2 className="text-white" size={32} />
-              </div>
-              <div className="text-center md:text-left max-w-2xl">
-                 <h4 className="text-white font-black text-base uppercase tracking-[0.3em] mb-2">Resultado Esperado (Escala)</h4>
-                 <p className="text-indigo-50 text-sm font-medium leading-relaxed">
-                    Operação centralizada, eventos próprios recorrentes, produção contínua de conteúdo e maior eficiência operacional com fortalecimento total da marca.
+              {/* Card — Aporte Recomendado */}
+              <div className="bg-indigo-600 text-white rounded-[2rem] p-8 text-center shadow-xl shadow-indigo-200 relative overflow-hidden">
+                 <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl -mr-10 -mt-10"></div>
+                 <p className="text-[10px] font-black uppercase tracking-[0.25em] mb-2 opacity-80">APORTE RECOMENDADO</p>
+                 <h3 className="text-4xl font-black tracking-tighter mb-4">R$ 200.000</h3>
+                 <p className="text-[11px] font-medium opacity-90 leading-relaxed px-4">
+                    “Estrutura ideal para crescimento acelerado e consolidação regional.”
                  </p>
               </div>
+
+              {/* Bloco — Ações Digitais (Grid 2x2) */}
+              <div className="space-y-4">
+                 <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">AÇÕES DIGITAIS</h3>
+                 <div className="grid grid-cols-2 gap-3">
+                    {[
+                      { title: "Marketing Full", desc: "Estratégia multicanal agressiva" },
+                      { title: "Influencers Locais", desc: "Criadores regionais recorrentes" },
+                      { title: "Anúncios Massivos", desc: "Aquisição acelerada de usuários" },
+                      { title: "Performance & CAC", desc: "Otimização e escala previsível" }
+                    ].map((item, idx) => (
+                      <div key={idx} className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex flex-col justify-center min-h-[100px]">
+                         <h4 className="text-[11px] font-black text-slate-900 uppercase leading-tight mb-1">{item.title}</h4>
+                         <p className="text-[10px] text-slate-500 font-medium leading-tight">{item.desc}</p>
+                      </div>
+                    ))}
+                 </div>
+              </div>
+
+              {/* Bloco — Ações Territoriais (Grid 2x2) */}
+              <div className="space-y-4">
+                 <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">AÇÕES TERRITORIAIS</h3>
+                 <div className="grid grid-cols-2 gap-3">
+                    {[
+                      { title: "Ativações Físicas", desc: "Presença visual em PDVs" },
+                      { title: "Outdoors Estratégicos", desc: "Branding regional" },
+                      { title: "Sala Comercial", desc: "Base fixa e estúdio próprio" },
+                      { title: "Cloud VIP", desc: "Infra preparada para alta escala" }
+                    ].map((item, idx) => (
+                      <div key={idx} className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex flex-col justify-center min-h-[100px]">
+                         <h4 className="text-[11px] font-black text-slate-900 uppercase leading-tight mb-1">{item.title}</h4>
+                         <p className="text-[10px] text-slate-500 font-medium leading-tight">{item.desc}</p>
+                      </div>
+                    ))}
+                 </div>
+              </div>
+
+              {/* Card Final — Resultado Esperado */}
+              <div className="bg-slate-900 text-white rounded-[2rem] p-6 shadow-xl border border-white/5 relative overflow-hidden">
+                 <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-500/10 rounded-full blur-2xl"></div>
+                 <div className="flex items-center gap-3 mb-3">
+                    <CheckCircle2 className="text-emerald-400 w-5 h-5" />
+                    <h4 className="text-[11px] font-black uppercase tracking-[0.2em]">RESULTADO ESPERADO (ESCALA)</h4>
+                 </div>
+                 <p className="text-sm text-slate-300 font-medium leading-relaxed">
+                    “Reconhecimento total da marca, ocupação imediata de inventário e base consolidada para expansão geográfica.”
+                 </p>
+              </div>
+
            </div>
         </section>
 
