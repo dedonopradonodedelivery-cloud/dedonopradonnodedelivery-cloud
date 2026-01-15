@@ -57,7 +57,8 @@ import {
   ImageIcon,
   Flame,
   Milestone,
-  History
+  History,
+  PartyPopper
 } from 'lucide-react';
 import { User as SupabaseUser } from '@supabase/supabase-js';
 
@@ -85,6 +86,7 @@ const KPICard: React.FC<{ icon: any, label: string, value: string, isPositive?: 
 
 export const AdminPanel: React.FC<AdminPanelProps> = ({ user, onLogout, viewMode, onOpenViewSwitcher, onNavigateToApp }) => {
   const [activeView, setActiveView] = useState<AdminView>('dashboard');
+  const [showWelcomeModal, setShowWelcomeModal] = useState(false);
 
   if (!user || user.email !== ADMIN_EMAIL) {
     return (
@@ -529,7 +531,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ user, onLogout, viewMode
                     <Milestone size={20} />
                  </div>
                  <div>
-                    <h2 className="text-sm font-black text-slate-900 uppercase tracking-widest tracking-tighter">ESTRUTURA DE APORTE — 2 MOMENTOS</h2>
+                    <h2 className="text-sm font-black text-slate-900 uppercase tracking-widest">ESTRUTURA DE APORTE — 2 MOMENTOS</h2>
                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mt-0.5">Flexibilidade financeira e gestão de risco</p>
                  </div>
               </div>
@@ -602,21 +604,21 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ user, onLogout, viewMode
 
               <div className="flex flex-col sm:flex-row items-center gap-4 w-full max-w-sm">
                 <button 
-                  onClick={() => alert("Decisão confirmada! Vamos juntos mudar Jacarepaguá. 🚀")}
-                  className="w-full bg-indigo-600 text-white font-black py-5 rounded-2xl shadow-xl active:scale-95 transition-all uppercase tracking-widest text-sm hover:bg-indigo-700"
+                  onClick={() => setShowWelcomeModal(true)}
+                  className="w-full bg-[#1E5BFF] text-white font-black py-5 rounded-2xl shadow-xl active:scale-[0.95] transition-all uppercase tracking-widest text-sm hover:bg-blue-700"
                 >
                   SIM
                 </button>
-                <span className="text-slate-400 font-black text-[10px] uppercase tracking-widest">OU</span>
+                <span className="text-slate-400 font-black text-xs uppercase tracking-widest">OU</span>
                 <button 
-                  onClick={() => alert("Decisão confirmada! Vamos juntos mudar Jacarepaguá. 🚀")}
-                  className="w-full bg-indigo-600 text-white font-black py-5 rounded-2xl shadow-xl active:scale-95 transition-all uppercase tracking-widest text-sm hover:bg-indigo-700"
+                  onClick={() => setShowWelcomeModal(true)}
+                  className="w-full bg-[#1E5BFF] text-white font-black py-5 rounded-2xl shadow-xl active:scale-[0.95] transition-all uppercase tracking-widest text-sm hover:bg-blue-700"
                 >
                   SIM
                 </button>
               </div>
 
-              <div className="mt-8 text-3xl animate-in zoom-in duration-500">😄</div>
+              <div className="mt-8 text-5xl animate-in zoom-in duration-500">😄</div>
               
               <p className="mt-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.4em] px-4">
                 A maior oportunidade da Freguesia espera por você
@@ -624,6 +626,36 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ user, onLogout, viewMode
            </div>
         </section>
 
+        {/* Welcome Modal */}
+        {showWelcomeModal && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 animate-in fade-in duration-300">
+            <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onClick={() => setShowWelcomeModal(false)}></div>
+            <div className="relative bg-white rounded-[2.5rem] p-8 md:p-12 shadow-2xl max-w-sm w-full text-center border border-slate-100 animate-in zoom-in-95 duration-300">
+              <button 
+                onClick={() => setShowWelcomeModal(false)}
+                className="absolute top-6 right-6 text-slate-300 hover:text-slate-500 transition-colors"
+              >
+                <X size={24} />
+              </button>
+              
+              <div className="w-20 h-20 bg-indigo-50 rounded-3xl flex items-center justify-center mx-auto mb-6 text-indigo-600">
+                <PartyPopper size={40} />
+              </div>
+              
+              <h3 className="text-2xl font-black text-slate-900 mb-2 font-display uppercase tracking-tight leading-tight">Parabéns!</h3>
+              <p className="text-slate-500 font-medium leading-relaxed">
+                Seja muito bem-vindo à Localizei Jacarepaguá!
+              </p>
+              
+              <button 
+                onClick={() => setShowWelcomeModal(false)}
+                className="mt-10 w-full bg-slate-900 text-white font-black py-4 rounded-2xl active:scale-[0.95] transition-all uppercase tracking-widest text-xs"
+              >
+                Vamos Começar
+              </button>
+            </div>
+          </div>
+        )}
       </main>
 
       <footer className="py-12 border-t border-slate-200 mt-auto text-center bg-white/50">
