@@ -84,9 +84,38 @@ const KPICard: React.FC<{ icon: any, label: string, value: string, isPositive?: 
   </div>
 );
 
+const Confetti: React.FC = () => {
+  return (
+    <div className="fixed inset-0 pointer-events-none z-[110] overflow-hidden">
+      {[...Array(50)].map((_, i) => (
+        <div
+          key={i}
+          className="absolute w-2.5 h-2.5 rounded-sm"
+          style={{
+            backgroundColor: ['#1E5BFF', '#F59E0B', '#10B981', '#EF4444', '#8B5CF6', '#F472B6'][i % 6],
+            top: '-5%',
+            left: `${Math.random() * 100}%`,
+            animation: `fall ${1.5 + Math.random() * 1.5}s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards`,
+            opacity: 1,
+            transform: `rotate(${Math.random() * 360}deg)`,
+          }}
+        />
+      ))}
+      <style>{`
+        @keyframes fall {
+          0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+          70% { opacity: 1; }
+          100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+        }
+      `}</style>
+    </div>
+  );
+};
+
 export const AdminPanel: React.FC<AdminPanelProps> = ({ user, onLogout, viewMode, onOpenViewSwitcher, onNavigateToApp }) => {
   const [activeView, setActiveView] = useState<AdminView>('dashboard');
   const [showWelcomeModal, setShowWelcomeModal] = useState(false);
+  const [showConfetti, setShowConfetti] = useState(false);
 
   if (!user || user.email !== ADMIN_EMAIL) {
     return (
@@ -102,6 +131,12 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ user, onLogout, viewMode
       </div>
     );
   }
+
+  const handleCelebrate = () => {
+    setShowWelcomeModal(true);
+    setShowConfetti(true);
+    setTimeout(() => setShowConfetti(false), 2000);
+  };
 
   const renderMonetizationModel = () => (
     <div className="min-h-screen bg-[#F8FAFC] text-slate-900 font-sans animate-in fade-in duration-500 flex flex-col">
@@ -604,14 +639,14 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ user, onLogout, viewMode
 
               <div className="flex flex-col sm:flex-row items-center gap-4 w-full max-w-sm">
                 <button 
-                  onClick={() => setShowWelcomeModal(true)}
+                  onClick={handleCelebrate}
                   className="w-full bg-[#1E5BFF] text-white font-black py-5 rounded-2xl shadow-xl active:scale-[0.95] transition-all uppercase tracking-widest text-sm hover:bg-blue-700"
                 >
                   SIM
                 </button>
                 <span className="text-slate-400 font-black text-xs uppercase tracking-widest">OU</span>
                 <button 
-                  onClick={() => setShowWelcomeModal(true)}
+                  onClick={handleCelebrate}
                   className="w-full bg-[#1E5BFF] text-white font-black py-5 rounded-2xl shadow-xl active:scale-[0.95] transition-all uppercase tracking-widest text-sm hover:bg-blue-700"
                 >
                   SIM
@@ -642,20 +677,15 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ user, onLogout, viewMode
                 <PartyPopper size={40} />
               </div>
               
-              <h3 className="text-2xl font-black text-slate-900 mb-2 font-display uppercase tracking-tight leading-tight">Parabéns!</h3>
+              <h3 className="text-2xl font-black text-slate-900 mb-2 font-display uppercase tracking-tight leading-tight">Parabéns, Jabinha!</h3>
               <p className="text-slate-500 font-medium leading-relaxed">
                 Seja muito bem-vindo à Localizei Jacarepaguá!
               </p>
-              
-              <button 
-                onClick={() => setShowWelcomeModal(false)}
-                className="mt-10 w-full bg-slate-900 text-white font-black py-4 rounded-2xl active:scale-[0.95] transition-all uppercase tracking-widest text-xs"
-              >
-                Vamos Começar
-              </button>
             </div>
           </div>
         )}
+
+        {showConfetti && <Confetti />}
       </main>
 
       <footer className="py-12 border-t border-slate-200 mt-auto text-center bg-white/50">
