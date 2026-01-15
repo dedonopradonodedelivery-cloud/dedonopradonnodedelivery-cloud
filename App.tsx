@@ -67,6 +67,8 @@ export type RoleMode = 'ADM' | 'Usuário' | 'Lojista' | 'Visitante';
 const App: React.FC = () => {
   const { user, userRole, loading: isAuthInitialLoading, signOut } = useAuth();
   const isAuthReturn = window.location.hash.includes('access_token') || window.location.search.includes('code=');
+  
+  // 0: Logo fade-in, 1: Typewriter starts, 2: Animation running, 3: Fade-out, 4: Gone
   const [splashStage, setSplashStage] = useState(isFirstBootAttempted || isAuthReturn ? 4 : 0);
   const [themeMode, setThemeMode] = useState<ThemeMode>(() => (localStorage.getItem('localizei_theme_mode') as ThemeMode) || 'light');
   const [isDarkMode, setIsDarkMode] = useState(false);
@@ -107,17 +109,24 @@ const App: React.FC = () => {
 
   useEffect(() => {
     if (splashStage === 4) return;
-    const t1 = setTimeout(() => setSplashStage(1), 1200);
-    const t2 = setTimeout(() => setSplashStage(2), 1500);
-    const t3 = setTimeout(() => setSplashStage(3), 4600);
-    const t4 = setTimeout(() => {
+    
+    // 0s -> 0.5s: Fade in Logo
+    // 0.5s -> 2.5s: Typewriter Sponsor
+    // 4.0s -> 5.0s: App Fade Out
+    
+    const tStartTypewriter = setTimeout(() => setSplashStage(1), 500);
+    const tStartFadeOut = setTimeout(() => setSplashStage(3), 4000);
+    const tFinished = setTimeout(() => {
         setSplashStage(4);
         isFirstBootAttempted = true;
     }, 5000);
+
     return () => {
-        clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); clearTimeout(t4);
+        clearTimeout(tStartTypewriter);
+        clearTimeout(tStartFadeOut);
+        clearTimeout(tFinished);
     };
-  }, []);
+  }, [splashStage]);
 
   useEffect(() => {
     const applyTheme = () => {
@@ -399,13 +408,28 @@ const App: React.FC = () => {
           <RoleSwitcherModal />
 
           {splashStage < 4 && (
-            <div className={`fixed inset-0 z-[999] flex items-center justify-center transition-opacity duration-500 ${splashStage === 3 ? 'animate-app-exit' : ''}`} style={{ backgroundColor: '#1E5BFF' }} >
-              <div className={`flex flex-col items-center justify-center z-10 transition-all duration-700 ${splashStage === 0 ? 'animate-logo-enter' : 'opacity-100'} ${splashStage >= 1 ? 'animate-logo-micro-move' : ''}`} >
-                  <div className="relative w-32 h-32 bg-white rounded-[2.5rem] flex items-center justify-center shadow-2xl mb-6">
+            <div 
+              className={`fixed inset-0 z-[999] flex flex-col items-center justify-center transition-all duration-1000 ${splashStage === 3 ? 'animate-app-exit' : ''}`} 
+              style={{ backgroundColor: '#1E5BFF' }} 
+            >
+              <div className="flex flex-col items-center justify-center z-10">
+                  <div className={`relative w-32 h-32 bg-white rounded-[2.5rem] flex items-center justify-center shadow-2xl mb-6 animate-logo-enter ${splashStage >= 1 ? 'animate-logo-micro-move' : ''}`}>
                     <MapPin className="w-16 h-16 text-brand-blue fill-brand-blue" />
                   </div>
-                  <h1 className="text-5xl font-black font-display text-white tracking-tighter drop-shadow-md">Localizei</h1>
-                  <span className="text-sm font-bold text-white/90 tracking-[0.5em] uppercase mt-1">JPA</span>
+                  <h1 className="text-5xl font-black font-display text-white tracking-tighter drop-shadow-md animate-fade-in">Localizei</h1>
+                  <span className="text-sm font-bold text-white/90 tracking-[0.5em] uppercase mt-1 animate-fade-in">JPA</span>
+                  
+                  {/* Patrocinador com efeito de escrita */}
+                  <div className="mt-12 flex flex-col items-center min-h-[60px]">
+                      {splashStage >= 1 && (
+                        <div className="flex flex-col items-center overflow-hidden">
+                           <p className="text-[10px] font-black text-white/60 uppercase tracking-[0.2em] mb-1 animate-fade-in">Patrocinador Master</p>
+                           <div className="typewriter-container animate-typewriter">
+                              <p className="text-lg font-medium text-white whitespace-nowrap">Grupo Esquematiza</p>
+                           </div>
+                        </div>
+                      )}
+                  </div>
               </div>
             </div>
           )}

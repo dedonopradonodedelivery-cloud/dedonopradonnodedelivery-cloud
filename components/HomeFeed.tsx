@@ -57,13 +57,6 @@ interface HomeFeedProps {
   onRequireLogin: () => void;
 }
 
-const MINI_TRIBOS = [
-  { id: 't-work', name: 'Home Office', subtitle: 'Wi-Fi e silêncio', icon: Coffee, color: 'bg-white text-blue-600 border-gray-100 shadow-sm' },
-  { id: 't-pet', name: 'Amigo do Pet', subtitle: 'Eles são bem-vindos', icon: DogIcon, color: 'bg-white text-purple-600 border-gray-100 shadow-sm' },
-  { id: 't-kids', name: 'Espaço Kids', subtitle: 'Lazer pros pequenos', icon: Baby, color: 'bg-white text-orange-600 border-gray-100 shadow-sm' },
-  { id: 't-health', name: 'Vibe Saúde', subtitle: 'Foco no bem-estar', icon: Leaf, color: 'bg-white text-emerald-600 border-gray-100 shadow-sm' },
-];
-
 const getCategoryCover = (category: string) => {
   switch (category) {
     case 'Alimentação': return 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=400&auto=format&fit=crop';
@@ -749,21 +742,10 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
       case 'trust_feed': return <CommunityTrustCarousel key="trust_feed" stores={sortedStores} onStoreClick={(s) => onStoreClick && onStoreClick(s)} />;
       case 'list':
         return (
-          <div key="list" className="w-full bg-white dark:bg-gray-900 pt-3 pb-6">
+          <div key="list" className="w-full bg-white dark:bg-gray-900 pt-3">
             <div className="px-5">
-              <SectionHeader title={`Parceiros Premium em ${currentNeighborhood === 'Jacarepaguá (todos)' ? 'Jacarepaguá' : currentNeighborhood}`} subtitle="O que há de melhor no bairro" rightElement={<div className="flex gap-1 bg-gray-100 dark:bg-gray-800 p-1 rounded-xl">{['all', 'cashback', 'top_rated'].map((f) => (<button key={f} onClick={() => setListFilter(f as any)} className={`text-[8px] font-black uppercase px-2.5 py-1.5 rounded-lg transition-all ${listFilter === f ? 'bg-white dark:bg-gray-700 text-[#1E5BFF] shadow-sm' : 'text-gray-400'}`}>{f === 'all' ? 'Tudo' : f === 'cashback' ? '%' : 'Top'}</button>))}</div>} />
-              <LojasEServicosList onStoreClick={onStoreClick} onViewAll={() => onNavigate('explore')} activeFilter={listFilter} user={user} onNavigate={onNavigate} premiumOnly={true} />
-            </div>
-          </div>
-        );
-      case 'mini_tribes':
-        return (
-          <div key="mini_tribes" className="w-full py-6 bg-white dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800">
-            <div className="px-5"><SectionHeader title="Estilo de Vida" subtitle="Lugares pela sua vibe" /></div>
-            <div className="grid grid-cols-2 gap-3 px-5">
-              {MINI_TRIBOS.map((tribo) => (
-                <button key={tribo.id} className={`flex items-center gap-3 p-4 rounded-2xl border text-left active:scale-[0.97] transition-all ${tribo.color} bg-white dark:bg-gray-800 border-gray-100 dark:border-gray-700`}><div className="p-2 bg-gray-50/50 dark:bg-gray-700 rounded-lg shrink-0"><tribo.icon size={18} strokeWidth={2.5} /></div><div className="min-w-0"><h4 className="font-bold text-[10px] truncate uppercase tracking-tight">{tribo.name}</h4></div></button>
-              ))}
+              <SectionHeader title={`Parceiros em ${currentNeighborhood === 'Jacarepaguá (todos)' ? 'Jacarepaguá' : currentNeighborhood}`} subtitle="O melhor do comércio local" rightElement={<div className="flex gap-1 bg-gray-100 dark:bg-gray-800 p-1 rounded-xl">{['all', 'cashback', 'top_rated'].map((f) => (<button key={f} onClick={() => setListFilter(f as any)} className={`text-[8px] font-black uppercase px-2.5 py-1.5 rounded-lg transition-all ${listFilter === f ? 'bg-white dark:bg-gray-700 text-[#1E5BFF] shadow-sm' : 'text-gray-400'}`}>{f === 'all' ? 'Tudo' : f === 'cashback' ? '%' : 'Top'}</button>))}</div>} />
+              <LojasEServicosList onStoreClick={onStoreClick} onViewAll={() => onNavigate('explore')} activeFilter={listFilter} user={user} onNavigate={onNavigate} premiumOnly={false} />
             </div>
           </div>
         );
@@ -779,17 +761,13 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
     'featured_jobs',        
     'trust_feed',
     'community_feed',       
-    'list',
-    'mini_tribes'
+    'list'
   ], []);
 
   return (
     <div className="flex flex-col bg-white dark:bg-gray-950 w-full max-w-md mx-auto animate-in fade-in duration-500 overflow-x-hidden pb-32">
       <div className="flex flex-col w-full">
           {homeStructure.map(section => renderSection(section))}
-          <div className="px-5 pb-6 pt-2 bg-white dark:bg-gray-900">
-            <MasterSponsorBanner onClick={() => onNavigate('patrocinador_master')} />
-          </div>
       </div>
     </div>
   );

@@ -1,6 +1,7 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Star, Loader2, AlertCircle, BadgeCheck, Heart, Award, Eye, Rocket, Crown } from 'lucide-react';
+/* Added Store as StoreIcon to imports from lucide-react to fix "Cannot find name 'StoreIcon'" error */
+import { Star, Loader2, AlertCircle, BadgeCheck, Heart, Award, Eye, Rocket, Crown, Store as StoreIcon } from 'lucide-react';
 import { Store, AdType } from '../types';
 import { useFavorites } from '../hooks/useFavorites';
 import { User } from '@supabase/supabase-js';
@@ -11,35 +12,40 @@ interface LojasEServicosListProps {
   activeFilter?: 'all' | 'cashback' | 'top_rated' | 'open_now';
   user?: User | null;
   onNavigate?: (view: string) => void;
-  premiumOnly?: boolean; // Nova prop para bloqueio de orgânicos
+  premiumOnly?: boolean; 
 }
 
-const CATEGORIES_MOCK = ['Alimentação', 'Beleza', 'Serviços', 'Pets', 'Moda', 'Saúde'];
-const SUBCATEGORIES_MOCK = ['Restaurante', 'Salão', 'Manutenção', 'Pet Shop', 'Roupas', 'Clínica'];
+const CATEGORIES_MOCK = ['Alimentação', 'Beleza', 'Serviços', 'Pets', 'Moda', 'Saúde', 'Autos', 'Mercado', 'Casa', 'Esportes'];
+const NEIGHBORHOODS_MOCK = ['Freguesia', 'Taquara', 'Pechincha', 'Tanque', 'Anil', 'Curicica', 'Gardênia'];
+const TAGS_MOCK = ['Verificado', 'Destaque', 'Promoção', null];
 
-const generateFakeStores = (): Store[] => {
-  return Array.from({ length: 64 }, (_, i) => {
+// Função para gerar dados fake robustos
+const generateFakeStores = (count: number): Store[] => {
+  return Array.from({ length: count }, (_, i) => {
     const catIndex = i % CATEGORIES_MOCK.length;
-    const isPremium = i % 10 === 0; 
-    const isSponsored = i % 15 === 0; 
-    const hasCashback = i % 3 === 0 && !isPremium && !isSponsored; 
-    const isOpenNow = Math.random() > 0.4; 
+    const hoodIndex = i % NEIGHBORHOODS_MOCK.length;
+    const tag = TAGS_MOCK[i % TAGS_MOCK.length];
+    const isPremium = i % 12 === 0; 
+    const isSponsored = i % 18 === 0; 
+    const hasCashback = i % 4 === 0; 
+    const isOpenNow = Math.random() > 0.3; 
 
     return {
-      id: `fake-infinite-${i}`,
-      name: `Loja Comercial ${i + 1}`,
+      id: `fake-infinite-${i}-${Math.random().toString(36).substr(2, 4)}`,
+      name: `${CATEGORIES_MOCK[catIndex]} ${['da Vila', 'Express', 'Premium', 'do Bairro', 'Center', 'Point'][i % 6]}`,
       category: CATEGORIES_MOCK[catIndex],
-      subcategory: SUBCATEGORIES_MOCK[catIndex],
-      logoUrl: '/assets/default-logo.png',
-      rating: Number((3.8 + Math.random() * 1.2).toFixed(1)),
-      reviewsCount: Math.floor(Math.random() * 500) + 10,
-      description: 'O melhor atendimento da região.',
-      distance: `${(Math.random() * 5).toFixed(1)}km`,
+      subcategory: 'Geral',
+      logoUrl: '', // Gerado pelo utilitário mockLogos se disponível ou placeholder
+      rating: Number((4.0 + Math.random() * 1.0).toFixed(1)),
+      reviewsCount: Math.floor(Math.random() * 300) + 5,
+      description: 'O melhor atendimento da região, venha conferir nossas ofertas.',
+      distance: `${(0.5 + Math.random() * 5.5).toFixed(1)} km`,
+      neighborhood: NEIGHBORHOODS_MOCK[hoodIndex],
       adType: isPremium ? AdType.PREMIUM : AdType.ORGANIC,
       isSponsored: isSponsored || isPremium,
-      verified: i % 2 === 0,
-      cashback: hasCashback ? (Math.floor(Math.random() * 10) + 2) : undefined,
-      address: 'Rua Exemplo, 123',
+      verified: i % 3 === 0 || tag === 'Verificado',
+      cashback: hasCashback ? (Math.floor(Math.random() * 12) + 3) : undefined,
+      address: `Rua Principal, ${100 + i}`,
       isOpenNow: isOpenNow,
     };
   });
@@ -50,254 +56,203 @@ const MASTER_SPONSOR_STORE: Store = {
   name: 'Grupo Esquematiza',
   category: 'Segurança & Facilities',
   subcategory: 'Patrocinador Master',
-  logoUrl: '', // Rendered as an icon
+  logoUrl: '', 
   rating: 5.0,
   reviewsCount: 999,
   description: 'Segurança e serviços com excelência para empresas e condomínios.',
-  distance: 'Freguesia • RJ',
+  distance: '0.2 km',
+  neighborhood: 'Freguesia',
   adType: AdType.PREMIUM,
   isSponsored: true,
   verified: true,
   isOpenNow: true,
-  cashback: 10, // Example value
+  cashback: 10,
 };
 
-// ALGORITMO CRÍTICO: ORDENAÇÃO POR MONETIZAÇÃO
+const ITEMS_PER_PAGE = 12;
+const TOTAL_MOCK_COUNT = 64;
+
+// Alvos de monetização
 const sortStores = (stores: Store[]) => {
-  return stores.sort((a, b) => {
-    // 1. PRIORIDADE MÁXIMA: PREMIUM E PATROCINADOS (Obrigatório por contrato)
+  return [...stores].sort((a, b) => {
     const aSponsored = a.isSponsored || a.adType === AdType.PREMIUM;
     const bSponsored = b.isSponsored || b.adType === AdType.PREMIUM;
     if (aSponsored && !bSponsored) return -1;
     if (!aSponsored && bSponsored) return 1;
-
-    // 2. PRIORIDADE SECUNDÁRIA: LOCAL ADS (Ocupam a segunda camada)
-    const aLocal = a.adType === AdType.LOCAL;
-    const bLocal = b.adType === AdType.LOCAL;
-    if (aLocal && !bLocal) return -1;
-    if (!aLocal && bLocal) return 1;
-
-    // 3. PRIORIDADE TERCIÁRIA: ALTA REPUTAÇÃO + CASHBACK (Incentivo de uso)
-    const aSmart = (a.rating >= 4.5 && (a.cashback || 0) > 0);
-    const bSmart = (b.rating >= 4.5 && (b.cashback || 0) > 0);
-    if (aSmart && !bSmart) return -1;
-    if (!aSmart && bSmart) return 1;
-
-    // 4. ORDEM ORGÂNICA POR AVALIAÇÃO
     return (b.rating || 0) - (a.rating || 0);
   });
 };
 
-const RAW_STORES = generateFakeStores();
-const ALL_SORTED_STORES = sortStores([...RAW_STORES]);
-const ITEMS_PER_PAGE = 12;
-
-const getStoreExtras = (index: number, store: Store) => {
-  const copies = [
-    "Muito elogiada pelos moradores",
-    "Clientes voltam sempre",
-    "Atendimento 5 estrelas",
-    "Uma das mais recomendadas",
-    "Sucesso absoluto no bairro",
-    "Qualidade garantida"
-  ];
-  const copy = copies[index % copies.length];
-  return { copy };
-};
-
-export const LojasEServicosList: React.FC<LojasEServicosListProps> = ({ onStoreClick, onViewAll, activeFilter = 'all', user = null, onNavigate, premiumOnly = false }) => {
+export const LojasEServicosList: React.FC<LojasEServicosListProps> = ({ onStoreClick, activeFilter = 'all', user = null, onNavigate, premiumOnly = false }) => {
   const [visibleStores, setVisibleStores] = useState<Store[]>([]);
-  const [filteredStores, setFilteredStores] = useState<Store[]>([]);
+  const [pool, setPool] = useState<Store[]>([]);
   const [loading, setLoading] = useState(false);
-  const [hasMore, setHasMore] = useState(true);
-  const [error, setError] = useState(false);
+  const observer = useRef<IntersectionObserver | null>(null);
   
   const { toggleFavorite, isFavorite } = useFavorites(user);
-  const observer = useRef<IntersectionObserver | null>(null);
 
+  // Inicializa o pool de dados
   useEffect(() => {
-    let data = [...ALL_SORTED_STORES];
+    const initialPool = generateFakeStores(TOTAL_MOCK_COUNT);
+    setPool(initialPool);
     
-    // BLOQUEIO DE CONTEÚDO GRATUITO NA HOME
+    // Filtro inicial e ordenação
+    let filtered = [...initialPool];
     if (premiumOnly) {
-      data = data.filter(s => s.adType === AdType.PREMIUM || s.isSponsored);
+      filtered = filtered.filter(s => s.adType === AdType.PREMIUM || s.isSponsored);
     }
-
     if (activeFilter === 'cashback') {
-        data = data.filter(s => s.cashback && s.cashback > 0);
-    } else if (activeFilter === 'top_rated') {
-        data.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+      filtered = filtered.filter(s => s.cashback && s.cashback > 0);
     } else if (activeFilter === 'open_now') {
-        data = data.filter(s => s.isOpenNow);
+      filtered = filtered.filter(s => s.isOpenNow);
     }
     
-    // RE-APLICA ORDENAÇÃO DE MONETIZAÇÃO MESMO COM FILTROS (Critico)
-    const finalData = sortStores(data);
-
-    setFilteredStores(finalData);
-    setVisibleStores(finalData.slice(0, ITEMS_PER_PAGE));
-    setHasMore(finalData.length > ITEMS_PER_PAGE);
+    const sorted = sortStores(filtered);
+    setVisibleStores(sorted.slice(0, ITEMS_PER_PAGE));
   }, [activeFilter, premiumOnly]);
 
   const loadMore = useCallback(() => {
-    if (loading || !hasMore) return;
+    if (loading) return;
     setLoading(true);
-    setError(false);
+    
+    // Simula delay de rede
     setTimeout(() => {
-      try {
-        setVisibleStores(prev => {
-          const currentLength = prev.length;
-          const nextSlice = filteredStores.slice(currentLength, currentLength + ITEMS_PER_PAGE);
-          if (currentLength + nextSlice.length >= filteredStores.length) setHasMore(false);
-          return [...prev, ...nextSlice];
-        });
-      } catch (err) { setError(true); } finally { setLoading(false); }
-    }, 800);
-  }, [loading, hasMore, filteredStores]);
+      setVisibleStores(prev => {
+        // Se chegarmos perto do fim do pool, geramos mais ou re-embaralhamos
+        const nextBatchSize = ITEMS_PER_PAGE;
+        const currentCount = prev.length;
+        
+        let moreItems: Store[] = [];
+        
+        // Lógica de loop infinito: se o pool acabar, gera um novo re-embaralhado
+        if (currentCount + nextBatchSize > pool.length) {
+            const extra = generateFakeStores(TOTAL_MOCK_COUNT).sort(() => Math.random() - 0.5);
+            setPool(currentPool => [...currentPool, ...extra]);
+            moreItems = extra.slice(0, nextBatchSize);
+        } else {
+            moreItems = pool.slice(currentCount, currentCount + nextBatchSize);
+        }
+        
+        return [...prev, ...moreItems];
+      });
+      setLoading(false);
+    }, 1000);
+  }, [loading, pool]);
 
-  const lastStoreElementRef = useCallback((node: HTMLDivElement) => {
+  const lastElementRef = useCallback((node: HTMLDivElement) => {
     if (loading) return;
     if (observer.current) observer.current.disconnect();
     observer.current = new IntersectionObserver(entries => {
-      if (entries[0].isIntersecting && hasMore) loadMore();
-    }, { rootMargin: '100px' });
+      if (entries[0].isIntersecting) {
+        loadMore();
+      }
+    });
     if (node) observer.current.observe(node);
-  }, [loading, hasMore, loadMore]);
+  }, [loading, loadMore]);
 
   const handleToggleFavorite = async (e: React.MouseEvent, id: string) => {
     e.stopPropagation();
-    if (!user) { alert("Faça login para favoritar lojas!"); return; }
+    if (!user) { alert("Faça login para favoritar!"); return; }
     await toggleFavorite(id);
   };
 
-  const isMasterSponsorFavorite = isFavorite(MASTER_SPONSOR_STORE.id);
-
-  if (visibleStores.length === 0 && !loading) {
-    return (
-      <div className="w-full text-center py-10 bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700">
-        <p className="text-gray-400 dark:text-gray-500 font-medium text-sm">
-          Nenhum parceiro premium encontrado nesta categoria.
-        </p>
-      </div>
-    );
-  }
-
   return (
     <div className="flex flex-col w-full">
-      <div className="flex flex-col gap-3 pb-6">
+      <div className="flex flex-col gap-4 pb-6">
         
-        {/* Card do Patrocinador Master - Fixo no topo */}
-        <div
-          key={MASTER_SPONSOR_STORE.id}
-          onClick={() => onNavigate && onNavigate('patrocinador_master')}
-          className="bg-white dark:bg-gray-800 rounded-3xl p-4 flex gap-4 cursor-pointer relative group transition-all duration-300 shadow-[0_4px_12px_rgba(0,0,0,0.05)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] active:scale-[0.99] border-2 border-amber-500 mt-2 min-h-[150px]"
-        >
-          <div className="absolute top-0 right-4 -translate-y-1/2 z-10 pointer-events-none">
-            <span className="text-xs font-black px-4 py-2 rounded-full bg-amber-500 text-slate-900 shadow-lg uppercase tracking-wider flex items-center gap-1.5">
-              <Crown className="w-3.5 h-3.5" />
-              Patrocinador Master
-            </span>
-          </div>
-
-          <div className="w-24 h-full flex-shrink-0 relative rounded-2xl overflow-hidden bg-slate-900 flex items-center justify-center">
-            <Crown className="w-12 h-12 text-amber-500" />
-          </div>
-          
-          <div className="flex-1 flex flex-col justify-center min-w-0 pr-8">
-            <div className="flex flex-col gap-1.5">
-              <div className="flex items-center gap-1.5">
-                <h4 className="font-bold text-gray-900 dark:text-white text-base leading-tight truncate">{MASTER_SPONSOR_STORE.name}</h4>
-                <BadgeCheck className="w-4 h-4 text-[#1E5BFF] fill-white shrink-0" />
-              </div>
-              <p className="text-xs font-normal text-gray-500 dark:text-gray-400 not-italic line-clamp-2">{MASTER_SPONSOR_STORE.description}</p>
-              <div className="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400 pt-1">
-                <div className="flex items-center gap-1 bg-yellow-50 dark:bg-yellow-900/10 px-2 py-1 rounded-md text-yellow-700 dark:text-yellow-400 font-bold">
-                  <Star className="w-3 h-3 fill-current" />
-                  <span>{MASTER_SPONSOR_STORE.rating}</span>
+        {/* Card Fixo do Patrocinador Master no topo apenas se não estiver filtrando drasticamente */}
+        {activeFilter === 'all' && (
+          <div
+            onClick={() => onNavigate && onNavigate('patrocinador_master')}
+            className="bg-white dark:bg-gray-800 rounded-3xl p-4 flex gap-4 cursor-pointer relative group transition-all duration-300 shadow-[0_4px_12px_rgba(0,0,0,0.05)] border-2 border-amber-500 mt-2 min-h-[140px]"
+          >
+            <div className="absolute top-0 right-4 -translate-y-1/2 z-10">
+              <span className="text-[10px] font-black px-3 py-1.5 rounded-full bg-amber-500 text-slate-900 shadow-lg uppercase tracking-wider flex items-center gap-1.5">
+                <Crown className="w-3 h-3" /> Patrocinador Master
+              </span>
+            </div>
+            <div className="w-24 h-full flex-shrink-0 rounded-2xl overflow-hidden bg-slate-900 flex items-center justify-center">
+              <Crown className="w-10 h-10 text-amber-500" />
+            </div>
+            <div className="flex-1 flex flex-col justify-center min-w-0 pr-4">
+              <h4 className="font-bold text-gray-900 dark:text-white text-base truncate">{MASTER_SPONSOR_STORE.name}</h4>
+              <p className="text-[11px] text-gray-500 dark:text-gray-400 line-clamp-2 mt-1">{MASTER_SPONSOR_STORE.description}</p>
+              <div className="flex items-center gap-2 mt-2">
+                <div className="flex items-center gap-1 bg-yellow-50 dark:bg-yellow-900/10 px-1.5 py-0.5 rounded text-yellow-700 font-bold text-[10px]">
+                  <Star className="w-2.5 h-2.5 fill-current" /> {MASTER_SPONSOR_STORE.rating}
                 </div>
-                <span className="truncate max-w-[80px] font-medium">{MASTER_SPONSOR_STORE.category}</span>
+                <span className="text-[10px] text-gray-400 font-medium">{MASTER_SPONSOR_STORE.neighborhood}</span>
               </div>
             </div>
           </div>
-          
-          <button onClick={(e) => handleToggleFavorite(e, MASTER_SPONSOR_STORE.id)} className={`absolute top-1/2 -translate-y-1/2 right-4 w-9 h-9 rounded-full flex items-center justify-center transition-all duration-200 z-20 ${isMasterSponsorFavorite ? 'bg-red-100 dark:bg-red-900/20 text-red-500' : 'bg-gray-100 dark:bg-gray-700/50 text-gray-400 hover:text-red-400'}`}>
-            <Heart className={`w-5 h-5 transition-colors ${isMasterSponsorFavorite ? 'fill-current' : ''}`} />
-          </button>
-        </div>
+        )}
         
-        {/* Lista de Lojas */}
+        {/* Lista Infinita */}
         {visibleStores.map((store, index) => {
-            const isLastElement = index === visibleStores.length - 1;
+            const isLast = index === visibleStores.length - 1;
             const isFavorited = isFavorite(store.id);
             const isSponsored = store.isSponsored || store.adType === AdType.PREMIUM;
-            const { copy } = getStoreExtras(index, store);
 
             return (
                 <div
                     key={store.id}
-                    ref={isLastElement ? lastStoreElementRef : null}
+                    ref={isLast ? lastElementRef : null}
                     onClick={() => onStoreClick && onStoreClick(store)}
-                    className={`rounded-2xl p-3 flex gap-3 cursor-pointer relative group transition-all duration-300 shadow-[0_2px_8px_rgba(0,0,0,0.03)] hover:shadow-[0_8px_20px_rgba(0,0,0,0.06)] active:scale-[0.99] border ${isSponsored ? 'border-[#1E5BFF]/30 bg-white dark:bg-gray-800' : 'bg-white dark:bg-gray-800 border-transparent'}`}
+                    className={`rounded-2xl p-3 flex gap-3 cursor-pointer relative group transition-all duration-300 shadow-sm border ${isSponsored ? 'border-[#1E5BFF]/20 bg-blue-50/10 dark:bg-blue-900/5' : 'bg-white dark:bg-gray-800 border-transparent'}`}
                 >
                     {isSponsored && (
-                      <div className="absolute top-0 right-4 -translate-y-1/2 z-10 pointer-events-none flex flex-col items-end gap-1">
-                          <span className="text-[10px] font-black px-2.5 py-1 rounded-lg bg-[#1E5BFF] text-white shadow-xl shadow-blue-500/30 uppercase tracking-wider">
-                              Patrocinado
-                          </span>
+                      <div className="absolute top-0 right-3 -translate-y-1/2 z-10">
+                          <span className="text-[9px] font-black px-2 py-0.5 rounded bg-[#1E5BFF] text-white shadow-md uppercase tracking-widest">Ads</span>
                       </div>
                     )}
 
-                    <div className="w-[88px] h-[88px] flex-shrink-0 relative rounded-xl overflow-hidden bg-white dark:bg-gray-700 border border-gray-100 dark:border-gray-600">
-                        <img src={store.logoUrl || "/assets/default-logo.png"} alt={store.name} className="w-full h-full object-contain p-1" loading="lazy" />
+                    <div className="w-20 h-20 flex-shrink-0 relative rounded-xl overflow-hidden bg-gray-50 dark:bg-gray-700 border border-gray-100 dark:border-gray-600">
+                        <div className="w-full h-full flex items-center justify-center text-gray-300">
+                            {/* Placeholder robusto */}
+                            <StoreIcon className="w-8 h-8 opacity-20" />
+                        </div>
                         {store.cashback && (
-                            <div className="absolute bottom-0 left-0 right-0 bg-green-500/95 text-white text-[9px] font-bold text-center py-0.5 backdrop-blur-sm">
-                                {store.cashback}% VOLTA
+                            <div className="absolute bottom-0 left-0 right-0 bg-emerald-600/90 text-white text-[8px] font-black text-center py-0.5 uppercase">
+                                {store.cashback}% Cashback
                             </div>
                         )}
                     </div>
 
-                    <div className="flex-1 flex flex-col justify-center min-w-0 pr-1">
-                        <div className="flex flex-col gap-0.5 mb-1.5">
-                             <div className="flex items-center gap-1.5">
-                               <h4 className="font-bold text-gray-900 dark:text-white text-sm leading-tight truncate">{store.name}</h4>
-                               {store.verified && <BadgeCheck className="w-3.5 h-3.5 text-[#1E5BFF] fill-white shrink-0" />}
-                             </div>
-                             <p className="text-[10px] font-medium text-gray-400 dark:text-gray-500 italic truncate pr-4">{copy}</p>
+                    <div className="flex-1 flex flex-col justify-center min-w-0">
+                        <div className="flex items-center gap-1.5 mb-0.5">
+                            <h4 className="font-bold text-gray-900 dark:text-white text-sm truncate">{store.name}</h4>
+                            {store.verified && <BadgeCheck className="w-3.5 h-3.5 text-[#1E5BFF] fill-white shrink-0" />}
                         </div>
+                        <p className="text-[11px] text-gray-500 dark:text-gray-400 truncate">{store.category} • {store.neighborhood}</p>
 
-                        <div className="flex items-center gap-3 text-[11px] text-gray-500 dark:text-gray-400 mt-auto">
-                             <div className="flex items-center gap-1 bg-yellow-50 dark:bg-yellow-900/10 px-1.5 py-0.5 rounded text-yellow-700 dark:text-yellow-400 font-bold">
+                        <div className="flex items-center gap-3 text-[10px] text-gray-400 mt-2">
+                             <div className="flex items-center gap-0.5 text-yellow-600 font-bold">
                                 <Star className="w-3 h-3 fill-current" />
                                 <span>{store.rating}</span>
                              </div>
-                             <span className="truncate max-w-[80px] font-medium">{store.category}</span>
                              <span className="w-1 h-1 bg-gray-200 rounded-full"></span>
                              <span>{store.distance}</span>
+                             {store.isOpenNow && (
+                                <span className="text-emerald-500 font-bold">Aberto</span>
+                             )}
                         </div>
                     </div>
                     
-                    <button onClick={(e) => handleToggleFavorite(e, store.id)} className={`absolute bottom-3 right-3 w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200 z-20 ${isFavorited ? 'bg-red-50 dark:bg-red-900/20 text-red-500 shadow-sm' : 'bg-gray-50 dark:bg-gray-700/50 text-gray-400 hover:text-red-400'}`}>
-                        <Heart className={`w-4 h-4 transition-colors ${isFavorited ? 'fill-current' : ''}`} />
+                    <button onClick={(e) => handleToggleFavorite(e, store.id)} className={`absolute bottom-3 right-3 w-8 h-8 rounded-full flex items-center justify-center transition-all ${isFavorited ? 'text-red-500' : 'text-gray-300 hover:text-red-400'}`}>
+                        <Heart className={`w-4 h-4 ${isFavorited ? 'fill-current' : ''}`} />
                     </button>
                 </div>
             );
         })}
       </div>
 
-      {loading && (
-        <div className="w-full flex justify-center py-6">
-            <div className="flex items-center gap-2 text-[#1E5BFF] bg-white dark:bg-gray-800 px-4 py-2 rounded-full shadow-md border border-blue-50 dark:border-gray-700">
-                <Loader2 className="w-4 h-4 animate-spin" />
-                <span className="text-xs font-bold">Buscando mais parceiros...</span>
-            </div>
+      {/* Loading Indicator */}
+      <div className="w-full flex justify-center py-10">
+        <div className="flex flex-col items-center gap-2">
+            <Loader2 className="w-6 h-6 text-[#1E5BFF] animate-spin" />
+            <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Carregando mais lojas...</span>
         </div>
-      )}
-
-      {!hasMore && !loading && (
-        <div className="w-full text-center py-8">
-            <p className="text-[11px] text-gray-400 dark:text-gray-600 font-medium bg-gray-50 dark:bg-gray-800/50 inline-block px-4 py-1.5 rounded-full uppercase tracking-widest opacity-60">Fim da lista ✨</p>
-        </div>
-      )}
+      </div>
     </div>
   );
 };
