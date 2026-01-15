@@ -116,7 +116,7 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void }> = ({ onNavigat
     const advertiseBanner: BannerItem = {
       id: 'advertise-home',
       title: 'Anuncie aqui',
-      subtitle: 'Destaque sua marca para todo o bairro. Condições especiais de inauguração.',
+      subtitle: 'Destaque sua marca para todo o bairro. Condições especiais de iniciação.',
       target: 'advertise_home_banner', 
       tag: 'Oportunidade',
       bgColor: 'bg-[#1E5BFF]', 
@@ -222,17 +222,27 @@ const NeighborhoodCouponsBlock: React.FC<{ stores: Store[], onStoreClick: (store
 
   return (
     <div className="w-full bg-white dark:bg-gray-950 py-6">
-      <div className="px-5 mb-4">
-        <div className="flex items-center gap-2 mb-1">
-          <Ticket className="w-4 h-4 text-emerald-500 fill-emerald-500/20" />
-          <h2 className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-wider">
-            Cupons Ativos no Bairro
-          </h2>
+      <div className="px-5 mb-8">
+        <div className="relative h-14 w-full flex items-center justify-center filter drop-shadow-md overflow-visible">
+          {/* SVG Ticket Shape Background */}
+          <svg className="absolute inset-0 w-full h-full" preserveAspectRatio="none" viewBox="0 0 100 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M4 0C1.79086 0 0 1.79086 0 4V15C1.65685 15 3 16.3431 3 18C3 19.6569 1.65685 21 0 21V36C0 38.2091 1.79086 40 4 40H96C98.2091 40 100 38.2091 100 36V21C98.3431 21 97 19.6569 97 18C97 16.3431 98.3431 15 100 15V4C100 1.79086 98.2091 0 96 0H4Z" fill="#F97316"/>
+          </svg>
+          
+          <div className="relative z-10 flex items-center gap-4 px-6">
+            {/* Dotted Line Detail */}
+            <div className="h-6 border-l border-dashed border-white/40"></div>
+            
+            <h2 className="text-[13px] font-black text-white uppercase tracking-[0.18em] whitespace-nowrap drop-shadow-sm text-center leading-none">
+              CUPONS ATIVOS NO BAIRRO
+            </h2>
+            
+            {/* Dotted Line Detail */}
+            <div className="h-6 border-l border-dashed border-white/40"></div>
+          </div>
         </div>
-        <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">
-          Economize agora nas lojas perto de você
-        </p>
       </div>
+      
       <div className="flex gap-3 overflow-x-auto no-scrollbar px-5 pb-2 snap-x">
         {couponStores.map(store => (
           <button
@@ -251,7 +261,7 @@ const NeighborhoodCouponsBlock: React.FC<{ stores: Store[], onStoreClick: (store
                   </div>
                )}
                
-               {/* TICKET STYLE BADGE */}
+               {/* TICKET STYLE BADGE (Individual Card) */}
                <div className="absolute bottom-2 left-1.5 drop-shadow-md">
                  <div className="relative flex items-center h-8 px-1">
                     {/* SVG Ticket Shape with circular cutouts */}
