@@ -131,44 +131,16 @@ const App: React.FC = () => {
     localStorage.setItem('localizei_theme_mode', themeMode);
   }, [themeMode]);
 
-  // --- REDIRECIONAMENTO AUTOMÁTICO ADM (Refinado para Role Switcher) ---
+  // REDIRECIONAMENTO ADM (Respeita o View Mode)
   useEffect(() => {
-    const override = localStorage.getItem('admin_view_override');
-    // Se o usuário for ADM e NÃO houver override ativo (ou for modo ADM), força o painel
-    if (user && user.email === ADMIN_EMAIL && (!override || override === 'ADM') && activeTab !== 'admin_panel') {
-      setActiveTab('admin_panel');
-      setIsAuthOpen(false);
-    }
-  }, [user, activeTab]);
-
-  // Bloqueios e regras de segurança (Adaptados)
-  useEffect(() => {
-    const override = localStorage.getItem('admin_view_override');
     const isAdmin = user && user.email === ADMIN_EMAIL;
-    const isLojista = userRole === 'lojista' || (isAdmin && override === 'Lojista');
-    const isCliente = userRole === 'cliente' || (isAdmin && (override === 'Usuário' || !override));
-    const isVisitante = (isAdmin && override === 'Visitante') || (!user);
+    const viewMode = localStorage.getItem('admin_view_mode') || 'ADM';
 
-    if (!isAdmin && activeTab === 'admin_panel') {
-        setActiveTab('home');
+    // Se é ADM e está no modo ADM, garante que o painel é o destino inicial
+    if (isAdmin && viewMode === 'ADM' && activeTab === 'home') {
+       setActiveTab('admin_panel');
     }
-  }, [activeTab, userRole, user]);
-
-  const handleCupomClick = () => {
-    const override = localStorage.getItem('admin_view_override');
-    const isAdmin = user && user.email === ADMIN_EMAIL;
-    const isLojista = userRole === 'lojista' || (isAdmin && override === 'Lojista');
-    const isVisitante = (isAdmin && override === 'Visitante') || (!user);
-
-    if (isVisitante) {
-      setPendingRoute('cupom');
-      setIsAuthOpen(true);
-    } else if (isLojista) {
-      setActiveTab('qrcode_scan');
-    } else {
-      setActiveTab('user_cupom');
-    }
-  };
+  }, [user]);
 
   const handleAdminNavigate = (requestedRole?: string) => {
     if (requestedRole && requestedRole !== 'ADM') {
@@ -204,6 +176,24 @@ const App: React.FC = () => {
         setActiveTab('category_detail');
     } else {
         setActiveTab('store_area'); 
+    }
+  };
+
+  const handleCupomClick = () => {
+    const viewMode = localStorage.getItem('admin_view_mode') || 'ADM';
+    const isAdmin = user && user.email === ADMIN_EMAIL;
+    
+    // Simulação do role baseada no modo de visualização
+    const effectiveRole = isAdmin ? (viewMode.toLowerCase() === 'lojista' ? 'lojista' : 'cliente') : userRole;
+    const isVisitante = (isAdmin && viewMode === 'Visitante') || (!user);
+
+    if (isVisitante) {
+      setPendingRoute('cupom');
+      setIsAuthOpen(true);
+    } else if (effectiveRole === 'lojista') {
+      setActiveTab('qrcode_scan');
+    } else {
+      setActiveTab('user_cupom');
     }
   };
 
@@ -251,8 +241,8 @@ const App: React.FC = () => {
 
   const hideBottomNav = ['store_ads_module', 'store_detail', 'admin_moderation', 'advertise_home_banner', 'admin_panel'].includes(activeTab);
 
-  // Helper para detectar se o ADM está em modo simulação
-  const isAdminSimulating = user?.email === ADMIN_EMAIL && localStorage.getItem('admin_view_override') && localStorage.getItem('admin_view_override') !== 'ADM';
+  // Helper para detectar se o ADM está simulando
+  const isAdminSimulating = user?.email === ADMIN_EMAIL && localStorage.getItem('admin_view_mode') !== 'ADM';
 
   return (
     <div className={isDarkMode ? 'dark' : ''}>
@@ -262,14 +252,14 @@ const App: React.FC = () => {
           onTouchStart={onTouchStart}
           onTouchEnd={onTouchEnd}
         >
-          {/* Indicador Global para Admin em Simulação */}
+          {/* Botão Flutuante de Retorno ao ADM (Global) */}
           {isAdminSimulating && (
             <button 
               onClick={() => {
-                localStorage.setItem('admin_view_override', 'ADM');
+                localStorage.setItem('admin_view_mode', 'ADM');
                 setActiveTab('admin_panel');
               }}
-              className="fixed top-20 right-4 z-[99] bg-amber-500 text-slate-900 px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest shadow-xl flex items-center gap-2 active:scale-95 transition-transform"
+              className="fixed top-20 right-4 z-[99] bg-amber-500 text-slate-900 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-2xl flex items-center gap-2 active:scale-95 border-2 border-white/20"
             >
               <ShieldCheck size={14} /> Voltar ao ADM
             </button>
@@ -278,7 +268,7 @@ const App: React.FC = () => {
           <Layout 
               activeTab={activeTab} 
               setActiveTab={setActiveTab} 
-              userRole={isAdminSimulating ? (localStorage.getItem('admin_view_override')?.toLowerCase() as any) : userRole} 
+              userRole={isAdminSimulating ? (localStorage.getItem('admin_view_mode')?.toLowerCase() as any) : userRole} 
               onCashbackClick={handleCupomClick}
               hideNav={hideBottomNav}
           >
@@ -287,12 +277,12 @@ const App: React.FC = () => {
                   isDarkMode={isDarkMode}
                   toggleTheme={toggleTheme}
                   onAuthClick={() => setActiveTab('profile')} 
-                  user={isAdminSimulating && localStorage.getItem('admin_view_override') === 'Visitante' ? null : user}
+                  user={isAdminSimulating && localStorage.getItem('admin_view_mode') === 'Visitante' ? null : user}
                   searchTerm={globalSearch}
                   onSearchChange={setGlobalSearch}
                   onNavigate={setActiveTab}
                   activeTab={activeTab}
-                  userRole={isAdminSimulating ? (localStorage.getItem('admin_view_override')?.toLowerCase() as any) : userRole}
+                  userRole={isAdminSimulating ? (localStorage.getItem('admin_view_mode')?.toLowerCase() as any) : userRole}
                   onOpenMerchantQr={() => setActiveTab('merchant_qr')}
                   stores={STORES}
                   onStoreClick={handleSelectStore}
@@ -316,23 +306,22 @@ const App: React.FC = () => {
                   onStoreClick={handleSelectStore}
                   stores={STORES}
                   searchTerm={globalSearch}
-                  user={isAdminSimulating && localStorage.getItem('admin_view_override') === 'Visitante' ? null : (user as any)}
-                  userRole={isAdminSimulating ? (localStorage.getItem('admin_view_override')?.toLowerCase() as any) : userRole}
+                  user={isAdminSimulating && localStorage.getItem('admin_view_mode') === 'Visitante' ? null : (user as any)}
+                  userRole={isAdminSimulating ? (localStorage.getItem('admin_view_mode')?.toLowerCase() as any) : userRole}
                   onSpinWin={(reward) => { setSelectedReward(reward); setActiveTab('reward_details'); }}
                   onRequireLogin={() => setIsAuthOpen(true)}
                   />
               )}
-              {/* Restante dos componentes renderizados conforme o activeTab */}
+              
               {activeTab === 'explore' && <ExploreView stores={STORES} searchQuery={globalSearch} onStoreClick={handleSelectStore} onLocationClick={() => {}} onFilterClick={() => {}} onOpenPlans={() => {}} onNavigate={setActiveTab} />}
-              {activeTab === 'profile' && <MenuView user={isAdminSimulating && localStorage.getItem('admin_view_override') === 'Visitante' ? null : (user as any)} userRole={isAdminSimulating ? (localStorage.getItem('admin_view_override')?.toLowerCase() as any) : userRole} onAuthClick={() => setIsAuthOpen(true)} onNavigate={setActiveTab} onBack={() => setActiveTab('home')} currentTheme={themeMode} onThemeChange={setThemeMode} />}
+              {activeTab === 'profile' && <MenuView user={isAdminSimulating && localStorage.getItem('admin_view_mode') === 'Visitante' ? null : (user as any)} userRole={isAdminSimulating ? (localStorage.getItem('admin_view_mode')?.toLowerCase() as any) : userRole} onAuthClick={() => setIsAuthOpen(true)} onNavigate={setActiveTab} onBack={() => setActiveTab('home')} currentTheme={themeMode} onThemeChange={setThemeMode} />}
               {activeTab === 'category_detail' && selectedCategory && <CategoryView category={selectedCategory} onBack={() => { setActiveTab('home'); setSelectedCategory(null); }} onStoreClick={handleSelectStore} stores={STORES} userRole={userRole} onAdvertiseInCategory={handleAdvertiseInCategory} />}
               {activeTab === 'store_detail' && selectedStore && <StoreDetailView store={selectedStore} onBack={() => setActiveTab('home')} />}
               {activeTab === 'services' && <ServicesView onSelectMacro={(id, name) => { setSelectedServiceMacro({id, name}); if (id === 'emergency') { setQuoteCategory(name); setIsQuoteModalOpen(true); } else { setActiveTab('service_subcategories'); } }} onOpenTerms={() => setActiveTab('service_terms')} onNavigate={setActiveTab} searchTerm={globalSearch} />}
-              {activeTab === 'community_feed' && <CommunityFeedView onStoreClick={handleSelectStore} user={isAdminSimulating && localStorage.getItem('admin_view_override') === 'Visitante' ? null : (user as any)} onRequireLogin={() => setIsAuthOpen(true)} />}
+              {activeTab === 'community_feed' && <CommunityFeedView onStoreClick={handleSelectStore} user={isAdminSimulating && localStorage.getItem('admin_view_mode') === 'Visitante' ? null : (user as any)} onRequireLogin={() => setIsAuthOpen(true)} />}
               {activeTab === 'user_cupom' && <UserCupomScreen user={user as any} onBack={() => setActiveTab('home')} />}
               {activeTab === 'qrcode_scan' && <CashbackScanScreen onBack={() => setActiveTab('home')} onScanSuccess={(data) => { setScannedData(data); setActiveTab('scan_confirmation'); }} />}
               {activeTab === 'store_area' && <StoreAreaView onBack={() => setActiveTab('home')} onNavigate={setActiveTab} user={user as any} />}
-              {/* ... Outros componentes conforme necessário */}
               </main>
 
               <AuthModal 
