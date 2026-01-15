@@ -472,32 +472,92 @@ const CommunityTrustCarousel: React.FC<{ stores: Store[], onStoreClick: (store: 
 
 const CommunityFeedBlock: React.FC<{ onNavigate: (view: string) => void; }> = ({ onNavigate }) => {
   const { currentNeighborhood, isAll } = useNeighborhood();
+
   const previewPosts = useMemo(() => {
-     const allPosts = [...MOCK_COMMUNITY_POSTS];
-     allPosts.sort((a, b) => {
-         if (isAll) return 0; 
-         const aIsLocal = (a.neighborhood === currentNeighborhood);
-         const bIsLocal = (b.neighborhood === currentNeighborhood);
-         if (aIsLocal && !bIsLocal) return -1;
-         if (!aIsLocal && bIsLocal) return 1;
-         return 0;
-     });
-     return allPosts.slice(0, 4);
+     // Postagens Fake específicas conforme solicitado
+     const fakePosts: any[] = [
+        {
+          id: 'fake-1',
+          userName: 'Maria Souza',
+          userAvatar: 'https://i.pravatar.cc/100?u=maria',
+          neighborhood: 'Freguesia',
+          content: 'Genteeee!!! Adorei esse Aplicativo!!! é tudooooo!!!! #LocalizeiJPA',
+          timestamp: '2 min atrás',
+          likes: 24,
+          comments: 8
+        },
+        {
+          id: 'fake-2',
+          userName: 'Joaquim Neto',
+          userAvatar: 'https://i.pravatar.cc/100?u=joaquim',
+          neighborhood: 'Taquara',
+          content: 'O pão na Padaria Colonial tá saindo agora, quentinho demais! Recomendo 🥖☕',
+          timestamp: '12 min atrás',
+          likes: 15,
+          comments: 3
+        },
+        {
+          id: 'fake-3',
+          userName: 'Carla Dias',
+          userAvatar: 'https://i.pravatar.cc/100?u=carla',
+          neighborhood: 'Pechincha',
+          content: 'Finalmente um app que valoriza o comércio aqui de JPA. Amei o cashback!',
+          timestamp: '25 min atrás',
+          likes: 31,
+          comments: 5
+        },
+        {
+          id: 'fake-4',
+          userName: 'Bruno Alves',
+          userAvatar: 'https://i.pravatar.cc/100?u=bruno',
+          neighborhood: 'Anil',
+          content: 'Alguém indica um bom chaveiro 24h aqui perto do Anil?',
+          timestamp: '38 min atrás',
+          likes: 4,
+          comments: 12
+        },
+        {
+          id: 'fake-5',
+          userName: 'Patrícia Mello',
+          userAvatar: 'https://i.pravatar.cc/100?u=patricia',
+          neighborhood: 'Tanque',
+          content: 'A iluminação da praça nova ficou 10! Ótimo para caminhar à noite.',
+          timestamp: '50 min atrás',
+          likes: 42,
+          comments: 7
+        },
+        {
+          id: 'fake-6',
+          userName: 'Ricardo Santos',
+          userAvatar: 'https://i.pravatar.cc/100?u=ricardo',
+          neighborhood: 'Curicica',
+          content: 'Acabei de usar o cupom de desconto na Hamburgueria Brasa. Vale muito a pena galera!',
+          timestamp: '1h atrás',
+          likes: 19,
+          comments: 4
+        }
+     ];
+
+     // Combina com o original e filtra se necessário
+     const allPosts = [...fakePosts];
+     
+     if (!isAll) {
+         return allPosts.filter(p => p.neighborhood === currentNeighborhood || p.id === 'fake-1');
+     }
+     return allPosts;
   }, [currentNeighborhood, isAll]);
 
   if (previewPosts.length === 0) return null;
 
   return (
     <div className="w-full bg-white dark:bg-gray-950 py-3">
-      <div className="px-5 mb-3">
+      <div className="px-5 mb-2">
         <div className="flex justify-between items-center">
             <div>
-                <h2 className="text-lg font-black text-gray-900 dark:text-white tracking-tight leading-none flex items-center gap-2">
+                <h2 className="text-base font-black text-gray-900 dark:text-white tracking-tight leading-none flex items-center gap-2">
                     O que está bombando no bairro agora <div className="px-2 py-0.5 bg-red-100 text-red-600 text-[9px] font-bold rounded-full uppercase tracking-wide">Ao Vivo</div>
                 </h2>
-                <p className="text-xs text-gray-500 dark:text-gray-400 font-medium mt-1.5">Atividade real acontecendo perto de você</p>
             </div>
-            <button onClick={() => onNavigate('community_feed')} className="text-xs font-bold text-[#1E5BFF] hover:underline">Ver tudo</button>
         </div>
       </div>
       <div className="flex gap-4 overflow-x-auto no-scrollbar px-5 pb-2 snap-x">
