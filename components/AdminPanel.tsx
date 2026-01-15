@@ -30,7 +30,13 @@ import {
   Cpu,
   Server,
   Bell,
-  ShieldAlert
+  ShieldAlert,
+  ArrowRight,
+  Briefcase,
+  PieChart,
+  LayoutGrid,
+  // Added Crown icon to fix the reference error on line 190
+  Crown
 } from 'lucide-react';
 import { User as SupabaseUser } from '@supabase/supabase-js';
 
@@ -39,20 +45,20 @@ interface AdminPanelProps {
   onLogout: () => void;
   viewMode: string;
   onOpenViewSwitcher: () => void;
-  onNavigateToApp: () => void; // Mantido para compatibilidade, mas controlado via App.tsx
+  onNavigateToApp: () => void;
 }
 
 const ADMIN_EMAIL = 'dedonopradonodedelivery@gmail.com';
 
 type AdminView = 'dashboard' | 'operations' | 'monetization_model';
 
-const KPICard: React.FC<{ icon: any, label: string, value: string }> = ({ icon: Icon, label, value }) => (
-  <div className="bg-[#111827] p-6 flex flex-col items-center justify-center text-center h-36 border border-white/5 shadow-xl rounded-2xl">
-    <div className="w-10 h-10 flex items-center justify-center bg-white/5 text-white mb-4 rounded-xl">
+const KPICard: React.FC<{ icon: any, label: string, value: string, isPositive?: boolean }> = ({ icon: Icon, label, value, isPositive }) => (
+  <div className="bg-[#111827] p-6 flex flex-col items-center justify-center text-center h-36 border border-white/[0.04] shadow-xl rounded-2xl">
+    <div className="w-10 h-10 flex items-center justify-center bg-[#0B3A53]/30 text-[#9CA3AF] mb-4 rounded-xl">
       <Icon size={20} />
     </div>
     <p className="text-[9px] font-black text-[#9CA3AF] uppercase tracking-[0.2em] mb-1.5">{label}</p>
-    <p className="text-2xl font-black text-white leading-none tracking-tighter">{value}</p>
+    <p className={`text-2xl font-black leading-none tracking-tighter ${isPositive ? 'text-[#059669]' : 'text-white'}`}>{value}</p>
   </div>
 );
 
@@ -61,41 +67,226 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ user, onLogout, viewMode
 
   if (!user || user.email !== ADMIN_EMAIL) {
     return (
-      <div className="min-h-screen bg-white flex flex-col items-center justify-center p-6 text-center">
-        <div className="w-16 h-16 bg-red-50 flex items-center justify-center mb-4 rounded-2xl">
-          <Lock className="w-8 h-8 text-red-600" />
+      <div className="min-h-screen bg-[#0F172A] flex flex-col items-center justify-center p-6 text-center">
+        <div className="w-16 h-16 bg-[#111827] border border-white/[0.04] flex items-center justify-center mb-4 rounded-2xl shadow-2xl">
+          <Lock className="w-8 h-8 text-[#9CA3AF]" />
         </div>
-        <h1 className="text-xl font-black text-gray-900 mb-1 uppercase tracking-tighter">403 - Negado</h1>
-        <p className="text-gray-500 mb-6 max-w-xs text-xs">Acesso restrito ao administrador.</p>
-        <button onClick={onNavigateToApp} className="bg-gray-900 text-white px-8 py-3 font-black uppercase text-[10px] tracking-widest active:scale-95 transition-all">
+        <h1 className="text-xl font-black text-white mb-1 uppercase tracking-tighter">403 - Negado</h1>
+        <p className="text-[#9CA3AF] mb-6 max-w-xs text-xs">Acesso restrito ao administrador.</p>
+        <button onClick={onNavigateToApp} className="bg-[#0B3A53] hover:bg-[#0B3A53]/80 text-white px-8 py-3 font-black uppercase text-[10px] tracking-widest active:scale-95 transition-all rounded-xl">
           Voltar para o App
         </button>
       </div>
     );
   }
 
-  const Header = ({ theme = 'dark' }: { theme?: 'dark' | 'light' }) => {
-    const isDark = theme === 'dark';
+  const renderMonetizationModel = () => (
+    <div className="min-h-screen bg-[#F8FAFC] text-slate-900 font-sans animate-in fade-in duration-500 flex flex-col">
+      {/* INVESTOR HEADER */}
+      <header className="bg-white border-b border-slate-200 px-8 py-6 sticky top-0 z-50 shadow-sm flex items-center justify-between">
+        <div className="flex items-center gap-6">
+          <button 
+            onClick={() => setActiveView('dashboard')}
+            className="p-2.5 bg-slate-100 text-slate-500 hover:text-indigo-600 rounded-xl transition-all active:scale-90"
+          >
+            <ArrowLeft size={20} />
+          </button>
+          <div>
+            <div className="flex items-center gap-3">
+              <h1 className="text-2xl font-black tracking-tight text-slate-900 leading-none">Projeção Financeira</h1>
+              <span className="bg-indigo-50 text-indigo-600 text-[10px] font-black px-2.5 py-1 rounded-full border border-indigo-100 uppercase tracking-widest">
+                Investor Access
+              </span>
+            </div>
+            <p className="text-xs font-bold text-slate-400 mt-1.5 uppercase tracking-wider">
+              Modelo de Receita • Jacarepaguá v1.1.2
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-4">
+          <div className="px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl flex items-center gap-3">
+            <div className="flex flex-col items-end">
+              <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest leading-none mb-0.5">Visualização</span>
+              <span className="text-xs font-bold text-slate-900 uppercase">ADM</span>
+            </div>
+            <ShieldCheck size={16} className="text-indigo-600" />
+          </div>
+        </div>
+      </header>
+
+      <main className="p-8 max-w-5xl mx-auto w-full space-y-10 pb-32">
+        
+        {/* BLOCO: VISÃO ESTRATÉGICA */}
+        <section className="animate-in slide-in-from-bottom-4 duration-500">
+           <div className="bg-white p-10 rounded-[2.5rem] border border-slate-200 shadow-[0_20px_50px_rgba(0,0,0,0.02)] relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-50 rounded-full blur-3xl -mr-20 -mt-20 opacity-60"></div>
+              <div className="relative z-10">
+                <div className="flex items-center gap-3 mb-6">
+                  <Target className="text-indigo-600" size={24} />
+                  <h2 className="text-xs font-black text-slate-400 uppercase tracking-[0.3em]">Visão Estratégica</h2>
+                </div>
+                <p className="text-2xl font-medium text-slate-600 leading-relaxed max-w-3xl">
+                  Marketplace hiperlocal escalável. Modelo baseado em <span className="text-slate-900 font-bold">densidade de micro-ads</span> por bairro, gerando alta visibilidade para lojistas, CAC otimizado e margens crescentes, com infraestrutura técnica de baixo custo fixo.
+                </p>
+              </div>
+           </div>
+        </section>
+
+        {/* BLOCO: MODELOS DE RECEITA */}
+        <section className="grid grid-cols-1 md:grid-cols-2 gap-8">
+           {/* MICRO-ADS */}
+           <div className="bg-white p-8 rounded-[2rem] border border-slate-200 shadow-sm flex flex-col justify-between group hover:border-indigo-200 transition-all">
+              <div>
+                <div className="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center mb-6">
+                  <LayoutGrid size={24} />
+                </div>
+                <h3 className="text-xl font-black text-slate-900 mb-3">Micro-Ads de Bairro</h3>
+                <p className="text-sm text-slate-500 leading-relaxed mb-8">
+                  Venda de espaços publicitários segmentados por CEP e comportamento de consumo regional em Jacarepaguá.
+                </p>
+              </div>
+              <div className="grid grid-cols-2 gap-4 border-t border-slate-100 pt-6">
+                 <div>
+                   <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Capacidade</span>
+                   <p className="text-lg font-black text-slate-900">36 Slots</p>
+                 </div>
+                 <div className="text-right">
+                   <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Receita Bruta Est.</span>
+                   <p className="text-lg font-black text-[#059669]">R$ 14.200,00</p>
+                 </div>
+              </div>
+           </div>
+
+           {/* LEAD GENERATION */}
+           <div className="bg-white p-8 rounded-[2rem] border border-slate-200 shadow-sm flex flex-col justify-between group hover:border-indigo-200 transition-all">
+              <div>
+                <div className="w-12 h-12 bg-emerald-50 text-[#059669] rounded-2xl flex items-center justify-center mb-6">
+                  <Zap size={24} />
+                </div>
+                <h3 className="text-xl font-black text-slate-900 mb-3">Lead Generation</h3>
+                <p className="text-sm text-slate-500 leading-relaxed mb-8">
+                  Monetização sobre a intenção de compra: conversão direta de solicitações de serviços para profissionais verificados.
+                </p>
+              </div>
+              <div className="grid grid-cols-2 gap-4 border-t border-slate-100 pt-6">
+                 <div>
+                   <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Custo por Lead</span>
+                   <p className="text-lg font-black text-slate-900">R$ 3,90</p>
+                 </div>
+                 <div className="text-right">
+                   <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Volume Mensal</span>
+                   <p className="text-lg font-black text-[#059669]">R$ 8.500,00</p>
+                 </div>
+              </div>
+           </div>
+        </section>
+
+        {/* BLOCO: PATROCINADOR MASTER */}
+        <section>
+           <div className="bg-indigo-600 rounded-[2.5rem] p-10 text-white relative overflow-hidden shadow-2xl shadow-indigo-200">
+              <div className="absolute top-0 right-0 w-80 h-80 bg-white/10 rounded-full blur-3xl -mr-20 -mt-20"></div>
+              <div className="relative z-10 flex flex-col md:row items-start md:flex-row md:items-center justify-between gap-8">
+                 <div className="max-w-md">
+                    <div className="flex items-center gap-2 mb-4">
+                      <Crown size={20} className="text-amber-400" />
+                      <span className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-100">Patrocinador Master</span>
+                    </div>
+                    <h2 className="text-3xl font-black tracking-tight mb-4">Exclusividade Institucional</h2>
+                    <p className="text-indigo-100 text-sm leading-relaxed opacity-90">
+                      Cota única para empresas de grande porte com visibilidade em todas as interfaces do usuário e comunicações oficiais.
+                    </p>
+                    <div className="mt-6 inline-block bg-white/20 px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border border-white/20">
+                      Cota Única • Disponível
+                    </div>
+                 </div>
+                 <div className="grid grid-cols-2 gap-10 bg-black/10 p-8 rounded-[2rem] border border-white/10 backdrop-blur-sm">
+                    <div>
+                      <span className="text-[10px] font-bold text-indigo-200 uppercase tracking-widest">Recorrência</span>
+                      <p className="text-2xl font-black">R$ 4.000</p>
+                    </div>
+                    <div>
+                      <span className="text-[10px] font-bold text-indigo-200 uppercase tracking-widest">LTV 12m</span>
+                      <p className="text-2xl font-black">R$ 48.000</p>
+                    </div>
+                 </div>
+              </div>
+           </div>
+        </section>
+
+        {/* BLOCO: INVENTÁRIO DE CATEGORIAS */}
+        <section>
+          <div className="flex items-center justify-between mb-6 px-1">
+             <div className="flex items-center gap-3">
+                <PieChart size={20} className="text-slate-400" />
+                <h3 className="text-xs font-black text-slate-400 uppercase tracking-[0.3em]">Inventário de Categorias</h3>
+             </div>
+             <div className="text-[10px] font-bold text-slate-400">Escalabilidade: 144 slots totais</div>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+             {[
+               { label: 'Comida & Delivery', slots: 42, rev: '4.8k' },
+               { label: 'Saúde & Bem-estar', slots: 24, rev: '3.2k' },
+               { label: 'Serviços Pro', slots: 38, rev: '5.1k' },
+               { label: 'Moda & Varejo', slots: 40, rev: '3.1k' }
+             ].map((cat, i) => (
+               <div key={i} className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm text-center">
+                  <p className="text-[10px] font-bold text-slate-400 uppercase mb-2 truncate">{cat.label}</p>
+                  <p className="text-xl font-black text-slate-900 leading-none">R$ {cat.rev}</p>
+                  <div className="mt-3 w-full bg-slate-100 h-1 rounded-full overflow-hidden">
+                    <div className="bg-indigo-500 h-full w-[60%]"></div>
+                  </div>
+               </div>
+             ))}
+          </div>
+        </section>
+
+        {/* BLOCO FINAL: PROJEÇÃO BRUTA */}
+        <section className="pt-10">
+           <div className="bg-slate-900 p-12 rounded-[3rem] shadow-2xl text-center relative overflow-hidden border border-slate-800">
+              <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-full h-1 bg-gradient-to-r from-transparent via-[#059669] to-transparent opacity-50"></div>
+              <div className="relative z-10 flex flex-col items-center">
+                 <div className="w-16 h-16 bg-white/5 rounded-[2rem] flex items-center justify-center mb-8 border border-white/10">
+                    <BarChart3 size={32} className="text-[#059669]" />
+                 </div>
+                 <h2 className="text-white text-xl font-black uppercase tracking-[0.4em] mb-4">Projeção Bruta Mensal</h2>
+                 <div className="flex items-baseline justify-center gap-2 mb-4">
+                   <span className="text-2xl font-black text-[#059669]">R$</span>
+                   <h1 className="text-8xl font-black tracking-tighter text-[#059669] leading-none tabular-nums">43.060<span className="text-4xl ml-2 text-[#059669]/60">+</span></h1>
+                 </div>
+                 <p className="text-slate-500 font-bold uppercase tracking-[0.2em] text-sm">
+                   Cenário Consolidado • Jacarepaguá
+                 </p>
+                 <div className="mt-12 flex items-center gap-4 text-slate-400 text-xs">
+                    <div className="flex items-center gap-1.5"><Check size={14} className="text-[#059669]" /> Margem Alta</div>
+                    <div className="flex items-center gap-1.5"><Check size={14} className="text-[#059669]" /> Escalável</div>
+                    <div className="flex items-center gap-1.5"><Check size={14} className="text-[#059669]" /> Hiperlocal</div>
+                 </div>
+              </div>
+           </div>
+        </section>
+
+      </main>
+
+      <footer className="py-12 border-t border-slate-200 mt-auto text-center">
+        <p className="text-[10px] font-black text-slate-300 uppercase tracking-[0.8em]">Localizei JPA Enterprise 1.1.2</p>
+      </footer>
+    </div>
+  );
+
+  const Header = () => {
     return (
-      <header className={`px-6 py-8 flex items-center justify-between shrink-0 border-b transition-all sticky top-0 z-50 ${
-        isDark ? 'bg-[#111827] border-white/5 shadow-2xl' : 'bg-white border-slate-200 shadow-sm'
-      }`}>
+      <header className="px-6 py-6 flex items-center justify-between shrink-0 border-b border-white/[0.04] bg-[#0B3A53] shadow-2xl sticky top-0 z-50">
         <div className="flex items-center gap-5">
-          <div className={`w-14 h-14 flex items-center justify-center shadow-lg rounded-2xl transition-colors ${
-            isDark ? 'bg-white text-[#0F172A]' : 'bg-slate-900 text-white'
-          }`}>
-            <ShieldCheck size={32} strokeWidth={2.5} />
+          <div className="w-12 h-12 flex items-center justify-center bg-white text-[#0B3A53] shadow-lg rounded-xl">
+            <ShieldCheck size={28} strokeWidth={2.5} />
           </div>
           <div>
-            <h1 className={`font-black text-xl uppercase tracking-tighter leading-none ${
-              isDark ? 'text-white' : 'text-slate-900'
-            }`}>
+            <h1 className="font-black text-lg uppercase tracking-tighter leading-none text-white">
               {activeView === 'dashboard' ? 'Painel Gestor' : 
                activeView === 'operations' ? 'Centro de Operações' : 'Projeção Financeira'}
             </h1>
-            <p className={`text-[10px] font-black uppercase tracking-[0.25em] mt-2.5 ${
-              isDark ? 'text-[#9CA3AF]' : 'text-indigo-600'
-            }`}>
+            <p className="text-[9px] font-black uppercase tracking-[0.25em] mt-1.5 text-white/60">
               Localizei JPA Enterprise v2.4
             </p>
           </div>
@@ -104,23 +295,17 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ user, onLogout, viewMode
         <div className="flex items-center gap-4">
           <button 
               onClick={onOpenViewSwitcher}
-              className={`px-4 py-2.5 rounded-xl flex items-center gap-3 border transition-all active:scale-95 group ${
-                isDark 
-                ? 'bg-white/5 border-white/10 hover:bg-white/10 text-white' 
-                : 'bg-slate-50 border-slate-200 hover:bg-slate-100 text-slate-900'
-              }`}
+              className="px-4 py-2 rounded-xl flex items-center gap-3 border border-white/10 bg-white/5 hover:bg-white/10 text-white transition-all active:scale-95 group"
           >
               <div className="flex flex-col items-end">
-                <span className={`text-[8px] font-black uppercase tracking-widest leading-none mb-0.5 ${isDark ? 'text-[#9CA3AF]' : 'text-slate-500'}`}>Visualização</span>
-                <span className={`text-xs font-bold uppercase tracking-tight ${viewMode !== 'ADM' ? 'text-amber-500' : ''}`}>{viewMode}</span>
+                <span className="text-[8px] font-black uppercase tracking-widest leading-none mb-0.5 text-white/50">Visualização</span>
+                <span className={`text-xs font-bold uppercase tracking-tight ${viewMode !== 'ADM' ? 'text-[#059669]' : ''}`}>{viewMode}</span>
               </div>
-              <ChevronDown size={16} className={isDark ? 'text-[#9CA3AF]' : 'text-slate-400'} />
+              <ChevronDown size={16} className="text-white/40" />
           </button>
 
-          <button onClick={onLogout} className={`p-3 transition-colors border rounded-xl ${
-            isDark ? 'text-[#9CA3AF] hover:text-red-500 bg-white/5 border-white/10' : 'text-slate-400 hover:text-red-500 bg-slate-50 border-slate-200'
-          }`}>
-            <LogOut size={22} />
+          <button onClick={onLogout} className="p-3 transition-colors border border-white/10 rounded-xl text-white/50 hover:text-white hover:bg-red-500/10 hover:border-red-500/20 bg-white/5">
+            <LogOut size={20} />
           </button>
         </div>
       </header>
@@ -128,46 +313,46 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ user, onLogout, viewMode
   };
 
   const renderDashboard = () => (
-    <div className="animate-in fade-in duration-500 space-y-10">
+    <div className="animate-in fade-in duration-500 space-y-8">
       <section className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <KPICard icon={Users} label="Base Ativa" value="2.842" />
           <KPICard icon={Store} label="Lojistas" value="156" />
-          <KPICard icon={DollarSign} label="Projeção" value="R$ 43k" />
-          <KPICard icon={TrendingUp} label="Crescimento" value="+412" />
+          <KPICard icon={DollarSign} label="Projeção" value="R$ 43k" isPositive />
+          <KPICard icon={TrendingUp} label="Crescimento" value="+412" isPositive />
       </section>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
           <button 
             onClick={() => setActiveView('monetization_model')}
-            className="bg-[#111827] text-white p-10 flex flex-col items-center justify-center text-center gap-8 active:scale-[0.99] transition-all group border border-white/5 shadow-2xl relative overflow-hidden rounded-[2.5rem]"
+            className="bg-[#111827] text-white p-10 flex flex-col items-center justify-center text-center gap-8 active:scale-[0.99] transition-all group border border-white/[0.04] shadow-2xl relative overflow-hidden rounded-[2.5rem] hover:bg-[#0B3A53]/20"
           >
-              <div className="absolute top-0 right-0 w-32 h-32 bg-[#1E5BFF]/5 rounded-full blur-3xl"></div>
-              <div className="w-20 h-20 bg-white/5 border border-white/10 flex items-center justify-center text-white group-hover:border-[#1E5BFF]/50 transition-colors">
-                  <Presentation size={40} className="group-hover:text-[#1E5BFF] transition-colors" />
+              <div className="absolute top-0 right-0 w-32 h-32 bg-[#059669]/5 rounded-full blur-3xl"></div>
+              <div className="w-20 h-20 bg-[#0B3A53]/20 border border-white/[0.04] flex items-center justify-center text-white group-hover:border-[#059669]/50 transition-colors rounded-[2rem]">
+                  <Presentation size={36} className="group-hover:text-[#059669] transition-colors" />
               </div>
               <div>
-                <h3 className="font-black text-2xl uppercase tracking-tighter mb-3">Projeção Financeira</h3>
-                <p className="text-sm text-gray-500 font-bold leading-relaxed max-w-[240px] mx-auto">Relatório analítico de teto de faturamento para investidores externos.</p>
+                <h3 className="font-black text-xl uppercase tracking-tighter mb-2">Projeção Financeira</h3>
+                <p className="text-xs text-[#9CA3AF] font-bold leading-relaxed max-w-[240px] mx-auto">Relatório analítico de teto de faturamento e monetização de dados.</p>
               </div>
-              <div className="flex items-center gap-3 text-[#1E5BFF] text-[12px] font-black uppercase tracking-widest group-hover:gap-6 transition-all border-b-2 border-[#1E5BFF] pb-1">
-                  Ver Projeções <ArrowUpRight size={16} strokeWidth={3} />
+              <div className="flex items-center gap-3 text-[#059669] text-[10px] font-black uppercase tracking-widest group-hover:gap-6 transition-all border-b border-[#059669]/30 pb-1">
+                  Ver Projeções <ArrowUpRight size={14} strokeWidth={3} />
               </div>
           </button>
 
           <button 
             onClick={() => setActiveView('operations')}
-            className="bg-[#111827] text-white p-10 flex flex-col items-center justify-center text-center gap-8 active:scale-[0.99] transition-all group border border-white/5 shadow-2xl relative overflow-hidden rounded-[2.5rem]"
+            className="bg-[#111827] text-white p-10 flex flex-col items-center justify-center text-center gap-8 active:scale-[0.99] transition-all group border border-white/[0.04] shadow-2xl relative overflow-hidden rounded-[2.5rem] hover:bg-[#0B3A53]/20"
           >
-              <div className="absolute top-0 left-0 w-32 h-32 bg-emerald-500/5 rounded-full blur-3xl"></div>
-              <div className="w-20 h-20 bg-white/5 border border-white/10 flex items-center justify-center text-white group-hover:border-emerald-500/50 transition-colors">
-                  <Activity size={40} className="group-hover:text-emerald-500 transition-colors" />
+              <div className="absolute top-0 left-0 w-32 h-32 bg-[#0B3A53]/10 rounded-full blur-3xl"></div>
+              <div className="w-20 h-20 bg-[#0B3A53]/20 border border-white/[0.04] flex items-center justify-center text-white group-hover:border-[#0B3A53]/50 transition-colors rounded-[2rem]">
+                  <Activity size={36} className="group-hover:text-[#9CA3AF] transition-colors" />
               </div>
               <div>
-                <h3 className="font-black text-2xl uppercase tracking-tighter mb-3">Centro de Operações</h3>
-                <p className="text-sm text-gray-500 font-bold leading-relaxed max-w-[240px] mx-auto">Monitoramento em tempo real da rede e gestão de infraestrutura técnica.</p>
+                <h3 className="font-black text-xl uppercase tracking-tighter mb-2">Centro de Operações</h3>
+                <p className="text-xs text-[#9CA3AF] font-bold leading-relaxed max-w-[240px] mx-auto">Monitoramento técnico da infraestrutura e logs de rede em tempo real.</p>
               </div>
-              <div className="flex items-center gap-3 text-emerald-500 text-[12px] font-black uppercase tracking-widest group-hover:gap-6 transition-all border-b-2 border-emerald-500 pb-1">
-                  Gerenciar Rede <ChevronRight size={16} strokeWidth={3} />
+              <div className="flex items-center gap-3 text-white/50 text-[10px] font-black uppercase tracking-widest group-hover:gap-6 transition-all border-b border-white/10 pb-1">
+                  Gerenciar Rede <ChevronRight size={14} strokeWidth={3} />
               </div>
           </button>
       </div>
@@ -179,9 +364,9 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ user, onLogout, viewMode
             { icon: Mail, label: 'Newsletter' },
             { icon: Search, label: 'Audit Logs' }
           ].map((act, i) => (
-            <button key={i} className="bg-[#111827] p-8 flex flex-col items-center gap-4 border border-white/5 active:bg-white active:text-[#0F172A] transition-all group shadow-lg rounded-2xl">
-                <act.icon className="text-[#9CA3AF] group-active:text-[#0F172A]" size={24} />
-                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[#9CA3AF] group-active:text-[#0F172A]">{act.label}</span>
+            <button key={i} className="bg-[#111827] p-8 flex flex-col items-center gap-4 border border-white/[0.04] hover:bg-[#0B3A53] transition-all group shadow-lg rounded-2xl">
+                <act.icon className="text-[#9CA3AF] group-hover:text-white" size={24} />
+                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[#9CA3AF] group-hover:text-white">{act.label}</span>
             </button>
           ))}
       </div>
@@ -193,7 +378,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ user, onLogout, viewMode
       <div className="flex items-center gap-4 mb-6">
           <button 
             onClick={() => setActiveView('dashboard')}
-            className="p-2.5 bg-white/5 text-[#9CA3AF] hover:text-white transition-colors border border-white/10 rounded-xl"
+            className="p-2.5 bg-[#111827] text-[#9CA3AF] hover:text-white transition-colors border border-white/[0.04] rounded-xl"
           >
             <ArrowLeft size={20} />
           </button>
@@ -206,8 +391,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ user, onLogout, viewMode
             { label: 'Core API', value: '99.9% uptime', status: 'healthy', icon: Cpu },
             { label: 'Push Gateway', value: 'Operational', status: 'healthy', icon: Zap }
           ].map((sys, i) => (
-            <div key={i} className="bg-[#111827] p-6 border border-white/5 rounded-3xl flex items-center gap-5">
-               <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${sys.status === 'healthy' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-red-500/10 text-red-500'}`}>
+            <div key={i} className="bg-[#111827] p-6 border border-white/[0.04] rounded-2xl flex items-center gap-5">
+               <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${sys.status === 'healthy' ? 'bg-[#059669]/10 text-[#059669]' : 'bg-red-500/10 text-red-500'}`}>
                   <sys.icon size={24} />
                </div>
                <div>
@@ -218,10 +403,10 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ user, onLogout, viewMode
           ))}
       </div>
 
-      <div className="bg-[#111827] border border-white/5 rounded-[2.5rem] p-8">
+      <div className="bg-[#111827] border border-white/[0.04] rounded-[2.5rem] p-8 shadow-2xl">
           <div className="flex justify-between items-center mb-8">
-              <h3 className="text-sm font-black text-white uppercase tracking-[0.2em]">Últimas Requisições de Rede</h3>
-              <span className="px-3 py-1 bg-emerald-500/10 text-emerald-500 text-[10px] font-black uppercase tracking-widest border border-emerald-500/20 rounded-full animate-pulse">Live</span>
+              <h3 className="text-sm font-black text-white uppercase tracking-[0.2em]">Requisições de Rede</h3>
+              <span className="px-3 py-1 bg-[#059669]/10 text-[#059669] text-[10px] font-black uppercase tracking-widest border border-[#059669]/20 rounded-full animate-pulse">Live Monitoring</span>
           </div>
           <div className="space-y-2">
               {[
@@ -229,91 +414,21 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ user, onLogout, viewMode
                   { user: 'Lojista (Hamburgueria)', act: 'POST /vouchers', time: '1s atrás' },
                   { user: 'Admin (Master)', act: 'UPDATE /kpis', time: '3s atrás' }
               ].map((log, i) => (
-                  <div key={i} className="flex items-center justify-between p-4 bg-white/5 border border-white/5 rounded-xl group hover:border-[#1E5BFF]/30 transition-all">
+                  <div key={i} className="flex items-center justify-between p-4 bg-[#0F172A]/50 border border-white/[0.02] rounded-xl group hover:border-[#0B3A53] transition-all">
                       <div className="flex items-center gap-4">
-                          <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-gray-500">
+                          <div className="w-8 h-8 rounded-lg bg-[#0B3A53]/20 flex items-center justify-center text-[#9CA3AF]">
                              <Activity size={14} />
                           </div>
                           <div>
                             <p className="text-xs font-bold text-white">{log.user}</p>
-                            <p className="text-[9px] font-black text-indigo-400 uppercase font-mono mt-0.5">{log.act}</p>
+                            <p className="text-[9px] font-black text-[#9CA3AF] uppercase font-mono mt-0.5">{log.act}</p>
                           </div>
                       </div>
-                      <span className="text-[10px] text-gray-500 font-medium">{log.time}</span>
+                      <span className="text-[10px] text-[#9CA3AF]/60 font-medium">{log.time}</span>
                   </div>
               ))}
           </div>
       </div>
-    </div>
-  );
-
-  const renderMonetizationModel = () => (
-    <div className="animate-in slide-in-from-right duration-500 space-y-12 pb-32 text-slate-900">
-      <div className="flex items-center gap-5 mb-8">
-        <button 
-          onClick={() => setActiveView('dashboard')}
-          className="p-2.5 bg-white text-slate-400 hover:text-indigo-600 transition-colors border border-slate-200 shadow-sm rounded-xl"
-        >
-          <ArrowLeft size={20} />
-        </button>
-        <h2 className="text-2xl font-black text-slate-900 uppercase tracking-tighter leading-none">Análise de Investimento</h2>
-      </div>
-
-      <section>
-        <div className="bg-white p-8 border border-slate-200 shadow-sm rounded-[2rem] relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-50 rounded-full blur-3xl pointer-events-none"></div>
-            <div className="flex items-center gap-3 mb-5">
-                <Globe size={16} className="text-indigo-600" />
-                <h3 className="text-[11px] font-black text-slate-400 uppercase tracking-[0.2em]">Visão Estratégica</h3>
-            </div>
-            <p className="text-slate-600 text-lg leading-relaxed font-medium max-w-2xl">
-              Marketplace hyperlocal escalável. O modelo de receita foca em <span className="text-slate-900 font-bold">densidade de dados e visibilidade</span>, gerando valor direto para o lojista com custo de aquisição (CAC) otimizado.
-            </p>
-        </div>
-      </section>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="bg-white p-8 border border-slate-200 rounded-[2rem] shadow-sm flex flex-col justify-between">
-              <div>
-                <h4 className="font-black text-[11px] text-slate-400 uppercase tracking-[0.2em] mb-3">01. Micro-Ads Bairro</h4>
-                <p className="text-sm text-slate-500 leading-relaxed mb-8">Segmentação geográfica por CEP e comportamento regional.</p>
-              </div>
-              <div className="flex justify-between items-end">
-                  <span className="text-[10px] font-bold text-slate-400 uppercase">Capacidade</span>
-                  <span className="text-lg font-black text-slate-900">36 Slots</span>
-              </div>
-          </div>
-
-          <div className="bg-white p-8 border border-slate-200 rounded-[2rem] shadow-sm flex flex-col justify-between">
-              <div>
-                <h4 className="font-black text-[11px] text-slate-400 uppercase tracking-[0.2em] mb-3">02. Lead Generation</h4>
-                <p className="text-sm text-slate-500 leading-relaxed mb-8">Conversão direta de solicitações para profissionais verificados.</p>
-              </div>
-              <div className="flex justify-between items-end">
-                  <span className="text-[10px] font-bold text-slate-400 uppercase">Custo Lead</span>
-                  <span className="text-lg font-black text-slate-900">R$ 3,90</span>
-              </div>
-          </div>
-      </div>
-
-      <section>
-          <div className="bg-slate-900 text-white p-12 rounded-[2.5rem] shadow-2xl flex flex-col md:flex-row justify-between items-center gap-10">
-            <div className="text-center md:text-left space-y-2">
-                <div className="flex items-center gap-2 justify-center md:justify-start text-white/30 mb-2">
-                    <BarChart3 size={16} />
-                    <span className="text-[10px] font-black uppercase tracking-[0.4em]">Finance Projection</span>
-                </div>
-                <h3 className="text-3xl font-black uppercase tracking-tighter">Projeção Bruta Mensal</h3>
-                <p className="text-slate-400 text-xs font-bold uppercase tracking-[0.2em]">Cenário Jacarepaguá v1.1.2</p>
-            </div>
-            <div className="text-center md:text-right">
-                <div className="flex items-baseline justify-center md:justify-end gap-1">
-                    <span className="text-2xl font-black text-emerald-400">R$</span>
-                    <h2 className="text-8xl font-black tracking-tighter text-emerald-400 leading-none tabular-nums">43.060</h2>
-                </div>
-            </div>
-          </div>
-      </section>
     </div>
   );
 
@@ -322,17 +437,18 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ user, onLogout, viewMode
         activeView === 'monetization_model' ? 'bg-[#F8FAFC]' : 'bg-[#0F172A] text-white'
     }`}>
       
-      <Header theme={activeView === 'monetization_model' ? 'light' : 'dark'} />
-
-      <main className="p-6 max-w-5xl mx-auto w-full flex-1">
-        {activeView === 'dashboard' && renderDashboard()}
-        {activeView === 'operations' && renderOperations()}
-        {activeView === 'monetization_model' && renderMonetizationModel()}
-      </main>
-
-      <footer className="mt-auto py-12 text-center opacity-40">
-        <p className="text-[10px] font-black uppercase tracking-[0.8em] text-[#9CA3AF]">Localizei JPA Enterprise 1.1.2</p>
-      </footer>
+      {activeView === 'monetization_model' ? renderMonetizationModel() : (
+        <>
+          <Header />
+          <main className="p-8 max-w-6xl mx-auto w-full flex-1">
+            {activeView === 'dashboard' && renderDashboard()}
+            {activeView === 'operations' && renderOperations()}
+          </main>
+          <footer className="mt-auto py-12 text-center opacity-30 border-t border-white/[0.02]">
+            <p className="text-[10px] font-black uppercase tracking-[0.8em] text-[#9CA3AF]">Localizei JPA Enterprise 1.1.2</p>
+          </footer>
+        </>
+      )}
     </div>
   );
 };
