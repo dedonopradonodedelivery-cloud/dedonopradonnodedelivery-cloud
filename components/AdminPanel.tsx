@@ -542,19 +542,22 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ user, onLogout, viewMode
                  </div>
               </div>
 
-              {/* Bloco de Aplicação dos Recursos (Grid 2x2) */}
-              <div className="grid grid-cols-2 gap-3 w-full">
-                 {[
-                   { title: 'Marketing & Growth', desc: 'Agência de tráfego e estratégia regional.' },
-                   { title: 'Anúncios Online', desc: 'Aquisição e ativação de lojistas.' },
-                   { title: 'Jurídico & Compliance', desc: 'Ajustes contratuais e estrutura legal.' },
-                   { title: 'Estrutura de Apoio', desc: 'Infra cloud e ferramentas operacionais.' }
-                 ].map((item, i) => (
-                   <div key={i} className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex flex-col justify-center min-h-[100px] text-center">
-                      <h4 className="text-[11px] font-black text-slate-900 uppercase leading-tight mb-1">{item.title}</h4>
-                      <p className="text-[10px] text-slate-500 font-medium leading-tight">{item.desc}</p>
-                   </div>
-                 ))}
+              {/* Bloco — Ações Digitais (Grid 2x2) */}
+              <div className="space-y-4 w-full">
+                 <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">AÇÕES DIGITAIS</h3>
+                 <div className="grid grid-cols-2 gap-3">
+                    {[
+                      { title: "MARKETING FULL", desc: "Estratégia multicanal agressiva" },
+                      { title: "INFLUENCERS LOCAIS", desc: "Criadores regionais recorrentes" },
+                      { title: "ANÚNCIOS MASSIVOS", desc: "Aquisição acelerada de usuários" },
+                      { title: "PERFORMANCE & CAC", desc: "Otimização e escala previsível" }
+                    ].map((item, idx) => (
+                      <div key={idx} className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex flex-col justify-center min-h-[100px] text-center">
+                         <h4 className="text-[11px] font-black text-slate-900 uppercase leading-tight mb-1">{item.title}</h4>
+                         <p className="text-[10px] text-slate-500 font-medium leading-tight">{item.desc}</p>
+                      </div>
+                    ))}
+                 </div>
               </div>
 
               {/* Card Final — Resultado Esperado */}
