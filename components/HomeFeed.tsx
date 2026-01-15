@@ -69,6 +69,18 @@ const getCategoryCover = (category: string) => {
   }
 };
 
+const getServicePlaceholder = (category: string) => {
+  const cat = category.toLowerCase();
+  if (cat.includes('técnica') || cat.includes('informática')) return 'https://images.unsplash.com/photo-1581092160562-40aa08e78837?q=80&w=600&auto=format&fit=crop';
+  if (cat.includes('beleza') || cat.includes('estética')) return 'https://images.unsplash.com/photo-1560066984-138dadb4c035?q=80&w=600&auto=format&fit=crop';
+  if (cat.includes('papelaria')) return 'https://images.unsplash.com/photo-1456735190827-d1262f71b8a3?q=80&w=600&auto=format&fit=crop';
+  if (cat.includes('chaveiro')) return 'https://images.unsplash.com/photo-1582139329536-e7284fece509?q=80&w=600&auto=format&fit=crop';
+  if (cat.includes('elétrica') || cat.includes('eletricista')) return 'https://images.unsplash.com/photo-1621905476438-5f09f22d556c?q=80&w=600&auto=format&fit=crop';
+  if (cat.includes('gráfica')) return 'https://images.unsplash.com/photo-1562564025-51dc11516a0b?q=80&w=600&auto=format&fit=crop';
+  if (cat.includes('pet')) return 'https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?q=80&w=600&auto=format&fit=crop';
+  return 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=600&auto=format&fit=crop';
+};
+
 interface BannerItem {
   id: string;
   title: string;
@@ -148,7 +160,7 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void }> = ({ onNavigat
   };
 
   return (
-    <div className="px-5">
+    <div className="px-4">
       <div 
         onClick={() => onNavigate(current.target)}
         className={`w-full relative aspect-[5/3] rounded-[32px] overflow-hidden shadow-xl shadow-slate-200 dark:shadow-none border border-gray-100 dark:border-white/5 ${current.bgColor} cursor-pointer active:scale-[0.98] transition-all group`}
@@ -197,10 +209,10 @@ const NeighborhoodCouponsBlock: React.FC<{
   onStoreClick: (store: Store) => void,
   onNavigate: (view: string) => void,
   user: User | null,
+  userRole: 'cliente' | 'lojista' | null,
   onRequireLogin: () => void
-}> = ({ stores, onStoreClick, onNavigate, user, onRequireLogin }) => {
+}> = ({ stores, onStoreClick, onNavigate, user, userRole, onRequireLogin }) => {
   const { currentNeighborhood, isAll } = useNeighborhood();
-  const [isSelectorOpen, setIsSelectorOpen] = useState(false);
 
   const couponStores = useMemo(() => {
     let list = stores.filter(s => s.cashback && s.cashback > 0);
@@ -221,74 +233,25 @@ const NeighborhoodCouponsBlock: React.FC<{
 
   if (couponStores.length === 0) return null;
 
-  const handleUserQrClick = () => {
-    setIsSelectorOpen(false);
+  // Lógica de navegação direta para o Cupom (Consumidor ou Lojista)
+  const handleBannerClick = () => {
     if (!user) {
       onRequireLogin();
+    } else if (userRole === 'lojista') {
+      // Se for lojista, o fluxo de cupom/cashback na home leva para o scanner de recebimento
+      onNavigate('qrcode_scan');
     } else {
+      // Se for cliente, leva para o seu QR Code de desconto
       onNavigate('user_cupom');
     }
   };
 
-  const handleMerchantQrClick = () => {
-    setIsSelectorOpen(false);
-    onNavigate('merchant_qr');
-  };
-
   return (
     <div className="w-full bg-white dark:bg-gray-950 pt-3 pb-3">
-      {/* SELETOR DE QR CODE MODAL (BOTTOM SHEET) */}
-      {isSelectorOpen && (
-        <div className="fixed inset-0 z-[110] flex items-end justify-center animate-in fade-in duration-300">
-           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsSelectorOpen(false)}></div>
-           <div className="relative w-full max-w-md bg-white dark:bg-gray-900 rounded-t-[2.5rem] p-8 shadow-2xl animate-in slide-in-from-bottom duration-300">
-              <div className="w-12 h-1.5 bg-gray-200 dark:bg-gray-800 rounded-full mx-auto mb-6"></div>
-              
-              <h3 className="text-xl font-black text-gray-900 dark:text-white uppercase tracking-tighter mb-2 text-center">Opções de QR Code</h3>
-              <p className="text-xs text-gray-500 text-center mb-8 font-medium">Escolha como deseja prosseguir no bairro</p>
-
-              <div className="space-y-4">
-                  <button 
-                    onClick={handleUserQrClick}
-                    className="w-full flex items-center gap-5 p-5 bg-orange-50 dark:bg-orange-950/20 border border-orange-100 dark:border-orange-900/30 rounded-2xl transition-all active:scale-[0.98] group"
-                  >
-                      <div className="w-14 h-14 bg-orange-500 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-orange-500/30">
-                          <Ticket size={28} />
-                      </div>
-                      <div className="text-left">
-                          <p className="font-black text-gray-900 dark:text-white text-sm uppercase tracking-tight">Meu QR Code</p>
-                          <p className="text-[10px] text-orange-700 dark:text-orange-400 font-bold uppercase tracking-widest mt-1">Sou Consumidor</p>
-                      </div>
-                  </button>
-
-                  <button 
-                    onClick={handleMerchantQrClick}
-                    className="w-full flex items-center gap-5 p-5 bg-blue-50 dark:bg-blue-950/20 border border-blue-100 dark:border-blue-900/30 rounded-2xl transition-all active:scale-[0.98] group"
-                  >
-                      <div className="w-14 h-14 bg-[#1E5BFF] rounded-2xl flex items-center justify-center text-white shadow-lg shadow-blue-500/30">
-                          <QrCode size={28} />
-                      </div>
-                      <div className="text-left">
-                          <p className="font-black text-gray-900 dark:text-white text-sm uppercase tracking-tight">Terminal de Recebimento</p>
-                          <p className="text-[10px] text-blue-700 dark:text-blue-400 font-bold uppercase tracking-widest mt-1">Sou Lojista</p>
-                      </div>
-                  </button>
-              </div>
-
-              <button 
-                onClick={() => setIsSelectorOpen(false)}
-                className="w-full mt-6 py-4 text-xs font-black text-gray-400 dark:text-gray-600 uppercase tracking-[0.2em] active:opacity-50"
-              >
-                Fechar
-              </button>
-           </div>
-        </div>
-      )}
-
       <div className="px-5 mb-3">
         <button 
-          onClick={() => setIsSelectorOpen(true)}
-          className="relative h-14 w-full flex items-center justify-center filter drop-shadow-md overflow-visible cursor-pointer active:scale-[0.98] active:opacity-90 transition-all group"
+          onClick={handleBannerClick}
+          className="relative h-14 w-full flex items-center justify-center filter drop-shadow-md overflow-visible cursor-pointer active:scale-[0.98] active:opacity-90 transition-all group outline-none"
         >
           {/* SVG Ticket Shape Background */}
           <svg className="absolute inset-0 w-full h-full transition-transform group-hover:scale-[1.01]" preserveAspectRatio="none" viewBox="0 0 100 40" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -388,33 +351,44 @@ const FeaturedServicesBlock: React.FC<{ stores: Store[], onStoreClick: (store: S
         </p>
       </div>
       <div className="flex gap-4 overflow-x-auto no-scrollbar px-5 pb-2 snap-x">
-        {EDITORIAL_SERVICES.map(service => (
-          <button
-            key={service.id}
-            onClick={() => {
-                const mockStore: any = { id: service.id, name: service.name, category: 'Serviços', subcategory: service.category, image: service.image, rating: service.rating, distance: service.location, adType: AdType.ORGANIC };
-                onStoreClick(mockStore);
-            }}
-            className="snap-center w-[160px] shrink-0 aspect-[9/16] relative overflow-hidden group active:scale-[0.98] transition-all bg-gray-200 dark:bg-gray-800 shadow-md rounded-none"
-          >
-            <img src={service.image} alt={service.name} className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-transparent to-transparent"></div>
-            <div className="absolute top-3 left-3 z-10">
-                <div className="flex items-center gap-1 text-[10px] font-bold bg-white/90 backdrop-blur-md px-2 py-0.5 shadow-sm text-gray-900 rounded-none">
-                    <Star className="w-2.5 h-2.5 text-yellow-500 fill-yellow-500" />
-                    {service.rating.toFixed(1)}
-                </div>
-            </div>
-            <div className="absolute bottom-0 left-0 right-0 p-4 text-left z-10">
-                <p className="text-[8px] text-amber-400 font-black uppercase tracking-widest mb-1">{service.category}</p>
-                <h4 className="font-bold text-white text-sm leading-tight mb-1 drop-shadow-md">{service.name}</h4>
-                <div className="flex items-center gap-1 text-[9px] text-gray-300 font-medium">
-                    <MapPin className="w-2.5 h-2.5" />
-                    {service.location}
-                </div>
-            </div>
-          </button>
-        ))}
+        {EDITORIAL_SERVICES.map(service => {
+          const fallback = getServicePlaceholder(service.category);
+          return (
+            <button
+              key={service.id}
+              onClick={() => {
+                  const mockStore: any = { id: service.id, name: service.name, category: 'Serviços', subcategory: service.category, image: service.image || fallback, rating: service.rating, distance: service.location, adType: AdType.ORGANIC };
+                  onStoreClick(mockStore);
+              }}
+              className="snap-center w-[160px] shrink-0 aspect-[9/16] relative overflow-hidden group active:scale-[0.98] transition-all bg-gray-200 dark:bg-gray-800 shadow-md rounded-none"
+            >
+              <img 
+                src={service.image || fallback} 
+                alt={service.name} 
+                className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" 
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  if (target.src !== fallback) target.src = fallback;
+                }}
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-transparent to-transparent"></div>
+              <div className="absolute top-3 left-3 z-10">
+                  <div className="flex items-center gap-1 text-[10px] font-bold bg-white/90 backdrop-blur-md px-2 py-0.5 shadow-sm text-gray-900 rounded-none">
+                      <Star className="w-2.5 h-2.5 text-yellow-500 fill-yellow-500" />
+                      {service.rating.toFixed(1)}
+                  </div>
+              </div>
+              <div className="absolute bottom-0 left-0 right-0 p-4 text-left z-10">
+                  <p className="text-[8px] text-amber-400 font-black uppercase tracking-widest mb-1">{service.category}</p>
+                  <h4 className="font-bold text-white text-sm leading-tight mb-1 drop-shadow-md">{service.name}</h4>
+                  <div className="flex items-center gap-1 text-[9px] text-gray-300 font-medium">
+                      <MapPin className="w-2.5 h-2.5" />
+                      {service.location}
+                  </div>
+              </div>
+            </button>
+          );
+        })}
       </div>
     </div>
   );
@@ -692,9 +666,9 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
           </div>
         );
       case 'home_carousel':
-        return <div key="home_carousel" className="w-full bg-white dark:bg-gray-950 pb-3"><HomeCarousel onNavigate={onNavigate} /></div>;
+        return <div key="home_carousel" className="w-full bg-white dark:bg-gray-950 mt-4 pb-3"><HomeCarousel onNavigate={onNavigate} /></div>;
       case 'neighborhood_coupons':
-        return <NeighborhoodCouponsBlock key="neighborhood_coupons" stores={stores} onStoreClick={(s) => onStoreClick && onStoreClick(s)} onNavigate={onNavigate} user={user} onRequireLogin={onRequireLogin} />;
+        return <NeighborhoodCouponsBlock key="neighborhood_coupons" stores={stores} onStoreClick={(s) => onStoreClick && onStoreClick(s)} onNavigate={onNavigate} user={user} userRole={userRole || null} onRequireLogin={onRequireLogin} />;
       case 'featured_services':
         return <FeaturedServicesBlock key="featured_services" stores={stores} onStoreClick={(s) => onStoreClick && onStoreClick(s)} />;
       case 'featured_jobs':
