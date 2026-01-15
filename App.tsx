@@ -31,7 +31,7 @@ import { WeeklyPromoModule } from './components/WeeklyPromoModule';
 import { JobsView } from './components/JobsView';
 import { MerchantJobsModule } from './components/MerchantJobsModule';
 import { AdminPanel } from './components/AdminPanel'; 
-import { MapPin, ShieldCheck, Lock, LogIn } from 'lucide-react';
+import { MapPin, ShieldCheck, Lock, LogIn, ChevronDown, Check, X, User as UserIcon, Store as StoreIcon, EyeOff } from 'lucide-react';
 import { useAuth } from './contexts/AuthContext';
 import { NeighborhoodProvider } from './contexts/NeighborhoodContext';
 import { Category, Store, AdType, EditorialCollection, ThemeMode } from './types';
@@ -62,12 +62,20 @@ let isFirstBootAttempted = false;
 const ADMIN_EMAIL = 'dedonopradonodedelivery@gmail.com';
 const MAIN_TABS = ['home', 'explore', 'user_cupom', 'qrcode_scan', 'services', 'community_feed'];
 
+export type RoleMode = 'ADM' | 'Usuário' | 'Lojista' | 'Visitante';
+
 const App: React.FC = () => {
   const { user, userRole, loading: isAuthInitialLoading, signOut } = useAuth();
   const isAuthReturn = window.location.hash.includes('access_token') || window.location.search.includes('code=');
   const [splashStage, setSplashStage] = useState(isFirstBootAttempted || isAuthReturn ? 4 : 0);
   const [themeMode, setThemeMode] = useState<ThemeMode>(() => (localStorage.getItem('localizei_theme_mode') as ThemeMode) || 'light');
   const [isDarkMode, setIsDarkMode] = useState(false);
+
+  // VIEW MODE STATE (GLOBAL)
+  const [viewMode, setViewMode] = useState<RoleMode>(() => {
+    return (localStorage.getItem('admin_view_mode') as RoleMode) || 'ADM';
+  });
+  const [isRoleSwitcherOpen, setIsRoleSwitcherOpen] = useState(false);
 
   const toggleTheme = () => {
     setThemeMode((prev) => {
@@ -85,7 +93,6 @@ const App: React.FC = () => {
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [globalSearch, setGlobalSearch] = useState('');
   const [selectedServiceMacro, setSelectedServiceMacro] = useState<{id: string, name: string} | null>(null);
-  const [selectedServiceSub, setSelectedServiceSub] = useState<string | null>(null);
   const [isQuoteModalOpen, setIsQuoteModalOpen] = useState(false);
   const [quoteCategory, setQuoteCategory] = useState('');
   const [pendingRoute, setPendingRoute] = useState<string | null>(null);
@@ -131,24 +138,25 @@ const App: React.FC = () => {
     localStorage.setItem('localizei_theme_mode', themeMode);
   }, [themeMode]);
 
-  // REDIRECIONAMENTO ADM (Respeita o View Mode)
+  // LOGICA DE REDIRECIONAMENTO AUTOMÁTICO POR VIEW MODE
   useEffect(() => {
-    const isAdmin = user && user.email === ADMIN_EMAIL;
-    const viewMode = localStorage.getItem('admin_view_mode') || 'ADM';
+    if (user?.email !== ADMIN_EMAIL) return;
 
-    // Se é ADM e está no modo ADM, garante que o painel é o destino inicial
-    if (isAdmin && viewMode === 'ADM' && activeTab === 'home') {
-       setActiveTab('admin_panel');
-    }
-  }, [user]);
+    localStorage.setItem('admin_view_mode', viewMode);
 
-  const handleAdminNavigate = (requestedRole?: string) => {
-    if (requestedRole && requestedRole !== 'ADM') {
-        setActiveTab('home');
-    } else {
+    switch (viewMode) {
+      case 'ADM':
         setActiveTab('admin_panel');
+        break;
+      case 'Usuário':
+      case 'Visitante':
+        if (activeTab === 'admin_panel' || activeTab === 'store_area') setActiveTab('home');
+        break;
+      case 'Lojista':
+        setActiveTab('store_area');
+        break;
     }
-  };
+  }, [viewMode, user]);
 
   const handleSelectCategory = (category: Category) => {
     setSelectedCategory(category);
@@ -170,21 +178,9 @@ const App: React.FC = () => {
     setActiveTab('store_ads_module');
   };
 
-  const handleAdsBack = () => {
-    setAdCategoryTarget(null);
-    if (activeTab === 'store_ads_module' && selectedCategory) {
-        setActiveTab('category_detail');
-    } else {
-        setActiveTab('store_area'); 
-    }
-  };
-
   const handleCupomClick = () => {
-    const viewMode = localStorage.getItem('admin_view_mode') || 'ADM';
     const isAdmin = user && user.email === ADMIN_EMAIL;
-    
-    // Simulação do role baseada no modo de visualização
-    const effectiveRole = isAdmin ? (viewMode.toLowerCase() === 'lojista' ? 'lojista' : 'cliente') : userRole;
+    const effectiveRole = isAdmin ? (viewMode === 'Lojista' ? 'lojista' : 'cliente') : userRole;
     const isVisitante = (isAdmin && viewMode === 'Visitante') || (!user);
 
     if (isVisitante) {
@@ -241,8 +237,78 @@ const App: React.FC = () => {
 
   const hideBottomNav = ['store_ads_module', 'store_detail', 'admin_moderation', 'advertise_home_banner', 'admin_panel'].includes(activeTab);
 
-  // Helper para detectar se o ADM está simulando
-  const isAdminSimulating = user?.email === ADMIN_EMAIL && localStorage.getItem('admin_view_mode') !== 'ADM';
+  const isAdmin = user?.email === ADMIN_EMAIL;
+  const isSimulatingVisitante = isAdmin && viewMode === 'Visitante';
+  const effectiveUser = isSimulatingVisitante ? null : user;
+  const effectiveRole = isAdmin ? (viewMode === 'Lojista' ? 'lojista' : 'cliente') : userRole;
+
+  // ROLE SWITCHER MODAL COMPONENT (REUSABLE)
+  const RoleSwitcherModal = () => {
+    const roles: { id: RoleMode; label: string; desc: string; icon: any }[] = [
+        { id: 'ADM', label: 'Administrador', desc: 'Acesso total e controle operacional.', icon: ShieldCheck },
+        { id: 'Usuário', label: 'Usuário', desc: 'Simula visão do morador/cliente.', icon: UserIcon },
+        { id: 'Lojista', label: 'Lojista', desc: 'Simula visão do dono de negócio.', icon: StoreIcon },
+        { id: 'Visitante', label: 'Visitante', desc: 'Simula experiência externa/investidor.', icon: EyeOff },
+    ];
+
+    if (!isRoleSwitcherOpen) return null;
+
+    return (
+        <div 
+          className="fixed inset-0 z-[300] flex items-center justify-center bg-black/80 backdrop-blur-sm animate-in fade-in duration-300 p-6"
+          onClick={() => setIsRoleSwitcherOpen(false)}
+        >
+            <div 
+                className="bg-[#111827] w-full max-w-md rounded-[2.5rem] border border-white/10 p-8 shadow-2xl animate-in zoom-in-95 duration-300 overflow-hidden relative"
+                onClick={(e) => e.stopPropagation()}
+            >
+                <div className="flex justify-between items-start mb-8 px-2">
+                    <div>
+                        <h2 className="text-xl font-black uppercase tracking-tighter text-white">Modo de Visualização</h2>
+                        <p className="text-[10px] text-[#9CA3AF] font-black uppercase tracking-[0.2em] mt-1">Simular experiência de perfil</p>
+                    </div>
+                    <button onClick={() => setIsRoleSwitcherOpen(false)} className="w-10 h-10 bg-white/5 rounded-full flex items-center justify-center text-gray-500 hover:text-white transition-colors -mt-2 -mr-2">
+                        <X size={20} />
+                    </button>
+                </div>
+
+                <div className="space-y-3">
+                    {roles.map((role) => {
+                        const isSelected = viewMode === role.id;
+                        return (
+                            <button
+                                key={role.id}
+                                onClick={() => {
+                                    setViewMode(role.id);
+                                    setIsRoleSwitcherOpen(false);
+                                }}
+                                className={`w-full flex items-center gap-5 p-5 rounded-[1.5rem] border transition-all text-left relative overflow-hidden group
+                                    ${isSelected 
+                                        ? 'bg-white text-[#0F172A] border-white shadow-xl scale-[1.02]' 
+                                        : 'bg-white/5 border-white/5 text-white hover:bg-white/10'
+                                    }`}
+                            >
+                                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 transition-colors
+                                    ${isSelected ? 'bg-[#0F172A] text-white' : 'bg-white/5 text-[#9CA3AF] group-hover:text-white'}`}>
+                                    <role.icon size={24} />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                    <p className={`font-black text-sm uppercase tracking-tight ${isSelected ? 'text-[#0F172A]' : 'text-white'}`}>{role.label}</p>
+                                    <p className={`text-[10px] font-medium leading-tight mt-0.5 ${isSelected ? 'text-[#0F172A]/60' : 'text-[#9CA3AF]'}`}>{role.desc}</p>
+                                </div>
+                                {isSelected && (
+                                    <div className="w-6 h-6 bg-amber-500 rounded-full flex items-center justify-center shadow-lg">
+                                        <Check size={14} strokeWidth={4} className="text-white" />
+                                    </div>
+                                )}
+                            </button>
+                        );
+                    })}
+                </div>
+            </div>
+        </div>
+    );
+  };
 
   return (
     <div className={isDarkMode ? 'dark' : ''}>
@@ -252,23 +318,10 @@ const App: React.FC = () => {
           onTouchStart={onTouchStart}
           onTouchEnd={onTouchEnd}
         >
-          {/* Botão Flutuante de Retorno ao ADM (Global) */}
-          {isAdminSimulating && (
-            <button 
-              onClick={() => {
-                localStorage.setItem('admin_view_mode', 'ADM');
-                setActiveTab('admin_panel');
-              }}
-              className="fixed top-20 right-4 z-[99] bg-amber-500 text-slate-900 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-2xl flex items-center gap-2 active:scale-95 border-2 border-white/20"
-            >
-              <ShieldCheck size={14} /> Voltar ao ADM
-            </button>
-          )}
-
           <Layout 
               activeTab={activeTab} 
               setActiveTab={setActiveTab} 
-              userRole={isAdminSimulating ? (localStorage.getItem('admin_view_mode')?.toLowerCase() as any) : userRole} 
+              userRole={effectiveRole} 
               onCashbackClick={handleCupomClick}
               hideNav={hideBottomNav}
           >
@@ -277,15 +330,19 @@ const App: React.FC = () => {
                   isDarkMode={isDarkMode}
                   toggleTheme={toggleTheme}
                   onAuthClick={() => setActiveTab('profile')} 
-                  user={isAdminSimulating && localStorage.getItem('admin_view_mode') === 'Visitante' ? null : user}
+                  user={effectiveUser as any}
                   searchTerm={globalSearch}
                   onSearchChange={setGlobalSearch}
                   onNavigate={setActiveTab}
                   activeTab={activeTab}
-                  userRole={isAdminSimulating ? (localStorage.getItem('admin_view_mode')?.toLowerCase() as any) : userRole}
+                  userRole={effectiveRole}
                   onOpenMerchantQr={() => setActiveTab('merchant_qr')}
                   stores={STORES}
                   onStoreClick={handleSelectStore}
+                  // ADMIN VIEW SWITCHER PROPS
+                  isAdmin={isAdmin}
+                  viewMode={viewMode}
+                  onOpenViewSwitcher={() => setIsRoleSwitcherOpen(true)}
               />
               )}
               <main className="animate-in fade-in duration-500 w-full max-w-md mx-auto">
@@ -293,8 +350,10 @@ const App: React.FC = () => {
               {activeTab === 'admin_panel' && (
                   <AdminPanel 
                     user={user as any} 
-                    onNavigateToApp={handleAdminNavigate}
+                    onNavigateToApp={() => {}} // Not used with current global flow
                     onLogout={signOut}
+                    viewMode={viewMode}
+                    onOpenViewSwitcher={() => setIsRoleSwitcherOpen(true)}
                   />
               )}
 
@@ -306,22 +365,22 @@ const App: React.FC = () => {
                   onStoreClick={handleSelectStore}
                   stores={STORES}
                   searchTerm={globalSearch}
-                  user={isAdminSimulating && localStorage.getItem('admin_view_mode') === 'Visitante' ? null : (user as any)}
-                  userRole={isAdminSimulating ? (localStorage.getItem('admin_view_mode')?.toLowerCase() as any) : userRole}
+                  user={effectiveUser as any}
+                  userRole={effectiveRole}
                   onSpinWin={(reward) => { setSelectedReward(reward); setActiveTab('reward_details'); }}
                   onRequireLogin={() => setIsAuthOpen(true)}
                   />
               )}
               
               {activeTab === 'explore' && <ExploreView stores={STORES} searchQuery={globalSearch} onStoreClick={handleSelectStore} onLocationClick={() => {}} onFilterClick={() => {}} onOpenPlans={() => {}} onNavigate={setActiveTab} />}
-              {activeTab === 'profile' && <MenuView user={isAdminSimulating && localStorage.getItem('admin_view_mode') === 'Visitante' ? null : (user as any)} userRole={isAdminSimulating ? (localStorage.getItem('admin_view_mode')?.toLowerCase() as any) : userRole} onAuthClick={() => setIsAuthOpen(true)} onNavigate={setActiveTab} onBack={() => setActiveTab('home')} currentTheme={themeMode} onThemeChange={setThemeMode} />}
-              {activeTab === 'category_detail' && selectedCategory && <CategoryView category={selectedCategory} onBack={() => { setActiveTab('home'); setSelectedCategory(null); }} onStoreClick={handleSelectStore} stores={STORES} userRole={userRole} onAdvertiseInCategory={handleAdvertiseInCategory} />}
+              {activeTab === 'profile' && <MenuView user={effectiveUser as any} userRole={effectiveRole} onAuthClick={() => setIsAuthOpen(true)} onNavigate={setActiveTab} onBack={() => setActiveTab('home')} currentTheme={themeMode} onThemeChange={setThemeMode} />}
+              {activeTab === 'category_detail' && selectedCategory && <CategoryView category={selectedCategory} onBack={() => { setActiveTab('home'); setSelectedCategory(null); }} onStoreClick={handleSelectStore} stores={STORES} userRole={effectiveRole} onAdvertiseInCategory={handleAdvertiseInCategory} />}
               {activeTab === 'store_detail' && selectedStore && <StoreDetailView store={selectedStore} onBack={() => setActiveTab('home')} />}
               {activeTab === 'services' && <ServicesView onSelectMacro={(id, name) => { setSelectedServiceMacro({id, name}); if (id === 'emergency') { setQuoteCategory(name); setIsQuoteModalOpen(true); } else { setActiveTab('service_subcategories'); } }} onOpenTerms={() => setActiveTab('service_terms')} onNavigate={setActiveTab} searchTerm={globalSearch} />}
-              {activeTab === 'community_feed' && <CommunityFeedView onStoreClick={handleSelectStore} user={isAdminSimulating && localStorage.getItem('admin_view_mode') === 'Visitante' ? null : (user as any)} onRequireLogin={() => setIsAuthOpen(true)} />}
-              {activeTab === 'user_cupom' && <UserCupomScreen user={user as any} onBack={() => setActiveTab('home')} />}
+              {activeTab === 'community_feed' && <CommunityFeedView onStoreClick={handleSelectStore} user={effectiveUser as any} onRequireLogin={() => setIsAuthOpen(true)} />}
+              {activeTab === 'user_cupom' && <UserCupomScreen user={effectiveUser as any} onBack={() => setActiveTab('home')} />}
               {activeTab === 'qrcode_scan' && <CashbackScanScreen onBack={() => setActiveTab('home')} onScanSuccess={(data) => { setScannedData(data); setActiveTab('scan_confirmation'); }} />}
-              {activeTab === 'store_area' && <StoreAreaView onBack={() => setActiveTab('home')} onNavigate={setActiveTab} user={user as any} />}
+              {activeTab === 'store_area' && <StoreAreaView onBack={() => setActiveTab('home')} onNavigate={setActiveTab} user={effectiveUser as any} />}
               </main>
 
               <AuthModal 
@@ -330,11 +389,14 @@ const App: React.FC = () => {
                     setIsAuthOpen(false);
                     setPendingRoute(null);
                 }} 
-                user={user as any}
+                user={effectiveUser as any}
                 onLoginSuccess={() => { setIsAuthOpen(false); }}
               />
               {isQuoteModalOpen && <QuoteRequestModal isOpen={isQuoteModalOpen} onClose={() => setIsQuoteModalOpen(false)} categoryName={quoteCategory} onSuccess={() => { setIsQuoteModalOpen(false); setActiveTab('service_success'); }} />}
           </Layout>
+
+          {/* SHARED ROLE SWITCHER MODAL */}
+          <RoleSwitcherModal />
 
           {splashStage < 4 && (
             <div className={`fixed inset-0 z-[999] flex items-center justify-center transition-opacity duration-500 ${splashStage === 3 ? 'animate-app-exit' : ''}`} style={{ backgroundColor: '#1E5BFF' }} >
@@ -344,17 +406,6 @@ const App: React.FC = () => {
                   </div>
                   <h1 className="text-5xl font-black font-display text-white tracking-tighter drop-shadow-md">Localizei</h1>
                   <span className="text-sm font-bold text-white/90 tracking-[0.5em] uppercase mt-1">JPA</span>
-                  <div className={`mt-12 flex flex-col items-center gap-2 transition-all duration-300 ${splashStage >= 2 ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
-                     <p className="text-[10px] text-white/70 uppercase tracking-[0.2em] font-medium animate-sponsor-label-fade" style={{ animationDelay: '0ms' }}>Patrocinador Master</p>
-                     <div className="flex items-center gap-3 bg-white/10 px-5 py-3 rounded-full backdrop-blur-md border border-white/10 overflow-hidden min-h-[48px]">
-                        <div className="animate-sponsor-icon-elastic" style={{ animationDelay: '100ms' }}>
-                           <ShieldCheck className="w-5 h-5 text-white" />
-                        </div>
-                        <div className="flex overflow-hidden relative">
-                            <span className={`text-sm font-bold text-white tracking-wide whitespace-nowrap border-r-2 border-white pr-1 overflow-hidden w-0 ${splashStage >= 2 ? 'animate-typewriter' : 'opacity-0'}`} style={{ animationDelay: '400ms' }}>Grupo Esquematiza</span>
-                        </div>
-                     </div>
-                  </div>
               </div>
             </div>
           )}

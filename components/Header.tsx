@@ -1,6 +1,6 @@
 
-import React, { useMemo, useState, useEffect } from 'react';
-import { Search, QrCode, User as UserIcon, MapPin, ChevronDown, Check, ChevronRight, SearchX } from 'lucide-react';
+import React, { useMemo } from 'react';
+import { Search, QrCode, User as UserIcon, MapPin, ChevronDown, Check, ChevronRight, SearchX, ShieldCheck } from 'lucide-react';
 import { useNeighborhood, NEIGHBORHOODS } from '../contexts/NeighborhoodContext';
 import { Store } from '../types';
 
@@ -18,6 +18,10 @@ interface HeaderProps {
   customPlaceholder?: string;
   stores?: Store[];
   onStoreClick?: (store: Store) => void;
+  // NOVAS PROPS ADM
+  isAdmin?: boolean;
+  viewMode?: string;
+  onOpenViewSwitcher?: () => void;
 }
 
 const NeighborhoodSelectorModal: React.FC = () => {
@@ -79,14 +83,17 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenMerchantQr,
   customPlaceholder,
   stores = [],
-  onStoreClick
+  onStoreClick,
+  isAdmin,
+  viewMode,
+  onOpenViewSwitcher
 }) => {
   const isMerchant = userRole === 'lojista';
-  const { currentNeighborhood, setNeighborhood, toggleSelector, isAll } = useNeighborhood();
+  /* Adicionado setNeighborhood na desestruturação do hook useNeighborhood para corrigir erros nas linhas 254 e 266 */
+  const { currentNeighborhood, setNeighborhood, toggleSelector } = useNeighborhood();
 
   const showNeighborhoodFilter = ['home', 'explore', 'services'].includes(activeTab);
 
-  // --- MOTOR DE BUSCA OTIMIZADO ---
   const normalize = (text: any) => 
     (String(text || "")).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
 
@@ -96,12 +103,9 @@ export const Header: React.FC<HeaderProps> = ({
     
     return stores.filter(s => {
         if (!s) return false;
-
-        // Regra: Somente estabelecimentos ativos
         const isActive = (s as any).status === undefined || (s as any).status === 'active';
         if (!isActive) return false;
 
-        // Unifica todos os campos para busca textual parcial agressiva
         const searchableFields = [
             s.name,
             s.category,
@@ -112,22 +116,16 @@ export const Header: React.FC<HeaderProps> = ({
         ];
 
         const unifiedString = searchableFields.map(field => normalize(field)).join(' ');
-        
-        // Verifica se o termo está contido na string unificada
         return unifiedString.includes(term);
-    }).slice(0, 8); // Limite de resultados no dropdown
+    }).slice(0, 8);
   }, [stores, searchTerm, activeTab]);
 
   return (
     <>
-        <div 
-        className={`
-            sticky top-0 z-40 w-full bg-white/95 dark:bg-gray-900/95 backdrop-blur-md transition-all duration-300 ease-in-out shadow-sm border-b border-gray-100 dark:border-gray-800
-        `}
-        >
+        <div className="sticky top-0 z-40 w-full bg-white/95 dark:bg-gray-900/95 backdrop-blur-md transition-all duration-300 ease-in-out shadow-sm border-b border-gray-100 dark:border-gray-800">
         <div className="max-w-md mx-auto flex flex-col relative">
             
-            {/* Top Row: Location & Profile */}
+            {/* Top Row: Location, Admin Switcher & Profile */}
             <div className="flex items-center justify-between px-4 pt-3 pb-1">
                 <button 
                     onClick={toggleSelector}
@@ -139,7 +137,7 @@ export const Header: React.FC<HeaderProps> = ({
                     <div className="text-left flex flex-col">
                         <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wide leading-none">Você está em</span>
                         <div className="flex items-center gap-1">
-                            <span className="text-sm font-bold text-gray-900 dark:text-white leading-tight truncate max-w-[150px]">
+                            <span className="text-sm font-bold text-gray-900 dark:text-white leading-tight truncate max-w-[120px]">
                                 {currentNeighborhood === "Jacarepaguá (todos)" ? "Jacarepaguá" : currentNeighborhood}
                             </span>
                             <ChevronDown className="w-3 h-3 text-gray-400" />
@@ -147,27 +145,43 @@ export const Header: React.FC<HeaderProps> = ({
                     </div>
                 </button>
 
-                <button 
-                    onClick={onAuthClick}
-                    className="flex items-center gap-2 outline-none group active:scale-95 transition-transform bg-gray-50 dark:bg-gray-800 p-1 pl-3 rounded-full border border-gray-100 dark:border-gray-700"
-                >
-                    <span className="text-[10px] font-bold text-gray-600 dark:text-gray-300 group-hover:text-[#1E5BFF]">
-                        {user ? 'Perfil' : 'Entrar'}
-                    </span>
-                    <div className="w-7 h-7 rounded-full bg-white dark:bg-gray-700 flex items-center justify-center text-[#1E5BFF] dark:text-blue-400 overflow-hidden relative shadow-sm">
-                        {user?.user_metadata?.avatar_url ? (
-                            <img src={user.user_metadata.avatar_url} alt="Perfil" className="w-full h-full object-cover" />
-                        ) : (
-                            <UserIcon className="w-4 h-4" />
-                        )}
-                        {!user && <div className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-red-500 rounded-full border border-white dark:border-gray-900"></div>}
-                    </div>
-                </button>
+                <div className="flex items-center gap-2">
+                    {/* ADM VIEW SWITCHER - PERSISTENTE NO HEADER PRINCIPAL */}
+                    {isAdmin && (
+                        <button 
+                            onClick={onOpenViewSwitcher}
+                            className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 px-3 py-1.5 rounded-xl flex items-center gap-2 active:scale-95 transition-all shadow-sm"
+                        >
+                            <ShieldCheck size={14} className="text-amber-600 dark:text-amber-400" />
+                            <div className="flex flex-col items-start leading-none">
+                                <span className="text-[7px] font-black text-amber-500 uppercase tracking-widest mb-0.5">Visão</span>
+                                <span className="text-[10px] font-bold text-amber-900 dark:text-amber-200 uppercase">{viewMode}</span>
+                            </div>
+                            <ChevronDown size={12} className="text-amber-400" />
+                        </button>
+                    )}
+
+                    <button 
+                        onClick={onAuthClick}
+                        className="flex items-center gap-2 outline-none group active:scale-95 transition-transform bg-gray-50 dark:bg-gray-800 p-1 pl-3 rounded-full border border-gray-100 dark:border-gray-700 shadow-inner"
+                    >
+                        <span className="text-[10px] font-bold text-gray-600 dark:text-gray-300 group-hover:text-[#1E5BFF]">
+                            {user ? 'Perfil' : 'Entrar'}
+                        </span>
+                        <div className="w-7 h-7 rounded-full bg-white dark:bg-gray-700 flex items-center justify-center text-[#1E5BFF] dark:text-blue-400 overflow-hidden relative shadow-sm">
+                            {user?.user_metadata?.avatar_url ? (
+                                <img src={user.user_metadata.avatar_url} alt="Perfil" className="w-full h-full object-cover" />
+                            ) : (
+                                <UserIcon className="w-4 h-4" />
+                            )}
+                            {!user && <div className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-red-500 rounded-full border border-white dark:border-gray-900"></div>}
+                        </div>
+                    </button>
+                </div>
             </div>
 
             {/* Bottom Row: Search Bar */}
             <div className={`flex items-center gap-3 px-4 ${showNeighborhoodFilter ? 'pt-2 pb-2' : 'pt-2 pb-3'} transition-all duration-300 ease-in-out`}>
-            
                 <div className="relative flex-1 group">
                     <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
                         <Search className="h-4 w-4 text-gray-400 group-focus-within:text-[#1E5BFF] transition-colors" />
@@ -180,7 +194,6 @@ export const Header: React.FC<HeaderProps> = ({
                         className={`block w-full pl-10 pr-4 bg-gray-100 dark:bg-gray-800 border-none rounded-2xl text-sm font-medium text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1E5BFF]/50 transition-all shadow-inner py-3`}
                     />
 
-                    {/* EXPANSÃO DA BARRA DE BUSCA (DROPDOWN) */}
                     {searchTerm.trim().length > 0 && activeTab === 'home' && (
                         <div className="absolute top-[calc(100%+8px)] left-0 right-0 bg-white dark:bg-gray-900 rounded-[24px] shadow-[0_20px_50px_rgba(0,0,0,0.15)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.5)] border border-gray-100 dark:border-gray-800 z-[100] overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
                             <div className="p-2 max-h-[60vh] overflow-y-auto no-scrollbar">
@@ -234,7 +247,6 @@ export const Header: React.FC<HeaderProps> = ({
                         <QrCode className="w-5 h-5" />
                     </button>
                 )}
-
             </div>
 
             {showNeighborhoodFilter && (
@@ -266,7 +278,6 @@ export const Header: React.FC<HeaderProps> = ({
             )}
         </div>
         </div>
-        
         <NeighborhoodSelectorModal />
     </>
   );
