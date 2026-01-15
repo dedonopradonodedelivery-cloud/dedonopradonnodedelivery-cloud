@@ -35,7 +35,6 @@ import {
   Briefcase,
   PieChart,
   LayoutGrid,
-  // Added Crown icon to fix the reference error on line 190
   Crown
 } from 'lucide-react';
 import { User as SupabaseUser } from '@supabase/supabase-js';
@@ -53,11 +52,11 @@ const ADMIN_EMAIL = 'dedonopradonodedelivery@gmail.com';
 type AdminView = 'dashboard' | 'operations' | 'monetization_model';
 
 const KPICard: React.FC<{ icon: any, label: string, value: string, isPositive?: boolean }> = ({ icon: Icon, label, value, isPositive }) => (
-  <div className="bg-[#111827] p-6 flex flex-col items-center justify-center text-center h-36 border border-white/[0.04] shadow-xl rounded-2xl">
-    <div className="w-10 h-10 flex items-center justify-center bg-[#0B3A53]/30 text-[#9CA3AF] mb-4 rounded-xl">
-      <Icon size={20} />
+  <div className="bg-[#111827] p-6 flex flex-col items-center justify-center text-center h-36 border border-white/[0.04] shadow-md rounded-xl">
+    <div className="w-10 h-10 flex items-center justify-center bg-[#0B3A53]/30 text-[#9CA3AF] mb-4 rounded-lg">
+      <Icon size={20} strokeWidth={2} />
     </div>
-    <p className="text-[9px] font-black text-[#9CA3AF] uppercase tracking-[0.2em] mb-1.5">{label}</p>
+    <p className="text-[9px] font-bold text-[#9CA3AF] uppercase tracking-[0.2em] mb-1.5">{label}</p>
     <p className={`text-2xl font-black leading-none tracking-tighter ${isPositive ? 'text-[#059669]' : 'text-white'}`}>{value}</p>
   </div>
 );
@@ -67,13 +66,13 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ user, onLogout, viewMode
 
   if (!user || user.email !== ADMIN_EMAIL) {
     return (
-      <div className="min-h-screen bg-[#0F172A] flex flex-col items-center justify-center p-6 text-center">
-        <div className="w-16 h-16 bg-[#111827] border border-white/[0.04] flex items-center justify-center mb-4 rounded-2xl shadow-2xl">
+      <div className="min-h-screen bg-[#0F172A] flex flex-col items-center justify-center p-6 text-center font-sans">
+        <div className="w-16 h-16 bg-[#111827] border border-white/[0.04] flex items-center justify-center mb-4 rounded-xl">
           <Lock className="w-8 h-8 text-[#9CA3AF]" />
         </div>
         <h1 className="text-xl font-black text-white mb-1 uppercase tracking-tighter">403 - Negado</h1>
-        <p className="text-[#9CA3AF] mb-6 max-w-xs text-xs">Acesso restrito ao administrador.</p>
-        <button onClick={onNavigateToApp} className="bg-[#0B3A53] hover:bg-[#0B3A53]/80 text-white px-8 py-3 font-black uppercase text-[10px] tracking-widest active:scale-95 transition-all rounded-xl">
+        <p className="text-[#9CA3AF] mb-6 max-w-xs text-xs font-medium">Acesso restrito ao administrador.</p>
+        <button onClick={onNavigateToApp} className="bg-[#0B3A53] hover:bg-[#0B3A53]/80 text-white px-8 py-3 font-bold uppercase text-[10px] tracking-widest active:scale-95 transition-all rounded-lg">
           Voltar para o App
         </button>
       </div>
@@ -82,184 +81,188 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ user, onLogout, viewMode
 
   const renderMonetizationModel = () => (
     <div className="min-h-screen bg-[#F8FAFC] text-slate-900 font-sans animate-in fade-in duration-500 flex flex-col">
-      {/* INVESTOR HEADER */}
-      <header className="bg-white border-b border-slate-200 px-8 py-6 sticky top-0 z-50 shadow-sm flex items-center justify-between">
-        <div className="flex items-center gap-6">
+      {/* INVESTOR HEADER - CLEAN & SOPHISTICATED */}
+      <header className="bg-white border-b border-slate-200 px-8 py-4 sticky top-0 z-50 shadow-sm flex items-center justify-between">
+        <div className="flex items-center gap-5">
           <button 
             onClick={() => setActiveView('dashboard')}
-            className="p-2.5 bg-slate-100 text-slate-500 hover:text-indigo-600 rounded-xl transition-all active:scale-90"
+            className="p-2 bg-slate-50 text-slate-400 hover:text-indigo-600 hover:bg-slate-100 rounded-lg transition-all active:scale-90 border border-slate-200"
           >
-            <ArrowLeft size={20} />
+            <ArrowLeft size={18} />
           </button>
+          <div className="h-8 w-px bg-slate-200"></div>
           <div>
             <div className="flex items-center gap-3">
-              <h1 className="text-2xl font-black tracking-tight text-slate-900 leading-none">Projeção Financeira</h1>
-              <span className="bg-indigo-50 text-indigo-600 text-[10px] font-black px-2.5 py-1 rounded-full border border-indigo-100 uppercase tracking-widest">
+              <h1 className="text-xl font-black tracking-tight text-slate-900 leading-none uppercase">Projeção Financeira</h1>
+              <span className="bg-slate-900 text-white text-[8px] font-black px-2 py-0.5 rounded uppercase tracking-[0.2em]">
                 Investor Access
               </span>
             </div>
-            <p className="text-xs font-bold text-slate-400 mt-1.5 uppercase tracking-wider">
+            <p className="text-[10px] font-bold text-slate-400 mt-1 uppercase tracking-widest">
               Modelo de Receita • Jacarepaguá v1.1.2
             </p>
           </div>
         </div>
 
         <div className="flex items-center gap-4">
-          <div className="px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl flex items-center gap-3">
-            <div className="flex flex-col items-end">
-              <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest leading-none mb-0.5">Visualização</span>
-              <span className="text-xs font-bold text-slate-900 uppercase">ADM</span>
-            </div>
-            <ShieldCheck size={16} className="text-indigo-600" />
+          <div className="px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg flex items-center gap-2">
+            <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Visualização</span>
+            <span className="text-[10px] font-black text-slate-900 uppercase">ADM</span>
+            <ShieldCheck size={14} className="text-indigo-600" />
           </div>
         </div>
       </header>
 
-      <main className="p-8 max-w-5xl mx-auto w-full space-y-10 pb-32">
+      <main className="p-8 max-w-5xl mx-auto w-full space-y-8 pb-24">
         
-        {/* BLOCO: VISÃO ESTRATÉGICA */}
-        <section className="animate-in slide-in-from-bottom-4 duration-500">
-           <div className="bg-white p-10 rounded-[2.5rem] border border-slate-200 shadow-[0_20px_50px_rgba(0,0,0,0.02)] relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-50 rounded-full blur-3xl -mr-20 -mt-20 opacity-60"></div>
+        {/* BLOCO: VISÃO ESTRATÉGICA - COMPACT & HIGH CONTRAST */}
+        <section className="animate-in slide-in-from-bottom-2 duration-500">
+           <div className="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-48 h-48 bg-indigo-50/50 rounded-full blur-3xl pointer-events-none"></div>
               <div className="relative z-10">
-                <div className="flex items-center gap-3 mb-6">
-                  <Target className="text-indigo-600" size={24} />
-                  <h2 className="text-xs font-black text-slate-400 uppercase tracking-[0.3em]">Visão Estratégica</h2>
+                <div className="flex items-center gap-2 mb-4">
+                  <Target className="text-indigo-600" size={20} />
+                  <h2 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">Visão Estratégica</h2>
                 </div>
-                <p className="text-2xl font-medium text-slate-600 leading-relaxed max-w-3xl">
-                  Marketplace hiperlocal escalável. Modelo baseado em <span className="text-slate-900 font-bold">densidade de micro-ads</span> por bairro, gerando alta visibilidade para lojistas, CAC otimizado e margens crescentes, com infraestrutura técnica de baixo custo fixo.
+                <p className="text-xl font-semibold text-slate-800 leading-relaxed max-w-4xl tracking-tight">
+                  Marketplace hiperlocal escalável. Modelo baseado em <span className="text-slate-950 font-black border-b-2 border-indigo-200">densidade de micro-ads</span> por bairro, gerando alta visibilidade, CAC otimizado e margens crescentes com infraestrutura técnica de baixo custo fixo.
                 </p>
               </div>
            </div>
         </section>
 
-        {/* BLOCO: MODELOS DE RECEITA */}
-        <section className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        {/* BLOCO: MODELOS DE RECEITA - UNIFORM CARDS */}
+        <section className="grid grid-cols-1 md:grid-cols-2 gap-6">
            {/* MICRO-ADS */}
-           <div className="bg-white p-8 rounded-[2rem] border border-slate-200 shadow-sm flex flex-col justify-between group hover:border-indigo-200 transition-all">
+           <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between hover:border-slate-300 transition-all">
               <div>
-                <div className="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center mb-6">
-                  <LayoutGrid size={24} />
+                <div className="w-10 h-10 bg-slate-50 text-slate-900 border border-slate-100 rounded-xl flex items-center justify-center mb-5">
+                  <LayoutGrid size={20} />
                 </div>
-                <h3 className="text-xl font-black text-slate-900 mb-3">Micro-Ads de Bairro</h3>
-                <p className="text-sm text-slate-500 leading-relaxed mb-8">
-                  Venda de espaços publicitários segmentados por CEP e comportamento de consumo regional em Jacarepaguá.
+                <h3 className="text-lg font-black text-slate-900 mb-2 uppercase tracking-tight">Micro-Ads de Bairro</h3>
+                <p className="text-xs text-slate-500 leading-relaxed mb-6 font-medium">
+                  Monetização via espaços publicitários segmentados por geolocalização e comportamento de consumo regional.
                 </p>
               </div>
-              <div className="grid grid-cols-2 gap-4 border-t border-slate-100 pt-6">
+              <div className="grid grid-cols-2 gap-4 border-t border-slate-100 pt-5">
                  <div>
-                   <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Capacidade</span>
-                   <p className="text-lg font-black text-slate-900">36 Slots</p>
+                   <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Capacidade</span>
+                   <p className="text-base font-black text-slate-900">36 Slots</p>
                  </div>
                  <div className="text-right">
-                   <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Receita Bruta Est.</span>
-                   <p className="text-lg font-black text-[#059669]">R$ 14.200,00</p>
+                   <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Receita Bruta Est.</span>
+                   <p className="text-base font-black text-[#059669]">R$ 14.200,00</p>
                  </div>
               </div>
            </div>
 
            {/* LEAD GENERATION */}
-           <div className="bg-white p-8 rounded-[2rem] border border-slate-200 shadow-sm flex flex-col justify-between group hover:border-indigo-200 transition-all">
+           <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between hover:border-slate-300 transition-all">
               <div>
-                <div className="w-12 h-12 bg-emerald-50 text-[#059669] rounded-2xl flex items-center justify-center mb-6">
-                  <Zap size={24} />
+                <div className="w-10 h-10 bg-emerald-50 text-[#059669] border border-emerald-100 rounded-xl flex items-center justify-center mb-5">
+                  <Zap size={20} />
                 </div>
-                <h3 className="text-xl font-black text-slate-900 mb-3">Lead Generation</h3>
-                <p className="text-sm text-slate-500 leading-relaxed mb-8">
-                  Monetização sobre a intenção de compra: conversão direta de solicitações de serviços para profissionais verificados.
+                <h3 className="text-lg font-black text-slate-900 mb-2 uppercase tracking-tight">Lead Generation</h3>
+                <p className="text-xs text-slate-500 leading-relaxed mb-6 font-medium">
+                  Conversão direta de intenção de compra: receita por conexão entre solicitante e prestador verificado.
                 </p>
               </div>
-              <div className="grid grid-cols-2 gap-4 border-t border-slate-100 pt-6">
+              <div className="grid grid-cols-2 gap-4 border-t border-slate-100 pt-5">
                  <div>
-                   <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Custo por Lead</span>
-                   <p className="text-lg font-black text-slate-900">R$ 3,90</p>
+                   <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Custo por Lead</span>
+                   <p className="text-base font-black text-slate-900">R$ 3,90</p>
                  </div>
                  <div className="text-right">
-                   <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Volume Mensal</span>
-                   <p className="text-lg font-black text-[#059669]">R$ 8.500,00</p>
+                   <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Volume Mensal</span>
+                   <p className="text-base font-black text-[#059669]">R$ 8.500,00</p>
                  </div>
               </div>
            </div>
         </section>
 
-        {/* BLOCO: PATROCINADOR MASTER */}
+        {/* BLOCO: PATROCINADOR MASTER - PREMIUM DARK REFINED */}
         <section>
-           <div className="bg-indigo-600 rounded-[2.5rem] p-10 text-white relative overflow-hidden shadow-2xl shadow-indigo-200">
-              <div className="absolute top-0 right-0 w-80 h-80 bg-white/10 rounded-full blur-3xl -mr-20 -mt-20"></div>
-              <div className="relative z-10 flex flex-col md:row items-start md:flex-row md:items-center justify-between gap-8">
+           <div className="bg-slate-900 rounded-2xl p-8 text-white relative overflow-hidden border border-slate-800 shadow-lg">
+              <div className="absolute top-0 right-0 w-64 h-64 bg-amber-500/5 rounded-full blur-[80px] -mr-10 -mt-10"></div>
+              <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8">
                  <div className="max-w-md">
                     <div className="flex items-center gap-2 mb-4">
-                      <Crown size={20} className="text-amber-400" />
-                      <span className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-100">Patrocinador Master</span>
+                      <Crown size={18} className="text-amber-400" />
+                      <span className="text-[9px] font-black uppercase tracking-[0.4em] text-amber-400/80">Premium Placement</span>
                     </div>
-                    <h2 className="text-3xl font-black tracking-tight mb-4">Exclusividade Institucional</h2>
-                    <p className="text-indigo-100 text-sm leading-relaxed opacity-90">
-                      Cota única para empresas de grande porte com visibilidade em todas as interfaces do usuário e comunicações oficiais.
+                    <h2 className="text-2xl font-black tracking-tight mb-2 uppercase leading-none">Patrocinador Master</h2>
+                    <p className="text-slate-400 text-xs leading-relaxed font-medium">
+                      Exclusividade institucional com visibilidade nativa em todas as camadas da jornada do usuário.
                     </p>
-                    <div className="mt-6 inline-block bg-white/20 px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border border-white/20">
-                      Cota Única • Disponível
+                    <div className="mt-6 flex items-center gap-2">
+                        <div className="px-3 py-1 bg-amber-400/10 rounded border border-amber-400/20 text-[9px] font-black text-amber-400 uppercase tracking-widest">
+                        Cota Única
+                        </div>
+                        <div className="px-3 py-1 bg-emerald-400/10 rounded border border-emerald-400/20 text-[9px] font-black text-emerald-400 uppercase tracking-widest">
+                        Disponível
+                        </div>
                     </div>
                  </div>
-                 <div className="grid grid-cols-2 gap-10 bg-black/10 p-8 rounded-[2rem] border border-white/10 backdrop-blur-sm">
-                    <div>
-                      <span className="text-[10px] font-bold text-indigo-200 uppercase tracking-widest">Recorrência</span>
-                      <p className="text-2xl font-black">R$ 4.000</p>
+                 <div className="flex items-center gap-8 bg-black/30 p-6 rounded-xl border border-white/5 backdrop-blur-md">
+                    <div className="text-center md:text-left">
+                      <span className="text-[8px] font-black text-slate-500 uppercase tracking-widest block mb-1">Recorrência</span>
+                      <p className="text-xl font-black text-white">R$ 4.000</p>
                     </div>
-                    <div>
-                      <span className="text-[10px] font-bold text-indigo-200 uppercase tracking-widest">LTV 12m</span>
-                      <p className="text-2xl font-black">R$ 48.000</p>
+                    <div className="h-8 w-px bg-white/10"></div>
+                    <div className="text-center md:text-left">
+                      <span className="text-[8px] font-black text-slate-500 uppercase tracking-widest block mb-1">LTV Est. 12m</span>
+                      <p className="text-xl font-black text-[#059669]">R$ 48.000</p>
                     </div>
                  </div>
               </div>
            </div>
         </section>
 
-        {/* BLOCO: INVENTÁRIO DE CATEGORIAS */}
+        {/* BLOCO: INVENTÁRIO DE CATEGORIAS - COMPACT LIST */}
         <section>
-          <div className="flex items-center justify-between mb-6 px-1">
-             <div className="flex items-center gap-3">
-                <PieChart size={20} className="text-slate-400" />
-                <h3 className="text-xs font-black text-slate-400 uppercase tracking-[0.3em]">Inventário de Categorias</h3>
+          <div className="flex items-center justify-between mb-4 px-1">
+             <div className="flex items-center gap-2">
+                <PieChart size={18} className="text-slate-400" />
+                <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">Inventário por Nicho</h3>
              </div>
-             <div className="text-[10px] font-bold text-slate-400">Escalabilidade: 144 slots totais</div>
+             <div className="text-[9px] font-black text-slate-400 uppercase tracking-widest bg-slate-100 px-2 py-0.5 rounded">Capacidade: 144 slots</div>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
              {[
-               { label: 'Comida & Delivery', slots: 42, rev: '4.8k' },
-               { label: 'Saúde & Bem-estar', slots: 24, rev: '3.2k' },
-               { label: 'Serviços Pro', slots: 38, rev: '5.1k' },
-               { label: 'Moda & Varejo', slots: 40, rev: '3.1k' }
+               { label: 'Food & Delivery', rev: '4.8k' },
+               { label: 'Saúde & Wellness', rev: '3.2k' },
+               { label: 'Serviços Pro', rev: '5.1k' },
+               { label: 'Moda & Varejo', rev: '3.1k' }
              ].map((cat, i) => (
-               <div key={i} className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm text-center">
-                  <p className="text-[10px] font-bold text-slate-400 uppercase mb-2 truncate">{cat.label}</p>
-                  <p className="text-xl font-black text-slate-900 leading-none">R$ {cat.rev}</p>
+               <div key={i} className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm transition-hover hover:border-slate-300">
+                  <p className="text-[9px] font-black text-slate-400 uppercase mb-2 truncate tracking-tight">{cat.label}</p>
+                  <p className="text-lg font-black text-slate-900 leading-none">R$ {cat.rev}</p>
                   <div className="mt-3 w-full bg-slate-100 h-1 rounded-full overflow-hidden">
-                    <div className="bg-indigo-500 h-full w-[60%]"></div>
+                    <div className="bg-indigo-500 h-full w-[65%]" style={{ width: `${40 + (i * 15)}%` }}></div>
                   </div>
                </div>
              ))}
           </div>
         </section>
 
-        {/* BLOCO FINAL: PROJEÇÃO BRUTA */}
-        <section className="pt-10">
-           <div className="bg-slate-900 p-12 rounded-[3rem] shadow-2xl text-center relative overflow-hidden border border-slate-800">
-              <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-full h-1 bg-gradient-to-r from-transparent via-[#059669] to-transparent opacity-50"></div>
+        {/* BLOCO FINAL: PROJEÇÃO BRUTA - CLEAN & BOLD */}
+        <section className="pt-4">
+           <div className="bg-white p-10 rounded-2xl shadow-sm text-center relative overflow-hidden border border-slate-200">
               <div className="relative z-10 flex flex-col items-center">
-                 <div className="w-16 h-16 bg-white/5 rounded-[2rem] flex items-center justify-center mb-8 border border-white/10">
-                    <BarChart3 size={32} className="text-[#059669]" />
+                 <div className="w-12 h-12 bg-emerald-50 rounded-xl flex items-center justify-center mb-6 border border-emerald-100">
+                    <BarChart3 size={24} className="text-[#059669]" />
                  </div>
-                 <h2 className="text-white text-xl font-black uppercase tracking-[0.4em] mb-4">Projeção Bruta Mensal</h2>
-                 <div className="flex items-baseline justify-center gap-2 mb-4">
+                 <h2 className="text-slate-900 text-lg font-black uppercase tracking-[0.3em] mb-4">Projeção Bruta Mensal</h2>
+                 <div className="flex items-baseline justify-center gap-2 mb-2">
                    <span className="text-2xl font-black text-[#059669]">R$</span>
-                   <h1 className="text-8xl font-black tracking-tighter text-[#059669] leading-none tabular-nums">43.060<span className="text-4xl ml-2 text-[#059669]/60">+</span></h1>
+                   <h1 className="text-7xl font-black tracking-tighter text-[#059669] leading-none tabular-nums">43.060</h1>
                  </div>
-                 <p className="text-slate-500 font-bold uppercase tracking-[0.2em] text-sm">
+                 <p className="text-slate-400 font-bold uppercase tracking-[0.2em] text-[10px]">
                    Cenário Consolidado • Jacarepaguá
                  </p>
-                 <div className="mt-12 flex items-center gap-4 text-slate-400 text-xs">
+                 <div className="mt-10 flex flex-wrap justify-center gap-6 text-slate-400 text-[10px] font-black uppercase tracking-widest border-t border-slate-50 pt-8 w-full max-w-lg">
                     <div className="flex items-center gap-1.5"><Check size={14} className="text-[#059669]" /> Margem Alta</div>
-                    <div className="flex items-center gap-1.5"><Check size={14} className="text-[#059669]" /> Escalável</div>
+                    <div className="flex items-center gap-1.5"><Check size={14} className="text-[#059669]" /> Escalabilidade</div>
                     <div className="flex items-center gap-1.5"><Check size={14} className="text-[#059669]" /> Hiperlocal</div>
                  </div>
               </div>
@@ -268,8 +271,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ user, onLogout, viewMode
 
       </main>
 
-      <footer className="py-12 border-t border-slate-200 mt-auto text-center">
-        <p className="text-[10px] font-black text-slate-300 uppercase tracking-[0.8em]">Localizei JPA Enterprise 1.1.2</p>
+      <footer className="py-8 border-t border-slate-200 mt-auto text-center bg-white/50">
+        <p className="text-[9px] font-black text-slate-300 uppercase tracking-[0.6em]">Localizei JPA Enterprise 1.1.2</p>
       </footer>
     </div>
   );
