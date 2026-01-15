@@ -251,8 +251,159 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ user, onLogout, viewMode
            </div>
         </section>
 
+        {/* FASE V2 — NOVAS FRENTES DE MONETIZAÇÃO */}
+        <section className="pt-8 space-y-10 animate-in fade-in duration-700">
+           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-slate-200 pb-6">
+              <div>
+                 <div className="flex items-center gap-2 mb-2">
+                    <Sparkles className="text-indigo-600" size={22} />
+                    <h2 className="text-lg font-black text-slate-900 uppercase tracking-tight">Fase V2 — Novas Frentes de Monetização</h2>
+                 </div>
+                 <p className="text-sm text-slate-500 font-medium max-w-2xl leading-relaxed">
+                    Alavancas estratégicas de crescimento escalável para maximizar o LTV (Life Time Value) dos parceiros e a eficiência do ecossistema.
+                 </p>
+              </div>
+              <div className="bg-indigo-50 px-4 py-2 rounded-xl border border-indigo-100 shrink-0">
+                 <span className="text-[10px] font-black text-indigo-600 uppercase tracking-widest">Expansion Mode</span>
+              </div>
+           </div>
+
+           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {/* Cashback entre Lojas */}
+              <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm flex flex-col justify-between hover:border-indigo-300 transition-all group">
+                 <div>
+                    <div className="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                       <Handshake size={24} />
+                    </div>
+                    <h3 className="text-lg font-bold text-slate-900 mb-3 leading-tight">Cashback entre Lojas</h3>
+                    <p className="text-xs text-slate-500 leading-relaxed mb-6">
+                       Modelo de interoperabilidade: 1,99% de taxa de resgate sobre o valor transacionado no ecossistema.
+                    </p>
+                    <div className="space-y-2 bg-slate-50 p-4 rounded-xl mb-6">
+                       <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Premissas</p>
+                       <p className="text-[11px] text-slate-600 font-medium">• Base potencial: 25.000 negócios</p>
+                       <p className="text-[11px] text-slate-600 font-medium">• Adoção conservadora: 5%</p>
+                       <p className="text-[11px] text-slate-600 font-medium">• Ticket médio: R$ 2.000/mês</p>
+                    </div>
+                 </div>
+                 <div className="pt-4 border-t border-slate-100 flex items-baseline justify-between">
+                    <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Receita Est.</span>
+                    <p className="text-lg font-black text-[#059669]">≈ R$ 49.750</p>
+                 </div>
+              </div>
+
+              {/* Agência Localizei */}
+              <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm flex flex-col justify-between hover:border-indigo-300 transition-all group">
+                 <div>
+                    <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                       <BarChart3 size={24} />
+                    </div>
+                    <h3 className="text-lg font-bold text-slate-900 mb-3 leading-tight">Agência Localizei</h3>
+                    <p className="text-xs text-slate-500 leading-relaxed mb-6">
+                       Braço interno de performance digital e tráfego pago focado em resultados reais para lojistas locais.
+                    </p>
+                    <div className="space-y-2 bg-slate-50 p-4 rounded-xl mb-6">
+                       <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Premissas</p>
+                       <p className="text-[11px] text-slate-600 font-medium">• Ticket médio: R$ 1.000/mês</p>
+                       <p className="text-[11px] text-slate-600 font-medium">• 30 clientes ativos iniciais</p>
+                       <p className="text-[11px] text-slate-600 font-medium">• Expertise regional exclusiva</p>
+                    </div>
+                 </div>
+                 <div className="pt-4 border-t border-slate-100 flex items-baseline justify-between">
+                    <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Receita Est.</span>
+                    <p className="text-lg font-black text-[#059669]">≈ R$ 30.000</p>
+                 </div>
+              </div>
+
+              {/* Plano Pet */}
+              <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm flex flex-col justify-between hover:border-indigo-300 transition-all group">
+                 <div>
+                    <div className="w-12 h-12 bg-amber-50 text-amber-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                       <Percent size={24} />
+                    </div>
+                    <h3 className="text-lg font-bold text-slate-900 mb-3 leading-tight">Plano Pet (Assinatura)</h3>
+                    <p className="text-xs text-slate-500 leading-relaxed mb-6">
+                       Acesso premium a audiência segmentada e qualificada de donos de pets para ofertas direcionadas.
+                    </p>
+                    <div className="space-y-2 bg-slate-50 p-4 rounded-xl mb-6">
+                       <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Premissas</p>
+                       <p className="text-[11px] text-slate-600 font-medium">• Valor: R$ 49,90/mês</p>
+                       <p className="text-[11px] text-slate-600 font-medium">• Universo: 500 lojistas pet</p>
+                       <p className="text-[11px] text-slate-600 font-medium">• Adoção alvo: 20% (100 contas)</p>
+                    </div>
+                 </div>
+                 <div className="pt-4 border-t border-slate-100 flex items-baseline justify-between">
+                    <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Receita Est.</span>
+                    <p className="text-lg font-black text-[#059669]">≈ R$ 4.990</p>
+                 </div>
+              </div>
+
+              {/* Espaço Físico */}
+              <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm flex flex-col justify-between hover:border-indigo-300 transition-all group">
+                 <div>
+                    <div className="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                       <Building2 size={24} />
+                    </div>
+                    <h3 className="text-lg font-bold text-slate-900 mb-3 leading-tight">Freguesia Connect Space</h3>
+                    <p className="text-xs text-slate-500 leading-relaxed mb-6">
+                       Base física para produção de conteúdo, eventos de networking e venda de espaços publicitários offline.
+                    </p>
+                 </div>
+                 <div className="pt-4 border-t border-slate-100 flex items-baseline justify-between">
+                    <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Receita Est.</span>
+                    <p className="text-lg font-black text-slate-300 italic">Upside Estratégico</p>
+                 </div>
+              </div>
+
+              {/* Podcast */}
+              <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm flex flex-col justify-between hover:border-indigo-300 transition-all group">
+                 <div>
+                    <div className="w-12 h-12 bg-rose-50 text-rose-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                       <Mic size={24} />
+                    </div>
+                    <h3 className="text-lg font-bold text-slate-900 mb-3 leading-tight">PodLocalizar</h3>
+                    <p className="text-xs text-slate-500 leading-relaxed mb-6">
+                       Ecossistema de conteúdo proprietário com monetização via cotas de patrocínio por episódios.
+                    </p>
+                 </div>
+                 <div className="pt-4 border-t border-slate-100 flex items-baseline justify-between">
+                    <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Receita Est.</span>
+                    <p className="text-lg font-black text-slate-300 italic">Upside Estratégico</p>
+                 </div>
+              </div>
+
+              {/* Note about XXXX */}
+              <div className="bg-indigo-600 p-8 rounded-3xl shadow-xl flex flex-col justify-center items-center text-center text-white relative overflow-hidden">
+                 <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl -mr-16 -mt-16"></div>
+                 <Info className="mb-4 opacity-50" size={24} />
+                 <h4 className="text-sm font-black uppercase tracking-widest mb-3">Nota Estratégica</h4>
+                 <p className="text-xs leading-relaxed font-medium">
+                    Os itens marcados como upside representam alavancas a serem precificadas após validação de audiência e demanda orgânica do ecossistema.
+                 </p>
+              </div>
+           </div>
+
+           {/* TOTAL POTENCIAL V2 */}
+           <div className="bg-slate-900 rounded-3xl p-8 flex flex-col md:flex-row items-center justify-between gap-6 border border-white/5 shadow-2xl">
+              <div className="flex items-center gap-4">
+                 <div className="w-14 h-14 bg-indigo-500/20 rounded-2xl flex items-center justify-center border border-indigo-500/20">
+                    <TrendingUp className="text-indigo-400" size={28} />
+                 </div>
+                 <div>
+                    <h3 className="text-white font-black text-sm uppercase tracking-[0.2em] mb-1">Total Adicional Estimado V2</h3>
+                    <p className="text-slate-400 text-xs font-medium">Somatório das frentes de serviço e transacionais</p>
+                 </div>
+              </div>
+              <div className="flex items-baseline gap-2">
+                 <span className="text-lg font-black text-emerald-400">R$</span>
+                 <span className="text-5xl font-black text-emerald-400 tracking-tighter tabular-nums">84.740</span>
+                 <span className="text-[10px] font-black text-emerald-400/60 uppercase ml-2 tracking-widest">/mês</span>
+              </div>
+           </div>
+        </section>
+
         {/* --- APORTE MÍNIMO RECOMENDADO (CENÁRIO 1) --- */}
-        <section className="space-y-12">
+        <section className="space-y-10">
            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 px-1">
               <div>
                  <div className="flex items-center gap-2 mb-3">
@@ -260,11 +411,11 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ user, onLogout, viewMode
                     <h2 className="text-lg font-black text-slate-900 uppercase tracking-tighter">Aporte Mínimo Recomendado — Cenário 1</h2>
                  </div>
                  <p className="text-sm text-slate-500 font-medium max-w-lg leading-relaxed">
-                    Recursos focados na ativação e validação de tração da marca Localizei JPA.
+                    Recursos estratégicos para ativação operacional e validação de tração da marca Localizei JPA.
                  </p>
               </div>
               <div className="bg-white border-2 border-indigo-600 px-8 py-4 rounded-3xl shadow-xl shadow-indigo-100 shrink-0 text-center">
-                 <span className="text-[9px] font-black text-indigo-600 uppercase tracking-[0.2em] block mb-1">Investimento Mínimo</span>
+                 <span className="text-[9px] font-black text-indigo-600 uppercase tracking-[0.2em] block mb-1">Aporte Necessário</span>
                  <div className="flex items-baseline gap-2 justify-center">
                     <span className="text-sm font-black text-indigo-600">R$</span>
                     <h1 className="text-4xl font-black text-indigo-600 tracking-tighter">80.000</h1>
@@ -272,30 +423,30 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ user, onLogout, viewMode
               </div>
            </div>
 
-           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
               {[
-                { icon: Megaphone, title: 'Marketing', desc: 'Agência de tráfego e estratégia multicanal.', color: 'text-blue-600', bg: 'bg-blue-50' },
-                { icon: Target, title: 'Anúncios', desc: 'Aquisição ativa de usuários e lojistas-âncora.', color: 'text-indigo-600', bg: 'bg-indigo-50' },
-                { icon: Scale, title: 'Jurídico', desc: 'Compliance, contratos e termos de uso.', color: 'text-slate-600', bg: 'bg-slate-100' },
-                { icon: Server, title: 'Estrutura', desc: 'Infra Cloud e suporte técnico inicial.', color: 'text-emerald-600', bg: 'bg-emerald-50' }
+                { icon: Megaphone, title: 'Marketing', desc: 'Agência de tráfego e estratégia regional.', color: 'text-blue-600', bg: 'bg-blue-50' },
+                { icon: Target, title: 'Anúncios', desc: 'Aquisição de usuários e lojistas-âncora.', color: 'text-indigo-600', bg: 'bg-indigo-50' },
+                { icon: Scale, title: 'Jurídico', desc: 'Compliance, termos de uso e contratos.', color: 'text-slate-600', bg: 'bg-slate-100' },
+                { icon: Server, title: 'Estrutura', desc: 'Infra Cloud e assinaturas operacionais.', color: 'text-emerald-600', bg: 'bg-emerald-50' }
               ].map((item, i) => (
-                <div key={i} className="bg-white p-8 rounded-[2rem] border border-slate-100 shadow-sm flex flex-col items-center text-center h-[220px] justify-center group hover:border-indigo-100 transition-all">
-                   <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-5 ${item.bg} ${item.color}`}>
-                      <item.icon size={24} />
+                <div key={i} className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm flex flex-col items-center text-center group hover:border-indigo-100 transition-all">
+                   <div className={`w-12 h-12 rounded-2xl flex items-center justify-center mb-4 ${item.bg} ${item.color}`}>
+                      <item.icon size={22} />
                    </div>
-                   <h4 className="text-xs font-black text-slate-900 uppercase tracking-widest mb-3">{item.title}</h4>
-                   <p className="text-[11px] text-slate-500 font-medium leading-relaxed">{item.desc}</p>
+                   <h4 className="text-xs font-black text-slate-900 uppercase tracking-widest mb-2">{item.title}</h4>
+                   <p className="text-[11px] text-slate-500 font-medium leading-tight">{item.desc}</p>
                 </div>
               ))}
            </div>
 
-           <div className="bg-slate-900 rounded-[2.5rem] p-8 flex flex-col md:flex-row items-center justify-center gap-8 border border-white/5 shadow-2xl max-w-4xl mx-auto w-full">
+           <div className="bg-slate-900 rounded-[2.5rem] p-8 flex flex-col md:flex-row items-center justify-center gap-8 border border-white/5 shadow-2xl">
               <div className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center shrink-0">
                  <CheckCircle2 className="text-emerald-400" size={24} />
               </div>
               <div className="text-center md:text-left">
-                 <h4 className="text-white font-black text-sm uppercase tracking-[0.2em] mb-1">Resultado Esperado</h4>
-                 <p className="text-slate-400 text-xs font-medium">
+                 <h4 className="text-white font-black text-sm uppercase tracking-[0.2em] mb-1">Resultado Esperado (Mínimo)</h4>
+                 <p className="text-slate-400 text-xs font-medium max-w-xl">
                     Lançamento estruturado, validação do modelo e início do faturamento recorrente.
                  </p>
               </div>
@@ -315,7 +466,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ user, onLogout, viewMode
                  </p>
               </div>
               <div className="bg-indigo-600 px-8 py-5 rounded-[2.5rem] shadow-2xl shadow-indigo-200 shrink-0 text-center">
-                 <span className="text-[9px] font-black text-white/70 uppercase tracking-[0.2em] block mb-1">Aporte de Escala</span>
+                 <span className="text-[9px] font-black text-white/70 uppercase tracking-[0.2em] block mb-1">Aporte Recomendado</span>
                  <div className="flex items-baseline gap-2 justify-center">
                     <span className="text-sm font-black text-white">R$</span>
                     <h1 className="text-4xl font-black text-white tracking-tighter">200.000</h1>
@@ -323,25 +474,25 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ user, onLogout, viewMode
               </div>
            </div>
 
-           <div className="space-y-16">
+           <div className="space-y-12">
               {/* Ações Digitais */}
               <div className="space-y-6">
                 <div className="flex items-center gap-2 ml-1">
                    <div className="w-1.5 h-1.5 rounded-full bg-indigo-500"></div>
                    <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.25em]">Ações Digitais</h3>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
                     {[
-                      { icon: Megaphone, title: 'Marketing Full', desc: 'Agência Full Scope. Estratégia multicanal agressiva.', color: 'text-indigo-600', bg: 'bg-indigo-50' },
-                      { icon: Users, title: 'Influencers', desc: 'Creators locais (JPA). Conteúdo recorrente.', color: 'text-rose-600', bg: 'bg-rose-50' },
-                      { icon: Flame, title: 'Ads Massivos', desc: 'Orçamento agressivo. Aquisição em escala.', color: 'text-blue-600', bg: 'bg-blue-50' }
+                      { icon: Megaphone, title: 'Marketing Full', desc: 'Estratégia multicanal agressiva.', color: 'text-indigo-600', bg: 'bg-indigo-50' },
+                      { icon: Users, title: 'Influencers', desc: 'Parcerias locais recorrentes.', color: 'text-rose-600', bg: 'bg-rose-50' },
+                      { icon: Flame, title: 'Anúncios Massivos', desc: 'Aquisição em escala de usuários.', color: 'text-blue-600', bg: 'bg-blue-50' }
                     ].map((item, i) => (
-                      <div key={i} className="bg-white p-8 rounded-[2rem] border border-slate-100 shadow-sm flex flex-col items-center text-center h-[200px] justify-center group hover:border-indigo-100 transition-all">
+                      <div key={i} className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm flex flex-col items-center text-center group hover:border-indigo-100 transition-all">
                         <div className={`w-12 h-12 rounded-2xl flex items-center justify-center mb-4 ${item.bg} ${item.color}`}>
                             <item.icon size={22} />
                         </div>
                         <h4 className="text-xs font-black text-slate-900 uppercase tracking-widest mb-2">{item.title}</h4>
-                        <p className="text-[11px] text-slate-500 font-medium leading-relaxed">{item.desc}</p>
+                        <p className="text-[11px] text-slate-500 font-medium leading-tight">{item.desc}</p>
                       </div>
                     ))}
                 </div>
@@ -353,31 +504,31 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ user, onLogout, viewMode
                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
                    <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.25em]">Ações Territoriais</h3>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
                     {[
-                      { icon: MapPin, title: 'Ativações', desc: 'Adesivagem massiva. Materiais de PDV.', color: 'text-emerald-600', bg: 'bg-emerald-50' },
-                      { icon: ImageIcon, title: 'Outdoors', desc: 'Painéis estratégicos. Branding regional.', color: 'text-amber-600', bg: 'bg-amber-50' },
-                      { icon: Building2, title: 'Sala Comercial', desc: 'Base para eventos e estúdio próprio.', color: 'text-blue-600', bg: 'bg-blue-50' },
-                      { icon: Server, title: 'Cloud VIP', desc: 'Alta performance e atendimento VIP.', color: 'text-slate-600', bg: 'bg-slate-100' }
+                      { icon: MapPin, title: 'Ativações', desc: 'Adesivagem e presença em PDV.', color: 'text-emerald-600', bg: 'bg-emerald-50' },
+                      { icon: ImageIcon, title: 'Outdoors', desc: 'Branding visual no bairro.', color: 'text-amber-600', bg: 'bg-amber-50' },
+                      { icon: Building2, title: 'Sala Comercial', desc: 'Base fixa e estúdio próprio.', color: 'text-blue-600', bg: 'bg-blue-50' },
+                      { icon: Server, title: 'Cloud VIP', desc: 'Infra preparada para alta escala.', color: 'text-slate-600', bg: 'bg-slate-100' }
                     ].map((item, i) => (
-                      <div key={i} className="bg-white p-8 rounded-[2rem] border border-slate-100 shadow-sm flex flex-col items-center text-center h-[200px] justify-center group hover:border-emerald-100 transition-all">
+                      <div key={i} className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm flex flex-col items-center text-center group hover:border-emerald-100 transition-all">
                         <div className={`w-12 h-12 rounded-2xl flex items-center justify-center mb-4 ${item.bg} ${item.color}`}>
                             <item.icon size={22} />
                         </div>
                         <h4 className="text-xs font-black text-slate-900 uppercase tracking-widest mb-2">{item.title}</h4>
-                        <p className="text-[11px] text-slate-500 font-medium leading-relaxed">{item.desc}</p>
+                        <p className="text-[11px] text-slate-500 font-medium leading-tight">{item.desc}</p>
                       </div>
                     ))}
                 </div>
               </div>
            </div>
 
-           <div className="bg-indigo-600 rounded-[3rem] p-10 flex flex-col md:flex-row items-center justify-center gap-10 border border-white/20 shadow-2xl shadow-indigo-100 max-w-4xl mx-auto w-full">
+           <div className="bg-indigo-600 rounded-[3rem] p-10 flex flex-col md:flex-row items-center justify-center gap-10 border border-white/20 shadow-2xl shadow-indigo-100">
               <div className="w-16 h-16 bg-white/20 rounded-[1.5rem] flex items-center justify-center shrink-0 border border-white/30 backdrop-blur-md">
                  <CheckCircle2 className="text-white" size={32} />
               </div>
-              <div className="text-center md:text-left">
-                 <h4 className="text-white font-black text-base uppercase tracking-[0.3em] mb-2">Resultado Esperado</h4>
+              <div className="text-center md:text-left max-w-2xl">
+                 <h4 className="text-white font-black text-base uppercase tracking-[0.3em] mb-2">Resultado Esperado (Escala)</h4>
                  <p className="text-indigo-50 text-sm font-medium leading-relaxed">
                     Operação centralizada, eventos próprios recorrentes, produção contínua de conteúdo e maior eficiência operacional com fortalecimento total da marca.
                  </p>
@@ -484,29 +635,22 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ user, onLogout, viewMode
                 “E aí Jabinha, está dentro com a gente?”
               </h2>
 
-              <div className="flex items-center justify-center gap-6 w-full max-w-md mx-auto">
+              <div className="flex gap-4 w-full max-w-sm">
+                <button 
+                  onClick={() => alert("Decisão confirmada! Vamos juntos mudar Jacarepaguá. 🚀")}
+                  className="flex-1 bg-slate-900 text-white font-black py-5 rounded-2xl shadow-xl active:scale-95 transition-all uppercase tracking-widest text-sm hover:bg-slate-800"
+                >
+                  SIM
+                </button>
                 <button 
                   onClick={() => alert("Decisão confirmada! Vamos juntos mudar Jacarepaguá. 🚀")}
                   className="flex-1 bg-indigo-600 text-white font-black py-5 rounded-2xl shadow-xl active:scale-95 transition-all uppercase tracking-widest text-sm hover:bg-indigo-700"
                 >
                   SIM
                 </button>
-                
-                <span className="text-slate-400 font-black text-xs uppercase tracking-widest">OU</span>
-
-                <button 
-                  onClick={() => alert("Decisão confirmada! Vamos juntos mudar Jacarepaguá. 🚀")}
-                  className="flex-1 bg-indigo-600 text-white font-black py-5 rounded-2xl shadow-xl active:scale-95 transition-all uppercase tracking-widest text-sm hover:bg-indigo-700"
-                >
-                  SIM
-                </button>
-              </div>
-
-              <div className="mt-8 text-4xl animate-bounce">
-                😄
               </div>
               
-              <p className="mt-12 text-[10px] font-black text-slate-400 uppercase tracking-[0.4em]">
+              <p className="mt-8 text-[10px] font-black text-slate-400 uppercase tracking-[0.4em]">
                 A maior oportunidade da Freguesia espera por você
               </p>
            </div>
