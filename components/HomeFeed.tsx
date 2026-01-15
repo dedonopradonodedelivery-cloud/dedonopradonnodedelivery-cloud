@@ -608,11 +608,6 @@ const FeaturedJobsBlock: React.FC<{ onNavigate: (view: string) => void }> = ({ o
     return filtered.slice(0, 6);
   }, [currentNeighborhood, isAll]);
 
-  const getJobGradient = (index: number) => {
-    const gradients = ['from-orange-500 to-red-600', 'from-blue-500 to-indigo-600', 'from-emerald-500 to-teal-600', 'from-purple-500 to-fuchsia-600', 'from-pink-500 to-rose-600'];
-    return gradients[index % gradients.length];
-  };
-
   if (jobsList.length === 0) return null;
 
   return (
@@ -620,54 +615,48 @@ const FeaturedJobsBlock: React.FC<{ onNavigate: (view: string) => void }> = ({ o
       <div className="px-5 mb-3 flex justify-between items-end">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <Briefcase className="w-4 h-4 text-orange-500 fill-orange-500/20" />
+            <Briefcase className="w-4 h-4 text-[#1E5BFF]" />
             <h2 className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-wider">
               Vagas em Destaque
             </h2>
           </div>
           <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">
-            Oportunidades de emprego perto de você
+            Oportunidades reais no seu bairro
           </p>
         </div>
-        <button onClick={() => onNavigate('jobs_list')} className="text-[10px] font-bold text-[#1E5BFF] hover:underline">Ver todas</button>
+        <button onClick={() => onNavigate('jobs_list')} className="text-[10px] font-black text-[#1E5BFF] uppercase tracking-widest hover:underline">Ver todas</button>
       </div>
       <div className="flex gap-3 overflow-x-auto no-scrollbar px-5 pb-2 snap-x">
-        {jobsList.map((job, index) => (
+        {jobsList.map((job) => (
           <button
             key={job.id}
             onClick={() => onNavigate('jobs_list')}
-            className={`snap-center min-w-[128px] w-[128px] bg-gradient-to-br ${getJobGradient(index)} rounded-2xl p-3 shadow-md flex flex-col text-left group active:scale-[0.98] transition-all relative overflow-hidden h-[160px] justify-between border-0`}
+            className="snap-center min-w-[145px] w-[145px] bg-white dark:bg-gray-800 rounded-2xl p-3.5 shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col text-left group active:scale-[0.98] transition-all h-[165px] justify-between relative overflow-hidden"
           >
-            <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none"></div>
-            <div className="relative z-10 w-full">
+            <div className="w-full">
                <div className="flex justify-between items-start mb-2">
-                  <div className="w-8 h-8 rounded-lg bg-white/20 backdrop-blur-sm flex items-center justify-center text-white border border-white/10">
-                      <Building2 className="w-4 h-4" />
+                  <div className="w-7 h-7 rounded-lg bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center text-[#1E5BFF]">
+                      <Briefcase className="w-4 h-4" />
                   </div>
-                  {(job.isUrgent || job.isSponsored) && (
-                    <span className="bg-white text-red-600 text-[8px] font-black px-1.5 py-0.5 rounded uppercase tracking-wider shadow-sm">
-                        {job.isSponsored ? 'Top' : 'Urgente'}
-                    </span>
+                  {job.isUrgent && (
+                    <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 text-[8px] font-black px-1.5 py-0.5 rounded border border-red-100 dark:border-red-800 uppercase tracking-wider">
+                        Urgente
+                    </div>
                   )}
                </div>
-               <h4 className="font-bold text-white text-xs leading-tight line-clamp-2 mb-1 drop-shadow-sm">{job.role}</h4>
-               <p className="text-[10px] text-white/80 truncate font-medium">{job.company}</p>
+               <h4 className="font-extrabold text-gray-900 dark:text-white text-xs leading-tight line-clamp-2 mb-1 group-hover:text-[#1E5BFF] transition-colors">{job.role}</h4>
+               <p className="text-[10px] text-gray-400 dark:text-gray-500 truncate font-semibold">{job.company}</p>
             </div>
-            <div className="relative z-10 w-full mt-2">
-                {job.salary ? (
-                    <div className="inline-flex items-center gap-1 bg-black/20 backdrop-blur-sm px-2 py-1 rounded-lg border border-white/10 mb-2">
-                        <DollarSign className="w-2.5 h-2.5 text-green-300" />
-                        <span className="text-[9px] font-bold text-white truncate">{job.salary.split(' ')[1] || 'Salário'}</span>
-                    </div>
-                ) : (
-                    <div className="inline-flex items-center gap-1 bg-black/20 backdrop-blur-sm px-2 py-1 rounded-lg border border-white/10 mb-2">
-                        <Briefcase className="w-2.5 h-2.5 text-white" />
-                        <span className="text-[9px] font-bold text-white">{job.type}</span>
-                    </div>
-                )}
-                <div className="flex items-center justify-between border-t border-white/20 pt-2 w-full">
-                    <span className="text-[9px] font-bold text-white">Ver detalhes</span>
-                    <ChevronRight className="w-3 h-3 text-white" />
+            <div className="w-full mt-2">
+                <div className="inline-flex items-center gap-1 bg-emerald-50 dark:bg-emerald-900/20 px-2 py-1 rounded-md border border-emerald-100 dark:border-emerald-800/30 mb-2 max-w-full overflow-hidden">
+                    <DollarSign className="w-2.5 h-2.5 text-emerald-600" />
+                    <span className="text-[9px] font-black text-emerald-700 dark:text-emerald-400 truncate">
+                      {job.salary ? job.salary.split(' ')[1] || 'Sob consulta' : job.type}
+                    </span>
+                </div>
+                <div className="flex items-center justify-between border-t border-gray-50 dark:border-gray-700 pt-2 w-full">
+                    <span className="text-[9px] font-black text-gray-400 group-hover:text-[#1E5BFF] transition-colors uppercase tracking-wider">Ver detalhes</span>
+                    <ChevronRight className="w-3 h-3 text-gray-300 group-hover:text-[#1E5BFF]" />
                 </div>
             </div>
           </button>
