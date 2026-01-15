@@ -529,27 +529,27 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ user, onLogout, viewMode
                     <Milestone size={20} />
                  </div>
                  <div>
-                    <h2 className="text-sm font-black text-slate-900 uppercase tracking-widest">Estrutura de Aporte — 3 Momentos</h2>
+                    <h2 className="text-sm font-black text-slate-900 uppercase tracking-widest">Estrutura de Aporte — 2 Momentos</h2>
                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mt-0.5">Flexibilidade financeira e gestão de risco</p>
                  </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 relative max-w-2xl mx-auto">
                  {/* Timeline Line (Desktop) */}
-                 <div className="hidden md:block absolute top-[52px] left-10 right-10 h-0.5 border-t-2 border-dashed border-slate-100 -z-0"></div>
+                 <div className="hidden md:block absolute top-[52px] left-20 right-20 h-0.5 border-t-2 border-dashed border-slate-100 -z-0"></div>
 
                  {/* MOMENTO 1: T0 */}
-                 <div className="relative z-10 flex flex-col items-center md:items-start text-center md:text-left">
+                 <div className="relative z-10 flex flex-col items-center text-center">
                     <div className="w-14 h-14 bg-indigo-600 rounded-2xl flex items-center justify-center text-white shadow-xl shadow-indigo-100 mb-6 border-4 border-white">
                        <span className="font-black text-sm">T0</span>
                     </div>
                     <h3 className="font-black text-slate-900 text-xs uppercase tracking-wider mb-2">Aporte Inicial</h3>
                     <ul className="space-y-2 text-[11px] text-slate-500 font-medium">
-                       <li className="flex items-start gap-2">
+                       <li className="flex items-start gap-2 justify-center">
                           <div className="w-1 h-1 rounded-full bg-indigo-400 mt-1 shrink-0"></div>
                           Ajustes contratuais e pontapé inicial
                        </li>
-                       <li className="flex items-start gap-2">
+                       <li className="flex items-start gap-2 justify-center">
                           <div className="w-1 h-1 rounded-full bg-indigo-400 mt-1 shrink-0"></div>
                           Início imediato das ações de marketing
                        </li>
@@ -557,37 +557,19 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ user, onLogout, viewMode
                  </div>
 
                  {/* MOMENTO 2: +30 DIAS */}
-                 <div className="relative z-10 flex flex-col items-center md:items-start text-center md:text-left">
+                 <div className="relative z-10 flex flex-col items-center text-center">
                     <div className="w-14 h-14 bg-white border-2 border-slate-200 rounded-2xl flex items-center justify-center text-slate-400 shadow-sm mb-6">
                        <span className="font-black text-sm">+30d</span>
                     </div>
                     <h3 className="font-black text-slate-900 text-xs uppercase tracking-wider mb-2">Segundo Aporte</h3>
                     <ul className="space-y-2 text-[11px] text-slate-500 font-medium">
-                       <li className="flex items-start gap-2">
+                       <li className="flex items-start gap-2 justify-center">
                           <div className="w-1 h-1 rounded-full bg-slate-300 mt-1 shrink-0"></div>
                           Intensificar aquisição de base crítica
                        </li>
-                       <li className="flex items-start gap-2">
+                       <li className="flex items-start gap-2 justify-center">
                           <div className="w-1 h-1 rounded-full bg-slate-300 mt-1 shrink-0"></div>
                           Expansão das campanhas de awareness
-                       </li>
-                    </ul>
-                 </div>
-
-                 {/* MOMENTO 3: +60 DIAS */}
-                 <div className="relative z-10 flex flex-col items-center md:items-start text-center md:text-left">
-                    <div className="w-14 h-14 bg-white border-2 border-slate-200 rounded-2xl flex items-center justify-center text-slate-400 shadow-sm mb-6">
-                       <span className="font-black text-sm">+60d</span>
-                    </div>
-                    <h3 className="font-black text-slate-900 text-xs uppercase tracking-wider mb-2">Terceiro Aporte</h3>
-                    <ul className="space-y-2 text-[11px] text-slate-500 font-medium">
-                       <li className="flex items-start gap-2">
-                          <div className="w-1 h-1 rounded-full bg-slate-300 mt-1 shrink-0"></div>
-                          Reforço de escala e consolidação
-                       </li>
-                       <li className="flex items-start gap-2">
-                          <div className="w-1 h-1 rounded-full bg-slate-300 mt-1 shrink-0"></div>
-                          Ajustes finais para crescimento sustentável
                        </li>
                     </ul>
                  </div>
@@ -618,22 +600,25 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ user, onLogout, viewMode
                 “E aí Jabinha, está dentro com a gente?”
               </h2>
 
-              <div className="flex flex-col sm:flex-row gap-4 w-full max-w-sm">
+              <div className="flex flex-col sm:flex-row items-center gap-4 w-full max-w-sm">
                 <button 
                   onClick={() => alert("Decisão confirmada! Vamos juntos mudar Jacarepaguá. 🚀")}
-                  className="flex-1 bg-slate-900 text-white font-black py-5 rounded-2xl shadow-xl active:scale-95 transition-all uppercase tracking-widest text-sm hover:bg-slate-800"
+                  className="w-full bg-indigo-600 text-white font-black py-5 rounded-2xl shadow-xl active:scale-95 transition-all uppercase tracking-widest text-sm hover:bg-indigo-700"
                 >
                   SIM
                 </button>
+                <span className="text-slate-400 font-black text-[10px] uppercase tracking-widest">OU</span>
                 <button 
                   onClick={() => alert("Decisão confirmada! Vamos juntos mudar Jacarepaguá. 🚀")}
-                  className="flex-1 bg-indigo-600 text-white font-black py-5 rounded-2xl shadow-xl active:scale-95 transition-all uppercase tracking-widest text-sm hover:bg-indigo-700"
+                  className="w-full bg-indigo-600 text-white font-black py-5 rounded-2xl shadow-xl active:scale-95 transition-all uppercase tracking-widest text-sm hover:bg-indigo-700"
                 >
                   SIM
                 </button>
               </div>
+
+              <div className="mt-8 text-3xl">😄</div>
               
-              <p className="mt-8 text-[10px] font-black text-slate-400 uppercase tracking-[0.4em] px-4">
+              <p className="mt-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.4em] px-4">
                 A maior oportunidade da Freguesia espera por você
               </p>
            </div>
