@@ -474,7 +474,7 @@ const CommunityFeedBlock: React.FC<{ onNavigate: (view: string) => void; }> = ({
   const { currentNeighborhood, isAll } = useNeighborhood();
 
   const previewPosts = useMemo(() => {
-     // Postagens Fake específicas conforme solicitado
+     // Postagens Fake locais e espontâneas
      const fakePosts: any[] = [
         {
           id: 'fake-1',
@@ -538,7 +538,6 @@ const CommunityFeedBlock: React.FC<{ onNavigate: (view: string) => void; }> = ({
         }
      ];
 
-     // Combina com o original e filtra se necessário
      const allPosts = [...fakePosts];
      
      if (!isAll) {
@@ -550,42 +549,52 @@ const CommunityFeedBlock: React.FC<{ onNavigate: (view: string) => void; }> = ({
   if (previewPosts.length === 0) return null;
 
   return (
-    <div className="w-full bg-white dark:bg-gray-950 py-3">
-      <div className="px-5 mb-2">
+    <div className="w-full bg-white dark:bg-gray-950 py-3 border-t border-gray-50 dark:border-gray-800">
+      <div className="px-5 mb-3">
         <div className="flex justify-between items-center">
             <div>
-                <h2 className="text-base font-black text-gray-900 dark:text-white tracking-tight leading-none flex items-center gap-2">
-                    O que está bombando no bairro agora <div className="px-2 py-0.5 bg-red-100 text-red-600 text-[9px] font-bold rounded-full uppercase tracking-wide">Ao Vivo</div>
+                <h2 className="text-base font-[900] text-gray-900 dark:text-white tracking-tight leading-none flex items-center gap-2">
+                    O que está bombando no bairro agora 
+                    <div className="flex items-center gap-1.5 px-2.5 py-1 bg-red-600 text-white text-[9px] font-black rounded-full uppercase tracking-[0.15em] shadow-sm animate-pulse">
+                      <div className="w-1.5 h-1.5 rounded-full bg-white"></div>
+                      Ao Vivo
+                    </div>
                 </h2>
             </div>
         </div>
       </div>
-      <div className="flex gap-4 overflow-x-auto no-scrollbar px-5 pb-2 snap-x">
+      <div className="flex gap-4 overflow-x-auto no-scrollbar px-5 pb-3 snap-x">
         {previewPosts.map((post) => (
-            <div key={post.id} className="snap-center min-w-[280px] max-w-[280px] bg-white dark:bg-gray-800 p-4 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col justify-between active:scale-[0.99] transition-transform cursor-pointer relative" onClick={() => onNavigate('community_feed')}>
-                <div className="flex items-center gap-3 mb-3">
+            <div key={post.id} className="snap-center min-w-[280px] max-w-[280px] bg-[#1E5BFF]/5 dark:bg-blue-900/5 p-5 rounded-3xl shadow-inner border border-blue-100/50 dark:border-gray-700 flex flex-col justify-between active:scale-[0.99] transition-transform cursor-pointer relative" onClick={() => onNavigate('community_feed')}>
+                <div className="flex items-center gap-3 mb-4">
                     <div className="relative">
-                        <img src={post.userAvatar} alt={post.userName} className="w-10 h-10 rounded-full bg-gray-100 object-cover border border-gray-100 dark:border-gray-700" />
-                        <div className="absolute -bottom-1 -right-1 bg-green-500 w-3 h-3 rounded-full border-2 border-white dark:border-gray-800 animate-pulse"></div>
+                        <div className="w-11 h-11 rounded-full p-[2px] bg-gradient-to-tr from-[#1E5BFF] to-[#4D7CFF]">
+                            <img src={post.userAvatar} alt={post.userName} className="w-full h-full rounded-full bg-gray-100 object-cover border-2 border-white dark:border-gray-800" />
+                        </div>
+                        <div className="absolute -bottom-0.5 -right-0.5 bg-green-500 w-3.5 h-3.5 rounded-full border-[2.5px] border-white dark:border-gray-800 shadow-sm"></div>
                     </div>
                     <div className="flex-1 min-w-0">
                         <div className="flex justify-between items-center">
-                            <p className="text-xs font-bold text-gray-900 dark:text-white truncate">{post.userName}</p>
-                            <span className="text-[10px] whitespace-nowrap text-gray-400 font-medium">{post.timestamp}</span>
+                            <p className="text-xs font-black text-gray-900 dark:text-white truncate">@{post.userName.toLowerCase().replace(' ', '')}</p>
+                            <span className="text-[10px] whitespace-nowrap text-gray-400 font-bold">{post.timestamp}</span>
                         </div>
-                        {post.neighborhood && (
-                            <p className="text-[10px] font-bold text-[#1E5BFF] bg-blue-50 dark:bg-blue-900/20 px-1.5 py-0.5 rounded w-fit mt-0.5 flex items-center gap-1">
+                        <div className="flex items-center gap-1.5 mt-0.5">
+                            <span className="text-[9px] font-black text-[#1E5BFF] bg-blue-50 dark:bg-blue-900/30 px-2 py-0.5 rounded-lg border border-blue-100 dark:border-blue-800 flex items-center gap-1">
                                 <MapPin className="w-2.5 h-2.5" /> {post.neighborhood}
-                            </p>
-                        )}
+                            </span>
+                        </div>
                     </div>
                 </div>
-                <div className="flex-1 mb-3">
-                    <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed line-clamp-3 font-medium">"{post.content}"</p>
+                <div className="flex-1 mb-4">
+                    <p className="text-[13px] text-gray-800 dark:text-gray-200 leading-relaxed line-clamp-3 font-semibold italic">"{post.content}"</p>
                 </div>
-                <div className="flex items-center gap-4 text-gray-400 border-t border-gray-50 dark:border-gray-700 pt-3">
-                    <div className="flex items-center gap-1.5 text-xs font-medium"><ThumbsUp className="w-3.5 h-3.5" /> {post.likes > 0 ? post.likes : 'Curtir'}</div>
-                    <div className="flex items-center gap-1.5 text-xs font-medium"><MessageSquare className="w-3.5 h-3.5" /> {post.comments > 0 ? `${post.comments} coments` : 'Comentar'}</div>
+                <div className="flex items-center gap-5 text-gray-400 border-t border-gray-50 dark:border-gray-700 pt-4">
+                    <div className="flex items-center gap-1.5 text-[11px] font-bold text-gray-500 dark:text-gray-400 hover:text-[#1E5BFF] transition-colors">
+                      <ThumbsUp className="w-4 h-4" /> {post.likes}
+                    </div>
+                    <div className="flex items-center gap-1.5 text-[11px] font-bold text-gray-500 dark:text-gray-400 hover:text-[#1E5BFF] transition-colors">
+                      <MessageSquare className="w-4 h-4" /> {post.comments}
+                    </div>
                 </div>
             </div>
         ))}
