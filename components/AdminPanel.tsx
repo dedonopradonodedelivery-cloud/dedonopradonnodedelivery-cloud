@@ -46,7 +46,9 @@ import {
   Coins,
   Handshake,
   Dices,
-  Sparkles
+  Sparkles,
+  MapPin,
+  Globe2
 } from 'lucide-react';
 import { User as SupabaseUser } from '@supabase/supabase-js';
 
@@ -190,7 +192,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ user, onLogout, viewMode
            </div>
         </section>
 
-        {/* ROADMAP DE ESCALABILIDADE (EXISTENTE) */}
+        {/* ROADMAP DE ESCALABILIDADE */}
         <section className="space-y-6">
            <div className="flex items-center gap-2 mb-2">
               <LineChart className="text-indigo-600" size={20} />
@@ -240,7 +242,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ user, onLogout, viewMode
            </div>
         </section>
 
-        {/* --- NOVO BLOCO: FASE V2 --- */}
+        {/* FASE V2 — NOVAS FRENTES */}
         <section className="pt-8 space-y-6">
            <div className="flex items-center gap-2 mb-2">
               <Sparkles className="text-indigo-600" size={20} />
@@ -248,7 +250,6 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ user, onLogout, viewMode
            </div>
 
            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {/* 1. CASHBACK ENTRE LOJAS */}
               <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between hover:border-indigo-200 transition-all">
                 <div>
                    <div className="w-10 h-10 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center mb-5">
@@ -263,7 +264,6 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ user, onLogout, viewMode
                 </div>
               </div>
 
-              {/* 2. AGÊNCIA LOCALIZEI */}
               <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between hover:border-indigo-200 transition-all">
                 <div>
                    <div className="w-10 h-10 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center mb-5">
@@ -278,7 +278,6 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ user, onLogout, viewMode
                 </div>
               </div>
 
-              {/* 3. PLANO PET */}
               <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between hover:border-indigo-200 transition-all">
                 <div>
                    <div className="w-10 h-10 bg-amber-50 text-amber-600 rounded-xl flex items-center justify-center mb-5">
@@ -306,33 +305,66 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ user, onLogout, viewMode
            </div>
         </section>
 
-        {/* --- CONSOLIDAÇÃO FINAL --- */}
-        <section className="pt-12">
+        {/* CONSOLIDAÇÃO FINAL */}
+        <section className="pt-4">
            <div className="bg-slate-900 p-12 rounded-[2rem] border border-white/10 shadow-2xl relative overflow-hidden text-center">
               <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[#059669] to-transparent opacity-40"></div>
-              
               <div className="relative z-10 flex flex-col items-center">
                  <div className="flex items-center gap-2 mb-6">
                     <Target className="text-[#059669]" size={20} />
                     <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.4em]">Faturamento Mensal Consolidado</span>
                  </div>
-                 
                  <div className="flex items-baseline justify-center gap-3 mb-4">
                    <span className="text-3xl font-black text-[#059669]">R$</span>
                    <h1 className="text-8xl font-black tracking-tighter text-[#059669] leading-none tabular-nums">133.740</h1>
                  </div>
-                 
-                 <p className="text-slate-400 font-bold uppercase tracking-[0.25em] text-xs mb-10">
-                   Cenário Operação Core + Fases de Expansão V2
+                 <p className="text-slate-400 font-bold uppercase tracking-[0.25em] text-xs mb-10">Cenário Operação Core + Expansão V2</p>
+              </div>
+           </div>
+        </section>
+
+        {/* NOVO: POTENCIAL DE EXPANSÃO GEOGRÁFICA */}
+        <section className="pt-8 space-y-6">
+           <div className="bg-white rounded-3xl border border-slate-200 p-8 shadow-sm overflow-hidden relative group">
+              <div className="absolute top-0 right-0 w-48 h-48 bg-blue-50/50 rounded-full blur-3xl group-hover:bg-blue-100/40 transition-colors pointer-events-none"></div>
+              
+              <div className="relative z-10">
+                 <div className="flex items-center gap-2 mb-6">
+                    <Globe2 className="text-indigo-600" size={20} />
+                    <h2 className="text-sm font-black text-slate-900 uppercase tracking-wider">Potencial de Expansão — Visão Consolidada</h2>
+                 </div>
+
+                 <p className="text-sm text-slate-500 leading-relaxed mb-8 max-w-2xl font-medium">
+                   Modelo replicável para novos CEPs com baixa dependência de custo fixo. <br/>
+                   Referência conservadora de maturação (Ano 1): <strong>≈ R$ 85.000 / mês por praça.</strong>
                  </p>
 
-                 <div className="w-full max-w-2xl bg-white/5 border border-white/5 rounded-2xl p-6 text-left">
-                    <h4 className="text-xs font-bold text-white uppercase mb-4 flex items-center gap-2">
-                       <CheckCircle2 size={16} className="text-[#059669]" /> Mensagem Final para o Investidor
-                    </h4>
-                    <p className="text-sm text-slate-400 leading-relaxed font-medium">
-                       Após a fase de maturação comercial (3 meses) e a ativação sequencial das frentes de monetização da Fase V2, o ecossistema Localizei JPA atinge aproximadamente <strong>R$ 134.000,00</strong> em faturamento recorrente. Este modelo preserva premissas conservadoras de adoção, capitalizando sobre o efeito de rede e dados proprietários do bairro com baixa dependência de custos operacionais fixos.
-                    </p>
+                 <div className="mb-10">
+                    <h3 className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4">14 Praças Estratégicas Mapeadas</h3>
+                    <div className="flex flex-wrap gap-2">
+                       {[
+                         'Barra da Tijuca', 'Recreio', 'Zona Sul', 'Centro', 'Tijuca', 'Méier', 
+                         'Ilha do Governador', 'Niterói', 'Duque de Caxias', 'Nova Iguaçu', 
+                         'São João de Meriti', 'Região dos Lagos', 'Região Serrana', 'Metropolitana'
+                       ].map((praca, idx) => (
+                         <div key={idx} className="bg-slate-50 border border-slate-100 px-3 py-1.5 rounded-lg flex items-center gap-2 group-hover:border-indigo-100 transition-colors">
+                            <MapPin size={10} className="text-indigo-400" />
+                            <span className="text-[11px] font-bold text-slate-600">{praca}</span>
+                         </div>
+                       ))}
+                    </div>
+                 </div>
+
+                 <div className="bg-slate-900 rounded-2xl p-8 flex flex-col md:flex-row items-center justify-between gap-6 border border-slate-800">
+                    <div className="text-center md:text-left">
+                       <h4 className="text-white font-black text-sm uppercase tracking-widest mb-1">Faturamento Potencial Consolidado</h4>
+                       <p className="text-slate-400 text-xs font-medium italic">Sinergia total das 14 praças operacionais</p>
+                    </div>
+                    <div className="flex items-baseline gap-3">
+                       <span className="text-xl font-black text-[#059669]">R$</span>
+                       <h1 className="text-5xl font-black text-[#059669] tracking-tighter tabular-nums">1.190.000</h1>
+                       <span className="text-xs font-black text-slate-500 uppercase ml-1">/mês</span>
+                    </div>
                  </div>
               </div>
            </div>
