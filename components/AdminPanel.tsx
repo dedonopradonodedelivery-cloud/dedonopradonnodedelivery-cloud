@@ -54,10 +54,9 @@ import {
   Info,
   Scale,
   Megaphone,
-  Image as ImageIcon,
+  ImageIcon,
   Flame,
-  Milestone,
-  History
+  Milestone
 } from 'lucide-react';
 import { User as SupabaseUser } from '@supabase/supabase-js';
 
@@ -89,7 +88,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ user, onLogout, viewMode
   if (!user || user.email !== ADMIN_EMAIL) {
     return (
       <div className="min-h-screen bg-[#0F172A] flex flex-col items-center justify-center p-6 text-center font-sans">
-        <div className="w-16 h-16 bg-[#111827] border border-white/[0.04] flex items-center justify-center mb-4 rounded-xl">
+        <div className="w-16 h-16 bg-#111827 border border-white/[0.04] flex items-center justify-center mb-4 rounded-xl">
           <Lock className="w-8 h-8 text-[#9CA3AF]" />
         </div>
         <h1 className="text-xl font-black text-white mb-1 uppercase tracking-tighter">403 - Negado</h1>
@@ -380,50 +379,60 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ user, onLogout, viewMode
 
         {/* POTENCIAL DE EXPANSÃO GEOGRÁFICA */}
         <section className="pt-8">
-           <div className="bg-white rounded-[2.5rem] border border-slate-200 p-10 shadow-sm overflow-hidden relative group">
-              <div className="absolute top-0 right-0 w-64 h-64 bg-blue-50/30 rounded-full blur-3xl pointer-events-none"></div>
+           <div className="bg-white rounded-[2.5rem] border border-slate-200 p-10 shadow-sm overflow-hidden relative">
               
               <div className="relative z-10">
-                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
-                    <div>
+                 <div className="flex flex-col md:flex-row md:items-start justify-between gap-8 mb-10">
+                    <div className="flex-1">
                        <div className="flex items-center gap-2 mb-3">
-                          <Globe2 className="text-indigo-600" size={18} />
-                          <h2 className="text-xs font-black text-slate-900 uppercase tracking-[0.2em]">Potencial de Expansão Geográfica</h2>
+                          <Globe2 className="text-indigo-600" size={20} />
+                          <h2 className="text-sm font-black text-slate-900 uppercase tracking-[0.15em]">Potencial de Expansão Geográfica</h2>
                        </div>
-                       <p className="text-sm text-slate-500 leading-relaxed font-medium max-w-xl">
+                       <p className="text-sm text-slate-500 leading-relaxed font-medium max-w-md">
                          Modelo operacional replicável para novos CEPs com baixa dependência de custo fixo e alta escalabilidade regional.
                        </p>
                     </div>
-                    <div className="bg-slate-900 px-6 py-4 rounded-2xl border border-slate-800 shrink-0">
+                    <div className="bg-slate-900 px-6 py-5 rounded-3xl border border-slate-800 shadow-xl shrink-0">
                        <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-1">Referência por Praça (Ano 1)</span>
-                       <p className="text-xl font-black text-white tracking-tight">R$ 85.000 <span className="text-xs text-slate-500 font-bold">/mês</span></p>
+                       <div className="flex items-baseline gap-1.5">
+                          <span className="text-sm font-bold text-slate-400">R$</span>
+                          <p className="text-2xl font-black text-white tracking-tight">85.000</p>
+                          <span className="text-[9px] text-slate-500 font-black uppercase ml-1">/ mês</span>
+                       </div>
                     </div>
                  </div>
 
                  <div className="mb-12">
-                    <h3 className="text-[9px] font-black text-slate-400 uppercase tracking-[0.3em] mb-5 px-1">14 Praças Estratégicas Mapeadas</h3>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2">
+                    <h3 className="text-[9px] font-black text-slate-400 uppercase tracking-[0.3em] mb-4 px-1">14 Praças Estratégicas Mapeadas</h3>
+                    <div className="flex flex-wrap gap-1.5">
                        {[
                          'Barra da Tijuca', 'Recreio', 'Zona Sul', 'Centro', 'Tijuca', 'Méier', 
                          'Ilha do Governador', 'Niterói', 'Duque de Caxias', 'Nova Iguaçu', 
                          'São João de Meriti', 'Região dos Lagos', 'Região Serrana', 'Metropolitana'
                        ].map((praca, idx) => (
-                         <div key={idx} className="bg-slate-50/50 border border-slate-100 px-2.5 py-1.5 rounded-lg flex items-center gap-1.5">
-                            <MapPin size={10} className="text-indigo-300" />
-                            <span className="text-[10px] font-bold text-slate-500 whitespace-nowrap">{praca}</span>
+                         <div key={idx} className="bg-slate-50 border border-slate-100 px-2 py-1 rounded-md flex items-center gap-1.5 shadow-sm">
+                            <MapPin size={9} className="text-indigo-400" />
+                            <span className="text-[9px] font-bold text-slate-500 whitespace-nowrap uppercase tracking-tight">{praca}</span>
                          </div>
                        ))}
                     </div>
                  </div>
 
-                 <div className="bg-white border-2 border-slate-900 rounded-[2rem] p-10 flex flex-col items-center justify-center relative overflow-hidden">
-                    <div className="absolute top-0 left-0 w-full h-1 bg-slate-900 opacity-10"></div>
-                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.5em] mb-4">Faturamento Potencial Consolidado</span>
-                    <div className="flex items-baseline gap-3">
-                       <span className="text-2xl font-black text-slate-900">R$</span>
-                       <h1 className="text-7xl md:text-8xl font-black text-slate-900 tracking-tighter tabular-nums">1.190.000</h1>
+                 <div className="max-w-2xl mx-auto">
+                    <div className="bg-slate-900 rounded-[2.5rem] p-10 flex flex-col items-center justify-center relative overflow-hidden shadow-2xl">
+                       <div className="absolute top-0 left-0 w-full h-1 bg-indigo-500 opacity-30"></div>
+                       <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.4em] mb-4">Faturamento Potencial Consolidado</span>
+                       <div className="flex flex-col md:flex-row items-center md:items-baseline gap-3">
+                          <div className="flex items-baseline gap-3">
+                             <span className="text-3xl font-black text-white opacity-40">R$</span>
+                             <h1 className="text-6xl md:text-7xl font-black text-white tracking-tighter tabular-nums">1.190.000</h1>
+                          </div>
+                          <span className="text-lg font-black text-[#059669] uppercase tracking-widest mt-2 md:mt-0">/ mês</span>
+                       </div>
+                       <p className="text-[9px] font-black text-slate-500 uppercase tracking-[0.2em] mt-6 bg-white/5 px-4 py-1.5 rounded-full border border-white/5">
+                          Baseado na ativação simultânea das 14 praças
+                       </p>
                     </div>
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-4">Potencial Mensal (14 Praças Ativas)</p>
                  </div>
               </div>
            </div>
@@ -432,19 +441,19 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ user, onLogout, viewMode
         {/* --- INVESTIMENTO MÍNIMO RECOMENDADO (CENÁRIO 1) --- */}
         <section className="pt-8">
            <div className="bg-white rounded-[2.5rem] border border-slate-200 p-10 shadow-sm relative overflow-hidden">
-              <div className="absolute top-0 left-0 w-full h-1 bg-indigo-500 opacity-20"></div>
+              <div className="absolute top-0 left-0 w-full h-1 bg-indigo-500 opacity-10"></div>
               
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-8 mb-12">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-10 mb-12">
                  <div>
                     <div className="flex items-center gap-2 mb-3">
-                       <Coins className="text-indigo-600" size={20} />
+                       <Coins className="text-indigo-600" size={22} />
                        <h2 className="text-sm font-black text-slate-900 uppercase tracking-widest">Aporte Mínimo Recomendado — Cenário 1</h2>
                     </div>
-                    <p className="text-sm text-slate-500 font-medium max-w-xl leading-relaxed">
-                       Recursos estratégicos necessários para o lançamento estruturado, validação de mercado e tração inicial da operação Localizei JPA.
+                    <p className="text-sm text-slate-500 font-medium max-w-lg leading-relaxed">
+                       Recursos estratégicos focados na ativação operacional e validação de tração inicial da marca Localizei JPA.
                     </p>
                  </div>
-                 <div className="bg-indigo-600 px-8 py-6 rounded-3xl shadow-xl shadow-indigo-200 shrink-0 text-center">
+                 <div className="bg-indigo-600 px-10 py-7 rounded-[2.5rem] shadow-2xl shadow-indigo-200 shrink-0 text-center transform hover:scale-105 transition-transform">
                     <span className="text-[10px] font-black text-indigo-100 uppercase tracking-widest block mb-1 opacity-70">Investimento Mínimo</span>
                     <div className="flex items-baseline gap-2 justify-center">
                        <span className="text-xl font-black text-white">R$</span>
@@ -455,110 +464,74 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ user, onLogout, viewMode
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
                  {/* Marketing & Growth */}
-                 <div className="space-y-4">
+                 <div className="p-6 bg-slate-50 border border-slate-100 rounded-3xl space-y-4">
                     <div className="flex items-center gap-3">
                        <div className="w-10 h-10 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center">
                           <Megaphone size={20} />
                        </div>
-                       <h4 className="text-sm font-black text-slate-900 uppercase">Marketing e Growth</h4>
+                       <h4 className="text-sm font-black text-slate-900 uppercase">Marketing & Growth</h4>
                     </div>
-                    <ul className="space-y-2 text-xs text-slate-500 font-medium ml-2">
-                       <li className="flex items-center gap-2">
-                          <div className="w-1 h-1 rounded-full bg-slate-300"></div>
-                          Contratação de agência de marketing especializada
-                       </li>
-                       <li className="flex items-center gap-2">
-                          <div className="w-1 h-1 rounded-full bg-slate-300"></div>
-                          Estratégia multicanal (Google, Meta, mídia local)
-                       </li>
-                       <li className="flex items-center gap-2">
-                          <div className="w-1 h-1 rounded-full bg-slate-300"></div>
-                          Produção de conteúdo e ativações de lançamento
-                       </li>
+                    <ul className="space-y-2 text-xs text-slate-500 font-medium">
+                       <li className="flex items-center gap-2">Agência especializada em tráfego</li>
+                       <li className="flex items-center gap-2">Estratégia multicanal regional</li>
+                       <li className="flex items-center gap-2">Produção de materiais de estreia</li>
                     </ul>
                  </div>
 
                  {/* Anúncios Online */}
-                 <div className="space-y-4">
+                 <div className="p-6 bg-slate-50 border border-slate-100 rounded-3xl space-y-4">
                     <div className="flex items-center gap-3">
                        <div className="w-10 h-10 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center">
                           <Target size={20} />
                        </div>
                        <h4 className="text-sm font-black text-slate-900 uppercase">Anúncios Online</h4>
                     </div>
-                    <ul className="space-y-2 text-xs text-slate-500 font-medium ml-2">
-                       <li className="flex items-center gap-2">
-                          <div className="w-1 h-1 rounded-full bg-slate-300"></div>
-                          Aquisição de base de usuários qualificada
-                       </li>
-                       <li className="flex items-center gap-2">
-                          <div className="w-1 h-1 rounded-full bg-slate-300"></div>
-                          Captação ativa e qualificação de lojistas
-                       </li>
-                       <li className="flex items-center gap-2">
-                          <div className="w-1 h-1 rounded-full bg-slate-300"></div>
-                          Otimização de CAC e testes de escala
-                       </li>
+                    <ul className="space-y-2 text-xs text-slate-500 font-medium">
+                       <li className="flex items-center gap-2">Aquisição de usuários qualificados</li>
+                       <li className="flex items-center gap-2">Captação ativa de lojistas-âncora</li>
+                       <li className="flex items-center gap-2">Otimização de CAC e performance</li>
                     </ul>
                  </div>
 
                  {/* Jurídico & Contratual */}
-                 <div className="space-y-4">
+                 <div className="p-6 bg-slate-50 border border-slate-100 rounded-3xl space-y-4">
                     <div className="flex items-center gap-3">
-                       <div className="w-10 h-10 bg-slate-50 text-slate-600 rounded-xl flex items-center justify-center border border-slate-100">
+                       <div className="w-10 h-10 bg-slate-100 text-slate-600 rounded-xl flex items-center justify-center border border-slate-200">
                           <Scale size={20} />
                        </div>
-                       <h4 className="text-sm font-black text-slate-900 uppercase">Jurídico e Contratual</h4>
+                       <h4 className="text-sm font-black text-slate-900 uppercase">Jurídico & Compliance</h4>
                     </div>
-                    <ul className="space-y-2 text-xs text-slate-500 font-medium ml-2">
-                       <li className="flex items-center gap-2">
-                          <div className="w-1 h-1 rounded-full bg-slate-300"></div>
-                          Alterações contratuais e ajustes societários
-                       </li>
-                       <li className="flex items-center gap-2">
-                          <div className="w-1 h-1 rounded-full bg-slate-300"></div>
-                          Compliance básico e termos de uso
-                       </li>
-                       <li className="flex items-center gap-2">
-                          <div className="w-1 h-1 rounded-full bg-slate-300"></div>
-                          Estruturação para rodadas futuras de aporte
-                       </li>
+                    <ul className="space-y-2 text-xs text-slate-500 font-medium">
+                       <li className="flex items-center gap-2">Ajustes contratuais e societários</li>
+                       <li className="flex items-center gap-2">Termos de uso e LGPD</li>
+                       <li className="flex items-center gap-2">Preparação para rodadas futuras</li>
                     </ul>
                  </div>
 
                  {/* Operacional */}
-                 <div className="space-y-4">
+                 <div className="p-6 bg-slate-50 border border-slate-100 rounded-3xl space-y-4">
                     <div className="flex items-center gap-3">
                        <div className="w-10 h-10 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center">
                           <Server size={20} />
                        </div>
-                       <h4 className="text-sm font-black text-slate-900 uppercase">Estrutura Operacional</h4>
+                       <h4 className="text-sm font-black text-slate-900 uppercase">Estrutura de Apoio</h4>
                     </div>
-                    <ul className="space-y-2 text-xs text-slate-500 font-medium ml-2">
-                       <li className="flex items-center gap-2">
-                          <div className="w-1 h-1 rounded-full bg-slate-300"></div>
-                          Custos iniciais de infraestrutura Cloud
-                       </li>
-                       <li className="flex items-center gap-2">
-                          <div className="w-1 h-1 rounded-full bg-slate-300"></div>
-                          Assinaturas de SaaS e ferramentas de gestão
-                       </li>
-                       <li className="flex items-center gap-2">
-                          <div className="w-1 h-1 rounded-full bg-slate-300"></div>
-                          Suporte operacional nos primeiros 3 meses
-                       </li>
+                    <ul className="space-y-2 text-xs text-slate-500 font-medium">
+                       <li className="flex items-center gap-2">Infraestrutura Cloud inicial</li>
+                       <li className="flex items-center gap-2">Assinaturas SaaS operacionais</li>
+                       <li className="flex items-center gap-2">Suporte técnico de lançamento</li>
                     </ul>
                  </div>
               </div>
 
-              <div className="bg-slate-900 rounded-2xl p-8 flex flex-col md:flex-row items-center gap-8 border border-slate-800">
-                 <div className="w-14 h-14 bg-indigo-500/10 rounded-2xl flex items-center justify-center shrink-0">
-                    <CheckCircle2 className="text-indigo-400" size={28} />
+              <div className="bg-slate-900 rounded-[2rem] p-8 flex flex-col md:flex-row items-center gap-6 border border-slate-800">
+                 <div className="w-12 h-12 bg-indigo-500/10 rounded-2xl flex items-center justify-center shrink-0">
+                    <CheckCircle2 className="text-indigo-400" size={24} />
                  </div>
                  <div className="text-center md:text-left">
-                    <h4 className="text-white font-black text-sm uppercase tracking-widest mb-1">Resultado Esperado (Mínimo)</h4>
+                    <h4 className="text-white font-black text-sm uppercase tracking-widest mb-1">Resultado Esperado</h4>
                     <p className="text-slate-400 text-xs font-medium leading-relaxed">
-                       Lançamento oficial, ativação de lojistas-âncora, validação real do modelo de cashback e início do faturamento recorrente estruturado.
+                       Lançamento estruturado, validação do modelo de negócio e início do faturamento recorrente.
                     </p>
                  </div>
               </div>
