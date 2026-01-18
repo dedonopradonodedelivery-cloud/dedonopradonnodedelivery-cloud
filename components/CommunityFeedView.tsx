@@ -1,7 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { 
   ChevronLeft, 
-  ChevronDown, 
   MoreHorizontal, 
   Heart, 
   MessageCircle, 
@@ -13,12 +12,11 @@ import {
   BadgeCheck,
   ArrowRight,
   Vote,
-  BarChart3,
   Crown,
-  Sparkles,
-  CheckCircle2,
-  Lock,
-  PlusCircle
+  PlusCircle,
+  Camera,
+  MapPin,
+  Clock
 } from 'lucide-react';
 import { NeighborhoodCommunity, CommunityPost, CommunitySuggestion } from '../types';
 import { NEIGHBORHOOD_COMMUNITIES, MOCK_COMMUNITY_POSTS } from '../constants';
@@ -33,12 +31,11 @@ interface CommunityFeedViewProps {
 const CommunityCard: React.FC<{ 
   community: NeighborhoodCommunity; 
   isJoined: boolean; 
-  onToggleJoin: () => void;
-  onCardClick: () => void;
-}> = ({ community, isJoined, onToggleJoin, onCardClick }) => (
-  <div className="w-full bg-white dark:bg-gray-900 rounded-[2rem] overflow-hidden shadow-xl shadow-black/5 border border-gray-100 dark:border-gray-800 transition-all">
+  onAction: () => void;
+}> = ({ community, isJoined, onAction }) => (
+  <div className="w-full bg-white dark:bg-gray-900 rounded-[2.5rem] overflow-hidden shadow-xl shadow-black/5 border border-gray-100 dark:border-gray-800 transition-all mb-6">
     <button 
-      onClick={onCardClick}
+      onClick={onAction}
       className="w-full relative aspect-[16/9] overflow-hidden group active:scale-[0.99] transition-transform"
     >
       <img 
@@ -53,7 +50,7 @@ const CommunityCard: React.FC<{
           {React.cloneElement(community.icon as any, { size: 20 })}
         </div>
         <div>
-          <h3 className="font-black text-xl text-white uppercase leading-tight tracking-tight mb-1">{community.name}</h3>
+          <h3 className="font-black text-2xl text-white uppercase leading-tight tracking-tighter mb-1">{community.name}</h3>
           <span className="text-[10px] font-bold text-white/70 flex items-center gap-1 uppercase tracking-widest">
             <Users size={12}/> {community.membersCount} vizinhos
           </span>
@@ -61,19 +58,19 @@ const CommunityCard: React.FC<{
       </div>
     </button>
     
-    <div className="px-5 py-4 bg-white dark:bg-gray-900 flex items-center justify-between">
-      <p className="text-xs text-gray-500 dark:text-gray-400 font-medium line-clamp-1 max-w-[60%]">
+    <div className="px-6 py-5 bg-white dark:bg-gray-900 flex items-center justify-between">
+      <p className="text-xs text-gray-500 dark:text-gray-400 font-medium line-clamp-1 max-w-[55%]">
         {community.description}
       </p>
       <button 
-        onClick={(e) => { e.stopPropagation(); onToggleJoin(); }}
-        className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 ${
+        onClick={(e) => { e.stopPropagation(); onAction(); }}
+        className={`px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 ${
           isJoined 
             ? 'bg-blue-50 dark:bg-blue-900/30 text-[#1E5BFF] border border-blue-100 dark:border-blue-800' 
             : 'bg-[#1E5BFF] text-white shadow-lg shadow-blue-500/20'
         }`}
       >
-        {isJoined ? <><Check size={12} strokeWidth={3} /> Participando</> : <><Plus size={12} strokeWidth={3} /> Participar</>}
+        {isJoined ? <><Check size={12} strokeWidth={3} /> Ver Feed</> : <><Plus size={12} strokeWidth={3} /> Participar</>}
       </button>
     </div>
   </div>
@@ -83,11 +80,12 @@ const FeedPost: React.FC<{ post: CommunityPost }> = ({ post }) => {
   const [liked, setLiked] = useState(false);
 
   return (
-    <div className="bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800 pb-4 mb-2 w-full animate-in fade-in duration-500">
-      <div className="flex items-center justify-between px-4 py-3">
+    <div className="bg-white dark:bg-gray-900 pb-6 w-full animate-in fade-in duration-500">
+      {/* Header do Post */}
+      <div className="flex items-center justify-between px-4 py-4">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-full p-[2px] bg-gradient-to-tr from-yellow-400 via-red-500 to-fuchsia-600">
-            <div className="w-full h-full rounded-full border border-white dark:border-black overflow-hidden bg-gray-100">
+          <div className="w-10 h-10 rounded-full p-[2px] bg-gradient-to-tr from-yellow-400 via-red-500 to-fuchsia-600">
+            <div className="w-full h-full rounded-full border-2 border-white dark:border-black overflow-hidden bg-gray-100">
               <img src={post.userAvatar} alt={post.userName} className="w-full h-full object-cover" />
             </div>
           </div>
@@ -96,48 +94,126 @@ const FeedPost: React.FC<{ post: CommunityPost }> = ({ post }) => {
               {post.userName}
               {post.authorRole === 'merchant' && <BadgeCheck className="w-4 h-4 text-[#1E5BFF] fill-white" />}
             </h4>
-            <div className="flex items-center gap-1">
-              <p className="text-[9px] text-[#1E5BFF] font-black uppercase tracking-wider">{post.neighborhood}</p>
-              <span className="text-[9px] text-gray-300">•</span>
-              <p className="text-[9px] text-gray-400 font-bold uppercase tracking-wider">{post.timestamp}</p>
+            <div className="flex items-center gap-1.5">
+              <p className="text-[9px] text-[#1E5BFF] font-black uppercase tracking-widest">{post.neighborhood || 'Freguesia'}</p>
+              <span className="w-0.5 h-0.5 rounded-full bg-gray-300"></span>
+              <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest">{post.timestamp}</p>
             </div>
           </div>
         </div>
-        <button className="text-gray-400 p-1"><MoreHorizontal size={20} /></button>
+        <button className="text-gray-400 p-2"><MoreHorizontal size={20} /></button>
       </div>
 
-      {post.imageUrl && (
-        <div className="w-full aspect-square bg-gray-50 dark:bg-gray-800">
-          <img src={post.imageUrl} alt="Post content" className="w-full h-full object-cover" />
-        </div>
-      )}
+      {/* Imagem Obrigatória */}
+      <div className="w-full aspect-square bg-gray-50 dark:bg-gray-800 overflow-hidden">
+        <img 
+          src={post.imageUrl || 'https://images.unsplash.com/photo-1517457373958-b7bdd4587205?q=80&w=800&auto=format&fit=crop'} 
+          alt="Post content" 
+          className="w-full h-full object-cover" 
+        />
+      </div>
 
-      <div className="px-4 pt-3 flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <button onClick={() => setLiked(!liked)} className="active:scale-125 transition-transform">
-            <Heart size={26} className={liked ? "fill-red-500 text-red-500" : "text-gray-900 dark:text-white"} />
+      {/* Ações */}
+      <div className="px-4 pt-4 flex items-center justify-between">
+        <div className="flex items-center gap-5">
+          <button onClick={() => setLiked(!liked)} className="active:scale-125 transition-transform outline-none">
+            <Heart size={28} className={liked ? "fill-red-500 text-red-500" : "text-gray-900 dark:text-white"} />
           </button>
-          <button><MessageCircle size={26} className="text-gray-900 dark:text-white" /></button>
-          <button><Send size={26} className="text-gray-900 dark:text-white -rotate-12" /></button>
+          <button className="outline-none"><MessageCircle size={28} className="text-gray-900 dark:text-white" /></button>
+          <button className="outline-none"><Send size={28} className="text-gray-900 dark:text-white -rotate-12 translate-y-[-2px]" /></button>
         </div>
-        <button><Bookmark size={26} className="text-gray-900 dark:text-white" /></button>
+        <button className="outline-none"><Bookmark size={28} className="text-gray-900 dark:text-white" /></button>
       </div>
 
-      <div className="px-4 pt-3 space-y-1.5">
-        <p className="text-sm font-bold text-gray-900 dark:text-white">{post.likes + (liked ? 1 : 0)} curtidas</p>
-        <p className="text-sm text-gray-800 dark:text-gray-200">
-          <span className="font-bold mr-2">{post.userName}</span>
-          {post.content}
+      {/* Info de Engajamento e Texto */}
+      <div className="px-4 pt-4 space-y-2">
+        <p className="text-sm font-black text-gray-900 dark:text-white tracking-tight">
+          {post.likes + (liked ? 1 : 0)} vizinhos curtiram
         </p>
-        <button className="text-xs text-gray-400 font-medium mt-1">Ver todos os {post.comments} comentários</button>
+        <div className="text-sm text-gray-800 dark:text-gray-200 leading-relaxed">
+          <span className="font-black mr-2 tracking-tight">{post.userName}</span>
+          {post.content}
+        </div>
+        <button className="text-xs text-gray-400 font-bold uppercase tracking-widest mt-2 block">
+          Ver todos os {post.comments} comentários
+        </button>
+      </div>
+    </div>
+  );
+};
+
+const CommunityDetailFeed: React.FC<{ 
+  community: NeighborhoodCommunity; 
+  onBack: () => void;
+}> = ({ community, onBack }) => {
+  // Filtrar posts específicos desta comunidade
+  const posts = useMemo(() => {
+    return MOCK_COMMUNITY_POSTS.filter(p => p.communityId === community.id);
+  }, [community.id]);
+
+  return (
+    <div className="fixed inset-0 z-50 bg-white dark:bg-gray-950 flex flex-col animate-in slide-in-from-right duration-300">
+      {/* Header do Feed da Comunidade */}
+      <div className="sticky top-0 z-10 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border-b border-gray-100 dark:border-gray-800 px-4 h-16 flex items-center justify-between shrink-0">
+        <div className="flex items-center gap-3">
+          <button onClick={onBack} className="p-2 -ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800">
+            <ChevronLeft size={24} className="text-gray-900 dark:text-white" />
+          </button>
+          <div className="flex items-center gap-2.5">
+            <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${community.color} flex items-center justify-center text-white shadow-sm`}>
+                {React.cloneElement(community.icon as any, { size: 16, strokeWidth: 3 })}
+            </div>
+            <div>
+              <h2 className="font-black text-sm text-gray-900 dark:text-white uppercase tracking-tight leading-none">{community.name}</h2>
+              <p className="text-[9px] text-emerald-500 font-black uppercase tracking-widest mt-1">Online agora</p>
+            </div>
+          </div>
+        </div>
+        <button className="p-2 bg-gray-50 dark:bg-gray-800 rounded-xl text-gray-400">
+          <Camera size={20} />
+        </button>
+      </div>
+
+      {/* Feed Vertical */}
+      <div className="flex-1 overflow-y-auto no-scrollbar pb-24">
+        {/* Banner do Topo */}
+        <div className="relative w-full h-32 overflow-hidden shrink-0">
+           <img src={community.image} className="w-full h-full object-cover brightness-50" />
+           <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-6">
+              <p className="text-[10px] text-white/70 font-black uppercase tracking-[0.2em] mb-1">Membro da Comunidade</p>
+              <h3 className="text-white font-black text-xl uppercase tracking-tighter">{community.name}</h3>
+           </div>
+        </div>
+
+        {posts.length > 0 ? (
+          <div className="divide-y divide-gray-50 dark:divide-gray-800">
+            {posts.map(post => <FeedPost key={post.id} post={post} />)}
+            {/* Mock extra posts if the community is empty just for visual */}
+            {posts.length < 2 && MOCK_COMMUNITY_POSTS.slice(0, 3).map((p, i) => (
+               <FeedPost key={`extra-${i}`} post={{...p, communityId: community.id, id: `ext-${i}`}} />
+            ))}
+          </div>
+        ) : (
+          <div className="flex flex-col items-center justify-center py-24 px-10 text-center">
+            <div className="w-20 h-20 bg-blue-50 dark:bg-blue-900/10 rounded-[2rem] flex items-center justify-center mb-6 text-[#1E5BFF]">
+                <PlusCircle size={32} />
+            </div>
+            <h3 className="font-black text-lg text-gray-900 dark:text-white uppercase tracking-tight">Comece a conversa!</h3>
+            <p className="text-sm text-gray-400 font-medium leading-relaxed mt-2">
+              Seja o primeiro a postar algo legal aqui na comunidade de {community.name}.
+            </p>
+            <button className="mt-8 bg-[#1E5BFF] text-white px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl shadow-blue-500/20 active:scale-95 transition-all">
+                Nova Publicação
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
 };
 
 export const CommunityFeedView: React.FC<CommunityFeedViewProps> = ({ user, onRequireLogin, onNavigate }) => {
-  const [activeCommunityId, setActiveCommunityId] = useState<string | null>(null);
-  const [activeFilterId, setActiveFilterId] = useState<string>('all');
+  const [activeCommunity, setActiveCommunity] = useState<NeighborhoodCommunity | null>(null);
   const [isSuggestModalOpen, setIsSuggestModalOpen] = useState(false);
   
   // Lista de IDs das comunidades que o usuário participa
@@ -169,42 +245,16 @@ export const CommunityFeedView: React.FC<CommunityFeedViewProps> = ({ user, onRe
     []
   );
 
-  // Postagens das comunidades que o usuário participa
-  const userFeedPosts = useMemo(() => {
-    // Se o usuário não participa de nada, o feed é vazio (ou sugestão de entrada)
-    if (joinedIds.length === 0) return [];
-
-    let posts = MOCK_COMMUNITY_POSTS.filter(p => joinedIds.includes(p.communityId));
-    
-    if (activeFilterId !== 'all') {
-      posts = posts.filter(p => p.communityId === activeFilterId);
-    }
-    
-    return posts;
-  }, [joinedIds, activeFilterId]);
-
-  // Comunidades que o usuário participa para gerar os chips de filtro
-  const joinedCommunities = useMemo(() => 
-    NEIGHBORHOOD_COMMUNITIES.filter(c => joinedIds.includes(c.id)),
-    [joinedIds]
-  );
-
-  const toggleJoin = (id: string) => {
+  const handleActionCommunity = (comm: NeighborhoodCommunity) => {
     if (!user) { onRequireLogin(); return; }
     
-    setJoinedIds(prev => 
-      prev.includes(id) ? prev.filter(curr => curr !== id) : [...prev, id]
-    );
-  };
-
-  const handleSelectCommunity = (id: string) => {
-    if (!user) { onRequireLogin(); return; }
-    if (!joinedIds.includes(id)) {
-        // Se clicar no card e não estiver participando, oferece participar
-        toggleJoin(id);
+    // Entrar na comunidade (se não for membro, torna-se membro automaticamente)
+    if (!joinedIds.includes(comm.id)) {
+        setJoinedIds(prev => [...prev, comm.id]);
     }
-    setActiveFilterId(id);
-    window.scrollTo({ top: 800, behavior: 'smooth' });
+    
+    // Navegar para o Feed Independente da Comunidade
+    setActiveCommunity(comm);
   };
 
   const handleSendSuggestion = (e: React.FormEvent<HTMLFormElement>) => {
@@ -238,6 +288,10 @@ export const CommunityFeedView: React.FC<CommunityFeedViewProps> = ({ user, onRe
     ));
   };
 
+  if (activeCommunity) {
+    return <CommunityDetailFeed community={activeCommunity} onBack={() => setActiveCommunity(null)} />;
+  }
+
   return (
     <div className="min-h-screen bg-white dark:bg-gray-950 pb-32 animate-in fade-in duration-500">
       
@@ -260,98 +314,32 @@ export const CommunityFeedView: React.FC<CommunityFeedViewProps> = ({ user, onRe
       </div>
 
       {/* DESCOBERTA DE COMUNIDADES */}
-      <div className="px-5 space-y-8 mb-12">
-        <div className="flex items-center justify-between px-1">
+      <div className="px-5 space-y-2 mb-12">
+        <div className="flex items-center justify-between px-1 mb-6">
           <h3 className="text-xs font-black text-gray-400 uppercase tracking-[0.2em]">Descobrir Temas</h3>
           <span className="text-[10px] font-bold text-gray-400">{visibleCommunities.length} disponíveis</span>
         </div>
-        <div className="space-y-6">
+        <div>
           {visibleCommunities.map((comm) => (
             <CommunityCard 
               key={comm.id} 
               community={comm} 
               isJoined={joinedIds.includes(comm.id)}
-              onToggleJoin={() => toggleJoin(comm.id)}
-              onCardClick={() => handleSelectCommunity(comm.id)}
+              onAction={() => handleActionCommunity(comm)}
             />
           ))}
         </div>
       </div>
 
-      {/* FEED DE PARTICIPANTE */}
-      {user && joinedIds.length > 0 && (
-        <div className="border-t border-gray-100 dark:border-gray-800 pt-8 animate-in slide-in-from-bottom-4 duration-700">
-          <div className="px-5 mb-6">
-            <h3 className="text-lg font-black text-gray-900 dark:text-white uppercase tracking-tight mb-4">Seu Feed</h3>
-            
-            {/* FILTRO DE COMUNIDADES (CHIPS) */}
-            <div className="flex gap-2 overflow-x-auto no-scrollbar -mx-5 px-5 pb-2">
-                <button 
-                    onClick={() => setActiveFilterId('all')}
-                    className={`flex-shrink-0 px-5 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all border ${
-                        activeFilterId === 'all' 
-                        ? 'bg-gray-900 dark:bg-white text-white dark:text-black border-transparent shadow-lg' 
-                        : 'bg-white dark:bg-gray-900 text-gray-400 border-gray-200 dark:border-gray-800'
-                    }`}
-                >
-                    Todas
-                </button>
-                {joinedCommunities.map(comm => (
-                    <button 
-                        key={comm.id}
-                        onClick={() => setActiveFilterId(comm.id)}
-                        className={`flex-shrink-0 px-5 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all border ${
-                            activeFilterId === comm.id 
-                            ? 'bg-[#1E5BFF] text-white border-transparent shadow-lg shadow-blue-500/20' 
-                            : 'bg-white dark:bg-gray-900 text-gray-400 border-gray-200 dark:border-gray-800'
-                        }`}
-                    >
-                        {comm.name}
-                    </button>
-                ))}
-            </div>
-          </div>
-
-          <div className="flex flex-col">
-            {userFeedPosts.length > 0 ? (
-              userFeedPosts.map(post => (
-                <FeedPost key={post.id} post={post} />
-              ))
-            ) : (
-              <div className="py-20 text-center px-10">
-                <div className="w-16 h-16 bg-gray-50 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <MessageCircle className="text-gray-300" size={32} />
-                </div>
-                <h3 className="font-bold text-gray-900 dark:text-white text-sm">Nada por aqui ainda</h3>
-                <p className="text-xs text-gray-400 mt-2">Os posts da comunidade selecionada aparecerão aqui.</p>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* ESTADO VAZIO (NÃO PARTICIPA DE NADA) */}
-      {user && joinedIds.length === 0 && (
-          <div className="px-10 py-16 text-center animate-in fade-in duration-700">
-            <div className="w-20 h-20 bg-blue-50 dark:bg-blue-900/10 rounded-[2rem] flex items-center justify-center mx-auto mb-6 text-[#1E5BFF]">
-                <PlusCircle size={32} />
-            </div>
-            <h3 className="font-bold text-gray-900 dark:text-white mb-2">Seu feed está vazio</h3>
-            <p className="text-sm text-gray-400 font-medium leading-relaxed italic">
-              Escolha um dos temas acima e clique em "Participar" para começar a ver as conversas do bairro.
-            </p>
-          </div>
-      )}
-
       {/* BLOCO DE SUGESTÕES */}
       <div className="px-5 mt-12">
           <div className="bg-white dark:bg-gray-900 rounded-[2.5rem] p-8 border border-gray-100 dark:border-gray-800 shadow-2xl shadow-black/5">
               <div className="flex items-center gap-2 mb-6">
-                  <div className="w-10 h-10 rounded-2xl bg-orange-50 dark:bg-orange-900/20 flex items-center justify-center text-orange-600">
-                      <Vote size={22} />
+                  <div className="w-10 h-10 rounded-xl bg-orange-50 dark:bg-orange-900/20 flex items-center justify-center text-orange-600">
+                      <PlusCircle size={22} />
                   </div>
                   <div>
-                      <h3 className="font-black text-sm text-gray-900 dark:text-white uppercase tracking-wider leading-none">Comunidades Sugeridas</h3>
+                      <h3 className="font-black text-sm text-gray-900 dark:text-white uppercase tracking-wider leading-none">Sugerir Novo Tema</h3>
                       <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-1">Próximos temas do bairro</p>
                   </div>
               </div>
@@ -417,7 +405,7 @@ export const CommunityFeedView: React.FC<CommunityFeedViewProps> = ({ user, onRe
       {isSuggestModalOpen && (
           <div className="fixed inset-0 z-[100] flex items-end justify-center bg-black/80 backdrop-blur-sm animate-in fade-in duration-200" onClick={() => setIsSuggestModalOpen(false)}>
               <div className="bg-white dark:bg-gray-900 w-full max-w-md rounded-t-[2.5rem] p-8 shadow-2xl animate-in slide-in-from-bottom duration-300" onClick={e => e.stopPropagation()}>
-                  <div className="w-12 h-1.5 bg-gray-200 dark:bg-gray-800 rounded-full mx-auto mb-8" />
+                  <div className="w-12 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full mx-auto mb-8" />
                   <h3 className="text-xl font-black text-gray-900 dark:text-white uppercase mb-2">Sugerir Comunidade</h3>
                   <p className="text-sm text-gray-500 mb-8 font-medium">Sua ideia será analisada pelo ADM.</p>
                   

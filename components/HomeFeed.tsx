@@ -18,7 +18,8 @@ import {
   Sparkles,
   ArrowRight,
   TrendingUp,
-  Lightbulb
+  Lightbulb,
+  Compass
 } from 'lucide-react';
 import { LojasEServicosList } from './LojasEServicosList';
 import { User } from '@supabase/supabase-js';
@@ -110,28 +111,46 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void; onStoreClick?: (
   );
 };
 
-const NovidadesDaSemana: React.FC<{ stores: Store[]; onStoreClick?: (store: Store) => void }> = ({ stores, onStoreClick }) => {
+const SectionHeader: React.FC<{ icon: React.ElementType; title: string; subtitle: string; onSeeMore?: () => void }> = ({ icon: Icon, title, subtitle, onSeeMore }) => (
+  <div className="flex items-center justify-between mb-4">
+    <div className="flex items-center gap-3">
+      <div className="w-9 h-9 rounded-xl bg-gray-50 dark:bg-gray-800 flex items-center justify-center text-gray-900 dark:text-white shadow-sm">
+        <Icon size={18} strokeWidth={2.5} />
+      </div>
+      <div>
+        <h2 className="text-[11px] font-black text-gray-900 dark:text-white uppercase tracking-[0.15em] leading-none mb-1">
+          {title}
+        </h2>
+        <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest leading-none">
+          {subtitle}
+        </p>
+      </div>
+    </div>
+    <button 
+      onClick={onSeeMore}
+      className="text-[10px] font-black text-[#1E5BFF] uppercase tracking-widest hover:underline active:opacity-60"
+    >
+      Ver mais
+    </button>
+  </div>
+);
+
+const NovidadesDaSemana: React.FC<{ stores: Store[]; onStoreClick?: (store: Store) => void; onNavigate: (v: string) => void }> = ({ stores, onStoreClick, onNavigate }) => {
+  // Regra obrigatória: Apenas lojas que possuem imagem
   const newArrivals = useMemo(() => {
-    return stores.filter(s => ['f-38', 'f-39', 'f-45', 'f-42', 'f-50'].includes(s.id));
+    return stores.filter(s => (s.image || s.logoUrl) && ['f-38', 'f-39', 'f-45', 'f-42', 'f-50'].includes(s.id));
   }, [stores]);
 
   if (newArrivals.length === 0) return null;
 
   return (
-    <div className="bg-white dark:bg-gray-950 py-8 px-5">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h2 className="text-[11px] font-black text-gray-900 dark:text-white uppercase tracking-[0.2em] leading-none mb-1.5">
-            Novidades da Semana
-          </h2>
-          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-none">
-            Recém chegados no bairro
-          </p>
-        </div>
-        <button className="w-8 h-8 rounded-full bg-gray-50 dark:bg-gray-800 flex items-center justify-center text-gray-300">
-           <Sparkles size={14} />
-        </button>
-      </div>
+    <div className="bg-white dark:bg-gray-950 py-4 px-5">
+      <SectionHeader 
+        icon={Sparkles} 
+        title="Novidades da Semana" 
+        subtitle="Recém chegados no bairro" 
+        onSeeMore={() => onNavigate('explore')}
+      />
 
       <div className="flex gap-4 overflow-x-auto no-scrollbar snap-x -mx-5 px-5">
         {newArrivals.map((store) => (
@@ -165,29 +184,22 @@ const NovidadesDaSemana: React.FC<{ stores: Store[]; onStoreClick?: (store: Stor
   );
 };
 
-const SugestoesParaVoce: React.FC<{ stores: Store[]; onStoreClick?: (store: Store) => void }> = ({ stores, onStoreClick }) => {
-  // Filtramos algumas lojas para simular sugestões
+const SugestoesParaVoce: React.FC<{ stores: Store[]; onStoreClick?: (store: Store) => void; onNavigate: (v: string) => void }> = ({ stores, onStoreClick, onNavigate }) => {
+  // Regra obrigatória: Apenas lojas que possuem imagem
   const suggestions = useMemo(() => {
-    return stores.filter(s => ['f-3', 'f-5', 'f-8', 'f-12', 'f-15'].includes(s.id));
+    return stores.filter(s => (s.image || s.logoUrl) && ['f-3', 'f-5', 'f-8', 'f-12', 'f-15'].includes(s.id));
   }, [stores]);
 
   if (suggestions.length === 0) return null;
 
   return (
-    <div className="bg-white dark:bg-gray-950 py-8 px-5">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h2 className="text-[11px] font-black text-gray-900 dark:text-white uppercase tracking-[0.2em] leading-none mb-1.5">
-            Sugestões para você
-          </h2>
-          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-none">
-            Baseado nas suas últimas buscas
-          </p>
-        </div>
-        <button className="w-8 h-8 rounded-full bg-gray-50 dark:bg-gray-800 flex items-center justify-center text-gray-300">
-           <Lightbulb size={14} />
-        </button>
-      </div>
+    <div className="bg-white dark:bg-gray-950 py-4 px-5">
+      <SectionHeader 
+        icon={Lightbulb} 
+        title="Sugestões para você" 
+        subtitle="Baseado nas suas buscas" 
+        onSeeMore={() => onNavigate('explore')}
+      />
 
       <div className="flex gap-5 overflow-x-auto no-scrollbar snap-x -mx-5 px-5">
         {suggestions.map((store) => (
@@ -230,21 +242,22 @@ const SugestoesParaVoce: React.FC<{ stores: Store[]; onStoreClick?: (store: Stor
   );
 };
 
-const EmAltaNaCidade: React.FC<{ stores: Store[]; onStoreClick?: (store: Store) => void }> = ({ stores, onStoreClick }) => {
+const EmAltaNaCidade: React.FC<{ stores: Store[]; onStoreClick?: (store: Store) => void; onNavigate: (v: string) => void }> = ({ stores, onStoreClick, onNavigate }) => {
+  // Regra obrigatória: Apenas lojas que possuem imagem
   const trending = useMemo(() => {
-    return stores.filter(s => ['f-1', 'f-2'].includes(s.id));
+    return stores.filter(s => (s.image || s.logoUrl) && ['f-1', 'f-2'].includes(s.id));
   }, [stores]);
 
   if (trending.length < 2) return null;
 
   return (
-    <div className="bg-white dark:bg-gray-950 py-8 px-5">
-      <div className="flex items-center gap-2 mb-6">
-        <h2 className="text-[11px] font-black text-gray-900 dark:text-white uppercase tracking-[0.2em] leading-none">
-          Em alta na cidade
-        </h2>
-        <TrendingUp size={14} className="text-[#1E5BFF]" />
-      </div>
+    <div className="bg-white dark:bg-gray-950 py-4 px-5">
+      <SectionHeader 
+        icon={TrendingUp} 
+        title="Em alta na cidade" 
+        subtitle="O que a vizinhança ama" 
+        onSeeMore={() => onNavigate('explore')}
+      />
 
       <div className="flex gap-4">
         {trending.map((store, idx) => (
@@ -266,7 +279,7 @@ const EmAltaNaCidade: React.FC<{ stores: Store[]; onStoreClick?: (store: Store) 
               {store.category}
             </p>
 
-            <div className="mt-auto bg-gray-900 dark:bg-white text-white dark:text-gray-900 px-5 py-2.5 rounded-full text-[9px] font-black uppercase tracking-widest flex items-center gap-1.5 shadow-lg group-hover:bg-black transition-colors">
+            <div className="mt-auto bg-gray-900 dark:bg-white text-white dark:text-gray-900 px-5 py-2.5 rounded-full text-[9px] font-black uppercase tracking-widest flex items-center gap-1.5 shadow-lg transition-colors">
               Explorar <ArrowRight size={10} strokeWidth={4} />
             </div>
           </button>
@@ -292,7 +305,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
     switch (key) {
       case 'categories':
         return (
-          <div key="categories" className="w-full bg-white dark:bg-gray-950 pt-4 pb-0">
+          <div key="categories" className="w-full bg-white dark:bg-gray-950 pt-2 pb-0">
             <div ref={categoriesRef} className="flex overflow-x-auto no-scrollbar px-4 pb-4 snap-x">
               <div className="grid grid-flow-col grid-rows-2 gap-x-3 gap-y-3">
                 {CATEGORIES.map((cat) => (
@@ -307,19 +320,30 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
             </div>
           </div>
         );
-      case 'home_carousel': return <div key="home_carousel" className="w-full bg-white dark:bg-gray-950 mt-4 pb-3"><HomeCarousel onNavigate={onNavigate} onStoreClick={onStoreClick} stores={stores} /></div>;
-      case 'novidades': return <NovidadesDaSemana key="novidades" stores={stores} onStoreClick={onStoreClick} />;
-      case 'sugestoes': return <SugestoesParaVoce key="sugestoes" stores={stores} onStoreClick={onStoreClick} />;
-      case 'em_alta': return <EmAltaNaCidade key="em_alta" stores={stores} onStoreClick={onStoreClick} />;
+      case 'home_carousel': return <div key="home_carousel" className="w-full bg-white dark:bg-gray-950 mt-1 pb-1"><HomeCarousel onNavigate={onNavigate} onStoreClick={onStoreClick} stores={stores} /></div>;
+      case 'novidades': return <NovidadesDaSemana key="novidades" stores={stores} onStoreClick={onStoreClick} onNavigate={onNavigate} />;
+      case 'sugestoes': return <SugestoesParaVoce key="sugestoes" stores={stores} onStoreClick={onStoreClick} onNavigate={onNavigate} />;
+      case 'em_alta': return <EmAltaNaCidade key="em_alta" stores={stores} onStoreClick={onStoreClick} onNavigate={onNavigate} />;
       case 'list':
         return (
-          <div key="list" className="w-full bg-white dark:bg-gray-900 pt-3">
+          <div key="list" className="w-full bg-white dark:bg-gray-900 pt-1 pb-10">
             <div className="px-5">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-[11px] font-black text-gray-400 uppercase tracking-[0.2em]">Explorar Bairro</h3>
-                <div className="flex gap-1 bg-gray-100 dark:bg-gray-800 p-1 rounded-xl">
-                  {['all', 'top_rated'].map((f) => (<button key={f} onClick={() => setListFilter(f as any)} className={`text-[8px] font-black uppercase px-2.5 py-1.5 rounded-lg transition-all ${listFilter === f ? 'bg-white dark:bg-gray-700 text-[#1E5BFF] shadow-sm' : 'text-gray-400'}`}>{f === 'all' ? 'Tudo' : 'Top'}</button>))}
-                </div>
+              <SectionHeader 
+                icon={Compass} 
+                title="Explorar Bairro" 
+                subtitle="Tudo o que você precisa" 
+                onSeeMore={() => onNavigate('explore')}
+              />
+              <div className="flex gap-1 bg-gray-100 dark:bg-gray-800 p-1 rounded-xl w-fit mb-4">
+                {['all', 'top_rated'].map((f) => (
+                  <button 
+                    key={f} 
+                    onClick={() => setListFilter(f as any)} 
+                    className={`text-[8px] font-black uppercase px-4 py-1.5 rounded-lg transition-all ${listFilter === f ? 'bg-white dark:bg-gray-700 text-[#1E5BFF] shadow-sm' : 'text-gray-400'}`}
+                  >
+                    {f === 'all' ? 'Tudo' : 'Top'}
+                  </button>
+                ))}
               </div>
               <LojasEServicosList onStoreClick={onStoreClick} onViewAll={() => onNavigate('explore')} activeFilter={listFilter as any} user={user} onNavigate={onNavigate} premiumOnly={false} />
             </div>
@@ -331,7 +355,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
 
   return (
     <div className="flex flex-col bg-white dark:bg-gray-950 w-full max-w-md mx-auto animate-in fade-in duration-500 overflow-x-hidden pb-32">
-      <div className="flex flex-col w-full">
+      <div className="flex flex-col w-full gap-1">
           {homeStructure.map(section => renderSection(section))}
       </div>
     </div>
