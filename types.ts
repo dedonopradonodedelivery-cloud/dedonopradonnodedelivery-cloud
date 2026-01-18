@@ -62,6 +62,10 @@ export interface Store {
   paymentMethods?: string[];
   recentComments?: string[];
   cashback?: number;
+  // Novos campos para Marketplace
+  price_original?: number;
+  price_current?: number;
+  isMarketplace?: boolean;
 }
 
 export type CommunityPostType = 'tip' | 'recommendation' | 'alert' | 'news' | 'promo';
@@ -104,7 +108,7 @@ export interface CommunitySuggestion {
   votes: number;
   status: 'pending' | 'approved' | 'rejected';
   creatorId: string;
-  voterIds: string[]; // Array para garantir voto único
+  voterIds: string[]; 
 }
 
 export interface Category {
