@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { Store, Category, EditorialCollection, AdType } from '../types';
 import { 
@@ -15,7 +14,11 @@ import {
   DollarSign,
   Megaphone,
   Smartphone,
-  BadgeCheck
+  BadgeCheck,
+  Sparkles,
+  ArrowRight,
+  TrendingUp,
+  Lightbulb
 } from 'lucide-react';
 import { LojasEServicosList } from './LojasEServicosList';
 import { User } from '@supabase/supabase-js';
@@ -34,17 +37,6 @@ interface HomeFeedProps {
   onSpinWin: (reward: any) => void;
   onRequireLogin: () => void;
 }
-
-const getCategoryCover = (category: string) => {
-  switch (category) {
-    case 'Alimentação': return 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=400&auto=format&fit=crop';
-    case 'Pets': return 'https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?q=80&w=400&auto=format&fit=crop';
-    case 'Beleza': return 'https://images.unsplash.com/photo-1560066984-138dadb4c035?q=80&w=400&auto=format&fit=crop';
-    case 'Saúde': return 'https://images.unsplash.com/photo-1505751172876-fa1923c5c528?q=80&w=400&auto=format&fit=crop';
-    case 'Mercado': return 'https://images.unsplash.com/photo-1542838132-92c53300491e?q=80&w=400&auto=format&fit=crop';
-    default: return 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=400&auto=format&fit=crop';
-  }
-};
 
 interface BannerItem {
   id: string;
@@ -118,24 +110,53 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void; onStoreClick?: (
   );
 };
 
-const FeaturedServicesBlock: React.FC<{ stores: Store[], onStoreClick: (store: Store) => void }> = ({ stores, onStoreClick }) => {
-  const visibleServices = useMemo(() => EDITORIAL_SERVICES.filter(service => service.image), []);
-  if (visibleServices.length === 0) return null;
+const NovidadesDaSemana: React.FC<{ stores: Store[]; onStoreClick?: (store: Store) => void }> = ({ stores, onStoreClick }) => {
+  const newArrivals = useMemo(() => {
+    return stores.filter(s => ['f-38', 'f-39', 'f-45', 'f-42', 'f-50'].includes(s.id));
+  }, [stores]);
+
+  if (newArrivals.length === 0) return null;
+
   return (
-    <div className="w-full bg-white dark:bg-gray-950 py-3 border-t border-gray-50 dark:border-gray-800">
-      <div className="px-5 mb-3">
-        <h2 className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-wider">Serviços Recomendados</h2>
-        <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">Profissionais bem avaliados na região</p>
+    <div className="bg-white dark:bg-gray-950 py-8 px-5">
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h2 className="text-[11px] font-black text-gray-900 dark:text-white uppercase tracking-[0.2em] leading-none mb-1.5">
+            Novidades da Semana
+          </h2>
+          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-none">
+            Recém chegados no bairro
+          </p>
+        </div>
+        <button className="w-8 h-8 rounded-full bg-gray-50 dark:bg-gray-800 flex items-center justify-center text-gray-300">
+           <Sparkles size={14} />
+        </button>
       </div>
-      <div className="flex gap-4 overflow-x-auto no-scrollbar px-5 pb-2 snap-x">
-        {visibleServices.map(service => (
-          <button key={service.id} onClick={() => { const s = stores.find(st => st.id === service.id); if (s) onStoreClick(s); }} className="snap-center w-[160px] shrink-0 aspect-[9/16] relative overflow-hidden group active:scale-[0.98] transition-all bg-gray-200 dark:bg-gray-800 shadow-md">
-            <img src={service.image} alt={service.name} className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-transparent to-transparent"></div>
-            <div className="absolute bottom-0 left-0 right-0 p-4 pb-6 text-left z-10">
-                <p className="text-[8px] text-amber-400 font-black uppercase tracking-widest mb-1">{service.subcategory}</p>
-                <h4 className="font-bold text-white text-sm leading-[1.15] mb-1 line-clamp-2">{service.name}</h4>
-                <div className="flex items-center gap-1 text-[9px] text-gray-300"><MapPin className="w-2.5 h-2.5" />{service.location}</div>
+
+      <div className="flex gap-4 overflow-x-auto no-scrollbar snap-x -mx-5 px-5">
+        {newArrivals.map((store) => (
+          <button 
+            key={store.id}
+            onClick={() => onStoreClick && onStoreClick(store)}
+            className="flex-shrink-0 w-[180px] aspect-[4/5] rounded-[2.5rem] overflow-hidden relative snap-center shadow-2xl shadow-black/5 group active:scale-[0.98] transition-all"
+          >
+            <img 
+              src={store.image || store.logoUrl} 
+              alt={store.name} 
+              className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent"></div>
+            
+            <div className="absolute inset-0 p-5 flex flex-col justify-end text-left">
+              <span className="w-fit bg-emerald-500 text-white text-[7px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest mb-2 shadow-lg shadow-emerald-500/20">
+                Novo
+              </span>
+              <h3 className="text-sm font-black text-white leading-tight mb-0.5 truncate drop-shadow-md">
+                {store.name}
+              </h3>
+              <p className="text-[9px] font-bold text-white/60 uppercase tracking-widest truncate">
+                {store.category}
+              </p>
             </div>
           </button>
         ))}
@@ -144,39 +165,111 @@ const FeaturedServicesBlock: React.FC<{ stores: Store[], onStoreClick: (store: S
   );
 };
 
-const CommunityFeedBlock: React.FC<{ onNavigate: (view: string) => void; }> = ({ onNavigate }) => {
-  const { currentNeighborhood, isAll } = useNeighborhood();
-  const previewPosts = useMemo(() => {
-     const fakePosts: any[] = [
-        { id: 'fake-1', userName: 'Maria Souza', userAvatar: 'https://i.pravatar.cc/100?u=maria', neighborhood: 'Freguesia', content: 'Genteeee!!! Adorei esse Aplicativo!!! é tudooooo!!!! #LocalizeiJPA', timestamp: '2 min atrás', likes: 24, comments: 8 },
-        { id: 'fake-7', userName: 'Luciana Lima', userAvatar: 'https://i.pravatar.cc/100?u=luciana', neighborhood: 'Pechincha', content: 'Alguém sabe se o Hortifruti da Estrada do Tindiba tá aberto? 🍎', timestamp: '3 min atrás', likes: 12, comments: 4 }
-     ];
-     return isAll ? fakePosts : fakePosts.filter(p => p.neighborhood === currentNeighborhood || p.id === 'fake-1');
-  }, [currentNeighborhood, isAll]);
+const SugestoesParaVoce: React.FC<{ stores: Store[]; onStoreClick?: (store: Store) => void }> = ({ stores, onStoreClick }) => {
+  // Filtramos algumas lojas para simular sugestões
+  const suggestions = useMemo(() => {
+    return stores.filter(s => ['f-3', 'f-5', 'f-8', 'f-12', 'f-15'].includes(s.id));
+  }, [stores]);
 
-  if (previewPosts.length === 0) return null;
+  if (suggestions.length === 0) return null;
 
   return (
-    <div className="w-full bg-white dark:bg-gray-950 py-3 border-t border-gray-50 dark:border-gray-800">
-      <div className="px-5 mb-3 flex justify-between items-center">
-        <h2 className="text-base font-[900] text-gray-900 dark:text-white tracking-tight leading-none flex items-center gap-2">Bombando no bairro <div className="flex items-center gap-1.5 px-2.5 py-1 bg-red-600 text-white text-[9px] font-black rounded-full uppercase animate-pulse">Ao Vivo</div></h2>
+    <div className="bg-white dark:bg-gray-950 py-8 px-5">
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h2 className="text-[11px] font-black text-gray-900 dark:text-white uppercase tracking-[0.2em] leading-none mb-1.5">
+            Sugestões para você
+          </h2>
+          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-none">
+            Baseado nas suas últimas buscas
+          </p>
+        </div>
+        <button className="w-8 h-8 rounded-full bg-gray-50 dark:bg-gray-800 flex items-center justify-center text-gray-300">
+           <Lightbulb size={14} />
+        </button>
       </div>
-      <div className="flex gap-4 overflow-x-auto no-scrollbar px-5 pb-3 snap-x">
-        {previewPosts.map((post) => (
-            <div key={post.id} className="snap-center min-w-[280px] max-w-[280px] bg-[#1E5BFF]/5 dark:bg-blue-900/5 p-5 rounded-3xl border border-blue-100/50 dark:border-gray-700 flex flex-col justify-between active:scale-[0.99] transition-transform cursor-pointer" onClick={() => onNavigate('community_feed')}>
-                <div className="flex items-center gap-3 mb-4 shrink-0">
-                    <img src={post.userAvatar} alt={post.userName} className="w-11 h-11 rounded-full object-cover border-2 border-white dark:border-gray-800" />
-                    <div className="flex-1 min-w-0">
-                        <p className="text-xs font-black text-gray-900 dark:text-white truncate">@{post.userName.toLowerCase().replace(' ', '')}</p>
-                        <span className="text-[10px] text-[#1E5BFF] font-black">{post.neighborhood}</span>
-                    </div>
-                </div>
-                <p className="text-[13px] text-gray-800 dark:text-gray-200 leading-snug line-clamp-3 font-semibold italic mb-4">"{post.content}"</p>
-                <div className="flex items-center gap-5 text-gray-400 border-t border-gray-50 dark:border-gray-700 pt-4">
-                    <div className="flex items-center gap-1.5 text-[11px] font-bold"><ThumbsUp className="w-4 h-4" /> {post.likes}</div>
-                    <div className="flex items-center gap-1.5 text-[11px] font-bold"><MessageSquare className="w-4 h-4" /> {post.comments}</div>
-                </div>
+
+      <div className="flex gap-5 overflow-x-auto no-scrollbar snap-x -mx-5 px-5">
+        {suggestions.map((store) => (
+          <button 
+            key={store.id}
+            onClick={() => onStoreClick && onStoreClick(store)}
+            className="flex-shrink-0 w-[240px] bg-white dark:bg-gray-900 rounded-[2rem] overflow-hidden snap-center shadow-xl shadow-slate-200/50 dark:shadow-none border border-gray-100 dark:border-gray-800 group active:scale-[0.98] transition-all text-left"
+          >
+            <div className="relative h-32 overflow-hidden">
+              <img 
+                src={store.image || store.logoUrl} 
+                alt={store.name} 
+                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
+              />
+              <div className="absolute top-3 left-3">
+                <span className="bg-black/40 backdrop-blur-md text-white text-[8px] font-black px-2.5 py-1 rounded-lg uppercase tracking-widest border border-white/10">
+                  Para você
+                </span>
+              </div>
             </div>
+            
+            <div className="p-5">
+              <span className="text-[9px] font-black text-[#1E5BFF] uppercase tracking-widest block mb-1">
+                {store.category}
+              </span>
+              <h3 className="text-base font-bold text-gray-900 dark:text-white leading-tight mb-2 truncate">
+                {store.name}
+              </h3>
+              <div className="flex items-center gap-1.5 text-gray-400 dark:text-gray-500">
+                <MapPin size={12} />
+                <span className="text-[10px] font-bold uppercase tracking-tight">
+                  {store.neighborhood || store.distance}
+                </span>
+              </div>
+            </div>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+const EmAltaNaCidade: React.FC<{ stores: Store[]; onStoreClick?: (store: Store) => void }> = ({ stores, onStoreClick }) => {
+  const trending = useMemo(() => {
+    return stores.filter(s => ['f-1', 'f-2'].includes(s.id));
+  }, [stores]);
+
+  if (trending.length < 2) return null;
+
+  return (
+    <div className="bg-white dark:bg-gray-950 py-8 px-5">
+      <div className="flex items-center gap-2 mb-6">
+        <h2 className="text-[11px] font-black text-gray-900 dark:text-white uppercase tracking-[0.2em] leading-none">
+          Em alta na cidade
+        </h2>
+        <TrendingUp size={14} className="text-[#1E5BFF]" />
+      </div>
+
+      <div className="flex gap-4">
+        {trending.map((store, idx) => (
+          <button 
+            key={store.id}
+            onClick={() => onStoreClick && onStoreClick(store)}
+            className={`flex-1 rounded-[2.5rem] p-6 flex flex-col items-center text-center transition-all active:scale-[0.98] shadow-sm
+              ${idx === 0 ? 'bg-rose-50/70 dark:bg-rose-900/20' : 'bg-blue-50/70 dark:bg-blue-900/20'}
+            `}
+          >
+            <div className="w-20 h-20 rounded-full overflow-hidden bg-white shadow-xl border-4 border-white mb-5">
+              <img src={store.logoUrl || store.image} alt={store.name} className="w-full h-full object-cover" />
+            </div>
+            
+            <h3 className="text-sm font-black text-gray-900 dark:text-white leading-tight mb-1">
+              {store.name}
+            </h3>
+            <p className="text-[8px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-6">
+              {store.category}
+            </p>
+
+            <div className="mt-auto bg-gray-900 dark:bg-white text-white dark:text-gray-900 px-5 py-2.5 rounded-full text-[9px] font-black uppercase tracking-widest flex items-center gap-1.5 shadow-lg group-hover:bg-black transition-colors">
+              Explorar <ArrowRight size={10} strokeWidth={4} />
+            </div>
+          </button>
         ))}
       </div>
     </div>
@@ -191,10 +284,9 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
   user
 }) => {
   const [listFilter, setListFilter] = useState<'all' | 'top_rated' | 'open_now'>('all');
-  const { currentNeighborhood } = useNeighborhood();
   const categoriesRef = useRef<HTMLDivElement>(null);
 
-  const homeStructure = useMemo(() => ['categories', 'home_carousel', 'featured_services', 'community_feed', 'list'], []);
+  const homeStructure = useMemo(() => ['categories', 'home_carousel', 'novidades', 'sugestoes', 'em_alta', 'list'], []);
 
   const renderSection = (key: string) => {
     switch (key) {
@@ -216,8 +308,9 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
           </div>
         );
       case 'home_carousel': return <div key="home_carousel" className="w-full bg-white dark:bg-gray-950 mt-4 pb-3"><HomeCarousel onNavigate={onNavigate} onStoreClick={onStoreClick} stores={stores} /></div>;
-      case 'featured_services': return <FeaturedServicesBlock key="featured_services" stores={stores} onStoreClick={(s) => onStoreClick && onStoreClick(s)} />;
-      case 'community_feed': return <CommunityFeedBlock key="community_feed" onNavigate={onNavigate} />;
+      case 'novidades': return <NovidadesDaSemana key="novidades" stores={stores} onStoreClick={onStoreClick} />;
+      case 'sugestoes': return <SugestoesParaVoce key="sugestoes" stores={stores} onStoreClick={onStoreClick} />;
+      case 'em_alta': return <EmAltaNaCidade key="em_alta" stores={stores} onStoreClick={onStoreClick} />;
       case 'list':
         return (
           <div key="list" className="w-full bg-white dark:bg-gray-900 pt-3">

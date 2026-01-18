@@ -85,7 +85,7 @@ export interface CommunityPost {
   type: CommunityPostType;
   timestamp: string;
   isLiked?: boolean;
-  communityId: string; // Relaciona o post a uma comunidade específica
+  communityId: string;
 }
 
 export interface NeighborhoodCommunity {
@@ -96,6 +96,15 @@ export interface NeighborhoodCommunity {
   icon: React.ReactNode;
   color: string;
   membersCount: string;
+}
+
+export interface CommunitySuggestion {
+  id: string;
+  name: string;
+  votes: number;
+  status: 'pending' | 'approved' | 'rejected';
+  creatorId: string;
+  voterIds: string[]; // Array para garantir voto único
 }
 
 export interface Category {
