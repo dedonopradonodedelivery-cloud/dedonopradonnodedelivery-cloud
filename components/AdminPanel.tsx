@@ -7,60 +7,61 @@ import {
   TrendingUp, 
   ChevronRight, 
   Search, 
-  LogOut,
-  Mail,
-  Zap,
-  Globe,
-  Lock,
-  Eye,
-  DollarSign,
-  ArrowLeft,
-  Presentation,
-  Target,
-  Layers,
-  Repeat,
-  BarChart3,
-  ChevronDown,
-  User as UserIcon,
-  EyeOff,
-  Check,
-  X,
-  ArrowUpRight,
-  Activity,
-  Cpu,
-  Server,
-  Bell,
-  ShieldAlert,
-  ArrowRight,
-  Briefcase,
-  PieChart,
-  LayoutGrid,
-  Crown,
-  TrendingDown,
-  Percent,
-  CheckCircle2,
-  Calendar,
-  Rocket,
-  LineChart,
-  ArrowUp,
-  Coins,
-  Handshake,
-  Dices,
-  Sparkles,
-  MapPin,
-  Globe2,
-  Mic,
-  Building2,
-  Info,
-  Scale,
-  Megaphone,
-  ImageIcon,
-  Flame,
-  Milestone,
-  History,
+  LogOut, 
+  Mail, 
+  Zap, 
+  Globe, 
+  Lock, 
+  Eye, 
+  DollarSign, 
+  ArrowLeft, 
+  Presentation, 
+  Target, 
+  Layers, 
+  Repeat, 
+  BarChart3, 
+  ChevronDown, 
+  User as UserIcon, 
+  EyeOff, 
+  Check, 
+  X, 
+  ArrowUpRight, 
+  Activity, 
+  Cpu, 
+  Server, 
+  Bell, 
+  ShieldAlert, 
+  ArrowRight, 
+  Briefcase, 
+  PieChart, 
+  LayoutGrid, 
+  Crown, 
+  TrendingDown, 
+  Percent, 
+  CheckCircle2, 
+  Calendar, 
+  Rocket, 
+  LineChart, 
+  ArrowUp, 
+  Coins, 
+  Handshake, 
+  Dices, 
+  Sparkles, 
+  MapPin, 
+  Globe2, 
+  Mic, 
+  Building2, 
+  Info, 
+  Scale, 
+  Megaphone, 
+  ImageIcon, 
+  Flame, 
+  Milestone, 
+  History, 
   PartyPopper
 } from 'lucide-react';
 import { User as SupabaseUser } from '@supabase/supabase-js';
+import { ContactsBaseView } from './ContactsBaseView';
 
 interface AdminPanelProps {
   user: SupabaseUser | null;
@@ -72,7 +73,7 @@ interface AdminPanelProps {
 
 const ADMIN_EMAIL = 'dedonopradonodedelivery@gmail.com';
 
-type AdminView = 'dashboard' | 'operations' | 'monetization_model';
+type AdminView = 'dashboard' | 'operations' | 'monetization_model' | 'contacts';
 
 const KPICard: React.FC<{ icon: any, label: string, value: string, isPositive?: boolean }> = ({ icon: Icon, label, value, isPositive }) => (
   <div className="bg-[#111827] p-6 flex flex-col items-center justify-center text-center h-36 border border-white/[0.04] shadow-md rounded-xl">
@@ -806,6 +807,24 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ user, onLogout, viewMode
                   Gerenciar Rede <ChevronRight size={14} strokeWidth={3} />
               </div>
           </button>
+
+          {/* CARD NOVO: BASE DE CONTATOS */}
+          <button
+            onClick={() => setActiveView('contacts')}
+            className="bg-[#111827] text-white p-10 flex flex-col items-center justify-center text-center gap-8 active:scale-[0.99] transition-all group border border-white/[0.04] shadow-2xl relative overflow-hidden rounded-[2.5rem] hover:bg-[#0B3A53]/20 md:col-span-2"
+          >
+              <div className="absolute top-0 left-0 w-32 h-32 bg-[#1E5BFF]/10 rounded-full blur-3xl"></div>
+              <div className="w-20 h-20 bg-[#0B3A53]/20 border border-white/[0.04] flex items-center justify-center text-white group-hover:border-[#1E5BFF]/50 transition-colors rounded-[2rem]">
+                  <Users size={36} className="group-hover:text-[#1E5BFF] transition-colors" />
+              </div>
+              <div>
+                <h3 className="font-black text-xl uppercase tracking-tighter mb-2">Base de Contatos</h3>
+                <p className="text-xs text-[#9CA3AF] font-bold leading-relaxed max-w-[240px] mx-auto">Gestão de usuários, lojistas e leads. Exportação de dados.</p>
+              </div>
+              <div className="flex items-center gap-3 text-[#1E5BFF] text-[10px] font-black uppercase tracking-widest group-hover:gap-6 transition-all border-b border-[#1E5BFF]/30 pb-1">
+                  Acessar Base <ArrowRight size={14} strokeWidth={3} />
+              </div>
+          </button>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -888,7 +907,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ user, onLogout, viewMode
         activeView === 'monetization_model' ? 'bg-[#F8FAFC]' : 'bg-[#0F172A] text-white'
     }`}>
       
-      {activeView === 'monetization_model' ? renderMonetizationModel() : (
+      {activeView === 'monetization_model' ? renderMonetizationModel() : 
+       activeView === 'contacts' ? <ContactsBaseView onBack={() => setActiveView('dashboard')} /> : (
         <>
           <Header />
           <main className="p-8 max-w-6xl mx-auto w-full flex-1">

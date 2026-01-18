@@ -1,8 +1,161 @@
-import React from 'react';
 
-// This file is a placeholder to resolve build errors caused by duplicate/invalid file generation.
-// The real App component is located at src/App.tsx.
+import React, { useState, useEffect, useRef } from 'react';
+import { Layout } from './components/Layout';
+import { Header } from './components/Header';
+import { HomeFeed } from './components/HomeFeed';
+import { ExploreView } from './components/ExploreView';
+import { StoreDetailView } from './components/StoreDetailView';
+import { AuthModal } from './components/AuthModal';
+import { MenuView } from './components/MenuView';
+import { PatrocinadorMasterScreen } from './components/PatrocinadorMasterScreen';
+import { ServicesView } from './components/ServicesView';
+import { SubcategoriesView } from './components/SubcategoriesView';
+import { SpecialtiesView } from './components/SpecialtiesView';
+import { ServiceSuccessView } from './components/ServiceSuccessView';
+import { ServiceTermsView } from './components/ServiceTermsView';
+import { QuoteRequestModal } from './components/QuoteRequestModal';
+import { StoreAreaView } from './components/StoreAreaView';
+import { WeeklyPromoModule } from './components/WeeklyPromoModule';
+import { JobsView } from './components/JobsView';
+import { MerchantJobsModule } from './components/MerchantJobsModule';
+import { AdminPanel } from './components/AdminPanel'; 
+import { MapPin, ShieldCheck, User as UserIcon, Store as StoreIcon, EyeOff, X, Check } from 'lucide-react';
+import { useAuth } from './contexts/AuthContext';
+import { NeighborhoodProvider } from './contexts/NeighborhoodContext';
+import { Category, Store, EditorialCollection, ThemeMode } from './types';
+import { CategoryView } from './components/CategoryView';
+import { EditorialListView } from './components/EditorialListView';
+import { StoreAdsModule } from './components/StoreAdsModule';
+import { StoreProfileEdit } from './components/StoreProfileEdit';
+import { CommunityFeedView } from './components/CommunityFeedView';
+import { STORES } from './constants';
+import { AdminModerationPanel } from './components/AdminModerationPanel';
+import { 
+  AboutView, 
+  SupportView, 
+  InviteFriendView, 
+  FavoritesView 
+} from './components/SimplePages';
 
-export const AppFragment: React.FC = () => {
-  return null;
+let splashWasShownInSession = false;
+const ADMIN_EMAIL = 'dedonopradonodedelivery@gmail.com';
+const MAIN_TABS = ['home', 'explore', 'community_feed', 'services', 'profile'];
+
+export type RoleMode = 'ADM' | 'Usuário' | 'Lojista' | 'Visitante';
+
+const App: React.FC = () => {
+  const { user, userRole, loading: isAuthInitialLoading, signOut } = useAuth();
+  const isAuthReturn = window.location.hash.includes('access_token') || window.location.search.includes('code=');
+  const [splashStage, setSplashStage] = useState(splashWasShownInSession || isAuthReturn ? 4 : 0);
+  const [themeMode, setThemeMode] = useState<ThemeMode>(() => (localStorage.getItem('localizei_theme_mode') as ThemeMode) || 'light');
+  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [viewMode, setViewMode] = useState<RoleMode>(() => (localStorage.getItem('admin_view_mode') as RoleMode) || 'ADM');
+  const [isRoleSwitcherOpen, setIsRoleSwitcherOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState(() => localStorage.getItem('localizei_active_tab') || 'home');
+  const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
+  const [selectedStore, setSelectedStore] = useState<Store | null>(null);
+  const [selectedCollection, setSelectedCollection] = useState<EditorialCollection | null>(null);
+  const [isAuthOpen, setIsAuthOpen] = useState(false);
+  const [globalSearch, setGlobalSearch] = useState('');
+  const [selectedServiceMacro, setSelectedServiceMacro] = useState<{id: string, name: string} | null>(null);
+  const [isQuoteModalOpen, setIsQuoteModalOpen] = useState(false);
+  const [quoteCategory, setQuoteCategory] = useState('');
+  const [adCategoryTarget, setAdCategoryTarget] = useState<string | null>(null);
+
+  useEffect(() => {
+    localStorage.setItem('localizei_active_tab', activeTab);
+  }, [activeTab]);
+
+  useEffect(() => {
+    if (splashStage === 4) return;
+    const t1 = setTimeout(() => setSplashStage(3), 5000);
+    const t2 = setTimeout(() => { setSplashStage(4); splashWasShownInSession = true; }, 5800);
+    return () => { clearTimeout(t1); clearTimeout(t2); };
+  }, []);
+
+  useEffect(() => {
+    if (user?.email !== ADMIN_EMAIL) return;
+    localStorage.setItem('admin_view_mode', viewMode);
+    switch (viewMode) {
+      case 'ADM': setActiveTab('admin_panel'); break;
+      case 'Lojista': setActiveTab('store_area'); break;
+      default: if (activeTab === 'admin_panel' || activeTab === 'store_area') setActiveTab('home');
+    }
+  }, [viewMode, user]);
+
+  const handleSelectStore = (store: Store) => { setSelectedStore(store); setActiveTab('store_detail'); };
+  const headerExclusionList = ['store_area', 'editorial_list', 'store_profile', 'category_detail', 'store_detail', 'profile', 'patrocinador_master', 'service_subcategories', 'service_specialties', 'store_ads_module', 'about', 'support', 'favorites', 'community_feed', 'admin_panel'];
+  const hideBottomNav = ['store_ads_module', 'store_detail', 'admin_panel'].includes(activeTab);
+
+  const RoleSwitcherModal = () => {
+    if (!isRoleSwitcherOpen) return null;
+    return (
+        <div className="fixed inset-0 z-[300] flex items-center justify-center bg-black/80 backdrop-blur-sm p-6" onClick={() => setIsRoleSwitcherOpen(false)}>
+            <div className="bg-[#111827] w-full max-w-md rounded-[2.5rem] border border-white/10 p-8 shadow-2xl animate-in zoom-in-95 duration-300" onClick={(e) => e.stopPropagation()}>
+                <div className="flex justify-between items-start mb-8 px-2">
+                    <h2 className="text-xl font-black text-white uppercase">Modo de Visualização</h2>
+                    <button onClick={() => setIsRoleSwitcherOpen(false)} className="text-gray-500 hover:text-white"><X size={24} /></button>
+                </div>
+                <div className="space-y-3">
+                    {(['ADM', 'Usuário', 'Lojista', 'Visitante'] as RoleMode[]).map((role) => (
+                        <button key={role} onClick={() => { setViewMode(role); setIsRoleSwitcherOpen(false); }} className={`w-full p-5 rounded-[1.5rem] border text-left transition-all ${viewMode === role ? 'bg-white text-black' : 'bg-white/5 border-white/5 text-white'}`}>
+                            <span className="font-black uppercase">{role}</span>
+                        </button>
+                    ))}
+                </div>
+            </div>
+        </div>
+    );
+  };
+
+  return (
+    <div className={isDarkMode ? 'dark' : ''}>
+      <NeighborhoodProvider>
+        <div className="min-h-screen bg-white dark:bg-gray-900 flex justify-center relative">
+          <Layout activeTab={activeTab} setActiveTab={setActiveTab} userRole={userRole} hideNav={hideBottomNav}>
+              {!headerExclusionList.includes(activeTab) && (
+                <Header isDarkMode={isDarkMode} toggleTheme={() => {}} onAuthClick={() => setActiveTab('profile')} user={user} searchTerm={globalSearch} onSearchChange={setGlobalSearch} onNavigate={setActiveTab} activeTab={activeTab} userRole={userRole} stores={STORES} onStoreClick={handleSelectStore} isAdmin={user?.email === ADMIN_EMAIL} viewMode={viewMode} onOpenViewSwitcher={() => setIsRoleSwitcherOpen(true)} />
+              )}
+              <main className="animate-in fade-in duration-500 w-full max-w-md mx-auto">
+                {activeTab === 'admin_panel' && <AdminPanel user={user as any} onLogout={signOut} viewMode={viewMode} onOpenViewSwitcher={() => setIsRoleSwitcherOpen(true)} onNavigateToApp={() => setActiveTab('home')} />}
+                {activeTab === 'home' && <HomeFeed onNavigate={setActiveTab} onSelectCategory={(c) => { setSelectedCategory(c); setActiveTab('category_detail'); }} onSelectCollection={(c) => { setSelectedCollection(c); setActiveTab('editorial_list'); }} onStoreClick={handleSelectStore} stores={STORES} searchTerm={globalSearch} user={user as any} onSpinWin={() => {}} onRequireLogin={() => setIsAuthOpen(true)} />}
+                {activeTab === 'explore' && <ExploreView stores={STORES} searchQuery={globalSearch} onStoreClick={handleSelectStore} onLocationClick={() => {}} onFilterClick={() => {}} onOpenPlans={() => {}} onNavigate={setActiveTab} />}
+                {activeTab === 'profile' && <MenuView user={user as any} userRole={userRole} onAuthClick={() => setIsAuthOpen(true)} onNavigate={setActiveTab} onBack={() => setActiveTab('home')} />}
+                {activeTab === 'community_feed' && <CommunityFeedView onStoreClick={handleSelectStore} user={user as any} onRequireLogin={() => setIsAuthOpen(true)} />}
+                {activeTab === 'services' && <ServicesView onSelectMacro={(id, name) => { setSelectedServiceMacro({id, name}); if (id === 'emergency') { setQuoteCategory(name); setIsQuoteModalOpen(true); } else { setActiveTab('service_subcategories'); } }} onOpenTerms={() => setActiveTab('service_terms')} onNavigate={setActiveTab} searchTerm={globalSearch} />}
+                {activeTab === 'category_detail' && selectedCategory && <CategoryView category={selectedCategory} onBack={() => setActiveTab('home')} onStoreClick={handleSelectStore} stores={STORES} userRole={userRole} onAdvertiseInCategory={setAdCategoryTarget} />}
+                {activeTab === 'store_detail' && selectedStore && <StoreDetailView store={selectedStore} onBack={() => setActiveTab('home')} />}
+                {activeTab === 'store_area' && <StoreAreaView onBack={() => setActiveTab('home')} onNavigate={setActiveTab} user={user as any} />}
+                {activeTab === 'patrocinador_master' && <PatrocinadorMasterScreen onBack={() => setActiveTab('home')} />}
+                {activeTab === 'jobs_list' && <JobsView onBack={() => setActiveTab('home')} />}
+                {activeTab === 'about' && <AboutView onBack={() => setActiveTab('profile')} />}
+                {activeTab === 'support' && <SupportView onBack={() => setActiveTab('profile')} />}
+                {activeTab === 'favorites' && <FavoritesView onBack={() => setActiveTab('profile')} onNavigate={setActiveTab} user={user as any} />}
+                {activeTab === 'service_subcategories' && selectedServiceMacro && <SubcategoriesView macroId={selectedServiceMacro.id} macroName={selectedServiceMacro.name} onBack={() => setActiveTab('services')} onSelectSubcategory={(n) => { setQuoteCategory(n); setActiveTab('service_specialties'); }} />}
+                {activeTab === 'service_specialties' && <SpecialtiesView subcategoryName={quoteCategory} onBack={() => setActiveTab('service_subcategories')} onSelectSpecialty={() => setIsQuoteModalOpen(true)} />}
+                {activeTab === 'store_ads_module' && <StoreAdsModule onBack={() => setActiveTab('store_area')} onNavigate={setActiveTab} categoryName={adCategoryTarget || undefined} />}
+                {activeTab === 'store_profile' && <StoreProfileEdit onBack={() => setActiveTab('store_area')} />}
+              </main>
+              <AuthModal isOpen={isAuthOpen} onClose={() => setIsAuthOpen(false)} user={user as any} onLoginSuccess={() => setIsAuthOpen(false)} />
+              {isQuoteModalOpen && <QuoteRequestModal isOpen={isQuoteModalOpen} onClose={() => setIsQuoteModalOpen(false)} categoryName={quoteCategory} onSuccess={() => setActiveTab('service_success')} />}
+          </Layout>
+          <RoleSwitcherModal />
+          {splashStage < 4 && (
+            <div className={`fixed inset-0 z-[999] flex flex-col items-center justify-between py-20 transition-all duration-800 ${splashStage === 3 ? 'animate-app-exit' : ''}`} style={{ backgroundColor: '#1E5BFF' }}>
+              <div className="flex flex-col items-center">
+                  <div className="relative w-32 h-32 bg-white rounded-[2.5rem] flex items-center justify-center shadow-2xl mb-8 animate-logo-enter"><MapPin className="w-16 h-16 text-brand-blue fill-brand-blue" /></div>
+                  <h1 className="text-4xl font-black font-display text-white tracking-tighter drop-shadow-md animate-fade-in" style={{ animationDuration: '1200ms' }}>Localizei JPA</h1>
+                  <p className="text-[15px] font-medium text-white/85 mt-1.5 animate-fade-in-slide-up opacity-0" style={{ animationDelay: '2000ms' }}>Rede social do seu bairro.</p>
+              </div>
+              <div className="flex flex-col items-center animate-fade-in opacity-0" style={{ animationDelay: '3500ms' }}>
+                   <p className="text-[9px] font-black text-white/50 uppercase tracking-[0.25em] mb-1.5">Patrocinador Master</p>
+                   <p className="text-xl font-bold text-white tracking-tight">Grupo Esquematiza</p>
+              </div>
+            </div>
+          )}
+        </div>
+      </NeighborhoodProvider>
+    </div>
+  );
 };
+export default App;

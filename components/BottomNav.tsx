@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Home, Search, QrCode, Wrench, Users } from 'lucide-react';
+import { Home, Users, User } from 'lucide-react';
 
 interface BottomNavProps {
   activeTab: string;
@@ -9,40 +9,29 @@ interface BottomNavProps {
   onCashbackClick?: () => void;
 }
 
-export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, userRole, onCashbackClick }) => {
-  // UX: Botão central padronizado como "Cupom" para todos os perfis.
-  // A lógica de ação (Login / Gerar / Ler) é tratada no handler onCashbackClick.
-  const qrLabel = 'Cupom';
-
+export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab }) => {
   const navItems = [
     { id: 'home', icon: Home, label: 'Início' },
-    { id: 'explore', icon: Search, label: 'Explorar' },
-    { id: 'cupom_action', icon: QrCode, label: qrLabel, isCenter: true },
-    { id: 'services', icon: Wrench, label: 'Serviços' },
-    { id: 'community_feed', icon: Users, label: 'Feed' },
+    { id: 'community_feed', icon: Users, label: 'Comunidade', isCenter: true },
+    { id: 'profile', icon: User, label: 'Menu' },
   ];
 
   return (
     <div className="fixed bottom-0 left-0 right-0 mx-auto w-full max-w-md bg-[#1E5BFF] z-50 h-[80px] rounded-t-[24px] shadow-[0_-5px_30px_rgba(0,0,0,0.2)] border-t border-white/10">
-      <div className="flex items-end justify-between w-full px-2 h-full pb-2">
+      <div className="flex items-end justify-around w-full px-4 h-full pb-2">
         {navItems.map((tab) => {
-          // Lógica de ativação: Serviços engloba sub-rotas de serviço
-          const isActive = activeTab === tab.id || 
-                           (tab.id === 'services' && activeTab.startsWith('service_')) ||
-                           (tab.id === 'community_feed' && activeTab === 'community_feed') ||
-                           (tab.isCenter && (activeTab === 'user_cupom' || activeTab === 'qrcode_scan' || activeTab === 'cashback_landing'));
-                           
+          const isActive = activeTab === tab.id;
           const Icon = tab.icon;
 
           if (tab.isCenter) {
             return (
-              <div key={tab.id} className="relative w-24 flex justify-center -top-6">
+              <div key={tab.id} className="relative w-20 flex justify-center -top-6">
                  <button
-                    onClick={onCashbackClick}
+                    onClick={() => setActiveTab(tab.id)}
                     className="flex flex-col items-center group outline-none"
                  >
-                    <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-xl shadow-black/20 border-[6px] border-[#1E5BFF] active:scale-95 transition-transform duration-200">
-                        <Icon className="w-7 h-7 text-[#1E5BFF]" strokeWidth={2.5} />
+                    <div className={`w-16 h-16 rounded-full flex items-center justify-center shadow-xl shadow-black/20 border-[6px] border-[#1E5BFF] active:scale-95 transition-all duration-200 ${isActive ? 'bg-[#FFD700]' : 'bg-white'}`}>
+                        <Icon className={`w-7 h-7 ${isActive ? 'text-[#1E5BFF]' : 'text-[#1E5BFF]'}`} strokeWidth={2.5} />
                     </div>
                     <span className="text-[11px] font-bold text-white mt-1 tracking-tight whitespace-nowrap">
                         {tab.label}
@@ -56,10 +45,10 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className="flex-1 h-[60px] flex flex-col items-center justify-center gap-1 active:scale-95 transition-transform outline-none"
+              className="w-20 h-[60px] flex flex-col items-center justify-center gap-1 active:scale-95 transition-transform outline-none"
             >
               <div className={`
-                p-1.5 rounded-xl transition-all duration-300
+                p-2 rounded-xl transition-all duration-300
                 ${isActive ? 'bg-white/20' : 'bg-transparent'}
               `}>
                 <Icon 

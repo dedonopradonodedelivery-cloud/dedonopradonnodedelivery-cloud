@@ -13,7 +13,8 @@ import {
   Search,
   User as UserIcon,
   ChevronDown,
-  Check
+  Check,
+  Info
 } from 'lucide-react';
 import { MasterSponsorBanner } from './MasterSponsorBanner';
 
@@ -23,27 +24,22 @@ interface StoreAdsModuleProps {
   categoryName?: string;
 }
 
-const SUB_NEIGHBORHOODS = [
-  "Freguesia", "Taquara", "Pechincha", "Tanque", 
-  "Anil", "Curicica", "Cidade Jardim", "Gardênia", "Cidade de Deus"
+const AVAILABLE_NEIGHBORHOODS = [
+  "Freguesia", 
+  "Taquara", 
+  "Anil", 
+  "Pechincha", 
+  "Cidade de Deus", 
+  "Curicica", 
+  "Parque Olímpico", 
+  "Gardênia", 
+  "Tanque"
 ];
 
-const AD_PRICING = {
-  jpa: {
-    title: "Jacarepaguá Inteiro",
-    subtitle: "Alcance máximo em todo o app",
-    monthly: 999,
-    quarterly: 2599,
-    tag: "DESTAQUE MÁXIMO"
-  },
-  sub: {
-    title: "Por Sub-bairro",
-    subtitle: "Foco total na sua vizinhança",
-    monthly: 497,
-    quarterly: 1199,
-    tag: "DESTAQUE LOCAL"
-  }
-};
+// Configuração de Preços
+const PRICE_BASE = 397;
+const PRICE_PROMO = 149;
+const DISCOUNT_QUARTERLY = 0.12; // 12%
 
 const IPhoneMock = () => {
   return (
@@ -128,26 +124,45 @@ const IPhoneMock = () => {
 };
 
 export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNavigate, categoryName }) => {
-  const [territory, setTerritory] = useState<'jpa' | 'sub'>('jpa');
-  const [selectedSubHood, setSelectedSubHood] = useState<string | null>(null);
+  const [selectedNeighborhoods, setSelectedNeighborhoods] = useState<string[]>([]);
   const [isInterested, setIsInterested] = useState(false);
 
-  const activePricing = AD_PRICING[territory];
-  const isSelectionComplete = territory === 'jpa' || (territory === 'sub' && selectedSubHood);
+  const toggleNeighborhood = (name: string) => {
+    setSelectedNeighborhoods(prev => 
+      prev.includes(name) 
+        ? prev.filter(item => item !== name)
+        : [...prev, name]
+    );
+  };
+
+  // Cálculos Financeiros
+  const count = selectedNeighborhoods.length;
+  
+  // Mensal (Unitário)
+  const monthlyTotal = count * PRICE_PROMO;
+  const monthlyBaseTotal = count * PRICE_BASE;
+  const monthlySavings = monthlyBaseTotal - monthlyTotal;
+
+  // Trimestral (Total)
+  const quarterlyTotalRaw = monthlyTotal * 3;
+  const quarterlyTotalFinal = quarterlyTotalRaw * (1 - DISCOUNT_QUARTERLY);
+  const quarterlySavings = (monthlyBaseTotal * 3) - quarterlyTotalFinal;
+
+  const isSelectionComplete = count > 0;
 
   const handleContactSales = (plan: 'monthly' | 'quarterly') => {
     if (!isSelectionComplete) return;
 
     setIsInterested(true);
-    const scopeName = territory === 'jpa' ? "Jacarepaguá Inteiro" : `Sub-bairro ${selectedSubHood}`;
-    const price = plan === 'monthly' ? activePricing.monthly : activePricing.quarterly;
+    const scopeName = selectedNeighborhoods.join(', ');
+    const price = plan === 'monthly' ? monthlyTotal : quarterlyTotalFinal;
     const duration = plan === 'monthly' ? "1 Mês" : "3 Meses";
     
     let contextMessage = categoryName 
         ? `Quero anunciar na categoria *${categoryName}*.` 
         : `Tenho interesse em anunciar no app Localizei.`;
 
-    const message = `Olá! ${contextMessage}\n\n*Território:* ${scopeName}\n*Plano:* ${duration}\n*Valor:* R$ ${price.toLocaleString('pt-BR')}`;
+    const message = `Olá! ${contextMessage}\n\n*Bairros:* ${scopeName}\n*Plano:* ${duration}\n*Valor Total:* R$ ${price.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
     const whatsappUrl = `https://wa.me/5521999999999?text=${encodeURIComponent(message)}`; 
     
     setTimeout(() => {
@@ -169,12 +184,12 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
         <div className="text-center mt-2">
             <div className="inline-flex items-center gap-2 bg-white/20 text-white px-4 py-1.5 rounded-full border border-white/20 mb-6 shadow-sm backdrop-blur-sm">
                 <Crown className="w-4 h-4 fill-current" />
-                <span className="text-[10px] font-black uppercase tracking-widest">{activePricing.tag}</span>
+                <span className="text-[10px] font-black uppercase tracking-widest">DESTAQUE MÁXIMO</span>
             </div>
             <h1 className="text-3xl md:text-4xl font-black text-white leading-[1.1] mb-4 font-display tracking-tight">
                 Destaque sua marca<br/>
                 <span className="text-blue-200">
-                    {categoryName ? `em ${categoryName}` : (territory === 'jpa' ? 'na Freguesia' : (selectedSubHood || 'sua região'))}
+                    na Jacarepaguá
                 </span>
             </h1>
             <div className="my-8 animate-in fade-in zoom-in duration-700">
@@ -182,59 +197,79 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
             </div>
         </div>
 
+        {/* PASSO 1 - SELEÇÃO DE BAIRROS */}
         <div className="bg-white/10 rounded-3xl p-1 border border-white/20">
             <h3 className="text-center font-bold text-white text-sm uppercase tracking-wide py-3">Passo 1: Onde anunciar?</h3>
-            <div className="bg-black/20 rounded-[1.5rem] p-1.5 flex gap-1">
-                <button 
-                    onClick={() => { setTerritory('jpa'); setSelectedSubHood(null); }}
-                    className={`flex-1 py-3 rounded-[1.2rem] text-xs font-black uppercase tracking-wider transition-all flex items-center justify-center gap-2 ${territory === 'jpa' ? 'bg-white text-[#1E5BFF] shadow-lg' : 'text-blue-100 hover:bg-white/5'}`}
-                >
-                    <MapPin className="w-4 h-4" />
-                    JPA Inteiro
-                </button>
-                <button 
-                    onClick={() => setTerritory('sub')}
-                    className={`flex-1 py-3 rounded-[1.2rem] text-xs font-black uppercase tracking-wider transition-all flex items-center justify-center gap-2 ${territory === 'sub' ? 'bg-white text-[#1E5BFF] shadow-lg' : 'text-blue-100 hover:bg-white/5'}`}
-                >
-                    <Target className="w-4 h-4" />
-                    Sub-bairro
-                </button>
-            </div>
-            {territory === 'sub' && (
-                <div className="p-4 pt-6 animate-in slide-in-from-top-4 fade-in duration-300">
-                    <p className="text-xs text-blue-100 font-bold mb-3 text-center uppercase tracking-wide">Selecione a região:</p>
-                    <div className="flex flex-wrap gap-2 justify-center">
-                        {SUB_NEIGHBORHOODS.map(hood => (
+            
+            <div className="p-4 bg-white/5 rounded-[1.5rem] animate-in slide-in-from-top-4 fade-in duration-300">
+                <div className="flex items-center justify-center gap-2 mb-4">
+                    <p className="text-xs text-blue-100 font-bold uppercase tracking-wide">Selecione os bairros:</p>
+                    <span className="bg-white text-[#1E5BFF] text-[10px] font-black px-2 py-0.5 rounded-md">
+                        {count} selecionado{count !== 1 && 's'}
+                    </span>
+                </div>
+                
+                <div className="flex flex-wrap gap-2 justify-center">
+                    {AVAILABLE_NEIGHBORHOODS.map(hood => {
+                        const isSelected = selectedNeighborhoods.includes(hood);
+                        return (
                             <button
                                 key={hood}
-                                onClick={() => setSelectedSubHood(hood)}
-                                className={`px-3 py-2 rounded-xl text-xs font-bold transition-all border flex items-center gap-1.5 ${selectedSubHood === hood ? 'bg-green-400 text-green-900 border-green-400 shadow-lg scale-105' : 'bg-white/5 text-white border-white/20 hover:bg-white/10'}`}
+                                onClick={() => toggleNeighborhood(hood)}
+                                className={`px-3 py-2.5 rounded-xl text-xs font-bold transition-all border flex items-center gap-1.5 ${
+                                    isSelected 
+                                    ? 'bg-green-400 text-green-900 border-green-400 shadow-lg scale-105' 
+                                    : 'bg-white/5 text-white border-white/20 hover:bg-white/10'
+                                }`}
                             >
-                                {selectedSubHood === hood && <Check className="w-3 h-3" />}
+                                {isSelected && <Check className="w-3 h-3" />}
                                 {hood}
                             </button>
-                        ))}
+                        );
+                    })}
+                </div>
+
+                <div className="mt-6 flex flex-col items-center gap-1">
+                    <p className="text-[10px] text-blue-200 uppercase tracking-widest line-through decoration-blue-200/50">
+                        De R$ {PRICE_BASE}/bairro
+                    </p>
+                    <div className="flex items-center gap-2 bg-green-500 text-white px-3 py-1 rounded-full shadow-lg animate-pulse">
+                        <Zap className="w-3 h-3 fill-white" />
+                        <span className="text-xs font-black uppercase">Promoção: R$ {PRICE_PROMO}/bairro</span>
                     </div>
                 </div>
-            )}
+            </div>
         </div>
 
+        {/* PASSO 2 - PLANOS */}
         <div className={`space-y-4 transition-all duration-500 ${isSelectionComplete ? 'opacity-100 translate-y-0' : 'opacity-50 translate-y-4 grayscale pointer-events-none'}`}>
             <div className="text-center">
                 <h3 className="font-bold text-white text-sm uppercase tracking-wide mb-1">Passo 2: Escolha o Plano</h3>
                 <p className="text-xs text-blue-200">
-                    Valores para: <strong>{territory === 'jpa' ? 'Todo Jacarepaguá' : selectedSubHood}</strong>
+                    Investimento calculado para: <strong>{count} bairro{count !== 1 && 's'}</strong>
                 </p>
             </div>
+            
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* PLANO 1 MÊS */}
                 <div className="bg-white rounded-[2rem] p-6 flex flex-col items-center text-center shadow-lg relative overflow-hidden transition-all duration-300 group hover:scale-[1.02]">
                     <div className="absolute top-0 inset-x-0 h-1 bg-gray-200"></div>
                     <h4 className="text-lg font-black text-gray-400 uppercase tracking-wide mb-2 mt-2">1 Mês</h4>
+                    
+                    {monthlySavings > 0 && (
+                        <span className="text-xs text-gray-400 line-through mb-1">Total: R$ {monthlyBaseTotal.toLocaleString('pt-BR')}</span>
+                    )}
+                    
                     <div className="flex items-baseline justify-center gap-1 mb-2">
                         <span className="text-sm font-bold text-gray-400">R$</span>
-                        <span className="text-4xl font-black text-gray-900 tracking-tighter">{activePricing.monthly}</span>
+                        <span className="text-4xl font-black text-gray-900 tracking-tighter">
+                            {monthlyTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                        </span>
                     </div>
-                    <p className="text-xs text-gray-500 font-medium mb-6 px-4">Ideal para testar e ganhar visibilidade imediata.</p>
+                    <p className="text-[10px] text-green-600 font-bold bg-green-50 px-2 py-1 rounded-md mb-6">
+                        Economia de R$ {monthlySavings.toLocaleString('pt-BR')}
+                    </p>
+                    
                     <button 
                         onClick={() => handleContactSales('monthly')}
                         disabled={isInterested || !isSelectionComplete}
@@ -243,16 +278,26 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
                         Quero anunciar 1 mês
                     </button>
                 </div>
+
+                {/* PLANO 3 MESES */}
                 <div className="bg-white rounded-[2rem] p-6 flex flex-col items-center text-center shadow-2xl shadow-black/20 relative overflow-hidden transform md:scale-105 border-4 border-white ring-4 ring-black/5 transition-all duration-300 group hover:scale-[1.02]">
                     <div className="absolute top-0 right-0 bg-yellow-400 text-blue-900 text-[9px] font-black px-3 py-1 rounded-bl-xl uppercase tracking-widest flex items-center gap-1 shadow-sm z-10">
-                        <Star className="w-3 h-3 fill-blue-900" /> Recomendado
+                        <Star className="w-3 h-3 fill-blue-900" /> 12% OFF Extra
                     </div>
                     <h4 className="text-lg font-black text-[#1E5BFF] uppercase tracking-wide mb-2 mt-2">3 Meses</h4>
+                    
+                    <span className="text-xs text-gray-400 line-through mb-1">Total: R$ {quarterlyTotalRaw.toLocaleString('pt-BR')}</span>
+
                     <div className="flex items-baseline justify-center gap-1 mb-2">
                         <span className="text-sm font-bold text-blue-300">R$</span>
-                        <span className="text-5xl font-black text-[#1E5BFF] tracking-tighter">{activePricing.quarterly.toLocaleString('pt-BR')}</span>
+                        <span className="text-4xl font-black text-[#1E5BFF] tracking-tighter">
+                            {quarterlyTotalFinal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                        </span>
                     </div>
-                    <p className="text-xs text-gray-500 font-medium mb-6 px-2">Mais economia e presença contínua no bairro.</p>
+                    <p className="text-[10px] text-green-600 font-bold bg-green-50 px-2 py-1 rounded-md mb-6">
+                        Economia Total: R$ {quarterlySavings.toLocaleString('pt-BR')}
+                    </p>
+
                     <div className="w-full relative z-10">
                         <button 
                             onClick={() => handleContactSales('quarterly')}
@@ -274,11 +319,11 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
             </div>
             <div className="flex items-start gap-3">
                 <CheckCircle2 className="w-4 h-4 text-[#1E5BFF] shrink-0 mt-0.5" />
-                <span>Link direto para sua loja ou WhatsApp</span>
+                <span>Link direto para sua loja no app</span>
             </div>
             <div className="flex items-start gap-3">
                 <CheckCircle2 className="w-4 h-4 text-[#1E5BFF] shrink-0 mt-0.5" />
-                <span>Exibição exclusiva para: <strong className="text-gray-900">{territory === 'jpa' ? 'Todo Jacarepaguá' : (selectedSubHood || 'Bairro escolhido')}</strong></span>
+                <span>Exibição exclusiva nos bairros selecionados</span>
             </div>
             <div className="flex items-start gap-3">
                 <CheckCircle2 className="w-4 h-4 text-[#1E5BFF] shrink-0 mt-0.5" />

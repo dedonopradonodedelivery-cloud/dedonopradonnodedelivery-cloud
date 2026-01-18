@@ -6,9 +6,9 @@ import {
   LayoutGrid, Pill, Briefcase, Plane, Zap,
   Beef, Coffee, Pizza, Croissant, Soup, Cake, Sandwich, 
   Stethoscope, Package, Clock, Target, Settings, Dog,
-  Star, Tag, Award, TrendingUp, ChevronRight
+  Star, Tag, Award, TrendingUp, ChevronRight, MessageSquare, Users
 } from 'lucide-react';
-import { AdType, Category, Store, Story, EditorialCollection, Job, CommunityPost } from './types';
+import { AdType, Category, Store, Story, EditorialCollection, Job, CommunityPost, NeighborhoodCommunity } from './types';
 import { getStoreLogo } from './utils/mockLogos';
 
 export const CATEGORIES: Category[] = [
@@ -30,121 +30,168 @@ export const CATEGORIES: Category[] = [
   { id: 'cat-tourism', name: 'Viagem', slug: 'tourism', icon: <Plane />, color: 'from-sky-400 to-blue-500', illustrationUrl: 'https://cdn-icons-png.flaticon.com/512/290/290445.png' },
 ];
 
+export const NEIGHBORHOOD_COMMUNITIES: NeighborhoodCommunity[] = [
+  {
+    id: 'comm-services',
+    name: 'Serviços & Indicações',
+    description: 'Encontre os melhores profissionais do bairro indicados por quem mora aqui.',
+    image: 'https://images.unsplash.com/photo-1581578731117-104f2a8d23e9?q=80&w=600&auto=format&fit=crop',
+    icon: <Wrench />,
+    color: 'from-blue-500 to-blue-700',
+    membersCount: '2.4k'
+  },
+  {
+    id: 'comm-jobs',
+    name: 'Vagas no Bairro',
+    description: 'Oportunidades de emprego e freelances exclusivos na região de Jacarepaguá.',
+    image: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?q=80&w=600&auto=format&fit=crop',
+    icon: <Briefcase />,
+    color: 'from-amber-500 to-orange-600',
+    membersCount: '1.8k'
+  },
+  {
+    id: 'comm-pets',
+    name: 'Pets do Bairro',
+    description: 'Dicas de veterinários, banho e tosa, e ajuda para animais perdidos.',
+    image: 'https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?q=80&w=600&auto=format&fit=crop',
+    icon: <PawPrint />,
+    color: 'from-purple-500 to-indigo-600',
+    membersCount: '3.1k'
+  },
+  {
+    id: 'comm-food',
+    name: 'Comer & Beber',
+    description: 'Onde comer bem? As melhores pizzarias, bares e deliveries da Freguesia.',
+    image: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=600&auto=format&fit=crop',
+    icon: <Utensils />,
+    color: 'from-red-500 to-rose-600',
+    membersCount: '4.5k'
+  },
+  {
+    id: 'comm-fit',
+    name: 'Fit',
+    description: 'Academias, grupos de corrida, crossfit e alimentação saudável no bairro.',
+    image: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=600&auto=format&fit=crop',
+    icon: <Dumbbell />,
+    color: 'from-emerald-500 to-teal-600',
+    membersCount: '1.2k'
+  }
+];
+
+export const MOCK_COMMUNITY_POSTS: CommunityPost[] = [
+  {
+    id: 'post-1',
+    userId: 'u1',
+    userName: 'Ana Paula',
+    userAvatar: 'https://i.pravatar.cc/100?u=a',
+    authorRole: 'resident',
+    content: 'O pão da Padaria Imperial tá saindo agora! Quentinho demais 🍞😋',
+    type: 'recommendation',
+    communityId: 'comm-food',
+    neighborhood: 'Freguesia',
+    timestamp: '5 min atrás',
+    likes: 12,
+    comments: 2
+  },
+  {
+    id: 'post-2',
+    userId: 'u2',
+    userName: 'Carlos Silva',
+    userAvatar: 'https://i.pravatar.cc/100?u=c',
+    authorRole: 'resident',
+    content: 'Indico o João Eletricista! Fez um serviço impecável aqui em casa hoje. ⚡🔌',
+    type: 'recommendation',
+    communityId: 'comm-services',
+    neighborhood: 'Taquara',
+    timestamp: '1h atrás',
+    likes: 45,
+    comments: 8,
+    imageUrl: 'https://images.unsplash.com/photo-1621905476438-5f09f22d556c?q=80&w=400&auto=format&fit=crop'
+  },
+  {
+    id: 'post-3',
+    userId: 'u3',
+    userName: 'Mariana G.',
+    userAvatar: 'https://i.pravatar.cc/100?u=m',
+    authorRole: 'resident',
+    content: 'Alguém sabe de vaga para recepcionista aqui na Freguesia? Procuro para minha sobrinha.',
+    type: 'tip',
+    communityId: 'comm-jobs',
+    neighborhood: 'Freguesia',
+    timestamp: '2h atrás',
+    likes: 8,
+    comments: 15
+  },
+  {
+    id: 'post-4',
+    userId: 'u4',
+    userName: 'Bruno JPA',
+    userAvatar: 'https://i.pravatar.cc/100?u=b',
+    authorRole: 'resident',
+    content: 'Gente, perdi meu gatinho nas proximidades da Geremário Dantas. Se alguém vir, por favor me avise! 🙏🐱',
+    type: 'alert',
+    communityId: 'comm-pets',
+    neighborhood: 'Anil',
+    timestamp: '3h atrás',
+    likes: 89,
+    comments: 24,
+    imageUrl: 'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?q=80&w=400&auto=format&fit=crop'
+  },
+  {
+    id: 'post-5',
+    userId: 'u5',
+    userName: 'Juliana Fit',
+    userAvatar: 'https://i.pravatar.cc/100?u=j',
+    authorRole: 'resident',
+    content: 'Treino de pernas concluído na Smart Fit! Quem mais tá focado hoje? 💪🔥',
+    type: 'news',
+    communityId: 'comm-fit',
+    neighborhood: 'Pechincha',
+    timestamp: '4h atrás',
+    likes: 31,
+    comments: 4
+  }
+];
+
 export const STORES: Store[] = [
   {
-    id: 'demo-moda-fem',
-    name: 'Moda Feminina',
-    category: 'Moda',
-    subcategory: 'Roupas',
-    description: 'As melhores tendências da moda feminina.',
-    logoUrl: getStoreLogo(201),
-    image: 'https://images.unsplash.com/photo-1483985988355-763728e1935b?q=80&w=800&auto=format&fit=crop',
-    rating: 4.8,
-    reviewsCount: 120,
-    distance: 'Freguesia • RJ',
-    neighborhood: 'Freguesia',
-    cashback: 10,
-    adType: AdType.PREMIUM,
-    address: 'Rua Tirol, 100',
-    phone: '(21) 99999-0001',
-    hours: 'Seg a Sáb • 09h às 19h',
-    verified: true,
-    isOpenNow: true,
-    // @ts-ignore
-    status: 'active',
-    tags: ['moda', 'roupas', 'feminino']
-  },
-  {
-    id: 'demo-pet',
-    name: 'Pet Shop Amigo',
-    category: 'Pets',
-    subcategory: 'Pet Shop',
-    description: 'Cuidado e carinho para o seu melhor amigo.',
-    logoUrl: getStoreLogo(202),
-    image: 'https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?q=80&w=800&auto=format&fit=crop',
-    rating: 4.9,
-    reviewsCount: 89,
-    distance: 'Freguesia • RJ',
-    neighborhood: 'Freguesia',
-    cashback: 5,
-    adType: AdType.LOCAL,
-    address: 'Estrada dos Três Rios, 500',
-    phone: '(21) 99999-0002',
-    hours: 'Seg a Dom • 08h às 20h',
-    verified: true,
-    isOpenNow: true,
-    // @ts-ignore
-    status: 'active',
-    tags: ['pet', 'banho', 'tosa']
-  },
-  {
-    id: 'demo-moda-masc',
-    name: 'Moda Masculina',
-    category: 'Moda',
-    subcategory: 'Roupas',
-    description: 'Estilo e conforto para o dia a dia.',
-    logoUrl: getStoreLogo(203),
-    image: 'https://images.unsplash.com/photo-1490114538077-0a7f8cb49891?q=80&w=800&auto=format&fit=crop',
-    rating: 4.7,
-    reviewsCount: 56,
-    distance: 'Freguesia • RJ',
-    neighborhood: 'Freguesia',
-    cashback: 10,
-    adType: AdType.PREMIUM,
-    address: 'Rua Geminiano Gois, 300',
-    phone: '(21) 99999-0003',
-    hours: 'Seg a Sáb • 10h às 20h',
-    verified: true,
-    isOpenNow: true,
-    // @ts-ignore
-    status: 'active',
-    tags: ['moda', 'masculino', 'roupas']
-  },
-  {
-    id: 'demo-papelaria',
-    name: 'Papelaria & Co.',
+    id: 'grupo-esquematiza',
+    name: 'Grupo Esquematiza',
     category: 'Serviços',
-    subcategory: 'Papelaria',
-    description: 'Material escolar, escritório e presentes.',
-    logoUrl: getStoreLogo(204),
-    image: 'https://images.unsplash.com/photo-1531346878377-a5be20888e57?q=80&w=800&auto=format&fit=crop',
-    rating: 4.5,
-    reviewsCount: 42,
+    subcategory: 'Segurança e Facilities',
+    description: 'Líder em segurança, limpeza e facilities para condomínios e empresas.',
+    logoUrl: 'https://images.unsplash.com/photo-1560179707-f14e90ef3dab?q=80&w=200&auto=format&fit=crop',
+    image: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?q=80&w=800&auto=format&fit=crop',
+    rating: 5.0,
+    reviewsCount: 150,
     distance: 'Freguesia • RJ',
     neighborhood: 'Freguesia',
-    cashback: 5,
-    adType: AdType.ORGANIC,
-    address: 'Rua Araguaia, 200',
-    phone: '(21) 99999-0004',
+    adType: AdType.PREMIUM,
+    address: 'R. Cândido de Figueiredo, 204 – Tanque',
+    phone: '(21) 98555-9480',
     hours: 'Seg a Sex • 08h às 18h',
     verified: true,
     isOpenNow: true,
-    // @ts-ignore
-    status: 'active',
-    tags: ['papelaria', 'material', 'escritorio']
+  }
+];
+
+/* 
+ * ADDED: EDITORIAL_SERVICES export to fix HomeFeed.tsx import error.
+ */
+export const EDITORIAL_SERVICES = [
+  {
+    id: 'grupo-esquematiza',
+    name: 'Grupo Esquematiza',
+    subcategory: 'Segurança e Facilities',
+    image: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?q=80&w=800&auto=format&fit=crop',
+    location: 'Freguesia'
   },
   {
-    id: 'demo-tech-fix',
-    name: 'Tech Fix Freguesia',
-    category: 'Serviços',
-    subcategory: 'Assistência Técnica',
-    description: 'Conserto de celulares, notebooks e tablets na hora.',
-    logoUrl: getStoreLogo(207),
-    image: 'https://images.unsplash.com/photo-1597872250449-66ca64d2558a?q=80&w=800&auto=format&fit=crop',
-    rating: 4.9,
-    reviewsCount: 215,
-    distance: 'Freguesia • RJ',
-    neighborhood: 'Freguesia',
-    cashback: 0,
-    adType: AdType.PREMIUM, // Premium para aparecer no bloco
-    address: 'Estrada dos Três Rios, 200 - Shopping',
-    phone: '(21) 98888-7777',
-    hours: 'Seg a Sáb • 10h às 22h',
-    verified: true,
-    isOpenNow: true,
-    // @ts-ignore
-    status: 'active',
-    tags: ['celular', 'conserto', 'notebook']
+    id: 'job-1',
+    name: 'Padaria Imperial',
+    subcategory: 'Alimentação',
+    image: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=600&auto=format&fit=crop',
+    location: 'Freguesia'
   }
 ];
 
@@ -171,56 +218,6 @@ export const MOCK_JOBS: Job[] = [
     isUrgent: true,
     isSponsored: true,
     sponsoredUntil: '2099-12-31'
-  },
-  {
-    id: 'job-2',
-    role: 'Vendedor(a) de Loja',
-    company: 'Moda Feminina Store',
-    neighborhood: 'Freguesia',
-    category: 'Vendas',
-    type: 'CLT',
-    salary: 'R$ 1.800,00 + Comissão',
-    description: 'Vaga para vendedor com experiência em moda feminina. Foco em resultados e bom atendimento.',
-    requirements: ['Experiência em vendas', 'Gostar de moda', 'Proatividade'],
-    schedule: 'Horário de Shopping',
-    contactWhatsapp: '5521999998888',
-    postedAt: 'Ontem',
-    isUrgent: false,
-    isSponsored: true,
-    sponsoredUntil: '2099-12-31'
-  },
-  {
-    id: 'job-3',
-    role: 'Estágio em Marketing',
-    company: 'Agência Criativa',
-    neighborhood: 'Taquara',
-    category: 'Marketing',
-    type: 'Estágio',
-    salary: 'R$ 1.200,00',
-    description: 'Auxiliar na criação de conteúdo para redes sociais e gestão de tráfego.',
-    requirements: ['Cursando Marketing ou Publicidade', 'Noções de Canva/Photoshop'],
-    schedule: '6h diárias (Flexível)',
-    contactWhatsapp: '5521999997777',
-    postedAt: '2 dias atrás',
-    isUrgent: false
-  }
-];
-
-export const MOCK_COMMUNITY_POSTS: CommunityPost[] = [
-  {
-    id: 'post-1',
-    userId: 'u1',
-    userName: 'Ana Paula',
-    userAvatar: 'https://i.pravatar.cc/100?u=a',
-    authorRole: 'resident',
-    content: 'O pão da Padaria Imperial tá saindo agora! Quentinho demais 🍞😋',
-    type: 'recommendation',
-    relatedStoreId: 'premium-test',
-    relatedStoreName: 'Padaria Imperial',
-    neighborhood: 'Freguesia',
-    timestamp: '5 min atrás',
-    likes: 12,
-    comments: 2
   }
 ];
 
@@ -247,5 +244,4 @@ export const quickFilters = [
   { id: 'nearby', label: 'Perto de mim', icon: 'zap' },
   { id: 'top_rated', label: 'Melhores avaliados', icon: 'star' },
   { id: 'open_now', label: 'Aberto agora', icon: 'clock' },
-  { id: 'cashback', label: 'Cupom', icon: 'percent' },
 ];

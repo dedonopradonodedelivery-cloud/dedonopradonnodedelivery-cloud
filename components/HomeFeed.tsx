@@ -1,48 +1,25 @@
 
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { Store, Category, EditorialCollection, AdType, CommunityPost } from '../types';
+import { Store, Category, EditorialCollection, AdType } from '../types';
 import { 
   ChevronRight, 
-  Dices,
   ArrowUpRight,
-  Leaf,
-  Coffee,
-  Baby,
-  Dog as DogIcon,
   Crown,
-  MessageCircle,
-  TrendingUp,
-  Store as StoreIcon,
-  X,
-  Sparkles,
-  Timer,
-  Tag,
-  Briefcase,
-  Coins,
-  Repeat,
-  Quote,
   Zap,
   ThumbsUp,
-  AlertTriangle,
-  Lightbulb,
   MessageSquare,
   MapPin,
   Star,
   Users,
-  Search,
-  Wrench,
-  Ticket,
-  BadgeCheck,
-  Building2,
+  Briefcase,
   DollarSign,
   Megaphone,
   Smartphone,
-  QrCode
+  BadgeCheck
 } from 'lucide-react';
 import { LojasEServicosList } from './LojasEServicosList';
 import { User } from '@supabase/supabase-js';
-import { MasterSponsorBanner } from './MasterSponsorBanner';
-import { CATEGORIES, STORES, MOCK_JOBS, MOCK_COMMUNITY_POSTS } from '../constants';
+import { CATEGORIES, EDITORIAL_SERVICES } from '../constants';
 import { useNeighborhood } from '../contexts/NeighborhoodContext';
 
 interface HomeFeedProps {
@@ -69,68 +46,24 @@ const getCategoryCover = (category: string) => {
   }
 };
 
-const getServicePlaceholder = (category: string) => {
-  const cat = category.toLowerCase();
-  if (cat.includes('técnica') || cat.includes('informática')) return 'https://images.unsplash.com/photo-1581092160562-40aa08e78837?q=80&w=600&auto=format&fit=crop';
-  if (cat.includes('beleza') || cat.includes('estética')) return 'https://images.unsplash.com/photo-1560066984-138dadb4c035?q=80&w=600&auto=format&fit=crop';
-  if (cat.includes('papelaria')) return 'https://images.unsplash.com/photo-1456735190827-d1262f71b8a3?q=80&w=600&auto=format&fit=crop';
-  if (cat.includes('chaveiro')) return 'https://images.unsplash.com/photo-1582139329536-e7284fece509?q=80&w=600&auto=format&fit=crop';
-  if (cat.includes('elétrica') || cat.includes('eletricista')) return 'https://images.unsplash.com/photo-1621905476438-5f09f22d556c?q=80&w=600&auto=format&fit=crop';
-  if (cat.includes('gráfica')) return 'https://images.unsplash.com/photo-1562564025-51dc11516a0b?q=80&w=600&auto=format&fit=crop';
-  if (cat.includes('pet')) return 'https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?q=80&w=600&auto=format&fit=crop';
-  return 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=600&auto=format&fit=crop';
-};
-
 interface BannerItem {
   id: string;
   title: string;
-  subtitle?: string;
   target: string;
   tag?: string;
   bgColor: string;
   Icon: React.ElementType;
 }
 
-const HomeCarousel: React.FC<{ onNavigate: (v: string) => void }> = ({ onNavigate }) => {
+const HomeCarousel: React.FC<{ onNavigate: (v: string) => void; onStoreClick?: (store: Store) => void; stores?: Store[] }> = ({ onNavigate, onStoreClick, stores }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [progress, setProgress] = useState(0);
-  const { currentNeighborhood } = useNeighborhood();
 
-  const banners: BannerItem[] = useMemo(() => {
-    const masterBanner: BannerItem = {
-      id: 'master-sponsor',
-      title: 'Grupo Esquematiza',
-      subtitle: 'Segurança e Facilities com excelência para seu condomínio e empresa.',
-      target: 'patrocinador_master',
-      tag: 'Patrocinador Master',
-      bgColor: 'bg-slate-900',
-      Icon: Crown
-    };
-
-    const soldBanners: BannerItem[] = [
-       {
-          id: 'rio-phone-store',
-          title: 'Rio Phone Store',
-          subtitle: 'Especialista Apple: iPhone, iPad, Mac e Watch. Técnicos de confiança.',
-          target: 'explore', 
-          tag: 'Assistência Apple',
-          bgColor: 'bg-zinc-900',
-          Icon: Smartphone
-       }
-    ];
-
-    const advertiseBanner: BannerItem = {
-      id: 'advertise-home',
-      title: 'Anuncie aqui',
-      subtitle: 'Destaque sua marca para todo o bairro. Condições especiais de iniciação.',
-      target: 'advertise_home_banner', 
-      tag: 'Oportunidade',
-      bgColor: 'bg-[#1E5BFF]', 
-      Icon: Megaphone
-    };
-
-    return [masterBanner, ...soldBanners, advertiseBanner].slice(0, 5);
-  }, [currentNeighborhood]);
+  const banners: BannerItem[] = useMemo(() => [
+    { id: 'master-sponsor', title: 'Grupo Esquematiza', target: 'patrocinador_master', tag: 'Patrocinador Master', bgColor: 'bg-slate-900', Icon: Crown },
+    { id: 'rio-phone-store', title: 'Rio Phone Store', target: 'rio-phone-store', tag: 'Assistência Apple', bgColor: 'bg-zinc-900', Icon: Smartphone },
+    { id: 'advertise-home', title: 'Anuncie aqui', target: 'advertise_home_banner', tag: 'Destaque sua marca', bgColor: 'bg-[#1E5BFF]', Icon: Megaphone }
+  ], []);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -147,324 +80,65 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void }> = ({ onNavigat
 
   const current = banners[currentIndex];
 
-  const handleNext = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    setCurrentIndex((prev) => (prev + 1) % banners.length);
-    setProgress(0);
-  };
-
-  const handlePrev = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    setCurrentIndex((prev) => (prev === 0 ? banners.length - 1 : prev - 1));
-    setProgress(0);
+  const handleBannerClick = () => {
+    if (onStoreClick && stores) {
+      const targetStore = stores.find(s => s.id === current.target);
+      if (targetStore) {
+        onStoreClick(targetStore);
+        return;
+      }
+    }
+    onNavigate(current.target);
   };
 
   return (
     <div className="px-4">
       <div 
-        onClick={() => onNavigate(current.target)}
-        className={`w-full relative aspect-[5/3] rounded-[32px] overflow-hidden shadow-xl shadow-slate-200 dark:shadow-none border border-gray-100 dark:border-white/5 ${current.bgColor} cursor-pointer active:scale-[0.98] transition-all group`}
+        onClick={handleBannerClick}
+        className={`w-full relative aspect-[3/2] rounded-[32px] overflow-hidden shadow-xl shadow-slate-200 dark:shadow-none border border-gray-100 dark:border-white/5 ${current.bgColor} cursor-pointer active:scale-[0.98] transition-all group`}
       >
-        <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-white/10 to-transparent pointer-events-none"></div>
-        <div className="absolute -top-24 -right-24 w-64 h-64 bg-white/10 rounded-full blur-3xl pointer-events-none"></div>
-        <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-black/10 rounded-full blur-3xl pointer-events-none"></div>
-
-        <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center z-10">
-           <div className="p-5 bg-white/10 backdrop-blur-md rounded-[2.5rem] border border-white/20 shadow-2xl animate-in zoom-in duration-700 mb-6 group-hover:scale-105 transition-transform">
-              <current.Icon className="w-14 h-14 text-white drop-shadow-xl" strokeWidth={2} />
+        <div className="absolute inset-0 flex flex-col items-center justify-center px-6 pt-4 pb-12 text-center z-10">
+           <div className="p-4 bg-white/10 backdrop-blur-md rounded-[2rem] border border-white/20 shadow-2xl animate-in zoom-in duration-700 mb-5">
+              <current.Icon className="w-12 h-12 text-white" strokeWidth={2} />
            </div>
-           <div className="animate-in slide-in-from-bottom-2 duration-500 delay-100 fill-mode-both">
-              <span className="bg-white/20 text-white text-[8px] font-black px-2.5 py-1 rounded-lg uppercase tracking-[0.2em] shadow-sm border border-white/20 backdrop-blur-sm">
-                {current.tag}
-              </span>
-           </div>
-           <h3 className="text-2xl font-[900] text-white leading-tight font-display tracking-tight mt-4 mb-2 drop-shadow-md animate-in slide-in-from-bottom-3 duration-500 delay-200 fill-mode-both">
+           <h3 className="text-2xl font-[900] text-white leading-tight font-display tracking-tight mt-4 uppercase">
             {current.title}
            </h3>
-           <p className="text-xs text-white/85 font-medium line-clamp-2 leading-relaxed max-w-[280px] animate-in slide-in-from-bottom-4 duration-500 delay-300 fill-mode-both">
-            {current.subtitle}
-           </p>
+           <p className="text-white/60 text-[10px] font-black uppercase tracking-[0.2em] mt-2">{current.tag}</p>
         </div>
-
-        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-1.5 z-30 w-1/3 justify-center">
+        <div className="absolute bottom-5 left-1/2 -translate-x-1/2 flex gap-1.5 z-30 w-1/3 justify-center">
           {banners.map((_, idx) => (
-            <div key={idx} className="h-1 flex-1 bg-white/20 rounded-full overflow-hidden backdrop-blur-sm cursor-pointer" onClick={(e) => { e.stopPropagation(); setCurrentIndex(idx); setProgress(0); }}>
-              <div 
-                className="h-full bg-white transition-all duration-100 ease-linear shadow-[0_0_10px_rgba(255,255,255,0.5)]"
-                style={{ width: idx === currentIndex ? `${progress}%` : idx < currentIndex ? '100%' : '0%' }}
-              />
+            <div key={idx} className="h-1 flex-1 bg-white/20 rounded-full overflow-hidden">
+              <div className="h-full bg-white transition-all duration-100 ease-linear" style={{ width: idx === currentIndex ? `${progress}%` : idx < currentIndex ? '100%' : '0%' }} />
             </div>
           ))}
         </div>
-
-        <div className="absolute inset-y-0 left-0 w-1/6 z-20" onClick={handlePrev}></div>
-        <div className="absolute inset-y-0 right-0 w-1/6 z-20" onClick={handleNext}></div>
-      </div>
-    </div>
-  );
-};
-
-const NeighborhoodCouponsBlock: React.FC<{ 
-  stores: Store[], 
-  onStoreClick: (store: Store) => void,
-  onNavigate: (view: string) => void,
-  user: User | null,
-  userRole: 'cliente' | 'lojista' | null,
-  onRequireLogin: () => void
-}> = ({ stores, onStoreClick, onNavigate, user, userRole, onRequireLogin }) => {
-  const { currentNeighborhood, isAll } = useNeighborhood();
-
-  const couponStores = useMemo(() => {
-    let list = stores.filter(s => s.cashback && s.cashback > 0);
-    list.sort((a, b) => {
-        if (a.adType === AdType.PREMIUM && b.adType !== AdType.PREMIUM) return -1;
-        if (a.adType !== AdType.PREMIUM && b.adType === AdType.PREMIUM) return 1;
-        if (a.adType === AdType.LOCAL && b.adType !== AdType.LOCAL) return -1;
-        if (a.adType === AdType.LOCAL && b.adType === AdType.LOCAL) return 1;
-        if (isAll) return 0;
-        const aIsLocal = (a.neighborhood === currentNeighborhood);
-        const bIsLocal = (b.neighborhood === currentNeighborhood);
-        if (aIsLocal && !bIsLocal) return -1;
-        if (!aIsLocal && bIsLocal) return 1;
-        return 0;
-    });
-    return list;
-  }, [stores, currentNeighborhood, isAll]);
-
-  if (couponStores.length === 0) return null;
-
-  // Lógica de navegação direta para o Cupom (Consumidor ou Lojista)
-  const handleBannerClick = () => {
-    if (!user) {
-      onRequireLogin();
-    } else if (userRole === 'lojista') {
-      // Se for lojista, o fluxo de cupom/cashback na home leva para o scanner de recebimento
-      onNavigate('qrcode_scan');
-    } else {
-      // Se for cliente, leva para o seu QR Code de desconto
-      onNavigate('user_cupom');
-    }
-  };
-
-  return (
-    <div className="w-full bg-white dark:bg-gray-950 pt-3 pb-3">
-      <div className="px-5 mb-3">
-        <button 
-          onClick={handleBannerClick}
-          className="relative h-14 w-full flex items-center justify-center filter drop-shadow-md overflow-visible cursor-pointer active:scale-[0.98] active:opacity-90 transition-all group outline-none"
-        >
-          {/* SVG Ticket Shape Background */}
-          <svg className="absolute inset-0 w-full h-full transition-transform group-hover:scale-[1.01]" preserveAspectRatio="none" viewBox="0 0 100 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M4 0C1.79086 0 0 1.79086 0 4V15C1.65685 15 3 16.3431 3 18C3 19.6569 1.65685 21 0 21V36C0 38.2091 1.79086 40 4 40H96C98.2091 40 100 38.2091 100 36V21C98.3431 21 97 19.6569 97 18C97 16.3431 98.3431 15 100 15V4C100 1.79086 98.2091 0 96 0H4Z" fill="#F97316"/>
-          </svg>
-          
-          <div className="relative z-10 flex items-center gap-4 px-6">
-            {/* Dotted Line Detail */}
-            <div className="h-6 border-l border-dashed border-white/40"></div>
-            
-            <h2 className="text-[13px] font-black text-white uppercase tracking-[0.18em] whitespace-nowrap drop-shadow-sm text-center leading-none">
-              CUPONS ATIVOS NO BAIRRO
-            </h2>
-            
-            {/* Dotted Line Detail */}
-            <div className="h-6 border-l border-dashed border-white/40"></div>
-          </div>
-        </button>
-      </div>
-      
-      <div className="flex gap-3 overflow-x-auto no-scrollbar px-5 pb-2 snap-x">
-        {couponStores.map(store => (
-          <button
-            key={store.id}
-            onClick={() => onStoreClick(store)}
-            className="snap-center min-w-[160px] max-w-[160px] flex flex-col bg-white dark:bg-gray-800 rounded-[20px] shadow-[0_2px_8px_rgba(0,0,0,0.06)] dark:shadow-none border border-gray-100 dark:border-gray-700 overflow-hidden group active:scale-[0.98] transition-all"
-          >
-            <div className="relative h-[110px] w-full overflow-hidden">
-               <img src={store.image || store.logoUrl || '/assets/default-logo.png'} alt={store.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
-               <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
-               {(isAll || store.neighborhood !== currentNeighborhood) && store.neighborhood && (
-                  <div className="absolute top-2 right-2 bg-black/60 backdrop-blur-md px-2 py-0.5 rounded-md border border-white/10">
-                    <span className="text-[8px] font-bold text-white uppercase tracking-wider flex items-center gap-1">
-                      <MapPin className="w-2.5 h-2.5" /> {store.neighborhood}
-                    </span>
-                  </div>
-               )}
-               
-               {/* TICKET STYLE BADGE (Individual Card) */}
-               <div className="absolute bottom-2 left-1.5 drop-shadow-md">
-                 <div className="relative flex items-center h-8 px-1">
-                    {/* SVG Ticket Shape with circular cutouts */}
-                    <svg className="absolute inset-0 w-full h-full" preserveAspectRatio="none" viewBox="0 0 100 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M5 0C2.23858 0 0 2.23858 0 5V14C2.20914 14 4 15.7909 4 18C4 20.2091 2.20914 22 0 22V35C0 37.7614 2.23858 40 5 40H95C97.7614 40 100 37.7614 100 35V22C97.7909 22 96 20.2091 96 18C96 15.7909 97.7909 14 100 14V5C100 2.23858 97.7614 0 95 0H5Z" fill="#F97316"/>
-                    </svg>
-                    
-                    <div className="relative flex items-center gap-1.5 px-2.5 z-10">
-                      {/* Dotted Line */}
-                      <div className="h-4 border-l border-dashed border-white/40 mr-1"></div>
-                      <span className="text-[12px] font-black text-white whitespace-nowrap tracking-tighter">
-                        {store.cashback}% OFF
-                      </span>
-                    </div>
-                 </div>
-               </div>
-            </div>
-            <div className="p-3 flex flex-col flex-1 justify-between text-left">
-              <div>
-                <h4 className="font-bold text-gray-900 dark:text-white text-xs leading-tight line-clamp-2 mb-1">{store.name}</h4>
-                <p className="text-[10px] text-gray-500 dark:text-gray-400 font-medium truncate">{store.category}</p>
-              </div>
-              <div className="mt-2 pt-2 border-t border-gray-100 dark:border-gray-700 flex items-center justify-between">
-                <span className="text-[9px] font-bold text-orange-600 bg-orange-50 dark:bg-orange-900/20 px-1.5 py-0.5 rounded uppercase">Ativo</span>
-                <span className="text-[9px] font-medium text-gray-400">Resgatar</span>
-              </div>
-            </div>
-          </button>
-        ))}
       </div>
     </div>
   );
 };
 
 const FeaturedServicesBlock: React.FC<{ stores: Store[], onStoreClick: (store: Store) => void }> = ({ stores, onStoreClick }) => {
-  const EDITORIAL_SERVICES = [
-    { id: 'srv-tech', name: 'TechFix Pro', category: 'Assistência Técnica', image: 'https://images.unsplash.com/photo-1597872250449-66ca64d2558a?q=80&w=600&auto=format&fit=crop', rating: 4.9, location: 'Freguesia' },
-    { id: 'srv-paper', name: 'Papelaria Criativa', category: 'Papelaria', image: 'https://images.unsplash.com/photo-1531346878377-a5be20888e57?q=80&w=600&auto=format&fit=crop', rating: 4.8, location: 'Taquara' },
-    { id: 'srv-beauty', name: 'Studio Glamour', category: 'Salão de Beleza', image: 'https://images.unsplash.com/photo-1560066984-138dadb4c035?q=80&w=400&auto=format&fit=crop', rating: 5.0, location: 'Pechincha' },
-    { id: 'srv-lock', name: 'Chaveiro 24h', category: 'Chaveiro', image: 'https://images.unsplash.com/photo-1582139329536-e7284fece509?q=80&w=600&auto=format&fit=crop', rating: 4.7, location: 'Anil' },
-    { id: 'srv-eletric', name: 'Elétrica Rápida', category: 'Eletricista', image: 'https://images.unsplash.com/photo-1621905476438-5f09f22d556c?q=80&w=600&auto=format&fit=crop', rating: 4.9, location: 'Freguesia' },
-    { id: 'srv-print', name: 'Gráfica Express', category: 'Gráfica Rápida', image: 'https://images.unsplash.com/photo-1562564025-51dc11516a0b?q=80&w=600&auto=format&fit=crop', rating: 4.6, location: 'Tanque' },
-    { id: 'srv-pet', name: 'Pet Shop Amigo', category: 'Pet Shop', image: 'https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?q=80&w=600&auto=format&fit=crop', rating: 4.8, location: 'Curicica' },
-    { id: 'srv-info', name: 'InfoTech Soluções', category: 'Informática', image: 'https://images.unsplash.com/photo-1587620962725-abab7fe55159?q=80&w=600&auto=format&fit=crop', rating: 4.9, location: 'Freguesia' }
-  ];
-
+  const visibleServices = useMemo(() => EDITORIAL_SERVICES.filter(service => service.image), []);
+  if (visibleServices.length === 0) return null;
   return (
     <div className="w-full bg-white dark:bg-gray-950 py-3 border-t border-gray-50 dark:border-gray-800">
       <div className="px-5 mb-3">
-        <div className="flex items-center gap-2 mb-1">
-          <BadgeCheck className="w-4 h-4 text-amber-500 fill-amber-500/20" />
-          <h2 className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-wider">
-            Serviços Recomendados
-          </h2>
-        </div>
-        <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">
-          Profissionais verificados e bem avaliados
-        </p>
+        <h2 className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-wider">Serviços Recomendados</h2>
+        <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">Profissionais bem avaliados na região</p>
       </div>
       <div className="flex gap-4 overflow-x-auto no-scrollbar px-5 pb-2 snap-x">
-        {EDITORIAL_SERVICES.map(service => {
-          const fallback = getServicePlaceholder(service.category);
-          return (
-            <button
-              key={service.id}
-              onClick={() => {
-                  const mockStore: any = { id: service.id, name: service.name, category: 'Serviços', subcategory: service.category, image: service.image || fallback, rating: service.rating, distance: service.location, adType: AdType.ORGANIC };
-                  onStoreClick(mockStore);
-              }}
-              className="snap-center w-[160px] shrink-0 aspect-[9/16] relative overflow-hidden group active:scale-[0.98] transition-all bg-gray-200 dark:bg-gray-800 shadow-md rounded-none"
-            >
-              <img 
-                src={service.image || fallback} 
-                alt={service.name} 
-                className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" 
-                onError={(e) => {
-                  const target = e.target as HTMLImageElement;
-                  if (target.src !== fallback) target.src = fallback;
-                }}
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-transparent to-transparent"></div>
-              <div className="absolute top-3 left-3 z-10">
-                  <div className="flex items-center gap-1 text-[10px] font-bold bg-white/90 backdrop-blur-md px-2 py-0.5 shadow-sm text-gray-900 rounded-none">
-                      <Star className="w-2.5 h-2.5 text-yellow-500 fill-yellow-500" />
-                      {service.rating.toFixed(1)}
-                  </div>
-              </div>
-              <div className="absolute bottom-0 left-0 right-0 p-4 text-left z-10">
-                  <p className="text-[8px] text-amber-400 font-black uppercase tracking-widest mb-1">{service.category}</p>
-                  <h4 className="font-bold text-white text-sm leading-tight mb-1 drop-shadow-md">{service.name}</h4>
-                  <div className="flex items-center gap-1 text-[9px] text-gray-300 font-medium">
-                      <MapPin className="w-2.5 h-2.5" />
-                      {service.location}
-                  </div>
-              </div>
-            </button>
-          );
-        })}
-      </div>
-    </div>
-  );
-};
-
-const SectionHeader: React.FC<{ title: string; subtitle?: string; rightElement?: React.ReactNode }> = ({ title, subtitle, rightElement }) => (
-  <div className="flex items-center justify-between mb-3 px-1">
-    <div className="flex flex-col">
-      <h3 className="text-[11px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.2em] mb-1">
-        {title}
-      </h3>
-      {subtitle && <p className="text-[15px] font-bold text-gray-900 dark:text-white leading-tight tracking-tight">{subtitle}</p>}
-    </div>
-    {rightElement}
-  </div>
-);
-
-const CommunityTrustCarousel: React.FC<{ stores: Store[], onStoreClick: (store: Store) => void }> = ({ stores, onStoreClick }) => {
-  const { currentNeighborhood, isAll } = useNeighborhood();
-  const trustedStores = useMemo(() => {
-    let list = (stores || []).filter(s => s && s.recentComments && s.recentComments.length > 0 && s.adType === AdType.PREMIUM);
-    list.sort((a, b) => {
-        if (isAll) return 0;
-        const aIsLocal = (a.neighborhood === currentNeighborhood);
-        const bIsLocal = (b.neighborhood === currentNeighborhood);
-        if (aIsLocal && !bIsLocal) return -1;
-        if (!aIsLocal && bIsLocal) return 1;
-        return 0;
-    });
-    return list.slice(0, 6);
-  }, [stores, currentNeighborhood, isAll]);
-
-  if (trustedStores.length === 0) return null;
-
-  return (
-    <div className="w-full bg-white dark:bg-gray-950 py-3">
-      <div className="px-5 mb-3">
-        <h2 className="text-lg font-black text-gray-900 dark:text-white tracking-tight leading-none flex items-center gap-2">
-          Confiança no Bairro <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></div>
-        </h2>
-        <p className="text-xs text-gray-500 dark:text-gray-400 font-medium mt-1.5">O que os moradores realmente dizem e fazem</p>
-      </div>
-      <div className="flex gap-3 overflow-x-auto no-scrollbar px-5 pb-2 snap-x">
-        {trustedStores.map((store) => {
-            const comment = store.recentComments ? store.recentComments[0] : '';
-            const shortComment = comment.length > 70 ? comment.substring(0, 70) + '...' : comment;
-            return (
-              <button key={store.id} onClick={() => onStoreClick(store)} className="snap-center min-w-[160px] max-w-[160px] flex flex-col bg-white dark:bg-gray-800 rounded-[20px] shadow-[0_2px_8px_rgba(0,0,0,0.06)] dark:shadow-none border border-gray-100 dark:border-gray-700 overflow-hidden group active:scale-[0.98] transition-all relative">
-                <div className="h-24 w-full bg-gray-100 dark:bg-gray-700 relative overflow-hidden">
-                   <img src={store.image || getCategoryCover(store.category)} alt={store.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-90" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
-                  <div className="absolute -bottom-3 right-3 bg-white dark:bg-gray-700 shadow-md border border-gray-100 dark:border-gray-600 px-2 py-1 rounded-lg flex items-center gap-1 z-10">
-                     <Star className="w-2.5 h-2.5 fill-yellow-400 text-yellow-400" />
-                     <span className="text-[10px] font-bold text-gray-900 dark:text-white">{store.rating?.toFixed(1)}</span>
-                  </div>
-                </div>
-                <div className="p-3 pt-5 flex flex-col h-full bg-white dark:bg-gray-800 relative">
-                   <div className="absolute -top-3 left-3 w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center border-2 border-white dark:border-gray-800 shadow-sm z-10">
-                      <Quote className="w-3 h-3 text-white fill-white" />
-                   </div>
-                   <div className="mb-3 flex-1">
-                      <p className="text-[10px] text-gray-600 dark:text-gray-300 font-medium italic leading-relaxed line-clamp-3">"{shortComment}"</p>
-                   </div>
-                   <div className="flex flex-col border-t border-gray-50 dark:border-gray-700 pt-2 mt-auto">
-                      <h4 className="font-bold text-gray-900 dark:text-white text-xs leading-tight line-clamp-1">{store.name}</h4>
-                      <div className="flex items-center justify-between mt-1">
-                         <span className="text-[9px] text-gray-400 dark:text-gray-500 truncate max-w-[80px]">{store.category}</span>
-                         {(isAll || store.neighborhood !== currentNeighborhood) && store.neighborhood && (
-                            <span className="text-[8px] font-bold text-gray-400 bg-gray-50 dark:bg-gray-700 px-1.5 py-0.5 rounded">{store.neighborhood}</span>
-                         )}
-                      </div>
-                   </div>
-                </div>
-              </button>
-            );
-        })}
+        {visibleServices.map(service => (
+          <button key={service.id} onClick={() => { const s = stores.find(st => st.id === service.id); if (s) onStoreClick(s); }} className="snap-center w-[160px] shrink-0 aspect-[9/16] relative overflow-hidden group active:scale-[0.98] transition-all bg-gray-200 dark:bg-gray-800 shadow-md">
+            <img src={service.image} alt={service.name} className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-transparent to-transparent"></div>
+            <div className="absolute bottom-0 left-0 right-0 p-4 pb-6 text-left z-10">
+                <p className="text-[8px] text-amber-400 font-black uppercase tracking-widest mb-1">{service.subcategory}</p>
+                <h4 className="font-bold text-white text-sm leading-[1.15] mb-1 line-clamp-2">{service.name}</h4>
+                <div className="flex items-center gap-1 text-[9px] text-gray-300"><MapPin className="w-2.5 h-2.5" />{service.location}</div>
+            </div>
+          </button>
+        ))}
       </div>
     </div>
   );
@@ -472,203 +146,37 @@ const CommunityTrustCarousel: React.FC<{ stores: Store[], onStoreClick: (store: 
 
 const CommunityFeedBlock: React.FC<{ onNavigate: (view: string) => void; }> = ({ onNavigate }) => {
   const { currentNeighborhood, isAll } = useNeighborhood();
-
   const previewPosts = useMemo(() => {
-     // Postagens Fake locais e espontâneas
      const fakePosts: any[] = [
-        {
-          id: 'fake-1',
-          userName: 'Maria Souza',
-          userAvatar: 'https://i.pravatar.cc/100?u=maria',
-          neighborhood: 'Freguesia',
-          content: 'Genteeee!!! Adorei esse Aplicativo!!! é tudooooo!!!! #LocalizeiJPA',
-          timestamp: '2 min atrás',
-          likes: 24,
-          comments: 8
-        },
-        {
-          id: 'fake-2',
-          userName: 'Joaquim Neto',
-          userAvatar: 'https://i.pravatar.cc/100?u=joaquim',
-          neighborhood: 'Taquara',
-          content: 'O pão na Padaria Colonial tá saindo agora, quentinho demais! Recomendo 🥖☕',
-          timestamp: '12 min atrás',
-          likes: 15,
-          comments: 3
-        },
-        {
-          id: 'fake-3',
-          userName: 'Carla Dias',
-          userAvatar: 'https://i.pravatar.cc/100?u=carla',
-          neighborhood: 'Pechincha',
-          content: 'Finalmente um app que valoriza o comércio aqui de JPA. Amei o cashback!',
-          timestamp: '25 min atrás',
-          likes: 31,
-          comments: 5
-        },
-        {
-          id: 'fake-4',
-          userName: 'Bruno Alves',
-          userAvatar: 'https://i.pravatar.cc/100?u=bruno',
-          neighborhood: 'Anil',
-          content: 'Alguém indica um bom chaveiro 24h aqui perto do Anil?',
-          timestamp: '38 min atrás',
-          likes: 4,
-          comments: 12
-        },
-        {
-          id: 'fake-5',
-          userName: 'Patrícia Mello',
-          userAvatar: 'https://i.pravatar.cc/100?u=patricia',
-          neighborhood: 'Tanque',
-          content: 'A iluminação da praça nova ficou 10! Ótimo para caminhar à noite.',
-          timestamp: '50 min atrás',
-          likes: 42,
-          comments: 7
-        },
-        {
-          id: 'fake-6',
-          userName: 'Ricardo Santos',
-          userAvatar: 'https://i.pravatar.cc/100?u=ricardo',
-          neighborhood: 'Curicica',
-          content: 'Acabei de usar o cupom de desconto na Hamburgueria Brasa. Vale muito a pena galera!',
-          timestamp: '1h atrás',
-          likes: 19,
-          comments: 4
-        }
+        { id: 'fake-1', userName: 'Maria Souza', userAvatar: 'https://i.pravatar.cc/100?u=maria', neighborhood: 'Freguesia', content: 'Genteeee!!! Adorei esse Aplicativo!!! é tudooooo!!!! #LocalizeiJPA', timestamp: '2 min atrás', likes: 24, comments: 8 },
+        { id: 'fake-7', userName: 'Luciana Lima', userAvatar: 'https://i.pravatar.cc/100?u=luciana', neighborhood: 'Pechincha', content: 'Alguém sabe se o Hortifruti da Estrada do Tindiba tá aberto? 🍎', timestamp: '3 min atrás', likes: 12, comments: 4 }
      ];
-
-     const allPosts = [...fakePosts];
-     
-     if (!isAll) {
-         return allPosts.filter(p => p.neighborhood === currentNeighborhood || p.id === 'fake-1');
-     }
-     return allPosts;
+     return isAll ? fakePosts : fakePosts.filter(p => p.neighborhood === currentNeighborhood || p.id === 'fake-1');
   }, [currentNeighborhood, isAll]);
 
   if (previewPosts.length === 0) return null;
 
   return (
     <div className="w-full bg-white dark:bg-gray-950 py-3 border-t border-gray-50 dark:border-gray-800">
-      <div className="px-5 mb-3">
-        <div className="flex justify-between items-center">
-            <div>
-                <h2 className="text-base font-[900] text-gray-900 dark:text-white tracking-tight leading-none flex items-center gap-2">
-                    O que está bombando no bairro agora 
-                    <div className="flex items-center gap-1.5 px-2.5 py-1 bg-red-600 text-white text-[9px] font-black rounded-full uppercase tracking-[0.15em] shadow-sm animate-pulse">
-                      <div className="w-1.5 h-1.5 rounded-full bg-white"></div>
-                      Ao Vivo
-                    </div>
-                </h2>
-            </div>
-        </div>
+      <div className="px-5 mb-3 flex justify-between items-center">
+        <h2 className="text-base font-[900] text-gray-900 dark:text-white tracking-tight leading-none flex items-center gap-2">Bombando no bairro <div className="flex items-center gap-1.5 px-2.5 py-1 bg-red-600 text-white text-[9px] font-black rounded-full uppercase animate-pulse">Ao Vivo</div></h2>
       </div>
       <div className="flex gap-4 overflow-x-auto no-scrollbar px-5 pb-3 snap-x">
         {previewPosts.map((post) => (
-            <div key={post.id} className="snap-center min-w-[280px] max-w-[280px] bg-[#1E5BFF]/5 dark:bg-blue-900/5 p-5 rounded-3xl shadow-inner border border-blue-100/50 dark:border-gray-700 flex flex-col justify-between active:scale-[0.99] transition-transform cursor-pointer relative" onClick={() => onNavigate('community_feed')}>
-                <div className="flex items-center gap-3 mb-4">
-                    <div className="relative">
-                        <div className="w-11 h-11 rounded-full p-[2px] bg-gradient-to-tr from-[#1E5BFF] to-[#4D7CFF]">
-                            <img src={post.userAvatar} alt={post.userName} className="w-full h-full rounded-full bg-gray-100 object-cover border-2 border-white dark:border-gray-800" />
-                        </div>
-                        <div className="absolute -bottom-0.5 -right-0.5 bg-green-500 w-3.5 h-3.5 rounded-full border-[2.5px] border-white dark:border-gray-800 shadow-sm"></div>
-                    </div>
+            <div key={post.id} className="snap-center min-w-[280px] max-w-[280px] bg-[#1E5BFF]/5 dark:bg-blue-900/5 p-5 rounded-3xl border border-blue-100/50 dark:border-gray-700 flex flex-col justify-between active:scale-[0.99] transition-transform cursor-pointer" onClick={() => onNavigate('community_feed')}>
+                <div className="flex items-center gap-3 mb-4 shrink-0">
+                    <img src={post.userAvatar} alt={post.userName} className="w-11 h-11 rounded-full object-cover border-2 border-white dark:border-gray-800" />
                     <div className="flex-1 min-w-0">
-                        <div className="flex justify-between items-center">
-                            <p className="text-xs font-black text-gray-900 dark:text-white truncate">@{post.userName.toLowerCase().replace(' ', '')}</p>
-                            <span className="text-[10px] whitespace-nowrap text-gray-400 font-bold">{post.timestamp}</span>
-                        </div>
-                        <div className="flex items-center gap-1.5 mt-0.5">
-                            <span className="text-[9px] font-black text-[#1E5BFF] bg-blue-50 dark:bg-blue-900/30 px-2 py-0.5 rounded-lg border border-blue-100 dark:border-blue-800 flex items-center gap-1">
-                                <MapPin className="w-2.5 h-2.5" /> {post.neighborhood}
-                            </span>
-                        </div>
+                        <p className="text-xs font-black text-gray-900 dark:text-white truncate">@{post.userName.toLowerCase().replace(' ', '')}</p>
+                        <span className="text-[10px] text-[#1E5BFF] font-black">{post.neighborhood}</span>
                     </div>
                 </div>
-                <div className="flex-1 mb-4">
-                    <p className="text-[13px] text-gray-800 dark:text-gray-200 leading-relaxed line-clamp-3 font-semibold italic">"{post.content}"</p>
-                </div>
+                <p className="text-[13px] text-gray-800 dark:text-gray-200 leading-snug line-clamp-3 font-semibold italic mb-4">"{post.content}"</p>
                 <div className="flex items-center gap-5 text-gray-400 border-t border-gray-50 dark:border-gray-700 pt-4">
-                    <div className="flex items-center gap-1.5 text-[11px] font-bold text-gray-500 dark:text-gray-400 hover:text-[#1E5BFF] transition-colors">
-                      <ThumbsUp className="w-4 h-4" /> {post.likes}
-                    </div>
-                    <div className="flex items-center gap-1.5 text-[11px] font-bold text-gray-500 dark:text-gray-400 hover:text-[#1E5BFF] transition-colors">
-                      <MessageSquare className="w-4 h-4" /> {post.comments}
-                    </div>
+                    <div className="flex items-center gap-1.5 text-[11px] font-bold"><ThumbsUp className="w-4 h-4" /> {post.likes}</div>
+                    <div className="flex items-center gap-1.5 text-[11px] font-bold"><MessageSquare className="w-4 h-4" /> {post.comments}</div>
                 </div>
             </div>
-        ))}
-      </div>
-    </div>
-  );
-};
-
-const FeaturedJobsBlock: React.FC<{ onNavigate: (view: string) => void }> = ({ onNavigate }) => {
-  const { currentNeighborhood, isAll } = useNeighborhood();
-  const jobsList = useMemo(() => {
-    let filtered = MOCK_JOBS.filter(job => isAll || job.neighborhood === currentNeighborhood);
-    filtered.sort((a, b) => {
-        if (a.isSponsored && !b.isSponsored) return -1;
-        if (!a.isSponsored && b.isSponsored) return 1;
-        if (a.isUrgent && !b.isUrgent) return -1;
-        if (!a.isUrgent && b.isUrgent) return 1;
-        return 0;
-    });
-    return filtered.slice(0, 6);
-  }, [currentNeighborhood, isAll]);
-
-  if (jobsList.length === 0) return null;
-
-  return (
-    <div className="w-full bg-white dark:bg-gray-950 py-3 border-t border-gray-50 dark:border-gray-800">
-      <div className="px-5 mb-3 flex justify-between items-end">
-        <div>
-          <div className="flex items-center gap-2 mb-1">
-            <Briefcase className="w-4 h-4 text-[#1E5BFF]" />
-            <h2 className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-wider">
-              Vagas em Destaque
-            </h2>
-          </div>
-          <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">
-            Oportunidades reais no seu bairro
-          </p>
-        </div>
-        <button onClick={() => onNavigate('jobs_list')} className="text-[10px] font-black text-[#1E5BFF] uppercase tracking-widest hover:underline">Ver todas</button>
-      </div>
-      <div className="flex gap-3 overflow-x-auto no-scrollbar px-5 pb-2 snap-x">
-        {jobsList.map((job) => (
-          <button
-            key={job.id}
-            onClick={() => onNavigate('jobs_list')}
-            className="snap-center min-w-[145px] w-[145px] bg-white dark:bg-gray-800 rounded-2xl p-3.5 shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col text-left group active:scale-[0.98] transition-all h-[165px] justify-between relative overflow-hidden"
-          >
-            <div className="w-full">
-               <div className="flex justify-between items-start mb-2">
-                  <div className="w-7 h-7 rounded-lg bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center text-[#1E5BFF]">
-                      <Briefcase className="w-4 h-4" />
-                  </div>
-                  {job.isUrgent && (
-                    <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 text-[8px] font-black px-1.5 py-0.5 rounded border border-red-100 dark:border-red-800 uppercase tracking-wider">
-                        Urgente
-                    </div>
-                  )}
-               </div>
-               <h4 className="font-extrabold text-gray-900 dark:text-white text-xs leading-tight line-clamp-2 mb-1 group-hover:text-[#1E5BFF] transition-colors">{job.role}</h4>
-               <p className="text-[10px] text-gray-400 dark:text-gray-500 truncate font-semibold">{job.company}</p>
-            </div>
-            <div className="w-full mt-2">
-                <div className="inline-flex items-center gap-1 bg-emerald-50 dark:bg-emerald-900/20 px-2 py-1 rounded-md border border-emerald-100 dark:border-emerald-800/30 mb-2 max-w-full overflow-hidden">
-                    <DollarSign className="w-2.5 h-2.5 text-emerald-600" />
-                    <span className="text-[9px] font-black text-emerald-700 dark:text-emerald-400 truncate">
-                      {job.salary ? job.salary.split(' ')[1] || 'Sob consulta' : job.type}
-                    </span>
-                </div>
-                <div className="flex items-center justify-between border-t border-gray-50 dark:border-gray-700 pt-2 w-full">
-                    <span className="text-[9px] font-black text-gray-400 group-hover:text-[#1E5BFF] transition-colors uppercase tracking-wider">Ver detalhes</span>
-                    <ChevronRight className="w-3 h-3 text-gray-300 group-hover:text-[#1E5BFF]" />
-                </div>
-            </div>
-          </button>
         ))}
       </div>
     </div>
@@ -679,74 +187,54 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
   onNavigate, 
   onSelectCategory, 
   onStoreClick, 
-  searchTerm: externalSearchTerm,
   stores,
-  user,
-  userRole,
-  onSpinWin,
-  onRequireLogin
+  user
 }) => {
-  const [listFilter, setListFilter] = useState<'all' | 'cashback' | 'top_rated' | 'open_now'>('all');
-  const { currentNeighborhood, isAll } = useNeighborhood();
+  const [listFilter, setListFilter] = useState<'all' | 'top_rated' | 'open_now'>('all');
+  const { currentNeighborhood } = useNeighborhood();
   const categoriesRef = useRef<HTMLDivElement>(null);
-  const [scrollProgress, setScrollProgress] = useState(0);
 
-  const handleScrollCategories = () => {
-    if (categoriesRef.current) {
-        const { scrollLeft, scrollWidth, clientWidth } = categoriesRef.current;
-        const maxScroll = scrollWidth - clientWidth;
-        setScrollProgress(maxScroll > 0 ? (scrollLeft / maxScroll) : 0);
-    }
-  };
+  const homeStructure = useMemo(() => ['categories', 'home_carousel', 'featured_services', 'community_feed', 'list'], []);
 
   const renderSection = (key: string) => {
     switch (key) {
       case 'categories':
         return (
           <div key="categories" className="w-full bg-white dark:bg-gray-950 pt-4 pb-0">
-            <div ref={categoriesRef} onScroll={handleScrollCategories} className="flex overflow-x-auto no-scrollbar px-4 pb-2 snap-x">
+            <div ref={categoriesRef} className="flex overflow-x-auto no-scrollbar px-4 pb-4 snap-x">
               <div className="grid grid-flow-col grid-rows-2 gap-x-3 gap-y-3">
-                {(CATEGORIES || []).map((cat) => (
+                {CATEGORIES.map((cat) => (
                   <button key={cat.id} onClick={() => onSelectCategory(cat)} className="flex flex-col items-center group active:scale-95 transition-all">
-                    <div className={`w-[78px] h-[78px] rounded-[22px] shadow-lg flex flex-col items-center justify-between p-2 relative overflow-hidden bg-gradient-to-br ${cat.color} border border-white/20`}>
-                      <div className="flex-1 flex items-center justify-center w-full">{React.isValidElement(cat.icon) ? React.cloneElement(cat.icon as any, { className: "w-7 h-7 text-white drop-shadow-md", strokeWidth: 2.5 }) : null}</div>
+                    <div className={`w-[78px] h-[78px] rounded-[22px] shadow-lg flex flex-col items-center justify-between p-2 bg-gradient-to-br ${cat.color} border border-white/20`}>
+                      <div className="flex-1 flex items-center justify-center w-full">{React.cloneElement(cat.icon as any, { className: "w-7 h-7 text-white drop-shadow-md", strokeWidth: 2.5 })}</div>
                       <div className="w-full bg-black/10 backdrop-blur-[2px] py-1 rounded-b-[20px] -mx-2 -mb-2"><span className="block w-full text-[9px] font-black text-white text-center uppercase tracking-tight">{cat.name}</span></div>
                     </div>
                   </button>
                 ))}
               </div>
             </div>
-            <div className="flex justify-center w-full mt-1 mb-1">
-                <div className="w-12 h-[3px] bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden relative">
-                    <div className="absolute top-0 bottom-0 left-0 bg-[#1E5BFF] rounded-full transition-transform duration-100 ease-out w-4" style={{ transform: `translateX(${scrollProgress * 200}%)` }} />
-                </div>
-            </div>
           </div>
         );
-      case 'home_carousel':
-        return <div key="home_carousel" className="w-full bg-white dark:bg-gray-950 mt-4 pb-3"><HomeCarousel onNavigate={onNavigate} /></div>;
-      case 'neighborhood_coupons':
-        return <NeighborhoodCouponsBlock key="neighborhood_coupons" stores={stores} onStoreClick={(s) => onStoreClick && onStoreClick(s)} onNavigate={onNavigate} user={user} userRole={userRole || null} onRequireLogin={onRequireLogin} />;
-      case 'featured_services':
-        return <FeaturedServicesBlock key="featured_services" stores={stores} onStoreClick={(s) => onStoreClick && onStoreClick(s)} />;
-      case 'featured_jobs':
-        return <FeaturedJobsBlock key="featured_jobs" onNavigate={onNavigate} />;
+      case 'home_carousel': return <div key="home_carousel" className="w-full bg-white dark:bg-gray-950 mt-4 pb-3"><HomeCarousel onNavigate={onNavigate} onStoreClick={onStoreClick} stores={stores} /></div>;
+      case 'featured_services': return <FeaturedServicesBlock key="featured_services" stores={stores} onStoreClick={(s) => onStoreClick && onStoreClick(s)} />;
       case 'community_feed': return <CommunityFeedBlock key="community_feed" onNavigate={onNavigate} />;
-      case 'trust_feed': return <CommunityTrustCarousel key="trust_feed" stores={stores} onStoreClick={(s) => onStoreClick && onStoreClick(s)} />;
       case 'list':
         return (
           <div key="list" className="w-full bg-white dark:bg-gray-900 pt-3">
             <div className="px-5">
-              <SectionHeader title={`Parceiros em ${currentNeighborhood === 'Jacarepaguá (todos)' ? 'Jacarepaguá' : currentNeighborhood}`} subtitle="O melhor do comércio local" rightElement={<div className="flex gap-1 bg-gray-100 dark:bg-gray-800 p-1 rounded-xl">{['all', 'cashback', 'top_rated'].map((f) => (<button key={f} onClick={() => setListFilter(f as any)} className={`text-[8px] font-black uppercase px-2.5 py-1.5 rounded-lg transition-all ${listFilter === f ? 'bg-white dark:bg-gray-700 text-[#1E5BFF] shadow-sm' : 'text-gray-400'}`}>{f === 'all' ? 'Tudo' : f === 'cashback' ? '%' : 'Top'}</button>))}</div>} />
-              <LojasEServicosList onStoreClick={onStoreClick} onViewAll={() => onNavigate('explore')} activeFilter={listFilter} user={user} onNavigate={onNavigate} premiumOnly={false} />
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-[11px] font-black text-gray-400 uppercase tracking-[0.2em]">Explorar Bairro</h3>
+                <div className="flex gap-1 bg-gray-100 dark:bg-gray-800 p-1 rounded-xl">
+                  {['all', 'top_rated'].map((f) => (<button key={f} onClick={() => setListFilter(f as any)} className={`text-[8px] font-black uppercase px-2.5 py-1.5 rounded-lg transition-all ${listFilter === f ? 'bg-white dark:bg-gray-700 text-[#1E5BFF] shadow-sm' : 'text-gray-400'}`}>{f === 'all' ? 'Tudo' : 'Top'}</button>))}
+                </div>
+              </div>
+              <LojasEServicosList onStoreClick={onStoreClick} onViewAll={() => onNavigate('explore')} activeFilter={listFilter as any} user={user} onNavigate={onNavigate} premiumOnly={false} />
             </div>
           </div>
         );
       default: return null;
     }
   };
-
-  const homeStructure = useMemo(() => ['categories', 'home_carousel', 'neighborhood_coupons', 'featured_services', 'featured_jobs', 'trust_feed', 'community_feed', 'list'], []);
 
   return (
     <div className="flex flex-col bg-white dark:bg-gray-950 w-full max-w-md mx-auto animate-in fade-in duration-500 overflow-x-hidden pb-32">

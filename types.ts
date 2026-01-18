@@ -1,14 +1,14 @@
+
 import React from 'react';
 
 export type ThemeMode = 'light' | 'dark' | 'auto';
 
 export enum AdType {
   ORGANIC = 'ORGANIC',
-  LOCAL = 'LOCAL',   // R$ 1.90/dia
-  PREMIUM = 'PREMIUM' // R$ 3.90/dia - Top of list
+  LOCAL = 'LOCAL',   
+  PREMIUM = 'PREMIUM' 
 }
 
-// Add ChatMessage for Gemini Assistant
 export interface ChatMessage {
   role: 'user' | 'model';
   text: string;
@@ -31,9 +31,8 @@ export interface Profile {
   jobTypes?: string[];
   jobRegions?: string[];
   fcmTokens?: string[];
-  lastJobPushAt?: string; // ISO Date String
-  hasSeenJobsVideo?: boolean; // Flag para vídeo explicativo de vagas
-  hasSeenCashbackVideo?: boolean; // Flag para vídeo explicativo de cashback
+  lastJobPushAt?: string; 
+  hasSeenJobsVideo?: boolean;
 }
 
 export interface Store {
@@ -49,10 +48,6 @@ export interface Store {
   neighborhood?: string;
   adType: AdType;
   description: string;
-  cashback?: number;
-  isMarketplace?: boolean;
-  price_original?: number;
-  price_current?: number;
   address?: string;
   phone?: string;
   hours?: string;
@@ -66,6 +61,7 @@ export interface Store {
   isSponsored?: boolean;
   paymentMethods?: string[];
   recentComments?: string[];
+  cashback?: number;
 }
 
 export type CommunityPostType = 'tip' | 'recommendation' | 'alert' | 'news' | 'promo';
@@ -89,6 +85,17 @@ export interface CommunityPost {
   type: CommunityPostType;
   timestamp: string;
   isLiked?: boolean;
+  communityId: string; // Relaciona o post a uma comunidade específica
+}
+
+export interface NeighborhoodCommunity {
+  id: string;
+  name: string;
+  description: string;
+  image: string;
+  icon: React.ReactNode;
+  color: string;
+  membersCount: string;
 }
 
 export interface Category {
@@ -101,7 +108,6 @@ export interface Category {
   slug: string;
 }
 
-// Add EditorialCollection
 export interface EditorialCollection {
   id: string;
   title: string;
@@ -115,7 +121,6 @@ export interface Story {
   name: string;
   image: string;
   isLive?: boolean;
-  isMarketplace?: boolean;
 }
 
 export interface Job {
@@ -132,32 +137,9 @@ export interface Job {
   contactWhatsapp: string;
   postedAt: string;
   isUrgent?: boolean;
-  isUrgentToday?: boolean; // Gatilho para disparo de PUSH
+  isUrgentToday?: boolean; 
   isSponsored?: boolean;
   sponsoredUntil?: string;
-}
-
-// Add CashbackTransaction for merchant requests
-export interface CashbackTransaction {
-  id: string;
-  merchant_id: string;
-  store_id: string;
-  customer_id: string;
-  total_amount_cents: number;
-  cashback_used_cents: number;
-  cashback_to_earn_cents: number;
-  amount_to_pay_now_cents: number;
-  status: 'pending' | 'approved' | 'rejected';
-  created_at?: string;
-  approved_at?: string;
-  rejected_at?: string;
-}
-
-// Add LocalUserWallet
-export interface LocalUserWallet {
-  userId: string;
-  balance: number;
-  history: any[];
 }
 
 export type ReportReason = 'spam' | 'offensive' | 'fraud' | 'wrong_neighborhood' | 'other';
@@ -178,4 +160,19 @@ export interface PostReport {
   postThumbnail?: string;
   postContentSnippet?: string;
   authorUsername?: string;
+}
+
+export interface CashbackTransaction {
+  id: string;
+  merchant_id: string;
+  store_id: string;
+  customer_id: string;
+  total_amount_cents: number;
+  cashback_used_cents: number;
+  cashback_to_earn_cents: number;
+  amount_to_pay_now_cents: number;
+  status: 'pending' | 'approved' | 'rejected';
+  created_at?: string;
+  approved_at?: string;
+  rejected_at?: string;
 }
