@@ -23,6 +23,7 @@ import { CashbackScanScreen } from './CashbackScanScreen';
 import { CashbackPaymentScreen } from './CashbackPaymentScreen';
 import { MerchantCashbackDashboard } from './MerchantCashbackDashboard';
 import { MerchantQrScreen } from './MerchantQrScreen';
+import { MerchantCashbackOnboarding } from './MerchantCashbackOnboarding';
 import { MapPin, X } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { NeighborhoodProvider } from '../contexts/NeighborhoodContext';
@@ -51,7 +52,11 @@ const App: React.FC = () => {
   const [quoteCategory, setQuoteCategory] = useState('');
   const [adCategoryTarget, setAdCategoryTarget] = useState<string | null>(null);
   
-  // Contextos de Inspeção Admin e Dados do Scanner
+  // Controle de Onboarding de Cashback persistente no navegador
+  const [onboardingCashbackCompleted, setOnboardingCashbackCompleted] = useState(() => 
+    localStorage.getItem('onboarding_cashback_completed') === 'true'
+  );
+
   const [inspectedUserId, setInspectedUserId] = useState<string | null>(null);
   const [inspectedStore, setInspectedStore] = useState<Store | null>(null);
   const [scanData, setScanData] = useState<{ merchantId: string; storeId: string } | null>(null);
@@ -59,15 +64,21 @@ const App: React.FC = () => {
   useEffect(() => {
     localStorage.setItem('localizei_active_tab', activeTab);
     
-    if (!['scan_cashback', 'pay_cashback'].includes(activeTab)) {
-        setScanData(null);
+    // LÓGICA DE GATEKEEPER (Regra 5 e 6):
+    // Se o lojista tenta acessar ferramentas de venda (QR ou Dashboard) sem onboarding, redireciona.
+    const isAccessingMerchantTools = ['merchant_qr_display', 'merchant_cashback_dashboard'].includes(activeTab);
+    
+    if (isAccessingMerchantTools && userRole === 'lojista') {
+      if (!onboardingCashbackCompleted) {
+        setActiveTab('merchant_onboarding');
+      }
     }
-  }, [activeTab]);
+  }, [activeTab, userRole, onboardingCashbackCompleted]);
 
   const handleSelectStore = (store: Store) => { setSelectedStore(store); setActiveTab('store_detail'); };
   
-  const headerExclusionList = ['merchant_qr_display', 'wallet', 'scan_cashback', 'pay_cashback', 'merchant_cashback_dashboard', 'store_area', 'editorial_list', 'store_profile', 'category_detail', 'store_detail', 'profile', 'patrocinador_master', 'service_subcategories', 'service_specialties', 'store_ads_module', 'about', 'support', 'favorites', 'community_feed', 'admin_panel'];
-  const hideBottomNav = ['pay_cashback', 'scan_cashback', 'merchant_cashback_dashboard', 'store_ads_module', 'store_detail', 'admin_panel'].includes(activeTab);
+  const headerExclusionList = ['merchant_onboarding', 'merchant_qr_display', 'wallet', 'scan_cashback', 'pay_cashback', 'merchant_cashback_dashboard', 'store_area', 'editorial_list', 'store_profile', 'category_detail', 'store_detail', 'profile', 'patrocinador_master', 'service_subcategories', 'service_specialties', 'store_ads_module', 'about', 'support', 'favorites', 'community_feed', 'admin_panel'];
+  const hideBottomNav = ['merchant_onboarding', 'pay_cashback', 'scan_cashback', 'merchant_cashback_dashboard', 'store_ads_module', 'store_detail', 'admin_panel'].includes(activeTab);
 
   return (
     <NeighborhoodProvider>
@@ -146,7 +157,18 @@ const App: React.FC = () => {
                 />
               )}
 
-              {/* TELA DE QR EXCLUSIVA DO LOJISTA */}
+              {/* TELA DE ONBOARDING OBRIGATÓRIO */}
+              {activeTab === 'merchant_onboarding' && (
+                <MerchantCashbackOnboarding 
+                  onBack={() => setActiveTab('home')}
+                  onActivate={() => {
+                    setOnboardingCashbackCompleted(true);
+                    setActiveTab('merchant_qr_display'); // Após onboarding, vai direto para o QR
+                  }}
+                />
+              )}
+
+              {/* TELA DE IDENTIFICAÇÃO (QR) */}
               {activeTab === 'merchant_qr_display' && user && (
                 <MerchantQrScreen 
                     onBack={() => setActiveTab('home')} 
@@ -163,23 +185,6 @@ const App: React.FC = () => {
             </main>
             <AuthModal isOpen={isAuthOpen} onClose={() => setIsAuthOpen(false)} user={user as any} onLoginSuccess={() => setIsAuthOpen(false)} />
         </Layout>
-        {isRoleSwitcherOpen && (
-            <div className="fixed inset-0 z-[300] flex items-center justify-center bg-black/80 backdrop-blur-sm p-6" onClick={() => setIsRoleSwitcherOpen(false)}>
-                <div className="bg-[#111827] w-full max-w-md rounded-[2.5rem] border border-white/10 p-8 shadow-2xl animate-in zoom-in-95 duration-300" onClick={(e) => e.stopPropagation()}>
-                    <div className="flex justify-between items-start mb-8 px-2">
-                        <h2 className="text-xl font-black text-white uppercase">Modo de Visualização</h2>
-                        <button onClick={() => setIsRoleSwitcherOpen(false)} className="text-gray-500 hover:text-white"><X size={24} /></button>
-                    </div>
-                    <div className="space-y-3">
-                        {(['ADM', 'Usuário', 'Lojista', 'Visitante'] as RoleMode[]).map((role) => (
-                            <button key={role} onClick={() => { setViewMode(role); setIsRoleSwitcherOpen(false); }} className={`w-full p-5 rounded-[1.5rem] border text-left transition-all ${viewMode === role ? 'bg-white text-black' : 'bg-white/5 border-white/5 text-white'}`}>
-                                <span className="font-black uppercase">{role}</span>
-                            </button>
-                        ))}
-                    </div>
-                </div>
-            </div>
-        )}
       </div>
     </NeighborhoodProvider>
   );

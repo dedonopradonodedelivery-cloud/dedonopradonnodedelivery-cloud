@@ -26,9 +26,12 @@ export interface Store {
   cashback_percent?: number; 
   cashback_active?: boolean;
   cashback_validity_days?: number;
-  store_manual_code?: string; // Código fixo e amigável (ex: JPA-123)
-  secure_id?: string; // UUID usado no QR Code
-  // Propriedades extras para consistência
+  store_manual_code?: string;
+  secure_id?: string;
+  // Campos de controle de onboarding solicitados
+  onboarding_cashback_completed?: boolean;
+  onboarding_cashback_completed_at?: string;
+  // Propriedades extras
   neighborhood?: string;
   isSponsored?: boolean;
   recentComments?: string[];
