@@ -8,7 +8,7 @@ import { STORES } from '../constants';
 export const GeminiAssistant: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([
-    { role: 'model', text: 'Olá! Sou o assistente virtual do Localizei JPA. Posso te ajudar a encontrar lojas em Jacarepaguá, explicar como funciona o cashback ou como anunciar sua empresa!' }
+    { role: 'model', text: 'Olá! Sou o assistente virtual do Localizei JPA. Posso te ajudar a encontrar lojas em Jacarepaguá ou como anunciar sua empresa!' }
   ]);
   const [input, setInput] = useState('');
   const [isThinking, setIsThinking] = useState(false);
@@ -34,7 +34,6 @@ export const GeminiAssistant: React.FC = () => {
       const systemInstruction = `Você é o assistente útil e amigável do app "Localizei JPA". 
 O app atende a região de Jacarepaguá, no Rio de Janeiro.
 Lojistas: Planos de R$ 1,90/dia (Local) e R$ 3,90/dia (Premium). Podem comprar leads de serviços por R$ 3,90.
-Usuários: Ganham cashback em lojas parceiras de Jacarepaguá e podem usar a Roleta da Sorte.
 Sempre seja curto, use emojis e convide o usuário a explorar as seções do app.`;
 
       const promptContext = `

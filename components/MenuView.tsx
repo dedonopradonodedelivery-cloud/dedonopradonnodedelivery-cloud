@@ -15,7 +15,9 @@ import {
   Info, 
   Briefcase, 
   Store, 
-  PlusCircle
+  PlusCircle,
+  Coins,
+  Wallet
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { User } from '@supabase/supabase-js';
@@ -34,7 +36,6 @@ interface MenuViewProps {
 }
 
 const CATEGORIES_JOBS = ['Alimentação', 'Beleza', 'Serviços', 'Pets', 'Moda', 'Saúde', 'Educação', 'Tecnologia'];
-const JOBS_EXPLAINER_VIDEO = "https://videos.pexels.com/video-files/3129957/3129957-sd_540_960_30fps.mp4";
 
 export const MenuView: React.FC<MenuViewProps> = ({ 
   user, 
@@ -48,7 +49,6 @@ export const MenuView: React.FC<MenuViewProps> = ({
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [jobsAlerts, setJobsAlerts] = useState(false);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-  const [showVideoModal, setShowVideoModal] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -64,17 +64,6 @@ export const MenuView: React.FC<MenuViewProps> = ({
         setSelectedCategories(data.jobCategories || []);
       }
     } catch (e) { console.warn(e); }
-  };
-
-  const updateProfile = async (updates: any) => {
-    if (!user) return;
-    await supabase.from('profiles').update(updates).eq('id', user?.id);
-  };
-
-  const toggleCategory = (cat: string) => {
-    const newCats = selectedCategories.includes(cat) ? selectedCategories.filter(c => c !== cat) : [...selectedCategories, cat];
-    setSelectedCategories(newCats);
-    updateProfile({ jobCategories: newCats });
   };
 
   const handleLogout = async () => {
@@ -107,40 +96,35 @@ export const MenuView: React.FC<MenuViewProps> = ({
       </div>
 
       <div className="px-4 pb-5">
+        {/* User Card */}
         <div onClick={() => onNavigate('edit_profile')} className="mt-6 bg-white dark:bg-gray-800 p-4 rounded-[2rem] shadow-sm border border-gray-100 dark:border-gray-700 flex items-center gap-4 cursor-pointer active:scale-[0.98] mb-6">
           <div className="w-14 h-14 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center overflow-hidden border-2 border-white shadow-sm">
             {user?.user_metadata?.avatar_url ? <img src={user.user_metadata.avatar_url} className="w-full h-full object-cover" /> : <UserIcon className="w-6 h-6 text-gray-400" />}
           </div>
           <div className="flex-1 overflow-hidden">
             <h3 className="font-bold text-gray-900 dark:text-white text-base truncate">{user?.user_metadata?.full_name || user?.email}</h3>
-            <p className="text-xs text-[#1E5BFF] font-bold mt-0.5 flex items-center gap-1">Editar perfil <ChevronRight className="w-3 h-3" /></p>
+            <p className="text-xs text-[#1E5BFF] font-bold mt-0.5 flex items-center gap-1">Ver perfil <ChevronRight className="w-3 h-3" /></p>
           </div>
         </div>
 
-        <div className="bg-white dark:bg-gray-800 rounded-[2rem] p-6 border border-gray-100 dark:border-gray-700 mb-6 shadow-sm">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-orange-50 dark:bg-orange-900/20 flex items-center justify-center text-orange-600"><Bell className="w-5 h-5" /></div>
-              <h3 className="font-bold text-gray-900 dark:text-white text-base">Alertas de Vagas</h3>
+        {/* NEW: Wallet / Credits Entry */}
+        <button 
+            onClick={() => onNavigate('wallet')}
+            className="w-full bg-gradient-to-r from-[#1E5BFF] to-[#4D7CFF] p-5 rounded-[2rem] shadow-xl shadow-blue-500/20 mb-6 flex items-center justify-between group active:scale-[0.98] transition-all"
+        >
+            <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-md">
+                    <Wallet className="w-6 h-6 text-white" />
+                </div>
+                <div className="text-left">
+                    <h4 className="text-white font-bold">Meus Créditos</h4>
+                    <p className="text-blue-100 text-[10px] font-medium uppercase tracking-wider">Saldos nas lojas do bairro</p>
+                </div>
             </div>
-            <button onClick={() => { const s = !jobsAlerts; setJobsAlerts(s); updateProfile({ jobsAlertsEnabled: s }); }} className={`w-12 h-6 rounded-full p-1 transition-colors ${jobsAlerts ? 'bg-green-500' : 'bg-gray-300 dark:bg-gray-600'}`}><div className={`w-4 h-4 bg-white rounded-full transition-transform ${jobsAlerts ? 'translate-x-6' : 'translate-x-0'}`}></div></button>
-          </div>
-          {jobsAlerts && (
-            <div className="flex flex-wrap gap-2 pt-4 border-t border-gray-50">
-              {CATEGORIES_JOBS.map(cat => (<button key={cat} onClick={() => toggleCategory(cat)} className={`px-3 py-1.5 rounded-full text-xs font-bold border transition-all ${selectedCategories.includes(cat) ? 'bg-orange-500 text-white border-orange-500' : 'bg-gray-50 dark:bg-gray-700 text-gray-500 border-gray-200'}`}>{cat}</button>))}
+            <div className="bg-white/20 p-2 rounded-full backdrop-blur-md text-white">
+                <ChevronRight className="w-4 h-4" />
             </div>
-          )}
-        </div>
-
-        {isMerchant && (
-            <div className="mb-8">
-               <h3 className="text-xs font-black text-gray-400 uppercase tracking-[0.2em] mb-4 ml-2">Painel do Lojista</h3>
-               <div className="grid grid-cols-2 gap-3">
-                   <button onClick={() => onNavigate('store_area')} className="bg-white dark:bg-gray-800 p-4 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm flex flex-col gap-3 active:scale-95"><div className="w-10 h-10 bg-indigo-50 dark:bg-indigo-900/20 rounded-xl flex items-center justify-center text-indigo-600"><Briefcase className="w-5 h-5" /></div><span className="text-sm font-bold dark:text-white">Gerenciar Vagas</span></button>
-                   <button onClick={() => onNavigate('store_profile')} className="bg-white dark:bg-gray-800 p-4 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm flex flex-col gap-3 active:scale-95"><div className="w-10 h-10 bg-gray-50 dark:bg-gray-700 rounded-xl flex items-center justify-center text-gray-600"><Store className="w-5 h-5" /></div><span className="text-sm font-bold dark:text-white">Perfil da Loja</span></button>
-               </div>
-            </div>
-        )}
+        </button>
 
         <div className="space-y-4 mb-8">
             <h3 className="text-xs font-black text-gray-400 uppercase tracking-[0.2em] mb-2 ml-2">Geral</h3>
@@ -150,8 +134,6 @@ export const MenuView: React.FC<MenuViewProps> = ({
                 <button onClick={() => onNavigate('support')} className="w-full p-4 flex items-center justify-between active:bg-gray-50"><div className="flex items-center gap-3"><div className="w-9 h-9 rounded-xl bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center text-indigo-600"><HelpCircle className="w-4 h-4" /></div><span className="text-sm font-bold text-gray-700 dark:text-gray-200">Suporte</span></div><ChevronRight className="w-4 h-4 text-gray-300" /></button>
             </div>
         </div>
-
-        <MasterSponsorBanner onClick={() => onNavigate('patrocinador_master')} className="mb-8" />
 
         <button onClick={handleLogout} disabled={isLoggingOut} className="w-full bg-red-50 dark:bg-red-900/10 p-5 rounded-[2rem] border border-red-100 dark:border-red-900/30 flex items-center justify-center gap-3 active:scale-[0.98]">
             {isLoggingOut ? <Loader2 className="w-5 h-5 animate-spin text-red-600" /> : <LogOut className="w-5 h-5 text-red-600" />}

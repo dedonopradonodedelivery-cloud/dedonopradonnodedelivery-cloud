@@ -6,7 +6,6 @@ interface BottomNavProps {
   activeTab: string;
   setActiveTab: (tab: string) => void;
   userRole?: 'cliente' | 'lojista' | null;
-  onCashbackClick?: () => void;
 }
 
 export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab }) => {

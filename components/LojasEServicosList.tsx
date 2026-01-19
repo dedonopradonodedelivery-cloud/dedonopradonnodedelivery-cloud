@@ -46,7 +46,8 @@ export const LojasEServicosList: React.FC<LojasEServicosListProps> = ({ onStoreC
       pool = pool.filter(s => s.adType === AdType.PREMIUM || s.isSponsored);
     }
     if (activeFilter === 'cashback') {
-      pool = pool.filter(s => s.cashback && s.cashback > 0);
+      // FIX: Changed s.cashback to s.cashback_percent to match Store interface
+      pool = pool.filter(s => s.cashback_percent && s.cashback_percent > 0);
     } else if (activeFilter === 'open_now') {
       pool = pool.filter(s => s.isOpenNow);
     } else if (activeFilter === 'top_rated') {

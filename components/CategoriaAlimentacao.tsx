@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { ChevronLeft, Search, ImageIcon, Star, BadgeCheck, ChevronRight, X, AlertCircle, Grid, Filter } from 'lucide-react';
 import { SUBCATEGORIES } from '../constants';
@@ -32,7 +31,8 @@ const generateMockFoodStores = (): Store[] => {
       adType: i % 6 === 0 ? AdType.PREMIUM : AdType.ORGANIC,
       isSponsored: i % 6 === 0,
       verified: Math.random() > 0.3,
-      cashback: Math.random() > 0.5 ? Math.floor(Math.random() * 8) + 2 : undefined,
+      // FIX: Changed 'cashback' to 'cashback_percent' to match Store interface
+      cashback_percent: Math.random() > 0.5 ? Math.floor(Math.random() * 8) + 2 : undefined,
       isOpenNow: Math.random() > 0.2
     };
   });
@@ -124,9 +124,10 @@ const FoodStoreItem: React.FC<{ store: Store; onClick: () => void }> = ({ store,
   >
     <div className="w-16 h-16 rounded-xl bg-gray-100 dark:bg-gray-800 overflow-hidden relative shadow-sm border border-gray-100 dark:border-gray-700 shrink-0">
       <img src={store.logoUrl || "/assets/default-logo.png"} alt={store.name} className="w-full h-full object-contain" />
-      {store.cashback && (
+      {/* FIX: Changed 'cashback' to 'cashback_percent' to match Store interface */}
+      {store.cashback_percent && (
         <div className="absolute bottom-0 inset-x-0 bg-emerald-500 text-white text-[8px] font-bold text-center py-0.5">
-          {store.cashback}%
+          {store.cashback_percent}%
         </div>
       )}
     </div>

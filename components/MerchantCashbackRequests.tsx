@@ -9,7 +9,7 @@ interface MerchantCashbackRequestsProps {
   onBack: () => void;
 }
 
-// Fix: Use imported CashbackTransaction and ensure ID exists
+// Estendendo CashbackTransaction importada do types.ts (que agora exporta id como obrigatório)
 interface ExtendedCashbackTransaction extends CashbackTransaction {
   customer_name?: string; 
 }
@@ -90,7 +90,7 @@ export const MerchantCashbackRequests: React.FC<MerchantCashbackRequestsProps> =
   // --- Actions ---
 
   const handleApprove = async (tx: ExtendedCashbackTransaction) => {
-    // Fix: Access id safely
+    // Acessando id com segurança agora que types.ts exporta CashbackTransaction corretamente
     setProcessingId(tx.id);
 
     try {
@@ -120,7 +120,7 @@ export const MerchantCashbackRequests: React.FC<MerchantCashbackRequestsProps> =
   };
 
   const handleReject = async (tx: ExtendedCashbackTransaction) => {
-    // Fix: Access id safely
+    // Acessando id com segurança agora que types.ts exporta CashbackTransaction corretamente
     setProcessingId(tx.id);
 
     try {

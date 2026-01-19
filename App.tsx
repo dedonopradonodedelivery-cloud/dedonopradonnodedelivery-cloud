@@ -19,13 +19,13 @@ import { WeeklyPromoModule } from './components/WeeklyPromoModule';
 import { JobsView } from './components/JobsView';
 import { MerchantJobsModule } from './components/MerchantJobsModule';
 import { AdminPanel } from './components/AdminPanel'; 
-import { MapPin, ShieldCheck, User as UserIcon, Store as StoreIcon, EyeOff, X, Check } from 'lucide-react';
+// Adicionando import do StoreAdsModule para corrigir erro de nome não encontrado
+import { StoreAdsModule } from './components/StoreAdsModule';
+import { MapPin, ShieldCheck, X } from 'lucide-react';
 import { useAuth } from './contexts/AuthContext';
 import { NeighborhoodProvider } from './contexts/NeighborhoodContext';
 import { Category, Store, EditorialCollection, ThemeMode } from './types';
 import { CategoryView } from './components/CategoryView';
-import { EditorialListView } from './components/EditorialListView';
-import { StoreAdsModule } from './components/StoreAdsModule';
 import { StoreProfileEdit } from './components/StoreProfileEdit';
 import { CommunityFeedView } from './components/CommunityFeedView';
 import { STORES } from './constants';
@@ -39,14 +39,11 @@ import {
 
 let splashWasShownInSession = false;
 const ADMIN_EMAIL = 'dedonopradonodedelivery@gmail.com';
-const MAIN_TABS = ['home', 'explore', 'community_feed', 'services', 'profile'];
 
 export type RoleMode = 'ADM' | 'Usuário' | 'Lojista' | 'Visitante';
 
-// Componente para o efeito de digitação letra por letra em linha única
 const TypingText: React.FC<{ text: string; duration: number }> = ({ text, duration }) => {
   const [displayedText, setDisplayedText] = useState("");
-  
   useEffect(() => {
     let i = 0;
     const charDelay = duration / text.length;
@@ -58,29 +55,21 @@ const TypingText: React.FC<{ text: string; duration: number }> = ({ text, durati
         clearInterval(interval);
       }
     }, charDelay);
-    
     return () => clearInterval(interval);
   }, [text, duration]);
-
-  return (
-    <p className="text-[15px] font-medium text-white/90 mt-2 text-center whitespace-nowrap overflow-hidden border-r-2 border-transparent">
-      {displayedText}
-    </p>
-  );
+  return <p className="text-[15px] font-medium text-white/90 mt-2 text-center whitespace-nowrap overflow-hidden">{displayedText}</p>;
 };
 
 const App: React.FC = () => {
   const { user, userRole, loading: isAuthInitialLoading, signOut } = useAuth();
   const isAuthReturn = window.location.hash.includes('access_token') || window.location.search.includes('code=');
   const [splashStage, setSplashStage] = useState(splashWasShownInSession || isAuthReturn ? 4 : 0);
-  const [themeMode, setThemeMode] = useState<ThemeMode>(() => (localStorage.getItem('localizei_theme_mode') as ThemeMode) || 'light');
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [viewMode, setViewMode] = useState<RoleMode>(() => (localStorage.getItem('admin_view_mode') as RoleMode) || 'ADM');
   const [isRoleSwitcherOpen, setIsRoleSwitcherOpen] = useState(false);
   const [activeTab, setActiveTab] = useState(() => localStorage.getItem('localizei_active_tab') || 'home');
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
   const [selectedStore, setSelectedStore] = useState<Store | null>(null);
-  const [selectedCollection, setSelectedCollection] = useState<EditorialCollection | null>(null);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [globalSearch, setGlobalSearch] = useState('');
   const [selectedServiceMacro, setSelectedServiceMacro] = useState<{id: string, name: string} | null>(null);
@@ -88,13 +77,10 @@ const App: React.FC = () => {
   const [quoteCategory, setQuoteCategory] = useState('');
   const [adCategoryTarget, setAdCategoryTarget] = useState<string | null>(null);
 
-  useEffect(() => {
-    localStorage.setItem('localizei_active_tab', activeTab);
-  }, [activeTab]);
+  useEffect(() => { localStorage.setItem('localizei_active_tab', activeTab); }, [activeTab]);
 
   useEffect(() => {
     if (splashStage === 4) return;
-    // Splash dura total de 5 segundos antes de iniciar a transição de saída
     const t1 = setTimeout(() => setSplashStage(3), 5000);
     const t2 = setTimeout(() => { setSplashStage(4); splashWasShownInSession = true; }, 5800);
     return () => { clearTimeout(t1); clearTimeout(t2); };
@@ -145,7 +131,7 @@ const App: React.FC = () => {
               )}
               <main className="animate-in fade-in duration-500 w-full max-w-md mx-auto">
                 {activeTab === 'admin_panel' && <AdminPanel user={user as any} onLogout={signOut} viewMode={viewMode} onOpenViewSwitcher={() => setIsRoleSwitcherOpen(true)} onNavigateToApp={() => setActiveTab('home')} />}
-                {activeTab === 'home' && <HomeFeed onNavigate={setActiveTab} onSelectCategory={(c) => { setSelectedCategory(c); setActiveTab('category_detail'); }} onSelectCollection={(c) => { setSelectedCollection(c); setActiveTab('editorial_list'); }} onStoreClick={handleSelectStore} stores={STORES} searchTerm={globalSearch} user={user as any} onSpinWin={() => {}} onRequireLogin={() => setIsAuthOpen(true)} />}
+                {activeTab === 'home' && <HomeFeed onNavigate={setActiveTab} onSelectCategory={(c) => { setSelectedCategory(c); setActiveTab('category_detail'); }} onSelectCollection={() => {}} onStoreClick={handleSelectStore} stores={STORES} searchTerm={globalSearch} user={user as any} onRequireLogin={() => setIsAuthOpen(true)} />}
                 {activeTab === 'explore' && <ExploreView stores={STORES} searchQuery={globalSearch} onStoreClick={handleSelectStore} onLocationClick={() => {}} onFilterClick={() => {}} onOpenPlans={() => {}} onNavigate={setActiveTab} />}
                 {activeTab === 'profile' && <MenuView user={user as any} userRole={userRole} onAuthClick={() => setIsAuthOpen(true)} onNavigate={setActiveTab} onBack={() => setActiveTab('home')} />}
                 {activeTab === 'community_feed' && <CommunityFeedView onStoreClick={handleSelectStore} user={user as any} onRequireLogin={() => setIsAuthOpen(true)} onNavigate={setActiveTab} />}
@@ -167,43 +153,17 @@ const App: React.FC = () => {
               {isQuoteModalOpen && <QuoteRequestModal isOpen={isQuoteModalOpen} onClose={() => setIsQuoteModalOpen(false)} categoryName={quoteCategory} onSuccess={() => setActiveTab('service_success')} />}
           </Layout>
           <RoleSwitcherModal />
-          
-          {/* TELA DE SPLASH */}
           {splashStage < 4 && (
             <div className={`fixed inset-0 z-[999] flex flex-col items-center justify-between py-24 transition-all duration-800 ${splashStage === 3 ? 'animate-app-exit' : ''}`} style={{ backgroundColor: '#1E5BFF' }}>
-              
-              {/* BLOCO DE MARCA (0s -> 2s fade-in) */}
               <div className="flex flex-col items-center animate-fade-in text-center px-4">
-                  {/* Logo/Ícone */}
-                  <div className="relative w-32 h-32 bg-white rounded-[2.5rem] flex items-center justify-center shadow-2xl mb-8 animate-logo-enter">
-                    <MapPin className="w-16 h-16 text-brand-blue fill-brand-blue" />
-                  </div>
-                  
-                  {/* Nome da Marca */}
-                  <h1 className="text-4xl font-black font-display text-white tracking-tighter drop-shadow-md">
-                    Localizei JPA
-                  </h1>
-                  
-                  {/* Slogan com efeito de digitação em linha única (0s -> 2s) */}
-                  <TypingText 
-                    text="O app que cria comunidade no seu bairro" 
-                    duration={2000} 
-                  />
+                  <div className="relative w-32 h-32 bg-white rounded-[2.5rem] flex items-center justify-center shadow-2xl mb-8 animate-logo-enter"><MapPin className="w-16 h-16 text-brand-blue fill-brand-blue" /></div>
+                  <h1 className="text-4xl font-black font-display text-white tracking-tighter drop-shadow-md">Localizei JPA</h1>
+                  <TypingText text="O app que cria comunidade no seu bairro" duration={2000} />
               </div>
-
-              {/* BLOCO PATROCINADOR MASTER (3s -> 5s fade-in) */}
-              <div 
-                className="flex flex-col items-center animate-fade-in opacity-0" 
-                style={{ animationDelay: '3000ms', animationFillMode: 'forwards' }}
-              >
-                   <p className="text-[9px] font-black text-white/50 uppercase tracking-[0.25em] mb-1.5">
-                    Patrocinador Master
-                   </p>
-                   <p className="text-xl font-bold text-white tracking-tight">
-                    Grupo Esquematiza
-                   </p>
+              <div className="flex flex-col items-center animate-fade-in opacity-0" style={{ animationDelay: '3000ms', animationFillMode: 'forwards' }}>
+                   <p className="text-[9px] font-black text-white/50 uppercase tracking-[0.25em] mb-1.5">Patrocinador Master</p>
+                   <p className="text-xl font-bold text-white tracking-tight">Grupo Esquematiza</p>
               </div>
-
             </div>
           )}
         </div>

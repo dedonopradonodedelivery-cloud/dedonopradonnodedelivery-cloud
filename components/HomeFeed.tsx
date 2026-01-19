@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { Store, Category, EditorialCollection, AdType } from '../types';
 import { 
@@ -19,7 +20,8 @@ import {
   ArrowRight,
   TrendingUp,
   Lightbulb,
-  Compass
+  Compass,
+  FileText
 } from 'lucide-react';
 import { LojasEServicosList } from './LojasEServicosList';
 import { User } from '@supabase/supabase-js';
@@ -35,7 +37,6 @@ interface HomeFeedProps {
   stores: Store[];
   user: User | null;
   userRole?: 'cliente' | 'lojista' | null;
-  onSpinWin: (reward: any) => void;
   onRequireLogin: () => void;
 }
 
@@ -46,6 +47,7 @@ interface BannerItem {
   tag?: string;
   bgColor: string;
   Icon: React.ElementType;
+  isSpecial?: boolean;
 }
 
 const HomeCarousel: React.FC<{ onNavigate: (v: string) => void; onStoreClick?: (store: Store) => void; stores?: Store[] }> = ({ onNavigate, onStoreClick, stores }) => {
@@ -53,8 +55,8 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void; onStoreClick?: (
   const [progress, setProgress] = useState(0);
 
   const banners: BannerItem[] = useMemo(() => [
+    { id: 'rio-phone-store', title: 'RIO PHONE STORE', target: 'rio-phone-store', tag: 'Assistência Apple', bgColor: 'bg-black', Icon: Smartphone, isSpecial: true },
     { id: 'master-sponsor', title: 'Grupo Esquematiza', target: 'patrocinador_master', tag: 'Patrocinador Master', bgColor: 'bg-slate-900', Icon: Crown },
-    { id: 'rio-phone-store', title: 'Rio Phone Store', target: 'rio-phone-store', tag: 'Assistência Apple', bgColor: 'bg-zinc-900', Icon: Smartphone },
     { id: 'advertise-home', title: 'Anuncie aqui', target: 'advertise_home_banner', tag: 'Destaque sua marca', bgColor: 'bg-[#1E5BFF]', Icon: Megaphone }
   ], []);
 
@@ -90,15 +92,48 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void; onStoreClick?: (
         onClick={handleBannerClick}
         className={`w-full relative aspect-[3/2] rounded-[32px] overflow-hidden shadow-xl shadow-slate-200 dark:shadow-none border border-gray-100 dark:border-white/5 ${current.bgColor} cursor-pointer active:scale-[0.98] transition-all group`}
       >
-        <div className="absolute inset-0 flex flex-col items-center justify-center px-6 pt-4 pb-12 text-center z-10">
-           <div className="p-4 bg-white/10 backdrop-blur-md rounded-[2rem] border border-white/20 shadow-2xl animate-in zoom-in duration-700 mb-5">
-              <current.Icon className="w-12 h-12 text-white" strokeWidth={2} />
-           </div>
-           <h3 className="text-2xl font-[900] text-white leading-tight font-display tracking-tight mt-4 uppercase">
-            {current.title}
-           </h3>
-           <p className="text-white/60 text-[10px] font-black uppercase tracking-[0.2em] mt-2">{current.tag}</p>
-        </div>
+        {current.id === 'rio-phone-store' ? (
+          <div className="absolute inset-0 flex items-center justify-between px-8 relative overflow-hidden">
+            {/* Efeitos Animados de Luz (Lens Flare) */}
+            <div className="absolute top-1/4 right-1/4 w-32 h-32 bg-white/20 rounded-full blur-[60px] animate-pulse"></div>
+            <div className="absolute top-1/2 right-1/3 w-1 h-32 bg-gradient-to-b from-transparent via-blue-400/30 to-transparent rotate-45 blur-md animate-[pulse_3s_infinite]"></div>
+            
+            {/* Conteúdo Esquerdo (Texto) */}
+            <div className="z-20 flex flex-col items-start max-w-[50%] animate-in slide-in-from-left duration-700">
+               <h3 className="text-3xl font-[900] text-white leading-[0.9] font-display tracking-tighter mb-4">
+                RIO PHONE<br/>STORE
+               </h3>
+               <p className="text-white/90 text-sm font-medium mb-1">Há 8 anos no bairro</p>
+               <div className="flex items-start gap-2 text-white/70">
+                  <FileText className="w-3.5 h-3.5 mt-0.5 shrink-0" />
+                  <p className="text-[10px] leading-tight font-medium">Confiança, qualidade e<br/>atendimento local</p>
+               </div>
+            </div>
+
+            {/* Conteúdo Direito (iPhone) */}
+            <div className="z-10 absolute right-[-20px] top-1/2 -translate-y-1/2 w-[60%] h-full flex items-center justify-center animate-in zoom-in fade-in duration-1000">
+                <img 
+                  src="https://images.unsplash.com/photo-1510557880182-3d4d3cba35a5?q=80&w=800&auto=format&fit=crop" 
+                  alt="iPhone" 
+                  className="h-[85%] object-contain drop-shadow-[0_0_30px_rgba(255,255,255,0.15)] brightness-110"
+                />
+                {/* Sparkles / Shine over the phone */}
+                <div className="absolute top-1/4 right-1/4 w-4 h-4 bg-white rounded-full blur-sm animate-ping opacity-40"></div>
+            </div>
+          </div>
+        ) : (
+          <div className="absolute inset-0 flex flex-col items-center justify-center px-6 pt-4 pb-12 text-center z-10">
+             <div className="p-4 bg-white/10 backdrop-blur-md rounded-[2rem] border border-white/20 shadow-2xl animate-in zoom-in duration-700 mb-5">
+                <current.Icon className="w-12 h-12 text-white" strokeWidth={2} />
+             </div>
+             <h3 className="text-2xl font-[900] text-white leading-tight font-display tracking-tight mt-4 uppercase">
+              {current.title}
+             </h3>
+             <p className="text-white/60 text-[10px] font-black uppercase tracking-[0.2em] mt-2">{current.tag}</p>
+          </div>
+        )}
+
+        {/* Indicadores de Progresso */}
         <div className="absolute bottom-5 left-1/2 -translate-x-1/2 flex gap-1.5 z-30 w-1/3 justify-center">
           {banners.map((_, idx) => (
             <div key={idx} className="h-1 flex-1 bg-white/20 rounded-full overflow-hidden">
@@ -136,7 +171,6 @@ const SectionHeader: React.FC<{ icon: React.ElementType; title: string; subtitle
 );
 
 const NovidadesDaSemana: React.FC<{ stores: Store[]; onStoreClick?: (store: Store) => void; onNavigate: (v: string) => void }> = ({ stores, onStoreClick, onNavigate }) => {
-  // Regra obrigatória: Apenas lojas que possuem imagem
   const newArrivals = useMemo(() => {
     return stores.filter(s => (s.image || s.logoUrl) && ['f-38', 'f-39', 'f-45', 'f-42', 'f-50'].includes(s.id));
   }, [stores]);
@@ -185,7 +219,6 @@ const NovidadesDaSemana: React.FC<{ stores: Store[]; onStoreClick?: (store: Stor
 };
 
 const SugestoesParaVoce: React.FC<{ stores: Store[]; onStoreClick?: (store: Store) => void; onNavigate: (v: string) => void }> = ({ stores, onStoreClick, onNavigate }) => {
-  // Regra obrigatória: Apenas lojas que possuem imagem
   const suggestions = useMemo(() => {
     return stores.filter(s => (s.image || s.logoUrl) && ['f-3', 'f-5', 'f-8', 'f-12', 'f-15'].includes(s.id));
   }, [stores]);
@@ -243,7 +276,6 @@ const SugestoesParaVoce: React.FC<{ stores: Store[]; onStoreClick?: (store: Stor
 };
 
 const EmAltaNaCidade: React.FC<{ stores: Store[]; onStoreClick?: (store: Store) => void; onNavigate: (v: string) => void }> = ({ stores, onStoreClick, onNavigate }) => {
-  // Regra obrigatória: Apenas lojas que possuem imagem
   const trending = useMemo(() => {
     return stores.filter(s => (s.image || s.logoUrl) && ['f-1', 'f-2'].includes(s.id));
   }, [stores]);

@@ -7,11 +7,10 @@ interface LayoutProps {
   activeTab: string;
   setActiveTab: (tab: string) => void;
   userRole?: 'cliente' | 'lojista' | null;
-  onCashbackClick?: () => void;
   hideNav?: boolean;
 }
 
-export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab, userRole, onCashbackClick, hideNav = false }) => {
+export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab, userRole, hideNav = false }) => {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   // Reset scroll position when activeTab changes
@@ -46,7 +45,6 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
           activeTab={activeTab}
           setActiveTab={setActiveTab}
           userRole={userRole}
-          onCashbackClick={onCashbackClick}
         />
       )}
     </div>

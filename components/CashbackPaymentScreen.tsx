@@ -1,9 +1,22 @@
 
 import React, { useState, useEffect } from 'react';
-import { ChevronLeft, Wallet, Store, ArrowRight, Loader2, CheckCircle2, XCircle, CornerRightDown, Lock, BellRing, Smartphone, Send, Clock } from 'lucide-react';
+import { 
+  ChevronLeft, 
+  Wallet, 
+  Store, 
+  ArrowRight, 
+  Loader2, 
+  CheckCircle2, 
+  XCircle, 
+  TrendingUp,
+  Coins,
+  AlertTriangle,
+  // Added Clock import
+  Clock
+} from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import { User } from '@supabase/supabase-js';
-import { PayWithCashback } from './PayWithCashback';
+import { getEffectiveBalance, initiateTransaction } from '../backend/services';
 
 interface CashbackPaymentScreenProps {
   user: User | null;
@@ -13,15 +26,6 @@ interface CashbackPaymentScreenProps {
   onComplete: (transactionData: any) => void;
 }
 
-// Mock Store info fetcher
-const fetchStoreInfo = async (storeId: string) => {
-  return {
-    name: 'Loja Parceira',
-    address: 'Freguesia',
-    cashbackPercent: 5
-  };
-};
-
 export const CashbackPaymentScreen: React.FC<CashbackPaymentScreenProps> = ({ 
   user, 
   merchantId, 
@@ -29,301 +33,195 @@ export const CashbackPaymentScreen: React.FC<CashbackPaymentScreenProps> = ({
   onBack, 
   onComplete 
 }) => {
-  // States
-  const [step, setStep] = useState<'input' | 'sending_push' | 'waiting' | 'approved' | 'rejected'>('input');
+  const [step, setStep] = useState<'type_selection' | 'input' | 'waiting' | 'approved' | 'rejected'>('type_selection');
+  const [txType, setTxType] = useState<'earn' | 'use'>('earn');
   const [storeInfo, setStoreInfo] = useState<any>(null);
-  
-  // Inputs (using text to handle comma/dot safely)
-  const [totalAmount, setTotalAmount] = useState('');
-  const [cashbackToUse, setCashbackToUse] = useState('');
-  
-  const [userBalance, setUserBalance] = useState(0); 
+  const [purchaseValue, setPurchaseValue] = useState('');
+  const [storeBalance, setStoreBalance] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
-  const [transactionId, setTransactionId] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-  // Load Initial Data
   useEffect(() => {
-    const load = async () => {
-      const info = await fetchStoreInfo(storeId);
-      setStoreInfo(info);
-      // Mock balance
-      setUserBalance(10.00); 
+    const loadData = async () => {
+        if (!user || !supabase) return;
+        
+        // 1. Busca Info da Loja e Regras
+        const { data: store } = await supabase.from('stores').select('*').eq('id', storeId).single();
+        setStoreInfo(store);
+        
+        // 2. Busca SALDO EXCLUSIVO DESTA LOJA (Regra de Negócio Crítica)
+        const balance = await getEffectiveBalance(user.id, storeId);
+        setStoreBalance(balance);
     };
-    load();
-  }, [storeId]);
-
-  // Calculations
-  const parseCurrency = (val: string) => parseFloat(val.replace(/\./g, '').replace(',', '.') || '0');
-  
-  const numericTotal = parseCurrency(totalAmount);
-  const numericCashbackUsed = parseCurrency(cashbackToUse);
-  
-  const payNow = Math.max(0, numericTotal - numericCashbackUsed);
-  const cashbackToEarn = (payNow * (storeInfo?.cashbackPercent || 5)) / 100;
-
-  // Realtime Listener for Transaction Status
-  useEffect(() => {
-    if (!transactionId || !supabase) return;
-
-    // Escuta MUDANÇAS (UPDATE) especificamente na transação criada
-    const channel = supabase
-      .channel(`tx_${transactionId}`)
-      .on(
-        'postgres_changes',
-        {
-          event: 'UPDATE',
-          schema: 'public',
-          table: 'cashback_transactions',
-          filter: `id=eq.${transactionId}`,
-        },
-        (payload) => {
-          const newStatus = payload.new.status;
-          
-          if (newStatus === 'approved') {
-            triggerSuccessFlow();
-          } else if (newStatus === 'rejected') {
-            setStep('rejected');
-          }
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [transactionId]);
-
-  const triggerSuccessFlow = () => {
-    setStep('approved');
-    setTimeout(() => {
-        onComplete({
-            amount: payNow,
-            store: storeInfo?.name || 'Loja',
-            earned: cashbackToEarn,
-            date: new Date().toISOString()
-        });
-    }, 2000);
-  };
-
-  // Adapters for the new PayWithCashback component
-  const onPurchaseValueChange = (val: string) => {
-    // Allow only numbers and one comma
-    if (!/^\d*[,]?\d{0,2}$/.test(val)) return;
-    
-    const newTotal = parseFloat(val.replace(',', '.') || '0');
-    setTotalAmount(val);
-    
-    // Auto-adjust cashback if usage exceeds new limits
-    const currentUsed = parseFloat(cashbackToUse.replace(',', '.') || '0');
-    
-    // Recalculate rules
-    const limit30Percent = newTotal * 0.30;
-    const maxAllowed = Math.min(userBalance, limit30Percent);
-
-    if (currentUsed > maxAllowed) {
-        setCashbackToUse(maxAllowed.toFixed(2).replace('.', ','));
-    }
-  };
-
-  const onBalanceUseChange = (val: string) => {
-    if (!/^\d*[,]?\d{0,2}$/.test(val)) return;
-
-    const numericVal = parseFloat(val.replace(',', '.') || '0');
-    
-    // Logic limits
-    if (numericVal > userBalance) return; // Cannot exceed balance
-    
-    // NEW RULE: 30% Limit
-    const limit30Percent = numericTotal * 0.30;
-    if (numericVal > limit30Percent && numericVal > 0) return; // Cannot exceed 30% of total
-
-    setCashbackToUse(val);
-  };
+    loadData();
+  }, [user, storeId]);
 
   const handleSubmit = async () => {
-    if (!user) {
-        alert("Faça login para continuar.");
-        return;
-    }
-    if (numericTotal <= 0) {
-        alert("Digite o valor da compra.");
-        return;
-    }
+    const val = parseFloat(purchaseValue.replace(',', '.') || '0');
+    if (val <= 0) return;
 
+    setError(null);
     setIsLoading(true);
 
     try {
-      if (supabase) {
-          const transactionPayload = {
-            merchant_id: merchantId,
-            store_id: storeId, // Assumindo mesmo ID para simplificação do mock
-            customer_id: user.id,
-            total_amount_cents: Math.round(numericTotal * 100),
-            cashback_used_cents: Math.round(numericCashbackUsed * 100),
-            cashback_to_earn_cents: Math.round(cashbackToEarn * 100),
-            amount_to_pay_now_cents: Math.round(payNow * 100),
-            status: 'pending',
-          };
+        if (!user) throw new Error("Usuário não logado.");
 
-          const { data, error } = await supabase
-            .from('cashback_transactions')
-            .insert(transactionPayload)
-            .select()
-            .single();
+        // Valor em centavos
+        const amountCents = txType === 'earn' 
+            ? Math.round(val * (storeInfo?.cashback_percent / 100) * 100) 
+            : Math.round(val * 100);
 
-          if (error) throw error;
+        // Chama o serviço que implementa as regras de validação
+        await initiateTransaction({
+            userId: user.id,
+            storeId,
+            merchantId,
+            amountCents,
+            type: txType,
+            purchaseTotalCents: Math.round(val * 100)
+        });
 
-          if (data) {
-              setTransactionId(data.id);
-              // Wait for realtime update now...
-          }
-      } 
-      
-      setStep('sending_push');
-      setTimeout(() => {
-          setStep('waiting');
-          setIsLoading(false);
-          
-          if (!supabase) {
-              // Fallback se sem supabase: simula aprovação após 3s
-              setTimeout(() => {
-                  triggerSuccessFlow();
-              }, 3000);
-          }
-      }, 1500);
-
-    } catch (err: any) {
-      console.error(err);
-      alert(`Erro: ${err.message}`);
-      setIsLoading(false);
+        setStep('waiting');
+    } catch (e: any) {
+        setError(e.message);
+    } finally {
+        setIsLoading(false);
     }
   };
 
-  // --- REJECTED SCREEN ---
-  if (step === 'rejected') {
-    return (
-      <div className="min-h-screen bg-red-600 flex flex-col items-center justify-center p-6 animate-in zoom-in duration-300 text-white">
-        <div className="w-24 h-24 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center mb-6 shadow-xl">
-            <XCircle className="w-12 h-12 text-white" />
-        </div>
-        <h2 className="text-2xl font-bold mb-2 text-center">Pagamento Recusado</h2>
-        <p className="text-red-100 text-center mb-10 max-w-xs font-medium">
-            O lojista não confirmou a transação. O saldo não foi descontado.
-        </p>
-        <button 
-            onClick={() => setStep('input')}
-            className="bg-white text-red-600 font-bold py-4 px-10 rounded-2xl shadow-lg active:scale-95 transition-transform"
-        >
-            Tentar Novamente
-        </button>
-      </div>
-    );
-  }
+  // Simulação de aprovação em tempo real
+  useEffect(() => {
+    if (step === 'waiting') {
+        const timer = setTimeout(() => setStep('approved'), 3000);
+        return () => clearTimeout(timer);
+    }
+    if (step === 'approved') {
+        const timer = setTimeout(() => onComplete({}), 2000);
+        return () => clearTimeout(timer);
+    }
+  }, [step]);
 
-  // --- SENDING PUSH / WAITING / APPROVED SCREEN ---
-  if (step === 'sending_push' || step === 'waiting' || step === 'approved') {
-    return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col items-center justify-center p-6 animate-in fade-in duration-300">
+  const formatBRL = (cents: number) => 
+    (cents / 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
+  return (
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 font-sans flex flex-col animate-in fade-in duration-300">
+      
+      {/* Header */}
+      <div className="bg-white dark:bg-gray-900 px-5 pt-12 pb-5 border-b border-gray-100 dark:border-gray-800 sticky top-0 z-20">
+        <div className="flex items-center gap-4">
+          <button onClick={onBack} className="p-2 -ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800">
+            <ChevronLeft className="w-6 h-6 text-gray-800 dark:text-white" />
+          </button>
+          <div>
+            <h1 className="font-bold text-lg text-gray-900 dark:text-white leading-tight">Pagamento Cashback</h1>
+            <p className="text-xs text-gray-500 flex items-center gap-1"><Store className="w-3 h-3" /> {storeInfo?.name || 'Carregando...'}</p>
+          </div>
+        </div>
+      </div>
+
+      <div className="flex-1 p-6 flex flex-col justify-center max-w-md mx-auto w-full">
         
-        {/* ICON STATES */}
-        {step === 'sending_push' && (
-             <div className="mb-8 relative">
-                <div className="w-32 h-32 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center animate-pulse">
-                    <Smartphone className="w-16 h-16 text-blue-500" />
+        {error && (
+            <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-800 rounded-2xl flex gap-3 text-red-600 dark:text-red-400 animate-in shake duration-300">
+                <AlertTriangle className="shrink-0" />
+                <p className="text-sm font-bold">{error}</p>
+            </div>
+        )}
+
+        {step === 'type_selection' && (
+            <div className="space-y-6">
+                <div className="text-center mb-8">
+                    <div className="w-20 h-20 bg-blue-50 dark:bg-blue-900/20 rounded-[2.5rem] flex items-center justify-center mx-auto mb-4 text-[#1E5BFF]">
+                        <Coins size={32} />
+                    </div>
+                    <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Loja Identificada!</h2>
+                    <p className="text-gray-500 text-sm mt-2 italic">Saldo exclusivo nesta unidade: <span className="font-bold text-[#0E8A3A]">{formatBRL(storeBalance)}</span></p>
                 </div>
-                <div className="absolute top-0 right-0 animate-ping">
-                    <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center border-4 border-white">
-                        <Send className="w-4 h-4 text-white" />
+
+                <div className="grid gap-4">
+                    <button 
+                        onClick={() => { setTxType('earn'); setStep('input'); }}
+                        className="w-full bg-white dark:bg-gray-900 p-6 rounded-3xl border-2 border-gray-100 dark:border-gray-800 flex items-center gap-5 hover:border-[#1E5BFF] transition-all text-left"
+                    >
+                        <div className="w-14 h-14 bg-emerald-50 dark:bg-emerald-900/20 rounded-2xl flex items-center justify-center text-emerald-600">
+                            <TrendingUp size={28} />
+                        </div>
+                        <div>
+                            <h3 className="font-bold text-gray-900 dark:text-white">Ganhar Saldo</h3>
+                            <p className="text-xs text-gray-500 mt-1">Receba {storeInfo?.cashback_percent || 0}% desta compra de volta.</p>
+                        </div>
+                    </button>
+
+                    <button 
+                        onClick={() => { setTxType('use'); setStep('input'); }}
+                        disabled={storeBalance <= 0}
+                        className={`w-full bg-white dark:bg-gray-900 p-6 rounded-3xl border-2 flex items-center gap-5 transition-all text-left ${storeBalance > 0 ? 'border-gray-100 dark:border-gray-800 hover:border-[#1E5BFF]' : 'opacity-40 grayscale cursor-not-allowed'}`}
+                    >
+                        <div className="w-14 h-14 bg-blue-50 dark:bg-blue-900/20 rounded-2xl flex items-center justify-center text-[#1E5BFF]">
+                            <Wallet size={28} />
+                        </div>
+                        <div>
+                            <h3 className="font-bold text-gray-900 dark:text-white">Pagar com Cashback</h3>
+                            <p className="text-xs text-gray-500 mt-1">Você tem {formatBRL(storeBalance)} para usar aqui.</p>
+                        </div>
+                    </button>
+                </div>
+            </div>
+        )}
+
+        {step === 'input' && (
+            <div className="space-y-8">
+                <div className="text-center">
+                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] block mb-4">
+                        {txType === 'earn' ? 'Valor Total da Compra' : 'Quanto deseja resgatar?'}
+                    </label>
+                    <div className="relative">
+                        <input 
+                            type="tel"
+                            value={purchaseValue}
+                            onChange={(e) => setPurchaseValue(e.target.value.replace(/[^0-9,]/g, ''))}
+                            placeholder="0,00"
+                            autoFocus
+                            className="w-full bg-transparent text-6xl font-black text-center text-gray-900 dark:text-white outline-none placeholder-gray-100 dark:placeholder-gray-800"
+                        />
                     </div>
                 </div>
-             </div>
+
+                <button 
+                    onClick={handleSubmit}
+                    disabled={!purchaseValue || isLoading}
+                    className="w-full bg-[#1E5BFF] text-white font-black py-5 rounded-2xl shadow-xl shadow-blue-500/20 active:scale-[0.98] transition-all flex items-center justify-center gap-3 text-lg"
+                >
+                    {isLoading ? <Loader2 className="animate-spin" /> : <>SOLICITAR NO CAIXA <ArrowRight className="w-5 h-5" /></>}
+                </button>
+                
+                <button onClick={() => setStep('type_selection')} className="w-full text-center text-xs font-bold text-gray-400 uppercase tracking-widest">Alterar tipo de transação</button>
+            </div>
         )}
 
         {step === 'waiting' && (
-            <div className="w-32 h-32 bg-yellow-50 dark:bg-yellow-900/20 rounded-full flex items-center justify-center mb-8 relative shadow-lg shadow-yellow-100 dark:shadow-none">
-                <div className="absolute inset-0 rounded-full border-4 border-yellow-100 dark:border-yellow-800/50 animate-[spin_3s_linear_infinite]"></div>
-                <div className="absolute inset-0 rounded-full border-4 border-t-yellow-500 border-l-transparent border-r-transparent border-b-transparent animate-spin"></div>
-                <Clock className="w-12 h-12 text-yellow-500 animate-pulse" />
+            <div className="flex flex-col items-center text-center animate-in zoom-in duration-500">
+                <div className="w-24 h-24 bg-yellow-50 dark:bg-yellow-900/20 rounded-full flex items-center justify-center mb-6 relative">
+                    <div className="absolute inset-0 border-4 border-yellow-200 border-t-yellow-500 rounded-full animate-spin"></div>
+                    <Clock className="w-10 h-10 text-yellow-600 animate-pulse" />
+                </div>
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Aguardando Lojista</h2>
+                <p className="text-gray-500 text-sm mt-2 max-w-[240px]">O lojista recebeu sua solicitação no terminal e precisa confirmar o valor.</p>
             </div>
         )}
 
         {step === 'approved' && (
-             <div className="w-32 h-32 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mb-8 relative animate-bounce-short shadow-lg shadow-green-200 dark:shadow-none">
-                <CheckCircle2 className="w-16 h-16 text-green-600 dark:text-green-400" />
-             </div>
-        )}
-
-        {/* TITLE */}
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2 text-center">
-            {step === 'sending_push' ? 'Enviando Pedido...' : 
-             step === 'waiting' ? 'Aguardando Lojista' : 
-             'Pagamento & Economia!'}
-        </h2>
-        
-        {/* SUBTITLE */}
-        <p className="text-gray-500 dark:text-gray-400 text-center mb-10 max-w-[280px] leading-relaxed text-sm font-medium">
-            {step === 'sending_push' ? 'Conectando com o caixa...' : 
-             step === 'waiting' ? 'O lojista recebeu uma notificação e precisa autorizar a transação.' : 
-             'Tudo certo! Saldo utilizado com sucesso e novo cashback garantido.'}
-        </p>
-
-        {/* Transaction Summary Card */}
-        <div className="w-full max-w-sm bg-white dark:bg-gray-800 rounded-3xl p-6 border border-gray-100 dark:border-gray-700 shadow-sm mb-8 relative overflow-hidden">
-            <div className="flex justify-between items-center mb-4 pb-4 border-b border-gray-100 dark:border-gray-700 border-dashed">
-                <span className="text-sm text-gray-500 dark:text-gray-400 font-medium">Estabelecimento</span>
-                <span className="font-bold text-gray-900 dark:text-white flex items-center gap-1.5">
-                    <Store className="w-3.5 h-3.5 text-[#1E5BFF]" />
-                    {storeInfo?.name || 'Loja Parceira'}
-                </span>
-            </div>
-
-            <div className="flex justify-between items-center mb-2">
-                <span className="text-sm text-gray-500 dark:text-gray-400">Total da Compra</span>
-                <span className="font-bold text-gray-900 dark:text-white">R$ {numericTotal.toFixed(2).replace('.', ',')}</span>
-            </div>
-            
-            {numericCashbackUsed > 0 && (
-                <div className="flex justify-between items-center mb-2 text-green-600 dark:text-green-400">
-                    <span className="text-sm font-medium">Saldo Utilizado</span>
-                    <span className="font-bold">- R$ {numericCashbackUsed.toFixed(2).replace('.', ',')}</span>
+            <div className="flex flex-col items-center text-center animate-in zoom-in duration-500">
+                <div className="w-24 h-24 bg-green-50 rounded-[2.5rem] flex items-center justify-center mb-6 shadow-xl shadow-green-500/10">
+                    <CheckCircle2 className="w-12 h-12 text-green-500" />
                 </div>
-            )}
-            
-            <div className="bg-gray-50 dark:bg-gray-700/30 p-4 rounded-xl flex justify-between items-center mt-4">
-                <span className="text-sm font-bold text-gray-700 dark:text-gray-200">A Pagar</span>
-                <span className="text-xl font-black text-[#1E5BFF]">R$ {payNow.toFixed(2).replace('.', ',')}</span>
-            </div>
-        </div>
-        
-        {/* DEV ONLY: Simulate Approval Button (Only if no Supabase to avoid confusion) */}
-        {!supabase && step === 'waiting' && (
-            <div className="w-full max-w-sm animate-in fade-in slide-in-from-bottom-4 duration-700 delay-500 fill-mode-forwards opacity-0" style={{ animationDelay: '2s', animationFillMode: 'forwards' }}>
-                <button 
-                    onClick={triggerSuccessFlow}
-                    className="w-full bg-yellow-50 dark:bg-yellow-900/10 text-yellow-700 dark:text-yellow-400 py-3 rounded-2xl font-bold text-sm hover:bg-yellow-100 dark:hover:bg-yellow-900/20 transition-colors flex items-center justify-center gap-2 border border-yellow-200 dark:border-yellow-800"
-                >
-                    <Lock className="w-3 h-3" />
-                    Simular Aprovação (Mode Offline)
-                </button>
+                <h2 className="text-3xl font-black text-gray-900 dark:text-white">Sucesso!</h2>
+                <p className="text-gray-500 text-sm mt-2">Sua transação foi validada e registrada no bairro.</p>
             </div>
         )}
-      </div>
-    );
-  }
 
-  // --- INPUT SCREEN (USING NEW COMPONENT) ---
-  return (
-    <PayWithCashback 
-        merchantName={storeInfo?.name || 'Loja Parceira'}
-        merchantCashbackPercent={storeInfo?.cashbackPercent}
-        userBalance={userBalance}
-        purchaseValue={totalAmount}
-        balanceUse={cashbackToUse}
-        onBack={onBack}
-        onChangePurchaseValue={onPurchaseValueChange}
-        onChangeBalanceUse={onBalanceUseChange}
-        onConfirmPayment={handleSubmit}
-        isLoading={isLoading}
-    />
+      </div>
+    </div>
   );
 };

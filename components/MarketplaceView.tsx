@@ -1,6 +1,7 @@
+
 import React from 'react';
 import { Store } from '../types';
-import { ChevronLeft, Search, SlidersHorizontal, Coins, ShoppingCart } from 'lucide-react';
+import { ChevronLeft, Search, SlidersHorizontal, ShoppingCart } from 'lucide-react';
 
 interface MarketplaceViewProps {
   onBack: () => void;
@@ -12,7 +13,6 @@ const MarketplaceProductCard: React.FC<{ item: Store }> = ({ item }) => {
     const priceCurrent = item.price_current;
     const hasDiscount = priceOriginal && priceCurrent && priceOriginal > priceCurrent;
     const discountPercent = hasDiscount && priceOriginal ? Math.floor(((priceOriginal - priceCurrent) / priceOriginal) * 100) : 0;
-    const hasCashback = item.cashback && item.cashback > 0;
 
     return (
         <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col group transition-all duration-300 hover:shadow-lg hover:-translate-y-1 cursor-pointer">
@@ -56,12 +56,6 @@ const MarketplaceProductCard: React.FC<{ item: Store }> = ({ item }) => {
                             )}
                         </div>
                     </div>
-                    {hasCashback && (
-                        <div className="mt-1.5 flex items-center gap-1.5 bg-[#E6F8EA] text-[#0E8A3A] w-fit px-2 py-1 rounded-lg">
-                            <Coins className="w-3.5 h-3.5" />
-                            <span className="text-xs font-bold">{item.cashback}% Cashback</span>
-                        </div>
-                    )}
                 </div>
             </div>
         </div>
@@ -88,17 +82,7 @@ export const MarketplaceView: React.FC<MarketplaceViewProps> = ({ onBack, stores
 
       <div className="px-5 py-4 flex gap-2 overflow-x-auto no-scrollbar">
         <button className="flex items-center gap-2 px-4 py-2 bg-primary-500 text-white rounded-full text-xs font-bold shadow-md shadow-primary-500/20">
-          <SlidersHorizontal className="w-3 h-3" />
           Filtrar
-        </button>
-        <button className="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-full text-xs font-medium whitespace-nowrap">
-          Alimentos
-        </button>
-        <button className="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-full text-xs font-medium whitespace-nowrap">
-          Moda
-        </button>
-        <button className="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-full text-xs font-medium whitespace-nowrap">
-          Serviços
         </button>
       </div>
 

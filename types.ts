@@ -9,89 +9,154 @@ export enum AdType {
   PREMIUM = 'PREMIUM' 
 }
 
-export interface ChatMessage {
-  role: 'user' | 'model';
-  text: string;
-}
-
-export interface StoreReview {
-  id: string;
-  user: string;
-  rating: number;
-  text: string;
-  date: string;
-}
-
-export interface Profile {
-  id: string;
-  email: string;
-  role: 'cliente' | 'lojista';
-  jobsAlertsEnabled?: boolean;
-  jobCategories?: string[];
-  jobTypes?: string[];
-  jobRegions?: string[];
-  fcmTokens?: string[];
-  lastJobPushAt?: string; 
-  hasSeenJobsVideo?: boolean;
-}
-
 export interface Store {
   id: string;
   name: string;
-  username?: string;
   category: string;
   subcategory: string;
   logoUrl?: string; 
   image?: string; 
   rating: number;
   distance: string;
-  neighborhood?: string;
   adType: AdType;
   description: string;
+  verified?: boolean;
+  reviewsCount?: number;
+  isOpenNow?: boolean;
+  cashback_percent?: number; 
+  cashback_active?: boolean;
+  cashback_validity_days?: number;
+  store_manual_code?: string;
+  // Added properties for consistency across components
+  neighborhood?: string;
+  isSponsored?: boolean;
+  recentComments?: string[];
+  isMarketplace?: boolean;
+  price_original?: number;
+  price_current?: number;
   address?: string;
   phone?: string;
   hours?: string;
+  instagram?: string;
   gallery?: string[];
-  reviews?: StoreReview[];
-  verified?: boolean;
-  reviewsCount?: number;
   distanceKm?: number;
-  isOpenNow?: boolean;
   closingTime?: string;
-  isSponsored?: boolean;
-  paymentMethods?: string[];
-  recentComments?: string[];
-  cashback?: number;
-  // Novos campos para Marketplace
-  price_original?: number;
-  price_current?: number;
-  isMarketplace?: boolean;
 }
 
-export type CommunityPostType = 'tip' | 'recommendation' | 'alert' | 'news' | 'promo';
+// Representa o saldo consolidado de um usuário em uma loja específica
+export interface StoreCredit {
+  id: string;
+  user_id: string;
+  store_id: string;
+  store_name: string;
+  store_logo?: string;
+  balance_cents: number; // Saldo total disponível (Soma de créditos ativos - débitos)
+  expiring_soon_cents?: number; // Créditos que expiram nos próximos 7 dias
+  updated_at: string;
+}
 
+// O Ledger é o registro imutável de cada movimentação
+export interface CashbackLedgerEntry {
+  id: string;
+  user_id: string;
+  store_id: string;
+  transaction_id: string; // Vínculo com a transação que gerou o movimento
+  amount_cents: number;
+  type: 'credit' | 'debit'; // credit = ganho, debit = uso ou expiração
+  status: 'active' | 'used' | 'expired';
+  created_at: string;
+  expires_at?: string; // Nulo para débitos, obrigatório para créditos
+}
+
+export interface CashbackTransaction {
+  id: string;
+  user_id: string;
+  user_name?: string;
+  store_id: string;
+  merchant_id: string;
+  amount_cents: number; // Valor da movimentação de cashback
+  purchase_total_cents?: number; // Valor total da nota fiscal/compra
+  type: 'earn' | 'use';
+  status: 'pending' | 'approved' | 'rejected' | 'expired';
+  created_at: string;
+  approved_at?: string;
+  // Added properties for MerchantCashbackDashboard and MerchantCashbackRequests
+  customer_id?: string;
+  customer_name?: string;
+  total_amount_cents?: number;
+  cashback_used_cents?: number;
+  cashback_to_earn_cents?: number;
+  amount_to_pay_now_cents?: number;
+  rejected_at?: string;
+}
+
+export interface Category {
+  id: string;
+  name: string;
+  icon: React.ReactNode;
+  color: string;
+  slug: string;
+}
+
+export interface ChatMessage {
+  role: 'user' | 'model';
+  text: string;
+}
+
+// Added missing Story interface
+export interface Story {
+  id: string;
+  name: string;
+  image: string;
+}
+
+// Added missing EditorialCollection interface
+export interface EditorialCollection {
+  id: string;
+  title: string;
+  subtitle: string;
+  image: string;
+  keywords: string[];
+}
+
+// Added missing Job interface
+export interface Job {
+  id: string;
+  role: string;
+  company: string;
+  neighborhood: string;
+  category: string;
+  type: 'CLT' | 'PJ' | 'Freelancer';
+  salary?: string;
+  description: string;
+  requirements: string[];
+  schedule: string;
+  contactWhatsapp: string;
+  postedAt: string;
+  isUrgent?: boolean;
+  isSponsored?: boolean;
+  sponsoredUntil?: string;
+  isUrgentToday?: boolean;
+}
+
+// Added missing CommunityPost interface
 export interface CommunityPost {
   id: string;
   userId: string;
   userName: string;
-  userUsername?: string;
   userAvatar: string;
   authorRole: 'resident' | 'merchant';
   content: string;
-  imageUrl?: string;
-  imageUrls?: string[];
-  videoUrl?: string;
-  relatedStoreId?: string;
-  relatedStoreName?: string;
+  type: 'recommendation' | 'alert' | 'event' | 'poll';
+  communityId: string;
   neighborhood?: string;
+  timestamp: string;
   likes: number;
   comments: number;
-  type: CommunityPostType;
-  timestamp: string;
-  isLiked?: boolean;
-  communityId: string;
+  imageUrl?: string;
 }
 
+// Added missing NeighborhoodCommunity interface
 export interface NeighborhoodCommunity {
   id: string;
   name: string;
@@ -102,67 +167,28 @@ export interface NeighborhoodCommunity {
   membersCount: string;
 }
 
+// Added missing CommunitySuggestion interface
 export interface CommunitySuggestion {
   id: string;
   name: string;
   votes: number;
   status: 'pending' | 'approved' | 'rejected';
   creatorId: string;
-  voterIds: string[]; 
+  voterIds: string[];
 }
 
-export interface Category {
-  id: string;
-  name: string;
-  icon: React.ReactNode;
-  illustrationUrl?: string;
-  image?: string; 
-  color: string;
-  slug: string;
-}
-
-export interface EditorialCollection {
-  id: string;
-  title: string;
-  subtitle: string;
-  image: string;
-  keywords: string[];
-}
-
-export interface Story {
-  id: string;
-  name: string;
-  image: string;
-  isLive?: boolean;
-}
-
-export interface Job {
-  id: string;
-  role: string;
-  company: string;
-  neighborhood: string;
-  category: string; 
-  type: 'CLT' | 'PJ' | 'Freelancer' | 'Temporário' | 'Estágio';
-  salary?: string;
-  description: string;
-  requirements: string[];
-  schedule: string;
-  contactWhatsapp: string;
-  postedAt: string;
-  isUrgent?: boolean;
-  isUrgentToday?: boolean; 
-  isSponsored?: boolean;
-  sponsoredUntil?: string;
-}
-
+// Added missing ReportReason type
 export type ReportReason = 'spam' | 'offensive' | 'fraud' | 'wrong_neighborhood' | 'other';
-export type ReportStatus = 'open' | 'in_review' | 'resolved' | 'dismissed';
+
+// Added missing PostReport and related types
+export type ReportStatus = 'open' | 'resolved' | 'dismissed';
 export type ReportPriority = 'high' | 'medium' | 'low';
 
 export interface PostReport {
   id: string;
   postId: string;
   postAuthorId: string;
+  authorUsername: string;
   reporterUserId: string;
   postNeighborhood: string;
   reporterNeighborhood: string;
@@ -170,22 +196,6 @@ export interface PostReport {
   status: ReportStatus;
   priority: ReportPriority;
   timestamp: string;
-  postThumbnail?: string;
-  postContentSnippet?: string;
-  authorUsername?: string;
-}
-
-export interface CashbackTransaction {
-  id: string;
-  merchant_id: string;
-  store_id: string;
-  customer_id: string;
-  total_amount_cents: number;
-  cashback_used_cents: number;
-  cashback_to_earn_cents: number;
-  amount_to_pay_now_cents: number;
-  status: 'pending' | 'approved' | 'rejected';
-  created_at?: string;
-  approved_at?: string;
-  rejected_at?: string;
+  postContentSnippet: string;
+  postThumbnail: string;
 }

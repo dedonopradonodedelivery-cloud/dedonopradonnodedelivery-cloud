@@ -49,7 +49,6 @@ export const SUBCATEGORIES: Record<string, { name: string; icon: React.ReactNode
   'Eventos': [
     { name: 'Eventos no Bairro', icon: <MapIcon /> },
     { name: 'Festas & Comemorações', icon: <PartyPopper /> },
-    // Fix: Using StoreIcon (aliased lucide-react icon) instead of Store (which is a type from ./types)
     { name: 'Feiras & Exposições', icon: <StoreIcon /> },
     { name: 'Eventos Gastronômicos', icon: <Utensils /> },
     { name: 'Eventos Culturais', icon: <Music /> },
