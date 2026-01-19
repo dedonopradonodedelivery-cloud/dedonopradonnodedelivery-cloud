@@ -21,7 +21,8 @@ import {
   TrendingUp,
   Lightbulb,
   Compass,
-  FileText
+  FileText,
+  Shield
 } from 'lucide-react';
 import { LojasEServicosList } from './LojasEServicosList';
 import { User } from '@supabase/supabase-js';
@@ -49,6 +50,8 @@ interface BannerItem {
   Icon: React.ElementType;
   isSpecial?: boolean;
 }
+
+// --- COMPONENTE INDEPENDENTE: HOME CAROUSEL ---
 
 const HomeCarousel: React.FC<{ onNavigate: (v: string) => void; onStoreClick?: (store: Store) => void; stores?: Store[] }> = ({ onNavigate, onStoreClick, stores }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -94,25 +97,15 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void; onStoreClick?: (
       >
         {current.id === 'rio-phone-store' ? (
           <div className="absolute inset-0 flex items-center justify-between relative bg-gradient-to-br from-[#020617] via-[#0B1120] to-[#172554]">
-            
-            {/* Background Texture/Noise (Subtle) */}
             <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'radial-gradient(circle, #fff 1px, transparent 1px)', backgroundSize: '24px 24px' }}></div>
-            
-            {/* Ambient Light (Left) */}
             <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_0%_0%,rgba(30,91,255,0.08),transparent_60%)]"></div>
-
-            {/* Left Content (Text & Badges) */}
             <div className="z-10 pl-8 flex flex-col justify-center h-full max-w-[60%] relative">
-               
-               {/* Premium Badge - Glassmorphism */}
                <div className="mb-5 flex items-center gap-2 animate-in fade-in slide-in-from-left-4 duration-700">
                   <div className="bg-white/5 backdrop-blur-md border border-white/10 px-2.5 py-1 rounded-full flex items-center gap-1.5 shadow-sm">
                       <Star className="w-2.5 h-2.5 text-blue-200 fill-blue-200" />
                       <span className="text-[9px] font-bold text-blue-50 uppercase tracking-widest leading-none">Especialista Apple</span>
                   </div>
                </div>
-
-               {/* Main Title - Hierarchy & Contrast */}
                <div className="mb-3 animate-in fade-in slide-in-from-bottom-2 duration-700 delay-100">
                    <h3 className="text-[32px] font-[900] text-white leading-[0.85] font-display tracking-tight drop-shadow-lg">
                     RIO PHONE
@@ -121,32 +114,59 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void; onStoreClick?: (
                     STORE
                    </h3>
                </div>
-
-               {/* Description - Cleaner & Lighter */}
                <div className="mb-6 animate-in fade-in duration-700 delay-200">
                  <p className="text-slate-400 text-[10px] font-medium leading-relaxed max-w-[170px]">
                    Acessórios, manutenção e iPhones novos. Qualidade que você confia.
                  </p>
                </div>
-
-               {/* Trust Indicator - Discrete */}
                <div className="flex items-center gap-2 animate-in fade-in duration-700 delay-300">
                   <div className="w-6 h-[1px] bg-blue-500/50"></div>
                   <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Desde 2017</span>
                </div>
             </div>
-
-            {/* Right Content (Dynamic Product Image) - Full Height Usage */}
             <div className="absolute right-0 bottom-0 w-[55%] h-full z-0 pointer-events-none flex items-end justify-center">
-                {/* Product Glow/Backlight */}
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(30,91,255,0.15),transparent_70%)] blur-2xl transform scale-75"></div>
-                
                 <img 
                   src="https://images.unsplash.com/photo-1592750475338-74b7b21085ab?q=80&w=600&auto=format&fit=crop" 
                   alt="iPhone Premium" 
                   className="h-[95%] w-auto object-contain drop-shadow-[0_20px_50px_rgba(0,0,0,0.6)] transform -rotate-[6deg] brightness-105 mb-[-5%]"
                 />
             </div>
+          </div>
+        ) : current.id === 'master-sponsor' ? (
+          <div className="absolute inset-0 bg-gradient-to-br from-[#0F172A] via-[#1E293B] to-[#0F172A] flex flex-col items-center justify-center text-center p-8 overflow-hidden">
+             <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(30,91,255,0.1),transparent_70%)] animate-pulse"></div>
+             <div className="absolute -right-16 -bottom-16 opacity-[0.05] rotate-12 pointer-events-none">
+                <Shield className="w-64 h-64 text-white" />
+             </div>
+             <div className="relative z-10 mb-6 animate-in zoom-in-95 duration-1000">
+                <div className="bg-white/5 backdrop-blur-xl border border-white/10 px-4 py-1.5 rounded-full flex items-center gap-2.5 shadow-2xl">
+                    <div className="w-5 h-5 bg-amber-500/20 rounded-lg flex items-center justify-center">
+                       <Crown className="w-3 h-3 text-amber-400 fill-amber-400" />
+                    </div>
+                    <span className="text-[10px] font-black text-white/90 uppercase tracking-[0.25em] leading-none">
+                      Patrocinador Master
+                    </span>
+                </div>
+             </div>
+             <div className="relative z-10 space-y-2 animate-in slide-in-from-bottom-4 duration-700 delay-200">
+                <h3 className="text-4xl font-[950] bg-gradient-to-b from-white via-white to-blue-200 bg-clip-text text-transparent leading-none font-display tracking-tighter uppercase drop-shadow-2xl">
+                  GRUPO
+                </h3>
+                <h3 className="text-4xl font-[950] bg-gradient-to-r from-blue-400 to-blue-100 bg-clip-text text-transparent leading-none font-display tracking-tighter uppercase">
+                  ESQUEMATIZA
+                </h3>
+             </div>
+             <div className="relative z-10 mt-6 animate-in fade-in duration-1000 delay-500">
+                <p className="text-slate-400 text-[11px] font-bold uppercase tracking-[0.2em] opacity-80 mb-2">
+                  Segurança e Facilities
+                </p>
+                <div className="flex items-center justify-center gap-4">
+                   <div className="w-8 h-[1px] bg-white/10"></div>
+                   <p className="text-blue-400/90 text-[10px] font-black uppercase tracking-widest">Excelência comprovada</p>
+                   <div className="w-8 h-[1px] bg-white/10"></div>
+                </div>
+             </div>
           </div>
         ) : (
           <div className="absolute inset-0 flex flex-col items-center justify-center px-6 pt-4 pb-12 text-center z-10">
@@ -160,7 +180,6 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void; onStoreClick?: (
           </div>
         )}
 
-        {/* Indicadores de Progresso */}
         <div className="absolute bottom-5 left-1/2 -translate-x-1/2 flex gap-1.5 z-30 w-1/3 justify-center">
           {banners.map((_, idx) => (
             <div key={idx} className="h-1 flex-1 bg-white/20 rounded-full overflow-hidden">
@@ -288,7 +307,7 @@ const SugestoesParaVoce: React.FC<{ stores: Store[]; onStoreClick?: (store: Stor
               <h3 className="text-base font-bold text-gray-900 dark:text-white leading-tight mb-2 truncate">
                 {store.name}
               </h3>
-              <div className="flex items-center gap-1.5 text-gray-400 dark:text-gray-500">
+              <div className="flex items-center gap-1.5 text-gray-400 dark:text-gray-400 mt-0.5">
                 <MapPin size={12} />
                 <span className="text-[10px] font-bold uppercase tracking-tight">
                   {store.neighborhood || store.distance}
@@ -310,7 +329,7 @@ const EmAltaNaCidade: React.FC<{ stores: Store[]; onStoreClick?: (store: Store) 
   if (trending.length < 2) return null;
 
   return (
-    <div className="bg-white dark:bg-gray-950 py-4 px-5">
+    <div className="bg-white dark:bg-gray-900 py-4 px-5">
       <SectionHeader 
         icon={TrendingUp} 
         title="Em alta na cidade" 
@@ -358,10 +377,17 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
   const [listFilter, setListFilter] = useState<'all' | 'top_rated' | 'open_now'>('all');
   const categoriesRef = useRef<HTMLDivElement>(null);
 
+  // ESTRUTURA DA HOME: 'categories' primeiro, 'home_carousel' DEPOIS (conforme spec)
   const homeStructure = useMemo(() => ['categories', 'home_carousel', 'novidades', 'sugestoes', 'em_alta', 'list'], []);
 
   const renderSection = (key: string) => {
     switch (key) {
+      case 'home_carousel': 
+        return (
+          <div key="home_carousel" className="w-full bg-white dark:bg-gray-950 pb-2">
+            <HomeCarousel onNavigate={onNavigate} onStoreClick={onStoreClick} stores={stores} />
+          </div>
+        );
       case 'categories':
         return (
           <div key="categories" className="w-full bg-white dark:bg-gray-950 pt-2 pb-0">
@@ -379,7 +405,6 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
             </div>
           </div>
         );
-      case 'home_carousel': return <div key="home_carousel" className="w-full bg-white dark:bg-gray-950 mt-1 pb-1"><HomeCarousel onNavigate={onNavigate} onStoreClick={onStoreClick} stores={stores} /></div>;
       case 'novidades': return <NovidadesDaSemana key="novidades" stores={stores} onStoreClick={onStoreClick} onNavigate={onNavigate} />;
       case 'sugestoes': return <SugestoesParaVoce key="sugestoes" stores={stores} onStoreClick={onStoreClick} onNavigate={onNavigate} />;
       case 'em_alta': return <EmAltaNaCidade key="em_alta" stores={stores} onStoreClick={onStoreClick} onNavigate={onNavigate} />;

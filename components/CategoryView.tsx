@@ -11,15 +11,14 @@ interface PromoBanner {
   type: 'merchant' | 'institutional';
   title: string;
   subtitle?: string;
-  bgColor: string; // Hex or Tailwind class
+  bgColor: string; 
   textColor: string;
   merchantName?: string;
-  subcategoryTarget?: string; // If null, applies to all or fallback
+  subcategoryTarget?: string; 
   link?: string;
   image?: string;
 }
 
-// Banners Institucionais (Fallback para completar 3 slots)
 const INSTITUTIONAL_FALLBACKS: PromoBanner[] = [
   {
     id: 'inst-1',
@@ -48,7 +47,6 @@ const INSTITUTIONAL_FALLBACKS: PromoBanner[] = [
   }
 ];
 
-// Banners de Lojistas (Simulação do Banco de Dados)
 const MERCHANT_ADS_MOCK: PromoBanner[] = [
   {
     id: 'ad-burger-1',
@@ -56,7 +54,7 @@ const MERCHANT_ADS_MOCK: PromoBanner[] = [
     title: 'Burger Artesanal 2x1',
     subtitle: 'Só hoje na Hamburgueria Brasa',
     merchantName: 'Hamburgueria Brasa',
-    subcategoryTarget: 'Hamburguerias', // Alvo específico
+    subcategoryTarget: 'Hamburguerias', 
     bgColor: 'bg-[#FF9F1C]',
     textColor: 'text-black',
     image: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?q=80&w=800&auto=format&fit=crop'
@@ -73,28 +71,21 @@ const MERCHANT_ADS_MOCK: PromoBanner[] = [
   }
 ];
 
-// --- COMPONENTES ---
+// --- COMPONENTE INDEPENDENTE: SUBCATEGORY CAROUSEL ---
 
-const SubcategoryPromoCarousel: React.FC<{ subcategory: string }> = ({ subcategory }) => {
+const SubcategoryCarousel: React.FC<{ subcategory: string }> = ({ subcategory }) => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  // Lógica de Seleção de Banners (Regra dos 3 Fixos)
   const displayBanners = useMemo(() => {
-    // 1. Busca banners ativos do lojista para esta subcategoria
     const activeMerchantAds = MERCHANT_ADS_MOCK.filter(ad => 
       ad.subcategoryTarget && subcategory.toLowerCase().includes(ad.subcategoryTarget.toLowerCase())
     );
-
-    // 2. Preenche com institucionais até ter 3
     const needed = 3 - activeMerchantAds.length;
     const fillers = INSTITUTIONAL_FALLBACKS.slice(0, Math.max(0, needed));
-
-    // 3. Garante exatamente 3 (se tiver muitos ads, corta. Se tiver poucos fallbacks, repete - edge case)
     return [...activeMerchantAds, ...fillers].slice(0, 3);
   }, [subcategory]);
 
-  // Auto-scroll suave
   useEffect(() => {
     const interval = setInterval(() => {
         const nextSlide = (currentSlide + 1) % 3;
@@ -103,7 +94,7 @@ const SubcategoryPromoCarousel: React.FC<{ subcategory: string }> = ({ subcatego
             const width = scrollRef.current.offsetWidth;
             scrollRef.current.scrollTo({ left: width * nextSlide, behavior: 'smooth' });
         }
-    }, 5000); // 5 segundos por banner
+    }, 5000);
     return () => clearInterval(interval);
   }, [currentSlide]);
 
@@ -126,7 +117,6 @@ const SubcategoryPromoCarousel: React.FC<{ subcategory: string }> = ({ subcatego
                     key={`${banner.id}-${idx}`} 
                     className={`w-full flex-shrink-0 aspect-[5/2] snap-center relative overflow-hidden ${banner.bgColor} flex flex-col justify-center px-6`}
                 >
-                    {/* Background Image Overlay if exists */}
                     {banner.image && (
                         <div className="absolute inset-0 z-0">
                             <img src={banner.image} alt="" className="w-full h-full object-cover opacity-30 mix-blend-overlay" />
@@ -156,7 +146,6 @@ const SubcategoryPromoCarousel: React.FC<{ subcategory: string }> = ({ subcatego
                         </p>
                     </div>
 
-                    {/* Tag de Publicidade */}
                     <div className="absolute top-3 right-3 bg-black/10 backdrop-blur-md px-2 py-0.5 rounded-md border border-white/10">
                         <span className="text-[8px] font-bold text-white/80 uppercase">
                             {banner.type === 'merchant' ? 'Publicidade' : 'App'}
@@ -166,7 +155,6 @@ const SubcategoryPromoCarousel: React.FC<{ subcategory: string }> = ({ subcatego
             ))}
         </div>
 
-        {/* Indicadores (Dots) */}
         <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-1.5 z-20">
             {[0, 1, 2].map((idx) => (
                 <div 
@@ -231,7 +219,6 @@ const StoreListItem: React.FC<{ store: Store; onClick: () => void }> = ({ store,
   );
 };
 
-// Definindo interface para props da visualização de categoria para corrigir erros de tipo
 interface CategoryViewProps {
   category: Category;
   onBack: () => void;
@@ -241,7 +228,7 @@ interface CategoryViewProps {
   onAdvertiseInCategory: (categoryName: string | null) => void;
 }
 
-export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, onStoreClick, stores, userRole, onAdvertiseInCategory }) => {
+export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, onStoreClick, stores }) => {
   const [selectedSubcategory, setSelectedSubcategory] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const subcategories = useMemo(() => SUBCATEGORIES[category.name] || [], [category.name]);
@@ -262,11 +249,12 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
       
       <main className="pt-20 space-y-6">
         
-        {/* CARROSSEL FIXO DE BANNERS - MOVIDO PARA O TOPO */}
-        <section className="px-5 mt-2">
-            <SubcategoryPromoCarousel subcategory={selectedSubcategory || category.name} />
+        {/* 1. CARROSSEL DA SUBCATEGORIA - TOPO ABSOLUTO (Logo abaixo do header) */}
+        <section className="px-5">
+            <SubcategoryCarousel subcategory={selectedSubcategory || category.name} />
         </section>
 
+        {/* 2. GRID DE SUBCATEGORIAS - ABAIXO DO CARROSSEL */}
         <section className="px-5">
             <div className="grid grid-cols-4 gap-3">
             {subcategories.slice(0, 8).map((sub, i) => (
