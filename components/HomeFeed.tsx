@@ -93,32 +93,59 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void; onStoreClick?: (
         className={`w-full relative aspect-[3/2] rounded-[32px] overflow-hidden shadow-xl shadow-slate-200 dark:shadow-none border border-gray-100 dark:border-white/5 ${current.bgColor} cursor-pointer active:scale-[0.98] transition-all group`}
       >
         {current.id === 'rio-phone-store' ? (
-          <div className="absolute inset-0 flex items-center justify-between px-8 relative overflow-hidden">
-            {/* Efeitos Animados de Luz (Lens Flare) */}
-            <div className="absolute top-1/4 right-1/4 w-32 h-32 bg-white/20 rounded-full blur-[60px] animate-pulse"></div>
-            <div className="absolute top-1/2 right-1/3 w-1 h-32 bg-gradient-to-b from-transparent via-blue-400/30 to-transparent rotate-45 blur-md animate-[pulse_3s_infinite]"></div>
+          <div className="absolute inset-0 flex items-center justify-between relative bg-gradient-to-br from-[#020617] via-[#0B1120] to-[#172554]">
             
-            {/* Conteúdo Esquerdo (Texto) */}
-            <div className="z-20 flex flex-col items-start max-w-[50%] animate-in slide-in-from-left duration-700">
-               <h3 className="text-3xl font-[900] text-white leading-[0.9] font-display tracking-tighter mb-4">
-                RIO PHONE<br/>STORE
-               </h3>
-               <p className="text-white/90 text-sm font-medium mb-1">Há 8 anos no bairro</p>
-               <div className="flex items-start gap-2 text-white/70">
-                  <FileText className="w-3.5 h-3.5 mt-0.5 shrink-0" />
-                  <p className="text-[10px] leading-tight font-medium">Confiança, qualidade e<br/>atendimento local</p>
+            {/* Background Texture/Noise (Subtle) */}
+            <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'radial-gradient(circle, #fff 1px, transparent 1px)', backgroundSize: '24px 24px' }}></div>
+            
+            {/* Ambient Light (Left) */}
+            <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_0%_0%,rgba(30,91,255,0.08),transparent_60%)]"></div>
+
+            {/* Left Content (Text & Badges) */}
+            <div className="z-10 pl-8 flex flex-col justify-center h-full max-w-[60%] relative">
+               
+               {/* Premium Badge - Glassmorphism */}
+               <div className="mb-5 flex items-center gap-2 animate-in fade-in slide-in-from-left-4 duration-700">
+                  <div className="bg-white/5 backdrop-blur-md border border-white/10 px-2.5 py-1 rounded-full flex items-center gap-1.5 shadow-sm">
+                      <Star className="w-2.5 h-2.5 text-blue-200 fill-blue-200" />
+                      <span className="text-[9px] font-bold text-blue-50 uppercase tracking-widest leading-none">Especialista Apple</span>
+                  </div>
+               </div>
+
+               {/* Main Title - Hierarchy & Contrast */}
+               <div className="mb-3 animate-in fade-in slide-in-from-bottom-2 duration-700 delay-100">
+                   <h3 className="text-[32px] font-[900] text-white leading-[0.85] font-display tracking-tight drop-shadow-lg">
+                    RIO PHONE
+                   </h3>
+                   <h3 className="text-[32px] font-[300] text-blue-100 leading-[0.85] font-display tracking-tight opacity-90">
+                    STORE
+                   </h3>
+               </div>
+
+               {/* Description - Cleaner & Lighter */}
+               <div className="mb-6 animate-in fade-in duration-700 delay-200">
+                 <p className="text-slate-400 text-[10px] font-medium leading-relaxed max-w-[170px]">
+                   Acessórios, manutenção e iPhones novos. Qualidade que você confia.
+                 </p>
+               </div>
+
+               {/* Trust Indicator - Discrete */}
+               <div className="flex items-center gap-2 animate-in fade-in duration-700 delay-300">
+                  <div className="w-6 h-[1px] bg-blue-500/50"></div>
+                  <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Desde 2017</span>
                </div>
             </div>
 
-            {/* Conteúdo Direito (iPhone) */}
-            <div className="z-10 absolute right-[-20px] top-1/2 -translate-y-1/2 w-[60%] h-full flex items-center justify-center animate-in zoom-in fade-in duration-1000">
+            {/* Right Content (Dynamic Product Image) - Full Height Usage */}
+            <div className="absolute right-0 bottom-0 w-[55%] h-full z-0 pointer-events-none flex items-end justify-center">
+                {/* Product Glow/Backlight */}
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(30,91,255,0.15),transparent_70%)] blur-2xl transform scale-75"></div>
+                
                 <img 
-                  src="https://images.unsplash.com/photo-1510557880182-3d4d3cba35a5?q=80&w=800&auto=format&fit=crop" 
-                  alt="iPhone" 
-                  className="h-[85%] object-contain drop-shadow-[0_0_30px_rgba(255,255,255,0.15)] brightness-110"
+                  src="https://images.unsplash.com/photo-1592750475338-74b7b21085ab?q=80&w=600&auto=format&fit=crop" 
+                  alt="iPhone Premium" 
+                  className="h-[95%] w-auto object-contain drop-shadow-[0_20px_50px_rgba(0,0,0,0.6)] transform -rotate-[6deg] brightness-105 mb-[-5%]"
                 />
-                {/* Sparkles / Shine over the phone */}
-                <div className="absolute top-1/4 right-1/4 w-4 h-4 bg-white rounded-full blur-sm animate-ping opacity-40"></div>
             </div>
           </div>
         ) : (

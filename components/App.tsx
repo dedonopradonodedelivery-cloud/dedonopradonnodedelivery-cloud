@@ -27,8 +27,6 @@ import { CommunityFeedView } from './CommunityFeedView';
 import { CategoryView } from './CategoryView';
 import { StoreAdsModule } from './StoreAdsModule';
 import { StoreProfileEdit } from './StoreProfileEdit';
-import { MerchantBannerEditor } from './MerchantBannerEditor'; 
-import { OrkutView } from './OrkutView'; // Added import
 import { useAuth } from '../contexts/AuthContext';
 import { NeighborhoodProvider } from '../contexts/NeighborhoodContext';
 import { STORES } from '../constants';
@@ -64,7 +62,7 @@ const App: React.FC = () => {
 
   // Monitoramento de acessos restritos
   useEffect(() => {
-    const restrictedTabs = ['scan_cashback', 'merchant_qr_display', 'wallet', 'pay_cashback', 'store_area', 'admin_panel', 'merchant_banners'];
+    const restrictedTabs = ['scan_cashback', 'merchant_qr_display', 'wallet', 'pay_cashback', 'store_area', 'admin_panel'];
     
     if (restrictedTabs.includes(activeTab)) {
       if (!isAuthLoading && !user) {
@@ -94,12 +92,12 @@ const App: React.FC = () => {
   const headerExclusionList = [
     'merchant_onboarding', 'merchant_qr_display', 'wallet', 'scan_cashback', 
     'pay_cashback', 'merchant_cashback_dashboard', 'store_area', 'profile', 
-    'admin_panel', 'merchant_banners', 'orkut'
+    'admin_panel'
   ];
   
   const hideBottomNav = [
     'merchant_onboarding', 'pay_cashback', 'scan_cashback', 
-    'merchant_cashback_dashboard', 'admin_panel', 'merchant_banners', 'orkut'
+    'merchant_cashback_dashboard', 'admin_panel'
   ].includes(activeTab);
 
   const renderHome = () => (
@@ -126,7 +124,7 @@ const App: React.FC = () => {
     }
 
     // Fallback de segurança para evitar renderização de rotas restritas sem User
-    const restrictedTabs = ['scan_cashback', 'merchant_qr_display', 'wallet', 'pay_cashback', 'store_area', 'admin_panel', 'merchant_banners'];
+    const restrictedTabs = ['scan_cashback', 'merchant_qr_display', 'wallet', 'pay_cashback', 'store_area', 'admin_panel'];
     if (restrictedTabs.includes(activeTab) && !user) {
       return renderHome();
     }
@@ -192,15 +190,9 @@ const App: React.FC = () => {
       case 'store_area':
         return <StoreAreaView onBack={() => setActiveTab('home')} onNavigate={setActiveTab} user={user as any} />;
 
-      case 'merchant_banners':
-        return <MerchantBannerEditor onBack={() => setActiveTab('store_area')} />;
-
       case 'admin_panel':
         if (user?.email !== ADMIN_EMAIL) return renderHome();
         return <AdminPanel user={user as any} onLogout={signOut} viewMode="ADM" onOpenViewSwitcher={() => {}} onNavigateToApp={() => setActiveTab('home')} />;
-
-      case 'orkut':
-        return <OrkutView onBack={() => setActiveTab('profile')} />;
 
       default:
         return renderHome();

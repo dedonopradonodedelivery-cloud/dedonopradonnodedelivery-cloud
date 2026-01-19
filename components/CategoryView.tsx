@@ -1,8 +1,185 @@
 
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { ChevronLeft, Search, Star, BadgeCheck, ChevronRight, X, AlertCircle, Grid, Filter, Megaphone, ArrowUpRight } from 'lucide-react';
+import { ChevronLeft, Search, Star, BadgeCheck, ChevronRight, X, AlertCircle, Grid, Filter, Megaphone, ArrowUpRight, Info } from 'lucide-react';
 import { Category, Store, AdType } from '../types';
 import { SUBCATEGORIES } from '../constants';
+
+// --- INTERFACES & MOCK DATA FOR PROMO BANNERS ---
+
+interface PromoBanner {
+  id: string;
+  type: 'merchant' | 'institutional';
+  title: string;
+  subtitle?: string;
+  bgColor: string; // Hex or Tailwind class
+  textColor: string;
+  merchantName?: string;
+  subcategoryTarget?: string; // If null, applies to all or fallback
+  link?: string;
+  image?: string;
+}
+
+// Banners Institucionais (Fallback para completar 3 slots)
+const INSTITUTIONAL_FALLBACKS: PromoBanner[] = [
+  {
+    id: 'inst-1',
+    type: 'institutional',
+    title: 'Anuncie sua Loja Aqui',
+    subtitle: 'Alcance milhares de vizinhos',
+    bgColor: 'bg-gradient-to-r from-slate-900 to-slate-800',
+    textColor: 'text-white',
+    image: 'https://images.unsplash.com/photo-1557804506-669a67965ba0?q=80&w=800&auto=format&fit=crop'
+  },
+  {
+    id: 'inst-2',
+    type: 'institutional',
+    title: 'Clube de Vantagens',
+    subtitle: 'Descontos exclusivos no bairro',
+    bgColor: 'bg-gradient-to-r from-[#1E5BFF] to-[#0040DD]',
+    textColor: 'text-white'
+  },
+  {
+    id: 'inst-3',
+    type: 'institutional',
+    title: 'Apoie o Comércio Local',
+    subtitle: 'A Freguesia cresce com você',
+    bgColor: 'bg-gradient-to-r from-emerald-600 to-teal-600',
+    textColor: 'text-white'
+  }
+];
+
+// Banners de Lojistas (Simulação do Banco de Dados)
+const MERCHANT_ADS_MOCK: PromoBanner[] = [
+  {
+    id: 'ad-burger-1',
+    type: 'merchant',
+    title: 'Burger Artesanal 2x1',
+    subtitle: 'Só hoje na Hamburgueria Brasa',
+    merchantName: 'Hamburgueria Brasa',
+    subcategoryTarget: 'Hamburguerias', // Alvo específico
+    bgColor: 'bg-[#FF9F1C]',
+    textColor: 'text-black',
+    image: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?q=80&w=800&auto=format&fit=crop'
+  },
+  {
+    id: 'ad-pizza-1',
+    type: 'merchant',
+    title: 'Rodízio de Pizza',
+    subtitle: 'Crianças não pagam!',
+    merchantName: 'Pizzaria do Zé',
+    subcategoryTarget: 'Pizzarias',
+    bgColor: 'bg-[#E71D36]',
+    textColor: 'text-white'
+  }
+];
+
+// --- COMPONENTES ---
+
+const SubcategoryPromoCarousel: React.FC<{ subcategory: string }> = ({ subcategory }) => {
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  // Lógica de Seleção de Banners (Regra dos 3 Fixos)
+  const displayBanners = useMemo(() => {
+    // 1. Busca banners ativos do lojista para esta subcategoria
+    const activeMerchantAds = MERCHANT_ADS_MOCK.filter(ad => 
+      ad.subcategoryTarget && subcategory.toLowerCase().includes(ad.subcategoryTarget.toLowerCase())
+    );
+
+    // 2. Preenche com institucionais até ter 3
+    const needed = 3 - activeMerchantAds.length;
+    const fillers = INSTITUTIONAL_FALLBACKS.slice(0, Math.max(0, needed));
+
+    // 3. Garante exatamente 3 (se tiver muitos ads, corta. Se tiver poucos fallbacks, repete - edge case)
+    return [...activeMerchantAds, ...fillers].slice(0, 3);
+  }, [subcategory]);
+
+  // Auto-scroll suave
+  useEffect(() => {
+    const interval = setInterval(() => {
+        const nextSlide = (currentSlide + 1) % 3;
+        setCurrentSlide(nextSlide);
+        if (scrollRef.current) {
+            const width = scrollRef.current.offsetWidth;
+            scrollRef.current.scrollTo({ left: width * nextSlide, behavior: 'smooth' });
+        }
+    }, 5000); // 5 segundos por banner
+    return () => clearInterval(interval);
+  }, [currentSlide]);
+
+  const handleScroll = () => {
+      if (scrollRef.current) {
+          const index = Math.round(scrollRef.current.scrollLeft / scrollRef.current.offsetWidth);
+          if (index !== currentSlide) setCurrentSlide(index);
+      }
+  };
+
+  return (
+    <div className="relative">
+        <div 
+            ref={scrollRef}
+            onScroll={handleScroll}
+            className="flex overflow-x-auto snap-x snap-mandatory no-scrollbar rounded-[24px] shadow-sm"
+        >
+            {displayBanners.map((banner, idx) => (
+                <div 
+                    key={`${banner.id}-${idx}`} 
+                    className={`w-full flex-shrink-0 aspect-[5/2] snap-center relative overflow-hidden ${banner.bgColor} flex flex-col justify-center px-6`}
+                >
+                    {/* Background Image Overlay if exists */}
+                    {banner.image && (
+                        <div className="absolute inset-0 z-0">
+                            <img src={banner.image} alt="" className="w-full h-full object-cover opacity-30 mix-blend-overlay" />
+                            <div className="absolute inset-0 bg-gradient-to-r from-black/60 to-transparent"></div>
+                        </div>
+                    )}
+
+                    <div className="relative z-10 max-w-[80%]">
+                        {banner.type === 'merchant' && (
+                            <span className="text-[9px] font-black uppercase tracking-widest opacity-80 mb-1 block" style={{ color: banner.textColor }}>
+                                {banner.merchantName} apresenta:
+                            </span>
+                        )}
+                        {banner.type === 'institutional' && (
+                            <div className="flex items-center gap-1.5 mb-1.5 opacity-90">
+                                <BadgeCheck className="w-3 h-3" color={banner.textColor === 'text-white' ? '#fff' : '#000'} />
+                                <span className="text-[9px] font-black uppercase tracking-widest" style={{ color: banner.textColor }}>Dica Localizei</span>
+                            </div>
+                        )}
+                        
+                        <h3 className={`text-xl font-black leading-tight mb-1 ${banner.textColor} drop-shadow-sm font-display`}>
+                            {banner.title}
+                        </h3>
+                        
+                        <p className={`text-xs font-medium opacity-90 ${banner.textColor}`}>
+                            {banner.subtitle}
+                        </p>
+                    </div>
+
+                    {/* Tag de Publicidade */}
+                    <div className="absolute top-3 right-3 bg-black/10 backdrop-blur-md px-2 py-0.5 rounded-md border border-white/10">
+                        <span className="text-[8px] font-bold text-white/80 uppercase">
+                            {banner.type === 'merchant' ? 'Publicidade' : 'App'}
+                        </span>
+                    </div>
+                </div>
+            ))}
+        </div>
+
+        {/* Indicadores (Dots) */}
+        <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-1.5 z-20">
+            {[0, 1, 2].map((idx) => (
+                <div 
+                    key={idx} 
+                    className={`h-1.5 rounded-full transition-all duration-300 ${
+                        idx === currentSlide ? 'w-4 bg-white' : 'w-1.5 bg-white/40'
+                    }`} 
+                />
+            ))}
+        </div>
+    </div>
+  );
+};
 
 const BigSurCard: React.FC<{ 
   icon: React.ReactNode; 
@@ -82,7 +259,14 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
         <h1 className="text-lg font-bold text-gray-900 dark:text-white font-display">{category.name}</h1>
         <button onClick={() => {}} className="p-2 -mr-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800"><Search className="w-6 h-6 text-gray-800 dark:text-gray-200" /></button>
       </header>
+      
       <main className="pt-20 space-y-6">
+        
+        {/* CARROSSEL FIXO DE BANNERS - MOVIDO PARA O TOPO */}
+        <section className="px-5 mt-2">
+            <SubcategoryPromoCarousel subcategory={selectedSubcategory || category.name} />
+        </section>
+
         <section className="px-5">
             <div className="grid grid-cols-4 gap-3">
             {subcategories.slice(0, 8).map((sub, i) => (
@@ -90,12 +274,19 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
             ))}
             </div>
         </section>
+        
         <section className="px-5 min-h-[400px] bg-white dark:bg-gray-900 rounded-t-[32px] pt-6 pb-10 border-t border-gray-100 dark:border-gray-800">
             <h3 className="font-bold text-gray-900 dark:text-white text-lg mb-6">{selectedSubcategory || `Explorar ${category.name}`}</h3>
+            
             <div className="flex flex-col gap-2">
                 {displayStores.map((store) => (
                     <StoreListItem key={store.id} store={store} onClick={() => onStoreClick(store)} />
                 ))}
+                {displayStores.length === 0 && (
+                  <div className="text-center py-10 opacity-50">
+                    <p className="text-sm font-bold">Nenhum local encontrado.</p>
+                  </div>
+                )}
             </div>
         </section>
       </main>
