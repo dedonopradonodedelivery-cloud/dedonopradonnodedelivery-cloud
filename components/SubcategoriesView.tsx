@@ -123,4 +123,81 @@ const SUBCATEGORIES_DATA: Record<string, { name: string; icon: React.ElementType
     { name: 'Veterinário', icon: Dog },
     { name: 'Passeador (Dog Walker)', icon: User },
     { name: 'Adestramento', icon: Sparkles },
-    { name: 'Hotelzinho', icon:
+    { name: 'Hotelzinho', icon: Dog },
+  ],
+  'clean': [
+    { name: 'Diarista', icon: Sparkles },
+    { name: 'Limpeza de Estofados', icon: User },
+    { name: 'Dedetização', icon: Shield },
+    { name: 'Limpeza Pós-obra', icon: Hammer },
+    { name: 'Lavanderia', icon: Droplet },
+  ],
+  'pro': [
+    { name: 'Advogado', icon: Scale },
+    { name: 'Contador', icon: Calculator },
+    { name: 'Designer Gráfico', icon: PenTool },
+    { name: 'Consultor', icon: Briefcase },
+    { name: 'Tradutor', icon: PenTool },
+  ],
+  'other': [
+    { name: 'Fretes e Mudanças', icon: TruckIcon },
+    { name: 'Jardinagem', icon: Flower },
+    { name: 'Costureira', icon: Scissors },
+    { name: 'Sapateiro', icon: Hammer },
+    { name: 'Outros', icon: Search },
+  ],
+};
+
+export const SubcategoriesView: React.FC<SubcategoriesViewProps> = ({ macroId, macroName, onBack, onSelectSubcategory }) => {
+  const items = SUBCATEGORIES_DATA[macroId] || SUBCATEGORIES_DATA['other'];
+
+  return (
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-24 animate-in slide-in-from-right duration-300">
+      
+      {/* Header */}
+      <div className="bg-white dark:bg-gray-900 px-5 pt-8 pb-6 border-b border-gray-100 dark:border-gray-800 sticky top-0 z-10 flex items-center gap-4 mb-4">
+        <button 
+          onClick={onBack}
+          className="p-2 -ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+        >
+          <ChevronLeft className="w-6 h-6 text-gray-700 dark:text-white" />
+        </button>
+        <div>
+            <h1 className="text-xl font-bold text-gray-900 dark:text-white font-display leading-tight">
+              {macroName}
+            </h1>
+            <p className="text-xs text-gray-500 dark:text-gray-400">
+              Escolha o tipo de serviço que você precisa
+            </p>
+        </div>
+      </div>
+
+      {/* Carrossel de Banners */}
+      <SubcategoryCarousel />
+
+      {/* Content Grid */}
+      <div className="px-5">
+        <div className="grid grid-cols-2 gap-4">
+          {items.map((sub, idx) => {
+            const Icon = sub.icon;
+            return (
+              <button 
+                key={idx}
+                onClick={() => onSelectSubcategory(sub.name)}
+                className="bg-white dark:bg-gray-800 p-4 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col items-center justify-center gap-3 hover:shadow-md transition-all active:scale-[0.98] min-h-[120px] group"
+              >
+                <div className="w-12 h-12 rounded-full bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center text-[#1E5BFF] group-hover:bg-blue-100 transition-colors">
+                  <Icon className="w-6 h-6" />
+                </div>
+                <span className="font-bold text-gray-700 dark:text-gray-200 text-xs text-center leading-tight uppercase tracking-tight">
+                  {sub.name}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+    </div>
+  );
+};

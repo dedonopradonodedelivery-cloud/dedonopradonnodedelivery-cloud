@@ -38,6 +38,7 @@ const ADMIN_EMAIL = 'dedonopradonodedelivery@gmail.com';
 const App: React.FC = () => {
   const { user, userRole, loading: isAuthLoading, signOut } = useAuth();
   const [activeTab, setActiveTab] = useState(() => localStorage.getItem('localizei_active_tab') || 'home');
+  const [pendingTab, setPendingTab] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
   const [selectedStore, setSelectedStore] = useState<Store | null>(null);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
@@ -47,12 +48,11 @@ const App: React.FC = () => {
   const [quoteCategory, setQuoteCategory] = useState('');
   const [isQuoteModalOpen, setIsQuoteModalOpen] = useState(false);
 
-  // Estado de Onboarding do Lojista (Persistido no LocalStorage)
+  // Estado de Onboarding do Lojista
   const [onboardingCompleted, setOnboardingCompleted] = useState(() => 
     localStorage.getItem('onboarding_cashback_completed') === 'true'
   );
 
-  // Sincronizar estado de onboarding se o perfil do usuário já trouxer essa info
   useEffect(() => {
     if (userRole === 'lojista' && user?.user_metadata?.onboarding_cashback_completed) {
       setOnboardingCompleted(true);
@@ -60,13 +60,14 @@ const App: React.FC = () => {
     }
   }, [user, userRole]);
 
-  // Gatilho de Login para áreas restritas e Redirecionamento de Segurança
+  // Monitoramento de acessos restritos
   useEffect(() => {
     const restrictedTabs = ['scan_cashback', 'merchant_qr_display', 'wallet', 'pay_cashback', 'store_area', 'admin_panel'];
     
     if (restrictedTabs.includes(activeTab)) {
       if (!isAuthLoading && !user) {
-        // Se tentar acessar área restrita sem login, volta para home e abre login
+        // Salva onde o usuário queria ir, volta pra home e abre o login
+        setPendingTab(activeTab);
         setActiveTab('home');
         setIsAuthOpen(true);
       }
@@ -74,6 +75,14 @@ const App: React.FC = () => {
 
     localStorage.setItem('localizei_active_tab', activeTab);
   }, [activeTab, user, isAuthLoading]);
+
+  const handleLoginSuccess = () => {
+    setIsAuthOpen(false);
+    if (pendingTab) {
+      setActiveTab(pendingTab);
+      setPendingTab(null);
+    }
+  };
 
   const handleSelectStore = (store: Store) => { 
     setSelectedStore(store); 
@@ -105,7 +114,6 @@ const App: React.FC = () => {
   );
 
   const renderContent = () => {
-    // Caso de carregamento inicial do Auth
     if (isAuthLoading) {
       return (
         <div className="min-h-screen flex flex-col items-center justify-center bg-white dark:bg-gray-900">
@@ -113,6 +121,12 @@ const App: React.FC = () => {
           <p className="text-gray-400 text-xs font-bold uppercase tracking-widest">Sincronizando...</p>
         </div>
       );
+    }
+
+    // Fallback de segurança para evitar renderização de rotas restritas sem User
+    const restrictedTabs = ['scan_cashback', 'merchant_qr_display', 'wallet', 'pay_cashback', 'store_area', 'admin_panel'];
+    if (restrictedTabs.includes(activeTab) && !user) {
+      return renderHome();
     }
 
     switch (activeTab) {
@@ -197,7 +211,7 @@ const App: React.FC = () => {
               {renderContent()}
             </main>
 
-            <AuthModal isOpen={isAuthOpen} onClose={() => setIsAuthOpen(false)} user={user as any} onLoginSuccess={() => setIsAuthOpen(false)} />
+            <AuthModal isOpen={isAuthOpen} onClose={() => { setIsAuthOpen(false); setPendingTab(null); }} user={user as any} onLoginSuccess={handleLoginSuccess} />
             {isQuoteModalOpen && <QuoteRequestModal isOpen={isQuoteModalOpen} onClose={() => setIsQuoteModalOpen(false)} categoryName={quoteCategory} onSuccess={() => setActiveTab('home')} />}
         </Layout>
       </div>
