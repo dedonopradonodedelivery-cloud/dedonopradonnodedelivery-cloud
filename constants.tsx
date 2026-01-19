@@ -11,7 +11,8 @@ import {
   Apple, Building2, Leaf, Shield, PaintRoller, Hammer, Droplets, Laptop,
   Baby, GraduationCap, Microscope, Brain, Sparkles, Smile, Beer, 
   Activity, Eye, FileText, Globe, Calendar, Music, PartyPopper, Globe2, Edit3, User, Bell, Search,
-  Camera, Vote, Handshake, Flame, Milestone, History
+  Camera, Vote, Handshake, Flame, Milestone, History, Home as HomeIcon,
+  MessageCircle, HelpCircle, UserCheck
 } from 'lucide-react';
 import { AdType, Category, Store, Story, EditorialCollection, Job, CommunityPost, NeighborhoodCommunity } from './types';
 
@@ -24,7 +25,7 @@ export const CATEGORIES: Category[] = [
   { id: 'cat-beauty', name: 'Beleza', slug: 'beleza', icon: <Scissors />, color: 'bg-brand-blue' },
   { id: 'cat-autos', name: 'Autos', slug: 'autos', icon: <CarFront />, color: 'bg-brand-blue' },
   { id: 'cat-mercado', name: 'Mercado', slug: 'mercado', icon: <ShoppingCart />, color: 'bg-brand-blue' },
-  { id: 'cat-casa', name: 'Casa', slug: 'casa', icon: <Home />, color: 'bg-brand-blue' },
+  { id: 'cat-casa', name: 'Casa', slug: 'casa', icon: <HomeIcon />, color: 'bg-brand-blue' },
   { id: 'cat-sports', name: 'Esportes', slug: 'esportes', icon: <Dumbbell />, color: 'bg-brand-blue' },
   { id: 'cat-leisure', name: 'Lazer', slug: 'lazer', icon: <Ticket />, color: 'bg-brand-blue' },
   { id: 'cat-edu', name: 'Educação', slug: 'educacao', icon: <BookOpen />, color: 'bg-brand-blue' },
@@ -60,7 +61,7 @@ export const SUBCATEGORIES: Record<string, { name: string; icon: React.ReactNode
     { name: 'Pet Shop', icon: <ShoppingCart /> },
     { name: 'Banho & Tosa', icon: <Scissors /> },
     { name: 'Adestramento', icon: <Award /> },
-    { name: 'Hospedagem Pet', icon: <Home /> },
+    { name: 'Hospedagem Pet', icon: <HomeIcon /> },
     { name: 'Passeadores', icon: <Users /> },
     { name: 'Produtos Pet', icon: <Package /> },
     { name: 'Pets Exóticos', icon: <Sparkles /> },
@@ -117,7 +118,7 @@ export const SUBCATEGORIES: Record<string, { name: string; icon: React.ReactNode
   ],
   'Mercado': [
     { name: 'Supermercados', icon: <ShoppingCart /> },
-    { name: 'Mercados de Bairro', icon: <Home /> },
+    { name: 'Mercados de Bairro', icon: <HomeIcon /> },
     { name: 'Atacarejo', icon: <Package /> },
     { name: 'Conveniência', icon: <Clock /> },
     { name: 'Produtos Importados', icon: <Globe /> },
@@ -129,7 +130,7 @@ export const SUBCATEGORIES: Record<string, { name: string; icon: React.ReactNode
     { name: 'Materiais de Construção', icon: <Hammer /> },
     { name: 'Decoração', icon: <Sparkles /> },
     { name: 'Iluminação', icon: <Zap /> },
-    { name: 'Móveis', icon: <Home /> },
+    { name: 'Móveis', icon: <HomeIcon /> },
     { name: 'Eletrodomésticos', icon: <Monitor /> },
     { name: 'Jardinagem', icon: <Leaf /> },
     { name: 'Organização', icon: <LayoutGrid /> },
@@ -199,6 +200,42 @@ export const SUBCATEGORIES: Record<string, { name: string; icon: React.ReactNode
 
 export const NEIGHBORHOOD_COMMUNITIES: NeighborhoodCommunity[] = [
   {
+    id: 'comm-residents',
+    name: 'Moradores da Freguesia',
+    description: 'Espaço oficial para quem vive no bairro.',
+    image: 'https://images.unsplash.com/photo-1570129477492-45c003edd2be?q=80&w=800&auto=format&fit=crop',
+    icon: <Users />,
+    color: 'bg-blue-500',
+    membersCount: '2.356'
+  },
+  {
+    id: 'comm-market',
+    name: 'Promoções no Bairro',
+    description: 'Achadinhos, ofertas e descontos exclusivos.',
+    image: 'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?q=80&w=800&auto=format&fit=crop',
+    icon: <Tag />,
+    color: 'bg-[#1E5BFF]',
+    membersCount: '4.301'
+  },
+  {
+    id: 'comm-pro',
+    name: 'Recomendações e Dicas',
+    description: 'Quem você indicaria? Espaço para trocar sugestões.',
+    image: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?q=80&w=800&auto=format&fit=crop',
+    icon: <HelpCircle />,
+    color: 'bg-orange-500',
+    membersCount: '3.207'
+  },
+  {
+    id: 'comm-condo',
+    name: 'Aluguel e Imóveis',
+    description: 'Encontre o seu novo lar na região.',
+    image: 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?q=80&w=800&auto=format&fit=crop',
+    icon: <HomeIcon />,
+    color: 'bg-emerald-500',
+    membersCount: '1.832'
+  },
+  {
     id: 'comm-food',
     name: 'Onde a Gente Come',
     description: 'Sugestões, críticas, receitas e descobertas locais.',
@@ -206,141 +243,6 @@ export const NEIGHBORHOOD_COMMUNITIES: NeighborhoodCommunity[] = [
     icon: <Utensils />,
     color: 'bg-brand-blue',
     membersCount: '4.5k'
-  },
-  {
-    id: 'comm-pets',
-    name: 'Vida com Pets',
-    description: 'Cuidados, histórias, dicas e indicações.',
-    image: 'https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?q=80&w=800&auto=format&fit=crop',
-    icon: <PawPrint />,
-    color: 'bg-brand-blue',
-    membersCount: '3.1k'
-  },
-  {
-    id: 'comm-pro',
-    name: 'Quem Você Indicaria?',
-    description: 'Recomendações de quem faz bem feito.',
-    image: 'https://images.unsplash.com/photo-1521791136064-7986c2959443?q=80&w=800&auto=format&fit=crop',
-    icon: <Handshake />,
-    color: 'bg-brand-blue',
-    membersCount: '2.8k'
-  },
-  {
-    id: 'comm-saude',
-    name: 'Cuidar da Saúde',
-    description: 'Experiências, dicas e orientações.',
-    image: 'https://images.unsplash.com/photo-1505751172107-172449572052?q=80&w=800&auto=format&fit=crop',
-    icon: <Heart />,
-    color: 'bg-brand-blue',
-    membersCount: '2.2k'
-  },
-  {
-    id: 'comm-home-issue',
-    name: 'Deu Problema em Casa',
-    description: 'Soluções práticas e quem chamar.',
-    image: 'https://images.unsplash.com/photo-1581578731117-104f2a8d23e9?q=80&w=800&auto=format&fit=crop',
-    icon: <Wrench />,
-    color: 'bg-brand-blue',
-    membersCount: '3.4k'
-  },
-  {
-    id: 'comm-beauty',
-    name: 'Cuidar de Si',
-    description: 'Beleza, autoestima e experiências reais.',
-    image: 'https://images.unsplash.com/photo-1560066984-138dadb4c035?q=80&w=800&auto=format&fit=crop',
-    icon: <Scissors />,
-    color: 'bg-brand-blue',
-    membersCount: '1.9k'
-  },
-  {
-    id: 'comm-autos',
-    name: 'Vida Sobre Rodas',
-    description: 'Carro, moto, problemas e soluções.',
-    image: 'https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?q=80&w=800&auto=format&fit=crop',
-    icon: <CarFront />,
-    color: 'bg-brand-blue',
-    membersCount: '2.5k'
-  },
-  {
-    id: 'comm-market',
-    name: 'Compras do Dia a Dia',
-    description: 'Preços, achados e onde comprar melhor.',
-    image: 'https://images.unsplash.com/photo-1542838132-92c53300491e?q=80&w=800&auto=format&fit=crop',
-    icon: <ShoppingCart />,
-    color: 'bg-brand-blue',
-    membersCount: '4.1k'
-  },
-  {
-    id: 'comm-nossa-casa',
-    name: 'Nossa Casa',
-    description: 'Reformas, ideias, móveis e manutenção.',
-    image: 'https://images.unsplash.com/photo-1556228453-efd6c1ff04f6?q=80&w=800&auto=format&fit=crop',
-    icon: <Home />,
-    color: 'bg-brand-blue',
-    membersCount: '2.7k'
-  },
-  {
-    id: 'comm-sports',
-    name: 'Bora se Mexer',
-    description: 'Atividades físicas, esportes e treinos.',
-    image: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=800&auto=format&fit=crop',
-    icon: <Dumbbell />,
-    color: 'bg-brand-blue',
-    membersCount: '1.5k'
-  },
-  {
-    id: 'comm-leisure',
-    name: 'O Que Fazer Por Aqui',
-    description: 'Lazer, passeios e rolês locais.',
-    image: 'https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?q=80&w=800&auto=format&fit=crop',
-    icon: <Ticket />,
-    color: 'bg-brand-blue',
-    membersCount: '3.8k'
-  },
-  {
-    id: 'comm-edu',
-    name: 'Aprender e Evoluir',
-    description: 'Escolas, cursos, aulas e aprendizado.',
-    image: 'https://images.unsplash.com/photo-1543269865-cbf427effbad?q=80&w=800&auto=format&fit=crop',
-    icon: <BookOpen />,
-    color: 'bg-brand-blue',
-    membersCount: '1.2k'
-  },
-  {
-    id: 'comm-pharmacy',
-    name: 'Quando Precisa de Farmácia',
-    description: 'Medicamentos, dicas e orientações.',
-    image: 'https://images.unsplash.com/photo-1587854692152-cbe660dbbb88?q=80&w=800&auto=format&fit=crop',
-    icon: <Pill />,
-    color: 'bg-brand-blue',
-    membersCount: '2.1k'
-  },
-  {
-    id: 'comm-fashion',
-    name: 'Estilo no Dia a Dia',
-    description: 'Roupas, achados e tendências locais.',
-    image: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=800&auto=format&fit=crop',
-    icon: <Shirt />,
-    color: 'bg-brand-blue',
-    membersCount: '1.7k'
-  },
-  {
-    id: 'comm-eventos',
-    name: 'O Que Vai Rolar',
-    description: 'Eventos, feiras e encontros.',
-    image: 'https://images.unsplash.com/photo-1530103043960-ef38714abb15?q=80&w=800&auto=format&fit=crop',
-    icon: <PartyPopper />,
-    color: 'bg-brand-blue',
-    membersCount: '2.9k'
-  },
-  {
-    id: 'comm-condo',
-    name: 'Vida em Condomínio',
-    description: 'Convivência, avisos e indicações.',
-    image: 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?q=80&w=800&auto=format&fit=crop',
-    icon: <Building2 />,
-    color: 'bg-brand-blue',
-    membersCount: '3.6k'
   }
 ];
 
@@ -348,47 +250,31 @@ export const MOCK_COMMUNITY_POSTS: CommunityPost[] = [
   {
     id: 'post-1',
     userId: 'u1',
-    userName: 'Ana Paula',
-    userAvatar: 'https://i.pravatar.cc/100?u=a',
+    userName: 'Taty Oliveira',
+    userAvatar: 'https://i.pravatar.cc/100?u=taty',
     authorRole: 'resident',
-    content: 'O pão da Padaria Imperial tá saindo agora! Quentinho demais 🍞😋',
+    content: 'Alguém conhece um chaveiro de confiança na Freguesia? Perdi as chaves de casa agora pouco.',
     type: 'recommendation',
-    communityId: 'comm-food',
+    communityId: 'comm-pro',
     neighborhood: 'Freguesia',
-    timestamp: '5 min atrás',
-    likes: 12,
-    comments: 2,
-    imageUrl: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?q=80&w=400&auto=format&fit=crop'
+    timestamp: '2h',
+    likes: 8,
+    comments: 16
   },
   {
     id: 'post-2',
     userId: 'u2',
-    userName: 'Carlos Silva',
-    userAvatar: 'https://i.pravatar.cc/100?u=c',
+    userName: 'Tiago Santos',
+    userAvatar: 'https://i.pravatar.cc/100?u=tiago',
     authorRole: 'resident',
-    content: 'Indico o João Eletricista! Fez um serviço impecável aqui em casa hoje. ⚡🔌',
+    content: 'Olha esse hambúrguer top na casa de carnes aqui do bairro! 🍔🔥 Quem já experimentou?',
     type: 'recommendation',
-    communityId: 'comm-home-issue',
-    neighborhood: 'Taquara',
-    timestamp: '1h atrás',
+    communityId: 'comm-market',
+    neighborhood: 'Anil',
+    timestamp: '3h',
     likes: 45,
     comments: 8,
-    imageUrl: 'https://images.unsplash.com/photo-1621905476438-5f09f22d556c?q=80&w=400&auto=format&fit=crop'
-  },
-  {
-    id: 'post-3',
-    userId: 'u4',
-    userName: 'Bruno JPA',
-    userAvatar: 'https://i.pravatar.cc/100?u=b',
-    authorRole: 'resident',
-    content: 'Gente, perdi meu gatinho nas proximidades da Geremário Dantas. Se alguém vir, por favor me avise! 🙏🐱',
-    type: 'alert',
-    communityId: 'comm-pets',
-    neighborhood: 'Anil',
-    timestamp: '3h atrás',
-    likes: 89,
-    comments: 24,
-    imageUrl: 'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?q=80&w=400&auto=format&fit=crop'
+    imageUrl: 'https://images.unsplash.com/photo-1561758033-d89a9ad46330?q=80&w=600&auto=format&fit=crop'
   }
 ];
 
@@ -466,29 +352,40 @@ export const STORES: Store[] = [
   { id: 'f-50', name: 'Vila dos Pets', category: 'Pets', subcategory: 'Pet Shop', rating: 4.9, distance: 'Freguesia', adType: AdType.ORGANIC, description: 'Tudo para o seu melhor amigo.', isSponsored: false, image: 'https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?q=80&w=400&auto=format&fit=crop' },
 ];
 
-export const EDITORIAL_SERVICES = [
+// --- FIX: Added missing exported member 'EDITORIAL_SERVICES' ---
+export const EDITORIAL_SERVICES: EditorialCollection[] = [
   {
-    id: 'grupo-esquematiza',
-    name: 'Grupo Esquematiza',
-    subcategory: 'Segurança e Facilities',
-    image: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?q=80&w=800&auto=format&fit=crop',
-    location: 'Freguesia'
+    id: 'culinaria-jpa',
+    title: 'Melhores de JPA',
+    subtitle: 'Onde comer bem no bairro',
+    image: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=800&auto=format&fit=crop',
+    keywords: ['comida', 'restaurante', 'lanches', 'pizza']
   },
   {
-    id: 'job-1',
-    name: 'Padaria Imperial',
-    subcategory: 'Alimentação',
-    image: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=600&auto=format&fit=crop',
-    location: 'Freguesia'
+    id: 'servicos-confianca',
+    title: 'Serviços de Confiança',
+    subtitle: 'Profissionais avaliados por vizinhos',
+    image: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?q=80&w=800&auto=format&fit=crop',
+    keywords: ['serviços', 'reformas', 'consertos']
   }
 ];
 
-export const STORIES: Story[] = [
-  { id: '1', name: 'Moda Feminina', image: 'https://images.unsplash.com/photo-1483985988355-763728e1935b?q=80&w=200&auto=format&fit=crop' },
-  { id: '2', name: 'Ana Paula', image: 'https://i.pravatar.cc/150?u=a' },
-  { id: '3', name: 'Pet Shop Amigo', image: 'https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?q=80&w=200&auto=format&fit=crop' },
+// --- FIX: Added missing exported member 'quickFilters' ---
+export const quickFilters = [
+  { id: 'top_rated', label: 'Top Avaliados', icon: 'star' },
+  { id: 'open_now', label: 'Aberto Agora', icon: 'clock' },
+  { id: 'nearby', label: 'Perto de Mim', icon: 'zap' },
+  { id: 'cashback', label: 'Com Cashback', icon: 'percent' }
 ];
 
+// --- FIX: Added missing exported member 'STORIES' ---
+export const STORIES: Story[] = [
+  { id: 's1', name: 'Hamburgueria', image: 'https://images.unsplash.com/photo-1561758033-d89a9ad46330?q=80&w=400&auto=format&fit=crop' },
+  { id: 's2', name: 'Salão Vip', image: 'https://images.unsplash.com/photo-1562322140-8baeececf3df?q=80&w=400&auto=format&fit=crop' },
+  { id: 's3', name: 'Pet Shop', image: 'https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?q=80&w=400&auto=format&fit=crop' },
+];
+
+// --- FIX: Added missing exported member 'MOCK_JOBS' ---
 export const MOCK_JOBS: Job[] = [
   {
     id: 'job-1',
@@ -497,20 +394,28 @@ export const MOCK_JOBS: Job[] = [
     neighborhood: 'Freguesia',
     category: 'Alimentação',
     type: 'CLT',
-    salary: 'R$ 1.600,00',
-    description: 'Buscamos pessoa comunicativa e ágil para atendimento ao cliente e organização do balcão.',
-    requirements: ['Experiência anterior', 'Disponibilidade tarde/noite', 'Simpatia'],
-    schedule: '14h às 22h (Escala 6x1)',
+    salary: 'R$ 1.450,00',
+    description: 'Atendimento ao público, organização e limpeza do local.',
+    requirements: ['Experiência anterior', 'Boa comunicação'],
+    schedule: '6x1',
     contactWhatsapp: '5521999999999',
-    postedAt: 'Hoje',
-    isUrgent: true,
+    postedAt: 'Há 2h',
     isSponsored: true,
-    sponsoredUntil: '2099-12-31'
+    sponsoredUntil: '2025-12-31'
+  },
+  {
+    id: 'job-2',
+    role: 'Vendedor Externo',
+    company: 'JPA Telecom',
+    neighborhood: 'Taquara',
+    category: 'Vendas',
+    type: 'PJ',
+    salary: 'Comissão + Ajuda de Custo',
+    description: 'Vendas de planos de internet e TV a cabo.',
+    requirements: ['Carro próprio', 'Experiência com vendas'],
+    schedule: 'Seg-Sex',
+    contactWhatsapp: '5521988888888',
+    postedAt: 'Há 1 dia',
+    isUrgent: true
   }
-];
-
-export const quickFilters = [
-  { id: 'nearby', label: 'Perto de mim', icon: 'zap' },
-  { id: 'top_rated', label: 'Melhores avaliados', icon: 'star' },
-  { id: 'open_now', label: 'Aberto agora', icon: 'clock' },
 ];

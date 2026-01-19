@@ -27,6 +27,7 @@ import { CommunityFeedView } from './CommunityFeedView';
 import { CategoryView } from './CategoryView';
 import { StoreAdsModule } from './StoreAdsModule';
 import { StoreProfileEdit } from './StoreProfileEdit';
+import { EditProfileView } from './EditProfileView';
 import { useAuth } from '../contexts/AuthContext';
 import { NeighborhoodProvider } from '../contexts/NeighborhoodContext';
 import { STORES } from '../constants';
@@ -62,11 +63,10 @@ const App: React.FC = () => {
 
   // Monitoramento de acessos restritos
   useEffect(() => {
-    const restrictedTabs = ['scan_cashback', 'merchant_qr_display', 'wallet', 'pay_cashback', 'store_area', 'admin_panel'];
+    const restrictedTabs = ['scan_cashback', 'merchant_qr_display', 'wallet', 'pay_cashback', 'store_area', 'admin_panel', 'edit_profile'];
     
     if (restrictedTabs.includes(activeTab)) {
       if (!isAuthLoading && !user) {
-        // Salva onde o usuário queria ir, volta pra home e abre o login
         setPendingTab(activeTab);
         setActiveTab('home');
         setIsAuthOpen(true);
@@ -92,12 +92,12 @@ const App: React.FC = () => {
   const headerExclusionList = [
     'merchant_onboarding', 'merchant_qr_display', 'wallet', 'scan_cashback', 
     'pay_cashback', 'merchant_cashback_dashboard', 'store_area', 'profile', 
-    'admin_panel'
+    'admin_panel', 'edit_profile'
   ];
   
   const hideBottomNav = [
     'merchant_onboarding', 'pay_cashback', 'scan_cashback', 
-    'merchant_cashback_dashboard', 'admin_panel'
+    'merchant_cashback_dashboard', 'admin_panel', 'edit_profile'
   ].includes(activeTab);
 
   const renderHome = () => (
@@ -124,7 +124,7 @@ const App: React.FC = () => {
     }
 
     // Fallback de segurança para evitar renderização de rotas restritas sem User
-    const restrictedTabs = ['scan_cashback', 'merchant_qr_display', 'wallet', 'pay_cashback', 'store_area', 'admin_panel'];
+    const restrictedTabs = ['scan_cashback', 'merchant_qr_display', 'wallet', 'pay_cashback', 'store_area', 'admin_panel', 'edit_profile'];
     if (restrictedTabs.includes(activeTab) && !user) {
       return renderHome();
     }
@@ -174,6 +174,9 @@ const App: React.FC = () => {
 
       case 'profile':
         return <MenuView user={user as any} userRole={userRole} onAuthClick={() => setIsAuthOpen(true)} onNavigate={setActiveTab} onBack={() => setActiveTab('home')} />;
+
+      case 'edit_profile':
+        return <EditProfileView user={user as any} onBack={() => setActiveTab('profile')} />;
 
       case 'explore':
         return <ExploreView stores={STORES} searchQuery={globalSearch} onStoreClick={handleSelectStore} onLocationClick={() => {}} onFilterClick={() => {}} onOpenPlans={() => {}} onNavigate={setActiveTab} />;
