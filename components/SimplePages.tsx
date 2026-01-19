@@ -113,6 +113,7 @@ export const AboutView: React.FC<SimplePageProps> = ({ onBack }) => {
           <h2 className="text-3xl font-black text-gray-900 dark:text-white font-display text-center leading-tight">
             Localizei <br/> <span className="text-[#1E5BFF]">JPA</span>
           </h2>
+          <p className="text-[10px] text-[#1E5BFF] font-black uppercase tracking-[0.3em] mt-3">Onde o bairro conversa</p>
         </div>
 
         <div className="px-6 space-y-10 pb-16">
@@ -123,6 +124,7 @@ export const AboutView: React.FC<SimplePageProps> = ({ onBack }) => {
             </div>
             <div className="bg-gray-50 dark:bg-gray-800/40 p-6 rounded-[2rem] border border-gray-100 dark:border-gray-800 shadow-sm">
                 <p className="text-gray-700 dark:text-gray-300 text-base leading-relaxed font-medium">
+                  Onde o bairro conversa. <br/><br/>
                   Acreditamos que a vida acontece perto. Nos bairros, nas ruas e nas lojas de confiança. <br/><br/>
                   A Localizei JPA nasceu para aproximar quem procura de quem faz em Jacarepaguá. Queremos fortalecer o comércio local e criar conexões reais entre vizinhos.
                 </p>
