@@ -22,7 +22,8 @@ import {
   Lightbulb,
   Compass,
   FileText,
-  Shield
+  Shield,
+  Rocket
 } from 'lucide-react';
 import { LojasEServicosList } from './LojasEServicosList';
 import { User } from '@supabase/supabase-js';
@@ -58,7 +59,7 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void; onStoreClick?: (
   const [progress, setProgress] = useState(0);
 
   const banners: BannerItem[] = useMemo(() => [
-    { id: 'rio-phone-store', title: 'RIO PHONE STORE', target: 'rio-phone-store', tag: 'Assistência Apple', bgColor: 'bg-black', Icon: Smartphone, isSpecial: true },
+    { id: 'rio-phone-store', title: 'RIO PHONE STORE', target: 'rio-phone-store', tag: 'Assistência Apple', bgColor: 'bg-[#020617]', Icon: Smartphone, isSpecial: true },
     { id: 'master-sponsor', title: 'Grupo Esquematiza', target: 'patrocinador_master', tag: 'Patrocinador Master', bgColor: 'bg-slate-900', Icon: Crown },
     { id: 'advertise-home', title: 'Anuncie aqui', target: 'advertise_home_banner', tag: 'Destaque sua marca', bgColor: 'bg-[#1E5BFF]', Icon: Megaphone }
   ], []);
@@ -96,10 +97,21 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void; onStoreClick?: (
         className={`w-full relative aspect-[3/2] rounded-[32px] overflow-hidden shadow-xl shadow-slate-200 dark:shadow-none border border-gray-100 dark:border-white/5 ${current.bgColor} cursor-pointer active:scale-[0.98] transition-all group`}
       >
         {current.id === 'rio-phone-store' ? (
-          <div className="absolute inset-0 flex items-center justify-between relative bg-gradient-to-br from-[#020617] via-[#0B1120] to-[#172554]">
-            <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'radial-gradient(circle, #fff 1px, transparent 1px)', backgroundSize: '24px 24px' }}></div>
-            <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_0%_0%,rgba(30,91,255,0.08),transparent_60%)]"></div>
-            <div className="z-10 pl-8 flex flex-col justify-center h-full max-w-[60%] relative">
+          <div className="absolute inset-0">
+            {/* Imagem de Fundo Integrada (Aproveita 100% da área) */}
+            <div className="absolute inset-0 z-0">
+              <img 
+                src="https://images.unsplash.com/photo-1592750475338-74b7b21085ab?q=80&w=1200&auto=format&fit=crop" 
+                alt="RIO PHONE STORE" 
+                className="w-full h-full object-cover object-right brightness-110 group-hover:scale-105 transition-transform duration-1000 ease-out"
+              />
+              {/* Overlay de fusão para garantir leitura e remover aspecto de recorte */}
+              <div className="absolute inset-0 bg-gradient-to-r from-[#020617] via-[#020617]/85 to-transparent z-10"></div>
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_50%,rgba(30,91,255,0.1),transparent_70%)] z-10"></div>
+            </div>
+
+            {/* Conteúdo (Textos permanecem nos lugares originais) */}
+            <div className="z-20 pl-8 flex flex-col justify-center h-full max-w-[60%] relative">
                <div className="mb-5 flex items-center gap-2 animate-in fade-in slide-in-from-left-4 duration-700">
                   <div className="bg-white/5 backdrop-blur-md border border-white/10 px-2.5 py-1 rounded-full flex items-center gap-1.5 shadow-sm">
                       <Star className="w-2.5 h-2.5 text-blue-200 fill-blue-200" />
@@ -123,14 +135,6 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void; onStoreClick?: (
                   <div className="w-6 h-[1px] bg-blue-500/50"></div>
                   <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Desde 2017</span>
                </div>
-            </div>
-            <div className="absolute right-0 bottom-0 w-[55%] h-full z-0 pointer-events-none flex items-end justify-center">
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(30,91,255,0.15),transparent_70%)] blur-2xl transform scale-75"></div>
-                <img 
-                  src="https://images.unsplash.com/photo-1592750475338-74b7b21085ab?q=80&w=600&auto=format&fit=crop" 
-                  alt="iPhone Premium" 
-                  className="h-[95%] w-auto object-contain drop-shadow-[0_20px_50px_rgba(0,0,0,0.6)] transform -rotate-[6deg] brightness-105 mb-[-5%]"
-                />
             </div>
           </div>
         ) : current.id === 'master-sponsor' ? (
@@ -168,6 +172,33 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void; onStoreClick?: (
                 </div>
              </div>
           </div>
+        ) : current.id === 'advertise-home' ? (
+          <div className="absolute inset-0 bg-gradient-to-br from-[#1E5BFF] via-[#0040DD] to-[#1E5BFF] flex flex-col items-center justify-center text-center p-8 overflow-hidden">
+             <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '24px 24px' }}></div>
+             <div className="absolute -left-10 -top-10 w-40 h-40 bg-white/10 blur-3xl rounded-full"></div>
+             <div className="absolute -right-20 -bottom-20 w-64 h-64 bg-black/10 blur-3xl rounded-full"></div>
+             <div className="absolute -right-8 -bottom-8 opacity-[0.07] rotate-[-15deg] pointer-events-none group-hover:scale-110 transition-transform duration-1000">
+                <Rocket className="w-48 h-48 text-white" />
+             </div>
+             <div className="relative z-10 flex flex-col items-center max-w-xs">
+                <div className="mb-5 animate-in slide-in-from-top-2 duration-700">
+                    <div className="bg-black/20 backdrop-blur-md border border-white/20 px-3 py-1 rounded-full flex items-center gap-2">
+                        <Zap className="w-3 h-3 text-amber-300 fill-amber-300" />
+                        <span className="text-[10px] font-black text-white uppercase tracking-widest leading-none">Oportunidade de Ouro</span>
+                    </div>
+                </div>
+                <h3 className="text-3xl font-[950] text-white leading-[0.9] font-display tracking-tighter uppercase drop-shadow-xl mb-3 animate-in fade-in slide-in-from-bottom-2 duration-700 delay-100">
+                  ANUNCIE SUA MARCA
+                </h3>
+                <p className="text-blue-50 text-[11px] font-medium leading-relaxed max-w-[220px] mb-8 opacity-90 animate-in fade-in duration-1000 delay-200">
+                  Alcance milhares de vizinhos em Jacarepaguá e venda mais todos os dias através do nosso super-app.
+                </p>
+                <div className="bg-white text-[#1E5BFF] px-6 py-3 rounded-2xl font-black text-[10px] uppercase tracking-[0.15em] flex items-center gap-2 shadow-2xl shadow-blue-900/40 group-hover:scale-105 group-hover:bg-blue-50 transition-all duration-300 animate-in zoom-in-95 delay-300">
+                   Divulgar minha loja
+                   <ArrowRight className="w-4 h-4" strokeWidth={3} />
+                </div>
+             </div>
+          </div>
         ) : (
           <div className="absolute inset-0 flex flex-col items-center justify-center px-6 pt-4 pb-12 text-center z-10">
              <div className="p-4 bg-white/10 backdrop-blur-md rounded-[2rem] border border-white/20 shadow-2xl animate-in zoom-in duration-700 mb-5">
@@ -180,6 +211,7 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void; onStoreClick?: (
           </div>
         )}
 
+        {/* Indicadores de Progresso */}
         <div className="absolute bottom-5 left-1/2 -translate-x-1/2 flex gap-1.5 z-30 w-1/3 justify-center">
           {banners.map((_, idx) => (
             <div key={idx} className="h-1 flex-1 bg-white/20 rounded-full overflow-hidden">
@@ -187,6 +219,85 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void; onStoreClick?: (
             </div>
           ))}
         </div>
+      </div>
+    </div>
+  );
+};
+
+export const HomeFeed: React.FC<HomeFeedProps> = ({ 
+  onNavigate, 
+  onSelectCategory, 
+  onStoreClick, 
+  stores,
+  user
+}) => {
+  const [listFilter, setListFilter] = useState<'all' | 'top_rated' | 'open_now'>('all');
+  const categoriesRef = useRef<HTMLDivElement>(null);
+
+  // ESTRUTURA DA HOME: 'categories' primeiro, 'home_carousel' DEPOIS (abaixo das categorias)
+  const homeStructure = useMemo(() => ['categories', 'home_carousel', 'novidades', 'sugestoes', 'em_alta', 'list'], []);
+
+  const renderSection = (key: string) => {
+    switch (key) {
+      case 'home_carousel': 
+        return (
+          <div key="home_carousel" className="w-full bg-white dark:bg-gray-950 pb-2">
+            <HomeCarousel onNavigate={onNavigate} onStoreClick={onStoreClick} stores={stores} />
+          </div>
+        );
+      case 'categories':
+        return (
+          <div key="categories" className="w-full bg-white dark:bg-gray-950 pt-2 pb-0">
+            <div ref={categoriesRef} className="flex overflow-x-auto no-scrollbar px-4 pb-4 snap-x">
+              <div className="grid grid-flow-col grid-rows-2 gap-x-3 gap-y-3">
+                {CATEGORIES.map((cat) => (
+                  <button key={cat.id} onClick={() => onSelectCategory(cat)} className="flex flex-col items-center group active:scale-95 transition-all">
+                    <div className={`w-[78px] h-[78px] rounded-[22px] shadow-lg flex flex-col items-center justify-between p-2 ${cat.color} border border-white/20`}>
+                      <div className="flex-1 flex items-center justify-center w-full">{React.cloneElement(cat.icon as any, { className: "w-7 h-7 text-white drop-shadow-md", strokeWidth: 2.5 })}</div>
+                      <div className="w-full bg-black/10 backdrop-blur-[2px] py-1 rounded-b-[20px] -mx-2 -mb-2"><span className="block w-full text-[9px] font-black text-white text-center uppercase tracking-tight">{cat.name}</span></div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        );
+      case 'novidades': return <NovidadesDaSemana key="novidades" stores={stores} onStoreClick={onStoreClick} onNavigate={onNavigate} />;
+      case 'sugestoes': return <SugestoesParaVoce key="sugestoes" stores={stores} onStoreClick={onStoreClick} onNavigate={onNavigate} />;
+      case 'em_alta': return <EmAltaNaCidade key="em_alta" stores={stores} onStoreClick={onStoreClick} onNavigate={onNavigate} />;
+      case 'list':
+        return (
+          <div key="list" className="w-full bg-white dark:bg-gray-900 pt-1 pb-10">
+            <div className="px-5">
+              <SectionHeader 
+                icon={Compass} 
+                title="Explorar Bairro" 
+                subtitle="Tudo o que você precisa" 
+                onSeeMore={() => onNavigate('explore')}
+              />
+              <div className="flex gap-1 bg-gray-100 dark:bg-gray-800 p-1 rounded-xl w-fit mb-4">
+                {['all', 'top_rated'].map((f) => (
+                  <button 
+                    key={f} 
+                    onClick={() => setListFilter(f as any)} 
+                    className={`text-[8px] font-black uppercase px-4 py-1.5 rounded-lg transition-all ${listFilter === f ? 'bg-white dark:bg-gray-700 text-[#1E5BFF] shadow-sm' : 'text-gray-400'}`}
+                  >
+                    {f === 'all' ? 'Tudo' : 'Top'}
+                  </button>
+                ))}
+              </div>
+              <LojasEServicosList onStoreClick={onStoreClick} onViewAll={() => onNavigate('explore')} activeFilter={listFilter as any} user={user} onNavigate={onNavigate} premiumOnly={false} />
+            </div>
+          </div>
+        );
+      default: return null;
+    }
+  };
+
+  return (
+    <div className="flex flex-col bg-white dark:bg-gray-950 w-full max-w-md mx-auto animate-in fade-in duration-500 overflow-x-hidden pb-32">
+      <div className="flex flex-col w-full gap-1">
+          {homeStructure.map(section => renderSection(section))}
       </div>
     </div>
   );
@@ -362,85 +473,6 @@ const EmAltaNaCidade: React.FC<{ stores: Store[]; onStoreClick?: (store: Store) 
             </div>
           </button>
         ))}
-      </div>
-    </div>
-  );
-};
-
-export const HomeFeed: React.FC<HomeFeedProps> = ({ 
-  onNavigate, 
-  onSelectCategory, 
-  onStoreClick, 
-  stores,
-  user
-}) => {
-  const [listFilter, setListFilter] = useState<'all' | 'top_rated' | 'open_now'>('all');
-  const categoriesRef = useRef<HTMLDivElement>(null);
-
-  // ESTRUTURA DA HOME: 'categories' primeiro, 'home_carousel' DEPOIS (conforme spec)
-  const homeStructure = useMemo(() => ['categories', 'home_carousel', 'novidades', 'sugestoes', 'em_alta', 'list'], []);
-
-  const renderSection = (key: string) => {
-    switch (key) {
-      case 'home_carousel': 
-        return (
-          <div key="home_carousel" className="w-full bg-white dark:bg-gray-950 pb-2">
-            <HomeCarousel onNavigate={onNavigate} onStoreClick={onStoreClick} stores={stores} />
-          </div>
-        );
-      case 'categories':
-        return (
-          <div key="categories" className="w-full bg-white dark:bg-gray-950 pt-2 pb-0">
-            <div ref={categoriesRef} className="flex overflow-x-auto no-scrollbar px-4 pb-4 snap-x">
-              <div className="grid grid-flow-col grid-rows-2 gap-x-3 gap-y-3">
-                {CATEGORIES.map((cat) => (
-                  <button key={cat.id} onClick={() => onSelectCategory(cat)} className="flex flex-col items-center group active:scale-95 transition-all">
-                    <div className={`w-[78px] h-[78px] rounded-[22px] shadow-lg flex flex-col items-center justify-between p-2 ${cat.color} border border-white/20`}>
-                      <div className="flex-1 flex items-center justify-center w-full">{React.cloneElement(cat.icon as any, { className: "w-7 h-7 text-white drop-shadow-md", strokeWidth: 2.5 })}</div>
-                      <div className="w-full bg-black/10 backdrop-blur-[2px] py-1 rounded-b-[20px] -mx-2 -mb-2"><span className="block w-full text-[9px] font-black text-white text-center uppercase tracking-tight">{cat.name}</span></div>
-                    </div>
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-        );
-      case 'novidades': return <NovidadesDaSemana key="novidades" stores={stores} onStoreClick={onStoreClick} onNavigate={onNavigate} />;
-      case 'sugestoes': return <SugestoesParaVoce key="sugestoes" stores={stores} onStoreClick={onStoreClick} onNavigate={onNavigate} />;
-      case 'em_alta': return <EmAltaNaCidade key="em_alta" stores={stores} onStoreClick={onStoreClick} onNavigate={onNavigate} />;
-      case 'list':
-        return (
-          <div key="list" className="w-full bg-white dark:bg-gray-900 pt-1 pb-10">
-            <div className="px-5">
-              <SectionHeader 
-                icon={Compass} 
-                title="Explorar Bairro" 
-                subtitle="Tudo o que você precisa" 
-                onSeeMore={() => onNavigate('explore')}
-              />
-              <div className="flex gap-1 bg-gray-100 dark:bg-gray-800 p-1 rounded-xl w-fit mb-4">
-                {['all', 'top_rated'].map((f) => (
-                  <button 
-                    key={f} 
-                    onClick={() => setListFilter(f as any)} 
-                    className={`text-[8px] font-black uppercase px-4 py-1.5 rounded-lg transition-all ${listFilter === f ? 'bg-white dark:bg-gray-700 text-[#1E5BFF] shadow-sm' : 'text-gray-400'}`}
-                  >
-                    {f === 'all' ? 'Tudo' : 'Top'}
-                  </button>
-                ))}
-              </div>
-              <LojasEServicosList onStoreClick={onStoreClick} onViewAll={() => onNavigate('explore')} activeFilter={listFilter as any} user={user} onNavigate={onNavigate} premiumOnly={false} />
-            </div>
-          </div>
-        );
-      default: return null;
-    }
-  };
-
-  return (
-    <div className="flex flex-col bg-white dark:bg-gray-950 w-full max-w-md mx-auto animate-in fade-in duration-500 overflow-x-hidden pb-32">
-      <div className="flex flex-col w-full gap-1">
-          {homeStructure.map(section => renderSection(section))}
       </div>
     </div>
   );
