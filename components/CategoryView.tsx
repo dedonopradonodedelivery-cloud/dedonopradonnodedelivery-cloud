@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { ChevronLeft, Search, Star, BadgeCheck, ChevronRight, X, AlertCircle, Grid, Filter, Megaphone, ArrowUpRight } from 'lucide-react';
 import { Category, Store, AdType } from '../types';
@@ -114,28 +113,6 @@ const StoreListItem: React.FC<{ store: Store; onClick: () => void }> = ({ store,
   );
 };
 
-const FALLBACK_ADS = [
-  'https://images.unsplash.com/photo-1666214280557-f1b5022eb634?q=80&w=800&auto=format&fit=crop', 
-  'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?q=80&w=800&auto=format&fit=crop', 
-];
-
-const generateMockStoresForCategory = (categoryName: string, subcategoryName?: string): Store[] => {
-  return Array.from({ length: 8 }).map((_, i) => ({
-    id: `mock-${categoryName}-${i}`,
-    name: `${categoryName} ${subcategoryName ? subcategoryName : 'Local'} ${i + 1}`,
-    category: categoryName,
-    subcategory: subcategoryName || 'Geral',
-    rating: 4.5,
-    reviewsCount: 10 + i,
-    adType: i === 0 ? AdType.PREMIUM : AdType.ORGANIC,
-    logoUrl: '/assets/default-logo.png',
-    distance: '1.2km',
-    description: `O melhor de ${categoryName}`,
-    verified: i % 2 === 0,
-    cashback: i % 3 === 0 ? 5 : undefined
-  }));
-};
-
 const CategoryAdsCarousel: React.FC<{ 
   userRole?: 'cliente' | 'lojista' | null; 
   onAdvertise: () => void;
@@ -194,8 +171,8 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
   const [searchQuery, setSearchQuery] = useState('');
 
   const subcategories = useMemo(() => {
-    const key = category.name === 'Comida' ? 'Alimentação' : category.name;
-    return SUBCATEGORIES[key] || SUBCATEGORIES['default'];
+    // Busca direta pelo nome da categoria nas constantes
+    return SUBCATEGORIES[category.name] || SUBCATEGORIES['default'] || [];
   }, [category.name]);
 
   const MAX_VISIBLE = 8;
@@ -214,15 +191,8 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
               category.name.toLowerCase().includes(s.category.toLowerCase());
     });
 
-    if (filtered.length === 0) {
-        filtered = generateMockStoresForCategory(category.name, selectedSubcategory || undefined);
-    }
-
     if (selectedSubcategory) {
         filtered = filtered.filter(s => s.subcategory === selectedSubcategory || s.subcategory.includes(selectedSubcategory));
-        if (filtered.length === 0) {
-             filtered = generateMockStoresForCategory(category.name, selectedSubcategory);
-        }
     }
 
     if (searchQuery) {
