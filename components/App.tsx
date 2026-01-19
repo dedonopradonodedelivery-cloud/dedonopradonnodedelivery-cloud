@@ -22,6 +22,7 @@ import { UserWalletView } from './UserWalletView';
 import { CashbackScanScreen } from './CashbackScanScreen';
 import { CashbackPaymentScreen } from './CashbackPaymentScreen';
 import { MerchantCashbackDashboard } from './MerchantCashbackDashboard';
+import { MerchantQrScreen } from './MerchantQrScreen';
 import { MapPin, X } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { NeighborhoodProvider } from '../contexts/NeighborhoodContext';
@@ -50,18 +51,23 @@ const App: React.FC = () => {
   const [quoteCategory, setQuoteCategory] = useState('');
   const [adCategoryTarget, setAdCategoryTarget] = useState<string | null>(null);
   
-  // Contextos de Inspeção Admin
+  // Contextos de Inspeção Admin e Dados do Scanner
   const [inspectedUserId, setInspectedUserId] = useState<string | null>(null);
   const [inspectedStore, setInspectedStore] = useState<Store | null>(null);
   const [scanData, setScanData] = useState<{ merchantId: string; storeId: string } | null>(null);
 
   useEffect(() => {
     localStorage.setItem('localizei_active_tab', activeTab);
+    
+    if (!['scan_cashback', 'pay_cashback'].includes(activeTab)) {
+        setScanData(null);
+    }
   }, [activeTab]);
 
   const handleSelectStore = (store: Store) => { setSelectedStore(store); setActiveTab('store_detail'); };
-  const headerExclusionList = ['wallet', 'scan_cashback', 'pay_cashback', 'merchant_cashback_dashboard', 'wallet', 'scan_cashback', 'pay_cashback', 'store_area', 'editorial_list', 'store_profile', 'category_detail', 'store_detail', 'profile', 'patrocinador_master', 'service_subcategories', 'service_specialties', 'store_ads_module', 'about', 'support', 'favorites', 'community_feed', 'admin_panel'];
-  const hideBottomNav = ['pay_cashback', 'scan_cashback', 'merchant_cashback_dashboard', 'pay_cashback', 'scan_cashback', 'store_ads_module', 'store_detail', 'admin_panel'].includes(activeTab);
+  
+  const headerExclusionList = ['merchant_qr_display', 'wallet', 'scan_cashback', 'pay_cashback', 'merchant_cashback_dashboard', 'store_area', 'editorial_list', 'store_profile', 'category_detail', 'store_detail', 'profile', 'patrocinador_master', 'service_subcategories', 'service_specialties', 'store_ads_module', 'about', 'support', 'favorites', 'community_feed', 'admin_panel'];
+  const hideBottomNav = ['pay_cashback', 'scan_cashback', 'merchant_cashback_dashboard', 'store_ads_module', 'store_detail', 'admin_panel'].includes(activeTab);
 
   return (
     <NeighborhoodProvider>
@@ -107,8 +113,28 @@ const App: React.FC = () => {
                 />
               )}
 
-              {activeTab === 'scan_cashback' && <CashbackScanScreen onBack={() => setActiveTab('wallet')} onScanSuccess={(data) => { setScanData(data); setActiveTab('pay_cashback'); }} />}
-              {activeTab === 'pay_cashback' && scanData && <CashbackPaymentScreen user={user as any} merchantId={scanData.merchantId} storeId={scanData.storeId} onBack={() => setActiveTab('scan_cashback')} onComplete={() => setActiveTab('wallet')} />}
+              {activeTab === 'scan_cashback' && (
+                <CashbackScanScreen 
+                    onBack={() => setActiveTab('home')} 
+                    onScanSuccess={(storeData) => { 
+                        setScanData({ 
+                            merchantId: storeData.id, 
+                            storeId: storeData.id 
+                        }); 
+                        setActiveTab('pay_cashback'); 
+                    }} 
+                />
+              )}
+
+              {activeTab === 'pay_cashback' && scanData && (
+                <CashbackPaymentScreen 
+                    user={user as any} 
+                    merchantId={scanData.merchantId} 
+                    storeId={scanData.storeId} 
+                    onBack={() => setActiveTab('scan_cashback')} 
+                    onComplete={() => setActiveTab('wallet')} 
+                />
+              )}
               
               {activeTab === 'merchant_cashback_dashboard' && (STORES[0] || inspectedStore) && (
                 <MerchantCashbackDashboard 
@@ -117,6 +143,14 @@ const App: React.FC = () => {
                         if(inspectedStore) { setInspectedStore(null); setActiveTab('admin_panel'); } 
                         else setActiveTab('store_area'); 
                     }} 
+                />
+              )}
+
+              {/* TELA DE QR EXCLUSIVA DO LOJISTA */}
+              {activeTab === 'merchant_qr_display' && user && (
+                <MerchantQrScreen 
+                    onBack={() => setActiveTab('home')} 
+                    user={user} 
                 />
               )}
 

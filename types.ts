@@ -26,8 +26,9 @@ export interface Store {
   cashback_percent?: number; 
   cashback_active?: boolean;
   cashback_validity_days?: number;
-  store_manual_code?: string;
-  // Added properties for consistency across components
+  store_manual_code?: string; // Código fixo e amigável (ex: JPA-123)
+  secure_id?: string; // UUID usado no QR Code
+  // Propriedades extras para consistência
   neighborhood?: string;
   isSponsored?: boolean;
   recentComments?: string[];
@@ -43,29 +44,27 @@ export interface Store {
   closingTime?: string;
 }
 
-// Representa o saldo consolidado de um usuário em uma loja específica
 export interface StoreCredit {
   id: string;
   user_id: string;
   store_id: string;
   store_name: string;
   store_logo?: string;
-  balance_cents: number; // Saldo total disponível (Soma de créditos ativos - débitos)
-  expiring_soon_cents?: number; // Créditos que expiram nos próximos 7 dias
+  balance_cents: number; 
+  expiring_soon_cents?: number; 
   updated_at: string;
 }
 
-// O Ledger é o registro imutável de cada movimentação
 export interface CashbackLedgerEntry {
   id: string;
   user_id: string;
   store_id: string;
-  transaction_id: string; // Vínculo com a transação que gerou o movimento
+  transaction_id: string; 
   amount_cents: number;
-  type: 'credit' | 'debit'; // credit = ganho, debit = uso ou expiração
+  type: 'credit' | 'debit'; 
   status: 'active' | 'used' | 'expired';
   created_at: string;
-  expires_at?: string; // Nulo para débitos, obrigatório para créditos
+  expires_at?: string; 
 }
 
 export interface CashbackTransaction {
@@ -74,13 +73,12 @@ export interface CashbackTransaction {
   user_name?: string;
   store_id: string;
   merchant_id: string;
-  amount_cents: number; // Valor da movimentação de cashback
-  purchase_total_cents?: number; // Valor total da nota fiscal/compra
+  amount_cents: number; 
+  purchase_total_cents?: number; 
   type: 'earn' | 'use';
   status: 'pending' | 'approved' | 'rejected' | 'expired';
   created_at: string;
   approved_at?: string;
-  // Added properties for MerchantCashbackDashboard and MerchantCashbackRequests
   customer_id?: string;
   customer_name?: string;
   total_amount_cents?: number;
@@ -103,14 +101,12 @@ export interface ChatMessage {
   text: string;
 }
 
-// Added missing Story interface
 export interface Story {
   id: string;
   name: string;
   image: string;
 }
 
-// Added missing EditorialCollection interface
 export interface EditorialCollection {
   id: string;
   title: string;
@@ -119,7 +115,6 @@ export interface EditorialCollection {
   keywords: string[];
 }
 
-// Added missing Job interface
 export interface Job {
   id: string;
   role: string;
@@ -139,7 +134,6 @@ export interface Job {
   isUrgentToday?: boolean;
 }
 
-// Added missing CommunityPost interface
 export interface CommunityPost {
   id: string;
   userId: string;
@@ -156,7 +150,6 @@ export interface CommunityPost {
   imageUrl?: string;
 }
 
-// Added missing NeighborhoodCommunity interface
 export interface NeighborhoodCommunity {
   id: string;
   name: string;
@@ -167,7 +160,6 @@ export interface NeighborhoodCommunity {
   membersCount: string;
 }
 
-// Added missing CommunitySuggestion interface
 export interface CommunitySuggestion {
   id: string;
   name: string;
@@ -177,10 +169,7 @@ export interface CommunitySuggestion {
   voterIds: string[];
 }
 
-// Added missing ReportReason type
 export type ReportReason = 'spam' | 'offensive' | 'fraud' | 'wrong_neighborhood' | 'other';
-
-// Added missing PostReport and related types
 export type ReportStatus = 'open' | 'resolved' | 'dismissed';
 export type ReportPriority = 'high' | 'medium' | 'low';
 
