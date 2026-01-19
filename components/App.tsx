@@ -42,45 +42,138 @@ const App: React.FC = () => {
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [globalSearch, setGlobalSearch] = useState('');
   const [scanData, setScanData] = useState<{ merchantId: string; storeId: string } | null>(null);
-  const [inspectedUserId, setInspectedUserId] = useState<string | null>(null);
-  const [inspectedStore, setInspectedStore] = useState<Store | null>(null);
   const [selectedServiceMacro, setSelectedServiceMacro] = useState<{id: string, name: string} | null>(null);
   const [quoteCategory, setQuoteCategory] = useState('');
   const [isQuoteModalOpen, setIsQuoteModalOpen] = useState(false);
 
-  // Regra de Onboarding (Persistente no Navegador)
+  // Estado de Onboarding do Lojista
   const [onboardingCompleted, setOnboardingCompleted] = useState(() => 
     localStorage.getItem('onboarding_cashback_completed') === 'true'
   );
 
-  // GATEKEEPER: Validação de Rotas e Segurança de Fluxo
+  // Segurança e Gatilho de Login Imediato
   useEffect(() => {
     localStorage.setItem('localizei_active_tab', activeTab);
     
-    // 1. Interceptação de Ferramentas do Lojista
-    // Se o lojista tenta acessar Meu QR ou Dashboard sem ver o vídeo
-    const merchantToolRoutes = ['merchant_qr_display', 'merchant_cashback_dashboard'];
-    if (merchantToolRoutes.includes(activeTab) && userRole === 'lojista' && !onboardingCompleted) {
-      setActiveTab('merchant_onboarding');
+    // Se tentar acessar cashback ou painel lojista sem login, abre o modal
+    if ((activeTab === 'scan_cashback' || activeTab === 'merchant_qr_display' || activeTab === 'wallet') && !user) {
+      setIsAuthOpen(true);
+    }
+  }, [activeTab, user]);
+
+  const handleSelectStore = (store: Store) => { 
+    setSelectedStore(store); 
+    setActiveTab('store_detail'); 
+  };
+
+  const headerExclusionList = [
+    'merchant_onboarding', 'merchant_qr_display', 'wallet', 'scan_cashback', 
+    'pay_cashback', 'merchant_cashback_dashboard', 'store_area', 'profile', 
+    'admin_panel'
+  ];
+  
+  const hideBottomNav = [
+    'merchant_onboarding', 'pay_cashback', 'scan_cashback', 
+    'merchant_cashback_dashboard', 'admin_panel'
+  ].includes(activeTab);
+
+  // Helper para renderizar a Home (usado como fallback)
+  const renderHome = () => (
+    <HomeFeed 
+      onNavigate={setActiveTab} 
+      onSelectCategory={(c) => { setSelectedCategory(c); setActiveTab('category_detail'); }} 
+      onSelectCollection={() => {}} 
+      onStoreClick={handleSelectStore} 
+      stores={STORES} 
+      searchTerm={globalSearch} 
+      user={user as any} 
+      onRequireLogin={() => setIsAuthOpen(true)} 
+    />
+  );
+
+  const renderContent = () => {
+    // 1. Roteamento de Cashback (Fluxo do Cliente)
+    if (activeTab === 'scan_cashback') {
+      // Se não houver usuário, renderizamos a Home por baixo do modal de login (aberto pelo useEffect)
+      // Isso mantém a aba ativa em 'scan_cashback' para que o login redirecione automaticamente.
+      if (!user) return renderHome();
+      
+      return (
+        <CashbackScanScreen 
+          onBack={() => setActiveTab('home')} 
+          onScanSuccess={(data) => { 
+            setScanData({ merchantId: data.id, storeId: data.id }); 
+            setActiveTab('pay_cashback'); 
+          }} 
+        />
+      );
     }
 
-    // 2. Proteção contra rotas inexistentes (Fallback de Sanidade)
-    const validRoutes = [
-      'home', 'community_feed', 'merchant_qr_display', 'scan_cashback', 'profile',
-      'explore', 'wallet', 'pay_cashback', 'merchant_cashback_dashboard', 'merchant_onboarding',
-      'store_detail', 'category_detail', 'services', 'service_subcategories', 'service_specialties',
-      'admin_panel', 'store_area', 'patrocinador_master', 'jobs_list', 'store_ads_module', 'store_profile'
-    ];
-    
-    if (!validRoutes.includes(activeTab)) {
-      setActiveTab('home');
+    // 2. Roteamento de QR Code (Fluxo do Lojista)
+    if (activeTab === 'merchant_qr_display') {
+      if (!user) return renderHome();
+      
+      if (!onboardingCompleted) {
+        return (
+          <MerchantCashbackOnboarding 
+            onBack={() => setActiveTab('home')} 
+            onActivate={() => { 
+              setOnboardingCompleted(true); 
+              localStorage.setItem('onboarding_cashback_completed', 'true');
+              setActiveTab('merchant_qr_display'); 
+            }} 
+          />
+        );
+      }
+      
+      return <MerchantQrScreen onBack={() => setActiveTab('home')} user={user} />;
     }
-  }, [activeTab, userRole, onboardingCompleted]);
 
-  const handleSelectStore = (store: Store) => { setSelectedStore(store); setActiveTab('store_detail'); };
+    // 3. Carteira (Fluxo do Cliente)
+    if (activeTab === 'wallet') {
+      if (!user) return renderHome();
+      return <UserWalletView userId={user.id} onBack={() => setActiveTab('profile')} onStoreClick={(id) => { const s = STORES.find(st => st.id === id); if(s) handleSelectStore(s); }} onScanClick={() => setActiveTab('scan_cashback')} />;
+    }
 
-  const headerExclusionList = ['merchant_onboarding', 'merchant_qr_display', 'wallet', 'scan_cashback', 'pay_cashback', 'merchant_cashback_dashboard', 'store_area', 'profile', 'admin_panel'];
-  const hideBottomNav = ['merchant_onboarding', 'pay_cashback', 'scan_cashback', 'merchant_cashback_dashboard', 'admin_panel'].includes(activeTab);
+    // 4. Fluxo de Pagamento
+    if (activeTab === 'pay_cashback' && scanData) {
+      if (!user) return renderHome();
+      return <CashbackPaymentScreen user={user as any} merchantId={scanData.merchantId} storeId={scanData.storeId} onBack={() => setActiveTab('scan_cashback')} onComplete={() => setActiveTab('wallet')} />;
+    }
+
+    // 5. Switch Principal
+    switch (activeTab) {
+      case 'home':
+        return renderHome();
+      
+      case 'community_feed':
+        return <CommunityFeedView user={user as any} onRequireLogin={() => setIsAuthOpen(true)} onNavigate={setActiveTab} />;
+
+      case 'profile':
+        return <MenuView user={user as any} userRole={userRole} onAuthClick={() => setIsAuthOpen(true)} onNavigate={setActiveTab} onBack={() => setActiveTab('home')} />;
+
+      case 'explore':
+        return <ExploreView stores={STORES} searchQuery={globalSearch} onStoreClick={handleSelectStore} onLocationClick={() => {}} onFilterClick={() => {}} onOpenPlans={() => {}} onNavigate={setActiveTab} />;
+
+      case 'category_detail':
+        return selectedCategory ? <CategoryView category={selectedCategory} onBack={() => setActiveTab('home')} onStoreClick={handleSelectStore} stores={STORES} userRole={userRole} onAdvertiseInCategory={() => {}} /> : renderHome();
+
+      case 'store_detail':
+        return selectedStore ? <StoreDetailView store={selectedStore} onBack={() => setActiveTab('home')} onPay={() => setActiveTab('scan_cashback')} /> : renderHome();
+
+      case 'services':
+        return <ServicesView onSelectMacro={(id, name) => { setSelectedServiceMacro({id, name}); if (id === 'emergency') { setQuoteCategory(name); setIsQuoteModalOpen(true); } else { setActiveTab('service_subcategories'); } }} onOpenTerms={() => setActiveTab('service_terms')} onNavigate={setActiveTab} searchTerm={globalSearch} />;
+
+      case 'store_area':
+        return <StoreAreaView onBack={() => setActiveTab('home')} onNavigate={setActiveTab} user={user as any} />;
+
+      case 'admin_panel':
+        return <AdminPanel user={user as any} onLogout={signOut} viewMode="ADM" onOpenViewSwitcher={() => {}} onNavigateToApp={() => setActiveTab('home')} />;
+
+      default:
+        return renderHome();
+    }
+  };
 
   return (
     <NeighborhoodProvider>
@@ -90,61 +183,8 @@ const App: React.FC = () => {
               <Header isDarkMode={false} toggleTheme={() => {}} onAuthClick={() => setActiveTab('profile')} user={user} searchTerm={globalSearch} onSearchChange={setGlobalSearch} onNavigate={setActiveTab} activeTab={activeTab} userRole={userRole} stores={STORES} onStoreClick={handleSelectStore} isAdmin={user?.email === ADMIN_EMAIL} />
             )}
 
-            <main className="animate-in fade-in duration-500 w-full max-w-md mx-auto">
-              
-              {/* HOME */}
-              {activeTab === 'home' && <HomeFeed onNavigate={setActiveTab} onSelectCategory={(c) => { setSelectedCategory(c); setActiveTab('category_detail'); }} onSelectCollection={() => {}} onStoreClick={handleSelectStore} stores={STORES} searchTerm={globalSearch} user={user as any} onRequireLogin={() => setIsAuthOpen(true)} />}
-
-              {/* COMUNIDADE (Botão Fixo) */}
-              {activeTab === 'community_feed' && <CommunityFeedView user={user as any} onRequireLogin={() => setIsAuthOpen(true)} onNavigate={setActiveTab} />}
-
-              {/* SCAN CLIENTE (Botão Fixo para Cliente) */}
-              {activeTab === 'scan_cashback' && <CashbackScanScreen onBack={() => setActiveTab('home')} onScanSuccess={(data) => { setScanData({ merchantId: data.id, storeId: data.id }); setActiveTab('pay_cashback'); }} />}
-
-              {/* QR LOJISTA (Botão Fixo para Lojista) */}
-              {activeTab === 'merchant_qr_display' && user && <MerchantQrScreen onBack={() => setActiveTab('home')} user={user} />}
-
-              {/* MENU/PERFIL (Botão Fixo) */}
-              {activeTab === 'profile' && <MenuView user={user as any} userRole={userRole} onAuthClick={() => setIsAuthOpen(true)} onNavigate={setActiveTab} onBack={() => setActiveTab('home')} />}
-
-              {/* ONBOARDING OBRIGATÓRIO PARA LOJISTA */}
-              {activeTab === 'merchant_onboarding' && (
-                <MerchantCashbackOnboarding 
-                  onBack={() => setActiveTab('home')} 
-                  onActivate={() => { 
-                    setOnboardingCompleted(true); 
-                    localStorage.setItem('onboarding_cashback_completed', 'true');
-                    setActiveTab('merchant_qr_display'); 
-                  }} 
-                />
-              )}
-
-              {/* FLUXO DE PAGAMENTO */}
-              {activeTab === 'pay_cashback' && scanData && <CashbackPaymentScreen user={user as any} merchantId={scanData.merchantId} storeId={scanData.storeId} onBack={() => setActiveTab('scan_cashback')} onComplete={() => setActiveTab('wallet')} />}
-
-              {/* CARTEIRA / HISTÓRICO */}
-              {activeTab === 'wallet' && (user || inspectedUserId) && (
-                <UserWalletView 
-                  userId={inspectedUserId || user?.id || ''} 
-                  onBack={() => inspectedUserId ? (setInspectedUserId(null), setActiveTab('admin_panel')) : setActiveTab('profile')} 
-                  onStoreClick={(id) => { const s = STORES.find(st => st.id === id); if(s) handleSelectStore(s); }} 
-                  onScanClick={() => setActiveTab('scan_cashback')} 
-                />
-              )}
-
-              {/* OUTRAS TELAS */}
-              {activeTab === 'explore' && <ExploreView stores={STORES} searchQuery={globalSearch} onStoreClick={handleSelectStore} onLocationClick={() => {}} onFilterClick={() => {}} onOpenPlans={() => {}} onNavigate={setActiveTab} />}
-              {activeTab === 'services' && <ServicesView onSelectMacro={(id, name) => { setSelectedServiceMacro({id, name}); if (id === 'emergency') { setQuoteCategory(name); setIsQuoteModalOpen(true); } else { setActiveTab('service_subcategories'); } }} onOpenTerms={() => setActiveTab('service_terms')} onNavigate={setActiveTab} searchTerm={globalSearch} />}
-              {activeTab === 'category_detail' && selectedCategory && <CategoryView category={selectedCategory} onBack={() => setActiveTab('home')} onStoreClick={handleSelectStore} stores={STORES} userRole={userRole} onAdvertiseInCategory={() => {}} />}
-              {activeTab === 'store_detail' && selectedStore && <StoreDetailView store={selectedStore} onBack={() => setActiveTab('home')} onPay={() => setActiveTab('scan_cashback')} />}
-              {activeTab === 'store_area' && <StoreAreaView onBack={() => setActiveTab('home')} onNavigate={setActiveTab} user={user as any} />}
-              {activeTab === 'merchant_cashback_dashboard' && <MerchantCashbackDashboard store={STORES[0]} onBack={() => setActiveTab('store_area')} />}
-              {activeTab === 'store_profile' && <StoreProfileEdit onBack={() => setActiveTab('store_area')} />}
-              {activeTab === 'store_ads_module' && <StoreAdsModule onBack={() => setActiveTab('store_area')} onNavigate={setActiveTab} />}
-              {activeTab === 'admin_panel' && <AdminPanel user={user as any} onLogout={signOut} viewMode="ADM" onOpenViewSwitcher={() => {}} onNavigateToApp={() => setActiveTab('home')} />}
-              {activeTab === 'patrocinador_master' && <PatrocinadorMasterScreen onBack={() => setActiveTab('home')} />}
-              {activeTab === 'jobs_list' && <JobsView onBack={() => setActiveTab('home')} />}
-
+            <main className="animate-in fade-in duration-500 w-full max-w-md mx-auto h-full">
+              {renderContent()}
             </main>
 
             <AuthModal isOpen={isAuthOpen} onClose={() => setIsAuthOpen(false)} user={user as any} onLoginSuccess={() => setIsAuthOpen(false)} />
