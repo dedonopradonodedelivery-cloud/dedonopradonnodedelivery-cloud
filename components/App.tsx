@@ -170,7 +170,7 @@ const App: React.FC = () => {
         return <CashbackPaymentScreen user={user as any} merchantId={scanData.merchantId} storeId={scanData.storeId} onBack={() => setActiveTab('scan_cashback')} onComplete={() => setActiveTab('wallet')} />;
 
       case 'community_feed':
-        return <CommunityFeedView user={user as any} onRequireLogin={() => setIsAuthOpen(true)} onNavigate={setActiveTab} />;
+        return <CommunityFeedView user={user as any} onRequireLogin={() => setIsAuthOpen(true)} onNavigate={setActiveTab} onStoreClick={handleSelectStore} />;
 
       case 'profile':
         return <MenuView user={user as any} userRole={userRole} onAuthClick={() => setIsAuthOpen(true)} onNavigate={setActiveTab} onBack={() => setActiveTab('home')} />;

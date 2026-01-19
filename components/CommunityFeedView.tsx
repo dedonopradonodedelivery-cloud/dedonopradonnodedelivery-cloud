@@ -1,21 +1,15 @@
 
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import { 
   ChevronLeft, 
   MoreHorizontal, 
   Heart, 
   MessageSquare, 
   Plus, 
-  Check, 
-  ArrowRight,
   Users,
-  MapPin,
-  Clock,
-  Megaphone,
-  Share2,
-  MessageCircle,
   ArrowDown,
-  ChevronRight
+  ChevronRight,
+  MessageCircle
 } from 'lucide-react';
 import { NeighborhoodCommunity, CommunityPost } from '../types';
 import { NEIGHBORHOOD_COMMUNITIES, MOCK_COMMUNITY_POSTS } from '../constants';
@@ -27,7 +21,7 @@ interface CommunityFeedViewProps {
   onStoreClick: (store: any) => void;
 }
 
-// --- 1. CARD DE CATEGORIA (AJUSTADO: Ícone maior, nome com peso, membros sutis) ---
+// --- 1. CARD DE COMUNIDADE (Ajustado: Ícone maior, nome com peso, membros sutis) ---
 const CategoryInterestCard: React.FC<{ community: NeighborhoodCommunity; onOpen: () => void }> = ({ community, onOpen }) => (
   <div 
     onClick={onOpen}
@@ -35,28 +29,27 @@ const CategoryInterestCard: React.FC<{ community: NeighborhoodCommunity; onOpen:
   >
     <div className={`w-16 h-16 rounded-2xl ${community.color} bg-opacity-10 flex items-center justify-center mb-4`}>
       <div className="text-[#1E5BFF]">
-        {React.cloneElement(community.icon as any, { size: 36, strokeWidth: 2.5 })}
+        {React.cloneElement(community.icon as any, { size: 38, strokeWidth: 2.5 })}
       </div>
     </div>
-    <h4 className="text-[12px] font-black text-gray-900 dark:text-white leading-tight uppercase tracking-tighter mb-1 line-clamp-2 h-8">
+    <h4 className="text-[13px] font-black text-gray-900 dark:text-white leading-tight uppercase tracking-tighter mb-1 line-clamp-2 h-8">
       {community.name}
     </h4>
-    <p className="text-[8px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">
+    <p className="text-[8px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-3">
         {community.membersCount} membros
     </p>
-    <button className="mt-3 w-full py-1.5 bg-blue-50 dark:bg-blue-900/20 rounded-xl text-[9px] font-black text-[#1E5BFF] uppercase tracking-widest">
+    <button className="w-full py-1.5 bg-blue-50 dark:bg-blue-900/20 rounded-xl text-[9px] font-black text-[#1E5BFF] uppercase tracking-widest">
         Entrar
     </button>
   </div>
 );
 
-// --- 2. POST DO FEED (AJUSTADO: Botão de anúncio menos dominante) ---
+// --- 2. POST DO FEED (Ajustado: Botão de anúncio minimalista) ---
 const CommunityPostCard: React.FC<{ post: CommunityPost; communityName: string }> = ({ post, communityName }) => {
   const [liked, setLiked] = useState(false);
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-[2rem] p-5 shadow-sm border border-gray-100 dark:border-gray-700 mb-4 animate-in fade-in slide-in-from-bottom-2">
-      {/* Header do Post */}
       <div className="flex items-start justify-between mb-4">
         <div className="flex gap-3">
           <div className="w-10 h-10 rounded-full overflow-hidden border border-gray-100 dark:border-gray-600 shadow-sm shrink-0">
@@ -76,18 +69,16 @@ const CommunityPostCard: React.FC<{ post: CommunityPost; communityName: string }
         </button>
       </div>
 
-      {/* Conteúdo */}
       <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed mb-4">
         {post.content}
       </p>
 
       {post.imageUrl && (
         <div className="w-full aspect-video rounded-3xl overflow-hidden mb-4 border border-gray-100 dark:border-gray-700 shadow-inner">
-            <img src={post.imageUrl} className="w-full h-full object-cover" />
+            <img src={post.imageUrl} className="w-full h-full object-cover" alt="Post content" />
         </div>
       )}
 
-      {/* Footer Ações */}
       <div className="flex items-center justify-between pt-2 border-t border-gray-50 dark:border-gray-700/50 mt-2">
         <div className="flex items-center gap-5">
             <button onClick={() => setLiked(!liked)} className={`flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest transition-colors ${liked ? 'text-red-500' : 'text-gray-400'}`}>
@@ -99,7 +90,7 @@ const CommunityPostCard: React.FC<{ post: CommunityPost; communityName: string }
         </div>
 
         {post.communityId === 'comm-pro' && (
-            <button className="bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 px-4 py-2 rounded-full text-[8px] font-black uppercase tracking-widest active:scale-95 transition-transform border border-transparent hover:border-gray-200">
+            <button className="bg-gray-50 dark:bg-gray-700 text-gray-400 dark:text-gray-500 px-3 py-1.5 rounded-lg text-[8px] font-black uppercase tracking-widest border border-gray-100 dark:border-gray-600">
                 Anunciar no bairro
             </button>
         )}
@@ -112,7 +103,6 @@ export const CommunityFeedView: React.FC<CommunityFeedViewProps> = ({ user, onRe
   const [activeCommunity, setActiveCommunity] = useState<NeighborhoodCommunity | null>(null);
   const [showAllPosts, setShowAllPosts] = useState(false);
   
-  // Regra 5: Limitar feed a 3 posts
   const feedPosts = useMemo(() => {
     return showAllPosts ? MOCK_COMMUNITY_POSTS : MOCK_COMMUNITY_POSTS.slice(0, 3);
   }, [showAllPosts]);
@@ -120,55 +110,55 @@ export const CommunityFeedView: React.FC<CommunityFeedViewProps> = ({ user, onRe
   return (
     <div className="min-h-screen bg-[#F8F9FC] dark:bg-gray-950 font-sans pb-32 animate-in fade-in duration-500 overflow-x-hidden">
       
-      {/* 1. HERO BANNER (Ajustado com subtítulo e CTA discreto) */}
+      {/* 1. HERO BANNER */}
       <section className="px-5 pt-6 mb-10">
         <div className="w-full aspect-[16/8] bg-gradient-to-br from-[#A5C6FF] via-[#D6E6FF] to-[#F0F5FF] rounded-[2.5rem] relative overflow-hidden shadow-sm border border-white p-7 flex flex-col justify-center">
-            <div className="absolute right-0 bottom-0 w-1/2 h-full opacity-40">
-                 <img src="https://cdni.iconscout.com/illustration/premium/thumb/group-discussion-illustration-download-in-svg-png-gif-file-formats--meeting-man-woman-talking-business-pack-illustrations-5211993.png" className="w-full h-full object-contain object-bottom" alt="" />
+            <div className="absolute right-0 bottom-0 w-1/2 h-full opacity-30">
+                 <img src="https://cdni.iconscout.com/illustration/premium/thumb/group-discussion-illustration-download-in-svg-png-gif-file-formats--meeting-man-woman-talking-business-pack-illustrations-5211993.png" className="w-full h-full object-contain object-bottom" alt="Illustration" />
             </div>
             <div className="relative z-10">
                 <h2 className="text-xl font-black text-blue-900 leading-tight font-display tracking-tight uppercase">
                     Onde o bairro <br/> <span className="text-[#1E5BFF]">conversa</span>
                 </h2>
-                <p className="text-[10px] text-blue-600 font-bold mt-2 max-w-[150px] leading-tight">
-                    Participe das conversas e descubra o que acontece no seu bairro.
+                <p className="text-[10px] text-blue-600 font-bold mt-2 max-w-[160px] leading-tight">
+                    Conecte-se com vizinhos, compartilhe dicas e descubra o que acontece em JPA.
                 </p>
                 <button 
                   onClick={() => {
-                    const el = document.getElementById('comunidades-section');
+                    const el = document.getElementById('comunidades-grid');
                     el?.scrollIntoView({ behavior: 'smooth' });
                   }}
-                  className="mt-4 flex items-center gap-1.5 text-[9px] font-black text-[#1E5BFF] uppercase tracking-widest hover:underline"
+                  className="mt-4 flex items-center gap-1.5 text-[9px] font-black text-[#1E5BFF] uppercase tracking-widest"
                 >
                   Ver comunidades <ArrowDown size={10} strokeWidth={3} />
                 </button>
             </div>
         </div>
 
-        {/* 2. PROFILE MINI CARD (Reduzido visualmente, secundário) */}
-        <div className="mt-[-30px] px-4 relative z-20">
-            <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-md rounded-[2rem] p-3 shadow-md border border-white/50 dark:border-gray-700 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-full overflow-hidden border border-white shadow-sm shrink-0">
-                        <img src="https://i.pravatar.cc/150?u=paula" className="w-full h-full object-cover" alt="User" />
+        {/* 2. PROFILE MINI CARD (Reduzido, secundário) */}
+        <div className="mt-[-28px] px-6 relative z-20">
+            <div className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-md rounded-[2rem] p-3 shadow-md border border-white/50 dark:border-gray-700 flex items-center justify-between">
+                <div className="flex items-center gap-2.5">
+                    <div className="w-8 h-8 rounded-full overflow-hidden border border-white shadow-sm shrink-0">
+                        <img src={user?.user_metadata?.avatar_url || "https://i.pravatar.cc/150?u=paula"} className="w-full h-full object-cover" alt="User avatar" />
                     </div>
                     <div>
-                        <h3 className="font-bold text-gray-700 dark:text-gray-200 text-xs">Paula Castro</h3>
-                        <p className="text-[8px] font-bold text-gray-400 uppercase tracking-widest">Freguesia • 3 comunidades</p>
+                        <h3 className="font-bold text-gray-700 dark:text-gray-200 text-[11px] leading-none">{user?.user_metadata?.full_name || 'Paula Castro'}</h3>
+                        <p className="text-[8px] font-bold text-gray-400 uppercase tracking-widest mt-0.5">Freguesia • 3 comunidades</p>
                     </div>
                 </div>
                 <button 
-                    onClick={() => onRequireLogin()}
-                    className="text-[9px] font-black text-gray-400 uppercase tracking-widest px-3 py-1.5 hover:text-[#1E5BFF] transition-colors"
+                    onClick={() => onNavigate('edit_profile')}
+                    className="text-[8px] font-black text-gray-400 uppercase tracking-widest px-3 py-1.5 hover:text-[#1E5BFF]"
                 >
-                    Meu Perfil
+                    Perfil
                 </button>
             </div>
         </div>
       </section>
 
       {/* 3. SEÇÃO COMUNIDADES (Foco Principal) */}
-      <section id="comunidades-section" className="mb-12">
+      <section id="comunidades-grid" className="mb-12">
         <div className="px-6 mb-5">
             <p className="text-[10px] font-black text-[#1E5BFF] uppercase tracking-[0.2em] mb-1">Participe das comunidades do seu bairro</p>
             <div className="flex items-center justify-between">
@@ -188,11 +178,11 @@ export const CommunityFeedView: React.FC<CommunityFeedViewProps> = ({ user, onRe
         </div>
       </section>
 
-      {/* 4. FEED DE CONVERSAS (Microcopy ajustado) */}
+      {/* 4. FEED DE CONVERSAS */}
       <section className="px-5">
         <div className="px-1 mb-5">
-            <p className="text-[10px] font-black text-[#1E5BFF] uppercase tracking-[0.2em] mb-1 text-center sm:text-left">O que o bairro está falando agora</p>
-            <h3 className="text-xl font-black text-gray-900 dark:text-white font-display tracking-tight uppercase leading-none text-center sm:text-left">Conversas Recentes</h3>
+            <p className="text-[10px] font-black text-[#1E5BFF] uppercase tracking-[0.2em] mb-1">O que o bairro está falando agora</p>
+            <h3 className="text-xl font-black text-gray-900 dark:text-white font-display tracking-tight uppercase leading-none">Conversas Recentes</h3>
         </div>
 
         <div className="space-y-4">
@@ -208,7 +198,6 @@ export const CommunityFeedView: React.FC<CommunityFeedViewProps> = ({ user, onRe
             })}
         </div>
 
-        {/* Botão Ver Mais */}
         {!showAllPosts && MOCK_COMMUNITY_POSTS.length > 3 && (
             <button 
                 onClick={() => setShowAllPosts(true)}
@@ -227,7 +216,6 @@ export const CommunityFeedView: React.FC<CommunityFeedViewProps> = ({ user, onRe
           </p>
       </div>
 
-      {/* MODAL DETALHE (SE ATIVO) */}
       {activeCommunity && (
         <CommunityDetailView 
           community={activeCommunity} 
@@ -239,7 +227,7 @@ export const CommunityFeedView: React.FC<CommunityFeedViewProps> = ({ user, onRe
   );
 };
 
-// --- VIEW AUXILIAR: DETALHE DA COMUNIDADE (POPUP COMPACTO) ---
+// --- VIEW AUXILIAR: DETALHE DA COMUNIDADE ---
 const CommunityDetailView: React.FC<{ 
   community: NeighborhoodCommunity; 
   onBack: () => void;
@@ -250,7 +238,7 @@ const CommunityDetailView: React.FC<{
   return (
     <div className="fixed inset-0 z-50 bg-[#F8F9FC] dark:bg-gray-950 flex flex-col animate-in slide-in-from-right duration-300">
       <div className="relative h-48 shrink-0 overflow-hidden">
-        <img src={community.image} className="w-full h-full object-cover brightness-50" />
+        <img src={community.image} className="w-full h-full object-cover brightness-50" alt={community.name} />
         <div className="absolute inset-0 bg-gradient-to-t from-[#F8F9FC] dark:from-gray-950 to-transparent"></div>
         <button onClick={onBack} className="absolute top-6 left-6 p-2 rounded-full bg-black/20 backdrop-blur-md text-white border border-white/10 active:scale-90 transition-transform">
           <ChevronLeft size={24} />
@@ -282,7 +270,6 @@ const CommunityDetailView: React.FC<{
         )}
       </div>
 
-      {/* FAB FIXO NO DETALHE */}
       <div className="fixed bottom-10 left-1/2 -translate-x-1/2 z-50">
           <button className="w-14 h-14 bg-[#1E5BFF] text-white rounded-full shadow-2xl flex items-center justify-center border-4 border-white dark:border-gray-900 active:scale-90 transition-all">
               <Plus size={28} strokeWidth={3} />
