@@ -31,11 +31,12 @@ import { useAuth } from '../contexts/AuthContext';
 import { NeighborhoodProvider } from '../contexts/NeighborhoodContext';
 import { STORES } from '../constants';
 import { Category, Store } from '../types';
+import { Loader2 } from 'lucide-react';
 
 const ADMIN_EMAIL = 'dedonopradonodedelivery@gmail.com';
 
 const App: React.FC = () => {
-  const { user, userRole, signOut } = useAuth();
+  const { user, userRole, loading: isAuthLoading, signOut } = useAuth();
   const [activeTab, setActiveTab] = useState(() => localStorage.getItem('localizei_active_tab') || 'home');
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
   const [selectedStore, setSelectedStore] = useState<Store | null>(null);
@@ -46,20 +47,29 @@ const App: React.FC = () => {
   const [quoteCategory, setQuoteCategory] = useState('');
   const [isQuoteModalOpen, setIsQuoteModalOpen] = useState(false);
 
-  // Estado de Onboarding do Lojista
+  // Estado de Onboarding do Lojista (Persistido no LocalStorage)
   const [onboardingCompleted, setOnboardingCompleted] = useState(() => 
     localStorage.getItem('onboarding_cashback_completed') === 'true'
   );
 
-  // Segurança e Gatilho de Login Imediato
+  // Sincronizar estado de onboarding se o perfil do usuário já trouxer essa info
+  useEffect(() => {
+    if (userRole === 'lojista' && user?.user_metadata?.onboarding_cashback_completed) {
+      setOnboardingCompleted(true);
+      localStorage.setItem('onboarding_cashback_completed', 'true');
+    }
+  }, [user, userRole]);
+
+  // Gatilho de Login para áreas restritas
   useEffect(() => {
     localStorage.setItem('localizei_active_tab', activeTab);
     
-    // Se tentar acessar cashback ou painel lojista sem login, abre o modal
-    if ((activeTab === 'scan_cashback' || activeTab === 'merchant_qr_display' || activeTab === 'wallet') && !user) {
+    const restrictedTabs = ['scan_cashback', 'merchant_qr_display', 'wallet', 'pay_cashback', 'store_area', 'admin_panel'];
+    
+    if (restrictedTabs.includes(activeTab) && !user && !isAuthLoading) {
       setIsAuthOpen(true);
     }
-  }, [activeTab, user]);
+  }, [activeTab, user, isAuthLoading]);
 
   const handleSelectStore = (store: Store) => { 
     setSelectedStore(store); 
@@ -77,7 +87,6 @@ const App: React.FC = () => {
     'merchant_cashback_dashboard', 'admin_panel'
   ].includes(activeTab);
 
-  // Helper para renderizar a Home (usado como fallback)
   const renderHome = () => (
     <HomeFeed 
       onNavigate={setActiveTab} 
@@ -92,60 +101,65 @@ const App: React.FC = () => {
   );
 
   const renderContent = () => {
-    // 1. Roteamento de Cashback (Fluxo do Cliente)
-    if (activeTab === 'scan_cashback') {
-      // Se não houver usuário, renderizamos a Home por baixo do modal de login (aberto pelo useEffect)
-      // Isso mantém a aba ativa em 'scan_cashback' para que o login redirecione automaticamente.
-      if (!user) return renderHome();
-      
+    // Caso de carregamento inicial do Auth
+    if (isAuthLoading) {
       return (
-        <CashbackScanScreen 
-          onBack={() => setActiveTab('home')} 
-          onScanSuccess={(data) => { 
-            setScanData({ merchantId: data.id, storeId: data.id }); 
-            setActiveTab('pay_cashback'); 
-          }} 
-        />
+        <div className="min-h-screen flex flex-col items-center justify-center bg-white dark:bg-gray-900">
+          <Loader2 className="w-10 h-10 text-[#1E5BFF] animate-spin mb-4" />
+          <p className="text-gray-400 text-xs font-bold uppercase tracking-widest">Sincronizando...</p>
+        </div>
       );
     }
 
-    // 2. Roteamento de QR Code (Fluxo do Lojista)
-    if (activeTab === 'merchant_qr_display') {
-      if (!user) return renderHome();
-      
-      if (!onboardingCompleted) {
-        return (
-          <MerchantCashbackOnboarding 
-            onBack={() => setActiveTab('home')} 
-            onActivate={() => { 
-              setOnboardingCompleted(true); 
-              localStorage.setItem('onboarding_cashback_completed', 'true');
-              setActiveTab('merchant_qr_display'); 
-            }} 
-          />
-        );
-      }
-      
-      return <MerchantQrScreen onBack={() => setActiveTab('home')} user={user} />;
+    // Proteção contra acesso deslogado em rotas sensíveis
+    const restrictedTabs = ['scan_cashback', 'merchant_qr_display', 'wallet', 'pay_cashback', 'store_area', 'admin_panel'];
+    if (restrictedTabs.includes(activeTab) && !user) {
+      return renderHome();
     }
 
-    // 3. Carteira (Fluxo do Cliente)
-    if (activeTab === 'wallet') {
-      if (!user) return renderHome();
-      return <UserWalletView userId={user.id} onBack={() => setActiveTab('profile')} onStoreClick={(id) => { const s = STORES.find(st => st.id === id); if(s) handleSelectStore(s); }} onScanClick={() => setActiveTab('scan_cashback')} />;
-    }
-
-    // 4. Fluxo de Pagamento
-    if (activeTab === 'pay_cashback' && scanData) {
-      if (!user) return renderHome();
-      return <CashbackPaymentScreen user={user as any} merchantId={scanData.merchantId} storeId={scanData.storeId} onBack={() => setActiveTab('scan_cashback')} onComplete={() => setActiveTab('wallet')} />;
-    }
-
-    // 5. Switch Principal
     switch (activeTab) {
       case 'home':
         return renderHome();
-      
+
+      case 'scan_cashback':
+        return (
+          <CashbackScanScreen 
+            onBack={() => setActiveTab('home')} 
+            onScanSuccess={(data) => { 
+              setScanData({ merchantId: data.id, storeId: data.id }); 
+              setActiveTab('pay_cashback'); 
+            }} 
+          />
+        );
+
+      case 'merchant_qr_display':
+        // Fluxo específico do Lojista para o botão central "QR Code"
+        if (userRole === 'lojista') {
+          if (!onboardingCompleted) {
+            return (
+              <MerchantCashbackOnboarding 
+                onBack={() => setActiveTab('home')} 
+                onActivate={() => { 
+                  setOnboardingCompleted(true); 
+                  localStorage.setItem('onboarding_cashback_completed', 'true');
+                  // Após ativar, o próprio componente pode redirecionar ou forçamos re-render
+                  setActiveTab('merchant_qr_display'); 
+                }} 
+              />
+            );
+          }
+          return <MerchantQrScreen onBack={() => setActiveTab('home')} user={user} />;
+        }
+        // Se por erro de navegação um cliente cair aqui, volta pra home
+        return renderHome();
+
+      case 'wallet':
+        return <UserWalletView userId={user!.id} onBack={() => setActiveTab('profile')} onStoreClick={(id) => { const s = STORES.find(st => st.id === id); if(s) handleSelectStore(s); }} onScanClick={() => setActiveTab('scan_cashback')} />;
+
+      case 'pay_cashback':
+        if (!scanData) return renderHome();
+        return <CashbackPaymentScreen user={user as any} merchantId={scanData.merchantId} storeId={scanData.storeId} onBack={() => setActiveTab('scan_cashback')} onComplete={() => setActiveTab('wallet')} />;
+
       case 'community_feed':
         return <CommunityFeedView user={user as any} onRequireLogin={() => setIsAuthOpen(true)} onNavigate={setActiveTab} />;
 
@@ -168,6 +182,7 @@ const App: React.FC = () => {
         return <StoreAreaView onBack={() => setActiveTab('home')} onNavigate={setActiveTab} user={user as any} />;
 
       case 'admin_panel':
+        if (user?.email !== ADMIN_EMAIL) return renderHome();
         return <AdminPanel user={user as any} onLogout={signOut} viewMode="ADM" onOpenViewSwitcher={() => {}} onNavigateToApp={() => setActiveTab('home')} />;
 
       default:

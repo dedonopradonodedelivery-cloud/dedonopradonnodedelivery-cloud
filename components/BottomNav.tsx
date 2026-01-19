@@ -19,17 +19,16 @@ interface NavItem {
 export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, userRole }) => {
   const { user } = useAuth();
 
+  // Definição dos itens da barra - Comunidade movida para item regular para consistência
   const navItems: NavItem[] = [
     { id: 'home', icon: Home, label: 'Início' },
-    { id: 'community_feed', icon: Users, label: 'Comunidade', isCenter: true },
+    { id: 'community_feed', icon: Users, label: 'Comunidade' },
   ];
 
-  // Botão central de ação dinâmica
+  // Botão central de ação dinâmica (Cashback / QR Code)
   if (userRole !== 'admin') {
     const isMerchant = user && userRole === 'lojista';
 
-    // Para visitantes e clientes, o ID é sempre scan_cashback
-    // Para lojistas, merchant_qr_display
     const centerId = isMerchant 
       ? 'merchant_qr_display' 
       : 'scan_cashback';
@@ -56,13 +55,17 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
             onClick={() => setActiveTab(item.id)}
             className="flex flex-col items-center group outline-none"
           >
+            {/* Botão Central: Azul quando ativo, Branco quando inativo. Sem Amarelo. */}
             <div className={`
               w-16 h-16 rounded-full flex items-center justify-center 
               shadow-2xl shadow-black/40 border-[6px] border-[#1E5BFF] 
               active:scale-90 transition-all duration-200 
-              ${isActive ? 'bg-[#FFD700]' : 'bg-white'}
+              ${isActive ? 'bg-[#1E5BFF]' : 'bg-white'}
             `}>
-              <Icon className="w-7 h-7 text-[#1E5BFF]" strokeWidth={2.5} />
+              <Icon 
+                className={`w-7 h-7 transition-colors ${isActive ? 'text-white' : 'text-[#1E5BFF]'}`} 
+                strokeWidth={2.5} 
+              />
             </div>
             <span className="text-[10px] font-black uppercase text-white mt-1 tracking-tight whitespace-nowrap drop-shadow-sm">
               {item.label}
