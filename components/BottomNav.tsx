@@ -19,10 +19,10 @@ interface NavItem {
 export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, userRole }) => {
   const { user } = useAuth();
 
-  // Definição dos itens da barra - Comunidade movida para item regular para consistência
+  // Itens da barra: Home (Regular), Comunidade (Destaque), Cashback (Destaque), Menu (Regular)
   const navItems: NavItem[] = [
     { id: 'home', icon: Home, label: 'Início' },
-    { id: 'community_feed', icon: Users, label: 'Comunidade' },
+    { id: 'community_feed', icon: Users, label: 'Comunidade', isCenter: true },
   ];
 
   // Botão central de ação dinâmica (Cashback / QR Code)
@@ -48,6 +48,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
   const NavButton: React.FC<{ item: NavItem; isActive: boolean }> = ({ item, isActive }) => {
     const Icon = item.icon;
 
+    // Layout idêntico para botões de destaque (Círculo azul/branco flutuante)
     if (item.isCenter) {
       return (
         <div className="relative w-16 flex justify-center -top-6">
@@ -55,7 +56,6 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
             onClick={() => setActiveTab(item.id)}
             className="flex flex-col items-center group outline-none"
           >
-            {/* Botão Central: Azul quando ativo, Branco quando inativo. Sem Amarelo. */}
             <div className={`
               w-16 h-16 rounded-full flex items-center justify-center 
               shadow-2xl shadow-black/40 border-[6px] border-[#1E5BFF] 
@@ -75,6 +75,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
       );
     }
 
+    // Layout para botões regulares (Home e Menu)
     return (
       <button
         onClick={() => setActiveTab(item.id)}
