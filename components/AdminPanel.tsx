@@ -4,11 +4,9 @@ import {
   ShieldCheck, Users, Store, BarChart3, History, Eye, Search, 
   ArrowLeft, Download, Filter, TrendingUp, AlertTriangle, 
   Clock, DollarSign, Calendar, ChevronRight, LayoutDashboard,
-  CheckCircle, XCircle, LogOut, ImageIcon, Pause, Play
+  CheckCircle, XCircle, LogOut
 } from 'lucide-react';
 import { getAdminGlobalMetrics, fetchAdminMerchants, fetchAdminUsers, fetchAdminLedger } from '../backend/services';
-import { MOCK_BANNER_CAMPAIGNS } from '../constants';
-import { BannerCampaign } from '../types';
 
 interface AdminPanelProps {
   user: any;
@@ -29,14 +27,13 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   onInspectMerchant,
   onInspectUser
 }) => {
-  const [activeTab, setActiveTab] = useState<'metrics' | 'merchants' | 'users' | 'ledger' | 'banners'>('metrics');
+  const [activeTab, setActiveTab] = useState<'metrics' | 'merchants' | 'users' | 'ledger'>('metrics');
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [metrics, setMetrics] = useState({ totalGenerated: 0, totalUsed: 0, totalExpired: 0 });
   const [merchants, setMerchants] = useState<any[]>([]);
   const [users, setUsers] = useState<any[]>([]);
   const [ledger, setLedger] = useState<any[]>([]);
-  const [banners, setBanners] = useState<BannerCampaign[]>(MOCK_BANNER_CAMPAIGNS);
 
   useEffect(() => {
     loadData();
@@ -49,19 +46,9 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
       if (activeTab === 'merchants') setMerchants(await fetchAdminMerchants(searchTerm));
       if (activeTab === 'users') setUsers(await fetchAdminUsers(searchTerm));
       if (activeTab === 'ledger') setLedger(await fetchAdminLedger());
-      if (activeTab === 'banners') setBanners(MOCK_BANNER_CAMPAIGNS.filter(b => b.merchantName.toLowerCase().includes(searchTerm.toLowerCase())));
     } finally {
       setLoading(false);
     }
-  };
-
-  const toggleBannerStatus = (id: string) => {
-    setBanners(prev => prev.map(b => {
-      if (b.id === id) {
-        return { ...b, status: b.status === 'active' ? 'paused' : 'active' };
-      }
-      return b;
-    }));
   };
 
   const formatBRL = (cents: number) => 
@@ -99,7 +86,6 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                 { id: 'metrics', label: 'Métricas', icon: BarChart3 },
                 { id: 'merchants', label: 'Lojistas', icon: Store },
                 { id: 'users', label: 'Usuários', icon: Users },
-                { id: 'banners', label: 'Banners', icon: ImageIcon },
                 { id: 'ledger', label: 'Audit / Ledger', icon: History }
             ].map(tab => (
                 <button
@@ -135,7 +121,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
         {loading ? (
             <div className="flex flex-col items-center justify-center py-20 animate-pulse">
                 <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-4"></div>
-                <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">Carregando...</p>
+                <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">Carregando Auditoria...</p>
             </div>
         ) : (
           <>
@@ -167,6 +153,27 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                             <p className="text-xs text-slate-500 mt-2">Créditos não aproveitados</p>
                         </div>
                     </div>
+
+                    <div className="bg-slate-900 p-8 rounded-[2.5rem] border border-white/5 shadow-2xl relative overflow-hidden">
+                        <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/5 rounded-full blur-3xl -mr-20 -mt-20"></div>
+                        <div className="relative z-10 flex flex-col items-center text-center">
+                            <LayoutDashboard className="w-12 h-12 text-[#1E5BFF] mb-4" />
+                            <h3 className="text-2xl font-black text-white mb-2">Ecossistema Saudável</h3>
+                            <p className="text-slate-500 text-sm max-w-sm mb-6">
+                                O dinheiro circulando no bairro atualmente é de <span className="text-white font-bold">{formatBRL(metrics.totalGenerated - metrics.totalUsed - metrics.totalExpired)}</span>.
+                            </p>
+                            <div className="flex gap-4">
+                                <div className="bg-white/5 px-6 py-3 rounded-2xl border border-white/5">
+                                    <p className="text-[9px] font-black text-slate-500 uppercase mb-1">Taxa de Retenção</p>
+                                    <p className="text-xl font-black text-white">78%</p>
+                                </div>
+                                <div className="bg-white/5 px-6 py-3 rounded-2xl border border-white/5">
+                                    <p className="text-[9px] font-black text-slate-500 uppercase mb-1">Churn Mensal</p>
+                                    <p className="text-xl font-black text-white">4.2%</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             )}
 
@@ -189,47 +196,6 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                             >
                                 <Eye size={18} />
                             </button>
-                        </div>
-                    ))}
-                </div>
-            )}
-
-            {activeTab === 'banners' && (
-                <div className="space-y-4 animate-in slide-in-from-right duration-500">
-                    <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-sm font-bold text-slate-300 uppercase tracking-wider">Campanhas Ativas</h3>
-                        <span className="text-xs text-slate-500 font-bold bg-slate-900 px-3 py-1 rounded-full border border-white/5">{banners.length} Banners</span>
-                    </div>
-                    
-                    {banners.map(banner => (
-                        <div key={banner.id} className="bg-slate-900 p-5 rounded-3xl border border-white/5 flex items-center justify-between group hover:border-[#1E5BFF]/30 transition-all">
-                            <div className="flex items-center gap-4">
-                                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center font-bold text-white ${banner.content.bgColor}`}>
-                                    {banner.categoryTarget.charAt(0).toUpperCase()}
-                                </div>
-                                <div>
-                                    <h4 className="font-bold text-white text-base">{banner.content.title}</h4>
-                                    <p className="text-xs text-slate-500">{banner.merchantName} • {banner.categoryTarget}</p>
-                                    <div className="flex items-center gap-2 mt-1">
-                                        <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-md ${banner.status === 'active' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-rose-500/20 text-rose-400'}`}>
-                                            {banner.status}
-                                        </span>
-                                        <span className="text-[9px] text-slate-600 font-bold uppercase">{banner.planType}</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="flex items-center gap-4">
-                                <div className="text-right hidden sm:block">
-                                    <p className="text-[10px] font-black text-slate-600 uppercase">Visualizações</p>
-                                    <p className="text-lg font-black text-white">{banner.views}</p>
-                                </div>
-                                <button 
-                                    onClick={() => toggleBannerStatus(banner.id)}
-                                    className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${banner.status === 'active' ? 'bg-emerald-500/10 text-emerald-500 hover:bg-red-500/10 hover:text-red-500' : 'bg-slate-800 text-slate-500 hover:bg-emerald-500/10 hover:text-emerald-500'}`}
-                                >
-                                    {banner.status === 'active' ? <Pause size={18} /> : <Play size={18} />}
-                                </button>
-                            </div>
                         </div>
                     ))}
                 </div>

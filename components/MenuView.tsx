@@ -17,7 +17,8 @@ import {
   Store, 
   PlusCircle,
   Coins,
-  Wallet
+  Wallet,
+  Grid
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { User } from '@supabase/supabase-js';
@@ -107,7 +108,26 @@ export const MenuView: React.FC<MenuViewProps> = ({
           </div>
         </div>
 
-        {/* NEW: Wallet / Credits Entry */}
+        {/* ORKUT BETA ENTRY */}
+        <button 
+            onClick={() => onNavigate('orkut')}
+            className="w-full bg-[#E91C5D] p-5 rounded-[2rem] shadow-lg shadow-pink-500/20 mb-6 flex items-center justify-between group active:scale-[0.98] transition-all"
+        >
+            <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-md">
+                    <Grid className="w-6 h-6 text-white" />
+                </div>
+                <div className="text-left">
+                    <h4 className="text-white font-black text-lg tracking-tight">orkut <span className="text-[10px] bg-white text-[#E91C5D] px-1.5 py-0.5 rounded ml-1 align-middle">BETA</span></h4>
+                    <p className="text-pink-100 text-[10px] font-medium uppercase tracking-wider">Aba Social Experimental</p>
+                </div>
+            </div>
+            <div className="bg-white/20 p-2 rounded-full backdrop-blur-md text-white">
+                <ChevronRight className="w-4 h-4" />
+            </div>
+        </button>
+
+        {/* Wallet / Credits Entry */}
         <button 
             onClick={() => onNavigate('wallet')}
             className="w-full bg-gradient-to-r from-[#1E5BFF] to-[#4D7CFF] p-5 rounded-[2rem] shadow-xl shadow-blue-500/20 mb-6 flex items-center justify-between group active:scale-[0.98] transition-all"

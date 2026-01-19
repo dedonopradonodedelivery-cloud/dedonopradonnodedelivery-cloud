@@ -27,7 +27,8 @@ import { CommunityFeedView } from './CommunityFeedView';
 import { CategoryView } from './CategoryView';
 import { StoreAdsModule } from './StoreAdsModule';
 import { StoreProfileEdit } from './StoreProfileEdit';
-import { MerchantBannerEditor } from './MerchantBannerEditor'; // Added import
+import { MerchantBannerEditor } from './MerchantBannerEditor'; 
+import { OrkutView } from './OrkutView'; // Added import
 import { useAuth } from '../contexts/AuthContext';
 import { NeighborhoodProvider } from '../contexts/NeighborhoodContext';
 import { STORES } from '../constants';
@@ -93,12 +94,12 @@ const App: React.FC = () => {
   const headerExclusionList = [
     'merchant_onboarding', 'merchant_qr_display', 'wallet', 'scan_cashback', 
     'pay_cashback', 'merchant_cashback_dashboard', 'store_area', 'profile', 
-    'admin_panel', 'merchant_banners'
+    'admin_panel', 'merchant_banners', 'orkut'
   ];
   
   const hideBottomNav = [
     'merchant_onboarding', 'pay_cashback', 'scan_cashback', 
-    'merchant_cashback_dashboard', 'admin_panel', 'merchant_banners'
+    'merchant_cashback_dashboard', 'admin_panel', 'merchant_banners', 'orkut'
   ].includes(activeTab);
 
   const renderHome = () => (
@@ -197,6 +198,9 @@ const App: React.FC = () => {
       case 'admin_panel':
         if (user?.email !== ADMIN_EMAIL) return renderHome();
         return <AdminPanel user={user as any} onLogout={signOut} viewMode="ADM" onOpenViewSwitcher={() => {}} onNavigateToApp={() => setActiveTab('home')} />;
+
+      case 'orkut':
+        return <OrkutView onBack={() => setActiveTab('profile')} />;
 
       default:
         return renderHome();

@@ -13,12 +13,7 @@ import {
   Activity, Eye, FileText, Globe, Calendar, Music, PartyPopper, Globe2, Edit3, User, Bell, Search,
   Camera, Vote, Handshake, Flame, Milestone, History
 } from 'lucide-react';
-import { AdType, Category, Store, Story, EditorialCollection, Job, CommunityPost, NeighborhoodCommunity, BannerCampaign } from './types';
-
-// ... (Rest of existing constants content: CATEGORIES, SUBCATEGORIES, NEIGHBORHOOD_COMMUNITIES, MOCK_COMMUNITY_POSTS, STORES, EDITORIAL_SERVICES, STORIES, MOCK_JOBS, quickFilters) ...
-// NOTE: I am copying the existing constants because I need to append MOCK_BANNER_CAMPAIGNS at the end.
-// To save space in response, I will assume the previous constants are there and just add the new ones.
-// In a real file update, I would keep everything. Here I will provide the full file content to ensure consistency.
+import { AdType, Category, Store, Story, EditorialCollection, Job, CommunityPost, NeighborhoodCommunity } from './types';
 
 export const CATEGORIES: Category[] = [
   { id: 'cat-comida', name: 'Comida', slug: 'comida', icon: <Utensils />, color: 'bg-brand-blue' },
@@ -418,7 +413,57 @@ export const STORES: Store[] = [
     isOpenNow: true,
     isSponsored: true
   },
-  // ... (Other stores - keeping original STORES array for brevity in this XML response, assume full list is here)
+  // --- 50 FAKE STORES START ---
+  { id: 'f-1', name: 'Bibi Lanches', category: 'Comida', subcategory: 'Lanches & Hamburguerias', rating: 4.8, distance: 'Freguesia', adType: AdType.PREMIUM, description: 'Lanches clássicos e saudáveis.', isSponsored: true, image: 'https://images.unsplash.com/photo-1561758033-d89a9ad46330?q=80&w=400&auto=format&fit=crop' },
+  { id: 'f-2', name: 'Studio Hair Vip', category: 'Beleza', subcategory: 'Salão de Cabelo', rating: 4.9, distance: 'Taquara', adType: AdType.PREMIUM, description: 'Especialista em loiros e cortes modernos.', isSponsored: true, image: 'https://images.unsplash.com/photo-1562322140-8baeececf3df?q=80&w=400&auto=format&fit=crop' },
+  { id: 'f-3', name: 'Pet Shop Alegria', category: 'Pets', subcategory: 'Pet Shop', rating: 4.7, distance: 'Pechincha', adType: AdType.PREMIUM, description: 'O carinho que seu pet merece.', isSponsored: true, image: 'https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?q=80&w=400&auto=format&fit=crop' },
+  { id: 'f-4', name: 'Mecânica 24h', category: 'Autos', subcategory: 'Oficinas Mecânicas', rating: 4.5, distance: 'Anil', adType: AdType.PREMIUM, description: 'Socorro mecânico a qualquer hora.', isSponsored: true, image: 'https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?q=80&w=400&auto=format&fit=crop' },
+  { id: 'f-5', name: 'Pizzaria do Zé', category: 'Comida', subcategory: 'Pizzarias', rating: 4.6, distance: 'Freguesia', adType: AdType.PREMIUM, description: 'Pizza no forno a lenha.', isSponsored: true, image: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?q=80&w=400&auto=format&fit=crop' },
+  { id: 'f-6', name: 'Açaí da Praça', category: 'Comida', subcategory: 'Doces & Sobremesas', rating: 4.9, distance: 'Tanque', adType: AdType.PREMIUM, description: 'O melhor açaí da região.', isSponsored: true, image: 'https://images.unsplash.com/photo-1590301157890-4810ed352733?q=80&w=400&auto=format&fit=crop' },
+  { id: 'f-7', name: 'Drogaria JPA', category: 'Farmácia', subcategory: 'Medicamentos', rating: 4.4, distance: 'Freguesia', adType: AdType.PREMIUM, description: 'Medicamentos e perfumaria.', isSponsored: true, image: 'https://images.unsplash.com/photo-1587854692152-cbe660dbbb88?q=80&w=400&auto=format&fit=crop' },
+  { id: 'f-8', name: 'Academia FitBairro', category: 'Esportes', subcategory: 'Academias', rating: 4.7, distance: 'Taquara', adType: AdType.PREMIUM, description: 'Treine perto de casa.', isSponsored: true, image: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=400&auto=format&fit=crop' },
+  { id: 'f-9', name: 'Consultório Dra. Ana', category: 'Saúde', subcategory: 'Dentistas', rating: 5.0, distance: 'Freguesia', adType: AdType.PREMIUM, description: 'Cuidado completo com seu sorriso.', isSponsored: true, image: 'https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?q=80&w=400&auto=format&fit=crop' },
+  { id: 'f-10', name: 'Boutique Chic', category: 'Moda', subcategory: 'Moda Feminina', rating: 4.3, distance: 'Anil', adType: AdType.PREMIUM, description: 'Tendências e elegância.', isSponsored: true, image: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=400&auto=format&fit=crop' },
+  { id: 'f-11', name: 'Padaria de Luxo', category: 'Comida', subcategory: 'Cafés & Cafeterias', rating: 4.6, distance: 'Pechincha', adType: AdType.ORGANIC, description: 'Pães artesanais e doces.', isSponsored: false, image: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?q=80&w=400&auto=format&fit=crop' },
+  { id: 'f-12', name: 'Barber Shop Retro', category: 'Beleza', subcategory: 'Barbearia', rating: 4.8, distance: 'Taquara', adType: AdType.ORGANIC, description: 'Corte e barba clássicos.', isSponsored: false, image: 'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?q=80&w=400&auto=format&fit=crop' },
+  { id: 'f-13', name: 'Lavanderia Express', category: 'Serviços', subcategory: 'Limpeza Residencial', rating: 4.5, distance: 'Freguesia', adType: AdType.ORGANIC, description: 'Sua roupa limpa em 1h.', isSponsored: false, image: 'https://images.unsplash.com/photo-1545173168-9f1947eebb7f?q=80&w=400&auto=format&fit=crop' },
+  { id: 'f-14', name: 'InfoTech JPA', category: 'Pro', subcategory: 'Técnico em Informática', rating: 4.7, distance: 'Tanque', adType: AdType.ORGANIC, description: 'Manutenção de PC e Notebook.', isSponsored: false, image: 'https://images.unsplash.com/photo-1597733336794-12d05021d510?q=80&w=400&auto=format&fit=crop' },
+  { id: 'f-15', name: 'Flores do Campo', category: 'Casa', subcategory: 'Jardinagem', rating: 4.9, distance: 'Anil', adType: AdType.ORGANIC, description: 'Arranjos para todas as ocasiões.', isSponsored: false, image: 'https://images.unsplash.com/photo-1526047932273-341f2a7631f9?q=80&w=400&auto=format&fit=crop' },
+  { id: 'f-16', name: 'Sapataria Ideal', category: 'Serviços', subcategory: 'Manutenção Geral', rating: 4.4, distance: 'Pechincha', adType: AdType.ORGANIC, description: 'Conserto de sapatos e bolsas.', isSponsored: false, image: 'https://images.unsplash.com/photo-1560769629-975ec94e6a86?q=80&w=400&auto=format&fit=crop' },
+  { id: 'f-17', name: 'Escola de Inglês Top', category: 'Educação', subcategory: 'Idiomas', rating: 4.8, distance: 'Taquara', adType: AdType.ORGANIC, description: 'Fale inglês em 18 meses.', isSponsored: false, image: 'https://images.unsplash.com/photo-1543269865-cbf427effbad?q=80&w=400&auto=format&fit=crop' },
+  { id: 'f-18', name: 'Banca do Jornal', category: 'Lazer', subcategory: 'Eventos no Bairro', rating: 4.2, distance: 'Freguesia', adType: AdType.ORGANIC, description: 'Jornais, revistas e conveniência.', isSponsored: false, image: 'https://images.unsplash.com/photo-1589239203361-299651079565?q=80&w=400&auto=format&fit=crop' },
+  { id: 'f-19', name: 'Vidraçaria Transparente', category: 'Casa', subcategory: 'Reforma & Obras', rating: 4.5, distance: 'Anil', adType: AdType.ORGANIC, description: 'Box, espelhos e vidros em geral.', isSponsored: false, image: 'https://images.unsplash.com/photo-1554995207-c18c203602cb?q=80&w=400&auto=format&fit=crop' },
+  { id: 'f-20', name: 'Agência de Viagens Rio', category: 'Lazer', subcategory: 'Turismo Local', rating: 4.7, distance: 'Tanque', adType: AdType.ORGANIC, description: 'Sua próxima aventura começa aqui.', isSponsored: false, image: 'https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?q=80&w=400&auto=format&fit=crop' },
+  { id: 'f-21', name: 'Frango Assado do Bairro', category: 'Comida', subcategory: 'Comida Caseira', rating: 4.6, distance: 'Freguesia', adType: AdType.ORGANIC, description: 'O melhor frango de domingo.', isSponsored: false, image: 'https://images.unsplash.com/photo-1598515214211-89d3c73ae83b?q=80&w=400&auto=format&fit=crop' },
+  { id: 'f-22', name: 'Esmalteria Bella', category: 'Beleza', subcategory: 'Manicure & Pedicure', rating: 4.8, distance: 'Taquara', adType: AdType.ORGANIC, description: 'Manicure, pedicure e alongamento.', isSponsored: false, image: 'https://images.unsplash.com/photo-1604654894610-df4906687103?q=80&w=400&auto=format&fit=crop' },
+  { id: 'f-23', name: 'Loja de Celulares Connect', category: 'Serviços', subcategory: 'Assistência Técnica', rating: 4.5, distance: 'Pechincha', adType: AdType.ORGANIC, description: 'Capas, cabos e assistência.', isSponsored: false, image: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?q=80&w=400&auto=format&fit=crop' },
+  { id: 'f-24', name: 'Chaveiro Central', category: 'Serviços', subcategory: 'Chaveiro', rating: 4.9, distance: 'Anil', adType: AdType.ORGANIC, description: 'Cópias e aberturas 24h.', isSponsored: false, image: 'https://images.unsplash.com/photo-1582139329536-e7284fece509?q=80&w=400&auto=format&fit=crop' },
+  { id: 'f-25', name: 'Mercado Economia', category: 'Mercado', subcategory: 'Supermercados', rating: 4.3, distance: 'Tanque', adType: AdType.ORGANIC, description: 'Preço baixo todo dia.', isSponsored: false, image: 'https://images.unsplash.com/photo-1542838132-92c53300491e?q=80&w=400&auto=format&fit=crop' },
+  { id: 'f-26', name: 'Papelaria Cor & Arte', category: 'Educação', subcategory: 'Cursos Livres', rating: 4.6, distance: 'Freguesia', adType: AdType.ORGANIC, description: 'Tudo para estudantes e artistas.', isSponsored: false, image: 'https://images.unsplash.com/photo-1516962215378-7fa2e137ae93?q=80&w=400&auto=format&fit=crop' },
+  { id: 'f-27', name: 'Oficina de Motos Z', category: 'Autos', subcategory: 'Oficinas Mecânicas', rating: 4.7, distance: 'Taquara', adType: AdType.ORGANIC, description: 'Especializada em alta cilindrada.', isSponsored: false, image: 'https://images.unsplash.com/photo-1558981403-c5f91cbba527?q=80&w=400&auto=format&fit=crop' },
+  { id: 'f-28', name: 'Loja de Tintas Bairro', category: 'Casa', subcategory: 'Materiais de Construção', rating: 4.5, distance: 'Pechincha', adType: AdType.ORGANIC, description: 'Cores que transformam seu lar.', isSponsored: false, image: 'https://images.unsplash.com/photo-1589939705384-5185138a04b9?q=80&w=400&auto=format&fit=crop' },
+  { id: 'f-29', name: 'Consultório Dr. Marcos', category: 'Saúde', subcategory: 'Fisioterapia', rating: 4.9, distance: 'Anil', adType: AdType.ORGANIC, description: 'Recuperação e bem-estar.', isSponsored: false, image: 'https://images.unsplash.com/photo-1576091160550-2173dba999ef?q=80&w=400&auto=format&fit=crop' },
+  { id: 'f-30', name: 'Hortifruti da Vovó', category: 'Comida', subcategory: 'Hortifruti & Naturais', rating: 4.8, distance: 'Tanque', adType: AdType.ORGANIC, description: 'Produtos frescos direto do produtor.', isSponsored: false, image: 'https://images.unsplash.com/photo-1464226184884-fa280b87c399?q=80&w=400&auto=format&fit=crop' },
+  { id: 'f-31', name: 'Sushi Express', category: 'Comida', subcategory: 'Restaurantes', rating: 4.7, distance: 'Freguesia', adType: AdType.ORGANIC, description: 'Combinados frescos e rápidos.', isSponsored: false, image: 'https://images.unsplash.com/photo-1579871494447-9811cf80d66c?q=80&w=400&auto=format&fit=crop' },
+  { id: 'f-32', name: 'Clínica Pet Feliz', category: 'Pets', subcategory: 'Veterinários', rating: 4.9, distance: 'Taquara', adType: AdType.ORGANIC, description: 'Saúde animal com amor.', isSponsored: false, image: 'https://images.unsplash.com/photo-1599443015574-be5fe8a05783?q=80&w=400&auto=format&fit=crop' },
+  { id: 'f-33', name: 'Bicicletaria JPA', category: 'Esportes', subcategory: 'Esportes ao Ar Livre', rating: 4.6, distance: 'Anil', adType: AdType.ORGANIC, description: 'Venda e manutenção de bikes.', isSponsored: false, image: 'https://images.unsplash.com/photo-1485965120184-e220f721d03e?q=80&w=400&auto=format&fit=crop' },
+  { id: 'f-34', name: 'Loja de Doces Candy', category: 'Comida', subcategory: 'Doces & Sobremesas', rating: 4.8, distance: 'Pechincha', adType: AdType.ORGANIC, description: 'Um mundo de sabores.', isSponsored: false, image: 'https://images.unsplash.com/photo-1581798459219-318e76aecc7b?q=80&w=400&auto=format&fit=crop' },
+  { id: 'f-35', name: 'Marido de Aluguel VIP', category: 'Pro', subcategory: 'Marido de Aluguel', rating: 4.7, distance: 'Freguesia', adType: AdType.ORGANIC, description: 'Pequenos consertos em geral.', isSponsored: false, image: 'https://images.unsplash.com/photo-1581578731117-104f2a8d23e9?q=80&w=400&auto=format&fit=crop' },
+  { id: 'f-36', name: 'Gelo e Bebidas 24h', category: 'Mercado', subcategory: 'Conveniência', rating: 4.2, distance: 'Taquara', adType: AdType.ORGANIC, description: 'Sempre aberto para salvar sua festa.', isSponsored: false, image: 'https://images.unsplash.com/photo-1544145945-f904253d0c71?q=80&w=400&auto=format&fit=crop' },
+  { id: 'f-37', name: 'Gráfica Rápida JPA', category: 'Serviços', subcategory: 'Serviços Rápidos', rating: 4.5, distance: 'Tanque', adType: AdType.ORGANIC, description: 'Cartões, banners e cópias.', isSponsored: false, image: 'https://images.unsplash.com/photo-1562654501-a0ccc0af3fb1?q=80&w=400&auto=format&fit=crop' },
+  { id: 'f-38', name: 'Loja de Móveis Planejados', category: 'Casa', subcategory: 'Móveis', rating: 4.8, distance: 'Freguesia', adType: AdType.ORGANIC, description: 'Seu sonho sob medida.', isSponsored: false, image: 'https://images.unsplash.com/photo-1556228453-efd6c1ff04f6?q=80&w=400&auto=format&fit=crop' },
+  { id: 'f-39', name: 'Buffet Festas & Cia', category: 'Eventos', subcategory: 'Festas & Comemorações', rating: 4.9, distance: 'Anil', adType: AdType.ORGANIC, description: 'Realizando grandes momentos.', isSponsored: false, image: 'https://images.unsplash.com/photo-1530103043960-ef38714abb15?q=80&w=400&auto=format&fit=crop' },
+  { id: 'f-40', name: 'Distribuidora de Água', category: 'Mercado', subcategory: 'Bebidas', rating: 4.4, distance: 'Pechincha', adType: AdType.ORGANIC, description: 'Entrega rápida de galões.', isSponsored: false, image: 'https://images.unsplash.com/photo-1563203369-26f2e4a5ccf7?q=80&w=400&auto=format&fit=crop' },
+  { id: 'f-41', name: 'Adega Colonial', category: 'Mercado', subcategory: 'Bebidas', rating: 4.8, distance: 'Taquara', adType: AdType.ORGANIC, description: 'Rótulos exclusivos e artesanais.', isSponsored: false, image: 'https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?q=80&w=400&auto=format&fit=crop' },
+  { id: 'f-42', name: 'Boutique do Pão', category: 'Comida', subcategory: 'Cafés & Cafeterias', rating: 4.7, distance: 'Freguesia', adType: AdType.ORGANIC, description: 'Café da manhã completo.', isSponsored: false, image: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?q=80&w=400&auto=format&fit=crop' },
+  { id: 'f-43', name: 'Espaço Kids Recreação', category: 'Lazer', subcategory: 'Atividades em Família', rating: 4.9, distance: 'Anil', adType: AdType.ORGANIC, description: 'Brincadeiras com segurança.', isSponsored: false, image: 'https://images.unsplash.com/photo-1566454544259-f4b94c3d758c?q=80&w=400&auto=format&fit=crop' },
+  { id: 'f-44', name: 'Oficina de Ar Condicionado', category: 'Serviços', subcategory: 'Manutenção Geral', rating: 4.5, distance: 'Tanque', adType: AdType.ORGANIC, description: 'Instalação e limpeza.', isSponsored: false, image: 'https://images.unsplash.com/photo-1581094288338-2314dddb79a7?q=80&w=400&auto=format&fit=crop' },
+  { id: 'f-45', name: 'Studio de Yoga Bairro', category: 'Esportes', subcategory: 'Yoga & Pilates', rating: 5.0, distance: 'Freguesia', adType: AdType.ORGANIC, description: 'Equilíbrio para seu dia.', isSponsored: false, image: 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?q=80&w=400&auto=format&fit=crop' },
+  { id: 'f-46', name: 'Loja de Brinquedos JPA', category: 'Lazer', subcategory: 'Atividades em Família', rating: 4.6, distance: 'Taquara', adType: AdType.ORGANIC, description: 'Diversão para todas as idades.', isSponsored: false, image: 'https://images.unsplash.com/photo-1533906966484-a9c978a3f090?q=80&w=400&auto=format&fit=crop' },
+  { id: 'f-47', name: 'Auto Elétrica do Anil', category: 'Autos', subcategory: 'Auto Elétrica', rating: 4.4, distance: 'Anil', adType: AdType.ORGANIC, description: 'Baterias e reparos elétricos.', isSponsored: false, image: 'https://images.unsplash.com/photo-1487754180451-c456f719a1fc?q=80&w=400&auto=format&fit=crop' },
+  { id: 'f-48', name: 'Açaí do Parque', category: 'Comida', subcategory: 'Doces & Sobremesas', rating: 4.7, distance: 'Pechincha', adType: AdType.ORGANIC, description: 'Refrescante e delicioso.', isSponsored: false, image: 'https://images.unsplash.com/photo-1590301157890-4810ed352733?q=80&w=400&auto=format&fit=crop' },
+  { id: 'f-49', name: 'Costureira Express', category: 'Serviços', subcategory: 'Serviços Rápidos', rating: 4.8, distance: 'Tanque', adType: AdType.ORGANIC, description: 'Ajustes e reformas rápidas.', isSponsored: false, image: 'https://images.unsplash.com/photo-1528570188406-47020436d418?q=80&w=400&auto=format&fit=crop' },
+  { id: 'f-50', name: 'Vila dos Pets', category: 'Pets', subcategory: 'Pet Shop', rating: 4.9, distance: 'Freguesia', adType: AdType.ORGANIC, description: 'Tudo para o seu melhor amigo.', isSponsored: false, image: 'https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?q=80&w=400&auto=format&fit=crop' },
 ];
 
 export const EDITORIAL_SERVICES = [
@@ -468,67 +513,4 @@ export const quickFilters = [
   { id: 'nearby', label: 'Perto de mim', icon: 'zap' },
   { id: 'top_rated', label: 'Melhores avaliados', icon: 'star' },
   { id: 'open_now', label: 'Aberto agora', icon: 'clock' },
-];
-
-export const MOCK_BANNER_CAMPAIGNS: BannerCampaign[] = [
-  {
-    id: 'camp-1',
-    merchantId: 'm1',
-    merchantName: 'Chaveiro Express',
-    categoryTarget: 'emergency',
-    templateId: 'modern',
-    content: {
-      title: 'Chaveiro 24h na Freguesia',
-      subtitle: 'Chegamos em 15 minutos!',
-      bgColor: 'bg-red-600',
-      textColor: 'text-white',
-      iconName: 'Key'
-    },
-    status: 'active',
-    startDate: '2023-11-01',
-    endDate: '2023-12-01',
-    planType: 'monthly',
-    views: 1205,
-    clicks: 45
-  },
-  {
-    id: 'camp-2',
-    merchantId: 'm2',
-    merchantName: 'Pinturas Silva',
-    categoryTarget: 'home',
-    templateId: 'bold',
-    content: {
-      title: 'Pintura Residencial',
-      subtitle: 'Orçamento grátis hoje',
-      bgColor: 'bg-blue-600',
-      textColor: 'text-white',
-      iconName: 'PaintRoller'
-    },
-    status: 'active',
-    startDate: '2023-11-10',
-    endDate: '2023-11-17',
-    planType: 'weekly',
-    views: 890,
-    clicks: 32
-  },
-  {
-    id: 'camp-3',
-    merchantId: 'm3',
-    merchantName: 'Dr. Pet',
-    categoryTarget: 'pet',
-    templateId: 'minimal',
-    content: {
-      title: 'Banho e Tosa Promo',
-      subtitle: 'Seu pet merece o melhor',
-      bgColor: 'bg-amber-100',
-      textColor: 'text-amber-900',
-      iconName: 'Scissors'
-    },
-    status: 'active',
-    startDate: '2023-11-12',
-    endDate: '2023-11-19',
-    planType: 'weekly',
-    views: 650,
-    clicks: 28
-  }
 ];
