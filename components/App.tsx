@@ -68,16 +68,19 @@ const App: React.FC = () => {
       <div className="min-h-screen bg-white dark:bg-gray-900 flex justify-center relative">
         <Layout activeTab={activeTab} setActiveTab={setActiveTab} userRole={userRole} hideNav={hideBottomNav}>
             {!headerExclusionList.includes(activeTab) && (
-              <Header isDarkMode={false} toggleTheme={() => {}} onAuthClick={() => setActiveTab('profile')} user={user} searchTerm={globalSearch} onSearchChange={setGlobalSearch} onNavigate={setActiveTab} activeTab={activeTab} userRole={userRole} stores={STORES} onStoreClick={handleSelectStore} isAdmin={user?.email === ADMIN_EMAIL} viewMode={viewMode} onOpenViewSwitcher={() => {}} />
+              <Header isDarkMode={false} toggleTheme={() => {}} onAuthClick={() => setActiveTab('profile')} user={user} searchTerm={globalSearch} onSearchChange={setGlobalSearch} onNavigate={setActiveTab} activeTab={activeTab} userRole={userRole} stores={STORES} onStoreClick={handleSelectStore} isAdmin={user?.email === ADMIN_EMAIL} viewMode={viewMode} onOpenViewSwitcher={() => setIsRoleSwitcherOpen(true)} />
             )}
             <main className="animate-in fade-in duration-500 w-full max-w-md mx-auto">
               
               {/* ADMIN PANEL */}
               {activeTab === 'admin_panel' && (
                 <AdminPanel 
-                    onBack={() => setActiveTab('home')}
+                    user={user as any} 
+                    onLogout={signOut} 
+                    viewMode={viewMode} 
+                    onOpenViewSwitcher={() => setIsRoleSwitcherOpen(true)} 
+                    onNavigateToApp={() => setActiveTab('home')}
                     onInspectMerchant={(merchant) => { 
-                        // Transforma dados do DB em interface Store para compatibilidade
                         const mockStore: any = { id: merchant.id, name: merchant.name, category: merchant.category, logoUrl: merchant.logo_url };
                         setInspectedStore(mockStore); 
                         setActiveTab('merchant_cashback_dashboard'); 
@@ -92,7 +95,6 @@ const App: React.FC = () => {
               {activeTab === 'home' && <HomeFeed onNavigate={setActiveTab} onSelectCategory={(c) => { setSelectedCategory(c); setActiveTab('category_detail'); }} onSelectCollection={() => {}} onStoreClick={handleSelectStore} stores={STORES} searchTerm={globalSearch} user={user as any} onRequireLogin={() => setIsAuthOpen(true)} />}
               {activeTab === 'explore' && <ExploreView stores={STORES} searchQuery={globalSearch} onStoreClick={handleSelectStore} onLocationClick={() => {}} onFilterClick={() => {}} onOpenPlans={() => {}} onNavigate={setActiveTab} />}
               
-              {/* CARTEIRA / SALDO EXCLUSIVO (Com suporte a inspeção ADM) */}
               {activeTab === 'wallet' && (user || inspectedUserId) && (
                 <UserWalletView 
                     userId={inspectedUserId || user?.id || ''} 
@@ -108,7 +110,6 @@ const App: React.FC = () => {
               {activeTab === 'scan_cashback' && <CashbackScanScreen onBack={() => setActiveTab('wallet')} onScanSuccess={(data) => { setScanData(data); setActiveTab('pay_cashback'); }} />}
               {activeTab === 'pay_cashback' && scanData && <CashbackPaymentScreen user={user as any} merchantId={scanData.merchantId} storeId={scanData.storeId} onBack={() => setActiveTab('scan_cashback')} onComplete={() => setActiveTab('wallet')} />}
               
-              {/* DASHBOARD LOJISTA (Com suporte a inspeção ADM) */}
               {activeTab === 'merchant_cashback_dashboard' && (STORES[0] || inspectedStore) && (
                 <MerchantCashbackDashboard 
                     store={inspectedStore || STORES[0]} 
@@ -128,6 +129,23 @@ const App: React.FC = () => {
             </main>
             <AuthModal isOpen={isAuthOpen} onClose={() => setIsAuthOpen(false)} user={user as any} onLoginSuccess={() => setIsAuthOpen(false)} />
         </Layout>
+        {isRoleSwitcherOpen && (
+            <div className="fixed inset-0 z-[300] flex items-center justify-center bg-black/80 backdrop-blur-sm p-6" onClick={() => setIsRoleSwitcherOpen(false)}>
+                <div className="bg-[#111827] w-full max-w-md rounded-[2.5rem] border border-white/10 p-8 shadow-2xl animate-in zoom-in-95 duration-300" onClick={(e) => e.stopPropagation()}>
+                    <div className="flex justify-between items-start mb-8 px-2">
+                        <h2 className="text-xl font-black text-white uppercase">Modo de Visualização</h2>
+                        <button onClick={() => setIsRoleSwitcherOpen(false)} className="text-gray-500 hover:text-white"><X size={24} /></button>
+                    </div>
+                    <div className="space-y-3">
+                        {(['ADM', 'Usuário', 'Lojista', 'Visitante'] as RoleMode[]).map((role) => (
+                            <button key={role} onClick={() => { setViewMode(role); setIsRoleSwitcherOpen(false); }} className={`w-full p-5 rounded-[1.5rem] border text-left transition-all ${viewMode === role ? 'bg-white text-black' : 'bg-white/5 border-white/5 text-white'}`}>
+                                <span className="font-black uppercase">{role}</span>
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            </div>
+        )}
       </div>
     </NeighborhoodProvider>
   );
