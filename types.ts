@@ -191,3 +191,26 @@ export interface PostReport {
   postContentSnippet: string;
   postThumbnail: string;
 }
+
+export type BannerTemplateId = 'modern' | 'bold' | 'minimal';
+
+export interface BannerCampaign {
+  id: string;
+  merchantId: string;
+  merchantName: string;
+  categoryTarget: string; // Ex: 'emergency', 'food', 'home'
+  templateId: BannerTemplateId;
+  content: {
+    title: string;
+    subtitle: string;
+    bgColor: string; // Tailwind class or Hex
+    textColor: string; // Tailwind class or Hex
+    iconName: string; // Lucide icon name mapped
+  };
+  status: 'active' | 'paused' | 'expired' | 'pending_payment';
+  startDate: string;
+  endDate: string;
+  planType: 'weekly' | 'monthly';
+  views: number;
+  clicks: number;
+}
