@@ -60,15 +60,19 @@ const App: React.FC = () => {
     }
   }, [user, userRole]);
 
-  // Gatilho de Login para áreas restritas
+  // Gatilho de Login para áreas restritas e Redirecionamento de Segurança
   useEffect(() => {
-    localStorage.setItem('localizei_active_tab', activeTab);
-    
     const restrictedTabs = ['scan_cashback', 'merchant_qr_display', 'wallet', 'pay_cashback', 'store_area', 'admin_panel'];
     
-    if (restrictedTabs.includes(activeTab) && !user && !isAuthLoading) {
-      setIsAuthOpen(true);
+    if (restrictedTabs.includes(activeTab)) {
+      if (!isAuthLoading && !user) {
+        // Se tentar acessar área restrita sem login, volta para home e abre login
+        setActiveTab('home');
+        setIsAuthOpen(true);
+      }
     }
+
+    localStorage.setItem('localizei_active_tab', activeTab);
   }, [activeTab, user, isAuthLoading]);
 
   const handleSelectStore = (store: Store) => { 
@@ -111,12 +115,6 @@ const App: React.FC = () => {
       );
     }
 
-    // Proteção contra acesso deslogado em rotas sensíveis
-    const restrictedTabs = ['scan_cashback', 'merchant_qr_display', 'wallet', 'pay_cashback', 'store_area', 'admin_panel'];
-    if (restrictedTabs.includes(activeTab) && !user) {
-      return renderHome();
-    }
-
     switch (activeTab) {
       case 'home':
         return renderHome();
@@ -133,7 +131,6 @@ const App: React.FC = () => {
         );
 
       case 'merchant_qr_display':
-        // Fluxo específico do Lojista para o botão central "QR Code"
         if (userRole === 'lojista') {
           if (!onboardingCompleted) {
             return (
@@ -142,7 +139,6 @@ const App: React.FC = () => {
                 onActivate={() => { 
                   setOnboardingCompleted(true); 
                   localStorage.setItem('onboarding_cashback_completed', 'true');
-                  // Após ativar, o próprio componente pode redirecionar ou forçamos re-render
                   setActiveTab('merchant_qr_display'); 
                 }} 
               />
@@ -150,7 +146,6 @@ const App: React.FC = () => {
           }
           return <MerchantQrScreen onBack={() => setActiveTab('home')} user={user} />;
         }
-        // Se por erro de navegação um cliente cair aqui, volta pra home
         return renderHome();
 
       case 'wallet':

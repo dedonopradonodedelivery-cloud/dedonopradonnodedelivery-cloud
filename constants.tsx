@@ -3,7 +3,6 @@ import React from 'react';
 import { 
   Utensils, ShoppingCart, Scissors, Heart, PawPrint, Home, Wrench, 
   Dumbbell, CarFront, BookOpen, Monitor, Shirt, Ticket, Map as MapIcon, 
-  // Aliasing the Store icon from lucide-react to StoreIcon to avoid conflict with Store interface
   Store as StoreIcon,
   LayoutGrid, Pill, Briefcase, Plane, Zap,
   Beef, Coffee, Pizza, Croissant, Soup, Cake, Sandwich, 
@@ -17,22 +16,22 @@ import {
 import { AdType, Category, Store, Story, EditorialCollection, Job, CommunityPost, NeighborhoodCommunity } from './types';
 
 export const CATEGORIES: Category[] = [
-  { id: 'cat-comida', name: 'Comida', slug: 'comida', icon: <Utensils />, color: 'from-orange-500 to-red-600' },
-  { id: 'cat-pets', name: 'Pets', slug: 'pets', icon: <PawPrint />, color: 'from-purple-500 to-indigo-600' },
-  { id: 'cat-pro', name: 'Pro', slug: 'pro', icon: <Briefcase />, color: 'from-blue-700 to-indigo-800' },
-  { id: 'cat-saude', name: 'Saúde', slug: 'saude', icon: <Heart />, color: 'from-red-500 to-orange-600' },
-  { id: 'cat-services', name: 'Serviços', slug: 'servicos', icon: <Wrench />, color: 'from-amber-500 to-orange-600' },
-  { id: 'cat-beauty', name: 'Beleza', slug: 'beleza', icon: <Scissors />, color: 'from-pink-500 to-rose-600' },
-  { id: 'cat-autos', name: 'Autos', slug: 'autos', icon: <CarFront />, color: 'from-slate-600 to-slate-800' },
-  { id: 'cat-mercado', name: 'Mercado', slug: 'mercado', icon: <ShoppingCart />, color: 'from-emerald-500 to-teal-600' },
-  { id: 'cat-casa', name: 'Casa', slug: 'casa', icon: <Home />, color: 'from-sky-500 to-blue-600' },
-  { id: 'cat-sports', name: 'Esportes', slug: 'esportes', icon: <Dumbbell />, color: 'from-green-500 to-emerald-600' },
-  { id: 'cat-leisure', name: 'Lazer', slug: 'lazer', icon: <Ticket />, color: 'from-yellow-400 to-orange-500' },
-  { id: 'cat-edu', name: 'Educação', slug: 'educacao', icon: <BookOpen />, color: 'from-blue-500 to-indigo-600' },
-  { id: 'cat-pharmacy', name: 'Farmácia', slug: 'farmacia', icon: <Pill />, color: 'from-rose-500 to-red-600' },
-  { id: 'cat-fashion', name: 'Moda', slug: 'moda', icon: <Shirt />, color: 'from-fuchsia-500 to-purple-600' },
-  { id: 'cat-eventos', name: 'Eventos', slug: 'eventos', icon: <PartyPopper />, color: 'from-indigo-500 to-blue-600' },
-  { id: 'cat-condominio', name: 'Condomínio', slug: 'condominio', icon: <Building2 />, color: 'from-zinc-500 to-slate-700' },
+  { id: 'cat-comida', name: 'Comida', slug: 'comida', icon: <Utensils />, color: 'bg-brand-blue' },
+  { id: 'cat-pets', name: 'Pets', slug: 'pets', icon: <PawPrint />, color: 'bg-brand-blue' },
+  { id: 'cat-pro', name: 'Pro', slug: 'pro', icon: <Briefcase />, color: 'bg-brand-blue' },
+  { id: 'cat-saude', name: 'Saúde', slug: 'saude', icon: <Heart />, color: 'bg-brand-blue' },
+  { id: 'cat-services', name: 'Serviços', slug: 'servicos', icon: <Wrench />, color: 'bg-brand-blue' },
+  { id: 'cat-beauty', name: 'Beleza', slug: 'beleza', icon: <Scissors />, color: 'bg-brand-blue' },
+  { id: 'cat-autos', name: 'Autos', slug: 'autos', icon: <CarFront />, color: 'bg-brand-blue' },
+  { id: 'cat-mercado', name: 'Mercado', slug: 'mercado', icon: <ShoppingCart />, color: 'bg-brand-blue' },
+  { id: 'cat-casa', name: 'Casa', slug: 'casa', icon: <Home />, color: 'bg-brand-blue' },
+  { id: 'cat-sports', name: 'Esportes', slug: 'esportes', icon: <Dumbbell />, color: 'bg-brand-blue' },
+  { id: 'cat-leisure', name: 'Lazer', slug: 'lazer', icon: <Ticket />, color: 'bg-brand-blue' },
+  { id: 'cat-edu', name: 'Educação', slug: 'educacao', icon: <BookOpen />, color: 'bg-brand-blue' },
+  { id: 'cat-pharmacy', name: 'Farmácia', slug: 'farmacia', icon: <Pill />, color: 'bg-brand-blue' },
+  { id: 'cat-fashion', name: 'Moda', slug: 'moda', icon: <Shirt />, color: 'bg-brand-blue' },
+  { id: 'cat-eventos', name: 'Eventos', slug: 'eventos', icon: <PartyPopper />, color: 'bg-brand-blue' },
+  { id: 'cat-condominio', name: 'Condomínio', slug: 'condominio', icon: <Building2 />, color: 'bg-brand-blue' },
 ];
 
 export const SUBCATEGORIES: Record<string, { name: string; icon: React.ReactNode }[]> = {
@@ -205,7 +204,7 @@ export const NEIGHBORHOOD_COMMUNITIES: NeighborhoodCommunity[] = [
     description: 'Sugestões, críticas, receitas e descobertas locais.',
     image: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=800&auto=format&fit=crop',
     icon: <Utensils />,
-    color: 'from-orange-500 to-red-600',
+    color: 'bg-brand-blue',
     membersCount: '4.5k'
   },
   {
@@ -214,7 +213,7 @@ export const NEIGHBORHOOD_COMMUNITIES: NeighborhoodCommunity[] = [
     description: 'Cuidados, histórias, dicas e indicações.',
     image: 'https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?q=80&w=800&auto=format&fit=crop',
     icon: <PawPrint />,
-    color: 'from-purple-500 to-indigo-600',
+    color: 'bg-brand-blue',
     membersCount: '3.1k'
   },
   {
@@ -223,7 +222,7 @@ export const NEIGHBORHOOD_COMMUNITIES: NeighborhoodCommunity[] = [
     description: 'Recomendações de quem faz bem feito.',
     image: 'https://images.unsplash.com/photo-1521791136064-7986c2959443?q=80&w=800&auto=format&fit=crop',
     icon: <Handshake />,
-    color: 'from-blue-600 to-indigo-700',
+    color: 'bg-brand-blue',
     membersCount: '2.8k'
   },
   {
@@ -232,7 +231,7 @@ export const NEIGHBORHOOD_COMMUNITIES: NeighborhoodCommunity[] = [
     description: 'Experiências, dicas e orientações.',
     image: 'https://images.unsplash.com/photo-1505751172107-172449572052?q=80&w=800&auto=format&fit=crop',
     icon: <Heart />,
-    color: 'from-red-500 to-pink-600',
+    color: 'bg-brand-blue',
     membersCount: '2.2k'
   },
   {
@@ -241,7 +240,7 @@ export const NEIGHBORHOOD_COMMUNITIES: NeighborhoodCommunity[] = [
     description: 'Soluções práticas e quem chamar.',
     image: 'https://images.unsplash.com/photo-1581578731117-104f2a8d23e9?q=80&w=800&auto=format&fit=crop',
     icon: <Wrench />,
-    color: 'from-amber-600 to-orange-700',
+    color: 'bg-brand-blue',
     membersCount: '3.4k'
   },
   {
@@ -250,7 +249,7 @@ export const NEIGHBORHOOD_COMMUNITIES: NeighborhoodCommunity[] = [
     description: 'Beleza, autoestima e experiências reais.',
     image: 'https://images.unsplash.com/photo-1560066984-138dadb4c035?q=80&w=800&auto=format&fit=crop',
     icon: <Scissors />,
-    color: 'from-pink-400 to-rose-600',
+    color: 'bg-brand-blue',
     membersCount: '1.9k'
   },
   {
@@ -259,7 +258,7 @@ export const NEIGHBORHOOD_COMMUNITIES: NeighborhoodCommunity[] = [
     description: 'Carro, moto, problemas e soluções.',
     image: 'https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?q=80&w=800&auto=format&fit=crop',
     icon: <CarFront />,
-    color: 'from-slate-600 to-slate-800',
+    color: 'bg-brand-blue',
     membersCount: '2.5k'
   },
   {
@@ -268,7 +267,7 @@ export const NEIGHBORHOOD_COMMUNITIES: NeighborhoodCommunity[] = [
     description: 'Preços, achados e onde comprar melhor.',
     image: 'https://images.unsplash.com/photo-1542838132-92c53300491e?q=80&w=800&auto=format&fit=crop',
     icon: <ShoppingCart />,
-    color: 'from-emerald-500 to-teal-600',
+    color: 'bg-brand-blue',
     membersCount: '4.1k'
   },
   {
@@ -277,7 +276,7 @@ export const NEIGHBORHOOD_COMMUNITIES: NeighborhoodCommunity[] = [
     description: 'Reformas, ideias, móveis e manutenção.',
     image: 'https://images.unsplash.com/photo-1556228453-efd6c1ff04f6?q=80&w=800&auto=format&fit=crop',
     icon: <Home />,
-    color: 'from-sky-500 to-blue-600',
+    color: 'bg-brand-blue',
     membersCount: '2.7k'
   },
   {
@@ -286,7 +285,7 @@ export const NEIGHBORHOOD_COMMUNITIES: NeighborhoodCommunity[] = [
     description: 'Atividades físicas, esportes e treinos.',
     image: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=800&auto=format&fit=crop',
     icon: <Dumbbell />,
-    color: 'from-green-500 to-emerald-600',
+    color: 'bg-brand-blue',
     membersCount: '1.5k'
   },
   {
@@ -295,7 +294,7 @@ export const NEIGHBORHOOD_COMMUNITIES: NeighborhoodCommunity[] = [
     description: 'Lazer, passeios e rolês locais.',
     image: 'https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?q=80&w=800&auto=format&fit=crop',
     icon: <Ticket />,
-    color: 'from-yellow-400 to-orange-500',
+    color: 'bg-brand-blue',
     membersCount: '3.8k'
   },
   {
@@ -304,7 +303,7 @@ export const NEIGHBORHOOD_COMMUNITIES: NeighborhoodCommunity[] = [
     description: 'Escolas, cursos, aulas e aprendizado.',
     image: 'https://images.unsplash.com/photo-1543269865-cbf427effbad?q=80&w=800&auto=format&fit=crop',
     icon: <BookOpen />,
-    color: 'from-blue-500 to-indigo-600',
+    color: 'bg-brand-blue',
     membersCount: '1.2k'
   },
   {
@@ -313,7 +312,7 @@ export const NEIGHBORHOOD_COMMUNITIES: NeighborhoodCommunity[] = [
     description: 'Medicamentos, dicas e orientações.',
     image: 'https://images.unsplash.com/photo-1587854692152-cbe660dbbb88?q=80&w=800&auto=format&fit=crop',
     icon: <Pill />,
-    color: 'from-rose-500 to-red-600',
+    color: 'bg-brand-blue',
     membersCount: '2.1k'
   },
   {
@@ -322,7 +321,7 @@ export const NEIGHBORHOOD_COMMUNITIES: NeighborhoodCommunity[] = [
     description: 'Roupas, achados e tendências locais.',
     image: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=800&auto=format&fit=crop',
     icon: <Shirt />,
-    color: 'from-fuchsia-500 to-purple-600',
+    color: 'bg-brand-blue',
     membersCount: '1.7k'
   },
   {
@@ -331,7 +330,7 @@ export const NEIGHBORHOOD_COMMUNITIES: NeighborhoodCommunity[] = [
     description: 'Eventos, feiras e encontros.',
     image: 'https://images.unsplash.com/photo-1530103043960-ef38714abb15?q=80&w=800&auto=format&fit=crop',
     icon: <PartyPopper />,
-    color: 'from-indigo-600 to-blue-800',
+    color: 'bg-brand-blue',
     membersCount: '2.9k'
   },
   {
@@ -340,7 +339,7 @@ export const NEIGHBORHOOD_COMMUNITIES: NeighborhoodCommunity[] = [
     description: 'Convivência, avisos e indicações.',
     image: 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?q=80&w=800&auto=format&fit=crop',
     icon: <Building2 />,
-    color: 'from-zinc-600 to-slate-700',
+    color: 'bg-brand-blue',
     membersCount: '3.6k'
   }
 ];

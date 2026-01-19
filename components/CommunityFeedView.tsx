@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo, useEffect } from 'react';
 import { 
   ChevronLeft, 
@@ -46,7 +47,7 @@ const CommunityCard: React.FC<{
       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
       
       <div className="absolute inset-0 p-6 flex flex-col justify-end text-left">
-        <div className={`w-10 h-10 rounded-2xl bg-gradient-to-br ${community.color} flex items-center justify-center text-white mb-3 shadow-lg`}>
+        <div className={`w-10 h-10 rounded-2xl ${community.color} flex items-center justify-center text-white mb-3 shadow-lg`}>
           {React.cloneElement(community.icon as any, { size: 20 })}
         </div>
         <div>
@@ -160,7 +161,7 @@ const CommunityDetailFeed: React.FC<{
             <ChevronLeft size={24} className="text-gray-900 dark:text-white" />
           </button>
           <div className="flex items-center gap-2.5">
-            <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${community.color} flex items-center justify-center text-white shadow-sm`}>
+            <div className={`w-8 h-8 rounded-lg ${community.color} flex items-center justify-center text-white shadow-sm`}>
                 {React.cloneElement(community.icon as any, { size: 16, strokeWidth: 3 })}
             </div>
             <div>
