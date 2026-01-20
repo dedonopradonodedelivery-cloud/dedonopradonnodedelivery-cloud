@@ -120,7 +120,7 @@ const App: React.FC = () => {
     if (!viewMode) return;
     localStorage.setItem('admin_view_mode', viewMode);
     
-    const merchantTabs = ['store_area', 'banner_sales', 'store_ads_module', 'banner_checkout', 'sponsored_ads', 'sponsored_ads_checkout', 'sponsored_ads_success'];
+    const merchantTabs = ['store_area', 'store_ads_module', 'banner_checkout', 'sponsored_ads', 'sponsored_ads_checkout', 'sponsored_ads_success'];
 
     switch (viewMode) {
       case 'ADM':
@@ -158,7 +158,7 @@ const App: React.FC = () => {
 
   // General auth guard for restricted tabs
   useEffect(() => {
-    const restrictedTabs = ['scan_cashback', 'merchant_qr_display', 'wallet', 'pay_cashback', 'store_area', 'admin_panel', 'edit_profile', 'profile', 'favorites', 'banner_sales', 'store_ads_module', 'banner_checkout', 'sponsored_ads', 'sponsored_ads_checkout', 'sponsored_ads_success'];
+    const restrictedTabs = ['scan_cashback', 'merchant_qr_display', 'wallet', 'pay_cashback', 'store_area', 'admin_panel', 'edit_profile', 'profile', 'favorites', 'store_ads_module', 'banner_checkout', 'sponsored_ads', 'sponsored_ads_checkout', 'sponsored_ads_success'];
     
     if (restrictedTabs.includes(activeTab)) {
       if (!isAuthInitialLoading && !user) {
@@ -173,7 +173,7 @@ const App: React.FC = () => {
   useEffect(() => {
       if (isAuthInitialLoading) return;
       
-      const merchantTabs = ['store_area', 'store_ads_module', 'weekly_promo', 'merchant_jobs', 'store_profile', 'store_support', 'banner_upload', 'banner_production', 'banner_sales', 'banner_checkout', 'sponsored_ads', 'sponsored_ads_checkout', 'sponsored_ads_success'];
+      const merchantTabs = ['store_area', 'store_ads_module', 'weekly_promo', 'merchant_jobs', 'store_profile', 'store_support', 'banner_upload', 'banner_production', 'banner_checkout', 'sponsored_ads', 'sponsored_ads_checkout', 'sponsored_ads_success'];
       
       // Admin panel protection
       if (activeTab === 'admin_panel' && (viewMode !== 'ADM' || user?.email !== ADMIN_EMAIL)) {

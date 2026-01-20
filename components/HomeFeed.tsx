@@ -119,7 +119,7 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void; onStoreClick?: (
   const defaultBanners: BannerItem[] = useMemo(() => [
     { id: 'rio-phone-store', title: 'RIO PHONE STORE', target: 'rio-phone-store', tag: 'Assistência Apple', bgColor: 'bg-black', Icon: Smartphone, isSpecial: true },
     { id: 'master-sponsor', title: 'Grupo Esquematiza', target: 'grupo-esquematiza', tag: 'Patrocinador Master', bgColor: 'bg-[#0F172A]', Icon: Crown },
-    { id: 'advertise-home', title: 'Anuncie aqui', target: 'store_ads_module', tag: 'Destaque sua marca', bgColor: 'bg-brand-blue', Icon: Megaphone }
+    { id: 'advertise-home', title: 'Anuncie aqui', target: 'banner_sales', tag: 'Destaque sua marca', bgColor: 'bg-brand-blue', Icon: Megaphone }
   ], []);
 
   useEffect(() => {
