@@ -25,7 +25,7 @@ import { AdminBannerModeration } from './components/AdminBannerModeration';
 import { MapPin, ShieldCheck, X } from 'lucide-react';
 import { useAuth } from './contexts/AuthContext';
 import { NeighborhoodProvider } from './contexts/NeighborhoodContext';
-import { Category, Store, RoleMode, BannerPlan, SponsoredPlan } from './types';
+import { Category, Store, RoleMode, BannerPlan, SponsoredPlan, BannerConfig } from './types';
 import { CategoryView } from './components/CategoryView';
 import { StoreProfileEdit } from './components/StoreProfileEdit';
 import { CommunityFeedView } from './components/CommunityFeedView';
@@ -34,6 +34,7 @@ import { AdminModerationPanel } from './components/AdminModerationPanel';
 import { AboutView, SupportView, FavoritesView } from './components/SimplePages';
 import { getAccountEntryRoute } from './lib/roleRoutes';
 import { BannerSalesView } from './components/BannerSalesView';
+import { BannerConfigView } from './components/BannerConfigView';
 import { BannerCheckoutView } from './components/BannerCheckoutView';
 import { SponsoredAdsView } from './components/SponsoredAdsView';
 import { SponsoredAdsCheckoutView } from './components/SponsoredAdsCheckoutView';
@@ -120,7 +121,7 @@ const App: React.FC = () => {
     if (!viewMode) return;
     localStorage.setItem('admin_view_mode', viewMode);
     
-    const merchantTabs = ['store_area', 'store_ads_module', 'banner_checkout', 'sponsored_ads', 'sponsored_ads_checkout', 'sponsored_ads_success'];
+    const merchantTabs = ['store_area', 'store_ads_module', 'banner_config', 'banner_checkout', 'sponsored_ads', 'sponsored_ads_checkout', 'sponsored_ads_success'];
 
     switch (viewMode) {
       case 'ADM':
@@ -158,7 +159,7 @@ const App: React.FC = () => {
 
   // General auth guard for restricted tabs
   useEffect(() => {
-    const restrictedTabs = ['scan_cashback', 'merchant_qr_display', 'wallet', 'pay_cashback', 'store_area', 'admin_panel', 'edit_profile', 'profile', 'favorites', 'store_ads_module', 'banner_checkout', 'sponsored_ads', 'sponsored_ads_checkout', 'sponsored_ads_success'];
+    const restrictedTabs = ['scan_cashback', 'merchant_qr_display', 'wallet', 'pay_cashback', 'store_area', 'admin_panel', 'edit_profile', 'profile', 'favorites', 'store_ads_module', 'banner_config', 'banner_checkout', 'sponsored_ads', 'sponsored_ads_checkout', 'sponsored_ads_success'];
     
     if (restrictedTabs.includes(activeTab)) {
       if (!isAuthInitialLoading && !user) {
@@ -167,13 +168,18 @@ const App: React.FC = () => {
         setIsAuthOpen(true);
       }
     }
-  }, [activeTab, user, isAuthInitialLoading]);
+
+    // Guard for banner creation flow
+    if (activeTab === 'store_ads_module' && !bannerOrder.plan) {
+        setActiveTab('banner_config');
+    }
+  }, [activeTab, user, isAuthInitialLoading, bannerOrder.plan]);
 
   // Route Protection: Ensures the active tab is compatible with the current viewMode.
   useEffect(() => {
       if (isAuthInitialLoading) return;
       
-      const merchantTabs = ['store_area', 'store_ads_module', 'weekly_promo', 'merchant_jobs', 'store_profile', 'store_support', 'banner_upload', 'banner_production', 'banner_checkout', 'sponsored_ads', 'sponsored_ads_checkout', 'sponsored_ads_success'];
+      const merchantTabs = ['store_area', 'store_ads_module', 'weekly_promo', 'merchant_jobs', 'store_profile', 'store_support', 'banner_upload', 'banner_production', 'banner_config', 'banner_checkout', 'sponsored_ads', 'sponsored_ads_checkout', 'sponsored_ads_success'];
       
       // Admin panel protection
       if (activeTab === 'admin_panel' && (viewMode !== 'ADM' || user?.email !== ADMIN_EMAIL)) {
@@ -210,14 +216,23 @@ const App: React.FC = () => {
   };
   
   // Banner Ad Flow
-  const handleSelectBannerPlan = (plan: BannerPlan) => {
-    setBannerOrder({ plan, draft: null });
+  const handleConfigureAndCreateBanner = (config: BannerConfig) => {
+    const syntheticPlan: BannerPlan = {
+      id: config.duration === '1m' ? 'home_1m' : 'home_3m', // Mock ID to satisfy type
+      label: `${config.placement} - ${config.duration === '1m' ? '1 Mês' : '3 Meses'} - ${config.neighborhoods.length} bairro(s)`,
+      priceCents: config.priceCents,
+      placement: config.placement,
+      durationMonths: config.duration === '1m' ? 1 : 3,
+      benefit: 'Plano customizado com seleção de bairros.',
+      isPromo: config.duration === '3m_promo',
+    };
+    setBannerOrder({ plan: syntheticPlan, draft: null });
     setActiveTab('store_ads_module');
   };
 
   const handleFinalizeBannerCreation = (draft: any) => {
       if (!bannerOrder.plan) {
-        setActiveTab('banner_sales');
+        setActiveTab('banner_config');
         return;
       }
       setBannerOrder(prev => ({ ...prev, draft }));
@@ -255,8 +270,8 @@ const App: React.FC = () => {
   }, []);
 
   const handleSelectStore = (store: Store) => { setSelectedStore(store); setActiveTab('store_detail'); };
-  const headerExclusionList = ['store_area', 'editorial_list', 'store_profile', 'category_detail', 'store_detail', 'profile', 'patrocinador_master', 'service_subcategories', 'service_specialties', 'store_ads_module', 'about', 'support', 'favorites', 'community_feed', 'admin_panel', 'cashback_landing', 'admin_banner_moderation', 'banner_upload', 'banner_production', 'banner_sales', 'banner_checkout', 'sponsored_ads', 'sponsored_ads_checkout', 'sponsored_ads_success'];
-  const hideBottomNav = ['store_ads_module', 'store_detail', 'admin_panel', 'cashback_landing', 'admin_banner_moderation', 'banner_upload', 'banner_production', 'banner_sales', 'banner_checkout', 'sponsored_ads', 'sponsored_ads_checkout', 'sponsored_ads_success'].includes(activeTab);
+  const headerExclusionList = ['store_area', 'editorial_list', 'store_profile', 'category_detail', 'store_detail', 'profile', 'patrocinador_master', 'service_subcategories', 'service_specialties', 'store_ads_module', 'about', 'support', 'favorites', 'community_feed', 'admin_panel', 'cashback_landing', 'admin_banner_moderation', 'banner_upload', 'banner_production', 'banner_config', 'banner_checkout', 'sponsored_ads', 'sponsored_ads_checkout', 'sponsored_ads_success'];
+  const hideBottomNav = ['store_ads_module', 'store_detail', 'admin_panel', 'cashback_landing', 'admin_banner_moderation', 'banner_upload', 'banner_production', 'banner_config', 'banner_checkout', 'sponsored_ads', 'sponsored_ads_checkout', 'sponsored_ads_success'].includes(activeTab);
 
   const RoleSwitcherModal: React.FC = () => {
     if (!isRoleSwitcherOpen) return null;
@@ -278,6 +293,14 @@ const App: React.FC = () => {
         </div>
     );
   };
+  
+  if (splashStage === 4) {
+    const HOME_PATH = "/";
+    if (window.location.pathname !== HOME_PATH) {
+      window.location.replace(HOME_PATH);
+      return null;
+    }
+  }
 
   return (
     <div className={isDarkMode ? 'dark' : ''}>
@@ -306,11 +329,11 @@ const App: React.FC = () => {
                 {activeTab === 'favorites' && <FavoritesView onBack={() => setActiveTab('profile')} onNavigate={setActiveTab} user={user as any} />}
                 {activeTab === 'service_subcategories' && selectedServiceMacro && <SubcategoriesView macroId={selectedServiceMacro.id} macroName={selectedServiceMacro.name} onBack={() => setActiveTab('services')} onSelectSubcategory={(n) => { setQuoteCategory(n); setActiveTab('service_specialties'); }} />}
                 {activeTab === 'service_specialties' && <SpecialtiesView subcategoryName={quoteCategory} onBack={() => setActiveTab('service_subcategories')} onSelectSpecialty={() => setIsQuoteModalOpen(true)} />}
-                {activeTab === 'store_ads_module' && <StoreAdsModule onBack={() => setActiveTab(bannerOrder.plan ? 'banner_sales' : 'store_area')} onNavigate={setActiveTab} categoryName={adCategoryTarget || undefined} user={user as any} plan={bannerOrder.plan} onFinalize={handleFinalizeBannerCreation} />}
+                {activeTab === 'store_ads_module' && <StoreAdsModule onBack={() => setActiveTab(bannerOrder.plan ? 'banner_config' : 'store_area')} onNavigate={setActiveTab} categoryName={adCategoryTarget || undefined} user={user as any} plan={bannerOrder.plan} onFinalize={handleFinalizeBannerCreation} />}
                 {activeTab === 'banner_upload' && <BannerUploadView onBack={() => setActiveTab('store_ads_module')} />}
                 {activeTab === 'banner_production' && <BannerProductionView onBack={() => setActiveTab('store_ads_module')} />}
                 {activeTab === 'store_profile' && <StoreProfileEdit onBack={() => setActiveTab('store_area')} />}
-                {activeTab === 'banner_sales' && <BannerSalesView onBack={() => setActiveTab('store_area')} onSelectPlan={handleSelectBannerPlan} />}
+                {activeTab === 'banner_config' && <BannerConfigView onBack={() => setActiveTab('store_area')} onConfigure={handleConfigureAndCreateBanner} />}
                 {activeTab === 'banner_checkout' && bannerOrder.plan && bannerOrder.draft && (
                     <BannerCheckoutView 
                         plan={bannerOrder.plan}

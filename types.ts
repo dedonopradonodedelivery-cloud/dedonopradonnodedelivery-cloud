@@ -265,7 +265,7 @@ export interface BannerItem {
 
 // NEW: Type for Banner Plans
 export interface BannerPlan {
-  id: 'home_3m' | 'cat_3m' | 'home_1m' | 'cat_1m';
+  id: 'home_3m' | 'cat_3m' | 'home_1m' | 'cat_1m' | 'custom';
   placement: 'Home' | 'Categorias';
   durationMonths: 1 | 3;
   priceCents: number;
@@ -275,6 +275,16 @@ export interface BannerPlan {
   isMostAdvantageous?: boolean;
   benefit: string;
 }
+
+// NEW: Type for dynamic banner configuration
+export interface BannerConfig {
+  placement: 'Home' | 'Categorias';
+  duration: '1m' | '3m_promo';
+  neighborhoods: { id: string; name: string }[];
+  categories?: { id: string; name: string }[];
+  priceCents: number;
+}
+
 
 // NEW: Type for Sponsored Ads by day
 export interface SponsoredPlan {
