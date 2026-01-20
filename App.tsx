@@ -67,7 +67,7 @@ const App: React.FC = () => {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [viewMode, setViewMode] = useState<RoleMode>(() => (localStorage.getItem('admin_view_mode') as RoleMode) || 'Visitante');
   const [isRoleSwitcherOpen, setIsRoleSwitcherOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState(() => localStorage.getItem('localizei_active_tab') || 'home');
+  const [activeTab, setActiveTab] = useState('home');
   const [pendingTab, setPendingTab] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
   const [selectedStore, setSelectedStore] = useState<Store | null>(null);
@@ -80,7 +80,6 @@ const App: React.FC = () => {
   const [bannerOrder, setBannerOrder] = useState<{ plan: BannerPlan | null; draft: any | null }>({ plan: null, draft: null });
   const [sponsoredPlan, setSponsoredPlan] = useState<SponsoredPlan | null>(null);
 
-  useEffect(() => { localStorage.setItem('localizei_active_tab', activeTab); }, [activeTab]);
   
   // Set viewMode based on auth status. This prevents the login modal on startup for visitors.
   useEffect(() => {
