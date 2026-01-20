@@ -173,7 +173,7 @@ export const BannerConfigView: React.FC<BannerConfigViewProps> = ({ onBack, onCo
                             <p className="text-sm text-slate-400 mt-2">Preço normal</p>
                         </button>
                         <button onClick={() => setDuration('3m_promo')} className={`p-8 rounded-3xl text-center border-4 relative transition-all ${duration === '3m_promo' ? 'border-amber-400 bg-amber-500/10' : 'border-slate-700 bg-slate-800 hover:border-slate-600'}`}>
-                            <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-amber-400 text-slate-900 text-[10px] font-black px-4 py-1.5 rounded-full shadow-lg"><Star size={12} className="inline -mt-0.5 mr-1.5 fill-slate-900"/>MAIS VANTAJOSO</div>
+                            <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-amber-400 text-slate-900 text-[10px] font-black px-4 py-1.5 rounded-full shadow-lg"><Star size={12} className="inline -mt-0.5 mr-1.5 fill-slate-900"/>PROMOÇÃO DE INAUGURAÇÃO</div>
                             <p className="font-black text-4xl text-white">3 Meses</p>
                             <p className="text-sm font-bold text-amber-400 mt-2">Total com desconto • 3x sem juros</p>
                             <p className="text-[11px] text-slate-500 mt-4 leading-snug">
