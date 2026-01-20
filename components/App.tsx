@@ -1,5 +1,4 @@
-
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Layout } from './Layout';
 import { Header } from './Header';
 import { HomeFeed } from './HomeFeed';
@@ -17,26 +16,20 @@ import { StoreAreaView } from './StoreAreaView';
 import { WeeklyPromoModule } from './WeeklyPromoModule';
 import { JobsView } from './JobsView';
 import { MerchantJobsModule } from './MerchantJobsModule';
-import { AdminPanel } from './AdminPanel'; 
+import { AdminPanel } from './AdminPanel';
 import { CashbackLandingView } from './CashbackLandingView';
-// Adicionando import do StoreAdsModule para corrigir erro de nome não encontrado
 import { StoreAdsModule } from './StoreAdsModule';
 import { AdminBannerModeration } from './AdminBannerModeration';
 import { MapPin, ShieldCheck, X } from 'lucide-react';
-import { useAuth } from '../contexts/AuthContext';
-import { NeighborhoodProvider } from '../contexts/NeighborhoodContext';
-import { Category, Store, EditorialCollection, ThemeMode } from '../types';
+import { useAuth } from './contexts/AuthContext';
+import { NeighborhoodProvider } from './contexts/NeighborhoodContext';
+import { Category, Store } from './types';
 import { CategoryView } from './CategoryView';
 import { StoreProfileEdit } from './StoreProfileEdit';
 import { CommunityFeedView } from './CommunityFeedView';
-import { STORES } from '../constants';
+import { STORES } from './constants';
 import { AdminModerationPanel } from './AdminModerationPanel';
-import { 
-  AboutView, 
-  SupportView, 
-  InviteFriendView, 
-  FavoritesView 
-} from './SimplePages';
+import { AboutView, SupportView, FavoritesView } from './SimplePages';
 
 let splashWasShownInSession = false;
 const ADMIN_EMAIL = 'dedonopradonodedelivery@gmail.com';
@@ -123,7 +116,6 @@ const App: React.FC = () => {
   const headerExclusionList = ['store_area', 'editorial_list', 'store_profile', 'category_detail', 'store_detail', 'profile', 'patrocinador_master', 'service_subcategories', 'service_specialties', 'store_ads_module', 'about', 'support', 'favorites', 'community_feed', 'admin_panel', 'cashback_landing', 'admin_banner_moderation'];
   const hideBottomNav = ['store_ads_module', 'store_detail', 'admin_panel', 'cashback_landing', 'admin_banner_moderation'].includes(activeTab);
 
-  // FIX: Explicitly typed the functional component with React.FC to resolve a type inference issue.
   const RoleSwitcherModal: React.FC = () => {
     if (!isRoleSwitcherOpen) return null;
     return (
@@ -173,6 +165,7 @@ const App: React.FC = () => {
                 {activeTab === 'service_subcategories' && selectedServiceMacro && <SubcategoriesView macroId={selectedServiceMacro.id} macroName={selectedServiceMacro.name} onBack={() => setActiveTab('services')} onSelectSubcategory={(n) => { setQuoteCategory(n); setActiveTab('service_specialties'); }} />}
                 {activeTab === 'service_specialties' && <SpecialtiesView subcategoryName={quoteCategory} onBack={() => setActiveTab('service_subcategories')} onSelectSpecialty={() => setIsQuoteModalOpen(true)} />}
                 {activeTab === 'store_ads_module' && <StoreAdsModule onBack={() => setActiveTab('store_area')} onNavigate={setActiveTab} categoryName={adCategoryTarget || undefined} user={user as any} />}
+                {/* FIX: Removed the 'user' prop from StoreProfileEdit as it now uses AuthContext. */}
                 {activeTab === 'store_profile' && <StoreProfileEdit onBack={() => setActiveTab('store_area')} />}
               </main>
               <AuthModal isOpen={isAuthOpen} onClose={() => setIsAuthOpen(false)} user={user as any} onLoginSuccess={handleLoginSuccess} />

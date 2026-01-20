@@ -1,35 +1,35 @@
 import React, { useState, useEffect } from 'react';
-import { Layout } from './components/layout/Layout';
-import { Header } from './components/layout/Header';
-import { HomeFeed } from './pages/home/HomeFeed';
-import { ExploreView } from './pages/explore/ExploreView';
-import { StoreDetailView } from './pages/store/StoreDetailView';
+import { Layout } from './components/Layout';
+import { Header } from './components/Header';
+import { HomeFeed } from './components/HomeFeed';
+import { ExploreView } from './components/ExploreView';
+import { StoreDetailView } from './components/StoreDetailView';
 import { AuthModal } from './components/AuthModal';
-import { MenuView } from './pages/menu/MenuView';
-import { PatrocinadorMasterScreen } from './pages/PatrocinadorMasterScreen';
-import { ServicesView } from './pages/services/ServicesView';
-import { SubcategoriesView } from './pages/services/SubcategoriesView';
-import { SpecialtiesView } from './pages/services/SpecialtiesView';
-import { ServiceSuccessView } from './pages/services/ServiceSuccessView';
+import { MenuView } from './components/MenuView';
+import { PatrocinadorMasterScreen } from './components/PatrocinadorMasterScreen';
+import { ServicesView } from './components/ServicesView';
+import { SubcategoriesView } from './components/SubcategoriesView';
+import { SpecialtiesView } from './components/SpecialtiesView';
+import { ServiceSuccessView } from './components/ServiceSuccessView';
 import { QuoteRequestModal } from './components/QuoteRequestModal';
-import { StoreAreaView } from './pages/merchant/StoreAreaView';
-import { WeeklyPromoModule } from './pages/merchant/WeeklyPromoModule';
-import { JobsView } from './pages/jobs/JobsView';
-import { MerchantJobsModule } from './pages/merchant/MerchantJobsModule';
-import { AdminPanel } from './pages/admin/AdminPanel';
-import { CashbackLandingView } from './pages/cashback/CashbackLandingView';
-import { StoreAdsModule } from './pages/merchant/StoreAdsModule';
-import { AdminBannerModeration } from './pages/admin/AdminBannerModeration';
+import { StoreAreaView } from './components/StoreAreaView';
+import { WeeklyPromoModule } from './components/WeeklyPromoModule';
+import { JobsView } from './components/JobsView';
+import { MerchantJobsModule } from './components/MerchantJobsModule';
+import { AdminPanel } from './components/AdminPanel';
+import { CashbackLandingView } from './components/CashbackLandingView';
+import { StoreAdsModule } from './components/StoreAdsModule';
+import { AdminBannerModeration } from './components/AdminBannerModeration';
 import { MapPin, ShieldCheck, X } from 'lucide-react';
 import { useAuth } from './contexts/AuthContext';
 import { NeighborhoodProvider } from './contexts/NeighborhoodContext';
 import { Category, Store } from './types';
-import { CategoryView } from './pages/categories/CategoryView';
-import { StoreProfileEdit } from './pages/merchant/StoreProfileEdit';
-import { CommunityFeedView } from './pages/community/CommunityFeedView';
+import { CategoryView } from './components/CategoryView';
+import { StoreProfileEdit } from './components/StoreProfileEdit';
+import { CommunityFeedView } from './components/CommunityFeedView';
 import { STORES } from './constants';
-import { AdminModerationPanel } from './pages/admin/AdminModerationPanel';
-import { AboutView, SupportView, FavoritesView } from './pages/menu/SimplePages';
+import { AdminModerationPanel } from './components/AdminModerationPanel';
+import { AboutView, SupportView, FavoritesView } from './components/SimplePages';
 
 let splashWasShownInSession = false;
 const ADMIN_EMAIL = 'dedonopradonodedelivery@gmail.com';
@@ -143,7 +143,7 @@ const App: React.FC = () => {
         <div className="min-h-screen bg-white dark:bg-gray-900 flex justify-center relative">
           <Layout activeTab={activeTab} setActiveTab={setActiveTab} userRole={userRole} hideNav={hideBottomNav}>
               {!headerExclusionList.includes(activeTab) && (
-                <Header isDarkMode={isDarkMode} toggleTheme={() => {}} onAuthClick={() => setActiveTab('profile')} user={user} searchTerm={globalSearch} onSearchChange={setGlobalSearch} onNavigate={setActiveTab} activeTab={activeTab} userRole={userRole} stores={STORES} onStoreClick={handleSelectStore} isAdmin={user?.email === ADMIN_EMAIL} viewMode={viewMode} onOpenViewSwitcher={() => setIsRoleSwitcherOpen(true)} />
+                <Header isDarkMode={isDarkMode} toggleTheme={() => {}} onAuthClick={() => setActiveTab('profile')} user={user} searchTerm={globalSearch} onSearchChange={setGlobalSearch} onNavigate={setActiveTab} activeTab={activeTab} userRole={userRole as 'cliente' | 'lojista' | null} stores={STORES} onStoreClick={handleSelectStore} isAdmin={user?.email === ADMIN_EMAIL} viewMode={viewMode} onOpenViewSwitcher={() => setIsRoleSwitcherOpen(true)} />
               )}
               <main className="animate-in fade-in duration-500 w-full max-w-md mx-auto">
                 {activeTab === 'cashback_landing' && <CashbackLandingView onBack={() => setActiveTab('home')} onLogin={() => { setPendingTab('scan_cashback'); setIsAuthOpen(true); }} />}
@@ -165,7 +165,7 @@ const App: React.FC = () => {
                 {activeTab === 'service_subcategories' && selectedServiceMacro && <SubcategoriesView macroId={selectedServiceMacro.id} macroName={selectedServiceMacro.name} onBack={() => setActiveTab('services')} onSelectSubcategory={(n) => { setQuoteCategory(n); setActiveTab('service_specialties'); }} />}
                 {activeTab === 'service_specialties' && <SpecialtiesView subcategoryName={quoteCategory} onBack={() => setActiveTab('service_subcategories')} onSelectSpecialty={() => setIsQuoteModalOpen(true)} />}
                 {activeTab === 'store_ads_module' && <StoreAdsModule onBack={() => setActiveTab('store_area')} onNavigate={setActiveTab} categoryName={adCategoryTarget || undefined} user={user as any} />}
-                {activeTab === 'store_profile' && <StoreProfileEdit onBack={() => setActiveTab('store_area')} />}
+                {activeTab === 'store_profile' && <StoreProfileEdit onBack={() => setActiveTab('store_area')} user={user as any} />}
               </main>
               <AuthModal isOpen={isAuthOpen} onClose={() => setIsAuthOpen(false)} user={user as any} onLoginSuccess={handleLoginSuccess} />
               {isQuoteModalOpen && <QuoteRequestModal isOpen={isQuoteModalOpen} onClose={() => setIsQuoteModalOpen(false)} categoryName={quoteCategory} onSuccess={() => setActiveTab('service_success')} />}
