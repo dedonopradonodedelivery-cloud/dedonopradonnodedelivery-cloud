@@ -430,6 +430,7 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
                 <MenuLink icon={LayoutDashboard} label="Desempenho do seu negócio" onClick={() => setInternalView('performance')} highlight />
                 <MenuLink icon={Coins} label="Sistema de Cashback" onClick={() => setInternalView('cashback')} highlight />
                 <MenuLink icon={Megaphone} label="Anúncios de Banners" subtitle="Criação e gestão de banners" onClick={() => onNavigate?.('banner_sales')} />
+                <MenuLink icon={Rocket} label="ADS / Patrocinados" subtitle="Apareça em destaque para mais clientes" onClick={() => onNavigate?.('sponsored_ads')} />
                 <MenuLink icon={Tag} label="Promoção da Semana" subtitle="Ofertas em destaque na Home" onClick={() => onNavigate?.('weekly_promo')} />
                 <MenuLink icon={Settings} label="Minha Loja (Perfil)" onClick={() => onNavigate?.('store_profile')} />
                 <MenuLink icon={HelpCircle} label="Suporte" onClick={() => onNavigate?.('store_support')} />

@@ -275,3 +275,10 @@ export interface BannerPlan {
   isMostAdvantageous?: boolean;
   benefit: string;
 }
+
+// NEW: Type for Sponsored Ads by day
+export interface SponsoredPlan {
+  days: number;
+  pricePerDay: number;
+  total: number;
+}
