@@ -122,13 +122,14 @@ interface CategoryViewProps {
 export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, onStoreClick, stores, userRole, onAdvertiseInCategory, onNavigate }) => {
   const [selectedSubcategory, setSelectedSubcategory] = useState<string | null>(null);
   const [activeBanner, setActiveBanner] = useState<any | null>(null);
-  const [loadingBanner, setLoadingBanner] = useState(true);
+  const [loadingBanner, setLoadingBanner] = useState(false);
 
   const subcategories = SUBCATEGORIES[category.name] || [];
   const MAX_VISIBLE_SUBCATEGORIES = 8;
   const shouldShowMore = subcategories.length > MAX_VISIBLE_SUBCATEGORIES;
   const visibleSubcategories = shouldShowMore ? subcategories.slice(0, MAX_VISIBLE_SUBCATEGORIES - 1) : subcategories;
 
+  /*
   useEffect(() => {
     const fetchCategoryBanner = async () => {
       if (!supabase) {
@@ -181,6 +182,7 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
       supabase.removeChannel(channel);
     };
   }, [category.slug]);
+  */
 
   const filteredStores = useMemo(() => {
     let categoryStores = stores.filter(s => s.category === category.name);
