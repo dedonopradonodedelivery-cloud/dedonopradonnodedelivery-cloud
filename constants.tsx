@@ -39,15 +39,12 @@ export const NEIGHBORHOOD_OPTIONS = [
     { id: "freguesia", name: "Freguesia" },
     { id: "taquara", name: "Taquara" },
     { id: "pechincha", name: "Pechincha" },
-    { id: "anil", name: "Anil" },
-    { id: "curicica", name: "Curicica" },
     { id: "tanque", name: "Tanque" },
-    { id: "praca-seca", name: "Praça Seca" },
+    { id: "anil", name: "Anil" },
+    { id: "parque-olimpico", name: "Parque Olímpico" },
+    { id: "curicica", name: "Curicica" },
     { id: "cidade-de-deus", name: "Cidade de Deus" },
-    { id: "vila-valqueire", name: "Vila Valqueire" },
-    { id: "barra-da-tijuca", name: "Barra da Tijuca" },
-    { id: "recreio", name: "Recreio" },
-    { id: "camorim", name: "Camorim" },
+    { id: "gardenia", name: "Gardênia" },
 ];
 
 export const CATEGORIES: Category[] = [

@@ -32,11 +32,15 @@ import {
 import { User } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabaseClient';
 import { useAuth } from '../contexts/AuthContext';
+import { BannerOrder, BannerMessage } from '../types';
 
 interface StoreAreaViewProps {
   onBack: () => void;
   onNavigate?: (view: string) => void;
   user?: User | null;
+  bannerOrders?: BannerOrder[];
+  bannerMessages?: BannerMessage[];
+  onViewOrder?: (orderId: string) => void;
 }
 
 const STORE_DATA = {
@@ -60,16 +64,19 @@ const KPICard: React.FC<{ icon: React.ElementType; label: string; value: string;
   </div>
 );
 
-const MenuLink: React.FC<{ icon: React.ElementType; label: string; onClick?: () => void; highlight?: boolean; subtitle?: string }> = ({ icon: Icon, label, onClick, highlight, subtitle }) => (
+const MenuLink: React.FC<{ icon: React.ElementType; label: string; onClick?: () => void; highlight?: boolean; subtitle?: string; badge?: boolean; }> = ({ icon: Icon, label, onClick, highlight, subtitle, badge }) => (
   <button onClick={onClick} className={`w-full bg-white dark:bg-gray-800 p-4 border-b last:border-b-0 border-gray-100 dark:border-gray-700 flex items-center justify-between group active:bg-gray-50 dark:active:bg-gray-700/50 transition-colors`}>
     <div className="flex items-center gap-3">
-      <div className={`${highlight ? 'text-[#1E5BFF]' : 'text-gray-400'} group-hover:text-[#2D6DF6] transition-colors`}><Icon className="w-5 h-5" /></div>
+      <div className={`${highlight ? 'text-[#1E5BFF]' : 'text-gray-400'} group-hover:text-[#2D6DF6] transition-colors relative`}><Icon className="w-5 h-5" /></div>
       <div className="flex flex-col items-start">
         <span className={`text-sm font-semibold ${highlight ? 'text-gray-900 dark:text-white' : 'text-gray-700 dark:text-gray-200'}`}>{label}</span>
         {subtitle && <span className="text-[10px] text-gray-400 font-medium">{subtitle}</span>}
       </div>
     </div>
-    <ChevronRight className="w-4 h-4 text-gray-300" />
+    <div className="flex items-center gap-2">
+        {badge && <div className="w-2.5 h-2.5 bg-red-500 rounded-full animate-pulse"></div>}
+        <ChevronRight className="w-4 h-4 text-gray-300" />
+    </div>
   </button>
 );
 
@@ -376,11 +383,27 @@ const InternalViewWrapper: React.FC<{ title: string; icon: React.ElementType; on
   </div>
 );
 
-export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate, user }) => {
+export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate, user, bannerOrders = [], bannerMessages = [], onViewOrder }) => {
   const storeId = user?.id || 'grupo-esquematiza';
   const [internalView, setInternalView] = useState<'main' | 'performance' | 'cashback'>('main');
   const { signOut } = useAuth();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  const hasUnreadMessages = useMemo(() => {
+    const professionalOrders = bannerOrders.filter(o => o.bannerType === 'professional');
+    return professionalOrders.some(order => {
+        const lastTeamMessage = bannerMessages
+            .filter(m => m.orderId === order.id && m.senderType === 'team')
+            .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())[0];
+        
+        if (!lastTeamMessage) return false;
+        if (!order.lastViewedAt) return true;
+        
+        return new Date(lastTeamMessage.createdAt) > new Date(order.lastViewedAt);
+    });
+  }, [bannerOrders, bannerMessages]);
+
+  const professionalOrders = bannerOrders.filter(o => o.bannerType === 'professional');
 
   const handleLogout = async () => {
     if (isLoggingOut) return;
@@ -430,6 +453,22 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
                 <MenuLink icon={LayoutDashboard} label="Desempenho do seu negócio" onClick={() => setInternalView('performance')} highlight />
                 <MenuLink icon={Coins} label="Sistema de Cashback" onClick={() => setInternalView('cashback')} highlight />
                 <MenuLink icon={Megaphone} label="Anúncios de Banners" subtitle="Criação e gestão de banners" onClick={() => onNavigate?.('banner_config')} />
+                {professionalOrders.length > 0 && (
+                  <MenuLink 
+                    icon={Briefcase} 
+                    label="Acompanhar Pedidos" 
+                    subtitle={`${professionalOrders.length} pedido(s) em andamento`}
+                    onClick={() => {
+                        if (professionalOrders.length === 1 && onViewOrder) {
+                            onViewOrder(professionalOrders[0].id);
+                        } else {
+                            // Future: navigate to a list of orders
+                            onNavigate?.('banner_orders_list');
+                        }
+                    }}
+                    badge={hasUnreadMessages} 
+                  />
+                )}
                 <MenuLink icon={Rocket} label="ADS / Patrocinados" subtitle="Apareça em destaque para mais clientes" onClick={() => onNavigate?.('sponsored_ads')} />
                 <MenuLink icon={Tag} label="Promoção da Semana" subtitle="Ofertas em destaque na Home" onClick={() => onNavigate?.('weekly_promo')} />
                 <MenuLink icon={Settings} label="Minha Loja (Perfil)" onClick={() => onNavigate?.('store_profile')} />

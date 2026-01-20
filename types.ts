@@ -292,3 +292,26 @@ export interface SponsoredPlan {
   pricePerDay: number;
   total: number;
 }
+
+// NEW: Type for Professional Banner Orders
+export interface BannerOrder {
+  id: string;
+  merchantId: string;
+  bannerType: 'professional';
+  total: number; // in cents
+  paymentMethod: 'pix' | 'credit' | 'debit' | null;
+  paymentStatus: 'pending' | 'paid';
+  createdAt: string;
+  status: 'em_analise' | 'em_producao' | 'aprovado' | 'publicado';
+  lastViewedAt?: string;
+}
+
+// NEW: Type for Messages within an Order
+export interface BannerMessage {
+  id: string;
+  orderId: string;
+  senderType: 'merchant' | 'team';
+  body: string;
+  createdAt: string;
+  readAt?: string;
+}

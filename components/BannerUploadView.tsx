@@ -3,9 +3,10 @@ import { ChevronLeft, UploadCloud, CheckCircle2, File, Loader2 } from 'lucide-re
 
 interface BannerUploadViewProps {
   onBack: () => void;
+  onGoHome?: () => void;
 }
 
-export const BannerUploadView: React.FC<BannerUploadViewProps> = ({ onBack }) => {
+export const BannerUploadView: React.FC<BannerUploadViewProps> = ({ onBack, onGoHome }) => {
   const [file, setFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
@@ -54,10 +55,10 @@ export const BannerUploadView: React.FC<BannerUploadViewProps> = ({ onBack }) =>
                 Seu banner foi enviado para análise. Ele estará ativo no app em até 24h úteis após a aprovação.
             </p>
             <button 
-              onClick={onBack}
+              onClick={onGoHome || onBack}
               className="w-full max-w-sm bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold py-4 rounded-2xl shadow-lg border border-white/5 active:scale-[0.98] transition-all"
             >
-                Voltar para o Painel
+                Ir para a Home
             </button>
           </div>
         ) : (

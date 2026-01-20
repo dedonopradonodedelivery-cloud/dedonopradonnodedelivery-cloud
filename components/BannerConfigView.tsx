@@ -92,13 +92,13 @@ export const BannerConfigView: React.FC<BannerConfigViewProps> = ({ onBack, onCo
 
             <main className="flex-1 overflow-y-auto p-6 space-y-12 pb-48">
                 <section className="text-center">
-                    <h1 className="text-4xl font-black text-white font-display tracking-tight mb-4 leading-tight">
+                    <h1 className="text-3xl font-black text-white font-display tracking-tight mb-4 leading-tight">
                         Coloque sua loja em destaque<br/>
                         para quem já quer comprar
                     </h1>
                     <p className="text-slate-400 text-sm max-w-lg mx-auto leading-relaxed">
-                        Mais de 450 mil moradores em Jacarepaguá acessam o app todos os meses.
-                        Com os banners patrocinados, sua loja ganha mais visibilidade, cliques e pedidos — enquanto seus concorrentes ficam para trás.
+                        Jacarepaguá concentra mais de 450 mil moradores.
+                        Com os banners patrocinados, sua loja ganha mais visibilidade, mais cliques e mais pedidos — enquanto seus concorrentes ficam para trás.
                     </p>
                 </section>
                 
@@ -175,7 +175,7 @@ export const BannerConfigView: React.FC<BannerConfigViewProps> = ({ onBack, onCo
                         <button onClick={() => setDuration('3m_promo')} className={`p-8 rounded-3xl text-center border-4 relative transition-all ${duration === '3m_promo' ? 'border-amber-400 bg-amber-500/10' : 'border-slate-700 bg-slate-800 hover:border-slate-600'}`}>
                             <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-amber-400 text-slate-900 text-[10px] font-black px-4 py-1.5 rounded-full shadow-lg"><Star size={12} className="inline -mt-0.5 mr-1.5 fill-slate-900"/>PROMOÇÃO DE INAUGURAÇÃO</div>
                             <p className="font-black text-4xl text-white">3 Meses</p>
-                            <p className="text-sm font-bold text-amber-400 mt-2">Total com desconto • 3x sem juros</p>
+                            <p className="text-sm font-bold text-amber-400 mt-2">Total com desconto</p>
                             <p className="text-[11px] text-slate-500 mt-4 leading-snug">
                                 Você economiza <strong>{savings.percentage}%</strong> em relação ao plano mensal, o que representa <strong>{savings.amount} a menos</strong> no total, e garante mais tempo de destaque para sua loja.
                             </p>
@@ -188,8 +188,17 @@ export const BannerConfigView: React.FC<BannerConfigViewProps> = ({ onBack, onCo
 
             <div className="fixed bottom-0 left-0 right-0 max-w-md mx-auto p-4 bg-slate-900/80 backdrop-blur-md border-t border-white/5 z-20">
                 <div className="bg-slate-800 p-4 rounded-2xl mb-4 border border-slate-700 flex justify-between items-center">
-                    <span className="text-sm font-bold text-slate-300 uppercase tracking-wider">Total</span>
-                    <span className="text-2xl font-black text-white">{formatCurrency(priceCents)}</span>
+                    <div>
+                        {duration === '3m_promo' && (
+                            <span className="bg-slate-700 text-amber-400 text-[10px] font-bold px-3 py-1 rounded-full border border-slate-600">
+                                3x sem juros
+                            </span>
+                        )}
+                    </div>
+                    <div className="flex items-baseline gap-2">
+                        <span className="text-sm font-bold text-slate-300 uppercase tracking-wider">Total</span>
+                        <span className="text-2xl font-black text-white">{formatCurrency(priceCents)}</span>
+                    </div>
                 </div>
                 <button onClick={handleConfigure} disabled={!isReady} className="w-full bg-blue-600 text-white font-bold py-4 rounded-2xl disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.98] transition-transform duration-150 shadow-lg shadow-blue-900/50">
                     Escolher e criar meu banner

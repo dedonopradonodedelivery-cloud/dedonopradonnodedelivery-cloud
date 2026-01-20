@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Layout } from './components/Layout';
-import { Header } from './components/Header';
+import { Layout } from './components/layout/Layout';
+import { Header } from './components/layout/Header';
 import { HomeFeed } from './components/HomeFeed';
 import { ExploreView } from './components/ExploreView';
 import { StoreDetailView } from './components/StoreDetailView';
@@ -20,12 +20,11 @@ import { AdminPanel } from './components/AdminPanel';
 import { CashbackLandingView } from './components/CashbackLandingView';
 import { StoreAdsModule } from './components/StoreAdsModule';
 import { BannerUploadView } from './components/BannerUploadView';
-import { BannerProductionView } from './components/BannerProductionView';
 import { AdminBannerModeration } from './components/AdminBannerModeration';
 import { MapPin, ShieldCheck, X } from 'lucide-react';
 import { useAuth } from './contexts/AuthContext';
 import { NeighborhoodProvider } from './contexts/NeighborhoodContext';
-import { Category, Store, RoleMode, BannerPlan, SponsoredPlan, BannerConfig } from './types';
+import { Category, Store, RoleMode, BannerPlan, SponsoredPlan, BannerConfig, BannerOrder, BannerMessage } from './types';
 import { CategoryView } from './components/CategoryView';
 import { StoreProfileEdit } from './components/StoreProfileEdit';
 import { CommunityFeedView } from './components/CommunityFeedView';
@@ -39,6 +38,9 @@ import { BannerCheckoutView } from './components/BannerCheckoutView';
 import { SponsoredAdsView } from './components/SponsoredAdsView';
 import { SponsoredAdsCheckoutView } from './components/SponsoredAdsCheckoutView';
 import { SponsoredAdsSuccessView } from './components/SponsoredAdsSuccessView';
+import { BannerProfessionalPaymentView } from './components/BannerProfessionalPaymentView';
+import { BannerOrderTrackingView } from './components/BannerOrderTrackingView';
+
 
 let splashWasShownInSession = false;
 const ADMIN_EMAIL = 'dedonopradonodedelivery@gmail.com';
@@ -80,6 +82,11 @@ const App: React.FC = () => {
   const [adCategoryTarget, setAdCategoryTarget] = useState<string | null>(null);
   const [bannerOrder, setBannerOrder] = useState<{ plan: BannerPlan | null; draft: any | null }>({ plan: null, draft: null });
   const [sponsoredPlan, setSponsoredPlan] = useState<SponsoredPlan | null>(null);
+  
+  // State for Professional Banner Flow
+  const [bannerOrders, setBannerOrders] = useState<BannerOrder[]>([]);
+  const [bannerMessages, setBannerMessages] = useState<BannerMessage[]>([]);
+  const [viewingOrderId, setViewingOrderId] = useState<string | null>(null);
 
   
   // Set viewMode based on auth status. This prevents the login modal on startup for visitors.
@@ -121,7 +128,7 @@ const App: React.FC = () => {
     if (!viewMode) return;
     localStorage.setItem('admin_view_mode', viewMode);
     
-    const merchantTabs = ['store_area', 'store_ads_module', 'banner_config', 'banner_checkout', 'sponsored_ads', 'sponsored_ads_checkout', 'sponsored_ads_success'];
+    const merchantTabs = ['store_area', 'store_ads_module', 'banner_config', 'banner_checkout', 'sponsored_ads', 'sponsored_ads_checkout', 'sponsored_ads_success', 'banner_professional_payment', 'banner_order_tracking'];
 
     switch (viewMode) {
       case 'ADM':
@@ -159,7 +166,7 @@ const App: React.FC = () => {
 
   // General auth guard for restricted tabs
   useEffect(() => {
-    const restrictedTabs = ['scan_cashback', 'merchant_qr_display', 'wallet', 'pay_cashback', 'store_area', 'admin_panel', 'edit_profile', 'profile', 'favorites', 'store_ads_module', 'banner_config', 'banner_checkout', 'sponsored_ads', 'sponsored_ads_checkout', 'sponsored_ads_success'];
+    const restrictedTabs = ['scan_cashback', 'merchant_qr_display', 'wallet', 'pay_cashback', 'store_area', 'admin_panel', 'edit_profile', 'profile', 'favorites', 'store_ads_module', 'banner_config', 'banner_checkout', 'sponsored_ads', 'sponsored_ads_checkout', 'sponsored_ads_success', 'banner_professional_payment', 'banner_order_tracking'];
     
     if (restrictedTabs.includes(activeTab)) {
       if (!isAuthInitialLoading && !user) {
@@ -179,7 +186,7 @@ const App: React.FC = () => {
   useEffect(() => {
       if (isAuthInitialLoading) return;
       
-      const merchantTabs = ['store_area', 'store_ads_module', 'weekly_promo', 'merchant_jobs', 'store_profile', 'store_support', 'banner_upload', 'banner_production', 'banner_config', 'banner_checkout', 'sponsored_ads', 'sponsored_ads_checkout', 'sponsored_ads_success'];
+      const merchantTabs = ['store_area', 'store_ads_module', 'weekly_promo', 'merchant_jobs', 'store_profile', 'store_support', 'banner_upload', 'banner_production', 'banner_config', 'banner_checkout', 'sponsored_ads', 'sponsored_ads_checkout', 'sponsored_ads_success', 'banner_professional_payment', 'banner_order_tracking'];
       
       // Admin panel protection
       if (activeTab === 'admin_panel' && (viewMode !== 'ADM' || user?.email !== ADMIN_EMAIL)) {
@@ -260,6 +267,73 @@ const App: React.FC = () => {
     setSponsoredPlan(null);
     setActiveTab('store_area');
   };
+  
+  // Professional Banner Flow Handlers
+  const handleConfirmProfessionalPayment = (paymentMethod: 'pix' | 'credit' | 'debit') => {
+    if (!user) return;
+    const newOrderId = `ORD-${Date.now().toString().slice(-6)}`;
+    const now = new Date().toISOString();
+    
+    const newOrder: BannerOrder = {
+      id: newOrderId,
+      merchantId: user.id,
+      bannerType: 'professional',
+      total: 5990,
+      paymentMethod,
+      paymentStatus: 'paid',
+      createdAt: now,
+      status: 'em_analise',
+      lastViewedAt: now
+    };
+
+    const initialMessage: BannerMessage = {
+      id: `msg-${Date.now()}`,
+      orderId: newOrderId,
+      senderType: 'team',
+      body: 'Recebemos seu pedido! Em até 48h úteis vamos enviar o primeiro rascunho por aqui.',
+      createdAt: now,
+    };
+
+    setBannerOrders(prev => [...prev, newOrder]);
+    setBannerMessages(prev => [...prev, initialMessage]);
+    setViewingOrderId(newOrderId);
+    setActiveTab('banner_order_tracking');
+  };
+
+  const handleViewOrder = (orderId: string) => {
+    const now = new Date().toISOString();
+    setBannerOrders(prev => prev.map(order => 
+      order.id === orderId ? { ...order, lastViewedAt: now } : order
+    ));
+    setViewingOrderId(orderId);
+    setActiveTab('banner_order_tracking');
+  };
+
+  const handleSendMessage = (orderId: string, text: string) => {
+    const newMessage: BannerMessage = {
+      id: `msg-m-${Date.now()}`,
+      orderId,
+      senderType: 'merchant',
+      body: text,
+      createdAt: new Date().toISOString(),
+    };
+    setBannerMessages(prev => [...prev, newMessage]);
+  };
+
+  // Professional Banner Guardrail
+  useEffect(() => {
+    if (activeTab === 'banner_order_tracking') {
+      if (!viewingOrderId) {
+        setActiveTab('store_area');
+        return;
+      }
+      const order = bannerOrders.find(o => o.id === viewingOrderId);
+      if (!order || order.paymentStatus !== 'paid') {
+        alert("Finalize o pagamento para acompanhar o pedido.");
+        setActiveTab('banner_professional_payment');
+      }
+    }
+  }, [activeTab, viewingOrderId, bannerOrders]);
 
 
   useEffect(() => {
@@ -270,8 +344,8 @@ const App: React.FC = () => {
   }, []);
 
   const handleSelectStore = (store: Store) => { setSelectedStore(store); setActiveTab('store_detail'); };
-  const headerExclusionList = ['store_area', 'editorial_list', 'store_profile', 'category_detail', 'store_detail', 'profile', 'patrocinador_master', 'service_subcategories', 'service_specialties', 'store_ads_module', 'about', 'support', 'favorites', 'community_feed', 'admin_panel', 'cashback_landing', 'admin_banner_moderation', 'banner_upload', 'banner_production', 'banner_config', 'banner_checkout', 'sponsored_ads', 'sponsored_ads_checkout', 'sponsored_ads_success'];
-  const hideBottomNav = ['store_ads_module', 'store_detail', 'admin_panel', 'cashback_landing', 'admin_banner_moderation', 'banner_upload', 'banner_production', 'banner_config', 'banner_checkout', 'sponsored_ads', 'sponsored_ads_checkout', 'sponsored_ads_success'].includes(activeTab);
+  const headerExclusionList = ['store_area', 'editorial_list', 'store_profile', 'category_detail', 'store_detail', 'profile', 'patrocinador_master', 'service_subcategories', 'service_specialties', 'store_ads_module', 'about', 'support', 'favorites', 'community_feed', 'admin_panel', 'cashback_landing', 'admin_banner_moderation', 'banner_upload', 'banner_production', 'banner_config', 'banner_checkout', 'sponsored_ads', 'sponsored_ads_checkout', 'sponsored_ads_success', 'banner_professional_payment', 'banner_order_tracking'];
+  const hideBottomNav = ['store_ads_module', 'store_detail', 'admin_panel', 'cashback_landing', 'admin_banner_moderation', 'banner_upload', 'banner_production', 'banner_config', 'banner_checkout', 'sponsored_ads', 'sponsored_ads_checkout', 'sponsored_ads_success', 'banner_professional_payment', 'banner_order_tracking'].includes(activeTab);
 
   const RoleSwitcherModal: React.FC = () => {
     if (!isRoleSwitcherOpen) return null;
@@ -321,7 +395,7 @@ const App: React.FC = () => {
                 {activeTab === 'services' && <ServicesView onSelectMacro={(id, name) => { setSelectedServiceMacro({id, name}); if (id === 'emergency') { setQuoteCategory(name); setIsQuoteModalOpen(true); } else { setActiveTab('service_subcategories'); } }} onOpenTerms={() => setActiveTab('service_terms')} onNavigate={setActiveTab} searchTerm={globalSearch} />}
                 {activeTab === 'category_detail' && selectedCategory && <CategoryView category={selectedCategory} onBack={() => setActiveTab('home')} onStoreClick={handleSelectStore} stores={STORES} userRole={userRole} onAdvertiseInCategory={setAdCategoryTarget} onNavigate={setActiveTab} />}
                 {activeTab === 'store_detail' && selectedStore && <StoreDetailView store={selectedStore} onBack={() => setActiveTab('home')} />}
-                {activeTab === 'store_area' && <StoreAreaView onBack={() => setActiveTab('home')} onNavigate={setActiveTab} user={user as any} />}
+                {activeTab === 'store_area' && <StoreAreaView onBack={() => setActiveTab('home')} onNavigate={setActiveTab} user={user as any} bannerOrders={bannerOrders} bannerMessages={bannerMessages} onViewOrder={handleViewOrder} />}
                 {activeTab === 'patrocinador_master' && <PatrocinadorMasterScreen onBack={() => setActiveTab('home')} />}
                 {activeTab === 'jobs_list' && <JobsView onBack={() => setActiveTab('home')} />}
                 {activeTab === 'about' && <AboutView onBack={() => setActiveTab('profile')} />}
@@ -330,8 +404,8 @@ const App: React.FC = () => {
                 {activeTab === 'service_subcategories' && selectedServiceMacro && <SubcategoriesView macroId={selectedServiceMacro.id} macroName={selectedServiceMacro.name} onBack={() => setActiveTab('services')} onSelectSubcategory={(n) => { setQuoteCategory(n); setActiveTab('service_specialties'); }} />}
                 {activeTab === 'service_specialties' && <SpecialtiesView subcategoryName={quoteCategory} onBack={() => setActiveTab('service_subcategories')} onSelectSpecialty={() => setIsQuoteModalOpen(true)} />}
                 {activeTab === 'store_ads_module' && <StoreAdsModule onBack={() => setActiveTab(bannerOrder.plan ? 'banner_config' : 'store_area')} onNavigate={setActiveTab} categoryName={adCategoryTarget || undefined} user={user as any} plan={bannerOrder.plan} onFinalize={handleFinalizeBannerCreation} />}
-                {activeTab === 'banner_upload' && <BannerUploadView onBack={() => setActiveTab('store_ads_module')} />}
-                {activeTab === 'banner_production' && <BannerProductionView onBack={() => setActiveTab('store_ads_module')} />}
+                {activeTab === 'banner_upload' && <BannerUploadView onBack={() => setActiveTab('store_ads_module')} onGoHome={() => setActiveTab('home')} />}
+                
                 {activeTab === 'store_profile' && <StoreProfileEdit onBack={() => setActiveTab('store_area')} />}
                 {activeTab === 'banner_config' && <BannerConfigView onBack={() => setActiveTab('store_area')} onConfigure={handleConfigureAndCreateBanner} />}
                 {activeTab === 'banner_checkout' && bannerOrder.plan && bannerOrder.draft && (
@@ -356,6 +430,18 @@ const App: React.FC = () => {
                         plan={sponsoredPlan}
                         onComplete={handleCompleteSponsoredFlow}
                     />
+                )}
+                {/* Professional Banner Flow */}
+                {activeTab === 'banner_professional_payment' && <BannerProfessionalPaymentView onBack={() => setActiveTab('store_ads_module')} onConfirmPayment={handleConfirmProfessionalPayment} />}
+                {activeTab === 'banner_order_tracking' && viewingOrderId && (
+                  <BannerOrderTrackingView
+                    orderId={viewingOrderId}
+                    orders={bannerOrders}
+                    messages={bannerMessages}
+                    onBack={() => { setViewingOrderId(null); setActiveTab('store_area'); }}
+                    onSendMessage={handleSendMessage}
+                    onViewOrder={handleViewOrder}
+                  />
                 )}
               </main>
               <AuthModal isOpen={isAuthOpen} onClose={() => setIsAuthOpen(false)} user={user as any} onLoginSuccess={handleLoginSuccess} />
