@@ -177,7 +177,7 @@ export const BannerConfigView: React.FC<BannerConfigViewProps> = ({ onBack, onCo
                             <p className="font-black text-4xl text-white">3 Meses</p>
                             <p className="text-sm font-bold text-amber-400 mt-2">Total com desconto • 3x sem juros</p>
                             <p className="text-[11px] text-slate-500 mt-4 leading-snug">
-                                Você economiza {savings.percentage}% em relação ao plano mensal, o que representa {savings.amount} a menos no total, e garante mais tempo de destaque para sua loja.
+                                Você economiza <strong>{savings.percentage}%</strong> em relação ao plano mensal, o que representa <strong>{savings.amount} a menos</strong> no total, e garante mais tempo de destaque para sua loja.
                             </p>
                         </button>
                     </div>
