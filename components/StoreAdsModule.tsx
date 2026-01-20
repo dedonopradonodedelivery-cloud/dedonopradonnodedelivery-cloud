@@ -14,7 +14,6 @@ import {
   Target,
   Palette,
   LayoutTemplate,
-  Type,
   Paintbrush,
   AlertTriangle,
   X,
@@ -66,6 +65,8 @@ const getContrastRatio = (hex1: string, hex2: string): number => {
 };
 // --- END VALIDATION ---
 
+// FIX: Added missing formatCurrency helper function.
+const formatCurrency = (cents: number) => `R$ ${(cents / 100).toFixed(2).replace('.', ',')}`;
 
 interface StoreAdsModuleProps {
   onBack: () => void;
@@ -292,6 +293,19 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
     }
   }, [plan, onBack]);
 
+  const handleFormDataChange = (fieldId: string, value: string) => {
+    setFormData(prev => ({ ...prev, [fieldId]: value }));
+  };
+
+  useEffect(() => {
+    if (selectedTemplate?.id === 'institucional') {
+        const logoUrl = user?.user_metadata?.store_logo_url || user?.user_metadata?.avatar_url;
+        if (logoUrl && !formData.logo_url) {
+            handleFormDataChange('logo_url', logoUrl);
+        }
+    }
+  }, [selectedTemplate, user, formData.logo_url]);
+  
   const validateBanner = (): string[] => {
     const errors: string[] = [];
     const containsForbidden = (text: string) => FORBIDDEN_WORDS.some(word => text.toLowerCase().includes(word));
@@ -342,10 +356,6 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
     }, 500);
   };
 
-  const handleFormDataChange = (fieldId: string, value: string) => {
-    setFormData(prev => ({ ...prev, [fieldId]: value }));
-  };
-  
   const handleEditorDataChange = (field: keyof typeof editorData, value: any) => {
     setEditorData(prev => ({...prev, [field]: value}));
   }
@@ -534,6 +544,11 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
                                 onChange={(e) => handleFormDataChange(field.id, e.target.value)}
                                 className="w-full mt-2 bg-slate-700 p-3 rounded-lg text-white"
                             />
+                            {field.id === 'logo_url' && (
+                                <p className="text-xs text-slate-500 mt-2">
+                                    Usamos automaticamente a logo do seu perfil. Você pode trocar se quiser.
+                                </p>
+                            )}
                         </div>
                     ))}
                     {!ctaStepCompleted ? (
@@ -594,7 +609,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
                   <p className="text-xs text-slate-400">Plano Selecionado</p>
                   <p className="font-bold text-sm">{plan.label}</p>
               </div>
-              <p className="text-xl font-black">{`R$ ${(plan.priceCents / 100).toFixed(2).replace('.', ',')}`}</p>
+              <p className="text-xl font-black">{formatCurrency(plan.priceCents)}</p>
             </div>
             <button 
                 onClick={handlePublish}
