@@ -30,6 +30,7 @@ import { LojasEServicosList } from './LojasEServicosList';
 import { User } from '@supabase/supabase-js';
 import { CATEGORIES, EDITORIAL_SERVICES } from '../constants';
 import { useNeighborhood } from '../contexts/NeighborhoodContext';
+import { supabase } from '../lib/supabaseClient';
 
 interface HomeFeedProps {
   onNavigate: (view: string) => void;
@@ -131,19 +132,55 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void; onStoreClick?: (
   ], []);
 
   useEffect(() => {
-    try {
-      const bannerConfigRaw = localStorage.getItem('user_banner_config');
-      if (bannerConfigRaw) {
-        const config = JSON.parse(bannerConfigRaw);
-        setUserBanner({
-          id: 'user-banner',
-          isUserBanner: true,
-          config,
-        });
-      }
-    } catch (e) {
-      console.error("Failed to parse user banner from localStorage", e);
-    }
+    const fetchHomeBanner = async () => {
+        if (!supabase) return;
+
+        try {
+            const { data, error } = await supabase
+                .from('published_banners')
+                .select('id, config')
+                .eq('target', 'home')
+                .eq('is_active', true)
+                .order('created_at', { ascending: false })
+                .limit(1)
+                .single();
+            
+            if (error && error.code !== 'PGRST116') throw error;
+
+            if (data) {
+                setUserBanner({
+                    id: `user-banner-${data.id}`,
+                    isUserBanner: true,
+                    config: data.config,
+                });
+            } else {
+                setUserBanner(null);
+            }
+        } catch (e) {
+            console.error("Failed to fetch home banner from Supabase", e);
+            setUserBanner(null);
+        }
+    };
+    
+    fetchHomeBanner();
+    
+    const channel = supabase.channel('home-banner-updates')
+      .on('postgres_changes', { 
+          event: '*', 
+          schema: 'public', 
+          table: 'published_banners',
+          filter: 'target=eq.home'
+        }, 
+        (payload) => {
+          fetchHomeBanner();
+        }
+      )
+      .subscribe();
+      
+    return () => {
+      supabase.removeChannel(channel);
+    };
+
   }, []);
 
   const allBanners = useMemo(() => userBanner ? [userBanner, ...defaultBanners] : defaultBanners, [userBanner, defaultBanners]);

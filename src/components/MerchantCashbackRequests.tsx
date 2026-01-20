@@ -1,26 +1,17 @@
+
 import React, { useState, useEffect } from 'react';
 import { ChevronLeft, CheckCircle, XCircle, Clock, DollarSign, User, AlertCircle, Loader2, ArrowRight } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
+import { CashbackTransaction } from '../../types';
 
 interface MerchantCashbackRequestsProps {
   merchantId: string; // ID do lojista logado
   onBack: () => void;
 }
 
-interface ExtendedCashbackTransaction {
-  id?: string;
-  merchant_id: string;
-  store_id: string;
-  customer_id: string;
+// FIX: Changed interface to extend the global CashbackTransaction type for consistency.
+interface ExtendedCashbackTransaction extends CashbackTransaction {
   customer_name?: string;
-  total_amount_cents: number;
-  cashback_used_cents: number;
-  cashback_to_earn_cents: number;
-  amount_to_pay_now_cents: number;
-  status: 'pending' | 'approved' | 'rejected';
-  created_at?: string;
-  approved_at?: string;
-  rejected_at?: string;
 }
 
 export const MerchantCashbackRequests: React.FC<MerchantCashbackRequestsProps> = ({ merchantId, onBack }) => {
@@ -63,19 +54,22 @@ export const MerchantCashbackRequests: React.FC<MerchantCashbackRequestsProps> =
   const fetchPendingRequests = async () => {
     if (!supabase) {
         // Mock data if no supabase configured in env
+        // FIX: Adjusted mock data to match the CashbackTransaction interface.
         setRequests([
             {
                 id: 'mock-1',
                 merchant_id: merchantId,
                 store_id: 'store-1',
-                customer_id: 'cust-1',
+                user_id: 'cust-1',
                 customer_name: 'Maria Silva (Simulação)',
                 total_amount_cents: 15000,
                 cashback_used_cents: 500,
                 cashback_to_earn_cents: 725,
                 amount_to_pay_now_cents: 14500,
                 status: 'pending',
-                created_at: new Date().toISOString()
+                created_at: new Date().toISOString(),
+                amount_cents: 725,
+                type: 'earn'
             }
         ]);
         setLoading(false);
@@ -236,13 +230,13 @@ export const MerchantCashbackRequests: React.FC<MerchantCashbackRequestsProps> =
                             <div>
                                 <p className="text-xs text-gray-500 uppercase font-bold mb-0.5">Total da Compra</p>
                                 <p className="text-lg font-bold text-gray-900 dark:text-white">
-                                    {formatMoney(req.total_amount_cents)}
+                                    {formatMoney(req.total_amount_cents || 0)}
                                 </p>
                             </div>
                             <div className="text-right">
                                 <p className="text-xs text-[#1E5BFF] uppercase font-bold mb-0.5">A Receber</p>
                                 <p className="text-xl font-black text-[#1E5BFF]">
-                                    {formatMoney(req.amount_to_pay_now_cents)}
+                                    {formatMoney(req.amount_to_pay_now_cents || 0)}
                                 </p>
                             </div>
                         </div>
@@ -278,18 +272,18 @@ export const MerchantCashbackRequests: React.FC<MerchantCashbackRequestsProps> =
                     
                     <div className="flex justify-between items-center">
                         <span className="text-gray-500 text-sm">Valor Total</span>
-                        <span className="font-bold text-gray-900 dark:text-white text-lg">{formatMoney(selectedRequest.total_amount_cents)}</span>
+                        <span className="font-bold text-gray-900 dark:text-white text-lg">{formatMoney(selectedRequest.total_amount_cents || 0)}</span>
                     </div>
 
                     <div className="flex justify-between items-center text-red-500">
                         <span className="text-sm font-medium">Uso de Cashback</span>
-                        <span className="font-bold">- {formatMoney(selectedRequest.cashback_used_cents)}</span>
+                        <span className="font-bold">- {formatMoney(selectedRequest.cashback_used_cents || 0)}</span>
                     </div>
 
                     <div className="flex justify-between items-center pt-2 border-t border-gray-200 dark:border-gray-700">
                         <span className="text-base font-bold text-gray-900 dark:text-white">Cliente Paga Agora</span>
                         <span className="text-2xl font-black text-[#1E5BFF]">
-                            {formatMoney(selectedRequest.amount_to_pay_now_cents)}
+                            {formatMoney(selectedRequest.amount_to_pay_now_cents || 0)}
                         </span>
                     </div>
                 </div>

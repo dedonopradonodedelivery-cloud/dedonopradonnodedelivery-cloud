@@ -1,172 +1,63 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { ChevronLeft, Search, Star, BadgeCheck, ChevronRight, X, AlertCircle, Grid, Filter, Megaphone, ArrowUpRight, Info } from 'lucide-react';
+import { ChevronLeft, Search, Star, BadgeCheck, ChevronRight, X, AlertCircle, Grid, Filter, Megaphone, ArrowUpRight, Info, Image as ImageIcon, Sparkles } from 'lucide-react';
 import { Category, Store, AdType } from '../types';
 import { SUBCATEGORIES } from '../constants';
+import { supabase } from '../lib/supabaseClient';
 
-// --- INTERFACES & MOCK DATA FOR PROMO BANNERS ---
-
-interface PromoBanner {
-  id: string;
-  type: 'merchant' | 'institutional';
-  title: string;
-  subtitle?: string;
-  bgColor: string; 
-  textColor: string;
-  merchantName?: string;
-  subcategoryTarget?: string; 
-  link?: string;
-  image?: string;
-}
-
-const INSTITUTIONAL_FALLBACKS: PromoBanner[] = [
-  {
-    id: 'inst-1',
-    type: 'institutional',
-    title: 'Anuncie sua Loja Aqui',
-    subtitle: 'Alcance milhares de vizinhos',
-    bgColor: 'bg-gradient-to-r from-slate-900 to-slate-800',
-    textColor: 'text-white',
-    image: 'https://images.unsplash.com/photo-1557804506-669a67965ba0?q=80&w=800&auto=format&fit=crop'
-  },
-  {
-    id: 'inst-2',
-    type: 'institutional',
-    title: 'Clube de Vantagens',
-    subtitle: 'Descontos exclusivos no bairro',
-    bgColor: 'bg-gradient-to-r from-[#1E5BFF] to-[#0040DD]',
-    textColor: 'text-white'
-  },
-  {
-    id: 'inst-3',
-    type: 'institutional',
-    title: 'Apoie o Comércio Local',
-    subtitle: 'A Freguesia cresce com você',
-    bgColor: 'bg-gradient-to-r from-emerald-600 to-teal-600',
-    textColor: 'text-white'
-  }
-];
-
-const MERCHANT_ADS_MOCK: PromoBanner[] = [
-  {
-    id: 'ad-burger-1',
-    type: 'merchant',
-    title: 'Burger Artesanal 2x1',
-    subtitle: 'Só hoje na Hamburgueria Brasa',
-    merchantName: 'Hamburgueria Brasa',
-    subcategoryTarget: 'Hamburguerias', 
-    bgColor: 'bg-[#FF9F1C]',
-    textColor: 'text-black',
-    image: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?q=80&w=800&auto=format&fit=crop'
-  },
-  {
-    id: 'ad-pizza-1',
-    type: 'merchant',
-    title: 'Rodízio de Pizza',
-    subtitle: 'Crianças não pagam!',
-    merchantName: 'Pizzaria do Zé',
-    subcategoryTarget: 'Pizzarias',
-    bgColor: 'bg-[#E71D36]',
-    textColor: 'text-white'
-  }
-];
-
-// --- COMPONENTE INDEPENDENTE: SUBCATEGORY CAROUSEL ---
-
-const SubcategoryCarousel: React.FC<{ subcategory: string }> = ({ subcategory }) => {
-  const [currentSlide, setCurrentSlide] = useState(0);
-  const scrollRef = useRef<HTMLDivElement>(null);
-
-  const displayBanners = useMemo(() => {
-    const activeMerchantAds = MERCHANT_ADS_MOCK.filter(ad => 
-      ad.subcategoryTarget && subcategory.toLowerCase().includes(ad.subcategoryTarget.toLowerCase())
-    );
-    const needed = 3 - activeMerchantAds.length;
-    const fillers = INSTITUTIONAL_FALLBACKS.slice(0, Math.max(0, needed));
-    return [...activeMerchantAds, ...fillers].slice(0, 3);
-  }, [subcategory]);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-        const nextSlide = (currentSlide + 1) % 3;
-        setCurrentSlide(nextSlide);
-        if (scrollRef.current) {
-            const width = scrollRef.current.offsetWidth;
-            scrollRef.current.scrollTo({ left: width * nextSlide, behavior: 'smooth' });
-        }
-    }, 5000);
-    return () => clearInterval(interval);
-  }, [currentSlide]);
-
-  const handleScroll = () => {
-      if (scrollRef.current) {
-          const index = Math.round(scrollRef.current.scrollLeft / scrollRef.current.offsetWidth);
-          if (index !== currentSlide) setCurrentSlide(index);
-      }
-  };
-
-  return (
-    <div className="relative">
-        <div 
-            ref={scrollRef}
-            onScroll={handleScroll}
-            className="flex overflow-x-auto snap-x snap-mandatory no-scrollbar rounded-[32px] shadow-sm"
-        >
-            {displayBanners.map((banner, idx) => (
-                <div 
-                    key={`${banner.id}-${idx}`} 
-                    className={`w-full flex-shrink-0 aspect-[3/2] snap-center relative overflow-hidden ${banner.bgColor} flex flex-col justify-center px-6`}
-                >
-                    {banner.image && (
-                        <div className="absolute inset-0 z-0">
-                            <img src={banner.image} alt="" className="w-full h-full object-cover opacity-30 mix-blend-overlay" />
-                            <div className="absolute inset-0 bg-gradient-to-r from-black/60 to-transparent"></div>
-                        </div>
-                    )}
-
-                    <div className="relative z-10 max-w-[80%]">
-                        {banner.type === 'merchant' && (
-                            <span className="text-[9px] font-black uppercase tracking-widest opacity-80 mb-1 block" style={{ color: banner.textColor }}>
-                                {banner.merchantName} apresenta:
-                            </span>
-                        )}
-                        {banner.type === 'institutional' && (
-                            <div className="flex items-center gap-1.5 mb-1.5 opacity-90">
-                                <BadgeCheck className="w-3 h-3" color={banner.textColor === 'text-white' ? '#fff' : '#000'} />
-                                <span className="text-[9px] font-black uppercase tracking-widest" style={{ color: banner.textColor }}>Dica Localizei</span>
-                            </div>
-                        )}
-                        
-                        <h3 className={`text-xl font-black leading-tight mb-1 ${banner.textColor} drop-shadow-sm font-display`}>
-                            {banner.title}
-                        </h3>
-                        
-                        <p className={`text-xs font-medium opacity-90 ${banner.textColor}`}>
-                            {banner.subtitle}
-                        </p>
-                    </div>
-
-                    <div className="absolute top-3 right-3 bg-black/10 backdrop-blur-md px-2 py-0.5 rounded-md border border-white/10">
-                        <span className="text-[8px] font-bold text-white/80 uppercase">
-                            {banner.type === 'merchant' ? 'Publicidade' : 'App'}
-                        </span>
-                    </div>
-                </div>
-            ))}
-        </div>
-
-        <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-1.5 z-20">
-            {[0, 1, 2].map((idx) => (
-                <div 
-                    key={idx} 
-                    className={`h-1.5 rounded-full transition-all duration-300 ${
-                        idx === currentSlide ? 'w-4 bg-white' : 'w-1.5 bg-white/40'
-                    }`} 
-                />
-            ))}
-        </div>
-    </div>
-  );
+// --- Reusable Banner Rendering Components ---
+const TemplateBannerRender: React.FC<{ config: any }> = ({ config }) => {
+    const { template_id, headline, subheadline, product_image_url } = config;
+    switch (template_id) {
+      case 'oferta_relampago':
+        return (
+          <div className="w-full aspect-video rounded-2xl bg-gradient-to-br from-rose-500 to-red-600 text-white p-6 flex items-center justify-between overflow-hidden relative shadow-lg">
+            <div className="relative z-10">
+              <span className="text-sm font-bold bg-yellow-300 text-red-700 px-3 py-1 rounded-full uppercase shadow-sm">{headline || 'XX% OFF'}</span>
+              <h3 className="text-3xl font-black mt-4 drop-shadow-md max-w-[200px] leading-tight">{subheadline || 'Nome do Produto'}</h3>
+            </div>
+            <div className="relative z-10 w-32 h-32 rounded-full border-4 border-white/50 bg-gray-200 overflow-hidden flex items-center justify-center shrink-0 shadow-2xl">
+              {product_image_url ? <img src={product_image_url} className="w-full h-full object-cover" /> : <ImageIcon className="w-12 h-12 text-gray-400" />}
+            </div>
+          </div>
+        );
+      case 'lancamento':
+        return (
+          <div className="w-full aspect-video rounded-2xl bg-gradient-to-br from-slate-800 to-slate-900 text-white p-6 flex items-end justify-between overflow-hidden relative shadow-lg">
+             <img src={product_image_url || 'https://via.placeholder.com/150'} className="absolute inset-0 w-full h-full object-cover opacity-30 mix-blend-luminosity" />
+             <div className="relative z-10">
+                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-cyan-300">{headline || 'LANÇAMENTO'}</span>
+                <h3 className="text-2xl font-bold mt-1 max-w-[220px] leading-tight">{subheadline || 'Descrição'}</h3>
+             </div>
+          </div>
+        );
+      default: return null;
+    }
 };
+const CustomBannerRender: React.FC<{ config: any }> = ({ config }) => {
+    const { template_id, background_color, text_color, font_size, font_family, title, subtitle } = config;
+    const fontSizes = { small: 'text-2xl', medium: 'text-4xl', large: 'text-5xl' };
+    const subFontSizes = { small: 'text-sm', medium: 'text-base', large: 'text-lg' };
+    const headlineFontSize = { small: 'text-4xl', medium: 'text-6xl', large: 'text-7xl' };
+    const layoutClasses = {
+      simple_left: 'flex flex-col justify-center items-start text-left',
+      centered: 'flex flex-col justify-center items-center text-center',
+      headline: 'flex flex-col justify-center items-center text-center',
+    };
+    return (
+        <div 
+            className={`w-full aspect-video rounded-2xl overflow-hidden relative shadow-lg p-8 ${layoutClasses[template_id] || 'flex flex-col justify-center'}`}
+            style={{ backgroundColor: background_color, color: text_color }}
+        >
+            <h3 className={`${template_id === 'headline' ? headlineFontSize[font_size] : fontSizes[font_size]} font-black leading-tight line-clamp-2`} style={{ fontFamily: font_family }}>
+                {title || "Título"}
+            </h3>
+            <p className={`${subFontSizes[font_size]} mt-3 opacity-80 max-w-md line-clamp-3`} style={{ fontFamily: font_family }}>
+                {subtitle || "Subtítulo"}
+            </p>
+        </div>
+    );
+};
+// --- End Banner Rendering Components ---
 
 const BigSurCard: React.FC<{ 
   icon: React.ReactNode; 
@@ -225,11 +116,14 @@ interface CategoryViewProps {
   stores: Store[];
   userRole: 'cliente' | 'lojista' | null;
   onAdvertiseInCategory: (categoryName: string | null) => void;
+  onNavigate: (view: string) => void;
 }
 
-export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, onStoreClick, stores }) => {
+export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, onStoreClick, stores, userRole, onAdvertiseInCategory, onNavigate }) => {
   const [selectedSubcategory, setSelectedSubcategory] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [categoryBanner, setCategoryBanner] = useState<any | null>(null);
+  
   const subcategories = useMemo(() => SUBCATEGORIES[category.name] || [], [category.name]);
   const displayStores = useMemo(() => {
     let filtered = stores.filter(s => s.category.toLowerCase().includes(category.name.toLowerCase()));
@@ -237,6 +131,26 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
     if (searchQuery) filtered = filtered.filter(s => s.name.toLowerCase().includes(searchQuery.toLowerCase()));
     return filtered;
   }, [stores, category.name, selectedSubcategory, searchQuery]);
+
+  useEffect(() => {
+    const fetchBanner = async () => {
+        if (!supabase) return;
+        const target = `category:${category.name}`;
+        try {
+            const { data, error } = await supabase
+                .from('published_banners')
+                .select('config')
+                .eq('target', target)
+                .eq('is_active', true)
+                .order('created_at', { ascending: false })
+                .limit(1)
+                .single();
+            if (error && error.code !== 'PGRST116') throw error;
+            if (data) setCategoryBanner(data.config); else setCategoryBanner(null);
+        } catch (e) { console.error(`Error fetching banner for ${target}`, e); }
+    };
+    fetchBanner();
+  }, [category.name]);
 
   return (
     <div className="min-h-screen bg-[#FAFAFA] dark:bg-gray-950 font-sans pb-24 animate-in slide-in-from-right duration-300">
@@ -248,9 +162,26 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
       
       <main className="pt-20 space-y-6">
         
-        {/* 1. CARROSSEL DA SUBCATEGORIA - TOPO ABSOLUTO (Logo abaixo do header) */}
         <section className="px-5">
-            <SubcategoryCarousel subcategory={selectedSubcategory || category.name} />
+            {categoryBanner ? (
+                <div className="rounded-[32px] overflow-hidden">
+                    {categoryBanner.type === 'template' ? <TemplateBannerRender config={categoryBanner} /> : <CustomBannerRender config={categoryBanner} />}
+                </div>
+            ) : (
+                <div 
+                    onClick={() => {
+                        onAdvertiseInCategory(`category:${category.name}`);
+                        onNavigate('store_ads_module');
+                    }}
+                    className="w-full aspect-video rounded-3xl bg-slate-800 flex flex-col items-center justify-center text-center p-6 cursor-pointer"
+                >
+                    <div className="w-12 h-12 bg-slate-700 rounded-2xl flex items-center justify-center text-slate-400 mb-4">
+                        <Megaphone size={24} />
+                    </div>
+                    <h3 className="font-bold text-white">Anuncie nesta Categoria</h3>
+                    <p className="text-xs text-slate-400 mt-1">Seja o primeiro a aparecer aqui.</p>
+                </div>
+            )}
         </section>
 
         {/* 2. GRID DE SUBCATEGORIAS - ABAIXO DO CARROSSEL */}

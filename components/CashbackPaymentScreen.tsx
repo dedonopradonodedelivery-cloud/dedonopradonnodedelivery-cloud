@@ -15,6 +15,7 @@ import {
   Clock
 } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
+// FIX: Changed user import from firebase to supabase for consistency
 import { User } from '@supabase/supabase-js';
 import { getEffectiveBalance, initiateTransaction } from '../backend/services';
 

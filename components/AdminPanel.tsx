@@ -1,19 +1,154 @@
-
 import React, { useState, useEffect } from 'react';
 import { 
   ShieldCheck, Users, Store, BarChart3, History, Eye, Search, 
   ArrowLeft, Download, Filter, TrendingUp, AlertTriangle, 
   Clock, DollarSign, Calendar, ChevronRight, LayoutDashboard,
-  CheckCircle, XCircle, LogOut
+  CheckCircle, XCircle, LogOut, Megaphone, User as UserIcon, Building, Flag, PauseCircle, Image as ImageIcon,
+  Plus, Loader2
 } from 'lucide-react';
 import { getAdminGlobalMetrics, fetchAdminMerchants, fetchAdminUsers, fetchAdminLedger } from '../backend/services';
+import { supabase } from '../lib/supabaseClient';
+
+// --- BANNER PREVIEW COMPONENTS (COPIED FOR HISTORY VIEW) ---
+const TemplateBannerRender: React.FC<{ config: any }> = ({ config }) => {
+    if (!config) return <div className="p-2 text-xs text-slate-500">Configuração ausente</div>;
+    const { template_id, headline, subheadline, product_image_url } = config;
+    switch (template_id) {
+      case 'oferta_relampago':
+        return (
+          <div className="w-full h-full bg-gradient-to-br from-rose-500 to-red-600 text-white p-4 flex items-center justify-between overflow-hidden relative text-xs">
+            <div className="relative z-10">
+              <span className="text-[10px] font-bold bg-yellow-300 text-red-700 px-2 py-0.5 rounded-full uppercase">{headline || 'XX% OFF'}</span>
+              <h3 className="text-lg font-black mt-2 max-w-[120px] leading-tight">{subheadline || 'Produto'}</h3>
+            </div>
+            <div className="relative z-10 w-16 h-16 rounded-full border-2 border-white/50 bg-gray-200 overflow-hidden flex items-center justify-center shrink-0">
+              {product_image_url ? <img src={product_image_url} className="w-full h-full object-cover" /> : <ImageIcon className="w-8 h-8 text-gray-400" />}
+            </div>
+          </div>
+        );
+      case 'lancamento':
+        return (
+          <div className="w-full h-full bg-gradient-to-br from-slate-800 to-slate-900 text-white p-4 flex items-end justify-between overflow-hidden relative text-xs">
+             <img src={product_image_url || 'https://via.placeholder.com/150'} className="absolute inset-0 w-full h-full object-cover opacity-30" />
+             <div className="relative z-10">
+                <span className="text-[8px] font-black uppercase tracking-widest text-cyan-300">{headline || 'LANÇAMENTO'}</span>
+                <h3 className="text-base font-bold mt-1 max-w-[150px] leading-tight">{subheadline || 'Descrição'}</h3>
+             </div>
+          </div>
+        );
+      default: return <div className="p-2 text-xs">Template desconhecido</div>;
+    }
+};
+const CustomBannerRender: React.FC<{ config: any }> = ({ config }) => {
+    if (!config) return <div className="p-2 text-xs text-slate-500">Configuração ausente</div>;
+    const { background_color, text_color, title, subtitle } = config;
+    return (
+        <div className="w-full h-full p-4 flex flex-col justify-center text-xs" style={{ backgroundColor: background_color, color: text_color }}>
+            <h3 className="font-black text-base leading-tight line-clamp-2">{title || "Título"}</h3>
+            <p className="opacity-80 mt-1 line-clamp-2">{subtitle || "Subtítulo"}</p>
+        </div>
+    );
+};
+// --- END BANNER PREVIEW ---
+
+const BannerHistoryView: React.FC<{ onBack: () => void }> = ({ onBack }) => {
+    const [history, setHistory] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchHistory = async () => {
+            if (!supabase) { setLoading(false); return; }
+            try {
+                const { data, error } = await supabase
+                    .from('banner_audit_log')
+                    .select('*')
+                    .order('created_at', { ascending: false })
+                    .limit(50);
+                if (error) throw error;
+                setHistory(data || []);
+            } catch (e) {
+                console.error("Failed to fetch banner history", e);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchHistory();
+    }, []);
+
+    const formatDate = (iso: string) => new Date(iso).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
+
+    const renderBannerPreview = (log: any) => {
+        const config = log.details?.config || log.details;
+        if (!config) return <div className="p-2 text-xs text-slate-500">Preview Indisponível</div>;
+        return config.type === 'template' ? <TemplateBannerRender config={config} /> : <CustomBannerRender config={config} />;
+    };
+
+    return (
+        <div className="animate-in fade-in duration-500">
+            <div className="flex items-center gap-4 mb-8">
+                <button onClick={onBack} className="p-2.5 bg-[#1F2937] text-gray-400 hover:text-white transition-colors border border-white/5 rounded-xl active:scale-95">
+                    <ArrowLeft size={20} />
+                </button>
+                <div>
+                    <h2 className="font-black text-lg text-white">Histórico de Banners</h2>
+                    <p className="text-xs text-slate-500 font-medium">Auditoria de criação e moderação</p>
+                </div>
+            </div>
+
+            {loading ? (
+                <div className="flex justify-center pt-20"><Loader2 className="w-8 h-8 text-blue-500 animate-spin" /></div>
+            ) : history.length === 0 ? (
+                <div className="text-center py-20 text-slate-600">
+                    <History size={40} className="mx-auto mb-4" />
+                    <p className="font-bold">Nenhum registro encontrado.</p>
+                </div>
+            ) : (
+                <div className="space-y-4">
+                    {history.map(log => (
+                        <div key={log.id} className="bg-slate-900 p-4 rounded-2xl border border-white/5">
+                            <div className="flex justify-between items-start mb-3">
+                                <div className={`flex items-center gap-2 text-xs font-black uppercase tracking-widest ${log.action.includes('created') ? 'text-cyan-400' : 'text-rose-400'}`}>
+                                    {log.action.includes('created') ? <Plus size={14} /> : <PauseCircle size={14} />}
+                                    {log.action.includes('created') ? 'Criação/Update' : `Moderação: ${log.action}`}
+                                </div>
+                                <span className="text-[10px] text-slate-500 font-medium">{formatDate(log.created_at)}</span>
+                            </div>
+                            
+                            <div className="flex gap-4">
+                                <div className="w-48 h-24 rounded-lg overflow-hidden shrink-0 border border-white/10 bg-slate-800">
+                                    {renderBannerPreview(log)}
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                    <div className="flex items-center gap-2 mb-1 text-sm">
+                                        <UserIcon size={14} className="text-slate-400 shrink-0" />
+                                        <span className="font-bold text-white truncate">{log.details?.shopName || log.actor_email}</span>
+                                    </div>
+                                    <p className="text-xs text-slate-500 mb-2 truncate">Ator ID: {log.actor_id}</p>
+                                    
+                                    {log.details?.isFirstBanner && (
+                                        <div className="flex items-center gap-1.5 bg-green-500/10 text-green-400 text-[10px] font-bold px-2 py-1 rounded-full w-fit border border-green-500/20">
+                                            <Flag size={10} /> Primeiro Banner!
+                                        </div>
+                                    )}
+                                    <div className="mt-2 text-[10px] text-slate-500 font-medium uppercase tracking-wider bg-slate-800 px-2 py-1 rounded w-fit">
+                                        Destino: {log.details?.target || 'N/A'}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            )}
+        </div>
+    );
+};
 
 interface AdminPanelProps {
   user: any;
   onLogout: () => void;
   viewMode: string;
   onOpenViewSwitcher: () => void;
-  onNavigateToApp: () => void;
+  onNavigateToApp: (view: string) => void;
   onInspectMerchant?: (store: any) => void;
   onInspectUser?: (userId: string) => void;
 }
@@ -27,6 +162,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   onInspectMerchant,
   onInspectUser
 }) => {
+  const [view, setView] = useState<'dashboard' | 'history'>('dashboard');
   const [activeTab, setActiveTab] = useState<'metrics' | 'merchants' | 'users' | 'ledger'>('metrics');
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -36,8 +172,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   const [ledger, setLedger] = useState<any[]>([]);
 
   useEffect(() => {
-    loadData();
-  }, [activeTab, searchTerm]);
+    if(view === 'dashboard') loadData();
+  }, [activeTab, searchTerm, view]);
 
   const loadData = async () => {
     setLoading(true);
@@ -53,6 +189,19 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
 
   const formatBRL = (cents: number) => 
     (cents / 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
+  if (view === 'history') {
+    return (
+        <div className="min-h-screen bg-[#0F172A] text-slate-200 font-sans flex flex-col">
+            <header className="bg-slate-900 border-b border-white/5 px-6 py-4 sticky top-0 z-50">
+                <h1 className="font-black text-xl uppercase tracking-tighter text-white">Histórico</h1>
+            </header>
+            <main className="flex-1 p-6 overflow-y-auto no-scrollbar pb-32">
+                <BannerHistoryView onBack={() => setView('dashboard')} />
+            </main>
+        </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#0F172A] text-slate-200 font-sans flex flex-col">
@@ -72,7 +221,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                 <button onClick={onOpenViewSwitcher} className="px-4 py-2 bg-white/5 hover:bg-white/10 rounded-xl text-[10px] font-black uppercase tracking-widest text-blue-400 border border-blue-500/20">
                     Visão: {viewMode}
                 </button>
-                <button onClick={onNavigateToApp} className="p-2.5 bg-white/5 rounded-xl text-slate-400 hover:text-white transition-all">
+                <button onClick={() => onNavigateToApp('home')} className="p-2.5 bg-white/5 rounded-xl text-slate-400 hover:text-white transition-all">
                     <ArrowLeft size={20} />
                 </button>
                 <button onClick={onLogout} className="p-2.5 bg-red-500/10 rounded-xl text-red-500 hover:bg-red-500/20 transition-all">
@@ -105,6 +254,41 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
       </header>
 
       <main className="flex-1 p-6 overflow-y-auto no-scrollbar pb-32">
+        
+        <div className="mb-8">
+            <h3 className="text-xs font-black text-slate-500 uppercase tracking-widest mb-3">Auditoria e Moderação</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <button
+                    onClick={() => onNavigateToApp('admin_banner_moderation')}
+                    className="w-full bg-slate-900 p-5 rounded-3xl border border-white/5 flex items-center justify-between group hover:border-rose-500/30 transition-all"
+                >
+                    <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 bg-slate-800 rounded-2xl flex items-center justify-center text-slate-400 group-hover:text-rose-400 transition-colors">
+                            <Megaphone size={24} />
+                        </div>
+                        <div>
+                            <h4 className="font-bold text-white text-base text-left">Moderar Banners</h4>
+                            <p className="text-xs text-slate-500 text-left">Analisar e pausar.</p>
+                        </div>
+                    </div>
+                </button>
+                <button
+                    onClick={() => setView('history')}
+                    className="w-full bg-slate-900 p-5 rounded-3xl border border-white/5 flex items-center justify-between group hover:border-cyan-500/30 transition-all"
+                >
+                    <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 bg-slate-800 rounded-2xl flex items-center justify-center text-slate-400 group-hover:text-cyan-400 transition-colors">
+                            <History size={24} />
+                        </div>
+                        <div>
+                            <h4 className="font-bold text-white text-base text-left">Histórico de Banners</h4>
+                            <p className="text-xs text-slate-500 text-left">Logs de criação e moderação.</p>
+                        </div>
+                    </div>
+                </button>
+            </div>
+        </div>
+
         {activeTab !== 'metrics' && (
             <div className="relative mb-8 group">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500 group-focus-within:text-[#1E5BFF] transition-colors" />

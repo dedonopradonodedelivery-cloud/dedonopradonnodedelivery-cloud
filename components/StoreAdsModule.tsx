@@ -15,19 +15,59 @@ import {
   Palette,
   LayoutTemplate,
   Type,
-  Paintbrush
+  Paintbrush,
+  AlertTriangle,
+  X
 } from 'lucide-react';
+import { User } from '@supabase/supabase-js';
+import { supabase } from '../lib/supabaseClient';
+
+// --- VALIDATION HELPERS ---
+const FORBIDDEN_WORDS = ['palavrão', 'inapropriado', 'violação', 'gratis'];
+const CHAR_LIMITS = {
+  template_headline: 25,
+  template_subheadline: 50,
+  editor_title: 40,
+  editor_subtitle: 120,
+};
+const MIN_CONTRAST_RATIO = 4.5;
+
+const hexToRgb = (hex: string): { r: number; g: number; b: number } | null => {
+  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  return result ? {
+    r: parseInt(result[1], 16),
+    g: parseInt(result[2], 16),
+    b: parseInt(result[3], 16),
+  } : null;
+};
+
+const getLuminance = (r: number, g: number, b: number): number => {
+  const a = [r, g, b].map((v) => {
+    v /= 255;
+    return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+  });
+  return a[0] * 0.2126 + a[1] * 0.7152 + a[2] * 0.0722;
+};
+
+const getContrastRatio = (hex1: string, hex2: string): number => {
+  const rgb1 = hexToRgb(hex1);
+  const rgb2 = hexToRgb(hex2);
+  if (!rgb1 || !rgb2) return 1;
+  const lum1 = getLuminance(rgb1.r, rgb1.g, rgb1.b);
+  const lum2 = getLuminance(rgb2.r, rgb2.g, rgb2.b);
+  const lightest = Math.max(lum1, lum2);
+  const darkest = Math.min(lum1, lum2);
+  return (lightest + 0.05) / (darkest + 0.05);
+};
+// --- END VALIDATION ---
+
 
 interface StoreAdsModuleProps {
   onBack: () => void;
   onNavigate: (view: string) => void;
   categoryName?: string;
+  user: User | null;
 }
-
-const AVAILABLE_NEIGHBORHOODS = [
-  "Freguesia", "Taquara", "Anil", "Pechincha", "Cidade de Deus", 
-  "Curicica", "Parque Olímpico", "Gardênia", "Tanque"
-];
 
 // --- TEMPLATES DO SISTEMA DE BANNERS AUTOMÁTICOS ---
 const BANNER_TEMPLATES = [
@@ -143,9 +183,43 @@ const BannerEditorPreview: React.FC<{ data: any }> = ({ data }) => {
     );
 };
 
+const ValidationErrorsModal: React.FC<{ errors: string[]; onClose: () => void }> = ({ errors, onClose }) => {
+  if (errors.length === 0) return null;
+  return (
+    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-6">
+      <div className="bg-slate-800 p-8 rounded-2xl w-full max-w-md border border-red-500/30 shadow-2xl animate-in zoom-in-95">
+        <div className="flex items-center gap-4 mb-6">
+          <div className="w-12 h-12 bg-red-500/10 rounded-full flex items-center justify-center text-red-500">
+            <AlertTriangle size={24} />
+          </div>
+          <div>
+            <h2 className="font-black text-lg text-white">Publicação Bloqueada</h2>
+            <p className="text-sm text-slate-400">Corrija os erros para continuar:</p>
+          </div>
+        </div>
+        <ul className="space-y-3 mb-8">
+          {errors.map((err, i) => (
+            <li key={i} className="flex items-start gap-3 text-red-400">
+              <X size={16} className="shrink-0 mt-0.5" />
+              <span className="text-sm font-medium">{err}</span>
+            </li>
+          ))}
+        </ul>
+        <button
+          onClick={onClose}
+          className="w-full bg-slate-700 text-white font-bold py-3 rounded-xl hover:bg-slate-600"
+        >
+          Entendi
+        </button>
+      </div>
+    </div>
+  );
+};
 
-export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, categoryName }) => {
+
+export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNavigate, categoryName, user }) => {
   const [view, setView] = useState<'sales' | 'creator' | 'editor'>('sales');
+  const [validationErrors, setValidationErrors] = useState<string[]>([]);
 
   // --- Template Creator State ---
   const [selectedTemplate, setSelectedTemplate] = useState(BANNER_TEMPLATES[0]);
@@ -165,22 +239,60 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, category
   const [isSaving, setIsSaving] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
 
-  const handleSaveBanner = () => {
-    setIsSaving(true);
-    
-    let bannerDataToSave;
+  const clearErrorsOnChange = (setter: React.Dispatch<React.SetStateAction<any>>) => (value: any) => {
+    if (validationErrors.length > 0) setValidationErrors([]);
+    setter(value);
+  };
+  
+  const validateBanner = (): string[] => {
+    const errors: string[] = [];
+    const containsForbidden = (text: string) => FORBIDDEN_WORDS.some(word => text.toLowerCase().includes(word));
 
     if (view === 'creator') {
-      // Para o criador de templates, salvamos o ID do template e os dados do formulário.
-      bannerDataToSave = {
-        type: 'template',
-        template_id: selectedTemplate.id,
-        ...formData,
-      };
-    } else { // 'editor'
-      // Para o editor customizado, salvamos a configuração de estilo completa.
+        const { headline = '', subheadline = '' } = formData;
+        if (!headline.trim()) errors.push('A "Chamada Principal" é obrigatória.');
+        if (headline.length > CHAR_LIMITS.template_headline) errors.push(`A "Chamada Principal" deve ter no máximo ${CHAR_LIMITS.template_headline} caracteres.`);
+        if (subheadline.length > CHAR_LIMITS.template_subheadline) errors.push(`O "Nome do Produto" deve ter no máximo ${CHAR_LIMITS.template_subheadline} caracteres.`);
+        if (containsForbidden(headline) || containsForbidden(subheadline)) errors.push('Seu banner contém palavras não permitidas.');
+    } else if (view === 'editor') {
+        const { title = '', subtitle = '', palette } = editorData;
+        if (!title.trim()) errors.push('O "Título" do banner é obrigatório.');
+        if (title.length > CHAR_LIMITS.editor_title) errors.push(`O "Título" deve ter no máximo ${CHAR_LIMITS.editor_title} caracteres.`);
+        if (subtitle.length > CHAR_LIMITS.editor_subtitle) errors.push(`O "Subtítulo" deve ter no máximo ${CHAR_LIMITS.editor_subtitle} caracteres.`);
+        if (containsForbidden(title) || containsForbidden(subtitle)) errors.push('Seu banner contém palavras não permitidas.');
+        
+        const selectedPalette = COLOR_PALETTES.find(p => p.id === palette);
+        if (selectedPalette) {
+            const contrast = getContrastRatio(selectedPalette.bg, selectedPalette.text);
+            if (contrast < MIN_CONTRAST_RATIO) {
+                errors.push(`O contraste entre o fundo e o texto da paleta "${selectedPalette.name}" é muito baixo (${contrast.toFixed(1)}:1). Escolha outra paleta.`);
+            }
+        }
+    }
+    return errors;
+  };
+
+  const handleSaveBanner = async () => {
+    if (!user) {
+      alert("Você precisa estar logado para criar um banner.");
+      return;
+    }
+    
+    const errors = validateBanner();
+    if (errors.length > 0) {
+      setValidationErrors(errors);
+      return;
+    }
+
+    setIsSaving(true);
+    
+    let bannerConfigToSave;
+
+    if (view === 'creator') {
+      bannerConfigToSave = { type: 'template', template_id: selectedTemplate.id, ...formData };
+    } else {
       const selectedPalette = COLOR_PALETTES.find(p => p.id === editorData.palette) || COLOR_PALETTES[0];
-      bannerDataToSave = {
+      bannerConfigToSave = {
         type: 'custom_editor',
         template_id: editorData.template,
         background_color: selectedPalette.bg,
@@ -192,23 +304,74 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, category
       };
     }
 
-    // Salvando o JSON no localStorage
-    localStorage.setItem('user_banner_config', JSON.stringify(bannerDataToSave));
+    const targetKey = categoryName || 'home';
+    const firstBannerFlag = `has_created_banner_${user.id}`;
+    const isFirstBanner = !localStorage.getItem(firstBannerFlag);
 
-    setTimeout(() => {
-        setIsSaving(false);
-        setShowSuccess(true);
+    try {
+        if (!supabase) throw new Error("Supabase client not available");
+        
+        // 1. Upsert banner para o banco de dados
+        const { data: bannerData, error: upsertError } = await supabase
+            .from('published_banners')
+            .upsert({
+                merchant_id: user.id,
+                target: targetKey,
+                config: bannerConfigToSave,
+                is_active: true,
+                updated_at: new Date().toISOString()
+            }, { onConflict: 'merchant_id,target' })
+            .select()
+            .single();
+        
+        if (upsertError) throw upsertError;
+        
+        // 2. Logar a ação na tabela de auditoria
+        const { error: logError } = await supabase
+            .from('banner_audit_log')
+            .insert({
+                actor_id: user.id,
+                actor_email: user.email,
+                action: 'created/updated',
+                banner_id: bannerData.id,
+                details: {
+                    shopName: user.user_metadata?.store_name || "Loja Sem Nome",
+                    target: targetKey,
+                    isFirstBanner: isFirstBanner,
+                    config: bannerConfigToSave
+                }
+            });
+
+        if (logError) console.error("Failed to log banner event:", logError);
+
+        if (isFirstBanner) {
+            localStorage.setItem(firstBannerFlag, 'true');
+        }
+
+        // Simula o resto do fluxo de sucesso que já existia
         setTimeout(() => {
-            setShowSuccess(false);
-            setView('sales');
-        }, 3000);
-    }, 1500);
+            setIsSaving(false);
+            setShowSuccess(true);
+            setTimeout(() => {
+                setShowSuccess(false);
+                if (onNavigate) { onNavigate('home'); } 
+                else { setView('sales'); }
+            }, 3000);
+        }, 500);
+
+    } catch (e) {
+        console.error("Error saving banner to Supabase:", e);
+        setIsSaving(false);
+        // Mostrar erro para o usuário
+        setValidationErrors(["Ocorreu um erro ao salvar seu banner. Tente novamente."]);
+    }
   };
   
   // RENDERIZADOR DO CRIADOR DE BANNERS (TEMPLATES)
   if (view === 'creator') {
     return (
       <div className="min-h-screen bg-[#111827] flex flex-col">
+        <ValidationErrorsModal errors={validationErrors} onClose={() => setValidationErrors([])} />
         <header className="sticky top-0 z-20 bg-[#111827]/80 backdrop-blur-md border-b border-white/10 px-5 h-16 flex items-center gap-4">
           <button onClick={() => setView('sales')} className="p-2 -ml-2 rounded-full hover:bg-white/5"><ChevronLeft className="w-6 h-6 text-slate-300" /></button>
           <h1 className="font-bold text-lg text-white">Criador Rápido</h1>
@@ -232,7 +395,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, category
                     {selectedTemplate.fields.map(field => (
                         <div key={field.id}>
                             <label className="text-xs font-bold text-slate-400 mb-1.5 block">{field.label}</label>
-                            <input type={field.type} placeholder={field.placeholder} value={formData[field.id] || ''} onChange={(e) => setFormData({...formData, [field.id]: e.target.value})} className="w-full bg-slate-900 border border-slate-600 rounded-lg p-3 text-sm text-white focus:ring-2 focus:ring-blue-500 outline-none" />
+                            <input type={field.type} placeholder={field.placeholder} value={formData[field.id] || ''} onChange={clearErrorsOnChange((e) => setFormData({...formData, [field.id]: e.target.value}))} className="w-full bg-slate-900 border border-slate-600 rounded-lg p-3 text-sm text-white focus:ring-2 focus:ring-blue-500 outline-none" />
                         </div>
                     ))}
                 </div>
@@ -257,6 +420,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, category
   if (view === 'editor') {
     return (
       <div className="min-h-screen bg-[#111827] flex flex-col">
+        <ValidationErrorsModal errors={validationErrors} onClose={() => setValidationErrors([])} />
         <header className="sticky top-0 z-20 bg-[#111827]/80 backdrop-blur-md border-b border-white/10 px-5 h-16 flex items-center gap-4">
           <button onClick={() => setView('sales')} className="p-2 -ml-2 rounded-full hover:bg-white/5"><ChevronLeft className="w-6 h-6 text-slate-300" /></button>
           <h1 className="font-bold text-lg text-white">Editor de Banner</h1>
@@ -267,7 +431,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, category
             <h2 className="flex items-center gap-2 text-xs font-black text-slate-400 uppercase tracking-[0.2em] mb-4"><LayoutTemplate size={14}/>Layout</h2>
             <div className="grid grid-cols-3 gap-3">
               {EDITOR_LAYOUTS.map(layout => (
-                 <button key={layout.id} onClick={() => setEditorData({...editorData, template: layout.id})} className={`p-3 rounded-xl text-sm font-bold border-2 ${editorData.template === layout.id ? 'border-blue-500 bg-blue-500/10' : 'border-slate-700 bg-slate-800'}`}>
+                 <button key={layout.id} onClick={clearErrorsOnChange(() => setEditorData({...editorData, template: layout.id}))} className={`p-3 rounded-xl text-sm font-bold border-2 ${editorData.template === layout.id ? 'border-blue-500 bg-blue-500/10' : 'border-slate-700 bg-slate-800'}`}>
                   {layout.name}
                  </button>
               ))}
@@ -277,8 +441,8 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, category
           <section>
             <h2 className="flex items-center gap-2 text-xs font-black text-slate-400 uppercase tracking-[0.2em] mb-4"><Type size={14}/>Conteúdo</h2>
             <div className="space-y-4">
-              <input type="text" placeholder="Título" value={editorData.title} onChange={e => setEditorData({...editorData, title: e.target.value})} className="w-full bg-slate-800 p-3 rounded-lg border border-slate-700 text-white" />
-              <input type="text" placeholder="Subtítulo" value={editorData.subtitle} onChange={e => setEditorData({...editorData, subtitle: e.target.value})} className="w-full bg-slate-800 p-3 rounded-lg border border-slate-700 text-white" />
+              <input type="text" placeholder="Título" value={editorData.title} onChange={clearErrorsOnChange(e => setEditorData({...editorData, title: e.target.value}))} className="w-full bg-slate-800 p-3 rounded-lg border border-slate-700 text-white" />
+              <input type="text" placeholder="Subtítulo" value={editorData.subtitle} onChange={clearErrorsOnChange(e => setEditorData({...editorData, subtitle: e.target.value}))} className="w-full bg-slate-800 p-3 rounded-lg border border-slate-700 text-white" />
             </div>
           </section>
 
@@ -289,7 +453,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, category
                   <label className="text-xs text-slate-400 mb-2 block font-bold">Paleta de Cores</label>
                   <div className="flex gap-3">
                     {COLOR_PALETTES.map(p => (
-                      <button key={p.id} onClick={() => setEditorData({...editorData, palette: p.id})} className={`w-10 h-10 rounded-full flex items-center justify-center border-2 ${editorData.palette === p.id ? 'border-blue-500' : 'border-transparent'}`}>
+                      <button key={p.id} onClick={clearErrorsOnChange(() => setEditorData({...editorData, palette: p.id}))} className={`w-10 h-10 rounded-full flex items-center justify-center border-2 ${editorData.palette === p.id ? 'border-blue-500' : 'border-transparent'}`}>
                         <div className="w-8 h-8 rounded-full overflow-hidden flex">
                            <div className="w-1/2 h-full" style={{backgroundColor: p.previewColors[0]}}></div>
                            <div className="w-1/2 h-full" style={{backgroundColor: p.previewColors[1]}}></div>
@@ -301,7 +465,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, category
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="text-xs text-slate-400 font-bold">Fonte</label>
-                    <select value={editorData.fontFamily} onChange={e => setEditorData({...editorData, fontFamily: e.target.value})} className="w-full bg-slate-800 p-3 rounded-lg border border-slate-700 mt-1 text-white">
+                    <select value={editorData.fontFamily} onChange={clearErrorsOnChange(e => setEditorData({...editorData, fontFamily: e.target.value}))} className="w-full bg-slate-800 p-3 rounded-lg border border-slate-700 mt-1 text-white">
                       <option>Poppins</option>
                       <option>Outfit</option>
                       <option>Arial</option>
@@ -309,7 +473,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, category
                   </div>
                   <div>
                     <label className="text-xs text-slate-400 font-bold">Tamanho</label>
-                    <select value={editorData.fontSize} onChange={e => setEditorData({...editorData, fontSize: e.target.value})} className="w-full bg-slate-800 p-3 rounded-lg border border-slate-700 mt-1 text-white">
+                    <select value={editorData.fontSize} onChange={clearErrorsOnChange(e => setEditorData({...editorData, fontSize: e.target.value}))} className="w-full bg-slate-800 p-3 rounded-lg border border-slate-700 mt-1 text-white">
                       <option value="small">Pequeno</option>
                       <option value="medium">Médio</option>
                       <option value="large">Grande</option>
