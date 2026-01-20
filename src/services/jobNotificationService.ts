@@ -1,4 +1,5 @@
-import { supabase } from './supabaseClient';
+// FIX: Corrected supabase import path from ./supabaseClient to ../lib/supabaseClient
+import { supabase } from '../lib/supabaseClient';
 import { Job } from '../types';
 
 /**

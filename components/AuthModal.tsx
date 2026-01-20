@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { supabase } from '../services/supabase';
+import { supabase } from '../lib/supabaseClient';
 import {
   X,
   Mail,
@@ -258,7 +258,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           </div>
         )}
 
-        {/* Visual Cue for Merchant Mode */}
         {mode === 'register' && profileType === 'store' && (
             <div className="mb-4 bg-blue-50 dark:bg-blue-900/20 p-3 rounded-xl flex gap-3 items-center border border-blue-100 dark:border-blue-800">
                 <Briefcase className="w-5 h-5 text-[#1E5BFF]" />
@@ -339,7 +338,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           </button>
         </form>
 
-        {/* Google Sign-In Button */}
         <div className="relative my-6 flex items-center">
             <div className="flex-grow border-t border-gray-200 dark:border-gray-700"></div>
             <span className="flex-shrink mx-4 text-gray-400 text-sm">OU</span>

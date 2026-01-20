@@ -24,8 +24,10 @@ import {
   Eye
 } from 'lucide-react';
 import { User } from '@supabase/supabase-js';
-import { supabase } from '../../services/supabaseClient';
+// FIX: Corrected supabase import path from ../../services/supabaseClient to ../../lib/supabaseClient
+import { supabase } from '../../lib/supabaseClient';
 
+// --- VALIDATION HELPERS ---
 const FORBIDDEN_WORDS = ['palavrão', 'inapropriado', 'violação', 'gratis'];
 const CHAR_LIMITS = {
   template_headline: 25,
@@ -62,6 +64,8 @@ const getContrastRatio = (hex1: string, hex2: string): number => {
   const darkest = Math.min(lum1, lum2);
   return (lightest + 0.05) / (darkest + 0.05);
 };
+// --- END VALIDATION ---
+
 
 interface StoreAdsModuleProps {
   onBack: () => void;
@@ -70,6 +74,7 @@ interface StoreAdsModuleProps {
   user: User | null;
 }
 
+// --- CONFIGURAÇÕES DO CRIADOR RÁPIDO ---
 const GOALS = [
     { id: 'promover_oferta', name: 'Promover Oferta', icon: Gift, description: 'Descontos, combos e promoções.' },
     { id: 'anunciar_novidade', name: 'Anunciar Novidade', icon: Sparkles, description: 'Lançamentos de produtos ou serviços.' },
@@ -113,7 +118,9 @@ const BANNER_TEMPLATES = [
 ];
 
 const CTA_OPTIONS = ["Saiba Mais", "Peça Agora", "Ver Cardápio", "Agende seu Horário", "Visite nosso Instagram"];
+// --- FIM CONFIGURAÇÕES ---
 
+// --- CONFIGURAÇÕES DO EDITOR DE BANNER PERSONALIZADO ---
 const EDITOR_LAYOUTS = [
   { id: 'simple_left', name: 'Simples' },
   { id: 'centered', name: 'Centralizado' },
@@ -128,6 +135,7 @@ const COLOR_PALETTES = [
   { id: 'red_white', name: 'Vermelho', bg: '#DC2626', text: '#FFFFFF', previewColors: ['#DC2626', '#FFFFFF'] },
 ];
 
+// Componente de Preview do Banner (Template)
 const BannerPreview: React.FC<{ templateId: string; data: any; storeName: string; cta?: string | null; }> = ({ templateId, data, storeName, cta }) => {
   const template = BANNER_TEMPLATES.find(t => t.id === templateId);
   if (!template) return null;
@@ -185,6 +193,7 @@ const BannerPreview: React.FC<{ templateId: string; data: any; storeName: string
   return <div className="transition-all duration-300">{renderContent()}</div>;
 };
 
+// Componente de Preview do Editor
 const BannerEditorPreview: React.FC<{ data: any }> = ({ data }) => {
     const { template, palette, fontSize, fontFamily, title, subtitle } = data;
     
@@ -254,12 +263,14 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
   const [view, setView] = useState<'sales' | 'creator' | 'editor'>('sales');
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
 
+  // --- Template Creator State ---
   const [selectedGoal, setSelectedGoal] = useState<string | null>(null);
   const [selectedTemplate, setSelectedTemplate] = useState<any | null>(null);
   const [selectedCta, setSelectedCta] = useState<string | null>(null);
   const [ctaStepCompleted, setCtaStepCompleted] = useState(false);
   const [formData, setFormData] = useState<any>({});
   
+  // --- Custom Editor State ---
   const [editorData, setEditorData] = useState({
     template: 'simple_left',
     palette: 'blue_white',
@@ -269,6 +280,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
     subtitle: 'Subtítulo descritivo aqui',
   });
 
+  // --- Shared State ---
   const [isSaving, setIsSaving] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
 
@@ -321,6 +333,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
     try {
         if (!supabase || !user) throw new Error("Usuário ou Supabase não disponível.");
 
+        // 1. Inserir no 'published_banners'
         const { data: bannerData, error: bannerError } = await supabase
             .from('published_banners')
             .insert({
@@ -328,13 +341,14 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
                 target: bannerTarget,
                 config: config,
                 is_active: true,
-                expires_at: null,
+                expires_at: null, // banners manuais não expiram por padrão
             })
             .select()
             .single();
         
         if (bannerError) throw bannerError;
 
+        // 2. Log de Auditoria
         const { error: logError } = await supabase.from('banner_audit_log').insert({
             actor_id: user.id,
             actor_email: user.email,
@@ -342,13 +356,15 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
             banner_id: bannerData.id,
             details: { 
                 shopName: user.user_metadata?.store_name || 'Loja',
-                isFirstBanner: true,
+                isFirstBanner: true, // Lógica de verificação omitida por simplicidade
                 target: bannerTarget,
                 config,
             }
         });
         if (logError) console.warn("Log de auditoria falhou:", logError);
 
+        // 3. (OPCIONAL) Disparar notificação para ADM no primeiro banner
+        // Essa lógica seria melhor em um trigger de DB, mas fazemos aqui para o MVP.
         const { count } = await supabase.from('published_banners').select('*', { count: 'exact', head: true }).eq('merchant_id', user.id);
         if (count === 1) {
             await supabase.functions.invoke('send-email-admin-banner', {
@@ -382,6 +398,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
     setEditorData(prev => ({...prev, [field]: value}));
   }
 
+  // ---- RENDER LOGIC ----
   const renderStep = (): React.JSX.Element | null => {
     if (view === 'sales') {
       return (
@@ -475,6 +492,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
       };
 
       if (isCustom) {
+        // EDITOR PERSONALIZADO
         return (
             <div className="animate-in fade-in duration-500">
                 <div className="mb-8">
@@ -516,7 +534,9 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
             </div>
         );
       } else {
+        // CRIADOR RÁPIDO (TEMPLATE)
         if (!selectedGoal) {
+          // STEP 1: CHOOSE GOAL
           return (
             <div className="animate-in slide-in-from-right duration-500">
               <h3 className="font-black text-sm uppercase tracking-widest text-blue-400 mb-4">Passo 1: Qual seu objetivo?</h3>
@@ -536,6 +556,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
         }
 
         if (selectedGoal && !selectedTemplate) {
+          // STEP 2: CHOOSE TEMPLATE
           const availableTemplates = BANNER_TEMPLATES.filter(t => t.goal === selectedGoal);
           return (
             <div className="animate-in slide-in-from-right duration-500">
@@ -554,6 +575,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
         }
 
         if (selectedTemplate) {
+          // STEP 3: FILL FORM & PREVIEW
           return (
             <div className="animate-in slide-in-from-right duration-500">
                 <button onClick={handleBackToSelection} className="flex items-center gap-2 text-xs text-slate-400 mb-4"><ChevronLeft size={16} /> Voltar</button>

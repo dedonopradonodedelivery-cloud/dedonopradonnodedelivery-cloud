@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
-import { supabase } from '../services/supabaseClient';
+// FIX: Corrected supabase import path from ../services/supabaseClient to ../lib/supabaseClient
+import { supabase } from '../lib/supabaseClient';
 import { User } from '@supabase/supabase-js';
 
 export const useFavorites = (user: User | null) => {

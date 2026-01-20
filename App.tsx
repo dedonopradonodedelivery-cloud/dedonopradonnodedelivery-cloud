@@ -165,7 +165,6 @@ const App: React.FC = () => {
                 {activeTab === 'service_subcategories' && selectedServiceMacro && <SubcategoriesView macroId={selectedServiceMacro.id} macroName={selectedServiceMacro.name} onBack={() => setActiveTab('services')} onSelectSubcategory={(n) => { setQuoteCategory(n); setActiveTab('service_specialties'); }} />}
                 {activeTab === 'service_specialties' && <SpecialtiesView subcategoryName={quoteCategory} onBack={() => setActiveTab('service_subcategories')} onSelectSpecialty={() => setIsQuoteModalOpen(true)} />}
                 {activeTab === 'store_ads_module' && <StoreAdsModule onBack={() => setActiveTab('store_area')} onNavigate={setActiveTab} categoryName={adCategoryTarget || undefined} user={user as any} />}
-                {/* FIX: Removed the 'user' prop from StoreProfileEdit as it now uses AuthContext. */}
                 {activeTab === 'store_profile' && <StoreProfileEdit onBack={() => setActiveTab('store_area')} />}
               </main>
               <AuthModal isOpen={isAuthOpen} onClose={() => setIsAuthOpen(false)} user={user as any} onLoginSuccess={handleLoginSuccess} />

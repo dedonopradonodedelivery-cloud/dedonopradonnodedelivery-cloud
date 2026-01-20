@@ -1,2 +1,3 @@
-export const SUPABASE_URL = "https://nyneuuvcdmtqjyaqrztz.supabase.co";
-export const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im55bmV1dXZjZG10cWp5YXFyenR6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMxMzE5OTQsImV4cCI6MjA3ODcwNzk5NH0.myPZeiXk-0NQIlyvwgLlfIxei5sLoNpwexwDnxlJLUk";
+// This file's content has been merged into /lib/supabaseClient.ts
+// It is now empty to prevent duplicate declarations and build errors.
+export {};

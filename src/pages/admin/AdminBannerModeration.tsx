@@ -14,8 +14,10 @@ import {
   Loader2
 } from 'lucide-react';
 import { User } from '@supabase/supabase-js';
-import { supabase } from '../../services/supabaseClient';
+// FIX: Corrected supabase import path from ../../services/supabaseClient to ../../lib/supabaseClient
+import { supabase } from '../../lib/supabaseClient';
 
+// --- Reusable Banner Rendering Components ---
 const TemplateBannerRender: React.FC<{ config: any }> = ({ config }) => {
     if (!config) return <div className="p-2 text-xs text-slate-500">Configuração ausente</div>;
     const { template_id, headline, subheadline, product_image_url } = config;
@@ -55,6 +57,7 @@ const CustomBannerRender: React.FC<{ config: any }> = ({ config }) => {
         </div>
     );
 };
+// --- END ---
 
 interface AdminBannerModerationProps {
   onBack: () => void;
