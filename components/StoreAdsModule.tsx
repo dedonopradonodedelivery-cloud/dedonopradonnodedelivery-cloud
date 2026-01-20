@@ -414,7 +414,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
             </p>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 gap-6">
             <button
               onClick={() => setView('creator')}
               className="bg-slate-800 p-8 rounded-3xl border border-white/10 text-left hover:border-blue-500/50 transition-all group"
@@ -444,6 +444,37 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
                  <span className="text-xs font-black text-purple-400 uppercase tracking-widest flex items-center gap-2 group-hover:gap-3 transition-all">
                     Criar do zero <ArrowRight size={14} />
                 </span>
+            </button>
+            <button
+              onClick={() => alert('Solicitação de arte enviada! Entraremos em contato em breve.')}
+              className="bg-slate-800 p-8 rounded-3xl border border-white/10 text-left hover:border-emerald-500/50 transition-all group relative"
+            >
+              <div className="absolute top-4 right-4 bg-emerald-500/10 text-emerald-400 text-[9px] font-bold px-2.5 py-1 rounded-full border border-emerald-500/20">
+                  Oferta especial
+              </div>
+              <div className="w-12 h-12 bg-emerald-500/10 rounded-2xl flex items-center justify-center text-emerald-400 mb-4 border border-emerald-500/20">
+                  <Rocket size={24} />
+              </div>
+              <h3 className="font-bold text-white text-lg mb-2">👉 Banner criado por nossos designers</h3>
+              <p className="text-xs text-slate-400 mb-6 leading-relaxed">
+                  Nossa equipe cria um banner profissional para sua loja, pronto para anunciar no app.
+              </p>
+              
+              <ul className="text-xs text-slate-400 space-y-2 mb-6">
+                <li className="flex items-center gap-2"><Check size={14} className="text-emerald-400"/>Até 3 alterações inclusas</li>
+                <li className="flex items-center gap-2"><Check size={14} className="text-emerald-400"/>Arte profissional feita por designers</li>
+                <li className="flex items-center gap-2"><Check size={14} className="text-emerald-400"/>Banner otimizado para o app</li>
+              </ul>
+
+              <div className="flex items-baseline gap-2 mb-6">
+                <span className="text-slate-500 line-through">R$ 129,90</span>
+                <span className="text-3xl font-black text-white">R$ 59,90</span>
+                <span className="text-slate-400 text-xs font-medium">por arte</span>
+              </div>
+
+              <span className="text-xs font-black text-emerald-400 uppercase tracking-widest flex items-center gap-2 group-hover:gap-3 transition-all">
+                  Solicitar agora <ArrowRight size={14} />
+              </span>
             </button>
           </div>
         </div>
@@ -581,7 +612,6 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
         }
       }
     }
-// FIX: Add a fallback return statement in the `renderStep` function to ensure all code paths return a value, satisfying TypeScript's strict return type checking.
     return null;
   };
 
@@ -625,4 +655,16 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
       {showSuccess && (
         <div className="fixed inset-0 z-[100] bg-black/80 flex items-center justify-center p-6 animate-in fade-in">
            <div className="bg-slate-800 p-10 rounded-2xl flex flex-col items-center text-center">
-                <div className="w-16 h-1
+                <div className="w-16 h-16 bg-green-500/10 rounded-full flex items-center justify-center text-green-400 mb-6 border-2 border-green-500/20">
+                    <CheckCircle2 size={32} />
+                </div>
+                <h2 className="font-black text-xl text-white">Publicado!</h2>
+                <p className="text-sm text-slate-400 mt-2">Seu banner já está ativo no aplicativo.</p>
+           </div>
+        </div>
+      )}
+      
+      <ValidationErrorsModal errors={validationErrors} onClose={() => setValidationErrors([])} />
+    </div>
+  );
+};
