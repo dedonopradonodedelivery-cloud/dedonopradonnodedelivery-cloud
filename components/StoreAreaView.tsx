@@ -111,17 +111,68 @@ const dateRangeOptions = [
     { value: '365d', label: 'Último ano' },
 ];
 
+const generateMockData = (days: number) => {
+    const kpis = {
+        totalViews: 1284,
+        totalAdClicks: 96,
+        totalLeads: 327,
+        generalCtr: '8.32%'
+    };
+
+    const organicChartData = Array.from({ length: days }, (_, i) => {
+        const d = new Date();
+        d.setDate(d.getDate() - (days - 1 - i));
+        return {
+            label: d.toLocaleDateString('pt-BR', { day: '2-digit' }),
+            views: Math.max(0, Math.floor(1284 / days) + (Math.floor(Math.random() * 20) - 10)),
+            leads: Math.max(0, Math.floor(327 / days) + (Math.floor(Math.random() * 5) - 2))
+        };
+    });
+    
+    const sortedTopActions = [
+        ['whatsapp', 152],
+        ['directions', 98],
+        ['call', 77]
+    ];
+
+    const adsTableData = [
+        {
+            id: 'Banner Home',
+            impressions: 842,
+            clicks: 71,
+            ctr: ((71 / 842) * 100).toFixed(2) + '%',
+            placements: ['home'],
+            neighborhoods: new Set(['Freguesia', 'Anil']),
+            status: '🟢 Ativo'
+        },
+        {
+            id: 'Banner Categoria (Comida)',
+            impressions: 312,
+            clicks: 25,
+            ctr: ((25 / 312) * 100).toFixed(2) + '%',
+            placements: ['category'],
+            neighborhoods: new Set(['Taquara']),
+            status: '🟡 Em teste'
+        }
+    ];
+
+    return { kpis, organicChartData, sortedTopActions, adsTableData };
+};
+
+
 const PerformanceDashboard: React.FC<{ storeId: string }> = ({ storeId }) => {
     const [dateRange, setDateRange] = useState<string>('30d');
     const [displayPeriod, setDisplayPeriod] = useState('');
     const [loading, setLoading] = useState(true);
     const [stats, setStats] = useState<any>(null);
     const [adPlacementFilter, setAdPlacementFilter] = useState<'all' | 'home' | 'category'>('all');
+    const [isMockData, setIsMockData] = useState(false);
 
     useEffect(() => {
         const fetchData = async () => {
             if (!storeId || !supabase) return;
             setLoading(true);
+            setIsMockData(false);
 
             const endDate = new Date();
             const startDate = new Date();
@@ -166,6 +217,11 @@ const PerformanceDashboard: React.FC<{ storeId: string }> = ({ storeId }) => {
 
             if (metricsError || eventsError) {
                 console.error(metricsError || eventsError);
+            }
+            
+            if (!metricsData || metricsData.length === 0) {
+                setIsMockData(true);
+                setStats(generateMockData(days));
                 setLoading(false);
                 return;
             }
@@ -214,7 +270,8 @@ const PerformanceDashboard: React.FC<{ storeId: string }> = ({ storeId }) => {
             const adsTableData = Object.values(adsByBanner).map((b: any) => ({
                 ...b,
                 ctr: b.impressions > 0 ? ((b.clicks / b.impressions) * 100).toFixed(2) + '%' : '0.00%',
-                placements: Array.from(b.placements)
+                placements: Array.from(b.placements),
+                status: '🟢 Ativo'
             }));
             
             setStats({ kpis: { totalViews, totalAdClicks, totalLeads, generalCtr }, organicChartData, sortedTopActions, adsTableData });
@@ -248,7 +305,7 @@ const PerformanceDashboard: React.FC<{ storeId: string }> = ({ storeId }) => {
     if (loading) {
         return <div className="flex justify-center items-center h-64"><Loader2 className="w-8 h-8 text-blue-500 animate-spin" /></div>;
     }
-    if (!stats) return <div className="text-center text-gray-400">Não há dados para exibir.</div>;
+    if (!stats) return <div className="text-center text-gray-400 p-8 bg-gray-100 rounded-2xl">Não foi possível carregar os dados.</div>;
     
     const topActionIcons: {[key: string]: React.ElementType} = { whatsapp: MessageSquare, call: Phone, directions: MapPin, share: Share2, favorite: Heart };
 
@@ -313,8 +370,11 @@ const PerformanceDashboard: React.FC<{ storeId: string }> = ({ storeId }) => {
                         <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 divide-y divide-gray-100 dark:divide-gray-700">
                             {filteredAds.map((ad: any) => (
                                 <div key={ad.id} className="p-3">
-                                    <p className="text-[10px] font-bold text-gray-400 truncate">{ad.id}</p>
-                                    <div className="grid grid-cols-3 gap-2 text-center mt-2">
+                                    <div className="flex justify-between items-center mb-2">
+                                      <p className="text-[10px] font-bold text-gray-400 truncate">{ad.id}</p>
+                                      {ad.status && <p className="text-[10px] font-bold">{ad.status}</p>}
+                                    </div>
+                                    <div className="grid grid-cols-3 gap-2 text-center">
                                         <div><p className="text-xs text-gray-400">Impr.</p><p className="font-bold text-sm dark:text-white">{ad.impressions.toLocaleString()}</p></div>
                                         <div><p className="text-xs text-gray-400">Cliques</p><p className="font-bold text-sm dark:text-white">{ad.clicks.toLocaleString()}</p></div>
                                         <div><p className="text-xs text-gray-400">CTR</p><p className="font-bold text-sm text-blue-500">{ad.ctr}</p></div>
@@ -342,6 +402,13 @@ const PerformanceDashboard: React.FC<{ storeId: string }> = ({ storeId }) => {
                      </div>
                 </div>
             </div>
+            {isMockData && (
+                <div className="text-center mt-8 p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-xl border border-yellow-100 dark:border-yellow-800">
+                    <p className="text-[10px] text-yellow-700 dark:text-yellow-300 font-medium">
+                        Dados ilustrativos para visualização do painel.
+                    </p>
+                </div>
+            )}
         </div>
     );
 };
