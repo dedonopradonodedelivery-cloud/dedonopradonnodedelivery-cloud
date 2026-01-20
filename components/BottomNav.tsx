@@ -2,6 +2,7 @@ import React from 'react';
 import { Home, Users, User, QrCode } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { RoleMode } from '../types';
+import { getAccountEntryRoute } from '../lib/roleRoutes';
 
 interface BottomNavProps {
   activeTab: string;
@@ -49,7 +50,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
     });
   }
 
-  const profileTabId = viewMode === 'Lojista' ? 'store_area' : 'profile';
+  const profileTabId = getAccountEntryRoute(viewMode);
   navItems.push({ id: profileTabId, icon: User, label: 'Menu' });
 
   const NavButton: React.FC<{ item: NavItem; isActive: boolean }> = ({ item, isActive }) => {

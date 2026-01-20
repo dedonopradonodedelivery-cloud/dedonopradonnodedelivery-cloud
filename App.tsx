@@ -32,6 +32,7 @@ import { CommunityFeedView } from './components/CommunityFeedView';
 import { STORES } from './constants';
 import { AdminModerationPanel } from './components/AdminModerationPanel';
 import { AboutView, SupportView, FavoritesView } from './components/SimplePages';
+import { getAccountEntryRoute } from './lib/roleRoutes';
 
 let splashWasShownInSession = false;
 const ADMIN_EMAIL = 'dedonopradonodedelivery@gmail.com';
@@ -169,6 +170,19 @@ const App: React.FC = () => {
       setPendingTab(null);
     }
   };
+  
+  const handleAuthClick = () => {
+    if (user) {
+        const route = getAccountEntryRoute(viewMode);
+        if (activeTab !== route) {
+            setActiveTab(route);
+        }
+    } else {
+        const route = getAccountEntryRoute(viewMode);
+        setPendingTab(route);
+        setIsAuthOpen(true);
+    }
+  };
 
 
   useEffect(() => {
@@ -209,7 +223,7 @@ const App: React.FC = () => {
         <div className="min-h-screen bg-white dark:bg-gray-900 flex justify-center relative">
           <Layout activeTab={activeTab} setActiveTab={setActiveTab} userRole={userRole} hideNav={hideBottomNav} viewMode={viewMode}>
               {!headerExclusionList.includes(activeTab) && (
-                <Header isDarkMode={isDarkMode} toggleTheme={() => {}} onAuthClick={() => setActiveTab('profile')} user={user} searchTerm={globalSearch} onSearchChange={setGlobalSearch} onNavigate={setActiveTab} activeTab={activeTab} userRole={userRole as 'cliente' | 'lojista' | null} stores={STORES} onStoreClick={handleSelectStore} isAdmin={user?.email === ADMIN_EMAIL} viewMode={viewMode} onOpenViewSwitcher={() => setIsRoleSwitcherOpen(true)} />
+                <Header isDarkMode={isDarkMode} toggleTheme={() => {}} onAuthClick={handleAuthClick} user={user} searchTerm={globalSearch} onSearchChange={setGlobalSearch} onNavigate={setActiveTab} activeTab={activeTab} userRole={userRole as 'cliente' | 'lojista' | null} stores={STORES} onStoreClick={handleSelectStore} isAdmin={user?.email === ADMIN_EMAIL} viewMode={viewMode} onOpenViewSwitcher={() => setIsRoleSwitcherOpen(true)} />
               )}
               <main className="animate-in fade-in duration-500 w-full max-w-md mx-auto">
                 {activeTab === 'cashback_landing' && <CashbackLandingView onBack={() => setActiveTab('home')} onLogin={() => { setPendingTab('scan_cashback'); setIsAuthOpen(true); }} />}
