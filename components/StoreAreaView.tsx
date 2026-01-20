@@ -43,8 +43,6 @@ const STORE_DATA = {
   logo: "https://images.unsplash.com/photo-1594212699903-ec8a3eca50f5?q=80&w=200&auto=format&fit=crop",
 };
 
-type DateRange = '7d' | '30d';
-
 const KPICard: React.FC<{ icon: React.ElementType; label: string; value: string; color: string; trend?: string; }> = ({ icon: Icon, label, value, color, trend }) => (
   <div className="bg-white dark:bg-gray-800 p-4 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm flex flex-col justify-between h-28">
     <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${color} bg-opacity-10 dark:bg-opacity-20`}>
@@ -103,8 +101,19 @@ const BarChart: React.FC<{ data: { label: string; views: number; leads: number }
     );
 };
 
+const dateRangeOptions = [
+    { value: 'today', label: 'Hoje' },
+    { value: '7d', label: 'Semana (últimos 7 dias)' },
+    { value: '15d', label: 'Quinzena (últimos 15 dias)' },
+    { value: '30d', label: 'Mês (últimos 30 dias)' },
+    { value: '90d', label: 'Últimos 3 meses' },
+    { value: '180d', label: 'Últimos 6 meses' },
+    { value: '365d', label: 'Último ano' },
+];
+
 const PerformanceDashboard: React.FC<{ storeId: string }> = ({ storeId }) => {
-    const [dateRange, setDateRange] = useState<DateRange>('30d');
+    const [dateRange, setDateRange] = useState<string>('30d');
+    const [displayPeriod, setDisplayPeriod] = useState('');
     const [loading, setLoading] = useState(true);
     const [stats, setStats] = useState<any>(null);
     const [adPlacementFilter, setAdPlacementFilter] = useState<'all' | 'home' | 'category'>('all');
@@ -114,21 +123,45 @@ const PerformanceDashboard: React.FC<{ storeId: string }> = ({ storeId }) => {
             if (!storeId || !supabase) return;
             setLoading(true);
 
-            const days = dateRange === '7d' ? 7 : 30;
+            const endDate = new Date();
             const startDate = new Date();
-            startDate.setDate(startDate.getDate() - days);
+            let days = 30;
+
+            switch (dateRange) {
+                case 'today': days = 1; break;
+                case '7d': days = 7; break;
+                case '15d': days = 15; break;
+                case '90d': days = 90; break;
+                case '180d': days = 180; break;
+                case '365d': days = 365; break;
+                default: days = 30; // '30d'
+            }
+
+            if (dateRange === 'today') {
+                startDate.setHours(0, 0, 0, 0);
+            } else {
+                startDate.setDate(endDate.getDate() - (days - 1));
+            }
+            
+            const formatDate = (d: Date) => d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: '2-digit' });
+            setDisplayPeriod(`Período: ${formatDate(startDate)} a ${formatDate(endDate)}`);
+
+            const startDateISO = startDate.toISOString().split('T')[0];
+            const endDateISO = endDate.toISOString().split('T')[0];
 
             const { data: metricsData, error: metricsError } = await supabase
                 .from('metrics_daily')
                 .select('*')
                 .eq('store_id', storeId)
-                .gte('date', startDate.toISOString().split('T')[0]);
+                .gte('date', startDateISO)
+                .lte('date', endDateISO);
             
             const { data: eventsData, error: eventsError } = await supabase
                 .from('store_organic_events')
                 .select('event_type')
                 .eq('store_id', storeId)
                 .gte('created_at', startDate.toISOString())
+                .lte('created_at', endDate.toISOString())
                 .in('event_type', ['store_click_whatsapp', 'store_click_call', 'store_click_directions', 'store_click_share', 'store_click_favorite']);
 
             if (metricsError || eventsError) {
@@ -146,8 +179,8 @@ const PerformanceDashboard: React.FC<{ storeId: string }> = ({ storeId }) => {
 
             // Process Organic Chart Data
             const organicChartData = Array.from({ length: days }, (_, i) => {
-                const d = new Date();
-                d.setDate(d.getDate() - (days - 1 - i));
+                const d = new Date(startDate);
+                d.setDate(startDate.getDate() + i);
                 const dateStr = d.toISOString().split('T')[0];
                 const metricsForDay = metricsData.filter(m => m.date === dateStr && m.channel === 'organic');
                 return {
@@ -224,12 +257,18 @@ const PerformanceDashboard: React.FC<{ storeId: string }> = ({ storeId }) => {
             <div className="flex items-center justify-between mb-4 px-1">
               <h2 className="text-base font-bold text-gray-800 dark:text-gray-200 flex items-center gap-2"><LayoutDashboard className="w-4 h-4 text-[#2D6DF6]" />Desempenho da Loja</h2>
             </div>
-            <div className="flex gap-1 bg-gray-100 dark:bg-gray-800 p-1 rounded-xl w-fit mb-6">
-                {(['7d', '30d'] as DateRange[]).map(opt => (
-                    <button key={opt} onClick={() => setDateRange(opt)} className={`text-[10px] font-black uppercase px-4 py-1.5 rounded-lg transition-all ${dateRange === opt ? 'bg-white dark:bg-gray-700 text-[#1E5BFF] shadow-sm' : 'text-gray-400'}`}>
-                        {opt === '7d' ? '7 dias' : '30 dias'}
-                    </button>
-                ))}
+            
+            <div className="mb-6">
+                <select
+                    value={dateRange}
+                    onChange={(e) => setDateRange(e.target.value)}
+                    className="w-full bg-white dark:bg-gray-800 p-3 rounded-xl border border-gray-200 dark:border-gray-700 text-sm font-bold text-gray-700 dark:text-gray-200 focus:ring-2 focus:ring-blue-500 outline-none shadow-sm"
+                >
+                    {dateRangeOptions.map(opt => (
+                        <option key={opt.value} value={opt.value}>{opt.label}</option>
+                    ))}
+                </select>
+                <p className="text-[10px] text-gray-400 font-bold text-center mt-2 uppercase tracking-wider">{displayPeriod}</p>
             </div>
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
