@@ -2,8 +2,8 @@ import { mockUserBanners } from '../data/mockBanners';
 import { BannerItem } from '../types';
 import { supabase } from './supabaseClient';
 
-// FIX: Cast import.meta to any to resolve TypeScript error with Vite env variables.
-const useMock = ((import.meta as any).env.VITE_USE_MOCK_BANNERS ?? "true") === "true";
+// FIX: Added optional chaining to prevent runtime error if import.meta.env is undefined.
+const useMock = (((import.meta as any).env)?.VITE_USE_MOCK_BANNERS ?? "true") === "true";
 
 export async function fetchHomeBanner(): Promise<BannerItem | null> {
     if (useMock) {
