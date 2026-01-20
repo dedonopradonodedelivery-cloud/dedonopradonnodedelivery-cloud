@@ -304,14 +304,26 @@ export interface BannerOrder {
   createdAt: string;
   status: 'em_analise' | 'em_producao' | 'aprovado' | 'publicado';
   lastViewedAt?: string;
+  // AUTOMATION FLAGS
+  onboardingStage: 'none' | 'requested_assets' | 'assets_received' | 'in_production' | 'finalized';
+  assetsSubmittedAt?: string;
+  autoMessagesFlags: {
+    welcomeSent: boolean;
+    requestSent: boolean;
+    assetsReceivedSent: boolean;
+    thanksSent: boolean;
+  };
 }
 
 // NEW: Type for Messages within an Order
 export interface BannerMessage {
   id: string;
   orderId: string;
-  senderType: 'merchant' | 'team';
+  senderType: 'merchant' | 'team' | 'system';
   body: string;
   createdAt: string;
   readAt?: string;
+  // Rich types
+  type?: 'text' | 'form_request' | 'assets_payload' | 'status';
+  metadata?: any;
 }
