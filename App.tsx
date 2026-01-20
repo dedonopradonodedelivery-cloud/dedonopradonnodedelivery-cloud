@@ -25,7 +25,7 @@ import { AdminBannerModeration } from './components/AdminBannerModeration';
 import { MapPin, ShieldCheck, X } from 'lucide-react';
 import { useAuth } from './contexts/AuthContext';
 import { NeighborhoodProvider } from './contexts/NeighborhoodContext';
-import { Category, Store, RoleMode } from './types';
+import { Category, Store, RoleMode, BannerPlan } from './types';
 import { CategoryView } from './components/CategoryView';
 import { StoreProfileEdit } from './components/StoreProfileEdit';
 import { CommunityFeedView } from './components/CommunityFeedView';
@@ -33,6 +33,8 @@ import { STORES } from './constants';
 import { AdminModerationPanel } from './components/AdminModerationPanel';
 import { AboutView, SupportView, FavoritesView } from './components/SimplePages';
 import { getAccountEntryRoute } from './lib/roleRoutes';
+import { BannerSalesView } from './components/BannerSalesView';
+import { BannerCheckoutView } from './components/BannerCheckoutView';
 
 let splashWasShownInSession = false;
 const ADMIN_EMAIL = 'dedonopradonodedelivery@gmail.com';
@@ -72,6 +74,7 @@ const App: React.FC = () => {
   const [isQuoteModalOpen, setIsQuoteModalOpen] = useState(false);
   const [quoteCategory, setQuoteCategory] = useState('');
   const [adCategoryTarget, setAdCategoryTarget] = useState<string | null>(null);
+  const [bannerOrder, setBannerOrder] = useState<{ plan: BannerPlan | null; draft: any | null }>({ plan: null, draft: null });
 
   useEffect(() => { localStorage.setItem('localizei_active_tab', activeTab); }, [activeTab]);
   
@@ -120,7 +123,9 @@ const App: React.FC = () => {
         break;
       case 'Lojista':
         if (user) {
-            setActiveTab('store_area');
+            if (!['store_area', 'banner_sales', 'store_ads_module', 'banner_checkout'].includes(activeTab)) {
+               setActiveTab('store_area');
+            }
         } else {
             setPendingTab('store_area');
             setActiveTab('home');
@@ -139,7 +144,7 @@ const App: React.FC = () => {
         }
         break;
       case 'Visitante':
-        if (['admin_panel', 'store_area', 'profile', 'wallet', 'favorites'].includes(activeTab)) {
+        if (['admin_panel', 'store_area', 'profile', 'wallet', 'favorites', 'banner_sales', 'store_ads_module', 'banner_checkout'].includes(activeTab)) {
             setActiveTab('home');
         }
         break;
@@ -148,7 +153,7 @@ const App: React.FC = () => {
 
   // General auth guard for restricted tabs
   useEffect(() => {
-    const restrictedTabs = ['scan_cashback', 'merchant_qr_display', 'wallet', 'pay_cashback', 'store_area', 'admin_panel', 'edit_profile', 'profile', 'favorites'];
+    const restrictedTabs = ['scan_cashback', 'merchant_qr_display', 'wallet', 'pay_cashback', 'store_area', 'admin_panel', 'edit_profile', 'profile', 'favorites', 'banner_sales', 'store_ads_module', 'banner_checkout'];
     
     if (restrictedTabs.includes(activeTab)) {
       if (!isAuthInitialLoading && !user) {
@@ -163,7 +168,7 @@ const App: React.FC = () => {
   useEffect(() => {
       if (isAuthInitialLoading) return;
       
-      const merchantTabs = ['store_area', 'store_ads_module', 'weekly_promo', 'merchant_jobs', 'store_profile', 'store_support', 'banner_upload', 'banner_production'];
+      const merchantTabs = ['store_area', 'store_ads_module', 'weekly_promo', 'merchant_jobs', 'store_profile', 'store_support', 'banner_upload', 'banner_production', 'banner_sales', 'banner_checkout'];
       
       // Admin panel protection
       if (activeTab === 'admin_panel' && (viewMode !== 'ADM' || user?.email !== ADMIN_EMAIL)) {
@@ -198,6 +203,26 @@ const App: React.FC = () => {
         setIsAuthOpen(true);
     }
   };
+  
+  const handleSelectBannerPlan = (plan: BannerPlan) => {
+    setBannerOrder({ plan, draft: null });
+    setActiveTab('store_ads_module');
+  };
+
+  const handleFinalizeBannerCreation = (draft: any) => {
+      if (!bannerOrder.plan) {
+        setActiveTab('banner_sales');
+        return;
+      }
+      setBannerOrder(prev => ({ ...prev, draft }));
+      setActiveTab('banner_checkout');
+  };
+
+  const handlePaymentComplete = () => {
+      setBannerOrder({ plan: null, draft: null });
+      alert("Banner enviado para análise!");
+      setActiveTab('store_area'); 
+  };
 
 
   useEffect(() => {
@@ -208,8 +233,8 @@ const App: React.FC = () => {
   }, []);
 
   const handleSelectStore = (store: Store) => { setSelectedStore(store); setActiveTab('store_detail'); };
-  const headerExclusionList = ['store_area', 'editorial_list', 'store_profile', 'category_detail', 'store_detail', 'profile', 'patrocinador_master', 'service_subcategories', 'service_specialties', 'store_ads_module', 'about', 'support', 'favorites', 'community_feed', 'admin_panel', 'cashback_landing', 'admin_banner_moderation', 'banner_upload', 'banner_production'];
-  const hideBottomNav = ['store_ads_module', 'store_detail', 'admin_panel', 'cashback_landing', 'admin_banner_moderation', 'banner_upload', 'banner_production'].includes(activeTab);
+  const headerExclusionList = ['store_area', 'editorial_list', 'store_profile', 'category_detail', 'store_detail', 'profile', 'patrocinador_master', 'service_subcategories', 'service_specialties', 'store_ads_module', 'about', 'support', 'favorites', 'community_feed', 'admin_panel', 'cashback_landing', 'admin_banner_moderation', 'banner_upload', 'banner_production', 'banner_sales', 'banner_checkout'];
+  const hideBottomNav = ['store_ads_module', 'store_detail', 'admin_panel', 'cashback_landing', 'admin_banner_moderation', 'banner_upload', 'banner_production', 'banner_sales', 'banner_checkout'].includes(activeTab);
 
   const RoleSwitcherModal: React.FC = () => {
     if (!isRoleSwitcherOpen) return null;
@@ -259,10 +284,19 @@ const App: React.FC = () => {
                 {activeTab === 'favorites' && <FavoritesView onBack={() => setActiveTab('profile')} onNavigate={setActiveTab} user={user as any} />}
                 {activeTab === 'service_subcategories' && selectedServiceMacro && <SubcategoriesView macroId={selectedServiceMacro.id} macroName={selectedServiceMacro.name} onBack={() => setActiveTab('services')} onSelectSubcategory={(n) => { setQuoteCategory(n); setActiveTab('service_specialties'); }} />}
                 {activeTab === 'service_specialties' && <SpecialtiesView subcategoryName={quoteCategory} onBack={() => setActiveTab('service_subcategories')} onSelectSpecialty={() => setIsQuoteModalOpen(true)} />}
-                {activeTab === 'store_ads_module' && <StoreAdsModule onBack={() => setActiveTab('store_area')} onNavigate={setActiveTab} categoryName={adCategoryTarget || undefined} user={user as any} />}
+                {activeTab === 'store_ads_module' && <StoreAdsModule onBack={() => setActiveTab(bannerOrder.plan ? 'banner_sales' : 'store_area')} onNavigate={setActiveTab} categoryName={adCategoryTarget || undefined} user={user as any} plan={bannerOrder.plan} onFinalize={handleFinalizeBannerCreation} />}
                 {activeTab === 'banner_upload' && <BannerUploadView onBack={() => setActiveTab('store_ads_module')} />}
                 {activeTab === 'banner_production' && <BannerProductionView onBack={() => setActiveTab('store_ads_module')} />}
                 {activeTab === 'store_profile' && <StoreProfileEdit onBack={() => setActiveTab('store_area')} />}
+                {activeTab === 'banner_sales' && <BannerSalesView onBack={() => setActiveTab('store_area')} onSelectPlan={handleSelectBannerPlan} />}
+                {activeTab === 'banner_checkout' && bannerOrder.plan && bannerOrder.draft && (
+                    <BannerCheckoutView 
+                        plan={bannerOrder.plan}
+                        draft={bannerOrder.draft}
+                        onBack={() => setActiveTab('store_ads_module')}
+                        onComplete={handlePaymentComplete}
+                    />
+                )}
               </main>
               <AuthModal isOpen={isAuthOpen} onClose={() => setIsAuthOpen(false)} user={user as any} onLoginSuccess={handleLoginSuccess} />
               {isQuoteModalOpen && <QuoteRequestModal isOpen={isQuoteModalOpen} onClose={() => setIsQuoteModalOpen(false)} categoryName={quoteCategory} onSuccess={() => setActiveTab('service_success')} />}
