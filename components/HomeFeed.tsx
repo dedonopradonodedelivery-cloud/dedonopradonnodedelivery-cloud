@@ -31,6 +31,7 @@ import { User } from '@supabase/supabase-js';
 import { CATEGORIES, EDITORIAL_SERVICES } from '../constants';
 import { useNeighborhood } from '../contexts/NeighborhoodContext';
 import { supabase } from '../lib/supabaseClient';
+import { trackAdEvent } from '../lib/analytics';
 
 interface HomeFeedProps {
   onNavigate: (view: string) => void;
@@ -121,17 +122,17 @@ const CustomBannerRender: React.FC<{ config: any }> = ({ config }) => {
 // --- COMPONENTE INDEPENDENTE: HOME CAROUSEL ---
 
 const HomeCarousel: React.FC<{ onNavigate: (v: string) => void; onStoreClick?: (store: Store) => void; stores?: Store[] }> = ({ onNavigate, onStoreClick, stores }) => {
+  const { currentNeighborhood } = useNeighborhood();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [progress, setProgress] = useState(0);
   const [userBanner, setUserBanner] = useState<BannerItem | null>(null);
 
   const defaultBanners: BannerItem[] = useMemo(() => [
     { id: 'rio-phone-store', title: 'RIO PHONE STORE', target: 'rio-phone-store', tag: 'Assistência Apple', bgColor: 'bg-black', Icon: Smartphone, isSpecial: true },
-    { id: 'master-sponsor', title: 'Grupo Esquematiza', target: 'patrocinador_master', tag: 'Patrocinador Master', bgColor: 'bg-[#0F172A]', Icon: Crown },
+    { id: 'master-sponsor', title: 'Grupo Esquematiza', target: 'grupo-esquematiza', tag: 'Patrocinador Master', bgColor: 'bg-[#0F172A]', Icon: Crown },
     { id: 'advertise-home', title: 'Anuncie aqui', target: 'store_ads_module', tag: 'Destaque sua marca', bgColor: 'bg-brand-blue', Icon: Megaphone }
   ], []);
 
-  /*
   useEffect(() => {
     const fetchHomeBanner = async () => {
         if (!supabase) return;
@@ -139,7 +140,7 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void; onStoreClick?: (
         try {
             const { data, error } = await supabase
                 .from('published_banners')
-                .select('id, config')
+                .select('id, config, merchant_id')
                 .eq('target', 'home')
                 .eq('is_active', true)
                 .order('created_at', { ascending: false })
@@ -152,6 +153,8 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void; onStoreClick?: (
                     id: `user-banner-${data[0].id}`,
                     isUserBanner: true,
                     config: data[0].config,
+                    // Usando merchant_id como identificador da loja para tracking
+                    target: data[0].merchant_id,
                 });
             } else {
                 setUserBanner(null);
@@ -186,9 +189,24 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void; onStoreClick?: (
     };
 
   }, []);
-  */
 
   const allBanners = useMemo(() => userBanner ? [userBanner, ...defaultBanners] : defaultBanners, [userBanner, defaultBanners]);
+  
+  // Impression Tracking
+  useEffect(() => {
+    const banner = allBanners[currentIndex];
+    if (banner) {
+        trackAdEvent(
+            'ad_impression',
+            banner.id,
+            banner.target, // This will be store slug for hardcoded, or merchant_id for dynamic
+            'home',
+            null,
+            null,
+            currentNeighborhood
+        );
+    }
+  }, [currentIndex, allBanners, currentNeighborhood]);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -208,8 +226,19 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void; onStoreClick?: (
   const current = allBanners[currentIndex];
 
   const handleBannerClick = () => {
+    // Ad Click Tracking
+    trackAdEvent(
+        'ad_click',
+        current.id,
+        current.target,
+        'home',
+        null,
+        null,
+        currentNeighborhood
+    );
+
     if (current.isUserBanner) {
-        alert(`Clicou no banner personalizado.`);
+        // Banners de usuários não são navegáveis por enquanto, apenas rastreados.
         return;
     }
 

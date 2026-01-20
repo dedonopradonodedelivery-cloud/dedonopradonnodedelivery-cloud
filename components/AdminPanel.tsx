@@ -4,7 +4,12 @@ import {
   ArrowLeft, Download, Filter, TrendingUp, AlertTriangle, 
   Clock, DollarSign, Calendar, ChevronRight, LayoutDashboard,
   CheckCircle, XCircle, LogOut, Megaphone, User as UserIcon, Building, Flag, PauseCircle, Image as ImageIcon,
-  Plus, Loader2
+  Plus, Loader2,
+  // Added new icons for metrics
+  Heart,
+  Share2,
+  Phone,
+  MousePointerClick
 } from 'lucide-react';
 import { getAdminGlobalMetrics, fetchAdminMerchants, fetchAdminUsers, fetchAdminLedger } from '../backend/services';
 import { supabase } from '../lib/supabaseClient';

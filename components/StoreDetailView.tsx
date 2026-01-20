@@ -10,12 +10,15 @@ import {
   Phone,
   MessageSquare,
   Coins,
-  ArrowRight
+  ArrowRight,
+  Instagram // Added Instagram icon
 } from 'lucide-react';
-import { Store, StoreCredit } from '../types';
+import { Store } from '../types';
 import { TrustBlock } from './TrustBlock';
 import { supabase } from '../lib/supabaseClient';
 import { useAuth } from '../contexts/AuthContext';
+import { useNeighborhood } from '../contexts/NeighborhoodContext';
+import { trackOrganicEvent, OrganicEventType } from '../lib/analytics';
 
 const storeMock = {
   business: {
@@ -50,22 +53,50 @@ function mapStoreToBusiness(store?: Store | null) {
   };
 }
 
-const InfoCard: React.FC<{ icon: React.ElementType; title: string; value: string; }> = ({ icon: Icon, title, value }) => (
-  <div className="bg-white dark:bg-gray-800 p-4 rounded-2xl flex items-center gap-4 shadow-lg shadow-black/5 border border-gray-100 dark:border-gray-700/50">
-    <div className="w-12 h-12 bg-blue-50 dark:bg-blue-900/20 rounded-xl flex items-center justify-center text-[#1E5BFF] shrink-0"><Icon className="w-6 h-6" /></div>
-    <div>
-      <p className="text-xs font-semibold text-[#6C6C6C] dark:text-gray-400 uppercase tracking-wider">{title}</p>
-      <p className="font-semibold text-[#141414] dark:text-gray-200 mt-0.5">{value}</p>
-    </div>
-  </div>
-);
+const InfoCard: React.FC<{ icon: React.ElementType; title: string; value: string; href?: string; onClick?: () => void; }> = ({ icon: Icon, title, value, href, onClick }) => {
+  const Component = (href || onClick) ? 'a' : 'div';
+  
+  const props: any = {
+    className: `bg-white dark:bg-gray-800 p-4 rounded-2xl flex items-center gap-4 shadow-lg shadow-black/5 border border-gray-100 dark:border-gray-700/50 ${href || onClick ? 'cursor-pointer transition-all active:scale-95 hover:bg-gray-50 dark:hover:bg-gray-700' : ''}`,
+    onClick,
+  };
+
+  if (href) {
+    props.href = href;
+    props.target = "_blank";
+    props.rel = "noopener noreferrer";
+  }
+
+  return (
+    <Component {...props}>
+      <div className="w-12 h-12 bg-blue-50 dark:bg-blue-900/20 rounded-xl flex items-center justify-center text-[#1E5BFF] shrink-0"><Icon className="w-6 h-6" /></div>
+      <div>
+        <p className="text-xs font-semibold text-[#6C6C6C] dark:text-gray-400 uppercase tracking-wider">{title}</p>
+        <p className="font-semibold text-[#141414] dark:text-gray-200 mt-0.5">{value}</p>
+      </div>
+    </Component>
+  );
+};
 
 export const StoreDetailView: React.FC<{ store?: Store | null; onBack: () => void; onPay?: () => void }> = ({ store, onBack, onPay }) => {
   const { user } = useAuth();
+  const { currentNeighborhood } = useNeighborhood();
   const [isFavorite, setIsFavorite] = React.useState(false);
   const [userCredit, setUserCredit] = useState<number | null>(null);
   const business = mapStoreToBusiness(store);
   const photoGallery = business.banners || [];
+
+  // Analytics Helper
+  const track = (eventType: OrganicEventType) => {
+    if (store) {
+      trackOrganicEvent(eventType, store.id, currentNeighborhood, user);
+    }
+  };
+
+  // Track 'store_view' on component mount
+  useEffect(() => {
+    track('store_view');
+  }, []); // Empty dependency array ensures it runs once on mount.
 
   useEffect(() => {
     const fetchUserCredit = async () => {
@@ -85,6 +116,12 @@ export const StoreDetailView: React.FC<{ store?: Store | null; onBack: () => voi
     fetchUserCredit();
   }, [user, store]);
 
+  const phoneDigits = (business.contact.phone || '').replace(/\D/g, '');
+  const whatsappUrl = `https://wa.me/55${phoneDigits}`;
+  const phoneUrl = `tel:${phoneDigits}`;
+  const gmapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(business.contact.address)}`;
+  const instagramUsername = business.social.instagram?.replace('@', '');
+
   return (
     <div className="min-h-screen bg-[#F5F5F5] dark:bg-gray-950 font-sans relative">
       <main className="overflow-y-auto pb-32">
@@ -92,8 +129,8 @@ export const StoreDetailView: React.FC<{ store?: Store | null; onBack: () => voi
           <div className="absolute top-0 left-0 right-0 p-4 pt-6 flex justify-between items-center z-10">
             <button onClick={onBack} className="w-11 h-11 rounded-full bg-white/90 backdrop-blur-md flex items-center justify-center shadow-lg"><ChevronLeft className="w-6 h-6" /></button>
             <div className="flex gap-3">
-              <button className="w-11 h-11 rounded-full bg-white/90 flex items-center justify-center shadow-lg"><Share2 className="w-5 h-5" /></button>
-              <button onClick={() => setIsFavorite(!isFavorite)} className="w-11 h-11 rounded-full bg-white/90 flex items-center justify-center shadow-lg"><Heart className={`w-5 h-5 ${isFavorite ? 'fill-[#1E5BFF] text-[#1E5BFF]' : ''}`} /></button>
+              <button onClick={() => track('store_click_share')} className="w-11 h-11 rounded-full bg-white/90 flex items-center justify-center shadow-lg"><Share2 className="w-5 h-5" /></button>
+              <button onClick={() => { setIsFavorite(!isFavorite); track('store_click_favorite'); }} className="w-11 h-11 rounded-full bg-white/90 flex items-center justify-center shadow-lg"><Heart className={`w-5 h-5 ${isFavorite ? 'fill-[#1E5BFF] text-[#1E5BFF]' : ''}`} /></button>
             </div>
           </div>
           {photoGallery[0] && <img src={photoGallery[0]} className="w-full h-full object-cover" alt="" />}
@@ -115,7 +152,6 @@ export const StoreDetailView: React.FC<{ store?: Store | null; onBack: () => voi
               </div>
           </div>
 
-          {/* User Specific Credit Block */}
           {user && userCredit !== null && (
               <div className="bg-gradient-to-r from-[#1E5BFF] to-[#4D7CFF] rounded-3xl p-5 mb-8 text-white shadow-xl shadow-blue-500/20 flex items-center justify-between overflow-hidden relative group active:scale-[0.98] transition-all cursor-pointer" onClick={onPay}>
                   <div className="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full blur-2xl -mr-8 -mt-8"></div>
@@ -145,13 +181,22 @@ export const StoreDetailView: React.FC<{ store?: Store | null; onBack: () => voi
               >
                 Pagar com Crédito
               </button>
-              <a href="#" className="flex-1 bg-green-500 text-white font-bold py-4 rounded-2xl flex items-center justify-center gap-2 shadow-lg shadow-green-500/20 active:scale-95 transition-all"><MessageSquare className="w-5 h-5" /> Zap</a>
+              <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" onClick={() => track('store_click_whatsapp')} className="flex-1 bg-green-500 text-white font-bold py-4 rounded-2xl flex items-center justify-center gap-2 shadow-lg shadow-green-500/20 active:scale-95 transition-all"><MessageSquare className="w-5 h-5" /> Zap</a>
             </div>
 
             <div className="space-y-4">
-              <InfoCard icon={MapPin} title="Endereço" value={business.contact.address} />
+              <InfoCard icon={MapPin} title="Endereço" value={business.contact.address} href={gmapsUrl} onClick={() => track('store_click_directions')} />
               <InfoCard icon={Clock} title="Horário" value={business.contact.hours} />
-              <InfoCard icon={Phone} title="Telefone" value={business.contact.phone} />
+              <InfoCard icon={Phone} title="Telefone" value={business.contact.phone} href={phoneUrl} onClick={() => track('store_click_call')} />
+              {instagramUsername && (
+                <InfoCard 
+                    icon={Instagram} 
+                    title="Instagram" 
+                    value={`@${instagramUsername}`} 
+                    href={`https://instagram.com/${instagramUsername}`}
+                    onClick={() => track('store_click_instagram')}
+                />
+              )}
             </div>
           </section>
         </div>

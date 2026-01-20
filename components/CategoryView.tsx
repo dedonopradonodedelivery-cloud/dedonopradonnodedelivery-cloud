@@ -3,6 +3,8 @@ import { ChevronLeft, Search, Star, BadgeCheck, ChevronRight, X, AlertCircle, Gr
 import { Category, Store, AdType } from '../types';
 import { SUBCATEGORIES } from '../constants';
 import { supabase } from '../lib/supabaseClient';
+import { useNeighborhood } from '../contexts/NeighborhoodContext';
+import { trackAdEvent } from '../lib/analytics';
 
 // --- Reusable Banner Rendering Components ---
 const TemplateBannerRender: React.FC<{ config: any }> = ({ config }) => {
@@ -120,16 +122,16 @@ interface CategoryViewProps {
 }
 
 export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, onStoreClick, stores, userRole, onAdvertiseInCategory, onNavigate }) => {
+  const { currentNeighborhood } = useNeighborhood();
   const [selectedSubcategory, setSelectedSubcategory] = useState<string | null>(null);
   const [activeBanner, setActiveBanner] = useState<any | null>(null);
-  const [loadingBanner, setLoadingBanner] = useState(false);
+  const [loadingBanner, setLoadingBanner] = useState(true);
 
   const subcategories = SUBCATEGORIES[category.name] || [];
   const MAX_VISIBLE_SUBCATEGORIES = 8;
   const shouldShowMore = subcategories.length > MAX_VISIBLE_SUBCATEGORIES;
   const visibleSubcategories = shouldShowMore ? subcategories.slice(0, MAX_VISIBLE_SUBCATEGORIES - 1) : subcategories;
 
-  /*
   useEffect(() => {
     const fetchCategoryBanner = async () => {
       if (!supabase) {
@@ -140,7 +142,7 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
       try {
         const { data, error } = await supabase
           .from('published_banners')
-          .select('id, config')
+          .select('id, config, merchant_id')
           .eq('target', `category:${category.slug}`)
           .eq('is_active', true)
           .order('created_at', { ascending: false })
@@ -149,7 +151,17 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
         if (error) throw error;
 
         if (data && data.length > 0) {
-          setActiveBanner(data[0]);
+          const banner = data[0];
+          setActiveBanner(banner);
+          trackAdEvent(
+            'ad_impression',
+            banner.id,
+            banner.merchant_id,
+            'category',
+            category.name,
+            null,
+            currentNeighborhood
+          );
         } else {
           setActiveBanner(null);
         }
@@ -181,8 +193,7 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [category.slug]);
-  */
+  }, [category.slug, currentNeighborhood]);
 
   const filteredStores = useMemo(() => {
     let categoryStores = stores.filter(s => s.category === category.name);
@@ -245,11 +256,23 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
           {loadingBanner ? (
             <div className="w-full aspect-video bg-gray-200 dark:bg-gray-800 rounded-2xl animate-pulse"></div>
           ) : activeBanner ? (
-            activeBanner.config.type === 'template' ? (
-              <TemplateBannerRender config={activeBanner.config} />
-            ) : (
-              <CustomBannerRender config={activeBanner.config} />
-            )
+            <div onClick={() => {
+              trackAdEvent(
+                  'ad_click',
+                  activeBanner.id,
+                  activeBanner.merchant_id,
+                  'category',
+                  category.name,
+                  null,
+                  currentNeighborhood
+              );
+            }}>
+              {activeBanner.config.type === 'template' ? (
+                <TemplateBannerRender config={activeBanner.config} />
+              ) : (
+                <CustomBannerRender config={activeBanner.config} />
+              )}
+            </div>
           ) : (
             <div 
               onClick={handleAdvertiseClick}
