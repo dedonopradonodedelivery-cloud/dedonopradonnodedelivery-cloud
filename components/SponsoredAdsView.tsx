@@ -38,9 +38,11 @@ export const SponsoredAdsView: React.FC<SponsoredAdsViewProps> = ({ onBack, onPr
           <h2 className="text-2xl font-black text-white font-display uppercase tracking-tight mb-2">
             Apareça em destaque
           </h2>
-          <p className="text-slate-400 text-sm max-w-sm mx-auto leading-relaxed">
-            Escolha por quantos dias você quer que sua loja seja patrocinada no topo das buscas.
-          </p>
+          <div className="text-slate-400 text-sm max-w-sm mx-auto leading-relaxed space-y-4">
+            <p>Seus concorrentes já estão aparecendo primeiro. Enquanto isso, clientes prontos para comprar podem não estar vendo sua loja.</p>
+            <p>Com os anúncios patrocinados, sua loja aparece no topo das buscas e ganha mais cliques, mais visitas e mais vendas.</p>
+            <p>Tudo isso a partir de apenas R$ 0,99 por dia — e você pode começar com apenas 15 dias.</p>
+          </div>
         </div>
 
         <div className="bg-slate-800 rounded-[2rem] p-6 border border-white/10 flex-1 flex flex-col justify-between">
@@ -74,7 +76,7 @@ export const SponsoredAdsView: React.FC<SponsoredAdsViewProps> = ({ onBack, onPr
             </div>
           </div>
           
-          <div className="space-y-4 pt-8 border-t border-white/10 mt-8">
+          <div className="space-y-4 pt-4 border-t border-white/10 mt-4">
             <div className="flex justify-between items-center text-sm">
                 <span className="text-slate-400 flex items-center gap-2"><Calendar size={14}/> Duração</span>
                 <span className="font-bold text-white">{days} dias</span>
