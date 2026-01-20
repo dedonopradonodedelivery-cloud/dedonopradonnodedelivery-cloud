@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { 
   ChevronLeft, 
@@ -12,7 +13,7 @@ import {
   Check, 
   Vote, 
   MessageSquare,
-  /* Added missing Sparkles icon import */
+  // FIX: Added missing Sparkles icon import
   Sparkles 
 } from 'lucide-react';
 import { PostReport, ReportPriority, ReportStatus, CommunitySuggestion } from '../types';
