@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { Layout } from './components/Layout';
 import { Header } from './components/Header';
@@ -19,6 +18,7 @@ import { WeeklyPromoModule } from './components/WeeklyPromoModule';
 import { JobsView } from './components/JobsView';
 import { MerchantJobsModule } from './components/MerchantJobsModule';
 import { AdminPanel } from './components/AdminPanel'; 
+import { CashbackLandingView } from './components/CashbackLandingView';
 // Adicionando import do StoreAdsModule para corrigir erro de nome não encontrado
 import { StoreAdsModule } from './components/StoreAdsModule';
 import { MapPin, ShieldCheck, X } from 'lucide-react';
@@ -68,6 +68,7 @@ const App: React.FC = () => {
   const [viewMode, setViewMode] = useState<RoleMode>(() => (localStorage.getItem('admin_view_mode') as RoleMode) || 'ADM');
   const [isRoleSwitcherOpen, setIsRoleSwitcherOpen] = useState(false);
   const [activeTab, setActiveTab] = useState(() => localStorage.getItem('localizei_active_tab') || 'home');
+  const [pendingTab, setPendingTab] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
   const [selectedStore, setSelectedStore] = useState<Store | null>(null);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
@@ -78,6 +79,27 @@ const App: React.FC = () => {
   const [adCategoryTarget, setAdCategoryTarget] = useState<string | null>(null);
 
   useEffect(() => { localStorage.setItem('localizei_active_tab', activeTab); }, [activeTab]);
+  
+  useEffect(() => {
+    const restrictedTabs = ['scan_cashback', 'merchant_qr_display', 'wallet', 'pay_cashback', 'store_area', 'admin_panel', 'edit_profile'];
+    
+    if (restrictedTabs.includes(activeTab)) {
+      if (!isAuthInitialLoading && !user) {
+        setPendingTab(activeTab);
+        setActiveTab('home');
+        setIsAuthOpen(true);
+      }
+    }
+  }, [activeTab, user, isAuthInitialLoading]);
+
+  const handleLoginSuccess = () => {
+    setIsAuthOpen(false);
+    if (pendingTab) {
+      setActiveTab(pendingTab);
+      setPendingTab(null);
+    }
+  };
+
 
   useEffect(() => {
     if (splashStage === 4) return;
@@ -97,8 +119,8 @@ const App: React.FC = () => {
   }, [viewMode, user]);
 
   const handleSelectStore = (store: Store) => { setSelectedStore(store); setActiveTab('store_detail'); };
-  const headerExclusionList = ['store_area', 'editorial_list', 'store_profile', 'category_detail', 'store_detail', 'profile', 'patrocinador_master', 'service_subcategories', 'service_specialties', 'store_ads_module', 'about', 'support', 'favorites', 'community_feed', 'admin_panel'];
-  const hideBottomNav = ['store_ads_module', 'store_detail', 'admin_panel'].includes(activeTab);
+  const headerExclusionList = ['store_area', 'editorial_list', 'store_profile', 'category_detail', 'store_detail', 'profile', 'patrocinador_master', 'service_subcategories', 'service_specialties', 'store_ads_module', 'about', 'support', 'favorites', 'community_feed', 'admin_panel', 'cashback_landing'];
+  const hideBottomNav = ['store_ads_module', 'store_detail', 'admin_panel', 'cashback_landing'].includes(activeTab);
 
   const RoleSwitcherModal = () => {
     if (!isRoleSwitcherOpen) return null;
@@ -123,6 +145,7 @@ const App: React.FC = () => {
 
   return (
     <div className={isDarkMode ? 'dark' : ''}>
+      {/* FIX: Removed redundant AuthProvider. It's already provided in index.tsx, and this was causing a "Cannot find name" error. */}
       <NeighborhoodProvider>
         <div className="min-h-screen bg-white dark:bg-gray-900 flex justify-center relative">
           <Layout activeTab={activeTab} setActiveTab={setActiveTab} userRole={userRole} hideNav={hideBottomNav}>
@@ -130,6 +153,7 @@ const App: React.FC = () => {
                 <Header isDarkMode={isDarkMode} toggleTheme={() => {}} onAuthClick={() => setActiveTab('profile')} user={user} searchTerm={globalSearch} onSearchChange={setGlobalSearch} onNavigate={setActiveTab} activeTab={activeTab} userRole={userRole} stores={STORES} onStoreClick={handleSelectStore} isAdmin={user?.email === ADMIN_EMAIL} viewMode={viewMode} onOpenViewSwitcher={() => setIsRoleSwitcherOpen(true)} />
               )}
               <main className="animate-in fade-in duration-500 w-full max-w-md mx-auto">
+                {activeTab === 'cashback_landing' && <CashbackLandingView onBack={() => setActiveTab('home')} onLogin={() => { setPendingTab('scan_cashback'); setIsAuthOpen(true); }} />}
                 {activeTab === 'admin_panel' && <AdminPanel user={user as any} onLogout={signOut} viewMode={viewMode} onOpenViewSwitcher={() => setIsRoleSwitcherOpen(true)} onNavigateToApp={() => setActiveTab('home')} />}
                 {activeTab === 'home' && <HomeFeed onNavigate={setActiveTab} onSelectCategory={(c) => { setSelectedCategory(c); setActiveTab('category_detail'); }} onSelectCollection={() => {}} onStoreClick={handleSelectStore} stores={STORES} searchTerm={globalSearch} user={user as any} onRequireLogin={() => setIsAuthOpen(true)} />}
                 {activeTab === 'explore' && <ExploreView stores={STORES} searchQuery={globalSearch} onStoreClick={handleSelectStore} onLocationClick={() => {}} onFilterClick={() => {}} onOpenPlans={() => {}} onNavigate={setActiveTab} />}
@@ -149,7 +173,7 @@ const App: React.FC = () => {
                 {activeTab === 'store_ads_module' && <StoreAdsModule onBack={() => setActiveTab('store_area')} onNavigate={setActiveTab} categoryName={adCategoryTarget || undefined} />}
                 {activeTab === 'store_profile' && <StoreProfileEdit onBack={() => setActiveTab('store_area')} />}
               </main>
-              <AuthModal isOpen={isAuthOpen} onClose={() => setIsAuthOpen(false)} user={user as any} onLoginSuccess={() => setIsAuthOpen(false)} />
+              <AuthModal isOpen={isAuthOpen} onClose={() => setIsAuthOpen(false)} user={user as any} onLoginSuccess={handleLoginSuccess} />
               {isQuoteModalOpen && <QuoteRequestModal isOpen={isQuoteModalOpen} onClose={() => setIsQuoteModalOpen(false)} categoryName={quoteCategory} onSuccess={() => setActiveTab('service_success')} />}
           </Layout>
           <RoleSwitcherModal />

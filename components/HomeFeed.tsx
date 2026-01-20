@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { Store, Category, EditorialCollection, AdType } from '../types';
 import { 
@@ -23,7 +22,8 @@ import {
   Compass,
   FileText,
   Shield,
-  Rocket
+  Rocket,
+  CheckCircle
 } from 'lucide-react';
 import { LojasEServicosList } from './LojasEServicosList';
 import { User } from '@supabase/supabase-js';
@@ -59,9 +59,9 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void; onStoreClick?: (
   const [progress, setProgress] = useState(0);
 
   const banners: BannerItem[] = useMemo(() => [
-    { id: 'rio-phone-store', title: 'RIO PHONE STORE', target: 'rio-phone-store', tag: 'Assistência Apple', bgColor: 'bg-[#020617]', Icon: Smartphone, isSpecial: true },
-    { id: 'master-sponsor', title: 'Grupo Esquematiza', target: 'patrocinador_master', tag: 'Patrocinador Master', bgColor: 'bg-slate-900', Icon: Crown },
-    { id: 'advertise-home', title: 'Anuncie aqui', target: 'advertise_home_banner', tag: 'Destaque sua marca', bgColor: 'bg-[#1E5BFF]', Icon: Megaphone }
+    { id: 'rio-phone-store', title: 'RIO PHONE STORE', target: 'rio-phone-store', tag: 'Assistência Apple', bgColor: 'bg-black', Icon: Smartphone, isSpecial: true },
+    { id: 'master-sponsor', title: 'Grupo Esquematiza', target: 'patrocinador_master', tag: 'Patrocinador Master', bgColor: 'bg-[#0F172A]', Icon: Crown },
+    { id: 'advertise-home', title: 'Anuncie aqui', target: 'store_ads_module', tag: 'Destaque sua marca', bgColor: 'bg-brand-blue', Icon: Megaphone }
   ], []);
 
   useEffect(() => {
@@ -92,130 +92,162 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void; onStoreClick?: (
 
   return (
     <div className="px-4">
-      <div 
-        onClick={handleBannerClick}
-        className={`w-full relative aspect-[3/2] rounded-[32px] overflow-hidden shadow-xl shadow-slate-200 dark:shadow-none border border-gray-100 dark:border-white/5 ${current.bgColor} cursor-pointer active:scale-[0.98] transition-all group`}
-      >
-        {current.id === 'rio-phone-store' ? (
-          <div className="absolute inset-0">
-            {/* Imagem de Fundo Integrada (Aproveita 100% da área) */}
-            <div className="absolute inset-0 z-0">
-              <img 
-                src="https://images.unsplash.com/photo-1592750475338-74b7b21085ab?q=80&w=1200&auto=format&fit=crop" 
-                alt="RIO PHONE STORE" 
-                className="w-full h-full object-cover object-right brightness-110 group-hover:scale-105 transition-transform duration-1000 ease-out"
-              />
-              {/* Overlay de fusão para garantir leitura e remover aspecto de recorte */}
-              <div className="absolute inset-0 bg-gradient-to-r from-[#020617] via-[#020617]/85 to-transparent z-10"></div>
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_50%,rgba(30,91,255,0.1),transparent_70%)] z-10"></div>
+      <div className="flex flex-col gap-4">
+        {/* Banner Container */}
+        <div 
+          onClick={handleBannerClick}
+          className={`w-full relative aspect-[3/2] rounded-[32px] overflow-hidden shadow-xl shadow-slate-200 dark:shadow-none border border-gray-100 dark:border-white/5 ${current.bgColor} cursor-pointer active:scale-[0.98] transition-all group`}
+        >
+          {current.id === 'rio-phone-store' ? (
+            <div className="absolute inset-0 bg-black flex items-center justify-start px-4">
+              {/* Text on the left */}
+              <div className="w-1/2 h-full flex flex-col items-start justify-center text-left text-white z-10">
+                  <h3 className="text-xl font-bold tracking-wider opacity-90">
+                      <span className="opacity-70"></span> iPhone 17
+                  </h3>
+                  <h2 className="text-8xl font-black tracking-tighter my-1 bg-gradient-to-r from-orange-300 via-amber-400 to-orange-500 bg-clip-text text-transparent font-display">
+                      PRO
+                  </h2>
+                  <button className="mt-8 px-8 py-3 border-2 border-white/80 rounded-full text-base font-bold hover:bg-white hover:text-black transition-all duration-300 active:scale-95">
+                      Saiba mais
+                  </button>
+              </div>
+              {/* Image on the right */}
+              <div className="absolute right-0 top-0 bottom-0 w-[55%] h-full flex items-center justify-center overflow-hidden">
+                  <img 
+                    src="https://images.unsplash.com/photo-1678931481189-598199ea3504?q=80&w=1200&auto=format&fit=crop"
+                    alt="iPhone 17 Pro Laranja" 
+                    className="h-full w-auto object-cover scale-110 group-hover:scale-125 transition-transform duration-700 ease-out"
+                    style={{ objectPosition: '20% 35%' }}
+                  />
+              </div>
             </div>
+          ) : current.id === 'master-sponsor' ? (
+            <div className="absolute inset-0 bg-[#0F172A] flex overflow-hidden">
+              {/* LADO ESQUERDO: VISUAL / ANIMAÇÃO */}
+              <div className="relative w-[48%] h-full overflow-hidden shrink-0">
+                <div className="absolute inset-0 z-0">
+                  <img 
+                    src="https://images.unsplash.com/photo-1557597774-9d273605dfa9?q=80&w=800&auto=format&fit=crop" 
+                    alt="Segurança Esquematiza" 
+                    className="w-full h-full object-cover brightness-75 scale-110 animate-float-slow opacity-60"
+                  />
+                  {/* Gradiente de Fusão - Suaviza a transição para o texto no lado direito */}
+                  <div className="absolute inset-y-0 right-0 w-32 bg-gradient-to-r from-transparent to-[#0F172A] z-10"></div>
+                  {/* Subtle Glow de Tecnologia */}
+                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-40 h-40 bg-blue-500/20 rounded-full blur-[80px] animate-pulse"></div>
+                  {/* Textura de Scanline sutil */}
+                  <div className="absolute inset-0 opacity-[0.05] pointer-events-none" style={{ backgroundImage: 'linear-gradient(transparent 50%, rgba(255,255,255,0.1) 50%)', backgroundSize: '100% 4px' }}></div>
+                </div>
 
-            {/* Conteúdo (Textos permanecem nos lugares originais) */}
-            <div className="z-20 pl-8 flex flex-col justify-center h-full max-w-[60%] relative">
-               <div className="mb-5 flex items-center gap-2 animate-in fade-in slide-in-from-left-4 duration-700">
-                  <div className="bg-white/5 backdrop-blur-md border border-white/10 px-2.5 py-1 rounded-full flex items-center gap-1.5 shadow-sm">
-                      <Star className="w-2.5 h-2.5 text-blue-200 fill-blue-200" />
-                      <span className="text-[9px] font-bold text-blue-50 uppercase tracking-widest leading-none">Especialista Apple</span>
-                  </div>
-               </div>
-               <div className="mb-3 animate-in fade-in slide-in-from-bottom-2 duration-700 delay-100">
-                   <h3 className="text-[32px] font-[900] text-white leading-[0.85] font-display tracking-tight drop-shadow-lg">
-                    RIO PHONE
-                   </h3>
-                   <h3 className="text-[32px] font-[300] text-blue-100 leading-[0.85] font-display tracking-tight opacity-90">
-                    STORE
-                   </h3>
-               </div>
-               <div className="mb-6 animate-in fade-in duration-700 delay-200">
-                 <p className="text-slate-400 text-[10px] font-medium leading-relaxed max-w-[170px]">
-                   Acessórios, manutenção e iPhones novos. Qualidade que você confia.
-                 </p>
-               </div>
-               <div className="flex items-center gap-2 animate-in fade-in duration-700 delay-300">
-                  <div className="w-6 h-[1px] bg-blue-500/50"></div>
-                  <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Desde 2017</span>
-               </div>
-            </div>
-          </div>
-        ) : current.id === 'master-sponsor' ? (
-          <div className="absolute inset-0 bg-gradient-to-br from-[#0F172A] via-[#1E293B] to-[#0F172A] flex flex-col items-center justify-center text-center p-8 overflow-hidden">
-             <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(30,91,255,0.1),transparent_70%)] animate-pulse"></div>
-             <div className="absolute -right-16 -bottom-16 opacity-[0.05] rotate-12 pointer-events-none">
+                {/* Elemento flutuante de autoridade (Escudo) */}
+                <div className="absolute inset-0 flex items-center justify-center z-20">
+                    <div className="p-4 bg-white/5 backdrop-blur-xl rounded-full border border-white/10 shadow-2xl animate-subtle-glow">
+                        <Shield className="w-12 h-12 text-blue-400 opacity-80" strokeWidth={1.5} />
+                    </div>
+                </div>
+              </div>
+
+              {/* LADO DIREITO: TEXTO */}
+              <div className="flex-1 h-full flex flex-col justify-center pl-2 pr-10 z-30 text-left relative">
+                 {/* Badge Superior */}
+                 <div className="mb-4 flex items-center gap-2 animate-in fade-in slide-in-from-left-4 duration-1000">
+                    <div className="bg-amber-500/20 px-2.5 py-1 rounded-lg border border-amber-500/30 flex items-center gap-1.5">
+                        <Crown className="w-2.5 h-2.5 text-amber-400 fill-amber-400" />
+                        <span className="text-[9px] font-black text-amber-100 uppercase tracking-[0.2em] leading-none">Patrocinador Master</span>
+                    </div>
+                 </div>
+
+                 {/* Marca Principal */}
+                 <div className="mb-2 space-y-0.5 animate-in slide-in-from-bottom-2 duration-700 delay-100">
+                    <h3 className="text-3xl font-[950] text-white leading-[0.85] font-display tracking-tighter uppercase drop-shadow-2xl">
+                      GRUPO
+                    </h3>
+                    <h3 className="text-3xl font-[950] bg-gradient-to-r from-blue-400 to-blue-200 bg-clip-text text-transparent leading-[0.85] font-display tracking-tighter uppercase">
+                      ESQUEMATIZA
+                    </h3>
+                 </div>
+
+                 {/* Slogan / Área */}
+                 <div className="mb-6 animate-in fade-in duration-1000 delay-300">
+                    <p className="text-slate-400 text-[10px] font-bold uppercase tracking-[0.2em] opacity-90 leading-tight">
+                      SEGURANÇA E FACILITIES
+                    </p>
+                 </div>
+
+                 {/* Selo de Excelência */}
+                 <div className="flex items-center gap-3 animate-in fade-in duration-1000 delay-500">
+                    <div className="w-6 h-[1px] bg-blue-500/30"></div>
+                    <div className="flex items-center gap-1.5">
+                        <CheckCircle className="w-3 h-3 text-emerald-400" />
+                        <span className="text-[9px] font-black text-slate-500 uppercase tracking-[0.15em]">Excelência Comprovada</span>
+                    </div>
+                 </div>
+              </div>
+              
+              {/* Overlay Decorativo Right */}
+              <div className="absolute -right-16 -bottom-16 opacity-[0.03] rotate-12 pointer-events-none group-hover:scale-110 transition-transform duration-1000">
                 <Shield className="w-64 h-64 text-white" />
-             </div>
-             <div className="relative z-10 mb-6 animate-in zoom-in-95 duration-1000">
-                <div className="bg-white/5 backdrop-blur-xl border border-white/10 px-4 py-1.5 rounded-full flex items-center gap-2.5 shadow-2xl">
-                    <div className="w-5 h-5 bg-amber-500/20 rounded-lg flex items-center justify-center">
-                       <Crown className="w-3 h-3 text-amber-400 fill-amber-400" />
-                    </div>
-                    <span className="text-[10px] font-black text-white/90 uppercase tracking-[0.25em] leading-none">
-                      Patrocinador Master
-                    </span>
-                </div>
-             </div>
-             <div className="relative z-10 space-y-2 animate-in slide-in-from-bottom-4 duration-700 delay-200">
-                <h3 className="text-4xl font-[950] bg-gradient-to-b from-white via-white to-blue-200 bg-clip-text text-transparent leading-none font-display tracking-tighter uppercase drop-shadow-2xl">
-                  GRUPO
-                </h3>
-                <h3 className="text-4xl font-[950] bg-gradient-to-r from-blue-400 to-blue-100 bg-clip-text text-transparent leading-none font-display tracking-tighter uppercase">
-                  ESQUEMATIZA
-                </h3>
-             </div>
-             <div className="relative z-10 mt-6 animate-in fade-in duration-1000 delay-500">
-                <p className="text-slate-400 text-[11px] font-bold uppercase tracking-[0.2em] opacity-80 mb-2">
-                  Segurança e Facilities
-                </p>
-                <div className="flex items-center justify-center gap-4">
-                   <div className="w-8 h-[1px] bg-white/10"></div>
-                   <p className="text-blue-400/90 text-[10px] font-black uppercase tracking-widest">Excelência comprovada</p>
-                   <div className="w-8 h-[1px] bg-white/10"></div>
-                </div>
-             </div>
-          </div>
-        ) : current.id === 'advertise-home' ? (
-          <div className="absolute inset-0 bg-gradient-to-br from-[#1E5BFF] via-[#0040DD] to-[#1E5BFF] flex flex-col items-center justify-center text-center p-8 overflow-hidden">
-             <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '24px 24px' }}></div>
-             <div className="absolute -left-10 -top-10 w-40 h-40 bg-white/10 blur-3xl rounded-full"></div>
-             <div className="absolute -right-20 -bottom-20 w-64 h-64 bg-black/10 blur-3xl rounded-full"></div>
-             <div className="absolute -right-8 -bottom-8 opacity-[0.07] rotate-[-15deg] pointer-events-none group-hover:scale-110 transition-transform duration-1000">
-                <Rocket className="w-48 h-48 text-white" />
-             </div>
-             <div className="relative z-10 flex flex-col items-center max-w-xs">
-                <div className="mb-5 animate-in slide-in-from-top-2 duration-700">
-                    <div className="bg-black/20 backdrop-blur-md border border-white/20 px-3 py-1 rounded-full flex items-center gap-2">
-                        <Zap className="w-3 h-3 text-amber-300 fill-amber-300" />
-                        <span className="text-[10px] font-black text-white uppercase tracking-widest leading-none">Oportunidade de Ouro</span>
-                    </div>
-                </div>
-                <h3 className="text-3xl font-[950] text-white leading-[0.9] font-display tracking-tighter uppercase drop-shadow-xl mb-3 animate-in fade-in slide-in-from-bottom-2 duration-700 delay-100">
-                  ANUNCIE SUA MARCA
-                </h3>
-                <p className="text-blue-50 text-[11px] font-medium leading-relaxed max-w-[220px] mb-8 opacity-90 animate-in fade-in duration-1000 delay-200">
-                  Alcance milhares de vizinhos em Jacarepaguá e venda mais todos os dias através do nosso super-app.
-                </p>
-                <div className="bg-white text-[#1E5BFF] px-6 py-3 rounded-2xl font-black text-[10px] uppercase tracking-[0.15em] flex items-center gap-2 shadow-2xl shadow-blue-900/40 group-hover:scale-105 group-hover:bg-blue-50 transition-all duration-300 animate-in zoom-in-95 delay-300">
-                   Divulgar minha loja
-                   <ArrowRight className="w-4 h-4" strokeWidth={3} />
-                </div>
-             </div>
-          </div>
-        ) : (
-          <div className="absolute inset-0 flex flex-col items-center justify-center px-6 pt-4 pb-12 text-center z-10">
-             <div className="p-4 bg-white/10 backdrop-blur-md rounded-[2rem] border border-white/20 shadow-2xl animate-in zoom-in duration-700 mb-5">
-                <current.Icon className="w-12 h-12 text-white" strokeWidth={2} />
-             </div>
-             <h3 className="text-2xl font-[900] text-white leading-tight font-display tracking-tight mt-4 uppercase">
-              {current.title}
-             </h3>
-             <p className="text-white/60 text-[10px] font-black uppercase tracking-[0.2em] mt-2">{current.tag}</p>
-          </div>
-        )}
+              </div>
+            </div>
+          ) : current.id === 'advertise-home' ? (
+            <div className="absolute inset-0 bg-gradient-to-br from-brand-blue to-[#0A369D] flex flex-col items-center justify-center text-center p-8 overflow-hidden">
+              {/* Animated Watermark */}
+              <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                  <MapPin className="absolute -bottom-16 -right-16 w-80 h-80 text-white/5 rotate-[-20deg] animate-subtle-diagonal-scroll" />
+              </div>
+              {/* Subtle decorative glow */}
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] bg-white/5 rounded-full blur-[100px] animate-subtle-glow opacity-50"></div>
 
-        {/* Indicadores de Progresso */}
-        <div className="absolute bottom-5 left-1/2 -translate-x-1/2 flex gap-1.5 z-30 w-1/3 justify-center">
+              <div className="relative z-10 flex flex-col items-center w-full h-full justify-center">
+                  {/* Label */}
+                  <div className="mb-5 animate-in fade-in duration-1000">
+                      <div className="bg-white/10 backdrop-blur-sm border border-white/20 px-3 py-1 rounded-full flex items-center gap-2">
+                          <div className="w-1.5 h-1.5 rounded-full bg-white/80 shadow-[0_0_8px_rgba(255,255,255,0.5)]"></div>
+                          <span className="text-[8px] font-black text-white/80 uppercase tracking-[0.25em] leading-none">Destaque Exclusivo</span>
+                      </div>
+                  </div>
+
+                  {/* Title */}
+                  <h3 className="text-[28px] font-bold text-white leading-tight font-display tracking-tight mb-3 animate-in fade-in slide-in-from-bottom-1 duration-1000 delay-100">
+                    Anuncie sua marca
+                  </h3>
+
+                  {/* Subtitle */}
+                  <p className="text-blue-100/70 text-[12px] font-medium leading-snug max-w-[260px] mb-8 animate-in fade-in duration-1000 delay-300 text-center tracking-normal">
+                    Conecte sua empresa a milhares de novos clientes locais através do Localizei.
+                  </p>
+
+                  {/* CTA */}
+                  <div className="relative group/cta">
+                    <div className="relative bg-white text-[#1E5BFF] px-6 py-2.5 rounded-xl font-bold text-[10px] uppercase tracking-[0.15em] flex items-center gap-2 shadow-2xl shadow-black/30 active:scale-[0.98] transition-all duration-500 hover:bg-blue-50 hover:-translate-y-0.5">
+                      Divulgar minha loja
+                      <ArrowRight className="w-3 h-3 transition-transform duration-500 group-hover/cta:translate-x-1" strokeWidth={2.5} />
+                    </div>
+                  </div>
+              </div>
+            </div>
+          ) : (
+            <div className="absolute inset-0 flex flex-col items-center justify-center px-6 pt-4 pb-12 text-center z-10">
+              <div className="p-4 bg-white/10 backdrop-blur-md rounded-[2rem] border border-white/20 shadow-2xl animate-in zoom-in duration-700 mb-5">
+                  <current.Icon className="w-12 h-12 text-white" strokeWidth={2} />
+              </div>
+              <h3 className="text-2xl font-[900] text-white leading-tight font-display tracking-tight mt-4 uppercase">
+                {current.title}
+              </h3>
+              <p className="text-white/60 text-[10px] font-black uppercase tracking-[0.2em] mt-2">{current.tag}</p>
+            </div>
+          )}
+        </div>
+
+        {/* Progress Indicators - MOVED OUTSIDE AND BELOW */}
+        <div className="flex gap-1.5 z-30 w-1/3 mx-auto justify-center h-1">
           {banners.map((_, idx) => (
-            <div key={idx} className="h-1 flex-1 bg-white/20 rounded-full overflow-hidden">
-              <div className="h-full bg-white transition-all duration-100 ease-linear" style={{ width: idx === currentIndex ? `${progress}%` : idx < currentIndex ? '100%' : '0%' }} />
+            <div key={idx} className="h-full flex-1 bg-gray-200 dark:bg-gray-800 rounded-full overflow-hidden">
+              <div 
+                className="h-full bg-[#1E5BFF] transition-all duration-100 ease-linear" 
+                style={{ width: idx === currentIndex ? `${progress}%` : idx < currentIndex ? '100%' : '0%' }} 
+              />
             </div>
           ))}
         </div>
@@ -241,7 +273,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
     switch (key) {
       case 'home_carousel': 
         return (
-          <div key="home_carousel" className="w-full bg-white dark:bg-gray-950 pb-2">
+          <div key="home_carousel" className="w-full bg-white dark:bg-gray-950 pb-2 pt-4">
             <HomeCarousel onNavigate={onNavigate} onStoreClick={onStoreClick} stores={stores} />
           </div>
         );
@@ -294,10 +326,14 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
     }
   };
 
+  const MemoizedSections = useMemo(() => {
+    return homeStructure.map(section => renderSection(section));
+  }, [homeStructure, listFilter, stores, user, onSelectCategory, onNavigate, onStoreClick]);
+
   return (
     <div className="flex flex-col bg-white dark:bg-gray-950 w-full max-w-md mx-auto animate-in fade-in duration-500 overflow-x-hidden pb-32">
       <div className="flex flex-col w-full gap-1">
-          {homeStructure.map(section => renderSection(section))}
+          {MemoizedSections}
       </div>
     </div>
   );
@@ -383,7 +419,7 @@ const SugestoesParaVoce: React.FC<{ stores: Store[]; onStoreClick?: (store: Stor
   if (suggestions.length === 0) return null;
 
   return (
-    <div className="bg-white dark:bg-gray-950 py-4 px-5">
+    <div className="bg-white dark:bg-gray-900 py-4 px-5">
       <SectionHeader 
         icon={Lightbulb} 
         title="Sugestões para você" 

@@ -1,4 +1,3 @@
-
 import React from 'react';
 
 export type ThemeMode = 'light' | 'dark' | 'auto';
@@ -28,10 +27,8 @@ export interface Store {
   cashback_validity_days?: number;
   store_manual_code?: string;
   secure_id?: string;
-  // Campos de controle de onboarding solicitados
   onboarding_cashback_completed?: boolean;
   onboarding_cashback_completed_at?: string;
-  // Propriedades extras
   neighborhood?: string;
   isSponsored?: boolean;
   recentComments?: string[];
@@ -161,6 +158,7 @@ export interface NeighborhoodCommunity {
   icon: React.ReactNode;
   color: string;
   membersCount: string;
+  type?: 'official' | 'user';
 }
 
 export interface CommunitySuggestion {

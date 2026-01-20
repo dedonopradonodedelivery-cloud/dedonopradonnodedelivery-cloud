@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { ChevronLeft, Zap, Wrench, Hammer, PaintRoller, User, Car, Droplet, Key, Truck, Shield, Smartphone, Laptop, Wifi, Dog, Scissors, Sparkles, Briefcase, Scale, Calculator, PenTool, Truck as TruckIcon, Flower, Search, Star, ShieldCheck, Rocket } from 'lucide-react';
 
@@ -46,11 +45,11 @@ const SubcategoryCarousel = () => {
 
   return (
     <div className="px-5 mb-6">
-      <div className="relative h-32 w-full overflow-hidden rounded-[2rem] shadow-lg">
+      <div className="relative aspect-[3/2] w-full overflow-hidden rounded-[32px] shadow-lg">
         {SUB_BANNERS.map((banner, index) => (
           <div
             key={banner.id}
-            className={`absolute inset-0 w-full h-full transition-all duration-700 ease-in-out flex items-center px-6 gap-5 ${
+            className={`absolute inset-0 w-full h-full transition-all duration-700 ease-in-out flex flex-col items-center justify-center text-center px-6 gap-5 ${
               index === currentIndex 
                 ? 'opacity-100 translate-x-0' 
                 : index < currentIndex 
@@ -58,18 +57,18 @@ const SubcategoryCarousel = () => {
                   : 'opacity-0 translate-x-full'
             } ${banner.color}`}
           >
-            <div className="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center shrink-0 border border-white/10">
+            <div className="w-16 h-16 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center shrink-0 border border-white/10 shadow-lg">
               {banner.icon}
             </div>
             <div className="text-white">
-              <h3 className="font-black text-lg uppercase tracking-tight leading-tight">{banner.title}</h3>
-              <p className="text-xs font-medium text-white/80">{banner.subtitle}</p>
+              <h3 className="font-black text-xl uppercase tracking-tight leading-tight mb-2">{banner.title}</h3>
+              <p className="text-sm font-medium text-white/80">{banner.subtitle}</p>
             </div>
           </div>
         ))}
         
         {/* Indicadores */}
-        <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-1.5 z-10">
+        <div className="absolute bottom-5 left-0 right-0 flex justify-center gap-1.5 z-10">
           {SUB_BANNERS.map((_, idx) => (
             <div 
               key={idx} 

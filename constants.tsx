@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { 
   Utensils, ShoppingCart, Scissors, Heart, PawPrint, Home, Wrench, 
@@ -12,7 +11,7 @@ import {
   Baby, GraduationCap, Microscope, Brain, Sparkles, Smile, Beer, 
   Activity, Eye, FileText, Globe, Calendar, Music, PartyPopper, Globe2, Edit3, User, Bell, Search,
   Camera, Vote, Handshake, Flame, Milestone, History, Home as HomeIcon,
-  MessageCircle, HelpCircle, UserCheck
+  MessageCircle, HelpCircle, UserCheck, Recycle
 } from 'lucide-react';
 import { AdType, Category, Store, Story, EditorialCollection, Job, CommunityPost, NeighborhoodCommunity } from './types';
 
@@ -198,52 +197,105 @@ export const SUBCATEGORIES: Record<string, { name: string; icon: React.ReactNode
   ],
 };
 
-export const NEIGHBORHOOD_COMMUNITIES: NeighborhoodCommunity[] = [
+export const OFFICIAL_COMMUNITIES: NeighborhoodCommunity[] = [
   {
     id: 'comm-residents',
-    name: 'Moradores da Freguesia',
-    description: 'Espaço oficial para quem vive no bairro.',
+    name: 'Moradores de JPA',
+    description: 'Comunidade oficial para troca de informações entre vizinhos de Jacarepaguá.',
     image: 'https://images.unsplash.com/photo-1570129477492-45c003edd2be?q=80&w=800&auto=format&fit=crop',
     icon: <Users />,
     color: 'bg-blue-500',
-    membersCount: '2.356'
+    membersCount: '12.4k',
+    type: 'official'
   },
   {
-    id: 'comm-market',
-    name: 'Promoções no Bairro',
-    description: 'Achadinhos, ofertas e descontos exclusivos.',
-    image: 'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?q=80&w=800&auto=format&fit=crop',
-    icon: <Tag />,
-    color: 'bg-[#1E5BFF]',
-    membersCount: '4.301'
-  },
-  {
-    id: 'comm-pro',
-    name: 'Recomendações e Dicas',
-    description: 'Quem você indicaria? Espaço para trocar sugestões.',
+    id: 'comm-tips',
+    name: 'Recomendações e dicas no bairro',
+    description: 'Onde encontrar o melhor serviço? Peça e dê dicas para seus vizinhos.',
     image: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?q=80&w=800&auto=format&fit=crop',
     icon: <HelpCircle />,
     color: 'bg-orange-500',
-    membersCount: '3.207'
+    membersCount: '8.2k',
+    type: 'official'
   },
   {
-    id: 'comm-condo',
-    name: 'Aluguel e Imóveis',
-    description: 'Encontre o seu novo lar na região.',
+    id: 'comm-jobs',
+    name: 'Vagas de empregos',
+    description: 'Encontre ou anuncie oportunidades de trabalho em Jacarepaguá.',
+    image: 'https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?q=80&w=800&auto=format&fit=crop',
+    icon: <Briefcase />,
+    color: 'bg-emerald-500',
+    membersCount: '15.1k',
+    type: 'official'
+  },
+  {
+    id: 'comm-real-estate',
+    name: 'Aluguéis e vendas de imóveis',
+    description: 'Sua casa nova em JPA está aqui. Anúncios diretos e imobiliárias locais.',
     image: 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?q=80&w=800&auto=format&fit=crop',
     icon: <HomeIcon />,
-    color: 'bg-emerald-500',
-    membersCount: '1.832'
+    color: 'bg-purple-500',
+    membersCount: '5.4k',
+    type: 'official'
   },
   {
-    id: 'comm-food',
-    name: 'Onde a Gente Come',
-    description: 'Sugestões, críticas, receitas e descobertas locais.',
-    image: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=800&auto=format&fit=crop',
-    icon: <Utensils />,
-    color: 'bg-brand-blue',
-    membersCount: '4.5k'
+    id: 'comm-desapega',
+    name: 'Desapega – venda e troca',
+    description: 'Venda o que não usa mais ou encontre achados incríveis perto de você.',
+    image: 'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?q=80&w=800&auto=format&fit=crop',
+    icon: <Recycle />,
+    color: 'bg-[#1E5BFF]',
+    membersCount: '22.3k',
+    type: 'official'
   }
+];
+
+export const MOCK_USER_COMMUNITIES: NeighborhoodCommunity[] = [
+  {
+    id: 'user-comm-1',
+    name: 'Clube do Livro Freguesia',
+    description: 'Encontros mensais para discutir literatura na Praça da Freguesia.',
+    image: 'https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?q=80&w=800&auto=format&fit=crop',
+    icon: <BookOpen />,
+    color: 'bg-amber-600',
+    membersCount: '156',
+    type: 'user'
+  },
+  {
+    id: 'user-comm-2',
+    name: 'Vizinhos do Anil (Reserva)',
+    description: 'Grupo específico para moradores do condomínio Reserva do Anil.',
+    image: 'https://images.unsplash.com/photo-1570129477492-45c003edd2be?q=80&w=800&auto=format&fit=crop',
+    icon: <Building2 />,
+    color: 'bg-blue-400',
+    membersCount: '482',
+    type: 'user'
+  },
+  {
+    id: 'user-comm-3',
+    name: 'Trilhas em Jacarepaguá',
+    description: 'Para quem ama explorar o Maciço da Tijuca e arredores aos finais de semana.',
+    image: 'https://images.unsplash.com/photo-1551632432-c735e8399527?q=80&w=800&auto=format&fit=crop',
+    icon: <MapIcon />,
+    color: 'bg-green-600',
+    membersCount: '890',
+    type: 'user'
+  },
+  {
+    id: 'user-comm-4',
+    name: 'Donos de Golden Retriever JPA',
+    description: 'Troca de experiências e encontros de pets no Parque de Jacarepaguá.',
+    image: 'https://images.unsplash.com/photo-1552053831-71594a27632d?q=80&w=800&auto=format&fit=crop',
+    icon: <Dog />,
+    color: 'bg-yellow-500',
+    membersCount: '312',
+    type: 'user'
+  }
+];
+
+export const NEIGHBORHOOD_COMMUNITIES: NeighborhoodCommunity[] = [
+  ...OFFICIAL_COMMUNITIES,
+  ...MOCK_USER_COMMUNITIES
 ];
 
 export const MOCK_COMMUNITY_POSTS: CommunityPost[] = [
@@ -255,7 +307,7 @@ export const MOCK_COMMUNITY_POSTS: CommunityPost[] = [
     authorRole: 'resident',
     content: 'Alguém conhece um chaveiro de confiança na Freguesia? Perdi as chaves de casa agora pouco.',
     type: 'recommendation',
-    communityId: 'comm-pro',
+    communityId: 'comm-tips',
     neighborhood: 'Freguesia',
     timestamp: '2h',
     likes: 8,
@@ -269,12 +321,111 @@ export const MOCK_COMMUNITY_POSTS: CommunityPost[] = [
     authorRole: 'resident',
     content: 'Olha esse hambúrguer top na casa de carnes aqui do bairro! 🍔🔥 Quem já experimentou?',
     type: 'recommendation',
-    communityId: 'comm-market',
+    communityId: 'comm-tips',
     neighborhood: 'Anil',
     timestamp: '3h',
     likes: 45,
     comments: 8,
     imageUrl: 'https://images.unsplash.com/photo-1561758033-d89a9ad46330?q=80&w=600&auto=format&fit=crop'
+  },
+  {
+    id: 'post-3',
+    userId: 'u3',
+    userName: 'Bruno Rocha',
+    userAvatar: 'https://i.pravatar.cc/100?u=bruno',
+    authorRole: 'resident',
+    content: 'Alguém sabe se a feira de domingo vai acontecer amanhã mesmo com a chuva?',
+    type: 'event',
+    communityId: 'comm-residents',
+    neighborhood: 'Freguesia',
+    timestamp: '4h',
+    likes: 12,
+    comments: 4
+  },
+  {
+    id: 'post-4',
+    userId: 'u4',
+    userName: 'Mariana Luz',
+    userAvatar: 'https://i.pravatar.cc/100?u=mari',
+    authorRole: 'resident',
+    content: 'Vaga aberta para recepcionista em clínica odontológica na Taquara. Interessados, inbox!',
+    type: 'recommendation',
+    communityId: 'comm-jobs',
+    neighborhood: 'Taquara',
+    timestamp: '5h',
+    likes: 24,
+    comments: 12
+  },
+  {
+    id: 'post-5',
+    userId: 'u5',
+    userName: 'Ricardo Souza',
+    userAvatar: 'https://i.pravatar.cc/100?u=ricardo',
+    authorRole: 'resident',
+    content: 'Cuidado pessoal: semáforo da Geremário Dantas com problema, tá um caos o trânsito agora.',
+    type: 'alert',
+    communityId: 'comm-residents',
+    neighborhood: 'Freguesia',
+    timestamp: '6h',
+    likes: 38,
+    comments: 14
+  },
+  {
+    id: 'post-6',
+    userId: 'u6',
+    userName: 'Luciana Melo',
+    userAvatar: 'https://i.pravatar.cc/100?u=luciana',
+    authorRole: 'resident',
+    content: 'Estou desapegando dessa fritadeira elétrica, funcionando perfeitamente! R$ 150,00 para retirar no Anil.',
+    type: 'recommendation',
+    communityId: 'comm-desapega',
+    neighborhood: 'Anil',
+    timestamp: '8h',
+    likes: 24,
+    comments: 31,
+    imageUrl: 'https://images.unsplash.com/photo-1585659722982-789600c7690a?q=80&w=600&auto=format&fit=crop'
+  },
+  {
+    id: 'post-7',
+    userId: 'u7',
+    userName: 'Felipe Costa',
+    userAvatar: 'https://i.pravatar.cc/100?u=felipe',
+    authorRole: 'merchant',
+    content: 'Pessoal, abri uma vaga de emprego na minha loja de tintas no Tanque. Interessados, inbox!',
+    type: 'event',
+    communityId: 'comm-jobs',
+    neighborhood: 'Tanque',
+    timestamp: '12h',
+    likes: 15,
+    comments: 22
+  },
+  {
+    id: 'post-8',
+    userId: 'u8',
+    userName: 'Amanda Silva',
+    userAvatar: 'https://i.pravatar.cc/100?u=amanda',
+    authorRole: 'resident',
+    content: 'Apartamento disponível para aluguel na Freguesia, 2 quartos, direto com proprietário.',
+    type: 'recommendation',
+    communityId: 'comm-real-estate',
+    neighborhood: 'Freguesia',
+    timestamp: '14h',
+    likes: 18,
+    comments: 45
+  },
+  {
+    id: 'post-9',
+    userId: 'u9',
+    userName: 'Rafael Lima',
+    userAvatar: 'https://i.pravatar.cc/100?u=rafael',
+    authorRole: 'resident',
+    content: 'Alguém para dividir frete de mudança saindo da Freguesia para o Recreio este mês?',
+    type: 'recommendation',
+    communityId: 'comm-tips',
+    neighborhood: 'Freguesia',
+    timestamp: '1d',
+    likes: 5,
+    comments: 7
   }
 ];
 
@@ -299,7 +450,6 @@ export const STORES: Store[] = [
     isOpenNow: true,
     isSponsored: true
   },
-  // --- 50 FAKE STORES START ---
   { id: 'f-1', name: 'Bibi Lanches', category: 'Comida', subcategory: 'Lanches & Hamburguerias', rating: 4.8, distance: 'Freguesia', adType: AdType.PREMIUM, description: 'Lanches clássicos e saudáveis.', isSponsored: true, image: 'https://images.unsplash.com/photo-1561758033-d89a9ad46330?q=80&w=400&auto=format&fit=crop' },
   { id: 'f-2', name: 'Studio Hair Vip', category: 'Beleza', subcategory: 'Salão de Cabelo', rating: 4.9, distance: 'Taquara', adType: AdType.PREMIUM, description: 'Especialista em loiros e cortes modernos.', isSponsored: true, image: 'https://images.unsplash.com/photo-1562322140-8baeececf3df?q=80&w=400&auto=format&fit=crop' },
   { id: 'f-3', name: 'Pet Shop Alegria', category: 'Pets', subcategory: 'Pet Shop', rating: 4.7, distance: 'Pechincha', adType: AdType.PREMIUM, description: 'O carinho que seu pet merece.', isSponsored: true, image: 'https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?q=80&w=400&auto=format&fit=crop' },
@@ -310,49 +460,8 @@ export const STORES: Store[] = [
   { id: 'f-8', name: 'Academia FitBairro', category: 'Esportes', subcategory: 'Academias', rating: 4.7, distance: 'Taquara', adType: AdType.PREMIUM, description: 'Treine perto de casa.', isSponsored: true, image: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=400&auto=format&fit=crop' },
   { id: 'f-9', name: 'Consultório Dra. Ana', category: 'Saúde', subcategory: 'Dentistas', rating: 5.0, distance: 'Freguesia', adType: AdType.PREMIUM, description: 'Cuidado completo com seu sorriso.', isSponsored: true, image: 'https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?q=80&w=400&auto=format&fit=crop' },
   { id: 'f-10', name: 'Boutique Chic', category: 'Moda', subcategory: 'Moda Feminina', rating: 4.3, distance: 'Anil', adType: AdType.PREMIUM, description: 'Tendências e elegância.', isSponsored: true, image: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=400&auto=format&fit=crop' },
-  { id: 'f-11', name: 'Padaria de Luxo', category: 'Comida', subcategory: 'Cafés & Cafeterias', rating: 4.6, distance: 'Pechincha', adType: AdType.ORGANIC, description: 'Pães artesanais e doces.', isSponsored: false, image: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?q=80&w=400&auto=format&fit=crop' },
-  { id: 'f-12', name: 'Barber Shop Retro', category: 'Beleza', subcategory: 'Barbearia', rating: 4.8, distance: 'Taquara', adType: AdType.ORGANIC, description: 'Corte e barba clássicos.', isSponsored: false, image: 'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?q=80&w=400&auto=format&fit=crop' },
-  { id: 'f-13', name: 'Lavanderia Express', category: 'Serviços', subcategory: 'Limpeza Residencial', rating: 4.5, distance: 'Freguesia', adType: AdType.ORGANIC, description: 'Sua roupa limpa em 1h.', isSponsored: false, image: 'https://images.unsplash.com/photo-1545173168-9f1947eebb7f?q=80&w=400&auto=format&fit=crop' },
-  { id: 'f-14', name: 'InfoTech JPA', category: 'Pro', subcategory: 'Técnico em Informática', rating: 4.7, distance: 'Tanque', adType: AdType.ORGANIC, description: 'Manutenção de PC e Notebook.', isSponsored: false, image: 'https://images.unsplash.com/photo-1597733336794-12d05021d510?q=80&w=400&auto=format&fit=crop' },
-  { id: 'f-15', name: 'Flores do Campo', category: 'Casa', subcategory: 'Jardinagem', rating: 4.9, distance: 'Anil', adType: AdType.ORGANIC, description: 'Arranjos para todas as ocasiões.', isSponsored: false, image: 'https://images.unsplash.com/photo-1526047932273-341f2a7631f9?q=80&w=400&auto=format&fit=crop' },
-  { id: 'f-16', name: 'Sapataria Ideal', category: 'Serviços', subcategory: 'Manutenção Geral', rating: 4.4, distance: 'Pechincha', adType: AdType.ORGANIC, description: 'Conserto de sapatos e bolsas.', isSponsored: false, image: 'https://images.unsplash.com/photo-1560769629-975ec94e6a86?q=80&w=400&auto=format&fit=crop' },
-  { id: 'f-17', name: 'Escola de Inglês Top', category: 'Educação', subcategory: 'Idiomas', rating: 4.8, distance: 'Taquara', adType: AdType.ORGANIC, description: 'Fale inglês em 18 meses.', isSponsored: false, image: 'https://images.unsplash.com/photo-1543269865-cbf427effbad?q=80&w=400&auto=format&fit=crop' },
-  { id: 'f-18', name: 'Banca do Jornal', category: 'Lazer', subcategory: 'Eventos no Bairro', rating: 4.2, distance: 'Freguesia', adType: AdType.ORGANIC, description: 'Jornais, revistas e conveniência.', isSponsored: false, image: 'https://images.unsplash.com/photo-1589239203361-299651079565?q=80&w=400&auto=format&fit=crop' },
-  { id: 'f-19', name: 'Vidraçaria Transparente', category: 'Casa', subcategory: 'Reforma & Obras', rating: 4.5, distance: 'Anil', adType: AdType.ORGANIC, description: 'Box, espelhos e vidros em geral.', isSponsored: false, image: 'https://images.unsplash.com/photo-1554995207-c18c203602cb?q=80&w=400&auto=format&fit=crop' },
-  { id: 'f-20', name: 'Agência de Viagens Rio', category: 'Lazer', subcategory: 'Turismo Local', rating: 4.7, distance: 'Tanque', adType: AdType.ORGANIC, description: 'Sua próxima aventura começa aqui.', isSponsored: false, image: 'https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?q=80&w=400&auto=format&fit=crop' },
-  { id: 'f-21', name: 'Frango Assado do Bairro', category: 'Comida', subcategory: 'Comida Caseira', rating: 4.6, distance: 'Freguesia', adType: AdType.ORGANIC, description: 'O melhor frango de domingo.', isSponsored: false, image: 'https://images.unsplash.com/photo-1598515214211-89d3c73ae83b?q=80&w=400&auto=format&fit=crop' },
-  { id: 'f-22', name: 'Esmalteria Bella', category: 'Beleza', subcategory: 'Manicure & Pedicure', rating: 4.8, distance: 'Taquara', adType: AdType.ORGANIC, description: 'Manicure, pedicure e alongamento.', isSponsored: false, image: 'https://images.unsplash.com/photo-1604654894610-df4906687103?q=80&w=400&auto=format&fit=crop' },
-  { id: 'f-23', name: 'Loja de Celulares Connect', category: 'Serviços', subcategory: 'Assistência Técnica', rating: 4.5, distance: 'Pechincha', adType: AdType.ORGANIC, description: 'Capas, cabos e assistência.', isSponsored: false, image: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?q=80&w=400&auto=format&fit=crop' },
-  { id: 'f-24', name: 'Chaveiro Central', category: 'Serviços', subcategory: 'Chaveiro', rating: 4.9, distance: 'Anil', adType: AdType.ORGANIC, description: 'Cópias e aberturas 24h.', isSponsored: false, image: 'https://images.unsplash.com/photo-1582139329536-e7284fece509?q=80&w=400&auto=format&fit=crop' },
-  { id: 'f-25', name: 'Mercado Economia', category: 'Mercado', subcategory: 'Supermercados', rating: 4.3, distance: 'Tanque', adType: AdType.ORGANIC, description: 'Preço baixo todo dia.', isSponsored: false, image: 'https://images.unsplash.com/photo-1542838132-92c53300491e?q=80&w=400&auto=format&fit=crop' },
-  { id: 'f-26', name: 'Papelaria Cor & Arte', category: 'Educação', subcategory: 'Cursos Livres', rating: 4.6, distance: 'Freguesia', adType: AdType.ORGANIC, description: 'Tudo para estudantes e artistas.', isSponsored: false, image: 'https://images.unsplash.com/photo-1516962215378-7fa2e137ae93?q=80&w=400&auto=format&fit=crop' },
-  { id: 'f-27', name: 'Oficina de Motos Z', category: 'Autos', subcategory: 'Oficinas Mecânicas', rating: 4.7, distance: 'Taquara', adType: AdType.ORGANIC, description: 'Especializada em alta cilindrada.', isSponsored: false, image: 'https://images.unsplash.com/photo-1558981403-c5f91cbba527?q=80&w=400&auto=format&fit=crop' },
-  { id: 'f-28', name: 'Loja de Tintas Bairro', category: 'Casa', subcategory: 'Materiais de Construção', rating: 4.5, distance: 'Pechincha', adType: AdType.ORGANIC, description: 'Cores que transformam seu lar.', isSponsored: false, image: 'https://images.unsplash.com/photo-1589939705384-5185138a04b9?q=80&w=400&auto=format&fit=crop' },
-  { id: 'f-29', name: 'Consultório Dr. Marcos', category: 'Saúde', subcategory: 'Fisioterapia', rating: 4.9, distance: 'Anil', adType: AdType.ORGANIC, description: 'Recuperação e bem-estar.', isSponsored: false, image: 'https://images.unsplash.com/photo-1576091160550-2173dba999ef?q=80&w=400&auto=format&fit=crop' },
-  { id: 'f-30', name: 'Hortifruti da Vovó', category: 'Comida', subcategory: 'Hortifruti & Naturais', rating: 4.8, distance: 'Tanque', adType: AdType.ORGANIC, description: 'Produtos frescos direto do produtor.', isSponsored: false, image: 'https://images.unsplash.com/photo-1464226184884-fa280b87c399?q=80&w=400&auto=format&fit=crop' },
-  { id: 'f-31', name: 'Sushi Express', category: 'Comida', subcategory: 'Restaurantes', rating: 4.7, distance: 'Freguesia', adType: AdType.ORGANIC, description: 'Combinados frescos e rápidos.', isSponsored: false, image: 'https://images.unsplash.com/photo-1579871494447-9811cf80d66c?q=80&w=400&auto=format&fit=crop' },
-  { id: 'f-32', name: 'Clínica Pet Feliz', category: 'Pets', subcategory: 'Veterinários', rating: 4.9, distance: 'Taquara', adType: AdType.ORGANIC, description: 'Saúde animal com amor.', isSponsored: false, image: 'https://images.unsplash.com/photo-1599443015574-be5fe8a05783?q=80&w=400&auto=format&fit=crop' },
-  { id: 'f-33', name: 'Bicicletaria JPA', category: 'Esportes', subcategory: 'Esportes ao Ar Livre', rating: 4.6, distance: 'Anil', adType: AdType.ORGANIC, description: 'Venda e manutenção de bikes.', isSponsored: false, image: 'https://images.unsplash.com/photo-1485965120184-e220f721d03e?q=80&w=400&auto=format&fit=crop' },
-  { id: 'f-34', name: 'Loja de Doces Candy', category: 'Comida', subcategory: 'Doces & Sobremesas', rating: 4.8, distance: 'Pechincha', adType: AdType.ORGANIC, description: 'Um mundo de sabores.', isSponsored: false, image: 'https://images.unsplash.com/photo-1581798459219-318e76aecc7b?q=80&w=400&auto=format&fit=crop' },
-  { id: 'f-35', name: 'Marido de Aluguel VIP', category: 'Pro', subcategory: 'Marido de Aluguel', rating: 4.7, distance: 'Freguesia', adType: AdType.ORGANIC, description: 'Pequenos consertos em geral.', isSponsored: false, image: 'https://images.unsplash.com/photo-1581578731117-104f2a8d23e9?q=80&w=400&auto=format&fit=crop' },
-  { id: 'f-36', name: 'Gelo e Bebidas 24h', category: 'Mercado', subcategory: 'Conveniência', rating: 4.2, distance: 'Taquara', adType: AdType.ORGANIC, description: 'Sempre aberto para salvar sua festa.', isSponsored: false, image: 'https://images.unsplash.com/photo-1544145945-f904253d0c71?q=80&w=400&auto=format&fit=crop' },
-  { id: 'f-37', name: 'Gráfica Rápida JPA', category: 'Serviços', subcategory: 'Serviços Rápidos', rating: 4.5, distance: 'Tanque', adType: AdType.ORGANIC, description: 'Cartões, banners e cópias.', isSponsored: false, image: 'https://images.unsplash.com/photo-1562654501-a0ccc0af3fb1?q=80&w=400&auto=format&fit=crop' },
-  { id: 'f-38', name: 'Loja de Móveis Planejados', category: 'Casa', subcategory: 'Móveis', rating: 4.8, distance: 'Freguesia', adType: AdType.ORGANIC, description: 'Seu sonho sob medida.', isSponsored: false, image: 'https://images.unsplash.com/photo-1556228453-efd6c1ff04f6?q=80&w=400&auto=format&fit=crop' },
-  { id: 'f-39', name: 'Buffet Festas & Cia', category: 'Eventos', subcategory: 'Festas & Comemorações', rating: 4.9, distance: 'Anil', adType: AdType.ORGANIC, description: 'Realizando grandes momentos.', isSponsored: false, image: 'https://images.unsplash.com/photo-1530103043960-ef38714abb15?q=80&w=400&auto=format&fit=crop' },
-  { id: 'f-40', name: 'Distribuidora de Água', category: 'Mercado', subcategory: 'Bebidas', rating: 4.4, distance: 'Pechincha', adType: AdType.ORGANIC, description: 'Entrega rápida de galões.', isSponsored: false, image: 'https://images.unsplash.com/photo-1563203369-26f2e4a5ccf7?q=80&w=400&auto=format&fit=crop' },
-  { id: 'f-41', name: 'Adega Colonial', category: 'Mercado', subcategory: 'Bebidas', rating: 4.8, distance: 'Taquara', adType: AdType.ORGANIC, description: 'Rótulos exclusivos e artesanais.', isSponsored: false, image: 'https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?q=80&w=400&auto=format&fit=crop' },
-  { id: 'f-42', name: 'Boutique do Pão', category: 'Comida', subcategory: 'Cafés & Cafeterias', rating: 4.7, distance: 'Freguesia', adType: AdType.ORGANIC, description: 'Café da manhã completo.', isSponsored: false, image: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?q=80&w=400&auto=format&fit=crop' },
-  { id: 'f-43', name: 'Espaço Kids Recreação', category: 'Lazer', subcategory: 'Atividades em Família', rating: 4.9, distance: 'Anil', adType: AdType.ORGANIC, description: 'Brincadeiras com segurança.', isSponsored: false, image: 'https://images.unsplash.com/photo-1566454544259-f4b94c3d758c?q=80&w=400&auto=format&fit=crop' },
-  { id: 'f-44', name: 'Oficina de Ar Condicionado', category: 'Serviços', subcategory: 'Manutenção Geral', rating: 4.5, distance: 'Tanque', adType: AdType.ORGANIC, description: 'Instalação e limpeza.', isSponsored: false, image: 'https://images.unsplash.com/photo-1581094288338-2314dddb79a7?q=80&w=400&auto=format&fit=crop' },
-  { id: 'f-45', name: 'Studio de Yoga Bairro', category: 'Esportes', subcategory: 'Yoga & Pilates', rating: 5.0, distance: 'Freguesia', adType: AdType.ORGANIC, description: 'Equilíbrio para seu dia.', isSponsored: false, image: 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?q=80&w=400&auto=format&fit=crop' },
-  { id: 'f-46', name: 'Loja de Brinquedos JPA', category: 'Lazer', subcategory: 'Atividades em Família', rating: 4.6, distance: 'Taquara', adType: AdType.ORGANIC, description: 'Diversão para todas as idades.', isSponsored: false, image: 'https://images.unsplash.com/photo-1533906966484-a9c978a3f090?q=80&w=400&auto=format&fit=crop' },
-  { id: 'f-47', name: 'Auto Elétrica do Anil', category: 'Autos', subcategory: 'Auto Elétrica', rating: 4.4, distance: 'Anil', adType: AdType.ORGANIC, description: 'Baterias e reparos elétricos.', isSponsored: false, image: 'https://images.unsplash.com/photo-1487754180451-c456f719a1fc?q=80&w=400&auto=format&fit=crop' },
-  { id: 'f-48', name: 'Açaí do Parque', category: 'Comida', subcategory: 'Doces & Sobremesas', rating: 4.7, distance: 'Pechincha', adType: AdType.ORGANIC, description: 'Refrescante e delicioso.', isSponsored: false, image: 'https://images.unsplash.com/photo-1590301157890-4810ed352733?q=80&w=400&auto=format&fit=crop' },
-  { id: 'f-49', name: 'Costureira Express', category: 'Serviços', subcategory: 'Serviços Rápidos', rating: 4.8, distance: 'Tanque', adType: AdType.ORGANIC, description: 'Ajustes e reformas rápidas.', isSponsored: false, image: 'https://images.unsplash.com/photo-1528570188406-47020436d418?q=80&w=400&auto=format&fit=crop' },
-  { id: 'f-50', name: 'Vila dos Pets', category: 'Pets', subcategory: 'Pet Shop', rating: 4.9, distance: 'Freguesia', adType: AdType.ORGANIC, description: 'Tudo para o seu melhor amigo.', isSponsored: false, image: 'https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?q=80&w=400&auto=format&fit=crop' },
 ];
 
-// --- FIX: Added missing exported member 'EDITORIAL_SERVICES' ---
 export const EDITORIAL_SERVICES: EditorialCollection[] = [
   {
     id: 'culinaria-jpa',
@@ -370,7 +479,6 @@ export const EDITORIAL_SERVICES: EditorialCollection[] = [
   }
 ];
 
-// --- FIX: Added missing exported member 'quickFilters' ---
 export const quickFilters = [
   { id: 'top_rated', label: 'Top Avaliados', icon: 'star' },
   { id: 'open_now', label: 'Aberto Agora', icon: 'clock' },
@@ -378,14 +486,12 @@ export const quickFilters = [
   { id: 'cashback', label: 'Com Cashback', icon: 'percent' }
 ];
 
-// --- FIX: Added missing exported member 'STORIES' ---
 export const STORIES: Story[] = [
   { id: 's1', name: 'Hamburgueria', image: 'https://images.unsplash.com/photo-1561758033-d89a9ad46330?q=80&w=400&auto=format&fit=crop' },
   { id: 's2', name: 'Salão Vip', image: 'https://images.unsplash.com/photo-1562322140-8baeececf3df?q=80&w=400&auto=format&fit=crop' },
   { id: 's3', name: 'Pet Shop', image: 'https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?q=80&w=400&auto=format&fit=crop' },
 ];
 
-// --- FIX: Added missing exported member 'MOCK_JOBS' ---
 export const MOCK_JOBS: Job[] = [
   {
     id: 'job-1',

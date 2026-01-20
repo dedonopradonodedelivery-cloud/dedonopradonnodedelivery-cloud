@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { 
   ChevronLeft, 
   Target, 
@@ -14,7 +13,10 @@ import {
   User as UserIcon,
   ChevronDown,
   Check,
-  Info
+  Info,
+  Home,
+  LayoutGrid,
+  ArrowRight
 } from 'lucide-react';
 import { MasterSponsorBanner } from './MasterSponsorBanner';
 
@@ -36,10 +38,11 @@ const AVAILABLE_NEIGHBORHOODS = [
   "Tanque"
 ];
 
-// Configuração de Preços
-const PRICE_BASE = 397;
-const PRICE_PROMO = 149;
-const DISCOUNT_QUARTERLY = 0.12; // 12%
+// --- PREÇOS E REGRAS ---
+const HOME_BANNER_NORMAL_PRICE = 149.90;
+const HOME_BANNER_PROMO_PRICE = 99.90;
+const CATEGORY_BANNER_NORMAL_PRICE = 79.90;
+const CATEGORY_BANNER_PROMO_PRICE = 49.90;
 
 const IPhoneMock = () => {
   return (
@@ -87,20 +90,27 @@ const IPhoneMock = () => {
             </div>
 
             <div className="px-3 mt-3 relative z-10">
-                <div className="w-full aspect-[2/1] rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 shadow-lg shadow-blue-500/20 flex flex-col items-center justify-center text-center relative overflow-hidden animate-pulse-slow">
-                    <div className="absolute top-0 right-0 w-16 h-16 bg-white/20 blur-xl rounded-full -mr-4 -mt-4"></div>
+                <div className="w-full aspect-[2/1] rounded-xl bg-gradient-to-br from-blue-600 to-indigo-700 shadow-lg shadow-blue-500/20 flex flex-col items-center justify-center text-center relative overflow-hidden group">
                     
-                    <div className="relative z-10 p-2">
-                        <div className="bg-white/20 w-6 h-6 rounded-full flex items-center justify-center mx-auto mb-1 backdrop-blur-sm">
-                            <Rocket className="w-3 h-3 text-white" />
+                    {/* Subtle decorative glow & gradient animation */}
+                    <div className="absolute -top-8 -right-8 w-24 h-24 bg-white/10 blur-2xl rounded-full animate-subtle-glow opacity-60"></div>
+                    <div className="absolute -bottom-8 -left-8 w-20 h-20 bg-white/5 blur-xl rounded-full animate-subtle-glow" style={{ animationDelay: '-2s' }}></div>
+
+                    {/* Main Content */}
+                    <div className="relative z-10 flex flex-col items-center justify-center p-4 h-full">
+                        <h3 className="text-[14px] font-black text-white leading-tight uppercase tracking-wider drop-shadow-md">
+                            ANUNCIE SUA MARCA
+                        </h3>
+                        <p className="text-[8px] text-blue-100/90 mt-1.5 max-w-[95%] leading-snug">
+                            Destaque sua loja no bairro e atraia novos clientes.
+                        </p>
+                        <div className="mt-4 bg-white text-blue-600 px-4 py-1.5 rounded-lg text-[7px] font-bold uppercase flex items-center gap-1.5 shadow-lg group-hover:scale-105 transition-transform">
+                            Divulgar minha loja
+                            <ArrowRight className="w-2 h-2" strokeWidth={4} />
                         </div>
-                        <div className="w-20 h-2 bg-white rounded-full mx-auto mb-1"></div>
-                        <div className="w-12 h-1 bg-blue-200 rounded-full mx-auto"></div>
                     </div>
 
-                    <div className="absolute top-1.5 right-1.5 bg-white text-black text-[4px] font-bold px-1 py-0.5 rounded shadow-sm">
-                        PATROCINADO
-                    </div>
+                    {/* Seal Removed */}
                 </div>
             </div>
 
@@ -124,6 +134,7 @@ const IPhoneMock = () => {
 };
 
 export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNavigate, categoryName }) => {
+  const [adType, setAdType] = useState<'home' | 'category' | null>(null);
   const [selectedNeighborhoods, setSelectedNeighborhoods] = useState<string[]>([]);
   const [isInterested, setIsInterested] = useState(false);
 
@@ -136,32 +147,36 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
   };
 
   // Cálculos Financeiros
+  const { normalPrice, promoPrice } = useMemo(() => {
+    if (adType === 'home') return { normalPrice: HOME_BANNER_NORMAL_PRICE, promoPrice: HOME_BANNER_PROMO_PRICE };
+    if (adType === 'category') return { normalPrice: CATEGORY_BANNER_NORMAL_PRICE, promoPrice: CATEGORY_BANNER_PROMO_PRICE };
+    return { normalPrice: 0, promoPrice: 0 };
+  }, [adType]);
+  
   const count = selectedNeighborhoods.length;
   
-  // Mensal (Unitário)
-  const monthlyTotal = count * PRICE_PROMO;
-  const monthlyBaseTotal = count * PRICE_BASE;
-  const monthlySavings = monthlyBaseTotal - monthlyTotal;
+  // Mensal (Preço Normal)
+  const monthlyTotal = count * normalPrice;
 
-  // Trimestral (Total)
-  const quarterlyTotalRaw = monthlyTotal * 3;
-  const quarterlyTotalFinal = quarterlyTotalRaw * (1 - DISCOUNT_QUARTERLY);
-  const quarterlySavings = (monthlyBaseTotal * 3) - quarterlyTotalFinal;
+  // Trimestral (Preço Promocional)
+  const quarterlyBaseTotal = count * normalPrice * 3;
+  const quarterlyPromoTotal = count * promoPrice * 3;
+  const quarterlySavings = quarterlyBaseTotal - quarterlyPromoTotal;
 
   const isSelectionComplete = count > 0;
 
   const handleContactSales = (plan: 'monthly' | 'quarterly') => {
-    if (!isSelectionComplete) return;
+    if (!isSelectionComplete || !adType) return;
 
     setIsInterested(true);
     const scopeName = selectedNeighborhoods.join(', ');
-    const price = plan === 'monthly' ? monthlyTotal : quarterlyTotalFinal;
+    const price = plan === 'monthly' ? monthlyTotal : quarterlyPromoTotal;
     const duration = plan === 'monthly' ? "1 Mês" : "3 Meses";
     
-    let contextMessage = categoryName 
-        ? `Quero anunciar na categoria *${categoryName}*.` 
-        : `Tenho interesse em anunciar no app Localizei.`;
-
+    let contextMessage = adType === 'home' 
+      ? `Tenho interesse no *Banner da Home*.`
+      : `Tenho interesse nos *Banners de Categoria*${categoryName ? ` (especificamente: ${categoryName})` : ''}.`;
+    
     const message = `Olá! ${contextMessage}\n\n*Bairros:* ${scopeName}\n*Plano:* ${duration}\n*Valor Total:* R$ ${price.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
     const whatsappUrl = `https://wa.me/5521999999999?text=${encodeURIComponent(message)}`; 
     
@@ -189,7 +204,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
             <h1 className="text-3xl md:text-4xl font-black text-white leading-[1.1] mb-4 font-display tracking-tight">
                 Destaque sua marca<br/>
                 <span className="text-blue-200">
-                    na Jacarepaguá
+                    no seu bairro ou por todo JPA
                 </span>
             </h1>
             <div className="my-8 animate-in fade-in zoom-in duration-700">
@@ -197,142 +212,197 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
             </div>
         </div>
 
-        {/* PASSO 1 - SELEÇÃO DE BAIRROS */}
+        {/* --- PASSO 0: ESCOLHA DO TIPO DE ANÚNCIO --- */}
         <div className="bg-white/10 rounded-3xl p-1 border border-white/20">
-            <h3 className="text-center font-bold text-white text-sm uppercase tracking-wide py-3">Passo 1: Onde anunciar?</h3>
-            
-            <div className="p-4 bg-white/5 rounded-[1.5rem] animate-in slide-in-from-top-4 fade-in duration-300">
-                <div className="flex items-center justify-center gap-2 mb-4">
-                    <p className="text-xs text-blue-100 font-bold uppercase tracking-wide">Selecione os bairros:</p>
-                    <span className="bg-white text-[#1E5BFF] text-[10px] font-black px-2 py-0.5 rounded-md">
-                        {count} selecionado{count !== 1 && 's'}
-                    </span>
+            <h3 className="text-center font-bold text-white text-sm uppercase tracking-wide py-3">Passo 0: Onde você quer anunciar?</h3>
+            <div className="p-4 bg-white/5 rounded-[1.5rem] grid grid-cols-1 sm:grid-cols-2 gap-4">
+              
+              {/* Opção 1: Banner da Home */}
+              <button 
+                onClick={() => setAdType('home')} 
+                className={`p-6 rounded-2xl text-left border-4 transition-all duration-300 group hover:bg-white/10 flex flex-col ${adType === 'home' ? 'bg-white/10 border-green-400 shadow-lg' : 'bg-white/5 border-transparent'}`}
+              >
+                  {/* Nova Etiqueta Centralizada */}
+                  <div className="w-full flex justify-center mb-6">
+                      <div className="bg-white/10 text-white px-4 py-1.5 rounded-lg text-xs font-black uppercase tracking-widest border border-white/20">
+                          HOME
+                      </div>
+                  </div>
+                  
+                  {/* Textos */}
+                  <div className="flex-1">
+                    <h4 className="font-bold text-white text-base">Banner em destaque</h4>
+                    <p className="text-xs text-blue-200 leading-relaxed mt-2">Apareça no topo do app para todos do bairro.</p>
+                  </div>
+                  
+                  {/* Preço */}
+                  <div className="mt-auto pt-6 border-t border-white/10">
+                      <p className="text-[10px] text-blue-200 uppercase line-through">De R$ {HOME_BANNER_NORMAL_PRICE.toFixed(2).replace('.', ',')}</p>
+                      <p className="font-bold text-white text-xl">R$ {HOME_BANNER_PROMO_PRICE.toFixed(2).replace('.', ',')}</p>
+                      <p className="text-[10px] text-blue-200 font-semibold mt-1">por bairro · pacote 3 meses</p>
+                  </div>
+              </button>
+
+              {/* Opção 2: Banners de Categoria */}
+              <button 
+                onClick={() => setAdType('category')}
+                className={`p-6 rounded-2xl text-left border-4 transition-all duration-300 group hover:bg-white/10 flex flex-col ${adType === 'category' ? 'bg-white/10 border-green-400 shadow-lg' : 'bg-white/5 border-transparent'}`}
+              >
+                  {/* Nova Etiqueta Centralizada */}
+                  <div className="w-full flex justify-center mb-6">
+                      <div className="bg-white/10 text-white px-4 py-1.5 rounded-lg text-xs font-black uppercase tracking-widest border border-white/20">
+                          CATEGORIAS
+                      </div>
+                  </div>
+                  
+                  {/* Textos */}
+                  <div className="flex-1">
+                    <h4 className="font-bold text-white text-base">Banner nas categorias</h4>
+                    <p className="text-xs text-blue-200 leading-relaxed mt-2">Destaque sua loja dentro das categorias.</p>
+                  </div>
+                  
+                  {/* Preço */}
+                  <div className="mt-auto pt-6 border-t border-white/10">
+                      <p className="text-[10px] text-blue-200 uppercase line-through">De R$ {CATEGORY_BANNER_NORMAL_PRICE.toFixed(2).replace('.', ',')}</p>
+                      <p className="font-bold text-white text-xl">R$ {CATEGORY_BANNER_PROMO_PRICE.toFixed(2).replace('.', ',')}</p>
+                      <p className="text-[10px] text-blue-200 font-semibold mt-1">por bairro · pacote 3 meses</p>
+                  </div>
+              </button>
+
+            </div>
+        </div>
+
+        <div className={`space-y-8 transition-all duration-500 ${!adType ? 'opacity-30 grayscale pointer-events-none' : 'opacity-100'}`}>
+            {/* PASSO 1 - SELEÇÃO DE BAIRROS */}
+            <div className="bg-white/10 rounded-3xl p-1 border border-white/20">
+                <h3 className="text-center font-bold text-white text-sm uppercase tracking-wide py-3">Passo 1: Onde anunciar?</h3>
+                
+                <div className="p-4 bg-white/5 rounded-[1.5rem] animate-in slide-in-from-top-4 fade-in duration-300">
+                    <div className="flex items-center justify-center gap-2 mb-4">
+                        <p className="text-xs text-blue-100 font-bold uppercase tracking-wide">Selecione os bairros:</p>
+                        <span className="bg-white text-[#1E5BFF] text-[10px] font-black px-2 py-0.5 rounded-md">
+                            {count} selecionado{count !== 1 && 's'}
+                        </span>
+                    </div>
+                    
+                    <div className="flex flex-wrap gap-2 justify-center">
+                        {AVAILABLE_NEIGHBORHOODS.map(hood => {
+                            const isSelected = selectedNeighborhoods.includes(hood);
+                            return (
+                                <button
+                                    key={hood}
+                                    onClick={() => toggleNeighborhood(hood)}
+                                    className={`px-3 py-2.5 rounded-xl text-xs font-bold transition-all border flex items-center gap-1.5 ${
+                                        isSelected 
+                                        ? 'bg-green-400 text-green-900 border-green-400 shadow-lg scale-105' 
+                                        : 'bg-white/5 text-white border-white/20 hover:bg-white/10'
+                                    }`}
+                                >
+                                    {isSelected && <Check className="w-3 h-3" />}
+                                    {hood}
+                                </button>
+                            );
+                        })}
+                    </div>
+                </div>
+            </div>
+
+            {/* PASSO 2 - PLANOS */}
+            <div className={`space-y-4 transition-all duration-500 ${isSelectionComplete ? 'opacity-100' : 'opacity-50 grayscale pointer-events-none'}`}>
+                <div className="text-center">
+                    <h3 className="font-bold text-white text-sm uppercase tracking-wide mb-1">Passo 2: Escolha o Plano</h3>
+                    <p className="text-xs text-blue-200">
+                        Investimento calculado para: <strong>{count} bairro{count !== 1 && 's'}</strong>
+                    </p>
+                </div>
+
+                <div className="bg-blue-900/10 p-3 rounded-xl border border-blue-400/20 text-center">
+                    <p className="text-xs font-bold text-blue-200">
+                        Promoção de inauguração válida exclusivamente para o pacote de 3 meses.
+                    </p>
                 </div>
                 
-                <div className="flex flex-wrap gap-2 justify-center">
-                    {AVAILABLE_NEIGHBORHOODS.map(hood => {
-                        const isSelected = selectedNeighborhoods.includes(hood);
-                        return (
-                            <button
-                                key={hood}
-                                onClick={() => toggleNeighborhood(hood)}
-                                className={`px-3 py-2.5 rounded-xl text-xs font-bold transition-all border flex items-center gap-1.5 ${
-                                    isSelected 
-                                    ? 'bg-green-400 text-green-900 border-green-400 shadow-lg scale-105' 
-                                    : 'bg-white/5 text-white border-white/20 hover:bg-white/10'
-                                }`}
-                            >
-                                {isSelected && <Check className="w-3 h-3" />}
-                                {hood}
-                            </button>
-                        );
-                    })}
-                </div>
-
-                <div className="mt-6 flex flex-col items-center gap-1">
-                    <p className="text-[10px] text-blue-200 uppercase tracking-widest line-through decoration-blue-200/50">
-                        De R$ {PRICE_BASE}/bairro
-                    </p>
-                    <div className="flex items-center gap-2 bg-green-500 text-white px-3 py-1 rounded-full shadow-lg animate-pulse">
-                        <Zap className="w-3 h-3 fill-white" />
-                        <span className="text-xs font-black uppercase">Promoção: R$ {PRICE_PROMO}/bairro</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        {/* PASSO 2 - PLANOS */}
-        <div className={`space-y-4 transition-all duration-500 ${isSelectionComplete ? 'opacity-100 translate-y-0' : 'opacity-50 translate-y-4 grayscale pointer-events-none'}`}>
-            <div className="text-center">
-                <h3 className="font-bold text-white text-sm uppercase tracking-wide mb-1">Passo 2: Escolha o Plano</h3>
-                <p className="text-xs text-blue-200">
-                    Investimento calculado para: <strong>{count} bairro{count !== 1 && 's'}</strong>
-                </p>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* PLANO 1 MÊS */}
-                <div className="bg-white rounded-[2rem] p-6 flex flex-col items-center text-center shadow-lg relative overflow-hidden transition-all duration-300 group hover:scale-[1.02]">
-                    <div className="absolute top-0 inset-x-0 h-1 bg-gray-200"></div>
-                    <h4 className="text-lg font-black text-gray-400 uppercase tracking-wide mb-2 mt-2">1 Mês</h4>
-                    
-                    {monthlySavings > 0 && (
-                        <span className="text-xs text-gray-400 line-through mb-1">Total: R$ {monthlyBaseTotal.toLocaleString('pt-BR')}</span>
-                    )}
-                    
-                    <div className="flex items-baseline justify-center gap-1 mb-2">
-                        <span className="text-sm font-bold text-gray-400">R$</span>
-                        <span className="text-4xl font-black text-gray-900 tracking-tighter">
-                            {monthlyTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                        </span>
-                    </div>
-                    <p className="text-[10px] text-green-600 font-bold bg-green-50 px-2 py-1 rounded-md mb-6">
-                        Economia de R$ {monthlySavings.toLocaleString('pt-BR')}
-                    </p>
-                    
-                    <button 
-                        onClick={() => handleContactSales('monthly')}
-                        disabled={isInterested || !isSelectionComplete}
-                        className="w-full bg-gray-100 hover:bg-gray-200 text-gray-600 font-bold py-3.5 rounded-xl transition-all active:scale-[0.98] text-xs uppercase tracking-wider disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                        Quero anunciar 1 mês
-                    </button>
-                </div>
-
-                {/* PLANO 3 MESES */}
-                <div className="bg-white rounded-[2rem] p-6 flex flex-col items-center text-center shadow-2xl shadow-black/20 relative overflow-hidden transform md:scale-105 border-4 border-white ring-4 ring-black/5 transition-all duration-300 group hover:scale-[1.02]">
-                    <div className="absolute top-0 right-0 bg-yellow-400 text-blue-900 text-[9px] font-black px-3 py-1 rounded-bl-xl uppercase tracking-widest flex items-center gap-1 shadow-sm z-10">
-                        <Star className="w-3 h-3 fill-blue-900" /> 12% OFF Extra
-                    </div>
-                    <h4 className="text-lg font-black text-[#1E5BFF] uppercase tracking-wide mb-2 mt-2">3 Meses</h4>
-                    
-                    <span className="text-xs text-gray-400 line-through mb-1">Total: R$ {quarterlyTotalRaw.toLocaleString('pt-BR')}</span>
-
-                    <div className="flex items-baseline justify-center gap-1 mb-2">
-                        <span className="text-sm font-bold text-blue-300">R$</span>
-                        <span className="text-4xl font-black text-[#1E5BFF] tracking-tighter">
-                            {quarterlyTotalFinal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                        </span>
-                    </div>
-                    <p className="text-[10px] text-green-600 font-bold bg-green-50 px-2 py-1 rounded-md mb-6">
-                        Economia Total: R$ {quarterlySavings.toLocaleString('pt-BR')}
-                    </p>
-
-                    <div className="w-full relative z-10">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* PLANO 1 MÊS */}
+                    <div className="bg-white rounded-[2rem] p-6 flex flex-col items-center text-center shadow-lg relative overflow-hidden transition-all duration-300 group hover:scale-[1.02]">
+                        <div className="absolute top-0 inset-x-0 h-1 bg-gray-200"></div>
+                        <h4 className="text-lg font-black text-gray-400 uppercase tracking-wide mb-2 mt-2">1 Mês</h4>
+                        
+                        <div className="flex items-baseline justify-center gap-1 mb-2 h-14">
+                            <span className="text-sm font-bold text-gray-400">R$</span>
+                            <span className="text-4xl font-black text-gray-900 tracking-tighter">
+                                {monthlyTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                            </span>
+                        </div>
+                        <p className="text-[10px] h-6 mb-6">
+                            &nbsp; {/* Placeholder for spacing consistency */}
+                        </p>
+                        
                         <button 
-                            onClick={() => handleContactSales('quarterly')}
+                            onClick={() => handleContactSales('monthly')}
                             disabled={isInterested || !isSelectionComplete}
-                            className="w-full bg-[#1E5BFF] text-white hover:bg-blue-600 font-black py-4 rounded-xl shadow-lg shadow-blue-500/20 transition-all active:scale-[0.98] text-xs uppercase tracking-wider flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="w-full bg-gray-100 hover:bg-gray-200 text-gray-600 font-bold py-3.5 rounded-xl transition-all active:scale-[0.98] text-xs uppercase tracking-wider disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                            Quero anunciar 3 meses
-                            <Zap className="w-3 h-3 fill-current" />
+                            Quero anunciar 1 mês
                         </button>
                     </div>
+
+                    {/* PLANO 3 MESES */}
+                    <div className="bg-white rounded-[2rem] p-6 flex flex-col items-center text-center shadow-2xl shadow-black/20 relative overflow-hidden transform md:scale-105 border-4 border-white ring-4 ring-black/5 transition-all duration-300 group hover:scale-[1.02]">
+                        <div className="absolute top-0 right-0 bg-yellow-400 text-blue-900 text-[9px] font-black px-3 py-1 rounded-bl-xl uppercase tracking-widest flex items-center gap-1 shadow-sm z-10">
+                            <Star className="w-3 h-3 fill-blue-900" /> Promo de Inauguração
+                        </div>
+                        <h4 className="text-lg font-black text-[#1E5BFF] uppercase tracking-wide mb-2 mt-2">3 Meses</h4>
+                        
+                        <div className="h-14 flex flex-col items-center">
+                            <span className="text-xs text-gray-400 line-through mb-1">Total: R$ {quarterlyBaseTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                            <div className="flex items-baseline justify-center gap-1 mb-2">
+                                <span className="text-sm font-bold text-blue-300">R$</span>
+                                <span className="text-4xl font-black text-[#1E5BFF] tracking-tighter">
+                                    {quarterlyPromoTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                                </span>
+                            </div>
+                        </div>
+                        <p className="text-[10px] text-green-600 font-bold bg-green-50 px-2 py-1 rounded-md mb-6 h-6">
+                            Economia Total: R$ {quarterlySavings.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                        </p>
+
+                        <div className="w-full relative z-10">
+                            <button 
+                                onClick={() => handleContactSales('quarterly')}
+                                disabled={isInterested || !isSelectionComplete}
+                                className="w-full bg-[#1E5BFF] text-white hover:bg-blue-600 font-black py-4 rounded-xl shadow-lg shadow-blue-500/20 transition-all active:scale-[0.98] text-xs uppercase tracking-wider flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                Quero anunciar 3 meses
+                                <Zap className="w-3 h-3 fill-current" />
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <div className="flex flex-col gap-3 text-xs font-medium bg-white p-6 rounded-3xl text-gray-600 shadow-md">
-            <div className="flex items-start gap-3">
-                <CheckCircle2 className="w-4 h-4 text-[#1E5BFF] shrink-0 mt-0.5" />
-                <span>Banner rotativo no topo da {categoryName ? 'categoria' : 'home'}</span>
+            <div className="flex flex-col gap-3 text-xs font-medium bg-white p-6 rounded-3xl text-gray-600 shadow-md">
+                <div className="flex items-start gap-3">
+                    <CheckCircle2 className="w-4 h-4 text-[#1E5BFF] shrink-0 mt-0.5" />
+                    <span>Banner rotativo no topo da {adType === 'home' ? 'home do app' : `categoria escolhida`}</span>
+                </div>
+                <div className="flex items-start gap-3">
+                    <CheckCircle2 className="w-4 h-4 text-[#1E5BFF] shrink-0 mt-0.5" />
+                    <span>Link direto para sua loja no app</span>
+                </div>
+                <div className="flex items-start gap-3">
+                    <CheckCircle2 className="w-4 h-4 text-[#1E5BFF] shrink-0 mt-0.5" />
+                    <span>Exibição exclusiva nos bairros selecionados</span>
+                </div>
+                <div className="flex items-start gap-3">
+                    <CheckCircle2 className="w-4 h-4 text-[#1E5BFF] shrink-0 mt-0.5" />
+                    <span>Alcance potencial de milhares de moradores</span>
+                </div>
             </div>
-            <div className="flex items-start gap-3">
-                <CheckCircle2 className="w-4 h-4 text-[#1E5BFF] shrink-0 mt-0.5" />
-                <span>Link direto para sua loja no app</span>
-            </div>
-            <div className="flex items-start gap-3">
-                <CheckCircle2 className="w-4 h-4 text-[#1E5BFF] shrink-0 mt-0.5" />
-                <span>Exibição exclusiva nos bairros selecionados</span>
-            </div>
-            <div className="flex items-start gap-3">
-                <CheckCircle2 className="w-4 h-4 text-[#1E5BFF] shrink-0 mt-0.5" />
-                <span>Alcance potencial de milhares de moradores</span>
-            </div>
-        </div>
 
-        <div className="flex items-center justify-center gap-2 text-blue-200 text-[10px] font-bold uppercase tracking-widest pb-2 pt-2">
-            <ShieldCheck className="w-4 h-4" /> Pagamento Seguro e Facilitado
+            <div className="flex items-center justify-center gap-2 text-blue-200 text-[10px] font-bold uppercase tracking-widest pb-2 pt-2">
+                <ShieldCheck className="w-4 h-4" /> Pagamento Seguro e Facilitado
+            </div>
         </div>
 
         <MasterSponsorBanner 

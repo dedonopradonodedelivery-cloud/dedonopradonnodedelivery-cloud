@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Home, Users, User, QrCode } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
@@ -29,9 +28,14 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
   if (userRole !== 'admin') {
     const isMerchant = user && userRole === 'lojista';
 
-    const centerId = isMerchant 
-      ? 'merchant_qr_display' 
-      : 'scan_cashback';
+    let centerId: string;
+    if (!user) {
+      centerId = 'cashback_landing'; // Rota para visitante
+    } else if (isMerchant) {
+      centerId = 'merchant_qr_display'; // Rota para lojista
+    } else {
+      centerId = 'scan_cashback'; // Rota para cliente
+    }
 
     const centerLabel = isMerchant ? 'QR Code' : 'Cashback';
 
@@ -100,7 +104,8 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
         {navItems.map((item) => {
           const isActive = activeTab === item.id || 
                           (item.id === 'scan_cashback' && activeTab === 'pay_cashback') ||
-                          (item.id === 'merchant_qr_display' && activeTab === 'merchant_onboarding');
+                          (item.id === 'merchant_qr_display' && activeTab === 'merchant_onboarding') ||
+                          (item.id === 'cashback_landing' && (activeTab === 'scan_cashback' || activeTab === 'pay_cashback'));
           
           return (
             <div key={item.id} className="flex-1 flex justify-center items-end h-full">

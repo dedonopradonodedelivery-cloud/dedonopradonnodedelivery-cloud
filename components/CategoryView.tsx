@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { ChevronLeft, Search, Star, BadgeCheck, ChevronRight, X, AlertCircle, Grid, Filter, Megaphone, ArrowUpRight, Info } from 'lucide-react';
 import { Category, Store, AdType } from '../types';
@@ -110,12 +109,12 @@ const SubcategoryCarousel: React.FC<{ subcategory: string }> = ({ subcategory })
         <div 
             ref={scrollRef}
             onScroll={handleScroll}
-            className="flex overflow-x-auto snap-x snap-mandatory no-scrollbar rounded-[24px] shadow-sm"
+            className="flex overflow-x-auto snap-x snap-mandatory no-scrollbar rounded-[32px] shadow-sm"
         >
             {displayBanners.map((banner, idx) => (
                 <div 
                     key={`${banner.id}-${idx}`} 
-                    className={`w-full flex-shrink-0 aspect-[5/2] snap-center relative overflow-hidden ${banner.bgColor} flex flex-col justify-center px-6`}
+                    className={`w-full flex-shrink-0 aspect-[3/2] snap-center relative overflow-hidden ${banner.bgColor} flex flex-col justify-center px-6`}
                 >
                     {banner.image && (
                         <div className="absolute inset-0 z-0">
