@@ -142,22 +142,21 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void; onStoreClick?: (
                 .eq('target', 'home')
                 .eq('is_active', true)
                 .order('created_at', { ascending: false })
-                .limit(1)
-                .single();
+                .limit(1);
             
-            if (error && error.code !== 'PGRST116') throw error;
+            if (error) throw error;
 
-            if (data) {
+            if (data && data.length > 0) {
                 setUserBanner({
-                    id: `user-banner-${data.id}`,
+                    id: `user-banner-${data[0].id}`,
                     isUserBanner: true,
-                    config: data.config,
+                    config: data[0].config,
                 });
             } else {
                 setUserBanner(null);
             }
-        } catch (e) {
-            console.error("Failed to fetch home banner from Supabase", e);
+        } catch (e: any) {
+            console.error("Failed to fetch home banner from Supabase:", e.message || e);
             setUserBanner(null);
         }
     };
@@ -175,7 +174,11 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void; onStoreClick?: (
           fetchHomeBanner();
         }
       )
-      .subscribe();
+      .subscribe((status, err) => {
+        if (err) {
+          console.error('Realtime subscription failed for home banner:', err.message || err);
+        }
+      });
       
     return () => {
       supabase.removeChannel(channel);

@@ -7,6 +7,7 @@ CREATE TABLE IF NOT EXISTS public.published_banners (
     target TEXT NOT NULL, -- ex: 'home', 'category:Comida', 'subcategory:Pizzarias'
     config JSONB NOT NULL,
     is_active BOOLEAN DEFAULT TRUE,
+    expires_at TIMESTAMPTZ,
     -- Garante que um lojista só pode ter um banner ativo por alvo
     CONSTRAINT unique_merchant_target UNIQUE (merchant_id, target)
 );

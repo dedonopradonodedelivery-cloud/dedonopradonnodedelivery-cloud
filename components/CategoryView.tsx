@@ -121,93 +121,165 @@ interface CategoryViewProps {
 
 export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, onStoreClick, stores, userRole, onAdvertiseInCategory, onNavigate }) => {
   const [selectedSubcategory, setSelectedSubcategory] = useState<string | null>(null);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [categoryBanner, setCategoryBanner] = useState<any | null>(null);
-  
-  const subcategories = useMemo(() => SUBCATEGORIES[category.name] || [], [category.name]);
-  const displayStores = useMemo(() => {
-    let filtered = stores.filter(s => s.category.toLowerCase().includes(category.name.toLowerCase()));
-    if (selectedSubcategory) filtered = filtered.filter(s => s.subcategory === selectedSubcategory);
-    if (searchQuery) filtered = filtered.filter(s => s.name.toLowerCase().includes(searchQuery.toLowerCase()));
-    return filtered;
-  }, [stores, category.name, selectedSubcategory, searchQuery]);
+  const [activeBanner, setActiveBanner] = useState<any | null>(null);
+  const [loadingBanner, setLoadingBanner] = useState(true);
+
+  const subcategories = SUBCATEGORIES[category.name] || [];
+  const MAX_VISIBLE_SUBCATEGORIES = 8;
+  const shouldShowMore = subcategories.length > MAX_VISIBLE_SUBCATEGORIES;
+  const visibleSubcategories = shouldShowMore ? subcategories.slice(0, MAX_VISIBLE_SUBCATEGORIES - 1) : subcategories;
 
   useEffect(() => {
-    const fetchBanner = async () => {
-        if (!supabase) return;
-        const target = `category:${category.name}`;
-        try {
-            const { data, error } = await supabase
-                .from('published_banners')
-                .select('config')
-                .eq('target', target)
-                .eq('is_active', true)
-                .order('created_at', { ascending: false })
-                .limit(1)
-                .single();
-            if (error && error.code !== 'PGRST116') throw error;
-            if (data) setCategoryBanner(data.config); else setCategoryBanner(null);
-        } catch (e) { console.error(`Error fetching banner for ${target}`, e); }
+    const fetchCategoryBanner = async () => {
+      if (!supabase) {
+        setLoadingBanner(false);
+        return;
+      }
+      setLoadingBanner(true);
+      try {
+        const { data, error } = await supabase
+          .from('published_banners')
+          .select('id, config')
+          .eq('target', `category:${category.slug}`)
+          .eq('is_active', true)
+          .order('created_at', { ascending: false })
+          .limit(1);
+
+        if (error) throw error;
+
+        if (data && data.length > 0) {
+          setActiveBanner(data[0]);
+        } else {
+          setActiveBanner(null);
+        }
+      } catch (e: any) {
+        console.error("Failed to fetch category banner from Supabase:", e.message || e);
+        setActiveBanner(null);
+      } finally {
+        setLoadingBanner(false);
+      }
     };
-    fetchBanner();
-  }, [category.name]);
+    
+    fetchCategoryBanner();
+
+    const channel = supabase.channel(`category-banner-${category.slug}`)
+      .on('postgres_changes', {
+          event: '*',
+          schema: 'public',
+          table: 'published_banners',
+          filter: `target=eq.category:${category.slug}`
+        },
+        () => fetchCategoryBanner()
+      )
+      .subscribe((status, err) => {
+        if (err) {
+          console.error(`Realtime subscription failed for ${category.slug} banner:`, err.message || err);
+        }
+      });
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [category.slug]);
+
+  const filteredStores = useMemo(() => {
+    let categoryStores = stores.filter(s => s.category === category.name);
+    if (selectedSubcategory) {
+      return categoryStores.filter(s => s.subcategory === selectedSubcategory);
+    }
+    return categoryStores;
+  }, [stores, category.name, selectedSubcategory]);
+
+  const handleSubcategoryClick = (subName: string) => {
+    setSelectedSubcategory(prev => (prev === subName ? null : subName));
+  };
+
+  const handleAdvertiseClick = () => {
+    if (userRole === 'lojista') {
+      onAdvertiseInCategory(category.name);
+      onNavigate('store_ads_module');
+    } else {
+      alert("Apenas lojistas podem anunciar aqui. Crie ou acesse sua conta de lojista.");
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-[#FAFAFA] dark:bg-gray-950 font-sans pb-24 animate-in slide-in-from-right duration-300">
-      <header className="fixed top-0 left-0 right-0 w-full max-w-md mx-auto h-16 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md shadow-sm z-30 flex items-center justify-between px-4 border-b border-gray-100 dark:border-gray-800">
-        <button onClick={onBack} className="p-2 -ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"><ChevronLeft className="w-6 h-6 text-gray-800 dark:text-white" /></button>
-        <h1 className="text-lg font-bold text-gray-900 dark:text-white font-display">{category.name}</h1>
-        <button onClick={() => {}} className="p-2 -mr-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800"><Search className="w-6 h-6 text-gray-800 dark:text-gray-200" /></button>
-      </header>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 pb-24 animate-in slide-in-from-right duration-300">
+      <div className={`sticky top-0 z-30 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md px-5 h-16 flex items-center gap-4 border-b border-gray-100 dark:border-gray-800`}>
+        <button onClick={onBack} className="p-2 -ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+          <ChevronLeft className="w-6 h-6 text-gray-800 dark:text-white" />
+        </button>
+        <h1 className="font-bold text-lg text-gray-900 dark:text-white flex items-center gap-2">{React.cloneElement(category.icon as any, {className: 'w-5 h-5'})} {category.name}</h1>
+      </div>
       
-      <main className="pt-20 space-y-6">
-        
-        <section className="px-5">
-            {categoryBanner ? (
-                <div className="rounded-[32px] overflow-hidden">
-                    {categoryBanner.type === 'template' ? <TemplateBannerRender config={categoryBanner} /> : <CustomBannerRender config={categoryBanner} />}
+      <div className="p-5 space-y-8">
+        {visibleSubcategories.length > 0 && (
+          <section>
+            <div className="grid grid-cols-4 gap-3">
+              {visibleSubcategories.map((sub, i) => (
+                  <BigSurCard 
+                    key={i} 
+                    icon={sub.icon}
+                    name={sub.name}
+                    isSelected={selectedSubcategory === sub.name}
+                    onClick={() => handleSubcategoryClick(sub.name)}
+                    categoryColor={category.color}
+                  />
+              ))}
+              {shouldShowMore && (
+                  <BigSurCard 
+                      icon={<Grid />} 
+                      name="Ver Todas" 
+                      isSelected={false} 
+                      isMoreButton 
+                      onClick={() => alert('Mostrar todas as subcategorias')} 
+                  />
+              )}
+            </div>
+          </section>
+        )}
+
+        <section>
+          {loadingBanner ? (
+            <div className="w-full aspect-video bg-gray-200 dark:bg-gray-800 rounded-2xl animate-pulse"></div>
+          ) : activeBanner ? (
+            activeBanner.config.type === 'template' ? (
+              <TemplateBannerRender config={activeBanner.config} />
+            ) : (
+              <CustomBannerRender config={activeBanner.config} />
+            )
+          ) : (
+            <div 
+              onClick={handleAdvertiseClick}
+              className="w-full aspect-video rounded-2xl bg-gray-100 dark:bg-gray-800 border-2 border-dashed border-gray-300 dark:border-gray-600 flex flex-col items-center justify-center text-center p-6 cursor-pointer hover:border-blue-500 transition-all group"
+            >
+                <div className="p-3 bg-gray-200 dark:bg-gray-700 rounded-full mb-3 group-hover:bg-blue-100 transition-colors">
+                  <Megaphone className="w-6 h-6 text-gray-500 dark:text-gray-400 group-hover:text-blue-600 transition-colors" />
+                </div>
+                <h3 className="font-bold text-gray-800 dark:text-white">Anuncie sua loja aqui</h3>
+                <p className="text-xs text-gray-500 mt-1">Destaque-se para clientes que buscam por "{category.name}"</p>
+            </div>
+          )}
+        </section>
+
+        <section>
+            <h3 className="font-bold text-gray-900 dark:text-white mb-4">
+                {selectedSubcategory || `Destaques em ${category.name}`}
+            </h3>
+            {filteredStores.length > 0 ? (
+                <div className="flex flex-col gap-2">
+                    {filteredStores.map(store => (
+                        <StoreListItem key={store.id} store={store} onClick={() => onStoreClick(store)} />
+                    ))}
                 </div>
             ) : (
-                <div 
-                    onClick={() => {
-                        onAdvertiseInCategory(`category:${category.name}`);
-                        onNavigate('store_ads_module');
-                    }}
-                    className="w-full aspect-video rounded-3xl bg-slate-800 flex flex-col items-center justify-center text-center p-6 cursor-pointer"
-                >
-                    <div className="w-12 h-12 bg-slate-700 rounded-2xl flex items-center justify-center text-slate-400 mb-4">
-                        <Megaphone size={24} />
-                    </div>
-                    <h3 className="font-bold text-white">Anuncie nesta Categoria</h3>
-                    <p className="text-xs text-slate-400 mt-1">Seja o primeiro a aparecer aqui.</p>
+                <div className="text-center py-10 bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700">
+                    <AlertCircle className="w-8 h-8 text-gray-300 mx-auto mb-3" />
+                    <p className="text-sm font-medium text-gray-500">Nenhuma loja encontrada.</p>
                 </div>
             )}
         </section>
-
-        {/* 2. GRID DE SUBCATEGORIAS - ABAIXO DO CARROSSEL */}
-        <section className="px-5">
-            <div className="grid grid-cols-4 gap-3">
-            {subcategories.slice(0, 8).map((sub, i) => (
-                <BigSurCard key={i} icon={sub.icon} name={sub.name} isSelected={selectedSubcategory === sub.name} onClick={() => setSelectedSubcategory(selectedSubcategory === sub.name ? null : sub.name)} categoryColor={category.color} />
-            ))}
-            </div>
-        </section>
-        
-        <section className="px-5 min-h-[400px] bg-white dark:bg-gray-900 rounded-t-[32px] pt-6 pb-10 border-t border-gray-100 dark:border-gray-800">
-            <h3 className="font-bold text-gray-900 dark:text-white text-lg mb-6">{selectedSubcategory || `Explorar ${category.name}`}</h3>
-            
-            <div className="flex flex-col gap-2">
-                {displayStores.map((store) => (
-                    <StoreListItem key={store.id} store={store} onClick={() => onStoreClick(store)} />
-                ))}
-                {displayStores.length === 0 && (
-                  <div className="text-center py-10 opacity-50">
-                    <p className="text-sm font-bold">Nenhum local encontrado.</p>
-                  </div>
-                )}
-            </div>
-        </section>
-      </main>
+      </div>
     </div>
   );
 };

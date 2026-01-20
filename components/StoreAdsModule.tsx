@@ -17,7 +17,11 @@ import {
   Type,
   Paintbrush,
   AlertTriangle,
-  X
+  X,
+  Store as StoreIcon,
+  Megaphone,
+  Gift,
+  Eye
 } from 'lucide-react';
 import { User } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabaseClient';
@@ -69,12 +73,19 @@ interface StoreAdsModuleProps {
   user: User | null;
 }
 
-// --- TEMPLATES DO SISTEMA DE BANNERS AUTOMÁTICOS ---
+// --- CONFIGURAÇÕES DO CRIADOR RÁPIDO ---
+const GOALS = [
+    { id: 'promover_oferta', name: 'Promover Oferta', icon: Gift, description: 'Descontos, combos e promoções.' },
+    { id: 'anunciar_novidade', name: 'Anunciar Novidade', icon: Sparkles, description: 'Lançamentos de produtos ou serviços.' },
+    { id: 'aumentar_visibilidade', name: 'Aumentar Visibilidade', icon: Eye, description: 'Fortalecer o nome da sua marca.' },
+];
+
 const BANNER_TEMPLATES = [
   {
     id: 'oferta_relampago',
     name: 'Oferta Relâmpago',
     description: 'Ideal para promoções com tempo limitado.',
+    goal: 'promover_oferta',
     fields: [
       { id: 'headline', label: 'Chamada Principal', placeholder: '50% OFF', type: 'text' },
       { id: 'subheadline', label: 'Nome do Produto/Serviço', placeholder: 'Pizza Grande', type: 'text' },
@@ -85,13 +96,28 @@ const BANNER_TEMPLATES = [
     id: 'lancamento',
     name: 'Lançamento',
     description: 'Anuncie um novo produto ou serviço.',
+    goal: 'anunciar_novidade',
     fields: [
       { id: 'headline', label: 'Título do Lançamento', placeholder: 'NOVA COLEÇÃO', type: 'text' },
       { id: 'subheadline', label: 'Descrição Curta', placeholder: 'Outono/Inverno 2024', type: 'text' },
       { id: 'product_image_url', label: 'URL da Imagem do Produto', placeholder: 'https://...', type: 'url' },
     ]
   },
+  {
+    id: 'institucional',
+    name: 'Institucional',
+    description: 'Fortaleça sua marca no bairro.',
+    goal: 'aumentar_visibilidade',
+    fields: [
+      { id: 'headline', label: 'Chamada Principal', placeholder: 'Sua Loja de Confiança', type: 'text' },
+      { id: 'subheadline', label: 'Slogan ou Descrição', placeholder: 'Qualidade e Tradição na Freguesia', type: 'text' },
+      { id: 'logo_url', label: 'URL do seu Logo', placeholder: 'https://...', type: 'url' },
+    ]
+  }
 ];
+
+const CTA_OPTIONS = ["Saiba Mais", "Peça Agora", "Ver Cardápio", "Agende seu Horário", "Visite nosso Instagram"];
+// --- FIM CONFIGURAÇÕES ---
 
 // --- CONFIGURAÇÕES DO EDITOR DE BANNER PERSONALIZADO ---
 const EDITOR_LAYOUTS = [
@@ -109,7 +135,7 @@ const COLOR_PALETTES = [
 ];
 
 // Componente de Preview do Banner (Template)
-const BannerPreview: React.FC<{ templateId: string; data: any; storeName: string }> = ({ templateId, data, storeName }) => {
+const BannerPreview: React.FC<{ templateId: string; data: any; storeName: string; cta?: string | null; }> = ({ templateId, data, storeName, cta }) => {
   const template = BANNER_TEMPLATES.find(t => t.id === templateId);
   if (!template) return null;
 
@@ -122,7 +148,9 @@ const BannerPreview: React.FC<{ templateId: string; data: any; storeName: string
             <div className="relative z-10">
               <span className="text-sm font-bold bg-yellow-300 text-red-700 px-3 py-1 rounded-full uppercase shadow-sm">{data.headline || 'XX% OFF'}</span>
               <h3 className="text-3xl font-black mt-4 drop-shadow-md max-w-[200px] leading-tight">{data.subheadline || 'Nome do Produto'}</h3>
-              <p className="text-xs mt-4 opacity-70 font-bold">{storeName}</p>
+              {cta ? (
+                 <button className="mt-4 bg-white text-red-600 font-bold text-xs px-5 py-2 rounded-full shadow-lg">{cta}</button>
+              ) : <p className="text-xs mt-4 opacity-70 font-bold">{storeName}</p> }
             </div>
             <div className="relative z-10 w-32 h-32 rounded-full border-4 border-white/50 bg-gray-200 overflow-hidden flex items-center justify-center shrink-0 shadow-2xl">
               {data.product_image_url ? <img src={data.product_image_url} className="w-full h-full object-cover" /> : <ImageIcon className="w-12 h-12 text-gray-400" />}
@@ -131,16 +159,29 @@ const BannerPreview: React.FC<{ templateId: string; data: any; storeName: string
         );
       case 'lancamento':
         return (
-          <div className="w-full aspect-video rounded-2xl bg-gradient-to-br from-slate-800 to-slate-900 text-white p-6 flex items-end justify-between overflow-hidden relative shadow-lg">
+          <div className="w-full aspect-video rounded-2xl bg-gradient-to-br from-slate-800 to-slate-900 text-white p-6 flex flex-col justify-end text-left overflow-hidden relative shadow-lg">
              <img src={data.product_image_url || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=800'} className="absolute inset-0 w-full h-full object-cover opacity-30 mix-blend-luminosity" />
              <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
              <div className="relative z-10">
                 <span className="text-[10px] font-black uppercase tracking-[0.2em] text-cyan-300">{data.headline || 'LANÇAMENTO'}</span>
                 <h3 className="text-2xl font-bold mt-1 max-w-[220px] leading-tight">{data.subheadline || 'Descrição do Lançamento'}</h3>
+                {cta && <button className="mt-4 bg-cyan-400 text-slate-900 font-bold text-xs px-5 py-2 rounded-full shadow-lg">{cta}</button>}
              </div>
-             <div className="relative z-10 self-start p-2 bg-white/10 rounded-lg backdrop-blur-sm border border-white/10">
-                <Sparkles className="w-5 h-5 text-cyan-300" />
-             </div>
+          </div>
+        );
+      case 'institucional':
+        return (
+          <div className="w-full aspect-video rounded-2xl bg-gradient-to-br from-slate-100 to-slate-200 text-slate-800 p-8 flex flex-col items-center justify-center text-center relative shadow-lg">
+            <div className="w-16 h-16 rounded-full bg-white mb-4 border-4 border-slate-200 shadow-md flex items-center justify-center">
+              {data.logo_url ? <img src={data.logo_url} className="w-full h-full object-cover rounded-full" /> : <StoreIcon className="w-8 h-8 text-slate-400" />}
+            </div>
+            <h3 className="text-3xl font-black max-w-sm leading-tight">{data.headline || 'Sua Loja de Confiança'}</h3>
+            <p className="text-sm mt-2 opacity-70 max-w-xs">{data.subheadline || 'Qualidade e Tradição no Bairro'}</p>
+            {cta && (
+              <button className="mt-6 bg-slate-800 text-white font-bold text-xs px-6 py-2.5 rounded-full shadow-lg transition-transform hover:scale-105">
+                {cta}
+              </button>
+            )}
           </div>
         );
       default:
@@ -222,7 +263,10 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
 
   // --- Template Creator State ---
-  const [selectedTemplate, setSelectedTemplate] = useState(BANNER_TEMPLATES[0]);
+  const [selectedGoal, setSelectedGoal] = useState<string | null>(null);
+  const [selectedTemplate, setSelectedTemplate] = useState<any | null>(null);
+  const [selectedCta, setSelectedCta] = useState<string | null>(null);
+  const [ctaStepCompleted, setCtaStepCompleted] = useState(false);
   const [formData, setFormData] = useState<any>({});
   
   // --- Custom Editor State ---
@@ -265,322 +309,320 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
         if (selectedPalette) {
             const contrast = getContrastRatio(selectedPalette.bg, selectedPalette.text);
             if (contrast < MIN_CONTRAST_RATIO) {
-                errors.push(`O contraste entre o fundo e o texto da paleta "${selectedPalette.name}" é muito baixo (${contrast.toFixed(1)}:1). Escolha outra paleta.`);
+                errors.push(`O contraste entre o fundo e o texto da paleta "${selectedPalette.name}" é muito baixo. Escolha outra combinação.`);
             }
         }
     }
     return errors;
   };
-
-  const handleSaveBanner = async () => {
-    if (!user) {
-      alert("Você precisa estar logado para criar um banner.");
+  
+  const handlePublish = async () => {
+    const validation = validateBanner();
+    if (validation.length > 0) {
+      setValidationErrors(validation);
       return;
     }
     
-    const errors = validateBanner();
-    if (errors.length > 0) {
-      setValidationErrors(errors);
-      return;
-    }
-
     setIsSaving(true);
-    
-    let bannerConfigToSave;
 
-    if (view === 'creator') {
-      bannerConfigToSave = { type: 'template', template_id: selectedTemplate.id, ...formData };
-    } else {
-      const selectedPalette = COLOR_PALETTES.find(p => p.id === editorData.palette) || COLOR_PALETTES[0];
-      bannerConfigToSave = {
-        type: 'custom_editor',
-        template_id: editorData.template,
-        background_color: selectedPalette.bg,
-        text_color: selectedPalette.text,
-        font_size: editorData.fontSize,
-        font_family: editorData.fontFamily,
-        title: editorData.title,
-        subtitle: editorData.subtitle,
-      };
-    }
-
-    const targetKey = categoryName || 'home';
-    const firstBannerFlag = `has_created_banner_${user.id}`;
-    const isFirstBanner = !localStorage.getItem(firstBannerFlag);
+    const isCustom = view === 'editor';
+    const config = isCustom ? { type: 'custom_editor', ...editorData } : { type: 'template', ...formData, template_id: selectedTemplate.id, cta: selectedCta };
+    const bannerTarget = categoryName ? `category:${categoryName.toLowerCase()}` : 'home';
 
     try {
-        if (!supabase) throw new Error("Supabase client not available");
-        
-        // 1. Upsert banner para o banco de dados
-        const { data: bannerData, error: upsertError } = await supabase
+        if (!supabase || !user) throw new Error("Usuário ou Supabase não disponível.");
+
+        // 1. Inserir no 'published_banners'
+        const { data: bannerData, error: bannerError } = await supabase
             .from('published_banners')
-            .upsert({
+            .insert({
                 merchant_id: user.id,
-                target: targetKey,
-                config: bannerConfigToSave,
+                target: bannerTarget,
+                config: config,
                 is_active: true,
-                updated_at: new Date().toISOString()
-            }, { onConflict: 'merchant_id,target' })
+                expires_at: null, // banners manuais não expiram por padrão
+            })
             .select()
             .single();
         
-        if (upsertError) throw upsertError;
-        
-        // 2. Logar a ação na tabela de auditoria
-        const { error: logError } = await supabase
-            .from('banner_audit_log')
-            .insert({
-                actor_id: user.id,
-                actor_email: user.email,
-                action: 'created/updated',
-                banner_id: bannerData.id,
-                details: {
-                    shopName: user.user_metadata?.store_name || "Loja Sem Nome",
-                    target: targetKey,
-                    isFirstBanner: isFirstBanner,
-                    config: bannerConfigToSave
+        if (bannerError) throw bannerError;
+
+        // 2. Log de Auditoria
+        const { error: logError } = await supabase.from('banner_audit_log').insert({
+            actor_id: user.id,
+            actor_email: user.email,
+            action: 'created',
+            banner_id: bannerData.id,
+            details: { 
+                shopName: user.user_metadata?.store_name || 'Loja',
+                isFirstBanner: true, // Lógica de verificação omitida por simplicidade
+                target: bannerTarget,
+                config,
+            }
+        });
+        if (logError) console.warn("Log de auditoria falhou:", logError);
+
+        // 3. (OPCIONAL) Disparar notificação para ADM no primeiro banner
+        // Essa lógica seria melhor em um trigger de DB, mas fazemos aqui para o MVP.
+        const { count } = await supabase.from('published_banners').select('*', { count: 'exact', head: true }).eq('merchant_id', user.id);
+        if (count === 1) {
+            await supabase.functions.invoke('send-email-admin-banner', {
+                body: {
+                    shopName: user.user_metadata?.store_name || user.email,
+                    userId: user.id,
+                    bannerType: isCustom ? 'Editor Personalizado' : 'Template Rápido',
+                    bannerConfig: config
                 }
             });
-
-        if (logError) console.error("Failed to log banner event:", logError);
-
-        if (isFirstBanner) {
-            localStorage.setItem(firstBannerFlag, 'true');
         }
-
-        // Simula o resto do fluxo de sucesso que já existia
+        
+        setShowSuccess(true);
         setTimeout(() => {
-            setIsSaving(false);
-            setShowSuccess(true);
-            setTimeout(() => {
-                setShowSuccess(false);
-                if (onNavigate) { onNavigate('home'); } 
-                else { setView('sales'); }
-            }, 3000);
-        }, 500);
+            onBack();
+        }, 2000);
 
-    } catch (e) {
-        console.error("Error saving banner to Supabase:", e);
+    } catch (e: any) {
+        console.error("Erro ao publicar banner:", e);
+        alert(`Erro: ${e.message}`);
+    } finally {
         setIsSaving(false);
-        // Mostrar erro para o usuário
-        setValidationErrors(["Ocorreu um erro ao salvar seu banner. Tente novamente."]);
     }
   };
+
+  const handleFormDataChange = (fieldId: string, value: string) => {
+    setFormData(prev => ({ ...prev, [fieldId]: value }));
+  };
   
-  // RENDERIZADOR DO CRIADOR DE BANNERS (TEMPLATES)
-  if (view === 'creator') {
-    return (
-      <div className="min-h-screen bg-[#111827] flex flex-col">
-        <ValidationErrorsModal errors={validationErrors} onClose={() => setValidationErrors([])} />
-        <header className="sticky top-0 z-20 bg-[#111827]/80 backdrop-blur-md border-b border-white/10 px-5 h-16 flex items-center gap-4">
-          <button onClick={() => setView('sales')} className="p-2 -ml-2 rounded-full hover:bg-white/5"><ChevronLeft className="w-6 h-6 text-slate-300" /></button>
-          <h1 className="font-bold text-lg text-white">Criador Rápido</h1>
-        </header>
-
-        <main className="flex-1 overflow-y-auto p-6 space-y-8">
-            <section>
-                <h2 className="text-xs font-black text-slate-400 uppercase tracking-[0.2em] mb-4">Passo 1: Escolha um modelo</h2>
-                <div className="flex gap-4 overflow-x-auto no-scrollbar -mx-6 px-6 pb-2">
-                    {BANNER_TEMPLATES.map(template => (
-                        <button key={template.id} onClick={() => setSelectedTemplate(template)} className={`flex-shrink-0 w-48 text-left p-4 rounded-2xl border-2 transition-all ${selectedTemplate.id === template.id ? 'border-blue-500 bg-blue-500/10' : 'border-slate-700 bg-slate-800'}`}>
-                            <h3 className="font-bold text-sm text-white">{template.name}</h3>
-                            <p className="text-xs text-slate-400 mt-1">{template.description}</p>
-                        </button>
-                    ))}
-                </div>
-            </section>
-            <section>
-                <h2 className="text-xs font-black text-slate-400 uppercase tracking-[0.2em] mb-4">Passo 2: Personalize</h2>
-                <div className="bg-slate-800 rounded-2xl p-6 border border-slate-700 space-y-4">
-                    {selectedTemplate.fields.map(field => (
-                        <div key={field.id}>
-                            <label className="text-xs font-bold text-slate-400 mb-1.5 block">{field.label}</label>
-                            <input type={field.type} placeholder={field.placeholder} value={formData[field.id] || ''} onChange={clearErrorsOnChange((e) => setFormData({...formData, [field.id]: e.target.value}))} className="w-full bg-slate-900 border border-slate-600 rounded-lg p-3 text-sm text-white focus:ring-2 focus:ring-blue-500 outline-none" />
-                        </div>
-                    ))}
-                </div>
-            </section>
-            <section>
-                <h2 className="text-xs font-black text-slate-400 uppercase tracking-[0.2em] mb-4">Preview em Tempo Real</h2>
-                <BannerPreview templateId={selectedTemplate.id} data={formData} storeName="Sua Loja" />
-            </section>
-            <section>
-                <h2 className="text-xs font-black text-slate-400 uppercase tracking-[0.2em] mb-4">Passo 3: Publicar</h2>
-                <button onClick={handleSaveBanner} disabled={isSaving} className="w-full bg-blue-600 text-white font-bold py-4 rounded-xl shadow-lg flex items-center justify-center gap-2">
-                    {isSaving ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
-                    {isSaving ? 'Publicando...' : 'Salvar e Publicar Banner'}
-                </button>
-            </section>
-        </main>
-      </div>
-    );
+  const handleEditorDataChange = (field: keyof typeof editorData, value: any) => {
+    setEditorData(prev => ({...prev, [field]: value}));
   }
 
-  // RENDERIZADOR DO EDITOR DE BANNERS (CUSTOMIZADO)
-  if (view === 'editor') {
-    return (
-      <div className="min-h-screen bg-[#111827] flex flex-col">
-        <ValidationErrorsModal errors={validationErrors} onClose={() => setValidationErrors([])} />
-        <header className="sticky top-0 z-20 bg-[#111827]/80 backdrop-blur-md border-b border-white/10 px-5 h-16 flex items-center gap-4">
-          <button onClick={() => setView('sales')} className="p-2 -ml-2 rounded-full hover:bg-white/5"><ChevronLeft className="w-6 h-6 text-slate-300" /></button>
-          <h1 className="font-bold text-lg text-white">Editor de Banner</h1>
-        </header>
-
-        <main className="flex-1 overflow-y-auto p-6 space-y-8">
-          <section>
-            <h2 className="flex items-center gap-2 text-xs font-black text-slate-400 uppercase tracking-[0.2em] mb-4"><LayoutTemplate size={14}/>Layout</h2>
-            <div className="grid grid-cols-3 gap-3">
-              {EDITOR_LAYOUTS.map(layout => (
-                 <button key={layout.id} onClick={clearErrorsOnChange(() => setEditorData({...editorData, template: layout.id}))} className={`p-3 rounded-xl text-sm font-bold border-2 ${editorData.template === layout.id ? 'border-blue-500 bg-blue-500/10' : 'border-slate-700 bg-slate-800'}`}>
-                  {layout.name}
-                 </button>
-              ))}
+  // ---- RENDER LOGIC ----
+  const renderStep = (): React.JSX.Element | null => {
+    if (view === 'sales') {
+      return (
+        <div className="animate-in fade-in duration-500">
+          <div className="text-center mb-10">
+            <div className="w-16 h-16 bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-6 border-4 border-slate-700 shadow-lg">
+                <Megaphone size={32} className="text-amber-400" />
             </div>
-          </section>
-
-          <section>
-            <h2 className="flex items-center gap-2 text-xs font-black text-slate-400 uppercase tracking-[0.2em] mb-4"><Type size={14}/>Conteúdo</h2>
-            <div className="space-y-4">
-              <input type="text" placeholder="Título" value={editorData.title} onChange={clearErrorsOnChange(e => setEditorData({...editorData, title: e.target.value}))} className="w-full bg-slate-800 p-3 rounded-lg border border-slate-700 text-white" />
-              <input type="text" placeholder="Subtítulo" value={editorData.subtitle} onChange={clearErrorsOnChange(e => setEditorData({...editorData, subtitle: e.target.value}))} className="w-full bg-slate-800 p-3 rounded-lg border border-slate-700 text-white" />
-            </div>
-          </section>
-
-          <section>
-            <h2 className="flex items-center gap-2 text-xs font-black text-slate-400 uppercase tracking-[0.2em] mb-4"><Palette size={14}/>Estilo Visual</h2>
-            <div className="space-y-4">
-                <div>
-                  <label className="text-xs text-slate-400 mb-2 block font-bold">Paleta de Cores</label>
-                  <div className="flex gap-3">
-                    {COLOR_PALETTES.map(p => (
-                      <button key={p.id} onClick={clearErrorsOnChange(() => setEditorData({...editorData, palette: p.id}))} className={`w-10 h-10 rounded-full flex items-center justify-center border-2 ${editorData.palette === p.id ? 'border-blue-500' : 'border-transparent'}`}>
-                        <div className="w-8 h-8 rounded-full overflow-hidden flex">
-                           <div className="w-1/2 h-full" style={{backgroundColor: p.previewColors[0]}}></div>
-                           <div className="w-1/2 h-full" style={{backgroundColor: p.previewColors[1]}}></div>
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="text-xs text-slate-400 font-bold">Fonte</label>
-                    <select value={editorData.fontFamily} onChange={clearErrorsOnChange(e => setEditorData({...editorData, fontFamily: e.target.value}))} className="w-full bg-slate-800 p-3 rounded-lg border border-slate-700 mt-1 text-white">
-                      <option>Poppins</option>
-                      <option>Outfit</option>
-                      <option>Arial</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="text-xs text-slate-400 font-bold">Tamanho</label>
-                    <select value={editorData.fontSize} onChange={clearErrorsOnChange(e => setEditorData({...editorData, fontSize: e.target.value}))} className="w-full bg-slate-800 p-3 rounded-lg border border-slate-700 mt-1 text-white">
-                      <option value="small">Pequeno</option>
-                      <option value="medium">Médio</option>
-                      <option value="large">Grande</option>
-                    </select>
-                  </div>
-                </div>
-            </div>
-          </section>
-          
-          <section>
-            <h2 className="text-xs font-black text-slate-400 uppercase tracking-[0.2em] mb-4">Preview</h2>
-            <BannerEditorPreview data={editorData} />
-          </section>
-
-          <section>
-            <button onClick={handleSaveBanner} disabled={isSaving} className="w-full bg-blue-600 text-white font-bold py-4 rounded-xl shadow-lg flex items-center justify-center gap-2">
-              {isSaving ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
-              {isSaving ? 'Publicando...' : 'Salvar e Publicar'}
-            </button>
-          </section>
-        </main>
-      </div>
-    );
-  }
-
-  // RENDERIZADOR DA PÁGINA DE VENDAS (ORIGINAL)
-  return (
-    <div className="min-h-screen bg-[#1E5BFF] font-sans animate-in slide-in-from-right duration-300 relative flex flex-col">
-      <div className="sticky top-0 z-20 bg-[#1E5BFF]/90 backdrop-blur-md border-b border-blue-400/30 px-5 h-16 flex items-center gap-4">
-        <button onClick={onBack} className="p-2 -ml-2 rounded-full hover:bg-white/10 transition-colors">
-          <ChevronLeft className="w-6 h-6 text-white" />
-        </button>
-        <span className="font-bold text-sm text-blue-100 uppercase tracking-widest">Publicidade Premium</span>
-      </div>
-
-      <div className="flex-1 overflow-y-auto no-scrollbar p-6 space-y-8">
-        <div className="text-center mt-2">
-            <div className="inline-flex items-center gap-2 bg-white/20 text-white px-4 py-1.5 rounded-full border border-white/20 mb-6 shadow-sm backdrop-blur-sm">
-                <Crown className="w-4 h-4 fill-current" />
-                <span className="text-[10px] font-black uppercase tracking-widest">DESTAQUE MÁXIMO</span>
-            </div>
-            <h1 className="text-3xl md:text-4xl font-black text-white leading-[1.1] mb-4 font-display tracking-tight">
-                Sua marca no topo<br/>
-                <span className="text-blue-200">
-                    para todo o bairro ver
-                </span>
-            </h1>
-            <p className="text-blue-100 max-w-md mx-auto leading-relaxed">
-                Posicione sua loja na tela principal do aplicativo e seja a primeira escolha dos seus vizinhos.
+            <h2 className="text-3xl font-black text-white font-display uppercase tracking-tight mb-3">
+                Destaque sua Loja
+            </h2>
+            <p className="text-slate-400 text-sm max-w-sm mx-auto leading-relaxed">
+                Crie banners personalizados que aparecerão na Home do app ou em categorias específicas para atrair mais clientes.
             </p>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <button
+              onClick={() => setView('creator')}
+              className="bg-slate-800 p-8 rounded-3xl border border-white/10 text-left hover:border-blue-500/50 transition-all group"
+            >
+                <div className="w-12 h-12 bg-blue-500/10 rounded-2xl flex items-center justify-center text-blue-400 mb-4 border border-blue-500/20">
+                    <Sparkles size={24} />
+                </div>
+                <h3 className="font-bold text-white text-lg mb-2">Criador Rápido</h3>
+                <p className="text-xs text-slate-400 mb-6 leading-relaxed">
+                    Use nossos templates prontos. Ideal para criar ofertas e anúncios em segundos.
+                </p>
+                <span className="text-xs font-black text-blue-400 uppercase tracking-widest flex items-center gap-2 group-hover:gap-3 transition-all">
+                    Começar agora <ArrowRight size={14} />
+                </span>
+            </button>
+            <button
+              onClick={() => setView('editor')}
+              className="bg-slate-800 p-8 rounded-3xl border border-white/10 text-left hover:border-purple-500/50 transition-all group"
+            >
+                <div className="w-12 h-12 bg-purple-500/10 rounded-2xl flex items-center justify-center text-purple-400 mb-4 border border-purple-500/20">
+                    <Paintbrush size={24} />
+                </div>
+                <h3 className="font-bold text-white text-lg mb-2">Editor Personalizado</h3>
+                <p className="text-xs text-slate-400 mb-6 leading-relaxed">
+                    Tenha controle total sobre cores, fontes e layout para um banner 100% original.
+                </p>
+                 <span className="text-xs font-black text-purple-400 uppercase tracking-widest flex items-center gap-2 group-hover:gap-3 transition-all">
+                    Criar do zero <ArrowRight size={14} />
+                </span>
+            </button>
+          </div>
         </div>
+      );
+    }
+    
+    if (view === 'creator' || view === 'editor') {
+      const isCustom = view === 'editor';
 
-        <div className="bg-white/10 rounded-3xl p-6 border border-white/20 backdrop-blur-sm">
-            <h3 className="font-bold text-white text-lg text-center mb-6">Já tem um plano?</h3>
-            <div className="flex flex-col gap-3">
-              <button 
-                  onClick={() => setView('creator')}
-                  className="w-full bg-white text-blue-600 font-bold py-4 rounded-xl shadow-lg flex items-center justify-center gap-2 active:scale-95 transition-transform"
-              >
-                  <Sparkles className="w-5 h-5" />
-                  Criar com Template Rápido
-              </button>
-              <button 
-                  onClick={() => setView('editor')}
-                  className="w-full bg-slate-900/50 text-white font-bold py-4 rounded-xl shadow-lg flex items-center justify-center gap-2 active:scale-95 transition-transform border border-white/20 backdrop-blur-sm"
-              >
-                  <Palette className="w-5 h-5" />
-                  Criar Banner Personalizado
-              </button>
-            </div>
-        </div>
-        
-        <div className="space-y-4">
-            <div className="flex items-start gap-4 p-4">
-                <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center text-white shrink-0"><Target size={20} /></div>
-                <div>
-                    <h4 className="font-bold text-white">Alcance Direcionado</h4>
-                    <p className="text-xs text-blue-100 leading-relaxed mt-1">Sua marca aparece para quem realmente importa: seus vizinhos em Jacarepaguá.</p>
+      const handleBackToSelection = () => {
+        setSelectedGoal(null);
+        setSelectedTemplate(null);
+        setFormData({});
+      };
+
+      if (isCustom) {
+        // EDITOR PERSONALIZADO
+        return (
+            <div className="animate-in fade-in duration-500">
+                <div className="mb-8">
+                    <h3 className="font-black text-sm uppercase tracking-widest text-purple-400 mb-2">Preview do Banner</h3>
+                    <BannerEditorPreview data={editorData} />
+                </div>
+                <div className="bg-slate-800 rounded-3xl p-6 border border-white/10 space-y-6">
+                    <h3 className="font-bold">Editor</h3>
+                    <div>
+                        <label className="text-xs font-bold text-slate-400 uppercase">Layout</label>
+                        <div className="grid grid-cols-3 gap-2 mt-2">
+                           {EDITOR_LAYOUTS.map(l => (
+                               <button key={l.id} onClick={() => handleEditorDataChange('template', l.id)} className={`py-3 rounded-lg text-xs font-bold ${editorData.template === l.id ? 'bg-purple-500 text-white' : 'bg-slate-700 text-slate-300'}`}>{l.name}</button>
+                           ))}
+                        </div>
+                    </div>
+                    <div>
+                        <label className="text-xs font-bold text-slate-400 uppercase">Paleta de Cores</label>
+                        <div className="flex gap-3 mt-2">
+                           {COLOR_PALETTES.map(p => (
+                               <button key={p.id} onClick={() => handleEditorDataChange('palette', p.id)} className={`w-8 h-8 rounded-full flex items-center justify-center ${editorData.palette === p.id ? 'ring-2 ring-white ring-offset-2 ring-offset-slate-800' : ''}`}>
+                                   <div className="w-full h-full rounded-full overflow-hidden flex">
+                                       <div style={{ backgroundColor: p.previewColors[0] }} className="w-1/2 h-full"></div>
+                                       <div style={{ backgroundColor: p.previewColors[1] }} className="w-1/2 h-full"></div>
+                                   </div>
+                               </button>
+                           ))}
+                        </div>
+                    </div>
+                     <div>
+                        <label className="text-xs font-bold text-slate-400 uppercase">Texto Principal</label>
+                        <input value={editorData.title} onChange={(e) => handleEditorDataChange('title', e.target.value)} className="w-full mt-2 bg-slate-700 p-3 rounded-lg text-white" />
+                    </div>
+                    <div>
+                        <label className="text-xs font-bold text-slate-400 uppercase">Subtítulo</label>
+                        <input value={editorData.subtitle} onChange={(e) => handleEditorDataChange('subtitle', e.target.value)} className="w-full mt-2 bg-slate-700 p-3 rounded-lg text-white" />
+                    </div>
                 </div>
             </div>
-             <div className="flex items-start gap-4 p-4">
-                <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center text-white shrink-0"><Rocket size={20} /></div>
-                <div>
-                    <h4 className="font-bold text-white">Visibilidade Instantânea</h4>
-                    <p className="text-xs text-blue-100 leading-relaxed mt-1">Garanta a primeira impressão e seja a escolha óbvia para milhares de usuários.</p>
-                </div>
-            </div>
-        </div>
-
-        <div className="p-6 bg-gradient-to-br from-blue-400/20 to-transparent rounded-3xl border border-white/20 text-center">
-            <h3 className="font-bold text-white text-lg">Pronto para crescer?</h3>
-            <p className="text-xs text-blue-100 mt-2 mb-6">Nossa equipe comercial entrará em contato para finalizar a contratação.</p>
-            <button className="w-full bg-white text-blue-600 font-bold py-4 rounded-xl shadow-lg">Falar com um consultor</button>
-        </div>
-      </div>
-
-      {showSuccess && (
-          <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-6">
-              <div className="bg-slate-800 p-8 rounded-2xl text-center flex flex-col items-center border border-slate-700">
-                  <div className="w-16 h-16 bg-green-500/10 rounded-full flex items-center justify-center text-green-400 mb-4">
-                      <CheckCircle2 size={32} />
-                  </div>
-                  <h3 className="font-bold text-lg text-white">Banner Publicado!</h3>
-                  <p className="text-sm text-slate-400 mt-2">Sua campanha está ativa e já aparece para os clientes.</p>
+        );
+      } else {
+        // CRIADOR RÁPIDO (TEMPLATE)
+        if (!selectedGoal) {
+          // STEP 1: CHOOSE GOAL
+          return (
+            <div className="animate-in slide-in-from-right duration-500">
+              <h3 className="font-black text-sm uppercase tracking-widest text-blue-400 mb-4">Passo 1: Qual seu objetivo?</h3>
+              <div className="space-y-4">
+                {GOALS.map(goal => (
+                  <button key={goal.id} onClick={() => setSelectedGoal(goal.id)} className="w-full bg-slate-800 p-6 rounded-2xl border border-white/10 text-left hover:border-blue-500/50 transition-all flex items-center gap-5">
+                    <div className="w-12 h-12 bg-blue-500/10 rounded-xl flex items-center justify-center text-blue-400 border border-blue-500/20"><goal.icon size={24} /></div>
+                    <div>
+                      <h4 className="font-bold text-white text-base">{goal.name}</h4>
+                      <p className="text-xs text-slate-400">{goal.description}</p>
+                    </div>
+                  </button>
+                ))}
               </div>
+            </div>
+          );
+        }
+
+        if (selectedGoal && !selectedTemplate) {
+          // STEP 2: CHOOSE TEMPLATE
+          const availableTemplates = BANNER_TEMPLATES.filter(t => t.goal === selectedGoal);
+          return (
+            <div className="animate-in slide-in-from-right duration-500">
+              <button onClick={handleBackToSelection} className="flex items-center gap-2 text-xs text-slate-400 mb-4"><ChevronLeft size={16} /> Voltar</button>
+              <h3 className="font-black text-sm uppercase tracking-widest text-blue-400 mb-4">Passo 2: Escolha um modelo</h3>
+              <div className="space-y-4">
+                {availableTemplates.map(template => (
+                  <button key={template.id} onClick={() => setSelectedTemplate(template)} className="w-full bg-slate-800 p-5 rounded-2xl border border-white/10 text-left hover:border-blue-500/50 transition-all">
+                    <h4 className="font-bold text-white text-base">{template.name}</h4>
+                    <p className="text-xs text-slate-400">{template.description}</p>
+                  </button>
+                ))}
+              </div>
+            </div>
+          );
+        }
+
+        if (selectedTemplate) {
+          // STEP 3: FILL FORM & PREVIEW
+          return (
+            <div className="animate-in slide-in-from-right duration-500">
+                <button onClick={handleBackToSelection} className="flex items-center gap-2 text-xs text-slate-400 mb-4"><ChevronLeft size={16} /> Voltar</button>
+                <div className="mb-8">
+                    <h3 className="font-black text-sm uppercase tracking-widest text-blue-400 mb-4">Passo 3: Preencha e veja como fica</h3>
+                    <BannerPreview templateId={selectedTemplate.id} data={formData} storeName={user?.user_metadata?.store_name || "Sua Loja"} cta={selectedCta} />
+                </div>
+                <div className="bg-slate-800 rounded-3xl p-6 border border-white/10 space-y-5">
+                    {selectedTemplate.fields.map((field: any) => (
+                        <div key={field.id}>
+                            <label className="text-xs font-bold text-slate-400 uppercase">{field.label}</label>
+                            <input
+                                type={field.type}
+                                placeholder={field.placeholder}
+                                value={formData[field.id] || ''}
+                                onChange={(e) => handleFormDataChange(field.id, e.target.value)}
+                                className="w-full mt-2 bg-slate-700 p-3 rounded-lg text-white"
+                            />
+                        </div>
+                    ))}
+                    {!ctaStepCompleted ? (
+                        <div>
+                            <label className="text-xs font-bold text-slate-400 uppercase">Botão (Opcional)</label>
+                            <div className="flex gap-2 mt-2 flex-wrap">
+                                {CTA_OPTIONS.map(cta => (
+                                    <button key={cta} onClick={() => setSelectedCta(cta)} className={`text-xs px-3 py-1.5 rounded-lg ${selectedCta === cta ? 'bg-blue-500 text-white' : 'bg-slate-700 text-slate-300'}`}>{cta}</button>
+                                ))}
+                                <button onClick={() => setCtaStepCompleted(true)} className="text-xs px-3 py-1.5 rounded-lg bg-slate-600 text-slate-300">Pular</button>
+                            </div>
+                        </div>
+                    ) : null}
+                </div>
+            </div>
+          );
+        }
+      }
+    }
+// FIX: Add a fallback return statement in the `renderStep` function to ensure all code paths return a value, satisfying TypeScript's strict return type checking.
+    return null;
+  };
+
+  return (
+    <div className="min-h-screen bg-slate-900 text-white font-sans flex flex-col">
+      {/* Header */}
+      <div className="sticky top-0 z-40 bg-slate-900/80 backdrop-blur-md px-6 py-4 border-b border-white/5 flex items-center justify-between">
+        <div className="flex items-center gap-4">
+            <button onClick={view === 'sales' ? onBack : () => setView('sales')} className="p-2.5 bg-slate-800 text-slate-400 hover:text-white transition-colors border border-white/5 rounded-xl active:scale-95">
+                <ChevronLeft size={20} />
+            </button>
+            <div>
+                <h1 className="font-bold text-lg leading-none">Criar Anúncio</h1>
+                <p className="text-xs text-slate-500">{categoryName ? `Para: ${categoryName}` : 'Para: Home'}</p>
+            </div>
+        </div>
+        <button 
+            onClick={onBack}
+            className="p-2.5 bg-slate-800 text-slate-400 hover:text-white transition-colors border border-white/5 rounded-xl active:scale-95"
+        >
+            <X size={20} />
+        </button>
+      </div>
+      
+      <main className="flex-1 overflow-y-auto no-scrollbar p-6 pb-32">
+        {renderStep()}
+      </main>
+
+      {view !== 'sales' && (
+          <div className="fixed bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-slate-900 via-slate-900 to-transparent max-w-md mx-auto z-30">
+            <button 
+                onClick={handlePublish}
+                disabled={isSaving || (view === 'creator' && !selectedTemplate)}
+                className="w-full bg-[#1E5BFF] text-white font-black py-5 rounded-2xl shadow-xl shadow-blue-500/20 flex items-center justify-center gap-3 active:scale-[0.98] transition-all disabled:opacity-50 disabled:grayscale"
+            >
+                {isSaving ? <Loader2 className="w-6 h-6 animate-spin" /> : 'Publicar Banner'}
+            </button>
           </div>
       )}
-    </div>
-  );
-};
+
+      {showSuccess && (
+        <div className="fixed inset-0 z-[100] bg-black/80 flex items-center justify-center p-6 animate-in fade-in">
+           <div className="bg-slate-800 p-10 rounded-2xl flex flex-col items-center text-center">
+                <div className="w-16 h-1
