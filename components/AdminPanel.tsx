@@ -5,11 +5,11 @@ import {
   Clock, DollarSign, Calendar, ChevronRight, LayoutDashboard,
   CheckCircle, XCircle, LogOut, Megaphone, User as UserIcon, Building, Flag, PauseCircle, Image as ImageIcon,
   Plus, Loader2,
-  // Added new icons for metrics
   Heart,
   Share2,
   Phone,
-  MousePointerClick
+  MousePointerClick,
+  Briefcase
 } from 'lucide-react';
 import { getAdminGlobalMetrics, fetchAdminMerchants, fetchAdminUsers, fetchAdminLedger } from '../backend/services';
 import { supabase } from '../lib/supabaseClient';
@@ -264,6 +264,20 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
             <h3 className="text-xs font-black text-slate-500 uppercase tracking-widest mb-3">Auditoria e Moderação</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <button
+                    onClick={() => onNavigateToApp('admin_banner_orders_list')}
+                    className="w-full bg-slate-900 p-5 rounded-3xl border border-white/5 flex items-center justify-between group hover:border-[#1E5BFF]/30 transition-all"
+                >
+                    <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 bg-slate-800 rounded-2xl flex items-center justify-center text-slate-400 group-hover:text-[#1E5BFF] transition-colors">
+                            <Briefcase size={24} />
+                        </div>
+                        <div>
+                            <h4 className="font-bold text-white text-base text-left">Pedidos de Banners</h4>
+                            <p className="text-xs text-slate-500 text-left">Gerenciar produção profissional.</p>
+                        </div>
+                    </div>
+                </button>
+                <button
                     onClick={() => onNavigateToApp('admin_banner_moderation')}
                     className="w-full bg-slate-900 p-5 rounded-3xl border border-white/5 flex items-center justify-between group hover:border-rose-500/30 transition-all"
                 >
@@ -307,6 +321,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
             </div>
         )}
 
+        {/* ... Rest of the component (metrics, merchants, users, ledger logic remains the same) */}
         {loading ? (
             <div className="flex flex-col items-center justify-center py-20 animate-pulse">
                 <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-4"></div>

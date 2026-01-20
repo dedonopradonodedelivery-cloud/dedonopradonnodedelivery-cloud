@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Layout } from './components/layout/Layout';
 import { Header } from './components/layout/Header';
 import { HomeFeed } from './components/HomeFeed';
@@ -29,10 +29,8 @@ import { CategoryView } from './components/CategoryView';
 import { StoreProfileEdit } from './components/StoreProfileEdit';
 import { CommunityFeedView } from './components/CommunityFeedView';
 import { STORES } from './constants';
-import { AdminModerationPanel } from './components/AdminModerationPanel';
 import { AboutView, SupportView, FavoritesView } from './components/SimplePages';
 import { getAccountEntryRoute } from './lib/roleRoutes';
-import { BannerSalesView } from './components/BannerSalesView';
 import { BannerConfigView } from './components/BannerConfigView';
 import { BannerCheckoutView } from './components/BannerCheckoutView';
 import { SponsoredAdsView } from './components/SponsoredAdsView';
@@ -40,7 +38,8 @@ import { SponsoredAdsCheckoutView } from './components/SponsoredAdsCheckoutView'
 import { SponsoredAdsSuccessView } from './components/SponsoredAdsSuccessView';
 import { BannerProfessionalPaymentView } from './components/BannerProfessionalPaymentView';
 import { BannerOrderTrackingView } from './components/BannerOrderTrackingView';
-
+import { AdminBannerOrdersList } from './components/AdminBannerOrdersList';
+import { AdminBannerOrderDetail } from './components/AdminBannerOrderDetail';
 
 let splashWasShownInSession = false;
 const ADMIN_EMAIL = 'dedonopradonodedelivery@gmail.com';
@@ -87,6 +86,9 @@ const App: React.FC = () => {
   const [bannerOrders, setBannerOrders] = useState<BannerOrder[]>([]);
   const [bannerMessages, setBannerMessages] = useState<BannerMessage[]>([]);
   const [viewingOrderId, setViewingOrderId] = useState<string | null>(null);
+  
+  // Admin State
+  const [adminViewOrderId, setAdminViewOrderId] = useState<string | null>(null);
 
   
   // Set viewMode based on auth status. This prevents the login modal on startup for visitors.
@@ -96,25 +98,19 @@ const App: React.FC = () => {
     const persistedMode = localStorage.getItem('admin_view_mode') as RoleMode;
 
     if (!user) {
-        // If no user is logged in, always default to Visitor mode, ignoring localStorage.
         setViewMode('Visitante');
         return;
     }
 
-    // If a user is logged in:
-    // Validate persisted mode against their actual role.
     if (persistedMode) {
-        // Demote admin view if user isn't an admin
         if (persistedMode === 'ADM' && user.email !== ADMIN_EMAIL) {
             setViewMode('Visitante'); 
-        // A non-admin/non-lojista can't view as a lojista
         } else if (persistedMode === 'Lojista' && userRole !== 'lojista' && user.email !== ADMIN_EMAIL) {
              setViewMode('Usuário');
         } else {
             setViewMode(persistedMode);
         }
     } else {
-        // No mode was persisted, set a default based on the user's role.
         if (user.email === ADMIN_EMAIL) setViewMode('ADM');
         else if (userRole === 'lojista') setViewMode('Lojista');
         else setViewMode('Usuário');
@@ -162,11 +158,11 @@ const App: React.FC = () => {
         }
         break;
     }
-  }, [viewMode, isAuthInitialLoading, user]); // Added dependencies for safety
+  }, [viewMode, isAuthInitialLoading, user]);
 
   // General auth guard for restricted tabs
   useEffect(() => {
-    const restrictedTabs = ['scan_cashback', 'merchant_qr_display', 'wallet', 'pay_cashback', 'store_area', 'admin_panel', 'edit_profile', 'profile', 'favorites', 'store_ads_module', 'banner_config', 'banner_checkout', 'sponsored_ads', 'sponsored_ads_checkout', 'sponsored_ads_success', 'banner_professional_payment', 'banner_order_tracking'];
+    const restrictedTabs = ['scan_cashback', 'merchant_qr_display', 'wallet', 'pay_cashback', 'store_area', 'admin_panel', 'edit_profile', 'profile', 'favorites', 'store_ads_module', 'banner_config', 'banner_checkout', 'sponsored_ads', 'sponsored_ads_checkout', 'sponsored_ads_success', 'banner_professional_payment', 'banner_order_tracking', 'admin_banner_orders_list', 'admin_banner_order_detail'];
     
     if (restrictedTabs.includes(activeTab)) {
       if (!isAuthInitialLoading && !user) {
@@ -176,24 +172,22 @@ const App: React.FC = () => {
       }
     }
 
-    // Guard for banner creation flow
     if (activeTab === 'store_ads_module' && !bannerOrder.plan) {
         setActiveTab('banner_config');
     }
   }, [activeTab, user, isAuthInitialLoading, bannerOrder.plan]);
 
-  // Route Protection: Ensures the active tab is compatible with the current viewMode.
+  // Route Protection
   useEffect(() => {
       if (isAuthInitialLoading) return;
       
       const merchantTabs = ['store_area', 'store_ads_module', 'weekly_promo', 'merchant_jobs', 'store_profile', 'store_support', 'banner_upload', 'banner_production', 'banner_config', 'banner_checkout', 'sponsored_ads', 'sponsored_ads_checkout', 'sponsored_ads_success', 'banner_professional_payment', 'banner_order_tracking'];
+      const adminTabs = ['admin_panel', 'admin_banner_moderation', 'admin_banner_orders_list', 'admin_banner_order_detail'];
       
-      // Admin panel protection
-      if (activeTab === 'admin_panel' && (viewMode !== 'ADM' || user?.email !== ADMIN_EMAIL)) {
+      if (adminTabs.includes(activeTab) && (viewMode !== 'ADM' || user?.email !== ADMIN_EMAIL)) {
           setActiveTab('home');
       }
       
-      // Merchant panel protection
       if (merchantTabs.includes(activeTab) && viewMode !== 'Lojista') {
           setActiveTab(viewMode === 'Usuário' ? 'profile' : 'home');
       }
@@ -222,10 +216,9 @@ const App: React.FC = () => {
     }
   };
   
-  // Banner Ad Flow
   const handleConfigureAndCreateBanner = (config: BannerConfig) => {
     const syntheticPlan: BannerPlan = {
-      id: config.duration === '1m' ? 'home_1m' : 'home_3m', // Mock ID to satisfy type
+      id: config.duration === '1m' ? 'home_1m' : 'home_3m', 
       label: `${config.placement} - ${config.duration === '1m' ? '1 Mês' : '3 Meses'} - ${config.neighborhoods.length} bairro(s)`,
       priceCents: config.priceCents,
       placement: config.placement,
@@ -252,14 +245,12 @@ const App: React.FC = () => {
       setActiveTab('store_area'); 
   };
   
-  // Sponsored Ad Flow
   const handleProceedToSponsoredPayment = (days: number, total: number) => {
     setSponsoredPlan({ days, total, pricePerDay: 0.99 });
     setActiveTab('sponsored_ads_checkout');
   };
 
   const handleConfirmSponsoredPayment = () => {
-    // Mock payment confirmation
     setActiveTab('sponsored_ads_success');
   };
   
@@ -268,7 +259,6 @@ const App: React.FC = () => {
     setActiveTab('store_area');
   };
   
-  // Professional Banner Flow Handlers
   const handleConfirmProfessionalPayment = (paymentMethod: 'pix' | 'credit' | 'debit') => {
     if (!user) return;
     const newOrderId = `ORD-${Date.now().toString().slice(-6)}`;
@@ -302,11 +292,11 @@ const App: React.FC = () => {
 
   const handleViewOrder = (orderId: string) => {
     const now = new Date().toISOString();
+    // Update local state to mark as read
     setBannerOrders(prev => prev.map(order => 
       order.id === orderId ? { ...order, lastViewedAt: now } : order
     ));
     setViewingOrderId(orderId);
-    setActiveTab('banner_order_tracking');
   };
 
   const handleSendMessage = (orderId: string, text: string) => {
@@ -318,6 +308,23 @@ const App: React.FC = () => {
       createdAt: new Date().toISOString(),
     };
     setBannerMessages(prev => [...prev, newMessage]);
+  };
+  
+  // Admin handlers
+  const handleAdminSendMessage = (orderId: string, text: string) => {
+    const newMessage: BannerMessage = {
+      id: `msg-a-${Date.now()}`,
+      orderId,
+      senderType: 'team',
+      body: text,
+      createdAt: new Date().toISOString(),
+    };
+    setBannerMessages(prev => [...prev, newMessage]);
+  };
+
+  const handleAdminViewOrder = (orderId: string) => {
+      setAdminViewOrderId(orderId);
+      setActiveTab('admin_banner_order_detail');
   };
 
   // Professional Banner Guardrail
@@ -344,8 +351,8 @@ const App: React.FC = () => {
   }, []);
 
   const handleSelectStore = (store: Store) => { setSelectedStore(store); setActiveTab('store_detail'); };
-  const headerExclusionList = ['store_area', 'editorial_list', 'store_profile', 'category_detail', 'store_detail', 'profile', 'patrocinador_master', 'service_subcategories', 'service_specialties', 'store_ads_module', 'about', 'support', 'favorites', 'community_feed', 'admin_panel', 'cashback_landing', 'admin_banner_moderation', 'banner_upload', 'banner_production', 'banner_config', 'banner_checkout', 'sponsored_ads', 'sponsored_ads_checkout', 'sponsored_ads_success', 'banner_professional_payment', 'banner_order_tracking'];
-  const hideBottomNav = ['store_ads_module', 'store_detail', 'admin_panel', 'cashback_landing', 'admin_banner_moderation', 'banner_upload', 'banner_production', 'banner_config', 'banner_checkout', 'sponsored_ads', 'sponsored_ads_checkout', 'sponsored_ads_success', 'banner_professional_payment', 'banner_order_tracking'].includes(activeTab);
+  const headerExclusionList = ['store_area', 'editorial_list', 'store_profile', 'category_detail', 'store_detail', 'profile', 'patrocinador_master', 'service_subcategories', 'service_specialties', 'store_ads_module', 'about', 'support', 'favorites', 'community_feed', 'admin_panel', 'cashback_landing', 'admin_banner_moderation', 'banner_upload', 'banner_production', 'banner_config', 'banner_checkout', 'sponsored_ads', 'sponsored_ads_checkout', 'sponsored_ads_success', 'banner_professional_payment', 'banner_order_tracking', 'admin_banner_orders_list', 'admin_banner_order_detail'];
+  const hideBottomNav = ['store_ads_module', 'store_detail', 'admin_panel', 'cashback_landing', 'admin_banner_moderation', 'banner_upload', 'banner_production', 'banner_config', 'banner_checkout', 'sponsored_ads', 'sponsored_ads_checkout', 'sponsored_ads_success', 'banner_professional_payment', 'banner_order_tracking', 'admin_banner_orders_list', 'admin_banner_order_detail'].includes(activeTab);
 
   const RoleSwitcherModal: React.FC = () => {
     if (!isRoleSwitcherOpen) return null;
@@ -388,6 +395,15 @@ const App: React.FC = () => {
                 {activeTab === 'cashback_landing' && <CashbackLandingView onBack={() => setActiveTab('home')} onLogin={() => { setPendingTab('scan_cashback'); setIsAuthOpen(true); }} />}
                 {activeTab === 'admin_panel' && <AdminPanel user={user as any} onLogout={signOut} viewMode={viewMode} onOpenViewSwitcher={() => setIsRoleSwitcherOpen(true)} onNavigateToApp={setActiveTab} />}
                 {activeTab === 'admin_banner_moderation' && user?.email === ADMIN_EMAIL && <AdminBannerModeration user={user as any} onBack={() => setActiveTab('admin_panel')} />}
+                
+                {/* Admin Banner Orders */}
+                {activeTab === 'admin_banner_orders_list' && user?.email === ADMIN_EMAIL && (
+                    <AdminBannerOrdersList orders={bannerOrders} messages={bannerMessages} onBack={() => setActiveTab('admin_panel')} onSelectOrder={handleAdminViewOrder} />
+                )}
+                {activeTab === 'admin_banner_order_detail' && user?.email === ADMIN_EMAIL && adminViewOrderId && (
+                    <AdminBannerOrderDetail orderId={adminViewOrderId} orders={bannerOrders} messages={bannerMessages} onBack={() => setActiveTab('admin_banner_orders_list')} onSendMessage={handleAdminSendMessage} />
+                )}
+
                 {activeTab === 'home' && <HomeFeed onNavigate={setActiveTab} onSelectCategory={(c) => { setSelectedCategory(c); setActiveTab('category_detail'); }} onSelectCollection={() => {}} onStoreClick={handleSelectStore} stores={STORES} searchTerm={globalSearch} user={user as any} onRequireLogin={() => setIsAuthOpen(true)} />}
                 {activeTab === 'explore' && <ExploreView stores={STORES} searchQuery={globalSearch} onStoreClick={handleSelectStore} onLocationClick={() => {}} onFilterClick={() => {}} onOpenPlans={() => {}} onNavigate={setActiveTab} />}
                 {activeTab === 'profile' && <MenuView user={user as any} userRole={userRole} onAuthClick={() => setIsAuthOpen(true)} onNavigate={setActiveTab} onBack={() => setActiveTab('home')} />}

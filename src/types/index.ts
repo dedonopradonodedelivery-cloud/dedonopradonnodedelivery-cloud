@@ -246,3 +246,72 @@ export interface DbWalletMovement {
   description: string;
   created_at: string;
 }
+
+// NEW: Centralized RoleMode type
+export type RoleMode = 'ADM' | 'Usuário' | 'Lojista' | 'Visitante';
+
+// NEW: Centralized BannerItem type (moved from HomeFeed.tsx)
+export interface BannerItem {
+  id: string;
+  title?: string;
+  target?: string;
+  tag?: string;
+  bgColor?: string;
+  Icon?: React.ElementType;
+  isSpecial?: boolean;
+  isUserBanner?: boolean;
+  config?: any;
+}
+
+// NEW: Type for Banner Plans
+export interface BannerPlan {
+  id: 'home_3m' | 'cat_3m' | 'home_1m' | 'cat_1m' | 'custom';
+  placement: 'Home' | 'Categorias' | 'Todos';
+  durationMonths: 1 | 3;
+  priceCents: number;
+  label: string;
+  installmentText?: string;
+  isPromo?: boolean;
+  isMostAdvantageous?: boolean;
+  benefit: string;
+}
+
+// NEW: Type for dynamic banner configuration
+export interface BannerConfig {
+  placement: 'Home' | 'Categorias' | 'Todos';
+  duration: '1m' | '3m_promo';
+  neighborhoods: { id: string; name: string }[];
+  categories?: { id: string; name: string }[];
+  priceCents: number;
+}
+
+
+// NEW: Type for Sponsored Ads by day
+export interface SponsoredPlan {
+  days: number;
+  pricePerDay: number;
+  total: number;
+}
+
+// NEW: Type for Professional Banner Orders
+export interface BannerOrder {
+  id: string;
+  merchantId: string;
+  bannerType: 'professional';
+  total: number; // in cents
+  paymentMethod: 'pix' | 'credit' | 'debit' | null;
+  paymentStatus: 'pending' | 'paid';
+  createdAt: string;
+  status: 'em_analise' | 'em_producao' | 'aprovado' | 'publicado';
+  lastViewedAt?: string;
+}
+
+// NEW: Type for Messages within an Order
+export interface BannerMessage {
+  id: string;
+  orderId: string;
+  senderType: 'merchant' | 'team';
+  body: string;
+  createdAt: string;
+  readAt?: string;
+}
