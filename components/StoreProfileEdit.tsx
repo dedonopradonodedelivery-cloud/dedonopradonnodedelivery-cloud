@@ -16,7 +16,13 @@ import {
   AlertCircle,
   Hash,
   Heart,
-  Edit3
+  Edit3,
+  // FIX: Import missing icons
+  QrCode,
+  Banknote,
+  CreditCard,
+  Ticket,
+  Landmark
 } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import { NEIGHBORHOOD_COMMUNITIES } from '../constants';
