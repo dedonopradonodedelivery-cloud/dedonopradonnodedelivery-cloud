@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import { 
   ChevronLeft, 
@@ -15,7 +14,8 @@ import {
   Rocket,
   Tag,
   Coins,
-  QrCode
+  QrCode,
+  Megaphone
 } from 'lucide-react';
 import { User } from '@supabase/supabase-js';
 
@@ -100,16 +100,12 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
         <div>
             <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3 ml-2">Gestão da Loja</h3>
             <div className="rounded-2xl overflow-hidden shadow-sm border border-gray-100 dark:border-gray-700">
+                <MenuLink icon={Megaphone} label="Anúncios e Banners" subtitle="Destaque sua loja no app" highlight={true} onClick={() => onNavigate?.('store_ads_module')} />
                 <MenuLink icon={Tag} label="Promoção da Semana" highlight={true} onClick={() => onNavigate?.('weekly_promo')} />
                 <MenuLink icon={Briefcase} label="Vagas de Emprego" highlight={true} onClick={() => onNavigate?.('merchant_jobs')} />
                 <MenuLink icon={Settings} label="Minha Loja (Perfil Público)" onClick={() => onNavigate?.('store_profile')} />
                 <MenuLink icon={HelpCircle} label="Suporte ao Lojista" onClick={() => onNavigate?.('store_support')} />
             </div>
-        </div>
-        <div className="bg-slate-900 rounded-[2.5rem] p-8 shadow-2xl border border-white/10 relative overflow-hidden group">
-            <h3 className="font-black text-xl text-white font-display mb-2">Anuncie sua marca no app</h3>
-            <p className="text-sm text-slate-400 mb-8 leading-relaxed font-medium">Apareça com destaque para todo o bairro e atraia novos clientes agora mesmo.</p>
-            <button onClick={() => onNavigate?.('store_ads_module')} className="w-full bg-[#1E5BFF] text-white py-5 rounded-2xl text-sm font-black shadow-xl active:scale-[0.98] transition-all flex items-center justify-center gap-3 uppercase">EU QUERO ANUNCIAR<ArrowRight className="w-5 h-5" strokeWidth={3} /></button>
         </div>
       </div>
     </div>

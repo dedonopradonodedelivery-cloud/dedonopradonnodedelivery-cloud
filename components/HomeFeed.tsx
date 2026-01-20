@@ -23,7 +23,8 @@ import {
   FileText,
   Shield,
   Rocket,
-  CheckCircle
+  CheckCircle,
+  Image as ImageIcon
 } from 'lucide-react';
 import { LojasEServicosList } from './LojasEServicosList';
 import { User } from '@supabase/supabase-js';
@@ -44,50 +45,140 @@ interface HomeFeedProps {
 
 interface BannerItem {
   id: string;
-  title: string;
-  target: string;
+  title?: string;
+  target?: string;
   tag?: string;
-  bgColor: string;
-  Icon: React.ElementType;
+  bgColor?: string;
+  Icon?: React.ElementType;
   isSpecial?: boolean;
+  isUserBanner?: boolean;
+  config?: any;
 }
+
+// --- COMPONENTES DE RENDERIZAÇÃO DINÂMICA DE BANNER ---
+
+const TemplateBannerRender: React.FC<{ config: any }> = ({ config }) => {
+    const { template_id, headline, subheadline, product_image_url } = config;
+    switch (template_id) {
+      case 'oferta_relampago':
+        return (
+          <div className="w-full h-full bg-gradient-to-br from-rose-500 to-red-600 text-white p-6 flex items-center justify-between overflow-hidden relative">
+            <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-white/10 rounded-full blur-xl"></div>
+            <div className="relative z-10">
+              <span className="text-sm font-bold bg-yellow-300 text-red-700 px-3 py-1 rounded-full uppercase shadow-sm">{headline || 'XX% OFF'}</span>
+              <h3 className="text-3xl font-black mt-4 drop-shadow-md max-w-[200px] leading-tight">{subheadline || 'Nome do Produto'}</h3>
+            </div>
+            <div className="relative z-10 w-32 h-32 rounded-full border-4 border-white/50 bg-gray-200 overflow-hidden flex items-center justify-center shrink-0 shadow-2xl">
+              {product_image_url ? <img src={product_image_url} className="w-full h-full object-cover" /> : <ImageIcon className="w-12 h-12 text-gray-400" />}
+            </div>
+          </div>
+        );
+      case 'lancamento':
+        return (
+          <div className="w-full h-full bg-gradient-to-br from-slate-800 to-slate-900 text-white p-6 flex items-end justify-between overflow-hidden relative">
+             <img src={product_image_url || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=800'} className="absolute inset-0 w-full h-full object-cover opacity-30 mix-blend-luminosity" />
+             <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
+             <div className="relative z-10">
+                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-cyan-300">{headline || 'LANÇAMENTO'}</span>
+                <h3 className="text-2xl font-bold mt-1 max-w-[220px] leading-tight">{subheadline || 'Descrição'}</h3>
+             </div>
+          </div>
+        );
+      default: return null;
+    }
+};
+
+const CustomBannerRender: React.FC<{ config: any }> = ({ config }) => {
+    const { template_id, background_color, text_color, font_size, font_family, title, subtitle } = config;
+
+    const fontSizes = { small: 'text-2xl', medium: 'text-4xl', large: 'text-5xl' };
+    const subFontSizes = { small: 'text-sm', medium: 'text-base', large: 'text-lg' };
+    const headlineFontSize = { small: 'text-4xl', medium: 'text-6xl', large: 'text-7xl' };
+
+    const layoutClasses = {
+      simple_left: 'flex flex-col justify-center items-start text-left',
+      centered: 'flex flex-col justify-center items-center text-center',
+      headline: 'flex flex-col justify-center items-center text-center',
+    };
+    
+    return (
+        <div 
+            className={`w-full h-full p-8 ${layoutClasses[template_id] || 'flex flex-col justify-center'}`}
+            style={{ backgroundColor: background_color, color: text_color }}
+        >
+            <h3 className={`${template_id === 'headline' ? headlineFontSize[font_size] : fontSizes[font_size]} font-black leading-tight line-clamp-2`} style={{ fontFamily: font_family }}>
+                {title || "Seu Título Aqui"}
+            </h3>
+            <p className={`${subFontSizes[font_size]} mt-3 opacity-80 max-w-md line-clamp-3`} style={{ fontFamily: font_family }}>
+                {subtitle || "Descreva sua oferta."}
+            </p>
+        </div>
+    );
+};
+
 
 // --- COMPONENTE INDEPENDENTE: HOME CAROUSEL ---
 
 const HomeCarousel: React.FC<{ onNavigate: (v: string) => void; onStoreClick?: (store: Store) => void; stores?: Store[] }> = ({ onNavigate, onStoreClick, stores }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [progress, setProgress] = useState(0);
+  const [userBanner, setUserBanner] = useState<BannerItem | null>(null);
 
-  const banners: BannerItem[] = useMemo(() => [
+  const defaultBanners: BannerItem[] = useMemo(() => [
     { id: 'rio-phone-store', title: 'RIO PHONE STORE', target: 'rio-phone-store', tag: 'Assistência Apple', bgColor: 'bg-black', Icon: Smartphone, isSpecial: true },
     { id: 'master-sponsor', title: 'Grupo Esquematiza', target: 'patrocinador_master', tag: 'Patrocinador Master', bgColor: 'bg-[#0F172A]', Icon: Crown },
     { id: 'advertise-home', title: 'Anuncie aqui', target: 'store_ads_module', tag: 'Destaque sua marca', bgColor: 'bg-brand-blue', Icon: Megaphone }
   ], []);
 
   useEffect(() => {
+    try {
+      const bannerConfigRaw = localStorage.getItem('user_banner_config');
+      if (bannerConfigRaw) {
+        const config = JSON.parse(bannerConfigRaw);
+        setUserBanner({
+          id: 'user-banner',
+          isUserBanner: true,
+          config,
+        });
+      }
+    } catch (e) {
+      console.error("Failed to parse user banner from localStorage", e);
+    }
+  }, []);
+
+  const allBanners = useMemo(() => userBanner ? [userBanner, ...defaultBanners] : defaultBanners, [userBanner, defaultBanners]);
+
+  useEffect(() => {
     const interval = setInterval(() => {
       setProgress((prev) => {
         if (prev >= 100) {
-          setCurrentIndex((current) => (current + 1) % banners.length);
+          setCurrentIndex((current) => (current + 1) % allBanners.length);
           return 0;
         }
         return prev + 0.75; 
       });
     }, 30);
     return () => clearInterval(interval);
-  }, [banners.length]);
+  }, [allBanners.length]);
 
-  const current = banners[currentIndex];
+  if (allBanners.length === 0) return null;
+
+  const current = allBanners[currentIndex];
 
   const handleBannerClick = () => {
-    if (onStoreClick && stores) {
+    if (current.isUserBanner) {
+        alert(`Clicou no banner personalizado.`);
+        return;
+    }
+
+    if (onStoreClick && stores && current.target) {
       const targetStore = stores.find(s => s.id === current.target);
       if (targetStore) {
         onStoreClick(targetStore);
         return;
       }
     }
-    onNavigate(current.target);
+    if(current.target) onNavigate(current.target);
   };
 
   return (
@@ -96,9 +187,15 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void; onStoreClick?: (
         {/* Banner Container */}
         <div 
           onClick={handleBannerClick}
-          className={`w-full relative aspect-[3/2] rounded-[32px] overflow-hidden shadow-xl shadow-slate-200 dark:shadow-none border border-gray-100 dark:border-white/5 ${current.bgColor} cursor-pointer active:scale-[0.98] transition-all group`}
+          className={`w-full relative aspect-[3/2] rounded-[32px] overflow-hidden shadow-xl shadow-slate-200 dark:shadow-none border border-gray-100 dark:border-white/5 ${current.bgColor || ''} cursor-pointer active:scale-[0.98] transition-all group`}
         >
-          {current.id === 'rio-phone-store' ? (
+          {current.isUserBanner ? (
+            current.config.type === 'template' ? (
+              <TemplateBannerRender config={current.config} />
+            ) : (
+              <CustomBannerRender config={current.config} />
+            )
+          ) : current.id === 'rio-phone-store' ? (
             <div className="absolute inset-0 bg-black flex items-center justify-start px-4">
               {/* Text on the left */}
               <div className="w-1/2 h-full flex flex-col items-start justify-center text-left text-white z-10">
@@ -230,7 +327,7 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void; onStoreClick?: (
           ) : (
             <div className="absolute inset-0 flex flex-col items-center justify-center px-6 pt-4 pb-12 text-center z-10">
               <div className="p-4 bg-white/10 backdrop-blur-md rounded-[2rem] border border-white/20 shadow-2xl animate-in zoom-in duration-700 mb-5">
-                  <current.Icon className="w-12 h-12 text-white" strokeWidth={2} />
+                  {current.Icon && <current.Icon className="w-12 h-12 text-white" strokeWidth={2} />}
               </div>
               <h3 className="text-2xl font-[900] text-white leading-tight font-display tracking-tight mt-4 uppercase">
                 {current.title}
@@ -242,7 +339,7 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void; onStoreClick?: (
 
         {/* Progress Indicators - MOVED OUTSIDE AND BELOW */}
         <div className="flex gap-1.5 z-30 w-1/3 mx-auto justify-center h-1">
-          {banners.map((_, idx) => (
+          {allBanners.map((_, idx) => (
             <div key={idx} className="h-full flex-1 bg-gray-200 dark:bg-gray-800 rounded-full overflow-hidden">
               <div 
                 className="h-full bg-[#1E5BFF] transition-all duration-100 ease-linear" 
