@@ -47,7 +47,8 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
     });
   }
 
-  navItems.push({ id: 'profile', icon: User, label: 'Menu' });
+  const profileTabId = userRole === 'lojista' ? 'store_area' : 'profile';
+  navItems.push({ id: profileTabId, icon: User, label: 'Menu' });
 
   const NavButton: React.FC<{ item: NavItem; isActive: boolean }> = ({ item, isActive }) => {
     const Icon = item.icon;
@@ -105,7 +106,9 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
           const isActive = activeTab === item.id || 
                           (item.id === 'scan_cashback' && activeTab === 'pay_cashback') ||
                           (item.id === 'merchant_qr_display' && activeTab === 'merchant_onboarding') ||
-                          (item.id === 'cashback_landing' && (activeTab === 'scan_cashback' || activeTab === 'pay_cashback'));
+                          (item.id === 'cashback_landing' && (activeTab === 'scan_cashback' || activeTab === 'pay_cashback')) ||
+                          (item.id === 'store_area' && ['store_ads_module', 'weekly_promo', 'merchant_jobs', 'store_profile', 'store_support'].includes(activeTab)) ||
+                          (item.id === 'profile' && ['about', 'support', 'favorites'].includes(activeTab));
           
           return (
             <div key={item.id} className="flex-1 flex justify-center items-end h-full">

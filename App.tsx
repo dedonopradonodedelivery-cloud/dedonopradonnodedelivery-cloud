@@ -86,6 +86,19 @@ const App: React.FC = () => {
     }
   }, [activeTab, user, isAuthInitialLoading]);
 
+  // Route guards based on user role
+  useEffect(() => {
+    if (!isAuthInitialLoading && user) {
+      if (userRole === 'lojista' && activeTab === 'profile') {
+        setActiveTab('store_area');
+      }
+      if (userRole === 'cliente' && activeTab === 'store_area') {
+        setActiveTab('profile');
+      }
+    }
+  }, [activeTab, userRole, user, isAuthInitialLoading]);
+
+
   const handleLoginSuccess = () => {
     setIsAuthOpen(false);
     if (pendingTab) {
