@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { ChevronLeft, Store, Wallet, CornerRightDown, ArrowRight, Loader2, Info } from 'lucide-react';
 

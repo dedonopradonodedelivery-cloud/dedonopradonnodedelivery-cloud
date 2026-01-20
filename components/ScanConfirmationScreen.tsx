@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Store, CheckCircle2, X } from 'lucide-react';
 import { getStoreLogo } from '../utils/mockLogos';

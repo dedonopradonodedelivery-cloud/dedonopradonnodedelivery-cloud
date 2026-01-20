@@ -1,5 +1,4 @@
-
-import { supabase } from '../lib/supabaseClient';
+import { supabase } from './supabase';
 import { Job } from '../types';
 
 /**

@@ -1,0 +1,37 @@
+
+/* index.css */
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background-color: #f9fafb; /* Cor de fundo padrão para evitar flashes brancos */
+}
+
+#root {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+/* Esconder barra de rolagem para Chrome, Safari e Opera */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Esconder barra de rolagem para IE, Edge e Firefox */
+.no-scrollbar {
+  -ms-overflow-style: none;  /* IE e Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+/* Aplicar globalmente para todos os elementos se desejar esconder totalmente */
+*::-webkit-scrollbar {
+  display: none;
+}
+
+* {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

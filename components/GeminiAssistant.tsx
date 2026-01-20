@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { GoogleGenAI } from "@google/genai";
 import { MessageCircle, X, Send, Sparkles, Loader2 } from 'lucide-react';
@@ -50,7 +49,6 @@ Sempre seja curto, use emojis e convide o usuário a explorar as seções do app
         },
       });
 
-      // Per Gemini API guidelines, `response.text` is a property, not a method.
       const text = response.text || "Desculpe, tive um problema para processar sua mensagem.";
       setMessages(prev => [...prev, { role: 'model', text }]);
 

@@ -1,4 +1,3 @@
-
 import { useEffect, useRef, useState } from "react";
 // @ts-ignore
 import jsQR from "jsqr";

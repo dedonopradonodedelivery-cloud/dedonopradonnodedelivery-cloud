@@ -1,8 +1,7 @@
-
 import React, { useMemo } from 'react';
 import { Search, User as UserIcon, MapPin, ChevronDown, Check, ChevronRight, SearchX, ShieldCheck, Tag } from 'lucide-react';
 import { useNeighborhood, NEIGHBORHOODS } from '../contexts/NeighborhoodContext';
-import { Store } from '../types';
+import { Store, Category } from '../types';
 import { CATEGORIES } from '../constants';
 
 interface HeaderProps {

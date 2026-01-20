@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { X, AlertTriangle, ShieldAlert, Ban, MapPin, MessageSquare, CheckCircle2 } from 'lucide-react';
 import { ReportReason } from '../types';

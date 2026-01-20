@@ -1,6 +1,5 @@
-
 import { useState } from 'react';
-import { supabase } from '../lib/supabase';
+import { supabase } from '../services/supabase';
 
 interface SaveProfileData {
   firebase_uid: string;

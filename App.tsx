@@ -1,41 +1,35 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Layout } from './components/Layout';
-import { Header } from './components/Header';
-import { HomeFeed } from './components/HomeFeed';
-import { ExploreView } from './components/ExploreView';
-import { StoreDetailView } from './components/StoreDetailView';
+import React, { useState, useEffect } from 'react';
+import { Layout } from './components/layout/Layout';
+import { Header } from './components/layout/Header';
+import { HomeFeed } from './pages/home/HomeFeed';
+import { ExploreView } from './pages/explore/ExploreView';
+import { StoreDetailView } from './pages/store/StoreDetailView';
 import { AuthModal } from './components/AuthModal';
-import { MenuView } from './components/MenuView';
-import { PatrocinadorMasterScreen } from './components/PatrocinadorMasterScreen';
-import { ServicesView } from './components/ServicesView';
-import { SubcategoriesView } from './components/SubcategoriesView';
-import { SpecialtiesView } from './components/SpecialtiesView';
-import { ServiceSuccessView } from './components/ServiceSuccessView';
+import { MenuView } from './pages/menu/MenuView';
+import { PatrocinadorMasterScreen } from './pages/PatrocinadorMasterScreen';
+import { ServicesView } from './pages/services/ServicesView';
+import { SubcategoriesView } from './pages/services/SubcategoriesView';
+import { SpecialtiesView } from './pages/services/SpecialtiesView';
+import { ServiceSuccessView } from './pages/services/ServiceSuccessView';
 import { QuoteRequestModal } from './components/QuoteRequestModal';
-import { StoreAreaView } from './components/StoreAreaView';
-import { WeeklyPromoModule } from './components/WeeklyPromoModule';
-import { JobsView } from './components/JobsView';
-import { MerchantJobsModule } from './components/MerchantJobsModule';
-import { AdminPanel } from './components/AdminPanel'; 
-import { CashbackLandingView } from './components/CashbackLandingView';
-// Adicionando import do StoreAdsModule para corrigir erro de nome não encontrado
-import { StoreAdsModule } from './components/StoreAdsModule';
-import { AdminBannerModeration } from './components/AdminBannerModeration';
+import { StoreAreaView } from './pages/merchant/StoreAreaView';
+import { WeeklyPromoModule } from './pages/merchant/WeeklyPromoModule';
+import { JobsView } from './pages/jobs/JobsView';
+import { MerchantJobsModule } from './pages/merchant/MerchantJobsModule';
+import { AdminPanel } from './pages/admin/AdminPanel';
+import { CashbackLandingView } from './pages/cashback/CashbackLandingView';
+import { StoreAdsModule } from './pages/merchant/StoreAdsModule';
+import { AdminBannerModeration } from './pages/admin/AdminBannerModeration';
 import { MapPin, ShieldCheck, X } from 'lucide-react';
 import { useAuth } from './contexts/AuthContext';
 import { NeighborhoodProvider } from './contexts/NeighborhoodContext';
-import { Category, Store, EditorialCollection, ThemeMode } from './types';
-import { CategoryView } from './components/CategoryView';
-import { StoreProfileEdit } from './components/StoreProfileEdit';
-import { CommunityFeedView } from './components/CommunityFeedView';
+import { Category, Store } from './types';
+import { CategoryView } from './pages/categories/CategoryView';
+import { StoreProfileEdit } from './pages/merchant/StoreProfileEdit';
+import { CommunityFeedView } from './pages/community/CommunityFeedView';
 import { STORES } from './constants';
-import { AdminModerationPanel } from './components/AdminModerationPanel';
-import { 
-  AboutView, 
-  SupportView, 
-  InviteFriendView, 
-  FavoritesView 
-} from './components/SimplePages';
+import { AdminModerationPanel } from './pages/admin/AdminModerationPanel';
+import { AboutView, SupportView, FavoritesView } from './pages/menu/SimplePages';
 
 let splashWasShownInSession = false;
 const ADMIN_EMAIL = 'dedonopradonodedelivery@gmail.com';
@@ -122,7 +116,7 @@ const App: React.FC = () => {
   const headerExclusionList = ['store_area', 'editorial_list', 'store_profile', 'category_detail', 'store_detail', 'profile', 'patrocinador_master', 'service_subcategories', 'service_specialties', 'store_ads_module', 'about', 'support', 'favorites', 'community_feed', 'admin_panel', 'cashback_landing', 'admin_banner_moderation'];
   const hideBottomNav = ['store_ads_module', 'store_detail', 'admin_panel', 'cashback_landing', 'admin_banner_moderation'].includes(activeTab);
 
-  const RoleSwitcherModal = () => {
+  const RoleSwitcherModal: React.FC = () => {
     if (!isRoleSwitcherOpen) return null;
     return (
         <div className="fixed inset-0 z-[300] flex items-center justify-center bg-black/80 backdrop-blur-sm p-6" onClick={() => setIsRoleSwitcherOpen(false)}>
@@ -145,7 +139,6 @@ const App: React.FC = () => {
 
   return (
     <div className={isDarkMode ? 'dark' : ''}>
-      {/* FIX: Removed redundant AuthProvider. It's already provided in index.tsx, and this was causing a "Cannot find name" error. */}
       <NeighborhoodProvider>
         <div className="min-h-screen bg-white dark:bg-gray-900 flex justify-center relative">
           <Layout activeTab={activeTab} setActiveTab={setActiveTab} userRole={userRole} hideNav={hideBottomNav}>

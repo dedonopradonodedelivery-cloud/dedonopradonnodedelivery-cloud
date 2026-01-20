@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Crown, ArrowUpRight } from 'lucide-react';
 
