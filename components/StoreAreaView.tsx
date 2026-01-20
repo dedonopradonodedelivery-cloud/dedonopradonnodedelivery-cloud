@@ -26,10 +26,12 @@ import {
   HeartHandshake,
   MessageSquare,
   Lightbulb,
-  Loader2
+  Loader2,
+  LogOut
 } from 'lucide-react';
 import { User } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabaseClient';
+import { useAuth } from '../contexts/AuthContext';
 
 interface StoreAreaViewProps {
   onBack: () => void;
@@ -40,7 +42,7 @@ interface StoreAreaViewProps {
 const STORE_DATA = {
   name: "Hamburgueria Brasa",
   isVerified: true,
-  logo: "https://images.unsplash.com/photo-1594212699903-ec-a3eca50f5?q=80&w=200&auto=format&fit=crop",
+  logo: "https://images.unsplash.com/photo-1594212699903-ec8a3eca50f5?q=80&w=200&auto=format&fit=crop",
 };
 
 const KPICard: React.FC<{ icon: React.ElementType; label: string; value: string; color: string; trend?: string; }> = ({ icon: Icon, label, value, color, trend }) => (
@@ -374,9 +376,24 @@ const InternalViewWrapper: React.FC<{ title: string; icon: React.ElementType; on
   </div>
 );
 
-export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate }) => {
-  const storeId = 'grupo-esquematiza';
+export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate, user }) => {
+  const storeId = user?.id || 'grupo-esquematiza';
   const [internalView, setInternalView] = useState<'main' | 'performance' | 'cashback'>('main');
+  const { signOut } = useAuth();
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  const handleLogout = async () => {
+    if (isLoggingOut) return;
+    setIsLoggingOut(true);
+    try {
+        await signOut();
+        if (onNavigate) onNavigate('home');
+    } catch (error) {
+        console.error("Logout failed", error);
+    } finally {
+        setIsLoggingOut(false);
+    }
+  };
 
   if (internalView === 'performance') {
     return (
@@ -417,6 +434,16 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
                 <MenuLink icon={Settings} label="Minha Loja (Perfil)" onClick={() => onNavigate?.('store_profile')} />
                 <MenuLink icon={HelpCircle} label="Suporte" onClick={() => onNavigate?.('store_support')} />
             </div>
+        </div>
+        <div className="pt-4">
+            <button 
+                onClick={handleLogout} 
+                disabled={isLoggingOut} 
+                className="w-full bg-red-50 dark:bg-red-900/10 p-5 rounded-[2rem] border border-red-100 dark:border-red-900/30 flex items-center justify-center gap-3 active:scale-[0.98] transition-all"
+            >
+                {isLoggingOut ? <Loader2 className="w-5 h-5 animate-spin text-red-600" /> : <LogOut className="w-5 h-5 text-red-600" />}
+                <span className="font-bold text-red-600 text-sm">Sair da conta</span>
+            </button>
         </div>
       </div>
     </div>

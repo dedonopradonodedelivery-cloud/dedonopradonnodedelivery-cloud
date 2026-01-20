@@ -96,6 +96,7 @@ const App: React.FC = () => {
 
   // Effect to handle navigation redirects when viewMode changes.
   useEffect(() => {
+    if (isAuthInitialLoading) return; // FIX: Prevent running before auth state is resolved.
     if (!viewMode) return;
     localStorage.setItem('admin_view_mode', viewMode);
     
@@ -129,7 +130,7 @@ const App: React.FC = () => {
         }
         break;
     }
-  }, [viewMode]);
+  }, [viewMode, isAuthInitialLoading, user]); // Added dependencies for safety
 
   // General auth guard for restricted tabs
   useEffect(() => {
