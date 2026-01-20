@@ -59,7 +59,7 @@ const App: React.FC = () => {
   const isAuthReturn = window.location.hash.includes('access_token') || window.location.search.includes('code=');
   const [splashStage, setSplashStage] = useState(splashWasShownInSession || isAuthReturn ? 4 : 0);
   const [isDarkMode, setIsDarkMode] = useState(false);
-  const [viewMode, setViewMode] = useState<RoleMode>(() => (localStorage.getItem('admin_view_mode') as RoleMode) || 'ADM');
+  const [viewMode, setViewMode] = useState<RoleMode>(() => (localStorage.getItem('admin_view_mode') as RoleMode) || 'Visitante');
   const [isRoleSwitcherOpen, setIsRoleSwitcherOpen] = useState(false);
   const [activeTab, setActiveTab] = useState(() => localStorage.getItem('localizei_active_tab') || 'home');
   const [pendingTab, setPendingTab] = useState<string | null>(null);
@@ -74,8 +74,65 @@ const App: React.FC = () => {
 
   useEffect(() => { localStorage.setItem('localizei_active_tab', activeTab); }, [activeTab]);
   
+  // Set default viewMode after auth is resolved, but only if no mode was persisted.
   useEffect(() => {
-    const restrictedTabs = ['scan_cashback', 'merchant_qr_display', 'wallet', 'pay_cashback', 'store_area', 'admin_panel', 'edit_profile'];
+    if (isAuthInitialLoading) return;
+
+    const persistedMode = localStorage.getItem('admin_view_mode') as RoleMode;
+    if (!persistedMode) {
+        if (user?.email === ADMIN_EMAIL) setViewMode('ADM');
+        else if (userRole === 'lojista') setViewMode('Lojista');
+        else if (userRole === 'cliente') setViewMode('Usuário');
+        else setViewMode('Visitante');
+    } else {
+        // Validate persisted mode against actual user role
+        if (persistedMode === 'ADM' && user?.email !== ADMIN_EMAIL) {
+            setViewMode('Visitante'); // Demote if not an admin
+        }
+    }
+  }, [isAuthInitialLoading, user, userRole]);
+
+
+  // Effect to handle navigation redirects when viewMode changes.
+  useEffect(() => {
+    if (!viewMode) return;
+    localStorage.setItem('admin_view_mode', viewMode);
+    
+    switch (viewMode) {
+      case 'ADM':
+        if (user?.email === ADMIN_EMAIL) setActiveTab('admin_panel');
+        break;
+      case 'Lojista':
+        if (user) {
+            setActiveTab('store_area');
+        } else {
+            setPendingTab('store_area');
+            setActiveTab('home');
+            setIsAuthOpen(true);
+        }
+        break;
+      case 'Usuário':
+        if (user) {
+            if (['admin_panel', 'store_area'].includes(activeTab)) {
+                setActiveTab('profile');
+            }
+        } else {
+            setPendingTab('profile');
+            setActiveTab('home');
+            setIsAuthOpen(true);
+        }
+        break;
+      case 'Visitante':
+        if (['admin_panel', 'store_area', 'profile', 'wallet', 'favorites'].includes(activeTab)) {
+            setActiveTab('home');
+        }
+        break;
+    }
+  }, [viewMode]);
+
+  // General auth guard for restricted tabs
+  useEffect(() => {
+    const restrictedTabs = ['scan_cashback', 'merchant_qr_display', 'wallet', 'pay_cashback', 'store_area', 'admin_panel', 'edit_profile', 'profile', 'favorites'];
     
     if (restrictedTabs.includes(activeTab)) {
       if (!isAuthInitialLoading && !user) {
@@ -86,17 +143,23 @@ const App: React.FC = () => {
     }
   }, [activeTab, user, isAuthInitialLoading]);
 
-  // Route guards based on user role
+  // Route Protection: Ensures the active tab is compatible with the current viewMode.
   useEffect(() => {
-    if (!isAuthInitialLoading && user) {
-      if (userRole === 'lojista' && activeTab === 'profile') {
-        setActiveTab('store_area');
+      if (isAuthInitialLoading) return;
+      
+      const merchantTabs = ['store_area', 'store_ads_module', 'weekly_promo', 'merchant_jobs', 'store_profile', 'store_support'];
+      
+      // Admin panel protection
+      if (activeTab === 'admin_panel' && (viewMode !== 'ADM' || user?.email !== ADMIN_EMAIL)) {
+          setActiveTab('home');
       }
-      if (userRole === 'cliente' && activeTab === 'store_area') {
-        setActiveTab('profile');
+      
+      // Merchant panel protection
+      if (merchantTabs.includes(activeTab) && viewMode !== 'Lojista') {
+          setActiveTab(viewMode === 'Usuário' ? 'profile' : 'home');
       }
-    }
-  }, [activeTab, userRole, user, isAuthInitialLoading]);
+
+  }, [activeTab, viewMode, user, isAuthInitialLoading]);
 
 
   const handleLoginSuccess = () => {
@@ -114,16 +177,6 @@ const App: React.FC = () => {
     const t2 = setTimeout(() => { setSplashStage(4); splashWasShownInSession = true; }, 5800);
     return () => { clearTimeout(t1); clearTimeout(t2); };
   }, []);
-
-  useEffect(() => {
-    if (user?.email !== ADMIN_EMAIL) return;
-    localStorage.setItem('admin_view_mode', viewMode);
-    switch (viewMode) {
-      case 'ADM': setActiveTab('admin_panel'); break;
-      case 'Lojista': setActiveTab('store_area'); break;
-      default: if (activeTab === 'admin_panel' || activeTab === 'store_area') setActiveTab('home');
-    }
-  }, [viewMode, user]);
 
   const handleSelectStore = (store: Store) => { setSelectedStore(store); setActiveTab('store_detail'); };
   const headerExclusionList = ['store_area', 'editorial_list', 'store_profile', 'category_detail', 'store_detail', 'profile', 'patrocinador_master', 'service_subcategories', 'service_specialties', 'store_ads_module', 'about', 'support', 'favorites', 'community_feed', 'admin_panel', 'cashback_landing', 'admin_banner_moderation'];
@@ -154,7 +207,7 @@ const App: React.FC = () => {
     <div className={isDarkMode ? 'dark' : ''}>
       <NeighborhoodProvider>
         <div className="min-h-screen bg-white dark:bg-gray-900 flex justify-center relative">
-          <Layout activeTab={activeTab} setActiveTab={setActiveTab} userRole={userRole} hideNav={hideBottomNav}>
+          <Layout activeTab={activeTab} setActiveTab={setActiveTab} userRole={userRole} hideNav={hideBottomNav} viewMode={viewMode}>
               {!headerExclusionList.includes(activeTab) && (
                 <Header isDarkMode={isDarkMode} toggleTheme={() => {}} onAuthClick={() => setActiveTab('profile')} user={user} searchTerm={globalSearch} onSearchChange={setGlobalSearch} onNavigate={setActiveTab} activeTab={activeTab} userRole={userRole as 'cliente' | 'lojista' | null} stores={STORES} onStoreClick={handleSelectStore} isAdmin={user?.email === ADMIN_EMAIL} viewMode={viewMode} onOpenViewSwitcher={() => setIsRoleSwitcherOpen(true)} />
               )}

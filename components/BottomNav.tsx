@@ -1,11 +1,13 @@
 import React from 'react';
 import { Home, Users, User, QrCode } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import { RoleMode } from '../App';
 
 interface BottomNavProps {
   activeTab: string;
   setActiveTab: (tab: string) => void;
   userRole?: 'cliente' | 'lojista' | 'admin' | null;
+  viewMode: RoleMode;
 }
 
 interface NavItem {
@@ -15,7 +17,7 @@ interface NavItem {
   isCenter?: boolean;
 }
 
-export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, userRole }) => {
+export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, userRole, viewMode }) => {
   const { user } = useAuth();
 
   // Itens da barra: Home (Regular), Comunidade (Destaque), Cashback (Destaque), Menu (Regular)
@@ -25,19 +27,19 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
   ];
 
   // Botão central de ação dinâmica (Cashback / QR Code)
-  if (userRole !== 'admin') {
-    const isMerchant = user && userRole === 'lojista';
+  if (viewMode !== 'ADM') {
+    const isMerchantView = viewMode === 'Lojista';
 
     let centerId: string;
     if (!user) {
       centerId = 'cashback_landing'; // Rota para visitante
-    } else if (isMerchant) {
+    } else if (isMerchantView) {
       centerId = 'merchant_qr_display'; // Rota para lojista
     } else {
       centerId = 'scan_cashback'; // Rota para cliente
     }
 
-    const centerLabel = isMerchant ? 'QR Code' : 'Cashback';
+    const centerLabel = isMerchantView ? 'QR Code' : 'Cashback';
 
     navItems.push({ 
       id: centerId, 
@@ -47,7 +49,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
     });
   }
 
-  const profileTabId = userRole === 'lojista' ? 'store_area' : 'profile';
+  const profileTabId = viewMode === 'Lojista' ? 'store_area' : 'profile';
   navItems.push({ id: profileTabId, icon: User, label: 'Menu' });
 
   const NavButton: React.FC<{ item: NavItem; isActive: boolean }> = ({ item, isActive }) => {
