@@ -13,7 +13,47 @@ import {
   Camera, Vote, Handshake, Flame, Milestone, History, Home as HomeIcon,
   MessageCircle, HelpCircle, UserCheck, Recycle
 } from 'lucide-react';
-import { AdType, Category, Store, Story, EditorialCollection, Job, CommunityPost, NeighborhoodCommunity } from './types';
+import { AdType, Category, Store, Story, EditorialCollection, Job, CommunityPost, NeighborhoodCommunity, BannerPlan } from './types';
+
+export const BANNER_PLANS: BannerPlan[] = [
+  {
+    id: 'home_3m',
+    placement: 'Home',
+    durationMonths: 3,
+    priceCents: 14970,
+    label: 'Home — 3 meses',
+    installmentText: 'em 3x sem juros',
+    isPromo: true,
+    isMostAdvantageous: true,
+    benefit: 'Visibilidade máxima na tela principal do app.',
+  },
+  {
+    id: 'cat_3m',
+    placement: 'Categorias',
+    durationMonths: 3,
+    priceCents: 8970,
+    label: 'Categorias — 3 meses',
+    installmentText: 'em 3x sem juros',
+    isPromo: true,
+    benefit: 'Alcance clientes que buscam seu nicho.',
+  },
+  {
+    id: 'home_1m',
+    placement: 'Home',
+    durationMonths: 1,
+    priceCents: 9900,
+    label: 'Home — 1 mês',
+    benefit: 'Ideal para campanhas rápidas e de alto impacto.',
+  },
+  {
+    id: 'cat_1m',
+    placement: 'Categorias',
+    durationMonths: 1,
+    priceCents: 5990,
+    label: 'Categorias — 1 mês',
+    benefit: 'Ótimo custo-benefício para anunciar.',
+  },
+];
 
 export const CATEGORIES: Category[] = [
   { id: 'cat-comida', name: 'Comida', slug: 'comida', icon: <Utensils />, color: 'bg-brand-blue' },

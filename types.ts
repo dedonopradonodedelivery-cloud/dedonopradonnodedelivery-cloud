@@ -262,3 +262,16 @@ export interface BannerItem {
   isUserBanner?: boolean;
   config?: any;
 }
+
+// NEW: Type for Banner Plans
+export interface BannerPlan {
+  id: 'home_3m' | 'cat_3m' | 'home_1m' | 'cat_1m';
+  placement: 'Home' | 'Categorias';
+  durationMonths: 1 | 3;
+  priceCents: number;
+  label: string;
+  installmentText?: string;
+  isPromo?: boolean;
+  isMostAdvantageous?: boolean;
+  benefit: string;
+}

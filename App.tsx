@@ -75,28 +75,42 @@ const App: React.FC = () => {
 
   useEffect(() => { localStorage.setItem('localizei_active_tab', activeTab); }, [activeTab]);
   
-  // Set default viewMode after auth is resolved, but only if no mode was persisted.
+  // Set viewMode based on auth status. This prevents the login modal on startup for visitors.
   useEffect(() => {
     if (isAuthInitialLoading) return;
 
     const persistedMode = localStorage.getItem('admin_view_mode') as RoleMode;
-    if (!persistedMode) {
-        if (user?.email === ADMIN_EMAIL) setViewMode('ADM');
-        else if (userRole === 'lojista') setViewMode('Lojista');
-        else if (userRole === 'cliente') setViewMode('Usuário');
-        else setViewMode('Visitante');
-    } else {
-        // Validate persisted mode against actual user role
-        if (persistedMode === 'ADM' && user?.email !== ADMIN_EMAIL) {
-            setViewMode('Visitante'); // Demote if not an admin
+
+    if (!user) {
+        // If no user is logged in, always default to Visitor mode, ignoring localStorage.
+        setViewMode('Visitante');
+        return;
+    }
+
+    // If a user is logged in:
+    // Validate persisted mode against their actual role.
+    if (persistedMode) {
+        // Demote admin view if user isn't an admin
+        if (persistedMode === 'ADM' && user.email !== ADMIN_EMAIL) {
+            setViewMode('Visitante'); 
+        // A non-admin/non-lojista can't view as a lojista
+        } else if (persistedMode === 'Lojista' && userRole !== 'lojista' && user.email !== ADMIN_EMAIL) {
+             setViewMode('Usuário');
+        } else {
+            setViewMode(persistedMode);
         }
+    } else {
+        // No mode was persisted, set a default based on the user's role.
+        if (user.email === ADMIN_EMAIL) setViewMode('ADM');
+        else if (userRole === 'lojista') setViewMode('Lojista');
+        else setViewMode('Usuário');
     }
   }, [isAuthInitialLoading, user, userRole]);
 
 
   // Effect to handle navigation redirects when viewMode changes.
   useEffect(() => {
-    if (isAuthInitialLoading) return; // FIX: Prevent running before auth state is resolved.
+    if (isAuthInitialLoading) return; 
     if (!viewMode) return;
     localStorage.setItem('admin_view_mode', viewMode);
     
