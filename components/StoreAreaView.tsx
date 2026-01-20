@@ -380,7 +380,7 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
 
   if (internalView === 'performance') {
     return (
-      <InternalViewWrapper title="Desempenho da Loja" icon={LayoutDashboard} onBack={() => setInternalView('main')}>
+      <InternalViewWrapper title="Desempenho do seu negócio" icon={LayoutDashboard} onBack={() => setInternalView('main')}>
         <PerformanceDashboard storeId={storeId} />
       </InternalViewWrapper>
     );
@@ -388,7 +388,7 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
 
   if (internalView === 'cashback') {
     return (
-      <InternalViewWrapper title="Cashback da Loja" icon={Coins} onBack={() => setInternalView('main')}>
+      <InternalViewWrapper title="Sistema de Cashback" icon={Coins} onBack={() => setInternalView('main')}>
         <CashbackDashboard onNavigate={onNavigate} />
       </InternalViewWrapper>
     );
@@ -410,13 +410,12 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
         <div>
             <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3 ml-2">Ações</h3>
             <div className="rounded-2xl overflow-hidden shadow-sm border border-gray-100 dark:border-gray-700">
-                <MenuLink icon={LayoutDashboard} label="Desempenho da Loja" onClick={() => setInternalView('performance')} highlight />
-                <MenuLink icon={Coins} label="Cashback da Loja" onClick={() => setInternalView('cashback')} highlight />
-                <MenuLink icon={Megaphone} label="Anúncios e Banners" subtitle="Destaque sua loja no app" onClick={() => onNavigate?.('store_ads_module')} />
-                <MenuLink icon={Tag} label="Promoção da Semana" onClick={() => onNavigate?.('weekly_promo')} />
-                <MenuLink icon={Briefcase} label="Vagas de Emprego" onClick={() => onNavigate?.('merchant_jobs')} />
-                <MenuLink icon={Settings} label="Minha Loja (Perfil Público)" onClick={() => onNavigate?.('store_profile')} />
-                <MenuLink icon={HelpCircle} label="Suporte ao Lojista" onClick={() => onNavigate?.('store_support')} />
+                <MenuLink icon={LayoutDashboard} label="Desempenho do seu negócio" onClick={() => setInternalView('performance')} highlight />
+                <MenuLink icon={Coins} label="Sistema de Cashback" onClick={() => setInternalView('cashback')} highlight />
+                <MenuLink icon={Megaphone} label="Anúncios de Banners" subtitle="Criação e gestão de banners" onClick={() => onNavigate?.('store_ads_module')} />
+                <MenuLink icon={Tag} label="Promoção da Semana" subtitle="Ofertas em destaque na Home" onClick={() => onNavigate?.('weekly_promo')} />
+                <MenuLink icon={Settings} label="Minha Loja (Perfil)" onClick={() => onNavigate?.('store_profile')} />
+                <MenuLink icon={HelpCircle} label="Suporte" onClick={() => onNavigate?.('store_support')} />
             </div>
         </div>
       </div>
