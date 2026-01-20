@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { ChevronLeft, Check, Home, LayoutGrid, MapPin, Search, Star, Rocket, Sparkles, TrendingUp, X } from 'lucide-react';
+import { ChevronLeft, Check, Home, LayoutGrid, MapPin, Search, Star, Rocket, Sparkles, TrendingUp, X, Map, BarChart, Banknote } from 'lucide-react';
 import { BannerConfig } from '../types';
 import { BANNER_BASE_PRICES_CENTS, NEIGHBORHOOD_OPTIONS } from '../constants';
 
@@ -71,28 +71,52 @@ export const BannerConfigView: React.FC<BannerConfigViewProps> = ({ onBack, onCo
                     <ChevronLeft size={20} />
                 </button>
                 <div>
-                    <h1 className="font-bold text-lg leading-none">Configurar Anúncio</h1>
+                    <h1 className="font-bold text-lg leading-none">Configurar Banner</h1>
                     <p className="text-xs text-slate-500">Defina seu plano</p>
                 </div>
             </header>
 
             <main className="flex-1 overflow-y-auto p-6 space-y-12 pb-48">
                 <section className="text-center">
-                    <h1 className="text-4xl font-black text-white font-display uppercase tracking-tighter mb-3">
-                        ATRAIA MAIS CLIENTES
+                    <h1 className="text-4xl font-black text-white font-display uppercase tracking-tighter mb-4">
+                        COLOQUE SUA LOJA NA FRENTE DE QUEM QUER COMPRAR
                     </h1>
-                    <p className="text-slate-400 text-sm max-w-sm mx-auto leading-relaxed">
-                        Anuncie na Home ou nas Categorias e seja visto por clientes prontos para comprar.
+                    <p className="text-slate-400 text-sm max-w-lg mx-auto leading-relaxed">
+                        Mais de 450 mil moradores em Jacarepaguá acessam o app todos os meses.
+                        Enquanto seus concorrentes aparecem primeiro, sua loja pode estar ficando para trás.
+                        Com os banners patrocinados, você ganha mais visibilidade, mais cliques e mais pedidos — com investimento baixo e controle total.
                     </p>
                 </section>
                 
-                <div className="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-3xl p-6 flex items-center justify-between shadow-2xl shadow-blue-900/30 border border-blue-500/30">
-                    <div className="flex flex-col items-start gap-4">
-                        <div className="flex items-center gap-2 text-white font-bold text-xs bg-white/10 px-3 py-1 rounded-full border border-white/20"><Sparkles size={12}/>Sua loja em destaque</div>
-                        <div className="flex items-center gap-2 text-white font-bold text-xs bg-white/10 px-3 py-1 rounded-full border border-white/20"><TrendingUp size={12}/>Mais cliques</div>
-                        <div className="flex items-center gap-2 text-white font-bold text-xs bg-white/10 px-3 py-1 rounded-full border border-white/20"><Rocket size={12}/>Mais pedidos</div>
+                <div className="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-3xl p-6 grid grid-cols-2 gap-6 shadow-2xl shadow-blue-900/30 border border-blue-500/30">
+                    <div className="flex items-start gap-3">
+                        <Map size={20} className="text-white/80 shrink-0 mt-0.5"/>
+                        <div>
+                            <h4 className="font-bold text-sm text-white">Alcance local forte</h4>
+                            <p className="text-xs text-blue-200/80 leading-snug">Impacte mais de 450 mil moradores de Jacarepaguá.</p>
+                        </div>
                     </div>
-                    <Rocket size={64} className="text-white/10 -rotate-12"/>
+                     <div className="flex items-start gap-3">
+                        <Rocket size={20} className="text-white/80 shrink-0 mt-0.5"/>
+                        <div>
+                            <h4 className="font-bold text-sm text-white">Saia na frente</h4>
+                            <p className="text-xs text-blue-200/80 leading-snug">Sua loja aparece antes de quem não anuncia.</p>
+                        </div>
+                    </div>
+                     <div className="flex items-start gap-3">
+                        <Banknote size={20} className="text-white/80 shrink-0 mt-0.5"/>
+                        <div>
+                            <h4 className="font-bold text-sm text-white">Promoção de inauguração</h4>
+                            <p className="text-xs text-blue-200/80 leading-snug">Planos com desconto especial por tempo limitado.</p>
+                        </div>
+                    </div>
+                     <div className="flex items-start gap-3">
+                        <BarChart size={20} className="text-white/80 shrink-0 mt-0.5"/>
+                        <div>
+                            <h4 className="font-bold text-sm text-white">Mais resultados</h4>
+                            <p className="text-xs text-blue-200/80 leading-snug">Mais cliques, mais visitas e mais pedidos.</p>
+                        </div>
+                    </div>
                 </div>
 
                 <section>
@@ -106,20 +130,9 @@ export const BannerConfigView: React.FC<BannerConfigViewProps> = ({ onBack, onCo
                 <section>
                     <h2 className="text-xs font-black text-slate-400 uppercase tracking-[0.2em] mb-4 text-center">2. Para quais bairros?</h2>
                     <div className="bg-slate-800 p-6 rounded-3xl border border-slate-700">
-                        <div className="flex flex-col sm:flex-row gap-3 sm:items-center justify-between mb-6">
-                            <div className="relative flex-1">
-                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-                                <input 
-                                    value={neighborhoodSearch} 
-                                    onChange={e => setNeighborhoodSearch(e.target.value)} 
-                                    placeholder="Buscar bairro..." 
-                                    className="w-full bg-slate-700 text-white pl-9 p-3 rounded-xl text-sm border border-slate-600 focus:ring-2 focus:ring-blue-500 outline-none" 
-                                />
-                            </div>
-                            <div className="flex items-center gap-3">
-                                <button onClick={handleSelectAll} className="text-xs font-bold text-blue-400 hover:text-blue-300">Marcar Todos</button>
-                                <button onClick={handleClearAll} className="text-xs font-bold text-slate-500 hover:text-slate-300">Limpar</button>
-                            </div>
+                        <div className="flex items-center justify-end mb-6 gap-3">
+                            <button onClick={handleSelectAll} className="p-3 rounded-xl text-center text-xs font-bold transition-all border-2 bg-slate-700 border-slate-600 text-slate-300 hover:border-slate-500">Marcar Todos</button>
+                            <button onClick={handleClearAll} className="text-xs font-bold text-slate-500 hover:text-slate-300">Limpar</button>
                         </div>
                         <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-4">
                             {filteredNeighborhoods.map(hood => (
@@ -141,17 +154,18 @@ export const BannerConfigView: React.FC<BannerConfigViewProps> = ({ onBack, onCo
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <button onClick={() => setDuration('1m')} className={`p-8 rounded-3xl text-center border-4 transition-all ${duration === '1m' ? 'border-blue-500 bg-blue-500/10' : 'border-slate-700 bg-slate-800 hover:border-slate-600'}`}>
                             <p className="font-black text-4xl text-white">1 Mês</p>
-                            <p className="text-sm text-slate-400 mt-2">Ideal para começar</p>
+                            <p className="text-sm text-slate-400 mt-2">Preço normal</p>
                         </button>
                         <button onClick={() => setDuration('3m_promo')} className={`p-8 rounded-3xl text-center border-4 relative transition-all ${duration === '3m_promo' ? 'border-amber-400 bg-amber-500/10' : 'border-slate-700 bg-slate-800 hover:border-slate-600'}`}>
                             <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-amber-400 text-slate-900 text-[10px] font-black px-4 py-1.5 rounded-full shadow-lg"><Star size={12} className="inline -mt-0.5 mr-1.5 fill-slate-900"/>MAIS VANTAJOSO</div>
                             <p className="font-black text-4xl text-white">3 Meses</p>
-                            <p className="text-sm font-bold text-amber-400 mt-2">3x sem juros</p>
+                            <p className="text-sm font-bold text-amber-400 mt-2">Total com desconto • 3x sem juros</p>
+                            <p className="text-[11px] text-slate-500 mt-4 leading-snug">Você economiza em relação ao preço mensal e garante mais tempo de destaque.</p>
                         </button>
                     </div>
                 </section>
 
-                <p className="text-center text-xs text-slate-500 font-medium pt-4">Você só paga no final, depois de criar seu banner.</p>
+                <p className="text-center text-xs text-slate-500 font-medium pt-4">Você só paga no final, depois de criar e revisar seu banner.</p>
             </main>
 
             <div className="fixed bottom-0 left-0 right-0 max-w-md mx-auto p-4 bg-slate-900/80 backdrop-blur-md border-t border-white/5 z-20">
