@@ -19,6 +19,8 @@ import { MerchantJobsModule } from './components/MerchantJobsModule';
 import { AdminPanel } from './components/AdminPanel';
 import { CashbackLandingView } from './components/CashbackLandingView';
 import { StoreAdsModule } from './components/StoreAdsModule';
+import { BannerUploadView } from './components/BannerUploadView';
+import { BannerProductionView } from './components/BannerProductionView';
 import { AdminBannerModeration } from './components/AdminBannerModeration';
 import { MapPin, ShieldCheck, X } from 'lucide-react';
 import { useAuth } from './contexts/AuthContext';
@@ -147,7 +149,7 @@ const App: React.FC = () => {
   useEffect(() => {
       if (isAuthInitialLoading) return;
       
-      const merchantTabs = ['store_area', 'store_ads_module', 'weekly_promo', 'merchant_jobs', 'store_profile', 'store_support'];
+      const merchantTabs = ['store_area', 'store_ads_module', 'weekly_promo', 'merchant_jobs', 'store_profile', 'store_support', 'banner_upload', 'banner_production'];
       
       // Admin panel protection
       if (activeTab === 'admin_panel' && (viewMode !== 'ADM' || user?.email !== ADMIN_EMAIL)) {
@@ -179,8 +181,8 @@ const App: React.FC = () => {
   }, []);
 
   const handleSelectStore = (store: Store) => { setSelectedStore(store); setActiveTab('store_detail'); };
-  const headerExclusionList = ['store_area', 'editorial_list', 'store_profile', 'category_detail', 'store_detail', 'profile', 'patrocinador_master', 'service_subcategories', 'service_specialties', 'store_ads_module', 'about', 'support', 'favorites', 'community_feed', 'admin_panel', 'cashback_landing', 'admin_banner_moderation'];
-  const hideBottomNav = ['store_ads_module', 'store_detail', 'admin_panel', 'cashback_landing', 'admin_banner_moderation'].includes(activeTab);
+  const headerExclusionList = ['store_area', 'editorial_list', 'store_profile', 'category_detail', 'store_detail', 'profile', 'patrocinador_master', 'service_subcategories', 'service_specialties', 'store_ads_module', 'about', 'support', 'favorites', 'community_feed', 'admin_panel', 'cashback_landing', 'admin_banner_moderation', 'banner_upload', 'banner_production'];
+  const hideBottomNav = ['store_ads_module', 'store_detail', 'admin_panel', 'cashback_landing', 'admin_banner_moderation', 'banner_upload', 'banner_production'].includes(activeTab);
 
   const RoleSwitcherModal: React.FC = () => {
     if (!isRoleSwitcherOpen) return null;
@@ -231,6 +233,8 @@ const App: React.FC = () => {
                 {activeTab === 'service_subcategories' && selectedServiceMacro && <SubcategoriesView macroId={selectedServiceMacro.id} macroName={selectedServiceMacro.name} onBack={() => setActiveTab('services')} onSelectSubcategory={(n) => { setQuoteCategory(n); setActiveTab('service_specialties'); }} />}
                 {activeTab === 'service_specialties' && <SpecialtiesView subcategoryName={quoteCategory} onBack={() => setActiveTab('service_subcategories')} onSelectSpecialty={() => setIsQuoteModalOpen(true)} />}
                 {activeTab === 'store_ads_module' && <StoreAdsModule onBack={() => setActiveTab('store_area')} onNavigate={setActiveTab} categoryName={adCategoryTarget || undefined} user={user as any} />}
+                {activeTab === 'banner_upload' && <BannerUploadView onBack={() => setActiveTab('store_ads_module')} />}
+                {activeTab === 'banner_production' && <BannerProductionView onBack={() => setActiveTab('store_ads_module')} />}
                 {activeTab === 'store_profile' && <StoreProfileEdit onBack={() => setActiveTab('store_area')} />}
               </main>
               <AuthModal isOpen={isAuthOpen} onClose={() => setIsAuthOpen(false)} user={user as any} onLoginSuccess={handleLoginSuccess} />
