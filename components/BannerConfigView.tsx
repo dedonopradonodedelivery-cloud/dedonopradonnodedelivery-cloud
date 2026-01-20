@@ -31,11 +31,28 @@ export const BannerConfigView: React.FC<BannerConfigViewProps> = ({ onBack, onCo
     const [placement, setPlacement] = useState<'Home' | 'Categorias'>('Home');
     const [duration, setDuration] = useState<'1m' | '3m_promo'>('3m_promo');
     const [selectedNeighborhoods, setSelectedNeighborhoods] = useState<string[]>([]);
-    const [neighborhoodSearch, setNeighborhoodSearch] = useState('');
     
     const priceCents = useMemo(() => {
         return calculateBannerPrice(placement, duration, selectedNeighborhoods.length);
     }, [placement, duration, selectedNeighborhoods]);
+
+    const savings = useMemo(() => {
+        const key = placement.toLowerCase() as 'home' | 'categorias';
+        const price1m = BANNER_BASE_PRICES_CENTS[key]['1m'];
+        const price3m_promo = BANNER_BASE_PRICES_CENTS[key]['3m_promo'];
+
+        const totalNormal = price1m * 3;
+        const totalPromo = price3m_promo * 3;
+
+        const savedAmount = totalNormal - totalPromo;
+        const savedPercentage = totalNormal > 0 ? Math.round((savedAmount / totalNormal) * 100) : 0;
+        
+        return {
+            percentage: savedPercentage,
+            amount: formatCurrency(savedAmount)
+        };
+    }, [placement]);
+
 
     const isReady = selectedNeighborhoods.length > 0 && !!duration && !!placement;
 
@@ -50,19 +67,16 @@ export const BannerConfigView: React.FC<BannerConfigViewProps> = ({ onBack, onCo
         onConfigure(config);
     };
 
-    const filteredNeighborhoods = useMemo(() => {
-        return NEIGHBORHOOD_OPTIONS.filter(n => 
-            n.name.toLowerCase().includes(neighborhoodSearch.toLowerCase())
-        );
-    }, [neighborhoodSearch]);
+    const allNeighborhoodsSelected = selectedNeighborhoods.length === NEIGHBORHOOD_OPTIONS.length;
 
-    const handleSelectAll = () => {
-        setSelectedNeighborhoods(NEIGHBORHOOD_OPTIONS.map(n => n.id));
+    const handleToggleAllNeighborhoods = () => {
+        if (allNeighborhoodsSelected) {
+            setSelectedNeighborhoods([]);
+        } else {
+            setSelectedNeighborhoods(NEIGHBORHOOD_OPTIONS.map(n => n.id));
+        }
     };
 
-    const handleClearAll = () => {
-        setSelectedNeighborhoods([]);
-    };
 
     return (
         <div className="min-h-screen bg-slate-900 text-white font-sans flex flex-col">
@@ -78,13 +92,13 @@ export const BannerConfigView: React.FC<BannerConfigViewProps> = ({ onBack, onCo
 
             <main className="flex-1 overflow-y-auto p-6 space-y-12 pb-48">
                 <section className="text-center">
-                    <h1 className="text-4xl font-black text-white font-display uppercase tracking-tighter mb-4">
-                        COLOQUE SUA LOJA NA FRENTE DE QUEM QUER COMPRAR
+                    <h1 className="text-4xl font-black text-white font-display tracking-tight mb-4 leading-tight">
+                        Coloque sua loja em destaque<br/>
+                        para quem já quer comprar
                     </h1>
                     <p className="text-slate-400 text-sm max-w-lg mx-auto leading-relaxed">
                         Mais de 450 mil moradores em Jacarepaguá acessam o app todos os meses.
-                        Enquanto seus concorrentes aparecem primeiro, sua loja pode estar ficando para trás.
-                        Com os banners patrocinados, você ganha mais visibilidade, mais cliques e mais pedidos — com investimento baixo e controle total.
+                        Com os banners patrocinados, sua loja ganha mais visibilidade, cliques e pedidos — enquanto seus concorrentes ficam para trás.
                     </p>
                 </section>
                 
@@ -99,7 +113,7 @@ export const BannerConfigView: React.FC<BannerConfigViewProps> = ({ onBack, onCo
                      <div className="flex items-start gap-3">
                         <Rocket size={20} className="text-white/80 shrink-0 mt-0.5"/>
                         <div>
-                            <h4 className="font-bold text-sm text-white">Saia na frente</h4>
+                            <h4 className="font-bold text-sm text-white">Saia na frente do concorrente</h4>
                             <p className="text-xs text-blue-200/80 leading-snug">Sua loja aparece antes de quem não anuncia.</p>
                         </div>
                     </div>
@@ -113,7 +127,7 @@ export const BannerConfigView: React.FC<BannerConfigViewProps> = ({ onBack, onCo
                      <div className="flex items-start gap-3">
                         <BarChart size={20} className="text-white/80 shrink-0 mt-0.5"/>
                         <div>
-                            <h4 className="font-bold text-sm text-white">Mais resultados</h4>
+                            <h4 className="font-bold text-sm text-white">Mais visibilidade, mais resultados</h4>
                             <p className="text-xs text-blue-200/80 leading-snug">Mais cliques, mais visitas e mais pedidos.</p>
                         </div>
                     </div>
@@ -130,12 +144,14 @@ export const BannerConfigView: React.FC<BannerConfigViewProps> = ({ onBack, onCo
                 <section>
                     <h2 className="text-xs font-black text-slate-400 uppercase tracking-[0.2em] mb-4 text-center">2. Para quais bairros?</h2>
                     <div className="bg-slate-800 p-6 rounded-3xl border border-slate-700">
-                        <div className="flex items-center justify-end mb-6 gap-3">
-                            <button onClick={handleSelectAll} className="p-3 rounded-xl text-center text-xs font-bold transition-all border-2 bg-slate-700 border-slate-600 text-slate-300 hover:border-slate-500">Marcar Todos</button>
-                            <button onClick={handleClearAll} className="text-xs font-bold text-slate-500 hover:text-slate-300">Limpar</button>
-                        </div>
                         <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-4">
-                            {filteredNeighborhoods.map(hood => (
+                            <button 
+                                onClick={handleToggleAllNeighborhoods}
+                                className={`p-3 rounded-xl text-center text-xs font-bold transition-all border-2 ${allNeighborhoodsSelected ? 'bg-blue-500 border-blue-400 text-white' : 'bg-slate-600 border-slate-500 text-slate-200 hover:border-slate-400'}`}
+                            >
+                                {allNeighborhoodsSelected ? 'Desmarcar Todos' : 'Marcar Todos'}
+                            </button>
+                            {NEIGHBORHOOD_OPTIONS.map(hood => (
                                 <button 
                                     key={hood.id}
                                     onClick={() => setSelectedNeighborhoods(prev => prev.includes(hood.id) ? prev.filter(i => i !== hood.id) : [...prev, hood.id])}
@@ -160,7 +176,9 @@ export const BannerConfigView: React.FC<BannerConfigViewProps> = ({ onBack, onCo
                             <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-amber-400 text-slate-900 text-[10px] font-black px-4 py-1.5 rounded-full shadow-lg"><Star size={12} className="inline -mt-0.5 mr-1.5 fill-slate-900"/>MAIS VANTAJOSO</div>
                             <p className="font-black text-4xl text-white">3 Meses</p>
                             <p className="text-sm font-bold text-amber-400 mt-2">Total com desconto • 3x sem juros</p>
-                            <p className="text-[11px] text-slate-500 mt-4 leading-snug">Você economiza em relação ao preço mensal e garante mais tempo de destaque.</p>
+                            <p className="text-[11px] text-slate-500 mt-4 leading-snug">
+                                Você economiza {savings.percentage}% em relação ao plano mensal, o que representa {savings.amount} a menos no total, e garante mais tempo de destaque para sua loja.
+                            </p>
                         </button>
                     </div>
                 </section>
