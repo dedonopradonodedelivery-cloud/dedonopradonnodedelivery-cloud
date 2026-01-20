@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { Store, Category, EditorialCollection, AdType } from '../types';
+import { Store, Category, EditorialCollection, AdType, BannerItem } from '../types';
 import { 
   ChevronRight, 
   ArrowUpRight,
@@ -32,6 +32,7 @@ import { CATEGORIES, EDITORIAL_SERVICES } from '../constants';
 import { useNeighborhood } from '../contexts/NeighborhoodContext';
 import { supabase } from '../lib/supabaseClient';
 import { trackAdEvent } from '../lib/analytics';
+import { fetchHomeBanner } from '../lib/bannerService';
 
 interface HomeFeedProps {
   onNavigate: (view: string) => void;
@@ -43,18 +44,6 @@ interface HomeFeedProps {
   user: User | null;
   userRole?: 'cliente' | 'lojista' | null;
   onRequireLogin: () => void;
-}
-
-interface BannerItem {
-  id: string;
-  title?: string;
-  target?: string;
-  tag?: string;
-  bgColor?: string;
-  Icon?: React.ElementType;
-  isSpecial?: boolean;
-  isUserBanner?: boolean;
-  config?: any;
 }
 
 // --- COMPONENTES DE RENDERIZAÇÃO DINÂMICA DE BANNER ---
@@ -134,60 +123,12 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void; onStoreClick?: (
   ], []);
 
   useEffect(() => {
-    const fetchHomeBanner = async () => {
-        if (!supabase) return;
-
-        try {
-            const { data, error } = await supabase
-                .from('published_banners')
-                .select('id, config, merchant_id')
-                .eq('target', 'home')
-                .eq('is_active', true)
-                .order('created_at', { ascending: false })
-                .limit(1);
-            
-            if (error) throw error;
-
-            if (data && data.length > 0) {
-                setUserBanner({
-                    id: `user-banner-${data[0].id}`,
-                    isUserBanner: true,
-                    config: data[0].config,
-                    // Usando merchant_id como identificador da loja para tracking
-                    target: data[0].merchant_id,
-                });
-            } else {
-                setUserBanner(null);
-            }
-        } catch (e: any) {
-            console.error("Failed to fetch home banner from Supabase:", e.message || e);
-            setUserBanner(null);
-        }
+    const loadBanner = async () => {
+        const banner = await fetchHomeBanner();
+        setUserBanner(banner);
     };
-    
-    fetchHomeBanner();
-    
-    const channel = supabase.channel('home-banner-updates')
-      .on('postgres_changes', { 
-          event: '*', 
-          schema: 'public', 
-          table: 'published_banners',
-          filter: 'target=eq.home'
-        }, 
-        (payload) => {
-          fetchHomeBanner();
-        }
-      )
-      .subscribe((status, err) => {
-        if (err) {
-          console.error('Realtime subscription failed for home banner:', err.message || err);
-        }
-      });
-      
-    return () => {
-      supabase.removeChannel(channel);
-    };
-
+    loadBanner();
+    // Supabase realtime subscription is removed to decouple the dependency entirely for the build fix.
   }, []);
 
   const allBanners = useMemo(() => userBanner ? [userBanner, ...defaultBanners] : defaultBanners, [userBanner, defaultBanners]);

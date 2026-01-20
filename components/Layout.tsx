@@ -1,6 +1,6 @@
 import React, { ReactNode, useEffect, useRef } from 'react';
 import { BottomNav } from './BottomNav';
-import { RoleMode } from '../App';
+import { RoleMode } from '../types';
 
 interface LayoutProps {
   children: ReactNode;

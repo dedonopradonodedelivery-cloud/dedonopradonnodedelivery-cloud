@@ -1,6 +1,7 @@
 import React, { ReactNode, useEffect, useRef } from 'react';
 import { BottomNav } from '../BottomNav';
-import { RoleMode } from '../../App';
+// FIX: The RoleMode type is exported from `types.ts` at the root, not from `App.tsx`.
+import { RoleMode } from '../../types';
 
 interface LayoutProps {
   children: ReactNode;

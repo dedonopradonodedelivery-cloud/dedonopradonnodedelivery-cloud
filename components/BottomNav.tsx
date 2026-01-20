@@ -1,7 +1,7 @@
 import React from 'react';
 import { Home, Users, User, QrCode } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
-import { RoleMode } from '../App';
+import { RoleMode } from '../types';
 
 interface BottomNavProps {
   activeTab: string;

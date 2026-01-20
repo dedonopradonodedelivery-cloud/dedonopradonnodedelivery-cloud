@@ -246,3 +246,19 @@ export interface DbWalletMovement {
   description: string;
   created_at: string;
 }
+
+// NEW: Centralized RoleMode type
+export type RoleMode = 'ADM' | 'Usuário' | 'Lojista' | 'Visitante';
+
+// NEW: Centralized BannerItem type (moved from HomeFeed.tsx)
+export interface BannerItem {
+  id: string;
+  title?: string;
+  target?: string;
+  tag?: string;
+  bgColor?: string;
+  Icon?: React.ElementType;
+  isSpecial?: boolean;
+  isUserBanner?: boolean;
+  config?: any;
+}

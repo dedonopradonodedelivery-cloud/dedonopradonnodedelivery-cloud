@@ -25,7 +25,7 @@ import { AdminBannerModeration } from './components/AdminBannerModeration';
 import { MapPin, ShieldCheck, X } from 'lucide-react';
 import { useAuth } from './contexts/AuthContext';
 import { NeighborhoodProvider } from './contexts/NeighborhoodContext';
-import { Category, Store } from './types';
+import { Category, Store, RoleMode } from './types';
 import { CategoryView } from './components/CategoryView';
 import { StoreProfileEdit } from './components/StoreProfileEdit';
 import { CommunityFeedView } from './components/CommunityFeedView';
@@ -35,8 +35,6 @@ import { AboutView, SupportView, FavoritesView } from './components/SimplePages'
 
 let splashWasShownInSession = false;
 const ADMIN_EMAIL = 'dedonopradonodedelivery@gmail.com';
-
-export type RoleMode = 'ADM' | 'Usuário' | 'Lojista' | 'Visitante';
 
 const TypingText: React.FC<{ text: string; duration: number }> = ({ text, duration }) => {
   const [displayedText, setDisplayedText] = useState("");
