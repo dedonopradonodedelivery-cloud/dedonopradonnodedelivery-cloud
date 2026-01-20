@@ -263,7 +263,7 @@ export interface BannerItem {
   config?: any;
 }
 
-// DEPRECATED: Type for Banner Plans (static cards)
+// NEW: Type for Banner Plans
 export interface BannerPlan {
   id: 'home_3m' | 'cat_3m' | 'home_1m' | 'cat_1m';
   placement: 'Home' | 'Categorias';
@@ -275,18 +275,6 @@ export interface BannerPlan {
   isMostAdvantageous?: boolean;
   benefit: string;
 }
-
-// NEW: Types for dynamic ad configuration
-export type BannerPlacement = 'home' | 'categorias';
-export type BannerDuration = '1m' | '3m_promo';
-
-export interface BannerAdConfig {
-  placement: BannerPlacement;
-  duration: BannerDuration;
-  neighborhoods: string[]; // array of neighborhood IDs
-  priceCents: number;
-}
-
 
 // NEW: Type for Sponsored Ads by day
 export interface SponsoredPlan {

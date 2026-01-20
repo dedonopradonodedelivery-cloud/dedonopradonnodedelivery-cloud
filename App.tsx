@@ -25,7 +25,7 @@ import { AdminBannerModeration } from './components/AdminBannerModeration';
 import { MapPin, ShieldCheck, X } from 'lucide-react';
 import { useAuth } from './contexts/AuthContext';
 import { NeighborhoodProvider } from './contexts/NeighborhoodContext';
-import { Category, Store, RoleMode, BannerPlan } from './types';
+import { Category, Store, RoleMode, BannerPlan, SponsoredPlan } from './types';
 import { CategoryView } from './components/CategoryView';
 import { StoreProfileEdit } from './components/StoreProfileEdit';
 import { CommunityFeedView } from './components/CommunityFeedView';
@@ -35,6 +35,9 @@ import { AboutView, SupportView, FavoritesView } from './components/SimplePages'
 import { getAccountEntryRoute } from './lib/roleRoutes';
 import { BannerSalesView } from './components/BannerSalesView';
 import { BannerCheckoutView } from './components/BannerCheckoutView';
+import { SponsoredAdsView } from './components/SponsoredAdsView';
+import { SponsoredAdsCheckoutView } from './components/SponsoredAdsCheckoutView';
+import { SponsoredAdsSuccessView } from './components/SponsoredAdsSuccessView';
 
 let splashWasShownInSession = false;
 const ADMIN_EMAIL = 'dedonopradonodedelivery@gmail.com';
@@ -75,6 +78,7 @@ const App: React.FC = () => {
   const [quoteCategory, setQuoteCategory] = useState('');
   const [adCategoryTarget, setAdCategoryTarget] = useState<string | null>(null);
   const [bannerOrder, setBannerOrder] = useState<{ plan: BannerPlan | null; draft: any | null }>({ plan: null, draft: null });
+  const [sponsoredPlan, setSponsoredPlan] = useState<SponsoredPlan | null>(null);
 
   useEffect(() => { localStorage.setItem('localizei_active_tab', activeTab); }, [activeTab]);
   
@@ -117,13 +121,15 @@ const App: React.FC = () => {
     if (!viewMode) return;
     localStorage.setItem('admin_view_mode', viewMode);
     
+    const merchantTabs = ['store_area', 'banner_sales', 'store_ads_module', 'banner_checkout', 'sponsored_ads', 'sponsored_ads_checkout', 'sponsored_ads_success'];
+
     switch (viewMode) {
       case 'ADM':
         if (user?.email === ADMIN_EMAIL) setActiveTab('admin_panel');
         break;
       case 'Lojista':
         if (user) {
-            if (!['store_area', 'banner_sales', 'store_ads_module', 'banner_checkout'].includes(activeTab)) {
+            if (!merchantTabs.includes(activeTab)) {
                setActiveTab('store_area');
             }
         } else {
@@ -144,7 +150,7 @@ const App: React.FC = () => {
         }
         break;
       case 'Visitante':
-        if (['admin_panel', 'store_area', 'profile', 'wallet', 'favorites', 'banner_sales', 'store_ads_module', 'banner_checkout'].includes(activeTab)) {
+        if (['admin_panel', 'store_area', 'profile', 'wallet', 'favorites', ...merchantTabs].includes(activeTab)) {
             setActiveTab('home');
         }
         break;
@@ -153,7 +159,7 @@ const App: React.FC = () => {
 
   // General auth guard for restricted tabs
   useEffect(() => {
-    const restrictedTabs = ['scan_cashback', 'merchant_qr_display', 'wallet', 'pay_cashback', 'store_area', 'admin_panel', 'edit_profile', 'profile', 'favorites', 'banner_sales', 'store_ads_module', 'banner_checkout'];
+    const restrictedTabs = ['scan_cashback', 'merchant_qr_display', 'wallet', 'pay_cashback', 'store_area', 'admin_panel', 'edit_profile', 'profile', 'favorites', 'banner_sales', 'store_ads_module', 'banner_checkout', 'sponsored_ads', 'sponsored_ads_checkout', 'sponsored_ads_success'];
     
     if (restrictedTabs.includes(activeTab)) {
       if (!isAuthInitialLoading && !user) {
@@ -168,7 +174,7 @@ const App: React.FC = () => {
   useEffect(() => {
       if (isAuthInitialLoading) return;
       
-      const merchantTabs = ['store_area', 'store_ads_module', 'weekly_promo', 'merchant_jobs', 'store_profile', 'store_support', 'banner_upload', 'banner_production', 'banner_sales', 'banner_checkout'];
+      const merchantTabs = ['store_area', 'store_ads_module', 'weekly_promo', 'merchant_jobs', 'store_profile', 'store_support', 'banner_upload', 'banner_production', 'banner_sales', 'banner_checkout', 'sponsored_ads', 'sponsored_ads_checkout', 'sponsored_ads_success'];
       
       // Admin panel protection
       if (activeTab === 'admin_panel' && (viewMode !== 'ADM' || user?.email !== ADMIN_EMAIL)) {
@@ -204,6 +210,7 @@ const App: React.FC = () => {
     }
   };
   
+  // Banner Ad Flow
   const handleSelectBannerPlan = (plan: BannerPlan) => {
     setBannerOrder({ plan, draft: null });
     setActiveTab('store_ads_module');
@@ -223,6 +230,22 @@ const App: React.FC = () => {
       alert("Banner enviado para análise!");
       setActiveTab('store_area'); 
   };
+  
+  // Sponsored Ad Flow
+  const handleProceedToSponsoredPayment = (days: number, total: number) => {
+    setSponsoredPlan({ days, total, pricePerDay: 0.99 });
+    setActiveTab('sponsored_ads_checkout');
+  };
+
+  const handleConfirmSponsoredPayment = () => {
+    // Mock payment confirmation
+    setActiveTab('sponsored_ads_success');
+  };
+  
+  const handleCompleteSponsoredFlow = () => {
+    setSponsoredPlan(null);
+    setActiveTab('store_area');
+  };
 
 
   useEffect(() => {
@@ -233,8 +256,8 @@ const App: React.FC = () => {
   }, []);
 
   const handleSelectStore = (store: Store) => { setSelectedStore(store); setActiveTab('store_detail'); };
-  const headerExclusionList = ['store_area', 'editorial_list', 'store_profile', 'category_detail', 'store_detail', 'profile', 'patrocinador_master', 'service_subcategories', 'service_specialties', 'store_ads_module', 'about', 'support', 'favorites', 'community_feed', 'admin_panel', 'cashback_landing', 'admin_banner_moderation', 'banner_upload', 'banner_production', 'banner_sales', 'banner_checkout'];
-  const hideBottomNav = ['store_ads_module', 'store_detail', 'admin_panel', 'cashback_landing', 'admin_banner_moderation', 'banner_upload', 'banner_production', 'banner_sales', 'banner_checkout'].includes(activeTab);
+  const headerExclusionList = ['store_area', 'editorial_list', 'store_profile', 'category_detail', 'store_detail', 'profile', 'patrocinador_master', 'service_subcategories', 'service_specialties', 'store_ads_module', 'about', 'support', 'favorites', 'community_feed', 'admin_panel', 'cashback_landing', 'admin_banner_moderation', 'banner_upload', 'banner_production', 'banner_sales', 'banner_checkout', 'sponsored_ads', 'sponsored_ads_checkout', 'sponsored_ads_success'];
+  const hideBottomNav = ['store_ads_module', 'store_detail', 'admin_panel', 'cashback_landing', 'admin_banner_moderation', 'banner_upload', 'banner_production', 'banner_sales', 'banner_checkout', 'sponsored_ads', 'sponsored_ads_checkout', 'sponsored_ads_success'].includes(activeTab);
 
   const RoleSwitcherModal: React.FC = () => {
     if (!isRoleSwitcherOpen) return null;
@@ -295,6 +318,21 @@ const App: React.FC = () => {
                         draft={bannerOrder.draft}
                         onBack={() => setActiveTab('store_ads_module')}
                         onComplete={handlePaymentComplete}
+                    />
+                )}
+                {/* Sponsored Ads Flow */}
+                {activeTab === 'sponsored_ads' && <SponsoredAdsView onBack={() => setActiveTab('store_area')} onProceedToPayment={handleProceedToSponsoredPayment} />}
+                {activeTab === 'sponsored_ads_checkout' && sponsoredPlan && (
+                    <SponsoredAdsCheckoutView 
+                        plan={sponsoredPlan} 
+                        onBack={() => setActiveTab('sponsored_ads')}
+                        onConfirmPayment={handleConfirmSponsoredPayment}
+                    />
+                )}
+                {activeTab === 'sponsored_ads_success' && sponsoredPlan && (
+                    <SponsoredAdsSuccessView 
+                        plan={sponsoredPlan}
+                        onComplete={handleCompleteSponsoredFlow}
                     />
                 )}
               </main>
