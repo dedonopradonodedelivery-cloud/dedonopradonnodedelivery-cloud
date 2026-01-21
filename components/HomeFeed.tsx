@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { Store, Category, EditorialCollection, AdType, BannerItem } from '../types';
+import { Store, Category, EditorialCollection, AdType } from '../types';
 import { 
   ChevronRight, 
   ArrowUpRight,
@@ -32,7 +32,6 @@ import { CATEGORIES, EDITORIAL_SERVICES } from '../constants';
 import { useNeighborhood } from '../contexts/NeighborhoodContext';
 import { supabase } from '../lib/supabaseClient';
 import { trackAdEvent } from '../lib/analytics';
-import { fetchHomeBanner } from '../lib/bannerService';
 
 interface HomeFeedProps {
   onNavigate: (view: string) => void;
@@ -45,6 +44,20 @@ interface HomeFeedProps {
   userRole?: 'cliente' | 'lojista' | null;
   onRequireLogin: () => void;
 }
+
+interface BannerItem {
+  id: string;
+  title?: string;
+  target?: string;
+  tag?: string;
+  bgColor?: string;
+  Icon?: React.ElementType;
+  isSpecial?: boolean;
+  isUserBanner?: boolean;
+  config?: any;
+}
+
+// --- COMPONENTES DE RENDERIZAÇÃO DINÂMICA DE BANNER ---
 
 const TemplateBannerRender: React.FC<{ config: any }> = ({ config }) => {
     const { template_id, headline, subheadline, product_image_url } = config;
@@ -105,6 +118,9 @@ const CustomBannerRender: React.FC<{ config: any }> = ({ config }) => {
     );
 };
 
+
+// --- COMPONENTE INDEPENDENTE: HOME CAROUSEL ---
+
 const HomeCarousel: React.FC<{ onNavigate: (v: string) => void; onStoreClick?: (store: Store) => void; stores?: Store[] }> = ({ onNavigate, onStoreClick, stores }) => {
   const { currentNeighborhood } = useNeighborhood();
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -114,26 +130,76 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void; onStoreClick?: (
   const defaultBanners: BannerItem[] = useMemo(() => [
     { id: 'rio-phone-store', title: 'RIO PHONE STORE', target: 'rio-phone-store', tag: 'Assistência Apple', bgColor: 'bg-black', Icon: Smartphone, isSpecial: true },
     { id: 'master-sponsor', title: 'Grupo Esquematiza', target: 'grupo-esquematiza', tag: 'Patrocinador Master', bgColor: 'bg-[#0F172A]', Icon: Crown },
-    { id: 'advertise-home', title: 'Anuncie aqui', target: 'banner_sales', tag: 'Destaque sua marca', bgColor: 'bg-brand-blue', Icon: Megaphone }
+    { id: 'advertise-home', title: 'Anuncie aqui', target: 'store_ads_module', tag: 'Destaque sua marca', bgColor: 'bg-brand-blue', Icon: Megaphone }
   ], []);
 
   useEffect(() => {
-    const loadBanner = async () => {
-        const banner = await fetchHomeBanner();
-        setUserBanner(banner);
+    const fetchHomeBanner = async () => {
+        if (!supabase) return;
+
+        try {
+            const { data, error } = await supabase
+                .from('published_banners')
+                .select('id, config, merchant_id')
+                .eq('target', 'home')
+                .eq('is_active', true)
+                .order('created_at', { ascending: false })
+                .limit(1);
+            
+            if (error) throw error;
+
+            if (data && data.length > 0) {
+                setUserBanner({
+                    id: `user-banner-${data[0].id}`,
+                    isUserBanner: true,
+                    config: data[0].config,
+                    // Usando merchant_id como identificador da loja para tracking
+                    target: data[0].merchant_id,
+                });
+            } else {
+                setUserBanner(null);
+            }
+        } catch (e: any) {
+            console.error("Failed to fetch home banner from Supabase:", e.message || e);
+            setUserBanner(null);
+        }
     };
-    loadBanner();
+    
+    fetchHomeBanner();
+    
+    const channel = supabase.channel('home-banner-updates')
+      .on('postgres_changes', { 
+          event: '*', 
+          schema: 'public', 
+          table: 'published_banners',
+          filter: 'target=eq.home'
+        }, 
+        (payload) => {
+          fetchHomeBanner();
+        }
+      )
+      .subscribe((status, err) => {
+        if (err) {
+          console.error('Realtime subscription failed for home banner:', err.message || err);
+        }
+      });
+      
+    return () => {
+      supabase.removeChannel(channel);
+    };
+
   }, []);
 
   const allBanners = useMemo(() => userBanner ? [userBanner, ...defaultBanners] : defaultBanners, [userBanner, defaultBanners]);
   
+  // Impression Tracking
   useEffect(() => {
     const banner = allBanners[currentIndex];
     if (banner) {
         trackAdEvent(
             'ad_impression',
             banner.id,
-            banner.target,
+            banner.target, // This will be store slug for hardcoded, or merchant_id for dynamic
             'home',
             null,
             null,
@@ -160,6 +226,7 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void; onStoreClick?: (
   const current = allBanners[currentIndex];
 
   const handleBannerClick = () => {
+    // Ad Click Tracking
     trackAdEvent(
         'ad_click',
         current.id,
@@ -171,6 +238,7 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void; onStoreClick?: (
     );
 
     if (current.isUserBanner) {
+        // Banners de usuários não são navegáveis por enquanto, apenas rastreados.
         return;
     }
 
@@ -187,6 +255,7 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void; onStoreClick?: (
   return (
     <div className="px-4">
       <div className="flex flex-col gap-4">
+        {/* Banner Container */}
         <div 
           onClick={handleBannerClick}
           className={`w-full relative aspect-[3/2] rounded-[32px] overflow-hidden shadow-xl shadow-slate-200 dark:shadow-none border border-gray-100 dark:border-white/5 ${current.bgColor || ''} cursor-pointer active:scale-[0.98] transition-all group`}
@@ -199,6 +268,7 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void; onStoreClick?: (
             )
           ) : current.id === 'rio-phone-store' ? (
             <div className="absolute inset-0 bg-black flex items-center justify-start px-4">
+              {/* Text on the left */}
               <div className="w-1/2 h-full flex flex-col items-start justify-center text-left text-white z-10">
                   <h3 className="text-xl font-bold tracking-wider opacity-90">
                       <span className="opacity-70"></span> iPhone 17
@@ -210,6 +280,7 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void; onStoreClick?: (
                       Saiba mais
                   </button>
               </div>
+              {/* Image on the right */}
               <div className="absolute right-0 top-0 bottom-0 w-[55%] h-full flex items-center justify-center overflow-hidden">
                   <img 
                     src="https://images.unsplash.com/photo-1678931481189-598199ea3504?q=80&w=1200&auto=format&fit=crop"
@@ -221,6 +292,7 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void; onStoreClick?: (
             </div>
           ) : current.id === 'master-sponsor' ? (
             <div className="absolute inset-0 bg-[#0F172A] flex overflow-hidden">
+              {/* LADO ESQUERDO: VISUAL / ANIMAÇÃO */}
               <div className="relative w-[48%] h-full overflow-hidden shrink-0">
                 <div className="absolute inset-0 z-0">
                   <img 
@@ -228,23 +300,33 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void; onStoreClick?: (
                     alt="Segurança Esquematiza" 
                     className="w-full h-full object-cover brightness-75 scale-110 animate-float-slow opacity-60"
                   />
+                  {/* Gradiente de Fusão - Suaviza a transição para o texto no lado direito */}
                   <div className="absolute inset-y-0 right-0 w-32 bg-gradient-to-r from-transparent to-[#0F172A] z-10"></div>
+                  {/* Subtle Glow de Tecnologia */}
                   <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-40 h-40 bg-blue-500/20 rounded-full blur-[80px] animate-pulse"></div>
+                  {/* Textura de Scanline sutil */}
                   <div className="absolute inset-0 opacity-[0.05] pointer-events-none" style={{ backgroundImage: 'linear-gradient(transparent 50%, rgba(255,255,255,0.1) 50%)', backgroundSize: '100% 4px' }}></div>
                 </div>
+
+                {/* Elemento flutuante de autoridade (Escudo) */}
                 <div className="absolute inset-0 flex items-center justify-center z-20">
                     <div className="p-4 bg-white/5 backdrop-blur-xl rounded-full border border-white/10 shadow-2xl animate-subtle-glow">
                         <Shield className="w-12 h-12 text-blue-400 opacity-80" strokeWidth={1.5} />
                     </div>
                 </div>
               </div>
+
+              {/* LADO DIREITO: TEXTO */}
               <div className="flex-1 h-full flex flex-col justify-center pl-2 pr-10 z-30 text-left relative">
+                 {/* Badge Superior */}
                  <div className="mb-4 flex items-center gap-2 animate-in fade-in slide-in-from-left-4 duration-1000">
                     <div className="bg-amber-500/20 px-2.5 py-1 rounded-lg border border-amber-500/30 flex items-center gap-1.5">
                         <Crown className="w-2.5 h-2.5 text-amber-400 fill-amber-400" />
                         <span className="text-[9px] font-black text-amber-100 uppercase tracking-[0.2em] leading-none">Patrocinador Master</span>
                     </div>
                  </div>
+
+                 {/* Marca Principal */}
                  <div className="mb-2 space-y-0.5 animate-in slide-in-from-bottom-2 duration-700 delay-100">
                     <h3 className="text-3xl font-[950] text-white leading-[0.85] font-display tracking-tighter uppercase drop-shadow-2xl">
                       GRUPO
@@ -253,11 +335,15 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void; onStoreClick?: (
                       ESQUEMATIZA
                     </h3>
                  </div>
+
+                 {/* Slogan / Área */}
                  <div className="mb-6 animate-in fade-in duration-1000 delay-300">
                     <p className="text-slate-400 text-[10px] font-bold uppercase tracking-[0.2em] opacity-90 leading-tight">
                       SEGURANÇA E FACILITIES
                     </p>
                  </div>
+
+                 {/* Selo de Excelência */}
                  <div className="flex items-center gap-3 animate-in fade-in duration-1000 delay-500">
                     <div className="w-6 h-[1px] bg-blue-500/30"></div>
                     <div className="flex items-center gap-1.5">
@@ -266,29 +352,41 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void; onStoreClick?: (
                     </div>
                  </div>
               </div>
+              
+              {/* Overlay Decorativo Right */}
               <div className="absolute -right-16 -bottom-16 opacity-[0.03] rotate-12 pointer-events-none group-hover:scale-110 transition-transform duration-1000">
                 <Shield className="w-64 h-64 text-white" />
               </div>
             </div>
           ) : current.id === 'advertise-home' ? (
             <div className="absolute inset-0 bg-gradient-to-br from-brand-blue to-[#0A369D] flex flex-col items-center justify-center text-center p-8 overflow-hidden">
+              {/* Animated Watermark */}
               <div className="absolute inset-0 overflow-hidden pointer-events-none">
                   <MapPin className="absolute -bottom-16 -right-16 w-80 h-80 text-white/5 rotate-[-20deg] animate-subtle-diagonal-scroll" />
               </div>
+              {/* Subtle decorative glow */}
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] bg-white/5 rounded-full blur-[100px] animate-subtle-glow opacity-50"></div>
+
               <div className="relative z-10 flex flex-col items-center w-full h-full justify-center">
+                  {/* Label */}
                   <div className="mb-5 animate-in fade-in duration-1000">
                       <div className="bg-white/10 backdrop-blur-sm border border-white/20 px-3 py-1 rounded-full flex items-center gap-2">
                           <div className="w-1.5 h-1.5 rounded-full bg-white/80 shadow-[0_0_8px_rgba(255,255,255,0.5)]"></div>
                           <span className="text-[8px] font-black text-white/80 uppercase tracking-[0.25em] leading-none">Destaque Exclusivo</span>
                       </div>
                   </div>
+
+                  {/* Title */}
                   <h3 className="text-[28px] font-bold text-white leading-tight font-display tracking-tight mb-3 animate-in fade-in slide-in-from-bottom-1 duration-1000 delay-100">
                     Anuncie sua marca
                   </h3>
+
+                  {/* Subtitle */}
                   <p className="text-blue-100/70 text-[12px] font-medium leading-snug max-w-[260px] mb-8 animate-in fade-in duration-1000 delay-300 text-center tracking-normal">
                     Conecte sua empresa a milhares de novos clientes locais através do Localizei.
                   </p>
+
+                  {/* CTA */}
                   <div className="relative group/cta">
                     <div className="relative bg-white text-[#1E5BFF] px-6 py-2.5 rounded-xl font-bold text-[10px] uppercase tracking-[0.15em] flex items-center gap-2 shadow-2xl shadow-black/30 active:scale-[0.98] transition-all duration-500 hover:bg-blue-50 hover:-translate-y-0.5">
                       Divulgar minha loja
@@ -309,6 +407,8 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void; onStoreClick?: (
             </div>
           )}
         </div>
+
+        {/* Progress Indicators - MOVED OUTSIDE AND BELOW */}
         <div className="flex gap-1.5 z-30 w-1/3 mx-auto justify-center h-1">
           {allBanners.map((_, idx) => (
             <div key={idx} className="h-full flex-1 bg-gray-200 dark:bg-gray-800 rounded-full overflow-hidden">
@@ -333,6 +433,8 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
 }) => {
   const [listFilter, setListFilter] = useState<'all' | 'top_rated' | 'open_now'>('all');
   const categoriesRef = useRef<HTMLDivElement>(null);
+
+  // ESTRUTURA DA HOME: 'categories' primeiro, 'home_carousel' DEPOIS (abaixo das categorias)
   const homeStructure = useMemo(() => ['categories', 'home_carousel', 'novidades', 'sugestoes', 'em_alta', 'list'], []);
 
   const renderSection = (key: string) => {
@@ -433,7 +535,9 @@ const NovidadesDaSemana: React.FC<{ stores: Store[]; onStoreClick?: (store: Stor
   const newArrivals = useMemo(() => {
     return stores.filter(s => (s.image || s.logoUrl) && ['f-38', 'f-39', 'f-45', 'f-42', 'f-50'].includes(s.id));
   }, [stores]);
+
   if (newArrivals.length === 0) return null;
+
   return (
     <div className="bg-white dark:bg-gray-950 py-4 px-5">
       <SectionHeader 
@@ -442,6 +546,7 @@ const NovidadesDaSemana: React.FC<{ stores: Store[]; onStoreClick?: (store: Stor
         subtitle="Recém chegados no bairro" 
         onSeeMore={() => onNavigate('explore')}
       />
+
       <div className="flex gap-4 overflow-x-auto no-scrollbar snap-x -mx-5 px-5">
         {newArrivals.map((store) => (
           <button 
@@ -455,6 +560,7 @@ const NovidadesDaSemana: React.FC<{ stores: Store[]; onStoreClick?: (store: Stor
               className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent"></div>
+            
             <div className="absolute inset-0 p-5 flex flex-col justify-end text-left">
               <span className="w-fit bg-emerald-500 text-white text-[7px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest mb-2 shadow-lg shadow-emerald-500/20">
                 Novo
@@ -477,7 +583,9 @@ const SugestoesParaVoce: React.FC<{ stores: Store[]; onStoreClick?: (store: Stor
   const suggestions = useMemo(() => {
     return stores.filter(s => (s.image || s.logoUrl) && ['f-3', 'f-5', 'f-8', 'f-12', 'f-15'].includes(s.id));
   }, [stores]);
+
   if (suggestions.length === 0) return null;
+
   return (
     <div className="bg-white dark:bg-gray-900 py-4 px-5">
       <SectionHeader 
@@ -486,6 +594,7 @@ const SugestoesParaVoce: React.FC<{ stores: Store[]; onStoreClick?: (store: Stor
         subtitle="Baseado nas suas buscas" 
         onSeeMore={() => onNavigate('explore')}
       />
+
       <div className="flex gap-5 overflow-x-auto no-scrollbar snap-x -mx-5 px-5">
         {suggestions.map((store) => (
           <button 
@@ -505,6 +614,7 @@ const SugestoesParaVoce: React.FC<{ stores: Store[]; onStoreClick?: (store: Stor
                 </span>
               </div>
             </div>
+            
             <div className="p-5">
               <span className="text-[9px] font-black text-[#1E5BFF] uppercase tracking-widest block mb-1">
                 {store.category}
@@ -530,7 +640,9 @@ const EmAltaNaCidade: React.FC<{ stores: Store[]; onStoreClick?: (store: Store) 
   const trending = useMemo(() => {
     return stores.filter(s => (s.image || s.logoUrl) && ['f-1', 'f-2'].includes(s.id));
   }, [stores]);
+
   if (trending.length < 2) return null;
+
   return (
     <div className="bg-white dark:bg-gray-900 py-4 px-5">
       <SectionHeader 
@@ -539,6 +651,7 @@ const EmAltaNaCidade: React.FC<{ stores: Store[]; onStoreClick?: (store: Store) 
         subtitle="O que a vizinhança ama" 
         onSeeMore={() => onNavigate('explore')}
       />
+
       <div className="flex gap-4">
         {trending.map((store, idx) => (
           <button 
@@ -551,12 +664,14 @@ const EmAltaNaCidade: React.FC<{ stores: Store[]; onStoreClick?: (store: Store) 
             <div className="w-20 h-20 rounded-full overflow-hidden bg-white shadow-xl border-4 border-white mb-5">
               <img src={store.logoUrl || store.image} alt={store.name} className="w-full h-full object-cover" />
             </div>
+            
             <h3 className="text-sm font-black text-gray-900 dark:text-white leading-tight mb-1">
               {store.name}
             </h3>
             <p className="text-[8px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-6">
               {store.category}
             </p>
+
             <div className="mt-auto bg-gray-900 dark:bg-white text-white dark:text-gray-900 px-5 py-2.5 rounded-full text-[9px] font-black uppercase tracking-widest flex items-center gap-1.5 shadow-lg transition-colors">
               Explorar <ArrowRight size={10} strokeWidth={4} />
             </div>

@@ -1,5 +1,4 @@
 
-
 import React, { useState, useEffect } from 'react';
 import { ChevronLeft, CheckCircle, XCircle, Clock, DollarSign, User, AlertCircle, Loader2, ArrowRight } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
@@ -69,8 +68,8 @@ export const MerchantCashbackRequests: React.FC<MerchantCashbackRequestsProps> =
                 amount_to_pay_now_cents: 14500,
                 status: 'pending',
                 created_at: new Date().toISOString(),
-                amount_cents: 725, // Added as required by CashbackTransaction
-                type: 'earn'      // Added as required by CashbackTransaction
+                amount_cents: 725,
+                type: 'earn'
             }
         ]);
         setLoading(false);

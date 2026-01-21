@@ -1,6 +1,5 @@
 import React, { ReactNode, useEffect, useRef } from 'react';
 import { BottomNav } from './BottomNav';
-import { RoleMode } from '../types';
 
 interface LayoutProps {
   children: ReactNode;
@@ -8,10 +7,9 @@ interface LayoutProps {
   setActiveTab: (tab: string) => void;
   userRole?: 'cliente' | 'lojista' | null;
   hideNav?: boolean;
-  viewMode: RoleMode;
 }
 
-export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab, userRole, hideNav = false, viewMode }) => {
+export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab, userRole, hideNav = false }) => {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   // Reset scroll position when activeTab changes
@@ -46,7 +44,6 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
           activeTab={activeTab}
           setActiveTab={setActiveTab}
           userRole={userRole}
-          viewMode={viewMode}
         />
       )}
     </div>

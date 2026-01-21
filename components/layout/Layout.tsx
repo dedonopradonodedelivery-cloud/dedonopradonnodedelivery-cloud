@@ -1,7 +1,5 @@
 import React, { ReactNode, useEffect, useRef } from 'react';
 import { BottomNav } from '../BottomNav';
-// FIX: The RoleMode type is exported from `types.ts` at the root, not from `App.tsx`.
-import { RoleMode } from '../../types';
 
 interface LayoutProps {
   children: ReactNode;
@@ -9,14 +7,11 @@ interface LayoutProps {
   setActiveTab: (tab: string) => void;
   userRole?: 'cliente' | 'lojista' | null;
   hideNav?: boolean;
-  // FIX: Added viewMode to pass down to BottomNav
-  viewMode: RoleMode;
 }
 
-export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab, userRole, hideNav = false, viewMode }) => {
+export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab, userRole, hideNav = false }) => {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
-  // Reset scroll position when activeTab changes
   useEffect(() => {
     if (scrollContainerRef.current) {
       scrollContainerRef.current.scrollTop = 0;
@@ -47,8 +42,6 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
           activeTab={activeTab}
           setActiveTab={setActiveTab}
           userRole={userRole}
-          // FIX: Pass viewMode prop to BottomNav
-          viewMode={viewMode}
         />
       )}
     </div>

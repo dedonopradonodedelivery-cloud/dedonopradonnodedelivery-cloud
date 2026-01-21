@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { 
   Utensils, ShoppingCart, Scissors, Heart, PawPrint, Home, Wrench, 
@@ -14,47 +13,7 @@ import {
   Camera, Vote, Handshake, Flame, Milestone, History, Home as HomeIcon,
   MessageCircle, HelpCircle, UserCheck, Recycle
 } from 'lucide-react';
-import { AdType, Category, Store, Story, EditorialCollection, Job, CommunityPost, NeighborhoodCommunity, BannerPlan } from './types';
-
-export const BANNER_BASE_PRICES_CENTS = {
-  home: {
-    '1m_original': 19990,
-    '1m_promo': 8990,
-    '3m_promo': 14990,
-  },
-  categorias: {
-    '1m_original': 14990,
-    '1m_promo': 4990,
-    '3m_promo': 8990,
-  },
-};
-
-export const PROFESSIONAL_BANNER_PRICING = {
-  originalCents: 15990,
-  promoCents: 6990,
-  isInaugurationPromo: true,
-  savingsPercent: 56, // (159.90 - 69.90) / 159.90 * 100
-  savingsValueCents: 9000
-};
-
-export const BANNER_PLANS: BannerPlan[] = [
-    { id: 'home_3m', placement: 'Home', durationMonths: 3, priceCents: BANNER_BASE_PRICES_CENTS.home['3m_promo'] * 3, label: '3 Meses na Home (Promo)', installmentText: `3x de R$ ${(BANNER_BASE_PRICES_CENTS.home['3m_promo']/100).toFixed(2).replace('.',',')}`, isMostAdvantageous: true, benefit: 'Maior visibilidade por mais tempo' },
-    { id: 'home_1m', placement: 'Home', durationMonths: 1, priceCents: BANNER_BASE_PRICES_CENTS.home['1m_promo'], label: '1 Mês na Home', benefit: 'Destaque principal por 30 dias' },
-    { id: 'cat_3m', placement: 'Categorias', durationMonths: 3, priceCents: BANNER_BASE_PRICES_CENTS.categorias['3m_promo'] * 3, label: '3 Meses em Categorias (Promo)', installmentText: `3x de R$ ${(BANNER_BASE_PRICES_CENTS.categorias['3m_promo']/100).toFixed(2).replace('.',',')}`, isPromo: true, benefit: 'Alcance clientes segmentados' },
-    { id: 'cat_1m', placement: 'Categorias', durationMonths: 1, priceCents: BANNER_BASE_PRICES_CENTS.categorias['1m_promo'], label: '1 Mês em Categorias', benefit: 'Ideal para campanhas específicas' },
-];
-
-export const NEIGHBORHOOD_OPTIONS = [
-    { id: "freguesia", name: "Freguesia" },
-    { id: "taquara", name: "Taquara" },
-    { id: "pechincha", name: "Pechincha" },
-    { id: "tanque", name: "Tanque" },
-    { id: "anil", name: "Anil" },
-    { id: "parque-olimpico", name: "Parque Olímpico" },
-    { id: "curicica", name: "Curicica" },
-    { id: "cidade-de-deus", name: "Cidade de Deus" },
-    { id: "gardenia", name: "Gardênia" },
-];
+import { AdType, Category, Store, Story, EditorialCollection, Job, CommunityPost, NeighborhoodCommunity } from './types';
 
 export const CATEGORIES: Category[] = [
   { id: 'cat-comida', name: 'Comida', slug: 'comida', icon: <Utensils />, color: 'bg-brand-blue' },
@@ -491,18 +450,16 @@ export const STORES: Store[] = [
     isOpenNow: true,
     isSponsored: true
   },
-  { id: 'f-1', name: 'Bibi Lanches', category: 'Comida', subcategory: 'Lanches & Hamburguerias', rating: 4.8, distance: 'Freguesia', adType: AdType.PREMIUM, description: 'Lanches clássicos e saudáveis.', isSponsored: true, image: 'https://images.unsplash.com/photo-1561758033-d89a9ad46330?q=80&w=400&auto=format&fit=crop', neighborhood: 'Freguesia' },
-  { id: 'f-2', name: 'Studio Hair Vip', category: 'Beleza', subcategory: 'Salão de Cabelo', rating: 4.9, distance: 'Taquara', adType: AdType.PREMIUM, description: 'Especialista em loiros e cortes modernos.', isSponsored: true, image: 'https://images.unsplash.com/photo-1562322140-8baeececf3df?q=80&w=400&auto=format&fit=crop', neighborhood: 'Taquara' },
-  { id: 'f-3', name: 'Pet Shop Alegria', category: 'Pets', subcategory: 'Pet Shop', rating: 4.7, distance: 'Pechincha', adType: AdType.PREMIUM, description: 'O carinho que seu pet merece.', isSponsored: true, image: 'https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?q=80&w=400&auto=format&fit=crop', neighborhood: 'Pechincha', recentComments: ["Atendimento excelente!", "Meu cachorro ama o banho e tosa daqui."] },
-  { id: 'f-5', name: 'Pizzaria do Zé', category: 'Comida', subcategory: 'Pizzarias', rating: 4.6, distance: 'Freguesia', adType: AdType.PREMIUM, description: 'Pizza no forno a lenha.', isSponsored: true, image: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?q=80&w=400&auto=format&fit=crop', neighborhood: 'Freguesia' },
-  { id: 'f-8', name: 'Academia FitBairro', category: 'Esportes', subcategory: 'Academias', rating: 4.7, distance: 'Taquara', adType: AdType.PREMIUM, description: 'Treine perto de casa.', isSponsored: true, image: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=400&auto=format&fit=crop', neighborhood: 'Taquara' },
-  { id: 'f-12', name: 'Sushi da Praça', category: 'Comida', subcategory: 'Restaurantes', rating: 4.9, distance: 'Freguesia', adType: AdType.LOCAL, description: 'Combinados frescos e deliciosos.', isSponsored: false, image: 'https://images.unsplash.com/photo-1579871494447-9811cf80d66c?q=80&w=400&auto=format&fit=crop', neighborhood: 'Freguesia', cashback_percent: 10, recentComments: ["O melhor rodízio da região!", "Peixe sempre fresco."] },
-  { id: 'f-15', name: 'Café com Prosa', category: 'Comida', subcategory: 'Cafés & Cafeterias', rating: 4.8, distance: 'Pechincha', adType: AdType.LOCAL, description: 'Um cantinho para relaxar.', isSponsored: false, image: 'https://images.unsplash.com/photo-1497935586351-b67a49e012bf?q=80&w=400&auto=format&fit=crop', neighborhood: 'Pechincha', cashback_percent: 5 },
-  { id: 'f-38', name: 'Nova Padaria Imperial', category: 'Comida', subcategory: 'Padarias', rating: 4.8, distance: 'Freguesia', adType: AdType.ORGANIC, description: 'Pães frescos e café da manhã completo.', isSponsored: false, image: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?q=80&w=400&auto=format&fit=crop', neighborhood: 'Freguesia', recentComments: ["O pão na chapa é divino.", "Sempre pego pão fresquinho aqui."] },
-  { id: 'f-39', name: 'Barbearia do Tony', category: 'Beleza', subcategory: 'Barbearia', rating: 4.9, distance: 'Taquara', adType: AdType.ORGANIC, description: 'Corte e barba com estilo.', isSponsored: false, image: 'https://images.unsplash.com/photo-1621605815971-fbc3330058df?q=80&w=400&auto=format&fit=crop', neighborhood: 'Taquara' },
-  { id: 'f-42', name: 'Floricultura Verdejar', category: 'Casa', subcategory: 'Jardinagem', rating: 4.7, distance: 'Anil', adType: AdType.ORGANIC, description: 'Plantas e flores para alegrar seu lar.', isSponsored: false, image: 'https://images.unsplash.com/photo-1525310072745-f49212b5ac6d?q=80&w=400&auto=format&fit=crop', neighborhood: 'Anil' },
-  { id: 'f-45', name: 'Sorveteria Gelato', category: 'Comida', subcategory: 'Doces & Sobremesas', rating: 4.9, distance: 'Pechincha', adType: AdType.ORGANIC, description: 'Sorvetes artesanais e sabores incríveis.', isSponsored: false, image: 'https://images.unsplash.com/photo-1625862166342-53ab39795a25?q=80&w=400&auto=format&fit=crop', neighborhood: 'Pechincha' },
-  { id: 'f-50', name: 'Lava Jato Brilhante', category: 'Autos', subcategory: 'Lava-Jato', rating: 4.6, distance: 'Tanque', adType: AdType.ORGANIC, description: 'Seu carro novo de novo.', isSponsored: false, image: 'https://images.unsplash.com/photo-1607954940511-01685317325b?q=80&w=400&auto=format&fit=crop', neighborhood: 'Tanque' },
+  { id: 'f-1', name: 'Bibi Lanches', category: 'Comida', subcategory: 'Lanches & Hamburguerias', rating: 4.8, distance: 'Freguesia', adType: AdType.PREMIUM, description: 'Lanches clássicos e saudáveis.', isSponsored: true, image: 'https://images.unsplash.com/photo-1561758033-d89a9ad46330?q=80&w=400&auto=format&fit=crop' },
+  { id: 'f-2', name: 'Studio Hair Vip', category: 'Beleza', subcategory: 'Salão de Cabelo', rating: 4.9, distance: 'Taquara', adType: AdType.PREMIUM, description: 'Especialista em loiros e cortes modernos.', isSponsored: true, image: 'https://images.unsplash.com/photo-1562322140-8baeececf3df?q=80&w=400&auto=format&fit=crop' },
+  { id: 'f-3', name: 'Pet Shop Alegria', category: 'Pets', subcategory: 'Pet Shop', rating: 4.7, distance: 'Pechincha', adType: AdType.PREMIUM, description: 'O carinho que seu pet merece.', isSponsored: true, image: 'https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?q=80&w=400&auto=format&fit=crop' },
+  { id: 'f-4', name: 'Mecânica 24h', category: 'Autos', subcategory: 'Oficinas Mecânicas', rating: 4.5, distance: 'Anil', adType: AdType.PREMIUM, description: 'Socorro mecânico a qualquer hora.', isSponsored: true, image: 'https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?q=80&w=400&auto=format&fit=crop' },
+  { id: 'f-5', name: 'Pizzaria do Zé', category: 'Comida', subcategory: 'Pizzarias', rating: 4.6, distance: 'Freguesia', adType: AdType.PREMIUM, description: 'Pizza no forno a lenha.', isSponsored: true, image: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?q=80&w=400&auto=format&fit=crop' },
+  { id: 'f-6', name: 'Açaí da Praça', category: 'Comida', subcategory: 'Doces & Sobremesas', rating: 4.9, distance: 'Tanque', adType: AdType.PREMIUM, description: 'O melhor açaí da região.', isSponsored: true, image: 'https://images.unsplash.com/photo-1590301157890-4810ed352733?q=80&w=400&auto=format&fit=crop' },
+  { id: 'f-7', name: 'Drogaria JPA', category: 'Farmácia', subcategory: 'Medicamentos', rating: 4.4, distance: 'Freguesia', adType: AdType.PREMIUM, description: 'Medicamentos e perfumaria.', isSponsored: true, image: 'https://images.unsplash.com/photo-1587854692152-cbe660dbbb88?q=80&w=400&auto=format&fit=crop' },
+  { id: 'f-8', name: 'Academia FitBairro', category: 'Esportes', subcategory: 'Academias', rating: 4.7, distance: 'Taquara', adType: AdType.PREMIUM, description: 'Treine perto de casa.', isSponsored: true, image: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=400&auto=format&fit=crop' },
+  { id: 'f-9', name: 'Consultório Dra. Ana', category: 'Saúde', subcategory: 'Dentistas', rating: 5.0, distance: 'Freguesia', adType: AdType.PREMIUM, description: 'Cuidado completo com seu sorriso.', isSponsored: true, image: 'https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?q=80&w=400&auto=format&fit=crop' },
+  { id: 'f-10', name: 'Boutique Chic', category: 'Moda', subcategory: 'Moda Feminina', rating: 4.3, distance: 'Anil', adType: AdType.PREMIUM, description: 'Tendências e elegância.', isSponsored: true, image: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=400&auto=format&fit=crop' },
 ];
 
 export const EDITORIAL_SERVICES: EditorialCollection[] = [

@@ -1,14 +1,11 @@
 import React from 'react';
 import { Home, Users, User, QrCode } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
-import { RoleMode } from '../types';
-import { getAccountEntryRoute } from '../lib/roleRoutes';
 
 interface BottomNavProps {
   activeTab: string;
   setActiveTab: (tab: string) => void;
   userRole?: 'cliente' | 'lojista' | 'admin' | null;
-  viewMode: RoleMode;
 }
 
 interface NavItem {
@@ -18,7 +15,7 @@ interface NavItem {
   isCenter?: boolean;
 }
 
-export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, userRole, viewMode }) => {
+export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, userRole }) => {
   const { user } = useAuth();
 
   // Itens da barra: Home (Regular), Comunidade (Destaque), Cashback (Destaque), Menu (Regular)
@@ -28,19 +25,19 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
   ];
 
   // Botão central de ação dinâmica (Cashback / QR Code)
-  if (viewMode !== 'ADM') {
-    const isMerchantView = viewMode === 'Lojista';
+  if (userRole !== 'admin') {
+    const isMerchant = user && userRole === 'lojista';
 
     let centerId: string;
     if (!user) {
       centerId = 'cashback_landing'; // Rota para visitante
-    } else if (isMerchantView) {
+    } else if (isMerchant) {
       centerId = 'merchant_qr_display'; // Rota para lojista
     } else {
       centerId = 'scan_cashback'; // Rota para cliente
     }
 
-    const centerLabel = isMerchantView ? 'QR Code' : 'Cashback';
+    const centerLabel = isMerchant ? 'QR Code' : 'Cashback';
 
     navItems.push({ 
       id: centerId, 
@@ -50,7 +47,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
     });
   }
 
-  const profileTabId = getAccountEntryRoute(viewMode);
+  const profileTabId = userRole === 'lojista' ? 'store_area' : 'profile';
   navItems.push({ id: profileTabId, icon: User, label: 'Menu' });
 
   const NavButton: React.FC<{ item: NavItem; isActive: boolean }> = ({ item, isActive }) => {

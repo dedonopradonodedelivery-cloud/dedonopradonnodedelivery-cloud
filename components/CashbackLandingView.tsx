@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { ChevronLeft, Sparkles, ArrowRight, Wallet, Store, Coins, CheckCircle2, XCircle, HeartHandshake, ShoppingBag } from 'lucide-react';
 import { CashbackIcon } from './CashbackIcon';
@@ -36,8 +35,7 @@ export const CashbackLandingView: React.FC<CashbackLandingViewProps> = ({ onBack
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 font-sans animate-in slide-in-from-right duration-300 flex flex-col relative overflow-hidden">
       
       {/* HERO */}
-      {/* AJUSTE VISUAL: Aumentado h-[55vh] para h-[85vh] e adicionado min-h-[800px] para cobrir os cards em mobile */}
-      <div className="absolute top-0 left-0 right-0 h-[85vh] min-h-[800px] bg-[#1E5BFF] rounded-b-[48px] z-0">
+      <div className="absolute top-0 left-0 right-0 h-[55vh] bg-[#1E5BFF] rounded-b-[48px] z-0">
          <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle, #fff 2px, transparent 2.5px)', backgroundSize: '24px 24px' }}></div>
          <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-[#1E5BFF] to-transparent"></div>
       </div>

@@ -1,5 +1,4 @@
-
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import { 
   ChevronLeft, 
   Rocket, 
@@ -26,8 +25,6 @@ import {
 } from 'lucide-react';
 import { User } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabaseClient';
-import { BannerPlan } from '../types';
-import { PROFESSIONAL_BANNER_PRICING } from '../constants';
 
 // --- VALIDATION HELPERS ---
 const FORBIDDEN_WORDS = ['palavrão', 'inapropriado', 'violação', 'gratis'];
@@ -68,16 +65,12 @@ const getContrastRatio = (hex1: string, hex2: string): number => {
 };
 // --- END VALIDATION ---
 
-// FIX: Added missing formatCurrency helper function.
-const formatCurrency = (cents: number) => `R$ ${(cents / 100).toFixed(2).replace('.', ',')}`;
 
 interface StoreAdsModuleProps {
   onBack: () => void;
   onNavigate: (view: string) => void;
   categoryName?: string;
   user: User | null;
-  plan: BannerPlan | null;
-  onFinalize: (draft: any) => void;
 }
 
 // --- CONFIGURAÇÕES DO CRIADOR RÁPIDO ---
@@ -265,7 +258,7 @@ const ValidationErrorsModal: React.FC<{ errors: string[]; onClose: () => void }>
 };
 
 
-export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNavigate, categoryName, user, plan, onFinalize }) => {
+export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNavigate, categoryName, user }) => {
   const [view, setView] = useState<'sales' | 'creator' | 'editor'>('sales');
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
 
@@ -289,32 +282,17 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
   // --- Shared State ---
   const [isSaving, setIsSaving] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
-  
-  useEffect(() => {
-    if (!plan) {
-        onBack();
-    }
-  }, [plan, onBack]);
 
-  const handleFormDataChange = (fieldId: string, value: string) => {
-    setFormData(prev => ({ ...prev, [fieldId]: value }));
+  const clearErrorsOnChange = (setter: React.Dispatch<React.SetStateAction<any>>) => (value: any) => {
+    if (validationErrors.length > 0) setValidationErrors([]);
+    setter(value);
   };
-
-  useEffect(() => {
-    if (selectedTemplate?.id === 'institucional') {
-        const logoUrl = user?.user_metadata?.store_logo_url || user?.user_metadata?.avatar_url;
-        if (logoUrl && !formData.logo_url) {
-            handleFormDataChange('logo_url', logoUrl);
-        }
-    }
-  }, [selectedTemplate, user, formData.logo_url]);
   
   const validateBanner = (): string[] => {
     const errors: string[] = [];
     const containsForbidden = (text: string) => FORBIDDEN_WORDS.some(word => text.toLowerCase().includes(word));
 
     if (view === 'creator') {
-        if (!selectedTemplate) { errors.push("Nenhum modelo selecionado."); return errors; }
         const { headline = '', subheadline = '' } = formData;
         if (!headline.trim()) errors.push('A "Chamada Principal" é obrigatória.');
         if (headline.length > CHAR_LIMITS.template_headline) errors.push(`A "Chamada Principal" deve ter no máximo ${CHAR_LIMITS.template_headline} caracteres.`);
@@ -347,25 +325,77 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
     
     setIsSaving(true);
 
-    const draft = view === 'editor' 
-      ? { type: 'custom_editor', ...editorData } 
-      : { type: 'template', ...formData, template_id: selectedTemplate.id, cta: selectedCta };
+    const isCustom = view === 'editor';
+    const config = isCustom ? { type: 'custom_editor', ...editorData } : { type: 'template', ...formData, template_id: selectedTemplate.id, cta: selectedCta };
+    const bannerTarget = categoryName ? `category:${categoryName.toLowerCase()}` : 'home';
 
-    onFinalize(draft);
-    
-    // Simulating save time before navigating
-    setTimeout(() => {
-      setIsSaving(false);
-    }, 500);
+    try {
+        if (!supabase || !user) throw new Error("Usuário ou Supabase não disponível.");
+
+        // 1. Inserir no 'published_banners'
+        const { data: bannerData, error: bannerError } = await supabase
+            .from('published_banners')
+            .insert({
+                merchant_id: user.id,
+                target: bannerTarget,
+                config: config,
+                is_active: true,
+                expires_at: null, // banners manuais não expiram por padrão
+            })
+            .select()
+            .single();
+        
+        if (bannerError) throw bannerError;
+
+        // 2. Log de Auditoria
+        const { error: logError } = await supabase.from('banner_audit_log').insert({
+            actor_id: user.id,
+            actor_email: user.email,
+            action: 'created',
+            banner_id: bannerData.id,
+            details: { 
+                shopName: user.user_metadata?.store_name || 'Loja',
+                isFirstBanner: true, // Lógica de verificação omitida por simplicidade
+                target: bannerTarget,
+                config,
+            }
+        });
+        if (logError) console.warn("Log de auditoria falhou:", logError);
+
+        // 3. (OPCIONAL) Disparar notificação para ADM no primeiro banner
+        // Essa lógica seria melhor em um trigger de DB, mas fazemos aqui para o MVP.
+        const { count } = await supabase.from('published_banners').select('*', { count: 'exact', head: true }).eq('merchant_id', user.id);
+        if (count === 1) {
+            await supabase.functions.invoke('send-email-admin-banner', {
+                body: {
+                    shopName: user.user_metadata?.store_name || user.email,
+                    userId: user.id,
+                    bannerType: isCustom ? 'Editor Personalizado' : 'Template Rápido',
+                    bannerConfig: config
+                }
+            });
+        }
+        
+        setShowSuccess(true);
+        setTimeout(() => {
+            onBack();
+        }, 2000);
+
+    } catch (e: any) {
+        console.error("Erro ao publicar banner:", e);
+        alert(`Erro: ${e.message}`);
+    } finally {
+        setIsSaving(false);
+    }
   };
 
+  const handleFormDataChange = (fieldId: string, value: string) => {
+    setFormData(prev => ({ ...prev, [fieldId]: value }));
+  };
+  
   const handleEditorDataChange = (field: keyof typeof editorData, value: any) => {
     setEditorData(prev => ({...prev, [field]: value}));
   }
-
-  const handleSelectProfessional = () => {
-    onFinalize({ type: 'professional_service' });
-  };
 
   // ---- RENDER LOGIC ----
   const renderStep = (): React.JSX.Element | null => {
@@ -377,29 +407,14 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
                 <Megaphone size={32} className="text-amber-400" />
             </div>
             <h2 className="text-3xl font-black text-white font-display uppercase tracking-tight mb-3">
-                Crie seu Anúncio
+                Destaque sua Loja
             </h2>
             <p className="text-slate-400 text-sm max-w-sm mx-auto leading-relaxed">
-                Escolha uma das opções abaixo para criar seu banner e atrair mais clientes.
+                Crie banners personalizados que aparecerão na Home do app ou em categorias específicas para atrair mais clientes.
             </p>
           </div>
           
           <div className="grid grid-cols-1 gap-6">
-            <button
-              onClick={() => onNavigate('banner_upload')}
-              className="bg-slate-800 p-8 rounded-3xl border border-white/10 text-left hover:border-gray-500/50 transition-all group"
-            >
-                <div className="w-12 h-12 bg-gray-500/10 rounded-2xl flex items-center justify-center text-gray-400 mb-4 border border-gray-500/20">
-                    <ImageIcon size={24} />
-                </div>
-                <h3 className="font-bold text-white text-lg mb-2">Já tenho minha arte</h3>
-                <p className="text-xs text-slate-400 mb-6 leading-relaxed">
-                    Faça o upload do seu banner pronto (JPG, PNG) para aprovação.
-                </p>
-                <span className="text-xs font-black text-gray-400 uppercase tracking-widest flex items-center gap-2 group-hover:gap-3 transition-all">
-                    Fazer upload <ArrowRight size={14} />
-                </span>
-            </button>
             <button
               onClick={() => setView('creator')}
               className="bg-slate-800 p-8 rounded-3xl border border-white/10 text-left hover:border-blue-500/50 transition-all group"
@@ -407,44 +422,58 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
                 <div className="w-12 h-12 bg-blue-500/10 rounded-2xl flex items-center justify-center text-blue-400 mb-4 border border-blue-500/20">
                     <Sparkles size={24} />
                 </div>
-                <h3 className="font-bold text-white text-lg mb-2">Criador Rápido (Grátis)</h3>
+                <h3 className="font-bold text-white text-lg mb-2">Criador Rápido</h3>
                 <p className="text-xs text-slate-400 mb-6 leading-relaxed">
-                    Use nossos templates prontos. Ideal para criar ofertas em segundos.
+                    Use nossos templates prontos. Ideal para criar ofertas e anúncios em segundos.
                 </p>
                 <span className="text-xs font-black text-blue-400 uppercase tracking-widest flex items-center gap-2 group-hover:gap-3 transition-all">
                     Começar agora <ArrowRight size={14} />
                 </span>
             </button>
-            
-            {/* NOVO CARD BANNER PROFISSIONAL */}
             <button
-              onClick={handleSelectProfessional}
-              className="bg-slate-800 p-8 rounded-3xl border border-white/10 text-left hover:border-emerald-500/50 transition-all group relative overflow-hidden"
+              onClick={() => setView('editor')}
+              className="bg-slate-800 p-8 rounded-3xl border border-white/10 text-left hover:border-purple-500/50 transition-all group"
             >
-              <div className="absolute top-4 right-4 bg-emerald-500 text-white text-[9px] font-black px-3 py-1 rounded-full shadow-lg flex items-center gap-1">
-                  <Sparkles size={10} className="fill-white"/> PROMOÇÃO DE INAUGURAÇÃO
+                <div className="w-12 h-12 bg-purple-500/10 rounded-2xl flex items-center justify-center text-purple-400 mb-4 border border-purple-500/20">
+                    <Paintbrush size={24} />
+                </div>
+                <h3 className="font-bold text-white text-lg mb-2">Editor Personalizado</h3>
+                <p className="text-xs text-slate-400 mb-6 leading-relaxed">
+                    Tenha controle total sobre cores, fontes e layout para um banner 100% original.
+                </p>
+                 <span className="text-xs font-black text-purple-400 uppercase tracking-widest flex items-center gap-2 group-hover:gap-3 transition-all">
+                    Criar do zero <ArrowRight size={14} />
+                </span>
+            </button>
+            <button
+              onClick={() => alert('Solicitação de arte enviada! Entraremos em contato em breve.')}
+              className="bg-slate-800 p-8 rounded-3xl border border-white/10 text-left hover:border-emerald-500/50 transition-all group relative"
+            >
+              <div className="absolute top-4 right-4 bg-emerald-500/10 text-emerald-400 text-[9px] font-bold px-2.5 py-1 rounded-full border border-emerald-500/20">
+                  Oferta especial
               </div>
               <div className="w-12 h-12 bg-emerald-500/10 rounded-2xl flex items-center justify-center text-emerald-400 mb-4 border border-emerald-500/20">
                   <Rocket size={24} />
               </div>
-              <h3 className="font-bold text-white text-lg mb-2">Banner profissional criado pela plataforma ⭐</h3>
+              <h3 className="font-bold text-white text-lg mb-2">👉 Banner criado por nossos designers</h3>
               <p className="text-xs text-slate-400 mb-6 leading-relaxed">
-                  Nossa equipe cria um banner profissional para sua loja.
+                  Nossa equipe cria um banner profissional para sua loja, pronto para anunciar no app.
               </p>
               
-              <div className="flex items-center gap-3 mb-6 bg-slate-900/50 p-3 rounded-xl border border-white/5 w-fit">
-                 <span className="text-slate-500 line-through text-xs font-bold">R$ {formatCurrency(PROFESSIONAL_BANNER_PRICING.originalCents)}</span>
-                 <span className="text-xl font-black text-emerald-400">R$ {formatCurrency(PROFESSIONAL_BANNER_PRICING.promoCents)}</span>
-              </div>
-              
-              <div className="mb-6">
-                 <p className="text-[10px] text-emerald-400 font-bold uppercase tracking-widest">
-                    Você economiza {PROFESSIONAL_BANNER_PRICING.savingsPercent}% • R$ {(PROFESSIONAL_BANNER_PRICING.savingsValueCents / 100).toFixed(2).replace('.', ',')} a menos
-                 </p>
+              <ul className="text-xs text-slate-400 space-y-2 mb-6">
+                <li className="flex items-center gap-2"><Check size={14} className="text-emerald-400"/>Até 3 alterações inclusas</li>
+                <li className="flex items-center gap-2"><Check size={14} className="text-emerald-400"/>Arte profissional feita por designers</li>
+                <li className="flex items-center gap-2"><Check size={14} className="text-emerald-400"/>Banner otimizado para o app</li>
+              </ul>
+
+              <div className="flex items-baseline gap-2 mb-6">
+                <span className="text-slate-500 line-through">R$ 129,90</span>
+                <span className="text-3xl font-black text-white">R$ 59,90</span>
+                <span className="text-slate-400 text-xs font-medium">por arte</span>
               </div>
 
               <span className="text-xs font-black text-emerald-400 uppercase tracking-widest flex items-center gap-2 group-hover:gap-3 transition-all">
-                  Selecionar Serviço <ArrowRight size={14} />
+                  Solicitar agora <ArrowRight size={14} />
               </span>
             </button>
           </div>
@@ -459,7 +488,6 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
         setSelectedGoal(null);
         setSelectedTemplate(null);
         setFormData({});
-        setView('sales');
       };
 
       if (isCustom) {
@@ -565,11 +593,6 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
                                 onChange={(e) => handleFormDataChange(field.id, e.target.value)}
                                 className="w-full mt-2 bg-slate-700 p-3 rounded-lg text-white"
                             />
-                            {field.id === 'logo_url' && (
-                                <p className="text-xs text-slate-500 mt-2">
-                                    Usamos automaticamente a logo do seu perfil. Você pode trocar se quiser.
-                                </p>
-                            )}
                         </div>
                     ))}
                     {!ctaStepCompleted ? (
@@ -591,12 +614,6 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
     }
     return null;
   };
-  
-  const isCreationReady = useMemo(() => {
-    if (view === 'editor') return !!editorData.title;
-    if (view === 'creator') return !!(selectedTemplate && formData.headline);
-    return false;
-  }, [view, editorData, formData, selectedTemplate]);
 
   return (
     <div className="min-h-screen bg-slate-900 text-white font-sans flex flex-col">
@@ -619,25 +636,18 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
         </button>
       </div>
       
-      <main className="flex-1 overflow-y-auto no-scrollbar p-6 pb-48">
+      <main className="flex-1 overflow-y-auto no-scrollbar p-6 pb-32">
         {renderStep()}
       </main>
 
-      {plan && view !== 'sales' && (
+      {view !== 'sales' && (
           <div className="fixed bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-slate-900 via-slate-900 to-transparent max-w-md mx-auto z-30">
-            <div className="flex justify-between items-center mb-4 text-white bg-slate-800/50 p-3 rounded-xl backdrop-blur-sm border border-white/10">
-              <div>
-                  <p className="text-xs text-slate-400">Plano Selecionado</p>
-                  <p className="font-bold text-sm">{plan.label}</p>
-              </div>
-              <p className="text-xl font-black">{formatCurrency(plan.priceCents)}</p>
-            </div>
             <button 
                 onClick={handlePublish}
                 disabled={isSaving || (view === 'creator' && !selectedTemplate)}
                 className="w-full bg-[#1E5BFF] text-white font-black py-5 rounded-2xl shadow-xl shadow-blue-500/20 flex items-center justify-center gap-3 active:scale-[0.98] transition-all disabled:opacity-50 disabled:grayscale"
             >
-                {isSaving ? <Loader2 className="w-6 h-6 animate-spin" /> : 'Finalizar e Pagar'}
+                {isSaving ? <Loader2 className="w-6 h-6 animate-spin" /> : 'Publicar Banner'}
             </button>
           </div>
       )}

@@ -76,60 +76,6 @@
     <style>
       .no-scrollbar::-webkit-scrollbar { display: none; }
       .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-
-      /* Custom Slider Styles */
-      input[type=range] {
-        -webkit-appearance: none;
-        appearance: none;
-        background: transparent;
-        cursor: pointer;
-        width: 100%;
-      }
-      /* Webkit (Chrome, Safari) */
-      input[type=range]::-webkit-slider-runnable-track {
-        background: #e5e7eb; /* bg-gray-200 */
-        height: 0.5rem;
-        border-radius: 0.5rem;
-      }
-      .dark input[type=range]::-webkit-slider-runnable-track {
-        background: #374151; /* dark:bg-gray-700 */
-      }
-      input[type=range]::-webkit-slider-thumb {
-        -webkit-appearance: none;
-        appearance: none;
-        margin-top: -0.5rem; /* center thumb on track */
-        background-color: #1E5BFF;
-        height: 1.5rem;
-        width: 1.5rem;
-        border-radius: 9999px;
-        border: 4px solid white;
-        box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
-      }
-       .dark input[type=range]::-webkit-slider-thumb {
-        border-color: #111827; /* dark:bg-gray-900 */
-      }
-
-      /* Firefox */
-      input[type=range]::-moz-range-track {
-        background: #e5e7eb;
-        height: 0.5rem;
-        border-radius: 0.5rem;
-        border: none;
-      }
-       .dark input[type=range]::-moz-range-track {
-        background: #374151;
-      }
-      input[type=range]::-moz-range-thumb {
-        background-color: #1E5BFF;
-        height: 1.5rem;
-        width: 1.5rem;
-        border-radius: 9999px;
-        border: 4px solid white;
-        box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
-      }
-      .dark input[type=range]::-moz-range-thumb {
-        border-color: #111827;
-      }
     </style>
   <script type="importmap">
 {
