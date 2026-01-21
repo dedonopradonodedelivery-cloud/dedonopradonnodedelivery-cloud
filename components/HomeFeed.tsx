@@ -34,7 +34,17 @@ import { trackAdEvent } from '../lib/analytics';
 import { fetchHomeBanner } from '../lib/bannerService';
 import { useSwipeableCarousel } from '../hooks/useSwipeableCarousel';
 
-// --- COMPONENTES DE RENDERIZAÇÃO DINÂMICA DE BANNER ---
+interface HomeFeedProps {
+  onNavigate: (view: string) => void;
+  onSelectCategory: (category: Category) => void;
+  onSelectCollection: (collection: EditorialCollection) => void;
+  onStoreClick?: (store: Store) => void;
+  searchTerm?: string;
+  stores: Store[];
+  user: User | null;
+  userRole?: 'cliente' | 'lojista' | null;
+  onRequireLogin: () => void;
+}
 
 const TemplateBannerRender: React.FC<{ config: any }> = ({ config }) => {
     const { template_id, headline, subheadline, product_image_url } = config;
@@ -82,21 +92,18 @@ const CustomBannerRender: React.FC<{ config: any }> = ({ config }) => {
     
     return (
         <div 
-            className={`w-full h-full p-8 ${layoutClasses[template_id] || 'flex flex-col justify-center'} select-none`}
+            className={`w-full h-full p-8 ${layoutClasses[template_id as keyof typeof layoutClasses] || 'flex flex-col justify-center'} select-none`}
             style={{ backgroundColor: background_color, color: text_color }}
         >
-            <h3 className={`${template_id === 'headline' ? headlineFontSize[font_size] : fontSizes[font_size]} font-black leading-tight line-clamp-2`} style={{ fontFamily: font_family }}>
+            <h3 className={`${template_id === 'headline' ? headlineFontSize[font_size as keyof typeof headlineFontSize] : fontSizes[font_size as keyof typeof fontSizes]} font-black leading-tight line-clamp-2`} style={{ fontFamily: font_family }}>
                 {title || "Seu Título Aqui"}
             </h3>
-            <p className={`${subFontSizes[font_size]} mt-3 opacity-80 max-w-md line-clamp-3`} style={{ fontFamily: font_family }}>
+            <p className={`${subFontSizes[font_size as keyof typeof subFontSizes]} mt-3 opacity-80 max-w-md line-clamp-3`} style={{ fontFamily: font_family }}>
                 {subtitle || "Descreva sua oferta."}
             </p>
         </div>
     );
 };
-
-
-// --- COMPONENTE INDEPENDENTE: HOME CAROUSEL ---
 
 const HomeCarousel: React.FC<{ onNavigate: (v: string) => void; onStoreClick?: (store: Store) => void; stores?: Store[] }> = ({ onNavigate, onStoreClick, stores }) => {
   const { currentNeighborhood } = useNeighborhood();
@@ -309,29 +316,12 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void; onStoreClick?: (
   );
 };
 
-// FIX: Added missing HomeFeedProps interface definition
-interface HomeFeedProps {
-  onNavigate: (view: string) => void;
-  onSelectCategory: (category: Category) => void;
-  onSelectCollection: (collection: EditorialCollection) => void;
-  onStoreClick?: (store: Store) => void;
-  searchTerm?: string;
-  stores: Store[];
-  user: User | null;
-  userRole?: 'cliente' | 'lojista' | null;
-  onRequireLogin: () => void;
-}
-
 export const HomeFeed: React.FC<HomeFeedProps> = ({ 
   onNavigate, 
   onSelectCategory, 
-  onSelectCollection,
   onStoreClick, 
   stores,
-  searchTerm,
-  user,
-  userRole,
-  onRequireLogin
+  user
 }) => {
   const [listFilter, setListFilter] = useState<'all' | 'top_rated' | 'open_now'>('all');
   const categoriesRef = useRef<HTMLDivElement>(null);

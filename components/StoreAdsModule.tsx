@@ -217,13 +217,13 @@ const BannerEditorPreview: React.FC<{ data: any }> = ({ data }) => {
     
     return (
         <div 
-            className={`w-full aspect-video rounded-2xl overflow-hidden relative shadow-lg p-8 ${layoutClasses[template]}`}
+            className={`w-full aspect-video rounded-2xl overflow-hidden relative shadow-lg p-8 ${layoutClasses[template as keyof typeof layoutClasses]}`}
             style={{ backgroundColor: bgColor, color: textColor }}
         >
-            <h3 className={`${template === 'headline' ? headlineFontSize[fontSize] : fontSizes[fontSize]} font-black leading-tight line-clamp-2`} style={{ fontFamily }}>
+            <h3 className={`${template === 'headline' ? headlineFontSize[fontSize as keyof typeof headlineFontSize] : fontSizes[fontSize as keyof typeof fontSizes]} font-black leading-tight line-clamp-2`} style={{ fontFamily }}>
                 {title || "Seu Título Aqui"}
             </h3>
-            <p className={`${subFontSizes[fontSize]} mt-3 opacity-80 max-w-md line-clamp-3`} style={{ fontFamily }}>
+            <p className={`${subFontSizes[fontSize as keyof typeof subFontSizes]} mt-3 opacity-80 max-w-md line-clamp-3`} style={{ fontFamily }}>
                 {subtitle || "Descreva sua oferta em poucas palavras."}
             </p>
         </div>
@@ -268,14 +268,12 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
   const [view, setView] = useState<'sales' | 'creator' | 'editor'>('sales');
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
 
-  // --- Template Creator State ---
   const [selectedGoal, setSelectedGoal] = useState<string | null>(null);
   const [selectedTemplate, setSelectedTemplate] = useState<any | null>(null);
   const [selectedCta, setSelectedCta] = useState<string | null>(null);
   const [ctaStepCompleted, setCtaStepCompleted] = useState(false);
   const [formData, setFormData] = useState<any>({});
   
-  // --- Custom Editor State ---
   const [editorData, setEditorData] = useState({
     template: 'simple_left',
     palette: 'blue_white',
@@ -285,7 +283,6 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
     subtitle: 'Subtítulo descritivo aqui',
   });
 
-  // --- Shared State ---
   const [isSaving, setIsSaving] = useState(false);
   
   useEffect(() => {
@@ -529,7 +526,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
         if (selectedGoal && !selectedTemplate) {
           const availableTemplates = BANNER_TEMPLATES.filter(t => t.goal === selectedGoal);
           return (
-            <div className="animate-in slide-in-from-right duration-500">
+            <div className="animate-in slide-in-from-right duration-300">
               <button onClick={handleBackToSelection} className="flex items-center gap-2 text-xs text-slate-400 mb-4"><ChevronLeft size={16} /> Voltar</button>
               <h3 className="font-black text-sm uppercase tracking-widest text-blue-400 mb-4">Passo 2: Escolha um modelo</h3>
               <div className="space-y-4">
