@@ -1,5 +1,6 @@
 
 
+
 import React, { useState, useEffect, useMemo } from 'react';
 import { Layout } from './components/layout/Layout';
 import { Header } from './components/layout/Header';
@@ -413,12 +414,15 @@ const App: React.FC = () => {
   };
   
   // Admin handlers
-  const handleAdminSendMessage = (orderId: string, text: string, type: 'text' | 'system' = 'text') => {
+  // FIX: Updated `onSendMessage` type definition to allow 'system'
+  const handleAdminSendMessage = (orderId: string, text: string, type: 'text' | 'system' = 'text', metadata?: any) => {
     const newMessage: BannerMessage = {
       id: `msg-a-${Date.now()}`,
       orderId,
       senderType: type === 'system' ? 'system' : 'team',
       body: text,
+      type, // Pass the type
+      metadata,
       createdAt: new Date().toISOString(),
     };
     setBannerMessages(prev => [...prev, newMessage]);
