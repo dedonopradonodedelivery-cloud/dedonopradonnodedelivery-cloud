@@ -8,7 +8,7 @@ interface AdminBannerOrderDetailProps {
   orders: BannerOrder[];
   messages: BannerMessage[];
   onBack: () => void;
-  // FIX: Updated signature for onSendMessage
+  // FIX: Updated signature for onSendMessage to include type and metadata
   onSendMessage: (orderId: string, text: string, type?: 'text' | 'system' | 'assets_payload', metadata?: any) => void;
   // FIX: Added onUpdateOrder prop
   onUpdateOrder: (orderId: string, updates: Partial<BannerOrder>) => void;

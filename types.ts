@@ -277,6 +277,8 @@ export interface BannerPlan {
   isPromo?: boolean;
   isMostAdvantageous?: boolean;
   benefit: string;
+  // FIX: Add neighborhoods to BannerPlan
+  neighborhoods?: { id: string; name: string }[];
 }
 
 // NEW: Type for dynamic banner configuration
@@ -307,7 +309,7 @@ export interface BannerOrder {
   createdAt: string;
   status: 'em_analise' | 'em_producao' | 'aprovado' | 'publicado';
   lastViewedAt?: string;
-  // AUTOMATION STUFF
+  // AUTOMATION FLAGS
   onboardingStage: 'none' | 'requested_assets' | 'assets_received' | 'in_production' | 'finalized';
   assetsSubmittedAt?: string;
   autoMessagesFlags: {
@@ -326,7 +328,7 @@ export interface BannerMessage {
   body: string;
   createdAt: string;
   readAt?: string;
-  // RICH TYPES
+  // Rich types
   type?: 'text' | 'form_request' | 'assets_payload' | 'status' | 'thank_you';
   metadata?: any;
 }
