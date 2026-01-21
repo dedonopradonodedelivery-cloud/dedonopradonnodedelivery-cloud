@@ -1,6 +1,5 @@
 
 
-
 import React, { useState, useEffect, useMemo } from 'react';
 import { Layout } from './components/layout/Layout';
 import { Header } from './components/layout/Header';
@@ -39,6 +38,8 @@ import { BannerCheckoutView } from './components/BannerCheckoutView';
 import { SponsoredAdsView } from './components/SponsoredAdsView';
 import { SponsoredAdsCheckoutView } from './components/SponsoredAdsCheckoutView';
 import { SponsoredAdsSuccessView } from './components/SponsoredAdsSuccessView';
+// FIX: Removed import for BannerProfessionalPaymentView as it's deprecated.
+// import { BannerProfessionalPaymentView } from './components/BannerProfessionalPaymentView'; 
 import { BannerOrderTrackingView } from './components/BannerOrderTrackingView';
 import { AdminBannerOrdersList } from './components/AdminBannerOrdersList';
 import { AdminBannerOrderDetail } from './components/AdminBannerOrderDetail';
@@ -581,7 +582,7 @@ const App: React.FC = () => {
                         onComplete={handleCompleteSponsoredFlow}
                     />
                 )}
-                {/* NEW: Removed BannerProfessionalPaymentView as its functionality is merged into BannerCheckoutView */}
+                {/* FIX: Removed BannerProfessionalPaymentView as its functionality is merged into BannerCheckoutView. */}
                 {activeTab === 'banner_order_tracking' && viewingOrderId && (
                   <BannerOrderTrackingView
                     orderId={viewingOrderId}

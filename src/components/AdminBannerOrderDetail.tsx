@@ -110,6 +110,10 @@ export const AdminBannerOrderDetail: React.FC<AdminBannerOrderDetailProps> = ({
     );
   }
 
+  const isFinalized = order.status === 'publicado' || order.status === 'aprovado';
+  // FIX: Define showThanksButton here, before JSX usage.
+  const showThanksButton = isFinalized && !order.autoMessagesFlags?.thanksSent; // Derived from order prop.
+
   return (
     <div className="min-h-screen bg-slate-900 text-white font-sans flex flex-col animate-in fade-in duration-500">
       <header className="sticky top-0 z-40 bg-slate-900/95 backdrop-blur-md px-6 py-4 border-b border-white/5 flex items-center justify-between shadow-sm">

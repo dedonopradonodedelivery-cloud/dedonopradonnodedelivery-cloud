@@ -231,9 +231,7 @@ export interface DbCashbackTransaction {
   purchase_value: number;
   amount_from_balance: number;
   amount_to_pay: number;
-  // FIX: Renamed cashback_value to amount_cents
-  amount_cents: number;
-  // FIX: Removed duplicate TransactionStatus as it's defined globally
+  cashback_value: number;
   status: TransactionStatus;
   created_at: string;
   approved_at?: string;
@@ -329,6 +327,6 @@ export interface BannerMessage {
   createdAt: string;
   readAt?: string;
   // Rich types
-  type?: 'text' | 'form_request' | 'assets_payload' | 'status' | 'thank_you' | 'system'; // Add 'system' type
+  type?: 'text' | 'form_request' | 'assets_payload' | 'status' | 'thank_you' | 'system'; // Add 'system' type here
   metadata?: any;
 }
