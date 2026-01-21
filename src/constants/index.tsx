@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { 
   Utensils, ShoppingCart, Scissors, Heart, PawPrint, Home, Wrench, 
@@ -17,20 +18,29 @@ import { AdType, Category, Store, Story, EditorialCollection, Job, CommunityPost
 
 export const BANNER_BASE_PRICES_CENTS = {
   home: {
-    '1m': 19990,
-    '3m_promo': 14990,
+    fullMonthlyPrice: 19990, // Preço cheio por mês para 1 mês na Home
   },
   categorias: {
-    '1m': 14990,
-    '3m_promo': 8990,
+    fullMonthlyPrice: 14990, // Preço cheio por mês para 1 mês em Categorias
   },
 };
 
+export const PROFESSIONAL_BANNER_PRICING = {
+  originalCents: 15990,
+  promoCents: 6990,
+  isInaugurationPromo: true,
+  savingsPercent: 56, // (159.90 - 69.90) / 159.90 * 100
+  savingsValueCents: 9000
+};
+
 export const BANNER_PLANS: BannerPlan[] = [
-    { id: 'home_3m', placement: 'Home', durationMonths: 3, priceCents: BANNER_BASE_PRICES_CENTS.home['3m_promo'] * 3, label: '3 Meses na Home (Promo)', installmentText: `3x de R$ ${(BANNER_BASE_PRICES_CENTS.home['3m_promo']/100).toFixed(2).replace('.',',')}`, isMostAdvantageous: true, benefit: 'Maior visibilidade por mais tempo' },
-    { id: 'home_1m', placement: 'Home', durationMonths: 1, priceCents: BANNER_BASE_PRICES_CENTS.home['1m'], label: '1 Mês na Home', benefit: 'Destaque principal por 30 dias' },
-    { id: 'cat_3m', placement: 'Categorias', durationMonths: 3, priceCents: BANNER_BASE_PRICES_CENTS.categorias['3m_promo'] * 3, label: '3 Meses em Categorias (Promo)', installmentText: `3x de R$ ${(BANNER_BASE_PRICES_CENTS.categorias['3m_promo']/100).toFixed(2).replace('.',',')}`, isPromo: true, benefit: 'Alcance clientes segmentados' },
-    { id: 'cat_1m', placement: 'Categorias', durationMonths: 1, priceCents: BANNER_BASE_PRICES_CENTS.categorias['1m'], label: '1 Mês em Categorias', benefit: 'Ideal para campanhas específicas' },
+    // Esses planos agora terão seus `priceCents` e `installmentText` recalculados dinamicamente
+    // na BannerConfigView, para refletir o número de bairros e o desconto de 3 meses.
+    // Os IDs e labels são mantidos para identificação.
+    { id: 'home_3m', placement: 'Home', durationMonths: 3, priceCents: 0, label: '3 Meses na Home (Promo)', isMostAdvantageous: true, benefit: 'Maior visibilidade por mais tempo' },
+    { id: 'home_1m', placement: 'Home', durationMonths: 1, priceCents: 0, label: '1 Mês na Home', benefit: 'Destaque principal por 30 dias' },
+    { id: 'cat_3m', placement: 'Categorias', durationMonths: 3, priceCents: 0, label: '3 Meses em Categorias (Promo)', isPromo: true, benefit: 'Alcance clientes segmentados' },
+    { id: 'cat_1m', placement: 'Categorias', durationMonths: 1, priceCents: 0, label: '1 Mês em Categorias', benefit: 'Ideal para campanhas específicas' },
 ];
 
 export const NEIGHBORHOOD_OPTIONS = [
@@ -215,7 +225,7 @@ export const SUBCATEGORIES: Record<string, { name: string; icon: React.ReactNode
     { name: 'Moda Fitness', icon: <Dumbbell /> },
     { name: 'Brechós', icon: <Tag /> },
   ],
-  'Condomínio': [
+  'Condominio': [
     { name: 'Avisos & Comunicados', icon: <Bell /> },
     { name: 'Serviços para Condomínio', icon: <Wrench /> },
     { name: 'Manutenção Predial', icon: <Hammer /> },
