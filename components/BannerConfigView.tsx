@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo, useEffect } from 'react';
 import { ChevronLeft, Check, Home, LayoutGrid, MapPin, Search, Star, Rocket, Sparkles, TrendingUp, X, Map, BarChart, Banknote, Layers } from 'lucide-react';
 import { BannerConfig } from '../types';
@@ -43,10 +42,12 @@ export const BannerConfigView: React.FC<BannerConfigViewProps> = ({ onBack, onCo
     const [selectedNeighborhoods, setSelectedNeighborhoods] = useState<string[]>([]);
     
     const priceCents = useMemo(() => {
+        if (!placement) return 0;
         return calculateBannerPrice(placement, duration, selectedNeighborhoods.length);
     }, [placement, duration, selectedNeighborhoods]);
 
     const savings = useMemo(() => {
+        if (!placement) return { percentage: 0, amount: formatCurrency(0) };
         let price1m = 0;
         let price3m_promo = 0;
 
@@ -72,7 +73,7 @@ export const BannerConfigView: React.FC<BannerConfigViewProps> = ({ onBack, onCo
     }, [placement]);
 
     const oneMonthSavings = useMemo(() => {
-        if (placement === 'Todos') return null;
+        if (!placement || placement === 'Todos') return null;
         const key = placement.toLowerCase() as 'home' | 'categorias';
         const original = BANNER_BASE_PRICES_CENTS[key]['1m_original'];
         const promo = BANNER_BASE_PRICES_CENTS[key]['1m_promo'];
@@ -84,8 +85,8 @@ export const BannerConfigView: React.FC<BannerConfigViewProps> = ({ onBack, onCo
     const handleConfigure = () => {
         if (!isReady) return;
         const config: BannerConfig = {
-            placement,
-            duration,
+            placement: placement as 'Home' | 'Categorias' | 'Todos',
+            duration: duration as '1m' | '3m_promo',
             neighborhoods: NEIGHBORHOOD_OPTIONS.filter(n => selectedNeighborhoods.includes(n.id)),
             priceCents,
         };
@@ -102,7 +103,7 @@ export const BannerConfigView: React.FC<BannerConfigViewProps> = ({ onBack, onCo
         }
     };
 
-    const currentPlacementKey = placement === 'Todos' ? 'home' : placement.toLowerCase() as 'home' | 'categorias';
+    const currentPlacementKey = placement === 'Todos' ? 'home' : (placement?.toLowerCase() as 'home' | 'categorias' || 'home');
 
     return (
         <div className="min-h-screen bg-slate-900 text-white font-sans flex flex-col">
@@ -200,10 +201,10 @@ export const BannerConfigView: React.FC<BannerConfigViewProps> = ({ onBack, onCo
                             <p className="font-black text-4xl text-white">1 Mês</p>
                             <div className="mt-3 flex flex-col items-center">
                                 <p className="text-xs text-slate-400 line-through font-bold">
-                                    De {formatCurrency(BANNER_BASE_PRICES_CENTS[currentPlacementKey]['1m_original'])}
+                                    De {formatCurrency(BANNER_BASE_PRICES_CENTS[currentPlacementKey as keyof typeof BANNER_BASE_PRICES_CENTS]['1m_original'])}
                                 </p>
                                 <p className="text-lg font-black text-blue-400">
-                                    Por {formatCurrency(BANNER_BASE_PRICES_CENTS[currentPlacementKey]['1m_promo'])}
+                                    Por {formatCurrency(BANNER_BASE_PRICES_CENTS[currentPlacementKey as keyof typeof BANNER_BASE_PRICES_CENTS]['1m_promo'])}
                                 </p>
                             </div>
                             {oneMonthSavings && (

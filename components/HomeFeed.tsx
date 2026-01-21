@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { Store, Category, EditorialCollection, AdType, BannerItem } from '../types';
 import { 

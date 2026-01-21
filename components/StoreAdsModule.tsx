@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo, useEffect } from 'react';
 import { 
   ChevronLeft, 
@@ -67,7 +66,6 @@ const getContrastRatio = (hex1: string, hex2: string): number => {
   const darkest = Math.min(lum1, lum2);
   return (lightest + 0.05) / (darkest + 0.05);
 };
-// --- END VALIDATION ---
 
 const formatCurrency = (cents: number) => `R$ ${(cents / 100).toFixed(2).replace('.', ',')}`;
 
@@ -80,7 +78,6 @@ interface StoreAdsModuleProps {
   onFinalize: (draft: any) => void;
 }
 
-// --- CONFIGURAÇÕES DO CRIADOR RÁPIDO ---
 const GOALS = [
     { id: 'promover_oferta', name: 'Promover Oferta', icon: Gift, description: 'Descontos, combos e promoções.' },
     { id: 'anunciar_novidade', name: 'Anunciar Novidade', icon: Sparkles, description: 'Lançamentos de produtos ou serviços.' },
@@ -124,9 +121,7 @@ const BANNER_TEMPLATES = [
 ];
 
 const CTA_OPTIONS = ["Saiba Mais", "Peça Agora", "Ver Cardápio", "Agende seu Horário", "Visite nosso Instagram"];
-// --- FIM CONFIGURAÇÕES ---
 
-// --- CONFIGURAÇÕES DO EDITOR DE BANNER PERSONALIZADO ---
 const EDITOR_LAYOUTS = [
   { id: 'simple_left', name: 'Simples' },
   { id: 'centered', name: 'Centralizado' },
@@ -141,7 +136,6 @@ const COLOR_PALETTES = [
   { id: 'red_white', name: 'Vermelho', bg: '#DC2626', text: '#FFFFFF', previewColors: ['#DC2626', '#FFFFFF'] },
 ];
 
-// Componente de Preview do Banner (Template)
 const BannerPreview: React.FC<{ templateId: string; data: any; storeName: string; cta?: string | null; }> = ({ templateId, data, storeName, cta }) => {
   const template = BANNER_TEMPLATES.find(t => t.id === templateId);
   if (!template) return null;
@@ -199,10 +193,8 @@ const BannerPreview: React.FC<{ templateId: string; data: any; storeName: string
   return <div className="transition-all duration-300">{renderContent()}</div>;
 };
 
-// Componente de Preview do Editor
 const BannerEditorPreview: React.FC<{ data: any }> = ({ data }) => {
     const { template, palette, fontSize, fontFamily, title, subtitle } = data;
-    
     const selectedPalette = COLOR_PALETTES.find(p => p.id === palette) || COLOR_PALETTES[0];
     const { bg: bgColor, text: textColor } = selectedPalette;
     
@@ -264,19 +256,14 @@ const ValidationErrorsModal: React.FC<{ errors: string[]; onClose: () => void }>
   );
 };
 
-
 export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNavigate, categoryName, user, plan, onFinalize }) => {
   const [view, setView] = useState<'sales' | 'creator' | 'editor'>('sales');
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
-
-  // --- Template Creator State ---
   const [selectedGoal, setSelectedGoal] = useState<string | null>(null);
   const [selectedTemplate, setSelectedTemplate] = useState<any | null>(null);
   const [selectedCta, setSelectedCta] = useState<string | null>(null);
   const [ctaStepCompleted, setCtaStepCompleted] = useState(false);
   const [formData, setFormData] = useState<any>({});
-  
-  // --- Custom Editor State ---
   const [editorData, setEditorData] = useState({
     template: 'simple_left',
     palette: 'blue_white',
@@ -285,8 +272,6 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
     title: 'Título do Banner',
     subtitle: 'Subtítulo descritivo aqui',
   });
-
-  // --- Shared State ---
   const [isSaving, setIsSaving] = useState(false);
   
   useEffect(() => {
@@ -343,18 +328,12 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
       setValidationErrors(validation);
       return;
     }
-    
     setIsSaving(true);
-
     const draft = view === 'editor' 
       ? { type: 'custom_editor', ...editorData } 
       : { type: 'template', ...formData, template_id: selectedTemplate.id, cta: selectedCta };
-
     onFinalize(draft);
-    
-    setTimeout(() => {
-      setIsSaving(false);
-    }, 500);
+    setTimeout(() => { setIsSaving(false); }, 500);
   };
 
   const handleEditorDataChange = (field: keyof typeof editorData, value: any) => {
@@ -382,41 +361,27 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
           </div>
           
           <div className="grid grid-cols-1 gap-6">
-            <button
-              onClick={() => onNavigate('banner_upload')}
-              className="bg-slate-800 p-8 rounded-3xl border border-white/10 text-left hover:border-gray-500/50 transition-all group"
-            >
+            <button onClick={() => onNavigate('banner_upload')} className="bg-slate-800 p-8 rounded-3xl border border-white/10 text-left hover:border-gray-500/50 transition-all group">
                 <div className="w-12 h-12 bg-gray-500/10 rounded-2xl flex items-center justify-center text-gray-400 mb-4 border border-gray-500/20">
                     <ImageIcon size={24} />
                 </div>
                 <h3 className="font-bold text-white text-lg mb-2">Já tenho minha arte</h3>
-                <p className="text-xs text-slate-400 mb-6 leading-relaxed">
-                    Faça o upload do seu banner pronto (JPG, PNG) para aprovação.
-                </p>
+                <p className="text-xs text-slate-400 mb-6 leading-relaxed">Faça o upload do seu banner pronto (JPG, PNG) para aprovação.</p>
                 <span className="text-xs font-black text-gray-400 uppercase tracking-widest flex items-center gap-2 group-hover:gap-3 transition-all">
                     Fazer upload <ArrowRight size={14} />
                 </span>
             </button>
-            <button
-              onClick={() => setView('creator')}
-              className="bg-slate-800 p-8 rounded-3xl border border-white/10 text-left hover:border-blue-500/50 transition-all group"
-            >
+            <button onClick={() => setView('creator')} className="bg-slate-800 p-8 rounded-3xl border border-white/10 text-left hover:border-blue-500/50 transition-all group">
                 <div className="w-12 h-12 bg-blue-500/10 rounded-2xl flex items-center justify-center text-blue-400 mb-4 border border-blue-500/20">
                     <Sparkles size={24} />
                 </div>
                 <h3 className="font-bold text-white text-lg mb-2">Criador Rápido (Grátis)</h3>
-                <p className="text-xs text-slate-400 mb-6 leading-relaxed">
-                    Use nossos templates prontos. Ideal para criar ofertas em segundos.
-                </p>
+                <p className="text-xs text-slate-400 mb-6 leading-relaxed">Use nossos templates prontos. Ideal para criar ofertas em segundos.</p>
                 <span className="text-xs font-black text-blue-400 uppercase tracking-widest flex items-center gap-2 group-hover:gap-3 transition-all">
                     Começar agora <ArrowRight size={14} />
                 </span>
             </button>
-            
-            <button
-              onClick={handleSelectProfessional}
-              className="bg-slate-800 p-8 rounded-3xl border border-white/10 text-left hover:border-emerald-500/50 transition-all group relative overflow-hidden"
-            >
+            <button onClick={handleSelectProfessional} className="bg-slate-800 p-8 rounded-3xl border border-white/10 text-left hover:border-emerald-500/50 transition-all group relative overflow-hidden">
               <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-emerald-500 text-white text-[10px] font-black px-4 py-1.5 rounded-full shadow-lg flex items-center gap-1">
                   <Star size={12} className="fill-white"/> PROMOÇÃO DE INAUGURAÇÃO
               </div>
@@ -424,29 +389,18 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
                   <Rocket size={24} />
               </div>
               <h3 className="font-bold text-white text-lg mb-2">Banner profissional criado pela plataforma</h3>
-              <p className="text-xs text-slate-400 mb-6 leading-relaxed">
-                  Nossa equipe cria um banner profissional para sua loja.
-              </p>
-              
+              <p className="text-xs text-slate-400 mb-6 leading-relaxed">Nossa equipe cria um banner profissional para sua loja.</p>
               <div className="flex flex-col items-start gap-1 mb-6">
-                 <p className="text-sm text-slate-500 font-medium line-through">
-                    De: {formatCurrency(PROFESSIONAL_BANNER_PRICING.originalCents)}
-                 </p>
-                 <p className="text-4xl font-black text-emerald-400 leading-none">
-                    Por: {formatCurrency(PROFESSIONAL_BANNER_PRICING.promoCents)}
-                 </p>
-                 <p className="text-base font-bold text-emerald-400 mt-2">
-                    Economize {formatCurrency(PROFESSIONAL_BANNER_PRICING.savingsValueCents)} ({PROFESSIONAL_BANNER_PRICING.savingsPercent}%)
-                 </p>
+                 <p className="text-sm text-slate-500 font-medium line-through">De: {formatCurrency(PROFESSIONAL_BANNER_PRICING.originalCents)}</p>
+                 <p className="text-4xl font-black text-emerald-400 leading-none">Por: {formatCurrency(PROFESSIONAL_BANNER_PRICING.promoCents)}</p>
+                 <p className="text-base font-bold text-emerald-400 mt-2">Economize {formatCurrency(PROFESSIONAL_BANNER_PRICING.savingsValueCents)} ({PROFESSIONAL_BANNER_PRICING.savingsPercent}%)</p>
                  <p className="text-[10px] text-slate-500 mt-1 font-medium">por tempo indeterminado</p>
               </div>
-              
               <ul className="text-xs text-slate-400 space-y-2 mb-6">
                 <li className="flex items-center gap-2"><Check size={14} className="text-emerald-400"/>Até 3 alterações inclusas</li>
                 <li className="flex items-center gap-2"><Check size={14} className="text-emerald-400"/>Arte profissional feita por designers</li>
                 <li className="flex items-center gap-2"><Check size={14} className="text-emerald-400"/>Banner otimizado para o app</li>
               </ul>
-
               <span className="text-xs font-black text-emerald-400 uppercase tracking-widest flex items-center gap-2 group-hover:gap-3 transition-all">
                   Selecionar Serviço <ArrowRight size={14} />
               </span>
@@ -458,7 +412,6 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
     
     if (view === 'creator' || view === 'editor') {
       const isCustom = view === 'editor';
-
       const handleBackToSelection = () => {
         setSelectedGoal(null);
         setSelectedTemplate(null);
@@ -530,7 +483,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
         if (selectedGoal && !selectedTemplate) {
           const availableTemplates = BANNER_TEMPLATES.filter(t => t.goal === selectedGoal);
           return (
-            <div className="animate-in slide-in-from-right duration-300">
+            <div className="animate-in slide-in-from-right duration-500">
               <button onClick={handleBackToSelection} className="flex items-center gap-2 text-xs text-slate-400 mb-4"><ChevronLeft size={16} /> Voltar</button>
               <h3 className="font-black text-sm uppercase tracking-widest text-blue-400 mb-4">Passo 2: Escolha um modelo</h3>
               <div className="space-y-4">
@@ -564,11 +517,6 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
                                 onChange={(e) => handleFormDataChange(field.id, e.target.value)}
                                 className="w-full mt-2 bg-slate-700 p-3 rounded-lg text-white"
                             />
-                            {field.id === 'logo_url' && (
-                                <p className="text-xs text-slate-500 mt-2">
-                                    Usamos automaticamente a logo do seu perfil. Você pode trocar se quiser.
-                                </p>
-                            )}
                         </div>
                     ))}
                     {!ctaStepCompleted ? (
@@ -603,18 +551,13 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
                 <p className="text-xs text-slate-500">{categoryName ? `Para: ${categoryName}` : 'Para: Home'}</p>
             </div>
         </div>
-        <button 
-            onClick={onBack}
-            className="p-2.5 bg-slate-800 text-slate-400 hover:text-white transition-colors border border-white/5 rounded-xl active:scale-95"
-        >
+        <button onClick={onBack} className="p-2.5 bg-slate-800 text-slate-400 hover:text-white transition-colors border border-white/5 rounded-xl active:scale-95">
             <X size={20} />
         </button>
       </div>
-      
       <main className="flex-1 overflow-y-auto no-scrollbar p-6 pb-48">
         {renderStep()}
       </main>
-
       {plan && view !== 'sales' && (
           <div className="fixed bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-slate-900 via-slate-900 to-transparent max-w-md mx-auto z-30">
             <div className="flex justify-between items-center mb-4 text-white bg-slate-800/50 p-3 rounded-xl backdrop-blur-sm border border-white/10">
@@ -624,17 +567,11 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
               </div>
               <p className="text-xl font-black">{formatCurrency(plan.priceCents)}</p>
             </div>
-            <button 
-                onClick={handlePublish}
-                disabled={isSaving || (view === 'creator' && !selectedTemplate)}
-                className="w-full bg-[#1E5BFF] text-white font-black py-5 rounded-2xl shadow-xl shadow-blue-500/20 flex items-center justify-center gap-3 active:scale-[0.98] transition-all disabled:opacity-50 disabled:grayscale"
-            >
+            <button onClick={handlePublish} disabled={isSaving || (view === 'creator' && !selectedTemplate)} className="w-full bg-[#1E5BFF] text-white font-black py-5 rounded-2xl shadow-xl shadow-blue-500/20 flex items-center justify-center gap-3 active:scale-[0.98] transition-all disabled:opacity-50 disabled:grayscale">
                 {isSaving ? <Loader2 className="w-6 h-6 animate-spin" /> : 'Finalizar e Pagar'}
             </button>
           </div>
       )}
-
-      <ValidationErrorsModal errors={validationErrors} onClose={() => setValidationErrors([])} />
     </div>
   );
 };
