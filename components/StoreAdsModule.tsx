@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo, useEffect } from 'react';
 import { 
   ChevronLeft, 
@@ -268,12 +269,14 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
   const [view, setView] = useState<'sales' | 'creator' | 'editor'>('sales');
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
 
+  // --- Template Creator State ---
   const [selectedGoal, setSelectedGoal] = useState<string | null>(null);
   const [selectedTemplate, setSelectedTemplate] = useState<any | null>(null);
   const [selectedCta, setSelectedCta] = useState<string | null>(null);
   const [ctaStepCompleted, setCtaStepCompleted] = useState(false);
   const [formData, setFormData] = useState<any>({});
   
+  // --- Custom Editor State ---
   const [editorData, setEditorData] = useState({
     template: 'simple_left',
     palette: 'blue_white',
@@ -283,6 +286,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
     subtitle: 'Subtítulo descritivo aqui',
   });
 
+  // --- Shared State ---
   const [isSaving, setIsSaving] = useState(false);
   
   useEffect(() => {
