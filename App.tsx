@@ -60,9 +60,12 @@ const App: React.FC = () => {
   const isAuthReturn = window.location.hash.includes('access_token') || window.location.search.includes('code=');
   const [splashStage, setSplashStage] = useState(splashWasShownInSession || isAuthReturn ? 4 : 0);
   const [isDarkMode, setIsDarkMode] = useState(false);
-  const [viewMode, setViewMode] = useState<RoleMode>(() => (localStorage.getItem('admin_view_mode') as RoleMode) || 'ADM');
+  const [viewMode, setViewMode] = useState<RoleMode>(() => (localStorage.getItem('admin_view_mode') as RoleMode) || 'Usuário');
   const [isRoleSwitcherOpen, setIsRoleSwitcherOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState(() => localStorage.getItem('localizei_active_tab') || 'home');
+  
+  // FIX: activeTab agora sempre inicia em 'home' para evitar saltos indesejados no refresh (F5)
+  const [activeTab, setActiveTab] = useState('home');
+  
   const [pendingTab, setPendingTab] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
   const [selectedStore, setSelectedStore] = useState<Store | null>(null);
@@ -73,8 +76,9 @@ const App: React.FC = () => {
   const [quoteCategory, setQuoteCategory] = useState('');
   const [adCategoryTarget, setAdCategoryTarget] = useState<string | null>(null);
 
-  useEffect(() => { localStorage.setItem('localizei_active_tab', activeTab); }, [activeTab]);
-  
+  // Determina se o modo atual é de Lojista (considerando role real ou viewMode do Admin)
+  const isMerchantMode = userRole === 'lojista' || (user?.email === ADMIN_EMAIL && viewMode === 'Lojista');
+
   useEffect(() => {
     const restrictedTabs = ['scan_cashback', 'merchant_qr_display', 'wallet', 'pay_cashback', 'store_area', 'admin_panel', 'edit_profile'];
     
@@ -97,20 +101,10 @@ const App: React.FC = () => {
 
   useEffect(() => {
     if (splashStage === 4) return;
-    const t1 = setTimeout(() => setSplashStage(3), 5000);
-    const t2 = setTimeout(() => { setSplashStage(4); splashWasShownInSession = true; }, 5800);
+    const t1 = setTimeout(() => setSplashStage(3), 3000);
+    const t2 = setTimeout(() => { setSplashStage(4); splashWasShownInSession = true; }, 3800);
     return () => { clearTimeout(t1); clearTimeout(t2); };
   }, []);
-
-  useEffect(() => {
-    if (user?.email !== ADMIN_EMAIL) return;
-    localStorage.setItem('admin_view_mode', viewMode);
-    switch (viewMode) {
-      case 'ADM': setActiveTab('admin_panel'); break;
-      case 'Lojista': setActiveTab('profile'); break;
-      default: if (activeTab === 'admin_panel' || activeTab === 'profile') setActiveTab('home');
-    }
-  }, [viewMode, user]);
 
   const handleSelectStore = (store: Store) => { setSelectedStore(store); setActiveTab('store_detail'); };
   const headerExclusionList = ['store_area', 'editorial_list', 'store_profile', 'category_detail', 'store_detail', 'profile', 'patrocinador_master', 'service_subcategories', 'service_specialties', 'store_ads_module', 'about', 'support', 'favorites', 'community_feed', 'admin_panel', 'cashback_landing', 'admin_banner_moderation'];
@@ -127,7 +121,19 @@ const App: React.FC = () => {
                 </div>
                 <div className="space-y-3">
                     {(['ADM', 'Usuário', 'Lojista', 'Visitante'] as RoleMode[]).map((role) => (
-                        <button key={role} onClick={() => { setViewMode(role); setIsRoleSwitcherOpen(false); }} className={`w-full p-5 rounded-[1.5rem] border text-left transition-all ${viewMode === role ? 'bg-white text-black' : 'bg-white/5 border-white/5 text-white'}`}>
+                        <button 
+                          key={role} 
+                          onClick={() => { 
+                            setViewMode(role); 
+                            localStorage.setItem('admin_view_mode', role);
+                            setIsRoleSwitcherOpen(false); 
+                            // Navegação forçada apenas no momento da troca manual
+                            if (role === 'Lojista') setActiveTab('profile');
+                            else if (role === 'ADM') setActiveTab('admin_panel');
+                            else setActiveTab('home');
+                          }} 
+                          className={`w-full p-5 rounded-[1.5rem] border text-left transition-all ${viewMode === role ? 'bg-white text-black' : 'bg-white/5 border-white/5 text-white'}`}
+                        >
                             <span className="font-black uppercase">{role}</span>
                         </button>
                     ))}
@@ -143,7 +149,7 @@ const App: React.FC = () => {
         <div className="min-h-screen bg-white dark:bg-gray-900 flex justify-center relative">
           <Layout activeTab={activeTab} setActiveTab={setActiveTab} userRole={userRole} hideNav={hideBottomNav}>
               {!headerExclusionList.includes(activeTab) && (
-                <Header isDarkMode={isDarkMode} toggleTheme={() => {}} onAuthClick={() => setActiveTab('profile')} user={user} searchTerm={globalSearch} onSearchChange={setGlobalSearch} onNavigate={setActiveTab} activeTab={activeTab} userRole={userRole as 'cliente' | 'lojista' | null} stores={STORES} onStoreClick={handleSelectStore} isAdmin={user?.email === ADMIN_EMAIL} viewMode={viewMode} onOpenViewSwitcher={() => setIsRoleSwitcherOpen(true)} />
+                <Header isDarkMode={isDarkMode} toggleTheme={() => {}} onAuthClick={() => setActiveTab('profile')} user={user} searchTerm={globalSearch} onSearchChange={setGlobalSearch} onNavigate={setActiveTab} activeTab={activeTab} userRole={userRole as any} stores={STORES} onStoreClick={handleSelectStore} isAdmin={user?.email === ADMIN_EMAIL} viewMode={viewMode} onOpenViewSwitcher={() => setIsRoleSwitcherOpen(true)} />
               )}
               <main className="animate-in fade-in duration-500 w-full max-w-md mx-auto">
                 {activeTab === 'cashback_landing' && <CashbackLandingView onBack={() => setActiveTab('home')} onLogin={() => { setPendingTab('scan_cashback'); setIsAuthOpen(true); }} />}
@@ -153,17 +159,15 @@ const App: React.FC = () => {
                 {activeTab === 'explore' && <ExploreView stores={STORES} searchQuery={globalSearch} onStoreClick={handleSelectStore} onLocationClick={() => {}} onFilterClick={() => {}} onOpenPlans={() => {}} onNavigate={setActiveTab} />}
                 
                 {activeTab === 'profile' && (
-                  userRole === 'lojista' 
+                  isMerchantMode 
                     ? <StoreAreaView onBack={() => setActiveTab('home')} onNavigate={setActiveTab} user={user as any} />
                     : <MenuView user={user as any} userRole={userRole} onAuthClick={() => setIsAuthOpen(true)} onNavigate={setActiveTab} onBack={() => setActiveTab('home')} />
                 )}
 
                 {activeTab === 'community_feed' && <CommunityFeedView onStoreClick={handleSelectStore} user={user as any} onRequireLogin={() => setIsAuthOpen(true)} onNavigate={setActiveTab} />}
                 {activeTab === 'services' && <ServicesView onSelectMacro={(id, name) => { setSelectedServiceMacro({id, name}); if (id === 'emergency') { setQuoteCategory(name); setIsQuoteModalOpen(true); } else { setActiveTab('service_subcategories'); } }} onOpenTerms={() => setActiveTab('service_terms')} onNavigate={setActiveTab} searchTerm={globalSearch} />}
-                {activeTab === 'category_detail' && selectedCategory && <CategoryView category={selectedCategory} onBack={() => setActiveTab('home')} onStoreClick={handleSelectStore} stores={STORES} userRole={userRole} onAdvertiseInCategory={setAdCategoryTarget} onNavigate={setActiveTab} />}
+                {activeTab === 'category_detail' && selectedCategory && <CategoryView category={selectedCategory} onBack={() => setActiveTab('home')} onStoreClick={handleSelectStore} stores={STORES} userRole={userRole as any} onAdvertiseInCategory={setAdCategoryTarget} onNavigate={setActiveTab} />}
                 {activeTab === 'store_detail' && selectedStore && <StoreDetailView store={selectedStore} onBack={() => setActiveTab('home')} />}
-                
-                {/* Redundância removida: store_area agora é renderizado dentro de profile quando o role é lojista */}
                 
                 {activeTab === 'patrocinador_master' && <PatrocinadorMasterScreen onBack={() => setActiveTab('home')} />}
                 {activeTab === 'jobs_list' && <JobsView onBack={() => setActiveTab('home')} />}
@@ -186,7 +190,7 @@ const App: React.FC = () => {
                   <h1 className="text-4xl font-black font-display text-white tracking-tighter drop-shadow-md">Localizei JPA</h1>
                   <TypingText text="Onde o bairro conversa" duration={2000} />
               </div>
-              <div className="flex flex-col items-center animate-fade-in opacity-0" style={{ animationDelay: '3000ms', animationFillMode: 'forwards' }}>
+              <div className="flex flex-col items-center animate-fade-in opacity-0" style={{ animationDelay: '2000ms', animationFillMode: 'forwards' }}>
                    <p className="text-[9px] font-black text-white/50 uppercase tracking-[0.25em] mb-1.5">Patrocinador Master</p>
                    <p className="text-xl font-bold text-white tracking-tight">Grupo Esquematiza</p>
               </div>
