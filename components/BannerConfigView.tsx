@@ -1,5 +1,6 @@
+
 import React, { useState, useMemo, useEffect } from 'react';
-import { ChevronLeft, Check, Home, LayoutGrid, MapPin, Search, Star, Rocket, Sparkles, TrendingUp, X, Map, BarChart, Banknote } from 'lucide-react';
+import { ChevronLeft, Check, Home, LayoutGrid, MapPin, Search, Star, Rocket, Sparkles, TrendingUp, X, Map, BarChart, Banknote, Layers } from 'lucide-react';
 import { BannerConfig } from '../types';
 import { BANNER_BASE_PRICES_CENTS, NEIGHBORHOOD_OPTIONS } from '../constants';
 
@@ -11,15 +12,28 @@ interface BannerConfigViewProps {
 const formatCurrency = (cents: number) => `R$ ${(cents / 100).toFixed(2).replace('.', ',')}`;
 
 const calculateBannerPrice = (
-  placement: 'Home' | 'Categorias',
+  placement: 'Home' | 'Categorias' | 'Todos',
   duration: '1m' | '3m_promo',
   neighborhoodsCount: number
 ): number => {
     if (neighborhoodsCount === 0) return 0;
 
-    const basePricePerMonth = BANNER_BASE_PRICES_CENTS[placement.toLowerCase() as 'home' | 'categorias'][duration];
+    let basePricePerMonth = 0;
+    const placementKey = placement.toLowerCase() as 'home' | 'categorias';
+    
+    if (placement === 'Todos') {
+        // Fallback for 'Todos' as requested to keep as is
+        basePricePerMonth = BANNER_BASE_PRICES_CENTS['home'][duration === '1m' ? '1m_promo' : '3m_promo'] + 
+                           BANNER_BASE_PRICES_CENTS['categorias'][duration === '1m' ? '1m_promo' : '3m_promo'];
+    } else {
+        // Use 1m_promo or 3m_promo depending on selection
+        const durationKey = duration === '1m' ? '1m_promo' : '3m_promo';
+        basePricePerMonth = BANNER_BASE_PRICES_CENTS[placementKey][durationKey];
+    }
+
     const totalMonths = duration === '1m' ? 1 : 3;
 
+    // Aumento de 10% por bairro adicional (limite 2.0x)
     const factor = 1 + Math.max(0, neighborhoodsCount - 1) * 0.10;
     const effectiveFactor = Math.min(factor, 2.0);
     const totalPrice = basePricePerMonth * totalMonths * effectiveFactor;
@@ -28,7 +42,7 @@ const calculateBannerPrice = (
 };
 
 export const BannerConfigView: React.FC<BannerConfigViewProps> = ({ onBack, onConfigure }) => {
-    const [placement, setPlacement] = useState<'Home' | 'Categorias'>('Home');
+    const [placement, setPlacement] = useState<'Home' | 'Categorias' | 'Todos'>('Home');
     const [duration, setDuration] = useState<'1m' | '3m_promo'>('3m_promo');
     const [selectedNeighborhoods, setSelectedNeighborhoods] = useState<string[]>([]);
     
@@ -37,9 +51,17 @@ export const BannerConfigView: React.FC<BannerConfigViewProps> = ({ onBack, onCo
     }, [placement, duration, selectedNeighborhoods]);
 
     const savings = useMemo(() => {
-        const key = placement.toLowerCase() as 'home' | 'categorias';
-        const price1m = BANNER_BASE_PRICES_CENTS[key]['1m'];
-        const price3m_promo = BANNER_BASE_PRICES_CENTS[key]['3m_promo'];
+        let price1m = 0;
+        let price3m_promo = 0;
+
+        if (placement === 'Todos') {
+             price1m = BANNER_BASE_PRICES_CENTS.home['1m_original'] + BANNER_BASE_PRICES_CENTS.categorias['1m_original'];
+             price3m_promo = BANNER_BASE_PRICES_CENTS.home['3m_promo'] + BANNER_BASE_PRICES_CENTS.categorias['3m_promo'];
+        } else {
+             const key = placement.toLowerCase() as 'home' | 'categorias';
+             price1m = BANNER_BASE_PRICES_CENTS[key]['1m_original'];
+             price3m_promo = BANNER_BASE_PRICES_CENTS[key]['3m_promo'];
+        }
 
         const totalNormal = price1m * 3;
         const totalPromo = price3m_promo * 3;
@@ -51,6 +73,15 @@ export const BannerConfigView: React.FC<BannerConfigViewProps> = ({ onBack, onCo
             percentage: savedPercentage,
             amount: formatCurrency(savedAmount)
         };
+    }, [placement]);
+
+    // Cálculo específico de economia para o card de 1 mês
+    const oneMonthSavings = useMemo(() => {
+        if (placement === 'Todos') return null;
+        const key = placement.toLowerCase() as 'home' | 'categorias';
+        const original = BANNER_BASE_PRICES_CENTS[key]['1m_original'];
+        const promo = BANNER_BASE_PRICES_CENTS[key]['1m_promo'];
+        return formatCurrency(original - promo);
     }, [placement]);
 
 
@@ -77,6 +108,7 @@ export const BannerConfigView: React.FC<BannerConfigViewProps> = ({ onBack, onCo
         }
     };
 
+    const currentPlacementKey = placement === 'Todos' ? 'home' : placement.toLowerCase() as 'home' | 'categorias';
 
     return (
         <div className="min-h-screen bg-slate-900 text-white font-sans flex flex-col">
@@ -138,6 +170,7 @@ export const BannerConfigView: React.FC<BannerConfigViewProps> = ({ onBack, onCo
                     <div className="bg-slate-800 p-1.5 rounded-2xl flex gap-1.5 border border-slate-700 max-w-md mx-auto">
                         <button onClick={() => setPlacement('Home')} className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-sm transition-all ${placement === 'Home' ? 'bg-white text-slate-900 shadow-md' : 'text-slate-400'}`}><Home size={16}/> Home</button>
                         <button onClick={() => setPlacement('Categorias')} className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-sm transition-all ${placement === 'Categorias' ? 'bg-white text-slate-900 shadow-md' : 'text-slate-400'}`}><LayoutGrid size={16}/> Categorias</button>
+                        <button onClick={() => setPlacement('Todos')} className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-sm transition-all ${placement === 'Todos' ? 'bg-white text-slate-900 shadow-md' : 'text-slate-400'}`}><Layers size={16}/> Todos</button>
                     </div>
                 </section>
 
@@ -168,10 +201,26 @@ export const BannerConfigView: React.FC<BannerConfigViewProps> = ({ onBack, onCo
                 <section>
                     <h2 className="text-xs font-black text-slate-400 uppercase tracking-[0.2em] mb-4 text-center">3. Escolha a duração</h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <button onClick={() => setDuration('1m')} className={`p-8 rounded-3xl text-center border-4 transition-all ${duration === '1m' ? 'border-blue-500 bg-blue-500/10' : 'border-slate-700 bg-slate-800 hover:border-slate-600'}`}>
+                        {/* CARD 1 MÊS - COM PROMOÇÃO */}
+                        <button onClick={() => setDuration('1m')} className={`p-8 rounded-3xl text-center border-4 relative transition-all ${duration === '1m' ? 'border-blue-500 bg-blue-500/10' : 'border-slate-700 bg-slate-800 hover:border-slate-600'}`}>
+                            <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-blue-500 text-white text-[10px] font-black px-4 py-1.5 rounded-full shadow-lg"><Sparkles size={12} className="inline -mt-0.5 mr-1.5 fill-white"/>PROMOÇÃO DE INAUGURAÇÃO</div>
                             <p className="font-black text-4xl text-white">1 Mês</p>
-                            <p className="text-sm text-slate-400 mt-2">Preço normal</p>
+                            <div className="mt-3 flex flex-col items-center">
+                                <p className="text-xs text-slate-400 line-through font-bold">
+                                    De {formatCurrency(BANNER_BASE_PRICES_CENTS[currentPlacementKey]['1m_original'])}
+                                </p>
+                                <p className="text-lg font-black text-blue-400">
+                                    Por {formatCurrency(BANNER_BASE_PRICES_CENTS[currentPlacementKey]['1m_promo'])}
+                                </p>
+                            </div>
+                            {oneMonthSavings && (
+                                <p className="text-[10px] text-emerald-400 font-bold mt-2 uppercase tracking-wider">
+                                    Economize {oneMonthSavings}
+                                </p>
+                            )}
                         </button>
+
+                        {/* CARD 3 MESES - COM PROMOÇÃO EXISTENTE */}
                         <button onClick={() => setDuration('3m_promo')} className={`p-8 rounded-3xl text-center border-4 relative transition-all ${duration === '3m_promo' ? 'border-amber-400 bg-amber-500/10' : 'border-slate-700 bg-slate-800 hover:border-slate-600'}`}>
                             <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-amber-400 text-slate-900 text-[10px] font-black px-4 py-1.5 rounded-full shadow-lg"><Star size={12} className="inline -mt-0.5 mr-1.5 fill-slate-900"/>PROMOÇÃO DE INAUGURAÇÃO</div>
                             <p className="font-black text-4xl text-white">3 Meses</p>
@@ -192,6 +241,11 @@ export const BannerConfigView: React.FC<BannerConfigViewProps> = ({ onBack, onCo
                         {duration === '3m_promo' && (
                             <span className="bg-slate-700 text-amber-400 text-[10px] font-bold px-3 py-1 rounded-full border border-slate-600">
                                 3x sem juros
+                            </span>
+                        )}
+                        {duration === '1m' && (
+                            <span className="bg-slate-700 text-blue-400 text-[10px] font-bold px-3 py-1 rounded-full border border-slate-600 uppercase">
+                                Preço Especial
                             </span>
                         )}
                     </div>

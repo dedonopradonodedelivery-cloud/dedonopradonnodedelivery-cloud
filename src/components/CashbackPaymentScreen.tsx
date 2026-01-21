@@ -1,8 +1,9 @@
 
+
 import React, { useState, useEffect } from 'react';
 import { ChevronLeft, Wallet, Store, ArrowRight, Loader2, CheckCircle2, XCircle, CornerRightDown, Lock, BellRing, Smartphone, Send, Clock } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
-// FIX: Changed User import to be from supabase, not firebase
+// FIX: Changed User import to be from @supabase/supabase-js
 import { User } from '@supabase/supabase-js';
 import { PayWithCashback } from '../../components/PayWithCashback';
 
@@ -279,7 +280,7 @@ export const CashbackPaymentScreen: React.FC<CashbackPaymentScreenProps> = ({
             
             {numericCashbackUsed > 0 && (
                 <div className="flex justify-between items-center mb-2 text-green-600 dark:text-green-400">
-                    <span className="text-sm font-medium">Saldo Utilizado</span>
+                    <span className="sm font-medium">Saldo Utilizado</span>
                     <span className="font-bold">- R$ {numericCashbackUsed.toFixed(2).replace('.', ',')}</span>
                 </div>
             )}

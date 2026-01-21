@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useMemo } from 'react';
 import { Layout } from './components/layout/Layout';
 import { Header } from './components/layout/Header';
@@ -28,7 +29,7 @@ import { Category, Store, RoleMode, BannerPlan, SponsoredPlan, BannerConfig, Ban
 import { CategoryView } from './components/CategoryView';
 import { StoreProfileEdit } from './components/StoreProfileEdit';
 import { CommunityFeedView } from './components/CommunityFeedView';
-import { STORES } from './constants';
+import { STORES, PROFESSIONAL_BANNER_PRICING } from './constants';
 import { AboutView, SupportView, FavoritesView } from './components/SimplePages';
 import { getAccountEntryRoute } from './lib/roleRoutes';
 import { BannerConfigView } from './components/BannerConfigView';
@@ -240,9 +241,58 @@ const App: React.FC = () => {
   };
 
   const handlePaymentComplete = () => {
-      setBannerOrder({ plan: null, draft: null });
-      alert("Banner enviado para análise!");
-      setActiveTab('store_area'); 
+      // Logic split: If professional service, create order. Else, just notify.
+      if (bannerOrder.draft?.type === 'professional_service' && user) {
+          const newOrderId = `ORD-${Date.now().toString().slice(-6)}`;
+          const now = new Date().toISOString();
+          
+          const newOrder: BannerOrder = {
+              id: newOrderId,
+              merchantId: user.id,
+              bannerType: 'professional',
+              total: (bannerOrder.plan?.priceCents || 0) + PROFESSIONAL_BANNER_PRICING.promoCents,
+              paymentMethod: 'credit', // Assumido para simplificação
+              paymentStatus: 'paid',
+              createdAt: now,
+              status: 'em_analise',
+              lastViewedAt: now,
+              onboardingStage: 'requested_assets',
+              autoMessagesFlags: {
+                welcomeSent: true,
+                requestSent: true,
+                assetsReceivedSent: false,
+                thanksSent: false,
+              }
+          };
+
+          const msg1: BannerMessage = {
+              id: `msg-sys-1-${Date.now()}`,
+              orderId: newOrderId,
+              senderType: 'system',
+              body: '✅ Pagamento confirmado! Seu plano de anúncio já está reservado e agora vamos criar seu banner profissional.',
+              createdAt: now,
+          };
+          
+          const msg2: BannerMessage = {
+              id: `msg-sys-2-${Date.now() + 10}`,
+              orderId: newOrderId,
+              senderType: 'system',
+              type: 'form_request',
+              body: 'Para começar, precisamos de algumas informações. Por favor, preencha o formulário abaixo com seu logo e textos.',
+              createdAt: new Date(Date.now() + 1000).toISOString(),
+          };
+
+          setBannerOrders(prev => [...prev, newOrder]);
+          setBannerMessages(prev => [...prev, msg1, msg2]);
+          setViewingOrderId(newOrderId);
+          
+          setBannerOrder({ plan: null, draft: null });
+          setActiveTab('banner_order_tracking');
+      } else {
+          setBannerOrder({ plan: null, draft: null });
+          alert("Banner enviado para análise e publicação!");
+          setActiveTab('store_area'); 
+      }
   };
   
   const handleProceedToSponsoredPayment = (days: number, total: number) => {
@@ -264,30 +314,54 @@ const App: React.FC = () => {
     const newOrderId = `ORD-${Date.now().toString().slice(-6)}`;
     const now = new Date().toISOString();
     
+    // Create new order with initial automation state
     const newOrder: BannerOrder = {
       id: newOrderId,
       merchantId: user.id,
       bannerType: 'professional',
-      total: 5990,
+      total: 5990, // Legacy single purchase
       paymentMethod,
       paymentStatus: 'paid',
       createdAt: now,
       status: 'em_analise',
-      lastViewedAt: now
+      lastViewedAt: now,
+      onboardingStage: 'requested_assets',
+      autoMessagesFlags: {
+        welcomeSent: true,
+        requestSent: true,
+        assetsReceivedSent: false,
+        thanksSent: false,
+      }
     };
 
-    const initialMessage: BannerMessage = {
-      id: `msg-${Date.now()}`,
+    // Auto Msg #1: Welcome
+    const msg1: BannerMessage = {
+      id: `msg-sys-1-${Date.now()}`,
       orderId: newOrderId,
-      senderType: 'team',
-      body: 'Recebemos seu pedido! Em até 48h úteis vamos enviar o primeiro rascunho por aqui.',
+      senderType: 'system',
+      body: '✅ Recebemos seu pedido! Agora vamos criar seu banner profissional.',
       createdAt: now,
     };
 
+    // Auto Msg #2: Request Data (Form Request)
+    const msg2: BannerMessage = {
+      id: `msg-sys-2-${Date.now() + 10}`,
+      orderId: newOrderId,
+      senderType: 'system',
+      type: 'form_request',
+      body: 'Para começar, precisamos de algumas informações. Por favor, preencha o formulário abaixo com seu logo e textos.',
+      createdAt: new Date(Date.now() + 1000).toISOString(), // +1 sec
+    };
+
     setBannerOrders(prev => [...prev, newOrder]);
-    setBannerMessages(prev => [...prev, initialMessage]);
+    setBannerMessages(prev => [...prev, msg1, msg2]);
     setViewingOrderId(newOrderId);
     setActiveTab('banner_order_tracking');
+  };
+
+  // Logic to update an order (used for automation transitions)
+  const handleUpdateOrder = (orderId: string, updates: Partial<BannerOrder>) => {
+    setBannerOrders(prev => prev.map(o => o.id === orderId ? { ...o, ...updates } : o));
   };
 
   const handleViewOrder = (orderId: string) => {
@@ -299,23 +373,26 @@ const App: React.FC = () => {
     setViewingOrderId(orderId);
   };
 
-  const handleSendMessage = (orderId: string, text: string) => {
+  // Generic message sender (for basic chat)
+  const handleSendMessage = (orderId: string, text: string, type: 'text' | 'assets_payload' = 'text', metadata?: any) => {
     const newMessage: BannerMessage = {
       id: `msg-m-${Date.now()}`,
       orderId,
       senderType: 'merchant',
       body: text,
+      type,
+      metadata,
       createdAt: new Date().toISOString(),
     };
     setBannerMessages(prev => [...prev, newMessage]);
   };
   
   // Admin handlers
-  const handleAdminSendMessage = (orderId: string, text: string) => {
+  const handleAdminSendMessage = (orderId: string, text: string, type: 'text' | 'system' = 'text') => {
     const newMessage: BannerMessage = {
       id: `msg-a-${Date.now()}`,
       orderId,
-      senderType: 'team',
+      senderType: type === 'system' ? 'system' : 'team',
       body: text,
       createdAt: new Date().toISOString(),
     };
@@ -401,7 +478,14 @@ const App: React.FC = () => {
                     <AdminBannerOrdersList orders={bannerOrders} messages={bannerMessages} onBack={() => setActiveTab('admin_panel')} onSelectOrder={handleAdminViewOrder} />
                 )}
                 {activeTab === 'admin_banner_order_detail' && user?.email === ADMIN_EMAIL && adminViewOrderId && (
-                    <AdminBannerOrderDetail orderId={adminViewOrderId} orders={bannerOrders} messages={bannerMessages} onBack={() => setActiveTab('admin_banner_orders_list')} onSendMessage={handleAdminSendMessage} />
+                    <AdminBannerOrderDetail 
+                      orderId={adminViewOrderId} 
+                      orders={bannerOrders} 
+                      messages={bannerMessages} 
+                      onBack={() => setActiveTab('admin_banner_orders_list')} 
+                      onSendMessage={handleAdminSendMessage} 
+                      onUpdateOrder={handleUpdateOrder}
+                    />
                 )}
 
                 {activeTab === 'home' && <HomeFeed onNavigate={setActiveTab} onSelectCategory={(c) => { setSelectedCategory(c); setActiveTab('category_detail'); }} onSelectCollection={() => {}} onStoreClick={handleSelectStore} stores={STORES} searchTerm={globalSearch} user={user as any} onRequireLogin={() => setIsAuthOpen(true)} />}
@@ -457,6 +541,7 @@ const App: React.FC = () => {
                     onBack={() => { setViewingOrderId(null); setActiveTab('store_area'); }}
                     onSendMessage={handleSendMessage}
                     onViewOrder={handleViewOrder}
+                    onUpdateOrder={handleUpdateOrder}
                   />
                 )}
               </main>

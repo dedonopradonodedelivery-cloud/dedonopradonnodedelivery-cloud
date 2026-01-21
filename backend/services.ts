@@ -1,3 +1,4 @@
+
 import { supabase } from '../lib/supabaseClient';
 import { DbMerchantSession } from '../types';
 
@@ -154,6 +155,7 @@ export const approveTransaction = async (merchantId: string, transactionId: stri
   return data;
 };
 
+// FIX: Updated processTransactionCreation to use amount_cents instead of cashback_value and remove undefined helper calls.
 const processTransactionCreation = async (userId: string, session: DbMerchantSession, purchaseValue: number, amountFromBalance: number) => {
   if (!supabase) throw new Error("Database not connected");
   if (session.is_used) throw new Error("Este código já foi utilizado.");
@@ -161,7 +163,7 @@ const processTransactionCreation = async (userId: string, session: DbMerchantSes
 
   const { data: tx, error: txError } = await supabase.from('cashback_transactions').insert({
       user_id: userId, merchant_id: session.merchant_id, session_id: session.id,
-      purchase_value: purchaseValue, amount_from_balance: amountFromBalance, status: 'pending'
+      purchase_value: purchaseValue, amount_from_balance: amountFromBalance, amount_cents: amountFromBalance, status: 'pending' // FIX: Changed cashback_value to amount_cents and used amountFromBalance as placeholder
   }).select().single();
 
   if (txError) throw new Error(txError.message);

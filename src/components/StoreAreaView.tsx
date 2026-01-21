@@ -1,4 +1,5 @@
 
+
 import React, { useState, useMemo, useEffect } from 'react';
 import { 
   ChevronLeft, 
@@ -17,20 +18,29 @@ import {
   LayoutDashboard,
   Calendar,
   Bell,
-  QrCode
+  QrCode,
+  Briefcase, // Added Briefcase for professional banner orders
+  Loader2, // Added Loader2 for logout
+  LogOut // Added LogOut for logout
 } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
+import { useAuth } from '../contexts/AuthContext'; // FIX: Imported useAuth
+import { BannerOrder, BannerMessage } from '../types'; // FIX: Imported BannerOrder and BannerMessage
 
 interface StoreAreaViewProps {
   onBack: () => void;
   onNavigate?: (view: string) => void;
+  user?: any; // FIX: User type from supabase is better, but any for now
+  bannerOrders?: BannerOrder[]; // FIX: Added bannerOrders prop
+  bannerMessages?: BannerMessage[]; // FIX: Added bannerMessages prop
+  onViewOrder?: (orderId: string) => void; // FIX: Added onViewOrder prop
 }
 
 // Mock Base Data (Reference for 30 days)
 const STORE_DATA = {
   name: "Hamburgueria Brasa",
   isVerified: true,
-  logo: "https://images.unsplash.com/photo-1594212699903-ec8a3eca50f5?q=80&w=200&auto=format&fit=crop",
+  logo: "https://images.unsplash.com/photo-1594212699903-ec8a5eca50f5?q=80&w=200&auto=format&fit=crop",
   baseKpis: {
     sales: 12450.00,
     orders: 142,
@@ -66,7 +76,8 @@ const MenuLink: React.FC<{
   label: string; 
   onClick?: () => void;
   badge?: number;
-}> = ({ icon: Icon, label, onClick, badge }) => (
+  subtitle?: string; // FIX: Added subtitle prop
+}> = ({ icon: Icon, label, onClick, badge, subtitle }) => (
   <button 
     onClick={onClick}
     className="w-full bg-white dark:bg-gray-800 p-4 border-b last:border-b-0 border-gray-100 dark:border-gray-700 flex items-center justify-between group active:bg-gray-50 dark:active:bg-gray-700/50 transition-colors"
@@ -78,7 +89,10 @@ const MenuLink: React.FC<{
             <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white dark:border-gray-800"></span>
         ) : null}
       </div>
-      <span className="text-sm font-semibold text-gray-700 dark:text-gray-200">{label}</span>
+      <div className="flex flex-col items-start"> {/* FIX: Added container for label and subtitle */}
+        <span className="text-sm font-semibold text-gray-700 dark:text-gray-200">{label}</span>
+        {subtitle && <span className="text-[10px] text-gray-400 font-medium">{subtitle}</span>} {/* FIX: Render subtitle */}
+      </div>
     </div>
     <div className="flex items-center gap-2">
         {badge ? (
@@ -89,7 +103,10 @@ const MenuLink: React.FC<{
   </button>
 );
 
-export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate }) => {
+export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate, user, bannerOrders = [], bannerMessages = [], onViewOrder }) => {
+  const storeId = user?.id || 'grupo-esquematiza'; // FIX: Use user.id for storeId if available
+  const { signOut } = useAuth(); // FIX: Destructured signOut from useAuth
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [isCashbackEnabled, setIsCashbackEnabled] = useState(true);
   const [dateRange, setDateRange] = useState<DateRange>('30d');
   const [pendingRequestsCount, setPendingRequestsCount] = useState(0);
@@ -119,14 +136,15 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
   useEffect(() => {
     if (!supabase) return;
     
-    const merchantId = 'merchant_123_uuid'; // Mock ID needs to match whatever we use in app state
+    // FIX: Using actual user ID for merchant ID, or a mock if user is not available
+    const currentMerchantId = user?.id || 'merchant_123_uuid'; 
 
     // 1. Initial count fetch
     const fetchCount = async () => {
         const { count } = await supabase
             .from('cashback_transactions')
             .select('*', { count: 'exact', head: true })
-            .eq('merchant_id', merchantId)
+            .eq('merchant_id', currentMerchantId)
             .eq('status', 'pending');
         setPendingRequestsCount(count || 0);
     };
@@ -140,7 +158,7 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
                 event: '*', 
                 schema: 'public', 
                 table: 'cashback_transactions', 
-                filter: `merchant_id=eq.${merchantId}` 
+                filter: `merchant_id=eq.${currentMerchantId}` 
             }, 
             () => {
                 fetchCount(); // Re-fetch count on any change (insert/update)
@@ -149,7 +167,24 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
         .subscribe();
 
     return () => { supabase.removeChannel(sub); };
-  }, []);
+  }, [user]); // FIX: Added user to dependency array
+
+  // FIX: Memoized unread message logic for professional banner orders
+  const unreadProfessionalOrderMessages = useMemo(() => {
+    let count = 0;
+    for (const order of bannerOrders.filter(o => o.bannerType === 'professional')) {
+        const lastTeamMessage = bannerMessages
+            .filter(m => m.orderId === order.id && m.senderType === 'team')
+            .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())[0];
+        
+        // If there's a team message AND it's newer than the last time the merchant viewed the order
+        if (lastTeamMessage && (!order.lastViewedAt || new Date(lastTeamMessage.createdAt) > new Date(order.lastViewedAt))) {
+            count++;
+        }
+    }
+    return count;
+  }, [bannerOrders, bannerMessages]);
+
 
   const formatCurrency = (val: number) => 
     val.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -161,6 +196,19 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
       { id: '90d', label: '90 dias' },
       { id: 'custom', label: 'Personalizado' },
   ];
+
+  const handleLogout = async () => {
+    if (isLoggingOut) return;
+    setIsLoggingOut(true);
+    try {
+        await signOut();
+        if (onNavigate) onNavigate('home');
+    } catch (error) {
+        console.error("Logout failed", error);
+    } finally {
+        setIsLoggingOut(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-24 font-sans animate-in slide-in-from-right duration-300">
@@ -398,7 +446,45 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
             </button>
         </div>
 
+        {/* --- BLOCK: PROFESSIONAL BANNER ORDERS --- */}
+        {bannerOrders.filter(o => o.bannerType === 'professional').length > 0 && (
+            <div className="bg-white dark:bg-gray-800 rounded-3xl p-5 shadow-sm border border-gray-100 dark:border-gray-700">
+                <div className="flex items-center gap-2 mb-4">
+                    <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg text-purple-600 dark:text-purple-400">
+                        <Briefcase className="w-5 h-5" />
+                    </div>
+                    <h3 className="font-bold text-gray-900 dark:text-white">Pedidos Profissionais</h3>
+                </div>
+
+                <MenuLink
+                    icon={Briefcase}
+                    label="Acompanhar Pedidos de Banners"
+                    subtitle={`${bannerOrders.filter(o => o.bannerType === 'professional').length} pedido(s) em andamento`}
+                    onClick={() => {
+                        const professionalOrders = bannerOrders.filter(o => o.bannerType === 'professional');
+                        if (professionalOrders.length === 1 && onViewOrder) {
+                            onViewOrder(professionalOrders[0].id);
+                        } else {
+                            onNavigate?.('banner_orders_list');
+                        }
+                    }}
+                    badge={unreadProfessionalOrderMessages}
+                />
+            </div>
+        )}
+
       </div>
+        {/* LOGOUT BUTTON */}
+        <div className="p-5">
+            <button 
+                onClick={handleLogout} 
+                disabled={isLoggingOut} 
+                className="w-full bg-red-50 dark:bg-red-900/10 p-5 rounded-[2rem] border border-red-100 dark:border-red-900/30 flex items-center justify-center gap-3 active:scale-[0.98] transition-all"
+            >
+                {isLoggingOut ? <Loader2 className="w-5 h-5 animate-spin text-red-600" /> : <LogOut className="w-5 h-5 text-red-600" />}
+                <span className="font-bold text-red-600 text-sm">Sair da conta</span>
+            </button>
+        </div>
     </div>
   );
 };

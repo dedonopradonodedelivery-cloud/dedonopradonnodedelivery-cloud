@@ -1,3 +1,5 @@
+
+
 import React, { useState, useEffect, useRef } from 'react';
 import { ChevronLeft, Send, Loader2, User, Shield, Briefcase, FileText, Download, CheckCircle, PartyPopper } from 'lucide-react';
 import { BannerOrder, BannerMessage } from '../types';
@@ -45,16 +47,17 @@ export const AdminBannerOrderDetail: React.FC<AdminBannerOrderDetailProps> = ({
   };
 
   const handleSendThanks = () => {
-    if (!onUpdateOrder) return;
+    if (!onUpdateOrder || !order) return;
     
     const thankYouMsg = `🎉 Banner finalizado e publicado! Obrigado pela confiança no nosso trabalho.\nDesejamos muito sucesso com a campanha — se quiser ajustar algo no futuro, é só chamar por aqui.`;
     
+    // Send the message as a team message
     onSendMessage(orderId, thankYouMsg);
     
     // Update Flag to prevent duplicate buttons
     onUpdateOrder(orderId, {
         autoMessagesFlags: {
-            ...order!.autoMessagesFlags,
+            ...order.autoMessagesFlags,
             thanksSent: true
         }
     });
@@ -146,10 +149,9 @@ export const AdminBannerOrderDetail: React.FC<AdminBannerOrderDetailProps> = ({
                                             )}
                                         </div>
                                     </div>
-                                </div>
-                            ) : (
-                                <div dangerouslySetInnerHTML={{ __html: msg.body.replace(/\n/g, '<br/>') }} />
-                            )}
+                                ) : (
+                                    <div dangerouslySetInnerHTML={{ __html: msg.body.replace(/\n/g, '<br/>') }} />
+                                )}
                             
                             <p className={`text-[9px] mt-1.5 opacity-60 text-right ${msg.senderType === 'team' ? 'text-blue-100' : 'text-slate-500'}`}>
                                 {new Date(msg.createdAt).toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'})}

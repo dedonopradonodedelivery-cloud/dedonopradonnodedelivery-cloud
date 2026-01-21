@@ -18,21 +18,30 @@ import { AdType, Category, Store, Story, EditorialCollection, Job, CommunityPost
 
 export const BANNER_BASE_PRICES_CENTS = {
   home: {
-    '1m': 19990,
+    '1m_original': 19990,
+    '1m_promo': 8990,
     '3m_promo': 14990,
   },
   categorias: {
-    '1m': 14990,
+    '1m_original': 14990,
+    '1m_promo': 4990,
     '3m_promo': 8990,
   },
 };
 
-// FIX: Added BANNER_PLANS definition to be exported.
+export const PROFESSIONAL_BANNER_PRICING = {
+  originalCents: 15990,
+  promoCents: 6990,
+  isInaugurationPromo: true,
+  savingsPercent: 56, // (159.90 - 69.90) / 159.90 * 100
+  savingsValueCents: 9000
+};
+
 export const BANNER_PLANS: BannerPlan[] = [
     { id: 'home_3m', placement: 'Home', durationMonths: 3, priceCents: BANNER_BASE_PRICES_CENTS.home['3m_promo'] * 3, label: '3 Meses na Home (Promo)', installmentText: `3x de R$ ${(BANNER_BASE_PRICES_CENTS.home['3m_promo']/100).toFixed(2).replace('.',',')}`, isMostAdvantageous: true, benefit: 'Maior visibilidade por mais tempo' },
-    { id: 'home_1m', placement: 'Home', durationMonths: 1, priceCents: BANNER_BASE_PRICES_CENTS.home['1m'], label: '1 Mês na Home', benefit: 'Destaque principal por 30 dias' },
+    { id: 'home_1m', placement: 'Home', durationMonths: 1, priceCents: BANNER_BASE_PRICES_CENTS.home['1m_promo'], label: '1 Mês na Home', benefit: 'Destaque principal por 30 dias' },
     { id: 'cat_3m', placement: 'Categorias', durationMonths: 3, priceCents: BANNER_BASE_PRICES_CENTS.categorias['3m_promo'] * 3, label: '3 Meses em Categorias (Promo)', installmentText: `3x de R$ ${(BANNER_BASE_PRICES_CENTS.categorias['3m_promo']/100).toFixed(2).replace('.',',')}`, isPromo: true, benefit: 'Alcance clientes segmentados' },
-    { id: 'cat_1m', placement: 'Categorias', durationMonths: 1, priceCents: BANNER_BASE_PRICES_CENTS.categorias['1m'], label: '1 Mês em Categorias', benefit: 'Ideal para campanhas específicas' },
+    { id: 'cat_1m', placement: 'Categorias', durationMonths: 1, priceCents: BANNER_BASE_PRICES_CENTS.categorias['1m_promo'], label: '1 Mês em Categorias', benefit: 'Ideal para campanhas específicas' },
 ];
 
 export const NEIGHBORHOOD_OPTIONS = [
@@ -307,16 +316,24 @@ export const MOCK_USER_COMMUNITIES: NeighborhoodCommunity[] = [
     id: 'user-comm-3',
     name: 'Trilhas em Jacarepaguá',
     description: 'Para quem ama explorar o Maciço da Tijuca e arredores aos finais de semana.',
-    // FIX: Corrected truncated image URL and completed the object definition.
     image: 'https://images.unsplash.com/photo-1551632432-c735e8399527?q=80&w=800&auto=format&fit=crop',
     icon: <MapIcon />,
     color: 'bg-green-600',
     membersCount: '890',
     type: 'user'
+  },
+  {
+    id: 'user-comm-4',
+    name: 'Donos de Golden Retriever JPA',
+    description: 'Troca de experiências e encontros de pets no Parque de Jacarepaguá.',
+    image: 'https://images.unsplash.com/photo-1552053831-71594a27632d?q=80&w=800&auto=format&fit=crop',
+    icon: <Dog />,
+    color: 'bg-yellow-500',
+    membersCount: '312',
+    type: 'user'
   }
 ];
 
-// FIX: Added definitions for missing constants to resolve import errors.
 export const NEIGHBORHOOD_COMMUNITIES: NeighborhoodCommunity[] = [
   ...OFFICIAL_COMMUNITIES,
   ...MOCK_USER_COMMUNITIES
@@ -352,6 +369,105 @@ export const MOCK_COMMUNITY_POSTS: CommunityPost[] = [
     comments: 8,
     imageUrl: 'https://images.unsplash.com/photo-1561758033-d89a9ad46330?q=80&w=600&auto=format&fit=crop'
   },
+  {
+    id: 'post-3',
+    userId: 'u3',
+    userName: 'Bruno Rocha',
+    userAvatar: 'https://i.pravatar.cc/100?u=bruno',
+    authorRole: 'resident',
+    content: 'Alguém sabe se a feira de domingo vai acontecer amanhã mesmo com a chuva?',
+    type: 'event',
+    communityId: 'comm-residents',
+    neighborhood: 'Freguesia',
+    timestamp: '4h',
+    likes: 12,
+    comments: 4
+  },
+  {
+    id: 'post-4',
+    userId: 'u4',
+    userName: 'Mariana Luz',
+    userAvatar: 'https://i.pravatar.cc/100?u=mari',
+    authorRole: 'resident',
+    content: 'Vaga aberta para recepcionista em clínica odontológica na Taquara. Interessados, inbox!',
+    type: 'recommendation',
+    communityId: 'comm-jobs',
+    neighborhood: 'Taquara',
+    timestamp: '5h',
+    likes: 24,
+    comments: 12
+  },
+  {
+    id: 'post-5',
+    userId: 'u5',
+    userName: 'Ricardo Souza',
+    userAvatar: 'https://i.pravatar.cc/100?u=ricardo',
+    authorRole: 'resident',
+    content: 'Cuidado pessoal: semáforo da Geremário Dantas com problema, tá um caos o trânsito agora.',
+    type: 'alert',
+    communityId: 'comm-residents',
+    neighborhood: 'Freguesia',
+    timestamp: '6h',
+    likes: 38,
+    comments: 14
+  },
+  {
+    id: 'post-6',
+    userId: 'u6',
+    userName: 'Luciana Melo',
+    userAvatar: 'https://i.pravatar.cc/100?u=luciana',
+    authorRole: 'resident',
+    content: 'Estou desapegando dessa fritadeira elétrica, funcionando perfeitamente! R$ 150,00 para retirar no Anil.',
+    type: 'recommendation',
+    communityId: 'comm-desapega',
+    neighborhood: 'Anil',
+    timestamp: '8h',
+    likes: 24,
+    comments: 31,
+    imageUrl: 'https://images.unsplash.com/photo-1585659722982-789600c7690a?q=80&w=600&auto=format&fit=crop'
+  },
+  {
+    id: 'post-7',
+    userId: 'u7',
+    userName: 'Felipe Costa',
+    userAvatar: 'https://i.pravatar.cc/100?u=felipe',
+    authorRole: 'merchant',
+    content: 'Pessoal, abri uma vaga de emprego na minha loja de tintas no Tanque. Interessados, inbox!',
+    type: 'event',
+    communityId: 'comm-jobs',
+    neighborhood: 'Tanque',
+    timestamp: '12h',
+    likes: 15,
+    comments: 22
+  },
+  {
+    id: 'post-8',
+    userId: 'u8',
+    userName: 'Amanda Silva',
+    userAvatar: 'https://i.pravatar.cc/100?u=amanda',
+    authorRole: 'resident',
+    content: 'Apartamento disponível para aluguel na Freguesia, 2 quartos, direto com proprietário.',
+    type: 'recommendation',
+    communityId: 'comm-real-estate',
+    neighborhood: 'Freguesia',
+    timestamp: '14h',
+    likes: 18,
+    comments: 45
+  },
+  {
+    id: 'post-9',
+    userId: 'u9',
+    userName: 'Rafael Lima',
+    userAvatar: 'https://i.pravatar.cc/100?u=rafael',
+    authorRole: 'resident',
+    content: 'Alguém para dividir frete de mudança saindo da Freguesia para o Recreio este mês?',
+    type: 'recommendation',
+    communityId: 'comm-tips',
+    neighborhood: 'Freguesia',
+    timestamp: '1d',
+    likes: 5,
+    comments: 7
+  }
 ];
 
 export const STORES: Store[] = [

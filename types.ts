@@ -1,3 +1,4 @@
+
 import React from 'react';
 
 // From original types.ts
@@ -230,7 +231,9 @@ export interface DbCashbackTransaction {
   purchase_value: number;
   amount_from_balance: number;
   amount_to_pay: number;
-  cashback_value: number;
+  // FIX: Renamed cashback_value to amount_cents to match CashbackTransaction interface and resolve type conflict
+  amount_cents: number;
+  // FIX: Removed duplicate TransactionStatus as it's defined globally
   status: TransactionStatus;
   created_at: string;
   approved_at?: string;
@@ -266,7 +269,7 @@ export interface BannerItem {
 // NEW: Type for Banner Plans
 export interface BannerPlan {
   id: 'home_3m' | 'cat_3m' | 'home_1m' | 'cat_1m' | 'custom';
-  placement: 'Home' | 'Categorias';
+  placement: 'Home' | 'Categorias' | 'Todos';
   durationMonths: 1 | 3;
   priceCents: number;
   label: string;
@@ -278,7 +281,7 @@ export interface BannerPlan {
 
 // NEW: Type for dynamic banner configuration
 export interface BannerConfig {
-  placement: 'Home' | 'Categorias';
+  placement: 'Home' | 'Categorias' | 'Todos';
   duration: '1m' | '3m_promo';
   neighborhoods: { id: string; name: string }[];
   categories?: { id: string; name: string }[];
@@ -304,14 +307,26 @@ export interface BannerOrder {
   createdAt: string;
   status: 'em_analise' | 'em_producao' | 'aprovado' | 'publicado';
   lastViewedAt?: string;
+  // AUTOMATION STUFF
+  onboardingStage: 'none' | 'requested_assets' | 'assets_received' | 'in_production' | 'finalized';
+  assetsSubmittedAt?: string;
+  autoMessagesFlags: {
+    welcomeSent: boolean;
+    requestSent: boolean;
+    assetsReceivedSent: boolean;
+    thanksSent: boolean;
+  };
 }
 
 // NEW: Type for Messages within an Order
 export interface BannerMessage {
   id: string;
   orderId: string;
-  senderType: 'merchant' | 'team';
+  senderType: 'merchant' | 'team' | 'system';
   body: string;
   createdAt: string;
   readAt?: string;
+  // RICH TYPES
+  type?: 'text' | 'form_request' | 'assets_payload' | 'status' | 'thank_you';
+  metadata?: any;
 }

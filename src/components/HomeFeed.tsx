@@ -1,3 +1,5 @@
+
+
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { Store, Category, EditorialCollection, AdType, BannerItem } from '../types';
 import { 
@@ -33,6 +35,7 @@ import { useNeighborhood } from '../contexts/NeighborhoodContext';
 import { supabase } from '../lib/supabaseClient';
 import { trackAdEvent } from '../lib/analytics';
 import { fetchHomeBanner } from '../lib/bannerService';
+import { useSwipeableCarousel } from '../hooks/useSwipeableCarousel';
 
 interface HomeFeedProps {
   onNavigate: (view: string) => void;
@@ -53,21 +56,21 @@ const TemplateBannerRender: React.FC<{ config: any }> = ({ config }) => {
     switch (template_id) {
       case 'oferta_relampago':
         return (
-          <div className="w-full h-full bg-gradient-to-br from-rose-500 to-red-600 text-white p-6 flex items-center justify-between overflow-hidden relative">
+          <div className="w-full h-full bg-gradient-to-br from-rose-500 to-red-600 text-white p-6 flex items-center justify-between overflow-hidden relative select-none">
             <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-white/10 rounded-full blur-xl"></div>
             <div className="relative z-10">
               <span className="text-sm font-bold bg-yellow-300 text-red-700 px-3 py-1 rounded-full uppercase shadow-sm">{headline || 'XX% OFF'}</span>
               <h3 className="text-3xl font-black mt-4 drop-shadow-md max-w-[200px] leading-tight">{subheadline || 'Nome do Produto'}</h3>
             </div>
             <div className="relative z-10 w-32 h-32 rounded-full border-4 border-white/50 bg-gray-200 overflow-hidden flex items-center justify-center shrink-0 shadow-2xl">
-              {product_image_url ? <img src={product_image_url} className="w-full h-full object-cover" /> : <ImageIcon className="w-12 h-12 text-gray-400" />}
+              {product_image_url ? <img src={product_image_url} className="w-full h-full object-cover pointer-events-none" /> : <ImageIcon className="w-12 h-12 text-gray-400" />}
             </div>
           </div>
         );
       case 'lancamento':
         return (
-          <div className="w-full h-full bg-gradient-to-br from-slate-800 to-slate-900 text-white p-6 flex items-end justify-between overflow-hidden relative">
-             <img src={product_image_url || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=800'} className="absolute inset-0 w-full h-full object-cover opacity-30 mix-blend-luminosity" />
+          <div className="w-full h-full bg-gradient-to-br from-slate-800 to-slate-900 text-white p-6 flex items-end justify-between overflow-hidden relative select-none">
+             <img src={product_image_url || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=800'} className="absolute inset-0 w-full h-full object-cover opacity-30 mix-blend-luminosity pointer-events-none" />
              <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
              <div className="relative z-10">
                 <span className="text-[10px] font-black uppercase tracking-[0.2em] text-cyan-300">{headline || 'LANÇAMENTO'}</span>
@@ -94,7 +97,7 @@ const CustomBannerRender: React.FC<{ config: any }> = ({ config }) => {
     
     return (
         <div 
-            className={`w-full h-full p-8 ${layoutClasses[template_id] || 'flex flex-col justify-center'}`}
+            className={`w-full h-full p-8 ${layoutClasses[template_id] || 'flex flex-col justify-center'} select-none`}
             style={{ backgroundColor: background_color, color: text_color }}
         >
             <h3 className={`${template_id === 'headline' ? headlineFontSize[font_size] : fontSizes[font_size]} font-black leading-tight line-clamp-2`} style={{ fontFamily: font_family }}>
@@ -112,8 +115,6 @@ const CustomBannerRender: React.FC<{ config: any }> = ({ config }) => {
 
 const HomeCarousel: React.FC<{ onNavigate: (v: string) => void; onStoreClick?: (store: Store) => void; stores?: Store[] }> = ({ onNavigate, onStoreClick, stores }) => {
   const { currentNeighborhood } = useNeighborhood();
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [progress, setProgress] = useState(0);
   const [userBanner, setUserBanner] = useState<BannerItem | null>(null);
 
   const defaultBanners: BannerItem[] = useMemo(() => [
@@ -128,46 +129,41 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void; onStoreClick?: (
         setUserBanner(banner);
     };
     loadBanner();
-    // Supabase realtime subscription is removed to decouple the dependency entirely for the build fix.
   }, []);
 
   const allBanners = useMemo(() => userBanner ? [userBanner, ...defaultBanners] : defaultBanners, [userBanner, defaultBanners]);
   
+  // Use custom hook for swipe and autoplay logic
+  const { activeIndex, progress, handlers } = useSwipeableCarousel({
+    itemCount: allBanners.length,
+    intervalTime: 4500,
+    autoPlay: true
+  });
+
   // Impression Tracking
   useEffect(() => {
-    const banner = allBanners[currentIndex];
+    const banner = allBanners[activeIndex];
     if (banner) {
         trackAdEvent(
             'ad_impression',
             banner.id,
-            banner.target, // This will be store slug for hardcoded, or merchant_id for dynamic
+            banner.target, 
             'home',
             null,
             null,
             currentNeighborhood
         );
     }
-  }, [currentIndex, allBanners, currentNeighborhood]);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setProgress((prev) => {
-        if (prev >= 100) {
-          setCurrentIndex((current) => (current + 1) % allBanners.length);
-          return 0;
-        }
-        return prev + 0.75; 
-      });
-    }, 30);
-    return () => clearInterval(interval);
-  }, [allBanners.length]);
+  }, [activeIndex, allBanners, currentNeighborhood]);
 
   if (allBanners.length === 0) return null;
 
-  const current = allBanners[currentIndex];
+  const current = allBanners[activeIndex];
 
-  const handleBannerClick = () => {
-    // Ad Click Tracking
+  const handleBannerClick = (e: React.MouseEvent) => {
+    // Prevent click if user was dragging (though hook handles this logic mostly, this is a safety check)
+    // For now we assume a click is intentional if not a long drag.
+    
     trackAdEvent(
         'ad_click',
         current.id,
@@ -179,7 +175,6 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void; onStoreClick?: (
     );
 
     if (current.isUserBanner) {
-        // Banners de usuários não são navegáveis por enquanto, apenas rastreados.
         return;
     }
 
@@ -194,12 +189,12 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void; onStoreClick?: (
   };
 
   return (
-    <div className="px-4">
+    <div className="px-4 select-none" {...handlers}>
       <div className="flex flex-col gap-4">
         {/* Banner Container */}
         <div 
           onClick={handleBannerClick}
-          className={`w-full relative aspect-[3/2] rounded-[32px] overflow-hidden shadow-xl shadow-slate-200 dark:shadow-none border border-gray-100 dark:border-white/5 ${current.bgColor || ''} cursor-pointer active:scale-[0.98] transition-all group`}
+          className={`w-full relative aspect-[3/2] rounded-[32px] overflow-hidden shadow-xl shadow-slate-200 dark:shadow-none border border-gray-100 dark:border-white/5 ${current.bgColor || ''} cursor-pointer active:scale-[0.98] transition-all group touch-pan-y`}
         >
           {current.isUserBanner ? (
             current.config.type === 'template' ? (
@@ -208,9 +203,21 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void; onStoreClick?: (
               <CustomBannerRender config={current.config} />
             )
           ) : current.id === 'rio-phone-store' ? (
-            <div className="absolute inset-0 bg-black flex items-center justify-start px-4">
-              {/* Text on the left */}
-              <div className="w-1/2 h-full flex flex-col items-start justify-center text-left text-white z-10">
+            <div className="absolute inset-0 bg-black flex items-center justify-end px-4">
+              {/* Image on the left */}
+              <div className="absolute left-0 top-0 bottom-0 w-[55%] h-full flex items-center justify-center overflow-hidden">
+                  <img 
+                    src="https://images.unsplash.com/photo-1678931481189-598199ea3504?q=80&w=1200&auto=format&fit=crop"
+                    alt="iPhone 17 Pro Laranja" 
+                    className="h-full w-auto object-cover scale-110 group-hover:scale-125 transition-transform duration-700 ease-out pointer-events-none"
+                    style={{ objectPosition: '20% 35%' }}
+                  />
+                  {/* Mask */}
+                  <div className="absolute inset-y-0 right-0 w-24 bg-gradient-to-l from-black to-transparent z-10"></div>
+              </div>
+              
+              {/* Text on the right */}
+              <div className="w-1/2 h-full flex flex-col items-end justify-center text-right text-white z-10">
                   <h3 className="text-xl font-bold tracking-wider opacity-90">
                       <span className="opacity-70"></span> iPhone 17
                   </h3>
@@ -221,35 +228,20 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void; onStoreClick?: (
                       Saiba mais
                   </button>
               </div>
-              {/* Image on the right */}
-              <div className="absolute right-0 top-0 bottom-0 w-[55%] h-full flex items-center justify-center overflow-hidden">
-                  <img 
-                    src="https://images.unsplash.com/photo-1678931481189-598199ea3504?q=80&w=1200&auto=format&fit=crop"
-                    alt="iPhone 17 Pro Laranja" 
-                    className="h-full w-auto object-cover scale-110 group-hover:scale-125 transition-transform duration-700 ease-out"
-                    style={{ objectPosition: '20% 35%' }}
-                  />
-              </div>
             </div>
           ) : current.id === 'master-sponsor' ? (
             <div className="absolute inset-0 bg-[#0F172A] flex overflow-hidden">
-              {/* LADO ESQUERDO: VISUAL / ANIMAÇÃO */}
               <div className="relative w-[48%] h-full overflow-hidden shrink-0">
                 <div className="absolute inset-0 z-0">
                   <img 
                     src="https://images.unsplash.com/photo-1557597774-9d273605dfa9?q=80&w=800&auto=format&fit=crop" 
                     alt="Segurança Esquematiza" 
-                    className="w-full h-full object-cover brightness-75 scale-110 animate-float-slow opacity-60"
+                    className="w-full h-full object-cover brightness-75 scale-110 animate-float-slow opacity-60 pointer-events-none"
                   />
-                  {/* Gradiente de Fusão - Suaviza a transição para o texto no lado direito */}
                   <div className="absolute inset-y-0 right-0 w-32 bg-gradient-to-r from-transparent to-[#0F172A] z-10"></div>
-                  {/* Subtle Glow de Tecnologia */}
                   <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-40 h-40 bg-blue-500/20 rounded-full blur-[80px] animate-pulse"></div>
-                  {/* Textura de Scanline sutil */}
                   <div className="absolute inset-0 opacity-[0.05] pointer-events-none" style={{ backgroundImage: 'linear-gradient(transparent 50%, rgba(255,255,255,0.1) 50%)', backgroundSize: '100% 4px' }}></div>
                 </div>
-
-                {/* Elemento flutuante de autoridade (Escudo) */}
                 <div className="absolute inset-0 flex items-center justify-center z-20">
                     <div className="p-4 bg-white/5 backdrop-blur-xl rounded-full border border-white/10 shadow-2xl animate-subtle-glow">
                         <Shield className="w-12 h-12 text-blue-400 opacity-80" strokeWidth={1.5} />
@@ -257,9 +249,7 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void; onStoreClick?: (
                 </div>
               </div>
 
-              {/* LADO DIREITO: TEXTO */}
               <div className="flex-1 h-full flex flex-col justify-center pl-2 pr-10 z-30 text-left relative">
-                 {/* Badge Superior */}
                  <div className="mb-4 flex items-center gap-2 animate-in fade-in slide-in-from-left-4 duration-1000">
                     <div className="bg-amber-500/20 px-2.5 py-1 rounded-lg border border-amber-500/30 flex items-center gap-1.5">
                         <Crown className="w-2.5 h-2.5 text-amber-400 fill-amber-400" />
@@ -267,7 +257,6 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void; onStoreClick?: (
                     </div>
                  </div>
 
-                 {/* Marca Principal */}
                  <div className="mb-2 space-y-0.5 animate-in slide-in-from-bottom-2 duration-700 delay-100">
                     <h3 className="text-3xl font-[950] text-white leading-[0.85] font-display tracking-tighter uppercase drop-shadow-2xl">
                       GRUPO
@@ -277,14 +266,12 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void; onStoreClick?: (
                     </h3>
                  </div>
 
-                 {/* Slogan / Área */}
                  <div className="mb-6 animate-in fade-in duration-1000 delay-300">
                     <p className="text-slate-400 text-[10px] font-bold uppercase tracking-[0.2em] opacity-90 leading-tight">
                       SEGURANÇA E FACILITIES
                     </p>
                  </div>
 
-                 {/* Selo de Excelência */}
                  <div className="flex items-center gap-3 animate-in fade-in duration-1000 delay-500">
                     <div className="w-6 h-[1px] bg-blue-500/30"></div>
                     <div className="flex items-center gap-1.5">
@@ -294,22 +281,18 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void; onStoreClick?: (
                  </div>
               </div>
               
-              {/* Overlay Decorativo Right */}
               <div className="absolute -right-16 -bottom-16 opacity-[0.03] rotate-12 pointer-events-none group-hover:scale-110 transition-transform duration-1000">
                 <Shield className="w-64 h-64 text-white" />
               </div>
             </div>
           ) : current.id === 'advertise-home' ? (
             <div className="absolute inset-0 bg-gradient-to-br from-brand-blue to-[#0A369D] flex flex-col items-center justify-center text-center p-8 overflow-hidden">
-              {/* Animated Watermark */}
               <div className="absolute inset-0 overflow-hidden pointer-events-none">
                   <MapPin className="absolute -bottom-16 -right-16 w-80 h-80 text-white/5 rotate-[-20deg] animate-subtle-diagonal-scroll" />
               </div>
-              {/* Subtle decorative glow */}
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] bg-white/5 rounded-full blur-[100px] animate-subtle-glow opacity-50"></div>
 
               <div className="relative z-10 flex flex-col items-center w-full h-full justify-center">
-                  {/* Label */}
                   <div className="mb-5 animate-in fade-in duration-1000">
                       <div className="bg-white/10 backdrop-blur-sm border border-white/20 px-3 py-1 rounded-full flex items-center gap-2">
                           <div className="w-1.5 h-1.5 rounded-full bg-white/80 shadow-[0_0_8px_rgba(255,255,255,0.5)]"></div>
@@ -317,17 +300,14 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void; onStoreClick?: (
                       </div>
                   </div>
 
-                  {/* Title */}
                   <h3 className="text-[28px] font-bold text-white leading-tight font-display tracking-tight mb-3 animate-in fade-in slide-in-from-bottom-1 duration-1000 delay-100">
                     Anuncie sua marca
                   </h3>
 
-                  {/* Subtitle */}
                   <p className="text-blue-100/70 text-[12px] font-medium leading-snug max-w-[260px] mb-8 animate-in fade-in duration-1000 delay-300 text-center tracking-normal">
                     Conecte sua empresa a milhares de novos clientes locais através do Localizei.
                   </p>
 
-                  {/* CTA */}
                   <div className="relative group/cta">
                     <div className="relative bg-white text-[#1E5BFF] px-6 py-2.5 rounded-xl font-bold text-[10px] uppercase tracking-[0.15em] flex items-center gap-2 shadow-2xl shadow-black/30 active:scale-[0.98] transition-all duration-500 hover:bg-blue-50 hover:-translate-y-0.5">
                       Divulgar minha loja
@@ -349,13 +329,13 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void; onStoreClick?: (
           )}
         </div>
 
-        {/* Progress Indicators - MOVED OUTSIDE AND BELOW */}
+        {/* Progress Indicators */}
         <div className="flex gap-1.5 z-30 w-1/3 mx-auto justify-center h-1">
           {allBanners.map((_, idx) => (
             <div key={idx} className="h-full flex-1 bg-gray-200 dark:bg-gray-800 rounded-full overflow-hidden">
               <div 
                 className="h-full bg-[#1E5BFF] transition-all duration-100 ease-linear" 
-                style={{ width: idx === currentIndex ? `${progress}%` : idx < currentIndex ? '100%' : '0%' }} 
+                style={{ width: idx === activeIndex ? `${progress}%` : idx < activeIndex ? '100%' : '0%' }} 
               />
             </div>
           ))}
@@ -375,7 +355,6 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
   const [listFilter, setListFilter] = useState<'all' | 'top_rated' | 'open_now'>('all');
   const categoriesRef = useRef<HTMLDivElement>(null);
 
-  // ESTRUTURA DA HOME: 'categories' primeiro, 'home_carousel' DEPOIS (abaixo das categorias)
   const homeStructure = useMemo(() => ['categories', 'home_carousel', 'novidades', 'sugestoes', 'em_alta', 'list'], []);
 
   const renderSection = (key: string) => {

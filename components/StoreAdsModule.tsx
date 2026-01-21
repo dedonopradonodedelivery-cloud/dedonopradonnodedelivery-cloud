@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo, useEffect } from 'react';
 import { 
   ChevronLeft, 
@@ -14,6 +15,7 @@ import {
   Target,
   Palette,
   LayoutTemplate,
+  Type,
   Paintbrush,
   AlertTriangle,
   X,
@@ -25,6 +27,7 @@ import {
 import { User } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabaseClient';
 import { BannerPlan } from '../types';
+import { PROFESSIONAL_BANNER_PRICING } from '../constants';
 
 // --- VALIDATION HELPERS ---
 const FORBIDDEN_WORDS = ['palavrão', 'inapropriado', 'violação', 'gratis'];
@@ -360,6 +363,10 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
     setEditorData(prev => ({...prev, [field]: value}));
   }
 
+  const handleSelectProfessional = () => {
+    onFinalize({ type: 'professional_service' });
+  };
+
   // ---- RENDER LOGIC ----
   const renderStep = (): React.JSX.Element | null => {
     if (view === 'sales') {
@@ -408,22 +415,36 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
                     Começar agora <ArrowRight size={14} />
                 </span>
             </button>
+            
+            {/* NOVO CARD BANNER PROFISSIONAL */}
             <button
-              onClick={() => onNavigate('banner_professional_payment')}
-              className="bg-slate-800 p-8 rounded-3xl border border-white/10 text-left hover:border-emerald-500/50 transition-all group relative"
+              onClick={handleSelectProfessional}
+              className="bg-slate-800 p-8 rounded-3xl border border-white/10 text-left hover:border-emerald-500/50 transition-all group relative overflow-hidden"
             >
-              <div className="absolute top-4 right-4 bg-emerald-500/10 text-emerald-400 text-[9px] font-bold px-2.5 py-1 rounded-full border border-emerald-500/20">
-                  R$ 59,90
+              <div className="absolute top-4 right-4 bg-emerald-500 text-white text-[9px] font-black px-3 py-1 rounded-full shadow-lg flex items-center gap-1">
+                  <Sparkles size={10} className="fill-white"/> PROMOÇÃO DE INAUGURAÇÃO
               </div>
               <div className="w-12 h-12 bg-emerald-500/10 rounded-2xl flex items-center justify-center text-emerald-400 mb-4 border border-emerald-500/20">
                   <Rocket size={24} />
               </div>
-              <h3 className="font-bold text-white text-lg mb-2">Banner Profissional</h3>
+              <h3 className="font-bold text-white text-lg mb-2">Banner profissional criado pela plataforma ⭐</h3>
               <p className="text-xs text-slate-400 mb-6 leading-relaxed">
                   Nossa equipe cria um banner profissional para sua loja.
               </p>
+              
+              <div className="flex items-center gap-3 mb-6 bg-slate-900/50 p-3 rounded-xl border border-white/5 w-fit">
+                 <span className="text-slate-500 line-through text-xs font-bold">R$ {formatCurrency(PROFESSIONAL_BANNER_PRICING.originalCents)}</span>
+                 <span className="text-xl font-black text-emerald-400">R$ {formatCurrency(PROFESSIONAL_BANNER_PRICING.promoCents)}</span>
+              </div>
+              
+              <div className="mb-6">
+                 <p className="text-[10px] text-emerald-400 font-bold uppercase tracking-widest">
+                    Você economiza {PROFESSIONAL_BANNER_PRICING.savingsPercent}% • R$ {(PROFESSIONAL_BANNER_PRICING.savingsValueCents / 100).toFixed(2).replace('.', ',')} a menos
+                 </p>
+              </div>
+
               <span className="text-xs font-black text-emerald-400 uppercase tracking-widest flex items-center gap-2 group-hover:gap-3 transition-all">
-                  Solicitar agora <ArrowRight size={14} />
+                  Selecionar Serviço <ArrowRight size={14} />
               </span>
             </button>
           </div>
@@ -613,7 +634,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
             </div>
             <button 
                 onClick={handlePublish}
-                disabled={isSaving || !isCreationReady}
+                disabled={isSaving || (view === 'creator' && !selectedTemplate)}
                 className="w-full bg-[#1E5BFF] text-white font-black py-5 rounded-2xl shadow-xl shadow-blue-500/20 flex items-center justify-center gap-3 active:scale-[0.98] transition-all disabled:opacity-50 disabled:grayscale"
             >
                 {isSaving ? <Loader2 className="w-6 h-6 animate-spin" /> : 'Finalizar e Pagar'}

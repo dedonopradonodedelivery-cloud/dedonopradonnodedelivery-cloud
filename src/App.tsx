@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useMemo } from 'react';
 import { Layout } from './components/layout/Layout';
 import { Header } from './components/layout/Header';
@@ -21,14 +22,15 @@ import { CashbackLandingView } from './components/CashbackLandingView';
 import { StoreAdsModule } from './components/StoreAdsModule';
 import { BannerUploadView } from './components/BannerUploadView';
 import { AdminBannerModeration } from './components/AdminBannerModeration';
-import { MapPin, ShieldCheck, X } from 'lucide-react';
+import { MapPin, ShieldCheck, X, AlertTriangle } from 'lucide-react';
 import { useAuth } from './contexts/AuthContext';
 import { NeighborhoodProvider } from './contexts/NeighborhoodContext';
 import { Category, Store, RoleMode, BannerPlan, SponsoredPlan, BannerConfig, BannerOrder, BannerMessage } from './types';
 import { CategoryView } from './components/CategoryView';
 import { StoreProfileEdit } from './components/StoreProfileEdit';
 import { CommunityFeedView } from './components/CommunityFeedView';
-import { STORES } from './constants';
+// FIX: Corrected import path for PROFESSIONAL_BANNER_PRICING
+import { STORES, PROFESSIONAL_BANNER_PRICING } from '../constants';
 import { AboutView, SupportView, FavoritesView } from './components/SimplePages';
 import { getAccountEntryRoute } from './lib/roleRoutes';
 import { BannerConfigView } from './components/BannerConfigView';
@@ -40,6 +42,8 @@ import { BannerProfessionalPaymentView } from './components/BannerProfessionalPa
 import { BannerOrderTrackingView } from './components/BannerOrderTrackingView';
 import { AdminBannerOrdersList } from './components/AdminBannerOrdersList';
 import { AdminBannerOrderDetail } from './components/AdminBannerOrderDetail';
+import { GeminiAssistant } from './components/GeminiAssistant';
+import { ApiKeyRequiredModal } from './components/ApiKeyRequiredModal';
 
 let splashWasShownInSession = false;
 const ADMIN_EMAIL = 'dedonopradonodedelivery@gmail.com';
@@ -90,6 +94,33 @@ const App: React.FC = () => {
   // Admin State
   const [adminViewOrderId, setAdminViewOrderId] = useState<string | null>(null);
 
+  // NEW: API Key Selection State
+  const [isApiKeySelected, setIsApiKeySelected] = useState(true); // Assume true by default
+
+
+  // NEW: Check for AI Studio API Key Selection
+  useEffect(() => {
+    // Only run if window.aistudio exists (i.e., in AI Studio environment)
+    if ((window as any).aistudio && typeof (window as any).aistudio.hasSelectedApiKey === 'function') {
+      const checkKey = async () => {
+        const hasKey = await (window as any).aistudio.hasSelectedApiKey();
+        setIsApiKeySelected(hasKey);
+      };
+      checkKey();
+    }
+  }, []);
+
+  // NEW: Function to handle API Key Selection via AI Studio dialog
+  const handleSelectApiKey = async () => {
+    if ((window as any).aistudio && typeof (window as any).aistudio.openSelectKey === 'function') {
+      await (window as any).aistudio.openSelectKey();
+      // Assume selection was successful and proceed.
+      // Race condition handled by not adding delay here.
+      setIsApiKeySelected(true); 
+    } else {
+      alert("Recurso de seleção de chave de API não disponível neste ambiente.");
+    }
+  };
   
   // Set viewMode based on auth status. This prevents the login modal on startup for visitors.
   useEffect(() => {
@@ -240,9 +271,58 @@ const App: React.FC = () => {
   };
 
   const handlePaymentComplete = () => {
-      setBannerOrder({ plan: null, draft: null });
-      alert("Banner enviado para análise!");
-      setActiveTab('store_area'); 
+      // Logic split: If professional service, create order. Else, just notify.
+      if (bannerOrder.draft?.type === 'professional_service' && user) {
+          const newOrderId = `ORD-${Date.now().toString().slice(-6)}`;
+          const now = new Date().toISOString();
+          
+          const newOrder: BannerOrder = {
+              id: newOrderId,
+              merchantId: user.id,
+              bannerType: 'professional',
+              total: (bannerOrder.plan?.priceCents || 0) + PROFESSIONAL_BANNER_PRICING.promoCents,
+              paymentMethod: 'credit', // Assumido para simplificação
+              paymentStatus: 'paid',
+              createdAt: now,
+              status: 'em_analise',
+              lastViewedAt: now,
+              onboardingStage: 'requested_assets',
+              autoMessagesFlags: {
+                welcomeSent: true,
+                requestSent: true,
+                assetsReceivedSent: false,
+                thanksSent: false,
+              }
+          };
+
+          const msg1: BannerMessage = {
+              id: `msg-sys-1-${Date.now()}`,
+              orderId: newOrderId,
+              senderType: 'system',
+              body: '✅ Pagamento confirmado! Seu plano de anúncio já está reservado e agora vamos criar seu banner profissional.',
+              createdAt: now,
+          };
+          
+          const msg2: BannerMessage = {
+              id: `msg-sys-2-${Date.now() + 10}`,
+              orderId: newOrderId,
+              senderType: 'system',
+              type: 'form_request',
+              body: 'Para começar, precisamos de algumas informações. Por favor, preencha o formulário abaixo com seu logo e textos.',
+              createdAt: new Date(Date.now() + 1000).toISOString(),
+          };
+
+          setBannerOrders(prev => [...prev, newOrder]);
+          setBannerMessages(prev => [...prev, msg1, msg2]);
+          setViewingOrderId(newOrderId);
+          
+          setBannerOrder({ plan: null, draft: null });
+          setActiveTab('banner_order_tracking');
+      } else {
+          setBannerOrder({ plan: null, draft: null });
+          alert("Banner enviado para análise e publicação!");
+          setActiveTab('store_area'); 
+      }
   };
   
   const handleProceedToSponsoredPayment = (days: number, total: number) => {
@@ -269,7 +349,7 @@ const App: React.FC = () => {
       id: newOrderId,
       merchantId: user.id,
       bannerType: 'professional',
-      total: 5990,
+      total: PROFESSIONAL_BANNER_PRICING.promoCents, 
       paymentMethod,
       paymentStatus: 'paid',
       createdAt: now,
@@ -284,7 +364,7 @@ const App: React.FC = () => {
       }
     };
 
-    // Auto Msg #1: Welcome
+    // Automation 1: Welcome message
     const msg1: BannerMessage = {
       id: `msg-sys-1-${Date.now()}`,
       orderId: newOrderId,
@@ -293,7 +373,7 @@ const App: React.FC = () => {
       createdAt: now,
     };
 
-    // Auto Msg #2: Request Data (Form Request)
+    // Automation 2: Request Data (Form Request)
     const msg2: BannerMessage = {
       id: `msg-sys-2-${Date.now() + 10}`,
       orderId: newOrderId,
@@ -311,7 +391,27 @@ const App: React.FC = () => {
 
   // Logic to update an order (used for automation transitions)
   const handleUpdateOrder = (orderId: string, updates: Partial<BannerOrder>) => {
-    setBannerOrders(prev => prev.map(o => o.id === orderId ? { ...o, ...updates } : o));
+    setBannerOrders(prev => prev.map(o => {
+        if (o.id === orderId) {
+            const updatedOrder = { ...o, ...updates };
+
+            // Automation 2.1: If assets were just received, send a system message
+            if (updates.onboardingStage === 'assets_received' && !o.autoMessagesFlags.assetsReceivedSent) {
+                const autoMsg: BannerMessage = {
+                    id: `msg-sys-${Date.now()}-assets-ack`,
+                    orderId: orderId,
+                    senderType: 'system',
+                    body: 'Recebemos seus arquivos! Nossa equipe de design já está trabalhando na sua arte. Em breve enviaremos um rascunho.',
+                    createdAt: new Date().toISOString(),
+                };
+                setBannerMessages(prevMsgs => [...prevMsgs, autoMsg]);
+                updatedOrder.autoMessagesFlags.assetsReceivedSent = true;
+            }
+
+            return updatedOrder;
+        }
+        return o;
+    }));
   };
 
   const handleViewOrder = (orderId: string) => {
@@ -402,12 +502,31 @@ const App: React.FC = () => {
     );
   };
   
-  if (splashStage === 4) {
-    const HOME_PATH = "/";
-    if (window.location.pathname !== HOME_PATH) {
-      window.location.replace(HOME_PATH);
-      return null;
-    }
+  if (splashStage < 4) {
+    return (
+      <div className={`fixed inset-0 z-[999] flex flex-col items-center justify-between py-24 transition-all duration-800 ${splashStage === 3 ? 'animate-app-exit' : ''}`} style={{ backgroundColor: '#1E5BFF' }}>
+        <div className="flex flex-col items-center animate-fade-in text-center px-4">
+            <div className="relative w-32 h-32 bg-white rounded-[2.5rem] flex items-center justify-center shadow-2xl mb-8 animate-logo-enter"><MapPin className="w-16 h-16 text-brand-blue fill-brand-blue" /></div>
+            <h1 className="text-4xl font-black font-display text-white tracking-tighter drop-shadow-md">Localizei JPA</h1>
+            <TypingText text="Onde o bairro conversa" duration={2000} />
+        </div>
+        <div className="flex flex-col items-center animate-fade-in opacity-0" style={{ animationDelay: '3000ms', animationFillMode: 'forwards' }}>
+             <p className="text-[9px] font-black text-white/50 uppercase tracking-[0.25em] mb-1.5">Patrocinador Master</p>
+             <p className="text-xl font-bold text-white tracking-tight">Grupo Esquematiza</p>
+        </div>
+      </div>
+    );
+  }
+
+  // After splash, if API key is not selected, show the modal.
+  // The rest of the app is blocked until the key is selected.
+  if (!isApiKeySelected) {
+    return (
+      <ApiKeyRequiredModal 
+        onSelectApiKey={handleSelectApiKey} 
+        onClose={() => setIsApiKeySelected(true)} // Allow closing, but GeminiAssistant will be hidden
+      />
+    );
   }
 
   return (
@@ -499,19 +618,8 @@ const App: React.FC = () => {
               {isQuoteModalOpen && <QuoteRequestModal isOpen={isQuoteModalOpen} onClose={() => setIsQuoteModalOpen(false)} categoryName={quoteCategory} onSuccess={() => setActiveTab('service_success')} />}
           </Layout>
           <RoleSwitcherModal />
-          {splashStage < 4 && (
-            <div className={`fixed inset-0 z-[999] flex flex-col items-center justify-between py-24 transition-all duration-800 ${splashStage === 3 ? 'animate-app-exit' : ''}`} style={{ backgroundColor: '#1E5BFF' }}>
-              <div className="flex flex-col items-center animate-fade-in text-center px-4">
-                  <div className="relative w-32 h-32 bg-white rounded-[2.5rem] flex items-center justify-center shadow-2xl mb-8 animate-logo-enter"><MapPin className="w-16 h-16 text-brand-blue fill-brand-blue" /></div>
-                  <h1 className="text-4xl font-black font-display text-white tracking-tighter drop-shadow-md">Localizei JPA</h1>
-                  <TypingText text="Onde o bairro conversa" duration={2000} />
-              </div>
-              <div className="flex flex-col items-center animate-fade-in opacity-0" style={{ animationDelay: '3000ms', animationFillMode: 'forwards' }}>
-                   <p className="text-[9px] font-black text-white/50 uppercase tracking-[0.25em] mb-1.5">Patrocinador Master</p>
-                   <p className="text-xl font-bold text-white tracking-tight">Grupo Esquematiza</p>
-              </div>
-            </div>
-          )}
+          {/* Only render GeminiAssistant if API key is selected */}
+          {isApiKeySelected && <GeminiAssistant />}
         </div>
       </NeighborhoodProvider>
     </div>
