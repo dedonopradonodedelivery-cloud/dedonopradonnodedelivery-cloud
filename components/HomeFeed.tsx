@@ -30,42 +30,32 @@ import { LojasEServicosList } from './LojasEServicosList';
 import { User } from '@supabase/supabase-js';
 import { CATEGORIES, EDITORIAL_SERVICES } from '../constants';
 import { useNeighborhood } from '../contexts/NeighborhoodContext';
-import { supabase } from '../lib/supabaseClient';
 import { trackAdEvent } from '../lib/analytics';
 import { fetchHomeBanner } from '../lib/bannerService';
+import { useSwipeableCarousel } from '../hooks/useSwipeableCarousel';
 
-interface HomeFeedProps {
-  onNavigate: (view: string) => void;
-  onSelectCategory: (category: Category) => void;
-  onSelectCollection: (collection: EditorialCollection) => void;
-  onStoreClick?: (store: Store) => void;
-  searchTerm?: string;
-  stores: Store[];
-  user: User | null;
-  userRole?: 'cliente' | 'lojista' | null;
-  onRequireLogin: () => void;
-}
+// --- COMPONENTES DE RENDERIZAÇÃO DINÂMICA DE BANNER ---
 
 const TemplateBannerRender: React.FC<{ config: any }> = ({ config }) => {
     const { template_id, headline, subheadline, product_image_url } = config;
     switch (template_id) {
       case 'oferta_relampago':
         return (
-          <div className="w-full h-full bg-gradient-to-br from-rose-500 to-red-600 text-white p-6 flex items-center justify-between overflow-hidden relative">
+          <div className="w-full h-full bg-gradient-to-br from-rose-500 to-red-600 text-white p-6 flex items-center justify-between overflow-hidden relative select-none">
             <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-white/10 rounded-full blur-xl"></div>
             <div className="relative z-10">
               <span className="text-sm font-bold bg-yellow-300 text-red-700 px-3 py-1 rounded-full uppercase shadow-sm">{headline || 'XX% OFF'}</span>
               <h3 className="text-3xl font-black mt-4 drop-shadow-md max-w-[200px] leading-tight">{subheadline || 'Nome do Produto'}</h3>
             </div>
             <div className="relative z-10 w-32 h-32 rounded-full border-4 border-white/50 bg-gray-200 overflow-hidden flex items-center justify-center shrink-0 shadow-2xl">
-              {product_image_url ? <img src={product_image_url} className="w-full h-full object-cover" /> : <ImageIcon className="w-12 h-12 text-gray-400" />}
+              {product_image_url ? <img src={product_image_url} className="w-full h-full object-cover pointer-events-none" /> : <ImageIcon className="w-12 h-12 text-gray-400" />}
             </div>
           </div>
         );
       case 'lancamento':
         return (
-          <div className="w-full h-full bg-gradient-to-br from-slate-800 to-slate-900 text-white p-6 flex items-end justify-between overflow-hidden relative">
-             <img src={product_image_url || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=800'} className="absolute inset-0 w-full h-full object-cover opacity-30 mix-blend-luminosity" />
+          <div className="w-full h-full bg-gradient-to-br from-slate-800 to-slate-900 text-white p-6 flex items-end justify-between overflow-hidden relative select-none">
+             <img src={product_image_url || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=800'} className="absolute inset-0 w-full h-full object-cover opacity-30 mix-blend-luminosity pointer-events-none" />
              <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
              <div className="relative z-10">
                 <span className="text-[10px] font-black uppercase tracking-[0.2em] text-cyan-300">{headline || 'LANÇAMENTO'}</span>
@@ -80,11 +70,11 @@ const TemplateBannerRender: React.FC<{ config: any }> = ({ config }) => {
 const CustomBannerRender: React.FC<{ config: any }> = ({ config }) => {
     const { template_id, background_color, text_color, font_size, font_family, title, subtitle } = config;
 
-    const fontSizes = { small: 'text-2xl', medium: 'text-4xl', large: 'text-5xl' };
-    const subFontSizes = { small: 'text-sm', medium: 'text-base', large: 'text-lg' };
-    const headlineFontSize = { small: 'text-4xl', medium: 'text-6xl', large: 'text-7xl' };
+    const fontSizes: Record<string, string> = { small: 'text-2xl', medium: 'text-4xl', large: 'text-5xl' };
+    const subFontSizes: Record<string, string> = { small: 'text-sm', medium: 'text-base', large: 'text-lg' };
+    const headlineFontSize: Record<string, string> = { small: 'text-4xl', medium: 'text-6xl', large: 'text-7xl' };
 
-    const layoutClasses = {
+    const layoutClasses: Record<string, string> = {
       simple_left: 'flex flex-col justify-center items-start text-left',
       centered: 'flex flex-col justify-center items-center text-center',
       headline: 'flex flex-col justify-center items-center text-center',
@@ -92,7 +82,7 @@ const CustomBannerRender: React.FC<{ config: any }> = ({ config }) => {
     
     return (
         <div 
-            className={`w-full h-full p-8 ${layoutClasses[template_id] || 'flex flex-col justify-center'}`}
+            className={`w-full h-full p-8 ${layoutClasses[template_id] || 'flex flex-col justify-center'} select-none`}
             style={{ backgroundColor: background_color, color: text_color }}
         >
             <h3 className={`${template_id === 'headline' ? headlineFontSize[font_size] : fontSizes[font_size]} font-black leading-tight line-clamp-2`} style={{ fontFamily: font_family }}>
@@ -105,10 +95,11 @@ const CustomBannerRender: React.FC<{ config: any }> = ({ config }) => {
     );
 };
 
+
+// --- COMPONENTE INDEPENDENTE: HOME CAROUSEL ---
+
 const HomeCarousel: React.FC<{ onNavigate: (v: string) => void; onStoreClick?: (store: Store) => void; stores?: Store[] }> = ({ onNavigate, onStoreClick, stores }) => {
   const { currentNeighborhood } = useNeighborhood();
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [progress, setProgress] = useState(0);
   const [userBanner, setUserBanner] = useState<BannerItem | null>(null);
 
   const defaultBanners: BannerItem[] = useMemo(() => [
@@ -127,37 +118,30 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void; onStoreClick?: (
 
   const allBanners = useMemo(() => userBanner ? [userBanner, ...defaultBanners] : defaultBanners, [userBanner, defaultBanners]);
   
+  const { activeIndex, progress, handlers } = useSwipeableCarousel({
+    itemCount: allBanners.length,
+    intervalTime: 4500,
+    autoPlay: true
+  });
+
   useEffect(() => {
-    const banner = allBanners[currentIndex];
+    const banner = allBanners[activeIndex];
     if (banner) {
         trackAdEvent(
             'ad_impression',
             banner.id,
-            banner.target,
+            banner.target, 
             'home',
             null,
             null,
             currentNeighborhood
         );
     }
-  }, [currentIndex, allBanners, currentNeighborhood]);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setProgress((prev) => {
-        if (prev >= 100) {
-          setCurrentIndex((current) => (current + 1) % allBanners.length);
-          return 0;
-        }
-        return prev + 0.75; 
-      });
-    }, 30);
-    return () => clearInterval(interval);
-  }, [allBanners.length]);
+  }, [activeIndex, allBanners, currentNeighborhood]);
 
   if (allBanners.length === 0) return null;
 
-  const current = allBanners[currentIndex];
+  const current = allBanners[activeIndex];
 
   const handleBannerClick = () => {
     trackAdEvent(
@@ -185,11 +169,11 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void; onStoreClick?: (
   };
 
   return (
-    <div className="px-4">
+    <div className="px-4 select-none" {...handlers}>
       <div className="flex flex-col gap-4">
         <div 
           onClick={handleBannerClick}
-          className={`w-full relative aspect-[3/2] rounded-[32px] overflow-hidden shadow-xl shadow-slate-200 dark:shadow-none border border-gray-100 dark:border-white/5 ${current.bgColor || ''} cursor-pointer active:scale-[0.98] transition-all group`}
+          className={`w-full relative aspect-[3/2] rounded-[32px] overflow-hidden shadow-xl shadow-slate-200 dark:shadow-none border border-gray-100 dark:border-white/5 ${current.bgColor || ''} cursor-pointer active:scale-[0.98] transition-all group touch-pan-y`}
         >
           {current.isUserBanner ? (
             current.config.type === 'template' ? (
@@ -198,8 +182,17 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void; onStoreClick?: (
               <CustomBannerRender config={current.config} />
             )
           ) : current.id === 'rio-phone-store' ? (
-            <div className="absolute inset-0 bg-black flex items-center justify-start px-4">
-              <div className="w-1/2 h-full flex flex-col items-start justify-center text-left text-white z-10">
+            <div className="absolute inset-0 bg-black flex items-center justify-end px-4">
+              <div className="absolute left-0 top-0 bottom-0 w-[55%] h-full flex items-center justify-center overflow-hidden">
+                  <img 
+                    src="https://images.unsplash.com/photo-1678931481189-598199ea3504?q=80&w=1200&auto=format&fit=crop"
+                    alt="iPhone 17 Pro Laranja" 
+                    className="h-full w-auto object-cover scale-110 group-hover:scale-125 transition-transform duration-700 ease-out pointer-events-none"
+                    style={{ objectPosition: '20% 35%' }}
+                  />
+                  <div className="absolute inset-y-0 right-0 w-24 bg-gradient-to-l from-black to-transparent z-10"></div>
+              </div>
+              <div className="w-1/2 h-full flex flex-col items-end justify-center text-right text-white z-10">
                   <h3 className="text-xl font-bold tracking-wider opacity-90">
                       <span className="opacity-70"></span> iPhone 17
                   </h3>
@@ -210,14 +203,6 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void; onStoreClick?: (
                       Saiba mais
                   </button>
               </div>
-              <div className="absolute right-0 top-0 bottom-0 w-[55%] h-full flex items-center justify-center overflow-hidden">
-                  <img 
-                    src="https://images.unsplash.com/photo-1678931481189-598199ea3504?q=80&w=1200&auto=format&fit=crop"
-                    alt="iPhone 17 Pro Laranja" 
-                    className="h-full w-auto object-cover scale-110 group-hover:scale-125 transition-transform duration-700 ease-out"
-                    style={{ objectPosition: '20% 35%' }}
-                  />
-              </div>
             </div>
           ) : current.id === 'master-sponsor' ? (
             <div className="absolute inset-0 bg-[#0F172A] flex overflow-hidden">
@@ -226,7 +211,7 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void; onStoreClick?: (
                   <img 
                     src="https://images.unsplash.com/photo-1557597774-9d273605dfa9?q=80&w=800&auto=format&fit=crop" 
                     alt="Segurança Esquematiza" 
-                    className="w-full h-full object-cover brightness-75 scale-110 animate-float-slow opacity-60"
+                    className="w-full h-full object-cover brightness-75 scale-110 animate-float-slow opacity-60 pointer-events-none"
                   />
                   <div className="absolute inset-y-0 right-0 w-32 bg-gradient-to-r from-transparent to-[#0F172A] z-10"></div>
                   <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-40 h-40 bg-blue-500/20 rounded-full blur-[80px] animate-pulse"></div>
@@ -314,7 +299,7 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void; onStoreClick?: (
             <div key={idx} className="h-full flex-1 bg-gray-200 dark:bg-gray-800 rounded-full overflow-hidden">
               <div 
                 className="h-full bg-[#1E5BFF] transition-all duration-100 ease-linear" 
-                style={{ width: idx === currentIndex ? `${progress}%` : idx < currentIndex ? '100%' : '0%' }} 
+                style={{ width: idx === activeIndex ? `${progress}%` : idx < activeIndex ? '100%' : '0%' }} 
               />
             </div>
           ))}
@@ -324,12 +309,29 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void; onStoreClick?: (
   );
 };
 
+// FIX: Added missing HomeFeedProps interface definition
+interface HomeFeedProps {
+  onNavigate: (view: string) => void;
+  onSelectCategory: (category: Category) => void;
+  onSelectCollection: (collection: EditorialCollection) => void;
+  onStoreClick?: (store: Store) => void;
+  searchTerm?: string;
+  stores: Store[];
+  user: User | null;
+  userRole?: 'cliente' | 'lojista' | null;
+  onRequireLogin: () => void;
+}
+
 export const HomeFeed: React.FC<HomeFeedProps> = ({ 
   onNavigate, 
   onSelectCategory, 
+  onSelectCollection,
   onStoreClick, 
   stores,
-  user
+  searchTerm,
+  user,
+  userRole,
+  onRequireLogin
 }) => {
   const [listFilter, setListFilter] = useState<'all' | 'top_rated' | 'open_now'>('all');
   const categoriesRef = useRef<HTMLDivElement>(null);
@@ -452,7 +454,7 @@ const NovidadesDaSemana: React.FC<{ stores: Store[]; onStoreClick?: (store: Stor
             <img 
               src={store.image || store.logoUrl} 
               alt={store.name} 
-              className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
+              className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 pointer-events-none" 
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent"></div>
             <div className="absolute inset-0 p-5 flex flex-col justify-end text-left">
@@ -497,7 +499,7 @@ const SugestoesParaVoce: React.FC<{ stores: Store[]; onStoreClick?: (store: Stor
               <img 
                 src={store.image || store.logoUrl} 
                 alt={store.name} 
-                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
+                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 pointer-events-none" 
               />
               <div className="absolute top-3 left-3">
                 <span className="bg-black/40 backdrop-blur-md text-white text-[8px] font-black px-2.5 py-1 rounded-lg uppercase tracking-widest border border-white/10">
@@ -549,7 +551,7 @@ const EmAltaNaCidade: React.FC<{ stores: Store[]; onStoreClick?: (store: Store) 
             `}
           >
             <div className="w-20 h-20 rounded-full overflow-hidden bg-white shadow-xl border-4 border-white mb-5">
-              <img src={store.logoUrl || store.image} alt={store.name} className="w-full h-full object-cover" />
+              <img src={store.logoUrl || store.image} alt={store.name} className="w-full h-full object-cover pointer-events-none" />
             </div>
             <h3 className="text-sm font-black text-gray-900 dark:text-white leading-tight mb-1">
               {store.name}

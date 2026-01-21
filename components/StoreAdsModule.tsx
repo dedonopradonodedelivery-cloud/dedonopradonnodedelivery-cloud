@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo, useEffect } from 'react';
 import { 
   ChevronLeft, 
@@ -22,7 +21,8 @@ import {
   Store as StoreIcon,
   Megaphone,
   Gift,
-  Eye
+  Eye,
+  Star
 } from 'lucide-react';
 import { User } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabaseClient';
@@ -68,7 +68,6 @@ const getContrastRatio = (hex1: string, hex2: string): number => {
 };
 // --- END VALIDATION ---
 
-// FIX: Added missing formatCurrency helper function.
 const formatCurrency = (cents: number) => `R$ ${(cents / 100).toFixed(2).replace('.', ',')}`;
 
 interface StoreAdsModuleProps {
@@ -206,11 +205,11 @@ const BannerEditorPreview: React.FC<{ data: any }> = ({ data }) => {
     const selectedPalette = COLOR_PALETTES.find(p => p.id === palette) || COLOR_PALETTES[0];
     const { bg: bgColor, text: textColor } = selectedPalette;
     
-    const fontSizes = { small: 'text-2xl', medium: 'text-4xl', large: 'text-5xl' };
-    const subFontSizes = { small: 'text-sm', medium: 'text-base', large: 'text-lg' };
-    const headlineFontSize = { small: 'text-4xl', medium: 'text-6xl', large: 'text-7xl' };
+    const fontSizes: Record<string, string> = { small: 'text-2xl', medium: 'text-4xl', large: 'text-5xl' };
+    const subFontSizes: Record<string, string> = { small: 'text-sm', medium: 'text-base', large: 'text-lg' };
+    const headlineFontSize: Record<string, string> = { small: 'text-4xl', medium: 'text-6xl', large: 'text-7xl' };
 
-    const layoutClasses = {
+    const layoutClasses: Record<string, string> = {
       simple_left: 'flex flex-col justify-center items-start text-left',
       centered: 'flex flex-col justify-center items-center text-center',
       headline: 'flex flex-col justify-center items-center text-center',
@@ -288,7 +287,6 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
 
   // --- Shared State ---
   const [isSaving, setIsSaving] = useState(false);
-  const [showSuccess, setShowSuccess] = useState(false);
   
   useEffect(() => {
     if (!plan) {
@@ -297,7 +295,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
   }, [plan, onBack]);
 
   const handleFormDataChange = (fieldId: string, value: string) => {
-    setFormData(prev => ({ ...prev, [fieldId]: value }));
+    setFormData((prev: any) => ({ ...prev, [fieldId]: value }));
   };
 
   useEffect(() => {
@@ -353,7 +351,6 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
 
     onFinalize(draft);
     
-    // Simulating save time before navigating
     setTimeout(() => {
       setIsSaving(false);
     }, 500);
@@ -367,7 +364,6 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
     onFinalize({ type: 'professional_service' });
   };
 
-  // ---- RENDER LOGIC ----
   const renderStep = (): React.JSX.Element | null => {
     if (view === 'sales') {
       return (
@@ -416,32 +412,39 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
                 </span>
             </button>
             
-            {/* NOVO CARD BANNER PROFISSIONAL */}
             <button
               onClick={handleSelectProfessional}
               className="bg-slate-800 p-8 rounded-3xl border border-white/10 text-left hover:border-emerald-500/50 transition-all group relative overflow-hidden"
             >
-              <div className="absolute top-4 right-4 bg-emerald-500 text-white text-[9px] font-black px-3 py-1 rounded-full shadow-lg flex items-center gap-1">
-                  <Sparkles size={10} className="fill-white"/> PROMOÇÃO DE INAUGURAÇÃO
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-emerald-500 text-white text-[10px] font-black px-4 py-1.5 rounded-full shadow-lg flex items-center gap-1">
+                  <Star size={12} className="fill-white"/> PROMOÇÃO DE INAUGURAÇÃO
               </div>
               <div className="w-12 h-12 bg-emerald-500/10 rounded-2xl flex items-center justify-center text-emerald-400 mb-4 border border-emerald-500/20">
                   <Rocket size={24} />
               </div>
-              <h3 className="font-bold text-white text-lg mb-2">Banner profissional criado pela plataforma ⭐</h3>
+              <h3 className="font-bold text-white text-lg mb-2">Banner profissional criado pela plataforma</h3>
               <p className="text-xs text-slate-400 mb-6 leading-relaxed">
                   Nossa equipe cria um banner profissional para sua loja.
               </p>
               
-              <div className="flex items-center gap-3 mb-6 bg-slate-900/50 p-3 rounded-xl border border-white/5 w-fit">
-                 <span className="text-slate-500 line-through text-xs font-bold">R$ {formatCurrency(PROFESSIONAL_BANNER_PRICING.originalCents)}</span>
-                 <span className="text-xl font-black text-emerald-400">R$ {formatCurrency(PROFESSIONAL_BANNER_PRICING.promoCents)}</span>
+              <div className="flex flex-col items-start gap-1 mb-6">
+                 <p className="text-sm text-slate-500 font-medium line-through">
+                    De: {formatCurrency(PROFESSIONAL_BANNER_PRICING.originalCents)}
+                 </p>
+                 <p className="text-4xl font-black text-emerald-400 leading-none">
+                    Por: {formatCurrency(PROFESSIONAL_BANNER_PRICING.promoCents)}
+                 </p>
+                 <p className="text-base font-bold text-emerald-400 mt-2">
+                    Economize {formatCurrency(PROFESSIONAL_BANNER_PRICING.savingsValueCents)} ({PROFESSIONAL_BANNER_PRICING.savingsPercent}%)
+                 </p>
+                 <p className="text-[10px] text-slate-500 mt-1 font-medium">por tempo indeterminado</p>
               </div>
               
-              <div className="mb-6">
-                 <p className="text-[10px] text-emerald-400 font-bold uppercase tracking-widest">
-                    Você economiza {PROFESSIONAL_BANNER_PRICING.savingsPercent}% • R$ {(PROFESSIONAL_BANNER_PRICING.savingsValueCents / 100).toFixed(2).replace('.', ',')} a menos
-                 </p>
-              </div>
+              <ul className="text-xs text-slate-400 space-y-2 mb-6">
+                <li className="flex items-center gap-2"><Check size={14} className="text-emerald-400"/>Até 3 alterações inclusas</li>
+                <li className="flex items-center gap-2"><Check size={14} className="text-emerald-400"/>Arte profissional feita por designers</li>
+                <li className="flex items-center gap-2"><Check size={14} className="text-emerald-400"/>Banner otimizado para o app</li>
+              </ul>
 
               <span className="text-xs font-black text-emerald-400 uppercase tracking-widest flex items-center gap-2 group-hover:gap-3 transition-all">
                   Selecionar Serviço <ArrowRight size={14} />
@@ -463,7 +466,6 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
       };
 
       if (isCustom) {
-        // EDITOR PERSONALIZADO
         return (
             <div className="animate-in fade-in duration-500">
                 <div className="mb-8">
@@ -505,9 +507,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
             </div>
         );
       } else {
-        // CRIADOR RÁPIDO (TEMPLATE)
         if (!selectedGoal) {
-          // STEP 1: CHOOSE GOAL
           return (
             <div className="animate-in slide-in-from-right duration-500">
               <h3 className="font-black text-sm uppercase tracking-widest text-blue-400 mb-4">Passo 1: Qual seu objetivo?</h3>
@@ -527,7 +527,6 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
         }
 
         if (selectedGoal && !selectedTemplate) {
-          // STEP 2: CHOOSE TEMPLATE
           const availableTemplates = BANNER_TEMPLATES.filter(t => t.goal === selectedGoal);
           return (
             <div className="animate-in slide-in-from-right duration-500">
@@ -546,7 +545,6 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
         }
 
         if (selectedTemplate) {
-          // STEP 3: FILL FORM & PREVIEW
           return (
             <div className="animate-in slide-in-from-right duration-500">
                 <button onClick={handleBackToSelection} className="flex items-center gap-2 text-xs text-slate-400 mb-4"><ChevronLeft size={16} /> Voltar</button>
@@ -592,15 +590,8 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
     return null;
   };
   
-  const isCreationReady = useMemo(() => {
-    if (view === 'editor') return !!editorData.title;
-    if (view === 'creator') return !!(selectedTemplate && formData.headline);
-    return false;
-  }, [view, editorData, formData, selectedTemplate]);
-
   return (
     <div className="min-h-screen bg-slate-900 text-white font-sans flex flex-col">
-      {/* Header */}
       <div className="sticky top-0 z-40 bg-slate-900/80 backdrop-blur-md px-6 py-4 border-b border-white/5 flex items-center justify-between">
         <div className="flex items-center gap-4">
             <button onClick={view === 'sales' ? onBack : () => setView('sales')} className="p-2.5 bg-slate-800 text-slate-400 hover:text-white transition-colors border border-white/5 rounded-xl active:scale-95">
@@ -642,18 +633,6 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
           </div>
       )}
 
-      {showSuccess && (
-        <div className="fixed inset-0 z-[100] bg-black/80 flex items-center justify-center p-6 animate-in fade-in">
-           <div className="bg-slate-800 p-10 rounded-2xl flex flex-col items-center text-center">
-                <div className="w-16 h-16 bg-green-500/10 rounded-full flex items-center justify-center text-green-400 mb-6 border-2 border-green-500/20">
-                    <CheckCircle2 size={32} />
-                </div>
-                <h2 className="font-black text-xl text-white">Publicado!</h2>
-                <p className="text-sm text-slate-400 mt-2">Seu banner já está ativo no aplicativo.</p>
-           </div>
-        </div>
-      )}
-      
       <ValidationErrorsModal errors={validationErrors} onClose={() => setValidationErrors([])} />
     </div>
   );

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useMemo } from 'react';
 import { Layout } from './components/Layout';
 import { Header } from './components/Header';
@@ -64,7 +63,6 @@ const TypingText: React.FC<{ text: string; duration: number }> = ({ text, durati
   return <p className="text-[15px] font-medium text-white/90 mt-2 text-center whitespace-nowrap overflow-hidden">{displayedText}</p>;
 };
 
-// Main App Component with full logic and default export
 export const App: React.FC = () => {
   const { user, userRole, loading: isAuthInitialLoading, signOut } = useAuth();
   const isAuthReturn = window.location.hash.includes('access_token') || window.location.search.includes('code=');
@@ -103,11 +101,9 @@ export const App: React.FC = () => {
   }, []);
 
   const handleSelectApiKey = async () => {
-    if ((window as any).aistudio && typeof (window as any).aistudio.openSelectKey === 'function') {
+    if ((window as any).aistudio && typeof (window as any).aistudio.hasSelectedApiKey === 'function') {
       await (window as any).aistudio.openSelectKey();
       setIsApiKeySelected(true); 
-    } else {
-      alert("Recurso de seleção de chave de API não disponível neste ambiente.");
     }
   };
   
@@ -314,12 +310,12 @@ export const App: React.FC = () => {
     setViewingOrderId(orderId);
   };
 
-  const handleSendMessage = (orderId: string, text: string, type: 'text' | 'assets_payload' = 'text', metadata?: any) => {
-    const newMessage: BannerMessage = { id: `msg-m-${Date.now()}`, orderId, senderType: 'merchant', body: text, type, metadata, createdAt: new Date().toISOString() };
+  const handleSendMessage = (orderId: string, text: string, type: 'text' | 'assets_payload' | 'system' = 'text', metadata?: any) => {
+    const newMessage: BannerMessage = { id: `msg-m-${Date.now()}`, orderId, senderType: type === 'system' ? 'system' : 'merchant', body: text, type: type as any, metadata, createdAt: new Date().toISOString() };
     setBannerMessages(prev => [...prev, newMessage]);
   };
   
-  const handleAdminSendMessage = (orderId: string, text: string, type: 'text' | 'system' = 'text', metadata?: any) => {
+  const handleAdminSendMessage = (orderId: string, text: string, type: 'text' | 'system' | 'assets_payload' = 'text', metadata?: any) => {
     const newMessage: BannerMessage = { id: `msg-a-${Date.now()}`, orderId, senderType: type === 'system' ? 'system' : 'team', body: text, type: type as any, metadata, createdAt: new Date().toISOString() };
     setBannerMessages(prev => [...prev, newMessage]);
   };
@@ -390,9 +386,9 @@ export const App: React.FC = () => {
     <div className={isDarkMode ? 'dark' : ''}>
       <NeighborhoodProvider>
         <div className="min-h-screen bg-white dark:bg-gray-900 flex justify-center relative">
-          <Layout activeTab={activeTab} setActiveTab={setActiveTab} userRole={userRole} hideNav={hideBottomNav} viewMode={viewMode}>
+          <Layout activeTab={activeTab} setActiveTab={setActiveTab} userRole={userRole as 'cliente' | 'lojista' | null} hideNav={hideBottomNav} viewMode={viewMode}>
               {!headerExclusionList.includes(activeTab) && (
-                <Header isDarkMode={isDarkMode} toggleTheme={() => {}} onAuthClick={handleAuthClick} user={user} searchTerm={globalSearch} onSearchChange={setGlobalSearch} onNavigate={setActiveTab} activeTab={activeTab} userRole={userRole as 'cliente' | 'lojista' | null} stores={STORES} onStoreClick={handleSelectStore} isAdmin={user?.email === ADMIN_EMAIL} viewMode={viewMode} onOpenViewSwitcher={() => setIsRoleSwitcherOpen(true)} />
+                <Header isDarkMode={isDarkMode} toggleTheme={() => {}} onAuthClick={handleAuthClick} user={user} searchTerm={globalSearch} onSearchChange={setGlobalSearch} onNavigate={setActiveTab} activeTab={activeTab} userRole={userRole as 'cliente' | 'lojista' | 'admin' | null} stores={STORES} onStoreClick={handleSelectStore} isAdmin={user?.email === ADMIN_EMAIL} viewMode={viewMode} onOpenViewSwitcher={() => setIsRoleSwitcherOpen(true)} />
               )}
               <main className="animate-in fade-in duration-500 w-full max-w-md mx-auto">
                 {activeTab === 'cashback_landing' && <CashbackLandingView onBack={() => setActiveTab('home')} onLogin={() => { setPendingTab('scan_cashback'); setIsAuthOpen(true); }} />}
@@ -413,7 +409,7 @@ export const App: React.FC = () => {
                 {activeTab === 'about' && <AboutView onBack={() => setActiveTab('profile')} />}
                 {activeTab === 'support' && <SupportView onBack={() => setActiveTab('profile')} />}
                 {activeTab === 'favorites' && <FavoritesView onBack={() => setActiveTab('profile')} onNavigate={setActiveTab} user={user as any} />}
-                {activeTab === 'service_subcategories' && selectedServiceMacro && <SubcategoriesView macroId={selectedServiceMacro.id} macroName={selectedServiceMacro.name} onBack={() => setActiveTab('services')} onSelectSubcategory={(n) => { setQuoteCategory(n); setActiveTab('service_specialties'); }} />}
+                {activeTab === 'service_subcategories' && selectedServiceMacro && <SubcategoriesView macroId={selectedServiceMacro.id} macroName={selectedServiceMacro.name} onBack={() => setActiveTab('services')} onSelectSubcategory={(n: string) => { setQuoteCategory(n); setActiveTab('service_specialties'); }} />}
                 {activeTab === 'service_specialties' && <SpecialtiesView subcategoryName={quoteCategory} onBack={() => setActiveTab('service_subcategories')} onSelectSpecialty={() => setIsQuoteModalOpen(true)} />}
                 {activeTab === 'store_ads_module' && <StoreAdsModule onBack={() => setActiveTab(bannerOrder.plan ? 'banner_config' : 'store_area')} onNavigate={setActiveTab} categoryName={adCategoryTarget || undefined} user={user as any} plan={bannerOrder.plan} onFinalize={handleFinalizeBannerCreation} />}
                 {activeTab === 'banner_upload' && <BannerUploadView onBack={() => setActiveTab('store_ads_module')} onGoHome={() => setActiveTab('home')} />}
