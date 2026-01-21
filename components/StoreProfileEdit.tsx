@@ -1,282 +1,434 @@
 
-
-import React, { useState, useEffect, useMemo } from 'react';
-import { User } from '@supabase/supabase-js';
+import React, { useState, useEffect } from 'react';
 import { 
   ChevronLeft, 
   Camera, 
-  User as UserIcon, 
+  Store as StoreIcon, 
   Mail, 
   Phone, 
   MapPin, 
   CheckCircle2, 
   Loader2, 
   Save, 
-  AtSign, 
-  AlertCircle,
+  Info,
+  Clock,
+  Globe,
+  Instagram,
   Hash,
-  Heart,
-  Edit3,
-  // FIX: Import missing icons
-  QrCode,
-  Banknote,
-  CreditCard,
-  Ticket,
-  Landmark
+  X,
+  AlertTriangle
 } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
-import { NEIGHBORHOOD_COMMUNITIES } from '../constants';
-// FIX: Import useAuth to get user from context
 import { useAuth } from '../contexts/AuthContext';
+import { CATEGORIES, SUBCATEGORIES } from '../constants';
 
 interface StoreProfileEditProps {
   onBack: () => void;
 }
 
-const RESERVED_USERNAMES = ['admin', 'suporte', 'freguesia', 'localizei', 'oficial', 'moderacao', 'staff'];
+interface BusinessHour {
+  day: string;
+  open: string;
+  close: string;
+  closed: boolean;
+}
 
-const PAYMENT_OPTIONS = [
-  { id: 'pix', label: 'Pix', icon: QrCode },
-  { id: 'dinheiro', label: 'Dinheiro', icon: Banknote },
-  { id: 'credito', label: 'Cartão de Crédito', icon: CreditCard },
-  { id: 'debito', label: 'Cartão de Débito', icon: CreditCard },
-  { id: 'vale', label: 'VR / VA', icon: Ticket },
-  { id: 'transferencia', label: 'Transferência', icon: Landmark },
+const DAYS_OF_WEEK = [
+  'Segunda-feira', 'Terça-feira', 'Quarta-feira', 
+  'Quinta-feira', 'Sexta-feira', 'Sábado', 'Domingo'
 ];
 
 export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) => {
-  // FIX: Get user from context instead of props
   const { user } = useAuth();
-  
-  const [name, setName] = useState('');
-  const [username, setUsername] = useState('');
-  const [bio, setBio] = useState('Morador da Freguesia em busca do melhor do bairro!');
-  const [phone, setPhone] = useState('');
-  const [email, setEmail] = useState('');
-  const [neighborhood, setNeighborhood] = useState('Freguesia');
-  
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
 
-  // Lista de comunidades que o usuário participa (vindo do localStorage para consistência MVP)
-  const joinedIds = useMemo(() => {
-    const saved = localStorage.getItem('joined_communities_jpa');
-    return saved ? JSON.parse(saved) : [];
-  }, []);
+  // Form State
+  const [formData, setFormData] = useState({
+    name: '',
+    cnpj: '',
+    email: '',
+    whatsapp: '',
+    phone: '',
+    website: '',
+    instagram: '',
+    logo_url: '',
+    banner_url: '',
+    category: '',
+    subcategories: [] as string[],
+    specialties: [] as string[],
+    description: '',
+    notes: '',
+    // Address
+    cep: '',
+    street: '',
+    number: '',
+    complement: '',
+    neighborhood: '',
+    city: 'Rio de Janeiro',
+    state: 'RJ',
+    is_online_only: false,
+  });
 
-  const joinedCommunities = useMemo(() => 
-    NEIGHBORHOOD_COMMUNITIES.filter(c => joinedIds.includes(c.id)),
-    [joinedIds]
+  const [hours, setHours] = useState<BusinessHour[]>(
+    DAYS_OF_WEEK.map(day => ({ day, open: '09:00', close: '18:00', closed: false }))
   );
 
-  useEffect(() => {
-    // FIX: Add a guard to ensure user object exists before fetching profile
-    if (!user) {
-      setIsLoading(false);
-      return;
-    }
-    
-    // Set initial values from user object while fetching from DB
-    setName(user.user_metadata?.full_name || '');
-    setUsername(user.user_metadata?.username || '');
-    setEmail(user.email || '');
+  const [tempTag, setTempTag] = useState('');
 
-    const fetchProfile = async () => {
+  useEffect(() => {
+    if (!user) return;
+
+    const fetchStoreData = async () => {
       try {
-        const { data } = await supabase.from('profiles').select('*').eq('id', user.id).single();
+        const { data, error } = await supabase
+          .from('merchants')
+          .select('*, merchant_hours(*)')
+          .eq('owner_id', user.id)
+          .maybeSingle();
+
         if (data) {
-          setName(data.full_name || user.user_metadata?.full_name || '');
-          setUsername(data.username || user.user_metadata?.username || '');
-          setPhone(data.phone || '');
-          setNeighborhood(data.neighborhood || 'Freguesia');
-          if (data.bio) setBio(data.bio);
+          setFormData({
+            ...formData,
+            name: data.name || '',
+            cnpj: data.cnpj || '',
+            email: data.email || '',
+            whatsapp: data.whatsapp || '',
+            phone: data.phone || '',
+            website: data.website || '',
+            instagram: data.instagram || '',
+            logo_url: data.logo_url || '',
+            banner_url: data.banner_url || '',
+            category: data.category || '',
+            subcategories: data.subcategories || [],
+            specialties: data.specialties || [],
+            description: data.description || '',
+            notes: data.notes || '',
+            cep: data.cep || '',
+            street: data.street || '',
+            number: data.number || '',
+            complement: data.complement || '',
+            neighborhood: data.neighborhood || '',
+            is_online_only: data.is_online_only || false,
+          });
+
+          if (data.merchant_hours && data.merchant_hours.length > 0) {
+            setHours(data.merchant_hours);
+          }
         }
       } catch (e) {
-        console.warn(e);
+        console.warn('Erro ao carregar dados da loja:', e);
       } finally {
         setIsLoading(false);
       }
     };
-    fetchProfile();
+
+    fetchStoreData();
   }, [user]);
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    // FIX: Add guard for user
     if (!user) return;
+
+    // Validations
+    if (!formData.name || !formData.cnpj || !formData.email || !formData.whatsapp || !formData.logo_url || !formData.category) {
+      alert('Por favor, preencha todos os campos obrigatórios marcados com *');
+      return;
+    }
+
     setIsSaving(true);
     try {
-      const updates = { 
-        full_name: name, 
-        username, 
-        phone, 
-        neighborhood, 
-        bio,
-        updated_at: new Date().toISOString() 
-      };
-      const { error } = await supabase.from('profiles').update(updates).eq('id', user.id);
-      if (error) throw error;
+      const { error: merchantError } = await supabase
+        .from('merchants')
+        .upsert({
+          owner_id: user.id,
+          ...formData,
+          updated_at: new Date().toISOString()
+        }, { onConflict: 'owner_id' });
+
+      if (merchantError) throw merchantError;
+
+      // Em um cenário real, salvaríamos também as 'hours' em uma tabela relacionada
+      
       setShowSuccess(true);
       setTimeout(() => setShowSuccess(false), 3000);
     } catch (err) {
       console.error(err);
+      alert('Erro ao salvar perfil. Tente novamente.');
     } finally {
       setIsSaving(false);
     }
   };
 
-  // FIX: Add a loading/null user state to prevent crashes
-  if (isLoading || !user) {
-    return <div className="min-h-screen bg-white dark:bg-gray-950 flex flex-col items-center justify-center"><Loader2 className="w-10 h-10 text-[#1E5BFF] animate-spin mb-4" /><p className="text-gray-500 font-bold uppercase tracking-widest text-[10px]">Sincronizando Perfil...</p></div>;
+  const addSpecialty = () => {
+    if (tempTag.trim() && !formData.specialties.includes(tempTag.trim())) {
+      setFormData({ ...formData, specialties: [...formData.specialties, tempTag.trim()] });
+      setTempTag('');
+    }
+  };
+
+  const removeSpecialty = (tag: string) => {
+    setFormData({ ...formData, specialties: formData.specialties.filter(t => t !== tag) });
+  };
+
+  const toggleSubcategory = (sub: string) => {
+    const current = formData.subcategories;
+    if (current.includes(sub)) {
+      setFormData({ ...formData, subcategories: current.filter(s => s !== sub) });
+    } else {
+      setFormData({ ...formData, subcategories: [...current, sub] });
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-white dark:bg-gray-950 flex flex-col items-center justify-center p-6">
+        <Loader2 className="w-10 h-10 text-[#1E5BFF] animate-spin mb-4" />
+        <p className="text-gray-500 font-bold uppercase tracking-widest text-[10px]">Carregando Perfil da Loja...</p>
+      </div>
+    );
   }
 
   return (
-    <div className="min-h-screen bg-[#F8F9FC] dark:bg-gray-950 font-sans animate-in slide-in-from-right duration-300 pb-32">
-      {/* Header Fixo */}
-      <div className="sticky top-0 z-30 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md px-5 h-20 flex items-center justify-between border-b border-gray-100 dark:border-gray-800">
+    <div className="min-h-screen bg-[#F8F9FC] dark:bg-gray-950 font-sans animate-in slide-in-from-right duration-300 pb-40">
+      {/* Header */}
+      <div className="sticky top-0 z-40 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md px-5 h-20 flex items-center justify-between border-b border-gray-100 dark:border-gray-800">
         <div className="flex items-center gap-4">
-          <button onClick={onBack} className="p-2.5 bg-gray-100 dark:bg-gray-800 rounded-2xl hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+          <button onClick={onBack} className="p-2.5 bg-gray-100 dark:bg-gray-800 rounded-2xl hover:bg-gray-200 transition-colors">
             <ChevronLeft className="w-6 h-6 text-gray-800 dark:text-white" />
           </button>
           <div>
-            <h1 className="font-black text-lg text-gray-900 dark:text-white uppercase tracking-tighter">Perfil Moderno</h1>
-            <p className="text-[10px] text-blue-500 font-bold uppercase tracking-widest">Identidade Localizei</p>
+            <h1 className="font-black text-lg text-gray-900 dark:text-white uppercase tracking-tighter">Perfil da Loja</h1>
+            <p className="text-[10px] text-blue-500 font-bold uppercase tracking-widest">Configurações do Estabelecimento</p>
           </div>
         </div>
-        <button onClick={handleSave} disabled={isSaving} className="p-3 bg-[#1E5BFF] text-white rounded-2xl shadow-lg shadow-blue-500/20 active:scale-90 transition-transform">
-           {isSaving ? <Loader2 size={20} className="animate-spin" /> : <Save size={20} />}
-        </button>
       </div>
 
-      <div className="p-6 space-y-8">
+      <form onSubmit={handleSave} className="p-6 space-y-10 max-w-md mx-auto">
         
-        {/* 1. CARTÃO DE IDENTIDADE (ESTILO ORKUT) */}
-        <div className="bg-white dark:bg-gray-900 rounded-[3rem] p-8 shadow-xl shadow-black/5 border border-gray-100 dark:border-gray-800 text-center relative overflow-hidden">
-          <div className="absolute top-0 left-0 right-0 h-24 bg-gradient-to-br from-[#1E5BFF] to-[#4D7CFF] opacity-10"></div>
-          
-          <div className="relative mb-6">
-            <div className="w-28 h-28 rounded-[2.5rem] bg-gray-200 dark:bg-gray-800 overflow-hidden border-4 border-white dark:border-gray-900 shadow-2xl mx-auto group">
-              {user.user_metadata?.avatar_url ? <img src={user.user_metadata.avatar_url} className="w-full h-full object-cover" /> : <UserIcon className="w-full h-full p-8 text-gray-400" />}
-              <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
-                <Camera className="w-8 h-8 text-white" />
+        {/* 1. DADOS PRINCIPAIS */}
+        <section className="space-y-6">
+          <div className="flex items-center gap-2 mb-2">
+            <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center"><Info size={16} /></div>
+            <h2 className="text-xs font-black text-gray-400 uppercase tracking-[0.2em]">Dados Principais</h2>
+          </div>
+
+          <div className="space-y-4">
+            <div className="flex flex-col items-center gap-4 mb-8">
+              <div 
+                className="w-24 h-24 rounded-[2rem] bg-white dark:bg-gray-800 border-4 border-white dark:border-gray-900 shadow-xl overflow-hidden relative group cursor-pointer"
+                onClick={() => setFormData({...formData, logo_url: 'https://ui-avatars.com/api/?name=Loja&background=1E5BFF&color=fff'})}
+              >
+                {formData.logo_url ? <img src={formData.logo_url} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-gray-300"><Camera /></div>}
+                <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"><span className="text-[8px] font-black text-white uppercase">Logo *</span></div>
+              </div>
+              <p className="text-[10px] font-bold text-gray-400 uppercase">Logo da Loja *</p>
+            </div>
+
+            <div className="bg-white dark:bg-gray-900 rounded-3xl p-6 border border-gray-100 dark:border-gray-800 shadow-sm space-y-5">
+              <div>
+                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Nome da Empresa *</label>
+                <input required value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="w-full bg-gray-50 dark:bg-gray-800 p-4 rounded-2xl border border-transparent focus:border-[#1E5BFF] outline-none text-sm font-bold dark:text-white mt-1" placeholder="Ex: Padaria Freguesia" />
+              </div>
+              <div>
+                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">CNPJ *</label>
+                <input required value={formData.cnpj} onChange={e => setFormData({...formData, cnpj: e.target.value})} className="w-full bg-gray-50 dark:bg-gray-800 p-4 rounded-2xl border border-transparent focus:border-[#1E5BFF] outline-none text-sm font-bold dark:text-white mt-1" placeholder="00.000.000/0001-00" />
+              </div>
+              <div>
+                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Email Público *</label>
+                <input required type="email" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} className="w-full bg-gray-50 dark:bg-gray-800 p-4 rounded-2xl border border-transparent focus:border-[#1E5BFF] outline-none text-sm font-bold dark:text-white mt-1" placeholder="contato@empresa.com" />
+              </div>
+              <div>
+                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">WhatsApp Oficial *</label>
+                <input required value={formData.whatsapp} onChange={e => setFormData({...formData, whatsapp: e.target.value})} className="w-full bg-gray-50 dark:bg-gray-800 p-4 rounded-2xl border border-transparent focus:border-[#1E5BFF] outline-none text-sm font-bold dark:text-white mt-1" placeholder="(21) 99999-9999" />
               </div>
             </div>
           </div>
+        </section>
 
-          <h2 className="text-2xl font-black text-gray-900 dark:text-white tracking-tighter uppercase leading-none">{name || 'Usuário JPA'}</h2>
-          <p className="text-xs text-[#1E5BFF] font-black uppercase tracking-[0.2em] mt-2 flex items-center justify-center gap-1">
-             <AtSign size={12} strokeWidth={3} /> {username || 'jpanativo'}
-          </p>
-
-          <div className="mt-6 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-2xl border border-gray-100 dark:border-gray-800 relative">
-             <Edit3 size={14} className="absolute top-3 right-3 text-gray-300" />
-             <textarea 
-               value={bio}
-               onChange={(e) => setBio(e.target.value)}
-               className="bg-transparent border-none w-full text-sm text-gray-600 dark:text-gray-400 text-center italic leading-relaxed outline-none resize-none"
-               rows={2}
-               placeholder="Sua bio curta aqui..."
-             />
+        {/* 2. CATEGORIAS */}
+        <section className="space-y-6">
+          <div className="flex items-center gap-2 mb-2">
+            <div className="w-8 h-8 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center"><Hash size={16} /></div>
+            <h2 className="text-xs font-black text-gray-400 uppercase tracking-[0.2em]">Categorias e Especialidades</h2>
           </div>
 
-          <div className="flex items-center justify-center gap-4 mt-8 pt-6 border-t border-gray-50 dark:border-gray-800">
-             <div className="text-center">
-                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Membro de</p>
-                <p className="text-lg font-black text-gray-900 dark:text-white">{joinedCommunities.length}</p>
-             </div>
-             <div className="w-px h-8 bg-gray-100 dark:bg-gray-800"></div>
-             <div className="text-center">
-                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Local</p>
-                <p className="text-lg font-black text-gray-900 dark:text-white">{neighborhood}</p>
-             </div>
-          </div>
-        </div>
+          <div className="bg-white dark:bg-gray-900 rounded-3xl p-6 border border-gray-100 dark:border-gray-800 shadow-sm space-y-6">
+            <div>
+              <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Categoria Principal *</label>
+              <select 
+                required 
+                value={formData.category} 
+                onChange={e => setFormData({...formData, category: e.target.value, subcategories: []})} 
+                className="w-full bg-gray-50 dark:bg-gray-800 p-4 rounded-2xl border border-transparent focus:border-[#1E5BFF] outline-none text-sm font-bold dark:text-white mt-1"
+              >
+                <option value="">Selecione...</option>
+                {CATEGORIES.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}
+              </select>
+            </div>
 
-        {/* 2. MINHAS COMUNIDADES (CARDS HORIZONTAIS) */}
-        <section>
-          <div className="flex items-center justify-between px-2 mb-4">
-            <h3 className="text-xs font-black text-gray-900 dark:text-white uppercase tracking-[0.2em]">Minhas Comunidades</h3>
-            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Ver todas</span>
-          </div>
-
-          <div className="flex gap-4 overflow-x-auto no-scrollbar -mx-6 px-6 pb-2">
-            {joinedCommunities.length > 0 ? joinedCommunities.map((comm) => (
-              <div key={comm.id} className="w-32 flex-shrink-0 flex flex-col items-center gap-2 group cursor-pointer">
-                <div className={`w-20 h-20 rounded-[1.5rem] ${comm.color} shadow-lg flex items-center justify-center text-white border-2 border-white dark:border-gray-900 group-active:scale-90 transition-all`}>
-                  {React.cloneElement(comm.icon as any, { size: 32, strokeWidth: 2 })}
+            {formData.category && (
+              <div>
+                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1 mb-2 block">Subcategorias</label>
+                <div className="flex flex-wrap gap-2">
+                  {(SUBCATEGORIES[formData.category] || []).map(sub => (
+                    <button 
+                      key={sub.name} 
+                      type="button"
+                      onClick={() => toggleSubcategory(sub.name)}
+                      className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase transition-all ${formData.subcategories.includes(sub.name) ? 'bg-blue-600 text-white shadow-lg' : 'bg-gray-100 dark:bg-gray-800 text-gray-500'}`}
+                    >
+                      {sub.name}
+                    </button>
+                  ))}
                 </div>
-                <span className="text-[9px] font-black text-gray-900 dark:text-white uppercase tracking-tighter text-center line-clamp-1">
-                  {comm.name}
-                </span>
               </div>
-            )) : (
-              <div className="w-full bg-white dark:bg-gray-900 p-8 rounded-[2rem] border border-gray-100 dark:border-gray-800 text-center flex flex-col items-center">
-                 <Hash size={24} className="text-gray-200 mb-2" />
-                 <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Nenhuma comunidade ainda</p>
+            )}
+
+            <div>
+              <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1 mb-2 block">Especialidades (Tags)</label>
+              <div className="flex gap-2 mb-3">
+                <input value={tempTag} onChange={e => setTempTag(e.target.value)} onKeyPress={e => e.key === 'Enter' && (e.preventDefault(), addSpecialty())} className="flex-1 bg-gray-50 dark:bg-gray-800 p-3 rounded-xl border border-transparent focus:border-[#1E5BFF] outline-none text-xs font-bold dark:text-white" placeholder="Ex: Entrega Grátis" />
+                <button type="button" onClick={addSpecialty} className="bg-[#1E5BFF] text-white p-3 rounded-xl active:scale-95 transition-transform"><Save size={18} /></button>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {formData.specialties.map(tag => (
+                  <span key={tag} className="bg-blue-50 dark:bg-blue-900/30 text-[#1E5BFF] px-3 py-1.5 rounded-full text-[10px] font-bold flex items-center gap-1.5 border border-blue-100 dark:border-blue-800">
+                    {tag} <X size={10} className="cursor-pointer" onClick={() => removeSpecialty(tag)} />
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* 3. ENDEREÇO */}
+        <section className="space-y-6">
+          <div className="flex items-center gap-2 mb-2">
+            <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center"><MapPin size={16} /></div>
+            <h2 className="text-xs font-black text-gray-400 uppercase tracking-[0.2em]">Localização</h2>
+          </div>
+
+          <div className="bg-white dark:bg-gray-900 rounded-3xl p-6 border border-gray-100 dark:border-gray-800 shadow-sm space-y-5">
+            <div className="flex items-center gap-3 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-2xl mb-4">
+              <input type="checkbox" checked={formData.is_online_only} onChange={e => setFormData({...formData, is_online_only: e.target.checked})} className="w-5 h-5 rounded border-gray-300 text-blue-600" id="online_only" />
+              <label htmlFor="online_only" className="text-xs font-bold text-gray-700 dark:text-gray-300">Atendo somente online / Delivery</label>
+            </div>
+
+            {!formData.is_online_only && (
+              <div className="space-y-5 animate-in fade-in slide-in-from-top-2">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">CEP</label>
+                    <input value={formData.cep} onChange={e => setFormData({...formData, cep: e.target.value})} className="w-full bg-gray-50 dark:bg-gray-800 p-4 rounded-2xl border border-transparent outline-none text-sm font-bold dark:text-white mt-1" placeholder="22775-000" />
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Bairro</label>
+                    <input value={formData.neighborhood} onChange={e => setFormData({...formData, neighborhood: e.target.value})} className="w-full bg-gray-50 dark:bg-gray-800 p-4 rounded-2xl border border-transparent outline-none text-sm font-bold dark:text-white mt-1" placeholder="Freguesia" />
+                  </div>
+                </div>
+                <div>
+                  <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Logradouro (Rua/Av)</label>
+                  <input value={formData.street} onChange={e => setFormData({...formData, street: e.target.value})} className="w-full bg-gray-50 dark:bg-gray-800 p-4 rounded-2xl border border-transparent outline-none text-sm font-bold dark:text-white mt-1" placeholder="Estrada dos Três Rios" />
+                </div>
+                <div className="grid grid-cols-3 gap-4">
+                  <div>
+                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Nº</label>
+                    <input value={formData.number} onChange={e => setFormData({...formData, number: e.target.value})} className="w-full bg-gray-50 dark:bg-gray-800 p-4 rounded-2xl border border-transparent outline-none text-sm font-bold dark:text-white mt-1" placeholder="100" />
+                  </div>
+                  <div className="col-span-2">
+                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Complemento</label>
+                    <input value={formData.complement} onChange={e => setFormData({...formData, complement: e.target.value})} className="w-full bg-gray-50 dark:bg-gray-800 p-4 rounded-2xl border border-transparent outline-none text-sm font-bold dark:text-white mt-1" placeholder="Sala 204" />
+                  </div>
+                </div>
               </div>
             )}
           </div>
         </section>
 
-        {/* 3. FORMULÁRIO DE DADOS TÉCNICOS */}
-        <section className="space-y-4">
-           <h3 className="text-xs font-black text-gray-400 uppercase tracking-[0.2em] ml-2">Dados de Acesso</h3>
-           <div className="bg-white dark:bg-gray-900 rounded-[2.5rem] p-6 shadow-sm border border-gray-100 dark:border-gray-800 space-y-6">
-              <div className="space-y-1.5">
-                  <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">E-mail</label>
-                  <div className="relative">
-                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                    <input type="text" value={email} readOnly className="w-full bg-gray-50 dark:bg-gray-800 text-gray-400 pl-11 pr-4 py-4 rounded-2xl border border-transparent outline-none cursor-not-allowed text-xs font-bold" />
-                  </div>
-              </div>
+        {/* 4. HORÁRIOS */}
+        <section className="space-y-6">
+          <div className="flex items-center gap-2 mb-2">
+            <div className="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center"><Clock size={16} /></div>
+            <h2 className="text-xs font-black text-gray-400 uppercase tracking-[0.2em]">Horário de Funcionamento</h2>
+          </div>
 
-              <div className="space-y-1.5">
-                  <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">WhatsApp</label>
-                  <div className="relative group">
-                    <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 group-focus-within:text-[#1E5BFF]" />
-                    <input 
-                      type="tel" 
-                      value={phone} 
-                      onChange={(e) => setPhone(e.target.value)} 
-                      placeholder="(21) 99999-9999"
-                      className="w-full bg-white dark:bg-gray-900 text-gray-900 dark:text-white pl-11 pr-4 py-4 rounded-2xl border border-gray-100 dark:border-gray-800 focus:border-[#1E5BFF] focus:ring-4 focus:ring-blue-500/5 outline-none transition-all text-xs font-bold"
-                    />
-                  </div>
-              </div>
+          <div className="bg-white dark:bg-gray-900 rounded-3xl p-6 border border-gray-100 dark:border-gray-800 shadow-sm space-y-4">
+            {hours.map((h, idx) => (
+              <div key={idx} className="flex items-center justify-between gap-4 pb-4 border-b border-gray-50 dark:border-gray-800 last:border-0 last:pb-0">
+                <div className="w-24">
+                  <span className="text-[10px] font-black text-gray-700 dark:text-gray-300 uppercase">{h.day.slice(0,3)}</span>
+                </div>
+                
+                <div className="flex-1 flex items-center gap-2">
+                  <input type="time" disabled={h.closed} value={h.open} onChange={e => {
+                    const newHours = [...hours];
+                    newHours[idx].open = e.target.value;
+                    setHours(newHours);
+                  }} className="bg-gray-50 dark:bg-gray-800 p-2 rounded-lg text-xs font-bold dark:text-white outline-none disabled:opacity-30" />
+                  <span className="text-gray-300">/</span>
+                  <input type="time" disabled={h.closed} value={h.close} onChange={e => {
+                    const newHours = [...hours];
+                    newHours[idx].close = e.target.value;
+                    setHours(newHours);
+                  }} className="bg-gray-50 dark:bg-gray-800 p-2 rounded-lg text-xs font-bold dark:text-white outline-none disabled:opacity-30" />
+                </div>
 
-              <div className="space-y-1.5">
-                  <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Região</label>
-                  <div className="relative group">
-                    <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 group-focus-within:text-[#1E5BFF]" />
-                    <input 
-                      type="text" 
-                      value={neighborhood} 
-                      onChange={(e) => setNeighborhood(e.target.value)} 
-                      placeholder="Freguesia, Anil..."
-                      className="w-full bg-white dark:bg-gray-900 text-gray-900 dark:text-white pl-11 pr-4 py-4 rounded-2xl border border-gray-100 dark:border-gray-800 focus:border-[#1E5BFF] focus:ring-4 focus:ring-blue-500/5 outline-none transition-all text-xs font-bold"
-                    />
-                  </div>
+                <div className="flex items-center gap-1">
+                   <input type="checkbox" checked={h.closed} onChange={e => {
+                     const newHours = [...hours];
+                     newHours[idx].closed = e.target.checked;
+                     setHours(newHours);
+                   }} className="w-4 h-4 rounded border-gray-300 text-red-600" />
+                   <span className="text-[9px] font-black uppercase text-gray-400">Fechado</span>
+                </div>
               </div>
-           </div>
+            ))}
+          </div>
         </section>
 
-        {/* 4. FOOTER SAFETY */}
-        <div className="flex flex-col items-center gap-4 py-8 opacity-40 grayscale">
-           <AlertCircle size={20} className="text-gray-400" />
-           <p className="text-[9px] font-black text-gray-400 uppercase tracking-[0.4em] text-center">
-              Privacidade Garantida • Criptografia JPA
-           </p>
-        </div>
+        {/* 5. INFORMAÇÕES ADICIONAIS */}
+        <section className="space-y-6">
+          <div className="flex items-center gap-2 mb-2">
+            <div className="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center"><CheckCircle2 size={16} /></div>
+            <h2 className="text-xs font-black text-gray-400 uppercase tracking-[0.2em]">Descrição e Redes</h2>
+          </div>
 
+          <div className="bg-white dark:bg-gray-900 rounded-3xl p-6 border border-gray-100 dark:border-gray-800 shadow-sm space-y-5">
+            <div>
+              <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Descrição da Loja</label>
+              <textarea value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} rows={4} className="w-full bg-gray-50 dark:bg-gray-800 p-4 rounded-2xl border border-transparent outline-none text-sm font-medium dark:text-white mt-1 resize-none" placeholder="Conte um pouco sobre sua história e produtos..." />
+            </div>
+            <div>
+              <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1 flex items-center gap-1.5"><Instagram size={12} /> Instagram</label>
+              <input value={formData.instagram} onChange={e => setFormData({...formData, instagram: e.target.value})} className="w-full bg-gray-50 dark:bg-gray-800 p-4 rounded-2xl border border-transparent outline-none text-sm font-bold dark:text-white mt-1" placeholder="@sua.loja" />
+            </div>
+            <div>
+              <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1 flex items-center gap-1.5"><Globe size={12} /> Website</label>
+              <input value={formData.website} onChange={e => setFormData({...formData, website: e.target.value})} className="w-full bg-gray-50 dark:bg-gray-800 p-4 rounded-2xl border border-transparent outline-none text-sm font-bold dark:text-white mt-1" placeholder="www.sualoja.com.br" />
+            </div>
+          </div>
+        </section>
+
+      </form>
+
+      {/* Floating Action Bar */}
+      <div className="fixed bottom-0 left-0 right-0 p-6 bg-white/90 dark:bg-gray-950/90 backdrop-blur-md border-t border-gray-100 dark:border-gray-800 z-50 max-w-md mx-auto">
+        {showSuccess && (
+            <div className="flex items-center justify-center gap-2 text-emerald-600 font-bold text-sm mb-4 animate-in fade-in slide-in-from-bottom-2">
+                <CheckCircle2 className="w-5 h-5" /> Perfil atualizado com sucesso!
+            </div>
+        )}
+        <button 
+          onClick={handleSave} 
+          disabled={isSaving}
+          className="w-full bg-gray-900 dark:bg-white text-white dark:text-black font-black py-5 rounded-[2rem] shadow-2xl active:scale-[0.98] transition-all flex items-center justify-center gap-3 disabled:opacity-50"
+        >
+          {isSaving ? <Loader2 className="animate-spin" /> : <Save size={20} />}
+          SALVAR PERFIL DA LOJA
+        </button>
       </div>
-
-      {showSuccess && (
-        <div className="fixed bottom-24 left-1/2 -translate-x-1/2 bg-gray-900 dark:bg-white text-white dark:text-gray-900 px-8 py-4 rounded-full shadow-2xl flex items-center gap-3 animate-in slide-in-from-bottom-2 z-[100]">
-           <CheckCircle2 className="w-5 h-5 text-emerald-400" />
-           <span className="font-black text-xs uppercase tracking-widest">Perfil Sincronizado!</span>
-        </div>
-      )}
     </div>
   );
 };

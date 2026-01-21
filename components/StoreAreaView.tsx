@@ -17,7 +17,8 @@ import {
   User,
   Sparkles,
   Compass,
-  LifeBuoy
+  LifeBuoy,
+  AlertTriangle
 } from 'lucide-react';
 import { User as SupabaseUser } from '@supabase/supabase-js';
 import { useAuth } from '../contexts/AuthContext';
@@ -109,10 +110,27 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
   const storeName = user?.user_metadata?.store_name || "Sua Loja";
   const avatarUrl = user?.user_metadata?.avatar_url || `https://ui-avatars.com/api/?name=${storeName.replace(' ', '+')}&background=1E5BFF&color=fff`;
 
+  // Verificação de Completude do Perfil
+  const isProfileComplete = user?.user_metadata?.cnpj && 
+                             user?.user_metadata?.email && 
+                             user?.user_metadata?.whatsapp && 
+                             user?.user_metadata?.logo_url;
+
   return (
     <div className="min-h-screen bg-[#F8F9FB] dark:bg-gray-950 font-sans animate-in fade-in duration-500 pb-32">
       
-      {/* 1. TOPO / PERFIL (Mantido conforme spec) */}
+      {/* Aviso de Perfil Incompleto */}
+      {!isProfileComplete && (
+        <div className="bg-amber-500 text-white px-6 py-2.5 flex items-center justify-between shadow-lg animate-in slide-in-from-top duration-500">
+           <div className="flex items-center gap-2">
+             <AlertTriangle size={16} />
+             <span className="text-[10px] font-black uppercase tracking-widest">Complete o perfil da sua loja para aparecer no app</span>
+           </div>
+           <button onClick={() => onNavigate('store_profile')} className="bg-white text-amber-600 px-3 py-1 rounded-full text-[9px] font-black uppercase">Resolver</button>
+        </div>
+      )}
+
+      {/* 1. TOPO / PERFIL */}
       <div className="bg-white dark:bg-gray-900 px-6 pt-12 pb-8 border-b border-gray-100 dark:border-gray-800 shadow-sm">
         <div className="flex items-center gap-4 mb-6">
           <div className="w-20 h-20 rounded-[2rem] border-4 border-white dark:border-gray-800 shadow-xl overflow-hidden shrink-0">
@@ -127,7 +145,7 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
         </div>
         
         <button 
-          onClick={() => onNavigate('store_detail')}
+          onClick={() => onNavigate('store_profile')}
           className="w-full py-3.5 rounded-2xl border-2 border-gray-100 dark:border-gray-700 text-gray-600 dark:text-gray-300 font-bold text-xs uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all active:scale-[0.98]"
         >
           <User size={14} />
