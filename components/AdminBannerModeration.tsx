@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { 
   ChevronLeft, 
@@ -14,10 +15,11 @@ import {
   Loader2
 } from 'lucide-react';
 import { User } from '@supabase/supabase-js';
-import { supabase } from '../lib/supabaseClient';
+import { supabase } from '@/lib/supabaseClient';
 
 // --- Reusable Banner Rendering Components ---
 const TemplateBannerRender: React.FC<{ config: any }> = ({ config }) => {
+    if (!config) return <div className="p-2 text-xs text-slate-500">Configuração ausente</div>;
     const { template_id, headline, subheadline, product_image_url } = config;
     switch (template_id) {
       case 'oferta_relampago':
@@ -46,6 +48,7 @@ const TemplateBannerRender: React.FC<{ config: any }> = ({ config }) => {
     }
 };
 const CustomBannerRender: React.FC<{ config: any }> = ({ config }) => {
+    if (!config) return <div className="p-2 text-xs text-slate-500">Configuração ausente</div>;
     const { background_color, text_color, title, subtitle } = config;
     return (
         <div className="w-full h-full p-4 flex flex-col justify-center text-xs" style={{ backgroundColor: background_color, color: text_color }}>
@@ -54,7 +57,6 @@ const CustomBannerRender: React.FC<{ config: any }> = ({ config }) => {
         </div>
     );
 };
-// --- END ---
 
 interface AdminBannerModerationProps {
   onBack: () => void;
@@ -64,7 +66,7 @@ interface AdminBannerModerationProps {
 export const AdminBannerModeration: React.FC<AdminBannerModerationProps> = ({ onBack, user }) => {
   const [banners, setBanners] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [actionTaken, setActionTaken] = useState<{ [key: string]: 'paused' | null }>({});
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchActiveBanners = async () => {
@@ -74,6 +76,7 @@ export const AdminBannerModeration: React.FC<AdminBannerModerationProps> = ({ on
       }
       try {
         setLoading(true);
+        setErrorMsg(null);
         const { data, error } = await supabase
           .from('published_banners')
           .select(`
@@ -83,10 +86,18 @@ export const AdminBannerModeration: React.FC<AdminBannerModerationProps> = ({ on
           .eq('is_active', true)
           .order('created_at', { ascending: false });
 
-        if (error) throw error;
+        if (error) {
+          if (error.message.includes('schema cache') || error.code === 'PGRST116') {
+             setErrorMsg("As tabelas de banners ainda não foram criadas no Supabase.");
+             setBanners([]);
+             return;
+          }
+          throw error;
+        }
         setBanners(data || []);
       } catch (e) {
         console.error("Failed to fetch active banners", e);
+        setErrorMsg("Erro ao conectar com o banco de dados.");
       } finally {
         setLoading(false);
       }
@@ -95,7 +106,7 @@ export const AdminBannerModeration: React.FC<AdminBannerModerationProps> = ({ on
   }, []);
 
   const handlePauseBanner = async (banner: any) => {
-    if (confirm(`Pausar banner para "${banner.profiles.full_name || 'Loja'}"?`)) {
+    if (confirm(`Pausar banner para "${banner.profiles?.full_name || 'Loja'}"?`)) {
       try {
         if (!supabase) throw new Error("Supabase client not available");
         
@@ -105,7 +116,7 @@ export const AdminBannerModeration: React.FC<AdminBannerModerationProps> = ({ on
           .eq('id', banner.id);
         if (updateError) throw updateError;
         
-        const { error: logError } = await supabase
+        await supabase
           .from('banner_audit_log')
           .insert({
             actor_id: user?.id,
@@ -114,9 +125,7 @@ export const AdminBannerModeration: React.FC<AdminBannerModerationProps> = ({ on
             banner_id: banner.id,
             details: { reason: 'Moderação manual via painel.' }
           });
-        if (logError) console.error("Failed to log moderation event:", logError);
 
-        setActionTaken(prev => ({ ...prev, [banner.id]: 'paused' }));
         setBanners(prev => prev.filter(b => b.id !== banner.id));
 
       } catch (e) {
@@ -137,20 +146,29 @@ export const AdminBannerModeration: React.FC<AdminBannerModerationProps> = ({ on
         </button>
         <div>
           <h1 className="font-black text-lg text-white">Moderação de Banners</h1>
-          <p className="text-xs text-slate-500 font-medium">Banners atualmente ativos no app</p>
+          <p className="text-xs text-slate-500 font-medium">Fila de banners ativos</p>
         </div>
       </header>
 
       <main className="flex-1 p-6 overflow-y-auto no-scrollbar pb-32">
         {loading ? (
           <div className="flex justify-center pt-20"><Loader2 className="w-8 h-8 text-blue-500 animate-spin" /></div>
+        ) : errorMsg ? (
+          <div className="flex flex-col items-center justify-center text-center pt-20">
+            <AlertTriangle size={48} className="text-amber-500 mb-4" />
+            <h3 className="text-lg font-bold text-white mb-2">Atenção</h3>
+            <p className="text-slate-400 max-w-xs mb-6">{errorMsg}</p>
+            <div className="p-4 bg-slate-800 rounded-xl text-left font-mono text-[10px] text-slate-300">
+               Execute o SQL de migração no painel do Supabase para criar as tabelas necessárias.
+            </div>
+          </div>
         ) : banners.length === 0 ? (
           <div className="flex flex-col items-center justify-center text-center h-full pt-20">
             <div className="w-20 h-20 bg-slate-800 rounded-full flex items-center justify-center mb-6 border border-white/5">
               <CheckCircle size={40} className="text-slate-600" />
             </div>
             <h2 className="text-xl font-bold text-white mb-2">Tudo Certo!</h2>
-            <p className="text-slate-400 max-w-xs">Nenhum banner publicado por lojista para moderar no momento.</p>
+            <p className="text-slate-400 max-w-xs">Nenhum banner ativo para moderar no momento.</p>
           </div>
         ) : (
           <div className="space-y-6">
@@ -160,7 +178,7 @@ export const AdminBannerModeration: React.FC<AdminBannerModerationProps> = ({ on
                     <div className="w-48 h-24 rounded-lg overflow-hidden shrink-0 border border-white/10 bg-slate-800">
                         {banner.config?.type === 'template' ? <TemplateBannerRender config={banner.config} /> : <CustomBannerRender config={banner.config} />}
                     </div>
-                    <div className="flex-1">
+                    <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1 text-sm">
                             <UserIcon size={14} className="text-slate-400" />
                             <span className="font-bold text-white truncate">{banner.profiles?.full_name || 'Lojista'}</span>
@@ -179,7 +197,7 @@ export const AdminBannerModeration: React.FC<AdminBannerModerationProps> = ({ on
                         <PauseCircle size={16} /> Pausar Banner
                     </button>
                      <button className="w-full bg-sky-500/10 hover:bg-sky-500/20 text-sky-400 border border-sky-500/20 font-bold py-3 rounded-xl flex items-center justify-center gap-2 active:scale-95 transition-all text-xs">
-                        <Send size={14} /> Contatar Lojista
+                        <Send size={14} /> Contatar
                     </button>
                 </div>
               </div>

@@ -1,35 +1,36 @@
+
 import React, { useState, useEffect } from 'react';
-import { Layout } from './components/Layout';
-import { Header } from './components/Header';
-import { HomeFeed } from './components/HomeFeed';
-import { ExploreView } from './components/ExploreView';
-import { StoreDetailView } from './components/StoreDetailView';
-import { AuthModal } from './components/AuthModal';
-import { MenuView } from './components/MenuView';
-import { PatrocinadorMasterScreen } from './components/PatrocinadorMasterScreen';
-import { ServicesView } from './components/ServicesView';
-import { SubcategoriesView } from './components/SubcategoriesView';
-import { SpecialtiesView } from './components/SpecialtiesView';
-import { ServiceSuccessView } from './components/ServiceSuccessView';
-import { QuoteRequestModal } from './components/QuoteRequestModal';
-import { StoreAreaView } from './components/StoreAreaView';
-import { WeeklyPromoModule } from './components/WeeklyPromoModule';
-import { JobsView } from './components/JobsView';
-import { MerchantJobsModule } from './components/MerchantJobsModule';
-import { AdminPanel } from './components/AdminPanel';
-import { CashbackLandingView } from './components/CashbackLandingView';
-import { StoreAdsModule } from './components/StoreAdsModule';
-import { AdminBannerModeration } from './components/AdminBannerModeration';
+import { Layout } from '@/components/layout/Layout';
+import { Header } from '@/components/layout/Header';
+import { HomeFeed } from '@/components/HomeFeed';
+import { ExploreView } from '@/components/ExploreView';
+import { StoreDetailView } from '@/components/StoreDetailView';
+import { AuthModal } from '@/components/AuthModal';
+import { MenuView } from '@/components/MenuView';
+import { PatrocinadorMasterScreen } from '@/components/PatrocinadorMasterScreen';
+import { ServicesView } from '@/components/ServicesView';
+import { SubcategoriesView } from '@/components/SubcategoriesView';
+import { SpecialtiesView } from '@/components/SpecialtiesView';
+import { ServiceSuccessView } from '@/components/ServiceSuccessView';
+import { QuoteRequestModal } from '@/components/QuoteRequestModal';
+import { StoreAreaView } from '@/components/StoreAreaView';
+import { WeeklyPromoModule } from '@/components/WeeklyPromoModule';
+import { JobsView } from '@/components/JobsView';
+import { MerchantJobsModule } from '@/components/MerchantJobsModule';
+import { AdminPanel } from '@/components/AdminPanel';
+import { CashbackLandingView } from '@/components/CashbackLandingView';
+import { StoreAdsModule } from '@/components/StoreAdsModule';
+import { AdminBannerModeration } from '@/components/AdminBannerModeration';
 import { MapPin, ShieldCheck, X } from 'lucide-react';
-import { useAuth } from './contexts/AuthContext';
-import { NeighborhoodProvider } from './contexts/NeighborhoodContext';
-import { Category, Store } from './types';
-import { CategoryView } from './components/CategoryView';
-import { StoreProfileEdit } from './components/StoreProfileEdit';
-import { CommunityFeedView } from './components/CommunityFeedView';
-import { STORES } from './constants';
-import { AdminModerationPanel } from './components/AdminModerationPanel';
-import { AboutView, SupportView, FavoritesView } from './components/SimplePages';
+import { useAuth } from '@/contexts/AuthContext';
+import { NeighborhoodProvider } from '@/contexts/NeighborhoodContext';
+import { Category, Store } from '@/types';
+import { CategoryView } from '@/pages/categories/CategoryView';
+import { StoreProfileEdit } from '@/components/StoreProfileEdit';
+import { CommunityFeedView } from '@/components/CommunityFeedView';
+import { STORES } from '@/constants';
+import { AdminModerationPanel } from '@/components/AdminModerationPanel';
+import { AboutView, SupportView, FavoritesView } from '@/components/SimplePages';
 
 let splashWasShownInSession = false;
 const ADMIN_EMAIL = 'dedonopradonodedelivery@gmail.com';
@@ -86,19 +87,6 @@ const App: React.FC = () => {
     }
   }, [activeTab, user, isAuthInitialLoading]);
 
-  // Route guards based on user role
-  useEffect(() => {
-    if (!isAuthInitialLoading && user) {
-      if (userRole === 'lojista' && activeTab === 'profile') {
-        setActiveTab('store_area');
-      }
-      if (userRole === 'cliente' && activeTab === 'store_area') {
-        setActiveTab('profile');
-      }
-    }
-  }, [activeTab, userRole, user, isAuthInitialLoading]);
-
-
   const handleLoginSuccess = () => {
     setIsAuthOpen(false);
     if (pendingTab) {
@@ -106,7 +94,6 @@ const App: React.FC = () => {
       setPendingTab(null);
     }
   };
-
 
   useEffect(() => {
     if (splashStage === 4) return;
@@ -164,7 +151,13 @@ const App: React.FC = () => {
                 {activeTab === 'admin_banner_moderation' && user?.email === ADMIN_EMAIL && <AdminBannerModeration user={user as any} onBack={() => setActiveTab('admin_panel')} />}
                 {activeTab === 'home' && <HomeFeed onNavigate={setActiveTab} onSelectCategory={(c) => { setSelectedCategory(c); setActiveTab('category_detail'); }} onSelectCollection={() => {}} onStoreClick={handleSelectStore} stores={STORES} searchTerm={globalSearch} user={user as any} onRequireLogin={() => setIsAuthOpen(true)} />}
                 {activeTab === 'explore' && <ExploreView stores={STORES} searchQuery={globalSearch} onStoreClick={handleSelectStore} onLocationClick={() => {}} onFilterClick={() => {}} onOpenPlans={() => {}} onNavigate={setActiveTab} />}
-                {activeTab === 'profile' && <MenuView user={user as any} userRole={userRole} onAuthClick={() => setIsAuthOpen(true)} onNavigate={setActiveTab} onBack={() => setActiveTab('home')} />}
+                
+                {activeTab === 'profile' && (
+                  userRole === 'lojista' 
+                    ? <StoreAreaView onBack={() => setActiveTab('home')} onNavigate={setActiveTab} user={user as any} />
+                    : <MenuView user={user as any} userRole={userRole} onAuthClick={() => setIsAuthOpen(true)} onNavigate={setActiveTab} onBack={() => setActiveTab('home')} />
+                )}
+
                 {activeTab === 'community_feed' && <CommunityFeedView onStoreClick={handleSelectStore} user={user as any} onRequireLogin={() => setIsAuthOpen(true)} onNavigate={setActiveTab} />}
                 {activeTab === 'services' && <ServicesView onSelectMacro={(id, name) => { setSelectedServiceMacro({id, name}); if (id === 'emergency') { setQuoteCategory(name); setIsQuoteModalOpen(true); } else { setActiveTab('service_subcategories'); } }} onOpenTerms={() => setActiveTab('service_terms')} onNavigate={setActiveTab} searchTerm={globalSearch} />}
                 {activeTab === 'category_detail' && selectedCategory && <CategoryView category={selectedCategory} onBack={() => setActiveTab('home')} onStoreClick={handleSelectStore} stores={STORES} userRole={userRole} onAdvertiseInCategory={setAdCategoryTarget} onNavigate={setActiveTab} />}
