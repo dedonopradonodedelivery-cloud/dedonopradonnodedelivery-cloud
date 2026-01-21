@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { 
   ChevronLeft, 
   Rocket, 
@@ -14,7 +13,16 @@ import {
   Store as StoreIcon,
   Megaphone,
   Gift,
-  Eye
+  Eye,
+  Crown,
+  Target,
+  Clock,
+  MapPin,
+  Palette,
+  LayoutTemplate,
+  // Added missing AlertTriangle and TrendingUp icons to fix "Cannot find name" errors.
+  AlertTriangle,
+  TrendingUp
 } from 'lucide-react';
 import { User } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabaseClient';
@@ -57,6 +65,15 @@ const getContrastRatio = (hex1: string, hex2: string): number => {
   return (lightest + 0.05) / (darkest + 0.05);
 };
 
+// Added missing EditorData interface to fix multiple "Cannot find name 'EditorData'" errors.
+interface EditorData {
+  template: string;
+  palette: string;
+  fontSize: string;
+  fontFamily: string;
+  title: string;
+  subtitle: string;
+}
 
 interface StoreAdsModuleProps {
   onBack: () => void;
@@ -164,7 +181,7 @@ const BannerPreview: React.FC<{ templateId: string; data: any; storeName: string
               {data.logo_url ? <img src={data.logo_url} className="w-full h-full object-cover rounded-full" /> : <StoreIcon className="w-8 h-8 text-slate-400" />}
             </div>
             <h3 className="text-3xl font-black max-w-sm leading-tight">{data.headline || 'Sua Loja de Confiança'}</h3>
-            <p className="text-sm mt-2 opacity-70 max-w-xs">{data.subheadline || 'Qualidade e Tradição no Bairro'}</p>
+            <p className="text-sm mt-2 opacity-70 max-w-xs">{data.subheadline || 'Qualidade e Tradicão no Bairro'}</p>
             {cta && (
               <button className="mt-6 bg-slate-800 text-white font-bold text-xs px-6 py-2.5 rounded-full shadow-lg transition-transform hover:scale-105">
                 {cta}
@@ -181,7 +198,7 @@ const BannerPreview: React.FC<{ templateId: string; data: any; storeName: string
 };
 
 const BannerEditorPreview: React.FC<{ data: any }> = ({ data }) => {
-    const { template, palette, fontSize, title, subtitle, fontFamily } = data;
+    const { template, palette, fontSize, fontFamily, title, subtitle } = data;
     
     const selectedPalette = COLOR_PALETTES.find(p => p.id === palette) || COLOR_PALETTES[0];
     const { bg: bgColor, text: textColor } = selectedPalette;
@@ -198,13 +215,13 @@ const BannerEditorPreview: React.FC<{ data: any }> = ({ data }) => {
     
     return (
         <div 
-            className={`w-full aspect-video rounded-2xl overflow-hidden relative shadow-lg p-8 ${layoutClasses[template as keyof typeof layoutClasses]}`}
+            className={`w-full aspect-video rounded-2xl overflow-hidden relative shadow-lg p-8 ${layoutClasses[template as keyof typeof layoutClasses] || 'flex flex-col justify-center'}`}
             style={{ backgroundColor: bgColor, color: textColor }}
         >
-            <h3 className={`${template === 'headline' ? headlineFontSize[fontSize as keyof typeof headlineFontSize] : fontSizes[fontSize as keyof typeof fontSizes]} font-black leading-tight line-clamp-2`} style={{ fontFamily }}>
+            <h3 className={`${template === 'headline' ? headlineFontSize[fontSize as keyof typeof headlineFontSize] : fontSizes[fontSize as keyof typeof fontSizes]} font-black leading-tight line-clamp-2`} style={{ fontFamily: fontFamily }}>
                 {title || "Seu Título Aqui"}
             </h3>
-            <p className={`${subFontSizes[fontSize as keyof typeof subFontSizes]} mt-3 opacity-80 max-w-md line-clamp-3`} style={{ fontFamily }}>
+            <p className={`${subFontSizes[fontSize as keyof typeof subFontSizes]} mt-3 opacity-80 max-w-md line-clamp-3`} style={{ fontFamily: fontFamily }}>
                 {subtitle || "Descreva sua oferta em poucas palavras."}
             </p>
         </div>
@@ -218,7 +235,7 @@ const ValidationErrorsModal: React.FC<{ errors: string[]; onClose: () => void }>
       <div className="bg-slate-800 p-8 rounded-2xl w-full max-w-md border border-red-500/30 shadow-2xl animate-in zoom-in-95">
         <div className="flex items-center gap-4 mb-6">
           <div className="w-12 h-12 bg-red-500/10 rounded-full flex items-center justify-center text-red-500">
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+            <AlertTriangle size={24} />
           </div>
           <div>
             <h2 className="font-black text-lg text-white">Publicação Bloqueada</h2>
@@ -246,16 +263,25 @@ const ValidationErrorsModal: React.FC<{ errors: string[]; onClose: () => void }>
 
 
 export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNavigate, categoryName, user }) => {
-  const [view, setView] = useState<'sales' | 'creator' | 'editor'>('sales');
+  const [view, setView] = useState<'sales' | 'config' | 'design' | 'creator' | 'editor'>('sales');
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
 
+  // --- Plan Config State ---
+  const [planConfig, setPlanConfig] = useState({
+    target: 'home', // 'home' | 'category' | 'all'
+    neighborhood: 'current', // 'current' | 'all'
+    duration: '30', // '30' | '90'
+  });
+
+  // --- Template Creator State ---
   const [selectedGoal, setSelectedGoal] = useState<string | null>(null);
   const [selectedTemplate, setSelectedTemplate] = useState<any | null>(null);
   const [selectedCta, setSelectedCta] = useState<string | null>(null);
   const [ctaStepCompleted, setCtaStepCompleted] = useState(false);
-  const [formData, setFormData] = useState<any>({});
+  const [formData, setFormData] = useState<Record<string, any>>({});
   
-  const [editorData, setEditorData] = useState({
+  // --- Custom Editor State ---
+  const [editorData, setEditorData] = useState<EditorData>({
     template: 'simple_left',
     palette: 'blue_white',
     fontSize: 'medium',
@@ -264,8 +290,22 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
     subtitle: 'Subtítulo descritivo aqui',
   });
 
+  // --- Shared State ---
   const [isSaving, setIsSaving] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+
+  // Preço dinâmico simplificado
+  const calculatedPrice = useMemo(() => {
+    let base = planConfig.target === 'home' ? 9.90 : 5.90;
+    if (planConfig.target === 'all') base = 14.90;
+    
+    let days = parseInt(planConfig.duration);
+    let total = base * days;
+    
+    if (planConfig.duration === '90') total = total * 0.8; // 20% desconto
+    
+    return total;
+  }, [planConfig]);
 
   const validateBanner = (): string[] => {
     const errors: string[] = [];
@@ -303,46 +343,29 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
     }
     
     setIsSaving(true);
-
     const isCustom = view === 'editor';
     const config = isCustom ? { type: 'custom_editor', ...editorData } : { type: 'template', ...formData, template_id: selectedTemplate.id, cta: selectedCta };
     const bannerTarget = categoryName ? `category:${categoryName.toLowerCase()}` : 'home';
 
     try {
         if (!supabase || !user) throw new Error("Usuário ou Supabase não disponível.");
-
-        const { data: bannerData, error: bannerError } = await supabase
-            .from('published_banners')
-            .insert({
+        const { data: bannerData, error: bannerError } = await supabase.from('published_banners').insert({
                 merchant_id: user.id,
                 target: bannerTarget,
                 config: config,
                 is_active: true,
                 expires_at: null,
-            })
-            .select()
-            .single();
-        
+            }).select().single();
         if (bannerError) throw bannerError;
-
         await supabase.from('banner_audit_log').insert({
             actor_id: user.id,
             actor_email: user.email,
             action: 'created',
             banner_id: bannerData.id,
-            details: { 
-                shopName: user.user_metadata?.store_name || 'Loja',
-                isFirstBanner: true,
-                target: bannerTarget,
-                config,
-            }
+            details: { shopName: user.user_metadata?.store_name || 'Loja', target: bannerTarget, config }
         });
-
         setShowSuccess(true);
-        setTimeout(() => {
-            onBack();
-        }, 2000);
-
+        setTimeout(() => onBack(), 2000);
     } catch (e: any) {
         console.error("Erro ao publicar banner:", e);
         alert(`Erro: ${e.message}`);
@@ -352,55 +375,258 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
   };
 
   const handleFormDataChange = (fieldId: string, value: string) => {
-    setFormData((prev: any) => ({ ...prev, [fieldId]: value }));
+    setFormData((prev: Record<string, any>) => ({ ...prev, [fieldId]: value }));
   };
   
-  const handleEditorDataChange = (field: keyof typeof editorData, value: any) => {
-    setEditorData(prev => ({...prev, [field]: value}));
+  const handleEditorDataChange = (field: keyof EditorData, value: any) => {
+    setEditorData((prev: EditorData) => ({...prev, [field]: value}));
   }
 
+  // ---- RENDER LOGIC ----
   const renderStep = (): React.JSX.Element | null => {
+    
+    // 1. LANDING PAGE COMERCIAL
     if (view === 'sales') {
       return (
         <div className="animate-in fade-in duration-500">
           <div className="text-center mb-10">
-            <div className="w-16 h-16 bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-6 border-4 border-slate-700 shadow-lg">
-                <Megaphone size={32} className="text-amber-400" />
+            <div className="w-20 h-20 bg-blue-600 rounded-[2.5rem] flex items-center justify-center mx-auto mb-6 shadow-xl shadow-blue-500/30 border-4 border-white/10">
+                <Crown size={40} className="text-white fill-white" />
             </div>
             <h2 className="text-3xl font-black text-white font-display uppercase tracking-tight mb-3">
-                Destaque sua Loja
+                Destaque sua marca para o bairro
             </h2>
             <p className="text-slate-400 text-sm max-w-sm mx-auto leading-relaxed">
-                Crie banners personalizados que aparecerão na Home do app ou em categorias específicas para atrair mais clientes.
+                Apareça no topo do super-app Localizei JPA e seja visto por milhares de novos clientes na sua região todos os dias.
             </p>
           </div>
-          
-          <div className="grid grid-cols-1 gap-6">
-            <button onClick={() => setView('creator')} className="bg-slate-800 p-8 rounded-3xl border border-white/10 text-left hover:border-blue-500/50 transition-all group">
-                <div className="w-12 h-12 bg-blue-500/10 rounded-2xl flex items-center justify-center text-blue-400 mb-4 border border-blue-500/20"><Sparkles size={24} /></div>
-                <h3 className="font-bold text-white text-lg mb-2">Criador Rápido</h3>
-                <p className="text-xs text-slate-400 mb-6 leading-relaxed">Use templates prontos. Ideal para ofertas rápidas.</p>
-                <span className="text-xs font-black text-blue-400 uppercase tracking-widest flex items-center gap-2 group-hover:gap-3 transition-all">Começar agora <ArrowRight size={14} /></span>
-            </button>
-            <button onClick={() => setView('editor')} className="bg-slate-800 p-8 rounded-3xl border border-white/10 text-left hover:border-purple-500/50 transition-all group">
-                <div className="w-12 h-12 bg-purple-500/10 rounded-2xl flex items-center justify-center text-purple-400 mb-4 border border-purple-500/20"><Eye size={24} /></div>
-                <h3 className="font-bold text-white text-lg mb-2">Editor Personalizado</h3>
-                <p className="text-xs text-slate-400 mb-6 leading-relaxed">Controle total sobre cores e layout.</p>
-                 <span className="text-xs font-black text-purple-400 uppercase tracking-widest flex items-center gap-2 group-hover:gap-3 transition-all">Criar do zero <ArrowRight size={14} /></span>
-            </button>
+
+          <div className="grid grid-cols-1 gap-4 mb-10">
+              <div className="p-5 bg-white/5 rounded-3xl border border-white/5 flex gap-4 items-center">
+                  <div className="w-12 h-12 bg-blue-500/10 rounded-2xl flex items-center justify-center text-blue-400 shrink-0">
+                      <Target size={24} />
+                  </div>
+                  <div>
+                      <h4 className="font-bold text-white text-sm">Público Qualificado</h4>
+                      <p className="text-xs text-slate-500">Exibição exclusiva para quem mora ou está em Jacarepaguá.</p>
+                  </div>
+              </div>
+              <div className="p-5 bg-white/5 rounded-3xl border border-white/5 flex gap-4 items-center">
+                  <div className="w-12 h-12 bg-emerald-500/10 rounded-2xl flex items-center justify-center text-emerald-400 shrink-0">
+                      <TrendingUp size={24} />
+                  </div>
+                  <div>
+                      <h4 className="font-bold text-white text-sm">Mais Cliques, Mais Vendas</h4>
+                      <p className="text-xs text-slate-500">Banners premium geram 4x mais visualizações que listagens comuns.</p>
+                  </div>
+              </div>
           </div>
+
+          <button 
+            onClick={() => setView('config')}
+            className="w-full bg-[#1E5BFF] text-white font-black py-5 rounded-[2rem] shadow-xl shadow-blue-500/30 flex items-center justify-center gap-3 active:scale-[0.98] transition-all"
+          >
+            VER PLANOS E PREÇOS
+            <ArrowRight size={20} strokeWidth={3} />
+          </button>
         </div>
       );
     }
+
+    // 2. CONFIGURAÇÃO DO PLANO (ONDE E QUANTO TEMPO)
+    if (view === 'config') {
+        return (
+            <div className="animate-in slide-in-from-right duration-500 space-y-8">
+                <div>
+                    <h3 className="text-sm font-black uppercase tracking-widest text-blue-400 mb-4">1. Onde deseja aparecer?</h3>
+                    <div className="grid gap-3">
+                        {[
+                            { id: 'home', label: 'Home do Super-App', desc: 'Maior visibilidade possível', price: 'R$ 9,90/dia' },
+                            { id: 'category', label: 'Categorias Específicas', desc: 'Público segmentado por interesse', price: 'R$ 5,90/dia' },
+                            { id: 'all', label: 'Combo Total', desc: 'Home + Todas as Categorias', price: 'R$ 14,90/dia' },
+                        ].map(opt => (
+                            <button 
+                                key={opt.id}
+                                onClick={() => setPlanConfig({...planConfig, target: opt.id})}
+                                className={`p-5 rounded-3xl border-2 text-left transition-all ${planConfig.target === opt.id ? 'bg-blue-600/10 border-blue-500' : 'bg-white/5 border-white/5 hover:border-white/20'}`}
+                            >
+                                <div className="flex justify-between items-start mb-1">
+                                    <h4 className="font-bold text-white">{opt.label}</h4>
+                                    <span className="text-[10px] font-black text-blue-400 uppercase">{opt.price}</span>
+                                </div>
+                                <p className="text-xs text-slate-500">{opt.desc}</p>
+                            </button>
+                        ))}
+                    </div>
+                </div>
+
+                <div>
+                    <h3 className="text-sm font-black uppercase tracking-widest text-blue-400 mb-4">2. Duração do Destaque</h3>
+                    <div className="grid grid-cols-2 gap-3">
+                        {[
+                            { id: '30', label: '30 Dias', desc: 'Plano Mensal' },
+                            { id: '90', label: '90 Dias', desc: 'Combo - 20% OFF' },
+                        ].map(opt => (
+                            <button 
+                                key={opt.id}
+                                onClick={() => setPlanConfig({...planConfig, duration: opt.id})}
+                                className={`p-5 rounded-3xl border-2 text-center transition-all ${planConfig.duration === opt.id ? 'bg-blue-600/10 border-blue-500' : 'bg-white/5 border-white/5 hover:border-white/20'}`}
+                            >
+                                <h4 className="font-bold text-white mb-1">{opt.label}</h4>
+                                <p className="text-[10px] text-slate-500 uppercase font-bold">{opt.desc}</p>
+                            </button>
+                        ))}
+                    </div>
+                </div>
+
+                <div className="bg-slate-950 p-6 rounded-[2rem] border border-white/5 flex items-center justify-between">
+                    <div>
+                        <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Total do Investimento</p>
+                        <p className="text-3xl font-black text-white">{formatBRL(calculatedPrice * 100)}</p>
+                    </div>
+                    <button 
+                        onClick={() => setView('design')}
+                        className="bg-[#1E5BFF] text-white p-4 rounded-2xl shadow-lg active:scale-95 transition-all"
+                    >
+                        <ArrowRight size={24} strokeWidth={3} />
+                    </button>
+                </div>
+            </div>
+        );
+    }
+
+    // 3. ESCOLHA DO DESIGN (CRIADOR OU EDITOR)
+    if (view === 'design') {
+        return (
+            <div className="animate-in slide-in-from-right duration-500">
+                <div className="text-center mb-8">
+                    <h2 className="text-2xl font-black text-white uppercase tracking-tighter mb-2">Como deseja criar seu banner?</h2>
+                    <p className="text-slate-500 text-sm">Escolha a melhor opção para sua loja.</p>
+                </div>
+
+                <div className="grid gap-4">
+                    <button onClick={() => setView('creator')} className="p-6 bg-slate-800 rounded-3xl border border-white/10 text-left hover:border-blue-500/50 transition-all flex items-center gap-5 group">
+                        <div className="w-14 h-14 bg-blue-500/10 rounded-2xl flex items-center justify-center text-blue-400 border border-blue-500/20 group-hover:scale-110 transition-transform">
+                            <LayoutTemplate size={28} />
+                        </div>
+                        <div>
+                            <h4 className="font-bold text-white text-lg">Criador Rápido</h4>
+                            <p className="text-xs text-slate-500">Use templates prontos e otimizados.</p>
+                        </div>
+                    </button>
+
+                    <button onClick={() => setView('editor')} className="p-6 bg-slate-800 rounded-3xl border border-white/10 text-left hover:border-purple-500/50 transition-all flex items-center gap-5 group">
+                        <div className="w-14 h-14 bg-purple-500/10 rounded-2xl flex items-center justify-center text-purple-400 border border-purple-500/20 group-hover:scale-110 transition-transform">
+                            <Palette size={28} />
+                        </div>
+                        <div>
+                            <h4 className="font-bold text-white text-lg">Editor do Zero</h4>
+                            <p className="text-xs text-slate-500">Personalize cores, fontes e textos.</p>
+                        </div>
+                    </button>
+
+                    <button className="p-6 bg-white rounded-3xl border border-white text-left active:scale-[0.98] transition-all flex items-center gap-5 group">
+                        <div className="w-14 h-14 bg-emerald-500 rounded-2xl flex items-center justify-center text-white group-hover:scale-110 transition-transform">
+                            <Rocket size={28} />
+                        </div>
+                        <div>
+                            <h4 className="font-bold text-slate-900 text-lg">Banner Profissional</h4>
+                            <p className="text-xs text-slate-500">Nossa equipe cria para você (+ R$ 59,90).</p>
+                        </div>
+                    </button>
+                </div>
+            </div>
+        );
+    }
     
-    if (view === 'creator' || view === 'editor') {
-      if (view === 'editor') {
+    // 4. CRIADOR RÁPIDO (TEMPLATE)
+    if (view === 'creator') {
+        if (!selectedGoal) {
+          return (
+            <div className="animate-in slide-in-from-right duration-500">
+              <h3 className="font-black text-sm uppercase tracking-widest text-blue-400 mb-4">Qual seu objetivo com este banner?</h3>
+              <div className="space-y-4">
+                {GOALS.map(goal => (
+                  <button key={goal.id} onClick={() => setSelectedGoal(goal.id)} className="w-full bg-slate-800 p-6 rounded-2xl border border-white/10 text-left hover:border-blue-500/50 transition-all flex items-center gap-5">
+                    <div className="w-12 h-12 bg-blue-500/10 rounded-xl flex items-center justify-center text-blue-400 border border-blue-500/20"><goal.icon size={24} /></div>
+                    <div>
+                      <h4 className="font-bold text-white text-base">{goal.name}</h4>
+                      <p className="text-xs text-slate-400">{goal.description}</p>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          );
+        }
+
+        if (selectedGoal && !selectedTemplate) {
+          const availableTemplates = BANNER_TEMPLATES.filter(t => t.goal === selectedGoal);
+          return (
+            <div className="animate-in slide-in-from-right duration-500">
+              <button onClick={() => setSelectedGoal(null)} className="flex items-center gap-2 text-xs text-slate-400 mb-4"><ChevronLeft size={16} /> Voltar</button>
+              <h3 className="font-black text-sm uppercase tracking-widest text-blue-400 mb-4">Escolha um modelo visual</h3>
+              <div className="space-y-4">
+                {availableTemplates.map(template => (
+                  <button key={template.id} onClick={() => setSelectedTemplate(template)} className="w-full bg-slate-800 p-5 rounded-2xl border border-white/10 text-left hover:border-blue-500/50 transition-all">
+                    <h4 className="font-bold text-white text-base">{template.name}</h4>
+                    <p className="text-xs text-slate-400">{template.description}</p>
+                  </button>
+                ))}
+              </div>
+            </div>
+          );
+        }
+
+        if (selectedTemplate) {
+          return (
+            <div className="animate-in slide-in-from-right duration-500">
+                <button onClick={() => setSelectedTemplate(null)} className="flex items-center gap-2 text-xs text-slate-400 mb-4"><ChevronLeft size={16} /> Voltar</button>
+                <div className="mb-8">
+                    <h3 className="font-black text-sm uppercase tracking-widest text-blue-400 mb-4">Preencha e visualize</h3>
+                    <BannerPreview templateId={selectedTemplate.id} data={formData} storeName={user?.user_metadata?.store_name || "Sua Loja"} cta={selectedCta} />
+                </div>
+                <div className="bg-slate-800 rounded-3xl p-6 border border-white/10 space-y-5">
+                    {selectedTemplate.fields.map((field: any) => (
+                        <div key={field.id}>
+                            <label className="text-xs font-bold text-slate-400 uppercase">{field.label}</label>
+                            <input
+                                type={field.type}
+                                placeholder={field.placeholder}
+                                value={formData[field.id] || ''}
+                                onChange={(e) => handleFormDataChange(field.id, e.target.value)}
+                                className="w-full mt-2 bg-slate-700 p-3 rounded-lg text-white"
+                            />
+                        </div>
+                    ))}
+                    {!ctaStepCompleted ? (
+                        <div>
+                            <label className="text-xs font-bold text-slate-400 uppercase">Botão de Ação (CTA)</label>
+                            <div className="flex gap-2 mt-2 flex-wrap">
+                                {CTA_OPTIONS.map(cta => (
+                                    <button key={cta} onClick={() => setSelectedCta(cta)} className={`text-[10px] font-bold px-3 py-1.5 rounded-lg ${selectedCta === cta ? 'bg-blue-500 text-white' : 'bg-slate-700 text-slate-300'}`}>{cta}</button>
+                                ))}
+                                <button onClick={() => setCtaStepCompleted(true)} className="text-[10px] font-bold px-3 py-1.5 rounded-lg bg-slate-600 text-slate-300">Pular</button>
+                            </div>
+                        </div>
+                    ) : null}
+                </div>
+            </div>
+          );
+        }
+    }
+
+    // 5. EDITOR PERSONALIZADO
+    if (view === 'editor') {
         return (
             <div className="animate-in fade-in duration-500">
-                <div className="mb-8"><BannerEditorPreview data={editorData} /></div>
+                <div className="mb-8">
+                    <h3 className="font-black text-sm uppercase tracking-widest text-purple-400 mb-2">Visualização em tempo real</h3>
+                    <BannerEditorPreview data={editorData} />
+                </div>
                 <div className="bg-slate-800 rounded-3xl p-6 border border-white/10 space-y-6">
                     <div>
-                        <label className="text-xs font-bold text-slate-400 uppercase">Layout</label>
+                        <label className="text-xs font-bold text-slate-400 uppercase tracking-widest">Layout base</label>
                         <div className="grid grid-cols-3 gap-2 mt-2">
                            {EDITOR_LAYOUTS.map(l => (
                                <button key={l.id} onClick={() => handleEditorDataChange('template', l.id)} className={`py-3 rounded-lg text-xs font-bold ${editorData.template === l.id ? 'bg-purple-500 text-white' : 'bg-slate-700 text-slate-300'}`}>{l.name}</button>
@@ -408,71 +634,94 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
                         </div>
                     </div>
                     <div>
-                        <label className="text-xs font-bold text-slate-400 uppercase">Texto Principal</label>
-                        <input value={editorData.title} onChange={(e) => handleEditorDataChange('title', e.target.value)} className="w-full mt-2 bg-slate-700 p-3 rounded-lg text-white" />
+                        <label className="text-xs font-bold text-slate-400 uppercase tracking-widest">Cores</label>
+                        <div className="flex gap-3 mt-2">
+                           {COLOR_PALETTES.map(p => (
+                               <button key={p.id} onClick={() => handleEditorDataChange('palette', p.id)} className={`w-10 h-10 rounded-full flex items-center justify-center ${editorData.palette === p.id ? 'ring-2 ring-white ring-offset-2 ring-offset-slate-800' : ''}`}>
+                                   <div className="w-full h-full rounded-full overflow-hidden flex">
+                                       <div style={{ backgroundColor: p.previewColors[0] }} className="w-1/2 h-full"></div>
+                                       <div style={{ backgroundColor: p.previewColors[1] }} className="w-1/2 h-full"></div>
+                                   </div>
+                               </button>
+                           ))}
+                        </div>
+                    </div>
+                     <div>
+                        <label className="text-xs font-bold text-slate-400 uppercase tracking-widest">Texto Principal</label>
+                        <input value={editorData.title} onChange={(e) => handleEditorDataChange('title', e.target.value)} className="w-full mt-2 bg-slate-700 p-4 rounded-xl text-white font-bold outline-none focus:ring-2 focus:ring-purple-500" />
+                    </div>
+                    <div>
+                        <label className="text-xs font-bold text-slate-400 uppercase tracking-widest">Subtítulo</label>
+                        <input value={editorData.subtitle} onChange={(e) => handleEditorDataChange('subtitle', e.target.value)} className="w-full mt-2 bg-slate-700 p-4 rounded-xl text-white outline-none focus:ring-2 focus:ring-purple-500" />
                     </div>
                 </div>
             </div>
         );
-      } else {
-        if (!selectedGoal) {
-          return (
-            <div className="animate-in slide-in-from-right duration-500">
-              <h3 className="font-black text-sm uppercase tracking-widest text-blue-400 mb-4">Qual seu objetivo?</h3>
-              <div className="space-y-4">
-                {GOALS.map(goal => (
-                  <button key={goal.id} onClick={() => setSelectedGoal(goal.id)} className="w-full bg-slate-800 p-6 rounded-2xl border border-white/10 text-left hover:border-blue-500/50 transition-all flex items-center gap-5">
-                    <div className="w-12 h-12 bg-blue-500/10 rounded-xl flex items-center justify-center text-blue-400 border border-blue-500/20"><goal.icon size={24} /></div>
-                    <div><h4 className="font-bold text-white text-base">{goal.name}</h4><p className="text-xs text-slate-400">{goal.description}</p></div>
-                  </button>
-                ))}
-              </div>
-            </div>
-          );
-        }
-        if (selectedGoal && !selectedTemplate) {
-          return (
-            <div className="animate-in slide-in-from-right duration-500">
-              <button onClick={() => setSelectedGoal(null)} className="flex items-center gap-2 text-xs text-slate-400 mb-4"><ChevronLeft size={16} /> Voltar</button>
-              {BANNER_TEMPLATES.filter(t => t.goal === selectedGoal).map(template => (
-                <button key={template.id} onClick={() => setSelectedTemplate(template)} className="w-full bg-slate-800 p-5 rounded-2xl border border-white/10 text-left mb-4">{template.name}</button>
-              ))}
-            </div>
-          );
-        }
-        if (selectedTemplate) {
-          return (
-            <div className="animate-in slide-in-from-right duration-500">
-                <BannerPreview templateId={selectedTemplate.id} data={formData} storeName={user?.user_metadata?.store_name || "Sua Loja"} cta={selectedCta} />
-                <div className="bg-slate-800 rounded-3xl p-6 border border-white/10 space-y-5 mt-6">
-                    {selectedTemplate.fields.map((field: any) => (
-                        <div key={field.id}>
-                            <label className="text-xs font-bold text-slate-400 uppercase">{field.label}</label>
-                            <input type={field.type} value={formData[field.id] || ''} onChange={(e) => handleFormDataChange(field.id, e.target.value)} className="w-full mt-2 bg-slate-700 p-3 rounded-lg text-white" />
-                        </div>
-                    ))}
-                </div>
-            </div>
-          );
-        }
-      }
     }
+    
     return null;
   };
+
+  const formatBRL = (cents: number) => 
+    (cents / 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
   return (
     <div className="min-h-screen bg-slate-900 text-white font-sans flex flex-col">
       <div className="sticky top-0 z-40 bg-slate-900/80 backdrop-blur-md px-6 py-4 border-b border-white/5 flex items-center justify-between">
-        <button onClick={view === 'sales' ? onBack : () => setView('sales')} className="p-2.5 bg-slate-800 rounded-xl"><ChevronLeft size={20} /></button>
-        <h1 className="font-bold">Anunciar</h1>
-        <button onClick={onBack} className="p-2.5 bg-slate-800 rounded-xl"><X size={20} /></button>
+        <div className="flex items-center gap-4">
+            <button 
+                onClick={() => {
+                    if (view === 'sales') onBack();
+                    else if (view === 'config') setView('sales');
+                    else if (view === 'design') setView('config');
+                    else setView('design');
+                }} 
+                className="p-2.5 bg-slate-800 text-slate-400 hover:text-white transition-colors border border-white/5 rounded-xl active:scale-95"
+            >
+                <ChevronLeft size={20} />
+            </button>
+            <div>
+                <h1 className="font-bold text-lg leading-none">Banners Premium</h1>
+                <p className="text-[10px] text-slate-500 uppercase font-black tracking-widest mt-1">Status: Configuração</p>
+            </div>
+        </div>
+        <button 
+            onClick={onBack}
+            className="p-2.5 bg-slate-800 text-slate-400 hover:text-white transition-colors border border-white/5 rounded-xl active:scale-95"
+        >
+            <X size={20} />
+        </button>
       </div>
-      <main className="flex-1 p-6 pb-32">{renderStep()}</main>
-      {view !== 'sales' && (
-          <div className="fixed bottom-0 left-0 right-0 p-6 bg-slate-900 max-w-md mx-auto z-30">
-            <button onClick={handlePublish} disabled={isSaving} className="w-full bg-[#1E5BFF] py-5 rounded-2xl font-black">{isSaving ? <Loader2 className="animate-spin mx-auto" /> : 'Publicar'}</button>
+      
+      <main className="flex-1 overflow-y-auto no-scrollbar p-6 pb-40">
+        {renderStep()}
+      </main>
+
+      {/* FOOTER ACTIONS - Dinâmico por Step */}
+      {(view === 'creator' || view === 'editor') && (
+          <div className="fixed bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-slate-900 via-slate-900 to-transparent max-w-md mx-auto z-30">
+            <button 
+                onClick={handlePublish}
+                disabled={isSaving || (view === 'creator' && !selectedTemplate)}
+                className="w-full bg-[#1E5BFF] text-white font-black py-5 rounded-2xl shadow-xl shadow-blue-500/20 flex items-center justify-center gap-3 active:scale-[0.98] transition-all disabled:opacity-50 disabled:grayscale"
+            >
+                {isSaving ? <Loader2 className="w-6 h-6 animate-spin" /> : 'Confirmar e Publicar'}
+            </button>
           </div>
       )}
+
+      {showSuccess && (
+        <div className="fixed inset-0 z-[100] bg-black/80 flex items-center justify-center p-6 animate-in fade-in">
+           <div className="bg-slate-800 p-10 rounded-[3rem] border border-white/10 flex flex-col items-center text-center shadow-2xl">
+                <div className="w-20 h-20 bg-emerald-500/10 rounded-[2rem] flex items-center justify-center text-emerald-400 mb-6 border-2 border-emerald-500/20">
+                    <CheckCircle2 size={40} />
+                </div>
+                <h2 className="font-black text-2xl text-white uppercase tracking-tighter">Publicado com Sucesso!</h2>
+                <p className="text-sm text-slate-400 mt-2 max-w-[200px]">Seu banner premium já está ativo e visível no bairro.</p>
+           </div>
+        </div>
+      )}
+      
       <ValidationErrorsModal errors={validationErrors} onClose={() => setValidationErrors([])} />
     </div>
   );

@@ -18,7 +18,8 @@ import {
   Sparkles,
   Compass,
   LifeBuoy,
-  AlertTriangle
+  AlertTriangle,
+  Crown
 } from 'lucide-react';
 import { User as SupabaseUser } from '@supabase/supabase-js';
 import { useAuth } from '../contexts/AuthContext';
@@ -160,9 +161,9 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
           <SectionHeader title="Ações" icon={Sparkles} />
           <div className="grid grid-cols-2 gap-4">
             <ActionCard 
-              icon={Palette}
-              title="Criar Banner"
-              subtitle="Crie ou solicite sua arte profissional"
+              icon={Crown}
+              title="Banners Premium"
+              subtitle="Apareça em destaque para milhares de pessoas do seu bairro"
               colorClass="bg-blue-500"
               onClick={() => onNavigate('store_ads_module')}
             />
