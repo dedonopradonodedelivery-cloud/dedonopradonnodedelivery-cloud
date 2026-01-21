@@ -107,8 +107,8 @@ const App: React.FC = () => {
     localStorage.setItem('admin_view_mode', viewMode);
     switch (viewMode) {
       case 'ADM': setActiveTab('admin_panel'); break;
-      case 'Lojista': setActiveTab('store_area'); break;
-      default: if (activeTab === 'admin_panel' || activeTab === 'store_area') setActiveTab('home');
+      case 'Lojista': setActiveTab('profile'); break;
+      default: if (activeTab === 'admin_panel' || activeTab === 'profile') setActiveTab('home');
     }
   }, [viewMode, user]);
 
@@ -162,7 +162,9 @@ const App: React.FC = () => {
                 {activeTab === 'services' && <ServicesView onSelectMacro={(id, name) => { setSelectedServiceMacro({id, name}); if (id === 'emergency') { setQuoteCategory(name); setIsQuoteModalOpen(true); } else { setActiveTab('service_subcategories'); } }} onOpenTerms={() => setActiveTab('service_terms')} onNavigate={setActiveTab} searchTerm={globalSearch} />}
                 {activeTab === 'category_detail' && selectedCategory && <CategoryView category={selectedCategory} onBack={() => setActiveTab('home')} onStoreClick={handleSelectStore} stores={STORES} userRole={userRole} onAdvertiseInCategory={setAdCategoryTarget} onNavigate={setActiveTab} />}
                 {activeTab === 'store_detail' && selectedStore && <StoreDetailView store={selectedStore} onBack={() => setActiveTab('home')} />}
-                {activeTab === 'store_area' && <StoreAreaView onBack={() => setActiveTab('home')} onNavigate={setActiveTab} user={user as any} />}
+                
+                {/* Redundância removida: store_area agora é renderizado dentro de profile quando o role é lojista */}
+                
                 {activeTab === 'patrocinador_master' && <PatrocinadorMasterScreen onBack={() => setActiveTab('home')} />}
                 {activeTab === 'jobs_list' && <JobsView onBack={() => setActiveTab('home')} />}
                 {activeTab === 'about' && <AboutView onBack={() => setActiveTab('profile')} />}
@@ -170,8 +172,8 @@ const App: React.FC = () => {
                 {activeTab === 'favorites' && <FavoritesView onBack={() => setActiveTab('profile')} onNavigate={setActiveTab} user={user as any} />}
                 {activeTab === 'service_subcategories' && selectedServiceMacro && <SubcategoriesView macroId={selectedServiceMacro.id} macroName={selectedServiceMacro.name} onBack={() => setActiveTab('services')} onSelectSubcategory={(n) => { setQuoteCategory(n); setActiveTab('service_specialties'); }} />}
                 {activeTab === 'service_specialties' && <SpecialtiesView subcategoryName={quoteCategory} onBack={() => setActiveTab('service_subcategories')} onSelectSpecialty={() => setIsQuoteModalOpen(true)} />}
-                {activeTab === 'store_ads_module' && <StoreAdsModule onBack={() => setActiveTab('store_area')} onNavigate={setActiveTab} categoryName={adCategoryTarget || undefined} user={user as any} />}
-                {activeTab === 'store_profile' && <StoreProfileEdit onBack={() => setActiveTab('store_area')} />}
+                {activeTab === 'store_ads_module' && <StoreAdsModule onBack={() => setActiveTab('profile')} onNavigate={setActiveTab} categoryName={adCategoryTarget || undefined} user={user as any} />}
+                {activeTab === 'store_profile' && <StoreProfileEdit onBack={() => setActiveTab('profile')} />}
               </main>
               <AuthModal isOpen={isAuthOpen} onClose={() => setIsAuthOpen(false)} user={user as any} onLoginSuccess={handleLoginSuccess} />
               {isQuoteModalOpen && <QuoteRequestModal isOpen={isQuoteModalOpen} onClose={() => setIsQuoteModalOpen(false)} categoryName={quoteCategory} onSuccess={() => setActiveTab('service_success')} />}

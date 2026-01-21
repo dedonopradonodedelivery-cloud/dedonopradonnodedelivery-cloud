@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Home, Users, User, QrCode } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
@@ -47,8 +48,9 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
     });
   }
 
-  const profileTabId = userRole === 'lojista' ? 'store_area' : 'profile';
-  navItems.push({ id: profileTabId, icon: User, label: 'Menu' });
+  // O ID da aba de perfil/menu é sempre 'profile'. 
+  // A lógica de qual componente exibir (StoreAreaView ou MenuView) fica no App.tsx
+  navItems.push({ id: 'profile', icon: User, label: 'Menu' });
 
   const NavButton: React.FC<{ item: NavItem; isActive: boolean }> = ({ item, isActive }) => {
     const Icon = item.icon;
@@ -103,12 +105,12 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
     <div className="fixed bottom-0 left-0 right-0 mx-auto w-full max-w-md bg-[#1E5BFF] z-50 h-[80px] rounded-t-[24px] shadow-[0_-5px_30px_rgba(0,0,0,0.2)] border-t border-white/10">
       <div className="flex items-end justify-around w-full px-2 h-full pb-2">
         {navItems.map((item) => {
+          // Lógica de "Active" robusta para sub-rotas
           const isActive = activeTab === item.id || 
                           (item.id === 'scan_cashback' && activeTab === 'pay_cashback') ||
                           (item.id === 'merchant_qr_display' && activeTab === 'merchant_onboarding') ||
                           (item.id === 'cashback_landing' && (activeTab === 'scan_cashback' || activeTab === 'pay_cashback')) ||
-                          (item.id === 'store_area' && ['store_ads_module', 'weekly_promo', 'merchant_jobs', 'store_profile', 'store_support'].includes(activeTab)) ||
-                          (item.id === 'profile' && ['about', 'support', 'favorites'].includes(activeTab));
+                          (item.id === 'profile' && ['store_area', 'store_ads_module', 'weekly_promo', 'merchant_jobs', 'store_profile', 'store_support', 'about', 'support', 'favorites'].includes(activeTab));
           
           return (
             <div key={item.id} className="flex-1 flex justify-center items-end h-full">
