@@ -34,25 +34,33 @@ const TemplateBannerRender: React.FC<{ config: any }> = ({ config }) => {
       default: return null;
     }
 };
+
 const CustomBannerRender: React.FC<{ config: any }> = ({ config }) => {
     const { template_id, background_color, text_color, font_size, font_family, title, subtitle } = config;
+    
     const fontSizes = { small: 'text-2xl', medium: 'text-4xl', large: 'text-5xl' };
     const subFontSizes = { small: 'text-sm', medium: 'text-base', large: 'text-lg' };
     const headlineFontSize = { small: 'text-4xl', medium: 'text-6xl', large: 'text-7xl' };
+
     const layoutClasses = {
       simple_left: 'flex flex-col justify-center items-start text-left',
       centered: 'flex flex-col justify-center items-center text-center',
       headline: 'flex flex-col justify-center items-center text-center',
     };
+
+    type LayoutKey = keyof typeof layoutClasses;
+    type SizeKey = keyof typeof fontSizes;
+    type HeadlineSizeKey = keyof typeof headlineFontSize;
+
     return (
         <div 
-            className={`w-full aspect-video rounded-2xl overflow-hidden relative shadow-lg p-8 ${layoutClasses[template_id] || 'flex flex-col justify-center'}`}
+            className={`w-full aspect-video rounded-2xl overflow-hidden relative shadow-lg p-8 ${layoutClasses[template_id as LayoutKey] || 'flex flex-col justify-center'}`}
             style={{ backgroundColor: background_color, color: text_color }}
         >
-            <h3 className={`${template_id === 'headline' ? headlineFontSize[font_size] : fontSizes[font_size]} font-black leading-tight line-clamp-2`} style={{ fontFamily: font_family }}>
+            <h3 className={`${template_id === 'headline' ? headlineFontSize[font_size as HeadlineSizeKey] : fontSizes[font_size as SizeKey]} font-black leading-tight line-clamp-2`} style={{ fontFamily: font_family }}>
                 {title || "Título"}
             </h3>
-            <p className={`${subFontSizes[font_size]} mt-3 opacity-80 max-w-md line-clamp-3`} style={{ fontFamily: font_family }}>
+            <p className={`${subFontSizes[font_size as SizeKey]} mt-3 opacity-80 max-w-md line-clamp-3`} style={{ fontFamily: font_family }}>
                 {subtitle || "Subtítulo"}
             </p>
         </div>
@@ -147,9 +155,7 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
           .limit(1);
 
         if (error) {
-          // Fallback silencioso se a tabela não existir
           if (error.code === 'PGRST116' || error.message.includes('schema cache')) {
-            console.log("[Setup] Tabela 'published_banners' não encontrada. Ignore se ainda não executou as migrações SQL.");
             setActiveBanner(null);
             return;
           }
@@ -184,7 +190,7 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
         )
         .subscribe();
     } catch (e) {
-      // Ignora erro de realtime se a tabela não existir
+      // Ignora erro
     }
 
     return () => {

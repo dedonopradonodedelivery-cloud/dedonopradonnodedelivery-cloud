@@ -1,4 +1,5 @@
-import React, { useState, useMemo } from 'react';
+
+import React, { useState } from 'react';
 import { 
   ChevronLeft, 
   Rocket, 
@@ -72,6 +73,15 @@ interface StoreAdsModuleProps {
   onNavigate: (view: string) => void;
   categoryName?: string;
   user: User | null;
+}
+
+interface EditorData {
+  template: string;
+  palette: string;
+  fontSize: string;
+  fontFamily: string;
+  title: string;
+  subtitle: string;
 }
 
 // --- CONFIGURAÇÕES DO CRIADOR RÁPIDO ---
@@ -209,16 +219,20 @@ const BannerEditorPreview: React.FC<{ data: any }> = ({ data }) => {
       centered: 'flex flex-col justify-center items-center text-center',
       headline: 'flex flex-col justify-center items-center text-center',
     };
+
+    type LayoutKey = keyof typeof layoutClasses;
+    type SizeKey = keyof typeof fontSizes;
+    type HeadlineSizeKey = keyof typeof headlineFontSize;
     
     return (
         <div 
-            className={`w-full aspect-video rounded-2xl overflow-hidden relative shadow-lg p-8 ${layoutClasses[template]}`}
+            className={`w-full aspect-video rounded-2xl overflow-hidden relative shadow-lg p-8 ${layoutClasses[template as LayoutKey]}`}
             style={{ backgroundColor: bgColor, color: textColor }}
         >
-            <h3 className={`${template === 'headline' ? headlineFontSize[fontSize] : fontSizes[fontSize]} font-black leading-tight line-clamp-2`} style={{ fontFamily }}>
+            <h3 className={`${template === 'headline' ? headlineFontSize[fontSize as HeadlineSizeKey] : fontSizes[fontSize as SizeKey]} font-black leading-tight line-clamp-2`} style={{ fontFamily }}>
                 {title || "Seu Título Aqui"}
             </h3>
-            <p className={`${subFontSizes[fontSize]} mt-3 opacity-80 max-w-md line-clamp-3`} style={{ fontFamily }}>
+            <p className={`${subFontSizes[fontSize as SizeKey]} mt-3 opacity-80 max-w-md line-clamp-3`} style={{ fontFamily }}>
                 {subtitle || "Descreva sua oferta em poucas palavras."}
             </p>
         </div>
@@ -268,10 +282,10 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
   const [selectedTemplate, setSelectedTemplate] = useState<any | null>(null);
   const [selectedCta, setSelectedCta] = useState<string | null>(null);
   const [ctaStepCompleted, setCtaStepCompleted] = useState(false);
-  const [formData, setFormData] = useState<any>({});
+  const [formData, setFormData] = useState<Record<string, any>>({});
   
   // --- Custom Editor State ---
-  const [editorData, setEditorData] = useState({
+  const [editorData, setEditorData] = useState<EditorData>({
     template: 'simple_left',
     palette: 'blue_white',
     fontSize: 'medium',
@@ -284,11 +298,6 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
   const [isSaving, setIsSaving] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
 
-  const clearErrorsOnChange = (setter: React.Dispatch<React.SetStateAction<any>>) => (value: any) => {
-    if (validationErrors.length > 0) setValidationErrors([]);
-    setter(value);
-  };
-  
   const validateBanner = (): string[] => {
     const errors: string[] = [];
     const containsForbidden = (text: string) => FORBIDDEN_WORDS.some(word => text.toLowerCase().includes(word));
@@ -391,11 +400,11 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
   };
 
   const handleFormDataChange = (fieldId: string, value: string) => {
-    setFormData(prev => ({ ...prev, [fieldId]: value }));
+    setFormData((prev: Record<string, any>) => ({ ...prev, [fieldId]: value }));
   };
   
-  const handleEditorDataChange = (field: keyof typeof editorData, value: any) => {
-    setEditorData(prev => ({...prev, [field]: value}));
+  const handleEditorDataChange = (field: keyof EditorData, value: any) => {
+    setEditorData((prev: EditorData) => ({...prev, [field]: value}));
   }
 
   // ---- RENDER LOGIC ----
