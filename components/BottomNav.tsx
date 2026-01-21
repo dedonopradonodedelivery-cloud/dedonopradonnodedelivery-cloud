@@ -1,13 +1,15 @@
+
 import React from 'react';
 import { Home, Users, User, QrCode } from 'lucide-react';
-import { useAuth } from '../contexts/AuthContext';
-import { RoleMode } from '../types';
-import { getAccountEntryRoute } from '../lib/roleRoutes';
+import { useAuth } from './contexts/AuthContext'; // FIX: Corrected import path
+import { RoleMode } from './types'; // FIX: Corrected import path for RoleMode
+import { getAccountEntryRoute } from './lib/roleRoutes'; // FIX: Corrected import path
 
 interface BottomNavProps {
   activeTab: string;
   setActiveTab: (tab: string) => void;
   userRole?: 'cliente' | 'lojista' | 'admin' | null;
+  // FIX: Added viewMode prop
   viewMode: RoleMode;
 }
 
@@ -18,7 +20,7 @@ interface NavItem {
   isCenter?: boolean;
 }
 
-export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, userRole, viewMode }) => {
+export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, userRole, viewMode }) => { // FIX: Destructured viewMode
   const { user } = useAuth();
 
   // Itens da barra: Home (Regular), Comunidade (Destaque), Cashback (Destaque), Menu (Regular)
@@ -28,7 +30,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
   ];
 
   // Botão central de ação dinâmica (Cashback / QR Code)
-  if (viewMode !== 'ADM') {
+  if (viewMode !== 'ADM') { // FIX: Used viewMode to determine logic
     const isMerchantView = viewMode === 'Lojista';
 
     let centerId: string;
@@ -50,6 +52,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
     });
   }
 
+  // FIX: Dynamically get the profile tab ID based on viewMode
   const profileTabId = getAccountEntryRoute(viewMode);
   navItems.push({ id: profileTabId, icon: User, label: 'Menu' });
 
@@ -106,12 +109,15 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
     <div className="fixed bottom-0 left-0 right-0 mx-auto w-full max-w-md bg-[#1E5BFF] z-50 h-[80px] rounded-t-[24px] shadow-[0_-5px_30px_rgba(0,0,0,0.2)] border-t border-white/10">
       <div className="flex items-end justify-around w-full px-2 h-full pb-2">
         {navItems.map((item) => {
+          // FIX: Updated isActive logic to use viewMode for correct routing interpretation
           const isActive = activeTab === item.id || 
-                          (item.id === 'scan_cashback' && activeTab === 'pay_cashback') ||
-                          (item.id === 'merchant_qr_display' && activeTab === 'merchant_onboarding') ||
-                          (item.id === 'cashback_landing' && (activeTab === 'scan_cashback' || activeTab === 'pay_cashback')) ||
-                          (item.id === 'store_area' && ['store_ads_module', 'weekly_promo', 'merchant_jobs', 'store_profile', 'store_support'].includes(activeTab)) ||
-                          (item.id === 'profile' && ['about', 'support', 'favorites'].includes(activeTab));
+                          (item.id === 'scan_cashback' && ['scan_cashback', 'pay_cashback'].includes(activeTab)) ||
+                          (item.id === 'merchant_qr_display' && ['merchant_qr_display', 'merchant_onboarding', 'store_area'].includes(activeTab) && viewMode === 'Lojista') || // Lojista: QR Code, Onboarding e Store Area
+                          (item.id === 'cashback_landing' && ['cashback_landing', 'scan_cashback', 'pay_cashback'].includes(activeTab) && viewMode === 'Visitante') || // Visitante: Cashback Landing e fluxo de pagamento
+                          (item.id === profileTabId && ['profile', 'about', 'support', 'favorites', 'edit_profile', 'wallet', 'user_cupons_history'].includes(activeTab) && viewMode === 'Usuário') ||
+                          (item.id === profileTabId && ['store_area', 'store_profile', 'store_ads_module', 'banner_config', 'banner_checkout', 'sponsored_ads', 'sponsored_ads_checkout', 'sponsored_ads_success', 'banner_order_tracking', 'store_cashback_module', 'store_finance'].includes(activeTab) && viewMode === 'Lojista') ||
+                          (item.id === 'home' && ['explore', 'services', 'category_detail', 'store_detail', 'patrocinador_master', 'service_subcategories', 'service_specialties', 'service_success', 'jobs_list'].includes(activeTab)) ||
+                          (item.id === 'community_feed' && ['community_feed', 'freguesia_connect_public', 'freguesia_connect_dashboard', 'freguesia_connect_restricted'].includes(activeTab));
           
           return (
             <div key={item.id} className="flex-1 flex justify-center items-end h-full">

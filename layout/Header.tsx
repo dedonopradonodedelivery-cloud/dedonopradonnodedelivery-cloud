@@ -1,9 +1,9 @@
 
 import React, { useMemo } from 'react';
 import { Search, User as UserIcon, MapPin, ChevronDown, Check, ChevronRight, SearchX, ShieldCheck, Tag } from 'lucide-react';
-import { useNeighborhood, NEIGHBORHOODS } from '../../contexts/NeighborhoodContext';
-import { Store, Category } from '../../types';
-import { CATEGORIES } from '../../constants';
+import { useNeighborhood, NEIGHBORHOODS } from './contexts/NeighborhoodContext'; // FIX: Corrected import path
+import { Store, Category } from './types'; // FIX: Corrected import path
+import { CATEGORIES } from './constants'; // FIX: Corrected import path
 
 interface HeaderProps {
   isDarkMode: boolean;
@@ -14,6 +14,7 @@ interface HeaderProps {
   onSearchChange: (value: string) => void;
   onNavigate: (tab: string) => void;
   activeTab: string;
+  // FIX: Updated userRole type to include 'admin'
   userRole: 'cliente' | 'lojista' | 'admin' | null;
   stores?: Store[];
   onStoreClick?: (store: Store) => void;

@@ -1,3 +1,4 @@
+
 import React, { useEffect, useMemo, useState, useRef } from "react";
 import { Store } from "../types";
 import {
@@ -29,7 +30,8 @@ type ExploreViewProps = {
   onStoreClick: (store: Store) => void;
   onLocationClick: () => void;
   onFilterClick: () => void;
-  onOpenPlans: () => void;
+  // FIX: Changed onOpenPlans to onProceedToPayment to match App.tsx
+  onProceedToPayment: (days: number, total: number) => void; 
   onNavigate: (view: string) => void;
   onViewAllVerified?: () => void;
 };
@@ -131,7 +133,7 @@ const HorizontalStoreSection: React.FC<{ title: string; subtitle?: string; store
   );
 };
 
-export const ExploreView: React.FC<ExploreViewProps> = ({ stores, searchQuery, onStoreClick, onFilterClick, onNavigate }) => {
+export const ExploreView: React.FC<ExploreViewProps> = ({ stores, searchQuery, onStoreClick, onFilterClick, onNavigate, onProceedToPayment }) => {
   const { location } = useUserLocation();
   const [sortOption, setSortOption] = useState<"nearby" | "topRated" | null>(null);
   const [selectedStyle, setSelectedStyle] = useState<string | null>(null);

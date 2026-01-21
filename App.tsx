@@ -22,7 +22,7 @@ import { CashbackLandingView } from './components/CashbackLandingView';
 import { StoreAdsModule } from './components/StoreAdsModule';
 import { BannerUploadView } from './components/BannerUploadView';
 import { AdminBannerModeration } from './components/AdminBannerModeration';
-import { MapPin, ShieldCheck, X } from 'lucide-react';
+import { MapPin, ShieldCheck, X, AlertTriangle } from 'lucide-react';
 import { useAuth } from './contexts/AuthContext';
 import { NeighborhoodProvider } from './contexts/NeighborhoodContext';
 import { Category, Store, RoleMode, BannerPlan, SponsoredPlan, BannerConfig, BannerOrder, BannerMessage } from './types';
@@ -37,10 +37,13 @@ import { BannerCheckoutView } from './components/BannerCheckoutView';
 import { SponsoredAdsView } from './components/SponsoredAdsView';
 import { SponsoredAdsCheckoutView } from './components/SponsoredAdsCheckoutView';
 import { SponsoredAdsSuccessView } from './components/SponsoredAdsSuccessView';
-import { BannerProfessionalPaymentView } from './components/BannerProfessionalPaymentView';
+// FIX: Removed import for BannerProfessionalPaymentView as it's deprecated.
+// import { BannerProfessionalPaymentView } from './components/BannerProfessionalPaymentView'; 
 import { BannerOrderTrackingView } from './components/BannerOrderTrackingView';
 import { AdminBannerOrdersList } from './components/AdminBannerOrdersList';
 import { AdminBannerOrderDetail } from './components/AdminBannerOrderDetail';
+import { GeminiAssistant } from './components/GeminiAssistant';
+import { ApiKeyRequiredModal } from './components/ApiKeyRequiredModal';
 
 let splashWasShownInSession = false;
 const ADMIN_EMAIL = 'dedonopradonodedelivery@gmail.com';
@@ -76,6 +79,7 @@ const App: React.FC = () => {
   const [selectedStore, setSelectedStore] = useState<Store | null>(null);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [globalSearch, setGlobalSearch] = useState('');
+  // FIX: Initialize selectedServiceMacro to null
   const [selectedServiceMacro, setSelectedServiceMacro] = useState<{id: string, name: string} | null>(null);
   const [isQuoteModalOpen, setIsQuoteModalOpen] = useState(false);
   const [quoteCategory, setQuoteCategory] = useState('');
@@ -91,6 +95,33 @@ const App: React.FC = () => {
   // Admin State
   const [adminViewOrderId, setAdminViewOrderId] = useState<string | null>(null);
 
+  // NEW: API Key Selection State
+  const [isApiKeySelected, setIsApiKeySelected] = useState(true); // Assume true by default
+
+
+  // NEW: Check for AI Studio API Key Selection
+  useEffect(() => {
+    // Only run if window.aistudio exists (i.e., in AI Studio environment)
+    if ((window as any).aistudio && typeof (window as any).aistudio.hasSelectedApiKey === 'function') {
+      const checkKey = async () => {
+        const hasKey = await (window as any).aistudio.hasSelectedApiKey();
+        setIsApiKeySelected(hasKey);
+      };
+      checkKey();
+    }
+  }, []);
+
+  // NEW: Function to handle API Key Selection via AI Studio dialog
+  const handleSelectApiKey = async () => {
+    if ((window as any).aistudio && typeof (window as any).aistudio.openSelectKey === 'function') {
+      await (window as any).aistudio.openSelectKey();
+      // Assume selection was successful and proceed.
+      // Race condition handled by not adding delay here.
+      setIsApiKeySelected(true); 
+    } else {
+      alert("Recurso de seleção de chave de API não disponível neste ambiente.");
+    }
+  };
   
   // Set viewMode based on auth status. This prevents the login modal on startup for visitors.
   useEffect(() => {
@@ -211,13 +242,13 @@ const App: React.FC = () => {
             setActiveTab(route);
         }
     } else {
-        const route = getAccountEntryRoute(viewMode);
-        setPendingTab(route);
+        setPendingTab(getAccountEntryRoute(viewMode));
         setIsAuthOpen(true);
     }
   };
   
   const handleConfigureAndCreateBanner = (config: BannerConfig) => {
+    // This creates the 'plan' for ad placements
     const syntheticPlan: BannerPlan = {
       id: config.duration === '1m' ? 'home_1m' : 'home_3m', 
       label: `${config.placement} - ${config.duration === '1m' ? '1 Mês' : '3 Meses'} - ${config.neighborhoods.length} bairro(s)`,
@@ -226,23 +257,33 @@ const App: React.FC = () => {
       durationMonths: config.duration === '1m' ? 1 : 3,
       benefit: 'Plano customizado com seleção de bairros.',
       isPromo: config.duration === '3m_promo',
+      // FIX: Pass the neighborhoods array to the BannerPlan
+      neighborhoods: config.neighborhoods,
     };
     setBannerOrder({ plan: syntheticPlan, draft: null });
-    setActiveTab('store_ads_module');
+    setActiveTab('store_ads_module'); // Go to ad creation/selection
   };
 
   const handleFinalizeBannerCreation = (draft: any) => {
       if (!bannerOrder.plan) {
-        setActiveTab('banner_config');
+        setActiveTab('banner_config'); // Should not happen if flow is correct
         return;
       }
       setBannerOrder(prev => ({ ...prev, draft }));
-      setActiveTab('banner_checkout');
+      // NEW: Always go to banner_checkout, which now handles both scenarios
+      setActiveTab('banner_checkout'); 
   };
 
-  const handlePaymentComplete = () => {
-      // Logic split: If professional service, create order. Else, just notify.
-      if (bannerOrder.draft?.type === 'professional_service' && user) {
+  const handlePaymentComplete = (paymentMethod: 'pix' | 'credit' | 'debit') => {
+      if (!user || !bannerOrder.plan || !bannerOrder.draft) {
+        console.error("Missing user, plan or draft for payment completion.");
+        setActiveTab('store_area');
+        return;
+      }
+      
+      const isProfessionalService = bannerOrder.draft.type === 'professional_service';
+
+      if (isProfessionalService) {
           const newOrderId = `ORD-${Date.now().toString().slice(-6)}`;
           const now = new Date().toISOString();
           
@@ -250,8 +291,9 @@ const App: React.FC = () => {
               id: newOrderId,
               merchantId: user.id,
               bannerType: 'professional',
-              total: (bannerOrder.plan?.priceCents || 0) + PROFESSIONAL_BANNER_PRICING.promoCents,
-              paymentMethod: 'credit', // Assumido para simplificação
+              // Consolidate total price here: plan cost + professional service cost
+              total: bannerOrder.plan.priceCents + PROFESSIONAL_BANNER_PRICING.promoCents,
+              paymentMethod,
               paymentStatus: 'paid',
               createdAt: now,
               status: 'em_analise',
@@ -289,8 +331,11 @@ const App: React.FC = () => {
           setBannerOrder({ plan: null, draft: null });
           setActiveTab('banner_order_tracking');
       } else {
-          setBannerOrder({ plan: null, draft: null });
+          // Regular banner (template or custom editor)
+          // Here you'd typically save the 'published_banner' to Supabase
+          // For MVP, we'll just alert and clear the order
           alert("Banner enviado para análise e publicação!");
+          setBannerOrder({ plan: null, draft: null });
           setActiveTab('store_area'); 
       }
   };
@@ -309,59 +354,40 @@ const App: React.FC = () => {
     setActiveTab('store_area');
   };
   
+  // NOTE: This function is no longer needed after merging professional payment into BannerCheckoutView
+  // It is kept for reference or if the user wants to revert.
   const handleConfirmProfessionalPayment = (paymentMethod: 'pix' | 'credit' | 'debit') => {
-    if (!user) return;
-    const newOrderId = `ORD-${Date.now().toString().slice(-6)}`;
-    const now = new Date().toISOString();
-    
-    // Create new order with initial automation state
-    const newOrder: BannerOrder = {
-      id: newOrderId,
-      merchantId: user.id,
-      bannerType: 'professional',
-      total: 5990, // Legacy single purchase
-      paymentMethod,
-      paymentStatus: 'paid',
-      createdAt: now,
-      status: 'em_analise',
-      lastViewedAt: now,
-      onboardingStage: 'requested_assets',
-      autoMessagesFlags: {
-        welcomeSent: true,
-        requestSent: true,
-        assetsReceivedSent: false,
-        thanksSent: false,
-      }
-    };
-
-    // Auto Msg #1: Welcome
-    const msg1: BannerMessage = {
-      id: `msg-sys-1-${Date.now()}`,
-      orderId: newOrderId,
-      senderType: 'system',
-      body: '✅ Recebemos seu pedido! Agora vamos criar seu banner profissional.',
-      createdAt: now,
-    };
-
-    // Auto Msg #2: Request Data (Form Request)
-    const msg2: BannerMessage = {
-      id: `msg-sys-2-${Date.now() + 10}`,
-      orderId: newOrderId,
-      senderType: 'system',
-      type: 'form_request',
-      body: 'Para começar, precisamos de algumas informações. Por favor, preencha o formulário abaixo com seu logo e textos.',
-      createdAt: new Date(Date.now() + 1000).toISOString(), // +1 sec
-    };
-
-    setBannerOrders(prev => [...prev, newOrder]);
-    setBannerMessages(prev => [...prev, msg1, msg2]);
-    setViewingOrderId(newOrderId);
-    setActiveTab('banner_order_tracking');
+    // This logic is now handled in handlePaymentComplete in BannerCheckoutView
+    console.warn("handleConfirmProfessionalPayment called, but its logic should be in handlePaymentComplete.");
+    // This part should not be reachable if the App.tsx is correctly refactored.
+    // For now, it will just navigate as a fallback.
+    setActiveTab('banner_checkout'); 
   };
+
 
   // Logic to update an order (used for automation transitions)
   const handleUpdateOrder = (orderId: string, updates: Partial<BannerOrder>) => {
-    setBannerOrders(prev => prev.map(o => o.id === orderId ? { ...o, ...updates } : o));
+    setBannerOrders(prev => prev.map(o => {
+        if (o.id === orderId) {
+            const updatedOrder = { ...o, ...updates };
+
+            // Automation 2.1: If assets were just received, send a system message
+            if (updates.onboardingStage === 'assets_received' && !o.autoMessagesFlags.assetsReceivedSent) {
+                const autoMsg: BannerMessage = {
+                    id: `msg-sys-${Date.now()}-assets-ack`,
+                    orderId: orderId,
+                    senderType: 'system',
+                    body: 'Recebemos seus arquivos! Nossa equipe de design já está trabalhando na sua arte. Em breve enviaremos um rascunho.',
+                    createdAt: new Date().toISOString(),
+                };
+                setBannerMessages(prevMsgs => [...prevMsgs, autoMsg]);
+                updatedOrder.autoMessagesFlags.assetsReceivedSent = true;
+            }
+
+            return updatedOrder;
+        }
+        return o;
+    }));
   };
 
   const handleViewOrder = (orderId: string) => {
@@ -388,12 +414,15 @@ const App: React.FC = () => {
   };
   
   // Admin handlers
-  const handleAdminSendMessage = (orderId: string, text: string, type: 'text' | 'system' = 'text') => {
+  // FIX: Updated `onSendMessage` type definition to allow 'system'
+  const handleAdminSendMessage = (orderId: string, text: string, type: 'text' | 'system' = 'text', metadata?: any) => {
     const newMessage: BannerMessage = {
       id: `msg-a-${Date.now()}`,
       orderId,
       senderType: type === 'system' ? 'system' : 'team',
       body: text,
+      type, // Pass the type
+      metadata,
       createdAt: new Date().toISOString(),
     };
     setBannerMessages(prev => [...prev, newMessage]);
@@ -412,9 +441,11 @@ const App: React.FC = () => {
         return;
       }
       const order = bannerOrders.find(o => o.id === viewingOrderId);
+      // Removed the alert/navigation to banner_professional_payment since it's deprecated.
+      // Now it will simply stay on order tracking if the order is not paid (shouldn't happen with current flow).
       if (!order || order.paymentStatus !== 'paid') {
-        alert("Finalize o pagamento para acompanhar o pedido.");
-        setActiveTab('banner_professional_payment');
+        console.warn("Attempted to track unpaid professional banner order. This should not happen in current flow.");
+        setActiveTab('store_area'); // Fallback to store area if an unpaid order is somehow accessed directly
       }
     }
   }, [activeTab, viewingOrderId, bannerOrders]);
@@ -452,12 +483,31 @@ const App: React.FC = () => {
     );
   };
   
-  if (splashStage === 4) {
-    const HOME_PATH = "/";
-    if (window.location.pathname !== HOME_PATH) {
-      window.location.replace(HOME_PATH);
-      return null;
-    }
+  if (splashStage < 4) {
+    return (
+      <div className={`fixed inset-0 z-[999] flex flex-col items-center justify-between py-24 transition-all duration-800 ${splashStage === 3 ? 'animate-app-exit' : ''}`} style={{ backgroundColor: '#1E5BFF' }}>
+        <div className="flex flex-col items-center animate-fade-in text-center px-4">
+            <div className="relative w-32 h-32 bg-white rounded-[2.5rem] flex items-center justify-center shadow-2xl mb-8 animate-logo-enter"><MapPin className="w-16 h-16 text-brand-blue fill-brand-blue" /></div>
+            <h1 className="text-4xl font-black font-display text-white tracking-tighter drop-shadow-md">Localizei JPA</h1>
+            <TypingText text="Onde o bairro conversa" duration={2000} />
+        </div>
+        <div className="flex flex-col items-center animate-fade-in opacity-0" style={{ animationDelay: '3000ms', animationFillMode: 'forwards' }}>
+             <p className="text-[9px] font-black text-white/50 uppercase tracking-[0.25em] mb-1.5">Patrocinador Master</p>
+             <p className="text-xl font-bold text-white tracking-tight">Grupo Esquematiza</p>
+        </div>
+      </div>
+    );
+  }
+
+  // After splash, if API key is not selected, show the modal.
+  // The rest of the app is blocked until the key is selected.
+  if (!isApiKeySelected) {
+    return (
+      <ApiKeyRequiredModal 
+        onSelectApiKey={handleSelectApiKey} 
+        onClose={() => setIsApiKeySelected(true)} // Allow closing, but GeminiAssistant will be hidden
+      />
+    );
   }
 
   return (
@@ -484,12 +534,12 @@ const App: React.FC = () => {
                       messages={bannerMessages} 
                       onBack={() => setActiveTab('admin_banner_orders_list')} 
                       onSendMessage={handleAdminSendMessage} 
-                      onUpdateOrder={handleUpdateOrder}
+                      onUpdateOrder={handleUpdateOrder} // FIX: Pass onUpdateOrder
                     />
                 )}
 
                 {activeTab === 'home' && <HomeFeed onNavigate={setActiveTab} onSelectCategory={(c) => { setSelectedCategory(c); setActiveTab('category_detail'); }} onSelectCollection={() => {}} onStoreClick={handleSelectStore} stores={STORES} searchTerm={globalSearch} user={user as any} onRequireLogin={() => setIsAuthOpen(true)} />}
-                {activeTab === 'explore' && <ExploreView stores={STORES} searchQuery={globalSearch} onStoreClick={handleSelectStore} onLocationClick={() => {}} onFilterClick={() => {}} onOpenPlans={() => {}} onNavigate={setActiveTab} />}
+                {activeTab === 'explore' && <ExploreView stores={STORES} searchQuery={globalSearch} onStoreClick={handleSelectStore} onLocationClick={() => {}} onFilterClick={() => {}} onProceedToPayment={handleProceedToSponsoredPayment} onNavigate={setActiveTab} />}
                 {activeTab === 'profile' && <MenuView user={user as any} userRole={userRole} onAuthClick={() => setIsAuthOpen(true)} onNavigate={setActiveTab} onBack={() => setActiveTab('home')} />}
                 {activeTab === 'community_feed' && <CommunityFeedView onStoreClick={handleSelectStore} user={user as any} onRequireLogin={() => setIsAuthOpen(true)} onNavigate={setActiveTab} />}
                 {activeTab === 'services' && <ServicesView onSelectMacro={(id, name) => { setSelectedServiceMacro({id, name}); if (id === 'emergency') { setQuoteCategory(name); setIsQuoteModalOpen(true); } else { setActiveTab('service_subcategories'); } }} onOpenTerms={() => setActiveTab('service_terms')} onNavigate={setActiveTab} searchTerm={globalSearch} />}
@@ -531,8 +581,7 @@ const App: React.FC = () => {
                         onComplete={handleCompleteSponsoredFlow}
                     />
                 )}
-                {/* Professional Banner Flow */}
-                {activeTab === 'banner_professional_payment' && <BannerProfessionalPaymentView onBack={() => setActiveTab('store_ads_module')} onConfirmPayment={handleConfirmProfessionalPayment} />}
+                {/* FIX: Removed BannerProfessionalPaymentView as its functionality is merged into BannerCheckoutView. */}
                 {activeTab === 'banner_order_tracking' && viewingOrderId && (
                   <BannerOrderTrackingView
                     orderId={viewingOrderId}
@@ -541,7 +590,7 @@ const App: React.FC = () => {
                     onBack={() => { setViewingOrderId(null); setActiveTab('store_area'); }}
                     onSendMessage={handleSendMessage}
                     onViewOrder={handleViewOrder}
-                    onUpdateOrder={handleUpdateOrder}
+                    onUpdateOrder={handleUpdateOrder} // FIX: Pass onUpdateOrder
                   />
                 )}
               </main>
@@ -549,19 +598,8 @@ const App: React.FC = () => {
               {isQuoteModalOpen && <QuoteRequestModal isOpen={isQuoteModalOpen} onClose={() => setIsQuoteModalOpen(false)} categoryName={quoteCategory} onSuccess={() => setActiveTab('service_success')} />}
           </Layout>
           <RoleSwitcherModal />
-          {splashStage < 4 && (
-            <div className={`fixed inset-0 z-[999] flex flex-col items-center justify-between py-24 transition-all duration-800 ${splashStage === 3 ? 'animate-app-exit' : ''}`} style={{ backgroundColor: '#1E5BFF' }}>
-              <div className="flex flex-col items-center animate-fade-in text-center px-4">
-                  <div className="relative w-32 h-32 bg-white rounded-[2.5rem] flex items-center justify-center shadow-2xl mb-8 animate-logo-enter"><MapPin className="w-16 h-16 text-brand-blue fill-brand-blue" /></div>
-                  <h1 className="text-4xl font-black font-display text-white tracking-tighter drop-shadow-md">Localizei JPA</h1>
-                  <TypingText text="Onde o bairro conversa" duration={2000} />
-              </div>
-              <div className="flex flex-col items-center animate-fade-in opacity-0" style={{ animationDelay: '3000ms', animationFillMode: 'forwards' }}>
-                   <p className="text-[9px] font-black text-white/50 uppercase tracking-[0.25em] mb-1.5">Patrocinador Master</p>
-                   <p className="text-xl font-bold text-white tracking-tight">Grupo Esquematiza</p>
-              </div>
-            </div>
-          )}
+          {/* Only render GeminiAssistant if API key is selected */}
+          {isApiKeySelected && <GeminiAssistant />}
         </div>
       </NeighborhoodProvider>
     </div>

@@ -1,7 +1,7 @@
 
 import React, { ReactNode, useEffect, useRef } from 'react';
-import { BottomNav } from './BottomNav';
-import { RoleMode } from '../../types';
+import { BottomNav } from '../components/BottomNav';
+import { RoleMode } from './types'; // FIX: Corrected import path for RoleMode
 
 interface LayoutProps {
   children: ReactNode;
