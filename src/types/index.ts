@@ -1,3 +1,4 @@
+
 import React from 'react';
 
 // From original types.ts
@@ -274,6 +275,8 @@ export interface BannerPlan {
   isPromo?: boolean;
   isMostAdvantageous?: boolean;
   benefit: string;
+  // FIX: Add neighborhoods to BannerPlan
+  neighborhoods?: { id: string; name: string }[];
 }
 
 // NEW: Type for dynamic banner configuration
@@ -324,6 +327,6 @@ export interface BannerMessage {
   createdAt: string;
   readAt?: string;
   // Rich types
-  type?: 'text' | 'form_request' | 'assets_payload' | 'status';
+  type?: 'text' | 'form_request' | 'assets_payload' | 'status' | 'thank_you';
   metadata?: any;
 }

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { ChevronLeft, Send, Loader2, User, Shield, Briefcase, FileText, Download, CheckCircle, PartyPopper, Bot } from 'lucide-react'; // Added Bot
 import { BannerOrder, BannerMessage } from '../types';
@@ -7,9 +8,10 @@ interface AdminBannerOrderDetailProps {
   orders: BannerOrder[];
   messages: BannerMessage[];
   onBack: () => void;
-  onSendMessage: (orderId: string, text: string) => void;
-  // New Prop to update order flags
-  onUpdateOrder?: (orderId: string, updates: Partial<BannerOrder>) => void;
+  // FIX: Updated signature for onSendMessage
+  onSendMessage: (orderId: string, text: string, type?: 'text' | 'system' | 'assets_payload', metadata?: any) => void;
+  // FIX: Added onUpdateOrder prop
+  onUpdateOrder: (orderId: string, updates: Partial<BannerOrder>) => void;
 }
 
 export const AdminBannerOrderDetail: React.FC<AdminBannerOrderDetailProps> = ({ 
@@ -18,7 +20,7 @@ export const AdminBannerOrderDetail: React.FC<AdminBannerOrderDetailProps> = ({
   messages, 
   onBack, 
   onSendMessage,
-  onUpdateOrder
+  onUpdateOrder // Destructured onUpdateOrder
 }) => {
   const [newMessage, setNewMessage] = useState('');
   const [isSending, setIsSending] = useState(false);
@@ -61,7 +63,8 @@ export const AdminBannerOrderDetail: React.FC<AdminBannerOrderDetailProps> = ({
     const thankYouMsg = `🎉 Banner finalizado e publicado! Obrigado pela confiança no nosso trabalho.\nDesejamos muito sucesso com a campanha — se quiser ajustar algo no futuro, é só chamar por aqui.`;
     
     // Send the message as a team message
-    onSendMessage(orderId, thankYouMsg);
+    // FIX: Updated onSendMessage call to include 'system' type and empty metadata
+    onSendMessage(orderId, thankYouMsg, 'system', {}); 
     
     // Update Flag to prevent duplicate button
     onUpdateOrder(orderId, {

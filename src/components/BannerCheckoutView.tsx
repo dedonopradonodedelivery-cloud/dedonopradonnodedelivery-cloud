@@ -74,9 +74,10 @@ export const BannerCheckoutView: React.FC<BannerCheckoutViewProps> = ({ onBack, 
 
   // Helper para montar o subtítulo dos espaços publicitários
   const getAdPlacementSubtitle = () => {
-    const neighborhoodNames = plan.neighborhoods.map(id => {
-      const option = NEIGHBORHOOD_OPTIONS.find(n => n.id === id);
-      return option ? option.name : id;
+    // FIX: Safely access plan.neighborhoods which is now typed as { id: string; name: string }[]
+    const neighborhoodNames = plan.neighborhoods?.map(n => {
+      const option = NEIGHBORHOOD_OPTIONS.find(opt => opt.id === n.id);
+      return option ? option.name : n.id;
     }).join(', ');
     
     // Concatenar os detalhes do plano
@@ -86,7 +87,8 @@ export const BannerCheckoutView: React.FC<BannerCheckoutViewProps> = ({ onBack, 
     
     const durationText = plan.durationMonths === 1 ? '1 mês' : `${plan.durationMonths} meses`;
 
-    if (plan.neighborhoods.length === 0) return `${placementText} • Sem bairros selecionados • ${durationText}`;
+    // FIX: Check if neighborhoods exist before displaying count
+    if (!plan.neighborhoods || plan.neighborhoods.length === 0) return `${placementText} • Sem bairros selecionados • ${durationText}`;
 
     return `${placementText} • ${plan.neighborhoods.length} bairro(s) • ${durationText}`;
   };

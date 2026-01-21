@@ -1,4 +1,5 @@
 
+
 import React, { useState, useEffect, useMemo } from 'react';
 import { Layout } from './components/layout/Layout';
 import { Header } from './components/layout/Header';
@@ -255,6 +256,8 @@ const App: React.FC = () => {
       durationMonths: config.duration === '1m' ? 1 : 3,
       benefit: 'Plano customizado com seleção de bairros.',
       isPromo: config.duration === '3m_promo',
+      // FIX: Pass the neighborhoods array to the BannerPlan
+      neighborhoods: config.neighborhoods,
     };
     setBannerOrder({ plan: syntheticPlan, draft: null });
     setActiveTab('store_ads_module'); // Go to ad creation/selection
@@ -527,7 +530,7 @@ const App: React.FC = () => {
                       messages={bannerMessages} 
                       onBack={() => setActiveTab('admin_banner_orders_list')} 
                       onSendMessage={handleAdminSendMessage} 
-                      onUpdateOrder={handleUpdateOrder}
+                      onUpdateOrder={handleUpdateOrder} // FIX: Pass onUpdateOrder
                     />
                 )}
 
@@ -583,7 +586,7 @@ const App: React.FC = () => {
                     onBack={() => { setViewingOrderId(null); setActiveTab('store_area'); }}
                     onSendMessage={handleSendMessage}
                     onViewOrder={handleViewOrder}
-                    onUpdateOrder={handleUpdateOrder}
+                    onUpdateOrder={handleUpdateOrder} // FIX: Pass onUpdateOrder
                   />
                 )}
               </main>
