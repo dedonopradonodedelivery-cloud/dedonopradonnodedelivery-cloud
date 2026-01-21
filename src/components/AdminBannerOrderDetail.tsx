@@ -1,6 +1,7 @@
 
+
 import React, { useState, useEffect, useRef } from 'react';
-import { ChevronLeft, Send, Loader2, User, Shield, Briefcase, FileText, Download, CheckCircle, PartyPopper, Bot } from 'lucide-react'; // Added Bot
+import { ChevronLeft, Send, Loader2, User, Shield, Briefcase, FileText, Download, CheckCircle, PartyPopper } from 'lucide-react';
 import { BannerOrder, BannerMessage } from '../types';
 
 interface AdminBannerOrderDetailProps {
@@ -8,10 +9,9 @@ interface AdminBannerOrderDetailProps {
   orders: BannerOrder[];
   messages: BannerMessage[];
   onBack: () => void;
-  // FIX: Updated signature for onSendMessage to include type and metadata
-  onSendMessage: (orderId: string, text: string, type?: 'text' | 'system' | 'assets_payload', metadata?: any) => void;
-  // FIX: Added onUpdateOrder prop
-  onUpdateOrder: (orderId: string, updates: Partial<BannerOrder>) => void;
+  onSendMessage: (orderId: string, text: string) => void;
+  // New Prop to update order flags
+  onUpdateOrder?: (orderId: string, updates: Partial<BannerOrder>) => void;
 }
 
 export const AdminBannerOrderDetail: React.FC<AdminBannerOrderDetailProps> = ({ 
@@ -20,24 +20,11 @@ export const AdminBannerOrderDetail: React.FC<AdminBannerOrderDetailProps> = ({
   messages, 
   onBack, 
   onSendMessage,
-  onUpdateOrder // Destructured onUpdateOrder
+  onUpdateOrder
 }) => {
   const [newMessage, setNewMessage] = useState('');
   const [isSending, setIsSending] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-
-  // Form State for assets submission (should be in Merchant view, but fixing current code)
-  // This state is not needed in the Admin view, as the admin does not submit assets
-  // I will keep it for minimal changes as per instructions, but it won't be used.
-  const [formData, setFormData] = useState({
-    storeName: '',
-    title: '',
-    description: '',
-    ctaLabel: 'Saiba mais',
-    ctaLink: '',
-    logoFile: null as File | null
-  });
-  const [isSubmittingAssets, setIsSubmittingAssets] = useState(false); // Used by the assets form
 
   const order = orders.find(o => o.id === orderId);
   const orderMessages = messages
@@ -59,51 +46,23 @@ export const AdminBannerOrderDetail: React.FC<AdminBannerOrderDetailProps> = ({
     }, 500);
   };
 
-  const handleSendThanks = () => { // Defined handleSendThanks
+  const handleSendThanks = () => {
     if (!onUpdateOrder || !order) return;
     
     const thankYouMsg = `🎉 Banner finalizado e publicado! Obrigado pela confiança no nosso trabalho.\nDesejamos muito sucesso com a campanha — se quiser ajustar algo no futuro, é só chamar por aqui.`;
     
     // Send the message as a team message
-    // FIX: Updated onSendMessage call to include 'system' type and empty metadata
-    onSendMessage(orderId, thankYouMsg, 'system', {}); 
+    onSendMessage(orderId, thankYouMsg);
     
-    // Update Flag to prevent duplicate button
+    // Update Flag to prevent duplicate buttons
     onUpdateOrder(orderId, {
         autoMessagesFlags: {
             ...order.autoMessagesFlags,
             thanksSent: true
-        },
-        status: 'publicado' // Assuming 'publicado' is the final status for sending thanks
+        }
     });
   };
   
-  // This `handleSubmitAssets` function is actually for the Merchant view (`BannerOrderTrackingView`)
-  // It shouldn't be in Admin view. I'm leaving it as is for now as per "do not remove code" instruction,
-  // but it highlights a logic flaw in the provided file.
-  // FIX: Removed handleSubmitAssets as it's not relevant for Admin view.
-  // const handleSubmitAssets = async () => {
-  //   if (!formData.storeName || !formData.title || !formData.description || !onUpdateOrder || !order) return;
-    
-  //   setIsSubmittingAssets(true);
-  //   await new Promise(r => setTimeout(r, 1500));
-
-  //   const payload = {
-  //       ...formData,
-  //       logoUrl: formData.logoFile ? URL.createObjectURL(formData.logoFile) : null
-  //   };
-    
-  //   onSendMessage(orderId, "Enviei as informações do banner.", 'assets_payload', payload);
-
-  //   const now = new Date().toISOString();
-  //   onUpdateOrder(orderId, {
-  //       onboardingStage: 'assets_received',
-  //       assetsSubmittedAt: now
-  //   });
-    
-  //   setIsSubmittingAssets(false);
-  // };
-
   if (!order) {
     return (
       <div className="min-h-screen bg-slate-900 flex flex-col items-center justify-center p-8 text-center text-white">
@@ -113,9 +72,8 @@ export const AdminBannerOrderDetail: React.FC<AdminBannerOrderDetailProps> = ({
     );
   }
 
-  const isFinalized = order.status === 'publicado' || order.status === 'aprovado';
-  // FIX: Define showThanksButton here, before JSX usage.
-  const showThanksButton = isFinalized && !order.autoMessagesFlags?.thanksSent; // Derived from order prop.
+  const isFinalized = order.status === 'publicado' || order.status === 'aprovado'; // Assuming finalized is published/approved
+  const showThanksButton = isFinalized && !order.autoMessagesFlags?.thanksSent;
 
   return (
     <div className="min-h-screen bg-slate-900 text-white font-sans flex flex-col animate-in fade-in duration-500">
@@ -149,20 +107,17 @@ export const AdminBannerOrderDetail: React.FC<AdminBannerOrderDetailProps> = ({
             </div>
             {orderMessages.map(msg => {
                 const isSystem = msg.senderType === 'system';
-                const isTeam = msg.senderType === 'team';
-                const isMerchant = msg.senderType === 'merchant';
-                const alignClass = isMerchant ? 'justify-end' : 'justify-start';
-                const bgClass = isMerchant ? 'bg-blue-600 text-white rounded-br-none' : isSystem ? 'bg-slate-800 text-slate-300 border border-white/10' : 'bg-slate-700 text-slate-200 rounded-bl-none border border-white/5';
-
                 return (
-                    <div key={msg.id} className={`flex items-end gap-3 ${alignClass}`}>
-                        {!isMerchant && (
-                            <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${isSystem ? 'bg-green-500/20 text-green-400' : 'bg-slate-700 text-slate-400'}`}>
-                                {isSystem ? <Bot size={16} /> : <User size={16} />}
-                            </div>
-                        )}
+                    <div key={msg.id} className={`flex items-end gap-3 ${msg.senderType === 'team' || isSystem ? 'justify-end' : 'justify-start'}`}>
+                        {msg.senderType === 'merchant' && <div className="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center shrink-0 border border-white/10"><User size={14} className="text-slate-400" /></div>}
                         
-                        <div className={`max-w-[85%] p-3.5 rounded-2xl text-sm leading-relaxed ${bgClass}`}>
+                        <div className={`max-w-[85%] p-3.5 rounded-2xl text-sm leading-relaxed ${
+                            msg.senderType === 'team' 
+                            ? 'bg-[#1E5BFF] text-white rounded-br-none' 
+                            : isSystem 
+                              ? 'bg-slate-800 text-slate-300 rounded-br-none border border-white/10'
+                              : 'bg-slate-800 text-slate-200 rounded-bl-none border border-white/5'
+                        }`}>
                             {msg.type === 'assets_payload' ? (
                                 <div className="space-y-3">
                                     <div className="flex items-center gap-2 mb-2 border-b border-white/10 pb-2">
@@ -189,15 +144,14 @@ export const AdminBannerOrderDetail: React.FC<AdminBannerOrderDetailProps> = ({
                                             </div>
                                             {msg.metadata?.logoUrl && (
                                                 <a href={msg.metadata.logoUrl} target="_blank" className="bg-blue-500/20 p-2 rounded flex-1 flex items-center justify-center gap-1 text-blue-300 hover:bg-blue-500/30 transition-colors">
-                                                    <Download size={12} /> <span>Logo</span>
+                                                    <Download size={12} /> Logo
                                                 </a>
                                             )}
                                         </div>
                                     </div>
-                                </div>
-                            ) : (
-                                <div dangerouslySetInnerHTML={{ __html: msg.body.replace(/\n/g, '<br/>') }} />
-                            )}
+                                ) : (
+                                    <div dangerouslySetInnerHTML={{ __html: msg.body.replace(/\n/g, '<br/>') }} />
+                                )}
                             
                             <p className={`text-[9px] mt-1.5 opacity-60 text-right ${msg.senderType === 'team' ? 'text-blue-100' : 'text-slate-500'}`}>
                                 {new Date(msg.createdAt).toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'})}

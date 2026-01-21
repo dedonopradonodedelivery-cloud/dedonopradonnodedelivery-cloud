@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo, useEffect } from 'react';
 import { ChevronLeft, Check, Home, LayoutGrid, MapPin, Search, Star, Rocket, Sparkles, TrendingUp, X, Map, BarChart, Banknote, Layers } from 'lucide-react';
 import { BannerConfig } from '../types';
@@ -21,14 +22,18 @@ const calculateBannerPrice = (
     const placementKey = placement.toLowerCase() as 'home' | 'categorias';
     
     if (placement === 'Todos') {
+        // Fallback for 'Todos' as requested to keep as is
         basePricePerMonth = BANNER_BASE_PRICES_CENTS['home'][duration === '1m' ? '1m_promo' : '3m_promo'] + 
                            BANNER_BASE_PRICES_CENTS['categorias'][duration === '1m' ? '1m_promo' : '3m_promo'];
     } else {
+        // Use 1m_promo or 3m_promo depending on selection
         const durationKey = duration === '1m' ? '1m_promo' : '3m_promo';
         basePricePerMonth = BANNER_BASE_PRICES_CENTS[placementKey][durationKey];
     }
 
     const totalMonths = duration === '1m' ? 1 : 3;
+
+    // Aumento de 10% por bairro adicional (limite 2.0x)
     const factor = 1 + Math.max(0, neighborhoodsCount - 1) * 0.10;
     const effectiveFactor = Math.min(factor, 2.0);
     const totalPrice = basePricePerMonth * totalMonths * effectiveFactor;
@@ -42,12 +47,10 @@ export const BannerConfigView: React.FC<BannerConfigViewProps> = ({ onBack, onCo
     const [selectedNeighborhoods, setSelectedNeighborhoods] = useState<string[]>([]);
     
     const priceCents = useMemo(() => {
-        if (!placement) return 0;
         return calculateBannerPrice(placement, duration, selectedNeighborhoods.length);
     }, [placement, duration, selectedNeighborhoods]);
 
     const savings = useMemo(() => {
-        if (!placement) return { percentage: 0, amount: formatCurrency(0) };
         let price1m = 0;
         let price3m_promo = 0;
 
@@ -72,21 +75,23 @@ export const BannerConfigView: React.FC<BannerConfigViewProps> = ({ onBack, onCo
         };
     }, [placement]);
 
+    // Cálculo específico de economia para o card de 1 mês
     const oneMonthSavings = useMemo(() => {
-        if (!placement || placement === 'Todos') return null;
+        if (placement === 'Todos') return null;
         const key = placement.toLowerCase() as 'home' | 'categorias';
         const original = BANNER_BASE_PRICES_CENTS[key]['1m_original'];
         const promo = BANNER_BASE_PRICES_CENTS[key]['1m_promo'];
         return formatCurrency(original - promo);
     }, [placement]);
 
+
     const isReady = selectedNeighborhoods.length > 0 && !!duration && !!placement;
 
     const handleConfigure = () => {
         if (!isReady) return;
         const config: BannerConfig = {
-            placement: placement as 'Home' | 'Categorias' | 'Todos',
-            duration: duration as '1m' | '3m_promo',
+            placement,
+            duration,
             neighborhoods: NEIGHBORHOOD_OPTIONS.filter(n => selectedNeighborhoods.includes(n.id)),
             priceCents,
         };
@@ -103,7 +108,7 @@ export const BannerConfigView: React.FC<BannerConfigViewProps> = ({ onBack, onCo
         }
     };
 
-    const currentPlacementKey = placement === 'Todos' ? 'home' : (placement?.toLowerCase() as 'home' | 'categorias' || 'home');
+    const currentPlacementKey = placement === 'Todos' ? 'home' : placement.toLowerCase() as 'home' | 'categorias';
 
     return (
         <div className="min-h-screen bg-slate-900 text-white font-sans flex flex-col">
@@ -183,7 +188,7 @@ export const BannerConfigView: React.FC<BannerConfigViewProps> = ({ onBack, onCo
                                 <button 
                                     key={hood.id}
                                     onClick={() => setSelectedNeighborhoods(prev => prev.includes(hood.id) ? prev.filter(i => i !== hood.id) : [...prev, hood.id])}
-                                    className={`p-3 rounded-xl text-center text-xs font-bold transition-all border-2 ${selectedNeighborhoods.includes(hood.id) ? 'bg-blue-50 border-blue-400 text-white' : 'bg-slate-700 border-slate-600 text-slate-300 hover:border-slate-500'}`}
+                                    className={`p-3 rounded-xl text-center text-xs font-bold transition-all border-2 ${selectedNeighborhoods.includes(hood.id) ? 'bg-blue-500 border-blue-400 text-white' : 'bg-slate-700 border-slate-600 text-slate-300 hover:border-slate-500'}`}
                                 >
                                     {hood.name}
                                 </button>
@@ -196,15 +201,16 @@ export const BannerConfigView: React.FC<BannerConfigViewProps> = ({ onBack, onCo
                 <section>
                     <h2 className="text-xs font-black text-slate-400 uppercase tracking-[0.2em] mb-4 text-center">3. Escolha a duração</h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {/* CARD 1 MÊS - COM PROMOÇÃO */}
                         <button onClick={() => setDuration('1m')} className={`p-8 rounded-3xl text-center border-4 relative transition-all ${duration === '1m' ? 'border-blue-500 bg-blue-500/10' : 'border-slate-700 bg-slate-800 hover:border-slate-600'}`}>
                             <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-blue-500 text-white text-[10px] font-black px-4 py-1.5 rounded-full shadow-lg"><Sparkles size={12} className="inline -mt-0.5 mr-1.5 fill-white"/>PROMOÇÃO DE INAUGURAÇÃO</div>
                             <p className="font-black text-4xl text-white">1 Mês</p>
                             <div className="mt-3 flex flex-col items-center">
                                 <p className="text-xs text-slate-400 line-through font-bold">
-                                    De {formatCurrency(BANNER_BASE_PRICES_CENTS[currentPlacementKey as keyof typeof BANNER_BASE_PRICES_CENTS]['1m_original'])}
+                                    De {formatCurrency(BANNER_BASE_PRICES_CENTS[currentPlacementKey]['1m_original'])}
                                 </p>
                                 <p className="text-lg font-black text-blue-400">
-                                    Por {formatCurrency(BANNER_BASE_PRICES_CENTS[currentPlacementKey as keyof typeof BANNER_BASE_PRICES_CENTS]['1m_promo'])}
+                                    Por {formatCurrency(BANNER_BASE_PRICES_CENTS[currentPlacementKey]['1m_promo'])}
                                 </p>
                             </div>
                             {oneMonthSavings && (
@@ -214,6 +220,7 @@ export const BannerConfigView: React.FC<BannerConfigViewProps> = ({ onBack, onCo
                             )}
                         </button>
 
+                        {/* CARD 3 MESES - COM PROMOÇÃO EXISTENTE */}
                         <button onClick={() => setDuration('3m_promo')} className={`p-8 rounded-3xl text-center border-4 relative transition-all ${duration === '3m_promo' ? 'border-amber-400 bg-amber-500/10' : 'border-slate-700 bg-slate-800 hover:border-slate-600'}`}>
                             <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-amber-400 text-slate-900 text-[10px] font-black px-4 py-1.5 rounded-full shadow-lg"><Star size={12} className="inline -mt-0.5 mr-1.5 fill-slate-900"/>PROMOÇÃO DE INAUGURAÇÃO</div>
                             <p className="font-black text-4xl text-white">3 Meses</p>

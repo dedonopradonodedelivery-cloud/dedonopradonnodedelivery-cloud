@@ -60,8 +60,9 @@ export const Header: React.FC<HeaderProps> = ({
   viewMode,
   onOpenViewSwitcher
 }) => {
-  const { currentNeighborhood, toggleSelector } = useNeighborhood();
+  const { currentNeighborhood, setNeighborhood, toggleSelector } = useNeighborhood();
   const showNeighborhoodFilter = ['home', 'explore', 'services', 'community_feed'].includes(activeTab);
+
   const normalize = (text: any) => (String(text || "")).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
 
   const searchResults = useMemo(() => {
@@ -73,7 +74,9 @@ export const Header: React.FC<HeaderProps> = ({
   }, [stores, searchTerm, activeTab]);
 
   const dynamicPlaceholder = useMemo(() => {
-    if (currentNeighborhood === "Jacarepaguá (todos)") return "O que você busca em JPA?";
+    if (currentNeighborhood === "Jacarepaguá (todos)") {
+      return "O que você busca em JPA?";
+    }
     return `O que você busca em ${currentNeighborhood}?`;
   }, [currentNeighborhood]);
 
@@ -110,7 +113,13 @@ export const Header: React.FC<HeaderProps> = ({
             <div className="flex items-center gap-3 px-4 pt-2 pb-3">
                 <div className="relative flex-1 group">
                     <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                    <input type="text" value={searchTerm} onChange={(e) => onSearchChange(e.target.value)} placeholder={dynamicPlaceholder} className="block w-full pl-10 pr-4 bg-gray-100 dark:bg-gray-800 border-none rounded-2xl text-sm font-medium text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#1E5BFF]/50 py-3 shadow-inner" />
+                    <input 
+                      type="text" 
+                      value={searchTerm} 
+                      onChange={(e) => onSearchChange(e.target.value)} 
+                      placeholder={dynamicPlaceholder} 
+                      className="block w-full pl-10 pr-4 bg-gray-100 dark:bg-gray-800 border-none rounded-2xl text-sm font-medium text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#1E5BFF]/50 py-3 shadow-inner" 
+                    />
                     {searchTerm.trim().length > 0 && (activeTab === 'home' || activeTab === 'explore') && (
                         <div className="absolute top-[calc(100%+8px)] left-0 right-0 bg-white dark:bg-gray-900 rounded-[24px] shadow-2xl border border-gray-100 dark:border-gray-800 z-[100] overflow-hidden animate-in fade-in slide-in-from-top-2">
                             <div className="p-2 max-h-[60vh] overflow-y-auto no-scrollbar">
@@ -132,8 +141,8 @@ export const Header: React.FC<HeaderProps> = ({
             </div>
             {showNeighborhoodFilter && (
                 <div className="flex items-center gap-2 overflow-x-auto no-scrollbar px-4 pb-3 pt-1">
-                    <button onClick={() => {}} className={`flex-shrink-0 px-4 py-1.5 rounded-full text-xs font-bold transition-all border ${currentNeighborhood === "Jacarepaguá (todos)" ? "bg-[#1E5BFF] text-white border-[#1E5BFF]" : "bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-300 border-gray-100 dark:border-gray-800"}`}>Todos</button>
-                    {NEIGHBORHOODS.map(hood => (<button key={hood} onClick={() => {}} className={`flex-shrink-0 px-4 py-1.5 rounded-full text-xs font-bold transition-all border ${currentNeighborhood === hood ? "bg-[#1E5BFF] text-white border-[#1E5BFF]" : "bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-300 border-gray-100 dark:border-gray-800"}`}>{hood}</button>))}
+                    <button onClick={() => setNeighborhood("Jacarepaguá (todos)")} className={`flex-shrink-0 px-4 py-1.5 rounded-full text-xs font-bold transition-all border ${currentNeighborhood === "Jacarepaguá (todos)" ? "bg-[#1E5BFF] text-white border-[#1E5BFF]" : "bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-300 border-gray-100 dark:border-gray-800"}`}>Todos</button>
+                    {NEIGHBORHOODS.map(hood => (<button key={hood} onClick={() => setNeighborhood(hood)} className={`flex-shrink-0 px-4 py-1.5 rounded-full text-xs font-bold transition-all border ${currentNeighborhood === hood ? "bg-[#1E5BFF] text-white border-[#1E5BFF]" : "bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-300 border-gray-100 dark:border-gray-800"}`}>{hood}</button>))}
                 </div>
             )}
         </div>

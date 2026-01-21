@@ -1,5 +1,4 @@
 
-
 import React, { useState, useEffect, useMemo } from 'react';
 import { Layout } from './components/layout/Layout';
 import { Header } from './components/layout/Header';
@@ -30,7 +29,8 @@ import { Category, Store, RoleMode, BannerPlan, SponsoredPlan, BannerConfig, Ban
 import { CategoryView } from './components/CategoryView';
 import { StoreProfileEdit } from './components/StoreProfileEdit';
 import { CommunityFeedView } from './components/CommunityFeedView';
-import { STORES, PROFESSIONAL_BANNER_PRICING } from './constants';
+// FIX: Corrected import path for PROFESSIONAL_BANNER_PRICING
+import { STORES, PROFESSIONAL_BANNER_PRICING } from '../constants';
 import { AboutView, SupportView, FavoritesView } from './components/SimplePages';
 import { getAccountEntryRoute } from './lib/roleRoutes';
 import { BannerConfigView } from './components/BannerConfigView';
@@ -38,8 +38,7 @@ import { BannerCheckoutView } from './components/BannerCheckoutView';
 import { SponsoredAdsView } from './components/SponsoredAdsView';
 import { SponsoredAdsCheckoutView } from './components/SponsoredAdsCheckoutView';
 import { SponsoredAdsSuccessView } from './components/SponsoredAdsSuccessView';
-// FIX: Removed import for BannerProfessionalPaymentView as it's deprecated.
-// import { BannerProfessionalPaymentView } from './components/BannerProfessionalPaymentView'; 
+import { BannerProfessionalPaymentView } from './components/BannerProfessionalPaymentView';
 import { BannerOrderTrackingView } from './components/BannerOrderTrackingView';
 import { AdminBannerOrdersList } from './components/AdminBannerOrdersList';
 import { AdminBannerOrderDetail } from './components/AdminBannerOrderDetail';
@@ -80,7 +79,6 @@ const App: React.FC = () => {
   const [selectedStore, setSelectedStore] = useState<Store | null>(null);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [globalSearch, setGlobalSearch] = useState('');
-  // FIX: Initialize selectedServiceMacro to null
   const [selectedServiceMacro, setSelectedServiceMacro] = useState<{id: string, name: string} | null>(null);
   const [isQuoteModalOpen, setIsQuoteModalOpen] = useState(false);
   const [quoteCategory, setQuoteCategory] = useState('');
@@ -243,13 +241,13 @@ const App: React.FC = () => {
             setActiveTab(route);
         }
     } else {
-        setPendingTab(getAccountEntryRoute(viewMode));
+        const route = getAccountEntryRoute(viewMode);
+        setPendingTab(route);
         setIsAuthOpen(true);
     }
   };
   
   const handleConfigureAndCreateBanner = (config: BannerConfig) => {
-    // This creates the 'plan' for ad placements
     const syntheticPlan: BannerPlan = {
       id: config.duration === '1m' ? 'home_1m' : 'home_3m', 
       label: `${config.placement} - ${config.duration === '1m' ? '1 Mês' : '3 Meses'} - ${config.neighborhoods.length} bairro(s)`,
@@ -258,33 +256,23 @@ const App: React.FC = () => {
       durationMonths: config.duration === '1m' ? 1 : 3,
       benefit: 'Plano customizado com seleção de bairros.',
       isPromo: config.duration === '3m_promo',
-      // FIX: Pass the neighborhoods array to the BannerPlan
-      neighborhoods: config.neighborhoods,
     };
     setBannerOrder({ plan: syntheticPlan, draft: null });
-    setActiveTab('store_ads_module'); // Go to ad creation/selection
+    setActiveTab('store_ads_module');
   };
 
   const handleFinalizeBannerCreation = (draft: any) => {
       if (!bannerOrder.plan) {
-        setActiveTab('banner_config'); // Should not happen if flow is correct
+        setActiveTab('banner_config');
         return;
       }
       setBannerOrder(prev => ({ ...prev, draft }));
-      // NEW: Always go to banner_checkout, which now handles both scenarios
-      setActiveTab('banner_checkout'); 
+      setActiveTab('banner_checkout');
   };
 
-  const handlePaymentComplete = (paymentMethod: 'pix' | 'credit' | 'debit') => {
-      if (!user || !bannerOrder.plan || !bannerOrder.draft) {
-        console.error("Missing user, plan or draft for payment completion.");
-        setActiveTab('store_area');
-        return;
-      }
-      
-      const isProfessionalService = bannerOrder.draft.type === 'professional_service';
-
-      if (isProfessionalService) {
+  const handlePaymentComplete = () => {
+      // Logic split: If professional service, create order. Else, just notify.
+      if (bannerOrder.draft?.type === 'professional_service' && user) {
           const newOrderId = `ORD-${Date.now().toString().slice(-6)}`;
           const now = new Date().toISOString();
           
@@ -292,9 +280,8 @@ const App: React.FC = () => {
               id: newOrderId,
               merchantId: user.id,
               bannerType: 'professional',
-              // Consolidate total price here: plan cost + professional service cost
-              total: bannerOrder.plan.priceCents + PROFESSIONAL_BANNER_PRICING.promoCents,
-              paymentMethod,
+              total: (bannerOrder.plan?.priceCents || 0) + PROFESSIONAL_BANNER_PRICING.promoCents,
+              paymentMethod: 'credit', // Assumido para simplificação
               paymentStatus: 'paid',
               createdAt: now,
               status: 'em_analise',
@@ -332,11 +319,8 @@ const App: React.FC = () => {
           setBannerOrder({ plan: null, draft: null });
           setActiveTab('banner_order_tracking');
       } else {
-          // Regular banner (template or custom editor)
-          // Here you'd typically save the 'published_banner' to Supabase
-          // For MVP, we'll just alert and clear the order
-          alert("Banner enviado para análise e publicação!");
           setBannerOrder({ plan: null, draft: null });
+          alert("Banner enviado para análise e publicação!");
           setActiveTab('store_area'); 
       }
   };
@@ -355,16 +339,55 @@ const App: React.FC = () => {
     setActiveTab('store_area');
   };
   
-  // NOTE: This function is no longer needed after merging professional payment into BannerCheckoutView
-  // It is kept for reference or if the user wants to revert.
   const handleConfirmProfessionalPayment = (paymentMethod: 'pix' | 'credit' | 'debit') => {
-    // This logic is now handled in handlePaymentComplete in BannerCheckoutView
-    console.warn("handleConfirmProfessionalPayment called, but its logic should be in handlePaymentComplete.");
-    // This part should not be reachable if the App.tsx is correctly refactored.
-    // For now, it will just navigate as a fallback.
-    setActiveTab('banner_checkout'); 
-  };
+    if (!user) return;
+    const newOrderId = `ORD-${Date.now().toString().slice(-6)}`;
+    const now = new Date().toISOString();
+    
+    // Create new order with initial automation state
+    const newOrder: BannerOrder = {
+      id: newOrderId,
+      merchantId: user.id,
+      bannerType: 'professional',
+      total: PROFESSIONAL_BANNER_PRICING.promoCents, 
+      paymentMethod,
+      paymentStatus: 'paid',
+      createdAt: now,
+      status: 'em_analise',
+      lastViewedAt: now,
+      onboardingStage: 'requested_assets',
+      autoMessagesFlags: {
+        welcomeSent: true,
+        requestSent: true,
+        assetsReceivedSent: false,
+        thanksSent: false,
+      }
+    };
 
+    // Automation 1: Welcome message
+    const msg1: BannerMessage = {
+      id: `msg-sys-1-${Date.now()}`,
+      orderId: newOrderId,
+      senderType: 'system',
+      body: '✅ Recebemos seu pedido! Agora vamos criar seu banner profissional.',
+      createdAt: now,
+    };
+
+    // Automation 2: Request Data (Form Request)
+    const msg2: BannerMessage = {
+      id: `msg-sys-2-${Date.now() + 10}`,
+      orderId: newOrderId,
+      senderType: 'system',
+      type: 'form_request',
+      body: 'Para começar, precisamos de algumas informações. Por favor, preencha o formulário abaixo com seu logo e textos.',
+      createdAt: new Date(Date.now() + 1000).toISOString(), // +1 sec
+    };
+
+    setBannerOrders(prev => [...prev, newOrder]);
+    setBannerMessages(prev => [...prev, msg1, msg2]);
+    setViewingOrderId(newOrderId);
+    setActiveTab('banner_order_tracking');
+  };
 
   // Logic to update an order (used for automation transitions)
   const handleUpdateOrder = (orderId: string, updates: Partial<BannerOrder>) => {
@@ -415,15 +438,12 @@ const App: React.FC = () => {
   };
   
   // Admin handlers
-  // FIX: Updated `onSendMessage` type definition to allow 'system'
-  const handleAdminSendMessage = (orderId: string, text: string, type: 'text' | 'system' = 'text', metadata?: any) => {
+  const handleAdminSendMessage = (orderId: string, text: string, type: 'text' | 'system' = 'text') => {
     const newMessage: BannerMessage = {
       id: `msg-a-${Date.now()}`,
       orderId,
       senderType: type === 'system' ? 'system' : 'team',
       body: text,
-      type, // Pass the type
-      metadata,
       createdAt: new Date().toISOString(),
     };
     setBannerMessages(prev => [...prev, newMessage]);
@@ -442,11 +462,9 @@ const App: React.FC = () => {
         return;
       }
       const order = bannerOrders.find(o => o.id === viewingOrderId);
-      // Removed the alert/navigation to banner_professional_payment since it's deprecated.
-      // Now it will simply stay on order tracking if the order is not paid (shouldn't happen with current flow).
       if (!order || order.paymentStatus !== 'paid') {
-        console.warn("Attempted to track unpaid professional banner order. This should not happen in current flow.");
-        setActiveTab('store_area'); // Fallback to store area if an unpaid order is somehow accessed directly
+        alert("Finalize o pagamento para acompanhar o pedido.");
+        setActiveTab('banner_professional_payment');
       }
     }
   }, [activeTab, viewingOrderId, bannerOrders]);
@@ -535,7 +553,7 @@ const App: React.FC = () => {
                       messages={bannerMessages} 
                       onBack={() => setActiveTab('admin_banner_orders_list')} 
                       onSendMessage={handleAdminSendMessage} 
-                      onUpdateOrder={handleUpdateOrder} // FIX: Pass onUpdateOrder
+                      onUpdateOrder={handleUpdateOrder}
                     />
                 )}
 
@@ -582,7 +600,8 @@ const App: React.FC = () => {
                         onComplete={handleCompleteSponsoredFlow}
                     />
                 )}
-                {/* FIX: Removed BannerProfessionalPaymentView as its functionality is merged into BannerCheckoutView. */}
+                {/* Professional Banner Flow */}
+                {activeTab === 'banner_professional_payment' && <BannerProfessionalPaymentView onBack={() => setActiveTab('store_ads_module')} onConfirmPayment={handleConfirmProfessionalPayment} />}
                 {activeTab === 'banner_order_tracking' && viewingOrderId && (
                   <BannerOrderTrackingView
                     orderId={viewingOrderId}
@@ -591,7 +610,7 @@ const App: React.FC = () => {
                     onBack={() => { setViewingOrderId(null); setActiveTab('store_area'); }}
                     onSendMessage={handleSendMessage}
                     onViewOrder={handleViewOrder}
-                    onUpdateOrder={handleUpdateOrder} // FIX: Pass onUpdateOrder
+                    onUpdateOrder={handleUpdateOrder}
                   />
                 )}
               </main>
