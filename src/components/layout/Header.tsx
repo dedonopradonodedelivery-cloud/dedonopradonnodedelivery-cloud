@@ -14,7 +14,6 @@ interface HeaderProps {
   onSearchChange: (value: string) => void;
   onNavigate: (tab: string) => void;
   activeTab: string;
-  // FIX: Updated userRole type to include 'admin'
   userRole: 'cliente' | 'lojista' | 'admin' | null;
   stores?: Store[];
   onStoreClick?: (store: Store) => void;
@@ -145,7 +144,8 @@ export const Header: React.FC<HeaderProps> = ({
             </div>
             {showNeighborhoodFilter && (
                 <div className="flex items-center gap-2 overflow-x-auto no-scrollbar px-4 pb-3 pt-1">
-                    <button onClick={() => setNeighborhood("Jacarepaguá (todos)")} className={`flex-shrink-0 px-4 py-1.5 rounded-full text-xs font-bold transition-all border ${currentNeighborhood === "Jacarepaguá (todos)" ? "bg-[#1E5BFF] text-white border-[#1E5BFF]" : "bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-300 border-gray-100 dark:border-gray-800"}`}>{hood}</button>))}
+                    <button onClick={() => setNeighborhood("Jacarepaguá (todos)")} className={`flex-shrink-0 px-4 py-1.5 rounded-full text-xs font-bold transition-all border ${currentNeighborhood === "Jacarepaguá (todos)" ? "bg-[#1E5BFF] text-white border-[#1E5BFF]" : "bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-300 border-gray-100 dark:border-gray-800"}`}>Todos</button>
+                    {NEIGHBORHOODS.map(hood => (<button key={hood} onClick={() => setNeighborhood(hood)} className={`flex-shrink-0 px-4 py-1.5 rounded-full text-xs font-bold transition-all border ${currentNeighborhood === hood ? "bg-[#1E5BFF] text-white border-[#1E5BFF]" : "bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-300 border-gray-100 dark:border-gray-800"}`}>{hood}</button>))}
                 </div>
             )}
         </div>

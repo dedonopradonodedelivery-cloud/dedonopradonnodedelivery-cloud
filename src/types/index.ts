@@ -1,4 +1,5 @@
 
+
 import React from 'react';
 
 // From original types.ts
@@ -327,6 +328,6 @@ export interface BannerMessage {
   createdAt: string;
   readAt?: string;
   // Rich types
-  type?: 'text' | 'form_request' | 'assets_payload' | 'status' | 'thank_you';
+  type?: 'text' | 'form_request' | 'assets_payload' | 'status' | 'thank_you' | 'system'; // Add 'system' type here
   metadata?: any;
 }
