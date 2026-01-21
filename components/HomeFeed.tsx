@@ -106,13 +106,13 @@ const CustomBannerRender: React.FC<{ config: any }> = ({ config }) => {
     
     return (
         <div 
-            className={`w-full h-full p-8 ${layoutClasses[template_id] || 'flex flex-col justify-center'}`}
+            className={`w-full h-full p-8 ${layoutClasses[template_id as keyof typeof layoutClasses] || 'flex flex-col justify-center'}`}
             style={{ backgroundColor: background_color, color: text_color }}
         >
-            <h3 className={`${template_id === 'headline' ? headlineFontSize[font_size] : fontSizes[font_size]} font-black leading-tight line-clamp-2`} style={{ fontFamily: font_family }}>
+            <h3 className={`${template_id === 'headline' ? headlineFontSize[font_size as keyof typeof headlineFontSize] : fontSizes[font_size as keyof typeof fontSizes]} font-black leading-tight line-clamp-2`} style={{ fontFamily: font_family }}>
                 {title || "Seu Título Aqui"}
             </h3>
-            <p className={`${subFontSizes[font_size]} mt-3 opacity-80 max-w-md line-clamp-3`} style={{ fontFamily: font_family }}>
+            <p className={`${subFontSizes[font_size as keyof typeof subFontSizes]} mt-3 opacity-80 max-w-md line-clamp-3`} style={{ fontFamily: font_family }}>
                 {subtitle || "Descreva sua oferta."}
             </p>
         </div>

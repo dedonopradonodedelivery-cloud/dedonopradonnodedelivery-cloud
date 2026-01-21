@@ -4,21 +4,11 @@ import { Store } from "../types";
 import {
   MapPin,
   Filter,
-  Zap,
   Star,
-  Clock,
   ChevronRight,
   ChevronLeft,
-  Compass,
   BadgeCheck,
-  Sparkles,
-  Phone,
-  Crown,
   X,
-  Volume2,
-  VolumeX,
-  Heart,
-  Users
 } from "lucide-react";
 import { useUserLocation } from "../hooks/useUserLocation";
 import { useMediaQuery } from "../hooks/useMediaQuery";
@@ -132,13 +122,11 @@ const HorizontalStoreSection: React.FC<{ title: string; subtitle?: string; store
   );
 };
 
-export const ExploreView: React.FC<ExploreViewProps> = ({ stores, searchQuery, onStoreClick, onFilterClick, onNavigate }) => {
+export const ExploreView: React.FC<ExploreViewProps> = ({ stores, searchQuery, onStoreClick, onFilterClick }) => {
   const { location } = useUserLocation();
   const [sortOption, setSortOption] = useState<"nearby" | "topRated" | null>(null);
-  const [selectedStyle, setSelectedStyle] = useState<string | null>(null);
   const [activeStoryIndex, setActiveStoryIndex] = useState<number | null>(null);
   const [storyProgress, setStoryProgress] = useState(0);
-  const [isMuted, setIsMuted] = useState(true);
   const videoRef = useRef<HTMLVideoElement>(null);
 
   const filteredStores = useMemo(() => {
@@ -160,7 +148,7 @@ export const ExploreView: React.FC<ExploreViewProps> = ({ stores, searchQuery, o
       interval = setInterval(() => {
         setStoryProgress((prev) => {
           if (prev >= 100) {
-            if (activeStoryIndex < EXPLORE_STORIES.length - 1) setActiveStoryIndex(activeStoryIndex + 1);
+            if (activeStoryIndex !== null && activeStoryIndex < EXPLORE_STORIES.length - 1) setActiveStoryIndex(activeStoryIndex + 1);
             else setActiveStoryIndex(null);
             return 0;
           }
@@ -201,7 +189,7 @@ export const ExploreView: React.FC<ExploreViewProps> = ({ stores, searchQuery, o
         <div className="fixed inset-0 z-[100] bg-black animate-in fade-in zoom-in-95 duration-200 flex flex-col">
           <div className="absolute top-0 left-0 right-0 z-20 flex gap-1 p-2 pt-3">
              {EXPLORE_STORIES.map((s, i) => (
-                 <div key={s.id} className="h-1 flex-1 bg-white/30 rounded-full overflow-hidden"><div className="h-full bg-white transition-all duration-100" style={{ width: i === activeStoryIndex ? `${storyProgress}%` : i < activeStoryIndex ? '100%' : '0%' }} /></div>
+                 <div key={s.id} className="h-1 flex-1 bg-white/30 rounded-full overflow-hidden"><div className="h-full bg-white transition-all duration-100" style={{ width: i === activeStoryIndex ? `${storyProgress}%` : i < (activeStoryIndex || 0) ? '100%' : '0%' }} /></div>
              ))}
           </div>
           <div className="absolute top-6 left-0 right-0 z-20 px-4 py-2 flex items-center justify-between bg-gradient-to-b from-black/60 to-transparent">
@@ -212,7 +200,7 @@ export const ExploreView: React.FC<ExploreViewProps> = ({ stores, searchQuery, o
               <button onClick={() => setActiveStoryIndex(null)} className="p-1 hover:bg-white/10 rounded-full text-white"><X className="w-6 h-6" /></button>
           </div>
           <div className="flex-1 relative bg-gray-900 flex items-center justify-center">
-             <video ref={videoRef} src={activeStory.videoUrl} className="w-full h-full object-cover" autoPlay muted={isMuted} loop playsInline />
+             <video ref={videoRef} src={activeStory.videoUrl} className="w-full h-full object-cover" autoPlay muted loop playsInline />
           </div>
         </div>
       )}

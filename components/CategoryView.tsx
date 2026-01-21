@@ -1,10 +1,9 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { ChevronLeft, Search, Star, BadgeCheck, ChevronRight, X, AlertCircle, Grid, Filter, Megaphone, ArrowUpRight, Info, Image as ImageIcon, Sparkles } from 'lucide-react';
-import { Category, Store, AdType } from '../types';
-import { SUBCATEGORIES } from '../constants';
-import { supabase } from '../lib/supabaseClient';
-import { useNeighborhood } from '../contexts/NeighborhoodContext';
-import { trackAdEvent } from '../lib/analytics';
+
+import React, { useState, useEffect, useMemo } from 'react';
+import { ChevronLeft, Star, BadgeCheck, ChevronRight, AlertCircle, Grid, Megaphone, Image as ImageIcon } from 'lucide-react';
+import { Category, Store, AdType } from '@/types';
+import { SUBCATEGORIES } from '@/constants';
+import { supabase } from '@/lib/supabaseClient';
 
 // --- Reusable Banner Rendering Components ---
 const TemplateBannerRender: React.FC<{ config: any }> = ({ config }) => {
@@ -47,13 +46,13 @@ const CustomBannerRender: React.FC<{ config: any }> = ({ config }) => {
     };
     return (
         <div 
-            className={`w-full aspect-video rounded-2xl overflow-hidden relative shadow-lg p-8 ${layoutClasses[template_id] || 'flex flex-col justify-center'}`}
+            className={`w-full aspect-video rounded-2xl overflow-hidden relative shadow-lg p-8 ${layoutClasses[template_id as keyof typeof layoutClasses] || 'flex flex-col justify-center'}`}
             style={{ backgroundColor: background_color, color: text_color }}
         >
-            <h3 className={`${template_id === 'headline' ? headlineFontSize[font_size] : fontSizes[font_size]} font-black leading-tight line-clamp-2`} style={{ fontFamily: font_family }}>
+            <h3 className={`${template_id === 'headline' ? headlineFontSize[font_size as keyof typeof headlineFontSize] : fontSizes[font_size as keyof typeof fontSizes]} font-black leading-tight line-clamp-2`} style={{ fontFamily: font_family }}>
                 {title || "Título"}
             </h3>
-            <p className={`${subFontSizes[font_size]} mt-3 opacity-80 max-w-md line-clamp-3`} style={{ fontFamily: font_family }}>
+            <p className={`${subFontSizes[font_size as keyof typeof subFontSizes]} mt-3 opacity-80 max-w-md line-clamp-3`} style={{ fontFamily: font_family }}>
                 {subtitle || "Subtítulo"}
             </p>
         </div>
@@ -122,7 +121,6 @@ interface CategoryViewProps {
 }
 
 export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, onStoreClick, stores, userRole, onAdvertiseInCategory, onNavigate }) => {
-  const { currentNeighborhood } = useNeighborhood();
   const [selectedSubcategory, setSelectedSubcategory] = useState<string | null>(null);
   const [activeBanner, setActiveBanner] = useState<any | null>(null);
   const [loadingBanner, setLoadingBanner] = useState(true);
@@ -142,31 +140,27 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
       try {
         const { data, error } = await supabase
           .from('published_banners')
-          .select('id, config, merchant_id')
+          .select('id, config')
           .eq('target', `category:${category.slug}`)
           .eq('is_active', true)
           .order('created_at', { ascending: false })
           .limit(1);
 
-        if (error) throw error;
+        if (error) {
+          if (error.code === 'PGRST116' || error.message.includes('schema cache')) {
+            setActiveBanner(null);
+            return;
+          }
+          throw error;
+        }
 
         if (data && data.length > 0) {
-          const banner = data[0];
-          setActiveBanner(banner);
-          trackAdEvent(
-            'ad_impression',
-            banner.id,
-            banner.merchant_id,
-            'category',
-            category.name,
-            null,
-            currentNeighborhood
-          );
+          setActiveBanner(data[0]);
         } else {
           setActiveBanner(null);
         }
       } catch (e: any) {
-        console.error("Failed to fetch category banner from Supabase:", e.message || e);
+        console.warn("Category banner fetch suppressed:", e.message || e);
         setActiveBanner(null);
       } finally {
         setLoadingBanner(false);
@@ -175,25 +169,26 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
     
     fetchCategoryBanner();
 
-    const channel = supabase.channel(`category-banner-${category.slug}`)
-      .on('postgres_changes', {
-          event: '*',
-          schema: 'public',
-          table: 'published_banners',
-          filter: `target=eq.category:${category.slug}`
-        },
-        () => fetchCategoryBanner()
-      )
-      .subscribe((status, err) => {
-        if (err) {
-          console.error(`Realtime subscription failed for ${category.slug} banner:`, err.message || err);
-        }
-      });
+    let channel: any;
+    try {
+      channel = supabase.channel(`category-banner-${category.slug}`)
+        .on('postgres_changes', {
+            event: '*',
+            schema: 'public',
+            table: 'published_banners',
+            filter: `target=eq.category:${category.slug}`
+          },
+          () => fetchCategoryBanner()
+        )
+        .subscribe();
+    } catch (e) {
+      // Ignora erro
+    }
 
     return () => {
-      supabase.removeChannel(channel);
+      if (channel) supabase.removeChannel(channel);
     };
-  }, [category.slug, currentNeighborhood]);
+  }, [category.slug]);
 
   const filteredStores = useMemo(() => {
     let categoryStores = stores.filter(s => s.category === category.name);
@@ -256,23 +251,11 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
           {loadingBanner ? (
             <div className="w-full aspect-video bg-gray-200 dark:bg-gray-800 rounded-2xl animate-pulse"></div>
           ) : activeBanner ? (
-            <div onClick={() => {
-              trackAdEvent(
-                  'ad_click',
-                  activeBanner.id,
-                  activeBanner.merchant_id,
-                  'category',
-                  category.name,
-                  null,
-                  currentNeighborhood
-              );
-            }}>
-              {activeBanner.config.type === 'template' ? (
-                <TemplateBannerRender config={activeBanner.config} />
-              ) : (
-                <CustomBannerRender config={activeBanner.config} />
-              )}
-            </div>
+            activeBanner.config.type === 'template' ? (
+              <TemplateBannerRender config={activeBanner.config} />
+            ) : (
+              <CustomBannerRender config={activeBanner.config} />
+            )
           ) : (
             <div 
               onClick={handleAdvertiseClick}

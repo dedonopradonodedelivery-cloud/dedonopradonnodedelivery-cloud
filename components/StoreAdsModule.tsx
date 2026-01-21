@@ -1,22 +1,15 @@
-import React, { useState, useMemo } from 'react';
+
+import React, { useState } from 'react';
 import { 
   ChevronLeft, 
   Rocket, 
   CheckCircle2, 
-  Crown, 
-  MapPin, 
   ArrowRight,
   Sparkles,
   Save,
   Loader2,
   Image as ImageIcon,
   Check,
-  Target,
-  Palette,
-  LayoutTemplate,
-  Type,
-  Paintbrush,
-  AlertTriangle,
   X,
   Store as StoreIcon,
   Megaphone,
@@ -63,7 +56,6 @@ const getContrastRatio = (hex1: string, hex2: string): number => {
   const darkest = Math.min(lum1, lum2);
   return (lightest + 0.05) / (darkest + 0.05);
 };
-// --- END VALIDATION ---
 
 
 interface StoreAdsModuleProps {
@@ -73,7 +65,6 @@ interface StoreAdsModuleProps {
   user: User | null;
 }
 
-// --- CONFIGURAÇÕES DO CRIADOR RÁPIDO ---
 const GOALS = [
     { id: 'promover_oferta', name: 'Promover Oferta', icon: Gift, description: 'Descontos, combos e promoções.' },
     { id: 'anunciar_novidade', name: 'Anunciar Novidade', icon: Sparkles, description: 'Lançamentos de produtos ou serviços.' },
@@ -117,9 +108,7 @@ const BANNER_TEMPLATES = [
 ];
 
 const CTA_OPTIONS = ["Saiba Mais", "Peça Agora", "Ver Cardápio", "Agende seu Horário", "Visite nosso Instagram"];
-// --- FIM CONFIGURAÇÕES ---
 
-// --- CONFIGURAÇÕES DO EDITOR DE BANNER PERSONALIZADO ---
 const EDITOR_LAYOUTS = [
   { id: 'simple_left', name: 'Simples' },
   { id: 'centered', name: 'Centralizado' },
@@ -134,7 +123,6 @@ const COLOR_PALETTES = [
   { id: 'red_white', name: 'Vermelho', bg: '#DC2626', text: '#FFFFFF', previewColors: ['#DC2626', '#FFFFFF'] },
 ];
 
-// Componente de Preview do Banner (Template)
 const BannerPreview: React.FC<{ templateId: string; data: any; storeName: string; cta?: string | null; }> = ({ templateId, data, storeName, cta }) => {
   const template = BANNER_TEMPLATES.find(t => t.id === templateId);
   if (!template) return null;
@@ -192,9 +180,8 @@ const BannerPreview: React.FC<{ templateId: string; data: any; storeName: string
   return <div className="transition-all duration-300">{renderContent()}</div>;
 };
 
-// Componente de Preview do Editor
 const BannerEditorPreview: React.FC<{ data: any }> = ({ data }) => {
-    const { template, palette, fontSize, fontFamily, title, subtitle } = data;
+    const { template, palette, fontSize, title, subtitle, fontFamily } = data;
     
     const selectedPalette = COLOR_PALETTES.find(p => p.id === palette) || COLOR_PALETTES[0];
     const { bg: bgColor, text: textColor } = selectedPalette;
@@ -211,13 +198,13 @@ const BannerEditorPreview: React.FC<{ data: any }> = ({ data }) => {
     
     return (
         <div 
-            className={`w-full aspect-video rounded-2xl overflow-hidden relative shadow-lg p-8 ${layoutClasses[template]}`}
+            className={`w-full aspect-video rounded-2xl overflow-hidden relative shadow-lg p-8 ${layoutClasses[template as keyof typeof layoutClasses]}`}
             style={{ backgroundColor: bgColor, color: textColor }}
         >
-            <h3 className={`${template === 'headline' ? headlineFontSize[fontSize] : fontSizes[fontSize]} font-black leading-tight line-clamp-2`} style={{ fontFamily }}>
+            <h3 className={`${template === 'headline' ? headlineFontSize[fontSize as keyof typeof headlineFontSize] : fontSizes[fontSize as keyof typeof fontSizes]} font-black leading-tight line-clamp-2`} style={{ fontFamily }}>
                 {title || "Seu Título Aqui"}
             </h3>
-            <p className={`${subFontSizes[fontSize]} mt-3 opacity-80 max-w-md line-clamp-3`} style={{ fontFamily }}>
+            <p className={`${subFontSizes[fontSize as keyof typeof subFontSizes]} mt-3 opacity-80 max-w-md line-clamp-3`} style={{ fontFamily }}>
                 {subtitle || "Descreva sua oferta em poucas palavras."}
             </p>
         </div>
@@ -231,7 +218,7 @@ const ValidationErrorsModal: React.FC<{ errors: string[]; onClose: () => void }>
       <div className="bg-slate-800 p-8 rounded-2xl w-full max-w-md border border-red-500/30 shadow-2xl animate-in zoom-in-95">
         <div className="flex items-center gap-4 mb-6">
           <div className="w-12 h-12 bg-red-500/10 rounded-full flex items-center justify-center text-red-500">
-            <AlertTriangle size={24} />
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
           </div>
           <div>
             <h2 className="font-black text-lg text-white">Publicação Bloqueada</h2>
@@ -262,14 +249,12 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
   const [view, setView] = useState<'sales' | 'creator' | 'editor'>('sales');
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
 
-  // --- Template Creator State ---
   const [selectedGoal, setSelectedGoal] = useState<string | null>(null);
   const [selectedTemplate, setSelectedTemplate] = useState<any | null>(null);
   const [selectedCta, setSelectedCta] = useState<string | null>(null);
   const [ctaStepCompleted, setCtaStepCompleted] = useState(false);
   const [formData, setFormData] = useState<any>({});
   
-  // --- Custom Editor State ---
   const [editorData, setEditorData] = useState({
     template: 'simple_left',
     palette: 'blue_white',
@@ -279,15 +264,9 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
     subtitle: 'Subtítulo descritivo aqui',
   });
 
-  // --- Shared State ---
   const [isSaving, setIsSaving] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
 
-  const clearErrorsOnChange = (setter: React.Dispatch<React.SetStateAction<any>>) => (value: any) => {
-    if (validationErrors.length > 0) setValidationErrors([]);
-    setter(value);
-  };
-  
   const validateBanner = (): string[] => {
     const errors: string[] = [];
     const containsForbidden = (text: string) => FORBIDDEN_WORDS.some(word => text.toLowerCase().includes(word));
@@ -332,7 +311,6 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
     try {
         if (!supabase || !user) throw new Error("Usuário ou Supabase não disponível.");
 
-        // 1. Inserir no 'published_banners'
         const { data: bannerData, error: bannerError } = await supabase
             .from('published_banners')
             .insert({
@@ -340,42 +318,26 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
                 target: bannerTarget,
                 config: config,
                 is_active: true,
-                expires_at: null, // banners manuais não expiram por padrão
+                expires_at: null,
             })
             .select()
             .single();
         
         if (bannerError) throw bannerError;
 
-        // 2. Log de Auditoria
-        const { error: logError } = await supabase.from('banner_audit_log').insert({
+        await supabase.from('banner_audit_log').insert({
             actor_id: user.id,
             actor_email: user.email,
             action: 'created',
             banner_id: bannerData.id,
             details: { 
                 shopName: user.user_metadata?.store_name || 'Loja',
-                isFirstBanner: true, // Lógica de verificação omitida por simplicidade
+                isFirstBanner: true,
                 target: bannerTarget,
                 config,
             }
         });
-        if (logError) console.warn("Log de auditoria falhou:", logError);
 
-        // 3. (OPCIONAL) Disparar notificação para ADM no primeiro banner
-        // Essa lógica seria melhor em um trigger de DB, mas fazemos aqui para o MVP.
-        const { count } = await supabase.from('published_banners').select('*', { count: 'exact', head: true }).eq('merchant_id', user.id);
-        if (count === 1) {
-            await supabase.functions.invoke('send-email-admin-banner', {
-                body: {
-                    shopName: user.user_metadata?.store_name || user.email,
-                    userId: user.id,
-                    bannerType: isCustom ? 'Editor Personalizado' : 'Template Rápido',
-                    bannerConfig: config
-                }
-            });
-        }
-        
         setShowSuccess(true);
         setTimeout(() => {
             onBack();
@@ -390,14 +352,13 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
   };
 
   const handleFormDataChange = (fieldId: string, value: string) => {
-    setFormData(prev => ({ ...prev, [fieldId]: value }));
+    setFormData((prev: any) => ({ ...prev, [fieldId]: value }));
   };
   
   const handleEditorDataChange = (field: keyof typeof editorData, value: any) => {
     setEditorData(prev => ({...prev, [field]: value}));
   }
 
-  // ---- RENDER LOGIC ----
   const renderStep = (): React.JSX.Element | null => {
     if (view === 'sales') {
       return (
@@ -415,66 +376,17 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
           </div>
           
           <div className="grid grid-cols-1 gap-6">
-            <button
-              onClick={() => setView('creator')}
-              className="bg-slate-800 p-8 rounded-3xl border border-white/10 text-left hover:border-blue-500/50 transition-all group"
-            >
-                <div className="w-12 h-12 bg-blue-500/10 rounded-2xl flex items-center justify-center text-blue-400 mb-4 border border-blue-500/20">
-                    <Sparkles size={24} />
-                </div>
+            <button onClick={() => setView('creator')} className="bg-slate-800 p-8 rounded-3xl border border-white/10 text-left hover:border-blue-500/50 transition-all group">
+                <div className="w-12 h-12 bg-blue-500/10 rounded-2xl flex items-center justify-center text-blue-400 mb-4 border border-blue-500/20"><Sparkles size={24} /></div>
                 <h3 className="font-bold text-white text-lg mb-2">Criador Rápido</h3>
-                <p className="text-xs text-slate-400 mb-6 leading-relaxed">
-                    Use nossos templates prontos. Ideal para criar ofertas e anúncios em segundos.
-                </p>
-                <span className="text-xs font-black text-blue-400 uppercase tracking-widest flex items-center gap-2 group-hover:gap-3 transition-all">
-                    Começar agora <ArrowRight size={14} />
-                </span>
+                <p className="text-xs text-slate-400 mb-6 leading-relaxed">Use templates prontos. Ideal para ofertas rápidas.</p>
+                <span className="text-xs font-black text-blue-400 uppercase tracking-widest flex items-center gap-2 group-hover:gap-3 transition-all">Começar agora <ArrowRight size={14} /></span>
             </button>
-            <button
-              onClick={() => setView('editor')}
-              className="bg-slate-800 p-8 rounded-3xl border border-white/10 text-left hover:border-purple-500/50 transition-all group"
-            >
-                <div className="w-12 h-12 bg-purple-500/10 rounded-2xl flex items-center justify-center text-purple-400 mb-4 border border-purple-500/20">
-                    <Paintbrush size={24} />
-                </div>
+            <button onClick={() => setView('editor')} className="bg-slate-800 p-8 rounded-3xl border border-white/10 text-left hover:border-purple-500/50 transition-all group">
+                <div className="w-12 h-12 bg-purple-500/10 rounded-2xl flex items-center justify-center text-purple-400 mb-4 border border-purple-500/20"><Eye size={24} /></div>
                 <h3 className="font-bold text-white text-lg mb-2">Editor Personalizado</h3>
-                <p className="text-xs text-slate-400 mb-6 leading-relaxed">
-                    Tenha controle total sobre cores, fontes e layout para um banner 100% original.
-                </p>
-                 <span className="text-xs font-black text-purple-400 uppercase tracking-widest flex items-center gap-2 group-hover:gap-3 transition-all">
-                    Criar do zero <ArrowRight size={14} />
-                </span>
-            </button>
-            <button
-              onClick={() => alert('Solicitação de arte enviada! Entraremos em contato em breve.')}
-              className="bg-slate-800 p-8 rounded-3xl border border-white/10 text-left hover:border-emerald-500/50 transition-all group relative"
-            >
-              <div className="absolute top-4 right-4 bg-emerald-500/10 text-emerald-400 text-[9px] font-bold px-2.5 py-1 rounded-full border border-emerald-500/20">
-                  Oferta especial
-              </div>
-              <div className="w-12 h-12 bg-emerald-500/10 rounded-2xl flex items-center justify-center text-emerald-400 mb-4 border border-emerald-500/20">
-                  <Rocket size={24} />
-              </div>
-              <h3 className="font-bold text-white text-lg mb-2">👉 Banner criado por nossos designers</h3>
-              <p className="text-xs text-slate-400 mb-6 leading-relaxed">
-                  Nossa equipe cria um banner profissional para sua loja, pronto para anunciar no app.
-              </p>
-              
-              <ul className="text-xs text-slate-400 space-y-2 mb-6">
-                <li className="flex items-center gap-2"><Check size={14} className="text-emerald-400"/>Até 3 alterações inclusas</li>
-                <li className="flex items-center gap-2"><Check size={14} className="text-emerald-400"/>Arte profissional feita por designers</li>
-                <li className="flex items-center gap-2"><Check size={14} className="text-emerald-400"/>Banner otimizado para o app</li>
-              </ul>
-
-              <div className="flex items-baseline gap-2 mb-6">
-                <span className="text-slate-500 line-through">R$ 129,90</span>
-                <span className="text-3xl font-black text-white">R$ 59,90</span>
-                <span className="text-slate-400 text-xs font-medium">por arte</span>
-              </div>
-
-              <span className="text-xs font-black text-emerald-400 uppercase tracking-widest flex items-center gap-2 group-hover:gap-3 transition-all">
-                  Solicitar agora <ArrowRight size={14} />
-              </span>
+                <p className="text-xs text-slate-400 mb-6 leading-relaxed">Controle total sobre cores e layout.</p>
+                 <span className="text-xs font-black text-purple-400 uppercase tracking-widest flex items-center gap-2 group-hover:gap-3 transition-all">Criar do zero <ArrowRight size={14} /></span>
             </button>
           </div>
         </div>
@@ -482,24 +394,11 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
     }
     
     if (view === 'creator' || view === 'editor') {
-      const isCustom = view === 'editor';
-
-      const handleBackToSelection = () => {
-        setSelectedGoal(null);
-        setSelectedTemplate(null);
-        setFormData({});
-      };
-
-      if (isCustom) {
-        // EDITOR PERSONALIZADO
+      if (view === 'editor') {
         return (
             <div className="animate-in fade-in duration-500">
-                <div className="mb-8">
-                    <h3 className="font-black text-sm uppercase tracking-widest text-purple-400 mb-2">Preview do Banner</h3>
-                    <BannerEditorPreview data={editorData} />
-                </div>
+                <div className="mb-8"><BannerEditorPreview data={editorData} /></div>
                 <div className="bg-slate-800 rounded-3xl p-6 border border-white/10 space-y-6">
-                    <h3 className="font-bold">Editor</h3>
                     <div>
                         <label className="text-xs font-bold text-slate-400 uppercase">Layout</label>
                         <div className="grid grid-cols-3 gap-2 mt-2">
@@ -509,103 +408,49 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
                         </div>
                     </div>
                     <div>
-                        <label className="text-xs font-bold text-slate-400 uppercase">Paleta de Cores</label>
-                        <div className="flex gap-3 mt-2">
-                           {COLOR_PALETTES.map(p => (
-                               <button key={p.id} onClick={() => handleEditorDataChange('palette', p.id)} className={`w-8 h-8 rounded-full flex items-center justify-center ${editorData.palette === p.id ? 'ring-2 ring-white ring-offset-2 ring-offset-slate-800' : ''}`}>
-                                   <div className="w-full h-full rounded-full overflow-hidden flex">
-                                       <div style={{ backgroundColor: p.previewColors[0] }} className="w-1/2 h-full"></div>
-                                       <div style={{ backgroundColor: p.previewColors[1] }} className="w-1/2 h-full"></div>
-                                   </div>
-                               </button>
-                           ))}
-                        </div>
-                    </div>
-                     <div>
                         <label className="text-xs font-bold text-slate-400 uppercase">Texto Principal</label>
                         <input value={editorData.title} onChange={(e) => handleEditorDataChange('title', e.target.value)} className="w-full mt-2 bg-slate-700 p-3 rounded-lg text-white" />
-                    </div>
-                    <div>
-                        <label className="text-xs font-bold text-slate-400 uppercase">Subtítulo</label>
-                        <input value={editorData.subtitle} onChange={(e) => handleEditorDataChange('subtitle', e.target.value)} className="w-full mt-2 bg-slate-700 p-3 rounded-lg text-white" />
                     </div>
                 </div>
             </div>
         );
       } else {
-        // CRIADOR RÁPIDO (TEMPLATE)
         if (!selectedGoal) {
-          // STEP 1: CHOOSE GOAL
           return (
             <div className="animate-in slide-in-from-right duration-500">
-              <h3 className="font-black text-sm uppercase tracking-widest text-blue-400 mb-4">Passo 1: Qual seu objetivo?</h3>
+              <h3 className="font-black text-sm uppercase tracking-widest text-blue-400 mb-4">Qual seu objetivo?</h3>
               <div className="space-y-4">
                 {GOALS.map(goal => (
                   <button key={goal.id} onClick={() => setSelectedGoal(goal.id)} className="w-full bg-slate-800 p-6 rounded-2xl border border-white/10 text-left hover:border-blue-500/50 transition-all flex items-center gap-5">
                     <div className="w-12 h-12 bg-blue-500/10 rounded-xl flex items-center justify-center text-blue-400 border border-blue-500/20"><goal.icon size={24} /></div>
-                    <div>
-                      <h4 className="font-bold text-white text-base">{goal.name}</h4>
-                      <p className="text-xs text-slate-400">{goal.description}</p>
-                    </div>
+                    <div><h4 className="font-bold text-white text-base">{goal.name}</h4><p className="text-xs text-slate-400">{goal.description}</p></div>
                   </button>
                 ))}
               </div>
             </div>
           );
         }
-
         if (selectedGoal && !selectedTemplate) {
-          // STEP 2: CHOOSE TEMPLATE
-          const availableTemplates = BANNER_TEMPLATES.filter(t => t.goal === selectedGoal);
           return (
             <div className="animate-in slide-in-from-right duration-500">
-              <button onClick={handleBackToSelection} className="flex items-center gap-2 text-xs text-slate-400 mb-4"><ChevronLeft size={16} /> Voltar</button>
-              <h3 className="font-black text-sm uppercase tracking-widest text-blue-400 mb-4">Passo 2: Escolha um modelo</h3>
-              <div className="space-y-4">
-                {availableTemplates.map(template => (
-                  <button key={template.id} onClick={() => setSelectedTemplate(template)} className="w-full bg-slate-800 p-5 rounded-2xl border border-white/10 text-left hover:border-blue-500/50 transition-all">
-                    <h4 className="font-bold text-white text-base">{template.name}</h4>
-                    <p className="text-xs text-slate-400">{template.description}</p>
-                  </button>
-                ))}
-              </div>
+              <button onClick={() => setSelectedGoal(null)} className="flex items-center gap-2 text-xs text-slate-400 mb-4"><ChevronLeft size={16} /> Voltar</button>
+              {BANNER_TEMPLATES.filter(t => t.goal === selectedGoal).map(template => (
+                <button key={template.id} onClick={() => setSelectedTemplate(template)} className="w-full bg-slate-800 p-5 rounded-2xl border border-white/10 text-left mb-4">{template.name}</button>
+              ))}
             </div>
           );
         }
-
         if (selectedTemplate) {
-          // STEP 3: FILL FORM & PREVIEW
           return (
             <div className="animate-in slide-in-from-right duration-500">
-                <button onClick={handleBackToSelection} className="flex items-center gap-2 text-xs text-slate-400 mb-4"><ChevronLeft size={16} /> Voltar</button>
-                <div className="mb-8">
-                    <h3 className="font-black text-sm uppercase tracking-widest text-blue-400 mb-4">Passo 3: Preencha e veja como fica</h3>
-                    <BannerPreview templateId={selectedTemplate.id} data={formData} storeName={user?.user_metadata?.store_name || "Sua Loja"} cta={selectedCta} />
-                </div>
-                <div className="bg-slate-800 rounded-3xl p-6 border border-white/10 space-y-5">
+                <BannerPreview templateId={selectedTemplate.id} data={formData} storeName={user?.user_metadata?.store_name || "Sua Loja"} cta={selectedCta} />
+                <div className="bg-slate-800 rounded-3xl p-6 border border-white/10 space-y-5 mt-6">
                     {selectedTemplate.fields.map((field: any) => (
                         <div key={field.id}>
                             <label className="text-xs font-bold text-slate-400 uppercase">{field.label}</label>
-                            <input
-                                type={field.type}
-                                placeholder={field.placeholder}
-                                value={formData[field.id] || ''}
-                                onChange={(e) => handleFormDataChange(field.id, e.target.value)}
-                                className="w-full mt-2 bg-slate-700 p-3 rounded-lg text-white"
-                            />
+                            <input type={field.type} value={formData[field.id] || ''} onChange={(e) => handleFormDataChange(field.id, e.target.value)} className="w-full mt-2 bg-slate-700 p-3 rounded-lg text-white" />
                         </div>
                     ))}
-                    {!ctaStepCompleted ? (
-                        <div>
-                            <label className="text-xs font-bold text-slate-400 uppercase">Botão (Opcional)</label>
-                            <div className="flex gap-2 mt-2 flex-wrap">
-                                {CTA_OPTIONS.map(cta => (
-                                    <button key={cta} onClick={() => setSelectedCta(cta)} className={`text-xs px-3 py-1.5 rounded-lg ${selectedCta === cta ? 'bg-blue-500 text-white' : 'bg-slate-700 text-slate-300'}`}>{cta}</button>
-                                ))}
-                                <button onClick={() => setCtaStepCompleted(true)} className="text-xs px-3 py-1.5 rounded-lg bg-slate-600 text-slate-300">Pular</button>
-                            </div>
-                        </div>
-                    ) : null}
                 </div>
             </div>
           );
@@ -617,53 +462,17 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
 
   return (
     <div className="min-h-screen bg-slate-900 text-white font-sans flex flex-col">
-      {/* Header */}
       <div className="sticky top-0 z-40 bg-slate-900/80 backdrop-blur-md px-6 py-4 border-b border-white/5 flex items-center justify-between">
-        <div className="flex items-center gap-4">
-            <button onClick={view === 'sales' ? onBack : () => setView('sales')} className="p-2.5 bg-slate-800 text-slate-400 hover:text-white transition-colors border border-white/5 rounded-xl active:scale-95">
-                <ChevronLeft size={20} />
-            </button>
-            <div>
-                <h1 className="font-bold text-lg leading-none">Criar Anúncio</h1>
-                <p className="text-xs text-slate-500">{categoryName ? `Para: ${categoryName}` : 'Para: Home'}</p>
-            </div>
-        </div>
-        <button 
-            onClick={onBack}
-            className="p-2.5 bg-slate-800 text-slate-400 hover:text-white transition-colors border border-white/5 rounded-xl active:scale-95"
-        >
-            <X size={20} />
-        </button>
+        <button onClick={view === 'sales' ? onBack : () => setView('sales')} className="p-2.5 bg-slate-800 rounded-xl"><ChevronLeft size={20} /></button>
+        <h1 className="font-bold">Anunciar</h1>
+        <button onClick={onBack} className="p-2.5 bg-slate-800 rounded-xl"><X size={20} /></button>
       </div>
-      
-      <main className="flex-1 overflow-y-auto no-scrollbar p-6 pb-32">
-        {renderStep()}
-      </main>
-
+      <main className="flex-1 p-6 pb-32">{renderStep()}</main>
       {view !== 'sales' && (
-          <div className="fixed bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-slate-900 via-slate-900 to-transparent max-w-md mx-auto z-30">
-            <button 
-                onClick={handlePublish}
-                disabled={isSaving || (view === 'creator' && !selectedTemplate)}
-                className="w-full bg-[#1E5BFF] text-white font-black py-5 rounded-2xl shadow-xl shadow-blue-500/20 flex items-center justify-center gap-3 active:scale-[0.98] transition-all disabled:opacity-50 disabled:grayscale"
-            >
-                {isSaving ? <Loader2 className="w-6 h-6 animate-spin" /> : 'Publicar Banner'}
-            </button>
+          <div className="fixed bottom-0 left-0 right-0 p-6 bg-slate-900 max-w-md mx-auto z-30">
+            <button onClick={handlePublish} disabled={isSaving} className="w-full bg-[#1E5BFF] py-5 rounded-2xl font-black">{isSaving ? <Loader2 className="animate-spin mx-auto" /> : 'Publicar'}</button>
           </div>
       )}
-
-      {showSuccess && (
-        <div className="fixed inset-0 z-[100] bg-black/80 flex items-center justify-center p-6 animate-in fade-in">
-           <div className="bg-slate-800 p-10 rounded-2xl flex flex-col items-center text-center">
-                <div className="w-16 h-16 bg-green-500/10 rounded-full flex items-center justify-center text-green-400 mb-6 border-2 border-green-500/20">
-                    <CheckCircle2 size={32} />
-                </div>
-                <h2 className="font-black text-xl text-white">Publicado!</h2>
-                <p className="text-sm text-slate-400 mt-2">Seu banner já está ativo no aplicativo.</p>
-           </div>
-        </div>
-      )}
-      
       <ValidationErrorsModal errors={validationErrors} onClose={() => setValidationErrors([])} />
     </div>
   );
