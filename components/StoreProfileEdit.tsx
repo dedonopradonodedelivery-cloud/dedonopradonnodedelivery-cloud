@@ -21,7 +21,10 @@ import {
   ChevronDown,
   Search,
   PlusCircle,
-  HelpCircle
+  HelpCircle,
+  Pencil,
+  Trash2,
+  Image as ImageIcon
 } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import { useAuth } from '../contexts/AuthContext';
@@ -138,7 +141,12 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
     e.preventDefault();
     if (!user) return;
 
-    if (!formData.name || !formData.cnpj || !formData.email || !formData.whatsapp || !formData.logo_url || formData.categories.length === 0) {
+    if (!formData.logo_url) {
+      alert('A Logo da loja é obrigatória para aparecer no aplicativo.');
+      return;
+    }
+
+    if (!formData.name || !formData.cnpj || !formData.email || !formData.whatsapp || formData.categories.length === 0) {
       alert('Por favor, preencha todos os campos obrigatórios marcados com *');
       return;
     }
@@ -165,22 +173,37 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
     }
   };
 
+  // --- Image Handlers (Simulated) ---
+  const handleEditLogo = () => {
+    // Em prod: abriria picker de arquivos
+    const mockUrl = `https://ui-avatars.com/api/?name=${formData.name || 'Loja'}&background=1E5BFF&color=fff&size=512`;
+    setFormData({ ...formData, logo_url: mockUrl });
+  };
+
+  const handleRemoveLogo = () => {
+    setFormData({ ...formData, logo_url: '' });
+  };
+
+  const handleEditBanner = () => {
+    // Em prod: abriria picker de arquivos
+    const mockBanner = `https://images.unsplash.com/photo-1555396273-367ea4eb4db5?q=80&w=1200&auto=format&fit=crop`;
+    setFormData({ ...formData, banner_url: mockBanner });
+  };
+
+  const handleRemoveBanner = () => {
+    setFormData({ ...formData, banner_url: '' });
+  };
+
   // --- Taxonomy Handlers ---
 
   const toggleCategory = (catName: string) => {
     const current = formData.categories;
     if (current.includes(catName)) {
-        // Remover categoria: Deve limpar subcategorias e especialidades órfãs
         const newCats = current.filter(c => c !== catName);
-        
-        // Descobre quais subcategorias pertencem a essa categoria removida
         const subsOfRemoved = (SUBCATEGORIES[catName] || []).map(s => s.name);
         const newSubs = formData.subcategories.filter(s => !subsOfRemoved.includes(s));
-        
-        // Descobre especialidades órfãs
         const specialtiesToKeep = newSubs.flatMap(s => SPECIALTIES[s] || []);
         const newSpecs = formData.specialties.filter(spec => specialtiesToKeep.includes(spec));
-
         setFormData({ ...formData, categories: newCats, subcategories: newSubs, specialties: newSpecs });
     } else {
         setFormData({ ...formData, categories: [...current, catName] });
@@ -191,7 +214,6 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
     const current = formData.subcategories;
     if (current.includes(subName)) {
         const newSubs = current.filter(s => s !== subName);
-        // Limpar especialidades dessa subcategoria
         const specsOfRemoved = SPECIALTIES[subName] || [];
         const newSpecs = formData.specialties.filter(s => !specsOfRemoved.includes(s));
         setFormData({ ...formData, subcategories: newSubs, specialties: newSpecs });
@@ -211,8 +233,6 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
 
   const submitSuggestion = async () => {
     if (!suggestionName.trim() || !suggestionModal) return;
-    
-    // Simulação de envio para ADM (em prod salvaria em 'taxonomy_suggestions')
     const saved = localStorage.getItem('taxonomy_suggestions') || '[]';
     const suggestions = JSON.parse(saved);
     suggestions.push({
@@ -225,7 +245,6 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
         createdAt: new Date().toISOString()
     });
     localStorage.setItem('taxonomy_suggestions', JSON.stringify(suggestions));
-
     alert('Sua sugestão foi enviada para o ADM e está pendente de aprovação.');
     setSuggestionName('');
     setSuggestionModal(null);
@@ -250,32 +269,119 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
           </button>
           <div>
             <h1 className="font-black text-lg text-gray-900 dark:text-white uppercase tracking-tighter">Perfil da Loja</h1>
-            <p className="text-[10px] text-blue-500 font-bold uppercase tracking-widest">Painel Administrativo</p>
+            <p className="text-[10px] text-blue-500 font-bold uppercase tracking-widest">Identidade Visual e Dados</p>
           </div>
         </div>
       </div>
 
       <form onSubmit={handleSave} className="p-6 space-y-12 max-w-md mx-auto">
         
-        {/* 1. DADOS PRINCIPAIS */}
+        {/* 1. IMAGENS DA LOJA (LOGO E BANNER) */}
+        <section className="space-y-6">
+          <div className="flex items-center gap-2 mb-2">
+            <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center"><Camera size={16} /></div>
+            <h2 className="text-xs font-black text-gray-400 uppercase tracking-[0.2em]">Imagens da Loja</h2>
+          </div>
+
+          <div className="space-y-6">
+            {/* SLOT LOGO */}
+            <div className="flex flex-col items-center">
+              <div className="relative group">
+                <div className={`w-32 h-32 rounded-[2.5rem] overflow-hidden border-4 bg-white dark:bg-gray-800 shadow-xl transition-all ${!formData.logo_url ? 'border-dashed border-red-200 dark:border-red-900/30' : 'border-white dark:border-gray-900'}`}>
+                  {formData.logo_url ? (
+                    <img src={formData.logo_url} className="w-full h-full object-cover" alt="Logo preview" />
+                  ) : (
+                    <div className="w-full h-full flex flex-col items-center justify-center text-gray-300 gap-1 p-4 text-center">
+                      <StoreIcon size={24} />
+                      <span className="text-[8px] font-black uppercase leading-tight">Logo Obrigatória</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Actions Logo */}
+                <div className="absolute -right-2 -bottom-2 flex flex-col gap-2">
+                    <button 
+                      type="button"
+                      onClick={handleEditLogo}
+                      className="w-10 h-10 bg-[#1E5BFF] text-white rounded-2xl shadow-lg flex items-center justify-center active:scale-90 transition-transform"
+                    >
+                      <Pencil size={16} />
+                    </button>
+                    {formData.logo_url && (
+                        <button 
+                          type="button"
+                          onClick={handleRemoveLogo}
+                          className="w-10 h-10 bg-white dark:bg-gray-800 text-red-500 rounded-2xl shadow-lg border border-red-50 flex items-center justify-center active:scale-90 transition-transform"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                    )}
+                </div>
+              </div>
+              <p className="mt-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Logo da Empresa *</p>
+              {!formData.logo_url && (
+                <div className="flex items-center gap-1.5 mt-2 text-red-500">
+                    <AlertTriangle size={10} />
+                    <span className="text-[9px] font-bold uppercase">Logo é obrigatória para aparecer no app</span>
+                </div>
+              )}
+            </div>
+
+            {/* SLOT BANNER */}
+            <div className="space-y-3">
+              <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Banner / Capa (Opcional)</label>
+              <div className="relative group w-full aspect-[3/1] rounded-[2rem] overflow-hidden bg-gray-100 dark:bg-gray-800 border-2 border-dashed border-gray-200 dark:border-gray-700 transition-all hover:bg-gray-50 dark:hover:bg-gray-800/80">
+                {formData.banner_url ? (
+                  <>
+                    <img src={formData.banner_url} className="w-full h-full object-cover" alt="Banner preview" />
+                    <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors"></div>
+                  </>
+                ) : (
+                  <button 
+                    type="button"
+                    onClick={handleEditBanner}
+                    className="w-full h-full flex flex-col items-center justify-center text-gray-400 gap-2"
+                  >
+                    <PlusCircle size={20} />
+                    <span className="text-[9px] font-black uppercase tracking-widest">Adicionar Banner de Capa</span>
+                  </button>
+                )}
+
+                {/* Actions Banner */}
+                {formData.banner_url && (
+                  <div className="absolute top-4 right-4 flex gap-2">
+                    <button 
+                      type="button"
+                      onClick={handleEditBanner}
+                      className="p-2.5 bg-white/90 backdrop-blur-md text-gray-900 rounded-xl shadow-md active:scale-90 transition-transform"
+                    >
+                      <Pencil size={14} />
+                    </button>
+                    <button 
+                      type="button"
+                      onClick={handleRemoveBanner}
+                      className="p-2.5 bg-red-500 text-white rounded-xl shadow-md active:scale-90 transition-transform"
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  </div>
+                )}
+              </div>
+              <p className="text-[9px] text-gray-400 font-medium leading-relaxed italic ml-1">
+                "O banner aparece no topo do seu perfil público, gerando mais desejo de compra."
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* 2. DADOS PRINCIPAIS */}
         <section className="space-y-6">
           <div className="flex items-center gap-2 mb-2">
             <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center"><Info size={16} /></div>
             <h2 className="text-xs font-black text-gray-400 uppercase tracking-[0.2em]">Identificação *</h2>
           </div>
 
-          <div className="space-y-4">
-            <div className="flex flex-col items-center gap-4 mb-8">
-              <div 
-                className="w-24 h-24 rounded-[2rem] bg-white dark:bg-gray-800 border-4 border-white dark:border-gray-900 shadow-xl overflow-hidden relative group cursor-pointer"
-                onClick={() => setFormData({...formData, logo_url: 'https://ui-avatars.com/api/?name=Loja&background=1E5BFF&color=fff'})}
-              >
-                {formData.logo_url ? <img src={formData.logo_url} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-gray-300"><Camera /></div>}
-                <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"><span className="text-[8px] font-black text-white uppercase tracking-widest">Logo *</span></div>
-              </div>
-            </div>
-
-            <div className="bg-white dark:bg-gray-900 rounded-3xl p-6 border border-gray-100 dark:border-gray-800 shadow-sm space-y-5">
+          <div className="bg-white dark:bg-gray-900 rounded-3xl p-6 border border-gray-100 dark:border-gray-800 shadow-sm space-y-5">
               <div>
                 <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Nome Fantasia *</label>
                 <input required value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="w-full bg-gray-50 dark:bg-gray-800 p-4 rounded-2xl border border-transparent focus:border-[#1E5BFF] outline-none text-sm font-bold dark:text-white mt-1" />
@@ -284,18 +390,16 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
                 <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">CNPJ *</label>
                 <input required value={formData.cnpj} onChange={e => setFormData({...formData, cnpj: e.target.value})} className="w-full bg-gray-50 dark:bg-gray-800 p-4 rounded-2xl border border-transparent focus:border-[#1E5BFF] outline-none text-sm font-bold dark:text-white mt-1" placeholder="00.000.000/0001-00" />
               </div>
-            </div>
           </div>
         </section>
 
-        {/* 2. TAXONOMIA GUIADA */}
+        {/* 3. TAXONOMIA GUIADA */}
         <section className="space-y-8">
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-2">
                 <div className="w-8 h-8 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center"><Hash size={16} /></div>
                 <h2 className="text-xs font-black text-gray-400 uppercase tracking-[0.2em]">Classificação</h2>
             </div>
-            <HelpCircle size={14} className="text-gray-300" />
           </div>
 
           <div className="space-y-10">
@@ -333,9 +437,7 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
             {/* SUBCATEGORIAS */}
             {formData.categories.length > 0 && (
               <div className="animate-in fade-in slide-in-from-top-2">
-                <div className="flex items-center justify-between mb-4">
-                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">2. Subcategorias por Segmento *</label>
-                </div>
+                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-4">2. Subcategorias por Segmento *</label>
                 <div className="space-y-6">
                     {formData.categories.map(catName => (
                         <div key={catName} className="bg-white dark:bg-gray-900 p-5 rounded-[2rem] border border-gray-100 dark:border-gray-800 shadow-sm">
@@ -374,9 +476,7 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
             {/* ESPECIALIDADES */}
             {formData.subcategories.length > 0 && (
                <div className="animate-in fade-in slide-in-from-top-2">
-                 <div className="flex items-center justify-between mb-4">
-                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">3. Especialidades Técnicas</label>
-                 </div>
+                 <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-4">3. Especialidades Técnicas</label>
                  <div className="space-y-5">
                     {formData.subcategories.map(subName => (
                         <div key={subName} className="bg-gray-50 dark:bg-gray-800/40 p-5 rounded-3xl border border-gray-100 dark:border-gray-800">
@@ -414,7 +514,7 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
           </div>
         </section>
 
-        {/* 3. CONTATO E ENDEREÇO (Simplificado para o Spec atual) */}
+        {/* 4. CONTATO OFICIAL */}
         <section className="space-y-6">
           <div className="flex items-center gap-2 mb-2">
             <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center"><Phone size={16} /></div>
