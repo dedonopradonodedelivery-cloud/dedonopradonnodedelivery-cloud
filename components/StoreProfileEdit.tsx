@@ -149,6 +149,10 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
   const [isSaving, setIsSaving] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   
+  // File Inputs Refs
+  const logoInputRef = useRef<HTMLInputElement>(null);
+  const bannerInputRef = useRef<HTMLInputElement>(null);
+
   // Modals
   const [showAddAnotherModal, setShowAddAnotherModal] = useState(false);
   const [suggestionModal, setSuggestionModal] = useState<{ isOpen: boolean; type: TaxonomyType; parentName?: string } | null>(null);
@@ -193,8 +197,12 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
   }, [user]);
 
   const handleSave = async () => {
-    if (!formData.logo_url || !formData.name || formData.categories.length === 0) {
-      alert('Preencha os campos obrigatórios (Logo, Nome e Categorias)');
+    if (!formData.logo_url) {
+      alert('A Logo da empresa é obrigatória para aparecer no app.');
+      return;
+    }
+    if (!formData.name || formData.categories.length === 0) {
+      alert('Preencha os campos obrigatórios (Nome e Categorias)');
       return;
     }
     setIsSaving(true);
@@ -210,6 +218,22 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
     } catch (err) { alert('Erro ao salvar. Tente novamente.'); } finally { setIsSaving(false); }
   };
 
+  // --- Handlers Imagens ---
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>, type: 'logo' | 'banner') => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // Simulação de upload gerando URL local de preview
+      const previewUrl = URL.createObjectURL(file);
+      if (type === 'logo') setFormData(prev => ({ ...prev, logo_url: previewUrl }));
+      else setFormData(prev => ({ ...prev, banner_url: previewUrl }));
+    }
+  };
+
+  const handleRemoveImage = (type: 'logo' | 'banner') => {
+    if (type === 'logo') setFormData(prev => ({ ...prev, logo_url: '' }));
+    else setFormData(prev => ({ ...prev, banner_url: '' }));
+  };
+
   // --- Handlers Taxonomia ---
   const handleSelectCategory = (name: string) => {
     if (formData.categories.includes(name)) return;
@@ -219,7 +243,6 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
 
   const handleRemoveCategory = (name: string) => {
     const newCats = formData.categories.filter(c => c !== name);
-    // Limpeza em cascata
     const subsOfRemoved = (SUBCATEGORIES[name] || []).map(s => s.name);
     const newSubs = formData.subcategories.filter(s => !subsOfRemoved.includes(s));
     const specialtiesToKeep = newSubs.flatMap(s => SPECIALTIES[s] || []);
@@ -285,23 +308,114 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
           <button onClick={onBack} className="p-2.5 bg-gray-100 dark:bg-gray-800 rounded-2xl hover:bg-gray-200 transition-colors">
             <ChevronLeft className="w-6 h-6 text-gray-800 dark:text-white" />
           </button>
-          <h1 className="font-black text-lg text-gray-900 dark:text-white uppercase tracking-tighter">Perfil da Loja</h1>
+          <div>
+            <h1 className="font-black text-lg text-gray-900 dark:text-white uppercase tracking-tighter leading-none">Perfil da Loja</h1>
+            <p className="text-[10px] text-blue-500 font-bold uppercase tracking-widest mt-1">Identidade e Classificação</p>
+          </div>
         </div>
       </div>
 
       <div className="p-6 space-y-12 max-w-md mx-auto">
         
         {/* IDENTIDADE VISUAL */}
-        <section className="space-y-8">
-          <div className="flex flex-col items-center gap-6">
+        <section className="space-y-10">
+          <div className="flex items-center gap-2 px-1">
+            <Camera size={16} className="text-[#1E5BFF]" />
+            <h2 className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Identidade Visual</h2>
+          </div>
+
+          {/* LOGO */}
+          <div className="flex flex-col items-center">
             <div className="relative group">
-              <div className={`w-32 h-32 rounded-[2.5rem] overflow-hidden border-4 bg-white dark:bg-gray-800 shadow-xl ${!formData.logo_url ? 'border-dashed border-red-200' : 'border-white dark:border-gray-900'}`}>
-                {formData.logo_url ? <img src={formData.logo_url} className="w-full h-full object-cover" /> : <div className="w-full h-full flex flex-col items-center justify-center text-gray-300"><StoreIcon size={24} /><span className="text-[8px] font-bold uppercase mt-1">Logo Obrigatória</span></div>}
+              <div className={`w-32 h-32 rounded-[2.5rem] overflow-hidden border-4 bg-white dark:bg-gray-800 shadow-xl transition-all ${!formData.logo_url ? 'border-dashed border-red-200' : 'border-white dark:border-gray-900'}`}>
+                {formData.logo_url ? (
+                  <img src={formData.logo_url} className="w-full h-full object-cover" alt="Logo" />
+                ) : (
+                  <div className="w-full h-full flex flex-col items-center justify-center text-gray-300 p-4 text-center">
+                    <StoreIcon size={24} />
+                    <span className="text-[8px] font-bold uppercase mt-1">Logo Obrigatória</span>
+                  </div>
+                )}
               </div>
-              <button type="button" onClick={() => setFormData({...formData, logo_url: 'https://ui-avatars.com/api/?background=1E5BFF&color=fff&name=Loja'})} className="absolute -right-2 -bottom-2 w-10 h-10 bg-[#1E5BFF] text-white rounded-2xl shadow-lg flex items-center justify-center active:scale-90 transition-transform"><Pencil size={16} /></button>
+              
+              <div className="absolute -right-2 -bottom-2 flex gap-2">
+                <button 
+                  type="button" 
+                  onClick={() => logoInputRef.current?.click()} 
+                  className="w-10 h-10 bg-[#1E5BFF] text-white rounded-2xl shadow-lg flex items-center justify-center active:scale-90 transition-transform"
+                >
+                  <Pencil size={16} />
+                </button>
+                {formData.logo_url && (
+                  <button 
+                    type="button" 
+                    onClick={() => handleRemoveImage('logo')} 
+                    className="w-10 h-10 bg-white dark:bg-gray-800 text-red-500 border border-red-100 dark:border-red-900 rounded-2xl shadow-lg flex items-center justify-center active:scale-90 transition-transform"
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                )}
+              </div>
+              <input type="file" ref={logoInputRef} className="hidden" accept="image/*" onChange={(e) => handleImageUpload(e, 'logo')} />
             </div>
-            <div className="w-full aspect-[3/1] rounded-[2rem] overflow-hidden bg-gray-100 dark:bg-gray-800 border-2 border-dashed border-gray-200 dark:border-gray-700 flex flex-col items-center justify-center gap-2 group cursor-pointer" onClick={() => setFormData({...formData, banner_url: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?q=80&w=800'})}>
-                {formData.banner_url ? <img src={formData.banner_url} className="w-full h-full object-cover" /> : <><PlusCircle size={20} className="text-gray-400" /><span className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Adicionar Capa</span></>}
+            <div className="mt-4 text-center space-y-1">
+              <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Logo da Empresa *</p>
+              <div className="text-[9px] text-gray-400 font-medium leading-relaxed">
+                Tamanho recomendado: 500 × 500 px (quadrado)<br/>
+                Formato: PNG ou JPG • Fundo transparente recomendado<br/>
+                <span className="text-red-400 font-bold">Logo é obrigatória para aparecer no app</span>
+              </div>
+            </div>
+          </div>
+
+          {/* BANNER */}
+          <div className="w-full space-y-4">
+            <div className="flex justify-between items-end px-1">
+              <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none">Banner / Capa da Loja</label>
+              <span className="text-[9px] text-gray-400 font-bold uppercase">Opcional</span>
+            </div>
+            <div className="relative group">
+              <div 
+                onClick={() => !formData.banner_url && bannerInputRef.current?.click()}
+                className={`w-full aspect-[3/1] rounded-[2rem] overflow-hidden bg-gray-100 dark:bg-gray-800 border-2 border-dashed border-gray-200 dark:border-gray-700 flex flex-col items-center justify-center gap-2 transition-all relative ${formData.banner_url ? 'border-solid border-transparent' : 'cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700/50'}`}
+              >
+                {formData.banner_url ? (
+                  <img src={formData.banner_url} className="w-full h-full object-cover" alt="Banner" />
+                ) : (
+                  <>
+                    <PlusCircle size={20} className="text-gray-400" />
+                    <span className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Adicionar banner de capa</span>
+                  </>
+                )}
+              </div>
+
+              {formData.banner_url && (
+                <div className="absolute right-3 bottom-3 flex gap-2">
+                  <button 
+                    type="button" 
+                    onClick={() => bannerInputRef.current?.click()} 
+                    className="p-2.5 bg-white/90 backdrop-blur-md text-[#1E5BFF] rounded-xl shadow-lg flex items-center justify-center active:scale-90 transition-transform border border-white"
+                  >
+                    <Pencil size={14} />
+                  </button>
+                  <button 
+                    type="button" 
+                    onClick={() => handleRemoveImage('banner')} 
+                    className="p-2.5 bg-white/90 backdrop-blur-md text-red-500 rounded-xl shadow-lg flex items-center justify-center active:scale-90 transition-transform border border-white"
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                </div>
+              )}
+              <input type="file" ref={bannerInputRef} className="hidden" accept="image/*" onChange={(e) => handleImageUpload(e, 'banner')} />
+            </div>
+            <div className="px-1 space-y-1">
+              <p className="text-[9px] text-gray-400 font-medium leading-tight">
+                Tamanho recomendado: 1200 × 400 px • Formato: JPG ou PNG
+              </p>
+              <p className="text-[9px] text-blue-500 font-bold leading-tight italic">
+                "O banner aparece no topo do seu perfil público e aumenta a conversão."
+              </p>
             </div>
           </div>
         </section>
@@ -313,17 +427,40 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
             <h2 className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Identificação Fiscal</h2>
           </div>
           <div className="bg-white dark:bg-gray-900 p-6 rounded-[2rem] border border-gray-100 dark:border-gray-800 shadow-sm space-y-6">
-            <div>
-              <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Nome Fantasia *</label>
-              <input value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="w-full bg-gray-50 dark:bg-gray-800 p-4 rounded-2xl border-none outline-none text-sm font-bold mt-1" />
+            <div className="p-4 bg-blue-50 dark:bg-blue-900/10 rounded-2xl border border-blue-100 dark:border-blue-800/30 flex gap-3">
+              <Info className="w-4 h-4 text-[#1E5BFF] shrink-0 mt-0.5" />
+              <p className="text-[10px] text-blue-700 dark:text-blue-300 font-medium leading-relaxed">
+                Essas informações são usadas para emissão de nota fiscal e não ficam públicas.
+              </p>
             </div>
-            <div>
-              <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Razão Social *</label>
-              <input value={formData.razao_social} onChange={e => setFormData({...formData, razao_social: e.target.value})} className="w-full bg-gray-50 dark:bg-gray-800 p-4 rounded-2xl border-none outline-none text-sm font-bold mt-1" />
-            </div>
-            <div>
-              <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">CNPJ *</label>
-              <input value={formData.cnpj} onChange={e => setFormData({...formData, cnpj: e.target.value})} className="w-full bg-gray-50 dark:bg-gray-800 p-4 rounded-2xl border-none outline-none text-sm font-bold mt-1" placeholder="00.000.000/0001-00" />
+
+            <div className="grid gap-5">
+              <div>
+                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Nome Fantasia *</label>
+                <input value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="w-full bg-gray-50 dark:bg-gray-800 p-4 rounded-2xl border-none outline-none text-sm font-bold mt-1" placeholder="Nome no app" />
+              </div>
+              <div>
+                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Razão Social *</label>
+                <input value={formData.razao_social} onChange={e => setFormData({...formData, razao_social: e.target.value})} className="w-full bg-gray-50 dark:bg-gray-800 p-4 rounded-2xl border-none outline-none text-sm font-bold mt-1" />
+              </div>
+              <div>
+                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">CNPJ *</label>
+                <input value={formData.cnpj} onChange={e => setFormData({...formData, cnpj: e.target.value})} className="w-full bg-gray-50 dark:bg-gray-800 p-4 rounded-2xl border-none outline-none text-sm font-bold mt-1" placeholder="00.000.000/0001-00" />
+              </div>
+              <div>
+                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Email Financeiro *</label>
+                <div className="relative">
+                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <input value={formData.email_fiscal} onChange={e => setFormData({...formData, email_fiscal: e.target.value})} className="w-full bg-gray-50 dark:bg-gray-800 p-4 pl-11 rounded-2xl border-none outline-none text-sm font-bold mt-1" placeholder="financeiro@empresa.com" />
+                </div>
+              </div>
+              <div>
+                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">WhatsApp Financeiro *</label>
+                <div className="relative">
+                  <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <input value={formData.whatsapp_financeiro} onChange={e => setFormData({...formData, whatsapp_financeiro: e.target.value})} className="w-full bg-gray-50 dark:bg-gray-800 p-4 pl-11 rounded-2xl border-none outline-none text-sm font-bold mt-1" placeholder="(21) 99999-9999" />
+                </div>
+              </div>
             </div>
           </div>
         </section>
@@ -336,7 +473,6 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
           </div>
 
           <div className="space-y-10">
-            {/* CATEGORIA */}
             <TaxonomyField 
               label="1. Categorias Principais"
               guideText="Selecione a categoria"
@@ -349,7 +485,6 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
               multiple
             />
 
-            {/* SUBCATEGORIA POR CATEGORIA */}
             {formData.categories.map(cat => (
               <TaxonomyField 
                 key={cat}
@@ -365,7 +500,6 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
               />
             ))}
 
-            {/* ESPECIALIDADES POR SUBCATEGORIA */}
             {formData.subcategories.map(sub => (
               <TaxonomyField 
                 key={sub}
@@ -396,14 +530,14 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
         </button>
       </div>
 
-      {/* MODAL: ADICIONAR OUTRA? */}
+      {/* MODALS */}
       {showAddAnotherModal && (
-        <div className="fixed inset-0 z-[110] bg-black/60 backdrop-blur-sm flex items-center justify-center p-6">
-            <div className="bg-white dark:bg-gray-900 w-full max-w-xs rounded-[2.5rem] p-8 shadow-2xl animate-in zoom-in-95 duration-200 text-center">
+        <div className="fixed inset-0 z-[110] bg-black/60 backdrop-blur-sm flex items-center justify-center p-6" onClick={() => setShowAddAnotherModal(false)}>
+            <div className="bg-white dark:bg-gray-900 w-full max-w-xs rounded-[2.5rem] p-8 shadow-2xl animate-in zoom-in-95 duration-200 text-center" onClick={e => e.stopPropagation()}>
                 <div className="w-16 h-16 bg-blue-50 dark:bg-blue-900/20 rounded-2xl flex items-center justify-center mx-auto mb-4 text-[#1E5BFF]">
                     <PlusCircle size={32} />
                 </div>
-                <h3 className="text-lg font-black text-gray-900 dark:text-white uppercase leading-tight mb-2">Adicionar outra categoria?</h3>
+                <h3 className="text-lg font-black text-gray-900 dark:text-white uppercase leading-tight mb-2">Adicionar outro segmento?</h3>
                 <p className="text-xs text-gray-500 mb-8 leading-relaxed">Sua loja se encaixa em mais de um segmento principal?</p>
                 <div className="flex gap-3">
                     <button onClick={() => setShowAddAnotherModal(false)} className="flex-1 py-3 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 rounded-xl font-bold text-xs uppercase tracking-widest">Não</button>
@@ -413,10 +547,9 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
         </div>
       )}
 
-      {/* MODAL SUGESTÃO */}
       {suggestionModal && (
-        <div className="fixed inset-0 z-[120] bg-black/80 backdrop-blur-md flex items-center justify-center p-6">
-            <div className="bg-white dark:bg-gray-900 w-full max-w-sm rounded-[2.5rem] p-8 shadow-2xl animate-in zoom-in-95">
+        <div className="fixed inset-0 z-[120] bg-black/80 backdrop-blur-md flex items-center justify-center p-6" onClick={() => setSuggestionModal(null)}>
+            <div className="bg-white dark:bg-gray-900 w-full max-w-sm rounded-[2.5rem] p-8 shadow-2xl animate-in zoom-in-95" onClick={e => e.stopPropagation()}>
                 <div className="flex justify-between items-center mb-6">
                     <h3 className="text-lg font-black uppercase tracking-tighter">Sugerir Opção</h3>
                     <button onClick={() => setSuggestionModal(null)}><X size={24} /></button>
