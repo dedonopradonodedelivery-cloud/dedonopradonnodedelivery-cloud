@@ -1,4 +1,3 @@
-
 import React from 'react';
 
 // From original types.ts
@@ -246,20 +245,4 @@ export interface DbWalletMovement {
   amount: number;
   description: string;
   created_at: string;
-}
-
-// Fixed: Added missing Taxonomy types and TaxonomySuggestion interface
-export type TaxonomyType = 'category' | 'subcategory' | 'specialty';
-export type TaxonomyStatus = 'pending' | 'approved' | 'rejected';
-
-export interface TaxonomySuggestion {
-  id: string;
-  type: TaxonomyType;
-  name: string;
-  parentId?: string;
-  parentName?: string;
-  status: TaxonomyStatus;
-  storeName?: string;
-  createdAt: string;
-  justification?: string;
 }

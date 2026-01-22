@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { 
   Utensils, ShoppingCart, Scissors, Heart, PawPrint, Home, Wrench, 
@@ -12,9 +11,7 @@ import {
   Baby, GraduationCap, Microscope, Brain, Sparkles, Smile, Beer, 
   Activity, Eye, FileText, Globe, Calendar, Music, PartyPopper, Globe2, Edit3, User, Bell, Search,
   Camera, Vote, Handshake, Flame, Milestone, History, Home as HomeIcon,
-  MessageCircle, HelpCircle, UserCheck, Recycle,
-  // Fixed: Added missing icon imports from lucide-react
-  Scale, Calculator, PenTool
+  MessageCircle, HelpCircle, UserCheck, Recycle
 } from 'lucide-react';
 import { AdType, Category, Store, Story, EditorialCollection, Job, CommunityPost, NeighborhoodCommunity } from '../types';
 
@@ -76,9 +73,6 @@ export const SUBCATEGORIES: Record<string, { name: string; icon: React.ReactNode
     { name: 'Técnico em Informática', icon: <Laptop /> },
     { name: 'Montador de Móveis', icon: <Settings /> },
     { name: 'Marido de Aluguel', icon: <Wrench /> },
-    { name: 'Advogado', icon: <Scale /> },
-    { name: 'Contador', icon: <Calculator /> },
-    { name: 'Designer Gráfico', icon: <PenTool /> },
     { name: 'Freelancers em Geral', icon: <Briefcase /> },
   ],
   'Saúde': [

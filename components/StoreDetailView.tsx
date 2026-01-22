@@ -11,7 +11,7 @@ import {
   MessageSquare,
   Coins,
   ArrowRight,
-  Instagram 
+  Instagram // Added Instagram icon
 } from 'lucide-react';
 import { Store } from '../types';
 import { TrustBlock } from './TrustBlock';
@@ -30,8 +30,6 @@ const storeMock = {
     description: 'Descrição indisponível.',
     logo: '/assets/default-logo.png',
     banners: ['https://placehold.co/800x600?text=Banner'],
-    // Added missing banner_main property to fix type error at line 149
-    banner_main: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?q=80&w=1200&auto=format&fit=crop',
     social: { instagram: '', whatsapp: '' },
     contact: { phone: '(21) 99999-9999', address: 'Endereço não informado', hours: 'Consultar horário' },
   },
@@ -40,10 +38,6 @@ const storeMock = {
 function mapStoreToBusiness(store?: Store | null) {
   if (!store) return storeMock.business;
   const s: any = store;
-  
-  // Lógica de Banner: banner_url > image > fallback por categoria
-  const banner = s.banner_url || s.image || `https://images.unsplash.com/photo-1555396273-367ea4eb4db5?q=80&w=1200&auto=format&fit=crop`;
-  
   return {
     ...storeMock.business,
     id: s.id,
@@ -52,17 +46,11 @@ function mapStoreToBusiness(store?: Store | null) {
     rating: s.rating,
     ratingCount: s.reviewsCount,
     description: s.description,
-    logo: s.logo_url || s.logoUrl || s.image,
-    banners: photoGallery(s),
-    banner_main: banner,
+    logo: s.logoUrl || s.image,
+    banners: s.gallery && s.gallery.length > 0 ? s.gallery : [s.image].filter(Boolean),
     social: { instagram: s.instagram, whatsapp: s.phone },
     contact: { phone: s.phone, address: s.address, hours: s.hours },
   };
-}
-
-const photoGallery = (s: any) => {
-    if (s.gallery && s.gallery.length > 0) return s.gallery;
-    return [s.banner_url, s.image].filter(Boolean);
 }
 
 const InfoCard: React.FC<{ icon: React.ElementType; title: string; value: string; href?: string; onClick?: () => void; }> = ({ icon: Icon, title, value, href, onClick }) => {
@@ -96,6 +84,7 @@ export const StoreDetailView: React.FC<{ store?: Store | null; onBack: () => voi
   const [isFavorite, setIsFavorite] = React.useState(false);
   const [userCredit, setUserCredit] = useState<number | null>(null);
   const business = mapStoreToBusiness(store);
+  const photoGallery = business.banners || [];
 
   // Analytics Helper
   const track = (eventType: OrganicEventType) => {
@@ -107,7 +96,7 @@ export const StoreDetailView: React.FC<{ store?: Store | null; onBack: () => voi
   // Track 'store_view' on component mount
   useEffect(() => {
     track('store_view');
-  }, []); 
+  }, []); // Empty dependency array ensures it runs once on mount.
 
   useEffect(() => {
     const fetchUserCredit = async () => {
@@ -136,44 +125,30 @@ export const StoreDetailView: React.FC<{ store?: Store | null; onBack: () => voi
   return (
     <div className="min-h-screen bg-[#F5F5F5] dark:bg-gray-950 font-sans relative">
       <main className="overflow-y-auto pb-32">
-        
-        {/* BANNER DE CAPA */}
-        <section className="relative w-full h-[280px] bg-gray-200 overflow-hidden">
-          <div className="absolute top-0 left-0 right-0 p-4 pt-6 flex justify-between items-center z-20">
-            <button onClick={onBack} className="w-11 h-11 rounded-full bg-white/90 backdrop-blur-md flex items-center justify-center shadow-lg active:scale-90 transition-transform"><ChevronLeft className="w-6 h-6" /></button>
+        <section className="relative w-full h-[260px] bg-gray-200">
+          <div className="absolute top-0 left-0 right-0 p-4 pt-6 flex justify-between items-center z-10">
+            <button onClick={onBack} className="w-11 h-11 rounded-full bg-white/90 backdrop-blur-md flex items-center justify-center shadow-lg"><ChevronLeft className="w-6 h-6" /></button>
             <div className="flex gap-3">
-              <button onClick={() => track('store_click_share')} className="w-11 h-11 rounded-full bg-white/90 flex items-center justify-center shadow-lg active:scale-90 transition-transform"><Share2 className="w-5 h-5" /></button>
-              <button onClick={() => { setIsFavorite(!isFavorite); track('store_click_favorite'); }} className="w-11 h-11 rounded-full bg-white/90 flex items-center justify-center shadow-lg active:scale-90 transition-transform"><Heart className={`w-5 h-5 ${isFavorite ? 'fill-[#1E5BFF] text-[#1E5BFF]' : ''}`} /></button>
+              <button onClick={() => track('store_click_share')} className="w-11 h-11 rounded-full bg-white/90 flex items-center justify-center shadow-lg"><Share2 className="w-5 h-5" /></button>
+              <button onClick={() => { setIsFavorite(!isFavorite); track('store_click_favorite'); }} className="w-11 h-11 rounded-full bg-white/90 flex items-center justify-center shadow-lg"><Heart className={`w-5 h-5 ${isFavorite ? 'fill-[#1E5BFF] text-[#1E5BFF]' : ''}`} /></button>
             </div>
           </div>
-          
-          <img 
-            src={business.banner_main} 
-            className="w-full h-full object-cover" 
-            alt="Capa da Loja" 
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/10"></div>
+          {photoGallery[0] && <img src={photoGallery[0]} className="w-full h-full object-cover" alt="" />}
         </section>
 
         <div className="relative px-5 pt-7">
-          
-          {/* HEADER COM LOGO SOBREPOSTA */}
-          <div className="flex justify-between items-start mb-6">
+          <div className="flex justify-between items-start mb-4">
               <div className="flex-1 min-w-0">
-                <h1 className="text-3xl font-[800] text-[#141414] dark:text-white font-sans tracking-tighter leading-tight drop-shadow-sm">
-                    {business.name}
-                </h1>
+                <h1 className="text-3xl font-[800] text-[#141414] dark:text-white font-sans tracking-tighter leading-tight">{business.name}</h1>
                 <div className="flex items-center gap-2 text-sm font-medium text-[#6C6C6C] mt-2">
-                    <span className="bg-blue-50 dark:bg-blue-900/20 text-[#1E5BFF] px-2 py-0.5 rounded-lg text-[10px] font-black uppercase tracking-widest">{business.category}</span>
+                    <span>{business.category}</span>
                     <span className="text-gray-300">•</span>
                     <Star className="w-4 h-4 text-yellow-400 fill-current" />
-                    <span className="dark:text-gray-300">{business.rating} ({business.ratingCount ?? 0})</span>
+                    <span>{business.rating} ({business.ratingCount ?? 0})</span>
                 </div>
               </div>
-              
-              {/* LOGO DA LOJA */}
-              <div className="w-20 h-20 rounded-[2rem] bg-white dark:bg-gray-800 shadow-2xl border-4 border-white dark:border-gray-900 flex items-center justify-center p-2 shrink-0 -mt-16 overflow-hidden relative z-10 transition-transform hover:scale-105">
-                <img src={business.logo} alt="Logo" className="w-full h-full object-contain rounded-2xl" />
+              <div className="w-16 h-16 rounded-2xl bg-white dark:bg-gray-800 shadow-xl border border-gray-100 dark:border-gray-700 flex items-center justify-center p-2 shrink-0 -mt-12 overflow-hidden">
+                <img src={business.logo} alt="Logo" className="w-full h-full object-contain" />
               </div>
           </div>
 
@@ -197,10 +172,7 @@ export const StoreDetailView: React.FC<{ store?: Store | null; onBack: () => voi
 
           <section className="space-y-8">
             {store && <TrustBlock store={store} />}
-            <div>
-                <h3 className="text-lg font-black dark:text-white mb-3 uppercase tracking-widest text-gray-400 text-[10px]">Sobre o Estabelecimento</h3>
-                <p className="text-sm text-[#6C6C6C] dark:text-gray-300 leading-relaxed font-medium">{business.description}</p>
-            </div>
+            <div><h3 className="text-lg font-bold dark:text-white mb-3">Sobre</h3><p className="text-sm text-[#6C6C6C] dark:text-gray-300 leading-relaxed">{business.description}</p></div>
             
             <div className="flex gap-4">
               <button 
@@ -209,7 +181,7 @@ export const StoreDetailView: React.FC<{ store?: Store | null; onBack: () => voi
               >
                 Pagar com Crédito
               </button>
-              <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" onClick={() => track('store_click_whatsapp')} className="flex-1 bg-green-50 text-white font-bold py-4 rounded-2xl flex items-center justify-center gap-2 shadow-lg shadow-green-500/20 active:scale-95 transition-all"><MessageSquare className="w-5 h-5" /> Zap</a>
+              <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" onClick={() => track('store_click_whatsapp')} className="flex-1 bg-green-500 text-white font-bold py-4 rounded-2xl flex items-center justify-center gap-2 shadow-lg shadow-green-500/20 active:scale-95 transition-all"><MessageSquare className="w-5 h-5" /> Zap</a>
             </div>
 
             <div className="space-y-4">
