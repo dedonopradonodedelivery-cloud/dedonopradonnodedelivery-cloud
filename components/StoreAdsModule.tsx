@@ -26,6 +26,7 @@ import {
   Paintbrush
 } from 'lucide-react';
 import { User } from '@supabase/supabase-js';
+import { StoreBannerEditor } from './StoreBannerEditor';
 
 interface StoreAdsModuleProps {
   onBack: () => void;
@@ -83,6 +84,8 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [isArtSaved, setIsArtSaved] = useState(false);
+  const [isEditingArt, setIsEditingArt] = useState(false);
+  const [savedDesign, setSavedDesign] = useState<any>(null);
   const [toast, setToast] = useState<{msg: string, type: 'info' | 'error'} | null>(null);
 
   const neighborhoodRef = useRef<HTMLDivElement>(null);
@@ -148,7 +151,13 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
   };
 
   const handleFinishArt = () => {
+    setIsEditingArt(true);
+  };
+
+  const handleSaveDesign = (design: any) => {
+    setSavedDesign(design);
     setIsArtSaved(true);
+    setIsEditingArt(false);
     scrollTo(paymentRef);
   };
 
@@ -188,6 +197,16 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
     }, 2000);
   };
 
+  if (isEditingArt) {
+    return (
+      <StoreBannerEditor 
+        storeName={user?.user_metadata?.store_name || "Sua Loja"} 
+        onSave={handleSaveDesign} 
+        onBack={() => setIsEditingArt(false)} 
+      />
+    );
+  }
+
   if (isSuccess) {
     return (
         <div className="min-h-screen bg-[#020617] flex flex-col items-center justify-center p-6 text-center animate-in zoom-in duration-500">
@@ -213,13 +232,11 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
         </div>
       )}
 
-      <header className="sticky top-0 z-40 bg-[#020617]/80 backdrop-blur-xl border-b border-white/5 px-6 py-4 flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <button onClick={onBack} className="p-2 bg-slate-900 rounded-xl text-slate-400 hover:text-white transition-all active:scale-95"><ChevronLeft size={20} /></button>
-          <div>
-            <h1 className="font-bold text-lg leading-none flex items-center gap-2">Anunciar no Bairro <Crown size={16} className="text-amber-400 fill-amber-400" /></h1>
-            <p className="text-[10px] text-blue-400 uppercase font-black tracking-widest mt-1">Configuração de Campanha</p>
-          </div>
+      <header className="sticky top-0 z-40 bg-[#020617]/80 backdrop-blur-xl border-b border-white/5 px-6 py-4 flex items-center gap-4">
+        <button onClick={onBack} className="p-2 bg-slate-900 rounded-xl text-slate-400 hover:text-white transition-all active:scale-95"><ChevronLeft size={20} /></button>
+        <div>
+          <h1 className="font-bold text-lg leading-none flex items-center gap-2">Anunciar no Bairro <Crown size={16} className="text-amber-400 fill-amber-400" /></h1>
+          <p className="text-[10px] text-blue-400 uppercase font-black tracking-widest mt-1">Configuração de Campanha</p>
         </div>
       </header>
 
@@ -329,7 +346,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
                     return (
                         <button key={hood} onClick={() => { if (available) { setSelectedNeighborhoods(prev => prev.includes(hood) ? prev.filter(h => h !== hood) : [...prev, hood]); } }} className={`p-4 rounded-2xl border-2 flex flex-col justify-between transition-all min-h-[90px] relative text-left ${!available ? 'bg-slate-900/50 border-white/5 opacity-50 cursor-default' : isSelected ? 'bg-blue-600/10 border-blue-500 shadow-lg shadow-blue-500/10 scale-[1.02]' : 'bg-slate-900 border-white/5 hover:border-white/10'}`}>
                             <div className="flex items-center justify-between w-full mb-2">
-                                <div className={`p-1.5 rounded-lg ${!available ? 'bg-slate-800 text-slate-600' : isSelected ? 'bg-blue-500 text-white' : 'bg-slate-800 text-slate-500'}`}><MapPin size={14} /></div>
+                                <div className={`p-1.5 rounded-lg ${!available ? 'bg-slate-800 text-slate-600' : isSelected ? 'bg-blue-50 text-white' : 'bg-slate-800 text-slate-500'}`}><MapPin size={14} /></div>
                                 {available && <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${isSelected ? 'bg-blue-500 border-blue-500' : 'border-slate-700'}`}>{isSelected && <Check size={12} className="text-white" strokeWidth={4} />}</div>}
                             </div>
                             <div><p className={`font-bold text-xs ${!available ? 'text-slate-600' : 'text-white'}`}>{hood}</p><p className={`text-[8px] font-black uppercase tracking-widest mt-1 ${!available ? 'text-rose-500' : 'text-emerald-500'}`}>{!available ? `Ocupado no período` : 'Disponível'}</p></div>
@@ -366,6 +383,17 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
                             </div>
                         </div>
                     </div>
+
+                    {isArtSaved && artChoice === 'diy' && (
+                      <div className="mt-4 p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl flex items-center justify-between animate-in zoom-in duration-300">
+                        <div className="flex items-center gap-3">
+                          <CheckCircle2 size={16} className="text-emerald-400" />
+                          <span className="text-[10px] font-black text-emerald-400 uppercase">Arte Criada com Sucesso</span>
+                        </div>
+                        <button onClick={handleFinishArt} className="text-[9px] font-black text-white bg-emerald-500 px-3 py-1.5 rounded-lg uppercase tracking-widest">Editar</button>
+                      </div>
+                    )}
+
                     {artChoice === 'diy' && !isArtSaved && (
                         <div className="space-y-10 animate-in slide-in-from-top-4 duration-500 pt-8 border-t border-white/5">
                             <button onClick={handleFinishArt} className="w-full bg-[#1E5BFF] hover:bg-blue-600 text-white font-black py-5 rounded-2xl shadow-xl active:scale-[0.98] transition-all flex items-center justify-center gap-2 text-xs uppercase tracking-widest">
