@@ -26,16 +26,37 @@ import {
   Info,
   Globe,
   Image as ImageIcon,
-  Eye
+  Eye,
+  Clock,
+  CreditCard,
+  Banknote
 } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import { useAuth } from '../contexts/AuthContext';
 import { CATEGORIES, SUBCATEGORIES } from '../constants';
-import { TaxonomyType } from '../types';
+import { TaxonomyType, BusinessHour } from '../types';
 
 interface StoreProfileEditProps {
   onBack: () => void;
 }
+
+const WEEK_DAYS = [
+  { key: 'segunda', label: 'Segunda-feira' },
+  { key: 'terca', label: 'Terça-feira' },
+  { key: 'quarta', label: 'Quarta-feira' },
+  { key: 'quinta', label: 'Quinta-feira' },
+  { key: 'sexta', label: 'Sexta-feira' },
+  { key: 'sabado', label: 'Sábado' },
+  { key: 'domingo', label: 'Domingo' },
+];
+
+const DEFAULT_PAYMENT_METHODS = [
+  'Dinheiro',
+  'Pix',
+  'Cartão de Débito',
+  'Cartão de Crédito',
+  'Vale Refeição / Alimentação'
+];
 
 // --- Componente Auxiliar de Input ---
 const FormField: React.FC<{
@@ -174,7 +195,7 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
     telefone_fixo_publico: '',
     email_publico: '',
     description: '',
-    instagram: '', // Corrigido: adicionado propriedade faltante
+    instagram: '',
     
     // --- IMAGENS ---
     logo_url: '',
@@ -193,6 +214,14 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
     // --- CLASSIFICAÇÃO ---
     category: '',
     subcategory: '',
+
+    // --- NOVOS ---
+    business_hours: WEEK_DAYS.reduce((acc, day) => ({ 
+      ...acc, 
+      [day.key]: { open: true, start: '09:00', end: '18:00' } 
+    }), {} as Record<string, BusinessHour>),
+    payment_methods: [] as string[],
+    payment_methods_others: ''
   });
 
   useEffect(() => {
@@ -204,9 +233,10 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
           setFormData({
             ...formData,
             ...data,
-            // Fallbacks caso os campos estejam vazios mas existam mapeamentos legados
             name_fantasia: data.name_fantasia || data.name || '',
             nome_exibido: data.nome_exibido || data.name || '',
+            business_hours: data.business_hours || formData.business_hours,
+            payment_methods: data.payment_methods || [],
           });
         }
       } catch (e) { console.warn(e); } finally { setIsLoading(false); }
@@ -236,12 +266,17 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
       }
     }
 
+    if (formData.payment_methods.length === 0) {
+      alert("Selecione pelo menos uma forma de pagamento.");
+      return;
+    }
+
     setIsSaving(true);
     try {
       const { error } = await supabase.from('merchants').upsert({
         owner_id: user?.id,
         ...formData,
-        name: formData.nome_exibido, // Sincroniza nome legado para busca
+        name: formData.nome_exibido, 
         updated_at: new Date().toISOString()
       }, { onConflict: 'owner_id' });
       
@@ -258,6 +293,28 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
     const reader = new FileReader();
     reader.onload = () => setFormData({ ...formData, [target]: reader.result as string });
     reader.readAsDataURL(file);
+  };
+
+  const handleHourChange = (day: string, field: keyof BusinessHour, value: any) => {
+    setFormData({
+      ...formData,
+      business_hours: {
+        ...formData.business_hours,
+        [day]: {
+          ...formData.business_hours[day],
+          [field]: value
+        }
+      }
+    });
+  };
+
+  const togglePaymentMethod = (method: string) => {
+    const current = formData.payment_methods;
+    if (current.includes(method)) {
+      setFormData({ ...formData, payment_methods: current.filter(m => m !== method) });
+    } else {
+      setFormData({ ...formData, payment_methods: [...current, method] });
+    }
   };
 
   const submitSuggestion = async () => {
@@ -299,14 +356,35 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
 
       <div className="p-6 space-y-12 max-w-md mx-auto">
         
-        {/* 2. SEÇÃO IMAGENS */}
+        {/* 2. SEÇÃO IMAGENS (REORDENADA: LOGO PRIMEIRO) */}
         <section className="space-y-8">
           <div className="flex items-center gap-2 px-1">
             <ImageIcon size={16} className="text-[#1E5BFF]" />
             <h2 className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Identidade Visual</h2>
           </div>
 
-          {/* Banner / Capa */}
+          {/* Logo (AGORA NO TOPO) */}
+          <div className="flex flex-col items-center relative z-10">
+             <div className="relative group">
+                <div className={`w-32 h-32 rounded-[2.5rem] bg-white dark:bg-gray-800 overflow-hidden border-4 shadow-2xl flex items-center justify-center ${!formData.logo_url ? 'border-dashed border-red-200' : 'border-white dark:border-gray-900'}`}>
+                    {formData.logo_url ? (
+                        <img src={formData.logo_url} className="w-full h-full object-contain p-2" alt="Logo" />
+                    ) : (
+                        <div className="text-center p-4">
+                            <StoreIcon className="w-8 h-8 text-gray-300 mx-auto" />
+                            <p className="text-[8px] font-black text-gray-400 uppercase mt-1">Logo Obrigatória</p>
+                        </div>
+                    )}
+                </div>
+                <div className="absolute -right-2 -bottom-2 flex flex-col gap-2">
+                    <button onClick={() => logoInputRef.current?.click()} className="w-10 h-10 bg-[#1E5BFF] text-white rounded-2xl shadow-xl flex items-center justify-center border-2 border-white dark:border-gray-900 active:scale-90 transition-transform"><Pencil size={18} /></button>
+                    {formData.logo_url && <button onClick={() => setFormData({...formData, logo_url: ''})} className="w-10 h-10 bg-red-500 text-white rounded-2xl shadow-xl flex items-center justify-center border-2 border-white dark:border-gray-900 active:scale-90 transition-transform"><Trash2 size={18} /></button>}
+                </div>
+             </div>
+             <p className="text-[9px] text-gray-400 italic mt-3">Logo é obrigatória para aparecer no app. (500x500 px)</p>
+          </div>
+
+          {/* Banner / Capa (AGORA ABAIXO) */}
           <div className="space-y-3">
              <div className="relative w-full aspect-[3/1] bg-gray-200 dark:bg-gray-800 rounded-3xl overflow-hidden border-2 border-gray-100 dark:border-gray-900 shadow-inner group">
                 {formData.banner_url ? (
@@ -324,28 +402,7 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
                     </button>
                 )}
              </div>
-             <p className="text-[9px] text-gray-400 italic text-center">Recomendado: 1200×400 px • JPG/PNG</p>
-          </div>
-
-          {/* Logo */}
-          <div className="flex flex-col items-center -mt-16 relative z-10">
-             <div className="relative group">
-                <div className={`w-32 h-32 rounded-[2.5rem] bg-white dark:bg-gray-800 overflow-hidden border-4 shadow-2xl flex items-center justify-center ${!formData.logo_url ? 'border-dashed border-red-200' : 'border-white dark:border-gray-900'}`}>
-                    {formData.logo_url ? (
-                        <img src={formData.logo_url} className="w-full h-full object-contain p-2" alt="Logo" />
-                    ) : (
-                        <div className="text-center p-4">
-                            <StoreIcon className="w-8 h-8 text-gray-300 mx-auto" />
-                            <p className="text-[8px] font-black text-gray-400 uppercase mt-1">Logo Obrigatória</p>
-                        </div>
-                    )}
-                </div>
-                <div className="absolute -right-2 -bottom-2 flex flex-col gap-2">
-                    <button onClick={() => logoInputRef.current?.click()} className="w-10 h-10 bg-[#1E5BFF] text-white rounded-2xl shadow-xl flex items-center justify-center border-2 border-white dark:border-gray-900 active:scale-90 transition-transform"><Pencil size={18} /></button>
-                    {formData.logo_url && <button onClick={() => setFormData({...formData, logo_url: ''})} className="w-10 h-10 bg-red-500 text-white rounded-2xl shadow-xl flex items-center justify-center border-2 border-white dark:border-gray-900 active:scale-90 transition-transform"><Trash2 size={18} /></button>}
-                </div>
-             </div>
-             <p className="text-[9px] text-gray-400 italic mt-3">Recomendado: 500×500 px • PNG/JPG</p>
+             <p className="text-[9px] text-gray-400 italic text-center">Banner aparece no topo do seu perfil público. (1200x400 px)</p>
           </div>
 
           <input type="file" ref={logoInputRef} className="hidden" accept="image/*" onChange={e => handleImageUpload(e, 'logo_url')} />
@@ -362,7 +419,7 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
                 <div className="p-3 bg-blue-50 dark:bg-blue-900/10 rounded-xl border border-blue-100 dark:border-blue-800/30 flex gap-3">
                     <Info size={16} className="text-blue-500 shrink-0" />
                     <p className="text-[9px] text-blue-700 dark:text-blue-300 font-bold uppercase leading-tight">
-                        Estes dados são usados para emissão de nota fiscal e não ficam públicos para os clientes.
+                        Estes dados são usados para emissão de nota fiscal e não ficam públicos.
                     </p>
                 </div>
 
@@ -389,7 +446,7 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
                 <div className="p-3 bg-amber-50 dark:bg-amber-900/10 rounded-xl border border-amber-100 dark:border-amber-800/30 flex gap-3">
                     <Eye size={16} className="text-amber-500 shrink-0" />
                     <p className="text-[9px] text-amber-700 dark:text-amber-300 font-bold uppercase leading-tight">
-                        Estes dados aparecerão no perfil público da sua loja para todos os clientes.
+                        Estes dados aparecerão no perfil público da sua loja.
                     </p>
                 </div>
 
@@ -410,7 +467,100 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
             </div>
         </section>
 
-        {/* 5. ENDEREÇO E LOCALIZAÇÃO */}
+        {/* 5. NOVA SEÇÃO: HORÁRIO DE FUNCIONAMENTO */}
+        <section className="space-y-6">
+            <div className="flex items-center gap-2 px-1">
+                <Clock size={16} className="text-blue-500" />
+                <h2 className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Horário de Funcionamento</h2>
+            </div>
+            <div className="bg-white dark:bg-gray-900 p-6 rounded-[2rem] border border-gray-100 dark:border-gray-800 shadow-sm space-y-5">
+                {WEEK_DAYS.map((day) => {
+                  const data = formData.business_hours[day.key];
+                  return (
+                    <div key={day.key} className="flex flex-col gap-3 pb-4 border-b border-gray-50 dark:border-gray-800 last:border-0 last:pb-0">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-bold text-gray-700 dark:text-gray-200">{day.label}</span>
+                        <div className="flex items-center gap-2">
+                           <span className={`text-[10px] font-black uppercase ${data.open ? 'text-emerald-500' : 'text-rose-500'}`}>
+                              {data.open ? 'Aberto' : 'Fechado'}
+                           </span>
+                           <button 
+                              type="button"
+                              onClick={() => handleHourChange(day.key, 'open', !data.open)}
+                              className={`w-10 h-6 rounded-full p-1 transition-colors ${data.open ? 'bg-emerald-500' : 'bg-gray-200 dark:bg-gray-700'}`}
+                            >
+                              <div className={`w-4 h-4 bg-white rounded-full transition-transform ${data.open ? 'translate-x-4' : 'translate-x-0'}`}></div>
+                           </button>
+                        </div>
+                      </div>
+                      
+                      {data.open && (
+                        <div className="flex items-center gap-3 animate-in fade-in slide-in-from-top-1 duration-200">
+                          <div className="flex-1">
+                             <input 
+                                type="time" 
+                                value={data.start} 
+                                onChange={e => handleHourChange(day.key, 'start', e.target.value)}
+                                className="w-full bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl p-3 text-xs font-bold dark:text-white"
+                             />
+                          </div>
+                          <span className="text-gray-300 text-xs font-bold">até</span>
+                          <div className="flex-1">
+                             <input 
+                                type="time" 
+                                value={data.end} 
+                                onChange={e => handleHourChange(day.key, 'end', e.target.value)}
+                                className="w-full bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl p-3 text-xs font-bold dark:text-white"
+                             />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+            </div>
+        </section>
+
+        {/* 6. NOVA SEÇÃO: FORMAS DE PAGAMENTO ACEITAS */}
+        <section className="space-y-6">
+            <div className="flex items-center gap-2 px-1">
+                <CreditCard size={16} className="text-[#1E5BFF]" />
+                <h2 className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Formas de Pagamento Aceitas</h2>
+            </div>
+            <div className="bg-white dark:bg-gray-900 p-6 rounded-[2rem] border border-gray-100 dark:border-gray-800 shadow-sm space-y-6">
+                <div className="flex flex-wrap gap-2">
+                   {DEFAULT_PAYMENT_METHODS.map(method => {
+                     const isSelected = formData.payment_methods.includes(method);
+                     return (
+                        <button
+                          key={method}
+                          type="button"
+                          onClick={() => togglePaymentMethod(method)}
+                          className={`px-4 py-2.5 rounded-xl text-xs font-bold border transition-all ${isSelected ? 'bg-blue-50 border-[#1E5BFF] text-[#1E5BFF] dark:bg-blue-900/30' : 'bg-gray-50 border-gray-100 text-gray-400 dark:bg-gray-800 dark:border-gray-700'}`}
+                        >
+                          {method}
+                        </button>
+                     );
+                   })}
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Outras (opcional)</label>
+                  <input 
+                    value={formData.payment_methods_others}
+                    onChange={e => setFormData({...formData, payment_methods_others: e.target.value})}
+                    placeholder="Ex: PicPay, Vale Refeição Sodexo..."
+                    className="w-full bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-4 text-xs font-bold dark:text-white outline-none focus:border-[#1E5BFF] transition-all"
+                  />
+                </div>
+                
+                <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest italic text-center">
+                    Selecione pelo menos uma forma de pagamento.
+                </p>
+            </div>
+        </section>
+
+        {/* 7. ENDEREÇO E LOCALIZAÇÃO */}
         <section className="space-y-6">
             <div className="flex items-center gap-2 px-1">
                 <MapPin size={16} className="text-red-500" />
@@ -446,7 +596,7 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
             </div>
         </section>
 
-        {/* 6. CLASSIFICAÇÃO */}
+        {/* 8. CLASSIFICAÇÃO */}
         <section className="space-y-6">
             <div className="flex items-center gap-2 px-1">
                 <Hash size={16} className="text-[#1E5BFF]" />
@@ -488,7 +638,7 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
         </section>
       </div>
 
-      {/* 7. BOTÃO SALVAR FIXO */}
+      {/* 9. BOTÃO SALVAR FIXO */}
       <div className="fixed bottom-0 left-0 right-0 p-6 bg-white/90 dark:bg-gray-950/90 backdrop-blur-md border-t border-gray-100 dark:border-gray-800 z-50 max-w-md mx-auto">
         <button 
           onClick={handleSave} 
@@ -500,7 +650,7 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
         </button>
       </div>
 
-      {/* 8. MODAL DE SUGESTÃO */}
+      {/* 10. MODAL DE SUGESTÃO */}
       {suggestionModal && (
         <div className="fixed inset-0 z-[120] bg-black/80 backdrop-blur-md flex items-center justify-center p-6 animate-in fade-in duration-200">
             <div className="bg-white dark:bg-gray-900 w-full max-w-sm rounded-[2.5rem] p-8 shadow-2xl animate-in zoom-in-95 duration-300 relative border border-white/10" onClick={e => e.stopPropagation()}>

@@ -9,6 +9,12 @@ export enum AdType {
   PREMIUM = 'PREMIUM' 
 }
 
+export interface BusinessHour {
+  open: boolean;
+  start: string;
+  end: string;
+}
+
 export interface Store {
   id: string;
   name: string; // Nome fantasia / exibido
@@ -40,7 +46,7 @@ export interface Store {
   price_current?: number;
   address?: string;
   phone?: string;
-  hours?: string;
+  hours?: string; // Mantido para compatibilidade legado
   instagram?: string;
   gallery?: string[];
   distanceKm?: number;
@@ -70,6 +76,11 @@ export interface Store {
   cidade?: string;
   estado?: string;
   is_delivery_only?: boolean;
+
+  // --- NOVOS CAMPOS ESTRUTURADOS ---
+  business_hours?: Record<string, BusinessHour>;
+  payment_methods?: string[];
+  payment_methods_others?: string;
 }
 
 export interface StoreCredit {
