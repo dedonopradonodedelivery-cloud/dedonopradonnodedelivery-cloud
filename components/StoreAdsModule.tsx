@@ -1,7 +1,7 @@
-import React, { useState, useMemo, useEffect, useRef } from 'react';
+
+import React, { useState, useMemo, useRef } from 'react';
 import { 
   ChevronLeft, 
-  X, 
   ArrowRight, 
   Check, 
   Home, 
@@ -19,15 +19,7 @@ import {
   CreditCard,
   QrCode,
   Info,
-  Clock,
   AlertTriangle,
-  Type,
-  AlignLeft,
-  AlignCenter,
-  AlignRight,
-  Sparkles,
-  Store as StoreIcon,
-  Image as ImageIcon,
   Lock,
   Unlock,
   CheckSquare
@@ -46,10 +38,9 @@ const NEIGHBORHOODS = [
   "Curicica", "Parque Olímpico", "Gardênia", "Cidade de Deus"
 ];
 
-// Mock de ocupação por data - Simula que alguns bairros estão cheios hoje
 const MOCK_OCCUPANCY: Record<string, Record<string, boolean>> = {
-  "Freguesia": { "hoje": true },
-  "Taquara": { "proximo": true },
+  "Freguesia": { "periodo_1": true },
+  "Taquara": { "periodo_2": true },
 };
 
 const DISPLAY_MODES = [
@@ -71,12 +62,11 @@ const DISPLAY_MODES = [
   },
   { 
     id: 'combo', 
-    label: 'Home + Cat', 
+    label: 'Home + Categorias', 
     icon: Zap, 
-    recommended: true, 
     price: 119.90,
-    description: 'Destaque total na página inicial e em todas as categorias.',
-    whyChoose: 'Mais alcance, cliques e chances de vendas.'
+    description: 'Destaque na página inicial e em todas as categorias.',
+    whyChoose: 'Mais alcance, cliques e chances de venda.'
   },
 ];
 
@@ -95,21 +85,29 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
   const creativeRef = useRef<HTMLDivElement>(null);
   const paymentRef = useRef<HTMLDivElement>(null);
 
-  // Gera as 4 opções de início dinamicamente
+  // Lógica de Períodos Dinâmicos de 30 dias
   const dynamicPeriods = useMemo(() => {
     const now = new Date();
-    const formatDate = (date: Date) => date.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' }).replace('.', '');
+    const formatDate = (date: Date) => date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: '2-digit' });
     
+    const end1 = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+    const start2 = new Date(end1.getTime() + 1 * 24 * 60 * 60 * 1000);
+    const end2 = new Date(start2.getTime() + 30 * 24 * 60 * 60 * 1000);
+
     return [
-      { id: 'hoje', label: 'Começar hoje', date: now, isRecommended: true },
-      { id: '7d', label: 'Em 7 dias', date: new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000), isRecommended: false },
-      { id: '14d', label: 'Em 14 dias', date: new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000), isRecommended: false },
-      { id: '21d', label: 'Em 21 dias', date: new Date(now.getTime() + 21 * 24 * 60 * 60 * 1000), isRecommended: false },
-    ].map(p => ({
-      ...p,
-      displayDate: formatDate(p.date),
-      endDate: formatDate(new Date(p.date.getTime() + 30 * 24 * 60 * 60 * 1000))
-    }));
+      { 
+        id: 'periodo_1', 
+        label: 'Começar agora', 
+        sub: 'Exibição imediata após aprovação',
+        dates: `${formatDate(now)} → ${formatDate(end1)}`
+      },
+      { 
+        id: 'periodo_2', 
+        label: 'Próximos 30 dias', 
+        sub: 'Ideal para planejar promoções futuras',
+        dates: `${formatDate(start2)} → ${formatDate(end2)}`
+      },
+    ];
   }, []);
 
   const showToast = (msg: string, type: 'info' | 'error' = 'info') => {
@@ -124,12 +122,8 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
   const checkHoodAvailability = (hood: string, periodsToTest?: string[]): { available: boolean; busyIn: string[] } => {
     const targetPeriods = periodsToTest || selectedPeriods;
     if (targetPeriods.length === 0) return { available: true, busyIn: [] };
-    
     const busyIn = targetPeriods.filter(p => MOCK_OCCUPANCY[hood]?.[p] === true);
-    return { 
-      available: busyIn.length === 0,
-      busyIn 
-    };
+    return { available: busyIn.length === 0, busyIn };
   };
 
   const togglePeriod = (periodId: string) => {
@@ -142,7 +136,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
     if (selectedNeighborhoods.length > 0) {
       const validHoods = selectedNeighborhoods.filter(hood => checkHoodAvailability(hood, nextPeriods).available);
       if (validHoods.length < selectedNeighborhoods.length) {
-        showToast(`Bairro removido por indisponibilidade na data escolhida.`, 'error');
+        showToast(`Bairros removidos por indisponibilidade no novo período.`, 'error');
         setSelectedNeighborhoods(validHoods);
       }
     }
@@ -154,7 +148,6 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
     if (availableHoods.length > 0) scrollTo(creativeRef);
   };
 
-  // Fix: Add missing handleFinishArt function
   const handleFinishArt = () => {
     setIsArtSaved(true);
     scrollTo(paymentRef);
@@ -188,8 +181,8 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
     <div className="min-h-screen bg-[#020617] text-slate-100 font-sans flex flex-col selection:bg-blue-500/30 overflow-x-hidden">
       
       {toast && (
-        <div className={`fixed top-24 left-1/2 -translate-x-1/2 z-[100] px-6 py-3 rounded-2xl shadow-2xl flex items-center gap-3 animate-in slide-in-from-top-4 border ${toast.type === 'error' ? 'bg-rose-500 border-rose-400 text-white' : 'bg-blue-600 border-blue-500 text-white'}`}>
-           {toast.type === 'error' ? <AlertTriangle size={18} /> : <Info size={18} />}
+        <div className="fixed top-24 left-1/2 -translate-x-1/2 z-[100] px-6 py-3 rounded-2xl shadow-2xl flex items-center gap-3 animate-in slide-in-from-top-4 border bg-rose-500 border-rose-400 text-white">
+           <AlertTriangle size={18} />
            <p className="text-xs font-black uppercase tracking-tight">{toast.msg}</p>
         </div>
       )}
@@ -219,12 +212,9 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
                 className={`relative flex items-start text-left p-6 rounded-[2rem] border-2 transition-all duration-300 gap-5 ${
                   selectedMode?.id === mode.id 
                   ? 'bg-blue-600/10 border-blue-500 shadow-lg shadow-blue-500/10' 
-                  : 'bg-white/5 border-white/5 opacity-60'
+                  : 'bg-white/5 border-white/10'
                 }`}
               >
-                {mode.recommended && (
-                  <div className="absolute -top-2 left-8 bg-amber-400 text-slate-900 text-[8px] font-black px-2.5 py-0.5 rounded-full uppercase tracking-widest whitespace-nowrap">Recomendado</div>
-                )}
                 <div className={`p-4 rounded-2xl shrink-0 ${selectedMode?.id === mode.id ? 'bg-blue-500 text-white shadow-lg' : 'bg-white/5 text-slate-400'}`}>
                   <mode.icon size={28} />
                 </div>
@@ -235,51 +225,54 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
                       {selectedMode?.id === mode.id && <div className="w-2 h-2 bg-blue-500 rounded-full" />}
                     </div>
                   </div>
-                  <p className="text-[10px] text-slate-400 font-medium leading-relaxed line-clamp-2">{mode.description}</p>
-                  <p className="text-[9px] text-blue-400/70 font-bold uppercase tracking-widest mt-1.5 italic">{mode.whyChoose}</p>
+                  <p className="text-[10px] text-slate-300 font-medium leading-relaxed">{mode.description}</p>
+                  <p className="text-[9px] text-blue-400 font-bold uppercase tracking-widest mt-1.5 italic opacity-80">{mode.whyChoose}</p>
                 </div>
               </button>
             ))}
           </div>
         </section>
 
-        {/* BLOCO 2: DATA DE INÍCIO DINÂMICA */}
+        {/* BLOCO 2: PERÍODO (30 DIAS) */}
         <section 
           className={`space-y-8 transition-all duration-500 ${!selectedMode ? 'opacity-20 pointer-events-none' : 'opacity-100'}`}
         >
           <div>
-            <div className="flex justify-between items-end mb-5 px-1">
-                <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-blue-500 flex items-center gap-2">
-                    <Calendar size={14} /> 2. Escolha o início (30 dias)
-                </h3>
-            </div>
+            <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-blue-500 flex items-center gap-2 px-1 mb-5">
+                <Calendar size={14} /> 2. Escolha o período (30 dias)
+            </h3>
             
             <div className="p-4 bg-blue-500/5 border border-blue-500/10 rounded-2xl mb-6">
                 <p className="text-[10px] text-blue-200 leading-relaxed">
-                   {artChoice === 'pro' 
-                    ? '⚠️ Time Localizei: A contagem de 30 dias começa após a criação e aprovação da sua arte (estimado em até 72h).'
-                    : 'Sua campanha ficará no ar por 30 dias corridos a partir da data selecionada.'}
+                   Seu banner ficará no ar por 30 dias corridos após a publicação. 
+                   {artChoice === 'pro' && ' (A vigência do período de 30 dias inicia após a aprovação da arte).'}
                 </p>
             </div>
             
-            <div className="flex gap-3 overflow-x-auto no-scrollbar -mx-2 px-2 pb-2">
+            <div className="flex gap-4">
                 {dynamicPeriods.map(p => (
                     <button 
                         key={p.id} 
                         onClick={() => togglePeriod(p.id)}
-                        className={`relative px-5 py-4 rounded-2xl text-xs font-black uppercase tracking-widest transition-all border-2 shrink-0 flex flex-col items-center gap-1 ${selectedPeriods.includes(p.id) ? 'bg-blue-600 border-blue-500 text-white shadow-lg' : 'bg-slate-900 border-white/5 text-slate-500'}`}
+                        className={`flex-1 p-5 rounded-3xl border-2 transition-all flex flex-col gap-2 text-left ${
+                            selectedPeriods.includes(p.id) 
+                            ? 'bg-blue-600/10 border-blue-500 shadow-lg' 
+                            : 'bg-white/5 border-white/10'
+                        }`}
                     >
-                        {p.isRecommended && artChoice !== 'pro' && (
-                            <span className="absolute -top-2 bg-emerald-500 text-white text-[7px] px-1.5 py-0.5 rounded-md shadow-lg">RECOMENDADO</span>
-                        )}
-                        {artChoice === 'pro' && p.id === 'hoje' ? 'Após Aprovação' : p.label}
-                        <span className="text-[9px] opacity-60">{p.displayDate} → {p.endDate}</span>
+                        <div className="flex justify-between items-start">
+                            <CheckCircle2 size={16} className={selectedPeriods.includes(p.id) ? 'text-blue-500' : 'text-slate-700'} />
+                            <span className="text-[10px] font-bold text-slate-500">30 DIAS</span>
+                        </div>
+                        <p className="text-xs font-black text-white uppercase tracking-tight mt-2">{p.label}</p>
+                        <p className="text-[9px] text-slate-400 font-medium leading-tight">{p.sub}</p>
+                        <p className="text-[10px] text-blue-400 font-black mt-2 font-mono">{p.dates}</p>
                     </button>
                 ))}
             </div>
           </div>
 
-          {/* BLOCO 3: BAIRROS (GRID 2 COLUNAS) */}
+          {/* BLOCO 3: BAIRROS */}
           <div 
             ref={neighborhoodRef}
             className={`space-y-6 transition-all duration-500 ${selectedPeriods.length === 0 ? 'opacity-40 grayscale pointer-events-none' : 'opacity-100'}`}
@@ -293,10 +286,8 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
                     <button onClick={selectAllAvailableHoods} className="text-[10px] font-black text-[#1E5BFF] uppercase tracking-widest flex items-center gap-1.5 bg-blue-500/10 px-3 py-1.5 rounded-xl border border-blue-500/20 active:scale-95 transition-all"><CheckSquare size={12} /> Selecionar todos</button>
                   )}
                 </div>
-                {selectedPeriods.length === 0 ? (
-                    <div className="flex items-center gap-2 mt-4 bg-amber-400/10 border border-amber-400/20 px-3 py-2.5 rounded-xl"><Lock size={12} className="text-amber-400" /><p className="text-[9px] text-amber-400 uppercase font-black tracking-widest leading-none">Escolha a data de início para ver a disponibilidade</p></div>
-                ) : (
-                    <div className="flex items-center justify-between mt-4"><div className="flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 px-3 py-2 rounded-xl"><Unlock size={12} className="text-emerald-500" /><p className="text-[9px] text-emerald-500 uppercase font-black tracking-widest leading-none">Disponibilidade para os 30 dias</p></div>{selectedNeighborhoods.length > 0 && <span className="text-[10px] font-black text-blue-400 uppercase tracking-widest">{selectedNeighborhoods.length} selecionados</span>}</div>
+                {selectedPeriods.length > 0 && (
+                    <div className="flex items-center justify-between mt-4"><div className="flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 px-3 py-2 rounded-xl"><Unlock size={12} className="text-emerald-500" /><p className="text-[9px] text-emerald-500 uppercase font-black tracking-widest leading-none">Disponibilidade atualizada</p></div>{selectedNeighborhoods.length > 0 && <span className="text-[10px] font-black text-blue-400 uppercase tracking-widest">{selectedNeighborhoods.length} selecionados</span>}</div>
                 )}
             </div>
 
@@ -310,7 +301,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
                                 <div className={`p-1.5 rounded-lg ${!available ? 'bg-slate-800 text-slate-600' : isSelected ? 'bg-blue-500 text-white' : 'bg-slate-800 text-slate-500'}`}><MapPin size={14} /></div>
                                 {available && <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${isSelected ? 'bg-blue-500 border-blue-500' : 'border-slate-700'}`}>{isSelected && <Check size={12} className="text-white" strokeWidth={4} />}</div>}
                             </div>
-                            <div><p className={`font-bold text-xs ${!available ? 'text-slate-600' : 'text-white'}`}>{hood}</p><p className={`text-[8px] font-black uppercase tracking-widest mt-1 ${!available ? 'text-rose-500' : 'text-emerald-500'}`}>{!available ? `Ocupado no início` : 'Disponível'}</p></div>
+                            <div><p className={`font-bold text-xs ${!available ? 'text-slate-600' : 'text-white'}`}>{hood}</p><p className={`text-[8px] font-black uppercase tracking-widest mt-1 ${!available ? 'text-rose-500' : 'text-emerald-500'}`}>{!available ? `Ocupado no período` : 'Disponível'}</p></div>
                         </button>
                     );
                 })}
@@ -318,7 +309,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
           </div>
         </section>
 
-        {/* BLOCO 4: DESIGN DA ARTE */}
+        {/* BLOCO 4: DESIGN */}
         <section 
           ref={creativeRef}
           className={`space-y-8 transition-all duration-500 ${selectedNeighborhoods.length === 0 ? 'opacity-20 pointer-events-none' : 'opacity-100'}`}
@@ -335,8 +326,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
                 </div>
               </div>
               <div onClick={() => { setArtChoice('pro'); setIsArtSaved(true); scrollTo(paymentRef); }} className={`relative rounded-[2.5rem] border-2 transition-all cursor-pointer overflow-hidden ${artChoice === 'pro' ? 'bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 border-amber-500 shadow-2xl shadow-amber-500/10' : 'bg-slate-900 border-white/5 opacity-80 hover:opacity-100'}`}>
-                  <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-amber-400 text-slate-900 text-[8px] font-black px-4 py-1 rounded-full uppercase tracking-widest shadow-lg z-10">Mais Vendas</div>
-                  <div className="p-8"><div className="flex items-start justify-between mb-8 pt-4"><div className="flex items-start gap-5"><div className="w-12 h-12 bg-amber-400/10 rounded-2xl flex items-center justify-center text-amber-400 shrink-0 border border-amber-500/20"><Rocket size={24} /></div><div><h3 className="text-lg font-bold text-white mb-1 leading-tight">Time de Designers</h3><p className="text-xs text-slate-400 leading-relaxed max-w-[220px]">Criamos seu banner profissional. Entrega em até 72h.</p></div></div><div className="flex flex-col items-end gap-2"><div className="space-y-0.5 text-right"><span className="text-slate-500 line-through text-[10px] font-bold">R$ 149,90</span><p className="text-2xl font-black text-white leading-none">R$ 69,90</p></div><div className={`px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all mt-2 ${artChoice === 'pro' ? 'bg-[#1E5BFF] text-white shadow-lg' : 'bg-white/5 text-slate-400'}`}>{artChoice === 'pro' ? 'Selecionado' : 'Selecionar'}</div></div></div>
+                  <div className="p-8 pt-10"><div className="flex items-start justify-between mb-8"><div className="flex items-start gap-5"><div className="w-12 h-12 bg-amber-400/10 rounded-2xl flex items-center justify-center text-amber-400 shrink-0 border border-amber-500/20"><Rocket size={24} /></div><div><h3 className="text-lg font-bold text-white mb-1 leading-tight">Time de Designers</h3><p className="text-xs text-slate-400 leading-relaxed max-w-[220px]">Criamos seu banner profissional. Entrega em até 72h.</p></div></div><div className="flex flex-col items-end gap-2"><div className="space-y-0.5 text-right"><span className="text-slate-500 line-through text-[10px] font-bold">R$ 149,90</span><p className="text-2xl font-black text-white leading-none">R$ 69,90</p></div><div className={`px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all mt-2 ${artChoice === 'pro' ? 'bg-[#1E5BFF] text-white shadow-lg' : 'bg-white/5 text-slate-400'}`}>{artChoice === 'pro' ? 'Selecionado' : 'Selecionar'}</div></div></div>
                     <div className="grid grid-cols-1 gap-y-3 mb-8">{["Banner profissional", "Atendimento via chat", "Vigência conta após aprovação"].map((benefit, i) => (<div key={i} className="flex items-center gap-3"><div className="w-5 h-5 rounded-full bg-amber-400/10 flex items-center justify-center border border-amber-500/20 shrink-0"><Check size={10} className="text-amber-400" strokeWidth={4} /></div><span className="text-[11px] font-medium text-slate-300">{benefit}</span></div>))}</div>
                   </div>
               </div>
@@ -352,7 +342,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
                     <div className="space-y-2">
                         <div className="flex justify-between text-sm"><span className="text-slate-500">Exibição: {selectedMode?.label}</span><span className="font-bold text-white">R$ {selectedMode?.price.toFixed(2)}</span></div>
                         <div className="flex justify-between text-sm"><span className="text-slate-500">Bairros selecionados</span><span className="font-bold text-white">× {selectedNeighborhoods.length}</span></div>
-                        <div className="flex justify-between text-sm"><span className="text-slate-500">Blocos de 30 dias</span><span className="font-bold text-white">× {selectedPeriods.length || 1}</span></div>
+                        <div className="flex justify-between text-sm"><span className="text-slate-500">Período total</span><span className="font-bold text-white">{selectedPeriods.length * 30} dias ({selectedPeriods.length}x 30d)</span></div>
                         {artChoice === 'pro' && <div className="flex justify-between text-sm text-amber-400"><span className="font-medium">Arte Profissional</span><span className="font-black">+ R$ 69,90</span></div>}
                     </div>
                     <div className="pt-4 border-t border-white/5 flex justify-between items-center"><span className="text-sm font-bold text-slate-300">Total Geral</span><span className="text-2xl font-black text-white">R$ {totalAmount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span></div>
