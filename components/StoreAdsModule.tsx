@@ -15,7 +15,11 @@ import {
   ShieldCheck,
   ShoppingBag,
   Loader2,
-  Star
+  Star,
+  // Added Target, Image (aliased as ImageIcon), and Crown to fix "Cannot find name" errors
+  Target,
+  Image as ImageIcon,
+  Crown
 } from 'lucide-react';
 import { User } from '@supabase/supabase-js';
 
@@ -80,6 +84,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
       {/* 1. ONDE DESEJA APARECER */}
       <section>
         <h3 className="text-xs font-black uppercase tracking-[0.2em] text-blue-500 mb-6 flex items-center gap-2">
+          {/* Added Target icon to fix "Cannot find name" error */}
           <Target size={14} /> 1. Onde deseja aparecer?
         </h3>
         <div className="grid grid-cols-3 gap-3">
@@ -239,6 +244,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
           {artChoice === 'own' && (
             <div className="mt-8 p-6 bg-white/5 rounded-3xl border border-white/10 animate-in fade-in zoom-in-95 duration-300">
                <div className="flex flex-col items-center justify-center border-2 border-dashed border-slate-700 rounded-2xl p-8 mb-4">
+                  {/* Added ImageIcon to fix "Cannot find name" error */}
                   <ImageIcon size={32} className="text-slate-600 mb-2" />
                   <p className="text-[10px] font-black uppercase text-slate-500">Upload da Imagem</p>
                </div>
@@ -310,6 +316,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
           </button>
           <div>
             <h1 className="font-bold text-lg leading-none flex items-center gap-2">
+               {/* Added Crown icon to fix "Cannot find name" error */}
                Banners Premium <Crown size={16} className="text-amber-400 fill-amber-400" />
             </h1>
             <p className="text-[10px] text-blue-400 uppercase font-black tracking-widest mt-1">
