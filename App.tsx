@@ -21,7 +21,7 @@ import { AdminPanel } from '@/components/AdminPanel';
 import { CashbackLandingView } from '@/components/CashbackLandingView';
 import { StoreAdsModule } from '@/components/StoreAdsModule';
 import { AdminBannerModeration } from '@/components/AdminBannerModeration';
-import { MapPin, ShieldCheck, X } from 'lucide-react';
+import { MapPin, ShieldCheck, X, Palette } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { NeighborhoodProvider } from '@/contexts/NeighborhoodContext';
 import { Category, Store } from '@/types';
@@ -38,7 +38,7 @@ import { MerchantReviewsModule } from '@/components/MerchantReviewsModule';
 let splashWasShownInSession = false;
 const ADMIN_EMAIL = 'dedonopradonodedelivery@gmail.com';
 
-export type RoleMode = 'ADM' | 'Usuário' | 'Lojista' | 'Visitante';
+export type RoleMode = 'ADM' | 'Usuário' | 'Lojista' | 'Visitante' | 'Designer';
 
 const TypingText: React.FC<{ text: string; duration: number }> = ({ text, duration }) => {
   const [displayedText, setDisplayedText] = useState("");
@@ -78,6 +78,7 @@ const App: React.FC = () => {
   const [adCategoryTarget, setAdCategoryTarget] = useState<string | null>(null);
 
   const isMerchantMode = userRole === 'lojista' || (user?.email === ADMIN_EMAIL && viewMode === 'Lojista');
+  const isDesignerMode = user?.email === ADMIN_EMAIL && viewMode === 'Designer';
 
   useEffect(() => {
     const restrictedTabs = ['scan_cashback', 'merchant_qr_display', 'wallet', 'pay_cashback', 'store_area', 'admin_panel', 'edit_profile', 'store_claim', 'user_cashback_mock', 'merchant_reviews'];
@@ -120,7 +121,7 @@ const App: React.FC = () => {
                     <button onClick={() => setIsRoleSwitcherOpen(false)} className="text-gray-500 hover:text-white"><X size={24} /></button>
                 </div>
                 <div className="space-y-3">
-                    {(['ADM', 'Usuário', 'Lojista', 'Visitante'] as RoleMode[]).map((role) => (
+                    {(['ADM', 'Usuário', 'Lojista', 'Visitante', 'Designer'] as RoleMode[]).map((role) => (
                         <button 
                           key={role} 
                           onClick={() => { 
@@ -128,12 +129,16 @@ const App: React.FC = () => {
                             localStorage.setItem('admin_view_mode', role);
                             setIsRoleSwitcherOpen(false); 
                             if (role === 'Lojista') setActiveTab('profile');
+                            else if (role === 'Designer') setActiveTab('store_ads_module');
                             else if (role === 'ADM') setActiveTab('admin_panel');
                             else setActiveTab('home');
                           }} 
                           className={`w-full p-5 rounded-[1.5rem] border text-left transition-all ${viewMode === role ? 'bg-white text-black' : 'bg-white/5 border-white/5 text-white'}`}
                         >
-                            <span className="font-black uppercase">{role}</span>
+                            <div className="flex items-center justify-between">
+                              <span className="font-black uppercase">{role}</span>
+                              {role === 'Designer' && <Palette size={16} className="text-indigo-400" />}
+                            </div>
                         </button>
                     ))}
                 </div>
@@ -191,7 +196,7 @@ const App: React.FC = () => {
                 {activeTab === 'favorites' && <FavoritesView onBack={() => setActiveTab('profile')} onNavigate={setActiveTab} user={user as any} />}
                 {activeTab === 'service_subcategories' && selectedServiceMacro && <SubcategoriesView macroId={selectedServiceMacro.id} macroName={selectedServiceMacro.name} onBack={() => setActiveTab('services')} onSelectSubcategory={(n) => { setQuoteCategory(n); setActiveTab('service_specialties'); }} />}
                 {activeTab === 'service_specialties' && <SpecialtiesView subcategoryName={quoteCategory} onBack={() => setActiveTab('service_subcategories')} onSelectSpecialty={() => setIsQuoteModalOpen(true)} />}
-                {activeTab === 'store_ads_module' && <StoreAdsModule onBack={() => setActiveTab('profile')} onNavigate={setActiveTab} categoryName={adCategoryTarget || undefined} user={user as any} />}
+                {activeTab === 'store_ads_module' && <StoreAdsModule onBack={() => setActiveTab(isDesignerMode ? 'admin_panel' : 'profile')} onNavigate={setActiveTab} categoryName={adCategoryTarget || undefined} user={user as any} viewMode={viewMode} />}
                 {activeTab === 'store_profile' && <StoreProfileEdit onBack={() => setActiveTab('profile')} />}
               </main>
               <AuthModal isOpen={isAuthOpen} onClose={() => setIsAuthOpen(false)} user={user as any} onLoginSuccess={handleLoginSuccess} />
