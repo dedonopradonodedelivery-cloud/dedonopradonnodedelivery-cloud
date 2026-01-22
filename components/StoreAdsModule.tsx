@@ -26,7 +26,14 @@ import {
   Paintbrush,
   Image as ImageIcon,
   Upload,
-  X
+  X,
+  Plus,
+  Send,
+  User as UserIcon,
+  MessageSquare,
+  FileText,
+  BadgeCheck,
+  Building
 } from 'lucide-react';
 import { User } from '@supabase/supabase-js';
 import { StoreBannerEditor } from './StoreBannerEditor';
@@ -79,6 +86,7 @@ const DISPLAY_MODES = [
 ];
 
 export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNavigate, user, categoryName }) => {
+  const [view, setView] = useState<'sales' | 'creator' | 'editor' | 'pro_checkout' | 'pro_processing' | 'pro_approved' | 'pro_chat'>('sales');
   const [selectedMode, setSelectedMode] = useState<typeof DISPLAY_MODES[0] | null>(null);
   const [selectedPeriods, setSelectedPeriods] = useState<string[]>([]);
   const [selectedNeighborhoods, setSelectedNeighborhoods] = useState<string[]>([]);
@@ -93,6 +101,10 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
   const [toast, setToast] = useState<{msg: string, type: 'info' | 'error'} | null>(null);
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   
+  // States para o Chat Pro
+  const [chatMessages, setChatMessages] = useState<any[]>([]);
+  const [proChatStep, setProChatStep] = useState(0);
+
   // Controle de scroll inteligente
   const [highlightPeriod, setHighlightPeriod] = useState(false);
 
@@ -100,7 +112,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
   const neighborhoodRef = useRef<HTMLDivElement>(null);
   const creativeRef = useRef<HTMLDivElement>(null);
   const paymentRef = useRef<HTMLDivElement>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const chatScrollRef = useRef<HTMLDivElement>(null);
 
   const dynamicPeriods = useMemo(() => {
     const now = new Date();
@@ -114,6 +126,38 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
       { id: 'periodo_2', label: 'Próximos 30 dias', sub: 'Planejamento futuro', dates: `${formatDate(start2)} → ${formatDate(end2)}`, badge: 'Planejar' },
     ];
   }, []);
+
+  // Lógica de mensagens automáticas do Chat
+  useEffect(() => {
+    if (view === 'pro_chat' && proChatStep === 0) {
+      setProChatStep(1);
+      // Mensagem 1 - Instantânea
+      setChatMessages([{
+        id: 1,
+        role: 'system',
+        text: '🎉 Parabéns pela escolha profissional!\nNosso time vai criar um banner focado em conversão.\nEm até 72h você receberá a arte pronta para aprovação e publicação.',
+        timestamp: 'Agora'
+      }]);
+
+      // Mensagem 2 - Delay de 1.5s
+      setTimeout(() => {
+        setChatMessages(prev => [...prev, {
+          id: 2,
+          role: 'system',
+          text: 'Para começarmos, envie por aqui:\n• Logo em alta (PNG ou PDF)\n• Nome da empresa\n• Pequena descrição / promoção\nAssim que recebermos, damos início à criação.',
+          timestamp: 'Agora'
+        }]);
+        setProChatStep(2);
+      }, 1500);
+    }
+  }, [view]);
+
+  // Scroll automático do chat
+  useEffect(() => {
+    if (chatScrollRef.current) {
+      chatScrollRef.current.scrollTop = chatScrollRef.current.scrollHeight;
+    }
+  }, [chatMessages]);
 
   const showToast = (msg: string, type: 'info' | 'error' = 'info') => {
     setToast({ msg, type });
@@ -137,11 +181,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
   };
 
   const handleModeSelection = (mode: typeof DISPLAY_MODES[0]) => {
-    const isChanging = selectedMode !== null;
     setSelectedMode(mode);
-    
-    // Regra: Scroll assistido apenas do Passo 1 para o Passo 2
-    // Se o usuário já tiver escolhido um período, não rola para não perder o foco
     if (selectedPeriods.length === 0) {
         setHighlightPeriod(true);
         scrollTo(periodRef, 120);
@@ -159,11 +199,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
   const togglePeriod = (periodId: string) => {
     const isAdding = !selectedPeriods.includes(periodId);
     const nextPeriods = isAdding ? [...selectedPeriods, periodId] : selectedPeriods.filter(p => p !== periodId);
-    
     setSelectedPeriods(nextPeriods);
-
-    // Passo 2 -> 3 é manual, pois é seleção múltipla. 
-    // Não rolar automaticamente para não esconder as opções de período.
   };
 
   const selectAllAvailableHoods = () => {
@@ -171,18 +207,11 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
     setSelectedNeighborhoods(availableHoods);
   };
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setUploadedImage(reader.result as string);
-        setIsArtSaved(true);
-        setSavedDesign({ type: 'upload', image: reader.result as string });
-        scrollTo(paymentRef, 80);
-      };
-      reader.readAsDataURL(file);
-    }
+  const handlePayPro = () => {
+    setView('pro_processing');
+    setTimeout(() => {
+      setView('pro_approved');
+    }, 2000);
   };
 
   const handleSaveDesign = (design: any) => {
@@ -223,6 +252,137 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
       />
     );
   }
+
+  // --- VIEWS PROFISSIONAIS ---
+  
+  if (view === 'pro_checkout') {
+    return (
+      <div className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm flex items-end animate-in fade-in duration-300">
+        <div className="w-full bg-white dark:bg-gray-900 rounded-t-[3rem] p-8 shadow-2xl animate-in slide-in-from-bottom duration-500 max-w-md mx-auto">
+          <div className="w-12 h-1.5 bg-gray-200 dark:bg-gray-800 rounded-full mx-auto mb-8"></div>
+          <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Pagamento – Criação profissional</h2>
+          <p className="text-sm text-gray-500 mb-8">Após o pagamento, você será direcionado para o chat com nossos designers.</p>
+          
+          <div className="bg-gray-50 dark:bg-gray-800 rounded-2xl p-5 mb-8 border border-gray-100 dark:border-gray-700">
+            <div className="flex justify-between items-center mb-4">
+              <span className="text-gray-500 text-sm">Serviço</span>
+              <span className="font-bold text-gray-900 dark:text-white">Design Pro de Banner</span>
+            </div>
+            <div className="flex justify-between items-center pt-4 border-t border-gray-100 dark:border-gray-700">
+              <span className="text-gray-500 text-sm font-bold">Total</span>
+              <span className="text-2xl font-black text-blue-600">R$ 69,90</span>
+            </div>
+          </div>
+
+          <div className="space-y-3 mb-8">
+            <button onClick={() => setPaymentMethod('pix')} className={`w-full p-5 rounded-2xl border-2 flex items-center justify-between ${paymentMethod === 'pix' ? 'bg-blue-50 border-blue-500' : 'bg-white dark:bg-gray-800 border-gray-100 dark:border-gray-700'}`}>
+              <div className="flex items-center gap-3"><QrCode size={20} className="text-blue-500" /><span className="font-bold text-sm">PIX</span></div>
+              {paymentMethod === 'pix' && <CheckCircle2 size={18} className="text-blue-500" />}
+            </button>
+            <button onClick={() => setPaymentMethod('credit')} className={`w-full p-5 rounded-2xl border-2 flex items-center justify-between ${paymentMethod === 'credit' ? 'bg-blue-50 border-blue-500' : 'bg-white dark:bg-gray-800 border-gray-100 dark:border-gray-700'}`}>
+              <div className="flex items-center gap-3"><CreditCard size={20} className="text-blue-500" /><span className="font-bold text-sm">Cartão de Crédito (até 3x)</span></div>
+              {paymentMethod === 'credit' && <CheckCircle2 size={18} className="text-blue-500" />}
+            </button>
+          </div>
+
+          <button onClick={handlePayPro} className="w-full py-5 bg-blue-600 text-white font-black rounded-2xl shadow-xl active:scale-95 transition-all uppercase tracking-widest text-xs mb-4">Pagar agora (simulação)</button>
+          <button onClick={() => setView('sales')} className="w-full py-2 text-gray-400 font-bold text-xs uppercase tracking-widest">Cancelar</button>
+        </div>
+      </div>
+    );
+  }
+
+  if (view === 'pro_processing') {
+    return (
+      <div className="fixed inset-0 z-[120] bg-white dark:bg-gray-950 flex flex-col items-center justify-center p-8 text-center animate-in fade-in">
+        <Loader2 className="w-16 h-16 text-blue-600 animate-spin mb-6" />
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2 tracking-tight">Confirmando pagamento...</h2>
+        <p className="text-gray-500 text-sm">Validando sua transação com segurança.</p>
+      </div>
+    );
+  }
+
+  if (view === 'pro_approved') {
+    return (
+      <div className="fixed inset-0 z-[120] bg-white dark:bg-gray-950 flex flex-col items-center justify-center p-10 text-center animate-in zoom-in duration-300">
+        <div className="w-24 h-24 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mb-8 shadow-xl shadow-green-200 animate-bounce-short">
+          <CheckCircle2 className="w-12 h-12 text-green-600" />
+        </div>
+        <h2 className="text-3xl font-black text-gray-900 dark:text-white mb-3">Pagamento aprovado!</h2>
+        <p className="text-gray-500 text-base leading-relaxed mb-12 max-w-xs">Agora vamos iniciar a criação do seu banner pelo chat.</p>
+        <button onClick={() => setView('pro_chat')} className="w-full max-w-xs py-5 bg-blue-600 text-white font-black rounded-2xl shadow-xl active:scale-95 transition-all uppercase tracking-widest text-sm flex items-center justify-center gap-3">
+          Ir para o chat <ArrowRight size={18} />
+        </button>
+      </div>
+    );
+  }
+
+  if (view === 'pro_chat') {
+    return (
+      <div className="fixed inset-0 z-[130] bg-[#F8F9FC] dark:bg-gray-950 flex flex-col animate-in slide-in-from-right">
+        {/* Header do Chat */}
+        <header className="bg-white dark:bg-gray-900 px-6 py-5 border-b border-gray-100 dark:border-gray-800 flex items-center gap-4 shadow-sm">
+          <button onClick={() => setView('sales')} className="p-2 bg-gray-50 dark:bg-gray-800 rounded-xl text-gray-400"><ChevronLeft size={20} /></button>
+          <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white shadow-md relative shrink-0">
+              <Building size={20} />
+              <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-green-500 border-2 border-white dark:border-gray-900 rounded-full"></div>
+          </div>
+          <div>
+            <h2 className="font-bold text-gray-900 dark:text-white leading-tight">Time de Design</h2>
+            <p className="text-[10px] text-green-500 font-black uppercase tracking-widest">Online agora</p>
+          </div>
+        </header>
+
+        {/* Corpo do Chat */}
+        <main ref={chatScrollRef} className="flex-1 overflow-y-auto p-6 space-y-6 no-scrollbar">
+          {chatMessages.map(msg => (
+            <div key={msg.id} className="flex flex-col items-start gap-1 max-w-[85%] animate-in slide-in-from-bottom-2 duration-500">
+               <div className="bg-white dark:bg-gray-800 p-4 rounded-3xl rounded-tl-none shadow-sm border border-gray-100 dark:border-gray-700">
+                  <p className="text-sm text-gray-700 dark:text-gray-200 whitespace-pre-wrap leading-relaxed">{msg.text}</p>
+               </div>
+               <span className="text-[9px] text-gray-400 font-bold uppercase tracking-widest ml-2">{msg.timestamp}</span>
+            </div>
+          ))}
+          {proChatStep === 1 && (
+            <div className="flex gap-2 p-2 ml-2">
+               <div className="w-1.5 h-1.5 bg-blue-300 rounded-full animate-bounce"></div>
+               <div className="w-1.5 h-1.5 bg-blue-400 rounded-full animate-bounce [animation-delay:0.2s]"></div>
+               <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce [animation-delay:0.4s]"></div>
+            </div>
+          )}
+        </main>
+
+        {/* Barra de Ações do Chat */}
+        <footer className="p-6 bg-white dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800 space-y-4">
+           {proChatStep === 2 && (
+             <div className="flex flex-col gap-2">
+                <button className="w-full py-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800 rounded-2xl flex items-center justify-center gap-3 text-[#1E5BFF] text-xs font-black uppercase tracking-widest active:scale-[0.98] transition-all">
+                  <Upload size={16} /> Enviar logo
+                </button>
+                <button className="w-full py-4 bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl flex items-center justify-center gap-3 text-gray-700 dark:text-gray-200 text-xs font-black uppercase tracking-widest active:scale-[0.98] transition-all">
+                  <FileText size={16} /> Preencher informações
+                </button>
+             </div>
+           )}
+           <div className="flex items-center gap-3">
+              <input 
+                type="text" 
+                placeholder="Digite sua dúvida..."
+                className="flex-1 bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl px-5 py-4 text-sm outline-none focus:border-blue-500 transition-all dark:text-white"
+              />
+              <button onClick={() => window.open('https://wa.me/5521999999999', '_blank')} className="p-4 bg-green-500 text-white rounded-2xl shadow-lg active:scale-95 transition-all">
+                <MessageCircle size={20} className="fill-white" />
+              </button>
+           </div>
+           <p className="text-[9px] text-center text-gray-400 font-bold uppercase tracking-widest">
+             Atendimento oficial Localizei JPA
+           </p>
+        </footer>
+      </div>
+    );
+  }
+
+  // --- RENDER PADRÃO DO MÓDULO ---
 
   return (
     <div className="min-h-screen bg-[#020617] text-slate-100 font-sans flex flex-col overflow-x-hidden selection:bg-blue-500/30">
@@ -351,7 +511,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
                         <div className="space-y-4 animate-in slide-in-from-top-4 duration-500 pt-4 border-t border-white/5">
                             <div className="grid grid-cols-2 gap-3">
                                 <button 
-                                  onClick={(e) => { e.stopPropagation(); setDiyFlowStep('upload'); fileInputRef.current?.click(); }}
+                                  onClick={(e) => { e.stopPropagation(); setDiyFlowStep('upload'); }}
                                   className={`p-4 rounded-2xl border-2 flex flex-col items-center text-center gap-3 transition-all ${diyFlowStep === 'upload' && isArtSaved ? 'bg-emerald-500/10 border-emerald-500/30' : 'bg-white/5 border-white/5 hover:border-white/20'}`}
                                 >
                                     <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-slate-400"><ImageIcon size={20} /></div>
@@ -359,7 +519,6 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
                                         <p className="text-[10px] font-black text-white uppercase leading-tight">Usar banner pronto</p>
                                         <p className="text-[8px] text-slate-500 uppercase mt-1">Upload de arquivo</p>
                                     </div>
-                                    <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleImageUpload} />
                                 </button>
 
                                 <button 
@@ -388,19 +547,19 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
                 </div>
               </div>
 
-              <div onClick={() => { setArtChoice('pro'); setIsArtSaved(true); scrollTo(paymentRef, 80); }} className={`rounded-[2.5rem] border-2 transition-all cursor-pointer overflow-hidden ${artChoice === 'pro' ? 'bg-slate-900 border-amber-500 shadow-xl shadow-amber-500/5' : 'bg-slate-900 border-white/5'}`}>
+              <div onClick={() => { setArtChoice('pro'); setIsArtSaved(true); setView('pro_checkout'); }} className={`rounded-[2.5rem] border-2 transition-all cursor-pointer overflow-hidden ${artChoice === 'pro' ? 'bg-slate-900 border-amber-500 shadow-xl shadow-amber-500/5' : 'bg-slate-900 border-white/5'}`}>
                   <div className="p-8">
                     <div className="flex items-start justify-between">
                         <div className="flex items-start gap-5">
                             <div className="w-12 h-12 bg-amber-400/10 rounded-2xl flex items-center justify-center text-amber-400 shrink-0"><Rocket size={24} /></div>
                             <div>
-                                <h3 className="text-lg font-bold text-white mb-1 leading-tight">Time de Designers</h3>
+                                <h3 className="text-lg font-bold text-white mb-1 leading-tight">Contratar time profissional</h3>
                                 <p className="text-xs text-slate-400 leading-relaxed max-w-[180px]">Nós criamos o banner profissional para você.</p>
                             </div>
                         </div>
                         <div className="text-right">
                             <span className="text-slate-500 line-through text-[9px] font-bold">R$ 149</span>
-                            <p className="text-xl font-black text-white">R$ 69</p>
+                            <p className="text-xl font-black text-white">R$ 69,90</p>
                         </div>
                     </div>
                   </div>
@@ -408,7 +567,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
           </div>
         </section>
 
-        {/* BLOCO 5: CHECKOUT */}
+        {/* BLOCO 5: CHECKOUT FINAL */}
         <section ref={paymentRef} className={`space-y-8 transition-all duration-500 ${!isArtSaved ? 'opacity-20 pointer-events-none' : 'opacity-100'}`}>
             <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-blue-500 flex items-center gap-2 px-1"><Check size={14} /> 5. Finalizar Compra</h3>
             <div className="bg-slate-900 rounded-[2.5rem] p-8 border border-white/10 shadow-2xl space-y-8">
@@ -426,7 +585,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
         </section>
       </main>
 
-      {!isSuccess && (
+      {!isSuccess && view === 'sales' && (
       <div className="fixed bottom-0 left-0 right-0 p-6 bg-[#020617]/95 backdrop-blur-2xl border-t border-white/10 z-40 max-w-md mx-auto shadow-[0_-20px_40px_rgba(0,0,0,0.4)]">
         <button onClick={handleFooterClick} disabled={isSubmitting} className={`w-full py-5 rounded-[2rem] shadow-xl shadow-blue-500/20 flex flex-col items-center justify-center transition-all active:scale-[0.98] ${selectedMode ? 'bg-[#1E5BFF] text-white' : 'bg-white/5 text-slate-500 cursor-not-allowed opacity-50'}`}>
           {isSubmitting ? <Loader2 className="w-6 h-6 animate-spin" /> : !selectedMode ? <span className="font-black text-sm uppercase tracking-widest">Escolha onde aparecer</span> : (
