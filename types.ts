@@ -11,7 +11,7 @@ export enum AdType {
 
 export interface Store {
   id: string;
-  name: string;
+  name: string; // Nome fantasia / exibido
   category: string;
   subcategory: string;
   logoUrl?: string; 
@@ -45,6 +45,31 @@ export interface Store {
   gallery?: string[];
   distanceKm?: number;
   closingTime?: string;
+
+  // --- DADOS FISCAIS ---
+  razao_social?: string;
+  cnpj?: string;
+  email_fiscal?: string;
+  whatsapp_financeiro?: string;
+  telefone_fixo_fiscal?: string;
+  inscricao_municipal?: string;
+  inscricao_estadual?: string;
+
+  // --- DADOS PÚBLICOS ---
+  nome_exibido?: string;
+  whatsapp_publico?: string;
+  telefone_fixo_publico?: string;
+  email_publico?: string;
+  
+  // --- ENDEREÇO DETALHADO ---
+  cep?: string;
+  rua?: string;
+  numero?: string;
+  complemento?: string;
+  bairro?: string;
+  cidade?: string;
+  estado?: string;
+  is_delivery_only?: boolean;
 }
 
 export interface StoreCredit {
@@ -191,7 +216,7 @@ export interface AppNotification {
   userId: string;
   title: string;
   message: string;
-  type: 'taxonomy_approval' | 'taxonomy_rejection' | 'system';
+  type: 'taxonomy_approval' | 'taxonomy_rejection' | 'system' | 'job_push';
   read: boolean;
   createdAt: string;
 }

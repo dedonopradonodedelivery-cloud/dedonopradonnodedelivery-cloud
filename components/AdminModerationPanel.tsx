@@ -15,7 +15,9 @@ import {
   Tag,
   Clock,
   Send,
-  Bell
+  Bell,
+  CheckCircle2,
+  Info
 } from 'lucide-react';
 import { PostReport, ReportPriority, TaxonomySuggestion, AppNotification } from '../types';
 
@@ -64,6 +66,8 @@ export const AdminModerationPanel: React.FC<AdminModerationPanelProps> = ({ onBa
       createdAt: new Date().toISOString()
     };
     localStorage.setItem('app_notifications', JSON.stringify([newNotif, ...JSON.parse(savedNotifs)]));
+    
+    // Simular disparo PUSH no console
     console.log(`[PUSH SIMULATED] To: ${merchantId} | ${title}: ${message}`);
   };
 
@@ -72,16 +76,22 @@ export const AdminModerationPanel: React.FC<AdminModerationPanelProps> = ({ onBa
     if (!sug) return;
 
     if (action === 'approve') {
-      setTaxonomySuggestions(prev => prev.map(s => s.id === id ? { ...s, status: 'approved' } : s));
-      sendMerchantNotification(sug.merchantId, 'Sugestão Aprovada!', 'Sua sugestão foi aprovada e já está disponível para seleção.');
-      alert('Sugestão aprovada!');
+      const updated = taxonomySuggestions.map(s => s.id === id ? { ...s, status: 'approved' as const } : s);
+      setTaxonomySuggestions(updated);
+      localStorage.setItem('taxonomy_suggestions', JSON.stringify(updated));
+      
+      sendMerchantNotification(sug.merchantId, 'Sugestão Aprovada!', `Sua sugestão de ${sug.type === 'category' ? 'categoria' : 'subcategoria'} "${sug.name}" foi aprovada.`);
+      alert('Sugestão aprovada! O lojista foi notificado.');
     } else {
-      if (!rejectionReason.trim() && selectedSugForAction === id) {
+      if (!rejectionReason.trim()) {
         alert('Por favor, informe o motivo da rejeição.');
         return;
       }
-      setTaxonomySuggestions(prev => prev.map(s => s.id === id ? { ...s, status: 'rejected', rejectionReason } : s));
-      sendMerchantNotification(sug.merchantId, 'Sugestão Recusada', `Sua sugestão não foi aprovada. Motivo: ${rejectionReason}`);
+      const updated = taxonomySuggestions.map(s => s.id === id ? { ...s, status: 'rejected' as const, rejectionReason } : s);
+      setTaxonomySuggestions(updated);
+      localStorage.setItem('taxonomy_suggestions', JSON.stringify(updated));
+
+      sendMerchantNotification(sug.merchantId, 'Sugestão Recusada', `Não pudemos aprovar "${sug.name}". Motivo: ${rejectionReason}`);
       alert('Sugestão rejeitada.');
       setRejectionReason('');
       setSelectedSugForAction(null);
@@ -105,19 +115,23 @@ export const AdminModerationPanel: React.FC<AdminModerationPanelProps> = ({ onBa
       <div className="p-5 pb-24">
         {activeTab === 'reports' && (
             <div className="space-y-4">
-                {reports.map((report) => (
-                    <div key={report.id} className="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-gray-700">
-                        <div className="flex justify-between items-start mb-3">
-                            <div className={`px-2 py-1 rounded-md border text-[10px] font-black uppercase tracking-wider ${report.priority === 'high' ? 'bg-red-50 text-red-600' : 'bg-green-50 text-green-600'}`}>{report.priority} • {report.reason}</div>
-                            <span className="text-[10px] text-gray-400 font-medium">{report.timestamp}</span>
+                {reports.length === 0 ? (
+                    <div className="text-center py-20 opacity-30 flex flex-col items-center"><Info size={48} className="mb-4" /><p className="font-bold uppercase tracking-widest text-xs">Nenhuma denúncia pendente</p></div>
+                ) : (
+                    reports.map((report) => (
+                        <div key={report.id} className="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-gray-700">
+                            <div className="flex justify-between items-start mb-3">
+                                <div className={`px-2 py-1 rounded-md border text-[10px] font-black uppercase tracking-wider ${report.priority === 'high' ? 'bg-red-50 text-red-600' : 'bg-green-50 text-green-600'}`}>{report.priority} • {report.reason}</div>
+                                <span className="text-[10px] text-gray-400 font-medium">{report.timestamp}</span>
+                            </div>
+                            <p className="text-sm text-gray-600 dark:text-gray-300 italic mb-4 line-clamp-2">"{report.postContentSnippet}"</p>
+                            <div className="flex gap-3 pt-3 border-t border-gray-100 dark:border-gray-700">
+                                <button onClick={() => setReports(reports.filter(r => r.id !== report.id))} className="flex-1 py-2.5 rounded-xl bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 font-bold text-xs flex items-center justify-center gap-2">Ignorar</button>
+                                <button onClick={() => setReports(reports.filter(r => r.id !== report.id))} className="flex-1 py-2.5 rounded-xl bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 font-bold text-xs flex items-center justify-center gap-2">Remover</button>
+                            </div>
                         </div>
-                        <p className="text-sm text-gray-600 dark:text-gray-300 italic mb-4 line-clamp-2">"{report.postContentSnippet}"</p>
-                        <div className="flex gap-3 pt-3 border-t border-gray-100 dark:border-gray-700">
-                            <button onClick={() => setReports(reports.filter(r => r.id !== report.id))} className="flex-1 py-2.5 rounded-xl bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 font-bold text-xs flex items-center justify-center gap-2">Ignorar</button>
-                            <button onClick={() => setReports(reports.filter(r => r.id !== report.id))} className="flex-1 py-2.5 rounded-xl bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 font-bold text-xs flex items-center justify-center gap-2">Remover</button>
-                        </div>
-                    </div>
-                ))}
+                    ))
+                )}
             </div>
         )}
 
@@ -140,7 +154,7 @@ export const AdminModerationPanel: React.FC<AdminModerationPanelProps> = ({ onBa
                             </div>
 
                             {sug.parentName && (
-                                <div className="mb-3 px-3 py-1.5 bg-gray-50 dark:bg-gray-900 rounded-lg text-[10px] text-gray-500 font-bold uppercase tracking-wider border border-gray-100 dark:border-gray-700">Pai: {sug.parentName}</div>
+                                <div className="mb-3 px-3 py-1.5 bg-gray-50 dark:bg-gray-900 rounded-lg text-[10px] text-gray-500 font-bold uppercase tracking-wider border border-gray-100 dark:border-gray-700">Vincular à Categoria: {sug.parentName}</div>
                             )}
 
                             {sug.justification && (
@@ -155,7 +169,7 @@ export const AdminModerationPanel: React.FC<AdminModerationPanelProps> = ({ onBa
                                         value={rejectionReason}
                                         onChange={e => setRejectionReason(e.target.value)}
                                         placeholder="Motivo da rejeição (será enviado ao lojista)..."
-                                        className="w-full bg-red-50 dark:bg-red-900/10 p-3 rounded-xl border border-red-100 dark:border-red-900/30 text-xs text-red-600 dark:text-red-400 outline-none"
+                                        className="w-full bg-red-50 dark:bg-red-900/10 p-3 rounded-xl border border-red-100 dark:border-red-900/30 text-xs text-red-600 dark:text-red-400 outline-none font-bold"
                                         rows={2}
                                     />
                                     <div className="flex gap-2">
@@ -166,7 +180,7 @@ export const AdminModerationPanel: React.FC<AdminModerationPanelProps> = ({ onBa
                             ) : (
                                 <div className="flex gap-3">
                                     <button onClick={() => setSelectedSugForAction(sug.id)} className="flex-1 py-3 rounded-xl bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 font-bold text-xs flex items-center justify-center gap-2 active:scale-95 transition-all"><XCircle size={16} /> Rejeitar</button>
-                                    <button onClick={() => handleTaxonomyModerate(sug.id, 'approve')} className="flex-[2] py-3 rounded-xl bg-green-500 text-white font-bold text-xs flex items-center justify-center gap-2 active:scale-95 transition-all shadow-lg shadow-green-500/20"><CheckCircle size={16} /> Aprovar</button>
+                                    <button onClick={() => handleTaxonomyModerate(sug.id, 'approve')} className="flex-[2] py-3 rounded-xl bg-green-500 text-white font-bold text-xs flex items-center justify-center gap-2 active:scale-95 transition-all shadow-lg shadow-green-500/20"><CheckCircle2 size={16} /> Aprovar</button>
                                 </div>
                             )}
                         </div>
