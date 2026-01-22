@@ -92,6 +92,9 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
   const [savedDesign, setSavedDesign] = useState<any>(null);
   const [toast, setToast] = useState<{msg: string, type: 'info' | 'error'} | null>(null);
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
+  
+  // Controle de scroll inteligente
+  const [highlightPeriod, setHighlightPeriod] = useState(false);
 
   const periodRef = useRef<HTMLDivElement>(null);
   const neighborhoodRef = useRef<HTMLDivElement>(null);
@@ -117,10 +120,9 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
     setTimeout(() => setToast(null), 4000);
   };
 
-  const scrollTo = (ref: React.RefObject<HTMLDivElement | null>) => {
+  const scrollTo = (ref: React.RefObject<HTMLDivElement | null>, offset: number = 100) => {
     setTimeout(() => {
       if (ref.current) {
-        const offset = 120; // Aumentado para garantir visibilidade do título
         const bodyRect = document.body.getBoundingClientRect().top;
         const elementRect = ref.current.getBoundingClientRect().top;
         const elementPosition = elementRect - bodyRect;
@@ -131,7 +133,20 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
           behavior: 'smooth'
         });
       }
-    }, 150);
+    }, 50);
+  };
+
+  const handleModeSelection = (mode: typeof DISPLAY_MODES[0]) => {
+    const isChanging = selectedMode !== null;
+    setSelectedMode(mode);
+    
+    // Regra: Scroll assistido apenas do Passo 1 para o Passo 2
+    // Se o usuário já tiver escolhido um período, não rola para não perder o foco
+    if (selectedPeriods.length === 0) {
+        setHighlightPeriod(true);
+        scrollTo(periodRef, 120);
+        setTimeout(() => setHighlightPeriod(false), 2000);
+    }
   };
 
   const checkHoodAvailability = (hood: string, periodsToTest?: string[]): { available: boolean; busyIn: string[] } => {
@@ -147,26 +162,13 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
     
     setSelectedPeriods(nextPeriods);
 
-    // Regra de Ouro: Scroll 2 -> 3 (Período libera Bairro)
-    if (isAdding && nextPeriods.length === 1) {
-      scrollTo(neighborhoodRef);
-    }
-
-    if (selectedNeighborhoods.length > 0) {
-      const validHoods = selectedNeighborhoods.filter(hood => checkHoodAvailability(hood, nextPeriods).available);
-      if (validHoods.length < selectedNeighborhoods.length) {
-        showToast(`Bairros removidos por indisponibilidade no novo período.`, 'error');
-        setSelectedNeighborhoods(validHoods);
-      }
-    }
+    // Passo 2 -> 3 é manual, pois é seleção múltipla. 
+    // Não rolar automaticamente para não esconder as opções de período.
   };
 
   const selectAllAvailableHoods = () => {
     const availableHoods = NEIGHBORHOODS.filter(hood => checkHoodAvailability(hood).available);
     setSelectedNeighborhoods(availableHoods);
-    if (availableHoods.length > 0) {
-      scrollTo(creativeRef);
-    }
   };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -177,7 +179,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
         setUploadedImage(reader.result as string);
         setIsArtSaved(true);
         setSavedDesign({ type: 'upload', image: reader.result as string });
-        scrollTo(paymentRef);
+        scrollTo(paymentRef, 80);
       };
       reader.readAsDataURL(file);
     }
@@ -188,7 +190,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
     setIsArtSaved(true);
     setIsEditingArt(false);
     setDiyFlowStep('editor');
-    scrollTo(paymentRef);
+    scrollTo(paymentRef, 80);
   };
 
   const prices = useMemo(() => {
@@ -204,9 +206,9 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
 
   const handleFooterClick = () => {
     if (!selectedMode) return;
-    if (selectedPeriods.length === 0) { showToast("Selecione o período.", "error"); scrollTo(periodRef); return; }
-    if (selectedNeighborhoods.length === 0) { showToast("Escolha os bairros.", "error"); scrollTo(neighborhoodRef); return; }
-    if (!isArtSaved) { showToast("Configure a arte do banner.", "error"); scrollTo(creativeRef); return; }
+    if (selectedPeriods.length === 0) { showToast("Selecione o período.", "error"); scrollTo(periodRef, 120); return; }
+    if (selectedNeighborhoods.length === 0) { showToast("Escolha os bairros.", "error"); scrollTo(neighborhoodRef, 120); return; }
+    if (!isArtSaved) { showToast("Configure a arte do banner.", "error"); scrollTo(creativeRef, 120); return; }
     setIsSubmitting(true);
     setTimeout(() => { setIsSubmitting(false); setIsSuccess(true); }, 2000);
   };
@@ -242,14 +244,18 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
 
       <main className="flex-1 p-6 space-y-16 pb-64 max-w-md mx-auto w-full">
         
-        {/* BLOCO 1: POSICIONAMENTO (Gatilho para Etapa 2) */}
+        {/* BLOCO 1: POSICIONAMENTO */}
         <section className="space-y-6">
           <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-blue-500 flex items-center gap-2 px-1">
             <Target size={14} /> 1. Onde deseja aparecer?
           </h3>
           <div className="grid grid-cols-1 gap-4">
             {DISPLAY_MODES.map((mode) => (
-              <button key={mode.id} onClick={() => { setSelectedMode(mode); scrollTo(periodRef); }} className={`relative flex items-start text-left p-6 rounded-[2rem] border-2 transition-all duration-300 gap-5 ${selectedMode?.id === mode.id ? 'bg-blue-600/10 border-blue-500 shadow-lg' : 'bg-white/5 border-white/10'}`}>
+              <button 
+                key={mode.id} 
+                onClick={() => handleModeSelection(mode)} 
+                className={`relative flex items-start text-left p-6 rounded-[2rem] border-2 transition-all duration-300 gap-5 ${selectedMode?.id === mode.id ? 'bg-blue-600/10 border-blue-500 shadow-lg' : 'bg-white/5 border-white/10'}`}
+              >
                 <div className={`p-4 rounded-2xl shrink-0 ${selectedMode?.id === mode.id ? 'bg-blue-500 text-white shadow-lg' : 'bg-white/5 text-slate-400'}`}><mode.icon size={28} /></div>
                 <div className="flex-1 min-w-0 pr-4">
                   <div className="flex items-center justify-between mb-1">
@@ -263,17 +269,25 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
           </div>
         </section>
 
-        {/* BLOCO 2 & 3: PERÍODO E BAIRROS */}
-        <section ref={periodRef} className={`space-y-16 transition-all duration-500 ${!selectedMode ? 'opacity-20 pointer-events-none' : 'opacity-100'}`}>
-          <div className="space-y-6">
-            <div className="flex flex-col">
-              <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-blue-500 flex items-center gap-2 px-1"><Calendar size={14} /> 2. Período</h3>
+        {/* BLOCO 2: PERÍODO */}
+        <section 
+            ref={periodRef} 
+            className={`space-y-6 transition-all duration-500 ${!selectedMode ? 'opacity-20 pointer-events-none grayscale' : 'opacity-100'}`}
+        >
+            <div className={`flex flex-col transition-all duration-500 ${highlightPeriod ? 'scale-105' : 'scale-100'}`}>
+              <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-blue-500 flex items-center gap-2 px-1">
+                <Calendar size={14} /> 2. Período de Exibição
+              </h3>
               <p className="text-[9px] text-slate-500 uppercase font-bold mt-1 ml-6">Escolha por quanto tempo quer anunciar.</p>
             </div>
             
-            <div className="flex gap-3">
+            <div className={`flex gap-3 transition-all duration-700 ${highlightPeriod ? 'ring-2 ring-blue-500/20 rounded-3xl p-1' : ''}`}>
                 {dynamicPeriods.map(p => (
-                    <button key={p.id} onClick={() => togglePeriod(p.id)} className={`flex-1 p-5 rounded-3xl border-2 transition-all text-left group ${selectedPeriods.includes(p.id) ? 'bg-blue-600/10 border-blue-50' : 'bg-white/5 border-white/10'}`}>
+                    <button 
+                        key={p.id} 
+                        onClick={() => togglePeriod(p.id)} 
+                        className={`flex-1 p-5 rounded-3xl border-2 transition-all text-left group ${selectedPeriods.includes(p.id) ? 'bg-blue-600/10 border-blue-500' : 'bg-white/5 border-white/10'}`}
+                    >
                         <div className="flex justify-between items-start mb-2">
                            <p className="text-[10px] font-black text-white uppercase">{p.label}</p>
                            {selectedPeriods.includes(p.id) && <CheckCircle2 size={14} className="text-blue-500" />}
@@ -283,14 +297,23 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
                 ))}
             </div>
             {selectedMode && selectedPeriods.length === 0 && (
-              <p className="text-[10px] text-amber-500 font-bold animate-pulse px-1 uppercase tracking-wider">👉 Agora escolha o período para liberar os bairros.</p>
+              <div className="flex items-center gap-2 px-1 animate-bounce">
+                <ArrowRight size={14} className="text-blue-500 rotate-90" />
+                <p className="text-[10px] text-blue-400 font-bold uppercase tracking-wider">Selecione o período para liberar os bairros</p>
+              </div>
             )}
-          </div>
+        </section>
 
-          <div ref={neighborhoodRef} className={`space-y-6 transition-all duration-500 ${selectedPeriods.length === 0 ? 'opacity-20 grayscale pointer-events-none' : 'opacity-100'}`}>
+        {/* BLOCO 3: BAIRROS */}
+        <section 
+            ref={neighborhoodRef} 
+            className={`space-y-6 transition-all duration-500 ${selectedPeriods.length === 0 ? 'opacity-20 grayscale pointer-events-none' : 'opacity-100'}`}
+        >
             <div className="flex items-center justify-between px-1">
               <div className="flex flex-col">
-                <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-blue-500 flex items-center gap-2"><MapPin size={14} /> 3. Bairros</h3>
+                <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-blue-500 flex items-center gap-2">
+                    <MapPin size={14} /> 3. Bairros de Alcance
+                </h3>
                 <p className="text-[9px] text-slate-500 uppercase font-bold mt-1 ml-6">Onde seu banner será visto.</p>
               </div>
               <button onClick={selectAllAvailableHoods} className="text-[9px] font-black text-[#1E5BFF] uppercase tracking-widest bg-blue-500/10 px-3 py-1.5 rounded-xl border border-blue-500/20 active:scale-95 transition-all">Selecionar Todos</button>
@@ -300,18 +323,13 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
                     const { available } = checkHoodAvailability(hood);
                     const isSelected = selectedNeighborhoods.includes(hood);
                     return (
-                        <button key={hood} onClick={() => { if (available) { setSelectedNeighborhoods(prev => { 
-                          const next = prev.includes(hood) ? prev.filter(h => h !== hood) : [...prev, hood];
-                          if (next.length === 1 && prev.length === 0) scrollTo(creativeRef);
-                          return next;
-                        }); } }} className={`p-4 rounded-2xl border-2 flex flex-col justify-between transition-all min-h-[80px] ${!available ? 'bg-slate-900/50 border-white/5 opacity-50 cursor-default' : isSelected ? 'bg-blue-600/10 border-blue-500' : 'bg-slate-900 border-white/5'}`}>
+                        <button key={hood} onClick={() => { if (available) { setSelectedNeighborhoods(prev => prev.includes(hood) ? prev.filter(h => h !== hood) : [...prev, hood]); } }} className={`p-4 rounded-2xl border-2 flex flex-col justify-between transition-all min-h-[80px] ${!available ? 'bg-slate-900/50 border-white/5 opacity-50 cursor-default' : isSelected ? 'bg-blue-600/10 border-blue-500' : 'bg-slate-900 border-white/5'}`}>
                             <p className={`font-bold text-xs ${!available ? 'text-slate-600' : 'text-white'}`}>{hood}</p>
                             <p className={`text-[8px] font-black uppercase tracking-widest mt-1 ${!available ? 'text-rose-500' : isSelected ? 'text-blue-400' : 'text-emerald-500'}`}>{!available ? `Ocupado` : isSelected ? 'Selecionado' : 'Livre'}</p>
                         </button>
                     );
                 })}
             </div>
-          </div>
         </section>
 
         {/* BLOCO 4: DESIGN */}
@@ -370,7 +388,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
                 </div>
               </div>
 
-              <div onClick={() => { setArtChoice('pro'); setIsArtSaved(true); scrollTo(paymentRef); }} className={`rounded-[2.5rem] border-2 transition-all cursor-pointer overflow-hidden ${artChoice === 'pro' ? 'bg-slate-900 border-amber-500' : 'bg-slate-900 border-white/5'}`}>
+              <div onClick={() => { setArtChoice('pro'); setIsArtSaved(true); scrollTo(paymentRef, 80); }} className={`rounded-[2.5rem] border-2 transition-all cursor-pointer overflow-hidden ${artChoice === 'pro' ? 'bg-slate-900 border-amber-500 shadow-xl shadow-amber-500/5' : 'bg-slate-900 border-white/5'}`}>
                   <div className="p-8">
                     <div className="flex items-start justify-between">
                         <div className="flex items-start gap-5">

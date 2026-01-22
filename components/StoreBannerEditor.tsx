@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { 
   ChevronLeft, 
@@ -195,12 +196,12 @@ export const StoreBannerEditor: React.FC<StoreBannerEditorProps> = ({ storeName,
 
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-3 w-fit transition-all duration-300">
-                      {/* LÓGICA DE PREVIEW DA LOGO REATIVA */}
-                      {design.logoDisplay !== 'none' && storeLogo && (
+                      {/* LÓGICA DE PREVIEW DA LOGO REATIVA (REFINADA) */}
+                      {design.logoDisplay !== 'none' && storeLogo ? (
                           <div className={`shrink-0 overflow-hidden bg-white/20 p-0.5 border border-white/20 transition-all duration-300 ${design.logoDisplay === 'round' ? 'rounded-full' : 'rounded-lg animate-in zoom-in-50'}`}>
                               <img src={storeLogo} className={`w-5 h-5 object-contain transition-all duration-300 ${design.logoDisplay === 'round' ? 'rounded-full' : 'rounded-md'}`} alt="Logo" />
                           </div>
-                      )}
+                      ) : null}
                       <div className="bg-white/10 backdrop-blur-md px-2 py-0.5 rounded-lg border border-white/10 w-fit">
                           <span className="text-[7px] font-black uppercase tracking-[0.2em]" style={{ color: design.textColor }}>{storeName}</span>
                       </div>
@@ -336,7 +337,7 @@ export const StoreBannerEditor: React.FC<StoreBannerEditorProps> = ({ storeName,
                   { bg: '#0F172A', text: '#FFFFFF' },
                   { bg: '#FFFFFF', text: '#0F172A' },
                   { bg: '#FBBF24', text: '#000000' },
-                  { bg: '#EF4444', text: '#FFFFFF' },
+                  { bg: '#DC2626', text: '#FFFFFF' },
                   { bg: '#10B981', text: '#FFFFFF' },
                 ].map((c, i) => (
                   <button 
@@ -353,7 +354,7 @@ export const StoreBannerEditor: React.FC<StoreBannerEditorProps> = ({ storeName,
           </div>
         </section>
 
-        {/* BLOCO 4: LOGO DA LOJA - REATIVIDADE CORRIGIDA */}
+        {/* BLOCO 4: LOGO DA LOJA */}
         <section className="space-y-4">
           <div className="flex flex-col">
             <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-blue-500 flex items-center gap-2">
