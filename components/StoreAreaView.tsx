@@ -54,7 +54,7 @@ const ServiceBlock: React.FC<{
           {label}
         </p>
         {description && (
-          <p className="text-[10px] text-gray-400 font-medium leading-none mt-1">
+          <p className="text-[10px] text-gray-400 font-medium leading-tight mt-1 max-w-[200px]">
             {description}
           </p>
         )}
@@ -121,7 +121,7 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
             <ServiceBlock 
               icon={Crown} 
               label="Banners Premium" 
-              description="Apareça no topo do super-app"
+              description="Apareça em destaque para milhares de pessoas do seu bairro"
               onClick={() => onNavigate('store_ads_module')}
               colorClass="bg-blue-50 text-blue-600"
             />
