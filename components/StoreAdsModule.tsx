@@ -120,7 +120,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
   const scrollTo = (ref: React.RefObject<HTMLDivElement | null>) => {
     setTimeout(() => {
       if (ref.current) {
-        const offset = 100;
+        const offset = 120; // Aumentado para garantir visibilidade do título
         const bodyRect = document.body.getBoundingClientRect().top;
         const elementRect = ref.current.getBoundingClientRect().top;
         const elementPosition = elementRect - bodyRect;
@@ -131,7 +131,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
           behavior: 'smooth'
         });
       }
-    }, 100);
+    }, 150);
   };
 
   const checkHoodAvailability = (hood: string, periodsToTest?: string[]): { available: boolean; busyIn: string[] } => {
@@ -147,6 +147,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
     
     setSelectedPeriods(nextPeriods);
 
+    // Regra de Ouro: Scroll 2 -> 3 (Período libera Bairro)
     if (isAdding && nextPeriods.length === 1) {
       scrollTo(neighborhoodRef);
     }
@@ -241,7 +242,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
 
       <main className="flex-1 p-6 space-y-16 pb-64 max-w-md mx-auto w-full">
         
-        {/* BLOCO 1: POSICIONAMENTO */}
+        {/* BLOCO 1: POSICIONAMENTO (Gatilho para Etapa 2) */}
         <section className="space-y-6">
           <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-blue-500 flex items-center gap-2 px-1">
             <Target size={14} /> 1. Onde deseja aparecer?
@@ -263,33 +264,47 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
         </section>
 
         {/* BLOCO 2 & 3: PERÍODO E BAIRROS */}
-        <section ref={periodRef} className={`space-y-8 transition-all duration-500 ${!selectedMode ? 'opacity-20 pointer-events-none' : 'opacity-100'}`}>
-          <div className="space-y-5">
-            <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-blue-500 flex items-center gap-2 px-1"><Calendar size={14} /> 2. Período</h3>
+        <section ref={periodRef} className={`space-y-16 transition-all duration-500 ${!selectedMode ? 'opacity-20 pointer-events-none' : 'opacity-100'}`}>
+          <div className="space-y-6">
+            <div className="flex flex-col">
+              <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-blue-500 flex items-center gap-2 px-1"><Calendar size={14} /> 2. Período</h3>
+              <p className="text-[9px] text-slate-500 uppercase font-bold mt-1 ml-6">Escolha por quanto tempo quer anunciar.</p>
+            </div>
+            
             <div className="flex gap-3">
                 {dynamicPeriods.map(p => (
-                    <button key={p.id} onClick={() => togglePeriod(p.id)} className={`flex-1 p-4 rounded-3xl border-2 transition-all text-left ${selectedPeriods.includes(p.id) ? 'bg-blue-600/10 border-blue-500' : 'bg-white/5 border-white/10'}`}>
-                        <p className="text-[10px] font-black text-white uppercase mb-1">{p.label}</p>
+                    <button key={p.id} onClick={() => togglePeriod(p.id)} className={`flex-1 p-5 rounded-3xl border-2 transition-all text-left group ${selectedPeriods.includes(p.id) ? 'bg-blue-600/10 border-blue-50' : 'bg-white/5 border-white/10'}`}>
+                        <div className="flex justify-between items-start mb-2">
+                           <p className="text-[10px] font-black text-white uppercase">{p.label}</p>
+                           {selectedPeriods.includes(p.id) && <CheckCircle2 size={14} className="text-blue-500" />}
+                        </div>
                         <p className="text-[9px] text-blue-400 font-bold font-mono">{p.dates}</p>
                     </button>
                 ))}
             </div>
             {selectedMode && selectedPeriods.length === 0 && (
-              <p className="text-[10px] text-amber-500 font-bold animate-pulse px-1 uppercase tracking-wider">👉 Agora escolha o período do seu anúncio.</p>
+              <p className="text-[10px] text-amber-500 font-bold animate-pulse px-1 uppercase tracking-wider">👉 Agora escolha o período para liberar os bairros.</p>
             )}
           </div>
 
           <div ref={neighborhoodRef} className={`space-y-6 transition-all duration-500 ${selectedPeriods.length === 0 ? 'opacity-20 grayscale pointer-events-none' : 'opacity-100'}`}>
             <div className="flex items-center justify-between px-1">
-              <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-blue-500 flex items-center gap-2"><MapPin size={14} /> 3. Bairros</h3>
-              <button onClick={selectAllAvailableHoods} className="text-[9px] font-black text-[#1E5BFF] uppercase tracking-widest bg-blue-500/10 px-3 py-1.5 rounded-xl border border-blue-500/20 active:scale-95 transition-all">Todos disponíveis</button>
+              <div className="flex flex-col">
+                <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-blue-500 flex items-center gap-2"><MapPin size={14} /> 3. Bairros</h3>
+                <p className="text-[9px] text-slate-500 uppercase font-bold mt-1 ml-6">Onde seu banner será visto.</p>
+              </div>
+              <button onClick={selectAllAvailableHoods} className="text-[9px] font-black text-[#1E5BFF] uppercase tracking-widest bg-blue-500/10 px-3 py-1.5 rounded-xl border border-blue-500/20 active:scale-95 transition-all">Selecionar Todos</button>
             </div>
             <div className="grid grid-cols-2 gap-3">
                 {NEIGHBORHOODS.map(hood => {
                     const { available } = checkHoodAvailability(hood);
                     const isSelected = selectedNeighborhoods.includes(hood);
                     return (
-                        <button key={hood} onClick={() => { if (available) { setSelectedNeighborhoods(prev => prev.includes(hood) ? prev.filter(h => h !== hood) : [...prev, hood]); } }} className={`p-4 rounded-2xl border-2 flex flex-col justify-between transition-all min-h-[80px] ${!available ? 'bg-slate-900/50 border-white/5 opacity-50 cursor-default' : isSelected ? 'bg-blue-600/10 border-blue-500' : 'bg-slate-900 border-white/5'}`}>
+                        <button key={hood} onClick={() => { if (available) { setSelectedNeighborhoods(prev => { 
+                          const next = prev.includes(hood) ? prev.filter(h => h !== hood) : [...prev, hood];
+                          if (next.length === 1 && prev.length === 0) scrollTo(creativeRef);
+                          return next;
+                        }); } }} className={`p-4 rounded-2xl border-2 flex flex-col justify-between transition-all min-h-[80px] ${!available ? 'bg-slate-900/50 border-white/5 opacity-50 cursor-default' : isSelected ? 'bg-blue-600/10 border-blue-500' : 'bg-slate-900 border-white/5'}`}>
                             <p className={`font-bold text-xs ${!available ? 'text-slate-600' : 'text-white'}`}>{hood}</p>
                             <p className={`text-[8px] font-black uppercase tracking-widest mt-1 ${!available ? 'text-rose-500' : isSelected ? 'text-blue-400' : 'text-emerald-500'}`}>{!available ? `Ocupado` : isSelected ? 'Selecionado' : 'Livre'}</p>
                         </button>

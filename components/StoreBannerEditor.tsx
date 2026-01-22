@@ -38,7 +38,9 @@ import {
   Square,
   Circle,
   Ban,
-  TextQuote
+  TextQuote,
+  // Added Check to fix "Cannot find name 'Check'" error on line 449
+  Check
 } from 'lucide-react';
 
 const ICON_COMPONENTS: Record<string, React.ElementType> = {
@@ -168,8 +170,8 @@ export const StoreBannerEditor: React.FC<StoreBannerEditorProps> = ({ storeName,
               <X size={20} />
             </button>
             <div>
-              <h1 className="font-bold text-lg leading-none text-white tracking-tight">Editor Profissional</h1>
-              <p className="text-[9px] text-blue-400 uppercase font-black tracking-widest mt-1">Hierarquia Visual Ativa</p>
+              <h1 className="font-bold text-lg leading-none text-white tracking-tight">Editor de Banner</h1>
+              <p className="text-[9px] text-blue-400 uppercase font-black tracking-widest mt-1">Sua vitrine no bairro</p>
             </div>
           </div>
         </header>
@@ -224,16 +226,16 @@ export const StoreBannerEditor: React.FC<StoreBannerEditorProps> = ({ storeName,
         </div>
       </div>
 
-      {/* EDITOR */}
-      <main onScroll={handleScroll} className="flex-1 overflow-y-auto p-6 space-y-12 no-scrollbar pb-48 relative z-10">
+      {/* ÁREA DE EDIÇÃO ROLÁVEL */}
+      <main onScroll={handleScroll} className="flex-1 overflow-y-auto p-6 space-y-12 no-scrollbar pb-64 relative z-10">
         
-        {/* BLOCO 1: CHAMADA PRINCIPAL */}
+        {/* BLOCO 1: TEXTO CHAMADA */}
         <section className="space-y-6">
           <div className="flex flex-col">
             <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-blue-500 flex items-center gap-2">
-              <Type size={14} /> 1. Chamada do Banner
+              <Type size={14} /> 1. Chamada Principal
             </h3>
-            <p className="text-[9px] text-slate-500 uppercase font-bold mt-1 ml-6">É o texto que o cliente lê primeiro.</p>
+            <p className="text-[9px] text-slate-500 uppercase font-bold mt-1 ml-6">O que chama atenção primeiro no banner.</p>
           </div>
 
           <div className="bg-slate-900 border border-white/5 rounded-[2rem] p-6 space-y-6">
@@ -274,13 +276,13 @@ export const StoreBannerEditor: React.FC<StoreBannerEditorProps> = ({ storeName,
           </div>
         </section>
 
-        {/* BLOCO 2: DESCRIÇÃO DETALHADA */}
+        {/* BLOCO 2: TEXTO DESCRIÇÃO */}
         <section className="space-y-6">
           <div className="flex flex-col">
             <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-blue-500 flex items-center gap-2">
               <TextQuote size={14} /> 2. Descrição Detalhada
             </h3>
-            <p className="text-[9px] text-slate-500 uppercase font-bold mt-1 ml-6">Complementa a mensagem com detalhes.</p>
+            <p className="text-[9px] text-slate-500 uppercase font-bold mt-1 ml-6">Complemento para explicar sua oferta.</p>
           </div>
 
           <div className="bg-slate-900 border border-white/5 rounded-[2rem] p-6 space-y-6">
@@ -321,13 +323,43 @@ export const StoreBannerEditor: React.FC<StoreBannerEditorProps> = ({ storeName,
           </div>
         </section>
 
-        {/* LOGO DA LOJA */}
+        {/* BLOCO 3: IDENTIDADE (CORES) */}
+        <section className="space-y-6">
+          <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-blue-500 flex items-center gap-2">
+            <Palette size={14} /> 3. Cores do Banner
+          </h3>
+          <div className="bg-slate-900 border border-white/5 rounded-[2rem] p-6">
+              <label className="text-[9px] font-black text-slate-500 uppercase ml-1 mb-4 block tracking-widest">Tom de Fundo</label>
+              <div className="flex gap-3 overflow-x-auto no-scrollbar pb-2">
+                {[
+                  { bg: '#1E5BFF', text: '#FFFFFF' },
+                  { bg: '#0F172A', text: '#FFFFFF' },
+                  { bg: '#FFFFFF', text: '#0F172A' },
+                  { bg: '#FBBF24', text: '#000000' },
+                  { bg: '#EF4444', text: '#FFFFFF' },
+                  { bg: '#10B981', text: '#FFFFFF' },
+                ].map((c, i) => (
+                  <button 
+                    key={i} 
+                    onClick={() => setDesign({...design, bgColor: c.bg, textColor: c.text})} 
+                    className={`flex-shrink-0 w-14 h-14 rounded-2xl border-4 transition-all ${design.bgColor === c.bg ? 'border-blue-500 scale-110 shadow-lg' : 'border-transparent opacity-60'}`} 
+                    style={{ backgroundColor: c.bg }} 
+                  />
+                ))}
+                <button onClick={() => setShowColorPicker(true)} className="flex-shrink-0 w-14 h-14 rounded-2xl border-2 border-dashed border-slate-700 flex items-center justify-center text-slate-500 hover:text-white transition-all">
+                  <Palette size={20} />
+                </button>
+              </div>
+          </div>
+        </section>
+
+        {/* BLOCO 4: LOGO DA LOJA */}
         <section className="space-y-4">
           <div className="flex flex-col">
             <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-blue-500 flex items-center gap-2">
-              <Store size={14} /> Logo da Loja
+              <Store size={14} /> 4. Logo da Loja
             </h3>
-            <p className="text-[9px] text-slate-500 uppercase font-bold mt-1 ml-6">Escolha como sua logo aparece no banner.</p>
+            <p className="text-[9px] text-slate-500 uppercase font-bold mt-1 ml-6">Sua marca aparece em destaque.</p>
           </div>
           
           <div className="grid grid-cols-3 gap-3">
@@ -357,50 +389,24 @@ export const StoreBannerEditor: React.FC<StoreBannerEditorProps> = ({ storeName,
           </div>
         </section>
 
-        {/* CORES */}
+        {/* BLOCO 5: ÍCONE DECORATIVO */}
         <section className="space-y-6">
-          <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-blue-500 flex items-center gap-2">
-            <Palette size={14} /> 3. Identidade de Cores
-          </h3>
-          <div className="bg-slate-900 border border-white/5 rounded-[2rem] p-6">
-              <label className="text-[9px] font-black text-slate-500 uppercase ml-1 mb-4 block tracking-widest">Cor de Fundo</label>
-              <div className="flex gap-3 overflow-x-auto no-scrollbar pb-2">
-                {[
-                  { bg: '#1E5BFF', text: '#FFFFFF' },
-                  { bg: '#0F172A', text: '#FFFFFF' },
-                  { bg: '#FFFFFF', text: '#0F172A' },
-                  { bg: '#FBBF24', text: '#000000' },
-                  { bg: '#EF4444', text: '#FFFFFF' },
-                  { bg: '#10B981', text: '#FFFFFF' },
-                ].map((c, i) => (
-                  <button 
-                    key={i} 
-                    onClick={() => setDesign({...design, bgColor: c.bg, textColor: c.text})} 
-                    className={`flex-shrink-0 w-14 h-14 rounded-2xl border-4 transition-all ${design.bgColor === c.bg ? 'border-blue-500 scale-110 shadow-lg' : 'border-transparent opacity-60'}`} 
-                    style={{ backgroundColor: c.bg }} 
-                  />
-                ))}
-                <button onClick={() => setShowColorPicker(true)} className="flex-shrink-0 w-14 h-14 rounded-2xl border-2 border-dashed border-slate-700 flex items-center justify-center text-slate-500 hover:text-white transition-all">
-                  <Palette size={20} />
-                </button>
-              </div>
+          <div className="flex flex-col">
+            <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-blue-500 flex items-center gap-2">
+                <Sparkles size={14} /> 5. Ícone do Banner
+            </h3>
+            <p className="text-[9px] text-slate-500 uppercase font-bold mt-1 ml-6">Reforce o tema da sua promoção.</p>
           </div>
-        </section>
 
-        {/* ELEMENTOS VISUAIS */}
-        <section className="space-y-6">
-          <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-blue-500 flex items-center gap-2">
-            <Sparkles size={14} /> 4. Elementos Visuais
-          </h3>
-          <div className="bg-slate-900 border border-white/5 rounded-[2rem] p-6 space-y-8">
+          <div className="bg-slate-900 border border-white/5 rounded-[2rem] p-6">
               <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-400 border border-blue-500/20">
-                          <Tag size={20} />
+                          {design.iconName ? renderIcon(design.iconName, 'sm', 'text') : <Tag size={20} />}
                       </div>
                       <div>
-                          <p className="text-xs font-bold text-white">Ícone Decorativo</p>
-                          <p className="text-[8px] text-slate-500 uppercase font-black">Reforça o tema do anúncio</p>
+                          <p className="text-xs font-bold text-white">{design.iconName ? 'Ícone Ativo' : 'Nenhum Ícone'}</p>
+                          <p className="text-[8px] text-slate-500 uppercase font-black">Ilustração flutuante</p>
                       </div>
                   </div>
                   {design.iconName ? (
@@ -409,8 +415,16 @@ export const StoreBannerEditor: React.FC<StoreBannerEditorProps> = ({ storeName,
                       <button onClick={() => setShowIconPicker(true)} className="px-4 py-2 bg-[#1E5BFF] text-white text-[9px] font-black uppercase rounded-xl shadow-lg active:scale-95 transition-all">Adicionar</button>
                   )}
               </div>
+          </div>
+        </section>
 
-              <div className="grid grid-cols-2 gap-6 pt-4 border-t border-white/5">
+        {/* BLOCO 6: COMPORTAMENTO */}
+        <section className="space-y-6">
+          <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-blue-500 flex items-center gap-2 px-1">
+            <Zap size={14} /> 6. Layout & Animação
+          </h3>
+          <div className="bg-slate-900 border border-white/5 rounded-[2rem] p-6">
+              <div className="grid grid-cols-2 gap-6">
                 <div className="space-y-3">
                     <label className="text-[9px] font-black text-slate-500 uppercase ml-1 block tracking-widest">Alinhamento</label>
                     <div className="flex gap-1 bg-slate-800 p-1.5 rounded-2xl border border-white/5">
@@ -432,7 +446,20 @@ export const StoreBannerEditor: React.FC<StoreBannerEditorProps> = ({ storeName,
           </div>
         </section>
 
+        {/* BUFFER DE SEGURANÇA (Para o usuário ver que há espaço) */}
+        <div className="py-12 flex flex-col items-center opacity-20">
+            <Check size={32} className="text-blue-500" />
+            <p className="text-[9px] font-bold uppercase tracking-[0.4em] mt-2">Fim das configurações</p>
+        </div>
+
       </main>
+
+      {/* FOOTER CTA FIXO COM BLUR E PADDING */}
+      <div className="fixed bottom-0 left-0 right-0 p-6 bg-slate-900/90 backdrop-blur-2xl border-t border-white/10 z-[100] max-w-md mx-auto">
+        <button onClick={() => onSave(design)} className="w-full py-5 bg-[#1E5BFF] text-white font-black rounded-[2rem] shadow-2xl shadow-blue-500/30 flex items-center justify-center gap-3 active:scale-[0.98] transition-all uppercase tracking-[0.2em] text-xs">
+          <Save size={18} /> CONCLUIR ARTE
+        </button>
+      </div>
 
       {/* MODAIS (ÍCONES E COR) */}
       {showIconPicker && (
@@ -484,12 +511,6 @@ export const StoreBannerEditor: React.FC<StoreBannerEditorProps> = ({ storeName,
         </div>
       )}
 
-      {/* FOOTER CTA */}
-      <div className="fixed bottom-0 left-0 right-0 p-6 bg-slate-900/90 backdrop-blur-2xl border-t border-white/10 z-[100] max-w-md mx-auto">
-        <button onClick={() => onSave(design)} className="w-full py-5 bg-[#1E5BFF] text-white font-black rounded-[2rem] shadow-xl shadow-blue-500/30 flex items-center justify-center gap-3 active:scale-[0.98] transition-all uppercase tracking-[0.2em] text-xs">
-          <Save size={18} /> CONCLUIR ARTE
-        </button>
-      </div>
     </div>
   );
 };
