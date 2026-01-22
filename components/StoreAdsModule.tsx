@@ -75,8 +75,9 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
   };
 
   // --- CÁLCULO DE DISPONIBILIDADE BINÁRIA ---
-  const checkHoodAvailability = (hood: string) => {
-    if (selectedMonths.length === 0) return { available: true };
+  // CORREÇÃO: Definido retorno explícito para evitar busyMonths undefined (TS18048)
+  const checkHoodAvailability = (hood: string): { available: boolean; busyMonths: string[] } => {
+    if (selectedMonths.length === 0) return { available: true, busyMonths: [] };
     
     // Verifica se está ocupado em QUALQUER um dos meses selecionados
     const busyIn = selectedMonths.filter(m => MOCK_OCCUPANCY[hood]?.[m] === true);
@@ -169,7 +170,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
                 }`}
               >
                 {mode.recommended && (
-                  <div className="absolute -top-2 left-1/2 -translate-x-1/2 bg-amber-400 text-slate-900 text-[8px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest whitespace-nowrap">Destaque</div>
+                  <div className="absolute -top-2 left-1/2 -translate-x-1/2 bg-amber-400 text-slate-900 text-[8px] font-black px-2.5 py-0.5 rounded-full uppercase tracking-widest whitespace-nowrap">Destaque</div>
                 )}
                 <div className={`p-2.5 rounded-2xl ${selectedMode?.id === mode.id ? 'bg-blue-500 text-white' : 'bg-white/5 text-slate-400'}`}>
                   <mode.icon size={22} />
@@ -248,7 +249,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
                             }`}
                         >
                             <div className="flex items-center gap-4 text-left">
-                                <div className={`p-2 rounded-xl ${!available ? 'bg-slate-800 text-slate-600' : isSelected ? 'bg-blue-500 text-white' : 'bg-emerald-500/10 text-emerald-500'}`}>
+                                <div className={`p-2 rounded-xl ${!available ? 'bg-slate-800 text-slate-600' : isSelected ? 'bg-blue-50 text-white' : 'bg-emerald-500/10 text-emerald-500'}`}>
                                     <MapPin size={18} />
                                 </div>
                                 <div>
