@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { Store, Category, EditorialCollection, AdType } from '@/types';
 import { 
@@ -129,6 +128,7 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void; onStoreClick?: (
   const [userBanner, setUserBanner] = useState<BannerItem | null>(null);
 
   const defaultBanners: BannerItem[] = useMemo(() => [
+    { id: 'growth-opportunity', title: 'Anúncios que geram resultado', target: 'store_ads_module', tag: 'Sua loja em destaque', bgColor: 'bg-indigo-600', Icon: Rocket },
     { id: 'rio-phone-store', title: 'RIO PHONE STORE', target: 'rio-phone-store', tag: 'Assistência Apple', bgColor: 'bg-black', Icon: Smartphone, isSpecial: true },
     { id: 'master-sponsor', title: 'Grupo Esquematiza', target: 'grupo-esquematiza', tag: 'Patrocinador Master', bgColor: 'bg-[#0F172A]', Icon: Crown },
     { id: 'advertise-home', title: 'Anuncie aqui', target: 'store_ads_module', tag: 'Destaque sua marca', bgColor: 'bg-brand-blue', Icon: Megaphone }
@@ -148,7 +148,6 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void; onStoreClick?: (
                 .limit(1);
             
             if (error) {
-              // Se a tabela não existir, falha silenciosamente
               if (error.code === 'PGRST116' || error.message.includes('schema cache')) {
                 console.log("[Setup] Tabela 'published_banners' não encontrada. Ignore se ainda não executou as migrações SQL.");
                 return;
@@ -174,7 +173,6 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void; onStoreClick?: (
     
     fetchHomeBanner();
     
-    // Inscrição em tempo real segura
     let channel: any;
     try {
       channel = supabase.channel('home-banner-updates')
@@ -188,7 +186,6 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void; onStoreClick?: (
         )
         .subscribe();
     } catch (e) {
-      // Ignora erro de realtime se a tabela não existir
     }
       
     return () => {
@@ -199,7 +196,6 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void; onStoreClick?: (
 
   const allBanners = useMemo(() => userBanner ? [userBanner, ...defaultBanners] : defaultBanners, [userBanner, defaultBanners]);
   
-  // Impression Tracking
   useEffect(() => {
     const banner = allBanners[currentIndex];
     if (banner) {
@@ -258,7 +254,6 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void; onStoreClick?: (
   return (
     <div className="px-4">
       <div className="flex flex-col gap-4">
-        {/* Banner Container */}
         <div 
           onClick={handleBannerClick}
           className={`w-full relative aspect-[3/2] rounded-[32px] overflow-hidden shadow-xl shadow-slate-200 dark:shadow-none border border-gray-100 dark:border-white/5 ${current.bgColor || ''} cursor-pointer active:scale-[0.98] transition-all group`}
@@ -269,6 +264,18 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void; onStoreClick?: (
             ) : (
               <CustomBannerRender config={current.config} />
             )
+          ) : current.id === 'growth-opportunity' ? (
+            <div className="absolute inset-0 bg-gradient-to-br from-indigo-600 to-blue-700 flex items-center justify-between px-8 overflow-hidden">
+               <div className="relative z-10 flex-1 text-left">
+                  <span className="text-[10px] font-black uppercase tracking-widest text-indigo-200 mb-2 block">Cresça com o bairro</span>
+                  <h3 className="text-3xl font-black text-white leading-tight font-display tracking-tight uppercase">Sua loja em <br/><span className="text-amber-400">Destaque</span></h3>
+                  <p className="text-indigo-100 text-xs mt-3 font-medium opacity-80">Anúncios que geram resultado real</p>
+               </div>
+               <div className="relative w-32 h-32 flex items-center justify-center animate-float-slow">
+                  <div className="absolute inset-0 bg-white/10 blur-2xl rounded-full"></div>
+                  <Rocket className="w-20 h-20 text-white opacity-90" strokeWidth={1.5} />
+               </div>
+            </div>
           ) : current.id === 'rio-phone-store' ? (
             <div className="absolute inset-0 bg-black flex items-center justify-start px-4">
               <div className="w-1/2 h-full flex flex-col items-start justify-center text-left text-white z-10">

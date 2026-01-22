@@ -1,9 +1,8 @@
-
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { ChevronLeft, Search, Star, BadgeCheck, ChevronRight, X, AlertCircle, Grid, Filter, Megaphone, ArrowUpRight, Info, Image as ImageIcon, Sparkles } from 'lucide-react';
-import { Category, Store, AdType } from '@/types';
-import { SUBCATEGORIES } from '@/constants';
-import { supabase } from '@/lib/supabaseClient';
+import { ChevronLeft, Search, Star, BadgeCheck, ChevronRight, X, AlertCircle, Grid, Filter, Megaphone, ArrowUpRight, Info, Image as ImageIcon, Sparkles, ShieldCheck } from 'lucide-react';
+import { Category, Store, AdType } from '../../types';
+import { SUBCATEGORIES } from '../../constants';
+import { supabase } from '../../lib/supabaseClient';
 
 // --- Reusable Banner Rendering Components ---
 const TemplateBannerRender: React.FC<{ config: any }> = ({ config }) => {
@@ -154,13 +153,7 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
           .order('created_at', { ascending: false })
           .limit(1);
 
-        if (error) {
-          if (error.code === 'PGRST116' || error.message.includes('schema cache')) {
-            setActiveBanner(null);
-            return;
-          }
-          throw error;
-        }
+        if (error) throw error;
 
         if (data && data.length > 0) {
           setActiveBanner(data[0]);
@@ -168,7 +161,7 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
           setActiveBanner(null);
         }
       } catch (e: any) {
-        console.warn("Category banner fetch suppressed:", e.message || e);
+        console.error("Failed to fetch category banner from Supabase:", e.message || e);
         setActiveBanner(null);
       } finally {
         setLoadingBanner(false);
@@ -177,24 +170,19 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
     
     fetchCategoryBanner();
 
-    let channel: any;
-    try {
-      channel = supabase.channel(`category-banner-${category.slug}`)
-        .on('postgres_changes', {
-            event: '*',
-            schema: 'public',
-            table: 'published_banners',
-            filter: `target=eq.category:${category.slug}`
-          },
-          () => fetchCategoryBanner()
-        )
-        .subscribe();
-    } catch (e) {
-      // Ignora erro
-    }
+    const channel = supabase.channel(`category-banner-${category.slug}`)
+      .on('postgres_changes', {
+          event: '*',
+          schema: 'public',
+          table: 'published_banners',
+          filter: `target=eq.category:${category.slug}`
+        },
+        () => fetchCategoryBanner()
+      )
+      .subscribe();
 
     return () => {
-      if (channel) supabase.removeChannel(channel);
+      supabase.removeChannel(channel);
     };
   }, [category.slug]);
 
@@ -267,13 +255,21 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
           ) : (
             <div 
               onClick={handleAdvertiseClick}
-              className="w-full aspect-video rounded-2xl bg-gray-100 dark:bg-gray-800 border-2 border-dashed border-gray-300 dark:border-gray-600 flex flex-col items-center justify-center text-center p-6 cursor-pointer hover:border-blue-500 transition-all group"
+              className="w-full aspect-video rounded-2xl bg-slate-900 flex flex-col items-center justify-center text-center p-8 cursor-pointer relative overflow-hidden shadow-2xl border border-white/5 group"
             >
-                <div className="p-3 bg-gray-200 dark:bg-gray-700 rounded-full mb-3 group-hover:bg-blue-100 transition-colors">
-                  <Megaphone className="w-6 h-6 text-gray-500 dark:text-gray-400 group-hover:text-blue-600 transition-colors" />
+                <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 rounded-full blur-3xl -mr-16 -mt-16"></div>
+                <div className="absolute bottom-0 left-0 w-24 h-24 bg-indigo-500/10 rounded-full blur-2xl -ml-12 -mb-12"></div>
+                
+                <div className="relative z-10 flex flex-col items-center">
+                    <div className="p-3 bg-white/5 backdrop-blur-md rounded-2xl mb-4 border border-white/10 shadow-xl group-hover:scale-110 transition-transform">
+                      <ShieldCheck className="w-8 h-8 text-[#1E5BFF]" />
+                    </div>
+                    <h3 className="font-black text-2xl text-white uppercase tracking-tighter leading-tight">Serviços de <span className="text-[#1E5BFF]">Confiança</span></h3>
+                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-[0.2em] mt-2 mb-6">Os melhores profissionais da região</p>
+                    <div className="bg-white/10 hover:bg-white/20 backdrop-blur-sm px-4 py-2 rounded-xl text-[10px] font-black text-white uppercase tracking-widest border border-white/10 transition-all">
+                        Anunciar nesta categoria
+                    </div>
                 </div>
-                <h3 className="font-bold text-gray-800 dark:text-white">Anuncie sua loja aqui</h3>
-                <p className="text-xs text-gray-500 mt-1">Destaque-se para clientes que buscam por "{category.name}"</p>
             </div>
           )}
         </section>
