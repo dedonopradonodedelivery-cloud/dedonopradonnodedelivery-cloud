@@ -16,6 +16,8 @@ export interface Store {
   subcategory: string;
   logoUrl?: string; 
   image?: string; 
+  logo_url?: string;
+  banner_url?: string;
   rating: number;
   distance: string;
   adType: AdType;

@@ -16,6 +16,8 @@ export interface Store {
   subcategory: string;
   logoUrl?: string; 
   image?: string; 
+  logo_url?: string;
+  banner_url?: string;
   rating: number;
   distance: string;
   adType: AdType;
@@ -169,6 +171,17 @@ export interface CommunitySuggestion {
   status: 'pending' | 'approved' | 'rejected';
   creatorId: string;
   voterIds: string[];
+}
+
+export interface TaxonomySuggestion {
+  id: string;
+  type: 'category' | 'subcategory' | 'specialty';
+  name: string;
+  parentName?: string;
+  justification?: string;
+  status: 'pending' | 'approved' | 'rejected';
+  storeName: string;
+  createdAt: string;
 }
 
 export type ReportReason = 'spam' | 'offensive' | 'fraud' | 'wrong_neighborhood' | 'other';
