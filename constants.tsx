@@ -12,7 +12,6 @@ import {
   Activity, Eye, FileText, Globe, Calendar, Music, PartyPopper, Globe2, Edit3, User, Bell, Search,
   Camera, Vote, Handshake, Flame, Milestone, History, Home as HomeIcon,
   MessageCircle, HelpCircle, UserCheck, Recycle, Scale, Calculator, PenTool,
-  // Added missing Fish icon
   Fish
 } from 'lucide-react';
 import { Category, Store, Story, EditorialCollection, Job, CommunityPost, NeighborhoodCommunity } from './types';
@@ -70,28 +69,18 @@ export const SUBCATEGORIES: Record<string, { name: string; icon: React.ReactNode
 };
 
 export const SPECIALTIES: Record<string, string[]> = {
-  // Comida
   'Restaurante': ['Self-service', 'À la carte', 'Delivery', 'Comida Caseira', 'Churrascaria', 'Vegano'],
   'Pizzaria': ['Forno a lenha', 'Rodízio', 'Artesanal', 'Borda Recheada'],
   'Hamburgueria': ['Artesanal', 'Smash Burger', 'Veggie', 'Combos'],
-  
-  // Saúde
   'Dentista': ['Ortodontia', 'Implantes', 'Clareamento', 'Odontopediatria', 'Estética'],
   'Psicólogo': ['TCC', 'Psicanálise', 'Infantil', 'Casal', 'Ansiedade'],
-  
-  // Serviços
   'Eletricista': ['Residencial', 'Predial', 'Instalação de Ar', 'Quadro de Luz', 'Emergência 24h'],
   'Encanador': ['Vazamentos', 'Desentupimento', 'Instalação Hidráulica', 'Caixa d\'água'],
   'Técnico de Informática': ['Formatação', 'Hardware', 'Redes/Wifi', 'Macbook/iPhone', 'Remoção de Vírus'],
-
-  // Pro
   'Advogado': ['Cível', 'Criminal', 'Trabalhista', 'Família', 'Imobiliário', 'Previdenciário'],
   'Contador': ['MEI', 'Imposto de Renda', 'Abertura de Empresa', 'Assessoria Mensal', 'Consultoria'],
-  
-  // Pets
   'Veterinário': ['Clínica Geral', 'Castração', 'Exames', 'Vacinação', 'Especialista'],
   'Pet Shop': ['Rações', 'Acessórios', 'Farmácia Pet', 'Hospedagem'],
-
   'default': ['Consultoria', 'Orçamento Geral', 'Manutenção', 'Instalação']
 };
 
@@ -100,54 +89,22 @@ export const OFFICIAL_COMMUNITIES: NeighborhoodCommunity[] = [
   { id: 'comm-desapega', name: 'Desapega JPA', description: 'Venda e troca local.', image: 'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?q=80&w=800', icon: <Recycle />, color: 'bg-[#1E5BFF]', membersCount: '22.3k', type: 'official' }
 ];
 
-// Added missing MOCK_USER_COMMUNITIES
 export const MOCK_USER_COMMUNITIES: NeighborhoodCommunity[] = [
-  {
-    id: 'user-comm-1',
-    name: 'Clube do Livro Freguesia',
-    description: 'Encontros mensais para discutir literatura na Praça da Freguesia.',
-    image: 'https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?q=80&w=800&auto=format&fit=crop',
-    icon: <BookOpen />,
-    color: 'bg-amber-600',
-    membersCount: '156',
-    type: 'user'
-  },
-  {
-    id: 'user-comm-2',
-    name: 'Vizinhos do Anil (Reserva)',
-    description: 'Grupo específico para moradores do condomínio Reserva do Anil.',
-    image: 'https://images.unsplash.com/photo-1570129477492-45c003edd2be?q=80&w=800&auto=format&fit=crop',
-    icon: <Building2 />,
-    color: 'bg-blue-400',
-    membersCount: '482',
-    type: 'user'
-  },
-  {
-    id: 'user-comm-3',
-    name: 'Trilhas em Jacarepaguá',
-    description: 'Para quem ama explorar o Maciço da Tijuca e arredores aos finais de semana.',
-    image: 'https://images.unsplash.com/photo-1551632432-c735e8399527?q=80&w=800&auto=format&fit=crop',
-    icon: <MapIcon />,
-    color: 'bg-green-600',
-    membersCount: '890',
-    type: 'user'
-  },
-  {
-    id: 'user-comm-4',
-    name: 'Donos de Golden Retriever JPA',
-    description: 'Troca de experiências e encontros de pets no Parque de Jacarepaguá.',
-    image: 'https://images.unsplash.com/photo-1552053831-71594a27632d?q=80&w=800&auto=format&fit=crop',
-    icon: <Dog />,
-    color: 'bg-yellow-500',
-    membersCount: '312',
-    type: 'user'
-  }
+  { id: 'user-comm-1', name: 'Clube do Livro Freguesia', description: 'Encontros mensais para discutir literatura na Praça da Freguesia.', image: 'https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?q=80&w=800&auto=format&fit=crop', icon: <BookOpen />, color: 'bg-amber-600', membersCount: '156', type: 'user' },
+  { id: 'user-comm-2', name: 'Vizinhos do Anil (Reserva)', description: 'Grupo específico para moradores do condomínio Reserva do Anil.', image: 'https://images.unsplash.com/photo-1570129477492-45c003edd2be?q=80&w=800&auto=format&fit=crop', icon: <Building2 />, color: 'bg-blue-400', membersCount: '482', type: 'user' },
 ];
 
 export const NEIGHBORHOOD_COMMUNITIES: NeighborhoodCommunity[] = [...OFFICIAL_COMMUNITIES, ...MOCK_USER_COMMUNITIES];
 export const MOCK_COMMUNITY_POSTS: CommunityPost[] = [];
 export const STORES: Store[] = [];
 export const EDITORIAL_SERVICES: EditorialCollection[] = [];
-export const quickFilters = [];
+
+// Fixed: Correcting quickFilters from empty array to valid array to fix TS error in ExploreView.tsx
+export const quickFilters = [
+  { id: 'top_rated', label: 'Top Avaliados', icon: 'star' },
+  { id: 'open_now', label: 'Aberto Agora', icon: 'clock' },
+  { id: 'nearby', label: 'Perto de Mim', icon: 'zap' }
+];
+
 export const STORIES: Story[] = [];
 export const MOCK_JOBS: Job[] = [];

@@ -261,4 +261,5 @@ export interface TaxonomySuggestion {
   status: TaxonomyStatus;
   storeName?: string;
   createdAt: string;
+  justification?: string;
 }

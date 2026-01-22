@@ -5,7 +5,8 @@ import {
   ArrowLeft, Download, Filter, TrendingUp, AlertTriangle, 
   Clock, DollarSign, Calendar, ChevronRight, LayoutDashboard,
   CheckCircle, XCircle, LogOut, Megaphone, User as UserIcon, Building, Flag, PauseCircle, Image as ImageIcon,
-  Plus, Loader2, Heart, Share2, Phone, MousePointerClick, Tags, Check, X, Info, GitBranch
+  Plus, Loader2, Heart, Share2, Phone, MousePointerClick, Tags, Check, X, Info, GitBranch,
+  MessageSquare
 } from 'lucide-react';
 import { getAdminGlobalMetrics, fetchAdminMerchants, fetchAdminUsers, fetchAdminLedger } from '../backend/services';
 import { supabase } from '../lib/supabaseClient';
@@ -30,14 +31,12 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   onInspectMerchant,
   onInspectUser
 }) => {
-  const [activeTab, setActiveTab] = useState<'metrics' | 'merchants' | 'users' | 'ledger' | 'taxonomy'>('metrics');
+  const [activeTab, setActiveTab] = useState<'metrics' | 'merchants' | 'ledger' | 'taxonomy'>('metrics');
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [metrics, setMetrics] = useState({ totalGenerated: 0, totalUsed: 0, totalExpired: 0 });
   const [merchants, setMerchants] = useState<any[]>([]);
-  const [users, setUsers] = useState<any[]>([]);
-  const [ledger, setLedger] = useState<any[]>([]);
-  const [taxonomySuggestions, setTaxonomySuggestions] = useState<any[]>([]);
+  const [taxonomySuggestions, setTaxonomySuggestions] = useState<TaxonomySuggestion[]>([]);
 
   useEffect(() => { loadData(); }, [activeTab, searchTerm]);
 
@@ -46,11 +45,9 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
     try {
       if (activeTab === 'metrics') setMetrics(await getAdminGlobalMetrics());
       if (activeTab === 'merchants') setMerchants(await fetchAdminMerchants(searchTerm));
-      if (activeTab === 'users') setUsers(await fetchAdminUsers(searchTerm));
-      if (activeTab === 'ledger') setLedger(await fetchAdminLedger());
       if (activeTab === 'taxonomy') {
           const saved = localStorage.getItem('taxonomy_suggestions') || '[]';
-          setTaxonomySuggestions(JSON.parse(saved).filter((s: any) => s.status === 'pending'));
+          setTaxonomySuggestions(JSON.parse(saved).filter((s: TaxonomySuggestion) => s.status === 'pending'));
       }
     } finally { setLoading(false); }
   };
@@ -58,8 +55,10 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   const handleTaxonomyAction = (id: string, action: 'approved' | 'rejected') => {
       const saved = localStorage.getItem('taxonomy_suggestions') || '[]';
       let suggestions = JSON.parse(saved);
-      suggestions = suggestions.map((s: any) => s.id === id ? { ...s, status: action } : s);
+      suggestions = suggestions.map((s: TaxonomySuggestion) => s.id === id ? { ...s, status: action } : s);
       localStorage.setItem('taxonomy_suggestions', JSON.stringify(suggestions));
+      
+      // Em produção, isso dispararia um trigger para atualizar as constantes ou banco
       alert(`O item foi ${action === 'approved' ? 'aprovado e inserido no fluxo' : 'rejeitado'}.`);
       setTaxonomySuggestions(prev => prev.filter(s => s.id !== id));
   };
@@ -90,7 +89,6 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
             {[
                 { id: 'metrics', label: 'Métricas', icon: BarChart3 },
                 { id: 'merchants', label: 'Lojistas', icon: Store },
-                { id: 'ledger', label: 'Auditoria', icon: History },
                 { id: 'taxonomy', label: 'Classificação', icon: GitBranch }
             ].map(tab => (
                 <button
@@ -118,7 +116,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                         <Info className="text-indigo-400 mt-1 shrink-0" />
                         <div>
                             <h4 className="font-bold text-white text-sm">Governança de Taxonomia</h4>
-                            <p className="text-xs text-slate-400 mt-1 leading-relaxed">Mantenha a árvore de Categorias, Subcategorias e Especialidades limpa e organizada. Sugestões aprovadas entram em tempo real para todos os lojistas.</p>
+                            <p className="text-xs text-slate-400 mt-1 leading-relaxed">Mantenha a árvore de Categorias, Subcategorias e Especialidades limpa. Sugestões aprovadas entram em tempo real.</p>
                         </div>
                     </div>
 
@@ -144,6 +142,12 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                                         </div>
                                         <span className="text-[9px] text-slate-600 font-black uppercase tracking-widest">Sugerido por: {sug.storeName || 'Loja'}</span>
                                     </div>
+
+                                    {sug.justification && (
+                                        <div className="bg-slate-950 p-4 rounded-xl border border-white/5 italic text-xs text-slate-400">
+                                            "{sug.justification}"
+                                        </div>
+                                    )}
                                     
                                     <div className="flex gap-3">
                                         <button onClick={() => handleTaxonomyAction(sug.id, 'rejected')} className="flex-1 bg-white/5 hover:bg-rose-500/10 text-slate-500 hover:text-rose-400 py-3.5 rounded-2xl border border-white/5 font-black text-[10px] uppercase tracking-widest transition-all flex items-center justify-center gap-2"><X size={14} /> Rejeitar</button>
@@ -156,7 +160,6 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                 </div>
             )}
 
-            {/* Outras abas mantidas e simplificadas */}
             {activeTab === 'metrics' && (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-in fade-in">
                     <div className="bg-slate-900 p-8 rounded-[2.5rem] border border-white/5">
@@ -169,6 +172,35 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                         <h2 className="text-4xl font-black text-white">{formatBRL(metrics.totalUsed)}</h2>
                         <p className="text-xs text-slate-500 uppercase font-black tracking-widest mt-2">Créditos Resgatados</p>
                     </div>
+                </div>
+            )}
+            
+            {activeTab === 'merchants' && (
+                <div className="space-y-4">
+                     <div className="relative mb-6">
+                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 w-4 h-4" />
+                        <input 
+                            type="text" 
+                            placeholder="Buscar lojista por nome..." 
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="w-full bg-slate-900 border border-white/5 rounded-2xl py-4 pl-12 pr-4 text-sm focus:outline-none focus:border-indigo-500"
+                        />
+                    </div>
+                    {merchants.map(m => (
+                        <div key={m.id} className="bg-slate-900 p-6 rounded-3xl border border-white/5 flex items-center justify-between">
+                            <div className="flex items-center gap-4">
+                                <div className="w-12 h-12 bg-white/5 rounded-2xl flex items-center justify-center text-slate-500">
+                                    <Store size={24} />
+                                </div>
+                                <div>
+                                    <h4 className="font-bold text-white">{m.name}</h4>
+                                    <p className="text-xs text-slate-500">{m.category}</p>
+                                </div>
+                            </div>
+                            <ChevronRight size={18} className="text-slate-700" />
+                        </div>
+                    ))}
                 </div>
             )}
           </div>
