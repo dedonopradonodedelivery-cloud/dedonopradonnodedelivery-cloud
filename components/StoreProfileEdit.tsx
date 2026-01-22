@@ -26,7 +26,6 @@ import {
   Info,
   Globe,
   Image as ImageIcon,
-  // Added missing Eye icon import
   Eye
 } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
@@ -175,6 +174,7 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
     telefone_fixo_publico: '',
     email_publico: '',
     description: '',
+    instagram: '', // Corrigido: adicionado propriedade faltante
     
     // --- IMAGENS ---
     logo_url: '',
@@ -385,7 +385,7 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
                 <Sparkles size={16} className="text-amber-500" />
                 <h2 className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Loja no App (Público)</h2>
             </div>
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-[2rem] border border-gray-100 dark:border-gray-700 shadow-sm space-y-6">
+            <div className="bg-white dark:bg-gray-900 p-6 rounded-[2rem] border border-gray-100 dark:border-gray-800 shadow-sm space-y-6">
                 <div className="p-3 bg-amber-50 dark:bg-amber-900/10 rounded-xl border border-amber-100 dark:border-amber-800/30 flex gap-3">
                     <Eye size={16} className="text-amber-500 shrink-0" />
                     <p className="text-[9px] text-amber-700 dark:text-amber-300 font-bold uppercase leading-tight">
@@ -416,7 +416,7 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
                 <MapPin size={16} className="text-red-500" />
                 <h2 className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Endereço</h2>
             </div>
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-[2rem] border border-gray-100 dark:border-gray-700 shadow-sm space-y-6">
+            <div className="bg-white dark:bg-gray-900 p-6 rounded-[2rem] border border-gray-100 dark:border-gray-800 shadow-sm space-y-6">
                 
                 <div className="flex items-center gap-3 p-4 bg-gray-50 dark:bg-gray-800 rounded-2xl cursor-pointer" onClick={() => setFormData({...formData, is_delivery_only: !formData.is_delivery_only})}>
                     <div className={`w-6 h-6 rounded border-2 flex items-center justify-center transition-colors ${formData.is_delivery_only ? 'bg-[#1E5BFF] border-[#1E5BFF]' : 'bg-white border-gray-200'}`}>
@@ -452,7 +452,7 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
                 <Hash size={16} className="text-[#1E5BFF]" />
                 <h2 className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Classificação</h2>
             </div>
-            <div className="bg-white dark:bg-gray-900 p-6 rounded-[2rem] border border-gray-100 dark:border-gray-700 shadow-sm space-y-6">
+            <div className="bg-white dark:bg-gray-900 p-6 rounded-[2rem] border border-gray-100 dark:border-gray-800 shadow-sm space-y-6">
                 <TaxonomyField 
                     label="Categoria Principal" 
                     placeholder="Selecione..." 
