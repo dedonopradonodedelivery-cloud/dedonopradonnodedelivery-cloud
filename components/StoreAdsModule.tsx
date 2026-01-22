@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { 
   ChevronLeft, 
@@ -26,9 +27,10 @@ import {
   AlignCenter,
   AlignRight,
   Sparkles,
-  // Added Store as StoreIcon to fix "Cannot find name 'StoreIcon'" error on line 301
   Store as StoreIcon,
-  Image as ImageIcon
+  Image as ImageIcon,
+  Lock,
+  Unlock
 } from 'lucide-react';
 import { User } from '@supabase/supabase-js';
 
@@ -81,8 +83,8 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [isArtSaved, setIsArtSaved] = useState(false);
+  const [toast, setToast] = useState<{msg: string, type: 'info' | 'error'} | null>(null);
 
-  // Estados do Editor DIY
   const [diyData, setDiyData] = useState({
     storeName: user?.user_metadata?.store_name || 'Sua Loja',
     title: 'Sua Promoção Aqui',
@@ -100,14 +102,46 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
   const creativeRef = useRef<HTMLDivElement>(null);
   const paymentRef = useRef<HTMLDivElement>(null);
 
+  const showToast = (msg: string, type: 'info' | 'error' = 'info') => {
+    setToast({ msg, type });
+    setTimeout(() => setToast(null), 4000);
+  };
+
   const scrollTo = (ref: React.RefObject<HTMLDivElement | null>) => {
     setTimeout(() => ref.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
   };
 
-  const checkHoodAvailability = (hood: string): { available: boolean; busyMonths: string[] } => {
-    if (selectedMonths.length === 0) return { available: true, busyMonths: [] };
-    const busyIn = selectedMonths.filter(m => MOCK_OCCUPANCY[hood]?.[m] === true);
+  const checkHoodAvailability = (hood: string, monthsOverride?: string[]): { available: boolean; busyMonths: string[] } => {
+    const monthsToUse = monthsOverride || selectedMonths;
+    if (monthsToUse.length === 0) return { available: true, busyMonths: [] };
+    const busyIn = monthsToUse.filter(m => MOCK_OCCUPANCY[hood]?.[m] === true);
     return { available: busyIn.length === 0, busyMonths: busyIn };
+  };
+
+  const toggleMonth = (month: string) => {
+    const nextMonths = selectedMonths.includes(month) 
+      ? selectedMonths.filter(m => m !== month) 
+      : [...selectedMonths, month];
+    
+    setSelectedMonths(nextMonths);
+
+    // LÓGICA DE REVALIDAÇÃO DE BAIRROS
+    if (selectedNeighborhoods.length > 0) {
+      const validHoods = selectedNeighborhoods.filter(hood => {
+        const { available } = checkHoodAvailability(hood, nextMonths);
+        return available;
+      });
+
+      if (validHoods.length < selectedNeighborhoods.length) {
+        const diff = selectedNeighborhoods.length - validHoods.length;
+        showToast(`${diff} bairro(s) removido(s) por indisponibilidade no novo período.`, 'error');
+        setSelectedNeighborhoods(validHoods);
+      }
+    }
+
+    if (nextMonths.length > 0 && selectedNeighborhoods.length === 0) {
+      scrollTo(neighborhoodRef);
+    }
   };
 
   const totalAmount = useMemo(() => {
@@ -118,15 +152,6 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
     const artExtra = artChoice === 'pro' ? 69.90 : 0;
     return (base * hoodsMultiplier * monthsMultiplier) + artExtra;
   }, [selectedMode, selectedMonths, selectedNeighborhoods, artChoice]);
-
-  const toggleMonth = (month: string) => {
-    setSelectedMonths(prev => {
-        const next = prev.includes(month) ? prev.filter(m => m !== month) : [...prev, month];
-        setSelectedNeighborhoods([]);
-        return next;
-    });
-    if (selectedMonths.length === 0) scrollTo(neighborhoodRef);
-  };
 
   const handleFinishArt = () => {
     setIsArtSaved(true);
@@ -151,6 +176,14 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
   return (
     <div className="min-h-screen bg-[#020617] text-slate-100 font-sans flex flex-col selection:bg-blue-500/30 overflow-x-hidden">
       
+      {/* TOAST NOTIFICATION */}
+      {toast && (
+        <div className={`fixed top-24 left-1/2 -translate-x-1/2 z-[100] px-6 py-3 rounded-2xl shadow-2xl flex items-center gap-3 animate-in slide-in-from-top-4 border ${toast.type === 'error' ? 'bg-rose-500 border-rose-400 text-white' : 'bg-blue-600 border-blue-500 text-white'}`}>
+           {toast.type === 'error' ? <AlertTriangle size={18} /> : <Info size={18} />}
+           <p className="text-xs font-black uppercase tracking-tight">{toast.msg}</p>
+        </div>
+      )}
+
       <header className="sticky top-0 z-40 bg-[#020617]/80 backdrop-blur-xl border-b border-white/5 px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-4">
           <button onClick={onBack} className="p-2 bg-slate-900 rounded-xl text-slate-400 hover:text-white transition-all active:scale-95"><ChevronLeft size={20} /></button>
@@ -194,9 +227,8 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
           </div>
         </section>
 
-        {/* BLOCO 2: PERÍODO E BAIRROS */}
+        {/* BLOCO 2: PERÍODO (MÚLTIPLO) */}
         <section 
-          ref={neighborhoodRef}
           className={`space-y-8 transition-all duration-500 ${!selectedMode ? 'opacity-20 pointer-events-none' : 'opacity-100'}`}
         >
           <div>
@@ -216,9 +248,27 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
             </div>
           </div>
 
-          <div className="space-y-5">
-            <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-blue-500 px-1">3. Selecione os Bairros</h3>
-            <div className="grid grid-cols-1 gap-3">
+          {/* BLOCO 3: BAIRROS (BLOQUEADO ATÉ PERÍODO) */}
+          <div 
+            ref={neighborhoodRef}
+            className={`space-y-5 transition-all duration-500 ${selectedMonths.length === 0 ? 'opacity-40 grayscale' : 'opacity-100'}`}
+          >
+            <div className="flex flex-col gap-1 px-1">
+                <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-blue-500">3. Selecione os Bairros</h3>
+                {selectedMonths.length === 0 ? (
+                    <div className="flex items-center gap-2 mt-2 bg-amber-400/10 border border-amber-400/20 px-3 py-2 rounded-xl">
+                        <Lock size={12} className="text-amber-400" />
+                        <p className="text-[9px] text-amber-400 uppercase font-black tracking-widest leading-none">Escolha o período acima para ver a disponibilidade</p>
+                    </div>
+                ) : (
+                    <div className="flex items-center gap-2 mt-2 bg-emerald-500/10 border border-emerald-500/20 px-3 py-2 rounded-xl animate-in zoom-in-95">
+                        <Unlock size={12} className="text-emerald-500" />
+                        <p className="text-[9px] text-emerald-500 uppercase font-black tracking-widest leading-none">Bairros liberados para seleção</p>
+                    </div>
+                )}
+            </div>
+
+            <div className={`grid grid-cols-1 gap-3 ${selectedMonths.length === 0 ? 'pointer-events-none' : 'pointer-events-auto'}`}>
                 {NEIGHBORHOODS.map(hood => {
                     const { available, busyMonths } = checkHoodAvailability(hood);
                     const isSelected = selectedNeighborhoods.includes(hood);
@@ -227,15 +277,18 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
                             key={hood}
                             onClick={() => {
                                 if (available) {
-                                    setSelectedNeighborhoods(prev => prev.includes(hood) ? prev.filter(h => h !== hood) : [...prev, hood]);
-                                    scrollTo(creativeRef);
+                                    setSelectedNeighborhoods(prev => {
+                                      const next = prev.includes(hood) ? prev.filter(h => h !== hood) : [...prev, hood];
+                                      if (next.length > 0) scrollTo(creativeRef);
+                                      return next;
+                                    });
                                 }
                             }}
                             className={`p-4 rounded-2xl border-2 flex items-center justify-between transition-all ${
                                 !available 
                                 ? 'bg-slate-900/50 border-white/5 opacity-50 cursor-default' 
                                 : isSelected
-                                    ? 'bg-blue-600/10 border-blue-500'
+                                    ? 'bg-blue-600/10 border-blue-500 shadow-lg shadow-blue-500/5'
                                     : 'bg-slate-900 border-white/5'
                             }`}
                         >
@@ -244,7 +297,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
                                 <div className="text-left">
                                     <p className={`font-bold text-sm ${!available ? 'text-slate-600' : 'text-white'}`}>{hood}</p>
                                     <p className={`text-[9px] font-black uppercase tracking-widest ${!available ? 'text-rose-500' : 'text-emerald-500'}`}>
-                                        {!available ? `Ocupado em ${busyMonths.join(', ')}` : 'Livre'}
+                                        {!available ? `Ocupado em ${busyMonths.join(', ')}` : 'Disponível'}
                                     </p>
                                 </div>
                             </div>
@@ -257,6 +310,13 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
                     );
                 })}
             </div>
+            
+            {selectedMonths.length === 0 && (
+                <div 
+                  onClick={() => showToast('Selecione pelo menos 1 mês para continuar.')}
+                  className="absolute inset-0 z-10 cursor-pointer"
+                />
+            )}
           </div>
         </section>
 
@@ -270,7 +330,6 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
           </h3>
 
           <div className="space-y-4">
-              {/* DIY CHOICE */}
               <div className={`rounded-[2.5rem] border-2 transition-all overflow-hidden ${artChoice === 'diy' ? 'bg-slate-900 border-blue-500' : 'bg-slate-900 border-white/5'}`}>
                 <div className="p-8">
                     <div className="flex items-start gap-5 mb-6">
@@ -289,7 +348,6 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
 
                     {artChoice === 'diy' && !isArtSaved && (
                         <div className="space-y-10 animate-in slide-in-from-top-4 duration-500 pt-6 border-t border-white/5">
-                            {/* LIVE PREVIEW */}
                             <div className="sticky top-24 z-20">
                                 <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-3 ml-1 text-center">Prévia em tempo real</p>
                                 <div 
@@ -311,24 +369,21 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
                                 </div>
                             </div>
 
-                            {/* FERRAMENTAS */}
                             <div className="space-y-8">
-                                {/* 1. TEXTOS */}
                                 <div className="space-y-4">
                                     <div className="flex items-center gap-2 text-slate-400"><Type size={14} /><span className="text-[10px] font-black uppercase tracking-widest">Textos do Banner</span></div>
                                     <div className="space-y-3">
                                         <div className="relative">
-                                            <input value={diyData.title} onChange={e => setDiyData({...diyData, title: e.target.value.slice(0, 40)})} className="w-full bg-slate-950 border border-white/10 rounded-xl p-4 text-xs font-bold text-white outline-none focus:border-blue-500" placeholder="Título (Ex: 50% de Desconto)" />
+                                            <input value={diyData.title} onChange={e => setDiyData({...diyData, title: e.target.value.slice(0, 40)})} className="w-full bg-slate-950 border border-white/10 rounded-xl p-4 text-xs font-bold text-white outline-none focus:border-[#1E5BFF]" placeholder="Título (Ex: 50% de Desconto)" />
                                             <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[9px] font-bold text-slate-600">{diyData.title.length}/40</span>
                                         </div>
                                         <div className="relative">
-                                            <textarea value={diyData.description} onChange={e => setDiyData({...diyData, description: e.target.value.slice(0, 80)})} className="w-full bg-slate-950 border border-white/10 rounded-xl p-4 text-xs font-medium text-slate-400 outline-none focus:border-blue-500 resize-none h-20" placeholder="Descrição curta..." />
+                                            <textarea value={diyData.description} onChange={e => setDiyData({...diyData, description: e.target.value.slice(0, 80)})} className="w-full bg-slate-950 border border-white/10 rounded-xl p-4 text-xs font-medium text-slate-400 outline-none focus:border-[#1E5BFF] resize-none h-20" placeholder="Descrição curta..." />
                                             <span className="absolute right-4 bottom-4 text-[9px] font-bold text-slate-600">{diyData.description.length}/80</span>
                                         </div>
                                     </div>
                                 </div>
 
-                                {/* 2. TIPOGRAFIA */}
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="space-y-3">
                                         <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Fonte</span>
@@ -342,7 +397,6 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
                                     </div>
                                 </div>
 
-                                {/* 3. CORES & ALINHAMENTO */}
                                 <div className="space-y-6">
                                     <div className="space-y-3">
                                         <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Cores do Fundo</span>
@@ -370,7 +424,6 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
                                     </div>
                                 </div>
 
-                                {/* 4. ANIMAÇÃO */}
                                 <div className="space-y-3">
                                     <div className="flex items-center gap-2 text-slate-400"><Sparkles size={14} /><span className="text-[10px] font-black uppercase tracking-widest">Efeito Visual</span></div>
                                     <div className="grid grid-cols-3 gap-2">
@@ -390,7 +443,6 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
                 </div>
               </div>
 
-              {/* PRO CHOICE */}
               <button 
                 onClick={() => { setArtChoice('pro'); setIsArtSaved(true); scrollTo(paymentRef); }}
                 className={`relative p-8 rounded-[2.5rem] border-2 text-left flex flex-col transition-all ${artChoice === 'pro' ? 'bg-gradient-to-br from-slate-800 to-slate-900 border-amber-500' : 'bg-slate-900 border-white/5 opacity-80'}`}
