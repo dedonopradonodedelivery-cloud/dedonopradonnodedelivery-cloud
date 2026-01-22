@@ -145,7 +145,6 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
   const selectAllAvailableHoods = () => {
     const availableHoods = NEIGHBORHOODS.filter(hood => checkHoodAvailability(hood).available);
     setSelectedNeighborhoods(availableHoods);
-    if (availableHoods.length > 0) scrollTo(creativeRef);
   };
 
   const handleFinishArt = () => {
@@ -235,7 +234,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
             {DISPLAY_MODES.map((mode) => (
               <button
                 key={mode.id}
-                onClick={() => { setSelectedMode(mode); }}
+                onClick={() => { setSelectedMode(mode); scrollTo(neighborhoodRef); }}
                 className={`relative flex items-start text-left p-6 rounded-[2rem] border-2 transition-all duration-300 gap-5 ${
                   selectedMode?.id === mode.id 
                   ? 'bg-blue-600/10 border-blue-500 shadow-lg shadow-blue-500/10' 
@@ -317,6 +316,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
                     <button onClick={selectAllAvailableHoods} className="text-[10px] font-black text-[#1E5BFF] uppercase tracking-widest flex items-center gap-1.5 bg-blue-500/10 px-3 py-1.5 rounded-xl border border-blue-500/20 active:scale-95 transition-all"><CheckSquare size={12} /> Selecionar todos</button>
                   )}
                 </div>
+                <p className="text-[10px] text-slate-500 font-medium mt-1">Você pode selecionar um ou mais bairros.</p>
                 {selectedPeriods.length > 0 && (
                     <div className="flex items-center justify-between mt-4"><div className="flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 px-3 py-2 rounded-xl"><Unlock size={12} className="text-emerald-500" /><p className="text-[9px] text-emerald-500 uppercase font-black tracking-widest leading-none">Disponibilidade atualizada</p></div>{selectedNeighborhoods.length > 0 && <span className="text-[10px] font-black text-blue-400 uppercase tracking-widest">{selectedNeighborhoods.length} selecionados</span>}</div>
                 )}
@@ -327,7 +327,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
                     const { available } = checkHoodAvailability(hood);
                     const isSelected = selectedNeighborhoods.includes(hood);
                     return (
-                        <button key={hood} onClick={() => { if (available) { setSelectedNeighborhoods(prev => prev.includes(hood) ? prev.filter(h => h !== hood) : [...prev, hood]); if (!isSelected) scrollTo(creativeRef); } }} className={`p-4 rounded-2xl border-2 flex flex-col justify-between transition-all min-h-[90px] relative text-left ${!available ? 'bg-slate-900/50 border-white/5 opacity-50 cursor-default' : isSelected ? 'bg-blue-600/10 border-blue-500 shadow-lg shadow-blue-500/10 scale-[1.02]' : 'bg-slate-900 border-white/5 hover:border-white/10'}`}>
+                        <button key={hood} onClick={() => { if (available) { setSelectedNeighborhoods(prev => prev.includes(hood) ? prev.filter(h => h !== hood) : [...prev, hood]); } }} className={`p-4 rounded-2xl border-2 flex flex-col justify-between transition-all min-h-[90px] relative text-left ${!available ? 'bg-slate-900/50 border-white/5 opacity-50 cursor-default' : isSelected ? 'bg-blue-600/10 border-blue-500 shadow-lg shadow-blue-500/10 scale-[1.02]' : 'bg-slate-900 border-white/5 hover:border-white/10'}`}>
                             <div className="flex items-center justify-between w-full mb-2">
                                 <div className={`p-1.5 rounded-lg ${!available ? 'bg-slate-800 text-slate-600' : isSelected ? 'bg-blue-500 text-white' : 'bg-slate-800 text-slate-500'}`}><MapPin size={14} /></div>
                                 {available && <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${isSelected ? 'bg-blue-500 border-blue-500' : 'border-slate-700'}`}>{isSelected && <Check size={12} className="text-white" strokeWidth={4} />}</div>}
