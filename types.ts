@@ -171,6 +171,17 @@ export interface CommunitySuggestion {
   voterIds: string[];
 }
 
+export interface TaxonomySuggestion {
+  id: string;
+  type: 'category' | 'subcategory' | 'specialty';
+  name: string;
+  parentName?: string;
+  justification?: string;
+  status: 'pending' | 'approved' | 'rejected';
+  storeName: string;
+  createdAt: string;
+}
+
 export type ReportReason = 'spam' | 'offensive' | 'fraud' | 'wrong_neighborhood' | 'other';
 export type ReportStatus = 'open' | 'resolved' | 'dismissed';
 export type ReportPriority = 'high' | 'medium' | 'low';

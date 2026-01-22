@@ -17,7 +17,8 @@ import {
   Hash,
   Sparkles,
   HelpCircle,
-  CheckCircle2
+  CheckCircle2,
+  Send
 } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import { useAuth } from '../contexts/AuthContext';
@@ -36,6 +37,7 @@ interface TaxonomyFieldProps {
   selected: string[];
   onSelect: (name: string) => void;
   onRemove: (name: string) => void;
+  onSuggest: () => void;
   guideText?: string;
 }
 
@@ -46,6 +48,7 @@ const TaxonomyField: React.FC<TaxonomyFieldProps> = ({
   selected, 
   onSelect, 
   onRemove, 
+  onSuggest,
   guideText 
 }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -124,6 +127,16 @@ const TaxonomyField: React.FC<TaxonomyFieldProps> = ({
               }) : (
                 <div className="p-4 text-center text-xs text-gray-400">Nenhuma opção encontrada</div>
               )}
+              
+              {/* Botão de Sugestão */}
+              <button 
+                type="button"
+                onClick={() => { onSuggest(); setIsOpen(false); }}
+                className="w-full p-4 text-[#1E5BFF] text-xs font-black uppercase tracking-widest border-t border-gray-50 dark:border-gray-700 bg-blue-50/10 hover:bg-blue-50 transition-colors flex items-center justify-center gap-2"
+              >
+                <PlusCircle size={14} />
+                Sugerir Novo
+              </button>
             </div>
           </div>
         )}
@@ -142,6 +155,10 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
   const bannerInputRef = useRef<HTMLInputElement>(null);
 
   const [showAddAnotherModal, setShowAddAnotherModal] = useState(false);
+  
+  // Estado para Modal de Sugestão
+  const [suggestionModal, setSuggestionModal] = useState<{ isOpen: boolean; type: TaxonomyType; parentName?: string } | null>(null);
+  const [suggestionData, setSuggestionData] = useState({ name: '', justification: '' });
 
   const [formData, setFormData] = useState({
     name: '',
@@ -224,6 +241,30 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
       reader.onloadend = () => setFormData(prev => ({ ...prev, banner_url: reader.result as string }));
       reader.readAsDataURL(file);
     }
+  };
+
+  // --- Lógica de Sugestão ---
+  const submitSuggestion = async () => {
+    if (!suggestionData.name.trim() || !suggestionModal) return;
+    
+    // Simulação de persistência (em produção salvaria na tabela 'taxonomy_suggestions')
+    const suggestion = {
+      id: Date.now().toString(),
+      type: suggestionModal.type,
+      name: suggestionData.name.trim(),
+      parentName: suggestionModal.parentName,
+      justification: suggestionData.justification.trim(),
+      status: 'pending',
+      storeName: formData.name || 'Loja em Cadastro',
+      createdAt: new Date().toISOString()
+    };
+
+    const saved = localStorage.getItem('taxonomy_suggestions') || '[]';
+    localStorage.setItem('taxonomy_suggestions', JSON.stringify([...JSON.parse(saved), suggestion]));
+    
+    alert('Sua sugestão foi enviada para o ADM e está em análise.');
+    setSuggestionModal(null);
+    setSuggestionData({ name: '', justification: '' });
   };
 
   // --- Lógica de Taxonomia Guiada ---
@@ -359,7 +400,7 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
           </div>
         </section>
 
-        {/* CLASSIFICAÇÃO (REFATORADO) */}
+        {/* CLASSIFICAÇÃO */}
         <section className="space-y-8">
           <div className="flex items-center gap-2 px-1">
             <Hash size={16} className="text-[#1E5BFF]" />
@@ -376,6 +417,7 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
               selected={formData.categories}
               onSelect={handleSelectCategory}
               onRemove={handleRemoveCategory}
+              onSuggest={() => setSuggestionModal({ isOpen: true, type: 'category' })}
             />
 
             {/* 2. SUBCATEGORIA (DINÂMICO POR CATEGORIA) */}
@@ -389,6 +431,7 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
                 selected={formData.subcategories.filter(s => (SUBCATEGORIES[cat] || []).some(opt => opt.name === s))}
                 onSelect={handleSelectSub}
                 onRemove={handleRemoveSub}
+                onSuggest={() => setSuggestionModal({ isOpen: true, type: 'subcategory', parentName: cat })}
               />
             ))}
 
@@ -403,6 +446,7 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
                 selected={formData.specialties.filter(s => (SPECIALTIES[sub] || SPECIALTIES['default']).includes(s))}
                 onSelect={handleSelectSpec}
                 onRemove={handleRemoveSpec}
+                onSuggest={() => setSuggestionModal({ isOpen: true, type: 'specialty', parentName: sub })}
               />
             ))}
           </div>
@@ -416,6 +460,59 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
           SALVAR PERFIL
         </button>
       </div>
+
+      {/* MODAL DE SUGESTÃO */}
+      {suggestionModal && (
+        <div className="fixed inset-0 z-[120] bg-black/80 backdrop-blur-md flex items-center justify-center p-6 animate-in fade-in duration-200">
+            <div className="bg-white dark:bg-gray-900 w-full max-w-sm rounded-[2.5rem] p-8 shadow-2xl animate-in zoom-in-95 duration-300 relative border border-white/10" onClick={e => e.stopPropagation()}>
+                <div className="flex justify-between items-center mb-6">
+                    <div className="flex flex-col">
+                        <h3 className="text-lg font-black uppercase tracking-tighter leading-none">Sugerir Opção</h3>
+                        <p className="text-[10px] text-blue-500 font-bold mt-1 uppercase tracking-widest">Análise do ADM</p>
+                    </div>
+                    <button onClick={() => setSuggestionModal(null)} className="p-2 text-gray-400"><X size={24} /></button>
+                </div>
+
+                <div className="space-y-5">
+                    {suggestionModal.parentName && (
+                        <div className="p-3 bg-blue-50 dark:bg-blue-900/10 rounded-xl text-[10px] text-blue-700 font-bold border border-blue-100 dark:border-blue-800 uppercase tracking-widest">
+                            Vincular a: {suggestionModal.parentName}
+                        </div>
+                    )}
+                    
+                    <div>
+                        <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5 ml-1">Nome Sugerido</label>
+                        <input 
+                            value={suggestionData.name}
+                            onChange={e => setSuggestionData({...suggestionData, name: e.target.value})}
+                            placeholder={`Nova ${suggestionModal.type === 'category' ? 'Categoria' : suggestionModal.type === 'subcategory' ? 'Subcategoria' : 'Especialidade'}`}
+                            className="w-full bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 p-4 rounded-2xl outline-none focus:border-[#1E5BFF] transition-all dark:text-white font-bold"
+                        />
+                    </div>
+
+                    <div>
+                        <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5 ml-1">Justificativa (Opcional)</label>
+                        <textarea 
+                            value={suggestionData.justification}
+                            onChange={e => setSuggestionData({...suggestionData, justification: e.target.value})}
+                            placeholder="Por que deveríamos adicionar esta opção?"
+                            rows={3}
+                            className="w-full bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 p-4 rounded-2xl outline-none focus:border-[#1E5BFF] transition-all dark:text-white resize-none text-sm"
+                        />
+                    </div>
+
+                    <button 
+                        onClick={submitSuggestion}
+                        disabled={!suggestionData.name.trim()}
+                        className="w-full bg-[#1E5BFF] hover:bg-[#1749CC] text-white font-black py-4 rounded-2xl shadow-xl shadow-blue-500/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                    >
+                        <Send size={16} />
+                        ENVIAR PARA O ADM
+                    </button>
+                </div>
+            </div>
+        </div>
+      )}
 
       {/* POPUP: ADICIONAR OUTRA CATEGORIA? */}
       {showAddAnotherModal && (
