@@ -30,7 +30,8 @@ import {
   Store as StoreIcon,
   Image as ImageIcon,
   Lock,
-  Unlock
+  Unlock,
+  CheckSquare
 } from 'lucide-react';
 import { User } from '@supabase/supabase-js';
 
@@ -160,6 +161,15 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
     }
   };
 
+  const selectAllAvailableHoods = () => {
+    const availableHoods = NEIGHBORHOODS.filter(hood => {
+      const { available } = checkHoodAvailability(hood);
+      return available;
+    });
+    setSelectedNeighborhoods(availableHoods);
+    if (availableHoods.length > 0) scrollTo(creativeRef);
+  };
+
   const totalAmount = useMemo(() => {
     if (!selectedMode || selectedNeighborhoods.length === 0) return 0;
     const base = selectedMode.price;
@@ -279,27 +289,46 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
             </div>
           </div>
 
-          {/* BLOCO 3: BAIRROS (BLOQUEADO ATÉ PERÍODO) */}
+          {/* BLOCO 3: BAIRROS (GRID 2 COLUNAS) */}
           <div 
             ref={neighborhoodRef}
-            className={`space-y-5 transition-all duration-500 ${selectedMonths.length === 0 ? 'opacity-40 grayscale pointer-events-none' : 'opacity-100'}`}
+            className={`space-y-6 transition-all duration-500 ${selectedMonths.length === 0 ? 'opacity-40 grayscale pointer-events-none' : 'opacity-100'}`}
           >
             <div className="flex flex-col gap-1 px-1">
-                <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-blue-500">3. Selecione os Bairros</h3>
+                <div className="flex items-center justify-between">
+                  <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-blue-500 flex items-center gap-2">
+                    <MapPin size={14} /> 3. Selecione os Bairros
+                  </h3>
+                  {selectedMonths.length > 0 && (
+                    <button 
+                      onClick={selectAllAvailableHoods}
+                      className="text-[10px] font-black text-[#1E5BFF] uppercase tracking-widest flex items-center gap-1.5 bg-blue-500/10 px-3 py-1.5 rounded-xl border border-blue-500/20 active:scale-95 transition-all"
+                    >
+                      <CheckSquare size={12} />
+                      Selecionar todos
+                    </button>
+                  )}
+                </div>
+                
                 {selectedMonths.length === 0 ? (
-                    <div className="flex items-center gap-2 mt-2 bg-amber-400/10 border border-amber-400/20 px-3 py-2 rounded-xl">
+                    <div className="flex items-center gap-2 mt-4 bg-amber-400/10 border border-amber-400/20 px-3 py-2.5 rounded-xl">
                         <Lock size={12} className="text-amber-400" />
-                        <p className="text-[9px] text-amber-400 uppercase font-black tracking-widest leading-none">Escolha o período acima para ver a disponibilidade</p>
+                        <p className="text-[9px] text-amber-400 uppercase font-black tracking-widest leading-none">Escolha o período acima para ver os bairros disponíveis</p>
                     </div>
                 ) : (
-                    <div className="flex items-center gap-2 mt-2 bg-emerald-500/10 border border-emerald-500/20 px-3 py-2 rounded-xl animate-in zoom-in-95">
-                        <Unlock size={12} className="text-emerald-500" />
-                        <p className="text-[9px] text-emerald-500 uppercase font-black tracking-widest leading-none">Disponibilidade atualizada para o período</p>
+                    <div className="flex items-center justify-between mt-4">
+                        <div className="flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 px-3 py-2 rounded-xl">
+                            <Unlock size={12} className="text-emerald-500" />
+                            <p className="text-[9px] text-emerald-500 uppercase font-black tracking-widest leading-none">Disponibilidade atualizada</p>
+                        </div>
+                        {selectedNeighborhoods.length > 0 && (
+                          <span className="text-[10px] font-black text-blue-400 uppercase tracking-widest">{selectedNeighborhoods.length} selecionados</span>
+                        )}
                     </div>
                 )}
             </div>
 
-            <div className="grid grid-cols-1 gap-3">
+            <div className="grid grid-cols-2 gap-3">
                 {NEIGHBORHOODS.map(hood => {
                     const { available, busyIn } = checkHoodAvailability(hood);
                     const isSelected = selectedNeighborhoods.includes(hood);
@@ -315,28 +344,31 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
                                     });
                                 }
                             }}
-                            className={`p-4 rounded-2xl border-2 flex items-center justify-between transition-all ${
+                            className={`p-4 rounded-2xl border-2 flex flex-col justify-between transition-all min-h-[90px] relative text-left ${
                                 !available 
                                 ? 'bg-slate-900/50 border-white/5 opacity-50 cursor-default' 
                                 : isSelected
-                                    ? 'bg-blue-600/10 border-blue-500 shadow-lg shadow-blue-500/5'
-                                    : 'bg-slate-900 border-white/5'
+                                    ? 'bg-blue-600/10 border-blue-500 shadow-lg shadow-blue-500/10 scale-[1.02]'
+                                    : 'bg-slate-900 border-white/5 hover:border-white/10'
                             }`}
                         >
-                            <div className="flex items-center gap-4">
-                                <MapPin size={18} className={!available ? 'text-slate-700' : isSelected ? 'text-blue-500' : 'text-slate-500'} />
-                                <div className="text-left">
-                                    <p className={`font-bold text-sm ${!available ? 'text-slate-600' : 'text-white'}`}>{hood}</p>
-                                    <p className={`text-[9px] font-black uppercase tracking-widest ${!available ? 'text-rose-500' : 'text-emerald-500'}`}>
-                                        {!available ? `Ocupado em ${busyIn.join(', ')}` : 'Disponível'}
-                                    </p>
+                            <div className="flex items-center justify-between w-full mb-2">
+                                <div className={`p-1.5 rounded-lg ${!available ? 'bg-slate-800 text-slate-600' : isSelected ? 'bg-blue-500 text-white' : 'bg-slate-800 text-slate-500'}`}>
+                                  <MapPin size={14} />
                                 </div>
+                                {available && (
+                                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${isSelected ? 'bg-blue-500 border-blue-500' : 'border-slate-700'}`}>
+                                        {isSelected && <Check size={12} className="text-white" strokeWidth={4} />}
+                                    </div>
+                                )}
                             </div>
-                            {available && (
-                                <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${isSelected ? 'bg-blue-500 border-blue-500' : 'border-slate-700'}`}>
-                                    {isSelected && <Check size={12} className="text-white" strokeWidth={4} />}
-                                </div>
-                            )}
+                            
+                            <div>
+                                <p className={`font-bold text-xs ${!available ? 'text-slate-600' : 'text-white'}`}>{hood}</p>
+                                <p className={`text-[8px] font-black uppercase tracking-widest mt-1 ${!available ? 'text-rose-500' : 'text-emerald-500'}`}>
+                                    {!available ? `Ocupado: ${busyIn[0]}` : 'Disponível'}
+                                </p>
+                            </div>
                         </button>
                     );
                 })}
@@ -377,7 +409,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
 
                     {artChoice === 'diy' && !isArtSaved && (
                         <div className="space-y-10 animate-in slide-in-from-top-4 duration-500 pt-8 border-t border-white/5">
-                            {/* Editor manual omitido para brevidade, mantendo lógica existente */}
+                            {/* Editor manual (mantido conforme a última versão funcional) */}
                             <button onClick={handleFinishArt} className="w-full bg-[#1E5BFF] hover:bg-blue-600 text-white font-black py-5 rounded-2xl shadow-xl active:scale-[0.98] transition-all flex items-center justify-center gap-2 text-xs uppercase tracking-widest">
                                 Salvar arte e continuar
                                 <ArrowRight size={16} />
