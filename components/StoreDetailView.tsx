@@ -20,7 +20,9 @@ import {
   Quote,
   ThumbsUp,
   Loader2,
-  Map as MapIcon
+  Map as MapIcon,
+  Navigation,
+  Navigation2
 } from 'lucide-react';
 import { Store } from '../types';
 import { supabase } from '../lib/supabaseClient';
@@ -96,7 +98,10 @@ export const StoreDetailView: React.FC<{
     return store.address || 'Endereço não informado';
   }, [store]);
 
-  const gmapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(addressFormatted)}`;
+  const hasAddress = addressFormatted !== 'Endereço não informado';
+  const encodedAddress = encodeURIComponent(addressFormatted);
+  const gmapsRouteUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodedAddress}`;
+  const wazeRouteUrl = `https://waze.com/ul?q=${encodedAddress}&navigate=yes`;
 
   return (
     <div className="min-h-screen bg-white dark:bg-gray-950 font-sans relative overflow-x-hidden">
@@ -153,7 +158,7 @@ export const StoreDetailView: React.FC<{
             </div>
           </div>
 
-          {/* --- CASHBACK SALDO (Agora clicável) --- */}
+          {/* --- CASHBACK SALDO --- */}
           <button 
               onClick={onViewCashback}
               className="w-full bg-gray-50 dark:bg-gray-900 rounded-[24px] p-5 mb-8 flex items-center justify-between border border-gray-100 dark:border-gray-800 shadow-sm relative overflow-hidden group active:scale-[0.99] transition-all text-left"
@@ -172,7 +177,7 @@ export const StoreDetailView: React.FC<{
               </div>
           </button>
 
-          {/* --- WHATSAPP CTA (Padding Ajustado) --- */}
+          {/* --- WHATSAPP CTA --- */}
           <section className="mb-10">
               <a 
                 href={`https://wa.me/55${whatsappDigits}`} 
@@ -258,31 +263,57 @@ export const StoreDetailView: React.FC<{
                     )}
                 </div>
 
-                {/* 2. Endereço e Mapa Fake */}
+                {/* 2. Endereço e Mapa com Navegação */}
                 <div className="space-y-4">
                     <div className="flex gap-4">
                         <div className="w-10 h-10 rounded-xl bg-gray-50 dark:bg-gray-900 flex items-center justify-center text-gray-400 shrink-0">
                             <MapPin size={18} />
                         </div>
-                        <div>
+                        <div className="flex-1">
                             <p className="text-[9px] font-bold text-gray-400 uppercase tracking-wider mb-0.5">Endereço Unidade</p>
                             <p className="text-sm font-semibold text-gray-800 dark:text-gray-200 leading-snug">{addressFormatted}</p>
-                            <a href={gmapsUrl} target="_blank" rel="noopener" className="text-[10px] font-black text-[#1E5BFF] uppercase tracking-widest mt-1.5 inline-block hover:underline">Rota com Waze/Maps</a>
+                            {!hasAddress && <p className="text-[9px] text-amber-500 font-bold uppercase mt-1">Localização não disponível</p>}
                         </div>
                     </div>
 
-                    {/* Placeholder do Mapa */}
-                    <div className="w-full h-32 rounded-[24px] bg-gray-100 dark:bg-gray-800 border border-gray-100 dark:border-gray-800 overflow-hidden relative shadow-sm group">
+                    {/* Placeholder do Mapa + Botões de GPS */}
+                    <div className="w-full h-36 rounded-[24px] bg-gray-100 dark:bg-gray-800 border border-gray-100 dark:border-gray-800 overflow-hidden relative shadow-sm group">
                         <img 
                             src="https://images.unsplash.com/photo-1524661135-423995f22d0b?q=80&w=800&auto=format&fit=crop" 
                             className="w-full h-full object-cover opacity-60 grayscale transition-all group-hover:grayscale-0"
                             alt="Mapa"
                         />
-                        <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/5">
+                        
+                        {/* Overlay Central */}
+                        <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/5 pointer-events-none">
                             <div className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-md px-4 py-2 rounded-full border border-white/20 shadow-xl flex items-center gap-2">
                                 <MapIcon className="w-3.5 h-3.5 text-[#1E5BFF]" />
                                 <span className="text-[10px] font-black uppercase tracking-widest text-gray-600 dark:text-gray-300">Mapa Ilustrativo</span>
                             </div>
+                        </div>
+
+                        {/* Botões de Ação de Rota */}
+                        <div className="absolute bottom-3 right-3 flex gap-2">
+                            <a 
+                                href={wazeRouteUrl} 
+                                target="_blank" 
+                                rel="noopener" 
+                                onClick={(e) => !hasAddress && e.preventDefault()}
+                                className={`flex items-center gap-2 px-3 py-2 rounded-xl backdrop-blur-md border shadow-lg transition-all active:scale-95 ${hasAddress ? 'bg-white/90 border-white/20 text-gray-700 hover:bg-white' : 'bg-gray-200/50 border-transparent text-gray-400 cursor-not-allowed'}`}
+                            >
+                                <Navigation className={`w-3.5 h-3.5 ${hasAddress ? 'text-blue-400' : 'text-gray-400'}`} />
+                                <span className="text-[10px] font-black uppercase tracking-widest">Waze</span>
+                            </a>
+                            <a 
+                                href={gmapsRouteUrl} 
+                                target="_blank" 
+                                rel="noopener" 
+                                onClick={(e) => !hasAddress && e.preventDefault()}
+                                className={`flex items-center gap-2 px-3 py-2 rounded-xl backdrop-blur-md border shadow-lg transition-all active:scale-95 ${hasAddress ? 'bg-white/90 border-white/20 text-gray-700 hover:bg-white' : 'bg-gray-200/50 border-transparent text-gray-400 cursor-not-allowed'}`}
+                            >
+                                <Navigation2 className={`w-3.5 h-3.5 ${hasAddress ? 'text-red-400' : 'text-gray-400'}`} />
+                                <span className="text-[10px] font-black uppercase tracking-widest">Maps</span>
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -369,7 +400,7 @@ export const StoreDetailView: React.FC<{
               )}
 
               {closedReported ? (
-                  <div className="w-full py-4 text-center text-amber-600 bg-amber-50 dark:bg-amber-900/10 rounded-[20px] border border-amber-100 dark:border-amber-800 animate-in zoom-in duration-300">
+                  <div className="w-full py-4 text-center text-amber-600 bg-amber-50 dark:bg-amber-900/20 rounded-[20px] border border-amber-100 dark:border-amber-800 animate-in zoom-in duration-300">
                       <p className="text-[10px] font-black uppercase tracking-[0.2em]">Obrigado! Em análise técnica.</p>
                   </div>
               ) : (
