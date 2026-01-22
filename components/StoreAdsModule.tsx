@@ -43,9 +43,9 @@ interface StoreAdsModuleProps {
   categoryName?: string;
 }
 
-type AppStep = 'plans' | 'inventory' | 'art_choice' | 'diy_editor' | 'pro_confirm' | 'payment' | 'success';
+type AppStep = 'placement' | 'neighborhoods' | 'art_choice' | 'diy_editor' | 'pro_confirm' | 'payment' | 'success';
 
-// --- MOCK DE INVENTÁRIO ---
+// --- MOCK DE INVENTÁRIO (SIMULANDO BACKEND) ---
 const NEIGHBORHOODS = [
   "Freguesia", "Pechincha", "Anil", "Taquara", "Tanque", 
   "Curicica", "Parque Olímpico", "Gardênia", "Cidade de Deus"
@@ -72,14 +72,13 @@ const PRICING = {
 };
 
 export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNavigate, user, categoryName }) => {
-  const [step, setStep] = useState<AppStep>('plans');
+  const [step, setStep] = useState<AppStep>('placement');
   const [selectedMode, setSelectedMode] = useState<'home' | 'cat' | 'combo'>('combo');
   const [selectedMonth, setSelectedMonth] = useState(MONTHS[0]);
   const [selectedNeighborhoods, setSelectedNeighborhoods] = useState<string[]>([]);
   const [artChoice, setArtChoice] = useState<'diy' | 'pro' | null>(null);
   const [paymentMethod, setPaymentMethod] = useState<'pix' | 'credit' | 'debit'>('pix');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [checkingInventory, setCheckingInventory] = useState(false);
 
   // Estados do Editor DIY
   const [diyConfig, setDiyConfig] = useState({
@@ -89,11 +88,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
     textColor: 'white',
     alignment: 'center',
     showLogo: true,
-    animation: 'none'
   });
-
-  const storeName = user?.user_metadata?.store_name || "Sua Loja";
-  const storeLogo = user?.user_metadata?.avatar_url || "";
 
   // --- Lógica de Disponibilidade ---
   const getAvailability = (hood: string, month: string) => {
@@ -118,19 +113,13 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
     return base + extras + artExtra;
   }, [selectedMode, selectedNeighborhoods, artChoice]);
 
-  const handleNextStep = async () => {
-    if (step === 'plans') {
-        setStep('inventory');
-    } else if (step === 'inventory') {
-        if (selectedNeighborhoods.length === 0) return;
-        setCheckingInventory(true);
-        setTimeout(() => {
-            setCheckingInventory(false);
-            setStep('art_choice');
-        }, 1200);
-    } else if (step === 'diy_editor' || step === 'pro_confirm') {
-        setStep('payment');
-    } else if (step === 'payment') {
+  const handleNextStep = () => {
+    if (step === 'placement') setStep('neighborhoods');
+    else if (step === 'neighborhoods') {
+        if (selectedNeighborhoods.length > 0) setStep('art_choice');
+    }
+    else if (step === 'diy_editor' || step === 'pro_confirm') setStep('payment');
+    else if (step === 'payment') {
         setIsSubmitting(true);
         setTimeout(() => {
             setIsSubmitting(false);
@@ -140,51 +129,43 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
   };
 
   const handleBack = () => {
-    if (step === 'plans') onBack();
-    else if (step === 'inventory') setStep('plans');
-    else if (step === 'art_choice') setStep('inventory');
+    if (step === 'placement') onBack();
+    else if (step === 'neighborhoods') setStep('placement');
+    else if (step === 'art_choice') setStep('neighborhoods');
     else if (step === 'diy_editor' || step === 'pro_confirm') setStep('art_choice');
     else if (step === 'payment') {
         if (artChoice === 'pro') setStep('pro_confirm');
         else setStep('diy_editor');
     }
-    else onBack();
   };
 
-  const toggleNeighborhood = (hood: string) => {
-    const avail = getAvailability(hood, selectedMonth);
-    if (avail === 0) return;
-    setSelectedNeighborhoods(prev => 
-      prev.includes(hood) ? prev.filter(h => h !== hood) : [...prev, hood]
-    );
-  };
+  // --- RENDERERS DE ETAPAS ---
 
-  // --- RENDERERS ---
-
-  const renderPlansStep = () => (
+  // 1. ONDE DESEJA APARECER
+  const renderPlacementStep = () => (
     <div className="space-y-10 animate-in fade-in slide-in-from-right duration-500">
       <section>
-        <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-blue-500 mb-6 flex items-center gap-2 px-1">
+        <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-blue-500 mb-6 flex items-center gap-2 px-1">
           <Target size={14} /> 1. Onde deseja aparecer?
         </h3>
-        <div className="grid grid-cols-3 gap-2.5">
+        <div className="grid grid-cols-3 gap-3">
           {DISPLAY_MODES.map((mode) => (
             <button
               key={mode.id}
               onClick={() => setSelectedMode(mode.id as any)}
-              className={`relative flex flex-col items-center text-center p-3 rounded-2xl border-2 transition-all duration-300 min-h-[130px] justify-center gap-2 ${
+              className={`relative flex flex-col items-center text-center p-4 rounded-[2rem] border-2 transition-all duration-300 min-h-[140px] justify-center gap-2 ${
                 selectedMode === mode.id 
                 ? 'bg-blue-600/10 border-blue-500 shadow-lg shadow-blue-500/10' 
                 : 'bg-white/5 border-white/5 opacity-60'
               }`}
             >
               {mode.recommended && (
-                <div className="absolute -top-2 left-1/2 -translate-x-1/2 bg-amber-400 text-slate-900 text-[7px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest whitespace-nowrap">Recomendado</div>
+                <div className="absolute -top-2 left-1/2 -translate-x-1/2 bg-amber-400 text-slate-900 text-[8px] font-black px-2.5 py-0.5 rounded-full uppercase tracking-widest whitespace-nowrap">Destaque</div>
               )}
-              <div className={`p-2 rounded-xl ${selectedMode === mode.id ? 'bg-blue-500 text-white' : 'bg-white/5 text-slate-400'}`}>
-                <mode.icon size={20} />
+              <div className={`p-2.5 rounded-2xl ${selectedMode === mode.id ? 'bg-blue-500 text-white' : 'bg-white/5 text-slate-400'}`}>
+                <mode.icon size={22} />
               </div>
-              <p className="text-[11px] font-bold text-white leading-tight">{mode.label}</p>
+              <p className="text-[12px] font-bold text-white leading-tight mt-1">{mode.label}</p>
               <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${selectedMode === mode.id ? 'border-blue-500' : 'border-slate-700'}`}>
                 {selectedMode === mode.id && <div className="w-2 h-2 bg-blue-500 rounded-full" />}
               </div>
@@ -192,19 +173,14 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
           ))}
         </div>
       </section>
-      
-      <div className="bg-slate-900/50 p-6 rounded-3xl border border-white/5">
-        <p className="text-xs text-slate-400 leading-relaxed italic">
-          * No próximo passo você escolherá os bairros e verá a disponibilidade de espaços.
-        </p>
-      </div>
     </div>
   );
 
-  const renderInventoryStep = () => (
-    <div className="space-y-10 animate-in fade-in slide-in-from-right duration-500 pb-20">
+  // 2. BAIRROS E DISPONIBILIDADE
+  const renderNeighborhoodsStep = () => (
+    <div className="space-y-10 animate-in fade-in slide-in-from-right duration-500">
       <section>
-        <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-blue-500 mb-5 px-1 flex items-center gap-2">
+        <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-blue-500 mb-5 px-1 flex items-center gap-2">
             <Calendar size={14} /> 2. Escolha o período
         </h3>
         <div className="flex gap-2 overflow-x-auto no-scrollbar -mx-2 px-2">
@@ -212,7 +188,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
                 <button 
                     key={m} 
                     onClick={() => { setSelectedMonth(m); setSelectedNeighborhoods([]); }}
-                    className={`px-6 py-3 rounded-2xl text-xs font-black uppercase tracking-widest transition-all border-2 shrink-0 ${selectedMonth === m ? 'bg-blue-600 border-blue-500 text-white' : 'bg-slate-900 border-white/5 text-slate-500'}`}
+                    className={`px-6 py-3.5 rounded-2xl text-xs font-black uppercase tracking-widest transition-all border-2 shrink-0 ${selectedMonth === m ? 'bg-blue-600 border-blue-500 text-white shadow-lg' : 'bg-slate-900 border-white/5 text-slate-500'}`}
                 >
                     {m}
                 </button>
@@ -222,7 +198,19 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
 
       <section>
         <div className="flex justify-between items-end mb-5">
-            <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-blue-500 px-1">3. Disponibilidade por Bairro</h3>
+            <div>
+                <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-blue-500 px-1">3. Selecione os Bairros</h3>
+                <p className="text-[9px] text-slate-500 uppercase font-bold tracking-widest ml-1 mt-1">Disponibilidade atualizada em tempo real</p>
+            </div>
+            <button 
+                onClick={() => {
+                    const allAvailable = NEIGHBORHOODS.filter(h => getAvailability(h, selectedMonth) > 0);
+                    setSelectedNeighborhoods(selectedNeighborhoods.length === allAvailable.length ? [] : allAvailable);
+                }}
+                className="text-[9px] font-black text-blue-400 uppercase tracking-widest bg-blue-500/10 px-3 py-1.5 rounded-lg border border-blue-500/20"
+            >
+                {selectedNeighborhoods.length > 0 ? 'Limpar' : 'Selecionar Tudo'}
+            </button>
         </div>
 
         <div className="grid grid-cols-1 gap-3">
@@ -234,11 +222,14 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
                 return (
                     <button 
                         key={hood}
-                        onClick={() => toggleNeighborhood(hood)}
-                        disabled={avail === 0}
+                        onClick={() => {
+                            if (avail > 0) {
+                                setSelectedNeighborhoods(prev => prev.includes(hood) ? prev.filter(h => h !== hood) : [...prev, hood]);
+                            }
+                        }}
                         className={`p-4 rounded-2xl border-2 flex items-center justify-between transition-all ${
                             avail === 0 
-                            ? 'bg-slate-900/50 border-white/5 opacity-50 grayscale cursor-not-allowed' 
+                            ? 'bg-slate-900/50 border-white/5 opacity-50 grayscale cursor-default' 
                             : isSelected
                                 ? 'bg-blue-600/10 border-blue-500 shadow-lg shadow-blue-500/5'
                                 : 'bg-slate-900 border-white/5'
@@ -251,13 +242,17 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
                             <div>
                                 <p className={`font-bold text-sm ${avail === 0 ? 'text-slate-500' : 'text-white'}`}>{hood}</p>
                                 <p className={`text-[10px] font-black uppercase tracking-widest ${avail === 0 ? 'text-rose-500' : avail === 1 ? 'text-amber-500' : 'text-emerald-500'}`}>
-                                    {avail === 0 ? `Esgotado em ${selectedMonth}` : avail === 1 ? 'Última vaga!' : `${avail} vagas`}
+                                    {avail === 0 ? `Esgotado em ${selectedMonth}` : avail === 1 ? 'Última vaga!' : `${avail} vagas livres`}
                                 </p>
                             </div>
                         </div>
+                        
                         <div className="flex items-center gap-2">
                             {avail === 0 && nextMonth && (
-                                <span className="text-[8px] font-black text-slate-500 uppercase border border-white/10 px-2 py-1 rounded-md">Vaga em {nextMonth}</span>
+                                <div className="text-right">
+                                    <span className="text-[8px] font-black text-blue-400 uppercase border border-blue-400/20 px-2 py-1 rounded-md block mb-1">Vaga em {nextMonth}</span>
+                                    <span className="text-[7px] text-slate-500 uppercase font-bold tracking-tighter">Toque para mudar mês</span>
+                                </div>
                             )}
                             {avail > 0 && (
                                 <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${isSelected ? 'bg-blue-500 border-blue-500' : 'border-slate-700'}`}>
@@ -273,77 +268,70 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
     </div>
   );
 
+  // 3. ESCOLHA DA ARTE
   const renderArtChoiceStep = () => (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div className="text-center mb-10">
-        <h2 className="text-2xl font-black text-white font-display uppercase tracking-tight mb-2">Criação da Arte</h2>
-        <p className="text-slate-400 text-sm">Como deseja criar o seu banner?</p>
+        <h2 className="text-2xl font-black text-white font-display uppercase tracking-tight mb-2">Design do Banner</h2>
+        <p className="text-slate-400 text-sm">Como deseja produzir a sua arte?</p>
       </div>
 
       <div className="grid grid-cols-1 gap-5">
-          {/* DIY CARD */}
           <button 
             onClick={() => { setArtChoice('diy'); setStep('diy_editor'); }}
             className="bg-slate-800 p-8 rounded-[2.5rem] border border-white/5 text-left hover:border-blue-500/50 transition-all group"
           >
-              <div className="w-14 h-14 bg-blue-500/10 rounded-2xl flex items-center justify-center text-[#1E5BFF] mb-4 border border-blue-500/20"><Palette size={28} /></div>
-              <h3 className="text-xl font-bold text-white mb-2">Personalizar meu banner</h3>
+              <div className="w-14 h-14 bg-blue-500/10 rounded-2xl flex items-center justify-center text-blue-400 mb-4 border border-blue-500/20"><Palette size={28} /></div>
+              <h3 className="text-xl font-bold text-white mb-2 leading-tight">Criar e personalizar meu banner</h3>
               <p className="text-xs text-slate-400 mb-6 leading-relaxed">Eu mesmo crio os textos e ajusto o visual com as ferramentas do app.</p>
-              <div className="flex items-center gap-2 text-[#1E5BFF] font-black text-[10px] uppercase tracking-widest">CRIAR MEU BANNER <ArrowRight size={14} /></div>
+              <div className="flex items-center gap-2 text-blue-400 font-black text-[10px] uppercase tracking-widest group-hover:gap-3 transition-all">PERSONALIZAR AGORA <ArrowRight size={14} /></div>
           </button>
 
-          {/* PRO CARD (REFORMULADO) */}
           <button 
             onClick={() => { setArtChoice('pro'); setStep('pro_confirm'); }}
             className="bg-gradient-to-br from-slate-800 to-slate-900 p-8 rounded-[2.5rem] border border-white/5 text-left hover:border-amber-500/50 transition-all group relative"
           >
               <div className="absolute top-4 right-6 bg-amber-400 text-slate-900 text-[8px] font-black px-3 py-1 rounded-full uppercase tracking-widest whitespace-nowrap shadow-lg">Recomendado</div>
               <div className="w-14 h-14 bg-amber-400/10 rounded-2xl flex items-center justify-center text-amber-400 mb-4 border border-amber-400/20"><Rocket size={28} /></div>
+              <h3 className="text-xl font-bold text-white mb-2 leading-tight">Criar com o time Localizei</h3>
+              <p className="text-xs text-slate-400 leading-relaxed mb-6">Nossa equipe cria um banner profissional focado em conversão.</p>
               
-              <div className="mb-6">
-                <h3 className="text-xl font-bold text-white mb-2 leading-tight">Arte com time Localizei</h3>
-                <p className="text-xs text-slate-400 leading-relaxed mb-4">Nossa equipe cria um banner profissional focado em conversão.</p>
-                
-                {/* Lista Integrada */}
-                <div className="space-y-2.5">
-                    <div className="flex items-center gap-3 text-slate-200">
-                        <MessageCircle size={14} className="text-amber-400" />
-                        <span className="text-[11px] font-bold">Atendimento via chat após pagamento</span>
-                    </div>
-                    <div className="flex items-center gap-3 text-slate-200">
-                        <Clock size={14} className="text-amber-400" />
-                        <span className="text-[11px] font-bold">Prazo de entrega: até 72h</span>
-                    </div>
-                    <div className="flex items-center gap-3 text-slate-200">
-                        <Target size={14} className="text-amber-400" />
-                        <span className="text-[11px] font-bold">Design focado em vender seu produto</span>
-                    </div>
-                    <div className="flex items-center gap-3 text-slate-200">
-                        <CheckCircle2 size={14} className="text-amber-400" />
-                        <span className="text-[11px] font-bold">Publicação automática após aprovação</span>
-                    </div>
+              <div className="space-y-3 mb-8">
+                <div className="flex items-center gap-3 text-slate-200">
+                    <MessageCircle size={14} className="text-amber-400" />
+                    <span className="text-[11px] font-bold">Atendimento via chat após o pagamento</span>
+                </div>
+                <div className="flex items-center gap-3 text-slate-200">
+                    <Clock size={14} className="text-amber-400" />
+                    <span className="text-[11px] font-bold">Prazo de entrega: até 72h</span>
+                </div>
+                <div className="flex items-center gap-3 text-slate-200">
+                    <Target size={14} className="text-amber-400" />
+                    <span className="text-[11px] font-bold">Arte profissional focada em conversão</span>
+                </div>
+                <div className="flex items-center gap-3 text-slate-200">
+                    <CheckCircle2 size={14} className="text-amber-400" />
+                    <span className="text-[11px] font-bold">Publicação após aprovação</span>
                 </div>
               </div>
-              
-              <div className="flex items-center justify-between mt-8 pt-6 border-t border-white/5">
+
+              <div className="flex items-center justify-between mt-auto pt-6 border-t border-white/5">
                 <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                        <span className="text-slate-500 line-through text-xs font-medium">R$ 149,90</span>
-                        <span className="text-rose-500 text-[9px] font-black uppercase">53% OFF</span>
-                    </div>
+                    <span className="text-slate-500 line-through text-xs font-medium">R$ 149,90</span>
                     <p className="text-3xl font-black text-white leading-none">R$ 69,90</p>
                 </div>
-                <div className="bg-amber-400 text-slate-900 font-black px-5 py-3 rounded-2xl text-[10px] uppercase tracking-widest shadow-xl group-hover:scale-105 transition-transform">CONTRATAR TIME</div>
+                <div className="bg-amber-400 text-slate-900 font-black px-5 py-3 rounded-2xl text-[10px] uppercase tracking-widest shadow-xl">CONTRATAR TIME</div>
               </div>
           </button>
       </div>
     </div>
   );
 
+  // 4. EDITOR DIY
   const renderDiyEditor = () => (
     <div className="animate-in fade-in duration-500 space-y-10 pb-20">
         <div className="sticky top-20 z-30 pt-2 pb-6 bg-slate-900/80 backdrop-blur-md -mx-6 px-6 border-b border-white/5">
-            <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-3 text-center">Preview em tempo real</p>
+            <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-3 text-center">Visualização em Tempo Real</p>
             <div className="w-full aspect-[21/9] rounded-2xl overflow-hidden shadow-2xl flex flex-col p-4 relative" style={{ backgroundColor: diyConfig.bgColor, textAlign: diyConfig.alignment as any, alignItems: diyConfig.alignment === 'center' ? 'center' : 'flex-start', justifyContent: 'center' }}>
                 <div className={`max-w-[85%] ${diyConfig.textColor === 'white' ? 'text-white' : 'text-black'}`}>
                     <h4 className="font-black leading-tight mb-1 text-2xl">{diyConfig.title}</h4>
@@ -352,35 +340,33 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
             </div>
         </div>
         <div className="space-y-6">
-            <div>
-                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1 mb-2 block">Título Chamativo</label>
-                <input value={diyConfig.title} onChange={(e) => setDiyConfig({...diyConfig, title: e.target.value})} className="w-full bg-slate-800 border border-white/5 rounded-xl p-4 text-sm font-bold text-white outline-none focus:border-blue-500" />
-            </div>
-            <div>
-                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1 mb-2 block">Descrição Curta</label>
-                <textarea value={diyConfig.description} onChange={(e) => setDiyConfig({...diyConfig, description: e.target.value})} className="w-full bg-slate-800 border border-white/5 rounded-xl p-4 text-sm font-medium text-white outline-none resize-none h-24 focus:border-blue-500" />
-            </div>
+            <input value={diyConfig.title} onChange={(e) => setDiyConfig({...diyConfig, title: e.target.value})} placeholder="Título chamativo" className="w-full bg-slate-800 border border-white/5 rounded-xl p-4 text-sm font-bold text-white outline-none" />
+            <textarea value={diyConfig.description} onChange={(e) => setDiyConfig({...diyConfig, description: e.target.value})} placeholder="Descrição curta" className="w-full bg-slate-800 border border-white/5 rounded-xl p-4 text-sm font-medium text-white outline-none resize-none h-24" />
         </div>
     </div>
   );
 
+  // 5. CHECKOUT / PAGAMENTO
   const renderPaymentStep = () => (
     <div className="animate-in slide-in-from-bottom-4 duration-500 space-y-8 pt-4">
         <div className="text-center mb-6">
-            <h2 className="text-xl font-bold text-white uppercase tracking-widest">Finalizar Pedido</h2>
-            <p className="text-slate-500 text-xs mt-1 uppercase font-black tracking-widest">Checkout Seguro</p>
+            <h2 className="text-xl font-bold text-white uppercase tracking-widest">Finalizar Compra</h2>
+            <p className="text-slate-500 text-xs mt-1 uppercase font-black tracking-widest">Checkout Seguro Localizei</p>
         </div>
 
         <section className="bg-slate-800 rounded-3xl p-6 border border-white/10 shadow-xl space-y-6">
             <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest border-b border-white/5 pb-3">Resumo do Pedido</h3>
-            <div className="space-y-3">
-                <div className="flex justify-between text-sm"><span className="text-slate-400">Plano Selecionado</span><span className="font-bold text-white uppercase">{selectedMode === 'combo' ? 'Home + Cat' : selectedMode}</span></div>
-                <div className="flex justify-between text-sm"><span className="text-slate-400">Mês da Campanha</span><span className="font-bold text-white">{selectedMonth}</span></div>
-                <div className="flex justify-between text-sm"><span className="text-slate-400">Região de Exibição</span><span className="font-bold text-white text-right max-w-[150px] truncate">{selectedNeighborhoods.join(', ')}</span></div>
-                <div className="flex justify-between text-sm items-center py-2 border-t border-white/5 mt-2">
+            <div className="space-y-4">
+                <div className="flex justify-between text-sm"><span className="text-slate-400">Onde aparece</span><span className="font-bold text-white uppercase">{selectedMode === 'combo' ? 'Home + Categoria' : selectedMode}</span></div>
+                <div className="flex justify-between text-sm"><span className="text-slate-400">Período</span><span className="font-bold text-white">{selectedMonth}</span></div>
+                <div className="flex justify-between text-sm">
+                    <span className="text-slate-400">Bairros</span>
+                    <span className="font-bold text-white text-right max-w-[180px] truncate">{selectedNeighborhoods.join(', ')}</span>
+                </div>
+                <div className="flex justify-between text-sm items-center py-2 border-t border-white/5">
                     <span className="text-slate-400">Criação da Arte</span>
-                    <span className="text-[11px] font-black bg-blue-500/10 text-blue-400 px-2 py-1 rounded-lg border border-blue-500/20">
-                        {artChoice === 'pro' ? 'Time Designers (Via Chat)' : 'Manual (Personalizada)'}
+                    <span className="text-[11px] font-black bg-blue-500/10 text-blue-400 px-3 py-1 rounded-lg border border-blue-500/20">
+                        {artChoice === 'pro' ? 'Time de Designers (Chat)' : 'Manual (Personalizado)'}
                     </span>
                 </div>
             </div>
@@ -404,7 +390,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
             <div className="bg-blue-500/10 p-5 rounded-[2rem] border border-blue-500/20 flex gap-4 animate-pulse">
                 <MessageSquare className="w-6 h-6 text-blue-400 shrink-0" />
                 <p className="text-[11px] text-blue-100 leading-relaxed font-bold uppercase tracking-tight">
-                    Após o pagamento, você será direcionado automaticamente para um chat com nosso time de design.
+                    Após a confirmação do pagamento, você será direcionado automaticamente para um chat com nosso time de designers.
                 </p>
             </div>
         )}
@@ -413,24 +399,28 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
 
   return (
     <div className="min-h-screen bg-[#020617] text-slate-100 font-sans flex flex-col selection:bg-blue-500/30 overflow-x-hidden">
+      
+      {/* HEADER DINÂMICO */}
       <header className="sticky top-0 z-50 bg-[#020617]/80 backdrop-blur-xl border-b border-white/5 px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <button onClick={handleBack} className="p-2 bg-slate-900 rounded-xl text-slate-400 hover:text-white transition-all active:scale-95"><ChevronLeft size={20} /></button>
+          <button onClick={handleBack} className="p-2 bg-slate-900 rounded-xl text-slate-400 hover:text-white transition-all active:scale-95">
+            <ChevronLeft size={20} />
+          </button>
           <div>
             <h1 className="font-bold text-lg leading-none flex items-center gap-2">Anunciar no Bairro <Crown size={16} className="text-amber-400 fill-amber-400" /></h1>
             <p className="text-[10px] text-blue-400 uppercase font-black tracking-widest mt-1">
-                {step === 'plans' ? 'Plano e Duração' : 
-                 step === 'inventory' ? 'Disponibilidade' :
-                 step === 'art_choice' ? 'Método de Arte' : 
-                 'Checkout Final'}
+                {step === 'placement' ? '1. Posicionamento' : 
+                 step === 'neighborhoods' ? '2. Bairros e Período' :
+                 step === 'art_choice' ? '3. Design da Arte' : 
+                 '4. Finalizar'}
             </p>
           </div>
         </div>
       </header>
 
       <main className="flex-1 overflow-y-auto no-scrollbar p-6 pb-64">
-        {step === 'plans' && renderPlansStep()}
-        {step === 'inventory' && renderInventoryStep()}
+        {step === 'placement' && renderPlacementStep()}
+        {step === 'neighborhoods' && renderNeighborhoodsStep()}
         {step === 'art_choice' && renderArtChoiceStep()}
         {step === 'diy_editor' && renderDiyEditor()}
         {step === 'pro_confirm' && (
@@ -438,13 +428,9 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
                 <div className="bg-slate-900 rounded-[2.5rem] p-8 shadow-2xl border border-white/5 text-center relative overflow-hidden">
                     <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-400 to-orange-500"></div>
                     <div className="w-20 h-20 bg-amber-400/10 rounded-[2rem] flex items-center justify-center mx-auto mb-6 text-amber-500"><Rocket size={40} /></div>
-                    <h2 className="text-2xl font-black text-white uppercase tracking-tighter mb-4">Criação Profissional</h2>
-                    <p className="text-sm text-slate-400 leading-relaxed mb-6">Nossa equipe entrará em contato via chat para criar seu banner exclusivo.</p>
-                    <div className="space-y-3 mb-10 text-left">
-                        <div className="flex items-center gap-3 text-[10px] font-black uppercase text-slate-400"><MessageSquare size={14} className="text-blue-500" /> Atendimento via chat</div>
-                        <div className="flex items-center gap-3 text-[10px] font-black uppercase text-slate-400"><Clock size={14} className="text-blue-500" /> Entrega em 72h</div>
-                    </div>
-                    <button onClick={() => setStep('payment')} className="w-full bg-blue-600 py-4 rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl shadow-blue-500/20">Ir para Pagamento</button>
+                    <h2 className="text-2xl font-black text-white uppercase tracking-tighter mb-4">Time Profissional</h2>
+                    <p className="text-sm text-slate-400 leading-relaxed mb-6">Nossa equipe entrará em contato via chat para criar seu banner exclusivo em até 72h.</p>
+                    <button onClick={() => setStep('payment')} className="w-full bg-blue-600 py-4 rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl shadow-blue-500/20 active:scale-95 transition-all">Seguir para Pagamento</button>
                 </div>
             </div>
         )}
@@ -453,52 +439,60 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
         {step === 'success' && (
             <div className="flex flex-col items-center justify-center py-20 text-center animate-in zoom-in duration-500">
                 <div className="w-24 h-24 bg-emerald-500/10 rounded-[2.5rem] flex items-center justify-center text-emerald-400 mb-8 border-2 border-emerald-500/20 shadow-xl shadow-emerald-500/5"><CheckCircle2 size={48} /></div>
-                <h2 className="text-3xl font-black text-white uppercase tracking-tighter mb-4">Slot Reservado!</h2>
+                <h2 className="text-3xl font-black text-white uppercase tracking-tighter mb-4">Pedido Confirmado!</h2>
                 <p className="text-slate-400 text-sm max-w-xs mx-auto leading-relaxed">
-                    {artChoice === 'pro' 
-                        ? 'Pagamento em análise. Você será chamado no chat em alguns minutos para iniciarmos sua arte.' 
-                        : 'Pagamento em análise. Seu banner entrará no ar assim que confirmado.'}
+                    Seu anúncio foi processado com sucesso. {artChoice === 'pro' ? 'Aguarde o contato de nossa equipe via chat.' : 'Seu banner será publicado em breve.'}
                 </p>
                 <button onClick={onBack} className="mt-12 text-[#1E5BFF] font-black uppercase text-[10px] tracking-[0.2em] border-b-2 border-[#1E5BFF] pb-1">Voltar ao Painel</button>
             </div>
         )}
       </main>
 
+      {/* FOOTER FIXO - RESUMO E CTA */}
       {step !== 'success' && step !== 'pro_confirm' && (
       <div className="fixed bottom-0 left-0 right-0 p-6 bg-[#020617]/95 backdrop-blur-2xl border-t border-white/10 z-40 max-w-md mx-auto shadow-[0_-20px_40px_rgba(0,0,0,0.4)]">
         <div className="flex justify-between items-end mb-6">
             <div className="space-y-1">
-                <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Valor do Investimento</p>
+                <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Total do Investimento</p>
                 <div className="flex flex-wrap gap-x-3 gap-y-1">
-                    <span className="text-[11px] font-bold text-slate-300 flex items-center gap-1"><Check size={10} className="text-blue-500" /> {selectedMode.toUpperCase()}</span>
-                    {selectedNeighborhoods.length > 0 && <span className="text-[11px] font-bold text-slate-300 flex items-center gap-1"><Check size={10} className="text-blue-500" /> {selectedNeighborhoods.length} Bairros</span>}
-                    {artChoice === 'pro' && <span className="text-[11px] font-bold text-amber-400 flex items-center gap-1"><Check size={10} className="text-amber-500" /> Arte Inclusa</span>}
+                    <span className="text-[11px] font-bold text-slate-300 flex items-center gap-1">
+                        <Check size={10} className="text-blue-500" /> {selectedMode.toUpperCase()}
+                    </span>
+                    {selectedNeighborhoods.length > 0 && (
+                        <span className="text-[11px] font-bold text-slate-300 flex items-center gap-1">
+                            <Check size={10} className="text-blue-500" /> {selectedNeighborhoods.length} Bairros
+                        </span>
+                    )}
+                    {artChoice === 'pro' && (
+                        <span className="text-[11px] font-bold text-amber-400 flex items-center gap-1">
+                            <Check size={10} className="text-amber-500" /> Arte Inclusa
+                        </span>
+                    )}
                 </div>
             </div>
             <div className="text-right">
-                <p className="text-3xl font-black text-white leading-none tracking-tighter">R$ {totalAmount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+                <p className="text-3xl font-black text-white leading-none tracking-tighter">
+                  R$ {totalAmount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                </p>
             </div>
         </div>
 
         <button 
           onClick={handleNextStep}
-          disabled={isSubmitting || checkingInventory || (step === 'inventory' && selectedNeighborhoods.length === 0)}
+          disabled={isSubmitting || (step === 'neighborhoods' && selectedNeighborhoods.length === 0)}
           className="w-full bg-[#1E5BFF] hover:bg-[#1749CC] text-white font-black py-5 rounded-[2rem] shadow-xl shadow-blue-500/20 flex items-center justify-center gap-3 active:scale-[0.98] transition-all disabled:opacity-50 disabled:grayscale"
         >
-          {checkingInventory || isSubmitting ? <Loader2 className="w-6 h-6 animate-spin" /> : (
+          {isSubmitting ? <Loader2 className="w-6 h-6 animate-spin" /> : (
               <>
-                {step === 'plans' && 'VER DISPONIBILIDADE'}
-                {step === 'inventory' && 'ESCOLHER DESIGN'}
+                {step === 'placement' && 'CONTINUAR'}
+                {step === 'neighborhoods' && 'ESCOLHER DESIGN'}
                 {step === 'art_choice' && 'SELECIONE UMA OPÇÃO'}
                 {step === 'diy_editor' && 'IR PARA PAGAMENTO'}
-                {step === 'payment' && 'FINALIZAR E PAGAR'}
+                {step === 'payment' && 'FINALIZAR COMPRA'}
                 {step !== 'art_choice' && <ArrowRight size={18} />}
               </>
           )}
         </button>
-        <p className="text-center text-[9px] text-slate-500 font-bold uppercase mt-4 tracking-widest opacity-60">
-            Ambiente Seguro • Localizei JPA
-        </p>
       </div>
       )}
 
