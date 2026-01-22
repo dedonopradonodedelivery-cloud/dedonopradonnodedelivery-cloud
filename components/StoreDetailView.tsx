@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import {
   ChevronLeft,
@@ -12,7 +11,9 @@ import {
   Coins,
   ArrowRight,
   Instagram,
-  Image as ImageIcon
+  Image as ImageIcon,
+  Building2,
+  ShieldCheck
 } from 'lucide-react';
 import { Store } from '../types';
 import { TrustBlock } from './TrustBlock';
@@ -49,7 +50,6 @@ function mapStoreToBusiness(store?: Store | null) {
     rating: s.rating,
     ratingCount: s.reviewsCount,
     description: s.description,
-    // Prioridade total para logo_url e banner_url vindos do perfil editado
     logo: s.logo_url || s.logoUrl || s.image || '/assets/default-logo.png',
     banners: s.banner_url ? [s.banner_url] : (s.gallery && s.gallery.length > 0 ? s.gallery : [s.image || DEFAULT_BANNER].filter(Boolean)),
     social: { instagram: s.instagram, whatsapp: s.phone },
@@ -82,7 +82,12 @@ const InfoCard: React.FC<{ icon: React.ElementType; title: string; value: string
   );
 };
 
-export const StoreDetailView: React.FC<{ store?: Store | null; onBack: () => void; onPay?: () => void }> = ({ store, onBack, onPay }) => {
+export const StoreDetailView: React.FC<{ 
+  store?: Store | null; 
+  onBack: () => void; 
+  onPay?: () => void;
+  onClaim?: () => void;
+}> = ({ store, onBack, onPay, onClaim }) => {
   const { user } = useAuth();
   const { currentNeighborhood } = useNeighborhood();
   const [isFavorite, setIsFavorite] = React.useState(false);
@@ -153,7 +158,10 @@ export const StoreDetailView: React.FC<{ store?: Store | null; onBack: () => voi
           {/* Cabeçalho de Identidade com Logo Sobreposta */}
           <div className="flex justify-between items-start mb-6">
               <div className="flex-1 min-w-0 pr-4">
-                <h1 className="text-3xl font-[800] text-[#141414] dark:text-white font-sans tracking-tighter leading-tight">{business.name}</h1>
+                <div className="flex items-center gap-2 mb-1">
+                   <h1 className="text-3xl font-[800] text-[#141414] dark:text-white font-sans tracking-tighter leading-tight">{business.name}</h1>
+                   {store?.claimed && <ShieldCheck size={20} className="text-[#1E5BFF]" />}
+                </div>
                 <div className="flex items-center gap-2 text-sm font-medium text-[#6C6C6C] mt-2">
                     <span className="bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded-lg text-[10px] font-bold uppercase">{business.category}</span>
                     <span className="text-gray-300">•</span>
@@ -165,11 +173,21 @@ export const StoreDetailView: React.FC<{ store?: Store | null; onBack: () => voi
                 </div>
               </div>
               
-              {/* Logo Pequena Sobreposta (Estilo Apple / Moderno) */}
               <div className="w-24 h-24 rounded-3xl bg-white dark:bg-gray-800 shadow-2xl border-4 border-white dark:border-gray-900 flex items-center justify-center p-2 shrink-0 -mt-16 overflow-hidden z-30 relative animate-in zoom-in duration-500">
                 <img src={business.logo} alt="Logo" className="w-full h-full object-contain" />
               </div>
           </div>
+
+          {/* BOTÃO DE REIVINDICAÇÃO (Somente se não for claimed) */}
+          {!store?.claimed && (
+            <button 
+              onClick={onClaim}
+              className="w-full mb-8 py-3 bg-[#EAF0FF] dark:bg-blue-900/10 text-[#1E5BFF] rounded-2xl border border-blue-100 dark:border-blue-800 flex items-center justify-center gap-2 font-bold text-xs uppercase tracking-widest active:scale-95 transition-all"
+            >
+              <Building2 size={16} />
+              Reivindicar esta loja
+            </button>
+          )}
 
           {user && userCredit !== null && (
               <div className="bg-gradient-to-r from-[#1E5BFF] to-[#4D7CFF] rounded-3xl p-5 mb-8 text-white shadow-xl shadow-blue-500/20 flex items-center justify-between overflow-hidden relative group active:scale-[0.98] transition-all cursor-pointer" onClick={onPay}>
@@ -199,7 +217,6 @@ export const StoreDetailView: React.FC<{ store?: Store | null; onBack: () => voi
                 </div>
             </div>
             
-            {/* Botões de Ação Principais */}
             <div className="flex gap-4">
               <button 
                 onClick={onPay}
@@ -218,7 +235,6 @@ export const StoreDetailView: React.FC<{ store?: Store | null; onBack: () => voi
               </a>
             </div>
 
-            {/* Informações de Contato */}
             <div className="space-y-4">
               <h3 className="text-sm font-black text-gray-400 uppercase tracking-widest ml-1">Onde encontrar</h3>
               <div className="grid gap-4">

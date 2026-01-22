@@ -1,5 +1,62 @@
 import { supabase } from '../lib/supabaseClient';
-import { DbMerchantSession } from '../types';
+import { DbMerchantSession, StoreClaimRequest } from '../types';
+
+/**
+ * Simula o envio de um código OTP para o método escolhido.
+ */
+export const sendClaimOTP = async (storeId: string, method: 'whatsapp' | 'email') => {
+  // Em produção, aqui chamaria o backend para disparar WhatsApp/Email
+  await new Promise(resolve => setTimeout(resolve, 1500));
+  console.log(`[CLAIM OTP] Código enviado para a loja ${storeId} via ${method}`);
+  // Salva um código fixo no localStorage para fins de demonstração (JPA2024)
+  localStorage.setItem(`claim_otp_${storeId}`, "123456");
+  return true;
+};
+
+/**
+ * Valida o código OTP inserido pelo usuário.
+ */
+export const validateClaimOTP = async (storeId: string, userId: string, code: string) => {
+  await new Promise(resolve => setTimeout(resolve, 1000));
+  const savedCode = localStorage.getItem(`claim_otp_${storeId}`);
+  
+  if (code === savedCode || code === "123456") {
+    // SUCESSO AUTOMÁTICO
+    if (supabase) {
+       // Atualiza a loja se o Supabase estiver ativo
+       // await supabase.from('merchants').update({ claimed: true, owner_id: userId }).eq('id', storeId);
+    }
+    return true;
+  }
+  
+  throw new Error("Código incorreto ou expirado.");
+};
+
+/**
+ * Submete uma solicitação manual de reivindicação.
+ */
+export const submitManualClaim = async (claimData: Partial<StoreClaimRequest>) => {
+  if (supabase) {
+    const { error } = await supabase.from('store_claims').insert({
+        ...claimData,
+        status: 'pending',
+        created_at: new Date().toISOString()
+    });
+    if (error) throw error;
+  } else {
+    // Simulação Local
+    const saved = localStorage.getItem('manual_claims_jpa') || '[]';
+    const claims = JSON.parse(saved);
+    claims.push({
+        ...claimData,
+        id: `claim-${Date.now()}`,
+        status: 'pending',
+        created_at: new Date().toISOString()
+    });
+    localStorage.setItem('manual_claims_jpa', JSON.stringify(claims));
+  }
+  return true;
+};
 
 /**
  * Valida um código de loja (QR ou Manual) e retorna os dados públicos.

@@ -81,6 +81,27 @@ export interface Store {
   business_hours?: Record<string, BusinessHour>;
   payment_methods?: string[];
   payment_methods_others?: string;
+
+  // --- PROPRIEDADE E REIVINDICAÇÃO ---
+  claimed?: boolean;
+  owner_user_id?: string;
+}
+
+export interface StoreClaimRequest {
+  id: string;
+  store_id: string;
+  store_name: string;
+  user_id: string;
+  user_email: string;
+  method: 'whatsapp' | 'email' | 'manual';
+  status: 'pending' | 'approved' | 'rejected';
+  created_at: string;
+  // Campos para manual
+  responsible_name?: string;
+  cnpj?: string;
+  contact_phone?: string;
+  justification?: string;
+  attachments?: string[]; // URLs de comprovantes
 }
 
 export interface StoreCredit {
@@ -227,7 +248,7 @@ export interface AppNotification {
   userId: string;
   title: string;
   message: string;
-  type: 'taxonomy_approval' | 'taxonomy_rejection' | 'system' | 'job_push';
+  type: 'taxonomy_approval' | 'taxonomy_rejection' | 'system' | 'job_push' | 'claim_approval' | 'claim_rejection';
   read: boolean;
   createdAt: string;
 }
