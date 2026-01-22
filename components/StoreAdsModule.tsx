@@ -27,6 +27,7 @@ interface StoreAdsModuleProps {
   onBack: () => void;
   onNavigate: (view: string) => void;
   user: User | null;
+  categoryName?: string; // Propriedade adicionada para corrigir erro TS2322
 }
 
 const NEIGHBORHOODS = [
@@ -47,18 +48,19 @@ const BENEFIT_CARDS = [
   },
   { 
     title: "Segmentação por Bairro", 
-    desc: "Anuncie somente onde seu cliente realmente está.",
+    desc: "Anuncie somente onde seu cliente está.",
     icon: MapPin 
   }
 ];
 
-export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNavigate, user }) => {
+export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNavigate, user, categoryName }) => {
   // --- States ---
-  const [bannerType, setBannerType] = useState<'home' | 'categories' | 'combo'>('combo');
+  // Se categoryName estiver presente, talvez o lojista queira focar em categorias
+  const [bannerType, setBannerType] = useState<'home' | 'categories' | 'combo'>(categoryName ? 'categories' : 'combo');
   const [selectedNeighborhoods, setSelectedNeighborhoods] = useState<string[]>(["Freguesia"]);
-  const [duration, setDuration] = useState<'1m' | '3m'>('1m');
+  const [duration, setDuration] = useState<'1m' | '3m'>('3m'); // Promoção vantajosa por padrão
   const [paymentMethod, setPaymentMethod] = useState<'vista' | 'parcelado'>('vista');
-  const [creationType, setCreationType] = useState<'own' | 'pro'>('own');
+  const [creationType, setCreationType] = useState<'own' | 'pro'>('pro'); // Recomendado por padrão
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // --- Pricing Logic ---
@@ -123,7 +125,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
               Destaque sua marca <br/>no <span className="text-[#1E5BFF]">bairro certo</span>
             </h2>
             <p className="text-slate-400 text-sm max-w-xs mx-auto leading-relaxed font-medium animate-in fade-in duration-1000 delay-300">
-              Apareça no topo da Home e das Categorias para mais de <span className="text-white font-bold">450 moradores ativos</span> em Jacarepaguá ou escolha bairros estratégicos.
+              Apareça no topo da Home e das Categorias para mais de <span className="text-white font-bold">450 moradores ativos</span> em Jacarepaguá ou escolha bairros estratégicos conforme a necessidade do seu negócio.
             </p>
           </div>
         </section>
@@ -153,7 +155,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
             <div className="grid gap-3">
                 {[
                     { id: 'home', label: 'Banner na Home', price: 'A partir de R$ 89,90' },
-                    { id: 'categories', label: 'Banner nas Categorias', price: 'A partir de R$ 49,90' },
+                    { id: 'categories', label: `Banner em ${categoryName || 'Categorias'}`, price: 'A partir de R$ 49,90' },
                     { id: 'combo', label: 'Home + Categorias', price: 'Recomendado • R$ 119,90', isBest: true },
                 ].map((type) => (
                     <button 
@@ -184,7 +186,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
 
         {/* 5. SELEÇÃO DE BAIRROS */}
         <section className="px-6 mt-12">
-            <h3 className="text-xs font-black uppercase tracking-[0.2em] text-blue-400 mb-2">2. Escolha os bairros</h3>
+            <h3 className="text-xs font-black uppercase tracking-[0.2em] text-blue-400 mb-2">2. Escolha os bairros para anunciar</h3>
             <p className="text-xs text-slate-500 mb-6 font-medium">Você pode selecionar um ou vários bairros. O valor será somado automaticamente.</p>
             
             <div className="flex flex-wrap gap-2">
@@ -206,7 +208,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
 
         {/* 6. PLANOS E PREÇOS */}
         <section className="px-6 mt-12">
-            <h3 className="text-xs font-black uppercase tracking-[0.2em] text-blue-400 mb-6">3. Planos e Duração</h3>
+            <h3 className="text-xs font-black uppercase tracking-[0.2em] text-blue-400 mb-6">3. Planos e Preços</h3>
             <div className="grid grid-cols-2 gap-4">
                 <button 
                     onClick={() => setDuration('1m')}
@@ -216,8 +218,12 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
                 >
                     <p className="text-xs font-bold text-slate-400 uppercase mb-2">1 Mês</p>
                     <div className="flex flex-col items-center">
-                        <span className="text-slate-500 text-[10px] line-through">R$ 199,90</span>
-                        <span className="text-xl font-black text-white">R$ 89,90</span>
+                        <span className="text-slate-500 text-[10px] line-through">
+                          {bannerType === 'categories' ? 'R$ 149,90' : bannerType === 'home' ? 'R$ 199,90' : 'R$ 249,90'}
+                        </span>
+                        <span className="text-xl font-black text-white">
+                          R$ {bannerType === 'categories' ? '49,90' : bannerType === 'home' ? '89,90' : '119,90'}
+                        </span>
                     </div>
                 </button>
 
@@ -227,11 +233,13 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
                         duration === '3m' ? 'bg-blue-600/10 border-[#1E5BFF]' : 'bg-white/5 border-white/5'
                     }`}
                 >
-                    <div className="absolute top-0 left-0 right-0 bg-blue-500 text-[8px] font-black py-1 uppercase tracking-widest">Mais vantajoso</div>
+                    <div className="absolute top-0 left-0 right-0 bg-blue-500 text-[8px] font-black py-1 uppercase tracking-widest text-center">Mais vantajoso</div>
                     <p className="text-xs font-bold text-slate-400 uppercase mb-2 mt-2">3 Meses</p>
                     <div className="flex flex-col items-center">
                         <span className="text-slate-500 text-[10px] opacity-0">-</span>
-                        <span className="text-xl font-black text-white">R$ 149,90</span>
+                        <span className="text-xl font-black text-white">
+                          R$ {bannerType === 'categories' ? '89,90' : bannerType === 'home' ? '149,90' : '199,90'}
+                        </span>
                     </div>
                 </button>
             </div>
@@ -240,7 +248,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
         {/* 8. FORMA DE PAGAMENTO */}
         <section className="px-6 mt-12">
             <h3 className="text-xs font-black uppercase tracking-[0.2em] text-blue-400 mb-6 flex items-center gap-2">
-                <CreditCard size={14} /> 4. Pagamento
+                <CreditCard size={14} /> 4. Forma de Pagamento
             </h3>
             <div className="grid grid-cols-1 gap-3">
                 <button 
@@ -252,7 +260,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
                     <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${paymentMethod === 'vista' ? 'border-[#1E5BFF]' : 'border-slate-700'}`}>
                         {paymentMethod === 'vista' && <div className="w-2.5 h-2.5 bg-[#1E5BFF] rounded-full"></div>}
                     </div>
-                    <span className="font-bold text-sm">À vista (Pix ou Cartão)</span>
+                    <span className="font-bold text-sm">À vista</span>
                 </button>
                 <button 
                     onClick={() => setPaymentMethod('parcelado')}
@@ -263,7 +271,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
                     <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${paymentMethod === 'parcelado' ? 'border-[#1E5BFF]' : 'border-slate-700'}`}>
                         {paymentMethod === 'parcelado' && <div className="w-2.5 h-2.5 bg-[#1E5BFF] rounded-full"></div>}
                     </div>
-                    <span className="font-bold text-sm">3x sem juros no Cartão</span>
+                    <span className="font-bold text-sm">3x sem juros</span>
                 </button>
             </div>
         </section>
@@ -271,18 +279,17 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
         {/* 9. CRIAÇÃO DO BANNER */}
         <section className="px-6 mt-12">
             <h3 className="text-xs font-black uppercase tracking-[0.2em] text-blue-400 mb-6 flex items-center gap-2">
-                <Palette size={14} /> 5. Criação da Arte
+                <Palette size={14} /> 5. Criação do Banner
             </h3>
             <div className="grid gap-4">
                 <button 
-                    /* Fix: Change setCreationOption to setCreationType */
                     onClick={() => setCreationType('own')}
                     className={`p-6 rounded-[2.5rem] border-2 text-left transition-all ${
                         creationType === 'own' ? 'bg-blue-600/10 border-[#1E5BFF]' : 'bg-white/5 border-white/5'
                     }`}
                 >
                     <h4 className="font-bold text-white mb-1">Criar minha própria arte</h4>
-                    <p className="text-xs text-slate-500 font-medium italic">"Envie sua imagem e texto pronto."</p>
+                    <p className="text-xs text-slate-500 font-medium italic">“Envie sua imagem e texto.”</p>
                 </button>
 
                 <button 
@@ -293,7 +300,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
                 >
                     <div className="absolute top-4 right-4 text-amber-400 animate-pulse"><Star size={20} fill="currentColor" /></div>
                     <h4 className="font-bold text-white mb-1">Contratar criação profissional ⭐</h4>
-                    <p className="text-xs text-slate-500 font-medium mb-3">"Nossa equipe cria um banner profissional para você."</p>
+                    <p className="text-xs text-slate-500 font-medium mb-3">“Nossa equipe cria um banner profissional para você.”</p>
                     <div className="flex items-center gap-2">
                         <span className="text-slate-500 text-xs line-through">R$ 149,90</span>
                         <span className="text-base font-black text-emerald-400">R$ 69,90</span>
@@ -310,17 +317,17 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
         {/* Resumo */}
         <div className="bg-white/5 p-4 rounded-2xl mb-6 flex justify-between items-end border border-white/5">
             <div className="space-y-1">
-                <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Resumo do Pedido</p>
+                <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Resumo Dinâmico</p>
                 <div className="flex flex-wrap gap-x-3 gap-y-1">
                     <span className="text-[11px] font-bold text-slate-300 flex items-center gap-1"><Check size={10} className="text-[#1E5BFF]" /> {bannerType === 'combo' ? 'Home + Cat' : bannerType}</span>
-                    <span className="text-[11px] font-bold text-slate-300 flex items-center gap-1"><Check size={10} className="text-[#1E5BFF]" /> {selectedNeighborhoods.length} Bairros</span>
-                    <span className="text-[11px] font-bold text-slate-300 flex items-center gap-1"><Check size={10} className="text-[#1E5BFF]" /> {duration}</span>
+                    <span className="text-[11px] font-bold text-slate-300 flex items-center gap-1"><Check size={10} className="text-[#1E5BFF]" /> {selectedNeighborhoods.length} bairros</span>
+                    <span className="text-[11px] font-bold text-slate-300 flex items-center gap-1"><Check size={10} className="text-[#1E5BFF]" /> {duration === '1m' ? '1 mês' : '3 meses'}</span>
                 </div>
-                <p className="text-[10px] text-blue-400 font-bold mt-1">Parcelado em até 3x sem juros</p>
+                <p className="text-[10px] text-blue-400 font-bold mt-1">Você pode parcelar em até 3x sem juros.</p>
             </div>
             <div className="text-right">
                 <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Total</p>
-                <p className="text-3xl font-black text-white leading-none">R$ {calculateTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+                <p className="text-3xl font-black text-white leading-none tracking-tighter">R$ {calculateTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
             </div>
         </div>
 
@@ -334,7 +341,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
           ) : (
               <>
                 <ShoppingBag size={20} />
-                FINALIZAR COMPRA
+                Adicionar ao carrinho e finalizar compra
               </>
           )}
         </button>
