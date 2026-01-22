@@ -55,9 +55,31 @@ const MOCK_OCCUPANCY: Record<string, Record<string, boolean>> = {
 };
 
 const DISPLAY_MODES = [
-  { id: 'home', label: 'Home', icon: Home, price: 89.90 },
-  { id: 'cat', label: 'Categorias', icon: LayoutGrid, price: 49.90 },
-  { id: 'combo', label: 'Home + Cat', icon: Zap, recommended: true, price: 119.90 },
+  { 
+    id: 'home', 
+    label: 'Home', 
+    icon: Home, 
+    price: 89.90,
+    description: 'Exibido no carrossel da página inicial para todos os usuários.',
+    whyChoose: 'Ideal para máxima visibilidade imediata.'
+  },
+  { 
+    id: 'cat', 
+    label: 'Categorias', 
+    icon: LayoutGrid, 
+    price: 49.90,
+    description: 'Exibido no topo das buscas por produtos ou serviços específicos.',
+    whyChoose: 'Impacta o cliente no momento da decisão.'
+  },
+  { 
+    id: 'combo', 
+    label: 'Home + Cat', 
+    icon: Zap, 
+    recommended: true, 
+    price: 119.90,
+    description: 'Destaque total na página inicial e em todas as categorias.',
+    whyChoose: 'Mais alcance, cliques e chances de vendas.'
+  },
 ];
 
 const FONTS = [
@@ -226,26 +248,38 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
           <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-blue-500 flex items-center gap-2 px-1">
             <Target size={14} /> 1. Onde deseja aparecer?
           </h3>
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 gap-4">
             {DISPLAY_MODES.map((mode) => (
               <button
                 key={mode.id}
                 onClick={() => { setSelectedMode(mode); }}
-                className={`relative flex flex-col items-center text-center p-4 rounded-[2rem] border-2 transition-all duration-300 min-h-[140px] justify-center gap-2 ${
+                className={`relative flex items-start text-left p-6 rounded-[2rem] border-2 transition-all duration-300 gap-5 ${
                   selectedMode?.id === mode.id 
                   ? 'bg-blue-600/10 border-blue-500 shadow-lg shadow-blue-500/10' 
                   : 'bg-white/5 border-white/5 opacity-60'
                 }`}
               >
                 {mode.recommended && (
-                  <div className="absolute -top-2 left-1/2 -translate-x-1/2 bg-amber-400 text-slate-900 text-[8px] font-black px-2.5 py-0.5 rounded-full uppercase tracking-widest whitespace-nowrap">Destaque</div>
+                  <div className="absolute -top-2 left-8 bg-amber-400 text-slate-900 text-[8px] font-black px-2.5 py-0.5 rounded-full uppercase tracking-widest whitespace-nowrap">Recomendado</div>
                 )}
-                <div className={`p-2.5 rounded-2xl ${selectedMode?.id === mode.id ? 'bg-blue-500 text-white' : 'bg-white/5 text-slate-400'}`}>
-                  <mode.icon size={22} />
+                
+                <div className={`p-4 rounded-2xl shrink-0 ${selectedMode?.id === mode.id ? 'bg-blue-500 text-white shadow-lg' : 'bg-white/5 text-slate-400'}`}>
+                  <mode.icon size={28} />
                 </div>
-                <p className="text-[12px] font-bold text-white leading-tight mt-1">{mode.label}</p>
-                <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${selectedMode?.id === mode.id ? 'border-blue-500' : 'border-slate-700'}`}>
-                  {selectedMode?.id === mode.id && <div className="w-2 h-2 bg-blue-500 rounded-full" />}
+
+                <div className="flex-1 min-w-0 pr-4">
+                  <div className="flex items-center justify-between mb-1">
+                    <p className="text-sm font-black text-white uppercase tracking-tight">{mode.label}</p>
+                    <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 ${selectedMode?.id === mode.id ? 'border-blue-500' : 'border-slate-700'}`}>
+                      {selectedMode?.id === mode.id && <div className="w-2 h-2 bg-blue-500 rounded-full" />}
+                    </div>
+                  </div>
+                  <p className="text-[10px] text-slate-400 font-medium leading-relaxed line-clamp-2">
+                    {mode.description}
+                  </p>
+                  <p className="text-[9px] text-blue-400/70 font-bold uppercase tracking-widest mt-1.5 italic">
+                    {mode.whyChoose}
+                  </p>
                 </div>
               </button>
             ))}
