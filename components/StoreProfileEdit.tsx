@@ -383,7 +383,7 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
                     {formData.logo_url && <button onClick={() => setFormData({...formData, logo_url: ''})} className="w-11 h-11 bg-red-500 text-white rounded-2xl shadow-xl flex items-center justify-center border-2 border-white dark:border-gray-900 active:scale-90 transition-transform"><Trash2 size={20} /></button>}
                 </div>
             </div>
-            <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest mt-4">500×500 px • PNG/JPG</p>
+            <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest mt-4">recomendado 500x500 px (PNG/JPG)</p>
             <input type="file" ref={logoInputRef} className="hidden" accept="image/*" onChange={e => handleImageUpload(e, 'logo_url')} />
         </section>
 
@@ -409,7 +409,7 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
                     </button>
                 )}
             </div>
-            <p className="text-[9px] text-gray-400 text-center font-bold uppercase tracking-widest">1200×400 px • JPG/PNG</p>
+            <p className="text-[9px] text-gray-400 text-center font-bold uppercase tracking-widest">recomendado 1200x400 px (JPG/PNG)</p>
             <input type="file" ref={bannerInputRef} className="hidden" accept="image/*" onChange={e => handleImageUpload(e, 'banner_url')} />
         </section>
 
@@ -585,7 +585,7 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
                         <div className="flex items-center gap-3 animate-in fade-in slide-in-from-top-1">
                           <input type="time" value={data.start} onChange={e => handleHourChange(day.key, 'start', e.target.value)} className="flex-1 bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl p-3 text-xs font-bold dark:text-white" />
                           <span className="text-gray-300 text-xs font-bold">até</span>
-                          <input type="time" value={data.end} onChange={e => handleHourChange(day.key, 'end', e.target.value)} className="flex-1 bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl p-3 text-xs font-bold dark:text-white" />
+                          <input type="time" value={data.end} onChange={e => handleHourChange(day.key, 'end', e.target.value)} className="flex-1 bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-800 rounded-xl p-3 text-xs font-bold dark:text-white" />
                         </div>
                       )}
                     </div>
