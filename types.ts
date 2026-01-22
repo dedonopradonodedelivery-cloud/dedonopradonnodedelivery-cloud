@@ -175,12 +175,24 @@ export interface CommunitySuggestion {
 
 export interface TaxonomySuggestion {
   id: string;
-  type: 'category' | 'subcategory' | 'specialty';
+  type: 'category' | 'subcategory';
   name: string;
   parentName?: string;
   justification?: string;
   status: 'pending' | 'approved' | 'rejected';
+  rejectionReason?: string;
   storeName: string;
+  merchantId: string;
+  createdAt: string;
+}
+
+export interface AppNotification {
+  id: string;
+  userId: string;
+  title: string;
+  message: string;
+  type: 'taxonomy_approval' | 'taxonomy_rejection' | 'system';
+  read: boolean;
   createdAt: string;
 }
 
@@ -261,4 +273,4 @@ export interface DbWalletMovement {
 }
 
 // Added to fix import error in StoreProfileEdit.tsx
-export type TaxonomyType = 'category' | 'subcategory' | 'specialty';
+export type TaxonomyType = 'category' | 'subcategory';

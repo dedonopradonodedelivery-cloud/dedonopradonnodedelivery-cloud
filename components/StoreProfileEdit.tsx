@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { 
   ChevronLeft, 
@@ -18,18 +17,18 @@ import {
   Sparkles,
   HelpCircle,
   CheckCircle2,
-  Send
+  Send,
+  AlertCircle
 } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import { useAuth } from '../contexts/AuthContext';
-import { CATEGORIES, SUBCATEGORIES, SPECIALTIES } from '../constants';
+import { CATEGORIES, SUBCATEGORIES } from '../constants';
 import { TaxonomyType } from '../types';
 
 interface StoreProfileEditProps {
   onBack: () => void;
 }
 
-// Componente de Campo com Dropdown (Barra com Seta)
 interface TaxonomyFieldProps {
   label: string;
   placeholder: string;
@@ -37,7 +36,6 @@ interface TaxonomyFieldProps {
   selected: string[];
   onSelect: (name: string) => void;
   onRemove: (name: string) => void;
-  onSuggest: () => void;
   guideText?: string;
 }
 
@@ -48,7 +46,6 @@ const TaxonomyField: React.FC<TaxonomyFieldProps> = ({
   selected, 
   onSelect, 
   onRemove, 
-  onSuggest,
   guideText 
 }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -66,6 +63,9 @@ const TaxonomyField: React.FC<TaxonomyFieldProps> = ({
   }, []);
 
   const filtered = options.filter(opt => opt.name.toLowerCase().includes(search.toLowerCase()));
+  
+  // Adiciona a opção "Outras..." ao final
+  const finalOptions = [...filtered, { name: 'Outras... (sugerir nova)', icon: <PlusCircle size={14} />, isSuggestion: true }];
 
   return (
     <div className="space-y-2 animate-in fade-in duration-300" ref={dropdownRef}>
@@ -108,14 +108,15 @@ const TaxonomyField: React.FC<TaxonomyFieldProps> = ({
               />
             </div>
             <div className="max-h-60 overflow-y-auto no-scrollbar py-2">
-              {filtered.length > 0 ? filtered.map(opt => {
+              {finalOptions.map((opt, i) => {
                 const isSelected = selected.includes(opt.name);
+                const isSug = (opt as any).isSuggestion;
                 return (
                   <button
-                    key={opt.name}
+                    key={i}
                     type="button"
                     onClick={() => { onSelect(opt.name); setIsOpen(false); }}
-                    className={`w-full px-4 py-3 text-left text-sm flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors ${isSelected ? 'text-[#1E5BFF] font-bold bg-blue-50/30' : 'text-gray-600 dark:text-gray-300'}`}
+                    className={`w-full px-4 py-3 text-left text-sm flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors ${isSelected ? 'text-[#1E5BFF] font-bold bg-blue-50/30' : isSug ? 'text-blue-500 font-bold border-t border-gray-50 dark:border-gray-800 mt-1 pt-4' : 'text-gray-600 dark:text-gray-300'}`}
                   >
                     <div className="flex items-center gap-3">
                       {opt.icon && <span className="opacity-50">{opt.icon}</span>}
@@ -124,19 +125,7 @@ const TaxonomyField: React.FC<TaxonomyFieldProps> = ({
                     {isSelected && <Check size={16} />}
                   </button>
                 );
-              }) : (
-                <div className="p-4 text-center text-xs text-gray-400">Nenhuma opção encontrada</div>
-              )}
-              
-              {/* Botão de Sugestão */}
-              <button 
-                type="button"
-                onClick={() => { onSuggest(); setIsOpen(false); }}
-                className="w-full p-4 text-[#1E5BFF] text-xs font-black uppercase tracking-widest border-t border-gray-50 dark:border-gray-700 bg-blue-50/10 hover:bg-blue-50 transition-colors flex items-center justify-center gap-2"
-              >
-                <PlusCircle size={14} />
-                Sugerir Novo
-              </button>
+              })}
             </div>
           </div>
         )}
@@ -150,13 +139,11 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [showAnalysisFeedback, setShowAnalysisFeedback] = useState(false);
   
   const logoInputRef = useRef<HTMLInputElement>(null);
   const bannerInputRef = useRef<HTMLInputElement>(null);
 
-  const [showAddAnotherModal, setShowAddAnotherModal] = useState(false);
-  
-  // Estado para Modal de Sugestão
   const [suggestionModal, setSuggestionModal] = useState<{ isOpen: boolean; type: TaxonomyType; parentName?: string } | null>(null);
   const [suggestionData, setSuggestionData] = useState({ name: '', justification: '' });
 
@@ -166,14 +153,10 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
     cnpj: '',
     email_fiscal: '',
     whatsapp_financeiro: '',
-    telefone_fixo: '',
-    inscricao_municipal: '',
-    inscricao_estadual: '',
     logo_url: '',
     banner_url: '',
     categories: [] as string[],
     subcategories: [] as string[],
-    specialties: [] as string[]
   });
 
   useEffect(() => {
@@ -188,14 +171,10 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
             cnpj: data.cnpj || '',
             email_fiscal: data.email_fiscal || data.email || '',
             whatsapp_financeiro: data.whatsapp_financeiro || data.whatsapp || '',
-            telefone_fixo: data.telefone_fixo || '',
-            inscricao_municipal: data.inscricao_municipal || '',
-            inscricao_estadual: data.inscricao_estadual || '',
             logo_url: data.logo_url || '',
             banner_url: data.banner_url || '',
             categories: data.categories || [],
             subcategories: data.subcategories || [],
-            specialties: data.specialties || [],
           });
         }
       } catch (e) { console.warn(e); } finally { setIsLoading(false); }
@@ -204,14 +183,8 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
   }, [user]);
 
   const handleSave = async () => {
-    if (!formData.logo_url) {
-      alert('A Logo da empresa é obrigatória para aparecer no app.');
-      return;
-    }
-    if (!formData.name || !formData.razao_social || !formData.cnpj || !formData.email_fiscal || !formData.whatsapp_financeiro || formData.categories.length === 0) {
-      alert('Preencha todos os campos obrigatórios da Identificação Fiscal e Categorias.');
-      return;
-    }
+    if (!formData.logo_url) { alert('A Logo da empresa é obrigatória.'); return; }
+    if (!formData.name || !formData.cnpj || formData.categories.length === 0) { alert('Preencha os campos obrigatórios.'); return; }
     setIsSaving(true);
     try {
       const { error } = await supabase.from('merchants').upsert({
@@ -222,32 +195,12 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
       if (error) throw error;
       setShowSuccess(true);
       setTimeout(() => setShowSuccess(false), 3000);
-    } catch (err) { alert('Erro ao salvar. Tente novamente.'); } finally { setIsSaving(false); }
+    } catch (err) { alert('Erro ao salvar.'); } finally { setIsSaving(false); }
   };
 
-  const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => setFormData(prev => ({ ...prev, logo_url: reader.result as string }));
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const handleBannerUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => setFormData(prev => ({ ...prev, banner_url: reader.result as string }));
-      reader.readAsDataURL(file);
-    }
-  };
-
-  // --- Lógica de Sugestão ---
   const submitSuggestion = async () => {
     if (!suggestionData.name.trim() || !suggestionModal) return;
     
-    // Simulação de persistência (em produção salvaria na tabela 'taxonomy_suggestions')
     const suggestion = {
       id: Date.now().toString(),
       type: suggestionModal.type,
@@ -256,63 +209,42 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
       justification: suggestionData.justification.trim(),
       status: 'pending',
       storeName: formData.name || 'Loja em Cadastro',
+      merchantId: user?.id,
       createdAt: new Date().toISOString()
     };
 
     const saved = localStorage.getItem('taxonomy_suggestions') || '[]';
     localStorage.setItem('taxonomy_suggestions', JSON.stringify([...JSON.parse(saved), suggestion]));
     
-    alert('Sua sugestão foi enviada para o ADM e está em análise.');
     setSuggestionModal(null);
     setSuggestionData({ name: '', justification: '' });
+    setShowAnalysisFeedback(true);
+    setTimeout(() => setShowAnalysisFeedback(false), 4000);
   };
 
-  // --- Lógica de Taxonomia Guiada ---
-  
   const handleSelectCategory = (name: string) => {
+    if (name.includes('Outras...')) {
+      setSuggestionModal({ isOpen: true, type: 'category' });
+      return;
+    }
     if (formData.categories.includes(name)) return;
     setFormData(prev => ({ ...prev, categories: [...prev.categories, name] }));
-    setShowAddAnotherModal(true);
   };
 
   const handleRemoveCategory = (name: string) => {
     const newCats = formData.categories.filter(c => c !== name);
-    // Limpar subcategorias dependentes
     const validSubs = (SUBCATEGORIES[name] || []).map(s => s.name);
     const newSubs = formData.subcategories.filter(s => !validSubs.includes(s));
-    // Limpar especialidades dependentes
-    const specialtiesToKeep = newSubs.flatMap(s => SPECIALTIES[s] || []);
-    const newSpecs = formData.specialties.filter(spec => specialtiesToKeep.includes(spec));
-    
-    setFormData(prev => ({ 
-      ...prev, 
-      categories: newCats, 
-      subcategories: newSubs, 
-      specialties: newSpecs 
-    }));
+    setFormData(prev => ({ ...prev, categories: newCats, subcategories: newSubs }));
   };
 
-  const handleSelectSub = (name: string) => {
+  const handleSelectSub = (name: string, parentName: string) => {
+    if (name.includes('Outras...')) {
+      setSuggestionModal({ isOpen: true, type: 'subcategory', parentName });
+      return;
+    }
     if (formData.subcategories.includes(name)) return;
     setFormData(prev => ({ ...prev, subcategories: [...prev.subcategories, name] }));
-  };
-
-  const handleRemoveSub = (name: string) => {
-    const validSpecs = SPECIALTIES[name] || [];
-    setFormData(prev => ({ 
-      ...prev, 
-      subcategories: prev.subcategories.filter(s => s !== name),
-      specialties: prev.specialties.filter(s => !validSpecs.includes(s))
-    }));
-  };
-
-  const handleSelectSpec = (name: string) => {
-    if (formData.specialties.includes(name)) return;
-    setFormData(prev => ({ ...prev, specialties: [...prev.specialties, name] }));
-  };
-
-  const handleRemoveSpec = (name: string) => {
-    setFormData(prev => ({ ...prev, specialties: prev.specialties.filter(s => s !== name) }));
   };
 
   if (isLoading) return <div className="min-h-screen flex items-center justify-center bg-white dark:bg-gray-950"><Loader2 className="animate-spin text-[#1E5BFF]" /></div>;
@@ -329,131 +261,66 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
       </div>
 
       <div className="p-6 space-y-12 max-w-md mx-auto">
-        
-        {/* IDENTIDADE VISUAL */}
         <section className="space-y-10">
           <div className="flex items-center gap-2 px-1">
             <Camera size={16} className="text-[#1E5BFF]" />
             <h2 className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Identidade Visual</h2>
           </div>
-
           <div className="flex flex-col items-center">
             <div className="relative group">
               <div className={`w-32 h-32 rounded-[2.5rem] overflow-hidden border-4 bg-white dark:bg-gray-800 shadow-xl ${!formData.logo_url ? 'border-dashed border-red-200' : 'border-white dark:border-gray-900'}`}>
-                {formData.logo_url ? (
-                  <img src={formData.logo_url} className="w-full h-full object-cover" alt="Logo" />
-                ) : (
-                  <div className="w-full h-full flex flex-col items-center justify-center text-gray-300 p-4 text-center">
-                    <StoreIcon size={24} />
-                    <span className="text-[8px] font-bold uppercase mt-1">Logo Obrigatória</span>
-                  </div>
-                )}
+                {formData.logo_url ? <img src={formData.logo_url} className="w-full h-full object-cover" alt="Logo" /> : <div className="w-full h-full flex flex-col items-center justify-center text-gray-300 p-4 text-center"><StoreIcon size={24} /><span className="text-[8px] font-bold uppercase mt-1">Logo Obrigatória</span></div>}
               </div>
               <div className="absolute -right-2 -bottom-2 flex gap-2">
-                <button type="button" onClick={() => logoInputRef.current?.click()} className="w-10 h-10 bg-[#1E5BFF] text-white rounded-2xl shadow-lg flex items-center justify-center active:scale-90 transition-transform"><Pencil size={16} /></button>
-                {formData.logo_url && <button type="button" onClick={() => setFormData({...formData, logo_url: ''})} className="w-10 h-10 bg-white dark:bg-gray-800 text-red-500 border border-red-100 dark:border-red-900 rounded-2xl shadow-lg flex items-center justify-center active:scale-90 transition-transform"><Trash2 size={16} /></button>}
+                <button type="button" onClick={() => logoInputRef.current?.click()} className="w-10 h-10 bg-[#1E5BFF] text-white rounded-2xl shadow-lg flex items-center justify-center"><Pencil size={16} /></button>
               </div>
-              <input type="file" ref={logoInputRef} className="hidden" accept="image/*" onChange={handleLogoUpload} />
+              <input type="file" ref={logoInputRef} className="hidden" accept="image/*" onChange={(e) => { const f = e.target.files?.[0]; if(f){ const r=new FileReader(); r.onload=()=>setFormData({...formData, logo_url: r.result as string}); r.readAsDataURL(f); } }} />
             </div>
-            <div className="mt-4 text-center space-y-1">
-                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Logo da Empresa *</p>
-                <div className="text-[9px] text-gray-400 font-medium leading-tight">500x500 px • PNG/JPG<br/>Fundo transparente recomendado</div>
-            </div>
-          </div>
-
-          <div className="space-y-4">
-            <div className="flex justify-between items-end px-1">
-                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none">Banner / Capa da Loja</label>
-                <span className="text-[9px] text-gray-400 font-bold uppercase">Opcional</span>
-            </div>
-            <div className="relative group">
-              <div onClick={() => !formData.banner_url && bannerInputRef.current?.click()} className={`w-full aspect-[3/1] rounded-[2rem] overflow-hidden bg-gray-100 dark:bg-gray-800 border-2 border-dashed border-gray-200 dark:border-gray-700 flex flex-col items-center justify-center gap-2 transition-all relative ${formData.banner_url ? 'border-solid border-transparent' : 'cursor-pointer hover:bg-gray-200'}`}>
-                {formData.banner_url ? <img src={formData.banner_url} className="w-full h-full object-cover" alt="Banner" /> : <><PlusCircle size={20} className="text-gray-400" /><span className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Adicionar banner de capa</span></>}
-              </div>
-              {formData.banner_url && (
-                <div className="absolute right-3 bottom-3 flex gap-2">
-                    <button type="button" onClick={() => bannerInputRef.current?.click()} className="p-2.5 bg-white/90 backdrop-blur-md text-[#1E5BFF] rounded-xl shadow-lg flex items-center justify-center active:scale-90 transition-transform border border-white"><Pencil size={14} /></button>
-                    <button type="button" onClick={() => setFormData({...formData, banner_url: ''})} className="p-2.5 bg-white/90 backdrop-blur-md text-red-500 rounded-xl shadow-lg flex items-center justify-center active:scale-90 transition-transform border border-white"><Trash2 size={14} /></button>
-                </div>
-              )}
-              <input type="file" ref={bannerInputRef} className="hidden" accept="image/*" onChange={handleBannerUpload} />
-            </div>
-            <div className="px-1"><p className="text-[9px] text-gray-400 font-medium">1200x400 px • JPG/PNG</p></div>
           </div>
         </section>
 
-        {/* IDENTIFICAÇÃO FISCAL */}
         <section className="space-y-6">
           <div className="flex items-center gap-2 px-1">
             <Building2 size={16} className="text-[#1E5BFF]" />
             <h2 className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Identificação Fiscal</h2>
           </div>
-          <div className="bg-white dark:bg-gray-900 p-6 rounded-[2rem] border border-gray-100 dark:border-gray-800 shadow-sm space-y-6">
-            <p className="text-[9px] text-gray-400 font-bold italic mb-2 leading-relaxed">“Esses dados são usados para emissão de nota fiscal e não ficam públicos.”</p>
-            <div className="space-y-4">
-              <div><label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Nome Fantasia *</label><input value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="w-full bg-gray-50 dark:bg-gray-800 p-4 rounded-2xl border-none outline-none text-sm font-bold mt-1" /></div>
-              <div><label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Razão Social *</label><input value={formData.razao_social} onChange={e => setFormData({...formData, razao_social: e.target.value})} className="w-full bg-gray-50 dark:bg-gray-800 p-4 rounded-2xl border-none outline-none text-sm font-bold mt-1" /></div>
-              <div><label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">CNPJ *</label><input value={formData.cnpj} onChange={e => setFormData({...formData, cnpj: e.target.value})} className="w-full bg-gray-50 dark:bg-gray-800 p-4 rounded-2xl border-none outline-none text-sm font-bold mt-1" /></div>
-              <div><label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Email Fiscal *</label><input value={formData.email_fiscal} onChange={e => setFormData({...formData, email_fiscal: e.target.value})} className="w-full bg-gray-50 dark:bg-gray-800 p-4 rounded-2xl border-none outline-none text-sm font-bold mt-1" /></div>
-              <div><label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">WhatsApp Financeiro *</label><input value={formData.whatsapp_financeiro} onChange={e => setFormData({...formData, whatsapp_financeiro: e.target.value})} className="w-full bg-gray-50 dark:bg-gray-800 p-4 rounded-2xl border-none outline-none text-sm font-bold mt-1" /></div>
-            </div>
+          <div className="bg-white dark:bg-gray-900 p-6 rounded-[2rem] border border-gray-100 dark:border-gray-800 shadow-sm space-y-4">
+            <div><label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Nome Fantasia *</label><input value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="w-full bg-gray-50 dark:bg-gray-800 p-4 rounded-2xl border-none outline-none text-sm font-bold mt-1" /></div>
+            <div><label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">CNPJ *</label><input value={formData.cnpj} onChange={e => setFormData({...formData, cnpj: e.target.value})} className="w-full bg-gray-50 dark:bg-gray-800 p-4 rounded-2xl border-none outline-none text-sm font-bold mt-1" /></div>
           </div>
         </section>
 
-        {/* CLASSIFICAÇÃO */}
         <section className="space-y-8">
           <div className="flex items-center gap-2 px-1">
             <Hash size={16} className="text-[#1E5BFF]" />
             <h2 className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Classificação</h2>
           </div>
-
           <div className="space-y-10">
-            {/* 1. CATEGORIA */}
             <TaxonomyField 
               label="1. Categorias Principais"
-              guideText="Selecione a categoria"
-              placeholder="[ Selecione a categoria ▾ ]"
+              guideText="Selecione o segmento"
+              placeholder="[ Selecione ▾ ]"
               options={CATEGORIES.map(c => ({ name: c.name, icon: c.icon }))}
               selected={formData.categories}
               onSelect={handleSelectCategory}
               onRemove={handleRemoveCategory}
-              onSuggest={() => setSuggestionModal({ isOpen: true, type: 'category' })}
             />
-
-            {/* 2. SUBCATEGORIA (DINÂMICO POR CATEGORIA) */}
             {formData.categories.map(cat => (
               <TaxonomyField 
                 key={`sub-${cat}`}
                 label={`2. Subcategoria de ${cat}`}
-                guideText="Agora selecione a subcategoria"
-                placeholder="[ Selecione a subcategoria ▾ ]"
+                guideText="Selecione o tipo de negócio"
+                placeholder="[ Selecione ▾ ]"
                 options={SUBCATEGORIES[cat] || []}
                 selected={formData.subcategories.filter(s => (SUBCATEGORIES[cat] || []).some(opt => opt.name === s))}
-                onSelect={handleSelectSub}
-                onRemove={handleRemoveSub}
-                onSuggest={() => setSuggestionModal({ isOpen: true, type: 'subcategory', parentName: cat })}
-              />
-            ))}
-
-            {/* 3. ESPECIALIDADES (DINÂMICO POR SUBCATEGORIA) */}
-            {formData.subcategories.map(sub => (
-              <TaxonomyField 
-                key={`spec-${sub}`}
-                label={`3. Especialidades em ${sub}`}
-                guideText="Por fim, selecione as especialidades"
-                placeholder="[ Selecione as especialidades ▾ ]"
-                options={(SPECIALTIES[sub] || SPECIALTIES['default']).map(s => ({ name: s }))}
-                selected={formData.specialties.filter(s => (SPECIALTIES[sub] || SPECIALTIES['default']).includes(s))}
-                onSelect={handleSelectSpec}
-                onRemove={handleRemoveSpec}
-                onSuggest={() => setSuggestionModal({ isOpen: true, type: 'specialty', parentName: sub })}
+                onSelect={(name) => handleSelectSub(name, cat)}
+                onRemove={(name) => setFormData(prev => ({ ...prev, subcategories: prev.subcategories.filter(s => s !== name) }))}
               />
             ))}
           </div>
         </section>
       </div>
 
-      {/* Floating Action Bar */}
       <div className="fixed bottom-0 left-0 right-0 p-6 bg-white/90 dark:bg-gray-950/90 backdrop-blur-md border-t border-gray-100 dark:border-gray-800 z-50 max-w-md mx-auto">
         <button onClick={handleSave} disabled={isSaving} className="w-full bg-gray-900 dark:bg-white text-white dark:text-black font-black py-5 rounded-[2rem] shadow-2xl active:scale-[0.98] transition-all flex items-center justify-center gap-3 disabled:opacity-50">
           {isSaving ? <Loader2 className="animate-spin" /> : <Save size={20} />}
@@ -461,73 +328,33 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
         </button>
       </div>
 
-      {/* MODAL DE SUGESTÃO */}
       {suggestionModal && (
         <div className="fixed inset-0 z-[120] bg-black/80 backdrop-blur-md flex items-center justify-center p-6 animate-in fade-in duration-200">
             <div className="bg-white dark:bg-gray-900 w-full max-w-sm rounded-[2.5rem] p-8 shadow-2xl animate-in zoom-in-95 duration-300 relative border border-white/10" onClick={e => e.stopPropagation()}>
                 <div className="flex justify-between items-center mb-6">
-                    <div className="flex flex-col">
-                        <h3 className="text-lg font-black uppercase tracking-tighter leading-none">Sugerir Opção</h3>
-                        <p className="text-[10px] text-blue-500 font-bold mt-1 uppercase tracking-widest">Análise do ADM</p>
-                    </div>
+                    <h3 className="text-lg font-black uppercase tracking-tighter leading-none">Sugerir {suggestionModal.type === 'category' ? 'Categoria' : 'Subcategoria'}</h3>
                     <button onClick={() => setSuggestionModal(null)} className="p-2 text-gray-400"><X size={24} /></button>
                 </div>
-
                 <div className="space-y-5">
-                    {suggestionModal.parentName && (
-                        <div className="p-3 bg-blue-50 dark:bg-blue-900/10 rounded-xl text-[10px] text-blue-700 font-bold border border-blue-100 dark:border-blue-800 uppercase tracking-widest">
-                            Vincular a: {suggestionModal.parentName}
-                        </div>
-                    )}
-                    
+                    {suggestionModal.parentName && <div className="p-3 bg-blue-50 dark:bg-blue-900/10 rounded-xl text-[10px] text-blue-700 font-bold border border-blue-100 dark:border-blue-800 uppercase">Vincular a: {suggestionModal.parentName}</div>}
                     <div>
-                        <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5 ml-1">Nome Sugerido</label>
-                        <input 
-                            value={suggestionData.name}
-                            onChange={e => setSuggestionData({...suggestionData, name: e.target.value})}
-                            placeholder={`Nova ${suggestionModal.type === 'category' ? 'Categoria' : suggestionModal.type === 'subcategory' ? 'Subcategoria' : 'Especialidade'}`}
-                            className="w-full bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 p-4 rounded-2xl outline-none focus:border-[#1E5BFF] transition-all dark:text-white font-bold"
-                        />
+                        <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5 ml-1">Nome *</label>
+                        <input value={suggestionData.name} onChange={e => setSuggestionData({...suggestionData, name: e.target.value})} className="w-full bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 p-4 rounded-2xl outline-none focus:border-[#1E5BFF] transition-all dark:text-white font-bold" />
                     </div>
-
                     <div>
                         <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5 ml-1">Justificativa (Opcional)</label>
-                        <textarea 
-                            value={suggestionData.justification}
-                            onChange={e => setSuggestionData({...suggestionData, justification: e.target.value})}
-                            placeholder="Por que deveríamos adicionar esta opção?"
-                            rows={3}
-                            className="w-full bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 p-4 rounded-2xl outline-none focus:border-[#1E5BFF] transition-all dark:text-white resize-none text-sm"
-                        />
+                        <textarea value={suggestionData.justification} onChange={e => setSuggestionData({...suggestionData, justification: e.target.value})} rows={3} className="w-full bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 p-4 rounded-2xl outline-none focus:border-[#1E5BFF] transition-all dark:text-white resize-none text-sm" />
                     </div>
-
-                    <button 
-                        onClick={submitSuggestion}
-                        disabled={!suggestionData.name.trim()}
-                        className="w-full bg-[#1E5BFF] hover:bg-[#1749CC] text-white font-black py-4 rounded-2xl shadow-xl shadow-blue-500/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-50"
-                    >
-                        <Send size={16} />
-                        ENVIAR PARA O ADM
-                    </button>
+                    <button onClick={submitSuggestion} disabled={!suggestionData.name.trim()} className="w-full bg-[#1E5BFF] hover:bg-[#1749CC] text-white font-black py-4 rounded-2xl shadow-xl active:scale-[0.98] flex items-center justify-center gap-2 disabled:opacity-50"><Send size={16} /> ENVIAR PARA ANÁLISE</button>
                 </div>
             </div>
         </div>
       )}
 
-      {/* POPUP: ADICIONAR OUTRA CATEGORIA? */}
-      {showAddAnotherModal && (
-        <div className="fixed inset-0 z-[110] bg-black/60 backdrop-blur-sm flex items-center justify-center p-6 animate-in fade-in duration-200">
-            <div className="bg-white dark:bg-gray-900 w-full max-w-xs rounded-[2.5rem] p-8 shadow-2xl animate-in zoom-in-95 duration-300 text-center border border-white/10">
-                <div className="w-16 h-16 bg-blue-50 dark:bg-blue-900/20 rounded-2xl flex items-center justify-center mx-auto mb-4 text-[#1E5BFF]">
-                    <PlusCircle size={32} />
-                </div>
-                <h3 className="text-lg font-black text-gray-900 dark:text-white uppercase leading-tight mb-2 tracking-tighter">Outra Categoria?</h3>
-                <p className="text-xs text-gray-500 mb-8 leading-relaxed font-medium">Sua loja se encaixa em mais de um segmento principal?</p>
-                <div className="flex gap-3">
-                    <button onClick={() => setShowAddAnotherModal(false)} className="flex-1 py-3.5 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 rounded-xl font-bold text-[10px] uppercase tracking-widest active:scale-95 transition-transform">Não</button>
-                    <button onClick={() => setShowAddAnotherModal(false)} className="flex-1 py-3.5 bg-[#1E5BFF] text-white rounded-xl font-bold text-[10px] uppercase tracking-widest shadow-lg shadow-blue-500/20 active:scale-95 transition-transform">Sim, adicionar</button>
-                </div>
-            </div>
+      {showAnalysisFeedback && (
+        <div className="fixed top-10 left-1/2 -translate-x-1/2 z-[200] bg-gray-900 text-white px-8 py-5 rounded-3xl shadow-2xl border border-white/20 animate-in slide-in-from-top-10 flex flex-col items-center gap-2 max-w-xs text-center">
+            <CheckCircle2 className="text-emerald-400" size={28} />
+            <p className="text-sm font-bold leading-tight">Enviado para análise. Você terá uma resposta em até 48 horas.</p>
         </div>
       )}
 
