@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { 
   ShieldCheck, Users, Store, BarChart3, History, Eye, Search, 
@@ -5,16 +6,21 @@ import {
   Clock, DollarSign, Calendar, ChevronRight, LayoutDashboard,
   CheckCircle, XCircle, LogOut, Megaphone, User as UserIcon, Building, Flag, PauseCircle, Image as ImageIcon,
   Plus, Loader2,
-  // Added new icons for metrics
   Heart,
   Share2,
   Phone,
-  MousePointerClick
+  MousePointerClick,
+  Tags,
+  Check,
+  X,
+  // Fixed: Added Info icon import missing for line 326
+  Info
 } from 'lucide-react';
 import { getAdminGlobalMetrics, fetchAdminMerchants, fetchAdminUsers, fetchAdminLedger } from '../backend/services';
 import { supabase } from '../lib/supabaseClient';
+import { TaxonomySuggestion } from '../types';
 
-// --- BANNER PREVIEW COMPONENTS (COPIED FOR HISTORY VIEW) ---
+// --- BANNER PREVIEW COMPONENTS ---
 const TemplateBannerRender: React.FC<{ config: any }> = ({ config }) => {
     if (!config) return <div className="p-2 text-xs text-slate-500">Configuração ausente</div>;
     const { template_id, headline, subheadline, product_image_url } = config;
@@ -54,7 +60,6 @@ const CustomBannerRender: React.FC<{ config: any }> = ({ config }) => {
         </div>
     );
 };
-// --- END BANNER PREVIEW ---
 
 const BannerHistoryView: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     const [history, setHistory] = useState<any[]>([]);
@@ -130,11 +135,6 @@ const BannerHistoryView: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                                     </div>
                                     <p className="text-xs text-slate-500 mb-2 truncate">Ator ID: {log.actor_id}</p>
                                     
-                                    {log.details?.isFirstBanner && (
-                                        <div className="flex items-center gap-1.5 bg-green-500/10 text-green-400 text-[10px] font-bold px-2 py-1 rounded-full w-fit border border-green-500/20">
-                                            <Flag size={10} /> Primeiro Banner!
-                                        </div>
-                                    )}
                                     <div className="mt-2 text-[10px] text-slate-500 font-medium uppercase tracking-wider bg-slate-800 px-2 py-1 rounded w-fit">
                                         Destino: {log.details?.target || 'N/A'}
                                     </div>
@@ -168,13 +168,14 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   onInspectUser
 }) => {
   const [view, setView] = useState<'dashboard' | 'history'>('dashboard');
-  const [activeTab, setActiveTab] = useState<'metrics' | 'merchants' | 'users' | 'ledger'>('metrics');
+  const [activeTab, setActiveTab] = useState<'metrics' | 'merchants' | 'users' | 'ledger' | 'taxonomy'>('metrics');
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [metrics, setMetrics] = useState({ totalGenerated: 0, totalUsed: 0, totalExpired: 0 });
   const [merchants, setMerchants] = useState<any[]>([]);
   const [users, setUsers] = useState<any[]>([]);
   const [ledger, setLedger] = useState<any[]>([]);
+  const [taxonomySuggestions, setTaxonomySuggestions] = useState<any[]>([]);
 
   useEffect(() => {
     if(view === 'dashboard') loadData();
@@ -187,9 +188,26 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
       if (activeTab === 'merchants') setMerchants(await fetchAdminMerchants(searchTerm));
       if (activeTab === 'users') setUsers(await fetchAdminUsers(searchTerm));
       if (activeTab === 'ledger') setLedger(await fetchAdminLedger());
+      if (activeTab === 'taxonomy') {
+          const saved = localStorage.getItem('taxonomy_suggestions') || '[]';
+          setTaxonomySuggestions(JSON.parse(saved).filter((s: any) => s.status === 'pending'));
+      }
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleTaxonomyAction = (id: string, action: 'approved' | 'rejected') => {
+      const saved = localStorage.getItem('taxonomy_suggestions') || '[]';
+      let suggestions = JSON.parse(saved);
+      suggestions = suggestions.map((s: any) => s.id === id ? { ...s, status: action } : s);
+      localStorage.setItem('taxonomy_suggestions', JSON.stringify(suggestions));
+      
+      if (action === 'approved') {
+          alert("Sugestão aprovada! Em um sistema real, o item seria adicionado às tabelas oficiais agora.");
+      }
+      
+      setTaxonomySuggestions(prev => prev.filter(s => s.id !== id));
   };
 
   const formatBRL = (cents: number) => 
@@ -240,7 +258,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                 { id: 'metrics', label: 'Métricas', icon: BarChart3 },
                 { id: 'merchants', label: 'Lojistas', icon: Store },
                 { id: 'users', label: 'Usuários', icon: Users },
-                { id: 'ledger', label: 'Audit / Ledger', icon: History }
+                { id: 'ledger', label: 'Auditoria', icon: History },
+                { id: 'taxonomy', label: 'Taxonomia', icon: Tags }
             ].map(tab => (
                 <button
                     key={tab.id}
@@ -260,41 +279,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
 
       <main className="flex-1 p-6 overflow-y-auto no-scrollbar pb-32">
         
-        <div className="mb-8">
-            <h3 className="text-xs font-black text-slate-500 uppercase tracking-widest mb-3">Auditoria e Moderação</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <button
-                    onClick={() => onNavigateToApp('admin_banner_moderation')}
-                    className="w-full bg-slate-900 p-5 rounded-3xl border border-white/5 flex items-center justify-between group hover:border-rose-500/30 transition-all"
-                >
-                    <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 bg-slate-800 rounded-2xl flex items-center justify-center text-slate-400 group-hover:text-rose-400 transition-colors">
-                            <Megaphone size={24} />
-                        </div>
-                        <div>
-                            <h4 className="font-bold text-white text-base text-left">Moderar Banners</h4>
-                            <p className="text-xs text-slate-500 text-left">Analisar e pausar.</p>
-                        </div>
-                    </div>
-                </button>
-                <button
-                    onClick={() => setView('history')}
-                    className="w-full bg-slate-900 p-5 rounded-3xl border border-white/5 flex items-center justify-between group hover:border-cyan-500/30 transition-all"
-                >
-                    <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 bg-slate-800 rounded-2xl flex items-center justify-center text-slate-400 group-hover:text-cyan-400 transition-colors">
-                            <History size={24} />
-                        </div>
-                        <div>
-                            <h4 className="font-bold text-white text-base text-left">Histórico de Banners</h4>
-                            <p className="text-xs text-slate-500 text-left">Logs de criação e moderação.</p>
-                        </div>
-                    </div>
-                </button>
-            </div>
-        </div>
-
-        {activeTab !== 'metrics' && (
+        {activeTab !== 'metrics' && activeTab !== 'taxonomy' && (
             <div className="relative mb-8 group">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500 group-focus-within:text-[#1E5BFF] transition-colors" />
                 <input 
@@ -333,36 +318,70 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                             <h2 className="text-4xl font-black text-white">{formatBRL(metrics.totalUsed)}</h2>
                             <p className="text-xs text-slate-500 mt-2">Volume gasto nas lojas</p>
                         </div>
-                        <div className="bg-slate-900 p-6 rounded-[2rem] border border-white/5 shadow-xl">
-                            <div className="flex items-center gap-2 mb-4 text-rose-400">
-                                <Clock size={20} />
-                                <span className="text-[10px] font-black uppercase tracking-widest">Total Expirado</span>
-                            </div>
-                            <h2 className="text-4xl font-black text-white">{formatBRL(metrics.totalExpired)}</h2>
-                            <p className="text-xs text-slate-500 mt-2">Créditos não aproveitados</p>
+                    </div>
+                </div>
+            )}
+
+            {activeTab === 'taxonomy' && (
+                <div className="space-y-6 animate-in slide-in-from-right duration-500">
+                    <div className="bg-blue-500/10 border border-blue-500/20 p-5 rounded-3xl flex items-start gap-4">
+                        <Info className="text-blue-400 mt-1 shrink-0" />
+                        <div>
+                            <h4 className="font-bold text-white text-sm">Sugestões de Taxonomia</h4>
+                            <p className="text-xs text-slate-400 mt-1">Lojistas sugeriram novas categorias para expansão da base de dados.</p>
                         </div>
                     </div>
 
-                    <div className="bg-slate-900 p-8 rounded-[2.5rem] border border-white/5 shadow-2xl relative overflow-hidden">
-                        <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/5 rounded-full blur-3xl -mr-20 -mt-20"></div>
-                        <div className="relative z-10 flex flex-col items-center text-center">
-                            <LayoutDashboard className="w-12 h-12 text-[#1E5BFF] mb-4" />
-                            <h3 className="text-2xl font-black text-white mb-2">Ecossistema Saudável</h3>
-                            <p className="text-slate-500 text-sm max-w-sm mb-6">
-                                O dinheiro circulando no bairro atualmente é de <span className="text-white font-bold">{formatBRL(metrics.totalGenerated - metrics.totalUsed - metrics.totalExpired)}</span>.
-                            </p>
-                            <div className="flex gap-4">
-                                <div className="bg-white/5 px-6 py-3 rounded-2xl border border-white/5">
-                                    <p className="text-[9px] font-black text-slate-500 uppercase mb-1">Taxa de Retenção</p>
-                                    <p className="text-xl font-black text-white">78%</p>
-                                </div>
-                                <div className="bg-white/5 px-6 py-3 rounded-2xl border border-white/5">
-                                    <p className="text-[9px] font-black text-slate-500 uppercase mb-1">Churn Mensal</p>
-                                    <p className="text-xl font-black text-white">4.2%</p>
-                                </div>
-                            </div>
+                    {taxonomySuggestions.length === 0 ? (
+                        <div className="text-center py-20 bg-slate-900/50 rounded-3xl border border-dashed border-white/10">
+                            <CheckCircle size={48} className="text-slate-700 mx-auto mb-4" />
+                            <p className="text-slate-500 font-bold uppercase tracking-widest text-xs">Nenhuma sugestão pendente</p>
                         </div>
-                    </div>
+                    ) : (
+                        <div className="space-y-4">
+                            {taxonomySuggestions.map(sug => (
+                                <div key={sug.id} className="bg-slate-900 p-6 rounded-[2rem] border border-white/5 flex flex-col gap-4">
+                                    <div className="flex justify-between items-start">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-10 h-10 bg-blue-500/10 rounded-xl flex items-center justify-center text-blue-400">
+                                                <Tags size={20} />
+                                            </div>
+                                            <div>
+                                                <h4 className="font-bold text-white text-base">{sug.name}</h4>
+                                                <div className="flex items-center gap-2 mt-0.5">
+                                                    <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest px-2 py-0.5 bg-slate-800 rounded border border-white/5">{sug.type}</span>
+                                                    {sug.parentId && <span className="text-[9px] text-slate-500">Pai: {sug.parentId}</span>}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <span className="text-[10px] text-slate-600 font-medium">há 10 min</span>
+                                    </div>
+                                    
+                                    <div className="p-3 bg-white/5 rounded-xl border border-white/5 flex items-center justify-between">
+                                        <div className="flex items-center gap-2">
+                                            <Building size={12} className="text-slate-500" />
+                                            <span className="text-[10px] font-bold text-slate-400 uppercase">Sugestão de: {sug.storeName || 'Loja'}</span>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex gap-3">
+                                        <button 
+                                            onClick={() => handleTaxonomyAction(sug.id, 'rejected')}
+                                            className="flex-1 bg-white/5 hover:bg-rose-500/10 text-slate-400 hover:text-rose-400 py-3 rounded-xl border border-white/5 hover:border-rose-500/20 font-black text-[10px] uppercase tracking-widest transition-all flex items-center justify-center gap-2"
+                                        >
+                                            <X size={14} /> Rejeitar
+                                        </button>
+                                        <button 
+                                            onClick={() => handleTaxonomyAction(sug.id, 'approved')}
+                                            className="flex-[2] bg-[#1E5BFF] hover:bg-[#1E5BFF]/90 text-white py-3 rounded-xl shadow-lg shadow-blue-500/20 font-black text-[10px] uppercase tracking-widest transition-all flex items-center justify-center gap-2"
+                                        >
+                                            <Check size={14} /> Aprovar e Adicionar
+                                        </button>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
                 </div>
             )}
 

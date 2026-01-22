@@ -1,6 +1,6 @@
+
 import React from 'react';
 
-// From original types.ts
 export type ThemeMode = 'light' | 'dark' | 'auto';
 
 export enum AdType {
@@ -9,11 +9,28 @@ export enum AdType {
   PREMIUM = 'PREMIUM' 
 }
 
+// Taxonomia
+export type TaxonomyType = 'category' | 'subcategory' | 'specialty';
+export type TaxonomyStatus = 'pending' | 'approved' | 'rejected';
+
+export interface TaxonomyItem {
+  id: string;
+  name: string;
+  parentId?: string; // Categoria -> undefined, Sub -> categoryId, Specialty -> subcategoryId
+  type: TaxonomyType;
+  status: TaxonomyStatus;
+  suggestedBy?: string;
+  createdAt: string;
+}
+
 export interface Store {
   id: string;
   name: string;
   category: string;
   subcategory: string;
+  categories?: string[]; // Suporte a múltiplas
+  subcategories?: string[]; // Suporte a múltiplas
+  specialties?: string[]; // Suporte a múltiplas
   logoUrl?: string; 
   image?: string; 
   rating: number;
@@ -191,7 +208,6 @@ export interface PostReport {
   postThumbnail: string;
 }
 
-// From src/backend/types.ts
 export type TransactionStatus = 'pending' | 'approved' | 'rejected';
 export type SessionType = 'qr' | 'pin';
 export type MovementType = 'credit' | 'debit';

@@ -16,11 +16,17 @@ import {
   Instagram,
   Hash,
   X,
-  AlertTriangle
+  Plus,
+  AlertTriangle,
+  ChevronDown,
+  Search,
+  PlusCircle,
+  HelpCircle
 } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import { useAuth } from '../contexts/AuthContext';
-import { CATEGORIES, SUBCATEGORIES } from '../constants';
+import { CATEGORIES, SUBCATEGORIES, SPECIALTIES } from '../constants';
+import { TaxonomyType, TaxonomyStatus } from '../types';
 
 interface StoreProfileEditProps {
   onBack: () => void;
@@ -44,6 +50,10 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
   const [isSaving, setIsSaving] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
 
+  // Suggestion Modal State
+  const [suggestionModal, setSuggestionModal] = useState<{ isOpen: boolean; type: TaxonomyType; parentId?: string; parentName?: string } | null>(null);
+  const [suggestionName, setSuggestionName] = useState('');
+
   // Form State
   const [formData, setFormData] = useState({
     name: '',
@@ -55,12 +65,11 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
     instagram: '',
     logo_url: '',
     banner_url: '',
-    category: '',
+    categories: [] as string[],
     subcategories: [] as string[],
     specialties: [] as string[],
     description: '',
     notes: '',
-    // Address
     cep: '',
     street: '',
     number: '',
@@ -74,8 +83,6 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
   const [hours, setHours] = useState<BusinessHour[]>(
     DAYS_OF_WEEK.map(day => ({ day, open: '09:00', close: '18:00', closed: false }))
   );
-
-  const [tempTag, setTempTag] = useState('');
 
   useEffect(() => {
     if (!user) return;
@@ -100,7 +107,7 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
             instagram: data.instagram || '',
             logo_url: data.logo_url || '',
             banner_url: data.banner_url || '',
-            category: data.category || '',
+            categories: data.categories || (data.category ? [data.category] : []),
             subcategories: data.subcategories || [],
             specialties: data.specialties || [],
             description: data.description || '',
@@ -131,8 +138,7 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
     e.preventDefault();
     if (!user) return;
 
-    // Validations
-    if (!formData.name || !formData.cnpj || !formData.email || !formData.whatsapp || !formData.logo_url || !formData.category) {
+    if (!formData.name || !formData.cnpj || !formData.email || !formData.whatsapp || !formData.logo_url || formData.categories.length === 0) {
       alert('Por favor, preencha todos os campos obrigatórios marcados com *');
       return;
     }
@@ -148,8 +154,6 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
         }, { onConflict: 'owner_id' });
 
       if (merchantError) throw merchantError;
-
-      // Em um cenário real, salvaríamos também as 'hours' em uma tabela relacionada
       
       setShowSuccess(true);
       setTimeout(() => setShowSuccess(false), 3000);
@@ -161,37 +165,83 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
     }
   };
 
-  const addSpecialty = () => {
-    if (tempTag.trim() && !formData.specialties.includes(tempTag.trim())) {
-      setFormData({ ...formData, specialties: [...formData.specialties, tempTag.trim()] });
-      setTempTag('');
-    }
-  };
+  // --- Taxonomy Handlers ---
 
-  const removeSpecialty = (tag: string) => {
-    setFormData({ ...formData, specialties: formData.specialties.filter(t => t !== tag) });
-  };
+  const toggleCategory = (catName: string) => {
+    const current = formData.categories;
+    if (current.includes(catName)) {
+        // Remover categoria: Deve limpar subcategorias e especialidades órfãs
+        const newCats = current.filter(c => c !== catName);
+        
+        // Descobre quais subcategorias pertencem a essa categoria removida
+        const subsOfRemoved = (SUBCATEGORIES[catName] || []).map(s => s.name);
+        const newSubs = formData.subcategories.filter(s => !subsOfRemoved.includes(s));
+        
+        // Descobre especialidades órfãs
+        const specialtiesToKeep = newSubs.flatMap(s => SPECIALTIES[s] || []);
+        const newSpecs = formData.specialties.filter(spec => specialtiesToKeep.includes(spec));
 
-  const toggleSubcategory = (sub: string) => {
-    const current = formData.subcategories;
-    if (current.includes(sub)) {
-      setFormData({ ...formData, subcategories: current.filter(s => s !== sub) });
+        setFormData({ ...formData, categories: newCats, subcategories: newSubs, specialties: newSpecs });
     } else {
-      setFormData({ ...formData, subcategories: [...current, sub] });
+        setFormData({ ...formData, categories: [...current, catName] });
     }
+  };
+
+  const toggleSubcategory = (subName: string, catName: string) => {
+    const current = formData.subcategories;
+    if (current.includes(subName)) {
+        const newSubs = current.filter(s => s !== subName);
+        // Limpar especialidades dessa subcategoria
+        const specsOfRemoved = SPECIALTIES[subName] || [];
+        const newSpecs = formData.specialties.filter(s => !specsOfRemoved.includes(s));
+        setFormData({ ...formData, subcategories: newSubs, specialties: newSpecs });
+    } else {
+        setFormData({ ...formData, subcategories: [...current, subName] });
+    }
+  };
+
+  const toggleSpecialty = (spec: string) => {
+    const current = formData.specialties;
+    if (current.includes(spec)) {
+        setFormData({ ...formData, specialties: current.filter(s => s !== spec) });
+    } else {
+        setFormData({ ...formData, specialties: [...current, spec] });
+    }
+  };
+
+  const submitSuggestion = async () => {
+    if (!suggestionName.trim() || !suggestionModal) return;
+    
+    // Simulação de envio para ADM (em prod salvaria em 'taxonomy_suggestions')
+    const saved = localStorage.getItem('taxonomy_suggestions') || '[]';
+    const suggestions = JSON.parse(saved);
+    suggestions.push({
+        id: Date.now().toString(),
+        type: suggestionModal.type,
+        name: suggestionName.trim(),
+        parentId: suggestionModal.parentId,
+        status: 'pending',
+        storeName: formData.name,
+        createdAt: new Date().toISOString()
+    });
+    localStorage.setItem('taxonomy_suggestions', JSON.stringify(suggestions));
+
+    alert('Sua sugestão foi enviada para o ADM e está pendente de aprovação.');
+    setSuggestionName('');
+    setSuggestionModal(null);
   };
 
   if (isLoading) {
     return (
       <div className="min-h-screen bg-white dark:bg-gray-950 flex flex-col items-center justify-center p-6">
         <Loader2 className="w-10 h-10 text-[#1E5BFF] animate-spin mb-4" />
-        <p className="text-gray-500 font-bold uppercase tracking-widest text-[10px]">Carregando Perfil da Loja...</p>
+        <p className="text-gray-500 font-bold uppercase tracking-widest text-[10px]">Sincronizando Perfil...</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#F8F9FC] dark:bg-gray-950 font-sans animate-in slide-in-from-right duration-300 pb-40">
+    <div className="min-h-screen bg-[#F8F9FC] dark:bg-gray-950 font-sans animate-in slide-in-from-right duration-300 pb-48">
       {/* Header */}
       <div className="sticky top-0 z-40 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md px-5 h-20 flex items-center justify-between border-b border-gray-100 dark:border-gray-800">
         <div className="flex items-center gap-4">
@@ -200,18 +250,18 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
           </button>
           <div>
             <h1 className="font-black text-lg text-gray-900 dark:text-white uppercase tracking-tighter">Perfil da Loja</h1>
-            <p className="text-[10px] text-blue-500 font-bold uppercase tracking-widest">Configurações do Estabelecimento</p>
+            <p className="text-[10px] text-blue-500 font-bold uppercase tracking-widest">Painel Administrativo</p>
           </div>
         </div>
       </div>
 
-      <form onSubmit={handleSave} className="p-6 space-y-10 max-w-md mx-auto">
+      <form onSubmit={handleSave} className="p-6 space-y-12 max-w-md mx-auto">
         
         {/* 1. DADOS PRINCIPAIS */}
         <section className="space-y-6">
           <div className="flex items-center gap-2 mb-2">
             <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center"><Info size={16} /></div>
-            <h2 className="text-xs font-black text-gray-400 uppercase tracking-[0.2em]">Dados Principais</h2>
+            <h2 className="text-xs font-black text-gray-400 uppercase tracking-[0.2em]">Identificação *</h2>
           </div>
 
           <div className="space-y-4">
@@ -221,193 +271,165 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
                 onClick={() => setFormData({...formData, logo_url: 'https://ui-avatars.com/api/?name=Loja&background=1E5BFF&color=fff'})}
               >
                 {formData.logo_url ? <img src={formData.logo_url} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-gray-300"><Camera /></div>}
-                <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"><span className="text-[8px] font-black text-white uppercase">Logo *</span></div>
+                <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"><span className="text-[8px] font-black text-white uppercase tracking-widest">Logo *</span></div>
               </div>
-              <p className="text-[10px] font-bold text-gray-400 uppercase">Logo da Loja *</p>
             </div>
 
             <div className="bg-white dark:bg-gray-900 rounded-3xl p-6 border border-gray-100 dark:border-gray-800 shadow-sm space-y-5">
               <div>
-                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Nome da Empresa *</label>
-                <input required value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="w-full bg-gray-50 dark:bg-gray-800 p-4 rounded-2xl border border-transparent focus:border-[#1E5BFF] outline-none text-sm font-bold dark:text-white mt-1" placeholder="Ex: Padaria Freguesia" />
+                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Nome Fantasia *</label>
+                <input required value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="w-full bg-gray-50 dark:bg-gray-800 p-4 rounded-2xl border border-transparent focus:border-[#1E5BFF] outline-none text-sm font-bold dark:text-white mt-1" />
               </div>
               <div>
                 <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">CNPJ *</label>
                 <input required value={formData.cnpj} onChange={e => setFormData({...formData, cnpj: e.target.value})} className="w-full bg-gray-50 dark:bg-gray-800 p-4 rounded-2xl border border-transparent focus:border-[#1E5BFF] outline-none text-sm font-bold dark:text-white mt-1" placeholder="00.000.000/0001-00" />
               </div>
-              <div>
-                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Email Público *</label>
-                <input required type="email" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} className="w-full bg-gray-50 dark:bg-gray-800 p-4 rounded-2xl border border-transparent focus:border-[#1E5BFF] outline-none text-sm font-bold dark:text-white mt-1" placeholder="contato@empresa.com" />
-              </div>
-              <div>
-                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">WhatsApp Oficial *</label>
-                <input required value={formData.whatsapp} onChange={e => setFormData({...formData, whatsapp: e.target.value})} className="w-full bg-gray-50 dark:bg-gray-800 p-4 rounded-2xl border border-transparent focus:border-[#1E5BFF] outline-none text-sm font-bold dark:text-white mt-1" placeholder="(21) 99999-9999" />
-              </div>
             </div>
           </div>
         </section>
 
-        {/* 2. CATEGORIAS */}
-        <section className="space-y-6">
-          <div className="flex items-center gap-2 mb-2">
-            <div className="w-8 h-8 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center"><Hash size={16} /></div>
-            <h2 className="text-xs font-black text-gray-400 uppercase tracking-[0.2em]">Categorias e Especialidades</h2>
+        {/* 2. TAXONOMIA GUIADA */}
+        <section className="space-y-8">
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center"><Hash size={16} /></div>
+                <h2 className="text-xs font-black text-gray-400 uppercase tracking-[0.2em]">Classificação</h2>
+            </div>
+            <HelpCircle size={14} className="text-gray-300" />
           </div>
 
-          <div className="bg-white dark:bg-gray-900 rounded-3xl p-6 border border-gray-100 dark:border-gray-800 shadow-sm space-y-6">
+          <div className="space-y-10">
+            {/* CATEGORIAS */}
             <div>
-              <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Categoria Principal *</label>
-              <select 
-                required 
-                value={formData.category} 
-                onChange={e => setFormData({...formData, category: e.target.value, subcategories: []})} 
-                className="w-full bg-gray-50 dark:bg-gray-800 p-4 rounded-2xl border border-transparent focus:border-[#1E5BFF] outline-none text-sm font-bold dark:text-white mt-1"
-              >
-                <option value="">Selecione...</option>
-                {CATEGORIES.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}
-              </select>
-            </div>
-
-            {formData.category && (
-              <div>
-                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1 mb-2 block">Subcategorias</label>
-                <div className="flex flex-wrap gap-2">
-                  {(SUBCATEGORIES[formData.category] || []).map(sub => (
-                    <button 
-                      key={sub.name} 
-                      type="button"
-                      onClick={() => toggleSubcategory(sub.name)}
-                      className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase transition-all ${formData.subcategories.includes(sub.name) ? 'bg-blue-600 text-white shadow-lg' : 'bg-gray-100 dark:bg-gray-800 text-gray-500'}`}
-                    >
-                      {sub.name}
-                    </button>
-                  ))}
-                </div>
+              <div className="flex items-center justify-between mb-4">
+                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">1. Categorias Principais *</label>
+                <button 
+                  type="button" 
+                  onClick={() => setSuggestionModal({ isOpen: true, type: 'category' })}
+                  className="text-[9px] font-black text-[#1E5BFF] uppercase tracking-widest flex items-center gap-1 bg-blue-50 dark:bg-blue-900/20 px-2 py-1 rounded-lg"
+                >
+                  <Plus size={10} /> Sugerir nova
+                </button>
               </div>
-            )}
-
-            <div>
-              <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1 mb-2 block">Especialidades (Tags)</label>
-              <div className="flex gap-2 mb-3">
-                <input value={tempTag} onChange={e => setTempTag(e.target.value)} onKeyPress={e => e.key === 'Enter' && (e.preventDefault(), addSpecialty())} className="flex-1 bg-gray-50 dark:bg-gray-800 p-3 rounded-xl border border-transparent focus:border-[#1E5BFF] outline-none text-xs font-bold dark:text-white" placeholder="Ex: Entrega Grátis" />
-                <button type="button" onClick={addSpecialty} className="bg-[#1E5BFF] text-white p-3 rounded-xl active:scale-95 transition-transform"><Save size={18} /></button>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {formData.specialties.map(tag => (
-                  <span key={tag} className="bg-blue-50 dark:bg-blue-900/30 text-[#1E5BFF] px-3 py-1.5 rounded-full text-[10px] font-bold flex items-center gap-1.5 border border-blue-100 dark:border-blue-800">
-                    {tag} <X size={10} className="cursor-pointer" onClick={() => removeSpecialty(tag)} />
-                  </span>
+              <div className="grid grid-cols-2 gap-2">
+                {CATEGORIES.map(cat => (
+                  <button
+                    key={cat.id}
+                    type="button"
+                    onClick={() => toggleCategory(cat.name)}
+                    className={`p-3.5 rounded-2xl border text-[11px] font-bold transition-all flex items-center gap-3 ${
+                      formData.categories.includes(cat.name)
+                        ? 'bg-[#1E5BFF] text-white border-transparent shadow-lg shadow-blue-500/20'
+                        : 'bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-400 border-gray-100 dark:border-gray-800'
+                    }`}
+                  >
+                    {React.cloneElement(cat.icon as any, { size: 16 })}
+                    {cat.name}
+                  </button>
                 ))}
               </div>
             </div>
-          </div>
-        </section>
 
-        {/* 3. ENDEREÇO */}
-        <section className="space-y-6">
-          <div className="flex items-center gap-2 mb-2">
-            <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center"><MapPin size={16} /></div>
-            <h2 className="text-xs font-black text-gray-400 uppercase tracking-[0.2em]">Localização</h2>
-          </div>
-
-          <div className="bg-white dark:bg-gray-900 rounded-3xl p-6 border border-gray-100 dark:border-gray-800 shadow-sm space-y-5">
-            <div className="flex items-center gap-3 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-2xl mb-4">
-              <input type="checkbox" checked={formData.is_online_only} onChange={e => setFormData({...formData, is_online_only: e.target.checked})} className="w-5 h-5 rounded border-gray-300 text-blue-600" id="online_only" />
-              <label htmlFor="online_only" className="text-xs font-bold text-gray-700 dark:text-gray-300">Atendo somente online / Delivery</label>
-            </div>
-
-            {!formData.is_online_only && (
-              <div className="space-y-5 animate-in fade-in slide-in-from-top-2">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">CEP</label>
-                    <input value={formData.cep} onChange={e => setFormData({...formData, cep: e.target.value})} className="w-full bg-gray-50 dark:bg-gray-800 p-4 rounded-2xl border border-transparent outline-none text-sm font-bold dark:text-white mt-1" placeholder="22775-000" />
-                  </div>
-                  <div>
-                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Bairro</label>
-                    <input value={formData.neighborhood} onChange={e => setFormData({...formData, neighborhood: e.target.value})} className="w-full bg-gray-50 dark:bg-gray-800 p-4 rounded-2xl border border-transparent outline-none text-sm font-bold dark:text-white mt-1" placeholder="Freguesia" />
-                  </div>
+            {/* SUBCATEGORIAS */}
+            {formData.categories.length > 0 && (
+              <div className="animate-in fade-in slide-in-from-top-2">
+                <div className="flex items-center justify-between mb-4">
+                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">2. Subcategorias por Segmento *</label>
                 </div>
-                <div>
-                  <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Logradouro (Rua/Av)</label>
-                  <input value={formData.street} onChange={e => setFormData({...formData, street: e.target.value})} className="w-full bg-gray-50 dark:bg-gray-800 p-4 rounded-2xl border border-transparent outline-none text-sm font-bold dark:text-white mt-1" placeholder="Estrada dos Três Rios" />
-                </div>
-                <div className="grid grid-cols-3 gap-4">
-                  <div>
-                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Nº</label>
-                    <input value={formData.number} onChange={e => setFormData({...formData, number: e.target.value})} className="w-full bg-gray-50 dark:bg-gray-800 p-4 rounded-2xl border border-transparent outline-none text-sm font-bold dark:text-white mt-1" placeholder="100" />
-                  </div>
-                  <div className="col-span-2">
-                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Complemento</label>
-                    <input value={formData.complement} onChange={e => setFormData({...formData, complement: e.target.value})} className="w-full bg-gray-50 dark:bg-gray-800 p-4 rounded-2xl border border-transparent outline-none text-sm font-bold dark:text-white mt-1" placeholder="Sala 204" />
-                  </div>
+                <div className="space-y-6">
+                    {formData.categories.map(catName => (
+                        <div key={catName} className="bg-white dark:bg-gray-900 p-5 rounded-[2rem] border border-gray-100 dark:border-gray-800 shadow-sm">
+                            <div className="flex items-center justify-between mb-3 border-b border-gray-50 dark:border-gray-800 pb-2">
+                                <span className="text-[10px] font-black text-[#1E5BFF] uppercase tracking-[0.15em]">{catName}</span>
+                                <button 
+                                  type="button" 
+                                  onClick={() => setSuggestionModal({ isOpen: true, type: 'subcategory', parentId: catName, parentName: catName })}
+                                  className="p-1 text-gray-300 hover:text-blue-500"
+                                >
+                                  <Plus size={14} />
+                                </button>
+                            </div>
+                            <div className="flex flex-wrap gap-2">
+                                {(SUBCATEGORIES[catName] || []).map(sub => (
+                                    <button
+                                        key={sub.name}
+                                        type="button"
+                                        onClick={() => toggleSubcategory(sub.name, catName)}
+                                        className={`px-3 py-2 rounded-xl text-[10px] font-bold border transition-all ${
+                                            formData.subcategories.includes(sub.name)
+                                                ? 'bg-blue-500 text-white border-transparent'
+                                                : 'bg-gray-50 dark:bg-gray-800 text-gray-500 dark:text-gray-400 border-transparent'
+                                        }`}
+                                    >
+                                        {sub.name}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    ))}
                 </div>
               </div>
+            )}
+
+            {/* ESPECIALIDADES */}
+            {formData.subcategories.length > 0 && (
+               <div className="animate-in fade-in slide-in-from-top-2">
+                 <div className="flex items-center justify-between mb-4">
+                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">3. Especialidades Técnicas</label>
+                 </div>
+                 <div className="space-y-5">
+                    {formData.subcategories.map(subName => (
+                        <div key={subName} className="bg-gray-50 dark:bg-gray-800/40 p-5 rounded-3xl border border-gray-100 dark:border-gray-800">
+                             <div className="flex items-center justify-between mb-3">
+                                <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{subName}</span>
+                                <button 
+                                  type="button" 
+                                  onClick={() => setSuggestionModal({ isOpen: true, type: 'specialty', parentId: subName, parentName: subName })}
+                                  className="text-[9px] font-bold text-gray-400 flex items-center gap-1"
+                                >
+                                  <Plus size={10} /> Sugerir
+                                </button>
+                             </div>
+                             <div className="flex flex-wrap gap-2">
+                                {(SPECIALTIES[subName] || SPECIALTIES['default']).map(spec => (
+                                    <button
+                                        key={spec}
+                                        type="button"
+                                        onClick={() => toggleSpecialty(spec)}
+                                        className={`px-3 py-1.5 rounded-full text-[9px] font-black uppercase transition-all border ${
+                                            formData.specialties.includes(spec)
+                                                ? 'bg-white dark:bg-gray-700 text-[#1E5BFF] border-[#1E5BFF] shadow-sm'
+                                                : 'bg-transparent text-gray-400 border-gray-200 dark:border-gray-700'
+                                        }`}
+                                    >
+                                        {spec}
+                                    </button>
+                                ))}
+                             </div>
+                        </div>
+                    ))}
+                 </div>
+               </div>
             )}
           </div>
         </section>
 
-        {/* 4. HORÁRIOS */}
+        {/* 3. CONTATO E ENDEREÇO (Simplificado para o Spec atual) */}
         <section className="space-y-6">
           <div className="flex items-center gap-2 mb-2">
-            <div className="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center"><Clock size={16} /></div>
-            <h2 className="text-xs font-black text-gray-400 uppercase tracking-[0.2em]">Horário de Funcionamento</h2>
-          </div>
-
-          <div className="bg-white dark:bg-gray-900 rounded-3xl p-6 border border-gray-100 dark:border-gray-800 shadow-sm space-y-4">
-            {hours.map((h, idx) => (
-              <div key={idx} className="flex items-center justify-between gap-4 pb-4 border-b border-gray-50 dark:border-gray-800 last:border-0 last:pb-0">
-                <div className="w-24">
-                  <span className="text-[10px] font-black text-gray-700 dark:text-gray-300 uppercase">{h.day.slice(0,3)}</span>
-                </div>
-                
-                <div className="flex-1 flex items-center gap-2">
-                  <input type="time" disabled={h.closed} value={h.open} onChange={e => {
-                    const newHours = [...hours];
-                    newHours[idx].open = e.target.value;
-                    setHours(newHours);
-                  }} className="bg-gray-50 dark:bg-gray-800 p-2 rounded-lg text-xs font-bold dark:text-white outline-none disabled:opacity-30" />
-                  <span className="text-gray-300">/</span>
-                  <input type="time" disabled={h.closed} value={h.close} onChange={e => {
-                    const newHours = [...hours];
-                    newHours[idx].close = e.target.value;
-                    setHours(newHours);
-                  }} className="bg-gray-50 dark:bg-gray-800 p-2 rounded-lg text-xs font-bold dark:text-white outline-none disabled:opacity-30" />
-                </div>
-
-                <div className="flex items-center gap-1">
-                   <input type="checkbox" checked={h.closed} onChange={e => {
-                     const newHours = [...hours];
-                     newHours[idx].closed = e.target.checked;
-                     setHours(newHours);
-                   }} className="w-4 h-4 rounded border-gray-300 text-red-600" />
-                   <span className="text-[9px] font-black uppercase text-gray-400">Fechado</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* 5. INFORMAÇÕES ADICIONAIS */}
-        <section className="space-y-6">
-          <div className="flex items-center gap-2 mb-2">
-            <div className="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center"><CheckCircle2 size={16} /></div>
-            <h2 className="text-xs font-black text-gray-400 uppercase tracking-[0.2em]">Descrição e Redes</h2>
+            <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center"><Phone size={16} /></div>
+            <h2 className="text-xs font-black text-gray-400 uppercase tracking-[0.2em]">Contato Oficial</h2>
           </div>
 
           <div className="bg-white dark:bg-gray-900 rounded-3xl p-6 border border-gray-100 dark:border-gray-800 shadow-sm space-y-5">
-            <div>
-              <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Descrição da Loja</label>
-              <textarea value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} rows={4} className="w-full bg-gray-50 dark:bg-gray-800 p-4 rounded-2xl border border-transparent outline-none text-sm font-medium dark:text-white mt-1 resize-none" placeholder="Conte um pouco sobre sua história e produtos..." />
-            </div>
-            <div>
-              <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1 flex items-center gap-1.5"><Instagram size={12} /> Instagram</label>
-              <input value={formData.instagram} onChange={e => setFormData({...formData, instagram: e.target.value})} className="w-full bg-gray-50 dark:bg-gray-800 p-4 rounded-2xl border border-transparent outline-none text-sm font-bold dark:text-white mt-1" placeholder="@sua.loja" />
-            </div>
-            <div>
-              <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1 flex items-center gap-1.5"><Globe size={12} /> Website</label>
-              <input value={formData.website} onChange={e => setFormData({...formData, website: e.target.value})} className="w-full bg-gray-50 dark:bg-gray-800 p-4 rounded-2xl border border-transparent outline-none text-sm font-bold dark:text-white mt-1" placeholder="www.sualoja.com.br" />
-            </div>
+              <div>
+                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">WhatsApp de Vendas *</label>
+                <input required value={formData.whatsapp} onChange={e => setFormData({...formData, whatsapp: e.target.value})} className="w-full bg-gray-50 dark:bg-gray-800 p-4 rounded-2xl border border-transparent focus:border-[#1E5BFF] outline-none text-sm font-bold dark:text-white mt-1" placeholder="(21) 99999-9999" />
+              </div>
+              <div>
+                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Instagram</label>
+                <input value={formData.instagram} onChange={e => setFormData({...formData, instagram: e.target.value})} className="w-full bg-gray-50 dark:bg-gray-800 p-4 rounded-2xl border border-transparent focus:border-[#1E5BFF] outline-none text-sm font-bold dark:text-white mt-1" placeholder="@sua.loja" />
+              </div>
           </div>
         </section>
 
@@ -429,6 +451,50 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
           SALVAR PERFIL DA LOJA
         </button>
       </div>
+
+      {/* SUGGESTION MODAL */}
+      {suggestionModal && (
+        <div className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm flex items-center justify-center p-6">
+            <div className="bg-white dark:bg-gray-900 w-full max-w-sm rounded-[2.5rem] p-8 shadow-2xl animate-in zoom-in-95 duration-200">
+                <div className="flex justify-between items-center mb-6">
+                    <h3 className="text-xl font-black text-gray-900 dark:text-white uppercase tracking-tighter">Sugerir Nova Opção</h3>
+                    <button onClick={() => setSuggestionModal(null)}><X size={24} /></button>
+                </div>
+
+                <div className="bg-blue-50 dark:bg-blue-900/10 p-4 rounded-2xl mb-6 flex gap-3">
+                    <HelpCircle size={18} className="text-blue-600 shrink-0 mt-1" />
+                    <p className="text-xs text-blue-700 dark:text-blue-300 leading-relaxed">
+                        Sua sugestão será analisada pelo ADM antes de ficar disponível para seleção.
+                    </p>
+                </div>
+
+                <div className="space-y-5">
+                    {suggestionModal.parentName && (
+                        <div className="px-1">
+                            <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Vincular a: {suggestionModal.parentName}</span>
+                        </div>
+                    )}
+                    <div>
+                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5 block ml-1">Nome sugerido</label>
+                        <input 
+                            autoFocus
+                            value={suggestionName}
+                            onChange={(e) => setSuggestionName(e.target.value)}
+                            placeholder={`Ex: ${suggestionModal.type === 'category' ? 'Automóveis' : 'Pintor Predial'}`}
+                            className="w-full bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 p-4 rounded-2xl outline-none focus:border-[#1E5BFF] transition-all dark:text-white text-sm font-bold"
+                        />
+                    </div>
+                    <button 
+                        onClick={submitSuggestion}
+                        disabled={!suggestionName.trim()}
+                        className="w-full bg-[#1E5BFF] text-white font-black py-4 rounded-2xl active:scale-[0.98] transition-all shadow-lg shadow-blue-500/20 disabled:opacity-50"
+                    >
+                        ENVIAR SUGESTÃO
+                    </button>
+                </div>
+            </div>
+        </div>
+      )}
     </div>
   );
 };
