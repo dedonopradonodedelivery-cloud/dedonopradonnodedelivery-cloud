@@ -96,8 +96,20 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
     const end2 = new Date(start2.getTime() + 30 * 24 * 60 * 60 * 1000);
 
     return [
-      { id: 'periodo_1', label: 'Começar agora', sub: 'Exibição imediata', dates: `${formatDate(now)} → ${formatDate(end1)}` },
-      { id: 'periodo_2', label: 'Próximos 30 dias', sub: 'Planejamento futuro', dates: `${formatDate(start2)} → ${formatDate(end2)}` },
+      { 
+        id: 'periodo_1', 
+        label: 'Começar agora', 
+        sub: 'Exibição imediata após a publicação', 
+        dates: `${formatDate(now)} → ${formatDate(end1)}`,
+        badge: 'Mais rápido'
+      },
+      { 
+        id: 'periodo_2', 
+        label: 'Próximos 30 dias', 
+        sub: 'Planejamento para campanhas futuras', 
+        dates: `${formatDate(start2)} → ${formatDate(end2)}`,
+        badge: 'Planejar'
+      },
     ];
   }, []);
 
@@ -140,7 +152,6 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
     scrollTo(paymentRef);
   };
 
-  // Cálculo de Preços Totais (De/Por)
   const prices = useMemo(() => {
     if (!selectedMode) return { current: 0, original: 0 };
     const hoodsMult = Math.max(1, selectedNeighborhoods.length);
@@ -157,7 +168,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
     if (!selectedMode) return;
     
     if (selectedPeriods.length === 0) {
-        showToast("Selecione pelo menos um período de 30 dias.", "error");
+        showToast("Selecione pelo menos um período para continuar.", "error");
         return;
     }
     if (selectedNeighborhoods.length === 0) {
@@ -248,26 +259,42 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
           </div>
         </section>
 
-        {/* BLOCO 2: PERÍODO */}
-        <section className={`space-y-8 transition-all duration-500 ${!selectedMode ? 'opacity-20 pointer-events-none' : 'opacity-100'}`}>
+        {/* BLOCO 2: PERÍODO (30 DIAS) */}
+        <section 
+          className={`space-y-8 transition-all duration-500 ${!selectedMode ? 'opacity-20 pointer-events-none' : 'opacity-100'}`}
+        >
           <div>
             <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-blue-500 flex items-center gap-2 px-1 mb-5">
                 <Calendar size={14} /> 2. Escolha o período (30 dias)
             </h3>
+            
             <div className="p-4 bg-blue-500/5 border border-blue-500/10 rounded-2xl mb-6">
                 <p className="text-[10px] text-blue-200 leading-relaxed">
                    Seu banner ficará no ar por 30 dias corridos após a publicação. 
                    {artChoice === 'pro' && ' (A vigência do período de 30 dias inicia após a aprovação da arte).'}
                 </p>
             </div>
+            
             <div className="flex gap-4">
                 {dynamicPeriods.map(p => (
-                    <button key={p.id} onClick={() => togglePeriod(p.id)} className={`flex-1 p-5 rounded-3xl border-2 transition-all flex flex-col gap-2 text-left ${selectedPeriods.includes(p.id) ? 'bg-blue-600/10 border-blue-500 shadow-lg' : 'bg-white/5 border-white/10'}`}>
-                        <div className="flex justify-between items-start">
+                    <button 
+                        key={p.id} 
+                        onClick={() => togglePeriod(p.id)}
+                        className={`flex-1 p-5 rounded-3xl border-2 transition-all flex flex-col gap-2 text-left relative overflow-hidden ${
+                            selectedPeriods.includes(p.id) 
+                            ? 'bg-blue-600/10 border-blue-500 shadow-lg' 
+                            : 'bg-white/5 border-white/10'
+                        }`}
+                    >
+                        <div className="flex justify-between items-start mb-1">
                             <CheckCircle2 size={16} className={selectedPeriods.includes(p.id) ? 'text-blue-500' : 'text-slate-700'} />
-                            <span className="text-[10px] font-bold text-slate-500">30 DIAS</span>
+                            <span className={`text-[7px] font-black uppercase px-1.5 py-0.5 rounded-md ${
+                                selectedPeriods.includes(p.id) ? 'bg-blue-500 text-white' : 'bg-slate-800 text-slate-500'
+                            }`}>
+                                {p.badge}
+                            </span>
                         </div>
-                        <p className="text-xs font-black text-white uppercase tracking-tight mt-2">{p.label}</p>
+                        <p className="text-xs font-black text-white uppercase tracking-tight mt-1">{p.label}</p>
                         <p className="text-[9px] text-slate-400 font-medium leading-tight">{p.sub}</p>
                         <p className="text-[10px] text-blue-400 font-black mt-2 font-mono">{p.dates}</p>
                     </button>
@@ -276,7 +303,10 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
           </div>
 
           {/* BLOCO 3: BAIRROS */}
-          <div ref={neighborhoodRef} className={`space-y-6 transition-all duration-500 ${selectedPeriods.length === 0 ? 'opacity-40 grayscale pointer-events-none' : 'opacity-100'}`}>
+          <div 
+            ref={neighborhoodRef}
+            className={`space-y-6 transition-all duration-500 ${selectedPeriods.length === 0 ? 'opacity-40 grayscale pointer-events-none' : 'opacity-100'}`}
+          >
             <div className="flex flex-col gap-1 px-1">
                 <div className="flex items-center justify-between">
                   <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-blue-500 flex items-center gap-2">
@@ -290,6 +320,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
                     <div className="flex items-center justify-between mt-4"><div className="flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 px-3 py-2 rounded-xl"><Unlock size={12} className="text-emerald-500" /><p className="text-[9px] text-emerald-500 uppercase font-black tracking-widest leading-none">Disponibilidade atualizada</p></div>{selectedNeighborhoods.length > 0 && <span className="text-[10px] font-black text-blue-400 uppercase tracking-widest">{selectedNeighborhoods.length} selecionados</span>}</div>
                 )}
             </div>
+
             <div className="grid grid-cols-2 gap-3">
                 {NEIGHBORHOODS.map(hood => {
                     const { available } = checkHoodAvailability(hood);
@@ -309,7 +340,10 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
         </section>
 
         {/* BLOCO 4: DESIGN */}
-        <section ref={creativeRef} className={`space-y-8 transition-all duration-500 ${selectedNeighborhoods.length === 0 ? 'opacity-20 pointer-events-none' : 'opacity-100'}`}>
+        <section 
+          ref={creativeRef}
+          className={`space-y-8 transition-all duration-500 ${selectedNeighborhoods.length === 0 ? 'opacity-20 pointer-events-none' : 'opacity-100'}`}
+        >
           <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-blue-500 flex items-center gap-2 px-1"><Palette size={14} /> 4. Design da Arte</h3>
           <div className="space-y-6">
               <div onClick={() => { setArtChoice('diy'); setIsArtSaved(false); }} className={`rounded-[2.5rem] border-2 transition-all cursor-pointer overflow-hidden ${artChoice === 'diy' ? 'bg-slate-900 border-blue-500 shadow-2xl shadow-blue-500/10' : 'bg-slate-900 border-white/5 opacity-80 hover:opacity-100'}`}>
@@ -351,7 +385,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
         </section>
       </main>
 
-      {/* FOOTER FIXO REFORMULADO */}
+      {/* FOOTER FIXO */}
       {!isSuccess && (
       <div className="fixed bottom-0 left-0 right-0 p-6 bg-[#020617]/95 backdrop-blur-2xl border-t border-white/10 z-40 max-w-md mx-auto shadow-[0_-20px_40px_rgba(0,0,0,0.4)]">
         <button 
