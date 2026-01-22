@@ -125,7 +125,6 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
     
     setSelectedMonths(nextMonths);
 
-    // LÓGICA DE REVALIDAÇÃO DE BAIRROS
     if (selectedNeighborhoods.length > 0) {
       const validHoods = selectedNeighborhoods.filter(hood => {
         const { available } = checkHoodAvailability(hood, nextMonths);
@@ -176,7 +175,6 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
   return (
     <div className="min-h-screen bg-[#020617] text-slate-100 font-sans flex flex-col selection:bg-blue-500/30 overflow-x-hidden">
       
-      {/* TOAST NOTIFICATION */}
       {toast && (
         <div className={`fixed top-24 left-1/2 -translate-x-1/2 z-[100] px-6 py-3 rounded-2xl shadow-2xl flex items-center gap-3 animate-in slide-in-from-top-4 border ${toast.type === 'error' ? 'bg-rose-500 border-rose-400 text-white' : 'bg-blue-600 border-blue-500 text-white'}`}>
            {toast.type === 'error' ? <AlertTriangle size={18} /> : <Info size={18} />}
@@ -227,7 +225,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
           </div>
         </section>
 
-        {/* BLOCO 2: PERÍODO (MÚLTIPLO) */}
+        {/* BLOCO 2: PERÍODO */}
         <section 
           className={`space-y-8 transition-all duration-500 ${!selectedMode ? 'opacity-20 pointer-events-none' : 'opacity-100'}`}
         >
@@ -248,7 +246,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
             </div>
           </div>
 
-          {/* BLOCO 3: BAIRROS (BLOQUEADO ATÉ PERÍODO) */}
+          {/* BLOCO 3: BAIRROS */}
           <div 
             ref={neighborhoodRef}
             className={`space-y-5 transition-all duration-500 ${selectedMonths.length === 0 ? 'opacity-40 grayscale' : 'opacity-100'}`}
@@ -310,17 +308,10 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
                     );
                 })}
             </div>
-            
-            {selectedMonths.length === 0 && (
-                <div 
-                  onClick={() => showToast('Selecione pelo menos 1 mês para continuar.')}
-                  className="absolute inset-0 z-10 cursor-pointer"
-                />
-            )}
           </div>
         </section>
 
-        {/* BLOCO 4: DESIGN DA ARTE (EDITOR INLINE) */}
+        {/* BLOCO 4: DESIGN DA ARTE (HARMONIZADO) */}
         <section 
           ref={creativeRef}
           className={`space-y-8 transition-all duration-500 ${selectedNeighborhoods.length === 0 ? 'opacity-20 pointer-events-none' : 'opacity-100'}`}
@@ -329,25 +320,31 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
             <Palette size={14} /> 4. Design da Arte
           </h3>
 
-          <div className="space-y-4">
-              <div className={`rounded-[2.5rem] border-2 transition-all overflow-hidden ${artChoice === 'diy' ? 'bg-slate-900 border-blue-500' : 'bg-slate-900 border-white/5'}`}>
+          <div className="space-y-6">
+              {/* OPÇÃO 1: DIY */}
+              <div 
+                onClick={() => { setArtChoice('diy'); setIsArtSaved(false); }}
+                className={`rounded-[2.5rem] border-2 transition-all cursor-pointer overflow-hidden ${artChoice === 'diy' ? 'bg-slate-900 border-blue-500 shadow-2xl shadow-blue-500/10' : 'bg-slate-900 border-white/5 opacity-80 hover:opacity-100'}`}
+              >
                 <div className="p-8">
-                    <div className="flex items-start gap-5 mb-6">
-                        <div className="w-12 h-12 bg-blue-500/10 rounded-2xl flex items-center justify-center text-blue-400 shrink-0"><Palette size={24} /></div>
-                        <div className="flex-1">
-                            <h3 className="text-lg font-bold text-white mb-1">Personalizar manualmente</h3>
-                            <p className="text-xs text-slate-400 leading-relaxed">Eu mesmo crio os textos e ajusto o visual com o editor rápido.</p>
+                    <div className="flex items-start justify-between mb-6">
+                        <div className="flex items-start gap-5">
+                            <div className="w-12 h-12 bg-blue-500/10 rounded-2xl flex items-center justify-center text-blue-400 shrink-0"><Palette size={24} /></div>
+                            <div>
+                                <h3 className="text-lg font-bold text-white mb-1">Personalizar manualmente</h3>
+                                <p className="text-xs text-slate-400 leading-relaxed max-w-[200px]">Crie seu banner rapidamente usando nosso editor simples e pré-configurado.</p>
+                            </div>
                         </div>
-                        <button 
-                            onClick={() => { setArtChoice('diy'); setIsArtSaved(false); }}
-                            className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${artChoice === 'diy' ? 'bg-blue-500 text-white' : 'bg-white/5 text-slate-400'}`}
-                        >
-                            {artChoice === 'diy' ? 'Selecionado' : 'Selecionar'}
-                        </button>
+                        <div className="flex flex-col items-end gap-3">
+                            <span className="text-emerald-400 font-black text-[10px] uppercase tracking-widest">Grátis</span>
+                            <div className={`px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${artChoice === 'diy' ? 'bg-blue-600 text-white shadow-lg' : 'bg-white/5 text-slate-400'}`}>
+                                {artChoice === 'diy' ? 'Selecionado' : 'Selecionar'}
+                            </div>
+                        </div>
                     </div>
 
                     {artChoice === 'diy' && !isArtSaved && (
-                        <div className="space-y-10 animate-in slide-in-from-top-4 duration-500 pt-6 border-t border-white/5">
+                        <div className="space-y-10 animate-in slide-in-from-top-4 duration-500 pt-8 border-t border-white/5">
                             <div className="sticky top-24 z-20">
                                 <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-3 ml-1 text-center">Prévia em tempo real</p>
                                 <div 
@@ -443,22 +440,59 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
                 </div>
               </div>
 
-              <button 
+              {/* OPÇÃO 2: PRO */}
+              <div 
                 onClick={() => { setArtChoice('pro'); setIsArtSaved(true); scrollTo(paymentRef); }}
-                className={`relative p-8 rounded-[2.5rem] border-2 text-left flex flex-col transition-all ${artChoice === 'pro' ? 'bg-gradient-to-br from-slate-800 to-slate-900 border-amber-500' : 'bg-slate-900 border-white/5 opacity-80'}`}
+                className={`relative rounded-[2.5rem] border-2 transition-all cursor-pointer overflow-hidden ${artChoice === 'pro' ? 'bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 border-amber-500 shadow-2xl shadow-amber-500/10' : 'bg-slate-900 border-white/5 opacity-80 hover:opacity-100'}`}
               >
-                  <div className="absolute top-4 right-6 bg-amber-400 text-slate-900 text-[8px] font-black px-3 py-1 rounded-full uppercase tracking-widest shadow-lg">Recomendado</div>
-                  <div className="w-12 h-12 bg-amber-400/10 rounded-2xl flex items-center justify-center text-amber-400 mb-6 shrink-0"><Rocket size={24} /></div>
-                  <h3 className="text-lg font-bold text-white mb-2 leading-tight">Arte com time Localizei</h3>
-                  <div className="space-y-2 mb-8">
-                    <div className="flex items-center gap-3 text-slate-300"><MessageCircle size={14} className="text-amber-400" /><span className="text-[10px] font-bold">Atendimento via chat após pagamento</span></div>
-                    <div className="flex items-center gap-3 text-slate-300"><Clock size={14} className="text-amber-400" /><span className="text-[10px] font-bold">Design focado em conversão local</span></div>
+                  <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-amber-400 text-slate-900 text-[8px] font-black px-4 py-1 rounded-full uppercase tracking-widest shadow-lg z-10">Recomendado</div>
+                  
+                  <div className="p-8">
+                    <div className="flex items-start justify-between mb-8 pt-4">
+                        <div className="flex items-start gap-5">
+                            <div className="w-12 h-12 bg-amber-400/10 rounded-2xl flex items-center justify-center text-amber-400 shrink-0 border border-amber-500/20"><Rocket size={24} /></div>
+                            <div>
+                                <h3 className="text-lg font-bold text-white mb-1 leading-tight">Crie seu banner com o time da Localizei</h3>
+                                <p className="text-xs text-slate-400 leading-relaxed max-w-[220px]">Deixe seu anúncio mais profissional e aumente suas conversões e vendas.</p>
+                            </div>
+                        </div>
+                        <div className="flex flex-col items-end gap-2">
+                             <div className="space-y-0.5 text-right">
+                                <span className="text-slate-500 line-through text-[10px] font-bold">R$ 149,90</span>
+                                <p className="text-2xl font-black text-white leading-none">R$ 69,90</p>
+                             </div>
+                             <div className={`px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all mt-2 ${artChoice === 'pro' ? 'bg-blue-600 text-white shadow-lg' : 'bg-white/5 text-slate-400'}`}>
+                                {artChoice === 'pro' ? 'Selecionado' : 'Selecionar'}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 gap-y-3 mb-8">
+                        {[
+                            "Banner criado por designers profissionais",
+                            "Até 3 ajustes gratuitos",
+                            "Atendimento personalizado via chat",
+                            "Publicação após aprovação"
+                        ].map((benefit, i) => (
+                            <div key={i} className="flex items-center gap-3">
+                                <div className="w-5 h-5 rounded-full bg-amber-400/10 flex items-center justify-center border border-amber-500/20 shrink-0">
+                                    <Check size={10} className="text-amber-400" strokeWidth={4} />
+                                </div>
+                                <span className="text-[11px] font-medium text-slate-300">{benefit}</span>
+                            </div>
+                        ))}
+                    </div>
+
+                    <div className="pt-6 border-t border-white/5">
+                        <div className="flex items-center gap-3 text-slate-400">
+                            <MessageCircle size={14} className="text-amber-400" />
+                            <p className="text-[9px] font-bold uppercase tracking-tight leading-relaxed">
+                                Após a confirmação do pagamento, você será direcionado automaticamente para um chat com nosso time de designers.
+                            </p>
+                        </div>
+                    </div>
                   </div>
-                  <div className="flex items-center justify-between mt-auto pt-6 border-t border-white/5">
-                    <div className="space-y-1"><span className="text-slate-500 line-through text-xs font-medium">R$ 149,90</span><p className="text-2xl font-black text-white leading-none">R$ 69,90</p></div>
-                    {artChoice === 'pro' && <CheckCircle2 size={24} className="text-amber-400" />}
-                  </div>
-              </button>
+              </div>
           </div>
         </section>
 
