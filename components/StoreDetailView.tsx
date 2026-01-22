@@ -28,14 +28,13 @@ import { useAuth } from '../contexts/AuthContext';
 import { useNeighborhood } from '../contexts/NeighborhoodContext';
 import { trackOrganicEvent, OrganicEventType } from '../lib/analytics';
 
-const DEFAULT_BANNER = "https://images.unsplash.com/photo-1570129477492-45c003edd2be?q=80&w=1200&auto=format&fit=crop";
-
 export const StoreDetailView: React.FC<{ 
   store: Store; 
   onBack: () => void; 
   onPay?: () => void;
   onClaim?: () => void;
-}> = ({ store, onBack, onPay, onClaim }) => {
+  onViewCashback?: () => void; // Nova prop para navegação
+}> = ({ store, onBack, onPay, onClaim, onViewCashback }) => {
   const { user } = useAuth();
   const { currentNeighborhood } = useNeighborhood();
   const [isFavorite, setIsFavorite] = useState(false);
@@ -74,17 +73,14 @@ export const StoreDetailView: React.FC<{
 
   const handleReportClosed = () => {
     setIsClosedReporting(true);
-    // Simulação de registro de clique - Integrado logicamente conforme solicitado
     setTimeout(() => {
         setIsClosedReporting(false);
         setClosedReported(true);
-        // Em produção aqui enviaria para o banco para contar os 3 cliques de usuários únicos
         console.log("[ADM Alert] Registro de possível loja fechada:", store.name);
     }, 1200);
   };
 
-  // Mapeamento dinâmico preferindo campos estruturados do lojista
-  const bannerImg = store.banner_url || store.image || DEFAULT_BANNER;
+  const bannerImg = store.banner_url || store.image || "https://images.unsplash.com/photo-1570129477492-45c003edd2be?q=80&w=1200&auto=format&fit=crop";
   const logoImg = store.logo_url || store.logoUrl || '/assets/default-logo.png';
   
   const phoneFormatted = store.telefone_fixo_publico || store.phone || '';
@@ -157,32 +153,33 @@ export const StoreDetailView: React.FC<{
             </div>
           </div>
 
-          {/* --- CASHBACK SALDO --- */}
-          {user && userCredit !== null && (
-              <div className="bg-gray-50 dark:bg-gray-900 rounded-[24px] p-5 mb-8 flex items-center justify-between border border-gray-100 dark:border-gray-800 shadow-sm relative overflow-hidden group active:scale-[0.99] transition-all">
-                  <div className="flex items-center gap-3 relative z-10">
-                      <div className="w-10 h-10 rounded-2xl bg-[#1E5BFF] flex items-center justify-center text-white shadow-md shadow-blue-500/10">
-                          <Coins className="w-5 h-5" />
-                      </div>
-                      <div>
-                          <p className="text-[9px] font-bold uppercase tracking-[0.15em] text-gray-400">Seu cashback nesta loja</p>
-                          <h3 className="text-lg font-black text-gray-900 dark:text-white leading-none mt-0.5">R$ {userCredit.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</h3>
-                      </div>
+          {/* --- CASHBACK SALDO (Agora clicável) --- */}
+          <button 
+              onClick={onViewCashback}
+              className="w-full bg-gray-50 dark:bg-gray-900 rounded-[24px] p-5 mb-8 flex items-center justify-between border border-gray-100 dark:border-gray-800 shadow-sm relative overflow-hidden group active:scale-[0.99] transition-all text-left"
+          >
+              <div className="flex items-center gap-3 relative z-10">
+                  <div className="w-10 h-10 rounded-2xl bg-[#1E5BFF] flex items-center justify-center text-white shadow-md shadow-blue-500/10 group-hover:scale-110 transition-transform">
+                      <Coins className="w-5 h-5" />
                   </div>
-                  <div className="bg-white dark:bg-gray-800 p-1.5 rounded-full text-gray-300 shadow-inner">
-                    <ArrowRight className="w-3 h-3" />
+                  <div>
+                      <p className="text-[9px] font-bold uppercase tracking-[0.15em] text-gray-400">Seu cashback nesta loja</p>
+                      <h3 className="text-lg font-black text-gray-900 dark:text-white leading-none mt-0.5">R$ {(userCredit || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</h3>
                   </div>
               </div>
-          )}
+              <div className="bg-white dark:bg-gray-800 p-1.5 rounded-full text-gray-300 shadow-inner group-hover:text-[#1E5BFF] transition-colors">
+                <ArrowRight className="w-3 h-3" />
+              </div>
+          </button>
 
-          {/* --- WHATSAPP CTA --- */}
+          {/* --- WHATSAPP CTA (Padding Ajustado) --- */}
           <section className="mb-10">
               <a 
                 href={`https://wa.me/55${whatsappDigits}`} 
                 target="_blank" 
                 rel="noopener noreferrer" 
                 onClick={() => track('store_click_whatsapp')} 
-                className="w-full bg-[#00D95F] hover:bg-[#00C254] text-white font-black py-4.5 rounded-[24px] flex items-center justify-center gap-3 shadow-md shadow-green-500/10 active:scale-95 transition-all text-sm uppercase tracking-widest"
+                className="w-full bg-[#00D95F] hover:bg-[#00C254] text-white font-black py-6 rounded-[24px] flex items-center justify-center gap-3 shadow-md shadow-green-500/10 active:scale-95 transition-all text-sm uppercase tracking-widest"
               >
                 <MessageSquare className="w-5 h-5 fill-white" />
                 Falar no WhatsApp
@@ -232,7 +229,7 @@ export const StoreDetailView: React.FC<{
               )}
           </section>
 
-          {/* --- ONDE ENCONTRAR (REORGANIZADO) --- */}
+          {/* --- ONDE ENCONTRAR --- */}
           <section className="space-y-8 mb-12">
             <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Onde encontrar</h3>
             
@@ -361,7 +358,6 @@ export const StoreDetailView: React.FC<{
 
           {/* --- BOTÕES FINAIS --- */}
           <section className="space-y-3">
-              {/* Reivindicar Loja (Apenas se não tiver dono) */}
               {!store.claimed && (
                 <button 
                   onClick={onClaim}
@@ -372,7 +368,6 @@ export const StoreDetailView: React.FC<{
                 </button>
               )}
 
-              {/* Informar Fechamento */}
               {closedReported ? (
                   <div className="w-full py-4 text-center text-amber-600 bg-amber-50 dark:bg-amber-900/10 rounded-[20px] border border-amber-100 dark:border-amber-800 animate-in zoom-in duration-300">
                       <p className="text-[10px] font-black uppercase tracking-[0.2em]">Obrigado! Em análise técnica.</p>
