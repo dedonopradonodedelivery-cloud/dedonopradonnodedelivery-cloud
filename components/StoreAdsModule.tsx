@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { 
   ChevronLeft, 
@@ -21,7 +20,15 @@ import {
   QrCode,
   Info,
   Clock,
-  AlertTriangle
+  AlertTriangle,
+  Type,
+  AlignLeft,
+  AlignCenter,
+  AlignRight,
+  Sparkles,
+  // Added Store as StoreIcon to fix "Cannot find name 'StoreIcon'" error on line 301
+  Store as StoreIcon,
+  Image as ImageIcon
 } from 'lucide-react';
 import { User } from '@supabase/supabase-js';
 
@@ -32,7 +39,6 @@ interface StoreAdsModuleProps {
   categoryName?: string;
 }
 
-// --- CONFIGURAÇÕES DE NEGÓCIO ---
 const NEIGHBORHOODS = [
   "Freguesia", "Pechincha", "Anil", "Taquara", "Tanque", 
   "Curicica", "Parque Olímpico", "Gardênia", "Cidade de Deus"
@@ -40,7 +46,6 @@ const NEIGHBORHOODS = [
 
 const MONTHS = ["Março", "Abril", "Maio", "Junho"];
 
-// Mock de Ocupação: Se o bairro está ocupado (true) ou livre (false) naquele mês
 const MOCK_OCCUPANCY: Record<string, Record<string, boolean>> = {
   "Freguesia": { "Março": true, "Abril": false, "Maio": false, "Junho": false },
   "Taquara": { "Março": false, "Abril": true, "Maio": false, "Junho": false },
@@ -53,6 +58,20 @@ const DISPLAY_MODES = [
   { id: 'combo', label: 'Home + Cat', icon: Zap, recommended: true, price: 119.90 },
 ];
 
+const FONTS = [
+  { id: 'font-sans', name: 'Moderna (Sans)', class: 'font-sans' },
+  { id: 'font-display', name: 'Impactante (Outfit)', class: 'font-display' },
+  { id: 'font-serif', name: 'Elegante (Serif)', class: 'font-serif' },
+];
+
+const PALETTES = [
+  { id: 'p1', bg: '#1E5BFF', text: '#FFFFFF', label: 'Azul Localizei' },
+  { id: 'p2', bg: '#000000', text: '#FFFFFF', label: 'Black Gold' },
+  { id: 'p3', bg: '#FFFFFF', text: '#1E5BFF', label: 'Clean Blue' },
+  { id: 'p4', bg: '#DC2626', text: '#FFFFFF', label: 'Promo Red' },
+  { id: 'p5', bg: '#059669', text: '#FFFFFF', label: 'Eco Green' },
+];
+
 export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNavigate, user, categoryName }) => {
   const [selectedMode, setSelectedMode] = useState<typeof DISPLAY_MODES[0] | null>(null);
   const [selectedMonths, setSelectedMonths] = useState<string[]>([]);
@@ -61,66 +80,57 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
   const [paymentMethod, setPaymentMethod] = useState<'pix' | 'credit' | 'debit'>('pix');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [isArtSaved, setIsArtSaved] = useState(false);
 
   // Estados do Editor DIY
-  const [diyConfig, setDiyConfig] = useState({ title: 'Sua Promoção Aqui', description: 'Melhor oferta do bairro.' });
+  const [diyData, setDiyData] = useState({
+    storeName: user?.user_metadata?.store_name || 'Sua Loja',
+    title: 'Sua Promoção Aqui',
+    description: 'Melhores ofertas do bairro você encontra aqui.',
+    font: FONTS[1].class,
+    fontSize: 24,
+    bgColor: PALETTES[0].bg,
+    textColor: PALETTES[0].text,
+    alignment: 'center' as 'left' | 'center' | 'right',
+    showLogo: true,
+    animation: 'fade' as 'fade' | 'slide' | 'zoom'
+  });
 
   const neighborhoodRef = useRef<HTMLDivElement>(null);
   const creativeRef = useRef<HTMLDivElement>(null);
   const paymentRef = useRef<HTMLDivElement>(null);
 
-  // --- LÓGICA DE SCROLL ---
   const scrollTo = (ref: React.RefObject<HTMLDivElement | null>) => {
     setTimeout(() => ref.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
   };
 
-  // --- CÁLCULO DE DISPONIBILIDADE BINÁRIA ---
-  // CORREÇÃO: Definido retorno explícito para evitar busyMonths undefined (TS18048)
   const checkHoodAvailability = (hood: string): { available: boolean; busyMonths: string[] } => {
     if (selectedMonths.length === 0) return { available: true, busyMonths: [] };
-    
-    // Verifica se está ocupado em QUALQUER um dos meses selecionados
     const busyIn = selectedMonths.filter(m => MOCK_OCCUPANCY[hood]?.[m] === true);
-    
-    return {
-      available: busyIn.length === 0,
-      busyMonths: busyIn
-    };
+    return { available: busyIn.length === 0, busyMonths: busyIn };
   };
 
-  // --- CÁLCULO DE PREÇO (FÓRMULA DEFINITIVA) ---
   const totalAmount = useMemo(() => {
-    if (!selectedMode) return 0;
+    if (!selectedMode || selectedNeighborhoods.length === 0) return 0;
     const base = selectedMode.price;
     const monthsMultiplier = selectedMonths.length || 1;
-    const hoodsMultiplier = selectedNeighborhoods.length || 0;
+    const hoodsMultiplier = selectedNeighborhoods.length;
     const artExtra = artChoice === 'pro' ? 69.90 : 0;
-    
-    // Se não selecionou bairros ainda, mostra apenas o valor base unitário no rodapé
-    if (hoodsMultiplier === 0) return 0;
-
     return (base * hoodsMultiplier * monthsMultiplier) + artExtra;
   }, [selectedMode, selectedMonths, selectedNeighborhoods, artChoice]);
 
   const toggleMonth = (month: string) => {
     setSelectedMonths(prev => {
         const next = prev.includes(month) ? prev.filter(m => m !== month) : [...prev, month];
-        // Se mudar os meses, resetamos os bairros para evitar conflito de disponibilidade
         setSelectedNeighborhoods([]);
         return next;
     });
     if (selectedMonths.length === 0) scrollTo(neighborhoodRef);
   };
 
-  const toggleNeighborhood = (hood: string) => {
-    const { available } = checkHoodAvailability(hood);
-    if (!available) return;
-
-    setSelectedNeighborhoods(prev => {
-      const next = prev.includes(hood) ? prev.filter(h => h !== hood) : [...prev, hood];
-      if (next.length > 0) scrollTo(creativeRef);
-      return next;
-    });
+  const handleFinishArt = () => {
+    setIsArtSaved(true);
+    scrollTo(paymentRef);
   };
 
   if (isSuccess) {
@@ -141,12 +151,12 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
   return (
     <div className="min-h-screen bg-[#020617] text-slate-100 font-sans flex flex-col selection:bg-blue-500/30 overflow-x-hidden">
       
-      <header className="sticky top-0 z-50 bg-[#020617]/80 backdrop-blur-xl border-b border-white/5 px-6 py-4 flex items-center justify-between">
+      <header className="sticky top-0 z-40 bg-[#020617]/80 backdrop-blur-xl border-b border-white/5 px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-4">
           <button onClick={onBack} className="p-2 bg-slate-900 rounded-xl text-slate-400 hover:text-white transition-all active:scale-95"><ChevronLeft size={20} /></button>
           <div>
             <h1 className="font-bold text-lg leading-none flex items-center gap-2">Anunciar no Bairro <Crown size={16} className="text-amber-400 fill-amber-400" /></h1>
-            <p className="text-[10px] text-blue-400 uppercase font-black tracking-widest mt-1">Fluxo Único de Contratação</p>
+            <p className="text-[10px] text-blue-400 uppercase font-black tracking-widest mt-1">Configuração de Campanha</p>
           </div>
         </div>
       </header>
@@ -184,20 +194,15 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
           </div>
         </section>
 
-        {/* BLOCO 2: PERÍODO (MÚLTIPLO) */}
+        {/* BLOCO 2: PERÍODO E BAIRROS */}
         <section 
           ref={neighborhoodRef}
           className={`space-y-8 transition-all duration-500 ${!selectedMode ? 'opacity-20 pointer-events-none' : 'opacity-100'}`}
         >
           <div>
-            <div className="flex justify-between items-center px-1 mb-5">
-                <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-blue-500 flex items-center gap-2">
-                    <Calendar size={14} /> 2. Escolha o período
-                </h3>
-                {selectedMonths.length > 0 && (
-                    <span className="text-[10px] font-black text-amber-400 bg-amber-400/10 px-2 py-1 rounded-lg uppercase">{selectedMonths.length} meses selecionados</span>
-                )}
-            </div>
+            <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-blue-500 flex items-center gap-2 px-1 mb-5">
+                <Calendar size={14} /> 2. Escolha o período
+            </h3>
             <div className="flex gap-2 overflow-x-auto no-scrollbar -mx-2 px-2">
                 {MONTHS.map(m => (
                     <button 
@@ -205,68 +210,49 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
                         onClick={() => toggleMonth(m)}
                         className={`px-6 py-3.5 rounded-2xl text-xs font-black uppercase tracking-widest transition-all border-2 shrink-0 ${selectedMonths.includes(m) ? 'bg-blue-600 border-blue-500 text-white shadow-lg' : 'bg-slate-900 border-white/5 text-slate-500'}`}
                     >
-                        {selectedMonths.includes(m) && <Check size={10} className="inline mr-2" strokeWidth={4} />}
                         {m}
                     </button>
                 ))}
             </div>
           </div>
 
-          {/* BLOCO 3: BAIRROS (DISPONIBILIDADE REAL) */}
           <div className="space-y-5">
-            <div className="flex justify-between items-end px-1">
-                <div>
-                    <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-blue-500">3. Selecione os Bairros</h3>
-                    <p className="text-[9px] text-slate-500 uppercase font-bold tracking-widest mt-1">Disponibilidade de slot exclusivo</p>
-                </div>
-                <button 
-                    onClick={() => {
-                        const allAvail = NEIGHBORHOODS.filter(h => checkHoodAvailability(h).available);
-                        setSelectedNeighborhoods(selectedNeighborhoods.length === allAvail.length ? [] : allAvail);
-                        if (allAvail.length > 0) scrollTo(creativeRef);
-                    }}
-                    className="text-[9px] font-black text-blue-400 uppercase tracking-widest bg-blue-500/10 px-3 py-1.5 rounded-lg border border-blue-500/20"
-                >
-                    Selecionar Todos Livres
-                </button>
-            </div>
-
+            <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-blue-500 px-1">3. Selecione os Bairros</h3>
             <div className="grid grid-cols-1 gap-3">
                 {NEIGHBORHOODS.map(hood => {
                     const { available, busyMonths } = checkHoodAvailability(hood);
                     const isSelected = selectedNeighborhoods.includes(hood);
-
                     return (
                         <button 
                             key={hood}
-                            onClick={() => toggleNeighborhood(hood)}
+                            onClick={() => {
+                                if (available) {
+                                    setSelectedNeighborhoods(prev => prev.includes(hood) ? prev.filter(h => h !== hood) : [...prev, hood]);
+                                    scrollTo(creativeRef);
+                                }
+                            }}
                             className={`p-4 rounded-2xl border-2 flex items-center justify-between transition-all ${
                                 !available 
-                                ? 'bg-slate-900/50 border-white/5 opacity-50 grayscale cursor-default' 
+                                ? 'bg-slate-900/50 border-white/5 opacity-50 cursor-default' 
                                 : isSelected
-                                    ? 'bg-blue-600/10 border-blue-500 shadow-lg shadow-blue-500/5'
+                                    ? 'bg-blue-600/10 border-blue-500'
                                     : 'bg-slate-900 border-white/5'
                             }`}
                         >
-                            <div className="flex items-center gap-4 text-left">
-                                <div className={`p-2 rounded-xl ${!available ? 'bg-slate-800 text-slate-600' : isSelected ? 'bg-blue-50 text-white' : 'bg-emerald-500/10 text-emerald-500'}`}>
-                                    <MapPin size={18} />
-                                </div>
-                                <div>
-                                    <p className={`font-bold text-sm ${!available ? 'text-slate-500' : 'text-white'}`}>{hood}</p>
-                                    <p className={`text-[10px] font-black uppercase tracking-widest ${!available ? 'text-rose-500' : 'text-emerald-500'}`}>
-                                        {!available ? `Esgotado em ${busyMonths.join(', ')}` : 'Disponível'}
+                            <div className="flex items-center gap-4">
+                                <MapPin size={18} className={!available ? 'text-slate-700' : isSelected ? 'text-blue-500' : 'text-slate-500'} />
+                                <div className="text-left">
+                                    <p className={`font-bold text-sm ${!available ? 'text-slate-600' : 'text-white'}`}>{hood}</p>
+                                    <p className={`text-[9px] font-black uppercase tracking-widest ${!available ? 'text-rose-500' : 'text-emerald-500'}`}>
+                                        {!available ? `Ocupado em ${busyMonths.join(', ')}` : 'Livre'}
                                     </p>
                                 </div>
                             </div>
-                            
-                            <div className="flex items-center gap-2">
-                                {available && (
-                                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${isSelected ? 'bg-blue-500 border-blue-500' : 'border-slate-700'}`}>
-                                        {isSelected && <Check size={12} className="text-white" strokeWidth={4} />}
-                                    </div>
-                                )}
-                            </div>
+                            {available && (
+                                <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${isSelected ? 'bg-blue-500 border-blue-500' : 'border-slate-700'}`}>
+                                    {isSelected && <Check size={12} className="text-white" strokeWidth={4} />}
+                                </div>
+                            )}
                         </button>
                     );
                 })}
@@ -274,7 +260,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
           </div>
         </section>
 
-        {/* BLOCO 4: DESIGN DA ARTE (PROGRESSIVO) */}
+        {/* BLOCO 4: DESIGN DA ARTE (EDITOR INLINE) */}
         <section 
           ref={creativeRef}
           className={`space-y-8 transition-all duration-500 ${selectedNeighborhoods.length === 0 ? 'opacity-20 pointer-events-none' : 'opacity-100'}`}
@@ -283,30 +269,138 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
             <Palette size={14} /> 4. Design da Arte
           </h3>
 
-          <div className="grid grid-cols-1 gap-5">
-              <button 
-                onClick={() => { setArtChoice('diy'); scrollTo(paymentRef); }}
-                className={`relative p-8 rounded-[2.5rem] border-2 text-left flex flex-col transition-all ${artChoice === 'diy' ? 'bg-slate-800 border-blue-500 shadow-xl shadow-blue-500/10' : 'bg-slate-900 border-white/5 opacity-80'}`}
-              >
-                <div className="w-12 h-12 bg-blue-500/10 rounded-2xl flex items-center justify-center text-blue-400 mb-6 shrink-0"><Palette size={24} /></div>
-                <h3 className="text-lg font-bold text-white mb-1">Criar manualmente</h3>
-                <p className="text-xs text-slate-400 leading-relaxed mb-6">Eu mesmo crio os textos e ajusto o visual com o editor.</p>
-                <div className="mt-auto flex items-center justify-between pt-6 border-t border-white/5">
-                    <span className="text-emerald-400 font-black text-[10px] uppercase tracking-widest">GRÁTIS</span>
-                    {artChoice === 'diy' && <CheckCircle2 size={24} className="text-blue-500" />}
-                </div>
-              </button>
+          <div className="space-y-4">
+              {/* DIY CHOICE */}
+              <div className={`rounded-[2.5rem] border-2 transition-all overflow-hidden ${artChoice === 'diy' ? 'bg-slate-900 border-blue-500' : 'bg-slate-900 border-white/5'}`}>
+                <div className="p-8">
+                    <div className="flex items-start gap-5 mb-6">
+                        <div className="w-12 h-12 bg-blue-500/10 rounded-2xl flex items-center justify-center text-blue-400 shrink-0"><Palette size={24} /></div>
+                        <div className="flex-1">
+                            <h3 className="text-lg font-bold text-white mb-1">Personalizar manualmente</h3>
+                            <p className="text-xs text-slate-400 leading-relaxed">Eu mesmo crio os textos e ajusto o visual com o editor rápido.</p>
+                        </div>
+                        <button 
+                            onClick={() => { setArtChoice('diy'); setIsArtSaved(false); }}
+                            className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${artChoice === 'diy' ? 'bg-blue-500 text-white' : 'bg-white/5 text-slate-400'}`}
+                        >
+                            {artChoice === 'diy' ? 'Selecionado' : 'Selecionar'}
+                        </button>
+                    </div>
 
+                    {artChoice === 'diy' && !isArtSaved && (
+                        <div className="space-y-10 animate-in slide-in-from-top-4 duration-500 pt-6 border-t border-white/5">
+                            {/* LIVE PREVIEW */}
+                            <div className="sticky top-24 z-20">
+                                <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-3 ml-1 text-center">Prévia em tempo real</p>
+                                <div 
+                                    className={`w-full aspect-[21/9] rounded-[2rem] flex flex-col p-6 shadow-2xl relative overflow-hidden transition-all duration-500 animate-${diyData.animation}`}
+                                    style={{ backgroundColor: diyData.bgColor, color: diyData.textColor, alignItems: diyData.alignment === 'center' ? 'center' : diyData.alignment === 'right' ? 'flex-end' : 'flex-start', textAlign: diyData.alignment }}
+                                >
+                                    <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full blur-3xl"></div>
+                                    {diyData.showLogo && (
+                                        <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center mb-2 backdrop-blur-sm border border-white/10">
+                                            <StoreIcon size={16} />
+                                        </div>
+                                    )}
+                                    <h4 className={`${diyData.font} font-black leading-tight uppercase tracking-tight`} style={{ fontSize: diyData.fontSize }}>{diyData.title}</h4>
+                                    <p className="text-[10px] font-medium opacity-80 mt-1 max-w-[80%]">{diyData.description}</p>
+                                    <div className="mt-auto pt-2 border-t border-white/10 w-full flex justify-between items-center">
+                                        <span className="text-[8px] font-black uppercase tracking-widest opacity-60">{diyData.storeName}</span>
+                                        <div className="bg-white/20 px-2 py-0.5 rounded-md text-[7px] font-black uppercase">Ver Oferta</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* FERRAMENTAS */}
+                            <div className="space-y-8">
+                                {/* 1. TEXTOS */}
+                                <div className="space-y-4">
+                                    <div className="flex items-center gap-2 text-slate-400"><Type size={14} /><span className="text-[10px] font-black uppercase tracking-widest">Textos do Banner</span></div>
+                                    <div className="space-y-3">
+                                        <div className="relative">
+                                            <input value={diyData.title} onChange={e => setDiyData({...diyData, title: e.target.value.slice(0, 40)})} className="w-full bg-slate-950 border border-white/10 rounded-xl p-4 text-xs font-bold text-white outline-none focus:border-blue-500" placeholder="Título (Ex: 50% de Desconto)" />
+                                            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[9px] font-bold text-slate-600">{diyData.title.length}/40</span>
+                                        </div>
+                                        <div className="relative">
+                                            <textarea value={diyData.description} onChange={e => setDiyData({...diyData, description: e.target.value.slice(0, 80)})} className="w-full bg-slate-950 border border-white/10 rounded-xl p-4 text-xs font-medium text-slate-400 outline-none focus:border-blue-500 resize-none h-20" placeholder="Descrição curta..." />
+                                            <span className="absolute right-4 bottom-4 text-[9px] font-bold text-slate-600">{diyData.description.length}/80</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* 2. TIPOGRAFIA */}
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="space-y-3">
+                                        <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Fonte</span>
+                                        <select value={diyData.font} onChange={e => setDiyData({...diyData, font: e.target.value})} className="w-full bg-slate-950 border border-white/10 rounded-xl p-3 text-[10px] font-bold text-white outline-none">
+                                            {FONTS.map(f => <option key={f.id} value={f.class}>{f.name}</option>)}
+                                        </select>
+                                    </div>
+                                    <div className="space-y-3">
+                                        <div className="flex justify-between items-center"><span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Tamanho</span><span className="text-[10px] font-bold text-blue-500">{diyData.fontSize}px</span></div>
+                                        <input type="range" min="16" max="32" value={diyData.fontSize} onChange={e => setDiyData({...diyData, fontSize: parseInt(e.target.value)})} className="w-full h-1.5 bg-slate-800 rounded-full appearance-none accent-blue-500" />
+                                    </div>
+                                </div>
+
+                                {/* 3. CORES & ALINHAMENTO */}
+                                <div className="space-y-6">
+                                    <div className="space-y-3">
+                                        <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Cores do Fundo</span>
+                                        <div className="flex gap-2">
+                                            {PALETTES.map(p => (
+                                                <button key={p.id} onClick={() => setDiyData({...diyData, bgColor: p.bg, textColor: p.text})} className={`w-8 h-8 rounded-full border-2 transition-all ${diyData.bgColor === p.bg ? 'border-white scale-110' : 'border-transparent'}`} style={{ backgroundColor: p.bg }} />
+                                            ))}
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center justify-between">
+                                        <div className="space-y-3">
+                                            <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest block">Alinhamento</span>
+                                            <div className="flex bg-slate-950 rounded-xl p-1 border border-white/5">
+                                                <button onClick={() => setDiyData({...diyData, alignment: 'left'})} className={`p-2 rounded-lg ${diyData.alignment === 'left' ? 'bg-blue-500 text-white' : 'text-slate-600'}`}><AlignLeft size={16}/></button>
+                                                <button onClick={() => setDiyData({...diyData, alignment: 'center'})} className={`p-2 rounded-lg ${diyData.alignment === 'center' ? 'bg-blue-500 text-white' : 'text-slate-600'}`}><AlignCenter size={16}/></button>
+                                                <button onClick={() => setDiyData({...diyData, alignment: 'right'})} className={`p-2 rounded-lg ${diyData.alignment === 'right' ? 'bg-blue-500 text-white' : 'text-slate-600'}`}><AlignRight size={16}/></button>
+                                            </div>
+                                        </div>
+                                        <div className="space-y-3 text-right">
+                                            <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest block">Logo da Loja</span>
+                                            <button onClick={() => setDiyData({...diyData, showLogo: !diyData.showLogo})} className={`w-12 h-6 rounded-full p-1 transition-all ${diyData.showLogo ? 'bg-emerald-500' : 'bg-slate-800'}`}>
+                                                <div className={`w-4 h-4 bg-white rounded-full transition-all ${diyData.showLogo ? 'translate-x-6' : 'translate-x-0'}`} />
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* 4. ANIMAÇÃO */}
+                                <div className="space-y-3">
+                                    <div className="flex items-center gap-2 text-slate-400"><Sparkles size={14} /><span className="text-[10px] font-black uppercase tracking-widest">Efeito Visual</span></div>
+                                    <div className="grid grid-cols-3 gap-2">
+                                        {['fade', 'slide', 'zoom'].map(anim => (
+                                            <button key={anim} onClick={() => setDiyData({...diyData, animation: anim as any})} className={`py-3 rounded-xl text-[10px] font-black uppercase tracking-widest border-2 transition-all ${diyData.animation === anim ? 'bg-blue-500 border-blue-400 text-white' : 'bg-slate-950 border-white/5 text-slate-600'}`}>{anim}</button>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button onClick={handleFinishArt} className="w-full bg-[#1E5BFF] hover:bg-blue-600 text-white font-black py-5 rounded-2xl shadow-xl active:scale-[0.98] transition-all flex items-center justify-center gap-2 text-xs uppercase tracking-widest">
+                                Salvar arte e continuar
+                                <ArrowRight size={16} />
+                            </button>
+                        </div>
+                    )}
+                </div>
+              </div>
+
+              {/* PRO CHOICE */}
               <button 
-                onClick={() => { setArtChoice('pro'); scrollTo(paymentRef); }}
-                className={`relative p-8 rounded-[2.5rem] border-2 text-left flex flex-col transition-all ${artChoice === 'pro' ? 'bg-gradient-to-br from-slate-800 to-slate-900 border-amber-500 shadow-xl shadow-amber-500/10' : 'bg-slate-900 border-white/5 opacity-80'}`}
+                onClick={() => { setArtChoice('pro'); setIsArtSaved(true); scrollTo(paymentRef); }}
+                className={`relative p-8 rounded-[2.5rem] border-2 text-left flex flex-col transition-all ${artChoice === 'pro' ? 'bg-gradient-to-br from-slate-800 to-slate-900 border-amber-500' : 'bg-slate-900 border-white/5 opacity-80'}`}
               >
-                  <div className="absolute top-4 right-6 bg-amber-400 text-slate-900 text-[8px] font-black px-3 py-1 rounded-full uppercase tracking-widest whitespace-nowrap shadow-lg">Recomendado</div>
+                  <div className="absolute top-4 right-6 bg-amber-400 text-slate-900 text-[8px] font-black px-3 py-1 rounded-full uppercase tracking-widest shadow-lg">Recomendado</div>
                   <div className="w-12 h-12 bg-amber-400/10 rounded-2xl flex items-center justify-center text-amber-400 mb-6 shrink-0"><Rocket size={24} /></div>
                   <h3 className="text-lg font-bold text-white mb-2 leading-tight">Arte com time Localizei</h3>
                   <div className="space-y-2 mb-8">
                     <div className="flex items-center gap-3 text-slate-300"><MessageCircle size={14} className="text-amber-400" /><span className="text-[10px] font-bold">Atendimento via chat após pagamento</span></div>
-                    <div className="flex items-center gap-3 text-slate-300"><Clock size={14} className="text-amber-400" /><span className="text-[10px] font-bold">Prazo de entrega: até 72h</span></div>
+                    <div className="flex items-center gap-3 text-slate-300"><Clock size={14} className="text-amber-400" /><span className="text-[10px] font-bold">Design focado em conversão local</span></div>
                   </div>
                   <div className="flex items-center justify-between mt-auto pt-6 border-t border-white/5">
                     <div className="space-y-1"><span className="text-slate-500 line-through text-xs font-medium">R$ 149,90</span><p className="text-2xl font-black text-white leading-none">R$ 69,90</p></div>
@@ -316,30 +410,27 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
           </div>
         </section>
 
-        {/* BLOCO 5: CHECKOUT (PROGRESSIVO) */}
+        {/* BLOCO 5: CHECKOUT */}
         <section 
           ref={paymentRef}
-          className={`space-y-8 transition-all duration-500 ${!artChoice ? 'opacity-20 pointer-events-none' : 'opacity-100'}`}
+          className={`space-y-8 transition-all duration-500 ${!isArtSaved ? 'opacity-20 pointer-events-none' : 'opacity-100'}`}
         >
             <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-blue-500 flex items-center gap-2 px-1">
                 <Check size={14} /> 5. Finalizar Compra
             </h3>
 
             <div className="bg-slate-900 rounded-[2.5rem] p-8 border border-white/10 shadow-2xl space-y-8">
-                {/* Resumo Detalhado do Investimento */}
                 <div className="space-y-4">
-                    <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Detalhamento do Investimento</p>
+                    <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Resumo do Investimento</p>
                     <div className="space-y-2">
-                        <div className="flex justify-between text-sm"><span className="text-slate-500">Exibição em {selectedMode?.label}</span><span className="font-bold text-white">R$ {selectedMode?.price.toFixed(2)} / bairro</span></div>
-                        <div className="flex justify-between text-sm"><span className="text-slate-500">Bairros Selecionados</span><span className="font-bold text-white">× {selectedNeighborhoods.length}</span></div>
-                        <div className="flex justify-between text-sm"><span className="text-slate-500">Meses de Duração</span><span className="font-bold text-white">× {selectedMonths.length || 1}</span></div>
-                        {artChoice === 'pro' && (
-                            <div className="flex justify-between text-sm text-amber-400"><span className="font-medium">Serviço de Design Pro</span><span className="font-black">+ R$ 69,90</span></div>
-                        )}
+                        <div className="flex justify-between text-sm"><span className="text-slate-500">Exibição: {selectedMode?.label}</span><span className="font-bold text-white">R$ {selectedMode?.price.toFixed(2)}</span></div>
+                        <div className="flex justify-between text-sm"><span className="text-slate-500">Bairros selecionados</span><span className="font-bold text-white">× {selectedNeighborhoods.length}</span></div>
+                        <div className="flex justify-between text-sm"><span className="text-slate-500">Meses de duração</span><span className="font-bold text-white">× {selectedMonths.length || 1}</span></div>
+                        {artChoice === 'pro' && <div className="flex justify-between text-sm text-amber-400"><span className="font-medium">Serviço de Arte Pro</span><span className="font-black">+ R$ 69,90</span></div>}
                     </div>
                     <div className="pt-4 border-t border-white/5 flex justify-between items-center">
                         <span className="text-sm font-bold text-slate-300">Total Geral</span>
-                        <span className="text-2xl font-black text-white tracking-tighter">R$ {totalAmount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                        <span className="text-2xl font-black text-white">R$ {totalAmount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
                     </div>
                 </div>
 
@@ -355,54 +446,36 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
                     </button>
                 </div>
             </div>
-
-            {artChoice === 'pro' && (
-                <div className="bg-blue-500/10 p-5 rounded-3xl border border-blue-500/20 flex gap-4 animate-pulse">
-                    <MessageCircle className="w-6 h-6 text-blue-400 shrink-0" />
-                    <p className="text-[10px] text-blue-100 leading-relaxed font-bold uppercase tracking-tight">
-                        💬 Após o pagamento, nosso time entrará em contato via chat para iniciar a criação do seu banner profissional.
-                    </p>
-                </div>
-            )}
         </section>
       </main>
 
-      {/* FOOTER FIXO: RESUMO E CTA FINAL */}
+      {/* FOOTER FIXO */}
       {!isSuccess && (
       <div className="fixed bottom-0 left-0 right-0 p-6 bg-[#020617]/95 backdrop-blur-2xl border-t border-white/10 z-40 max-w-md mx-auto shadow-[0_-20px_40px_rgba(0,0,0,0.4)]">
-        <div className="flex justify-between items-end mb-6">
-            <div className="space-y-1">
-                <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Total do Investimento</p>
-                <div className="flex flex-wrap gap-x-3 gap-y-1">
-                    <span className="text-[11px] font-bold text-slate-300 flex items-center gap-1"><Check size={10} className="text-blue-500" /> {selectedMode?.label || '--'}</span>
-                    {selectedNeighborhoods.length > 0 && <span className="text-[11px] font-bold text-slate-300 flex items-center gap-1"><Check size={10} className="text-blue-500" /> {selectedNeighborhoods.length} Bairros</span>}
-                    {selectedMonths.length > 0 && <span className="text-[11px] font-bold text-slate-300 flex items-center gap-1"><Check size={10} className="text-blue-500" /> {selectedMonths.length} Meses</span>}
-                </div>
-            </div>
-            <div className="text-right">
-                <p className="text-3xl font-black text-white leading-none tracking-tighter">R$ {totalAmount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
-            </div>
-        </div>
-
         <button 
           onClick={() => { setIsSubmitting(true); setTimeout(() => { setIsSubmitting(false); setIsSuccess(true); }, 2000); }}
-          disabled={isSubmitting || !selectedMode || selectedNeighborhoods.length === 0 || !artChoice}
+          disabled={isSubmitting || !selectedMode || selectedNeighborhoods.length === 0 || !artChoice || !isArtSaved}
           className="w-full bg-[#1E5BFF] hover:bg-[#1749CC] text-white font-black py-5 rounded-[2rem] shadow-xl shadow-blue-500/20 flex items-center justify-center gap-3 active:scale-[0.98] transition-all disabled:opacity-30 disabled:grayscale"
         >
           {isSubmitting ? <Loader2 className="w-6 h-6 animate-spin" /> : (
               <>
-                FINALIZAR COMPRA
+                FINALIZAR COMPRA - R$ {totalAmount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                 <ArrowRight size={18} />
               </>
           )}
         </button>
-        <p className="text-center text-[9px] text-slate-600 font-bold uppercase mt-4 tracking-widest opacity-60">Ambiente Seguro Localizei JPA</p>
       </div>
       )}
 
       <style>{`
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .animate-fade { animation: fadeIn 0.5s ease-out; }
+        .animate-slide { animation: slideIn 0.5s ease-out; }
+        .animate-zoom { animation: zoomIn 0.5s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideIn { from { transform: translateX(-20px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        @keyframes zoomIn { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
       `}</style>
     </div>
   );
