@@ -1,5 +1,5 @@
 
-import React, { useState, useMemo, useRef } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { 
   ChevronLeft, 
   ArrowRight, 
@@ -93,6 +93,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
   const [toast, setToast] = useState<{msg: string, type: 'info' | 'error'} | null>(null);
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
 
+  const periodRef = useRef<HTMLDivElement>(null);
   const neighborhoodRef = useRef<HTMLDivElement>(null);
   const creativeRef = useRef<HTMLDivElement>(null);
   const paymentRef = useRef<HTMLDivElement>(null);
@@ -117,7 +118,20 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
   };
 
   const scrollTo = (ref: React.RefObject<HTMLDivElement | null>) => {
-    setTimeout(() => ref.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+    setTimeout(() => {
+      if (ref.current) {
+        const offset = 100; // Espaço para não bater no topo colado
+        const bodyRect = document.body.getBoundingClientRect().top;
+        const elementRect = ref.current.getBoundingClientRect().top;
+        const elementPosition = elementRect - bodyRect;
+        const offsetPosition = elementPosition - offset;
+
+        window.scrollTo({
+          top: offsetPosition,
+          behavior: 'smooth'
+        });
+      }
+    }, 100);
   };
 
   const checkHoodAvailability = (hood: string, periodsToTest?: string[]): { available: boolean; busyIn: string[] } => {
@@ -128,8 +142,16 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
   };
 
   const togglePeriod = (periodId: string) => {
-    const nextPeriods = selectedPeriods.includes(periodId) ? selectedPeriods.filter(p => p !== periodId) : [...selectedPeriods, periodId];
+    const isAdding = !selectedPeriods.includes(periodId);
+    const nextPeriods = isAdding ? [...selectedPeriods, periodId] : selectedPeriods.filter(p => p !== periodId);
+    
     setSelectedPeriods(nextPeriods);
+
+    // Se acabou de selecionar o primeiro período, rola para os bairros
+    if (isAdding && nextPeriods.length === 1) {
+      scrollTo(neighborhoodRef);
+    }
+
     if (selectedNeighborhoods.length > 0) {
       const validHoods = selectedNeighborhoods.filter(hood => checkHoodAvailability(hood, nextPeriods).available);
       if (validHoods.length < selectedNeighborhoods.length) {
@@ -142,6 +164,9 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
   const selectAllAvailableHoods = () => {
     const availableHoods = NEIGHBORHOODS.filter(hood => checkHoodAvailability(hood).available);
     setSelectedNeighborhoods(availableHoods);
+    if (availableHoods.length > 0) {
+      scrollTo(creativeRef);
+    }
   };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -179,8 +204,8 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
 
   const handleFooterClick = () => {
     if (!selectedMode) return;
-    if (selectedPeriods.length === 0) { showToast("Selecione o período.", "error"); return; }
-    if (selectedNeighborhoods.length === 0) { showToast("Escolha os bairros.", "error"); return; }
+    if (selectedPeriods.length === 0) { showToast("Selecione o período.", "error"); scrollTo(periodRef); return; }
+    if (selectedNeighborhoods.length === 0) { showToast("Escolha os bairros.", "error"); scrollTo(neighborhoodRef); return; }
     if (!isArtSaved) { showToast("Configure a arte do banner.", "error"); scrollTo(creativeRef); return; }
     setIsSubmitting(true);
     setTimeout(() => { setIsSubmitting(false); setIsSuccess(true); }, 2000);
@@ -217,7 +242,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
           </h3>
           <div className="grid grid-cols-1 gap-4">
             {DISPLAY_MODES.map((mode) => (
-              <button key={mode.id} onClick={() => { setSelectedMode(mode); scrollTo(neighborhoodRef); }} className={`relative flex items-start text-left p-6 rounded-[2rem] border-2 transition-all duration-300 gap-5 ${selectedMode?.id === mode.id ? 'bg-blue-600/10 border-blue-500 shadow-lg' : 'bg-white/5 border-white/10'}`}>
+              <button key={mode.id} onClick={() => { setSelectedMode(mode); scrollTo(periodRef); }} className={`relative flex items-start text-left p-6 rounded-[2rem] border-2 transition-all duration-300 gap-5 ${selectedMode?.id === mode.id ? 'bg-blue-600/10 border-blue-500 shadow-lg' : 'bg-white/5 border-white/10'}`}>
                 <div className={`p-4 rounded-2xl shrink-0 ${selectedMode?.id === mode.id ? 'bg-blue-500 text-white shadow-lg' : 'bg-white/5 text-slate-400'}`}><mode.icon size={28} /></div>
                 <div className="flex-1 min-w-0 pr-4">
                   <div className="flex items-center justify-between mb-1">
@@ -232,7 +257,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
         </section>
 
         {/* BLOCO 2 & 3: PERÍODO E BAIRROS */}
-        <section className={`space-y-8 transition-all duration-500 ${!selectedMode ? 'opacity-20 pointer-events-none' : 'opacity-100'}`}>
+        <section ref={periodRef} className={`space-y-8 transition-all duration-500 ${!selectedMode ? 'opacity-20 pointer-events-none' : 'opacity-100'}`}>
           <div className="space-y-5">
             <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-blue-500 flex items-center gap-2 px-1"><Calendar size={14} /> 2. Período</h3>
             <div className="flex gap-3">
@@ -243,9 +268,12 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
                     </button>
                 ))}
             </div>
+            {selectedMode && selectedPeriods.length === 0 && (
+              <p className="text-[10px] text-amber-500 font-bold animate-pulse px-1 uppercase tracking-wider">👉 Agora escolha o período do seu anúncio.</p>
+            )}
           </div>
 
-          <div ref={neighborhoodRef} className={`space-y-6 transition-all ${selectedPeriods.length === 0 ? 'opacity-40 grayscale pointer-events-none' : 'opacity-100'}`}>
+          <div ref={neighborhoodRef} className={`space-y-6 transition-all duration-500 ${selectedPeriods.length === 0 ? 'opacity-20 grayscale pointer-events-none' : 'opacity-100'}`}>
             <div className="flex items-center justify-between px-1">
               <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-blue-500 flex items-center gap-2"><MapPin size={14} /> 3. Bairros</h3>
               <button onClick={selectAllAvailableHoods} className="text-[9px] font-black text-[#1E5BFF] uppercase tracking-widest bg-blue-500/10 px-3 py-1.5 rounded-xl border border-blue-500/20 active:scale-95 transition-all">Todos disponíveis</button>
