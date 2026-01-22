@@ -138,6 +138,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
       }
     }
 
+    // Scroll suave apenas quando seleciona o primeiro mês para guiar o olhar para os bairros
     if (nextMonths.length > 0 && selectedNeighborhoods.length === 0) {
       scrollTo(neighborhoodRef);
     }
@@ -203,7 +204,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
             {DISPLAY_MODES.map((mode) => (
               <button
                 key={mode.id}
-                onClick={() => { setSelectedMode(mode); scrollTo(neighborhoodRef); }}
+                onClick={() => { setSelectedMode(mode); }} // REMOVIDO SCROLL AUTOMÁTICO AQUI
                 className={`relative flex flex-col items-center text-center p-4 rounded-[2rem] border-2 transition-all duration-300 min-h-[140px] justify-center gap-2 ${
                   selectedMode?.id === mode.id 
                   ? 'bg-blue-600/10 border-blue-500 shadow-lg shadow-blue-500/10' 
