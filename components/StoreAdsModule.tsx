@@ -49,6 +49,7 @@ const DISPLAY_MODES = [
     label: 'Home', 
     icon: Home, 
     price: 89.90,
+    originalPrice: 199.90,
     description: 'Exibido no carrossel da página inicial para todos os usuários.',
     whyChoose: 'Ideal para máxima visibilidade imediata.'
   },
@@ -57,6 +58,7 @@ const DISPLAY_MODES = [
     label: 'Categorias', 
     icon: LayoutGrid, 
     price: 49.90,
+    originalPrice: 149.90,
     description: 'Exibido no topo das buscas por produtos ou serviços específicos.',
     whyChoose: 'Impacta o cliente no momento da decisão.'
   },
@@ -65,6 +67,7 @@ const DISPLAY_MODES = [
     label: 'Home + Categorias', 
     icon: Zap, 
     price: 119.90,
+    originalPrice: 349.80,
     description: 'Destaque na página inicial e em todas as categorias.',
     whyChoose: 'Mais alcance, cliques e chances de venda.'
   },
@@ -85,28 +88,16 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
   const creativeRef = useRef<HTMLDivElement>(null);
   const paymentRef = useRef<HTMLDivElement>(null);
 
-  // Lógica de Períodos Dinâmicos de 30 dias
   const dynamicPeriods = useMemo(() => {
     const now = new Date();
     const formatDate = (date: Date) => date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: '2-digit' });
-    
     const end1 = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
     const start2 = new Date(end1.getTime() + 1 * 24 * 60 * 60 * 1000);
     const end2 = new Date(start2.getTime() + 30 * 24 * 60 * 60 * 1000);
 
     return [
-      { 
-        id: 'periodo_1', 
-        label: 'Começar agora', 
-        sub: 'Exibição imediata após aprovação',
-        dates: `${formatDate(now)} → ${formatDate(end1)}`
-      },
-      { 
-        id: 'periodo_2', 
-        label: 'Próximos 30 dias', 
-        sub: 'Ideal para planejar promoções futuras',
-        dates: `${formatDate(start2)} → ${formatDate(end2)}`
-      },
+      { id: 'periodo_1', label: 'Começar agora', sub: 'Exibição imediata', dates: `${formatDate(now)} → ${formatDate(end1)}` },
+      { id: 'periodo_2', label: 'Próximos 30 dias', sub: 'Planejamento futuro', dates: `${formatDate(start2)} → ${formatDate(end2)}` },
     ];
   }, []);
 
@@ -127,12 +118,8 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
   };
 
   const togglePeriod = (periodId: string) => {
-    const nextPeriods = selectedPeriods.includes(periodId) 
-      ? selectedPeriods.filter(p => p !== periodId) 
-      : [...selectedPeriods, periodId];
-    
+    const nextPeriods = selectedPeriods.includes(periodId) ? selectedPeriods.filter(p => p !== periodId) : [...selectedPeriods, periodId];
     setSelectedPeriods(nextPeriods);
-
     if (selectedNeighborhoods.length > 0) {
       const validHoods = selectedNeighborhoods.filter(hood => checkHoodAvailability(hood, nextPeriods).available);
       if (validHoods.length < selectedNeighborhoods.length) {
@@ -153,14 +140,42 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
     scrollTo(paymentRef);
   };
 
-  const totalAmount = useMemo(() => {
-    if (!selectedMode || selectedNeighborhoods.length === 0) return 0;
-    const base = selectedMode.price;
-    const periodsMultiplier = selectedPeriods.length || 1;
-    const hoodsMultiplier = selectedNeighborhoods.length;
+  // Cálculo de Preços Totais (De/Por)
+  const prices = useMemo(() => {
+    if (!selectedMode) return { current: 0, original: 0 };
+    const hoodsMult = Math.max(1, selectedNeighborhoods.length);
+    const periodsMult = Math.max(1, selectedPeriods.length);
     const artExtra = artChoice === 'pro' ? 69.90 : 0;
-    return (base * hoodsMultiplier * periodsMultiplier) + artExtra;
+
+    return {
+      current: (selectedMode.price * hoodsMult * periodsMult) + artExtra,
+      original: (selectedMode.originalPrice * hoodsMult * periodsMult) + artExtra
+    };
   }, [selectedMode, selectedPeriods, selectedNeighborhoods, artChoice]);
+
+  const handleFooterClick = () => {
+    if (!selectedMode) return;
+    
+    if (selectedPeriods.length === 0) {
+        showToast("Selecione pelo menos um período de 30 dias.", "error");
+        return;
+    }
+    if (selectedNeighborhoods.length === 0) {
+        showToast("Escolha em quais bairros deseja anunciar.", "error");
+        return;
+    }
+    if (!artChoice || !isArtSaved) {
+        showToast("Configure o design da sua arte para continuar.", "error");
+        scrollTo(creativeRef);
+        return;
+    }
+
+    setIsSubmitting(true);
+    setTimeout(() => {
+        setIsSubmitting(false);
+        setIsSuccess(true);
+    }, 2000);
+  };
 
   if (isSuccess) {
     return (
@@ -181,8 +196,8 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
     <div className="min-h-screen bg-[#020617] text-slate-100 font-sans flex flex-col selection:bg-blue-500/30 overflow-x-hidden">
       
       {toast && (
-        <div className="fixed top-24 left-1/2 -translate-x-1/2 z-[100] px-6 py-3 rounded-2xl shadow-2xl flex items-center gap-3 animate-in slide-in-from-top-4 border bg-rose-500 border-rose-400 text-white">
-           <AlertTriangle size={18} />
+        <div className={`fixed top-24 left-1/2 -translate-x-1/2 z-[100] px-6 py-3 rounded-2xl shadow-2xl flex items-center gap-3 animate-in slide-in-from-top-4 border ${toast.type === 'error' ? 'bg-rose-600 border-rose-500' : 'bg-blue-600 border-blue-500'} text-white`}>
+           {toast.type === 'error' ? <AlertTriangle size={18} /> : <Info size={18} />}
            <p className="text-xs font-black uppercase tracking-tight">{toast.msg}</p>
         </div>
       )}
@@ -233,33 +248,21 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
           </div>
         </section>
 
-        {/* BLOCO 2: PERÍODO (30 DIAS) */}
-        <section 
-          className={`space-y-8 transition-all duration-500 ${!selectedMode ? 'opacity-20 pointer-events-none' : 'opacity-100'}`}
-        >
+        {/* BLOCO 2: PERÍODO */}
+        <section className={`space-y-8 transition-all duration-500 ${!selectedMode ? 'opacity-20 pointer-events-none' : 'opacity-100'}`}>
           <div>
             <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-blue-500 flex items-center gap-2 px-1 mb-5">
                 <Calendar size={14} /> 2. Escolha o período (30 dias)
             </h3>
-            
             <div className="p-4 bg-blue-500/5 border border-blue-500/10 rounded-2xl mb-6">
                 <p className="text-[10px] text-blue-200 leading-relaxed">
                    Seu banner ficará no ar por 30 dias corridos após a publicação. 
                    {artChoice === 'pro' && ' (A vigência do período de 30 dias inicia após a aprovação da arte).'}
                 </p>
             </div>
-            
             <div className="flex gap-4">
                 {dynamicPeriods.map(p => (
-                    <button 
-                        key={p.id} 
-                        onClick={() => togglePeriod(p.id)}
-                        className={`flex-1 p-5 rounded-3xl border-2 transition-all flex flex-col gap-2 text-left ${
-                            selectedPeriods.includes(p.id) 
-                            ? 'bg-blue-600/10 border-blue-500 shadow-lg' 
-                            : 'bg-white/5 border-white/10'
-                        }`}
-                    >
+                    <button key={p.id} onClick={() => togglePeriod(p.id)} className={`flex-1 p-5 rounded-3xl border-2 transition-all flex flex-col gap-2 text-left ${selectedPeriods.includes(p.id) ? 'bg-blue-600/10 border-blue-500 shadow-lg' : 'bg-white/5 border-white/10'}`}>
                         <div className="flex justify-between items-start">
                             <CheckCircle2 size={16} className={selectedPeriods.includes(p.id) ? 'text-blue-500' : 'text-slate-700'} />
                             <span className="text-[10px] font-bold text-slate-500">30 DIAS</span>
@@ -273,10 +276,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
           </div>
 
           {/* BLOCO 3: BAIRROS */}
-          <div 
-            ref={neighborhoodRef}
-            className={`space-y-6 transition-all duration-500 ${selectedPeriods.length === 0 ? 'opacity-40 grayscale pointer-events-none' : 'opacity-100'}`}
-          >
+          <div ref={neighborhoodRef} className={`space-y-6 transition-all duration-500 ${selectedPeriods.length === 0 ? 'opacity-40 grayscale pointer-events-none' : 'opacity-100'}`}>
             <div className="flex flex-col gap-1 px-1">
                 <div className="flex items-center justify-between">
                   <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-blue-500 flex items-center gap-2">
@@ -290,10 +290,9 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
                     <div className="flex items-center justify-between mt-4"><div className="flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 px-3 py-2 rounded-xl"><Unlock size={12} className="text-emerald-500" /><p className="text-[9px] text-emerald-500 uppercase font-black tracking-widest leading-none">Disponibilidade atualizada</p></div>{selectedNeighborhoods.length > 0 && <span className="text-[10px] font-black text-blue-400 uppercase tracking-widest">{selectedNeighborhoods.length} selecionados</span>}</div>
                 )}
             </div>
-
             <div className="grid grid-cols-2 gap-3">
                 {NEIGHBORHOODS.map(hood => {
-                    const { available, busyIn } = checkHoodAvailability(hood);
+                    const { available } = checkHoodAvailability(hood);
                     const isSelected = selectedNeighborhoods.includes(hood);
                     return (
                         <button key={hood} onClick={() => { if (available) { setSelectedNeighborhoods(prev => prev.includes(hood) ? prev.filter(h => h !== hood) : [...prev, hood]); if (!isSelected) scrollTo(creativeRef); } }} className={`p-4 rounded-2xl border-2 flex flex-col justify-between transition-all min-h-[90px] relative text-left ${!available ? 'bg-slate-900/50 border-white/5 opacity-50 cursor-default' : isSelected ? 'bg-blue-600/10 border-blue-500 shadow-lg shadow-blue-500/10 scale-[1.02]' : 'bg-slate-900 border-white/5 hover:border-white/10'}`}>
@@ -310,10 +309,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
         </section>
 
         {/* BLOCO 4: DESIGN */}
-        <section 
-          ref={creativeRef}
-          className={`space-y-8 transition-all duration-500 ${selectedNeighborhoods.length === 0 ? 'opacity-20 pointer-events-none' : 'opacity-100'}`}
-        >
+        <section ref={creativeRef} className={`space-y-8 transition-all duration-500 ${selectedNeighborhoods.length === 0 ? 'opacity-20 pointer-events-none' : 'opacity-100'}`}>
           <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-blue-500 flex items-center gap-2 px-1"><Palette size={14} /> 4. Design da Arte</h3>
           <div className="space-y-6">
               <div onClick={() => { setArtChoice('diy'); setIsArtSaved(false); }} className={`rounded-[2.5rem] border-2 transition-all cursor-pointer overflow-hidden ${artChoice === 'diy' ? 'bg-slate-900 border-blue-500 shadow-2xl shadow-blue-500/10' : 'bg-slate-900 border-white/5 opacity-80 hover:opacity-100'}`}>
@@ -345,7 +341,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
                         <div className="flex justify-between text-sm"><span className="text-slate-500">Período total</span><span className="font-bold text-white">{selectedPeriods.length * 30} dias ({selectedPeriods.length}x 30d)</span></div>
                         {artChoice === 'pro' && <div className="flex justify-between text-sm text-amber-400"><span className="font-medium">Arte Profissional</span><span className="font-black">+ R$ 69,90</span></div>}
                     </div>
-                    <div className="pt-4 border-t border-white/5 flex justify-between items-center"><span className="text-sm font-bold text-slate-300">Total Geral</span><span className="text-2xl font-black text-white">R$ {totalAmount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span></div>
+                    <div className="pt-4 border-t border-white/5 flex justify-between items-center"><span className="text-sm font-bold text-slate-300">Total Geral</span><span className="text-2xl font-black text-white">R$ {prices.current.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span></div>
                 </div>
                 <div className="space-y-3 pt-6 border-t border-white/10">
                     <button onClick={() => setPaymentMethod('pix')} className={`w-full p-5 rounded-2xl border-2 flex items-center justify-between transition-all ${paymentMethod === 'pix' ? 'bg-blue-600/10 border-blue-500' : 'bg-slate-950 border-transparent'}`}><div className="flex items-center gap-4"><QrCode size={20} className={paymentMethod === 'pix' ? 'text-blue-400' : 'text-slate-600'} /><span className="font-bold text-sm">PIX (Imediato)</span></div>{paymentMethod === 'pix' && <CheckCircle2 size={18} className="text-blue-500" />}</button>
@@ -355,14 +351,36 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
         </section>
       </main>
 
+      {/* FOOTER FIXO REFORMULADO */}
       {!isSuccess && (
       <div className="fixed bottom-0 left-0 right-0 p-6 bg-[#020617]/95 backdrop-blur-2xl border-t border-white/10 z-40 max-w-md mx-auto shadow-[0_-20px_40px_rgba(0,0,0,0.4)]">
         <button 
-          onClick={() => { setIsSubmitting(true); setTimeout(() => { setIsSubmitting(false); setIsSuccess(true); }, 2000); }}
-          disabled={isSubmitting || !selectedMode || selectedNeighborhoods.length === 0 || !artChoice || !isArtSaved || selectedPeriods.length === 0}
-          className="w-full bg-[#1E5BFF] hover:bg-[#1749CC] text-white font-black py-5 rounded-[2rem] shadow-xl shadow-blue-500/20 flex items-center justify-center gap-3 active:scale-[0.98] transition-all disabled:opacity-30 disabled:grayscale"
+          onClick={handleFooterClick}
+          disabled={isSubmitting}
+          className={`w-full py-5 rounded-[2rem] shadow-xl shadow-blue-500/20 flex flex-col items-center justify-center transition-all active:scale-[0.98] ${
+            selectedMode 
+            ? 'bg-[#1E5BFF] text-white opacity-100' 
+            : 'bg-white/5 text-slate-500 opacity-50 cursor-not-allowed'
+          }`}
         >
-          {isSubmitting ? <Loader2 className="w-6 h-6 animate-spin" /> : (<>PUBLICAR - R$ {totalAmount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} <ArrowRight size={18} /></>)}
+          {isSubmitting ? (
+              <Loader2 className="w-6 h-6 animate-spin" />
+          ) : !selectedMode ? (
+              <span className="font-black text-sm uppercase tracking-widest">Escolha onde aparecer</span>
+          ) : (
+              <div className="flex flex-col items-center">
+                  <div className="flex items-center gap-2 mb-0.5">
+                    <span className="text-[10px] font-black text-white/60 uppercase tracking-widest">Publicar: {selectedMode.label}</span>
+                    <ArrowRight size={14} className="text-white/60" />
+                  </div>
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-xs font-bold text-white/40 line-through">R$ {prices.original.toFixed(2).replace('.', ',')}</span>
+                    <span className="text-xl font-black text-white">R$ {prices.current.toFixed(2).replace('.', ',')}</span>
+                    <span className="text-[10px] font-black text-emerald-400 ml-1 uppercase tracking-tighter">({Math.round((1 - prices.current/prices.original) * 100)}% OFF)</span>
+                  </div>
+                  <span className="text-[9px] font-black text-white/30 uppercase tracking-[0.2em] mt-1">por {selectedPeriods.length > 1 ? selectedPeriods.length * 30 : 30} dias de exibição</span>
+              </div>
+          )}
         </button>
       </div>
       )}
