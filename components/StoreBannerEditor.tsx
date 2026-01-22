@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { 
   ChevronLeft, 
@@ -39,8 +38,8 @@ import {
   Circle,
   Ban,
   TextQuote,
-  // Added Check to fix "Cannot find name 'Check'" error on line 449
-  Check
+  Check,
+  AlertCircle
 } from 'lucide-react';
 
 const ICON_COMPONENTS: Record<string, React.ElementType> = {
@@ -195,10 +194,11 @@ export const StoreBannerEditor: React.FC<StoreBannerEditorProps> = ({ storeName,
                 )}
 
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-3 w-fit">
+                  <div className="flex items-center gap-2 mb-3 w-fit transition-all duration-300">
+                      {/* LÓGICA DE PREVIEW DA LOGO REATIVA */}
                       {design.logoDisplay !== 'none' && storeLogo && (
-                          <div className={`shrink-0 overflow-hidden bg-white/20 p-0.5 border border-white/20 ${design.logoDisplay === 'round' ? 'rounded-full' : 'rounded-lg'}`}>
-                              <img src={storeLogo} className={`w-5 h-5 object-contain ${design.logoDisplay === 'round' ? 'rounded-full' : 'rounded-md'}`} alt="Logo" />
+                          <div className={`shrink-0 overflow-hidden bg-white/20 p-0.5 border border-white/20 transition-all duration-300 ${design.logoDisplay === 'round' ? 'rounded-full' : 'rounded-lg animate-in zoom-in-50'}`}>
+                              <img src={storeLogo} className={`w-5 h-5 object-contain transition-all duration-300 ${design.logoDisplay === 'round' ? 'rounded-full' : 'rounded-md'}`} alt="Logo" />
                           </div>
                       )}
                       <div className="bg-white/10 backdrop-blur-md px-2 py-0.5 rounded-lg border border-white/10 w-fit">
@@ -353,40 +353,47 @@ export const StoreBannerEditor: React.FC<StoreBannerEditorProps> = ({ storeName,
           </div>
         </section>
 
-        {/* BLOCO 4: LOGO DA LOJA */}
+        {/* BLOCO 4: LOGO DA LOJA - REATIVIDADE CORRIGIDA */}
         <section className="space-y-4">
           <div className="flex flex-col">
             <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-blue-500 flex items-center gap-2">
               <Store size={14} /> 4. Logo da Loja
             </h3>
-            <p className="text-[9px] text-slate-500 uppercase font-bold mt-1 ml-6">Sua marca aparece em destaque.</p>
+            <p className="text-[9px] text-slate-500 uppercase font-bold mt-1 ml-6">Escolha como sua logo aparece no banner.</p>
           </div>
           
-          <div className="grid grid-cols-3 gap-3">
-              <button 
-                onClick={() => setDesign({...design, logoDisplay: 'square'})}
-                className={`flex flex-col items-center gap-2 p-4 rounded-[1.5rem] border-2 transition-all ${design.logoDisplay === 'square' ? 'bg-blue-600/10 border-blue-500 text-white shadow-lg' : 'bg-slate-900 border-white/5 text-slate-500'}`}
-              >
-                <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center"><Square size={20} /></div>
-                <span className="text-[9px] font-black uppercase tracking-widest">Quadrado</span>
-              </button>
-              
-              <button 
-                onClick={() => setDesign({...design, logoDisplay: 'round'})}
-                className={`flex flex-col items-center gap-2 p-4 rounded-[1.5rem] border-2 transition-all ${design.logoDisplay === 'round' ? 'bg-blue-600/10 border-blue-500 text-white shadow-lg' : 'bg-slate-900 border-white/5 text-slate-500'}`}
-              >
-                <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center"><Circle size={20} /></div>
-                <span className="text-[9px] font-black uppercase tracking-widest">Redondo</span>
-              </button>
+          {!storeLogo ? (
+            <div className="bg-amber-500/10 border border-amber-500/20 p-4 rounded-2xl flex items-center gap-3">
+              <AlertCircle size={18} className="text-amber-500" />
+              <p className="text-[10px] font-bold text-amber-500 uppercase">Logo não cadastrada no perfil.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-3 gap-3">
+                <button 
+                  onClick={() => setDesign({...design, logoDisplay: 'square'})}
+                  className={`flex flex-col items-center gap-2 p-4 rounded-[1.5rem] border-2 transition-all active:scale-95 ${design.logoDisplay === 'square' ? 'bg-blue-600/10 border-blue-500 text-white shadow-lg' : 'bg-slate-900 border-white/5 text-slate-500'}`}
+                >
+                  <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center"><Square size={20} /></div>
+                  <span className="text-[9px] font-black uppercase tracking-widest">Quadrado</span>
+                </button>
+                
+                <button 
+                  onClick={() => setDesign({...design, logoDisplay: 'round'})}
+                  className={`flex flex-col items-center gap-2 p-4 rounded-[1.5rem] border-2 transition-all active:scale-95 ${design.logoDisplay === 'round' ? 'bg-blue-600/10 border-blue-500 text-white shadow-lg' : 'bg-slate-900 border-white/5 text-slate-500'}`}
+                >
+                  <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center"><Circle size={20} /></div>
+                  <span className="text-[9px] font-black uppercase tracking-widest">Redondo</span>
+                </button>
 
-              <button 
-                onClick={() => setDesign({...design, logoDisplay: 'none'})}
-                className={`flex flex-col items-center gap-2 p-4 rounded-[1.5rem] border-2 transition-all ${design.logoDisplay === 'none' ? 'bg-blue-600/10 border-blue-500 text-white shadow-lg' : 'bg-slate-900 border-white/5 text-slate-500'}`}
-              >
-                <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center"><Ban size={20} /></div>
-                <span className="text-[9px] font-black uppercase tracking-widest">Sem logo</span>
-              </button>
-          </div>
+                <button 
+                  onClick={() => setDesign({...design, logoDisplay: 'none'})}
+                  className={`flex flex-col items-center gap-2 p-4 rounded-[1.5rem] border-2 transition-all active:scale-95 ${design.logoDisplay === 'none' ? 'bg-blue-600/10 border-blue-500 text-white shadow-lg' : 'bg-slate-900 border-white/5 text-slate-500'}`}
+                >
+                  <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center"><Ban size={20} /></div>
+                  <span className="text-[9px] font-black uppercase tracking-widest">Sem logo</span>
+                </button>
+            </div>
+          )}
         </section>
 
         {/* BLOCO 5: ÍCONE DECORATIVO */}
@@ -446,7 +453,7 @@ export const StoreBannerEditor: React.FC<StoreBannerEditorProps> = ({ storeName,
           </div>
         </section>
 
-        {/* BUFFER DE SEGURANÇA (Para o usuário ver que há espaço) */}
+        {/* BUFFER DE SEGURANÇA */}
         <div className="py-12 flex flex-col items-center opacity-20">
             <Check size={32} className="text-blue-500" />
             <p className="text-[9px] font-bold uppercase tracking-[0.4em] mt-2">Fim das configurações</p>
@@ -454,14 +461,14 @@ export const StoreBannerEditor: React.FC<StoreBannerEditorProps> = ({ storeName,
 
       </main>
 
-      {/* FOOTER CTA FIXO COM BLUR E PADDING */}
+      {/* FOOTER CTA */}
       <div className="fixed bottom-0 left-0 right-0 p-6 bg-slate-900/90 backdrop-blur-2xl border-t border-white/10 z-[100] max-w-md mx-auto">
         <button onClick={() => onSave(design)} className="w-full py-5 bg-[#1E5BFF] text-white font-black rounded-[2rem] shadow-2xl shadow-blue-500/30 flex items-center justify-center gap-3 active:scale-[0.98] transition-all uppercase tracking-[0.2em] text-xs">
           <Save size={18} /> CONCLUIR ARTE
         </button>
       </div>
 
-      {/* MODAIS (ÍCONES E COR) */}
+      {/* MODAIS */}
       {showIconPicker && (
         <div className="fixed inset-0 z-[120] bg-black/80 backdrop-blur-sm flex items-end animate-in fade-in duration-300">
           <div className="w-full bg-slate-900 rounded-t-[3rem] p-8 pb-12 animate-in slide-in-from-bottom duration-500 border-t border-white/10 max-w-md mx-auto h-[70vh] flex flex-col shadow-2xl">
