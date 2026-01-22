@@ -40,7 +40,7 @@ const WEEK_DAYS = [
   { key: 'segunda', label: 'Segunda-feira' },
   { key: 'terca', label: 'Terça-feira' },
   { key: 'quarta', label: 'Quarta-feira' },
-  { key: 'quinta', label: 'Quinta-feira' },
+  { key: 'quinta', label: 'Quarta-feira' },
   { key: 'sexta', label: 'Sexta-feira' },
   { key: 'sabado', label: 'Sábado' },
   { key: 'domingo', label: 'Domingo' },
@@ -240,33 +240,33 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
   }, [user]);
 
   const handleSave = async () => {
-    // 1. VALIDAÇÃO DE LOGO
+    // 1. LOGO DA LOJA * (OBRIGATÓRIO)
     if (!formData.logo_url) {
-      alert("A Logo da loja é OBRIGATÓRIA para aparecer no app.");
+      alert("Logo obrigatória para aparecer no app.");
       return;
     }
 
-    // 2. VALIDAÇÃO FISCAL
+    // 2. IDENTIFICAÇÃO FISCAL * (OBRIGATÓRIO)
     if (!formData.razao_social || !formData.cnpj || !formData.email_fiscal || !formData.whatsapp_financeiro) {
       alert("Preencha todos os campos obrigatórios da Identificação Fiscal.");
       return;
     }
 
-    // 3. VALIDAÇÃO PÚBLICA
+    // 3. LOJA NO APP * (OBRIGATÓRIO)
     if (!formData.nome_exibido || !formData.whatsapp_publico) {
-      alert("Nome e WhatsApp da Loja são campos obrigatórios.");
+      alert("Nome exibido e WhatsApp da Loja são campos obrigatórios.");
       return;
     }
 
-    // 4. VALIDAÇÃO CLASSIFICAÇÃO
+    // 4. CLASSIFICAÇÃO * (OBRIGATÓRIO)
     if (!formData.category || !formData.subcategory) {
       alert("Escolha uma Categoria e Subcategoria para sua loja.");
       return;
     }
 
-    // 5. VALIDAÇÃO ENDEREÇO
+    // 5. ENDEREÇO * (OBRIGATÓRIO)
     if (!formData.is_delivery_only) {
-      if (!formData.cep || !formData.rua || !formData.numero || !formData.bairro || !formData.cidade) {
+      if (!formData.cep || !formData.rua || !formData.numero || !formData.bairro || !formData.cidade || !formData.estado) {
         alert("Preencha o endereço completo ou marque que atende somente online.");
         return;
       }
@@ -277,7 +277,7 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
       const { error } = await supabase.from('merchants').upsert({
         owner_id: user?.id,
         ...formData,
-        name: formData.nome_exibido, // Sincroniza para busca legada
+        name: formData.nome_exibido, 
         updated_at: new Date().toISOString()
       }, { onConflict: 'owner_id' });
       
@@ -285,7 +285,12 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
       
       setShowSuccess(true);
       setTimeout(() => setShowSuccess(false), 3000);
-    } catch (err) { alert('Erro ao salvar informações.'); } finally { setIsSaving(false); }
+    } catch (err) { 
+      console.error(err);
+      alert('Erro ao salvar alterações. Verifique sua conexão.'); 
+    } finally { 
+      setIsSaving(false); 
+    }
   };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>, target: 'logo_url' | 'banner_url') => {
@@ -331,7 +336,7 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
       merchantId: user?.id,
       createdAt: new Date().toISOString()
     };
-    // Simulação de salvamento local ou envio ADM
+    
     const saved = localStorage.getItem('taxonomy_suggestions') || '[]';
     localStorage.setItem('taxonomy_suggestions', JSON.stringify([...JSON.parse(saved), suggestion]));
     
@@ -344,16 +349,14 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
   if (isLoading) return <div className="min-h-screen flex items-center justify-center bg-white dark:bg-gray-950"><Loader2 className="animate-spin text-[#1E5BFF]" /></div>;
 
   return (
-    <div className="min-h-screen bg-[#F8F9FC] dark:bg-gray-950 font-sans pb-48 animate-in slide-in-from-right duration-300">
+    <div className="min-h-screen bg-[#F8F9FC] dark:bg-gray-950 font-sans pb-32 animate-in slide-in-from-right duration-300">
       
       {/* HEADER */}
-      <div className="sticky top-0 z-40 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md px-5 h-20 flex items-center justify-between border-b border-gray-100 dark:border-gray-800">
-        <div className="flex items-center gap-4">
-          <button onClick={onBack} className="p-2.5 bg-gray-100 dark:bg-gray-800 rounded-2xl hover:bg-gray-200 transition-colors">
-            <ChevronLeft className="w-6 h-6 text-gray-800 dark:text-white" />
-          </button>
-          <h1 className="font-black text-lg text-gray-900 dark:text-white uppercase tracking-tighter">Perfil da Loja</h1>
-        </div>
+      <div className="sticky top-0 z-40 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md px-5 h-20 flex items-center gap-4 border-b border-gray-100 dark:border-gray-800">
+        <button onClick={onBack} className="p-2.5 bg-gray-100 dark:bg-gray-800 rounded-2xl hover:bg-gray-200 transition-colors">
+          <ChevronLeft className="w-6 h-6 text-gray-800 dark:text-white" />
+        </button>
+        <h1 className="font-black text-lg text-gray-900 dark:text-white uppercase tracking-tighter">Perfil da Loja</h1>
       </div>
 
       <div className="p-6 space-y-12 max-w-md mx-auto">
@@ -590,18 +593,18 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
                 })}
             </div>
         </section>
-      </div>
 
-      {/* BOTÃO FIXO FINAL (OBRIGATÓRIO) */}
-      <div className="fixed bottom-0 left-0 right-0 p-6 bg-white/90 dark:bg-gray-950/90 backdrop-blur-md border-t border-gray-100 dark:border-gray-800 z-50 max-w-md mx-auto">
-        <button 
-          onClick={handleSave} 
-          disabled={isSaving} 
-          className="w-full bg-[#1E5BFF] text-white font-black py-5 rounded-[2rem] shadow-2xl active:scale-[0.98] transition-all flex items-center justify-center gap-3 disabled:opacity-50"
-        >
-          {isSaving ? <Loader2 className="animate-spin" /> : <Save size={20} />}
-          SALVAR INFORMAÇÕES
-        </button>
+        {/* BOTÃO FINAL DE SALVAR ALTERAÇÕES (AJUSTADO PARA FLOW) */}
+        <div className="pt-6 pb-12">
+            <button 
+                onClick={handleSave} 
+                disabled={isSaving} 
+                className="w-full bg-[#1E5BFF] text-white font-black py-5 rounded-[2rem] shadow-2xl active:scale-[0.98] transition-all flex items-center justify-center gap-3 disabled:opacity-50"
+            >
+                {isSaving ? <Loader2 className="animate-spin" /> : <Save size={20} />}
+                SALVAR ALTERAÇÕES
+            </button>
+        </div>
       </div>
 
       {/* MODAL DE SUGESTÃO TAXONOMIA */}
@@ -637,8 +640,9 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
       {showSuccess && (
         <div className="fixed inset-0 z-[150] bg-white/95 dark:bg-gray-950/95 flex flex-col items-center justify-center p-6 animate-in fade-in duration-500">
             <div className="w-20 h-20 bg-emerald-500 rounded-[2.5rem] flex items-center justify-center text-white mb-6 shadow-xl shadow-emerald-500/20"><CheckCircle2 size={40} /></div>
-            <h2 className="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tighter text-center">Informações Salvas!</h2>
-            <p className="text-gray-500 text-sm font-medium mt-1">Seu perfil foi atualizado com sucesso.</p>
+            <h2 className="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tighter text-center">Perfil Atualizado!</h2>
+            <p className="text-gray-500 text-sm font-medium mt-1">Perfil da loja atualizado com sucesso</p>
+            <button onClick={() => setShowSuccess(false)} className="mt-8 text-[10px] font-black text-[#1E5BFF] uppercase tracking-widest">Fechar</button>
         </div>
       )}
     </div>
