@@ -1,19 +1,14 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { 
   ChevronLeft, 
   Camera, 
   Store as StoreIcon, 
-  Mail, 
   Phone, 
-  MapPin, 
   CheckCircle2, 
   Loader2, 
   Save, 
   Info,
-  Clock,
-  Globe,
-  Instagram,
   Hash,
   X,
   Plus,
@@ -24,38 +19,123 @@ import {
   HelpCircle,
   Pencil,
   Trash2,
-  Image as ImageIcon
+  Check
 } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import { useAuth } from '../contexts/AuthContext';
 import { CATEGORIES, SUBCATEGORIES, SPECIALTIES } from '../constants';
-import { TaxonomyType, TaxonomyStatus } from '../types';
+import { TaxonomyType } from '../types';
 
 interface StoreProfileEditProps {
   onBack: () => void;
 }
 
-interface BusinessHour {
-  day: string;
-  open: string;
-  close: string;
-  closed: boolean;
-}
+// --- Componente de Seleção Customizado (Campo + Dropdown) ---
+const TaxonomySelect: React.FC<{
+  label: string;
+  placeholder: string;
+  options: { name: string; icon?: React.ReactNode }[];
+  selected: string[];
+  onSelect: (name: string) => void;
+  onRemove: (name: string) => void;
+  multiple?: boolean;
+  onSuggest: () => void;
+  helperText?: string;
+}> = ({ label, placeholder, options, selected, onSelect, onRemove, multiple = false, onSuggest, helperText }) => {
+    const [isOpen, setIsOpen] = useState(false);
+    const [search, setSearch] = useState('');
 
-const DAYS_OF_WEEK = [
-  'Segunda-feira', 'Terça-feira', 'Quarta-feira', 
-  'Quinta-feira', 'Sexta-feira', 'Sábado', 'Domingo'
-];
+    const filteredOptions = options.filter(opt => 
+        opt.name.toLowerCase().includes(search.toLowerCase())
+    );
+
+    return (
+        <div className="space-y-2 relative animate-in fade-in duration-300">
+            <div className="flex justify-between items-center px-1">
+                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{label}</label>
+                {helperText && <span className="text-[9px] text-[#1E5BFF] font-bold">{helperText}</span>}
+            </div>
+            
+            <div className="relative">
+                <div 
+                    onClick={() => setIsOpen(!isOpen)}
+                    className={`w-full p-4 bg-white dark:bg-gray-900 border rounded-2xl flex items-center justify-between cursor-pointer transition-all ${isOpen ? 'border-[#1E5BFF] ring-4 ring-blue-500/5' : 'border-gray-100 dark:border-gray-800'}`}
+                >
+                    <div className="flex flex-wrap gap-2 flex-1">
+                        {selected.length === 0 ? (
+                            <span className="text-gray-400 text-sm">{placeholder}</span>
+                        ) : (
+                            selected.map(item => (
+                                <span key={item} className="bg-blue-50 dark:bg-blue-900/30 text-[#1E5BFF] px-2.5 py-1 rounded-lg text-xs font-bold flex items-center gap-1.5 border border-blue-100 dark:border-blue-800 animate-in zoom-in-95">
+                                    {item}
+                                    <X size={12} className="cursor-pointer hover:text-red-500" onClick={(e) => { e.stopPropagation(); onRemove(item); }} />
+                                </span>
+                            ))
+                        )}
+                    </div>
+                    <ChevronDown size={18} className={`text-gray-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+                </div>
+
+                {isOpen && (
+                    <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl shadow-2xl z-[100] overflow-hidden animate-in slide-in-from-top-2">
+                        <div className="p-3 border-b border-gray-50 dark:border-gray-800 flex items-center gap-2">
+                            <Search size={16} className="text-gray-400" />
+                            <input 
+                                autoFocus
+                                value={search}
+                                onChange={e => setSearch(e.target.value)}
+                                placeholder="Filtrar opções..."
+                                className="flex-1 bg-transparent border-none outline-none text-sm dark:text-white"
+                            />
+                        </div>
+                        <div className="max-h-60 overflow-y-auto no-scrollbar py-2">
+                            {filteredOptions.length > 0 ? filteredOptions.map(opt => {
+                                const isSelected = selected.includes(opt.name);
+                                return (
+                                    <button
+                                        key={opt.name}
+                                        type="button"
+                                        onClick={() => { onSelect(opt.name); if (!multiple) setIsOpen(false); }}
+                                        className={`w-full px-4 py-3 text-left text-sm flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors ${isSelected ? 'text-[#1E5BFF] font-bold' : 'text-gray-600 dark:text-gray-300'}`}
+                                    >
+                                        <div className="flex items-center gap-3">
+                                            {opt.icon && <span className="opacity-50 scale-75">{opt.icon}</span>}
+                                            {opt.name}
+                                        </div>
+                                        {isSelected && <Check size={16} />}
+                                    </button>
+                                );
+                            }) : (
+                                <div className="px-4 py-6 text-center">
+                                    <p className="text-xs text-gray-400">Nenhum resultado encontrado.</p>
+                                    <button 
+                                        type="button"
+                                        onClick={() => { onSuggest(); setIsOpen(false); }}
+                                        className="mt-2 text-[#1E5BFF] text-xs font-bold hover:underline flex items-center gap-1 mx-auto"
+                                    >
+                                        <Plus size={12} /> Sugerir nova opção
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                )}
+            </div>
+            {isOpen && <div className="fixed inset-0 z-[90]" onClick={() => setIsOpen(false)} />}
+        </div>
+    );
+};
 
 export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) => {
   const { user } = useAuth();
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
-
-  // Suggestion Modal State
-  const [suggestionModal, setSuggestionModal] = useState<{ isOpen: boolean; type: TaxonomyType; parentId?: string; parentName?: string } | null>(null);
+  
+  // Modals
+  const [suggestionModal, setSuggestionModal] = useState<{ isOpen: boolean; type: TaxonomyType; parentName?: string } | null>(null);
   const [suggestionName, setSuggestionName] = useState('');
+  const [showMultiCatPrompt, setShowMultiCatPrompt] = useState(false);
 
   // Form State
   const [formData, setFormData] = useState({
@@ -63,175 +143,98 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
     cnpj: '',
     email: '',
     whatsapp: '',
-    phone: '',
-    website: '',
-    instagram: '',
     logo_url: '',
     banner_url: '',
     categories: [] as string[],
     subcategories: [] as string[],
-    specialties: [] as string[],
-    description: '',
-    notes: '',
-    cep: '',
-    street: '',
-    number: '',
-    complement: '',
-    neighborhood: '',
-    city: 'Rio de Janeiro',
-    state: 'RJ',
-    is_online_only: false,
+    specialties: [] as string[]
   });
-
-  const [hours, setHours] = useState<BusinessHour[]>(
-    DAYS_OF_WEEK.map(day => ({ day, open: '09:00', close: '18:00', closed: false }))
-  );
 
   useEffect(() => {
     if (!user) return;
-
     const fetchStoreData = async () => {
       try {
-        const { data, error } = await supabase
-          .from('merchants')
-          .select('*, merchant_hours(*)')
-          .eq('owner_id', user.id)
-          .maybeSingle();
-
+        const { data } = await supabase.from('merchants').select('*').eq('owner_id', user.id).maybeSingle();
         if (data) {
-          setFormData({
-            ...formData,
+          setFormData(prev => ({
+            ...prev,
             name: data.name || '',
             cnpj: data.cnpj || '',
             email: data.email || '',
             whatsapp: data.whatsapp || '',
-            phone: data.phone || '',
-            website: data.website || '',
-            instagram: data.instagram || '',
             logo_url: data.logo_url || '',
             banner_url: data.banner_url || '',
-            categories: data.categories || (data.category ? [data.category] : []),
+            categories: data.categories || [],
             subcategories: data.subcategories || [],
             specialties: data.specialties || [],
-            description: data.description || '',
-            notes: data.notes || '',
-            cep: data.cep || '',
-            street: data.street || '',
-            number: data.number || '',
-            complement: data.complement || '',
-            neighborhood: data.neighborhood || '',
-            is_online_only: data.is_online_only || false,
-          });
-
-          if (data.merchant_hours && data.merchant_hours.length > 0) {
-            setHours(data.merchant_hours);
-          }
+          }));
         }
-      } catch (e) {
-        console.warn('Erro ao carregar dados da loja:', e);
-      } finally {
-        setIsLoading(false);
-      }
+      } catch (e) { console.warn(e); } finally { setIsLoading(false); }
     };
-
     fetchStoreData();
   }, [user]);
 
-  const handleSave = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!user) return;
-
-    if (!formData.logo_url) {
-      alert('A Logo da loja é obrigatória para aparecer no aplicativo.');
+  const handleSave = async (e?: React.FormEvent) => {
+    e?.preventDefault();
+    if (!formData.logo_url || !formData.name || formData.categories.length === 0) {
+      alert('Preencha os campos obrigatórios (Logo, Nome e pelo menos 1 Categoria)');
       return;
     }
-
-    if (!formData.name || !formData.cnpj || !formData.email || !formData.whatsapp || formData.categories.length === 0) {
-      alert('Por favor, preencha todos os campos obrigatórios marcados com *');
-      return;
-    }
-
     setIsSaving(true);
     try {
-      const { error: merchantError } = await supabase
-        .from('merchants')
-        .upsert({
-          owner_id: user.id,
-          ...formData,
-          updated_at: new Date().toISOString()
-        }, { onConflict: 'owner_id' });
-
-      if (merchantError) throw merchantError;
-      
+      const { error } = await supabase.from('merchants').upsert({ owner_id: user?.id, ...formData }, { onConflict: 'owner_id' });
+      if (error) throw error;
       setShowSuccess(true);
       setTimeout(() => setShowSuccess(false), 3000);
-    } catch (err) {
-      console.error(err);
-      alert('Erro ao salvar perfil. Tente novamente.');
-    } finally {
-      setIsSaving(false);
-    }
+    } catch (err) { alert('Erro ao salvar. Tente novamente.'); } finally { setIsSaving(false); }
   };
 
-  // --- Image Handlers (Simulated) ---
-  const handleEditLogo = () => {
-    // Em prod: abriria picker de arquivos
-    const mockUrl = `https://ui-avatars.com/api/?name=${formData.name || 'Loja'}&background=1E5BFF&color=fff&size=512`;
-    setFormData({ ...formData, logo_url: mockUrl });
+  // --- Lógica de Taxonomia Cascata ---
+  
+  const addCategory = (name: string) => {
+    if (formData.categories.includes(name)) return;
+    setFormData(prev => ({ ...prev, categories: [...prev.categories, name] }));
+    setShowMultiCatPrompt(true);
   };
 
-  const handleRemoveLogo = () => {
-    setFormData({ ...formData, logo_url: '' });
+  const removeCategory = (name: string) => {
+    const subsOfRemoved = (SUBCATEGORIES[name] || []).map(s => s.name);
+    const newSubs = formData.subcategories.filter(s => !subsOfRemoved.includes(s));
+    const specialtiesToKeep = newSubs.flatMap(s => SPECIALTIES[s] || []);
+    const newSpecs = formData.specialties.filter(spec => specialtiesToKeep.includes(spec));
+    setFormData(prev => ({ 
+        ...prev, 
+        categories: prev.categories.filter(c => c !== name),
+        subcategories: newSubs,
+        specialties: newSpecs
+    }));
   };
 
-  const handleEditBanner = () => {
-    // Em prod: abriria picker de arquivos
-    const mockBanner = `https://images.unsplash.com/photo-1555396273-367ea4eb4db5?q=80&w=1200&auto=format&fit=crop`;
-    setFormData({ ...formData, banner_url: mockBanner });
+  const addSubcategory = (name: string) => {
+    if (formData.subcategories.includes(name)) return;
+    setFormData(prev => ({ ...prev, subcategories: [...prev.subcategories, name] }));
   };
 
-  const handleRemoveBanner = () => {
-    setFormData({ ...formData, banner_url: '' });
+  const removeSubcategory = (name: string) => {
+    const specsOfRemoved = SPECIALTIES[name] || [];
+    const newSpecs = formData.specialties.filter(s => !specsOfRemoved.includes(s));
+    setFormData(prev => ({ 
+        ...prev, 
+        subcategories: prev.subcategories.filter(s => s !== name),
+        specialties: newSpecs
+    }));
   };
 
-  // --- Taxonomy Handlers ---
-
-  const toggleCategory = (catName: string) => {
-    const current = formData.categories;
-    if (current.includes(catName)) {
-        const newCats = current.filter(c => c !== catName);
-        const subsOfRemoved = (SUBCATEGORIES[catName] || []).map(s => s.name);
-        const newSubs = formData.subcategories.filter(s => !subsOfRemoved.includes(s));
-        const specialtiesToKeep = newSubs.flatMap(s => SPECIALTIES[s] || []);
-        const newSpecs = formData.specialties.filter(spec => specialtiesToKeep.includes(spec));
-        setFormData({ ...formData, categories: newCats, subcategories: newSubs, specialties: newSpecs });
-    } else {
-        setFormData({ ...formData, categories: [...current, catName] });
-    }
+  const addSpecialty = (name: string) => {
+    if (formData.specialties.includes(name)) return;
+    setFormData(prev => ({ ...prev, specialties: [...prev.specialties, name] }));
   };
 
-  const toggleSubcategory = (subName: string, catName: string) => {
-    const current = formData.subcategories;
-    if (current.includes(subName)) {
-        const newSubs = current.filter(s => s !== subName);
-        const specsOfRemoved = SPECIALTIES[subName] || [];
-        const newSpecs = formData.specialties.filter(s => !specsOfRemoved.includes(s));
-        setFormData({ ...formData, subcategories: newSubs, specialties: newSpecs });
-    } else {
-        setFormData({ ...formData, subcategories: [...current, subName] });
-    }
+  const removeSpecialty = (name: string) => {
+    setFormData(prev => ({ ...prev, specialties: prev.specialties.filter(s => s !== name) }));
   };
 
-  const toggleSpecialty = (spec: string) => {
-    const current = formData.specialties;
-    if (current.includes(spec)) {
-        setFormData({ ...formData, specialties: current.filter(s => s !== spec) });
-    } else {
-        setFormData({ ...formData, specialties: [...current, spec] });
-    }
-  };
-
-  const submitSuggestion = async () => {
+  const submitSuggestion = () => {
     if (!suggestionName.trim() || !suggestionModal) return;
     const saved = localStorage.getItem('taxonomy_suggestions') || '[]';
     const suggestions = JSON.parse(saved);
@@ -239,360 +242,191 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
         id: Date.now().toString(),
         type: suggestionModal.type,
         name: suggestionName.trim(),
-        parentId: suggestionModal.parentId,
+        parentName: suggestionModal.parentName,
         status: 'pending',
         storeName: formData.name,
         createdAt: new Date().toISOString()
     });
     localStorage.setItem('taxonomy_suggestions', JSON.stringify(suggestions));
-    alert('Sua sugestão foi enviada para o ADM e está pendente de aprovação.');
+    alert('Sugestão enviada para análise do ADM.');
     setSuggestionName('');
     setSuggestionModal(null);
   };
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-white dark:bg-gray-950 flex flex-col items-center justify-center p-6">
-        <Loader2 className="w-10 h-10 text-[#1E5BFF] animate-spin mb-4" />
-        <p className="text-gray-500 font-bold uppercase tracking-widest text-[10px]">Sincronizando Perfil...</p>
-      </div>
-    );
-  }
+  if (isLoading) return (
+    <div className="min-h-screen bg-white dark:bg-gray-950 flex flex-col items-center justify-center">
+      <Loader2 className="w-10 h-10 text-[#1E5BFF] animate-spin mb-4" />
+      <p className="text-gray-400 font-bold uppercase text-[10px]">Carregando Perfil...</p>
+    </div>
+  );
 
   return (
-    <div className="min-h-screen bg-[#F8F9FC] dark:bg-gray-950 font-sans animate-in slide-in-from-right duration-300 pb-48">
-      {/* Header */}
+    <div className="min-h-screen bg-[#F8F9FC] dark:bg-gray-950 font-sans pb-48 animate-in slide-in-from-right duration-300">
       <div className="sticky top-0 z-40 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md px-5 h-20 flex items-center justify-between border-b border-gray-100 dark:border-gray-800">
         <div className="flex items-center gap-4">
           <button onClick={onBack} className="p-2.5 bg-gray-100 dark:bg-gray-800 rounded-2xl hover:bg-gray-200 transition-colors">
             <ChevronLeft className="w-6 h-6 text-gray-800 dark:text-white" />
           </button>
-          <div>
-            <h1 className="font-black text-lg text-gray-900 dark:text-white uppercase tracking-tighter">Perfil da Loja</h1>
-            <p className="text-[10px] text-blue-500 font-bold uppercase tracking-widest">Identidade Visual e Dados</p>
-          </div>
+          <h1 className="font-black text-lg text-gray-900 dark:text-white uppercase tracking-tighter leading-none">Perfil da Loja</h1>
         </div>
       </div>
 
-      <form onSubmit={handleSave} className="p-6 space-y-12 max-w-md mx-auto">
+      <div className="p-6 space-y-12 max-w-md mx-auto">
         
-        {/* 1. IMAGENS DA LOJA (LOGO E BANNER) */}
-        <section className="space-y-6">
-          <div className="flex items-center gap-2 mb-2">
-            <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center"><Camera size={16} /></div>
-            <h2 className="text-xs font-black text-gray-400 uppercase tracking-[0.2em]">Imagens da Loja</h2>
-          </div>
-
-          <div className="space-y-6">
-            {/* SLOT LOGO */}
-            <div className="flex flex-col items-center">
-              <div className="relative group">
-                <div className={`w-32 h-32 rounded-[2.5rem] overflow-hidden border-4 bg-white dark:bg-gray-800 shadow-xl transition-all ${!formData.logo_url ? 'border-dashed border-red-200 dark:border-red-900/30' : 'border-white dark:border-gray-900'}`}>
-                  {formData.logo_url ? (
-                    <img src={formData.logo_url} className="w-full h-full object-cover" alt="Logo preview" />
-                  ) : (
-                    <div className="w-full h-full flex flex-col items-center justify-center text-gray-300 gap-1 p-4 text-center">
-                      <StoreIcon size={24} />
-                      <span className="text-[8px] font-black uppercase leading-tight">Logo Obrigatória</span>
-                    </div>
-                  )}
-                </div>
-
-                {/* Actions Logo */}
-                <div className="absolute -right-2 -bottom-2 flex flex-col gap-2">
-                    <button 
-                      type="button"
-                      onClick={handleEditLogo}
-                      className="w-10 h-10 bg-[#1E5BFF] text-white rounded-2xl shadow-lg flex items-center justify-center active:scale-90 transition-transform"
-                    >
-                      <Pencil size={16} />
-                    </button>
-                    {formData.logo_url && (
-                        <button 
-                          type="button"
-                          onClick={handleRemoveLogo}
-                          className="w-10 h-10 bg-white dark:bg-gray-800 text-red-500 rounded-2xl shadow-lg border border-red-50 flex items-center justify-center active:scale-90 transition-transform"
-                        >
-                          <Trash2 size={16} />
-                        </button>
-                    )}
-                </div>
-              </div>
-              <p className="mt-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Logo da Empresa *</p>
-              {!formData.logo_url && (
-                <div className="flex items-center gap-1.5 mt-2 text-red-500">
-                    <AlertTriangle size={10} />
-                    <span className="text-[9px] font-bold uppercase">Logo é obrigatória para aparecer no app</span>
-                </div>
-              )}
-            </div>
-
-            {/* SLOT BANNER */}
-            <div className="space-y-3">
-              <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Banner / Capa (Opcional)</label>
-              <div className="relative group w-full aspect-[3/1] rounded-[2rem] overflow-hidden bg-gray-100 dark:bg-gray-800 border-2 border-dashed border-gray-200 dark:border-gray-700 transition-all hover:bg-gray-50 dark:hover:bg-gray-800/80">
-                {formData.banner_url ? (
-                  <>
-                    <img src={formData.banner_url} className="w-full h-full object-cover" alt="Banner preview" />
-                    <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors"></div>
-                  </>
-                ) : (
-                  <button 
-                    type="button"
-                    onClick={handleEditBanner}
-                    className="w-full h-full flex flex-col items-center justify-center text-gray-400 gap-2"
-                  >
-                    <PlusCircle size={20} />
-                    <span className="text-[9px] font-black uppercase tracking-widest">Adicionar Banner de Capa</span>
-                  </button>
-                )}
-
-                {/* Actions Banner */}
-                {formData.banner_url && (
-                  <div className="absolute top-4 right-4 flex gap-2">
-                    <button 
-                      type="button"
-                      onClick={handleEditBanner}
-                      className="p-2.5 bg-white/90 backdrop-blur-md text-gray-900 rounded-xl shadow-md active:scale-90 transition-transform"
-                    >
-                      <Pencil size={14} />
-                    </button>
-                    <button 
-                      type="button"
-                      onClick={handleRemoveBanner}
-                      className="p-2.5 bg-red-500 text-white rounded-xl shadow-md active:scale-90 transition-transform"
-                    >
-                      <Trash2 size={14} />
-                    </button>
-                  </div>
-                )}
-              </div>
-              <p className="text-[9px] text-gray-400 font-medium leading-relaxed italic ml-1">
-                "O banner aparece no topo do seu perfil público, gerando mais desejo de compra."
-              </p>
-            </div>
-          </div>
-        </section>
-
-        {/* 2. DADOS PRINCIPAIS */}
-        <section className="space-y-6">
-          <div className="flex items-center gap-2 mb-2">
-            <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center"><Info size={16} /></div>
-            <h2 className="text-xs font-black text-gray-400 uppercase tracking-[0.2em]">Identificação *</h2>
-          </div>
-
-          <div className="bg-white dark:bg-gray-900 rounded-3xl p-6 border border-gray-100 dark:border-gray-800 shadow-sm space-y-5">
-              <div>
-                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Nome Fantasia *</label>
-                <input required value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="w-full bg-gray-50 dark:bg-gray-800 p-4 rounded-2xl border border-transparent focus:border-[#1E5BFF] outline-none text-sm font-bold dark:text-white mt-1" />
-              </div>
-              <div>
-                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">CNPJ *</label>
-                <input required value={formData.cnpj} onChange={e => setFormData({...formData, cnpj: e.target.value})} className="w-full bg-gray-50 dark:bg-gray-800 p-4 rounded-2xl border border-transparent focus:border-[#1E5BFF] outline-none text-sm font-bold dark:text-white mt-1" placeholder="00.000.000/0001-00" />
-              </div>
-          </div>
-        </section>
-
-        {/* 3. TAXONOMIA GUIADA */}
+        {/* IDENTIDADE VISUAL */}
         <section className="space-y-8">
-          <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center"><Hash size={16} /></div>
-                <h2 className="text-xs font-black text-gray-400 uppercase tracking-[0.2em]">Classificação</h2>
+            <div className="flex items-center gap-2 px-1">
+                <Camera size={16} className="text-[#1E5BFF]" />
+                <h2 className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Identidade Visual</h2>
             </div>
-          </div>
-
-          <div className="space-y-10">
-            {/* CATEGORIAS */}
-            <div>
-              <div className="flex items-center justify-between mb-4">
-                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">1. Categorias Principais *</label>
-                <button 
-                  type="button" 
-                  onClick={() => setSuggestionModal({ isOpen: true, type: 'category' })}
-                  className="text-[9px] font-black text-[#1E5BFF] uppercase tracking-widest flex items-center gap-1 bg-blue-50 dark:bg-blue-900/20 px-2 py-1 rounded-lg"
-                >
-                  <Plus size={10} /> Sugerir nova
-                </button>
-              </div>
-              <div className="grid grid-cols-2 gap-2">
-                {CATEGORIES.map(cat => (
-                  <button
-                    key={cat.id}
-                    type="button"
-                    onClick={() => toggleCategory(cat.name)}
-                    className={`p-3.5 rounded-2xl border text-[11px] font-bold transition-all flex items-center gap-3 ${
-                      formData.categories.includes(cat.name)
-                        ? 'bg-[#1E5BFF] text-white border-transparent shadow-lg shadow-blue-500/20'
-                        : 'bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-400 border-gray-100 dark:border-gray-800'
-                    }`}
-                  >
-                    {React.cloneElement(cat.icon as any, { size: 16 })}
-                    {cat.name}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* SUBCATEGORIAS */}
-            {formData.categories.length > 0 && (
-              <div className="animate-in fade-in slide-in-from-top-2">
-                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-4">2. Subcategorias por Segmento *</label>
-                <div className="space-y-6">
-                    {formData.categories.map(catName => (
-                        <div key={catName} className="bg-white dark:bg-gray-900 p-5 rounded-[2rem] border border-gray-100 dark:border-gray-800 shadow-sm">
-                            <div className="flex items-center justify-between mb-3 border-b border-gray-50 dark:border-gray-800 pb-2">
-                                <span className="text-[10px] font-black text-[#1E5BFF] uppercase tracking-[0.15em]">{catName}</span>
-                                <button 
-                                  type="button" 
-                                  onClick={() => setSuggestionModal({ isOpen: true, type: 'subcategory', parentId: catName, parentName: catName })}
-                                  className="p-1 text-gray-300 hover:text-blue-500"
-                                >
-                                  <Plus size={14} />
-                                </button>
-                            </div>
-                            <div className="flex flex-wrap gap-2">
-                                {(SUBCATEGORIES[catName] || []).map(sub => (
-                                    <button
-                                        key={sub.name}
-                                        type="button"
-                                        onClick={() => toggleSubcategory(sub.name, catName)}
-                                        className={`px-3 py-2 rounded-xl text-[10px] font-bold border transition-all ${
-                                            formData.subcategories.includes(sub.name)
-                                                ? 'bg-blue-500 text-white border-transparent'
-                                                : 'bg-gray-50 dark:bg-gray-800 text-gray-500 dark:text-gray-400 border-transparent'
-                                        }`}
-                                    >
-                                        {sub.name}
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-                    ))}
+            
+            <div className="flex flex-col items-center gap-6">
+                <div className="relative group">
+                    <div className={`w-32 h-32 rounded-[2.5rem] overflow-hidden border-4 bg-white dark:bg-gray-800 shadow-xl ${!formData.logo_url ? 'border-dashed border-red-200' : 'border-white dark:border-gray-900'}`}>
+                        {formData.logo_url ? <img src={formData.logo_url} className="w-full h-full object-cover" /> : <div className="w-full h-full flex flex-col items-center justify-center text-gray-300 p-4 text-center"><StoreIcon size={24} /><span className="text-[8px] font-bold uppercase mt-1">Logo Obrigatória</span></div>}
+                    </div>
+                    <button type="button" onClick={() => setFormData({...formData, logo_url: 'https://ui-avatars.com/api/?background=1E5BFF&color=fff&name=Loja'})} className="absolute -right-2 -bottom-2 w-10 h-10 bg-[#1E5BFF] text-white rounded-2xl shadow-lg flex items-center justify-center active:scale-90 transition-transform"><Pencil size={16} /></button>
                 </div>
-              </div>
-            )}
 
-            {/* ESPECIALIDADES */}
-            {formData.subcategories.length > 0 && (
-               <div className="animate-in fade-in slide-in-from-top-2">
-                 <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-4">3. Especialidades Técnicas</label>
-                 <div className="space-y-5">
-                    {formData.subcategories.map(subName => (
-                        <div key={subName} className="bg-gray-50 dark:bg-gray-800/40 p-5 rounded-3xl border border-gray-100 dark:border-gray-800">
-                             <div className="flex items-center justify-between mb-3">
-                                <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{subName}</span>
-                                <button 
-                                  type="button" 
-                                  onClick={() => setSuggestionModal({ isOpen: true, type: 'specialty', parentId: subName, parentName: subName })}
-                                  className="text-[9px] font-bold text-gray-400 flex items-center gap-1"
-                                >
-                                  <Plus size={10} /> Sugerir
-                                </button>
-                             </div>
-                             <div className="flex flex-wrap gap-2">
-                                {(SPECIALTIES[subName] || SPECIALTIES['default']).map(spec => (
-                                    <button
-                                        key={spec}
-                                        type="button"
-                                        onClick={() => toggleSpecialty(spec)}
-                                        className={`px-3 py-1.5 rounded-full text-[9px] font-black uppercase transition-all border ${
-                                            formData.specialties.includes(spec)
-                                                ? 'bg-white dark:bg-gray-700 text-[#1E5BFF] border-[#1E5BFF] shadow-sm'
-                                                : 'bg-transparent text-gray-400 border-gray-200 dark:border-gray-700'
-                                        }`}
-                                    >
-                                        {spec}
-                                    </button>
-                                ))}
-                             </div>
-                        </div>
-                    ))}
-                 </div>
-               </div>
-            )}
-          </div>
+                <div className="w-full space-y-3">
+                    <div className="w-full aspect-[3/1] rounded-[2rem] overflow-hidden bg-gray-100 dark:bg-gray-800 border-2 border-dashed border-gray-200 dark:border-gray-700 flex flex-col items-center justify-center gap-2 group cursor-pointer" onClick={() => setFormData({...formData, banner_url: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?q=80&w=800'})}>
+                        {formData.banner_url ? <img src={formData.banner_url} className="w-full h-full object-cover" /> : <><PlusCircle size={20} className="text-gray-400" /><span className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Adicionar Capa (Banner)</span></>}
+                    </div>
+                </div>
+            </div>
         </section>
 
-        {/* 4. CONTATO OFICIAL */}
+        {/* DADOS BÁSICOS */}
+        <section className="space-y-4">
+            <div className="flex items-center gap-2 px-1">
+                <Info size={16} className="text-[#1E5BFF]" />
+                <h2 className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Informações Básicas</h2>
+            </div>
+            <div className="bg-white dark:bg-gray-900 p-6 rounded-[2rem] border border-gray-100 dark:border-gray-800 shadow-sm space-y-6">
+                <div>
+                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Nome Fantasia *</label>
+                    <input value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="w-full bg-gray-50 dark:bg-gray-800 p-4 rounded-2xl border-none outline-none text-sm font-bold mt-1" />
+                </div>
+                <div>
+                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">WhatsApp de Vendas *</label>
+                    <div className="relative">
+                        <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+                        <input value={formData.whatsapp} onChange={e => setFormData({...formData, whatsapp: e.target.value})} className="w-full bg-gray-50 dark:bg-gray-800 p-4 pl-12 rounded-2xl border-none outline-none text-sm font-bold mt-1" placeholder="(21) 99999-9999" />
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        {/* CLASSIFICAÇÃO GUIADA */}
         <section className="space-y-6">
-          <div className="flex items-center gap-2 mb-2">
-            <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center"><Phone size={16} /></div>
-            <h2 className="text-xs font-black text-gray-400 uppercase tracking-[0.2em]">Contato Oficial</h2>
-          </div>
+            <div className="flex items-center gap-2 px-1">
+                <Hash size={16} className="text-[#1E5BFF]" />
+                <h2 className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Classificação do Negócio</h2>
+            </div>
 
-          <div className="bg-white dark:bg-gray-900 rounded-3xl p-6 border border-gray-100 dark:border-gray-800 shadow-sm space-y-5">
-              <div>
-                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">WhatsApp de Vendas *</label>
-                <input required value={formData.whatsapp} onChange={e => setFormData({...formData, whatsapp: e.target.value})} className="w-full bg-gray-50 dark:bg-gray-800 p-4 rounded-2xl border border-transparent focus:border-[#1E5BFF] outline-none text-sm font-bold dark:text-white mt-1" placeholder="(21) 99999-9999" />
-              </div>
-              <div>
-                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Instagram</label>
-                <input value={formData.instagram} onChange={e => setFormData({...formData, instagram: e.target.value})} className="w-full bg-gray-50 dark:bg-gray-800 p-4 rounded-2xl border border-transparent focus:border-[#1E5BFF] outline-none text-sm font-bold dark:text-white mt-1" placeholder="@sua.loja" />
-              </div>
-          </div>
+            <div className="space-y-8">
+                {/* CATEGORIAS */}
+                <TaxonomySelect 
+                    label="1. Categorias Principais"
+                    placeholder="Selecione o segmento principal..."
+                    options={CATEGORIES.map(c => ({ name: c.name, icon: c.icon }))}
+                    selected={formData.categories}
+                    onSelect={addCategory}
+                    onRemove={removeCategory}
+                    multiple
+                    onSuggest={() => setSuggestionModal({ isOpen: true, type: 'category' })}
+                    helperText="Obrigatório"
+                />
+
+                {/* SUBCATEGORIAS */}
+                {formData.categories.length > 0 && (
+                    <TaxonomySelect 
+                        label="2. Subcategorias"
+                        placeholder="Selecione como sua loja é conhecida..."
+                        options={formData.categories.flatMap(cat => SUBCATEGORIES[cat] || [])}
+                        selected={formData.subcategories}
+                        onSelect={addSubcategory}
+                        onRemove={removeSubcategory}
+                        multiple
+                        onSuggest={() => setSuggestionModal({ isOpen: true, type: 'subcategory', parentName: formData.categories.join(', ') })}
+                        helperText="Selecione pelo menos uma"
+                    />
+                )}
+
+                {/* ESPECIALIDADES */}
+                {formData.subcategories.length > 0 && (
+                    <TaxonomySelect 
+                        label="3. Especialidades Técnicas"
+                        placeholder="Quais serviços específicos você faz?"
+                        options={formData.subcategories.flatMap(sub => (SPECIALTIES[sub] || SPECIALTIES['default']).map(s => ({ name: s })))}
+                        selected={formData.specialties}
+                        onSelect={addSpecialty}
+                        onRemove={removeSpecialty}
+                        multiple
+                        onSuggest={() => setSuggestionModal({ isOpen: true, type: 'specialty', parentName: formData.subcategories.join(', ') })}
+                        helperText="Aumente seus filtros de busca"
+                    />
+                )}
+            </div>
         </section>
 
-      </form>
+      </div>
 
       {/* Floating Action Bar */}
       <div className="fixed bottom-0 left-0 right-0 p-6 bg-white/90 dark:bg-gray-950/90 backdrop-blur-md border-t border-gray-100 dark:border-gray-800 z-50 max-w-md mx-auto">
-        {showSuccess && (
-            <div className="flex items-center justify-center gap-2 text-emerald-600 font-bold text-sm mb-4 animate-in fade-in slide-in-from-bottom-2">
-                <CheckCircle2 className="w-5 h-5" /> Perfil atualizado com sucesso!
-            </div>
-        )}
         <button 
-          onClick={handleSave} 
+          onClick={() => handleSave()} 
           disabled={isSaving}
           className="w-full bg-gray-900 dark:bg-white text-white dark:text-black font-black py-5 rounded-[2rem] shadow-2xl active:scale-[0.98] transition-all flex items-center justify-center gap-3 disabled:opacity-50"
         >
           {isSaving ? <Loader2 className="animate-spin" /> : <Save size={20} />}
-          SALVAR PERFIL DA LOJA
+          SALVAR ALTERAÇÕES
         </button>
       </div>
 
-      {/* SUGGESTION MODAL */}
-      {suggestionModal && (
-        <div className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm flex items-center justify-center p-6">
-            <div className="bg-white dark:bg-gray-900 w-full max-w-sm rounded-[2.5rem] p-8 shadow-2xl animate-in zoom-in-95 duration-200">
-                <div className="flex justify-between items-center mb-6">
-                    <h3 className="text-xl font-black text-gray-900 dark:text-white uppercase tracking-tighter">Sugerir Nova Opção</h3>
-                    <button onClick={() => setSuggestionModal(null)}><X size={24} /></button>
+      {/* MODAL: ADICIONAR OUTRA CATEGORIA? */}
+      {showMultiCatPrompt && (
+        <div className="fixed inset-0 z-[110] bg-black/60 backdrop-blur-sm flex items-center justify-center p-6">
+            <div className="bg-white dark:bg-gray-900 w-full max-w-xs rounded-[2.5rem] p-8 shadow-2xl animate-in zoom-in-95 duration-200 text-center">
+                <div className="w-16 h-16 bg-blue-50 dark:bg-blue-900/20 rounded-2xl flex items-center justify-center mx-auto mb-4 text-[#1E5BFF]">
+                    <PlusCircle size={32} />
                 </div>
-
-                <div className="bg-blue-50 dark:bg-blue-900/10 p-4 rounded-2xl mb-6 flex gap-3">
-                    <HelpCircle size={18} className="text-blue-600 shrink-0 mt-1" />
-                    <p className="text-xs text-blue-700 dark:text-blue-300 leading-relaxed">
-                        Sua sugestão será analisada pelo ADM antes de ficar disponível para seleção.
-                    </p>
-                </div>
-
-                <div className="space-y-5">
-                    {suggestionModal.parentName && (
-                        <div className="px-1">
-                            <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Vincular a: {suggestionModal.parentName}</span>
-                        </div>
-                    )}
-                    <div>
-                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5 block ml-1">Nome sugerido</label>
-                        <input 
-                            autoFocus
-                            value={suggestionName}
-                            onChange={(e) => setSuggestionName(e.target.value)}
-                            placeholder={`Ex: ${suggestionModal.type === 'category' ? 'Automóveis' : 'Pintor Predial'}`}
-                            className="w-full bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 p-4 rounded-2xl outline-none focus:border-[#1E5BFF] transition-all dark:text-white text-sm font-bold"
-                        />
-                    </div>
-                    <button 
-                        onClick={submitSuggestion}
-                        disabled={!suggestionName.trim()}
-                        className="w-full bg-[#1E5BFF] text-white font-black py-4 rounded-2xl active:scale-[0.98] transition-all shadow-lg shadow-blue-500/20 disabled:opacity-50"
-                    >
-                        ENVIAR SUGESTÃO
-                    </button>
+                <h3 className="text-lg font-black text-gray-900 dark:text-white uppercase leading-tight mb-2">Adicionar outro segmento?</h3>
+                <p className="text-xs text-gray-500 mb-8 leading-relaxed">Sua loja se encaixa em mais de uma categoria? (Ex: Comida e Mercado)</p>
+                <div className="flex gap-3">
+                    <button onClick={() => setShowMultiCatPrompt(false)} className="flex-1 py-3 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 rounded-xl font-bold text-xs uppercase tracking-widest">Não</button>
+                    <button onClick={() => setShowMultiCatPrompt(false)} className="flex-1 py-3 bg-[#1E5BFF] text-white rounded-xl font-bold text-xs uppercase tracking-widest">Sim</button>
                 </div>
             </div>
+        </div>
+      )}
+
+      {/* SUGGESTION MODAL */}
+      {suggestionModal && (
+        <div className="fixed inset-0 z-[120] bg-black/80 backdrop-blur-md flex items-center justify-center p-6">
+            <div className="bg-white dark:bg-gray-900 w-full max-w-sm rounded-[2.5rem] p-8 shadow-2xl animate-in zoom-in-95">
+                <div className="flex justify-between items-center mb-6">
+                    <h3 className="text-lg font-black uppercase tracking-tighter">Sugerir Opção</h3>
+                    <button onClick={() => setSuggestionModal(null)}><X size={24} /></button>
+                </div>
+                <div className="space-y-5">
+                    {suggestionModal.parentName && <div className="p-3 bg-blue-50 dark:bg-blue-900/10 rounded-xl text-[10px] text-blue-700 font-bold border border-blue-100 dark:border-blue-800 uppercase tracking-widest leading-relaxed">Vincular a: {suggestionModal.parentName}</div>}
+                    <div>
+                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5 block">Nome Sugerido</label>
+                        <input value={suggestionName} onChange={e => setSuggestionName(e.target.value)} placeholder="Ex: Engenheiro Mecânico" className="w-full bg-gray-50 dark:bg-gray-800 p-4 rounded-2xl border-none outline-none dark:text-white font-bold" />
+                    </div>
+                    <button onClick={submitSuggestion} disabled={!suggestionName.trim()} className="w-full bg-[#1E5BFF] text-white font-black py-4 rounded-2xl active:scale-[0.98] transition-all disabled:opacity-50">ENVIAR PARA O ADM</button>
+                </div>
+            </div>
+        </div>
+      )}
+
+      {/* SUCCESS MODAL */}
+      {showSuccess && (
+        <div className="fixed inset-0 z-[150] bg-white/95 dark:bg-gray-950/95 flex flex-col items-center justify-center p-6 animate-in fade-in duration-500">
+            <div className="w-20 h-20 bg-emerald-500 rounded-[2rem] flex items-center justify-center text-white mb-6 animate-bounce-short shadow-xl shadow-emerald-500/20"><CheckCircle2 size={40} /></div>
+            <h2 className="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tighter">Perfil Atualizado!</h2>
+            <p className="text-gray-500 dark:text-gray-400 text-sm mt-2 text-center max-w-[200px]">As mudanças já estão visíveis para os moradores do bairro.</p>
         </div>
       )}
     </div>
