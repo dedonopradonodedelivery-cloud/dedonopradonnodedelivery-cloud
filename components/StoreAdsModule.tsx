@@ -120,7 +120,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
   const scrollTo = (ref: React.RefObject<HTMLDivElement | null>) => {
     setTimeout(() => {
       if (ref.current) {
-        const offset = 100; // Espaço para não bater no topo colado
+        const offset = 100;
         const bodyRect = document.body.getBoundingClientRect().top;
         const elementRect = ref.current.getBoundingClientRect().top;
         const elementPosition = elementRect - bodyRect;
@@ -147,7 +147,6 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
     
     setSelectedPeriods(nextPeriods);
 
-    // Se acabou de selecionar o primeiro período, rola para os bairros
     if (isAdding && nextPeriods.length === 1) {
       scrollTo(neighborhoodRef);
     }
@@ -212,7 +211,14 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
   };
 
   if (isEditingArt) {
-    return <StoreBannerEditor storeName={user?.user_metadata?.store_name || "Sua Loja"} onSave={handleSaveDesign} onBack={() => setIsEditingArt(false)} />;
+    return (
+      <StoreBannerEditor 
+        storeName={user?.user_metadata?.store_name || "Sua Loja"} 
+        storeLogo={user?.user_metadata?.logo_url}
+        onSave={handleSaveDesign} 
+        onBack={() => setIsEditingArt(false)} 
+      />
+    );
   }
 
   return (
@@ -293,12 +299,11 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
           </div>
         </section>
 
-        {/* BLOCO 4: DESIGN (FLUXO DIY REFORMULADO) */}
+        {/* BLOCO 4: DESIGN */}
         <section ref={creativeRef} className={`space-y-8 transition-all duration-500 ${selectedNeighborhoods.length === 0 ? 'opacity-20 pointer-events-none' : 'opacity-100'}`}>
           <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-blue-500 flex items-center gap-2 px-1"><Palette size={14} /> 4. Design da Arte</h3>
           
           <div className="space-y-4">
-              {/* Opção Personalizar (DIY) */}
               <div onClick={() => setArtChoice('diy')} className={`rounded-[2.5rem] border-2 transition-all cursor-pointer overflow-hidden ${artChoice === 'diy' ? 'bg-slate-900 border-blue-500 shadow-xl' : 'bg-slate-900 border-white/5'}`}>
                 <div className="p-8">
                     <div className="flex items-start gap-5 mb-6">
@@ -311,7 +316,6 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
 
                     {artChoice === 'diy' && (
                         <div className="space-y-4 animate-in slide-in-from-top-4 duration-500 pt-4 border-t border-white/5">
-                            {/* ESCOLHA INTERMEDIÁRIA */}
                             <div className="grid grid-cols-2 gap-3">
                                 <button 
                                   onClick={(e) => { e.stopPropagation(); setDiyFlowStep('upload'); fileInputRef.current?.click(); }}
@@ -351,7 +355,6 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
                 </div>
               </div>
 
-              {/* Opção Time de Designers */}
               <div onClick={() => { setArtChoice('pro'); setIsArtSaved(true); scrollTo(paymentRef); }} className={`rounded-[2.5rem] border-2 transition-all cursor-pointer overflow-hidden ${artChoice === 'pro' ? 'bg-slate-900 border-amber-500' : 'bg-slate-900 border-white/5'}`}>
                   <div className="p-8">
                     <div className="flex items-start justify-between">

@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import { 
   ChevronLeft, 
   Type, 
@@ -7,9 +7,7 @@ import {
   AlignCenter, 
   AlignRight, 
   Save, 
-  Image as ImageIcon,
   X,
-  Check,
   Flame,
   Zap,
   Percent,
@@ -35,13 +33,12 @@ import {
   Clock,
   Heart,
   Sparkles,
-  Search,
-  Plus,
   Trash2,
-  Maximize2
+  Square,
+  Circle,
+  Ban
 } from 'lucide-react';
 
-// Mapeamento de componentes para renderização dinâmica
 const ICON_COMPONENTS: Record<string, React.ElementType> = {
   Flame, Zap, Percent, Tag, Gift, Utensils, Pizza, Coffee, Beef, IceCream,
   ShoppingCart, Store, Package, Wrench, Truck, CreditCard, Coins, Star,
@@ -77,16 +74,18 @@ interface BannerDesign {
   iconPos: 'left' | 'top' | 'right';
   iconSize: 'sm' | 'md' | 'lg';
   iconColorMode: 'text' | 'white' | 'black' | 'custom';
+  logoDisplay: 'square' | 'round' | 'none';
   iconCustomColor?: string;
 }
 
 interface StoreBannerEditorProps {
   storeName: string;
+  storeLogo?: string;
   onSave: (design: BannerDesign) => void;
   onBack: () => void;
 }
 
-export const StoreBannerEditor: React.FC<StoreBannerEditorProps> = ({ storeName, onSave, onBack }) => {
+export const StoreBannerEditor: React.FC<StoreBannerEditorProps> = ({ storeName, storeLogo, onSave, onBack }) => {
   const [design, setDesign] = useState<BannerDesign>({
     title: 'Sua oferta principal aqui',
     subtitle: 'Uma descrição curta e impactante para o bairro.',
@@ -98,7 +97,8 @@ export const StoreBannerEditor: React.FC<StoreBannerEditorProps> = ({ storeName,
     iconName: null,
     iconPos: 'left',
     iconSize: 'md',
-    iconColorMode: 'text'
+    iconColorMode: 'text',
+    logoDisplay: 'round'
   });
 
   const [isScrolled, setIsScrolled] = useState(false);
@@ -133,12 +133,8 @@ export const StoreBannerEditor: React.FC<StoreBannerEditorProps> = ({ storeName,
   return (
     <div className="fixed inset-0 z-[60] bg-[#020617] flex flex-col animate-in fade-in duration-300 overflow-hidden">
       
-      {/* 
-          ESTRUTURA FIXA SUPERIOR (Z-INDEX 80) 
-          Isso garante que o Header e o Preview fiquem ACIMA dos modais e do formulário.
-      */}
+      {/* PREVIEW FIXO SUPERIOR */}
       <div className="relative z-[80] bg-[#020617] flex flex-col shrink-0">
-        {/* Header */}
         <header className="px-6 py-4 border-b border-white/5 flex items-center justify-between bg-slate-900/50 backdrop-blur-xl">
           <div className="flex items-center gap-4">
             <button onClick={onBack} className="p-2 bg-slate-800 rounded-xl text-slate-400 hover:text-white transition-all active:scale-95">
@@ -151,7 +147,6 @@ export const StoreBannerEditor: React.FC<StoreBannerEditorProps> = ({ storeName,
           </div>
         </header>
 
-        {/* PREVIEW CONTAINER */}
         <div className={`w-full px-6 py-4 bg-slate-900/40 backdrop-blur-md border-b border-white/5 transition-all duration-300 ${isScrolled ? 'shadow-2xl shadow-blue-500/10' : ''}`}>
           <div className={`transition-all duration-500 mx-auto max-w-sm ${isScrolled ? 'scale-90 -my-2' : 'scale-100'}`}>
             <div 
@@ -171,8 +166,15 @@ export const StoreBannerEditor: React.FC<StoreBannerEditorProps> = ({ storeName,
                 )}
 
                 <div className="flex-1">
-                  <div className="bg-white/20 backdrop-blur-md px-2.5 py-0.5 rounded-lg mb-2 border border-white/20 w-fit">
-                      <span className="text-[8px] font-black uppercase tracking-[0.2em]" style={{ color: design.textColor }}>{storeName}</span>
+                  <div className="flex items-center gap-2 mb-2 w-fit">
+                      {design.logoDisplay !== 'none' && storeLogo && (
+                          <div className={`shrink-0 overflow-hidden bg-white/20 p-0.5 border border-white/20 ${design.logoDisplay === 'round' ? 'rounded-full' : 'rounded-lg'}`}>
+                              <img src={storeLogo} className={`w-6 h-6 object-contain ${design.logoDisplay === 'round' ? 'rounded-full' : 'rounded-md'}`} alt="Logo" />
+                          </div>
+                      )}
+                      <div className="bg-white/20 backdrop-blur-md px-2 py-0.5 rounded-lg border border-white/20 w-fit">
+                          <span className="text-[8px] font-black uppercase tracking-[0.2em]" style={{ color: design.textColor }}>{storeName}</span>
+                      </div>
                   </div>
                   <h2 className={`text-2xl font-black leading-tight mb-1 tracking-tighter line-clamp-2 ${design.font}`} style={{ color: design.textColor }}>
                       {design.title}
@@ -187,10 +189,49 @@ export const StoreBannerEditor: React.FC<StoreBannerEditorProps> = ({ storeName,
         </div>
       </div>
 
-      {/* SCROLLABLE EDITOR (Z-INDEX 10) */}
+      {/* EDITOR */}
       <main onScroll={handleScroll} className="flex-1 overflow-y-auto p-6 space-y-10 no-scrollbar pb-40 relative z-10">
         
-        {/* TEXTO */}
+        {/* LOGO DA LOJA */}
+        <div className="space-y-4">
+          <div className="flex flex-col">
+            <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-blue-500 flex items-center gap-2">
+              <Store size={14} /> Logo da Loja
+            </h3>
+            <p className="text-[9px] text-slate-500 uppercase font-bold mt-1 ml-6">Escolha como sua logo aparece no banner.</p>
+          </div>
+          
+          <div className="grid grid-cols-3 gap-3">
+              <button 
+                onClick={() => setDesign({...design, logoDisplay: 'square'})}
+                className={`flex flex-col items-center gap-2 p-3 rounded-2xl border-2 transition-all ${design.logoDisplay === 'square' ? 'bg-blue-600/10 border-blue-500 text-white' : 'bg-slate-900 border-white/5 text-slate-500 hover:border-white/20'}`}
+              >
+                <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center"><Square size={18} /></div>
+                <span className="text-[9px] font-black uppercase tracking-widest">Quadrado</span>
+              </button>
+              
+              <button 
+                onClick={() => setDesign({...design, logoDisplay: 'round'})}
+                className={`flex flex-col items-center gap-2 p-3 rounded-2xl border-2 transition-all ${design.logoDisplay === 'round' ? 'bg-blue-600/10 border-blue-500 text-white' : 'bg-slate-900 border-white/5 text-slate-500 hover:border-white/20'}`}
+              >
+                <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center"><Circle size={18} /></div>
+                <span className="text-[9px] font-black uppercase tracking-widest">Redondo</span>
+              </button>
+
+              <button 
+                onClick={() => setDesign({...design, logoDisplay: 'none'})}
+                className={`flex flex-col items-center gap-2 p-3 rounded-2xl border-2 transition-all ${design.logoDisplay === 'none' ? 'bg-blue-600/10 border-blue-500 text-white' : 'bg-slate-900 border-white/5 text-slate-500 hover:border-white/20'}`}
+              >
+                <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center"><Ban size={18} /></div>
+                <span className="text-[9px] font-black uppercase tracking-widest">Sem logo</span>
+              </button>
+          </div>
+          {design.logoDisplay === 'none' && (
+              <p className="text-[9px] text-slate-600 italic ml-1 leading-tight">Você pode usar apenas texto e ícones decorativos.</p>
+          )}
+        </div>
+
+        {/* MENSAGEM */}
         <div className="space-y-6">
           <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-blue-500 flex items-center gap-2">
             <Type size={14} /> 1. Mensagem Principal
@@ -210,53 +251,29 @@ export const StoreBannerEditor: React.FC<StoreBannerEditorProps> = ({ storeName,
         {/* ELEMENTOS VISUAIS */}
         <div className="space-y-6">
           <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-blue-500 flex items-center gap-2">
-            <Sparkles size={14} /> 2. Elementos Visuais
+            <Sparkles size={14} /> 2. Elementos Decorativos
           </h3>
-          
-          <div className="space-y-6">
-            <div className="bg-slate-900 border border-white/5 rounded-3xl p-5 space-y-5">
-                <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-400">
-                            <Tag size={20} />
-                        </div>
-                        <div>
-                            <p className="text-xs font-bold text-white">Ícone do Banner</p>
-                            <p className="text-[9px] text-slate-500 uppercase font-black">Destaque visual da oferta</p>
-                        </div>
-                    </div>
-                    {design.iconName ? (
-                        <button onClick={() => setDesign({...design, iconName: null})} className="p-2 text-rose-500 bg-rose-500/10 rounded-lg active:scale-90 transition-all"><Trash2 size={16} /></button>
-                    ) : (
-                        <button onClick={() => setShowIconPicker(true)} className="px-4 py-2 bg-[#1E5BFF] text-white text-[10px] font-black uppercase rounded-xl shadow-lg active:scale-95 transition-all">Adicionar</button>
-                    )}
-                </div>
-
-                {design.iconName && (
-                    <div className="grid grid-cols-2 gap-4 animate-in slide-in-from-top-2 duration-300">
-                        <div className="space-y-2">
-                            <label className="text-[8px] font-black text-slate-500 uppercase ml-1">Posição</label>
-                            <div className="flex gap-1 bg-slate-950 p-1 rounded-xl">
-                                <button onClick={() => setDesign({...design, iconPos: 'left'})} className={`flex-1 py-1.5 rounded-lg flex justify-center ${design.iconPos === 'left' ? 'bg-blue-500 text-white' : 'text-slate-500'}`}><AlignLeft size={14}/></button>
-                                <button onClick={() => setDesign({...design, iconPos: 'top'})} className={`flex-1 py-1.5 rounded-lg flex justify-center ${design.iconPos === 'top' ? 'bg-blue-500 text-white' : 'text-slate-500'}`}><AlignCenter size={14}/></button>
-                                <button onClick={() => setDesign({...design, iconPos: 'right'})} className={`flex-1 py-1.5 rounded-lg flex justify-center ${design.iconPos === 'right' ? 'bg-blue-500 text-white' : 'text-slate-500'}`}><AlignRight size={14}/></button>
-                            </div>
-                        </div>
-                        <div className="space-y-2">
-                            <label className="text-[8px] font-black text-slate-500 uppercase ml-1">Tamanho</label>
-                            <div className="flex gap-1 bg-slate-950 p-1 rounded-xl">
-                                <button onClick={() => setDesign({...design, iconSize: 'sm'})} className={`flex-1 text-[9px] font-bold rounded-lg ${design.iconSize === 'sm' ? 'bg-blue-500 text-white' : 'text-slate-500'}`}>P</button>
-                                <button onClick={() => setDesign({...design, iconSize: 'md'})} className={`flex-1 text-[9px] font-bold rounded-lg ${design.iconSize === 'md' ? 'bg-blue-500 text-white' : 'text-slate-500'}`}>M</button>
-                                <button onClick={() => setDesign({...design, iconSize: 'lg'})} className={`flex-1 text-[9px] font-bold rounded-lg ${design.iconSize === 'lg' ? 'bg-blue-500 text-white' : 'text-slate-500'}`}>G</button>
-                            </div>
-                        </div>
-                    </div>
-                )}
-            </div>
+          <div className="bg-slate-900 border border-white/5 rounded-3xl p-5 space-y-5">
+              <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-400">
+                          <Tag size={20} />
+                      </div>
+                      <div>
+                          <p className="text-xs font-bold text-white">Ícone Opcional</p>
+                          <p className="text-[9px] text-slate-500 uppercase font-black">Ilustração da oferta</p>
+                      </div>
+                  </div>
+                  {design.iconName ? (
+                      <button onClick={() => setDesign({...design, iconName: null})} className="p-2 text-rose-500 bg-rose-500/10 rounded-lg active:scale-90 transition-all"><Trash2 size={16} /></button>
+                  ) : (
+                      <button onClick={() => setShowIconPicker(true)} className="px-4 py-2 bg-[#1E5BFF] text-white text-[10px] font-black uppercase rounded-xl shadow-lg active:scale-95 transition-all">Adicionar</button>
+                  )}
+              </div>
           </div>
         </div>
 
-        {/* ESTILO */}
+        {/* CORES */}
         <div className="space-y-6">
           <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-blue-500 flex items-center gap-2">
             <Palette size={14} /> 3. Cores e Layout
@@ -283,7 +300,7 @@ export const StoreBannerEditor: React.FC<StoreBannerEditorProps> = ({ storeName,
 
             <div className="grid grid-cols-2 gap-6">
                 <div className="space-y-3">
-                    <label className="text-[9px] font-black text-slate-500 uppercase ml-1 block tracking-widest">Alinhamento Texto</label>
+                    <label className="text-[9px] font-black text-slate-500 uppercase ml-1 block tracking-widest">Alinhamento</label>
                     <div className="flex gap-1 bg-slate-900 p-1.5 rounded-2xl border border-white/5">
                         <button onClick={() => setDesign({...design, align: 'left'})} className={`flex-1 p-2 rounded-xl flex justify-center transition-all ${design.align === 'left' ? 'bg-blue-500 text-white shadow-lg' : 'text-slate-500'}`}><AlignLeft size={16}/></button>
                         <button onClick={() => setDesign({...design, align: 'center'})} className={`flex-1 p-2 rounded-xl flex justify-center transition-all ${design.align === 'center' ? 'bg-blue-500 text-white shadow-lg' : 'text-slate-500'}`}><AlignCenter size={16}/></button>
@@ -316,28 +333,21 @@ export const StoreBannerEditor: React.FC<StoreBannerEditorProps> = ({ storeName,
         </div>
       </main>
 
-      {/* ICON PICKER MODAL (Z-INDEX 70) */}
+      {/* MODAIS (ÍCONES E COR) */}
       {showIconPicker && (
-        <div className="fixed inset-0 z-[70] bg-black/80 backdrop-blur-sm flex items-end animate-in fade-in duration-300">
+        <div className="fixed inset-0 z-[120] bg-black/80 backdrop-blur-sm flex items-end animate-in fade-in duration-300">
           <div className="w-full bg-slate-900 rounded-t-[3rem] p-8 pb-12 animate-in slide-in-from-bottom duration-500 border-t border-white/10 max-w-md mx-auto h-[70vh] flex flex-col">
             <div className="flex items-center justify-between mb-8 shrink-0">
               <h3 className="text-white font-bold">Escolha um Ícone</h3>
               <button onClick={() => setShowIconPicker(false)} className="p-2 text-slate-500 hover:text-white"><X size={24} /></button>
             </div>
-            
             <div className="flex-1 overflow-y-auto no-scrollbar space-y-8">
                 {ICON_CATEGORIES.map((cat, i) => (
                     <div key={i} className="space-y-4">
                         <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">{cat.label}</label>
                         <div className="grid grid-cols-5 gap-3">
                             {cat.icons.map(iconName => (
-                                <button 
-                                    key={iconName}
-                                    onClick={() => { setDesign({...design, iconName}); setShowIconPicker(false); }}
-                                    className={`aspect-square rounded-2xl flex items-center justify-center transition-all ${design.iconName === iconName ? 'bg-blue-500 text-white' : 'bg-slate-800 text-slate-400 hover:bg-slate-700'}`}
-                                >
-                                    {renderIcon(iconName, 'sm', design.iconName === iconName ? 'white' : 'text')}
-                                </button>
+                                <button key={iconName} onClick={() => { setDesign({...design, iconName}); setShowIconPicker(false); }} className={`aspect-square rounded-2xl flex items-center justify-center transition-all ${design.iconName === iconName ? 'bg-blue-500 text-white' : 'bg-slate-800 text-slate-400 hover:bg-slate-700'}`}>{renderIcon(iconName, 'sm', design.iconName === iconName ? 'white' : 'text')}</button>
                             ))}
                         </div>
                     </div>
@@ -347,27 +357,24 @@ export const StoreBannerEditor: React.FC<StoreBannerEditorProps> = ({ storeName,
         </div>
       )}
 
-      {/* COLOR PICKER MODAL (Z-INDEX 70) */}
       {showColorPicker && (
-        <div className="fixed inset-0 z-[70] bg-black/60 backdrop-blur-sm flex items-end animate-in fade-in duration-300">
+        <div className="fixed inset-0 z-[120] bg-black/60 backdrop-blur-sm flex items-end animate-in fade-in duration-300">
           <div className="w-full bg-slate-900 rounded-t-[3rem] p-8 pb-12 animate-in slide-in-from-bottom duration-500 border-t border-white/10 max-w-md mx-auto">
             <div className="flex items-center justify-between mb-8">
               <h3 className="text-white font-bold">Cor Personalizada</h3>
               <button onClick={() => setShowColorPicker(false)} className="p-2 text-slate-500 hover:text-white"><X size={24} /></button>
             </div>
             <div className="space-y-8">
-              <div className="space-y-4">
-                <div className="relative w-full aspect-square rounded-3xl overflow-hidden cursor-crosshair border border-white/10" style={{ backgroundColor: `hsl(${customHue}, 100%, 50%)` }}
-                  onMouseMove={(e) => { if (e.buttons === 1) {
-                    const rect = e.currentTarget.getBoundingClientRect();
-                    const x = Math.max(0, Math.min(100, ((e.clientX - rect.left) / rect.width) * 100));
-                    const y = Math.max(0, Math.min(100, ((e.clientY - rect.top) / rect.height) * 100));
-                    updateCustomColor(customHue, x, 100 - y);
-                  }}}
-                >
-                  <div className="absolute inset-0 bg-gradient-to-r from-white via-transparent to-transparent"></div>
-                  <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent"></div>
-                </div>
+              <div className="relative w-full aspect-square rounded-3xl overflow-hidden cursor-crosshair border border-white/10" style={{ backgroundColor: `hsl(${customHue}, 100%, 50%)` }}
+                onMouseMove={(e) => { if (e.buttons === 1) {
+                  const rect = e.currentTarget.getBoundingClientRect();
+                  const x = Math.max(0, Math.min(100, ((e.clientX - rect.left) / rect.width) * 100));
+                  const y = Math.max(0, Math.min(100, ((e.clientY - rect.top) / rect.height) * 100));
+                  updateCustomColor(customHue, x, 100 - y);
+                }}}
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-white via-transparent to-transparent"></div>
+                <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent"></div>
               </div>
               <input type="range" min="0" max="360" value={customHue} onChange={(e) => { const h = parseInt(e.target.value); setCustomHue(h); updateCustomColor(h, 100, 50); }} className="w-full h-3 rounded-full appearance-none bg-gradient-to-r from-red-500 via-yellow-500 via-green-500 via-blue-500 via-purple-500 to-red-500 outline-none" />
               <button onClick={() => setShowColorPicker(false)} className="w-full py-4 bg-[#1E5BFF] text-white font-black rounded-2xl text-xs uppercase tracking-widest">Aplicar Cor</button>
@@ -376,7 +383,7 @@ export const StoreBannerEditor: React.FC<StoreBannerEditorProps> = ({ storeName,
         </div>
       )}
 
-      {/* Footer CTA (Z-INDEX 100) */}
+      {/* FOOTER CTA */}
       <div className="fixed bottom-0 left-0 right-0 p-6 bg-slate-900/90 backdrop-blur-2xl border-t border-white/10 z-[100] max-w-md mx-auto">
         <button onClick={() => onSave(design)} className="w-full py-5 bg-[#1E5BFF] text-white font-black rounded-[2rem] shadow-xl shadow-blue-500/30 flex items-center justify-center gap-3 active:scale-[0.98] transition-all uppercase tracking-[0.2em] text-xs">
           <Save size={18} /> CONCLUIR ARTE
