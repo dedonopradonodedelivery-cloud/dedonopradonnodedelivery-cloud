@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState, useMemo } from 'react';
 import {
   ChevronLeft,
@@ -24,10 +25,10 @@ import {
   Navigation,
   Navigation2,
   Send,
-  User as UserIcon
+  User as UserIcon,
+  CornerDownRight
 } from 'lucide-react';
-/* Added BusinessHour to the import list to fix TypeScript errors */
-import { Store, BusinessHour } from '../types';
+import { Store, BusinessHour, StoreReview } from '../types';
 import { supabase } from '../lib/supabaseClient';
 import { useAuth } from '../contexts/AuthContext';
 import { useNeighborhood } from '../contexts/NeighborhoodContext';
@@ -42,6 +43,30 @@ const WEEK_DAYS_LABELS: Record<string, string> = {
   sabado: 'Sábado',
   domingo: 'Domingo',
 };
+
+// MOCK DE AVALIAÇÕES ESTRUTURADAS PARA O EXEMPLO
+const MOCK_REVIEWS: StoreReview[] = [
+  {
+    id: 'rev-1',
+    user_id: 'u1',
+    user_name: 'Anônimo',
+    rating: 5,
+    comment: 'Comida excelente e entrega rápida! Recomendo a todos.',
+    created_at: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(), // 2h atrás
+    merchant_response: {
+      text: 'Muito obrigado pelo feedback! Ficamos felizes que tenha gostado.',
+      responded_at: new Date(Date.now() - 1000 * 60 * 60 * 1).toISOString()
+    }
+  },
+  {
+    id: 'rev-2',
+    user_id: 'u2',
+    user_name: 'Anônimo',
+    rating: 4,
+    comment: 'Muito bom, mas a pizza poderia vir um pouco mais quente.',
+    created_at: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(), // 1 dia atrás
+  }
+];
 
 export const StoreDetailView: React.FC<{ 
   store: Store; 
@@ -139,6 +164,11 @@ export const StoreDetailView: React.FC<{
   const encodedAddress = encodeURIComponent(addressFormatted);
   const gmapsRouteUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodedAddress}`;
   const wazeRouteUrl = `https://waze.com/ul?q=${encodedAddress}&navigate=yes`;
+
+  // Mescla comentários antigos com mocks novos para visualização
+  const reviewsToDisplay = useMemo(() => {
+    return MOCK_REVIEWS;
+  }, []);
 
   return (
     <div className="min-h-screen bg-white dark:bg-gray-950 font-sans relative overflow-x-hidden">
@@ -264,7 +294,7 @@ export const StoreDetailView: React.FC<{
                         </p>
                     </div>
 
-                    {/* Onde encontrar (reunido aqui) */}
+                    {/* Onde encontrar */}
                     <div className="space-y-8">
                         <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Onde encontrar</h3>
                         
@@ -342,18 +372,6 @@ export const StoreDetailView: React.FC<{
                             </div>
                         </div>
                     </div>
-
-                    {/* Confiança */}
-                    <div className="bg-gray-50/50 dark:bg-gray-900/30 rounded-[28px] p-6 border border-gray-100 dark:border-gray-800">
-                        <div className="mb-6">
-                            <h3 className="text-sm font-bold text-gray-900 dark:text-white flex items-center gap-2">Confiança no bairro</h3>
-                        </div>
-                        <div className="grid grid-cols-1 gap-2.5">
-                            <div className="flex items-center gap-3 px-4 py-2.5 rounded-2xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 shadow-sm"><Star className="w-4 h-4 text-yellow-500 fill-current" /><span className="text-[10px] font-bold text-gray-700 dark:text-gray-300 uppercase tracking-tight">Muito bem avaliado</span></div>
-                            <div className="flex items-center gap-3 px-4 py-2.5 rounded-2xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 shadow-sm"><ShieldCheck className="w-4 h-4 text-[#1E5BFF]" /><span className="text-[10px] font-bold text-gray-700 dark:text-gray-300 uppercase tracking-tight">Registro oficial ativo</span></div>
-                            <div className="flex items-center gap-3 px-4 py-2.5 rounded-2xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 shadow-sm"><ThumbsUp className="w-4 h-4 text-emerald-600" /><span className="text-[10px] font-bold text-gray-700 dark:text-gray-300 uppercase tracking-tight">Indicação de vizinhos</span></div>
-                        </div>
-                    </div>
                 </div>
               )}
 
@@ -361,25 +379,52 @@ export const StoreDetailView: React.FC<{
               {activeTab === 'reviews' && (
                 <div className="animate-in fade-in duration-500 space-y-10">
                     {/* Lista de Avaliações */}
-                    <div className="space-y-6">
-                        {(store.recentComments && store.recentComments.length > 0) ? (
-                            store.recentComments.map((comment, idx) => (
-                                <div key={idx} className="bg-gray-50 dark:bg-gray-900/50 p-5 rounded-[24px] border border-gray-100 dark:border-gray-800">
-                                    <div className="flex items-center justify-between mb-3">
-                                        <div className="flex items-center gap-2">
-                                            <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-800 flex items-center justify-center text-gray-400">
-                                                <UserIcon size={14} />
-                                            </div>
-                                            <p className="text-xs font-bold text-gray-800 dark:text-gray-200">Anônimo</p>
+                    <div className="space-y-8">
+                        {reviewsToDisplay.length > 0 ? (
+                            reviewsToDisplay.map((rev) => (
+                                <div key={rev.id} className="space-y-3">
+                                  <div className="bg-gray-50 dark:bg-gray-900/50 p-5 rounded-[24px] border border-gray-100 dark:border-gray-800">
+                                      <div className="flex items-center justify-between mb-3">
+                                          <div className="flex items-center gap-2">
+                                              <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-800 flex items-center justify-center text-gray-400">
+                                                  <UserIcon size={14} />
+                                              </div>
+                                              <p className="text-xs font-bold text-gray-800 dark:text-gray-200">{rev.user_name}</p>
+                                          </div>
+                                          <div className="flex items-center gap-0.5">
+                                              {[1,2,3,4,5].map(s => (
+                                                  <Star key={s} size={10} className={`${s <= rev.rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`} />
+                                              ))}
+                                          </div>
+                                      </div>
+                                      <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed italic">"{rev.comment}"</p>
+                                      <p className="text-[9px] text-gray-400 font-bold uppercase mt-4 tracking-widest">
+                                        {new Date(rev.created_at).toLocaleDateString()}
+                                      </p>
+                                  </div>
+                                  
+                                  {/* Resposta do Lojista */}
+                                  {rev.merchant_response && (
+                                    <div className="ml-6 flex gap-3 animate-in slide-in-from-left-2 duration-500">
+                                      <div className="pt-2 text-gray-300">
+                                        <CornerDownRight size={18} />
+                                      </div>
+                                      <div className="flex-1 bg-blue-50/50 dark:bg-blue-900/10 p-4 rounded-[20px] border border-blue-100 dark:border-blue-900/30">
+                                        <div className="flex items-center gap-2 mb-1.5">
+                                          <div className="w-5 h-5 rounded-full bg-[#1E5BFF] flex items-center justify-center text-white shrink-0">
+                                            <Building2 size={10} />
+                                          </div>
+                                          <span className="text-[9px] font-black text-[#1E5BFF] uppercase tracking-wider">Resposta do estabelecimento</span>
                                         </div>
-                                        <div className="flex items-center gap-0.5">
-                                            {[1,2,3,4,5].map(s => (
-                                                <Star key={s} size={10} className={`${s <= 4 ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`} />
-                                            ))}
-                                        </div>
+                                        <p className="text-xs text-gray-700 dark:text-gray-300 leading-relaxed font-medium">
+                                          {rev.merchant_response.text}
+                                        </p>
+                                        <p className="text-[8px] text-gray-400 font-bold uppercase mt-3 text-right">
+                                          {new Date(rev.merchant_response.responded_at).toLocaleDateString()}
+                                        </p>
+                                      </div>
                                     </div>
-                                    <p className="text-sm text-gray-600 dark:text-gray-400 italic">"{comment}"</p>
-                                    <p className="text-[9px] text-gray-400 font-bold uppercase mt-4 tracking-widest">Recente</p>
+                                  )}
                                 </div>
                             ))
                         ) : (
@@ -390,8 +435,8 @@ export const StoreDetailView: React.FC<{
                         )}
                     </div>
 
-                    {/* Formulário de Avaliação */}
-                    <div className="bg-white dark:bg-gray-900 rounded-[28px] p-6 border border-gray-100 dark:border-gray-700 shadow-sm">
+                    {/* Formulário de Avaliar */}
+                    <div className="bg-white dark:bg-gray-900 rounded-[28px] p-6 border border-gray-100 dark:border-gray-800 shadow-sm">
                         <h3 className="text-sm font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
                             <Star className="w-4 h-4 text-[#1E5BFF]" /> Avaliar estabelecimento
                         </h3>
@@ -448,7 +493,7 @@ export const StoreDetailView: React.FC<{
               {/* CONTEÚDO: HORÁRIO */}
               {activeTab === 'hours' && (
                 <div className="animate-in fade-in duration-500">
-                    <div className="bg-white dark:bg-gray-900 rounded-[28px] p-6 border border-gray-100 dark:border-gray-700 shadow-sm">
+                    <div className="bg-white dark:bg-gray-900 rounded-[28px] p-6 border border-gray-100 dark:border-gray-800 shadow-sm">
                         <div className="flex items-center justify-between mb-8">
                             <h3 className="text-sm font-bold text-gray-900 dark:text-white flex items-center gap-2">
                                 <Clock className="w-4 h-4 text-[#1E5BFF]" /> Horários de funcionamento
@@ -463,7 +508,6 @@ export const StoreDetailView: React.FC<{
                         <div className="space-y-4">
                             {store.business_hours ? (
                                 Object.entries(store.business_hours).map(([key, value]) => {
-                                    /* Added explicit casting to BusinessHour to fix 'unknown' type errors */
                                     const h = value as BusinessHour;
                                     return (
                                         <div key={key} className="flex items-center justify-between text-sm py-1 border-b border-gray-50 dark:border-gray-800 last:border-0">

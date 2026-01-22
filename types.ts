@@ -1,3 +1,4 @@
+
 import React from 'react';
 
 // From original types.ts
@@ -13,6 +14,19 @@ export interface BusinessHour {
   open: boolean;
   start: string;
   end: string;
+}
+
+export interface StoreReview {
+  id: string;
+  user_id: string;
+  user_name: string;
+  rating: number;
+  comment: string;
+  created_at: string;
+  merchant_response?: {
+    text: string;
+    responded_at: string;
+  };
 }
 
 export interface Store {
@@ -41,6 +55,7 @@ export interface Store {
   neighborhood?: string;
   isSponsored?: boolean;
   recentComments?: string[];
+  recentReviews?: StoreReview[]; // Campo para avaliações estruturadas
   isMarketplace?: boolean;
   price_original?: number;
   price_current?: number;
@@ -248,7 +263,7 @@ export interface AppNotification {
   userId: string;
   title: string;
   message: string;
-  type: 'taxonomy_approval' | 'taxonomy_rejection' | 'system' | 'job_push' | 'claim_approval' | 'claim_rejection';
+  type: 'taxonomy_approval' | 'taxonomy_rejection' | 'system' | 'job_push' | 'claim_approval' | 'claim_rejection' | 'new_review';
   read: boolean;
   createdAt: string;
 }

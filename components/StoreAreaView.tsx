@@ -17,7 +17,8 @@ import {
   Compass,
   LifeBuoy,
   AlertTriangle,
-  Crown
+  Crown,
+  Star
 } from 'lucide-react';
 import { User as SupabaseUser } from '@supabase/supabase-js';
 import { useAuth } from '../contexts/AuthContext';
@@ -36,18 +37,24 @@ const ServiceBlock: React.FC<{
   onClick: () => void;
   isDestructive?: boolean;
   colorClass?: string;
-}> = ({ icon: Icon, label, description, onClick, isDestructive, colorClass }) => (
+  badge?: number;
+}> = ({ icon: Icon, label, description, onClick, isDestructive, colorClass, badge }) => (
   <button 
     onClick={onClick}
     className="w-full flex items-center justify-between p-5 bg-white dark:bg-gray-800 border-b border-gray-50 dark:border-gray-700 last:border-b-0 active:bg-gray-50 dark:active:bg-gray-700/50 transition-colors group"
   >
     <div className="flex items-center gap-4">
-      <div className={`p-2.5 rounded-xl transition-colors ${
+      <div className={`p-2.5 rounded-xl transition-colors relative ${
         isDestructive 
           ? 'bg-red-50 text-red-500' 
           : colorClass || 'bg-gray-50 dark:bg-gray-700 text-gray-400 group-hover:text-[#1E5BFF] group-hover:bg-blue-50'
       }`}>
         <Icon size={22} />
+        {badge ? (
+          <div className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-red-500 rounded-full border-2 border-white dark:border-gray-800 flex items-center justify-center animate-bounce">
+            <span className="text-[10px] font-black text-white">{badge}</span>
+          </div>
+        ) : null}
       </div>
       <div className="text-left">
         <p className={`text-sm font-bold ${isDestructive ? 'text-red-500' : 'text-gray-700 dark:text-gray-200'}`}>
@@ -126,17 +133,18 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
               colorClass="bg-blue-50 text-blue-600"
             />
             <ServiceBlock 
-              icon={LayoutGrid} 
-              label="Meus Banners" 
-              description="Gerenciar artes e posições"
-              onClick={() => onNavigate('store_ads_module')}
+              icon={Star} 
+              label="Avaliações" 
+              description="Responda seus clientes e gerencie sua reputação"
+              onClick={() => onNavigate('merchant_reviews')}
+              badge={2} // Mock de notificação
+              colorClass="bg-amber-50 text-amber-600"
             />
             <ServiceBlock 
               icon={Megaphone} 
               label="Anunciar (ADS)" 
               description="Destaque-se nas categorias"
               onClick={() => onNavigate('store_ads_module')}
-              colorClass="bg-amber-50 text-amber-600"
             />
             <ServiceBlock 
               icon={BarChart3} 
@@ -213,7 +221,7 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
       {/* Footer / Info */}
       <div className="mt-12 text-center opacity-30 px-10">
         <p className="text-[9px] font-black text-gray-500 uppercase tracking-[0.3em]">
-          Localizei JPA Parceiros <br/> v1.4.0
+          Localizei JPA Parceiros <br/> v1.5.0
         </p>
       </div>
     </div>
