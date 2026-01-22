@@ -11,7 +11,7 @@ import {
   Coins,
   ArrowRight,
   Instagram,
-  Image as ImageIcon,
+  ImageIcon,
   Building2,
   ShieldCheck,
   CreditCard,
@@ -22,28 +22,47 @@ import {
   Loader2,
   Map as MapIcon,
   Navigation,
-  Navigation2
+  Navigation2,
+  Send,
+  User as UserIcon
 } from 'lucide-react';
-import { Store } from '../types';
+/* Added BusinessHour to the import list to fix TypeScript errors */
+import { Store, BusinessHour } from '../types';
 import { supabase } from '../lib/supabaseClient';
 import { useAuth } from '../contexts/AuthContext';
 import { useNeighborhood } from '../contexts/NeighborhoodContext';
 import { trackOrganicEvent, OrganicEventType } from '../lib/analytics';
+
+const WEEK_DAYS_LABELS: Record<string, string> = {
+  segunda: 'Segunda-feira',
+  terca: 'Terça-feira',
+  quarta: 'Quarta-feira',
+  quinta: 'Quinta-feira',
+  sexta: 'Sexta-feira',
+  sabado: 'Sábado',
+  domingo: 'Domingo',
+};
 
 export const StoreDetailView: React.FC<{ 
   store: Store; 
   onBack: () => void; 
   onPay?: () => void;
   onClaim?: () => void;
-  onViewCashback?: () => void; // Nova prop para navegação
+  onViewCashback?: () => void;
 }> = ({ store, onBack, onPay, onClaim, onViewCashback }) => {
   const { user } = useAuth();
   const { currentNeighborhood } = useNeighborhood();
   const [isFavorite, setIsFavorite] = useState(false);
   const [userCredit, setUserCredit] = useState<number | null>(null);
-  const [activeTab, setActiveTab] = useState<'description' | 'reviews'>('description');
+  const [activeTab, setActiveTab] = useState<'description' | 'reviews' | 'hours'>('description');
   const [isClosedReporting, setIsClosedReporting] = useState(false);
   const [closedReported, setClosedReported] = useState(false);
+
+  // States para Avaliação
+  const [userRating, setUserRating] = useState(0);
+  const [userComment, setUserComment] = useState('');
+  const [isSubmittingReview, setIsSubmittingReview] = useState(false);
+  const [reviewSuccessMessage, setReviewSuccessMessage] = useState('');
 
   const track = (eventType: OrganicEventType) => {
     if (store) {
@@ -82,12 +101,30 @@ export const StoreDetailView: React.FC<{
     }, 1200);
   };
 
+  const handleSubmitReview = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (userRating === 0) {
+      alert("Por favor, selecione uma nota.");
+      return;
+    }
+    setIsSubmittingReview(true);
+    
+    // Simulação de envio
+    setTimeout(() => {
+      setIsSubmittingReview(false);
+      setReviewSuccessMessage('Avaliação enviada (modo teste)');
+      setUserRating(0);
+      setUserComment('');
+      
+      setTimeout(() => setReviewSuccessMessage(''), 3000);
+    }, 1500);
+  };
+
   const bannerImg = store.banner_url || store.image || "https://images.unsplash.com/photo-1570129477492-45c003edd2be?q=80&w=1200&auto=format&fit=crop";
   const logoImg = store.logo_url || store.logoUrl || '/assets/default-logo.png';
   
   const phoneFormatted = store.telefone_fixo_publico || store.phone || '';
   const phoneDigits = phoneFormatted.replace(/\D/g, '');
-  
   const whatsappFormatted = store.whatsapp_publico || store.phone || '';
   const whatsappDigits = whatsappFormatted.replace(/\D/g, '');
   
@@ -145,7 +182,7 @@ export const StoreDetailView: React.FC<{
           </div>
 
           {/* Cabeçalho */}
-          <div className="mb-8">
+          <div className="mb-6">
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight leading-tight mb-2">{store.name}</h1>
             <div className="flex items-center gap-2 text-xs font-medium text-gray-500 dark:text-gray-400">
                 <span className="uppercase font-bold tracking-widest text-[#1E5BFF]">{store.category}</span>
@@ -191,9 +228,9 @@ export const StoreDetailView: React.FC<{
               </a>
           </section>
 
-          {/* --- ABAS SOBRE / AVALIAÇÕES --- */}
-          <section className="mb-12">
-              <div className="flex items-center gap-6 mb-6 px-1 border-b border-gray-100 dark:border-gray-800">
+          {/* --- NAVEGAÇÃO DE ABAS --- */}
+          <section className="mb-10">
+              <div className="flex items-center gap-6 mb-8 px-1 border-b border-gray-100 dark:border-gray-800">
                   <button 
                     onClick={() => setActiveTab('description')}
                     className={`pb-4 text-xs font-bold uppercase tracking-widest transition-all relative ${activeTab === 'description' ? 'text-gray-900 dark:text-white' : 'text-gray-400'}`}
@@ -208,187 +245,248 @@ export const StoreDetailView: React.FC<{
                     Avaliações
                     {activeTab === 'reviews' && <div className="absolute bottom-0 left-0 right-0 h-1 bg-[#1E5BFF] rounded-t-full"></div>}
                   </button>
+                  <button 
+                    onClick={() => setActiveTab('hours')}
+                    className={`pb-4 text-xs font-bold uppercase tracking-widest transition-all relative ${activeTab === 'hours' ? 'text-gray-900 dark:text-white' : 'text-gray-400'}`}
+                  >
+                    Horário
+                    {activeTab === 'hours' && <div className="absolute bottom-0 left-0 right-0 h-1 bg-[#1E5BFF] rounded-t-full"></div>}
+                  </button>
               </div>
 
-              {activeTab === 'description' ? (
-                <div className="animate-in fade-in duration-500">
-                    <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed font-medium">{store.description || 'O lojista ainda não preencheu a descrição desta unidade.'}</p>
-                </div>
-              ) : (
-                <div className="animate-in fade-in duration-500 space-y-4">
-                    {store.recentComments && store.recentComments.length > 0 ? (
-                        store.recentComments.map((comment, idx) => (
-                            <div key={idx} className="bg-gray-50 dark:bg-gray-900/50 p-4 rounded-2xl border border-gray-100 dark:border-gray-800 flex gap-3">
-                                <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-800 flex-shrink-0 flex items-center justify-center">
-                                    <Quote size={10} className="text-gray-400" />
+              {/* CONTEÚDO: SOBRE A LOJA */}
+              {activeTab === 'description' && (
+                <div className="animate-in fade-in duration-500 space-y-12">
+                    {/* Descrição */}
+                    <div>
+                        <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed font-medium">
+                          {store.description || 'O lojista ainda não preencheu a descrição desta unidade.'}
+                        </p>
+                    </div>
+
+                    {/* Onde encontrar (reunido aqui) */}
+                    <div className="space-y-8">
+                        <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Onde encontrar</h3>
+                        
+                        <div className="space-y-8">
+                            <div className="flex items-center justify-between group">
+                                <div className="flex gap-4">
+                                    <div className="w-10 h-10 rounded-xl bg-gray-50 dark:bg-gray-900 flex items-center justify-center text-gray-400 shrink-0">
+                                        <Phone size={18} />
+                                    </div>
+                                    <div>
+                                        <p className="text-[9px] font-bold text-gray-400 uppercase tracking-wider mb-0.5">Telefone Comercial</p>
+                                        <p className="text-lg font-black text-gray-800 dark:text-gray-200 tracking-tight leading-none">
+                                            {phoneFormatted || 'Não informado'}
+                                        </p>
+                                    </div>
                                 </div>
-                                <p className="text-xs text-gray-600 dark:text-gray-400 italic">"{comment}"</p>
+                                {phoneDigits && (
+                                    <a 
+                                      href={`tel:${phoneDigits}`} 
+                                      className="w-10 h-10 rounded-full bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center text-[#1E5BFF] active:scale-90 transition-transform shadow-sm border border-blue-100/50"
+                                    >
+                                        <Phone size={16} />
+                                    </a>
+                                )}
                             </div>
-                        ))
-                    ) : (
-                        <div className="py-8 text-center bg-gray-50 dark:bg-gray-900/50 rounded-2xl border border-dashed border-gray-200 dark:border-gray-800">
-                            <p className="text-xs text-gray-400 font-medium uppercase tracking-widest">Sem avaliações recentes</p>
+
+                            <div className="space-y-4">
+                                <div className="flex gap-4">
+                                    <div className="w-10 h-10 rounded-xl bg-gray-50 dark:bg-gray-900 flex items-center justify-center text-gray-400 shrink-0">
+                                        <MapPin size={18} />
+                                    </div>
+                                    <div className="flex-1">
+                                        <p className="text-[9px] font-bold text-gray-400 uppercase tracking-wider mb-0.5">Endereço Unidade</p>
+                                        <p className="text-sm font-semibold text-gray-800 dark:text-gray-200 leading-snug">{addressFormatted}</p>
+                                        {!hasAddress && <p className="text-[9px] text-amber-500 font-bold uppercase mt-1">Localização não disponível</p>}
+                                    </div>
+                                </div>
+
+                                <div className="w-full h-36 rounded-[24px] bg-gray-100 dark:bg-gray-800 border border-gray-100 dark:border-gray-800 overflow-hidden relative shadow-sm group">
+                                    <img 
+                                        src="https://images.unsplash.com/photo-1524661135-423995f22d0b?q=80&w=800&auto=format&fit=crop" 
+                                        className="w-full h-full object-cover opacity-60 grayscale transition-all group-hover:grayscale-0"
+                                        alt="Mapa"
+                                    />
+                                    <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/5 pointer-events-none">
+                                        <div className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-md px-4 py-2 rounded-full border border-white/20 shadow-xl flex items-center gap-2">
+                                            <MapIcon className="w-3.5 h-3.5 text-[#1E5BFF]" />
+                                            <span className="text-[10px] font-black uppercase tracking-widest text-gray-600 dark:text-gray-300">Mapa Ilustrativo</span>
+                                        </div>
+                                    </div>
+                                    <div className="absolute bottom-3 right-3 flex gap-2">
+                                        <a href={wazeRouteUrl} target="_blank" rel="noopener" onClick={(e) => !hasAddress && e.preventDefault()} className={`flex items-center gap-2 px-3 py-2 rounded-xl backdrop-blur-md border shadow-lg transition-all active:scale-95 ${hasAddress ? 'bg-white/90 border-white/20 text-gray-700 hover:bg-white' : 'bg-gray-200/50 border-transparent text-gray-400 cursor-not-allowed'}`}><Navigation className={`w-3.5 h-3.5 ${hasAddress ? 'text-blue-400' : 'text-gray-400'}`} /><span className="text-[10px] font-black uppercase tracking-widest">Waze</span></a>
+                                        <a href={gmapsRouteUrl} target="_blank" rel="noopener" onClick={(e) => !hasAddress && e.preventDefault()} className={`flex items-center gap-2 px-3 py-2 rounded-xl backdrop-blur-md border shadow-lg transition-all active:scale-95 ${hasAddress ? 'bg-white/90 border-white/20 text-gray-700 hover:bg-white' : 'bg-gray-200/50 border-transparent text-gray-400 cursor-not-allowed'}`}><Navigation2 className={`w-3.5 h-3.5 ${hasAddress ? 'text-red-400' : 'text-gray-400'}`} /><span className="text-[10px] font-black uppercase tracking-widest">Maps</span></a>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                    )}
+                    </div>
+
+                    {/* Pagamento */}
+                    <div className="space-y-4">
+                        <div className="flex items-center gap-2 ml-1">
+                            <CreditCard size={14} className="text-gray-400" />
+                            <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Formas de pagamento</h3>
+                        </div>
+                        <div className="bg-gray-50/50 dark:bg-gray-900/30 p-5 rounded-[24px] border border-gray-100 dark:border-gray-800">
+                            <div className="flex flex-wrap gap-2">
+                                {store.payment_methods && store.payment_methods.length > 0 ? (
+                                    store.payment_methods.map(method => (
+                                        <span key={method} className="bg-white dark:bg-gray-800 px-3 py-1.5 rounded-xl border border-gray-100 dark:border-gray-700 text-[9px] font-black text-gray-600 dark:text-gray-300 uppercase tracking-tight shadow-sm">{method}</span>
+                                    ))
+                                ) : (
+                                    <span className="text-[10px] text-gray-400 italic">Consulte as formas disponíveis no local.</span>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Confiança */}
+                    <div className="bg-gray-50/50 dark:bg-gray-900/30 rounded-[28px] p-6 border border-gray-100 dark:border-gray-800">
+                        <div className="mb-6">
+                            <h3 className="text-sm font-bold text-gray-900 dark:text-white flex items-center gap-2">Confiança no bairro</h3>
+                        </div>
+                        <div className="grid grid-cols-1 gap-2.5">
+                            <div className="flex items-center gap-3 px-4 py-2.5 rounded-2xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 shadow-sm"><Star className="w-4 h-4 text-yellow-500 fill-current" /><span className="text-[10px] font-bold text-gray-700 dark:text-gray-300 uppercase tracking-tight">Muito bem avaliado</span></div>
+                            <div className="flex items-center gap-3 px-4 py-2.5 rounded-2xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 shadow-sm"><ShieldCheck className="w-4 h-4 text-[#1E5BFF]" /><span className="text-[10px] font-bold text-gray-700 dark:text-gray-300 uppercase tracking-tight">Registro oficial ativo</span></div>
+                            <div className="flex items-center gap-3 px-4 py-2.5 rounded-2xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 shadow-sm"><ThumbsUp className="w-4 h-4 text-emerald-600" /><span className="text-[10px] font-bold text-gray-700 dark:text-gray-300 uppercase tracking-tight">Indicação de vizinhos</span></div>
+                        </div>
+                    </div>
+                </div>
+              )}
+
+              {/* CONTEÚDO: AVALIAÇÕES */}
+              {activeTab === 'reviews' && (
+                <div className="animate-in fade-in duration-500 space-y-10">
+                    {/* Lista de Avaliações */}
+                    <div className="space-y-6">
+                        {(store.recentComments && store.recentComments.length > 0) ? (
+                            store.recentComments.map((comment, idx) => (
+                                <div key={idx} className="bg-gray-50 dark:bg-gray-900/50 p-5 rounded-[24px] border border-gray-100 dark:border-gray-800">
+                                    <div className="flex items-center justify-between mb-3">
+                                        <div className="flex items-center gap-2">
+                                            <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-800 flex items-center justify-center text-gray-400">
+                                                <UserIcon size={14} />
+                                            </div>
+                                            <p className="text-xs font-bold text-gray-800 dark:text-gray-200">Anônimo</p>
+                                        </div>
+                                        <div className="flex items-center gap-0.5">
+                                            {[1,2,3,4,5].map(s => (
+                                                <Star key={s} size={10} className={`${s <= 4 ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`} />
+                                            ))}
+                                        </div>
+                                    </div>
+                                    <p className="text-sm text-gray-600 dark:text-gray-400 italic">"{comment}"</p>
+                                    <p className="text-[9px] text-gray-400 font-bold uppercase mt-4 tracking-widest">Recente</p>
+                                </div>
+                            ))
+                        ) : (
+                            <div className="py-12 text-center bg-gray-50 dark:bg-gray-900/50 rounded-[24px] border border-dashed border-gray-200 dark:border-gray-800">
+                                <MessageSquare className="w-8 h-8 text-gray-300 mx-auto mb-3" />
+                                <p className="text-xs text-gray-400 font-medium uppercase tracking-widest">Ainda não há avaliações.</p>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Formulário de Avaliação */}
+                    <div className="bg-white dark:bg-gray-900 rounded-[28px] p-6 border border-gray-100 dark:border-gray-700 shadow-sm">
+                        <h3 className="text-sm font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
+                            <Star className="w-4 h-4 text-[#1E5BFF]" /> Avaliar estabelecimento
+                        </h3>
+                        
+                        <form onSubmit={handleSubmitReview} className="space-y-5">
+                            <div>
+                                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 ml-1">Sua nota</p>
+                                <div className="flex gap-2">
+                                    {[1,2,3,4,5].map((star) => (
+                                        <button
+                                            key={star}
+                                            type="button"
+                                            onClick={() => setUserRating(star)}
+                                            className="p-1 transition-transform active:scale-90"
+                                        >
+                                            <Star 
+                                                size={32} 
+                                                className={`transition-all ${star <= userRating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-200 dark:text-gray-700'}`} 
+                                            />
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Comentário (opcional)</label>
+                                <textarea 
+                                    value={userComment}
+                                    onChange={(e) => setUserComment(e.target.value)}
+                                    placeholder="Conte como foi sua experiência..."
+                                    className="w-full h-24 p-4 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl outline-none focus:border-[#1E5BFF] text-sm dark:text-white transition-all resize-none"
+                                />
+                            </div>
+
+                            {reviewSuccessMessage && (
+                                <div className="p-3 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 text-xs font-bold rounded-xl border border-emerald-100 dark:border-emerald-800 animate-in zoom-in duration-300">
+                                    {reviewSuccessMessage}
+                                </div>
+                            )}
+
+                            <button 
+                                type="submit"
+                                disabled={isSubmittingReview}
+                                className="w-full py-4 bg-gray-900 dark:bg-white text-white dark:text-gray-900 font-bold rounded-2xl flex items-center justify-center gap-2 active:scale-95 transition-all text-xs uppercase tracking-widest disabled:opacity-50"
+                            >
+                                {isSubmittingReview ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+                                Enviar avaliação
+                            </button>
+                        </form>
+                    </div>
+                </div>
+              )}
+
+              {/* CONTEÚDO: HORÁRIO */}
+              {activeTab === 'hours' && (
+                <div className="animate-in fade-in duration-500">
+                    <div className="bg-white dark:bg-gray-900 rounded-[28px] p-6 border border-gray-100 dark:border-gray-700 shadow-sm">
+                        <div className="flex items-center justify-between mb-8">
+                            <h3 className="text-sm font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                                <Clock className="w-4 h-4 text-[#1E5BFF]" /> Horários de funcionamento
+                            </h3>
+                            {store.isOpenNow !== undefined && (
+                                <div className={`px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-widest ${store.isOpenNow ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' : 'bg-rose-50 text-rose-600 border border-rose-100'}`}>
+                                    {store.isOpenNow ? 'Aberto agora' : 'Fechado'}
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="space-y-4">
+                            {store.business_hours ? (
+                                Object.entries(store.business_hours).map(([key, value]) => {
+                                    /* Added explicit casting to BusinessHour to fix 'unknown' type errors */
+                                    const h = value as BusinessHour;
+                                    return (
+                                        <div key={key} className="flex items-center justify-between text-sm py-1 border-b border-gray-50 dark:border-gray-800 last:border-0">
+                                            <span className="font-medium text-gray-600 dark:text-gray-400">{WEEK_DAYS_LABELS[key] || key}</span>
+                                            <span className={`font-bold ${h.open ? 'text-gray-900 dark:text-white' : 'text-rose-400 uppercase text-[10px]'}`}>
+                                                {h.open ? `${h.start}–${h.end}` : 'Fechado'}
+                                            </span>
+                                        </div>
+                                    );
+                                })
+                            ) : (
+                                <div className="py-8 text-center bg-gray-50 dark:bg-gray-900/50 rounded-2xl border border-dashed border-gray-200 dark:border-gray-800">
+                                    <p className="text-xs text-gray-400 font-medium uppercase tracking-widest">Horário não informado.</p>
+                                </div>
+                            )}
+                        </div>
+                    </div>
                 </div>
               )}
           </section>
 
-          {/* --- ONDE ENCONTRAR --- */}
-          <section className="space-y-8 mb-12">
-            <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Onde encontrar</h3>
-            
-            <div className="space-y-8">
-                
-                {/* 1. Telefone em Destaque */}
-                <div className="flex items-center justify-between group">
-                    <div className="flex gap-4">
-                        <div className="w-10 h-10 rounded-xl bg-gray-50 dark:bg-gray-900 flex items-center justify-center text-gray-400 shrink-0">
-                            <Phone size={18} />
-                        </div>
-                        <div>
-                            <p className="text-[9px] font-bold text-gray-400 uppercase tracking-wider mb-0.5">Telefone Comercial</p>
-                            <p className="text-lg font-black text-gray-800 dark:text-gray-200 tracking-tight leading-none">
-                                {phoneFormatted || 'Não informado'}
-                            </p>
-                        </div>
-                    </div>
-                    {phoneDigits && (
-                        <a 
-                          href={`tel:${phoneDigits}`} 
-                          className="w-10 h-10 rounded-full bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center text-[#1E5BFF] active:scale-90 transition-transform shadow-sm border border-blue-100/50"
-                        >
-                            <Phone size={16} />
-                        </a>
-                    )}
-                </div>
-
-                {/* 2. Endereço e Mapa com Navegação */}
-                <div className="space-y-4">
-                    <div className="flex gap-4">
-                        <div className="w-10 h-10 rounded-xl bg-gray-50 dark:bg-gray-900 flex items-center justify-center text-gray-400 shrink-0">
-                            <MapPin size={18} />
-                        </div>
-                        <div className="flex-1">
-                            <p className="text-[9px] font-bold text-gray-400 uppercase tracking-wider mb-0.5">Endereço Unidade</p>
-                            <p className="text-sm font-semibold text-gray-800 dark:text-gray-200 leading-snug">{addressFormatted}</p>
-                            {!hasAddress && <p className="text-[9px] text-amber-500 font-bold uppercase mt-1">Localização não disponível</p>}
-                        </div>
-                    </div>
-
-                    {/* Placeholder do Mapa + Botões de GPS */}
-                    <div className="w-full h-36 rounded-[24px] bg-gray-100 dark:bg-gray-800 border border-gray-100 dark:border-gray-800 overflow-hidden relative shadow-sm group">
-                        <img 
-                            src="https://images.unsplash.com/photo-1524661135-423995f22d0b?q=80&w=800&auto=format&fit=crop" 
-                            className="w-full h-full object-cover opacity-60 grayscale transition-all group-hover:grayscale-0"
-                            alt="Mapa"
-                        />
-                        
-                        {/* Overlay Central */}
-                        <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/5 pointer-events-none">
-                            <div className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-md px-4 py-2 rounded-full border border-white/20 shadow-xl flex items-center gap-2">
-                                <MapIcon className="w-3.5 h-3.5 text-[#1E5BFF]" />
-                                <span className="text-[10px] font-black uppercase tracking-widest text-gray-600 dark:text-gray-300">Mapa Ilustrativo</span>
-                            </div>
-                        </div>
-
-                        {/* Botões de Ação de Rota */}
-                        <div className="absolute bottom-3 right-3 flex gap-2">
-                            <a 
-                                href={wazeRouteUrl} 
-                                target="_blank" 
-                                rel="noopener" 
-                                onClick={(e) => !hasAddress && e.preventDefault()}
-                                className={`flex items-center gap-2 px-3 py-2 rounded-xl backdrop-blur-md border shadow-lg transition-all active:scale-95 ${hasAddress ? 'bg-white/90 border-white/20 text-gray-700 hover:bg-white' : 'bg-gray-200/50 border-transparent text-gray-400 cursor-not-allowed'}`}
-                            >
-                                <Navigation className={`w-3.5 h-3.5 ${hasAddress ? 'text-blue-400' : 'text-gray-400'}`} />
-                                <span className="text-[10px] font-black uppercase tracking-widest">Waze</span>
-                            </a>
-                            <a 
-                                href={gmapsRouteUrl} 
-                                target="_blank" 
-                                rel="noopener" 
-                                onClick={(e) => !hasAddress && e.preventDefault()}
-                                className={`flex items-center gap-2 px-3 py-2 rounded-xl backdrop-blur-md border shadow-lg transition-all active:scale-95 ${hasAddress ? 'bg-white/90 border-white/20 text-gray-700 hover:bg-white' : 'bg-gray-200/50 border-transparent text-gray-400 cursor-not-allowed'}`}
-                            >
-                                <Navigation2 className={`w-3.5 h-3.5 ${hasAddress ? 'text-red-400' : 'text-gray-400'}`} />
-                                <span className="text-[10px] font-black uppercase tracking-widest">Maps</span>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Instagram */}
-                {store.instagram && (
-                    <div className="flex items-center justify-between">
-                        <div className="flex gap-4">
-                            <div className="w-10 h-10 rounded-xl bg-gray-50 dark:bg-gray-900 flex items-center justify-center text-gray-400 shrink-0">
-                                <Instagram size={18} />
-                            </div>
-                            <div>
-                                <p className="text-[9px] font-bold text-gray-400 uppercase tracking-wider mb-0.5">Instagram Oficial</p>
-                                <p className="text-sm font-semibold text-gray-800 dark:text-gray-200">@{store.instagram.replace('@', '')}</p>
-                            </div>
-                        </div>
-                        <a 
-                          href={`https://instagram.com/${store.instagram.replace('@', '')}`} 
-                          target="_blank" 
-                          rel="noopener" 
-                          className="w-10 h-10 rounded-full bg-pink-50 dark:bg-pink-900/30 flex items-center justify-center text-pink-500 active:scale-90 transition-transform shadow-sm border border-pink-100/50"
-                        >
-                            <ArrowRight size={16} />
-                        </a>
-                    </div>
-                )}
-            </div>
-          </section>
-
-          {/* --- FORMAS DE PAGAMENTO --- */}
-          <section className="mb-16">
-              <div className="flex items-center gap-2 mb-4 ml-1">
-                  <CreditCard size={14} className="text-gray-400" />
-                  <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Formas de pagamento aceitas</h3>
-              </div>
-              <div className="bg-gray-50/50 dark:bg-gray-900/30 p-5 rounded-[24px] border border-gray-100 dark:border-gray-800">
-                  <div className="flex flex-wrap gap-2 mb-3">
-                      {store.payment_methods && store.payment_methods.length > 0 ? (
-                          store.payment_methods.map(method => (
-                              <span key={method} className="bg-white dark:bg-gray-800 px-3 py-1.5 rounded-xl border border-gray-100 dark:border-gray-700 text-[9px] font-black text-gray-600 dark:text-gray-300 uppercase tracking-tight shadow-sm">{method}</span>
-                          ))
-                      ) : (
-                          <span className="text-[10px] text-gray-400 italic">Consulte o estabelecimento sobre formas de pagamento disponíveis.</span>
-                      )}
-                  </div>
-                  {store.payment_methods_others && (
-                      <p className="text-[10px] text-gray-400 font-medium ml-1">Obs: {store.payment_methods_others}</p>
-                  )}
-              </div>
-          </section>
-
-          {/* --- CONFIANÇA NO BAIRRO --- */}
-          <section className="bg-gray-50/50 dark:bg-gray-900/30 rounded-[28px] p-6 border border-gray-100 dark:border-gray-800 mb-10 animate-in fade-in duration-500">
-              <div className="mb-6">
-                <h3 className="text-sm font-bold text-gray-900 dark:text-white flex items-center gap-2">Confiança no bairro</h3>
-                <p className="text-[10px] text-gray-400 mt-1 font-medium leading-relaxed">Indicadores de transparência e atendimento local.</p>
-              </div>
-              <div className="grid grid-cols-1 gap-2.5">
-                  <div className="flex items-center gap-3 px-4 py-2.5 rounded-2xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 shadow-sm">
-                    <Star className="w-4 h-4 text-yellow-500 fill-current" />
-                    <span className="text-[10px] font-bold text-gray-700 dark:text-gray-300 uppercase tracking-tight">Muito bem avaliado</span>
-                  </div>
-                  <div className="flex items-center gap-3 px-4 py-2.5 rounded-2xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 shadow-sm">
-                    <ShieldCheck className="w-4 h-4 text-[#1E5BFF]" />
-                    <span className="text-[10px] font-bold text-gray-700 dark:text-gray-300 uppercase tracking-tight">Registro oficial ativo</span>
-                  </div>
-                  <div className="flex items-center gap-3 px-4 py-2.5 rounded-2xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 shadow-sm">
-                    <ThumbsUp className="w-4 h-4 text-emerald-600" />
-                    <span className="text-[10px] font-bold text-gray-700 dark:text-gray-300 uppercase tracking-tight">Indicação de vizinhos</span>
-                  </div>
-              </div>
-          </section>
-
           {/* --- BOTÕES FINAIS --- */}
-          <section className="space-y-3">
+          <section className="space-y-3 mt-4">
               {!store.claimed && (
                 <button 
                   onClick={onClaim}
@@ -400,7 +498,7 @@ export const StoreDetailView: React.FC<{
               )}
 
               {closedReported ? (
-                  <div className="w-full py-4 text-center text-amber-600 bg-amber-50 dark:bg-amber-900/20 rounded-[20px] border border-amber-100 dark:border-amber-800 animate-in zoom-in duration-300">
+                  <div className="w-full py-4 text-center text-amber-600 bg-amber-50 dark:bg-amber-900/10 rounded-[20px] border border-amber-100 dark:border-amber-800 animate-in zoom-in duration-300">
                       <p className="text-[10px] font-black uppercase tracking-[0.2em]">Obrigado! Em análise técnica.</p>
                   </div>
               ) : (
