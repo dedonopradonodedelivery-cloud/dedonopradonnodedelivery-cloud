@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { 
   ChevronLeft, 
@@ -53,7 +52,7 @@ import {
   Palette as PaletteIcon
 } from 'lucide-react';
 import { User } from '@supabase/supabase-js';
-import { StoreBannerEditor } from './StoreBannerEditor';
+import { StoreBannerEditor } from '@/components/StoreBannerEditor';
 
 interface StoreAdsModuleProps {
   onBack: () => void;
@@ -414,11 +413,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
     if (!isArtSaved) { showToast("Configure a arte do banner.", "error"); scrollTo(creativeRef, 120); return; }
     
     if (artChoice === 'pro') {
-        if (dailySalesCount > 5) {
-            setView('pro_high_demand_warning');
-        } else {
-            setView('pro_checkout');
-        }
+        setView('pro_checkout');
         return;
     }
 
@@ -522,7 +517,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
   if (view === 'pro_high_demand_warning') {
     return (
         <div className="fixed inset-0 z-[150] bg-black/80 backdrop-blur-sm flex items-center justify-center p-6 animate-in fade-in duration-300">
-            <div className="bg-slate-900 w-full max-w-sm rounded-[2.5rem] p-8 shadow-2xl border border-amber-500/30 text-center">
+            <div className="bg-slate-900 w-full max-sm rounded-[2.5rem] p-8 shadow-2xl border border-amber-500/30 text-center">
                 <div className="w-16 h-16 bg-amber-500/10 rounded-full flex items-center justify-center mx-auto mb-6 border-4 border-amber-500/20">
                     <AlertTriangle size={32} className="text-amber-400" />
                 </div>
@@ -551,7 +546,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
 
   if (view === 'pro_checkout') {
     return (
-        <div className="min-h-screen bg-slate-950 flex flex-col animate-in fade-in duration-300">
+        <div className="min-h-screen bg-slate-950 flex flex-col animate-in fade-in duration-300 pb-[80px]">
             <header className="sticky top-0 z-40 bg-slate-950/80 backdrop-blur-md px-6 py-4 flex items-center gap-4 border-b border-white/5">
                 <button onClick={() => setView('sales')} className="p-2 bg-slate-900 rounded-xl text-slate-400"><ChevronLeft size={20} /></button>
                 <h1 className="font-bold text-lg leading-none">Confirmação do Pedido</h1>
@@ -604,7 +599,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
                 <p className="text-slate-500 text-[10px] mt-1">Nosso time irá iniciar a produção conforme a ordem de chegada.</p>
               </div>
 
-              <button onClick={() => { setChatMessages([]); setProChatStep(0); setView('pro_chat'); }} className="w-full max-w-xs py-5 bg-white text-slate-900 font-black rounded-2xl shadow-2xl active:scale-[0.98] transition-all flex items-center justify-center gap-2">
+              <button onClick={() => { setChatMessages([]); setProChatStep(0); setView('pro_chat'); }} className="w-full max-w-xs py-5 bg-white text-slate-900 font-black rounded-2xl shadow-2xl active:scale-95 transition-transform flex items-center justify-center gap-2">
                   Falar com o designer <ArrowRight />
               </button>
           </div>
@@ -656,7 +651,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
                 <button onClick={onBack} className="p-2 bg-white/5 rounded-xl text-slate-400 hover:text-white"><X size={20} /></button>
             </header>
 
-            <main className="flex-1 p-6 space-y-4 overflow-x-auto no-scrollbar">
+            <main className="flex-1 p-6 space-y-4 overflow-x-auto no-scrollbar pb-[80px]">
                 <div className="flex gap-4 min-w-full w-fit">
                     {KANBAN_COLUMNS.map((column) => (
                         <div key={column.id} className="w-72 bg-slate-900 rounded-3xl p-4 border border-white/5 flex flex-col shrink-0">
@@ -729,7 +724,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
     const currentStatusInfo = KANBAN_COLUMNS.find(c => c.id === selectedOrder.status);
 
     return (
-        <div className="fixed inset-0 z-[130] bg-slate-950 flex flex-col animate-in slide-in-from-right h-full">
+        <div className="fixed inset-0 z-[130] bg-slate-950 flex flex-col animate-in slide-in-from-right h-full pb-[80px]">
             <header className="bg-slate-900 p-6 border-b border-white/10 flex items-start justify-between shrink-0">
                 <div className="flex items-start gap-4">
                     <button onClick={() => setView('designer_panel')} className="p-2 bg-white/5 rounded-xl text-slate-400 mt-1"><ChevronLeft size={20} /></button>
@@ -811,6 +806,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
     );
   }
 
+  // FIX: Define isCheckoutStep before it's used in the return statement to fix 'Cannot find name' error.
   const isCheckoutStep = selectedMode && selectedPeriods.length > 0 && selectedNeighborhoods.length > 0 && isArtSaved;
 
   return (
@@ -826,13 +822,14 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
       <header className="sticky top-0 z-40 bg-[#020617]/80 backdrop-blur-xl border-b border-white/5 px-6 py-4 flex items-center gap-4">
         <button onClick={onBack} className="p-2 bg-slate-900 rounded-xl text-slate-400 hover:text-white transition-all active:scale-95"><ChevronLeft size={20} /></button>
         <div>
-          <h1 className="font-bold text-lg leading-none flex items-center gap-2">Criar Anúncio Patrocinado <Crown size={16} className="text-amber-400 fill-amber-400" /></h1>
+          <h1 className="font-bold text-lg leading-none flex items-center gap-2">Anunciar no Bairro <Crown size={16} className="text-amber-400 fill-amber-400" /></h1>
           <p className="text-[10px] text-blue-400 uppercase font-black tracking-widest mt-1">Configuração de Campanha</p>
         </div>
       </header>
 
       <main className="flex-1 p-6 space-y-16 pb-64 max-w-md mx-auto w-full">
         
+        {/* BLOCO DE DESTAQUE: URGÊNCIA E CONVERSÃO */}
         <section className="animate-in fade-in slide-in-from-top-4 duration-700">
             <div className="bg-slate-900 border-l-4 border-blue-600 rounded-r-[2.5rem] p-8 shadow-2xl relative overflow-hidden group">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none"></div>
@@ -861,6 +858,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
             </div>
         </section>
 
+        {/* BLOCO 1: POSICIONAMENTO */}
         <section className="space-y-6">
           <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-blue-500 flex items-center gap-2 px-1">
             <Target size={14} /> 1. Onde deseja aparecer?
@@ -889,6 +887,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
           </div>
         </section>
 
+        {/* BLOCO 2: PERÍODO */}
         <section 
             ref={periodRef} 
             className={`space-y-6 transition-all duration-500 ${!selectedMode ? 'opacity-20 pointer-events-none grayscale' : 'opacity-100'}`}
@@ -920,6 +919,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
             </div>
         </section>
 
+        {/* BLOCO 3: BAIRROS */}
         <section 
             ref={neighborhoodRef} 
             className={`space-y-6 transition-all duration-500 ${selectedPeriods.length === 0 ? 'opacity-20 grayscale pointer-events-none' : 'opacity-100'}`}
@@ -947,8 +947,10 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
             </div>
         </section>
 
+        {/* BLOCO 4: DESIGN */}
         <section ref={creativeRef} className={`space-y-8 transition-all duration-500 ${selectedNeighborhoods.length === 0 ? 'opacity-20 pointer-events-none' : 'opacity-100'}`}>
           <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-blue-500 flex items-center gap-2 px-1"><Palette size={14} /> 4. Design da Arte</h3>
+          
           <div className="space-y-4">
               <div onClick={() => setArtChoice('diy')} className={`rounded-[2.5rem] border-2 transition-all cursor-pointer overflow-hidden ${artChoice === 'diy' ? 'bg-slate-900 border-blue-500 shadow-xl' : 'bg-slate-900 border-white/5'}`}>
                 <div className="p-8">
@@ -959,41 +961,107 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
                             <p className="text-xs text-slate-400 leading-relaxed">Use seu banner pronto ou crie no editor.</p>
                         </div>
                     </div>
+
                     {artChoice === 'diy' && (
                         <div className="space-y-4 animate-in slide-in-from-top-4 duration-500 pt-4 border-t border-white/5">
                             <div className="grid grid-cols-2 gap-3">
-                                <button onClick={(e) => { e.stopPropagation(); setDiyFlowStep('upload'); }} className={`p-4 rounded-2xl border-2 flex flex-col items-center text-center gap-3 transition-all ${diyFlowStep === 'upload' && isArtSaved ? 'bg-emerald-500/10 border-emerald-500/30' : 'bg-white/5 border-white/5 hover:border-white/20'}`}><div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-slate-400"><ImageIcon size={20} /></div><div><p className="text-[10px] font-black text-white uppercase leading-tight">Usar banner pronto</p><p className="text-[8px] text-slate-500 uppercase mt-1">Upload de arquivo</p></div></button>
-                                <button onClick={(e) => { e.stopPropagation(); setDiyFlowStep('editor'); setIsEditingArt(true); }} className={`p-4 rounded-2xl border-2 flex flex-col items-center text-center gap-3 transition-all ${diyFlowStep === 'editor' && isArtSaved ? 'bg-blue-500/10 border-blue-500/30' : 'bg-white/5 border-white/5 hover:border-white/20'}`}><div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-slate-400"><Palette size={20} /></div><div><p className="text-[10px] font-black text-white uppercase leading-tight">Criar no editor</p><p className="text-[8px] text-slate-500 uppercase mt-1">Fazer do zero</p></div></button>
+                                <button 
+                                  onClick={(e) => { e.stopPropagation(); setDiyFlowStep('upload'); }}
+                                  className={`p-4 rounded-2xl border-2 flex flex-col items-center text-center gap-3 transition-all ${diyFlowStep === 'upload' && isArtSaved ? 'bg-emerald-500/10 border-emerald-500/30' : 'bg-white/5 border-white/5 hover:border-white/20'}`}
+                                >
+                                    <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-slate-400"><ImageIcon size={20} /></div>
+                                    <div>
+                                        <p className="text-[10px] font-black text-white uppercase leading-tight">Usar banner pronto</p>
+                                        <p className="text-[8px] text-slate-500 uppercase mt-1">Upload de arquivo</p>
+                                    </div>
+                                </button>
+
+                                <button 
+                                  onClick={(e) => { e.stopPropagation(); setDiyFlowStep('editor'); setIsEditingArt(true); }}
+                                  className={`p-4 rounded-2xl border-2 flex flex-col items-center text-center gap-3 transition-all ${diyFlowStep === 'editor' && isArtSaved ? 'bg-blue-500/10 border-blue-500/30' : 'bg-white/5 border-white/5 hover:border-white/20'}`}
+                                >
+                                    <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-slate-400"><Palette size={20} /></div>
+                                    <div>
+                                        <p className="text-[10px] font-black text-white uppercase leading-tight">Criar no editor</p>
+                                        <p className="text-[8px] text-slate-500 uppercase mt-1">Fazer do zero</p>
+                                    </div>
+                                </button>
                             </div>
-                            {isArtSaved && (<div className="p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl flex items-center justify-between animate-in zoom-in duration-300"><div className="flex items-center gap-3"><CheckCircle2 size={16} className="text-emerald-400" /><span className="text-[10px] font-black text-emerald-400 uppercase">Arte {diyFlowStep === 'upload' ? 'Enviada' : 'Criada'}</span></div><button onClick={() => setDiyFlowStep('selection')} className="text-[9px] font-black text-white bg-slate-800 px-3 py-1.5 rounded-lg uppercase tracking-widest">Alterar</button></div>)}
+
+                            {isArtSaved && (
+                                <div className="p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl flex items-center justify-between animate-in zoom-in duration-300">
+                                    <div className="flex items-center gap-3">
+                                        <CheckCircle2 size={16} className="text-emerald-400" />
+                                        <span className="text-[10px] font-black text-emerald-400 uppercase">Arte {diyFlowStep === 'upload' ? 'Enviada' : 'Criada'}</span>
+                                    </div>
+                                    <button onClick={() => setDiyFlowStep('selection')} className="text-[9px] font-black text-white bg-slate-800 px-3 py-1.5 rounded-lg uppercase tracking-widest">Alterar</button>
+                                </div>
+                            )}
                         </div>
                     )}
                 </div>
               </div>
+
               <div onClick={() => { setArtChoice('pro'); setIsArtSaved(true); setView('sales'); scrollTo(paymentRef, 80); }} className={`rounded-[2.5rem] border-2 transition-all cursor-pointer overflow-hidden ${artChoice === 'pro' ? 'bg-slate-900 border-amber-500 shadow-xl shadow-amber-500/5' : 'bg-slate-900 border-white/5'}`}>
-                  <div className="p-8"><div className="flex items-start justify-between"><div className="flex items-start gap-5"><div className="w-12 h-12 bg-amber-400/10 rounded-2xl flex items-center justify-center text-amber-400 shrink-0"><Rocket size={24} /></div><div><h3 className="text-lg font-bold text-white mb-1 leading-tight">Contratar time profissional</h3><p className="text-xs text-slate-400 leading-relaxed max-w-[180px]">Nós criamos o banner profissional para você.</p></div></div><div className="text-right"><span className="text-slate-500 line-through text-[9px] font-bold">R$ 149</span><p className="text-xl font-black text-white">R$ 69,90</p></div></div>
-                    {artChoice === 'pro' && (<div className="mt-6 p-4 bg-amber-400/10 border border-amber-400/20 rounded-2xl flex items-center justify-between animate-in zoom-in duration-300"><div className="flex items-center gap-3"><CheckCircle2 size={16} className="text-amber-400" /><span className="text-[10px] font-black text-amber-400 uppercase tracking-widest">Opção PRO Selecionada</span></div><button onClick={() => setView('pro_chat')} className="text-[9px] font-black text-white bg-amber-600 px-3 py-1.5 rounded-lg uppercase tracking-widest">Enviar Briefing</button></div>)}
+                  <div className="p-8">
+                    <div className="flex items-start justify-between">
+                        <div className="flex items-start gap-5">
+                            <div className="w-12 h-12 bg-amber-400/10 rounded-2xl flex items-center justify-center text-amber-400 shrink-0"><Rocket size={24} /></div>
+                            <div>
+                                <h3 className="text-lg font-bold text-white mb-1 leading-tight">Contratar time profissional</h3>
+                                <p className="text-xs text-slate-400 leading-relaxed max-w-[180px]">Nós criamos o banner profissional para você.</p>
+                            </div>
+                        </div>
+                        <div className="text-right">
+                            <span className="text-slate-500 line-through text-[9px] font-bold">R$ 149</span>
+                            <p className="text-xl font-black text-white">R$ 69,90</p>
+                        </div>
+                    </div>
+                    {artChoice === 'pro' && (
+                         <div className="mt-6 p-4 bg-amber-400/10 border border-amber-400/20 rounded-2xl flex items-center justify-between animate-in zoom-in duration-300">
+                            <div className="flex items-center gap-3">
+                                <CheckCircle2 size={16} className="text-amber-400" />
+                                <span className="text-[10px] font-black text-amber-400 uppercase tracking-widest">Opção PRO Selecionada</span>
+                            </div>
+                            <button onClick={() => setView('pro_chat')} className="text-[9px] font-black text-white bg-amber-600 px-3 py-1.5 rounded-lg uppercase tracking-widest">Enviar Briefing</button>
+                        </div>
+                    )}
                   </div>
               </div>
           </div>
         </section>
 
+        {/* BLOCO 5: CHECKOUT FINAL */}
         <section ref={paymentRef} className={`space-y-8 transition-all duration-500 ${!isArtSaved ? 'opacity-20 pointer-events-none' : 'opacity-100'}`}>
             <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-blue-500 flex items-center gap-2 px-1"><Check size={14} /> 5. Finalizar Compra</h3>
             <div className="bg-slate-900 rounded-[2.5rem] p-8 border border-white/10 shadow-2xl space-y-8">
-                <div className="space-y-2"><div className="flex justify-between text-sm"><span className="text-slate-500">Modo: {selectedMode?.label}</span><span className="font-bold text-white">R$ {selectedMode?.price.toFixed(2)} / mês</span></div><div className="flex justify-between text-sm"><span className="text-slate-500">Bairros selecionados</span><span className="font-bold text-white">× {selectedNeighborhoods.length}</span></div><div className="flex justify-between text-sm"><span className="text-slate-500">Vigência Total</span><span className="font-bold text-white">{prices.isPackage ? '90 dias' : '30 dias'}</span></div>
+                <div className="space-y-2">
+                    <div className="flex justify-between text-sm"><span className="text-slate-500">Modo: {selectedMode?.label}</span><span className="font-bold text-white">R$ {selectedMode?.price.toFixed(2)} / mês</span></div>
+                    <div className="flex justify-between text-sm"><span className="text-slate-500">Bairros selecionados</span><span className="font-bold text-white">× {selectedNeighborhoods.length}</span></div>
+                    <div className="flex justify-between text-sm"><span className="text-slate-500">Vigência Total</span><span className="font-bold text-white">{prices.isPackage ? '90 dias' : '30 dias'}</span></div>
                     {artChoice === 'pro' && <div className="flex justify-between text-sm text-amber-400"><span className="font-medium">Arte Profissional</span><span className="font-black">+ R$ 69,90</span></div>}
                     
-                    <div className="pt-4 border-t border-white/5 flex flex-col items-end"><div className="flex justify-between items-center w-full mb-1"><span className="text-sm font-bold text-slate-300">Total do Pacote</span><span className="text-2xl font-black text-white">R$ {prices.current.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span></div>{prices.isPackage && (<p className="text-emerald-400 font-black text-xs uppercase tracking-widest">3x de R$ {prices.monthly.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} sem juros</p>)}</div>
+                    <div className="pt-4 border-t border-white/5 flex flex-col items-end">
+                      <div className="flex justify-between items-center w-full mb-1">
+                        <span className="text-sm font-bold text-slate-300">Total do Pacote</span>
+                        <span className="text-2xl font-black text-white">R$ {prices.current.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                      </div>
+                      {prices.isPackage && (
+                        <p className="text-emerald-400 font-black text-xs uppercase tracking-widest">3x de R$ {prices.monthly.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} sem juros</p>
+                      )}
+                    </div>
                 </div>
-                <div className="space-y-3 pt-6 border-t border-white/10"><button onClick={() => setPaymentMethod('pix')} className={`w-full p-5 rounded-2xl border-2 flex items-center justify-between transition-all ${paymentMethod === 'pix' ? 'bg-blue-600/10 border-blue-500' : 'bg-slate-950 border-transparent'}`}><div className="flex items-center gap-4"><QrCode size={20} className={paymentMethod === 'pix' ? 'text-blue-400' : 'text-slate-600'} /><span className="font-bold text-sm">PIX (Imediato)</span></div>{paymentMethod === 'pix' && <CheckCircle2 size={18} className="text-blue-500" />}</button></div>
+                <div className="space-y-3 pt-6 border-t border-white/10">
+                    <button onClick={() => setPaymentMethod('pix')} className={`w-full p-5 rounded-2xl border-2 flex items-center justify-between transition-all ${paymentMethod === 'pix' ? 'bg-blue-600/10 border-blue-500' : 'bg-slate-950 border-transparent'}`}><div className="flex items-center gap-4"><QrCode size={20} className={paymentMethod === 'pix' ? 'text-blue-400' : 'text-slate-600'} /><span className="font-bold text-sm">PIX (Imediato)</span></div>{paymentMethod === 'pix' && <CheckCircle2 size={18} className="text-blue-500" />}</button>
+                </div>
             </div>
+            {/* Espaçador para o botão fixo não cobrir o conteúdo final */}
             <div className="h-32"></div>
         </section>
       </main>
 
-      {!isSuccess && (view === 'sales' || view === 'pro_checkout') && (
-      <div className="fixed bottom-[80px] left-0 right-0 p-6 bg-[#020617]/95 backdrop-blur-2xl border-t border-white/10 z-30 max-w-md mx-auto shadow-[0_-20px_40px_rgba(0,0,0,0.6)] animate-in slide-in-from-bottom duration-500">
+      {!isSuccess && view === 'sales' && (
+      <div className="fixed bottom-[80px] left-0 right-0 p-6 bg-[#020617]/95 backdrop-blur-2xl border-t border-white/10 z-[100] max-w-md mx-auto shadow-[0_-20px_40px_rgba(0,0,0,0.6)] animate-in slide-in-from-bottom duration-500">
         <button 
           onClick={handleFooterClick} 
           disabled={isSubmitting} 
@@ -1001,7 +1069,29 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
             selectedMode ? 'bg-[#1E5BFF] text-white hover:bg-blue-600' : 'bg-white/5 text-slate-500 cursor-not-allowed opacity-50'
           }`}
         >
-          {isSubmitting ? (<Loader2 className="w-6 h-6 animate-spin" />) : !isCheckoutStep ? (<span className="font-black text-sm uppercase tracking-widest">{!selectedMode ? "Escolha onde aparecer" : selectedPeriods.length === 0 ? "Escolha o período" : selectedNeighborhoods.length === 0 ? "Escolha os bairros" : "Configure a arte"}</span>) : (<div className="flex flex-col items-center"><div className="flex items-center gap-2 mb-0.5"><span className="text-[10px] font-black text-white/60 uppercase tracking-widest">FINALIZAR: {artChoice === 'pro' ? 'Time Profissional' : selectedMode.label}</span><ArrowRight size={14} className="text-white/60" /></div><div className="flex items-center gap-3"><span className="text-xl font-black text-white">PAGAR AGORA — R$ {prices.current.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span></div>{prices.isPackage && (<span className="text-[9px] font-black text-emerald-400 uppercase tracking-widest mt-0.5">Ou 3x de R$ {prices.monthly.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>)}</div>)}
+          {isSubmitting ? (
+            <Loader2 className="w-6 h-6 animate-spin" />
+          ) : !isCheckoutStep ? (
+              <span className="font-black text-sm uppercase tracking-widest">
+                  {!selectedMode ? "Escolha onde aparecer" : 
+                   selectedPeriods.length === 0 ? "Escolha o período" :
+                   selectedNeighborhoods.length === 0 ? "Escolha os bairros" :
+                   "Configure a arte"}
+              </span>
+          ) : (
+              <div className="flex flex-col items-center">
+                  <div className="flex items-center gap-2 mb-0.5">
+                    <span className="text-[10px] font-black text-white/60 uppercase tracking-widest">FINALIZAR: {selectedMode.label}</span>
+                    <ArrowRight size={14} className="text-white/60" />
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span className="text-xl font-black text-white">PAGAR AGORA — R$ {prices.current.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                  </div>
+                  {prices.isPackage && (
+                    <span className="text-[9px] font-black text-emerald-400 uppercase tracking-widest mt-0.5">Ou 3x de R$ {prices.monthly.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                  )}
+              </div>
+          )}
         </button>
       </div>
       )}

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import {
@@ -31,7 +32,6 @@ const DISPOSABLE_DOMAINS = [
   'throwawaymail.com',
 ];
 
-// Google Icon SVG for direct use in component
 const GoogleIcon: React.FC = () => (
     <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
         <g clipPath="url(#clip0_2311_190)">
