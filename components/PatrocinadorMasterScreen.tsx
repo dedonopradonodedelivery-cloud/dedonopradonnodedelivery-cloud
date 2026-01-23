@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { 
   ChevronLeft, 
@@ -153,14 +152,14 @@ export const PatrocinadorMasterScreen: React.FC<PatrocinadorMasterScreenProps> =
     switch (step) {
         case 'payment': return 'Pagamento';
         case 'admin_chat': return 'Alinhamento';
-        default: return 'Patrocinador Master';
+        default: return 'Seja Patrocinador Master';
     }
   }
 
   // --- RENDERS ---
 
   const renderSelection = () => (
-    <div className="animate-in fade-in duration-500 px-6 pt-8">
+    <div className="animate-in fade-in duration-500 px-6 pt-8 pb-32">
       <section className="text-center">
         <div className="w-24 h-24 bg-gradient-to-br from-amber-400 to-amber-600 rounded-[2.5rem] flex items-center justify-center mx-auto mb-8 shadow-2xl shadow-amber-500/20 border-2 border-white/10">
           <Award className="w-12 h-12 text-white" />
@@ -235,7 +234,7 @@ export const PatrocinadorMasterScreen: React.FC<PatrocinadorMasterScreenProps> =
         )}
       </section>
 
-      <section className="mt-8 space-y-4 mb-20">
+      <section className="mt-8 space-y-4">
         <h3 className="font-bold text-lg text-white mb-6 text-center">Benefícios Diretos:</h3>
         <BenefitItem icon={Eye} text="Máxima exposição local" />
         <BenefitItem icon={Award} text="Autoridade imediata no bairro" />
@@ -258,7 +257,7 @@ export const PatrocinadorMasterScreen: React.FC<PatrocinadorMasterScreenProps> =
   );
 
   const renderPayment = () => (
-    <div className="animate-in slide-in-from-right duration-500 flex flex-col h-full px-6 pt-8">
+    <div className="animate-in slide-in-from-right duration-500 flex flex-col h-full px-6 pt-8 pb-32">
         <div className="flex-1">
             <div className="bg-slate-900 border border-white/10 rounded-[2.5rem] p-8 space-y-6">
                 <div>
@@ -293,7 +292,7 @@ export const PatrocinadorMasterScreen: React.FC<PatrocinadorMasterScreenProps> =
             </p>
         </div>
 
-        <footer className="p-6 bg-slate-950 sticky bottom-0 mt-auto">
+        <footer className="fixed bottom-0 left-0 right-0 p-6 bg-slate-950 border-t border-white/5 max-w-md mx-auto z-30">
             <button 
                 onClick={handleConfirmPayment}
                 className="w-full bg-[#1E5BFF] hover:bg-blue-600 text-white font-black py-5 rounded-2xl shadow-xl active:scale-[0.98] transition-all"
@@ -305,7 +304,7 @@ export const PatrocinadorMasterScreen: React.FC<PatrocinadorMasterScreenProps> =
   );
 
   const renderProcessing = () => (
-    <div className="flex-1 flex flex-col items-center justify-center p-6 text-center animate-in fade-in duration-500 min-h-screen bg-slate-950">
+    <div className="flex-1 flex flex-col items-center justify-center p-6 text-center animate-in fade-in duration-500 min-h-[70vh] bg-slate-950">
         <Loader2 className="w-12 h-12 text-[#1E5BFF] animate-spin mb-6" />
         <h2 className="text-xl font-bold text-white">Processando pagamento...</h2>
         <p className="text-slate-400 text-xs mt-2 uppercase tracking-widest font-black">Não feche esta tela</p>
@@ -313,7 +312,7 @@ export const PatrocinadorMasterScreen: React.FC<PatrocinadorMasterScreenProps> =
   );
 
   const renderSuccess = () => (
-    <div className="flex-1 flex flex-col items-center justify-center p-8 text-center animate-in zoom-in duration-500 min-h-screen bg-slate-950">
+    <div className="flex-1 flex flex-col items-center justify-center p-8 text-center animate-in zoom-in duration-500 min-h-[70vh] bg-slate-950">
         <div className="w-24 h-24 bg-emerald-500/10 rounded-full flex items-center justify-center mb-8 border-4 border-emerald-500/20 shadow-2xl shadow-emerald-500/10">
             <CheckCircle2 size={48} className="text-emerald-400" />
         </div>
@@ -339,7 +338,7 @@ export const PatrocinadorMasterScreen: React.FC<PatrocinadorMasterScreenProps> =
   const renderChat = () => (
     <div className="flex flex-col h-full bg-[#020617] animate-in slide-in-from-bottom duration-500 pb-[80px]">
         {/* Info Admin */}
-        <div className="px-6 py-3 bg-slate-800/30 border-b border-white/5 flex items-center justify-between">
+        <div className="px-6 py-3 bg-slate-800/30 border-b border-white/5 flex items-center justify-between sticky top-0 z-10 backdrop-blur-md">
             <div className="flex items-center gap-2">
                 <div className="p-1 bg-blue-50/10 rounded-lg">
                     <Shield size={12} className="text-blue-400" />
@@ -401,12 +400,12 @@ export const PatrocinadorMasterScreen: React.FC<PatrocinadorMasterScreenProps> =
         </>
       )}
 
-      {/* CABEÇALHO FIXO PERSISTENTE */}
+      {/* CABEÇALHO FIXO PERSISTENTE (STICKY HEADER) */}
       {step !== 'success' && step !== 'processing' && (
-        <header className="sticky top-0 z-50 bg-slate-950/90 backdrop-blur-md px-5 h-20 flex items-center gap-4 border-b border-white/5 shrink-0">
+        <header className="sticky top-0 z-50 bg-slate-950/90 backdrop-blur-md px-5 h-16 flex items-center gap-4 border-b border-white/5 shrink-0">
             <button 
                 onClick={handleHeaderBack}
-                className="w-10 h-10 bg-white/5 hover:bg-white/10 rounded-xl flex items-center justify-center text-slate-300 transition-colors"
+                className="p-2.5 bg-white/5 hover:bg-white/10 rounded-xl flex items-center justify-center text-slate-300 transition-colors"
             >
                 <ChevronLeft className="w-6 h-6" />
             </button>

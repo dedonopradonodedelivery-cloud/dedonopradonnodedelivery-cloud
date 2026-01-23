@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { 
   ChevronLeft, 
@@ -117,11 +116,12 @@ export const JPAConnectSalesView: React.FC<JPAConnectSalesViewProps> = ({ onBack
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950 font-sans animate-in slide-in-from-right duration-300 flex flex-col relative">
       
-      <header className="sticky top-0 z-40 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md px-5 h-16 flex items-center gap-4 border-b border-gray-100 dark:border-gray-800 shrink-0">
-        <button onClick={onBack} className="p-2 -ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+      {/* CABEÇALHO FIXO PERSISTENTE (STICKY HEADER) */}
+      <header className="sticky top-0 z-50 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md px-5 h-16 flex items-center gap-4 border-b border-gray-100 dark:border-gray-800 shrink-0">
+        <button onClick={onBack} className="p-2.5 bg-gray-100 dark:bg-gray-800 rounded-2xl hover:bg-gray-200 transition-colors">
             <ChevronLeft className="w-6 h-6 text-gray-700 dark:text-white" />
         </button>
-        <h1 className="font-bold text-lg text-gray-900 dark:text-white">Freguesia Connect</h1>
+        <h1 className="font-bold text-lg text-gray-900 dark:text-white leading-none">JPA Connect</h1>
       </header>
 
       <main className="flex-1 overflow-y-auto no-scrollbar pb-40">
@@ -130,14 +130,14 @@ export const JPAConnectSalesView: React.FC<JPAConnectSalesViewProps> = ({ onBack
                 <Handshake className="w-10 h-10 text-indigo-600 dark:text-indigo-400" />
             </div>
             <h2 className="text-3xl font-black text-gray-900 dark:text-white font-display tracking-tight leading-tight mb-3">
-                Freguesia Connect
+                JPA Connect
             </h2>
             <p className="text-base font-bold text-indigo-600 dark:text-indigo-400 max-w-sm mx-auto">
                 Networking exclusivo entre empresários do seu bairro
             </p>
             <div className="max-w-md mx-auto mt-6 bg-indigo-50 dark:bg-indigo-900/20 p-4 rounded-2xl border border-indigo-100 dark:border-indigo-800/50">
               <p className="text-sm text-indigo-800 dark:text-indigo-200 leading-relaxed font-semibold">
-                  O Freguesia Connect não é um grupo de vendas. É um ambiente exclusivo de relacionamento, troca e conexão real entre donos de negócios do mesmo bairro.
+                  O JPA Connect não é um grupo de vendas. É um ambiente exclusivo de relacionamento, troca e conexão real entre donos de negócios do mesmo bairro.
               </p>
             </div>
         </section>
@@ -145,7 +145,7 @@ export const JPAConnectSalesView: React.FC<JPAConnectSalesViewProps> = ({ onBack
         <div className="px-6 space-y-12">
             <section>
               <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
-                  O Freguesia Connect foi criado para empresários que querem conhecer outros donos de negócios relevantes da sua região, criar laços reais e fazer parte de um círculo seleto de confiança local.
+                  O JPA Connect foi criado para empresários que querem conhecer outros donos de negócios relevantes da sua região, criar laços reais e fazer parte de um círculo seleto de confiança local.
               </p>
               <p className="text-sm text-gray-800 dark:text-gray-100 font-bold mt-4">
                   Aqui, você não conhece estranhos. Você conhece empresários que constroem, investem e crescem no mesmo bairro que você.

@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { 
   ChevronLeft, 
@@ -44,7 +43,6 @@ import {
   ShieldAlert,
   TrendingUp,
   Award,
-  // Added FileSignature to fix "Cannot find name 'FileSignature'" error
   FileSignature
 } from 'lucide-react';
 import { User } from '@supabase/supabase-js';
@@ -368,8 +366,8 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
   const getPageTitle = () => {
     switch (view) {
       case 'pro_checkout': return 'Pagamento';
-      case 'pro_chat': return 'Chat com Designer';
-      default: return 'Anunciar no Bairro';
+      case 'pro_chat': return 'Banner Patrocinado';
+      default: return 'Anunciar nos Banners';
     }
   }
 
@@ -396,7 +394,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
         </div>
       )}
 
-      {/* CABEÇALHO FIXO PERSISTENTE */}
+      {/* CABEÇALHO FIXO PERSISTENTE (STICKY HEADER) */}
       {view !== 'pro_approved' && view !== 'pro_processing' && (
         <header className="sticky top-0 z-50 bg-[#020617]/90 backdrop-blur-xl border-b border-white/5 px-6 py-4 flex items-center gap-4 shrink-0">
           <button onClick={handleHeaderBack} className="p-2 bg-slate-900 rounded-xl text-slate-400 hover:text-white transition-all active:scale-95">
@@ -460,14 +458,11 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
         {view === 'sales' && (
           <div className="p-6 space-y-16">
             
-            {/* NOVO BLOCO DE DESTAQUE PREMIUM E PERSUASIVO */}
             <section className="animate-in fade-in slide-in-from-top-4 duration-700">
                 <div className="bg-slate-900 border border-blue-500/20 rounded-[2.5rem] p-8 shadow-2xl relative overflow-hidden group">
-                    {/* Efeito de luz sutil decorativo */}
                     <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none"></div>
                     
                     <div className="relative z-10">
-                        {/* Badge de Oportunidade */}
                         <div className="bg-blue-600 text-white text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-full w-fit mb-4 shadow-lg shadow-blue-600/20">
                             Oportunidade
                         </div>

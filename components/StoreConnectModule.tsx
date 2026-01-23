@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { 
   ChevronLeft, 
@@ -35,17 +34,17 @@ export const StoreConnectModule: React.FC<StoreConnectModuleProps> = ({ onBack }
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 font-sans animate-in slide-in-from-right duration-300 pb-20 relative">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 font-sans animate-in slide-in-from-right duration-300 pb-20 relative flex flex-col">
       
-      {/* Header */}
-      <div className="sticky top-0 z-30 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md px-5 h-16 flex items-center gap-4 border-b border-gray-100 dark:border-gray-800">
+      {/* Header Fixo Sticky */}
+      <header className="sticky top-0 z-50 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md px-5 h-16 flex items-center gap-4 border-b border-gray-100 dark:border-gray-800 shrink-0">
         <button onClick={onBack} className="p-2 -ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
           <ChevronLeft className="w-6 h-6 text-gray-800 dark:text-white" />
         </button>
-        <h1 className="font-bold text-lg text-gray-900 dark:text-white">JPA Connect</h1>
-      </div>
+        <h1 className="font-bold text-lg text-gray-900 dark:text-white leading-none">JPA Connect</h1>
+      </header>
 
-      <div className="p-5 space-y-6">
+      <main className="flex-1 overflow-y-auto no-scrollbar p-5 space-y-6">
         
         {/* --- STATUS BLOCK --- */}
         {status === 'inactive' && (
@@ -211,7 +210,7 @@ export const StoreConnectModule: React.FC<StoreConnectModuleProps> = ({ onBack }
           </div>
         )}
 
-      </div>
+      </main>
 
       {/* --- EXPLANATORY MODAL --- */}
       {showInfoModal && (

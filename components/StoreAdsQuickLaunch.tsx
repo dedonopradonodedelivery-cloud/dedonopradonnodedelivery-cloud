@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { 
   ChevronLeft, 
@@ -42,9 +41,9 @@ export const StoreAdsQuickLaunch: React.FC<StoreAdsQuickLaunchProps> = ({ onBack
 
     return (
         <div className="min-h-screen bg-slate-950 text-white font-sans flex flex-col">
-            {/* CABEÇALHO FIXO PERSISTENTE */}
+            {/* CABEÇALHO FIXO PERSISTENTE (STICKY HEADER) */}
             {step !== 'success' && (
-                <header className="sticky top-0 z-50 bg-slate-950/90 backdrop-blur-md px-5 h-20 flex items-center gap-4 border-b border-white/5 shrink-0">
+                <header className="sticky top-0 z-50 bg-slate-950/90 backdrop-blur-md px-5 h-16 flex items-center gap-4 border-b border-white/5 shrink-0">
                     <button onClick={handleHeaderBack} className="p-2.5 bg-slate-800 rounded-2xl hover:bg-slate-700 transition-colors">
                         <ChevronLeft className="w-6 h-6 text-white" />
                     </button>
