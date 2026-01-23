@@ -46,6 +46,7 @@ import { useNeighborhood } from '@/contexts/NeighborhoodContext';
 import { supabase } from '@/lib/supabaseClient';
 import { trackAdEvent } from '@/lib/analytics';
 import { BannerDesign } from './StoreBannerEditor';
+import { LaunchOfferBanner } from './LaunchOfferBanner';
 
 // --- BANNER VIEWER (LOCAL COMPONENT) ---
 
@@ -355,6 +356,7 @@ interface HomeFeedProps {
   onStoreClick: (store: Store) => void;
   stores: Store[];
   user: User | null;
+  userRole: 'cliente' | 'lojista' | null;
 }
 
 export const HomeFeed: React.FC<HomeFeedProps> = ({ 
@@ -362,7 +364,8 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
   onSelectCategory, 
   onStoreClick, 
   stores,
-  user
+  user,
+  userRole
 }) => {
   const [listFilter, setListFilter] = useState<'all' | 'top_rated' | 'open_now'>('all');
   const categoriesRef = useRef<HTMLDivElement>(null);
@@ -431,6 +434,12 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
 
   return (
     <div className="flex flex-col bg-white dark:bg-gray-950 w-full max-w-md mx-auto animate-in fade-in duration-500 overflow-x-hidden pb-32">
+      {/* Mocking that a lojista has not yet purchased */}
+      {userRole === 'lojista' && (
+        <section className="px-4 py-4 bg-white dark:bg-gray-950">
+           <LaunchOfferBanner onClick={() => onNavigate('store_ads_module')} />
+        </section>
+      )}
       <div className="flex flex-col w-full gap-1">
           {MemoizedSections}
       </div>

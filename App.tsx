@@ -27,7 +27,7 @@ import { MapPin, ShieldCheck, X, Palette } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { NeighborhoodProvider } from '@/contexts/NeighborhoodContext';
 import { Category, Store } from '@/types';
-import { CategoryView } from '@/pages/categories/CategoryView';
+import { CategoryView } from '@/components/CategoryView';
 import { StoreProfileEdit } from '@/components/StoreProfileEdit';
 import { CommunityFeedView } from '@/components/CommunityFeedView';
 import { STORES } from '@/constants';
@@ -167,7 +167,7 @@ const App: React.FC = () => {
                 {activeTab === 'cashback_landing' && <CashbackLandingView onBack={() => setActiveTab('home')} onLogin={() => { setPendingTab('scan_cashback'); setIsAuthOpen(true); }} />}
                 {activeTab === 'admin_panel' && <AdminPanel user={user as any} onLogout={signOut} viewMode={viewMode} onOpenViewSwitcher={() => setIsRoleSwitcherOpen(true)} onNavigateToApp={setActiveTab} />}
                 {activeTab === 'admin_banner_moderation' && user?.email === ADMIN_EMAIL && <AdminBannerModeration user={user as any} onBack={() => setActiveTab('admin_panel')} />}
-                {activeTab === 'home' && <HomeFeed onNavigate={handleNavigate} onSelectCategory={(c) => { setSelectedCategory(c); setActiveTab('category_detail'); }} onStoreClick={handleSelectStore} stores={STORES} user={user as any} />}
+                {activeTab === 'home' && <HomeFeed onNavigate={handleNavigate} onSelectCategory={(c) => { setSelectedCategory(c); setActiveTab('category_detail'); }} onStoreClick={handleSelectStore} stores={STORES} user={user as any} userRole={userRole} />}
                 {activeTab === 'explore' && <ExploreView stores={STORES} searchQuery={globalSearch} onStoreClick={handleSelectStore} onLocationClick={() => {}} onFilterClick={() => {}} onOpenPlans={() => {}} onNavigate={setActiveTab} />}
                 
                 {activeTab === 'profile' && (

@@ -5,6 +5,7 @@ import { Category, Store, AdType } from '@/types';
 import { SUBCATEGORIES } from '@/constants';
 import { supabase } from '@/lib/supabaseClient';
 import { BannerDesign } from './StoreBannerEditor';
+import { LaunchOfferBanner } from './LaunchOfferBanner';
 
 // --- BANNER VIEWER (LOCAL COMPONENT) ---
 
@@ -260,6 +261,15 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
       </div>
       
       <div className="p-5 space-y-8">
+        {userRole === 'lojista' && (
+            <section>
+                <LaunchOfferBanner onClick={() => {
+                    onAdvertiseInCategory(category.name);
+                    onNavigate('store_ads_module');
+                }} />
+            </section>
+        )}
+        
         {visibleSubcategories.length > 0 && (
           <section>
             <div className="grid grid-cols-4 gap-3">
