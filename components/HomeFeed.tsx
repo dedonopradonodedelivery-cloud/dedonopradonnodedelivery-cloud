@@ -24,7 +24,32 @@ import {
   Shield,
   Rocket,
   CheckCircle, 
-  Image as ImageIcon
+  Image as ImageIcon,
+  Flame,
+  Percent,
+  Tag,
+  Gift,
+  Utensils,
+  Pizza,
+  Coffee,
+  Beef,
+  IceCream,
+  ShoppingCart,
+  Store as StoreIcon,
+  Package,
+  Wrench,
+  Truck,
+  CreditCard,
+  Coins,
+  Award,
+  Smile,
+  Bell,
+  Clock,
+  Heart,
+  ShieldCheck,
+  Ban,
+  Circle,
+  Square
 } from 'lucide-react';
 import { LojasEServicosList } from '@/components/LojasEServicosList';
 import { User } from '@supabase/supabase-js';
@@ -33,165 +58,253 @@ import { useNeighborhood } from '@/contexts/NeighborhoodContext';
 import { supabase } from '@/lib/supabaseClient';
 import { trackAdEvent } from '@/lib/analytics';
 
-interface HomeFeedProps {
-  onNavigate: (view: string) => void;
-  onSelectCategory: (category: Category) => void;
-  onSelectCollection: (collection: EditorialCollection) => void;
-  onStoreClick?: (store: Store) => void;
-  searchTerm?: string;
-  stores: Store[];
-  user: User | null;
-  userRole?: 'cliente' | 'lojista' | null;
-  onRequireLogin: () => void;
+// --- START: BANNER EDITOR LOGIC DUPLICATION ---
+// NOTE: This logic is duplicated in CategoryView.tsx.
+// In a real-world scenario, this would be extracted into a shared `components/EditorBanner.tsx` file
+// to avoid code duplication and maintain a single source of truth.
+
+interface BannerDesign {
+  title: string;
+  titleFont: string;
+  titleSize: string;
+  subtitle: string;
+  subtitleFont: string;
+  subtitleSize: string;
+  bgColor: string;
+  textColor: string;
+  align: 'left' | 'center' | 'right';
+  animation: 'none' | 'slide' | 'pulse' | 'float';
+  iconName: string | null;
+  iconPos: 'left' | 'top' | 'right';
+  iconSize: 'sm' | 'md' | 'lg';
+  iconColorMode: 'text' | 'white' | 'black' | 'custom';
+  logoDisplay: 'square' | 'round' | 'none';
+  iconCustomColor?: string;
 }
 
-interface BannerItem {
-  id: string;
-  title?: string;
-  target?: string;
-  tag?: string;
-  bgColor?: string;
-  Icon?: React.ElementType;
-  isSpecial?: boolean;
-  isUserBanner?: boolean;
-  config?: any;
-}
-
-// --- COMPONENTES DE RENDERIZAÇÃO DINÂMICA DE BANNER ---
-
-const TemplateBannerRender: React.FC<{ config: any }> = ({ config }) => {
-    const { template_id, headline, subheadline, product_image_url } = config;
-    switch (template_id) {
-      case 'oferta_relampago':
-        return (
-          <div className="w-full h-full bg-gradient-to-br from-rose-500 to-red-600 text-white p-6 flex items-center justify-between overflow-hidden relative">
-            <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-white/10 rounded-full blur-xl"></div>
-            <div className="relative z-10">
-              <span className="text-sm font-bold bg-yellow-300 text-red-700 px-3 py-1 rounded-full uppercase shadow-sm">{headline || 'XX% OFF'}</span>
-              <h3 className="text-3xl font-black mt-4 drop-shadow-md max-w-[200px] leading-tight">{subheadline || 'Nome do Produto'}</h3>
-            </div>
-            <div className="relative z-10 w-32 h-32 rounded-full border-4 border-white/50 bg-gray-200 overflow-hidden flex items-center justify-center shrink-0 shadow-2xl">
-              {product_image_url ? <img src={product_image_url} className="w-full h-full object-cover" /> : <ImageIcon className="w-12 h-12 text-gray-400" />}
-            </div>
-          </div>
-        );
-      case 'lancamento':
-        return (
-          <div className="w-full h-full bg-gradient-to-br from-slate-800 to-slate-900 text-white p-6 flex items-end justify-between overflow-hidden relative">
-             <img src={product_image_url || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=800'} className="absolute inset-0 w-full h-full object-cover opacity-30 mix-blend-luminosity" />
-             <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
-             <div className="relative z-10">
-                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-cyan-300">{headline || 'LANÇAMENTO'}</span>
-                <h3 className="text-2xl font-bold mt-1 max-w-[220px] leading-tight">{subheadline || 'Descrição'}</h3>
-             </div>
-          </div>
-        );
-      default: return null;
-    }
+const ICON_COMPONENTS: Record<string, React.ElementType> = {
+  Flame, Zap, Percent, Tag, Gift, Utensils, Pizza, Coffee, Beef, IceCream,
+  ShoppingCart, Store: StoreIcon, Package, Wrench, Truck, CreditCard, Coins, Star,
+  Award, MapPin, Smile, Bell, Clock, Heart, Sparkles, Rocket, Megaphone, Crown, ShieldCheck
 };
 
-const CustomBannerRender: React.FC<{ config: any }> = ({ config }) => {
-    const { template_id, background_color, text_color, font_size, font_family, title, subtitle } = config;
+const FONT_STYLES = [
+  { id: 'font-moderna', name: 'Moderna', family: "'Outfit', sans-serif" },
+  { id: 'font-forte', name: 'Forte', family: "'Inter', sans-serif", weight: '900' },
+  { id: 'font-elegante', name: 'Elegante', family: "'Lora', serif" },
+  { id: 'font-amigavel', name: 'Amigável', family: "'Quicksand', sans-serif" },
+  { id: 'font-neutra', name: 'Neutra', family: "'Inter', sans-serif" },
+  { id: 'font-impacto', name: 'Impacto', family: "'Anton', sans-serif" },
+];
 
-    const fontSizes = { small: 'text-2xl', medium: 'text-4xl', large: 'text-5xl' };
-    const subFontSizes = { small: 'text-sm', medium: 'text-base', large: 'text-lg' };
-    const headlineFontSize = { small: 'text-4xl', medium: 'text-6xl', large: 'text-7xl' };
+const SIZE_LEVELS = [
+  { id: 'xs', name: 'M. Pequeno', titleClass: 'text-lg', subClass: 'text-[9px]' },
+  { id: 'sm', name: 'Pequeno', titleClass: 'text-xl', subClass: 'text-[10px]' },
+  { id: 'md', name: 'Médio', titleClass: 'text-2xl', subClass: 'text-xs' },
+  { id: 'lg', name: 'Grande', titleClass: 'text-3xl', subClass: 'text-sm' },
+  { id: 'xl', name: 'M. Grande', titleClass: 'text-4xl', subClass: 'text-base' },
+];
 
-    const layoutClasses = {
-      simple_left: 'flex flex-col justify-center items-start text-left',
-      centered: 'flex flex-col justify-center items-center text-center',
-      headline: 'flex flex-col justify-center items-center text-center',
+const EditorBanner: React.FC<{ config: BannerDesign; storeName: string; storeLogo?: string | null; }> = ({ config, storeName, storeLogo }) => {
+    const { 
+      title, subtitle, titleFont, titleSize, subtitleFont, subtitleSize, 
+      bgColor, textColor, align, animation, iconName, iconPos, iconSize, 
+      logoDisplay, iconColorMode, iconCustomColor 
+    } = config;
+
+    const renderIcon = (name: string | null, size: 'sm' | 'md' | 'lg', colorMode: string) => {
+      if (!name || !ICON_COMPONENTS[name]) return null;
+      const IconComp = ICON_COMPONENTS[name];
+      const sizes = { sm: 24, md: 44, lg: 64 };
+      const colors: Record<string, string> = { text: textColor, white: '#FFFFFF', black: '#000000', custom: iconCustomColor || '#1E5BFF' };
+      return <IconComp size={sizes[size]} style={{ color: colors[colorMode] }} strokeWidth={2.5} />;
+    };
+
+    const getFontStyle = (fontId: string) => {
+      const f = FONT_STYLES.find(x => x.id === fontId);
+      return f ? { fontFamily: f.family, fontWeight: f.weight || '700' } : {};
     };
     
     return (
-        <div 
-            className={`w-full h-full p-8 ${layoutClasses[template_id as keyof typeof layoutClasses] || 'flex flex-col justify-center'}`}
-            style={{ backgroundColor: background_color, color: text_color }}
-        >
-            <h3 className={`${template_id === 'headline' ? headlineFontSize[font_size as keyof typeof headlineFontSize] : fontSizes[font_size as keyof typeof fontSizes]} font-black leading-tight line-clamp-2`} style={{ fontFamily: font_family }}>
-                {title || "Seu Título Aqui"}
-            </h3>
-            <p className={`${subFontSizes[font_size as keyof typeof subFontSizes]} mt-3 opacity-80 max-w-md line-clamp-3`} style={{ fontFamily: font_family }}>
-                {subtitle || "Descreva sua oferta."}
+      <div 
+        className={`w-full h-full p-8 shadow-2xl relative overflow-hidden transition-all duration-500 flex flex-col justify-center border border-white/10 ${
+          align === 'center' ? 'items-center text-center' : align === 'right' ? 'items-end text-right' : 'items-start text-left'
+        } ${animation === 'pulse' ? 'animate-pulse' : animation === 'float' ? 'animate-float-slow' : ''}`}
+        style={{ backgroundColor: bgColor }}
+      >
+        <div className={`relative z-10 transition-all duration-500 flex ${iconPos === 'top' ? 'flex-col items-inherit' : iconPos === 'right' ? 'flex-row-reverse items-center gap-4' : 'flex-row items-center gap-4'} ${animation === 'slide' ? 'animate-in slide-in-from-left-8' : ''}`}>
+          {iconName && (
+            <div className={`${iconPos === 'top' ? 'mb-4' : ''} shrink-0`}>
+                {renderIcon(iconName, iconSize, iconColorMode)}
+            </div>
+          )}
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 mb-3 w-fit transition-all duration-300">
+              {logoDisplay !== 'none' && storeLogo && (
+                  <div className={`shrink-0 overflow-hidden bg-white/20 p-0.5 border border-white/20 transition-all duration-300 ${logoDisplay === 'round' ? 'rounded-full' : 'rounded-lg'}`}>
+                      <img src={storeLogo} className={`w-5 h-5 object-contain transition-all duration-300 ${logoDisplay === 'round' ? 'rounded-full' : 'rounded-md'}`} alt="Logo" />
+                  </div>
+              )}
+              <div className="bg-black/10 backdrop-blur-md px-2 py-0.5 rounded-lg border border-white/10 w-fit">
+                  <span className="text-[7px] font-black uppercase tracking-[0.2em]" style={{ color: textColor }}>{storeName}</span>
+              </div>
+            </div>
+            <h2 
+              className={`font-black leading-tight mb-2 tracking-tight line-clamp-2 transition-all duration-300 ${SIZE_LEVELS.find(s => s.id === titleSize)?.titleClass}`} 
+              style={{ ...getFontStyle(titleFont), color: textColor }}
+            >
+                {title}
+            </h2>
+            <p 
+              className={`font-medium opacity-80 leading-snug max-w-[280px] line-clamp-2 transition-all duration-300 ${SIZE_LEVELS.find(s => s.id === subtitleSize)?.subClass}`} 
+              style={{ ...getFontStyle(subtitleFont), color: textColor }}
+            >
+                {subtitle}
             </p>
+          </div>
         </div>
+      </div>
     );
 };
 
+const mapToEditorConfig = (dbConfig: any): BannerDesign => {
+  if (dbConfig.type === 'custom_editor') {
+    return dbConfig;
+  }
+  if (dbConfig.type === 'template') {
+    switch (dbConfig.template_id) {
+      case 'oferta_relampago':
+        return {
+          title: dbConfig.subheadline || 'Oferta Imperdível',
+          subtitle: `Com ${dbConfig.headline || 'desconto'}!`,
+          titleFont: 'font-impacto', titleSize: 'lg',
+          subtitleFont: 'font-amigavel', subtitleSize: 'md',
+          bgColor: '#DC2626', textColor: '#FFFFFF',
+          align: 'center', iconName: 'Flame', iconPos: 'top',
+          iconSize: 'lg', logoDisplay: 'none', animation: 'pulse',
+          iconColorMode: 'white',
+        };
+      case 'lancamento':
+        return {
+          title: dbConfig.headline || 'Lançamento',
+          subtitle: dbConfig.subheadline || 'Conheça a novidade.',
+          titleFont: 'font-moderna', titleSize: 'lg',
+          subtitleFont: 'font-elegante', subtitleSize: 'md',
+          bgColor: '#0F172A', textColor: '#FFFFFF',
+          align: 'left', iconName: 'Sparkles', iconPos: 'right',
+          iconSize: 'lg', logoDisplay: 'square', animation: 'none',
+          iconColorMode: 'text'
+        };
+      default: break;
+    }
+  }
+  return {
+    title: 'Anúncio Patrocinado',
+    subtitle: 'Confira as novidades da loja.',
+    bgColor: '#1E5BFF', textColor: '#FFFFFF',
+    titleFont: 'font-moderna', titleSize: 'md',
+    subtitleFont: 'font-neutra', subtitleSize: 'sm',
+    align: 'left', iconName: null, iconPos: 'left',
+    iconSize: 'md', logoDisplay: 'round', animation: 'none',
+    iconColorMode: 'text'
+  };
+};
 
-// --- COMPONENTE INDEPENDENTE: HOME CAROUSEL ---
+// --- END: BANNER EDITOR LOGIC DUPLICATION ---
 
-const HomeCarousel: React.FC<{ onNavigate: (v: string) => void; onStoreClick?: (store: Store) => void; stores?: Store[] }> = ({ onNavigate, onStoreClick, stores }) => {
+interface BannerItem {
+  id: string;
+  target?: string;
+  storeSlug?: string;
+  isUserBanner?: boolean;
+  config: any;
+}
+
+const HomeCarousel: React.FC<{ onNavigate: (v: string) => void; onStoreClick?: (store: Store) => void; stores: Store[] }> = ({ onNavigate, onStoreClick, stores }) => {
   const { currentNeighborhood } = useNeighborhood();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [progress, setProgress] = useState(0);
   const [userBanner, setUserBanner] = useState<BannerItem | null>(null);
 
   const defaultBanners: BannerItem[] = useMemo(() => [
-    { id: 'growth-opportunity', title: 'Anúncios que geram resultado', target: 'store_ads_module', tag: 'Sua loja em destaque', bgColor: 'bg-indigo-600', Icon: Rocket },
-    { id: 'rio-phone-store', title: 'RIO PHONE STORE', target: 'rio-phone-store', tag: 'Assistência Apple', bgColor: 'bg-black', Icon: Smartphone, isSpecial: true },
-    { id: 'master-sponsor', title: 'Grupo Esquematiza', target: 'grupo-esquematiza', tag: 'Patrocinador Master', bgColor: 'bg-[#0F172A]', Icon: Crown },
-    { id: 'advertise-home', title: 'Anuncie aqui', target: 'store_ads_module', tag: 'Destaque sua marca', bgColor: 'bg-brand-blue', Icon: Megaphone }
+    { 
+      id: 'growth-opportunity', 
+      target: 'store_ads_module',
+      config: {
+        title: 'Sua Loja em Destaque',
+        subtitle: 'Anúncios que geram resultado real no seu bairro.',
+        titleFont: 'font-impacto', titleSize: 'xl',
+        subtitleFont: 'font-neutra', subtitleSize: 'sm',
+        bgColor: '#1E5BFF', textColor: '#FFFFFF',
+        align: 'left', iconName: 'Rocket', iconPos: 'right',
+        iconSize: 'lg', logoDisplay: 'none', animation: 'float',
+        iconColorMode: 'white'
+      }
+    },
+    { 
+      id: 'master-sponsor', 
+      target: 'grupo-esquematiza', 
+      storeSlug: 'grupo-esquematiza',
+      config: {
+        title: 'GRUPO ESQUEMATIZA',
+        subtitle: 'Segurança e Facilities para Empresas e Condomínios.',
+        titleFont: 'font-forte', titleSize: 'lg',
+        subtitleFont: 'font-neutra', subtitleSize: 'sm',
+        bgColor: '#0F172A', textColor: '#FFFFFF',
+        align: 'left', iconName: 'ShieldCheck', iconPos: 'left',
+        iconSize: 'lg', logoDisplay: 'none', animation: 'none',
+        iconColorMode: 'text'
+      }
+    },
+    { 
+      id: 'advertise-home', 
+      target: 'store_ads_module',
+      config: {
+        title: 'Anuncie Sua Marca Aqui',
+        subtitle: 'Apareça para milhares de clientes em Jacarepaguá.',
+        titleFont: 'font-moderna', titleSize: 'lg',
+        subtitleFont: 'font-neutra', subtitleSize: 'sm',
+        bgColor: '#FFFFFF', textColor: '#1E5BFF',
+        align: 'center', iconName: 'Megaphone', iconPos: 'top',
+        iconSize: 'lg', logoDisplay: 'none', animation: 'none',
+        iconColorMode: 'text'
+      }
+    }
   ], []);
 
   useEffect(() => {
     const fetchHomeBanner = async () => {
         if (!supabase) return;
-
         try {
             const { data, error } = await supabase
                 .from('published_banners')
-                .select('id, config, merchant_id')
+                .select('id, config, merchant_id, profiles(store_name, logo_url)')
                 .eq('target', 'home')
                 .eq('is_active', true)
                 .order('created_at', { ascending: false })
-                .limit(1);
+                .limit(1)
+                .single();
             
             if (error) {
-              if (error.code === 'PGRST116' || error.message.includes('schema cache')) {
-                console.log("[Setup] Tabela 'published_banners' não encontrada. Ignore se ainda não executou as migrações SQL.");
-                return;
-              }
-              throw error;
+              if (error.code !== 'PGRST116') throw error;
+              return;
             }
 
-            if (data && data.length > 0) {
+            if (data) {
                 setUserBanner({
-                    id: `user-banner-${data[0].id}`,
+                    id: `user-banner-${data.id}`,
                     isUserBanner: true,
-                    config: data[0].config,
-                    target: data[0].merchant_id,
+                    config: { ...(data.config as object), profiles: data.profiles },
+                    target: data.merchant_id,
                 });
             } else {
                 setUserBanner(null);
             }
         } catch (e: any) {
-            console.warn("Home banner fetch suppressed (table likely missing):", e.message || e);
-            setUserBanner(null);
+            console.warn("Home banner fetch suppressed:", e.message || e);
         }
     };
-    
     fetchHomeBanner();
-    
-    let channel: any;
-    try {
-      channel = supabase.channel('home-banner-updates')
-        .on('postgres_changes', { 
-            event: '*', 
-            schema: 'public', 
-            table: 'published_banners',
-            filter: 'target=eq.home'
-          }, 
-          () => fetchHomeBanner()
-        )
-        .subscribe();
-    } catch (e) {
-    }
-      
-    return () => {
-      if (channel) supabase.removeChannel(channel);
-    };
-
   }, []);
 
   const allBanners = useMemo(() => userBanner ? [userBanner, ...defaultBanners] : defaultBanners, [userBanner, defaultBanners]);
@@ -199,15 +312,7 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void; onStoreClick?: (
   useEffect(() => {
     const banner = allBanners[currentIndex];
     if (banner) {
-        trackAdEvent(
-            'ad_impression',
-            banner.id,
-            banner.target,
-            'home',
-            null,
-            null,
-            currentNeighborhood
-        );
+        trackAdEvent('ad_impression', banner.id, banner.target, 'home', null, null, currentNeighborhood);
     }
   }, [currentIndex, allBanners, currentNeighborhood]);
 
@@ -229,20 +334,9 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void; onStoreClick?: (
   const current = allBanners[currentIndex];
 
   const handleBannerClick = () => {
-    trackAdEvent(
-        'ad_click',
-        current.id,
-        current.target,
-        'home',
-        null,
-        null,
-        currentNeighborhood
-    );
-
-    if (current.isUserBanner) return;
-
-    if (onStoreClick && stores && current.target) {
-      const targetStore = stores.find(s => s.id === current.target);
+    trackAdEvent('ad_click', current.id, current.target, 'home', null, null, currentNeighborhood);
+    if (onStoreClick && stores && (current.target || current.storeSlug)) {
+      const targetStore = stores.find(s => s.id === (current.storeSlug || current.target));
       if (targetStore) {
         onStoreClick(targetStore);
         return;
@@ -250,119 +344,22 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void; onStoreClick?: (
     }
     if(current.target) onNavigate(current.target);
   };
+  
+  const findStore = (slug?: string) => stores?.find(s => s.id === slug);
+  const storeForBanner = findStore(current.storeSlug);
 
   return (
     <div className="px-4">
       <div className="flex flex-col gap-4">
         <div 
           onClick={handleBannerClick}
-          className={`w-full relative aspect-[3/2] rounded-[32px] overflow-hidden shadow-xl shadow-slate-200 dark:shadow-none border border-gray-100 dark:border-white/5 ${current.bgColor || ''} cursor-pointer active:scale-[0.98] transition-all group`}
+          className="w-full relative aspect-[3/2] rounded-[32px] overflow-hidden shadow-xl shadow-slate-200 dark:shadow-none border border-gray-100 dark:border-white/5 cursor-pointer active:scale-[0.98] transition-all group"
         >
-          {current.isUserBanner ? (
-            current.config.type === 'template' ? (
-              <TemplateBannerRender config={current.config} />
-            ) : (
-              <CustomBannerRender config={current.config} />
-            )
-          ) : current.id === 'growth-opportunity' ? (
-            <div className="absolute inset-0 bg-gradient-to-br from-indigo-600 to-blue-700 flex items-center justify-between px-8 overflow-hidden">
-               <div className="relative z-10 flex-1 text-left">
-                  <span className="text-[10px] font-black uppercase tracking-widest text-indigo-200 mb-2 block">Cresça com o bairro</span>
-                  <h3 className="text-3xl font-black text-white leading-tight font-display tracking-tight uppercase">Sua loja em <br/><span className="text-amber-400">Destaque</span></h3>
-                  <p className="text-indigo-100 text-xs mt-3 font-medium opacity-80">Anúncios que geram resultado real</p>
-               </div>
-               <div className="relative w-32 h-32 flex items-center justify-center animate-float-slow">
-                  <div className="absolute inset-0 bg-white/10 blur-2xl rounded-full"></div>
-                  <Rocket className="w-20 h-20 text-white opacity-90" strokeWidth={1.5} />
-               </div>
-            </div>
-          ) : current.id === 'rio-phone-store' ? (
-            <div className="absolute inset-0 bg-black flex items-center justify-start px-4">
-              <div className="w-1/2 h-full flex flex-col items-start justify-center text-left text-white z-10">
-                  <h3 className="text-xl font-bold tracking-wider opacity-90">
-                      <span className="opacity-70"></span> iPhone 17
-                  </h3>
-                  <h2 className="text-8xl font-black tracking-tighter my-1 bg-gradient-to-r from-orange-300 via-amber-400 to-orange-500 bg-clip-text text-transparent font-display">
-                      PRO
-                  </h2>
-                  <button className="mt-8 px-8 py-3 border-2 border-white/80 rounded-full text-base font-bold hover:bg-white hover:text-black transition-all duration-300 active:scale-95">
-                      Saiba mais
-                  </button>
-              </div>
-              <div className="absolute right-0 top-0 bottom-0 w-[55%] h-full flex items-center justify-center overflow-hidden">
-                  <img 
-                    src="https://images.unsplash.com/photo-1678931481189-598199ea3504?q=80&w=1200&auto=format&fit=crop"
-                    alt="iPhone" 
-                    className="h-full w-auto object-cover scale-110 group-hover:scale-125 transition-transform duration-700 ease-out"
-                    style={{ objectPosition: '20% 35%' }}
-                  />
-              </div>
-            </div>
-          ) : current.id === 'master-sponsor' ? (
-            <div className="absolute inset-0 bg-[#0F172A] flex overflow-hidden">
-              <div className="relative w-[48%] h-full overflow-hidden shrink-0">
-                <div className="absolute inset-0 z-0">
-                  <img 
-                    src="https://images.unsplash.com/photo-1557597774-9d273605dfa9?q=80&w=800&auto=format&fit=crop" 
-                    alt="Segurança" 
-                    className="w-full h-full object-cover brightness-75 scale-110 animate-float-slow opacity-60"
-                  />
-                  <div className="absolute inset-y-0 right-0 w-32 bg-gradient-to-r from-transparent to-[#0F172A] z-10"></div>
-                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-40 h-40 bg-blue-500/20 rounded-full blur-[80px] animate-pulse"></div>
-                </div>
-                <div className="absolute inset-0 flex items-center justify-center z-20">
-                    <div className="p-4 bg-white/5 backdrop-blur-xl rounded-full border border-white/10 shadow-2xl animate-subtle-glow">
-                        <Shield className="w-12 h-12 text-blue-400 opacity-80" strokeWidth={1.5} />
-                    </div>
-                </div>
-              </div>
-              <div className="flex-1 h-full flex flex-col justify-center pl-2 pr-10 z-30 text-left relative">
-                 <div className="mb-4 flex items-center gap-2">
-                    <div className="bg-amber-500/20 px-2.5 py-1 rounded-lg border border-amber-500/30 flex items-center gap-1.5">
-                        <Crown className="w-2.5 h-2.5 text-amber-400 fill-amber-400" />
-                        <span className="text-[9px] font-black text-amber-100 uppercase tracking-[0.2em] leading-none">Patrocinador Master</span>
-                    </div>
-                 </div>
-                 <div className="mb-2 space-y-0.5">
-                    <h3 className="text-3xl font-[950] text-white leading-[0.85] font-display tracking-tighter uppercase drop-shadow-2xl">GRUPO</h3>
-                    <h3 className="text-3xl font-[950] bg-gradient-to-r from-blue-400 to-blue-200 bg-clip-text text-transparent leading-[0.85] font-display tracking-tighter uppercase">ESQUEMATIZA</h3>
-                 </div>
-                 <div className="mb-6">
-                    <p className="text-slate-400 text-[10px] font-bold uppercase tracking-[0.2em] opacity-90 leading-tight">SEGURANÇA E FACILITIES</p>
-                 </div>
-              </div>
-            </div>
-          ) : current.id === 'advertise-home' ? (
-            <div className="absolute inset-0 bg-gradient-to-br from-brand-blue to-[#0A369D] flex flex-col items-center justify-center text-center p-8 overflow-hidden">
-              <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                  <MapPin className="absolute -bottom-16 -right-16 w-80 h-80 text-white/5 rotate-[-20deg] animate-subtle-diagonal-scroll" />
-              </div>
-              <div className="relative z-10 flex flex-col items-center w-full h-full justify-center">
-                  <div className="mb-5">
-                      <div className="bg-white/10 backdrop-blur-sm border border-white/20 px-3 py-1 rounded-full flex items-center gap-2">
-                          <div className="w-1.5 h-1.5 rounded-full bg-white/80 shadow-[0_0_8px_rgba(255,255,255,0.5)]"></div>
-                          <span className="text-[8px] font-black text-white/80 uppercase tracking-[0.25em] leading-none">Destaque Exclusivo</span>
-                      </div>
-                  </div>
-                  <h3 className="text-[28px] font-bold text-white leading-tight font-display tracking-tight mb-3">Anuncie sua marca</h3>
-                  <p className="text-blue-100/70 text-[12px] font-medium leading-snug max-w-[260px] mb-8 text-center tracking-normal">Conecte sua empresa a milhares de novos clientes locais.</p>
-                  <div className="relative group/cta">
-                    <div className="relative bg-white text-[#1E5BFF] px-6 py-2.5 rounded-xl font-bold text-[10px] uppercase tracking-[0.15em] flex items-center gap-2 shadow-2xl transition-all duration-500 hover:bg-blue-50">
-                      Divulgar minha loja
-                      <ArrowRight className="w-3 h-3" strokeWidth={2.5} />
-                    </div>
-                  </div>
-              </div>
-            </div>
-          ) : (
-            <div className="absolute inset-0 flex flex-col items-center justify-center px-6 pt-4 pb-12 text-center z-10">
-              <div className="p-4 bg-white/10 backdrop-blur-md rounded-[2rem] border border-white/20 shadow-2xl mb-5">
-                  {current.Icon && <current.Icon className="w-12 h-12 text-white" strokeWidth={2} />}
-              </div>
-              <h3 className="text-2xl font-[900] text-white leading-tight font-display tracking-tight mt-4 uppercase">{current.title}</h3>
-              <p className="text-white/60 text-[10px] font-black uppercase tracking-[0.2em] mt-2">{current.tag}</p>
-            </div>
-          )}
+          <EditorBanner 
+              config={current.isUserBanner ? mapToEditorConfig(current.config) : current.config}
+              storeName={current.isUserBanner ? (current.config.profiles?.store_name || 'Loja Parceira') : (storeForBanner?.name || 'Localizei JPA')}
+              storeLogo={current.isUserBanner ? (current.config.profiles?.logo_url) : (storeForBanner?.logoUrl)}
+          />
         </div>
 
         <div className="flex gap-1.5 z-30 w-1/3 mx-auto justify-center h-1">
@@ -380,6 +377,16 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void; onStoreClick?: (
   );
 };
 
+// --- O RESTANTE DO COMPONENTE HomeFeed.tsx (SEM ALTERAÇÕES) ---
+// FIX: Added HomeFeedProps interface definition to fix TypeScript error.
+interface HomeFeedProps {
+  onNavigate: (view: string) => void;
+  onSelectCategory: (category: Category) => void;
+  onStoreClick: (store: Store) => void;
+  stores: Store[];
+  user: User | null;
+}
+
 export const HomeFeed: React.FC<HomeFeedProps> = ({ 
   onNavigate, 
   onSelectCategory, 
@@ -389,7 +396,6 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
 }) => {
   const [listFilter, setListFilter] = useState<'all' | 'top_rated' | 'open_now'>('all');
   const categoriesRef = useRef<HTMLDivElement>(null);
-
   const homeStructure = useMemo(() => ['categories', 'home_carousel', 'novidades', 'sugestoes', 'em_alta', 'list'], []);
 
   const renderSection = (key: string) => {
@@ -461,7 +467,6 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
     </div>
   );
 };
-
 const SectionHeader: React.FC<{ icon: React.ElementType; title: string; subtitle: string; onSeeMore?: () => void }> = ({ icon: Icon, title, subtitle, onSeeMore }) => (
   <div className="flex items-center justify-between mb-4">
     <div className="flex items-center gap-3">
@@ -476,7 +481,6 @@ const SectionHeader: React.FC<{ icon: React.ElementType; title: string; subtitle
     <button onClick={onSeeMore} className="text-[10px] font-black text-[#1E5BFF] uppercase tracking-widest hover:underline active:opacity-60">Ver mais</button>
   </div>
 );
-
 const NovidadesDaSemana: React.FC<{ stores: Store[]; onStoreClick?: (store: Store) => void; onNavigate: (v: string) => void }> = ({ stores, onStoreClick, onNavigate }) => {
   const newArrivals = useMemo(() => stores.filter(s => (s.image || s.logoUrl) && ['f-38', 'f-39', 'f-45', 'f-42', 'f-50'].includes(s.id)), [stores]);
   if (newArrivals.length === 0) return null;
@@ -499,7 +503,6 @@ const NovidadesDaSemana: React.FC<{ stores: Store[]; onStoreClick?: (store: Stor
     </div>
   );
 };
-
 const SugestoesParaVoce: React.FC<{ stores: Store[]; onStoreClick?: (store: Store) => void; onNavigate: (v: string) => void }> = ({ stores, onStoreClick, onNavigate }) => {
   const suggestions = useMemo(() => stores.filter(s => (s.image || s.logoUrl) && ['f-3', 'f-5', 'f-8', 'f-12', 'f-15'].includes(s.id)), [stores]);
   if (suggestions.length === 0) return null;
@@ -526,7 +529,6 @@ const SugestoesParaVoce: React.FC<{ stores: Store[]; onStoreClick?: (store: Stor
     </div>
   );
 };
-
 const EmAltaNaCidade: React.FC<{ stores: Store[]; onStoreClick?: (store: Store) => void; onNavigate: (v: string) => void }> = ({ stores, onStoreClick, onNavigate }) => {
   const trending = useMemo(() => stores.filter(s => (s.image || s.logoUrl) && ['f-1', 'f-2'].includes(s.id)), [stores]);
   if (trending.length < 2) return null;

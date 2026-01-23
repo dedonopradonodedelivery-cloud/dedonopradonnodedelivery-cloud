@@ -1,64 +1,149 @@
-
 import React, { useState, useEffect, useMemo } from 'react';
-import { ChevronLeft, Star, BadgeCheck, ChevronRight, AlertCircle, Grid, Megaphone, Image as ImageIcon } from 'lucide-react';
+import { ChevronLeft, Star, BadgeCheck, ChevronRight, AlertCircle, Grid, Megaphone, Image as ImageIcon, Sparkles, Rocket, Crown, ShieldCheck, MapPin, Tag, Gift, Zap, Flame, Percent, Utensils, Pizza, Coffee, Beef, IceCream, ShoppingCart, Store as StoreIcon, Package, Wrench, Truck, CreditCard, Coins, Award, Smile, Bell, Clock, Heart, Ban, Circle, Square } from 'lucide-react';
 import { Category, Store, AdType } from '@/types';
 import { SUBCATEGORIES } from '@/constants';
 import { supabase } from '@/lib/supabaseClient';
 
-// --- Reusable Banner Rendering Components ---
-const TemplateBannerRender: React.FC<{ config: any }> = ({ config }) => {
-    const { template_id, headline, subheadline, product_image_url } = config;
-    switch (template_id) {
-      case 'oferta_relampago':
-        return (
-          <div className="w-full aspect-video rounded-2xl bg-gradient-to-br from-rose-500 to-red-600 text-white p-6 flex items-center justify-between overflow-hidden relative shadow-lg">
-            <div className="relative z-10">
-              <span className="text-sm font-bold bg-yellow-300 text-red-700 px-3 py-1 rounded-full uppercase shadow-sm">{headline || 'XX% OFF'}</span>
-              <h3 className="text-3xl font-black mt-4 drop-shadow-md max-w-[200px] leading-tight">{subheadline || 'Nome do Produto'}</h3>
-            </div>
-            <div className="relative z-10 w-32 h-32 rounded-full border-4 border-white/50 bg-gray-200 overflow-hidden flex items-center justify-center shrink-0 shadow-2xl">
-              {product_image_url ? <img src={product_image_url} className="w-full h-full object-cover" /> : <ImageIcon className="w-12 h-12 text-gray-400" />}
-            </div>
-          </div>
-        );
-      case 'lancamento':
-        return (
-          <div className="w-full aspect-video rounded-2xl bg-gradient-to-br from-slate-800 to-slate-900 text-white p-6 flex items-end justify-between overflow-hidden relative shadow-lg">
-             <img src={product_image_url || 'https://via.placeholder.com/150'} className="absolute inset-0 w-full h-full object-cover opacity-30 mix-blend-luminosity" />
-             <div className="relative z-10">
-                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-cyan-300">{headline || 'LANÇAMENTO'}</span>
-                <h3 className="text-2xl font-bold mt-1 max-w-[220px] leading-tight">{subheadline || 'Descrição'}</h3>
-             </div>
-          </div>
-        );
-      default: return null;
-    }
+// --- START: BANNER EDITOR LOGIC DUPLICATION ---
+// NOTE: This logic is duplicated in HomeFeed.tsx.
+// In a real-world scenario, this would be extracted into a shared `components/EditorBanner.tsx` file.
+
+interface BannerDesign {
+  title: string;
+  titleFont: string;
+  titleSize: string;
+  subtitle: string;
+  subtitleFont: string;
+  subtitleSize: string;
+  bgColor: string;
+  textColor: string;
+  align: 'left' | 'center' | 'right';
+  animation: 'none' | 'slide' | 'pulse' | 'float';
+  iconName: string | null;
+  iconPos: 'left' | 'top' | 'right';
+  iconSize: 'sm' | 'md' | 'lg';
+  iconColorMode: 'text' | 'white' | 'black' | 'custom';
+  logoDisplay: 'square' | 'round' | 'none';
+  iconCustomColor?: string;
+}
+
+const ICON_COMPONENTS: Record<string, React.ElementType> = {
+  Flame, Zap, Percent, Tag, Gift, Utensils, Pizza, Coffee, Beef, IceCream,
+  ShoppingCart, Store: StoreIcon, Package, Wrench, Truck, CreditCard, Coins, Star,
+  Award, MapPin, Smile, Bell, Clock, Heart, Sparkles, Rocket, Megaphone, Crown, ShieldCheck
 };
-const CustomBannerRender: React.FC<{ config: any }> = ({ config }) => {
-    const { template_id, background_color, text_color, font_size, font_family, title, subtitle } = config;
-    const fontSizes = { small: 'text-2xl', medium: 'text-4xl', large: 'text-5xl' };
-    const subFontSizes = { small: 'text-sm', medium: 'text-base', large: 'text-lg' };
-    const headlineFontSize = { small: 'text-4xl', medium: 'text-6xl', large: 'text-7xl' };
-    const layoutClasses = {
-      simple_left: 'flex flex-col justify-center items-start text-left',
-      centered: 'flex flex-col justify-center items-center text-center',
-      headline: 'flex flex-col justify-center items-center text-center',
+
+const FONT_STYLES = [
+  { id: 'font-moderna', name: 'Moderna', family: "'Outfit', sans-serif" },
+  { id: 'font-forte', name: 'Forte', family: "'Inter', sans-serif", weight: '900' },
+  { id: 'font-elegante', name: 'Elegante', family: "'Lora', serif" },
+  { id: 'font-amigavel', name: 'Amigável', family: "'Quicksand', sans-serif" },
+  { id: 'font-neutra', name: 'Neutra', family: "'Inter', sans-serif" },
+  { id: 'font-impacto', name: 'Impacto', family: "'Anton', sans-serif" },
+];
+
+const SIZE_LEVELS = [
+  { id: 'xs', name: 'M. Pequeno', titleClass: 'text-lg', subClass: 'text-[9px]' },
+  { id: 'sm', name: 'Pequeno', titleClass: 'text-xl', subClass: 'text-[10px]' },
+  { id: 'md', name: 'Médio', titleClass: 'text-2xl', subClass: 'text-xs' },
+  { id: 'lg', name: 'Grande', titleClass: 'text-3xl', subClass: 'text-sm' },
+  { id: 'xl', name: 'M. Grande', titleClass: 'text-4xl', subClass: 'text-base' },
+];
+
+const EditorBanner: React.FC<{ config: BannerDesign; storeName: string; storeLogo?: string | null; }> = ({ config, storeName, storeLogo }) => {
+    const { 
+      title, subtitle, titleFont, titleSize, subtitleFont, subtitleSize, 
+      bgColor, textColor, align, animation, iconName, iconPos, iconSize, 
+      logoDisplay, iconColorMode, iconCustomColor 
+    } = config;
+
+    const renderIcon = (name: string | null, size: 'sm' | 'md' | 'lg', colorMode: string) => {
+      if (!name || !ICON_COMPONENTS[name]) return null;
+      const IconComp = ICON_COMPONENTS[name];
+      const sizes = { sm: 24, md: 44, lg: 64 };
+      const colors: Record<string, string> = { text: textColor, white: '#FFFFFF', black: '#000000', custom: iconCustomColor || '#1E5BFF' };
+      return <IconComp size={sizes[size]} style={{ color: colors[colorMode] }} strokeWidth={2.5} />;
     };
+
+    const getFontStyle = (fontId: string) => {
+      const f = FONT_STYLES.find(x => x.id === fontId);
+      return f ? { fontFamily: f.family, fontWeight: f.weight || '700' } : {};
+    };
+    
     return (
-        <div 
-            className={`w-full aspect-video rounded-2xl overflow-hidden relative shadow-lg p-8 ${layoutClasses[template_id as keyof typeof layoutClasses] || 'flex flex-col justify-center'}`}
-            style={{ backgroundColor: background_color, color: text_color }}
-        >
-            <h3 className={`${template_id === 'headline' ? headlineFontSize[font_size as keyof typeof headlineFontSize] : fontSizes[font_size as keyof typeof fontSizes]} font-black leading-tight line-clamp-2`} style={{ fontFamily: font_family }}>
-                {title || "Título"}
-            </h3>
-            <p className={`${subFontSizes[font_size as keyof typeof subFontSizes]} mt-3 opacity-80 max-w-md line-clamp-3`} style={{ fontFamily: font_family }}>
-                {subtitle || "Subtítulo"}
+      <div 
+        className={`w-full aspect-video rounded-[2.5rem] p-8 shadow-2xl relative overflow-hidden transition-all duration-500 flex flex-col justify-center border border-white/10 ${
+          align === 'center' ? 'items-center text-center' : align === 'right' ? 'items-end text-right' : 'items-start text-left'
+        } ${animation === 'pulse' ? 'animate-pulse' : animation === 'float' ? 'animate-float-slow' : ''}`}
+        style={{ backgroundColor: bgColor }}
+      >
+        <div className={`relative z-10 transition-all duration-500 flex ${iconPos === 'top' ? 'flex-col items-inherit' : iconPos === 'right' ? 'flex-row-reverse items-center gap-4' : 'flex-row items-center gap-4'} ${animation === 'slide' ? 'animate-in slide-in-from-left-8' : ''}`}>
+          {iconName && (
+            <div className={`${iconPos === 'top' ? 'mb-4' : ''} shrink-0`}>
+                {renderIcon(iconName, iconSize, iconColorMode)}
+            </div>
+          )}
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 mb-3 w-fit transition-all duration-300">
+              {logoDisplay !== 'none' && storeLogo && (
+                  <div className={`shrink-0 overflow-hidden bg-white/20 p-0.5 border border-white/20 transition-all duration-300 ${logoDisplay === 'round' ? 'rounded-full' : 'rounded-lg'}`}>
+                      <img src={storeLogo} className={`w-5 h-5 object-contain transition-all duration-300 ${logoDisplay === 'round' ? 'rounded-full' : 'rounded-md'}`} alt="Logo" />
+                  </div>
+              )}
+              <div className="bg-black/10 backdrop-blur-md px-2 py-0.5 rounded-lg border border-white/10 w-fit">
+                  <span className="text-[7px] font-black uppercase tracking-[0.2em]" style={{ color: textColor }}>{storeName}</span>
+              </div>
+            </div>
+            <h2 
+              className={`font-black leading-tight mb-2 tracking-tight line-clamp-2 transition-all duration-300 ${SIZE_LEVELS.find(s => s.id === titleSize)?.titleClass}`} 
+              style={{ ...getFontStyle(titleFont), color: textColor }}
+            >
+                {title}
+            </h2>
+            <p 
+              className={`font-medium opacity-80 leading-snug max-w-[280px] line-clamp-2 transition-all duration-300 ${SIZE_LEVELS.find(s => s.id === subtitleSize)?.subClass}`} 
+              style={{ ...getFontStyle(subtitleFont), color: textColor }}
+            >
+                {subtitle}
             </p>
+          </div>
         </div>
+      </div>
     );
 };
-// --- End Banner Rendering Components ---
+
+const mapToEditorConfig = (dbConfig: any): BannerDesign => {
+  if (dbConfig.type === 'custom_editor') {
+    return dbConfig;
+  }
+  if (dbConfig.type === 'template') {
+    switch (dbConfig.template_id) {
+      case 'oferta_relampago':
+        return {
+          title: dbConfig.subheadline || 'Oferta Imperdível', subtitle: `Com ${dbConfig.headline || 'desconto'}!`,
+          titleFont: 'font-impacto', titleSize: 'lg', subtitleFont: 'font-amigavel', subtitleSize: 'md',
+          bgColor: '#DC2626', textColor: '#FFFFFF', align: 'center', iconName: 'Flame', iconPos: 'top',
+          iconSize: 'lg', logoDisplay: 'none', animation: 'pulse', iconColorMode: 'white'
+        };
+      case 'lancamento':
+        return {
+          title: dbConfig.headline || 'Lançamento', subtitle: dbConfig.subheadline || 'Conheça a novidade.',
+          titleFont: 'font-moderna', titleSize: 'lg', subtitleFont: 'font-elegante', subtitleSize: 'md',
+          bgColor: '#0F172A', textColor: '#FFFFFF', align: 'left', iconName: 'Sparkles', iconPos: 'right',
+          iconSize: 'lg', logoDisplay: 'square', animation: 'none', iconColorMode: 'text'
+        };
+      default: break;
+    }
+  }
+  return {
+    title: 'Anúncio Patrocinado', subtitle: 'Confira as novidades da loja.', bgColor: '#1E5BFF', textColor: '#FFFFFF',
+    titleFont: 'font-moderna', titleSize: 'md', subtitleFont: 'font-neutra', subtitleSize: 'sm',
+    align: 'left', iconName: null, iconPos: 'left', iconSize: 'md', logoDisplay: 'round', animation: 'none', iconColorMode: 'text'
+  };
+};
+
+// --- END: BANNER EDITOR LOGIC DUPLICATION ---
+
 
 const BigSurCard: React.FC<{ 
   icon: React.ReactNode; 
@@ -130,35 +215,25 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
   const shouldShowMore = subcategories.length > MAX_VISIBLE_SUBCATEGORIES;
   const visibleSubcategories = shouldShowMore ? subcategories.slice(0, MAX_VISIBLE_SUBCATEGORIES - 1) : subcategories;
 
+  const advertiseHereConfig: BannerDesign = {
+    title: `Anuncie em ${category.name}`,
+    subtitle: 'Destaque-se para clientes que buscam por produtos e serviços como o seu.',
+    titleFont: 'font-forte', titleSize: 'lg',
+    subtitleFont: 'font-neutra', subtitleSize: 'sm',
+    bgColor: '#F3F4F6', textColor: '#1E5BFF',
+    align: 'center', iconName: 'Megaphone', iconPos: 'top',
+    iconSize: 'lg', logoDisplay: 'none', animation: 'none',
+    iconColorMode: 'text',
+  };
+
   useEffect(() => {
     const fetchCategoryBanner = async () => {
-      if (!supabase) {
-        setLoadingBanner(false);
-        return;
-      }
+      if (!supabase) { setLoadingBanner(false); return; }
       setLoadingBanner(true);
       try {
-        const { data, error } = await supabase
-          .from('published_banners')
-          .select('id, config')
-          .eq('target', `category:${category.slug}`)
-          .eq('is_active', true)
-          .order('created_at', { ascending: false })
-          .limit(1);
-
-        if (error) {
-          if (error.code === 'PGRST116' || error.message.includes('schema cache')) {
-            setActiveBanner(null);
-            return;
-          }
-          throw error;
-        }
-
-        if (data && data.length > 0) {
-          setActiveBanner(data[0]);
-        } else {
-          setActiveBanner(null);
-        }
+        const { data, error } = await supabase.from('published_banners').select('id, config').eq('target', `category:${category.slug}`).eq('is_active', true).order('created_at', { ascending: false }).limit(1).single();
+        if (error && error.code !== 'PGRST116') throw error; // Ignore 'not found' error
+        setActiveBanner(data || null);
       } catch (e: any) {
         console.warn("Category banner fetch suppressed:", e.message || e);
         setActiveBanner(null);
@@ -166,28 +241,7 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
         setLoadingBanner(false);
       }
     };
-    
     fetchCategoryBanner();
-
-    let channel: any;
-    try {
-      channel = supabase.channel(`category-banner-${category.slug}`)
-        .on('postgres_changes', {
-            event: '*',
-            schema: 'public',
-            table: 'published_banners',
-            filter: `target=eq.category:${category.slug}`
-          },
-          () => fetchCategoryBanner()
-        )
-        .subscribe();
-    } catch (e) {
-      // Ignora erro
-    }
-
-    return () => {
-      if (channel) supabase.removeChannel(channel);
-    };
   }, [category.slug]);
 
   const filteredStores = useMemo(() => {
@@ -250,22 +304,12 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
         <section>
           {loadingBanner ? (
             <div className="w-full aspect-video bg-gray-200 dark:bg-gray-800 rounded-2xl animate-pulse"></div>
-          ) : activeBanner ? (
-            activeBanner.config.type === 'template' ? (
-              <TemplateBannerRender config={activeBanner.config} />
-            ) : (
-              <CustomBannerRender config={activeBanner.config} />
-            )
           ) : (
-            <div 
-              onClick={handleAdvertiseClick}
-              className="w-full aspect-video rounded-2xl bg-gray-100 dark:bg-gray-800 border-2 border-dashed border-gray-300 dark:border-gray-600 flex flex-col items-center justify-center text-center p-6 cursor-pointer hover:border-blue-500 transition-all group"
-            >
-                <div className="p-3 bg-gray-200 dark:bg-gray-700 rounded-full mb-3 group-hover:bg-blue-100 transition-colors">
-                  <Megaphone className="w-6 h-6 text-gray-500 dark:text-gray-400 group-hover:text-blue-600 transition-colors" />
-                </div>
-                <h3 className="font-bold text-gray-800 dark:text-white">Anuncie sua loja aqui</h3>
-                <p className="text-xs text-gray-500 mt-1">Destaque-se para clientes que buscam por "{category.name}"</p>
+            <div onClick={!activeBanner ? handleAdvertiseClick : undefined} className={!activeBanner ? 'cursor-pointer' : ''}>
+              <EditorBanner 
+                config={activeBanner ? mapToEditorConfig(activeBanner.config) : advertiseHereConfig}
+                storeName={activeBanner ? 'Loja Parceira' : 'Localizei JPA'}
+              />
             </div>
           )}
         </section>
