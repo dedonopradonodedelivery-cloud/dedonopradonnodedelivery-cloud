@@ -139,9 +139,6 @@ const BannerViewer: React.FC<{
     );
 };
 
-// --- END LOCAL COMPONENT ---
-
-
 const mapToViewerConfig = (dbConfig: any): BannerDesign => {
   if (dbConfig.type === 'custom_editor') {
     return dbConfig;
@@ -228,20 +225,6 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void; onStoreClick?: (
         iconSize: 'lg', logoDisplay: 'none', animation: 'none',
         iconColorMode: 'text'
       }
-    },
-    { 
-      id: 'advertise-home', 
-      target: 'store_ads_module',
-      config: {
-        title: 'Anuncie Sua Marca Aqui',
-        subtitle: 'Apareça para milhares de clientes em Jacarepaguá.',
-        titleFont: 'font-moderna', titleSize: 'lg',
-        subtitleFont: 'font-neutra', subtitleSize: 'sm',
-        bgColor: '#FFFFFF', textColor: '#1E5BFF',
-        align: 'center', iconName: 'Megaphone', iconPos: 'top',
-        iconSize: 'lg', logoDisplay: 'none', animation: 'none',
-        iconColorMode: 'text'
-      }
     }
   ], []);
 
@@ -296,9 +279,9 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void; onStoreClick?: (
           setCurrentIndex((current) => (current + 1) % allBanners.length);
           return 0;
         }
-        return prev + 0.75; 
+        return prev + 1; 
       });
-    }, 30);
+    }, 40);
     return () => clearInterval(interval);
   }, [allBanners.length]);
 
@@ -325,7 +308,7 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void; onStoreClick?: (
     <div className="px-4 py-2">
       <div 
         onClick={handleBannerClick}
-        className="w-full relative aspect-[3/2] rounded-[32px] overflow-hidden shadow-xl shadow-slate-200 dark:shadow-none border border-gray-100 dark:border-white/5 cursor-pointer active:scale-[0.98] transition-all group"
+        className="w-full relative aspect-[16/9] rounded-[2.5rem] overflow-hidden shadow-2xl border border-white/10 cursor-pointer active:scale-[0.98] transition-all group"
       >
         <BannerViewer 
             config={current.isUserBanner ? mapToViewerConfig(current.config) : current.config}
@@ -333,11 +316,9 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void; onStoreClick?: (
             storeLogo={current.isUserBanner ? (current.config.profiles?.logo_url) : (storeForBanner?.logoUrl)}
         />
         
-        <div className="absolute bottom-0 left-0 right-0 h-1/4 bg-gradient-to-t from-black/40 to-transparent pointer-events-none"></div>
-
-        <div className="absolute bottom-3 left-1/2 -translate-x-1/2 w-1/2 h-[3px] flex gap-1.5 z-10">
+        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 w-1/2 h-[2px] flex gap-1.5 z-10">
           {allBanners.map((_, idx) => (
-            <div key={idx} className="h-full flex-1 bg-white/30 backdrop-blur-sm rounded-full overflow-hidden">
+            <div key={idx} className="h-full flex-1 bg-white/20 backdrop-blur-sm rounded-full overflow-hidden">
               <div 
                 className="h-full bg-white transition-all duration-100 ease-linear" 
                 style={{ width: idx === currentIndex ? `${progress}%` : idx < currentIndex ? '100%' : '0%' }} 
@@ -368,55 +349,50 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
   userRole
 }) => {
   const [listFilter, setListFilter] = useState<'all' | 'top_rated' | 'open_now'>('all');
-  const categoriesRef = useRef<HTMLDivElement>(null);
-  const homeStructure = useMemo(() => ['categories', 'home_carousel', 'novidades', 'sugestoes', 'em_alta', 'list'], []);
+  const homeStructure = useMemo(() => ['categories', 'home_carousel', 'novidades', 'em_alta', 'list'], []);
 
   const renderSection = (key: string) => {
     switch (key) {
       case 'home_carousel': 
         return (
-          <div key="home_carousel" className="w-full bg-white dark:bg-gray-950 pt-4">
+          <div key="home_carousel" className="w-full bg-white dark:bg-gray-950 pb-4">
             <HomeCarousel onNavigate={onNavigate} onStoreClick={onStoreClick} stores={stores} />
           </div>
         );
       case 'categories':
         return (
-          <div key="categories" className="w-full bg-white dark:bg-gray-950 pt-2 pb-0">
-            <div ref={categoriesRef} className="flex overflow-x-auto no-scrollbar px-4 pb-4 snap-x">
-              <div className="grid grid-flow-col grid-rows-2 gap-x-3 gap-y-3">
+          <div key="categories" className="w-full bg-white dark:bg-gray-950 pt-6 pb-2">
+            <div className="grid grid-cols-4 gap-y-6 px-4">
                 {CATEGORIES.map((cat) => (
                   <button key={cat.id} onClick={() => onSelectCategory(cat)} className="flex flex-col items-center group active:scale-95 transition-all">
-                    <div className={`w-[78px] h-[78px] rounded-[22px] shadow-lg flex flex-col items-center justify-between p-2 ${cat.color} border border-white/20`}>
-                      <div className="flex-1 flex items-center justify-center w-full">{React.cloneElement(cat.icon as any, { className: "w-7 h-7 text-white drop-shadow-md", strokeWidth: 2.5 })}</div>
-                      <div className="w-full bg-black/10 backdrop-blur-[2px] py-1 rounded-b-[20px] -mx-2 -mb-2"><span className="block w-full text-[9px] font-black text-white text-center uppercase tracking-tight">{cat.name}</span></div>
+                    <div className="w-14 h-14 rounded-2xl bg-white dark:bg-gray-900 shadow-xl border border-gray-100 dark:border-gray-800 flex items-center justify-center text-[#1E5BFF] mb-2 group-hover:bg-[#1E5BFF] group-hover:text-white transition-colors">
+                      {React.cloneElement(cat.icon as any, { className: "w-6 h-6", strokeWidth: 2.5 })}
                     </div>
+                    <span className="text-[10px] font-black text-gray-500 dark:text-gray-400 text-center uppercase tracking-widest">{cat.name}</span>
                   </button>
                 ))}
-              </div>
             </div>
           </div>
         );
       case 'novidades': return <NovidadesDaSemana key="novidades" stores={stores} onStoreClick={onStoreClick} onNavigate={onNavigate} />;
-      case 'sugestoes': return <SugestoesParaVoce key="sugestoes" stores={stores} onStoreClick={onStoreClick} onNavigate={onNavigate} />;
       case 'em_alta': return <EmAltaNaCidade key="em_alta" stores={stores} onStoreClick={onStoreClick} onNavigate={onNavigate} />;
       case 'list':
         return (
-          <div key="list" className="w-full bg-white dark:bg-gray-900 pt-1 pb-10">
+          <div key="list" className="w-full bg-white dark:bg-gray-950 pt-8 pb-10">
             <div className="px-5">
               <SectionHeader 
                 icon={Compass} 
                 title="Explorar Bairro" 
-                subtitle="Tudo o que você precisa" 
-                onSeeMore={() => onNavigate('explore')}
+                subtitle="O que há de melhor perto de você" 
               />
-              <div className="flex gap-1 bg-gray-100 dark:bg-gray-800 p-1 rounded-xl w-fit mb-4">
-                {['all', 'top_rated'].map((f) => (
+              <div className="flex gap-2 mb-6 overflow-x-auto no-scrollbar">
+                {['all', 'top_rated', 'open_now'].map((f) => (
                   <button 
                     key={f} 
                     onClick={() => setListFilter(f as any)} 
-                    className={`text-[8px] font-black uppercase px-4 py-1.5 rounded-lg transition-all ${listFilter === f ? 'bg-white dark:bg-gray-700 text-[#1E5BFF] shadow-sm' : 'text-gray-400'}`}
+                    className={`px-5 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all border ${listFilter === f ? 'bg-[#1E5BFF] text-white border-[#1E5BFF] shadow-lg shadow-blue-500/20' : 'bg-gray-50 dark:bg-gray-900 text-gray-400 border-gray-100 dark:border-gray-800'}`}
                   >
-                    {f === 'all' ? 'Tudo' : 'Top'}
+                    {f === 'all' ? 'Tudo' : f === 'top_rated' ? 'Top' : 'Aberto'}
                   </button>
                 ))}
               </div>
@@ -428,53 +404,51 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
     }
   };
 
-  const MemoizedSections = useMemo(() => {
-    return homeStructure.map(section => renderSection(section));
-  }, [homeStructure, listFilter, stores, user, onSelectCategory, onNavigate, onStoreClick]);
-
   return (
-    <div className="flex flex-col bg-white dark:bg-gray-950 w-full max-w-md mx-auto animate-in fade-in duration-500 overflow-x-hidden pb-32">
-      {/* Mocking that a lojista has not yet purchased */}
+    <div className="flex flex-col bg-white dark:bg-gray-950 w-full max-w-md mx-auto animate-in fade-in duration-700 pb-32">
       {userRole === 'lojista' && (
-        <section className="px-4 py-4 bg-white dark:bg-gray-950">
+        <section className="px-4 py-4">
            <LaunchOfferBanner onClick={() => onNavigate('store_ads_module')} />
         </section>
       )}
-      <div className="flex flex-col w-full gap-1">
-          {MemoizedSections}
+      <div className="flex flex-col w-full gap-2">
+          {homeStructure.map(section => renderSection(section))}
       </div>
     </div>
   );
 };
+
 const SectionHeader: React.FC<{ icon: React.ElementType; title: string; subtitle: string; onSeeMore?: () => void }> = ({ icon: Icon, title, subtitle, onSeeMore }) => (
-  <div className="flex items-center justify-between mb-3">
+  <div className="flex items-center justify-between mb-5 px-1">
     <div className="flex items-center gap-3">
-      <div className="w-9 h-9 rounded-xl bg-gray-50 dark:bg-gray-800 flex items-center justify-center text-gray-900 dark:text-white shadow-sm">
-        <Icon size={18} strokeWidth={2.5} />
+      <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center text-[#1E5BFF] shadow-sm">
+        <Icon size={20} strokeWidth={2.5} />
       </div>
       <div>
-        <h2 className="text-[11px] font-black text-gray-900 dark:text-white uppercase tracking-[0.15em] leading-none mb-1">{title}</h2>
-        <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest leading-none">{subtitle}</p>
+        <h2 className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-tight leading-none mb-1">{title}</h2>
+        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-none">{subtitle}</p>
       </div>
     </div>
-    <button onClick={onSeeMore} className="text-[10px] font-black text-[#1E5BFF] uppercase tracking-widest hover:underline active:opacity-60">Ver mais</button>
+    {onSeeMore && <button onClick={onSeeMore} className="p-2 text-gray-400 hover:text-[#1E5BFF] transition-colors"><ChevronRight size={20} /></button>}
   </div>
 );
+
 const NovidadesDaSemana: React.FC<{ stores: Store[]; onStoreClick?: (store: Store) => void; onNavigate: (v: string) => void }> = ({ stores, onStoreClick, onNavigate }) => {
-  const newArrivals = useMemo(() => stores.filter(s => (s.image || s.logoUrl) && ['f-3', 'f-5', 'f-8', 'f-12', 'f-15'].includes(s.id)), [stores]);
-  if (newArrivals.length === 0) return null;
+  const newArrivals = useMemo(() => stores.filter(s => (s.image || s.logoUrl)).slice(0, 5), [stores]);
   return (
-    <div className="bg-white dark:bg-gray-950 pt-4 pb-2 px-5">
-      <SectionHeader icon={Sparkles} title="Novidades da Semana" subtitle="Recém chegados" onSeeMore={() => onNavigate('explore')} />
-      <div className="flex gap-4 overflow-x-auto no-scrollbar snap-x -mx-5 px-5">
+    <div className="bg-white dark:bg-gray-950 py-6">
+      <div className="px-5">
+        <SectionHeader icon={Sparkles} title="Novidades" subtitle="Recém chegados em Jacarepaguá" />
+      </div>
+      <div className="flex gap-4 overflow-x-auto no-scrollbar snap-x px-5">
         {newArrivals.map((store) => (
-          <button key={store.id} onClick={() => onStoreClick && onStoreClick(store)} className="flex-shrink-0 w-[170px] aspect-[4/5] rounded-[2.5rem] overflow-hidden relative snap-center shadow-2xl group active:scale-[0.98] transition-all">
-            <img src={store.image || store.logoUrl} alt="" className="absolute inset-0 w-full h-full object-cover transition-transform group-hover:scale-110" />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent"></div>
-            <div className="absolute inset-0 p-4 flex flex-col justify-end text-left">
-              <span className="w-fit bg-emerald-500 text-white text-[7px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest mb-1.5 shadow-lg">Novo</span>
-              <h3 className="text-sm font-black text-white leading-tight mb-0.5 truncate drop-shadow-md">{store.name}</h3>
-              <p className="text-[9px] font-bold text-white/60 uppercase tracking-widest truncate">{store.category}</p>
+          <button key={store.id} onClick={() => onStoreClick?.(store)} className="flex-shrink-0 w-[160px] aspect-[4/5] rounded-[2.5rem] overflow-hidden relative snap-center shadow-xl group active:scale-95 transition-all">
+            <img src={store.image || store.logoUrl} alt="" className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+            <div className="absolute inset-0 p-5 flex flex-col justify-end text-left">
+              <span className="w-fit bg-emerald-500 text-white text-[8px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest mb-2">Novo</span>
+              <h3 className="text-sm font-black text-white leading-tight truncate mb-0.5">{store.name}</h3>
+              <p className="text-[10px] font-bold text-white/60 uppercase tracking-widest truncate">{store.category}</p>
             </div>
           </button>
         ))}
@@ -482,48 +456,22 @@ const NovidadesDaSemana: React.FC<{ stores: Store[]; onStoreClick?: (store: Stor
     </div>
   );
 };
-const SugestoesParaVoce: React.FC<{ stores: Store[]; onStoreClick?: (store: Store) => void; onNavigate: (v: string) => void }> = ({ stores, onStoreClick, onNavigate }) => {
-  const suggestions = useMemo(() => stores.filter(s => (s.image || s.logoUrl) && ['f-3', 'f-5', 'f-8', 'f-12', 'f-15'].includes(s.id)), [stores]);
-  if (suggestions.length === 0) return null;
-  return (
-    <div className="bg-white dark:bg-gray-900 py-4 px-5">
-      <SectionHeader icon={Lightbulb} title="Sugestões" subtitle="Para você" onSeeMore={() => onNavigate('explore')} />
-      <div className="flex gap-5 overflow-x-auto no-scrollbar snap-x -mx-5 px-5">
-        {suggestions.map((store) => (
-          <button key={store.id} onClick={() => onStoreClick && onStoreClick(store)} className="flex-shrink-0 w-[240px] bg-white dark:bg-gray-900 rounded-[2rem] overflow-hidden snap-center shadow-xl border border-gray-100 dark:border-gray-800 group active:scale-[0.98] transition-all text-left">
-            <div className="relative h-32 overflow-hidden">
-              <img src={store.image || store.logoUrl} alt="" className="w-full h-full object-cover transition-transform group-hover:scale-110" />
-            </div>
-            <div className="p-5">
-              <span className="text-[9px] font-black text-[#1E5BFF] uppercase tracking-widest block mb-1">{store.category}</span>
-              <h3 className="text-base font-bold text-gray-900 dark:text-white leading-tight mb-2 truncate">{store.name}</h3>
-              <div className="flex items-center gap-1.5 text-gray-400 dark:text-gray-400 mt-0.5">
-                <MapPin size={12} />
-                <span className="text-[10px] font-bold uppercase tracking-tight">{store.neighborhood || store.distance}</span>
-              </div>
-            </div>
-          </button>
-        ))}
-      </div>
-    </div>
-  );
-};
+
 const EmAltaNaCidade: React.FC<{ stores: Store[]; onStoreClick?: (store: Store) => void; onNavigate: (v: string) => void }> = ({ stores, onStoreClick, onNavigate }) => {
-  const trending = useMemo(() => stores.filter(s => (s.image || s.logoUrl) && ['f-1', 'f-2'].includes(s.id)), [stores]);
-  if (trending.length < 2) return null;
+  const trending = useMemo(() => stores.filter(s => s.rating >= 4.7).slice(0, 2), [stores]);
   return (
-    <div className="bg-white dark:bg-gray-900 py-4 px-5">
-      <SectionHeader icon={TrendingUp} title="Em alta" subtitle="O bairro ama" onSeeMore={() => onNavigate('explore')} />
+    <div className="bg-white dark:bg-gray-950 py-6 px-5">
+      <SectionHeader icon={TrendingUp} title="Em Alta" subtitle="O bairro está amando" />
       <div className="flex gap-4">
         {trending.map((store, idx) => (
-          <button key={store.id} onClick={() => onStoreClick && onStoreClick(store)} className={`flex-1 rounded-[2.5rem] p-6 flex flex-col items-center text-center transition-all active:scale-[0.98] shadow-sm ${idx === 0 ? 'bg-rose-50/70 dark:bg-rose-900/20' : 'bg-blue-50/70 dark:bg-blue-900/20'}`}>
-            <div className="w-20 h-20 rounded-full overflow-hidden bg-white shadow-xl border-4 border-white mb-5">
+          <button key={store.id} onClick={() => onStoreClick?.(store)} className={`flex-1 rounded-[2.5rem] p-6 flex flex-col items-center text-center transition-all active:scale-95 shadow-sm border border-gray-50 dark:border-gray-900 ${idx === 0 ? 'bg-rose-50/50 dark:bg-rose-900/10' : 'bg-blue-50/50 dark:bg-blue-900/10'}`}>
+            <div className="w-20 h-20 rounded-[2rem] overflow-hidden bg-white shadow-xl border-4 border-white mb-6">
               <img src={store.logoUrl || store.image} alt="" className="w-full h-full object-cover" />
             </div>
-            <h3 className="text-sm font-black text-gray-900 dark:text-white leading-tight mb-1">{store.name}</h3>
-            <p className="text-[8px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-6">{store.category}</p>
-            <div className="mt-auto bg-gray-900 dark:bg-white text-white dark:text-gray-900 px-5 py-2.5 rounded-full text-[9px] font-black uppercase tracking-widest flex items-center justify-center gap-1.5 shadow-lg">
-              Explorar <ArrowRight size={10} strokeWidth={4} />
+            <h3 className="text-base font-black text-gray-900 dark:text-white leading-tight mb-1">{store.name}</h3>
+            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-8">{store.category}</p>
+            <div className="mt-auto bg-gray-900 dark:bg-white text-white dark:text-gray-900 px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest flex items-center gap-2 shadow-lg">
+              Conhecer <ChevronRight size={14} strokeWidth={3} />
             </div>
           </button>
         ))}
