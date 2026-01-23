@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { 
   ChevronLeft, 
@@ -51,6 +52,7 @@ interface StoreAdsModuleProps {
   user: User | null;
   categoryName?: string;
   viewMode?: string;
+  initialView?: 'sales' | 'chat';
 }
 
 const NEIGHBORHOODS = [
@@ -93,10 +95,10 @@ const DISPLAY_MODES = [
   },
 ];
 
-export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNavigate, user, categoryName, viewMode }) => {
+export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNavigate, user, categoryName, viewMode, initialView = 'sales' }) => {
   const isDesigner = viewMode === 'Designer';
   
-  const [view, setView] = useState<'sales' | 'creator' | 'editor' | 'pro_checkout' | 'pro_processing' | 'pro_approved' | 'pro_chat' | 'designer_workspace'>('sales');
+  const [view, setView] = useState<'sales' | 'creator' | 'editor' | 'pro_checkout' | 'pro_processing' | 'pro_approved' | 'pro_chat' | 'designer_workspace' | 'chat_onboarding'>('sales');
   const [selectedMode, setSelectedMode] = useState<typeof DISPLAY_MODES[0] | null>(null);
   const [selectedPeriods, setSelectedPeriods] = useState<string[]>([]);
   const [selectedNeighborhoods, setSelectedNeighborhoods] = useState<string[]>([]);
@@ -136,12 +138,19 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
   const paymentRef = useRef<HTMLDivElement>(null);
   const chatScrollRef = useRef<HTMLDivElement>(null);
 
-  // Redirecionamento automático para o Workspace se for Designer
   useEffect(() => {
     if (isDesigner) {
       setView('designer_workspace');
+    } else if (initialView === 'chat') {
+      // Mock para a lógica de verificação de pedido ativo.
+      const hasActiveOrder = false; 
+      if (hasActiveOrder) {
+        setView('pro_chat');
+      } else {
+        setView('chat_onboarding');
+      }
     }
-  }, [isDesigner]);
+  }, [isDesigner, initialView]);
 
   const dynamicPeriods = useMemo(() => {
     const now = new Date();
