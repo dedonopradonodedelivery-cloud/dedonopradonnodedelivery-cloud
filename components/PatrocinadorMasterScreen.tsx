@@ -76,7 +76,7 @@ export const PatrocinadorMasterScreen: React.FC<PatrocinadorMasterScreenProps> =
   
   const pricing = useMemo(() => {
     const count = selectedMonths.length;
-    const basePrice = 1500;
+    const basePrice = 4000;
     const totalWithoutDiscount = count * basePrice;
     let discountPercent = 0;
     
@@ -198,7 +198,7 @@ export const PatrocinadorMasterScreen: React.FC<PatrocinadorMasterScreenProps> =
               {selectedMonths.length > 0 && (
                 <div className="bg-slate-900 border border-white/10 rounded-3xl p-6 space-y-4 text-sm animate-in fade-in">
                   <div className="flex justify-between"><span className="text-slate-400">Meses selecionados:</span><span className="font-bold text-white">{selectedMonths.join(', ')}</span></div>
-                  <div className="flex justify-between"><span className="text-slate-400">Valor por mês:</span><span className="font-bold text-white">R$ {pricing.basePrice.toFixed(2)}</span></div>
+                  <div className="flex justify-between"><span className="text-slate-400">Valor por mês:</span><span className="font-bold text-white">R$ {pricing.basePrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span></div>
                   <div className="border-t border-white/5 pt-4 space-y-4">
                      <div className="flex justify-between text-emerald-400"><span className="font-bold">Desconto aplicado:</span><span className="font-bold">{pricing.discountPercent}% OFF</span></div>
                      <div className="flex justify-between text-emerald-400"><span className="font-bold">Economia total:</span><span className="font-bold">R$ {pricing.totalSavings.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span></div>
@@ -247,7 +247,7 @@ export const PatrocinadorMasterScreen: React.FC<PatrocinadorMasterScreenProps> =
       </main>
 
       {!areAllMonthsSoldOut && (
-        <footer className="fixed bottom-0 left-0 right-0 p-5 bg-slate-950/80 backdrop-blur-md border-t border-white/5 z-30 max-w-md mx-auto">
+        <footer className="fixed bottom-[80px] left-0 right-0 p-5 bg-slate-950/80 backdrop-blur-md border-t border-white/5 z-30 max-w-md mx-auto">
           <div className="flex flex-col items-center">
             <button 
                 disabled={selectedMonths.length === 0}
