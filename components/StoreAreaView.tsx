@@ -152,7 +152,7 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
           <div className="grid grid-cols-1 gap-4">
             <MarketingActionCard 
               icon={Crown} 
-              label="Anunciar nos Banners" 
+              label="Banners Patrocinados" 
               description="Apareça em destaque para mais de 450 mil pessoas de Jacarepaguá"
               onClick={() => onNavigate('store_ads_module')}
               iconBgClass="bg-blue-100 dark:bg-blue-900/30"

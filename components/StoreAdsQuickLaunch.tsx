@@ -1,16 +1,12 @@
 
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import { 
   ChevronLeft, 
+  ArrowRight, 
   Megaphone, 
-  Zap, 
-  Target, 
-  TrendingUp, 
-  DollarSign, 
-  Rocket,
   CheckCircle2,
-  ArrowRight,
-  ShieldCheck,
+  CreditCard,
+  Loader2,
   Info
 } from 'lucide-react';
 
@@ -19,130 +15,162 @@ interface StoreAdsQuickLaunchProps {
   onNavigate: (view: string) => void;
 }
 
-const BENEFIT_LIST = [
-  { icon: Rocket, text: "Apareça antes da concorrência", color: "text-blue-400" },
-  { icon: Target, text: "Destaque para clientes da sua região", color: "text-emerald-400" },
-  { icon: DollarSign, text: "Custo baixo, controle total", color: "text-amber-400" },
-  { icon: Zap, text: "Ativação rápida, sem criar banner", color: "text-purple-400" },
-  { icon: TrendingUp, text: "Mais visitas e chances de venda", color: "text-blue-400" },
+const DURATION_OPTIONS = [
+    { days: 7, price: 6.93 },
+    { days: 15, price: 13.90 },
+    { days: 30, price: 27.90 },
 ];
 
-export const StoreAdsQuickLaunch: React.FC<StoreAdsQuickLaunchProps> = ({ onBack, onNavigate }) => {
-  const [days, setDays] = useState(14);
-  const pricePerDay = 0.99;
-  
-  const totalInvestment = useMemo(() => {
-    return (days * pricePerDay).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-  }, [days]);
+export const StoreAdsQuickLaunch: React.FC<StoreAdsQuickLaunchProps> = ({ onBack }) => {
+    const [step, setStep] = useState<'selection' | 'payment' | 'success'>('selection');
+    const [selectedOption, setSelectedOption] = useState<(typeof DURATION_OPTIONS)[0] | null>(null);
+    const [isProcessing, setIsProcessing] = useState(false);
 
-  return (
-    <div className="min-h-screen bg-[#020617] text-slate-100 font-sans flex flex-col animate-in fade-in slide-in-from-right duration-500">
-      
-      {/* Header */}
-      <header className="sticky top-0 z-40 bg-[#020617]/80 backdrop-blur-xl border-b border-white/5 px-6 py-4 flex items-center gap-4">
-        <button onClick={onBack} className="p-2 bg-slate-900 rounded-xl text-slate-400 hover:text-white transition-all active:scale-95">
-          <ChevronLeft size={20} />
-        </button>
-        <div>
-          <h1 className="font-bold text-lg leading-none flex items-center gap-2">Anunciar (ADS) <Megaphone size={16} className="text-[#1E5BFF]" /></h1>
-          <p className="text-[10px] text-blue-400 uppercase font-black tracking-widest mt-1">Presença Patrocinada</p>
-        </div>
-      </header>
+    const handleSelectOption = (option: (typeof DURATION_OPTIONS)[0]) => {
+        setSelectedOption(option);
+    };
 
-      <main className="flex-1 p-6 space-y-10 pb-40 max-w-md mx-auto w-full">
-        
-        {/* Intro Section */}
-        <section className="text-center space-y-4">
-          <h2 className="text-2xl font-black text-white leading-tight font-display uppercase tracking-tight">
-            Destaque sua loja para quem está pronto para comprar
-          </h2>
-          <p className="text-sm text-slate-400 leading-relaxed">
-            Com os ADS da Localizei, sua loja aparece em posições patrocinadas para clientes que estão buscando exatamente o que você vende.
-          </p>
-          <p className="text-sm text-slate-400 leading-relaxed font-medium">
-            Você paga pouco, escolhe quantos dias quer anunciar e ganha mais visibilidade sem complicação.
-          </p>
-        </section>
+    const handleActivate = () => {
+        if (selectedOption) {
+            setStep('payment');
+        }
+    };
+    
+    const handlePay = () => {
+        setIsProcessing(true);
+        setTimeout(() => {
+            setIsProcessing(false);
+            setStep('success');
+        }, 1500);
+    };
 
-        {/* Benefits Section */}
-        <section className="bg-slate-900/50 border border-white/5 rounded-[2.5rem] p-6 space-y-4 shadow-xl">
-          {BENEFIT_LIST.map((benefit, index) => (
-            <div key={index} className="flex items-center gap-4 group">
-              <div className={`w-10 h-10 rounded-2xl bg-white/5 flex items-center justify-center shrink-0 border border-white/5 group-hover:scale-110 transition-transform ${benefit.color}`}>
-                <benefit.icon size={18} />
-              </div>
-              <p className="text-sm font-bold text-slate-300">{benefit.text}</p>
+    const handleSuccessClose = () => {
+        onBack(); // Volta para o painel do lojista
+    };
+
+    const renderSelectionScreen = () => (
+        <>
+            <main className="flex-1 p-6 space-y-8 pb-40">
+                <section className="text-center">
+                    <div className="w-20 h-20 bg-amber-500/10 rounded-[2rem] flex items-center justify-center mx-auto mb-6 border-2 border-amber-500/20 shadow-lg shadow-amber-900/10">
+                        <Megaphone className="w-10 h-10 text-amber-400" />
+                    </div>
+                    <h2 className="text-2xl font-black text-white font-display uppercase tracking-tight mb-3">Destaque Patrocinado</h2>
+                    <p className="text-sm text-slate-400 max-w-sm mx-auto leading-relaxed">
+                        Sua empresa aparece como patrocinada antes das demais nas listas do app.
+                    </p>
+                </section>
+                <section>
+                    <div className="grid grid-cols-1 gap-4">
+                        {DURATION_OPTIONS.map(option => (
+                            <button
+                                key={option.days}
+                                onClick={() => handleSelectOption(option)}
+                                className={`p-6 rounded-3xl border-2 transition-all flex items-center justify-between text-left group ${selectedOption?.days === option.days ? 'bg-blue-600/10 border-blue-500' : 'bg-slate-800/50 border-slate-700 hover:border-slate-600'}`}
+                            >
+                                <div>
+                                    <h3 className="font-bold text-white text-lg">{option.days} DIAS</h3>
+                                    <p className="text-xs text-slate-400 font-medium">de visibilidade extra</p>
+                                </div>
+                                <div className="text-right">
+                                    <p className="font-black text-2xl text-white">R$ {option.price.toFixed(2).replace('.', ',')}</p>
+                                    <p className="text-[10px] text-slate-500 font-bold uppercase">R$ 0,99 / DIA</p>
+                                </div>
+                            </button>
+                        ))}
+                    </div>
+                     {selectedOption && (
+                        <p className="text-center text-sm font-bold text-emerald-400 mt-6 animate-in fade-in">
+                            Duração escolhida: {selectedOption.days} dias
+                        </p>
+                    )}
+                </section>
+            </main>
+            <footer className="fixed bottom-0 left-0 right-0 p-5 bg-slate-950/80 backdrop-blur-md border-t border-white/5 z-30 max-w-md mx-auto">
+                {selectedOption ? (
+                    <div className="flex gap-3">
+                        <div className="flex-1 bg-slate-800 rounded-2xl flex flex-col items-center justify-center p-3 text-center border border-slate-700">
+                            <span className="text-[10px] text-slate-400 font-bold uppercase">Comprar {selectedOption.days} dias</span>
+                            <span className="text-lg font-black text-white">R$ {selectedOption.price.toFixed(2).replace('.', ',')}</span>
+                        </div>
+                        <button
+                            onClick={handleActivate}
+                            className="flex-1 bg-blue-600 text-white font-bold rounded-2xl flex items-center justify-center gap-2 shadow-lg active:scale-95 transition-transform"
+                        >
+                            Ativar agora <ArrowRight size={16} />
+                        </button>
+                    </div>
+                ) : (
+                    <div className="text-center p-4 bg-slate-800 rounded-2xl border border-slate-700">
+                        <p className="text-sm font-bold text-slate-500">Selecione a duração para continuar.</p>
+                    </div>
+                )}
+            </footer>
+        </>
+    );
+
+    const renderPaymentScreen = () => (
+         <main className="flex-1 p-6 flex flex-col justify-center animate-in fade-in duration-300">
+            <div className="text-center mb-10">
+                <h2 className="text-2xl font-black text-white font-display uppercase tracking-tight">Pagamento</h2>
             </div>
-          ))}
-        </section>
-
-        {/* Control Section */}
-        <section className="space-y-8 py-4">
-          <div className="flex flex-col items-center gap-2">
-            <h3 className="text-xs font-black text-blue-500 uppercase tracking-[0.2em]">
-              Escolha por quantos dias anunciar
-            </h3>
-            <div className="bg-blue-600/10 px-4 py-2 rounded-2xl border border-blue-500/20 mt-2">
-               <p className="text-xl font-black text-white">Dias selecionados: {days} dias</p>
+            <div className="bg-slate-900 rounded-3xl p-6 border border-white/10 space-y-4">
+                 <div className="flex justify-between items-center text-sm border-b border-white/5 pb-4">
+                    <span className="text-slate-400">Produto:</span>
+                    <span className="font-bold text-white">Destaque Patrocinado</span>
+                </div>
+                <div className="flex justify-between items-center text-sm border-b border-white/5 pb-4">
+                    <span className="text-slate-400">Duração:</span>
+                    <span className="font-bold text-white">{selectedOption?.days} dias</span>
+                </div>
+                <div className="flex justify-between items-center pt-2">
+                    <span className="text-slate-300 font-bold">Total:</span>
+                    <span className="text-2xl font-black text-emerald-400">R$ {selectedOption?.price.toFixed(2).replace('.', ',')}</span>
+                </div>
             </div>
-          </div>
 
-          <div className="relative w-full px-2">
-            <input 
-              type="range" 
-              min="7" 
-              max="30" 
-              step="1"
-              value={days}
-              onChange={(e) => setDays(parseInt(e.target.value))}
-              className="w-full h-3 bg-slate-800 rounded-full appearance-none cursor-pointer accent-[#1E5BFF] transition-all hover:bg-slate-700"
-            />
-            <div className="flex justify-between mt-4 text-[10px] font-black text-slate-500 uppercase tracking-widest px-1">
-              <span>7 Dias (Mínimo)</span>
-              <span>30 Dias</span>
+            <button
+                onClick={handlePay}
+                disabled={isProcessing}
+                className="w-full mt-8 bg-emerald-500 text-white font-bold py-5 rounded-2xl shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2 active:scale-95 transition-transform"
+            >
+                {isProcessing ? <Loader2 className="animate-spin" /> : 'Pagar agora'}
+            </button>
+         </main>
+    );
+
+    const renderSuccessScreen = () => (
+        <main className="flex-1 p-6 flex flex-col items-center justify-center text-center animate-in zoom-in-95 duration-500">
+            <div className="w-24 h-24 bg-emerald-500/10 rounded-full flex items-center justify-center mb-8 border-4 border-emerald-500/20">
+                <CheckCircle2 size={48} className="text-emerald-400" />
             </div>
-          </div>
-        </section>
+            <h2 className="text-3xl font-bold text-white mb-3">Pagamento aprovado ✅</h2>
+            <p className="text-slate-400 max-w-sm mb-6 leading-relaxed">
+                Parabéns pela escolha de se destacar! Seu Destaque Patrocinado já está ativo e sua empresa vai aparecer como patrocinada nas listas do app.
+            </p>
+            <div className="bg-slate-800/50 rounded-2xl p-4 text-center border border-white/10 mb-10 w-full max-w-xs">
+                <p className="text-slate-400 text-xs">Duração:</p>
+                <p className="text-white font-bold">{selectedOption?.days} dias</p>
+            </div>
+            <button onClick={handleSuccessClose} className="w-full max-w-xs py-4 bg-white text-slate-900 font-black rounded-2xl shadow-2xl active:scale-95 transition-transform">
+                Ok, entendi
+            </button>
+        </main>
+    );
 
-        {/* Pricing Summary */}
-        <section className="bg-slate-900 rounded-[2.5rem] p-8 border border-white/10 shadow-2xl space-y-6 relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 rounded-full blur-3xl -mr-10 -mt-10"></div>
+    return (
+        <div className="min-h-screen bg-slate-950 text-white font-sans flex flex-col">
+            {step !== 'success' && (
+                <header className="sticky top-0 z-40 bg-slate-950/80 backdrop-blur-md px-5 h-20 flex items-center gap-4 border-b border-white/5 shrink-0">
+                    <button onClick={step === 'selection' ? onBack : () => setStep('selection')} className="p-2.5 bg-slate-800 rounded-2xl hover:bg-slate-700 transition-colors">
+                        <ChevronLeft className="w-6 h-6 text-white" />
+                    </button>
+                </header>
+            )}
             
-            <div className="space-y-4 relative z-10">
-              <div className="flex justify-between items-center pb-4 border-b border-white/5">
-                <span className="text-sm font-bold text-slate-400 uppercase tracking-widest">Valor por dia</span>
-                <span className="text-lg font-black text-white">R$ 0,99</span>
-              </div>
-              <div className="flex justify-between items-center pt-2">
-                <span className="text-sm font-bold text-slate-400 uppercase tracking-widest">Total do investimento</span>
-                <span className="text-3xl font-black text-[#1E5BFF]">R$ {totalInvestment}</span>
-              </div>
-            </div>
-
-            <div className="flex items-start gap-3 p-4 bg-blue-500/5 rounded-2xl border border-blue-500/10">
-                <ShieldCheck className="w-5 h-5 text-blue-500 shrink-0 mt-0.5" />
-                <p className="text-[10px] font-medium text-slate-400 leading-relaxed italic">
-                  Você pode anunciar a partir de menos de R$ 7, sem contrato e sem fidelidade. Remova as barreiras para seu crescimento.
-                </p>
-            </div>
-        </section>
-
-      </main>
-
-      {/* CTA Footer */}
-      <div className="fixed bottom-0 left-0 right-0 p-6 bg-[#020617]/95 backdrop-blur-2xl border-t border-white/10 z-[100] max-w-md mx-auto shadow-[0_-20px_40px_rgba(0,0,0,0.6)]">
-        <button 
-          onClick={() => alert('Seguindo para pagamento simplificado (em desenvolvimento)')}
-          className="w-full py-5 bg-[#1E5BFF] hover:bg-blue-600 text-white rounded-[2rem] shadow-xl shadow-blue-500/30 flex flex-col items-center justify-center transition-all active:scale-[0.98] group"
-        >
-          <div className="flex items-center gap-2 mb-0.5">
-            <span className="font-black text-base uppercase tracking-widest">ATIVAR ADS AGORA</span>
-            <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
-          </div>
-          <span className="text-[10px] font-bold text-white/60 uppercase tracking-[0.2em]">Comece hoje mesmo</span>
-        </button>
-      </div>
-
-    </div>
-  );
+            {step === 'selection' && renderSelectionScreen()}
+            {step === 'payment' && renderPaymentScreen()}
+            {step === 'success' && renderSuccessScreen()}
+        </div>
+    );
 };

@@ -409,7 +409,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
                 </div>
                 <h2 className="text-2xl font-bold text-white mb-8">Resumo do serviço</h2>
                 <div className="w-full max-w-sm bg-slate-900 rounded-3xl p-6 border border-white/10 space-y-4 text-left">
-                    <div className="flex justify-between items-center"><span className="text-sm text-slate-400">Produto:</span><span className="font-bold text-sm">Anunciar nos Banners</span></div>
+                    <div className="flex justify-between items-center"><span className="text-sm text-slate-400">Produto:</span><span className="font-bold text-sm">Banners Patrocinados</span></div>
                     <div className="flex justify-between items-center"><span className="text-sm text-slate-400">Plano:</span><span className="font-bold text-sm">Time Profissional</span></div>
                     <div className="text-sm text-slate-400 leading-relaxed border-t border-white/5 pt-4 mt-4">
                         <span className="font-bold text-slate-200">Descrição:</span> Criação profissional do banner + publicação no app.
@@ -558,41 +558,223 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
   if (view === 'pro_chat') {
     return (
       <div className="fixed inset-0 z-[130] bg-[#F8F9FC] dark:bg-gray-950 flex flex-col animate-in slide-in-from-right h-full">
-        <header className="bg-white dark:bg-gray-900 px-6 py-5 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between shadow-sm sticky top-0 z-50">
+        {toast && (
+            <div className={`fixed top-24 left-1/2 -translate-x-1/2 z-[200] px-6 py-3 rounded-2xl shadow-2xl flex items-center gap-3 animate-in slide-in-from-top-4 border ${toast.type === 'designer' ? 'bg-indigo-600 border-indigo-500' : 'bg-rose-600 border-rose-500'} text-white`}>
+                <p className="text-xs font-black uppercase tracking-tight">{toast.msg}</p>
+            </div>
+        )}
+
+        <header className={`${isDesigner ? 'bg-indigo-950 text-white' : 'bg-white dark:bg-gray-900'} px-6 py-5 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between shadow-sm sticky top-0 z-50`}>
           <div className="flex items-center gap-4">
-             <button onClick={() => setView(isDesigner ? 'designer_workspace' : 'sales')} className="p-2 bg-gray-100 dark:bg-gray-800 rounded-xl text-gray-400"><ChevronLeft size={20} /></button>
+             <button onClick={() => setView(isDesigner ? 'designer_workspace' : 'sales')} className="p-2 bg-white/5 rounded-xl text-slate-400"><ChevronLeft size={20} /></button>
+             <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white shadow-md relative shrink-0">
+                 {isDesigner ? <UserIcon size={20} /> : <Building size={20} />}
+                 <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-green-500 border-2 border-white dark:border-gray-900 rounded-full"></div>
+             </div>
              <div>
-               <h2 className="font-bold leading-tight text-gray-900 dark:text-white">Pedido • Banner Profissional</h2>
-               <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">Time de Design</p>
+               <h2 className="font-bold leading-tight">{isDesigner ? 'Hamburgueria do Zé' : 'Time de Design'}</h2>
+               <p className={`text-[10px] font-black uppercase tracking-widest ${isDesigner ? 'text-indigo-300' : 'text-green-500'}`}>{isDesigner ? 'Briefing Ativo' : 'Online agora'}</p>
              </div>
           </div>
+          {isDesigner && (
+              <span className="text-[8px] font-black bg-indigo-500 text-white px-2 py-1 rounded-md uppercase tracking-widest">Modo Designer</span>
+          )}
         </header>
-
-        <div className="bg-amber-100 dark:bg-amber-900/20 p-3 flex items-center justify-center gap-2 text-amber-700 dark:text-amber-300">
-            <span className="text-[10px] font-black uppercase tracking-widest">Status do pedido: 🟡 Aguardando início da produção</span>
-        </div>
 
         <main ref={chatScrollRef} className="flex-1 overflow-y-auto p-6 space-y-6 no-scrollbar pb-32">
           {chatMessages.map(msg => (
-            <div key={msg.id} className={`flex flex-col gap-1 max-w-[85%] animate-in slide-in-from-bottom-2 duration-500 ${msg.role === 'system' ? 'items-start' : 'items-end ml-auto'}`}>
+            <div key={msg.id} className={`flex flex-col gap-1 max-w-[85%] animate-in slide-in-from-bottom-2 duration-500 ${msg.role === (isDesigner ? 'user' : 'system') ? 'items-start' : 'items-end ml-auto'}`}>
                <div className={`p-4 rounded-3xl shadow-sm border ${
-                   msg.role === 'system' 
+                   msg.role === (isDesigner ? 'user' : 'system') 
                     ? 'bg-white dark:bg-gray-800 rounded-tl-none border-gray-100 dark:border-gray-700' 
                     : 'bg-[#1E5BFF] text-white rounded-tr-none border-blue-500'
                 }`}>
-                  <p className="text-sm whitespace-pre-wrap leading-relaxed">{msg.text}</p>
+                  {msg.type === 'attachment' ? (
+                      <div className="space-y-3">
+                         <div className="flex items-center gap-2 mb-2">
+                             <ClipboardList size={16} />
+                             <span className="font-bold text-xs uppercase">Briefing de Criação</span>
+                         </div>
+                         <div className="text-xs space-y-1 opacity-90">
+                             <p><strong>Loja:</strong> {msg.details.name}</p>
+                             <p><strong>Chamada:</strong> {msg.details.promo}</p>
+                             <p><strong>Desc:</strong> {msg.details.desc}</p>
+                             {msg.details.obs && <p><strong>Obs:</strong> {msg.details.obs}</p>}
+                         </div>
+                      </div>
+                  ) : msg.type === 'file' ? (
+                      <div className="space-y-3">
+                          <div className="flex items-center gap-3">
+                              <ImageIcon size={20} />
+                              <p className="text-sm font-bold">{msg.text}</p>
+                              <button className="p-1.5 bg-black/10 rounded-lg"><Check size={14}/></button>
+                          </div>
+                          {msg.preview && (
+                            <img src={msg.preview} className="w-full rounded-xl" alt="Preview" />
+                          )}
+                      </div>
+                  ) : (
+                    <p className="text-sm whitespace-pre-wrap leading-relaxed">{msg.text}</p>
+                  )}
                </div>
                <span className="text-[9px] text-gray-400 font-bold uppercase tracking-widest px-2">{msg.timestamp}</span>
             </div>
           ))}
+          {!isDesigner && proChatStep === 1 && (
+            <div className="flex gap-2 p-2 ml-2">
+               <div className="w-1.5 h-1.5 bg-blue-300 rounded-full animate-bounce"></div>
+               <div className="w-1.5 h-1.5 bg-blue-400 rounded-full animate-bounce [animation-delay:0.2s]"></div>
+               <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce [animation-delay:0.4s]"></div>
+            </div>
+          )}
         </main>
 
-        <footer className="p-6 border-t bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800">
-           <div className="flex items-center gap-3">
-              <input type="text" placeholder="Digite sua mensagem..." className="flex-1 bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl px-5 py-4 text-sm outline-none focus:border-blue-500 transition-all dark:text-white" />
-              <button className="p-4 bg-blue-600 text-white rounded-2xl shadow-lg active:scale-95 transition-all"><Send size={20} /></button>
-           </div>
+        <footer className={`p-6 border-t space-y-4 sticky bottom-0 z-50 ${isDesigner ? 'bg-indigo-950 border-white/10' : 'bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800'}`}>
+           {isDesigner ? (
+              <div className="flex flex-col gap-2">
+                 <div className="flex gap-2">
+                    <button onClick={() => showToast("Ação desativada no modo visualização", "designer")} className="flex-1 py-4 bg-indigo-500 text-white rounded-2xl flex items-center justify-center gap-2 text-xs font-black uppercase tracking-widest active:scale-95 transition-all">
+                        <Upload size={16} /> Enviar V1
+                    </button>
+                    <button onClick={() => showToast("Ação desativada no modo visualização", "designer")} className="flex-1 py-4 bg-white/5 text-slate-300 border border-white/10 rounded-2xl flex items-center justify-center gap-2 text-xs font-black uppercase tracking-widest active:scale-95 transition-all">
+                        <Check size={16} /> Finalizar
+                    </button>
+                 </div>
+                 <div className="flex items-center gap-2 px-3 py-1.5 bg-indigo-500/10 rounded-xl border border-indigo-500/20">
+                    <Info size={12} className="text-indigo-400" />
+                    <p className="text-[9px] font-bold text-indigo-300 uppercase tracking-widest leading-none">Prazo: 48h restantes</p>
+                 </div>
+              </div>
+           ) : (
+             <>
+               {proChatStep === 2 && (
+                 <div className="flex flex-col gap-2">
+                    <button onClick={() => setIsLogoModalOpen(true)} className="w-full py-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800 rounded-2xl flex items-center justify-center gap-3 text-[#1E5BFF] text-xs font-black uppercase tracking-widest active:scale-[0.98] transition-all">
+                      <Upload size={16} /> Enviar logo
+                    </button>
+                    <button onClick={() => setIsBriefingModalOpen(true)} className="w-full py-4 bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl flex items-center justify-center gap-3 text-gray-700 dark:text-gray-200 text-xs font-black uppercase tracking-widest active:scale-[0.98] transition-all">
+                      <FileText size={16} /> Preencher informações
+                    </button>
+                    <p className="text-[9px] text-center text-gray-400 font-bold uppercase tracking-widest">Assim que recebermos as informações, iniciamos a criação.</p>
+                 </div>
+               )}
+               <div className="flex items-center gap-3">
+                  <input 
+                    type="text" 
+                    placeholder="Digite sua dúvida..."
+                    className="flex-1 bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl px-5 py-4 text-sm outline-none focus:border-blue-500 transition-all dark:text-white"
+                  />
+                  <button onClick={() => window.open('https://wa.me/5521999999999', '_blank')} className="p-4 bg-green-500 text-white rounded-2xl shadow-lg active:scale-95 transition-all">
+                    <MessageCircle size={20} className="fill-white" />
+                  </button>
+               </div>
+             </>
+           )}
         </footer>
+
+        {isLogoModalOpen && (
+          <div className="fixed inset-0 z-[140] bg-black/60 backdrop-blur-sm flex items-end animate-in fade-in duration-300">
+            <div className="w-full bg-white dark:bg-gray-900 rounded-t-[3rem] p-8 pb-12 shadow-2xl animate-in slide-in-from-bottom duration-500 max-w-md mx-auto">
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-xl font-bold dark:text-white">Enviar logo da empresa</h3>
+                <button onClick={() => setIsLogoModalOpen(false)} className="p-2 bg-gray-100 dark:bg-gray-800 rounded-full text-gray-500"><X size={20} /></button>
+              </div>
+              <p className="text-sm text-gray-500 mb-8">Envie sua logo em alta qualidade (PNG ou PDF).</p>
+
+              {logoPreview ? (
+                <div className="relative w-40 h-40 mx-auto bg-gray-50 dark:bg-gray-800 rounded-3xl border-2 border-dashed border-blue-500 flex items-center justify-center p-4 group">
+                    <img src={logoPreview} className="max-w-full max-h-full object-contain" alt="Preview" />
+                    <button onClick={() => setLogoPreview(null)} className="absolute -top-2 -right-2 p-1.5 bg-red-500 text-white rounded-full shadow-lg"><X size={14}/></button>
+                </div>
+              ) : (
+                <label className="w-full aspect-video rounded-3xl border-2 border-dashed border-gray-200 dark:border-gray-700 flex flex-col items-center justify-center gap-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                  <input type="file" className="hidden" accept="image/png, application/pdf" onChange={handleLogoUpload} />
+                  <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-2xl text-blue-600"><Upload size={24} /></div>
+                  <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">Selecionar arquivo</p>
+                </label>
+              )}
+
+              {user?.user_metadata?.logo_url && !logoPreview && (
+                <button 
+                  onClick={() => setLogoPreview(user.user_metadata.logo_url)}
+                  className="w-full mt-6 py-4 bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl flex items-center justify-center gap-3 text-sm font-bold text-gray-600 dark:text-gray-300 active:scale-[0.98] transition-all"
+                >
+                  <Building size={16} /> Usar logo do meu perfil
+                </button>
+              )}
+
+              <button 
+                onClick={confirmLogoSend}
+                disabled={!logoPreview}
+                className="w-full mt-8 py-5 bg-[#1E5BFF] text-white font-black rounded-2xl shadow-xl active:scale-[0.98] transition-all uppercase tracking-widest text-xs disabled:opacity-50 disabled:grayscale"
+              >
+                Confirmar Envio
+              </button>
+            </div>
+          </div>
+        )}
+
+        {isBriefingModalOpen && (
+          <div className="fixed inset-0 z-[140] bg-black/60 backdrop-blur-sm flex items-end animate-in fade-in duration-300">
+            <div className="w-full bg-white dark:bg-gray-900 rounded-t-[3rem] p-8 pb-12 shadow-2xl animate-in slide-in-from-bottom duration-500 max-w-md mx-auto max-h-[90vh] overflow-y-auto no-scrollbar">
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-xl font-bold dark:text-white">Informações do banner</h3>
+                <button onClick={() => setIsBriefingModalOpen(false)} className="p-2 bg-gray-100 dark:bg-gray-800 rounded-full text-gray-500"><X size={20} /></button>
+              </div>
+              <p className="text-sm text-gray-500 mb-8">Preencha os dados abaixo para criarmos seu banner.</p>
+
+              <div className="space-y-6">
+                <div>
+                  <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5 ml-1">Nome da Empresa</label>
+                  <input 
+                    type="text"
+                    value={briefingData.companyName}
+                    onChange={e => setBriefingData({...briefingData, companyName: e.target.value})}
+                    className="w-full p-4 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl text-sm font-bold dark:text-white outline-none focus:border-blue-500 transition-all"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5 ml-1">Chamada Principal</label>
+                  <input 
+                    type="text"
+                    placeholder="Ex: Promoção da Semana"
+                    value={briefingData.headline}
+                    onChange={e => setBriefingData({...briefingData, headline: e.target.value})}
+                    className="w-full p-4 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl text-sm font-bold dark:text-white outline-none focus:border-blue-500 transition-all"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5 ml-1">Descrição Curta</label>
+                  <textarea 
+                    rows={2}
+                    placeholder="Ex: Ofertas exclusivas para o bairro"
+                    value={briefingData.description}
+                    onChange={e => setBriefingData({...briefingData, description: e.target.value})}
+                    className="w-full p-4 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl text-sm font-medium dark:text-white outline-none focus:border-blue-500 transition-all resize-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5 ml-1">Observações (opcional)</label>
+                  <textarea 
+                    rows={2}
+                    placeholder="Ex: cores preferidas, estilo, algo que não quer"
+                    value={briefingData.observations}
+                    onChange={e => setBriefingData({...briefingData, observations: e.target.value})}
+                    className="w-full p-4 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl text-sm font-medium dark:text-white outline-none focus:border-blue-500 transition-all resize-none"
+                  />
+                </div>
+
+                <button 
+                  onClick={saveBriefing}
+                  disabled={!briefingData.companyName || !briefingData.headline}
+                  className="w-full mt-4 py-5 bg-[#1E5BFF] text-white font-black rounded-2xl shadow-xl active:scale-[0.98] transition-all uppercase tracking-widest text-xs disabled:opacity-50 disabled:grayscale"
+                >
+                  Salvar Informações
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     );
   }
@@ -612,12 +794,14 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
       <header className="sticky top-0 z-40 bg-[#020617]/80 backdrop-blur-xl border-b border-white/5 px-6 py-4 flex items-center gap-4">
         <button onClick={onBack} className="p-2 bg-slate-900 rounded-xl text-slate-400 hover:text-white transition-all active:scale-95"><ChevronLeft size={20} /></button>
         <div>
-          <h1 className="font-bold text-lg leading-none flex items-center gap-2">Anunciar no Bairro <Crown size={16} className="text-amber-400 fill-amber-400" /></h1>
+          <h1 className="font-bold text-lg leading-none flex items-center gap-2">Criar Anúncio Patrocinado <Crown size={16} className="text-amber-400 fill-amber-400" /></h1>
           <p className="text-[10px] text-blue-400 uppercase font-black tracking-widest mt-1">Configuração de Campanha</p>
         </div>
       </header>
 
       <main className="flex-1 p-6 space-y-16 pb-64 max-w-md mx-auto w-full">
+        
+        {/* BLOCO DE DESTAQUE: URGÊNCIA E CONVERSÃO */}
         <section className="animate-in fade-in slide-in-from-top-4 duration-700">
             <div className="bg-slate-900 border-l-4 border-blue-600 rounded-r-[2.5rem] p-8 shadow-2xl relative overflow-hidden group">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none"></div>
@@ -646,6 +830,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
             </div>
         </section>
 
+        {/* BLOCO 1: POSICIONAMENTO */}
         <section className="space-y-6">
           <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-blue-500 flex items-center gap-2 px-1">
             <Target size={14} /> 1. Onde deseja aparecer?
@@ -674,6 +859,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
           </div>
         </section>
 
+        {/* BLOCO 2: PERÍODO */}
         <section 
             ref={periodRef} 
             className={`space-y-6 transition-all duration-500 ${!selectedMode ? 'opacity-20 pointer-events-none grayscale' : 'opacity-100'}`}
@@ -705,6 +891,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
             </div>
         </section>
 
+        {/* BLOCO 3: BAIRROS */}
         <section 
             ref={neighborhoodRef} 
             className={`space-y-6 transition-all duration-500 ${selectedPeriods.length === 0 ? 'opacity-20 grayscale pointer-events-none' : 'opacity-100'}`}
@@ -732,6 +919,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
             </div>
         </section>
 
+        {/* BLOCO 4: DESIGN */}
         <section ref={creativeRef} className={`space-y-8 transition-all duration-500 ${selectedNeighborhoods.length === 0 ? 'opacity-20 pointer-events-none' : 'opacity-100'}`}>
           <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-blue-500 flex items-center gap-2 px-1"><Palette size={14} /> 4. Design da Arte</h3>
           <div className="space-y-4">

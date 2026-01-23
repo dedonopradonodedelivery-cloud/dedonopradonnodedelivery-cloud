@@ -48,7 +48,7 @@ const MOCK_ADS = [
   },
   {
     id: 'ad3',
-    type: 'ADS Patrocinado',
+    type: 'Destaque Patrocinado',
     badgeIcon: Megaphone,
     locations: 'Todo o Bairro',
     dateRange: '10/01/26 → 10/02/26',
