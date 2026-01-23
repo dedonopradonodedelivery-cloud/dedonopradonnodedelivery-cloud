@@ -167,20 +167,20 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
               iconColorClass="text-purple-600 dark:text-purple-400"
             />
             <MarketingActionCard 
-              icon={Users} 
-              label="Freguesia Connect" 
-              description="Networking exclusivo entre empresários de Jacarepaguá"
-              onClick={() => onNavigate('jpa_connect_sales')}
-              iconBgClass="bg-indigo-100 dark:bg-indigo-900/30"
-              iconColorClass="text-indigo-600 dark:text-indigo-400"
-            />
-             <MarketingActionCard 
               icon={Award} 
               label="Seja Patrocinador Master" 
               description="Destaque máximo em nosso app"
               onClick={() => onNavigate('patrocinador_master')}
               iconBgClass="bg-amber-100 dark:bg-amber-900/30"
               iconColorClass="text-amber-500 dark:text-amber-400"
+            />
+            <MarketingActionCard 
+              icon={Users} 
+              label="JPA Connect" 
+              description="Networking exclusivo entre empresários de Jacarepaguá"
+              onClick={() => onNavigate('jpa_connect_sales')}
+              iconBgClass="bg-indigo-100 dark:bg-indigo-900/30"
+              iconColorClass="text-indigo-600 dark:text-indigo-400"
             />
           </div>
         </section>
