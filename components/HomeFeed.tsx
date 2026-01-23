@@ -447,7 +447,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
   );
 };
 const SectionHeader: React.FC<{ icon: React.ElementType; title: string; subtitle: string; onSeeMore?: () => void }> = ({ icon: Icon, title, subtitle, onSeeMore }) => (
-  <div className="flex items-center justify-between mb-4">
+  <div className="flex items-center justify-between mb-3">
     <div className="flex items-center gap-3">
       <div className="w-9 h-9 rounded-xl bg-gray-50 dark:bg-gray-800 flex items-center justify-center text-gray-900 dark:text-white shadow-sm">
         <Icon size={18} strokeWidth={2.5} />
@@ -464,15 +464,15 @@ const NovidadesDaSemana: React.FC<{ stores: Store[]; onStoreClick?: (store: Stor
   const newArrivals = useMemo(() => stores.filter(s => (s.image || s.logoUrl) && ['f-3', 'f-5', 'f-8', 'f-12', 'f-15'].includes(s.id)), [stores]);
   if (newArrivals.length === 0) return null;
   return (
-    <div className="bg-white dark:bg-gray-950 py-4 px-5">
+    <div className="bg-white dark:bg-gray-950 pt-4 pb-2 px-5">
       <SectionHeader icon={Sparkles} title="Novidades da Semana" subtitle="Recém chegados" onSeeMore={() => onNavigate('explore')} />
       <div className="flex gap-4 overflow-x-auto no-scrollbar snap-x -mx-5 px-5">
         {newArrivals.map((store) => (
-          <button key={store.id} onClick={() => onStoreClick && onStoreClick(store)} className="flex-shrink-0 w-[180px] aspect-[4/5] rounded-[2.5rem] overflow-hidden relative snap-center shadow-2xl group active:scale-[0.98] transition-all">
+          <button key={store.id} onClick={() => onStoreClick && onStoreClick(store)} className="flex-shrink-0 w-[170px] aspect-[4/5] rounded-[2.5rem] overflow-hidden relative snap-center shadow-2xl group active:scale-[0.98] transition-all">
             <img src={store.image || store.logoUrl} alt="" className="absolute inset-0 w-full h-full object-cover transition-transform group-hover:scale-110" />
             <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent"></div>
-            <div className="absolute inset-0 p-5 flex flex-col justify-end text-left">
-              <span className="w-fit bg-emerald-500 text-white text-[7px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest mb-2 shadow-lg">Novo</span>
+            <div className="absolute inset-0 p-4 flex flex-col justify-end text-left">
+              <span className="w-fit bg-emerald-500 text-white text-[7px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest mb-1.5 shadow-lg">Novo</span>
               <h3 className="text-sm font-black text-white leading-tight mb-0.5 truncate drop-shadow-md">{store.name}</h3>
               <p className="text-[9px] font-bold text-white/60 uppercase tracking-widest truncate">{store.category}</p>
             </div>
@@ -522,7 +522,7 @@ const EmAltaNaCidade: React.FC<{ stores: Store[]; onStoreClick?: (store: Store) 
             </div>
             <h3 className="text-sm font-black text-gray-900 dark:text-white leading-tight mb-1">{store.name}</h3>
             <p className="text-[8px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-6">{store.category}</p>
-            <div className="mt-auto bg-gray-900 dark:bg-white text-white dark:text-gray-900 px-5 py-2.5 rounded-full text-[9px] font-black uppercase tracking-widest flex items-center gap-1.5 shadow-lg">
+            <div className="mt-auto bg-gray-900 dark:bg-white text-white dark:text-gray-900 px-5 py-2.5 rounded-full text-[9px] font-black uppercase tracking-widest flex items-center justify-center gap-1.5 shadow-lg">
               Explorar <ArrowRight size={10} strokeWidth={4} />
             </div>
           </button>
