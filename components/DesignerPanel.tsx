@@ -4,6 +4,7 @@ import { User } from '@supabase/supabase-js';
 import { 
   Palette, 
   ChevronLeft, 
+  ChevronRight,
   X, 
   Search, 
   Clock, 
@@ -18,7 +19,8 @@ import {
   Building,
   Loader2,
   Calendar,
-  Hourglass
+  Hourglass,
+  Flag
 } from 'lucide-react';
 
 interface DesignerPanelProps {
@@ -33,7 +35,7 @@ interface OrderCard {
   serviceType: string;
   status: 'new' | 'production' | 'review' | 'done';
   date: string;
-  priority?: 'high' | 'normal';
+  priority?: 'urgent' | 'priority' | 'normal';
   purchaseDate: string;
   deliveryDeadline: string;
 }
@@ -46,12 +48,12 @@ interface ChatMessage {
   type?: 'text' | 'image' | 'file';
 }
 
-const MOCK_ORDERS: OrderCard[] = [
-  { id: 'ord-001', merchantId: 'm-123', merchantName: 'Hamburgueria Brasa', serviceType: 'Banner Home', status: 'new', date: 'Hoje, 10:30', priority: 'high', purchaseDate: '22/01/2026', deliveryDeadline: '25/01/2026' },
-  { id: 'ord-002', merchantId: 'm-456', merchantName: 'Studio Hair Vip', serviceType: 'Destaque Categoria', status: 'production', date: 'Ontem, 16:20', purchaseDate: '21/01/2026', deliveryDeadline: '24/01/2026' },
-  { id: 'ord-003', merchantId: 'm-789', merchantName: 'PetShop Amigo', serviceType: 'Arte Instagram', status: 'review', date: '10/11', purchaseDate: '19/01/2026', deliveryDeadline: '22/01/2026' },
-  { id: 'ord-004', merchantId: 'm-321', merchantName: 'Farmácia Central', serviceType: 'Banner Promo', status: 'done', date: '08/11', purchaseDate: '15/01/2026', deliveryDeadline: '18/01/2026' },
-  { id: 'ord-005', merchantId: 'm-654', merchantName: 'Pizzaria do Zé', serviceType: 'Banner Home', status: 'new', date: 'Hoje, 09:15', purchaseDate: '23/01/2026', deliveryDeadline: '26/01/2026' },
+const INITIAL_ORDERS: OrderCard[] = [
+  { id: 'ord-001', merchantId: 'm-123', merchantName: 'Hamburgueria Brasa', serviceType: 'Banner Home', status: 'new', date: 'Hoje, 10:30', priority: 'urgent', purchaseDate: '22/01/2026', deliveryDeadline: '25/01/2026' },
+  { id: 'ord-002', merchantId: 'm-456', merchantName: 'Studio Hair Vip', serviceType: 'Destaque Categoria', status: 'production', date: 'Ontem, 16:20', priority: 'priority', purchaseDate: '21/01/2026', deliveryDeadline: '24/01/2026' },
+  { id: 'ord-003', merchantId: 'm-789', merchantName: 'PetShop Amigo', serviceType: 'Arte Instagram', status: 'review', date: '10/11', priority: 'normal', purchaseDate: '19/01/2026', deliveryDeadline: '22/01/2026' },
+  { id: 'ord-004', merchantId: 'm-321', merchantName: 'Farmácia Central', serviceType: 'Banner Promo', status: 'done', date: '08/11', priority: 'normal', purchaseDate: '15/01/2026', deliveryDeadline: '18/01/2026' },
+  { id: 'ord-005', merchantId: 'm-654', merchantName: 'Pizzaria do Zé', serviceType: 'Banner Home', status: 'new', date: 'Hoje, 09:15', priority: 'normal', purchaseDate: '23/01/2026', deliveryDeadline: '26/01/2026' },
 ];
 
 const COLUMNS = [
@@ -63,10 +65,14 @@ const COLUMNS = [
 
 export const DesignerPanel: React.FC<DesignerPanelProps> = ({ user, onBack }) => {
   const [activeView, setActiveView] = useState<'board' | 'chat'>('board');
+  const [orders, setOrders] = useState<OrderCard[]>(INITIAL_ORDERS);
   const [selectedOrder, setSelectedOrder] = useState<OrderCard | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [loading, setLoading] = useState(true);
   const [chatInput, setChatInput] = useState('');
+  
+  // State for priority menu
+  const [openPriorityMenu, setOpenPriorityMenu] = useState<string | null>(null);
   
   const chatEndRef = useRef<HTMLDivElement>(null);
 
@@ -125,6 +131,50 @@ export const DesignerPanel: React.FC<DesignerPanelProps> = ({ user, onBack }) =>
     setMessages([]);
   };
 
+  // --- ACTIONS: Priority & Move ---
+
+  const handleChangePriority = (e: React.MouseEvent, orderId: string, newPriority: 'urgent' | 'priority' | 'normal') => {
+    e.stopPropagation();
+    setOrders(prev => prev.map(o => o.id === orderId ? { ...o, priority: newPriority } : o));
+    setOpenPriorityMenu(null);
+  };
+
+  const handleMoveCard = (e: React.MouseEvent, order: OrderCard, direction: 'prev' | 'next') => {
+    e.stopPropagation();
+    
+    const statusOrder: OrderCard['status'][] = ['new', 'production', 'review', 'done'];
+    const currentIndex = statusOrder.indexOf(order.status);
+    const newIndex = direction === 'next' ? currentIndex + 1 : currentIndex - 1;
+
+    if (newIndex >= 0 && newIndex < statusOrder.length) {
+        const newStatus = statusOrder[newIndex];
+        const oldStatusLabel = COLUMNS.find(c => c.id === order.status)?.title;
+        const newStatusLabel = COLUMNS.find(c => c.id === newStatus)?.title;
+
+        // 1. Update Order State
+        setOrders(prev => prev.map(o => o.id === order.id ? { ...o, status: newStatus } : o));
+
+        // 2. Log Message to Chat (simulated)
+        const systemMsg: ChatMessage = {
+            id: Date.now(),
+            role: 'system',
+            text: `🔔 Atualização do seu pedido ${order.id}: status mudou de ${oldStatusLabel} para ${newStatusLabel}.`,
+            timestamp: 'Agora'
+        };
+
+        // If chat is open for this order, append immediately
+        if (selectedOrder?.id === order.id) {
+            setMessages(prev => [...prev, systemMsg]);
+        }
+        // In a real app, you would dispatch this message to the backend here.
+    }
+  };
+
+  const togglePriorityMenu = (e: React.MouseEvent, orderId: string) => {
+    e.stopPropagation();
+    setOpenPriorityMenu(openPriorityMenu === orderId ? null : orderId);
+  };
+
   if (loading && !selectedOrder) {
     return (
       <div className="min-h-screen bg-[#0F172A] flex flex-col items-center justify-center">
@@ -135,7 +185,7 @@ export const DesignerPanel: React.FC<DesignerPanelProps> = ({ user, onBack }) =>
   }
 
   return (
-    <div className="min-h-screen bg-[#0F172A] text-slate-200 font-sans flex flex-col">
+    <div className="min-h-screen bg-[#0F172A] text-slate-200 font-sans flex flex-col" onClick={() => setOpenPriorityMenu(null)}>
       
       {/* --- BOARD VIEW --- */}
       {activeView === 'board' && (
@@ -158,7 +208,7 @@ export const DesignerPanel: React.FC<DesignerPanelProps> = ({ user, onBack }) =>
           <main className="flex-1 overflow-x-auto overflow-y-hidden p-6">
             <div className="flex items-stretch h-full min-w-max px-2">
               {COLUMNS.map((col, index) => {
-                const colOrders = MOCK_ORDERS.filter(o => o.status === col.id);
+                const colOrders = orders.filter(o => o.status === col.id);
                 return (
                   <React.Fragment key={col.id}>
                     <div className="w-72 flex flex-col h-full bg-slate-900/50 rounded-2xl border border-white/5 overflow-hidden">
@@ -175,12 +225,34 @@ export const DesignerPanel: React.FC<DesignerPanelProps> = ({ user, onBack }) =>
                           <div 
                             key={order.id} 
                             onClick={() => handleOpenChat(order)}
-                            className="bg-slate-800 p-4 rounded-xl shadow-sm border border-white/5 hover:border-indigo-500/50 hover:shadow-indigo-500/10 cursor-pointer transition-all active:scale-[0.98] group"
+                            className="bg-slate-800 p-4 rounded-xl shadow-sm border border-white/5 hover:border-indigo-500/50 hover:shadow-indigo-500/10 cursor-pointer transition-all active:scale-[0.98] group relative"
                           >
                             <div className="flex justify-between items-start mb-2">
                               <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">{order.id}</span>
-                              {order.priority === 'high' && <span className="text-[8px] font-bold bg-red-500/10 text-red-400 px-1.5 py-0.5 rounded border border-red-500/20">URGENTE</span>}
+                              
+                              {/* --- INTERACTIVE PRIORITY LABEL --- */}
+                              <div className="relative">
+                                  {order.priority === 'urgent' && (
+                                    <button onClick={(e) => togglePriorityMenu(e, order.id)} className="text-[8px] font-bold bg-red-500/10 text-red-400 px-1.5 py-0.5 rounded border border-red-500/20 hover:bg-red-500/20 transition-colors">URGENTE</button>
+                                  )}
+                                  {order.priority === 'priority' && (
+                                    <button onClick={(e) => togglePriorityMenu(e, order.id)} className="text-[8px] font-bold bg-amber-500/10 text-amber-400 px-1.5 py-0.5 rounded border border-amber-500/20 hover:bg-amber-500/20 transition-colors">PRIORIDADE</button>
+                                  )}
+                                  {order.priority === 'normal' && (
+                                    <button onClick={(e) => togglePriorityMenu(e, order.id)} className="text-[8px] font-bold bg-slate-700/50 text-slate-400 px-1.5 py-0.5 rounded border border-slate-600/50 hover:bg-slate-700 transition-colors">NORMAL</button>
+                                  )}
+                                  
+                                  {/* Priority Dropdown */}
+                                  {openPriorityMenu === order.id && (
+                                      <div className="absolute top-full right-0 mt-1 bg-slate-900 border border-white/10 rounded-lg shadow-xl z-20 flex flex-col w-24 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+                                          <button onClick={(e) => handleChangePriority(e, order.id, 'urgent')} className="px-3 py-2 text-left text-[9px] font-bold text-red-400 hover:bg-white/5 flex items-center gap-2"><Flag size={10} /> Urgente</button>
+                                          <button onClick={(e) => handleChangePriority(e, order.id, 'priority')} className="px-3 py-2 text-left text-[9px] font-bold text-amber-400 hover:bg-white/5 flex items-center gap-2"><Flag size={10} /> Prioridade</button>
+                                          <button onClick={(e) => handleChangePriority(e, order.id, 'normal')} className="px-3 py-2 text-left text-[9px] font-bold text-slate-400 hover:bg-white/5 flex items-center gap-2"><Flag size={10} /> Normal</button>
+                                      </div>
+                                  )}
+                              </div>
                             </div>
+                            
                             <h4 className="font-bold text-white text-sm mb-1 leading-tight group-hover:text-indigo-400 transition-colors">{order.merchantName}</h4>
                             <p className="text-xs text-slate-400 mb-3">{order.serviceType}</p>
                             
@@ -200,8 +272,32 @@ export const DesignerPanel: React.FC<DesignerPanelProps> = ({ user, onBack }) =>
                               <div className="flex items-center gap-1.5 text-[10px] text-slate-500">
                                 <Clock size={12} /> {order.date}
                               </div>
-                              <div className="w-6 h-6 rounded-full bg-slate-700 flex items-center justify-center text-slate-400">
-                                <MessageSquare size={12} />
+                              
+                              {/* --- COLUMN NAVIGATION ARROWS --- */}
+                              <div className="flex items-center gap-1">
+                                {index > 0 && (
+                                    <button 
+                                        onClick={(e) => handleMoveCard(e, order, 'prev')} 
+                                        className="p-1 rounded bg-slate-700 text-slate-400 hover:text-white hover:bg-slate-600 transition-colors"
+                                        title="Mover para coluna anterior"
+                                    >
+                                        <ChevronLeft size={12} />
+                                    </button>
+                                )}
+                                
+                                <div className="w-6 h-6 rounded-full bg-slate-700 flex items-center justify-center text-slate-400 ml-1">
+                                    <MessageSquare size={12} />
+                                </div>
+
+                                {index < COLUMNS.length - 1 && (
+                                    <button 
+                                        onClick={(e) => handleMoveCard(e, order, 'next')} 
+                                        className="p-1 rounded bg-slate-700 text-slate-400 hover:text-white hover:bg-slate-600 transition-colors ml-1"
+                                        title="Mover para próxima coluna"
+                                    >
+                                        <ChevronRight size={12} />
+                                    </button>
+                                )}
                               </div>
                             </div>
                           </div>
