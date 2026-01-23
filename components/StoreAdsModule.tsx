@@ -56,6 +56,9 @@ interface StoreAdsModuleProps {
   initialView?: 'sales' | 'chat';
 }
 
+type ViewState = 'sales' | 'creator' | 'editor' | 'pro_checkout' | 'pro_processing' | 'pro_approved' | 'pro_chat' | 'designer_workspace' | 'chat_onboarding' | 'pro_high_demand_warning';
+
+
 const NEIGHBORHOODS = [
   "Freguesia", "Pechincha", "Anil", "Taquara", "Tanque", 
   "Curicica", "Parque Olímpico", "Gardênia", "Cidade de Deus"
@@ -99,7 +102,7 @@ const DISPLAY_MODES = [
 export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNavigate, user, categoryName, viewMode, initialView = 'sales' }) => {
   const isDesigner = viewMode === 'Designer';
   
-  const [view, setView] = useState<'sales' | 'creator' | 'editor' | 'pro_checkout' | 'pro_processing' | 'pro_approved' | 'pro_chat' | 'designer_workspace' | 'chat_onboarding'>('sales');
+  const [view, setView] = useState<ViewState>('sales');
   const [selectedMode, setSelectedMode] = useState<typeof DISPLAY_MODES[0] | null>(null);
   const [selectedPeriods, setSelectedPeriods] = useState<string[]>([]);
   const [selectedNeighborhoods, setSelectedNeighborhoods] = useState<string[]>([]);
@@ -113,6 +116,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
   const [savedDesign, setSavedDesign] = useState<any>(null);
   const [toast, setToast] = useState<{msg: string, type: 'info' | 'error' | 'designer'} | null>(null);
   
+  const [dailySalesCount, setDailySalesCount] = useState(7);
   const [chatMessages, setChatMessages] = useState<any[]>([]);
   const [proChatStep, setProChatStep] = useState(0);
   const [isLogoModalOpen, setIsLogoModalOpen] = useState(false);
@@ -134,11 +138,16 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
   const paymentRef = useRef<HTMLDivElement>(null);
   const chatScrollRef = useRef<HTMLDivElement>(null);
 
+  const calculatedDeadlineDays = useMemo(() => {
+    if (dailySalesCount <= 5) return 3; // 72h
+    return 3 + Math.floor((dailySalesCount - 1) / 5);
+  }, [dailySalesCount]);
+
   useEffect(() => {
     if (isDesigner) {
       setView('designer_workspace');
     } else if (initialView === 'chat') {
-      const hasActiveOrder = true; // Simulação para entrar no chat
+      const hasActiveOrder = true; 
       if (hasActiveOrder) {
         setView('pro_chat');
       } else {
@@ -164,17 +173,21 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
     if (view === 'pro_chat' && proChatStep === 0) {
       setProChatStep(1);
       
+      const highDemandText = dailySalesCount > 5 
+        ? `Devido à alta demanda no momento, o prazo estimado para criação do seu banner é de até ${calculatedDeadlineDays} dias.\n\n`
+        : '';
+
       const professionalMessage = {
           id: 1,
           role: 'system',
-          text: `Olá! 👋\nSeu pedido de Anunciar nos Banners – Time Profissional foi confirmado com sucesso.\n\nA partir deste chat vamos alinhar todas as informações para a criação do seu banner.\n\nPara começar, envie por aqui:\n\n• Logo da sua empresa\n• Cores da sua marca\n• Texto ou promoção que deseja divulgar\n• Alguma referência visual (se tiver)\n\nNosso time irá te acompanhar até a aprovação final do banner.`,
+          text: `Olá! 👋\nSeu pedido de Anunciar nos Banners – Time Profissional foi confirmado com sucesso.\n\n${highDemandText}A partir deste chat vamos alinhar todas as informações para a criação da arte.\n\nPara começar, envie por aqui:\n\n• Logo da sua empresa\n• Cores da sua marca\n• Texto ou promoção desejada\n• Alguma referência visual (se tiver)\n\nAssim que seu banner entrar em produção, avisaremos por aqui.`,
           timestamp: 'Agora'
       };
 
       setChatMessages([professionalMessage]);
       setProChatStep(2);
     }
-  }, [view, isDesigner, proChatStep]);
+  }, [view, isDesigner, proChatStep, dailySalesCount, calculatedDeadlineDays]);
 
   useEffect(() => {
     if (chatScrollRef.current) {
@@ -230,6 +243,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
 
   const handlePayPro = () => {
     setView('pro_processing');
+    setDailySalesCount(prev => prev + 1); // Simula a venda
     setTimeout(() => {
       setView('pro_approved');
     }, 2000);
@@ -272,7 +286,11 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
     if (!isArtSaved) { showToast("Configure a arte do banner.", "error"); scrollTo(creativeRef, 120); return; }
     
     if (artChoice === 'pro') {
-        setView('pro_checkout');
+        if (dailySalesCount > 5) {
+            setView('pro_high_demand_warning');
+        } else {
+            setView('pro_checkout');
+        }
         return;
     }
 
@@ -348,6 +366,36 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
     );
   }
 
+  if (view === 'pro_high_demand_warning') {
+    return (
+        <div className="fixed inset-0 z-[150] bg-black/80 backdrop-blur-sm flex items-center justify-center p-6 animate-in fade-in duration-300">
+            <div className="bg-slate-900 w-full max-w-sm rounded-[2.5rem] p-8 shadow-2xl border border-amber-500/30 text-center">
+                <div className="w-16 h-16 bg-amber-500/10 rounded-full flex items-center justify-center mx-auto mb-6 border-4 border-amber-500/20">
+                    <AlertTriangle size={32} className="text-amber-400" />
+                </div>
+                <h2 className="text-xl font-bold text-white mb-3">Demanda alta no momento</h2>
+                <p className="text-slate-400 text-sm leading-relaxed mb-4">
+                    Nosso prazo normal de criação é de 72 horas.
+                </p>
+                <p className="text-slate-300 text-sm leading-relaxed mb-6">
+                    Devido à alta demanda hoje, o prazo estimado para novos pedidos é de até <strong className="text-amber-400">{calculatedDeadlineDays} dias</strong>.
+                </p>
+                 <p className="text-slate-500 text-xs leading-relaxed mb-8">
+                    Assim que seu banner entrar em produção, você será avisado.
+                </p>
+                <div className="space-y-3">
+                    <button onClick={() => setView('pro_checkout')} className="w-full py-4 bg-amber-500 text-slate-900 font-black rounded-2xl shadow-xl active:scale-[0.98] transition-all">
+                        Continuar para pagamento
+                    </button>
+                    <button onClick={() => setView('sales')} className="w-full py-3 text-sm font-bold text-slate-500 hover:text-white">
+                        Voltar
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+  }
+
   if (view === 'pro_checkout') {
     return (
         <div className="min-h-screen bg-slate-950 flex flex-col animate-in fade-in duration-300">
@@ -396,8 +444,13 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
                   <CheckCircle2 size={48} className="text-emerald-400" />
               </div>
               <h2 className="text-3xl font-bold text-white mb-3">Pagamento aprovado ✅</h2>
-              <p className="text-slate-400 max-w-sm mb-8">Seu pedido foi confirmado com sucesso. Agora vamos iniciar a criação do seu banner.</p>
-              <p className="text-slate-500 text-xs mb-10">Você será direcionado para o chat do seu pedido.</p>
+              <p className="text-slate-400 max-w-sm mb-6">Seu pedido foi confirmado com sucesso.</p>
+              
+              <div className="w-full max-w-sm bg-slate-800/50 rounded-2xl p-4 text-center border border-white/10 mb-10">
+                <p className="text-slate-400 text-xs">Prazo estimado de criação: <strong className="text-white">até {calculatedDeadlineDays} dias</strong>.</p>
+                <p className="text-slate-500 text-[10px] mt-1">Nosso time irá iniciar a produção conforme a ordem de chegada.</p>
+              </div>
+
               <button onClick={() => { setChatMessages([]); setProChatStep(0); setView('pro_chat'); }} className="w-full max-w-xs py-5 bg-white text-slate-900 font-black rounded-2xl shadow-2xl active:scale-[0.98] transition-all flex items-center justify-center gap-2">
                   Falar com o designer <ArrowRight />
               </button>
@@ -516,7 +569,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
         </header>
 
         <div className="bg-amber-100 dark:bg-amber-900/20 p-3 flex items-center justify-center gap-2 text-amber-700 dark:text-amber-300">
-            <span className="text-[10px] font-black uppercase tracking-widest">Status do pedido: 🟡 Em criação</span>
+            <span className="text-[10px] font-black uppercase tracking-widest">Status do pedido: 🟡 Aguardando início da produção</span>
         </div>
 
         <main ref={chatScrollRef} className="flex-1 overflow-y-auto p-6 space-y-6 no-scrollbar pb-32">
