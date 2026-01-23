@@ -40,10 +40,11 @@ const MarketingActionCard: React.FC<{
   iconBgClass: string;
   iconColorClass: string;
   badge?: number;
-}> = ({ icon: Icon, label, description, onClick, iconBgClass, iconColorClass, badge }) => (
+  note?: string;
+}> = ({ icon: Icon, label, description, onClick, iconBgClass, iconColorClass, badge, note }) => (
   <button 
     onClick={onClick}
-    className="w-full flex items-center gap-5 p-5 bg-white dark:bg-gray-800 rounded-[2.5rem] border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all group active:scale-[0.98]"
+    className="w-full flex items-start gap-5 p-5 bg-white dark:bg-gray-800 rounded-[2.5rem] border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all group active:scale-[0.98]"
   >
     <div className={`relative w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 ${iconBgClass} group-hover:scale-105 transition-transform`}>
       <Icon size={28} className={iconColorClass} />
@@ -60,10 +61,21 @@ const MarketingActionCard: React.FC<{
       <p className="text-xs text-gray-400 font-medium leading-snug mt-1">
         {description}
       </p>
+      {note && (
+        <div className="mt-3 pt-3 border-t border-gray-100 dark:border-gray-700">
+          <div className="flex items-start gap-2 bg-blue-50 dark:bg-blue-900/20 p-3 rounded-xl border border-blue-100 dark:border-blue-800/50">
+            <Info size={14} className="text-blue-600 dark:text-blue-400 shrink-0 mt-0.5" />
+            <p className="text-[10px] text-blue-700 dark:text-blue-300 font-semibold leading-snug">
+              {note}
+            </p>
+          </div>
+        </div>
+      )}
     </div>
     <ChevronRight size={20} className="text-gray-300 group-hover:text-[#1E5BFF]" />
   </button>
 );
+
 
 // Componente para Serviços (Lista Simples)
 const ServiceBlock: React.FC<{ 
@@ -176,7 +188,7 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
             />
             <MarketingActionCard 
               icon={Users} 
-              label="JPA Connect" 
+              label="Freguesia Connect" 
               description="Networking exclusivo entre empresários de Jacarepaguá"
               onClick={() => onNavigate('jpa_connect_sales')}
               iconBgClass="bg-indigo-100 dark:bg-indigo-900/30"
@@ -186,6 +198,7 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
               icon={Award} 
               label="Seja Patrocinador Master" 
               description="Destaque máximo em nosso app"
+              note="Aqui você contrata o espaço. A criação visual dos banners é feita após a contratação."
               onClick={() => onNavigate('patrocinador_master')}
               iconBgClass="bg-amber-100 dark:bg-amber-900/30"
               iconColorClass="text-amber-500 dark:text-amber-400"
