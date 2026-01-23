@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { 
   ChevronLeft, 
@@ -43,7 +44,8 @@ import {
   ShieldAlert,
   FileSignature,
   Paperclip,
-  MoreVertical
+  MoreVertical,
+  ArrowLeft
 } from 'lucide-react';
 import { User } from '@supabase/supabase-js';
 import { StoreBannerEditor } from './StoreBannerEditor';
@@ -100,6 +102,59 @@ const DISPLAY_MODES = [
   },
 ];
 
+// --- KANBAN DATA ---
+const KANBAN_COLUMNS = [
+  { id: 'primeiro_contato', title: 'Primeiro contato' },
+  { id: 'aguardando_dados', title: 'Aguardando dados' },
+  { id: 'em_producao', title: 'Em produção' },
+  { id: 'aguardando_aprovacao', title: 'Aguardando aprovação' },
+  { id: 'em_alteracao', title: 'Em alteração' },
+  { id: 'aprovacao_final', title: 'Aprovação final' },
+  { id: 'aprovado', title: 'Aprovado' }
+];
+
+const MOCK_KANBAN_ORDERS = [
+    { 
+        id: '#PJ-123', 
+        lojistaName: 'José Carlos',
+        companyName: 'Hamburgueria do Zé', 
+        status: 'primeiro_contato', 
+        deadline: 'Até 4 dias', 
+        lastUpdate: 'há 5 min', 
+        chatHistory: [
+            { author: 'Sistema', text: '✅ Seu pedido entrou em atendimento. Em instantes vamos falar com você por aqui para alinhar seu banner.', timestamp: '10:00', role: 'System' },
+        ]
+    },
+    { 
+        id: '#PJ-124', 
+        lojistaName: 'Ana Paula',
+        companyName: 'Studio Bella', 
+        status: 'aguardando_dados', 
+        deadline: 'Até 3 dias', 
+        lastUpdate: 'há 1h',
+        chatHistory: []
+    },
+    { 
+        id: '#PJ-125', 
+        lojistaName: 'Marcos Andrade',
+        companyName: 'PetShop Patas', 
+        status: 'em_producao', 
+        deadline: 'Até 2 dias', 
+        lastUpdate: 'hoje, 09:15',
+        chatHistory: []
+    },
+];
+
+const CHAT_MESSAGES_BY_STATUS: Record<string, string> = {
+    primeiro_contato: "✅ Seu pedido entrou em atendimento. Em instantes vamos falar com você por aqui para alinhar seu banner.",
+    aguardando_dados: "📌 Estamos aguardando seus dados para iniciar a criação. Por favor, envie por aqui: logo, cores, texto da oferta e referências (se tiver).",
+    em_producao: "🎨 Seu banner entrou em produção! Nosso designer já está criando a arte. Em breve enviaremos a primeira prévia por aqui.",
+    aguardando_aprovacao: "🟡 Prévia enviada! Assim que você aprovar, seguimos para finalizar e publicar. Se quiser ajustes, responda por aqui.",
+    em_alteracao: "🛠️ Ajustes solicitados recebidos! Estamos realizando as alterações e enviaremos a nova versão em seguida.",
+    aprovacao_final: "✅ Tudo pronto para aprovação final. Confira a versão atual e confirme por aqui para concluirmos.",
+    aprovado: "🎉 Banner aprovado! Parabéns 👏 Agora vamos publicar seu banner no app conforme combinado."
+};
+
 export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNavigate, user, categoryName, viewMode, initialView = 'sales' }) => {
   const isDesigner = viewMode === 'Designer';
   
@@ -123,6 +178,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
   const [isLogoModalOpen, setIsLogoModalOpen] = useState(false);
   const [isBriefingModalOpen, setIsBriefingModalOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<any | null>(null);
+  const [kanbanOrders, setKanbanOrders] = useState(MOCK_KANBAN_ORDERS);
 
   const [briefingData, setBriefingData] = useState({
     companyName: user?.user_metadata?.store_name || '',
@@ -174,7 +230,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
   }, []);
 
   useEffect(() => {
-    if (view === 'pro_chat' && proChatStep === 0) {
+    if (view === 'pro_chat' && proChatStep === 0 && !selectedOrder) {
       setProChatStep(1);
       
       const highDemandText = dailySalesCount > 5 
@@ -183,7 +239,8 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
 
       const professionalMessage = {
           id: 1,
-          role: 'system',
+          author: 'Sistema',
+          role: 'System',
           text: `Olá! 👋\nSeu pedido de Anunciar nos Banners – Time Profissional foi confirmado com sucesso.\n\n${highDemandText}A partir deste chat vamos alinhar todas as informações para a criação da arte.\n\nPara começar, envie por aqui:\n\n• Logo da sua empresa\n• Cores da sua marca\n• Texto ou promoção desejada\n• Alguma referência visual (se tiver)\n\nAssim que seu banner entrar em produção, avisaremos por aqui.`,
           timestamp: 'Agora'
       };
@@ -191,13 +248,48 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
       setChatMessages([professionalMessage]);
       setProChatStep(2);
     }
-  }, [view, isDesigner, proChatStep, dailySalesCount, calculatedDeadlineDays]);
+  }, [view, isDesigner, proChatStep, dailySalesCount, calculatedDeadlineDays, selectedOrder]);
 
   useEffect(() => {
     if (chatScrollRef.current) {
       chatScrollRef.current.scrollTop = chatScrollRef.current.scrollHeight;
     }
   }, [chatMessages]);
+
+  const handleMoveCard = (orderId: string, direction: 'forward' | 'backward') => {
+      setKanbanOrders(prevOrders => {
+          const orderIndex = prevOrders.findIndex(o => o.id === orderId);
+          if (orderIndex === -1) return prevOrders;
+
+          const order = { ...prevOrders[orderIndex] };
+          const currentColumnIndex = KANBAN_COLUMNS.findIndex(c => c.id === order.status);
+          
+          let nextColumnIndex = direction === 'forward' ? currentColumnIndex + 1 : currentColumnIndex - 1;
+
+          if (nextColumnIndex < 0 || nextColumnIndex >= KANBAN_COLUMNS.length) return prevOrders;
+
+          const newStatus = KANBAN_COLUMNS[nextColumnIndex].id;
+          order.status = newStatus as any;
+          order.lastUpdate = 'agora';
+
+          const newSystemMessageText = direction === 'forward'
+              ? CHAT_MESSAGES_BY_STATUS[newStatus]
+              : `🔄 Atualização do pedido: retornamos para a etapa ${KANBAN_COLUMNS[nextColumnIndex].title} para dar continuidade. Se precisar, responda por aqui.`;
+
+          const newSystemMessage = {
+              author: 'Sistema',
+              text: newSystemMessageText,
+              timestamp: 'Agora',
+              role: 'System'
+          };
+
+          order.chatHistory = [...(order.chatHistory || []), newSystemMessage];
+
+          const newOrders = [...prevOrders];
+          newOrders[orderIndex] = order;
+          return newOrders;
+      });
+  };
 
   const showToast = (msg: string, type: 'info' | 'error' | 'designer' = 'info') => {
     setToast({ msg, type });
@@ -375,7 +467,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
     
     const lastUser = users[users.length - 1];
     const otherUsers = users.slice(0, -1).join(', ');
-    return `${otherUsers} e ${lastUser} estão digitando...`;
+    return `${otherUsers}, ${lastUser} estão digitando...`;
   };
 
   const handleOpenChat = (order: any) => {
@@ -517,20 +609,9 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
   }
 
   if (view === 'designer_panel') {
-    const activeProjects = [
-        { id: '#PJ-123', store: 'Hamburgueria do Zé', status: 'Em criação', date: 'Hoje, 10:05', deadline: 'Prazo: até 3 dias', lastMessage: 'Tiago: Recebido! Iniciando a criação...', chatHistory: [
-            { author: 'Hamburgueria do Zé', text: 'Olá, gostaria de um banner para o combo do dia dos pais.', timestamp: '10:00', role: 'Lojista' },
-            { author: 'Tiago Alves', text: 'Claro! Pode me enviar seu logo e as cores da marca?', timestamp: '10:02', role: 'Designer' },
-            { author: 'Rafael Carvalho', text: 'Acompanhando o pedido. Qualquer dúvida, estou à disposição.', timestamp: '10:03', role: 'Admin' },
-            { author: 'Tiago Alves', text: 'Recebido! Iniciando a criação...', timestamp: '10:05', role: 'Designer' },
-        ]},
-        { id: '#PJ-122', store: 'Studio Bella', status: 'Aguardando', date: 'Ontem', deadline: 'Prazo: até 4 dias', lastMessage: 'Studio Bella: Olá! Preciso de um banner para...' },
-        { id: '#PJ-121', store: 'PetShop Patas', status: 'Aprovado', date: '02 Nov', deadline: 'Concluído', lastMessage: 'Você: Perfeito, pode publicar!' },
-    ];
-
     return (
-        <div className="min-h-screen bg-[#0F172A] text-slate-100 flex flex-col animate-in slide-in-from-right h-full">
-            <header className="bg-slate-900 px-6 py-6 border-b border-white/5 flex items-center justify-between sticky top-0 z-50">
+        <div className="min-h-screen bg-[#0F172A] text-slate-100 flex flex-col h-full">
+            <header className="bg-slate-900 px-6 py-6 border-b border-white/5 flex items-center justify-between sticky top-0 z-50 shrink-0">
                 <div className="flex items-center gap-4">
                     <div className="w-12 h-12 bg-indigo-600 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-500/20">
                         <Palette size={24} />
@@ -543,29 +624,37 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
                 <button onClick={onBack} className="p-2 bg-white/5 rounded-xl text-slate-400 hover:text-white"><X size={20} /></button>
             </header>
 
-            <main className="p-6 space-y-4 pb-32 overflow-y-auto no-scrollbar">
-                {activeProjects.map(proj => (
-                    <button key={proj.id} onClick={() => handleOpenChat(proj)} className="w-full bg-slate-900 p-5 rounded-3xl border border-white/5 flex flex-col text-left hover:border-indigo-500/30 transition-all group active:scale-[0.98]">
-                        <div className="flex justify-between items-start mb-3">
-                            <div>
-                                <h4 className="font-bold text-white text-base">{proj.store}</h4>
-                                <p className="text-[10px] text-slate-500 font-black uppercase tracking-widest">{proj.id} • {proj.date}</p>
+            <main className="flex-1 p-6 space-y-4 overflow-x-auto no-scrollbar">
+                <div className="flex gap-4 min-w-full w-fit">
+                    {KANBAN_COLUMNS.map((column) => (
+                        <div key={column.id} className="w-72 bg-slate-900 rounded-3xl p-4 border border-white/5 flex flex-col shrink-0">
+                            <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest px-2 mb-4">{column.title}</h3>
+                            <div className="space-y-3 overflow-y-auto no-scrollbar flex-1 pr-1">
+                                {kanbanOrders.filter(o => o.status === column.id).map(order => (
+                                    <div key={order.id} className="bg-slate-800 p-4 rounded-2xl border border-white/5 shadow-md animate-in fade-in">
+                                        <div className="flex justify-between items-start mb-2">
+                                            <span className="text-[9px] font-bold bg-blue-500/10 text-blue-400 px-2 py-0.5 rounded-md border border-blue-500/20">Banner Profissional</span>
+                                            <span className="text-[9px] text-slate-500 font-bold">{order.id}</span>
+                                        </div>
+                                        <p className="font-bold text-white text-sm leading-tight mb-1">{order.companyName}</p>
+                                        <p className="text-xs text-slate-400 mb-3">{order.lojistaName}</p>
+                                        <div className="flex items-center justify-between text-xs text-slate-500 mb-4">
+                                            <span>Prazo: <span className="font-bold text-slate-300">{order.deadline}</span></span>
+                                            <span>Atualizado: <span className="font-bold text-slate-300">{order.lastUpdate}</span></span>
+                                        </div>
+                                        <button onClick={() => handleOpenChat(order)} className="w-full text-center py-2 bg-slate-700/50 hover:bg-slate-700 rounded-lg text-xs font-bold text-slate-300 transition-colors">
+                                            Abrir chat do pedido
+                                        </button>
+                                        <div className="flex gap-2 mt-3">
+                                            <button onClick={() => handleMoveCard(order.id, 'backward')} className="flex-1 py-2 bg-white/5 hover:bg-white/10 rounded-lg flex items-center justify-center gap-1 text-[10px] font-bold text-slate-400"><ArrowLeft size={12}/> Voltar</button>
+                                            <button onClick={() => handleMoveCard(order.id, 'forward')} className="flex-1 py-2 bg-white/5 hover:bg-white/10 rounded-lg flex items-center justify-center gap-1 text-[10px] font-bold text-slate-400">Avançar <ArrowRight size={12} /></button>
+                                        </div>
+                                    </div>
+                                ))}
                             </div>
-                            <span className={`text-[9px] font-black uppercase px-2 py-1 rounded-md border ${
-                                proj.status === 'Aguardando' ? 'bg-blue-500/10 text-blue-400 border-blue-500/20' :
-                                proj.status === 'Em criação' ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' :
-                                'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
-                            }`}>{proj.status}</span>
                         </div>
-                        <div className="text-xs text-slate-400 italic line-clamp-1 mb-4">
-                            "{proj.lastMessage}"
-                        </div>
-                        <div className="flex justify-between items-center pt-3 border-t border-white/5">
-                            <span className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">{proj.deadline}</span>
-                            <span className="text-xs font-bold text-indigo-400 group-hover:underline">Abrir chat do pedido</span>
-                        </div>
-                    </button>
-                ))}
+                    ))}
+                </div>
             </main>
         </div>
     );
@@ -580,7 +669,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
           <div className="flex items-center gap-4">
              <button onClick={() => setView(isDesigner ? 'designer_panel' : 'sales')} className="p-2 bg-white/5 rounded-xl text-slate-400"><ChevronLeft size={20} /></button>
              <div>
-               <h2 className="font-bold leading-tight text-white">Pedido • Banner Profissional</h2>
+               <h2 className="font-bold leading-tight text-white">Pedido • {selectedOrder?.companyName || 'Banner Profissional'}</h2>
                <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Lojista + Designer + Admin</p>
              </div>
           </div>
@@ -597,7 +686,9 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
                <div className={`p-4 rounded-3xl shadow-sm border ${
                    msg.role === 'Lojista'
                     ? 'bg-blue-600 text-white rounded-tr-none border-blue-500' 
-                    : 'bg-slate-800 rounded-tl-none border-slate-700 text-slate-200'
+                    : msg.role === 'System'
+                      ? 'bg-slate-950 border-slate-700/50 text-slate-300 text-xs italic'
+                      : 'bg-slate-800 rounded-tl-none border-slate-700 text-slate-200'
                 }`}>
                   <p className="text-sm whitespace-pre-wrap leading-relaxed">{msg.text}</p>
                </div>
@@ -623,10 +714,10 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
               <Send size={20} />
             </button>
           </div>
-          {isDesigner && (
+          {(isDesigner || user?.email === 'dedonopradonodedelivery@gmail.com') && (
               <div className="flex gap-2 justify-center pt-2">
                   <button onClick={() => simulateTyping('Rafael Carvalho')} className="text-[8px] text-slate-600">(Simular Admin digitando)</button>
-                  <button onClick={() => simulateTyping(selectedOrder?.store || 'Lojista')} className="text-[8px] text-slate-600">(Simular Lojista digitando)</button>
+                  <button onClick={() => simulateTyping(selectedOrder?.lojistaName || 'Lojista')} className="text-[8px] text-slate-600">(Simular Lojista digitando)</button>
               </div>
           )}
         </footer>
@@ -649,7 +740,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
       <header className="sticky top-0 z-40 bg-[#020617]/80 backdrop-blur-xl border-b border-white/5 px-6 py-4 flex items-center gap-4">
         <button onClick={onBack} className="p-2 bg-slate-900 rounded-xl text-slate-400 hover:text-white transition-all active:scale-95"><ChevronLeft size={20} /></button>
         <div>
-          <h1 className="font-bold text-lg leading-none flex items-center gap-2">Anunciar no Bairro <Crown size={16} className="text-amber-400 fill-amber-400" /></h1>
+          <h1 className="font-bold text-lg leading-none flex items-center gap-2">Criar Anúncio Patrocinado <Crown size={16} className="text-amber-400 fill-amber-400" /></h1>
           <p className="text-[10px] text-blue-400 uppercase font-black tracking-widest mt-1">Configuração de Campanha</p>
         </div>
       </header>
