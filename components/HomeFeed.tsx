@@ -1,31 +1,21 @@
 
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { Store, Category, EditorialCollection, AdType } from '@/types';
+import { Store, Category, AdType } from '@/types';
 import { 
   ChevronRight, 
-  ArrowUpRight,
   Crown,
   Zap,
-  ThumbsUp,
-  MessageSquare,
   MapPin,
   Star,
   Users,
   Briefcase,
-  DollarSign,
   Megaphone,
-  Smartphone,
-  BadgeCheck,
   Sparkles,
   ArrowRight,
   TrendingUp,
   Lightbulb,
   Compass,
-  FileText,
-  Shield,
-  Rocket,
   CheckCircle, 
-  Image as ImageIcon,
   Flame,
   Percent,
   Tag,
@@ -48,19 +38,110 @@ import {
   Clock,
   Heart,
   ShieldCheck,
-  Ban,
-  Circle,
-  Square
 } from 'lucide-react';
 import { LojasEServicosList } from '@/components/LojasEServicosList';
 import { User } from '@supabase/supabase-js';
-import { CATEGORIES, EDITORIAL_SERVICES } from '@/constants';
+import { CATEGORIES } from '@/constants';
 import { useNeighborhood } from '@/contexts/NeighborhoodContext';
 import { supabase } from '@/lib/supabaseClient';
 import { trackAdEvent } from '@/lib/analytics';
-import { StoreBannerEditor, BannerDesign } from './StoreBannerEditor';
+import { BannerDesign } from './StoreBannerEditor';
 
-const mapToEditorConfig = (dbConfig: any): BannerDesign => {
+// --- BANNER VIEWER (LOCAL COMPONENT) ---
+
+const ICON_COMPONENTS: Record<string, React.ElementType> = {
+  Flame, Zap, Percent, Tag, Gift, Utensils, Pizza, Coffee, Beef, IceCream,
+  ShoppingCart, Store: StoreIcon, Package, Wrench, Truck, CreditCard, Coins, Star,
+  Award, MapPin, Smile, Bell, Clock, Heart, Sparkles, Rocket: Sparkles, Megaphone, Crown, ShieldCheck
+};
+
+const FONT_STYLES = [
+  { id: 'font-moderna', name: 'Moderna', family: "'Outfit', sans-serif" },
+  { id: 'font-forte', name: 'Forte', family: "'Inter', sans-serif", weight: '900' },
+  { id: 'font-elegante', name: 'Elegante', family: "'Lora', serif" },
+  { id: 'font-amigavel', name: 'Amigável', family: "'Quicksand', sans-serif" },
+  { id: 'font-neutra', name: 'Neutra', family: "'Inter', sans-serif" },
+  { id: 'font-impacto', name: 'Impacto', family: "'Anton', sans-serif" },
+];
+
+const SIZE_LEVELS = [
+  { id: 'xs', name: 'M. Pequeno', titleClass: 'text-lg', subClass: 'text-[9px]' },
+  { id: 'sm', name: 'Pequeno', titleClass: 'text-xl', subClass: 'text-[10px]' },
+  { id: 'md', name: 'Médio', titleClass: 'text-2xl', subClass: 'text-xs' },
+  { id: 'lg', name: 'Grande', titleClass: 'text-3xl', subClass: 'text-sm' },
+  { id: 'xl', name: 'M. Grande', titleClass: 'text-4xl', subClass: 'text-base' },
+];
+
+const BannerViewer: React.FC<{ 
+  config: BannerDesign; 
+  storeName: string; 
+  storeLogo?: string | null; 
+}> = ({ config, storeName, storeLogo }) => {
+    const { 
+      title, subtitle, titleFont, titleSize, subtitleFont, subtitleSize, 
+      bgColor, textColor, align, animation, iconName, iconPos, iconSize, 
+      logoDisplay, iconColorMode, iconCustomColor 
+    } = config;
+
+    const renderIcon = (name: string | null, size: 'sm' | 'md' | 'lg', colorMode: string) => {
+      if (!name || !ICON_COMPONENTS[name]) return null;
+      const IconComp = ICON_COMPONENTS[name];
+      const sizes = { sm: 24, md: 44, lg: 64 };
+      const colors: Record<string, string> = { text: textColor, white: '#FFFFFF', black: '#000000', custom: iconCustomColor || '#1E5BFF' };
+      return <IconComp size={sizes[size]} style={{ color: colors[colorMode] }} strokeWidth={2.5} />;
+    };
+
+    const getFontStyle = (fontId: string) => {
+      const f = FONT_STYLES.find(x => x.id === fontId);
+      return f ? { fontFamily: f.family, fontWeight: f.weight || '700' } : {};
+    };
+    
+    return (
+      <div 
+        className={`w-full h-full p-8 shadow-2xl relative overflow-hidden transition-all duration-500 flex flex-col justify-center border border-white/10 ${
+          align === 'center' ? 'items-center text-center' : align === 'right' ? 'items-end text-right' : 'items-start text-left'
+        } ${animation === 'pulse' ? 'animate-pulse' : animation === 'float' ? 'animate-float-slow' : ''}`}
+        style={{ backgroundColor: bgColor }}
+      >
+        <div className={`relative z-10 transition-all duration-500 flex ${iconPos === 'top' ? 'flex-col items-inherit' : iconPos === 'right' ? 'flex-row-reverse items-center gap-4' : 'flex-row items-center gap-4'} ${animation === 'slide' ? 'animate-in slide-in-from-left-8' : ''}`}>
+          {iconName && (
+            <div className={`${iconPos === 'top' ? 'mb-4' : ''} shrink-0`}>
+                {renderIcon(iconName, iconSize, iconColorMode)}
+            </div>
+          )}
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 mb-3 w-fit transition-all duration-300">
+              {logoDisplay !== 'none' && storeLogo && (
+                  <div className={`shrink-0 overflow-hidden bg-white/20 p-0.5 border border-white/20 transition-all duration-300 ${logoDisplay === 'round' ? 'rounded-full' : 'rounded-lg'}`}>
+                      <img src={storeLogo} className={`w-5 h-5 object-contain transition-all duration-300 ${logoDisplay === 'round' ? 'rounded-full' : 'rounded-md'}`} alt="Logo" />
+                  </div>
+              )}
+              <div className="bg-black/10 backdrop-blur-md px-2 py-0.5 rounded-lg border border-white/10 w-fit">
+                  <span className="text-[7px] font-black uppercase tracking-[0.2em]" style={{ color: textColor }}>{storeName}</span>
+              </div>
+            </div>
+            <h2 
+              className={`font-black leading-tight mb-2 tracking-tight line-clamp-2 transition-all duration-300 ${SIZE_LEVELS.find(s => s.id === titleSize)?.titleClass}`} 
+              style={{ ...getFontStyle(titleFont), color: textColor }}
+            >
+                {title}
+            </h2>
+            <p 
+              className={`font-medium opacity-80 leading-snug max-w-[280px] line-clamp-2 transition-all duration-300 ${SIZE_LEVELS.find(s => s.id === subtitleSize)?.subClass}`} 
+              style={{ ...getFontStyle(subtitleFont), color: textColor }}
+            >
+                {subtitle}
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+};
+
+// --- END LOCAL COMPONENT ---
+
+
+const mapToViewerConfig = (dbConfig: any): BannerDesign => {
   if (dbConfig.type === 'custom_editor') {
     return dbConfig;
   }
@@ -245,16 +326,14 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void; onStoreClick?: (
         onClick={handleBannerClick}
         className="w-full relative aspect-[3/2] rounded-[32px] overflow-hidden shadow-xl shadow-slate-200 dark:shadow-none border border-gray-100 dark:border-white/5 cursor-pointer active:scale-[0.98] transition-all group"
       >
-        <StoreBannerEditor 
-            config={current.isUserBanner ? mapToEditorConfig(current.config) : current.config}
+        <BannerViewer 
+            config={current.isUserBanner ? mapToViewerConfig(current.config) : current.config}
             storeName={current.isUserBanner ? (current.config.profiles?.store_name || 'Loja Parceira') : (storeForBanner?.name || 'Localizei JPA')}
             storeLogo={current.isUserBanner ? (current.config.profiles?.logo_url) : (storeForBanner?.logoUrl)}
         />
         
-        {/* Protective Gradient Overlay */}
         <div className="absolute bottom-0 left-0 right-0 h-1/4 bg-gradient-to-t from-black/40 to-transparent pointer-events-none"></div>
 
-        {/* Progress Bars (Inside Banner) */}
         <div className="absolute bottom-3 left-1/2 -translate-x-1/2 w-1/2 h-[3px] flex gap-1.5 z-10">
           {allBanners.map((_, idx) => (
             <div key={idx} className="h-full flex-1 bg-white/30 backdrop-blur-sm rounded-full overflow-hidden">
@@ -270,8 +349,6 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void; onStoreClick?: (
   );
 };
 
-// --- O RESTANTE DO COMPONENTE HomeFeed.tsx (SEM ALTERAÇÕES) ---
-// FIX: Added HomeFeedProps interface definition to fix TypeScript error.
 interface HomeFeedProps {
   onNavigate: (view: string) => void;
   onSelectCategory: (category: Category) => void;
@@ -375,7 +452,7 @@ const SectionHeader: React.FC<{ icon: React.ElementType; title: string; subtitle
   </div>
 );
 const NovidadesDaSemana: React.FC<{ stores: Store[]; onStoreClick?: (store: Store) => void; onNavigate: (v: string) => void }> = ({ stores, onStoreClick, onNavigate }) => {
-  const newArrivals = useMemo(() => stores.filter(s => (s.image || s.logoUrl) && ['f-38', 'f-39', 'f-45', 'f-42', 'f-50'].includes(s.id)), [stores]);
+  const newArrivals = useMemo(() => stores.filter(s => (s.image || s.logoUrl) && ['f-3', 'f-5', 'f-8', 'f-12', 'f-15'].includes(s.id)), [stores]);
   if (newArrivals.length === 0) return null;
   return (
     <div className="bg-white dark:bg-gray-950 py-4 px-5">

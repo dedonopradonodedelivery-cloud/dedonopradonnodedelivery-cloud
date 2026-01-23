@@ -1,9 +1,10 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { 
+  ChevronLeft, X, Save, Palette, Type, AlignLeft, Sparkles, Image as ImageIcon,
   Flame, Zap, Percent, Tag, Gift, Utensils, Pizza, Coffee, Beef, IceCream,
   ShoppingCart, Store as StoreIcon, Package, Wrench, Truck, CreditCard, Coins, Star,
-  Award, MapPin, Smile, Bell, Clock, Heart, Sparkles, Rocket, Megaphone, Crown, ShieldCheck
+  Award, MapPin, Smile, Bell, Clock, Heart, Megaphone, Crown, ShieldCheck, Rocket
 } from 'lucide-react';
 
 export interface BannerDesign {
@@ -48,11 +49,14 @@ const SIZE_LEVELS = [
   { id: 'xl', name: 'M. Grande', titleClass: 'text-4xl', subClass: 'text-base' },
 ];
 
-export const StoreBannerEditor: React.FC<{ 
-  config: BannerDesign; 
-  storeName: string; 
-  storeLogo?: string | null; 
-}> = ({ config, storeName, storeLogo }) => {
+interface StoreBannerEditorProps {
+  storeName: string;
+  storeLogo?: string | null;
+  onSave: (design: BannerDesign) => void;
+  onBack: () => void;
+}
+
+const BannerPreview: React.FC<{ config: BannerDesign; storeName: string; storeLogo?: string | null; }> = ({ config, storeName, storeLogo }) => {
     const { 
       title, subtitle, titleFont, titleSize, subtitleFont, subtitleSize, 
       bgColor, textColor, align, animation, iconName, iconPos, iconSize, 
@@ -112,4 +116,87 @@ export const StoreBannerEditor: React.FC<{
         </div>
       </div>
     );
+};
+
+export const StoreBannerEditor: React.FC<StoreBannerEditorProps> = ({ storeName, storeLogo, onSave, onBack }) => {
+  const [config, setConfig] = useState<BannerDesign>({
+    title: 'Sua Oferta de Destaque',
+    subtitle: 'Descreva os benefícios para o cliente em poucas palavras.',
+    titleFont: 'font-impacto',
+    titleSize: 'lg',
+    subtitleFont: 'font-neutra',
+    subtitleSize: 'md',
+    bgColor: '#1E5BFF',
+    textColor: '#FFFFFF',
+    align: 'left',
+    animation: 'none',
+    iconName: 'Sparkles',
+    iconPos: 'left',
+    iconSize: 'md',
+    logoDisplay: 'round',
+    iconColorMode: 'white',
+    iconCustomColor: '#FFFFFF',
+  });
+
+  const updateConfig = (key: keyof BannerDesign, value: any) => {
+    setConfig(prev => ({...prev, [key]: value}));
+  };
+  
+  return (
+    <div className="fixed inset-0 bg-slate-900 text-white z-[200] flex flex-col font-sans">
+      <header className="flex-shrink-0 bg-slate-800 p-4 flex justify-between items-center border-b border-white/10">
+        <button onClick={onBack} className="p-2 text-slate-300 hover:text-white"><ChevronLeft /></button>
+        <h1 className="font-bold">Editor de Banner</h1>
+        <button onClick={() => onSave(config)} className="bg-blue-600 px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 active:scale-95 transition-transform"><Save size={16} /> Salvar</button>
+      </header>
+      
+      <div className="flex-1 flex overflow-hidden">
+        <aside className="w-80 bg-slate-950 p-4 overflow-y-auto no-scrollbar space-y-6">
+          <h2 className="text-xs font-bold uppercase text-slate-500">Conteúdo</h2>
+          <div className="space-y-3">
+            <div>
+                <label className="text-xs">Título</label>
+                <input type="text" value={config.title} onChange={e => updateConfig('title', e.target.value)} className="w-full bg-slate-800 p-2 rounded mt-1 text-sm border border-slate-700" />
+            </div>
+            <div>
+                <label className="text-xs">Subtítulo</label>
+                <textarea value={config.subtitle} onChange={e => updateConfig('subtitle', e.target.value)} className="w-full bg-slate-800 p-2 rounded mt-1 text-sm h-20 resize-none border border-slate-700" />
+            </div>
+          </div>
+
+          <h2 className="text-xs font-bold uppercase text-slate-500 mt-6">Design</h2>
+          <div className="space-y-3">
+             <div>
+                <label className="text-xs">Cor de Fundo</label>
+                <input type="color" value={config.bgColor} onChange={e => updateConfig('bgColor', e.target.value)} className="w-full h-10 mt-1" />
+            </div>
+            <div>
+                <label className="text-xs">Cor do Texto</label>
+                <input type="color" value={config.textColor} onChange={e => updateConfig('textColor', e.target.value)} className="w-full h-10 mt-1" />
+            </div>
+             <div>
+                <label className="text-xs">Fonte do Título</label>
+                <select value={config.titleFont} onChange={e => updateConfig('titleFont', e.target.value)} className="w-full bg-slate-800 p-2 rounded mt-1 text-sm border border-slate-700">
+                  {FONT_STYLES.map(f => <option key={f.id} value={f.id}>{f.name}</option>)}
+                </select>
+            </div>
+             <div>
+                <label className="text-xs">Alinhamento</label>
+                <select value={config.align} onChange={e => updateConfig('align', e.target.value)} className="w-full bg-slate-800 p-2 rounded mt-1 text-sm border border-slate-700">
+                  <option value="left">Esquerda</option>
+                  <option value="center">Centro</option>
+                  <option value="right">Direita</option>
+                </select>
+            </div>
+          </div>
+        </aside>
+
+        <main className="flex-1 flex items-center justify-center p-8 bg-slate-900">
+           <div className="w-full max-w-lg aspect-[3/2]">
+             <BannerPreview config={config} storeName={storeName} storeLogo={storeLogo} />
+           </div>
+        </main>
+      </div>
+    </div>
+  );
 };

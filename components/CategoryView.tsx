@@ -1,12 +1,106 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { ChevronLeft, Star, BadgeCheck, ChevronRight, AlertCircle, Grid, Megaphone, Image as ImageIcon, Sparkles, Rocket, Crown, ShieldCheck, MapPin, Tag, Gift, Zap, Flame, Percent, Utensils, Pizza, Coffee, Beef, IceCream, ShoppingCart, Store as StoreIcon, Package, Wrench, Truck, CreditCard, Coins, Award, Smile, Bell, Clock, Heart, Ban, Circle, Square } from 'lucide-react';
+import { ChevronLeft, Star, BadgeCheck, ChevronRight, AlertCircle, Grid, Megaphone, Sparkles, Rocket, Crown, ShieldCheck, MapPin, Tag, Gift, Zap, Flame, Percent, Utensils, Pizza, Coffee, Beef, IceCream, ShoppingCart, Store as StoreIcon, Package, Wrench, Truck, CreditCard, Coins, Award, Smile, Bell, Clock, Heart } from 'lucide-react';
 import { Category, Store, AdType } from '@/types';
 import { SUBCATEGORIES } from '@/constants';
 import { supabase } from '@/lib/supabaseClient';
-import { StoreBannerEditor, BannerDesign } from './StoreBannerEditor';
+import { BannerDesign } from './StoreBannerEditor';
 
-const mapToEditorConfig = (dbConfig: any): BannerDesign => {
+// --- BANNER VIEWER (LOCAL COMPONENT) ---
+
+const ICON_COMPONENTS: Record<string, React.ElementType> = {
+  Flame, Zap, Percent, Tag, Gift, Utensils, Pizza, Coffee, Beef, IceCream,
+  ShoppingCart, Store: StoreIcon, Package, Wrench, Truck, CreditCard, Coins, Star,
+  Award, MapPin, Smile, Bell, Clock, Heart, Sparkles, Rocket, Megaphone, Crown, ShieldCheck
+};
+
+const FONT_STYLES = [
+  { id: 'font-moderna', name: 'Moderna', family: "'Outfit', sans-serif" },
+  { id: 'font-forte', name: 'Forte', family: "'Inter', sans-serif", weight: '900' },
+  { id: 'font-elegante', name: 'Elegante', family: "'Lora', serif" },
+  { id: 'font-amigavel', name: 'Amigável', family: "'Quicksand', sans-serif" },
+  { id: 'font-neutra', name: 'Neutra', family: "'Inter', sans-serif" },
+  { id: 'font-impacto', name: 'Impacto', family: "'Anton', sans-serif" },
+];
+
+const SIZE_LEVELS = [
+  { id: 'xs', name: 'M. Pequeno', titleClass: 'text-lg', subClass: 'text-[9px]' },
+  { id: 'sm', name: 'Pequeno', titleClass: 'text-xl', subClass: 'text-[10px]' },
+  { id: 'md', name: 'Médio', titleClass: 'text-2xl', subClass: 'text-xs' },
+  { id: 'lg', name: 'Grande', titleClass: 'text-3xl', subClass: 'text-sm' },
+  { id: 'xl', name: 'M. Grande', titleClass: 'text-4xl', subClass: 'text-base' },
+];
+
+const BannerViewer: React.FC<{ 
+  config: BannerDesign; 
+  storeName: string; 
+  storeLogo?: string | null; 
+}> = ({ config, storeName, storeLogo }) => {
+    const { 
+      title, subtitle, titleFont, titleSize, subtitleFont, subtitleSize, 
+      bgColor, textColor, align, animation, iconName, iconPos, iconSize, 
+      logoDisplay, iconColorMode, iconCustomColor 
+    } = config;
+
+    const renderIcon = (name: string | null, size: 'sm' | 'md' | 'lg', colorMode: string) => {
+      if (!name || !ICON_COMPONENTS[name]) return null;
+      const IconComp = ICON_COMPONENTS[name];
+      const sizes = { sm: 24, md: 44, lg: 64 };
+      const colors: Record<string, string> = { text: textColor, white: '#FFFFFF', black: '#000000', custom: iconCustomColor || '#1E5BFF' };
+      return <IconComp size={sizes[size]} style={{ color: colors[colorMode] }} strokeWidth={2.5} />;
+    };
+
+    const getFontStyle = (fontId: string) => {
+      const f = FONT_STYLES.find(x => x.id === fontId);
+      return f ? { fontFamily: f.family, fontWeight: f.weight || '700' } : {};
+    };
+    
+    return (
+      <div 
+        className={`w-full h-full p-8 shadow-2xl relative overflow-hidden transition-all duration-500 flex flex-col justify-center border border-white/10 ${
+          align === 'center' ? 'items-center text-center' : align === 'right' ? 'items-end text-right' : 'items-start text-left'
+        } ${animation === 'pulse' ? 'animate-pulse' : animation === 'float' ? 'animate-float-slow' : ''}`}
+        style={{ backgroundColor: bgColor }}
+      >
+        <div className={`relative z-10 transition-all duration-500 flex ${iconPos === 'top' ? 'flex-col items-inherit' : iconPos === 'right' ? 'flex-row-reverse items-center gap-4' : 'flex-row items-center gap-4'} ${animation === 'slide' ? 'animate-in slide-in-from-left-8' : ''}`}>
+          {iconName && (
+            <div className={`${iconPos === 'top' ? 'mb-4' : ''} shrink-0`}>
+                {renderIcon(iconName, iconSize, iconColorMode)}
+            </div>
+          )}
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 mb-3 w-fit transition-all duration-300">
+              {logoDisplay !== 'none' && storeLogo && (
+                  <div className={`shrink-0 overflow-hidden bg-white/20 p-0.5 border border-white/20 transition-all duration-300 ${logoDisplay === 'round' ? 'rounded-full' : 'rounded-lg'}`}>
+                      <img src={storeLogo} className={`w-5 h-5 object-contain transition-all duration-300 ${logoDisplay === 'round' ? 'rounded-full' : 'rounded-md'}`} alt="Logo" />
+                  </div>
+              )}
+              <div className="bg-black/10 backdrop-blur-md px-2 py-0.5 rounded-lg border border-white/10 w-fit">
+                  <span className="text-[7px] font-black uppercase tracking-[0.2em]" style={{ color: textColor }}>{storeName}</span>
+              </div>
+            </div>
+            <h2 
+              className={`font-black leading-tight mb-2 tracking-tight line-clamp-2 transition-all duration-300 ${SIZE_LEVELS.find(s => s.id === titleSize)?.titleClass}`} 
+              style={{ ...getFontStyle(titleFont), color: textColor }}
+            >
+                {title}
+            </h2>
+            <p 
+              className={`font-medium opacity-80 leading-snug max-w-[280px] line-clamp-2 transition-all duration-300 ${SIZE_LEVELS.find(s => s.id === subtitleSize)?.subClass}`} 
+              style={{ ...getFontStyle(subtitleFont), color: textColor }}
+            >
+                {subtitle}
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+};
+
+// --- END LOCAL COMPONENT ---
+
+
+const mapToViewerConfig = (dbConfig: any): BannerDesign => {
   if (dbConfig.type === 'custom_editor') {
     return dbConfig;
   }
@@ -197,8 +291,8 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
             <div className="w-full aspect-video bg-gray-200 dark:bg-gray-800 rounded-2xl animate-pulse"></div>
           ) : (
             <div onClick={!activeBanner ? handleAdvertiseClick : undefined} className={`w-full aspect-video rounded-[2.5rem] overflow-hidden ${!activeBanner ? 'cursor-pointer' : ''}`}>
-              <StoreBannerEditor 
-                config={activeBanner ? mapToEditorConfig(activeBanner.config) : advertiseHereConfig}
+              <BannerViewer 
+                config={activeBanner ? mapToViewerConfig(activeBanner.config) : advertiseHereConfig}
                 storeName={activeBanner ? activeBanner.profiles?.store_name || 'Loja Parceira' : 'Localizei JPA'}
                 storeLogo={activeBanner ? activeBanner.profiles?.logo_url : undefined}
               />
