@@ -44,7 +44,7 @@ import {
   ShieldAlert
 } from 'lucide-react';
 import { User } from '@supabase/supabase-js';
-import { StoreBannerEditor } from './StoreBannerEditor';
+import { StoreBannerEditor } from '@/components/StoreBannerEditor';
 
 interface StoreAdsModuleProps {
   onBack: () => void;

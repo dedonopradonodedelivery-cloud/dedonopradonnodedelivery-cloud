@@ -21,7 +21,7 @@ import {
   Star
 } from 'lucide-react';
 import { User as SupabaseUser } from '@supabase/supabase-js';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface StoreAreaViewProps {
   onBack: () => void;
