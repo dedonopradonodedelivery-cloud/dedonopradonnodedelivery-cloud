@@ -122,7 +122,8 @@ const App: React.FC = () => {
   
   // REMOVIDO: splashStage < 4 da lógica de ocultar nav. 
   // O layout inteiro (incluindo nav) é renderizado por trás e faz fade-in.
-  const hideBottomNav = ['admin_panel', 'designer_panel'].includes(activeTab);
+  // REMOVIDO: 'designer_panel' da lista de ocultar nav. O designer panel agora deve mostrar a bottom bar.
+  const hideBottomNav = ['admin_panel'].includes(activeTab);
 
   const RoleSwitcherModal: React.FC = () => {
     if (!isRoleSwitcherOpen) return null;

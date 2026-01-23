@@ -151,50 +151,57 @@ export const DesignerPanel: React.FC<DesignerPanelProps> = ({ user, onBack }) =>
           </header>
 
           <main className="flex-1 overflow-x-auto overflow-y-hidden p-6">
-            <div className="flex gap-4 h-full min-w-max">
-              {COLUMNS.map(col => {
+            <div className="flex items-stretch h-full min-w-max px-2">
+              {COLUMNS.map((col, index) => {
                 const colOrders = MOCK_ORDERS.filter(o => o.status === col.id);
                 return (
-                  <div key={col.id} className="w-72 flex flex-col h-full bg-slate-900/50 rounded-2xl border border-white/5 overflow-hidden">
-                    <div className="p-4 border-b border-white/5 flex items-center justify-between bg-slate-900">
-                      <div className="flex items-center gap-2">
-                        <div className={`w-2 h-2 rounded-full ${col.color}`}></div>
-                        <h3 className="font-bold text-sm text-slate-300">{col.title}</h3>
+                  <React.Fragment key={col.id}>
+                    <div className="w-72 flex flex-col h-full bg-slate-900/50 rounded-2xl border border-white/5 overflow-hidden">
+                      <div className="p-4 border-b border-white/5 flex items-center justify-between bg-slate-900">
+                        <div className="flex items-center gap-2">
+                          <div className={`w-2 h-2 rounded-full ${col.color}`}></div>
+                          <h3 className="font-bold text-sm text-slate-300">{col.title}</h3>
+                        </div>
+                        <span className="text-xs font-bold text-slate-600 bg-slate-800 px-2 py-0.5 rounded-full">{colOrders.length}</span>
                       </div>
-                      <span className="text-xs font-bold text-slate-600 bg-slate-800 px-2 py-0.5 rounded-full">{colOrders.length}</span>
-                    </div>
-                    
-                    <div className="flex-1 p-3 overflow-y-auto space-y-3 custom-scrollbar">
-                      {colOrders.map(order => (
-                        <div 
-                          key={order.id} 
-                          onClick={() => handleOpenChat(order)}
-                          className="bg-slate-800 p-4 rounded-xl shadow-sm border border-white/5 hover:border-indigo-500/50 hover:shadow-indigo-500/10 cursor-pointer transition-all active:scale-[0.98] group"
-                        >
-                          <div className="flex justify-between items-start mb-2">
-                            <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">{order.id}</span>
-                            {order.priority === 'high' && <span className="text-[8px] font-bold bg-red-500/10 text-red-400 px-1.5 py-0.5 rounded border border-red-500/20">URGENTE</span>}
-                          </div>
-                          <h4 className="font-bold text-white text-sm mb-1 leading-tight group-hover:text-indigo-400 transition-colors">{order.merchantName}</h4>
-                          <p className="text-xs text-slate-400 mb-3">{order.serviceType}</p>
-                          
-                          <div className="flex items-center justify-between pt-3 border-t border-white/5">
-                            <div className="flex items-center gap-1.5 text-[10px] text-slate-500">
-                              <Clock size={12} /> {order.date}
+                      
+                      <div className="flex-1 p-3 overflow-y-auto space-y-3 custom-scrollbar">
+                        {colOrders.map(order => (
+                          <div 
+                            key={order.id} 
+                            onClick={() => handleOpenChat(order)}
+                            className="bg-slate-800 p-4 rounded-xl shadow-sm border border-white/5 hover:border-indigo-500/50 hover:shadow-indigo-500/10 cursor-pointer transition-all active:scale-[0.98] group"
+                          >
+                            <div className="flex justify-between items-start mb-2">
+                              <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">{order.id}</span>
+                              {order.priority === 'high' && <span className="text-[8px] font-bold bg-red-500/10 text-red-400 px-1.5 py-0.5 rounded border border-red-500/20">URGENTE</span>}
                             </div>
-                            <div className="w-6 h-6 rounded-full bg-slate-700 flex items-center justify-center text-slate-400">
-                              <MessageSquare size={12} />
+                            <h4 className="font-bold text-white text-sm mb-1 leading-tight group-hover:text-indigo-400 transition-colors">{order.merchantName}</h4>
+                            <p className="text-xs text-slate-400 mb-3">{order.serviceType}</p>
+                            
+                            <div className="flex items-center justify-between pt-3 border-t border-white/5">
+                              <div className="flex items-center gap-1.5 text-[10px] text-slate-500">
+                                <Clock size={12} /> {order.date}
+                              </div>
+                              <div className="w-6 h-6 rounded-full bg-slate-700 flex items-center justify-center text-slate-400">
+                                <MessageSquare size={12} />
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      ))}
-                      {colOrders.length === 0 && (
-                        <div className="h-24 flex items-center justify-center text-slate-600 border-2 border-dashed border-white/5 rounded-xl">
-                          <p className="text-[10px] font-bold uppercase tracking-widest">Vazio</p>
-                        </div>
-                      )}
+                        ))}
+                        {colOrders.length === 0 && (
+                          <div className="h-24 flex items-center justify-center text-slate-600 border-2 border-dashed border-white/5 rounded-xl">
+                            <p className="text-[10px] font-bold uppercase tracking-widest">Vazio</p>
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  </div>
+
+                    {/* Linha Divisória Visível */}
+                    {index < COLUMNS.length - 1 && (
+                      <div className="w-[2px] h-full bg-slate-700 mx-3 shrink-0 rounded-full opacity-50" />
+                    )}
+                  </React.Fragment>
                 );
               })}
             </div>
