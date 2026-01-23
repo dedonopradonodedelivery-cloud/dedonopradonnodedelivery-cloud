@@ -3,8 +3,8 @@ import {
   ChevronLeft, 
   ArrowRight, 
   Megaphone, 
-  CheckCircle2, 
-  CreditCard, 
+  CheckCircle2,
+  CreditCard,
   Loader2,
   Info
 } from 'lucide-react';
@@ -43,7 +43,7 @@ export const StoreAdsQuickLaunch: React.FC<StoreAdsQuickLaunchProps> = ({ onBack
         <div className="min-h-screen bg-slate-950 text-white font-sans flex flex-col">
             {/* CABEÇALHO FIXO PERSISTENTE (STICKY HEADER) */}
             {step !== 'success' && (
-                <header className="fixed top-0 left-0 right-0 z-50 bg-slate-950/90 backdrop-blur-md px-5 h-16 flex items-center gap-4 border-b border-white/5 shrink-0">
+                <header className="sticky top-0 z-50 bg-slate-950/90 backdrop-blur-md px-5 h-16 flex items-center gap-4 border-b border-white/5 shrink-0">
                     <button onClick={handleHeaderBack} className="p-2.5 bg-slate-800 rounded-2xl hover:bg-slate-700 transition-colors">
                         <ChevronLeft className="w-6 h-6 text-white" />
                     </button>
@@ -56,7 +56,7 @@ export const StoreAdsQuickLaunch: React.FC<StoreAdsQuickLaunchProps> = ({ onBack
                 </header>
             )}
             
-            <main className={`flex-1 flex flex-col no-scrollbar ${step !== 'success' ? 'pt-20' : ''}`}>
+            <main className="flex-1 flex flex-col no-scrollbar">
                 {step === 'selection' && (
                     <div className="flex-1 p-6 space-y-8 animate-in fade-in pb-32">
                         <section className="text-center">
