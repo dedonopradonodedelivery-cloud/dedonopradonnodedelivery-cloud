@@ -45,7 +45,12 @@ import {
   FileSignature,
   Paperclip,
   MoreVertical,
-  ArrowLeft
+  ArrowLeft,
+  Briefcase,
+  Link as LinkIcon,
+  Clock,
+  Download,
+  Palette as PaletteIcon
 } from 'lucide-react';
 import { User } from '@supabase/supabase-js';
 import { StoreBannerEditor } from './StoreBannerEditor';
@@ -59,7 +64,7 @@ interface StoreAdsModuleProps {
   initialView?: 'sales' | 'chat';
 }
 
-type ViewState = 'sales' | 'creator' | 'editor' | 'pro_checkout' | 'pro_processing' | 'pro_approved' | 'pro_chat' | 'designer_panel' | 'chat_onboarding' | 'pro_high_demand_warning';
+type ViewState = 'sales' | 'creator' | 'editor' | 'pro_checkout' | 'pro_processing' | 'pro_approved' | 'pro_chat' | 'designer_panel' | 'designer_order_detail' | 'chat_onboarding' | 'pro_high_demand_warning';
 
 
 const NEIGHBORHOODS = [
@@ -122,7 +127,11 @@ const MOCK_KANBAN_ORDERS = [
         deadline: 'Até 4 dias', 
         lastUpdate: 'há 5 min', 
         chatHistory: [
-            { author: 'Sistema', text: '✅ Seu pedido entrou em atendimento. Em instantes vamos falar com você por aqui para alinhar seu banner.', timestamp: '10:00', role: 'System' },
+            { author: 'Sistema', text: '✅ Seu pedido entrou em atendimento. Em instantes vamos falar com você por aqui para alinhar seu banner.', timestamp: '10:00', role: 'System', type: 'status_update' },
+            { author: 'José Carlos', role: 'Lojista', text: 'Oi! Tudo bem? Segue minha logo e a ideia para o banner.', timestamp: '10:05', type: 'text' },
+            { author: 'José Carlos', role: 'Lojista', text: 'Logo_Hamburgueria.png', timestamp: '10:06', type: 'file', fileType: 'image/png', preview: 'https://placehold.co/100x100/FF6501/FFFFFF?text=Logo' },
+            { author: 'José Carlos', role: 'Lojista', text: 'briefing.pdf', timestamp: '10:07', type: 'file', fileType: 'application/pdf' },
+            { author: 'José Carlos', role: 'Lojista', text: 'Nossas cores são laranja, preto e branco. Queria uma promoção de "Combo Casal por R$49,90". E também um link para o iFood: https://ifood.com.br/hamburgueria-do-ze', timestamp: '10:08', type: 'briefing_text' }
         ]
     },
     { 
@@ -132,7 +141,10 @@ const MOCK_KANBAN_ORDERS = [
         status: 'aguardando_dados', 
         deadline: 'Até 3 dias', 
         lastUpdate: 'há 1h',
-        chatHistory: []
+        chatHistory: [
+            { author: 'Sistema', text: '✅ Seu pedido entrou em atendimento...', timestamp: '08:00', role: 'System', type: 'status_update' },
+            { author: 'Sistema', text: '📌 Estamos aguardando seus dados para iniciar a criação...', timestamp: '09:00', role: 'System', type: 'status_update' },
+        ]
     },
     { 
         id: '#PJ-125', 
@@ -141,7 +153,15 @@ const MOCK_KANBAN_ORDERS = [
         status: 'em_producao', 
         deadline: 'Até 2 dias', 
         lastUpdate: 'hoje, 09:15',
-        chatHistory: []
+        chatHistory: [
+            { author: 'Sistema', text: '✅ Seu pedido entrou em atendimento...', timestamp: '08:00', role: 'System', type: 'status_update' },
+            { author: 'Marcos Andrade', role: 'Lojista', text: 'Oi, segue a logo e o que eu preciso.', timestamp: '08:10', type: 'text' },
+            { author: 'Marcos Andrade', role: 'Lojista', text: 'Logo_PetShop.png', timestamp: '08:11', type: 'file', fileType: 'image/png', preview: 'https://placehold.co/100x100/34D399/FFFFFF?text=Logo' },
+            { author: 'Marcos Andrade', role: 'Lojista', text: 'Gostaria de uma promoção de banho e tosa. A partir de R$ 50,00. Pode usar a foto do golden que mandei anexo.', timestamp: '08:15', type: 'briefing_text' },
+            { author: 'Marcos Andrade', role: 'Lojista', text: 'golden_retriever.jpg', timestamp: '08:16', type: 'file', fileType: 'image/jpeg', preview: 'https://images.unsplash.com/photo-1552053831-71594a27632d?q=80&w=200&auto=format&fit=crop' },
+            { author: 'Sistema', text: '📌 Movido para "Aguardando dados".', timestamp: '09:00', role: 'System', type: 'status_update' },
+            { author: 'Sistema', text: '🎨 Seu banner entrou em produção! ...', timestamp: '09:15', role: 'System', type: 'status_update' }
+        ]
     },
 ];
 
@@ -179,6 +199,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
   const [isBriefingModalOpen, setIsBriefingModalOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<any | null>(null);
   const [kanbanOrders, setKanbanOrders] = useState(MOCK_KANBAN_ORDERS);
+  const [activeDetailTab, setActiveDetailTab] = useState<'details' | 'chat'>('details');
 
   const [briefingData, setBriefingData] = useState({
     companyName: user?.user_metadata?.store_name || '',
@@ -254,7 +275,17 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
     if (chatScrollRef.current) {
       chatScrollRef.current.scrollTop = chatScrollRef.current.scrollHeight;
     }
-  }, [chatMessages]);
+  }, [chatMessages, activeDetailTab]);
+
+  // Sincroniza o `selectedOrder` com a lista principal sempre que ela mudar.
+  useEffect(() => {
+    if (view === 'designer_order_detail' && selectedOrder) {
+        const updatedOrderInList = kanbanOrders.find(o => o.id === selectedOrder.id);
+        if (updatedOrderInList && updatedOrderInList !== selectedOrder) {
+            setSelectedOrder(updatedOrderInList);
+        }
+    }
+  }, [kanbanOrders, selectedOrder, view]);
 
   const handleMoveCard = (orderId: string, direction: 'forward' | 'backward') => {
       setKanbanOrders(prevOrders => {
@@ -280,7 +311,8 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
               author: 'Sistema',
               text: newSystemMessageText,
               timestamp: 'Agora',
-              role: 'System'
+              role: 'System',
+              type: 'status_update'
           };
 
           order.chatHistory = [...(order.chatHistory || []), newSystemMessage];
@@ -470,10 +502,10 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
     return `${otherUsers}, ${lastUser} estão digitando...`;
   };
 
-  const handleOpenChat = (order: any) => {
+  const handleOpenOrderDetail = (order: any) => {
       setSelectedOrder(order);
-      setChatMessages(order.chatHistory || []);
-      setView('pro_chat');
+      setActiveDetailTab('details');
+      setView('designer_order_detail');
   };
 
   if (isEditingArt) {
@@ -631,7 +663,11 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
                             <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest px-2 mb-4">{column.title}</h3>
                             <div className="space-y-3 overflow-y-auto no-scrollbar flex-1 pr-1">
                                 {kanbanOrders.filter(o => o.status === column.id).map(order => (
-                                    <div key={order.id} className="bg-slate-800 p-4 rounded-2xl border border-white/5 shadow-md animate-in fade-in">
+                                    <div 
+                                        key={order.id} 
+                                        onClick={() => handleOpenOrderDetail(order)}
+                                        className="bg-slate-800 p-4 rounded-2xl border border-white/5 shadow-md animate-in fade-in cursor-pointer hover:border-indigo-500/50 transition-colors"
+                                    >
                                         <div className="flex justify-between items-start mb-2">
                                             <span className="text-[9px] font-bold bg-blue-500/10 text-blue-400 px-2 py-0.5 rounded-md border border-blue-500/20">Banner Profissional</span>
                                             <span className="text-[9px] text-slate-500 font-bold">{order.id}</span>
@@ -642,12 +678,9 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
                                             <span>Prazo: <span className="font-bold text-slate-300">{order.deadline}</span></span>
                                             <span>Atualizado: <span className="font-bold text-slate-300">{order.lastUpdate}</span></span>
                                         </div>
-                                        <button onClick={() => handleOpenChat(order)} className="w-full text-center py-2 bg-slate-700/50 hover:bg-slate-700 rounded-lg text-xs font-bold text-slate-300 transition-colors">
-                                            Abrir chat do pedido
-                                        </button>
                                         <div className="flex gap-2 mt-3">
-                                            <button onClick={() => handleMoveCard(order.id, 'backward')} className="flex-1 py-2 bg-white/5 hover:bg-white/10 rounded-lg flex items-center justify-center gap-1 text-[10px] font-bold text-slate-400"><ArrowLeft size={12}/> Voltar</button>
-                                            <button onClick={() => handleMoveCard(order.id, 'forward')} className="flex-1 py-2 bg-white/5 hover:bg-white/10 rounded-lg flex items-center justify-center gap-1 text-[10px] font-bold text-slate-400">Avançar <ArrowRight size={12} /></button>
+                                            <button onClick={(e) => { e.stopPropagation(); handleMoveCard(order.id, 'backward'); }} className="flex-1 py-2 bg-white/5 hover:bg-white/10 rounded-lg flex items-center justify-center gap-1 text-[10px] font-bold text-slate-400"><ArrowLeft size={12}/> Voltar</button>
+                                            <button onClick={(e) => { e.stopPropagation(); handleMoveCard(order.id, 'forward'); }} className="flex-1 py-2 bg-white/5 hover:bg-white/10 rounded-lg flex items-center justify-center gap-1 text-[10px] font-bold text-slate-400">Avançar <ArrowRight size={12} /></button>
                                         </div>
                                     </div>
                                 ))}
@@ -660,68 +693,121 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
     );
   }
 
-  if (view === 'pro_chat') {
-    const typingMessage = formatTypingMessage(typingUsers);
+  if (view === 'designer_order_detail' && selectedOrder) {
+    const { extractedData, extractedFiles, timelineEvents } = useMemo(() => {
+        if (!selectedOrder?.chatHistory) {
+            return { extractedData: {}, extractedFiles: [], timelineEvents: [] };
+        }
+
+        const data: any = { logo: null, colors: '', promoText: '', notes: [], links: [] };
+        const files: any[] = [];
+        const timeline: any[] = [];
+        
+        const urlRegex = /(https?:\/\/[^\s]+)/g;
+
+        for (const msg of selectedOrder.chatHistory) {
+            if (msg.type === 'file') {
+                files.push(msg);
+                if (msg.fileType.startsWith('image') && !data.logo) {
+                    data.logo = msg.preview;
+                }
+            } else if (msg.type === 'briefing_text') {
+                const lowerText = msg.text.toLowerCase();
+                const foundLinks = msg.text.match(urlRegex);
+                if (foundLinks) data.links.push(...foundLinks);
+
+                if (lowerText.includes('cores')) data.colors = msg.text;
+                else if (lowerText.includes('promoção') || lowerText.includes('combo') || lowerText.includes('oferta')) data.promoText = msg.text;
+                else data.notes.push(msg.text);
+            } else if (msg.role === 'System' && msg.type === 'status_update') {
+                timeline.push(msg);
+            }
+        }
+        return { extractedData: data, extractedFiles: files.reverse(), timelineEvents: timeline.reverse() };
+    }, [selectedOrder]);
+
+    const currentStatusInfo = KANBAN_COLUMNS.find(c => c.id === selectedOrder.status);
 
     return (
-      <div className="fixed inset-0 z-[130] bg-slate-900 flex flex-col animate-in slide-in-from-right h-full">
-        <header className="bg-slate-950 px-6 py-5 border-b border-white/10 flex items-center justify-between shadow-sm sticky top-0 z-50">
-          <div className="flex items-center gap-4">
-             <button onClick={() => setView(isDesigner ? 'designer_panel' : 'sales')} className="p-2 bg-white/5 rounded-xl text-slate-400"><ChevronLeft size={20} /></button>
-             <div>
-               <h2 className="font-bold leading-tight text-white">Pedido • {selectedOrder?.companyName || 'Banner Profissional'}</h2>
-               <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Lojista + Designer + Admin</p>
-             </div>
-          </div>
-          <button className="p-2 bg-white/5 rounded-full text-slate-400"><MoreVertical size={16} /></button>
-        </header>
+        <div className="fixed inset-0 z-[130] bg-slate-950 flex flex-col animate-in slide-in-from-right h-full">
+            <header className="bg-slate-900 p-6 border-b border-white/10 flex items-start justify-between shrink-0">
+                <div className="flex items-start gap-4">
+                    <button onClick={() => setView('designer_panel')} className="p-2 bg-white/5 rounded-xl text-slate-400 mt-1"><ChevronLeft size={20} /></button>
+                    <div>
+                        <p className="text-[10px] font-black uppercase tracking-widest text-indigo-400">{selectedOrder.id}</p>
+                        <h2 className="font-bold text-xl leading-tight text-white">{selectedOrder.companyName}</h2>
+                        <p className="text-xs font-medium text-slate-400">{selectedOrder.lojistaName}</p>
+                    </div>
+                </div>
+                <div className="text-right shrink-0">
+                    <p className="text-[10px] font-black uppercase text-slate-500 tracking-widest">{currentStatusInfo?.title}</p>
+                    <p className="text-xs font-bold text-slate-300">{selectedOrder.deadline}</p>
+                </div>
+            </header>
 
-        <main ref={chatScrollRef} className="flex-1 overflow-y-auto p-6 space-y-6 no-scrollbar pb-32">
-          {chatMessages.map((msg, idx) => (
-            <div key={idx} className={`flex flex-col gap-1.5 max-w-[85%] animate-in slide-in-from-bottom-2 duration-500 ${msg.role === 'Lojista' ? 'items-end ml-auto' : 'items-start'}`}>
-               <div className="flex items-center gap-2">
-                 <span className="text-[9px] text-slate-500 font-bold uppercase tracking-widest">{msg.author}</span>
-                 {msg.role === 'Admin' && <span className="text-[8px] font-black bg-indigo-500 text-white px-1.5 py-0.5 rounded-md uppercase">Admin</span>}
-               </div>
-               <div className={`p-4 rounded-3xl shadow-sm border ${
-                   msg.role === 'Lojista'
-                    ? 'bg-blue-600 text-white rounded-tr-none border-blue-500' 
-                    : msg.role === 'System'
-                      ? 'bg-slate-950 border-slate-700/50 text-slate-300 text-xs italic'
-                      : 'bg-slate-800 rounded-tl-none border-slate-700 text-slate-200'
-                }`}>
-                  <p className="text-sm whitespace-pre-wrap leading-relaxed">{msg.text}</p>
-               </div>
-               <span className="text-[9px] text-slate-600 font-bold uppercase tracking-widest px-2">{msg.timestamp}</span>
+            <div className="bg-slate-900 border-b border-white/5 px-6 pb-4 flex flex-col gap-4">
+                 <div className="flex gap-2">
+                    <button onClick={() => handleMoveCard(selectedOrder.id, 'backward')} className="flex-1 py-3 bg-white/5 hover:bg-white/10 rounded-lg flex items-center justify-center gap-1 text-sm font-bold text-slate-300"><ArrowLeft size={14}/> Voltar Etapa</button>
+                    <button onClick={() => handleMoveCard(selectedOrder.id, 'forward')} className="flex-1 py-3 bg-white/10 hover:bg-white/20 rounded-lg flex items-center justify-center gap-1 text-sm font-bold text-slate-200">Avançar Etapa <ArrowRight size={14} /></button>
+                </div>
+                <div className="flex gap-1 bg-slate-800 p-1 rounded-xl border border-white/5">
+                    <button onClick={() => setActiveDetailTab('details')} className={`flex-1 text-center py-2 text-xs font-bold rounded-lg ${activeDetailTab === 'details' ? 'bg-slate-700 text-white' : 'text-slate-400'}`}>Detalhes</button>
+                    <button onClick={() => setActiveDetailTab('chat')} className={`flex-1 text-center py-2 text-xs font-bold rounded-lg ${activeDetailTab === 'chat' ? 'bg-slate-700 text-white' : 'text-slate-400'}`}>Chat</button>
+                </div>
             </div>
-          ))}
-        </main>
 
-        <footer className="p-6 border-t border-white/10 bg-slate-950 sticky bottom-0 z-50 space-y-3">
-          {typingMessage && (
-            <div className="px-4 py-2 bg-slate-800 rounded-full w-fit animate-in fade-in">
-              <p className="text-xs font-medium text-slate-400 italic">{typingMessage}</p>
-            </div>
-          )}
-          <div className="flex items-center gap-3">
-            <button className="p-4 bg-slate-800 rounded-2xl text-slate-400 active:scale-95 transition-transform"><Paperclip size={20} /></button>
-            <input 
-              type="text" 
-              placeholder="Digite sua mensagem..."
-              className="flex-1 bg-slate-800 border-none rounded-2xl px-5 py-4 text-sm outline-none focus:ring-2 focus:ring-blue-500 transition-all text-white"
-            />
-            <button className="p-4 bg-blue-600 text-white rounded-2xl shadow-lg active:scale-95 transition-transform">
-              <Send size={20} />
-            </button>
-          </div>
-          {(isDesigner || user?.email === 'dedonopradonodedelivery@gmail.com') && (
-              <div className="flex gap-2 justify-center pt-2">
-                  <button onClick={() => simulateTyping('Rafael Carvalho')} className="text-[8px] text-slate-600">(Simular Admin digitando)</button>
-                  <button onClick={() => simulateTyping(selectedOrder?.lojistaName || 'Lojista')} className="text-[8px] text-slate-600">(Simular Lojista digitando)</button>
-              </div>
-          )}
-        </footer>
-      </div>
+            {activeDetailTab === 'details' ? (
+                <main className="flex-1 overflow-y-auto p-6 space-y-8 no-scrollbar pb-10">
+                    <section>
+                        <h3 className="text-xs font-black uppercase text-slate-500 mb-3 flex items-center gap-2"><Briefcase size={14} /> Dados do lojista</h3>
+                        <div className="bg-slate-900 p-5 rounded-2xl border border-white/10 space-y-4">
+                            {extractedData.logo && <div className="space-y-2"><p className="text-[9px] font-bold text-slate-400 uppercase">Logo</p><img src={extractedData.logo} className="w-24 rounded-lg border border-white/10" /></div>}
+                            {extractedData.colors && <div className="space-y-2"><p className="text-[9px] font-bold text-slate-400 uppercase flex items-center gap-1.5"><PaletteIcon size={12}/>Cores</p><p className="text-sm text-slate-300 italic">"{extractedData.colors}"</p></div>}
+                            {extractedData.promoText && <div className="space-y-2"><p className="text-[9px] font-bold text-slate-400 uppercase">Texto da Oferta</p><p className="text-sm text-slate-300 italic">"{extractedData.promoText}"</p></div>}
+                            {extractedData.links.length > 0 && <div className="space-y-2"><p className="text-[9px] font-bold text-slate-400 uppercase flex items-center gap-1.5"><LinkIcon size={12}/>Links</p>{extractedData.links.map((link: string, i: number) => <a key={i} href={link} target="_blank" className="text-sm text-blue-400 block truncate hover:underline">{link}</a>)}</div>}
+                            {extractedData.notes.length > 0 && <div className="space-y-2"><p className="text-[9px] font-bold text-slate-400 uppercase">Observações</p>{extractedData.notes.map((note: string, i: number) => <p key={i} className="text-sm text-slate-300 italic">"{note}"</p>)}</div>}
+                        </div>
+                    </section>
+                    <section>
+                        <h3 className="text-xs font-black uppercase text-slate-500 mb-3 flex items-center gap-2"><Paperclip size={14} /> Arquivos e imagens</h3>
+                        <div className="grid grid-cols-3 gap-3">
+                            {extractedFiles.map((file, i) => (
+                                <div key={i} className="bg-slate-900 rounded-lg border border-white/10 p-2 text-center">
+                                    {file.fileType.startsWith('image') ? <img src={file.preview} className="w-full aspect-square object-cover rounded" /> : <div className="w-full aspect-square bg-slate-800 flex items-center justify-center rounded"><FileText /></div>}
+                                    <p className="text-[9px] text-slate-500 truncate mt-1">{file.text}</p>
+                                </div>
+                            ))}
+                        </div>
+                    </section>
+                    <section>
+                        <h3 className="text-xs font-black uppercase text-slate-500 mb-3 flex items-center gap-2"><Clock size={14} /> Linha do tempo</h3>
+                        <div className="space-y-2">
+                            {timelineEvents.map((event: any, i: number) => (
+                                <div key={i} className="flex items-center gap-3 text-xs">
+                                    <span className="text-slate-600 font-mono">{event.timestamp}</span>
+                                    <span className="text-slate-400">{event.text}</span>
+                                </div>
+                            ))}
+                        </div>
+                    </section>
+                </main>
+            ) : (
+                 <main ref={chatScrollRef} className="flex-1 overflow-y-auto p-6 space-y-6 no-scrollbar pb-10">
+                    {selectedOrder.chatHistory.map((msg: any, idx: number) => (
+                        <div key={idx} className={`flex flex-col gap-1.5 max-w-[85%] animate-in slide-in-from-bottom-2 duration-500 ${msg.role === 'Lojista' ? 'items-start' : msg.role === 'System' ? 'items-center w-full max-w-full' : 'items-end ml-auto'}`}>
+                           <div className={`p-4 rounded-3xl shadow-sm border ${
+                               msg.role === 'Lojista' ? 'bg-slate-800 rounded-tl-none border-slate-700 text-slate-200'
+                                : msg.role === 'System' ? 'bg-transparent border-none text-slate-500 text-[10px] italic font-medium'
+                                : 'bg-blue-600 text-white rounded-tr-none border-blue-500'
+                            }`}>
+                              <p className="text-sm whitespace-pre-wrap leading-relaxed">{msg.text}</p>
+                           </div>
+                           {msg.role !== 'System' && <span className="text-[9px] text-slate-600 font-bold uppercase tracking-widest px-2">{msg.timestamp}</span>}
+                        </div>
+                    ))}
+                </main>
+            )}
+        </div>
     );
   }
 
