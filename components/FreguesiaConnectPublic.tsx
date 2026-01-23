@@ -109,7 +109,7 @@ export const FreguesiaConnectPublic: React.FC<FreguesiaConnectPublicProps> = ({ 
       </div>
 
       {/* Footer Fixo */}
-      <div className="fixed bottom-0 left-0 right-0 p-5 pb-8 bg-white dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800 z-30 flex flex-col gap-3 max-w-md mx-auto shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
+      <div className="fixed bottom-[80px] left-0 right-0 p-5 bg-white/80 dark:bg-gray-950/80 backdrop-blur-md border-t border-gray-100 dark:border-gray-800 z-30 flex flex-col gap-3 max-w-md mx-auto">
         <button 
             onClick={onLogin}
             className="w-full bg-[#4F46E5] hover:bg-[#4338CA] text-white font-bold text-lg py-4 rounded-2xl shadow-xl shadow-indigo-500/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2"

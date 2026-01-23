@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { ChevronLeft, Store, Wallet, CornerRightDown, ArrowRight, Loader2, Info } from 'lucide-react';
 
@@ -46,7 +47,7 @@ export const PayWithCashback: React.FC<PayWithCashbackProps> = ({
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 font-sans flex flex-col animate-in slide-in-from-right duration-300">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 font-sans flex flex-col">
       
       {/* Header */}
       <div className="bg-white dark:bg-gray-800 p-5 pt-6 shadow-sm border-b border-gray-100 dark:border-gray-700 sticky top-0 z-20">
@@ -159,7 +160,10 @@ export const PayWithCashback: React.FC<PayWithCashbackProps> = ({
             </div>
         </div>
 
-        {/* Main Action Button */}
+      </div>
+
+      {/* Footer Button */}
+      <div className="fixed bottom-[80px] left-0 right-0 p-5 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-t border-gray-100 dark:border-gray-700 z-20 max-w-md mx-auto">
         <button 
             onClick={onConfirmPayment}
             disabled={numericTotal <= 0 || isLoading}
@@ -177,8 +181,8 @@ export const PayWithCashback: React.FC<PayWithCashbackProps> = ({
                 </>
             )}
         </button>
-
       </div>
+
     </div>
   );
 };

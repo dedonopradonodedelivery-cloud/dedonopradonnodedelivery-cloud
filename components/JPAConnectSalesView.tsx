@@ -195,7 +195,7 @@ export const JPAConnectSalesView: React.FC<JPAConnectSalesViewProps> = ({ onBack
         </div>
       </main>
 
-      <footer className="fixed bottom-0 left-0 right-0 p-5 bg-white/80 dark:bg-gray-950/80 backdrop-blur-md border-t border-gray-100 dark:border-gray-800 z-30 max-w-md mx-auto">
+      <footer className="fixed bottom-[80px] left-0 right-0 p-5 bg-white/80 dark:bg-gray-950/80 backdrop-blur-md border-t border-gray-100 dark:border-gray-800 z-30 max-w-md mx-auto">
         <div className="text-center mb-3">
           <p className="text-xs font-bold text-gray-600 dark:text-gray-300">Vagas limitadas e participação sujeita à aprovação.</p>
         </div>

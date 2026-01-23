@@ -34,7 +34,7 @@ import { STORES } from '@/constants';
 import { AdminModerationPanel } from '@/components/AdminModerationPanel';
 import { AboutView, SupportView, FavoritesView } from '@/components/SimplePages';
 import { StoreClaimFlow } from '@/components/StoreClaimFlow';
-import { UserCashbackMockView } from '@/components/UserCashbackMockView';
+import { UserStatementView } from '@/components/UserStatementView';
 import { MerchantReviewsModule } from '@/components/MerchantReviewsModule';
 import { JPAConnectSalesView } from '@/components/JPAConnectSalesView';
 
@@ -117,8 +117,8 @@ const App: React.FC = () => {
   }, []);
 
   const handleSelectStore = (store: Store) => { setSelectedStore(store); setActiveTab('store_detail'); };
-  const headerExclusionList = ['store_area', 'editorial_list', 'store_profile', 'category_detail', 'store_detail', 'profile', 'patrocinador_master', 'service_subcategories', 'service_specialties', 'store_ads_module', 'store_ads_quick', 'merchant_performance', 'about', 'support', 'favorites', 'community_feed', 'admin_panel', 'cashback_landing', 'admin_banner_moderation', 'store_claim', 'user_cashback_mock', 'merchant_reviews', 'jpa_connect_sales'];
-  const hideBottomNav = ['store_ads_module', 'store_ads_quick', 'merchant_performance', 'store_detail', 'admin_panel', 'cashback_landing', 'admin_banner_moderation', 'store_claim', 'user_cashback_mock', 'merchant_reviews', 'jpa_connect_sales'].includes(activeTab);
+  const headerExclusionList = ['store_area', 'editorial_list', 'store_profile', 'category_detail', 'store_detail', 'profile', 'patrocinador_master', 'service_subcategories', 'service_specialties', 'store_ads_module', 'store_ads_quick', 'merchant_performance', 'about', 'support', 'favorites', 'community_feed', 'admin_panel', 'cashback_landing', 'admin_banner_moderation', 'store_claim', 'user_cashback_mock', 'merchant_reviews', 'jpa_connect_sales', 'wallet'];
+  const hideBottomNav = ['admin_panel'].includes(activeTab);
 
   const RoleSwitcherModal: React.FC = () => {
     if (!isRoleSwitcherOpen) return null;
@@ -165,11 +165,12 @@ const App: React.FC = () => {
                 <Header isDarkMode={isDarkMode} toggleTheme={() => {}} onAuthClick={() => setActiveTab('profile')} user={user} searchTerm={globalSearch} onSearchChange={setGlobalSearch} onNavigate={setActiveTab} activeTab={activeTab} userRole={userRole as any} stores={STORES} onStoreClick={handleSelectStore} isAdmin={user?.email === ADMIN_EMAIL} viewMode={viewMode} onOpenViewSwitcher={() => setIsRoleSwitcherOpen(true)} />
               )}
               <main className="animate-in fade-in duration-500 w-full max-w-md mx-auto">
+                {activeTab === 'home' && <HomeFeed onNavigate={handleNavigate} onSelectCategory={(c) => { setSelectedCategory(c); setActiveTab('category_detail'); }} onStoreClick={handleSelectStore} stores={STORES} user={user as any} userRole={userRole} />}
+                {activeTab === 'explore' && <ExploreView stores={STORES} searchQuery={globalSearch} onStoreClick={handleSelectStore} onLocationClick={() => {}} onFilterClick={() => {}} onOpenPlans={() => {}} onNavigate={setActiveTab} />}
+                {activeTab === 'wallet' && <UserStatementView onBack={() => setActiveTab('home')} onExploreStores={() => setActiveTab('explore')} />}
                 {activeTab === 'cashback_landing' && <CashbackLandingView onBack={() => setActiveTab('home')} onLogin={() => { setPendingTab('scan_cashback'); setIsAuthOpen(true); }} />}
                 {activeTab === 'admin_panel' && <AdminPanel user={user as any} onLogout={signOut} viewMode={viewMode} onOpenViewSwitcher={() => setIsRoleSwitcherOpen(true)} onNavigateToApp={setActiveTab} />}
                 {activeTab === 'admin_banner_moderation' && user?.email === ADMIN_EMAIL && <AdminBannerModeration user={user as any} onBack={() => setActiveTab('admin_panel')} />}
-                {activeTab === 'home' && <HomeFeed onNavigate={handleNavigate} onSelectCategory={(c) => { setSelectedCategory(c); setActiveTab('category_detail'); }} onStoreClick={handleSelectStore} stores={STORES} user={user as any} userRole={userRole} />}
-                {activeTab === 'explore' && <ExploreView stores={STORES} searchQuery={globalSearch} onStoreClick={handleSelectStore} onLocationClick={() => {}} onFilterClick={() => {}} onOpenPlans={() => {}} onNavigate={setActiveTab} />}
                 
                 {activeTab === 'profile' && (
                   isMerchantMode 
@@ -181,9 +182,9 @@ const App: React.FC = () => {
                 {activeTab === 'community_feed' && <CommunityFeedView onStoreClick={handleSelectStore} user={user as any} onRequireLogin={() => setIsAuthOpen(true)} onNavigate={setActiveTab} />}
                 {activeTab === 'services' && <ServicesView onSelectMacro={(id, name) => { setSelectedServiceMacro({id, name}); if (id === 'emergency') { setQuoteCategory(name); setIsQuoteModalOpen(true); } else { setActiveTab('service_subcategories'); } }} onOpenTerms={() => setActiveTab('service_terms')} onNavigate={setActiveTab} searchTerm={globalSearch} />}
                 {activeTab === 'category_detail' && selectedCategory && <CategoryView category={selectedCategory} onBack={() => setActiveTab('home')} onStoreClick={handleSelectStore} stores={STORES} userRole={userRole as any} onAdvertiseInCategory={setAdCategoryTarget} onNavigate={handleNavigate} />}
-                {activeTab === 'store_detail' && selectedStore && <StoreDetailView store={selectedStore} onBack={() => setActiveTab('home')} onClaim={() => setActiveTab('store_claim')} onViewCashback={() => setActiveTab('user_cashback_mock')} />}
+                {activeTab === 'store_detail' && selectedStore && <StoreDetailView store={selectedStore} onBack={() => setActiveTab('home')} onClaim={() => setActiveTab('store_claim')} onViewCashback={() => setActiveTab('user_statement')} />}
                 
-                {activeTab === 'user_cashback_mock' && <UserCashbackMockView onBack={() => setActiveTab('store_detail')} storeName={selectedStore?.name} />}
+                {activeTab === 'user_statement' && <UserStatementView onBack={() => setActiveTab('store_detail')} onExploreStores={() => setActiveTab('explore')} />}
 
                 {activeTab === 'store_claim' && selectedStore && user && (
                     <StoreClaimFlow 
