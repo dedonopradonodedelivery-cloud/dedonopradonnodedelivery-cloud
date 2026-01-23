@@ -20,7 +20,8 @@ import {
   Loader2,
   Calendar,
   Hourglass,
-  Flag
+  Flag,
+  Bell
 } from 'lucide-react';
 
 interface DesignerPanelProps {
@@ -38,6 +39,7 @@ interface OrderCard {
   priority?: 'urgent' | 'priority' | 'normal';
   purchaseDate: string;
   deliveryDeadline: string;
+  hasUnreadMessages?: boolean; // Novo campo para notificação
 }
 
 interface ChatMessage {
@@ -49,11 +51,11 @@ interface ChatMessage {
 }
 
 const INITIAL_ORDERS: OrderCard[] = [
-  { id: 'ord-001', merchantId: 'm-123', merchantName: 'Hamburgueria Brasa', serviceType: 'Banner Home', status: 'new', date: 'Hoje, 10:30', priority: 'urgent', purchaseDate: '22/01/2026', deliveryDeadline: '25/01/2026' },
-  { id: 'ord-002', merchantId: 'm-456', merchantName: 'Studio Hair Vip', serviceType: 'Destaque Categoria', status: 'production', date: 'Ontem, 16:20', priority: 'priority', purchaseDate: '21/01/2026', deliveryDeadline: '24/01/2026' },
-  { id: 'ord-003', merchantId: 'm-789', merchantName: 'PetShop Amigo', serviceType: 'Arte Instagram', status: 'review', date: '10/11', priority: 'normal', purchaseDate: '19/01/2026', deliveryDeadline: '22/01/2026' },
-  { id: 'ord-004', merchantId: 'm-321', merchantName: 'Farmácia Central', serviceType: 'Banner Promo', status: 'done', date: '08/11', priority: 'normal', purchaseDate: '15/01/2026', deliveryDeadline: '18/01/2026' },
-  { id: 'ord-005', merchantId: 'm-654', merchantName: 'Pizzaria do Zé', serviceType: 'Banner Home', status: 'new', date: 'Hoje, 09:15', priority: 'normal', purchaseDate: '23/01/2026', deliveryDeadline: '26/01/2026' },
+  { id: 'ord-001', merchantId: 'm-123', merchantName: 'Hamburgueria Brasa', serviceType: 'Banner Home', status: 'new', date: 'Hoje, 10:30', priority: 'urgent', purchaseDate: '22/01/2026', deliveryDeadline: '25/01/2026', hasUnreadMessages: false },
+  { id: 'ord-002', merchantId: 'm-456', merchantName: 'Studio Hair Vip', serviceType: 'Destaque Categoria', status: 'production', date: 'Ontem, 16:20', priority: 'priority', purchaseDate: '21/01/2026', deliveryDeadline: '24/01/2026', hasUnreadMessages: false },
+  { id: 'ord-003', merchantId: 'm-789', merchantName: 'PetShop Amigo', serviceType: 'Arte Instagram', status: 'review', date: '10/11', priority: 'normal', purchaseDate: '19/01/2026', deliveryDeadline: '22/01/2026', hasUnreadMessages: false },
+  { id: 'ord-004', merchantId: 'm-321', merchantName: 'Farmácia Central', serviceType: 'Banner Promo', status: 'done', date: '08/11', priority: 'normal', purchaseDate: '15/01/2026', deliveryDeadline: '18/01/2026', hasUnreadMessages: false },
+  { id: 'ord-005', merchantId: 'm-654', merchantName: 'Pizzaria do Zé', serviceType: 'Banner Home', status: 'new', date: 'Hoje, 09:15', priority: 'normal', purchaseDate: '23/01/2026', deliveryDeadline: '26/01/2026', hasUnreadMessages: false },
 ];
 
 const COLUMNS = [
@@ -82,8 +84,32 @@ export const DesignerPanel: React.FC<DesignerPanelProps> = ({ user, onBack }) =>
     return () => clearTimeout(timer);
   }, []);
 
+  // --- SIMULAÇÃO DE MENSAGEM EM TEMPO REAL ---
+  useEffect(() => {
+    // Simula o recebimento de uma mensagem do Lojista (ord-002) após 5 segundos
+    const timer = setTimeout(() => {
+        setOrders(prevOrders => prevOrders.map(o => {
+            if (o.id === 'ord-002') {
+                // Regra anti-bug: Se o designer já está no chat deste pedido, não marca como não lida
+                if (activeView === 'chat' && selectedOrder?.id === 'ord-002') {
+                    return o;
+                }
+                return { ...o, hasUnreadMessages: true };
+            }
+            return o;
+        }));
+    }, 5000);
+
+    return () => clearTimeout(timer);
+  }, [activeView, selectedOrder]);
+
   // Handle Opening Chat
   const handleOpenChat = (order: OrderCard) => {
+    // Remove notificação de "Nova mensagem" ao abrir o chat (Regra 4)
+    if (order.hasUnreadMessages) {
+        setOrders(prev => prev.map(o => o.id === order.id ? { ...o, hasUnreadMessages: false } : o));
+    }
+
     setLoading(true);
     setSelectedOrder(order);
     
@@ -225,31 +251,40 @@ export const DesignerPanel: React.FC<DesignerPanelProps> = ({ user, onBack }) =>
                           <div 
                             key={order.id} 
                             onClick={() => handleOpenChat(order)}
-                            className="bg-slate-800 p-4 rounded-xl shadow-sm border border-white/5 hover:border-indigo-500/50 hover:shadow-indigo-500/10 cursor-pointer transition-all active:scale-[0.98] group relative"
+                            className={`bg-slate-800 p-4 rounded-xl shadow-sm border ${order.hasUnreadMessages ? 'border-blue-500/50 shadow-blue-500/20' : 'border-white/5'} hover:border-indigo-500/50 hover:shadow-indigo-500/10 cursor-pointer transition-all active:scale-[0.98] group relative`}
                           >
                             <div className="flex justify-between items-start mb-2">
                               <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">{order.id}</span>
                               
-                              {/* --- INTERACTIVE PRIORITY LABEL --- */}
-                              <div className="relative">
-                                  {order.priority === 'urgent' && (
-                                    <button onClick={(e) => togglePriorityMenu(e, order.id)} className="text-[8px] font-bold bg-red-500/10 text-red-400 px-1.5 py-0.5 rounded border border-red-500/20 hover:bg-red-500/20 transition-colors">URGENTE</button>
+                              <div className="flex gap-2">
+                                  {/* --- NOTIFICAÇÃO DE NOVA MENSAGEM --- */}
+                                  {order.hasUnreadMessages && (
+                                    <span className="text-[8px] font-bold bg-blue-500 text-white px-1.5 py-0.5 rounded flex items-center gap-1 animate-pulse shadow-sm shadow-blue-500/50">
+                                      <MessageSquare size={8} className="fill-current" /> Nova msg
+                                    </span>
                                   )}
-                                  {order.priority === 'priority' && (
-                                    <button onClick={(e) => togglePriorityMenu(e, order.id)} className="text-[8px] font-bold bg-amber-500/10 text-amber-400 px-1.5 py-0.5 rounded border border-amber-500/20 hover:bg-amber-500/20 transition-colors">PRIORIDADE</button>
-                                  )}
-                                  {order.priority === 'normal' && (
-                                    <button onClick={(e) => togglePriorityMenu(e, order.id)} className="text-[8px] font-bold bg-slate-700/50 text-slate-400 px-1.5 py-0.5 rounded border border-slate-600/50 hover:bg-slate-700 transition-colors">NORMAL</button>
-                                  )}
-                                  
-                                  {/* Priority Dropdown */}
-                                  {openPriorityMenu === order.id && (
-                                      <div className="absolute top-full right-0 mt-1 bg-slate-900 border border-white/10 rounded-lg shadow-xl z-20 flex flex-col w-24 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-                                          <button onClick={(e) => handleChangePriority(e, order.id, 'urgent')} className="px-3 py-2 text-left text-[9px] font-bold text-red-400 hover:bg-white/5 flex items-center gap-2"><Flag size={10} /> Urgente</button>
-                                          <button onClick={(e) => handleChangePriority(e, order.id, 'priority')} className="px-3 py-2 text-left text-[9px] font-bold text-amber-400 hover:bg-white/5 flex items-center gap-2"><Flag size={10} /> Prioridade</button>
-                                          <button onClick={(e) => handleChangePriority(e, order.id, 'normal')} className="px-3 py-2 text-left text-[9px] font-bold text-slate-400 hover:bg-white/5 flex items-center gap-2"><Flag size={10} /> Normal</button>
-                                      </div>
-                                  )}
+
+                                  {/* --- INTERACTIVE PRIORITY LABEL --- */}
+                                  <div className="relative">
+                                      {order.priority === 'urgent' && (
+                                        <button onClick={(e) => togglePriorityMenu(e, order.id)} className="text-[8px] font-bold bg-red-500/10 text-red-400 px-1.5 py-0.5 rounded border border-red-500/20 hover:bg-red-500/20 transition-colors">URGENTE</button>
+                                      )}
+                                      {order.priority === 'priority' && (
+                                        <button onClick={(e) => togglePriorityMenu(e, order.id)} className="text-[8px] font-bold bg-amber-500/10 text-amber-400 px-1.5 py-0.5 rounded border border-amber-500/20 hover:bg-amber-500/20 transition-colors">PRIORIDADE</button>
+                                      )}
+                                      {order.priority === 'normal' && (
+                                        <button onClick={(e) => togglePriorityMenu(e, order.id)} className="text-[8px] font-bold bg-slate-700/50 text-slate-400 px-1.5 py-0.5 rounded border border-slate-600/50 hover:bg-slate-700 transition-colors">NORMAL</button>
+                                      )}
+                                      
+                                      {/* Priority Dropdown */}
+                                      {openPriorityMenu === order.id && (
+                                          <div className="absolute top-full right-0 mt-1 bg-slate-900 border border-white/10 rounded-lg shadow-xl z-20 flex flex-col w-24 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+                                              <button onClick={(e) => handleChangePriority(e, order.id, 'urgent')} className="px-3 py-2 text-left text-[9px] font-bold text-red-400 hover:bg-white/5 flex items-center gap-2"><Flag size={10} /> Urgente</button>
+                                              <button onClick={(e) => handleChangePriority(e, order.id, 'priority')} className="px-3 py-2 text-left text-[9px] font-bold text-amber-400 hover:bg-white/5 flex items-center gap-2"><Flag size={10} /> Prioridade</button>
+                                              <button onClick={(e) => handleChangePriority(e, order.id, 'normal')} className="px-3 py-2 text-left text-[9px] font-bold text-slate-400 hover:bg-white/5 flex items-center gap-2"><Flag size={10} /> Normal</button>
+                                          </div>
+                                      )}
+                                  </div>
                               </div>
                             </div>
                             
