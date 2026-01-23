@@ -1,13 +1,6 @@
+
 import React, { useState } from 'react';
-import { 
-  ChevronLeft, 
-  ArrowRight, 
-  Megaphone, 
-  CheckCircle2,
-  CreditCard,
-  Loader2,
-  Info
-} from 'lucide-react';
+import { ChevronLeft, Zap, ArrowRight, CheckCircle2, Megaphone } from 'lucide-react';
 
 interface StoreAdsQuickLaunchProps {
   onBack: () => void;
@@ -15,112 +8,95 @@ interface StoreAdsQuickLaunchProps {
 }
 
 export const StoreAdsQuickLaunch: React.FC<StoreAdsQuickLaunchProps> = ({ onBack }) => {
-    const [step, setStep] = useState<'selection' | 'payment' | 'success'>('selection');
-    const [duration, setDuration] = useState(7);
-    const [isProcessing, setIsProcessing] = useState(false);
+  const [step, setStep] = useState<'intro' | 'payment' | 'success'>('intro');
 
-    const PRICE_PER_DAY = 0.99;
-    const totalPrice = duration * PRICE_PER_DAY;
+  const handleHeaderBack = () => {
+     if (step === 'intro') onBack();
+     else setStep('intro');
+  };
 
-    const handleActivate = () => {
-        setStep('payment');
-    };
-    
-    const handlePay = () => {
-        setIsProcessing(true);
-        setTimeout(() => {
-            setIsProcessing(false);
-            setStep('success');
-        }, 1500);
-    };
+  return (
+    <div className="min-h-screen bg-slate-950 text-slate-100 font-sans flex flex-col">
+       {step !== 'success' && (
+            <header className="sticky top-0 z-50 bg-slate-950 px-5 h-16 flex items-center gap-4 border-b border-white/5 shrink-0 shadow-lg">
+                <button onClick={handleHeaderBack} className="p-2.5 bg-slate-800 rounded-2xl hover:bg-slate-700 transition-colors">
+                    <ChevronLeft className="w-6 h-6 text-white" />
+                </button>
+                <div>
+                    <h1 className="font-bold text-lg leading-none">
+                        {step === 'payment' ? 'Pagamento' : 'Destaque Rápido'}
+                    </h1>
+                    <p className="text-[10px] text-blue-400 uppercase font-black tracking-widest mt-1">Impulsione sua visibilidade</p>
+                </div>
+            </header>
+        )}
 
-    const handleHeaderBack = () => {
-        if (step === 'payment') setStep('selection');
-        else onBack();
-    }
-
-    return (
-        <div className="min-h-screen bg-slate-950 text-white font-sans flex flex-col">
-            {/* CABEÇALHO FIXO PERSISTENTE (STICKY HEADER) */}
-            {step !== 'success' && (
-                <header className="sticky top-0 z-50 bg-slate-950/90 backdrop-blur-md px-5 h-16 flex items-center gap-4 border-b border-white/5 shrink-0">
-                    <button onClick={handleHeaderBack} className="p-2.5 bg-slate-800 rounded-2xl hover:bg-slate-700 transition-colors">
-                        <ChevronLeft className="w-6 h-6 text-white" />
-                    </button>
-                    <div>
-                        <h1 className="font-bold text-lg leading-none">
-                            {step === 'payment' ? 'Pagamento' : 'Destaque Patrocinado'}
-                        </h1>
-                        <p className="text-[10px] text-blue-400 uppercase font-black tracking-widest mt-1">Impulsione sua visibilidade</p>
+        {step === 'intro' && (
+            <main className="flex-1 p-6 pb-24">
+                <div className="text-center py-8">
+                    <div className="w-20 h-20 bg-blue-500/10 rounded-full flex items-center justify-center mx-auto mb-6 border border-blue-500/30">
+                        <Zap className="w-10 h-10 text-blue-400" />
                     </div>
-                </header>
-            )}
-            
-            <main className="flex-1 flex flex-col no-scrollbar">
-                {step === 'selection' && (
-                    <div className="flex-1 p-6 space-y-8 animate-in fade-in pb-32">
-                        <section className="text-center">
-                            <div className="w-20 h-20 bg-amber-500/10 rounded-[2rem] flex items-center justify-center mx-auto mb-6 border-2 border-amber-500/20 shadow-lg shadow-amber-900/10">
-                                <Megaphone className="w-10 h-10 text-amber-400" />
-                            </div>
-                            <h2 className="text-2xl font-black text-white font-display uppercase tracking-tight mb-3">Destaque Patrocinado</h2>
-                            <p className="text-sm text-slate-400 max-sm mx-auto leading-relaxed">Sua empresa aparece como patrocinada antes das demais nas listas do app.</p>
-                        </section>
-                        
-                        <section className="space-y-4">
-                            <h3 className="text-sm font-bold text-slate-300 text-center">Escolha por quantos dias deseja ficar patrocinado</h3>
-                            <div className="bg-slate-800/50 p-6 rounded-3xl border border-slate-700">
-                                <div className="flex justify-between items-baseline mb-4">
-                                    <span className="text-slate-400 font-medium">Duração selecionada:</span>
-                                    <span className="text-3xl font-black text-white">{duration} dias</span>
-                                </div>
-                                <input type="range" min="7" max="30" value={duration} onChange={(e) => setDuration(Number(e.target.value))} className="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer range-lg accent-blue-500" />
-                                <div className="flex justify-between text-xs text-slate-500 mt-2"><span>7 dias</span><span>30 dias</span></div>
-                            </div>
-                            <div className="mt-4 text-center"><p className="text-xs text-slate-400">Custo: <span className="font-bold text-slate-200">R$ 0,99 por dia</span></p></div>
-                        </section>
+                    <h2 className="text-2xl font-black text-white mb-2">Impulso Instantâneo</h2>
+                    <p className="text-slate-400 text-sm">Coloque sua loja no topo da lista da sua categoria por 24 horas.</p>
+                </div>
 
-                        <footer className="fixed bottom-[80px] left-0 right-0 p-5 bg-slate-950/80 backdrop-blur-md border-t border-white/5 z-30 max-w-md mx-auto">
-                            <div className="flex gap-3">
-                                <div className="flex-1 bg-slate-800 rounded-2xl flex flex-col items-center justify-center p-3 text-center border border-slate-700">
-                                    <span className="text-[10px] text-slate-400 font-bold uppercase">Valor total</span>
-                                    <span className="text-lg font-black text-white">R$ {totalPrice.toFixed(2).replace('.', ',')}</span>
-                                </div>
-                                <button onClick={handleActivate} className="flex-1 bg-blue-600 text-white font-bold rounded-2xl flex items-center justify-center gap-2 shadow-lg active:scale-95 transition-transform">Ativar por {duration} dias <ArrowRight size={16} /></button>
-                            </div>
-                        </footer>
+                <div className="bg-slate-900 border border-white/5 rounded-3xl p-6 mb-8">
+                    <div className="flex justify-between items-center mb-4">
+                        <span className="text-slate-300 font-bold">Duração</span>
+                        <span className="text-white font-bold">24 Horas</span>
                     </div>
-                )}
+                    <div className="flex justify-between items-center mb-4">
+                        <span className="text-slate-300 font-bold">Alcance Estimado</span>
+                        <span className="text-white font-bold">~1.200 pessoas</span>
+                    </div>
+                    <div className="border-t border-white/5 my-4"></div>
+                    <div className="flex justify-between items-center">
+                        <span className="text-white font-black text-lg">Investimento</span>
+                        <span className="text-[#1E5BFF] font-black text-2xl">R$ 19,90</span>
+                    </div>
+                </div>
 
-                {step === 'payment' && (
-                    <div className="flex-1 p-6 flex flex-col justify-center animate-in fade-in duration-300">
-                        <div className="bg-slate-900 rounded-3xl p-6 border border-white/10 space-y-4">
-                            <div className="flex justify-between items-center text-sm border-b border-white/5 pb-4"><span className="text-slate-400">Produto:</span><span className="font-bold text-white">Destaque Patrocinado</span></div>
-                            <div className="flex justify-between items-center text-sm border-b border-white/5 pb-4"><span className="text-slate-400">Duração:</span><span className="font-bold text-white">{duration} dias</span></div>
-                            <div className="flex justify-between items-center pt-2"><span className="text-slate-300 font-bold">Total:</span><span className="text-2xl font-black text-emerald-400">R$ {totalPrice.toFixed(2).replace('.', ',')}</span></div>
-                        </div>
-                        <button onClick={handlePay} disabled={isProcessing} className="w-full mt-8 bg-emerald-500 text-white font-bold py-5 rounded-2xl shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2 active:scale-95 transition-transform">{isProcessing ? <Loader2 className="animate-spin" /> : 'Pagar agora'}</button>
-                    </div>
-                )}
-
-                {isProcessing && (
-                    <div className="fixed inset-0 z-[60] bg-slate-950 flex flex-col items-center justify-center p-6 text-center animate-in fade-in">
-                        <Loader2 className="w-12 h-12 text-blue-500 animate-spin mb-6" />
-                        <h2 className="text-xl font-bold text-white">Processando pagamento...</h2>
-                    </div>
-                )}
-
-                {step === 'success' && (
-                    <div className="flex-1 p-6 flex flex-col items-center justify-center text-center animate-in zoom-in-95 duration-500">
-                        <div className="w-24 h-24 bg-emerald-500/10 rounded-full flex items-center justify-center mb-8 border-4 border-emerald-500/20">
-                            <CheckCircle2 size={48} className="text-emerald-400" />
-                        </div>
-                        <h2 className="text-3xl font-bold text-white mb-3">Pagamento aprovado ✅</h2>
-                        <p className="text-slate-400 max-w-sm mb-6 leading-relaxed">Parabéns pela escolha de se destacar! Seu Destaque Patrocinado já está ativo por {duration} dias.</p>
-                        <button onClick={onBack} className="w-full max-w-xs py-4 bg-white text-slate-900 font-black rounded-2xl shadow-2xl active:scale-95 transition-transform">Ok, entendi</button>
-                    </div>
-                )}
+                <button 
+                    onClick={() => setStep('payment')}
+                    className="w-full bg-[#1E5BFF] text-white font-black py-4 rounded-2xl shadow-lg shadow-blue-500/20 active:scale-95 transition-all flex items-center justify-center gap-2"
+                >
+                    Ativar Agora <ArrowRight size={18} />
+                </button>
             </main>
-        </div>
-    );
+        )}
+
+        {step === 'payment' && (
+            <main className="flex-1 p-6 flex flex-col justify-center">
+                <div className="bg-slate-900 p-6 rounded-3xl border border-white/5 mb-8 text-center">
+                    <Megaphone className="w-10 h-10 text-white mx-auto mb-4" />
+                    <p className="text-slate-400 text-sm mb-6">Confirmar impulsionamento de 24h para sua loja.</p>
+                    <p className="text-3xl font-black text-white">R$ 19,90</p>
+                </div>
+                <button 
+                    onClick={() => setStep('success')}
+                    className="w-full bg-green-600 text-white font-black py-4 rounded-2xl shadow-lg active:scale-95 transition-all"
+                >
+                    Pagar com PIX
+                </button>
+            </main>
+        )}
+
+        {step === 'success' && (
+            <main className="flex-1 p-6 flex flex-col items-center justify-center text-center animate-in zoom-in">
+                <div className="w-24 h-24 bg-green-500/20 rounded-full flex items-center justify-center mb-6 border border-green-500/40">
+                    <CheckCircle2 className="w-12 h-12 text-green-500" />
+                </div>
+                <h2 className="text-3xl font-black text-white mb-2">Tudo Pronto!</h2>
+                <p className="text-slate-400 text-sm mb-8">Sua loja já está em destaque na categoria.</p>
+                <button 
+                    onClick={onBack}
+                    className="bg-white text-slate-900 font-bold px-8 py-3 rounded-xl"
+                >
+                    Voltar ao Painel
+                </button>
+            </main>
+        )}
+    </div>
+  );
 };
