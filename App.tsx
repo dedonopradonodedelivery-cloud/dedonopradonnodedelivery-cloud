@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Layout } from '@/components/layout/Layout';
 import { Header } from '@/components/layout/Header';
@@ -25,6 +26,7 @@ import { AdminBannerModeration } from '@/components/AdminBannerModeration';
 import { DesignerPanel } from '@/components/DesignerPanel';
 import { MapPin, ShieldCheck, X, Palette } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTheme } from '@/contexts/ThemeContext';
 import { NeighborhoodProvider } from '@/contexts/NeighborhoodContext';
 import { Category, Store } from '@/types';
 import { CategoryView } from '@/components/CategoryView';
@@ -63,9 +65,9 @@ const TypingText: React.FC<{ text: string; duration: number }> = ({ text, durati
 
 const App: React.FC = () => {
   const { user, userRole, loading: isAuthInitialLoading, signOut } = useAuth();
+  const { theme } = useTheme();
   const isAuthReturn = window.location.hash.includes('access_token') || window.location.search.includes('code=');
   const [splashStage, setSplashStage] = useState(splashWasShownInSession || isAuthReturn ? 4 : 0);
-  const [isDarkMode, setIsDarkMode] = useState(false);
   const [viewMode, setViewMode] = useState<RoleMode>(() => (localStorage.getItem('admin_view_mode') as RoleMode) || 'Usuário');
   const [isRoleSwitcherOpen, setIsRoleSwitcherOpen] = useState(false);
   
@@ -111,18 +113,14 @@ const App: React.FC = () => {
 
   useEffect(() => {
     if (splashStage === 4) return;
-    // Reduzi um pouco os tempos para alinhar com a transição de 400ms solicitada
-    const t1 = setTimeout(() => setSplashStage(3), 2800); // Inicia fade out
-    const t2 = setTimeout(() => { setSplashStage(4); splashWasShownInSession = true; }, 3200); // Remove do DOM após 400ms
+    const t1 = setTimeout(() => setSplashStage(3), 2800);
+    const t2 = setTimeout(() => { setSplashStage(4); splashWasShownInSession = true; }, 3200);
     return () => { clearTimeout(t1); clearTimeout(t2); };
   }, []);
 
   const handleSelectStore = (store: Store) => { setSelectedStore(store); setActiveTab('store_detail'); };
   const headerExclusionList = ['store_area', 'editorial_list', 'store_profile', 'category_detail', 'store_detail', 'profile', 'patrocinador_master', 'service_subcategories', 'service_specialties', 'store_ads_module', 'store_ads_quick', 'merchant_performance', 'about', 'support', 'favorites', 'community_feed', 'admin_panel', 'cashback_landing', 'admin_banner_moderation', 'store_claim', 'user_cashback_mock', 'merchant_reviews', 'jpa_connect_sales', 'wallet', 'designer_panel'];
   
-  // REMOVIDO: splashStage < 4 da lógica de ocultar nav. 
-  // O layout inteiro (incluindo nav) é renderizado por trás e faz fade-in.
-  // REMOVIDO: 'designer_panel' da lista de ocultar nav. O designer panel agora deve mostrar a bottom bar.
   const hideBottomNav = ['admin_panel'].includes(activeTab);
 
   const RoleSwitcherModal: React.FC = () => {
@@ -162,20 +160,13 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className={isDarkMode ? 'dark' : ''}>
+    <div className={theme === 'dark' ? 'dark' : ''}>
       <NeighborhoodProvider>
-        {/* Adicionado bg-white/gray-900 aqui para garantir fundo sólido durante transição */}
-        <div className="min-h-screen bg-white dark:bg-gray-900 flex justify-center relative">
-          
-          {/* 
-             WRAPPER PRINCIPAL:
-             Controla o Fade-In da Home (Opacity 0 -> 1).
-             A Home já é renderizada desde o início, apenas invisível até o splash sair.
-          */}
+        <div className="min-h-screen bg-white dark:bg-gray-900 flex justify-center relative transition-colors duration-300">
           <div className={`w-full max-w-md h-full transition-opacity duration-700 ease-out ${splashStage >= 3 ? 'opacity-100' : 'opacity-0'}`}>
               <Layout activeTab={activeTab} setActiveTab={setActiveTab} userRole={userRole} hideNav={hideBottomNav}>
                   {!headerExclusionList.includes(activeTab) && (
-                    <Header isDarkMode={isDarkMode} toggleTheme={() => {}} onAuthClick={() => setActiveTab('profile')} user={user} searchTerm={globalSearch} onSearchChange={setGlobalSearch} onNavigate={setActiveTab} activeTab={activeTab} userRole={userRole as any} stores={STORES} onStoreClick={handleSelectStore} isAdmin={user?.email === ADMIN_EMAIL} viewMode={viewMode} onOpenViewSwitcher={() => setIsRoleSwitcherOpen(true)} />
+                    <Header isDarkMode={theme === 'dark'} toggleTheme={() => {}} onAuthClick={() => setActiveTab('profile')} user={user} searchTerm={globalSearch} onSearchChange={setGlobalSearch} onNavigate={setActiveTab} activeTab={activeTab} userRole={userRole as any} stores={STORES} onStoreClick={handleSelectStore} isAdmin={user?.email === ADMIN_EMAIL} viewMode={viewMode} onOpenViewSwitcher={() => setIsRoleSwitcherOpen(true)} />
                   )}
                   <main className="w-full mx-auto">
                     {activeTab === 'home' && <HomeFeed onNavigate={handleNavigate} onSelectCategory={(c) => { setSelectedCategory(c); setActiveTab('category_detail'); }} onStoreClick={handleSelectStore} stores={STORES} user={user as any} userRole={userRole} />}
@@ -232,12 +223,6 @@ const App: React.FC = () => {
               <RoleSwitcherModal />
           </div>
 
-          {/* 
-              SPLASH SCREEN OVERLAY:
-              Renderizado por cima de tudo (z-[9999]).
-              Faz fade-out (opacity-0) quando o estágio é 3.
-              É removido do DOM quando o estágio é 4.
-          */}
           {splashStage < 4 && (
             <div 
                 className={`fixed inset-0 z-[9999] flex flex-col items-center justify-between py-24 transition-opacity duration-500 ease-out ${splashStage === 3 ? 'opacity-0' : 'opacity-100'}`} 

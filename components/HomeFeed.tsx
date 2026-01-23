@@ -464,7 +464,7 @@ const NovidadesDaSemana: React.FC<{ stores: Store[]; onStoreClick?: (store: Stor
   const newArrivals = useMemo(() => stores.filter(s => (s.image || s.logoUrl) && ['f-3', 'f-5', 'f-8', 'f-12', 'f-15'].includes(s.id)), [stores]);
   if (newArrivals.length === 0) return null;
   return (
-    <div className="bg-white dark:bg-gray-950 pt-4 pb-2 px-5">
+    <div className="bg-white dark:bg-gray-950 pt-2 pb-1 px-5">
       <SectionHeader icon={Sparkles} title="Novidades da Semana" subtitle="Recém chegados" onSeeMore={() => onNavigate('explore')} />
       <div className="flex gap-4 overflow-x-auto no-scrollbar snap-x -mx-5 px-5">
         {newArrivals.map((store) => (

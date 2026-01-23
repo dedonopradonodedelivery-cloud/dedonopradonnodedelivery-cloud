@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { 
   ChevronLeft, 
@@ -250,21 +251,22 @@ const AdsCarousel = () => {
     }
   ], []);
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentIndex(prev => (prev + 1) % ads.length);
-    }, 5000);
-    return () => clearInterval(interval);
-  }, [ads.length]);
+  const nextSlide = () => {
+    setCurrentIndex((prev) => (prev + 1) % ads.length);
+  };
+
+  const prevSlide = () => {
+    setCurrentIndex((prev) => (prev - 1 + ads.length) % ads.length);
+  };
 
   return (
     <div className="w-full mb-10 px-4">
-      <div className="relative aspect-[16/9] w-full rounded-[2.5rem] overflow-hidden shadow-2xl border border-white/10">
+      <div className="relative aspect-[16/9] w-full rounded-[2.5rem] overflow-hidden shadow-2xl border border-white/10 group">
         {ads.map((ad, idx) => (
           <div 
             key={ad.id}
-            className={`absolute inset-0 w-full h-full p-8 flex flex-col justify-center transition-all duration-700 ease-in-out ${
-              idx === currentIndex ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-10 pointer-events-none'
+            className={`absolute inset-0 w-full h-full p-8 flex flex-col justify-center transition-opacity duration-700 ease-in-out ${
+              idx === currentIndex ? 'opacity-100' : 'opacity-0 pointer-events-none'
             }`}
             style={{ backgroundColor: ad.bgColor }}
           >
@@ -297,6 +299,14 @@ const AdsCarousel = () => {
             />
           ))}
         </div>
+        
+        {/* Navigation Buttons */}
+        <button onClick={prevSlide} className="absolute left-3 top-1/2 -translate-y-1/2 z-20 p-2 bg-black/20 rounded-full text-white opacity-0 group-hover:opacity-100 transition-opacity active:scale-95">
+          <ChevronLeft className="w-5 h-5" />
+        </button>
+        <button onClick={nextSlide} className="absolute right-3 top-1/2 -translate-y-1/2 z-20 p-2 bg-black/20 rounded-full text-white opacity-0 group-hover:opacity-100 transition-opacity active:scale-95">
+          <ChevronRight className="w-5 h-5" />
+        </button>
       </div>
     </div>
   );
@@ -394,7 +404,6 @@ const BannerEditorPreview = ({ data }: { data: any }) => {
     );
 };
 
-// FIX: Added ValidationErrorsModal component to fix "Cannot find name 'ValidationErrorsModal'" error.
 const ValidationErrorsModal: React.FC<{ errors: string[]; onClose: () => void }> = ({ errors, onClose }) => {
   if (errors.length === 0) return null;
   return (
@@ -765,13 +774,15 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
             banner_id: bannerData.id,
             details: { 
                 shopName: user.user_metadata?.store_name || 'Loja',
-                isFirstBanner: true,
+                isFirstBanner: true, // Lógica de verificação omitida por simplicidade
                 target: bannerTarget,
                 config,
             }
         });
         if (logError) console.warn("Log de auditoria falhou:", logError);
 
+        // 3. (OPCIONAL) Disparar notificação para ADM no primeiro banner
+        // Essa lógica seria melhor em um trigger de DB, mas fazemos aqui para o MVP.
         const { count } = await supabase.from('published_banners').select('*', { count: 'exact', head: true }).eq('merchant_id', user.id);
         if (count === 1) {
             await supabase.functions.invoke('send-email-admin-banner', {
@@ -846,8 +857,8 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
               onClick={() => alert('Solicitação de arte enviada! Entraremos em contato em breve.')}
               className="bg-slate-800 p-8 rounded-3xl border border-white/10 text-left hover:border-emerald-500/50 transition-all group relative"
             >
-              <div className="absolute top-4 right-4 bg-emerald-500/10 text-emerald-400 text-[9px] font-bold px-2.5 py-1 rounded-full border border-emerald-500/20">
-                  Oferta especial
+              <div className="absolute top-4 right-4 bg-emerald-500/10 text-emerald-400 text-[9px] font-bold px-3 py-1.5 rounded-xl border border-emerald-500/20">
+                  Promoção de lançamento do app
               </div>
               <div className="w-12 h-12 bg-emerald-500/10 rounded-2xl flex items-center justify-center text-emerald-400 mb-4 border border-emerald-500/20">
                   <Rocket size={24} />
@@ -863,10 +874,15 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
                 <li className="flex items-center gap-2"><Check size={14} className="text-emerald-400"/>Banner otimizado para o app</li>
               </ul>
 
-              <div className="flex items-baseline gap-2 mb-6">
-                <span className="text-slate-500 line-through">R$ 129,90</span>
-                <span className="text-3xl font-black text-white">R$ 59,90</span>
-                <span className="text-slate-400 text-xs font-medium">por arte</span>
+              <div className="mb-6">
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-slate-500 line-through">R$ 179,90</span>
+                    <span className="text-3xl font-black text-white">R$ 89,90</span>
+                    <span className="text-slate-400 text-xs font-medium">por arte</span>
+                  </div>
+                  <div className="mt-1.5 w-fit px-2 py-0.5 bg-emerald-500/10 border border-emerald-500/20 rounded-md">
+                      <span className="text-emerald-400 font-bold text-[10px]">Economize R$ 90,00 (~50% OFF)</span>
+                  </div>
               </div>
 
               <span className="text-xs font-black text-emerald-400 uppercase tracking-widest flex items-center gap-2 group-hover:gap-3 transition-all">
@@ -888,6 +904,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
       };
 
       if (isCustom) {
+        // EDITOR PERSONALIZADO
         return (
             <div className="animate-in fade-in duration-500">
                 <div className="mb-8">
@@ -929,7 +946,9 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
             </div>
         );
       } else {
+        // CRIADOR RÁPIDO (TEMPLATE)
         if (!selectedGoal) {
+          // STEP 1: CHOOSE GOAL
           return (
             <div className="animate-in slide-in-from-right duration-300">
               <h3 className="font-black text-sm uppercase tracking-widest text-blue-400 mb-4">Passo 1: Qual seu objetivo?</h3>
@@ -949,6 +968,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
         }
 
         if (selectedGoal && !selectedTemplate) {
+          // STEP 2: CHOOSE TEMPLATE
           const availableTemplates = BANNER_TEMPLATES.filter(t => t.goal === selectedGoal);
           return (
             <div className="animate-in slide-in-from-right duration-300">
@@ -967,6 +987,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
         }
 
         if (selectedTemplate) {
+          // STEP 3: FILL FORM & PREVIEW
           return (
             <div className="animate-in slide-in-from-right duration-300">
                 <button onClick={handleBackToSelection} className="flex items-center gap-2 text-xs text-slate-400 mb-4"><ChevronLeft size={16} /> Voltar</button>
@@ -1007,7 +1028,6 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
     return null;
   };
 
-  // FIX: Added missing isCheckoutStep constant to fix "Cannot find name 'isCheckoutStep'" error.
   const isCheckoutStep = !!(selectedMode && selectedPeriods.length > 0 && selectedNeighborhoods.length > 0 && isArtSaved);
 
   return (
@@ -1021,7 +1041,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
       )}
 
       <header className="sticky top-0 z-40 bg-[#020617]/80 backdrop-blur-xl border-b border-white/5 px-6 py-4 flex items-center gap-4">
-        <button onClick={onBack} className="p-2 bg-slate-900 rounded-xl text-slate-400 hover:text-white transition-all active:scale-95"><ChevronLeft size={20} /></button>
+        <button onClick={view === 'sales' ? onBack : () => setView('sales')} className="p-2 bg-slate-900 rounded-xl text-slate-400 hover:text-white transition-all active:scale-95"><ChevronLeft size={20} /></button>
         <div>
           <h1 className="font-bold text-lg leading-none flex items-center gap-2">Anunciar no Bairro <Crown size={16} className="text-amber-400 fill-amber-400" /></h1>
           <p className="text-[10px] text-blue-400 uppercase font-black tracking-widest mt-1">Configuração de Campanha</p>
@@ -1029,274 +1049,23 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
       </header>
 
       <main className="flex-1 p-6 space-y-16 pb-64 max-w-md mx-auto w-full">
-        
-        {/* BLOCO DE DESTAQUE: URGÊNCIA E CONVERSÃO */}
-        <section className="animate-in fade-in slide-in-from-top-4 duration-700">
-            <div className="bg-slate-900 border-l-4 border-blue-600 rounded-r-[2.5rem] p-8 shadow-2xl relative overflow-hidden group">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none"></div>
-                <div className="relative z-10">
-                    <div className="flex items-center gap-2 mb-3">
-                        <ShieldAlert className="w-5 h-5 text-blue-500" />
-                        <h3 className="text-lg font-black text-white leading-tight uppercase tracking-tighter">
-                            Seu concorrente pode estar aqui antes de você
-                        </h3>
-                    </div>
-                    <p className="text-sm text-slate-400 leading-relaxed mb-6 font-medium">
-                        Todos os dias, milhares de pessoas de Jacarepaguá (450 mil+ moradores) acessam o app em busca de produtos e serviços. 
-                        Os espaços de destaque são limitados e essa promoção de lançamento não tem data para acabar.
-                    </p>
-                    <div className="flex flex-col gap-2 pt-4 border-t border-white/5">
-                        <p className="text-xs font-black text-white uppercase tracking-widest flex items-center gap-2">
-                            <span className="w-1.5 h-1.5 bg-blue-500 rounded-full"></span>
-                            Quem garante o espaço agora sai na frente.
-                        </p>
-                        <p className="text-xs font-bold text-slate-500 uppercase tracking-widest flex items-center gap-2">
-                            <span className="w-1.5 h-1.5 bg-slate-700 rounded-full"></span>
-                            Quem deixa para depois, fica invisível.
-                        </p>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        {/* BLOCO 1: POSICIONAMENTO */}
-        <section className="space-y-6">
-          <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-blue-500 flex items-center gap-2 px-1">
-            <Target size={14} /> 1. Onde deseja aparecer?
-          </h3>
-          <div className="grid grid-cols-1 gap-4">
-            {DISPLAY_MODES.map((mode) => (
-              <button 
-                key={mode.id} 
-                onClick={() => handleModeSelection(mode)} 
-                className={`relative flex items-start text-left p-6 rounded-[2rem] border-2 transition-all duration-300 gap-5 ${selectedMode?.id === mode.id ? 'bg-blue-600/10 border-blue-500 shadow-lg' : 'bg-white/5 border-white/10'}`}
-              >
-                <div className={`p-4 rounded-2xl shrink-0 ${selectedMode?.id === mode.id ? 'bg-blue-50 text-white shadow-lg' : 'bg-white/5 text-slate-400'}`}><mode.icon size={28} /></div>
-                <div className="flex-1 min-w-0 pr-4">
-                  <div className="flex items-center justify-between mb-1">
-                    <p className="text-sm font-black text-white uppercase tracking-tight">{mode.label}</p>
-                    <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 ${selectedMode?.id === mode.id ? 'border-blue-500' : 'border-slate-700'}`}>{selectedMode?.id === mode.id && <div className="w-2 h-2 bg-blue-500 rounded-full" />}</div>
-                  </div>
-                  <div className="flex items-baseline gap-1.5 mb-1.5">
-                    <span className="text-xs text-slate-500 line-through">R$ {mode.originalPrice.toFixed(2)}</span>
-                    <span className="text-sm font-black text-white">por R$ {mode.price.toFixed(2)}</span>
-                  </div>
-                  <p className="text-[10px] text-slate-300 font-medium leading-relaxed">{mode.description}</p>
-                </div>
-              </button>
-            ))}
-          </div>
-        </section>
-
-        {/* BLOCO 2: PERÍODO */}
-        <section 
-            ref={periodRef} 
-            className={`space-y-6 transition-all duration-500 ${!selectedMode ? 'opacity-20 pointer-events-none grayscale' : 'opacity-100'}`}
-        >
-            <div className={`flex flex-col transition-all duration-500 ${highlightPeriod ? 'scale-105' : 'scale-100'}`}>
-              <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-blue-500 flex items-center gap-2 px-1">
-                <Calendar size={14} /> 2. Período de Exibição
-              </h3>
-              <p className="text-[9px] text-slate-500 uppercase font-bold mt-1 ml-6">Escolha por quanto tempo quer anunciar.</p>
-            </div>
-            
-            <div className={`flex gap-3 transition-all duration-700 ${highlightPeriod ? 'ring-2 ring-blue-500/20 rounded-3xl p-1' : ''}`}>
-                {dynamicPeriods.map(p => (
-                    <button 
-                        key={p.id} 
-                        onClick={() => togglePeriod(p.id)} 
-                        className={`flex-1 p-5 rounded-3xl border-2 transition-all text-left group ${selectedPeriods.includes(p.id) ? 'bg-blue-600/10 border-blue-500' : 'bg-white/5 border-white/10'}`}
-                    >
-                        <div className="flex justify-between items-start mb-2">
-                           <p className="text-[10px] font-black text-white uppercase">{p.label}</p>
-                           {selectedPeriods.includes(p.id) && <CheckCircle2 size={14} className="text-blue-500" />}
-                        </div>
-                        <p className="text-[9px] text-blue-400 font-bold font-mono">{p.dates}</p>
-                        {p.days === 90 && selectedMode && (
-                          <p className="text-[9px] text-emerald-400 font-black uppercase mt-1">3x de R$ {selectedMode.price.toFixed(2)} s/ juros</p>
-                        )}
-                    </button>
-                ))}
-            </div>
-        </section>
-
-        {/* BLOCO 3: BAIRROS */}
-        <section 
-            ref={neighborhoodRef} 
-            className={`space-y-6 transition-all duration-500 ${selectedPeriods.length === 0 ? 'opacity-20 grayscale pointer-events-none' : 'opacity-100'}`}
-        >
-            <div className="flex items-center justify-between px-1">
-              <div className="flex flex-col">
-                <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-blue-500 flex items-center gap-2">
-                    <MapPin size={14} /> 3. Bairros de Alcance
-                </h3>
-                <p className="text-[9px] text-slate-500 uppercase font-bold mt-1 ml-6">Onde seu banner será visto.</p>
-              </div>
-              <button onClick={selectAllAvailableHoods} className="text-[9px] font-black text-[#1E5BFF] uppercase tracking-widest bg-blue-500/10 px-3 py-1.5 rounded-xl border border-blue-500/20 active:scale-95 transition-all">Selecionar Todos</button>
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-                {NEIGHBORHOODS.map(hood => {
-                    const { available } = checkHoodAvailability(hood);
-                    const isSelected = selectedNeighborhoods.includes(hood);
-                    return (
-                        <button key={hood} onClick={() => { if (available) { setSelectedNeighborhoods(prev => prev.includes(hood) ? prev.filter(h => h !== hood) : [...prev, hood]); } }} className={`p-4 rounded-2xl border-2 flex flex-col justify-between transition-all min-h-[80px] ${!available ? 'bg-slate-900/50 border-white/5 opacity-50 cursor-default' : isSelected ? 'bg-blue-600/10 border-blue-500' : 'bg-slate-900 border-white/5'}`}>
-                            <p className={`font-bold text-xs ${!available ? 'text-slate-600' : 'text-white'}`}>{hood}</p>
-                            <p className={`text-[8px] font-black uppercase tracking-widest mt-1 ${!available ? 'text-rose-500' : isSelected ? 'text-blue-400' : 'text-emerald-500'}`}>{!available ? `Ocupado` : isSelected ? 'Selecionado' : 'Livre'}</p>
-                        </button>
-                    );
-                })}
-            </div>
-        </section>
-
-        {/* BLOCO 4: DESIGN */}
-        <section ref={creativeRef} className={`space-y-8 transition-all duration-500 ${selectedNeighborhoods.length === 0 ? 'opacity-20 pointer-events-none' : 'opacity-100'}`}>
-          <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-blue-500 flex items-center gap-2 px-1"><Palette size={14} /> 4. Design da Arte</h3>
-          
-          <div className="space-y-4">
-              <div onClick={() => setArtChoice('diy')} className={`rounded-[2.5rem] border-2 transition-all cursor-pointer overflow-hidden ${artChoice === 'diy' ? 'bg-slate-900 border-blue-500 shadow-xl' : 'bg-slate-900 border-white/5'}`}>
-                <div className="p-8">
-                    <div className="flex items-start gap-5 mb-6">
-                        <div className="w-12 h-12 bg-blue-500/10 rounded-2xl flex items-center justify-center text-blue-400 shrink-0"><Paintbrush size={24} /></div>
-                        <div>
-                            <h3 className="text-lg font-bold text-white mb-1 leading-tight">Personalizar manualmente</h3>
-                            <p className="text-xs text-slate-400 leading-relaxed">Use seu banner pronto ou crie no editor.</p>
-                        </div>
-                    </div>
-
-                    {artChoice === 'diy' && (
-                        <div className="space-y-4 animate-in slide-in-from-top-4 duration-500 pt-4 border-t border-white/5">
-                            <div className="grid grid-cols-2 gap-3">
-                                <button 
-                                  onClick={(e) => { e.stopPropagation(); setDiyFlowStep('upload'); }}
-                                  className={`p-4 rounded-2xl border-2 flex flex-col items-center text-center gap-3 transition-all ${diyFlowStep === 'upload' && isArtSaved ? 'bg-emerald-500/10 border-emerald-500/30' : 'bg-white/5 border-white/5 hover:border-white/20'}`}
-                                >
-                                    <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-slate-400"><ImageIcon size={20} /></div>
-                                    <div>
-                                        <p className="text-[10px] font-black text-white uppercase leading-tight">Usar banner pronto</p>
-                                        <p className="text-[8px] text-slate-500 uppercase mt-1">Upload de arquivo</p>
-                                    </div>
-                                </button>
-
-                                <button 
-                                  onClick={(e) => { e.stopPropagation(); setDiyFlowStep('editor'); setIsEditingArt(true); }}
-                                  className={`p-4 rounded-2xl border-2 flex flex-col items-center text-center gap-3 transition-all ${diyFlowStep === 'editor' && isArtSaved ? 'bg-blue-500/10 border-blue-500/30' : 'bg-white/5 border-white/5 hover:border-white/20'}`}
-                                >
-                                    <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-slate-400"><Palette size={20} /></div>
-                                    <div>
-                                        <p className="text-[10px] font-black text-white uppercase leading-tight">Criar no editor</p>
-                                        <p className="text-[8px] text-slate-500 uppercase mt-1">Fazer do zero</p>
-                                    </div>
-                                </button>
-                            </div>
-
-                            {isArtSaved && (
-                                <div className="p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl flex items-center justify-between animate-in zoom-in duration-300">
-                                    <div className="flex items-center gap-3">
-                                        <CheckCircle2 size={16} className="text-emerald-400" />
-                                        <span className="text-[10px] font-black text-emerald-400 uppercase">Arte {diyFlowStep === 'upload' ? 'Enviada' : 'Criada'}</span>
-                                    </div>
-                                    <button onClick={() => setDiyFlowStep('selection')} className="text-[9px] font-black text-white bg-slate-800 px-3 py-1.5 rounded-lg uppercase tracking-widest">Alterar</button>
-                                </div>
-                            )}
-                        </div>
-                    )}
-                </div>
-              </div>
-
-              <div onClick={() => { setArtChoice('pro'); setIsArtSaved(true); setView('sales'); scrollTo(paymentRef, 80); }} className={`rounded-[2.5rem] border-2 transition-all cursor-pointer overflow-hidden ${artChoice === 'pro' ? 'bg-slate-900 border-amber-500 shadow-xl shadow-amber-500/5' : 'bg-slate-900 border-white/5'}`}>
-                  <div className="p-8">
-                    <div className="flex items-start justify-between">
-                        <div className="flex items-start gap-5">
-                            <div className="w-12 h-12 bg-amber-400/10 rounded-2xl flex items-center justify-center text-amber-400 shrink-0"><Rocket size={24} /></div>
-                            <div>
-                                <h3 className="text-lg font-bold text-white mb-1 leading-tight">Contratar time profissional</h3>
-                                <p className="text-xs text-slate-400 leading-relaxed max-w-[180px]">Nós criamos o banner profissional para você.</p>
-                            </div>
-                        </div>
-                        <div className="text-right">
-                            <span className="text-slate-500 line-through text-[9px] font-bold">R$ 149</span>
-                            <p className="text-xl font-black text-white">R$ 69,90</p>
-                        </div>
-                    </div>
-                    {artChoice === 'pro' && (
-                         <div className="mt-6 p-4 bg-amber-400/10 border border-amber-400/20 rounded-2xl flex items-center justify-between animate-in zoom-in duration-300">
-                            <div className="flex items-center gap-3">
-                                <CheckCircle2 size={16} className="text-amber-400" />
-                                <span className="text-[10px] font-black text-amber-400 uppercase tracking-widest">Opção PRO Selecionada</span>
-                            </div>
-                            <button onClick={() => setView('pro_chat')} className="text-[9px] font-black text-white bg-amber-600 px-3 py-1.5 rounded-lg uppercase tracking-widest">Enviar Briefing</button>
-                        </div>
-                    )}
-                  </div>
-              </div>
-          </div>
-        </section>
-
-        {/* BLOCO 5: CHECKOUT FINAL */}
-        <section ref={paymentRef} className={`space-y-8 transition-all duration-500 ${!isArtSaved ? 'opacity-20 pointer-events-none' : 'opacity-100'}`}>
-            <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-blue-500 flex items-center gap-2 px-1"><Check size={14} /> 5. Finalizar Compra</h3>
-            <div className="bg-slate-900 rounded-[2.5rem] p-8 border border-white/10 shadow-2xl space-y-8">
-                <div className="space-y-2">
-                    <div className="flex justify-between text-sm"><span className="text-slate-500">Modo: {selectedMode?.label}</span><span className="font-bold text-white">R$ {selectedMode?.price.toFixed(2)} / mês</span></div>
-                    <div className="flex justify-between text-sm"><span className="text-slate-500">Bairros selecionados</span><span className="font-bold text-white">× {selectedNeighborhoods.length}</span></div>
-                    <div className="flex justify-between text-sm"><span className="text-slate-500">Vigência Total</span><span className="font-bold text-white">{prices.isPackage ? '90 dias' : '30 dias'}</span></div>
-                    {artChoice === 'pro' && <div className="flex justify-between text-sm text-amber-400"><span className="font-medium">Arte Profissional</span><span className="font-black">+ R$ 69,90</span></div>}
-                    
-                    <div className="pt-4 border-t border-white/5 flex flex-col items-end">
-                      <div className="flex justify-between items-center w-full mb-1">
-                        <span className="text-sm font-bold text-slate-300">Total do Pacote</span>
-                        <span className="text-2xl font-black text-white">R$ {prices.current.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
-                      </div>
-                      {prices.isPackage && (
-                        <p className="text-emerald-400 font-black text-xs uppercase tracking-widest">3x de R$ {prices.monthly.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} sem juros</p>
-                      )}
-                    </div>
-                </div>
-                <div className="space-y-3 pt-6 border-t border-white/10">
-                    <button onClick={() => setPaymentMethod('pix')} className={`w-full p-5 rounded-2xl border-2 flex items-center justify-between transition-all ${paymentMethod === 'pix' ? 'bg-blue-600/10 border-blue-500' : 'bg-slate-950 border-transparent'}`}><div className="flex items-center gap-4"><QrCode size={20} className={paymentMethod === 'pix' ? 'text-blue-400' : 'text-slate-600'} /><span className="font-bold text-sm">PIX (Imediato)</span></div>{paymentMethod === 'pix' && <CheckCircle2 size={18} className="text-blue-500" />}</button>
-                </div>
-            </div>
-            {/* Espaçador para o botão fixo não cobrir o conteúdo final */}
-            <div className="h-32"></div>
-        </section>
+        {renderStep()}
       </main>
 
-      {!isSuccess && (view === 'sales' || view === 'pro_checkout') && (
-      <div className="fixed bottom-0 left-0 right-0 p-6 bg-[#020617]/95 backdrop-blur-xl border-t border-white/10 z-[100] max-w-md mx-auto shadow-[0_-20px_40px_rgba(0,0,0,0.6)] animate-in slide-in-from-bottom duration-500">
-        <button 
-          onClick={handleFooterClick} 
-          disabled={isSubmitting} 
-          className={`w-full py-5 rounded-[2rem] shadow-xl shadow-blue-500/30 flex flex-col items-center justify-center transition-all active:scale-[0.98] ${
-            selectedMode ? 'bg-[#1E5BFF] text-white hover:bg-blue-600' : 'bg-white/5 text-slate-500 cursor-not-allowed opacity-50'
-          }`}
-        >
-          {isSubmitting ? (
-            <Loader2 className="w-6 h-6 animate-spin" />
-          ) : !isCheckoutStep ? (
-              <span className="font-black text-sm uppercase tracking-widest">
-                  {!selectedMode ? "Escolha onde aparecer" : 
-                   selectedPeriods.length === 0 ? "Escolha o período" :
-                   selectedNeighborhoods.length === 0 ? "Escolha os bairros" :
-                   "Configure a arte"}
-              </span>
-          ) : (
-              <div className="flex flex-col items-center">
-                  <div className="flex items-center gap-2 mb-0.5">
-                    <span className="text-[10px] font-black text-white/60 uppercase tracking-widest">FINALIZAR: {selectedMode.label}</span>
-                    <ArrowRight size={14} className="text-white/60" />
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <span className="text-xl font-black text-white">PAGAR AGORA — R$ {prices.current.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
-                  </div>
-                  {prices.isPackage && (
-                    <span className="text-[9px] font-black text-emerald-400 uppercase tracking-widest mt-0.5">Ou 3x de R$ {prices.monthly.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
-                  )}
-              </div>
-          )}
-        </button>
-      </div>
+      {view !== 'sales' && (
+        <div className="fixed bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-slate-900 via-slate-900 to-transparent max-w-md mx-auto z-30">
+          <button 
+            onClick={handlePublish}
+            disabled={isSubmitting || (view === 'creator' && !selectedTemplate)}
+            className="w-full bg-[#1E5BFF] text-white font-black py-5 rounded-2xl shadow-xl shadow-blue-500/20 flex items-center justify-center gap-3 active:scale-[0.98] transition-all disabled:opacity-50"
+          >
+            {isSubmitting ? <Loader2 className="animate-spin" /> : 'Publicar Banner'}
+          </button>
+        </div>
       )}
-
+      
+      <ValidationErrorsModal errors={validationErrors} onClose={() => setValidationErrors([])} />
+      
       {isSuccess && (
         <div className="fixed inset-0 z-[100] bg-black/80 flex items-center justify-center p-6 animate-in fade-in">
            <div className="bg-slate-800 p-10 rounded-2xl flex flex-col items-center text-center">
@@ -1308,9 +1077,6 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
            </div>
         </div>
       )}
-      
-      {/* FIX: Added ValidationErrorsModal usage with state handler to fix the error. */}
-      <ValidationErrorsModal errors={validationErrors} onClose={() => setValidationErrors([])} />
     </div>
   );
 };

@@ -18,10 +18,13 @@ import {
   LifeBuoy,
   AlertTriangle,
   Crown,
-  Star
+  Star,
+  Moon,
+  Sun
 } from 'lucide-react';
 import { User as SupabaseUser } from '@supabase/supabase-js';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTheme } from '@/contexts/ThemeContext';
 
 interface StoreAreaViewProps {
   onBack: () => void;
@@ -38,7 +41,8 @@ const ServiceBlock: React.FC<{
   isDestructive?: boolean;
   colorClass?: string;
   badge?: number;
-}> = ({ icon: Icon, label, description, onClick, isDestructive, colorClass, badge }) => (
+  rightElement?: React.ReactNode;
+}> = ({ icon: Icon, label, description, onClick, isDestructive, colorClass, badge, rightElement }) => (
   <button 
     onClick={onClick}
     className="w-full flex items-center justify-between p-5 bg-white dark:bg-gray-800 border-b border-gray-50 dark:border-gray-700 last:border-b-0 active:bg-gray-50 dark:active:bg-gray-700/50 transition-colors group"
@@ -67,7 +71,7 @@ const ServiceBlock: React.FC<{
         )}
       </div>
     </div>
-    <ChevronRight size={16} className={isDestructive ? 'text-red-300' : 'text-gray-300'} />
+    {rightElement || <ChevronRight size={16} className={isDestructive ? 'text-red-300' : 'text-gray-300'} />}
   </button>
 );
 
@@ -82,6 +86,7 @@ const SectionHeader: React.FC<{ title: string; icon?: React.ElementType }> = ({ 
 
 export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate, user }) => {
   const { signOut } = useAuth();
+  const { theme, toggleTheme } = useTheme();
 
   const handleLogout = async () => {
     if (confirm('Deseja realmente sair da sua conta de lojista?')) {
@@ -137,7 +142,7 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
               label="Avaliações" 
               description="Responda seus clientes e gerencie sua reputação"
               onClick={() => onNavigate('merchant_reviews')}
-              badge={2} // Mock de notificação
+              badge={2} 
               colorClass="bg-amber-50 text-amber-600"
             />
             <ServiceBlock 
@@ -180,10 +185,28 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
           </div>
         </section>
 
-        {/* 4. SEÇÃO: SUPORTE */}
+        {/* 4. SEÇÃO: CONFIGURAÇÕES */}
+        <section>
+          <SectionHeader title="Preferências" />
+          <div className="bg-white dark:bg-gray-800 rounded-[2.5rem] border border-gray-100 dark:border-gray-700 overflow-hidden shadow-sm">
+            <ServiceBlock 
+              icon={theme === 'dark' ? Moon : Sun} 
+              label="Modo Noite" 
+              description={theme === 'dark' ? "Ativado" : "Desativado"}
+              onClick={toggleTheme}
+              rightElement={
+                <div className={`w-12 h-6 rounded-full p-1 transition-colors duration-300 ${theme === 'dark' ? 'bg-[#1E5BFF]' : 'bg-gray-200 dark:bg-gray-700'}`}>
+                  <div className={`w-4 h-4 bg-white rounded-full shadow-sm transform transition-transform duration-300 ${theme === 'dark' ? 'translate-x-6' : 'translate-x-0'}`} />
+                </div>
+              }
+            />
+          </div>
+        </section>
+
+        {/* 5. SEÇÃO: SUPORTE */}
         <section>
           <SectionHeader title="Suporte" />
-          <div className="bg-white dark:bg-gray-800 rounded-[2.5rem] border border-gray-100 dark:border-gray-700 overflow-hidden shadow-sm">
+          <div className="bg-white dark:bg-gray-800 rounded-[2.5rem] border border-gray-100 dark:border-gray-800 overflow-hidden shadow-sm">
             <ServiceBlock 
               icon={LifeBuoy} 
               label="Suporte" 
@@ -193,7 +216,7 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
           </div>
         </section>
 
-        {/* 5. SEÇÃO: GERAL */}
+        {/* 6. SEÇÃO: GERAL */}
         <section>
           <SectionHeader title="Geral" />
           <div className="bg-white dark:bg-gray-800 rounded-[2.5rem] border border-gray-100 dark:border-gray-700 overflow-hidden shadow-sm">
