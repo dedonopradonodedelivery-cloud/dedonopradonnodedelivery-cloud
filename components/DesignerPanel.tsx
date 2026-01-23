@@ -1,358 +1,122 @@
-
-import React, { useState, useEffect, useRef } from 'react';
-import { User } from '@supabase/supabase-js';
+import React, { useState, useRef, useEffect } from 'react';
 import { 
-  Palette, 
   ChevronLeft, 
-  ChevronRight,
-  X, 
-  Search, 
-  Clock, 
-  MessageSquare, 
+  MoreHorizontal, 
+  Loader2, 
   CheckCircle2, 
   AlertCircle, 
-  MoreHorizontal,
-  Send,
-  Image as ImageIcon,
-  Paperclip,
-  Check,
-  Building,
-  Loader2,
-  Calendar,
-  Hourglass,
-  Flag,
-  Bell
+  Send, 
+  Paperclip, 
+  Clock,
+  User,
+  MessageSquare
 } from 'lucide-react';
+import { User as SupabaseUser } from '@supabase/supabase-js';
 
 interface DesignerPanelProps {
-  user: User;
+  user: SupabaseUser | null;
   onBack: () => void;
 }
 
-interface OrderCard {
-  id: string;
-  merchantId: string;
-  merchantName: string;
-  serviceType: string;
-  status: 'new' | 'production' | 'review' | 'done';
-  date: string;
-  priority?: 'urgent' | 'priority' | 'normal';
-  purchaseDate: string;
-  deliveryDeadline: string;
-  hasUnreadMessages?: boolean; // Novo campo para notificação
-}
-
-interface ChatMessage {
-  id: number;
-  role: 'user' | 'designer' | 'system';
-  text: string;
-  timestamp: string;
-  type?: 'text' | 'image' | 'file';
-}
-
-const INITIAL_ORDERS: OrderCard[] = [
-  { id: 'ord-001', merchantId: 'm-123', merchantName: 'Hamburgueria Brasa', serviceType: 'Banner Home', status: 'new', date: 'Hoje, 10:30', priority: 'urgent', purchaseDate: '22/01/2026', deliveryDeadline: '25/01/2026', hasUnreadMessages: false },
-  { id: 'ord-002', merchantId: 'm-456', merchantName: 'Studio Hair Vip', serviceType: 'Destaque Categoria', status: 'production', date: 'Ontem, 16:20', priority: 'priority', purchaseDate: '21/01/2026', deliveryDeadline: '24/01/2026', hasUnreadMessages: false },
-  { id: 'ord-003', merchantId: 'm-789', merchantName: 'PetShop Amigo', serviceType: 'Arte Instagram', status: 'review', date: '10/11', priority: 'normal', purchaseDate: '19/01/2026', deliveryDeadline: '22/01/2026', hasUnreadMessages: false },
-  { id: 'ord-004', merchantId: 'm-321', merchantName: 'Farmácia Central', serviceType: 'Banner Promo', status: 'done', date: '08/11', priority: 'normal', purchaseDate: '15/01/2026', deliveryDeadline: '18/01/2026', hasUnreadMessages: false },
-  { id: 'ord-005', merchantId: 'm-654', merchantName: 'Pizzaria do Zé', serviceType: 'Banner Home', status: 'new', date: 'Hoje, 09:15', priority: 'normal', purchaseDate: '23/01/2026', deliveryDeadline: '26/01/2026', hasUnreadMessages: false },
+// Mock Data
+const MOCK_ORDERS = [
+  { id: 'ord-1', merchantName: 'Hamburgueria do Zé', serviceType: 'Banner Home', status: 'new', date: 'Hoje, 10:00' },
+  { id: 'ord-2', merchantName: 'Studio Bella', serviceType: 'Destaque Categoria', status: 'in_progress', date: 'Ontem' },
+  { id: 'ord-3', merchantName: 'PetShop Patas', serviceType: 'Banner Home', status: 'review', date: '02 Nov' },
 ];
 
-const COLUMNS = [
-  { id: 'new', title: 'Novos', color: 'bg-blue-500' },
-  { id: 'production', title: 'Em Produção', color: 'bg-amber-500' },
-  { id: 'review', title: 'Revisão', color: 'bg-purple-500' },
-  { id: 'done', title: 'Concluído', color: 'bg-emerald-500' },
+const MOCK_MESSAGES = [
+  { id: 1, role: 'system', text: 'Pedido iniciado. O cliente enviou os arquivos.', timestamp: '10:00' },
+  { id: 2, role: 'merchant', text: 'Olá, gostaria de algo com cores vibrantes.', timestamp: '10:05' },
+  { id: 3, role: 'designer', text: 'Perfeito! Vou preparar um esboço.', timestamp: '10:10' },
 ];
 
 export const DesignerPanel: React.FC<DesignerPanelProps> = ({ user, onBack }) => {
-  const [activeView, setActiveView] = useState<'board' | 'chat'>('board');
-  const [orders, setOrders] = useState<OrderCard[]>(INITIAL_ORDERS);
-  const [selectedOrder, setSelectedOrder] = useState<OrderCard | null>(null);
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [activeView, setActiveView] = useState<'dashboard' | 'chat'>('dashboard');
+  const [selectedOrder, setSelectedOrder] = useState<any>(null);
+  const [messages, setMessages] = useState(MOCK_MESSAGES);
   const [chatInput, setChatInput] = useState('');
-  
-  // State for priority menu
-  const [openPriorityMenu, setOpenPriorityMenu] = useState<string | null>(null);
-  
+  const [loading, setLoading] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
 
-  // Simulate initial data loading
-  useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 800);
-    return () => clearTimeout(timer);
-  }, []);
-
-  // --- SIMULAÇÃO DE MENSAGEM EM TEMPO REAL ---
-  useEffect(() => {
-    // Simula o recebimento de uma mensagem do Lojista (ord-002) após 5 segundos
-    const timer = setTimeout(() => {
-        setOrders(prevOrders => prevOrders.map(o => {
-            if (o.id === 'ord-002') {
-                // Regra anti-bug: Se o designer já está no chat deste pedido, não marca como não lida
-                if (activeView === 'chat' && selectedOrder?.id === 'ord-002') {
-                    return o;
-                }
-                return { ...o, hasUnreadMessages: true };
-            }
-            return o;
-        }));
-    }, 5000);
-
-    return () => clearTimeout(timer);
-  }, [activeView, selectedOrder]);
-
-  // Handle Opening Chat
-  const handleOpenChat = (order: OrderCard) => {
-    // Remove notificação de "Nova mensagem" ao abrir o chat (Regra 4)
-    if (order.hasUnreadMessages) {
-        setOrders(prev => prev.map(o => o.id === order.id ? { ...o, hasUnreadMessages: false } : o));
-    }
-
-    setLoading(true);
+  const handleOrderClick = (order: any) => {
     setSelectedOrder(order);
-    
-    // Simulate fetching chat history based on orderID
-    setTimeout(() => {
-      const mockHistory: ChatMessage[] = [
-        { id: 1, role: 'system', text: `Chat iniciado para o pedido #${order.id} - ${order.serviceType}`, timestamp: order.date },
-        { id: 2, role: 'system', text: 'Olá! Me envie as informações/briefing para iniciarmos seu material.', timestamp: 'Automático' }
-      ];
-      
-      // Add some fake context if it's not "new"
-      if (order.status !== 'new') {
-        mockHistory.push({ id: 3, role: 'user', text: 'Oi! Segue o logo em anexo.', timestamp: 'Ontem, 10:00', type: 'text' });
-        mockHistory.push({ id: 4, role: 'designer', text: 'Recebido! Vou iniciar o esboço.', timestamp: 'Ontem, 10:15', type: 'text' });
-      }
-
-      setMessages(mockHistory);
-      setActiveView('chat');
-      setLoading(false);
-    }, 600);
-  };
-
-  const handleSendMessage = (e?: React.FormEvent) => {
-    if (e) e.preventDefault();
-    if (!chatInput.trim()) return;
-
-    const newMsg: ChatMessage = {
-      id: Date.now(),
-      role: 'designer',
-      text: chatInput,
-      timestamp: 'Agora',
-      type: 'text'
-    };
-
-    setMessages([...messages, newMsg]);
-    setChatInput('');
-    
-    // Scroll to bottom
-    setTimeout(() => chatEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
+    setActiveView('chat');
+    // Simulate loading messages
+    setLoading(true);
+    setTimeout(() => setLoading(false), 800);
   };
 
   const handleBackToBoard = () => {
-    setActiveView('board');
     setSelectedOrder(null);
-    setMessages([]);
+    setActiveView('dashboard');
   };
 
-  // --- ACTIONS: Priority & Move ---
-
-  const handleChangePriority = (e: React.MouseEvent, orderId: string, newPriority: 'urgent' | 'priority' | 'normal') => {
-    e.stopPropagation();
-    setOrders(prev => prev.map(o => o.id === orderId ? { ...o, priority: newPriority } : o));
-    setOpenPriorityMenu(null);
-  };
-
-  const handleMoveCard = (e: React.MouseEvent, order: OrderCard, direction: 'prev' | 'next') => {
-    e.stopPropagation();
+  const handleSendMessage = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!chatInput.trim()) return;
     
-    const statusOrder: OrderCard['status'][] = ['new', 'production', 'review', 'done'];
-    const currentIndex = statusOrder.indexOf(order.status);
-    const newIndex = direction === 'next' ? currentIndex + 1 : currentIndex - 1;
+    const newMsg = {
+      id: Date.now(),
+      role: 'designer',
+      text: chatInput,
+      timestamp: 'Agora'
+    };
+    
+    setMessages([...messages, newMsg]);
+    setChatInput('');
+  };
 
-    if (newIndex >= 0 && newIndex < statusOrder.length) {
-        const newStatus = statusOrder[newIndex];
-        const oldStatusLabel = COLUMNS.find(c => c.id === order.status)?.title;
-        const newStatusLabel = COLUMNS.find(c => c.id === newStatus)?.title;
-
-        // 1. Update Order State
-        setOrders(prev => prev.map(o => o.id === order.id ? { ...o, status: newStatus } : o));
-
-        // 2. Log Message to Chat (simulated)
-        const systemMsg: ChatMessage = {
-            id: Date.now(),
-            role: 'system',
-            text: `🔔 Atualização do seu pedido ${order.id}: status mudou de ${oldStatusLabel} para ${newStatusLabel}.`,
-            timestamp: 'Agora'
-        };
-
-        // If chat is open for this order, append immediately
-        if (selectedOrder?.id === order.id) {
-            setMessages(prev => [...prev, systemMsg]);
-        }
-        // In a real app, you would dispatch this message to the backend here.
+  useEffect(() => {
+    if (activeView === 'chat' && chatEndRef.current) {
+      chatEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
-  };
-
-  const togglePriorityMenu = (e: React.MouseEvent, orderId: string) => {
-    e.stopPropagation();
-    setOpenPriorityMenu(openPriorityMenu === orderId ? null : orderId);
-  };
-
-  if (loading && !selectedOrder) {
-    return (
-      <div className="min-h-screen bg-[#0F172A] flex flex-col items-center justify-center">
-        <Loader2 className="w-10 h-10 text-[#1E5BFF] animate-spin mb-4" />
-        <p className="text-slate-400 text-xs font-black uppercase tracking-widest animate-pulse">Carregando Workspace...</p>
-      </div>
-    );
-  }
+  }, [messages, activeView]);
 
   return (
-    <div className="min-h-screen bg-[#0F172A] text-slate-200 font-sans flex flex-col" onClick={() => setOpenPriorityMenu(null)}>
-      
-      {/* --- BOARD VIEW --- */}
-      {activeView === 'board' && (
+    <div className="min-h-screen bg-[#0F172A] text-slate-200 font-sans flex flex-col">
+      {activeView === 'dashboard' && (
         <>
-          <header className="bg-slate-900 border-b border-white/5 px-6 py-4 sticky top-0 z-50 flex items-center justify-between shadow-lg">
-            <div className="flex items-center gap-4">
-              <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/20">
-                <Palette size={20} className="text-white" />
-              </div>
-              <div>
-                <h1 className="font-black text-lg text-white uppercase tracking-tighter leading-none">Designer Panel</h1>
-                <p className="text-[10px] font-bold text-indigo-400 uppercase tracking-widest mt-1">Kanban de Pedidos</p>
-              </div>
-            </div>
-            <button onClick={onBack} className="p-2.5 bg-white/5 rounded-xl text-slate-400 hover:text-white transition-all">
-              <X size={20} />
+          <header className="bg-slate-900 border-b border-white/5 px-6 py-4 sticky top-0 z-50 flex items-center gap-4">
+            <button 
+              onClick={onBack}
+              className="p-2.5 bg-[#1F2937] text-gray-400 hover:text-white transition-colors border border-white/5 rounded-xl active:scale-95"
+            >
+              <ChevronLeft size={20} />
             </button>
+            <div>
+              <h1 className="font-black text-lg text-white">Painel do Designer</h1>
+              <p className="text-xs text-slate-500 font-medium">Gerenciamento de pedidos</p>
+            </div>
           </header>
 
-          <main className="flex-1 overflow-x-auto overflow-y-hidden p-6">
-            <div className="flex items-stretch h-full min-w-max px-2">
-              {COLUMNS.map((col, index) => {
-                const colOrders = orders.filter(o => o.status === col.id);
-                return (
-                  <React.Fragment key={col.id}>
-                    <div className="w-72 flex flex-col h-full bg-slate-900/50 rounded-2xl border border-white/5 overflow-hidden">
-                      <div className="p-4 border-b border-white/5 flex items-center justify-between bg-slate-900">
-                        <div className="flex items-center gap-2">
-                          <div className={`w-2 h-2 rounded-full ${col.color}`}></div>
-                          <h3 className="font-bold text-sm text-slate-300">{col.title}</h3>
+          <main className="flex-1 p-6 overflow-y-auto no-scrollbar pb-32">
+             <div className="space-y-4">
+                <h3 className="text-xs font-black text-slate-500 uppercase tracking-widest px-1">Pedidos Recentes</h3>
+                {MOCK_ORDERS.map(order => (
+                  <div 
+                    key={order.id} 
+                    onClick={() => handleOrderClick(order)}
+                    className="bg-slate-900 p-5 rounded-3xl border border-white/5 flex items-center justify-between cursor-pointer hover:border-indigo-500/30 transition-all active:scale-[0.98]"
+                  >
+                     <div className="flex items-center gap-4">
+                        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${
+                          order.status === 'new' ? 'bg-blue-500/10 text-blue-400' : 
+                          order.status === 'review' ? 'bg-amber-500/10 text-amber-400' : 'bg-slate-800 text-slate-400'
+                        }`}>
+                           <User size={20} />
                         </div>
-                        <span className="text-xs font-bold text-slate-600 bg-slate-800 px-2 py-0.5 rounded-full">{colOrders.length}</span>
-                      </div>
-                      
-                      <div className="flex-1 p-3 overflow-y-auto space-y-3 custom-scrollbar">
-                        {colOrders.map(order => (
-                          <div 
-                            key={order.id} 
-                            onClick={() => handleOpenChat(order)}
-                            className={`bg-slate-800 p-4 rounded-xl shadow-sm border ${order.hasUnreadMessages ? 'border-blue-500/50 shadow-blue-500/20' : 'border-white/5'} hover:border-indigo-500/50 hover:shadow-indigo-500/10 cursor-pointer transition-all active:scale-[0.98] group relative`}
-                          >
-                            <div className="flex justify-between items-start mb-2">
-                              <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">{order.id}</span>
-                              
-                              <div className="flex gap-2">
-                                  {/* --- NOTIFICAÇÃO DE NOVA MENSAGEM --- */}
-                                  {order.hasUnreadMessages && (
-                                    <span className="text-[8px] font-bold bg-blue-500 text-white px-1.5 py-0.5 rounded flex items-center gap-1 animate-pulse shadow-sm shadow-blue-500/50">
-                                      <MessageSquare size={8} className="fill-current" /> Nova msg
-                                    </span>
-                                  )}
-
-                                  {/* --- INTERACTIVE PRIORITY LABEL --- */}
-                                  <div className="relative">
-                                      {order.priority === 'urgent' && (
-                                        <button onClick={(e) => togglePriorityMenu(e, order.id)} className="text-[8px] font-bold bg-red-500/10 text-red-400 px-1.5 py-0.5 rounded border border-red-500/20 hover:bg-red-500/20 transition-colors">URGENTE</button>
-                                      )}
-                                      {order.priority === 'priority' && (
-                                        <button onClick={(e) => togglePriorityMenu(e, order.id)} className="text-[8px] font-bold bg-amber-500/10 text-amber-400 px-1.5 py-0.5 rounded border border-amber-500/20 hover:bg-amber-500/20 transition-colors">PRIORIDADE</button>
-                                      )}
-                                      {order.priority === 'normal' && (
-                                        <button onClick={(e) => togglePriorityMenu(e, order.id)} className="text-[8px] font-bold bg-slate-700/50 text-slate-400 px-1.5 py-0.5 rounded border border-slate-600/50 hover:bg-slate-700 transition-colors">NORMAL</button>
-                                      )}
-                                      
-                                      {/* Priority Dropdown */}
-                                      {openPriorityMenu === order.id && (
-                                          <div className="absolute top-full right-0 mt-1 bg-slate-900 border border-white/10 rounded-lg shadow-xl z-20 flex flex-col w-24 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-                                              <button onClick={(e) => handleChangePriority(e, order.id, 'urgent')} className="px-3 py-2 text-left text-[9px] font-bold text-red-400 hover:bg-white/5 flex items-center gap-2"><Flag size={10} /> Urgente</button>
-                                              <button onClick={(e) => handleChangePriority(e, order.id, 'priority')} className="px-3 py-2 text-left text-[9px] font-bold text-amber-400 hover:bg-white/5 flex items-center gap-2"><Flag size={10} /> Prioridade</button>
-                                              <button onClick={(e) => handleChangePriority(e, order.id, 'normal')} className="px-3 py-2 text-left text-[9px] font-bold text-slate-400 hover:bg-white/5 flex items-center gap-2"><Flag size={10} /> Normal</button>
-                                          </div>
-                                      )}
-                                  </div>
-                              </div>
-                            </div>
-                            
-                            <h4 className="font-bold text-white text-sm mb-1 leading-tight group-hover:text-indigo-400 transition-colors">{order.merchantName}</h4>
-                            <p className="text-xs text-slate-400 mb-3">{order.serviceType}</p>
-                            
-                            {/* Datas de Compra e Entrega */}
-                            <div className="mb-3 pt-3 border-t border-white/5 grid grid-cols-1 gap-1">
-                                <div className="flex items-center gap-2 text-[10px] text-slate-400">
-                                    <Calendar size={10} className="text-slate-500" />
-                                    <span>Compra: <span className="text-slate-300 font-medium">{order.purchaseDate}</span></span>
-                                </div>
-                                <div className="flex items-center gap-2 text-[10px] text-slate-400">
-                                    <Hourglass size={10} className="text-indigo-400" />
-                                    <span>Entrega: <span className="text-indigo-300 font-bold">{order.deliveryDeadline}</span></span>
-                                </div>
-                            </div>
-
-                            <div className="flex items-center justify-between pt-2 border-t border-white/5">
-                              <div className="flex items-center gap-1.5 text-[10px] text-slate-500">
-                                <Clock size={12} /> {order.date}
-                              </div>
-                              
-                              {/* --- COLUMN NAVIGATION ARROWS --- */}
-                              <div className="flex items-center gap-1">
-                                {index > 0 && (
-                                    <button 
-                                        onClick={(e) => handleMoveCard(e, order, 'prev')} 
-                                        className="p-1 rounded bg-slate-700 text-slate-400 hover:text-white hover:bg-slate-600 transition-colors"
-                                        title="Mover para coluna anterior"
-                                    >
-                                        <ChevronLeft size={12} />
-                                    </button>
-                                )}
-                                
-                                <div className="w-6 h-6 rounded-full bg-slate-700 flex items-center justify-center text-slate-400 ml-1">
-                                    <MessageSquare size={12} />
-                                </div>
-
-                                {index < COLUMNS.length - 1 && (
-                                    <button 
-                                        onClick={(e) => handleMoveCard(e, order, 'next')} 
-                                        className="p-1 rounded bg-slate-700 text-slate-400 hover:text-white hover:bg-slate-600 transition-colors ml-1"
-                                        title="Mover para próxima coluna"
-                                    >
-                                        <ChevronRight size={12} />
-                                    </button>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-                        {colOrders.length === 0 && (
-                          <div className="h-24 flex items-center justify-center text-slate-600 border-2 border-dashed border-white/5 rounded-xl">
-                            <p className="text-[10px] font-bold uppercase tracking-widest">Vazio</p>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Linha Divisória Vertical - Reforçada */}
-                    {index < COLUMNS.length - 1 && (
-                      <div className="w-[2px] h-full bg-indigo-500/20 mx-4 shrink-0 rounded-full" />
-                    )}
-                  </React.Fragment>
-                );
-              })}
-            </div>
+                        <div>
+                           <h4 className="font-bold text-white text-sm">{order.merchantName}</h4>
+                           <p className="text-xs text-slate-500">{order.serviceType} • {order.date}</p>
+                        </div>
+                     </div>
+                     {order.status === 'new' && (
+                       <div className="w-3 h-3 bg-blue-500 rounded-full animate-pulse"></div>
+                     )}
+                  </div>
+                ))}
+             </div>
           </main>
         </>
       )}
@@ -457,7 +221,6 @@ export const DesignerPanel: React.FC<DesignerPanelProps> = ({ user, onBack }) =>
           </footer>
         </div>
       )}
-
     </div>
   );
 };
