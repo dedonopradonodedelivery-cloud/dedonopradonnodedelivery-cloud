@@ -22,6 +22,7 @@ import { StoreAdsModule } from '@/components/StoreAdsModule';
 import { StoreAdsQuickLaunch } from '@/components/StoreAdsQuickLaunch';
 import { MerchantPerformanceDashboard } from '@/components/MerchantPerformanceDashboard';
 import { AdminBannerModeration } from '@/components/AdminBannerModeration';
+import { DesignerPanel } from '@/components/DesignerPanel';
 import { MapPin, ShieldCheck, X, Palette } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { NeighborhoodProvider } from '@/contexts/NeighborhoodContext';
@@ -89,7 +90,7 @@ const App: React.FC = () => {
   };
   
   useEffect(() => {
-    const restrictedTabs = ['scan_cashback', 'merchant_qr_display', 'wallet', 'pay_cashback', 'store_area', 'admin_panel', 'edit_profile', 'store_claim', 'user_cashback_mock', 'merchant_reviews'];
+    const restrictedTabs = ['scan_cashback', 'merchant_qr_display', 'wallet', 'pay_cashback', 'store_area', 'admin_panel', 'edit_profile', 'store_claim', 'user_cashback_mock', 'merchant_reviews', 'designer_panel'];
     
     if (restrictedTabs.includes(activeTab)) {
       if (!isAuthInitialLoading && !user) {
@@ -117,11 +118,11 @@ const App: React.FC = () => {
   }, []);
 
   const handleSelectStore = (store: Store) => { setSelectedStore(store); setActiveTab('store_detail'); };
-  const headerExclusionList = ['store_area', 'editorial_list', 'store_profile', 'category_detail', 'store_detail', 'profile', 'patrocinador_master', 'service_subcategories', 'service_specialties', 'store_ads_module', 'store_ads_quick', 'merchant_performance', 'about', 'support', 'favorites', 'community_feed', 'admin_panel', 'cashback_landing', 'admin_banner_moderation', 'store_claim', 'user_cashback_mock', 'merchant_reviews', 'jpa_connect_sales', 'wallet'];
+  const headerExclusionList = ['store_area', 'editorial_list', 'store_profile', 'category_detail', 'store_detail', 'profile', 'patrocinador_master', 'service_subcategories', 'service_specialties', 'store_ads_module', 'store_ads_quick', 'merchant_performance', 'about', 'support', 'favorites', 'community_feed', 'admin_panel', 'cashback_landing', 'admin_banner_moderation', 'store_claim', 'user_cashback_mock', 'merchant_reviews', 'jpa_connect_sales', 'wallet', 'designer_panel'];
   
   // REMOVIDO: splashStage < 4 da lógica de ocultar nav. 
   // O layout inteiro (incluindo nav) é renderizado por trás e faz fade-in.
-  const hideBottomNav = ['admin_panel'].includes(activeTab);
+  const hideBottomNav = ['admin_panel', 'designer_panel'].includes(activeTab);
 
   const RoleSwitcherModal: React.FC = () => {
     if (!isRoleSwitcherOpen) return null;
@@ -141,7 +142,7 @@ const App: React.FC = () => {
                             localStorage.setItem('admin_view_mode', role);
                             setIsRoleSwitcherOpen(false); 
                             if (role === 'Lojista') setActiveTab('profile');
-                            else if (role === 'Designer') setActiveTab('store_ads_module');
+                            else if (role === 'Designer') setActiveTab('designer_panel');
                             else if (role === 'ADM') setActiveTab('admin_panel');
                             else setActiveTab('home');
                           }} 
@@ -181,6 +182,7 @@ const App: React.FC = () => {
                     {activeTab === 'wallet' && <UserStatementView onBack={() => setActiveTab('home')} onExploreStores={() => setActiveTab('explore')} />}
                     {activeTab === 'cashback_landing' && <CashbackLandingView onBack={() => setActiveTab('home')} onLogin={() => { setPendingTab('scan_cashback'); setIsAuthOpen(true); }} />}
                     {activeTab === 'admin_panel' && <AdminPanel user={user as any} onLogout={signOut} viewMode={viewMode} onOpenViewSwitcher={() => setIsRoleSwitcherOpen(true)} onNavigateToApp={setActiveTab} />}
+                    {activeTab === 'designer_panel' && <DesignerPanel user={user as any} onBack={() => setActiveTab('home')} />}
                     {activeTab === 'admin_banner_moderation' && user?.email === ADMIN_EMAIL && <AdminBannerModeration user={user as any} onBack={() => setActiveTab('admin_panel')} />}
                     
                     {activeTab === 'profile' && (
@@ -219,7 +221,7 @@ const App: React.FC = () => {
                     {activeTab === 'favorites' && <FavoritesView onBack={() => setActiveTab('profile')} onNavigate={setActiveTab} user={user as any} />}
                     {activeTab === 'service_subcategories' && selectedServiceMacro && <SubcategoriesView macroId={selectedServiceMacro.id} macroName={selectedServiceMacro.name} onBack={() => setActiveTab('services')} onSelectSubcategory={(n) => { setQuoteCategory(n); setActiveTab('service_specialties'); }} />}
                     {activeTab === 'service_specialties' && <SpecialtiesView subcategoryName={quoteCategory} onBack={() => setActiveTab('service_subcategories')} onSelectSpecialty={() => setIsQuoteModalOpen(true)} />}
-                    {activeTab === 'store_ads_module' && <StoreAdsModule onBack={() => setActiveTab(isDesignerMode ? 'admin_panel' : 'profile')} onNavigate={setActiveTab} categoryName={adCategoryTarget || undefined} user={user as any} viewMode={viewMode} initialView={initialStoreAdsView} />}
+                    {activeTab === 'store_ads_module' && <StoreAdsModule onBack={() => setActiveTab(isDesignerMode ? 'designer_panel' : 'profile')} onNavigate={setActiveTab} categoryName={adCategoryTarget || undefined} user={user as any} viewMode={viewMode} initialView={initialStoreAdsView} />}
                     {activeTab === 'store_ads_quick' && <StoreAdsQuickLaunch onBack={() => setActiveTab('profile')} onNavigate={setActiveTab} />}
                     {activeTab === 'store_profile' && <StoreProfileEdit onBack={() => setActiveTab('profile')} />}
                   </main>
