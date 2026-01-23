@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { 
   ChevronLeft, 
@@ -131,7 +130,7 @@ const MOCK_KANBAN_ORDERS = [
             { author: 'José Carlos', role: 'Lojista', text: 'Oi! Tudo bem? Segue minha logo e a ideia para o banner.', timestamp: '10:05', type: 'text' },
             { author: 'José Carlos', role: 'Lojista', text: 'Logo_Hamburgueria.png', timestamp: '10:06', type: 'file', fileType: 'image/png', preview: 'https://placehold.co/100x100/FF6501/FFFFFF?text=Logo' },
             { author: 'José Carlos', role: 'Lojista', text: 'briefing.pdf', timestamp: '10:07', type: 'file', fileType: 'application/pdf' },
-            { author: 'José Carlos', role: 'Lojista', text: 'Nossas cores são laranja, preto e branco. Queria uma promoção de "Combo Casal por R$49,90". E também um link para o iFood: https://ifood.com.br/hamburgueria-do-ze', timestamp: '10:08', type: 'briefing_text' }
+            { author: 'José Carlos', role: 'Lojista', text: 'Nossas cores da marca são laranja, preto e branco. Queria uma promoção de "Combo Casal por R$49,90". E também um link para o iFood: https://ifood.com.br/hamburgueria-do-ze', timestamp: '10:08', type: 'briefing_text' }
         ]
     },
     { 
@@ -659,7 +658,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
             <main className="flex-1 p-6 space-y-4 overflow-x-auto no-scrollbar">
                 <div className="flex gap-4 min-w-full w-fit">
                     {KANBAN_COLUMNS.map((column) => (
-                        <div key={column.id} className="w-72 bg-slate-900 rounded-3xl p-4 border border-slate-700 flex flex-col shrink-0">
+                        <div key={column.id} className="w-72 bg-slate-900 rounded-3xl p-4 border border-white/5 flex flex-col shrink-0">
                             <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest px-2 mb-4">{column.title}</h3>
                             <div className="space-y-3 overflow-y-auto no-scrollbar flex-1 pr-1">
                                 {kanbanOrders.filter(o => o.status === column.id).map(order => (
@@ -716,7 +715,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
                 const foundLinks = msg.text.match(urlRegex);
                 if (foundLinks) data.links.push(...foundLinks);
 
-                if (lowerText.includes('cores')) data.colors = msg.text;
+                if (lowerText.includes('cores da marca')) data.colors = msg.text;
                 else if (lowerText.includes('promoção') || lowerText.includes('combo') || lowerText.includes('oferta')) data.promoText = msg.text;
                 else data.notes.push(msg.text);
             } else if (msg.role === 'System' && msg.type === 'status_update') {
@@ -762,10 +761,10 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
                         <h3 className="text-xs font-black uppercase text-slate-500 mb-3 flex items-center gap-2"><Briefcase size={14} /> Dados do lojista</h3>
                         <div className="bg-slate-900 p-5 rounded-2xl border border-white/10 space-y-4">
                             {extractedData.logo && <div className="space-y-2"><p className="text-[9px] font-bold text-slate-400 uppercase">Logo</p><img src={extractedData.logo} className="w-24 rounded-lg border border-white/10" /></div>}
-                            {extractedData.colors && <div className="space-y-2"><p className="text-[9px] font-bold text-slate-400 uppercase flex items-center gap-1.5"><PaletteIcon size={12}/>Cores</p><p className="text-sm text-slate-300 italic">"{extractedData.colors}"</p></div>}
-                            {extractedData.promoText && <div className="space-y-2"><p className="text-[9px] font-bold text-slate-400 uppercase">Texto da Oferta</p><p className="text-sm text-slate-300 italic">"{extractedData.promoText}"</p></div>}
+                            {extractedData.colors && <div className="space-y-2"><p className="text-[9px] font-bold text-slate-400 uppercase flex items-center gap-1.5"><PaletteIcon size={12}/>Cores da marca</p><p className="text-sm text-slate-300 italic">"{extractedData.colors}"</p></div>}
+                            {extractedData.promoText && <div className="space-y-2"><p className="text-[9px] font-bold text-slate-400 uppercase">Texto do banner / promoção</p><p className="text-sm text-slate-300 italic">"{extractedData.promoText}"</p></div>}
                             {extractedData.links.length > 0 && <div className="space-y-2"><p className="text-[9px] font-bold text-slate-400 uppercase flex items-center gap-1.5"><LinkIcon size={12}/>Links</p>{extractedData.links.map((link: string, i: number) => <a key={i} href={link} target="_blank" className="text-sm text-blue-400 block truncate hover:underline">{link}</a>)}</div>}
-                            {extractedData.notes.length > 0 && <div className="space-y-2"><p className="text-[9px] font-bold text-slate-400 uppercase">Observações</p>{extractedData.notes.map((note: string, i: number) => <p key={i} className="text-sm text-slate-300 italic">"{note}"</p>)}</div>}
+                            {extractedData.notes.length > 0 && <div className="space-y-2"><p className="text-[9px] font-bold text-slate-400 uppercase">Preferências / observações</p>{extractedData.notes.map((note: string, i: number) => <p key={i} className="text-sm text-slate-300 italic">"{note}"</p>)}</div>}
                         </div>
                     </section>
                     <section>
@@ -780,7 +779,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
                         </div>
                     </section>
                     <section>
-                        <h3 className="text-xs font-black uppercase text-slate-500 mb-3 flex items-center gap-2"><Clock size={14} /> Linha do tempo</h3>
+                        <h3 className="text-xs font-black uppercase text-slate-500 mb-3 flex items-center gap-2"><Clock size={14} /> Linha do tempo do pedido</h3>
                         <div className="space-y-2">
                             {timelineEvents.map((event: any, i: number) => (
                                 <div key={i} className="flex items-center gap-3 text-xs">
@@ -972,7 +971,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
               </div>
               <div onClick={() => { setArtChoice('pro'); setIsArtSaved(true); setView('sales'); scrollTo(paymentRef, 80); }} className={`rounded-[2.5rem] border-2 transition-all cursor-pointer overflow-hidden ${artChoice === 'pro' ? 'bg-slate-900 border-amber-500 shadow-xl shadow-amber-500/5' : 'bg-slate-900 border-white/5'}`}>
                   <div className="p-8"><div className="flex items-start justify-between"><div className="flex items-start gap-5"><div className="w-12 h-12 bg-amber-400/10 rounded-2xl flex items-center justify-center text-amber-400 shrink-0"><Rocket size={24} /></div><div><h3 className="text-lg font-bold text-white mb-1 leading-tight">Contratar time profissional</h3><p className="text-xs text-slate-400 leading-relaxed max-w-[180px]">Nós criamos o banner profissional para você.</p></div></div><div className="text-right"><span className="text-slate-500 line-through text-[9px] font-bold">R$ 149</span><p className="text-xl font-black text-white">R$ 69,90</p></div></div>
-                    {artChoice === 'pro' && (<div className="mt-6 p-4 bg-amber-400/10 border border-amber-400/20 rounded-2xl flex items-center justify-between animate-in zoom-in duration-300"><div className="flex items-center gap-3"><CheckCircle2 size={16} className="text-amber-400" /><span className="text-[10px] font-black text-amber-400 uppercase tracking-widest">Opção PRO Selecionada</span></div><button onClick={() => { setChatMessages([]); setProChatStep(0); setView('pro_chat');}} className="text-[9px] font-black text-white bg-amber-600 px-3 py-1.5 rounded-lg uppercase tracking-widest">Enviar Briefing</button></div>)}
+                    {artChoice === 'pro' && (<div className="mt-6 p-4 bg-amber-400/10 border border-amber-400/20 rounded-2xl flex items-center justify-between animate-in zoom-in duration-300"><div className="flex items-center gap-3"><CheckCircle2 size={16} className="text-amber-400" /><span className="text-[10px] font-black text-amber-400 uppercase tracking-widest">Opção PRO Selecionada</span></div><button onClick={() => setView('pro_chat')} className="text-[9px] font-black text-white bg-amber-600 px-3 py-1.5 rounded-lg uppercase tracking-widest">Enviar Briefing</button></div>)}
                   </div>
               </div>
           </div>
@@ -992,7 +991,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
         </section>
       </main>
 
-      {!isSuccess && (view === 'sales') && (
+      {!isSuccess && (view === 'sales' || view === 'pro_checkout') && (
       <div className="fixed bottom-0 left-0 right-0 p-6 bg-[#020617]/95 backdrop-blur-2xl border-t border-white/10 z-[100] max-w-md mx-auto shadow-[0_-20px_40px_rgba(0,0,0,0.6)] animate-in slide-in-from-bottom duration-500">
         <button 
           onClick={handleFooterClick} 
