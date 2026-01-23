@@ -1,6 +1,5 @@
-
 import React from 'react';
-import { Home, Users, User, QrCode, Wallet } from 'lucide-react';
+import { Home, Users, User, QrCode } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 
 interface BottomNavProps {
@@ -21,13 +20,13 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
 
   const navItems: NavItem[] = [
     { id: 'home', icon: Home, label: 'Início' },
-    { id: 'community_feed', icon: Users, label: 'Comunidade' },
+    { id: 'community_feed', icon: Users, label: 'Comunidade', isCenter: true },
   ];
 
   if (userRole !== 'admin') {
     const isMerchant = user && userRole === 'lojista';
+
     let centerId: string;
-    
     if (!user) {
       centerId = 'cashback_landing';
     } else if (isMerchant) {
@@ -37,11 +36,10 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
     }
 
     const centerLabel = isMerchant ? 'QR Code' : 'Cashback';
-    const centerIcon = isMerchant ? QrCode : Wallet;
 
     navItems.push({ 
       id: centerId, 
-      icon: centerIcon, 
+      icon: QrCode, 
       label: centerLabel, 
       isCenter: true 
     });
@@ -54,23 +52,23 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
 
     if (item.isCenter) {
       return (
-        <div className="relative w-16 flex justify-center -mt-10">
+        <div className="relative w-16 flex justify-center -top-6">
           <button
             onClick={() => setActiveTab(item.id)}
             className="flex flex-col items-center group outline-none"
           >
             <div className={`
-              w-16 h-16 rounded-[2rem] flex items-center justify-center 
-              shadow-2xl shadow-blue-600/40 border-[4px] border-white dark:border-gray-950 
-              active:scale-90 transition-all duration-300 transform-gpu
-              ${isActive ? 'bg-white' : 'bg-[#1E5BFF]'}
+              w-16 h-16 rounded-full flex items-center justify-center 
+              shadow-2xl shadow-black/40 border-[6px] border-[#1E5BFF] 
+              active:scale-90 transition-all duration-200 
+              ${isActive ? 'bg-[#1E5BFF]' : 'bg-white'}
             `}>
               <Icon 
-                className={`w-7 h-7 transition-colors ${isActive ? 'text-[#1E5BFF]' : 'text-white'}`} 
-                strokeWidth={3} 
+                className={`w-7 h-7 transition-colors ${isActive ? 'text-white' : 'text-[#1E5BFF]'}`} 
+                strokeWidth={2.5} 
               />
             </div>
-            <span className={`text-[9px] font-black uppercase mt-2 tracking-tight transition-colors ${isActive ? 'text-[#1E5BFF]' : 'text-gray-400 dark:text-gray-500'}`}>
+            <span className="text-[10px] font-black uppercase text-white mt-1 tracking-tight whitespace-nowrap drop-shadow-sm">
               {item.label}
             </span>
           </button>
@@ -81,15 +79,15 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
     return (
       <button
         onClick={() => setActiveTab(item.id)}
-        className="w-full h-full flex flex-col items-center justify-center gap-1.5 active:scale-90 transition-transform outline-none"
+        className="w-full h-[60px] flex flex-col items-center justify-center gap-1 active:scale-95 transition-transform outline-none"
       >
-        <div className={`p-2 rounded-xl transition-all duration-300 ${isActive ? 'bg-blue-50 dark:bg-blue-900/20' : 'bg-transparent'}`}>
+        <div className={`p-2 rounded-xl transition-all duration-300 ${isActive ? 'bg-white/20' : 'bg-transparent'}`}>
           <Icon 
-            className={`w-5 h-5 transition-colors ${isActive ? 'text-[#1E5BFF]' : 'text-gray-400 dark:text-gray-600'}`} 
-            strokeWidth={isActive ? 3 : 2}
+            className={`w-5 h-5 transition-colors ${isActive ? 'text-white fill-white' : 'text-white/60'}`} 
+            strokeWidth={isActive ? 0 : 2}
           />
         </div>
-        <span className={`text-[9px] font-black uppercase transition-colors ${isActive ? 'text-[#1E5BFF]' : 'text-gray-400 dark:text-gray-600'}`}>
+        <span className={`text-[9px] font-black uppercase transition-colors ${isActive ? 'text-white' : 'text-white/60'}`}>
           {item.label}
         </span>
       </button>
@@ -97,8 +95,8 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
   };
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 mx-auto w-full max-w-md bg-white dark:bg-gray-950 z-50 h-[80px] rounded-t-[2.5rem] shadow-[0_-8px_40px_rgba(0,0,0,0.08)] border-t border-gray-100 dark:border-gray-900 transition-all duration-500">
-      <div className="flex items-center justify-around w-full h-full px-4">
+    <div className="fixed bottom-0 left-0 right-0 mx-auto w-full max-w-md bg-[#1E5BFF] z-50 h-[80px] rounded-t-[24px] shadow-[0_-5px_30px_rgba(0,0,0,0.2)] border-t border-white/10">
+      <div className="flex items-end justify-around w-full px-2 h-full pb-2">
         {navItems.map((item) => {
           const isActive = activeTab === item.id || 
                           (item.id === 'scan_cashback' && activeTab === 'pay_cashback') ||
@@ -106,7 +104,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
                           (item.id === 'cashback_landing' && (activeTab === 'scan_cashback' || activeTab === 'pay_cashback'));
           
           return (
-            <div key={item.id} className="flex-1 flex justify-center items-center h-full">
+            <div key={item.id} className="flex-1 flex justify-center items-end h-full">
               <NavButton item={item} isActive={isActive} />
             </div>
           );
