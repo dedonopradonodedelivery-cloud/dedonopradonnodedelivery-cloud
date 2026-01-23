@@ -659,7 +659,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
             <main className="flex-1 p-6 space-y-4 overflow-x-auto no-scrollbar">
                 <div className="flex gap-4 min-w-full w-fit">
                     {KANBAN_COLUMNS.map((column) => (
-                        <div key={column.id} className="w-72 bg-slate-900 rounded-3xl p-4 border border-white/5 flex flex-col shrink-0">
+                        <div key={column.id} className="w-72 bg-slate-900 rounded-3xl p-4 border border-slate-700 flex flex-col shrink-0">
                             <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest px-2 mb-4">{column.title}</h3>
                             <div className="space-y-3 overflow-y-auto no-scrollbar flex-1 pr-1">
                                 {kanbanOrders.filter(o => o.status === column.id).map(order => (
