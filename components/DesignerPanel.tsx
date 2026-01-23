@@ -23,7 +23,8 @@ import {
   Flag,
   Bell,
   GripVertical,
-  SlidersHorizontal
+  SlidersHorizontal,
+  ArrowRight
 } from 'lucide-react';
 
 interface DesignerPanelProps {
@@ -71,7 +72,7 @@ const COLUMNS = [
 ];
 
 export const DesignerPanel: React.FC<DesignerPanelProps> = ({ user, onBack }) => {
-  const [activeView, setActiveView] = useState<'board' | 'chat'>('board');
+  const [activeView, setActiveView] = useState<'board' | 'chat' | 'notifications'>('board');
   const [orders, setOrders] = useState<OrderCard[]>(INITIAL_ORDERS);
   const [selectedOrder, setSelectedOrder] = useState<OrderCard | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -85,6 +86,9 @@ export const DesignerPanel: React.FC<DesignerPanelProps> = ({ user, onBack }) =>
 
   const chatEndRef = useRef<HTMLDivElement>(null);
   const boardRef = useRef<HTMLDivElement>(null);
+
+  // Computed
+  const unreadCount = orders.filter(o => o.hasUnreadMessages).length;
 
   // Initial Load
   useEffect(() => {
@@ -153,7 +157,6 @@ export const DesignerPanel: React.FC<DesignerPanelProps> = ({ user, onBack }) =>
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     setDraggedOrder(null);
-    // Here you would typically save the new orderIndex to the backend
   };
 
   // --- SIMULAÇÃO DE MENSAGEM EM TEMPO REAL ---
@@ -277,9 +280,23 @@ export const DesignerPanel: React.FC<DesignerPanelProps> = ({ user, onBack }) =>
                 <p className="text-[10px] font-bold text-indigo-400 uppercase tracking-widest mt-1">Kanban de Pedidos</p>
               </div>
             </div>
-            <button onClick={onBack} className="p-2.5 bg-white/5 rounded-xl text-slate-400 hover:text-white transition-all">
-              <X size={20} />
-            </button>
+            
+            <div className="flex items-center gap-3">
+               <button 
+                  onClick={() => setActiveView('notifications')}
+                  className="p-2.5 bg-white/5 rounded-xl text-slate-400 hover:text-white transition-all relative"
+                >
+                  <Bell size={20} />
+                  {unreadCount > 0 && (
+                      <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full text-[9px] font-black text-white flex items-center justify-center border-2 border-slate-900">
+                          {unreadCount}
+                      </span>
+                  )}
+               </button>
+               <button onClick={onBack} className="p-2.5 bg-white/5 rounded-xl text-slate-400 hover:text-white transition-all">
+                  <X size={20} />
+               </button>
+            </div>
           </header>
 
           {/* MAIN KANBAN AREA */}
@@ -414,10 +431,10 @@ export const DesignerPanel: React.FC<DesignerPanelProps> = ({ user, onBack }) =>
             </div>
           </main>
           
-          {/* HORIZONTAL ADJUSTMENT SLIDER */}
-          <div className="fixed bottom-0 left-0 right-0 bg-slate-900 border-t border-white/10 p-4 z-50 flex items-center justify-center gap-4">
-            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest flex items-center gap-1">
-                <SlidersHorizontal size={12} /> Ajuste
+          {/* HORIZONTAL ADJUSTMENT SLIDER - POSITIONED ABOVE BOTTOM BAR (FIXED BOTTOM ~80px) */}
+          <div className="fixed bottom-[85px] left-0 right-0 bg-slate-900/90 backdrop-blur-md border-t border-white/10 p-4 z-50 flex items-center justify-center gap-4 shadow-2xl">
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1">
+                <SlidersHorizontal size={12} /> Ajuste Horizontal
             </span>
             <input 
                 type="range" 
@@ -427,7 +444,7 @@ export const DesignerPanel: React.FC<DesignerPanelProps> = ({ user, onBack }) =>
                 onChange={handleSliderChange}
                 className="w-64 h-1.5 bg-slate-700 rounded-full appearance-none cursor-pointer accent-indigo-500 hover:accent-indigo-400 transition-all"
             />
-            <span className="text-[10px] font-bold text-slate-500">{Math.round(scrollProgress)}%</span>
+            <span className="text-[10px] font-bold text-slate-500 w-8 text-right">{Math.round(scrollProgress)}%</span>
           </div>
         </>
       )}
@@ -531,6 +548,39 @@ export const DesignerPanel: React.FC<DesignerPanelProps> = ({ user, onBack }) =>
              </form>
           </footer>
         </div>
+      )}
+
+      {/* --- NOTIFICATIONS VIEW --- */}
+      {activeView === 'notifications' && (
+         <div className="flex flex-col h-full bg-[#0F172A] fixed inset-0 z-[60]">
+             <header className="bg-slate-900 border-b border-white/5 px-4 py-4 flex items-center gap-3 shadow-md">
+                 <button onClick={handleBackToBoard} className="p-2 bg-slate-800 rounded-lg text-slate-300 hover:text-white transition-colors">
+                    <ChevronLeft size={20} />
+                 </button>
+                 <h2 className="font-bold text-white text-lg">Notificações</h2>
+             </header>
+             <div className="flex-1 overflow-y-auto p-4 space-y-3">
+                 {orders.filter(o => o.hasUnreadMessages).length === 0 ? (
+                     <div className="flex flex-col items-center justify-center pt-20 opacity-40">
+                         <Bell size={48} className="text-slate-500 mb-4" />
+                         <p className="text-slate-400 font-bold uppercase tracking-widest text-xs">Nenhuma notificação nova</p>
+                     </div>
+                 ) : (
+                     orders.filter(o => o.hasUnreadMessages).map(order => (
+                         <div key={order.id} onClick={() => handleOpenChat(order)} className="bg-slate-800 p-4 rounded-2xl border border-white/5 flex gap-4 cursor-pointer hover:bg-slate-750 transition-colors">
+                             <div className="w-12 h-12 bg-blue-500/10 rounded-xl flex items-center justify-center text-blue-500 shrink-0">
+                                 <MessageSquare size={24} />
+                             </div>
+                             <div>
+                                 <h4 className="font-bold text-white text-sm">{order.merchantName}</h4>
+                                 <p className="text-slate-400 text-xs mt-1">Enviou uma nova mensagem no pedido {order.orderNumber}.</p>
+                                 <span className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-2 block">Toque para responder</span>
+                             </div>
+                         </div>
+                     ))
+                 )}
+             </div>
+         </div>
       )}
 
     </div>
