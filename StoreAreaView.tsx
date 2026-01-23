@@ -25,7 +25,7 @@ import { useAuth } from '../contexts/AuthContext';
 
 interface StoreAreaViewProps {
   onBack: () => void;
-  onNavigate: (view: string) => void;
+  onNavigate: (view: string, initialView?: 'sales' | 'chat') => void;
   user: SupabaseUser | null;
 }
 
@@ -150,7 +150,7 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
               icon={BarChart3} 
               label="Meus Anúncios" 
               description="Performance e estatísticas"
-              onClick={() => onNavigate('store_ads_module')}
+              onClick={() => onNavigate('merchant_performance')}
             />
           </div>
         </section>
@@ -162,8 +162,8 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
             <ServiceBlock 
               icon={MessageSquare} 
               label="Chat com Designer" 
-              description="Fale sobre artes e campanhas"
-              onClick={() => window.open('https://wa.me/5521999999999', '_blank')} 
+              description="Criação e acompanhamento do seu banner"
+              onClick={() => onNavigate('store_ads_module', 'chat')} 
             />
             <ServiceBlock 
               icon={FileText} 

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { Store, Category, EditorialCollection, AdType } from '@/types';
 import { 
@@ -349,24 +350,26 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void; onStoreClick?: (
   const storeForBanner = findStore(current.storeSlug);
 
   return (
-    <div className="px-4">
-      <div className="flex flex-col gap-4">
-        <div 
-          onClick={handleBannerClick}
-          className="w-full relative aspect-[3/2] rounded-[32px] overflow-hidden shadow-xl shadow-slate-200 dark:shadow-none border border-gray-100 dark:border-white/5 cursor-pointer active:scale-[0.98] transition-all group"
-        >
-          <EditorBanner 
-              config={current.isUserBanner ? mapToEditorConfig(current.config) : current.config}
-              storeName={current.isUserBanner ? (current.config.profiles?.store_name || 'Loja Parceira') : (storeForBanner?.name || 'Localizei JPA')}
-              storeLogo={current.isUserBanner ? (current.config.profiles?.logo_url) : (storeForBanner?.logoUrl)}
-          />
-        </div>
+    <div className="px-4 py-2">
+      <div 
+        onClick={handleBannerClick}
+        className="w-full relative aspect-[3/2] rounded-[32px] overflow-hidden shadow-xl shadow-slate-200 dark:shadow-none border border-gray-100 dark:border-white/5 cursor-pointer active:scale-[0.98] transition-all group"
+      >
+        <EditorBanner 
+            config={current.isUserBanner ? mapToEditorConfig(current.config) : current.config}
+            storeName={current.isUserBanner ? (current.config.profiles?.store_name || 'Loja Parceira') : (storeForBanner?.name || 'Localizei JPA')}
+            storeLogo={current.isUserBanner ? (current.config.profiles?.logo_url) : (storeForBanner?.logoUrl)}
+        />
+        
+        {/* Protective Gradient Overlay */}
+        <div className="absolute bottom-0 left-0 right-0 h-1/4 bg-gradient-to-t from-black/40 to-transparent pointer-events-none"></div>
 
-        <div className="flex gap-1.5 z-30 w-1/3 mx-auto justify-center h-1">
+        {/* Progress Bars (Inside Banner) */}
+        <div className="absolute bottom-3 left-1/2 -translate-x-1/2 w-1/2 h-[3px] flex gap-1.5 z-10">
           {allBanners.map((_, idx) => (
-            <div key={idx} className="h-full flex-1 bg-gray-200 dark:bg-gray-800 rounded-full overflow-hidden">
+            <div key={idx} className="h-full flex-1 bg-white/30 backdrop-blur-sm rounded-full overflow-hidden">
               <div 
-                className="h-full bg-[#1E5BFF] transition-all duration-100 ease-linear" 
+                className="h-full bg-white transition-all duration-100 ease-linear" 
                 style={{ width: idx === currentIndex ? `${progress}%` : idx < currentIndex ? '100%' : '0%' }} 
               />
             </div>
@@ -402,7 +405,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
     switch (key) {
       case 'home_carousel': 
         return (
-          <div key="home_carousel" className="w-full bg-white dark:bg-gray-950 pb-2 pt-4">
+          <div key="home_carousel" className="w-full bg-white dark:bg-gray-950 pt-4">
             <HomeCarousel onNavigate={onNavigate} onStoreClick={onStoreClick} stores={stores} />
           </div>
         );

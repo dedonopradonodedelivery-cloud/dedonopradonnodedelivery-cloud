@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { 
   ChevronLeft, 
@@ -51,6 +52,7 @@ interface StoreAdsModuleProps {
   user: User | null;
   categoryName?: string;
   viewMode?: string;
+  initialView?: 'sales' | 'chat';
 }
 
 const NEIGHBORHOODS = [
@@ -93,10 +95,10 @@ const DISPLAY_MODES = [
   },
 ];
 
-export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNavigate, user, categoryName, viewMode }) => {
+export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNavigate, user, categoryName, viewMode, initialView = 'sales' }) => {
   const isDesigner = viewMode === 'Designer';
   
-  const [view, setView] = useState<'sales' | 'creator' | 'editor' | 'pro_checkout' | 'pro_processing' | 'pro_approved' | 'pro_chat' | 'designer_workspace'>('sales');
+  const [view, setView] = useState<'sales' | 'creator' | 'editor' | 'pro_checkout' | 'pro_processing' | 'pro_approved' | 'pro_chat' | 'designer_workspace' | 'chat_onboarding'>('sales');
   const [selectedMode, setSelectedMode] = useState<typeof DISPLAY_MODES[0] | null>(null);
   const [selectedPeriods, setSelectedPeriods] = useState<string[]>([]);
   const [selectedNeighborhoods, setSelectedNeighborhoods] = useState<string[]>([]);
@@ -136,12 +138,19 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
   const paymentRef = useRef<HTMLDivElement>(null);
   const chatScrollRef = useRef<HTMLDivElement>(null);
 
-  // Redirecionamento automático para o Workspace se for Designer
   useEffect(() => {
     if (isDesigner) {
       setView('designer_workspace');
+    } else if (initialView === 'chat') {
+      // Mock para a lógica de verificação de pedido ativo.
+      const hasActiveOrder = false; 
+      if (hasActiveOrder) {
+        setView('pro_chat');
+      } else {
+        setView('chat_onboarding');
+      }
     }
-  }, [isDesigner]);
+  }, [isDesigner, initialView]);
 
   const dynamicPeriods = useMemo(() => {
     const now = new Date();
@@ -355,6 +364,36 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
         onSave={handleSaveDesign} 
         onBack={() => setIsEditingArt(false)} 
       />
+    );
+  }
+
+  // --- TELA DE ONBOARDING PARA O CHAT (CASO NÃO TENHA PEDIDO) ---
+  if (view === 'chat_onboarding') {
+    return (
+        <div className="min-h-screen bg-[#020617] text-slate-100 flex flex-col items-center justify-center p-8 text-center animate-in fade-in duration-500">
+            <header className="absolute top-0 left-0 right-0 p-6 flex">
+                <button onClick={onBack} className="p-2 bg-slate-900 rounded-xl text-slate-400 hover:text-white transition-all active:scale-95"><ChevronLeft size={20} /></button>
+            </header>
+            
+            <div className="w-24 h-24 bg-blue-500/10 rounded-full flex items-center justify-center mb-8 border-4 border-blue-500/20 shadow-lg">
+                <MessageCircle size={40} className="text-blue-400" />
+            </div>
+            
+            <h1 className="text-2xl font-bold text-white mb-4 leading-tight">👋 Olá, {user?.user_metadata?.store_name}!</h1>
+            <p className="text-slate-400 leading-relaxed max-w-sm mb-8">
+                Este é o canal para criação e acompanhamento de banners com nosso time de designers.
+            </p>
+            <p className="text-slate-400 leading-relaxed max-w-sm mb-12">
+                Para iniciar um novo banner, crie um anúncio ou contrate a criação profissional.
+            </p>
+            
+            <button 
+              onClick={() => setView('sales')}
+              className="w-full max-w-sm py-5 bg-[#1E5BFF] text-white font-black rounded-2xl shadow-xl active:scale-[0.98] transition-all uppercase tracking-widest text-sm flex items-center justify-center gap-2"
+            >
+              Criar Novo Banner <ArrowRight size={18} />
+            </button>
+        </div>
     );
   }
 
