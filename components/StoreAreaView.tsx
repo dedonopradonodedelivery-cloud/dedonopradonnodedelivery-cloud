@@ -20,7 +20,8 @@ import {
   Crown,
   Star,
   Users,
-  Award
+  Award,
+  Tag
 } from 'lucide-react';
 import { User as SupabaseUser } from '@supabase/supabase-js';
 import { useAuth } from '@/contexts/AuthContext';
@@ -158,6 +159,14 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
               iconBgClass="bg-blue-100 dark:bg-blue-900/30"
               iconColorClass="text-blue-600 dark:text-blue-400"
             />
+             <MarketingActionCard 
+              icon={Tag}
+              label="Promoção da Semana"
+              description="Configure seu cupom semanal e valide clientes."
+              onClick={() => onNavigate('weekly_promo')}
+              iconBgClass="bg-amber-100 dark:bg-amber-900/30"
+              iconColorClass="text-amber-500 dark:text-amber-400"
+            />
             <MarketingActionCard 
               icon={Megaphone} 
               label="Destaque Patrocinado" 
@@ -165,14 +174,6 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
               onClick={() => onNavigate('store_ads_quick')}
               iconBgClass="bg-purple-100 dark:bg-purple-900/30"
               iconColorClass="text-purple-600 dark:text-purple-400"
-            />
-            <MarketingActionCard 
-              icon={Award} 
-              label="Seja Patrocinador Master" 
-              description="Destaque máximo em nosso app"
-              onClick={() => onNavigate('patrocinador_master')}
-              iconBgClass="bg-amber-100 dark:bg-amber-900/30"
-              iconColorClass="text-amber-500 dark:text-amber-400"
             />
             <MarketingActionCard 
               icon={Users} 

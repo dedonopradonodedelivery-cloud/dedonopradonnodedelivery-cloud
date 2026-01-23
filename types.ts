@@ -102,6 +102,21 @@ export interface Store {
   owner_user_id?: string;
 }
 
+export interface UserCoupon {
+  id: string;
+  userId: string;
+  storeId: string;
+  storeName: string;
+  storeLogo?: string;
+  discountType: 'percentage' | 'fixed';
+  discountValue: number;
+  code: string;
+  status: 'active' | 'used' | 'expired';
+  redeemedAt: string; // Data de resgate (início da validade)
+  expiresAt: string; // Data de expiração (7 dias após resgate)
+  validatedAt?: string; // Data de uso na loja
+}
+
 export interface StoreClaimRequest {
   id: string;
   store_id: string;

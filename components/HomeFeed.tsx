@@ -350,6 +350,29 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void; onStoreClick?: (
   );
 };
 
+const WeeklyPromoBanner: React.FC<{ onClick: () => void }> = ({ onClick }) => (
+    <div onClick={onClick} className="px-5 w-full">
+        <div className="relative w-full rounded-[2.5rem] bg-gradient-to-br from-amber-400 to-orange-500 p-8 shadow-2xl shadow-amber-500/20 overflow-hidden cursor-pointer group transition-all duration-300 hover:shadow-amber-500/40 active:scale-[0.98]">
+            <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-3xl animate-pulse"></div>
+            <div className="relative z-10 flex flex-col md:flex-row justify-between items-center gap-6">
+                <div className="text-white text-center md:text-left flex-1">
+                    <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-md px-3 py-1 rounded-full border border-white/20 mb-4 shadow-sm">
+                        <Gift size={12} className="fill-current" />
+                        <span className="text-[10px] font-black uppercase tracking-widest">Exclusivo</span>
+                    </div>
+                    <h2 className="text-2xl font-black leading-tight tracking-tight drop-shadow-md mb-4">
+                        Desbloqueie seu Desconto da Semana
+                    </h2>
+                    <button className="bg-white text-orange-600 font-black py-3 px-6 rounded-2xl shadow-lg hover:bg-amber-50 transition-all text-sm uppercase tracking-widest flex items-center justify-center gap-2 w-full md:w-auto group/btn">
+                        Ver Lojas
+                        <ArrowRight size={16} className="transition-transform group-hover/btn:translate-x-1" />
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+);
+
 interface HomeFeedProps {
   onNavigate: (view: string) => void;
   onSelectCategory: (category: Category) => void;
@@ -369,7 +392,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
 }) => {
   const [listFilter, setListFilter] = useState<'all' | 'top_rated' | 'open_now'>('all');
   const categoriesRef = useRef<HTMLDivElement>(null);
-  const homeStructure = useMemo(() => ['categories', 'home_carousel', 'novidades', 'sugestoes', 'em_alta', 'list'], []);
+  const homeStructure = useMemo(() => ['categories', 'home_carousel', 'weekly_promo', 'novidades', 'sugestoes', 'em_alta', 'list'], []);
 
   const renderSection = (key: string) => {
     switch (key) {
@@ -396,6 +419,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
             </div>
           </div>
         );
+      case 'weekly_promo': return userRole === 'cliente' && <WeeklyPromoBanner key="weekly_promo" onClick={() => onNavigate('weekly_promo')} />;
       case 'novidades': return <NovidadesDaSemana key="novidades" stores={stores} onStoreClick={onStoreClick} onNavigate={onNavigate} />;
       case 'sugestoes': return <SugestoesParaVoce key="sugestoes" stores={stores} onStoreClick={onStoreClick} onNavigate={onNavigate} />;
       case 'em_alta': return <EmAltaNaCidade key="em_alta" stores={stores} onStoreClick={onStoreClick} onNavigate={onNavigate} />;
@@ -440,7 +464,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
            <LaunchOfferBanner onClick={() => onNavigate('store_ads_module')} />
         </section>
       )}
-      <div className="flex flex-col w-full gap-1">
+      <div className="flex flex-col w-full gap-4">
           {MemoizedSections}
       </div>
     </div>
@@ -464,7 +488,7 @@ const NovidadesDaSemana: React.FC<{ stores: Store[]; onStoreClick?: (store: Stor
   const newArrivals = useMemo(() => stores.filter(s => (s.image || s.logoUrl) && ['f-3', 'f-5', 'f-8', 'f-12', 'f-15'].includes(s.id)), [stores]);
   if (newArrivals.length === 0) return null;
   return (
-    <div className="bg-white dark:bg-gray-950 pt-2 pb-1 px-5">
+    <div className="bg-white dark:bg-gray-950 pt-2 px-5">
       <SectionHeader icon={Sparkles} title="Novidades da Semana" subtitle="Recém chegados" onSeeMore={() => onNavigate('explore')} />
       <div className="flex gap-4 overflow-x-auto no-scrollbar snap-x -mx-5 px-5">
         {newArrivals.map((store) => (
