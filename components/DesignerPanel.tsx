@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { User } from '@supabase/supabase-js';
 import { 
@@ -15,7 +16,9 @@ import {
   Paperclip,
   Check,
   Building,
-  Loader2
+  Loader2,
+  Calendar,
+  Hourglass
 } from 'lucide-react';
 
 interface DesignerPanelProps {
@@ -31,6 +34,8 @@ interface OrderCard {
   status: 'new' | 'production' | 'review' | 'done';
   date: string;
   priority?: 'high' | 'normal';
+  purchaseDate: string;
+  deliveryDeadline: string;
 }
 
 interface ChatMessage {
@@ -42,11 +47,11 @@ interface ChatMessage {
 }
 
 const MOCK_ORDERS: OrderCard[] = [
-  { id: 'ord-001', merchantId: 'm-123', merchantName: 'Hamburgueria Brasa', serviceType: 'Banner Home', status: 'new', date: 'Hoje, 10:30', priority: 'high' },
-  { id: 'ord-002', merchantId: 'm-456', merchantName: 'Studio Hair Vip', serviceType: 'Destaque Categoria', status: 'production', date: 'Ontem, 16:20' },
-  { id: 'ord-003', merchantId: 'm-789', merchantName: 'PetShop Amigo', serviceType: 'Arte Instagram', status: 'review', date: '10/11' },
-  { id: 'ord-004', merchantId: 'm-321', merchantName: 'Farmácia Central', serviceType: 'Banner Promo', status: 'done', date: '08/11' },
-  { id: 'ord-005', merchantId: 'm-654', merchantName: 'Pizzaria do Zé', serviceType: 'Banner Home', status: 'new', date: 'Hoje, 09:15' },
+  { id: 'ord-001', merchantId: 'm-123', merchantName: 'Hamburgueria Brasa', serviceType: 'Banner Home', status: 'new', date: 'Hoje, 10:30', priority: 'high', purchaseDate: '22/01/2026', deliveryDeadline: '25/01/2026' },
+  { id: 'ord-002', merchantId: 'm-456', merchantName: 'Studio Hair Vip', serviceType: 'Destaque Categoria', status: 'production', date: 'Ontem, 16:20', purchaseDate: '21/01/2026', deliveryDeadline: '24/01/2026' },
+  { id: 'ord-003', merchantId: 'm-789', merchantName: 'PetShop Amigo', serviceType: 'Arte Instagram', status: 'review', date: '10/11', purchaseDate: '19/01/2026', deliveryDeadline: '22/01/2026' },
+  { id: 'ord-004', merchantId: 'm-321', merchantName: 'Farmácia Central', serviceType: 'Banner Promo', status: 'done', date: '08/11', purchaseDate: '15/01/2026', deliveryDeadline: '18/01/2026' },
+  { id: 'ord-005', merchantId: 'm-654', merchantName: 'Pizzaria do Zé', serviceType: 'Banner Home', status: 'new', date: 'Hoje, 09:15', purchaseDate: '23/01/2026', deliveryDeadline: '26/01/2026' },
 ];
 
 const COLUMNS = [
@@ -179,7 +184,19 @@ export const DesignerPanel: React.FC<DesignerPanelProps> = ({ user, onBack }) =>
                             <h4 className="font-bold text-white text-sm mb-1 leading-tight group-hover:text-indigo-400 transition-colors">{order.merchantName}</h4>
                             <p className="text-xs text-slate-400 mb-3">{order.serviceType}</p>
                             
-                            <div className="flex items-center justify-between pt-3 border-t border-white/5">
+                            {/* Datas de Compra e Entrega */}
+                            <div className="mb-3 pt-3 border-t border-white/5 grid grid-cols-1 gap-1">
+                                <div className="flex items-center gap-2 text-[10px] text-slate-400">
+                                    <Calendar size={10} className="text-slate-500" />
+                                    <span>Compra: <span className="text-slate-300 font-medium">{order.purchaseDate}</span></span>
+                                </div>
+                                <div className="flex items-center gap-2 text-[10px] text-slate-400">
+                                    <Hourglass size={10} className="text-indigo-400" />
+                                    <span>Entrega: <span className="text-indigo-300 font-bold">{order.deliveryDeadline}</span></span>
+                                </div>
+                            </div>
+
+                            <div className="flex items-center justify-between pt-2 border-t border-white/5">
                               <div className="flex items-center gap-1.5 text-[10px] text-slate-500">
                                 <Clock size={12} /> {order.date}
                               </div>
@@ -197,9 +214,9 @@ export const DesignerPanel: React.FC<DesignerPanelProps> = ({ user, onBack }) =>
                       </div>
                     </div>
 
-                    {/* Linha Divisória Visível */}
+                    {/* Linha Divisória Vertical - Reforçada */}
                     {index < COLUMNS.length - 1 && (
-                      <div className="w-[2px] h-full bg-slate-700 mx-3 shrink-0 rounded-full opacity-50" />
+                      <div className="w-[2px] h-full bg-indigo-500/20 mx-4 shrink-0 rounded-full" />
                     )}
                   </React.Fragment>
                 );
