@@ -1,16 +1,7 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   ChevronLeft, 
-  Crown, 
-  ShieldCheck, 
-  CheckCircle2, 
-  Home, 
-  LayoutGrid,
-  List,
-  Sparkles,
-  ImageIcon,
-  Repeat,
   ArrowRight, 
   Info, 
   Lock,
@@ -18,7 +9,14 @@ import {
   BarChart3,
   Users,
   Eye,
-  Award
+  Award,
+  CalendarDays,
+  Home, 
+  LayoutGrid,
+  List,
+  Sparkles,
+  ImageIcon,
+  Repeat
 } from 'lucide-react';
 
 interface PatrocinadorMasterScreenProps {
@@ -46,6 +44,24 @@ const PlacementItem: React.FC<{ icon: React.ElementType, text: string }> = ({ ic
 );
 
 export const PatrocinadorMasterScreen: React.FC<PatrocinadorMasterScreenProps> = ({ onBack }) => {
+  const [availableMonths] = useState([
+    { name: 'Junho', available: true },
+    { name: 'Julho', available: true },
+    { name: 'Agosto', available: true },
+  ]);
+  const [selectedMonths, setSelectedMonths] = useState<string[]>([]);
+
+  const handleMonthToggle = (monthName: string) => {
+    setSelectedMonths(prev =>
+      prev.includes(monthName)
+        ? prev.filter(m => m !== monthName)
+        : [...prev, monthName]
+    );
+  };
+
+  const totalPrice = selectedMonths.length * 1500;
+  const areAllMonthsSoldOut = availableMonths.every(m => !m.available);
+
   return (
     <div className="min-h-screen bg-slate-950 text-white font-sans animate-in slide-in-from-right duration-300 flex flex-col relative overflow-hidden">
       
@@ -67,7 +83,7 @@ export const PatrocinadorMasterScreen: React.FC<PatrocinadorMasterScreenProps> =
         </div>
       </header>
 
-      <main className="flex-1 overflow-y-auto no-scrollbar pb-72 px-6 pt-8 space-y-16">
+      <main className="flex-1 overflow-y-auto no-scrollbar pb-80 px-6 pt-8 space-y-16">
         
         {/* Hero Section */}
         <section className="text-center">
@@ -88,7 +104,7 @@ export const PatrocinadorMasterScreen: React.FC<PatrocinadorMasterScreenProps> =
             <Info size={20} />
           </div>
           <p className="text-xs text-slate-300 leading-relaxed font-medium">
-            A criação dos materiais visuais (banners, artes e destaques) é realizada <strong>após a contratação</strong>, com suporte da nossa equipe de design.
+            Aqui você contrata o espaço Patrocinador Master (por mês fechado). A criação dos materiais visuais acontece após a contratação, com suporte da nossa equipe de design.
           </p>
         </div>
         
@@ -105,12 +121,62 @@ export const PatrocinadorMasterScreen: React.FC<PatrocinadorMasterScreenProps> =
           </div>
         </section>
 
-        {/* Diferencial */}
-        <div className="bg-gradient-to-r from-blue-600/10 via-slate-900/5 to-blue-600/10 p-8 rounded-3xl border border-blue-500/20 text-center">
-          <p className="text-xl font-bold text-white leading-relaxed">
-            Enquanto outros anunciantes aparecem pontualmente, o Patrocinador Master aparece <span className="text-blue-400">o tempo todo</span>.
-          </p>
-        </div>
+        {/* SELEÇÃO DE MESES */}
+        <section>
+          <div className="text-center mb-8">
+            <h3 className="font-bold text-xl text-white mb-2">Escolha seus meses</h3>
+            <p className="text-[11px] text-slate-400 font-bold uppercase tracking-widest">(venda por mês fechado)</p>
+            <p className="text-xs text-slate-500 mt-3 max-w-md mx-auto">
+              Você pode reservar até 3 meses. Cada mês garante sua marca com destaque máximo durante todo o período.
+            </p>
+          </div>
+
+          {areAllMonthsSoldOut ? (
+            <div className="bg-slate-900 border-2 border-amber-500/20 rounded-3xl p-8 text-center">
+              <h4 className="text-lg font-bold text-amber-400 mb-3">Vagas Esgotadas</h4>
+              <p className="text-slate-300 text-sm mb-4">No momento, as próximas 3 vagas mensais do Patrocinador Master estão esgotadas.</p>
+              <p className="text-slate-400 text-xs mb-6">Entre na lista de espera para ser avisado assim que abrir uma disponibilidade.</p>
+              <button className="w-full bg-amber-500 text-slate-900 font-bold py-3 rounded-xl">
+                Entrar na lista de espera
+              </button>
+            </div>
+          ) : (
+            <>
+              <div className="grid grid-cols-3 gap-4 mb-8">
+                {availableMonths.map(month => (
+                  <button
+                    key={month.name}
+                    disabled={!month.available}
+                    onClick={() => handleMonthToggle(month.name)}
+                    className={`p-4 rounded-3xl border-2 flex flex-col items-center justify-center text-center transition-all duration-200 h-32
+                      ${!month.available
+                        ? 'bg-slate-800 border-slate-700 opacity-50 cursor-not-allowed'
+                        : selectedMonths.includes(month.name)
+                          ? 'bg-blue-500/20 border-blue-500 scale-105'
+                          : 'bg-slate-900 border-slate-800 hover:border-blue-500'
+                      }
+                    `}
+                  >
+                    <CalendarDays size={24} className={!month.available ? 'text-slate-600' : 'text-slate-300'} />
+                    <span className="font-black text-lg mt-2">{month.name}</span>
+                    {!month.available && <span className="text-[9px] font-bold text-red-400 uppercase mt-1">Esgotado</span>}
+                  </button>
+                ))}
+              </div>
+
+              {selectedMonths.length > 0 && (
+                <div className="bg-slate-900 border border-white/10 rounded-3xl p-5 space-y-3 text-sm animate-in fade-in">
+                  <p className="text-slate-300">Você selecionou: <span className="font-bold text-white">{selectedMonths.join(', ')}</span></p>
+                  <p className="text-slate-300">Valor por mês: <span className="font-bold text-white">R$ 1.500,00</span></p>
+                  <div className="pt-3 border-t border-white/5 flex items-center justify-between">
+                    <p className="text-slate-200 font-bold">Total do pedido:</p>
+                    <p className="text-2xl font-black text-amber-400">R$ {totalPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+                  </div>
+                </div>
+              )}
+            </>
+          )}
+        </section>
 
         {/* Benefícios */}
         <section>
@@ -145,18 +211,26 @@ export const PatrocinadorMasterScreen: React.FC<PatrocinadorMasterScreenProps> =
             Vagas extremamente limitadas para manter exclusividade e performance.
           </p>
         </div>
-        
       </main>
 
-      {/* Footer Fixo com CTA */}
-      <footer className="fixed bottom-20 left-0 right-0 p-5 bg-slate-950/80 backdrop-blur-md border-t border-white/5 z-30 max-w-md mx-auto">
-        <button 
-            className="w-full bg-amber-500 hover:bg-amber-600 text-slate-900 font-black text-base py-5 rounded-2xl shadow-xl shadow-amber-500/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
-        >
-            Quero contratar o espaço Patrocinador Master
-            <ArrowRight className="w-5 h-5 stroke-[3]" />
-        </button>
-      </footer>
+      {!areAllMonthsSoldOut && (
+        <footer className="fixed bottom-20 left-0 right-0 p-5 bg-slate-950/80 backdrop-blur-md border-t border-white/5 z-30 max-w-md mx-auto">
+          <div className="flex flex-col items-center">
+            <button 
+                disabled={selectedMonths.length === 0}
+                className="w-full bg-amber-500 hover:bg-amber-600 text-slate-900 font-black text-base py-5 rounded-2xl shadow-xl shadow-amber-500/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+                Quero contratar Patrocinador Master
+                <ArrowRight className="w-5 h-5 stroke-[3]" />
+            </button>
+            {selectedMonths.length === 0 && (
+              <p className="text-red-400 text-xs font-bold mt-3 animate-in fade-in">
+                Selecione ao menos 1 mês para continuar.
+              </p>
+            )}
+          </div>
+        </footer>
+      )}
     </div>
   );
 };
