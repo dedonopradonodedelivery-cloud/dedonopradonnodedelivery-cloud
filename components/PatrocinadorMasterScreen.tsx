@@ -67,7 +67,7 @@ export const PatrocinadorMasterScreen: React.FC<PatrocinadorMasterScreenProps> =
         </div>
       </header>
 
-      <main className="flex-1 overflow-y-auto no-scrollbar pb-48 px-6 pt-8 space-y-16">
+      <main className="flex-1 overflow-y-auto no-scrollbar pb-72 px-6 pt-8 space-y-16">
         
         {/* Hero Section */}
         <section className="text-center">
@@ -149,7 +149,7 @@ export const PatrocinadorMasterScreen: React.FC<PatrocinadorMasterScreenProps> =
       </main>
 
       {/* Footer Fixo com CTA */}
-      <footer className="fixed bottom-0 left-0 right-0 p-5 bg-slate-950/80 backdrop-blur-md border-t border-white/5 z-30 max-w-md mx-auto">
+      <footer className="fixed bottom-20 left-0 right-0 p-5 bg-slate-950/80 backdrop-blur-md border-t border-white/5 z-30 max-w-md mx-auto">
         <button 
             className="w-full bg-amber-500 hover:bg-amber-600 text-slate-900 font-black text-base py-5 rounded-2xl shadow-xl shadow-amber-500/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
         >
