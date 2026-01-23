@@ -59,7 +59,7 @@ const ApplicationModal: React.FC<{
             setIsSubmitting(false);
             setIsSuccess(true);
             // Fecha modal após sucesso
-            setTimeout(() => onClose(), 3000);
+            setTimeout(() => onClose(), 5000);
         }, 1500);
     };
 
@@ -74,10 +74,12 @@ const ApplicationModal: React.FC<{
                         <div className="w-20 h-20 bg-emerald-100 dark:bg-emerald-900/30 rounded-full flex items-center justify-center mb-6 text-emerald-600 dark:text-emerald-400">
                             <CheckCircle2 size={40} />
                         </div>
-                        <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Aplicação Enviada!</h3>
-                        <p className="text-gray-500 dark:text-gray-400">
-                            Sua candidatura foi recebida. Nossa equipe analisará seu perfil e entrará em contato em breve.
-                        </p>
+                        <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Aplicação enviada com sucesso ✅</h3>
+                        <div className="space-y-4 text-sm text-gray-600 dark:text-gray-300 max-w-sm leading-relaxed">
+                          <p>Sua aplicação para o Freguesia Connect foi enviada com sucesso.</p>
+                          <p>Nossa equipe irá analisar seus dados e entraremos em contato pelo WhatsApp em até 72 horas.</p>
+                          <p>Agradecemos seu interesse em fazer parte desse grupo exclusivo de empresários.</p>
+                        </div>
                     </div>
                 ) : (
                     <>
@@ -86,14 +88,14 @@ const ApplicationModal: React.FC<{
                             <h2 className="text-xl font-bold text-gray-900 dark:text-white text-center">Formulário de Aplicação</h2>
                         </div>
                         <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto no-scrollbar p-6 space-y-5">
-                            <input name="name" type="text" placeholder="Nome completo" required onChange={handleChange} className="w-full p-4 bg-gray-50 dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 text-sm font-medium" />
-                            <input name="company" type="text" placeholder="Nome fantasia da empresa" required onChange={handleChange} className="w-full p-4 bg-gray-50 dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 text-sm font-medium" />
-                            <input name="segment" type="text" placeholder="Segmento de atuação" required onChange={handleChange} className="w-full p-4 bg-gray-50 dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 text-sm font-medium" />
-                            <input name="whatsapp" type="tel" placeholder="WhatsApp" required onChange={handleChange} className="w-full p-4 bg-gray-50 dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 text-sm font-medium" />
-                            <input name="email" type="email" placeholder="E-mail" required onChange={handleChange} className="w-full p-4 bg-gray-50 dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 text-sm font-medium" />
-                            <textarea name="reason" placeholder="Por que você acredita que deveria fazer parte desse seleto grupo de empresários?" required onChange={handleChange} rows={5} className="w-full p-4 bg-gray-50 dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 text-sm font-medium resize-none"></textarea>
+                            <input name="name" type="text" placeholder="Nome completo" required onChange={handleChange} className="w-full p-4 bg-gray-50 dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 text-sm font-medium dark:text-white" />
+                            <input name="company" type="text" placeholder="Nome fantasia da empresa" required onChange={handleChange} className="w-full p-4 bg-gray-50 dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 text-sm font-medium dark:text-white" />
+                            <input name="segment" type="text" placeholder="Segmento de atuação" required onChange={handleChange} className="w-full p-4 bg-gray-50 dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 text-sm font-medium dark:text-white" />
+                            <input name="whatsapp" type="tel" placeholder="WhatsApp" required onChange={handleChange} className="w-full p-4 bg-gray-50 dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 text-sm font-medium dark:text-white" />
+                            <input name="email" type="email" placeholder="E-mail" required onChange={handleChange} className="w-full p-4 bg-gray-50 dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 text-sm font-medium dark:text-white" />
+                            <textarea name="reason" placeholder="Por que você acredita que deveria fazer parte desse seleto grupo de empresários?" required onChange={handleChange} rows={5} className="w-full p-4 bg-gray-50 dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 text-sm font-medium resize-none dark:text-white"></textarea>
                             <button type="submit" disabled={isSubmitting} className="w-full bg-indigo-600 text-white font-bold py-4 rounded-xl flex items-center justify-center gap-2 disabled:opacity-50">
-                                {isSubmitting ? <Loader2 className="animate-spin" /> : <Send />} Enviar Candidatura
+                                {isSubmitting ? <Loader2 className="animate-spin" /> : <Send />} Enviar aplicação
                             </button>
                         </form>
                     </>
@@ -195,7 +197,7 @@ export const JPAConnectSalesView: React.FC<JPAConnectSalesViewProps> = ({ onBack
             onClick={() => setIsApplicationOpen(true)}
             className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-black text-base py-5 rounded-2xl shadow-xl shadow-indigo-500/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
         >
-            Quero me candidatar
+            Quero fazer minha aplicação
             <ArrowRight className="w-5 h-5 stroke-[3]" />
         </button>
       </footer>
