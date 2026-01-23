@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { 
   ChevronLeft, 
@@ -40,7 +41,11 @@ import {
   ClipboardList,
   FileArchive,
   CornerDownRight,
-  ShieldAlert
+  ShieldAlert,
+  TrendingUp,
+  Award,
+  // Added FileSignature to fix "Cannot find name 'FileSignature'" error
+  FileSignature
 } from 'lucide-react';
 import { User } from '@supabase/supabase-js';
 import { StoreBannerEditor } from '@/components/StoreBannerEditor';
@@ -53,6 +58,9 @@ interface StoreAdsModuleProps {
   viewMode?: string;
   initialView?: 'sales' | 'chat';
 }
+
+type ViewState = 'sales' | 'creator' | 'editor' | 'pro_checkout' | 'pro_processing' | 'pro_approved' | 'pro_chat' | 'designer_panel' | 'designer_order_detail' | 'chat_onboarding' | 'pro_high_demand_warning';
+
 
 const NEIGHBORHOODS = [
   "Freguesia", "Pechincha", "Anil", "Taquara", "Tanque", 
@@ -97,7 +105,7 @@ const DISPLAY_MODES = [
 export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNavigate, user, categoryName, viewMode, initialView = 'sales' }) => {
   const isDesigner = viewMode === 'Designer';
   
-  const [view, setView] = useState<'sales' | 'creator' | 'editor' | 'pro_checkout' | 'pro_processing' | 'pro_approved' | 'pro_chat' | 'designer_workspace' | 'chat_onboarding'>('sales');
+  const [view, setView] = useState<ViewState>('sales');
   const [selectedMode, setSelectedMode] = useState<typeof DISPLAY_MODES[0] | null>(null);
   const [selectedPeriods, setSelectedPeriods] = useState<string[]>([]);
   const [selectedNeighborhoods, setSelectedNeighborhoods] = useState<string[]>([]);
@@ -111,13 +119,12 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
   const [savedDesign, setSavedDesign] = useState<any>(null);
   const [toast, setToast] = useState<{msg: string, type: 'info' | 'error' | 'designer'} | null>(null);
   
-  // States para o Chat Pro
+  const [dailySalesCount, setDailySalesCount] = useState(7);
   const [chatMessages, setChatMessages] = useState<any[]>([]);
   const [proChatStep, setProChatStep] = useState(0);
   const [isLogoModalOpen, setIsLogoModalOpen] = useState(false);
   const [isBriefingModalOpen, setIsBriefingModalOpen] = useState(false);
 
-  // Briefing Form State
   const [briefingData, setBriefingData] = useState({
     companyName: user?.user_metadata?.store_name || '',
     headline: '',
@@ -125,10 +132,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
     observations: ''
   });
 
-  // Logo Upload State
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
-
-  // Controle de scroll inteligente
   const [highlightPeriod, setHighlightPeriod] = useState(false);
 
   const periodRef = useRef<HTMLDivElement>(null);
@@ -137,12 +141,16 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
   const paymentRef = useRef<HTMLDivElement>(null);
   const chatScrollRef = useRef<HTMLDivElement>(null);
 
+  const calculatedDeadlineDays = useMemo(() => {
+    if (dailySalesCount <= 5) return 3; // 72h
+    return 3 + Math.floor((dailySalesCount - 1) / 5);
+  }, [dailySalesCount]);
+
   useEffect(() => {
     if (isDesigner) {
-      setView('designer_workspace');
+      setView('designer_panel');
     } else if (initialView === 'chat') {
-      // Mock para a lógica de verificação de pedido ativo.
-      const hasActiveOrder = false; 
+      const hasActiveOrder = true; 
       if (hasActiveOrder) {
         setView('pro_chat');
       } else {
@@ -164,40 +172,26 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
     ];
   }, []);
 
-  // Lógica de mensagens automáticas do Chat
   useEffect(() => {
     if (view === 'pro_chat' && proChatStep === 0) {
       setProChatStep(1);
       
-      if (isDesigner) {
-        setChatMessages([
-            { id: 1, role: 'system', text: '🎉 Parabéns pela escolha profissional!\nNosso time vai criar um banner focado em conversão.\nEm até 72h você receberá a arte pronta para aprovação e publicação.', timestamp: '10:00' },
-            { id: 2, role: 'system', text: 'Para começarmos, envie por aqui:\n• Logo em alta (PNG ou PDF)\n• Nome da empresa\n• Pequena descrição / promoção', timestamp: '10:01' },
-            { id: 3, role: 'user', text: 'Olá! Enviei os dados abaixo.', timestamp: '10:05' },
-            { id: 4, role: 'user', type: 'attachment', text: '📋 Informações do banner enviadas.', details: { name: 'Hamburgueria do Zé', promo: 'Combo Casal R$ 49,90', obs: 'Usar cores preto e laranja.' }, timestamp: '10:05' },
-            { id: 5, role: 'user', type: 'file', text: 'Logo_Vetorial.png', timestamp: '10:06' }
-        ]);
-        setProChatStep(2);
-      } else {
-        setChatMessages([{
-            id: 1,
-            role: 'system',
-            text: '🎉 Parabéns pela escolha profissional!\nNosso time vai criar um banner focado em conversão.\nEm até 72h você receberá a arte pronta para aprovação e publicação.',
-            timestamp: 'Agora'
-          }]);
-    
-          setTimeout(() => {
-            setChatMessages(prev => [...prev, {
-              id: 2,
-              role: 'system',
-              text: 'Para começarmos, envie por aqui:\n• Logo em alta (PNG ou PDF)\n• Nome da empresa\n• Pequena descrição / promoção\nAssim que recebermos, damos início à criação.',
-              timestamp: 'Agora'
-            }]);
-            setProChatStep(2);
-          }, 1500);
-      }
+      const highDemandText = dailySalesCount > 5 
+        ? `Devido à alta demanda no momento, o prazo estimado para criação do seu banner é de até ${calculatedDeadlineDays} dias.\n\n`
+        : '';
+
+      const professionalMessage = {
+          id: 1,
+          author: 'Sistema',
+          role: 'System',
+          text: `Olá! 👋\nSeu pedido de Anunciar nos Banners – Time Profissional foi confirmado com sucesso.\n\n${highDemandText}A partir deste chat vamos alinhar todas as informações para a criação da arte.\n\nPara começar, envie por aqui:\n\n• Logo da sua empresa\n• Cores da sua marca\n• Texto ou promoção desejada\n• Alguma referência visual (se tiver)\n\nAssim que seu banner entrar em produção, avisaremos por aqui.`,
+          timestamp: 'Agora'
+      };
+
+      setChatMessages([professionalMessage]);
+      setProChatStep(2);
     }
-  }, [view, isDesigner, proChatStep]);
+  }, [view, isDesigner, proChatStep, dailySalesCount, calculatedDeadlineDays]);
 
   useEffect(() => {
     if (chatScrollRef.current) {
@@ -253,6 +247,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
 
   const handlePayPro = () => {
     setView('pro_processing');
+    setDailySalesCount(prev => prev + 1); // Simula a venda
     setTimeout(() => {
       setView('pro_approved');
     }, 2000);
@@ -293,11 +288,20 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
     if (selectedPeriods.length === 0) { showToast("Selecione o período.", "error"); scrollTo(periodRef, 120); return; }
     if (selectedNeighborhoods.length === 0) { showToast("Escolha os bairros.", "error"); scrollTo(neighborhoodRef, 120); return; }
     if (!isArtSaved) { showToast("Configure a arte do banner.", "error"); scrollTo(creativeRef, 120); return; }
+    
+    if (artChoice === 'pro') {
+        if (dailySalesCount > 5) {
+            setView('pro_high_demand_warning');
+        } else {
+            setView('pro_checkout');
+        }
+        return;
+    }
+
     setIsSubmitting(true);
     setTimeout(() => { setIsSubmitting(false); setIsSuccess(true); }, 2000);
   };
 
-  // HANDLERS PARA O CHAT PRO
   const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -357,7 +361,6 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
 
   const handleHeaderBack = () => {
     if (view === 'pro_checkout' || view === 'pro_high_demand_warning') setView('sales');
-    else if (view === 'designer_workspace') onBack();
     else if (view === 'pro_chat') setView('sales');
     else onBack();
   }
@@ -365,13 +368,11 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
   const getPageTitle = () => {
     switch (view) {
       case 'pro_checkout': return 'Pagamento';
-      case 'designer_workspace': return 'Painel do Designer';
       case 'pro_chat': return 'Chat com Designer';
       default: return 'Anunciar no Bairro';
     }
   }
 
-  // Fix: defined missing isCheckoutStep variable used in the footer logic
   const isCheckoutStep = !!(selectedMode && selectedPeriods.length > 0 && selectedNeighborhoods.length > 0 && isArtSaved);
 
   if (isEditingArt) {
@@ -403,36 +404,35 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
           </button>
           <div>
             <h1 className="font-bold text-lg leading-none flex items-center gap-2">{getPageTitle()} <Crown size={16} className="text-amber-400 fill-amber-400" /></h1>
-            <p className="text-[10px] text-blue-400 uppercase font-black tracking-widest mt-1">
-              {view.startsWith('designer') ? 'Gestão de Produção' : 'Configuração de Campanha'}
-            </p>
+            <p className="text-[10px] text-blue-400 uppercase font-black tracking-widest mt-1">Configuração de Campanha</p>
           </div>
         </header>
       )}
 
-      <main className={`flex-1 overflow-y-auto no-scrollbar ${view === 'sales' || view === 'designer_workspace' ? 'pb-32' : ''}`}>
+      <main className={`flex-1 overflow-y-auto no-scrollbar ${view === 'sales' ? 'pb-64' : ''}`}>
         
-        {view === 'chat_onboarding' && (
-           <div className="flex flex-col items-center justify-center p-8 text-center animate-in fade-in duration-500 h-full min-h-[70vh]">
-                <div className="w-24 h-24 bg-blue-500/10 rounded-full flex items-center justify-center mb-8 border-4 border-blue-500/20 shadow-lg">
-                    <MessageCircle size={40} className="text-blue-400" />
+        {view === 'pro_high_demand_warning' && (
+           <div className="flex flex-col items-center justify-center p-8 text-center animate-in fade-in duration-300 min-h-[70vh]">
+                <div className="w-16 h-16 bg-amber-500/10 rounded-full flex items-center justify-center mx-auto mb-6 border-4 border-amber-500/20">
+                    <AlertTriangle size={32} className="text-amber-400" />
                 </div>
-                <h1 className="text-2xl font-bold text-white mb-4 leading-tight">👋 Olá, {user?.user_metadata?.store_name}!</h1>
-                <p className="text-slate-400 leading-relaxed max-w-sm mb-12">Este é o canal para criação e acompanhamento de banners com nosso time de designers. Para iniciar, crie um anúncio primeiro.</p>
-                <button onClick={() => setView('sales')} className="w-full max-w-sm py-5 bg-[#1E5BFF] text-white font-black rounded-2xl shadow-xl active:scale-[0.98] transition-all uppercase tracking-widest text-sm flex items-center justify-center gap-2">Criar Novo Banner <ArrowRight size={18} /></button>
+                <h2 className="text-xl font-bold text-white mb-3">Demanda alta no momento</h2>
+                <p className="text-slate-400 text-sm leading-relaxed mb-4">Nosso prazo normal de criação é de 72 horas.</p>
+                <p className="text-slate-300 text-sm leading-relaxed mb-6">Devido à alta demanda hoje, o prazo estimado para novos pedidos é de até <strong className="text-amber-400">{calculatedDeadlineDays} dias</strong>.</p>
+                <button onClick={() => setView('pro_checkout')} className="w-full max-w-xs py-4 bg-amber-500 text-slate-900 font-black rounded-2xl shadow-xl active:scale-[0.98] transition-all">Continuar para pagamento</button>
            </div>
         )}
 
         {view === 'pro_checkout' && (
           <div className="p-6 flex flex-col justify-center items-center text-center animate-in fade-in">
               <div className="w-20 h-20 bg-blue-500/10 rounded-full flex items-center justify-center mb-6 border-4 border-blue-500/20">
-                  <Plus size={32} className="text-blue-400" />
+                  <FileSignature size={32} className="text-blue-400" />
               </div>
               <h2 className="text-2xl font-bold text-white mb-8">Resumo do serviço</h2>
               <div className="w-full max-w-sm bg-slate-900 rounded-3xl p-6 border border-white/10 space-y-4 text-left">
-                  <div className="flex justify-between items-center text-sm border-b border-white/5 pb-4"><span className="text-slate-400">Produto:</span><span className="font-bold text-white">Banner Patrocinado</span></div>
+                  <div className="flex justify-between items-center text-sm border-b border-white/5 pb-4"><span className="text-slate-400">Produto:</span><span className="font-bold text-white">Banners Patrocinados</span></div>
                   <div className="flex justify-between items-center text-sm border-b border-white/5 pb-4"><span className="text-slate-400">Plano:</span><span className="font-bold text-white">Time Profissional</span></div>
-                  <div className="flex justify-between items-center pt-2"><span className="text-slate-300 font-bold">Total:</span><span className="text-2xl font-black text-emerald-400">R$ 69,90</span></div>
+                  <div className="text-sm text-slate-400 leading-relaxed border-t border-white/5 pt-4 mt-4"><span className="font-bold text-slate-200">Descrição:</span> Criação profissional do banner + publicação no app.</div>
               </div>
               <button onClick={handlePayPro} className="w-full max-w-sm mt-8 py-5 bg-[#1E5BFF] text-white font-black rounded-2xl shadow-xl active:scale-[0.98] transition-all">Confirmar pagamento</button>
           </div>
@@ -459,17 +459,38 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
 
         {view === 'sales' && (
           <div className="p-6 space-y-16">
+            
+            {/* NOVO BLOCO DE DESTAQUE PREMIUM E PERSUASIVO */}
             <section className="animate-in fade-in slide-in-from-top-4 duration-700">
-                <div className="bg-slate-900 border-l-4 border-blue-600 rounded-r-[2.5rem] p-8 shadow-2xl relative overflow-hidden group">
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none"></div>
+                <div className="bg-slate-900 border border-blue-500/20 rounded-[2.5rem] p-8 shadow-2xl relative overflow-hidden group">
+                    {/* Efeito de luz sutil decorativo */}
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none"></div>
+                    
                     <div className="relative z-10">
-                        <div className="flex items-center gap-2 mb-3">
-                            <ShieldAlert className="w-5 h-5 text-blue-500" />
-                            <h3 className="text-lg font-black text-white leading-tight uppercase tracking-tighter">Seu concorrente pode estar aqui antes de você</h3>
+                        {/* Badge de Oportunidade */}
+                        <div className="bg-blue-600 text-white text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-full w-fit mb-4 shadow-lg shadow-blue-600/20">
+                            Oportunidade
                         </div>
-                        <p className="text-sm text-slate-400 leading-relaxed mb-6 font-medium">Todos os dias, milhares de pessoas de Jacarepaguá acessam o app em busca de produtos e serviços. Os espaços de destaque são limited.</p>
-                        <div className="flex flex-col gap-2 pt-4 border-t border-white/5">
-                            <p className="text-xs font-black text-white uppercase tracking-widest flex items-center gap-2"><span className="w-1.5 h-1.5 bg-blue-500 rounded-full"></span>Quem garante o espaço agora sai na frente.</p>
+
+                        <div className="flex items-start gap-4">
+                            <div className="w-12 h-12 bg-blue-500/10 rounded-2xl flex items-center justify-center text-blue-500 shrink-0 border border-blue-500/20 group-hover:scale-105 transition-transform duration-500">
+                                <TrendingUp size={24} />
+                            </div>
+                            <div>
+                                <h3 className="text-xl font-black text-white leading-tight uppercase tracking-tighter">
+                                    Seu concorrente pode estar aqui antes de você.
+                                </h3>
+                                <p className="text-sm text-slate-400 leading-relaxed mt-2 font-medium">
+                                    Garanta seu destaque agora e apareça como patrocinado antes dos demais nas listas do app.
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <div className="flex flex-col gap-2 pt-6 mt-6 border-t border-white/5">
+                            <p className="text-[10px] font-black text-white uppercase tracking-widest flex items-center gap-2">
+                                <span className="w-1.5 h-1.5 bg-blue-500 rounded-full"></span>
+                                Quem garante o espaço agora sai na frente.
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -536,7 +557,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
                                 <div className="w-12 h-12 bg-blue-500/10 rounded-2xl flex items-center justify-center text-blue-400 shrink-0"><Paintbrush size={24} /></div>
                                 <div>
                                     <h3 className="text-lg font-bold text-white mb-1 leading-tight">Personalizar manualmente</h3>
-                                    <p className="text-xs text-slate-400 leading-relaxed">Use seu banner pronto ou crie no editor.</p>
+                                    <p className="text-xs text-slate-400 leading-relaxed">Use seu banner pronto or crie no editor.</p>
                                 </div>
                             </div>
                             {artChoice === 'diy' && (
@@ -560,24 +581,32 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
                     </div>
                 </div>
             </section>
-          </div>
-        )}
 
-        {view === 'designer_workspace' && (
-          <div className="p-6 space-y-4">
-              <div className="flex gap-4 min-w-full w-fit overflow-x-auto no-scrollbar pb-6">
-                  {['briefing_recebido', 'em_criacao', 'aguardando_aprovacao', 'aprovado'].map((col) => (
-                      <div key={col} className="w-72 bg-slate-900 rounded-3xl p-4 border border-white/5 flex flex-col shrink-0">
-                          <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest px-2 mb-4">{col.replace('_', ' ')}</h3>
-                          <div className="space-y-3">
-                              <div onClick={() => setView('pro_chat')} className="bg-slate-800 p-4 rounded-2xl border border-white/5 shadow-md cursor-pointer hover:border-indigo-500/50 transition-colors">
-                                  <p className="font-bold text-white text-sm leading-tight mb-1">Hamburgueria do Zé</p>
-                                  <p className="text-xs text-slate-500">há 10 min • Home</p>
-                              </div>
-                          </div>
-                      </div>
-                  ))}
-              </div>
+            {/* BLOCO 5: CHECKOUT FINAL */}
+            <section ref={paymentRef} className={`space-y-8 transition-all duration-500 ${!isArtSaved ? 'opacity-20 pointer-events-none' : 'opacity-100'}`}>
+                <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-blue-500 flex items-center gap-2 px-1"><Check size={14} /> 5. Finalizar Compra</h3>
+                <div className="bg-slate-900 rounded-[2.5rem] p-8 border border-white/10 shadow-2xl space-y-8">
+                    <div className="space-y-2">
+                        <div className="flex justify-between text-sm"><span className="text-slate-500">Modo: {selectedMode?.label}</span><span className="font-bold text-white">R$ {selectedMode?.price.toFixed(2)} / mês</span></div>
+                        <div className="flex justify-between text-sm"><span className="text-slate-500">Bairros selecionados</span><span className="font-bold text-white">× {selectedNeighborhoods.length}</span></div>
+                        <div className="flex justify-between text-sm"><span className="text-slate-500">Vigência Total</span><span className="font-bold text-white">{prices.isPackage ? '90 dias' : '30 dias'}</span></div>
+                        {artChoice === 'pro' && <div className="flex justify-between text-sm text-amber-400"><span className="font-medium">Arte Profissional</span><span className="font-black">+ R$ 69,90</span></div>}
+                        
+                        <div className="pt-4 border-t border-white/5 flex flex-col items-end">
+                            <div className="flex justify-between items-center w-full mb-1">
+                                <span className="text-sm font-bold text-slate-300">Total do Pacote</span>
+                                <span className="text-2xl font-black text-white">R$ {prices.current.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                            </div>
+                            {prices.isPackage && (
+                                <p className="text-emerald-400 font-black text-xs uppercase tracking-widest">3x de R$ {prices.monthly.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} sem juros</p>
+                            )}
+                        </div>
+                    </div>
+                    <div className="space-y-3 pt-6 border-t border-white/10">
+                        <button onClick={() => setPaymentMethod('pix')} className={`w-full p-5 rounded-2xl border-2 flex items-center justify-between transition-all ${paymentMethod === 'pix' ? 'bg-blue-600/10 border-blue-500' : 'bg-slate-950 border-transparent'}`}><div className="flex items-center gap-4"><QrCode size={20} className={paymentMethod === 'pix' ? 'text-blue-400' : 'text-slate-600'} /><span className="font-bold text-sm">PIX (Imediato)</span></div>{paymentMethod === 'pix' && <CheckCircle2 size={18} className="text-blue-500" />}</button>
+                    </div>
+                </div>
+            </section>
           </div>
         )}
 
@@ -598,12 +627,12 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
       </main>
 
       {/* FOOTER PARA VIEW SALES */}
-      {view === 'sales' && (
-        <footer className="fixed bottom-[80px] left-0 right-0 p-5 bg-[#020617]/95 backdrop-blur-2xl border-t border-white/10 z-[100] max-w-md mx-auto shadow-[0_-20px_40px_rgba(0,0,0,0.6)] animate-in slide-in-from-bottom">
-            <button onClick={handleFooterClick} disabled={isSubmitting} className={`w-full py-5 rounded-[2rem] shadow-xl shadow-blue-500/30 flex flex-col items-center justify-center transition-all active:scale-[0.98] ${selectedMode ? 'bg-[#1E5BFF] text-white hover:bg-blue-600' : 'bg-white/5 text-slate-500 cursor-not-allowed opacity-50'}`}>
-                {isSubmitting ? (<Loader2 className="w-6 h-6 animate-spin" />) : !isCheckoutStep ? (<span className="font-black text-sm uppercase tracking-widest">{!selectedMode ? "Escolha onde aparecer" : selectedPeriods.length === 0 ? "Escolha o período" : selectedNeighborhoods.length === 0 ? "Escolha os bairros" : "Configure a arte"}</span>) : (<div className="flex flex-col items-center"><div className="flex items-center gap-2 mb-0.5"><span className="text-[10px] font-black text-white/60 uppercase tracking-widest">FINALIZAR</span><ArrowRight size={14} className="text-white/60" /></div><div className="flex items-center gap-3"><span className="text-xl font-black text-white">PAGAR AGORA — R$ {prices.current.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span></div></div>)}
-            </button>
-        </footer>
+      {!isSuccess && (view === 'sales' || view === 'pro_checkout') && (
+      <div className="fixed bottom-[80px] left-0 right-0 p-5 bg-[#020617]/95 backdrop-blur-2xl border-t border-white/10 z-[100] max-w-md mx-auto shadow-[0_-20px_40px_rgba(0,0,0,0.6)] animate-in slide-in-from-bottom">
+        <button onClick={handleFooterClick} disabled={isSubmitting} className={`w-full py-5 rounded-[2rem] shadow-xl shadow-blue-500/30 flex flex-col items-center justify-center transition-all active:scale-[0.98] ${selectedMode ? 'bg-[#1E5BFF] text-white hover:bg-blue-600' : 'bg-white/5 text-slate-500 cursor-not-allowed opacity-50'}`}>
+            {isSubmitting ? (<Loader2 className="w-6 h-6 animate-spin" />) : !isCheckoutStep ? (<span className="font-black text-sm uppercase tracking-widest">{!selectedMode ? "Escolha onde aparecer" : selectedPeriods.length === 0 ? "Escolha o período" : selectedNeighborhoods.length === 0 ? "Escolha os bairros" : "Configure a arte"}</span>) : (<div className="flex flex-col items-center"><div className="flex items-center gap-2 mb-0.5"><span className="text-[10px] font-black text-white/60 uppercase tracking-widest">FINALIZAR</span><ArrowRight size={14} className="text-white/60" /></div><div className="flex items-center gap-3"><span className="text-xl font-black text-white">PAGAR AGORA — R$ {prices.current.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span></div></div>)}
+        </button>
+      </div>
       )}
 
       {/* FOOTER PARA VIEW CHAT */}
