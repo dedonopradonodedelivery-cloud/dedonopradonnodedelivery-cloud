@@ -40,6 +40,7 @@ Sempre seja curto, use emojis e convide o usuário a explorar as seções do app
         ${STORES.slice(0, 5).map(s => `- ${s.name} (${s.category}): ${s.description}.`).join('\n')}
       `;
 
+      // Fix: Correctly structured the generateContent call.
       const response = await ai.models.generateContent({
         model: 'gemini-3-flash-preview',
         contents: `${promptContext}\n\nPergunta do usuário: ${userMsg}`,
@@ -49,6 +50,7 @@ Sempre seja curto, use emojis e convide o usuário a explorar as seções do app
         },
       });
 
+      // Fix: Access the text property directly instead of calling a method.
       const text = response.text || "Desculpe, tive um problema para processar sua mensagem.";
       setMessages(prev => [...prev, { role: 'model', text }]);
 

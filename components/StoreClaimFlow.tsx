@@ -236,7 +236,7 @@ export const StoreClaimFlow: React.FC<StoreClaimFlowProps> = ({ store, userId, o
                     </div>
                     <div className="space-y-1.5">
                         <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Anexar Prova (Opcional)</label>
-                        <div className="w-full border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-2xl p-6 flex flex-col items-center justify-center gap-2 bg-gray-50 dark:bg-gray-800/50 hover:bg-gray-100 transition-colors cursor-pointer">
+                        <div className="w-full border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-2xl p-6 flex flex-col items-center justify-center gap-2 bg-gray-50 dark:bg-gray-900/50 hover:bg-gray-100 transition-colors cursor-pointer group">
                             <Upload className="text-gray-300" />
                             <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Cartão CNPJ, Fachada ou NF</span>
                         </div>
