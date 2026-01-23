@@ -177,7 +177,7 @@ const App: React.FC = () => {
                     : <MenuView user={user as any} userRole={userRole} onAuthClick={() => setIsAuthOpen(true)} onNavigate={setActiveTab} onBack={() => setActiveTab('home')} />
                 )}
 
-                {activeTab === 'jpa_connect_sales' && <JPAConnectSalesView onBack={() => setActiveTab('profile')} onJoin={() => alert('Abrir fluxo de adesão (em desenvolvimento)')} />}
+                {activeTab === 'jpa_connect_sales' && <JPAConnectSalesView onBack={() => setActiveTab('profile')} />}
                 {activeTab === 'community_feed' && <CommunityFeedView onStoreClick={handleSelectStore} user={user as any} onRequireLogin={() => setIsAuthOpen(true)} onNavigate={setActiveTab} />}
                 {activeTab === 'services' && <ServicesView onSelectMacro={(id, name) => { setSelectedServiceMacro({id, name}); if (id === 'emergency') { setQuoteCategory(name); setIsQuoteModalOpen(true); } else { setActiveTab('service_subcategories'); } }} onOpenTerms={() => setActiveTab('service_terms')} onNavigate={setActiveTab} searchTerm={globalSearch} />}
                 {activeTab === 'category_detail' && selectedCategory && <CategoryView category={selectedCategory} onBack={() => setActiveTab('home')} onStoreClick={handleSelectStore} stores={STORES} userRole={userRole as any} onAdvertiseInCategory={setAdCategoryTarget} onNavigate={handleNavigate} />}
@@ -200,7 +200,7 @@ const App: React.FC = () => {
                 {activeTab === 'merchant_reviews' && <MerchantReviewsModule onBack={() => setActiveTab('profile')} />}
                 {activeTab === 'merchant_performance' && <MerchantPerformanceDashboard onBack={() => setActiveTab('profile')} onNavigate={handleNavigate} />}
                 
-                {activeTab === 'patrocinador_master' && <PatrocinadorMasterScreen onBack={() => setActiveTab('home')} />}
+                {activeTab === 'patrocinador_master' && <PatrocinadorMasterScreen onBack={() => setActiveTab('profile')} />}
                 {activeTab === 'jobs_list' && <JobsView onBack={() => setActiveTab('home')} />}
                 {activeTab === 'about' && <AboutView onBack={() => setActiveTab('profile')} />}
                 {activeTab === 'support' && <SupportView onBack={() => setActiveTab('profile')} />}

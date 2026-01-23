@@ -39,20 +39,13 @@ const MarketingActionCard: React.FC<{
   onClick: () => void;
   iconBgClass: string;
   iconColorClass: string;
-  badge?: number;
-  note?: string;
-}> = ({ icon: Icon, label, description, onClick, iconBgClass, iconColorClass, badge, note }) => (
+}> = ({ icon: Icon, label, description, onClick, iconBgClass, iconColorClass }) => (
   <button 
     onClick={onClick}
     className="w-full flex items-start gap-5 p-5 bg-white dark:bg-gray-800 rounded-[2.5rem] border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all group active:scale-[0.98]"
   >
-    <div className={`relative w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 ${iconBgClass} group-hover:scale-105 transition-transform`}>
+    <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 ${iconBgClass} group-hover:scale-105 transition-transform`}>
       <Icon size={28} className={iconColorClass} />
-      {badge ? (
-        <div className="absolute -top-1.5 -right-1.5 w-6 h-6 bg-red-500 rounded-full border-4 border-white dark:border-gray-800 flex items-center justify-center animate-bounce">
-          <span className="text-xs font-black text-white">{badge}</span>
-        </div>
-      ) : null}
     </div>
     <div className="flex-1 text-left">
       <p className="font-black text-gray-800 dark:text-white text-base leading-tight">
@@ -61,16 +54,6 @@ const MarketingActionCard: React.FC<{
       <p className="text-xs text-gray-400 font-medium leading-snug mt-1">
         {description}
       </p>
-      {note && (
-        <div className="mt-3 pt-3 border-t border-gray-100 dark:border-gray-700">
-          <div className="flex items-start gap-2 bg-blue-50 dark:bg-blue-900/20 p-3 rounded-xl border border-blue-100 dark:border-blue-800/50">
-            <Info size={14} className="text-blue-600 dark:text-blue-400 shrink-0 mt-0.5" />
-            <p className="text-[10px] text-blue-700 dark:text-blue-300 font-semibold leading-snug">
-              {note}
-            </p>
-          </div>
-        </div>
-      )}
     </div>
     <ChevronRight size={20} className="text-gray-300 group-hover:text-[#1E5BFF]" />
   </button>
@@ -83,14 +66,20 @@ const ServiceBlock: React.FC<{
   label: string; 
   description?: string;
   onClick: () => void;
-}> = ({ icon: Icon, label, description, onClick }) => (
+  badge?: number;
+}> = ({ icon: Icon, label, description, onClick, badge }) => (
   <button 
     onClick={onClick}
     className="w-full flex items-center justify-between p-5 bg-white dark:bg-gray-800 border-b border-gray-50 dark:border-gray-700 last:border-b-0 active:bg-gray-50 dark:active:bg-gray-700/50 transition-colors group"
   >
     <div className="flex items-center gap-4">
-      <div className="p-2.5 rounded-xl bg-gray-50 dark:bg-gray-700 text-gray-400 group-hover:text-[#1E5BFF] group-hover:bg-blue-50 transition-colors">
+      <div className="p-2.5 rounded-xl bg-gray-50 dark:bg-gray-700 text-gray-400 group-hover:text-[#1E5BFF] group-hover:bg-blue-50 transition-colors relative">
         <Icon size={22} />
+        {badge && (
+           <div className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full border-2 border-white dark:border-gray-800 flex items-center justify-center">
+             <span className="text-[8px] font-black text-white">{badge}</span>
+           </div>
+        )}
       </div>
       <div className="text-left">
         <p className="text-sm font-bold text-gray-700 dark:text-gray-200">
@@ -178,15 +167,6 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
               iconColorClass="text-purple-600 dark:text-purple-400"
             />
             <MarketingActionCard 
-              icon={Star} 
-              label="Avaliações" 
-              description="Responda seus clientes e gerencie sua reputação"
-              onClick={() => onNavigate('merchant_reviews')}
-              badge={2}
-              iconBgClass="bg-amber-100 dark:bg-amber-900/30"
-              iconColorClass="text-amber-600 dark:text-amber-400"
-            />
-            <MarketingActionCard 
               icon={Users} 
               label="Freguesia Connect" 
               description="Networking exclusivo entre empresários de Jacarepaguá"
@@ -198,7 +178,6 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
               icon={Award} 
               label="Seja Patrocinador Master" 
               description="Destaque máximo em nosso app"
-              note="Aqui você contrata o espaço. A criação visual dos banners é feita após a contratação."
               onClick={() => onNavigate('patrocinador_master')}
               iconBgClass="bg-amber-100 dark:bg-amber-900/30"
               iconColorClass="text-amber-500 dark:text-amber-400"
@@ -211,9 +190,16 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
           <SectionHeader title="Serviços" />
           <div className="bg-white dark:bg-gray-800 rounded-[2.5rem] border border-gray-100 dark:border-gray-700 overflow-hidden shadow-sm">
             <ServiceBlock 
+              icon={Star} 
+              label="Avaliações" 
+              description="Responda seus clientes e gerencie sua reputação"
+              onClick={() => onNavigate('merchant_reviews')} 
+              badge={2}
+            />
+            <ServiceBlock 
               icon={MessageSquare} 
               label="Chat com Designer" 
-              description="Criação e acompanhamento do seu banner"
+              description="Criação e acompanhamento do seu material"
               onClick={() => onNavigate('store_ads_module', 'chat')} 
             />
             <ServiceBlock 
@@ -221,12 +207,6 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
               label="Pedidos de Banner" 
               description="Status de criação e aprovação"
               onClick={() => alert('Módulo de pedidos em desenvolvimento')} 
-            />
-             <ServiceBlock 
-              icon={BarChart3} 
-              label="Meus Anúncios" 
-              description="Performance e estatísticas"
-              onClick={() => onNavigate('merchant_performance')}
             />
             <ServiceBlock 
               icon={CreditCard} 
