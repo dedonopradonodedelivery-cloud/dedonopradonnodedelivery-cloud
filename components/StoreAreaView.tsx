@@ -127,8 +127,8 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
           <div className="bg-white dark:bg-gray-800 rounded-[2.5rem] border border-gray-100 dark:border-gray-700 overflow-hidden shadow-sm">
             <ServiceBlock 
               icon={Crown} 
-              label="Banners Premium" 
-              description="Apareça em destaque para milhares de pessoas do seu bairro"
+              label="Anunciar nos Banners" 
+              description="Apareça em destaque para mais de 450 mil pessoas de Jacarepaguá"
               onClick={() => onNavigate('store_ads_module')}
               colorClass="bg-blue-50 text-blue-600"
             />
@@ -142,8 +142,8 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
             />
             <ServiceBlock 
               icon={Megaphone} 
-              label="Anunciar (ADS)" 
-              description="Destaque-se nas categorias sem complicação"
+              label="Destaque Patrocinado" 
+              description="Apareça em destaque como patrocinado na frente de todas as listas do app"
               onClick={() => onNavigate('store_ads_quick')}
             />
             <ServiceBlock 
