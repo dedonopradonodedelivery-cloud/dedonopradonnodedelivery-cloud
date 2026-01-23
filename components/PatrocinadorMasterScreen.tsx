@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { 
   ChevronLeft, 
@@ -23,8 +24,8 @@ import {
   MessageSquare,
   Shield,
   ExternalLink,
-  // Added ShieldCheck to fix "Cannot find name" error on line 390
-  ShieldCheck
+  ShieldCheck,
+  X
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -143,10 +144,23 @@ export const PatrocinadorMasterScreen: React.FC<PatrocinadorMasterScreenProps> =
     }
   }, [chatMessages]);
 
+  const handleHeaderBack = () => {
+    if (step === 'payment' || step === 'admin_chat') setStep('selection');
+    else onBack();
+  }
+
+  const getPageTitle = () => {
+    switch (step) {
+        case 'payment': return 'Pagamento';
+        case 'admin_chat': return 'Alinhamento';
+        default: return 'Patrocinador Master';
+    }
+  }
+
   // --- RENDERS ---
 
   const renderSelection = () => (
-    <div className="animate-in fade-in duration-500">
+    <div className="animate-in fade-in duration-500 px-6 pt-8">
       <section className="text-center">
         <div className="w-24 h-24 bg-gradient-to-br from-amber-400 to-amber-600 rounded-[2.5rem] flex items-center justify-center mx-auto mb-8 shadow-2xl shadow-amber-500/20 border-2 border-white/10">
           <Award className="w-12 h-12 text-white" />
@@ -206,7 +220,7 @@ export const PatrocinadorMasterScreen: React.FC<PatrocinadorMasterScreenProps> =
                     ${!month.available
                       ? 'bg-slate-800 border-slate-700 opacity-50 cursor-not-allowed'
                       : isSelected
-                        ? 'bg-blue-500/20 border-blue-500 scale-105'
+                        ? 'bg-blue-50/20 border-blue-500 scale-105'
                         : 'bg-slate-900 border-slate-800 hover:border-blue-500 disabled:opacity-30'
                     }
                   `}
@@ -244,10 +258,8 @@ export const PatrocinadorMasterScreen: React.FC<PatrocinadorMasterScreenProps> =
   );
 
   const renderPayment = () => (
-    <div className="animate-in slide-in-from-right duration-500 flex flex-col h-full">
-        <div className="flex-1 px-6 pt-8">
-            <h2 className="text-3xl font-black text-white uppercase tracking-tighter mb-8">Pagamento</h2>
-            
+    <div className="animate-in slide-in-from-right duration-500 flex flex-col h-full px-6 pt-8">
+        <div className="flex-1">
             <div className="bg-slate-900 border border-white/10 rounded-[2.5rem] p-8 space-y-6">
                 <div>
                     <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Produto</p>
@@ -281,7 +293,7 @@ export const PatrocinadorMasterScreen: React.FC<PatrocinadorMasterScreenProps> =
             </p>
         </div>
 
-        <footer className="p-6 border-t border-white/5 bg-slate-950 sticky bottom-0">
+        <footer className="p-6 bg-slate-950 sticky bottom-0 mt-auto">
             <button 
                 onClick={handleConfirmPayment}
                 className="w-full bg-[#1E5BFF] hover:bg-blue-600 text-white font-black py-5 rounded-2xl shadow-xl active:scale-[0.98] transition-all"
@@ -293,7 +305,7 @@ export const PatrocinadorMasterScreen: React.FC<PatrocinadorMasterScreenProps> =
   );
 
   const renderProcessing = () => (
-    <div className="flex-1 flex flex-col items-center justify-center p-6 text-center animate-in fade-in duration-500">
+    <div className="flex-1 flex flex-col items-center justify-center p-6 text-center animate-in fade-in duration-500 min-h-screen bg-slate-950">
         <Loader2 className="w-12 h-12 text-[#1E5BFF] animate-spin mb-6" />
         <h2 className="text-xl font-bold text-white">Processando pagamento...</h2>
         <p className="text-slate-400 text-xs mt-2 uppercase tracking-widest font-black">Não feche esta tela</p>
@@ -301,7 +313,7 @@ export const PatrocinadorMasterScreen: React.FC<PatrocinadorMasterScreenProps> =
   );
 
   const renderSuccess = () => (
-    <div className="flex-1 flex flex-col items-center justify-center p-8 text-center animate-in zoom-in duration-500 h-full">
+    <div className="flex-1 flex flex-col items-center justify-center p-8 text-center animate-in zoom-in duration-500 min-h-screen bg-slate-950">
         <div className="w-24 h-24 bg-emerald-500/10 rounded-full flex items-center justify-center mb-8 border-4 border-emerald-500/20 shadow-2xl shadow-emerald-500/10">
             <CheckCircle2 size={48} className="text-emerald-400" />
         </div>
@@ -316,7 +328,7 @@ export const PatrocinadorMasterScreen: React.FC<PatrocinadorMasterScreenProps> =
 
         <button 
             onClick={() => setStep('admin_chat')}
-            className="w-full bg-white text-slate-950 font-black py-5 rounded-2xl shadow-2xl active:scale-[0.98] transition-all flex items-center justify-center gap-3"
+            className="w-full max-w-sm bg-white text-slate-950 font-black py-5 rounded-2xl shadow-2xl active:scale-[0.98] transition-all flex items-center justify-center gap-3"
         >
             Falar com o administrador
             <ArrowRight size={20} strokeWidth={3} />
@@ -326,27 +338,10 @@ export const PatrocinadorMasterScreen: React.FC<PatrocinadorMasterScreenProps> =
 
   const renderChat = () => (
     <div className="flex flex-col h-full bg-[#020617] animate-in slide-in-from-bottom duration-500 pb-[80px]">
-        {/* Chat Header */}
-        <div className="bg-slate-900 p-6 border-b border-white/5 flex items-center justify-between shrink-0">
-            <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-2xl bg-[#1E5BFF] flex items-center justify-center text-white shadow-lg relative">
-                    <UserIcon size={24} />
-                    <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-green-500 border-2 border-slate-900 rounded-full"></div>
-                </div>
-                <div>
-                    <h2 className="font-bold text-white text-lg">Patrocinador Master • Alinhamento</h2>
-                    <div className="flex items-center gap-1.5 mt-0.5">
-                        <CheckCircle2 size={10} className="text-emerald-400" />
-                        <span className="text-[9px] font-black text-emerald-400 uppercase tracking-widest">Patrocinador Master ativo</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-
         {/* Info Admin */}
         <div className="px-6 py-3 bg-slate-800/30 border-b border-white/5 flex items-center justify-between">
             <div className="flex items-center gap-2">
-                <div className="p-1 bg-blue-500/10 rounded-lg">
+                <div className="p-1 bg-blue-50/10 rounded-lg">
                     <Shield size={12} className="text-blue-400" />
                 </div>
                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Administrador: Rafael Carvalho</span>
@@ -371,7 +366,7 @@ export const PatrocinadorMasterScreen: React.FC<PatrocinadorMasterScreenProps> =
         </div>
 
         {/* Chat Input */}
-        <footer className="p-6 bg-slate-900 border-t border-white/10">
+        <footer className="p-6 bg-slate-900 border-t border-white/10 shrink-0">
             <div className="flex items-center gap-3">
                 <div className="flex-1 relative">
                     <input 
@@ -406,18 +401,18 @@ export const PatrocinadorMasterScreen: React.FC<PatrocinadorMasterScreenProps> =
         </>
       )}
 
-      {/* Header Condicional */}
-      {step !== 'admin_chat' && step !== 'success' && (
-        <header className="sticky top-0 z-40 bg-slate-950/80 backdrop-blur-md px-5 h-20 flex items-center gap-4 border-b border-white/5 shrink-0">
+      {/* CABEÇALHO FIXO PERSISTENTE */}
+      {step !== 'success' && step !== 'processing' && (
+        <header className="sticky top-0 z-50 bg-slate-950/90 backdrop-blur-md px-5 h-20 flex items-center gap-4 border-b border-white/5 shrink-0">
             <button 
-                onClick={step === 'selection' ? onBack : () => setStep('selection')}
+                onClick={handleHeaderBack}
                 className="w-10 h-10 bg-white/5 hover:bg-white/10 rounded-xl flex items-center justify-center text-slate-300 transition-colors"
             >
                 <ChevronLeft className="w-6 h-6" />
             </button>
             <div>
                 <h1 className="font-bold text-white text-lg leading-tight">
-                    {step === 'selection' ? 'Patrocinador Master' : 'Pagamento'}
+                    {getPageTitle()}
                 </h1>
                 <p className="text-[10px] font-bold text-amber-400 uppercase tracking-widest">
                     {step === 'selection' ? 'Plano de Máxima Visibilidade' : 'Contratação Premium'}
@@ -426,7 +421,7 @@ export const PatrocinadorMasterScreen: React.FC<PatrocinadorMasterScreenProps> =
         </header>
       )}
 
-      <main className={`flex-1 overflow-y-auto no-scrollbar ${step === 'selection' ? 'px-6 pt-8' : ''}`}>
+      <main className={`flex-1 overflow-y-auto no-scrollbar`}>
         {step === 'selection' && renderSelection()}
         {step === 'payment' && renderPayment()}
         {step === 'processing' && renderProcessing()}
