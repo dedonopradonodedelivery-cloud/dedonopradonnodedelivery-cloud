@@ -44,13 +44,11 @@ const MOCK_BANNERS: BannerData[] = [
     subtitle: 'Atendimento rápido no bairro',
     cta: 'Falar agora',
     image: 'https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?q=80&w=600&auto=format&fit=crop',
-    // Added missing bgColor and neighborhood properties to fix type errors
     bgColor: 'bg-blue-600',
     neighborhood: 'Freguesia'
   }
 ];
 
-// Added named export to fix "Module has no exported member" error in HomeFeed.tsx
 export const HomeBannerCarousel: React.FC<{ onStoreClick: (store: Store) => void }> = ({ onStoreClick }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const { currentNeighborhood } = useNeighborhood();
@@ -80,12 +78,12 @@ export const HomeBannerCarousel: React.FC<{ onStoreClick: (store: Store) => void
     <div className="px-5 mb-6">
       <div 
         onClick={handleBannerClick}
-        className={`relative aspect-[16/8] w-full rounded-[2.5rem] overflow-hidden shadow-2xl cursor-pointer group transition-all duration-500 ${currentBanner.bgColor}`}
+        className={`relative aspect-[16/8] w-full rounded-[2.5rem] overflow-hidden shadow-2xl cursor-pointer transition-all duration-300 active:brightness-90 active:scale-[0.99] group ${currentBanner.bgColor}`}
       >
         <img 
           src={currentBanner.image} 
           alt={currentBanner.title} 
-          className="absolute inset-0 w-full h-full object-cover mix-blend-overlay opacity-60 group-hover:scale-105 transition-transform duration-700" 
+          className="absolute inset-0 w-full h-full object-cover mix-blend-overlay opacity-60 transition-transform duration-700" 
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
         
@@ -93,13 +91,9 @@ export const HomeBannerCarousel: React.FC<{ onStoreClick: (store: Store) => void
           <h2 className="text-2xl font-black uppercase tracking-tighter leading-none mb-2 drop-shadow-md">
             {currentBanner.title}
           </h2>
-          <p className="text-xs font-bold text-white/90 max-w-[180px] leading-tight mb-6">
+          <p className="text-xs font-bold text-white/90 max-w-[200px] leading-tight drop-shadow-sm">
             {currentBanner.subtitle}
           </p>
-          <div className="bg-white/20 backdrop-blur-md border border-white/30 rounded-full px-5 py-2 w-fit flex items-center gap-2 group-hover:bg-white/30 transition-all">
-            <span className="text-[9px] font-black uppercase tracking-widest">{currentBanner.cta}</span>
-            <ChevronRight size={14} strokeWidth={3} />
-          </div>
         </div>
 
         {/* Indicators */}
