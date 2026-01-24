@@ -77,19 +77,19 @@ export const HomeFeed: React.FC<HomeFeedFeedProps> = ({
         </div>
       </div>
 
-      {/* CARROSSEL DE BANNERS RESTAURADO */}
+      {/* CARROSSEL DE BANNERS RESTAURADO (PROTAGONISTA) */}
       <HomeBannerCarousel onStoreClick={onStoreClick} />
 
-      {/* 1. SISTEMA DE RECOMPENSA (BLOCO FIXO OBRIGATÓRIO) */}
-      <section className="px-5 pt-2 mb-4">
-        <div className="bg-gradient-to-br from-indigo-600 to-blue-700 rounded-[2.5rem] p-7 text-white shadow-xl shadow-blue-500/20 relative overflow-hidden">
-          {/* Animação de Confete sutil no fundo quando ativo */}
+      {/* 1. SISTEMA DE RECOMPENSA (BLOQUE COMPACTO E ELEGANTE) */}
+      <section className="px-5 py-2 mb-4">
+        <div className="bg-indigo-50/50 dark:bg-blue-900/10 rounded-[2rem] p-5 border border-indigo-100/50 dark:border-blue-800/30 relative overflow-hidden">
+          {/* Animação de Confete sutil */}
           {isAnimating && (
             <div className="absolute inset-0 pointer-events-none">
-              {[...Array(12)].map((_, i) => (
+              {[...Array(8)].map((_, i) => (
                 <div 
                   key={i} 
-                  className={`absolute w-2 h-2 bg-yellow-400 rounded-full animate-ping opacity-70`}
+                  className={`absolute w-1.5 h-1.5 bg-yellow-400 rounded-full animate-ping opacity-60`}
                   style={{
                     top: `${Math.random() * 100}%`,
                     left: `${Math.random() * 100}%`,
@@ -101,30 +101,35 @@ export const HomeFeed: React.FC<HomeFeedFeedProps> = ({
           )}
 
           <div className="relative z-10">
-            <div className="flex items-center gap-2 mb-4">
-              <div className="w-8 h-8 bg-white/20 backdrop-blur-md rounded-xl flex items-center justify-center">
-                <Gift className="w-5 h-5 text-yellow-300" />
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <div className="w-7 h-7 bg-[#1E5BFF]/10 rounded-lg flex items-center justify-center">
+                  <Gift className="w-4 h-4 text-[#1E5BFF]" />
+                </div>
+                <h3 className="font-black text-[10px] text-[#1E5BFF] uppercase tracking-widest">Recompensa da Semana</h3>
               </div>
-              <h3 className="font-black text-sm uppercase tracking-widest">Recompensa da Semana</h3>
+              <div className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-tight">
+                Dia {consecutiveDays} de 5
+              </div>
             </div>
 
-            <h2 className="text-xl font-bold leading-tight mb-6">
-              Volte todos os dias e desbloqueie seus benefícios
+            <h2 className="text-sm font-bold text-gray-800 dark:text-gray-200 leading-tight mb-5 px-1">
+              Complete sua sequência e ganhe benefícios exclusivos
             </h2>
 
-            {/* Indicador de Progresso (5 dias) */}
-            <div className="flex justify-between items-center mb-8 px-1">
+            {/* Indicador de Progresso Compacto */}
+            <div className="flex justify-between items-center mb-6 px-1 max-w-[280px] mx-auto">
               {[1, 2, 3, 4, 5].map((day) => (
-                <div key={day} className="flex flex-col items-center gap-2">
-                  <div className={`w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all duration-500 ${
+                <div key={day} className="flex flex-col items-center gap-1.5">
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center border-2 transition-all duration-500 ${
                     day <= consecutiveDays 
-                      ? 'bg-yellow-400 border-yellow-300 text-indigo-900 shadow-lg shadow-yellow-400/20 scale-110' 
-                      : 'bg-white/10 border-white/10 text-white/40'
+                      ? 'bg-white dark:bg-blue-600 border-[#1E5BFF] text-[#1E5BFF] dark:text-white shadow-sm scale-105' 
+                      : 'bg-white/50 dark:bg-gray-800 border-gray-100 dark:border-gray-700 text-gray-300 dark:text-gray-600'
                   }`}>
                     {day <= consecutiveDays ? (
-                      <CheckCircle2 size={20} strokeWidth={3} />
+                      <CheckCircle2 size={16} strokeWidth={3} />
                     ) : (
-                      <span className="text-[10px] font-black uppercase">D{day}</span>
+                      <span className="text-[8px] font-black uppercase">D{day}</span>
                     )}
                   </div>
                 </div>
@@ -133,10 +138,10 @@ export const HomeFeed: React.FC<HomeFeedFeedProps> = ({
 
             <button 
               onClick={handleClaimReward}
-              className="w-full bg-white text-indigo-700 font-black py-4 rounded-2xl shadow-lg active:scale-95 transition-all flex items-center justify-center gap-2 text-sm uppercase tracking-widest"
+              className="w-full bg-white dark:bg-gray-800 text-[#1E5BFF] border border-indigo-100 dark:border-gray-700 font-black py-3 rounded-xl shadow-sm active:scale-95 transition-all flex items-center justify-center gap-2 text-[10px] uppercase tracking-widest"
             >
-              {isAnimating ? 'Celebrando...' : `Liberar Dia ${consecutiveDays}`}
-              {!isAnimating && <ArrowRight size={18} strokeWidth={3} />}
+              {isAnimating ? 'Processando...' : `Liberar Dia ${consecutiveDays}`}
+              {!isAnimating && <ArrowRight size={14} strokeWidth={3} />}
             </button>
           </div>
         </div>

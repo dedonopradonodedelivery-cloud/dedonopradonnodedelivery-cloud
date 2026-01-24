@@ -16,9 +16,7 @@ interface BannerData {
   neighborhood: string;
 }
 
-// Mock de banners realistas por bairro
 const MOCK_BANNERS: BannerData[] = [
-  // Freguesia
   {
     id: 'b-fre-1',
     storeId: 'f-1',
@@ -39,7 +37,6 @@ const MOCK_BANNERS: BannerData[] = [
     bgColor: 'bg-red-700',
     neighborhood: 'Freguesia'
   },
-  // Taquara
   {
     id: 'b-taq-1',
     storeId: 'f-2',
@@ -60,7 +57,6 @@ const MOCK_BANNERS: BannerData[] = [
     bgColor: 'bg-blue-600',
     neighborhood: 'Taquara'
   },
-  // Pechincha
   {
     id: 'b-pec-1',
     storeId: 'f-3',
@@ -80,21 +76,63 @@ interface HomeBannerCarouselProps {
 export const HomeBannerCarousel: React.FC<HomeBannerCarouselProps> = ({ onStoreClick }) => {
   const { currentNeighborhood } = useNeighborhood();
   const [activeIndex, setActiveIndex] = useState(0);
+  const [progress, setProgress] = useState(0);
   const scrollRef = useRef<HTMLDivElement>(null);
+  // Fixed error in line 81: Cannot find namespace 'NodeJS'. Replaced NodeJS.Timeout with ReturnType<typeof setInterval>
+  const autoplayRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const filteredBanners = useMemo(() => {
-    // Se for "Todos", mostra uma mistura, se não, filtra pelo bairro exato
     if (currentNeighborhood === "Jacarepaguá (todos)") {
       return MOCK_BANNERS;
     }
     return MOCK_BANNERS.filter(b => b.neighborhood === currentNeighborhood);
   }, [currentNeighborhood]);
 
+  // Lógica de Autoplay e Barra de Progresso
+  useEffect(() => {
+    if (filteredBanners.length <= 1) return;
+
+    const tickRate = 100; // atualiza a cada 100ms
+    const totalDuration = 4000; // 4 segundos
+    const step = (tickRate / totalDuration) * 100;
+
+    autoplayRef.current = setInterval(() => {
+      setProgress((prev) => {
+        if (prev >= 100) {
+          const nextIndex = (activeIndex + 1) % filteredBanners.length;
+          scrollToIndex(nextIndex);
+          return 0;
+        }
+        return prev + step;
+      });
+    }, tickRate);
+
+    return () => {
+      if (autoplayRef.current) clearInterval(autoplayRef.current);
+    };
+  }, [activeIndex, filteredBanners.length]);
+
+  const scrollToIndex = (index: number) => {
+    if (scrollRef.current) {
+      const width = scrollRef.current.offsetWidth;
+      scrollRef.current.scrollTo({
+        left: width * index,
+        behavior: 'smooth'
+      });
+      setActiveIndex(index);
+      setProgress(0);
+    }
+  };
+
   const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
     const scrollLeft = e.currentTarget.scrollLeft;
     const width = e.currentTarget.offsetWidth;
     const index = Math.round(scrollLeft / width);
-    setActiveIndex(index);
+    
+    if (index !== activeIndex) {
+      setActiveIndex(index);
+      setProgress(0);
+    }
   };
 
   const handleBannerClick = (storeId: string) => {
@@ -106,49 +144,59 @@ export const HomeBannerCarousel: React.FC<HomeBannerCarouselProps> = ({ onStoreC
 
   return (
     <section className="w-full py-4 animate-in fade-in duration-700">
-      <div 
-        ref={scrollRef}
-        onScroll={handleScroll}
-        className="flex overflow-x-auto snap-x snap-mandatory no-scrollbar px-5 gap-4"
-      >
-        {filteredBanners.map((banner) => (
-          <div 
-            key={banner.id}
-            onClick={() => handleBannerClick(banner.storeId)}
-            className={`relative flex-shrink-0 w-full aspect-[16/8] rounded-[2rem] overflow-hidden snap-center shadow-lg active:scale-[0.98] transition-all cursor-pointer ${banner.bgColor}`}
-          >
-            {/* Imagem de Fundo com Overlay */}
-            <img src={banner.image} alt="" className="absolute inset-0 w-full h-full object-cover opacity-40 mix-blend-overlay" />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
-            
-            {/* Conteúdo do Banner */}
-            <div className="absolute inset-0 p-7 flex flex-col justify-end">
-              <div className="bg-white/20 backdrop-blur-md w-fit px-3 py-1 rounded-lg border border-white/20 mb-2">
-                <span className="text-[10px] font-black text-white uppercase tracking-widest">{banner.title}</span>
-              </div>
-              <h3 className="text-xl font-black text-white leading-tight mb-4 drop-shadow-md max-w-[80%]">
-                {banner.subtitle}
-              </h3>
-              <div className="flex items-center gap-2 bg-white text-gray-900 w-fit px-5 py-2.5 rounded-xl shadow-lg">
-                <span className="text-[10px] font-black uppercase tracking-widest">{banner.cta}</span>
-                <ChevronRight size={14} strokeWidth={3} />
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Indicadores de Página */}
-      {filteredBanners.length > 1 && (
-        <div className="flex justify-center gap-1.5 mt-4">
-          {filteredBanners.map((_, idx) => (
+      <div className="relative group">
+        <div 
+          ref={scrollRef}
+          onScroll={handleScroll}
+          className="flex overflow-x-auto snap-x snap-mandatory no-scrollbar px-5 gap-4"
+        >
+          {filteredBanners.map((banner, index) => (
             <div 
-              key={idx} 
-              className={`h-1 rounded-full transition-all duration-300 ${idx === activeIndex ? 'w-4 bg-[#1E5BFF]' : 'w-1 bg-gray-200 dark:bg-gray-800'}`} 
-            />
+              key={banner.id}
+              onClick={() => handleBannerClick(banner.storeId)}
+              className={`relative flex-shrink-0 w-full aspect-[16/8] rounded-[2rem] overflow-hidden snap-center shadow-lg active:scale-[0.98] transition-all cursor-pointer ${banner.bgColor}`}
+            >
+              {/* Imagem de Fundo com Overlay */}
+              <img src={banner.image} alt="" className="absolute inset-0 w-full h-full object-cover opacity-40 mix-blend-overlay" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent"></div>
+              
+              {/* Conteúdo do Banner */}
+              <div className="absolute inset-0 p-7 flex flex-col justify-end">
+                <div className="bg-white/20 backdrop-blur-md w-fit px-3 py-1 rounded-lg border border-white/20 mb-2">
+                  <span className="text-[10px] font-black text-white uppercase tracking-widest">{banner.title}</span>
+                </div>
+                <h3 className="text-xl font-black text-white leading-tight mb-4 drop-shadow-md max-w-[80%]">
+                  {banner.subtitle}
+                </h3>
+                <div className="flex items-center gap-2 bg-white text-gray-900 w-fit px-5 py-2.5 rounded-xl shadow-lg mb-2">
+                  <span className="text-[10px] font-black uppercase tracking-widest">{banner.cta}</span>
+                  <ChevronRight size={14} strokeWidth={3} />
+                </div>
+              </div>
+
+              {/* BARRA DE PROGRESSÃO INTERNA (Segmentada) */}
+              {filteredBanners.length > 1 && (
+                <div className="absolute bottom-4 left-7 right-7 flex gap-1.5 z-20">
+                  {filteredBanners.map((_, idx) => (
+                    <div 
+                      key={idx} 
+                      className="h-1 flex-1 bg-white/20 rounded-full overflow-hidden"
+                    >
+                      <div 
+                        className={`h-full bg-white transition-all ease-linear ${idx === activeIndex ? '' : 'hidden'}`}
+                        style={{ width: idx === activeIndex ? `${progress}%` : '0%' }}
+                      />
+                      <div 
+                        className={`h-full bg-white/60 ${idx < activeIndex ? 'block' : 'hidden'}`}
+                      />
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           ))}
         </div>
-      )}
+      </div>
     </section>
   );
 };
