@@ -1,4 +1,3 @@
-
 import React from 'react';
 
 // From original types.ts
@@ -246,27 +245,6 @@ export interface DbWalletMovement {
   amount: number;
   description: string;
   created_at: string;
-}
-
-// Interface para as configurações do editor de banners
-export interface BannerDesign {
-  title: string;
-  titleFont: string;
-  titleSize: string;
-  subtitle: string;
-  subtitleFont: string;
-  subtitleSize: string;
-  bgColor: string;
-  textColor: string;
-  align: 'left' | 'center' | 'right';
-  animation: 'none' | 'slide' | 'pulse' | 'float';
-  iconName: string | null;
-  iconPos: 'left' | 'top' | 'right';
-  iconSize: 'sm' | 'md' | 'lg';
-  iconColorMode: 'text' | 'white' | 'black' | 'custom';
-  logoDisplay: 'square' | 'round' | 'none';
-  iconCustomColor?: string;
-  imageUrl?: string; // Adicionado aqui para uso no BannerViewer
 }
 
 // Added to fix import error in StoreProfileEdit.tsx

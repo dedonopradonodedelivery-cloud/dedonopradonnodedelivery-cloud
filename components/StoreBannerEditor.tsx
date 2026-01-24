@@ -6,14 +6,24 @@ import {
   ShoppingCart, Store as StoreIcon, Package, Wrench, Truck, CreditCard, Coins, Star,
   Award, MapPin, Smile, Bell, Clock, Heart, Megaphone, Crown, ShieldCheck, Rocket
 } from 'lucide-react';
-// FIX: Import BannerDesign interface from the central types file
-import { BannerDesign } from '../types';
 
-interface StoreBannerEditorProps {
-  storeName: string;
-  storeLogo?: string | null;
-  onSave: (design: BannerDesign) => void;
-  onBack: () => void;
+export interface BannerDesign {
+  title: string;
+  titleFont: string;
+  titleSize: string;
+  subtitle: string;
+  subtitleFont: string;
+  subtitleSize: string;
+  bgColor: string;
+  textColor: string;
+  align: 'left' | 'center' | 'right';
+  animation: 'none' | 'slide' | 'pulse' | 'float';
+  iconName: string | null;
+  iconPos: 'left' | 'top' | 'right';
+  iconSize: 'sm' | 'md' | 'lg';
+  iconColorMode: 'text' | 'white' | 'black' | 'custom';
+  logoDisplay: 'square' | 'round' | 'none';
+  iconCustomColor?: string;
 }
 
 const ICON_COMPONENTS: Record<string, React.ElementType> = {
@@ -39,6 +49,12 @@ const SIZE_LEVELS = [
   { id: 'xl', name: 'M. Grande', titleClass: 'text-4xl', subClass: 'text-base' },
 ];
 
+interface StoreBannerEditorProps {
+  storeName: string;
+  storeLogo?: string | null;
+  onSave: (design: BannerDesign) => void;
+  onBack: () => void;
+}
 
 const BannerPreview: React.FC<{ config: BannerDesign; storeName: string; storeLogo?: string | null; }> = ({ config, storeName, storeLogo }) => {
     const { 

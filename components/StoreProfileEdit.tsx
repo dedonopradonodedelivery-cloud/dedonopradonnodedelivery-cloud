@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { 
   ChevronLeft, 
@@ -25,7 +24,7 @@ import {
   Globe,
   Image as ImageIcon,
   Eye,
-  Clock, // Added Clock to imports
+  Clock,
   CreditCard
 } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';

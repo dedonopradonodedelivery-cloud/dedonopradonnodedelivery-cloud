@@ -15,7 +15,7 @@ import { ServiceSuccessView } from '@/components/ServiceSuccessView';
 import { QuoteRequestModal } from '@/components/QuoteRequestModal';
 import { StoreAreaView } from '@/components/StoreAreaView';
 import { WeeklyPromoModule } from '@/components/WeeklyPromoModule';
-import { WeeklyRewardView } from '@/components/WeeklyRewardView'; // Importar novo componente
+import { WeeklyPromoSelectionView } from '@/components/WeeklyPromoSelectionView';
 import { UserCupomScreen } from '@/components/UserCupomScreen';
 import { UserCouponsHistoryView } from '@/components/UserCouponsHistoryView';
 import { JobsView } from '@/components/JobsView';
@@ -32,20 +32,17 @@ import { MapPin, ShieldCheck, X, Palette } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import { NeighborhoodProvider } from '@/contexts/NeighborhoodContext';
-import { Category, Store, BairroPost } from '@/types';
+import { Category, Store } from '@/types';
 import { CategoryView } from '@/components/CategoryView';
 import { StoreProfileEdit } from '@/components/StoreProfileEdit';
 import { CommunityFeedView } from '@/components/CommunityFeedView';
-import { STORES, MOCK_BAIRRO_POSTS } from '@/constants';
+import { STORES } from '@/constants';
 import { AdminModerationPanel } from '@/components/AdminModerationPanel';
 import { AboutView, SupportView, FavoritesView } from '@/components/SimplePages';
 import { StoreClaimFlow } from '@/components/StoreClaimFlow';
 import { UserStatementView } from '@/components/UserStatementView';
 import { MerchantReviewsModule } from '@/components/MerchantReviewsModule';
 import { JPAConnectSalesView } from '@/components/JPAConnectSalesView';
-import { BairroFeedView } from './components/BairroFeedView';
-import { CreateBairroPostView } from './components/CreateBairroPostView';
-
 
 let splashWasShownInSession = false;
 const ADMIN_EMAIL = 'dedonopradonodedelivery@gmail.com';
@@ -70,7 +67,7 @@ const TypingText: React.FC<{ text: string; duration: number }> = ({ text, durati
   return <p className="text-[15px] font-medium text-white/90 mt-2 text-center whitespace-nowrap overflow-hidden">{displayedText}</p>;
 };
 
-export const App: React.FC = () => {
+const App: React.FC = () => {
   const { user, userRole, loading: isAuthInitialLoading, signOut } = useAuth();
   const { theme } = useTheme();
   const isAuthReturn = window.location.hash.includes('access_token') || window.location.search.includes('code=');
@@ -99,7 +96,7 @@ export const App: React.FC = () => {
   };
   
   useEffect(() => {
-    const restrictedTabs = ['scan_cashback', 'merchant_qr_display', 'wallet', 'pay_cashback', 'store_area', 'admin_panel', 'edit_profile', 'store_claim', 'user_cashback_mock', 'merchant_reviews', 'designer_panel', 'weekly_promo', 'user_coupons', 'store_cashback_module', 'create_bairro_post', 'merchant_performance']; // Adicionado 'create_bairro_post'
+    const restrictedTabs = ['scan_cashback', 'merchant_qr_display', 'wallet', 'pay_cashback', 'store_area', 'admin_panel', 'edit_profile', 'store_claim', 'user_cashback_mock', 'merchant_reviews', 'designer_panel', 'weekly_promo', 'user_coupons', 'store_cashback_module'];
     
     if (restrictedTabs.includes(activeTab)) {
       if (!isAuthInitialLoading && !user) {
@@ -126,7 +123,7 @@ export const App: React.FC = () => {
   }, []);
 
   const handleSelectStore = (store: Store) => { setSelectedStore(store); setActiveTab('store_detail'); };
-  const headerExclusionList = ['store_area', 'editorial_list', 'store_profile', 'category_detail', 'store_detail', 'profile', 'patrocinador_master', 'service_subcategories', 'service_specialties', 'store_ads_module', 'store_ads_quick', 'merchant_performance', 'about', 'support', 'favorites', 'community_feed', 'admin_panel', 'cashback_landing', 'admin_banner_moderation', 'store_claim', 'user_cashback_mock', 'merchant_reviews', 'jpa_connect_sales', 'wallet', 'designer_panel', 'weekly_promo', 'user_coupons', 'user_coupons_history', 'store_cashback_module', 'bairro_feed', 'create_bairro_post', 'merchant_performance']; // Adicionado 'bairro_feed' e 'create_bairro_post'
+  const headerExclusionList = ['store_area', 'editorial_list', 'store_profile', 'category_detail', 'store_detail', 'profile', 'patrocinador_master', 'service_subcategories', 'service_specialties', 'store_ads_module', 'store_ads_quick', 'merchant_performance', 'about', 'support', 'favorites', 'community_feed', 'admin_panel', 'cashback_landing', 'admin_banner_moderation', 'store_claim', 'user_cashback_mock', 'merchant_reviews', 'jpa_connect_sales', 'wallet', 'designer_panel', 'weekly_promo', 'user_coupons', 'user_coupons_history', 'store_cashback_module'];
   
   const hideBottomNav = ['admin_panel'].includes(activeTab);
 
@@ -190,8 +187,11 @@ export const App: React.FC = () => {
                         : <MenuView user={user as any} userRole={userRole} onAuthClick={() => setIsAuthOpen(true)} onNavigate={setActiveTab} onBack={() => setActiveTab('home')} />
                     )}
 
-                    {/* ROTA ATUALIZADA PARA A NOVA TELA */}
-                    {activeTab === 'weekly_promo' && <WeeklyRewardView onBack={() => setActiveTab('home')} onNavigate={setActiveTab} />}
+                    {activeTab === 'weekly_promo' && (
+                        isMerchantMode 
+                            ? <WeeklyPromoModule onBack={() => setActiveTab('profile')} user={user as any} />
+                            : <WeeklyPromoSelectionView onBack={() => setActiveTab('home')} onNavigate={setActiveTab} />
+                    )}
                     {activeTab === 'user_coupons' && <UserCupomScreen user={user as any} onBack={() => setActiveTab('profile')} onHistory={() => setActiveTab('user_coupons_history')} />}
                     {activeTab === 'user_coupons_history' && <UserCouponsHistoryView onBack={() => setActiveTab('user_coupons')} />}
                     {activeTab === 'store_cashback_module' && <StoreCashbackModule onBack={() => setActiveTab('profile')} user={user as any} />}
@@ -227,11 +227,9 @@ export const App: React.FC = () => {
                     {activeTab === 'favorites' && <FavoritesView onBack={() => setActiveTab('profile')} onNavigate={setActiveTab} user={user as any} />}
                     {activeTab === 'service_subcategories' && selectedServiceMacro && <SubcategoriesView macroId={selectedServiceMacro.id} macroName={selectedServiceMacro.name} onBack={() => setActiveTab('services')} onSelectSubcategory={(n) => { setQuoteCategory(n); setActiveTab('service_specialties'); }} />}
                     {activeTab === 'service_specialties' && <SpecialtiesView subcategoryName={quoteCategory} onBack={() => setActiveTab('service_subcategories')} onSelectSpecialty={() => setIsQuoteModalOpen(true)} />}
-                    {activeTab === 'store_ads_module' && <StoreAdsModule onBack={() => setActiveTab(isDesignerMode ? 'designer_panel' : 'profile')} onNavigate={setActiveTab} categoryName={adCategoryTarget || undefined} user={user as any} initialView={initialStoreAdsView} />}
+                    {activeTab === 'store_ads_module' && <StoreAdsModule onBack={() => setActiveTab(isDesignerMode ? 'designer_panel' : 'profile')} onNavigate={setActiveTab} categoryName={adCategoryTarget || undefined} user={user as any} viewMode={viewMode} initialView={initialStoreAdsView} />}
                     {activeTab === 'store_ads_quick' && <StoreAdsQuickLaunch onBack={() => setActiveTab('profile')} onNavigate={setActiveTab} />}
                     {activeTab === 'store_profile' && <StoreProfileEdit onBack={() => setActiveTab('profile')} />}
-                    {activeTab === 'bairro_feed' && <BairroFeedView onBack={() => setActiveTab('home')} onStoreClick={handleSelectStore} />}
-                    {activeTab === 'create_bairro_post' && <CreateBairroPostView onBack={() => setActiveTab('profile')} user={user as any} stores={STORES} />}
                   </main>
                   <AuthModal isOpen={isAuthOpen} onClose={() => setIsAuthOpen(false)} user={user as any} onLoginSuccess={handleLoginSuccess} />
                   {isQuoteModalOpen && <QuoteRequestModal isOpen={isQuoteModalOpen} onClose={() => setIsQuoteModalOpen(false)} categoryName={quoteCategory} onSuccess={() => setActiveTab('service_success')} />}
@@ -250,7 +248,7 @@ export const App: React.FC = () => {
                   <TypingText text="Onde o bairro conversa" duration={2000} />
               </div>
               <div className="flex flex-col items-center animate-fade-in opacity-0" style={{ animationDelay: '2000ms', animationFillMode: 'forwards' }}>
-                   <p className="text-[9px] font-black text-white/50 uppercase tracking-[0.3em] mb-1.5">Patrocinador Master</p>
+                   <p className="text-[9px] font-black text-white/50 uppercase tracking-[0.25em] mb-1.5">Patrocinador Master</p>
                    <p className="text-xl font-bold text-white tracking-tight">Grupo Esquematiza</p>
               </div>
             </div>
@@ -260,3 +258,4 @@ export const App: React.FC = () => {
     </div>
   );
 };
+export default App;

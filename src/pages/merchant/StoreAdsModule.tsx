@@ -1,61 +1,32 @@
 
-
-import React, { useState, useMemo, useRef, useEffect, useCallback } from 'react';
+import React, { useState } from 'react';
 import { 
   ChevronLeft, 
-  ChevronRight,
-  ArrowRight, 
-  Check, 
-  Home, 
-  LayoutGrid, 
-  Zap, 
-  MapPin, 
-  Palette, 
   Rocket, 
-  Loader2, 
-  Target, 
-  Crown, 
-  Calendar, 
   CheckCircle2, 
-  MessageCircle, 
-  CreditCard, 
-  QrCode, 
-  Info, 
-  AlertTriangle, 
-  Lock, 
-  Unlock, 
-  CheckSquare, 
-  Paintbrush, 
-  Image as ImageIcon, 
-  Upload, 
-  X, 
-  Plus, 
-  Send, 
-  User as UserIcon, 
-  MessageSquare, 
-  FileText, 
-  BadgeCheck, 
-  Building, 
-  Terminal, 
-  Layers, 
-  Sparkles, 
-  ClipboardList, 
-  FileArchive, 
-  CornerDownRight, 
-  ShieldAlert,
-  Gift,
-  Eye,
-  Megaphone,
+  Crown, 
+  MapPin, 
+  ArrowRight,
+  Sparkles,
+  Save,
+  Loader2,
+  Image as ImageIcon,
+  Check,
+  Target,
+  Palette,
+  LayoutTemplate,
+  Type,
+  Paintbrush,
+  AlertTriangle,
+  X,
   Store as StoreIcon,
-  Utensils,
-  Shirt,
-  ShoppingCart
+  Megaphone,
+  Gift,
+  Eye
 } from 'lucide-react';
 import { User } from '@supabase/supabase-js';
+// FIX: Corrected supabase import path from ../../services/supabaseClient to ../../lib/supabaseClient
 import { supabase } from '../../lib/supabaseClient';
-import { StoreBannerEditor } from '../../components/StoreBannerEditor';
-// FIX: Corrected import path for BannerDesign
-import { BannerDesign } from '../../types'; 
 
 // --- VALIDATION HELPERS ---
 const FORBIDDEN_WORDS = ['palavrão', 'inapropriado', 'violação', 'gratis'];
@@ -96,54 +67,12 @@ const getContrastRatio = (hex1: string, hex2: string): number => {
 };
 // --- END VALIDATION ---
 
-// FIX: Moved constant definitions to the top level of the file
-const NEIGHBORHOODS = [
-  "Freguesia", "Pechincha", "Anil", "Taquara", "Tanque", 
-  "Curicica", "Parque Olímpico", "Gardênia", "Cidade de Deus"
-];
-
-const MOCK_OCCUPANCY: Record<string, Record<string, boolean>> = {
-  "Freguesia": { "periodo_1": true },
-  "Taquara": { "periodo_2": true },
-};
-
-const DISPLAY_MODES = [
-  { 
-    id: 'home', 
-    label: 'Home', 
-    icon: Home, 
-    price: 49.90,
-    originalPrice: 199.90,
-    description: 'Exibido no carrossel da página inicial para todos os usuários.',
-    whyChoose: 'Ideal para máxima visibilidade imediata.'
-  },
-  { 
-    id: 'cat', 
-    label: 'Categorias', 
-    icon: LayoutGrid, 
-    price: 29.90,
-    originalPrice: 149.90,
-    description: 'Exibido no topo das buscas por produtos ou serviços específicos.',
-    whyChoose: 'Impacta o cliente no momento da decisão.'
-  },
-  { 
-    id: 'combo', 
-    label: 'Home + Categorias', 
-    icon: Zap, 
-    price: 69.90,
-    originalPrice: 349.80,
-    description: 'Destaque na página inicial e em todas as categorias.',
-    whyChoose: 'Mais alcance, cliques e chances de venda.'
-  },
-];
 
 interface StoreAdsModuleProps {
   onBack: () => void;
-  onNavigate: (view: string, initialView?: 'sales' | 'chat') => void;
+  onNavigate: (view: string) => void;
   categoryName?: string;
   user: User | null;
-  viewMode?: string;
-  initialView?: 'sales' | 'chat';
 }
 
 interface EditorData {
@@ -297,10 +226,10 @@ const BannerEditorPreview: React.FC<{ data: any }> = ({ data }) => {
     
     return (
         <div 
-            className="w-full aspect-video rounded-2xl overflow-hidden relative shadow-lg p-8"
+            className={`w-full aspect-video rounded-2xl overflow-hidden relative shadow-lg p-8 ${layoutClasses[template as LayoutKey]}`}
             style={{ backgroundColor: bgColor, color: textColor }}
         >
-            <h3 className={`${layoutClasses[template as LayoutKey] || 'flex flex-col justify-center items-center text-center'} ${template === 'headline' ? headlineFontSize[fontSize as HeadlineSizeKey] : fontSizes[fontSize as SizeKey]} font-black leading-tight line-clamp-2`} style={{ fontFamily }}>
+            <h3 className={`${template === 'headline' ? headlineFontSize[fontSize as HeadlineSizeKey] : fontSizes[fontSize as SizeKey]} font-black leading-tight line-clamp-2`} style={{ fontFamily }}>
                 {title || "Seu Título Aqui"}
             </h3>
             <p className={`${subFontSizes[fontSize as SizeKey]} mt-3 opacity-80 max-w-md line-clamp-3`} style={{ fontFamily }}>
@@ -343,25 +272,9 @@ const ValidationErrorsModal: React.FC<{ errors: string[]; onClose: () => void }>
   );
 };
 
-export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNavigate, categoryName, user, viewMode, initialView = 'sales' }) => {
-  const isDesigner = viewMode === 'Designer';
-  
-  const [view, setView] = useState<'sales' | 'creator' | 'editor' | 'pro_checkout' | 'pro_processing' | 'pro_approved' | 'pro_chat' | 'designer_workspace' | 'chat_onboarding'>('sales');
-  // FIX: Use DISPLAY_MODES from top-level scope
-  const [selectedMode, setSelectedMode] = useState<typeof DISPLAY_MODES[0] | null>(null);
-  const [selectedPeriods, setSelectedPeriods] = useState<string[]>([]);
-  // FIX: Use NEIGHBORHOODS from top-level scope
-  const [selectedNeighborhoods, setSelectedNeighborhoods] = useState<string[]>([]);
-  const [artChoice, setArtChoice] = useState<'diy' | 'pro' | null>(null);
-  const [diyFlowStep, setDiyFlowStep] = useState<'selection' | 'upload' | 'editor'>('selection');
-  const [paymentMethod, setPaymentMethod] = useState<'pix' | 'credit' | 'debit'>('pix');
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  // FIX: Renamed from setShowSuccess
-  const [isSuccess, setIsSuccess] = useState(false); 
-  const [isArtSaved, setIsArtSaved] = useState(false);
-  const [isEditingArt, setIsEditingArt] = useState(false);
-  const [savedDesign, setSavedDesign] = useState<any>(null);
-  const [toast, setToast] = useState<{msg: string, type: 'info' | 'error' | 'designer'} | null>(null);
+
+export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNavigate, categoryName, user }) => {
+  const [view, setView] = useState<'sales' | 'creator' | 'editor'>('sales');
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
 
   // --- Template Creator State ---
@@ -380,190 +293,12 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
     title: 'Título do Banner',
     subtitle: 'Subtítulo descritivo aqui',
   });
-  
-  const [chatMessages, setChatMessages] = useState<any[]>([]);
-  const [proChatStep, setProChatStep] = useState(0);
-  const [isLogoModalOpen, setIsLogoModalOpen] = useState(false);
-  const [isBriefingModalOpen, setIsBriefingModalOpen] = useState(false);
 
-  const [briefingData, setBriefingData] = useState({
-    companyName: user?.user_metadata?.store_name || '',
-    headline: '',
-    description: '',
-    observations: ''
-  });
+  // --- Shared State ---
+  const [isSaving, setIsSaving] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
 
-  const [logoPreview, setLogoPreview] = useState<string | null>(null);
-  const [highlightPeriod, setHighlightPeriod] = useState(false);
-
-  const periodRef = useRef<HTMLDivElement>(null);
-  const neighborhoodRef = useRef<HTMLDivElement>(null);
-  const creativeRef = useRef<HTMLDivElement>(null);
-  const paymentRef = useRef<HTMLDivElement>(null);
-  const chatScrollRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (isDesigner) {
-      setView('designer_workspace');
-    } else if (initialView === 'chat') {
-      const hasActiveOrder = false; 
-      if (hasActiveOrder) {
-        setView('pro_chat');
-      } else {
-        setView('chat_onboarding');
-      }
-    }
-  }, [isDesigner, initialView]);
-
-  const dynamicPeriods = useMemo(() => {
-    const now = new Date();
-    const formatDate = (date: Date) => date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' }); // Changed to full year
-    
-    // Periodo 1: Hoje a +30 dias
-    const period1Start = new Date(now);
-    const period1End = new Date(now);
-    period1End.setDate(now.getDate() + 30);
-    
-    // Periodo 2: +31 dias a +60 dias
-    const period2Start = new Date(now);
-    period2Start.setDate(period2Start.getDate() + 31);
-    const period2End = new Date(now);
-    period2End.setDate(now.getDate() + 60);
-
-    return [
-      { id: 'fixed_period_1', label: 'Primeiro Mês', sub: 'Visibilidade inicial', dates: `${formatDate(period1Start)} → ${formatDate(period1End)}`, days: 30, multiplier: 1 },
-      { id: 'fixed_period_2', label: 'Segundo Mês', sub: 'Extensão de visibilidade', dates: `${formatDate(period2Start)} → ${formatDate(period2End)}`, days: 30, multiplier: 1 },
-    ];
-  }, []);
-
-  // Lógica de mensagens automáticas do Chat
-  useEffect(() => {
-    if (view === 'pro_chat' && proChatStep === 0) {
-      setProChatStep(1);
-      
-      if (isDesigner) {
-        setChatMessages([
-            { id: 1, role: 'system', text: '🎉 Parabéns pela escolha profissional!\nNosso time vai criar um banner focado em conversão.\nEm até 72h você receberá a arte pronta para aprovação e publicação.', timestamp: '10:00' },
-            { id: 2, role: 'system', text: 'Para começarmos, envie por aqui:\n• Logo em alta (PNG ou PDF)\n• Nome da empresa\n• Pequena descrição / promoção', timestamp: '10:01' },
-            { id: 3, role: 'user', text: 'Olá! Enviei os dados abaixo.', timestamp: '10:05' },
-            { id: 4, role: 'user', type: 'attachment', text: '📋 Informações do banner enviadas.', details: { name: 'Hamburgueria do Zé', promo: 'Combo Casal R$ 49,90', obs: 'Usar cores preto e laranja.' }, timestamp: '10:05' },
-            { id: 5, role: 'user', type: 'file', text: 'Logo_Vetorial.png', timestamp: '10:06' }
-        ]);
-        setProChatStep(2);
-      } else {
-        setChatMessages([{
-            id: 1,
-            role: 'system',
-            text: '🎉 Parabéns pela escolha profissional!\nNosso time vai criar um banner focado em conversão.\nEm até 72h você receberá a arte pronta para aprovação e publicação.',
-            timestamp: 'Agora'
-          }]);
-    
-          setTimeout(() => {
-            setChatMessages(prev => [...prev, {
-              id: 2,
-              role: 'system',
-              text: 'Para começarmos, envie por aqui:\n• Logo em alta (PNG ou PDF)\n• Nome da empresa\n• Pequena descrição / promoção\nAssim que recebermos, damos início à criação.',
-              timestamp: 'Agora'
-            }]);
-            setProChatStep(2);
-          }, 1500);
-      }
-    }
-  }, [view, isDesigner, proChatStep]);
-
-  useEffect(() => {
-    if (chatScrollRef.current) {
-      chatScrollRef.current.scrollTop = chatScrollRef.current.scrollHeight;
-    }
-  }, [chatMessages]);
-
-  const showToast = (msg: string, type: 'info' | 'error' | 'designer' = 'info') => {
-    setToast({ msg, type });
-    setTimeout(() => setToast(null), 4000);
-  };
-
-  const scrollTo = (ref: React.RefObject<HTMLDivElement | null>, offset: number = 100) => {
-    setTimeout(() => {
-      if (ref.current) {
-        const bodyRect = document.body.getBoundingClientRect().top;
-        const elementRect = ref.current.getBoundingClientRect().top;
-        const elementPosition = elementRect - bodyRect;
-        const offsetPosition = elementPosition - offset;
-
-        window.scrollTo({
-          top: offsetPosition,
-          behavior: 'smooth'
-        });
-      }
-    }, 50);
-  };
-
-  const handleModeSelection = (mode: typeof DISPLAY_MODES[0]) => {
-    setSelectedMode(mode);
-    if (selectedPeriods.length === 0) {
-        setHighlightPeriod(true);
-        scrollTo(periodRef, 120);
-        setTimeout(() => setHighlightPeriod(false), 2000);
-    }
-  };
-
-  const checkHoodAvailability = useCallback((hood: string, periodsToTest?: string[]): { available: boolean; busyIn: string[] } => {
-    const targetPeriods = periodsToTest || selectedPeriods;
-    if (targetPeriods.length === 0) return { available: true, busyIn: [] };
-    // FIX: Use MOCK_OCCUPANCY from top-level scope
-    const busyIn = targetPeriods.filter(p => MOCK_OCCUPANCY[hood]?.[p] === true);
-    return { available: busyIn.length === 0, busyIn };
-  }, [selectedPeriods]);
-
-  const togglePeriod = (periodId: string) => {
-    setSelectedPeriods([periodId]);
-  };
-
-  const selectAllAvailableHoods = () => {
-    // FIX: Use NEIGHBORHOODS from top-level scope
-    const availableHoods = NEIGHBORHOODS.filter(hood => checkHoodAvailability(hood).available);
-    setSelectedNeighborhoods(availableHoods);
-  };
-
-  const handlePayPro = () => {
-    setView('pro_processing');
-    setTimeout(() => {
-      setView('pro_approved');
-    }, 2000);
-  };
-
-  const handleSaveDesign = (design: BannerDesign) => {
-    setSavedDesign({ type: 'editor', ...design });
-    setIsArtSaved(true);
-    setIsEditingArt(false);
-    setDiyFlowStep('editor');
-    // FIX: Removed invalid call to paymentRef. It's not a direct scroll target for art saving.
-  };
-
-  const prices = useMemo(() => {
-    if (!selectedMode) return { current: 0, original: 0, isPackage: false, installments: 0, monthly: 0 };
-    const hoodsMult = Math.max(1, selectedNeighborhoods.length);
-    const period = dynamicPeriods.find(p => selectedPeriods.includes(p.id));
-    const periodsMult = period ? period.multiplier : 1;
-    const artExtra = artChoice === 'pro' ? 69.90 : 0;
-    
-    const basePrice = selectedMode.price;
-    const originalBasePrice = selectedMode.originalPrice;
-    
-    const current = period?.days === 90 ? (basePrice * 3 * hoodsMult) + artExtra : (basePrice * hoodsMult) + artExtra;
-    const original = period?.days === 90 ? (originalBasePrice * 3 * hoodsMult) + artExtra : (originalBasePrice * hoodsMult) + artExtra;
-    
-    return {
-      current,
-      original,
-      isPackage: period?.days === 90,
-      installments: 3,
-      monthly: (basePrice * 3 * hoodsMult) / 3 
-    };
-  }, [selectedMode, selectedPeriods, selectedNeighborhoods, artChoice, dynamicPeriods]);
-
-  // FIX: Moved validateBanner function inside the component to have access to state
-  const validateBanner = useCallback((): string[] => {
+  const validateBanner = (): string[] => {
     const errors: string[] = [];
     const containsForbidden = (text: string) => FORBIDDEN_WORDS.some(word => text.toLowerCase().includes(word));
 
@@ -589,8 +324,8 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
         }
     }
     return errors;
-  }, [view, formData, editorData]);
-
+  };
+  
   const handlePublish = async () => {
     const validation = validateBanner();
     if (validation.length > 0) {
@@ -598,7 +333,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
       return;
     }
     
-    setIsSubmitting(true);
+    setIsSaving(true);
 
     const isCustom = view === 'editor';
     const config = isCustom ? { type: 'custom_editor', ...editorData } : { type: 'template', ...formData, template_id: selectedTemplate.id, cta: selectedCta };
@@ -607,6 +342,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
     try {
         if (!supabase || !user) throw new Error("Usuário ou Supabase não disponível.");
 
+        // 1. Inserir no 'published_banners'
         const { data: bannerData, error: bannerError } = await supabase
             .from('published_banners')
             .insert({
@@ -614,13 +350,14 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
                 target: bannerTarget,
                 config: config,
                 is_active: true,
-                expires_at: null,
+                expires_at: null, // banners manuais não expiram por padrão
             })
             .select()
             .single();
         
         if (bannerError) throw bannerError;
 
+        // 2. Log de Auditoria
         const { error: logError } = await supabase.from('banner_audit_log').insert({
             actor_id: user.id,
             actor_email: user.email,
@@ -628,13 +365,15 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
             banner_id: bannerData.id,
             details: { 
                 shopName: user.user_metadata?.store_name || 'Loja',
-                isFirstBanner: true, 
+                isFirstBanner: true, // Lógica de verificação omitida por simplicidade
                 target: bannerTarget,
                 config,
             }
         });
         if (logError) console.warn("Log de auditoria falhou:", logError);
 
+        // 3. (OPCIONAL) Disparar notificação para ADM no primeiro banner
+        // Essa lógica seria melhor em um trigger de DB, mas fazemos aqui para o MVP.
         const { count } = await supabase.from('published_banners').select('*', { count: 'exact', head: true }).eq('merchant_id', user.id);
         if (count === 1) {
             await supabase.functions.invoke('send-email-admin-banner', {
@@ -647,7 +386,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
             });
         }
         
-        setIsSuccess(true);
+        setShowSuccess(true);
         setTimeout(() => {
             onBack();
         }, 2000);
@@ -656,7 +395,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
         console.error("Erro ao publicar banner:", e);
         alert(`Erro: ${e.message}`);
     } finally {
-        setIsSubmitting(false);
+        setIsSaving(false);
     }
   };
 
@@ -668,283 +407,273 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
     setEditorData((prev: EditorData) => ({...prev, [field]: value}));
   }
 
-  // FIX: Added handleLogoUpload for chat logic
-  const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => setLogoPreview(reader.result as string);
-      reader.readAsDataURL(file);
-    }
-  };
-
-  // FIX: Added confirmLogoSend for chat logic
-  const confirmLogoSend = () => {
-    if (!logoPreview) return;
-    setChatMessages(prev => [...prev, {
-      id: Date.now(),
-      role: 'user',
-      type: 'file',
-      text: 'Logo_Empresa.png',
-      preview: logoPreview,
-      timestamp: 'Agora'
-    }]);
-    setIsLogoModalOpen(false);
-    setLogoPreview(null);
-    setTimeout(() => {
-      setChatMessages(prev => [...prev, {
-        id: Date.now() + 1,
-        role: 'system',
-        text: 'Logo recebida com sucesso! 👍',
-        timestamp: 'Agora'
-      }]);
-    }, 800);
-  };
-
-  // FIX: Added saveBriefing for chat logic
-  const saveBriefing = () => {
-    if (!briefingData.companyName || !briefingData.headline) return;
-    setChatMessages(prev => [...prev, {
-      id: Date.now(),
-      role: 'user',
-      type: 'attachment',
-      text: '📋 Informações do banner enviadas.',
-      details: {
-        name: briefingData.companyName,
-        promo: briefingData.headline,
-        desc: briefingData.description,
-        obs: briefingData.observations
-      },
-      timestamp: 'Agora'
-    }]);
-    setIsBriefingModalOpen(false);
-    setTimeout(() => {
-      setChatMessages(prev => [...prev, {
-        id: Date.now() + 1,
-        role: 'system',
-        text: 'Briefing recebido! Já estamos analisando suas informações.',
-        timestamp: 'Agora'
-      }]);
-    }, 800);
-  };
-
-  if (isEditingArt) {
-    return (
-      <StoreBannerEditor 
-        storeName={user?.user_metadata?.store_name || "Sua Loja"} 
-        storeLogo={user?.user_metadata?.logo_url}
-        onSave={handleSaveDesign} 
-        onBack={() => setIsEditingArt(false)} 
-      />
-    );
-  }
-
-  // --- TELA DE ONBOARDING PARA O CHAT (CASO NÃO TENHA PEDIDO) ---
-  if (view === 'chat_onboarding') {
-    return (
-        <div className="min-h-screen bg-[#020617] text-slate-100 flex flex-col items-center justify-center p-8 text-center animate-in fade-in duration-500">
-            <header className="absolute top-0 left-0 right-0 p-6 flex">
-                <button onClick={onBack} className="p-2 bg-slate-900 rounded-xl text-slate-400 hover:text-white transition-all active:scale-95"><ChevronLeft size={20} /></button>
-            </header>
-            
-            <div className="w-24 h-24 bg-blue-500/10 rounded-full flex items-center justify-center mb-8 border-4 border-blue-500/20 shadow-lg">
-                <MessageCircle size={40} className="text-blue-400" />
+  // ---- RENDER LOGIC ----
+  const renderStep = (): React.JSX.Element | null => {
+    if (view === 'sales') {
+      return (
+        <div className="animate-in fade-in duration-500">
+          <div className="text-center mb-10">
+            <div className="w-16 h-16 bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-6 border-4 border-slate-700 shadow-lg">
+                <Megaphone size={32} className="text-amber-400" />
             </div>
-            
-            <h1 className="text-2xl font-bold text-white mb-4 leading-tight">👋 Olá, {user?.user_metadata?.store_name}!</h1>
-            <p className="text-slate-400 leading-relaxed max-w-sm mb-8">
-                Este é o canal para criação e acompanhamento de banners com nosso time de designers.
+            <h2 className="text-3xl font-black text-white font-display uppercase tracking-tight mb-3">
+                Destaque sua Loja
+            </h2>
+            <p className="text-slate-400 text-sm max-w-sm mx-auto leading-relaxed">
+                Crie banners personalizados que aparecerão na Home do app ou em categorias específicas para atrair mais clientes.
             </p>
-            <p className="text-slate-400 leading-relaxed max-w-sm mb-12">
-                Para iniciar um novo banner, crie um anúncio ou contrate a criação profissional.
-            </p>
-            
-            <button 
-              onClick={() => setView('sales')}
-              className="w-full max-w-sm py-5 bg-[#1E5BFF] text-white font-black rounded-2xl shadow-xl active:scale-[0.98] transition-all uppercase tracking-widest text-sm flex items-center justify-center gap-2"
+          </div>
+          
+          <div className="grid grid-cols-1 gap-6">
+            <button
+              onClick={() => setView('creator')}
+              className="bg-slate-800 p-8 rounded-3xl border border-white/10 text-left hover:border-blue-500/50 transition-all group"
             >
-              Criar Novo Banner <ArrowRight size={18} />
+                <div className="w-12 h-12 bg-blue-500/10 rounded-2xl flex items-center justify-center text-blue-400 mb-4 border border-blue-500/20">
+                    <Sparkles size={24} />
+                </div>
+                <h3 className="font-bold text-white text-lg mb-2">Criador Rápido</h3>
+                <p className="text-xs text-slate-400 mb-6 leading-relaxed">
+                    Use nossos templates prontos. Ideal para criar ofertas e anúncios em segundos.
+                </p>
+                <span className="text-xs font-black text-blue-400 uppercase tracking-widest flex items-center gap-2 group-hover:gap-3 transition-all">
+                    Começar agora <ArrowRight size={14} />
+                </span>
             </button>
+            <button
+              onClick={() => setView('editor')}
+              className="bg-slate-800 p-8 rounded-3xl border border-white/10 text-left hover:border-purple-500/50 transition-all group"
+            >
+                <div className="w-12 h-12 bg-purple-500/10 rounded-2xl flex items-center justify-center text-purple-400 mb-4 border border-purple-500/20">
+                    <Paintbrush size={24} />
+                </div>
+                <h3 className="font-bold text-white text-lg mb-2">Editor Personalizado</h3>
+                <p className="text-xs text-slate-400 mb-6 leading-relaxed">
+                    Tenha controle total sobre cores, fontes e layout para um banner 100% original.
+                </p>
+                 <span className="text-xs font-black text-purple-400 uppercase tracking-widest flex items-center gap-2 group-hover:gap-3 transition-all">
+                    Criar do zero <ArrowRight size={14} />
+                </span>
+            </button>
+            <button
+              onClick={() => alert('Solicitação de arte enviada! Entraremos em contato em breve.')}
+              className="bg-slate-800 p-8 rounded-3xl border border-white/10 text-left hover:border-emerald-500/50 transition-all group relative"
+            >
+              <div className="absolute top-4 right-4 bg-emerald-500/10 text-emerald-400 text-[9px] font-bold px-2.5 py-1 rounded-full border border-emerald-500/20">
+                  Oferta especial
+              </div>
+              <div className="w-12 h-12 bg-emerald-500/10 rounded-2xl flex items-center justify-center text-emerald-400 mb-4 border border-emerald-500/20">
+                  <Rocket size={24} />
+              </div>
+              <h3 className="font-bold text-white text-lg mb-2">👉 Banner criado por nossos designers</h3>
+              <p className="text-xs text-slate-400 mb-6 leading-relaxed">
+                  Nossa equipe cria um banner profissional para sua loja, pronto para anunciar no app.
+              </p>
+              
+              <ul className="text-xs text-slate-400 space-y-2 mb-6">
+                <li className="flex items-center gap-2"><Check size={14} className="text-emerald-400"/>Até 3 alterações inclusas</li>
+                <li className="flex items-center gap-2"><Check size={14} className="text-emerald-400"/>Arte profissional feita por designers</li>
+                <li className="flex items-center gap-2"><Check size={14} className="text-emerald-400"/>Banner otimizado para o app</li>
+              </ul>
+
+              <div className="flex items-baseline gap-2 mb-6">
+                <span className="text-slate-500 line-through">R$ 129,90</span>
+                <span className="text-3xl font-black text-white">R$ 59,90</span>
+                <span className="text-slate-400 text-xs font-medium">por arte</span>
+              </div>
+
+              <span className="text-xs font-black text-emerald-400 uppercase tracking-widest flex items-center gap-2 group-hover:gap-3 transition-all">
+                  Solicitar agora <ArrowRight size={14} />
+              </span>
+            </button>
+          </div>
         </div>
-    );
-  }
+      );
+    }
+    
+    if (view === 'creator' || view === 'editor') {
+      const isCustom = view === 'editor';
 
-  // --- DESIGNER WORKSPACE ---
-  if (view === 'designer_workspace') {
-    const activeProjects = [
-        { id: 'pj-1', store: 'Hamburgueria do Zé', status: 'briefing_recebido', date: 'Hoje, 10:05', type: 'Home' },
-        { id: 'pj-2', store: 'Studio Bella', status: 'em_criacao', date: 'Ontem', type: 'Categorias' },
-        { id: 'pj-3', store: 'PetShop Patas', status: 'aguardando_aprovacao', date: '02 Nov', type: 'Home' },
-    ];
+      const handleBackToSelection = () => {
+        setSelectedGoal(null);
+        setSelectedTemplate(null);
+        setFormData({});
+      };
 
-    return (
-        <div className="min-h-screen bg-[#020617] text-slate-100 flex flex-col animate-in slide-in-from-right h-full">
-            <header className="bg-indigo-950 px-6 py-6 border-b border-white/10 flex items-center justify-between sticky top-0 z-50">
-                <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-indigo-500 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-500/20">
-                        <Palette size={24} />
+      if (isCustom) {
+        // EDITOR PERSONALIZADO
+        return (
+            <div className="animate-in fade-in duration-500">
+                <div className="mb-8">
+                    <h3 className="font-black text-sm uppercase tracking-widest text-purple-400 mb-2">Preview do Banner</h3>
+                    <BannerEditorPreview data={editorData} />
+                </div>
+                <div className="bg-slate-800 rounded-3xl p-6 border border-white/10 space-y-6">
+                    <h3 className="font-bold">Editor</h3>
+                    <div>
+                        <label className="text-xs font-bold text-slate-400 uppercase">Layout</label>
+                        <div className="grid grid-cols-3 gap-2 mt-2">
+                           {EDITOR_LAYOUTS.map(l => (
+                               <button key={l.id} onClick={() => handleEditorDataChange('template', l.id)} className={`py-3 rounded-lg text-xs font-bold ${editorData.template === l.id ? 'bg-purple-500 text-white' : 'bg-slate-700 text-slate-300'}`}>{l.name}</button>
+                           ))}
+                        </div>
                     </div>
                     <div>
-                        <h1 className="font-black text-xl uppercase tracking-tighter">Workspace</h1>
-                        <div className="flex items-center gap-1.5 mt-0.5">
-                            <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span>
-                            <p className="text-[10px] text-indigo-300 font-bold uppercase tracking-widest">Modo Designer (Visualização)</p>
+                        <label className="text-xs font-bold text-slate-400 uppercase">Paleta de Cores</label>
+                        <div className="flex gap-3 mt-2">
+                           {COLOR_PALETTES.map(p => (
+                               <button key={p.id} onClick={() => handleEditorDataChange('palette', p.id)} className={`w-8 h-8 rounded-full flex items-center justify-center ${editorData.palette === p.id ? 'ring-2 ring-white ring-offset-2 ring-offset-slate-800' : ''}`}>
+                                   <div className="w-full h-full rounded-full overflow-hidden flex">
+                                       <div style={{ backgroundColor: p.previewColors[0] }} className="w-1/2 h-full"></div>
+                                       <div style={{ backgroundColor: p.previewColors[1] }} className="w-1/2 h-full"></div>
+                                   </div>
+                               </button>
+                           ))}
                         </div>
                     </div>
-                </div>
-                <button onClick={onBack} className="p-2 bg-white/5 rounded-xl text-slate-400 hover:text-white"><X size={20} /></button>
-            </header>
-
-            <main className="p-6 space-y-8 pb-32 overflow-y-auto no-scrollbar">
-                <div className="grid grid-cols-2 gap-3">
-                    <div className="bg-slate-900 p-5 rounded-3xl border border-white/5">
-                        <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Pendentes</p>
-                        <p className="text-3xl font-black text-white">08</p>
+                     <div>
+                        <label className="text-xs font-bold text-slate-400 uppercase">Texto Principal</label>
+                        <input value={editorData.title} onChange={(e) => handleEditorDataChange('title', e.target.value)} className="w-full mt-2 bg-slate-700 p-3 rounded-lg text-white" />
                     </div>
-                    <div className="bg-slate-900 p-5 rounded-3xl border border-white/5">
-                        <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Entregar hoje</p>
-                        <p className="text-3xl font-black text-indigo-400">02</p>
+                    <div>
+                        <label className="text-xs font-bold text-slate-400 uppercase">Subtítulo</label>
+                        <input value={editorData.subtitle} onChange={(e) => handleEditorDataChange('subtitle', e.target.value)} className="w-full mt-2 bg-slate-700 p-3 rounded-lg text-white" />
                     </div>
                 </div>
+            </div>
+        );
+      } else {
+        // CRIADOR RÁPIDO (TEMPLATE)
+        if (!selectedGoal) {
+          // STEP 1: CHOOSE GOAL
+          return (
+            <div className="animate-in slide-in-from-right duration-500">
+              <h3 className="font-black text-sm uppercase tracking-widest text-blue-400 mb-4">Passo 1: Qual seu objetivo?</h3>
+              <div className="space-y-4">
+                {GOALS.map(goal => (
+                  <button key={goal.id} onClick={() => setSelectedGoal(goal.id)} className="w-full bg-slate-800 p-6 rounded-2xl border border-white/10 text-left hover:border-blue-500/50 transition-all flex items-center gap-5">
+                    <div className="w-12 h-12 bg-blue-500/10 rounded-xl flex items-center justify-center text-blue-400 border border-blue-500/20"><goal.icon size={24} /></div>
+                    <div>
+                      <h4 className="font-bold text-white text-base">{goal.name}</h4>
+                      <p className="text-xs text-slate-400">{goal.description}</p>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          );
+        }
 
-                <div className="space-y-4">
-                    <h3 className="text-xs font-black text-slate-500 uppercase tracking-[0.2em] ml-2">Fila de Pedidos</h3>
-                    {activeProjects.map(proj => (
-                        <div key={proj.id} onClick={() => setView('pro_chat')} className="bg-slate-900 p-5 rounded-[2rem] border border-white/5 flex items-center justify-between hover:border-indigo-500/30 transition-all cursor-pointer group active:scale-[0.98]">
-                            <div className="flex items-center gap-4">
-                                <div className="w-12 h-12 bg-white/5 rounded-2xl flex items-center justify-center text-slate-500 group-hover:text-indigo-400 transition-colors">
-                                    <Building size={20} />
-                                </div>
-                                <div className="text-left">
-                                    <p className="font-bold text-white leading-tight">{proj.store}</p>
-                                    <p className="text-[10px] text-slate-500 uppercase font-black mt-1">{proj.type} • {proj.date}</p>
-                                </div>
-                            </div>
-                            <div className="flex flex-col items-end gap-2">
-                                <span className={`text-[8px] font-black uppercase px-2 py-1 rounded-md border ${
-                                    proj.status === 'briefing_recebido' ? 'bg-blue-50/10 text-blue-400 border-blue-500/20' :
-                                    proj.status === 'em_criacao' ? 'bg-amber-50/10 text-amber-400 border-amber-500/20' :
-                                    'bg-indigo-500/10 text-indigo-400 border-indigo-500/20'
-                                }`}>
-                                    {proj.status.replace('_', ' ')}
-                                </span>
-                                <ChevronRight size={16} className="text-slate-700" />
-                            </div>
+        if (selectedGoal && !selectedTemplate) {
+          // STEP 2: CHOOSE TEMPLATE
+          const availableTemplates = BANNER_TEMPLATES.filter(t => t.goal === selectedGoal);
+          return (
+            <div className="animate-in slide-in-from-right duration-500">
+              <button onClick={handleBackToSelection} className="flex items-center gap-2 text-xs text-slate-400 mb-4"><ChevronLeft size={16} /> Voltar</button>
+              <h3 className="font-black text-sm uppercase tracking-widest text-blue-400 mb-4">Passo 2: Escolha um modelo</h3>
+              <div className="space-y-4">
+                {availableTemplates.map(template => (
+                  <button key={template.id} onClick={() => setSelectedTemplate(template)} className="w-full bg-slate-800 p-5 rounded-2xl border border-white/10 text-left hover:border-blue-500/50 transition-all">
+                    <h4 className="font-bold text-white text-base">{template.name}</h4>
+                    <p className="text-xs text-slate-400">{template.description}</p>
+                  </button>
+                ))}
+              </div>
+            </div>
+          );
+        }
+
+        if (selectedTemplate) {
+          // STEP 3: FILL FORM & PREVIEW
+          return (
+            <div className="animate-in slide-in-from-right duration-500">
+                <button onClick={handleBackToSelection} className="flex items-center gap-2 text-xs text-slate-400 mb-4"><ChevronLeft size={16} /> Voltar</button>
+                <div className="mb-8">
+                    <h3 className="font-black text-sm uppercase tracking-widest text-blue-400 mb-4">Passo 3: Preencha e veja como fica</h3>
+                    <BannerPreview templateId={selectedTemplate.id} data={formData} storeName={user?.user_metadata?.store_name || "Sua Loja"} cta={selectedCta} />
+                </div>
+                <div className="bg-slate-800 rounded-3xl p-6 border border-white/10 space-y-5">
+                    {selectedTemplate.fields.map((field: any) => (
+                        <div key={field.id}>
+                            <label className="text-xs font-bold text-slate-400 uppercase">{field.label}</label>
+                            <input
+                                type={field.type}
+                                placeholder={field.placeholder}
+                                value={formData[field.id] || ''}
+                                onChange={(e) => handleFormDataChange(field.id, e.target.value)}
+                                className="w-full mt-2 bg-slate-700 p-3 rounded-lg text-white"
+                            />
                         </div>
                     ))}
+                    {!ctaStepCompleted ? (
+                        <div>
+                            <label className="text-xs font-bold text-slate-400 uppercase">Botão (Opcional)</label>
+                            <div className="flex gap-2 mt-2 flex-wrap">
+                                {CTA_OPTIONS.map(cta => (
+                                    <button key={cta} onClick={() => setSelectedCta(cta)} className={`text-xs px-3 py-1.5 rounded-lg ${selectedCta === cta ? 'bg-blue-500 text-white' : 'bg-slate-700 text-slate-300'}`}>{cta}</button>
+                                ))}
+                                <button onClick={() => setCtaStepCompleted(true)} className="text-xs px-3 py-1.5 rounded-lg bg-slate-600 text-slate-300">Pular</button>
+                            </div>
+                        </div>
+                    ) : null}
                 </div>
-            </main>
+            </div>
+          );
+        }
+      }
+    }
+    return null;
+  };
+
+  return (
+    <div className="min-h-screen bg-slate-900 text-white font-sans flex flex-col">
+      <div className="sticky top-0 z-40 bg-slate-900/80 backdrop-blur-md px-6 py-4 border-b border-white/5 flex items-center justify-between">
+        <div className="flex items-center gap-4">
+            <button onClick={view === 'sales' ? onBack : () => setView('sales')} className="p-2.5 bg-slate-800 text-slate-400 hover:text-white transition-colors border border-white/5 rounded-xl active:scale-95">
+                <ChevronLeft size={20} />
+            </button>
+            <div>
+                <h1 className="font-bold text-lg leading-none">Criar Anúncio</h1>
+                <p className="text-xs text-slate-500">{categoryName ? `Para: ${categoryName}` : 'Para: Home'}</p>
+            </div>
         </div>
-    );
-  }
+        <button 
+            onClick={onBack}
+            className="p-2.5 bg-slate-800 text-slate-400 hover:text-white transition-colors border border-white/5 rounded-xl active:scale-95"
+        >
+            <X size={20} />
+        </button>
+      </div>
+      
+      <main className="flex-1 overflow-y-auto no-scrollbar p-6 pb-32">
+        {renderStep()}
+      </main>
 
-  if (view === 'pro_chat') {
-    return (
-      <div className="fixed inset-0 z-[130] bg-[#F8F9FC] dark:bg-gray-950 flex flex-col animate-in slide-in-from-right h-full">
-        {toast && (
-            <div className={`fixed top-24 left-1/2 -translate-x-1/2 z-[200] px-6 py-3 rounded-2xl shadow-2xl flex items-center gap-3 animate-in slide-in-from-top-4 border ${toast.type === 'designer' ? 'bg-indigo-600 border-indigo-500' : 'bg-rose-600 border-rose-500'} text-white`}>
-                <p className="text-xs font-black uppercase tracking-tight">{toast.msg}</p>
-            </div>
-        )}
-
-        <header className={`${isDesigner ? 'bg-indigo-950 text-white' : 'bg-white dark:bg-gray-900'} px-6 py-5 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between shadow-sm sticky top-0 z-50`}>
-          <div className="flex items-center gap-4">
-             <button onClick={() => setView(isDesigner ? 'designer_workspace' : 'sales')} className="p-2 bg-white/5 rounded-xl text-slate-400"><ChevronLeft size={20} /></button>
-             <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white shadow-md relative shrink-0">
-                 {isDesigner ? <UserIcon size={20} /> : <Building size={20} />}
-                 <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-green-500 border-2 border-white dark:border-gray-900 rounded-full"></div>
-             </div>
-             <div>
-               <h2 className="font-bold leading-tight">{isDesigner ? 'Hamburgueria do Zé' : 'Time de Design'}</h2>
-               <p className={`text-[10px] font-black uppercase tracking-widest ${isDesigner ? 'text-indigo-300' : 'text-green-500'}`}>{isDesigner ? 'Briefing Ativo' : 'Online agora'}</p>
-             </div>
+      {view !== 'sales' && (
+          <div className="fixed bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-slate-900 via-slate-900 to-transparent max-w-md mx-auto z-30">
+            <button 
+                onClick={handlePublish}
+                disabled={isSaving || (view === 'creator' && !selectedTemplate)}
+                className="w-full bg-[#1E5BFF] text-white font-black py-5 rounded-2xl shadow-xl shadow-blue-500/20 flex items-center justify-center gap-3 active:scale-[0.98] transition-all disabled:opacity-50 disabled:grayscale"
+            >
+                {isSaving ? <Loader2 className="w-6 h-6 animate-spin" /> : 'Publicar Banner'}
+            </button>
           </div>
-          {isDesigner && (
-              <span className="text-[8px] font-black bg-indigo-500 text-white px-2 py-1 rounded-md uppercase tracking-widest">Modo Designer</span>
-          )}
-        </header>
+      )}
 
-        <main ref={chatScrollRef} className="flex-1 overflow-y-auto p-6 space-y-6 no-scrollbar pb-32">
-          {chatMessages.map(msg => (
-            <div key={msg.id} className={`flex flex-col gap-1 max-w-[85%] animate-in slide-in-from-bottom-2 duration-500 ${msg.role === (isDesigner ? 'user' : 'system') ? 'items-start' : 'items-end ml-auto'}`}>
-               <div className={`p-4 rounded-3xl shadow-sm border ${
-                   msg.role === (isDesigner ? 'user' : 'system') 
-                    ? 'bg-white dark:bg-gray-800 rounded-tl-none border-gray-100 dark:border-gray-700' 
-                    : 'bg-[#1E5BFF] text-white rounded-tr-none border-blue-500'
-                }`}>
-                  {msg.type === 'attachment' ? (
-                      <div className="space-y-3">
-                         <div className="flex items-center gap-2 mb-2">
-                             <ClipboardList size={16} />
-                             <span className="font-bold text-xs uppercase">Briefing de Criação</span>
-                         </div>
-                         <div className="text-xs space-y-1 opacity-90">
-                             <p><strong>Loja:</strong> {msg.details.name}</p>
-                             <p><strong>Chamada:</strong> {msg.details.promo}</p>
-                             <p><strong>Desc:</strong> {msg.details.desc}</p>
-                             {msg.details.obs && <p><strong>Obs:</strong> {msg.details.obs}</p>}
-                         </div>
-                      </div>
-                  ) : msg.type === 'file' ? (
-                      <div className="space-y-3">
-                          <div className="flex items-center gap-3">
-                              <ImageIcon size={20} />
-                              <p className="text-sm font-bold">{msg.text}</p>
-                              <button className="p-1.5 bg-black/10 rounded-lg"><Check size={14}/></button>
-                          </div>
-                          {msg.preview && (
-                            <img src={msg.preview} className="w-full rounded-xl" alt="Preview" />
-                          )}
-                      </div>
-                  ) : (
-                    <p className="text-sm whitespace-pre-wrap leading-relaxed">{msg.text}</p>
-                  )}
-               </div>
-               <span className="text-[9px] text-gray-400 font-bold uppercase tracking-widest px-2">{msg.timestamp}</span>
-            </div>
-          ))}
-          {!isDesigner && proChatStep === 1 && (
-            <div className="flex gap-2 p-2 ml-2">
-               <div className="w-1.5 h-1.5 bg-blue-300 rounded-full animate-bounce"></div>
-               <div className="w-1.5 h-1.5 bg-blue-400 rounded-full animate-bounce [animation-delay:0.2s]"></div>
-               <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce [animation-delay:0.4s]"></div>
-            </div>
-          )}
-        </main>
-
-        <footer className={`p-6 border-t space-y-4 sticky bottom-0 z-50 ${isDesigner ? 'bg-indigo-950 border-white/10' : 'bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800'}`}>
-           {isDesigner ? (
-              <div className="flex flex-col gap-2">
-                 <div className="flex gap-2">
-                    <button onClick={() => showToast("Ação desativada no modo visualização", "designer")} className="flex-1 py-4 bg-indigo-500 text-white rounded-2xl flex items-center justify-center gap-2 text-xs font-black uppercase tracking-widest active:scale-95 transition-all">
-                        <Upload size={16} /> Enviar V1
-                    </button>
-                    <button onClick={() => showToast("Ação desativada no modo visualização", "designer")} className="flex-1 py-4 bg-white/5 text-slate-300 border border-white/10 rounded-2xl flex items-center justify-center gap-2 text-xs font-black uppercase tracking-widest active:scale-95 transition-all">
-                        <Check size={16} /> Finalizar
-                    </button>
-                 </div>
-                 <div className="flex items-center gap-2 px-3 py-1.5 bg-indigo-500/10 rounded-xl border border-indigo-500/20">
-                    <Info size={12} className="text-indigo-400" />
-                    <p className="text-[9px] font-bold text-indigo-300 uppercase tracking-widest leading-none">Prazo: 48h restantes</p>
-                 </div>
-              </div>
-           ) : (
-             <>
-               {proChatStep === 2 && (
-                 <div className="flex flex-col gap-2">
-                    <button onClick={() => setIsLogoModalOpen(true)} className="w-full py-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800 rounded-2xl flex items-center justify-center gap-3 text-[#1E5BFF] text-xs font-black uppercase tracking-widest active:scale-[0.98] transition-all">
-                      <Upload size={16} /> Enviar logo
-                    </button>
-                    <button onClick={() => setIsBriefingModalOpen(true)} className="w-full py-4 bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl flex items-center justify-center gap-3 text-gray-700 dark:text-gray-200 text-xs font-black uppercase tracking-widest active:scale-[0.98] transition-all">
-                      <FileText size={16} /> Preencher informações
-                    </button>
-                    <p className="text-[9px] text-center text-gray-400 font-bold uppercase tracking-widest">Assim que recebermos as informações, iniciamos a criação.</p>
-                 </div>
-               )}
-               <div className="flex items-center gap-3">
-                  <input 
-                    type="text" 
-                    placeholder="Digite sua dúvida..."
-                    className="flex-1 bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl px-5 py-4 text-sm outline-none focus:border-blue-500 transition-all dark:text-white"
-                  />
-                  <button onClick
+      {showSuccess && (
+        <div className="fixed inset-0 z-[100] bg-black/80 flex items-center justify-center p-6 animate-in fade-in">
+           <div className="bg-slate-800 p-10 rounded-2xl flex flex-col items-center text-center">
+                <div className="w-16 h-16 bg-green-500/10 rounded-full flex items-center justify-center text-green-400 mb-6 border-2 border-green-500/20">
+                    <CheckCircle2 size={32} />
+                </div>
+                <h2 className="font-black text-xl text-white">Publicado!</h2>
+                <p className="text-sm text-slate-400 mt-2">Seu banner já está ativo no aplicativo.</p>
+           </div>
+        </div>
+      )}
+      
+      <ValidationErrorsModal errors={validationErrors} onClose={() => setValidationErrors([])} />
+    </div>
+  );
+};

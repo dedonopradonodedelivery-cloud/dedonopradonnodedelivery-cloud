@@ -18,11 +18,9 @@ import {
   Lock,
   Play
 } from 'lucide-react';
-import { User } from '@supabase/supabase-js'; // Importação adicionada
 
 interface StoreCashbackModuleProps {
   onBack: () => void;
-  user: User | null; // Propriedade 'user' adicionada
 }
 
 // Mock Transactions
@@ -30,10 +28,10 @@ const TRANSACTIONS = [
   { id: 1, date: '12/11 - 14:30', client: 'Ana S.', purchase: 150.00, cashback: 7.50, status: 'confirmado' },
   { id: 2, date: '12/11 - 10:15', client: 'Carlos M.', purchase: 85.00, cashback: 4.25, status: 'pendente' },
   { id: 3, date: '11/11 - 18:45', client: 'Beatriz L.', purchase: 210.00, cashback: 10.50, status: 'confirmado' },
-  { id: 4, date: '10/11 - 09:20', client: 'João P.', purchase: 45.00, cashback: 2.25, status: 'expirado' }, // Corrigido para incluir 'client'
+  { id: 4, date: '10/11 - 09:20', client: 'João P.', purchase: 45.00, cashback: 2.25, status: 'expirado' },
 ];
 
-export const StoreCashbackModule: React.FC<StoreCashbackModuleProps> = ({ onBack, user }) => {
+export const StoreCashbackModule: React.FC<StoreCashbackModuleProps> = ({ onBack }) => {
   // Mock Store ID
   const STORE_ID = 'store_123_freguesia';
   

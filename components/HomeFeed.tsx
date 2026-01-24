@@ -1,6 +1,6 @@
 
-
 import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { Store, Category, AdType } from '@/types';
 import { 
   ChevronRight, 
   Crown,
@@ -19,7 +19,7 @@ import {
   Flame,
   Percent,
   Tag,
-  Gift, // Alterado de Tag para Gift
+  Gift,
   Utensils,
   Pizza,
   Coffee,
@@ -38,45 +38,25 @@ import {
   Clock,
   Heart,
   ShieldCheck,
-  CheckCircle2, 
-  Lock, // Adicionado Lock
+  CheckCircle2,
+  Lock,
   Info,
-  Shirt, // Adicionado para Banner de Moda
-  CarFront // Adicionado para Banner de Serviços Automotivos
 } from 'lucide-react';
 import { LojasEServicosList } from '@/components/LojasEServicosList';
 import { User } from '@supabase/supabase-js';
-import { CATEGORIES, MOCK_BAIRRO_POSTS, FORBIDDEN_POST_WORDS } from '@/constants';
+import { CATEGORIES } from '@/constants';
 import { useNeighborhood } from '@/contexts/NeighborhoodContext';
 import { supabase } from '@/lib/supabaseClient';
 import { trackAdEvent } from '@/lib/analytics';
-// FIX: Import BannerDesign, Category, and Store interfaces from '@/types'
-import { BannerDesign, Category, Store } from '@/types'; 
+import { BannerDesign } from './StoreBannerEditor';
 import { LaunchOfferBanner } from './LaunchOfferBanner';
-import { BairroPost } from '@/types'; // Importando o novo tipo de post
-import { BairroPostsBlock } from './BairroPostsBlock'; // Importando o novo componente
-import { getStoreLogo } from '@/utils/mockLogos'; // Import para mock de logos
-
-// FIX: Define BannerItem interface to resolve type inference issues for carousel items
-interface BannerItem {
-  id: string;
-  target?: string;
-  storeSlug?: string;
-  isUserBanner?: boolean;
-  config: BannerDesign; // Ensures 'imageUrl' is a known property in the config object
-  profiles?: { // Add profiles directly here
-    store_name: string;
-    logo_url: string;
-  } | null; // Allow profiles to be null if not found
-}
 
 // --- BANNER VIEWER (LOCAL COMPONENT) ---
 
 const ICON_COMPONENTS: Record<string, React.ElementType> = {
   Flame, Zap, Percent, Tag, Gift, Utensils, Pizza, Coffee, Beef, IceCream,
   ShoppingCart, Store: StoreIcon, Package, Wrench, Truck, CreditCard, Coins, Star,
-  Award, MapPin, Smile, Bell, Clock, Heart, Sparkles, Rocket: Sparkles, Megaphone, Crown, ShieldCheck,
-  Shirt, CarFront // Adicionado Shirt e CarFront
+  Award, MapPin, Smile, Bell, Clock, Heart, Sparkles, Rocket: Sparkles, Megaphone, Crown, ShieldCheck
 };
 
 const FONT_STYLES = [
@@ -97,14 +77,14 @@ const SIZE_LEVELS = [
 ];
 
 const BannerViewer: React.FC<{ 
-  config: BannerDesign & { imageUrl?: string; }; // Adicionado imageUrl ao config local
+  config: BannerDesign; 
   storeName: string; 
   storeLogo?: string | null; 
 }> = ({ config, storeName, storeLogo }) => {
     const { 
       title, subtitle, titleFont, titleSize, subtitleFont, subtitleSize, 
       bgColor, textColor, align, animation, iconName, iconPos, iconSize, 
-      logoDisplay, iconColorMode, iconCustomColor, imageUrl
+      logoDisplay, iconColorMode, iconCustomColor 
     } = config;
 
     const renderIcon = (name: string | null, size: 'sm' | 'md' | 'lg', colorMode: string) => {
@@ -125,16 +105,8 @@ const BannerViewer: React.FC<{
         className={`w-full h-full p-8 shadow-2xl relative overflow-hidden transition-all duration-500 flex flex-col justify-center border border-white/10 ${
           align === 'center' ? 'items-center text-center' : align === 'right' ? 'items-end text-right' : 'items-start text-left'
         } ${animation === 'pulse' ? 'animate-pulse' : animation === 'float' ? 'animate-float-slow' : ''}`}
-        style={{
-          backgroundColor: bgColor,
-          backgroundImage: imageUrl ? `url(${imageUrl})` : undefined,
-          backgroundSize: imageUrl ? 'cover' : undefined,
-          backgroundPosition: imageUrl ? 'center' : undefined,
-        }}
+        style={{ backgroundColor: bgColor }}
       >
-        {/* Overlay para escurecer imagem de fundo se houver */}
-        {imageUrl && <div className="absolute inset-0 bg-black/40"></div>}
-
         <div className={`relative z-10 transition-all duration-500 flex ${iconPos === 'top' ? 'flex-col items-inherit' : iconPos === 'right' ? 'flex-row-reverse items-center gap-4' : 'flex-row items-center gap-4'} ${animation === 'slide' ? 'animate-in slide-in-from-left-8' : ''}`}>
           {iconName && (
             <div className={`${iconPos === 'top' ? 'mb-4' : ''} shrink-0`}>
@@ -189,7 +161,6 @@ const mapToViewerConfig = (dbConfig: any): BannerDesign => {
           align: 'center', iconName: 'Flame', iconPos: 'top',
           iconSize: 'lg', logoDisplay: 'none', animation: 'pulse',
           iconColorMode: 'white',
-          imageUrl: dbConfig.product_image_url
         };
       case 'lancamento':
         return {
@@ -200,20 +171,7 @@ const mapToViewerConfig = (dbConfig: any): BannerDesign => {
           bgColor: '#0F172A', textColor: '#FFFFFF',
           align: 'left', iconName: 'Sparkles', iconPos: 'right',
           iconSize: 'lg', logoDisplay: 'square', animation: 'none',
-          iconColorMode: 'text',
-          imageUrl: dbConfig.product_image_url
-        };
-      case 'institucional':
-        return {
-          title: dbConfig.headline || 'Sua Loja',
-          subtitle: dbConfig.subheadline || 'Qualidade e Tradição.',
-          titleFont: 'font-forte', titleSize: 'lg',
-          subtitleFont: 'font-neutra', subtitleSize: 'sm',
-          bgColor: '#FFFFFF', textColor: '#111827',
-          align: 'center', iconName: 'Store', iconPos: 'top',
-          iconSize: 'md', logoDisplay: 'round', animation: 'none',
-          iconColorMode: 'text',
-          imageUrl: dbConfig.logo_url
+          iconColorMode: 'text'
         };
       default: break;
     }
@@ -230,6 +188,14 @@ const mapToViewerConfig = (dbConfig: any): BannerDesign => {
   };
 };
 
+interface BannerItem {
+  id: string;
+  target?: string;
+  storeSlug?: string;
+  isUserBanner?: boolean;
+  config: any;
+}
+
 const HomeCarousel: React.FC<{ onNavigate: (v: string) => void; onStoreClick?: (store: Store) => void; stores: Store[] }> = ({ onNavigate, onStoreClick, stores }) => {
   const { currentNeighborhood } = useNeighborhood();
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -237,66 +203,47 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void; onStoreClick?: (
   const [userBanner, setUserBanner] = useState<BannerItem | null>(null);
 
   const defaultBanners: BannerItem[] = useMemo(() => [
-    { // Banner 1: App Official Promo (AGORA ESTATIC)
-      id: 'app-ads-promo',
-      target: 'store_ads_module', // Navigates to ads module
+    { 
+      id: 'growth-opportunity', 
+      target: 'store_ads_module',
       config: {
-        title: 'Anuncie sua loja a partir de R$ 29,90',
-        subtitle: 'Promoção de inauguração dos banners por tempo indeterminado. Anunciar agora!',
+        title: 'Sua Loja em Destaque',
+        subtitle: 'Anúncios que geram resultado real no seu bairro.',
         titleFont: 'font-impacto', titleSize: 'xl',
         subtitleFont: 'font-neutra', subtitleSize: 'sm',
         bgColor: '#1E5BFF', textColor: '#FFFFFF',
-        align: 'center', iconName: 'Megaphone', iconPos: 'top',
-        iconSize: 'lg', logoDisplay: 'none', animation: 'none', // <<< ALTERADO AQUI para 'none'
+        align: 'left', iconName: 'Rocket', iconPos: 'right',
+        iconSize: 'lg', logoDisplay: 'none', animation: 'float',
         iconColorMode: 'white'
       }
     },
-    { // Banner 2: Restaurante Sabor do Bairro
-      id: 'restaurante-sabor-bairro',
-      target: 'store_detail', // Navigates to store detail
-      storeSlug: 'restaurante-sabor-bairro', // Match with STORES mock ID
+    { 
+      id: 'master-sponsor', 
+      target: 'grupo-esquematiza', 
+      storeSlug: 'grupo-esquematiza',
       config: {
-        title: 'Almoço especial hoje',
-        subtitle: 'Pratos caseiros feitos na hora. Ver cardápio.',
-        titleFont: 'font-elegante', titleSize: 'lg',
-        subtitleFont: 'font-amigavel', subtitleSize: 'md',
-        bgColor: '#15803D', textColor: '#FFFFFF', // Dark green for food
-        align: 'left', iconName: 'Utensils', iconPos: 'left',
-        iconSize: 'md', logoDisplay: 'round', animation: 'none',
-        iconColorMode: 'white',
-        imageUrl: 'https://images.unsplash.com/photo-1517248135467-4c7edab74dad?q=80&w=800&auto=format&fit=crop' // Restaurant interior/dish
-      }
-    },
-    { // Banner 3: Loja Estilo Urbano
-      id: 'loja-estilo-urbano',
-      target: 'store_detail',
-      storeSlug: 'loja-estilo-urbano',
-      config: {
-        title: 'Nova coleção já disponível',
-        subtitle: 'Peças exclusivas no bairro. Conhecer loja.',
-        titleFont: 'font-moderna', titleSize: 'lg',
-        subtitleFont: 'font-neutra', subtitleSize: 'md',
-        bgColor: '#8B5CF6', textColor: '#FFFFFF', // Purple for fashion
-        align: 'right', iconName: 'Shirt', iconPos: 'right',
-        iconSize: 'md', logoDisplay: 'square', animation: 'none',
-        iconColorMode: 'white',
-        imageUrl: 'https://images.unsplash.com/photo-1596753040212-0761e3894458?q=80&w=800&auto=format&fit=crop' // Fashion model/clothing
-      }
-    },
-    { // Banner 4: Oficina Auto JPA
-      id: 'oficina-auto-jpa',
-      target: 'store_detail',
-      storeSlug: 'oficina-auto-jpa',
-      config: {
-        title: 'Seu carro em boas mãos',
-        subtitle: 'Revisão e manutenção completa. Falar com a loja.',
+        title: 'GRUPO ESQUEMATIZA',
+        subtitle: 'Segurança e Facilities para Empresas e Condomínios.',
         titleFont: 'font-forte', titleSize: 'lg',
         subtitleFont: 'font-neutra', subtitleSize: 'sm',
-        bgColor: '#212121', textColor: '#FFFFFF', // Dark gray/black for auto
-        align: 'left', iconName: 'CarFront', iconPos: 'left',
-        iconSize: 'md', logoDisplay: 'round', animation: 'none',
-        iconColorMode: 'white',
-        imageUrl: 'https://images.unsplash.com/photo-1582236371300-84a1e9c5f87b?q=80&w=800&auto=format&fit=crop' // Car service garage
+        bgColor: '#0F172A', textColor: '#FFFFFF',
+        align: 'left', iconName: 'ShieldCheck', iconPos: 'left',
+        iconSize: 'lg', logoDisplay: 'none', animation: 'none',
+        iconColorMode: 'text'
+      }
+    },
+    { 
+      id: 'advertise-home', 
+      target: 'store_ads_module',
+      config: {
+        title: 'Anuncie Sua Marca Aqui',
+        subtitle: 'Apareça para milhares de clientes em Jacarepaguá.',
+        titleFont: 'font-moderna', titleSize: 'lg',
+        subtitleFont: 'font-neutra', subtitleSize: 'sm',
+        bgColor: '#FFFFFF', textColor: '#1E5BFF',
+        align: 'center', iconName: 'Megaphone', iconPos: 'top',
+        iconSize: 'lg', logoDisplay: 'none', animation: 'none',
+        iconColorMode: 'text'
       }
     }
   ], []);
@@ -305,11 +252,9 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void; onStoreClick?: (
     const fetchHomeBanner = async () => {
         if (!supabase) return;
         try {
-            // FIX: Ensure to select 'profiles' to get store_name and logo_url
-            // Supabase returns related objects as arrays, so we expect data.profiles to be Array<{...}>
             const { data, error } = await supabase
                 .from('published_banners')
-                .select('id, config, merchant_id, profiles(store_name, logo_url)') 
+                .select('id, config, merchant_id, profiles(store_name, logo_url)')
                 .eq('target', 'home')
                 .eq('is_active', true)
                 .order('created_at', { ascending: false })
@@ -322,16 +267,10 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void; onStoreClick?: (
             }
 
             if (data) {
-                // Extract the first profile object if available, otherwise null
-                const profileData = data.profiles && Array.isArray(data.profiles) && data.profiles.length > 0
-                    ? data.profiles[0] as { store_name: string; logo_url: string; }
-                    : null;
-
                 setUserBanner({
                     id: `user-banner-${data.id}`,
                     isUserBanner: true,
-                    config: data.config as BannerDesign,
-                    profiles: profileData, // Assign the extracted single object or null
+                    config: { ...(data.config as object), profiles: data.profiles },
                     target: data.merchant_id,
                 });
             } else {
@@ -383,10 +322,7 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void; onStoreClick?: (
   };
   
   const findStore = (slug?: string) => stores?.find(s => s.id === slug);
-  // FIX: Prioritize current.profiles for store_name and logo_url
-  const storeForBanner = current.storeSlug ? findStore(current.storeSlug) : undefined;
-  const storeNameForViewer = current.profiles?.store_name || storeForBanner?.name || 'Localizei JPA'; 
-  const storeLogoForViewer = current.profiles?.logo_url || storeForBanner?.logoUrl || getStoreLogo(storeNameForViewer.length); 
+  const storeForBanner = findStore(current.storeSlug);
 
   return (
     <div className="px-4 py-2">
@@ -396,8 +332,8 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void; onStoreClick?: (
       >
         <BannerViewer 
             config={current.isUserBanner ? mapToViewerConfig(current.config) : current.config}
-            storeName={storeNameForViewer}
-            storeLogo={storeLogoForViewer}
+            storeName={current.isUserBanner ? (current.config.profiles?.store_name || 'Loja Parceira') : (storeForBanner?.name || 'Localizei JPA')}
+            storeLogo={current.isUserBanner ? (current.config.profiles?.logo_url) : (storeForBanner?.logoUrl)}
         />
         
         <div className="absolute bottom-0 left-0 right-0 h-1/4 bg-gradient-to-t from-black/40 to-transparent pointer-events-none"></div>
@@ -416,85 +352,47 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void; onStoreClick?: (
     </div>
   );
 };
+
 const WeeklyDiscountBlock: React.FC<{ onClick: () => void }> = ({ onClick }) => {
-    // FIX: Declare isSaving state
-    const [isSaving, setIsSaving] = useState(false);
+    const consecutiveDays = parseInt(localStorage.getItem('consecutive_days_count') || '1');
+    const [animatedDays, setAnimatedDays] = useState(0);
+    const [isCelebrated, setIsCelebrated] = useState(false);
+    const [showShine, setShowShine] = useState(true);
+    const days = [1, 2, 3, 4, 5];
 
-    // Lógica de sequência diária
-    const [consecutiveDays, setConsecutiveDays] = useState(
-      parseInt(localStorage.getItem('consecutive_days_count') || '0')
-    );
-    const dailyClaimedFlag = `daily_claimed_${new Date().toISOString().split('T')[0]}`;
-    const [hasClaimedToday, setHasClaimedToday] = useState(
-      localStorage.getItem(dailyClaimedFlag) === 'true'
-    );
-
-    // Ajuste inicial: se o dia mudou, resetar a reivindicação de hoje
     useEffect(() => {
-      const storedDate = localStorage.getItem(dailyClaimedFlag);
-      if (!storedDate || new Date(storedDate).toDateString() !== new Date().toDateString()) { // Se não tem flag ou é um novo dia
-          setHasClaimedToday(false);
-          // Reiniciar a sequência se o dia de "last_claim_date" não for o dia anterior
-          const lastClaimDate = localStorage.getItem('last_claim_date');
-          if (lastClaimDate) {
-            const yesterday = new Date();
-            yesterday.setDate(yesterday.getDate() - 1);
-            if (new Date(lastClaimDate).toDateString() !== yesterday.toDateString()) {
-              setConsecutiveDays(0); // Reinicia a contagem se a sequência foi quebrada
-              localStorage.setItem('consecutive_days_count', '0');
-            }
-          }
-      }
-    }, [dailyClaimedFlag]);
+        // Animação coreografada do Dia 0 -> Dia Atual ao carregar
+        const timer = setTimeout(() => {
+            let current = 0;
+            const interval = setInterval(() => {
+                if (current < consecutiveDays) {
+                    current++;
+                    setAnimatedDays(current);
+                } else {
+                    clearInterval(interval);
+                }
+            }, 120);
+        }, 600);
+        
+        // Remove o shine do botão após 4 segundos (2 ciclos)
+        const shineTimer = setTimeout(() => setShowShine(false), 4000);
+        
+        return () => {
+          clearTimeout(timer);
+          clearTimeout(shineTimer);
+        };
+    }, [consecutiveDays]);
 
     const handleActionClick = () => {
-      let newConsecutiveDays = consecutiveDays;
-      const today = new Date().toISOString().split('T')[0];
-      const lastClaimDate = localStorage.getItem('last_claim_date');
-      
-      // Se não reivindicou hoje e é um novo dia ou primeira vez
-      if (!hasClaimedToday) {
-        if (!lastClaimDate || new Date(lastClaimDate).toDateString() !== new Date().toDateString()) {
-          // É um novo dia (ou o primeiro)
-          const yesterday = new Date();
-          yesterday.setDate(yesterday.getDate() - 1);
-          if (lastClaimDate && new Date(lastClaimDate).toDateString() === yesterday.toDateString()) {
-            // Continuação da sequência
-            newConsecutiveDays = Math.min(5, consecutiveDays + 1);
-          } else {
-            // Nova sequência ou quebra de sequência
-            newConsecutiveDays = 1;
-          }
-          setConsecutiveDays(newConsecutiveDays);
-          localStorage.setItem('consecutive_days_count', newConsecutiveDays.toString());
-          localStorage.setItem('last_claim_date', today); // Atualiza a última data de reivindicação
-          localStorage.setItem(dailyClaimedFlag, 'true'); // Marca o dia como reivindicado
-          setHasClaimedToday(true); // Atualiza o estado para refletir a reivindicação
+        if (consecutiveDays === 1 && !isCelebrated) {
+          setIsCelebrated(true);
+          // Pequeno delay para a celebração visual antes de mudar de página
+          setTimeout(onClick, 850);
+        } else {
+          onClick();
         }
-      }
-      
-      // Navega para a nova tela de recompensa
-      onClick();
     };
     
-    // Determine o texto do subheader com base no estado
-    const subheaderText = hasClaimedToday 
-      ? `Dia ${consecutiveDays} liberado! Volte amanhã.` 
-      : (consecutiveDays >= 5 ? `Semana concluída! Volte amanhã para um novo ciclo.` : `Continue acessando e seu cupom será liberado no Dia ${consecutiveDays + 1 || 1}.`);
-    
-    // Determine o texto do botão
-    const buttonText = hasClaimedToday
-      ? 'Ver Recompensa do Dia'
-      : (consecutiveDays >= 5 ? 'Iniciar Nova Semana' : `Liberar Dia ${consecutiveDays + 1 || 1}`);
-
-    // FIX: Declare the 'days' array
-    const days = [1, 2, 3, 4, 5];
-    const currentDayToDisplay = Math.min(5, consecutiveDays);
-    const nextDayToClaim = consecutiveDays >= 5 ? 1 : consecutiveDays + 1;
-    // FIX: Define isButtonDisabled here
-    const isButtonDisabled = isSaving || hasClaimedToday;
-
-
     return (
         <div className="px-5 w-full">
             <style>{`
@@ -517,75 +415,58 @@ const WeeklyDiscountBlock: React.FC<{ onClick: () => void }> = ({ onClick }) => 
                 background: linear-gradient(to right, transparent, rgba(255,255,255,0.4), transparent);
                 animation: shine-slide 2.5s infinite;
               }
-              @keyframes float-subtle {
-                0%, 100% { transform: translateY(0px) rotate(0deg); }
-                50% { transform: translateY(-3px) rotate(1deg); }
-              }
             `}</style>
 
             <div className="bg-white dark:bg-gray-800 rounded-[2rem] p-5 shadow-sm border border-gray-100 dark:border-gray-700 animate-in fade-in zoom-in-95 duration-500 fill-mode-backwards" style={{ animationDelay: '100ms' }}>
                 <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2">
-                        {/* Headline: Ícone de Presente com Animação */}
-                        <div className="p-1.5 bg-blue-50 dark:bg-blue-900/30 rounded-lg animate-[float-subtle_2s_ease-in-out_infinite]">
-                            <Gift className="w-3.5 h-3.5 text-blue-600" />
+                        <div className="p-1.5 bg-blue-50 dark:bg-blue-900/30 rounded-lg">
+                            <Tag className="w-3.5 h-3.5 text-blue-600" />
                         </div>
-                        <h2 className="text-sm font-bold text-gray-900 dark:text-white">🎁 Recompensa da Semana</h2>
+                        <h2 className="text-sm font-bold text-gray-900 dark:text-white">Cupom da Semana</h2>
                     </div>
                     {/* Indicador de Progresso Minimalista com Animação Staggered */}
-                    <div className="flex gap-1.5" id="weekly-promo-progress-indicators">
+                    <div className="flex gap-1.5">
                         {days.map(d => (
                             <div 
                               key={d} 
-                              className={`w-5 h-5 rounded-full transition-all duration-500 relative flex items-center justify-center ${
-                                d <= currentDayToDisplay 
-                                  ? 'bg-emerald-500 scale-110 shadow-[0_0_8px_rgba(16,185,129,0.5)]' 
-                                  : 'bg-gray-100 dark:bg-gray-700'
-                              }`} 
-                              // Adiciona delay para animação staggered ao completar
-                              style={{ animationDelay: `${d * 50 + 100}ms` }}
+                              className={`w-2.5 h-2.5 rounded-full transition-all duration-500 relative flex items-center justify-center ${
+                                d <= animatedDays ? 'bg-emerald-500 scale-110' : 'bg-gray-100 dark:bg-gray-700'
+                              } ${d === 1 && animatedDays >= 1 ? 'shadow-[0_0_8px_rgba(16,185,129,0.5)]' : ''}`} 
                             >
-                                {d <= currentDayToDisplay ? (
+                                {d <= animatedDays && (
                                     <div className="animate-in zoom-in duration-300">
-                                        <CheckCircle2 size={12} className="text-white" strokeWidth={3} />
+                                        <CheckCircle2 size={7} className="text-white" strokeWidth={4} />
                                     </div>
-                                ) : (
-                                    <Lock size={10} className="text-gray-400 opacity-40" />
                                 )}
                             </div>
                         ))}
                     </div>
                 </div>
                 
-                {/* Subheadline Motivacional */}
-                <p className="text-[10px] text-gray-500 dark:text-gray-400 mb-2 leading-tight font-medium" id="weekly-promo-subheader">
-                  {subheaderText}
-                </p>
-                {/* Microcopy de Escassez */}
-                <p className="text-[9px] text-gray-400 opacity-70 mb-4 font-medium" id="weekly-promo-scarcity-text">
-                    Exclusivo para quem acompanha o bairro.
+                <p className="text-[10px] text-gray-500 dark:text-gray-400 mb-4 leading-tight font-medium">
+                  {isCelebrated 
+                    ? "Dia 1 liberado! Volte amanhã para o Dia 2." 
+                    : "Acesse o app por 5 dias seguidos e garanta o uso do seu cupom nesta semana."}
                 </p>
                 
-                {/* Botão Principal com Animação Condicional */}
                 <button 
                     onClick={handleActionClick} 
                     className={`w-full font-black py-3.5 rounded-xl active:scale-[0.96] transition-all text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 ${
-                        hasClaimedToday 
+                        isCelebrated 
                           ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20' 
                           : 'bg-[#1E5BFF] text-white shadow-md shadow-blue-500/10'
-                    }`}
-                    id="weekly-promo-main-button"
-                    disabled={isButtonDisabled}
+                    } ${showShine && !isCelebrated ? 'btn-shine-effect' : ''}`}
                 >
-                    {hasClaimedToday ? (
+                    {isCelebrated ? (
                       <span className="flex items-center gap-2 animate-in zoom-in duration-300">
                          <CheckCircle size={14} strokeWidth={3} />
-                         {buttonText}
+                         Resgatado!
                       </span>
                     ) : (
                       <>
-                        {buttonText}
-                        <ArrowRight className="w-5 h-5" strokeWidth={3} />
+                        {consecutiveDays > 1 ? 'Acompanhar Recompensa' : 'Resgatar Dia 1'}
+                        <ArrowRight size={12} strokeWidth={3} />
                       </>
                     )}
                 </button>
@@ -593,20 +474,7 @@ const WeeklyDiscountBlock: React.FC<{ onClick: () => void }> = ({ onClick }) => 
         </div>
     );
 };
-const SectionHeader: React.FC<{ icon: React.ElementType; title: string; subtitle: string; onSeeMore?: () => void }> = ({ icon: Icon, title, subtitle, onSeeMore }) => (
-  <div className="flex items-center justify-between mb-3 px-1">
-    <div className="flex items-center gap-3">
-      <div className="w-9 h-9 rounded-xl bg-gray-50 dark:bg-gray-800 flex items-center justify-center text-gray-900 dark:text-white shadow-sm">
-        <Icon size={18} strokeWidth={2.5} />
-      </div>
-      <div>
-        <h2 className="text-[11px] font-black text-gray-900 dark:text-white uppercase tracking-[0.15em] leading-none mb-1">{title}</h2>
-        <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest leading-none">{subtitle}</p>
-      </div>
-    </div>
-    <button onClick={onSeeMore} className="text-[10px] font-black text-[#1E5BFF] uppercase tracking-widest hover:underline active:opacity-60">Ver mais</button>
-  </div>
-);
+
 
 interface HomeFeedProps {
   onNavigate: (view: string) => void;
@@ -627,7 +495,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
 }) => {
   const [listFilter, setListFilter] = useState<'all' | 'top_rated' | 'open_now'>('all');
   const categoriesRef = useRef<HTMLDivElement>(null);
-  const homeStructure = useMemo(() => ['categories', 'home_carousel', 'weekly_promo', 'bairro_posts', 'list'], []);
+  const homeStructure = useMemo(() => ['categories', 'home_carousel', 'weekly_promo', 'list'], []);
 
   const renderSection = (key: string) => {
     switch (key) {
@@ -659,12 +527,6 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
             <div key="weekly_promo_container" className="py-2">
                 <WeeklyDiscountBlock onClick={() => onNavigate('weekly_promo')} />
             </div>
-        );
-      case 'bairro_posts': // NOVO BLOCO
-        return (
-          <div key="bairro_posts_container" className="py-4">
-              <BairroPostsBlock posts={MOCK_BAIRRO_POSTS} onNavigate={onNavigate} onStoreClick={onStoreClick} stores={stores} />
-          </div>
         );
       case 'list':
         return (
@@ -712,3 +574,17 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
     </div>
   );
 };
+const SectionHeader: React.FC<{ icon: React.ElementType; title: string; subtitle: string; onSeeMore?: () => void }> = ({ icon: Icon, title, subtitle, onSeeMore }) => (
+  <div className="flex items-center justify-between mb-3">
+    <div className="flex items-center gap-3">
+      <div className="w-9 h-9 rounded-xl bg-gray-50 dark:bg-gray-800 flex items-center justify-center text-gray-900 dark:text-white shadow-sm">
+        <Icon size={18} strokeWidth={2.5} />
+      </div>
+      <div>
+        <h2 className="text-[11px] font-black text-gray-900 dark:text-white uppercase tracking-[0.15em] leading-none mb-1">{title}</h2>
+        <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest leading-none">{subtitle}</p>
+      </div>
+    </div>
+    <button onClick={onSeeMore} className="text-[10px] font-black text-[#1E5BFF] uppercase tracking-widest hover:underline active:opacity-60">Ver mais</button>
+  </div>
+);

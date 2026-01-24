@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { 
   Utensils, ShoppingCart, Scissors, Heart, PawPrint, Home, Wrench, 
@@ -12,70 +11,27 @@ import {
   Baby, GraduationCap, Microscope, Brain, Sparkles, Smile, Beer, 
   Activity, Eye, FileText, Globe, Calendar, Music, PartyPopper, Globe2, Edit3, User, Bell, Search,
   Camera, Vote, Handshake, Flame, Milestone, History, Home as HomeIcon,
-  MessageCircle, HelpCircle, UserCheck, Recycle,
-  Navigation,
-  Newspaper // Adicionado para Posts do Bairro
+  MessageCircle, HelpCircle, UserCheck, Recycle
 } from 'lucide-react';
-import { AdType, Category, Store, Story, EditorialCollection, Job, CommunityPost, NeighborhoodCommunity, BairroPost } from './types';
-import { getStoreLogo } from '@/utils/mockLogos'; // Importe getStoreLogo aqui
-
-// NOVO: Mock de Posts do Bairro
-export const MOCK_BAIRRO_POSTS: BairroPost[] = [
-  {
-    id: 'bp1',
-    storeId: 'f-1',
-    storeName: 'Bibi Lanches',
-    storeLogoUrl: 'https://images.unsplash.com/photo-1561758033-d89a9ad46330?q=80&w=100&auto=format&fit=crop',
-    imageUrl: 'https://images.unsplash.com/photo-1626202456388-7578b9b8b21c?q=80&w=600&auto=format&fit=crop',
-    content: 'Obrigado por nos visitar! Em breve teremos novos sabores de suco natural fresquinho. Fiquem ligados!',
-    createdAt: new Date(Date.now() - 1000 * 60 * 30).toISOString(), // 30 mins ago
-  },
-  {
-    id: 'bp2',
-    storeId: 'f-3',
-    storeName: 'Pet Shop Alegria',
-    storeLogoUrl: 'https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?q=80&w=100&auto=format&fit=crop',
-    imageUrl: 'https://images.unsplash.com/photo-1544973347-19815049389c?q=80&w=600&auto=format&fit=crop',
-    content: 'Chegaram novas coleiras personalizadas e brinquedos ecológicos para seu pet! Venha conferir as novidades.',
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(), // 2 hours ago
-  },
-  {
-    id: 'bp3',
-    storeId: 'f-2',
-    storeName: 'Studio Hair Vip',
-    storeLogoUrl: 'https://images.unsplash.com/photo-1562322140-8baeececf3df?q=80&w=100&auto=format&fit=crop',
-    imageUrl: 'https://images.unsplash.com/photo-1596465492061-f3b3d4f8f4a0?q=80&w=600&auto=format&fit=crop',
-    content: 'Hoje é dia de cuidar dos cabelos! Nossa equipe está pronta para um novo visual. Agende seu horário e arrase!',
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 5).toISOString(), // 5 hours ago
-  },
-  {
-    id: 'bp4',
-    storeId: 'f-5',
-    storeName: 'Pizzaria do Zé',
-    storeLogoUrl: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?q=80&w=100&auto=format&fit=crop',
-    imageUrl: 'https://images.unsplash.com/photo-1593560704563-f1a66f2fa402?q=80&w=600&auto=format&fit=crop',
-    content: 'Nosso forno a lenha está a todo vapor! Qual o seu sabor preferido para hoje? Peça agora e receba quentinho.',
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(), // 1 day ago
-  },
-];
+import { AdType, Category, Store, Story, EditorialCollection, Job, CommunityPost, NeighborhoodCommunity } from './types';
 
 export const CATEGORIES: Category[] = [
   { id: 'cat-comida', name: 'Comida', slug: 'comida', icon: <Utensils />, color: 'bg-brand-blue' },
   { id: 'cat-pets', name: 'Pets', slug: 'pets', icon: <PawPrint />, color: 'bg-brand-blue' },
   { id: 'cat-pro', name: 'Pro', slug: 'pro', icon: <Briefcase />, color: 'bg-brand-blue' },
-  { id: 'cat-saude', slug: 'saude', name: 'Saúde', icon: <Heart />, color: 'bg-brand-blue' },
-  { id: 'cat-services', slug: 'servicos', name: 'Serviços', icon: <Wrench />, color: 'bg-brand-blue' },
-  { id: 'cat-beauty', slug: 'beleza', name: 'Beleza', icon: <Scissors />, color: 'bg-brand-blue' },
-  { id: 'cat-autos', slug: 'autos', name: 'Autos', icon: <CarFront />, color: 'bg-brand-blue' },
-  { id: 'cat-mercado', slug: 'mercado', name: 'Mercado', icon: <ShoppingCart />, color: 'bg-brand-blue' },
-  { id: 'cat-casa', slug: 'casa', name: 'Casa', icon: <HomeIcon />, color: 'bg-brand-blue' },
-  { id: 'cat-sports', slug: 'esportes', name: 'Esportes', icon: <Dumbbell />, color: 'bg-brand-blue' },
-  { id: 'cat-leisure', slug: 'lazer', name: 'Lazer', icon: <Ticket />, color: 'bg-brand-blue' },
-  { id: 'cat-edu', slug: 'educacao', name: 'Educação', icon: <BookOpen />, color: 'bg-brand-blue' },
-  { id: 'cat-pharmacy', slug: 'farmacia', name: 'Farmácia', icon: <Pill />, color: 'bg-brand-blue' },
-  { id: 'cat-fashion', slug: 'moda', name: 'Moda', icon: <Shirt />, color: 'bg-brand-blue' },
-  { id: 'cat-eventos', slug: 'eventos', name: 'Eventos', icon: <PartyPopper />, color: 'bg-brand-blue' },
-  { id: 'cat-condominio', slug: 'condominio', name: 'Condomínio', icon: <Building2 />, color: 'bg-brand-blue' },
+  { id: 'cat-saude', name: 'Saúde', slug: 'saude', icon: <Heart />, color: 'bg-brand-blue' },
+  { id: 'cat-services', name: 'Serviços', slug: 'servicos', icon: <Wrench />, color: 'bg-brand-blue' },
+  { id: 'cat-beauty', name: 'Beleza', slug: 'beleza', icon: <Scissors />, color: 'bg-brand-blue' },
+  { id: 'cat-autos', name: 'Autos', slug: 'autos', icon: <CarFront />, color: 'bg-brand-blue' },
+  { id: 'cat-mercado', name: 'Mercado', slug: 'mercado', icon: <ShoppingCart />, color: 'bg-brand-blue' },
+  { id: 'cat-casa', name: 'Casa', slug: 'casa', icon: <HomeIcon />, color: 'bg-brand-blue' },
+  { id: 'cat-sports', name: 'Esportes', slug: 'esportes', icon: <Dumbbell />, color: 'bg-brand-blue' },
+  { id: 'cat-leisure', name: 'Lazer', slug: 'lazer', icon: <Ticket />, color: 'bg-brand-blue' },
+  { id: 'cat-edu', name: 'Educação', slug: 'educacao', icon: <BookOpen />, color: 'bg-brand-blue' },
+  { id: 'cat-pharmacy', name: 'Farmácia', slug: 'farmacia', icon: <Pill />, color: 'bg-brand-blue' },
+  { id: 'cat-fashion', name: 'Moda', slug: 'moda', icon: <Shirt />, color: 'bg-brand-blue' },
+  { id: 'cat-eventos', name: 'Eventos', slug: 'eventos', icon: <PartyPopper />, color: 'bg-brand-blue' },
+  { id: 'cat-condominio', name: 'Condomínio', slug: 'condominio', icon: <Building2 />, color: 'bg-brand-blue' },
 ];
 
 export const SUBCATEGORIES: Record<string, { name: string; icon: React.ReactNode }[]> = {
@@ -427,7 +383,7 @@ export const MOCK_COMMUNITY_POSTS: CommunityPost[] = [
     timestamp: '8h',
     likes: 24,
     comments: 31,
-    imageUrl: 'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?q=80&w=600&auto=format&fit=crop'
+    imageUrl: 'https://images.unsplash.com/photo-1585659722982-789600c7690a?q=80&w=600&auto=format&fit=crop'
   },
   {
     id: 'post-7',
@@ -503,38 +459,7 @@ export const STORES: Store[] = [
   { id: 'f-7', name: 'Drogaria JPA', category: 'Farmácia', subcategory: 'Medicamentos', rating: 4.4, distance: 'Freguesia', adType: AdType.PREMIUM, description: 'Medicamentos e perfumaria.', isSponsored: true, image: 'https://images.unsplash.com/photo-1587854692152-cbe660dbbb88?q=80&w=400&auto=format&fit=crop' },
   { id: 'f-8', name: 'Academia FitBairro', category: 'Esportes', subcategory: 'Academias', rating: 4.7, distance: 'Taquara', adType: AdType.PREMIUM, description: 'Treine perto de casa.', isSponsored: true, image: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=400&auto=format&fit=crop' },
   { id: 'f-9', name: 'Consultório Dra. Ana', category: 'Saúde', subcategory: 'Dentistas', rating: 5.0, distance: 'Freguesia', adType: AdType.PREMIUM, description: 'Cuidado completo com seu sorriso.', isSponsored: true, image: 'https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?q=80&w=400&auto=format&fit=crop' },
-  { id: 'f-10', name: 'Boutique Chic', category: 'Moda', subcategory: 'Moda Feminina', rating: 4.3, distance: 'Anil', adType: AdType.PREMIUM, description: 'Roupas e acessórios para mulheres que não abrem mão da elegância e do estilo. Peças selecionadas que acompanham as tendências da moda nacional e internacional.', isSponsored: true, image: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=400&auto=format&fit=crop' },
-  // NOVOS MOCK STORES PARA BANNERS
-  {
-    id: 'restaurante-sabor-bairro',
-    name: 'Restaurante Sabor do Bairro',
-    category: 'Comida',
-    subcategory: 'Restaurantes',
-    logoUrl: getStoreLogo(100), // Unique index for logo
-    image: 'https://images.unsplash.com/photo-1517248135467-4c7edab74dad?q=80&w=800&auto=format&fit=crop',
-    rating: 4.9, distance: 'Freguesia', adType: AdType.ORGANIC, description: 'Pratos caseiros feitos na hora.',
-    verified: true, isOpenNow: true, isSponsored: false
-  },
-  {
-    id: 'loja-estilo-urbano',
-    name: 'Loja Estilo Urbano',
-    category: 'Moda',
-    subcategory: 'Moda Feminina',
-    logoUrl: getStoreLogo(101),
-    image: 'https://images.unsplash.com/photo-1596753040212-0761e3894458?q=80&w=800&auto=format&fit=crop',
-    rating: 4.7, distance: 'Taquara', adType: AdType.ORGANIC, description: 'Peças exclusivas no bairro.',
-    verified: true, isOpenNow: true, isSponsored: false
-  },
-  {
-    id: 'oficina-auto-jpa',
-    name: 'Oficina Auto JPA',
-    category: 'Autos',
-    subcategory: 'Oficinas Mecânicas',
-    logoUrl: getStoreLogo(102),
-    image: 'https://images.unsplash.com/photo-1582236371300-84a1e9c5f87b?q=80&w=800&auto=format&fit=crop',
-    rating: 4.8, distance: 'Pechincha', adType: AdType.ORGANIC, description: 'Revisão e manutenção.',
-    verified: true, isOpenNow: true, isSponsored: false
-  }
+  { id: 'f-10', name: 'Boutique Chic', category: 'Moda', subcategory: 'Moda Feminina', rating: 4.3, distance: 'Anil', adType: AdType.PREMIUM, description: 'Tendências e elegância.', isSponsored: true, image: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=400&auto=format&fit=crop' },
 ];
 
 export const EDITORIAL_SERVICES: EditorialCollection[] = [
@@ -594,7 +519,7 @@ export const MOCK_JOBS: Job[] = [
     salary: 'Comissão + Ajuda de Custo',
     description: 'Vendas de planos de internet e TV a cabo.',
     requirements: ['Carro próprio', 'Experiência com vendas'],
-    schedule: 'Seg-Mex',
+    schedule: 'Seg-Sex',
     contactWhatsapp: '5521988888888',
     postedAt: 'Há 1 dia',
     isUrgent: true
@@ -604,6 +529,7 @@ export const MOCK_JOBS: Job[] = [
 // Added to fix import error in StoreProfileEdit.tsx
 export type TaxonomyType = 'category' | 'subcategory' | 'specialty';
 
+// Added to fix import error in StoreProfileEdit.tsx
 export const SPECIALTIES: Record<string, string[]> = {
   'Chaveiro 24h': ['Abertura de portas', 'Troca de fechadura', 'Chave codificada', 'Abertura de cofre', 'Cópia de chaves', 'Instalação de tetra chave'],
   'Desentupidora': ['Pia de cozinha', 'Vaso sanitário', 'Caixa de gordura', 'Ralo de banheiro', 'Rede de esgoto externa', 'Limpeza de fossa'],
@@ -621,8 +547,3 @@ export const SPECIALTIES: Record<string, string[]> = {
   'Informática': ['Formatação', 'Remoção de vírus', 'Upgrade de memória/SSD', 'Limpeza interna', 'Configuração de rede'],
   'default': ['Consultoria', 'Orçamento geral', 'Manutenção preventiva', 'Reparo específico', 'Instalação']
 };
-
-// NOVO: Palavras proibidas para posts do bairro
-export const FORBIDDEN_POST_WORDS = [
-  'promoção', 'oferta', 'desconto', 'cupom', 'r$', '% off', 'grátis', 'barato', 'imperdível', 'liquidação', 'black friday'
-];
