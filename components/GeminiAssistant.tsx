@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { GoogleGenAI } from "@google/genai";
 import { MessageCircle, X, Send, Sparkles, Loader2 } from 'lucide-react';
@@ -32,7 +33,7 @@ export const GeminiAssistant: React.FC = () => {
     try {
       const systemInstruction = `Você é o assistente útil e amigável do app "Localizei JPA". 
 O app atende a região de Jacarepaguá, no Rio de Janeiro.
-Lojistas: Planos de R$ 1,90/dia (Local) e R$ 3,90/dia (Premium). Podem comprar leads de serviços por R$ 3,90.
+Lojistas podem anunciar seus negócios por planos competitivos para ganhar destaque.
 Sempre seja curto, use emojis e convide o usuário a explorar as seções do app.`;
 
       const promptContext = `
@@ -40,7 +41,6 @@ Sempre seja curto, use emojis e convide o usuário a explorar as seções do app
         ${STORES.slice(0, 5).map(s => `- ${s.name} (${s.category}): ${s.description}.`).join('\n')}
       `;
 
-      // Fix: Correctly structured the generateContent call.
       const response = await ai.models.generateContent({
         model: 'gemini-3-flash-preview',
         contents: `${promptContext}\n\nPergunta do usuário: ${userMsg}`,
@@ -50,7 +50,6 @@ Sempre seja curto, use emojis e convide o usuário a explorar as seções do app
         },
       });
 
-      // FIX: Access the text property directly instead of calling a method.
       const text = response.text || "Desculpe, tive um problema para processar sua mensagem.";
       setMessages(prev => [...prev, { role: 'model', text }]);
 

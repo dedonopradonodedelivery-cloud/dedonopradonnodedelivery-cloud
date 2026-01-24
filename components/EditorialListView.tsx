@@ -1,3 +1,4 @@
+
 import React, { useMemo } from 'react';
 import { ChevronLeft, Star, MapPin, BadgeCheck } from 'lucide-react';
 import { Store, AdType, EditorialCollection } from '../types';
@@ -87,12 +88,6 @@ export const EditorialListView: React.FC<EditorialListViewProps> = ({
               >
                 <div className="w-24 h-24 rounded-xl overflow-hidden flex-shrink-0 bg-gray-50 dark:bg-gray-700 relative border border-gray-100 dark:border-gray-600">
                   <img src={store.logoUrl || "/assets/default-logo.png"} alt={store.name} className="w-full h-full object-contain" />
-                  {/* FIX: Changed 'cashback' to 'cashback_percent' to match Store interface */}
-                  {store.cashback_percent && (
-                     <div className="absolute bottom-0 left-0 right-0 bg-green-600/90 text-white text-[9px] font-bold text-center py-0.5 backdrop-blur-sm">
-                        {store.cashback_percent}% VOLTA
-                     </div>
-                  )}
                 </div>
 
                 <div className="flex-1 flex flex-col justify-center min-w-0">

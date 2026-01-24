@@ -8,7 +8,6 @@ import {
   Users, 
   Repeat, 
   TrendingUp, 
-  Wallet, 
   Megaphone, 
   ChevronRight,
   Settings,
@@ -17,7 +16,6 @@ import {
   LayoutDashboard,
   Calendar,
   Bell,
-  QrCode,
   Moon,
   Sun,
   Crown,
@@ -27,7 +25,6 @@ import {
   BarChart3,
   LogOut,
   User,
-  /* Add missing icon imports */
   MessageSquare,
   FileText,
   Heart,
@@ -138,7 +135,6 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
   return (
     <div className="min-h-screen bg-[#F8F9FB] dark:bg-gray-950 font-sans animate-in fade-in duration-500 pb-32">
       
-      {/* 1. TOPO / PERFIL - CABEÇALHO PADRÃO DO LOJISTA */}
       <div className="bg-white dark:bg-gray-900 px-6 pt-12 pb-8 border-b border-gray-100 dark:border-gray-800 shadow-sm mb-8">
         <div className="flex items-center gap-4">
           <div className="w-20 h-20 rounded-[2rem] border-4 border-white dark:border-gray-800 shadow-xl overflow-hidden shrink-0">
@@ -163,7 +159,6 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
 
       <div className="px-6 space-y-10">
         
-        {/* BLOCO DE DESEMPENHO NO TOPO */}
         <section>
           <MarketingActionCard 
             icon={BarChart3} 
@@ -175,7 +170,6 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
           />
         </section>
 
-        {/* 2. SEÇÃO: AÇÕES (Marketing e Visibilidade) */}
         <section>
           <SectionHeader title="Ações" icon={Sparkles} />
           <div className="bg-white dark:bg-gray-800 rounded-[2.5rem] border border-gray-100 dark:border-gray-700 overflow-hidden shadow-sm">
@@ -209,7 +203,6 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
           </div>
         </section>
 
-        {/* 3. SEÇÃO: SERVIÇOS (Operacional e Financeiro) */}
         <section>
           <SectionHeader title="Serviços" />
           <div className="bg-white dark:bg-gray-800 rounded-[2.5rem] border border-gray-100 dark:border-gray-700 overflow-hidden shadow-sm">
@@ -234,7 +227,6 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
           </div>
         </section>
 
-        {/* 4. SEÇÃO: CONFIGURAÇÕES */}
         <section>
           <SectionHeader title="Preferências" />
           <div className="bg-white dark:bg-gray-800 rounded-[2.5rem] border border-gray-100 dark:border-gray-700 overflow-hidden shadow-sm">
@@ -252,10 +244,9 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
           </div>
         </section>
 
-        {/* 5. SEÇÃO: SUPORTE */}
         <section>
           <SectionHeader title="Suporte" />
-          <div className="bg-white dark:bg-gray-800 rounded-[2.5rem] border border-gray-100 border-gray-100 dark:border-gray-700 overflow-hidden shadow-sm">
+          <div className="bg-white dark:bg-gray-800 rounded-[2.5rem] border border-gray-100 dark:border-gray-700 overflow-hidden shadow-sm">
             <ServiceBlock 
               icon={LifeBuoy} 
               label="Suporte" 
@@ -265,7 +256,6 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
           </div>
         </section>
 
-        {/* 6. SEÇÃO: GERAL */}
         <section>
           <SectionHeader title="Geral" />
           <div className="bg-white dark:bg-gray-800 rounded-[2.5rem] border border-gray-100 dark:border-gray-700 overflow-hidden shadow-sm">
@@ -290,7 +280,6 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
 
       </div>
 
-      {/* Footer / Info */}
       <div className="mt-12 text-center opacity-30 px-10">
         <p className="text-[9px] font-black text-gray-500 uppercase tracking-[0.3em]">
           Localizei JPA Parceiros <br/> v1.5.0

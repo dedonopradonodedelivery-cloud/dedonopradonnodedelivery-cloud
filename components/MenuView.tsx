@@ -16,8 +16,6 @@ import {
   Briefcase, 
   Store, 
   PlusCircle,
-  Coins,
-  Wallet,
   Tag
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
@@ -107,24 +105,6 @@ export const MenuView: React.FC<MenuViewProps> = ({
             <p className="text-xs text-[#1E5BFF] font-bold mt-0.5 flex items-center gap-1">Ver perfil <ChevronRight className="w-3 h-3" /></p>
           </div>
         </div>
-
-        <button 
-            onClick={() => onNavigate('wallet')}
-            className="w-full bg-gradient-to-r from-[#1E5BFF] to-[#4D7CFF] p-5 rounded-[2rem] shadow-xl shadow-blue-500/20 mb-6 flex items-center justify-between group active:scale-[0.98] transition-all"
-        >
-            <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-md">
-                    <Wallet className="w-6 h-6 text-white" />
-                </div>
-                <div className="text-left">
-                    <h4 className="text-white font-bold">Meus Créditos</h4>
-                    <p className="text-blue-100 text-[10px] font-medium uppercase tracking-wider">Saldos nas lojas do bairro</p>
-                </div>
-            </div>
-            <div className="bg-white/20 p-2 rounded-full backdrop-blur-md text-white">
-                <ChevronRight className="w-4 h-4" />
-            </div>
-        </button>
 
         <div className="space-y-4 mb-8">
             <h3 className="text-xs font-black text-gray-400 uppercase tracking-[0.2em] mb-2 ml-2">Geral</h3>

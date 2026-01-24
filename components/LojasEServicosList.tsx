@@ -9,7 +9,7 @@ import { STORES } from '../constants';
 interface LojasEServicosListProps {
   onStoreClick?: (store: Store) => void;
   onViewAll?: () => void;
-  activeFilter?: 'all' | 'cashback' | 'top_rated' | 'open_now';
+  activeFilter?: 'all' | 'top_rated' | 'open_now';
   user?: User | null;
   onNavigate?: (view: string) => void;
   premiumOnly?: boolean; 
@@ -35,10 +35,10 @@ export const LojasEServicosList: React.FC<LojasEServicosListProps> = ({ onStoreC
   
   const { toggleFavorite, isFavorite } = useFavorites(user);
 
-  // Identifica o Master Store para renderizar separado (conforme já estava)
+  // Identifica o Master Store para renderizar separado
   const masterStore = useMemo(() => STORES.find(s => s.id === MASTER_ID), []);
 
-  // Pool final de 50 lojas ordenadas conforme as regras
+  // Pool final de lojas ordenadas conforme as regras
   const filteredPool = useMemo(() => {
     let pool = STORES.filter(s => s.id !== MASTER_ID);
 
@@ -46,9 +46,7 @@ export const LojasEServicosList: React.FC<LojasEServicosListProps> = ({ onStoreC
     if (premiumOnly) {
       pool = pool.filter(s => s.adType === AdType.PREMIUM || s.isSponsored);
     }
-    if (activeFilter === 'cashback') {
-      pool = pool.filter(s => s.cashback_percent && s.cashback_percent > 0);
-    } else if (activeFilter === 'open_now') {
+    if (activeFilter === 'open_now') {
       pool = pool.filter(s => s.isOpenNow);
     } else if (activeFilter === 'top_rated') {
       pool = pool.filter(s => (s.rating || 0) >= 4.7);

@@ -29,6 +29,40 @@ export interface StoreReview {
   };
 }
 
+// Added StoreCredit to fix import error in UserWalletView.tsx
+export interface StoreCredit {
+  id: string;
+  user_id: string;
+  store_id: string;
+  store_name: string;
+  store_logo?: string;
+  balance_cents: number; 
+  expiring_soon_cents?: number; 
+  updated_at: string;
+}
+
+// Added CashbackTransaction to fix import error in MerchantCashbackRequests.tsx
+export interface CashbackTransaction {
+  id: string;
+  user_id: string;
+  user_name?: string;
+  store_id: string;
+  merchant_id: string;
+  amount_cents: number; 
+  purchase_total_cents?: number; 
+  type: 'earn' | 'use';
+  status: 'pending' | 'approved' | 'rejected' | 'expired';
+  created_at: string;
+  approved_at?: string;
+  customer_id?: string;
+  customer_name?: string;
+  total_amount_cents?: number;
+  cashback_used_cents?: number;
+  cashback_to_earn_cents?: number;
+  amount_to_pay_now_cents?: number;
+  rejected_at?: string;
+}
+
 export interface Store {
   id: string;
   name: string; // Nome fantasia / exibido
@@ -45,13 +79,6 @@ export interface Store {
   verified?: boolean;
   reviewsCount?: number;
   isOpenNow?: boolean;
-  cashback_percent?: number; 
-  cashback_active?: boolean;
-  cashback_validity_days?: number;
-  store_manual_code?: string;
-  secure_id?: string;
-  onboarding_cashback_completed?: boolean;
-  onboarding_cashback_completed_at?: string;
   neighborhood?: string;
   isSponsored?: boolean;
   recentComments?: string[];
@@ -132,50 +159,6 @@ export interface StoreClaimRequest {
   contact_phone?: string;
   justification?: string;
   attachments?: string[]; // URLs de comprovantes
-}
-
-export interface StoreCredit {
-  id: string;
-  user_id: string;
-  store_id: string;
-  store_name: string;
-  store_logo?: string;
-  balance_cents: number; 
-  expiring_soon_cents?: number; 
-  updated_at: string;
-}
-
-export interface CashbackLedgerEntry {
-  id: string;
-  user_id: string;
-  store_id: string;
-  transaction_id: string; 
-  amount_cents: number;
-  type: 'credit' | 'debit'; 
-  status: 'active' | 'used' | 'expired';
-  created_at: string;
-  expires_at?: string; 
-}
-
-export interface CashbackTransaction {
-  id: string;
-  user_id: string;
-  user_name?: string;
-  store_id: string;
-  merchant_id: string;
-  amount_cents: number; 
-  purchase_total_cents?: number; 
-  type: 'earn' | 'use';
-  status: 'pending' | 'approved' | 'rejected' | 'expired';
-  created_at: string;
-  approved_at?: string;
-  customer_id?: string;
-  customer_name?: string;
-  total_amount_cents?: number;
-  cashback_used_cents?: number;
-  cashback_to_earn_cents?: number;
-  amount_to_pay_now_cents?: number;
-  rejected_at?: string;
 }
 
 export interface Category {
@@ -334,30 +317,5 @@ export interface DbMerchantSession {
   created_at: string;
 }
 
-export interface DbCashbackTransaction {
-  id: string; // uuid
-  user_id: string;
-  merchant_id: string;
-  session_id?: string;
-  purchase_value: number;
-  amount_from_balance: number;
-  amount_to_pay: number;
-  cashback_value: number;
-  status: TransactionStatus;
-  created_at: string;
-  approved_at?: string;
-  rejected_at?: string;
-}
-
-export interface DbWalletMovement {
-  id: string; // uuid
-  user_id: string;
-  transaction_id?: string;
-  type: MovementType;
-  amount: number;
-  description: string;
-  created_at: string;
-}
-
 // Added to fix import error in StoreProfileEdit.tsx
-export type TaxonomyType = 'category' | 'subcategory';
+export type TaxonomyType = 'category' | 'subcategory' | 'specialty';

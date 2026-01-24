@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Home, Compass, Users, Wallet, User as UserIcon } from 'lucide-react';
+import { Home, Compass, Users, User as UserIcon } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
 interface BottomNavProps {
@@ -23,7 +23,6 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
     { id: 'home', icon: Home, label: 'Inicio' },
     { id: 'explore', icon: Compass, label: 'Explorar' },
     { id: 'community_feed', icon: Users, label: 'Comunidade', isCenter: true },
-    { id: 'wallet', icon: Wallet, label: 'Cashback' },
     { id: 'profile', icon: UserIcon, label: 'Menu' },
   ];
 
@@ -65,11 +64,10 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
 
   return (
     <div className="fixed bottom-0 left-0 right-0 mx-auto w-full max-w-md bg-white dark:bg-gray-900 z-[1000] h-[80px] rounded-t-[24px] shadow-[0_-5px_30px_rgba(0,0,0,0.1)] border-t border-gray-100 dark:border-gray-800">
-      <div className="grid grid-cols-5 items-center w-full h-full">
+      <div className="grid grid-cols-4 items-center w-full h-full">
         {navItems.map((item) => {
           const isActive = activeTab === item.id ||
-            (item.id === 'profile' && ['store_area', 'store_ads_module', 'weekly_promo', 'merchant_jobs', 'store_profile', 'store_support', 'about', 'support', 'favorites'].includes(activeTab)) ||
-            (item.id === 'wallet' && ['user_cashback_mock', 'cashback_landing', 'scan_cashback', 'pay_cashback', 'user_statement', 'wallet'].includes(activeTab));
+            (item.id === 'profile' && ['store_area', 'store_ads_module', 'weekly_promo', 'merchant_jobs', 'store_profile', 'store_support', 'about', 'support', 'favorites'].includes(activeTab));
           
           return (
             <div key={item.id} className="flex justify-center items-center h-full">

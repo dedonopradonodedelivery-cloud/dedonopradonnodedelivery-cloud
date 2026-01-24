@@ -256,7 +256,7 @@ export const ExploreView: React.FC<ExploreViewProps> = ({ stores, searchQuery, o
     <div className="min-h-screen bg-white dark:bg-gray-950 pb-24">
       <div className="px-4 py-4 flex gap-2 overflow-x-auto no-scrollbar items-center">
         <button onClick={onFilterClick} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-gray-200 dark:border-gray-700 text-xs font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all whitespace-nowrap flex-shrink-0 shadow-sm"><Filter className="w-3.5 h-3.5" />Filtros</button>
-        {quickFilters.filter(f => f.id !== 'cashback').map((f) => (
+        {quickFilters.map((f) => (
           <CategoryChip key={f.id} label={f.label} active={sortOption === f.id} onClick={() => { if (f.id === 'top_rated') setSortOption('topRated'); }} />
         ))}
       </div>

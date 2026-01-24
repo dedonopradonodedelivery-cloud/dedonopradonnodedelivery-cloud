@@ -9,7 +9,6 @@ import {
   Clock,
   Phone,
   MessageSquare,
-  Coins,
   ArrowRight,
   Instagram,
   ImageIcon,
@@ -38,7 +37,7 @@ const WEEK_DAYS_LABELS: Record<string, string> = {
   segunda: 'Segunda-feira',
   terca: 'Terça-feira',
   quarta: 'Quarta-feira',
-  quinta: 'Quinta-feira',
+  quinta: 'Quarta-feira',
   sexta: 'Sexta-feira',
   sabado: 'Sábado',
   domingo: 'Domingo',
@@ -73,12 +72,10 @@ export const StoreDetailView: React.FC<{
   onBack: () => void; 
   onPay?: () => void;
   onClaim?: () => void;
-  onViewCashback?: () => void;
-}> = ({ store, onBack, onPay, onClaim, onViewCashback }) => {
+}> = ({ store, onBack, onPay, onClaim }) => {
   const { user } = useAuth();
   const { currentNeighborhood } = useNeighborhood();
   const [isFavorite, setIsFavorite] = useState(false);
-  const [userCredit, setUserCredit] = useState<number | null>(null);
   const [activeTab, setActiveTab] = useState<'description' | 'reviews' | 'hours'>('description');
   const [isClosedReporting, setIsClosedReporting] = useState(false);
   const [closedReported, setClosedReported] = useState(false);
@@ -98,24 +95,6 @@ export const StoreDetailView: React.FC<{
   useEffect(() => {
     track('store_view');
   }, []);
-
-  useEffect(() => {
-    const fetchUserCredit = async () => {
-        if (!user || !store || !supabase) return;
-        try {
-            const { data } = await supabase
-                .from('store_credits')
-                .select('balance_cents')
-                .eq('user_id', user.id)
-                .eq('store_id', store.id)
-                .maybeSingle();
-            
-            if (data) setUserCredit(data.balance_cents / 100);
-            else setUserCredit(0);
-        } catch (e) { console.error(e); }
-    };
-    fetchUserCredit();
-  }, [user, store]);
 
   const handleReportClosed = () => {
     setIsClosedReporting(true);
@@ -165,7 +144,6 @@ export const StoreDetailView: React.FC<{
   const gmapsRouteUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodedAddress}`;
   const wazeRouteUrl = `https://waze.com/ul?q=${encodedAddress}&navigate=yes`;
 
-  // Mescla comentários antigos com mocks novos para visualização
   const reviewsToDisplay = useMemo(() => {
     return MOCK_REVIEWS;
   }, []);
@@ -224,25 +202,6 @@ export const StoreDetailView: React.FC<{
                 </div>
             </div>
           </div>
-
-          {/* --- CASHBACK SALDO --- */}
-          <button 
-              onClick={onViewCashback}
-              className="w-full bg-gray-50 dark:bg-gray-900 rounded-[24px] p-5 mb-8 flex items-center justify-between border border-gray-100 dark:border-gray-800 shadow-sm relative overflow-hidden group active:scale-[0.99] transition-all text-left"
-          >
-              <div className="flex items-center gap-3 relative z-10">
-                  <div className="w-10 h-10 rounded-2xl bg-[#1E5BFF] flex items-center justify-center text-white shadow-md shadow-blue-500/10 group-hover:scale-110 transition-transform">
-                      <Coins className="w-5 h-5" />
-                  </div>
-                  <div>
-                      <p className="text-[9px] font-bold uppercase tracking-[0.15em] text-gray-400">Seu cashback nesta loja</p>
-                      <h3 className="text-lg font-black text-gray-900 dark:text-white leading-none mt-0.5">R$ {(userCredit || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</h3>
-                  </div>
-              </div>
-              <div className="bg-white dark:bg-gray-800 p-1.5 rounded-full text-gray-300 shadow-inner group-hover:text-[#1E5BFF] transition-colors">
-                <ArrowRight className="w-3 h-3" />
-              </div>
-          </button>
 
           {/* --- WHATSAPP CTA --- */}
           <section className="mb-10">

@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { 
   Utensils, ShoppingCart, Scissors, Heart, PawPrint, Home, Wrench, 
@@ -482,8 +483,7 @@ export const EDITORIAL_SERVICES: EditorialCollection[] = [
 export const quickFilters = [
   { id: 'top_rated', label: 'Top Avaliados', icon: 'star' },
   { id: 'open_now', label: 'Aberto Agora', icon: 'clock' },
-  { id: 'nearby', label: 'Perto de Mim', icon: 'zap' },
-  { id: 'cashback', label: 'Com Cashback', icon: 'percent' }
+  { id: 'nearby', label: 'Perto de Mim', icon: 'zap' }
 ];
 
 export const STORIES: Story[] = [
