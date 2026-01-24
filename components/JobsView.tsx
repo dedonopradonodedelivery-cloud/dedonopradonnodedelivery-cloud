@@ -120,9 +120,9 @@ export const JobsView: React.FC<JobsViewProps> = ({ onBack }) => {
   }, [filterType, filterHood]);
 
   return (
-    <div className="min-h-screen bg-[#F8F9FC] dark:bg-gray-950 font-sans pb-32 animate-in fade-in duration-500">
+    <div className="flex flex-col bg-white dark:bg-gray-950 w-full max-w-md mx-auto min-h-screen font-sans pb-32 animate-in fade-in duration-500">
       {/* Header */}
-      <header className="sticky top-0 z-40 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md px-6 py-6 border-b border-gray-100 dark:border-gray-800">
+      <header className="sticky top-0 z-40 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md px-4 py-6 border-b border-gray-100 dark:border-gray-800">
         <div className="flex items-center gap-4 mb-6">
           <button onClick={onBack} className="p-2.5 bg-gray-100 dark:bg-gray-800 rounded-xl text-gray-500 transition-colors">
             <ChevronLeft size={20} />
@@ -172,7 +172,7 @@ export const JobsView: React.FC<JobsViewProps> = ({ onBack }) => {
         </div>
       </header>
 
-      <main className="p-6 space-y-4">
+      <main className="px-4 py-6 space-y-4">
         {filteredJobs.length > 0 ? filteredJobs.map((job) => (
           <div 
             key={job.id} 
