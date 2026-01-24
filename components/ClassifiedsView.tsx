@@ -35,13 +35,6 @@ const CATEGORIES_DATA: { id: ClassifiedCategory; label: string; icon: any; color
   { id: 'Avisos', label: 'Avisos', icon: Megaphone, color: 'bg-amber-600' },
 ];
 
-const SUBCATEGORIES_MAP: Record<ClassifiedCategory, string[]> = {
-  'Empregos': ['CLT', 'PJ', 'Freelancer'],
-  'Serviços': ['Reforma', 'Conserto', 'Aulas', 'Profissionais'],
-  'Compra & Venda': ['Vende-se', 'Compra-se', 'Usados'],
-  'Avisos': ['Utilidade pública', 'Comunidade', 'Informativos'],
-};
-
 const CLASSIFIEDS_BANNERS = [
   {
     id: 'b1',
@@ -91,7 +84,7 @@ const BannerCarousel: React.FC = () => {
           <h2 className="text-2xl font-black uppercase tracking-tighter leading-tight mb-2 drop-shadow-md">
             {currentBanner.title}
           </h2>
-          <p className="text-xs font-bold text-white/90 max-w-[180px] leading-tight drop-shadow-sm">
+          <p className="text-xs font-bold text-white/90 max-w-[200px] leading-tight drop-shadow-sm">
             {currentBanner.subtitle}
           </p>
         </div>
@@ -146,11 +139,9 @@ const ClassifiedDetailModal: React.FC<{ classified: Classified; onClose: () => v
               <span className="px-3 py-1 bg-blue-100 dark:bg-blue-900/40 text-[#1E5BFF] rounded-full text-[10px] font-black uppercase tracking-widest">
                 {classified.category}
               </span>
-              {classified.typeLabel && (
-                <span className="px-3 py-1 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 rounded-full text-[10px] font-black uppercase tracking-widest">
-                    {classified.typeLabel}
-                </span>
-              )}
+              <span className="px-3 py-1 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 rounded-full text-[10px] font-black uppercase tracking-widest">
+                {classified.typeLabel}
+              </span>
               <span className="px-3 py-1 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center gap-1">
                 <MapPin size={10} /> {classified.neighborhood}
               </span>
@@ -209,65 +200,43 @@ const ClassifiedDetailModal: React.FC<{ classified: Classified; onClose: () => v
 export const ClassifiedsView: React.FC<ClassifiedsViewProps> = ({ onBack }) => {
   const [selectedClassified, setSelectedClassified] = useState<Classified | null>(null);
   const [activeCategory, setActiveCategory] = useState<ClassifiedCategory | 'Todos'>('Todos');
-  const [activeSubCategory, setActiveSubCategory] = useState<string | null>(null);
 
   const filteredClassifieds = useMemo(() => {
-    let list = [...MOCK_CLASSIFIEDS];
-    if (activeCategory !== 'Todos') {
-      list = list.filter(item => item.category === activeCategory);
-      if (activeSubCategory) {
-        list = list.filter(item => item.subCategory === activeSubCategory);
-      }
-    }
-    return list;
-  }, [activeCategory, activeSubCategory]);
-
-  const handleSelectCategory = (catId: ClassifiedCategory | 'Todos') => {
-    setActiveCategory(catId);
-    setActiveSubCategory(null);
-  };
+    if (activeCategory === 'Todos') return MOCK_CLASSIFIEDS;
+    return MOCK_CLASSIFIEDS.filter(item => item.category === activeCategory);
+  }, [activeCategory]);
 
   return (
-    <div className="flex flex-col bg-white dark:bg-gray-950 w-full max-w-md mx-auto min-h-screen font-sans pb-32 animate-in fade-in duration-500 overflow-x-hidden">
-      {/* Header */}
-      <header className="sticky top-0 z-40 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md px-4 py-6 border-b border-gray-100 dark:border-gray-800 flex items-center gap-4">
-        <button onClick={onBack} className="p-2.5 bg-gray-100 dark:bg-gray-800 rounded-xl text-gray-500 transition-colors">
+    <div className="flex flex-col bg-[#F8F9FC] dark:bg-gray-950 w-full max-w-md mx-auto min-h-screen font-sans pb-32 animate-in fade-in duration-500 overflow-x-hidden">
+      {/* 1. TOPO DA PÁGINA */}
+      <header className="bg-white dark:bg-gray-900 px-6 pt-12 pb-8 border-b border-gray-100 dark:border-gray-800 rounded-b-[3rem] shadow-sm">
+        <button onClick={onBack} className="mb-6 p-2 bg-gray-100 dark:bg-gray-800 rounded-xl text-gray-500 transition-colors">
           <ChevronLeft size={20} />
         </button>
-        <div>
-          <h1 className="font-black text-2xl text-gray-900 dark:text-white uppercase tracking-tighter leading-none">Classificados</h1>
-          <p className="text-[10px] text-[#1E5BFF] font-black uppercase tracking-widest mt-1">Oportunidades e Avisos Locais</p>
+        
+        <div className="space-y-3">
+            <h1 className="text-3xl font-black text-gray-900 dark:text-white uppercase tracking-tighter leading-none">Classificados</h1>
+            <p className="text-sm text-gray-500 dark:text-gray-400 font-medium leading-relaxed">
+              O que está acontecendo em Jacarepaguá. Oportunidades, serviços e avisos úteis para o seu dia a dia.
+            </p>
         </div>
       </header>
 
       <main className="flex flex-col">
-        {/* 1. CARROSSEL DE BANNERS */}
+        {/* 2. CARROSSEL DE BANNERS */}
         <BannerCarousel />
 
-        {/* 2. CATEGORIAS VISUAIS (ESTILO HOME) */}
-        <section className="px-5 mb-8">
+        {/* 3. CATEGORIAS VISUAIS (ESTILO HOME) */}
+        <section className="px-5 mb-10">
           <div className="grid grid-cols-4 gap-3">
-             {/* Opção "Todos" separada ou integrada */}
-             <button 
-                onClick={() => handleSelectCategory('Todos')}
-                className={`flex flex-col items-center gap-2 group active:scale-95 transition-all`}
-              >
-                <div className={`w-full aspect-square rounded-[22px] shadow-lg flex items-center justify-center border transition-all ${
-                  activeCategory === 'Todos' ? 'bg-[#1E5BFF] border-white/20' : 'bg-gray-50 dark:bg-gray-800 border-gray-100 dark:border-gray-700'
-                }`}>
-                  <LayoutGrid className={`w-6 h-6 ${activeCategory === 'Todos' ? 'text-white' : 'text-gray-400'}`} />
-                </div>
-                <span className={`text-[9px] font-black uppercase tracking-tighter ${activeCategory === 'Todos' ? 'text-[#1E5BFF]' : 'text-gray-400'}`}>Todos</span>
-              </button>
-
             {CATEGORIES_DATA.map((cat) => (
               <button 
                 key={cat.id} 
-                onClick={() => handleSelectCategory(cat.id)}
+                onClick={() => setActiveCategory(cat.id)}
                 className={`flex flex-col items-center gap-2 group active:scale-95 transition-all`}
               >
                 <div className={`w-full aspect-square rounded-[22px] shadow-lg flex items-center justify-center border transition-all ${
-                  activeCategory === cat.id ? `${cat.color} border-white/20` : 'bg-gray-50 dark:bg-gray-800 border-gray-100 dark:border-gray-700'
+                  activeCategory === cat.id ? `${cat.color} border-white/20` : 'bg-white dark:bg-gray-800 border-gray-100 dark:border-gray-700'
                 }`}>
                   {React.cloneElement(cat.icon as any, { 
                     className: `w-6 h-6 ${activeCategory === cat.id ? 'text-white' : 'text-gray-400'}` 
@@ -281,45 +250,30 @@ export const ClassifiedsView: React.FC<ClassifiedsViewProps> = ({ onBack }) => {
           </div>
         </section>
 
-        {/* 3. SUBCATEGORIAS (Contextual) */}
-        {activeCategory !== 'Todos' && SUBCATEGORIES_MAP[activeCategory] && (
-          <section className="px-5 mb-6 animate-in slide-in-from-left duration-300">
+        {/* 5. FILTROS RÁPIDOS */}
+        <section className="px-5 mb-6">
             <div className="flex gap-2 overflow-x-auto no-scrollbar -mx-1 px-1">
-              <button 
-                onClick={() => setActiveSubCategory(null)}
-                className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border transition-all whitespace-nowrap ${
-                  activeSubCategory === null 
-                  ? 'bg-gray-900 text-white border-gray-900 shadow-md' 
-                  : 'bg-white dark:bg-gray-800 text-gray-400 border-gray-100 dark:border-gray-700'
-                }`}
-              >
-                Tudo em {activeCategory}
-              </button>
-              {SUBCATEGORIES_MAP[activeCategory].map(sub => (
                 <button 
-                  key={sub}
-                  onClick={() => setActiveSubCategory(sub)}
-                  className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border transition-all whitespace-nowrap ${
-                    activeSubCategory === sub 
-                    ? 'bg-blue-600 text-white border-blue-600 shadow-lg shadow-blue-500/20' 
-                    : 'bg-white dark:bg-gray-800 text-gray-400 border-gray-100 dark:border-gray-700'
-                  }`}
+                    onClick={() => setActiveCategory('Todos')}
+                    className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border transition-all ${activeCategory === 'Todos' ? 'bg-[#1E5BFF] text-white border-[#1E5BFF] shadow-lg' : 'bg-white dark:bg-gray-800 text-gray-400 border-gray-100 dark:border-gray-700'}`}
                 >
-                  {sub}
+                    Todos
                 </button>
-              ))}
+                {CATEGORIES_DATA.map(cat => (
+                    <button 
+                        key={cat.id}
+                        onClick={() => setActiveCategory(cat.id)}
+                        className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border transition-all whitespace-nowrap ${activeCategory === cat.id ? 'bg-[#1E5BFF] text-white border-[#1E5BFF] shadow-lg' : 'bg-white dark:bg-gray-800 text-gray-400 border-gray-100 dark:border-gray-700'}`}
+                    >
+                        {cat.label}
+                    </button>
+                ))}
             </div>
-          </section>
-        )}
+        </section>
 
         {/* 4. FEED DE CLASSIFICADOS */}
         <section className="px-4 py-2 space-y-4">
-          <div className="px-1 flex items-center justify-between">
-             <h3 className="text-xs font-black uppercase tracking-[0.2em] text-gray-400">
-                {activeCategory === 'Todos' ? 'Feed do Bairro' : `${activeCategory} em Jacarepaguá`}
-             </h3>
-             <span className="text-[10px] font-bold text-gray-300 uppercase">{filteredClassifieds.length} itens</span>
-          </div>
+          <h3 className="text-xs font-black uppercase tracking-[0.2em] text-gray-400 px-1 mb-4">Feed do Bairro</h3>
 
           {filteredClassifieds.length > 0 ? filteredClassifieds.map((item) => (
             <div 
@@ -350,7 +304,7 @@ export const ClassifiedsView: React.FC<ClassifiedsViewProps> = ({ onBack }) => {
                   item.category === 'Compra & Venda' ? 'bg-emerald-50 text-emerald-600' :
                   'bg-gray-50 text-gray-500'
                 }`}>
-                  {item.subCategory || item.typeLabel}
+                  {item.typeLabel}
                 </span>
               </div>
 
@@ -366,12 +320,13 @@ export const ClassifiedsView: React.FC<ClassifiedsViewProps> = ({ onBack }) => {
           )) : (
             <div className="py-20 text-center flex flex-col items-center opacity-30">
               <AlertCircle size={48} className="text-gray-400 mb-4" />
-              <p className="text-sm font-bold uppercase tracking-widest leading-relaxed">Nenhum anúncio<br/>encontrado nesta categoria.</p>
+              <p className="text-sm font-bold uppercase tracking-widest leading-relaxed">Nenhum anúncio<br/>encontrado.</p>
             </div>
           )}
         </section>
       </main>
 
+      {/* 6. DETALHE DO CLASSIFICADO */}
       {selectedClassified && <ClassifiedDetailModal classified={selectedClassified} onClose={() => setSelectedClassified(null)} />}
     </div>
   );

@@ -221,12 +221,11 @@ export interface Classified {
   title: string;
   advertiser: string;
   category: ClassifiedCategory;
-  subCategory?: string; // Ex: CLT, Reforma, Usado, etc.
   neighborhood: string;
   description: string;
   timestamp: string;
   contactWhatsapp: string;
-  typeLabel?: string; // CLT, PJ, Venda, Troca, etc.
+  typeLabel: string; // CLT, PJ, Venda, Troca, etc.
   price?: string;
   isUrgent?: boolean;
   isSponsored?: boolean;
