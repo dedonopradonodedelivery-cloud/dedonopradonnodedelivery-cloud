@@ -18,7 +18,7 @@ import {
   Flame,
   Percent,
   Tag,
-  Gift,
+  Gift, // Alterado de Tag para Gift
   Utensils,
   Pizza,
   Coffee,
@@ -37,8 +37,8 @@ import {
   Clock,
   Heart,
   ShieldCheck,
-  CheckCircle2,
-  Lock,
+  CheckCircle2, 
+  Lock, // Adicionado Lock
   Info,
   Shirt, // Adicionado para Banner de Moda
   CarFront // Adicionado para Banner de Serviços Automotivos
@@ -431,7 +431,7 @@ const WeeklyDiscountBlock: React.FC<{ onClick: () => void }> = ({ onClick }) => 
                 } else {
                     clearInterval(interval);
                 }
-            }, 120);
+            }, 120); // Delay entre a animação de cada dia
         }, 600);
         
         // Remove o shine do botão após 4 segundos (2 ciclos)
@@ -453,6 +453,16 @@ const WeeklyDiscountBlock: React.FC<{ onClick: () => void }> = ({ onClick }) => 
         }
     };
     
+    // Determine o texto do subheader com base no estado
+    const subheaderText = isCelebrated 
+      ? `Dia 1 liberado! Volte amanhã para o Dia 2.` 
+      : (consecutiveDays > 1 ? `Continue acessando e seu cupom será liberado no Dia ${consecutiveDays + 1}.` : `Volte todos os dias e desbloqueie seu benefício.`);
+    
+    // Determine o texto do botão
+    const buttonText = isCelebrated 
+      ? 'Resgatado!' 
+      : (consecutiveDays > 1 ? 'Acompanhar Recompensa' : 'Liberar Dia 1');
+
     return (
         <div className="px-5 w-full">
             <style>{`
@@ -475,41 +485,56 @@ const WeeklyDiscountBlock: React.FC<{ onClick: () => void }> = ({ onClick }) => 
                 background: linear-gradient(to right, transparent, rgba(255,255,255,0.4), transparent);
                 animation: shine-slide 2.5s infinite;
               }
+              @keyframes float-subtle {
+                0%, 100% { transform: translateY(0px) rotate(0deg); }
+                50% { transform: translateY(-3px) rotate(1deg); }
+              }
             `}</style>
 
             <div className="bg-white dark:bg-gray-800 rounded-[2rem] p-5 shadow-sm border border-gray-100 dark:border-gray-700 animate-in fade-in zoom-in-95 duration-500 fill-mode-backwards" style={{ animationDelay: '100ms' }}>
                 <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2">
-                        <div className="p-1.5 bg-blue-50 dark:bg-blue-900/30 rounded-lg">
-                            <Tag className="w-3.5 h-3.5 text-blue-600" />
+                        {/* Headline: Ícone de Presente com Animação */}
+                        <div className="p-1.5 bg-blue-50 dark:bg-blue-900/30 rounded-lg animate-[float-subtle_2s_ease-in-out_infinite]">
+                            <Gift className="w-3.5 h-3.5 text-blue-600" />
                         </div>
-                        <h2 className="text-sm font-bold text-gray-900 dark:text-white">Cupom da Semana</h2>
+                        <h2 className="text-sm font-bold text-gray-900 dark:text-white">🎁 Recompensa da Semana</h2>
                     </div>
                     {/* Indicador de Progresso Minimalista com Animação Staggered */}
-                    <div className="flex gap-1.5">
+                    <div className="flex gap-1.5" id="weekly-promo-progress-indicators">
                         {days.map(d => (
                             <div 
                               key={d} 
-                              className={`w-2.5 h-2.5 rounded-full transition-all duration-500 relative flex items-center justify-center ${
-                                d <= animatedDays ? 'bg-emerald-500 scale-110' : 'bg-gray-100 dark:bg-gray-700'
-                              } ${d === 1 && animatedDays >= 1 ? 'shadow-[0_0_8px_rgba(16,185,129,0.5)]' : ''}`} 
+                              className={`w-5 h-5 rounded-full transition-all duration-500 relative flex items-center justify-center ${
+                                d <= animatedDays 
+                                  ? 'bg-emerald-500 scale-110 shadow-[0_0_8px_rgba(16,185,129,0.5)]' 
+                                  : 'bg-gray-100 dark:bg-gray-700'
+                              }`} 
+                              // Adiciona delay para animação staggered ao completar
+                              style={{ animationDelay: `${d * 50 + 100}ms` }}
                             >
-                                {d <= animatedDays && (
+                                {d <= animatedDays ? (
                                     <div className="animate-in zoom-in duration-300">
-                                        <CheckCircle2 size={7} className="text-white" strokeWidth={4} />
+                                        <CheckCircle2 size={12} className="text-white" strokeWidth={3} />
                                     </div>
+                                ) : (
+                                    <Lock size={10} className="text-gray-400 opacity-40" />
                                 )}
                             </div>
                         ))}
                     </div>
                 </div>
                 
-                <p className="text-[10px] text-gray-500 dark:text-gray-400 mb-4 leading-tight font-medium">
-                  {isCelebrated 
-                    ? "Dia 1 liberado! Volte amanhã para o Dia 2." 
-                    : "Acesse o app por 5 dias seguidos e garanta o uso do seu cupom nesta semana."}
+                {/* Subheadline Motivacional */}
+                <p className="text-[10px] text-gray-500 dark:text-gray-400 mb-2 leading-tight font-medium" id="weekly-promo-subheader">
+                  {subheaderText}
+                </p>
+                {/* Microcopy de Escassez */}
+                <p className="text-[9px] text-gray-400 opacity-70 mb-4 font-medium" id="weekly-promo-scarcity-text">
+                    Exclusivo para quem acompanha o bairro.
                 </p>
                 
+                {/* Botão Principal com Animação Condicional */}
                 <button 
                     onClick={handleActionClick} 
                     className={`w-full font-black py-3.5 rounded-xl active:scale-[0.96] transition-all text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 ${
@@ -517,15 +542,16 @@ const WeeklyDiscountBlock: React.FC<{ onClick: () => void }> = ({ onClick }) => 
                           ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20' 
                           : 'bg-[#1E5BFF] text-white shadow-md shadow-blue-500/10'
                     } ${showShine && !isCelebrated ? 'btn-shine-effect' : ''}`}
+                    id="weekly-promo-main-button"
                 >
                     {isCelebrated ? (
                       <span className="flex items-center gap-2 animate-in zoom-in duration-300">
                          <CheckCircle size={14} strokeWidth={3} />
-                         Resgatado!
+                         {buttonText}
                       </span>
                     ) : (
                       <>
-                        {consecutiveDays > 1 ? 'Acompanhar Recompensa' : 'Resgatar Dia 1'}
+                        {buttonText}
                         <ArrowRight size={12} strokeWidth={3} />
                       </>
                     )}
