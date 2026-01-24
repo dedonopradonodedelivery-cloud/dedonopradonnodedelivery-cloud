@@ -6,7 +6,7 @@ import { useAuth } from '../contexts/AuthContext';
 interface BottomNavProps {
   activeTab: string;
   setActiveTab: (tab: string) => void;
-  userRole?: 'cliente' | 'lojista' | 'admin' | null;
+  userRole?: 'cliente' | 'lojista' | null;
 }
 
 interface NavItem {
@@ -22,8 +22,8 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
   const navItems: NavItem[] = [
     { id: 'home', icon: Home, label: 'Inicio' },
     { id: 'explore', icon: Compass, label: 'Explorar' },
-    { id: 'classifieds', icon: Newspaper, label: 'Classificados' },
-    { id: 'community_feed', icon: Users, label: 'Comunidade', isCenter: true },
+    { id: 'classifieds', icon: Newspaper, label: 'Classificados', isCenter: true },
+    { id: 'community_feed', icon: Users, label: 'Comunidade' },
     { id: 'profile', icon: UserIcon, label: 'Menu' },
   ];
 
