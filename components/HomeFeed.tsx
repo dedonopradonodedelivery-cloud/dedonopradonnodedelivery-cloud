@@ -41,6 +41,8 @@ import {
   CheckCircle2,
   Lock,
   Info,
+  /* Add missing Rocket icon import */
+  Rocket
 } from 'lucide-react';
 import { LojasEServicosList } from '@/components/LojasEServicosList';
 import { User } from '@supabase/supabase-js';
@@ -56,7 +58,7 @@ import { LaunchOfferBanner } from './LaunchOfferBanner';
 const ICON_COMPONENTS: Record<string, React.ElementType> = {
   Flame, Zap, Percent, Tag, Gift, Utensils, Pizza, Coffee, Beef, IceCream,
   ShoppingCart, Store: StoreIcon, Package, Wrench, Truck, CreditCard, Coins, Star,
-  Award, MapPin, Smile, Bell, Clock, Heart, Sparkles, Rocket: Sparkles, Megaphone, Crown, ShieldCheck
+  Award, MapPin, Smile, Bell, Clock, Heart, Sparkles, Rocket, Megaphone, Crown, ShieldCheck
 };
 
 const FONT_STYLES = [
@@ -199,7 +201,6 @@ interface BannerItem {
 const HomeCarousel: React.FC<{ onNavigate: (v: string) => void; onStoreClick?: (store: Store) => void; stores: Store[] }> = ({ onNavigate, onStoreClick, stores }) => {
   const { currentNeighborhood } = useNeighborhood();
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [progress, setProgress] = useState(0);
   const [userBanner, setUserBanner] = useState<BannerItem | null>(null);
 
   const defaultBanners: BannerItem[] = useMemo(() => [
@@ -213,7 +214,7 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void; onStoreClick?: (
         subtitleFont: 'font-neutra', subtitleSize: 'sm',
         bgColor: '#1E5BFF', textColor: '#FFFFFF',
         align: 'left', iconName: 'Rocket', iconPos: 'right',
-        iconSize: 'lg', logoDisplay: 'none', animation: 'float',
+        iconSize: 'lg', logoDisplay: 'none', animation: 'none', 
         iconColorMode: 'white'
       }
     },
@@ -292,19 +293,6 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void; onStoreClick?: (
     }
   }, [currentIndex, allBanners, currentNeighborhood]);
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setProgress((prev) => {
-        if (prev >= 100) {
-          setCurrentIndex((current) => (current + 1) % allBanners.length);
-          return 0;
-        }
-        return prev + 0.75; 
-      });
-    }, 30);
-    return () => clearInterval(interval);
-  }, [allBanners.length]);
-
   if (allBanners.length === 0) return null;
 
   const current = allBanners[currentIndex];
@@ -340,11 +328,7 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void; onStoreClick?: (
 
         <div className="absolute bottom-3 left-1/2 -translate-x-1/2 w-1/2 h-[3px] flex gap-1.5 z-10">
           {allBanners.map((_, idx) => (
-            <div key={idx} className="h-full flex-1 bg-white/30 backdrop-blur-sm rounded-full overflow-hidden">
-              <div 
-                className="h-full bg-white transition-all duration-100 ease-linear" 
-                style={{ width: idx === currentIndex ? `${progress}%` : idx < currentIndex ? '100%' : '0%' }} 
-              />
+            <div key={idx} className={`h-full flex-1 rounded-full overflow-hidden transition-all duration-300 ${idx === currentIndex ? 'bg-white' : 'bg-white/30 backdrop-blur-sm'}`}>
             </div>
           ))}
         </div>
@@ -476,7 +460,7 @@ const WeeklyDiscountBlock: React.FC<{ onClick: () => void }> = ({ onClick }) => 
 };
 
 
-interface HomeFeedProps {
+interface HomeFeedFeedProps {
   onNavigate: (view: string) => void;
   onSelectCategory: (category: Category) => void;
   onStoreClick: (store: Store) => void;
@@ -485,7 +469,7 @@ interface HomeFeedProps {
   userRole: 'cliente' | 'lojista' | null;
 }
 
-export const HomeFeed: React.FC<HomeFeedProps> = ({ 
+export const HomeFeed: React.FC<HomeFeedFeedProps> = ({ 
   onNavigate, 
   onSelectCategory, 
   onStoreClick, 
