@@ -1,4 +1,5 @@
 
+
 import React, { useState, useEffect } from 'react';
 import { Layout } from './components/Layout';
 import { Header } from './components/Header';
@@ -20,7 +21,6 @@ import { UserCouponsHistoryView } from './components/UserCouponsHistoryView';
 import { JobsView } from './components/JobsView';
 import { MerchantJobsModule } from './components/MerchantJobsModule';
 import { AdminPanel } from './components/AdminPanel';
-import { StoreAdsModule } from './components/StoreAdsModule'; 
 import { StoreAdsQuickLaunch } from './components/StoreAdsQuickLaunch';
 import { MerchantPerformanceDashboard } from './components/MerchantPerformanceDashboard';
 import { AdminBannerModeration } from './components/AdminBannerModeration';
@@ -43,6 +43,11 @@ import { BairroFeedView } from './components/BairroFeedView';
 import { CreateBairroPostView } from './components/CreateBairroPostView';
 import { MerchantPerformanceDashboardView } from './components/MerchantPerformanceDashboardView'; 
 import { MerchantQrScreen } from './components/MerchantQrScreen';
+import { CashbackLandingView } from './components/CashbackLandingView';
+import { CashbackScanScreen } from './components/CashbackScanScreen';
+import { ScanConfirmationScreen } from './components/ScanConfirmationScreen';
+import { CashbackPaymentScreen } from './components/CashbackPaymentScreen';
+import { MerchantPayRoute } from './components/MerchantPayRoute';
 
 
 let splashWasShownInSession = false;
@@ -87,6 +92,9 @@ export const App: React.FC = () => {
   const [quoteCategory, setQuoteCategory] = useState('');
   const [adCategoryTarget, setAdCategoryTarget] = useState<string | null>(null);
   const [initialStoreAdsView, setInitialStoreAdsView] = useState<'sales' | 'chat'>('sales');
+  // Cashback Flow states
+  const [scannedStoreId, setScannedStoreId] = useState<string | null>(null);
+  const [payCashbackStoreId, setPayCashbackStoreId] = useState<string | null>(null);
 
 
   const isMerchantMode = userRole === 'lojista' || (user?.email === ADMIN_EMAIL && viewMode === 'Lojista');
@@ -98,7 +106,7 @@ export const App: React.FC = () => {
   };
   
   useEffect(() => {
-    const restrictedTabs = ['store_area', 'admin_panel', 'edit_profile', 'store_claim', 'merchant_reviews', 'designer_panel', 'weekly_promo', 'user_coupons', 'user_coupons_history', 'create_bairro_post', 'merchant_performance_dashboard', 'merchant_qr_display']; 
+    const restrictedTabs = ['store_area', 'admin_panel', 'edit_profile', 'store_claim', 'merchant_reviews', 'designer_panel', 'weekly_promo', 'user_coupons', 'user_coupons_history', 'create_bairro_post', 'merchant_performance_dashboard', 'merchant_qr_display', 'cashback_landing', 'scan_cashback', 'pay_cashback', 'confirm_scan_cashback']; 
     
     if (restrictedTabs.includes(activeTab)) {
       if (!isAuthInitialLoading && !user) {
@@ -125,9 +133,10 @@ export const App: React.FC = () => {
   }, []);
 
   const handleSelectStore = (store: Store) => { setSelectedStore(store); setActiveTab('store_detail'); };
-  const headerExclusionList = ['store_area', 'editorial_list', 'store_profile', 'category_detail', 'store_detail', 'profile', 'patrocinador_master', 'service_subcategories', 'service_specialties', 'store_ads_module', 'store_ads_quick', 'merchant_performance', 'about', 'support', 'favorites', 'community_feed', 'admin_panel', 'admin_banner_moderation', 'store_claim', 'merchant_reviews', 'jpa_connect_sales', 'designer_panel', 'weekly_promo', 'user_coupons', 'user_coupons_history', 'bairro_feed', 'create_bairro_post', 'merchant_performance_dashboard', 'merchant_qr_display']; 
+  const headerExclusionList = ['store_area', 'editorial_list', 'store_profile', 'category_detail', 'store_detail', 'profile', 'patrocinador_master', 'service_subcategories', 'service_specialties', 'store_ads_module', 'store_ads_quick', 'merchant_performance', 'about', 'support', 'favorites', 'community_feed', 'admin_panel', 'admin_banner_moderation', 'store_claim', 'merchant_reviews', 'jpa_connect_sales', 'designer_panel', 'weekly_promo', 'user_coupons', 'user_coupons_history', 'bairro_feed', 'create_bairro_post', 'merchant_performance_dashboard', 'merchant_qr_display', 'cashback_landing', 'scan_cashback', 'pay_cashback', 'confirm_scan_cashback']; 
   
-  const hideBottomNav = ['admin_panel', 'merchant_performance_dashboard'].includes(activeTab); 
+  // FIX: Added 'confirm_scan_cashback' to hideBottomNav list
+  const hideBottomNav = ['admin_panel', 'merchant_performance_dashboard', 'cashback_landing', 'scan_cashback', 'pay_cashback', 'confirm_scan_cashback'].includes(activeTab); 
 
   const RoleSwitcherModal: React.FC = () => {
     if (!isRoleSwitcherOpen) return null;
@@ -233,6 +242,24 @@ export const App: React.FC = () => {
                     {activeTab === 'merchant_qr_display' && user && (
                        <MerchantQrScreen user={user} onBack={() => setActiveTab('profile')} />
                      )}
+                    {activeTab === 'cashback_landing' && <CashbackLandingView onBack={() => setActiveTab('home')} onLogin={() => setIsAuthOpen(true)} />}
+                    {activeTab === 'scan_cashback' && <CashbackScanScreen onBack={() => setActiveTab('home')} onScanSuccess={(data) => { setScannedStoreId(data.id); setActiveTab('confirm_scan_cashback'); }} />}
+                    {activeTab === 'confirm_scan_cashback' && scannedStoreId && (
+                      <ScanConfirmationScreen
+                        storeId={scannedStoreId}
+                        onConfirm={() => { setPayCashbackStoreId(scannedStoreId); setActiveTab('pay_cashback'); }}
+                        onCancel={() => { setScannedStoreId(null); setActiveTab('scan_cashback'); }}
+                      />
+                    )}
+                    {activeTab === 'pay_cashback' && payCashbackStoreId && (
+                      <MerchantPayRoute
+                        merchantId={payCashbackStoreId}
+                        user={user}
+                        onLogin={() => setIsAuthOpen(true)}
+                        onBack={() => setActiveTab('scan_cashback')}
+                        onComplete={() => setActiveTab('home')} // Or a transaction success screen
+                      />
+                    )}
                   </main>
                   <AuthModal isOpen={isAuthOpen} onClose={() => setIsAuthOpen(false)} user={user as any} onLoginSuccess={handleLoginSuccess} />
                   {isQuoteModalOpen && <QuoteRequestModal isOpen={isQuoteModalOpen} onClose={() => setIsQuoteModal(false)} categoryName={quoteCategory} onSuccess={() => setActiveTab('service_success')} />}

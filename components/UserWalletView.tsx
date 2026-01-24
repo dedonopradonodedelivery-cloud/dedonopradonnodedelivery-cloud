@@ -18,7 +18,8 @@ import {
   AlertTriangle
 } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
-import { StoreCredit, CashbackTransaction } from '../types';
+// FIX: Corrected import paths for StoreCredit and DbCashbackTransaction
+import { StoreCredit, DbCashbackTransaction } from '../types';
 
 interface UserWalletViewProps {
   userId: string;
@@ -42,14 +43,14 @@ export const UserWalletView: React.FC<UserWalletViewProps> = ({ userId, onBack, 
         // Busca saldos consolidados por loja
         const { data: balanceData } = await supabase
           .from('store_credits')
-          .select('*, stores(name, logoUrl)')
+          .select('*, stores(name, logo_url)') // FIX: Changed logoUrl to logo_url to match DbMerchant
           .eq('user_id', userId)
           .gt('balance_cents', 0);
         
         // Busca histórico vindo do Ledger (Movimentações reais e auditáveis)
         const { data: ledgerData } = await supabase
-          .from('cashback_ledger')
-          .select('*, stores(name)')
+          .from('cashback_transactions') // FIX: Changed from 'cashback_ledger' to 'cashback_transactions'
+          .select('*, stores(name)') // FIX: Select stores(name) for store name
           .eq('user_id', userId)
           .order('created_at', { ascending: false });
 
@@ -152,7 +153,7 @@ export const UserWalletView: React.FC<UserWalletViewProps> = ({ userId, onBack, 
                             <div>
                                 <h4 className="font-bold text-gray-900 dark:text-white text-xs">{entry.stores?.name}</h4>
                                 <p className="text-[9px] text-gray-400 font-medium uppercase tracking-tighter">
-                                    {entry.type === 'credit' ? `Expira em ${new Date(entry.expires_at).toLocaleDateString()}` : 'Resgate de saldo'}
+                                    {entry.type === 'credit' ? `Expira em ${new Date(entry.created_at).toLocaleDateString()}` : 'Resgate de saldo'}
                                 </p>
                             </div>
                         </div>

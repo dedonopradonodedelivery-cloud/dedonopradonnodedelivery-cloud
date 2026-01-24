@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { ChevronLeft, CheckCircle, XCircle, Clock, DollarSign, User, AlertCircle, Loader2, ArrowRight } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
-// FIX: Renamed CashbackTransaction to DbCashbackTransaction to align with consolidated types.ts
+// FIX: Corrected import path for DbCashbackTransaction to align with consolidated types.ts
 import { DbCashbackTransaction } from '../types';
 
 interface MerchantCashbackRequestsProps {
@@ -22,7 +22,6 @@ export const MerchantCashbackRequests: React.FC<MerchantCashbackRequestsProps> =
   const [processingId, setProcessingId] = useState<string | null>(null);
   const [selectedRequest, setSelectedRequest] = useState<ExtendedCashbackTransaction | null>(null);
 
-  // FIX: Moved fetchPendingRequests function definition above its useEffect usage
   // --- Realtime & Fetch ---
   const fetchPendingRequests = useCallback(async () => {
     if (!supabase) {
@@ -43,9 +42,6 @@ export const MerchantCashbackRequests: React.FC<MerchantCashbackRequestsProps> =
                 created_at: new Date().toISOString(),
                 amount_cents: 725, // For cashback to earn
                 type: 'earn',
-                purchase_value: 150, // Added from old type
-                amount_from_balance: 5, // Added from old type
-                cashback_value: 7.25, // Added from old type
             }
         ]);
         setLoading(false);
@@ -228,6 +224,7 @@ export const MerchantCashbackRequests: React.FC<MerchantCashbackRequestsProps> =
                                 <User className="w-3.5 h-3.5 text-gray-500" />
                                 <span className="text-xs font-bold text-gray-700 dark:text-gray-300 max-w-[100px] truncate">
                                     {req.user_name || 'Cliente'}
+                                
                                 </span>
                             </div>
                         </div>

@@ -1,8 +1,9 @@
 
 
+
 import { supabase } from '../lib/supabaseClient';
 // FIX: Corrected import path for DbMerchantSession and DbCashbackTransaction to use canonical types.ts at root
-import { DbMerchantSession, StoreClaimRequest, DbCashbackTransaction, StoreCredit } from '../../types'; 
+import { DbMerchantSession, StoreClaimRequest, DbCashbackTransaction, StoreCredit } from '../types'; 
 
 /**
  * Simula o envio de um código OTP para o método escolhido.
@@ -157,7 +158,7 @@ export const fetchAdminMerchants = async (searchTerm: string = '') => {
  */
 export const fetchAdminUsers = async (searchTerm: string = '') => {
   if (!supabase) return [];
-  let query = supabase.from('profiles').select('*, cashback_balances(balance_cents)').eq('role', 'cliente');
+  let query = supabase.from('profiles').select('*, store_credits(balance_cents)').eq('role', 'cliente'); // FIX: Changed cashback_balances to store_credits
   if (searchTerm) { query = query.or(`full_name.ilike.%${searchTerm}%,email.ilike.%${searchTerm}%`); }
   const { data, error } = await query.order('created_at', { ascending: false });
   if (error) return [];
@@ -169,7 +170,7 @@ export const fetchAdminUsers = async (searchTerm: string = '') => {
  */
 export const fetchAdminLedger = async () => {
   if (!supabase) return [];
-  const { data, error } = await supabase.from('cashback_ledger').select('*, profiles(full_name), merchants(name)').order('created_at', { ascending: false }).limit(100);
+  const { data, error } = await supabase.from('cashback_transactions').select('*, profiles(full_name), merchants(name)').order('created_at', { ascending: false }).limit(100); // FIX: Changed cashback_ledger to cashback_transactions
   if (error) return [];
   return data || [];
 };
@@ -214,14 +215,22 @@ export const approveTransaction = async (merchantId: string, transactionId: stri
   return data;
 };
 
-const processTransactionCreation = async (userId: string, session: DbMerchantSession, purchaseValue: number, amountFromBalance: number) => {
+const processTransactionCreation = async (userId: string, session: DbMerchantSession, purchaseTotalCents: number, cashbackUsedCents: number) => {
   if (!supabase) throw new Error("Database not connected");
   if (session.is_used) throw new Error("Este código já foi utilizado.");
   if (new Date(session.expires_at) < new Date()) throw new Error("Este código expirou.");
 
   const { data: tx, error: txError } = await supabase.from('cashback_transactions').insert({
-      user_id: userId, merchant_id: session.merchant_id, session_id: session.id,
-      purchase_value: purchaseValue, amount_from_balance: amountFromBalance, status: 'pending'
+      user_id: userId, 
+      merchant_id: session.merchant_id, 
+      store_id: session.merchant_id, // Assuming store_id is same as merchant_id for simplicity here
+      session_id: session.id,
+      purchase_total_cents: purchaseTotalCents,
+      cashback_used_cents: cashbackUsedCents,
+      amount_cents: purchaseTotalCents, // This 'amount_cents' means the full purchase in old schema
+      amount_to_pay_now_cents: purchaseTotalCents - cashbackUsedCents,
+      type: 'use', // Assuming this flow is always 'use'
+      status: 'pending'
   }).select().single();
 
   if (txError) throw new Error(txError.message);
@@ -229,26 +238,30 @@ const processTransactionCreation = async (userId: string, session: DbMerchantSes
   return tx;
 };
 
-export const createTransactionFromQR = async (userId: string, sessionId: string, purchaseValue: number, amountFromBalance: number) => {
+export const createTransactionFromQR = async (userId: string, sessionId: string, purchaseTotalCents: number, cashbackUsedCents: number) => {
   if (!supabase) return null;
   const { data: session, error } = await supabase.from('merchant_sessions').select('*').eq('id', sessionId).single();
   if (error || !session) throw new Error("Sessão inválida ou não encontrada.");
-  return processTransactionCreation(userId, session, purchaseValue, amountFromBalance);
+  return processTransactionCreation(userId, session, purchaseTotalCents, cashbackUsedCents);
 };
 
-export const createTransactionFromPIN = async (userId: string, pinCode: string, purchaseValue: number, amountFromBalance: number) => {
+export const createTransactionFromPIN = async (userId: string, pinCode: string, purchaseTotalCents: number, cashbackUsedCents: number) => {
   if (!supabase) return null;
   const { data: sessions, error } = await supabase.from('merchant_sessions').select('*').eq('pin_code', pinCode).eq('is_used', false).gt('expires_at', new Date().toISOString()).limit(1);
   if (error || !sessions || sessions.length === 0) { throw new Error("PIN inválido ou expirado."); }
   const session = sessions[0];
-  return processTransactionCreation(userId, session, purchaseValue, amountFromBalance);
+  return processTransactionCreation(userId, session, purchaseTotalCents, cashbackUsedCents);
 };
 
 export const getUserWallet = async (userId: string) => {
   if (!supabase) return { balance: 0, history: [] };
   const { data: user, error: userError } = await supabase.from('profiles').select('wallet_balance').eq('id', userId).single(); // FIX: Changed from 'users' to 'profiles'
   if (userError) throw new Error(userError.message);
-  const { data: history, error: histError } = await supabase.from('wallet_movements').select('*').eq('user_id', userId).order('created_at', { ascending: false }).limit(20);
+  const { data: history, error: histError } = await supabase.from('cashback_transactions').select('*').eq('user_id', userId).order('created_at', { ascending: false }).limit(20); // FIX: Changed wallet_movements to cashback_transactions
   if (histError) throw new Error(histError.message);
-  return { balance: user.wallet_balance, history: history as any[] };
+  // Summarize the balance from store_credits for a global wallet view, or specific stores if needed
+  const { data: creditsData, error: creditsError } = await supabase.from('store_credits').select('balance_cents').eq('user_id', userId);
+  const balance = creditsError ? 0 : creditsData?.reduce((sum, credit) => sum + credit.balance_cents, 0) || 0;
+
+  return { balance, history: history as any[] };
 };

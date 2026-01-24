@@ -1,5 +1,3 @@
-
-
 // Paleta de cores suaves (Flat Design)
 const COLORS = [
   '#FF6501', // Laranja (Brand)
@@ -31,4 +29,33 @@ const ICONS = [
   // Wrench (Tools)
   '<path d="M416 96 C416 140 380 176 336 176 C320 176 304 170 292 160 L140 312 L96 356 L156 416 L200 372 L352 220 C362 208 368 192 368 176" stroke="white" stroke-width="32" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M96 356 L156 416" stroke="white" stroke-width="32"/>',
   // Coffee
-  '<path d="M96 176 V336 C96 380 132 416 176 416 H288 C332 416 368 380 368 336 V176 H96 Z M368 208 H416 C433 208 448 222 448 240 S433 27
+  '<path d="M96 176 V336 C96 380 132 416 176 416 H288 C332 416 368 380 368 336 V176 H96 Z M368 208 H416 C433 208 448 222 448 240 S433 272 416 272 H368 M160 80 L160 128 M232 64 V128 M304 80 L304 128" stroke="white" stroke-width="32" fill="none" stroke-linecap="round" stroke-linejoin="round"/>',
+  // Tag (Discount)
+  '<path d="M432 192 L256 16 L64 16 L64 208 L240 384 L432 192 Z M144 112 C144 130 130 144 112 144 C94 144 80 130 80 112 C80 94 94 80 112 80 C130 80 144 94 144 112 Z" fill="white"/>'
+];
+
+/**
+ * Gera uma string Base64 de um SVG com base em um índice.
+ * Isso garante que o mesmo índice sempre gere o mesmo logo.
+ * @param index - Um número para determinar deterministicamente a cor e o ícone.
+ * @returns string (data:image/svg+xml;base64,...)
+ */
+export const getStoreLogo = (index: number): string => {
+  // Garantir inteiros positivos
+  const safeIndex = Math.abs(Math.floor(index));
+  
+  const color = COLORS[safeIndex % COLORS.length];
+  const icon = ICONS[safeIndex % ICONS.length];
+  
+  const svgString = `
+    <svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="512" height="512" rx="128" fill="${color}"/>
+      <g transform="translate(56, 56) scale(0.78)">
+        ${icon}
+      </g>
+    </svg>
+  `.trim();
+
+  // Converter para Base64 para usar como src de imagem
+  return `data:image/svg+xml;base64,${btoa(svgString)}`;
+};

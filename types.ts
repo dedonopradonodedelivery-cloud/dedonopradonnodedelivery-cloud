@@ -1,4 +1,5 @@
 
+
 import React from 'react';
 
 export type ThemeMode = 'light' | 'dark' | 'auto';
@@ -60,7 +61,6 @@ export interface Store {
   gallery?: string[];
   distanceKm?: number;
   closingTime?: string;
-  // Added or confirmed for various components, e.g., LojasEServicosList
   cashback_percent?: number; 
   cashback_active?: boolean;
   cashback_validity_days?: number;
@@ -291,7 +291,7 @@ export interface BannerDesign {
   iconColorMode: 'text' | 'white' | 'black' | 'custom';
   logoDisplay: 'square' | 'round' | 'none';
   iconCustomColor?: string;
-  imageUrl?: string;
+  imageUrl?: string; // Added to BannerDesign (from StoreAdsModule.tsx)
 }
 
 export interface StoreAdsModuleProps {
@@ -313,11 +313,6 @@ export interface EditorData {
 }
 
 // --- Backend DB Interfaces (for Supabase interaction) ---
-// FIX: Renamed global CashbackTransaction to UserCashbackTransaction to avoid naming conflict
-export type TransactionStatus = 'pending' | 'approved' | 'rejected';
-export type SessionType = 'qr' | 'pin';
-export type MovementType = 'credit' | 'debit';
-
 export interface DbUser {
   id: string; // uuid from auth.users
   full_name?: string; // Assuming 'full_name' is preferred over 'name'
@@ -328,12 +323,79 @@ export interface DbUser {
   created_at: string;
   updated_at?: string;
   fcmTokens?: string[]; // For push notifications
-  lastJobPushAt?: string; // Cooldown for job notifications
+  lastJobPushAt?: string[]; // Cooldown for job notifications
   jobCategories?: string[]; // User's preferred job categories
-  wallet_balance?: number; // Added from src/backend/types.ts
+  wallet_balance?: number; // Added for global wallet balance
 }
 
 export interface DbMerchant {
   id: string; // uuid, usually maps to auth.users.id for owner
   name: string; // Display name
-  
+  owner_id: string; // Foreign key to auth.users.id
+  is_active: boolean;
+  created_at: string;
+  updated_at?: string;
+  secure_id?: string; // For QR codes (UUID)
+  manual_code?: string; // For manual entry (short code)
+  category?: string;
+  subcategory?: string;
+  logo_url?: string;
+  banner_url?: string;
+  address?: string;
+  phone?: string;
+  email_publico?: string;
+  whatsapp_publico?: string;
+  telefone_fixo_publico?: string;
+  description?: string;
+  claimed?: boolean; // Re-added from Store to DbMerchant for consistency with claim flow
+  cashback_percent?: number;
+  cashback_validity_days?: number;
+  // Cashback properties removed as per general instruction
+}
+
+export type TransactionStatus = 'pending' | 'approved' | 'rejected';
+export type SessionType = 'qr' | 'pin';
+export type MovementType = 'credit' | 'debit';
+
+export interface DbMerchantSession {
+  id: string; // uuid
+  merchant_id: string;
+  session_type: SessionType;
+  pin_code?: string;
+  expires_at: string;
+  is_used: boolean;
+  created_at: string;
+}
+
+export interface DbCashbackTransaction {
+  id: string; // uuid
+  user_id: string;
+  user_name?: string; // Added for easier display in merchant panel
+  store_id: string;
+  merchant_id: string;
+  session_id?: string;
+  purchase_total_cents: number;
+  cashback_used_cents: number;
+  amount_to_pay_now_cents: number;
+  cashback_to_earn_cents: number; // The amount of cashback the user will earn
+  amount_cents: number; // This will likely be the cashback_to_earn_cents or cashback_used_cents depending on context
+  type: 'earn' | 'use';
+  status: TransactionStatus;
+  created_at: string;
+  approved_at?: string;
+  rejected_at?: string;
+}
+
+export interface StoreCredit {
+  id: string;
+  user_id: string;
+  store_id: string;
+  balance_cents: number; 
+  expiring_soon_cents?: number; 
+  updated_at: string;
+  // Relationship with 'stores' table for display purposes
+  stores?: {
+    name: string;
+    logo_url?: string;
+  }
+}

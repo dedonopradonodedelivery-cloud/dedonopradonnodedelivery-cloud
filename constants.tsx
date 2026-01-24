@@ -114,8 +114,8 @@ export const CATEGORIES: Category[] = [
   { id: 'cat-edu', slug: 'educacao', name: 'Educação', icon: <BookOpen />, color: 'bg-brand-blue' },
   { id: 'cat-pharmacy', slug: 'farmacia', name: 'Farmácia', icon: <Pill />, color: 'bg-brand-blue' },
   { id: 'cat-fashion', slug: 'moda', name: 'Moda', icon: <Shirt />, color: 'bg-brand-blue' },
-  { id: 'cat-eventos', slug: 'eventos', name: 'Eventos', icon: <PartyPopper />, color: 'bg-brand-blue' },
-  { id: 'cat-condominio', slug: 'condominio', name: 'Condomínio', icon: <Building2 />, color: 'bg-brand-blue' },
+  { id: 'cat-eventos', name: 'Eventos', slug: 'eventos', icon: <PartyPopper />, color: 'bg-brand-blue' },
+  { id: 'cat-condominio', name: 'Condomínio', slug: 'condominio', icon: <Building2 />, color: 'bg-brand-blue' },
 ];
 
 export const SUBCATEGORIES: Record<string, { name: string; icon: React.ReactNode }[]> = {
@@ -295,7 +295,7 @@ export const OFFICIAL_COMMUNITIES: NeighborhoodCommunity[] = [
   {
     id: 'comm-tips',
     name: 'Recomendações e dicas no bairro',
-    description: 'Onde encontrar the melhor serviço? Peça e dê dicas para seus vizinhos.',
+    description: 'Onde encontrar o melhor serviço? Peça e dê dicas para seus vizinhos.',
     image: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?q=80&w=800&auto=format&fit=crop',
     icon: <HelpCircle />,
     color: 'bg-orange-500',
@@ -597,8 +597,7 @@ export const EDITORIAL_SERVICES: EditorialCollection[] = [
 export const quickFilters = [
   { id: 'top_rated', label: 'Top Avaliados', icon: 'star' },
   { id: 'open_now', label: 'Aberto Agora', icon: 'clock' },
-  { id: 'nearby', label: 'Perto de Mim', icon: 'zap' },
-  { id: 'cashback', label: 'Com Cashback', icon: 'percent' }
+  { id: 'nearby', label: 'Perto de Mim', icon: 'zap' }
 ];
 
 export const STORIES: Story[] = [
@@ -662,6 +661,9 @@ export const SPECIALTIES: Record<string, string[]> = {
   'default': ['Consultoria', 'Orçamento geral', 'Manutenção preventiva', 'Reparo específico', 'Instalação']
 };
 
+// NOVO: Mock de Posts do Bairro
+// Removed duplicate declaration of MOCK_BAIRRO_POSTS as it's defined above.
+
 // NOVO: Palavras proibidas para posts do bairro
 export const FORBIDDEN_POST_WORDS = [
   'promoção', 'oferta', 'desconto', 'cupom', 'r$', '% off', 'grátis', 'barato', 'imperdível', 'liquidação', 'black friday'
@@ -672,6 +674,7 @@ export const NEIGHBORHOODS = [
   "Curicica", "Parque Olímpico", "Gardênia", "Cidade de Deus"
 ];
 
+// FIX: Moved MOCK_OCCUPANCY and DISPLAY_MODES definitions here as intended by comments in StoreAdsModule.tsx
 export const MOCK_OCCUPANCY: Record<string, Record<string, boolean>> = {
   "Freguesia": { "periodo_1": true },
   "Taquara": { "periodo_2": true },

@@ -1,5 +1,4 @@
 
-
 import React, { useState, useMemo, useRef, useEffect, useCallback } from 'react';
 import { 
   ChevronLeft, 
@@ -57,44 +56,7 @@ import { StoreBannerEditor } from './StoreBannerEditor';
 // FIX: Imported BannerDesign, EditorData, StoreAdsModuleProps from types
 import { BannerDesign, EditorData, StoreAdsModuleProps } from '../types'; 
 // FIX: Imported constants from the consolidated constants.tsx
-import { NEIGHBORHOODS, FORBIDDEN_WORDS, CHAR_LIMITS, MIN_CONTRAST_RATIO, hexToRgb, getLuminance, getContrastRatio } from '../constants'; 
-
-// FIX: Moved MOCK_OCCUPANCY and DISPLAY_MODES definitions here as intended by constants.tsx comments
-const MOCK_OCCUPANCY: Record<string, Record<string, boolean>> = {
-  "Freguesia": { "periodo_1": true },
-  "Taquara": { "periodo_2": true },
-};
-
-const DISPLAY_MODES = [
-  { 
-    id: 'home', 
-    label: 'Home', 
-    icon: Home, 
-    price: 49.90,
-    originalPrice: 199.90,
-    description: 'Exibido no carrossel da página inicial para todos os usuários.',
-    whyChoose: 'Ideal para máxima visibilidade imediata.'
-  },
-  { 
-    id: 'cat', 
-    label: 'Categorias', 
-    icon: LayoutGrid, 
-    price: 29.90,
-    originalPrice: 149.90,
-    description: 'Exibido no topo das buscas por produtos ou serviços específicos.',
-    whyChoose: 'Impacta o cliente no momento da decisão.'
-  },
-  { 
-    id: 'combo', 
-    label: 'Home + Categorias', 
-    icon: Zap, 
-    price: 69.90,
-    originalPrice: 349.80,
-    description: 'Destaque na página inicial e em todas as categorias.',
-    whyChoose: 'Mais alcance, cliques e chances de venda.'
-  },
-];
-
+import { NEIGHBORHOODS, FORBIDDEN_WORDS, CHAR_LIMITS, MIN_CONTRAST_RATIO, hexToRgb, getLuminance, getContrastRatio, MOCK_OCCUPANCY, DISPLAY_MODES } from '../constants'; 
 
 // --- CONFIGURAÇÕES DO CRIADOR RÁPIDO ---
 const GOALS = [
@@ -602,6 +564,31 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
   // FIX: Moved validateBanner function inside the component to have access to state
   const validateBanner = useCallback((): string[] => {
     const errors: string[] = [];
+    const FORBIDDEN_WORDS = ['palavrão', 'inapropriado', 'violação']; // Re-defined locally for this validation function scope
+    const CHAR_LIMITS = { template_headline: 25, template_subheadline: 50, editor_title: 40, editor_subtitle: 120 }; // Re-defined locally
+    const MIN_CONTRAST_RATIO = 4.5; // Re-defined locally
+    
+    const hexToRgb = (hex: string): { r: number; g: number; b: number } | null => {
+      const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+      return result ? { r: parseInt(result[1], 16), g: parseInt(result[2], 16), b: parseInt(result[3], 16) } : null;
+    };
+    
+    const getLuminance = (r: number, g: number, b: number): number => {
+      const a = [r, g, b].map((v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); });
+      return a[0] * 0.2126 + a[1] * 0.7152 + a[2] * 0.0722;
+    };
+    
+    const getContrastRatio = (hex1: string, hex2: string): number => {
+      const rgb1 = hexToRgb(hex1);
+      const rgb2 = hexToRgb(hex2);
+      if (!rgb1 || !rgb2) return 1;
+      const lum1 = getLuminance(rgb1.r, rgb1.g, rgb1.b);
+      const lum2 = getLuminance(rgb2.r, rgb2.g, rgb2.b);
+      const lightest = Math.max(lum1, lum2);
+      const darkest = Math.min(lum1, lum2);
+      return (lightest + 0.05) / (darkest + 0.05);
+    };
+
     const containsForbidden = (text: string) => FORBIDDEN_WORDS.some(word => text.toLowerCase().includes(word));
 
     if (diyFlowStep === 'upload' || diyFlowStep === 'selection') { // For template-based or direct upload
@@ -1101,9 +1088,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
     );
   }
 
-  const isCheckoutStep = useMemo(() => {
-    return selectedMode && selectedPeriods.length > 0 && selectedNeighborhoods.length > 0 && isArtSaved;
-  }, [selectedMode, selectedPeriods, selectedNeighborhoods, isArtSaved]);
+  const isCheckoutStep = selectedMode && selectedPeriods.length > 0 && selectedNeighborhoods.length > 0 && isArtSaved;
 
   return (
     <div className="min-h-screen bg-[#020617] text-slate-100 font-sans flex flex-col overflow-x-hidden selection:bg-blue-500/30">
@@ -1343,7 +1328,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
                         <span className="text-2xl font-black text-white">R$ {prices.current.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
                       </div>
                       {prices.isPackage && (
-                        <p className="text-emerald-400 font-black text-xs uppercase tracking-widest">Ou 3x de R$ {prices.monthly.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+                        <p className="text-[9px] font-black text-emerald-400 uppercase tracking-widest mt-0.5">Ou 3x de R$ {prices.monthly.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
                       )}
                     </div>
                 </div>

@@ -31,7 +31,8 @@ import { Store, BusinessHour, StoreReview } from '../types';
 import { supabase } from '../lib/supabaseClient';
 import { useAuth } from '../contexts/AuthContext';
 import { useNeighborhood } from '../contexts/NeighborhoodContext';
-import { trackOrganicEvent } from '../lib/analytics';
+// FIX: Imported OrganicEventType from analytics
+import { trackOrganicEvent, OrganicEventType } from '../lib/analytics';
 
 const WEEK_DAYS_LABELS: Record<string, string> = {
   segunda: 'Segunda-feira',
@@ -427,11 +428,43 @@ export const StoreDetailView: React.FC<{
                                 className="w-full bg-[#1E5BFF] text-white font-bold py-3 rounded-xl flex items-center justify-center gap-2 disabled:opacity-50"
                             >
                                 {isSubmittingReview ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send size={16} />}
-                                Enviar Avaliação
+                                Publicar Avaliação
                             </button>
                         </form>
                     )}
                 </div>
               )}
 
-              {/* CON
+              {/* CONTEÚDO: HORÁRIOS */}
+              {activeTab === 'hours' && (
+                <div className="animate-in fade-in duration-500 space-y-6">
+                    <div className="bg-gray-50 dark:bg-gray-800 rounded-2xl p-5 border border-gray-100 dark:border-gray-700">
+                        {store.business_hours && Object.keys(store.business_hours).length > 0 ? (
+                            Object.entries(store.business_hours).map(([dayKey, hours]: [string, BusinessHour]) => (
+                                <div key={dayKey} className="flex justify-between items-center py-2 border-b border-gray-100 dark:border-gray-700 last:border-b-0">
+                                    <span className="text-sm font-medium text-gray-700 dark:text-gray-200 capitalize">
+                                        {WEEK_DAYS_LABELS[dayKey]}
+                                    </span>
+                                    {hours.open ? (
+                                        <span className="text-sm font-bold text-gray-900 dark:text-white">
+                                            {hours.start} - {hours.end}
+                                        </span>
+                                    ) : (
+                                        <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                                            Fechado
+                                        </span>
+                                    )}
+                                </div>
+                            ))
+                        ) : (
+                            <div className="text-center py-5 text-gray-500">Horários não informados.</div>
+                        )}
+                    </div>
+                </div>
+              )}
+          </section>
+        </div>
+      </main>
+    </div>
+  );
+};

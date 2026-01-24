@@ -1,4 +1,5 @@
 
+
 import React, { useEffect, useMemo, useState, useRef } from "react";
 import { Store } from "../types";
 import {
@@ -212,5 +213,64 @@ const HorizontalStoreSection: React.FC<{ title: string; subtitle?: string; store
         ))}
       </div>
     </section>
+  );
+};
+
+// FIX: Exporting ExploreView
+export const ExploreView: React.FC<ExploreViewProps> = ({
+  stores,
+  searchQuery,
+  onStoreClick,
+  onLocationClick,
+  onFilterClick,
+  onOpenPlans,
+  onNavigate,
+  onViewAllVerified,
+}) => {
+  const { isLoading: isLoadingLocation, location: userLocation } = useUserLocation();
+
+  const filteredStores = useMemo(() => {
+    let result = stores;
+    if (searchQuery) {
+      const lowerCaseQuery = searchQuery.toLowerCase();
+      result = result.filter(
+        (store) =>
+          store.name.toLowerCase().includes(lowerCaseQuery) ||
+          store.category.toLowerCase().includes(lowerCaseQuery) ||
+          store.description.toLowerCase().includes(lowerCaseQuery)
+      );
+    }
+    return result;
+  }, [stores, searchQuery]);
+
+  return (
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 font-sans pb-24 animate-in slide-in-from-right duration-300">
+      <div className="p-5 space-y-8">
+        {/* Novidades da Semana */}
+        <NovidadesDaSemana stores={filteredStores} onStoreClick={onStoreClick} onNavigate={onNavigate} />
+
+        {/* Sugestões para Você */}
+        <SugestoesParaVoce stores={filteredStores} onStoreClick={onStoreClick} onNavigate={onNavigate} />
+        
+        {/* Em Alta na Cidade */}
+        <EmAltaNaCidade stores={filteredStores} onStoreClick={onStoreClick} onNavigate={onNavigate} />
+
+        {/* Todas as Lojas e Serviços */}
+        <section>
+          <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">Todas as Lojas e Serviços</h2>
+          <div className="grid grid-cols-1 gap-4">
+            {filteredStores.map((store) => (
+              <HorizontalStoreSection
+                key={store.id}
+                title={store.name}
+                subtitle={store.category}
+                stores={[store]}
+                onStoreClick={onStoreClick}
+              />
+            ))}
+          </div>
+        </section>
+      </div>
+    </div>
   );
 };

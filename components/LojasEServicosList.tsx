@@ -9,7 +9,8 @@ import { STORES } from '../constants';
 interface LojasEServicosListProps {
   onStoreClick?: (store: Store) => void;
   onViewAll?: () => void;
-  activeFilter?: 'all' | 'cashback' | 'top_rated' | 'open_now';
+  // FIX: Removed 'cashback' filter option
+  activeFilter?: 'all' | 'top_rated' | 'open_now';
   user?: User | null;
   onNavigate?: (view: string) => void;
   premiumOnly?: boolean; 
@@ -42,20 +43,22 @@ export const LojasEServicosList: React.FC<LojasEServicosListProps> = ({ onStoreC
   const filteredPool = useMemo(() => {
     let pool = STORES.filter(s => s.id !== MASTER_ID);
 
-    // FIX: Added mock cashback_percent to stores for demonstration
-    pool = pool.map(s => ({
-      ...s,
-      cashback_percent: Math.random() > 0.5 ? Math.floor(Math.random() * 8) + 2 : undefined,
-    }));
+    // FIX: Removed mock cashback_percent as cashback is removed
+    // pool = pool.map(s => ({
+    //   ...s,
+    //   cashback_percent: Math.random() > 0.5 ? Math.floor(Math.random() * 8) + 2 : undefined,
+    // }));
 
 
     // Filtros de UI
     if (premiumOnly) {
       pool = pool.filter(s => s.adType === AdType.PREMIUM || s.isSponsored);
     }
-    if (activeFilter === 'cashback') {
-      pool = pool.filter(s => s.cashback_percent && s.cashback_percent > 0);
-    } else if (activeFilter === 'open_now') {
+    // FIX: Removed 'cashback' filter condition
+    // if (activeFilter === 'cashback') {
+    //   pool = pool.filter(s => s.cashback_percent && s.cashback_percent > 0);
+    // } 
+    else if (activeFilter === 'open_now') {
       pool = pool.filter(s => s.isOpenNow);
     } else if (activeFilter === 'top_rated') {
       pool = pool.filter(s => (s.rating || 0) >= 4.7);
@@ -183,12 +186,7 @@ export const LojasEServicosList: React.FC<LojasEServicosListProps> = ({ onStoreC
                             alt={store.name} 
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
                         />
-                         {/* FIX: Add conditional rendering for cashback_percent */}
-                        {store.cashback_percent && (
-                            <div className="absolute bottom-0 inset-x-0 bg-emerald-500 text-white text-[8px] font-bold text-center py-0.5">
-                                {store.cashback_percent}%
-                            </div>
-                        )}
+                         {/* FIX: Removed conditional rendering for cashback_percent as cashback is removed */}
                     </div>
                     <div className="flex-1 flex flex-col justify-center min-w-0">
                         <div className="flex items-center gap-1.5 mb-0.5">
