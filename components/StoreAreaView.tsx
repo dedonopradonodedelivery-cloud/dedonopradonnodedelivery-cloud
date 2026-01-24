@@ -1,34 +1,30 @@
 
-import React, { useState, useMemo, useEffect } from 'react';
+import React from 'react';
 import { 
-  ChevronLeft, 
-  BadgeCheck, 
-  DollarSign, 
-  ShoppingBag, 
-  Users, 
-  Repeat, 
-  TrendingUp, 
+  ChevronRight, 
   Megaphone, 
-  ChevronRight,
-  Settings,
-  HelpCircle,
-  CreditCard,
-  LayoutDashboard,
-  Calendar,
-  Bell,
-  Moon,
-  Sun,
-  Crown,
-  Star,
-  Sparkles,
-  LifeBuoy,
-  BarChart3,
+  LayoutGrid, 
+  BarChart3, 
+  MessageSquare, 
+  FileText, 
+  CreditCard, 
+  Heart, 
+  Info, 
+  HelpCircle, 
   LogOut,
   User,
-  MessageSquare,
-  FileText,
-  Heart,
-  Compass
+  Sparkles,
+  Compass,
+  LifeBuoy,
+  AlertTriangle,
+  Crown,
+  Star,
+  Moon,
+  Sun,
+  Gift,
+  Briefcase,
+  Zap,
+  Tag
 } from 'lucide-react';
 import { User as SupabaseUser } from '@supabase/supabase-js';
 import { useAuth } from '@/contexts/AuthContext';
@@ -48,8 +44,9 @@ const ServiceBlock: React.FC<{
   isDestructive?: boolean;
   colorClass?: string;
   badge?: number;
+  labelBadge?: string;
   rightElement?: React.ReactNode;
-}> = ({ icon: Icon, label, description, onClick, isDestructive, colorClass, badge, rightElement }) => (
+}> = ({ icon: Icon, label, description, onClick, isDestructive, colorClass, badge, labelBadge, rightElement }) => (
   <button 
     onClick={onClick}
     className="w-full flex items-center justify-between p-5 bg-white dark:bg-gray-800 border-b border-gray-50 dark:border-gray-700 last:border-b-0 active:bg-gray-50 dark:active:bg-gray-700/50 transition-colors group"
@@ -68,9 +65,16 @@ const ServiceBlock: React.FC<{
         ) : null}
       </div>
       <div className="text-left">
-        <p className={`text-sm font-bold ${isDestructive ? 'text-red-500' : 'text-gray-700 dark:text-gray-200'}`}>
-          {label}
-        </p>
+        <div className="flex items-center gap-2">
+            <p className={`text-sm font-bold ${isDestructive ? 'text-red-500' : 'text-gray-700 dark:text-gray-200'}`}>
+                {label}
+            </p>
+            {labelBadge && (
+                <span className="text-[7px] font-black uppercase bg-emerald-500/10 text-emerald-600 px-1.5 py-0.5 rounded border border-emerald-500/20 tracking-widest">
+                    {labelBadge}
+                </span>
+            )}
+        </div>
         {description && (
           <p className="text-[10px] text-gray-400 font-medium leading-tight mt-1 max-w-[200px]">
             {description}
@@ -80,6 +84,15 @@ const ServiceBlock: React.FC<{
     </div>
     {rightElement || <ChevronRight size={16} className={isDestructive ? 'text-red-300' : 'text-gray-300'} />}
   </button>
+);
+
+const SectionHeader: React.FC<{ title: string; icon?: React.ElementType }> = ({ title, icon: Icon }) => (
+  <div className="flex items-center gap-2 mb-3 px-1">
+    {Icon && <Icon size={14} className="text-[#1E5BFF]" />}
+    <h2 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">
+      {title}
+    </h2>
+  </div>
 );
 
 const MarketingActionCard: React.FC<{
@@ -109,15 +122,6 @@ const MarketingActionCard: React.FC<{
   </button>
 );
 
-const SectionHeader: React.FC<{ title: string; icon?: React.ElementType }> = ({ title, icon: Icon }) => (
-  <div className="flex items-center gap-2 mb-3 px-1">
-    {Icon && <Icon size={14} className="text-[#1E5BFF]" />}
-    <h2 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">
-      {title}
-    </h2>
-  </div>
-);
-
 export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate, user }) => {
   const { signOut } = useAuth();
   const { theme, toggleTheme } = useTheme();
@@ -135,6 +139,7 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
   return (
     <div className="min-h-screen bg-[#F8F9FB] dark:bg-gray-950 font-sans animate-in fade-in duration-500 pb-32">
       
+      {/* 1. BLOCO SUPERIOR: PERFIL E PERFORMANCE */}
       <div className="bg-white dark:bg-gray-900 px-6 pt-12 pb-8 border-b border-gray-100 dark:border-gray-800 shadow-sm mb-8">
         <div className="flex items-center gap-4">
           <div className="w-20 h-20 rounded-[2rem] border-4 border-white dark:border-gray-800 shadow-xl overflow-hidden shrink-0">
@@ -170,16 +175,61 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
           />
         </section>
 
+        {/* 2. NOVO BLOCO: SERVIÇOS GRATUITOS */}
+        <section>
+          <SectionHeader title="Serviços Gratuitos" icon={Zap} />
+          <div className="bg-white dark:bg-gray-800 rounded-[2.5rem] border border-gray-100 dark:border-gray-700 overflow-hidden shadow-sm">
+            <ServiceBlock 
+              icon={Tag} 
+              label="Recompensa da Semana" 
+              labelBadge="Gratuito"
+              description="Benefícios para engajar moradores do bairro"
+              onClick={() => onNavigate('weekly_reward_page')}
+              colorClass="bg-emerald-50 text-emerald-600"
+            />
+            <ServiceBlock 
+              icon={Briefcase} 
+              label="Vaga de Emprego" 
+              labelBadge="Gratuito"
+              description="Divulgação de oportunidades da loja"
+              onClick={() => onNavigate('merchant_jobs')}
+              colorClass="bg-emerald-50 text-emerald-600"
+            />
+          </div>
+        </section>
+
+        {/* 3. BLOCO: AÇÕES (PAGO) */}
         <section>
           <SectionHeader title="Ações" icon={Sparkles} />
           <div className="bg-white dark:bg-gray-800 rounded-[2.5rem] border border-gray-100 dark:border-gray-700 overflow-hidden shadow-sm">
             <ServiceBlock 
-              icon={Crown} 
-              label="Banners Premium" 
-              description="Apareça em destaque para milhares de pessoas do seu bairro"
-              onClick={() => onNavigate('store_ads_module')}
+              icon={Zap} 
+              label="Patrocinados" 
+              description="Destaques e visibilidade no app"
+              onClick={() => onNavigate('store_ads_quick')}
               colorClass="bg-blue-50 text-blue-600"
             />
+            <ServiceBlock 
+              icon={LayoutGrid} 
+              label="Banners Home e Categoria" 
+              description="Anúncios visuais na home e categorias"
+              onClick={() => onNavigate('store_ads_module')}
+              colorClass="bg-purple-50 text-purple-600"
+            />
+            <ServiceBlock 
+              icon={Crown} 
+              label="Seja um Patrocinador Master" 
+              description="Destaque premium exclusivo"
+              onClick={() => onNavigate('patrocinador_master')}
+              colorClass="bg-amber-50 text-amber-600"
+            />
+          </div>
+        </section>
+
+        {/* OUTROS ITENS DE GESTÃO (PRESERVADOS) */}
+        <section>
+          <SectionHeader title="Gestão e Reputação" />
+          <div className="bg-white dark:bg-gray-800 rounded-[2.5rem] border border-gray-100 dark:border-gray-700 overflow-hidden shadow-sm">
             <ServiceBlock 
               icon={Star} 
               label="Avaliações" 
@@ -189,34 +239,10 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
               colorClass="bg-amber-50 text-amber-600"
             />
             <ServiceBlock 
-              icon={Megaphone} 
-              label="Anunciar (ADS)" 
-              description="Destaque-se nas categorias sem complicação"
-              onClick={() => onNavigate('store_ads_quick')}
-            />
-            <ServiceBlock 
-              icon={BarChart3} 
-              label="Meus Anúncios" 
-              description="Performance e estatísticas"
-              onClick={() => onNavigate('merchant_performance')}
-            />
-          </div>
-        </section>
-
-        <section>
-          <SectionHeader title="Serviços" />
-          <div className="bg-white dark:bg-gray-800 rounded-[2.5rem] border border-gray-100 dark:border-gray-700 overflow-hidden shadow-sm">
-            <ServiceBlock 
               icon={MessageSquare} 
               label="Chat com Designer" 
               description="Criação e acompanhamento do seu banner"
               onClick={() => onNavigate('store_ads_module', 'chat')} 
-            />
-            <ServiceBlock 
-              icon={FileText} 
-              label="Pedidos de Banner" 
-              description="Status de criação e aprovação"
-              onClick={() => alert('Módulo de pedidos em desenvolvimento')} 
             />
             <ServiceBlock 
               icon={CreditCard} 
@@ -245,24 +271,12 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
         </section>
 
         <section>
-          <SectionHeader title="Suporte" />
+          <SectionHeader title="Geral" />
           <div className="bg-white dark:bg-gray-800 rounded-[2.5rem] border border-gray-100 dark:border-gray-700 overflow-hidden shadow-sm">
             <ServiceBlock 
               icon={LifeBuoy} 
               label="Suporte" 
-              description="Ajuda com o app e conta"
               onClick={() => onNavigate('store_support')} 
-            />
-          </div>
-        </section>
-
-        <section>
-          <SectionHeader title="Geral" />
-          <div className="bg-white dark:bg-gray-800 rounded-[2.5rem] border border-gray-100 dark:border-gray-700 overflow-hidden shadow-sm">
-            <ServiceBlock 
-              icon={Heart} 
-              label="Favoritos" 
-              onClick={() => onNavigate('favorites')} 
             />
             <ServiceBlock 
               icon={Compass} 
