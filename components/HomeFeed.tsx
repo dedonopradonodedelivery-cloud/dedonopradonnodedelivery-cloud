@@ -9,7 +9,8 @@ import {
   CheckCircle2,
   Clock,
   Lock,
-  Star
+  Star,
+  MessageSquare
 } from 'lucide-react';
 import { LojasEServicosList } from '@/components/LojasEServicosList';
 import { User } from '@supabase/supabase-js';
@@ -27,6 +28,12 @@ interface HomeFeedFeedProps {
   userRole: 'cliente' | 'lojista' | null;
 }
 
+const MOCK_PREVIEW_POSTS = [
+  { id: 'p1', store: 'Padaria Imperial', img: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?q=80&w=400', text: 'Pão saindo agora! 🥖' },
+  { id: 'p2', store: 'Studio Hair Vip', img: 'https://images.unsplash.com/photo-1560066984-138dadb4c035?q=80&w=400', text: 'Novo visual da cliente...' },
+  { id: 'p3', store: 'Academia FitBairro', img: 'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?q=80&w=400', text: 'Turma das 7h focada! 💪' },
+];
+
 export const HomeFeed: React.FC<HomeFeedFeedProps> = ({ 
   onNavigate, 
   onSelectCategory, 
@@ -39,7 +46,6 @@ export const HomeFeed: React.FC<HomeFeedFeedProps> = ({
   const [isAnimating, setIsAnimating] = useState(false);
   const { currentNeighborhood } = useNeighborhood();
 
-  // Lógica da Recompensa da Semana
   const [consecutiveDays, setConsecutiveDays] = useState(() => {
     return parseInt(localStorage.getItem('reward_consecutive_days') || '1');
   });
@@ -77,13 +83,11 @@ export const HomeFeed: React.FC<HomeFeedFeedProps> = ({
         </div>
       </div>
 
-      {/* CARROSSEL DE BANNERS RESTAURADO (PROTAGONISTA) */}
       <HomeBannerCarousel onStoreClick={onStoreClick} />
 
-      {/* 1. SISTEMA DE RECOMPENSA (BLOQUE COMPACTO E ELEGANTE) */}
+      {/* 1. SISTEMA DE RECOMPENSA */}
       <section className="px-5 py-2 mb-4">
         <div className="bg-indigo-50/50 dark:bg-blue-900/10 rounded-[2rem] p-5 border border-indigo-100/50 dark:border-blue-800/30 relative overflow-hidden">
-          {/* Animação de Confete sutil */}
           {isAnimating && (
             <div className="absolute inset-0 pointer-events-none">
               {[...Array(8)].map((_, i) => (
@@ -117,7 +121,6 @@ export const HomeFeed: React.FC<HomeFeedFeedProps> = ({
               Complete sua sequência e ganhe benefícios exclusivos
             </h2>
 
-            {/* Indicador de Progresso Compacto */}
             <div className="flex justify-between items-center mb-6 px-1 max-w-[280px] mx-auto">
               {[1, 2, 3, 4, 5].map((day) => (
                 <div key={day} className="flex flex-col items-center gap-1.5">
@@ -144,6 +147,40 @@ export const HomeFeed: React.FC<HomeFeedFeedProps> = ({
               {!isAnimating && <ArrowRight size={14} strokeWidth={3} />}
             </button>
           </div>
+        </div>
+      </section>
+
+      {/* 2. POSTS DO BAIRRO (NOVO BLOCO) */}
+      <section className="px-5 py-4 mb-6">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-purple-50 dark:bg-purple-900/20 flex items-center justify-center text-purple-600">
+              <MessageSquare size={18} strokeWidth={2.5} />
+            </div>
+            <div>
+              <h2 className="text-[11px] font-black text-gray-900 dark:text-white uppercase tracking-[0.15em] leading-none mb-1">Posts do Bairro</h2>
+              <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest leading-none">O que está rolando agora</p>
+            </div>
+          </div>
+          <button onClick={() => onNavigate('neighborhood_posts')} className="text-[9px] font-black text-[#1E5BFF] uppercase tracking-widest">Ver mais</button>
+        </div>
+
+        <div className="flex gap-4 overflow-x-auto no-scrollbar -mx-5 px-5 pb-2">
+            {MOCK_PREVIEW_POSTS.map((post) => (
+                <div 
+                    key={post.id} 
+                    onClick={() => onNavigate('neighborhood_posts')}
+                    className="flex-shrink-0 w-44 bg-white dark:bg-gray-900 rounded-[2rem] border border-gray-100 dark:border-gray-800 overflow-hidden shadow-sm active:scale-95 transition-all"
+                >
+                    <div className="h-32 w-full overflow-hidden">
+                        <img src={post.img} alt={post.store} className="w-full h-full object-cover" />
+                    </div>
+                    <div className="p-3">
+                        <p className="text-[10px] font-black text-[#1E5BFF] uppercase tracking-tighter truncate">{post.store}</p>
+                        <p className="text-[11px] text-gray-600 dark:text-gray-400 font-medium mt-0.5 line-clamp-1">{post.text}</p>
+                    </div>
+                </div>
+            ))}
         </div>
       </section>
 

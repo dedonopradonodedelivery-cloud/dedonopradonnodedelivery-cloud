@@ -259,6 +259,13 @@ const AdsCarousel = () => {
     setCurrentIndex((prev) => (prev - 1 + ads.length) % ads.length);
   };
 
+  useEffect(() => {
+    const interval = setInterval(() => {
+        setCurrentIndex(prev => (prev + 1) % ads.length);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [ads.length]);
+
   return (
     <div className="w-full mb-10 px-4">
       <div className="relative aspect-[16/9] w-full rounded-[2.5rem] overflow-hidden shadow-2xl border border-white/10 group">
@@ -353,7 +360,7 @@ const BannerPreview = ({ templateId, data, storeName, cta }: { templateId: strin
               {data.logo_url ? <img src={data.logo_url} className="w-full h-full object-cover rounded-full" /> : <StoreIcon className="w-8 h-8 text-slate-400" />}
             </div>
             <h3 className="text-3xl font-black max-w-sm leading-tight">{data.headline || 'Sua Loja de Confiança'}</h3>
-            <p className="text-sm mt-2 opacity-70 max-w-xs">{data.subheadline || 'Qualidade e Tradição no Bairro'}</p>
+            <p className="text-sm mt-2 opacity-70 max-w-xs">{data.subheadline || 'Qualidade e Tradição na Freguesia'}</p>
             {cta && (
               <button className="mt-6 bg-slate-800 text-white font-bold text-xs px-6 py-2.5 rounded-full shadow-lg transition-transform hover:scale-105">
                 {cta}
@@ -730,7 +737,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
         if (selectedPalette) {
             const contrast = getContrastRatio(selectedPalette.bg, selectedPalette.text);
             if (contrast < MIN_CONTRAST_RATIO) {
-                errors.push(`O contraste entre o fundo e o texto da paleta "${selectedPalette.name}" é muito baixo. Escolha outra combinação.`);
+                errors.push(`O contraste entre o fundo e o texto da paleta "${selectedPalette.name}" é muito baixo. Escolha outra combination.`);
             }
         }
     }
@@ -781,8 +788,6 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
         });
         if (logError) console.warn("Log de auditoria falhou:", logError);
 
-        // 3. (OPCIONAL) Disparar notificação para ADM no primeiro banner
-        // Essa lógica seria melhor em um trigger de DB, mas fazemos aqui para o MVP.
         const { count } = await supabase.from('published_banners').select('*', { count: 'exact', head: true }).eq('merchant_id', user.id);
         if (count === 1) {
             await supabase.functions.invoke('send-email-admin-banner', {
@@ -821,6 +826,16 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
       return (
         <div className="animate-in fade-in duration-500">
           <AdsCarousel />
+
+          <div className="bg-amber-900/20 border border-amber-500/30 p-4 rounded-2xl mb-8 flex gap-4 items-start shadow-inner">
+              <ShieldAlert className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
+              <div>
+                  <h4 className="text-xs font-black text-amber-400 uppercase tracking-widest leading-none mb-1.5">Regra de Conteúdo</h4>
+                  <p className="text-[10px] text-amber-200/70 leading-relaxed font-medium">
+                      O feed "Posts do Bairro" é para novidades e bastidores. <strong className="text-amber-400">Descontos e preços devem ser publicados apenas em Recompensa da Semana / Cupons.</strong>
+                  </p>
+              </div>
+          </div>
           
           <div className="grid grid-cols-1 gap-6">
             <button
@@ -904,7 +919,6 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
       };
 
       if (isCustom) {
-        // EDITOR PERSONALIZADO
         return (
             <div className="animate-in fade-in duration-500">
                 <div className="mb-8">
@@ -930,7 +944,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
                                        <div style={{ backgroundColor: p.previewColors[0] }} className="w-1/2 h-full"></div>
                                        <div style={{ backgroundColor: p.previewColors[1] }} className="w-1/2 h-full"></div>
                                    </div>
-                                </button>
+                               </button>
                            ))}
                         </div>
                     </div>
@@ -946,11 +960,9 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
             </div>
         );
       } else {
-        // CRIADOR RÁPIDO (TEMPLATE)
         if (!selectedGoal) {
-          // STEP 1: CHOOSE GOAL
           return (
-            <div className="animate-in slide-in-from-right duration-300">
+            <div className="animate-in slide-in-from-right duration-500">
               <h3 className="font-black text-sm uppercase tracking-widest text-blue-400 mb-4">Passo 1: Qual seu objetivo?</h3>
               <div className="space-y-4">
                 {GOALS.map(goal => (
@@ -968,10 +980,9 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
         }
 
         if (selectedGoal && !selectedTemplate) {
-          // STEP 2: CHOOSE TEMPLATE
           const availableTemplates = BANNER_TEMPLATES.filter(t => t.goal === selectedGoal);
           return (
-            <div className="animate-in slide-in-from-right duration-300">
+            <div className="animate-in slide-in-from-right duration-500">
               <button onClick={handleBackToSelection} className="flex items-center gap-2 text-xs text-slate-400 mb-4"><ChevronLeft size={16} /> Voltar</button>
               <h3 className="font-black text-sm uppercase tracking-widest text-blue-400 mb-4">Passo 2: Escolha um modelo</h3>
               <div className="space-y-4">
@@ -987,9 +998,8 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
         }
 
         if (selectedTemplate) {
-          // STEP 3: FILL FORM & PREVIEW
           return (
-            <div className="animate-in slide-in-from-right duration-300">
+            <div className="animate-in slide-in-from-right duration-500">
                 <button onClick={handleBackToSelection} className="flex items-center gap-2 text-xs text-slate-400 mb-4"><ChevronLeft size={16} /> Voltar</button>
                 <div className="mb-8">
                     <h3 className="font-black text-sm uppercase tracking-widest text-blue-400 mb-4">Passo 3: Preencha e veja como fica</h3>
@@ -1027,8 +1037,6 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
     }
     return null;
   };
-
-  const isCheckoutStep = !!(selectedMode && selectedPeriods.length > 0 && selectedNeighborhoods.length > 0 && isArtSaved);
 
   return (
     <div className="min-h-screen bg-[#020617] text-slate-100 font-sans flex flex-col overflow-x-hidden selection:bg-blue-500/30">
