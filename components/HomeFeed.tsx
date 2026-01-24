@@ -236,7 +236,7 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void; onStoreClick?: (
   const [userBanner, setUserBanner] = useState<BannerItem | null>(null);
 
   const defaultBanners: BannerItem[] = useMemo(() => [
-    { // Banner 1: App Official Promo
+    { // Banner 1: App Official Promo (AGORA ESTATIC)
       id: 'app-ads-promo',
       target: 'store_ads_module', // Navigates to ads module
       config: {
@@ -246,7 +246,7 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void; onStoreClick?: (
         subtitleFont: 'font-neutra', subtitleSize: 'sm',
         bgColor: '#1E5BFF', textColor: '#FFFFFF',
         align: 'center', iconName: 'Megaphone', iconPos: 'top',
-        iconSize: 'lg', logoDisplay: 'none', animation: 'float',
+        iconSize: 'lg', logoDisplay: 'none', animation: 'none', // <<< ALTERADO AQUI para 'none'
         iconColorMode: 'white'
       }
     },
