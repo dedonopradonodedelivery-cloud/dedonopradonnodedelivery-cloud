@@ -27,7 +27,8 @@ import {
   Sun, // Adicionado para Modo Noite
   Moon, // Adicionado para Modo Noite
   Rocket, // FIX: Added missing Rocket icon
-  Palette // FIX: Added missing Palette icon
+  Palette, // FIX: Added missing Palette icon
+  Newspaper // Ícone para Posts do Bairro
 } from 'lucide-react';
 import { User as SupabaseUser } from '@supabase/supabase-js';
 import { useAuth } from '@/contexts/AuthContext';
@@ -157,6 +158,13 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
               description="Encontre talentos locais e divulgue oportunidades."
               onClick={() => onNavigate('merchant_jobs')}
               colorClass="bg-emerald-50 text-emerald-600"
+            />
+            <ServiceBlock // NOVO ITEM: Posts do Bairro
+              icon={Newspaper} 
+              label="Posts do Bairro" 
+              description="Compartilhe novidades e comunicados."
+              onClick={() => onNavigate('create_bairro_post')}
+              colorClass="bg-purple-50 text-purple-600"
             />
           </div>
         </section>

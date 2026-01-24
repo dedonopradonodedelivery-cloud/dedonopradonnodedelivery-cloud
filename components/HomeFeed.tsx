@@ -44,12 +44,14 @@ import {
 } from 'lucide-react';
 import { LojasEServicosList } from '@/components/LojasEServicosList';
 import { User } from '@supabase/supabase-js';
-import { CATEGORIES } from '@/constants';
+import { CATEGORIES, MOCK_BAIRRO_POSTS, FORBIDDEN_POST_WORDS } from '@/constants';
 import { useNeighborhood } from '@/contexts/NeighborhoodContext';
 import { supabase } from '@/lib/supabaseClient';
 import { trackAdEvent } from '@/lib/analytics';
 import { BannerDesign } from './StoreBannerEditor';
 import { LaunchOfferBanner } from './LaunchOfferBanner';
+import { BairroPost } from '@/types'; // Importando o novo tipo de post
+import { BairroPostsBlock } from './BairroPostsBlock'; // Importando o novo componente
 
 // --- BANNER VIEWER (LOCAL COMPONENT) ---
 
@@ -495,7 +497,8 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
 }) => {
   const [listFilter, setListFilter] = useState<'all' | 'top_rated' | 'open_now'>('all');
   const categoriesRef = useRef<HTMLDivElement>(null);
-  const homeStructure = useMemo(() => ['categories', 'home_carousel', 'weekly_promo', 'list'], []);
+  // Adiciona 'bairro_posts' à estrutura da Home
+  const homeStructure = useMemo(() => ['categories', 'home_carousel', 'weekly_promo', 'bairro_posts', 'list'], []);
 
   const renderSection = (key: string) => {
     switch (key) {
@@ -527,6 +530,12 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
             <div key="weekly_promo_container" className="py-2">
                 <WeeklyDiscountBlock onClick={() => onNavigate('weekly_promo')} />
             </div>
+        );
+      case 'bairro_posts': // NOVO BLOCO
+        return (
+          <div key="bairro_posts_container" className="py-4">
+              <BairroPostsBlock posts={MOCK_BAIRRO_POSTS} onNavigate={onNavigate} onStoreClick={onStoreClick} stores={stores} />
+          </div>
         );
       case 'list':
         return (

@@ -303,6 +303,17 @@ export interface PostReport {
   postThumbnail: string;
 }
 
+// NOVO: Interface para Posts do Bairro
+export interface BairroPost {
+  id: string;
+  storeId: string;
+  storeName: string;
+  storeLogoUrl?: string;
+  imageUrl?: string; // Imagem do post
+  content: string; // Texto do post
+  createdAt: string; // Data de criação
+}
+
 // From src/backend/types.ts
 export type TransactionStatus = 'pending' | 'approved' | 'rejected';
 export type SessionType = 'qr' | 'pin';
