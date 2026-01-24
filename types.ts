@@ -214,6 +214,24 @@ export interface Job {
   isUrgentToday?: boolean;
 }
 
+export type ClassifiedCategory = 'Empregos' | 'Serviços' | 'Compra & Venda' | 'Avisos';
+
+export interface Classified {
+  id: string;
+  title: string;
+  advertiser: string;
+  category: ClassifiedCategory;
+  neighborhood: string;
+  description: string;
+  timestamp: string;
+  contactWhatsapp: string;
+  typeLabel?: string; // CLT, PJ, Venda, Troca, etc.
+  price?: string;
+  isUrgent?: boolean;
+  isSponsored?: boolean;
+  jobDetails?: Job; // Reutilização do objeto Job existente
+}
+
 export interface CommunityPost {
   id: string;
   userId: string;

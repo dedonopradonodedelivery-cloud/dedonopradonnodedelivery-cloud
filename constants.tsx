@@ -14,7 +14,7 @@ import {
   Camera, Vote, Handshake, Flame, Milestone, History, Home as HomeIcon,
   MessageCircle, HelpCircle, UserCheck, Recycle
 } from 'lucide-react';
-import { AdType, Category, Store, Story, EditorialCollection, Job, CommunityPost, NeighborhoodCommunity } from './types';
+import { AdType, Category, Store, Story, EditorialCollection, Job, CommunityPost, NeighborhoodCommunity, Classified } from './types';
 
 export const CATEGORIES: Category[] = [
   { id: 'cat-comida', name: 'Comida', slug: 'comida', icon: <Utensils />, color: 'bg-brand-blue' },
@@ -524,6 +524,67 @@ export const MOCK_JOBS: Job[] = [
     postedAt: 'Há 1 dia',
     isUrgent: true
   }
+];
+
+export const MOCK_CLASSIFIEDS: Classified[] = [
+    {
+        id: 'cl-1',
+        title: 'Atendente de Balcão',
+        advertiser: 'Padaria Imperial',
+        category: 'Empregos',
+        neighborhood: 'Freguesia',
+        description: 'Vaga para atendimento em padaria tradicional. Horário flexível.',
+        timestamp: 'Há 2h',
+        contactWhatsapp: '5521999999999',
+        typeLabel: 'CLT',
+        jobDetails: MOCK_JOBS[0]
+    },
+    {
+        id: 'cl-2',
+        title: 'Reforma de Estofados e Poltronas',
+        advertiser: 'Tapeçaria Silva',
+        category: 'Serviços',
+        neighborhood: 'Taquara',
+        description: 'Especialista em reformas de sofás, cadeiras e estofados em geral. Orçamento grátis.',
+        timestamp: 'Há 5h',
+        contactWhatsapp: '5521988888888',
+        typeLabel: 'Estofador'
+    },
+    {
+        id: 'cl-3',
+        title: 'Venda de Balcão Refrigerado Industrial',
+        advertiser: 'Padaria Imperial',
+        category: 'Compra & Venda',
+        neighborhood: 'Freguesia',
+        description: 'Balcão em perfeito estado. Ideal para novos negócios de alimentação.',
+        timestamp: 'Ontem',
+        contactWhatsapp: '5521999999999',
+        price: 'R$ 1.200,00',
+        typeLabel: 'Venda'
+    },
+    {
+        id: 'cl-4',
+        title: 'Interrupção de Energia para Manutenção',
+        advertiser: 'Light / Comunitário',
+        category: 'Avisos',
+        neighborhood: 'Anil',
+        description: 'Aviso aos moradores: Manutenção programada na rede elétrica domingo das 08h às 12h.',
+        timestamp: 'Ontem',
+        contactWhatsapp: '5521999999999',
+        typeLabel: 'Utilidade'
+    },
+    {
+        id: 'cl-5',
+        title: 'Vendedor Externo',
+        advertiser: 'JPA Telecom',
+        category: 'Empregos',
+        neighborhood: 'Taquara',
+        description: 'Vendas de planos de internet. Comissionamento agressivo.',
+        timestamp: 'Há 1 dia',
+        contactWhatsapp: '5521988888888',
+        typeLabel: 'PJ',
+        jobDetails: MOCK_JOBS[1]
+    }
 ];
 
 // Added to fix import error in StoreProfileEdit.tsx

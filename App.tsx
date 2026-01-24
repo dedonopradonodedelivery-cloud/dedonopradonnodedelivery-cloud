@@ -15,7 +15,7 @@ import { QuoteRequestModal } from '@/components/QuoteRequestModal';
 import { StoreAreaView } from '@/components/StoreAreaView';
 import { UserCupomScreen } from '@/components/UserCupomScreen';
 import { UserCouponsHistoryView } from '@/components/UserCouponsHistoryView';
-import { JobsView } from '@/components/JobsView';
+import { ClassifiedsView } from '@/components/ClassifiedsView';
 import { MerchantPerformanceDashboard } from '@/components/MerchantPerformanceDashboard';
 import { WeeklyRewardPage } from '@/components/WeeklyRewardPage';
 import { MerchantWeeklyReward } from '@/components/MerchantWeeklyReward';
@@ -119,7 +119,7 @@ const App: React.FC = () => {
   }, []);
 
   const handleSelectStore = (store: Store) => { setSelectedStore(store); setActiveTab('store_detail'); };
-  const headerExclusionList = ['store_area', 'editorial_list', 'store_profile', 'category_detail', 'store_detail', 'profile', 'patrocinador_master', 'service_subcategories', 'service_specialties', 'store_ads_module', 'store_ads_quick', 'merchant_performance', 'about', 'support', 'favorites', 'community_feed', 'admin_panel', 'admin_banner_moderation', 'store_claim', 'merchant_reviews', 'jpa_connect_sales', 'designer_panel', 'user_coupons', 'user_coupons_history', 'weekly_reward_page', 'neighborhood_posts', 'merchant_weekly_reward', 'merchant_jobs'];
+  const headerExclusionList = ['store_area', 'editorial_list', 'store_profile', 'category_detail', 'store_detail', 'profile', 'patrocinador_master', 'service_subcategories', 'service_specialties', 'store_ads_module', 'store_ads_quick', 'merchant_performance', 'about', 'support', 'favorites', 'community_feed', 'admin_panel', 'admin_banner_moderation', 'store_claim', 'merchant_reviews', 'jpa_connect_sales', 'designer_panel', 'user_coupons', 'user_coupons_history', 'weekly_reward_page', 'neighborhood_posts', 'merchant_weekly_reward', 'merchant_jobs', 'classifieds'];
   
   const hideBottomNav = ['admin_panel', 'weekly_reward_page', 'neighborhood_posts', 'merchant_weekly_reward', 'merchant_jobs'].includes(activeTab);
 
@@ -211,7 +211,7 @@ const App: React.FC = () => {
                     {activeTab === 'merchant_performance' && <MerchantPerformanceDashboard onBack={() => setActiveTab('profile')} onNavigate={handleNavigate} />}
                     
                     {activeTab === 'patrocinador_master' && <PatrocinadorMasterScreen onBack={() => setActiveTab('profile')} />}
-                    {activeTab === 'jobs_list' && <JobsView onBack={() => setActiveTab('home')} />}
+                    {activeTab === 'classifieds' && <ClassifiedsView onBack={() => setActiveTab('home')} />}
                     {activeTab === 'about' && <AboutView onBack={() => setActiveTab('profile')} />}
                     {activeTab === 'support' && <SupportView onBack={() => setActiveTab('profile')} />}
                     {activeTab === 'favorites' && <FavoritesView onBack={() => setActiveTab('profile')} onNavigate={setActiveTab} user={user as any} />}
