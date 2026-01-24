@@ -257,7 +257,15 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
         if (error) throw error;
 
         if (data && data.length > 0) {
-          setActiveBanner(data[0]);
+          // Extract the first profile object if available, otherwise null
+          const fetchedProfile = data[0].profiles && Array.isArray(data[0].profiles) && data[0].profiles.length > 0
+            ? data[0].profiles[0] as { store_name: string; logo_url: string; }
+            : null;
+
+          setActiveBanner({
+              ...data[0], // Keep other banner properties
+              profiles: fetchedProfile // Assign the correctly typed profile
+          });
         } else {
           setActiveBanner(null);
         }
