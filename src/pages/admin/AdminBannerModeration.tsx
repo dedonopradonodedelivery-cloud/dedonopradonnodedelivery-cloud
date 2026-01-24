@@ -1,5 +1,3 @@
-
-
 import React, { useState, useEffect } from 'react';
 import { 
   ChevronLeft, 
@@ -40,7 +38,6 @@ const TemplateBannerRender: React.FC<{ config: any }> = ({ config }) => {
          return (
           <div className="w-full h-full bg-gradient-to-br from-slate-800 to-slate-900 text-white p-4 flex items-end justify-between overflow-hidden relative text-xs">
              <img src={product_image_url || 'https://via.placeholder.com/150'} className="absolute inset-0 w-full h-full object-cover opacity-30" />
-             <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
              <div className="relative z-10">
                 <span className="text-[8px] font-black uppercase tracking-widest text-cyan-300">{headline}</span>
                 <h3 className="text-base font-bold mt-1 max-w-[150px] leading-tight">{subheadline}</h3>
@@ -70,9 +67,7 @@ interface AdminBannerModerationProps {
 export const AdminBannerModeration: React.FC<AdminBannerModerationProps> = ({ onBack, user }) => {
   const [banners, setBanners] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  // FIX: Declared setActionTaken state variable
-  const [actionTaken, setActionTaken] = useState<Record<string, string>>({}); 
+  const [actionTaken, setActionTaken] = useState<{ [key: string]: 'paused' | null }>({});
 
   useEffect(() => {
     const fetchActiveBanners = async () => {
@@ -82,7 +77,6 @@ export const AdminBannerModeration: React.FC<AdminBannerModerationProps> = ({ on
       }
       try {
         setLoading(true);
-        setErrorMsg(null);
         const { data, error } = await supabase
           .from('published_banners')
           .select(`
@@ -92,18 +86,10 @@ export const AdminBannerModeration: React.FC<AdminBannerModerationProps> = ({ on
           .eq('is_active', true)
           .order('created_at', { ascending: false });
 
-        if (error) {
-          if (error.message.includes('schema cache') || error.code === 'PGRST116') {
-             setErrorMsg("As tabelas de banners ainda não foram criadas no Supabase.");
-             setBanners([]);
-             return;
-          }
-          throw error;
-        }
+        if (error) throw error;
         setBanners(data || []);
       } catch (e) {
         console.error("Failed to fetch active banners", e);
-        setErrorMsg("Erro ao conectar com o banco de dados.");
       } finally {
         setLoading(false);
       }
@@ -112,7 +98,7 @@ export const AdminBannerModeration: React.FC<AdminBannerModerationProps> = ({ on
   }, []);
 
   const handlePauseBanner = async (banner: any) => {
-    if (confirm(`Pausar banner para "${banner.profiles?.full_name || 'Loja'}"?`)) {
+    if (confirm(`Pausar banner para "${banner.profiles.full_name || 'Loja'}"?`)) {
       try {
         if (!supabase) throw new Error("Supabase client not available");
         
@@ -133,7 +119,7 @@ export const AdminBannerModeration: React.FC<AdminBannerModerationProps> = ({ on
           });
         if (logError) console.error("Failed to log moderation event:", logError);
 
-        // FIX: Removed unnecessary setActionTaken calls. The banner is removed from list.
+        setActionTaken(prev => ({ ...prev, [banner.id]: 'paused' }));
         setBanners(prev => prev.filter(b => b.id !== banner.id));
 
       } catch (e) {
@@ -161,15 +147,6 @@ export const AdminBannerModeration: React.FC<AdminBannerModerationProps> = ({ on
       <main className="flex-1 p-6 overflow-y-auto no-scrollbar pb-32">
         {loading ? (
           <div className="flex justify-center pt-20"><Loader2 className="w-8 h-8 text-blue-500 animate-spin" /></div>
-        ) : errorMsg ? (
-          <div className="flex flex-col items-center justify-center text-center pt-20">
-            <AlertTriangle size={48} className="text-amber-500 mb-4" />
-            <h3 className="text-lg font-bold text-white mb-2">Atenção</h3>
-            <p className="text-slate-400 max-w-xs mb-6">{errorMsg}</p>
-            <div className="p-4 bg-slate-800 rounded-xl text-left font-mono text-[10px] text-slate-300">
-               Execute o SQL de migração no painel do Supabase para criar as tabelas necessárias.
-            </div>
-          </div>
         ) : banners.length === 0 ? (
           <div className="flex flex-col items-center justify-center text-center h-full pt-20">
             <div className="w-20 h-20 bg-slate-800 rounded-full flex items-center justify-center mb-6 border border-white/5">
@@ -205,7 +182,7 @@ export const AdminBannerModeration: React.FC<AdminBannerModerationProps> = ({ on
                         <PauseCircle size={16} /> Pausar Banner
                     </button>
                      <button className="w-full bg-sky-500/10 hover:bg-sky-500/20 text-sky-400 border border-sky-500/20 font-bold py-3 rounded-xl flex items-center justify-center gap-2 active:scale-95 transition-all text-xs">
-                        <Send size={14} /> Contatar
+                        <Send size={14} /> Contatar Lojista
                     </button>
                 </div>
               </div>

@@ -1,4 +1,5 @@
 
+
 import React, { useState, useMemo, useRef, useEffect, useCallback } from 'react';
 import { 
   ChevronLeft, 
@@ -53,12 +54,105 @@ import {
 import { User } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabaseClient';
 import { StoreBannerEditor } from './StoreBannerEditor';
-// FIX: Imported BannerDesign, EditorData, StoreAdsModuleProps from types
-import { BannerDesign, EditorData, StoreAdsModuleProps } from '../types'; 
-// FIX: Imported constants from the consolidated constants.tsx
-import { NEIGHBORHOODS, FORBIDDEN_WORDS, CHAR_LIMITS, MIN_CONTRAST_RATIO, hexToRgb, getLuminance, getContrastRatio, MOCK_OCCUPANCY, DISPLAY_MODES } from '../constants'; 
+import { BannerDesign } from '../types'; // Import BannerDesign from types
 
-// --- CONFIGURAÇÕES DO CRIADOR RÁPIDO ---
+// --- VALIDATION HELPERS ---
+const FORBIDDEN_WORDS = ['palavrão', 'inapropriado', 'violação', 'gratis'];
+const CHAR_LIMITS = {
+  template_headline: 25,
+  template_subheadline: 50,
+  editor_title: 40,
+  editor_subtitle: 120,
+};
+const MIN_CONTRAST_RATIO = 4.5;
+
+const hexToRgb = (hex: string): { r: number; g: number; b: number } | null => {
+  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  return result ? {
+    r: parseInt(result[1], 16),
+    g: parseInt(result[2], 16),
+    b: parseInt(result[3], 16),
+  } : null;
+};
+
+const getLuminance = (r: number, g: number, b: number): number => {
+  const a = [r, g, b].map((v) => {
+    v /= 255;
+    return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+  });
+  return a[0] * 0.2126 + a[1] * 0.7152 + a[2] * 0.0722;
+};
+
+const getContrastRatio = (hex1: string, hex2: string): number => {
+  const rgb1 = hexToRgb(hex1);
+  const rgb2 = hexToRgb(hex2);
+  if (!rgb1 || !rgb2) return 1;
+  const lum1 = getLuminance(rgb1.r, rgb1.g, rgb1.b);
+  const lum2 = getLuminance(rgb2.r, rgb2.g, rgb2.b);
+  const lightest = Math.max(lum1, lum2);
+  const darkest = Math.min(lum1, lum2);
+  return (lightest + 0.05) / (darkest + 0.05);
+};
+// --- END VALIDATION ---
+
+const NEIGHBORHOODS = [
+  "Freguesia", "Pechincha", "Anil", "Taquara", "Tanque", 
+  "Curicica", "Parque Olímpico", "Gardênia", "Cidade de Deus"
+];
+
+const MOCK_OCCUPANCY: Record<string, Record<string, boolean>> = {
+  "Freguesia": { "periodo_1": true },
+  "Taquara": { "periodo_2": true },
+};
+
+const DISPLAY_MODES = [
+  { 
+    id: 'home', 
+    label: 'Home', 
+    icon: Home, 
+    price: 49.90,
+    originalPrice: 199.90,
+    description: 'Exibido no carrossel da página inicial para todos os usuários.',
+    whyChoose: 'Ideal para máxima visibilidade imediata.'
+  },
+  { 
+    id: 'cat', 
+    label: 'Categorias', 
+    icon: LayoutGrid, 
+    price: 29.90,
+    originalPrice: 149.90,
+    description: 'Exibido no topo das buscas por produtos ou serviços específicos.',
+    whyChoose: 'Impacta o cliente no momento da decisão.'
+  },
+  { 
+    id: 'combo', 
+    label: 'Home + Categorias', 
+    icon: Zap, 
+    price: 69.90,
+    originalPrice: 349.80,
+    description: 'Destaque na página inicial e em todas as categorias.',
+    whyChoose: 'Mais alcance, cliques e chances de venda.'
+  },
+];
+
+interface StoreAdsModuleProps {
+  onBack: () => void;
+  onNavigate: (view: string, initialView?: 'sales' | 'chat') => void;
+  categoryName?: string;
+  user: User | null;
+  viewMode?: string;
+  initialView?: 'sales' | 'chat';
+}
+
+interface EditorData {
+  template: string;
+  palette: string;
+  fontSize: string;
+  fontFamily: string;
+  title: string;
+  subtitle: string;
+}
+
 const GOALS = [
     { id: 'promover_oferta', name: 'Promover Oferta', icon: Gift, description: 'Descontos, combos e promoções.' },
     { id: 'anunciar_novidade', name: 'Anunciar Novidade', icon: Sparkles, description: 'Lançamentos de produtos ou serviços.' },
@@ -101,10 +195,8 @@ const BANNER_TEMPLATES = [
   }
 ];
 
-const CTA_OPTIONS = ["Saiba Mais", "Peça Agora", "Ver Cardápio", "Agende seu Horário", "Visite nosso Instagram"];
-// --- FIM CONFIGURAÇÕES ---
+const CTA_OPTIONS = ["Saiba Mais", "Peça Agora", "Ver Encarte", "Agende seu Horário", "Visite nosso Instagram"];
 
-// --- CONFIGURAÇÕES DO EDITOR DE BANNER PERSONALIZADO ---
 const EDITOR_LAYOUTS = [
   { id: 'simple_left', name: 'Simples' },
   { id: 'centered', name: 'Centralizado' },
@@ -277,8 +369,11 @@ const BannerPreview: React.FC<{ templateId: string; data: any; storeName: string
     }
   };
 
+  return <div className="transition-all duration-300">{renderContent()}</div>;
+};
+
 // Componente de Preview do Editor
-const BannerEditorPreview: React.FC<{ data: EditorData }> = ({ data }) => {
+const BannerEditorPreview: React.FC<{ data: any }> = ({ data }) => {
     const { template, palette, fontSize, fontFamily, title, subtitle } = data;
     
     const selectedPalette = COLOR_PALETTES.find(p => p.id === palette) || COLOR_PALETTES[0];
@@ -300,7 +395,7 @@ const BannerEditorPreview: React.FC<{ data: EditorData }> = ({ data }) => {
     
     return (
         <div 
-            className="w-full aspect-video rounded-2xl overflow-hidden relative shadow-lg p-8"
+            className={`w-full aspect-video rounded-2xl overflow-hidden relative shadow-lg p-8 ${layoutClasses[template as LayoutKey]}`}
             style={{ backgroundColor: bgColor, color: textColor }}
         >
             <h3 className={`${template === 'headline' ? headlineFontSize[fontSize as HeadlineSizeKey] : fontSizes[fontSize as SizeKey]} font-black leading-tight line-clamp-2`} style={{ fontFamily }}>
@@ -380,9 +475,6 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
     title: 'Título do Banner',
     subtitle: 'Subtítulo descritivo aqui',
   });
-
-  // FIX: Added isSaving state variable
-  const [isSaving, setIsSaving] = useState(false);
   
   const [chatMessages, setChatMessages] = useState<any[]>([]);
   const [proChatStep, setProChatStep] = useState(0);
@@ -420,12 +512,14 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
 
   const dynamicPeriods = useMemo(() => {
     const now = new Date();
-    const formatDate = (date: Date) => date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' }); 
+    const formatDate = (date: Date) => date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' }); // Changed to full year
     
+    // Periodo 1: Hoje a +30 dias
     const period1Start = new Date(now);
     const period1End = new Date(now);
     period1End.setDate(now.getDate() + 30);
     
+    // Periodo 2: +31 dias a +60 dias
     const period2Start = new Date(now);
     period2Start.setDate(period2Start.getDate() + 31);
     const period2End = new Date(now);
@@ -550,7 +644,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
     const originalBasePrice = selectedMode.originalPrice;
     
     const current = period?.days === 90 ? (basePrice * 3 * hoodsMult) + artExtra : (basePrice * hoodsMult) + artExtra;
-    const original = period?.days === 90 ? (originalBasePrice * 3 * hoodsMult) + artExtra : (originalBasePrice * 3 * hoodsMult) + artExtra;
+    const original = period?.days === 90 ? (originalBasePrice * 3 * hoodsMult) + artExtra : (originalBasePrice * hoodsMult) + artExtra;
     
     return {
       current,
@@ -564,40 +658,15 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
   // FIX: Moved validateBanner function inside the component to have access to state
   const validateBanner = useCallback((): string[] => {
     const errors: string[] = [];
-    const FORBIDDEN_WORDS = ['palavrão', 'inapropriado', 'violação']; // Re-defined locally for this validation function scope
-    const CHAR_LIMITS = { template_headline: 25, template_subheadline: 50, editor_title: 40, editor_subtitle: 120 }; // Re-defined locally
-    const MIN_CONTRAST_RATIO = 4.5; // Re-defined locally
-    
-    const hexToRgb = (hex: string): { r: number; g: number; b: number } | null => {
-      const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-      return result ? { r: parseInt(result[1], 16), g: parseInt(result[2], 16), b: parseInt(result[3], 16) } : null;
-    };
-    
-    const getLuminance = (r: number, g: number, b: number): number => {
-      const a = [r, g, b].map((v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); });
-      return a[0] * 0.2126 + a[1] * 0.7152 + a[2] * 0.0722;
-    };
-    
-    const getContrastRatio = (hex1: string, hex2: string): number => {
-      const rgb1 = hexToRgb(hex1);
-      const rgb2 = hexToRgb(hex2);
-      if (!rgb1 || !rgb2) return 1;
-      const lum1 = getLuminance(rgb1.r, rgb1.g, rgb1.b);
-      const lum2 = getLuminance(rgb2.r, rgb2.g, rgb2.b);
-      const lightest = Math.max(lum1, lum2);
-      const darkest = Math.min(lum1, lum2);
-      return (lightest + 0.05) / (darkest + 0.05);
-    };
-
     const containsForbidden = (text: string) => FORBIDDEN_WORDS.some(word => text.toLowerCase().includes(word));
 
-    if (diyFlowStep === 'upload' || diyFlowStep === 'selection') { // For template-based or direct upload
+    if (view === 'creator') {
         const { headline = '', subheadline = '' } = formData;
         if (!headline.trim()) errors.push('A "Chamada Principal" é obrigatória.');
         if (headline.length > CHAR_LIMITS.template_headline) errors.push(`A "Chamada Principal" deve ter no máximo ${CHAR_LIMITS.template_headline} caracteres.`);
         if (subheadline.length > CHAR_LIMITS.template_subheadline) errors.push(`O "Nome do Produto" deve ter no máximo ${CHAR_LIMITS.template_subheadline} caracteres.`);
         if (containsForbidden(headline) || containsForbidden(subheadline)) errors.push('Seu banner contém palavras não permitidas.');
-    } else if (diyFlowStep === 'editor' && isEditingArt) { // For custom editor
+    } else if (view === 'editor') {
         const { title = '', subtitle = '', palette } = editorData;
         if (!title.trim()) errors.push('O "Título" do banner é obrigatório.');
         if (title.length > CHAR_LIMITS.editor_title) errors.push(`O "Título" deve ter no máximo ${CHAR_LIMITS.editor_title} caracteres.`);
@@ -613,7 +682,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
         }
     }
     return errors;
-  }, [diyFlowStep, isEditingArt, formData, editorData]);
+  }, [view, formData, editorData]);
 
   const handlePublish = async () => {
     const validation = validateBanner();
@@ -624,10 +693,8 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
     
     setIsSubmitting(true);
 
-    const isCustom = diyFlowStep === 'editor'; // Determine if it's a custom editor banner
-    const config = isCustom ? { type: 'custom_editor', ...editorData } : { type: 'template', ...formData, template_id: selectedTemplate?.id, cta: selectedCta }; // Fallback for template_id
-
-    // Determine the target based on categoryName prop or default to 'home'
+    const isCustom = view === 'editor';
+    const config = isCustom ? { type: 'custom_editor', ...editorData } : { type: 'template', ...formData, template_id: selectedTemplate.id, cta: selectedCta };
     const bannerTarget = categoryName ? `category:${categoryName.toLowerCase()}` : 'home';
 
     try {
@@ -640,7 +707,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
                 target: bannerTarget,
                 config: config,
                 is_active: true,
-                expires_at: null, // Set expires_at based on selectedPeriods later
+                expires_at: null,
             })
             .select()
             .single();
@@ -667,12 +734,13 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
                 body: {
                     shopName: user.user_metadata?.store_name || user.email,
                     userId: user.id,
-                    bannerType: isCustom ? 'Editor Personalizado' : 'Template Rápato',
+                    bannerType: isCustom ? 'Editor Personalizado' : 'Template Rápido',
                     bannerConfig: config
                 }
             });
         }
         
+        // FIX: Replaced setShowSuccess with setIsSuccess
         setIsSuccess(true);
         setTimeout(() => {
             onBack();
@@ -682,6 +750,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
         console.error("Erro ao publicar banner:", e);
         alert(`Erro: ${e.message}`);
     } finally {
+        // FIX: Added setIsSubmitting(false) to finally block
         setIsSubmitting(false);
     }
   };
@@ -754,341 +823,233 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
     }, 800);
   };
 
-  if (isEditingArt) {
-    return (
-      <StoreBannerEditor 
-        storeName={user?.user_metadata?.store_name || "Sua Loja"} 
-        storeLogo={user?.user_metadata?.logo_url}
-        onSave={handleSaveDesign} 
-        onBack={() => setIsEditingArt(false)} 
-      />
-    );
-  }
-
-  // --- TELA DE ONBOARDING PARA O CHAT (CASO NÃO TENHA PEDIDO) ---
-  if (view === 'chat_onboarding') {
-    return (
-        <div className="min-h-screen bg-[#020617] text-slate-100 flex flex-col items-center justify-center p-8 text-center animate-in fade-in duration-500">
-            <header className="absolute top-0 left-0 right-0 p-6 flex">
-                <button onClick={onBack} className="p-2 bg-slate-900 rounded-xl text-slate-400 hover:text-white transition-all active:scale-95"><ChevronLeft size={20} /></button>
-            </header>
-            
-            <div className="w-24 h-24 bg-blue-500/10 rounded-full flex items-center justify-center mb-8 border-4 border-blue-500/20 shadow-lg">
-                <MessageCircle size={40} className="text-blue-400" />
+  // ---- RENDER LOGIC ----
+  const renderStep = (): React.JSX.Element | null => {
+    if (view === 'sales') {
+      return (
+        <div className="animate-in fade-in duration-500">
+          <div className="text-center mb-10">
+            <div className="w-16 h-16 bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-6 border-4 border-slate-700 shadow-lg">
+                <Megaphone size={32} className="text-amber-400" />
             </div>
-            
-            <h1 className="text-2xl font-bold text-white mb-4 leading-tight">👋 Olá, {user?.user_metadata?.store_name}!</h1>
-            <p className="text-slate-400 leading-relaxed max-w-sm mb-8">
-                Este é o canal para criação e acompanhamento de banners com nosso time de designers.
+            <h2 className="text-3xl font-black text-white font-display uppercase tracking-tight mb-3">
+                Destaque sua Loja
+            </h2>
+            <p className="text-slate-400 text-sm max-w-sm mx-auto leading-relaxed">
+                Crie banners personalizados que aparecerão na Home do app ou em categorias específicas para atrair mais clientes.
             </p>
-            <p className="text-slate-400 leading-relaxed max-w-sm mb-12">
-                Para iniciar um novo banner, crie um anúncio ou contrate a criação profissional.
-            </p>
-            
-            <button 
-              onClick={() => setView('sales')}
-              className="w-full max-w-sm py-5 bg-[#1E5BFF] text-white font-black rounded-2xl shadow-xl active:scale-[0.98] transition-all uppercase tracking-widest text-sm flex items-center justify-center gap-2"
+          </div>
+          
+          <div className="grid grid-cols-1 gap-6">
+            <button
+              onClick={() => setView('creator')}
+              className="bg-slate-800 p-8 rounded-3xl border border-white/10 text-left hover:border-blue-500/50 transition-all group"
             >
-              Criar Novo Banner <ArrowRight size={18} />
+                <div className="w-12 h-12 bg-blue-500/10 rounded-2xl flex items-center justify-center text-blue-400 border border-blue-500/20"><Sparkles size={24} /></div>
+                <h3 className="font-bold text-white text-lg mb-2">Criador Rápido</h3>
+                <p className="text-xs text-slate-400 mb-6 leading-relaxed">
+                    Use nossos templates prontos. Ideal para criar ofertas e anúncios em segundos.
+                </p>
+                <span className="text-xs font-black text-blue-400 uppercase tracking-widest flex items-center gap-2 group-hover:gap-3 transition-all">
+                    Começar agora <ArrowRight size={14} />
+                </span>
             </button>
+            <button
+              onClick={() => setView('editor')}
+              className="bg-slate-800 p-8 rounded-3xl border border-white/10 text-left hover:border-purple-500/50 transition-all group"
+            >
+                <div className="w-12 h-12 bg-purple-500/10 rounded-2xl flex items-center justify-center text-purple-400 mb-4 border border-purple-500/20">
+                    <Paintbrush size={24} />
+                </div>
+                <h3 className="font-bold text-white text-lg mb-2">Editor Personalizado</h3>
+                <p className="text-xs text-slate-400 mb-6 leading-relaxed">
+                    Tenha controle total sobre cores, fontes e layout para um banner 100% original.
+                </p>
+                 <span className="text-xs font-black text-purple-400 uppercase tracking-widest flex items-center gap-2 group-hover:gap-3 transition-all">
+                    Criar do zero <ArrowRight size={14} />
+                </span>
+            </button>
+            <button
+              onClick={() => alert('Solicitação de arte enviada! Entraremos em contato em breve.')}
+              className="bg-slate-800 p-8 rounded-3xl border border-white/10 text-left hover:border-emerald-500/50 transition-all group relative"
+            >
+              <div className="absolute top-4 right-4 bg-emerald-500/10 text-emerald-400 text-[9px] font-bold px-2.5 py-1 rounded-full border border-emerald-500/20">
+                  Oferta especial
+              </div>
+              <div className="w-12 h-12 bg-emerald-500/10 rounded-2xl flex items-center justify-center text-emerald-400 mb-4 border border-emerald-500/20">
+                  <Rocket size={24} />
+              </div>
+              <h3 className="font-bold text-white text-lg mb-2">👉 Banner criado por nossos designers</h3>
+              <p className="text-xs text-slate-400 mb-6 leading-relaxed">
+                  Nossa equipe cria um banner profissional para sua loja, pronto para anunciar no app.
+              </p>
+              
+              <ul className="text-xs text-slate-400 space-y-2 mb-6">
+                <li className="flex items-center gap-2"><Check size={14} className="text-emerald-400"/>Até 3 alterações inclusas</li>
+                <li className="flex items-center gap-2"><Check size={14} className="text-emerald-400"/>Arte profissional feita por designers</li>
+                <li className="flex items-center gap-2"><Check size={14} className="text-emerald-400"/>Banner otimizado para o app</li>
+              </ul>
+
+              <div className="flex items-baseline gap-2 mb-6">
+                <span className="text-slate-500 line-through">R$ 129,90</span>
+                <span className="text-3xl font-black text-white">R$ 59,90</span>
+                <span className="text-slate-400 text-xs font-medium">por arte</span>
+              </div>
+
+              <span className="text-xs font-black text-emerald-400 uppercase tracking-widest flex items-center gap-2 group-hover:gap-3 transition-all">
+                  Solicitar agora <ArrowRight size={14} />
+              </span>
+            </button>
+          </div>
         </div>
-    );
-  }
+      );
+    }
+    
+    if (view === 'creator' || view === 'editor') {
+      const isCustom = view === 'editor';
 
-  // --- DESIGNER WORKSPACE ---
-  if (view === 'designer_workspace') {
-    const activeProjects = [
-        { id: 'pj-1', store: 'Hamburgueria do Zé', status: 'briefing_recebido', date: 'Hoje, 10:05', type: 'Home' },
-        { id: 'pj-2', store: 'Studio Bella', status: 'em_criacao', date: 'Ontem', type: 'Categorias' },
-        { id: 'pj-3', store: 'PetShop Patas', status: 'aguardando_aprovacao', date: '02 Nov', type: 'Home' },
-    ];
+      const handleBackToSelection = () => {
+        setSelectedGoal(null);
+        setSelectedTemplate(null);
+        setFormData({});
+      };
 
-    return (
-        <div className="min-h-screen bg-[#020617] text-slate-100 flex flex-col animate-in slide-in-from-right h-full">
-            <header className="bg-indigo-950 px-6 py-6 border-b border-white/10 flex items-center justify-between sticky top-0 z-50">
-                <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-indigo-500 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-500/20">
-                        <Palette size={24} />
+      if (isCustom) {
+        // EDITOR PERSONALIZADO
+        return (
+            <div className="animate-in fade-in duration-500">
+                <div className="mb-8">
+                    <h3 className="font-black text-sm uppercase tracking-widest text-purple-400 mb-2">Preview do Banner</h3>
+                    <BannerEditorPreview data={editorData} />
+                </div>
+                <div className="bg-slate-800 rounded-3xl p-6 border border-white/10 space-y-6">
+                    <h3 className="font-bold">Editor</h3>
+                    <div>
+                        <label className="text-xs">Título</label>
+                        <input type="text" value={editorData.title} onChange={(e) => handleEditorDataChange('title', e.target.value)} className="w-full bg-slate-700 p-3 rounded mt-1 text-sm border border-slate-700 text-white" />
                     </div>
                     <div>
-                        <h1 className="font-black text-xl uppercase tracking-tighter">Workspace</h1>
-                        <div className="flex items-center gap-1.5 mt-0.5">
-                            <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span>
-                            <p className="text-[10px] text-indigo-300 font-bold uppercase tracking-widest">Modo Designer (Visualização)</p>
+                        <label className="text-xs">Subtítulo</label>
+                        <textarea value={editorData.subtitle} onChange={(e) => handleEditorDataChange('subtitle', e.target.value)} className="w-full bg-slate-700 p-3 rounded mt-1 text-sm h-20 resize-none border border-slate-700 text-white" />
+                    </div>
+                    <div>
+                        <label className="text-xs font-bold text-slate-400 uppercase">Layout</label>
+                        <div className="grid grid-cols-3 gap-2 mt-2">
+                           {EDITOR_LAYOUTS.map(l => (
+                               <button key={l.id} onClick={() => handleEditorDataChange('template', l.id)} className={`py-3 rounded-lg text-xs font-bold ${editorData.template === l.id ? 'bg-purple-500 text-white' : 'bg-slate-700 text-slate-300'}`}>{l.name}</button>
+                           ))}
                         </div>
                     </div>
-                </div>
-                <button onClick={onBack} className="p-2 bg-white/5 rounded-xl text-slate-400 hover:text-white"><X size={20} /></button>
-            </header>
-
-            <main className="p-6 space-y-8 pb-32 overflow-y-auto no-scrollbar">
-                <div className="grid grid-cols-2 gap-3">
-                    <div className="bg-slate-900 p-5 rounded-3xl border border-white/5">
-                        <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Pendentes</p>
-                        <p className="text-3xl font-black text-white">08</p>
+                    <div>
+                        <label className="text-xs font-bold text-slate-400 uppercase">Paleta de Cores</label>
+                        <div className="flex gap-3 mt-2">
+                           {COLOR_PALETTES.map(p => (
+                               <button key={p.id} onClick={() => handleEditorDataChange('palette', p.id)} className={`w-8 h-8 rounded-full flex items-center justify-center ${editorData.palette === p.id ? 'ring-2 ring-white ring-offset-2 ring-offset-slate-800' : ''}`}>
+                                   <div className="w-full h-full rounded-full overflow-hidden flex">
+                                       <div style={{ backgroundColor: p.previewColors[0] }} className="w-1/2 h-full"></div>
+                                       <div style={{ backgroundColor: p.previewColors[1] }} className="w-1/2 h-full"></div>
+                                   </div>
+                               </button>
+                           ))}
+                        </div>
                     </div>
-                    <div className="bg-slate-900 p-5 rounded-3xl border border-white/5">
-                        <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Entregar hoje</p>
-                        <p className="text-3xl font-black text-indigo-400">02</p>
+                     <div>
+                        <label className="text-xs font-bold text-slate-400 uppercase">Tamanho da Fonte</label>
+                        <select value={editorData.fontSize} onChange={e => handleEditorDataChange('fontSize', e.target.value)} className="w-full bg-slate-700 p-3 rounded mt-1 text-sm border border-slate-700 text-white">
+                           {Object.keys({ small: 'text-2xl', medium: 'text-4xl', large: 'text-5xl' }).map(size => <option key={size} value={size}>{size}</option>)}
+                        </select>
+                    </div>
+                    <div>
+                        <label className="text-xs font-bold text-slate-400 uppercase">Família da Fonte</label>
+                        <select value={editorData.fontFamily} onChange={e => handleEditorDataChange('fontFamily', e.target.value)} className="w-full bg-slate-700 p-3 rounded mt-1 text-sm border border-slate-700 text-white">
+                           {['Arial', 'Verdana', 'Helvetica', 'Georgia', 'Times New Roman', 'Courier New', 'Brush Script MT', 'Poppins', 'Inter', 'Lora', 'Quicksand', 'Anton', 'Outfit'].map(font => <option key={font} value={font}>{font}</option>)}
+                        </select>
                     </div>
                 </div>
+            </div>
+        );
+      } else {
+        // CRIADOR RÁPIDO (TEMPLATE)
+        if (!selectedGoal) {
+          // STEP 1: CHOOSE GOAL
+          return (
+            <div className="animate-in slide-in-from-right duration-500">
+              <h3 className="font-black text-sm uppercase tracking-widest text-blue-400 mb-4">Passo 1: Qual seu objetivo?</h3>
+              <div className="space-y-4">
+                {GOALS.map(goal => (
+                  <button key={goal.id} onClick={() => setSelectedGoal(goal.id)} className="w-full bg-slate-800 p-6 rounded-2xl border border-white/10 text-left hover:border-blue-500/50 transition-all flex items-center gap-5">
+                    <div className="w-12 h-12 bg-blue-500/10 rounded-xl flex items-center justify-center text-blue-400 border border-blue-500/20"><goal.icon size={24} /></div>
+                    <div>
+                      <h4 className="font-bold text-white text-base">{goal.name}</h4>
+                      <p className="text-xs text-slate-400">{goal.description}</p>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          );
+        }
 
-                <div className="space-y-4">
-                    <h3 className="text-xs font-black text-slate-500 uppercase tracking-[0.2em] ml-2">Fila de Pedidos</h3>
-                    {activeProjects.map(proj => (
-                        <div key={proj.id} onClick={() => setView('pro_chat')} className="bg-slate-900 p-5 rounded-[2rem] border border-white/5 flex items-center justify-between hover:border-indigo-500/30 transition-all cursor-pointer group active:scale-[0.98]">
-                            <div className="flex items-center gap-4">
-                                <div className="w-12 h-12 bg-white/5 rounded-2xl flex items-center justify-center text-slate-500 group-hover:text-indigo-400 transition-colors">
-                                    <Building size={20} />
-                                </div>
-                                <div className="text-left">
-                                    <p className="font-bold text-white leading-tight">{proj.store}</p>
-                                    <p className="text-[10px] text-slate-500 uppercase font-black mt-1">{proj.type} • {proj.date}</p>
-                                </div>
-                            </div>
-                            <div className="flex flex-col items-end gap-2">
-                                <span className={`text-[8px] font-black uppercase px-2 py-1 rounded-md border ${
-                                    proj.status === 'briefing_recebido' ? 'bg-blue-50/10 text-blue-400 border-blue-500/20' :
-                                    proj.status === 'em_criacao' ? 'bg-amber-50/10 text-amber-400 border-amber-500/20' :
-                                    'bg-indigo-500/10 text-indigo-400 border-indigo-500/20'
-                                }`}>
-                                    {proj.status.replace('_', ' ')}
-                                </span>
-                                <ChevronRight size={16} className="text-slate-700" />
-                            </div>
+        if (selectedGoal && !selectedTemplate) {
+          // STEP 2: CHOOSE TEMPLATE
+          const availableTemplates = BANNER_TEMPLATES.filter(t => t.goal === selectedGoal);
+          return (
+            <div className="animate-in slide-in-from-right duration-500">
+              <button onClick={handleBackToSelection} className="flex items-center gap-2 text-xs text-slate-400 mb-4"><ChevronLeft size={16} /> Voltar</button>
+              <h3 className="font-black text-sm uppercase tracking-widest text-blue-400 mb-4">Passo 2: Escolha um modelo</h3>
+              <div className="space-y-4">
+                {availableTemplates.map(template => (
+                  <button key={template.id} onClick={() => setSelectedTemplate(template)} className="w-full bg-slate-800 p-5 rounded-2xl border border-white/10 text-left hover:border-blue-500/50 transition-all">
+                    <h4 className="font-bold text-white text-base">{template.name}</h4>
+                    <p className="text-xs text-slate-400">{template.description}</p>
+                  </button>
+                ))}
+              </div>
+            </div>
+          );
+        }
+
+        if (selectedTemplate) {
+          // STEP 3: FILL FORM & PREVIEW
+          return (
+            <div className="animate-in slide-in-from-right duration-500">
+                <button onClick={handleBackToSelection} className="flex items-center gap-2 text-xs text-slate-400 mb-4"><ChevronLeft size={16} /> Voltar</button>
+                <div className="mb-8">
+                    <h3 className="font-black text-sm uppercase tracking-widest text-blue-400 mb-4">Passo 3: Preencha e veja como fica</h3>
+                    <BannerPreview templateId={selectedTemplate.id} data={formData} storeName={user?.user_metadata?.store_name || "Sua Loja"} cta={selectedCta} />
+                </div>
+                <div className="bg-slate-800 rounded-3xl p-6 border border-white/10 space-y-5">
+                    {selectedTemplate.fields.map((field: any) => (
+                        <div key={field.id}>
+                            <label className="text-xs font-bold text-slate-400 uppercase">{field.label}</label>
+                            <input
+                                type={field.type}
+                                placeholder={field.placeholder}
+                                value={formData[field.id] || ''}
+                                onChange={(e) => handleFormDataChange(field.id, e.target.value)}
+                                className="w-full mt-2 bg-slate-700 p-3 rounded-lg text-white"
+                            />
                         </div>
                     ))}
+                    {!ctaStepCompleted ? (
+                        <div>
+                            <label className="text-xs font-bold text-slate-400 uppercase">Botão (Opcional)</label>
+                            <div className="flex gap-2 mt-2 flex-wrap">
+                                {CTA_OPTIONS.map(cta => (
+                                    <button key={cta} onClick={() => setSelectedCta(cta)} className={`text-xs px-3 py-1.5 rounded-lg ${selectedCta === cta ? 'bg-blue-500 text-white' : 'bg-slate-700 text-slate-300'}`}>{cta}</button>
+                                ))}
+                                <button onClick={() => setCtaStepCompleted(true)} className="text-xs px-3 py-1.5 rounded-lg bg-slate-600 text-slate-300">Pular</button>
+                            </div>
+                        </div>
+                    ) : null}
                 </div>
-            </main>
-        </div>
-    );
-  }
-
-  if (view === 'pro_chat') {
-    return (
-      <div className="fixed inset-0 z-[130] bg-[#F8F9FC] dark:bg-gray-950 flex flex-col animate-in slide-in-from-right h-full">
-        {toast && (
-            <div className={`fixed top-24 left-1/2 -translate-x-1/2 z-[200] px-6 py-3 rounded-2xl shadow-2xl flex items-center gap-3 animate-in slide-in-from-top-4 border ${toast.type === 'designer' ? 'bg-indigo-600 border-indigo-500' : 'bg-rose-600 border-rose-500'} text-white`}>
-                <p className="text-xs font-black uppercase tracking-tight">{toast.msg}</p>
             </div>
-        )}
-
-        <header className={`${isDesigner ? 'bg-indigo-950 text-white' : 'bg-white dark:bg-gray-900'} px-6 py-5 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between shadow-sm sticky top-0 z-50`}>
-          <div className="flex items-center gap-4">
-             <button onClick={() => setView(isDesigner ? 'designer_workspace' : 'sales')} className="p-2 bg-white/5 rounded-xl text-slate-400"><ChevronLeft size={20} /></button>
-             <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white shadow-md relative shrink-0">
-                 {isDesigner ? <UserIcon size={20} /> : <Building size={20} />}
-                 <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-green-500 border-2 border-white dark:border-gray-900 rounded-full"></div>
-             </div>
-             <div>
-               <h2 className="font-bold leading-tight">{isDesigner ? 'Hamburgueria do Zé' : 'Time de Design'}</h2>
-               <p className={`text-[10px] font-black uppercase tracking-widest ${isDesigner ? 'text-indigo-300' : 'text-green-500'}`}>{isDesigner ? 'Briefing Ativo' : 'Online agora'}</p>
-             </div>
-          </div>
-          {isDesigner && (
-              <span className="text-[8px] font-black bg-indigo-500 text-white px-2 py-1 rounded-md uppercase tracking-widest">Modo Designer</span>
-          )}
-        </header>
-
-        <main ref={chatScrollRef} className="flex-1 overflow-y-auto p-6 space-y-6 no-scrollbar pb-32">
-          {chatMessages.map(msg => (
-            <div key={msg.id} className={`flex flex-col gap-1 max-w-[85%] animate-in slide-in-from-bottom-2 duration-500 ${msg.role === (isDesigner ? 'user' : 'system') ? 'items-start' : 'items-end ml-auto'}`}>
-               <div className={`p-4 rounded-3xl shadow-sm border ${
-                   msg.role === (isDesigner ? 'user' : 'system') 
-                    ? 'bg-white dark:bg-gray-800 rounded-tl-none border-gray-100 dark:border-gray-700' 
-                    : 'bg-[#1E5BFF] text-white rounded-tr-none border-blue-500'
-                }`}>
-                  {msg.type === 'attachment' ? (
-                      <div className="space-y-3">
-                         <div className="flex items-center gap-2 mb-2">
-                             <ClipboardList size={16} />
-                             <span className="font-bold text-xs uppercase">Briefing de Criação</span>
-                         </div>
-                         <div className="text-xs space-y-1 opacity-90">
-                             <p><strong>Loja:</strong> {msg.details.name}</p>
-                             <p><strong>Chamada:</strong> {msg.details.promo}</p>
-                             <p><strong>Desc:</strong> {msg.details.desc}</p>
-                             {msg.details.obs && <p><strong>Obs:</strong> {msg.details.obs}</p>}
-                         </div>
-                      </div>
-                  ) : msg.type === 'file' ? (
-                      <div className="space-y-3">
-                          <div className="flex items-center gap-3">
-                              <ImageIcon size={20} />
-                              <p className="text-sm font-bold">{msg.text}</p>
-                              <button className="p-1.5 bg-black/10 rounded-lg"><Check size={14}/></button>
-                          </div>
-                          {msg.preview && (
-                            <img src={msg.preview} className="w-full rounded-xl" alt="Preview" />
-                          )}
-                      </div>
-                  ) : (
-                    <p className="text-sm whitespace-pre-wrap leading-relaxed">{msg.text}</p>
-                  )}
-               </div>
-               <span className="text-[9px] text-gray-400 font-bold uppercase tracking-widest px-2">{msg.timestamp}</span>
-            </div>
-          ))}
-          {!isDesigner && proChatStep === 1 && (
-            <div className="flex gap-2 p-2 ml-2">
-               <div className="w-1.5 h-1.5 bg-blue-300 rounded-full animate-bounce"></div>
-               <div className="w-1.5 h-1.5 bg-blue-400 rounded-full animate-bounce [animation-delay:0.2s]"></div>
-               <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce [animation-delay:0.4s]"></div>
-            </div>
-          )}
-        </main>
-
-        <footer className={`p-6 border-t space-y-4 sticky bottom-0 z-50 ${isDesigner ? 'bg-indigo-950 border-white/10' : 'bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800'}`}>
-           {isDesigner ? (
-              <div className="flex flex-col gap-2">
-                 <div className="flex gap-2">
-                    <button onClick={() => showToast("Ação desativada no modo visualização", "designer")} className="flex-1 py-4 bg-indigo-500 text-white rounded-2xl flex items-center justify-center gap-2 text-xs font-black uppercase tracking-widest active:scale-95 transition-all">
-                        <Upload size={16} /> Enviar V1
-                    </button>
-                    <button onClick={() => showToast("Ação desativada no modo visualização", "designer")} className="flex-1 py-4 bg-white/5 text-slate-300 border border-white/10 rounded-2xl flex items-center justify-center gap-2 text-xs font-black uppercase tracking-widest active:scale-95 transition-all">
-                        <Check size={16} /> Finalizar
-                    </button>
-                 </div>
-                 <div className="flex items-center gap-2 px-3 py-1.5 bg-indigo-500/10 rounded-xl border border-indigo-500/20">
-                    <Info size={12} className="text-indigo-400" />
-                    <p className="text-[9px] font-bold text-indigo-300 uppercase tracking-widest leading-none">Prazo: 48h restantes</p>
-                 </div>
-              </div>
-           ) : (
-             <>
-               {proChatStep === 2 && (
-                 <div className="flex flex-col gap-2">
-                    <button onClick={() => setIsLogoModalOpen(true)} className="w-full py-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800 rounded-2xl flex items-center justify-center gap-3 text-[#1E5BFF] text-xs font-black uppercase tracking-widest active:scale-[0.98] transition-all">
-                      <Upload size={16} /> Enviar logo
-                    </button>
-                    <button onClick={() => setIsBriefingModalOpen(true)} className="w-full py-4 bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl flex items-center justify-center gap-3 text-gray-700 dark:text-gray-200 text-xs font-black uppercase tracking-widest active:scale-[0.98] transition-all">
-                      <FileText size={16} /> Preencher informações
-                    </button>
-                    <p className="text-[9px] text-center text-gray-400 font-bold uppercase tracking-widest">Assim que recebermos as informações, iniciamos a criação.</p>
-                 </div>
-               )}
-               <div className="flex items-center gap-3">
-                  <input 
-                    type="text" 
-                    placeholder="Digite sua dúvida..."
-                    className="flex-1 bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl px-5 py-4 text-sm outline-none focus:border-blue-500 transition-all dark:text-white"
-                  />
-                  <button onClick={() => window.open('https://wa.me/5521999999999', '_blank')} className="p-4 bg-green-500 text-white rounded-2xl shadow-lg active:scale-95 transition-all">
-                    <MessageCircle size={20} className="fill-white" />
-                  </button>
-               </div>
-             </>
-           )}
-        </footer>
-
-        {isLogoModalOpen && (
-          <div className="fixed inset-0 z-[140] bg-black/60 backdrop-blur-sm flex items-end animate-in fade-in duration-300">
-            <div className="w-full bg-white dark:bg-gray-900 rounded-t-[3rem] p-8 pb-12 shadow-2xl animate-in slide-in-from-bottom duration-500 max-w-md mx-auto">
-              <div className="flex justify-between items-center mb-6">
-                <h3 className="text-xl font-bold dark:text-white">Enviar logo da empresa</h3>
-                <button onClick={() => setIsLogoModalOpen(false)} className="p-2 bg-gray-100 dark:bg-gray-800 rounded-full text-gray-500"><X size={20} /></button>
-              </div>
-              <p className="text-sm text-gray-500 mb-8">Envie sua logo em alta qualidade (PNG ou PDF).</p>
-
-              {logoPreview ? (
-                <div className="relative w-40 h-40 mx-auto bg-gray-50 dark:bg-gray-800 rounded-3xl border-2 border-dashed border-blue-500 flex items-center justify-center p-4 group">
-                    <img src={logoPreview} className="max-w-full max-h-full object-contain" alt="Preview" />
-                    <button onClick={() => setLogoPreview(null)} className="absolute -top-2 -right-2 p-1.5 bg-red-500 text-white rounded-full shadow-lg"><X size={14}/></button>
-                </div>
-              ) : (
-                <label className="w-full aspect-video rounded-3xl border-2 border-dashed border-gray-200 dark:border-gray-700 flex flex-col items-center justify-center gap-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
-                  <input type="file" className="hidden" accept="image/png, application/pdf" onChange={handleLogoUpload} />
-                  <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-2xl text-blue-600"><Upload size={24} /></div>
-                  <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">Selecionar arquivo</p>
-                </label>
-              )}
-
-              {user?.user_metadata?.logo_url && !logoPreview && (
-                <button 
-                  onClick={() => setLogoPreview(user.user_metadata.logo_url)}
-                  className="w-full mt-6 py-4 bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl flex items-center justify-center gap-3 text-sm font-bold text-gray-600 dark:text-gray-300 active:scale-[0.98] transition-all"
-                >
-                  <Building size={16} /> Usar logo do meu perfil
-                </button>
-              )}
-
-              <button 
-                onClick={confirmLogoSend}
-                disabled={!logoPreview}
-                className="w-full mt-8 py-5 bg-[#1E5BFF] text-white font-black rounded-2xl shadow-xl active:scale-[0.98] transition-all uppercase tracking-widest text-xs disabled:opacity-50 disabled:grayscale"
-              >
-                Confirmar Envio
-              </button>
-            </div>
-          </div>
-        )}
-
-        {isBriefingModalOpen && (
-          <div className="fixed inset-0 z-[140] bg-black/60 backdrop-blur-sm flex items-end animate-in fade-in duration-300">
-            <div className="w-full bg-white dark:bg-gray-900 rounded-t-[3rem] p-8 pb-12 shadow-2xl animate-in slide-in-from-bottom duration-500 max-w-md mx-auto max-h-[90vh] overflow-y-auto no-scrollbar">
-              <div className="flex justify-between items-center mb-6">
-                <h3 className="text-xl font-bold dark:text-white">Informações do banner</h3>
-                <button onClick={() => setIsBriefingModalOpen(false)} className="p-2 bg-gray-100 dark:bg-gray-800 rounded-full text-gray-500"><X size={20} /></button>
-              </div>
-              <p className="text-sm text-gray-500 mb-8">Preencha os dados abaixo para criarmos seu banner.</p>
-
-              <div className="space-y-6">
-                <div>
-                  <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5 ml-1">Nome da Empresa</label>
-                  <input 
-                    type="text"
-                    value={briefingData.companyName}
-                    onChange={e => setBriefingData({...briefingData, companyName: e.target.value})}
-                    className="w-full p-4 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl text-sm font-bold dark:text-white outline-none focus:border-blue-500 transition-all"
-                  />
-                </div>
-                <div>
-                  <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5 ml-1">Chamada Principal</label>
-                  <input 
-                    type="text"
-                    placeholder="Ex: Promoção da Semana"
-                    value={briefingData.headline}
-                    onChange={e => setBriefingData({...briefingData, headline: e.target.value})}
-                    className="w-full p-4 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl text-sm font-bold dark:text-white outline-none focus:border-blue-500 transition-all"
-                  />
-                </div>
-                <div>
-                  <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5 ml-1">Descrição Curta</label>
-                  <textarea 
-                    rows={2}
-                    placeholder="Ex: Ofertas exclusivas para o bairro"
-                    value={briefingData.description}
-                    onChange={e => setBriefingData({...briefingData, description: e.target.value})}
-                    className="w-full p-4 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl text-sm font-medium dark:text-white outline-none focus:border-blue-500 transition-all resize-none"
-                  />
-                </div>
-                <div>
-                  <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5 ml-1">Observações (opcional)</label>
-                  <textarea 
-                    rows={2}
-                    placeholder="Ex: cores preferidas, estilo, algo que não quer"
-                    value={briefingData.observations}
-                    onChange={e => setBriefingData({...briefingData, observations: e.target.value})}
-                    className="w-full p-4 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl text-sm font-medium dark:text-white outline-none focus:border-blue-500 transition-all resize-none"
-                  />
-                </div>
-
-                <button 
-                  onClick={saveBriefing}
-                  disabled={!briefingData.companyName || !briefingData.headline}
-                  className="w-full mt-4 py-5 bg-[#1E5BFF] text-white font-black rounded-2xl shadow-xl active:scale-[0.98] transition-all uppercase tracking-widest text-xs disabled:opacity-50 disabled:grayscale"
-                >
-                  Salvar Informações
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
-    );
-  }
-
-  const isCheckoutStep = selectedMode && selectedPeriods.length > 0 && selectedNeighborhoods.length > 0 && isArtSaved;
+          );
+        }
+      }
+    }
+    return null;
+  };
 
   return (
     <div className="min-h-screen bg-[#020617] text-slate-100 font-sans flex flex-col overflow-x-hidden selection:bg-blue-500/30">
@@ -1193,7 +1154,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
                         </div>
                         <p className="text-[9px] text-blue-400 font-bold font-mono">{p.dates}</p>
                         {p.days === 90 && selectedMode && (
-                          <p className="text-[9px] text-emerald-400 font-black uppercase mt-1">3x de R$ {selectedMode.price.toFixed(2).replace('.', ',')} s/ juros</p>
+                          <p className="text-[9px] text-emerald-400 font-black uppercase mt-1">3x de R$ {selectedMode.price.toFixed(2)} s/ juros</p>
                         )}
                     </button>
                 ))}
@@ -1238,7 +1199,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
                     <div className="flex items-start gap-5 mb-6">
                         <div className="w-12 h-12 bg-blue-500/10 rounded-2xl flex items-center justify-center text-blue-400 shrink-0"><Paintbrush size={24} /></div>
                         <div>
-                            <h3 className="text-lg font-bold text-white mb-1 leading-tight">Personalizar manualmente</h3>
+                            <h3 className="font-bold text-white text-lg mb-1 leading-tight">Personalizar manualmente</h3>
                             <p className="text-xs text-slate-400 leading-relaxed">Use seu banner pronto ou crie no editor.</p>
                         </div>
                     </div>
@@ -1289,7 +1250,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
                         <div className="flex items-start gap-5">
                             <div className="w-12 h-12 bg-amber-400/10 rounded-2xl flex items-center justify-center text-amber-400 shrink-0"><Rocket size={24} /></div>
                             <div>
-                                <h3 className="text-lg font-bold text-white mb-1 leading-tight">Contratar time profissional</h3>
+                                <h3 className="font-bold text-white text-lg mb-1 leading-tight">Contratar time profissional</h3>
                                 <p className="text-xs text-slate-400 leading-relaxed max-w-[180px]">Nós criamos o banner profissional para você.</p>
                             </div>
                         </div>
@@ -1328,7 +1289,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
                         <span className="text-2xl font-black text-white">R$ {prices.current.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
                       </div>
                       {prices.isPackage && (
-                        <p className="text-[9px] font-black text-emerald-400 uppercase tracking-widest mt-0.5">Ou 3x de R$ {prices.monthly.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+                        <p className="text-emerald-400 font-black text-xs uppercase tracking-widest">3x de R$ {prices.monthly.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} sem juros</p>
                       )}
                     </div>
                 </div>
@@ -1344,8 +1305,8 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
       {!isSuccess && (view === 'sales' || view === 'pro_checkout') && (
       <div className="fixed bottom-0 left-0 right-0 p-6 bg-[#020617]/95 backdrop-blur-2xl border-t border-white/10 z-[100] max-w-md mx-auto shadow-[0_-20px_40px_rgba(0,0,0,0.6)] animate-in slide-in-from-bottom duration-500">
         <button 
-          onClick={handlePublish} // FIX: Changed to handlePublish for actual submission
-          disabled={isSubmitting || !isCheckoutStep || !!validationErrors.length} // FIX: Added validationErrors check
+          onClick={handleFooterClick} 
+          disabled={isSubmitting} 
           className={`w-full py-5 rounded-[2rem] shadow-xl shadow-blue-500/30 flex flex-col items-center justify-center transition-all active:scale-[0.98] ${
             selectedMode ? 'bg-[#1E5BFF] text-white hover:bg-blue-600' : 'bg-white/5 text-slate-500 cursor-not-allowed opacity-50'
           }`}
@@ -1376,8 +1337,6 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
         </button>
       </div>
       )}
-
-      <ValidationErrorsModal errors={validationErrors} onClose={() => setValidationErrors([])} />
     </div>
   );
 };

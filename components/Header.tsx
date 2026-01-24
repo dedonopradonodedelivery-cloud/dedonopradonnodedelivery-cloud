@@ -1,4 +1,3 @@
-
 import React, { useMemo } from 'react';
 import { Search, User as UserIcon, MapPin, ChevronDown, Check, ChevronRight, SearchX, ShieldCheck, Tag } from 'lucide-react';
 import { useNeighborhood, NEIGHBORHOODS } from '../contexts/NeighborhoodContext';
@@ -15,6 +14,7 @@ interface HeaderProps {
   onNavigate: (tab: string) => void;
   activeTab: string;
   userRole: "cliente" | "lojista" | null;
+  onOpenMerchantQr?: () => void; // Mantido para compatibilidade, não renderizado
   customPlaceholder?: string;
   stores?: Store[];
   onStoreClick?: (store: Store) => void;
@@ -62,6 +62,7 @@ export const Header: React.FC<HeaderProps> = ({
   viewMode,
   onOpenViewSwitcher
 }) => {
+  // Added setNeighborhood to the destructuring here
   const { currentNeighborhood, setNeighborhood, toggleSelector } = useNeighborhood();
   const showNeighborhoodFilter = ['home', 'explore', 'services', 'community_feed'].includes(activeTab);
 
@@ -75,6 +76,7 @@ export const Header: React.FC<HeaderProps> = ({
     return { stores: matchedStores.slice(0, 15), categories: matchedCategories.slice(0, 4) };
   }, [stores, searchTerm, activeTab]);
 
+  // Placeholder dinâmico conforme o bairro selecionado
   const dynamicPlaceholder = useMemo(() => {
     if (currentNeighborhood === "Jacarepaguá (todos)") {
       return "O que você busca em JPA?";

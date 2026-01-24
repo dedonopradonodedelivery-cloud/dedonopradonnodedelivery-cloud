@@ -1,4 +1,5 @@
 
+
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { 
   ChevronRight, 
@@ -30,6 +31,7 @@ import {
   Wrench,
   Truck,
   CreditCard,
+  Coins,
   Award,
   Smile,
   Bell,
@@ -40,13 +42,11 @@ import {
   Lock, // Adicionado Lock
   Info,
   Shirt, // Adicionado para Banner de Moda
-  CarFront, // Adicionado para Banner de Serviços Automotivos
-  // FIX: Added missing Rocket import
-  Rocket
+  CarFront // Adicionado para Banner de Serviços Automotivos
 } from 'lucide-react';
 import { LojasEServicosList } from '@/components/LojasEServicosList';
 import { User } from '@supabase/supabase-js';
-import { CATEGORIES, MOCK_BAIRRO_POSTS, FORBIDDEN_WORDS, quickFilters } from '@/constants';
+import { CATEGORIES, MOCK_BAIRRO_POSTS, FORBIDDEN_POST_WORDS } from '@/constants';
 import { useNeighborhood } from '@/contexts/NeighborhoodContext';
 import { supabase } from '@/lib/supabaseClient';
 import { trackAdEvent } from '@/lib/analytics';
@@ -65,8 +65,8 @@ interface BannerItem {
   isUserBanner?: boolean;
   config: BannerDesign; // Ensures 'imageUrl' is a known property in the config object
   profiles?: { // Add profiles directly here
-    full_name: string;
-    avatar_url: string;
+    store_name: string;
+    logo_url: string;
   } | null; // Allow profiles to be null if not found
 }
 
@@ -74,8 +74,8 @@ interface BannerItem {
 
 const ICON_COMPONENTS: Record<string, React.ElementType> = {
   Flame, Zap, Percent, Tag, Gift, Utensils, Pizza, Coffee, Beef, IceCream,
-  ShoppingCart, Store: StoreIcon, Package, Wrench, Truck, CreditCard, Star,
-  Award, MapPin, Smile, Bell, Clock, Heart, Sparkles, Rocket, Megaphone, Crown, ShieldCheck,
+  ShoppingCart, Store: StoreIcon, Package, Wrench, Truck, CreditCard, Coins, Star,
+  Award, MapPin, Smile, Bell, Clock, Heart, Sparkles, Rocket: Sparkles, Megaphone, Crown, ShieldCheck,
   Shirt, CarFront // Adicionado Shirt e CarFront
 };
 
@@ -97,14 +97,14 @@ const SIZE_LEVELS = [
 ];
 
 const BannerViewer: React.FC<{ 
-  config: BannerDesign; // Removed redundant imageUrl, it's already in BannerDesign
+  config: BannerDesign & { imageUrl?: string; }; // Adicionado imageUrl ao config local
   storeName: string; 
   storeLogo?: string | null; 
 }> = ({ config, storeName, storeLogo }) => {
     const { 
       title, subtitle, titleFont, titleSize, subtitleFont, subtitleSize, 
       bgColor, textColor, align, animation, iconName, iconPos, iconSize, 
-      logoDisplay, iconColorMode, iconCustomColor, imageUrl // Access imageUrl directly from config
+      logoDisplay, iconColorMode, iconCustomColor, imageUrl
     } = config;
 
     const renderIcon = (name: string | null, size: 'sm' | 'md' | 'lg', colorMode: string) => {
@@ -237,7 +237,7 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void; onStoreClick?: (
   const [userBanner, setUserBanner] = useState<BannerItem | null>(null);
 
   const defaultBanners: BannerItem[] = useMemo(() => [
-    { // Banner 1: App Official Promo (AGORA ESTATICO)
+    { // Banner 1: App Official Promo (AGORA ESTATIC)
       id: 'app-ads-promo',
       target: 'store_ads_module', // Navigates to ads module
       config: {
@@ -305,11 +305,11 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void; onStoreClick?: (
     const fetchHomeBanner = async () => {
         if (!supabase) return;
         try {
-            // FIX: Ensure to select 'profiles' to get full_name and avatar_url
+            // FIX: Ensure to select 'profiles' to get store_name and logo_url
             // Supabase returns related objects as arrays, so we expect data.profiles to be Array<{...}>
             const { data, error } = await supabase
                 .from('published_banners')
-                .select('id, config, merchant_id, profiles(full_name, avatar_url)') 
+                .select('id, config, merchant_id, profiles(store_name, logo_url)') 
                 .eq('target', 'home')
                 .eq('is_active', true)
                 .order('created_at', { ascending: false })
@@ -324,7 +324,7 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void; onStoreClick?: (
             if (data) {
                 // Extract the first profile object if available, otherwise null
                 const profileData = data.profiles && Array.isArray(data.profiles) && data.profiles.length > 0
-                    ? data.profiles[0] as { full_name: string; avatar_url: string; }
+                    ? data.profiles[0] as { store_name: string; logo_url: string; }
                     : null;
 
                 setUserBanner({
@@ -383,10 +383,10 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void; onStoreClick?: (
   };
   
   const findStore = (slug?: string) => stores?.find(s => s.id === slug);
-  // FIX: Prioritize current.profiles for full_name and avatar_url
+  // FIX: Prioritize current.profiles for store_name and logo_url
   const storeForBanner = current.storeSlug ? findStore(current.storeSlug) : undefined;
-  const storeNameForViewer = current.profiles?.full_name || storeForBanner?.name || 'Localizei JPA'; 
-  const storeLogoForViewer = current.profiles?.avatar_url || storeForBanner?.logoUrl || getStoreLogo(storeNameForViewer.length); 
+  const storeNameForViewer = current.profiles?.store_name || storeForBanner?.name || 'Localizei JPA'; 
+  const storeLogoForViewer = current.profiles?.logo_url || storeForBanner?.logoUrl || getStoreLogo(storeNameForViewer.length); 
 
   return (
     <div className="px-4 py-2">
@@ -502,6 +502,10 @@ const WeeklyDiscountBlock: React.FC<{ onClick: () => void }> = ({ onClick }) => 
                 0% { transform: translateX(-200%) skewX(-20deg); }
                 30% { transform: translateX(200%) skewX(-20deg); }
                 100% { transform: translateX(200%) skewX(-20deg); }
+              }
+              .btn-shine-effect {
+                position: relative;
+                overflow: hidden;
               }
               .btn-shine-effect::after {
                 content: '';
@@ -673,13 +677,13 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
                 onSeeMore={() => onNavigate('explore')}
               />
               <div className="flex gap-1 bg-gray-100 dark:bg-gray-800 p-1 rounded-xl w-fit mb-4">
-                {quickFilters.map((f) => (
+                {['all', 'top_rated'].map((f) => (
                   <button 
-                    key={f.id} 
-                    onClick={() => setListFilter(f.id as any)} 
-                    className={`text-[8px] font-black uppercase px-4 py-1.5 rounded-lg transition-all ${listFilter === f.id ? 'bg-white dark:bg-gray-700 text-[#1E5BFF] shadow-sm' : 'text-gray-400'}`}
+                    key={f} 
+                    onClick={() => setListFilter(f as any)} 
+                    className={`text-[8px] font-black uppercase px-4 py-1.5 rounded-lg transition-all ${listFilter === f ? 'bg-white dark:bg-gray-700 text-[#1E5BFF] shadow-sm' : 'text-gray-400'}`}
                   >
-                    {f.label === 'Todos' ? 'Tudo' : f.label}
+                    {f === 'all' ? 'Tudo' : 'Top'}
                   </button>
                 ))}
               </div>

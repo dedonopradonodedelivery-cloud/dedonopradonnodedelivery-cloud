@@ -14,50 +14,10 @@ import {
   Camera, Vote, Handshake, Flame, Milestone, History, Home as HomeIcon,
   MessageCircle, HelpCircle, UserCheck, Recycle,
   Navigation,
-  Newspaper 
+  Newspaper // Adicionado para Posts do Bairro
 } from 'lucide-react';
-// FIX: Corrected import path for BairroPost
 import { AdType, Category, Store, Story, EditorialCollection, Job, CommunityPost, NeighborhoodCommunity, BairroPost } from './types';
-import { getStoreLogo } from './utils/mockLogos'; 
-
-// --- VALIDATION HELPERS (Moved from StoreAdsModule.tsx) ---
-export const FORBIDDEN_WORDS = ['palavrão', 'inapropriado', 'violação'];
-export const CHAR_LIMITS = {
-  template_headline: 25,
-  template_subheadline: 50,
-  editor_title: 40,
-  editor_subtitle: 120,
-};
-export const MIN_CONTRAST_RATIO = 4.5;
-
-export const hexToRgb = (hex: string): { r: number; g: number; b: number } | null => {
-  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-  return result ? {
-    r: parseInt(result[1], 16),
-    g: parseInt(result[2], 16),
-    b: parseInt(result[3], 16),
-  } : null;
-};
-
-export const getLuminance = (r: number, g: number, b: number): number => {
-  const a = [r, g, b].map((v) => {
-    v /= 255;
-    return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
-  });
-  return a[0] * 0.2126 + a[1] * 0.7152 + a[2] * 0.0722;
-};
-
-export const getContrastRatio = (hex1: string, hex2: string): number => {
-  const rgb1 = hexToRgb(hex1);
-  const rgb2 = hexToRgb(hex2);
-  if (!rgb1 || !rgb2) return 1;
-  const lum1 = getLuminance(rgb1.r, rgb1.g, rgb1.b);
-  const lum2 = getLuminance(rgb2.r, rgb2.g, rgb2.b);
-  const lightest = Math.max(lum1, lum2);
-  const darkest = Math.min(lum1, lum2);
-  return (lightest + 0.05) / (darkest + 0.05);
-};
-// --- END VALIDATION HELPERS ---
+import { getStoreLogo } from '@/utils/mockLogos'; // Importe getStoreLogo aqui
 
 // NOVO: Mock de Posts do Bairro
 export const MOCK_BAIRRO_POSTS: BairroPost[] = [
@@ -114,8 +74,8 @@ export const CATEGORIES: Category[] = [
   { id: 'cat-edu', slug: 'educacao', name: 'Educação', icon: <BookOpen />, color: 'bg-brand-blue' },
   { id: 'cat-pharmacy', slug: 'farmacia', name: 'Farmácia', icon: <Pill />, color: 'bg-brand-blue' },
   { id: 'cat-fashion', slug: 'moda', name: 'Moda', icon: <Shirt />, color: 'bg-brand-blue' },
-  { id: 'cat-eventos', name: 'Eventos', slug: 'eventos', icon: <PartyPopper />, color: 'bg-brand-blue' },
-  { id: 'cat-condominio', name: 'Condomínio', slug: 'condominio', icon: <Building2 />, color: 'bg-brand-blue' },
+  { id: 'cat-eventos', slug: 'eventos', name: 'Eventos', icon: <PartyPopper />, color: 'bg-brand-blue' },
+  { id: 'cat-condominio', slug: 'condominio', name: 'Condomínio', icon: <Building2 />, color: 'bg-brand-blue' },
 ];
 
 export const SUBCATEGORIES: Record<string, { name: string; icon: React.ReactNode }[]> = {
@@ -597,7 +557,8 @@ export const EDITORIAL_SERVICES: EditorialCollection[] = [
 export const quickFilters = [
   { id: 'top_rated', label: 'Top Avaliados', icon: 'star' },
   { id: 'open_now', label: 'Aberto Agora', icon: 'clock' },
-  { id: 'nearby', label: 'Perto de Mim', icon: 'zap' }
+  { id: 'nearby', label: 'Perto de Mim', icon: 'zap' },
+  { id: 'cashback', label: 'Com Cashback', icon: 'percent' }
 ];
 
 export const STORIES: Story[] = [
@@ -633,7 +594,7 @@ export const MOCK_JOBS: Job[] = [
     salary: 'Comissão + Ajuda de Custo',
     description: 'Vendas de planos de internet e TV a cabo.',
     requirements: ['Carro próprio', 'Experiência com vendas'],
-    schedule: 'Seg-Sex',
+    schedule: 'Seg-Mex',
     contactWhatsapp: '5521988888888',
     postedAt: 'Há 1 dia',
     isUrgent: true
@@ -661,51 +622,7 @@ export const SPECIALTIES: Record<string, string[]> = {
   'default': ['Consultoria', 'Orçamento geral', 'Manutenção preventiva', 'Reparo específico', 'Instalação']
 };
 
-// NOVO: Mock de Posts do Bairro
-// Removed duplicate declaration of MOCK_BAIRRO_POSTS as it's defined above.
-
 // NOVO: Palavras proibidas para posts do bairro
 export const FORBIDDEN_POST_WORDS = [
   'promoção', 'oferta', 'desconto', 'cupom', 'r$', '% off', 'grátis', 'barato', 'imperdível', 'liquidação', 'black friday'
-];
-
-export const NEIGHBORHOODS = [
-  "Freguesia", "Pechincha", "Anil", "Taquara", "Tanque", 
-  "Curicica", "Parque Olímpico", "Gardênia", "Cidade de Deus"
-];
-
-// FIX: Moved MOCK_OCCUPANCY and DISPLAY_MODES definitions here as intended by comments in StoreAdsModule.tsx
-export const MOCK_OCCUPANCY: Record<string, Record<string, boolean>> = {
-  "Freguesia": { "periodo_1": true },
-  "Taquara": { "periodo_2": true },
-};
-
-export const DISPLAY_MODES = [
-  { 
-    id: 'home', 
-    label: 'Home', 
-    icon: HomeIcon, 
-    price: 49.90,
-    originalPrice: 199.90,
-    description: 'Exibido no carrossel da página inicial para todos os usuários.',
-    whyChoose: 'Ideal para máxima visibilidade imediata.'
-  },
-  { 
-    id: 'cat', 
-    label: 'Categorias', 
-    icon: LayoutGrid, 
-    price: 29.90,
-    originalPrice: 149.90,
-    description: 'Exibido no topo das buscas por produtos ou serviços específicos.',
-    whyChoose: 'Impacta o cliente no momento da decisão.'
-  },
-  { 
-    id: 'combo', 
-    label: 'Home + Categorias', 
-    icon: Zap, 
-    price: 69.90,
-    originalPrice: 349.80,
-    description: 'Destaque na página inicial e em todas as categorias.',
-    whyChoose: 'Mais alcance, cliques e chances de venda.'
-  },
 ];

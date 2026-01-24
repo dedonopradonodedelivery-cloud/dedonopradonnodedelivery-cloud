@@ -3,6 +3,7 @@
   "description": "Onde o bairro conversa. O super-app de Jacarepaguá para conectar moradores, comércios e serviços locais.",
   "requestFramePermissions": [
     "geolocation",
-    "camera"
+    "camera",
+    "microphone"
   ]
 }

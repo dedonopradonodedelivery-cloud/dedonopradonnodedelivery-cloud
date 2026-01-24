@@ -1,75 +1,170 @@
 
-import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { ChevronLeft, Search, Star, BadgeCheck, ChevronRight, X, AlertCircle, Grid, Filter, Megaphone, ArrowUpRight, Info, Image as ImageIcon, Sparkles, ShieldCheck } from 'lucide-react';
-import { Category, Store, AdType, BannerDesign } from '../types';
-import { SUBCATEGORIES } from '../constants';
-import { supabase } from '../lib/supabaseClient';
+import React, { useState, useEffect, useMemo } from 'react';
+import { ChevronLeft, Star, BadgeCheck, ChevronRight, AlertCircle, Grid, Megaphone, Sparkles, Rocket, Crown, ShieldCheck, MapPin, Tag, Gift, Zap, Flame, Percent, Utensils, Pizza, Coffee, Beef, IceCream, ShoppingCart, Store as StoreIcon, Package, Wrench, Truck, CreditCard, Coins, Award, Smile, Bell, Clock, Heart } from 'lucide-react';
+import { Category, Store, AdType, BannerDesign } from '@/types';
+import { SUBCATEGORIES } from '@/constants';
+import { supabase } from '@/lib/supabaseClient';
+import { LaunchOfferBanner } from './LaunchOfferBanner';
 
+// --- BANNER VIEWER (LOCAL COMPONENT) ---
 
-// --- Reusable Banner Rendering Components ---
-const TemplateBannerRender: React.FC<{ config: any }> = ({ config }) => {
-    if (!config) return <div className="p-2 text-xs text-slate-500">Configuração ausente</div>;
-    const { template_id, headline, subheadline, product_image_url } = config;
-    switch (template_id) {
-      case 'oferta_relampago':
-        return (
-          <div className="w-full aspect-video rounded-2xl bg-gradient-to-br from-rose-500 to-red-600 text-white p-6 flex items-center justify-between overflow-hidden relative shadow-lg">
-            <div className="relative z-10">
-              <span className="text-sm font-bold bg-yellow-300 text-red-700 px-3 py-1 rounded-full uppercase shadow-sm">{headline || 'XX% OFF'}</span>
-              <h3 className="text-3xl font-black mt-4 drop-shadow-md max-w-[200px] leading-tight">{subheadline || 'Nome do Produto'}</h3>
-            </div>
-            <div className="relative z-10 w-32 h-32 rounded-full border-4 border-white/50 bg-gray-200 overflow-hidden flex items-center justify-center shrink-0 shadow-2xl">
-              {product_image_url ? <img src={product_image_url} className="w-full h-full object-cover" /> : <ImageIcon className="w-12 h-12 text-gray-400" />}
-            </div>
-          </div>
-        );
-      case 'lancamento':
-        return (
-          <div className="w-full aspect-video rounded-2xl bg-gradient-to-br from-slate-800 to-slate-900 text-white p-6 flex items-end justify-between overflow-hidden relative shadow-lg">
-             <img src={product_image_url || 'https://via.placeholder.com/150'} className="absolute inset-0 w-full h-full object-cover opacity-30 mix-blend-luminosity" />
-             <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
-             <div className="relative z-10">
-                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-cyan-300">{headline || 'LANÇAMENTO'}</span>
-                <h3 className="text-2xl font-bold mt-1 max-w-[220px] leading-tight">{subheadline || 'Descrição'}</h3>
-             </div>
-          </div>
-        );
-      default: return null;
-    }
+const ICON_COMPONENTS: Record<string, React.ElementType> = {
+  Flame, Zap, Percent, Tag, Gift, Utensils, Pizza, Coffee, Beef, IceCream,
+  ShoppingCart, Store: StoreIcon, Package, Wrench, Truck, CreditCard, Coins, Star,
+  Award, MapPin, Smile, Bell, Clock, Heart, Sparkles, Rocket, Megaphone, Crown, ShieldCheck
 };
 
-const CustomBannerRender: React.FC<{ config: any }> = ({ config }) => {
-    const { template_id, background_color, text_color, font_size, font_family, title, subtitle } = config;
-    
-    const fontSizes = { small: 'text-2xl', medium: 'text-4xl', large: 'text-5xl' };
-    const subFontSizes = { small: 'text-sm', medium: 'text-base', large: 'text-lg' };
-    const headlineFontSize = { small: 'text-4xl', medium: 'text-6xl', large: 'text-7xl' };
+const FONT_STYLES = [
+  { id: 'font-moderna', name: 'Moderna', family: "'Outfit', sans-serif" },
+  { id: 'font-forte', name: 'Forte', family: "'Inter', sans-serif", weight: '900' },
+  { id: 'font-elegante', name: 'Elegante', family: "'Lora', serif" },
+  { id: 'font-amigavel', name: 'Amigável', family: "'Quicksand', sans-serif" },
+  { id: 'font-neutra', name: 'Neutra', family: "'Inter', sans-serif" },
+  { id: 'font-impacto', name: 'Impacto', family: "'Anton', sans-serif" },
+];
 
-    const layoutClasses = {
-      simple_left: 'flex flex-col justify-center items-start text-left',
-      centered: 'flex flex-col justify-center items-center text-center',
-      headline: 'flex flex-col justify-center items-center text-center',
+const SIZE_LEVELS = [
+  { id: 'xs', name: 'M. Pequeno', titleClass: 'text-lg', subClass: 'text-[9px]' },
+  { id: 'sm', name: 'Pequeno', titleClass: 'text-xl', subClass: 'text-[10px]' },
+  { id: 'md', name: 'Médio', titleClass: 'text-2xl', subClass: 'text-xs' },
+  { id: 'lg', name: 'Grande', titleClass: 'text-3xl', subClass: 'text-sm' },
+  { id: 'xl', name: 'M. Grande', titleClass: 'text-4xl', subClass: 'text-base' },
+];
+
+const BannerViewer: React.FC<{ 
+  config: BannerDesign; 
+  storeName: string; 
+  storeLogo?: string | null; 
+}> = ({ config, storeName, storeLogo }) => {
+    const { 
+      title, subtitle, titleFont, titleSize, subtitleFont, subtitleSize, 
+      bgColor, textColor, align, animation, iconName, iconPos, iconSize, 
+      logoDisplay, iconColorMode, iconCustomColor, imageUrl // Added imageUrl to destructuring
+    } = config;
+
+    const renderIcon = (name: string | null, size: 'sm' | 'md' | 'lg', colorMode: string) => {
+      if (!name || !ICON_COMPONENTS[name]) return null;
+      const IconComp = ICON_COMPONENTS[name];
+      const sizes = { sm: 24, md: 44, lg: 64 };
+      const colors: Record<string, string> = { text: textColor, white: '#FFFFFF', black: '#000000', custom: iconCustomColor || '#1E5BFF' };
+      return <IconComp size={sizes[size]} style={{ color: colors[colorMode] }} strokeWidth={2.5} />;
     };
 
-    type LayoutKey = keyof typeof layoutClasses;
-    type SizeKey = keyof typeof fontSizes;
-    type HeadlineSizeKey = keyof typeof headlineFontSize;
-
+    const getFontStyle = (fontId: string) => {
+      const f = FONT_STYLES.find(x => x.id === fontId);
+      return f ? { fontFamily: f.family, fontWeight: f.weight || '700' } : {};
+    };
+    
     return (
-        <div 
-            className={`w-full aspect-video rounded-2xl overflow-hidden relative shadow-lg p-8 ${layoutClasses[template_id as LayoutKey] || 'flex flex-col justify-center'}`}
-            style={{ backgroundColor: background_color, color: text_color }}
-        >
-            <h3 className={`${template_id === 'headline' ? headlineFontSize[font_size as HeadlineSizeKey] : fontSizes[font_size as SizeKey]} font-black leading-tight line-clamp-2`} style={{ fontFamily: font_family }}>
-                {title || "Título"}
-            </h3>
-            <p className={`${subFontSizes[font_size as SizeKey]} mt-3 opacity-80 max-w-md line-clamp-3`} style={{ fontFamily: font_family }}>
-                {subtitle || "Subtítulo"}
+      <div 
+        className={`w-full h-full p-8 shadow-2xl relative overflow-hidden transition-all duration-500 flex flex-col justify-center border border-white/10 ${
+          align === 'center' ? 'items-center text-center' : align === 'right' ? 'items-end text-right' : 'items-start text-left'
+        } ${animation === 'pulse' ? 'animate-pulse' : animation === 'float' ? 'animate-float-slow' : ''}`}
+        style={{
+          backgroundColor: bgColor,
+          backgroundImage: imageUrl ? `url(${imageUrl})` : undefined, // Apply imageUrl as background
+          backgroundSize: imageUrl ? 'cover' : undefined,
+          backgroundPosition: imageUrl ? 'center' : undefined,
+        }}
+      >
+        {/* Overlay para escurecer imagem de fundo se houver */}
+        {imageUrl && <div className="absolute inset-0 bg-black/40"></div>}
+
+        <div className={`relative z-10 transition-all duration-500 flex ${iconPos === 'top' ? 'flex-col items-inherit' : iconPos === 'right' ? 'flex-row-reverse items-center gap-4' : 'flex-row items-center gap-4'} ${animation === 'slide' ? 'animate-in slide-in-from-left-8' : ''}`}>
+          {iconName && (
+            <div className={`${iconPos === 'top' ? 'mb-4' : ''} shrink-0`}>
+                {renderIcon(iconName, iconSize, iconColorMode)}
+            </div>
+          )}
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 mb-3 w-fit transition-all duration-300">
+              {logoDisplay !== 'none' && storeLogo && (
+                  <div className={`shrink-0 overflow-hidden bg-white/20 p-0.5 border border-white/20 transition-all duration-300 ${logoDisplay === 'round' ? 'rounded-full' : 'rounded-lg'}`}>
+                      <img src={storeLogo} className={`w-5 h-5 object-contain transition-all duration-300 ${logoDisplay === 'round' ? 'rounded-full' : 'rounded-md'}`} alt="Logo" />
+                  </div>
+              )}
+              <div className="bg-black/10 backdrop-blur-md px-2 py-0.5 rounded-lg border border-white/10 w-fit">
+                  <span className="text-[7px] font-black uppercase tracking-[0.2em]" style={{ color: textColor }}>{storeName}</span>
+              </div>
+            </div>
+            <h2 
+              className={`font-black leading-tight mb-2 tracking-tight line-clamp-2 transition-all duration-300 ${SIZE_LEVELS.find(s => s.id === titleSize)?.titleClass}`} 
+              style={{ ...getFontStyle(titleFont), color: textColor }}
+            >
+                {title}
+            </h2>
+            <p 
+              className={`font-medium opacity-80 leading-snug max-w-[280px] line-clamp-2 transition-all duration-300 ${SIZE_LEVELS.find(s => s.id === subtitleSize)?.subClass}`} 
+              style={{ ...getFontStyle(subtitleFont), color: textColor }}
+            >
+                {subtitle}
             </p>
+          </div>
         </div>
+      </div>
     );
 };
-// --- End Banner Rendering Components ---
+
+// This function maps the Supabase banner config to the generic BannerDesign type
+const mapToViewerConfig = (dbConfig: any): BannerDesign => {
+  if (dbConfig.type === 'custom_editor') {
+    return dbConfig; // Custom editor configs are already in BannerDesign format
+  }
+  if (dbConfig.type === 'template') {
+    switch (dbConfig.template_id) {
+      case 'oferta_relampago':
+        return {
+          title: dbConfig.subheadline || 'Oferta Imperdível',
+          subtitle: `Com ${dbConfig.headline || 'desconto'}!`,
+          titleFont: 'font-impacto', titleSize: 'lg',
+          subtitleFont: 'font-amigavel', subtitleSize: 'md',
+          bgColor: '#DC2626', textColor: '#FFFFFF',
+          align: 'center', iconName: 'Flame', iconPos: 'top',
+          iconSize: 'lg', logoDisplay: 'none', animation: 'pulse',
+          iconColorMode: 'white',
+          imageUrl: dbConfig.product_image_url || undefined, // Include imageUrl from template
+        };
+      case 'lancamento':
+        return {
+          title: dbConfig.headline || 'Lançamento',
+          subtitle: dbConfig.subheadline || 'Conheça a novidade.',
+          titleFont: 'font-moderna', titleSize: 'lg',
+          subtitleFont: 'font-elegante', subtitleSize: 'md',
+          bgColor: '#0F172A', textColor: '#FFFFFF',
+          align: 'left', iconName: 'Sparkles', iconPos: 'right',
+          iconSize: 'lg', logoDisplay: 'square', animation: 'none',
+          iconColorMode: 'text',
+          imageUrl: dbConfig.product_image_url || undefined, // Include imageUrl from template
+        };
+      case 'institucional':
+        return {
+          title: dbConfig.headline || 'Sua Loja',
+          subtitle: dbConfig.subheadline || 'Qualidade e Tradição.',
+          titleFont: 'font-forte', titleSize: 'lg',
+          subtitleFont: 'font-neutra', subtitleSize: 'sm',
+          bgColor: '#FFFFFF', textColor: '#111827',
+          align: 'center', iconName: 'Store', iconPos: 'top',
+          iconSize: 'md', logoDisplay: 'round', animation: 'none',
+          iconColorMode: 'text',
+          imageUrl: dbConfig.logo_url || undefined, // Include imageUrl from template
+        };
+      default: break;
+    }
+  }
+  return {
+    title: 'Anúncio Patrocinado',
+    subtitle: 'Confira as novidades da loja.',
+    bgColor: '#1E5BFF', textColor: '#FFFFFF',
+    titleFont: 'font-moderna', titleSize: 'md',
+    subtitleFont: 'font-neutra', subtitleSize: 'sm',
+    align: 'left', iconName: null, iconPos: 'left',
+    iconSize: 'md', logoDisplay: 'round', animation: 'none',
+    iconColorMode: 'text',
+  };
+};
+
+// --- END LOCAL COMPONENT ---
+
 
 const BigSurCard: React.FC<{ 
   icon: React.ReactNode; 
@@ -132,6 +227,7 @@ interface CategoryViewProps {
 }
 
 export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, onStoreClick, stores, userRole, onAdvertiseInCategory, onNavigate }) => {
+  // FIX: Initialized selectedSubcategory to null
   const [selectedSubcategory, setSelectedSubcategory] = useState<string | null>(null);
   const [activeBanner, setActiveBanner] = useState<any | null>(null);
   const [loadingBanner, setLoadingBanner] = useState(true);
@@ -149,9 +245,10 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
       }
       setLoadingBanner(true);
       try {
+        // FIX: Added 'profiles(store_name, logo_url)' to the select statement to retrieve store info for the banner.
         const { data, error } = await supabase
           .from('published_banners')
-          .select('id, config')
+          .select('id, config, profiles(store_name, logo_url)') 
           .eq('target', `category:${category.slug}`)
           .eq('is_active', true)
           .order('created_at', { ascending: false })
@@ -160,7 +257,15 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
         if (error) throw error;
 
         if (data && data.length > 0) {
-          setActiveBanner(data[0]);
+          // Extract the first profile object if available, otherwise null
+          const fetchedProfile = data[0].profiles && Array.isArray(data[0].profiles) && data[0].profiles.length > 0
+            ? data[0].profiles[0] as { store_name: string; logo_url: string; }
+            : null;
+
+          setActiveBanner({
+              ...data[0], // Keep other banner properties
+              profiles: fetchedProfile // Assign the correctly typed profile
+          });
         } else {
           setActiveBanner(null);
         }
@@ -240,7 +345,7 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
                       name="Ver Todas" 
                       isSelected={false} 
                       isMoreButton 
-                      onClick={() => alert('Mostrar todas as subcategories')} 
+                      onClick={() => alert('Mostrar todas as subcategorias')} 
                   />
               )}
             </div>
@@ -251,11 +356,11 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
           {loadingBanner ? (
             <div className="w-full aspect-video bg-gray-200 dark:bg-gray-800 rounded-2xl animate-pulse"></div>
           ) : activeBanner ? (
-            activeBanner.config.type === 'template' ? (
-              <TemplateBannerRender config={activeBanner.config} />
-            ) : (
-              <CustomBannerRender config={activeBanner.config} />
-            )
+            <BannerViewer
+              config={mapToViewerConfig(activeBanner.config)}
+              storeName={activeBanner.profiles?.store_name || 'Loja Patrocinada'}
+              storeLogo={activeBanner.profiles?.logo_url || '/assets/default-logo.png'}
+            />
           ) : (
             <div 
               onClick={handleAdvertiseClick}

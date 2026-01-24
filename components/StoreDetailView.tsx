@@ -9,6 +9,7 @@ import {
   Clock,
   Phone,
   MessageSquare,
+  Coins,
   ArrowRight,
   Instagram,
   ImageIcon,
@@ -31,14 +32,13 @@ import { Store, BusinessHour, StoreReview } from '../types';
 import { supabase } from '../lib/supabaseClient';
 import { useAuth } from '../contexts/AuthContext';
 import { useNeighborhood } from '../contexts/NeighborhoodContext';
-// FIX: Imported OrganicEventType from analytics
 import { trackOrganicEvent, OrganicEventType } from '../lib/analytics';
 
 const WEEK_DAYS_LABELS: Record<string, string> = {
   segunda: 'Segunda-feira',
   terca: 'Terça-feira',
   quarta: 'Quarta-feira',
-  quinta: 'Quarta-feira',
+  quinta: 'Quinta-feira',
   sexta: 'Sexta-feira',
   sabado: 'Sábado',
   domingo: 'Domingo',
@@ -71,11 +71,14 @@ const MOCK_REVIEWS: StoreReview[] = [
 export const StoreDetailView: React.FC<{ 
   store: Store; 
   onBack: () => void; 
+  onPay?: () => void;
   onClaim?: () => void;
-}> = ({ store, onBack, onClaim }) => {
+  onViewCashback?: () => void;
+}> = ({ store, onBack, onPay, onClaim, onViewCashback }) => {
   const { user } = useAuth();
   const { currentNeighborhood } = useNeighborhood();
   const [isFavorite, setIsFavorite] = useState(false);
+  const [userCredit, setUserCredit] = useState<number | null>(null);
   const [activeTab, setActiveTab] = useState<'description' | 'reviews' | 'hours'>('description');
   const [isClosedReporting, setIsClosedReporting] = useState(false);
   const [closedReported, setClosedReported] = useState(false);
@@ -97,8 +100,21 @@ export const StoreDetailView: React.FC<{
   }, []);
 
   useEffect(() => {
-    // Lógica para verificar se a loja está nos favoritos do usuário
-    // (Ainda não implementado, mas aqui seria o fetch)
+    const fetchUserCredit = async () => {
+        if (!user || !store || !supabase) return;
+        try {
+            const { data } = await supabase
+                .from('store_credits')
+                .select('balance_cents')
+                .eq('user_id', user.id)
+                .eq('store_id', store.id)
+                .maybeSingle();
+            
+            if (data) setUserCredit(data.balance_cents / 100);
+            else setUserCredit(0);
+        } catch (e) { console.error(e); }
+    };
+    fetchUserCredit();
   }, [user, store]);
 
   const handleReportClosed = () => {
@@ -132,16 +148,16 @@ export const StoreDetailView: React.FC<{
   const bannerImg = store.banner_url || store.image || "https://images.unsplash.com/photo-1570129477492-45c003edd2be?q=80&w=1200&auto=format&fit=crop";
   const logoImg = store.logo_url || store.logoUrl || '/assets/default-logo.png';
   
-  const phoneFormatted = store.phone || '';
+  const phoneFormatted = store.telefone_fixo_publico || store.phone || '';
   const phoneDigits = phoneFormatted.replace(/\D/g, '');
   const whatsappFormatted = store.whatsapp_publico || store.phone || '';
   const whatsappDigits = whatsappFormatted.replace(/\D/g, '');
   
   const addressFormatted = useMemo(() => {
-    if (store.address) {
-        return `${store.address}`; // Assuming store.address is already formatted or a simple string
+    if (store.rua) {
+        return `${store.rua}, ${store.numero}${store.complemento ? ` - ${store.complemento}` : ''} - ${store.bairro}`;
     }
-    return 'Endereço não informado';
+    return store.address || 'Endereço não informado';
   }, [store]);
 
   const hasAddress = addressFormatted !== 'Endereço não informado';
@@ -208,6 +224,25 @@ export const StoreDetailView: React.FC<{
                 </div>
             </div>
           </div>
+
+          {/* --- CASHBACK SALDO --- */}
+          <button 
+              onClick={onViewCashback}
+              className="w-full bg-gray-50 dark:bg-gray-900 rounded-[24px] p-5 mb-8 flex items-center justify-between border border-gray-100 dark:border-gray-800 shadow-sm relative overflow-hidden group active:scale-[0.99] transition-all text-left"
+          >
+              <div className="flex items-center gap-3 relative z-10">
+                  <div className="w-10 h-10 rounded-2xl bg-[#1E5BFF] flex items-center justify-center text-white shadow-md shadow-blue-500/10 group-hover:scale-110 transition-transform">
+                      <Coins className="w-5 h-5" />
+                  </div>
+                  <div>
+                      <p className="text-[9px] font-bold uppercase tracking-[0.15em] text-gray-400">Seu cashback nesta loja</p>
+                      <h3 className="text-lg font-black text-gray-900 dark:text-white leading-none mt-0.5">R$ {(userCredit || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</h3>
+                  </div>
+              </div>
+              <div className="bg-white dark:bg-gray-800 p-1.5 rounded-full text-gray-300 shadow-inner group-hover:text-[#1E5BFF] transition-colors">
+                <ArrowRight className="w-3 h-3" />
+              </div>
+          </button>
 
           {/* --- WHATSAPP CTA --- */}
           <section className="mb-10">
@@ -329,140 +364,199 @@ export const StoreDetailView: React.FC<{
                             <div className="flex flex-wrap gap-2">
                                 {store.payment_methods && store.payment_methods.length > 0 ? (
                                     store.payment_methods.map(method => (
-                                        <span key={method} className="bg-white dark:bg-gray-800 px-3 py-1.5 rounded-xl text-xs font-bold text-gray-600 dark:text-gray-300 border border-gray-100 dark:border-gray-700">
-                                            {method}
-                                        </span>
+                                        <span key={method} className="bg-white dark:bg-gray-800 px-3 py-1.5 rounded-xl border border-gray-100 dark:border-gray-700 text-[9px] font-black text-gray-600 dark:text-gray-300 uppercase tracking-tight shadow-sm">{method}</span>
                                     ))
                                 ) : (
-                                    <span className="text-sm text-gray-400">Não informado</span>
+                                    <span className="text-[10px] text-gray-400 italic">Consulte as formas disponíveis no local.</span>
                                 )}
                             </div>
-                            {store.payment_methods_others && (
-                                <p className="text-xs text-gray-500 dark:text-gray-400 mt-3 border-t border-gray-100 dark:border-gray-700 pt-2">
-                                    Outros: {store.payment_methods_others}
-                                </p>
-                            )}
                         </div>
                     </div>
-
-                    {/* Trust Block (Recomendado por Moradores) */}
-                    <div className="mt-12">
-                        <h3 className="text-base font-bold text-gray-900 dark:text-white flex items-center gap-2">Confiança no bairro</h3>
-                        <p className="text-[11px] text-gray-400 mt-1 font-medium leading-relaxed">Indicadores de qualidade baseados na experiência real dos moradores.</p>
-                        <div className="grid grid-cols-1 gap-3 mt-4">
-                            <div className="flex items-center gap-3 px-4 py-3 rounded-2xl bg-yellow-50 dark:bg-yellow-900/10 border border-yellow-100 dark:border-yellow-800/50">
-                                <Star className="w-5 h-5 text-yellow-500 fill-current" />
-                                <span className="text-xs font-bold text-yellow-700 dark:text-yellow-400 uppercase tracking-tight">Muito bem avaliado</span>
-                            </div>
-                            <div className="flex items-center gap-3 px-4 py-3 rounded-2xl bg-blue-50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-800/50">
-                                <CheckCircle2 className="w-5 h-5 text-[#1E5BFF]" />
-                                <span className="text-xs font-bold text-blue-700 dark:text-blue-300 uppercase tracking-tight">Registro oficial ativo</span>
-                            </div>
-                            <div className="flex items-center gap-3 px-4 py-3 rounded-2xl bg-emerald-50 dark:bg-emerald-900/10 border border-emerald-100 dark:border-emerald-800/50">
-                                <ThumbsUp className="w-5 h-5 text-emerald-600" />
-                                <span className="text-xs font-bold text-emerald-700 dark:text-emerald-400 uppercase tracking-tight">Indicação de vizinhos</span>
-                            </div>
-                        </div>
-                    </div>
-
                 </div>
               )}
 
               {/* CONTEÚDO: AVALIAÇÕES */}
               {activeTab === 'reviews' && (
-                <div className="animate-in fade-in duration-500 space-y-6">
-                    <div className="flex flex-col gap-2">
-                        {reviewsToDisplay.length > 0 ? reviewsToDisplay.map(review => (
-                            <div key={review.id} className="bg-gray-50 dark:bg-gray-800 p-4 rounded-2xl border border-gray-100 dark:border-gray-700">
-                                <div className="flex items-center gap-3 mb-2">
-                                    <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-gray-400">
-                                        <UserIcon size={16} />
-                                    </div>
-                                    <div>
-                                        <h4 className="font-bold text-gray-900 dark:text-white text-sm">{review.user_name}</h4>
-                                        <div className="flex items-center gap-0.5 mt-0.5">
-                                            {[1,2,3,4,5].map(s => (
-                                                <Star key={s} size={8} className={`${s <= review.rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-200'}`} />
-                                            ))}
+                <div className="animate-in fade-in duration-500 space-y-10">
+                    {/* Lista de Avaliações */}
+                    <div className="space-y-8">
+                        {reviewsToDisplay.length > 0 ? (
+                            reviewsToDisplay.map((rev) => (
+                                <div key={rev.id} className="space-y-3">
+                                  <div className="bg-gray-50 dark:bg-gray-900/50 p-5 rounded-[24px] border border-gray-100 dark:border-gray-800">
+                                      <div className="flex items-center justify-between mb-3">
+                                          <div className="flex items-center gap-2">
+                                              <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-800 flex items-center justify-center text-gray-400">
+                                                  <UserIcon size={14} />
+                                              </div>
+                                              <p className="text-xs font-bold text-gray-800 dark:text-gray-200">{rev.user_name}</p>
+                                          </div>
+                                          <div className="flex items-center gap-0.5">
+                                              {[1,2,3,4,5].map(s => (
+                                                  <Star key={s} size={10} className={`${s <= rev.rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`} />
+                                              ))}
+                                          </div>
+                                      </div>
+                                      <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed italic">"{rev.comment}"</p>
+                                      <p className="text-[9px] text-gray-400 font-bold uppercase mt-4 tracking-widest">
+                                        {new Date(rev.created_at).toLocaleDateString()}
+                                      </p>
+                                  </div>
+                                  
+                                  {/* Resposta do Lojista */}
+                                  {rev.merchant_response && (
+                                    <div className="ml-6 flex gap-3 animate-in slide-in-from-left-2 duration-500">
+                                      <div className="pt-2 text-gray-300">
+                                        <CornerDownRight size={18} />
+                                      </div>
+                                      <div className="flex-1 bg-blue-50/50 dark:bg-blue-900/10 p-4 rounded-[20px] border border-blue-100 dark:border-blue-900/30">
+                                        <div className="flex items-center gap-2 mb-1.5">
+                                          <div className="w-5 h-5 rounded-full bg-[#1E5BFF] flex items-center justify-center text-white shrink-0">
+                                            <Building2 size={10} />
+                                          </div>
+                                          <span className="text-[9px] font-black text-[#1E5BFF] uppercase tracking-wider">Resposta do estabelecimento</span>
                                         </div>
-                                    </div>
-                                </div>
-                                <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed italic">"{review.comment}"</p>
-                                {review.merchant_response && (
-                                    <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/10 rounded-xl border border-blue-100 dark:border-blue-800 flex items-start gap-2">
-                                        <CornerDownRight size={16} className="text-blue-500 shrink-0" />
-                                        <p className="text-xs text-blue-700 dark:text-blue-300 leading-relaxed">
-                                            <span className="font-bold">Resposta do lojista:</span> {review.merchant_response.text}
+                                        <p className="text-xs text-gray-700 dark:text-gray-300 leading-relaxed font-medium">
+                                          {rev.merchant_response.text}
                                         </p>
+                                        <p className="text-[8px] text-gray-400 font-bold uppercase mt-3 text-right">
+                                          {new Date(rev.merchant_response.responded_at).toLocaleDateString()}
+                                        </p>
+                                      </div>
                                     </div>
-                                )}
-                            </div>
-                        )) : (
-                            <div className="text-center py-10 text-gray-500">Nenhuma avaliação ainda.</div>
-                        )}
-                    </div>
-                    {user && (
-                        <form onSubmit={handleSubmitReview} className="mt-6 space-y-4 bg-white dark:bg-gray-800 p-5 rounded-[2rem] border border-gray-100 dark:border-gray-700 shadow-sm">
-                            <h4 className="font-bold text-gray-900 dark:text-white text-base mb-3">Sua Avaliação</h4>
-                            <div className="flex items-center justify-center gap-2">
-                                {[1,2,3,4,5].map(s => (
-                                    <Star 
-                                        key={s} 
-                                        size={32} 
-                                        className={`cursor-pointer ${s <= userRating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`} 
-                                        onClick={() => setUserRating(s)}
-                                    />
-                                ))}
-                            </div>
-                            <textarea
-                                value={userComment}
-                                onChange={(e) => setUserComment(e.target.value)}
-                                placeholder="Compartilhe sua experiência..."
-                                rows={3}
-                                className="w-full p-3 bg-gray-50 dark:bg-gray-700 border border-gray-100 dark:border-gray-600 rounded-xl text-sm dark:text-white outline-none focus:border-[#1E5BFF] transition-all resize-none"
-                            />
-                            {reviewSuccessMessage && <p className="text-green-600 text-sm font-bold text-center">{reviewSuccessMessage}</p>}
-                            <button
-                                type="submit"
-                                disabled={isSubmittingReview || userRating === 0}
-                                className="w-full bg-[#1E5BFF] text-white font-bold py-3 rounded-xl flex items-center justify-center gap-2 disabled:opacity-50"
-                            >
-                                {isSubmittingReview ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send size={16} />}
-                                Publicar Avaliação
-                            </button>
-                        </form>
-                    )}
-                </div>
-              )}
-
-              {/* CONTEÚDO: HORÁRIOS */}
-              {activeTab === 'hours' && (
-                <div className="animate-in fade-in duration-500 space-y-6">
-                    <div className="bg-gray-50 dark:bg-gray-800 rounded-2xl p-5 border border-gray-100 dark:border-gray-700">
-                        {store.business_hours && Object.keys(store.business_hours).length > 0 ? (
-                            Object.entries(store.business_hours).map(([dayKey, hours]: [string, BusinessHour]) => (
-                                <div key={dayKey} className="flex justify-between items-center py-2 border-b border-gray-100 dark:border-gray-700 last:border-b-0">
-                                    <span className="text-sm font-medium text-gray-700 dark:text-gray-200 capitalize">
-                                        {WEEK_DAYS_LABELS[dayKey]}
-                                    </span>
-                                    {hours.open ? (
-                                        <span className="text-sm font-bold text-gray-900 dark:text-white">
-                                            {hours.start} - {hours.end}
-                                        </span>
-                                    ) : (
-                                        <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                                            Fechado
-                                        </span>
-                                    )}
+                                  )}
                                 </div>
                             ))
                         ) : (
-                            <div className="text-center py-5 text-gray-500">Horários não informados.</div>
+                            <div className="py-12 text-center bg-gray-50 dark:bg-gray-900/50 rounded-[24px] border border-dashed border-gray-200 dark:border-gray-800">
+                                <MessageSquare className="w-8 h-8 text-gray-300 mx-auto mb-3" />
+                                <p className="text-xs text-gray-400 font-medium uppercase tracking-widest">Ainda não há avaliações.</p>
+                            </div>
                         )}
+                    </div>
+
+                    {/* Formulário de Avaliar */}
+                    <div className="bg-white dark:bg-gray-900 rounded-[28px] p-6 border border-gray-100 dark:border-gray-800 shadow-sm">
+                        <h3 className="text-sm font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
+                            <Star className="w-4 h-4 text-[#1E5BFF]" /> Avaliar estabelecimento
+                        </h3>
+                        
+                        <form onSubmit={handleSubmitReview} className="space-y-5">
+                            <div>
+                                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 ml-1">Sua nota</p>
+                                <div className="flex gap-2">
+                                    {[1,2,3,4,5].map((star) => (
+                                        <button
+                                            key={star}
+                                            type="button"
+                                            onClick={() => setUserRating(star)}
+                                            className="p-1 transition-transform active:scale-90"
+                                        >
+                                            <Star 
+                                                size={32} 
+                                                className={`transition-all ${star <= userRating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-200 dark:text-gray-700'}`} 
+                                            />
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Comentário (opcional)</label>
+                                <textarea 
+                                    value={userComment}
+                                    onChange={(e) => setUserComment(e.target.value)}
+                                    placeholder="Conte como foi sua experiência..."
+                                    className="w-full h-24 p-4 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl outline-none focus:border-[#1E5BFF] text-sm dark:text-white transition-all resize-none"
+                                />
+                            </div>
+
+                            {reviewSuccessMessage && (
+                                <div className="p-3 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 text-xs font-bold rounded-xl border border-emerald-100 dark:border-emerald-800 animate-in zoom-in duration-300">
+                                    {reviewSuccessMessage}
+                                </div>
+                            )}
+
+                            <button 
+                                type="submit"
+                                disabled={isSubmittingReview}
+                                className="w-full py-4 bg-gray-900 dark:bg-white text-white dark:text-gray-900 font-bold rounded-2xl flex items-center justify-center gap-2 active:scale-95 transition-all text-xs uppercase tracking-widest disabled:opacity-50"
+                            >
+                                {isSubmittingReview ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+                                Enviar avaliação
+                            </button>
+                        </form>
+                    </div>
+                </div>
+              )}
+
+              {/* CONTEÚDO: HORÁRIO */}
+              {activeTab === 'hours' && (
+                <div className="animate-in fade-in duration-500">
+                    <div className="bg-white dark:bg-gray-900 rounded-[28px] p-6 border border-gray-100 dark:border-gray-800 shadow-sm">
+                        <div className="flex items-center justify-between mb-8">
+                            <h3 className="text-sm font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                                <Clock className="w-4 h-4 text-[#1E5BFF]" /> Horários de funcionamento
+                            </h3>
+                            {store.isOpenNow !== undefined && (
+                                <div className={`px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-widest ${store.isOpenNow ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' : 'bg-rose-50 text-rose-600 border border-rose-100'}`}>
+                                    {store.isOpenNow ? 'Aberto agora' : 'Fechado'}
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="space-y-4">
+                            {store.business_hours ? (
+                                Object.entries(store.business_hours).map(([key, value]) => {
+                                    const h = value as BusinessHour;
+                                    return (
+                                        <div key={key} className="flex items-center justify-between text-sm py-1 border-b border-gray-50 dark:border-gray-800 last:border-0">
+                                            <span className="font-medium text-gray-600 dark:text-gray-400">{WEEK_DAYS_LABELS[key] || key}</span>
+                                            <span className={`font-bold ${h.open ? 'text-gray-900 dark:text-white' : 'text-rose-400 uppercase text-[10px]'}`}>
+                                                {h.open ? `${h.start}–${h.end}` : 'Fechado'}
+                                            </span>
+                                        </div>
+                                    );
+                                })
+                            ) : (
+                                <div className="py-8 text-center bg-gray-50 dark:bg-gray-900/50 rounded-2xl border border-dashed border-gray-200 dark:border-gray-800">
+                                    <p className="text-xs text-gray-400 font-medium uppercase tracking-widest">Horário não informado.</p>
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </div>
               )}
           </section>
+
+          {/* --- BOTÕES FINAIS --- */}
+          <section className="space-y-3 mt-4">
+              {!store.claimed && (
+                <button 
+                  onClick={onClaim}
+                  className="w-full py-4 border-2 border-gray-100 dark:border-gray-800 text-gray-600 dark:text-gray-300 rounded-[20px] flex items-center justify-center gap-2 font-black text-[11px] uppercase tracking-widest hover:bg-gray-50 transition-all active:scale-95"
+                >
+                  <Building2 size={16} />
+                  É o dono? Reivindicar loja
+                </button>
+              )}
+
+              {closedReported ? (
+                  <div className="w-full py-4 text-center text-amber-600 bg-amber-50 dark:bg-amber-900/10 rounded-[20px] border border-amber-100 dark:border-amber-800 animate-in zoom-in duration-300">
+                      <p className="text-[10px] font-black uppercase tracking-[0.2em]">Obrigado! Em análise técnica.</p>
+                  </div>
+              ) : (
+                  <button 
+                    onClick={handleReportClosed}
+                    disabled={isClosedReporting}
+                    className="w-full py-4 flex items-center justify-center gap-2 text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-[0.2em] hover:text-red-400 transition-colors"
+                  >
+                    {isClosedReporting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <AlertTriangle className="w-3.5 h-3.5" />}
+                    Informar que esta loja fechou
+                  </button>
+              )}
+          </section>
+
         </div>
       </main>
     </div>

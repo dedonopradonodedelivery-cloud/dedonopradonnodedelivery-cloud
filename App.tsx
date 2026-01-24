@@ -1,53 +1,51 @@
 
 
 import React, { useState, useEffect } from 'react';
-import { Layout } from './components/Layout';
-import { Header } from './components/Header';
-import { HomeFeed } from './components/HomeFeed';
-import { ExploreView } from './components/ExploreView';
-import { StoreDetailView } from './components/StoreDetailView';
-import { AuthModal } from './components/AuthModal';
-import { MenuView } from './components/MenuView';
-import { PatrocinadorMasterScreen } from './components/PatrocinadorMasterScreen';
-import { ServicesView } from './components/ServicesView';
-import { SubcategoriesView } from './components/SubcategoriesView';
-import { SpecialtiesView } from './components/SpecialtiesView';
-import { ServiceSuccessView } from './components/ServiceSuccessView';
-import { QuoteRequestModal } from './components/QuoteRequestModal';
-import { StoreAreaView } from './components/StoreAreaView'; 
-import { WeeklyRewardView } from './components/WeeklyRewardView'; 
-import { UserCupomScreen } from './components/UserCupomScreen';
-import { UserCouponsHistoryView } from './components/UserCouponsHistoryView';
-import { JobsView } from './components/JobsView';
-import { MerchantJobsModule } from './components/MerchantJobsModule';
-import { AdminPanel } from './components/AdminPanel';
-import { StoreAdsQuickLaunch } from './components/StoreAdsQuickLaunch';
-import { MerchantPerformanceDashboard } from './components/MerchantPerformanceDashboard';
-import { AdminBannerModeration } from './components/AdminBannerModeration';
-import { DesignerPanel } from './components/DesignerPanel';
+import { Layout } from '@/components/layout/Layout';
+import { Header } from '@/components/layout/Header';
+import { HomeFeed } from '@/components/HomeFeed';
+import { ExploreView } from '@/components/ExploreView';
+import { StoreDetailView } from '@/components/StoreDetailView';
+import { AuthModal } from '@/components/AuthModal';
+import { MenuView } from '@/components/MenuView';
+import { PatrocinadorMasterScreen } from '@/components/PatrocinadorMasterScreen';
+import { ServicesView } from '@/components/ServicesView';
+import { SubcategoriesView } from '@/components/SubcategoriesView';
+import { SpecialtiesView } from '@/components/SpecialtiesView';
+import { ServiceSuccessView } from '@/components/ServiceSuccessView';
+import { QuoteRequestModal } from '@/components/QuoteRequestModal';
+import { StoreAreaView } from '@/components/StoreAreaView';
+import { WeeklyPromoModule } from '@/components/WeeklyPromoModule';
+import { WeeklyRewardView } from '@/components/WeeklyRewardView'; // Importar novo componente
+import { UserCupomScreen } from '@/components/UserCupomScreen';
+import { UserCouponsHistoryView } from '@/components/UserCouponsHistoryView';
+import { JobsView } from '@/components/JobsView';
+import { MerchantJobsModule } from '@/components/MerchantJobsModule';
+import { AdminPanel } from '@/components/AdminPanel';
+import { CashbackLandingView } from '@/components/CashbackLandingView';
+import { StoreAdsModule } from '@/components/StoreAdsModule';
+import { StoreAdsQuickLaunch } from '@/components/StoreAdsQuickLaunch';
+import { MerchantPerformanceDashboard } from '@/components/MerchantPerformanceDashboard';
+import { AdminBannerModeration } from '@/components/AdminBannerModeration';
+import { DesignerPanel } from '@/components/DesignerPanel';
+import { StoreCashbackModule } from '@/components/StoreCashbackModule';
 import { MapPin, ShieldCheck, X, Palette } from 'lucide-react';
-import { useAuth } from './contexts/AuthContext';
-import { useTheme } from './contexts/ThemeContext';
-import { NeighborhoodProvider } from './contexts/NeighborhoodContext';
-import { Category, Store } from './types';
-import { CategoryView } from './components/CategoryView';
-import { StoreProfileEdit } from './components/StoreProfileEdit';
-import { CommunityFeedView } from './components/CommunityFeedView';
-import { STORES, MOCK_BAIRRO_POSTS } from './constants';
-import { AdminModerationPanel } from './components/AdminModerationPanel';
-import { AboutView, SupportView, FavoritesView } from './components/SimplePages';
-import { StoreClaimFlow } from './components/StoreClaimFlow';
-import { MerchantReviewsModule } from './components/MerchantReviewsModule';
-import { JPAConnectSalesView } from './components/JPAConnectSalesView';
+import { useAuth } from '@/contexts/AuthContext';
+import { useTheme } from '@/contexts/ThemeContext';
+import { NeighborhoodProvider } from '@/contexts/NeighborhoodContext';
+import { Category, Store, BairroPost } from '@/types';
+import { CategoryView } from '@/components/CategoryView';
+import { StoreProfileEdit } from '@/components/StoreProfileEdit';
+import { CommunityFeedView } from '@/components/CommunityFeedView';
+import { STORES, MOCK_BAIRRO_POSTS } from '@/constants';
+import { AdminModerationPanel } from '@/components/AdminModerationPanel';
+import { AboutView, SupportView, FavoritesView } from '@/components/SimplePages';
+import { StoreClaimFlow } from '@/components/StoreClaimFlow';
+import { UserStatementView } from '@/components/UserStatementView';
+import { MerchantReviewsModule } from '@/components/MerchantReviewsModule';
+import { JPAConnectSalesView } from '@/components/JPAConnectSalesView';
 import { BairroFeedView } from './components/BairroFeedView';
 import { CreateBairroPostView } from './components/CreateBairroPostView';
-import { MerchantPerformanceDashboardView } from './components/MerchantPerformanceDashboardView'; 
-import { MerchantQrScreen } from './components/MerchantQrScreen';
-import { CashbackLandingView } from './components/CashbackLandingView';
-import { CashbackScanScreen } from './components/CashbackScanScreen';
-import { ScanConfirmationScreen } from './components/ScanConfirmationScreen';
-import { CashbackPaymentScreen } from './components/CashbackPaymentScreen';
-import { MerchantPayRoute } from './components/MerchantPayRoute';
 
 
 let splashWasShownInSession = false;
@@ -88,14 +86,10 @@ export const App: React.FC = () => {
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [globalSearch, setGlobalSearch] = useState('');
   const [selectedServiceMacro, setSelectedServiceMacro] = useState<{id: string, name: string} | null>(null);
-  const [isQuoteModalOpen, setIsQuoteModal] = useState(false);
+  const [isQuoteModalOpen, setIsQuoteModalOpen] = useState(false);
   const [quoteCategory, setQuoteCategory] = useState('');
   const [adCategoryTarget, setAdCategoryTarget] = useState<string | null>(null);
   const [initialStoreAdsView, setInitialStoreAdsView] = useState<'sales' | 'chat'>('sales');
-  // Cashback Flow states
-  const [scannedStoreId, setScannedStoreId] = useState<string | null>(null);
-  const [payCashbackStoreId, setPayCashbackStoreId] = useState<string | null>(null);
-
 
   const isMerchantMode = userRole === 'lojista' || (user?.email === ADMIN_EMAIL && viewMode === 'Lojista');
   const isDesignerMode = user?.email === ADMIN_EMAIL && viewMode === 'Designer';
@@ -106,7 +100,7 @@ export const App: React.FC = () => {
   };
   
   useEffect(() => {
-    const restrictedTabs = ['store_area', 'admin_panel', 'edit_profile', 'store_claim', 'merchant_reviews', 'designer_panel', 'weekly_promo', 'user_coupons', 'user_coupons_history', 'create_bairro_post', 'merchant_performance_dashboard', 'merchant_qr_display', 'cashback_landing', 'scan_cashback', 'pay_cashback', 'confirm_scan_cashback']; 
+    const restrictedTabs = ['scan_cashback', 'merchant_qr_display', 'wallet', 'pay_cashback', 'store_area', 'admin_panel', 'edit_profile', 'store_claim', 'user_cashback_mock', 'merchant_reviews', 'designer_panel', 'weekly_promo', 'user_coupons', 'store_cashback_module', 'create_bairro_post']; // Adicionado 'create_bairro_post'
     
     if (restrictedTabs.includes(activeTab)) {
       if (!isAuthInitialLoading && !user) {
@@ -133,10 +127,9 @@ export const App: React.FC = () => {
   }, []);
 
   const handleSelectStore = (store: Store) => { setSelectedStore(store); setActiveTab('store_detail'); };
-  const headerExclusionList = ['store_area', 'editorial_list', 'store_profile', 'category_detail', 'store_detail', 'profile', 'patrocinador_master', 'service_subcategories', 'service_specialties', 'store_ads_module', 'store_ads_quick', 'merchant_performance', 'about', 'support', 'favorites', 'community_feed', 'admin_panel', 'admin_banner_moderation', 'store_claim', 'merchant_reviews', 'jpa_connect_sales', 'designer_panel', 'weekly_promo', 'user_coupons', 'user_coupons_history', 'bairro_feed', 'create_bairro_post', 'merchant_performance_dashboard', 'merchant_qr_display', 'cashback_landing', 'scan_cashback', 'pay_cashback', 'confirm_scan_cashback']; 
+  const headerExclusionList = ['store_area', 'editorial_list', 'store_profile', 'category_detail', 'store_detail', 'profile', 'patrocinador_master', 'service_subcategories', 'service_specialties', 'store_ads_module', 'store_ads_quick', 'merchant_performance', 'about', 'support', 'favorites', 'community_feed', 'admin_panel', 'cashback_landing', 'admin_banner_moderation', 'store_claim', 'user_cashback_mock', 'merchant_reviews', 'jpa_connect_sales', 'wallet', 'designer_panel', 'weekly_promo', 'user_coupons', 'user_coupons_history', 'store_cashback_module', 'bairro_feed', 'create_bairro_post']; // Adicionado 'bairro_feed' e 'create_bairro_post'
   
-  // FIX: Added 'confirm_scan_cashback' to hideBottomNav list
-  const hideBottomNav = ['admin_panel', 'merchant_performance_dashboard', 'cashback_landing', 'scan_cashback', 'pay_cashback', 'confirm_scan_cashback'].includes(activeTab); 
+  const hideBottomNav = ['admin_panel'].includes(activeTab);
 
   const RoleSwitcherModal: React.FC = () => {
     if (!isRoleSwitcherOpen) return null;
@@ -186,6 +179,8 @@ export const App: React.FC = () => {
                   <main className="w-full mx-auto">
                     {activeTab === 'home' && <HomeFeed onNavigate={handleNavigate} onSelectCategory={(c) => { setSelectedCategory(c); setActiveTab('category_detail'); }} onStoreClick={handleSelectStore} stores={STORES} user={user as any} userRole={userRole} />}
                     {activeTab === 'explore' && <ExploreView stores={STORES} searchQuery={globalSearch} onStoreClick={handleSelectStore} onLocationClick={() => {}} onFilterClick={() => {}} onOpenPlans={() => {}} onNavigate={setActiveTab} />}
+                    {activeTab === 'wallet' && <UserStatementView onBack={() => setActiveTab('home')} onExploreStores={() => setActiveTab('explore')} />}
+                    {activeTab === 'cashback_landing' && <CashbackLandingView onBack={() => setActiveTab('home')} onLogin={() => { setPendingTab('scan_cashback'); setIsAuthOpen(true); }} />}
                     {activeTab === 'admin_panel' && <AdminPanel user={user as any} onLogout={signOut} viewMode={viewMode} onOpenViewSwitcher={() => setIsRoleSwitcherOpen(true)} onNavigateToApp={setActiveTab} />}
                     {activeTab === 'designer_panel' && <DesignerPanel user={user as any} onBack={() => setActiveTab('home')} />}
                     {activeTab === 'admin_banner_moderation' && user?.email === ADMIN_EMAIL && <AdminBannerModeration user={user as any} onBack={() => setActiveTab('admin_panel')} />}
@@ -200,14 +195,16 @@ export const App: React.FC = () => {
                     {activeTab === 'weekly_promo' && <WeeklyRewardView onBack={() => setActiveTab('home')} onNavigate={setActiveTab} />}
                     {activeTab === 'user_coupons' && <UserCupomScreen user={user as any} onBack={() => setActiveTab('profile')} onHistory={() => setActiveTab('user_coupons_history')} />}
                     {activeTab === 'user_coupons_history' && <UserCouponsHistoryView onBack={() => setActiveTab('user_coupons')} />}
+                    {activeTab === 'store_cashback_module' && <StoreCashbackModule onBack={() => setActiveTab('profile')} user={user as any} />}
 
 
                     {activeTab === 'jpa_connect_sales' && <JPAConnectSalesView onBack={() => setActiveTab('profile')} />}
                     {activeTab === 'community_feed' && <CommunityFeedView onStoreClick={handleSelectStore} user={user as any} onRequireLogin={() => setIsAuthOpen(true)} onNavigate={setActiveTab} />}
-                    {activeTab === 'services' && <ServicesView onSelectMacro={(id, name) => { setSelectedServiceMacro({id, name}); if (id === 'emergency') { setQuoteCategory(name); setIsQuoteModal(true); } else { setActiveTab('service_subcategories'); } }} onOpenTerms={() => setActiveTab('service_terms')} onNavigate={setActiveTab} searchTerm={globalSearch} />}
+                    {activeTab === 'services' && <ServicesView onSelectMacro={(id, name) => { setSelectedServiceMacro({id, name}); if (id === 'emergency') { setQuoteCategory(name); setIsQuoteModalOpen(true); } else { setActiveTab('service_subcategories'); } }} onOpenTerms={() => setActiveTab('service_terms')} onNavigate={setActiveTab} searchTerm={globalSearch} />}
                     {activeTab === 'category_detail' && selectedCategory && <CategoryView category={selectedCategory} onBack={() => setActiveTab('home')} onStoreClick={handleSelectStore} stores={STORES} userRole={userRole as any} onAdvertiseInCategory={setAdCategoryTarget} onNavigate={handleNavigate} />}
-                    {activeTab === 'store_detail' && selectedStore && <StoreDetailView store={selectedStore} onBack={() => setActiveTab('home')} onClaim={() => setActiveTab('store_claim')} />}
+                    {activeTab === 'store_detail' && selectedStore && <StoreDetailView store={selectedStore} onBack={() => setActiveTab('home')} onClaim={() => setActiveTab('store_claim')} onViewCashback={() => setActiveTab('user_statement')} />}
                     
+                    {activeTab === 'user_statement' && <UserStatementView onBack={() => setActiveTab('store_detail')} onExploreStores={() => setActiveTab('explore')} />}
 
                     {activeTab === 'store_claim' && selectedStore && user && (
                         <StoreClaimFlow 
@@ -224,45 +221,21 @@ export const App: React.FC = () => {
                     {activeTab === 'merchant_reviews' && <MerchantReviewsModule onBack={() => setActiveTab('profile')} />}
                     {activeTab === 'merchant_performance' && <MerchantPerformanceDashboard onBack={() => setActiveTab('profile')} onNavigate={handleNavigate} />}
                     
-                    {/* NOVO: Rota para o dashboard de desempenho */}
-                    {activeTab === 'merchant_performance_dashboard' && <MerchantPerformanceDashboardView onBack={() => setActiveTab('profile')} />}
-
                     {activeTab === 'patrocinador_master' && <PatrocinadorMasterScreen onBack={() => setActiveTab('profile')} />}
                     {activeTab === 'jobs_list' && <JobsView onBack={() => setActiveTab('home')} />}
                     {activeTab === 'about' && <AboutView onBack={() => setActiveTab('profile')} />}
                     {activeTab === 'support' && <SupportView onBack={() => setActiveTab('profile')} />}
                     {activeTab === 'favorites' && <FavoritesView onBack={() => setActiveTab('profile')} onNavigate={setActiveTab} user={user as any} />}
                     {activeTab === 'service_subcategories' && selectedServiceMacro && <SubcategoriesView macroId={selectedServiceMacro.id} macroName={selectedServiceMacro.name} onBack={() => setActiveTab('services')} onSelectSubcategory={(n) => { setQuoteCategory(n); setActiveTab('service_specialties'); }} />}
-                    {activeTab === 'service_specialties' && <SpecialtiesView subcategoryName={quoteCategory} onBack={() => setActiveTab('service_subcategories')} onSelectSpecialty={() => setIsQuoteModal(true)} />}
-                    {activeTab === 'store_ads_module' && <StoreAdsModule onBack={() => setActiveTab(isDesignerMode ? 'designer_panel' : 'profile')} onNavigate={handleNavigate} categoryName={adCategoryTarget || undefined} user={user as any} initialView={initialStoreAdsView} />}
+                    {activeTab === 'service_specialties' && <SpecialtiesView subcategoryName={quoteCategory} onBack={() => setActiveTab('service_subcategories')} onSelectSpecialty={() => setIsQuoteModalOpen(true)} />}
+                    {activeTab === 'store_ads_module' && <StoreAdsModule onBack={() => setActiveTab(isDesignerMode ? 'designer_panel' : 'profile')} onNavigate={setActiveTab} categoryName={adCategoryTarget || undefined} user={user as any} initialView={initialStoreAdsView} />}
                     {activeTab === 'store_ads_quick' && <StoreAdsQuickLaunch onBack={() => setActiveTab('profile')} onNavigate={setActiveTab} />}
                     {activeTab === 'store_profile' && <StoreProfileEdit onBack={() => setActiveTab('profile')} />}
                     {activeTab === 'bairro_feed' && <BairroFeedView onBack={() => setActiveTab('home')} onStoreClick={handleSelectStore} />}
                     {activeTab === 'create_bairro_post' && <CreateBairroPostView onBack={() => setActiveTab('profile')} user={user as any} stores={STORES} />}
-                    {activeTab === 'merchant_qr_display' && user && (
-                       <MerchantQrScreen user={user} onBack={() => setActiveTab('profile')} />
-                     )}
-                    {activeTab === 'cashback_landing' && <CashbackLandingView onBack={() => setActiveTab('home')} onLogin={() => setIsAuthOpen(true)} />}
-                    {activeTab === 'scan_cashback' && <CashbackScanScreen onBack={() => setActiveTab('home')} onScanSuccess={(data) => { setScannedStoreId(data.id); setActiveTab('confirm_scan_cashback'); }} />}
-                    {activeTab === 'confirm_scan_cashback' && scannedStoreId && (
-                      <ScanConfirmationScreen
-                        storeId={scannedStoreId}
-                        onConfirm={() => { setPayCashbackStoreId(scannedStoreId); setActiveTab('pay_cashback'); }}
-                        onCancel={() => { setScannedStoreId(null); setActiveTab('scan_cashback'); }}
-                      />
-                    )}
-                    {activeTab === 'pay_cashback' && payCashbackStoreId && (
-                      <MerchantPayRoute
-                        merchantId={payCashbackStoreId}
-                        user={user}
-                        onLogin={() => setIsAuthOpen(true)}
-                        onBack={() => setActiveTab('scan_cashback')}
-                        onComplete={() => setActiveTab('home')} // Or a transaction success screen
-                      />
-                    )}
                   </main>
                   <AuthModal isOpen={isAuthOpen} onClose={() => setIsAuthOpen(false)} user={user as any} onLoginSuccess={handleLoginSuccess} />
-                  {isQuoteModalOpen && <QuoteRequestModal isOpen={isQuoteModalOpen} onClose={() => setIsQuoteModal(false)} categoryName={quoteCategory} onSuccess={() => setActiveTab('service_success')} />}
+                  {isQuoteModalOpen && <QuoteRequestModal isOpen={isQuoteModalOpen} onClose={() => setIsQuoteModalOpen(false)} categoryName={quoteCategory} onSuccess={() => setActiveTab('service_success')} />}
               </Layout>
               <RoleSwitcherModal />
           </div>

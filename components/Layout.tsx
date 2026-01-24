@@ -1,4 +1,3 @@
-
 import React, { ReactNode, useEffect, useRef } from 'react';
 import { BottomNav } from './BottomNav';
 

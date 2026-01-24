@@ -1,17 +1,12 @@
-
-
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { ChevronLeft, Search, Star, BadgeCheck, ChevronRight, X, AlertCircle, Grid, Filter, Megaphone, ArrowUpRight, Info, Image as ImageIcon, Sparkles, ShieldCheck } from 'lucide-react';
 import { Category, Store, AdType } from '../../types';
 import { SUBCATEGORIES } from '../../constants';
 // FIX: Corrected supabase import path from ../../services/supabaseClient to ../../lib/supabaseClient
 import { supabase } from '../../lib/supabaseClient';
-// FIX: Import BannerDesign interface from the central types file
-import { BannerDesign } from '../types'; 
 
 // --- Reusable Banner Rendering Components ---
 const TemplateBannerRender: React.FC<{ config: any }> = ({ config }) => {
-    if (!config) return <div className="p-2 text-xs text-slate-500">Configuração ausente</div>;
     const { template_id, headline, subheadline, product_image_url } = config;
     switch (template_id) {
       case 'oferta_relampago':
@@ -30,7 +25,6 @@ const TemplateBannerRender: React.FC<{ config: any }> = ({ config }) => {
         return (
           <div className="w-full aspect-video rounded-2xl bg-gradient-to-br from-slate-800 to-slate-900 text-white p-6 flex items-end justify-between overflow-hidden relative shadow-lg">
              <img src={product_image_url || 'https://via.placeholder.com/150'} className="absolute inset-0 w-full h-full object-cover opacity-30 mix-blend-luminosity" />
-             <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
              <div className="relative z-10">
                 <span className="text-[10px] font-black uppercase tracking-[0.2em] text-cyan-300">{headline || 'LANÇAMENTO'}</span>
                 <h3 className="text-2xl font-bold mt-1 max-w-[220px] leading-tight">{subheadline || 'Descrição'}</h3>
@@ -243,7 +237,7 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
                       name="Ver Todas" 
                       isSelected={false} 
                       isMoreButton 
-                      onClick={() => alert('Mostrar todas as subcategories')} 
+                      onClick={() => alert('Mostrar todas as subcategorias')} 
                   />
               )}
             </div>
