@@ -1,3 +1,4 @@
+
 import React, { useMemo } from 'react';
 import { Search, User as UserIcon, MapPin, ChevronDown, Check, ChevronRight, SearchX, ShieldCheck, Tag } from 'lucide-react';
 import { useNeighborhood, NEIGHBORHOODS } from '../contexts/NeighborhoodContext';
@@ -14,7 +15,6 @@ interface HeaderProps {
   onNavigate: (tab: string) => void;
   activeTab: string;
   userRole: "cliente" | "lojista" | null;
-  onOpenMerchantQr?: () => void; // Mantido para compatibilidade, não renderizado
   customPlaceholder?: string;
   stores?: Store[];
   onStoreClick?: (store: Store) => void;

@@ -71,6 +71,8 @@ export const AdminBannerModeration: React.FC<AdminBannerModerationProps> = ({ on
   const [banners, setBanners] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  // FIX: Declared setActionTaken state variable
+  const [actionTaken, setActionTaken] = useState<Record<string, string>>({}); 
 
   useEffect(() => {
     const fetchActiveBanners = async () => {
@@ -110,7 +112,7 @@ export const AdminBannerModeration: React.FC<AdminBannerModerationProps> = ({ on
   }, []);
 
   const handlePauseBanner = async (banner: any) => {
-    if (confirm(`Pausar banner para "${banner.profiles.full_name || 'Loja'}"?`)) {
+    if (confirm(`Pausar banner para "${banner.profiles?.full_name || 'Loja'}"?`)) {
       try {
         if (!supabase) throw new Error("Supabase client not available");
         
@@ -131,7 +133,7 @@ export const AdminBannerModeration: React.FC<AdminBannerModerationProps> = ({ on
           });
         if (logError) console.error("Failed to log moderation event:", logError);
 
-        setActionTaken(prev => ({ ...prev, [banner.id]: 'paused' }));
+        // FIX: Removed unnecessary setActionTaken calls. The banner is removed from list.
         setBanners(prev => prev.filter(b => b.id !== banner.id));
 
       } catch (e) {
@@ -202,4 +204,15 @@ export const AdminBannerModeration: React.FC<AdminBannerModerationProps> = ({ on
                     >
                         <PauseCircle size={16} /> Pausar Banner
                     </button>
-                     <button className="w-full bg-sky-500/10 hover:bg-sky-500/20 text-sky-400 border border-sky-500/20 font-bold py-3 rounded-xl flex items-center justify-center gap-2 active:scale-95 transition
+                     <button className="w-full bg-sky-500/10 hover:bg-sky-500/20 text-sky-400 border border-sky-500/20 font-bold py-3 rounded-xl flex items-center justify-center gap-2 active:scale-95 transition-all text-xs">
+                        <Send size={14} /> Contatar
+                    </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </main>
+    </div>
+  );
+};

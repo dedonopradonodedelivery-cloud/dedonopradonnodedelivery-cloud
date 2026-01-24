@@ -1,5 +1,4 @@
 
-
 import React from 'react';
 import { 
   Utensils, ShoppingCart, Scissors, Heart, PawPrint, Home, Wrench, 
@@ -21,7 +20,7 @@ import { AdType, Category, Store, Story, EditorialCollection, Job, CommunityPost
 import { getStoreLogo } from './utils/mockLogos'; 
 
 // --- VALIDATION HELPERS (Moved from StoreAdsModule.tsx) ---
-export const FORBIDDEN_WORDS = ['palavrão', 'inapropriado', 'violação', 'gratis', 'promoção', 'oferta', 'desconto', 'cupom', 'r$', '% off', 'grátis', 'barato', 'imperdível', 'liquidação', 'black friday'];
+export const FORBIDDEN_WORDS = ['palavrão', 'inapropriado', 'violação'];
 export const CHAR_LIMITS = {
   template_headline: 25,
   template_subheadline: 50,
@@ -662,21 +661,55 @@ export const SPECIALTIES: Record<string, string[]> = {
   'default': ['Consultoria', 'Orçamento geral', 'Manutenção preventiva', 'Reparo específico', 'Instalação']
 };
 
+// NOVO: Mock de Posts do Bairro
+export const MOCK_BAIRRO_POSTS: BairroPost[] = [
+  {
+    id: 'bp1',
+    storeId: 'f-1',
+    storeName: 'Bibi Lanches',
+    storeLogoUrl: 'https://images.unsplash.com/photo-1561758033-d89a9ad46330?q=80&w=100&auto=format&fit=crop',
+    imageUrl: 'https://images.unsplash.com/photo-1626202456388-7578b9b8b21c?q=80&w=600&auto=format&fit=crop',
+    content: 'Obrigado por nos visitar! Em breve teremos novos sabores de suco natural fresquinho. Fiquem ligados!',
+    createdAt: new Date(Date.now() - 1000 * 60 * 30).toISOString(), // 30 mins ago
+  },
+  {
+    id: 'bp2',
+    storeId: 'f-3',
+    storeName: 'Pet Shop Alegria',
+    storeLogoUrl: 'https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?q=80&w=100&auto=format&fit=crop',
+    imageUrl: 'https://images.unsplash.com/photo-1544973347-19815049389c?q=80&w=600&auto=format&fit=crop',
+    content: 'Chegaram novas coleiras personalizadas e brinquedos ecológicos para seu pet! Venha conferir as novidades.',
+    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(), // 2 hours ago
+  },
+  {
+    id: 'bp3',
+    storeId: 'f-2',
+    storeName: 'Studio Hair Vip',
+    storeLogoUrl: 'https://images.unsplash.com/photo-1562322140-8baeececf3df?q=80&w=100&auto=format&fit=crop',
+    imageUrl: 'https://images.unsplash.com/photo-1596465492061-f3b3d4f8f4a0?q=80&w=600&auto=format&fit=crop',
+    content: 'Hoje é dia de cuidar dos cabelos! Nossa equipe está pronta para um novo visual. Agende seu horário e arrase!',
+    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 5).toISOString(), // 5 hours ago
+  },
+  {
+    id: 'bp4',
+    storeId: 'f-5',
+    storeName: 'Pizzaria do Zé',
+    storeLogoUrl: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?q=80&w=100&auto=format&fit=crop',
+    imageUrl: 'https://images.unsplash.com/photo-1593560704563-f1a66f2fa402?q=80&w=600&auto=format&fit=crop',
+    content: 'Nosso forno a lenha está a todo vapor! Qual o seu sabor preferido para hoje? Peça agora e receba quentinho.',
+    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(), // 1 day ago
+  },
+];
+
 // NOVO: Palavras proibidas para posts do bairro
 export const FORBIDDEN_POST_WORDS = [
   'promoção', 'oferta', 'desconto', 'cupom', 'r$', '% off', 'grátis', 'barato', 'imperdível', 'liquidação', 'black friday'
 ];
 
+// MOCK para MOCK_OCCUPANCY e DISPLAY_MODES (movido para cá para evitar duplicação)
 export const NEIGHBORHOODS = [
-  "Freguesia",
-  "Taquara",
-  "Pechincha",
-  "Tanque",
-  "Anil",
-  "Curicica",
-  "Gardênia Azul",
-  "Cidade de Deus",
-  "Praça Seca"
+  "Freguesia", "Pechincha", "Anil", "Taquara", "Tanque", 
+  "Curicica", "Parque Olímpico", "Gardênia", "Cidade de Deus"
 ];
 
 export const MOCK_OCCUPANCY: Record<string, Record<string, boolean>> = {

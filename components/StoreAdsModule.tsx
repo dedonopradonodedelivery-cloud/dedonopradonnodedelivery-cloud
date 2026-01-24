@@ -302,7 +302,7 @@ const BannerEditorPreview: React.FC<{ data: EditorData }> = ({ data }) => {
     
     return (
         <div 
-            className={`w-full aspect-video rounded-2xl overflow-hidden relative shadow-lg p-8 ${layoutClasses[template as LayoutKey]}`}
+            className="w-full aspect-video rounded-2xl overflow-hidden relative shadow-lg p-8"
             style={{ backgroundColor: bgColor, color: textColor }}
         >
             <h3 className={`${template === 'headline' ? headlineFontSize[fontSize as HeadlineSizeKey] : fontSizes[fontSize as SizeKey]} font-black leading-tight line-clamp-2`} style={{ fontFamily }}>
@@ -1215,7 +1215,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
                     <div className="flex items-start gap-5 mb-6">
                         <div className="w-12 h-12 bg-blue-500/10 rounded-2xl flex items-center justify-center text-blue-400 shrink-0"><Paintbrush size={24} /></div>
                         <div>
-                            <h3 className="font-bold text-white text-lg mb-1 leading-tight">Personalizar manualmente</h3>
+                            <h3 className="text-lg font-bold text-white mb-1 leading-tight">Personalizar manualmente</h3>
                             <p className="text-xs text-slate-400 leading-relaxed">Use seu banner pronto ou crie no editor.</p>
                         </div>
                     </div>
@@ -1266,7 +1266,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
                         <div className="flex items-start gap-5">
                             <div className="w-12 h-12 bg-amber-400/10 rounded-2xl flex items-center justify-center text-amber-400 shrink-0"><Rocket size={24} /></div>
                             <div>
-                                <h3 className="font-bold text-white text-lg mb-1 leading-tight">Contratar time profissional</h3>
+                                <h3 className="text-lg font-bold text-white mb-1 leading-tight">Contratar time profissional</h3>
                                 <p className="text-xs text-slate-400 leading-relaxed max-w-[180px]">Nós criamos o banner profissional para você.</p>
                             </div>
                         </div>

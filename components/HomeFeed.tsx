@@ -1,5 +1,4 @@
 
-
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { 
   ChevronRight, 
@@ -47,7 +46,7 @@ import {
 import { LojasEServicosList } from '@/components/LojasEServicosList';
 import { User } from '@supabase/supabase-js';
 // FIX: Changed FORBIDDEN_POST_WORDS to FORBIDDEN_WORDS
-import { CATEGORIES, MOCK_BAIRRO_POSTS, FORBIDDEN_WORDS } from '@/constants';
+import { CATEGORIES, MOCK_BAIRRO_POSTS, FORBIDDEN_WORDS, quickFilters } from '@/constants';
 import { useNeighborhood } from '@/contexts/NeighborhoodContext';
 import { supabase } from '@/lib/supabaseClient';
 import { trackAdEvent } from '@/lib/analytics';
@@ -310,7 +309,7 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void; onStoreClick?: (
             // Supabase returns related objects as arrays, so we expect data.profiles to be Array<{...}>
             const { data, error } = await supabase
                 .from('published_banners')
-                .select('id, config, merchant_id, profiles(store_name, logo_url)') 
+                .select('id, config, merchant_id, profiles(full_name, avatar_url)') 
                 .eq('target', 'home')
                 .eq('is_active', true)
                 .order('created_at', { ascending: false })
@@ -325,7 +324,7 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void; onStoreClick?: (
             if (data) {
                 // Extract the first profile object if available, otherwise null
                 const profileData = data.profiles && Array.isArray(data.profiles) && data.profiles.length > 0
-                    ? data.profiles[0] as { store_name: string; logo_url: string; }
+                    ? { store_name: (data.profiles[0] as any).full_name, logo_url: (data.profiles[0] as any).avatar_url }
                     : null;
 
                 setUserBanner({
@@ -504,10 +503,6 @@ const WeeklyDiscountBlock: React.FC<{ onClick: () => void }> = ({ onClick }) => 
                 30% { transform: translateX(200%) skewX(-20deg); }
                 100% { transform: translateX(200%) skewX(-20deg); }
               }
-              .btn-shine-effect {
-                position: relative;
-                overflow: hidden;
-              }
               .btn-shine-effect::after {
                 content: '';
                 position: absolute;
@@ -678,13 +673,13 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
                 onSeeMore={() => onNavigate('explore')}
               />
               <div className="flex gap-1 bg-gray-100 dark:bg-gray-800 p-1 rounded-xl w-fit mb-4">
-                {['all', 'top_rated'].map((f) => (
+                {quickFilters.map((f) => (
                   <button 
-                    key={f} 
-                    onClick={() => setListFilter(f as any)} 
-                    className={`text-[8px] font-black uppercase px-4 py-1.5 rounded-lg transition-all ${listFilter === f ? 'bg-white dark:bg-gray-700 text-[#1E5BFF] shadow-sm' : 'text-gray-400'}`}
+                    key={f.id} 
+                    onClick={() => setListFilter(f.id as any)} 
+                    className={`text-[8px] font-black uppercase px-4 py-1.5 rounded-lg transition-all ${listFilter === f.id ? 'bg-white dark:bg-gray-700 text-[#1E5BFF] shadow-sm' : 'text-gray-400'}`}
                   >
-                    {f === 'all' ? 'Tudo' : 'Top'}
+                    {f.label === 'Todos' ? 'Tudo' : f.label}
                   </button>
                 ))}
               </div>

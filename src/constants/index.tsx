@@ -15,10 +15,89 @@ import {
   Camera, Vote, Handshake, Flame, Milestone, History, Home as HomeIcon,
   MessageCircle, HelpCircle, UserCheck, Recycle,
   Navigation,
-  Newspaper // Adicionado para Posts do Bairro
+  Newspaper 
 } from 'lucide-react';
-import { AdType, Category, Store, Story, EditorialCollection, Job, CommunityPost, NeighborhoodCommunity, BairroPost } from '../types';
-import { getStoreLogo } from '../utils/mockLogos';
+import { AdType, Category, Store, Story, EditorialCollection, Job, CommunityPost, NeighborhoodCommunity, BairroPost } from '../types'; // Corrected import path for BairroPost
+import { getStoreLogo } from '../utils/mockLogos'; // Corrected import path
+
+// --- VALIDATION HELPERS (Moved from StoreAdsModule.tsx) ---
+export const FORBIDDEN_WORDS = ['palavrão', 'inapropriado', 'violação'];
+export const CHAR_LIMITS = {
+  template_headline: 25,
+  template_subheadline: 50,
+  editor_title: 40,
+  editor_subtitle: 120,
+};
+export const MIN_CONTRAST_RATIO = 4.5;
+
+export const hexToRgb = (hex: string): { r: number; g: number; b: number } | null => {
+  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  return result ? {
+    r: parseInt(result[1], 16),
+    g: parseInt(result[2], 16),
+    b: parseInt(result[3], 16),
+  } : null;
+};
+
+export const getLuminance = (r: number, g: number, b: number): number => {
+  const a = [r, g, b].map((v) => {
+    v /= 255;
+    return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+  });
+  return a[0] * 0.2126 + a[1] * 0.7152 + a[2] * 0.0722;
+};
+
+export const getContrastRatio = (hex1: string, hex2: string): number => {
+  const rgb1 = hexToRgb(hex1);
+  const rgb2 = hexToRgb(hex2);
+  if (!rgb1 || !rgb2) return 1;
+  const lum1 = getLuminance(rgb1.r, rgb1.g, rgb1.b);
+  const lum2 = getLuminance(rgb2.r, rgb2.g, rgb2.b);
+  const lightest = Math.max(lum1, lum2);
+  const darkest = Math.min(lum1, lum2);
+  return (lightest + 0.05) / (darkest + 0.05);
+};
+// --- END VALIDATION HELPERS ---
+
+// NOVO: Mock de Posts do Bairro
+export const MOCK_BAIRRO_POSTS: BairroPost[] = [
+  {
+    id: 'bp1',
+    storeId: 'f-1',
+    storeName: 'Bibi Lanches',
+    storeLogoUrl: 'https://images.unsplash.com/photo-1561758033-d89a9ad46330?q=80&w=100&auto=format&fit=crop',
+    imageUrl: 'https://images.unsplash.com/photo-1626202456388-7578b9b8b21c?q=80&w=600&auto=format&fit=crop',
+    content: 'Obrigado por nos visitar! Em breve teremos novos sabores de suco natural fresquinho. Fiquem ligados!',
+    createdAt: new Date(Date.now() - 1000 * 60 * 30).toISOString(), // 30 mins ago
+  },
+  {
+    id: 'bp2',
+    storeId: 'f-3',
+    storeName: 'Pet Shop Alegria',
+    storeLogoUrl: 'https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?q=80&w=100&auto=format&fit=crop',
+    imageUrl: 'https://images.unsplash.com/photo-1544973347-19815049389c?q=80&w=600&auto=format&fit=crop',
+    content: 'Chegaram novas coleiras personalizadas e brinquedos ecológicos para seu pet! Venha conferir as novidades.',
+    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(), // 2 hours ago
+  },
+  {
+    id: 'bp3',
+    storeId: 'f-2',
+    storeName: 'Studio Hair Vip',
+    storeLogoUrl: 'https://images.unsplash.com/photo-1562322140-8baeececf3df?q=80&w=100&auto=format&fit=crop',
+    imageUrl: 'https://images.unsplash.com/photo-1596465492061-f3b3d4f8f4a0?q=80&w=600&auto=format&fit=crop',
+    content: 'Hoje é dia de cuidar dos cabelos! Nossa equipe está pronta para um novo visual. Agende seu horário e arrase!',
+    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 5).toISOString(), // 5 hours ago
+  },
+  {
+    id: 'bp4',
+    storeId: 'f-5',
+    storeName: 'Pizzaria do Zé',
+    storeLogoUrl: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?q=80&w=100&auto=format&fit=crop',
+    imageUrl: 'https://images.unsplash.com/photo-1593560704563-f1a66f2fa402?q=80&w=600&auto=format&fit=crop',
+    content: 'Nosso forno a lenha está a todo vapor! Qual o seu sabor preferido para hoje? Peça agora e receba quentinho.',
+    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(), // 1 day ago
+  },
+];
 
 export const CATEGORIES: Category[] = [
   { id: 'cat-comida', name: 'Comida', slug: 'comida', icon: <Utensils />, color: 'bg-brand-blue' },

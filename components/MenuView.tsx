@@ -16,8 +16,6 @@ import {
   Briefcase, 
   Store, 
   PlusCircle,
-  Coins,
-  Wallet,
   Tag
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
@@ -108,29 +106,11 @@ export const MenuView: React.FC<MenuViewProps> = ({
           </div>
         </div>
 
-        <button 
-            onClick={() => onNavigate('wallet')}
-            className="w-full bg-gradient-to-r from-[#1E5BFF] to-[#4D7CFF] p-5 rounded-[2rem] shadow-xl shadow-blue-500/20 mb-6 flex items-center justify-between group active:scale-[0.98] transition-all"
-        >
-            <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-md">
-                    <Wallet className="w-6 h-6 text-white" />
-                </div>
-                <div className="text-left">
-                    <h4 className="text-white font-bold">Meus Créditos</h4>
-                    <p className="text-blue-100 text-[10px] font-medium uppercase tracking-wider">Saldos nas lojas do bairro</p>
-                </div>
-            </div>
-            <div className="bg-white/20 p-2 rounded-full backdrop-blur-md text-white">
-                <ChevronRight className="w-4 h-4" />
-            </div>
-        </button>
-
         <div className="space-y-4 mb-8">
             <h3 className="text-xs font-black text-gray-400 uppercase tracking-[0.2em] mb-2 ml-2">Geral</h3>
             <div className="bg-white dark:bg-gray-800 rounded-[2rem] overflow-hidden border border-gray-100 dark:border-gray-700 shadow-sm">
-                <button onClick={() => onNavigate('user_coupons')} className="w-full p-4 flex items-center justify-between border-b border-gray-50 dark:border-gray-700 active:bg-gray-50"><div className="flex items-center gap-3"><div className="w-9 h-9 rounded-xl bg-amber-50 dark:bg-amber-900/20 flex items-center justify-center text-amber-500"><Tag className="w-4 h-4" /></div><span className="text-sm font-bold text-gray-700 dark:text-gray-200">Meus Cupons</span></div><ChevronRight className="w-4 h-4 text-gray-300" /></button>
                 <button onClick={() => onNavigate('favorites')} className="w-full p-4 flex items-center justify-between border-b border-gray-50 dark:border-gray-700 active:bg-gray-50"><div className="flex items-center gap-3"><div className="w-9 h-9 rounded-xl bg-pink-50 dark:bg-pink-900/20 flex items-center justify-center text-pink-500"><Heart className="w-4 h-4" /></div><span className="text-sm font-bold text-gray-700 dark:text-gray-200">Favoritos</span></div><ChevronRight className="w-4 h-4 text-gray-300" /></button>
+                <button onClick={() => onNavigate('user_coupons')} className="w-full p-4 flex items-center justify-between border-b border-gray-50 dark:border-gray-700 active:bg-gray-50"><div className="flex items-center gap-3"><div className="w-9 h-9 rounded-xl bg-amber-50 dark:bg-amber-900/20 flex items-center justify-center text-amber-500"><Tag className="w-4 h-4" /></div><span className="text-sm font-bold text-gray-700 dark:text-gray-200">Meus Cupons</span></div><ChevronRight className="w-4 h-4 text-gray-300" /></button>
                 <button onClick={() => onNavigate('about')} className="w-full p-4 flex items-center justify-between border-b border-gray-50 dark:border-gray-700 active:bg-gray-50"><div className="flex items-center gap-3"><div className="w-9 h-9 rounded-xl bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center text-[#1E5BFF]"><Info className="w-4 h-4" /></div><span className="text-sm font-bold text-gray-700 dark:text-gray-200">Quem Somos</span></div><ChevronRight className="w-4 h-4 text-gray-300" /></button>
                 <button onClick={() => onNavigate('support')} className="w-full p-4 flex items-center justify-between active:bg-gray-50"><div className="flex items-center gap-3"><div className="w-9 h-9 rounded-xl bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center text-indigo-600"><HelpCircle className="w-4 h-4" /></div><span className="text-sm font-bold text-gray-700 dark:text-gray-200">Suporte</span></div><ChevronRight className="w-4 h-4 text-gray-300" /></button>
             </div>

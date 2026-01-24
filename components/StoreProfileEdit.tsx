@@ -1,4 +1,5 @@
 
+
 import React, { useState, useEffect, useRef } from 'react';
 import { 
   ChevronLeft, 
@@ -334,7 +335,7 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
       justification: suggestionData.justification.trim(),
       status: 'pending',
       storeName: formData.nome_exibido || 'Nova Loja',
-      merchantId: user?.id,
+      merchantId: user?.id, // Pass merchantId
       createdAt: new Date().toISOString()
     };
     

@@ -1,17 +1,18 @@
 
+
 import React, { useState, useEffect } from 'react';
 import { ChevronLeft, CheckCircle, XCircle, Clock, DollarSign, User, AlertCircle, Loader2, ArrowRight } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
-import { CashbackTransaction } from '../types';
+import { CashbackTransaction } from '../types'; // Corrected import path
 
 interface MerchantCashbackRequestsProps {
   merchantId: string; // ID do lojista logado
   onBack: () => void;
 }
 
-// Estendendo CashbackTransaction para incluir campos voláteis da UI
+// FIX: Changed interface to extend the global CashbackTransaction type for consistency.
 interface ExtendedCashbackTransaction extends CashbackTransaction {
-  customer_name?: string; 
+  customer_name?: string;
 }
 
 export const MerchantCashbackRequests: React.FC<MerchantCashbackRequestsProps> = ({ merchantId, onBack }) => {
@@ -26,6 +27,8 @@ export const MerchantCashbackRequests: React.FC<MerchantCashbackRequestsProps> =
 
     if (!supabase) return;
 
+    // Listener para MUDANÇAS em tempo real
+    // Escuta INSERT (nova compra) e UPDATE (aprovada/rejeitada) na tabela
     const channel = supabase
       .channel('merchant_transactions_channel')
       .on(
@@ -36,7 +39,9 @@ export const MerchantCashbackRequests: React.FC<MerchantCashbackRequestsProps> =
           table: 'cashback_transactions',
           filter: `merchant_id=eq.${merchantId}`,
         },
-        () => {
+        (payload) => {
+          // Recarrega a lista para garantir consistência e ordenação
+          // Em um cenário de altíssimo volume, faríamos manipulação otimista do state array
           fetchPendingRequests();
         }
       )
@@ -49,22 +54,23 @@ export const MerchantCashbackRequests: React.FC<MerchantCashbackRequestsProps> =
 
   const fetchPendingRequests = async () => {
     if (!supabase) {
-        // Mock data corrigido com propriedades obrigatórias da interface CashbackTransaction
+        // Mock data if no supabase configured in env
+        // FIX: Adjusted mock data to match the CashbackTransaction interface.
         setRequests([
             {
                 id: 'mock-1',
                 merchant_id: merchantId,
                 store_id: 'store-1',
-                user_id: 'cust-1', // Corrigido de customer_id para user_id
+                user_id: 'cust-1',
                 customer_name: 'Maria Silva (Simulação)',
                 total_amount_cents: 15000,
                 cashback_used_cents: 500,
                 cashback_to_earn_cents: 725,
                 amount_to_pay_now_cents: 14500,
-                amount_cents: 725, // Campo obrigatório
-                type: 'earn',      // Campo obrigatório
                 status: 'pending',
-                created_at: new Date().toISOString()
+                created_at: new Date().toISOString(),
+                amount_cents: 725,
+                type: 'earn'
             }
         ]);
         setLoading(false);
@@ -95,6 +101,8 @@ export const MerchantCashbackRequests: React.FC<MerchantCashbackRequestsProps> =
 
     try {
       if (supabase) {
+          // Atualiza status no banco.
+          // O Trigger do banco (definido na Parte 3) cuidará de atualizar o saldo do usuário.
           const { error: updateError } = await supabase
             .from('cashback_transactions')
             .update({ 
@@ -105,9 +113,11 @@ export const MerchantCashbackRequests: React.FC<MerchantCashbackRequestsProps> =
 
           if (updateError) throw updateError;
       } else {
+          // Simulation delay
           await new Promise(r => setTimeout(r, 1000));
       }
 
+      // Atualização otimista da UI (remove da lista)
       setRequests((prev) => prev.filter((r) => r.id !== tx.id));
       setSelectedRequest(null); 
 
@@ -134,6 +144,7 @@ export const MerchantCashbackRequests: React.FC<MerchantCashbackRequestsProps> =
 
           if (error) throw error;
       } else {
+          // Simulation delay
           await new Promise(r => setTimeout(r, 1000));
       }
 
@@ -148,6 +159,7 @@ export const MerchantCashbackRequests: React.FC<MerchantCashbackRequestsProps> =
     }
   };
 
+  // Formatadores
   const formatMoney = (cents: number) => {
     return (cents / 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
   };
@@ -168,6 +180,12 @@ export const MerchantCashbackRequests: React.FC<MerchantCashbackRequestsProps> =
       </div>
 
       <div className="p-5 pb-24">
+        {!supabase && (
+            <div className="mb-4 bg-yellow-50 text-yellow-800 text-xs p-3 rounded-xl border border-yellow-200">
+                Modo Demonstração (Supabase não configurado). Dados são simulados.
+            </div>
+        )}
+
         {loading ? (
             <div className="flex justify-center pt-10">
                 <Loader2 className="w-8 h-8 text-[#1E5BFF] animate-spin" />
@@ -179,6 +197,7 @@ export const MerchantCashbackRequests: React.FC<MerchantCashbackRequestsProps> =
                 </div>
                 <h2 className="text-lg font-bold text-gray-900 dark:text-white">Tudo limpo!</h2>
                 <p className="text-gray-500 text-sm mt-1">Nenhuma solicitação pendente no momento.</p>
+                <p className="text-xs text-gray-400 mt-4 animate-pulse">Aguardando novas transações em tempo real...</p>
             </div>
         ) : (
             <div className="space-y-4">
@@ -188,8 +207,10 @@ export const MerchantCashbackRequests: React.FC<MerchantCashbackRequestsProps> =
                         onClick={() => setSelectedRequest(req)}
                         className="bg-white dark:bg-gray-800 rounded-2xl p-5 shadow-sm border border-gray-100 dark:border-gray-700 relative overflow-hidden cursor-pointer hover:shadow-md transition-all active:scale-[0.98]"
                     >
-                        <div className="absolute top-0 right-0 w-3 h-3 bg-red-500 rounded-bl-lg"></div>
+                        {/* Indicador de Novo */}
+                        <div className="absolute top-0 right-0 w-3 h-3 bg-red-500 rounded-bl-lg animate-pulse"></div>
 
+                        {/* Top Info */}
                         <div className="flex justify-between items-start mb-4">
                             <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
                                 <Clock className="w-4 h-4" />
@@ -200,11 +221,12 @@ export const MerchantCashbackRequests: React.FC<MerchantCashbackRequestsProps> =
                             <div className="flex items-center gap-1.5 bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded-lg">
                                 <User className="w-3.5 h-3.5 text-gray-500" />
                                 <span className="text-xs font-bold text-gray-700 dark:text-gray-300 max-w-[100px] truncate">
-                                    {req.customer_name || 'Cliente'}
+                                    {req.user_name || 'Cliente'}
                                 </span>
                             </div>
                         </div>
 
+                        {/* Resumo Valores */}
                         <div className="flex justify-between items-end">
                             <div>
                                 <p className="text-xs text-gray-500 uppercase font-bold mb-0.5">Total da Compra</p>
@@ -225,24 +247,28 @@ export const MerchantCashbackRequests: React.FC<MerchantCashbackRequestsProps> =
         )}
       </div>
 
-      {/* DETALHE MODAL */}
+      {/* DETALHE MODAL (BottomSheet) */}
       {selectedRequest && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-end justify-center animate-in fade-in duration-200">
             <div 
                 className="bg-white dark:bg-gray-900 w-full max-w-md rounded-t-[2rem] p-6 pb-8 shadow-2xl animate-in slide-in-from-bottom duration-300"
                 onClick={(e) => e.stopPropagation()}
             >
+                {/* Handle */}
                 <div className="w-12 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full mx-auto mb-6"></div>
 
                 <div className="text-center mb-8">
                     <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Confirmar Transação</h2>
-                    <p className="text-gray-500 text-sm mt-1">Verifique os dados antes de aprovar.</p>
+                    <p className="text-gray-500 text-sm mt-1">
+                        Verifique os dados antes de aprovar.
+                    </p>
                 </div>
 
-                <div className="bg-gray-50 dark:bg-gray-800 rounded-2xl p-5 border border-gray-100 dark:border-gray-700 mb-8 space-y-4">
+                {/* Info Box */}
+                <div className="bg-gray-50 dark:bg-gray-800 rounded-2xl p-5 border border-gray-200 dark:border-gray-700 mb-8 space-y-4">
                     <div className="flex justify-between border-b border-gray-200 dark:border-gray-700 pb-3">
                         <span className="text-gray-500 text-sm">Cliente</span>
-                        <span className="font-bold text-gray-900 dark:text-white">{selectedRequest.customer_name || 'Cliente'}</span>
+                        <span className="font-bold text-gray-900 dark:text-white">{selectedRequest.user_name || 'Cliente'}</span>
                     </div>
                     
                     <div className="flex justify-between items-center">
@@ -263,6 +289,7 @@ export const MerchantCashbackRequests: React.FC<MerchantCashbackRequestsProps> =
                     </div>
                 </div>
 
+                {/* Actions */}
                 <div className="flex gap-3">
                     <button 
                         onClick={() => handleReject(selectedRequest)}
@@ -291,6 +318,7 @@ export const MerchantCashbackRequests: React.FC<MerchantCashbackRequestsProps> =
             </div>
         </div>
       )}
+
     </div>
   );
 };
