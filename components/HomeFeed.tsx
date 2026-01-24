@@ -63,6 +63,10 @@ interface BannerItem {
   storeSlug?: string;
   isUserBanner?: boolean;
   config: BannerDesign; // Ensures 'imageUrl' is a known property in the config object
+  profiles?: { // Add profiles directly here
+    store_name: string;
+    logo_url: string;
+  };
 }
 
 // --- BANNER VIEWER (LOCAL COMPONENT) ---
@@ -225,15 +229,6 @@ const mapToViewerConfig = (dbConfig: any): BannerDesign => {
   };
 };
 
-// FIX: Use the explicitly defined BannerItem interface
-// interface BannerItem {
-//   id: string;
-//   target?: string;
-//   storeSlug?: string;
-//   isUserBanner?: boolean;
-//   config: BannerDesign; 
-// }
-
 const HomeCarousel: React.FC<{ onNavigate: (v: string) => void; onStoreClick?: (store: Store) => void; stores: Store[] }> = ({ onNavigate, onStoreClick, stores }) => {
   const { currentNeighborhood } = useNeighborhood();
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -309,6 +304,7 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void; onStoreClick?: (
     const fetchHomeBanner = async () => {
         if (!supabase) return;
         try {
+            // FIX: Ensure to select 'profiles' to get store_name and logo_url
             const { data, error } = await supabase
                 .from('published_banners')
                 .select('id, config, merchant_id, profiles(store_name, logo_url)')
@@ -327,7 +323,8 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void; onStoreClick?: (
                 setUserBanner({
                     id: `user-banner-${data.id}`,
                     isUserBanner: true,
-                    config: { ...(data.config as object), profiles: data.profiles },
+                    config: data.config as BannerDesign, // Pass raw config
+                    profiles: data.profiles,             // Pass profiles separately
                     target: data.merchant_id,
                 });
             } else {
@@ -379,11 +376,10 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void; onStoreClick?: (
   };
   
   const findStore = (slug?: string) => stores?.find(s => s.id === slug);
-  // Prioriza o storeSlug para buscar a loja, caso contrário, usa o storeName do config
+  // FIX: Prioritize current.profiles for store_name and logo_url
   const storeForBanner = current.storeSlug ? findStore(current.storeSlug) : undefined;
-  const storeNameForViewer = storeForBanner?.name || current.config.storeName || 'Localizei JPA';
-  const storeLogoForViewer = storeForBanner?.logoUrl || getStoreLogo(storeNameForViewer.length);
-
+  const storeNameForViewer = current.profiles?.store_name || storeForBanner?.name || 'Localizei JPA'; // FIX: Removed current.config.storeName
+  const storeLogoForViewer = current.profiles?.logo_url || storeForBanner?.logoUrl || getStoreLogo(storeNameForViewer.length); // FIX: Removed current.config.logoUrl
 
   return (
     <div className="px-4 py-2">
@@ -392,7 +388,7 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void; onStoreClick?: (
         className="w-full relative aspect-[3/2] rounded-[32px] overflow-hidden shadow-xl shadow-slate-200 dark:shadow-none border border-gray-100 dark:border-white/5 cursor-pointer active:scale-[0.98] transition-all group"
       >
         <BannerViewer 
-            config={current.isUserBanner ? mapToViewerConfig(current.config) : current.config}
+            config={current.config} // Now current.config is purely BannerDesign
             storeName={storeNameForViewer}
             storeLogo={storeLogoForViewer}
         />
@@ -552,7 +548,7 @@ const WeeklyDiscountBlock: React.FC<{ onClick: () => void }> = ({ onClick }) => 
                     ) : (
                       <>
                         {buttonText}
-                        <ArrowRight size={12} strokeWidth={3} />
+                        <ArrowRight className="w-5 h-5" strokeWidth={3} />
                       </>
                     )}
                 </button>
