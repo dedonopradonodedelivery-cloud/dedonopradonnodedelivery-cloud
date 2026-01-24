@@ -18,7 +18,8 @@ import {
   ShieldCheck,
   Megaphone,
   X,
-  ImageIcon
+  ImageIcon,
+  CreditCard
 } from 'lucide-react';
 import { User } from '@supabase/supabase-js';
 import { StoreBannerEditor } from '@/components/StoreBannerEditor';
@@ -44,7 +45,7 @@ const PLACEMENT_OPTIONS = [
 ];
 
 export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNavigate, user, categoryName, viewMode, initialView = 'sales' }) => {
-  const [view, setView] = useState<'sales' | 'editor' | 'pro_chat'>('sales');
+  const [view, setView] = useState<'sales' | 'editor' | 'pro_checkout' | 'pro_processing' | 'pro_approved' | 'pro_chat'>('sales');
   const [selectedPlacement, setSelectedPlacement] = useState<string | null>(null);
   const [selectedPeriods, setSelectedPeriods] = useState<string[]>([]);
   const [selectedHoods, setSelectedHoods] = useState<string[]>([]);
@@ -130,6 +131,13 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
     else setSelectedHoods([...NEIGHBORHOODS_LIST]);
   };
 
+  const handleConfirmPayment = () => {
+    setView('pro_processing');
+    setTimeout(() => {
+        setView('pro_approved');
+    }, 2000);
+  };
+
   if (view === 'editor') {
     return (
       <StoreBannerEditor 
@@ -140,9 +148,88 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
     );
   }
 
+  if (view === 'pro_checkout') {
+    return (
+      <div className="min-h-screen bg-[#F8F9FC] dark:bg-gray-950 flex flex-col animate-in slide-in-from-right duration-300">
+        <header className="px-6 py-5 border-b border-gray-100 dark:border-gray-800 flex items-center gap-4 bg-white dark:bg-gray-900">
+          <button onClick={() => setView('sales')} className="p-2 bg-gray-100 dark:bg-gray-800 rounded-xl"><ChevronLeft size={20}/></button>
+          <h2 className="font-bold">Checkout Seguro</h2>
+        </header>
+        <main className="flex-1 p-6 space-y-6">
+          <div className="bg-white dark:bg-gray-900 p-6 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-800 space-y-4">
+             <h3 className="text-xs font-black uppercase tracking-widest text-gray-400">Resumo do Investimento</h3>
+             <div className="flex justify-between text-sm">
+                <span className="text-gray-600">Anúncio ({selectedPlacement})</span>
+                <span className="font-bold">R$ {(calculateTotal - (artChoice === 'pro' ? 89.90 : 0)).toFixed(2).replace('.', ',')}</span>
+             </div>
+             <div className="flex justify-between text-sm text-amber-600">
+                <span className="font-bold">Criação com Time Localizei</span>
+                <span className="font-black">+ R$ 89,90</span>
+             </div>
+             <div className="pt-4 border-t border-gray-100 dark:border-gray-800 flex justify-between items-center">
+                <span className="font-black text-gray-900 dark:text-white uppercase tracking-tighter">Total a Pagar</span>
+                <span className="text-2xl font-black text-[#1E5BFF]">R$ {calculateTotal.toFixed(2).replace('.', ',')}</span>
+             </div>
+          </div>
+
+          <div className="space-y-3">
+             <p className="text-xs font-bold text-gray-500 uppercase tracking-widest ml-1">Forma de Pagamento</p>
+             <button className="w-full flex items-center justify-between p-5 bg-white dark:bg-gray-900 rounded-2xl border-2 border-[#1E5BFF] shadow-sm">
+                <div className="flex items-center gap-3">
+                    <CreditCard className="text-[#1E5BFF]" />
+                    <span className="font-bold">Cartão de Crédito</span>
+                </div>
+                <CheckCircle2 size={18} className="text-[#1E5BFF]" />
+             </button>
+             <p className="text-[10px] text-gray-400 text-center">Ambiente seguro criptografado</p>
+          </div>
+        </main>
+        <footer className="p-6">
+            <button 
+                onClick={handleConfirmPayment}
+                className="w-full bg-[#1E5BFF] text-white font-black py-5 rounded-2xl shadow-xl active:scale-[0.98] transition-all"
+            >
+                Confirmar Pagamento
+            </button>
+        </footer>
+      </div>
+    );
+  }
+
+  if (view === 'pro_processing') {
+    return (
+        <div className="min-h-screen bg-[#F8F9FC] dark:bg-gray-950 flex flex-col items-center justify-center p-6 text-center animate-in fade-in duration-500">
+            <Loader2 className="w-12 h-12 text-[#1E5BFF] animate-spin mb-6" />
+            <h2 className="text-xl font-bold">Processando seu pedido...</h2>
+            <p className="text-gray-500 text-sm mt-2">Estamos validando os dados do pagamento.</p>
+        </div>
+    );
+  }
+
+  if (view === 'pro_approved') {
+    return (
+        <div className="min-h-screen bg-[#F8F9FC] dark:bg-gray-950 flex flex-col items-center justify-center p-6 text-center animate-in zoom-in duration-500">
+            <div className="w-20 h-20 bg-emerald-100 dark:bg-emerald-900/30 rounded-full flex items-center justify-center text-emerald-600 mb-8">
+                <CheckCircle2 size={48} />
+            </div>
+            <h2 className="text-3xl font-black text-gray-900 dark:text-white mb-2">Pagamento Confirmado!</h2>
+            <p className="text-gray-500 text-sm max-w-xs mb-10">
+                Agora você pode falar com nosso time de designers para criar seu banner personalizado.
+            </p>
+            <button 
+                onClick={() => setView('pro_chat')}
+                className="w-full max-w-sm bg-[#1E5BFF] text-white font-black py-5 rounded-2xl shadow-xl flex items-center justify-center gap-3 animate-bounce"
+            >
+                Falar com o designer
+                <ArrowRight size={20} />
+            </button>
+        </div>
+    );
+  }
+
   if (view === 'pro_chat') {
     return (
-        <div className="min-h-screen bg-white dark:bg-gray-950 flex flex-col animate-in slide-in-from-right duration-300">
+        <div className="min-h-screen bg-white dark:bg-gray-950 flex flex-col animate-in slide-in-from-bottom duration-300">
             <header className="px-6 py-5 border-b border-gray-100 dark:border-gray-800 flex items-center gap-4">
                 <button onClick={() => setView('sales')} className="p-2 bg-gray-100 dark:bg-gray-800 rounded-xl"><ChevronLeft size={20}/></button>
                 <div className="flex-1">
@@ -151,7 +238,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
                 </div>
             </header>
             <main className="flex-1 p-6 flex flex-col justify-end gap-4 overflow-y-auto bg-gray-50 dark:bg-gray-950">
-                <div className="bg-white dark:bg-gray-900 p-4 rounded-2xl rounded-bl-none shadow-sm border border-gray-100 dark:border-gray-800 max-w-[80%]">
+                <div className="bg-[#1E5BFF] text-white p-4 rounded-2xl rounded-bl-none shadow-sm max-w-[80%]">
                     <p className="text-sm">Olá! Sou o designer da Localizei. Vi que você contratou a criação profissional. Vamos começar?</p>
                 </div>
             </main>
@@ -341,11 +428,11 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
         </div>
 
         <button 
-          onClick={() => artChoice === 'pro' ? setView('pro_chat') : alert('Iniciando Pagamento...')}
+          onClick={() => artChoice === 'pro' ? setView('pro_checkout') : alert('Iniciando Pagamento...')}
           disabled={!selectedPlacement || selectedPeriods.length === 0 || selectedHoods.length === 0 || !artChoice}
           className="w-full bg-[#1E5BFF] hover:bg-[#1749CC] text-white font-black py-5 rounded-[2rem] shadow-xl shadow-blue-500/20 active:scale-[0.98] transition-all flex items-center justify-center gap-3 disabled:opacity-30 disabled:grayscale uppercase tracking-widest text-xs"
         >
-          {artChoice === 'pro' ? 'Falar com Designer' : 'Pagar anúncio'}
+          {artChoice === 'pro' ? 'PAGAR E CONTRATAR CRIAÇÃO' : 'Pagar anúncio'}
           <ArrowRight size={16} strokeWidth={3} />
         </button>
       </footer>
