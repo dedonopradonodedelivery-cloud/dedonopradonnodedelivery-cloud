@@ -1,9 +1,8 @@
 
 import React, { useState, useMemo } from 'react';
-import { ChevronLeft, Briefcase, MapPin, Clock, DollarSign, MessageCircle, AlertCircle, Building2, CheckCircle2, ChevronDown, Zap } from 'lucide-react';
+import { ChevronLeft, Briefcase, MapPin, Clock, DollarSign, MessageCircle, AlertCircle, Building2, CheckCircle2, ChevronRight, X, Filter } from 'lucide-react';
 import { MOCK_JOBS } from '../constants';
 import { Job } from '../types';
-import { useNeighborhood } from '../contexts/NeighborhoodContext';
 
 interface JobsViewProps {
   onBack: () => void;
@@ -17,88 +16,85 @@ const JobDetailModal: React.FC<{ job: Job; onClose: () => void }> = ({ job, onCl
   };
 
   return (
-    <div className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-[1100] bg-black/60 backdrop-blur-sm flex items-end justify-center animate-in fade-in duration-200" onClick={onClose}>
       <div 
-        className="bg-white dark:bg-gray-900 w-full max-w-md h-[85vh] sm:h-auto sm:max-h-[85vh] rounded-t-[2rem] sm:rounded-3xl p-6 flex flex-col relative animate-in slide-in-from-bottom duration-300 shadow-2xl"
+        className="bg-white dark:bg-gray-950 w-full max-w-md h-[90vh] rounded-t-[2.5rem] shadow-2xl overflow-hidden flex flex-col animate-in slide-in-from-bottom duration-300"
         onClick={(e) => e.stopPropagation()}
       >
-        <button 
-          onClick={onClose}
-          className="absolute top-4 right-4 p-2 bg-gray-100 dark:bg-gray-800 rounded-full text-gray-500 hover:text-gray-700 dark:hover:text-white transition-colors"
-        >
-          <span className="sr-only">Fechar</span>
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
-        </button>
+        {/* Header do Modal */}
+        <div className="px-6 py-6 border-b border-gray-100 dark:border-gray-800 flex justify-between items-center bg-white dark:bg-gray-950 sticky top-0 z-10">
+          <h2 className="text-xl font-black text-gray-900 dark:text-white uppercase tracking-tighter">Detalhes da Vaga</h2>
+          <button onClick={onClose} className="p-2 bg-gray-100 dark:bg-gray-800 rounded-full text-gray-500">
+            <X size={24} />
+          </button>
+        </div>
 
-        <div className="flex-1 overflow-y-auto pr-2 pb-20 no-scrollbar">
-          <div className="mb-6">
-            <span className="inline-block px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-[10px] font-bold uppercase tracking-wider rounded-full mb-3">
-              {job.type}
-            </span>
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white leading-tight mb-1">
-              {job.role}
-            </h2>
-            <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400 font-medium text-sm">
-              <Building2 className="w-4 h-4" />
-              {job.company}
+        <div className="flex-1 overflow-y-auto no-scrollbar p-6 space-y-8 pb-32">
+          {/* Card Principal de Info */}
+          <div className="space-y-4">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 bg-blue-50 dark:bg-blue-900/20 rounded-2xl flex items-center justify-center text-[#1E5BFF]">
+                <Building2 size={24} />
+              </div>
+              <div>
+                <h3 className="text-xl font-bold text-gray-900 dark:text-white leading-tight">{job.role}</h3>
+                <p className="text-sm text-gray-500 font-bold uppercase tracking-widest">{job.company}</p>
+              </div>
+            </div>
+
+            <div className="flex flex-wrap gap-2">
+              <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${
+                job.type === 'CLT' ? 'bg-blue-100 text-blue-700' :
+                job.type === 'PJ' ? 'bg-purple-100 text-purple-700' :
+                'bg-emerald-100 text-emerald-700'
+              }`}>
+                {job.type}
+              </span>
+              <span className="px-3 py-1 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center gap-1">
+                <MapPin size={10} /> {job.neighborhood}
+              </span>
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-3 mb-6">
-            <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded-xl border border-gray-100 dark:border-gray-700">
-              <div className="flex items-center gap-2 text-gray-400 mb-1">
-                <MapPin className="w-3.5 h-3.5" />
-                <span className="text-[10px] font-bold uppercase tracking-wider">Local</span>
-              </div>
-              <p className="text-sm font-semibold text-gray-800 dark:text-gray-200">{job.neighborhood}</p>
-            </div>
-            <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded-xl border border-gray-100 dark:border-gray-700">
-              <div className="flex items-center gap-2 text-gray-400 mb-1">
-                <Clock className="w-3.5 h-3.5" />
-                <span className="text-[10px] font-bold uppercase tracking-wider">Horário</span>
-              </div>
-              <p className="text-sm font-semibold text-gray-800 dark:text-gray-200">{job.schedule}</p>
-            </div>
-            {job.salary && (
-              <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded-xl border border-gray-100 dark:border-gray-700 col-span-2">
-                <div className="flex items-center gap-2 text-gray-400 mb-1">
-                  <DollarSign className="w-3.5 h-3.5" />
-                  <span className="text-[10px] font-bold uppercase tracking-wider">Salário / Remuneração</span>
-                </div>
-                <p className="text-sm font-semibold text-gray-800 dark:text-gray-200">{job.salary}</p>
-              </div>
-            )}
-          </div>
-
-          <div className="space-y-6">
-            <div>
-              <h3 className="font-bold text-gray-900 dark:text-white mb-2 text-sm">Descrição</h3>
-              <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
+          {/* Descrição */}
+          <section className="space-y-4">
+            <h4 className="text-xs font-black text-gray-400 uppercase tracking-[0.2em] px-1">Sobre a oportunidade</h4>
+            <div className="bg-gray-50 dark:bg-gray-900/50 p-6 rounded-3xl border border-gray-100 dark:border-gray-800">
+              <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed font-medium">
                 {job.description}
               </p>
             </div>
+          </section>
 
-            <div>
-              <h3 className="font-bold text-gray-900 dark:text-white mb-2 text-sm">Requisitos</h3>
-              <ul className="space-y-2">
-                {job.requirements.map((req, idx) => (
-                  <li key={idx} className="flex items-start gap-2 text-sm text-gray-600 dark:text-gray-300">
-                    <CheckCircle2 className="w-4 h-4 text-green-500 mt-0.5 shrink-0" />
-                    {req}
-                  </li>
+          {/* Requisitos */}
+          <section className="space-y-4">
+            <h4 className="text-xs font-black text-gray-400 uppercase tracking-[0.2em] px-1">Requisitos e Horário</h4>
+            <div className="bg-white dark:bg-gray-900 p-6 rounded-3xl border border-gray-100 dark:border-gray-800 shadow-sm space-y-4">
+              <div className="flex items-center gap-3 text-sm font-bold text-gray-700 dark:text-gray-200">
+                <Clock size={18} className="text-blue-500" />
+                {job.schedule}
+              </div>
+              <div className="h-px bg-gray-50 dark:bg-gray-800"></div>
+              <div className="space-y-3">
+                {job.requirements.map((req, i) => (
+                  <div key={i} className="flex items-start gap-3">
+                    <CheckCircle2 size={16} className="text-emerald-500 shrink-0 mt-0.5" />
+                    <span className="text-sm text-gray-500 dark:text-gray-400 font-medium">{req}</span>
+                  </div>
                 ))}
-              </ul>
+              </div>
             </div>
-          </div>
+          </section>
         </div>
 
-        <div className="absolute bottom-0 left-0 right-0 p-5 bg-white dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800">
+        {/* Footer CTA */}
+        <div className="p-6 bg-white dark:bg-gray-950 border-t border-gray-100 dark:border-gray-800 sticky bottom-0">
           <button 
             onClick={handleApply}
-            className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-4 rounded-2xl shadow-lg shadow-green-600/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+            className="w-full bg-[#1E5BFF] hover:bg-blue-600 text-white font-black py-5 rounded-2xl shadow-xl shadow-blue-500/20 active:scale-[0.98] transition-all flex items-center justify-center gap-3 uppercase tracking-widest text-sm"
           >
-            <MessageCircle className="w-5 h-5" />
-            Candidatar-se via WhatsApp
+            <MessageCircle size={20} className="fill-current" />
+            Entrar em contato
           </button>
         </div>
       </div>
@@ -106,155 +102,120 @@ const JobDetailModal: React.FC<{ job: Job; onClose: () => void }> = ({ job, onCl
   );
 };
 
-/**
- * Função utilitária para calcular se a vaga está patrocinada e ativa.
- */
-const isJobSponsored = (job: Job, today: string): boolean => {
-  return !!(job.isSponsored && job.sponsoredUntil && job.sponsoredUntil >= today);
-};
-
 export const JobsView: React.FC<JobsViewProps> = ({ onBack }) => {
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
-  const { currentNeighborhood, isAll, toggleSelector } = useNeighborhood();
+  const [filterType, setFilterType] = useState<string | null>(null);
+  const [filterHood, setFilterHood] = useState<string | null>(null);
 
-  const sortedJobs = useMemo(() => {
-    const today = new Date().toISOString().split('T')[0];
-    
-    // 1. Filtra por Bairro
-    const neighborhoodFiltered = MOCK_JOBS.filter(j => isAll || j.neighborhood === currentNeighborhood);
+  const neighborhoods = useMemo(() => {
+    return Array.from(new Set(MOCK_JOBS.map(j => j.neighborhood)));
+  }, []);
 
-    // 2. Separa Patrocinadas Válidas vs Normais (Incluindo as patrocinadas expiradas)
-    const sponsoredCandidates = neighborhoodFiltered.filter(j => isJobSponsored(j, today));
-    const regularCandidates = neighborhoodFiltered.filter(j => !isJobSponsored(j, today));
-
-    // 3. Ordena Patrocinadas por data de expiração (mais distante primeiro = contrato mais longo/novo primeiro)
-    sponsoredCandidates.sort((a, b) => {
-      return (b.sponsoredUntil || '').localeCompare(a.sponsoredUntil || '');
+  const filteredJobs = useMemo(() => {
+    return MOCK_JOBS.filter(job => {
+      const matchType = !filterType || job.type === filterType;
+      const matchHood = !filterHood || job.neighborhood === filterHood;
+      return matchType && matchHood;
     });
-
-    // 4. Aplica regra de limite (Max 2 no topo)
-    const topSponsored = sponsoredCandidates.slice(0, 2);
-    const overflowSponsored = sponsoredCandidates.slice(2);
-    
-    // 5. Concatena os restantes (as excedentes do limite voltam para a lista normal preservando a ordem original)
-    const rest = [...overflowSponsored, ...regularCandidates];
-    
-    return [...topSponsored, ...rest];
-  }, [currentNeighborhood, isAll]);
+  }, [filterType, filterHood]);
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 font-sans animate-in slide-in-from-right duration-300 pb-10">
+    <div className="min-h-screen bg-[#F8F9FC] dark:bg-gray-950 font-sans pb-32 animate-in fade-in duration-500">
       {/* Header */}
-      <div className="sticky top-0 z-30 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md px-5 h-16 flex items-center gap-4 border-b border-gray-100 dark:border-gray-800">
-        <button onClick={onBack} className="p-2 -ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
-          <ChevronLeft className="w-6 h-6 text-gray-800 dark:text-white" />
-        </button>
-        <div className="flex-1">
-            <h1 className="font-bold text-lg text-gray-900 dark:text-white flex items-center gap-2">
-              <Briefcase className="w-5 h-5 text-[#1E5BFF]" />
-              Vagas de Emprego
-            </h1>
-            <button 
-              onClick={toggleSelector}
-              className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400 mt-0.5"
-            >
-              <MapPin className="w-3 h-3" />
-              <span>{currentNeighborhood === 'Jacarepaguá (todos)' ? 'Todo Bairro' : currentNeighborhood}</span>
-              <ChevronDown className="w-3 h-3" />
-            </button>
-        </div>
-      </div>
-
-      <div className="p-5">
-        {sortedJobs.length === 0 ? (
-          <div className="flex flex-col items-center justify-center pt-20 text-center">
-            <div className="w-20 h-20 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mb-4">
-              <Briefcase className="w-8 h-8 text-gray-400" />
-            </div>
-            <h3 className="font-bold text-gray-900 dark:text-white">Nenhuma vaga encontrada</h3>
-            <p className="text-sm text-gray-500 dark:text-gray-400 max-w-xs mt-2">
-              Não encontramos vagas no momento.
-            </p>
+      <header className="sticky top-0 z-40 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md px-6 py-6 border-b border-gray-100 dark:border-gray-800">
+        <div className="flex items-center gap-4 mb-6">
+          <button onClick={onBack} className="p-2.5 bg-gray-100 dark:bg-gray-800 rounded-xl text-gray-500 transition-colors">
+            <ChevronLeft size={20} />
+          </button>
+          <div>
+            <h1 className="font-black text-2xl text-gray-900 dark:text-white uppercase tracking-tighter leading-none">Vagas de Emprego</h1>
+            <p className="text-[10px] text-[#1E5BFF] font-black uppercase tracking-widest mt-1">Jacarepaguá Conectada</p>
           </div>
-        ) : (
-          <div className="space-y-4">
-            <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-2xl border border-blue-100 dark:border-blue-800 mb-6 flex items-start gap-3">
-                <AlertCircle className="w-5 h-5 text-blue-600 dark:text-blue-400 shrink-0 mt-0.5" />
-                <p className="text-xs text-blue-700 dark:text-blue-300 leading-relaxed font-medium">
-                    Todas as vagas são de empresas locais. O contato é feito diretamente com o contratante.
-                </p>
+        </div>
+
+        {/* Filtros Rápidos */}
+        <div className="space-y-4">
+          <div className="flex gap-2 overflow-x-auto no-scrollbar -mx-1 px-1">
+            {['CLT', 'PJ', 'Freelancer'].map(type => (
+              <button 
+                key={type}
+                onClick={() => setFilterType(filterType === type ? null : type)}
+                className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border transition-all ${
+                  filterType === type 
+                  ? 'bg-blue-600 text-white border-blue-600 shadow-lg shadow-blue-500/20' 
+                  : 'bg-white dark:bg-gray-800 text-gray-400 border-gray-100 dark:border-gray-700'
+                }`}
+              >
+                {type}
+              </button>
+            ))}
+          </div>
+          
+          <div className="flex gap-2 overflow-x-auto no-scrollbar -mx-1 px-1">
+            <div className="flex items-center gap-2 pr-2 border-r border-gray-100 dark:border-gray-800 shrink-0">
+              <MapPin size={14} className="text-gray-300" />
+            </div>
+            {neighborhoods.map(hood => (
+              <button 
+                key={hood}
+                onClick={() => setFilterHood(filterHood === hood ? null : hood)}
+                className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border transition-all whitespace-nowrap ${
+                  filterHood === hood 
+                  ? 'bg-emerald-600 text-white border-emerald-600 shadow-lg shadow-emerald-500/20' 
+                  : 'bg-white dark:bg-gray-800 text-gray-400 border-gray-100 dark:border-gray-700'
+                }`}
+              >
+                {hood}
+              </button>
+            ))}
+          </div>
+        </div>
+      </header>
+
+      <main className="p-6 space-y-4">
+        {filteredJobs.length > 0 ? filteredJobs.map((job) => (
+          <div 
+            key={job.id} 
+            onClick={() => setSelectedJob(job)}
+            className="bg-white dark:bg-gray-900 rounded-[2rem] p-6 shadow-sm border border-gray-100 dark:border-gray-800 active:scale-[0.98] transition-all cursor-pointer group"
+          >
+            <div className="flex justify-between items-start mb-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center text-[#1E5BFF]">
+                  <Briefcase size={20} />
+                </div>
+                <div>
+                  <h3 className="font-bold text-gray-900 dark:text-white text-sm group-hover:text-[#1E5BFF] transition-colors">{job.role}</h3>
+                  <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest">{job.company}</p>
+                </div>
+              </div>
+              <span className={`px-2 py-0.5 rounded-lg text-[8px] font-black uppercase tracking-widest ${
+                job.type === 'CLT' ? 'bg-blue-50 text-blue-600' :
+                job.type === 'PJ' ? 'bg-purple-50 text-purple-600' :
+                'bg-emerald-50 text-emerald-600'
+              }`}>
+                {job.type}
+              </span>
             </div>
 
-            {sortedJobs.map((job, index) => {
-              const today = new Date().toISOString().split('T')[0];
-              // Uma vaga só mostra o badge se for patrocinada E ativa E estiver entre as top 2
-              const showSponsoredBadge = isJobSponsored(job, today) && index < 2;
-
-              return (
-                <div 
-                  key={job.id}
-                  onClick={() => setSelectedJob(job)}
-                  className={`p-5 rounded-2xl shadow-sm active:scale-[0.98] transition-all cursor-pointer group relative overflow-hidden
-                    ${showSponsoredBadge 
-                        ? 'bg-amber-50/40 dark:bg-amber-900/10 border-l-4 border-l-amber-400 dark:border-l-amber-500 border border-gray-100 dark:border-gray-800' 
-                        : 'bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700'
-                    }`}
-                >
-                  {showSponsoredBadge && (
-                      <div className="absolute top-0 right-0 bg-amber-100 dark:bg-amber-900/40 px-2 py-1 rounded-bl-xl border-b border-l border-amber-200 dark:border-amber-800/50">
-                          <span className="text-[9px] font-bold text-amber-700 dark:text-amber-400 uppercase tracking-wider flex items-center gap-1">
-                              <Zap className="w-3 h-3 fill-amber-500 text-amber-500" /> Patrocinada
-                          </span>
-                      </div>
-                  )}
-
-                  {job.isUrgent && !showSponsoredBadge && (
-                      <div className="absolute top-0 right-0 bg-red-500 text-white text-[9px] font-black px-2 py-1 rounded-bl-xl uppercase tracking-wider">
-                          Urgente
-                      </div>
-                  )}
-                  
-                  <div className="flex justify-between items-start mb-3 pr-16">
-                      <div>
-                          <h3 className="font-bold text-gray-900 dark:text-white text-lg leading-tight">{job.role}</h3>
-                          <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">{job.company}</p>
-                      </div>
-                  </div>
-
-                  <div className="flex flex-wrap gap-2 mb-4">
-                      <span className="px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 text-[10px] font-bold uppercase rounded-md border border-gray-200 dark:border-gray-600">
-                          {job.type}
-                      </span>
-                      <span className={`px-2 py-1 text-[10px] font-bold uppercase rounded-md border ${
-                          job.neighborhood === currentNeighborhood && !isAll
-                           ? 'bg-blue-50 text-blue-600 border-blue-100 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800'
-                           : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-600'
-                      }`}>
-                          {job.neighborhood}
-                      </span>
-                      {job.salary && (
-                          <span className="px-2 py-1 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 text-[10px] font-bold uppercase rounded-md border border-green-100 dark:border-green-800">
-                              {job.salary}
-                          </span>
-                      )}
-                  </div>
-
-                  <div className="flex items-center justify-between pt-3 border-t border-gray-100 dark:border-gray-700">
-                      <span className="text-xs text-gray-400 font-medium">Publicado {job.postedAt}</span>
-                      <span className={`text-xs font-bold group-hover:underline ${showSponsoredBadge ? 'text-amber-600 dark:text-amber-400' : 'text-[#1E5BFF]'}`}>
-                          Ver detalhes
-                      </span>
-                  </div>
-                </div>
-              );
-            })}
+            <div className="flex items-center justify-between pt-4 border-t border-gray-50 dark:border-gray-800">
+              <div className="flex items-center gap-1.5 text-gray-400 text-[10px] font-bold uppercase tracking-tight">
+                <MapPin size={12} /> {job.neighborhood}
+              </div>
+              <span className="text-[10px] font-black text-[#1E5BFF] uppercase tracking-widest flex items-center gap-1">
+                Ver detalhes <ChevronRight size={12} />
+              </span>
+            </div>
+          </div>
+        )) : (
+          <div className="py-20 text-center flex flex-col items-center opacity-30">
+            <AlertCircle size={48} className="text-gray-400 mb-4" />
+            <p className="text-sm font-bold uppercase tracking-widest leading-relaxed">Nenhuma vaga<br/>encontrada com esses filtros.</p>
           </div>
         )}
-      </div>
+      </main>
 
-      {selectedJob && (
-        <JobDetailModal job={selectedJob} onClose={() => setSelectedJob(null)} />
-      )}
+      {selectedJob && <JobDetailModal job={selectedJob} onClose={() => setSelectedJob(null)} />}
     </div>
   );
 };

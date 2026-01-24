@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Home, Compass, Users, User as UserIcon } from 'lucide-react';
+import { Home, Compass, Users, User as UserIcon, Briefcase } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
 interface BottomNavProps {
@@ -22,6 +22,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
   const navItems: NavItem[] = [
     { id: 'home', icon: Home, label: 'Inicio' },
     { id: 'explore', icon: Compass, label: 'Explorar' },
+    { id: 'jobs_list', icon: Briefcase, label: 'Empregos' },
     { id: 'community_feed', icon: Users, label: 'Comunidade', isCenter: true },
     { id: 'profile', icon: UserIcon, label: 'Menu' },
   ];
@@ -64,7 +65,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
 
   return (
     <div className="fixed bottom-0 left-0 right-0 mx-auto w-full max-w-md bg-white dark:bg-gray-900 z-[1000] h-[80px] rounded-t-[24px] shadow-[0_-5px_30px_rgba(0,0,0,0.1)] border-t border-gray-100 dark:border-gray-800">
-      <div className="grid grid-cols-4 items-center w-full h-full">
+      <div className="grid grid-cols-5 items-center w-full h-full">
         {navItems.map((item) => {
           const isActive = activeTab === item.id ||
             (item.id === 'profile' && ['store_area', 'store_ads_module', 'weekly_promo', 'merchant_jobs', 'store_profile', 'store_support', 'about', 'support', 'favorites'].includes(activeTab));
