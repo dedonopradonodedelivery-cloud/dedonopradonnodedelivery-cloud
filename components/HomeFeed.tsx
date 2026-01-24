@@ -1,4 +1,5 @@
 
+
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { 
   ChevronRight, 
@@ -416,54 +417,83 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void; onStoreClick?: (
   );
 };
 const WeeklyDiscountBlock: React.FC<{ onClick: () => void }> = ({ onClick }) => {
-    const consecutiveDays = parseInt(localStorage.getItem('consecutive_days_count') || '1');
-    const [animatedDays, setAnimatedDays] = useState(0);
-    const [isCelebrated, setIsCelebrated] = useState(false);
-    const [showShine, setShowShine] = useState(true);
-    const days = [1, 2, 3, 4, 5];
+    // FIX: Declare isSaving state
+    const [isSaving, setIsSaving] = useState(false);
 
+    // Lógica de sequência diária
+    const [consecutiveDays, setConsecutiveDays] = useState(
+      parseInt(localStorage.getItem('consecutive_days_count') || '0')
+    );
+    const dailyClaimedFlag = `daily_claimed_${new Date().toISOString().split('T')[0]}`;
+    const [hasClaimedToday, setHasClaimedToday] = useState(
+      localStorage.getItem(dailyClaimedFlag) === 'true'
+    );
+
+    // Ajuste inicial: se o dia mudou, resetar a reivindicação de hoje
     useEffect(() => {
-        // Animação coreografada do Dia 0 -> Dia Atual ao carregar
-        const timer = setTimeout(() => {
-            let current = 0;
-            const interval = setInterval(() => {
-                if (current < consecutiveDays) {
-                    current++;
-                    setAnimatedDays(current);
-                } else {
-                    clearInterval(interval);
-                }
-            }, 120); // Delay entre a animação de cada dia
-        }, 600);
-        
-        // Remove o shine do botão após 4 segundos (2 ciclos)
-        const shineTimer = setTimeout(() => setShowShine(false), 4000);
-        
-        return () => {
-          clearTimeout(timer);
-          clearTimeout(shineTimer);
-        };
-    }, [consecutiveDays]);
+      const storedDate = localStorage.getItem(dailyClaimedFlag);
+      if (!storedDate || new Date(storedDate).toDateString() !== new Date().toDateString()) { // Se não tem flag ou é um novo dia
+          setHasClaimedToday(false);
+          // Reiniciar a sequência se o dia de "last_claim_date" não for o dia anterior
+          const lastClaimDate = localStorage.getItem('last_claim_date');
+          if (lastClaimDate) {
+            const yesterday = new Date();
+            yesterday.setDate(yesterday.getDate() - 1);
+            if (new Date(lastClaimDate).toDateString() !== yesterday.toDateString()) {
+              setConsecutiveDays(0); // Reinicia a contagem se a sequência foi quebrada
+              localStorage.setItem('consecutive_days_count', '0');
+            }
+          }
+      }
+    }, [dailyClaimedFlag]);
 
     const handleActionClick = () => {
-        if (consecutiveDays === 1 && !isCelebrated) {
-          setIsCelebrated(true);
-          // Pequeno delay para a celebração visual antes de mudar de página
-          setTimeout(onClick, 850);
-        } else {
-          onClick();
+      let newConsecutiveDays = consecutiveDays;
+      const today = new Date().toISOString().split('T')[0];
+      const lastClaimDate = localStorage.getItem('last_claim_date');
+      
+      // Se não reivindicou hoje e é um novo dia ou primeira vez
+      if (!hasClaimedToday) {
+        if (!lastClaimDate || new Date(lastClaimDate).toDateString() !== new Date().toDateString()) {
+          // É um novo dia (ou o primeiro)
+          const yesterday = new Date();
+          yesterday.setDate(yesterday.getDate() - 1);
+          if (lastClaimDate && new Date(lastClaimDate).toDateString() === yesterday.toDateString()) {
+            // Continuação da sequência
+            newConsecutiveDays = Math.min(5, consecutiveDays + 1);
+          } else {
+            // Nova sequência ou quebra de sequência
+            newConsecutiveDays = 1;
+          }
+          setConsecutiveDays(newConsecutiveDays);
+          localStorage.setItem('consecutive_days_count', newConsecutiveDays.toString());
+          localStorage.setItem('last_claim_date', today); // Atualiza a última data de reivindicação
+          localStorage.setItem(dailyClaimedFlag, 'true'); // Marca o dia como reivindicado
+          setHasClaimedToday(true); // Atualiza o estado para refletir a reivindicação
         }
+      }
+      
+      // Navega para a nova tela de recompensa
+      onClick();
     };
     
     // Determine o texto do subheader com base no estado
-    const subheaderText = isCelebrated 
-      ? `Dia 1 liberado! Volte amanhã para o Dia 2.` 
-      : (consecutiveDays > 1 ? `Continue acessando e seu cupom será liberado no Dia ${consecutiveDays + 1}.` : `Volte todos os dias e desbloqueie seu benefício.`);
+    const subheaderText = hasClaimedToday 
+      ? `Dia ${consecutiveDays} liberado! Volte amanhã.` 
+      : (consecutiveDays >= 5 ? `Semana concluída! Volte amanhã para um novo ciclo.` : `Continue acessando e seu cupom será liberado no Dia ${consecutiveDays + 1 || 1}.`);
     
     // Determine o texto do botão
-    const buttonText = isCelebrated 
-      ? 'Resgatado!' 
-      : (consecutiveDays > 1 ? 'Acompanhar Recompensa' : 'Liberar Dia 1');
+    const buttonText = hasClaimedToday
+      ? 'Ver Recompensa do Dia'
+      : (consecutiveDays >= 5 ? 'Iniciar Nova Semana' : `Liberar Dia ${consecutiveDays + 1 || 1}`);
+
+    // FIX: Declare the 'days' array
+    const days = [1, 2, 3, 4, 5];
+    const currentDayToDisplay = Math.min(5, consecutiveDays);
+    const nextDayToClaim = consecutiveDays >= 5 ? 1 : consecutiveDays + 1;
+    // FIX: Define isButtonDisabled here
+    const isButtonDisabled = isSaving || hasClaimedToday;
+
 
     return (
         <div className="px-5 w-full">
@@ -508,14 +538,14 @@ const WeeklyDiscountBlock: React.FC<{ onClick: () => void }> = ({ onClick }) => 
                             <div 
                               key={d} 
                               className={`w-5 h-5 rounded-full transition-all duration-500 relative flex items-center justify-center ${
-                                d <= animatedDays 
+                                d <= currentDayToDisplay 
                                   ? 'bg-emerald-500 scale-110 shadow-[0_0_8px_rgba(16,185,129,0.5)]' 
                                   : 'bg-gray-100 dark:bg-gray-700'
                               }`} 
                               // Adiciona delay para animação staggered ao completar
                               style={{ animationDelay: `${d * 50 + 100}ms` }}
                             >
-                                {d <= animatedDays ? (
+                                {d <= currentDayToDisplay ? (
                                     <div className="animate-in zoom-in duration-300">
                                         <CheckCircle2 size={12} className="text-white" strokeWidth={3} />
                                     </div>
@@ -540,13 +570,14 @@ const WeeklyDiscountBlock: React.FC<{ onClick: () => void }> = ({ onClick }) => 
                 <button 
                     onClick={handleActionClick} 
                     className={`w-full font-black py-3.5 rounded-xl active:scale-[0.96] transition-all text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 ${
-                        isCelebrated 
+                        hasClaimedToday 
                           ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20' 
                           : 'bg-[#1E5BFF] text-white shadow-md shadow-blue-500/10'
-                    } ${showShine && !isCelebrated ? 'btn-shine-effect' : ''}`}
+                    }`}
                     id="weekly-promo-main-button"
+                    disabled={isButtonDisabled}
                 >
-                    {isCelebrated ? (
+                    {hasClaimedToday ? (
                       <span className="flex items-center gap-2 animate-in zoom-in duration-300">
                          <CheckCircle size={14} strokeWidth={3} />
                          {buttonText}

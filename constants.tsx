@@ -1,4 +1,5 @@
 
+
 import React from 'react';
 import { 
   Utensils, ShoppingCart, Scissors, Heart, PawPrint, Home, Wrench, 
@@ -14,10 +15,49 @@ import {
   Camera, Vote, Handshake, Flame, Milestone, History, Home as HomeIcon,
   MessageCircle, HelpCircle, UserCheck, Recycle,
   Navigation,
-  Newspaper // Adicionado para Posts do Bairro
+  Newspaper 
 } from 'lucide-react';
 import { AdType, Category, Store, Story, EditorialCollection, Job, CommunityPost, NeighborhoodCommunity, BairroPost } from './types';
-import { getStoreLogo } from '@/utils/mockLogos'; // Importe getStoreLogo aqui
+import { getStoreLogo } from './utils/mockLogos'; 
+
+// --- VALIDATION HELPERS (Moved from StoreAdsModule.tsx) ---
+export const FORBIDDEN_WORDS = ['palavrão', 'inapropriado', 'violação', 'gratis', 'promoção', 'oferta', 'desconto', 'cupom', 'r$', '% off', 'grátis', 'barato', 'imperdível', 'liquidação', 'black friday'];
+export const CHAR_LIMITS = {
+  template_headline: 25,
+  template_subheadline: 50,
+  editor_title: 40,
+  editor_subtitle: 120,
+};
+export const MIN_CONTRAST_RATIO = 4.5;
+
+export const hexToRgb = (hex: string): { r: number; g: number; b: number } | null => {
+  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  return result ? {
+    r: parseInt(result[1], 16),
+    g: parseInt(result[2], 16),
+    b: parseInt(result[3], 16),
+  } : null;
+};
+
+export const getLuminance = (r: number, g: number, b: number): number => {
+  const a = [r, g, b].map((v) => {
+    v /= 255;
+    return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+  });
+  return a[0] * 0.2126 + a[1] * 0.7152 + a[2] * 0.0722;
+};
+
+export const getContrastRatio = (hex1: string, hex2: string): number => {
+  const rgb1 = hexToRgb(hex1);
+  const rgb2 = hexToRgb(hex2);
+  if (!rgb1 || !rgb2) return 1;
+  const lum1 = getLuminance(rgb1.r, rgb1.g, rgb1.b);
+  const lum2 = getLuminance(rgb2.r, rgb2.g, rgb2.b);
+  const lightest = Math.max(lum1, lum2);
+  const darkest = Math.min(lum1, lum2);
+  return (lightest + 0.05) / (darkest + 0.05);
+};
+// --- END VALIDATION HELPERS ---
 
 // NOVO: Mock de Posts do Bairro
 export const MOCK_BAIRRO_POSTS: BairroPost[] = [
@@ -594,7 +634,7 @@ export const MOCK_JOBS: Job[] = [
     salary: 'Comissão + Ajuda de Custo',
     description: 'Vendas de planos de internet e TV a cabo.',
     requirements: ['Carro próprio', 'Experiência com vendas'],
-    schedule: 'Seg-Mex',
+    schedule: 'Seg-Sex',
     contactWhatsapp: '5521988888888',
     postedAt: 'Há 1 dia',
     isUrgent: true
@@ -621,8 +661,3 @@ export const SPECIALTIES: Record<string, string[]> = {
   'Informática': ['Formatação', 'Remoção de vírus', 'Upgrade de memória/SSD', 'Limpeza interna', 'Configuração de rede'],
   'default': ['Consultoria', 'Orçamento geral', 'Manutenção preventiva', 'Reparo específico', 'Instalação']
 };
-
-// NOVO: Palavras proibidas para posts do bairro
-export const FORBIDDEN_POST_WORDS = [
-  'promoção', 'oferta', 'desconto', 'cupom', 'r$', '% off', 'grátis', 'barato', 'imperdível', 'liquidação', 'black friday'
-];

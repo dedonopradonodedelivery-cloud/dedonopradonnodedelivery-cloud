@@ -28,7 +28,8 @@ import {
   Moon, // Adicionado para Modo Noite
   Rocket, // FIX: Added missing Rocket icon
   Palette, // FIX: Added missing Palette icon
-  Newspaper // Ícone para Posts do Bairro
+  Newspaper, // Ícone para Posts do Bairro
+  BarChart2 // Ícone para Desempenho
 } from 'lucide-react';
 import { User as SupabaseUser } from '@supabase/supabase-js';
 import { useAuth } from '@/contexts/AuthContext';
@@ -137,6 +138,24 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
 
       <div className="px-6 space-y-10">
         
+        {/* NOVO BLOCO: Desempenho da Minha Loja */}
+        <section>
+          <SectionHeader 
+            title="Desempenho da Minha Loja" 
+            icon={BarChart2} 
+            description="Veja como sua loja está se saindo no app." 
+          />
+          <div className="bg-white dark:bg-gray-800 rounded-[2.5rem] border border-gray-100 dark:border-gray-700 overflow-hidden shadow-sm">
+            <ServiceBlock 
+              icon={BarChart2} 
+              label="Ver Dashboard Completo" 
+              description="Visualizações, cliques, engajamento e mais."
+              onClick={() => onNavigate('merchant_performance_dashboard')}
+              colorClass="bg-indigo-50 text-indigo-600"
+            />
+          </div>
+        </section>
+
         {/* NOVO BLOCO: ORGÂNICOS / GRATUITOS */}
         <section>
           <SectionHeader 
@@ -286,7 +305,7 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
               onClick={() => onNavigate('favorites')} 
             />
             <ServiceBlock 
-              icon={Info} 
+              icon={Compass} 
               label="Quem Somos" 
               description="Conheça mais sobre o Localizei JPA"
               onClick={() => onNavigate('about')} 
