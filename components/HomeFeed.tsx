@@ -10,7 +10,11 @@ import {
   Clock,
   Lock,
   Star,
-  MessageSquare
+  MessageSquare,
+  Zap,
+  Award,
+  // Fix: Add missing Loader2 icon to resolve "Cannot find name 'Loader2'" error
+  Loader2
 } from 'lucide-react';
 import { LojasEServicosList } from '@/components/LojasEServicosList';
 import { User } from '@supabase/supabase-js';
@@ -55,7 +59,7 @@ export const HomeFeed: React.FC<HomeFeedFeedProps> = ({
     setTimeout(() => {
       setIsAnimating(false);
       onNavigate('weekly_reward_page');
-    }, 1500);
+    }, 1200);
   };
 
   return (
@@ -85,72 +89,93 @@ export const HomeFeed: React.FC<HomeFeedFeedProps> = ({
 
       <HomeBannerCarousel onStoreClick={onStoreClick} />
 
-      {/* 1. SISTEMA DE RECOMPENSA */}
+      {/* 1. SISTEMA DE RECOMPENSA (VERSÃO REFINADA) */}
       <section className="px-5 py-2 mb-4">
-        <div className="bg-indigo-50/50 dark:bg-blue-900/10 rounded-[2rem] p-5 border border-indigo-100/50 dark:border-blue-800/30 relative overflow-hidden">
-          {isAnimating && (
-            <div className="absolute inset-0 pointer-events-none">
-              {[...Array(8)].map((_, i) => (
-                <div 
-                  key={i} 
-                  className={`absolute w-1.5 h-1.5 bg-yellow-400 rounded-full animate-ping opacity-60`}
-                  style={{
-                    top: `${Math.random() * 100}%`,
-                    left: `${Math.random() * 100}%`,
-                    animationDuration: `${0.5 + Math.random()}s`
-                  }}
-                />
-              ))}
-            </div>
-          )}
-
+        <div className="bg-white dark:bg-gray-900 rounded-[2.2rem] p-6 border border-gray-100 dark:border-gray-800 shadow-xl shadow-blue-900/5 relative overflow-hidden group">
+          {/* Micro-animação de fundo quando ativado */}
+          <div className={`absolute top-0 right-0 w-32 h-32 bg-blue-500/5 rounded-full blur-3xl -mr-16 -mt-16 transition-opacity duration-1000 ${isAnimating ? 'opacity-100' : 'opacity-0'}`}></div>
+          
           <div className="relative z-10">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-2">
-                <div className="w-7 h-7 bg-[#1E5BFF]/10 rounded-lg flex items-center justify-center">
-                  <Gift className="w-4 h-4 text-[#1E5BFF]" />
+            <div className="flex items-center justify-between mb-5">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 bg-blue-50 dark:bg-blue-900/30 rounded-2xl flex items-center justify-center text-[#1E5BFF] border border-blue-100/50 dark:border-blue-800/30 shadow-sm">
+                  <Gift className="w-5 h-5" />
                 </div>
-                <h3 className="font-black text-[10px] text-[#1E5BFF] uppercase tracking-widest">Recompensa da Semana</h3>
+                <div>
+                  <h3 className="font-black text-[10px] text-[#1E5BFF] uppercase tracking-[0.15em] leading-none mb-1">Recompensa da Semana</h3>
+                  <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest leading-none">Acesse e ganhe</p>
+                </div>
               </div>
-              <div className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-tight">
-                Dia {consecutiveDays} de 5
+              <div className="bg-gray-50 dark:bg-gray-800 px-3 py-1.5 rounded-full border border-gray-100 dark:border-gray-700">
+                <span className="text-[10px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-tighter">Dia {consecutiveDays} de 5</span>
               </div>
             </div>
 
-            <h2 className="text-sm font-bold text-gray-800 dark:text-gray-200 leading-tight mb-5 px-1">
-              Complete sua sequência e ganhe benefícios exclusivos
-            </h2>
+            <div className="px-1 mb-6">
+              <h2 className="text-sm font-bold text-gray-800 dark:text-gray-200 leading-tight">
+                {consecutiveDays < 5 
+                  ? "Cada dia conta para liberar seus benefícios exclusivos" 
+                  : "Parabéns! Sua recompensa está pronta para ser liberada."}
+              </h2>
+            </div>
 
-            <div className="flex justify-between items-center mb-6 px-1 max-w-[280px] mx-auto">
-              {[1, 2, 3, 4, 5].map((day) => (
-                <div key={day} className="flex flex-col items-center gap-1.5">
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center border-2 transition-all duration-500 ${
-                    day <= consecutiveDays 
-                      ? 'bg-white dark:bg-blue-600 border-[#1E5BFF] text-[#1E5BFF] dark:text-white shadow-sm scale-105' 
-                      : 'bg-white/50 dark:bg-gray-800 border-gray-100 dark:border-gray-700 text-gray-300 dark:text-gray-600'
-                  }`}>
-                    {day <= consecutiveDays ? (
-                      <CheckCircle2 size={16} strokeWidth={3} />
-                    ) : (
-                      <span className="text-[8px] font-black uppercase">D{day}</span>
-                    )}
+            {/* Marcadores de Progresso */}
+            <div className="flex justify-between items-center mb-8 px-2">
+              {[1, 2, 3, 4, 5].map((day) => {
+                const isCompleted = day <= consecutiveDays;
+                const isNext = day === consecutiveDays + 1;
+
+                return (
+                  <div key={day} className="flex flex-col items-center gap-2">
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all duration-700 relative ${
+                      isCompleted 
+                        ? 'bg-blue-500 border-blue-500 text-white shadow-lg shadow-blue-500/20 scale-105' 
+                        : isNext
+                          ? 'bg-white dark:bg-gray-800 border-blue-200 dark:border-blue-900 border-dashed animate-pulse'
+                          : 'bg-gray-50 dark:bg-gray-800 border-gray-100 dark:border-gray-700 text-gray-300 dark:text-gray-600'
+                    }`}>
+                      {isCompleted ? (
+                        <CheckCircle2 size={18} strokeWidth={3} />
+                      ) : (
+                        <span className="text-[9px] font-black">{day}</span>
+                      )}
+                      
+                      {/* Brilho sutil no dia atual */}
+                      {day === consecutiveDays && !isAnimating && (
+                        <div className="absolute inset-0 rounded-full bg-blue-400/20 animate-ping"></div>
+                      )}
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
 
             <button 
               onClick={handleClaimReward}
-              className="w-full bg-white dark:bg-gray-800 text-[#1E5BFF] border border-indigo-100 dark:border-gray-700 font-black py-3 rounded-xl shadow-sm active:scale-95 transition-all flex items-center justify-center gap-2 text-[10px] uppercase tracking-widest"
+              disabled={isAnimating}
+              className={`w-full py-4 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-2 shadow-lg active:scale-95 ${
+                isAnimating 
+                  ? 'bg-gray-100 text-gray-400' 
+                  : 'bg-[#1E5BFF] text-white shadow-blue-500/20 hover:brightness-110'
+              }`}
             >
-              {isAnimating ? 'Processando...' : `Liberar Dia ${consecutiveDays}`}
-              {!isAnimating && <ArrowRight size={14} strokeWidth={3} />}
+              {isAnimating ? (
+                <>
+                  <Loader2 size={14} className="animate-spin" />
+                  Sincronizando...
+                </>
+              ) : (
+                <>
+                  {consecutiveDays < 5 ? `Liberar Dia ${consecutiveDays}` : "Resgatar Recompensa"}
+                  <ArrowRight size={14} strokeWidth={3} />
+                </>
+              )}
             </button>
           </div>
         </div>
       </section>
 
-      {/* 2. POSTS DO BAIRRO (NOVO BLOCO) */}
+      {/* 2. POSTS DO BAIRRO */}
       <section className="px-5 py-4 mb-6">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
@@ -170,7 +195,7 @@ export const HomeFeed: React.FC<HomeFeedFeedProps> = ({
                 <div 
                     key={post.id} 
                     onClick={() => onNavigate('neighborhood_posts')}
-                    className="flex-shrink-0 w-44 bg-white dark:bg-gray-900 rounded-[2rem] border border-gray-100 dark:border-gray-800 overflow-hidden shadow-sm active:scale-95 transition-all"
+                    className="flex-shrink-0 w-44 bg-white dark:bg-gray-900 rounded-[2rem] border border-gray-100 dark:border-gray-800 overflow-hidden shadow-sm active:scale-[0.98] transition-all"
                 >
                     <div className="h-32 w-full overflow-hidden">
                         <img src={post.img} alt={post.store} className="w-full h-full object-cover" />
