@@ -12,7 +12,9 @@ import {
   AlertTriangle,
   Loader2,
   Clock,
-  Zap
+  Zap,
+  Percent,
+  DollarSign
 } from 'lucide-react';
 
 interface MerchantWeeklyRewardProps {
@@ -23,6 +25,10 @@ interface MerchantWeeklyRewardProps {
 export const MerchantWeeklyReward: React.FC<MerchantWeeklyRewardProps> = ({ onBack, user }) => {
   const [isParticipating, setIsParticipating] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [rewardType, setRewardType] = useState<'percent' | 'fixed'>('percent');
+  const [rewardValue, setRewardValue] = useState<string>('10');
+  const [isCustomValue, setIsCustomValue] = useState(false);
+
   const [rewardData, setRewardData] = useState({
     title: 'Suco Natural Grátis',
     description: 'Na compra de qualquer hambúrguer artesanal.',
@@ -38,18 +44,29 @@ export const MerchantWeeklyReward: React.FC<MerchantWeeklyRewardProps> = ({ onBa
     }, 1200);
   };
 
+  const percentPresets = ['5', '10', '20', '30', '35', '40'];
+  const fixedPresets = ['5', '20', '35', '50'];
+
+  const handlePresetClick = (val: string) => {
+    setRewardValue(val);
+    setIsCustomValue(false);
+  };
+
   return (
     <div className="min-h-screen bg-[#F8F9FB] dark:bg-gray-950 font-sans pb-32 animate-in slide-in-from-right duration-300">
       {/* Header */}
-      <header className="sticky top-0 z-40 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md px-6 py-6 border-b border-gray-100 dark:border-gray-800">
-        <div className="flex items-center gap-4 mb-2">
-          <button onClick={onBack} className="p-2.5 bg-gray-100 dark:bg-gray-800 rounded-xl text-gray-500 transition-colors">
-            <ChevronLeft size={20} />
-          </button>
-          <div>
-            <h1 className="font-black text-xl text-gray-900 dark:text-white uppercase tracking-tighter leading-none">Gestão de Recompensas</h1>
-            <p className="text-[10px] text-[#1E5BFF] font-black uppercase tracking-widest mt-1">Serviço Gratuito</p>
-          </div>
+      <header className="sticky top-0 z-40 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md px-6 h-20 flex items-center gap-4 border-b border-gray-100 dark:border-gray-800 shadow-sm">
+        <button 
+          onClick={onBack} 
+          className="p-3 bg-gray-50 dark:bg-gray-800 rounded-2xl hover:bg-gray-100 transition-all active:scale-90"
+        >
+          <ChevronLeft size={20} className="text-gray-600 dark:text-gray-300" />
+        </button>
+        <div>
+          <h1 className="font-black text-xl text-gray-900 dark:text-white uppercase tracking-tighter leading-none">
+            Gestão de Recompensas
+          </h1>
+          <p className="text-[10px] text-[#1E5BFF] font-black uppercase tracking-widest mt-1">Serviço Gratuito</p>
         </div>
       </header>
 
@@ -66,7 +83,7 @@ export const MerchantWeeklyReward: React.FC<MerchantWeeklyRewardProps> = ({ onBa
         {/* 2. STATUS DE PARTICIPAÇÃO */}
         <section className="space-y-4">
             <h3 className="text-xs font-black uppercase tracking-[0.2em] text-gray-400 px-1">Status no Bairro</h3>
-            <div className={`p-6 rounded-[2.5rem] border-2 transition-all flex items-center justify-between ${isParticipating ? 'bg-white dark:bg-gray-900 border-[#1E5BFF]/20 shadow-sm' : 'bg-gray-100 dark:bg-gray-800 border-transparent opacity-60'}`}>
+            <div className={`p-6 rounded-[2.5rem] border-2 transition-all flex items-center justify-between ${isParticipating ? 'bg-white dark:bg-gray-900 border-[#1E5BFF]/20 shadow-sm' : 'bg-gray-100 dark:bg-gray-900 border-transparent opacity-60'}`}>
                 <div className="flex items-center gap-4">
                     <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${isParticipating ? 'bg-emerald-500 text-white' : 'bg-gray-400 text-white'}`}>
                         {isParticipating ? <CheckCircle2 size={24} /> : <Clock size={24} />}
@@ -115,6 +132,73 @@ export const MerchantWeeklyReward: React.FC<MerchantWeeklyRewardProps> = ({ onBa
                     />
                 </div>
 
+                {/* NOVA SEÇÃO: TIPO DE RECOMPENSA */}
+                <div className="space-y-4 pt-2 border-t border-gray-50 dark:border-gray-800">
+                    <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Tipo de recompensa</label>
+                    
+                    <div className="flex bg-gray-50 dark:bg-gray-800 p-1 rounded-2xl border border-gray-100 dark:border-gray-700">
+                      <button 
+                        onClick={() => { setRewardType('percent'); setRewardValue('10'); setIsCustomValue(false); }}
+                        className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-xs font-bold transition-all ${rewardType === 'percent' ? 'bg-white dark:bg-gray-700 text-[#1E5BFF] shadow-sm' : 'text-gray-400'}`}
+                      >
+                        <Percent size={14} /> Percentual
+                      </button>
+                      <button 
+                        onClick={() => { setRewardType('fixed'); setRewardValue('20'); setIsCustomValue(false); }}
+                        className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-xs font-bold transition-all ${rewardType === 'fixed' ? 'bg-white dark:bg-gray-700 text-[#1E5BFF] shadow-sm' : 'text-gray-400'}`}
+                      >
+                        <DollarSign size={14} /> Valor em reais
+                      </button>
+                    </div>
+
+                    <div className="flex flex-wrap gap-2">
+                      {rewardType === 'percent' ? (
+                        percentPresets.map(val => (
+                          <button
+                            key={val}
+                            onClick={() => handlePresetClick(val)}
+                            className={`px-4 py-2 rounded-xl text-xs font-bold border transition-all ${rewardValue === val && !isCustomValue ? 'bg-[#1E5BFF] border-[#1E5BFF] text-white shadow-md' : 'bg-white dark:bg-gray-800 text-gray-500 border-gray-100 dark:border-gray-700'}`}
+                          >
+                            {val}%
+                          </button>
+                        ))
+                      ) : (
+                        fixedPresets.map(val => (
+                          <button
+                            key={val}
+                            onClick={() => handlePresetClick(val)}
+                            className={`px-4 py-2 rounded-xl text-xs font-bold border transition-all ${rewardValue === val && !isCustomValue ? 'bg-[#1E5BFF] border-[#1E5BFF] text-white shadow-md' : 'bg-white dark:bg-gray-800 text-gray-500 border-gray-100 dark:border-gray-700'}`}
+                          >
+                            R$ {val}
+                          </button>
+                        ))
+                      )}
+                      <button
+                        onClick={() => setIsCustomValue(true)}
+                        className={`px-4 py-2 rounded-xl text-xs font-bold border transition-all ${isCustomValue ? 'bg-[#1E5BFF] border-[#1E5BFF] text-white shadow-md' : 'bg-white dark:bg-gray-800 text-gray-500 border-gray-100 dark:border-gray-700'}`}
+                      >
+                        Personalizado
+                      </button>
+                    </div>
+
+                    {isCustomValue && (
+                      <div className="animate-in slide-in-from-top-2 duration-300">
+                        <div className="relative">
+                          <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold">
+                            {rewardType === 'percent' ? '%' : 'R$'}
+                          </span>
+                          <input 
+                            type="number"
+                            value={rewardValue}
+                            onChange={(e) => setRewardValue(e.target.value)}
+                            placeholder="Digite o valor..."
+                            className="w-full bg-gray-50 dark:bg-gray-800 border-none rounded-2xl p-4 pl-10 text-sm font-bold dark:text-white focus:ring-2 focus:ring-[#1E5BFF] outline-none"
+                          />
+                        </div>
+                      </div>
+                    )}
+                </div>
+
                 <div>
                     <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5 ml-1">Regras de Uso</label>
                     <input 
@@ -159,7 +243,9 @@ export const MerchantWeeklyReward: React.FC<MerchantWeeklyRewardProps> = ({ onBa
                         <Tag className="w-6 h-6" />
                     </div>
                     <div>
-                        <h4 className="text-sm font-black text-gray-900 dark:text-white uppercase">{rewardData.title || 'Título da Recompensa'}</h4>
+                        <h4 className="text-sm font-black text-gray-900 dark:text-white uppercase">
+                          {rewardType === 'percent' ? `${rewardValue}% de desconto` : `R$ ${rewardValue} de desconto`} em {rewardData.title}
+                        </h4>
                         <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">{user?.user_metadata?.store_name || 'Sua Loja'}</p>
                     </div>
                 </div>

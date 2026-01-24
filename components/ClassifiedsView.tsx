@@ -28,11 +28,12 @@ interface ClassifiedsViewProps {
   onBack: () => void;
 }
 
-const CATEGORIES_DATA: { id: ClassifiedCategory; label: string; icon: any; color: string }[] = [
-  { id: 'Empregos', label: 'Empregos', icon: Briefcase, color: 'bg-blue-600' },
-  { id: 'Serviços', label: 'Serviços', icon: Wrench, color: 'bg-purple-600' },
-  { id: 'Compra & Venda', label: 'Compra & Venda', icon: ShoppingCart, color: 'bg-emerald-600' },
-  { id: 'Avisos', label: 'Avisos', icon: Megaphone, color: 'bg-amber-600' },
+// Fixed: Icons must be Elements <Icon /> to work with React.cloneElement
+const CATEGORIES_DATA: { id: ClassifiedCategory; label: string; icon: React.ReactElement; color: string }[] = [
+  { id: 'Empregos', label: 'Empregos', icon: <Briefcase />, color: 'bg-blue-600' },
+  { id: 'Serviços', label: 'Serviços', icon: <Wrench />, color: 'bg-purple-600' },
+  { id: 'Compra & Venda', label: 'Compra & Venda', icon: <ShoppingCart />, color: 'bg-emerald-600' },
+  { id: 'Avisos', label: 'Avisos', icon: <Megaphone />, color: 'bg-amber-600' },
 ];
 
 const CLASSIFIEDS_BANNERS = [
@@ -58,6 +59,13 @@ const CLASSIFIEDS_BANNERS = [
     color: 'bg-emerald-700'
   }
 ];
+
+// Fixed: Moving local helper components to the top to ensure availability
+const ChevronDownIcon = ({ size, className }: { size?: number, className?: string }) => (
+  <svg width={size || 24} height={size || 24} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <path d="m6 9 6 6 6-6"/>
+  </svg>
+);
 
 const BannerCarousel: React.FC = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -238,7 +246,7 @@ export const ClassifiedsView: React.FC<ClassifiedsViewProps> = ({ onBack }) => {
                 <div className={`w-full aspect-square rounded-[22px] shadow-lg flex items-center justify-center border transition-all ${
                   activeCategory === cat.id ? `${cat.color} border-white/20` : 'bg-white dark:bg-gray-800 border-gray-100 dark:border-gray-700'
                 }`}>
-                  {React.cloneElement(cat.icon as any, { 
+                  {React.cloneElement(cat.icon, { 
                     className: `w-6 h-6 ${activeCategory === cat.id ? 'text-white' : 'text-gray-400'}` 
                   })}
                 </div>
@@ -328,6 +336,14 @@ export const ClassifiedsView: React.FC<ClassifiedsViewProps> = ({ onBack }) => {
 
       {/* 6. DETALHE DO CLASSIFICADO */}
       {selectedClassified && <ClassifiedDetailModal classified={selectedClassified} onClose={() => setSelectedClassified(null)} />}
+      
+      {/* 7. Footer Spacer for scroll slider in some views */}
+      <div className="h-4"></div>
+      
+      {/* Internal Helper - Moved here to ensure no non-hoisted const reference errors */}
+      <div className="hidden">
+          <ChevronDownIcon />
+      </div>
     </div>
   );
 };
