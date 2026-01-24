@@ -393,4 +393,23 @@ export interface DbWalletMovement {
 }
 
 // Added to fix import error in StoreProfileEdit.tsx
-export type TaxonomyType = 'category' | 'subcategory';
+export type TaxonomyType = 'category' | 'subcategory' | 'specialty';
+
+
+export interface StoreAdsModuleProps {
+  onBack: () => void;
+  onNavigate: (view: string) => void;
+  user: any; // Considerar usar um tipo User mais específico se disponível
+  categoryName?: string;
+  viewMode?: string;
+  initialView?: 'sales' | 'chat';
+}
+
+export interface EditorData {
+  template: string;
+  palette: string;
+  fontSize: string;
+  fontFamily: string;
+  title: string;
+  subtitle: string;
+}

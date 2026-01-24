@@ -1,3 +1,5 @@
+
+
 import React from 'react';
 import { 
   Utensils, ShoppingCart, Scissors, Heart, PawPrint, Home, Wrench, 
@@ -11,27 +13,30 @@ import {
   Baby, GraduationCap, Microscope, Brain, Sparkles, Smile, Beer, 
   Activity, Eye, FileText, Globe, Calendar, Music, PartyPopper, Globe2, Edit3, User, Bell, Search,
   Camera, Vote, Handshake, Flame, Milestone, History, Home as HomeIcon,
-  MessageCircle, HelpCircle, UserCheck, Recycle
+  MessageCircle, HelpCircle, UserCheck, Recycle,
+  Navigation,
+  Newspaper // Adicionado para Posts do Bairro
 } from 'lucide-react';
-import { AdType, Category, Store, Story, EditorialCollection, Job, CommunityPost, NeighborhoodCommunity } from '../types';
+import { AdType, Category, Store, Story, EditorialCollection, Job, CommunityPost, NeighborhoodCommunity, BairroPost } from '../types';
+import { getStoreLogo } from '../utils/mockLogos';
 
 export const CATEGORIES: Category[] = [
   { id: 'cat-comida', name: 'Comida', slug: 'comida', icon: <Utensils />, color: 'bg-brand-blue' },
   { id: 'cat-pets', name: 'Pets', slug: 'pets', icon: <PawPrint />, color: 'bg-brand-blue' },
   { id: 'cat-pro', name: 'Pro', slug: 'pro', icon: <Briefcase />, color: 'bg-brand-blue' },
-  { id: 'cat-saude', name: 'Saúde', slug: 'saude', icon: <Heart />, color: 'bg-brand-blue' },
-  { id: 'cat-services', name: 'Serviços', slug: 'servicos', icon: <Wrench />, color: 'bg-brand-blue' },
-  { id: 'cat-beauty', name: 'Beleza', slug: 'beleza', icon: <Scissors />, color: 'bg-brand-blue' },
-  { id: 'cat-autos', name: 'Autos', slug: 'autos', icon: <CarFront />, color: 'bg-brand-blue' },
-  { id: 'cat-mercado', name: 'Mercado', slug: 'mercado', icon: <ShoppingCart />, color: 'bg-brand-blue' },
-  { id: 'cat-casa', name: 'Casa', slug: 'casa', icon: <HomeIcon />, color: 'bg-brand-blue' },
-  { id: 'cat-sports', name: 'Esportes', slug: 'esportes', icon: <Dumbbell />, color: 'bg-brand-blue' },
-  { id: 'cat-leisure', name: 'Lazer', slug: 'lazer', icon: <Ticket />, color: 'bg-brand-blue' },
-  { id: 'cat-edu', name: 'Educação', slug: 'educacao', icon: <BookOpen />, color: 'bg-brand-blue' },
-  { id: 'cat-pharmacy', name: 'Farmácia', slug: 'farmacia', icon: <Pill />, color: 'bg-brand-blue' },
-  { id: 'cat-fashion', name: 'Moda', slug: 'moda', icon: <Shirt />, color: 'bg-brand-blue' },
-  { id: 'cat-eventos', name: 'Eventos', slug: 'eventos', icon: <PartyPopper />, color: 'bg-brand-blue' },
-  { id: 'cat-condominio', name: 'Condomínio', slug: 'condominio', icon: <Building2 />, color: 'bg-brand-blue' },
+  { id: 'cat-saude', slug: 'saude', name: 'Saúde', icon: <Heart />, color: 'bg-brand-blue' },
+  { id: 'cat-services', slug: 'servicos', name: 'Serviços', icon: <Wrench />, color: 'bg-brand-blue' },
+  { id: 'cat-beauty', slug: 'beleza', name: 'Beleza', icon: <Scissors />, color: 'bg-brand-blue' },
+  { id: 'cat-autos', slug: 'autos', name: 'Autos', icon: <CarFront />, color: 'bg-brand-blue' },
+  { id: 'cat-mercado', slug: 'mercado', name: 'Mercado', icon: <ShoppingCart />, color: 'bg-brand-blue' },
+  { id: 'cat-casa', slug: 'casa', name: 'Casa', icon: <HomeIcon />, color: 'bg-brand-blue' },
+  { id: 'cat-sports', slug: 'esportes', name: 'Esportes', icon: <Dumbbell />, color: 'bg-brand-blue' },
+  { id: 'cat-leisure', slug: 'lazer', name: 'Lazer', icon: <Ticket />, color: 'bg-brand-blue' },
+  { id: 'cat-edu', slug: 'educacao', name: 'Educação', icon: <BookOpen />, color: 'bg-brand-blue' },
+  { id: 'cat-pharmacy', slug: 'farmacia', name: 'Farmácia', icon: <Pill />, color: 'bg-brand-blue' },
+  { id: 'cat-fashion', slug: 'moda', name: 'Moda', icon: <Shirt />, color: 'bg-brand-blue' },
+  { id: 'cat-eventos', slug: 'eventos', name: 'Eventos', icon: <PartyPopper />, color: 'bg-brand-blue' },
+  { id: 'cat-condominio', slug: 'condominio', name: 'Condomínio', icon: <Building2 />, color: 'bg-brand-blue' },
 ];
 
 export const SUBCATEGORIES: Record<string, { name: string; icon: React.ReactNode }[]> = {
@@ -383,7 +388,7 @@ export const MOCK_COMMUNITY_POSTS: CommunityPost[] = [
     timestamp: '8h',
     likes: 24,
     comments: 31,
-    imageUrl: 'https://images.unsplash.com/photo-1585659722982-789600c7690a?q=80&w=600&auto=format&fit=crop'
+    imageUrl: 'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?q=80&w=600&auto=format&fit=crop'
   },
   {
     id: 'post-7',
@@ -459,7 +464,38 @@ export const STORES: Store[] = [
   { id: 'f-7', name: 'Drogaria JPA', category: 'Farmácia', subcategory: 'Medicamentos', rating: 4.4, distance: 'Freguesia', adType: AdType.PREMIUM, description: 'Medicamentos e perfumaria.', isSponsored: true, image: 'https://images.unsplash.com/photo-1587854692152-cbe660dbbb88?q=80&w=400&auto=format&fit=crop' },
   { id: 'f-8', name: 'Academia FitBairro', category: 'Esportes', subcategory: 'Academias', rating: 4.7, distance: 'Taquara', adType: AdType.PREMIUM, description: 'Treine perto de casa.', isSponsored: true, image: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=400&auto=format&fit=crop' },
   { id: 'f-9', name: 'Consultório Dra. Ana', category: 'Saúde', subcategory: 'Dentistas', rating: 5.0, distance: 'Freguesia', adType: AdType.PREMIUM, description: 'Cuidado completo com seu sorriso.', isSponsored: true, image: 'https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?q=80&w=400&auto=format&fit=crop' },
-  { id: 'f-10', name: 'Boutique Chic', category: 'Moda', subcategory: 'Moda Feminina', rating: 4.3, distance: 'Anil', adType: AdType.PREMIUM, description: 'Tendências e elegância.', isSponsored: true, image: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=400&auto=format&fit=crop' },
+  { id: 'f-10', name: 'Boutique Chic', category: 'Moda', subcategory: 'Moda Feminina', rating: 4.3, distance: 'Anil', adType: AdType.PREMIUM, description: 'Roupas e acessórios para mulheres que não abrem mão da elegância e do estilo. Peças selecionadas que acompanham as tendências da moda nacional e internacional.', isSponsored: true, image: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=400&auto=format&fit=crop' },
+  // NOVOS MOCK STORES PARA BANNERS
+  {
+    id: 'restaurante-sabor-bairro',
+    name: 'Restaurante Sabor do Bairro',
+    category: 'Comida',
+    subcategory: 'Restaurantes',
+    logoUrl: getStoreLogo(100), // Unique index for logo
+    image: 'https://images.unsplash.com/photo-1517248135467-4c7edab74dad?q=80&w=800&auto=format&fit=crop',
+    rating: 4.9, distance: 'Freguesia', adType: AdType.ORGANIC, description: 'Pratos caseiros feitos na hora.',
+    verified: true, isOpenNow: true, isSponsored: false
+  },
+  {
+    id: 'loja-estilo-urbano',
+    name: 'Loja Estilo Urbano',
+    category: 'Moda',
+    subcategory: 'Moda Feminina',
+    logoUrl: getStoreLogo(101),
+    image: 'https://images.unsplash.com/photo-1596753040212-0761e3894458?q=80&w=800&auto=format&fit=crop',
+    rating: 4.7, distance: 'Taquara', adType: AdType.ORGANIC, description: 'Peças exclusivas no bairro.',
+    verified: true, isOpenNow: true, isSponsored: false
+  },
+  {
+    id: 'oficina-auto-jpa',
+    name: 'Oficina Auto JPA',
+    category: 'Autos',
+    subcategory: 'Oficinas Mecânicas',
+    logoUrl: getStoreLogo(102),
+    image: 'https://images.unsplash.com/photo-1582236371300-84a1e9c5f87b?q=80&w=800&auto=format&fit=crop',
+    rating: 4.8, distance: 'Pechincha', adType: AdType.ORGANIC, description: 'Revisão e manutenção.',
+    verified: true, isOpenNow: true, isSponsored: false
+  }
 ];
 
 export const EDITORIAL_SERVICES: EditorialCollection[] = [
@@ -527,6 +563,8 @@ export const MOCK_JOBS: Job[] = [
 ];
 
 // Added to fix import error in StoreProfileEdit.tsx
+export type TaxonomyType = 'category' | 'subcategory' | 'specialty';
+
 export const SPECIALTIES: Record<string, string[]> = {
   'Chaveiro 24h': ['Abertura de portas', 'Troca de fechadura', 'Chave codificada', 'Abertura de cofre', 'Cópia de chaves', 'Instalação de tetra chave'],
   'Desentupidora': ['Pia de cozinha', 'Vaso sanitário', 'Caixa de gordura', 'Ralo de banheiro', 'Rede de esgoto externa', 'Limpeza de fossa'],

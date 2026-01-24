@@ -1,4 +1,5 @@
 
+
 export type TransactionStatus = 'pending' | 'approved' | 'rejected';
 export type SessionType = 'qr' | 'pin';
 export type MovementType = 'credit' | 'debit';
@@ -52,4 +53,53 @@ export interface DbWalletMovement {
   amount: number;
   description: string;
   created_at: string;
+}
+
+// Added to fix import error in StoreProfileEdit.tsx
+export type TaxonomyType = 'category' | 'subcategory' | 'specialty';
+
+// Added missing interfaces from project root `types.ts` for consistency
+export interface BusinessHour {
+  open: boolean;
+  start: string;
+  end: string;
+}
+
+export interface StoreReview {
+  id: string;
+  user_id: string;
+  user_name: string;
+  rating: number;
+  comment: string;
+  created_at: string;
+  merchant_response?: {
+    text: string;
+    responded_at: string;
+  };
+}
+
+export interface StoreClaimRequest {
+  id: string;
+  store_id: string;
+  store_name: string;
+  user_id: string;
+  user_email: string;
+  method: 'whatsapp' | 'email' | 'manual';
+  status: 'pending' | 'approved' | 'rejected';
+  created_at: string;
+  responsible_name?: string;
+  cnpj?: string;
+  contact_phone?: string;
+  justification?: string;
+  attachments?: string[];
+}
+
+export interface AppNotification {
+  id: string;
+  userId: string;
+  title: string;
+  message: string;
+  type: 'taxonomy_approval' | 'taxonomy_rejection' | 'system' | 'job_push' | 'claim_approval' | 'claim_rejection' | 'new_review';
+  read: boolean;
+  createdAt: string;
 }

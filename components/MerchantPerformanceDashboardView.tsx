@@ -93,7 +93,7 @@ const MOCK_DASHBOARD_DATA = {
   ]
 };
 
-// --- SUB-COMPONENTS ---
+// --- SUB-COMPONENTES DE VISUALIZAÇÃO ---
 
 // 1. Cartão Grande (Retangular)
 const StatCard: React.FC<{ icon: React.ElementType; title: string; value: string | number; color: string; bgColor: string }> = ({ icon: Icon, title, value, color, bgColor }) => (

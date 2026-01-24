@@ -46,7 +46,8 @@ import {
 } from 'lucide-react';
 import { LojasEServicosList } from '@/components/LojasEServicosList';
 import { User } from '@supabase/supabase-js';
-import { CATEGORIES, MOCK_BAIRRO_POSTS, FORBIDDEN_POST_WORDS } from '@/constants';
+// FIX: Changed FORBIDDEN_POST_WORDS to FORBIDDEN_WORDS
+import { CATEGORIES, MOCK_BAIRRO_POSTS, FORBIDDEN_WORDS } from '@/constants';
 import { useNeighborhood } from '@/contexts/NeighborhoodContext';
 import { supabase } from '@/lib/supabaseClient';
 import { trackAdEvent } from '@/lib/analytics';
@@ -237,7 +238,7 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void; onStoreClick?: (
   const [userBanner, setUserBanner] = useState<BannerItem | null>(null);
 
   const defaultBanners: BannerItem[] = useMemo(() => [
-    { // Banner 1: App Official Promo (AGORA ESTATIC)
+    { // Banner 1: App Official Promo (AGORA ESTATICO)
       id: 'app-ads-promo',
       target: 'store_ads_module', // Navigates to ads module
       config: {

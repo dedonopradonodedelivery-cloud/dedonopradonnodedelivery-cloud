@@ -1,4 +1,5 @@
 
+
 import React, { useState, useMemo, useRef, useEffect, useCallback } from 'react';
 import { 
   ChevronLeft, 
@@ -53,41 +54,10 @@ import {
 import { User } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabaseClient';
 import { StoreBannerEditor } from './StoreBannerEditor';
-import { BannerDesign } from '../types'; // Import BannerDesign from types
-import { NEIGHBORHOODS, MOCK_OCCUPANCY, DISPLAY_MODES, FORBIDDEN_WORDS, CHAR_LIMITS } from '../constants'; // Import constants
-
-
-// --- VALIDATION HELPERS ---
-const MIN_CONTRAST_RATIO = 4.5;
-
-const hexToRgb = (hex: string): { r: number; g: number; b: number } | null => {
-  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-  return result ? {
-    r: parseInt(result[1], 16),
-    g: parseInt(result[2], 16),
-    b: parseInt(result[3], 16),
-  } : null;
-};
-
-const getLuminance = (r: number, g: number, b: number): number => {
-  const a = [r, g, b].map((v) => {
-    v /= 255;
-    return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
-  });
-  return a[0] * 0.2126 + a[1] * 0.7152 + a[2] * 0.0722;
-};
-
-const getContrastRatio = (hex1: string, hex2: string): number => {
-  const rgb1 = hexToRgb(hex1);
-  const rgb2 = hexToRgb(hex2);
-  if (!rgb1 || !rgb2) return 1;
-  const lum1 = getLuminance(rgb1.r, rgb1.g, rgb1.b);
-  const lum2 = getLuminance(rgb2.r, rgb2.g, rgb2.b);
-  const lightest = Math.max(lum1, lum2);
-  const darkest = Math.min(lum1, lum2);
-  return (lightest + 0.05) / (darkest + 0.05);
-};
-// --- END VALIDATION ---
+// FIX: Imported BannerDesign, EditorData, StoreAdsModuleProps from types
+import { BannerDesign, EditorData, StoreAdsModuleProps } from '../types'; 
+// FIX: Imported constants from the consolidated constants.tsx
+import { NEIGHBORHOODS, MOCK_OCCUPANCY, DISPLAY_MODES, FORBIDDEN_WORDS, CHAR_LIMITS, MIN_CONTRAST_RATIO, hexToRgb, getLuminance, getContrastRatio } from '../constants'; 
 
 
 // --- CONFIGURAÇÕES DO CRIADOR RÁPIDO ---
@@ -310,7 +280,7 @@ const BannerPreview: React.FC<{ templateId: string; data: any; storeName: string
   };
 
 // Componente de Preview do Editor
-const BannerEditorPreview: React.FC<{ data: any }> = ({ data }) => {
+const BannerEditorPreview: React.FC<{ data: EditorData }> = ({ data }) => {
     const { template, palette, fontSize, fontFamily, title, subtitle } = data;
     
     const selectedPalette = COLOR_PALETTES.find(p => p.id === palette) || COLOR_PALETTES[0];
@@ -389,7 +359,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
   const [diyFlowStep, setDiyFlowStep] = useState<'selection' | 'upload' | 'editor'>('selection');
   const [paymentMethod, setPaymentMethod] = useState<'pix' | 'credit' | 'debit'>('pix');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isSuccess, setIsSuccess] = useState(false); // FIX: Renamed from setShowSuccess
+  const [isSuccess, setIsSuccess] = useState(false);
   const [isArtSaved, setIsArtSaved] = useState(false);
   const [isEditingArt, setIsEditingArt] = useState(false);
   const [savedDesign, setSavedDesign] = useState<any>(null);
@@ -672,7 +642,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
                 body: {
                     shopName: user.user_metadata?.store_name || user.email,
                     userId: user.id,
-                    bannerType: isCustom ? 'Editor Personalizado' : 'Template Rápido',
+                    bannerType: isCustom ? 'Editor Personalizado' : 'Template Rápato',
                     bannerConfig: config
                 }
             });
@@ -1093,7 +1063,9 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
     );
   }
 
-  const isCheckoutStep = selectedMode && selectedPeriods.length > 0 && selectedNeighborhoods.length > 0 && isArtSaved;
+  const isCheckoutStep = useMemo(() => {
+    return selectedMode && selectedPeriods.length > 0 && selectedNeighborhoods.length > 0 && isArtSaved;
+  }, [selectedMode, selectedPeriods, selectedNeighborhoods, isArtSaved]);
 
   return (
     <div className="min-h-screen bg-[#020617] text-slate-100 font-sans flex flex-col overflow-x-hidden selection:bg-blue-500/30">
@@ -1243,7 +1215,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
                     <div className="flex items-start gap-5 mb-6">
                         <div className="w-12 h-12 bg-blue-500/10 rounded-2xl flex items-center justify-center text-blue-400 shrink-0"><Paintbrush size={24} /></div>
                         <div>
-                            <h3 className="text-lg font-bold text-white mb-1 leading-tight">Personalizar manualmente</h3>
+                            <h3 className="font-bold text-white text-lg mb-1 leading-tight">Personalizar manualmente</h3>
                             <p className="text-xs text-slate-400 leading-relaxed">Use seu banner pronto ou crie no editor.</p>
                         </div>
                     </div>
@@ -1294,7 +1266,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
                         <div className="flex items-start gap-5">
                             <div className="w-12 h-12 bg-amber-400/10 rounded-2xl flex items-center justify-center text-amber-400 shrink-0"><Rocket size={24} /></div>
                             <div>
-                                <h3 className="text-lg font-bold text-white mb-1 leading-tight">Contratar time profissional</h3>
+                                <h3 className="font-bold text-white text-lg mb-1 leading-tight">Contratar time profissional</h3>
                                 <p className="text-xs text-slate-400 leading-relaxed max-w-[180px]">Nós criamos o banner profissional para você.</p>
                             </div>
                         </div>
@@ -1333,7 +1305,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
                         <span className="text-2xl font-black text-white">R$ {prices.current.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
                       </div>
                       {prices.isPackage && (
-                        <p className="text-emerald-400 font-black text-xs uppercase tracking-widest">3x de R$ {prices.monthly.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} sem juros</p>
+                        <p className="text-emerald-400 font-black text-xs uppercase tracking-widest mt-0.5">Ou 3x de R$ {prices.monthly.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} sem juros</p>
                       )}
                     </div>
                 </div>
@@ -1349,13 +1321,13 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
       {!isSuccess && (view === 'sales' || view === 'pro_checkout') && (
       <div className="fixed bottom-0 left-0 right-0 p-6 bg-[#020617]/95 backdrop-blur-2xl border-t border-white/10 z-[100] max-w-md mx-auto shadow-[0_-20px_40px_rgba(0,0,0,0.6)] animate-in slide-in-from-bottom duration-500">
         <button 
-          onClick={handleFooterClick} 
-          disabled={isSubmitting || isSaving} 
+          onClick={handlePublish} // FIX: Changed to handlePublish for actual submission
+          disabled={isSubmitting || !isCheckoutStep || !!validationErrors.length} // FIX: Added validationErrors check
           className={`w-full py-5 rounded-[2rem] shadow-xl shadow-blue-500/30 flex flex-col items-center justify-center transition-all active:scale-[0.98] ${
             selectedMode ? 'bg-[#1E5BFF] text-white hover:bg-blue-600' : 'bg-white/5 text-slate-500 cursor-not-allowed opacity-50'
           }`}
         >
-          {isSubmitting || isSaving ? (
+          {isSubmitting ? (
             <Loader2 className="w-6 h-6 animate-spin" />
           ) : !isCheckoutStep ? (
               <span className="font-black text-sm uppercase tracking-widest">
@@ -1381,6 +1353,8 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
         </button>
       </div>
       )}
+
+      <ValidationErrorsModal errors={validationErrors} onClose={() => setValidationErrors([])} />
     </div>
   );
 };

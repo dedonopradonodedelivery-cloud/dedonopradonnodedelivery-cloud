@@ -661,3 +661,55 @@ export const SPECIALTIES: Record<string, string[]> = {
   'Informática': ['Formatação', 'Remoção de vírus', 'Upgrade de memória/SSD', 'Limpeza interna', 'Configuração de rede'],
   'default': ['Consultoria', 'Orçamento geral', 'Manutenção preventiva', 'Reparo específico', 'Instalação']
 };
+
+// NOVO: Palavras proibidas para posts do bairro
+export const FORBIDDEN_POST_WORDS = [
+  'promoção', 'oferta', 'desconto', 'cupom', 'r$', '% off', 'grátis', 'barato', 'imperdível', 'liquidação', 'black friday'
+];
+
+export const NEIGHBORHOODS = [
+  "Freguesia",
+  "Taquara",
+  "Pechincha",
+  "Tanque",
+  "Anil",
+  "Curicica",
+  "Gardênia Azul",
+  "Cidade de Deus",
+  "Praça Seca"
+];
+
+export const MOCK_OCCUPANCY: Record<string, Record<string, boolean>> = {
+  "Freguesia": { "periodo_1": true },
+  "Taquara": { "periodo_2": true },
+};
+
+export const DISPLAY_MODES = [
+  { 
+    id: 'home', 
+    label: 'Home', 
+    icon: Home, 
+    price: 49.90,
+    originalPrice: 199.90,
+    description: 'Exibido no carrossel da página inicial para todos os usuários.',
+    whyChoose: 'Ideal para máxima visibilidade imediata.'
+  },
+  { 
+    id: 'cat', 
+    label: 'Categorias', 
+    icon: LayoutGrid, 
+    price: 29.90,
+    originalPrice: 149.90,
+    description: 'Exibido no topo das buscas por produtos ou serviços específicos.',
+    whyChoose: 'Impacta o cliente no momento da decisão.'
+  },
+  { 
+    id: 'combo', 
+    label: 'Home + Categorias', 
+    icon: Zap, 
+    price: 69.90,
+    originalPrice: 349.80,
+    description: 'Destaque na página inicial e em todas as categorias.',
+    whyChoose: 'Mais alcance, cliques e chances de venda.'
+  },
+];
