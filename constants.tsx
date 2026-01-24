@@ -19,6 +19,46 @@ import {
 import { AdType, Category, Store, Story, EditorialCollection, Job, CommunityPost, NeighborhoodCommunity, BairroPost } from './types';
 import { getStoreLogo } from '@/utils/mockLogos'; // Importe getStoreLogo aqui
 
+// NOVO: Mock de Posts do Bairro
+export const MOCK_BAIRRO_POSTS: BairroPost[] = [
+  {
+    id: 'bp1',
+    storeId: 'f-1',
+    storeName: 'Bibi Lanches',
+    storeLogoUrl: 'https://images.unsplash.com/photo-1561758033-d89a9ad46330?q=80&w=100&auto=format&fit=crop',
+    imageUrl: 'https://images.unsplash.com/photo-1626202456388-7578b9b8b21c?q=80&w=600&auto=format&fit=crop',
+    content: 'Obrigado por nos visitar! Em breve teremos novos sabores de suco natural fresquinho. Fiquem ligados!',
+    createdAt: new Date(Date.now() - 1000 * 60 * 30).toISOString(), // 30 mins ago
+  },
+  {
+    id: 'bp2',
+    storeId: 'f-3',
+    storeName: 'Pet Shop Alegria',
+    storeLogoUrl: 'https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?q=80&w=100&auto=format&fit=crop',
+    imageUrl: 'https://images.unsplash.com/photo-1544973347-19815049389c?q=80&w=600&auto=format&fit=crop',
+    content: 'Chegaram novas coleiras personalizadas e brinquedos ecológicos para seu pet! Venha conferir as novidades.',
+    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(), // 2 hours ago
+  },
+  {
+    id: 'bp3',
+    storeId: 'f-2',
+    storeName: 'Studio Hair Vip',
+    storeLogoUrl: 'https://images.unsplash.com/photo-1562322140-8baeececf3df?q=80&w=100&auto=format&fit=crop',
+    imageUrl: 'https://images.unsplash.com/photo-1596465492061-f3b3d4f8f4a0?q=80&w=600&auto=format&fit=crop',
+    content: 'Hoje é dia de cuidar dos cabelos! Nossa equipe está pronta para um novo visual. Agende seu horário e arrase!',
+    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 5).toISOString(), // 5 hours ago
+  },
+  {
+    id: 'bp4',
+    storeId: 'f-5',
+    storeName: 'Pizzaria do Zé',
+    storeLogoUrl: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?q=80&w=100&auto=format&fit=crop',
+    imageUrl: 'https://images.unsplash.com/photo-1593560704563-f1a66f2fa402?q=80&w=600&auto=format&fit=crop',
+    content: 'Nosso forno a lenha está a todo vapor! Qual o seu sabor preferido para hoje? Peça agora e receba quentinho.',
+    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(), // 1 day ago
+  },
+];
+
 export const CATEGORIES: Category[] = [
   { id: 'cat-comida', name: 'Comida', slug: 'comida', icon: <Utensils />, color: 'bg-brand-blue' },
   { id: 'cat-pets', name: 'Pets', slug: 'pets', icon: <PawPrint />, color: 'bg-brand-blue' },
@@ -28,7 +68,7 @@ export const CATEGORIES: Category[] = [
   { id: 'cat-beauty', slug: 'beleza', name: 'Beleza', icon: <Scissors />, color: 'bg-brand-blue' },
   { id: 'cat-autos', slug: 'autos', name: 'Autos', icon: <CarFront />, color: 'bg-brand-blue' },
   { id: 'cat-mercado', slug: 'mercado', name: 'Mercado', icon: <ShoppingCart />, color: 'bg-brand-blue' },
-  { id: 'cat-casa', slug: 'casa', icon: <HomeIcon />, color: 'bg-brand-blue' },
+  { id: 'cat-casa', slug: 'casa', name: 'Casa', icon: <HomeIcon />, color: 'bg-brand-blue' },
   { id: 'cat-sports', slug: 'esportes', name: 'Esportes', icon: <Dumbbell />, color: 'bg-brand-blue' },
   { id: 'cat-leisure', slug: 'lazer', name: 'Lazer', icon: <Ticket />, color: 'bg-brand-blue' },
   { id: 'cat-edu', slug: 'educacao', name: 'Educação', icon: <BookOpen />, color: 'bg-brand-blue' },
@@ -387,7 +427,7 @@ export const MOCK_COMMUNITY_POSTS: CommunityPost[] = [
     timestamp: '8h',
     likes: 24,
     comments: 31,
-    imageUrl: 'https://images.unsplash.com/photo-1585659722982-789600c7690a?q=80&w=600&auto=format&fit=crop'
+    imageUrl: 'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?q=80&w=600&auto=format&fit=crop'
   },
   {
     id: 'post-7',
@@ -554,7 +594,7 @@ export const MOCK_JOBS: Job[] = [
     salary: 'Comissão + Ajuda de Custo',
     description: 'Vendas de planos de internet e TV a cabo.',
     requirements: ['Carro próprio', 'Experiência com vendas'],
-    schedule: 'Seg-Sex',
+    schedule: 'Seg-Mex',
     contactWhatsapp: '5521988888888',
     postedAt: 'Há 1 dia',
     isUrgent: true
@@ -581,46 +621,6 @@ export const SPECIALTIES: Record<string, string[]> = {
   'Informática': ['Formatação', 'Remoção de vírus', 'Upgrade de memória/SSD', 'Limpeza interna', 'Configuração de rede'],
   'default': ['Consultoria', 'Orçamento geral', 'Manutenção preventiva', 'Reparo específico', 'Instalação']
 };
-
-// NOVO: Mock de Posts do Bairro
-export const MOCK_BAIRRO_POSTS: BairroPost[] = [
-  {
-    id: 'bp1',
-    storeId: 'f-1',
-    storeName: 'Bibi Lanches',
-    storeLogoUrl: 'https://images.unsplash.com/photo-1561758033-d89a9ad46330?q=80&w=100&auto=format&fit=crop',
-    imageUrl: 'https://images.unsplash.com/photo-1626202456388-7578b9b8b21c?q=80&w=600&auto=format&fit=crop',
-    content: 'Obrigado por nos visitar! Em breve teremos novos sabores de suco natural fresquinho. Fiquem ligados!',
-    createdAt: new Date(Date.now() - 1000 * 60 * 30).toISOString(), // 30 mins ago
-  },
-  {
-    id: 'bp2',
-    storeId: 'f-3',
-    storeName: 'Pet Shop Alegria',
-    storeLogoUrl: 'https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?q=80&w=100&auto=format&fit=crop',
-    imageUrl: 'https://images.unsplash.com/photo-1544973347-19815049389c?q=80&w=600&auto=format&fit=crop',
-    content: 'Chegaram novas coleiras personalizadas e brinquedos ecológicos para seu pet! Venha conferir as novidades.',
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(), // 2 hours ago
-  },
-  {
-    id: 'bp3',
-    storeId: 'f-2',
-    storeName: 'Studio Hair Vip',
-    storeLogoUrl: 'https://images.unsplash.com/photo-1562322140-8baeececf3df?q=80&w=100&auto=format&fit=crop',
-    imageUrl: 'https://images.unsplash.com/photo-1596465492061-f3b3d4f8f4a0?q=80&w=600&auto=format&fit=crop',
-    content: 'Hoje é dia de cuidar dos cabelos! Nossa equipe está pronta para um novo visual. Agende seu horário e arrase!',
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 5).toISOString(), // 5 hours ago
-  },
-  {
-    id: 'bp4',
-    storeId: 'f-5',
-    storeName: 'Pizzaria do Zé',
-    storeLogoUrl: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?q=80&w=100&auto=format&fit=crop',
-    imageUrl: 'https://images.unsplash.com/photo-1593560704563-f1a66f2fa402?q=80&w=600&auto=format&fit=crop',
-    content: 'Nosso forno a lenha está a todo vapor! Qual o seu sabor preferido para hoje? Peça agora e receba quentinho.',
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(), // 1 day ago
-  },
-];
 
 // NOVO: Palavras proibidas para posts do bairro
 export const FORBIDDEN_POST_WORDS = [

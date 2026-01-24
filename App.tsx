@@ -253,7 +253,7 @@ const App: React.FC = () => {
                   <TypingText text="Onde o bairro conversa" duration={2000} />
               </div>
               <div className="flex flex-col items-center animate-fade-in opacity-0" style={{ animationDelay: '2000ms', animationFillMode: 'forwards' }}>
-                   <p className="text-[9px] font-black text-white/50 uppercase tracking-[0.25em] mb-1.5">Patrocinador Master</p>
+                   <p className="text-[9px] font-black text-white/50 uppercase tracking-[0.3em] mb-1.5">Patrocinador Master</p>
                    <p className="text-xl font-bold text-white tracking-tight">Grupo Esquematiza</p>
               </div>
             </div>

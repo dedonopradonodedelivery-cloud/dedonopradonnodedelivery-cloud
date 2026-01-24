@@ -1,10 +1,9 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { ChevronLeft, Star, BadgeCheck, ChevronRight, AlertCircle, Grid, Megaphone, Sparkles, Rocket, Crown, ShieldCheck, MapPin, Tag, Gift, Zap, Flame, Percent, Utensils, Pizza, Coffee, Beef, IceCream, ShoppingCart, Store as StoreIcon, Package, Wrench, Truck, CreditCard, Coins, Award, Smile, Bell, Clock, Heart } from 'lucide-react';
-import { Category, Store, AdType } from '@/types';
+import { Category, Store, AdType, BannerDesign } from '@/types';
 import { SUBCATEGORIES } from '@/constants';
 import { supabase } from '@/lib/supabaseClient';
-import { BannerDesign } from './StoreBannerEditor';
 import { LaunchOfferBanner } from './LaunchOfferBanner';
 
 // --- BANNER VIEWER (LOCAL COMPONENT) ---
@@ -40,7 +39,7 @@ const BannerViewer: React.FC<{
     const { 
       title, subtitle, titleFont, titleSize, subtitleFont, subtitleSize, 
       bgColor, textColor, align, animation, iconName, iconPos, iconSize, 
-      logoDisplay, iconColorMode, iconCustomColor 
+      logoDisplay, iconColorMode, iconCustomColor, imageUrl // Added imageUrl to destructuring
     } = config;
 
     const renderIcon = (name: string | null, size: 'sm' | 'md' | 'lg', colorMode: string) => {
@@ -61,8 +60,16 @@ const BannerViewer: React.FC<{
         className={`w-full h-full p-8 shadow-2xl relative overflow-hidden transition-all duration-500 flex flex-col justify-center border border-white/10 ${
           align === 'center' ? 'items-center text-center' : align === 'right' ? 'items-end text-right' : 'items-start text-left'
         } ${animation === 'pulse' ? 'animate-pulse' : animation === 'float' ? 'animate-float-slow' : ''}`}
-        style={{ backgroundColor: bgColor }}
+        style={{
+          backgroundColor: bgColor,
+          backgroundImage: imageUrl ? `url(${imageUrl})` : undefined, // Apply imageUrl as background
+          backgroundSize: imageUrl ? 'cover' : undefined,
+          backgroundPosition: imageUrl ? 'center' : undefined,
+        }}
       >
+        {/* Overlay para escurecer imagem de fundo se houver */}
+        {imageUrl && <div className="absolute inset-0 bg-black/40"></div>}
+
         <div className={`relative z-10 transition-all duration-500 flex ${iconPos === 'top' ? 'flex-col items-inherit' : iconPos === 'right' ? 'flex-row-reverse items-center gap-4' : 'flex-row items-center gap-4'} ${animation === 'slide' ? 'animate-in slide-in-from-left-8' : ''}`}>
           {iconName && (
             <div className={`${iconPos === 'top' ? 'mb-4' : ''} shrink-0`}>
@@ -98,38 +105,66 @@ const BannerViewer: React.FC<{
     );
 };
 
-// --- END LOCAL COMPONENT ---
-
-
+// This function maps the Supabase banner config to the generic BannerDesign type
 const mapToViewerConfig = (dbConfig: any): BannerDesign => {
   if (dbConfig.type === 'custom_editor') {
-    return dbConfig;
+    return dbConfig; // Custom editor configs are already in BannerDesign format
   }
   if (dbConfig.type === 'template') {
     switch (dbConfig.template_id) {
       case 'oferta_relampago':
         return {
-          title: dbConfig.subheadline || 'Oferta Imperdível', subtitle: `Com ${dbConfig.headline || 'desconto'}!`,
-          titleFont: 'font-impacto', titleSize: 'lg', subtitleFont: 'font-amigavel', subtitleSize: 'md',
-          bgColor: '#DC2626', textColor: '#FFFFFF', align: 'center', iconName: 'Flame', iconPos: 'top',
-          iconSize: 'lg', logoDisplay: 'none', animation: 'pulse', iconColorMode: 'white'
+          title: dbConfig.subheadline || 'Oferta Imperdível',
+          subtitle: `Com ${dbConfig.headline || 'desconto'}!`,
+          titleFont: 'font-impacto', titleSize: 'lg',
+          subtitleFont: 'font-amigavel', subtitleSize: 'md',
+          bgColor: '#DC2626', textColor: '#FFFFFF',
+          align: 'center', iconName: 'Flame', iconPos: 'top',
+          iconSize: 'lg', logoDisplay: 'none', animation: 'pulse',
+          iconColorMode: 'white',
+          imageUrl: dbConfig.product_image_url || undefined, // Include imageUrl from template
         };
       case 'lancamento':
         return {
-          title: dbConfig.headline || 'Lançamento', subtitle: dbConfig.subheadline || 'Conheça a novidade.',
-          titleFont: 'font-moderna', titleSize: 'lg', subtitleFont: 'font-elegante', subtitleSize: 'md',
-          bgColor: '#0F172A', textColor: '#FFFFFF', align: 'left', iconName: 'Sparkles', iconPos: 'right',
-          iconSize: 'lg', logoDisplay: 'square', animation: 'none', iconColorMode: 'text'
+          title: dbConfig.headline || 'Lançamento',
+          subtitle: dbConfig.subheadline || 'Conheça a novidade.',
+          titleFont: 'font-moderna', titleSize: 'lg',
+          subtitleFont: 'font-elegante', subtitleSize: 'md',
+          bgColor: '#0F172A', textColor: '#FFFFFF',
+          align: 'left', iconName: 'Sparkles', iconPos: 'right',
+          iconSize: 'lg', logoDisplay: 'square', animation: 'none',
+          iconColorMode: 'text',
+          imageUrl: dbConfig.product_image_url || undefined, // Include imageUrl from template
+        };
+      case 'institucional':
+        return {
+          title: dbConfig.headline || 'Sua Loja',
+          subtitle: dbConfig.subheadline || 'Qualidade e Tradição.',
+          titleFont: 'font-forte', titleSize: 'lg',
+          subtitleFont: 'font-neutra', subtitleSize: 'sm',
+          bgColor: '#FFFFFF', textColor: '#111827',
+          align: 'center', iconName: 'Store', iconPos: 'top',
+          iconSize: 'md', logoDisplay: 'round', animation: 'none',
+          iconColorMode: 'text',
+          imageUrl: dbConfig.logo_url || undefined, // Include imageUrl from template
         };
       default: break;
     }
   }
   return {
-    title: 'Anúncio Patrocinado', subtitle: 'Confira as novidades da loja.', bgColor: '#1E5BFF', textColor: '#FFFFFF',
-    titleFont: 'font-moderna', titleSize: 'md', subtitleFont: 'font-neutra', subtitleSize: 'sm',
-    align: 'left', iconName: null, iconPos: 'left', iconSize: 'md', logoDisplay: 'round', animation: 'none', iconColorMode: 'text'
+    title: 'Anúncio Patrocinado',
+    subtitle: 'Confira as novidades da loja.',
+    bgColor: '#1E5BFF', textColor: '#FFFFFF',
+    titleFont: 'font-moderna', titleSize: 'md',
+    subtitleFont: 'font-neutra', subtitleSize: 'sm',
+    align: 'left', iconName: null, iconPos: 'left',
+    iconSize: 'md', logoDisplay: 'round', animation: 'none',
+    iconColorMode: 'text',
   };
 };
+
+// --- END LOCAL COMPONENT ---
+
 
 const BigSurCard: React.FC<{ 
   icon: React.ReactNode; 
@@ -164,7 +199,7 @@ const StoreListItem: React.FC<{ store: Store; onClick: () => void }> = ({ store,
       <div className="flex-1 min-w-0">
         <div className="flex justify-between items-start">
           <h4 className="font-bold text-gray-900 dark:text-white text-sm truncate pr-2">{store.name}</h4>
-          {isSponsored && <span className="text-[9px] font-bold text-gray-400 bg-gray-100 dark:bg-gray-700 px-1.5 py-0.5 rounded uppercase">Patrocinado</span>}
+          {isSponsored && <span className="text-[9px] font-bold text-gray-400 bg-gray-100 dark:bg-gray-700 px-1.5 py-0.5 rounded uppercase">Ads</span>}
         </div>
         <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 mt-0.5">
           <span className="flex items-center gap-1 font-bold text-[#1E5BFF]"><Star className="w-3 h-3 fill-current" /> {store.rating?.toFixed(1)}</span>
@@ -192,6 +227,7 @@ interface CategoryViewProps {
 }
 
 export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, onStoreClick, stores, userRole, onAdvertiseInCategory, onNavigate }) => {
+  // FIX: Initialized selectedSubcategory to null
   const [selectedSubcategory, setSelectedSubcategory] = useState<string | null>(null);
   const [activeBanner, setActiveBanner] = useState<any | null>(null);
   const [loadingBanner, setLoadingBanner] = useState(true);
@@ -201,33 +237,54 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
   const shouldShowMore = subcategories.length > MAX_VISIBLE_SUBCATEGORIES;
   const visibleSubcategories = shouldShowMore ? subcategories.slice(0, MAX_VISIBLE_SUBCATEGORIES - 1) : subcategories;
 
-  const advertiseHereConfig: BannerDesign = {
-    title: `Anuncie em ${category.name}`,
-    subtitle: 'Destaque-se para clientes que buscam por produtos e serviços como o seu.',
-    titleFont: 'font-forte', titleSize: 'lg',
-    subtitleFont: 'font-neutra', subtitleSize: 'sm',
-    bgColor: '#F3F4F6', textColor: '#1E5BFF',
-    align: 'center', iconName: 'Megaphone', iconPos: 'top',
-    iconSize: 'lg', logoDisplay: 'none', animation: 'none',
-    iconColorMode: 'text',
-  };
-
   useEffect(() => {
     const fetchCategoryBanner = async () => {
-      if (!supabase) { setLoadingBanner(false); return; }
+      if (!supabase) {
+        setLoadingBanner(false);
+        return;
+      }
       setLoadingBanner(true);
       try {
-        const { data, error } = await supabase.from('published_banners').select('id, config, profiles(store_name, logo_url)').eq('target', `category:${category.slug}`).eq('is_active', true).order('created_at', { ascending: false }).limit(1).single();
-        if (error && error.code !== 'PGRST116') throw error; // Ignore 'not found' error
-        setActiveBanner(data || null);
+        // FIX: Added 'profiles(store_name, logo_url)' to the select statement to retrieve store info for the banner.
+        const { data, error } = await supabase
+          .from('published_banners')
+          .select('id, config, profiles(store_name, logo_url)') 
+          .eq('target', `category:${category.slug}`)
+          .eq('is_active', true)
+          .order('created_at', { ascending: false })
+          .limit(1);
+
+        if (error) throw error;
+
+        if (data && data.length > 0) {
+          setActiveBanner(data[0]);
+        } else {
+          setActiveBanner(null);
+        }
       } catch (e: any) {
-        console.warn("Category banner fetch suppressed:", e.message || e);
+        console.error("Failed to fetch category banner from Supabase:", e.message || e);
         setActiveBanner(null);
       } finally {
         setLoadingBanner(false);
       }
     };
+    
     fetchCategoryBanner();
+
+    const channel = supabase.channel(`category-banner-${category.slug}`)
+      .on('postgres_changes', {
+          event: '*',
+          schema: 'public',
+          table: 'published_banners',
+          filter: `target=eq.category:${category.slug}`
+        },
+        () => fetchCategoryBanner()
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [category.slug]);
 
   const filteredStores = useMemo(() => {
@@ -261,15 +318,6 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
       </div>
       
       <div className="p-5 space-y-8">
-        {userRole === 'lojista' && (
-            <section>
-                <LaunchOfferBanner onClick={() => {
-                    onAdvertiseInCategory(category.name);
-                    onNavigate('store_ads_module');
-                }} />
-            </section>
-        )}
-        
         {visibleSubcategories.length > 0 && (
           <section>
             <div className="grid grid-cols-4 gap-3">
@@ -299,13 +347,30 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
         <section>
           {loadingBanner ? (
             <div className="w-full aspect-video bg-gray-200 dark:bg-gray-800 rounded-2xl animate-pulse"></div>
+          ) : activeBanner ? (
+            <BannerViewer
+              config={mapToViewerConfig(activeBanner.config)}
+              storeName={activeBanner.profiles?.store_name || 'Loja Patrocinada'}
+              storeLogo={activeBanner.profiles?.logo_url || '/assets/default-logo.png'}
+            />
           ) : (
-            <div onClick={!activeBanner ? handleAdvertiseClick : undefined} className={`w-full aspect-video rounded-[2.5rem] overflow-hidden ${!activeBanner ? 'cursor-pointer' : ''}`}>
-              <BannerViewer 
-                config={activeBanner ? mapToViewerConfig(activeBanner.config) : advertiseHereConfig}
-                storeName={activeBanner ? activeBanner.profiles?.store_name || 'Loja Parceira' : 'Localizei JPA'}
-                storeLogo={activeBanner ? activeBanner.profiles?.logo_url : undefined}
-              />
+            <div 
+              onClick={handleAdvertiseClick}
+              className="w-full aspect-video rounded-2xl bg-slate-900 flex flex-col items-center justify-center text-center p-8 cursor-pointer relative overflow-hidden shadow-2xl border border-white/5 group"
+            >
+                <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 rounded-full blur-3xl -mr-16 -mt-16"></div>
+                <div className="absolute bottom-0 left-0 w-24 h-24 bg-indigo-500/10 rounded-full blur-2xl -ml-12 -mb-12"></div>
+                
+                <div className="relative z-10 flex flex-col items-center">
+                    <div className="p-3 bg-white/5 backdrop-blur-md rounded-2xl mb-4 border border-white/10 shadow-xl group-hover:scale-110 transition-transform">
+                      <ShieldCheck className="w-8 h-8 text-[#1E5BFF]" />
+                    </div>
+                    <h3 className="font-black text-2xl text-white uppercase tracking-tighter leading-tight">Serviços de <span className="text-[#1E5BFF]">Confiança</span></h3>
+                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-[0.2em] mt-2 mb-6">Os melhores profissionais da região</p>
+                    <div className="bg-white/10 hover:bg-white/20 backdrop-blur-sm px-4 py-2 rounded-xl text-[10px] font-black text-white uppercase tracking-widest border border-white/10 transition-all">
+                        Anunciar nesta categoria
+                    </div>
+                </div>
             </div>
           )}
         </section>
