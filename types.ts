@@ -94,6 +94,13 @@ export interface Store {
   distanceKm?: number;
   closingTime?: string;
 
+  // --- DADOS DE CASHBACK (V1.5) ---
+  cashback_active?: boolean;
+  cashback_percent?: number;
+  cashback_validity_days?: number;
+  store_manual_code?: string;
+  onboarding_cashback_completed?: boolean;
+
   // --- DADOS FISCAIS ---
   razao_social?: string;
   cnpj?: string;
