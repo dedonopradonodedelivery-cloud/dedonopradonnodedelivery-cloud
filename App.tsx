@@ -11,21 +11,13 @@ import { PatrocinadorMasterScreen } from '@/components/PatrocinadorMasterScreen'
 import { ServicesView } from '@/components/ServicesView';
 import { SubcategoriesView } from '@/components/SubcategoriesView';
 import { SpecialtiesView } from '@/components/SpecialtiesView';
-import { ServiceSuccessView } from '@/components/ServiceSuccessView';
 import { QuoteRequestModal } from '@/components/QuoteRequestModal';
 import { StoreAreaView } from '@/components/StoreAreaView';
-import { WeeklyPromoModule } from '@/components/WeeklyPromoModule';
-import { WeeklyPromoSelectionView } from '@/components/WeeklyPromoSelectionView';
 import { UserCupomScreen } from '@/components/UserCupomScreen';
 import { UserCouponsHistoryView } from '@/components/UserCouponsHistoryView';
 import { JobsView } from '@/components/JobsView';
-import { MerchantJobsModule } from '@/components/MerchantJobsModule';
-import { AdminPanel } from '@/components/AdminPanel';
-import { StoreAdsModule } from '@/components/StoreAdsModule';
-import { StoreAdsQuickLaunch } from '@/components/StoreAdsQuickLaunch';
 import { MerchantPerformanceDashboard } from '@/components/MerchantPerformanceDashboard';
-import { AdminBannerModeration } from '@/components/AdminBannerModeration';
-import { DesignerPanel } from '@/components/DesignerPanel';
+import { WeeklyRewardPage } from '@/components/WeeklyRewardPage';
 import { MapPin, ShieldCheck, X, Palette } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
@@ -35,11 +27,15 @@ import { CategoryView } from '@/components/CategoryView';
 import { StoreProfileEdit } from '@/components/StoreProfileEdit';
 import { CommunityFeedView } from '@/components/CommunityFeedView';
 import { STORES } from '@/constants';
-import { AdminModerationPanel } from '@/components/AdminModerationPanel';
 import { AboutView, SupportView, FavoritesView } from '@/components/SimplePages';
 import { StoreClaimFlow } from '@/components/StoreClaimFlow';
 import { MerchantReviewsModule } from '@/components/MerchantReviewsModule';
 import { JPAConnectSalesView } from '@/components/JPAConnectSalesView';
+import { StoreAdsModule } from '@/components/StoreAdsModule';
+import { StoreAdsQuickLaunch } from '@/components/StoreAdsQuickLaunch';
+import { AdminPanel } from '@/components/AdminPanel';
+import { DesignerPanel } from '@/components/DesignerPanel';
+import { AdminBannerModeration } from '@/components/AdminBannerModeration';
 
 let splashWasShownInSession = false;
 const ADMIN_EMAIL = 'dedonopradonodedelivery@gmail.com';
@@ -93,7 +89,7 @@ const App: React.FC = () => {
   };
   
   useEffect(() => {
-    const restrictedTabs = ['store_area', 'admin_panel', 'edit_profile', 'store_claim', 'merchant_reviews', 'designer_panel', 'weekly_promo', 'user_coupons'];
+    const restrictedTabs = ['store_area', 'admin_panel', 'edit_profile', 'store_claim', 'merchant_reviews', 'designer_panel', 'user_coupons'];
     
     if (restrictedTabs.includes(activeTab)) {
       if (!isAuthInitialLoading && !user) {
@@ -120,9 +116,9 @@ const App: React.FC = () => {
   }, []);
 
   const handleSelectStore = (store: Store) => { setSelectedStore(store); setActiveTab('store_detail'); };
-  const headerExclusionList = ['store_area', 'editorial_list', 'store_profile', 'category_detail', 'store_detail', 'profile', 'patrocinador_master', 'service_subcategories', 'service_specialties', 'store_ads_module', 'store_ads_quick', 'merchant_performance', 'about', 'support', 'favorites', 'community_feed', 'admin_panel', 'admin_banner_moderation', 'store_claim', 'merchant_reviews', 'jpa_connect_sales', 'designer_panel', 'weekly_promo', 'user_coupons', 'user_coupons_history'];
+  const headerExclusionList = ['store_area', 'editorial_list', 'store_profile', 'category_detail', 'store_detail', 'profile', 'patrocinador_master', 'service_subcategories', 'service_specialties', 'store_ads_module', 'store_ads_quick', 'merchant_performance', 'about', 'support', 'favorites', 'community_feed', 'admin_panel', 'admin_banner_moderation', 'store_claim', 'merchant_reviews', 'jpa_connect_sales', 'designer_panel', 'user_coupons', 'user_coupons_history', 'weekly_reward_page'];
   
-  const hideBottomNav = ['admin_panel'].includes(activeTab);
+  const hideBottomNav = ['admin_panel', 'weekly_reward_page'].includes(activeTab);
 
   const RoleSwitcherModal: React.FC = () => {
     if (!isRoleSwitcherOpen) return null;
@@ -182,13 +178,9 @@ const App: React.FC = () => {
                         : <MenuView user={user as any} userRole={userRole} onAuthClick={() => setIsAuthOpen(true)} onNavigate={setActiveTab} onBack={() => setActiveTab('home')} />
                     )}
 
-                    {activeTab === 'weekly_promo' && (
-                        isMerchantMode 
-                            ? <WeeklyPromoModule onBack={() => setActiveTab('profile')} user={user as any} />
-                            : <WeeklyPromoSelectionView onBack={() => setActiveTab('home')} onNavigate={setActiveTab} />
-                    )}
                     {activeTab === 'user_coupons' && <UserCupomScreen user={user as any} onBack={() => setActiveTab('profile')} onHistory={() => setActiveTab('user_coupons_history')} />}
                     {activeTab === 'user_coupons_history' && <UserCouponsHistoryView onBack={() => setActiveTab('user_coupons')} />}
+                    {activeTab === 'weekly_reward_page' && <WeeklyRewardPage onBack={() => setActiveTab('home')} onNavigate={setActiveTab} />}
 
 
                     {activeTab === 'jpa_connect_sales' && <JPAConnectSalesView onBack={() => setActiveTab('profile')} />}
