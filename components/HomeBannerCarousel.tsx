@@ -77,9 +77,7 @@ export const HomeBannerCarousel: React.FC<HomeBannerCarouselProps> = ({ onStoreC
   const { currentNeighborhood } = useNeighborhood();
   const [activeIndex, setActiveIndex] = useState(0);
   const [progress, setProgress] = useState(0);
-  const scrollRef = useRef<HTMLDivElement>(null);
-  // Fixed error in line 81: Cannot find namespace 'NodeJS'. Replaced NodeJS.Timeout with ReturnType<typeof setInterval>
-  const autoplayRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const touchStart = useRef<number | null>(null);
 
   const filteredBanners = useMemo(() => {
     if (currentNeighborhood === "Jacarepaguá (todos)") {
@@ -88,51 +86,48 @@ export const HomeBannerCarousel: React.FC<HomeBannerCarouselProps> = ({ onStoreC
     return MOCK_BANNERS.filter(b => b.neighborhood === currentNeighborhood);
   }, [currentNeighborhood]);
 
-  // Lógica de Autoplay e Barra de Progresso
+  // Autoplay and Progress logic
   useEffect(() => {
     if (filteredBanners.length <= 1) return;
 
-    const tickRate = 100; // atualiza a cada 100ms
-    const totalDuration = 4000; // 4 segundos
-    const step = (tickRate / totalDuration) * 100;
+    const duration = 4000; // 4 seconds per banner
+    const interval = 100; // tick every 100ms
+    const step = (interval / duration) * 100;
 
-    autoplayRef.current = setInterval(() => {
+    const timer = setInterval(() => {
       setProgress((prev) => {
         if (prev >= 100) {
-          const nextIndex = (activeIndex + 1) % filteredBanners.length;
-          scrollToIndex(nextIndex);
+          setActiveIndex((current) => (current + 1) % filteredBanners.length);
           return 0;
         }
         return prev + step;
       });
-    }, tickRate);
+    }, interval);
 
-    return () => {
-      if (autoplayRef.current) clearInterval(autoplayRef.current);
-    };
+    return () => clearInterval(timer);
   }, [activeIndex, filteredBanners.length]);
 
-  const scrollToIndex = (index: number) => {
-    if (scrollRef.current) {
-      const width = scrollRef.current.offsetWidth;
-      scrollRef.current.scrollTo({
-        left: width * index,
-        behavior: 'smooth'
-      });
-      setActiveIndex(index);
-      setProgress(0);
-    }
+  // Handle manual swipe within the fixed space
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStart.current = e.touches[0].clientX;
   };
 
-  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
-    const scrollLeft = e.currentTarget.scrollLeft;
-    const width = e.currentTarget.offsetWidth;
-    const index = Math.round(scrollLeft / width);
-    
-    if (index !== activeIndex) {
-      setActiveIndex(index);
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStart.current === null) return;
+    const touchEnd = e.changedTouches[0].clientX;
+    const diff = touchStart.current - touchEnd;
+
+    if (Math.abs(diff) > 50) { // Swipe threshold
+      if (diff > 0) {
+        // Next
+        setActiveIndex((current) => (current + 1) % filteredBanners.length);
+      } else {
+        // Prev
+        setActiveIndex((current) => (current - 1 + filteredBanners.length) % filteredBanners.length);
+      }
       setProgress(0);
     }
+    touchStart.current = null;
   };
 
   const handleBannerClick = (storeId: string) => {
@@ -142,60 +137,60 @@ export const HomeBannerCarousel: React.FC<HomeBannerCarouselProps> = ({ onStoreC
 
   if (filteredBanners.length === 0) return null;
 
+  const currentBanner = filteredBanners[activeIndex];
+
   return (
-    <section className="w-full py-4 animate-in fade-in duration-700">
-      <div className="relative group">
-        <div 
-          ref={scrollRef}
-          onScroll={handleScroll}
-          className="flex overflow-x-auto snap-x snap-mandatory no-scrollbar px-5 gap-4"
-        >
-          {filteredBanners.map((banner, index) => (
-            <div 
-              key={banner.id}
-              onClick={() => handleBannerClick(banner.storeId)}
-              className={`relative flex-shrink-0 w-full aspect-[16/8] rounded-[2rem] overflow-hidden snap-center shadow-lg active:scale-[0.98] transition-all cursor-pointer ${banner.bgColor}`}
-            >
-              {/* Imagem de Fundo com Overlay */}
-              <img src={banner.image} alt="" className="absolute inset-0 w-full h-full object-cover opacity-40 mix-blend-overlay" />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent"></div>
-              
-              {/* Conteúdo do Banner */}
-              <div className="absolute inset-0 p-7 flex flex-col justify-end">
+    <section className="w-full py-4 px-5">
+      <div 
+        onClick={() => handleBannerClick(currentBanner.storeId)}
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+        className={`relative w-full aspect-[16/8] rounded-[2.2rem] overflow-hidden shadow-xl active:scale-[0.98] transition-all cursor-pointer ${currentBanner.bgColor}`}
+      >
+        {/* Banner Content (Animate key change for smooth transition) */}
+        <div key={currentBanner.id} className="absolute inset-0 animate-in fade-in slide-in-from-right-4 duration-500">
+            {/* Image Layer */}
+            <img 
+                src={currentBanner.image} 
+                alt="" 
+                className="absolute inset-0 w-full h-full object-cover opacity-40 mix-blend-overlay" 
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
+            
+            {/* Content Layer */}
+            <div className="absolute inset-0 p-7 flex flex-col justify-end">
                 <div className="bg-white/20 backdrop-blur-md w-fit px-3 py-1 rounded-lg border border-white/20 mb-2">
-                  <span className="text-[10px] font-black text-white uppercase tracking-widest">{banner.title}</span>
+                    <span className="text-[10px] font-black text-white uppercase tracking-widest">{currentBanner.title}</span>
                 </div>
-                <h3 className="text-xl font-black text-white leading-tight mb-4 drop-shadow-md max-w-[80%]">
-                  {banner.subtitle}
+                <h3 className="text-xl font-black text-white leading-tight mb-4 drop-shadow-md max-w-[85%]">
+                    {currentBanner.subtitle}
                 </h3>
                 <div className="flex items-center gap-2 bg-white text-gray-900 w-fit px-5 py-2.5 rounded-xl shadow-lg mb-2">
-                  <span className="text-[10px] font-black uppercase tracking-widest">{banner.cta}</span>
-                  <ChevronRight size={14} strokeWidth={3} />
+                    <span className="text-[10px] font-black uppercase tracking-widest">{currentBanner.cta}</span>
+                    <ChevronRight size={14} strokeWidth={3} />
                 </div>
-              </div>
-
-              {/* BARRA DE PROGRESSÃO INTERNA (Segmentada) */}
-              {filteredBanners.length > 1 && (
-                <div className="absolute bottom-4 left-7 right-7 flex gap-1.5 z-20">
-                  {filteredBanners.map((_, idx) => (
-                    <div 
-                      key={idx} 
-                      className="h-1 flex-1 bg-white/20 rounded-full overflow-hidden"
-                    >
-                      <div 
-                        className={`h-full bg-white transition-all ease-linear ${idx === activeIndex ? '' : 'hidden'}`}
-                        style={{ width: idx === activeIndex ? `${progress}%` : '0%' }}
-                      />
-                      <div 
-                        className={`h-full bg-white/60 ${idx < activeIndex ? 'block' : 'hidden'}`}
-                      />
-                    </div>
-                  ))}
-                </div>
-              )}
             </div>
-          ))}
         </div>
+
+        {/* INTEGRATED PROGRESS BAR (Stories Style) */}
+        {filteredBanners.length > 1 && (
+            <div className="absolute bottom-4 left-7 right-7 flex gap-1.5 z-20">
+                {filteredBanners.map((_, idx) => (
+                    <div 
+                        key={idx} 
+                        className="h-1 flex-1 bg-white/20 rounded-full overflow-hidden"
+                    >
+                        <div 
+                            className={`h-full bg-white transition-all ease-linear ${idx === activeIndex ? '' : 'hidden'}`}
+                            style={{ width: idx === activeIndex ? `${progress}%` : '0%' }}
+                        />
+                        <div 
+                            className={`h-full bg-white/60 ${idx < activeIndex ? 'block' : 'hidden'}`}
+                        />
+                    </div>
+                ))}
+            </div>
+        )}
       </div>
     </section>
   );
