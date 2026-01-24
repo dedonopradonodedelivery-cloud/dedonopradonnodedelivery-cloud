@@ -1,6 +1,5 @@
 
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { Store, Category, AdType } from '@/types';
 import { 
   ChevronRight, 
   Crown,
@@ -41,6 +40,8 @@ import {
   CheckCircle2,
   Lock,
   Info,
+  Shirt, // Adicionado para Banner de Moda
+  CarFront // Adicionado para Banner de Serviços Automotivos
 } from 'lucide-react';
 import { LojasEServicosList } from '@/components/LojasEServicosList';
 import { User } from '@supabase/supabase-js';
@@ -48,17 +49,29 @@ import { CATEGORIES, MOCK_BAIRRO_POSTS, FORBIDDEN_POST_WORDS } from '@/constants
 import { useNeighborhood } from '@/contexts/NeighborhoodContext';
 import { supabase } from '@/lib/supabaseClient';
 import { trackAdEvent } from '@/lib/analytics';
-import { BannerDesign } from './StoreBannerEditor';
+// FIX: Import BannerDesign, Category, and Store interfaces from '@/types'
+import { BannerDesign, Category, Store } from '@/types'; 
 import { LaunchOfferBanner } from './LaunchOfferBanner';
 import { BairroPost } from '@/types'; // Importando o novo tipo de post
 import { BairroPostsBlock } from './BairroPostsBlock'; // Importando o novo componente
+import { getStoreLogo } from '@/utils/mockLogos'; // Import para mock de logos
+
+// FIX: Define BannerItem interface to resolve type inference issues for carousel items
+interface BannerItem {
+  id: string;
+  target?: string;
+  storeSlug?: string;
+  isUserBanner?: boolean;
+  config: BannerDesign; // Ensures 'imageUrl' is a known property in the config object
+}
 
 // --- BANNER VIEWER (LOCAL COMPONENT) ---
 
 const ICON_COMPONENTS: Record<string, React.ElementType> = {
   Flame, Zap, Percent, Tag, Gift, Utensils, Pizza, Coffee, Beef, IceCream,
   ShoppingCart, Store: StoreIcon, Package, Wrench, Truck, CreditCard, Coins, Star,
-  Award, MapPin, Smile, Bell, Clock, Heart, Sparkles, Rocket: Sparkles, Megaphone, Crown, ShieldCheck
+  Award, MapPin, Smile, Bell, Clock, Heart, Sparkles, Rocket: Sparkles, Megaphone, Crown, ShieldCheck,
+  Shirt, CarFront // Adicionado Shirt e CarFront
 };
 
 const FONT_STYLES = [
@@ -79,14 +92,14 @@ const SIZE_LEVELS = [
 ];
 
 const BannerViewer: React.FC<{ 
-  config: BannerDesign; 
+  config: BannerDesign & { imageUrl?: string; }; // Adicionado imageUrl ao config local
   storeName: string; 
   storeLogo?: string | null; 
 }> = ({ config, storeName, storeLogo }) => {
     const { 
       title, subtitle, titleFont, titleSize, subtitleFont, subtitleSize, 
       bgColor, textColor, align, animation, iconName, iconPos, iconSize, 
-      logoDisplay, iconColorMode, iconCustomColor 
+      logoDisplay, iconColorMode, iconCustomColor, imageUrl
     } = config;
 
     const renderIcon = (name: string | null, size: 'sm' | 'md' | 'lg', colorMode: string) => {
@@ -107,8 +120,16 @@ const BannerViewer: React.FC<{
         className={`w-full h-full p-8 shadow-2xl relative overflow-hidden transition-all duration-500 flex flex-col justify-center border border-white/10 ${
           align === 'center' ? 'items-center text-center' : align === 'right' ? 'items-end text-right' : 'items-start text-left'
         } ${animation === 'pulse' ? 'animate-pulse' : animation === 'float' ? 'animate-float-slow' : ''}`}
-        style={{ backgroundColor: bgColor }}
+        style={{
+          backgroundColor: bgColor,
+          backgroundImage: imageUrl ? `url(${imageUrl})` : undefined,
+          backgroundSize: imageUrl ? 'cover' : undefined,
+          backgroundPosition: imageUrl ? 'center' : undefined,
+        }}
       >
+        {/* Overlay para escurecer imagem de fundo se houver */}
+        {imageUrl && <div className="absolute inset-0 bg-black/40"></div>}
+
         <div className={`relative z-10 transition-all duration-500 flex ${iconPos === 'top' ? 'flex-col items-inherit' : iconPos === 'right' ? 'flex-row-reverse items-center gap-4' : 'flex-row items-center gap-4'} ${animation === 'slide' ? 'animate-in slide-in-from-left-8' : ''}`}>
           {iconName && (
             <div className={`${iconPos === 'top' ? 'mb-4' : ''} shrink-0`}>
@@ -163,6 +184,7 @@ const mapToViewerConfig = (dbConfig: any): BannerDesign => {
           align: 'center', iconName: 'Flame', iconPos: 'top',
           iconSize: 'lg', logoDisplay: 'none', animation: 'pulse',
           iconColorMode: 'white',
+          imageUrl: dbConfig.product_image_url
         };
       case 'lancamento':
         return {
@@ -173,7 +195,20 @@ const mapToViewerConfig = (dbConfig: any): BannerDesign => {
           bgColor: '#0F172A', textColor: '#FFFFFF',
           align: 'left', iconName: 'Sparkles', iconPos: 'right',
           iconSize: 'lg', logoDisplay: 'square', animation: 'none',
-          iconColorMode: 'text'
+          iconColorMode: 'text',
+          imageUrl: dbConfig.product_image_url
+        };
+      case 'institucional':
+        return {
+          title: dbConfig.headline || 'Sua Loja',
+          subtitle: dbConfig.subheadline || 'Qualidade e Tradição.',
+          titleFont: 'font-forte', titleSize: 'lg',
+          subtitleFont: 'font-neutra', subtitleSize: 'sm',
+          bgColor: '#FFFFFF', textColor: '#111827',
+          align: 'center', iconName: 'Store', iconPos: 'top',
+          iconSize: 'md', logoDisplay: 'round', animation: 'none',
+          iconColorMode: 'text',
+          imageUrl: dbConfig.logo_url
         };
       default: break;
     }
@@ -190,13 +225,14 @@ const mapToViewerConfig = (dbConfig: any): BannerDesign => {
   };
 };
 
-interface BannerItem {
-  id: string;
-  target?: string;
-  storeSlug?: string;
-  isUserBanner?: boolean;
-  config: any;
-}
+// FIX: Use the explicitly defined BannerItem interface
+// interface BannerItem {
+//   id: string;
+//   target?: string;
+//   storeSlug?: string;
+//   isUserBanner?: boolean;
+//   config: BannerDesign; 
+// }
 
 const HomeCarousel: React.FC<{ onNavigate: (v: string) => void; onStoreClick?: (store: Store) => void; stores: Store[] }> = ({ onNavigate, onStoreClick, stores }) => {
   const { currentNeighborhood } = useNeighborhood();
@@ -205,47 +241,66 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void; onStoreClick?: (
   const [userBanner, setUserBanner] = useState<BannerItem | null>(null);
 
   const defaultBanners: BannerItem[] = useMemo(() => [
-    { 
-      id: 'growth-opportunity', 
-      target: 'store_ads_module',
+    { // Banner 1: App Official Promo
+      id: 'app-ads-promo',
+      target: 'store_ads_module', // Navigates to ads module
       config: {
-        title: 'Sua Loja em Destaque',
-        subtitle: 'Anúncios que geram resultado real no seu bairro.',
+        title: 'Anuncie sua loja a partir de R$ 29,90',
+        subtitle: 'Promoção de inauguração dos banners por tempo indeterminado. Anunciar agora!',
         titleFont: 'font-impacto', titleSize: 'xl',
         subtitleFont: 'font-neutra', subtitleSize: 'sm',
         bgColor: '#1E5BFF', textColor: '#FFFFFF',
-        align: 'left', iconName: 'Rocket', iconPos: 'right',
+        align: 'center', iconName: 'Megaphone', iconPos: 'top',
         iconSize: 'lg', logoDisplay: 'none', animation: 'float',
         iconColorMode: 'white'
       }
     },
-    { 
-      id: 'master-sponsor', 
-      target: 'grupo-esquematiza', 
-      storeSlug: 'grupo-esquematiza',
+    { // Banner 2: Restaurante Sabor do Bairro
+      id: 'restaurante-sabor-bairro',
+      target: 'store_detail', // Navigates to store detail
+      storeSlug: 'restaurante-sabor-bairro', // Match with STORES mock ID
       config: {
-        title: 'GRUPO ESQUEMATIZA',
-        subtitle: 'Segurança e Facilities para Empresas e Condomínios.',
-        titleFont: 'font-forte', titleSize: 'lg',
-        subtitleFont: 'font-neutra', subtitleSize: 'sm',
-        bgColor: '#0F172A', textColor: '#FFFFFF',
-        align: 'left', iconName: 'ShieldCheck', iconPos: 'left',
-        iconSize: 'lg', logoDisplay: 'none', animation: 'none',
-        iconColorMode: 'text'
+        title: 'Almoço especial hoje',
+        subtitle: 'Pratos caseiros feitos na hora. Ver cardápio.',
+        titleFont: 'font-elegante', titleSize: 'lg',
+        subtitleFont: 'font-amigavel', subtitleSize: 'md',
+        bgColor: '#15803D', textColor: '#FFFFFF', // Dark green for food
+        align: 'left', iconName: 'Utensils', iconPos: 'left',
+        iconSize: 'md', logoDisplay: 'round', animation: 'none',
+        iconColorMode: 'white',
+        imageUrl: 'https://images.unsplash.com/photo-1517248135467-4c7edab74dad?q=80&w=800&auto=format&fit=crop' // Restaurant interior/dish
       }
     },
-    { 
-      id: 'advertise-home', 
-      target: 'store_ads_module',
+    { // Banner 3: Loja Estilo Urbano
+      id: 'loja-estilo-urbano',
+      target: 'store_detail',
+      storeSlug: 'loja-estilo-urbano',
       config: {
-        title: 'Anuncie Sua Marca Aqui',
-        subtitle: 'Apareça para milhares de clientes em Jacarepaguá.',
+        title: 'Nova coleção já disponível',
+        subtitle: 'Peças exclusivas no bairro. Conhecer loja.',
         titleFont: 'font-moderna', titleSize: 'lg',
+        subtitleFont: 'font-neutra', subtitleSize: 'md',
+        bgColor: '#8B5CF6', textColor: '#FFFFFF', // Purple for fashion
+        align: 'right', iconName: 'Shirt', iconPos: 'right',
+        iconSize: 'md', logoDisplay: 'square', animation: 'none',
+        iconColorMode: 'white',
+        imageUrl: 'https://images.unsplash.com/photo-1596753040212-0761e3894458?q=80&w=800&auto=format&fit=crop' // Fashion model/clothing
+      }
+    },
+    { // Banner 4: Oficina Auto JPA
+      id: 'oficina-auto-jpa',
+      target: 'store_detail',
+      storeSlug: 'oficina-auto-jpa',
+      config: {
+        title: 'Seu carro em boas mãos',
+        subtitle: 'Revisão e manutenção completa. Falar com a loja.',
+        titleFont: 'font-forte', titleSize: 'lg',
         subtitleFont: 'font-neutra', subtitleSize: 'sm',
-        bgColor: '#FFFFFF', textColor: '#1E5BFF',
-        align: 'center', iconName: 'Megaphone', iconPos: 'top',
-        iconSize: 'lg', logoDisplay: 'none', animation: 'none',
-        iconColorMode: 'text'
+        bgColor: '#212121', textColor: '#FFFFFF', // Dark gray/black for auto
+        align: 'left', iconName: 'CarFront', iconPos: 'left',
+        iconSize: 'md', logoDisplay: 'round', animation: 'none',
+        iconColorMode: 'white',
+        imageUrl: 'https://images.unsplash.com/photo-1582236371300-84a1e9c5f87b?q=80&w=800&auto=format&fit=crop' // Car service garage
       }
     }
   ], []);
@@ -324,7 +379,11 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void; onStoreClick?: (
   };
   
   const findStore = (slug?: string) => stores?.find(s => s.id === slug);
-  const storeForBanner = findStore(current.storeSlug);
+  // Prioriza o storeSlug para buscar a loja, caso contrário, usa o storeName do config
+  const storeForBanner = current.storeSlug ? findStore(current.storeSlug) : undefined;
+  const storeNameForViewer = storeForBanner?.name || current.config.storeName || 'Localizei JPA';
+  const storeLogoForViewer = storeForBanner?.logoUrl || getStoreLogo(storeNameForViewer.length);
+
 
   return (
     <div className="px-4 py-2">
@@ -334,8 +393,8 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void; onStoreClick?: (
       >
         <BannerViewer 
             config={current.isUserBanner ? mapToViewerConfig(current.config) : current.config}
-            storeName={current.isUserBanner ? (current.config.profiles?.store_name || 'Loja Parceira') : (storeForBanner?.name || 'Localizei JPA')}
-            storeLogo={current.isUserBanner ? (current.config.profiles?.logo_url) : (storeForBanner?.logoUrl)}
+            storeName={storeNameForViewer}
+            storeLogo={storeLogoForViewer}
         />
         
         <div className="absolute bottom-0 left-0 right-0 h-1/4 bg-gradient-to-t from-black/40 to-transparent pointer-events-none"></div>
@@ -354,7 +413,6 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void; onStoreClick?: (
     </div>
   );
 };
-
 const WeeklyDiscountBlock: React.FC<{ onClick: () => void }> = ({ onClick }) => {
     const consecutiveDays = parseInt(localStorage.getItem('consecutive_days_count') || '1');
     const [animatedDays, setAnimatedDays] = useState(0);
@@ -476,7 +534,20 @@ const WeeklyDiscountBlock: React.FC<{ onClick: () => void }> = ({ onClick }) => 
         </div>
     );
 };
-
+const SectionHeader: React.FC<{ icon: React.ElementType; title: string; subtitle: string; onSeeMore?: () => void }> = ({ icon: Icon, title, subtitle, onSeeMore }) => (
+  <div className="flex items-center justify-between mb-3 px-1">
+    <div className="flex items-center gap-3">
+      <div className="w-9 h-9 rounded-xl bg-gray-50 dark:bg-gray-800 flex items-center justify-center text-gray-900 dark:text-white shadow-sm">
+        <Icon size={18} strokeWidth={2.5} />
+      </div>
+      <div>
+        <h2 className="text-[11px] font-black text-gray-900 dark:text-white uppercase tracking-[0.15em] leading-none mb-1">{title}</h2>
+        <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest leading-none">{subtitle}</p>
+      </div>
+    </div>
+    <button onClick={onSeeMore} className="text-[10px] font-black text-[#1E5BFF] uppercase tracking-widest hover:underline active:opacity-60">Ver mais</button>
+  </div>
+);
 
 interface HomeFeedProps {
   onNavigate: (view: string) => void;
@@ -497,7 +568,6 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
 }) => {
   const [listFilter, setListFilter] = useState<'all' | 'top_rated' | 'open_now'>('all');
   const categoriesRef = useRef<HTMLDivElement>(null);
-  // Adiciona 'bairro_posts' à estrutura da Home
   const homeStructure = useMemo(() => ['categories', 'home_carousel', 'weekly_promo', 'bairro_posts', 'list'], []);
 
   const renderSection = (key: string) => {
@@ -583,17 +653,3 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
     </div>
   );
 };
-const SectionHeader: React.FC<{ icon: React.ElementType; title: string; subtitle: string; onSeeMore?: () => void }> = ({ icon: Icon, title, subtitle, onSeeMore }) => (
-  <div className="flex items-center justify-between mb-3">
-    <div className="flex items-center gap-3">
-      <div className="w-9 h-9 rounded-xl bg-gray-50 dark:bg-gray-800 flex items-center justify-center text-gray-900 dark:text-white shadow-sm">
-        <Icon size={18} strokeWidth={2.5} />
-      </div>
-      <div>
-        <h2 className="text-[11px] font-black text-gray-900 dark:text-white uppercase tracking-[0.15em] leading-none mb-1">{title}</h2>
-        <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest leading-none">{subtitle}</p>
-      </div>
-    </div>
-    <button onClick={onSeeMore} className="text-[10px] font-black text-[#1E5BFF] uppercase tracking-widest hover:underline active:opacity-60">Ver mais</button>
-  </div>
-);

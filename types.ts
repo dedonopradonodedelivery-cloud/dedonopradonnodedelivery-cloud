@@ -314,6 +314,27 @@ export interface BairroPost {
   createdAt: string; // Data de criação
 }
 
+// Interface para as configurações do editor de banners
+export interface BannerDesign {
+  title: string;
+  titleFont: string;
+  titleSize: string;
+  subtitle: string;
+  subtitleFont: string;
+  subtitleSize: string;
+  bgColor: string;
+  textColor: string;
+  align: 'left' | 'center' | 'right';
+  animation: 'none' | 'slide' | 'pulse' | 'float';
+  iconName: string | null;
+  iconPos: 'left' | 'top' | 'right';
+  iconSize: 'sm' | 'md' | 'lg';
+  iconColorMode: 'text' | 'white' | 'black' | 'custom';
+  logoDisplay: 'square' | 'round' | 'none';
+  iconCustomColor?: string;
+  imageUrl?: string; // Adicionado aqui para uso no BannerViewer
+}
+
 // From src/backend/types.ts
 export type TransactionStatus = 'pending' | 'approved' | 'rejected';
 export type SessionType = 'qr' | 'pin';
