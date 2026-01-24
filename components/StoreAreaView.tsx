@@ -21,7 +21,8 @@ import {
   Star,
   Users,
   Award,
-  Tag
+  Tag,
+  Wallet
 } from 'lucide-react';
 import { User as SupabaseUser } from '@supabase/supabase-js';
 import { useAuth } from '@/contexts/AuthContext';
@@ -160,9 +161,17 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
               iconColorClass="text-blue-600 dark:text-blue-400"
             />
              <MarketingActionCard 
+              icon={Wallet}
+              label="Cashback do Bairro"
+              description="Fidelize clientes devolvendo parte do valor da compra."
+              onClick={() => onNavigate('store_cashback_module')}
+              iconBgClass="bg-green-100 dark:bg-green-900/30"
+              iconColorClass="text-green-600 dark:text-green-400"
+            />
+             <MarketingActionCard 
               icon={Tag}
-              label="Promoção da Semana"
-              description="Configure seu cupom semanal e valide clientes."
+              label="Cupons da Semana"
+              description="Ative e gerencie o Desconto da Semana para sua loja."
               onClick={() => onNavigate('weekly_promo')}
               iconBgClass="bg-amber-100 dark:bg-amber-900/30"
               iconColorClass="text-amber-500 dark:text-amber-400"

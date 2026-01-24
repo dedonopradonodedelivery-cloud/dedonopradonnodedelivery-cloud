@@ -1,6 +1,6 @@
 
 import React, { useState, useMemo, useEffect, useRef } from 'react';
-import { ChevronLeft, CheckCircle2, Tag, Percent, DollarSign, Check, X, Loader2, Save, Clock, Users, XCircle, Search, Play, Lock, ArrowRight } from 'lucide-react';
+import { ChevronLeft, CheckCircle2, Tag, Percent, DollarSign, Check, X, Loader2, Save, Clock, Users, XCircle, Search, Play, Lock, ArrowRight, Info } from 'lucide-react';
 import { User } from '@supabase/supabase-js';
 
 interface WeeklyPromoModuleProps {
@@ -37,10 +37,10 @@ const TutorialView: React.FC<{ onComplete: () => void }> = ({ onComplete }) => {
                     <Play className="w-10 h-10 text-blue-400 fill-blue-400" />
                 </div>
                 <h2 className="text-2xl font-black text-white font-display uppercase tracking-tight mb-3">
-                    Como Funciona a Promoção
+                    Como Funciona o Cupom Semanal
                 </h2>
                 <p className="text-slate-400 text-sm max-w-xs mx-auto leading-relaxed">
-                    Assista ao vídeo rápido para entender as regras e como validar o cupom do seu cliente no caixa.
+                    Assista ao vídeo obrigatório para entender as regras, como validar o cupom do seu cliente e os benefícios para sua loja.
                 </p>
             </div>
             
@@ -82,7 +82,7 @@ const TutorialView: React.FC<{ onComplete: () => void }> = ({ onComplete }) => {
 };
 
 export const WeeklyPromoModule: React.FC<WeeklyPromoModuleProps> = ({ onBack, user }) => {
-  const tutorialStorageKey = `promo_tutorial_completed_${user?.id}`;
+  const tutorialStorageKey = `video_cupons_lojista_assistido_${user?.id}`;
   const [isTutorialCompleted, setIsTutorialCompleted] = useState(() => localStorage.getItem(tutorialStorageKey) === 'true');
 
   const [view, setView] = useState<View>('config');
@@ -93,6 +93,9 @@ export const WeeklyPromoModule: React.FC<WeeklyPromoModuleProps> = ({ onBack, us
   const [discountType, setDiscountType] = useState<DiscountType>('percentage');
   const [discountValue, setDiscountValue] = useState('10');
   const [minValue, setMinValue] = useState('');
+  const [validCategories, setValidCategories] = useState('');
+  const [couponLimit, setCouponLimit] = useState('');
+
 
   // Validation state
   const [validationCode, setValidationCode] = useState('');
@@ -126,7 +129,7 @@ export const WeeklyPromoModule: React.FC<WeeklyPromoModuleProps> = ({ onBack, us
     <div className="space-y-8">
         <div className="flex justify-between items-center bg-slate-800 p-6 rounded-3xl border border-white/10">
             <div>
-                <h3 className="font-bold text-white text-lg">Participar da Promoção</h3>
+                <h3 className="font-bold text-white text-lg">Participar do Desconto da Semana</h3>
                 <p className="text-xs text-slate-400">Ative para sua loja aparecer na lista.</p>
             </div>
             <button 
@@ -142,17 +145,17 @@ export const WeeklyPromoModule: React.FC<WeeklyPromoModuleProps> = ({ onBack, us
                 <label className="text-xs font-bold text-slate-400 uppercase ml-1 mb-2 block">Tipo de Desconto</label>
                 <div className="grid grid-cols-2 gap-3">
                     <button onClick={() => setDiscountType('percentage')} className={`py-4 rounded-2xl border-2 flex items-center justify-center gap-2 ${discountType === 'percentage' ? 'bg-blue-600/10 border-blue-500 text-white' : 'bg-slate-800 border-slate-700 text-slate-400'}`}>
-                        <Percent size={16} /> <span className="text-sm font-bold">Percentual</span>
+                        <Percent size={16} /> <span className="text-sm font-bold">Percentual (%)</span>
                     </button>
                     <button onClick={() => setDiscountType('fixed')} className={`py-4 rounded-2xl border-2 flex items-center justify-center gap-2 ${discountType === 'fixed' ? 'bg-blue-600/10 border-blue-500 text-white' : 'bg-slate-800 border-slate-700 text-slate-400'}`}>
-                        <DollarSign size={16} /> <span className="text-sm font-bold">Valor Fixo</span>
+                        <DollarSign size={16} /> <span className="text-sm font-bold">Valor Fixo (R$)</span>
                     </button>
                 </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
                 <div>
-                    <label className="text-xs font-bold text-slate-400 uppercase ml-1 mb-2 block">{discountType === 'percentage' ? 'Desconto (%)' : 'Desconto (R$)'}</label>
+                    <label className="text-xs font-bold text-slate-400 uppercase ml-1 mb-2 block">Até {discountType === 'percentage' ? 'X%' : 'R$ Y'}</label>
                     <input 
                         type="number"
                         value={discountValue}
@@ -171,14 +174,45 @@ export const WeeklyPromoModule: React.FC<WeeklyPromoModuleProps> = ({ onBack, us
                     />
                 </div>
             </div>
+            
+            <div>
+                <label className="text-xs font-bold text-slate-400 uppercase ml-1 mb-2 block">Produtos/Categorias Válidas (Opcional)</label>
+                <input 
+                    type="text"
+                    value={validCategories}
+                    onChange={(e) => setValidCategories(e.target.value)}
+                    placeholder="Ex: Pizzas, Bebidas (separado por vírgula)"
+                    className="w-full p-4 bg-slate-800 rounded-2xl border border-slate-700 outline-none focus:border-blue-500 text-white font-bold text-sm"
+                />
+            </div>
+            
+            <div>
+                <label className="text-xs font-bold text-slate-400 uppercase ml-1 mb-2 block">Limite de Cupons por Semana (Opcional)</label>
+                <input 
+                    type="number"
+                    value={couponLimit}
+                    onChange={(e) => setCouponLimit(e.target.value)}
+                    placeholder="Ex: 100"
+                    className="w-full p-4 bg-slate-800 rounded-2xl border border-slate-700 outline-none focus:border-blue-500 text-white font-bold text-sm"
+                />
+            </div>
         </div>
+
+         <div className="bg-slate-800 p-5 rounded-2xl border border-slate-700 space-y-3">
+             <h4 className="text-xs font-bold text-amber-400 uppercase flex items-center gap-2"><Info size={14}/> Regras para o cliente:</h4>
+             <ul className="text-xs text-slate-400 list-disc list-inside space-y-1 pl-1">
+                 <li>O usuário precisa acessar o app por 5 dias consecutivos para liberar o desconto.</li>
+                 <li>Após resgatar, o cupom vale por 7 dias.</li>
+                 <li>Cada usuário escolhe 1 único lojista por semana.</li>
+             </ul>
+         </div>
 
         <button 
             onClick={handleSave}
             disabled={isSaving}
             className="w-full bg-emerald-500 text-white font-bold py-4 rounded-2xl shadow-lg flex items-center justify-center gap-2 disabled:opacity-50"
         >
-            {isSaving ? <Loader2 className="animate-spin" /> : <Save size={18} />} Salvar Regras
+            {isSaving ? <Loader2 className="animate-spin" /> : <Save size={18} />} Salvar Configurações
         </button>
     </div>
   );
@@ -229,7 +263,7 @@ export const WeeklyPromoModule: React.FC<WeeklyPromoModuleProps> = ({ onBack, us
     <div className="min-h-screen bg-slate-900 text-white font-sans flex flex-col">
       <header className="sticky top-0 z-10 bg-slate-900/80 backdrop-blur-md px-5 h-16 flex items-center gap-4 border-b border-white/10 shrink-0">
         <button onClick={onBack} className="p-2 -ml-2 rounded-full hover:bg-white/10"><ChevronLeft className="w-6 h-6" /></button>
-        <h1 className="font-bold text-lg">Promoção da Semana</h1>
+        <h1 className="font-bold text-lg">Cupons da Semana</h1>
       </header>
       
       {!isTutorialCompleted ? (

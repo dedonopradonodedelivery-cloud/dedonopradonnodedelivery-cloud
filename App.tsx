@@ -27,6 +27,7 @@ import { StoreAdsQuickLaunch } from '@/components/StoreAdsQuickLaunch';
 import { MerchantPerformanceDashboard } from '@/components/MerchantPerformanceDashboard';
 import { AdminBannerModeration } from '@/components/AdminBannerModeration';
 import { DesignerPanel } from '@/components/DesignerPanel';
+import { StoreCashbackModule } from '@/components/StoreCashbackModule';
 import { MapPin, ShieldCheck, X, Palette } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
@@ -95,7 +96,7 @@ const App: React.FC = () => {
   };
   
   useEffect(() => {
-    const restrictedTabs = ['scan_cashback', 'merchant_qr_display', 'wallet', 'pay_cashback', 'store_area', 'admin_panel', 'edit_profile', 'store_claim', 'user_cashback_mock', 'merchant_reviews', 'designer_panel', 'weekly_promo', 'user_coupons'];
+    const restrictedTabs = ['scan_cashback', 'merchant_qr_display', 'wallet', 'pay_cashback', 'store_area', 'admin_panel', 'edit_profile', 'store_claim', 'user_cashback_mock', 'merchant_reviews', 'designer_panel', 'weekly_promo', 'user_coupons', 'store_cashback_module'];
     
     if (restrictedTabs.includes(activeTab)) {
       if (!isAuthInitialLoading && !user) {
@@ -122,7 +123,7 @@ const App: React.FC = () => {
   }, []);
 
   const handleSelectStore = (store: Store) => { setSelectedStore(store); setActiveTab('store_detail'); };
-  const headerExclusionList = ['store_area', 'editorial_list', 'store_profile', 'category_detail', 'store_detail', 'profile', 'patrocinador_master', 'service_subcategories', 'service_specialties', 'store_ads_module', 'store_ads_quick', 'merchant_performance', 'about', 'support', 'favorites', 'community_feed', 'admin_panel', 'cashback_landing', 'admin_banner_moderation', 'store_claim', 'user_cashback_mock', 'merchant_reviews', 'jpa_connect_sales', 'wallet', 'designer_panel', 'weekly_promo', 'user_coupons', 'user_coupons_history'];
+  const headerExclusionList = ['store_area', 'editorial_list', 'store_profile', 'category_detail', 'store_detail', 'profile', 'patrocinador_master', 'service_subcategories', 'service_specialties', 'store_ads_module', 'store_ads_quick', 'merchant_performance', 'about', 'support', 'favorites', 'community_feed', 'admin_panel', 'cashback_landing', 'admin_banner_moderation', 'store_claim', 'user_cashback_mock', 'merchant_reviews', 'jpa_connect_sales', 'wallet', 'designer_panel', 'weekly_promo', 'user_coupons', 'user_coupons_history', 'store_cashback_module'];
   
   const hideBottomNav = ['admin_panel'].includes(activeTab);
 
@@ -193,6 +194,8 @@ const App: React.FC = () => {
                     )}
                     {activeTab === 'user_coupons' && <UserCupomScreen user={user as any} onBack={() => setActiveTab('profile')} onHistory={() => setActiveTab('user_coupons_history')} />}
                     {activeTab === 'user_coupons_history' && <UserCouponsHistoryView onBack={() => setActiveTab('user_coupons')} />}
+                    {activeTab === 'store_cashback_module' && <StoreCashbackModule onBack={() => setActiveTab('profile')} user={user as any} />}
+
 
                     {activeTab === 'jpa_connect_sales' && <JPAConnectSalesView onBack={() => setActiveTab('profile')} />}
                     {activeTab === 'community_feed' && <CommunityFeedView onStoreClick={handleSelectStore} user={user as any} onRequireLogin={() => setIsAuthOpen(true)} onNavigate={setActiveTab} />}

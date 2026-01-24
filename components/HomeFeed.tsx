@@ -38,6 +38,9 @@ import {
   Clock,
   Heart,
   ShieldCheck,
+  CheckCircle2,
+  Lock,
+  Info,
 } from 'lucide-react';
 import { LojasEServicosList } from '@/components/LojasEServicosList';
 import { User } from '@supabase/supabase-js';
@@ -350,28 +353,128 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void; onStoreClick?: (
   );
 };
 
-const WeeklyPromoBanner: React.FC<{ onClick: () => void }> = ({ onClick }) => (
-    <div onClick={onClick} className="px-5 w-full">
-        <div className="relative w-full rounded-[2.5rem] bg-gradient-to-br from-amber-400 to-orange-500 p-8 shadow-2xl shadow-amber-500/20 overflow-hidden cursor-pointer group transition-all duration-300 hover:shadow-amber-500/40 active:scale-[0.98]">
-            <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-3xl animate-pulse"></div>
-            <div className="relative z-10 flex flex-col md:flex-row justify-between items-center gap-6">
-                <div className="text-white text-center md:text-left flex-1">
-                    <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-md px-3 py-1 rounded-full border border-white/20 mb-4 shadow-sm">
-                        <Gift size={12} className="fill-current" />
-                        <span className="text-[10px] font-black uppercase tracking-widest">Exclusivo</span>
+const WeeklyDiscountBlock: React.FC<{ onClick: () => void }> = ({ onClick }) => {
+    const consecutiveDays = parseInt(localStorage.getItem('consecutive_days_count') || '1');
+    const [animatedDays, setAnimatedDays] = useState(0);
+    const [isCelebrated, setIsCelebrated] = useState(false);
+    const [showShine, setShowShine] = useState(true);
+    const days = [1, 2, 3, 4, 5];
+
+    useEffect(() => {
+        // Animação coreografada do Dia 0 -> Dia Atual ao carregar
+        const timer = setTimeout(() => {
+            let current = 0;
+            const interval = setInterval(() => {
+                if (current < consecutiveDays) {
+                    current++;
+                    setAnimatedDays(current);
+                } else {
+                    clearInterval(interval);
+                }
+            }, 120);
+        }, 600);
+        
+        // Remove o shine do botão após 4 segundos (2 ciclos)
+        const shineTimer = setTimeout(() => setShowShine(false), 4000);
+        
+        return () => {
+          clearTimeout(timer);
+          clearTimeout(shineTimer);
+        };
+    }, [consecutiveDays]);
+
+    const handleActionClick = () => {
+        if (consecutiveDays === 1 && !isCelebrated) {
+          setIsCelebrated(true);
+          // Pequeno delay para a celebração visual antes de mudar de página
+          setTimeout(onClick, 850);
+        } else {
+          onClick();
+        }
+    };
+    
+    return (
+        <div className="px-5 w-full">
+            <style>{`
+              @keyframes shine-slide {
+                0% { transform: translateX(-200%) skewX(-20deg); }
+                30% { transform: translateX(200%) skewX(-20deg); }
+                100% { transform: translateX(200%) skewX(-20deg); }
+              }
+              .btn-shine-effect {
+                position: relative;
+                overflow: hidden;
+              }
+              .btn-shine-effect::after {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 50%;
+                height: 100%;
+                background: linear-gradient(to right, transparent, rgba(255,255,255,0.4), transparent);
+                animation: shine-slide 2.5s infinite;
+              }
+            `}</style>
+
+            <div className="bg-white dark:bg-gray-800 rounded-[2rem] p-5 shadow-sm border border-gray-100 dark:border-gray-700 animate-in fade-in zoom-in-95 duration-500 fill-mode-backwards" style={{ animationDelay: '100ms' }}>
+                <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                        <div className="p-1.5 bg-blue-50 dark:bg-blue-900/30 rounded-lg">
+                            <Tag className="w-3.5 h-3.5 text-blue-600" />
+                        </div>
+                        <h2 className="text-sm font-bold text-gray-900 dark:text-white">Cupom da Semana</h2>
                     </div>
-                    <h2 className="text-2xl font-black leading-tight tracking-tight drop-shadow-md mb-4">
-                        Desbloqueie seu Desconto da Semana
-                    </h2>
-                    <button className="bg-white text-orange-600 font-black py-3 px-6 rounded-2xl shadow-lg hover:bg-amber-50 transition-all text-sm uppercase tracking-widest flex items-center justify-center gap-2 w-full md:w-auto group/btn">
-                        Ver Lojas
-                        <ArrowRight size={16} className="transition-transform group-hover/btn:translate-x-1" />
-                    </button>
+                    {/* Indicador de Progresso Minimalista com Animação Staggered */}
+                    <div className="flex gap-1.5">
+                        {days.map(d => (
+                            <div 
+                              key={d} 
+                              className={`w-2.5 h-2.5 rounded-full transition-all duration-500 relative flex items-center justify-center ${
+                                d <= animatedDays ? 'bg-emerald-500 scale-110' : 'bg-gray-100 dark:bg-gray-700'
+                              } ${d === 1 && animatedDays >= 1 ? 'shadow-[0_0_8px_rgba(16,185,129,0.5)]' : ''}`} 
+                            >
+                                {d <= animatedDays && (
+                                    <div className="animate-in zoom-in duration-300">
+                                        <CheckCircle2 size={7} className="text-white" strokeWidth={4} />
+                                    </div>
+                                )}
+                            </div>
+                        ))}
+                    </div>
                 </div>
+                
+                <p className="text-[10px] text-gray-500 dark:text-gray-400 mb-4 leading-tight font-medium">
+                  {isCelebrated 
+                    ? "Dia 1 liberado! Volte amanhã para o Dia 2." 
+                    : "Acesse o app por 5 dias seguidos e garanta o uso do seu cupom nesta semana."}
+                </p>
+                
+                <button 
+                    onClick={handleActionClick} 
+                    className={`w-full font-black py-3.5 rounded-xl active:scale-[0.96] transition-all text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 ${
+                        isCelebrated 
+                          ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20' 
+                          : 'bg-[#1E5BFF] text-white shadow-md shadow-blue-500/10'
+                    } ${showShine && !isCelebrated ? 'btn-shine-effect' : ''}`}
+                >
+                    {isCelebrated ? (
+                      <span className="flex items-center gap-2 animate-in zoom-in duration-300">
+                         <CheckCircle size={14} strokeWidth={3} />
+                         Resgatado!
+                      </span>
+                    ) : (
+                      <>
+                        {consecutiveDays > 1 ? 'Acompanhar Recompensa' : 'Resgatar Dia 1'}
+                        <ArrowRight size={12} strokeWidth={3} />
+                      </>
+                    )}
+                </button>
             </div>
         </div>
-    </div>
-);
+    );
+};
+
 
 interface HomeFeedProps {
   onNavigate: (view: string) => void;
@@ -392,7 +495,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
 }) => {
   const [listFilter, setListFilter] = useState<'all' | 'top_rated' | 'open_now'>('all');
   const categoriesRef = useRef<HTMLDivElement>(null);
-  const homeStructure = useMemo(() => ['categories', 'home_carousel', 'weekly_promo', 'novidades', 'sugestoes', 'em_alta', 'list'], []);
+  const homeStructure = useMemo(() => ['categories', 'home_carousel', 'weekly_promo', 'list'], []);
 
   const renderSection = (key: string) => {
     switch (key) {
@@ -419,10 +522,12 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
             </div>
           </div>
         );
-      case 'weekly_promo': return userRole === 'cliente' && <WeeklyPromoBanner key="weekly_promo" onClick={() => onNavigate('weekly_promo')} />;
-      case 'novidades': return <NovidadesDaSemana key="novidades" stores={stores} onStoreClick={onStoreClick} onNavigate={onNavigate} />;
-      case 'sugestoes': return <SugestoesParaVoce key="sugestoes" stores={stores} onStoreClick={onStoreClick} onNavigate={onNavigate} />;
-      case 'em_alta': return <EmAltaNaCidade key="em_alta" stores={stores} onStoreClick={onStoreClick} onNavigate={onNavigate} />;
+      case 'weekly_promo': 
+        return userRole !== 'lojista' && (
+            <div key="weekly_promo_container" className="py-2">
+                <WeeklyDiscountBlock onClick={() => onNavigate('weekly_promo')} />
+            </div>
+        );
       case 'list':
         return (
           <div key="list" className="w-full bg-white dark:bg-gray-900 pt-1 pb-10">
@@ -454,11 +559,10 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
 
   const MemoizedSections = useMemo(() => {
     return homeStructure.map(section => renderSection(section));
-  }, [homeStructure, listFilter, stores, user, onSelectCategory, onNavigate, onStoreClick]);
+  }, [homeStructure, listFilter, stores, user, onSelectCategory, onNavigate, onStoreClick, userRole]);
 
   return (
     <div className="flex flex-col bg-white dark:bg-gray-950 w-full max-w-md mx-auto animate-in fade-in duration-500 overflow-x-hidden pb-32">
-      {/* Mocking that a lojista has not yet purchased */}
       {userRole === 'lojista' && (
         <section className="px-4 py-4 bg-white dark:bg-gray-950">
            <LaunchOfferBanner onClick={() => onNavigate('store_ads_module')} />
@@ -484,74 +588,3 @@ const SectionHeader: React.FC<{ icon: React.ElementType; title: string; subtitle
     <button onClick={onSeeMore} className="text-[10px] font-black text-[#1E5BFF] uppercase tracking-widest hover:underline active:opacity-60">Ver mais</button>
   </div>
 );
-const NovidadesDaSemana: React.FC<{ stores: Store[]; onStoreClick?: (store: Store) => void; onNavigate: (v: string) => void }> = ({ stores, onStoreClick, onNavigate }) => {
-  const newArrivals = useMemo(() => stores.filter(s => (s.image || s.logoUrl) && ['f-3', 'f-5', 'f-8', 'f-12', 'f-15'].includes(s.id)), [stores]);
-  if (newArrivals.length === 0) return null;
-  return (
-    <div className="bg-white dark:bg-gray-950 pt-2 px-5">
-      <SectionHeader icon={Sparkles} title="Novidades da Semana" subtitle="Recém chegados" onSeeMore={() => onNavigate('explore')} />
-      <div className="flex gap-4 overflow-x-auto no-scrollbar snap-x -mx-5 px-5">
-        {newArrivals.map((store) => (
-          <button key={store.id} onClick={() => onStoreClick && onStoreClick(store)} className="flex-shrink-0 w-[170px] aspect-[4/5] rounded-[2.5rem] overflow-hidden relative snap-center shadow-2xl group active:scale-[0.98] transition-all">
-            <img src={store.image || store.logoUrl} alt="" className="absolute inset-0 w-full h-full object-cover transition-transform group-hover:scale-110" />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent"></div>
-            <div className="absolute inset-0 p-4 flex flex-col justify-end text-left">
-              <span className="w-fit bg-emerald-500 text-white text-[7px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest mb-1.5 shadow-lg">Novo</span>
-              <h3 className="text-sm font-black text-white leading-tight mb-0.5 truncate drop-shadow-md">{store.name}</h3>
-              <p className="text-[9px] font-bold text-white/60 uppercase tracking-widest truncate">{store.category}</p>
-            </div>
-          </button>
-        ))}
-      </div>
-    </div>
-  );
-};
-const SugestoesParaVoce: React.FC<{ stores: Store[]; onStoreClick?: (store: Store) => void; onNavigate: (v: string) => void }> = ({ stores, onStoreClick, onNavigate }) => {
-  const suggestions = useMemo(() => stores.filter(s => (s.image || s.logoUrl) && ['f-3', 'f-5', 'f-8', 'f-12', 'f-15'].includes(s.id)), [stores]);
-  if (suggestions.length === 0) return null;
-  return (
-    <div className="bg-white dark:bg-gray-900 py-4 px-5">
-      <SectionHeader icon={Lightbulb} title="Sugestões" subtitle="Para você" onSeeMore={() => onNavigate('explore')} />
-      <div className="flex gap-5 overflow-x-auto no-scrollbar snap-x -mx-5 px-5">
-        {suggestions.map((store) => (
-          <button key={store.id} onClick={() => onStoreClick && onStoreClick(store)} className="flex-shrink-0 w-[240px] bg-white dark:bg-gray-900 rounded-[2rem] overflow-hidden snap-center shadow-xl border border-gray-100 dark:border-gray-800 group active:scale-[0.98] transition-all text-left">
-            <div className="relative h-32 overflow-hidden">
-              <img src={store.image || store.logoUrl} alt="" className="w-full h-full object-cover transition-transform group-hover:scale-110" />
-            </div>
-            <div className="p-5">
-              <span className="text-[9px] font-black text-[#1E5BFF] uppercase tracking-widest block mb-1">{store.category}</span>
-              <h3 className="text-base font-bold text-gray-900 dark:text-white leading-tight mb-2 truncate">{store.name}</h3>
-              <div className="flex items-center gap-1.5 text-gray-400 dark:text-gray-400 mt-0.5">
-                <MapPin size={12} />
-                <span className="text-[10px] font-bold uppercase tracking-tight">{store.neighborhood || store.distance}</span>
-              </div>
-            </div>
-          </button>
-        ))}
-      </div>
-    </div>
-  );
-};
-const EmAltaNaCidade: React.FC<{ stores: Store[]; onStoreClick?: (store: Store) => void; onNavigate: (v: string) => void }> = ({ stores, onStoreClick, onNavigate }) => {
-  const trending = useMemo(() => stores.filter(s => (s.image || s.logoUrl) && ['f-1', 'f-2'].includes(s.id)), [stores]);
-  if (trending.length < 2) return null;
-  return (
-    <div className="bg-white dark:bg-gray-900 py-4 px-5">
-      <SectionHeader icon={TrendingUp} title="Em alta" subtitle="O bairro ama" onSeeMore={() => onNavigate('explore')} />
-      <div className="flex gap-4">
-        {trending.map((store, idx) => (
-          <button key={store.id} onClick={() => onStoreClick && onStoreClick(store)} className={`flex-1 rounded-[2.5rem] p-6 flex flex-col items-center text-center transition-all active:scale-[0.98] shadow-sm ${idx === 0 ? 'bg-rose-50/70 dark:bg-rose-900/20' : 'bg-blue-50/70 dark:bg-blue-900/20'}`}>
-            <div className="w-20 h-20 rounded-full overflow-hidden bg-white shadow-xl border-4 border-white mb-5">
-              <img src={store.logoUrl || store.image} alt="" className="w-full h-full object-cover" />
-            </div>
-            <h3 className="text-sm font-black text-gray-900 dark:text-white leading-tight mb-1">{store.name}</h3>
-            <p className="text-[8px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-6">{store.category}</p>
-            <div className="mt-auto bg-gray-900 dark:bg-white text-white dark:text-gray-900 px-5 py-2.5 rounded-full text-[9px] font-black uppercase tracking-widest flex items-center justify-center gap-1.5 shadow-lg">
-              Explorar <ArrowRight size={10} strokeWidth={4} />
-            </div>
-          </button>
-        ))}
-      </div>
-    </div>
-  );
-};
