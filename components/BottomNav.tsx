@@ -78,8 +78,9 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
     <div className="fixed bottom-0 left-0 right-0 mx-auto w-full max-w-md bg-[#1E5BFF] z-50 h-[80px] rounded-t-[24px] shadow-[0_-5px_30px_rgba(0,0,0,0.2)] border-t border-white/10">
       <div className="flex items-end justify-around w-full px-2 h-full pb-2">
         {navItems.map((item) => {
+          // FIX: Updated activeTab checks
           const isActive = activeTab === item.id || 
-                          (item.id === 'profile' && ['store_area', 'store_ads_module', 'weekly_promo', 'merchant_jobs', 'store_profile', 'store_support', 'about', 'support', 'favorites', 'jpa_connect_sales', 'merchant_reviews', 'create_bairro_post', 'merchant_performance_dashboard', 'merchant_qr_display'].includes(activeTab)) ||
+                          (item.id === 'profile' && ['store_area', 'store_ads_module', 'weekly_promo', 'merchant_jobs', 'store_profile', 'store_support', 'about', 'support', 'favorites', 'jpa_connect_sales', 'merchant_reviews', 'create_bairro_post', 'merchant_performance_dashboard', 'merchant_qr_display', 'user_coupons', 'user_coupons_history'].includes(activeTab)) ||
                           (item.id === 'community_feed' && ['community_feed', 'bairro_feed'].includes(activeTab));
           
           return (

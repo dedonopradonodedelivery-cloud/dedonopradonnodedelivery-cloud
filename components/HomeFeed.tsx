@@ -97,14 +97,14 @@ const SIZE_LEVELS = [
 ];
 
 const BannerViewer: React.FC<{ 
-  config: BannerDesign & { imageUrl?: string; }; // Adicionado imageUrl ao config local
+  config: BannerDesign; // Removed redundant imageUrl, it's already in BannerDesign
   storeName: string; 
   storeLogo?: string | null; 
 }> = ({ config, storeName, storeLogo }) => {
     const { 
       title, subtitle, titleFont, titleSize, subtitleFont, subtitleSize, 
       bgColor, textColor, align, animation, iconName, iconPos, iconSize, 
-      logoDisplay, iconColorMode, iconCustomColor 
+      logoDisplay, iconColorMode, iconCustomColor, imageUrl // Access imageUrl directly from config
     } = config;
 
     const renderIcon = (name: string | null, size: 'sm' | 'md' | 'lg', colorMode: string) => {
@@ -127,15 +127,13 @@ const BannerViewer: React.FC<{
         } ${animation === 'pulse' ? 'animate-pulse' : animation === 'float' ? 'animate-float-slow' : ''}`}
         style={{
           backgroundColor: bgColor,
-          // FIX: Access imageUrl from config object
-          backgroundImage: config.imageUrl ? `url(${config.imageUrl})` : undefined,
-          backgroundSize: config.imageUrl ? 'cover' : undefined,
-          backgroundPosition: config.imageUrl ? 'center' : undefined,
+          backgroundImage: imageUrl ? `url(${imageUrl})` : undefined,
+          backgroundSize: imageUrl ? 'cover' : undefined,
+          backgroundPosition: imageUrl ? 'center' : undefined,
         }}
       >
         {/* Overlay para escurecer imagem de fundo se houver */}
-        {/* FIX: Access imageUrl from config object */}
-        {config.imageUrl && <div className="absolute inset-0 bg-black/40"></div>}
+        {imageUrl && <div className="absolute inset-0 bg-black/40"></div>}
 
         <div className={`relative z-10 transition-all duration-500 flex ${iconPos === 'top' ? 'flex-col items-inherit' : iconPos === 'right' ? 'flex-row-reverse items-center gap-4' : 'flex-row items-center gap-4'} ${animation === 'slide' ? 'animate-in slide-in-from-left-8' : ''}`}>
           {iconName && (

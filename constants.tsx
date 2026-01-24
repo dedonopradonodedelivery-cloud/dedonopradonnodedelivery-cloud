@@ -641,8 +641,8 @@ export const MOCK_JOBS: Job[] = [
   }
 ];
 
-// FIX: TaxonomyType moved to types.ts to avoid redeclaration.
-// export type TaxonomyType = 'category' | 'subcategory' | 'specialty';
+// Added to fix import error in StoreProfileEdit.tsx
+export type TaxonomyType = 'category' | 'subcategory' | 'specialty';
 
 export const SPECIALTIES: Record<string, string[]> = {
   'Chaveiro 24h': ['Abertura de portas', 'Troca de fechadura', 'Chave codificada', 'Abertura de cofre', 'Cópia de chaves', 'Instalação de tetra chave'],
@@ -672,6 +672,37 @@ export const NEIGHBORHOODS = [
   "Curicica", "Parque Olímpico", "Gardênia", "Cidade de Deus"
 ];
 
-// MOCK_OCCUPANCY e DISPLAY_MODES são definidos localmente em StoreAdsModule.tsx
-// para evitar duplicação e acoplamento desnecessário, conforme os guidelines.
-// Removidos deste arquivo global.
+export const MOCK_OCCUPANCY: Record<string, Record<string, boolean>> = {
+  "Freguesia": { "periodo_1": true },
+  "Taquara": { "periodo_2": true },
+};
+
+export const DISPLAY_MODES = [
+  { 
+    id: 'home', 
+    label: 'Home', 
+    icon: HomeIcon, 
+    price: 49.90,
+    originalPrice: 199.90,
+    description: 'Exibido no carrossel da página inicial para todos os usuários.',
+    whyChoose: 'Ideal para máxima visibilidade imediata.'
+  },
+  { 
+    id: 'cat', 
+    label: 'Categorias', 
+    icon: LayoutGrid, 
+    price: 29.90,
+    originalPrice: 149.90,
+    description: 'Exibido no topo das buscas por produtos ou serviços específicos.',
+    whyChoose: 'Impacta o cliente no momento da decisão.'
+  },
+  { 
+    id: 'combo', 
+    label: 'Home + Categorias', 
+    icon: Zap, 
+    price: 69.90,
+    originalPrice: 349.80,
+    description: 'Destaque na página inicial e em todas as categorias.',
+    whyChoose: 'Mais alcance, cliques e chances de venda.'
+  },
+];

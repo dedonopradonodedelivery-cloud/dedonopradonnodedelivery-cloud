@@ -31,7 +31,7 @@ import { Store, BusinessHour, StoreReview } from '../types';
 import { supabase } from '../lib/supabaseClient';
 import { useAuth } from '../contexts/AuthContext';
 import { useNeighborhood } from '../contexts/NeighborhoodContext';
-import { trackOrganicEvent, OrganicEventType } from '../lib/analytics';
+import { trackOrganicEvent } from '../lib/analytics';
 
 const WEEK_DAYS_LABELS: Record<string, string> = {
   segunda: 'Segunda-feira',
@@ -131,16 +131,16 @@ export const StoreDetailView: React.FC<{
   const bannerImg = store.banner_url || store.image || "https://images.unsplash.com/photo-1570129477492-45c003edd2be?q=80&w=1200&auto=format&fit=crop";
   const logoImg = store.logo_url || store.logoUrl || '/assets/default-logo.png';
   
-  const phoneFormatted = store.telefone_fixo_publico || store.phone || '';
+  const phoneFormatted = store.phone || '';
   const phoneDigits = phoneFormatted.replace(/\D/g, '');
   const whatsappFormatted = store.whatsapp_publico || store.phone || '';
   const whatsappDigits = whatsappFormatted.replace(/\D/g, '');
   
   const addressFormatted = useMemo(() => {
-    if (store.rua) {
-        return `${store.rua}, ${store.numero}${store.complemento ? ` - ${store.complemento}` : ''} - ${store.bairro}`;
+    if (store.address) {
+        return `${store.address}`; // Assuming store.address is already formatted or a simple string
     }
-    return store.address || 'Endereço não informado';
+    return 'Endereço não informado';
   }, [store]);
 
   const hasAddress = addressFormatted !== 'Endereço não informado';
@@ -328,4 +328,110 @@ export const StoreDetailView: React.FC<{
                             <div className="flex flex-wrap gap-2">
                                 {store.payment_methods && store.payment_methods.length > 0 ? (
                                     store.payment_methods.map(method => (
-                                        <span key={method} className="bg-white dark:bg-gray-800 px
+                                        <span key={method} className="bg-white dark:bg-gray-800 px-3 py-1.5 rounded-xl text-xs font-bold text-gray-600 dark:text-gray-300 border border-gray-100 dark:border-gray-700">
+                                            {method}
+                                        </span>
+                                    ))
+                                ) : (
+                                    <span className="text-sm text-gray-400">Não informado</span>
+                                )}
+                            </div>
+                            {store.payment_methods_others && (
+                                <p className="text-xs text-gray-500 dark:text-gray-400 mt-3 border-t border-gray-100 dark:border-gray-700 pt-2">
+                                    Outros: {store.payment_methods_others}
+                                </p>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Trust Block (Recomendado por Moradores) */}
+                    <div className="mt-12">
+                        <h3 className="text-base font-bold text-gray-900 dark:text-white flex items-center gap-2">Confiança no bairro</h3>
+                        <p className="text-[11px] text-gray-400 mt-1 font-medium leading-relaxed">Indicadores de qualidade baseados na experiência real dos moradores.</p>
+                        <div className="grid grid-cols-1 gap-3 mt-4">
+                            <div className="flex items-center gap-3 px-4 py-3 rounded-2xl bg-yellow-50 dark:bg-yellow-900/10 border border-yellow-100 dark:border-yellow-800/50">
+                                <Star className="w-5 h-5 text-yellow-500 fill-current" />
+                                <span className="text-xs font-bold text-yellow-700 dark:text-yellow-400 uppercase tracking-tight">Muito bem avaliado</span>
+                            </div>
+                            <div className="flex items-center gap-3 px-4 py-3 rounded-2xl bg-blue-50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-800/50">
+                                <CheckCircle2 className="w-5 h-5 text-[#1E5BFF]" />
+                                <span className="text-xs font-bold text-blue-700 dark:text-blue-300 uppercase tracking-tight">Registro oficial ativo</span>
+                            </div>
+                            <div className="flex items-center gap-3 px-4 py-3 rounded-2xl bg-emerald-50 dark:bg-emerald-900/10 border border-emerald-100 dark:border-emerald-800/50">
+                                <ThumbsUp className="w-5 h-5 text-emerald-600" />
+                                <span className="text-xs font-bold text-emerald-700 dark:text-emerald-400 uppercase tracking-tight">Indicação de vizinhos</span>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+              )}
+
+              {/* CONTEÚDO: AVALIAÇÕES */}
+              {activeTab === 'reviews' && (
+                <div className="animate-in fade-in duration-500 space-y-6">
+                    <div className="flex flex-col gap-2">
+                        {reviewsToDisplay.length > 0 ? reviewsToDisplay.map(review => (
+                            <div key={review.id} className="bg-gray-50 dark:bg-gray-800 p-4 rounded-2xl border border-gray-100 dark:border-gray-700">
+                                <div className="flex items-center gap-3 mb-2">
+                                    <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-gray-400">
+                                        <UserIcon size={16} />
+                                    </div>
+                                    <div>
+                                        <h4 className="font-bold text-gray-900 dark:text-white text-sm">{review.user_name}</h4>
+                                        <div className="flex items-center gap-0.5 mt-0.5">
+                                            {[1,2,3,4,5].map(s => (
+                                                <Star key={s} size={8} className={`${s <= review.rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-200'}`} />
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+                                <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed italic">"{review.comment}"</p>
+                                {review.merchant_response && (
+                                    <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/10 rounded-xl border border-blue-100 dark:border-blue-800 flex items-start gap-2">
+                                        <CornerDownRight size={16} className="text-blue-500 shrink-0" />
+                                        <p className="text-xs text-blue-700 dark:text-blue-300 leading-relaxed">
+                                            <span className="font-bold">Resposta do lojista:</span> {review.merchant_response.text}
+                                        </p>
+                                    </div>
+                                )}
+                            </div>
+                        )) : (
+                            <div className="text-center py-10 text-gray-500">Nenhuma avaliação ainda.</div>
+                        )}
+                    </div>
+                    {user && (
+                        <form onSubmit={handleSubmitReview} className="mt-6 space-y-4 bg-white dark:bg-gray-800 p-5 rounded-[2rem] border border-gray-100 dark:border-gray-700 shadow-sm">
+                            <h4 className="font-bold text-gray-900 dark:text-white text-base mb-3">Sua Avaliação</h4>
+                            <div className="flex items-center justify-center gap-2">
+                                {[1,2,3,4,5].map(s => (
+                                    <Star 
+                                        key={s} 
+                                        size={32} 
+                                        className={`cursor-pointer ${s <= userRating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`} 
+                                        onClick={() => setUserRating(s)}
+                                    />
+                                ))}
+                            </div>
+                            <textarea
+                                value={userComment}
+                                onChange={(e) => setUserComment(e.target.value)}
+                                placeholder="Compartilhe sua experiência..."
+                                rows={3}
+                                className="w-full p-3 bg-gray-50 dark:bg-gray-700 border border-gray-100 dark:border-gray-600 rounded-xl text-sm dark:text-white outline-none focus:border-[#1E5BFF] transition-all resize-none"
+                            />
+                            {reviewSuccessMessage && <p className="text-green-600 text-sm font-bold text-center">{reviewSuccessMessage}</p>}
+                            <button
+                                type="submit"
+                                disabled={isSubmittingReview || userRating === 0}
+                                className="w-full bg-[#1E5BFF] text-white font-bold py-3 rounded-xl flex items-center justify-center gap-2 disabled:opacity-50"
+                            >
+                                {isSubmittingReview ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send size={16} />}
+                                Enviar Avaliação
+                            </button>
+                        </form>
+                    )}
+                </div>
+              )}
+
+              {/* CON

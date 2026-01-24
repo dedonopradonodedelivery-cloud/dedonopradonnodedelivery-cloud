@@ -60,8 +60,12 @@ export interface Store {
   gallery?: string[];
   distanceKm?: number;
   closingTime?: string;
-  // FIX: Added cashback_percent to Store interface
-  cashback_percent?: number;
+  // Added or confirmed for various components, e.g., LojasEServicosList
+  cashback_percent?: number; 
+  cashback_active?: boolean;
+  cashback_validity_days?: number;
+  onboarding_cashback_completed?: boolean;
+  onboarding_cashback_completed_at?: string;
 
   // --- DADOS FISCAIS ---
   razao_social?: string;
@@ -215,6 +219,21 @@ export interface CommunitySuggestion {
 // FIX: TaxonomyType is already defined here, removing duplicate from constants.tsx
 export type TaxonomyType = 'category' | 'subcategory' | 'specialty';
 
+// Added for AdminModerationPanel (Error 6)
+export interface TaxonomySuggestion {
+  id: string;
+  type: 'category' | 'subcategory' | 'specialty';
+  name: string;
+  parentName?: string;
+  justification?: string;
+  status: 'pending' | 'approved' | 'rejected';
+  storeName: string;
+  createdAt: string;
+  merchantId?: string; // Added to track which merchant suggested it
+  rejectionReason?: string; // Added for rejection feedback
+}
+
+
 export interface AppNotification {
   id: string;
   userId: string;
@@ -317,82 +336,4 @@ export interface DbUser {
 export interface DbMerchant {
   id: string; // uuid, usually maps to auth.users.id for owner
   name: string; // Display name
-  owner_id: string; // Foreign key to auth.users.id
-  is_active: boolean;
-  created_at: string;
-  updated_at?: string;
-  secure_id?: string; // For QR codes (UUID)
-  manual_code?: string; // For manual entry (short code)
-  category?: string;
-  subcategory?: string;
-  logo_url?: string;
-  banner_url?: string;
-  address?: string;
-  phone?: string;
-  email_publico?: string;
-  whatsapp_publico?: string;
-  telefone_fixo_publico?: string;
-  description?: string;
-  // FIX: Added cashback related fields from src/backend/types.ts
-  cashback_percent?: number; 
-  cashback_active?: boolean;
-  cashback_validity_days?: number;
-  onboarding_cashback_completed?: boolean;
-  onboarding_cashback_completed_at?: string;
-}
-
-// DbMerchantSession for backend session management
-export interface DbMerchantSession {
-  id: string; // uuid
-  merchant_id: string;
-  session_type: SessionType;
-  pin_code?: string;
-  expires_at: string;
-  is_used: boolean;
-  created_at: string;
-}
-
-// DbCashbackTransaction for backend transaction logging
-export interface DbCashbackTransaction {
-  id: string; // uuid
-  user_id: string;
-  merchant_id: string;
-  store_id: string; 
-  session_id?: string;
-  purchase_total_cents?: number; // Total value of the purchase (in cents)
-  amount_cents: number; // Value of cashback earned OR amount of cashback used (in cents)
-  cashback_used_cents?: number; // Explicitly used for 'use' type
-  cashback_to_earn_cents?: number; // Explicitly used for 'earn' type
-  amount_to_pay_now_cents?: number; // Amount client pays store directly
-  type: 'earn' | 'use';
-  status: TransactionStatus;
-  created_at: string;
-  approved_at?: string;
-  rejected_at?: string;
-  user_name?: string; // Added for display in merchant dashboard
-  customer_id?: string; // Alias for user_id, if needed
-  customer_name?: string; // Alias for user_name, if needed
-}
-
-// DbWalletMovement for backend wallet movements
-export interface DbWalletMovement {
-  id: string; // uuid
-  user_id: string;
-  transaction_id?: string;
-  type: MovementType;
-  amount: number;
-  description: string;
-  created_at: string;
-}
-
-export interface StoreCredit {
-  id: string;
-  user_id: string;
-  store_id: string;
-  balance_cents: number;
-  created_at: string;
-  updated_at: string;
-  store_name?: string;
-  store_logo?: string;
-}
-
+  
