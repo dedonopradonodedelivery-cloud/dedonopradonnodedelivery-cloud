@@ -136,6 +136,24 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
       </div>
 
       <div className="px-6 space-y-10">
+
+        {/* NOVO BLOCO: Desempenho da Minha Loja */}
+        <section>
+          <SectionHeader 
+            title="Desempenho da Minha Loja" 
+            icon={BarChart3} 
+            description="Acompanhe os resultados da sua loja no app." 
+          />
+          <div className="bg-white dark:bg-gray-800 rounded-[2.5rem] border border-gray-100 dark:border-gray-700 overflow-hidden shadow-sm">
+            <ServiceBlock 
+              icon={BarChart3} 
+              label="Visão Geral" 
+              description="Métricas de visitas, cliques e conversões."
+              onClick={() => onNavigate('merchant_performance')}
+              colorClass="bg-blue-50 text-blue-600"
+            />
+          </div>
+        </section>
         
         {/* NOVO BLOCO: ORGÂNICOS / GRATUITOS */}
         <section>

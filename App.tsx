@@ -1,5 +1,4 @@
 
-
 import React, { useState, useEffect } from 'react';
 import { Layout } from '@/components/layout/Layout';
 import { Header } from '@/components/layout/Header';
@@ -100,7 +99,7 @@ export const App: React.FC = () => {
   };
   
   useEffect(() => {
-    const restrictedTabs = ['scan_cashback', 'merchant_qr_display', 'wallet', 'pay_cashback', 'store_area', 'admin_panel', 'edit_profile', 'store_claim', 'user_cashback_mock', 'merchant_reviews', 'designer_panel', 'weekly_promo', 'user_coupons', 'store_cashback_module', 'create_bairro_post']; // Adicionado 'create_bairro_post'
+    const restrictedTabs = ['scan_cashback', 'merchant_qr_display', 'wallet', 'pay_cashback', 'store_area', 'admin_panel', 'edit_profile', 'store_claim', 'user_cashback_mock', 'merchant_reviews', 'designer_panel', 'weekly_promo', 'user_coupons', 'store_cashback_module', 'create_bairro_post', 'merchant_performance']; // Adicionado 'create_bairro_post'
     
     if (restrictedTabs.includes(activeTab)) {
       if (!isAuthInitialLoading && !user) {
@@ -127,7 +126,7 @@ export const App: React.FC = () => {
   }, []);
 
   const handleSelectStore = (store: Store) => { setSelectedStore(store); setActiveTab('store_detail'); };
-  const headerExclusionList = ['store_area', 'editorial_list', 'store_profile', 'category_detail', 'store_detail', 'profile', 'patrocinador_master', 'service_subcategories', 'service_specialties', 'store_ads_module', 'store_ads_quick', 'merchant_performance', 'about', 'support', 'favorites', 'community_feed', 'admin_panel', 'cashback_landing', 'admin_banner_moderation', 'store_claim', 'user_cashback_mock', 'merchant_reviews', 'jpa_connect_sales', 'wallet', 'designer_panel', 'weekly_promo', 'user_coupons', 'user_coupons_history', 'store_cashback_module', 'bairro_feed', 'create_bairro_post']; // Adicionado 'bairro_feed' e 'create_bairro_post'
+  const headerExclusionList = ['store_area', 'editorial_list', 'store_profile', 'category_detail', 'store_detail', 'profile', 'patrocinador_master', 'service_subcategories', 'service_specialties', 'store_ads_module', 'store_ads_quick', 'merchant_performance', 'about', 'support', 'favorites', 'community_feed', 'admin_panel', 'cashback_landing', 'admin_banner_moderation', 'store_claim', 'user_cashback_mock', 'merchant_reviews', 'jpa_connect_sales', 'wallet', 'designer_panel', 'weekly_promo', 'user_coupons', 'user_coupons_history', 'store_cashback_module', 'bairro_feed', 'create_bairro_post', 'merchant_performance']; // Adicionado 'bairro_feed' e 'create_bairro_post'
   
   const hideBottomNav = ['admin_panel'].includes(activeTab);
 

@@ -392,4 +392,4 @@ export interface DbWalletMovement {
 }
 
 // Added to fix import error in StoreProfileEdit.tsx
-export type TaxonomyType = 'category' | 'subcategory';
+export type TaxonomyType = 'category' | 'subcategory' | 'specialty';
