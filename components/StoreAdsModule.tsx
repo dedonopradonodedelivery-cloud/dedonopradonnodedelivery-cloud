@@ -37,9 +37,9 @@ const NEIGHBORHOODS_LIST = [
 ];
 
 const PLACEMENT_OPTIONS = [
-  { id: 'home', label: 'Home', icon: Home, price: 49.90, description: 'Página inicial' },
-  { id: 'cat', label: 'Categorias', icon: LayoutGrid, price: 29.90, description: 'Buscas específicas' },
-  { id: 'combo', label: 'Home + Categorias', icon: Zap, price: 79.80, description: 'Visibilidade total' },
+  { id: 'home', label: 'Home', icon: Home, price: 49.90, originalPrice: 199.90, description: 'Página inicial' },
+  { id: 'cat', label: 'Categorias', icon: LayoutGrid, price: 29.90, originalPrice: 149.90, description: 'Buscas específicas' },
+  { id: 'combo', label: 'Home + Cats', icon: Zap, price: 79.80, originalPrice: 349.80, description: 'Visibilidade total' },
 ];
 
 export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNavigate, user, categoryName, viewMode, initialView = 'sales' }) => {
@@ -145,7 +145,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
   }
 
   return (
-    <div className="min-h-screen bg-[#F8F9FC] dark:bg-[#020617] font-sans pb-48">
+    <div className="min-h-screen bg-slate-950 font-sans pb-48">
       
       {/* 1. TOPO DA PÁGINA (PITCH) */}
       <header className="bg-white dark:bg-gray-900 px-6 pt-12 pb-8 border-b border-gray-100 dark:border-gray-800 rounded-b-[3rem] shadow-sm">
@@ -164,23 +164,36 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
 
       <div className="p-6 space-y-12">
         
-        {/* 2. ONDE VOCÊ QUER ANUNCIAR? */}
+        {/* 2. ONDE VOCÊ QUER ANUNCIAR? - REESTRUTURADO PARA GRID */}
         <section className="space-y-4">
-          <h3 className="text-xs font-black uppercase tracking-[0.2em] text-gray-400 px-1">Onde você quer anunciar?</h3>
-          <div className="flex gap-3 overflow-x-auto no-scrollbar pb-2">
+          <h3 className="text-xs font-black uppercase tracking-[0.2em] text-gray-500 px-1">Onde você quer anunciar?</h3>
+          <div className="grid grid-cols-3 gap-2">
             {PLACEMENT_OPTIONS.map((opt) => (
               <button 
                 key={opt.id}
                 onClick={() => handleSelectPlacement(opt.id)}
-                className={`flex-shrink-0 w-40 p-5 rounded-[2rem] border-2 transition-all text-left flex flex-col justify-between h-36 ${
-                  selectedPlacement === opt.id ? 'bg-[#1E5BFF] border-[#1E5BFF] text-white shadow-xl' : 'bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800 text-gray-500'
+                className={`relative p-3 rounded-2xl border-2 transition-all text-center flex flex-col items-center justify-between h-44 ${
+                  selectedPlacement === opt.id 
+                  ? 'bg-blue-600/10 border-[#1E5BFF] text-[#1E5BFF] shadow-lg' 
+                  : 'bg-slate-900 border-slate-800 text-slate-500'
                 }`}
               >
-                <opt.icon size={24} className={selectedPlacement === opt.id ? 'text-white' : 'text-[#1E5BFF]'} />
-                <div>
-                    <p className="font-black uppercase text-xs tracking-tighter leading-tight">{opt.label}</p>
-                    <p className={`text-[10px] font-bold mt-1 ${selectedPlacement === opt.id ? 'text-blue-100' : 'text-gray-400'}`}>{opt.description}</p>
+                <opt.icon size={22} className={selectedPlacement === opt.id ? 'text-[#1E5BFF]' : 'text-slate-600'} />
+                
+                <p className="font-black uppercase text-[9px] tracking-tight leading-none mt-2">{opt.label}</p>
+                
+                <div className="mt-auto pt-2 flex flex-col items-center">
+                    <span className="text-[8px] line-through opacity-50 block">R$ {opt.originalPrice.toFixed(2).replace('.', ',')}</span>
+                    <span className={`text-xs font-black block mt-0.5 ${selectedPlacement === opt.id ? 'text-[#1E5BFF]' : 'text-slate-300'}`}>
+                        R$ {opt.price.toFixed(2).replace('.', ',')}
+                    </span>
                 </div>
+
+                {selectedPlacement === opt.id && (
+                  <div className="absolute top-2 right-2">
+                    <CheckCircle2 size={14} className="text-[#1E5BFF]" />
+                  </div>
+                )}
               </button>
             ))}
           </div>
@@ -188,19 +201,19 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
 
         {/* 3. POR QUANTO TEMPO? */}
         <section ref={periodRef} className={`space-y-4 transition-all duration-500 ${!selectedPlacement ? 'opacity-30 blur-[1px] pointer-events-none' : ''}`}>
-          <h3 className="text-xs font-black uppercase tracking-[0.2em] text-gray-400 px-1">Por quanto tempo você quer anunciar?</h3>
+          <h3 className="text-xs font-black uppercase tracking-[0.2em] text-gray-500 px-1">Por quanto tempo você quer anunciar?</h3>
           <div className="flex gap-3">
             {dynamicPeriods.map((p) => (
               <button 
                 key={p.id}
                 onClick={() => togglePeriod(p.id)}
                 className={`flex-1 p-5 rounded-[2rem] border-2 transition-all text-left relative overflow-hidden ${
-                  selectedPeriods.includes(p.id) ? 'bg-white dark:bg-gray-900 border-[#1E5BFF] shadow-lg' : 'bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800 text-gray-500'
+                  selectedPeriods.includes(p.id) ? 'bg-white dark:bg-gray-900 border-[#1E5BFF] shadow-lg text-blue-600' : 'bg-slate-900 border-slate-800 text-slate-500'
                 }`}
               >
-                {p.promo && <div className="absolute top-0 right-0 bg-emerald-500 text-white text-[7px] font-black px-2 py-1 uppercase tracking-tighter rounded-bl-lg">Melhor Valor</div>}
+                {p.promo && <div className="absolute top-0 right-0 bg-emerald-500 text-white text-[7px] font-black px-2 py-1 uppercase tracking-tighter rounded-bl-lg">Promo</div>}
                 <p className={`font-black text-sm uppercase tracking-tighter ${selectedPeriods.includes(p.id) ? 'text-[#1E5BFF]' : ''}`}>{p.label}</p>
-                <p className="text-[9px] font-bold text-gray-400 mt-1 uppercase tracking-widest">{p.dates}</p>
+                <p className="text-[9px] font-bold opacity-60 mt-1 uppercase tracking-widest">{p.dates}</p>
               </button>
             ))}
           </div>
@@ -209,9 +222,9 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
         {/* 4. BAIRROS DE EXIBIÇÃO */}
         <section ref={neighborhoodsRef} className={`space-y-4 transition-all duration-500 ${selectedPeriods.length === 0 ? 'opacity-30 blur-[1px] pointer-events-none' : ''}`}>
           <div className="flex items-center justify-between px-1">
-            <h3 className="text-xs font-black uppercase tracking-[0.2em] text-gray-400">Bairros de exibição</h3>
-            <button onClick={handleSelectAllHoods} className="text-[10px] font-black text-[#1E5BFF] uppercase tracking-widest bg-blue-50 dark:bg-blue-900/20 px-3 py-1.5 rounded-xl border border-blue-100 dark:border-blue-900/30">
-              {selectedHoods.length === NEIGHBORHOODS_LIST.length ? 'Desmarcar todos' : 'Selecionar todos'}
+            <h3 className="text-xs font-black uppercase tracking-[0.2em] text-gray-500">Bairros de exibição</h3>
+            <button onClick={handleSelectAllHoods} className="text-[10px] font-black text-[#1E5BFF] uppercase tracking-widest bg-blue-500/10 px-3 py-1.5 rounded-xl border border-blue-500/20">
+              {selectedHoods.length === NEIGHBORHOODS_LIST.length ? 'Limpar' : 'Todos'}
             </button>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -220,7 +233,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
                 key={hood}
                 onClick={() => toggleHood(hood)}
                 className={`px-4 py-2.5 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all border ${
-                  selectedHoods.includes(hood) ? 'bg-[#1E5BFF] border-[#1E5BFF] text-white shadow-md' : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-500'
+                  selectedHoods.includes(hood) ? 'bg-[#1E5BFF] border-[#1E5BFF] text-white shadow-md' : 'bg-slate-900 border-slate-800 text-slate-500'
                 }`}
               >
                 {hood}
@@ -231,40 +244,40 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
 
         {/* 6. COMO VOCÊ QUER CRIAR SEU BANNER? */}
         <section className={`space-y-4 transition-all duration-500 ${selectedHoods.length === 0 ? 'opacity-30 blur-[1px] pointer-events-none' : ''}`}>
-          <h3 className="text-xs font-black uppercase tracking-[0.2em] text-gray-400 px-1">Como você quer criar seu banner?</h3>
+          <h3 className="text-xs font-black uppercase tracking-[0.2em] text-gray-500 px-1">Como você quer criar seu banner?</h3>
           <div className="space-y-3">
             <button 
                 onClick={() => setArtChoice('upload')}
-                className={`w-full flex items-center justify-between p-5 rounded-2xl border-2 transition-all ${artChoice === 'upload' ? 'bg-white dark:bg-gray-900 border-[#1E5BFF] shadow-md' : 'bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800 opacity-60'}`}
+                className={`w-full flex items-center justify-between p-5 rounded-2xl border-2 transition-all ${artChoice === 'upload' ? 'bg-white dark:bg-gray-900 border-[#1E5BFF] shadow-md' : 'bg-slate-900 border-slate-800 opacity-60'}`}
             >
                 <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-500"><Upload size={18}/></div>
-                    <p className="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-tight">Usar minha arte</p>
+                    <div className="w-10 h-10 rounded-xl bg-slate-800 flex items-center justify-center text-slate-500"><Upload size={18}/></div>
+                    <p className={`text-sm font-bold uppercase tracking-tight ${artChoice === 'upload' ? 'text-gray-900 dark:text-white' : 'text-slate-400'}`}>Usar minha arte</p>
                 </div>
                 {artChoice === 'upload' && <CheckCircle2 size={18} className="text-[#1E5BFF]" />}
             </button>
 
             <button 
                 onClick={() => setView('editor')}
-                className={`w-full flex items-center justify-between p-5 rounded-2xl border-2 transition-all ${artChoice === 'diy' ? 'bg-white dark:bg-gray-900 border-[#1E5BFF] shadow-md' : 'bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800 opacity-60'}`}
+                className={`w-full flex items-center justify-between p-5 rounded-2xl border-2 transition-all ${artChoice === 'diy' ? 'bg-white dark:bg-gray-900 border-[#1E5BFF] shadow-md' : 'bg-slate-900 border-slate-800 opacity-60'}`}
             >
                 <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-xl bg-purple-100 dark:bg-purple-900/20 flex items-center justify-center text-purple-600"><Paintbrush size={18}/></div>
-                    <p className="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-tight">Criação personalizada</p>
+                    <div className="w-10 h-10 rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-600"><Paintbrush size={18}/></div>
+                    <p className={`text-sm font-bold uppercase tracking-tight ${artChoice === 'diy' ? 'text-gray-900 dark:text-white' : 'text-slate-400'}`}>Criação personalizada</p>
                 </div>
                 {artChoice === 'diy' && <CheckCircle2 size={18} className="text-[#1E5BFF]" />}
             </button>
 
             <button 
                 onClick={() => setArtChoice('pro')}
-                className={`w-full flex items-center justify-between p-5 rounded-2xl border-2 transition-all relative overflow-hidden ${artChoice === 'pro' ? 'bg-amber-50 dark:bg-amber-900/10 border-amber-500 shadow-md' : 'bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800 opacity-60'}`}
+                className={`w-full flex items-center justify-between p-5 rounded-2xl border-2 transition-all relative overflow-hidden ${artChoice === 'pro' ? 'bg-amber-50 dark:bg-amber-900/10 border-amber-500 shadow-md' : 'bg-slate-900 border-slate-800 opacity-60'}`}
             >
                 <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-900/20 flex items-center justify-center text-amber-600"><Rocket size={18}/></div>
+                    <div className="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-600"><Rocket size={18}/></div>
                     <div>
-                        <p className="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-tight">Criar com o time Localizei</p>
+                        <p className={`text-sm font-bold uppercase tracking-tight ${artChoice === 'pro' ? 'text-amber-900 dark:text-amber-100' : 'text-slate-400'}`}>Criar com o time Localizei</p>
                         <div className="flex items-center gap-2 mt-0.5">
-                            <span className="text-[9px] text-gray-400 line-through">R$ 169,90</span>
+                            <span className="text-[9px] text-slate-500 line-through">R$ 169,90</span>
                             <span className="text-xs font-black text-amber-600">R$ 89,90</span>
                         </div>
                     </div>
@@ -277,27 +290,27 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
       </div>
 
       {/* 7. RESUMO DO PEDIDO (FIXO) */}
-      <footer className="fixed bottom-0 left-0 right-0 p-6 bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl border-t border-gray-100 dark:border-gray-800 z-50 max-w-md mx-auto shadow-[0_-20px_40px_rgba(0,0,0,0.1)]">
+      <footer className="fixed bottom-0 left-0 right-0 p-6 bg-slate-900/95 backdrop-blur-xl border-t border-white/10 z-50 max-w-md mx-auto shadow-[0_-20px_40px_rgba(0,0,0,0.5)]">
         <div className="flex justify-between items-end mb-6">
             <div className="space-y-1">
-                <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Resumo do Pedido</p>
-                <div className="flex flex-wrap gap-x-2 text-[11px] font-bold text-gray-700 dark:text-gray-300">
-                    <span>{selectedPlacement ? PLACEMENT_OPTIONS.find(p => p.id === selectedPlacement)?.label : 'Onde?'}</span>
-                    <span className="text-gray-300">•</span>
-                    <span>{selectedPeriods.length > 0 ? `${selectedPeriods.length} período(s)` : 'Quanto tempo?'}</span>
+                <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Resumo do Pedido</p>
+                <div className="flex flex-wrap gap-x-2 text-[11px] font-bold text-slate-200">
+                    <span>{selectedPlacement ? PLACEMENT_OPTIONS.find(p => p.id === selectedPlacement)?.label : 'Selecione local'}</span>
+                    <span className="text-slate-600">•</span>
+                    <span>{selectedPeriods.length > 0 ? `${selectedPeriods.length} período(s)` : 'Aguardando'}</span>
                 </div>
-                <p className="text-[11px] font-bold text-gray-500">{selectedHoods.length} bairro(s) escolhido(s)</p>
+                <p className="text-[11px] font-bold text-slate-500">{selectedHoods.length} bairro(s) escolhido(s)</p>
             </div>
             <div className="text-right">
                 <p className="text-[9px] font-black text-[#1E5BFF] uppercase tracking-widest mb-1">Total a Investir</p>
-                <p className="text-2xl font-black text-gray-900 dark:text-white tracking-tighter">R$ {calculateTotal.toFixed(2).replace('.', ',')}</p>
+                <p className="text-2xl font-black text-white tracking-tighter">R$ {calculateTotal.toFixed(2).replace('.', ',')}</p>
             </div>
         </div>
 
         <button 
           onClick={() => artChoice === 'pro' ? setView('pro_chat') : alert('Iniciando Checkout...')}
           disabled={!selectedPlacement || selectedPeriods.length === 0 || selectedHoods.length === 0 || !artChoice}
-          className="w-full bg-[#1E5BFF] hover:bg-[#1749CC] text-white font-black py-5 rounded-[2rem] shadow-xl shadow-blue-500/20 active:scale-[0.98] transition-all flex items-center justify-center gap-3 disabled:opacity-50 disabled:grayscale uppercase tracking-widest text-xs"
+          className="w-full bg-[#1E5BFF] hover:bg-[#1749CC] text-white font-black py-5 rounded-[2rem] shadow-xl shadow-blue-500/20 active:scale-[0.98] transition-all flex items-center justify-center gap-3 disabled:opacity-30 disabled:grayscale uppercase tracking-widest text-xs"
         >
           {artChoice === 'pro' ? 'Contratar Banner e Falar com Designer' : 'Contratar Anúncio'}
           <ArrowRight size={16} strokeWidth={3} />
