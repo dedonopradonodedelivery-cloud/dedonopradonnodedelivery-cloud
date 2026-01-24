@@ -18,6 +18,8 @@ import { UserCouponsHistoryView } from '@/components/UserCouponsHistoryView';
 import { JobsView } from '@/components/JobsView';
 import { MerchantPerformanceDashboard } from '@/components/MerchantPerformanceDashboard';
 import { WeeklyRewardPage } from '@/components/WeeklyRewardPage';
+import { MerchantWeeklyReward } from '@/components/MerchantWeeklyReward';
+import { MerchantJobsModule } from '@/components/MerchantJobsModule';
 import { NeighborhoodPostsView } from '@/components/NeighborhoodPostsView';
 import { MapPin, ShieldCheck, X, Palette } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
@@ -65,7 +67,6 @@ const App: React.FC = () => {
   const { user, userRole, loading: isAuthInitialLoading, signOut } = useAuth();
   const { theme } = useTheme();
   const isAuthReturn = window.location.hash.includes('access_token') || window.location.search.includes('code=');
-  // Fixed typo: changed 'iAuthReturn' to 'isAuthReturn'
   const [splashStage, setSplashStage] = useState(splashWasShownInSession || isAuthReturn ? 4 : 0);
   const [viewMode, setViewMode] = useState<RoleMode>(() => (localStorage.getItem('admin_view_mode') as RoleMode) || 'Usuário');
   const [isRoleSwitcherOpen, setIsRoleSwitcherOpen] = useState(false);
@@ -91,7 +92,7 @@ const App: React.FC = () => {
   };
   
   useEffect(() => {
-    const restrictedTabs = ['store_area', 'admin_panel', 'edit_profile', 'store_claim', 'merchant_reviews', 'designer_panel', 'user_coupons'];
+    const restrictedTabs = ['store_area', 'admin_panel', 'edit_profile', 'store_claim', 'merchant_reviews', 'designer_panel', 'user_coupons', 'merchant_weekly_reward', 'merchant_jobs'];
     
     if (restrictedTabs.includes(activeTab)) {
       if (!isAuthInitialLoading && !user) {
@@ -118,9 +119,9 @@ const App: React.FC = () => {
   }, []);
 
   const handleSelectStore = (store: Store) => { setSelectedStore(store); setActiveTab('store_detail'); };
-  const headerExclusionList = ['store_area', 'editorial_list', 'store_profile', 'category_detail', 'store_detail', 'profile', 'patrocinador_master', 'service_subcategories', 'service_specialties', 'store_ads_module', 'store_ads_quick', 'merchant_performance', 'about', 'support', 'favorites', 'community_feed', 'admin_panel', 'admin_banner_moderation', 'store_claim', 'merchant_reviews', 'jpa_connect_sales', 'designer_panel', 'user_coupons', 'user_coupons_history', 'weekly_reward_page', 'neighborhood_posts'];
+  const headerExclusionList = ['store_area', 'editorial_list', 'store_profile', 'category_detail', 'store_detail', 'profile', 'patrocinador_master', 'service_subcategories', 'service_specialties', 'store_ads_module', 'store_ads_quick', 'merchant_performance', 'about', 'support', 'favorites', 'community_feed', 'admin_panel', 'admin_banner_moderation', 'store_claim', 'merchant_reviews', 'jpa_connect_sales', 'designer_panel', 'user_coupons', 'user_coupons_history', 'weekly_reward_page', 'neighborhood_posts', 'merchant_weekly_reward', 'merchant_jobs'];
   
-  const hideBottomNav = ['admin_panel', 'weekly_reward_page', 'neighborhood_posts'].includes(activeTab);
+  const hideBottomNav = ['admin_panel', 'weekly_reward_page', 'neighborhood_posts', 'merchant_weekly_reward', 'merchant_jobs'].includes(activeTab);
 
   const RoleSwitcherModal: React.FC = () => {
     if (!isRoleSwitcherOpen) return null;
@@ -184,6 +185,9 @@ const App: React.FC = () => {
                     {activeTab === 'user_coupons_history' && <UserCouponsHistoryView onBack={() => setActiveTab('user_coupons')} />}
                     {activeTab === 'weekly_reward_page' && <WeeklyRewardPage onBack={() => setActiveTab('home')} onNavigate={setActiveTab} />}
                     {activeTab === 'neighborhood_posts' && <NeighborhoodPostsView onBack={() => setActiveTab('home')} onStoreClick={handleSelectStore} />}
+
+                    {activeTab === 'merchant_weekly_reward' && <MerchantWeeklyReward onBack={() => setActiveTab('profile')} user={user as any} />}
+                    {activeTab === 'merchant_jobs' && <MerchantJobsModule onBack={() => setActiveTab('profile')} />}
 
                     {activeTab === 'jpa_connect_sales' && <JPAConnectSalesView onBack={() => setActiveTab('profile')} />}
                     {activeTab === 'community_feed' && <CommunityFeedView onStoreClick={handleSelectStore} user={user as any} onRequireLogin={() => setIsAuthOpen(true)} onNavigate={setActiveTab} />}

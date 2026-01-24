@@ -184,7 +184,7 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
               label="Recompensa da Semana" 
               labelBadge="Gratuito"
               description="Benefícios para engajar moradores do bairro"
-              onClick={() => onNavigate('weekly_reward_page')}
+              onClick={() => onNavigate('merchant_weekly_reward')}
               colorClass="bg-emerald-50 text-emerald-600"
             />
             <ServiceBlock 
