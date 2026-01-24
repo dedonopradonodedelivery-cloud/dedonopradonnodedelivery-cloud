@@ -16,6 +16,7 @@ import { User } from '@supabase/supabase-js';
 import { CATEGORIES } from '@/constants';
 import { useNeighborhood } from '@/contexts/NeighborhoodContext';
 import { LaunchOfferBanner } from './LaunchOfferBanner';
+import { HomeBannerCarousel } from './HomeBannerCarousel';
 
 interface HomeFeedFeedProps {
   onNavigate: (view: string) => void;
@@ -54,8 +55,33 @@ export const HomeFeed: React.FC<HomeFeedFeedProps> = ({
   return (
     <div className="flex flex-col bg-white dark:bg-gray-950 w-full max-w-md mx-auto animate-in fade-in duration-500 overflow-x-hidden pb-32">
       
+      {userRole === 'lojista' && (
+        <section className="px-4 py-4 bg-white dark:bg-gray-950">
+           <LaunchOfferBanner onClick={() => onNavigate('store_ads_module')} />
+        </section>
+      )}
+
+      {/* CATEGORIAS */}
+      <div className="w-full bg-white dark:bg-gray-950 pt-4 pb-0">
+        <div className="flex overflow-x-auto no-scrollbar px-4 pb-4 snap-x">
+          <div className="grid grid-flow-col grid-rows-2 gap-x-3 gap-y-3">
+            {CATEGORIES.map((cat) => (
+              <button key={cat.id} onClick={() => onSelectCategory(cat)} className="flex flex-col items-center group active:scale-95 transition-all">
+                <div className={`w-[78px] h-[78px] rounded-[22px] shadow-lg flex flex-col items-center justify-between p-2 ${cat.color} border border-white/20`}>
+                  <div className="flex-1 flex items-center justify-center w-full">{React.cloneElement(cat.icon as any, { className: "w-7 h-7 text-white drop-shadow-md", strokeWidth: 2.5 })}</div>
+                  <div className="w-full bg-black/10 backdrop-blur-[2px] py-1 rounded-b-[20px] -mx-2 -mb-2"><span className="block w-full text-[9px] font-black text-white text-center uppercase tracking-tight">{cat.name}</span></div>
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* CARROSSEL DE BANNERS RESTAURADO */}
+      <HomeBannerCarousel onStoreClick={onStoreClick} />
+
       {/* 1. SISTEMA DE RECOMPENSA (BLOCO FIXO OBRIGATÓRIO) */}
-      <section className="px-5 pt-6 mb-4">
+      <section className="px-5 pt-2 mb-4">
         <div className="bg-gradient-to-br from-indigo-600 to-blue-700 rounded-[2.5rem] p-7 text-white shadow-xl shadow-blue-500/20 relative overflow-hidden">
           {/* Animação de Confete sutil no fundo quando ativo */}
           {isAnimating && (
@@ -115,28 +141,6 @@ export const HomeFeed: React.FC<HomeFeedFeedProps> = ({
           </div>
         </div>
       </section>
-
-      {userRole === 'lojista' && (
-        <section className="px-4 py-4 bg-white dark:bg-gray-950">
-           <LaunchOfferBanner onClick={() => onNavigate('store_ads_module')} />
-        </section>
-      )}
-
-      {/* CATEGORIAS */}
-      <div className="w-full bg-white dark:bg-gray-950 pt-2 pb-0">
-        <div className="flex overflow-x-auto no-scrollbar px-4 pb-4 snap-x">
-          <div className="grid grid-flow-col grid-rows-2 gap-x-3 gap-y-3">
-            {CATEGORIES.map((cat) => (
-              <button key={cat.id} onClick={() => onSelectCategory(cat)} className="flex flex-col items-center group active:scale-95 transition-all">
-                <div className={`w-[78px] h-[78px] rounded-[22px] shadow-lg flex flex-col items-center justify-between p-2 ${cat.color} border border-white/20`}>
-                  <div className="flex-1 flex items-center justify-center w-full">{React.cloneElement(cat.icon as any, { className: "w-7 h-7 text-white drop-shadow-md", strokeWidth: 2.5 })}</div>
-                  <div className="w-full bg-black/10 backdrop-blur-[2px] py-1 rounded-b-[20px] -mx-2 -mb-2"><span className="block w-full text-[9px] font-black text-white text-center uppercase tracking-tight">{cat.name}</span></div>
-                </div>
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
 
       {/* LISTA EXPLORAR */}
       <div className="w-full bg-white dark:bg-gray-900 pt-1 pb-10">
