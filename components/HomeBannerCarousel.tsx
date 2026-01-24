@@ -1,5 +1,5 @@
 
-import React, { useState, useMemo, useEffect, useRef } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Store } from '../types';
 import { STORES } from '../constants';
 import { useNeighborhood } from '../contexts/NeighborhoodContext';
@@ -38,160 +38,82 @@ const MOCK_BANNERS: BannerData[] = [
     neighborhood: 'Freguesia'
   },
   {
-    id: 'b-taq-1',
-    storeId: 'f-2',
-    title: 'Studio Hair Vip',
-    subtitle: 'Nova coleção de cores para o verão.',
-    cta: 'Agendar',
-    image: 'https://images.unsplash.com/photo-1562322140-8baeececf3df?q=80&w=600&auto=format&fit=crop',
-    bgColor: 'bg-purple-600',
-    neighborhood: 'Taquara'
-  },
-  {
-    id: 'b-taq-2',
-    storeId: 'f-8',
-    title: 'Academia FitBairro',
-    subtitle: 'Matrícula grátis para novos alunos.',
-    cta: 'Conhecer',
-    image: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=600&auto=format&fit=crop',
+    id: 'b-fre-3',
+    storeId: 'f-4',
+    title: 'Chaveiro Rápido JPA',
+    subtitle: 'Atendimento rápido no bairro',
+    cta: 'Falar agora',
+    image: 'https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?q=80&w=600&auto=format&fit=crop',
+    // Added missing bgColor and neighborhood properties to fix type errors
     bgColor: 'bg-blue-600',
-    neighborhood: 'Taquara'
-  },
-  {
-    id: 'b-pec-1',
-    storeId: 'f-3',
-    title: 'Pet Shop Alegria',
-    subtitle: 'Banho e Tosa com 20% de desconto.',
-    cta: 'Ver preços',
-    image: 'https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?q=80&w=600&auto=format&fit=crop',
-    bgColor: 'bg-emerald-600',
-    neighborhood: 'Pechincha'
+    neighborhood: 'Freguesia'
   }
 ];
 
-interface HomeBannerCarouselProps {
-  onStoreClick: (store: Store) => void;
-}
-
-export const HomeBannerCarousel: React.FC<HomeBannerCarouselProps> = ({ onStoreClick }) => {
+// Added named export to fix "Module has no exported member" error in HomeFeed.tsx
+export const HomeBannerCarousel: React.FC<{ onStoreClick: (store: Store) => void }> = ({ onStoreClick }) => {
+  const [currentIndex, setCurrentIndex] = useState(0);
   const { currentNeighborhood } = useNeighborhood();
-  const [activeIndex, setActiveIndex] = useState(0);
-  const [progress, setProgress] = useState(0);
-  const touchStart = useRef<number | null>(null);
 
-  const filteredBanners = useMemo(() => {
-    if (currentNeighborhood === "Jacarepaguá (todos)") {
-      return MOCK_BANNERS;
-    }
-    return MOCK_BANNERS.filter(b => b.neighborhood === currentNeighborhood);
+  const activeBanners = useMemo(() => {
+    return MOCK_BANNERS.filter(b => b.neighborhood === currentNeighborhood || currentNeighborhood === 'Jacarepaguá (todos)');
   }, [currentNeighborhood]);
 
-  // Autoplay and Progress logic
   useEffect(() => {
-    if (filteredBanners.length <= 1) return;
+    if (activeBanners.length <= 1) return;
+    const interval = setInterval(() => {
+      setCurrentIndex((prev) => (prev + 1) % activeBanners.length);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [activeBanners.length]);
 
-    const duration = 4000; // 4 seconds per banner
-    const interval = 100; // tick every 100ms
-    const step = (interval / duration) * 100;
+  if (activeBanners.length === 0) return null;
 
-    const timer = setInterval(() => {
-      setProgress((prev) => {
-        if (prev >= 100) {
-          setActiveIndex((current) => (current + 1) % filteredBanners.length);
-          return 0;
-        }
-        return prev + step;
-      });
-    }, interval);
+  const currentBanner = activeBanners[currentIndex];
 
-    return () => clearInterval(timer);
-  }, [activeIndex, filteredBanners.length]);
-
-  // Handle manual swipe within the fixed space
-  const handleTouchStart = (e: React.TouchEvent) => {
-    touchStart.current = e.touches[0].clientX;
-  };
-
-  const handleTouchEnd = (e: React.TouchEvent) => {
-    if (touchStart.current === null) return;
-    const touchEnd = e.changedTouches[0].clientX;
-    const diff = touchStart.current - touchEnd;
-
-    if (Math.abs(diff) > 50) { // Swipe threshold
-      if (diff > 0) {
-        // Next
-        setActiveIndex((current) => (current + 1) % filteredBanners.length);
-      } else {
-        // Prev
-        setActiveIndex((current) => (current - 1 + filteredBanners.length) % filteredBanners.length);
-      }
-      setProgress(0);
-    }
-    touchStart.current = null;
-  };
-
-  const handleBannerClick = (storeId: string) => {
-    const store = STORES.find(s => s.id === storeId);
+  const handleBannerClick = () => {
+    const store = STORES.find(s => s.id === currentBanner.storeId);
     if (store) onStoreClick(store);
   };
 
-  if (filteredBanners.length === 0) return null;
-
-  const currentBanner = filteredBanners[activeIndex];
-
   return (
-    <section className="w-full py-4 px-5">
+    <div className="px-5 mb-6">
       <div 
-        onClick={() => handleBannerClick(currentBanner.storeId)}
-        onTouchStart={handleTouchStart}
-        onTouchEnd={handleTouchEnd}
-        className={`relative w-full aspect-[16/8] rounded-[2.2rem] overflow-hidden shadow-xl active:scale-[0.98] transition-all cursor-pointer ${currentBanner.bgColor}`}
+        onClick={handleBannerClick}
+        className={`relative aspect-[16/8] w-full rounded-[2.5rem] overflow-hidden shadow-2xl cursor-pointer group transition-all duration-500 ${currentBanner.bgColor}`}
       >
-        {/* Banner Content (Animate key change for smooth transition) */}
-        <div key={currentBanner.id} className="absolute inset-0 animate-in fade-in slide-in-from-right-4 duration-500">
-            {/* Image Layer */}
-            <img 
-                src={currentBanner.image} 
-                alt="" 
-                className="absolute inset-0 w-full h-full object-cover opacity-40 mix-blend-overlay" 
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
-            
-            {/* Content Layer */}
-            <div className="absolute inset-0 p-7 flex flex-col justify-end">
-                <div className="bg-white/20 backdrop-blur-md w-fit px-3 py-1 rounded-lg border border-white/20 mb-2">
-                    <span className="text-[10px] font-black text-white uppercase tracking-widest">{currentBanner.title}</span>
-                </div>
-                <h3 className="text-xl font-black text-white leading-tight mb-4 drop-shadow-md max-w-[85%]">
-                    {currentBanner.subtitle}
-                </h3>
-                <div className="flex items-center gap-2 bg-white text-gray-900 w-fit px-5 py-2.5 rounded-xl shadow-lg mb-2">
-                    <span className="text-[10px] font-black uppercase tracking-widest">{currentBanner.cta}</span>
-                    <ChevronRight size={14} strokeWidth={3} />
-                </div>
-            </div>
+        <img 
+          src={currentBanner.image} 
+          alt={currentBanner.title} 
+          className="absolute inset-0 w-full h-full object-cover mix-blend-overlay opacity-60 group-hover:scale-105 transition-transform duration-700" 
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
+        
+        <div className="relative h-full flex flex-col justify-center p-8 text-white">
+          <h2 className="text-2xl font-black uppercase tracking-tighter leading-none mb-2 drop-shadow-md">
+            {currentBanner.title}
+          </h2>
+          <p className="text-xs font-bold text-white/90 max-w-[180px] leading-tight mb-6">
+            {currentBanner.subtitle}
+          </p>
+          <div className="bg-white/20 backdrop-blur-md border border-white/30 rounded-full px-5 py-2 w-fit flex items-center gap-2 group-hover:bg-white/30 transition-all">
+            <span className="text-[9px] font-black uppercase tracking-widest">{currentBanner.cta}</span>
+            <ChevronRight size={14} strokeWidth={3} />
+          </div>
         </div>
 
-        {/* INTEGRATED PROGRESS BAR (Stories Style) */}
-        {filteredBanners.length > 1 && (
-            <div className="absolute bottom-4 left-7 right-7 flex gap-1.5 z-20">
-                {filteredBanners.map((_, idx) => (
-                    <div 
-                        key={idx} 
-                        className="h-1 flex-1 bg-white/20 rounded-full overflow-hidden"
-                    >
-                        <div 
-                            className={`h-full bg-white transition-all ease-linear ${idx === activeIndex ? '' : 'hidden'}`}
-                            style={{ width: idx === activeIndex ? `${progress}%` : '0%' }}
-                        />
-                        <div 
-                            className={`h-full bg-white/60 ${idx < activeIndex ? 'block' : 'hidden'}`}
-                        />
-                    </div>
-                ))}
-            </div>
+        {/* Indicators */}
+        {activeBanners.length > 1 && (
+          <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-1.5 z-10">
+            {activeBanners.map((_, idx) => (
+              <div 
+                key={idx} 
+                className={`h-1 rounded-full transition-all duration-300 ${idx === currentIndex ? 'w-4 bg-white' : 'w-1 bg-white/40'}`} 
+              />
+            ))}
+          </div>
         )}
       </div>
-    </section>
+    </div>
   );
 };
