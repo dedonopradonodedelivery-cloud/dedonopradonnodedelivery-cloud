@@ -57,7 +57,7 @@ import { StoreBannerEditor } from './StoreBannerEditor';
 // FIX: Imported BannerDesign, EditorData, StoreAdsModuleProps from types
 import { BannerDesign, EditorData, StoreAdsModuleProps } from '../types'; 
 // FIX: Imported constants from the consolidated constants.tsx
-import { NEIGHBORHOODS, MOCK_OCCUPANCY, DISPLAY_MODES, FORBIDDEN_WORDS, CHAR_LIMITS, MIN_CONTRAST_RATIO, hexToRgb, getLuminance, getContrastRatio } from '../constants'; 
+import { NEIGHBORHOODS, MOCK_OCCUPANCY, DISPLAY_MODES, FORBIDDEN_WORDS, CHAR_LIMITS, MIN_CONTRAST_RATIO, hexToRgb, getLuminance, getContrastRatio } from '../../constants'; 
 
 
 // --- CONFIGURAÇÕES DO CRIADOR RÁPIDO ---
@@ -552,7 +552,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
     const originalBasePrice = selectedMode.originalPrice;
     
     const current = period?.days === 90 ? (basePrice * 3 * hoodsMult) + artExtra : (basePrice * hoodsMult) + artExtra;
-    const original = period?.days === 90 ? (originalBasePrice * 3 * hoodsMult) + artExtra : (originalBasePrice * hoodsMult) + artExtra;
+    const original = period?.days === 90 ? (originalBasePrice * 3 * hoodsMult) + artExtra : (originalBasePrice * 3 * hoodsMult) + artExtra;
     
     return {
       current,
@@ -568,13 +568,13 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
     const errors: string[] = [];
     const containsForbidden = (text: string) => FORBIDDEN_WORDS.some(word => text.toLowerCase().includes(word));
 
-    if (view === 'creator') {
+    if (diyFlowStep === 'upload' || diyFlowStep === 'selection') { // For template-based or direct upload
         const { headline = '', subheadline = '' } = formData;
         if (!headline.trim()) errors.push('A "Chamada Principal" é obrigatória.');
         if (headline.length > CHAR_LIMITS.template_headline) errors.push(`A "Chamada Principal" deve ter no máximo ${CHAR_LIMITS.template_headline} caracteres.`);
         if (subheadline.length > CHAR_LIMITS.template_subheadline) errors.push(`O "Nome do Produto" deve ter no máximo ${CHAR_LIMITS.template_subheadline} caracteres.`);
         if (containsForbidden(headline) || containsForbidden(subheadline)) errors.push('Seu banner contém palavras não permitidas.');
-    } else if (view === 'editor') {
+    } else if (diyFlowStep === 'editor' && isEditingArt) { // For custom editor
         const { title = '', subtitle = '', palette } = editorData;
         if (!title.trim()) errors.push('O "Título" do banner é obrigatório.');
         if (title.length > CHAR_LIMITS.editor_title) errors.push(`O "Título" deve ter no máximo ${CHAR_LIMITS.editor_title} caracteres.`);
@@ -590,7 +590,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
         }
     }
     return errors;
-  }, [view, formData, editorData]);
+  }, [diyFlowStep, isEditingArt, formData, editorData]);
 
   const handlePublish = async () => {
     const validation = validateBanner();
@@ -601,8 +601,10 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
     
     setIsSubmitting(true);
 
-    const isCustom = view === 'editor';
-    const config = isCustom ? { type: 'custom_editor', ...editorData } : { type: 'template', ...formData, template_id: selectedTemplate.id, cta: selectedCta };
+    const isCustom = diyFlowStep === 'editor'; // Determine if it's a custom editor banner
+    const config = isCustom ? { type: 'custom_editor', ...editorData } : { type: 'template', ...formData, template_id: selectedTemplate?.id, cta: selectedCta }; // Fallback for template_id
+
+    // Determine the target based on categoryName prop or default to 'home'
     const bannerTarget = categoryName ? `category:${categoryName.toLowerCase()}` : 'home';
 
     try {
@@ -615,7 +617,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
                 target: bannerTarget,
                 config: config,
                 is_active: true,
-                expires_at: null,
+                expires_at: null, // Set expires_at based on selectedPeriods later
             })
             .select()
             .single();

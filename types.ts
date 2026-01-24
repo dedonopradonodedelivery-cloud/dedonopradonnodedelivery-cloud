@@ -1,4 +1,5 @@
 
+
 import React from 'react';
 
 export type ThemeMode = 'light' | 'dark' | 'auto';
@@ -44,14 +45,8 @@ export interface Store {
   verified?: boolean;
   reviewsCount?: number;
   isOpenNow?: boolean;
-  // Add missing properties used across components
-  cashback_percent?: number; 
-  cashback_active?: boolean;
-  cashback_validity_days?: number;
   store_manual_code?: string;
   secure_id?: string;
-  onboarding_cashback_completed?: boolean;
-  onboarding_cashback_completed_at?: string;
   neighborhood?: string;
   isSponsored?: boolean;
   recentComments?: string[];
@@ -96,6 +91,13 @@ export interface Store {
   business_hours?: Record<string, BusinessHour>;
   payment_methods?: string[];
   payment_methods_others?: string;
+
+  // FIX: Added new cashback-related properties
+  cashback_percent?: number; 
+  cashback_active?: boolean;
+  cashback_validity_days?: number;
+  onboarding_cashback_completed?: boolean;
+  onboarding_cashback_completed_at?: string;
 
   // --- PROPRIEDADE E REIVINDICAÇÃO ---
   claimed?: boolean;
@@ -216,9 +218,10 @@ export interface CommunitySuggestion {
   voterIds: string[];
 }
 
-export interface TaxonomySuggestion {
+// FIX: Moved TaxonomyType from constants.tsx to types.ts
+export type TaxonomySuggestion = {
   id: string;
-  type: 'category' | 'subcategory' | 'specialty';
+  type: TaxonomyType;
   name: string;
   parentName?: string;
   justification?: string;
@@ -308,6 +311,7 @@ export interface EditorData {
 }
 
 // --- Backend DB Interfaces (for Supabase interaction) ---
+// FIX: Moved Db* interfaces from src/backend/types.ts to here
 export type TransactionStatus = 'pending' | 'approved' | 'rejected';
 export type SessionType = 'qr' | 'pin';
 export type MovementType = 'credit' | 'debit';
@@ -346,50 +350,11 @@ export interface DbMerchant {
   telefone_fixo_publico?: string;
   description?: string;
   // Other fiscal and business data...
-}
-
-export interface StoreCredit {
-  id: string;
-  user_id: string;
-  store_id: string;
-  store_name?: string;
-  store_logo?: string;
-  balance_cents: number; 
-  expiring_soon_cents?: number; 
-  updated_at: string;
-}
-
-export interface CashbackLedgerEntry {
-  id: string;
-  user_id: string;
-  store_id: string;
-  transaction_id: string; 
-  amount_cents: number;
-  type: 'credit' | 'debit'; 
-  status: 'active' | 'used' | 'expired';
-  created_at: string;
-  expires_at?: string; 
-}
-
-export interface CashbackTransaction {
-  id: string;
-  user_id: string;
-  user_name?: string;
-  store_id: string;
-  merchant_id: string;
-  amount_cents: number; 
-  purchase_total_cents?: number; 
-  type: 'earn' | 'use';
-  status: 'pending' | 'approved' | 'rejected' | 'expired';
-  created_at: string;
-  approved_at?: string;
-  customer_id?: string;
-  customer_name?: string;
-  total_amount_cents?: number;
-  cashback_used_cents?: number;
-  cashback_to_earn_cents?: number;
-  amount_to_pay_now_cents?: number;
-  rejected_at?: string;
+  cashback_percent?: number; // numeric(5,2)
+  cashback_active?: boolean;
+  cashback_validity_days?: number;
+  onboarding_cashback_completed?: boolean;
+  onboarding_cashback_completed_at?: string;
 }
 
 export interface DbMerchantSession {
@@ -401,3 +366,31 @@ export interface DbMerchantSession {
   is_used: boolean;
   created_at: string;
 }
+
+export interface DbCashbackTransaction {
+  id: string; // uuid
+  user_id: string;
+  merchant_id: string;
+  session_id?: string;
+  purchase_value: number;
+  amount_from_balance: number;
+  amount_to_pay: number;
+  cashback_value: number;
+  status: TransactionStatus;
+  created_at: string;
+  approved_at?: string;
+  rejected_at?: string;
+}
+
+export interface DbWalletMovement {
+  id: string; // uuid
+  user_id: string;
+  transaction_id?: string;
+  type: MovementType;
+  amount: number;
+  description: string;
+  created_at: string;
+}
+
+// Added to fix import error in StoreProfileEdit.tsx
+export type TaxonomyType = 'category' | 'subcategory' | 'specialty';

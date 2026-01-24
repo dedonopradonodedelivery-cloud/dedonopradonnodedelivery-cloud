@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { 
   ChevronRight, 
@@ -30,7 +29,6 @@ import {
   Wrench,
   Truck,
   CreditCard,
-  Coins,
   Award,
   Smile,
   Bell,
@@ -41,11 +39,12 @@ import {
   Lock, // Adicionado Lock
   Info,
   Shirt, // Adicionado para Banner de Moda
-  CarFront // Adicionado para Banner de Serviços Automotivos
+  CarFront, // Adicionado para Banner de Serviços Automotivos
+  // FIX: Added missing Rocket import
+  Rocket
 } from 'lucide-react';
 import { LojasEServicosList } from '@/components/LojasEServicosList';
 import { User } from '@supabase/supabase-js';
-// FIX: Changed FORBIDDEN_POST_WORDS to FORBIDDEN_WORDS
 import { CATEGORIES, MOCK_BAIRRO_POSTS, FORBIDDEN_WORDS, quickFilters } from '@/constants';
 import { useNeighborhood } from '@/contexts/NeighborhoodContext';
 import { supabase } from '@/lib/supabaseClient';
@@ -65,8 +64,8 @@ interface BannerItem {
   isUserBanner?: boolean;
   config: BannerDesign; // Ensures 'imageUrl' is a known property in the config object
   profiles?: { // Add profiles directly here
-    store_name: string;
-    logo_url: string;
+    full_name: string;
+    avatar_url: string;
   } | null; // Allow profiles to be null if not found
 }
 
@@ -74,8 +73,8 @@ interface BannerItem {
 
 const ICON_COMPONENTS: Record<string, React.ElementType> = {
   Flame, Zap, Percent, Tag, Gift, Utensils, Pizza, Coffee, Beef, IceCream,
-  ShoppingCart, Store: StoreIcon, Package, Wrench, Truck, CreditCard, Coins, Star,
-  Award, MapPin, Smile, Bell, Clock, Heart, Sparkles, Rocket: Sparkles, Megaphone, Crown, ShieldCheck,
+  ShoppingCart, Store: StoreIcon, Package, Wrench, Truck, CreditCard, Star,
+  Award, MapPin, Smile, Bell, Clock, Heart, Sparkles, Rocket, Megaphone, Crown, ShieldCheck,
   Shirt, CarFront // Adicionado Shirt e CarFront
 };
 
@@ -104,7 +103,7 @@ const BannerViewer: React.FC<{
     const { 
       title, subtitle, titleFont, titleSize, subtitleFont, subtitleSize, 
       bgColor, textColor, align, animation, iconName, iconPos, iconSize, 
-      logoDisplay, iconColorMode, iconCustomColor, imageUrl
+      logoDisplay, iconColorMode, iconCustomColor 
     } = config;
 
     const renderIcon = (name: string | null, size: 'sm' | 'md' | 'lg', colorMode: string) => {
@@ -127,13 +126,15 @@ const BannerViewer: React.FC<{
         } ${animation === 'pulse' ? 'animate-pulse' : animation === 'float' ? 'animate-float-slow' : ''}`}
         style={{
           backgroundColor: bgColor,
-          backgroundImage: imageUrl ? `url(${imageUrl})` : undefined,
-          backgroundSize: imageUrl ? 'cover' : undefined,
-          backgroundPosition: imageUrl ? 'center' : undefined,
+          // FIX: Access imageUrl from config object
+          backgroundImage: config.imageUrl ? `url(${config.imageUrl})` : undefined,
+          backgroundSize: config.imageUrl ? 'cover' : undefined,
+          backgroundPosition: config.imageUrl ? 'center' : undefined,
         }}
       >
         {/* Overlay para escurecer imagem de fundo se houver */}
-        {imageUrl && <div className="absolute inset-0 bg-black/40"></div>}
+        {/* FIX: Access imageUrl from config object */}
+        {config.imageUrl && <div className="absolute inset-0 bg-black/40"></div>}
 
         <div className={`relative z-10 transition-all duration-500 flex ${iconPos === 'top' ? 'flex-col items-inherit' : iconPos === 'right' ? 'flex-row-reverse items-center gap-4' : 'flex-row items-center gap-4'} ${animation === 'slide' ? 'animate-in slide-in-from-left-8' : ''}`}>
           {iconName && (
@@ -305,7 +306,7 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void; onStoreClick?: (
     const fetchHomeBanner = async () => {
         if (!supabase) return;
         try {
-            // FIX: Ensure to select 'profiles' to get store_name and logo_url
+            // FIX: Ensure to select 'profiles' to get full_name and avatar_url
             // Supabase returns related objects as arrays, so we expect data.profiles to be Array<{...}>
             const { data, error } = await supabase
                 .from('published_banners')
@@ -324,7 +325,7 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void; onStoreClick?: (
             if (data) {
                 // Extract the first profile object if available, otherwise null
                 const profileData = data.profiles && Array.isArray(data.profiles) && data.profiles.length > 0
-                    ? { store_name: (data.profiles[0] as any).full_name, logo_url: (data.profiles[0] as any).avatar_url }
+                    ? data.profiles[0] as { full_name: string; avatar_url: string; }
                     : null;
 
                 setUserBanner({
@@ -383,10 +384,10 @@ const HomeCarousel: React.FC<{ onNavigate: (v: string) => void; onStoreClick?: (
   };
   
   const findStore = (slug?: string) => stores?.find(s => s.id === slug);
-  // FIX: Prioritize current.profiles for store_name and logo_url
+  // FIX: Prioritize current.profiles for full_name and avatar_url
   const storeForBanner = current.storeSlug ? findStore(current.storeSlug) : undefined;
-  const storeNameForViewer = current.profiles?.store_name || storeForBanner?.name || 'Localizei JPA'; 
-  const storeLogoForViewer = current.profiles?.logo_url || storeForBanner?.logoUrl || getStoreLogo(storeNameForViewer.length); 
+  const storeNameForViewer = current.profiles?.full_name || storeForBanner?.name || 'Localizei JPA'; 
+  const storeLogoForViewer = current.profiles?.avatar_url || storeForBanner?.logoUrl || getStoreLogo(storeNameForViewer.length); 
 
   return (
     <div className="px-4 py-2">

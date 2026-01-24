@@ -1,5 +1,7 @@
 
+
 import { useEffect, useState } from 'react';
+// FIX: Corrected supabase import path from ../services/supabaseClient to ../lib/supabaseClient
 import { supabase } from '../lib/supabaseClient';
 import { Store, AdType } from '../types';
 
@@ -15,7 +17,8 @@ export function useStores(): UseStoresResult {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    async function fetchStores() {
+    // FIX: Explicitly set return type of fetchStores to Promise<void>
+    async function fetchStores(): Promise<void> {
       if (!supabase) {
         setLoading(false);
         return;
@@ -30,25 +33,4 @@ export function useStores(): UseStoresResult {
           name: row.nome,
           category: row.categoria ?? 'Outros',
           description: row.descricao ?? row.endereco ?? '',
-          image: row.image_url ?? 'https://via.placeholder.com/300x300?text=Localizei',
-          rating: row.rating ?? 0,
-          reviewsCount: row.total_reviews ?? 0,
-          distance: 'Freguesia • RJ',
-          adType: (row.ad_type as AdType) ?? AdType.ORGANIC,
-          subcategory: row.subcategoria ?? '',
-          address: row.endereco,
-          phone: row.telefone,
-          hours: row.horario_funcionamento,
-        }));
-        setStores(mapped);
-      } catch (e: any) {
-        setError(e?.message ?? 'Erro desconhecido');
-      } finally {
-        setLoading(false);
-      }
-    }
-    fetchStores();
-  }, []);
-
-  return { stores, loading, error };
-}
+          image: row.image_url

@@ -57,7 +57,11 @@ export const MenuView: React.FC<MenuViewProps> = ({
 
   const loadPreferences = async () => {
     try {
-      const { data } = await supabase.from('profiles').select('jobsAlertsEnabled, jobCategories').eq('id', user?.id).single();
+      const { data } = await supabase
+        .from('profiles')
+        .select('jobsAlertsEnabled, jobCategories')
+        .eq('id', user?.id)
+        .maybeSingle();
       if (data) {
         setJobsAlerts(!!data.jobsAlertsEnabled);
         setSelectedCategories(data.jobCategories || []);
