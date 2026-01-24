@@ -78,7 +78,7 @@ export const HomeBannerCarousel: React.FC<{ onStoreClick: (store: Store) => void
     <div className="px-5 mb-6">
       <div 
         onClick={handleBannerClick}
-        className={`relative aspect-[16/8] w-full rounded-[2.5rem] overflow-hidden shadow-2xl cursor-pointer transition-all duration-300 active:brightness-90 active:scale-[0.99] group ${currentBanner.bgColor}`}
+        className={`relative aspect-[16/10] w-full rounded-[2.5rem] overflow-hidden shadow-2xl cursor-pointer transition-all duration-300 active:brightness-90 active:scale-[0.99] group ${currentBanner.bgColor}`}
       >
         <img 
           src={currentBanner.image} 
