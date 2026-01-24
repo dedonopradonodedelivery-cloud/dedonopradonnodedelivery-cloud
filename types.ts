@@ -221,6 +221,7 @@ export interface Classified {
   title: string;
   advertiser: string;
   category: ClassifiedCategory;
+  subCategory?: string; // Ex: CLT, Reforma, Usado, etc.
   neighborhood: string;
   description: string;
   timestamp: string;
