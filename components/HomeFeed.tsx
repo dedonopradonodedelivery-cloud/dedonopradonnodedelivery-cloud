@@ -89,55 +89,55 @@ export const HomeFeed: React.FC<HomeFeedFeedProps> = ({
 
       <HomeBannerCarousel onStoreClick={onStoreClick} />
 
-      {/* 1. SISTEMA DE RECOMPENSA (VERSÃO REFINADA) */}
-      <section className="px-5 py-2 mb-4">
-        <div className="bg-white dark:bg-gray-900 rounded-[2.2rem] p-6 border border-gray-100 dark:border-gray-800 shadow-xl shadow-blue-900/5 relative overflow-hidden group">
+      {/* 1. SISTEMA DE RECOMPENSA (VERSÃO COMPACTA) */}
+      <section className="px-5 py-1 mb-2">
+        <div className="bg-white dark:bg-gray-900 rounded-[2rem] p-4 border border-gray-100 dark:border-gray-800 shadow-xl shadow-blue-900/5 relative overflow-hidden group">
           {/* Micro-animação de fundo quando ativado */}
-          <div className={`absolute top-0 right-0 w-32 h-32 bg-blue-500/5 rounded-full blur-3xl -mr-16 -mt-16 transition-opacity duration-1000 ${isAnimating ? 'opacity-100' : 'opacity-0'}`}></div>
+          <div className={`absolute top-0 right-0 w-24 h-24 bg-blue-500/5 rounded-full blur-3xl -mr-12 -mt-12 transition-opacity duration-1000 ${isAnimating ? 'opacity-100' : 'opacity-0'}`}></div>
           
           <div className="relative z-10">
-            <div className="flex items-center justify-between mb-5">
-              <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 bg-blue-50 dark:bg-blue-900/30 rounded-2xl flex items-center justify-center text-[#1E5BFF] border border-blue-100/50 dark:border-blue-800/30 shadow-sm">
-                  <Gift className="w-5 h-5" />
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <div className="w-7 h-7 bg-blue-50 dark:bg-blue-900/30 rounded-xl flex items-center justify-center text-[#1E5BFF] border border-blue-100/50 dark:border-blue-800/30 shadow-sm">
+                  <Gift className="w-4 h-4" />
                 </div>
                 <div>
-                  <h3 className="font-black text-[10px] text-[#1E5BFF] uppercase tracking-[0.15em] leading-none mb-1">Recompensa da Semana</h3>
-                  <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest leading-none">Acesse e ganhe</p>
+                  <h3 className="font-black text-[9px] text-[#1E5BFF] uppercase tracking-[0.12em] leading-none mb-0.5">Recompensa da Semana</h3>
+                  <p className="text-[8px] font-bold text-gray-400 uppercase tracking-widest leading-none">Acesse e ganhe</p>
                 </div>
               </div>
-              <div className="bg-gray-50 dark:bg-gray-800 px-3 py-1.5 rounded-full border border-gray-100 dark:border-gray-700">
-                <span className="text-[10px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-tighter">Dia {consecutiveDays} de 5</span>
+              <div className="bg-gray-50 dark:bg-gray-800 px-2 py-1 rounded-lg border border-gray-100 dark:border-gray-700">
+                <span className="text-[8px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-tighter">Dia {consecutiveDays} de 5</span>
               </div>
             </div>
 
-            <div className="px-1 mb-6">
-              <h2 className="text-sm font-bold text-gray-800 dark:text-gray-200 leading-tight">
+            <div className="px-1 mb-3">
+              <h2 className="text-[11px] font-bold text-gray-800 dark:text-gray-200 leading-tight">
                 {consecutiveDays < 5 
                   ? "Cada dia conta para liberar seus benefícios exclusivos" 
-                  : "Parabéns! Sua recompensa está pronta para ser liberada."}
+                  : "Parabéns! Sua recompensa está pronta."}
               </h2>
             </div>
 
-            {/* Marcadores de Progresso */}
-            <div className="flex justify-between items-center mb-8 px-2">
+            {/* Marcadores de Progresso Compactos */}
+            <div className="flex justify-between items-center mb-4 px-2">
               {[1, 2, 3, 4, 5].map((day) => {
                 const isCompleted = day <= consecutiveDays;
                 const isNext = day === consecutiveDays + 1;
 
                 return (
-                  <div key={day} className="flex flex-col items-center gap-2">
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all duration-700 relative ${
+                  <div key={day} className="flex flex-col items-center gap-1">
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center border-2 transition-all duration-700 relative ${
                       isCompleted 
-                        ? 'bg-blue-500 border-blue-500 text-white shadow-lg shadow-blue-500/20 scale-105' 
+                        ? 'bg-blue-500 border-blue-500 text-white shadow-md shadow-blue-500/10 scale-105' 
                         : isNext
                           ? 'bg-white dark:bg-gray-800 border-blue-200 dark:border-blue-900 border-dashed animate-pulse'
                           : 'bg-gray-50 dark:bg-gray-800 border-gray-100 dark:border-gray-700 text-gray-300 dark:text-gray-600'
                     }`}>
                       {isCompleted ? (
-                        <CheckCircle2 size={18} strokeWidth={3} />
+                        <CheckCircle2 size={14} strokeWidth={3} />
                       ) : (
-                        <span className="text-[9px] font-black">{day}</span>
+                        <span className="text-[8px] font-black">{day}</span>
                       )}
                       
                       {/* Brilho sutil no dia atual */}
@@ -153,21 +153,21 @@ export const HomeFeed: React.FC<HomeFeedFeedProps> = ({
             <button 
               onClick={handleClaimReward}
               disabled={isAnimating}
-              className={`w-full py-4 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-2 shadow-lg active:scale-95 ${
+              className={`w-full py-3 rounded-xl font-black text-[9px] uppercase tracking-[0.15em] transition-all flex items-center justify-center gap-2 shadow-md active:scale-[0.98] ${
                 isAnimating 
                   ? 'bg-gray-100 text-gray-400' 
-                  : 'bg-[#1E5BFF] text-white shadow-blue-500/20 hover:brightness-110'
+                  : 'bg-[#1E5BFF] text-white shadow-blue-500/10 hover:brightness-110'
               }`}
             >
               {isAnimating ? (
                 <>
-                  <Loader2 size={14} className="animate-spin" />
+                  <Loader2 size={12} className="animate-spin" />
                   Sincronizando...
                 </>
               ) : (
                 <>
                   {consecutiveDays < 5 ? `Liberar Dia ${consecutiveDays}` : "Resgatar Recompensa"}
-                  <ArrowRight size={14} strokeWidth={3} />
+                  <ArrowRight size={12} strokeWidth={3} />
                 </>
               )}
             </button>
