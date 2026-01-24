@@ -1,17 +1,18 @@
 
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { ChevronLeft, CheckCircle, XCircle, Clock, DollarSign, User, AlertCircle, Loader2, ArrowRight } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
-import { CashbackTransaction } from '../types'; // Corrected import path
+// FIX: Renamed CashbackTransaction to DbCashbackTransaction to align with consolidated types.ts
+import { DbCashbackTransaction } from '../types';
 
 interface MerchantCashbackRequestsProps {
   merchantId: string; // ID do lojista logado
   onBack: () => void;
 }
 
-// FIX: Changed interface to extend the global CashbackTransaction type for consistency.
-interface ExtendedCashbackTransaction extends CashbackTransaction {
+// FIX: Changed interface to extend the global DbCashbackTransaction type for consistency.
+interface ExtendedCashbackTransaction extends DbCashbackTransaction {
   customer_name?: string;
 }
 
@@ -21,7 +22,54 @@ export const MerchantCashbackRequests: React.FC<MerchantCashbackRequestsProps> =
   const [processingId, setProcessingId] = useState<string | null>(null);
   const [selectedRequest, setSelectedRequest] = useState<ExtendedCashbackTransaction | null>(null);
 
+  // FIX: Moved fetchPendingRequests function definition above its useEffect usage
   // --- Realtime & Fetch ---
+  const fetchPendingRequests = useCallback(async () => {
+    if (!supabase) {
+        // Mock data if no supabase configured in env
+        // FIX: Adjusted mock data to match the DbCashbackTransaction interface.
+        setRequests([
+            {
+                id: 'mock-1',
+                merchant_id: merchantId,
+                store_id: 'store-1',
+                user_id: 'cust-1',
+                user_name: 'Maria Silva (Simulação)', // Using user_name from DbCashbackTransaction
+                purchase_total_cents: 15000,
+                cashback_used_cents: 500,
+                cashback_to_earn_cents: 725,
+                amount_to_pay_now_cents: 14500,
+                status: 'pending',
+                created_at: new Date().toISOString(),
+                amount_cents: 725, // For cashback to earn
+                type: 'earn',
+                purchase_value: 150, // Added from old type
+                amount_from_balance: 5, // Added from old type
+                cashback_value: 7.25, // Added from old type
+            }
+        ]);
+        setLoading(false);
+        return;
+    }
+
+    try {
+      const { data, error } = await supabase
+        .from('cashback_transactions')
+        .select('*') 
+        .eq('merchant_id', merchantId)
+        .eq('status', 'pending')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setRequests((data as any) || []);
+    } catch (err) {
+      console.error('Erro ao buscar solicitações:', err);
+    } finally {
+      setLoading(false);
+    }
+  }, [merchantId]);
+
+
   useEffect(() => {
     fetchPendingRequests();
 
@@ -50,49 +98,7 @@ export const MerchantCashbackRequests: React.FC<MerchantCashbackRequestsProps> =
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [merchantId]);
-
-  const fetchPendingRequests = async () => {
-    if (!supabase) {
-        // Mock data if no supabase configured in env
-        // FIX: Adjusted mock data to match the CashbackTransaction interface.
-        setRequests([
-            {
-                id: 'mock-1',
-                merchant_id: merchantId,
-                store_id: 'store-1',
-                user_id: 'cust-1',
-                customer_name: 'Maria Silva (Simulação)',
-                total_amount_cents: 15000,
-                cashback_used_cents: 500,
-                cashback_to_earn_cents: 725,
-                amount_to_pay_now_cents: 14500,
-                status: 'pending',
-                created_at: new Date().toISOString(),
-                amount_cents: 725,
-                type: 'earn'
-            }
-        ]);
-        setLoading(false);
-        return;
-    }
-
-    try {
-      const { data, error } = await supabase
-        .from('cashback_transactions')
-        .select('*') 
-        .eq('merchant_id', merchantId)
-        .eq('status', 'pending')
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      setRequests((data as any) || []);
-    } catch (err) {
-      console.error('Erro ao buscar solicitações:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
+  }, [merchantId, fetchPendingRequests]);
 
   // --- Actions ---
 
@@ -117,7 +123,7 @@ export const MerchantCashbackRequests: React.FC<MerchantCashbackRequestsProps> =
           await new Promise(r => setTimeout(r, 1000));
       }
 
-      // Atualização otimista da UI (remove da lista)
+      // Atualização otimista da UI (removes from list)
       setRequests((prev) => prev.filter((r) => r.id !== tx.id));
       setSelectedRequest(null); 
 
@@ -231,7 +237,7 @@ export const MerchantCashbackRequests: React.FC<MerchantCashbackRequestsProps> =
                             <div>
                                 <p className="text-xs text-gray-500 uppercase font-bold mb-0.5">Total da Compra</p>
                                 <p className="text-lg font-bold text-gray-900 dark:text-white">
-                                    {formatMoney(req.total_amount_cents || 0)}
+                                    {formatMoney(req.purchase_total_cents || 0)}
                                 </p>
                             </div>
                             <div className="text-right">
@@ -273,7 +279,7 @@ export const MerchantCashbackRequests: React.FC<MerchantCashbackRequestsProps> =
                     
                     <div className="flex justify-between items-center">
                         <span className="text-gray-500 text-sm">Valor Total</span>
-                        <span className="font-bold text-gray-900 dark:text-white text-lg">{formatMoney(selectedRequest.total_amount_cents || 0)}</span>
+                        <span className="font-bold text-gray-900 dark:text-white text-lg">{formatMoney(selectedRequest.purchase_total_cents || 0)}</span>
                     </div>
 
                     <div className="flex justify-between items-center text-red-500">
@@ -283,7 +289,7 @@ export const MerchantCashbackRequests: React.FC<MerchantCashbackRequestsProps> =
 
                     <div className="flex justify-between items-center pt-2 border-t border-gray-200 dark:border-gray-700">
                         <span className="text-base font-bold text-gray-900 dark:text-white">Cliente Paga Agora</span>
-                        <span className="text-2xl font-black text-[#1E5BFF]">
+                        <span className="2xl font-black text-[#1E5BFF]">
                             {formatMoney(selectedRequest.amount_to_pay_now_cents || 0)}
                         </span>
                     </div>

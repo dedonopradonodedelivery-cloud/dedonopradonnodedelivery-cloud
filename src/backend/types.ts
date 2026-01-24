@@ -1,25 +1,57 @@
 
+// All global types (like Store, BusinessHour, StoreReview, etc.) are now in the root types.ts.
+// This file only contains types specifically for backend DB interaction or unique backend concepts.
+
+// Import necessary global types from root types.ts if they are extended or used here.
+import { StoreClaimRequest, AppNotification, BusinessHour, StoreReview } from '../../types'; // Adjust path as needed
 
 export type TransactionStatus = 'pending' | 'approved' | 'rejected';
 export type SessionType = 'qr' | 'pin';
 export type MovementType = 'credit' | 'debit';
 
+// DbUser contains minimal user data from profiles table relevant to DB ops
 export interface DbUser {
-  id: string; // uuid
-  name: string;
+  id: string; // uuid from auth.users
+  full_name?: string; 
   email: string;
-  wallet_balance: number;
+  phone?: string;
+  avatar_url?: string;
+  role: 'cliente' | 'lojista';
   created_at: string;
+  updated_at?: string;
+  fcmTokens?: string[]; // For push notifications
+  lastJobPushAt?: string; // Cooldown for job notifications
+  jobCategories?: string[]; // User's preferred job categories
 }
 
+// DbMerchant contains minimal merchant data from merchants table relevant to DB ops
 export interface DbMerchant {
-  id: string; // uuid
-  name: string;
-  cashback_percent: number; // numeric(5,2)
+  id: string; // uuid, usually maps to auth.users.id for owner
+  name: string; // Display name
+  owner_id: string; // Foreign key to auth.users.id
   is_active: boolean;
   created_at: string;
+  updated_at?: string;
+  secure_id?: string; // For QR codes (UUID)
+  manual_code?: string; // For manual entry (short code)
+  category?: string;
+  subcategory?: string;
+  logo_url?: string;
+  banner_url?: string;
+  address?: string;
+  phone?: string;
+  email_publico?: string;
+  whatsapp_publico?: string;
+  telefone_fixo_publico?: string;
+  description?: string;
+  cashback_percent?: number; 
+  cashback_active?: boolean;
+  cashback_validity_days?: number;
+  onboarding_cashback_completed?: boolean;
+  onboarding_cashback_completed_at?: string;
 }
 
+// DbMerchantSession for backend session management
 export interface DbMerchantSession {
   id: string; // uuid
   merchant_id: string;
@@ -30,21 +62,29 @@ export interface DbMerchantSession {
   created_at: string;
 }
 
+// DbCashbackTransaction for backend transaction logging
 export interface DbCashbackTransaction {
   id: string; // uuid
   user_id: string;
   merchant_id: string;
+  store_id: string; 
   session_id?: string;
-  purchase_value: number;
-  amount_from_balance: number;
-  amount_to_pay: number;
-  cashback_value: number;
+  purchase_total_cents?: number; 
+  amount_cents: number; 
+  cashback_used_cents?: number; 
+  cashback_to_earn_cents?: number; 
+  amount_to_pay_now_cents?: number; 
+  type: 'earn' | 'use';
   status: TransactionStatus;
   created_at: string;
   approved_at?: string;
   rejected_at?: string;
+  user_name?: string;
+  customer_id?: string;
+  customer_name?: string;
 }
 
+// DbWalletMovement for backend wallet movements
 export interface DbWalletMovement {
   id: string; // uuid
   user_id: string;
@@ -55,51 +95,5 @@ export interface DbWalletMovement {
   created_at: string;
 }
 
-// Added to fix import error in StoreProfileEdit.tsx
+// Backend-specific type definition
 export type TaxonomyType = 'category' | 'subcategory' | 'specialty';
-
-// Added missing interfaces from project root `types.ts` for consistency
-export interface BusinessHour {
-  open: boolean;
-  start: string;
-  end: string;
-}
-
-export interface StoreReview {
-  id: string;
-  user_id: string;
-  user_name: string;
-  rating: number;
-  comment: string;
-  created_at: string;
-  merchant_response?: {
-    text: string;
-    responded_at: string;
-  };
-}
-
-export interface StoreClaimRequest {
-  id: string;
-  store_id: string;
-  store_name: string;
-  user_id: string;
-  user_email: string;
-  method: 'whatsapp' | 'email' | 'manual';
-  status: 'pending' | 'approved' | 'rejected';
-  created_at: string;
-  responsible_name?: string;
-  cnpj?: string;
-  contact_phone?: string;
-  justification?: string;
-  attachments?: string[];
-}
-
-export interface AppNotification {
-  id: string;
-  userId: string;
-  title: string;
-  message: string;
-  type: 'taxonomy_approval' | 'taxonomy_rejection' | 'system' | 'job_push' | 'claim_approval' | 'claim_rejection' | 'new_review';
-  read: boolean;
-  createdAt: string;
-}

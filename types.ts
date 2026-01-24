@@ -1,5 +1,4 @@
 
-
 import React from 'react';
 
 export type ThemeMode = 'light' | 'dark' | 'auto';
@@ -61,6 +60,8 @@ export interface Store {
   gallery?: string[];
   distanceKm?: number;
   closingTime?: string;
+  // FIX: Added cashback_percent to Store interface
+  cashback_percent?: number;
 
   // --- DADOS FISCAIS ---
   razao_social?: string;
@@ -91,13 +92,6 @@ export interface Store {
   business_hours?: Record<string, BusinessHour>;
   payment_methods?: string[];
   payment_methods_others?: string;
-
-  // FIX: Added new cashback-related properties
-  cashback_percent?: number; 
-  cashback_active?: boolean;
-  cashback_validity_days?: number;
-  onboarding_cashback_completed?: boolean;
-  onboarding_cashback_completed_at?: string;
 
   // --- PROPRIEDADE E REIVINDICAÇÃO ---
   claimed?: boolean;
@@ -218,19 +212,8 @@ export interface CommunitySuggestion {
   voterIds: string[];
 }
 
-// FIX: Moved TaxonomyType from constants.tsx to types.ts
-export type TaxonomySuggestion = {
-  id: string;
-  type: TaxonomyType;
-  name: string;
-  parentName?: string;
-  justification?: string;
-  status: 'pending' | 'approved' | 'rejected';
-  rejectionReason?: string;
-  storeName: string;
-  merchantId?: string; // Add merchantId
-  createdAt: string;
-}
+// FIX: TaxonomyType is already defined here, removing duplicate from constants.tsx
+export type TaxonomyType = 'category' | 'subcategory' | 'specialty';
 
 export interface AppNotification {
   id: string;
@@ -294,7 +277,7 @@ export interface BannerDesign {
 
 export interface StoreAdsModuleProps {
   onBack: () => void;
-  onNavigate: (view: string) => void;
+  onNavigate: (view: string, initialView?: 'sales' | 'chat') => void;
   user: any;
   categoryName?: string;
   viewMode?: string;
@@ -311,7 +294,7 @@ export interface EditorData {
 }
 
 // --- Backend DB Interfaces (for Supabase interaction) ---
-// FIX: Moved Db* interfaces from src/backend/types.ts to here
+// FIX: Renamed global CashbackTransaction to UserCashbackTransaction to avoid naming conflict
 export type TransactionStatus = 'pending' | 'approved' | 'rejected';
 export type SessionType = 'qr' | 'pin';
 export type MovementType = 'credit' | 'debit';
@@ -328,6 +311,7 @@ export interface DbUser {
   fcmTokens?: string[]; // For push notifications
   lastJobPushAt?: string; // Cooldown for job notifications
   jobCategories?: string[]; // User's preferred job categories
+  wallet_balance?: number; // Added from src/backend/types.ts
 }
 
 export interface DbMerchant {
@@ -349,14 +333,15 @@ export interface DbMerchant {
   whatsapp_publico?: string;
   telefone_fixo_publico?: string;
   description?: string;
-  // Other fiscal and business data...
-  cashback_percent?: number; // numeric(5,2)
+  // FIX: Added cashback related fields from src/backend/types.ts
+  cashback_percent?: number; 
   cashback_active?: boolean;
   cashback_validity_days?: number;
   onboarding_cashback_completed?: boolean;
   onboarding_cashback_completed_at?: string;
 }
 
+// DbMerchantSession for backend session management
 export interface DbMerchantSession {
   id: string; // uuid
   merchant_id: string;
@@ -367,21 +352,29 @@ export interface DbMerchantSession {
   created_at: string;
 }
 
+// DbCashbackTransaction for backend transaction logging
 export interface DbCashbackTransaction {
   id: string; // uuid
   user_id: string;
   merchant_id: string;
+  store_id: string; 
   session_id?: string;
-  purchase_value: number;
-  amount_from_balance: number;
-  amount_to_pay: number;
-  cashback_value: number;
+  purchase_total_cents?: number; // Total value of the purchase (in cents)
+  amount_cents: number; // Value of cashback earned OR amount of cashback used (in cents)
+  cashback_used_cents?: number; // Explicitly used for 'use' type
+  cashback_to_earn_cents?: number; // Explicitly used for 'earn' type
+  amount_to_pay_now_cents?: number; // Amount client pays store directly
+  type: 'earn' | 'use';
   status: TransactionStatus;
   created_at: string;
   approved_at?: string;
   rejected_at?: string;
+  user_name?: string; // Added for display in merchant dashboard
+  customer_id?: string; // Alias for user_id, if needed
+  customer_name?: string; // Alias for user_name, if needed
 }
 
+// DbWalletMovement for backend wallet movements
 export interface DbWalletMovement {
   id: string; // uuid
   user_id: string;
@@ -392,5 +385,14 @@ export interface DbWalletMovement {
   created_at: string;
 }
 
-// Added to fix import error in StoreProfileEdit.tsx
-export type TaxonomyType = 'category' | 'subcategory' | 'specialty';
+export interface StoreCredit {
+  id: string;
+  user_id: string;
+  store_id: string;
+  balance_cents: number;
+  created_at: string;
+  updated_at: string;
+  store_name?: string;
+  store_logo?: string;
+}
+

@@ -1,6 +1,7 @@
 
+
 import { useEffect, useState } from 'react';
-// FIX: Corrected supabase import path from ../services/supabaseClient to ../lib/supabaseClient
+// FIX: Corrected supabase import path
 import { supabase } from '../lib/supabaseClient';
 import { Store, AdType } from '../types';
 
@@ -16,7 +17,8 @@ export function useStores(): UseStoresResult {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    async function fetchStores() {
+    // FIX: Explicitly set return type of fetchStores to Promise<void>
+    async function fetchStores(): Promise<void> {
       if (!supabase) {
         setLoading(false);
         return;

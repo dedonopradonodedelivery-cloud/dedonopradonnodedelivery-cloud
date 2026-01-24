@@ -1,5 +1,4 @@
 
-
 import React from 'react';
 import { 
   Utensils, ShoppingCart, Scissors, Heart, PawPrint, Home, Wrench, 
@@ -15,9 +14,9 @@ import {
   Camera, Vote, Handshake, Flame, Milestone, History, Home as HomeIcon,
   MessageCircle, HelpCircle, UserCheck, Recycle,
   Navigation,
-  Newspaper,
-  Rocket 
+  Newspaper 
 } from 'lucide-react';
+// FIX: Corrected import path for BairroPost
 import { AdType, Category, Store, Story, EditorialCollection, Job, CommunityPost, NeighborhoodCommunity, BairroPost } from './types';
 import { getStoreLogo } from './utils/mockLogos'; 
 
@@ -104,19 +103,19 @@ export const CATEGORIES: Category[] = [
   { id: 'cat-comida', name: 'Comida', slug: 'comida', icon: <Utensils />, color: 'bg-brand-blue' },
   { id: 'cat-pets', name: 'Pets', slug: 'pets', icon: <PawPrint />, color: 'bg-brand-blue' },
   { id: 'cat-pro', name: 'Pro', slug: 'pro', icon: <Briefcase />, color: 'bg-brand-blue' },
-  { id: 'cat-saude', name: 'Saúde', slug: 'saude', icon: <Heart />, color: 'bg-brand-blue' },
-  { id: 'cat-services', name: 'Serviços', slug: 'servicos', icon: <Wrench />, color: 'bg-brand-blue' },
-  { id: 'cat-beauty', name: 'Beleza', slug: 'beleza', icon: <Scissors />, color: 'bg-brand-blue' },
-  { id: 'cat-autos', name: 'Autos', slug: 'autos', icon: <CarFront />, color: 'bg-brand-blue' },
-  { id: 'cat-mercado', name: 'Mercado', slug: 'mercado', icon: <ShoppingCart />, color: 'bg-brand-blue' },
-  { id: 'cat-casa', name: 'Casa', slug: 'casa', icon: <HomeIcon />, color: 'bg-brand-blue' },
-  { id: 'cat-sports', name: 'Esportes', slug: 'esportes', icon: <Dumbbell />, color: 'bg-brand-blue' },
-  { id: 'cat-leisure', name: 'Lazer', slug: 'lazer', icon: <Ticket />, color: 'bg-brand-blue' },
-  { id: 'cat-edu', name: 'Educação', slug: 'educacao', icon: <BookOpen />, color: 'bg-brand-blue' },
-  { id: 'cat-pharmacy', name: 'Farmácia', slug: 'farmacia', icon: <Pill />, color: 'bg-brand-blue' },
-  { id: 'cat-fashion', name: 'Moda', slug: 'moda', icon: <Shirt />, color: 'bg-brand-blue' },
-  { id: 'cat-eventos', name: 'Eventos', slug: 'eventos', icon: <PartyPopper />, color: 'bg-brand-blue' },
-  { id: 'cat-condominio', name: 'Condomínio', slug: 'condominio', icon: <Building2 />, color: 'bg-brand-blue' },
+  { id: 'cat-saude', slug: 'saude', name: 'Saúde', icon: <Heart />, color: 'bg-brand-blue' },
+  { id: 'cat-services', slug: 'servicos', name: 'Serviços', icon: <Wrench />, color: 'bg-brand-blue' },
+  { id: 'cat-beauty', slug: 'beleza', name: 'Beleza', icon: <Scissors />, color: 'bg-brand-blue' },
+  { id: 'cat-autos', slug: 'autos', name: 'Autos', icon: <CarFront />, color: 'bg-brand-blue' },
+  { id: 'cat-mercado', slug: 'mercado', name: 'Mercado', icon: <ShoppingCart />, color: 'bg-brand-blue' },
+  { id: 'cat-casa', slug: 'casa', name: 'Casa', icon: <HomeIcon />, color: 'bg-brand-blue' },
+  { id: 'cat-sports', slug: 'esportes', name: 'Esportes', icon: <Dumbbell />, color: 'bg-brand-blue' },
+  { id: 'cat-leisure', slug: 'lazer', name: 'Lazer', icon: <Ticket />, color: 'bg-brand-blue' },
+  { id: 'cat-edu', slug: 'educacao', name: 'Educação', icon: <BookOpen />, color: 'bg-brand-blue' },
+  { id: 'cat-pharmacy', slug: 'farmacia', name: 'Farmácia', icon: <Pill />, color: 'bg-brand-blue' },
+  { id: 'cat-fashion', slug: 'moda', name: 'Moda', icon: <Shirt />, color: 'bg-brand-blue' },
+  { id: 'cat-eventos', slug: 'eventos', name: 'Eventos', icon: <PartyPopper />, color: 'bg-brand-blue' },
+  { id: 'cat-condominio', slug: 'condominio', name: 'Condomínio', icon: <Building2 />, color: 'bg-brand-blue' },
 ];
 
 export const SUBCATEGORIES: Record<string, { name: string; icon: React.ReactNode }[]> = {
@@ -296,7 +295,7 @@ export const OFFICIAL_COMMUNITIES: NeighborhoodCommunity[] = [
   {
     id: 'comm-tips',
     name: 'Recomendações e dicas no bairro',
-    description: 'Onde encontrar o melhor serviço? Peça e dê dicas para seus vizinhos.',
+    description: 'Onde encontrar the melhor serviço? Peça e dê dicas para seus vizinhos.',
     image: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?q=80&w=800&auto=format&fit=crop',
     icon: <HelpCircle />,
     color: 'bg-orange-500',
@@ -642,8 +641,8 @@ export const MOCK_JOBS: Job[] = [
   }
 ];
 
-// Added to fix import error in StoreProfileEdit.tsx
-export type TaxonomyType = 'category' | 'subcategory' | 'specialty';
+// FIX: TaxonomyType moved to types.ts to avoid redeclaration.
+// export type TaxonomyType = 'category' | 'subcategory' | 'specialty';
 
 export const SPECIALTIES: Record<string, string[]> = {
   'Chaveiro 24h': ['Abertura de portas', 'Troca de fechadura', 'Chave codificada', 'Abertura de cofre', 'Cópia de chaves', 'Instalação de tetra chave'],
@@ -673,37 +672,6 @@ export const NEIGHBORHOODS = [
   "Curicica", "Parque Olímpico", "Gardênia", "Cidade de Deus"
 ];
 
-export const MOCK_OCCUPANCY: Record<string, Record<string, boolean>> = {
-  "Freguesia": { "periodo_1": true },
-  "Taquara": { "periodo_2": true },
-};
-
-export const DISPLAY_MODES = [
-  { 
-    id: 'home', 
-    label: 'Home', 
-    icon: HomeIcon, 
-    price: 49.90,
-    originalPrice: 199.90,
-    description: 'Exibido no carrossel da página inicial para todos os usuários.',
-    whyChoose: 'Ideal para máxima visibilidade imediata.'
-  },
-  { 
-    id: 'cat', 
-    label: 'Categorias', 
-    icon: LayoutGrid, 
-    price: 29.90,
-    originalPrice: 149.90,
-    description: 'Exibido no topo das buscas por produtos ou serviços específicos.',
-    whyChoose: 'Impacta o cliente no momento da decisão.'
-  },
-  { 
-    id: 'combo', 
-    label: 'Home + Categorias', 
-    icon: Zap, 
-    price: 69.90,
-    originalPrice: 349.80,
-    description: 'Destaque na página inicial e em todas as categorias.',
-    whyChoose: 'Mais alcance, cliques e chances de venda.'
-  },
-];
+// MOCK_OCCUPANCY e DISPLAY_MODES são definidos localmente em StoreAdsModule.tsx
+// para evitar duplicação e acoplamento desnecessário, conforme os guidelines.
+// Removidos deste arquivo global.

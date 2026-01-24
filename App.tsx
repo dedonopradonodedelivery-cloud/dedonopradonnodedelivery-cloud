@@ -1,5 +1,4 @@
 
-
 import React, { useState, useEffect } from 'react';
 import { Layout } from './components/Layout';
 import { Header } from './components/Header';
@@ -44,10 +43,6 @@ import { BairroFeedView } from './components/BairroFeedView';
 import { CreateBairroPostView } from './components/CreateBairroPostView';
 import { MerchantPerformanceDashboardView } from './components/MerchantPerformanceDashboardView'; 
 import { MerchantQrScreen } from './components/MerchantQrScreen';
-import { CashbackLandingView } from './components/CashbackLandingView';
-import { CashbackScanScreen } from './components/CashbackScanScreen';
-import { CashbackPayFromQrScreen } from './components/CashbackPayFromQrScreen';
-import { UserWalletView } from './components/UserWalletView';
 
 
 let splashWasShownInSession = false;
@@ -93,7 +88,6 @@ export const App: React.FC = () => {
   const [adCategoryTarget, setAdCategoryTarget] = useState<string | null>(null);
   const [initialStoreAdsView, setInitialStoreAdsView] = useState<'sales' | 'chat'>('sales');
 
-  const [scannedMerchantId, setScannedMerchantId] = useState<string | null>(null); // For cashback flow
 
   const isMerchantMode = userRole === 'lojista' || (user?.email === ADMIN_EMAIL && viewMode === 'Lojista');
   const isDesignerMode = user?.email === ADMIN_EMAIL && viewMode === 'Designer';
@@ -104,10 +98,10 @@ export const App: React.FC = () => {
   };
   
   useEffect(() => {
-    const restrictedTabs = ['store_area', 'admin_panel', 'edit_profile', 'store_claim', 'merchant_reviews', 'designer_panel', 'weekly_promo', 'user_coupons', 'user_coupons_history', 'create_bairro_post', 'merchant_performance_dashboard', 'merchant_qr_display', 'scan_cashback', 'pay_cashback', 'user_wallet']; 
+    const restrictedTabs = ['store_area', 'admin_panel', 'edit_profile', 'store_claim', 'merchant_reviews', 'designer_panel', 'weekly_promo', 'user_coupons', 'user_coupons_history', 'create_bairro_post', 'merchant_performance_dashboard', 'merchant_qr_display']; 
     
     if (restrictedTabs.includes(activeTab)) {
-      if (!isAuthInitialLoading && !user && activeTab !== 'cashback_landing') { // cashback_landing is for unauthenticated users
+      if (!isAuthInitialLoading && !user) {
         setPendingTab(activeTab);
         setActiveTab('home');
         setIsAuthOpen(true);
@@ -131,9 +125,9 @@ export const App: React.FC = () => {
   }, []);
 
   const handleSelectStore = (store: Store) => { setSelectedStore(store); setActiveTab('store_detail'); };
-  const headerExclusionList = ['store_area', 'editorial_list', 'store_profile', 'category_detail', 'store_detail', 'profile', 'patrocinador_master', 'service_subcategories', 'service_specialties', 'store_ads_module', 'store_ads_quick', 'merchant_performance', 'about', 'support', 'favorites', 'community_feed', 'admin_panel', 'admin_banner_moderation', 'store_claim', 'merchant_reviews', 'jpa_connect_sales', 'designer_panel', 'weekly_promo', 'user_coupons', 'user_coupons_history', 'bairro_feed', 'create_bairro_post', 'merchant_performance_dashboard', 'cashback_landing', 'scan_cashback', 'pay_cashback', 'user_wallet', 'merchant_qr_display']; 
+  const headerExclusionList = ['store_area', 'editorial_list', 'store_profile', 'category_detail', 'store_detail', 'profile', 'patrocinador_master', 'service_subcategories', 'service_specialties', 'store_ads_module', 'store_ads_quick', 'merchant_performance', 'about', 'support', 'favorites', 'community_feed', 'admin_panel', 'admin_banner_moderation', 'store_claim', 'merchant_reviews', 'jpa_connect_sales', 'designer_panel', 'weekly_promo', 'user_coupons', 'user_coupons_history', 'bairro_feed', 'create_bairro_post', 'merchant_performance_dashboard', 'merchant_qr_display']; 
   
-  const hideBottomNav = ['admin_panel', 'merchant_performance_dashboard', 'cashback_landing', 'scan_cashback', 'pay_cashback'].includes(activeTab); 
+  const hideBottomNav = ['admin_panel', 'merchant_performance_dashboard'].includes(activeTab); 
 
   const RoleSwitcherModal: React.FC = () => {
     if (!isRoleSwitcherOpen) return null;
@@ -193,20 +187,6 @@ export const App: React.FC = () => {
                         : <MenuView user={user as any} userRole={userRole} onAuthClick={() => setIsAuthOpen(true)} onNavigate={setActiveTab} onBack={() => setActiveTab('home')} />
                     )}
 
-                    {/* Cashback flow for unauthenticated users */}
-                    {activeTab === 'cashback_landing' && <CashbackLandingView onBack={() => setActiveTab('home')} onLogin={() => setIsAuthOpen(true)} />}
-                    {activeTab === 'scan_cashback' && <CashbackScanScreen onBack={() => setActiveTab('home')} onScanSuccess={(merchantData) => {setScannedMerchantId(merchantData.id); setActiveTab('pay_cashback');}} />}
-                    {activeTab === 'pay_cashback' && scannedMerchantId && (
-                        <CashbackPayFromQrScreen 
-                          merchantId={scannedMerchantId}
-                          user={user as any}
-                          onLogin={() => setIsAuthOpen(true)}
-                          onBack={() => setActiveTab('scan_cashback')}
-                          onComplete={() => setActiveTab('user_wallet')}
-                        />
-                    )}
-                    {activeTab === 'user_wallet' && user && <UserWalletView userId={user.id} onBack={() => setActiveTab('home')} onStoreClick={handleSelectStore} onScanClick={() => setActiveTab('scan_cashback')} />}
-
                     {/* ROTA ATUALIZADA PARA A NOVA TELA */}
                     {activeTab === 'weekly_promo' && <WeeklyRewardView onBack={() => setActiveTab('home')} onNavigate={setActiveTab} />}
                     {activeTab === 'user_coupons' && <UserCupomScreen user={user as any} onBack={() => setActiveTab('profile')} onHistory={() => setActiveTab('user_coupons_history')} />}
@@ -262,7 +242,7 @@ export const App: React.FC = () => {
 
           {splashStage < 4 && (
             <div 
-                className={`fixed inset-0 z-[9999] flex flex-col items-center justify-between py-24 transition-opacity duration-500 ease-out ${splashStage === 3 ? 'opacity-100' : 'opacity-0'}`} 
+                className={`fixed inset-0 z-[9999] flex flex-col items-center justify-between py-24 transition-opacity duration-500 ease-out ${splashStage === 3 ? 'opacity-0' : 'opacity-100'}`} 
                 style={{ backgroundColor: '#1E5BFF' }}
             >
               <div className="flex flex-col items-center animate-fade-in text-center px-4">

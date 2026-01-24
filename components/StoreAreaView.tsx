@@ -1,8 +1,7 @@
 
-
 import React, { useState, useMemo, useEffect } from 'react';
 import { 
-  ChevronRight, 
+  ChevronLeft, 
   BadgeCheck, 
   DollarSign, 
   ShoppingBag, 
@@ -11,7 +10,7 @@ import {
   TrendingUp, 
   Wallet, 
   Megaphone, 
-  // FIX: Added missing Settings icon
+  ChevronRight,
   Settings,
   HelpCircle,
   CreditCard,
@@ -19,21 +18,12 @@ import {
   Calendar,
   Bell,
   QrCode,
-  User,
-  Sparkles,
-  Compass,
-  LifeBuoy,
-  AlertTriangle,
-  Crown,
-  Star,
-  Moon,
-  Sun,
-  LogOut
+  User as UserIcon // Added UserIcon from lucide-react, renamed to avoid conflict with DbUser
 } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
-// FIX: Imported DbMerchant and DbUser types
+// FIX: Imported DbMerchant and DbUser types from types.ts
 import { DbMerchant, DbUser } from '../types';
 
 interface StoreAreaViewProps {
@@ -101,6 +91,7 @@ const MenuLink: React.FC<{
         {badge ? (
             <span className="bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">{badge}</span>
         ) : null}
+        {/* FIX: Added ChevronRight icon */}
         <ChevronRight className="w-4 h-4 text-gray-300" />
     </div>
   </button>
@@ -266,6 +257,7 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
                     <p className="text-xs text-blue-100">Gerar QR, PIN e validar compras</p>
                 </div>
             </div>
+            {/* FIX: Added ChevronRight icon */}
             <ChevronRight className="w-5 h-5 text-white/70" />
         </button>
 
@@ -375,9 +367,9 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
                 {/* Toggle Switch */}
                 <button 
                     onClick={() => setIsCashbackEnabled(!isCashbackEnabled)}
-                    className={`w-12 h-6 rounded-full p-1 transition-colors duration-300 ${isCashbackEnabled ? 'bg-green-500' : 'bg-gray-300 dark:bg-gray-600'}`}
+                    className={`w-14 h-8 rounded-full p-1 transition-colors duration-300 ${isCashbackEnabled ? 'bg-green-500' : 'bg-gray-300 dark:bg-gray-600'}`}
                 >
-                    <div className={`w-4 h-4 bg-white rounded-full shadow-sm transition-transform duration-300 ${isCashbackEnabled ? 'translate-x-6' : 'translate-x-0'}`}></div>
+                    <div className={`w-6 h-6 bg-white rounded-full shadow-sm transform transition-transform duration-300 ${isCashbackEnabled ? 'translate-x-6' : 'translate-x-0'}`}></div>
                 </button>
             </div>
 

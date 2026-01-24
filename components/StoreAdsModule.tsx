@@ -57,7 +57,43 @@ import { StoreBannerEditor } from './StoreBannerEditor';
 // FIX: Imported BannerDesign, EditorData, StoreAdsModuleProps from types
 import { BannerDesign, EditorData, StoreAdsModuleProps } from '../types'; 
 // FIX: Imported constants from the consolidated constants.tsx
-import { NEIGHBORHOODS, MOCK_OCCUPANCY, DISPLAY_MODES, FORBIDDEN_WORDS, CHAR_LIMITS, MIN_CONTRAST_RATIO, hexToRgb, getLuminance, getContrastRatio } from '../../constants'; 
+import { NEIGHBORHOODS, FORBIDDEN_WORDS, CHAR_LIMITS, MIN_CONTRAST_RATIO, hexToRgb, getLuminance, getContrastRatio } from '../constants'; 
+
+// FIX: Moved MOCK_OCCUPANCY and DISPLAY_MODES definitions here as intended by constants.tsx comments
+const MOCK_OCCUPANCY: Record<string, Record<string, boolean>> = {
+  "Freguesia": { "periodo_1": true },
+  "Taquara": { "periodo_2": true },
+};
+
+const DISPLAY_MODES = [
+  { 
+    id: 'home', 
+    label: 'Home', 
+    icon: Home, 
+    price: 49.90,
+    originalPrice: 199.90,
+    description: 'Exibido no carrossel da página inicial para todos os usuários.',
+    whyChoose: 'Ideal para máxima visibilidade imediata.'
+  },
+  { 
+    id: 'cat', 
+    label: 'Categorias', 
+    icon: LayoutGrid, 
+    price: 29.90,
+    originalPrice: 149.90,
+    description: 'Exibido no topo das buscas por produtos ou serviços específicos.',
+    whyChoose: 'Impacta o cliente no momento da decisão.'
+  },
+  { 
+    id: 'combo', 
+    label: 'Home + Categorias', 
+    icon: Zap, 
+    price: 69.90,
+    originalPrice: 349.80,
+    description: 'Destaque na página inicial e em todas as categorias.',
+    whyChoose: 'Mais alcance, cliques e chances de venda.'
+  },
+];
 
 
 // --- CONFIGURAÇÕES DO CRIADOR RÁPIDO ---
@@ -1307,7 +1343,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
                         <span className="text-2xl font-black text-white">R$ {prices.current.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
                       </div>
                       {prices.isPackage && (
-                        <p className="text-emerald-400 font-black text-xs uppercase tracking-widest mt-0.5">Ou 3x de R$ {prices.monthly.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} sem juros</p>
+                        <p className="text-emerald-400 font-black text-xs uppercase tracking-widest">Ou 3x de R$ {prices.monthly.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
                       )}
                     </div>
                 </div>

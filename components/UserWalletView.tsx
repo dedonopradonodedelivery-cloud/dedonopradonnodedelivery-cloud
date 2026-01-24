@@ -1,4 +1,5 @@
 
+
 import React, { useState, useEffect } from 'react';
 import { 
   ChevronLeft, 
@@ -134,7 +135,7 @@ export const UserWalletView: React.FC<UserWalletViewProps> = ({ userId, onBack, 
                                 </div>
                             </div>
                             <div className="text-right">
-                                <p className="text-lg font-black text-gray-900 dark:text-white">{formatBRL(credit.balance_cents)}</p>
+                                <p className="lg font-black text-gray-900 dark:text-white">{formatBRL(credit.balance_cents)}</p>
                             </div>
                         </div>
                     ))
