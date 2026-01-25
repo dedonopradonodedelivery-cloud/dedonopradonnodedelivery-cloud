@@ -1,644 +1,406 @@
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useMemo } from 'react';
 import { 
-  TriangleAlert, 
-  Hammer, 
-  CarFront, 
-  Smartphone, 
-  Dog, 
-  Sparkles, 
-  Briefcase, 
+  ChevronLeft, 
+  Wrench, 
   CheckCircle2, 
   ArrowRight, 
-  Shield,
+  Camera, 
+  Clock, 
+  MapPin, 
+  X,
   Zap,
-  Flame,
-  Star,
-  ShieldCheck,
-  Clock,
-  MessageSquare,
-  MessageCircle,
-  Phone,
-  BarChart3
+  Loader2,
+  Search,
+  Check,
+  ChevronDown,
+  AlertCircle
 } from 'lucide-react';
-import { supabase } from '../lib/supabaseClient';
-import { MOCK_JOBS } from '../constants';
+import { useNeighborhood, NEIGHBORHOODS } from '../contexts/NeighborhoodContext';
+import { ServiceRequest, ServiceUrgency } from '../types';
+import { MasterSponsorBanner } from './MasterSponsorBanner';
+import { ClassifiedsBannerCarousel } from './ClassifiedsBannerCarousel';
+
+type FlowStep = 'intro' | 'form' | 'success';
 
 interface ServicesViewProps {
-  onSelectMacro: (id: string, name: string) => void;
-  onOpenTerms: () => void;
-  onNavigate: (view: string) => void;
-  searchTerm?: string;
+  onNavigate: (view: string, data?: any) => void;
+  onOpenChat?: (requestId: string) => void;
 }
 
-// --- CONFIGURATION & MOCK DATA ---
-
-const MACRO_SERVICES = [
-  { 
-    id: 'emergency', 
-    name: 'Emergência', 
-    icon: TriangleAlert,
-    description: 'Atendimento imediato • 24h',
-    color: 'bg-red-600',
-    textColor: 'text-white',
-    keywords: ['chaveiro', 'desentupidora', 'guincho', 'eletricista', 'bombeiro', 'vazamento', '24 horas', '24h', 'urgente']
-  },
-  { 
-    id: 'home', 
-    name: 'Casa & Reparos', 
-    icon: Hammer,
-    color: 'bg-white dark:bg-gray-800',
-    textColor: 'text-gray-900 dark:text-white',
-    keywords: ['pedreiro', 'pintor', 'encanador', 'marido de aluguel', 'ar condicionado', 'marceneiro', 'serralheiro', 'obra', 'reforma', 'manutenção']
-  },
-  { 
-    id: 'auto', 
-    name: 'Auto & Veículos', 
-    icon: CarFront,
-    color: 'bg-white dark:bg-gray-800',
-    textColor: 'text-gray-900 dark:text-white',
-    keywords: ['mecânico', 'oficina', 'funilaria', 'pintura', 'borracharia', 'insulfilm', 'lavajato', 'estética automotiva', 'carro', 'moto']
-  },
-  { 
-    id: 'tech', 
-    name: 'Tecnologia', 
-    icon: Smartphone,
-    color: 'bg-white dark:bg-gray-800',
-    textColor: 'text-gray-900 dark:text-white',
-    keywords: ['celular', 'smartphone', 'computador', 'notebook', 'impressora', 'internet', 'wifi', 'câmera', 'segurança', 'iphone', 'android']
-  },
-  { 
-    id: 'pet', 
-    name: 'Pets', 
-    icon: Dog,
-    color: 'bg-white dark:bg-gray-800',
-    textColor: 'text-gray-900 dark:text-white',
-    keywords: ['veterinário', 'banho', 'tosa', 'adestramento', 'hotel', 'dog walker', 'passeador', 'gato', 'cachorro']
-  },
-  { 
-    id: 'clean', 
-    name: 'Limpeza', 
-    icon: Sparkles,
-    color: 'bg-white dark:bg-gray-800',
-    textColor: 'text-gray-900 dark:text-white',
-    keywords: ['diarista', 'faxina', 'limpeza de estofados', 'lavanderia', 'passadeira', 'dedetização', 'pós obra']
-  },
-  { 
-    id: 'pro', 
-    name: 'Consultoria', 
-    icon: Briefcase,
-    color: 'bg-white dark:bg-gray-800',
-    textColor: 'text-gray-900 dark:text-white',
-    keywords: ['advogado', 'contador', 'marketing', 'designer', 'tradutor', 'consultor', 'frete', 'mudança', 'jardinagem']
-  },
+const SERVICE_TYPES = [
+  "Eletricista",
+  "Encanador",
+  "Pintor",
+  "Pedreiro",
+  "Técnico em Informática",
+  "Montador de Móveis",
+  "Marido de Aluguel",
+  "Faxina / Limpeza Residencial",
+  "Diarista",
+  "Dedetização",
+  "Chaveiro",
+  "Segurança",
+  "Assistência Técnica",
+  "Instalações",
+  "Mecânico",
+  "Funilaria e Pintura",
+  "Auto Elétrica",
+  "Borracharia",
+  "Banho e Tosa",
+  "Veterinário",
+  "Fretes e Mudanças",
+  "Jardinagem",
+  "Costureira",
+  "Outros"
 ];
 
-const NEIGHBORHOOD_ACTIVITY = [
-  "Maria pediu um Eletricista há 5 min",
-  "João avaliou a Padaria Imperial",
-  "3 vizinhos pediram Orçamento de Pintura",
-  "Novo profissional verificado: Dra. Pet"
-];
+export const ServicesView: React.FC<ServicesViewProps> = ({ onNavigate, onOpenChat }) => {
+  const { currentNeighborhood } = useNeighborhood();
+  const [step, setStep] = useState<FlowStep>('intro');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isServiceModalOpen, setIsServiceModalOpen] = useState(false);
+  const [serviceSearch, setServiceSearch] = useState('');
+  const [createdRequestId, setCreatedRequestId] = useState<string | null>(null);
 
-// --- EXTENDED SERVICE PROVIDER DATABASE (MOCK) ---
-// Includes Premium flags, verification status, and ratings for the algorithm.
-interface ServiceProvider {
-  id: string;
-  name: string;
-  category: string;
-  rating: number;
-  reviews: number;
-  badges: string[];
-  response: string;
-  whatsappAvailable: boolean;
-  isPremium: boolean; // Flag for Ad Engine
-  verified: boolean;  // Flag for Ad Engine
-}
+  // Form State
+  const [formData, setFormData] = useState({
+    clientName: '',
+    serviceType: '',
+    description: '',
+    neighborhood: currentNeighborhood === "Jacarepaguá (todos)" ? "" : currentNeighborhood,
+    urgency: 'Essa semana' as ServiceUrgency,
+    images: [] as string[]
+  });
 
-const SERVICE_PROVIDERS_POOL: ServiceProvider[] = [
-  // --- PREMIUM CANDIDATES ---
-  { 
-    id: 'p_joao_eletr', 
-    name: 'João Eletricista', 
-    category: 'Elétrica Residencial', 
-    rating: 4.9, 
-    reviews: 124, 
-    badges: ['⚡ Rápido', '🏅 Top Pro'], 
-    response: '< 5 min', 
-    whatsappAvailable: true,
-    isPremium: true,
-    verified: true
-  },
-  { 
-    id: 'p_maria_clean', 
-    name: 'Maria Diarista', 
-    category: 'Limpeza e Organização', 
-    rating: 5.0, 
-    reviews: 89, 
-    badges: ['⭐ Impecável', 'Verificado'], 
-    response: '~ 15 min', 
-    whatsappAvailable: true,
-    isPremium: true,
-    verified: true
-  },
-  { 
-    id: 'p_tech_fix', 
-    name: 'Tech Fix Freguesia', 
-    category: 'Conserto Celulares', 
-    rating: 4.8, 
-    reviews: 210, 
-    badges: ['⚡ Na Hora'], 
-    response: 'Online', 
-    whatsappAvailable: true,
-    isPremium: true,
-    verified: true
-  },
-  { 
-    id: 'p_refrig_polar', 
-    name: 'Refrigeração Polar', 
-    category: 'Climatização', 
-    rating: 4.7, 
-    reviews: 56, 
-    badges: ['❄️ Verão', 'Garantia'], 
-    response: '~ 30 min', 
-    whatsappAvailable: true,
-    isPremium: true,
-    verified: true
-  },
-  { 
-    id: 'p_doutor_pet', 
-    name: 'Dr. Pet em Casa', 
-    category: 'Veterinário', 
-    rating: 4.9, 
-    reviews: 112, 
-    badges: ['🐾 24h', 'Amoroso'], 
-    response: 'Imediato', 
-    whatsappAvailable: true,
-    isPremium: true,
-    verified: true
-  },
+  // Validação real e sincronizada
+  const isClientNameValid = formData.clientName.trim().length >= 2;
+  const isDescriptionValid = formData.description.trim().length >= 10;
+  const isServiceTypeValid = formData.serviceType.length >= 3;
+  const isNeighborhoodValid = formData.neighborhood !== "";
+  const isUrgencyValid = !!formData.urgency;
 
-  // --- ORGANIC CANDIDATES ---
-  { 
-    id: 'o_pedro_pintor', 
-    name: 'Pedro Pinturas', 
-    category: 'Pintura', 
-    rating: 4.6, 
-    reviews: 34, 
-    badges: ['🎨 Detalhe'], 
-    response: '~ 1h', 
-    whatsappAvailable: true,
-    isPremium: false,
-    verified: true
-  },
-  { 
-    id: 'o_marido_aluguel', 
-    name: 'Resolve Tudo', 
-    category: 'Marido de Aluguel', 
-    rating: 4.5, 
-    reviews: 78, 
-    badges: ['🛠️ Prático'], 
-    response: '~ 20 min', 
-    whatsappAvailable: false, // Forces app chat
-    isPremium: false,
-    verified: true
-  },
-];
+  const isFormValid = useMemo(() => {
+    return isClientNameValid && isServiceTypeValid && isDescriptionValid && isNeighborhoodValid && isUrgencyValid;
+  }, [isClientNameValid, isServiceTypeValid, isDescriptionValid, isNeighborhoodValid, isUrgencyValid]);
 
-const ADS_CAP_PER_DAY = 3; // Max views per user per provider per day
-
-export const ServicesView: React.FC<ServicesViewProps> = ({ onSelectMacro, onOpenTerms, onNavigate, searchTerm = '' }) => {
-  const [showStickyCTA, setShowStickyCTA] = useState(false);
-  const [activityIndex, setActivityIndex] = useState(0);
-  const [displayedPros, setDisplayedPros] = useState<ServiceProvider[]>([]);
-  const heroRef = useRef<HTMLDivElement>(null);
-
-  // --- AD ENGINE LOGIC ---
-  useEffect(() => {
-    // 1. Get user view history from local storage
-    const today = new Date().toDateString();
-    
-    const checkCap = (providerId: string) => {
-      const key = `ad_views_${providerId}_${today}`;
-      const views = parseInt(localStorage.getItem(key) || '0');
-      return views < ADS_CAP_PER_DAY;
-    };
-
-    const incrementView = (providerId: string) => {
-      const key = `ad_views_${providerId}_${today}`;
-      const views = parseInt(localStorage.getItem(key) || '0');
-      localStorage.setItem(key, (views + 1).toString());
-    };
-
-    // 2. Filter & Shuffle Premiums
-    const eligiblePremiums = SERVICE_PROVIDERS_POOL.filter(
-      p => p.isPremium && p.verified && p.rating >= 4.5 && checkCap(p.id)
-    );
-
-    // Shuffle (Fisher-Yates) to ensure fairness rotation
-    for (let i = eligiblePremiums.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [eligiblePremiums[i], eligiblePremiums[j]] = [eligiblePremiums[j], eligiblePremiums[i]];
-    }
-
-    // 3. Select up to 3 Premiums
-    const selectedPremiums = eligiblePremiums.slice(0, 3);
-
-    // 4. Record Impressions
-    selectedPremiums.forEach(p => {
-      incrementView(p.id);
-      trackAdMetric('impression', p.id);
-    });
-
-    // 5. Fill remaining spots with Organics if needed
-    let finalSelection = [...selectedPremiums];
-    if (finalSelection.length < 3) {
-      const organics = SERVICE_PROVIDERS_POOL
-        .filter(p => !p.isPremium)
-        .sort((a, b) => b.rating - a.rating) // Best rated organics first
-        .slice(0, 3 - finalSelection.length);
-      
-      finalSelection = [...finalSelection, ...organics];
-    }
-
-    setDisplayedPros(finalSelection);
-
-  }, []); // Run once on mount
-
-  // --- METRICS HANDLER ---
-  const trackAdMetric = async (type: 'impression' | 'click_quote' | 'click_whatsapp', providerId: string) => {
-    // console.log(`[AdMetric] ${type} for provider ${providerId}`);
-    
-    // Simulating Database Call
-    if (supabase) {
-      // In a real app, this table 'ad_metrics' would exist
-      /*
-      await supabase.from('ad_metrics').insert({
-        provider_id: providerId,
-        event_type: type,
-        placement: 'servicos_premium_recomendados',
-        timestamp: new Date().toISOString()
-      });
-      */
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && formData.images.length < 3) {
+      const file = e.target.files[0];
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setFormData(prev => ({ ...prev, images: [...prev.images, reader.result as string] }));
+      };
+      reader.readAsDataURL(file);
     }
   };
 
-  // Scroll listener for Sticky CTA
-  useEffect(() => {
-    const handleScroll = () => {
-      if (heroRef.current) {
-        const heroBottom = heroRef.current.getBoundingClientRect().bottom;
-        // Show sticky CTA when Hero is scrolled out of view
-        setShowStickyCTA(heroBottom < 0);
-      }
+  const removeImage = (index: number) => {
+    setFormData(prev => ({ ...prev, images: prev.images.filter((_, i) => i !== index) }));
+  };
+
+  const handleSubmit = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (!isFormValid || isSubmitting) return;
+
+    setIsSubmitting(true);
+    
+    // Gerar número único do pedido
+    const orderNumber = Math.floor(1000 + Math.random() * 9000);
+    const requestId = `REQ-${orderNumber}`;
+
+    const newRequest: ServiceRequest = {
+        id: requestId,
+        userId: 'current-user-id',
+        userName: formData.clientName,
+        serviceType: formData.serviceType,
+        description: formData.description,
+        neighborhood: formData.neighborhood,
+        urgency: formData.urgency,
+        images: formData.images,
+        status: 'open',
+        createdAt: new Date().toISOString()
     };
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
 
-  // Activity Ticker
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setActivityIndex((prev) => (prev + 1) % NEIGHBORHOOD_ACTIVITY.length);
-    }, 4000);
-    return () => clearInterval(interval);
-  }, []);
-  
-  const filteredServices = MACRO_SERVICES.filter(service => {
-    const term = searchTerm.toLowerCase().trim();
-    if (!term) return true;
-    return service.name.toLowerCase().includes(term) || service.keywords.some(k => k.toLowerCase().includes(term));
-  });
+    // Salvar no mock local
+    const existing = JSON.parse(localStorage.getItem('service_requests_mock') || '[]');
+    localStorage.setItem('service_requests_mock', JSON.stringify([newRequest, ...existing]));
 
-  return (
-    <div className="min-h-screen bg-[#F7F8FA] dark:bg-gray-900 font-sans animate-in fade-in duration-500 pb-36">
-      
-      <div className="flex flex-col gap-6">
-        
-        {/* 1. NEIGHBORHOOD PULSE (Social Proof) */}
-        {!searchTerm && (
-          <div className="px-5 pt-4 -mb-2">
-            <div className="flex items-center gap-2 bg-white dark:bg-gray-800 py-1.5 px-3 rounded-full border border-gray-100 dark:border-gray-700 shadow-sm w-fit">
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
-              </span>
-              <p className="text-[10px] font-medium text-gray-500 dark:text-gray-400 animate-in fade-in slide-in-from-bottom-1 duration-500 key={activityIndex}">
-                {NEIGHBORHOOD_ACTIVITY[activityIndex]}
-              </p>
-            </div>
-          </div>
-        )}
+    // Seta o ID criado para o botão de sucesso usar depois
+    setCreatedRequestId(requestId);
 
-        {/* 2. HERO CONVERSION CARD */}
-        {!searchTerm && (
-          <div className="px-5 pt-2" ref={heroRef}>
-            <div className="relative w-full rounded-[24px] bg-gradient-to-r from-[#0A46FF] to-[#0039CC] p-6 shadow-lg shadow-blue-500/20 overflow-hidden group cursor-pointer active:scale-[0.99] transition-all">
-              {/* Subtle glow effect */}
-              <div className="absolute top-[-50px] right-[-50px] w-48 h-48 bg-white/10 rounded-full blur-3xl pointer-events-none"></div>
+    // Feedback de carregamento antes de mostrar a tela de sucesso
+    setTimeout(() => {
+      setIsSubmitting(false);
+      setStep('success');
+    }, 1200);
+  };
 
-              <div className="relative z-10">
-                {/* Invisible Onboarding Badge */}
-                <div className="inline-flex items-center gap-1 bg-white/20 backdrop-blur-sm px-2 py-0.5 rounded-lg mb-3 border border-white/10">
-                  <Clock className="w-3 h-3 text-white" />
-                  <span className="text-[10px] font-bold text-white uppercase tracking-wide">Primeira vez? Leva &lt; 1 min</span>
-                </div>
+  const filteredServices = useMemo(() => {
+    return SERVICE_TYPES.filter(s => s.toLowerCase().includes(serviceSearch.toLowerCase()));
+  }, [serviceSearch]);
 
-                <h2 className="text-2xl font-bold text-white leading-tight mb-2 tracking-tight font-display">
-                  Qual serviço você precisa?
-                </h2>
-                <p className="text-sm text-blue-100 font-medium leading-relaxed max-w-[90%] mb-6">
-                  Receba até 5 orçamentos gratuitos de profissionais verificados da Freguesia.
-                </p>
-                
-                <button 
-                  onClick={() => onSelectMacro('home', 'Casa & Reparos')} 
-                  className="w-full bg-white text-[#0A46FF] font-bold py-3.5 rounded-xl shadow-sm flex items-center justify-center gap-2 group-hover:bg-blue-50 transition-colors relative overflow-hidden"
-                >
-                  <span className="relative z-10 flex items-center gap-2">
-                    Pedir orçamento
-                    <ArrowRight className="w-4 h-4" strokeWidth={3} />
-                  </span>
-                </button>
-                
-                <div className="flex items-center justify-center gap-4 mt-4 text-[10px] text-blue-100 font-medium opacity-90">
-                  <span className="flex items-center gap-1.5"><CheckCircle2 className="w-3 h-3" /> Grátis</span>
-                  <span className="flex items-center gap-1.5"><ShieldCheck className="w-3 h-3" /> Seguro</span>
-                  <span className="flex items-center gap-1.5"><Zap className="w-3 h-3" /> Rápido</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
+  if (step === 'intro') {
+    return (
+      <div className="min-h-screen bg-white dark:bg-gray-950 animate-in fade-in duration-500">
+        <header className="px-6 pt-12 pb-6 flex items-center gap-4">
+          <button onClick={() => onNavigate('classifieds')} className="p-2 bg-gray-50 dark:bg-gray-800 rounded-xl text-gray-500 transition-all active:scale-90"><ChevronLeft size={20}/></button>
+          <h1 className="font-black text-xl text-gray-900 dark:text-white uppercase tracking-tighter">Serviços Locais</h1>
+        </header>
 
-        {/* 3. EDUCATION FLOW (SIMPLE) */}
-        {!searchTerm && (
-          <div className="px-5">
-            <div className="bg-white dark:bg-gray-800 rounded-2xl p-4 border border-gray-100 dark:border-gray-700 shadow-sm">
-              <div className="flex justify-between items-start text-center relative">
-                {/* Connecting Line */}
-                <div className="absolute top-3 left-6 right-6 h-[2px] bg-gray-100 dark:bg-gray-700 -z-0"></div>
-                
-                <div className="flex flex-col items-center gap-2 relative z-10 flex-1">
-                  <div className="w-7 h-7 rounded-full bg-blue-50 dark:bg-blue-900/30 text-[#0A46FF] flex items-center justify-center border-2 border-white dark:border-gray-800 font-bold text-xs">1</div>
-                  <p className="text-[10px] font-bold text-gray-600 dark:text-gray-300 leading-tight">Descreva<br/>o pedido</p>
-                </div>
-                <div className="flex flex-col items-center gap-2 relative z-10 flex-1">
-                  <div className="w-7 h-7 rounded-full bg-blue-50 dark:bg-blue-900/30 text-[#0A46FF] flex items-center justify-center border-2 border-white dark:border-gray-800 font-bold text-xs">2</div>
-                  <p className="text-[10px] font-bold text-gray-600 dark:text-gray-300 leading-tight">Receba<br/>orçamentos</p>
-                </div>
-                <div className="flex flex-col items-center gap-2 relative z-10 flex-1">
-                  <div className="w-7 h-7 rounded-full bg-blue-50 dark:bg-blue-900/30 text-[#0A46FF] flex items-center justify-center border-2 border-white dark:border-gray-800 font-bold text-xs">3</div>
-                  <p className="text-[10px] font-bold text-gray-600 dark:text-gray-300 leading-tight">Negocie<br/>direto</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* 5. CATEGORIES & EMERGENCY */}
-        <div className="px-5">
-          <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-            O que você precisa?
-          </h3>
+        <main className="p-6 pt-0 space-y-12 pb-32">
           
-          <div className="grid grid-cols-2 gap-3">
-            {/* JOBS CARD REMOVED HERE AS REQUESTED */}
+          <ClassifiedsBannerCarousel categoryName="services" />
 
-            {filteredServices.map((item) => {
-              const Icon = item.icon;
-              const isEmergency = item.id === 'emergency';
-
-              // EMERGENCY CARD (SPECIAL LAYOUT)
-              if (isEmergency) {
-                return (
-                  <div
-                    key={item.id}
-                    className="col-span-2 bg-red-600 rounded-[20px] p-4 text-white shadow-lg shadow-red-500/20 relative overflow-hidden"
-                  >
-                    <div className="flex justify-between items-start relative z-10">
-                      <div>
-                        <div className="flex items-center gap-2 mb-1">
-                          <Icon className="w-5 h-5 text-white" strokeWidth={3} />
-                          <h3 className="text-lg font-bold">Emergência</h3>
-                        </div>
-                        <p className="text-xs text-red-100 font-medium mb-3">Atendimento imediato • 24h</p>
-                      </div>
-                      <span className="text-[10px] font-bold bg-white/20 px-2 py-1 rounded-full backdrop-blur-sm animate-pulse border border-white/20">
-                        Plantão Ativo
-                      </span>
-                    </div>
-
-                    <div className="flex gap-3 relative z-10">
-                      <button 
-                        onClick={() => onSelectMacro(item.id, item.name)}
-                        className="flex-1 bg-white text-red-600 font-bold text-sm py-2.5 rounded-xl shadow-sm active:scale-95 transition-transform flex items-center justify-center"
-                      >
-                        Pedir orçamento
-                      </button>
-                      <button 
-                        className="flex-1 border border-white/30 text-white font-medium text-xs py-2.5 rounded-xl hover:bg-white/10 active:scale-95 transition-transform flex items-center justify-center gap-1"
-                      >
-                        <Phone className="w-3 h-3" />
-                        Chamar agora (24h)
-                      </button>
-                    </div>
-                  </div>
-                );
-              }
-
-              // STANDARD CATEGORY CARD
-              return (
-                <button
-                  key={item.id}
-                  onClick={() => onSelectMacro(item.id, item.name)}
-                  className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white border border-gray-100 dark:border-gray-700 relative overflow-hidden rounded-[20px] p-4 text-left shadow-sm hover:shadow-md transition-all active:scale-[0.98] group min-h-[130px] flex flex-col justify-between"
-                >
-                  <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-3 bg-blue-50 dark:bg-gray-700 text-[#0A46FF] dark:text-blue-400">
-                    <Icon className="w-5 h-5" strokeWidth={2} />
-                  </div>
-                  
-                  <div>
-                    <span className="block font-bold text-base leading-tight mb-1">
-                      {item.name}
-                    </span>
-                    <span className="block text-[10px] text-gray-400 dark:text-gray-500 mb-2 font-medium">
-                        Orçamento grátis
-                    </span>
-                    <span className="text-[10px] font-bold flex items-center gap-1 mt-auto text-blue-600 dark:text-blue-400">
-                      Pedir orçamento <ArrowRight className="w-3 h-3 transition-transform group-hover:translate-x-1" />
-                    </span>
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* 6. RECOMMENDED PROFESSIONALS (ADS ENGINE - PREMIUM & ORGANIC MIX) */}
-        <div className="px-5">
-          <div className="mb-4 flex items-center justify-between">
-            <div>
-                <h3 className="text-lg font-bold text-gray-900 dark:text-white leading-tight flex items-center gap-2">
-                  Destaques no bairro
-                  <span className="bg-yellow-100 text-yellow-700 text-[10px] font-bold px-2 py-0.5 rounded-full border border-yellow-200">TOP</span>
-                </h3>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                  Profissionais verificados com alta reputação
-                </p>
+          <div className="text-center space-y-4">
+            <div className="w-20 h-20 bg-blue-50 dark:bg-blue-900/20 rounded-[2.5rem] flex items-center justify-center mx-auto text-[#1E5BFF]">
+              <Wrench size={40} strokeWidth={1.5} />
             </div>
+            <h2 className="text-2xl font-black text-gray-900 dark:text-white leading-tight uppercase tracking-tighter">Precisa de um serviço?</h2>
+            <p className="text-gray-500 dark:text-gray-400 text-sm max-w-xs mx-auto font-medium">Descreva o que você precisa e receba até 5 propostas gratuitas de profissionais da sua região.</p>
           </div>
-          
-          <div className="flex flex-col gap-4">
-            {displayedPros.map((item, i) => (
-              <div 
-                key={item.id}
-                className={`
-                    p-4 rounded-2xl shadow-sm flex flex-col gap-3 relative group transition-all hover:shadow-md
-                    ${item.isPremium 
-                        ? 'bg-gradient-to-br from-white to-blue-50 dark:from-gray-800 dark:to-gray-800/80 border border-blue-200 dark:border-blue-900/50' 
-                        : 'bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700'
-                    }
-                `}
-                onClick={() => trackAdMetric('impression', item.id)} 
-              >
-                {item.isPremium && (
-                    <div className="absolute top-0 right-0 bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 text-[9px] font-bold px-2 py-1 rounded-bl-xl rounded-tr-xl border-l border-b border-blue-200 dark:border-blue-800/50 uppercase tracking-wide flex items-center gap-1">
-                        <BarChart3 className="w-3 h-3" /> Patrocinado
+
+          <div className="space-y-6">
+            {[
+                { step: 1, title: 'Descreva o serviço', sub: 'Conte o que você precisa e adicione fotos.' },
+                { step: 2, title: 'Profissionais recebem', sub: 'O pedido é enviado para especialistas do bairro.' },
+                { step: 3, title: 'Converse pelo chat', sub: 'Receba orçamentos e feche o serviço por aqui.' }
+            ].map((item) => (
+                <div key={item.step} className="flex items-center gap-5">
+                    <div className="w-12 h-12 rounded-2xl bg-gray-50 dark:bg-gray-800 flex items-center justify-center font-black text-[#1E5BFF] shrink-0 border border-gray-100 dark:border-gray-700">{item.step}</div>
+                    <div>
+                        <h4 className="font-bold text-gray-900 dark:text-white text-sm">{item.title}</h4>
+                        <p className="text-xs text-gray-500 font-medium">{item.sub}</p>
                     </div>
-                )}
-
-                <div className="flex gap-3 items-start mt-1">
-                  <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 text-lg font-bold ${item.isPremium ? 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' : 'bg-gray-100 text-gray-400 dark:bg-gray-700'}`}>
-                    {item.name.charAt(0)}
-                  </div>
-                  
-                  <div className="flex-1 min-w-0">
-                    <div className="flex justify-between items-start">
-                      <h4 className="font-bold text-gray-900 dark:text-white text-base truncate pr-20">{item.name}</h4>
-                    </div>
-                    <div className="flex items-center gap-2 mt-0.5">
-                        <p className="text-xs text-gray-500 dark:text-gray-400">{item.category}</p>
-                        <div className="flex items-center gap-1 text-[10px] font-bold text-yellow-600 bg-yellow-50 dark:bg-yellow-900/20 px-1.5 py-0.5 rounded border border-yellow-100 dark:border-yellow-800/30">
-                            <Star className="w-2.5 h-2.5 fill-current" /> {item.rating}
-                        </div>
-                    </div>
-                  </div>
                 </div>
-
-                <div className="flex flex-wrap gap-2">
-                   <div className="flex items-center gap-1 text-[10px] font-bold text-green-600 bg-green-50 dark:bg-green-900/20 px-2 py-1 rounded-md border border-green-100 dark:border-green-800">
-                      <Clock className="w-3 h-3" />
-                      {item.response}
-                   </div>
-                   {item.badges.map(badge => (
-                      <span key={badge} className="text-[10px] font-medium bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-2 py-1 rounded-md border border-gray-200 dark:border-gray-600">
-                        {badge}
-                      </span>
-                   ))}
-                </div>
-
-                <div className="flex flex-col gap-2 mt-1">
-                  <button 
-                    onClick={() => {
-                        trackAdMetric('click_quote', item.id);
-                        onSelectMacro('pro', item.category);
-                    }}
-                    className={`w-full text-white text-sm font-bold py-3 rounded-xl shadow-md active:scale-[0.98] transition-transform flex items-center justify-center gap-2 ${item.isPremium ? 'bg-gradient-to-r from-blue-600 to-indigo-600 shadow-blue-500/20' : 'bg-[#0A46FF] shadow-blue-500/10'}`}
-                  >
-                    Pedir orçamento
-                  </button>
-                  
-                  {item.whatsappAvailable && (
-                    <button 
-                      onClick={() => trackAdMetric('click_whatsapp', item.id)}
-                      className="w-full flex items-center justify-center gap-2 py-2 rounded-xl text-xs font-bold text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 transition-colors border border-transparent hover:border-green-100"
-                    >
-                      <MessageCircle className="w-4 h-4" />
-                      Chamar no WhatsApp
-                    </button>
-                  )}
-                </div>
-
-                <div className="flex justify-center">
-                  <p className="text-[9px] text-gray-400 font-medium flex items-center gap-1">
-                    <ShieldCheck className="w-2.5 h-2.5" /> Contato direto, sem compromisso
-                  </p>
-                </div>
-              </div>
             ))}
           </div>
-        </div>
 
-        {/* 7. CLOSURE BLOCK (Decision Helper) */}
-        <div className="px-5 mt-4">
-          <div className="bg-gray-100 dark:bg-gray-800/50 rounded-2xl p-5 text-center border border-gray-200 dark:border-gray-700">
-            <h4 className="font-bold text-gray-900 dark:text-white text-sm mb-1">
-              Ainda não encontrou o que precisa?
-            </h4>
-            <p className="text-xs text-gray-500 dark:text-gray-400 mb-4 max-w-[200px] mx-auto">
-              Nós encontramos para você. É grátis e rápido.
-            </p>
+          <div className="pt-8">
             <button 
-              onClick={() => onSelectMacro('home', 'Geral')}
-              className="w-full bg-white dark:bg-gray-800 text-[#0A46FF] text-sm font-bold border border-[#0A46FF] px-6 py-3 rounded-xl hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors shadow-sm"
+              onClick={() => setStep('form')}
+              className="w-full bg-[#1E5BFF] text-white font-black py-5 rounded-[2rem] shadow-xl shadow-blue-500/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2 uppercase tracking-widest text-sm"
             >
-              Pedir orçamento
+              Pedir orçamento gratuito <ArrowRight size={18} />
             </button>
           </div>
-        </div>
 
-        {/* 8. PATROCINADOR MASTER */}
-        <div className="px-5">
-          <div 
-            onClick={() => onNavigate('patrocinador_master')}
-            className="w-full rounded-[24px] relative overflow-hidden group cursor-pointer shadow-md hover:shadow-lg transition-all bg-[#0F172A]"
-          >
-            <div className="relative z-10 flex flex-col items-start px-6 py-6">
-              <div className="flex flex-col items-start gap-2 mb-4">
-                 <span className="text-[10px] font-bold text-white/60 uppercase tracking-[0.2em]">
-                   Patrocinador Master
-                 </span>
-                 <div className="flex items-center gap-2">
-                   <Shield className="w-5 h-5 text-white/40" />
-                   <h3 className="text-white font-semibold text-base tracking-wide">
-                     Grupo Esquematiza
-                   </h3>
-                 </div>
+          <section>
+            <MasterSponsorBanner onClick={() => onNavigate('patrocinador_master')} label="Serviços" />
+          </section>
+        </main>
+      </div>
+    );
+  }
+
+  if (step === 'form') {
+    return (
+      <div className="min-h-screen bg-white dark:bg-gray-950 animate-in slide-in-from-right duration-300">
+        <form onSubmit={handleSubmit} className="pb-80">
+          <header className="sticky top-0 z-40 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md px-6 py-6 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <button type="button" onClick={() => setStep('intro')} className="p-2 bg-gray-50 dark:bg-gray-800 rounded-xl text-gray-500 transition-all active:scale-90"><ChevronLeft size={20}/></button>
+              <h1 className="font-black text-lg text-gray-900 dark:text-white uppercase tracking-tighter">Solicitação de Orçamento Grátis</h1>
+            </div>
+          </header>
+
+          <main className="p-6 space-y-8">
+            <div className="space-y-6">
+
+              <div>
+                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1 mb-2 block">Nome do cliente *</label>
+                <input
+                  type="text"
+                  value={formData.clientName}
+                  onChange={e => setFormData({...formData, clientName: e.target.value})}
+                  placeholder="Digite seu nome"
+                  className={`w-full bg-gray-50 dark:bg-gray-800 p-4 rounded-2xl border transition-all outline-none dark:text-white font-bold ${
+                    formData.clientName.length > 0 && !isClientNameValid ? 'border-amber-200' : 'border-transparent focus:border-[#1E5BFF]'
+                  }`}
+                  required
+                />
               </div>
               
-              <h2 className="text-lg font-bold text-white leading-tight max-w-[90%] mb-6">
-                Serviços Profissionais para Empresas e Condomínios
-              </h2>
-              
-              <button className="bg-[#0A46FF] text-white text-xs font-bold px-6 py-2.5 rounded-full shadow-lg hover:bg-blue-600 transition-all flex items-center gap-2">
-                Saiba mais
-                <ArrowRight className="w-3.5 h-3.5" />
-              </button>
+              <div>
+                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1 mb-2 block">Tipo de Serviço *</label>
+                <button 
+                  type="button"
+                  onClick={() => setIsServiceModalOpen(true)}
+                  className="w-full bg-gray-50 dark:bg-gray-800 p-4 rounded-2xl border border-transparent text-left flex items-center justify-between dark:text-white font-bold transition-all hover:bg-gray-100 dark:hover:bg-gray-700"
+                >
+                  <span className={formData.serviceType ? "text-gray-900 dark:text-white" : "text-gray-400"}>
+                    {formData.serviceType || "Selecione o serviço"}
+                  </span>
+                  <ChevronDown className="w-5 h-5 text-gray-400" />
+                </button>
+              </div>
+
+              <div>
+                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1 mb-2 block">Descrição detalhada *</label>
+                <textarea 
+                  value={formData.description}
+                  onChange={e => setFormData({...formData, description: e.target.value})}
+                  placeholder="O que exatamente você precisa?"
+                  rows={4}
+                  className={`w-full bg-gray-50 dark:bg-gray-800 p-4 rounded-2xl border transition-all outline-none dark:text-white font-medium resize-none ${
+                    formData.description.length > 0 && !isDescriptionValid ? 'border-amber-200' : 'border-transparent focus:border-[#1E5BFF]'
+                  }`}
+                  required
+                />
+                {formData.description.length > 0 && !isDescriptionValid && (
+                  <p className="text-[10px] text-amber-600 dark:text-amber-400 font-bold uppercase mt-2 ml-1 flex items-center gap-1">
+                    <AlertCircle size={10} /> Mínimo de 10 caracteres
+                  </p>
+                )}
+              </div>
+
+              <div>
+                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1 mb-2 block">Bairro de Jacarepaguá *</label>
+                <select 
+                  value={formData.neighborhood}
+                  onChange={e => setFormData({...formData, neighborhood: e.target.value})}
+                  className="w-full bg-gray-50 dark:bg-gray-800 p-4 rounded-2xl border border-transparent focus:border-[#1E5BFF] outline-none dark:text-white font-bold appearance-none"
+                  required
+                >
+                  <option value="">Selecione o bairro</option>
+                  {NEIGHBORHOODS.map(h => <option key={h} value={h}>{h}</option>)}
+                </select>
+              </div>
+
+              <div>
+                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1 mb-2 block">Urgência *</label>
+                <div className="grid grid-cols-3 gap-2">
+                  {(['Hoje', 'Essa semana', 'Sem pressa'] as const).map(u => (
+                    <button
+                      key={u}
+                      type="button"
+                      onClick={() => setFormData({...formData, urgency: u})}
+                      className={`py-3 rounded-xl text-[10px] font-black uppercase tracking-widest border-2 transition-all ${formData.urgency === u ? 'bg-blue-50 border-[#1E5BFF] text-[#1E5BFF]' : 'bg-white dark:bg-gray-800 border-gray-100 dark:border-gray-700 text-gray-400'}`}
+                    >
+                      {u}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <div className="flex justify-between items-center mb-2 px-1">
+                  <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Fotos (Máx 3)</label>
+                  <span className="text-[10px] font-bold text-gray-400">{formData.images.length}/3</span>
+                </div>
+                <div className="flex gap-3">
+                  {formData.images.map((img, i) => (
+                    <div key={i} className="relative w-20 h-20 rounded-2xl overflow-hidden border border-gray-100 dark:border-gray-800 shadow-sm">
+                      <img src={img} className="w-full h-full object-cover" alt="Service" />
+                      <button type="button" onClick={() => removeImage(i)} className="absolute top-1 right-1 p-1 bg-black/50 text-white rounded-full"><X size={10}/></button>
+                    </div>
+                  ))}
+                  {formData.images.length < 3 && (
+                    <label className="w-20 h-20 rounded-2xl border-2 border-dashed border-gray-200 dark:border-gray-700 flex flex-col items-center justify-center text-gray-300 cursor-pointer hover:bg-gray-50 transition-all">
+                      <Camera size={24} />
+                      <input type="file" className="hidden" accept="image/*" onChange={handleImageUpload} />
+                    </label>
+                  )}
+                </div>
+              </div>
             </div>
-            
-            <div className="absolute -right-6 -bottom-6 opacity-[0.05] pointer-events-none rotate-12">
-               <Shield className="w-48 h-48 text-white" />
-            </div>
+          </main>
+
+          {/* FOOTER FIXO ACIMA DA BOTTOM NAV */}
+          <footer className="fixed bottom-[80px] left-0 right-0 p-6 bg-white/95 dark:bg-gray-950/95 backdrop-blur-md border-t border-gray-100 dark:border-gray-800 max-w-md mx-auto z-50 shadow-[0_-10px_20px_rgba(0,0,0,0.05)]">
+            <button 
+              type="submit"
+              disabled={!isFormValid || isSubmitting}
+              className={`w-full font-black py-5 rounded-[2rem] shadow-xl transition-all uppercase tracking-widest text-sm flex items-center justify-center gap-3 ${
+                isFormValid && !isSubmitting
+                  ? 'bg-[#1E5BFF] text-white shadow-blue-500/20 active:scale-[0.98] cursor-pointer'
+                  : 'bg-gray-100 text-gray-300 cursor-not-allowed border-gray-200'
+              }`}
+            >
+              {isSubmitting ? (
+                <Loader2 size={20} className="animate-spin" />
+              ) : (
+                <>
+                  Solicitar orçamento gratuito 
+                  <Zap size={16} fill="currentColor" />
+                </>
+              )}
+            </button>
+          </footer>
+        </form>
+
+        {/* MODAL DE SELEÇÃO DE SERVIÇO */}
+        {isServiceModalOpen && (
+          <div className="fixed inset-0 z-[100] flex items-end justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-200" onClick={() => setIsServiceModalOpen(false)}>
+              <div className="bg-white dark:bg-gray-900 w-full max-w-md rounded-t-[2.5rem] p-6 shadow-2xl animate-in slide-in-from-bottom duration-300 relative h-[80vh] flex flex-col" onClick={e => e.stopPropagation()}>
+                  <div className="w-12 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full mx-auto mb-6 shrink-0"></div>
+                  <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4 px-2 shrink-0">Tipo de Serviço</h3>
+                  
+                  <div className="relative mb-4 shrink-0">
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
+                    <input 
+                      type="text" 
+                      value={serviceSearch}
+                      onChange={(e) => setServiceSearch(e.target.value)}
+                      placeholder="Pesquisar serviço..."
+                      className="w-full bg-gray-50 dark:bg-gray-800 border-none py-3 pl-11 pr-4 rounded-xl text-sm font-medium outline-none focus:ring-2 focus:ring-[#1E5BFF]/30 dark:text-white"
+                    />
+                  </div>
+
+                  <div className="flex-1 overflow-y-auto no-scrollbar space-y-1">
+                      {filteredServices.map(service => (
+                          <button 
+                            key={service} 
+                            type="button"
+                            onClick={() => {
+                              setFormData({...formData, serviceType: service});
+                              setIsServiceModalOpen(false);
+                              setServiceSearch('');
+                            }} 
+                            className={`w-full text-left px-4 py-3.5 rounded-xl font-medium transition-colors flex items-center justify-between ${formData.serviceType === service ? "bg-[#1E5BFF]/10 text-[#1E5BFF]" : "hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300"}`}
+                          >
+                              <span>{service}</span>
+                              {formData.serviceType === service && <Check className="w-4 h-4" />}
+                          </button>
+                      ))}
+                      {filteredServices.length === 0 && (
+                        <div className="py-12 text-center text-gray-400">
+                          <p className="text-sm font-medium uppercase tracking-widest">Nenhum serviço encontrado</p>
+                        </div>
+                      )}
+                  </div>
+              </div>
           </div>
-        </div>
-
+        )}
       </div>
+    );
+  }
 
-      {/* SMART STICKY CTA (Context Aware) */}
-      <div className={`fixed bottom-[70px] left-0 right-0 px-5 z-40 transition-all duration-300 transform ${showStickyCTA ? 'translate-y-0 opacity-100' : 'translate-y-20 opacity-0 pointer-events-none'}`}>
+  if (step === 'success') {
+    return (
+      <div className="min-h-screen bg-white dark:bg-gray-950 flex flex-col items-center justify-center p-8 text-center animate-in zoom-in duration-500">
+        <div className="w-24 h-24 bg-emerald-100 dark:bg-emerald-900/30 rounded-[2.5rem] flex items-center justify-center mb-8 text-emerald-600 dark:text-emerald-400 shadow-xl shadow-emerald-500/10">
+          <CheckCircle2 size={48} />
+        </div>
+        <h2 className="text-3xl font-black text-gray-900 dark:text-white uppercase tracking-tighter leading-none mb-4">Pedido Enviado!</h2>
+        <p className="text-gray-500 dark:text-gray-400 text-sm max-w-xs mx-auto leading-relaxed mb-12">
+            Seu pedido foi enviado para até 5 profissionais da sua região. Em instantes, os interessados entrarão em contato via chat.
+        </p>
         <button 
-            onClick={() => onSelectMacro('home', 'Geral')}
-            className="w-full bg-[#0A46FF] text-white font-bold py-3.5 rounded-full shadow-xl shadow-blue-600/30 flex items-center justify-between px-6 active:scale-[0.98] transition-transform"
+          onClick={() => {
+            if (onOpenChat && createdRequestId) {
+              onOpenChat(createdRequestId);
+            } else {
+              onNavigate('home');
+            }
+          }}
+          className="w-full max-w-sm bg-[#1E5BFF] text-white font-black py-5 rounded-[2rem] shadow-xl active:scale-[0.98] transition-all uppercase tracking-widest text-xs"
         >
-            <span className="flex items-center gap-2 text-sm">
-                <MessageSquare className="w-4 h-4 fill-white text-white" />
-                Pedir orçamento
-            </span>
-            <ArrowRight className="w-4 h-4" />
+          Acompanhar pelo chat
         </button>
       </div>
+    );
+  }
 
-    </div>
-  );
+  return null;
 };

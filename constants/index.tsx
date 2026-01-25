@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { 
   Utensils, ShoppingCart, Scissors, Heart, PawPrint, Home, Wrench, 
@@ -11,8 +12,7 @@ import {
   Baby, GraduationCap, Microscope, Brain, Sparkles, Smile, Beer, 
   Activity, Eye, FileText, Globe, Calendar, Music, PartyPopper, Globe2, Edit3, User, Bell, Search,
   Camera, Vote, Handshake, Flame, Milestone, History, Home as HomeIcon,
-  MessageCircle, HelpCircle, UserCheck, Recycle,
-  Navigation
+  MessageCircle, HelpCircle, UserCheck, Recycle
 } from 'lucide-react';
 import { AdType, Category, Store, Story, EditorialCollection, Job, CommunityPost, NeighborhoodCommunity } from '../types';
 
@@ -46,16 +46,221 @@ export const SUBCATEGORIES: Record<string, { name: string; icon: React.ReactNode
     { name: 'Comida Caseira', icon: <Utensils /> },
     { name: 'Hortifruti & Naturais', icon: <Apple /> },
   ],
-  // ... (outras subcategorias mantidas)
+  'Eventos': [
+    { name: 'Eventos no Bairro', icon: <MapIcon /> },
+    { name: 'Festas & Comemorações', icon: <PartyPopper /> },
+    { name: 'Feiras & Exposições', icon: <StoreIcon /> },
+    { name: 'Eventos Gastronômicos', icon: <Utensils /> },
+    { name: 'Eventos Culturais', icon: <Music /> },
+    { name: 'Eventos Esportivos', icon: <Dumbbell /> },
+    { name: 'Eventos Infantis', icon: <Baby /> },
+    { name: 'Eventos em Condomínio', icon: <Building2 /> },
+  ],
+  'Pets': [
+    { name: 'Veterinários', icon: <Stethoscope /> },
+    { name: 'Pet Shop', icon: <ShoppingCart /> },
+    { name: 'Banho & Tosa', icon: <Scissors /> },
+    { name: 'Adestramento', icon: <Award /> },
+    { name: 'Hospedagem Pet', icon: <HomeIcon /> },
+    { name: 'Passeadores', icon: <Users /> },
+    { name: 'Produtos Pet', icon: <Package /> },
+    { name: 'Pets Exóticos', icon: <Sparkles /> },
+  ],
+  'Pro': [
+    { name: 'Eletricista', icon: <Zap /> },
+    { name: 'Encanador', icon: <Droplets /> },
+    { name: 'Pintor', icon: <PaintRoller /> },
+    { name: 'Pedreiro', icon: <Hammer /> },
+    { name: 'Técnico em Informática', icon: <Laptop /> },
+    { name: 'Montador de Móveis', icon: <Settings /> },
+    { name: 'Marido de Aluguel', icon: <Wrench /> },
+    { name: 'Freelancers em Geral', icon: <Briefcase /> },
+  ],
+  'Saúde': [
+    { name: 'Clínicas', icon: <Building2 /> },
+    { name: 'Dentistas', icon: <Smile /> },
+    { name: 'Psicologia', icon: <Brain /> },
+    { name: 'Fisioterapia', icon: <Activity /> },
+    { name: 'Exames & Diagnósticos', icon: <Microscope /> },
+    { name: 'Nutrição', icon: <Apple /> },
+    { name: 'Terapias Alternativas', icon: <Sparkles /> },
+    { name: 'Saúde Preventiva', icon: <Shield /> },
+  ],
+  'Serviços': [
+    { name: 'Limpeza Residencial', icon: <Sparkles /> },
+    { name: 'Dedetização', icon: <Shield /> },
+    { name: 'Manutenção Geral', icon: <Settings /> },
+    { name: 'Chaveiro', icon: <Zap /> },
+    { name: 'Segurança', icon: <Shield /> },
+    { name: 'Serviços Rápidos', icon: <Zap /> },
+    { name: 'Assistência Técnica', icon: <Monitor /> },
+    { name: 'Instalações', icon: <Wrench /> },
+  ],
+  'Beleza': [
+    { name: 'Salão de Cabelo', icon: <Scissors /> },
+    { name: 'Barbearia', icon: <Scissors /> },
+    { name: 'Manicure & Pedicure', icon: <Star /> },
+    { name: 'Estética Facial', icon: <Sparkles /> },
+    { name: 'Estética Corporal', icon: <Activity /> },
+    { name: 'Maquiagem', icon: <Star /> },
+    { name: 'Sobrancelhas & Cílios', icon: <Eye /> },
+    { name: 'Spa & Relaxamento', icon: <Heart /> },
+  ],
+  'Autos': [
+    { name: 'Oficinas Mecânicas', icon: <Wrench /> },
+    { name: 'Lava-Jato', icon: <Droplets /> },
+    { name: 'Auto Elétrica', icon: <Zap /> },
+    { name: 'Pneus & Alinhamento', icon: <Settings /> },
+    { name: 'Funilaria & Pintura', icon: <PaintRoller /> },
+    { name: 'Peças & Accessories', icon: <Package /> },
+    { name: 'Vistoria & Documentação', icon: <FileText /> },
+    { name: 'Serviços Rápidos Auto', icon: <Zap /> },
+  ],
+  'Mercado': [
+    { name: 'Supermercados', icon: <ShoppingCart /> },
+    { name: 'Mercados de Bairro', icon: <HomeIcon /> },
+    { name: 'Atacarejo', icon: <Package /> },
+    { name: 'Conveniência', icon: <Clock /> },
+    { name: 'Produtos Importados', icon: <Globe /> },
+    { name: 'Bebidas', icon: <Beer /> },
+    { name: 'Produtos Congelados', icon: <Package /> },
+    { name: 'Assinaturas & Cestas', icon: <Calendar /> },
+  ],
+  'Casa': [
+    { name: 'Materiais de Construção', icon: <Hammer /> },
+    { name: 'Decoração', icon: <Sparkles /> },
+    { name: 'Iluminação', icon: <Zap /> },
+    { name: 'Móveis', icon: <HomeIcon /> },
+    { name: 'Eletrodomésticos', icon: <Monitor /> },
+    { name: 'Jardinagem', icon: <Leaf /> },
+    { name: 'Organização', icon: <LayoutGrid /> },
+    { name: 'Reforma & Obras', icon: <Hammer /> },
+  ],
+  'Esportes': [
+    { name: 'Academias', icon: <Dumbbell /> },
+    { name: 'Personal Trainer', icon: <Users /> },
+    { name: 'Esportes Coletivos', icon: <Users /> },
+    { name: 'Artes Marciais', icon: <Target /> },
+    { name: 'Yoga & Pilates', icon: <Activity /> },
+    { name: 'Dança', icon: <Music /> },
+    { name: 'Treino Funcional', icon: <Zap /> },
+    { name: 'Esportes ao Ar Livre', icon: <Plane /> },
+  ],
+  'Lazer': [
+    { name: 'Eventos', icon: <PartyPopper /> },
+    { name: 'Shows & Música', icon: <Music /> },
+    { name: 'Cinema & Teatro', icon: <Ticket /> },
+    { name: 'Bares & Baladas', icon: <Beer /> },
+    { name: 'Passeios', icon: <MapIcon /> },
+    { name: 'Turismo Local', icon: <Globe2 /> },
+    { name: 'Experiências', icon: <Sparkles /> },
+    { name: 'Atividades em Família', icon: <Users /> },
+  ],
+  'Educação': [
+    { name: 'Escolas', icon: <Building2 /> },
+    { name: 'Cursos Livres', icon: <GraduationCap /> },
+    { name: 'Idiomas', icon: <Globe2 /> },
+    { name: 'Reforço Escolar', icon: <Edit3 /> },
+    { name: 'Aulas Particulares', icon: <User /> },
+    { name: 'Educação Infantil', icon: <Baby /> },
+    { name: 'Cursos Profissionalizantes', icon: <Briefcase /> },
+    { name: 'Tecnologia & Programação', icon: <Laptop /> },
+  ],
+  'Farmácia': [
+    { name: 'Medicamentos', icon: <Pill /> },
+    { name: 'Genéricos', icon: <Tag /> },
+    { name: 'Manipulação', icon: <Microscope /> },
+    { name: 'Perfumaria', icon: <Star /> },
+    { name: 'Higiene & Cuidados', icon: <Heart /> },
+    { name: 'Testes Rápidos', icon: <Zap /> },
+    { name: 'Suplementos', icon: <Dumbbell /> },
+    { name: 'Delivery Farmácia', icon: <Package /> },
+  ],
+  'Moda': [
+    { name: 'Moda Feminina', icon: <Shirt /> },
+    { name: 'Moda Masculina', icon: <Shirt /> },
+    { name: 'Moda Infantil', icon: <Baby /> },
+    { name: 'Calçados', icon: <Star /> },
+    { name: 'Acessórios', icon: <Star /> },
+    { name: 'Moda Íntima', icon: <Heart /> },
+    { name: 'Moda Fitness', icon: <Dumbbell /> },
+    { name: 'Brechós', icon: <Tag /> },
+  ],
+  'Condomínio': [
+    { name: 'Avisos & Comunicados', icon: <Bell /> },
+    { name: 'Serviços para Condomínio', icon: <Wrench /> },
+    { name: 'Manutenção Predial', icon: <Hammer /> },
+    { name: 'Segurança Condominial', icon: <Shield /> },
+    { name: 'Limpeza & Portaria', icon: <Building2 /> },
+    { name: 'Indicações de Profissionais', icon: <Users /> },
+    { name: 'Eventos do Condomínio', icon: <Calendar /> },
+    { name: 'Achados & Perdidos', icon: <Search /> },
+  ],
 };
 
-export const STORES: Store[] = [
+const IMG_IDS: Record<string, string> = {
+  'Comida': '1504674900247-0877df9cc836',
+  'Pets': '1516734212186-a967f81ad0d7',
+  'Pro': '1486312338219-ce68d2c6f44d',
+  'Saúde': '1588776814546-1ffcf47267a5',
+  'Serviços': '1454165804606-c3d57bc86b40',
+  'Beleza': '1562322140-8baeececf3df',
+  'Autos': '1486262715619-67b85e0b08d3',
+  'Mercado': '1587854692152-cbe660dbbb88',
+  'Casa': '1524661135-423995f22d0b',
+  'Esportes': '1534438327276-14e5300c3a48',
+  'Lazer': '1517457373958-b7bdd4587205',
+  'Educação': '1556761175-5973dc0f32e7',
+  'Farmácia': '1587854692152-cbe660dbbb88',
+  'Moda': '1441986300917-64674bd600d8',
+  'Eventos': '1511632765486-a01980e01a18',
+  'Condomínio': '1570129477492-45c003edd2be'
+};
+
+const generateFakeStores = () => {
+    const allStores: Store[] = [];
+    const hoods = ["Freguesia", "Anil", "Taquara", "Pechincha", "Tanque", "Curicica"];
+    const modifiers = ["Gourmet", "Express", "da Villa", "Master", "do Bairro", "Central"];
+
+    Object.entries(SUBCATEGORIES).forEach(([catName, subs]) => {
+        subs.forEach(sub => {
+            // Gerar 6 lojas por subcategoria
+            for (let i = 1; i <= 6; i++) {
+                const isSponsored = i <= 3; // Primeiras 3 patrocinadas
+                const hood = hoods[i % hoods.length];
+                const rating = 4.2 + (Math.random() * 0.8);
+                const imgId = IMG_IDS[catName] || '1557804506-669a67965ba0';
+
+                allStores.push({
+                    id: `fake-${catName}-${sub.name}-${i}`.replace(/\s+/g, '-').toLowerCase(),
+                    name: `${sub.name} ${modifiers[i-1]}`,
+                    category: catName,
+                    subcategory: sub.name,
+                    rating: parseFloat(rating.toFixed(1)),
+                    reviewsCount: Math.floor(Math.random() * 500) + 20,
+                    distance: `${hood} • RJ`,
+                    neighborhood: hood,
+                    adType: isSponsored ? AdType.PREMIUM : AdType.ORGANIC,
+                    isSponsored: isSponsored,
+                    description: `O melhor em ${sub.name.toLowerCase()} de toda a região de ${hood}. Venha conhecer!`,
+                    image: `https://images.unsplash.com/photo-${imgId}?q=80&w=400&auto=format&fit=crop&sig=${sub.name}-${i}`,
+                    verified: Math.random() > 0.4,
+                    isOpenNow: Math.random() > 0.2
+                });
+            }
+        });
+    });
+    return allStores;
+};
+
+// Dados Fixos de Lojas (Preservados para consistência)
+const BASE_STORES: Store[] = [
   {
     id: 'grupo-esquematiza',
     name: 'Grupo Esquematiza',
     category: 'Serviços',
     subcategory: 'Segurança e Facilities',
-    description: 'Líder em segurança, limpeza e facilities para condomínios e empresas em toda Jacarepaguá. Atendimento personalizado com foco em tecnologia e profissionais altamente treinados para garantir o bem-estar do seu patrimônio.',
+    description: 'Líder em segurança, limpeza e facilities para condomínios e empresas.',
     logoUrl: 'https://images.unsplash.com/photo-1560179707-f14e90ef3dab?q=80&w=200&auto=format&fit=crop',
     image: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?q=80&w=800&auto=format&fit=crop',
     rating: 5.0,
@@ -63,373 +268,18 @@ export const STORES: Store[] = [
     distance: 'Freguesia • RJ',
     neighborhood: 'Freguesia',
     adType: AdType.PREMIUM,
-    rua: 'Rua Cândido de Figueiredo',
-    numero: '204',
-    bairro: 'Tanque',
-    cidade: 'Rio de Janeiro',
-    whatsapp_publico: '21985559480',
-    telefone_fixo_publico: '2133445566',
-    instagram: '@grupoesquematiza',
-    business_hours: {
-      segunda: { open: true, start: '08:00', end: '18:00' },
-      terca: { open: true, start: '08:00', end: '18:00' },
-      quarta: { open: true, start: '08:00', end: '18:00' },
-      quinta: { open: true, start: '08:00', end: '18:00' },
-      sexta: { open: true, start: '08:00', end: '18:00' },
-      sabado: { open: false, start: '09:00', end: '14:00' },
-      domingo: { open: false, start: '10:00', end: '14:00' },
-    },
-    payment_methods: ['Pix', 'Faturamento (B2B)', 'Cartão de Crédito'],
-    recentComments: [
-      'Serviço de portaria excelente, muito educados.',
-      'A limpeza do condomínio melhorou 100% com eles.',
-      'Equipe muito profissional e atenciosa.'
-    ],
+    address: 'R. Cândido de Figueiredo, 204 – Tanque',
+    phone: '(21) 98555-9480',
+    hours: 'Seg a Sex • 08h às 18h',
     verified: true,
     isOpenNow: true,
     isSponsored: true
-  },
-  { 
-    id: 'f-1', 
-    name: 'Bibi Lanches', 
-    category: 'Comida', 
-    subcategory: 'Lanches & Hamburguerias', 
-    rating: 4.8, 
-    reviewsCount: 1240,
-    distance: 'Freguesia', 
-    adType: AdType.PREMIUM, 
-    description: 'O tradicional lanche do Rio agora com o melhor atendimento da Freguesia. Sucos naturais fresquinhos, sanduíches icônicos e os melhores petiscos para o seu pós-praia ou final de dia no bairro.',
-    rua: 'Estrada de Jacarepaguá',
-    numero: '7500',
-    bairro: 'Freguesia',
-    cidade: 'Rio de Janeiro',
-    whatsapp_publico: '21998877665',
-    telefone_fixo_publico: '2124251234',
-    instagram: '@bibilanches_oficial',
-    business_hours: {
-      segunda: { open: true, start: '11:00', end: '00:00' },
-      terca: { open: true, start: '11:00', end: '00:00' },
-      quarta: { open: true, start: '11:00', end: '00:00' },
-      quinta: { open: true, start: '11:00', end: '00:00' },
-      sexta: { open: true, start: '11:00', end: '01:00' },
-      sabado: { open: true, start: '11:00', end: '01:00' },
-      domingo: { open: true, start: '11:00', end: '23:30' },
-    },
-    payment_methods: ['Pix', 'Crédito', 'Débito', 'Dinheiro', 'Vale Refeição'],
-    recentComments: [
-      'Melhor suco de manga da região!',
-      'O hambúrguer clássico nunca decepciona.',
-      'Ambiente agradável para ir com a família.'
-    ],
-    isSponsored: true, 
-    image: 'https://images.unsplash.com/photo-1561758033-d89a9ad46330?q=80&w=400&auto=format&fit=crop',
-    verified: true,
-    isOpenNow: true
-  },
-  { 
-    id: 'f-2', 
-    name: 'Studio Hair Vip', 
-    category: 'Beleza', 
-    subcategory: 'Salão de Cabelo', 
-    rating: 4.9, 
-    reviewsCount: 850,
-    distance: 'Taquara', 
-    adType: AdType.PREMIUM, 
-    description: 'Especialistas em coloração, mechas e cortes modernos. No Studio Hair Vip, cuidamos da sua autoestima com os melhores produtos do mercado mundial. Atendimento com hora marcada para sua maior comodidade.',
-    rua: 'Estrada do Rio Grande',
-    numero: '120',
-    bairro: 'Taquara',
-    cidade: 'Rio de Janeiro',
-    whatsapp_publico: '21912345678',
-    instagram: '@studiohairvip_jpa',
-    business_hours: {
-      segunda: { open: false, start: '09:00', end: '18:00' },
-      terca: { open: true, start: '09:00', end: '19:00' },
-      quarta: { open: true, start: '09:00', end: '19:00' },
-      quinta: { open: true, start: '09:00', end: '19:00' },
-      sexta: { open: true, start: '09:00', end: '20:00' },
-      sabado: { open: true, start: '08:00', end: '20:00' },
-      domingo: { open: false, start: '10:00', end: '14:00' },
-    },
-    payment_methods: ['Pix', 'Crédito', 'Débito'],
-    recentComments: [
-      'Minhas luzes ficaram perfeitas! Recomendo.',
-      'Atendimento de primeira, muito atenciosos.',
-      'Melhor salão da Taquara sem dúvidas.'
-    ],
-    isSponsored: true, 
-    image: 'https://images.unsplash.com/photo-1562322140-8baeececf3df?q=80&w=400&auto=format&fit=crop',
-    verified: true
-  },
-  { 
-    id: 'f-3', 
-    name: 'Pet Shop Alegria', 
-    category: 'Pets', 
-    subcategory: 'Pet Shop', 
-    rating: 4.7, 
-    reviewsCount: 320,
-    distance: 'Pechincha', 
-    adType: AdType.PREMIUM, 
-    description: 'Banho, tosa, veterinário e uma grande variedade de acessórios para o seu melhor amigo. Tratamos seu pet como se fosse nosso, com todo o carinho e cuidado que ele merece.',
-    rua: 'Avenida Geremário Dantas',
-    numero: '500',
-    bairro: 'Pechincha',
-    cidade: 'Rio de Janeiro',
-    whatsapp_publico: '21977778888',
-    business_hours: {
-      segunda: { open: true, start: '09:00', end: '18:00' },
-      terca: { open: true, start: '09:00', end: '18:00' },
-      quarta: { open: true, start: '09:00', end: '18:00' },
-      quinta: { open: true, start: '09:00', end: '18:00' },
-      sexta: { open: true, start: '09:00', end: '18:00' },
-      sabado: { open: true, start: '09:00', end: '14:00' },
-      domingo: { open: false, start: '10:00', end: '14:00' },
-    },
-    payment_methods: ['Pix', 'Crédito', 'Débito', 'Dinheiro'],
-    recentComments: [
-      'A tosa ficou linda e meu cachorro saiu feliz.',
-      'Dra. Paula é uma excelente veterinária.',
-      'Preços justos e muita variedade de ração.'
-    ],
-    isSponsored: true, 
-    image: 'https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?q=80&w=400&auto=format&fit=crop',
-    verified: true
-  },
-  { 
-    id: 'f-4', 
-    name: 'Mecânica 24h', 
-    category: 'Autos', 
-    subcategory: 'Oficinas Mecânicas', 
-    rating: 4.5, 
-    reviewsCount: 112,
-    distance: 'Anil', 
-    adType: AdType.PREMIUM, 
-    description: 'Socorro mecânico especializado disponível 24 horas por dia. Reboque, recarga de bateria, troca de pneus e diagnósticos rápidos para que você não fique na mão.',
-    rua: 'Estrada de Jacarepaguá',
-    numero: '4200',
-    bairro: 'Anil',
-    cidade: 'Rio de Janeiro',
-    whatsapp_publico: '21955554444',
-    business_hours: {
-      segunda: { open: true, start: '00:00', end: '23:59' },
-      terca: { open: true, start: '00:00', end: '23:59' },
-      quarta: { open: true, start: '00:00', end: '23:59' },
-      quinta: { open: true, start: '00:00', end: '23:59' },
-      sexta: { open: true, start: '00:00', end: '23:59' },
-      sabado: { open: true, start: '00:00', end: '23:59' },
-      domingo: { open: true, start: '00:00', end: '23:59' },
-    },
-    payment_methods: ['Pix', 'Crédito', 'Dinheiro'],
-    recentComments: [
-      'Me salvaram às 3 da manhã na Linha Amarela.',
-      'Serviço honesto e preço justo pela urgência.',
-      'Mecânico muito experiente.'
-    ],
-    isSponsored: true, 
-    image: 'https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?q=80&w=400&auto=format&fit=crop' 
-  },
-  { 
-    id: 'f-5', 
-    name: 'Pizzaria do Zé', 
-    category: 'Comida', 
-    subcategory: 'Pizzarias', 
-    rating: 4.6, 
-    reviewsCount: 540,
-    distance: 'Freguesia', 
-    adType: AdType.PREMIUM, 
-    description: 'A pizza mais crocante da Freguesia, feita no tradicional forno a lenha. Sabores clássicos e receitas exclusivas do mestre pizzaiolo Zé.',
-    rua: 'Rua Araguaia',
-    numero: '230',
-    bairro: 'Freguesia',
-    cidade: 'Rio de Janeiro',
-    whatsapp_publico: '21944443333',
-    business_hours: {
-      segunda: { open: true, start: '18:00', end: '23:30' },
-      terca: { open: true, start: '18:00', end: '23:30' },
-      quarta: { open: true, start: '18:00', end: '23:30' },
-      quinta: { open: true, start: '18:00', end: '23:30' },
-      sexta: { open: true, start: '18:00', end: '00:30' },
-      sabado: { open: true, start: '18:00', end: '00:30' },
-      domingo: { open: true, start: '18:00', end: '23:30' },
-    },
-    payment_methods: ['Pix', 'Crédito', 'Débito', 'Dinheiro'],
-    recentComments: [
-      'Massa fininha e recheio caprichado.',
-      'A de Calabresa com cebola é imbatível.',
-      'Entrega sempre no prazo.'
-    ],
-    isSponsored: true, 
-    image: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?q=80&w=400&auto=format&fit=crop' 
-  },
-  { 
-    id: 'f-6', 
-    name: 'Açaí da Praça', 
-    category: 'Comida', 
-    subcategory: 'Doces & Sobremesas', 
-    rating: 4.9, 
-    reviewsCount: 920,
-    distance: 'Tanque', 
-    adType: AdType.PREMIUM, 
-    description: 'O açaí mais cremoso e gelado da região. Diversas opções de acompanhamentos frescos e montagem do seu jeito. Refresque seu dia com o verdadeiro sabor do Norte.',
-    rua: 'Praça do Tanque',
-    numero: 's/n',
-    bairro: 'Tanque',
-    cidade: 'Rio de Janeiro',
-    whatsapp_publico: '21933332222',
-    business_hours: {
-      segunda: { open: true, start: '10:00', end: '21:00' },
-      terca: { open: true, start: '10:00', end: '21:00' },
-      quarta: { open: true, start: '10:00', end: '21:00' },
-      quinta: { open: true, start: '10:00', end: '21:00' },
-      sexta: { open: true, start: '10:00', end: '22:00' },
-      sabado: { open: true, start: '10:00', end: '22:00' },
-      domingo: { open: true, start: '10:00', end: '21:00' },
-    },
-    payment_methods: ['Pix', 'Crédito', 'Débito', 'Dinheiro'],
-    recentComments: [
-      'Açaí puro e sem cristais de gelo.',
-      'O creme de leite ninho deles é surreal!',
-      'Ponto de encontro perfeito no Tanque.'
-    ],
-    isSponsored: true, 
-    image: 'https://images.unsplash.com/photo-1590301157890-4810ed352733?q=80&w=400&auto=format&fit=crop' 
-  },
-  { 
-    id: 'f-7', 
-    name: 'Drogaria JPA', 
-    category: 'Farmácia', 
-    subcategory: 'Medicamentos', 
-    rating: 4.4, 
-    reviewsCount: 205,
-    distance: 'Freguesia', 
-    adType: AdType.PREMIUM, 
-    description: 'Ampla linha de medicamentos genéricos e de marca, além de perfumaria e cuidados pessoais. Entrega domiciliar rápida para toda a região de Jacarepaguá.',
-    rua: 'Estrada dos Três Rios',
-    numero: '1100',
-    bairro: 'Freguesia',
-    cidade: 'Rio de Janeiro',
-    whatsapp_publico: '21922221111',
-    telefone_fixo_publico: '2133440000',
-    business_hours: {
-      segunda: { open: true, start: '07:00', end: '23:00' },
-      terca: { open: true, start: '07:00', end: '23:00' },
-      quarta: { open: true, start: '07:00', end: '23:00' },
-      quinta: { open: true, start: '07:00', end: '23:00' },
-      sexta: { open: true, start: '07:00', end: '23:00' },
-      sabado: { open: true, start: '08:00', end: '22:00' },
-      domingo: { open: true, start: '08:00', end: '20:00' },
-    },
-    payment_methods: ['Pix', 'Crédito', 'Débito', 'Dinheiro'],
-    recentComments: [
-      'Sempre encontro o que preciso.',
-      'O delivery é muito rápido mesmo.',
-      'Farmacêuticos atenciosos.'
-    ],
-    isSponsored: true, 
-    image: 'https://images.unsplash.com/photo-1587854692152-cbe660dbbb88?q=80&w=400&auto=format&fit=crop' 
-  },
-  { 
-    id: 'f-8', 
-    name: 'Academia FitBairro', 
-    category: 'Esportes', 
-    subcategory: 'Academias', 
-    rating: 4.7, 
-    reviewsCount: 380,
-    distance: 'Taquara', 
-    adType: AdType.PREMIUM, 
-    description: 'Equipamentos modernos e professores dedicados para ajudar você a alcançar seus objetivos. Musculação, funcional e aulas coletivas em um ambiente motivador e climatizado.',
-    rua: 'Rua Nelson Cardoso',
-    numero: '800',
-    bairro: 'Taquara',
-    cidade: 'Rio de Janeiro',
-    whatsapp_publico: '21911110000',
-    business_hours: {
-      segunda: { open: true, start: '06:00', end: '22:00' },
-      terca: { open: true, start: '06:00', end: '22:00' },
-      quarta: { open: true, start: '06:00', end: '22:00' },
-      quinta: { open: true, start: '06:00', end: '22:00' },
-      sexta: { open: true, start: '06:00', end: '22:00' },
-      sabado: { open: true, start: '08:00', end: '14:00' },
-      domingo: { open: false, start: '10:00', end: '14:00' },
-    },
-    payment_methods: ['Pix', 'Crédito', 'Débito'],
-    recentComments: [
-      'Ótimo custo-benefício.',
-      'Professores muito presentes na sala.',
-      'Ambiente limpo e organizado.'
-    ],
-    isSponsored: true, 
-    image: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=400&auto=format&fit=crop',
-    verified: true
-  },
-  { 
-    id: 'f-9', 
-    name: 'Consultório Dra. Ana', 
-    category: 'Saúde', 
-    subcategory: 'Dentistas', 
-    rating: 5.0, 
-    reviewsCount: 65,
-    distance: 'Freguesia', 
-    adType: AdType.PREMIUM, 
-    description: 'Odontologia moderna com foco no conforto do paciente. Clínica geral, ortodontia e estética dental com tecnologia de ponta para devolver o seu melhor sorriso.',
-    rua: 'Rua Comendador Siqueira',
-    numero: '350',
-    bairro: 'Freguesia',
-    cidade: 'Rio de Janeiro',
-    whatsapp_publico: '21900009999',
-    business_hours: {
-      segunda: { open: true, start: '09:00', end: '18:00' },
-      terca: { open: true, start: '09:00', end: '18:00' },
-      quarta: { open: true, start: '09:00', end: '18:00' },
-      quinta: { open: true, start: '09:00', end: '18:00' },
-      sexta: { open: true, start: '09:00', end: '17:00' },
-      sabado: { open: false, start: '09:00', end: '14:00' },
-      domingo: { open: false, start: '10:00', end: '14:00' },
-    },
-    payment_methods: ['Pix', 'Crédito', 'Débito'],
-    recentComments: [
-      'Extremamente cuidadosa e detalhista.',
-      'Não senti dor nenhuma no tratamento.',
-      'Consultório impecável.'
-    ],
-    isSponsored: true, 
-    image: 'https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?q=80&w=400&auto=format&fit=crop',
-    verified: true
-  },
-  { 
-    id: 'f-10', 
-    name: 'Boutique Chic', 
-    category: 'Moda', 
-    subcategory: 'Moda Feminina', 
-    rating: 4.3, 
-    reviewsCount: 42,
-    distance: 'Anil', 
-    adType: AdType.PREMIUM, 
-    description: 'Roupas e acessórios para mulheres que não abrem mão da elegância e do estilo. Peças selecionadas que acompanham as tendências da moda nacional e internacional.',
-    rua: 'Estrada de Jacarepaguá',
-    numero: '5000',
-    bairro: 'Anil',
-    cidade: 'Rio de Janeiro',
-    whatsapp_publico: '21988887777',
-    instagram: '@boutiquechic_jpa',
-    business_hours: {
-      segunda: { open: true, start: '10:00', end: '19:00' },
-      terca: { open: true, start: '10:00', end: '19:00' },
-      quarta: { open: true, start: '10:00', end: '19:00' },
-      quinta: { open: true, start: '10:00', end: '19:00' },
-      sexta: { open: true, start: '10:00', end: '19:00' },
-      sabado: { open: true, start: '09:00', end: '18:00' },
-      domingo: { open: false, start: '10:00', end: '14:00' },
-    },
-    payment_methods: ['Pix', 'Crédito', 'Débito', 'Dinheiro'],
-    recentComments: [
-      'Peças exclusivas e de ótima qualidade.',
-      'O atendimento da vendedora Sheila foi ótimo.',
-      'Sempre encontro looks lindos aqui.'
-    ],
-    isSponsored: true, 
-    image: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=400&auto=format&fit=crop' 
-  },
+  }
+];
+
+export const STORES: Store[] = [
+  ...BASE_STORES,
+  ...generateFakeStores()
 ];
 
 export const EDITORIAL_SERVICES: EditorialCollection[] = [
@@ -452,8 +302,7 @@ export const EDITORIAL_SERVICES: EditorialCollection[] = [
 export const quickFilters = [
   { id: 'top_rated', label: 'Top Avaliados', icon: 'star' },
   { id: 'open_now', label: 'Aberto Agora', icon: 'clock' },
-  { id: 'nearby', label: 'Perto de Mim', icon: 'zap' },
-  { id: 'cashback', label: 'Com Cashback', icon: 'percent' }
+  { id: 'nearby', label: 'Perto de Mim', icon: 'zap' }
 ];
 
 export const STORIES: Story[] = [
@@ -471,7 +320,7 @@ export const MOCK_JOBS: Job[] = [
     category: 'Alimentação',
     type: 'CLT',
     salary: 'R$ 1.450,00',
-    description: 'Atendimento ao público, organization e limpeza do local.',
+    description: 'Atendimento ao público, organização e limpeza do local.',
     requirements: ['Experiência anterior', 'Boa comunicação'],
     schedule: '6x1',
     contactWhatsapp: '5521999999999',

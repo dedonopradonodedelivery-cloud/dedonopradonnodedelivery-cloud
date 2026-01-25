@@ -1,7 +1,6 @@
 
 import React from 'react';
 
-// From original types.ts
 export type ThemeMode = 'light' | 'dark' | 'auto';
 
 export enum AdType {
@@ -29,43 +28,10 @@ export interface StoreReview {
   };
 }
 
-// Added StoreCredit to fix import error in UserWalletView.tsx
-export interface StoreCredit {
-  id: string;
-  user_id: string;
-  store_id: string;
-  store_name: string;
-  store_logo?: string;
-  balance_cents: number; 
-  expiring_soon_cents?: number; 
-  updated_at: string;
-}
-
-// Added CashbackTransaction to fix import error in MerchantCashbackRequests.tsx
-export interface CashbackTransaction {
-  id: string;
-  user_id: string;
-  user_name?: string;
-  store_id: string;
-  merchant_id: string;
-  amount_cents: number; 
-  purchase_total_cents?: number; 
-  type: 'earn' | 'use';
-  status: 'pending' | 'approved' | 'rejected' | 'expired';
-  created_at: string;
-  approved_at?: string;
-  customer_id?: string;
-  customer_name?: string;
-  total_amount_cents?: number;
-  cashback_used_cents?: number;
-  cashback_to_earn_cents?: number;
-  amount_to_pay_now_cents?: number;
-  rejected_at?: string;
-}
-
+// Fixed: Expanded Store interface with all properties used in object literals throughout the app
 export interface Store {
   id: string;
-  name: string; // Nome fantasia / exibido
+  name: string;
   category: string;
   subcategory: string;
   logoUrl?: string; 
@@ -80,28 +46,39 @@ export interface Store {
   reviewsCount?: number;
   isOpenNow?: boolean;
   neighborhood?: string;
+  is_delivery_only?: boolean;
+  claimed?: boolean;
+  owner_user_id?: string;
+  payment_methods?: string[];
+  business_hours?: Record<string, BusinessHour>;
+  address?: string;
   isSponsored?: boolean;
-  recentComments?: string[];
-  recentReviews?: StoreReview[]; // Campo para avaliações estruturadas
+  rua?: string;
+  numero?: string;
+  complemento?: string;
+  bairro?: string;
+  cidade?: string;
+  whatsapp_publico?: string;
+  telefone_fixo_publico?: string;
+  instagram?: string;
   isMarketplace?: boolean;
   price_original?: number;
   price_current?: number;
-  address?: string;
-  phone?: string;
-  hours?: string; // Mantido para compatibilidade legado
-  instagram?: string;
-  gallery?: string[];
   distanceKm?: number;
-  closingTime?: string;
-
-  // --- DADOS DE CASHBACK (V1.5) ---
-  cashback_active?: boolean;
+  phone?: string;
+  hours?: string;
   cashback_percent?: number;
+  cashback_active?: boolean;
   cashback_validity_days?: number;
   store_manual_code?: string;
+  secure_id?: string;
   onboarding_cashback_completed?: boolean;
-
-  // --- DADOS FISCAIS ---
+  onboarding_cashback_completed_at?: string;
+  recentComments?: string[];
+  gallery?: string[];
+  closingTime?: string;
+  estado?: string;
+  nome_exibido?: string;
   razao_social?: string;
   cnpj?: string;
   email_fiscal?: string;
@@ -109,65 +86,46 @@ export interface Store {
   telefone_fixo_fiscal?: string;
   inscricao_municipal?: string;
   inscricao_estadual?: string;
-
-  // --- DADOS PÚBLICOS ---
-  nome_exibido?: string;
-  whatsapp_publico?: string;
-  telefone_fixo_publico?: string;
   email_publico?: string;
-  
-  // --- ENDEREÇO DETALHADO ---
-  cep?: string;
-  rua?: string;
-  numero?: string;
-  complemento?: string;
-  bairro?: string;
-  cidade?: string;
-  estado?: string;
-  is_delivery_only?: boolean;
-
-  // --- NOVOS CAMPOS ESTRUTURADOS ---
-  business_hours?: Record<string, BusinessHour>;
-  payment_methods?: string[];
-  payment_methods_others?: string;
-
-  // --- PROPRIEDADE E REIVINDICAÇÃO ---
-  claimed?: boolean;
-  owner_user_id?: string;
 }
 
-export interface UserCoupon {
+// --- TIPOS DE SERVIÇOS LOCAIS (V1) ---
+
+export type ServiceUrgency = 'Hoje' | 'Essa semana' | 'Sem pressa';
+
+export interface ServiceRequest {
   id: string;
   userId: string;
-  storeId: string;
-  storeName: string;
-  storeLogo?: string;
-  discountType: 'percentage' | 'fixed';
-  discountValue: number;
-  code: string;
-  status: 'active' | 'used' | 'expired';
-  redeemedAt: string; // Data de resgate (início da validade)
-  expiresAt: string; // Data de expiração (7 dias após resgate)
-  validatedAt?: string; // Data de uso na loja
+  userName: string;
+  serviceType: string;
+  description: string;
+  neighborhood: string;
+  urgency: ServiceUrgency;
+  images: string[];
+  status: 'open' | 'closed';
+  createdAt: string;
 }
 
-export interface StoreClaimRequest {
+export interface ServiceLead {
   id: string;
-  store_id: string;
-  store_name: string;
-  user_id: string;
-  user_email: string;
-  method: 'whatsapp' | 'email' | 'manual';
-  status: 'pending' | 'approved' | 'rejected';
-  created_at: string;
-  // Campos para manual
-  responsible_name?: string;
-  cnpj?: string;
-  contact_phone?: string;
-  justification?: string;
-  attachments?: string[]; // URLs de comprovantes
+  requestId: string;
+  merchantId: string;
+  merchantName: string;
+  status: 'pending_payment' | 'paid';
+  purchasedAt?: string;
 }
 
+export interface ServiceMessage {
+  id: string;
+  requestId: string;
+  senderId: string;
+  senderName: string;
+  senderRole: 'resident' | 'merchant';
+  text: string;
+  timestamp: string;
+}
+
+// Re-exporting common types
 export interface Category {
   id: string;
   name: string;
@@ -181,20 +139,7 @@ export interface ChatMessage {
   text: string;
 }
 
-export interface Story {
-  id: string;
-  name: string;
-  image: string;
-}
-
-export interface EditorialCollection {
-  id: string;
-  title: string;
-  subtitle: string;
-  image: string;
-  keywords: string[];
-}
-
+// Fixed: Expanded Job interface with missing properties
 export interface Job {
   id: string;
   role: string;
@@ -205,31 +150,24 @@ export interface Job {
   salary?: string;
   description: string;
   requirements: string[];
-  schedule: string;
-  contactWhatsapp: string;
   postedAt: string;
-  isUrgent?: boolean;
+  isUrgentToday?: boolean;
+  schedule?: string;
+  contactWhatsapp?: string;
   isSponsored?: boolean;
   sponsoredUntil?: string;
-  isUrgentToday?: boolean;
+  isUrgent?: boolean;
 }
 
-export type ClassifiedCategory = 'Empregos' | 'Serviços' | 'Compra & Venda' | 'Avisos';
-
-export interface Classified {
+export interface NeighborhoodCommunity {
   id: string;
-  title: string;
-  advertiser: string;
-  category: ClassifiedCategory;
-  neighborhood: string;
+  name: string;
   description: string;
-  timestamp: string;
-  contactWhatsapp: string;
-  typeLabel: string; // CLT, PJ, Venda, Troca, etc.
-  price?: string;
-  isUrgent?: boolean;
-  isSponsored?: boolean;
-  jobDetails?: Job; // Reutilização do objeto Job existente
+  image: string;
+  icon: React.ReactNode;
+  color: string;
+  membersCount: string;
+  type?: 'official' | 'user';
 }
 
 export interface CommunityPost {
@@ -248,47 +186,67 @@ export interface CommunityPost {
   imageUrl?: string;
 }
 
-export interface NeighborhoodCommunity {
+export type TaxonomyType = 'category' | 'subcategory' | 'specialty';
+
+// Added missing interfaces to fix build errors
+export interface Story {
   id: string;
   name: string;
-  description: string;
   image: string;
-  icon: React.ReactNode;
-  color: string;
-  membersCount: string;
-  type?: 'official' | 'user';
 }
 
-export interface CommunitySuggestion {
+export interface EditorialCollection {
   id: string;
-  name: string;
-  votes: number;
-  status: 'pending' | 'approved' | 'rejected';
-  creatorId: string;
-  voterIds: string[];
-}
-
-export interface TaxonomySuggestion {
-  id: string;
-  type: 'category' | 'subcategory';
-  name: string;
-  parentName?: string;
-  justification?: string;
-  status: 'pending' | 'approved' | 'rejected';
-  rejectionReason?: string;
-  storeName: string;
-  merchantId: string;
-  createdAt: string;
-}
-
-export interface AppNotification {
-  id: string;
-  userId: string;
   title: string;
-  message: string;
-  type: 'taxonomy_approval' | 'taxonomy_rejection' | 'system' | 'job_push' | 'claim_approval' | 'claim_rejection' | 'new_review';
-  read: boolean;
-  createdAt: string;
+  subtitle: string;
+  image: string;
+  keywords: string[];
+}
+
+export interface Classified {
+  id: string;
+  title: string;
+  advertiser: string;
+  category: string;
+  neighborhood: string;
+  description: string;
+  timestamp: string;
+  contactWhatsapp: string;
+  typeLabel: string;
+  price?: string;
+  jobDetails?: Job;
+}
+
+export interface StoreCredit {
+  id: string;
+  user_id: string;
+  store_id: string;
+  store_name: string;
+  store_logo?: string;
+  balance_cents: number;
+  expiring_soon_cents?: number;
+  updated_at: string;
+}
+
+export interface CashbackTransaction {
+  id: string;
+  user_id: string;
+  user_name?: string;
+  store_id: string;
+  merchant_id: string;
+  amount_cents: number;
+  purchase_total_cents?: number;
+  type: 'earn' | 'use';
+  status: 'pending' | 'approved' | 'rejected' | 'expired';
+  created_at: string;
+  approved_at?: string;
+  customer_id?: string;
+  customer_name?: string;
+  total_amount_cents?: number;
+  cashback_used_cents?: number;
+  cashback_to_earn_cents?: number;
+  amount_to_pay_now_cents?: number;
+  rejected_at?: string;
 }
 
 export type ReportReason = 'spam' | 'offensive' | 'fraud' | 'wrong_neighborhood' | 'other';
@@ -311,13 +269,50 @@ export interface PostReport {
   postThumbnail: string;
 }
 
-// From src/backend/types.ts
+export interface TaxonomySuggestion {
+  id: string;
+  type: 'category' | 'subcategory' | 'specialty';
+  name: string;
+  parentName?: string;
+  justification?: string;
+  status: 'pending' | 'approved' | 'rejected';
+  storeName: string;
+  createdAt: string;
+  merchantId: string;
+  rejectionReason?: string;
+}
+
+export interface AppNotification {
+  id: string;
+  userId: string;
+  title: string;
+  message: string;
+  type: 'claim_approval' | 'claim_rejection' | 'taxonomy_approval' | 'taxonomy_rejection' | 'system';
+  read: boolean;
+  createdAt: string;
+}
+
+export interface StoreClaimRequest {
+  id: string;
+  store_id: string;
+  store_name: string;
+  user_id: string;
+  user_email: string;
+  method: 'whatsapp' | 'email' | 'manual';
+  status: 'pending' | 'approved' | 'rejected';
+  created_at: string;
+  responsible_name?: string;
+  cnpj?: string;
+  contact_phone?: string;
+  justification?: string;
+}
+
 export type TransactionStatus = 'pending' | 'approved' | 'rejected';
 export type SessionType = 'qr' | 'pin';
 export type MovementType = 'credit' | 'debit';
 
 export interface DbUser {
-  id: string; // uuid
+  id: string;
   name: string;
   email: string;
   wallet_balance: number;
@@ -325,15 +320,15 @@ export interface DbUser {
 }
 
 export interface DbMerchant {
-  id: string; // uuid
+  id: string;
   name: string;
-  cashback_percent: number; // numeric(5,2)
+  cashback_percent: number;
   is_active: boolean;
   created_at: string;
 }
 
 export interface DbMerchantSession {
-  id: string; // uuid
+  id: string;
   merchant_id: string;
   session_type: SessionType;
   pin_code?: string;
@@ -342,5 +337,27 @@ export interface DbMerchantSession {
   created_at: string;
 }
 
-// Added to fix import error in StoreProfileEdit.tsx
-export type TaxonomyType = 'category' | 'subcategory' | 'specialty';
+export interface DbCashbackTransaction {
+  id: string;
+  user_id: string;
+  merchant_id: string;
+  session_id?: string;
+  purchase_value: number;
+  amount_from_balance: number;
+  amount_to_pay: number;
+  cashback_value: number;
+  status: TransactionStatus;
+  created_at: string;
+  approved_at?: string;
+  rejected_at?: string;
+}
+
+export interface DbWalletMovement {
+  id: string;
+  user_id: string;
+  transaction_id?: string;
+  type: MovementType;
+  amount: number;
+  description: string;
+  created_at: string;
+}

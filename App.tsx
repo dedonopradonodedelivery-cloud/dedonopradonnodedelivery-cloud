@@ -9,36 +9,22 @@ import { AuthModal } from '@/components/AuthModal';
 import { MenuView } from '@/components/MenuView';
 import { PatrocinadorMasterScreen } from '@/components/PatrocinadorMasterScreen';
 import { ServicesView } from '@/components/ServicesView';
-import { SubcategoriesView } from '@/components/SubcategoriesView';
-import { SpecialtiesView } from '@/components/SpecialtiesView';
-import { QuoteRequestModal } from '@/components/QuoteRequestModal';
 import { StoreAreaView } from '@/components/StoreAreaView';
-import { UserCupomScreen } from '@/components/UserCupomScreen';
-import { UserCouponsHistoryView } from '@/components/UserCouponsHistoryView';
 import { ClassifiedsView } from '@/components/ClassifiedsView';
 import { MerchantPerformanceDashboard } from '@/components/MerchantPerformanceDashboard';
-import { WeeklyRewardPage } from '@/components/WeeklyRewardPage';
-import { MerchantWeeklyReward } from '@/components/MerchantWeeklyReward';
-import { MerchantJobsModule } from '@/components/MerchantJobsModule';
 import { NeighborhoodPostsView } from '@/components/NeighborhoodPostsView';
-import { MapPin, ShieldCheck, X, Palette } from 'lucide-react';
+import { AdminPanel } from '@/components/AdminPanel';
+import { MerchantLeadsView } from '@/components/MerchantLeadsView';
+import { ServiceChatView } from '@/components/ServiceChatView';
+import { CategoryView } from '@/components/CategoryView';
+import { SubcategoryDetailView } from '@/components/SubcategoryDetailView';
+import { SponsorInfoView } from '@/components/SponsorInfoView';
+import { MapPin, X, Palette } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import { NeighborhoodProvider } from '@/contexts/NeighborhoodContext';
 import { Category, Store } from '@/types';
-import { CategoryView } from '@/components/CategoryView';
-import { StoreProfileEdit } from '@/components/StoreProfileEdit';
-import { CommunityFeedView } from '@/components/CommunityFeedView';
-import { STORES } from '@/constants';
-import { AboutView, SupportView, FavoritesView } from '@/components/SimplePages';
-import { StoreClaimFlow } from '@/components/StoreClaimFlow';
-import { MerchantReviewsModule } from '@/components/MerchantReviewsModule';
-import { JPAConnectSalesView } from '@/components/JPAConnectSalesView';
-import { StoreAdsModule } from '@/components/StoreAdsModule';
-import { StoreAdsQuickLaunch } from '@/components/StoreAdsQuickLaunch';
-import { AdminPanel } from '@/components/AdminPanel';
-import { DesignerPanel } from '@/components/DesignerPanel';
-import { AdminBannerModeration } from '@/components/AdminBannerModeration';
+import { STORES, CATEGORIES } from '@/constants';
 
 let splashWasShownInSession = false;
 const ADMIN_EMAIL = 'dedonopradonodedelivery@gmail.com';
@@ -72,43 +58,23 @@ const App: React.FC = () => {
   const [isRoleSwitcherOpen, setIsRoleSwitcherOpen] = useState(false);
   
   const [activeTab, setActiveTab] = useState('home');
-  const [pendingTab, setPendingTab] = useState<string | null>(null);
-  const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
-  const [selectedStore, setSelectedStore] = useState<Store | null>(null);
-  const [isAuthOpen, setIsAuthOpen] = useState(false);
+  const [previousTab, setPreviousTab] = useState('home');
   const [globalSearch, setGlobalSearch] = useState('');
-  const [selectedServiceMacro, setSelectedServiceMacro] = useState<{id: string, name: string} | null>(null);
-  const [isQuoteModalOpen, setIsQuoteModalOpen] = useState(false);
-  const [quoteCategory, setQuoteCategory] = useState('');
-  const [adCategoryTarget, setAdCategoryTarget] = useState<string | null>(null);
-  const [initialStoreAdsView, setInitialStoreAdsView] = useState<'sales' | 'chat'>('sales');
+  const [selectedStore, setSelectedStore] = useState<Store | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
+  const [selectedSubcategoryName, setSelectedSubcategoryName] = useState<string | null>(null);
+  const [isAuthOpen, setIsAuthOpen] = useState(false);
+  
+  const [activeServiceRequestId, setActiveServiceRequestId] = useState<string | null>(null);
+  const [chatRole, setChatRole] = useState<'resident' | 'merchant' | 'admin'>('resident');
 
   const isMerchantMode = userRole === 'lojista' || (user?.email === ADMIN_EMAIL && viewMode === 'Lojista');
-  const isDesignerMode = user?.email === ADMIN_EMAIL && viewMode === 'Designer';
 
-  const handleNavigate = (view: string, initialView?: 'sales' | 'chat') => {
-    setInitialStoreAdsView(initialView || 'sales');
+  const handleNavigate = (view: string) => {
+    if (view !== 'sponsor_info') {
+      setPreviousTab(activeTab);
+    }
     setActiveTab(view);
-  };
-  
-  useEffect(() => {
-    const restrictedTabs = ['store_area', 'admin_panel', 'edit_profile', 'store_claim', 'merchant_reviews', 'designer_panel', 'user_coupons', 'merchant_weekly_reward', 'merchant_jobs'];
-    
-    if (restrictedTabs.includes(activeTab)) {
-      if (!isAuthInitialLoading && !user) {
-        setPendingTab(activeTab);
-        setActiveTab('home');
-        setIsAuthOpen(true);
-      }
-    }
-  }, [activeTab, user, isAuthInitialLoading]);
-
-  const handleLoginSuccess = () => {
-    setIsAuthOpen(false);
-    if (pendingTab) {
-      setActiveTab(pendingTab);
-      setPendingTab(null);
-    }
   };
 
   useEffect(() => {
@@ -118,10 +84,21 @@ const App: React.FC = () => {
     return () => { clearTimeout(t1); clearTimeout(t2); };
   }, []);
 
-  const handleSelectStore = (store: Store) => { setSelectedStore(store); setActiveTab('store_detail'); };
-  const headerExclusionList = ['store_area', 'editorial_list', 'store_profile', 'category_detail', 'store_detail', 'profile', 'patrocinador_master', 'service_subcategories', 'service_specialties', 'store_ads_module', 'store_ads_quick', 'merchant_performance', 'about', 'support', 'favorites', 'community_feed', 'admin_panel', 'admin_banner_moderation', 'store_claim', 'merchant_reviews', 'jpa_connect_sales', 'designer_panel', 'user_coupons', 'user_coupons_history', 'weekly_reward_page', 'neighborhood_posts', 'merchant_weekly_reward', 'merchant_jobs', 'classifieds'];
+  const handleSelectStore = (store: Store) => { setSelectedStore(store); handleNavigate('store_detail'); };
   
-  const hideBottomNav = ['admin_panel', 'weekly_reward_page', 'neighborhood_posts', 'merchant_weekly_reward', 'merchant_jobs'].includes(activeTab);
+  const handleSelectCategory = (category: Category) => {
+    setSelectedCategory(category);
+    handleNavigate('category_detail');
+  };
+
+  const handleSelectSubcategory = (subName: string, parentCat: Category) => {
+    setSelectedSubcategoryName(subName);
+    setSelectedCategory(parentCat);
+    handleNavigate('subcategory_detail');
+  };
+
+  const headerExclusionList = ['store_area', 'store_detail', 'profile', 'patrocinador_master', 'merchant_performance', 'neighborhood_posts', 'classifieds', 'services', 'merchant_leads', 'service_chat', 'admin_panel', 'category_detail', 'subcategory_detail', 'sponsor_info'];
+  const hideBottomNav = ['admin_panel', 'weekly_reward_page', 'neighborhood_posts', 'service_chat', 'sponsor_info'].includes(activeTab);
 
   const RoleSwitcherModal: React.FC = () => {
     if (!isRoleSwitcherOpen) return null;
@@ -134,23 +111,8 @@ const App: React.FC = () => {
                 </div>
                 <div className="space-y-3">
                     {(['ADM', 'Usuário', 'Lojista', 'Visitante', 'Designer'] as RoleMode[]).map((role) => (
-                        <button 
-                          key={role} 
-                          onClick={() => { 
-                            setViewMode(role); 
-                            localStorage.setItem('admin_view_mode', role);
-                            setIsRoleSwitcherOpen(false); 
-                            if (role === 'Lojista') setActiveTab('profile');
-                            else if (role === 'Designer') setActiveTab('designer_panel');
-                            else if (role === 'ADM') setActiveTab('admin_panel');
-                            else setActiveTab('home');
-                          }} 
-                          className={`w-full p-5 rounded-[1.5rem] border text-left transition-all ${viewMode === role ? 'bg-white text-black' : 'bg-white/5 border-white/5 text-white'}`}
-                        >
-                            <div className="flex items-center justify-between">
-                              <span className="font-black uppercase">{role}</span>
-                              {role === 'Designer' && <Palette size={16} className="text-indigo-400" />}
-                            </div>
+                        <button key={role} onClick={() => { setViewMode(role); localStorage.setItem('admin_view_mode', role); setIsRoleSwitcherOpen(false); if (role === 'Lojista') setActiveTab('profile'); else if (role === 'ADM') setActiveTab('admin_panel'); else setActiveTab('home'); }} className={`w-full p-5 rounded-[1.5rem] border text-left transition-all ${viewMode === role ? 'bg-white text-black' : 'bg-white/5 border-white/5 text-white'}`}>
+                            <div className="flex items-center justify-between"><span className="font-black uppercase">{role}</span>{role === 'Designer' && <Palette size={16} className="text-indigo-400" />}</div>
                         </button>
                     ))}
                 </div>
@@ -164,82 +126,81 @@ const App: React.FC = () => {
       <NeighborhoodProvider>
         <div className="min-h-screen bg-white dark:bg-gray-900 flex justify-center relative transition-colors duration-300">
           <div className={`w-full max-w-md h-full transition-opacity duration-700 ease-out ${splashStage >= 3 ? 'opacity-100' : 'opacity-0'}`}>
-              <Layout activeTab={activeTab} setActiveTab={setActiveTab} userRole={userRole} hideNav={hideBottomNav}>
+              <Layout activeTab={activeTab} setActiveTab={handleNavigate} userRole={userRole} hideNav={hideBottomNav}>
                   {!headerExclusionList.includes(activeTab) && (
-                    <Header isDarkMode={theme === 'dark'} toggleTheme={() => {}} onAuthClick={() => setActiveTab('profile')} user={user} searchTerm={globalSearch} onSearchChange={setGlobalSearch} onNavigate={setActiveTab} activeTab={activeTab} userRole={userRole as any} stores={STORES} onStoreClick={handleSelectStore} isAdmin={user?.email === ADMIN_EMAIL} viewMode={viewMode} onOpenViewSwitcher={() => setIsRoleSwitcherOpen(true)} />
+                    <Header isDarkMode={theme === 'dark'} toggleTheme={() => {}} onAuthClick={() => handleNavigate('profile')} user={user} searchTerm={globalSearch} onSearchChange={setGlobalSearch} onNavigate={handleNavigate} activeTab={activeTab} userRole={userRole as any} stores={STORES} onStoreClick={handleSelectStore} isAdmin={user?.email === ADMIN_EMAIL} viewMode={viewMode} onOpenViewSwitcher={() => setIsRoleSwitcherOpen(true)} />
                   )}
                   <main className="w-full mx-auto">
-                    {activeTab === 'home' && <HomeFeed onNavigate={handleNavigate} onSelectCategory={(c) => { setSelectedCategory(c); setActiveTab('category_detail'); }} onStoreClick={handleSelectStore} stores={STORES} user={user as any} userRole={userRole} />}
-                    {activeTab === 'explore' && <ExploreView stores={STORES} searchQuery={globalSearch} onStoreClick={handleSelectStore} onLocationClick={() => {}} onFilterClick={() => {}} onOpenPlans={() => {}} onNavigate={setActiveTab} />}
-                    {activeTab === 'admin_panel' && <AdminPanel user={user as any} onLogout={signOut} viewMode={viewMode} onOpenViewSwitcher={() => setIsRoleSwitcherOpen(true)} onNavigateToApp={setActiveTab} />}
-                    {activeTab === 'designer_panel' && <DesignerPanel user={user as any} onBack={() => setActiveTab('home')} />}
-                    {activeTab === 'admin_banner_moderation' && user?.email === ADMIN_EMAIL && <AdminBannerModeration user={user as any} onBack={() => setActiveTab('admin_panel')} />}
+                    {activeTab === 'home' && <HomeFeed onNavigate={handleNavigate} onSelectCategory={handleSelectCategory} onStoreClick={handleSelectStore} stores={STORES} user={user as any} userRole={userRole} />}
+                    {activeTab === 'explore' && <ExploreView stores={STORES} searchQuery={globalSearch} onStoreClick={handleSelectStore} onLocationClick={() => {}} onFilterClick={() => {}} onOpenPlans={() => {}} onNavigate={handleNavigate} />}
+                    
+                    {activeTab === 'services' && (
+                      <ServicesView 
+                        onNavigate={(view) => handleNavigate(view)} 
+                        onOpenChat={(id) => { 
+                          setActiveServiceRequestId(id); 
+                          setChatRole('resident'); 
+                          handleNavigate('service_chat'); 
+                        }} 
+                      />
+                    )}
+
+                    {activeTab === 'category_detail' && selectedCategory && (
+                      <CategoryView 
+                        category={selectedCategory} 
+                        onBack={() => handleNavigate('home')} 
+                        onStoreClick={handleSelectStore} 
+                        stores={STORES} 
+                        userRole={userRole as any} 
+                        onAdvertiseInCategory={() => {}} 
+                        onNavigate={handleNavigate}
+                        onSubcategoryClick={(subName) => handleSelectSubcategory(subName, selectedCategory)}
+                      />
+                    )}
+
+                    {activeTab === 'subcategory_detail' && selectedSubcategoryName && selectedCategory && (
+                      <SubcategoryDetailView 
+                        subcategoryName={selectedSubcategoryName}
+                        categoryName={selectedCategory.name}
+                        onBack={() => handleNavigate('category_detail')}
+                        onStoreClick={handleSelectStore}
+                        stores={STORES}
+                        userRole={userRole as any}
+                        onNavigate={handleNavigate}
+                      />
+                    )}
                     
                     {activeTab === 'profile' && (
                       isMerchantMode 
-                        ? <StoreAreaView onBack={() => setActiveTab('home')} onNavigate={handleNavigate} user={user as any} />
-                        : <MenuView user={user as any} userRole={userRole} onAuthClick={() => setIsAuthOpen(true)} onNavigate={setActiveTab} onBack={() => setActiveTab('home')} />
+                        ? <StoreAreaView onBack={() => handleNavigate('home')} onNavigate={(view) => handleNavigate(view)} user={user as any} />
+                        : <MenuView user={user as any} userRole={userRole} onAuthClick={() => setIsAuthOpen(true)} onNavigate={handleNavigate} onBack={() => handleNavigate('home')} />
+                    )}
+                    {activeTab === 'merchant_performance' && <MerchantPerformanceDashboard onBack={() => handleNavigate('profile')} onNavigate={handleNavigate} />}
+                    {activeTab === 'merchant_leads' && <MerchantLeadsView onBack={() => handleNavigate('profile')} onOpenChat={(id) => { setActiveServiceRequestId(id); setChatRole('merchant'); handleNavigate('service_chat'); }} />}
+
+                    {activeTab === 'service_chat' && activeServiceRequestId && (
+                        <ServiceChatView requestId={activeServiceRequestId} userRole={chatRole} onBack={() => handleNavigate(isMerchantMode ? 'merchant_leads' : 'home')} />
                     )}
 
-                    {activeTab === 'user_coupons' && <UserCupomScreen user={user as any} onBack={() => setActiveTab('profile')} onHistory={() => setActiveTab('user_coupons_history')} />}
-                    {activeTab === 'user_coupons_history' && <UserCouponsHistoryView onBack={() => setActiveTab('user_coupons')} />}
-                    {activeTab === 'weekly_reward_page' && <WeeklyRewardPage onBack={() => setActiveTab('home')} onNavigate={setActiveTab} />}
-                    {activeTab === 'neighborhood_posts' && <NeighborhoodPostsView onBack={() => setActiveTab('home')} onStoreClick={handleSelectStore} />}
-
-                    {activeTab === 'merchant_weekly_reward' && <MerchantWeeklyReward onBack={() => setActiveTab('profile')} user={user as any} />}
-                    {activeTab === 'merchant_jobs' && <MerchantJobsModule onBack={() => setActiveTab('profile')} />}
-
-                    {activeTab === 'jpa_connect_sales' && <JPAConnectSalesView onBack={() => setActiveTab('profile')} />}
-                    {activeTab === 'community_feed' && <CommunityFeedView onStoreClick={handleSelectStore} user={user as any} onRequireLogin={() => setIsAuthOpen(true)} onNavigate={setActiveTab} />}
-                    {activeTab === 'services' && <ServicesView onSelectMacro={(id, name) => { setSelectedServiceMacro({id, name}); if (id === 'emergency') { setQuoteCategory(name); setIsQuoteModalOpen(true); } else { setActiveTab('service_subcategories'); } }} onOpenTerms={() => setActiveTab('service_terms')} onNavigate={setActiveTab} searchTerm={globalSearch} />}
-                    {activeTab === 'category_detail' && selectedCategory && <CategoryView category={selectedCategory} onBack={() => setActiveTab('home')} onStoreClick={handleSelectStore} stores={STORES} userRole={userRole as any} onAdvertiseInCategory={setAdCategoryTarget} onNavigate={handleNavigate} />}
-                    {activeTab === 'store_detail' && selectedStore && <StoreDetailView store={selectedStore} onBack={() => setActiveTab('home')} onClaim={() => setActiveTab('store_claim')} />}
+                    {activeTab === 'admin_panel' && <AdminPanel user={user as any} onLogout={signOut} viewMode={viewMode} onOpenViewSwitcher={() => setIsRoleSwitcherOpen(true)} onNavigateToApp={handleNavigate} onOpenMonitorChat={(id) => { setActiveServiceRequestId(id); setChatRole('admin'); handleNavigate('service_chat'); }} />}
                     
-                    {activeTab === 'store_claim' && selectedStore && user && (
-                        <StoreClaimFlow 
-                          store={selectedStore} 
-                          userId={user.id} 
-                          onBack={() => setActiveTab('store_detail')} 
-                          onSuccess={() => {
-                            setSelectedStore({...selectedStore, claimed: true, owner_user_id: user.id});
-                            setActiveTab('store_detail');
-                          }} 
-                        />
-                    )}
-
-                    {activeTab === 'merchant_reviews' && <MerchantReviewsModule onBack={() => setActiveTab('profile')} />}
-                    {activeTab === 'merchant_performance' && <MerchantPerformanceDashboard onBack={() => setActiveTab('profile')} onNavigate={handleNavigate} />}
-                    
-                    {activeTab === 'patrocinador_master' && <PatrocinadorMasterScreen onBack={() => setActiveTab('profile')} />}
-                    {activeTab === 'classifieds' && <ClassifiedsView onBack={() => setActiveTab('home')} />}
-                    {activeTab === 'about' && <AboutView onBack={() => setActiveTab('profile')} />}
-                    {activeTab === 'support' && <SupportView onBack={() => setActiveTab('profile')} />}
-                    {activeTab === 'favorites' && <FavoritesView onBack={() => setActiveTab('profile')} onNavigate={setActiveTab} user={user as any} />}
-                    {activeTab === 'service_subcategories' && selectedServiceMacro && <SubcategoriesView macroId={selectedServiceMacro.id} macroName={selectedServiceMacro.name} onBack={() => setActiveTab('services')} onSelectSubcategory={(n) => { setQuoteCategory(n); setActiveTab('service_specialties'); }} />}
-                    {activeTab === 'service_specialties' && <SpecialtiesView subcategoryName={quoteCategory} onBack={() => setActiveTab('service_subcategories')} onSelectSpecialty={() => setIsQuoteModalOpen(true)} />}
-                    {activeTab === 'store_ads_module' && <StoreAdsModule onBack={() => setActiveTab(isDesignerMode ? 'designer_panel' : 'profile')} onNavigate={setActiveTab} categoryName={adCategoryTarget || undefined} user={user as any} viewMode={viewMode} initialView={initialStoreAdsView} />}
-                    {activeTab === 'store_ads_quick' && <StoreAdsQuickLaunch onBack={() => setActiveTab('profile')} onNavigate={setActiveTab} />}
-                    {activeTab === 'store_profile' && <StoreProfileEdit onBack={() => setActiveTab('profile')} />}
+                    {activeTab === 'store_detail' && selectedStore && <StoreDetailView store={selectedStore} onBack={() => handleNavigate(previousTab)} />}
+                    {activeTab === 'classifieds' && <ClassifiedsView onBack={() => handleNavigate('home')} onNavigate={handleNavigate} />}
+                    {activeTab === 'neighborhood_posts' && <NeighborhoodPostsView onBack={() => handleNavigate('home')} onStoreClick={handleSelectStore} />}
+                    {activeTab === 'sponsor_info' && <SponsorInfoView onBack={() => handleNavigate(previousTab)} />}
+                    {activeTab === 'patrocinador_master' && <PatrocinadorMasterScreen onBack={() => handleNavigate(previousTab)} />}
                   </main>
-                  <AuthModal isOpen={isAuthOpen} onClose={() => setIsAuthOpen(false)} user={user as any} onLoginSuccess={handleLoginSuccess} />
-                  {isQuoteModalOpen && <QuoteRequestModal isOpen={isQuoteModalOpen} onClose={() => setIsQuoteModalOpen(false)} categoryName={quoteCategory} onSuccess={() => setActiveTab('service_success')} />}
+                  <AuthModal isOpen={isAuthOpen} onClose={() => setIsAuthOpen(false)} user={user as any} />
               </Layout>
               <RoleSwitcherModal />
           </div>
 
           {splashStage < 4 && (
-            <div 
-                className={`fixed inset-0 z-[9999] flex flex-col items-center justify-between py-24 transition-opacity duration-500 ease-out ${splashStage === 3 ? 'opacity-0' : 'opacity-100'}`} 
-                style={{ backgroundColor: '#1E5BFF' }}
-            >
+            <div className={`fixed inset-0 z-[9999] flex flex-col items-center justify-between py-24 transition-opacity duration-500 ease-out ${splashStage === 3 ? 'opacity-0' : 'opacity-100'}`} style={{ backgroundColor: '#1E5BFF' }}>
               <div className="flex flex-col items-center animate-fade-in text-center px-4">
                   <div className="relative w-32 h-32 bg-white rounded-[2.5rem] flex items-center justify-center shadow-2xl mb-8 animate-logo-enter"><MapPin className="w-16 h-16 text-brand-blue fill-brand-blue" /></div>
                   <h1 className="text-4xl font-black font-display text-white tracking-tighter drop-shadow-md">Localizei JPA</h1>
                   <TypingText text="Onde o bairro conversa" duration={2000} />
-              </div>
-              <div className="flex flex-col items-center animate-fade-in opacity-0" style={{ animationDelay: '2000ms', animationFillMode: 'forwards' }}>
-                   <p className="text-[9px] font-black text-white/50 uppercase tracking-[0.25em] mb-1.5">Patrocinador Master</p>
-                   <p className="text-xl font-bold text-white tracking-tight">Grupo Esquematiza</p>
               </div>
             </div>
           )}

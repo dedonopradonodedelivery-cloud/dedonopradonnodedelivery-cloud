@@ -25,6 +25,8 @@ interface MerchantWeeklyRewardProps {
 export const MerchantWeeklyReward: React.FC<MerchantWeeklyRewardProps> = ({ onBack, user }) => {
   const [isParticipating, setIsParticipating] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  
+  // Estados para o Tipo e Valor do Benefício
   const [rewardType, setRewardType] = useState<'percent' | 'fixed'>('percent');
   const [rewardValue, setRewardValue] = useState<string>('10');
   const [isCustomValue, setIsCustomValue] = useState(false);
@@ -243,7 +245,7 @@ export const MerchantWeeklyReward: React.FC<MerchantWeeklyRewardProps> = ({ onBa
                         <Tag className="w-6 h-6" />
                     </div>
                     <div>
-                        <h4 className="text-sm font-black text-gray-900 dark:text-white uppercase">
+                        <h4 className="text-sm font-black text-gray-900 dark:text-white uppercase leading-tight">
                           {rewardType === 'percent' ? `${rewardValue}% de desconto` : `R$ ${rewardValue} de desconto`} em {rewardData.title}
                         </h4>
                         <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">{user?.user_metadata?.store_name || 'Sua Loja'}</p>

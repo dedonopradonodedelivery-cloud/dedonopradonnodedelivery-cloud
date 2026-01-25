@@ -39,9 +39,9 @@ const NEIGHBORHOODS_LIST = [
 ];
 
 const PLACEMENT_OPTIONS = [
-  { id: 'home', label: 'Home', icon: Home, price: 49.90, originalPrice: 199.90, description: 'Página inicial' },
-  { id: 'cat', label: 'Categorias', icon: LayoutGrid, price: 29.90, originalPrice: 149.90, description: 'Buscas específicas' },
-  { id: 'combo', label: 'Home + Cats', icon: Zap, price: 79.80, originalPrice: 349.80, description: 'Visibilidade total' },
+  { id: 'home', label: 'Banner na Home', icon: Home, price: 39.90, originalPrice: 199.90, description: 'Maior destaque do app. Ideal para visibilidade máxima no bairro.' },
+  { id: 'cat', label: 'Banner na Categoria', icon: LayoutGrid, price: 19.90, originalPrice: 149.90, description: 'Destaque sua loja dentro da categoria onde seus clientes procuram.' },
+  { id: 'sub', label: 'Banner na Subcategoria', icon: Zap, price: 9.90, originalPrice: 99.90, description: 'Apareça quando o cliente busca exatamente o que você vende.' },
 ];
 
 export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNavigate, user, categoryName, viewMode, initialView = 'sales' }) => {
@@ -107,7 +107,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
       if (p) total += (basePrice * p.multiplier * (hoodCount || 1));
     });
 
-    if (artChoice === 'pro') total += 89.90;
+    if (artChoice === 'pro') total += 149.90;
     
     return total;
   }, [selectedPlacement, selectedPeriods, selectedHoods, artChoice, dynamicPeriods]);
@@ -159,12 +159,12 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
           <div className="bg-white dark:bg-gray-900 p-6 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-800 space-y-4">
              <h3 className="text-xs font-black uppercase tracking-widest text-gray-400">Resumo do Investimento</h3>
              <div className="flex justify-between text-sm">
-                <span className="text-gray-600">Anúncio ({selectedPlacement})</span>
-                <span className="font-bold">R$ {(calculateTotal - (artChoice === 'pro' ? 89.90 : 0)).toFixed(2).replace('.', ',')}</span>
+                <span className="text-gray-600">Investimento em Banners</span>
+                <span className="font-bold">R$ {(calculateTotal - (artChoice === 'pro' ? 149.90 : 0)).toFixed(2).replace('.', ',')}</span>
              </div>
              <div className="flex justify-between text-sm text-amber-600">
-                <span className="font-bold">Criação com Time Localizei</span>
-                <span className="font-black">+ R$ 89,90</span>
+                <span className="font-bold">Criação com Time Localizei JPA</span>
+                <span className="font-black">+ R$ 149,90</span>
              </div>
              <div className="pt-4 border-t border-gray-100 dark:border-gray-800 flex justify-between items-center">
                 <span className="font-black text-gray-900 dark:text-white uppercase tracking-tighter">Total a Pagar</span>
@@ -261,9 +261,10 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
         
         <div className="space-y-3">
             <h1 className="text-3xl font-black text-gray-900 dark:text-white uppercase tracking-tighter leading-none">Anunciar no Bairro</h1>
-            <h2 className="text-lg font-bold text-[#1E5BFF] leading-tight">Coloque sua loja na frente de mais de 450 mil moradores de Jacarepaguá.</h2>
+            <h2 className="text-lg font-bold text-[#1E5BFF] leading-tight">Destaque sua loja com banners exibidos para moradores do seu bairro, dentro do app.</h2>
             <p className="text-sm text-gray-500 dark:text-gray-400 font-medium leading-relaxed">
-              Apareça em destaque exatamente para quem mora perto da sua loja. Mais visibilidade, mais visitas e mais chances de vender — todos os dias, dentro do app.
+              Apareça em locais estratégicos como Home, Categorias e Subcategorias.
+              Mais visibilidade, mais visitas e mais chances de vender — todos os dias.
             </p>
         </div>
       </header>
@@ -278,7 +279,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
               <button 
                 key={opt.id}
                 onClick={() => handleSelectPlacement(opt.id)}
-                className={`relative p-3 rounded-2xl border-2 transition-all text-center flex flex-col items-center justify-between h-44 ${
+                className={`relative p-3 rounded-2xl border-2 transition-all text-center flex flex-col items-center justify-between h-52 ${
                   selectedPlacement === opt.id 
                   ? 'bg-[#1E5BFF]/5 border-[#1E5BFF] text-[#1E5BFF] shadow-md' 
                   : 'bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800 text-gray-400'
@@ -286,7 +287,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
               >
                 <opt.icon size={22} className={selectedPlacement === opt.id ? 'text-[#1E5BFF]' : 'text-gray-300'} />
                 
-                <p className="font-black uppercase text-[9px] tracking-tight leading-none mt-2">{opt.label}</p>
+                <p className="font-black uppercase text-[9px] tracking-tight leading-tight mt-2 h-8 flex items-center justify-center">{opt.label}</p>
                 
                 <div className="mt-auto pt-2 flex flex-col items-center">
                     <span className="text-[8px] line-through opacity-50 block">R$ {opt.originalPrice.toFixed(2).replace('.', ',')}</span>
@@ -303,6 +304,11 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
               </button>
             ))}
           </div>
+          {selectedPlacement && (
+              <p className="text-[10px] text-gray-400 font-medium px-1 text-center animate-in fade-in">
+                  {PLACEMENT_OPTIONS.find(p => p.id === selectedPlacement)?.description}
+              </p>
+          )}
         </section>
 
         {/* 3. POR QUANTO TEMPO? */}
@@ -311,7 +317,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
           <div className="flex gap-3">
             {dynamicPeriods.map((p) => (
               <button 
-                key={p.id}
+                key={p.id} 
                 onClick={() => togglePeriod(p.id)}
                 className={`flex-1 p-5 rounded-[2rem] border-2 transition-all text-left relative overflow-hidden ${
                   selectedPeriods.includes(p.id) ? 'bg-white dark:bg-gray-900 border-[#1E5BFF] shadow-md text-[#1E5BFF]' : 'bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800 text-gray-400'
@@ -333,6 +339,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
               {selectedHoods.length === NEIGHBORHOODS_LIST.length ? 'Limpar' : 'Todos'}
             </button>
           </div>
+          <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wide px-1">O banner será exibido apenas nos bairros selecionados.</p>
           <div className="flex flex-wrap gap-2">
             {NEIGHBORHOODS_LIST.map((hood) => (
               <button 
@@ -371,7 +378,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
                     </div>
                     <div className="text-left">
                       <p className={`text-sm font-bold uppercase tracking-tight ${artChoice === 'upload' ? 'text-gray-900 dark:text-white' : 'text-gray-500'}`}>Usar minha arte</p>
-                      {uploadedImage && <p className="text-[9px] text-emerald-500 font-bold uppercase">Imagem selecionada</p>}
+                      <p className="text-[9px] text-emerald-500 font-bold uppercase">{uploadedImage ? 'Imagem selecionada' : 'Sem custo adicional'}</p>
                     </div>
                 </div>
                 {artChoice === 'upload' && <CheckCircle2 size={18} className="text-[#1E5BFF]" />}
@@ -379,11 +386,11 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
 
             <button 
                 onClick={() => setView('editor')}
-                className={`w-full flex items-center justify-between p-5 rounded-2xl border-2 transition-all ${artChoice === 'diy' ? 'bg-white dark:bg-gray-900 border-[#1E5BFF] shadow-md' : 'bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800'}`}
+                className={`w-full flex items-center justify-between p-5 rounded-2xl border-2 transition-all ${artChoice === 'diy' ? 'bg-white dark:bg-gray-900 border-[#1E5BFF] shadow-md' : 'bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800 opacity-60 grayscale'}`}
             >
                 <div className="flex items-center gap-4">
                     <div className="w-10 h-10 rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-600"><Paintbrush size={18}/></div>
-                    <p className={`text-sm font-bold uppercase tracking-tight ${artChoice === 'diy' ? 'text-gray-900 dark:text-white' : 'text-gray-500'}`}>Criação personalizada</p>
+                    <p className={`text-sm font-bold uppercase tracking-tight ${artChoice === 'diy' ? 'text-gray-900 dark:text-white' : 'text-gray-500'}`}>Criação personalizada (Opcional)</p>
                 </div>
                 {artChoice === 'diy' && <CheckCircle2 size={18} className="text-[#1E5BFF]" />}
             </button>
@@ -395,15 +402,19 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
                 <div className="flex items-center gap-4">
                     <div className="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-600"><Rocket size={18}/></div>
                     <div className="text-left">
-                        <p className={`text-sm font-bold uppercase tracking-tight ${artChoice === 'pro' ? 'text-amber-900 dark:text-amber-100' : 'text-gray-500'}`}>Criar com o time Localizei</p>
+                        <p className={`text-sm font-bold uppercase tracking-tight ${artChoice === 'pro' ? 'text-amber-900 dark:text-amber-100' : 'text-gray-500'}`}>Criar com o time Localizei JPA</p>
                         <div className="flex items-center gap-2 mt-0.5">
-                            <span className="text-[9px] text-gray-400 line-through">R$ 169,90</span>
-                            <span className="text-xs font-black text-amber-600">R$ 89,90</span>
+                            <span className="text-xs font-black text-amber-600">R$ 149,90</span>
                         </div>
                     </div>
                 </div>
                 {artChoice === 'pro' && <CheckCircle2 size={18} className="text-amber-500" />}
             </button>
+            {artChoice === 'pro' && (
+                <p className="text-[10px] text-amber-600 dark:text-amber-400 font-medium px-4 py-2 bg-amber-50 dark:bg-amber-900/10 rounded-xl animate-in fade-in">
+                    Banner criado por nossa equipe. Ideal para quem quer um visual profissional.
+                </p>
+            )}
           </div>
         </section>
 
@@ -415,7 +426,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
             <div className="space-y-1">
                 <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Resumo do Pedido</p>
                 <div className="flex flex-wrap gap-x-2 text-[11px] font-bold text-gray-700 dark:text-gray-200">
-                    <span>{selectedPlacement ? PLACEMENT_OPTIONS.find(p => p.id === selectedPlacement)?.label : 'Selecione local'}</span>
+                    <span>{selectedPlacement ? PLACEMENT_OPTIONS.find(p => p.id === selectedPlacement)?.label : 'Selecione o local'}</span>
                     <span className="text-gray-300">•</span>
                     <span>{selectedPeriods.length > 0 ? `${selectedPeriods.length} período(s)` : 'Aguardando'}</span>
                 </div>
@@ -432,7 +443,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
           disabled={!selectedPlacement || selectedPeriods.length === 0 || selectedHoods.length === 0 || !artChoice}
           className="w-full bg-[#1E5BFF] hover:bg-[#1749CC] text-white font-black py-5 rounded-[2rem] shadow-xl shadow-blue-500/20 active:scale-[0.98] transition-all flex items-center justify-center gap-3 disabled:opacity-30 disabled:grayscale uppercase tracking-widest text-xs"
         >
-          {artChoice === 'pro' ? 'PAGAR E CONTRATAR CRIAÇÃO' : 'Pagar anúncio'}
+          Pagar anúncio
           <ArrowRight size={16} strokeWidth={3} />
         </button>
       </footer>

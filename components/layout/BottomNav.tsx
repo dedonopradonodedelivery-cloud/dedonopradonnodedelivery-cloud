@@ -1,5 +1,6 @@
+
 import React from 'react';
-import { Home, Users, User, QrCode } from 'lucide-react';
+import { Home, User, Newspaper } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 
 interface BottomNavProps {
@@ -20,32 +21,9 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
 
   const navItems: NavItem[] = [
     { id: 'home', icon: Home, label: 'Início' },
-    { id: 'community_feed', icon: Users, label: 'Comunidade', isCenter: true },
+    { id: 'classifieds', icon: Newspaper, label: 'Classificados', isCenter: true },
+    { id: 'profile', icon: User, label: 'Menu' },
   ];
-
-  if (userRole !== 'admin') {
-    const isMerchant = user && userRole === 'lojista';
-
-    let centerId: string;
-    if (!user) {
-      centerId = 'cashback_landing';
-    } else if (isMerchant) {
-      centerId = 'merchant_qr_display';
-    } else {
-      centerId = 'scan_cashback';
-    }
-
-    const centerLabel = isMerchant ? 'QR Code' : 'Cashback';
-
-    navItems.push({ 
-      id: centerId, 
-      icon: QrCode, 
-      label: centerLabel, 
-      isCenter: true 
-    });
-  }
-
-  navItems.push({ id: 'profile', icon: User, label: 'Menu' });
 
   const NavButton: React.FC<{ item: NavItem; isActive: boolean }> = ({ item, isActive }) => {
     const Icon = item.icon;
@@ -98,10 +76,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
     <div className="fixed bottom-0 left-0 right-0 mx-auto w-full max-w-md bg-[#1E5BFF] z-50 h-[80px] rounded-t-[24px] shadow-[0_-5px_30px_rgba(0,0,0,0.2)] border-t border-white/10">
       <div className="flex items-end justify-around w-full px-2 h-full pb-2">
         {navItems.map((item) => {
-          const isActive = activeTab === item.id || 
-                          (item.id === 'scan_cashback' && activeTab === 'pay_cashback') ||
-                          (item.id === 'merchant_qr_display' && activeTab === 'merchant_onboarding') ||
-                          (item.id === 'cashback_landing' && (activeTab === 'scan_cashback' || activeTab === 'pay_cashback'));
+          const isActive = activeTab === item.id;
           
           return (
             <div key={item.id} className="flex-1 flex justify-center items-end h-full">

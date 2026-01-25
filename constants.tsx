@@ -430,7 +430,8 @@ export const MOCK_COMMUNITY_POSTS: CommunityPost[] = [
   }
 ];
 
-export const STORES: Store[] = [
+// Dados das Lojas Iniciais
+const BASE_STORES: Store[] = [
   {
     id: 'grupo-esquematiza',
     name: 'Grupo Esquematiza',
@@ -461,6 +462,39 @@ export const STORES: Store[] = [
   { id: 'f-8', name: 'Academia FitBairro', category: 'Esportes', subcategory: 'Academias', rating: 4.7, distance: 'Taquara', adType: AdType.PREMIUM, description: 'Treine perto de casa.', isSponsored: true, image: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=400&auto=format&fit=crop' },
   { id: 'f-9', name: 'Consultório Dra. Ana', category: 'Saúde', subcategory: 'Dentistas', rating: 5.0, distance: 'Freguesia', adType: AdType.PREMIUM, description: 'Cuidado completo com seu sorriso.', isSponsored: true, image: 'https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?q=80&w=400&auto=format&fit=crop' },
   { id: 'f-10', name: 'Boutique Chic', category: 'Moda', subcategory: 'Moda Feminina', rating: 4.3, distance: 'Anil', adType: AdType.PREMIUM, description: 'Tendências e elegância.', isSponsored: true, image: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=400&auto=format&fit=crop' },
+];
+
+// Gerar mais 50 lojas fake para o scroll infinito
+const generateFakeStores = (count: number): Store[] => {
+  const hoods = ['Freguesia', 'Taquara', 'Pechincha', 'Anil', 'Tanque', 'Curicica'];
+  const categoriesList = ['Comida', 'Saúde', 'Serviços', 'Pets', 'Beleza', 'Moda'];
+  const stores: Store[] = [];
+
+  for (let i = 1; i <= count; i++) {
+    const cat = categoriesList[i % categoriesList.length];
+    const hood = hoods[i % hoods.length];
+    stores.push({
+      id: `fake-${i}`,
+      name: `Loja Exemplo ${i}`,
+      category: cat,
+      subcategory: 'Geral',
+      rating: 4.0 + (Math.random() * 1.0),
+      reviewsCount: Math.floor(Math.random() * 100),
+      distance: `${hood} • RJ`,
+      neighborhood: hood,
+      adType: AdType.ORGANIC,
+      description: `Descrição breve da loja exemplo número ${i} localizada na região de ${hood}.`,
+      image: `https://images.unsplash.com/photo-${1500000000000 + (i * 1000)}?q=80&w=400&auto=format&fit=crop`,
+      isSponsored: false,
+      isOpenNow: Math.random() > 0.3
+    });
+  }
+  return stores;
+};
+
+export const STORES: Store[] = [
+  ...BASE_STORES,
+  ...generateFakeStores(60)
 ];
 
 export const EDITORIAL_SERVICES: EditorialCollection[] = [
@@ -587,10 +621,8 @@ export const MOCK_CLASSIFIEDS: Classified[] = [
     }
 ];
 
-// Added to fix import error in StoreProfileEdit.tsx
 export type TaxonomyType = 'category' | 'subcategory' | 'specialty';
 
-// Added to fix import error in StoreProfileEdit.tsx
 export const SPECIALTIES: Record<string, string[]> = {
   'Chaveiro 24h': ['Abertura de portas', 'Troca de fechadura', 'Chave codificada', 'Abertura de cofre', 'Cópia de chaves', 'Instalação de tetra chave'],
   'Desentupidora': ['Pia de cozinha', 'Vaso sanitário', 'Caixa de gordura', 'Ralo de banheiro', 'Rede de esgoto externa', 'Limpeza de fossa'],

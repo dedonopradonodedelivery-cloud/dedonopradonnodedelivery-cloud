@@ -4,132 +4,9 @@ import { ChevronLeft, Star, BadgeCheck, ChevronRight, AlertCircle, Grid, Megapho
 import { Category, Store, AdType } from '@/types';
 import { SUBCATEGORIES } from '@/constants';
 import { supabase } from '@/lib/supabaseClient';
-import { BannerDesign } from './StoreBannerEditor';
 import { LaunchOfferBanner } from './LaunchOfferBanner';
-
-// --- BANNER VIEWER (LOCAL COMPONENT) ---
-
-const ICON_COMPONENTS: Record<string, React.ElementType> = {
-  Flame, Zap, Percent, Tag, Gift, Utensils, Pizza, Coffee, Beef, IceCream,
-  ShoppingCart, Store: StoreIcon, Package, Wrench, Truck, CreditCard, Coins, Star,
-  Award, MapPin, Smile, Bell, Clock, Heart, Sparkles, Rocket, Megaphone, Crown, ShieldCheck
-};
-
-const FONT_STYLES = [
-  { id: 'font-moderna', name: 'Moderna', family: "'Outfit', sans-serif" },
-  { id: 'font-forte', name: 'Forte', family: "'Inter', sans-serif", weight: '900' },
-  { id: 'font-elegante', name: 'Elegante', family: "'Lora', serif" },
-  { id: 'font-amigavel', name: 'Amigável', family: "'Quicksand', sans-serif" },
-  { id: 'font-neutra', name: 'Neutra', family: "'Inter', sans-serif" },
-  { id: 'font-impacto', name: 'Impacto', family: "'Anton', sans-serif" },
-];
-
-const SIZE_LEVELS = [
-  { id: 'xs', name: 'M. Pequeno', titleClass: 'text-lg', subClass: 'text-[9px]' },
-  { id: 'sm', name: 'Pequeno', titleClass: 'text-xl', subClass: 'text-[10px]' },
-  { id: 'md', name: 'Médio', titleClass: 'text-2xl', subClass: 'text-xs' },
-  { id: 'lg', name: 'Grande', titleClass: 'text-3xl', subClass: 'text-sm' },
-  { id: 'xl', name: 'M. Grande', titleClass: 'text-4xl', subClass: 'text-base' },
-];
-
-const BannerViewer: React.FC<{ 
-  config: BannerDesign; 
-  storeName: string; 
-  storeLogo?: string | null; 
-}> = ({ config, storeName, storeLogo }) => {
-    const { 
-      title, subtitle, titleFont, titleSize, subtitleFont, subtitleSize, 
-      bgColor, textColor, align, animation, iconName, iconPos, iconSize, 
-      logoDisplay, iconColorMode, iconCustomColor 
-    } = config;
-
-    const renderIcon = (name: string | null, size: 'sm' | 'md' | 'lg', colorMode: string) => {
-      if (!name || !ICON_COMPONENTS[name]) return null;
-      const IconComp = ICON_COMPONENTS[name];
-      const sizes = { sm: 24, md: 44, lg: 64 };
-      const colors: Record<string, string> = { text: textColor, white: '#FFFFFF', black: '#000000', custom: iconCustomColor || '#1E5BFF' };
-      return <IconComp size={sizes[size]} style={{ color: colors[colorMode] }} strokeWidth={2.5} />;
-    };
-
-    const getFontStyle = (fontId: string) => {
-      const f = FONT_STYLES.find(x => x.id === fontId);
-      return f ? { fontFamily: f.family, fontWeight: f.weight || '700' } : {};
-    };
-    
-    return (
-      <div 
-        className={`w-full h-full p-8 shadow-2xl relative overflow-hidden transition-all duration-500 flex flex-col justify-center border border-white/10 ${
-          align === 'center' ? 'items-center text-center' : align === 'right' ? 'items-end text-right' : 'items-start text-left'
-        } ${animation === 'pulse' ? 'animate-pulse' : animation === 'float' ? 'animate-float-slow' : ''}`}
-        style={{ backgroundColor: bgColor }}
-      >
-        <div className={`relative z-10 transition-all duration-500 flex ${iconPos === 'top' ? 'flex-col items-inherit' : iconPos === 'right' ? 'flex-row-reverse items-center gap-4' : 'flex-row items-center gap-4'} ${animation === 'slide' ? 'animate-in slide-in-from-left-8' : ''}`}>
-          {iconName && (
-            <div className={`${iconPos === 'top' ? 'mb-4' : ''} shrink-0`}>
-                {renderIcon(iconName, iconSize, iconColorMode)}
-            </div>
-          )}
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 mb-3 w-fit transition-all duration-300">
-              {logoDisplay !== 'none' && storeLogo && (
-                  <div className={`shrink-0 overflow-hidden bg-white/20 p-0.5 border border-white/20 transition-all duration-300 ${logoDisplay === 'round' ? 'rounded-full' : 'rounded-lg'}`}>
-                      <img src={storeLogo} className={`w-5 h-5 object-contain transition-all duration-300 ${logoDisplay === 'round' ? 'rounded-full' : 'rounded-md'}`} alt="Logo" />
-                  </div>
-              )}
-              <div className="bg-black/10 backdrop-blur-md px-2 py-0.5 rounded-lg border border-white/10 w-fit">
-                  <span className="text-[7px] font-black uppercase tracking-[0.2em]" style={{ color: textColor }}>{storeName}</span>
-              </div>
-            </div>
-            <h2 
-              className={`font-black leading-tight mb-2 tracking-tight line-clamp-2 transition-all duration-300 ${SIZE_LEVELS.find(s => s.id === titleSize)?.titleClass}`} 
-              style={{ ...getFontStyle(titleFont), color: textColor }}
-            >
-                {title}
-            </h2>
-            <p 
-              className={`font-medium opacity-80 leading-snug max-w-[280px] line-clamp-2 transition-all duration-300 ${SIZE_LEVELS.find(s => s.id === subtitleSize)?.subClass}`} 
-              style={{ ...getFontStyle(subtitleFont), color: textColor }}
-            >
-                {subtitle}
-            </p>
-          </div>
-        </div>
-      </div>
-    );
-};
-
-// --- END LOCAL COMPONENT ---
-
-
-const mapToViewerConfig = (dbConfig: any): BannerDesign => {
-  if (dbConfig.type === 'custom_editor') {
-    return dbConfig;
-  }
-  if (dbConfig.type === 'template') {
-    switch (dbConfig.template_id) {
-      case 'oferta_relampago':
-        return {
-          title: dbConfig.subheadline || 'Oferta Imperdível', subtitle: `Com ${dbConfig.headline || 'desconto'}!`,
-          titleFont: 'font-impacto', titleSize: 'lg', subtitleFont: 'font-amigavel', subtitleSize: 'md',
-          bgColor: '#DC2626', textColor: '#FFFFFF', align: 'center', iconName: 'Flame', iconPos: 'top',
-          iconSize: 'lg', logoDisplay: 'none', animation: 'pulse', iconColorMode: 'white'
-        };
-      case 'lancamento':
-        return {
-          title: dbConfig.headline || 'Lançamento', subtitle: dbConfig.subheadline || 'Conheça a novidade.',
-          titleFont: 'font-moderna', titleSize: 'lg', subtitleFont: 'font-elegante', subtitleSize: 'md',
-          bgColor: '#0F172A', textColor: '#FFFFFF', align: 'left', iconName: 'Sparkles', iconPos: 'right',
-          iconSize: 'lg', logoDisplay: 'square', animation: 'none', iconColorMode: 'text'
-        };
-      default: break;
-    }
-  }
-  return {
-    title: 'Anúncio Patrocinado', subtitle: 'Confira as novidades da loja.', bgColor: '#1E5BFF', textColor: '#FFFFFF',
-    titleFont: 'font-moderna', titleSize: 'md', subtitleFont: 'font-neutra', subtitleSize: 'sm',
-    align: 'left', iconName: null, iconPos: 'left', iconSize: 'md', logoDisplay: 'round', animation: 'none', iconColorMode: 'text'
-  };
-};
+import { HomeBannerCarousel } from './HomeBannerCarousel';
+import { MasterSponsorBanner } from './MasterSponsorBanner';
 
 const BigSurCard: React.FC<{ 
   icon: React.ReactNode; 
@@ -164,7 +41,7 @@ const StoreListItem: React.FC<{ store: Store; onClick: () => void }> = ({ store,
       <div className="flex-1 min-w-0">
         <div className="flex justify-between items-start">
           <h4 className="font-bold text-gray-900 dark:text-white text-sm truncate pr-2">{store.name}</h4>
-          {isSponsored && <span className="text-[9px] font-bold text-gray-400 bg-gray-100 dark:bg-gray-700 px-1.5 py-0.5 rounded uppercase">Patrocinado</span>}
+          {isSponsored && <span className="text-[9px] font-bold text-gray-400 bg-gray-100 dark:bg-gray-700 px-1.5 py-0.5 rounded uppercase text-[8px] tracking-widest font-black">PATROCINADO</span>}
         </div>
         <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 mt-0.5">
           <span className="flex items-center gap-1 font-bold text-[#1E5BFF]"><Star className="w-3 h-3 fill-current" /> {store.rating?.toFixed(1)}</span>
@@ -189,67 +66,18 @@ interface CategoryViewProps {
   userRole: 'cliente' | 'lojista' | null;
   onAdvertiseInCategory: (categoryName: string | null) => void;
   onNavigate: (view: string) => void;
+  onSubcategoryClick: (subName: string) => void;
 }
 
-export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, onStoreClick, stores, userRole, onAdvertiseInCategory, onNavigate }) => {
-  const [selectedSubcategory, setSelectedSubcategory] = useState<string | null>(null);
-  const [activeBanner, setActiveBanner] = useState<any | null>(null);
-  const [loadingBanner, setLoadingBanner] = useState(true);
-
+export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, onStoreClick, stores, userRole, onAdvertiseInCategory, onNavigate, onSubcategoryClick }) => {
   const subcategories = SUBCATEGORIES[category.name] || [];
   const MAX_VISIBLE_SUBCATEGORIES = 8;
   const shouldShowMore = subcategories.length > MAX_VISIBLE_SUBCATEGORIES;
   const visibleSubcategories = shouldShowMore ? subcategories.slice(0, MAX_VISIBLE_SUBCATEGORIES - 1) : subcategories;
 
-  const advertiseHereConfig: BannerDesign = {
-    title: `Anuncie em ${category.name}`,
-    subtitle: 'Destaque-se para clientes que buscam por produtos e serviços como o seu.',
-    titleFont: 'font-forte', titleSize: 'lg',
-    subtitleFont: 'font-neutra', subtitleSize: 'sm',
-    bgColor: '#F3F4F6', textColor: '#1E5BFF',
-    align: 'center', iconName: 'Megaphone', iconPos: 'top',
-    iconSize: 'lg', logoDisplay: 'none', animation: 'none',
-    iconColorMode: 'text',
-  };
-
-  useEffect(() => {
-    const fetchCategoryBanner = async () => {
-      if (!supabase) { setLoadingBanner(false); return; }
-      setLoadingBanner(true);
-      try {
-        const { data, error } = await supabase.from('published_banners').select('id, config, profiles(store_name, logo_url)').eq('target', `category:${category.slug}`).eq('is_active', true).order('created_at', { ascending: false }).limit(1).single();
-        if (error && error.code !== 'PGRST116') throw error; // Ignore 'not found' error
-        setActiveBanner(data || null);
-      } catch (e: any) {
-        console.warn("Category banner fetch suppressed:", e.message || e);
-        setActiveBanner(null);
-      } finally {
-        setLoadingBanner(false);
-      }
-    };
-    fetchCategoryBanner();
-  }, [category.slug]);
-
   const filteredStores = useMemo(() => {
-    let categoryStores = stores.filter(s => s.category === category.name);
-    if (selectedSubcategory) {
-      return categoryStores.filter(s => s.subcategory === selectedSubcategory);
-    }
-    return categoryStores;
-  }, [stores, category.name, selectedSubcategory]);
-
-  const handleSubcategoryClick = (subName: string) => {
-    setSelectedSubcategory(prev => (prev === subName ? null : subName));
-  };
-
-  const handleAdvertiseClick = () => {
-    if (userRole === 'lojista') {
-      onAdvertiseInCategory(category.name);
-      onNavigate('store_ads_module');
-    } else {
-      alert("Apenas lojistas podem anunciar aqui. Crie ou acesse sua conta de lojista.");
-    }
-  };
+    return stores.filter(s => s.category === category.name);
+  }, [stores, category.name]);
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950 pb-24 animate-in slide-in-from-right duration-300">
@@ -260,7 +88,12 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
         <h1 className="font-bold text-lg text-gray-900 dark:text-white flex items-center gap-2">{React.cloneElement(category.icon as any, {className: 'w-5 h-5'})} {category.name}</h1>
       </div>
       
-      <div className="p-5 space-y-8">
+      {/* CARROSSEL PADRONIZADO */}
+      <div className="mt-4">
+        <HomeBannerCarousel onStoreClick={onStoreClick} categoryName={category.name} />
+      </div>
+
+      <div className="p-5 pt-0 space-y-8">
         {userRole === 'lojista' && (
             <section>
                 <LaunchOfferBanner onClick={() => {
@@ -278,8 +111,8 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
                     key={i} 
                     icon={sub.icon}
                     name={sub.name}
-                    isSelected={selectedSubcategory === sub.name}
-                    onClick={() => handleSubcategoryClick(sub.name)}
+                    isSelected={false}
+                    onClick={() => onSubcategoryClick(sub.name)}
                     categoryColor={category.color}
                   />
               ))}
@@ -297,22 +130,8 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
         )}
 
         <section>
-          {loadingBanner ? (
-            <div className="w-full aspect-video bg-gray-200 dark:bg-gray-800 rounded-2xl animate-pulse"></div>
-          ) : (
-            <div onClick={!activeBanner ? handleAdvertiseClick : undefined} className={`w-full aspect-video rounded-[2.5rem] overflow-hidden ${!activeBanner ? 'cursor-pointer' : ''}`}>
-              <BannerViewer 
-                config={activeBanner ? mapToViewerConfig(activeBanner.config) : advertiseHereConfig}
-                storeName={activeBanner ? activeBanner.profiles?.store_name || 'Loja Parceira' : 'Localizei JPA'}
-                storeLogo={activeBanner ? activeBanner.profiles?.logo_url : undefined}
-              />
-            </div>
-          )}
-        </section>
-
-        <section>
             <h3 className="font-bold text-gray-900 dark:text-white mb-4">
-                {selectedSubcategory || `Destaques em ${category.name}`}
+                Principais em {category.name}
             </h3>
             {filteredStores.length > 0 ? (
                 <div className="flex flex-col gap-2">
@@ -326,6 +145,11 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
                     <p className="text-sm font-medium text-gray-500">Nenhuma loja encontrada.</p>
                 </div>
             )}
+        </section>
+
+        {/* BANNER PATROCINADOR MASTER FINAL */}
+        <section>
+          <MasterSponsorBanner onClick={() => onNavigate('patrocinador_master')} label={category.name} />
         </section>
       </div>
     </div>
