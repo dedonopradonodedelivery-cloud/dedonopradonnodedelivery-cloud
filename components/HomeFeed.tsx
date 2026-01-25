@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { Store, Category, AdType } from '@/types';
 import { 
   Compass, 
@@ -53,6 +53,8 @@ export const HomeFeed: React.FC<HomeFeedFeedProps> = ({
   const [listFilter, setListFilter] = useState<'all' | 'top_rated' | 'open_now'>('all');
   const [isAnimating, setIsAnimating] = useState(false);
   const { currentNeighborhood } = useNeighborhood();
+  const categoryScrollRef = useRef<HTMLDivElement>(null);
+  const [scrollIndicator, setScrollIndicator] = useState({ width: '0%', left: '0%' });
 
   const [consecutiveDays, setConsecutiveDays] = useState(() => {
     return parseInt(localStorage.getItem('reward_consecutive_days') || '1');
@@ -66,6 +68,41 @@ export const HomeFeed: React.FC<HomeFeedFeedProps> = ({
     }, 1200);
   };
 
+  const updateScrollIndicator = useCallback(() => {
+    const el = categoryScrollRef.current;
+    if (el) {
+        const { scrollWidth, clientWidth, scrollLeft } = el;
+        if (scrollWidth <= clientWidth) {
+            setScrollIndicator({ width: '0%', left: '0%' });
+            return;
+        }
+        
+        const thumbWidth = (clientWidth / scrollWidth) * 100;
+        const thumbLeft = (scrollLeft / scrollWidth) * 100;
+
+        setScrollIndicator({
+            width: `${thumbWidth}%`,
+            left: `${thumbLeft}%`
+        });
+    }
+  }, []);
+
+  useEffect(() => {
+      const el = categoryScrollRef.current;
+      if (el) {
+          updateScrollIndicator(); 
+          el.addEventListener('scroll', updateScrollIndicator, { passive: true });
+          
+          const resizeObserver = new ResizeObserver(updateScrollIndicator);
+          resizeObserver.observe(el);
+          
+          return () => {
+              el.removeEventListener('scroll', updateScrollIndicator);
+              resizeObserver.unobserve(el);
+          };
+      }
+  }, [updateScrollIndicator]);
+
   return (
     <div className="flex flex-col bg-white dark:bg-gray-950 w-full max-w-md mx-auto animate-in fade-in duration-500 overflow-x-hidden pb-32">
       
@@ -77,7 +114,7 @@ export const HomeFeed: React.FC<HomeFeedFeedProps> = ({
 
       {/* CATEGORIAS */}
       <div className="w-full bg-white dark:bg-gray-950 pt-4 pb-0">
-        <div className="flex overflow-x-auto no-scrollbar px-4 pb-4 snap-x">
+        <div ref={categoryScrollRef} className="flex overflow-x-auto no-scrollbar px-4 pb-2 snap-x">
           <div className="grid grid-flow-col grid-rows-2 gap-x-3 gap-y-3">
             {CATEGORIES.map((cat) => (
               <button key={cat.id} onClick={() => onSelectCategory(cat)} className="flex flex-col items-center group active:scale-95 transition-all">
@@ -87,6 +124,18 @@ export const HomeFeed: React.FC<HomeFeedFeedProps> = ({
                 </div>
               </button>
             ))}
+          </div>
+        </div>
+        {/* SCROLL INDICATOR BAR */}
+        <div className="px-4 pb-4">
+          <div className="w-full h-[3px] bg-gray-100 dark:bg-gray-800 rounded-full">
+            <div 
+              className="h-full bg-brand-blue rounded-full" 
+              style={{ 
+                width: scrollIndicator.width, 
+                marginLeft: scrollIndicator.left 
+              }}
+            ></div>
           </div>
         </div>
       </div>
