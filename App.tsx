@@ -78,7 +78,7 @@ const App: React.FC = () => {
 
     const typingTimeout = setTimeout(() => {
       setSloganText(fullSlogan.slice(0, sloganText.length + 1));
-    }, 45); // ~1.8s total duration
+    }, 96); // ~2.5s total duration
 
     return () => clearTimeout(typingTimeout);
   }, [sloganText, splashStage]);
