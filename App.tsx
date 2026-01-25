@@ -51,6 +51,11 @@ const App: React.FC = () => {
   const [activeServiceRequestId, setActiveServiceRequestId] = useState<string | null>(null);
   const [chatRole, setChatRole] = useState<'resident' | 'merchant' | 'admin'>('resident');
 
+  // Typewriter effect state
+  const [sloganText, setSloganText] = useState('');
+  const [isTyping, setIsTyping] = useState(true);
+  const fullSlogan = 'Localizei JPA – Onde o bairro conversa 💬';
+
   const isMerchantMode = userRole === 'lojista' || (user?.email === ADMIN_EMAIL && viewMode === 'Lojista');
 
   const handleNavigate = (view: string) => {
@@ -59,6 +64,26 @@ const App: React.FC = () => {
     }
     setActiveTab(view);
   };
+
+  // Typewriter effect logic
+  useEffect(() => {
+    if (splashStage >= 4) {
+      setIsTyping(false);
+      return;
+    }
+
+    if (sloganText.length === fullSlogan.length) {
+      setIsTyping(false);
+      return;
+    }
+
+    const typingTimeout = setTimeout(() => {
+      setSloganText(fullSlogan.slice(0, sloganText.length + 1));
+    }, 40); // ~1.7s total duration
+
+    return () => clearTimeout(typingTimeout);
+  }, [sloganText, splashStage]);
+
 
   // Updated splash screen timing logic
   useEffect(() => {
@@ -193,8 +218,10 @@ const App: React.FC = () => {
             <div className={`fixed inset-0 z-[9999] flex flex-col items-center justify-between py-16 transition-opacity duration-500 ease-out ${splashStage === 3 ? 'opacity-0' : 'opacity-100'}`} style={{ backgroundColor: '#1E5BFF' }}>
               <div className="flex flex-col items-center animate-fade-in text-center px-4">
                   <div className="relative w-32 h-32 bg-white rounded-[2.5rem] flex items-center justify-center shadow-2xl mb-8 animate-logo-enter"><MapPin className="w-16 h-16 text-brand-blue fill-brand-blue" /></div>
-                  <h1 className="text-4xl font-black font-display text-white tracking-tighter drop-shadow-md">Localizei JPA</h1>
-                  <p className="text-[15px] font-medium text-white/90 mt-2 text-center">Onde o bairro conversa 💬</p>
+                  <h1 className="text-2xl font-black font-display text-white tracking-tighter drop-shadow-md h-20 flex items-center justify-center">
+                    {sloganText}
+                    {isTyping && <span className="animate-blink ml-1">|</span>}
+                  </h1>
               </div>
               <div className={`text-center transition-opacity duration-1000 ${showSponsor ? 'opacity-100' : 'opacity-0'}`}>
                 <p className="text-[10px] font-bold text-white/60 uppercase tracking-[0.3em]">Patrocinador Master</p>

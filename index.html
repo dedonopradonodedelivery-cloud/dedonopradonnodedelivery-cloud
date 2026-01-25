@@ -39,6 +39,7 @@
               'subtle-glow': 'subtleGlow 8s ease-in-out infinite',
               'slow-shimmer': 'slowShimmer 4s linear infinite',
               'subtle-diagonal-scroll': 'subtleDiagonalScroll 25s linear infinite alternate',
+              'blink': 'blink 0.7s step-end infinite',
             },
             keyframes: {
               logoPop: {
@@ -69,6 +70,10 @@
                 '0%': { transform: 'translate(0, 0) rotate(-20deg)' },
                 '100%': { transform: 'translate(-20px, -20px) rotate(-20deg)' },
               },
+              blink: {
+                'from, to': { opacity: 1 },
+                '50%': { opacity: 0 },
+              }
             }
           }
         }
