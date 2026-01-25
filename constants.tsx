@@ -310,6 +310,23 @@ export const NEIGHBORHOOD_COMMUNITIES: NeighborhoodCommunity[] = [
 
 export const MOCK_COMMUNITY_POSTS: CommunityPost[] = [
   {
+    id: 'post-bibi-1',
+    userId: 'u-bibi',
+    userName: 'Bibi Lanches',
+    userAvatar: 'https://i.pravatar.cc/100?u=bibilanches',
+    authorRole: 'merchant',
+    content: 'Promoção de hoje: X-Tudo em dobro! Peça agora pelo app e aproveite essa delícia em dobro. Válido somente hoje!',
+    type: 'recommendation',
+    communityId: 'comm-tips',
+    neighborhood: 'Freguesia',
+    timestamp: 'Há 30 min',
+    likes: 22,
+    comments: 3,
+    imageUrl: 'https://images.unsplash.com/photo-1571091718767-18b5b1457add?q=80&w=600&auto=format&fit=crop',
+    theme: 'dicas',
+    showOnStoreProfile: false
+  },
+  {
     id: 'post-new-1',
     userId: 'u-carlos',
     userName: 'Carlos Henrique',
@@ -378,15 +395,16 @@ export const MOCK_COMMUNITY_POSTS: CommunityPost[] = [
     userId: 'u4',
     userName: 'Mariana Luz',
     userAvatar: 'https://i.pravatar.cc/100?u=mari',
-    authorRole: 'resident',
-    content: 'Vaga aberta para recepcionista em clínica odontológica na Taquara. Interessados, inbox!',
+    authorRole: 'merchant',
+    content: 'Vaga aberta para recepcionista em clínica odontológica na Taquara. Horário comercial, salário a combinar. Interessados, inbox!',
     type: 'recommendation',
     communityId: 'comm-jobs',
     neighborhood: 'Taquara',
     timestamp: '5h',
     likes: 24,
     comments: 12,
-    theme: 'utilidade'
+    theme: 'utilidade',
+    showOnStoreProfile: true
   },
   {
     id: 'post-6',
@@ -474,6 +492,7 @@ const BASE_STORES: Store[] = [
     telefone_fixo_publico: '2124471234',
     instagram: '@bibilanchesjpa',
     payment_methods: ['Dinheiro', 'Pix', 'Cartão de Crédito', 'Cartão de Débito', 'VR'],
+    owner_user_id: 'u-bibi',
     business_hours: {
       segunda: { open: true, start: '11:00', end: '22:00' },
       terca: { open: true, start: '11:00', end: '22:00' },
@@ -630,6 +649,9 @@ const generateAllFakeStores = (): Store[] => {
           domingo: { open: false, start: '', end: '' },
         },
       };
+      if (store.id === 'fake-saude-1') { // Dentistas Central
+        store.owner_user_id = 'u4';
+      }
       allStores.push(store);
     }
   });

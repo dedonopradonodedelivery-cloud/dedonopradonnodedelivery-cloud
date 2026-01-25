@@ -219,6 +219,7 @@ export interface CommunityPost {
   comments: number;
   imageUrl?: string;
   theme?: 'utilidade' | 'seguranca' | 'lazer' | 'dicas' | 'geral';
+  showOnStoreProfile?: boolean;
 }
 
 export type TaxonomyType = 'category' | 'subcategory' | 'specialty';
