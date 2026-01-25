@@ -1,20 +1,7 @@
 
-import React, { useState } from 'react';
-import { 
-  X, 
-  Search, 
-  ChevronLeft, 
-  Building2, 
-  MapPin, 
-  DollarSign, 
-  Maximize2, 
-  Car, 
-  ShieldCheck, 
-  User as UserIcon,
-  SortAsc,
-  // Fix: Add missing CheckCircle2 icon to resolve "Cannot find name 'CheckCircle2'" error
-  CheckCircle2
-} from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { X, SlidersHorizontal, MapPin, DollarSign, BedDouble, Bath, Car, Maximize2 } from 'lucide-react';
+import { NEIGHBORHOODS } from '../contexts/NeighborhoodContext';
 
 export interface RealEstateFilters {
   transaction: 'aluguel' | 'venda' | null;
@@ -22,348 +9,151 @@ export interface RealEstateFilters {
   locations: string[];
   priceMin: string;
   priceMax: string;
-  iptuMin: string;
-  iptuMax: string;
-  condoMin: string;
-  condoMax: string;
   areaMin: string;
   areaMax: string;
-  parkingSpaces: string | null;
-  details: string[];
-  advertiserType: 'ambos' | 'particular' | 'profissional';
+  bedrooms: number | null;
+  bathrooms: number | null;
+  parkingSpaces: number | null;
+  condoMin: string;
+  condoMax: string;
+  isFurnished: boolean | null;
+  petsAllowed: boolean | null;
+  highCeiling: boolean | null;
+  loadingAccess: boolean | null;
   sortBy: 'relevantes' | 'recentes' | 'menor_preco' | 'maior_preco';
 }
 
 interface RealEstateFiltersViewProps {
-  initialFilters: RealEstateFilters;
+  isOpen: boolean;
+  onClose: () => void;
   onApply: (filters: RealEstateFilters) => void;
-  onBack: () => void;
+  activeTab: 'Residencial' | 'Comercial';
+  initialFilters: RealEstateFilters;
 }
 
-const SECTION_TITLE_CLASS = "text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-4 ml-1";
+const SECTION_TITLE_CLASS = "text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.2em] mb-4 ml-1";
 
-export const RealEstateFiltersView: React.FC<RealEstateFiltersViewProps> = ({ initialFilters, onApply, onBack }) => {
+export const RealEstateFiltersView: React.FC<RealEstateFiltersViewProps> = ({ isOpen, onClose, onApply, activeTab, initialFilters }) => {
   const [filters, setFilters] = useState<RealEstateFilters>(initialFilters);
-  const [locationSearch, setLocationSearch] = useState('');
 
-  const toggleType = (type: string) => {
-    setFilters(prev => ({
-      ...prev,
-      types: prev.types.includes(type) 
-        ? prev.types.filter(t => t !== type) 
-        : [...prev.types, type]
-    }));
-  };
+  useEffect(() => {
+    if (isOpen) {
+      setFilters(initialFilters);
+    }
+  }, [isOpen, initialFilters]);
 
-  const toggleDetail = (detail: string) => {
-    setFilters(prev => ({
-      ...prev,
-      details: prev.details.includes(detail) 
-        ? prev.details.filter(d => d !== detail) 
-        : [...prev.details, detail]
-    }));
-  };
-
-  const handleReset = () => {
-    setFilters({
-      transaction: null,
-      types: [],
-      locations: [],
-      priceMin: '',
-      priceMax: '',
-      iptuMin: '',
-      iptuMax: '',
-      condoMin: '',
-      condoMax: '',
-      areaMin: '',
-      areaMax: '',
-      parkingSpaces: null,
-      details: [],
-      advertiserType: 'ambos',
-      sortBy: 'relevantes'
+  const toggleFilter = (field: keyof RealEstateFilters, value: any) => {
+    setFilters(prev => {
+      const currentValues = prev[field] as any[];
+      if (Array.isArray(currentValues)) {
+        if (currentValues.includes(value)) {
+          return { ...prev, [field]: currentValues.filter(v => v !== value) };
+        } else {
+          return { ...prev, [field]: [...currentValues, value] };
+        }
+      }
+      return { ...prev, [field]: value };
     });
   };
 
+  const handleReset = () => {
+    const defaultFilters: RealEstateFilters = {
+      transaction: null, types: [], locations: [], priceMin: '', priceMax: '',
+      areaMin: '', areaMax: '', bedrooms: null, bathrooms: null, parkingSpaces: null,
+      condoMin: '', condoMax: '', isFurnished: null, petsAllowed: null,
+      highCeiling: null, loadingAccess: null, sortBy: 'relevantes'
+    };
+    setFilters(defaultFilters);
+    onApply(defaultFilters);
+  };
+  
+  if (!isOpen) return null;
+
   return (
-    <div className="fixed inset-0 z-[100] bg-white dark:bg-gray-950 flex flex-col animate-in slide-in-from-right duration-300 overflow-hidden">
-      {/* HEADER */}
-      <header className="px-6 pt-12 pb-6 border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 sticky top-0 z-10">
-        <div className="flex items-center gap-4">
-          <button 
-            onClick={onBack} 
-            className="p-2 bg-gray-50 dark:bg-gray-800 rounded-xl text-gray-500"
-          >
-            <ChevronLeft size={20} />
-          </button>
-          <div>
-            <h1 className="font-black text-xl text-gray-900 dark:text-white uppercase tracking-tighter">Filtros</h1>
-            <p className="text-[10px] text-blue-500 font-bold uppercase tracking-widest">Imóveis Comerciais</p>
-          </div>
-        </div>
-      </header>
+    <div className="fixed inset-0 z-[1001] bg-black/60 flex items-end" onClick={onClose}>
+      <div 
+        className="bg-white dark:bg-gray-900 w-full rounded-t-[2.5rem] p-6 shadow-2xl animate-in slide-in-from-bottom duration-300 max-h-[90vh] flex flex-col"
+        onClick={e => e.stopPropagation()}
+      >
+        <div className="w-12 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full mx-auto mb-6 shrink-0"></div>
+        <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6 shrink-0">Filtrar e Ordenar</h2>
 
-      {/* CONTENT */}
-      <main className="flex-1 overflow-y-auto p-6 space-y-10 no-scrollbar">
-        
-        {/* 1. Transação */}
-        <section>
-          <h3 className={SECTION_TITLE_CLASS}>Transação</h3>
-          <div className="grid grid-cols-2 gap-3">
-            {['Aluguel', 'Venda'].map(label => (
-              <button 
-                key={label}
-                onClick={() => setFilters({...filters, transaction: label.toLowerCase() as any})}
-                className={`py-4 rounded-2xl border-2 font-bold text-sm transition-all ${
-                  filters.transaction === label.toLowerCase() 
-                    ? 'bg-[#1E5BFF]/5 border-[#1E5BFF] text-[#1E5BFF]' 
-                    : 'bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800 text-gray-500'
-                }`}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
-        </section>
+        <main className="flex-1 overflow-y-auto no-scrollbar space-y-8 pr-2 -mr-2">
+            
+            {/* GERAL */}
+            <section><h3 className={SECTION_TITLE_CLASS}>Geral</h3>
+                <div className="grid grid-cols-2 gap-3 mb-4">
+                  <button onClick={() => setFilters({...filters, transaction: 'aluguel'})} className={`py-3 rounded-xl font-bold text-sm border ${filters.transaction === 'aluguel' ? 'bg-blue-600 text-white border-blue-600' : 'bg-gray-50 dark:bg-gray-800 border-gray-100 dark:border-gray-700 text-gray-500'}`}>Alugar</button>
+                  <button onClick={() => setFilters({...filters, transaction: 'venda'})} className={`py-3 rounded-xl font-bold text-sm border ${filters.transaction === 'venda' ? 'bg-blue-600 text-white border-blue-600' : 'bg-gray-50 dark:bg-gray-800 border-gray-100 dark:border-gray-700 text-gray-500'}`}>Comprar</button>
+                </div>
+            </section>
+            
+            {/* TIPO */}
+            <section><h3 className={SECTION_TITLE_CLASS}>Tipo de Imóvel</h3>
+              <div className="flex flex-wrap gap-2">
+                {(activeTab === 'Residencial' 
+                  ? ['Casa', 'Apartamento', 'Kitnet/Studio', 'Cobertura'] 
+                  : ['Sala comercial', 'Loja', 'Galpão', 'Andar/Conjunto', 'Terreno comercial']
+                ).map(type => (
+                  <button key={type} onClick={() => toggleFilter('types', type)} className={`px-4 py-2 text-xs font-bold rounded-full border ${filters.types.includes(type) ? 'bg-blue-600 text-white border-blue-600' : 'bg-gray-50 dark:bg-gray-800 border-gray-100 dark:border-gray-700 text-gray-500'}`}>{type}</button>
+                ))}
+              </div>
+            </section>
 
-        {/* 2. Tipo */}
-        <section>
-          <h3 className={SECTION_TITLE_CLASS}>Tipo de Imóvel</h3>
-          <div className="flex flex-wrap gap-2">
-            {['Sala comercial', 'Galpão / Depósito', 'Loja', 'Outros'].map(type => (
-              <button 
-                key={type}
-                onClick={() => toggleType(type)}
-                className={`px-5 py-2.5 rounded-full text-xs font-bold border-2 transition-all ${
-                  filters.types.includes(type)
-                    ? 'bg-[#1E5BFF] border-[#1E5BFF] text-white shadow-md shadow-blue-500/20'
-                    : 'bg-white dark:bg-gray-800 border-gray-100 dark:border-gray-800 text-gray-500'
-                }`}
-              >
-                {type}
-              </button>
-            ))}
-          </div>
-        </section>
+            {/* PREÇO */}
+            <section><h3 className={SECTION_TITLE_CLASS}>Faixa de Preço</h3>
+              <div className="grid grid-cols-2 gap-3">
+                <input type="number" placeholder="Mínimo (R$)" value={filters.priceMin} onChange={e => setFilters({...filters, priceMin: e.target.value})} className="w-full p-3 bg-gray-50 dark:bg-gray-800 rounded-xl text-sm border border-gray-100 dark:border-gray-700 outline-none" />
+                <input type="number" placeholder="Máximo (R$)" value={filters.priceMax} onChange={e => setFilters({...filters, priceMax: e.target.value})} className="w-full p-3 bg-gray-50 dark:bg-gray-800 rounded-xl text-sm border border-gray-100 dark:border-gray-700 outline-none" />
+              </div>
+            </section>
 
-        {/* 3. Localização */}
-        <section>
-          <h3 className={SECTION_TITLE_CLASS}>Local</h3>
-          <div className="relative mb-3">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
-            <input 
-              type="text" 
-              value={locationSearch}
-              onChange={(e) => setLocationSearch(e.target.value)}
-              placeholder="Buscar bairros, ruas ou centros comerciais..."
-              className="w-full bg-gray-50 dark:bg-gray-800 border-none py-3.5 pl-11 pr-4 rounded-2xl text-sm font-medium outline-none focus:ring-2 focus:ring-[#1E5BFF]/30 shadow-inner dark:text-white"
-            />
-          </div>
-          <div className="flex flex-wrap gap-2">
-             {/* Mock locations chips */}
-             {['Freguesia', 'Pechincha', 'Quality Shopping', 'Araguaia'].map(loc => (
-               <div key={loc} className="bg-blue-50 dark:bg-blue-900/20 text-[#1E5BFF] px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center gap-2 border border-blue-100">
-                 {loc} <X size={12} className="cursor-pointer" />
-               </div>
-             ))}
-          </div>
-        </section>
+            {/* RESIDENCIAL */}
+            {activeTab === 'Residencial' && (
+              <>
+                <section><h3 className={SECTION_TITLE_CLASS}>Quartos</h3>
+                  <div className="flex gap-2">
+                    {[1,2,3,4].map(q => (<button key={q} onClick={() => setFilters({...filters, bedrooms: q})} className={`flex-1 py-3 text-sm font-bold rounded-xl border ${filters.bedrooms === q ? 'bg-blue-600 text-white' : 'bg-gray-50 dark:bg-gray-800 text-gray-500'}`}>{q === 4 ? '4+' : q}</button>))}
+                  </div>
+                </section>
+                <section><h3 className={SECTION_TITLE_CLASS}>Vagas</h3>
+                  <div className="flex gap-2">
+                    {[0,1,2,3].map(v => (<button key={v} onClick={() => setFilters({...filters, parkingSpaces: v})} className={`flex-1 py-3 text-sm font-bold rounded-xl border ${filters.parkingSpaces === v ? 'bg-blue-600 text-white' : 'bg-gray-50 dark:bg-gray-800 text-gray-500'}`}>{v === 3 ? '3+' : v}</button>))}
+                  </div>
+                </section>
+                <section>
+                    <div className="flex items-center gap-4">
+                        <div className="flex-1 space-y-2"><label className="text-xs font-bold text-gray-400">Mobiliado?</label><button onClick={() => toggleFilter('isFurnished', !filters.isFurnished)} className={`w-full py-2 rounded-lg text-xs font-bold ${filters.isFurnished ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-500'}`}>{filters.isFurnished ? 'Sim' : 'Não'}</button></div>
+                        <div className="flex-1 space-y-2"><label className="text-xs font-bold text-gray-400">Aceita Pet?</label><button onClick={() => toggleFilter('petsAllowed', !filters.petsAllowed)} className={`w-full py-2 rounded-lg text-xs font-bold ${filters.petsAllowed ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-500'}`}>{filters.petsAllowed ? 'Sim' : 'Não'}</button></div>
+                    </div>
+                </section>
+              </>
+            )}
 
-        {/* 4. Faixa de Preço */}
-        <section>
-          <h3 className={SECTION_TITLE_CLASS}>Faixa de preço</h3>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="relative">
-              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-xs font-bold">Mín</span>
-              <input 
-                type="number" 
-                value={filters.priceMin}
-                onChange={(e) => setFilters({...filters, priceMin: e.target.value})}
-                placeholder="R$ 0" 
-                className="w-full bg-gray-50 dark:bg-gray-800 border-none py-4 pl-12 pr-4 rounded-2xl text-sm font-bold outline-none focus:ring-2 focus:ring-[#1E5BFF]/30 dark:text-white"
-              />
-            </div>
-            <div className="relative">
-              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-xs font-bold">Máx</span>
-              <input 
-                type="number" 
-                value={filters.priceMax}
-                onChange={(e) => setFilters({...filters, priceMax: e.target.value})}
-                placeholder="R$ s/ limite" 
-                className="w-full bg-gray-50 dark:bg-gray-800 border-none py-4 pl-12 pr-4 rounded-2xl text-sm font-bold outline-none focus:ring-2 focus:ring-[#1E5BFF]/30 dark:text-white"
-              />
-            </div>
-          </div>
-        </section>
+            {/* COMERCIAL */}
+            {activeTab === 'Comercial' && (
+                <>
+                <section><h3 className={SECTION_TITLE_CLASS}>Vagas</h3>
+                  <div className="flex gap-2">
+                    {[0,1,2,3].map(v => (<button key={v} onClick={() => setFilters({...filters, parkingSpaces: v})} className={`flex-1 py-3 text-sm font-bold rounded-xl border ${filters.parkingSpaces === v ? 'bg-blue-600 text-white' : 'bg-gray-50 dark:bg-gray-800 text-gray-500'}`}>{v === 3 ? '3+' : v}</button>))}
+                  </div>
+                </section>
+                 <section>
+                    <div className="flex items-center gap-4">
+                        <div className="flex-1 space-y-2"><label className="text-xs font-bold text-gray-400">Pé-direito alto?</label><button onClick={() => toggleFilter('highCeiling', !filters.highCeiling)} className={`w-full py-2 rounded-lg text-xs font-bold ${filters.highCeiling ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-500'}`}>{filters.highCeiling ? 'Sim' : 'Não'}</button></div>
+                        <div className="flex-1 space-y-2"><label className="text-xs font-bold text-gray-400">Carga/Descarga?</label><button onClick={() => toggleFilter('loadingAccess', !filters.loadingAccess)} className={`w-full py-2 rounded-lg text-xs font-bold ${filters.loadingAccess ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-500'}`}>{filters.loadingAccess ? 'Sim' : 'Não'}</button></div>
+                    </div>
+                </section>
+                </>
+            )}
+             
+        </main>
 
-        {/* 5. IPTU */}
-        <section>
-          <h3 className={SECTION_TITLE_CLASS}>IPTU</h3>
-          <div className="grid grid-cols-2 gap-4">
-            <input 
-              type="number" 
-              value={filters.iptuMin}
-              onChange={(e) => setFilters({...filters, iptuMin: e.target.value})}
-              placeholder="Mínimo" 
-              className="w-full bg-gray-50 dark:bg-gray-800 border-none p-4 rounded-2xl text-sm font-bold outline-none focus:ring-2 focus:ring-[#1E5BFF]/30 dark:text-white"
-            />
-            <input 
-              type="number" 
-              value={filters.iptuMax}
-              onChange={(e) => setFilters({...filters, iptuMax: e.target.value})}
-              placeholder="Máximo" 
-              className="w-full bg-gray-50 dark:bg-gray-800 border-none p-4 rounded-2xl text-sm font-bold outline-none focus:ring-2 focus:ring-[#1E5BFF]/30 dark:text-white"
-            />
-          </div>
-        </section>
-
-        {/* 6. Condomínio */}
-        <section>
-          <h3 className={SECTION_TITLE_CLASS}>Condomínio</h3>
-          <div className="grid grid-cols-2 gap-4">
-            <input 
-              type="number" 
-              value={filters.condoMin}
-              onChange={(e) => setFilters({...filters, condoMin: e.target.value})}
-              placeholder="Mínimo" 
-              className="w-full bg-gray-50 dark:bg-gray-800 border-none p-4 rounded-2xl text-sm font-bold outline-none focus:ring-2 focus:ring-[#1E5BFF]/30 dark:text-white"
-            />
-            <input 
-              type="number" 
-              value={filters.condoMax}
-              onChange={(e) => setFilters({...filters, condoMax: e.target.value})}
-              placeholder="Máximo" 
-              className="w-full bg-gray-50 dark:bg-gray-800 border-none p-4 rounded-2xl text-sm font-bold outline-none focus:ring-2 focus:ring-[#1E5BFF]/30 dark:text-white"
-            />
-          </div>
-        </section>
-
-        {/* 7. Área */}
-        <section>
-          <h3 className={SECTION_TITLE_CLASS}>Área (m²)</h3>
-          <div className="grid grid-cols-2 gap-4">
-            <input 
-              type="number" 
-              value={filters.areaMin}
-              onChange={(e) => setFilters({...filters, areaMin: e.target.value})}
-              placeholder="Min m²" 
-              className="w-full bg-gray-50 dark:bg-gray-800 border-none p-4 rounded-2xl text-sm font-bold outline-none focus:ring-2 focus:ring-[#1E5BFF]/30 dark:text-white"
-            />
-            <input 
-              type="number" 
-              value={filters.areaMax}
-              onChange={(e) => setFilters({...filters, areaMax: e.target.value})}
-              placeholder="Max m²" 
-              className="w-full bg-gray-50 dark:bg-gray-800 border-none p-4 rounded-2xl text-sm font-bold outline-none focus:ring-2 focus:ring-[#1E5BFF]/30 dark:text-white"
-            />
-          </div>
-        </section>
-
-        {/* 8. Vagas na garagem */}
-        <section>
-          <h3 className={SECTION_TITLE_CLASS}>Vagas na garagem</h3>
-          <div className="grid grid-cols-5 gap-2">
-            {['01', '02', '03', '04', '+05'].map(num => (
-              <button 
-                key={num}
-                onClick={() => setFilters({...filters, parkingSpaces: num})}
-                className={`py-3 rounded-xl font-bold text-xs transition-all ${
-                  filters.parkingSpaces === num 
-                    ? 'bg-[#1E5BFF] text-white shadow-md' 
-                    : 'bg-gray-50 dark:bg-gray-800 text-gray-500'
-                }`}
-              >
-                {num}
-              </button>
-            ))}
-          </div>
-        </section>
-
-        {/* 9. Detalhes */}
-        <section>
-          <h3 className={SECTION_TITLE_CLASS}>Detalhes</h3>
-          <div className="flex flex-wrap gap-2">
-            {['Segurança 24h', 'Câmeras de segurança', 'Elevador', 'Portaria', 'Acesso para deficientes'].map(detail => (
-              <button 
-                key={detail}
-                onClick={() => toggleDetail(detail)}
-                className={`px-4 py-2 rounded-full text-[11px] font-bold border-2 transition-all ${
-                  filters.details.includes(detail)
-                    ? 'bg-[#1E5BFF] border-[#1E5BFF] text-white'
-                    : 'bg-white dark:bg-gray-800 border-gray-100 dark:border-gray-800 text-gray-500'
-                }`}
-              >
-                {detail}
-              </button>
-            ))}
-          </div>
-        </section>
-
-        {/* 10. Tipo de anunciante */}
-        <section>
-          <h3 className={SECTION_TITLE_CLASS}>Tipo de anunciante</h3>
-          <div className="grid grid-cols-3 gap-2">
-            {[
-              {id: 'ambos', label: 'Ambos'},
-              {id: 'particular', label: 'Particular'},
-              {id: 'profissional', label: 'Profissional'}
-            ].map(opt => (
-              <button 
-                key={opt.id}
-                onClick={() => setFilters({...filters, advertiserType: opt.id as any})}
-                className={`py-3 rounded-xl font-bold text-xs transition-all ${
-                  filters.advertiserType === opt.id 
-                    ? 'bg-gray-900 dark:bg-white text-white dark:text-gray-950' 
-                    : 'bg-gray-50 dark:bg-gray-800 text-gray-500'
-                }`}
-              >
-                {opt.label}
-              </button>
-            ))}
-          </div>
-        </section>
-
-        {/* 11. Ordenar por */}
-        <section>
-          <h3 className={SECTION_TITLE_CLASS}>Ordenar por</h3>
-          <div className="space-y-2">
-            {[
-              {id: 'relevantes', label: 'Mais relevantes'},
-              {id: 'recentes', label: 'Mais recentes'},
-              {id: 'menor_preco', label: 'Menor preço'},
-              {id: 'maior_preco', label: 'Maior preço'}
-            ].map(opt => (
-              <button 
-                key={opt.id}
-                onClick={() => setFilters({...filters, sortBy: opt.id as any})}
-                className="w-full p-4 rounded-2xl flex items-center justify-between bg-gray-50 dark:bg-gray-800 group"
-              >
-                <span className={`text-sm font-bold ${filters.sortBy === opt.id ? 'text-[#1E5BFF]' : 'text-gray-600 dark:text-gray-400'}`}>
-                  {opt.label}
-                </span>
-                {/* Fix: CheckCircle2 icon was not imported from lucide-react */}
-                {filters.sortBy === opt.id && <CheckCircle2 size={18} className="text-[#1E5BFF]" />}
-              </button>
-            ))}
-          </div>
-        </section>
-
-      </main>
-
-      {/* FOOTER ACTIONS */}
-      <footer className="p-6 border-t border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 flex gap-4">
-        <button 
-          onClick={handleReset}
-          className="flex-1 py-4 text-gray-400 font-black uppercase text-xs tracking-widest hover:text-gray-900 transition-colors"
-        >
-          Limpar
-        </button>
-        <button 
-          onClick={() => onApply(filters)}
-          className="flex-[2] bg-[#1E5BFF] text-white font-black py-4 rounded-2xl shadow-xl shadow-blue-500/20 active:scale-[0.98] transition-all uppercase tracking-widest text-xs"
-        >
-          Aplicar Filtros
-        </button>
-      </footer>
+        <footer className="pt-6 flex gap-4 shrink-0 border-t border-gray-100 dark:border-gray-800">
+          <button onClick={handleReset} className="flex-1 py-4 text-sm font-bold text-gray-500 bg-gray-100 dark:bg-gray-800 rounded-xl">Limpar</button>
+          <button onClick={() => onApply(filters)} className="flex-1 py-4 text-sm font-bold bg-blue-600 text-white rounded-xl">Aplicar</button>
+        </footer>
+      </div>
     </div>
   );
 };

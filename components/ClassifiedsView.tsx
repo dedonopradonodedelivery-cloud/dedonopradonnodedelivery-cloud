@@ -213,14 +213,20 @@ export const ClassifiedsView: React.FC<ClassifiedsViewProps> = ({ onBack, onNavi
                 <ClassifiedCategoryButton 
                     key={cat.id} 
                     category={cat} 
-                    onClick={() => scrollToCategory(cat.id)} 
+                    onClick={() => {
+                        if (cat.id === 'imoveis') {
+                            onNavigate('real_estate');
+                        } else {
+                            scrollToCategory(cat.id);
+                        }
+                    }} 
                 />
             ))}
         </div>
         
         {/* Blocos de Conteúdo */}
         <div className="space-y-8">
-          {CLASSIFIED_CATEGORIES.map(cat => (
+          {CLASSIFIED_CATEGORIES.filter(c => c.id !== 'imoveis').map(cat => (
             <CategorySection 
               key={cat.id}
               category={cat}

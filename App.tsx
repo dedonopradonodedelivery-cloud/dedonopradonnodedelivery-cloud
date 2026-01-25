@@ -11,6 +11,7 @@ import { PatrocinadorMasterScreen } from '@/components/PatrocinadorMasterScreen'
 import { ServicesView } from '@/components/ServicesView';
 import { StoreAreaView } from '@/components/StoreAreaView';
 import { ClassifiedsView } from '@/components/ClassifiedsView';
+import { RealEstateView } from '@/components/RealEstateView';
 import { MerchantPerformanceDashboard } from '@/components/MerchantPerformanceDashboard';
 import { NeighborhoodPostsView } from '@/components/NeighborhoodPostsView';
 import { AdminPanel } from '@/components/AdminPanel';
@@ -112,8 +113,8 @@ const App: React.FC = () => {
     handleNavigate('subcategory_detail');
   };
 
-  const headerExclusionList = ['store_area', 'store_detail', 'profile', 'patrocinador_master', 'merchant_performance', 'neighborhood_posts', 'classifieds', 'services', 'merchant_leads', 'service_chat', 'admin_panel', 'category_detail', 'subcategory_detail', 'sponsor_info'];
-  const hideBottomNav = ['admin_panel', 'weekly_reward_page', 'service_chat', 'sponsor_info'].includes(activeTab);
+  const headerExclusionList = ['store_area', 'store_detail', 'profile', 'patrocinador_master', 'merchant_performance', 'neighborhood_posts', 'classifieds', 'services', 'merchant_leads', 'service_chat', 'admin_panel', 'category_detail', 'subcategory_detail', 'sponsor_info', 'real_estate'];
+  const hideBottomNav = ['admin_panel', 'weekly_reward_page', 'service_chat', 'sponsor_info', 'real_estate'].includes(activeTab);
 
   const RoleSwitcherModal: React.FC = () => {
     if (!isRoleSwitcherOpen) return null;
@@ -202,6 +203,7 @@ const App: React.FC = () => {
                     
                     {activeTab === 'store_detail' && selectedStore && <StoreDetailView store={selectedStore} onBack={() => handleNavigate(previousTab)} />}
                     {activeTab === 'classifieds' && <ClassifiedsView onBack={() => handleNavigate('home')} onNavigate={handleNavigate} user={user} onRequireLogin={() => setIsAuthOpen(true)} />}
+                    {activeTab === 'real_estate' && <RealEstateView onBack={() => handleNavigate('classifieds')} user={user} onRequireLogin={() => setIsAuthOpen(true)} />}
                     {activeTab === 'neighborhood_posts' && <NeighborhoodPostsView onBack={() => handleNavigate('home')} onStoreClick={handleSelectStore} user={user} onRequireLogin={() => setIsAuthOpen(true)} />}
                     {activeTab === 'sponsor_info' && <SponsorInfoView onBack={() => handleNavigate(previousTab)} />}
                     {activeTab === 'patrocinador_master' && <PatrocinadorMasterScreen onBack={() => handleNavigate(previousTab)} />}

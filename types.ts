@@ -89,6 +89,34 @@ export interface Store {
   email_publico?: string;
 }
 
+export interface RealEstateProperty {
+  id: string;
+  type: 'Residencial' | 'Comercial';
+  title: string;
+  description: string;
+  image: string;
+  neighborhood: string;
+  price: number;
+  transaction: 'aluguel' | 'venda';
+  area: number; // m²
+  postedAt: string;
+
+  // Residencial
+  bedrooms?: number;
+  bathrooms?: number;
+  parkingSpaces?: number;
+  propertyTypeRes?: 'Casa' | 'Apartamento' | 'Kitnet/Studio' | 'Cobertura';
+  condoFee?: number;
+  isFurnished?: boolean;
+  petsAllowed?: boolean;
+
+  // Comercial
+  propertyTypeCom?: 'Sala comercial' | 'Loja' | 'Galpão' | 'Andar/Conjunto' | 'Terreno comercial';
+  hasBathroom?: boolean;
+  highCeiling?: boolean;
+  loadingAccess?: boolean;
+}
+
 // --- TIPOS DE SERVIÇOS LOCAIS (V1) ---
 
 export type ServiceUrgency = 'Hoje' | 'Essa semana' | 'Sem pressa';
