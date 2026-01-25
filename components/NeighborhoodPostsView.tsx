@@ -26,7 +26,6 @@ import {
   PlusCircle,
   Hash,
   AlertCircle,
-  ChevronDown,
   // FIX: Added Store as StoreIcon to fix usage as component and avoid name conflict
   Store as StoreIcon
 } from 'lucide-react';

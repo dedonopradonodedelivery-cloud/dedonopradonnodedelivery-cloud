@@ -195,17 +195,17 @@ export const StoreDetailView: React.FC<{
       <main className="pb-24">
         
         {/* --- CAROUSEL DE IMAGENS --- */}
-        <section className="relative w-full aspect-[12/5] bg-gray-100 dark:bg-gray-800 group">
+        <section className="relative w-full aspect-[16/9] sm:aspect-[2/1] bg-gray-100 dark:bg-gray-800 group">
           <div className="absolute top-0 left-0 right-0 p-4 pt-6 flex justify-between items-center z-40">
-            <button onClick={onBack} className="w-10 h-10 rounded-full bg-white/90 dark:bg-gray-800/90 backdrop-blur-md flex items-center justify-center shadow-md active:scale-90 transition-transform">
-              <ChevronLeft className="w-6 h-6 dark:text-white" />
+            <button onClick={onBack} className="w-10 h-10 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center shadow-md active:scale-90 transition-transform">
+              <ChevronLeft className="w-6 h-6 text-white" />
             </button>
             <div className="flex gap-2">
-              <button onClick={() => track('store_click_share')} className="w-10 h-10 rounded-full bg-white/90 dark:bg-gray-800/90 flex items-center justify-center shadow-md active:scale-90 transition-transform">
-                <Share2 className="w-5 h-5 dark:text-white" />
+              <button onClick={() => track('store_click_share')} className="w-10 h-10 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center shadow-md active:scale-90 transition-transform">
+                <Share2 className="w-5 h-5 text-white" />
               </button>
-              <button onClick={() => { setIsFavorite(!isFavorite); track('store_click_favorite'); }} className="w-10 h-10 rounded-full bg-white/90 dark:bg-gray-800/90 flex items-center justify-center shadow-md active:scale-90 transition-transform">
-                <Heart className={`w-5 h-5 ${isFavorite ? 'fill-rose-500 text-rose-500' : 'dark:text-white'}`} />
+              <button onClick={() => { setIsFavorite(!isFavorite); track('store_click_favorite'); }} className="w-10 h-10 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center shadow-md active:scale-90 transition-transform">
+                <Heart className={`w-5 h-5 ${isFavorite ? 'fill-rose-500 text-rose-500' : 'text-white'}`} />
               </button>
             </div>
           </div>
@@ -241,26 +241,25 @@ export const StoreDetailView: React.FC<{
 
         <div className="px-5 relative">
           
-          {/* --- LOGO --- */}
-          <div className="flex justify-between items-end -mt-8 mb-6">
-              <div className="w-20 h-20 rounded-[24px] bg-white dark:bg-gray-800 p-1 shadow-lg border-4 border-white dark:border-gray-900 overflow-hidden z-30">
-                <img src={logoImg} alt="Logo" className="w-full h-full object-contain rounded-[20px]" />
-              </div>
+          {/* --- LOGO CENTRALIZADA --- */}
+          <div className="flex justify-center -mt-12 z-20 relative">
+            <div className="w-24 h-24 rounded-[28px] bg-white dark:bg-gray-800 p-1 shadow-lg border-4 border-white dark:border-gray-900 overflow-hidden">
+              <img src={logoImg} alt="Logo" className="w-full h-full object-contain rounded-[24px]" />
+            </div>
           </div>
 
-          {/* Cabeçalho */}
-          <div className="mb-8">
-            <div className="flex flex-wrap items-center gap-x-3 gap-y-2 mb-2">
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight leading-tight">{store.name}</h1>
+          {/* NOVO CARD DE INFORMAÇÕES */}
+          <div className="bg-white dark:bg-gray-800 rounded-3xl p-6 pt-16 -mt-12 text-center shadow-lg border border-gray-100 dark:border-gray-700 mb-8">
+            <div className="flex items-center justify-center gap-2 mb-2">
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">{store.name}</h1>
               {store.verified && (
-                  <div className="flex items-center gap-1.5 bg-blue-50 dark:bg-blue-900/20 text-[#1E5BFF] px-3 py-1 rounded-full border border-blue-100 dark:border-blue-800/50 shadow-sm">
-                      <BadgeCheck size={14} className="fill-current" />
-                      <span className="text-[9px] font-black uppercase tracking-widest">Verificada</span>
+                  <div className="flex items-center gap-1 text-[#1E5BFF]">
+                      <BadgeCheck size={20} className="fill-current" />
                   </div>
               )}
             </div>
-            <div className="flex items-center gap-2 text-xs font-medium text-gray-500 dark:text-gray-400">
-                <span className="uppercase font-bold tracking-widest text-[#1E5BFF]">{store.category}</span>
+            <div className="flex items-center justify-center gap-2 text-xs font-medium text-gray-500 dark:text-gray-400">
+                <span className="uppercase font-bold tracking-widest text-gray-400">{store.category}</span>
                 <span className="text-gray-300">•</span>
                 <div className="flex items-center gap-1">
                   <Star className="w-3.5 h-3.5 text-yellow-400 fill-current" />
@@ -269,8 +268,8 @@ export const StoreDetailView: React.FC<{
                 </div>
             </div>
           </div>
-
-          {/* ONDE ENCONTRAR (REPOSICIONADO) */}
+        
+          {/* ONDE ENCONTRAR */}
           <section className="mb-10 space-y-6">
               <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Onde encontrar essa loja:</h3>
               
