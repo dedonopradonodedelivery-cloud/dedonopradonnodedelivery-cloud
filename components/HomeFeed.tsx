@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { Store, Category, AdType } from '@/types';
 import { 
@@ -18,7 +17,7 @@ import {
 } from 'lucide-react';
 import { LojasEServicosList } from '@/components/LojasEServicosList';
 import { User } from '@supabase/supabase-js';
-import { CATEGORIES } from '@/constants';
+import { CATEGORIES, MOCK_COMMUNITY_POSTS } from '@/constants';
 import { useNeighborhood } from '@/contexts/NeighborhoodContext';
 import { LaunchOfferBanner } from './LaunchOfferBanner';
 import { HomeBannerCarousel } from './HomeBannerCarousel';
@@ -31,12 +30,6 @@ interface HomeFeedFeedProps {
   user: User | null;
   userRole: 'cliente' | 'lojista' | null;
 }
-
-const MOCK_PREVIEW_POSTS = [
-  { id: 'p1', store: 'Padaria Imperial', img: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?q=80&w=400', text: 'Pão saindo agora! 🥖' },
-  { id: 'p2', store: 'Studio Hair Vip', img: 'https://images.unsplash.com/photo-1560066984-138dadb4c035?q=80&w=400', text: 'Novo visual da cliente...' },
-  { id: 'p3', store: 'Academia FitBairro', img: 'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?q=80&w=400', text: 'Turma das 7h focada! 💪' },
-];
 
 export const HomeFeed: React.FC<HomeFeedFeedProps> = ({ 
   onNavigate, 
@@ -175,7 +168,7 @@ export const HomeFeed: React.FC<HomeFeedFeedProps> = ({
         </div>
       </section>
 
-      {/* 2. POSTS DO BAIRRO */}
+      {/* 2. ONDE O BAIRRO CONVERSA */}
       <section className="px-5 py-4 mb-6">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
@@ -183,26 +176,26 @@ export const HomeFeed: React.FC<HomeFeedFeedProps> = ({
               <MessageSquare size={18} strokeWidth={2.5} />
             </div>
             <div>
-              <h2 className="text-[11px] font-black text-gray-900 dark:text-white uppercase tracking-[0.15em] leading-none mb-1">Posts do Bairro</h2>
-              <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest leading-none">O que está rolando agora</p>
+              <h2 className="text-[11px] font-black text-gray-900 dark:text-white uppercase tracking-[0.15em] leading-none mb-1">Onde o bairro conversa</h2>
+              <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest leading-none">Posts recentes dos vizinhos</p>
             </div>
           </div>
-          <button onClick={() => onNavigate('neighborhood_posts')} className="text-[9px] font-black text-[#1E5BFF] uppercase tracking-widest">Ver mais</button>
+          <button onClick={() => onNavigate('neighborhood_posts')} className="text-[9px] font-black text-[#1E5BFF] uppercase tracking-widest">Ver tudo</button>
         </div>
 
         <div className="flex gap-4 overflow-x-auto no-scrollbar -mx-5 px-5 pb-2">
-            {MOCK_PREVIEW_POSTS.map((post) => (
+            {MOCK_COMMUNITY_POSTS.slice(0, 5).map((post) => (
                 <div 
                     key={post.id} 
                     onClick={() => onNavigate('neighborhood_posts')}
                     className="flex-shrink-0 w-44 bg-white dark:bg-gray-900 rounded-[2rem] border border-gray-100 dark:border-gray-800 overflow-hidden shadow-sm active:scale-[0.98] transition-all"
                 >
                     <div className="h-32 w-full overflow-hidden">
-                        <img src={post.img} alt={post.store} className="w-full h-full object-cover" />
+                        <img src={post.imageUrl || 'https://images.unsplash.com/photo-1570129477492-45c003edd2be?q=80&w=800&auto=format&fit=crop'} alt={post.userName} className="w-full h-full object-cover" />
                     </div>
                     <div className="p-3">
-                        <p className="text-[10px] font-black text-[#1E5BFF] uppercase tracking-tighter truncate">{post.store}</p>
-                        <p className="text-[11px] text-gray-600 dark:text-gray-400 font-medium mt-0.5 line-clamp-1">{post.text}</p>
+                        <p className="text-[10px] font-black text-[#1E5BFF] uppercase tracking-tighter truncate">{post.userName}</p>
+                        <p className="text-[11px] text-gray-600 dark:text-gray-400 font-medium mt-0.5 line-clamp-1">{post.content}</p>
                     </div>
                 </div>
             ))}

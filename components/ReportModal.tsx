@@ -1,5 +1,6 @@
+
 import React, { useState } from 'react';
-import { X, AlertTriangle, ShieldAlert, Ban, MapPin, MessageSquare, CheckCircle2 } from 'lucide-react';
+import { X, AlertTriangle, ShieldAlert, Ban, MapPin, MessageSquare, CheckCircle2, Flag } from 'lucide-react';
 import { ReportReason } from '../types';
 
 interface ReportModalProps {
@@ -14,9 +15,8 @@ export const ReportModal: React.FC<ReportModalProps> = ({ isOpen, onClose, onSub
   if (!isOpen) return null;
 
   const reasons: { id: ReportReason; label: string; icon: React.ElementType; color: string }[] = [
+    { id: 'offensive', label: 'Conteúdo Ofensivo / Impróprio', icon: ShieldAlert, color: 'text-red-500' },
     { id: 'spam', label: 'Spam / Propaganda Indevida', icon: MessageSquare, color: 'text-yellow-500' },
-    { id: 'offensive', label: 'Conteúdo Ofensivo', icon: ShieldAlert, color: 'text-red-500' },
-    { id: 'fraud', label: 'Golpe / Fraude', icon: Ban, color: 'text-red-600' },
     { id: 'wrong_neighborhood', label: 'Conteúdo fora do bairro', icon: MapPin, color: 'text-blue-500' },
     { id: 'other', label: 'Outro motivo', icon: AlertTriangle, color: 'text-gray-500' },
   ];
@@ -28,14 +28,14 @@ export const ReportModal: React.FC<ReportModalProps> = ({ isOpen, onClose, onSub
   };
 
   return (
-    <div className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-[1002] bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center animate-in fade-in duration-200" onClick={onClose}>
       <div 
         className="bg-white dark:bg-gray-900 w-full max-w-md rounded-t-[2rem] sm:rounded-3xl p-6 shadow-2xl animate-in slide-in-from-bottom duration-300"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-            <AlertTriangle className="w-5 h-5 text-red-500" />
+            <Flag className="w-5 h-5 text-red-500" />
             Denunciar publicação
           </h2>
           <button 
@@ -58,16 +58,16 @@ export const ReportModal: React.FC<ReportModalProps> = ({ isOpen, onClose, onSub
               <button
                 key={reason.id}
                 onClick={() => setSelectedReason(reason.id)}
-                className={`w-full flex items-center gap-4 p-4 rounded-xl border transition-all text-left ${
+                className={`w-full flex items-center gap-4 p-4 rounded-xl border-2 transition-all text-left ${
                   isSelected 
-                    ? 'bg-red-50 dark:bg-red-900/20 border-red-500 ring-1 ring-red-500' 
+                    ? 'bg-red-50 dark:bg-red-900/20 border-red-500' 
                     : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700'
                 }`}
               >
                 <div className={`p-2 rounded-lg ${isSelected ? 'bg-white dark:bg-gray-800' : 'bg-gray-100 dark:bg-gray-700'}`}>
                   <Icon className={`w-5 h-5 ${reason.color}`} />
                 </div>
-                <span className={`font-medium text-sm flex-1 ${isSelected ? 'text-red-700 dark:text-red-300' : 'text-gray-700 dark:text-gray-200'}`}>
+                <span className={`font-medium text-sm flex-1 ${isSelected ? 'text-red-700 dark:text-red-300 font-bold' : 'text-gray-700 dark:text-gray-200'}`}>
                   {reason.label}
                 </span>
                 {isSelected && <CheckCircle2 className="w-5 h-5 text-red-500" />}
