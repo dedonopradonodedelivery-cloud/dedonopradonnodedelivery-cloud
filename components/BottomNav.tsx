@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Home, User as UserIcon, Users } from 'lucide-react';
+import { Home, User as UserIcon, Newspaper } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
 interface BottomNavProps {
@@ -21,7 +21,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
 
   const navItems: NavItem[] = [
     { id: 'home', icon: Home, label: 'Início' },
-    { id: 'community', icon: Users, label: 'Bairro', isCenter: true },
+    { id: 'classifieds', icon: Newspaper, label: 'Classificados', isCenter: true },
     { id: 'profile', icon: UserIcon, label: 'Menu' },
   ];
 

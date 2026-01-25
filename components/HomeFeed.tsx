@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { Store, Category, AdType, CommunityPost } from '@/types';
+import { Store, Category, AdType } from '@/types';
 import { 
   Compass, 
   Sparkles, 
@@ -13,12 +13,12 @@ import {
   MessageSquare,
   Zap,
   Award,
-  Loader2,
-  Users
+  // Fix: Add missing Loader2 icon to resolve "Cannot find name 'Loader2'" error
+  Loader2
 } from 'lucide-react';
 import { LojasEServicosList } from '@/components/LojasEServicosList';
 import { User } from '@supabase/supabase-js';
-import { CATEGORIES, MOCK_COMMUNITY_POSTS } from '@/constants';
+import { CATEGORIES } from '@/constants';
 import { useNeighborhood } from '@/contexts/NeighborhoodContext';
 import { LaunchOfferBanner } from './LaunchOfferBanner';
 import { HomeBannerCarousel } from './HomeBannerCarousel';
@@ -31,6 +31,12 @@ interface HomeFeedFeedProps {
   user: User | null;
   userRole: 'cliente' | 'lojista' | null;
 }
+
+const MOCK_PREVIEW_POSTS = [
+  { id: 'p1', store: 'Padaria Imperial', img: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?q=80&w=400', text: 'Pão saindo agora! 🥖' },
+  { id: 'p2', store: 'Studio Hair Vip', img: 'https://images.unsplash.com/photo-1560066984-138dadb4c035?q=80&w=400', text: 'Novo visual da cliente...' },
+  { id: 'p3', store: 'Academia FitBairro', img: 'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?q=80&w=400', text: 'Turma das 7h focada! 💪' },
+];
 
 export const HomeFeed: React.FC<HomeFeedFeedProps> = ({ 
   onNavigate, 
@@ -83,40 +89,125 @@ export const HomeFeed: React.FC<HomeFeedFeedProps> = ({
 
       <HomeBannerCarousel onStoreClick={onStoreClick} />
 
-      {/* 2. ONDE O BAIRRO CONVERSA */}
+      {/* 1. SISTEMA DE RECOMPENSA (VERSÃO COMPACTA) */}
+      <section className="px-5 py-1 mb-2">
+        <div className="bg-white dark:bg-gray-900 rounded-[2rem] p-4 border border-gray-100 dark:border-gray-800 shadow-xl shadow-blue-900/5 relative overflow-hidden group">
+          {/* Micro-animação de fundo quando ativado */}
+          <div className={`absolute top-0 right-0 w-24 h-24 bg-blue-500/5 rounded-full blur-3xl -mr-12 -mt-12 transition-opacity duration-1000 ${isAnimating ? 'opacity-100' : 'opacity-0'}`}></div>
+          
+          <div className="relative z-10">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <div className="w-7 h-7 bg-blue-50 dark:bg-blue-900/30 rounded-xl flex items-center justify-center text-[#1E5BFF] border border-blue-100/50 dark:border-blue-800/30 shadow-sm">
+                  <Gift className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="font-black text-[9px] text-[#1E5BFF] uppercase tracking-[0.12em] leading-none mb-0.5">Recompensa da Semana</h3>
+                  <p className="text-[8px] font-bold text-gray-400 uppercase tracking-widest leading-none">Acesse e ganhe</p>
+                </div>
+              </div>
+              <div className="bg-gray-50 dark:bg-gray-800 px-2 py-1 rounded-lg border border-gray-100 dark:border-gray-700">
+                <span className="text-[8px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-tighter">Dia {consecutiveDays} de 5</span>
+              </div>
+            </div>
+
+            <div className="px-1 mb-3">
+              <h2 className="text-[11px] font-bold text-gray-800 dark:text-gray-200 leading-tight">
+                {consecutiveDays < 5 
+                  ? "Cada dia conta para liberar seus benefícios exclusivos" 
+                  : "Parabéns! Sua recompensa está pronta."}
+              </h2>
+            </div>
+
+            {/* Marcadores de Progresso Compactos */}
+            <div className="flex justify-between items-center mb-4 px-2">
+              {[1, 2, 3, 4, 5].map((day) => {
+                const isCompleted = day <= consecutiveDays;
+                const isNext = day === consecutiveDays + 1;
+
+                return (
+                  <div key={day} className="flex flex-col items-center gap-1">
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center border-2 transition-all duration-700 relative ${
+                      isCompleted 
+                        ? 'bg-blue-500 border-blue-500 text-white shadow-md shadow-blue-500/10 scale-105' 
+                        : isNext
+                          ? 'bg-white dark:bg-gray-800 border-blue-200 dark:border-blue-900 border-dashed animate-pulse'
+                          : 'bg-gray-50 dark:bg-gray-800 border-gray-100 dark:border-gray-700 text-gray-300 dark:text-gray-600'
+                    }`}>
+                      {isCompleted ? (
+                        <CheckCircle2 size={14} strokeWidth={3} />
+                      ) : (
+                        <span className="text-[8px] font-black">{day}</span>
+                      )}
+                      
+                      {/* Brilho sutil no dia atual */}
+                      {day === consecutiveDays && !isAnimating && (
+                        <div className="absolute inset-0 rounded-full bg-blue-400/20 animate-ping"></div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            <button 
+              onClick={handleClaimReward}
+              disabled={isAnimating}
+              className={`w-full py-3 rounded-xl font-black text-[9px] uppercase tracking-[0.15em] transition-all flex items-center justify-center gap-2 shadow-md active:scale-[0.98] ${
+                isAnimating 
+                  ? 'bg-gray-100 text-gray-400' 
+                  : 'bg-[#1E5BFF] text-white shadow-blue-500/10 hover:brightness-110'
+              }`}
+            >
+              {isAnimating ? (
+                <>
+                  <Loader2 size={12} className="animate-spin" />
+                  Sincronizando...
+                </>
+              ) : (
+                <>
+                  {consecutiveDays < 5 ? `Liberar Dia ${consecutiveDays}` : "Resgatar Recompensa"}
+                  <ArrowRight size={12} strokeWidth={3} />
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* 2. POSTS DO BAIRRO */}
       <section className="px-5 py-4 mb-6">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-xl bg-purple-50 dark:bg-purple-900/20 flex items-center justify-center text-purple-600">
-              <Users size={18} strokeWidth={2.5} />
+              <MessageSquare size={18} strokeWidth={2.5} />
             </div>
             <div>
-              <h2 className="text-[11px] font-black text-gray-900 dark:text-white uppercase tracking-[0.15em] leading-none mb-1">Onde o bairro conversa</h2>
+              <h2 className="text-[11px] font-black text-gray-900 dark:text-white uppercase tracking-[0.15em] leading-none mb-1">Posts do Bairro</h2>
               <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest leading-none">O que está rolando agora</p>
             </div>
           </div>
-          <button onClick={() => onNavigate('community')} className="text-[9px] font-black text-[#1E5BFF] uppercase tracking-widest">Ver tudo</button>
+          <button onClick={() => onNavigate('neighborhood_posts')} className="text-[9px] font-black text-[#1E5BFF] uppercase tracking-widest">Ver mais</button>
         </div>
 
         <div className="flex gap-4 overflow-x-auto no-scrollbar -mx-5 px-5 pb-2">
-            {MOCK_COMMUNITY_POSTS.slice(0, 4).map((post: CommunityPost) => (
+            {MOCK_PREVIEW_POSTS.map((post) => (
                 <div 
                     key={post.id} 
-                    onClick={() => onNavigate('community')}
+                    onClick={() => onNavigate('neighborhood_posts')}
                     className="flex-shrink-0 w-44 bg-white dark:bg-gray-900 rounded-[2rem] border border-gray-100 dark:border-gray-800 overflow-hidden shadow-sm active:scale-[0.98] transition-all"
                 >
                     <div className="h-32 w-full overflow-hidden">
-                        <img src={post.imageUrl} alt={post.userName} className="w-full h-full object-cover" />
+                        <img src={post.img} alt={post.store} className="w-full h-full object-cover" />
                     </div>
                     <div className="p-3">
-                        <p className="text-[10px] font-black text-[#1E5BFF] uppercase tracking-tighter truncate">{post.userName}</p>
-                        <p className="text-[11px] text-gray-600 dark:text-gray-400 font-medium mt-0.5 line-clamp-1">{post.content}</p>
+                        <p className="text-[10px] font-black text-[#1E5BFF] uppercase tracking-tighter truncate">{post.store}</p>
+                        <p className="text-[11px] text-gray-600 dark:text-gray-400 font-medium mt-0.5 line-clamp-1">{post.text}</p>
                     </div>
                 </div>
             ))}
         </div>
       </section>
-
 
       {/* LISTA EXPLORAR */}
       <div className="w-full bg-white dark:bg-gray-900 pt-1 pb-10">

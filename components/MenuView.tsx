@@ -16,8 +16,7 @@ import {
   Briefcase, 
   Store, 
   PlusCircle,
-  Tag,
-  Newspaper
+  Tag
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { User } from '@supabase/supabase-js';
@@ -111,7 +110,6 @@ export const MenuView: React.FC<MenuViewProps> = ({
             <h3 className="text-xs font-black text-gray-400 uppercase tracking-[0.2em] mb-2 ml-2">Geral</h3>
             <div className="bg-white dark:bg-gray-800 rounded-[2rem] overflow-hidden border border-gray-100 dark:border-gray-700 shadow-sm">
                 <button onClick={() => onNavigate('user_coupons')} className="w-full p-4 flex items-center justify-between border-b border-gray-50 dark:border-gray-700 active:bg-gray-50"><div className="flex items-center gap-3"><div className="w-9 h-9 rounded-xl bg-amber-50 dark:bg-amber-900/20 flex items-center justify-center text-amber-500"><Tag className="w-4 h-4" /></div><span className="text-sm font-bold text-gray-700 dark:text-gray-200">Meus Cupons</span></div><ChevronRight className="w-4 h-4 text-gray-300" /></button>
-                <button onClick={() => onNavigate('classifieds')} className="w-full p-4 flex items-center justify-between border-b border-gray-50 dark:border-gray-700 active:bg-gray-50"><div className="flex items-center gap-3"><div className="w-9 h-9 rounded-xl bg-gray-50 dark:bg-gray-900/20 flex items-center justify-center text-gray-500"><Newspaper className="w-4 h-4" /></div><span className="text-sm font-bold text-gray-700 dark:text-gray-200">Classificados</span></div><ChevronRight className="w-4 h-4 text-gray-300" /></button>
                 <button onClick={() => onNavigate('favorites')} className="w-full p-4 flex items-center justify-between border-b border-gray-50 dark:border-gray-700 active:bg-gray-50"><div className="flex items-center gap-3"><div className="w-9 h-9 rounded-xl bg-pink-50 dark:bg-pink-900/20 flex items-center justify-center text-pink-500"><Heart className="w-4 h-4" /></div><span className="text-sm font-bold text-gray-700 dark:text-gray-200">Favoritos</span></div><ChevronRight className="w-4 h-4 text-gray-300" /></button>
                 <button onClick={() => onNavigate('about')} className="w-full p-4 flex items-center justify-between border-b border-gray-50 dark:border-gray-700 active:bg-gray-50"><div className="flex items-center gap-3"><div className="w-9 h-9 rounded-xl bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center text-[#1E5BFF]"><Info className="w-4 h-4" /></div><span className="text-sm font-bold text-gray-700 dark:text-gray-200">Quem Somos</span></div><ChevronRight className="w-4 h-4 text-gray-300" /></button>
                 <button onClick={() => onNavigate('support')} className="w-full p-4 flex items-center justify-between active:bg-gray-50"><div className="flex items-center gap-3"><div className="w-9 h-9 rounded-xl bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center text-indigo-600"><HelpCircle className="w-4 h-4" /></div><span className="text-sm font-bold text-gray-700 dark:text-gray-200">Suporte</span></div><ChevronRight className="w-4 h-4 text-gray-300" /></button>

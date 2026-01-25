@@ -97,8 +97,8 @@ const App: React.FC = () => {
     handleNavigate('subcategory_detail');
   };
 
-  const headerExclusionList = ['store_area', 'store_detail', 'profile', 'patrocinador_master', 'merchant_performance', 'services', 'merchant_leads', 'service_chat', 'admin_panel', 'category_detail', 'subcategory_detail', 'sponsor_info'];
-  const hideBottomNav = ['admin_panel', 'weekly_reward_page', 'service_chat', 'sponsor_info'].includes(activeTab);
+  const headerExclusionList = ['store_area', 'store_detail', 'profile', 'patrocinador_master', 'merchant_performance', 'neighborhood_posts', 'classifieds', 'services', 'merchant_leads', 'service_chat', 'admin_panel', 'category_detail', 'subcategory_detail', 'sponsor_info'];
+  const hideBottomNav = ['admin_panel', 'weekly_reward_page', 'neighborhood_posts', 'service_chat', 'sponsor_info'].includes(activeTab);
 
   const RoleSwitcherModal: React.FC = () => {
     if (!isRoleSwitcherOpen) return null;
@@ -134,8 +134,6 @@ const App: React.FC = () => {
                     {activeTab === 'home' && <HomeFeed onNavigate={handleNavigate} onSelectCategory={handleSelectCategory} onStoreClick={handleSelectStore} stores={STORES} user={user as any} userRole={userRole} />}
                     {activeTab === 'explore' && <ExploreView stores={STORES} searchQuery={globalSearch} onStoreClick={handleSelectStore} onLocationClick={() => {}} onFilterClick={() => {}} onOpenPlans={() => {}} onNavigate={handleNavigate} />}
                     
-                    {activeTab === 'community' && <NeighborhoodPostsView onBack={() => handleNavigate('home')} onStoreClick={handleSelectStore} />}
-
                     {activeTab === 'services' && (
                       <ServicesView 
                         onNavigate={(view) => handleNavigate(view)} 
@@ -188,6 +186,7 @@ const App: React.FC = () => {
                     
                     {activeTab === 'store_detail' && selectedStore && <StoreDetailView store={selectedStore} onBack={() => handleNavigate(previousTab)} />}
                     {activeTab === 'classifieds' && <ClassifiedsView onBack={() => handleNavigate('home')} onNavigate={handleNavigate} />}
+                    {activeTab === 'neighborhood_posts' && <NeighborhoodPostsView onBack={() => handleNavigate('home')} onStoreClick={handleSelectStore} />}
                     {activeTab === 'sponsor_info' && <SponsorInfoView onBack={() => handleNavigate(previousTab)} />}
                     {activeTab === 'patrocinador_master' && <PatrocinadorMasterScreen onBack={() => handleNavigate(previousTab)} />}
                   </main>
