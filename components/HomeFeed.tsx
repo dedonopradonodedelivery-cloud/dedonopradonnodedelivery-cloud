@@ -38,55 +38,43 @@ interface HomeFeedFeedProps {
 }
 
 const MiniPostCard: React.FC<{ post: CommunityPost }> = ({ post }) => {
-  const [liked, setLiked] = useState(false);
+  const postImage = post.imageUrls?.[0] || 'https://images.unsplash.com/photo-1549488344-cbb6c34cf08b?q=80&w=400&auto=format&fit=crop';
   
+  // Simplistic action handlers for demo
+  const handleLike = (e: React.MouseEvent) => { e.stopPropagation(); alert('Curtido!'); };
+  const handleComment = (e: React.MouseEvent) => { e.stopPropagation(); alert('Comentário aberto!'); };
+
   return (
-    <div className="py-4">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-2">
-        <div className="flex items-center gap-2.5">
-          <img src={post.userAvatar} alt={post.userName} className="w-8 h-8 rounded-full object-cover" />
-          <div>
-            <p className="font-semibold text-xs text-gray-800 dark:text-white leading-none">{post.userName}</p>
-            <p className="text-[10px] text-gray-400 font-medium leading-none mt-0.5">{post.neighborhood}</p>
+      <div className="flex-shrink-0 w-1/2 snap-center p-1.5 group">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl overflow-hidden shadow-sm border border-gray-100 dark:border-gray-700 relative">
+              <div className="aspect-square relative">
+                  <img src={postImage} alt={post.content} className="w-full h-full object-cover" />
+                  {post.imageUrls && post.imageUrls.length > 0 && (
+                      <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-t from-black/60 to-transparent">
+                         <img src={post.imageUrls[0]} alt={post.content} className="w-full h-full object-cover" />
+                      </div>
+                  )}
+                  <div className="absolute bottom-0 left-0 right-0 p-2.5 text-white">
+                      <div className="flex items-center gap-2">
+                         <img src={post.userAvatar} className="w-5 h-5 rounded-full border-2 border-white" alt={post.userName} />
+                         <p className="text-[10px] font-bold drop-shadow-md truncate">{post.userName}</p>
+                      </div>
+                      <p className="text-[11px] mt-1.5 font-medium leading-tight line-clamp-2 drop-shadow-sm">
+                         {post.content}
+                      </p>
+                  </div>
+              </div>
+              <div className="p-2 flex justify-between items-center bg-white/50 backdrop-blur-sm -mt-10 relative z-10 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="flex items-center gap-2">
+                      <button onClick={handleLike} className="flex items-center gap-1 text-xs text-gray-600"><Heart size={14} /> {post.likes}</button>
+                      <button onClick={handleComment} className="flex items-center gap-1 text-xs text-gray-600"><MessageSquare size={14} /> {post.comments}</button>
+                  </div>
+                  <span className="text-[9px] text-gray-500">{post.timestamp}</span>
+              </div>
           </div>
-        </div>
-        <p className="text-[10px] font-medium text-gray-400">{post.timestamp}</p>
       </div>
-
-      {/* Content */}
-      <p className="text-sm text-gray-600 dark:text-gray-300 leading-snug line-clamp-3 my-2">
-        {post.content}
-        {post.content.length > 120 && <button className="text-blue-500 font-semibold ml-1">...ver mais</button>}
-      </p>
-
-      {/* Media */}
-      {post.imageUrl && (
-        <div className="aspect-[4/3] rounded-lg overflow-hidden mt-3 border border-gray-100 dark:border-gray-800">
-          <img src={post.imageUrl} alt="Post media" className="w-full h-full object-cover" />
-        </div>
-      )}
-
-      {/* Actions */}
-      <div className="flex items-center justify-between mt-3">
-        <div className="flex items-center gap-5 text-gray-500 dark:text-gray-400">
-          <button onClick={() => setLiked(!liked)} className={`flex items-center gap-1.5 transition-colors ${liked ? 'text-rose-500' : 'hover:text-rose-500'}`}>
-            <Heart size={16} className={liked ? 'fill-current' : ''} />
-            <span className="text-[11px] font-bold">{liked ? post.likes + 1 : post.likes}</span>
-          </button>
-          <button className="flex items-center gap-1.5 hover:text-blue-500">
-            <MessageSquare size={16} />
-            <span className="text-[11px] font-bold">{post.comments}</span>
-          </button>
-          <button className="hover:text-blue-500">
-            <Share2 size={16} />
-          </button>
-        </div>
-      </div>
-    </div>
   );
 };
-
 
 export const HomeFeed: React.FC<HomeFeedFeedProps> = ({ 
   onNavigate, 
@@ -284,27 +272,27 @@ export const HomeFeed: React.FC<HomeFeedFeedProps> = ({
         </div>
       </section>
 
-      {/* 2. ONDE O BAIRRO CONVERSA - MINI INSTAGRAM */}
-      <section className="px-5 py-4">
-        <div className="bg-white dark:bg-gray-900 rounded-[2rem] p-4 border border-gray-100 dark:border-gray-800 shadow-sm">
-          {/* Header */}
-          <div className="flex items-center justify-between mb-2 px-2">
-            <h2 className="text-lg font-bold text-gray-800 dark:text-white">Bairro Conversa</h2>
-            <div className="flex items-center gap-2">
-              <button onClick={() => onNavigate('neighborhood_posts')} className="text-xs font-bold text-blue-500">Ver tudo</button>
-              <button onClick={() => onNavigate('neighborhood_posts')} className="p-1.5 bg-gray-100 dark:bg-gray-800 rounded-full text-gray-500"><Plus size={14} /></button>
+      {/* 2. ONDE O BAIRRO CONVERSA */}
+      <section className="bg-white dark:bg-gray-950 pt-8 pb-4">
+        <div className="px-5">
+            {/* Header */}
+            <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-bold text-gray-800 dark:text-white">Onde o bairro conversa</h2>
+                <div className="flex items-center gap-2">
+                  <button onClick={() => onNavigate('neighborhood_posts')} className="text-xs font-bold text-blue-500">Ver tudo</button>
+                  <button onClick={() => onNavigate('neighborhood_posts')} className="p-1.5 bg-gray-100 dark:bg-gray-800 rounded-full text-gray-500"><Plus size={14} /></button>
+                </div>
             </div>
-          </div>
-          {/* Posts */}
-          <div className="divide-y divide-gray-100 dark:divide-gray-800 px-2">
-            {MOCK_COMMUNITY_POSTS.slice(0, 3).map(post => (
-              <MiniPostCard key={post.id} post={post} />
+        </div>
+        {/* Posts */}
+        <div className="flex overflow-x-auto no-scrollbar snap-x -mx-3.5 px-3.5">
+            {MOCK_COMMUNITY_POSTS.slice(0, 5).map((post) => (
+                <MiniPostCard key={post.id} post={post} />
             ))}
-          </div>
         </div>
       </section>
-
-      {/* 3. PEÇA ORÇAMENTOS (REFORMULADO) */}
+      
+      {/* 3. PEÇA ORÇAMENTOS */}
       <section className="px-5 py-4 mb-6">
         <div className="bg-white dark:bg-gray-900 p-5 rounded-[2rem] border border-gray-100 dark:border-gray-800 shadow-sm flex items-center gap-4">
           <div className="w-11 h-11 bg-blue-50 dark:bg-blue-900/20 rounded-xl flex items-center justify-center shrink-0 text-[#1E5BFF]">
@@ -319,16 +307,16 @@ export const HomeFeed: React.FC<HomeFeedFeedProps> = ({
               </p>
           </div>
           <button 
-            onClick={() => onNavigate('services_landing')}
-            className="ml-auto bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-200 font-bold py-3 px-5 rounded-xl text-[10px] uppercase tracking-wider active:scale-[0.98] transition-all whitespace-nowrap border border-gray-100 dark:border-gray-700 shadow-sm"
+            onClick={() => onNavigate('services')}
+            className="ml-auto bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-200 font-bold py-3 px-5 rounded-xl text-[10px] uppercase tracking-wider active:scale-[0.98] transition-all whitespace-nowrap"
           >
-            Solicitar orçamentos
+            Solicitar
           </button>
         </div>
       </section>
 
       {/* LISTA EXPLORAR */}
-      <div className="w-full bg-white dark:bg-gray-900 pt-1 pb-10">
+      <div className="w-full bg-white dark:bg-gray-950 pt-1 pb-10">
         <div className="px-5">
           <SectionHeader 
             icon={Compass} 

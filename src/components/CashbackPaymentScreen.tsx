@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { ChevronLeft, Wallet, Store, ArrowRight, Loader2, CheckCircle2, XCircle, CornerRightDown, Lock, BellRing, Smartphone, Send, Clock } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';

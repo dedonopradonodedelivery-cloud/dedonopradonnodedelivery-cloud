@@ -1,7 +1,7 @@
 
 import React, { useState, useMemo } from 'react';
 // Added ChevronRight to imports
-import { ChevronLeft, ChevronRight, Gift, CheckCircle2, Lock, ArrowRight, Tag, Info, Calendar, Sparkles } from 'lucide-react';
+import { ChevronLeft, Gift, CheckCircle2, Lock, ArrowRight, Tag, Info, Calendar, Sparkles, ChevronRight } from 'lucide-react';
 import { STORES } from '../constants';
 import { Store } from '../types';
 
@@ -133,7 +133,7 @@ export const WeeklyPromoSelectionView: React.FC<WeeklyPromoSelectionViewProps> =
                             </div>
                             <div className="flex-1 min-w-0">
                                 <h4 className="font-bold text-gray-900 dark:text-white text-sm truncate">{store.name}</h4>
-                                <p className="text-[10px] text-gray-400 font-bold uppercase mt-0.5">{store.neighborhood}</p>
+                                <p className="text-[10px] text-gray-400 font-bold uppercase mt-0.5 tracking-tight">{store.neighborhood}</p>
                                 <div className="mt-2 flex items-center gap-1 text-[#0E8A3A] font-black text-base italic">
                                     {store.discountType === 'percentage' ? `Até ${store.discountValue}%` : `Até R$ ${store.discountValue}`}
                                     <span className="text-[9px] uppercase not-italic tracking-tighter opacity-70 ml-1">OFF</span>

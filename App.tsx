@@ -116,7 +116,7 @@ const App: React.FC = () => {
   };
 
   const headerExclusionList = ['store_area', 'store_detail', 'profile', 'patrocinador_master', 'merchant_performance', 'neighborhood_posts', 'saved_posts', 'classifieds', 'services', 'services_landing', 'merchant_leads', 'service_chat', 'admin_panel', 'category_detail', 'subcategory_detail', 'sponsor_info', 'real_estate', 'jobs', 'job_detail'];
-  const hideBottomNav = ['admin_panel', 'weekly_reward_page', 'service_chat', 'sponsor_info', 'real_estate', 'job_detail', 'services_landing'].includes(activeTab);
+  const hideBottomNav = ['admin_panel', 'weekly_reward_page', 'service_chat', 'sponsor_info', 'real_estate', 'job_detail'].includes(activeTab);
 
   const RoleSwitcherModal: React.FC = () => {
     if (!isRoleSwitcherOpen) return null;

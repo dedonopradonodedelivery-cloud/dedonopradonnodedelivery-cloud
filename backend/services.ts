@@ -1,11 +1,10 @@
 
 import { supabase } from '../lib/supabaseClient';
-import { DbMerchantSession, StoreClaimRequest } from '../types';
+import { StoreClaimRequest } from '../types';
 
 /**
  * Valida um código de loja (QR ou Manual) e retorna os dados públicos.
  */
-// Added validateStoreCode to fix import error in CashbackScanScreen.tsx
 export const validateStoreCode = async (code: string) => {
   if (!supabase) {
     // Mock local para desenvolvimento
@@ -60,7 +59,6 @@ export const validateStoreCode = async (code: string) => {
 /**
  * Registra uma intenção de transação no Ledger.
  */
-// Added initiateTransaction to fix import error in CashbackPaymentScreen.tsx
 export const initiateTransaction = async (params: {
     userId: string;
     storeId: string;
@@ -92,7 +90,6 @@ export const initiateTransaction = async (params: {
 /**
  * Busca o saldo efetivo de um usuário para uma loja específica.
  */
-// Added getEffectiveBalance to fix import error in CashbackPaymentScreen.tsx
 export const getEffectiveBalance = async (userId: string, storeId: string) => {
   if (!supabase) return 0;
   const { data, error } = await supabase

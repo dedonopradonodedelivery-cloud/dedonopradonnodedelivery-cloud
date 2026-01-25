@@ -1,7 +1,14 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { User } from '@supabase/supabase-js';
-import { ChevronLeft, ChevronDown, CheckCircle2, ArrowRight, Wrench, Clock, ShieldCheck, MessageCircle, Zap, Droplets, PaintRoller, Hammer, Palette, Sparkles, PartyPopper } from 'lucide-react';
+import { 
+    ChevronLeft, 
+    ArrowRight, 
+    Wrench, 
+    FileText, 
+    MessageSquare, 
+    CheckCircle2 
+} from 'lucide-react';
 
 interface ServicesLandingViewProps {
   onBack: () => void;
@@ -9,23 +16,6 @@ interface ServicesLandingViewProps {
   user: User | null;
   onRequireLogin: () => void;
 }
-
-const FaqItem: React.FC<{ q: string, a: string }> = ({ q, a }) => {
-  const [isOpen, setIsOpen] = useState(false);
-  return (
-    <div className="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm">
-      <button onClick={() => setIsOpen(!isOpen)} className="w-full flex justify-between items-center text-left">
-        <h4 className="font-bold text-sm text-gray-900 dark:text-white">{q}</h4>
-        <ChevronDown size={20} className={`text-gray-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
-      </button>
-      {isOpen && (
-        <p className="mt-4 text-sm text-gray-600 dark:text-gray-400 leading-relaxed animate-in fade-in duration-300">
-          {a}
-        </p>
-      )}
-    </div>
-  );
-};
 
 export const ServicesLandingView: React.FC<ServicesLandingViewProps> = ({ onBack, onNavigate, user, onRequireLogin }) => {
   
@@ -37,98 +27,83 @@ export const ServicesLandingView: React.FC<ServicesLandingViewProps> = ({ onBack
     }
   };
 
-  const scrollToSection = (id: string) => {
-    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
-  }
-
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 font-sans">
-      <header className="sticky top-0 z-30 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md px-5 py-4 border-b border-gray-100 dark:border-gray-800">
-        <div className="flex items-center gap-4">
-          <button onClick={onBack} className="p-2 bg-gray-50 dark:bg-gray-800 rounded-xl text-gray-500"><ChevronLeft size={20}/></button>
-          <div className="flex-1"><h1 className="text-xl font-black text-gray-900 dark:text-white uppercase tracking-tighter">Orçamentos de Serviços</h1></div>
-        </div>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 font-sans animate-in fade-in duration-500">
+      
+      <header className="sticky top-0 z-30 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md px-5 h-16 flex items-center gap-4 border-b border-gray-100 dark:border-gray-800">
+        <button onClick={onBack} className="p-2 -ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+          <ChevronLeft className="w-6 h-6 text-gray-800 dark:text-white" />
+        </button>
+        <h1 className="font-bold text-lg text-gray-900 dark:text-white">Orçamento de Serviços</h1>
       </header>
 
-      <main className="pb-24">
-        {/* HERO */}
-        <section className="p-6 pt-10 text-center">
-            <div className="w-20 h-20 bg-blue-50 dark:bg-blue-900/20 rounded-[2.5rem] flex items-center justify-center mx-auto mb-6 text-[#1E5BFF] border-4 border-white dark:border-gray-900 shadow-xl">
-                <Wrench size={40} />
+      <main className="overflow-y-auto no-scrollbar pb-12">
+        
+        {/* 1. New Vibrant Banner */}
+        <section className="p-6">
+          <div className="relative rounded-[2.5rem] bg-gradient-to-br from-blue-500 to-indigo-600 p-8 text-white overflow-hidden shadow-2xl shadow-blue-500/20">
+            <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full opacity-50 blur-xl"></div>
+            <div className="absolute bottom-0 left-0 right-0 h-2/3 bg-gradient-to-t from-black/10 to-transparent"></div>
+            
+            <div className="relative z-10 flex flex-col items-center justify-center text-center h-64">
+              <div className="w-24 h-24 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center border-2 border-white/30 mb-8 animate-float-slow shadow-lg">
+                <Wrench size={48} className="text-white drop-shadow-lg" />
+              </div>
+              <button 
+                onClick={handleRequestQuote} 
+                className="w-full max-w-xs bg-white text-blue-600 font-black py-4 rounded-2xl shadow-xl active:scale-95 transition-transform flex items-center justify-center gap-2 uppercase tracking-widest text-sm"
+              >
+                Pedir orçamento gratuito
+                <ArrowRight size={18} />
+              </button>
             </div>
-            <h2 className="text-3xl font-black text-gray-900 dark:text-white font-display tracking-tighter leading-tight mb-4">Peça orçamentos de serviços sem dor de cabeça</h2>
-            <p className="text-base text-gray-500 dark:text-gray-400 max-w-sm mx-auto">Descreva o que precisa e receba propostas de profissionais da sua região.</p>
-            <div className="flex flex-col sm:flex-row gap-3 mt-8">
-                <button onClick={handleRequestQuote} className="flex-1 bg-[#1E5BFF] text-white font-bold py-4 rounded-2xl shadow-lg">Pedir orçamento agora</button>
-                <button onClick={() => scrollToSection('how-it-works')} className="flex-1 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200 font-bold py-4 rounded-2xl">Como funciona</button>
-            </div>
+          </div>
         </section>
 
-        {/* COMO FUNCIONA */}
-        <section id="how-it-works" className="px-6 py-12 bg-white dark:bg-gray-900">
-            <div className="grid md:grid-cols-3 gap-8">
-                <div className="text-center"><div className="text-3xl font-black text-blue-200 dark:text-blue-900 mb-2">1</div><h3 className="font-bold text-lg mb-1">Conte o que precisa</h3><p className="text-sm text-gray-500">Descreva o serviço em detalhes. Adicione fotos para ajudar.</p></div>
-                <div className="text-center"><div className="text-3xl font-black text-blue-200 dark:text-blue-900 mb-2">2</div><h3 className="font-bold text-lg mb-1">Receba propostas</h3><p className="text-sm text-gray-500">Até 5 profissionais verificados enviam orçamentos.</p></div>
-                <div className="text-center"><div className="text-3xl font-black text-blue-200 dark:text-blue-900 mb-2">3</div><h3 className="font-bold text-lg mb-1">Escolha com confiança</h3><p className="text-sm text-gray-500">Converse, negocie e feche com o melhor para você.</p></div>
-            </div>
+        {/* 3. "Como funciona" Title */}
+        <section className="py-12 text-center">
+          <h2 className="text-3xl font-black text-gray-900 dark:text-white font-display tracking-tight">
+            Como funciona
+          </h2>
         </section>
 
-        {/* BENEFÍCIOS */}
-        <section className="px-6 py-12">
-            <h3 className="text-2xl font-black text-center mb-8">Vantagens para você</h3>
-            <div className="grid grid-cols-2 gap-4">
-                <div className="bg-white dark:bg-gray-800 p-4 rounded-2xl border border-gray-100 dark:border-gray-700 flex items-center gap-3"><Clock size={20} className="text-blue-500" /><span className="text-sm font-semibold">Economize tempo</span></div>
-                <div className="bg-white dark:bg-gray-800 p-4 rounded-2xl border border-gray-100 dark:border-gray-700 flex items-center gap-3"><CheckCircle2 size={20} className="text-blue-500" /><span className="text-sm font-semibold">Compare preços</span></div>
-                <div className="bg-white dark:bg-gray-800 p-4 rounded-2xl border border-gray-100 dark:border-gray-700 flex items-center gap-3"><MessageCircle size={20} className="text-blue-500" /><span className="text-sm font-semibold">Converse antes</span></div>
-                <div className="bg-white dark:bg-gray-800 p-4 rounded-2xl border border-gray-100 dark:border-gray-700 flex items-center gap-3"><ShieldCheck size={20} className="text-blue-500" /><span className="text-sm font-semibold">Decida com segurança</span></div>
+        {/* 4. Redesigned Steps */}
+        <section className="px-6 space-y-6">
+          <div className="flex items-start gap-4 bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm">
+            <div className="text-5xl font-black text-blue-100 dark:text-blue-900/50">1</div>
+            <div className="flex-1 pt-1">
+              <div className="flex items-center gap-2 mb-1">
+                <FileText size={16} className="text-blue-500"/>
+                <h4 className="font-bold text-gray-900 dark:text-white">Descreva o serviço</h4>
+              </div>
+              <p className="text-sm text-gray-500 dark:text-gray-400">Conte o que você precisa e adicione fotos para ajudar os profissionais.</p>
             </div>
-        </section>
+          </div>
+          
+          <div className="flex items-start gap-4 bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm">
+            <div className="text-5xl font-black text-blue-100 dark:text-blue-900/50">2</div>
+            <div className="flex-1 pt-1">
+              <div className="flex items-center gap-2 mb-1">
+                <MessageSquare size={16} className="text-blue-500"/>
+                <h4 className="font-bold text-gray-900 dark:text-white">Receba propostas</h4>
+              </div>
+              <p className="text-sm text-gray-500 dark:text-gray-400">Até 5 profissionais verificados enviam orçamentos pelo chat interno do Localizei JPA.</p>
+            </div>
+          </div>
 
-        {/* TIPOS DE SERVIÇOS */}
-        <section className="px-6 py-12 bg-white dark:bg-gray-900">
-            <h3 className="text-2xl font-black text-center mb-8">Alguns serviços disponíveis</h3>
-            <div className="flex flex-wrap justify-center gap-4 text-center">
-                <div className="flex flex-col items-center gap-2 w-20"><div className="w-12 h-12 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center"><Zap size={24} className="text-gray-500" /></div><span className="text-xs font-bold">Elétrica</span></div>
-                <div className="flex flex-col items-center gap-2 w-20"><div className="w-12 h-12 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center"><Droplets size={24} className="text-gray-500" /></div><span className="text-xs font-bold">Hidráulica</span></div>
-                <div className="flex flex-col items-center gap-2 w-20"><div className="w-12 h-12 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center"><PaintRoller size={24} className="text-gray-500" /></div><span className="text-xs font-bold">Pintura</span></div>
-                <div className="flex flex-col items-center gap-2 w-20"><div className="w-12 h-12 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center"><Hammer size={24} className="text-gray-500" /></div><span className="text-xs font-bold">Reforma</span></div>
-                <div className="flex flex-col items-center gap-2 w-20"><div className="w-12 h-12 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center"><Palette size={24} className="text-gray-500" /></div><span className="text-xs font-bold">Design</span></div>
-                <div className="flex flex-col items-center gap-2 w-20"><div className="w-12 h-12 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center"><Sparkles size={24} className="text-gray-500" /></div><span className="text-xs font-bold">Limpeza</span></div>
-                <div className="flex flex-col items-center gap-2 w-20"><div className="w-12 h-12 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center"><PartyPopper size={24} className="text-gray-500" /></div><span className="text-xs font-bold">Eventos</span></div>
+          <div className="flex items-start gap-4 bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm">
+            <div className="text-5xl font-black text-blue-100 dark:text-blue-900/50">3</div>
+            <div className="flex-1 pt-1">
+              <div className="flex items-center gap-2 mb-1">
+                <CheckCircle2 size={16} className="text-blue-500"/>
+                <h4 className="font-bold text-gray-900 dark:text-white">Escolha com confiança</h4>
+              </div>
+              <p className="text-sm text-gray-500 dark:text-gray-400">Converse, negocie e feche com o melhor profissional para você.</p>
             </div>
-            <p className="text-center text-xs text-gray-400 mt-6">Não achou seu serviço? Descreva que a gente direciona.</p>
+          </div>
         </section>
         
-        {/* DEPOIMENTOS */}
-        <section className="px-6 py-12">
-            <h3 className="text-2xl font-black text-center mb-8">Vizinhos que aprovaram</h3>
-            <div className="space-y-4">
-                <div className="bg-white dark:bg-gray-800 p-4 rounded-2xl border border-gray-100 dark:border-gray-700">"Recebi 3 orçamentos em menos de 1 hora. Sensacional!" <span className="font-bold text-xs">- Carla M.</span></div>
-                <div className="bg-white dark:bg-gray-800 p-4 rounded-2xl border border-gray-100 dark:border-gray-700">"Facilitou muito minha vida na hora de achar um eletricista." <span className="font-bold text-xs">- João P.</span></div>
-                <div className="bg-white dark:bg-gray-800 p-4 rounded-2xl border border-gray-100 dark:border-gray-700">"Seguro e prático. Recomendo!" <span className="font-bold text-xs">- Fernanda S.</span></div>
-            </div>
-        </section>
-
-        {/* FAQ */}
-        <section className="px-6 py-12 bg-white dark:bg-gray-900">
-            <h3 className="text-2xl font-black text-center mb-8">Dúvidas Frequentes</h3>
-            <div className="space-y-3">
-                <FaqItem q="É gratuito pedir orçamento?" a="Sim, é 100% gratuito. Você só paga diretamente ao profissional se fechar o serviço." />
-                <FaqItem q="Quantas propostas vou receber?" a="Seu pedido é enviado para a rede e você pode receber até 5 propostas para comparar." />
-                <FaqItem q="Quanto tempo leva?" a="A maioria dos pedidos recebe a primeira proposta em menos de 30 minutos." />
-                <FaqItem q="Posso conversar antes de fechar?" a="Sim! Você terá um chat exclusivo para conversar com cada profissional, tirar dúvidas e negociar." />
-                <FaqItem q="Como escolho o melhor profissional?" a="Você pode ver as avaliações de cada profissional, conversar e decidir com base no preço e confiança." />
-            </div>
-        </section>
-
-        {/* CTA FINAL */}
-        <section className="px-6 py-12 text-center">
-            <button onClick={handleRequestQuote} className="w-full max-w-sm bg-[#1E5BFF] text-white font-bold py-4 rounded-2xl shadow-lg flex items-center justify-center gap-2 mx-auto">
-                Pedir orçamento agora <ArrowRight size={20} />
-            </button>
-            <p className="text-xs text-gray-400 mt-3">Leva menos de 2 minutos. Sem compromisso.</p>
-        </section>
-
+        <div className="h-16"></div>
       </main>
     </div>
   );
