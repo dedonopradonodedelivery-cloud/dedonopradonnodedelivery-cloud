@@ -21,13 +21,26 @@ import { Classified } from '../types';
 import { MOCK_CLASSIFIEDS } from '../constants';
 
 const CLASSIFIED_CATEGORIES = [
-  { id: 'servicos', name: 'Serviços locais', slug: 'servicos', icon: <Wrench />, color: 'bg-blue-500' },
-  { id: 'imoveis', name: 'Imóveis', slug: 'imoveis', icon: <Building2 />, color: 'bg-purple-500' },
-  { id: 'emprego', name: 'Vaga de emprego', slug: 'emprego', icon: <Briefcase />, color: 'bg-emerald-500' },
-  { id: 'adocao', name: 'Adoção de pets', slug: 'adocao', icon: <PawPrint />, color: 'bg-orange-500' },
-  { id: 'doacoes', name: 'Doações em geral', slug: 'doacoes', icon: <Heart />, color: 'bg-rose-500' },
-  { id: 'desapega', name: 'Desapega JPA', slug: 'desapega', icon: <Tag />, color: 'bg-indigo-500' },
+  { id: 'servicos', name: 'Serviços', slug: 'servicos', icon: <Wrench />, color: 'bg-brand-blue' },
+  { id: 'imoveis', name: 'Imóveis', slug: 'imoveis', icon: <Building2 />, color: 'bg-brand-blue' },
+  { id: 'emprego', name: 'Emprego', slug: 'emprego', icon: <Briefcase />, color: 'bg-brand-blue' },
+  { id: 'adocao', name: 'Adoção', slug: 'adocao', icon: <PawPrint />, color: 'bg-brand-blue' },
+  { id: 'doacoes', name: 'Doações', slug: 'doacoes', icon: <Heart />, color: 'bg-brand-blue' },
+  { id: 'desapega', name: 'Desapega', slug: 'desapega', icon: <Tag />, color: 'bg-brand-blue' },
 ];
+
+const ClassifiedCategoryButton: React.FC<{ category: any; onClick: () => void }> = ({ category, onClick }) => (
+  <button onClick={onClick} className="flex flex-col items-center group active:scale-95 transition-all">
+    <div className={`w-full aspect-square rounded-[22px] shadow-lg flex flex-col items-center justify-between p-2 ${category.color} border border-white/20`}>
+      <div className="flex-1 flex items-center justify-center w-full">
+        {React.cloneElement(category.icon as any, { className: "w-7 h-7 text-white drop-shadow-md", strokeWidth: 2.5 })}
+      </div>
+      <div className="w-full bg-black/10 backdrop-blur-[2px] py-1 rounded-b-[20px] -mx-2 -mb-2">
+        <span className="block w-full text-[9px] font-black text-white text-center uppercase tracking-tight">{category.name}</span>
+      </div>
+    </div>
+  </button>
+);
 
 const ClassifiedCard: React.FC<{ item: Classified; onClick: () => void }> = ({ item, onClick }) => (
     <div 
@@ -197,18 +210,11 @@ export const ClassifiedsView: React.FC<ClassifiedsViewProps> = ({ onBack, onNavi
         {/* Categorias (Estilo Home) */}
         <div className="grid grid-cols-3 sm:grid-cols-6 gap-3 mb-8">
             {CLASSIFIED_CATEGORIES.map(cat => (
-                <button 
+                <ClassifiedCategoryButton 
                     key={cat.id} 
+                    category={cat} 
                     onClick={() => scrollToCategory(cat.id)} 
-                    className="flex flex-col items-center group active:scale-95 transition-all"
-                >
-                    <div className={`w-full aspect-square rounded-[22px] shadow-lg flex flex-col items-center justify-between p-2 ${cat.color} border border-white/20`}>
-                        <div className="flex-1 flex items-center justify-center w-full">{React.cloneElement(cat.icon as any, { className: "w-7 h-7 text-white drop-shadow-md", strokeWidth: 2.5 })}</div>
-                        <div className="w-full bg-black/10 backdrop-blur-[2px] py-1 rounded-b-[20px] -mx-2 -mb-2">
-                          <span className="block w-full text-[9px] font-black text-white text-center uppercase tracking-tight">{cat.name}</span>
-                        </div>
-                    </div>
-                </button>
+                />
             ))}
         </div>
         
