@@ -36,7 +36,6 @@ const App: React.FC = () => {
   const { theme } = useTheme();
   const isAuthReturn = window.location.hash.includes('access_token') || window.location.search.includes('code=');
   const [splashStage, setSplashStage] = useState(splashWasShownInSession || isAuthReturn ? 4 : 0);
-  const [showSponsor, setShowSponsor] = useState(false); // State to control sponsor visibility
   const [viewMode, setViewMode] = useState<RoleMode>(() => (localStorage.getItem('admin_view_mode') as RoleMode) || 'Usuário');
   const [isRoleSwitcherOpen, setIsRoleSwitcherOpen] = useState(false);
   
@@ -51,10 +50,10 @@ const App: React.FC = () => {
   const [activeServiceRequestId, setActiveServiceRequestId] = useState<string | null>(null);
   const [chatRole, setChatRole] = useState<'resident' | 'merchant' | 'admin'>('resident');
 
-  // Typewriter effect state
+  // Typewriter effect state for the second line
   const [sloganText, setSloganText] = useState('');
   const [isTyping, setIsTyping] = useState(true);
-  const fullSlogan = 'Localizei JPA – Onde o bairro conversa 💬';
+  const fullSlogan = 'Onde o bairro conversa 💬';
 
   const isMerchantMode = userRole === 'lojista' || (user?.email === ADMIN_EMAIL && viewMode === 'Lojista');
 
@@ -79,16 +78,15 @@ const App: React.FC = () => {
 
     const typingTimeout = setTimeout(() => {
       setSloganText(fullSlogan.slice(0, sloganText.length + 1));
-    }, 40); // ~1.7s total duration
+    }, 45); // ~1.8s total duration
 
     return () => clearTimeout(typingTimeout);
   }, [sloganText, splashStage]);
 
 
-  // Updated splash screen timing logic
+  // Splash screen timing logic
   useEffect(() => {
     if (splashStage === 4) return;
-    const sponsorTimer = setTimeout(() => setShowSponsor(true), 2000); // Show sponsor after 2s
     const fadeOutTimer = setTimeout(() => setSplashStage(3), 4500); // Start fade-out at 4.5s
     const endSplashTimer = setTimeout(() => {
       setSplashStage(4);
@@ -96,11 +94,10 @@ const App: React.FC = () => {
     }, 5000); // Total splash duration 5s
 
     return () => {
-      clearTimeout(sponsorTimer);
       clearTimeout(fadeOutTimer);
       clearTimeout(endSplashTimer);
     };
-  }, []);
+  }, [splashStage]);
 
   const handleSelectStore = (store: Store) => { setSelectedStore(store); handleNavigate('store_detail'); };
   
@@ -218,12 +215,15 @@ const App: React.FC = () => {
             <div className={`fixed inset-0 z-[9999] flex flex-col items-center justify-between py-16 transition-opacity duration-500 ease-out ${splashStage === 3 ? 'opacity-0' : 'opacity-100'}`} style={{ backgroundColor: '#1E5BFF' }}>
               <div className="flex flex-col items-center animate-fade-in text-center px-4">
                   <div className="relative w-32 h-32 bg-white rounded-[2.5rem] flex items-center justify-center shadow-2xl mb-8 animate-logo-enter"><MapPin className="w-16 h-16 text-brand-blue fill-brand-blue" /></div>
-                  <h1 className="text-2xl font-black font-display text-white tracking-tighter drop-shadow-md h-20 flex items-center justify-center">
+                  <h1 className="text-4xl font-black font-display text-white tracking-tighter drop-shadow-md">
+                    Localizei JPA
+                  </h1>
+                  <p className="text-lg font-medium text-white/90 mt-2 h-8 flex items-center justify-center font-sans">
                     {sloganText}
                     {isTyping && <span className="animate-blink ml-1">|</span>}
-                  </h1>
+                  </p>
               </div>
-              <div className={`text-center transition-opacity duration-1000 ${showSponsor ? 'opacity-100' : 'opacity-0'}`}>
+              <div className="text-center">
                 <p className="text-[10px] font-bold text-white/60 uppercase tracking-[0.3em]">Patrocinador Master</p>
                 <p className="text-lg font-display font-bold text-white mt-1 tracking-wide">Grupo Esquematiza</p>
               </div>
