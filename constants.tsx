@@ -319,7 +319,8 @@ export const MOCK_COMMUNITY_POSTS: CommunityPost[] = [
     timestamp: 'Agora',
     likes: 8,
     comments: 1,
-    imageUrl: 'https://images.unsplash.com/photo-1570125909248-73dfa3383b18?q=80&w=600&auto=format&fit=crop'
+    imageUrl: 'https://images.unsplash.com/photo-1570125909248-73dfa3383b18?q=80&w=600&auto=format&fit=crop',
+    theme: 'utilidade'
   },
   {
     id: 'post-new-2',
@@ -334,7 +335,8 @@ export const MOCK_COMMUNITY_POSTS: CommunityPost[] = [
     timestamp: '1h',
     likes: 10,
     comments: 1,
-    imageUrl: 'https://images.unsplash.com/photo-1570129477492-45c003edd2be?q=80&w=600&auto=format&fit=crop'
+    imageUrl: 'https://images.unsplash.com/photo-1570129477492-45c003edd2be?q=80&w=600&auto=format&fit=crop',
+    theme: 'seguranca'
   },
   {
     id: 'post-new-3',
@@ -349,7 +351,8 @@ export const MOCK_COMMUNITY_POSTS: CommunityPost[] = [
     timestamp: '2h',
     likes: 5,
     comments: 1,
-    imageUrl: 'https://images.unsplash.com/photo-1567332243413-56545bce13f2?q=80&w=600&auto=format&fit=crop'
+    imageUrl: 'https://images.unsplash.com/photo-1567332243413-56545bce13f2?q=80&w=600&auto=format&fit=crop',
+    theme: 'lazer'
   },
   {
     id: 'post-2',
@@ -364,7 +367,8 @@ export const MOCK_COMMUNITY_POSTS: CommunityPost[] = [
     timestamp: '3h',
     likes: 45,
     comments: 8,
-    imageUrl: 'https://images.unsplash.com/photo-1561758033-d89a9ad46330?q=80&w=600&auto=format&fit=crop'
+    imageUrl: 'https://images.unsplash.com/photo-1561758033-d89a9ad46330?q=80&w=600&auto=format&fit=crop',
+    theme: 'dicas'
   },
   {
     id: 'post-4',
@@ -378,7 +382,8 @@ export const MOCK_COMMUNITY_POSTS: CommunityPost[] = [
     neighborhood: 'Taquara',
     timestamp: '5h',
     likes: 24,
-    comments: 12
+    comments: 12,
+    theme: 'utilidade'
   },
   {
     id: 'post-6',
@@ -393,7 +398,8 @@ export const MOCK_COMMUNITY_POSTS: CommunityPost[] = [
     timestamp: '8h',
     likes: 24,
     comments: 31,
-    imageUrl: 'https://images.unsplash.com/photo-1585659722982-789600c7690a?q=80&w=600&auto=format&fit=crop'
+    imageUrl: 'https://images.unsplash.com/photo-1585659722982-789600c7690a?q=80&w=600&auto=format&fit=crop',
+    theme: 'dicas'
   },
 ];
 

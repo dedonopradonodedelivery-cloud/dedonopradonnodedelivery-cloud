@@ -7,6 +7,14 @@ import { useNeighborhood, NEIGHBORHOODS } from '../contexts/NeighborhoodContext'
 
 const MOCK_POSTS: CommunityPost[] = MOCK_COMMUNITY_POSTS;
 
+const THEME_FILTERS = [
+  { id: 'all', label: 'Todos' },
+  { id: 'utilidade', label: 'Utilidade pública' },
+  { id: 'seguranca', label: 'Segurança' },
+  { id: 'lazer', label: 'Lazer & Eventos' },
+  { id: 'dicas', label: 'Dicas do bairro' },
+];
+
 const PostCard: React.FC<{ post: CommunityPost; onStoreClick: (store: StoreType) => void }> = ({ post, onStoreClick }) => {
   const [liked, setLiked] = useState(false);
   const [likesCount, setLikesCount] = useState(post.likes);
@@ -118,14 +126,16 @@ const PostCard: React.FC<{ post: CommunityPost; onStoreClick: (store: StoreType)
 export const NeighborhoodPostsView: React.FC<{ onBack: () => void; onStoreClick: (store: StoreType) => void }> = ({ onBack, onStoreClick }) => {
   const { currentNeighborhood, setNeighborhood } = useNeighborhood();
   const [searchTerm, setSearchTerm] = useState('');
+  const [activeTheme, setActiveTheme] = useState('all');
 
   const filteredPosts = useMemo(() => {
     return MOCK_POSTS.filter(post => {
       const matchNeighborhood = currentNeighborhood === "Jacarepaguá (todos)" || post.neighborhood === currentNeighborhood;
       const matchSearch = !searchTerm || post.content.toLowerCase().includes(searchTerm.toLowerCase()) || post.userName.toLowerCase().includes(searchTerm.toLowerCase());
-      return matchNeighborhood && matchSearch;
+      const matchTheme = activeTheme === 'all' || post.theme === activeTheme;
+      return matchNeighborhood && matchSearch && matchTheme;
     });
-  }, [currentNeighborhood, searchTerm]);
+  }, [currentNeighborhood, searchTerm, activeTheme]);
 
   return (
     <div className="min-h-screen bg-[#F8F9FC] dark:bg-gray-950 font-sans animate-in fade-in duration-500 overflow-x-hidden">
@@ -151,10 +161,26 @@ export const NeighborhoodPostsView: React.FC<{ onBack: () => void; onStoreClick:
           />
         </div>
 
-        <div className="flex gap-2 overflow-x-auto no-scrollbar -mx-1 px-1">
+        <div className="flex gap-2 overflow-x-auto no-scrollbar -mx-1 px-1 mb-4">
           <button onClick={() => setNeighborhood("Jacarepaguá (todos)")} className={`px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap border ${currentNeighborhood === "Jacarepaguá (todos)" ? 'bg-[#1E5BFF] border-[#1E5BFF] text-white shadow-md' : 'bg-white dark:bg-gray-800 border-gray-100 dark:border-gray-700 text-gray-400'}`}>Todos</button>
           {NEIGHBORHOODS.map(hood => (
             <button key={hood} onClick={() => setNeighborhood(hood)} className={`px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap border ${currentNeighborhood === hood ? 'bg-[#1E5BFF] border-[#1E5BFF] text-white shadow-md' : 'bg-white dark:bg-gray-800 border-gray-100 dark:border-gray-700 text-gray-400'}`}>{hood}</button>
+          ))}
+        </div>
+
+        <div className="flex gap-2 overflow-x-auto no-scrollbar -mx-1 px-1 pt-4 border-t border-gray-100 dark:border-gray-800">
+          {THEME_FILTERS.map(theme => (
+            <button 
+              key={theme.id}
+              onClick={() => setActiveTheme(theme.id)}
+              className={`px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap border ${
+                activeTheme === theme.id 
+                ? 'bg-slate-800 border-slate-700 text-white shadow-md dark:bg-slate-700 dark:border-slate-600' 
+                : 'bg-white dark:bg-gray-800 border-gray-100 dark:border-gray-700 text-gray-400'
+              }`}
+            >
+              {theme.label}
+            </button>
           ))}
         </div>
       </header>

@@ -1,4 +1,3 @@
-
 import React from 'react';
 
 export type ThemeMode = 'light' | 'dark' | 'auto';
@@ -184,6 +183,7 @@ export interface CommunityPost {
   likes: number;
   comments: number;
   imageUrl?: string;
+  theme?: 'utilidade' | 'seguranca' | 'lazer' | 'dicas' | 'geral';
 }
 
 export type TaxonomyType = 'category' | 'subcategory' | 'specialty';
