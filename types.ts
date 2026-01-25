@@ -1,3 +1,4 @@
+
 import React from 'react';
 
 export type ThemeMode = 'light' | 'dark' | 'auto';
@@ -215,6 +216,7 @@ export interface Classified {
   typeLabel: string;
   price?: string;
   jobDetails?: Job;
+  imageUrl?: string;
 }
 
 export interface StoreCredit {

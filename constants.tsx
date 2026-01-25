@@ -666,7 +666,8 @@ export const MOCK_CLASSIFIEDS: Classified[] = [
         timestamp: 'Há 2h',
         contactWhatsapp: '5521999999999',
         typeLabel: 'CLT',
-        jobDetails: MOCK_JOBS[0]
+        jobDetails: MOCK_JOBS[0],
+        imageUrl: 'https://images.unsplash.com/photo-1555963634-b51a42e1fe28?q=80&w=800&auto=format&fit=crop'
     },
     {
         id: 'cl-2',
@@ -677,30 +678,34 @@ export const MOCK_CLASSIFIEDS: Classified[] = [
         description: 'Especialista em reformas de sofás, cadeiras e estofados em geral. Orçamento grátis no local.',
         timestamp: 'Há 5h',
         contactWhatsapp: '5521988888888',
-        typeLabel: 'Serviço'
+        typeLabel: 'Serviço',
+        imageUrl: 'https://images.unsplash.com/photo-1595861225919-21d53874316b?q=80&w=800&auto=format&fit=crop'
     },
     {
         id: 'cl-3',
         title: 'Venda de Balcão Refrigerado Industrial',
         advertiser: 'Padaria Imperial',
-        category: 'Compra & Venda',
+        category: 'Desapega JPA',
         neighborhood: 'Freguesia',
         description: 'Balcão em perfeito estado, revisado recentemente. Motivo: reforma total da loja.',
         timestamp: 'Ontem',
         contactWhatsapp: '5521999999999',
         price: 'R$ 1.200,00',
-        typeLabel: 'Venda'
+        typeLabel: 'Venda',
+        imageUrl: 'https://images.unsplash.com/photo-1620912189862-85a732230042?q=80&w=800&auto=format&fit=crop'
     },
     {
         id: 'cl-4',
-        title: 'Interrupção de Energia para Manutenção',
-        advertiser: 'Light / Comunitário',
-        category: 'Avisos',
-        neighborhood: 'Anil',
-        description: 'Aviso aos moradores: Manutenção programada na rede elétrica domingo das 08h às 12h.',
-        timestamp: 'Ontem',
-        contactWhatsapp: '5521999999999',
-        typeLabel: 'Utilidade'
+        title: 'Aluga-se Sala Comercial na Freguesia',
+        advertiser: 'JPA Imóveis',
+        category: 'Imóveis',
+        neighborhood: 'Freguesia',
+        description: 'Sala com 32m², ar condicionado e 1 vaga. Prédio com portaria 24h. Ideal para consultórios.',
+        timestamp: 'Há 2 dias',
+        contactWhatsapp: '5521977777777',
+        price: 'R$ 1.500/mês',
+        typeLabel: 'Aluguel',
+        imageUrl: 'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?q=80&w=800&auto=format&fit=crop'
     },
     {
         id: 'cl-5',
@@ -712,7 +717,32 @@ export const MOCK_CLASSIFIEDS: Classified[] = [
         timestamp: 'Há 1 dia',
         contactWhatsapp: '5521988888888',
         typeLabel: 'PJ',
-        jobDetails: MOCK_JOBS[1]
+        jobDetails: MOCK_JOBS[1],
+        imageUrl: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?q=80&w=800&auto=format&fit=crop'
+    },
+    {
+        id: 'cl-6',
+        title: 'Adoção: filhotes de gatinho',
+        advertiser: 'Mariana L.',
+        category: 'Adoção de pets',
+        neighborhood: 'Anil',
+        description: 'Resgatei uma ninhada e agora esses 3 bebês procuram um lar com amor. Já comem ração e usam a caixa de areia.',
+        timestamp: 'Há 3 dias',
+        contactWhatsapp: '5521966666666',
+        typeLabel: 'Adoção',
+        imageUrl: 'https://images.unsplash.com/photo-1574158622682-e40e69841006?q=80&w=800&auto=format&fit=crop'
+    },
+    {
+        id: 'cl-7',
+        title: 'Doação de Roupas de Inverno',
+        advertiser: 'Comunitário',
+        category: 'Doações em geral',
+        neighborhood: 'Pechincha',
+        description: 'Estamos arrecadando casacos e cobertores em bom estado para a campanha do agasalho. Ponto de coleta na associação de moradores.',
+        timestamp: 'Há 4 dias',
+        contactWhatsapp: '5521955555555',
+        typeLabel: 'Doação',
+        imageUrl: 'https://images.unsplash.com/photo-160533833-2413154b54e3?q=80&w=800&auto=format&fit=crop'
     }
 ];
 

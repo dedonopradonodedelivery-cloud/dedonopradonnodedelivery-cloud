@@ -2,79 +2,57 @@
 import React, { useState, useMemo } from 'react';
 import { User } from '@supabase/supabase-js';
 import { 
-  ChevronLeft, 
   Plus, 
-  X, 
   MessageSquare, 
   Briefcase, 
   Building2, 
   Wrench, 
   PawPrint, 
   Tag, 
-  LayoutGrid,
-  Info
+  Heart,
+  Search,
+  MapPin,
+  Clock
 } from 'lucide-react';
-import { useNeighborhood } from '../contexts/NeighborhoodContext';
+import { useNeighborhood, NEIGHBORHOODS } from '../contexts/NeighborhoodContext';
 import { Classified } from '../types';
 import { MOCK_CLASSIFIEDS } from '../constants';
 
-const CATEGORIES = [
-  { id: 'all', label: 'Todos', icon: LayoutGrid },
-  { id: 'empregos', label: 'Empregos', icon: Briefcase },
-  { id: 'serviços', label: 'Serviços', icon: Wrench },
-  { id: 'imóveis', label: 'Imóveis', icon: Building2 },
-  { id: 'pets', label: 'Pets', icon: PawPrint },
-  { id: 'venda', label: 'Compra & Venda', icon: Tag },
+const CLASSIFIED_CATEGORIES = [
+  { id: 'servicos', label: 'Serviços locais', icon: Wrench, color: 'bg-blue-500' },
+  { id: 'imoveis', label: 'Imóveis', icon: Building2, color: 'bg-purple-500' },
+  { id: 'emprego', label: 'Vaga de emprego', icon: Briefcase, color: 'bg-emerald-500' },
+  { id: 'adocao', label: 'Adoção de pets', icon: PawPrint, color: 'bg-orange-500' },
+  { id: 'doacoes', label: 'Doações em geral', icon: Heart, color: 'bg-rose-500' },
+  { id: 'desapega', label: 'Desapega JPA', icon: Tag, color: 'bg-indigo-500' },
 ];
 
-const ClassifiedDetailModal: React.FC<{
-  item: Classified;
-  user: User | null;
-  onClose: () => void;
-  onRequireLogin: () => void;
-}> = ({ item, user, onClose, onRequireLogin }) => {
-  const handleContact = () => {
-    if (!user) {
-      onRequireLogin();
-    } else {
-      window.open(`https://wa.me/${item.contactWhatsapp}`, '_blank');
-    }
-  };
-
-  return (
-    <div className="fixed inset-0 z-[1001] bg-black/60 flex items-end" onClick={onClose}>
-      <div 
-        className="bg-white dark:bg-gray-900 w-full rounded-t-[2.5rem] p-6 shadow-2xl animate-in slide-in-from-bottom duration-300 max-h-[85vh] flex flex-col"
-        onClick={e => e.stopPropagation()}
-      >
-        <div className="w-12 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full mx-auto mb-6 shrink-0"></div>
-        <div className="flex justify-between items-start mb-4">
-          <div>
-            <span className="text-[10px] font-black text-blue-500 uppercase tracking-widest">{item.category} • {item.neighborhood}</span>
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white mt-1">{item.title}</h2>
-          </div>
-          <button onClick={onClose} className="p-2 -mr-2 text-gray-400"><X size={24} /></button>
+const ClassifiedCard: React.FC<{ item: Classified; onClick: () => void }> = ({ item, onClick }) => (
+    <div 
+        onClick={onClick} 
+        className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col group transition-all duration-300 hover:shadow-lg hover:-translate-y-1 cursor-pointer overflow-hidden"
+    >
+        <div className="aspect-[4/3] w-full overflow-hidden bg-gray-50 dark:bg-gray-700 relative">
+            <img 
+                src={item.imageUrl || "/assets/default-logo.png"} 
+                alt={item.title} 
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+            />
+            <div className="absolute top-2 left-2 bg-black/50 text-white text-[9px] font-bold px-2 py-1 rounded-lg backdrop-blur-sm">
+                {item.neighborhood}
+            </div>
         </div>
-        
-        <div className="flex-1 overflow-y-auto no-scrollbar space-y-4 pr-2 -mr-2">
-            <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">{item.description}</p>
-            {item.price && <p className="text-lg font-bold text-gray-900 dark:text-white">{item.price}</p>}
-            <p className="text-xs text-gray-400">Publicado {item.timestamp} por <strong>{item.advertiser}</strong></p>
+        <div className="p-4 flex-1 flex flex-col">
+            <h3 className="font-bold text-sm text-gray-800 dark:text-white line-clamp-2 h-10 leading-tight">
+                {item.title}
+            </h3>
+            <div className="mt-auto pt-2 flex items-center justify-between text-[10px] text-gray-400 font-bold uppercase tracking-wider">
+                <span>{item.timestamp}</span>
+                {item.price && <span className="text-emerald-600 dark:text-emerald-400">{item.price}</span>}
+            </div>
         </div>
-        
-        <div className="pt-6 border-t border-gray-100 dark:border-gray-800">
-            <button 
-              onClick={handleContact}
-              className="w-full bg-emerald-500 text-white font-bold py-4 rounded-2xl flex items-center justify-center gap-2"
-            >
-              <MessageSquare size={20} /> Entrar em contato
-            </button>
-        </div>
-      </div>
     </div>
-  );
-};
-
+);
 
 export interface ClassifiedsViewProps {
   onBack: () => void;
@@ -84,107 +62,158 @@ export interface ClassifiedsViewProps {
 }
 
 export const ClassifiedsView: React.FC<ClassifiedsViewProps> = ({ onBack, onNavigate, user, onRequireLogin }) => {
-  const { currentNeighborhood } = useNeighborhood();
-  const [activeCategory, setActiveCategory] = useState('all');
+  const [activeCategory, setActiveCategory] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedNeighborhoods, setSelectedNeighborhoods] = useState<string[]>([]);
   const [selectedItem, setSelectedItem] = useState<Classified | null>(null);
+
+  const toggleNeighborhood = (hood: string) => {
+    if (hood === 'Jacarepaguá (todos)') {
+      setSelectedNeighborhoods([]);
+      return;
+    }
+    setSelectedNeighborhoods(prev => 
+      prev.includes(hood) 
+        ? prev.filter(h => h !== hood) 
+        : [...prev, hood]
+    );
+  };
 
   const filteredItems = useMemo(() => {
     return MOCK_CLASSIFIEDS.filter(item => {
-      const matchHood = currentNeighborhood === 'Jacarepaguá (todos)' || item.neighborhood === currentNeighborhood;
-      const matchCat = activeCategory === 'all' || item.category.toLowerCase().includes(activeCategory);
-      return matchHood && matchCat;
+      const matchSearch = searchTerm ? item.title.toLowerCase().includes(searchTerm.toLowerCase()) : true;
+      const matchHood = selectedNeighborhoods.length === 0 ? true : selectedNeighborhoods.includes(item.neighborhood);
+      
+      let matchCat = true;
+      if (activeCategory) {
+        // Mapeamento simplificado para o mock
+        if (activeCategory === 'emprego') matchCat = item.category === 'Empregos';
+        else if (activeCategory === 'servicos') matchCat = item.category === 'Serviços';
+        else if (activeCategory === 'imoveis') matchCat = item.category === 'Imóveis';
+        else if (activeCategory === 'adocao') matchCat = item.category === 'Adoção de pets';
+        else if (activeCategory === 'doacoes') matchCat = item.category === 'Doações em geral';
+        else if (activeCategory === 'desapega') matchCat = item.category === 'Desapega JPA';
+      }
+      
+      return matchSearch && matchHood && matchCat;
     });
-  }, [currentNeighborhood, activeCategory]);
-  
+  }, [searchTerm, selectedNeighborhoods, activeCategory]);
+
   const handlePublish = () => {
-    if (!user) {
-      onRequireLogin();
-    } else {
-      alert('Publicar anúncio (em breve)');
-    }
+    if (!user) onRequireLogin();
+    else alert('Tela de publicação em breve!');
   };
 
-  const getIconForCategory = (category: string) => {
-    switch (category) {
-        case 'Empregos': return <Briefcase size={16} />;
-        case 'Serviços': return <Wrench size={16} />;
-        case 'Avisos': return <Info size={16} />;
-        default: return <Tag size={16} />;
-    }
-  }
-
   return (
-    <div className="min-h-screen bg-[#F8F9FC] dark:bg-gray-950 font-sans animate-in fade-in duration-500 overflow-x-hidden">
-      <header className="bg-white dark:bg-gray-900 px-6 pt-10 pb-6 border-b border-gray-100 dark:border-gray-800 rounded-b-[2.5rem] shadow-sm sticky top-0 z-40">
-        <div className="flex items-center gap-4 mb-3">
-          <button onClick={onBack} className="p-2 bg-gray-50 dark:bg-gray-800 rounded-xl text-gray-500 hover:text-gray-900">
-            <ChevronLeft size={20} />
-          </button>
-          <div>
-            <h1 className="font-black text-xl text-gray-900 dark:text-white uppercase tracking-tighter leading-none">Classificados JPA</h1>
-            <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-1">O que acontece no bairro</p>
-          </div>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 font-sans animate-in fade-in duration-500 relative">
+      <header className="sticky top-0 z-30 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md px-5 py-6 border-b border-gray-100 dark:border-gray-800">
+        <div className="text-center mb-4">
+          <h1 className="text-2xl font-black text-gray-900 dark:text-white font-display uppercase tracking-tighter">Classificados JPA</h1>
+          <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">Resolva o que você precisa perto de casa</p>
         </div>
-        <div className="flex gap-2 overflow-x-auto no-scrollbar -mx-1 px-1 mt-4">
-            {CATEGORIES.map(cat => (
-              <button 
-                key={cat.id}
-                onClick={() => setActiveCategory(cat.id)}
-                className={`flex-shrink-0 px-4 py-2 rounded-full text-xs font-bold border-2 transition-all flex items-center gap-2 ${activeCategory === cat.id ? 'bg-blue-600 text-white border-blue-600' : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-500'}`}
-              >
-                <cat.icon size={12} /> {cat.label}
-              </button>
-            ))}
+        <div className="relative">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
+          <input 
+            type="text" 
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder="O que você procura?"
+            className="w-full bg-gray-100 dark:bg-gray-800 border-none py-3.5 pl-11 pr-4 rounded-2xl text-sm font-medium outline-none focus:ring-2 focus:ring-[#1E5BFF]/30 dark:text-white"
+          />
         </div>
       </header>
-
-      <main className="max-w-md mx-auto py-4 space-y-4 w-full px-4">
-        <div className="p-4 bg-white dark:bg-gray-900 sm:rounded-2xl border-b sm:border border-gray-100 dark:border-gray-800">
+      
+      <main className="p-5 pb-32">
+        <div className="flex gap-2 overflow-x-auto no-scrollbar pb-6">
           <button 
-            onClick={handlePublish}
-            className="w-full bg-blue-50 dark:bg-blue-900/30 text-blue-600 font-bold text-sm py-3 px-4 rounded-xl transition-colors flex items-center gap-2 hover:bg-blue-100"
+            onClick={() => toggleNeighborhood('Jacarepaguá (todos)')}
+            className={`flex-shrink-0 px-4 py-2 rounded-full text-xs font-bold border transition-all ${selectedNeighborhoods.length === 0 ? 'bg-blue-600 text-white border-blue-600' : 'bg-white dark:bg-gray-800 text-gray-500 border-gray-200 dark:border-gray-700'}`}
           >
-            <Plus size={16} />
-            Publicar Anúncio Grátis
+            Jacarepaguá (Todos)
           </button>
+          {NEIGHBORHOODS.map(hood => (
+            <button 
+              key={hood}
+              onClick={() => toggleNeighborhood(hood)}
+              className={`flex-shrink-0 px-4 py-2 rounded-full text-xs font-bold border transition-all ${selectedNeighborhoods.includes(hood) ? 'bg-blue-600 text-white border-blue-600' : 'bg-white dark:bg-gray-800 text-gray-500 border-gray-200 dark:border-gray-700'}`}
+            >
+              {hood}
+            </button>
+          ))}
         </div>
 
-        {filteredItems.map((item) => (
-          <div 
-            key={item.id} 
-            onClick={() => setSelectedItem(item)}
-            className="bg-white dark:bg-gray-900 rounded-2xl p-4 border border-gray-100 dark:border-gray-800 shadow-sm cursor-pointer"
-          >
-            <div className="flex justify-between items-start">
-              <div>
-                <div className="flex items-center gap-2 mb-1">
-                  {getIconForCategory(item.category)}
-                  <span className="text-[10px] font-bold uppercase text-gray-400">{item.category}</span>
-                </div>
-                <h3 className="font-bold text-gray-800 dark:text-white">{item.title}</h3>
-              </div>
-              {item.price && <span className="font-bold text-blue-600 text-sm">{item.price}</span>}
-            </div>
-            <div className="flex justify-between items-center mt-3 pt-3 border-t border-gray-50 dark:border-gray-800">
-                <p className="text-xs text-gray-400">{item.advertiser}</p>
-                <p className="text-xs text-gray-400">{item.timestamp}</p>
-            </div>
-          </div>
-        ))}
+        <div className="grid grid-cols-3 gap-3 mb-8">
+          {CLASSIFIED_CATEGORIES.map(cat => {
+            const Icon = cat.icon;
+            const isSelected = activeCategory === cat.id;
+            return (
+              <button 
+                key={cat.id}
+                onClick={() => setActiveCategory(isSelected ? null : cat.id)}
+                className={`p-3 rounded-2xl flex flex-col items-center justify-center gap-2 text-center transition-all ${isSelected ? `${cat.color} text-white shadow-lg` : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300'}`}
+              >
+                <Icon size={20} />
+                <span className="text-[10px] font-bold leading-tight">{cat.label}</span>
+              </button>
+            )
+          })}
+        </div>
+        
+        <div className="grid grid-cols-2 gap-4">
+          {filteredItems.map(item => (
+            <ClassifiedCard key={item.id} item={item} onClick={() => setSelectedItem(item)} />
+          ))}
+        </div>
+
         {filteredItems.length === 0 && (
-          <div className="text-center py-12 text-gray-400">
-            <p>Nenhum classificado encontrado.</p>
+          <div className="text-center py-16 text-gray-400">
+            <p>Nenhum anúncio encontrado.</p>
           </div>
         )}
       </main>
-      
+
+      <div className="fixed bottom-24 right-5 z-50">
+        <button 
+          onClick={handlePublish}
+          className="w-16 h-16 bg-blue-600 text-white rounded-2xl shadow-2xl flex items-center justify-center active:scale-95 transition-transform"
+        >
+          <Plus size={32} />
+        </button>
+      </div>
+
       {selectedItem && (
-        <ClassifiedDetailModal 
-          item={selectedItem}
-          user={user}
-          onClose={() => setSelectedItem(null)}
-          onRequireLogin={onRequireLogin}
-        />
+        <div className="fixed inset-0 z-[1001] bg-black/60 flex items-end" onClick={() => setSelectedItem(null)}>
+          <div 
+            className="bg-white dark:bg-gray-900 w-full rounded-t-[2.5rem] p-6 shadow-2xl animate-in slide-in-from-bottom duration-300 max-h-[85vh] flex flex-col"
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="w-12 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full mx-auto mb-6 shrink-0"></div>
+            <div className="flex justify-between items-start mb-4">
+              <div>
+                <span className="text-[10px] font-black text-blue-500 uppercase tracking-widest">{selectedItem.category} • {selectedItem.neighborhood}</span>
+                <h2 className="text-xl font-bold text-gray-900 dark:text-white mt-1">{selectedItem.title}</h2>
+              </div>
+            </div>
+            
+            <div className="flex-1 overflow-y-auto no-scrollbar space-y-4 pr-2 -mr-2">
+                <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">{selectedItem.description}</p>
+                {selectedItem.price && <p className="text-lg font-bold text-gray-900 dark:text-white">{selectedItem.price}</p>}
+                <p className="text-xs text-gray-400">Publicado {selectedItem.timestamp} por <strong>{selectedItem.advertiser}</strong></p>
+            </div>
+            
+            <div className="pt-6 border-t border-gray-100 dark:border-gray-800">
+                <button 
+                  onClick={() => {
+                    if (!user) onRequireLogin();
+                    else window.open(`https://wa.me/${selectedItem.contactWhatsapp}`, '_blank');
+                  }}
+                  className="w-full bg-emerald-500 text-white font-bold py-4 rounded-2xl flex items-center justify-center gap-2"
+                >
+                  <MessageSquare size={20} /> Entrar em contato
+                </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
