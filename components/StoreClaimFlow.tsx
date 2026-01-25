@@ -245,7 +245,7 @@ export const StoreClaimFlow: React.FC<StoreClaimFlowProps> = ({ store, userId, o
                     <button 
                         type="submit"
                         disabled={isLoading}
-                        className="w-full bg-[#1E5BFF] text-white font-black py-5 rounded-2xl shadow-xl shadow-blue-500/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                        className="w-full bg-indigo-600 text-white font-bold py-4 rounded-2xl shadow-lg active:scale-[0.98] transition-all"
                     >
                         {isLoading ? <Loader2 className="animate-spin" /> : 'Solicitar Verificação'}
                     </button>
@@ -255,21 +255,21 @@ export const StoreClaimFlow: React.FC<StoreClaimFlowProps> = ({ store, userId, o
 
         {step === 'success' && (
             <div className="flex-1 flex flex-col items-center justify-center text-center animate-in zoom-in duration-500 pb-20">
-                <div className="w-24 h-24 bg-green-100 dark:bg-green-900/30 rounded-[2.5rem] flex items-center justify-center mb-8 shadow-xl shadow-green-500/10">
-                    <CheckCircle2 size={48} className="text-green-600" />
+                <div className="w-24 h-24 bg-[#EAF0FF] dark:bg-blue-900/20 rounded-[2.5rem] flex items-center justify-center mb-8 shadow-xl shadow-blue-200 dark:shadow-none">
+                    <CheckCircle2 className="w-12 h-12 text-[#1E5BFF]" />
                 </div>
-                <h2 className="text-3xl font-black text-gray-900 dark:text-white uppercase tracking-tighter mb-4">Verificado!</h2>
-                <p className="text-gray-500 dark:text-gray-400 text-sm leading-relaxed max-w-[280px]">
-                    Parabéns! Você acaba de assumir o controle desta loja no Localizei JPA.
+                <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2 font-display tracking-tight">Sucesso!</h2>
+                <p className="text-gray-500 dark:text-gray-400 text-sm mb-10 max-w-[260px] leading-relaxed font-medium">
+                    Sua loja foi reivindicada e em breve você terá acesso total ao Painel do Parceiro.
                 </p>
-                <div className="mt-10 p-5 bg-white dark:bg-gray-800 rounded-3xl border border-gray-100 dark:border-gray-700 flex items-center gap-4 w-full">
-                    {/* Fixed "Cannot find name 'StoreIcon'" by adding it to imports */}
-                    <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center text-[#1E5BFF]"><StoreIcon size={20} /></div>
-                    <div className="text-left">
-                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Acesso liberado</p>
-                        <p className="text-sm font-bold text-gray-900 dark:text-white">Painel do Parceiro</p>
-                    </div>
-                </div>
+
+                <button 
+                    onClick={onSuccess}
+                    className="w-full bg-gray-900 dark:bg-white dark:text-black text-white font-bold py-4 rounded-2xl shadow-xl active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                >
+                    Acessar meu painel
+                    <ArrowRight className="w-5 h-5" />
+                </button>
             </div>
         )}
 

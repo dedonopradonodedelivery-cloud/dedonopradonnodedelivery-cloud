@@ -105,13 +105,18 @@ export const MerchantReviewsModule: React.FC<MerchantReviewsModuleProps> = ({ on
   return (
     <div className="min-h-screen bg-[#F8F9FB] dark:bg-gray-950 font-sans animate-in slide-in-from-right duration-300 pb-20">
       {/* Header */}
-      <header className="sticky top-0 z-40 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md px-5 h-20 flex items-center gap-4 border-b border-gray-100 dark:border-gray-800">
-        <button onClick={onBack} className="p-2.5 bg-gray-100 dark:bg-gray-800 rounded-2xl hover:bg-gray-200 transition-colors">
-          <ChevronLeft className="w-6 h-6 text-gray-800 dark:text-white" />
+      <header className="sticky top-0 z-40 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md px-5 h-20 flex items-center gap-4 border-b border-gray-100 dark:border-gray-800 shadow-sm">
+        <button 
+          onClick={onBack} 
+          className="p-3 bg-gray-50 dark:bg-gray-800 rounded-2xl hover:bg-gray-100 transition-all active:scale-90"
+        >
+          <ChevronLeft size={20} className="text-gray-600 dark:text-gray-300" />
         </button>
         <div>
-          <h1 className="font-black text-lg text-gray-900 dark:text-white uppercase tracking-tighter leading-none">Avaliações</h1>
-          <p className="text-[10px] text-amber-600 font-bold uppercase tracking-widest mt-1">Gestão de Reputação</p>
+          <h1 className="font-black text-xl text-gray-900 dark:text-white uppercase tracking-tighter leading-none">
+            Avaliações
+          </h1>
+          <p className="text-[10px] text-amber-600 font-black uppercase tracking-widest mt-1">Gestão de Reputação</p>
         </div>
       </header>
 

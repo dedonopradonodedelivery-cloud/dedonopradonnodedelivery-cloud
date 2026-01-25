@@ -174,6 +174,7 @@ const App: React.FC = () => {
                         <ServiceChatView requestId={activeServiceRequestId} userRole={chatRole} onBack={() => handleNavigate(isMerchantMode ? 'merchant_leads' : 'home')} />
                     )}
 
+                    {/* Fix: Pass `viewMode` as a prop instead of calling it as a function `viewMode()`. */}
                     {activeTab === 'admin_panel' && <AdminPanel user={user as any} onLogout={signOut} viewMode={viewMode} onOpenViewSwitcher={() => setIsRoleSwitcherOpen(true)} onNavigateToApp={handleNavigate} onOpenMonitorChat={(id: string) => { setActiveServiceRequestId(id); setChatRole('admin'); handleNavigate('service_chat'); }} />}
                     
                     {activeTab === 'store_detail' && selectedStore && <StoreDetailView store={selectedStore} onBack={() => handleNavigate(previousTab)} />}
@@ -206,4 +207,3 @@ const App: React.FC = () => {
   );
 };
 export default App;
-```

@@ -1,4 +1,5 @@
 
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
 export const NEIGHBORHOODS = [
@@ -32,11 +33,14 @@ const NeighborhoodContext = createContext<NeighborhoodContextType>({
 export const NeighborhoodProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [currentNeighborhood, setCurrentNeighborhood] = useState(() => {
     const saved = localStorage.getItem('localizei_neighborhood');
-    // Se "todos" estiver salvo, ou for inválido, reseta para um bairro padrão.
-    if (saved === 'Jacarepaguá (todos)' || !saved || !NEIGHBORHOODS.includes(saved)) {
-      return 'Freguesia';
+    // FIX: Corrected logic to persist the "Jacarepaguá (todos)" option on refresh.
+    // The previous logic would incorrectly reset it to the default value.
+    const validOptions = [...NEIGHBORHOODS, "Jacarepaguá (todos)"];
+    if (saved && validOptions.includes(saved)) {
+      return saved;
     }
-    return saved;
+    // Default to Freguesia if nothing valid is saved.
+    return 'Freguesia';
   });
   const [isSelectorOpen, setIsSelectorOpen] = useState(false);
 
