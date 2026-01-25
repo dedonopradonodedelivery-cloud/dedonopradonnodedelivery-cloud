@@ -12,8 +12,10 @@ import {
   MessageSquare,
   Zap,
   Award,
-  // Fix: Add missing Loader2 icon to resolve "Cannot find name 'Loader2'" error
-  Loader2
+  Loader2,
+  Wrench,
+  Key,
+  Hammer
 } from 'lucide-react';
 import { LojasEServicosList } from '@/components/LojasEServicosList';
 import { User } from '@supabase/supabase-js';
@@ -30,6 +32,14 @@ interface HomeFeedFeedProps {
   user: User | null;
   userRole: 'cliente' | 'lojista' | null;
 }
+
+const LOCAL_SERVICES = [
+  { name: 'Eletricista', icon: Zap, color: 'text-amber-500', bg: 'bg-amber-50' },
+  { name: 'Encanador', icon: Wrench, color: 'text-blue-500', bg: 'bg-blue-50' },
+  { name: 'Chaveiro', icon: Key, color: 'text-sky-500', bg: 'bg-sky-50' },
+  { name: 'Diarista', icon: Sparkles, color: 'text-purple-500', bg: 'bg-purple-50' },
+  { name: 'Montador', icon: Hammer, color: 'text-orange-500', bg: 'bg-orange-50' },
+];
 
 export const HomeFeed: React.FC<HomeFeedFeedProps> = ({ 
   onNavigate, 
@@ -199,6 +209,47 @@ export const HomeFeed: React.FC<HomeFeedFeedProps> = ({
                     </div>
                 </div>
             ))}
+        </div>
+      </section>
+
+      {/* 3. SERVIÇOS LOCAIS PERTO DE VOCÊ */}
+      <section className="px-5 py-6 mb-6 bg-gray-50 dark:bg-gray-900/50 rounded-[2.5rem] border border-gray-100 dark:border-gray-800">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-emerald-50 dark:bg-emerald-900/20 flex items-center justify-center text-emerald-600">
+              <Wrench size={18} strokeWidth={2.5} />
+            </div>
+            <div>
+              <h2 className="text-[11px] font-black text-gray-900 dark:text-white uppercase tracking-[0.15em] leading-none mb-1">Serviços locais perto de você</h2>
+              <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest leading-none">Resolva o que precisa no bairro</p>
+            </div>
+          </div>
+          <button onClick={() => onNavigate('services')} className="text-[9px] font-black text-[#1E5BFF] uppercase tracking-widest">Ver tudo</button>
+        </div>
+
+        <div className="flex gap-3 overflow-x-auto no-scrollbar -mx-5 px-5 pb-2">
+          {LOCAL_SERVICES.map((service) => {
+            const Icon = service.icon;
+            return (
+              <button 
+                key={service.name} 
+                onClick={() => onNavigate('services')}
+                className="flex-shrink-0 w-28 h-28 bg-white dark:bg-gray-800 rounded-[1.5rem] border border-gray-100 dark:border-gray-700 p-4 flex flex-col items-center justify-center gap-2 shadow-sm active:scale-[0.98] transition-all"
+              >
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center ${service.bg} dark:bg-opacity-20`}>
+                  <Icon size={18} className={service.color} />
+                </div>
+                <p className="text-[10px] font-bold text-gray-700 dark:text-gray-300 truncate">{service.name}</p>
+              </button>
+            );
+          })}
+          <button 
+            onClick={() => onNavigate('services')}
+            className="flex-shrink-0 w-28 h-28 bg-gray-50 dark:bg-gray-800/50 rounded-[1.5rem] border-2 border-dashed border-gray-200 dark:border-gray-700 p-4 flex flex-col items-center justify-center gap-2 shadow-sm active:scale-[0.98] transition-all"
+          >
+            <ArrowRight size={24} className="text-gray-300 dark:text-gray-600" />
+            <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500">Ver todos</p>
+          </button>
         </div>
       </section>
 
