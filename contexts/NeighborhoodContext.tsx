@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
 export const NEIGHBORHOODS = [
@@ -30,7 +31,12 @@ const NeighborhoodContext = createContext<NeighborhoodContextType>({
 
 export const NeighborhoodProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [currentNeighborhood, setCurrentNeighborhood] = useState(() => {
-    return localStorage.getItem('localizei_neighborhood') || 'Freguesia';
+    const saved = localStorage.getItem('localizei_neighborhood');
+    // Se "todos" estiver salvo, ou for inválido, reseta para um bairro padrão.
+    if (saved === 'Jacarepaguá (todos)' || !saved || !NEIGHBORHOODS.includes(saved)) {
+      return 'Freguesia';
+    }
+    return saved;
   });
   const [isSelectorOpen, setIsSelectorOpen] = useState(false);
 

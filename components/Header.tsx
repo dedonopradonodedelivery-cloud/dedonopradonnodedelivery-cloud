@@ -1,3 +1,4 @@
+
 import React, { useMemo } from 'react';
 import { Search, User as UserIcon, MapPin, ChevronDown, Check, ChevronRight, SearchX, ShieldCheck, Tag } from 'lucide-react';
 import { useNeighborhood, NEIGHBORHOODS } from '../contexts/NeighborhoodContext';
@@ -32,11 +33,6 @@ const NeighborhoodSelectorModal: React.FC = () => {
                 <div className="w-12 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full mx-auto mb-6"></div>
                 <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4 px-2">Escolha o Bairro</h3>
                 <div className="max-h-[60vh] overflow-y-auto no-scrollbar space-y-2">
-                    <button onClick={() => setNeighborhood("Jacarepaguá (todos)")} className={`w-full text-left px-4 py-3.5 rounded-xl font-medium transition-colors flex items-center justify-between ${currentNeighborhood === "Jacarepaguá (todos)" ? "bg-[#1E5BFF]/10 text-[#1E5BFF]" : "bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-200"}`}>
-                        <span>Jacarepaguá (todos)</span>
-                        {currentNeighborhood === "Jacarepaguá (todos)" && <Check className="w-4 h-4" />}
-                    </button>
-                    <div className="h-px bg-gray-100 dark:bg-gray-800 my-2"></div>
                     {NEIGHBORHOODS.map(hood => (
                         <button key={hood} onClick={() => setNeighborhood(hood)} className={`w-full text-left px-4 py-3.5 rounded-xl font-medium transition-colors flex items-center justify-between ${currentNeighborhood === hood ? "bg-[#1E5BFF]/10 text-[#1E5BFF]" : "hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300"}`}>
                             <span>{hood}</span>
@@ -145,7 +141,6 @@ export const Header: React.FC<HeaderProps> = ({
             </div>
             {showNeighborhoodFilter && (
                 <div className="flex items-center gap-2 overflow-x-auto no-scrollbar px-4 pb-3 pt-1">
-                    <button onClick={() => setNeighborhood("Jacarepaguá (todos)")} className={`flex-shrink-0 px-4 py-1.5 rounded-full text-xs font-bold transition-all border ${currentNeighborhood === "Jacarepaguá (todos)" ? "bg-[#1E5BFF] text-white border-[#1E5BFF]" : "bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-300 border-gray-100 dark:border-gray-800"}`}>Todos</button>
                     {NEIGHBORHOODS.map(hood => (<button key={hood} onClick={() => setNeighborhood(hood)} className={`flex-shrink-0 px-4 py-1.5 rounded-full text-xs font-bold transition-all border ${currentNeighborhood === hood ? "bg-[#1E5BFF] text-white border-[#1E5BFF]" : "bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-300 border-gray-100 dark:border-gray-800"}`}>{hood}</button>))}
                 </div>
             )}

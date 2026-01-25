@@ -19,7 +19,17 @@ import {
   Megaphone,
   X,
   ImageIcon,
-  CreditCard
+  CreditCard,
+  MessageCircle,
+  Palette,
+  Building,
+  ChevronRight as ChevronRightIcon,
+  AlertTriangle,
+  Info,
+  Crown,
+  ShieldAlert,
+  Target,
+  QrCode
 } from 'lucide-react';
 import { User } from '@supabase/supabase-js';
 import { StoreBannerEditor } from '@/components/StoreBannerEditor';
@@ -38,415 +48,792 @@ const NEIGHBORHOODS_LIST = [
   "Curicica", "Parque Olímpico", "Gardênia", "Cidade de Deus"
 ];
 
-const PLACEMENT_OPTIONS = [
-  { id: 'home', label: 'Banner na Home', icon: Home, price: 39.90, originalPrice: 199.90, description: 'Maior destaque do app. Ideal para visibilidade máxima no bairro.' },
-  { id: 'cat', label: 'Banner na Categoria', icon: LayoutGrid, price: 19.90, originalPrice: 149.90, description: 'Destaque sua loja dentro da categoria onde seus clientes procuram.' },
-  { id: 'sub', label: 'Banner na Subcategoria', icon: Zap, price: 9.90, originalPrice: 99.90, description: 'Apareça quando o cliente busca exatamente o que você vende.' },
+// REGRA DE NEGÓCIO: Simulação de vagas ocupadas
+const MOCK_SLOTS_OCCUPIED: Record<string, Record<string, Record<string, number>>> = {
+  'home': { // 3 vagas no total
+    'all': {
+      'Freguesia': 2, // 1 vaga -> Poucas vagas
+      'Taquara': 3,   // 0 vagas -> Esgotado
+      'Anil': 0,      // 3 vagas -> Disponível
+      'Pechincha': 1, // 2 vagas -> Disponível
+    }
+  },
+  'cat': {
+    'Serviços': { // 4 vagas no total
+      'Freguesia': 3, // 1 vaga -> Poucas vagas
+      'Pechincha': 4, // 0 vagas -> Esgotado
+      'Taquara': 1    // 3 vagas -> Disponível
+    },
+    'Imóveis Comerciais': { // 4 vagas no total
+      'Freguesia': 0, // 4 vagas -> Disponível
+      'Anil': 4,      // 0 vagas -> Esgotado
+    },
+    'default': { // 2 vagas no total para outras categorias
+      'Anil': 2,      // 0 vagas -> Esgotado
+      'Tanque': 1,    // 1 vaga -> Poucas vagas
+      'Curicica': 0,  // 2 vagas -> Disponível
+    }
+  }
+};
+
+
+const DISPLAY_MODES = [
+  { 
+    id: 'home', 
+    label: 'Home', 
+    icon: Home, 
+    price: 59.90,
+    originalPrice: 199.90,
+    description: 'Exibido no carrossel da página inicial para todos os usuários.',
+    whyChoose: 'Ideal para máxima visibilidade imediata.'
+  },
+  { 
+    id: 'cat', 
+    label: 'Categorias', 
+    icon: LayoutGrid, 
+    price: 39.90,
+    originalPrice: 149.90,
+    description: 'Exibido no topo das buscas por produtos ou serviços específicos.',
+    whyChoose: 'Impacta o cliente no momento da decisão.'
+  },
 ];
 
 export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNavigate, user, categoryName, viewMode, initialView = 'sales' }) => {
-  const [view, setView] = useState<'sales' | 'editor' | 'pro_checkout' | 'pro_processing' | 'pro_approved' | 'pro_chat'>('sales');
-  const [selectedPlacement, setSelectedPlacement] = useState<string | null>(null);
+  const isDesigner = viewMode === 'Designer';
+  
+  const [view, setView] = useState<'sales' | 'creator' | 'editor' | 'pro_checkout' | 'pro_processing' | 'pro_approved' | 'pro_chat' | 'designer_workspace' | 'chat_onboarding'>('sales');
+  const [selectedMode, setSelectedMode] = useState<typeof DISPLAY_MODES[0] | null>(null);
   const [selectedPeriods, setSelectedPeriods] = useState<string[]>([]);
-  const [selectedHoods, setSelectedHoods] = useState<string[]>([]);
-  const [artChoice, setArtChoice] = useState<'upload' | 'diy' | 'pro' | null>(null);
-  const [uploadedImage, setUploadedImage] = useState<string | null>(null);
+  const [selectedNeighborhoods, setSelectedNeighborhoods] = useState<string[]>([]);
+  const [artChoice, setArtChoice] = useState<'diy' | 'pro' | null>(null);
+  const [diyFlowStep, setDiyFlowStep] = useState<'selection' | 'upload' | 'editor'>('selection');
+  const [paymentMethod, setPaymentMethod] = useState<'pix' | 'credit' | 'debit'>('pix');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
+  const [isArtSaved, setIsArtSaved] = useState(false);
+  const [isEditingArt, setIsEditingArt] = useState(false);
+  const [savedDesign, setSavedDesign] = useState<any>(null);
+  const [toast, setToast] = useState<{msg: string, type: 'info' | 'error' | 'designer'} | null>(null);
+  
+  // States para o Chat Pro
+  const [chatMessages, setChatMessages] = useState<any[]>([]);
+  const [proChatStep, setProChatStep] = useState(0);
+  const [isLogoModalOpen, setIsLogoModalOpen] = useState(false);
+  const [isBriefingModalOpen, setIsBriefingModalOpen] = useState(false);
 
-  // Refs
+  // Briefing Form State
+  const [briefingData, setBriefingData] = useState({
+    companyName: user?.user_metadata?.store_name || '',
+    headline: '',
+    description: '',
+    observations: ''
+  });
+
+  // Logo Upload State
+  const [logoPreview, setLogoPreview] = useState<string | null>(null);
+
+  // Controle de scroll inteligente
+  const [highlightPeriod, setHighlightPeriod] = useState(false);
+
   const periodRef = useRef<HTMLDivElement>(null);
-  const neighborhoodsRef = useRef<HTMLDivElement>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const neighborhoodRef = useRef<HTMLDivElement>(null);
+  const creativeRef = useRef<HTMLDivElement>(null);
+  const paymentRef = useRef<HTMLDivElement>(null);
+  const chatScrollRef = useRef<HTMLDivElement>(null);
 
-  const scrollTo = (ref: React.RefObject<HTMLDivElement | null>) => {
-    setTimeout(() => {
-      ref.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }, 100);
+  useEffect(() => {
+    if (isDesigner) {
+      setView('designer_workspace');
+    } else if (initialView === 'chat') {
+      // Mock para a lógica de verificação de pedido ativo.
+      const hasActiveOrder = false; 
+      if (hasActiveOrder) {
+        setView('pro_chat');
+      } else {
+        setView('chat_onboarding');
+      }
+    }
+  }, [isDesigner, initialView]);
+
+  const dynamicPeriods = useMemo(() => {
+    const now = new Date();
+    const formatDate = (date: Date) => date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: '2-digit' });
+    const end1 = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+    const start2 = new Date(now.getTime());
+    const end2 = new Date(start2.getTime() + 90 * 24 * 60 * 60 * 1000);
+
+    return [
+      { id: 'periodo_1', label: '1 Mês (30 dias)', sub: 'Visibilidade mensal', dates: `${formatDate(now)} → ${formatDate(end1)}`, badge: 'Mais simples', days: 30, multiplier: 1 },
+      { id: 'periodo_2', label: '3 Meses (90 dias)', sub: 'Pacote trimestral', dates: `${formatDate(start2)} → ${formatDate(end2)}`, badge: 'Melhor Valor', days: 90, multiplier: 3 },
+    ];
+  }, []);
+
+  // Lógica de mensagens automáticas do Chat
+  useEffect(() => {
+    if (view === 'pro_chat' && proChatStep === 0) {
+      setProChatStep(1);
+      
+      if (isDesigner) {
+        setChatMessages([
+            { id: 1, role: 'system', text: '🎉 Parabéns pela escolha profissional!\nNosso time vai criar um banner focado em conversão.\nEm até 72h você receberá a arte pronta para aprovação e publicação.', timestamp: '10:00' },
+            { id: 2, role: 'system', text: 'Para começarmos, envie por aqui:\n• Logo em alta (PNG ou PDF)\n• Nome da empresa\n• Pequena descrição / promoção', timestamp: '10:01' },
+            { id: 3, role: 'user', text: 'Olá! Enviei os dados abaixo.', timestamp: '10:05' },
+            { id: 4, role: 'user', type: 'attachment', text: '📋 Informações do banner enviadas.', details: { name: 'Hamburgueria do Zé', promo: 'Combo Casal R$ 49,90', obs: 'Usar cores preto e laranja.' }, timestamp: '10:05' },
+            { id: 5, role: 'user', type: 'file', text: 'Logo_Vetorial.png', timestamp: '10:06' }
+        ]);
+        setProChatStep(2);
+      } else {
+        setChatMessages([{
+            id: 1,
+            role: 'system',
+            text: '🎉 Parabéns pela escolha profissional!\nNosso time vai criar um banner focado em conversão.\nEm até 72h você receberá a arte pronta para aprovação e publicação.',
+            timestamp: 'Agora'
+          }]);
+    
+          setTimeout(() => {
+            setChatMessages(prev => [...prev, {
+              id: 2,
+              role: 'system',
+              text: 'Para começarmos, envie por aqui:\n• Logo em alta (PNG ou PDF)\n• Nome da empresa\n• Pequena descrição / promoção\nAssim que recebermos, damos início à criação.',
+              timestamp: 'Agora'
+            }]);
+            setProChatStep(2);
+          }, 1500);
+      }
+    }
+  }, [view, isDesigner, proChatStep]);
+
+  useEffect(() => {
+    if (chatScrollRef.current) {
+      chatScrollRef.current.scrollTop = chatScrollRef.current.scrollHeight;
+    }
+  }, [chatMessages]);
+
+  const showToast = (msg: string, type: 'info' | 'error' | 'designer' = 'info') => {
+    setToast({ msg, type });
+    setTimeout(() => setToast(null), 4000);
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const scrollTo = (ref: React.RefObject<HTMLDivElement | null>, offset: number = 100) => {
+    setTimeout(() => {
+      if (ref.current) {
+        const bodyRect = document.body.getBoundingClientRect().top;
+        const elementRect = ref.current.getBoundingClientRect().top;
+        const elementPosition = elementRect - bodyRect;
+        const offsetPosition = elementPosition - offset;
+
+        window.scrollTo({
+          top: offsetPosition,
+          behavior: 'smooth'
+        });
+      }
+    }, 50);
+  };
+
+  const handleModeSelection = (mode: typeof DISPLAY_MODES[0]) => {
+    setSelectedMode(mode);
+    if (selectedPeriods.length === 0) {
+        setHighlightPeriod(true);
+        scrollTo(periodRef, 120);
+        setTimeout(() => setHighlightPeriod(false), 2000);
+    }
+  };
+
+  const getNeighborhoodAvailabilityStatus = (hood: string): { status: 'Disponível' | 'Poucas vagas' | 'Esgotado'; available: boolean } => {
+    if (!selectedMode) return { status: 'Disponível', available: true };
+
+    let totalSlots = 0;
+    let occupiedSlots = 0;
+    
+    if (selectedMode.id === 'home') {
+        totalSlots = 3;
+        occupiedSlots = MOCK_SLOTS_OCCUPIED.home?.all?.[hood] || 0;
+    } else if (selectedMode.id === 'cat') {
+        if (categoryName === 'Serviços' || categoryName === 'Imóveis Comerciais') {
+            totalSlots = 4;
+        } else {
+            totalSlots = 2;
+        }
+        // Verifica categoria específica, senão usa 'default'
+        occupiedSlots = MOCK_SLOTS_OCCUPIED.cat?.[categoryName || '']?.[hood] ?? MOCK_SLOTS_OCCUPIED.cat?.default?.[hood] ?? 0;
+    }
+    
+    const availableSlots = totalSlots - occupiedSlots;
+
+    if (availableSlots <= 0) return { status: 'Esgotado', available: false };
+    if (availableSlots === 1) return { status: 'Poucas vagas', available: true };
+    return { status: 'Disponível', available: true };
+  };
+
+  const togglePeriod = (periodId: string) => {
+    setSelectedPeriods([periodId]);
+  };
+
+  const selectAllAvailableHoods = () => {
+    const availableHoods = NEIGHBORHOODS_LIST.filter(hood => getNeighborhoodAvailabilityStatus(hood).available);
+    setSelectedNeighborhoods(availableHoods);
+  };
+
+  const handlePayPro = () => {
+    setView('pro_processing');
+    setTimeout(() => {
+      setView('pro_approved');
+    }, 2000);
+  };
+
+  const handleSaveDesign = (design: any) => {
+    setSavedDesign({ type: 'editor', ...design });
+    setIsArtSaved(true);
+    setIsEditingArt(false);
+    setDiyFlowStep('editor');
+    scrollTo(paymentRef, 80);
+  };
+
+  const prices = useMemo(() => {
+    if (!selectedMode) return { current: 0, original: 0, isPackage: false, installments: 0, monthly: 0 };
+    
+    let basePrice = selectedMode.price;
+
+    // Preços dinâmicos por categoria
+    if (selectedMode.id === 'cat') {
+      if (categoryName === 'Serviços') {
+        basePrice = 49.90;
+      } else if (categoryName === 'Imóveis Comerciais') {
+        basePrice = 59.90;
+      } else {
+        basePrice = 39.90; // Preço padrão da categoria
+      }
+    }
+    
+    const hoodsMult = Math.max(1, selectedNeighborhoods.length);
+    const period = dynamicPeriods.find(p => selectedPeriods.includes(p.id));
+    const periodsMult = period ? period.multiplier : 1;
+    const artExtra = artChoice === 'pro' ? 69.90 : 0;
+    
+    const current = (basePrice * periodsMult * hoodsMult) + artExtra;
+    const original = (selectedMode.originalPrice * periodsMult * hoodsMult) + artExtra;
+    
+    return {
+      current,
+      original,
+      isPackage: period?.days === 90,
+      installments: 3,
+      monthly: (basePrice * periodsMult * hoodsMult) / (period?.days === 90 ? 3 : 1)
+    };
+  }, [selectedMode, selectedPeriods, selectedNeighborhoods, artChoice, categoryName, dynamicPeriods]);
+
+
+  const handleFooterClick = () => {
+    if (!selectedMode) return;
+    if (selectedPeriods.length === 0) { showToast("Selecione o período.", "error"); scrollTo(periodRef, 120); return; }
+    if (selectedNeighborhoods.length === 0) { showToast("Escolha os bairros.", "error"); scrollTo(neighborhoodRef, 120); return; }
+    if (!isArtSaved) { showToast("Configure a arte do banner.", "error"); scrollTo(creativeRef, 120); return; }
+    setIsSubmitting(true);
+    setTimeout(() => { setIsSubmitting(false); setIsSuccess(true); }, 2000);
+  };
+
+  // HANDLERS PARA O CHAT PRO
+  const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       const reader = new FileReader();
-      reader.onloadend = () => {
-        setUploadedImage(reader.result as string);
-        setArtChoice('upload');
-      };
+      reader.onloadend = () => setLogoPreview(reader.result as string);
       reader.readAsDataURL(file);
     }
   };
 
-  const triggerUpload = () => {
-    fileInputRef.current?.click();
-  };
-
-  const dynamicPeriods = useMemo(() => {
-    const now = new Date();
-    const formatDate = (date: Date) => date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
-    
-    const end1 = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
-    const end3 = new Date(now.getTime() + 90 * 24 * 60 * 60 * 1000);
-
-    return [
-      { id: '1m', label: '1 Mês', dates: `${formatDate(now)} a ${formatDate(end1)}`, multiplier: 1 },
-      { id: '3m', label: '3 Meses', dates: `${formatDate(now)} a ${formatDate(end3)}`, multiplier: 3, promo: true },
-    ];
-  }, []);
-
-  const calculateTotal = useMemo(() => {
-    if (!selectedPlacement) return 0;
-    const placement = PLACEMENT_OPTIONS.find(p => p.id === selectedPlacement);
-    if (!placement) return 0;
-
-    const basePrice = placement.price;
-    const hoodCount = Math.max(0, selectedHoods.length);
-    
-    let total = 0;
-    selectedPeriods.forEach(pId => {
-      const p = dynamicPeriods.find(period => period.id === pId);
-      if (p) total += (basePrice * p.multiplier * (hoodCount || 1));
-    });
-
-    if (artChoice === 'pro') total += 149.90;
-    
-    return total;
-  }, [selectedPlacement, selectedPeriods, selectedHoods, artChoice, dynamicPeriods]);
-
-  const handleSelectPlacement = (id: string) => {
-    setSelectedPlacement(id);
-    scrollTo(periodRef);
-  };
-
-  const togglePeriod = (id: string) => {
-    setSelectedPeriods(prev => prev.includes(id) ? prev.filter(p => p !== id) : [...prev, id]);
-    if (selectedPeriods.length === 0) scrollTo(neighborhoodsRef);
-  };
-
-  const toggleHood = (hood: string) => {
-    setSelectedHoods(prev => prev.includes(hood) ? prev.filter(h => h !== hood) : [...prev, hood]);
-  };
-
-  const handleSelectAllHoods = () => {
-    if (selectedHoods.length === NEIGHBORHOODS_LIST.length) setSelectedHoods([]);
-    else setSelectedHoods([...NEIGHBORHOODS_LIST]);
-  };
-
-  const handleConfirmPayment = () => {
-    setView('pro_processing');
+  const confirmLogoSend = () => {
+    if (!logoPreview) return;
+    setChatMessages(prev => [...prev, {
+      id: Date.now(),
+      role: 'user',
+      type: 'file',
+      text: 'Logo_Empresa.png',
+      preview: logoPreview,
+      timestamp: 'Agora'
+    }]);
+    setIsLogoModalOpen(false);
+    setLogoPreview(null);
     setTimeout(() => {
-        setView('pro_approved');
-    }, 2000);
+      setChatMessages(prev => [...prev, {
+        id: Date.now() + 1,
+        role: 'system',
+        text: 'Logo recebida com sucesso! 👍',
+        timestamp: 'Agora'
+      }]);
+    }, 800);
   };
 
-  if (view === 'editor') {
+  const saveBriefing = () => {
+    if (!briefingData.companyName || !briefingData.headline) return;
+    setChatMessages(prev => [...prev, {
+      id: Date.now(),
+      role: 'user',
+      type: 'attachment',
+      text: '📋 Informações do banner enviadas.',
+      details: {
+        name: briefingData.companyName,
+        promo: briefingData.headline,
+        desc: briefingData.description,
+        obs: briefingData.observations
+      },
+      timestamp: 'Agora'
+    }]);
+    setIsBriefingModalOpen(false);
+    setTimeout(() => {
+      setChatMessages(prev => [...prev, {
+        id: Date.now() + 1,
+        role: 'system',
+        text: 'Briefing recebido! Já estamos analisando suas informações.',
+        timestamp: 'Agora'
+      }]);
+    }, 800);
+  };
+
+  if (isEditingArt) {
     return (
       <StoreBannerEditor 
         storeName={user?.user_metadata?.store_name || "Sua Loja"} 
-        onSave={() => { setArtChoice('diy'); setView('sales'); }} 
-        onBack={() => setView('sales')} 
+        storeLogo={user?.user_metadata?.logo_url}
+        onSave={handleSaveDesign} 
+        onBack={() => setIsEditingArt(false)} 
       />
     );
   }
 
-  if (view === 'pro_checkout') {
+  // --- TELA DE ONBOARDING PARA O CHAT (CASO NÃO TENHA PEDIDO) ---
+  if (view === 'chat_onboarding') {
     return (
-      <div className="min-h-screen bg-[#F8F9FC] dark:bg-gray-950 flex flex-col animate-in slide-in-from-right duration-300">
-        <header className="px-6 py-5 border-b border-gray-100 dark:border-gray-800 flex items-center gap-4 bg-white dark:bg-gray-900">
-          <button onClick={() => setView('sales')} className="p-2 bg-gray-100 dark:bg-gray-800 rounded-xl"><ChevronLeft size={20}/></button>
-          <h2 className="font-bold">Checkout Seguro</h2>
-        </header>
-        <main className="flex-1 p-6 space-y-6">
-          <div className="bg-white dark:bg-gray-900 p-6 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-800 space-y-4">
-             <h3 className="text-xs font-black uppercase tracking-widest text-gray-400">Resumo do Investimento</h3>
-             <div className="flex justify-between text-sm">
-                <span className="text-gray-600">Investimento em Banners</span>
-                <span className="font-bold">R$ {(calculateTotal - (artChoice === 'pro' ? 149.90 : 0)).toFixed(2).replace('.', ',')}</span>
-             </div>
-             <div className="flex justify-between text-sm text-amber-600">
-                <span className="font-bold">Criação com Time Localizei JPA</span>
-                <span className="font-black">+ R$ 149,90</span>
-             </div>
-             <div className="pt-4 border-t border-gray-100 dark:border-gray-800 flex justify-between items-center">
-                <span className="font-black text-gray-900 dark:text-white uppercase tracking-tighter">Total a Pagar</span>
-                <span className="text-2xl font-black text-[#1E5BFF]">R$ {calculateTotal.toFixed(2).replace('.', ',')}</span>
-             </div>
-          </div>
-
-          <div className="space-y-3">
-             <p className="text-xs font-bold text-gray-500 uppercase tracking-widest ml-1">Forma de Pagamento</p>
-             <button className="w-full flex items-center justify-between p-5 bg-white dark:bg-gray-900 rounded-2xl border-2 border-[#1E5BFF] shadow-sm">
-                <div className="flex items-center gap-3">
-                    <CreditCard className="text-[#1E5BFF]" />
-                    <span className="font-bold">Cartão de Crédito</span>
-                </div>
-                <CheckCircle2 size={18} className="text-[#1E5BFF]" />
-             </button>
-             <p className="text-[10px] text-gray-400 text-center">Ambiente seguro criptografado</p>
-          </div>
-        </main>
-        <footer className="p-6">
-            <button 
-                onClick={handleConfirmPayment}
-                className="w-full bg-[#1E5BFF] text-white font-black py-5 rounded-2xl shadow-xl active:scale-[0.98] transition-all"
-            >
-                Confirmar Pagamento
-            </button>
-        </footer>
-      </div>
-    );
-  }
-
-  if (view === 'pro_processing') {
-    return (
-        <div className="min-h-screen bg-[#F8F9FC] dark:bg-gray-950 flex flex-col items-center justify-center p-6 text-center animate-in fade-in duration-500">
-            <Loader2 className="w-12 h-12 text-[#1E5BFF] animate-spin mb-6" />
-            <h2 className="text-xl font-bold">Processando seu pedido...</h2>
-            <p className="text-gray-500 text-sm mt-2">Estamos validando os dados do pagamento.</p>
-        </div>
-    );
-  }
-
-  if (view === 'pro_approved') {
-    return (
-        <div className="min-h-screen bg-[#F8F9FC] dark:bg-gray-950 flex flex-col items-center justify-center p-6 text-center animate-in zoom-in duration-500">
-            <div className="w-20 h-20 bg-emerald-100 dark:bg-emerald-900/30 rounded-full flex items-center justify-center text-emerald-600 mb-8">
-                <CheckCircle2 size={48} />
-            </div>
-            <h2 className="text-3xl font-black text-gray-900 dark:text-white mb-2">Pagamento Confirmado!</h2>
-            <p className="text-gray-500 text-sm max-w-xs mb-10">
-                Agora você pode falar com nosso time de designers para criar seu banner personalizado.
-            </p>
-            <button 
-                onClick={() => setView('pro_chat')}
-                className="w-full max-w-sm bg-[#1E5BFF] text-white font-black py-5 rounded-2xl shadow-xl flex items-center justify-center gap-3 animate-bounce"
-            >
-                Falar com o designer
-                <ArrowRight size={20} />
-            </button>
-        </div>
-    );
-  }
-
-  if (view === 'pro_chat') {
-    return (
-        <div className="min-h-screen bg-white dark:bg-gray-950 flex flex-col animate-in slide-in-from-bottom duration-300">
-            <header className="px-6 py-5 border-b border-gray-100 dark:border-gray-800 flex items-center gap-4">
-                <button onClick={() => setView('sales')} className="p-2 bg-gray-100 dark:bg-gray-800 rounded-xl"><ChevronLeft size={20}/></button>
-                <div className="flex-1">
-                    <h2 className="font-bold">Chat com Designer</h2>
-                    <p className="text-[10px] text-green-500 font-bold uppercase tracking-widest">Online agora</p>
-                </div>
+        <div className="min-h-screen bg-[#020617] text-slate-100 flex flex-col items-center justify-center p-8 text-center animate-in fade-in duration-500">
+            <header className="absolute top-0 left-0 right-0 p-6 flex">
+                <button onClick={onBack} className="p-2 bg-slate-900 rounded-xl text-slate-400 hover:text-white transition-all active:scale-95"><ChevronLeft size={20} /></button>
             </header>
-            <main className="flex-1 p-6 flex flex-col justify-end gap-4 overflow-y-auto bg-gray-50 dark:bg-gray-950">
-                <div className="bg-[#1E5BFF] text-white p-4 rounded-2xl rounded-bl-none shadow-sm max-w-[80%]">
-                    <p className="text-sm">Olá! Sou o designer da Localizei. Vi que você contratou a criação profissional. Vamos começar?</p>
-                </div>
-            </main>
-            <footer className="p-4 border-t border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 flex gap-2">
-                <input type="text" placeholder="Digite sua mensagem..." className="flex-1 bg-gray-100 dark:bg-gray-800 rounded-xl px-4 py-3 text-sm outline-none" />
-                <button className="p-3 bg-[#1E5BFF] text-white rounded-xl"><ArrowRight size={20}/></button>
-            </footer>
+            
+            <div className="w-24 h-24 bg-blue-500/10 rounded-full flex items-center justify-center mb-8 border-4 border-blue-500/20 shadow-lg">
+                <MessageCircle size={40} className="text-blue-400" />
+            </div>
+            
+            <h1 className="text-2xl font-bold text-white mb-4 leading-tight">👋 Olá, {user?.user_metadata?.store_name}!</h1>
+            <p className="text-slate-400 leading-relaxed max-w-sm mb-8">
+                Este é o canal para criação e acompanhamento de banners com nosso time de designers.
+            </p>
+            <p className="text-slate-400 leading-relaxed max-w-sm mb-12">
+                Para iniciar um novo banner, crie um anúncio ou contrate a criação profissional.
+            </p>
+            
+            <button 
+              onClick={() => setView('sales')}
+              className="w-full max-w-sm py-5 bg-[#1E5BFF] text-white font-black rounded-2xl shadow-xl active:scale-[0.98] transition-all uppercase tracking-widest text-sm flex items-center justify-center gap-2"
+            >
+              Criar Novo Banner <ArrowRight size={18} />
+            </button>
         </div>
     );
   }
 
-  return (
-    <div className="min-h-screen bg-[#F8F9FC] dark:bg-gray-950 font-sans pb-64">
-      
-      {/* 1. TOPO DA PÁGINA (PITCH) */}
-      <header className="bg-white dark:bg-gray-900 px-6 pt-12 pb-8 border-b border-gray-100 dark:border-gray-800 rounded-b-[3rem] shadow-sm">
-        <button onClick={onBack} className="mb-6 p-2 bg-gray-100 dark:bg-gray-800 rounded-xl text-gray-500 transition-colors">
-          <ChevronLeft size={20} />
-        </button>
-        
-        <div className="space-y-3">
-            <h1 className="text-3xl font-black text-gray-900 dark:text-white uppercase tracking-tighter leading-none">Anunciar no Bairro</h1>
-            <h2 className="text-lg font-bold text-[#1E5BFF] leading-tight">Destaque sua loja com banners exibidos para moradores do seu bairro, dentro do app.</h2>
-            <p className="text-sm text-gray-500 dark:text-gray-400 font-medium leading-relaxed">
-              Apareça em locais estratégicos como Home, Categorias e Subcategorias.
-              Mais visibilidade, mais visitas e mais chances de vender — todos os dias.
-            </p>
-        </div>
-      </header>
+  // --- DESIGNER WORKSPACE ---
+  if (view === 'designer_workspace') {
+    const activeProjects = [
+        { id: 'pj-1', store: 'Hamburgueria do Zé', status: 'briefing_recebido', date: 'Hoje, 10:05', type: 'Home' },
+        { id: 'pj-2', store: 'Studio Bella', status: 'em_criacao', date: 'Ontem', type: 'Categorias' },
+        { id: 'pj-3', store: 'PetShop Patas', status: 'aguardando_aprovacao', date: '02 Nov', type: 'Home' },
+    ];
 
-      <div className="p-6 space-y-12">
-        
-        {/* 2. ONDE VOCÊ QUER ANUNCIAR? */}
-        <section className="space-y-4">
-          <h3 className="text-xs font-black uppercase tracking-[0.2em] text-gray-400 px-1">Onde você quer anunciar?</h3>
-          <div className="grid grid-cols-3 gap-2">
-            {PLACEMENT_OPTIONS.map((opt) => (
-              <button 
-                key={opt.id}
-                onClick={() => handleSelectPlacement(opt.id)}
-                className={`relative p-3 rounded-2xl border-2 transition-all text-center flex flex-col items-center justify-between h-52 ${
-                  selectedPlacement === opt.id 
-                  ? 'bg-[#1E5BFF]/5 border-[#1E5BFF] text-[#1E5BFF] shadow-md' 
-                  : 'bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800 text-gray-400'
-                }`}
-              >
-                <opt.icon size={22} className={selectedPlacement === opt.id ? 'text-[#1E5BFF]' : 'text-gray-300'} />
-                
-                <p className="font-black uppercase text-[9px] tracking-tight leading-tight mt-2 h-8 flex items-center justify-center">{opt.label}</p>
-                
-                <div className="mt-auto pt-2 flex flex-col items-center">
-                    <span className="text-[8px] line-through opacity-50 block">R$ {opt.originalPrice.toFixed(2).replace('.', ',')}</span>
-                    <span className={`text-xs font-black block mt-0.5 ${selectedPlacement === opt.id ? 'text-[#1E5BFF]' : 'text-gray-700 dark:text-gray-200'}`}>
-                        R$ {opt.price.toFixed(2).replace('.', ',')}
-                    </span>
-                </div>
-
-                {selectedPlacement === opt.id && (
-                  <div className="absolute top-2 right-2">
-                    <CheckCircle2 size={14} className="text-[#1E5BFF]" />
-                  </div>
-                )}
-              </button>
-            ))}
-          </div>
-          {selectedPlacement && (
-              <p className="text-[10px] text-gray-400 font-medium px-1 text-center animate-in fade-in">
-                  {PLACEMENT_OPTIONS.find(p => p.id === selectedPlacement)?.description}
-              </p>
-          )}
-        </section>
-
-        {/* 3. POR QUANTO TEMPO? */}
-        <section ref={periodRef} className={`space-y-4 transition-all duration-500 ${!selectedPlacement ? 'opacity-30 blur-[1px] pointer-events-none' : ''}`}>
-          <h3 className="text-xs font-black uppercase tracking-[0.2em] text-gray-400 px-1">Por quanto tempo você quer anunciar?</h3>
-          <div className="flex gap-3">
-            {dynamicPeriods.map((p) => (
-              <button 
-                key={p.id} 
-                onClick={() => togglePeriod(p.id)}
-                className={`flex-1 p-5 rounded-[2rem] border-2 transition-all text-left relative overflow-hidden ${
-                  selectedPeriods.includes(p.id) ? 'bg-white dark:bg-gray-900 border-[#1E5BFF] shadow-md text-[#1E5BFF]' : 'bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800 text-gray-400'
-                }`}
-              >
-                {p.promo && <div className="absolute top-0 right-0 bg-emerald-500 text-white text-[7px] font-black px-2 py-1 uppercase tracking-tighter rounded-bl-lg">Promo</div>}
-                <p className={`font-black text-sm uppercase tracking-tighter ${selectedPeriods.includes(p.id) ? 'text-[#1E5BFF]' : ''}`}>{p.label}</p>
-                <p className="text-[9px] font-bold opacity-60 mt-1 uppercase tracking-widest">{p.dates}</p>
-              </button>
-            ))}
-          </div>
-        </section>
-
-        {/* 4. BAIRROS DE EXIBIÇÃO */}
-        <section ref={neighborhoodsRef} className={`space-y-4 transition-all duration-500 ${selectedPeriods.length === 0 ? 'opacity-30 blur-[1px] pointer-events-none' : ''}`}>
-          <div className="flex items-center justify-between px-1">
-            <h3 className="text-xs font-black uppercase tracking-[0.2em] text-gray-400">Bairros de exibição</h3>
-            <button onClick={handleSelectAllHoods} className="text-[10px] font-black text-[#1E5BFF] uppercase tracking-widest bg-[#1E5BFF]/10 px-3 py-1.5 rounded-xl border border-[#1E5BFF]/20">
-              {selectedHoods.length === NEIGHBORHOODS_LIST.length ? 'Limpar' : 'Todos'}
-            </button>
-          </div>
-          <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wide px-1">O banner será exibido apenas nos bairros selecionados.</p>
-          <div className="flex flex-wrap gap-2">
-            {NEIGHBORHOODS_LIST.map((hood) => (
-              <button 
-                key={hood}
-                onClick={() => toggleHood(hood)}
-                className={`px-4 py-2.5 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all border ${
-                  selectedHoods.includes(hood) ? 'bg-[#1E5BFF] border-[#1E5BFF] text-white shadow-md' : 'bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800 text-gray-500'
-                }`}
-              >
-                {hood}
-              </button>
-            ))}
-          </div>
-        </section>
-
-        {/* 6. COMO VOCÊ QUER CRIAR SEU BANNER? */}
-        <section className={`space-y-4 transition-all duration-500 ${selectedHoods.length === 0 ? 'opacity-30 blur-[1px] pointer-events-none' : ''}`}>
-          <h3 className="text-xs font-black uppercase tracking-[0.2em] text-gray-400 px-1">Como você quer criar seu banner?</h3>
-          <div className="space-y-3">
-            {/* INPUT DE ARQUIVO OCULTO */}
-            <input 
-              type="file" 
-              ref={fileInputRef} 
-              className="hidden" 
-              accept="image/*" 
-              onChange={handleFileChange}
-            />
-
-            <button 
-                onClick={triggerUpload}
-                className={`w-full flex items-center justify-between p-5 rounded-2xl border-2 transition-all ${artChoice === 'upload' ? 'bg-white dark:bg-gray-900 border-[#1E5BFF] shadow-md' : 'bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800'}`}
-            >
+    return (
+        <div className="min-h-screen bg-[#020617] text-slate-100 flex flex-col animate-in slide-in-from-right h-full">
+            <header className="bg-indigo-950 px-6 py-6 border-b border-white/10 flex items-center justify-between sticky top-0 z-50">
                 <div className="flex items-center gap-4">
-                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${artChoice === 'upload' ? 'bg-[#1E5BFF]/10 text-[#1E5BFF]' : 'bg-gray-50 dark:bg-gray-800 text-gray-400'}`}>
-                      {uploadedImage ? <img src={uploadedImage} className="w-full h-full object-cover rounded-lg" alt="Preview" /> : <Upload size={18}/>}
+                    <div className="w-12 h-12 bg-indigo-500 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-500/20">
+                        <Palette size={24} />
                     </div>
-                    <div className="text-left">
-                      <p className={`text-sm font-bold uppercase tracking-tight ${artChoice === 'upload' ? 'text-gray-900 dark:text-white' : 'text-gray-500'}`}>Usar minha arte</p>
-                      <p className="text-[9px] text-emerald-500 font-bold uppercase">{uploadedImage ? 'Imagem selecionada' : 'Sem custo adicional'}</p>
-                    </div>
-                </div>
-                {artChoice === 'upload' && <CheckCircle2 size={18} className="text-[#1E5BFF]" />}
-            </button>
-
-            <button 
-                onClick={() => setView('editor')}
-                className={`w-full flex items-center justify-between p-5 rounded-2xl border-2 transition-all ${artChoice === 'diy' ? 'bg-white dark:bg-gray-900 border-[#1E5BFF] shadow-md' : 'bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800 opacity-60 grayscale'}`}
-            >
-                <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-600"><Paintbrush size={18}/></div>
-                    <p className={`text-sm font-bold uppercase tracking-tight ${artChoice === 'diy' ? 'text-gray-900 dark:text-white' : 'text-gray-500'}`}>Criação personalizada (Opcional)</p>
-                </div>
-                {artChoice === 'diy' && <CheckCircle2 size={18} className="text-[#1E5BFF]" />}
-            </button>
-
-            <button 
-                onClick={() => setArtChoice('pro')}
-                className={`w-full flex items-center justify-between p-5 rounded-2xl border-2 transition-all relative overflow-hidden ${artChoice === 'pro' ? 'bg-amber-50 dark:bg-amber-900/10 border-amber-500 shadow-md' : 'bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800'}`}
-            >
-                <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-600"><Rocket size={18}/></div>
-                    <div className="text-left">
-                        <p className={`text-sm font-bold uppercase tracking-tight ${artChoice === 'pro' ? 'text-amber-900 dark:text-amber-100' : 'text-gray-500'}`}>Criar com o time Localizei JPA</p>
-                        <div className="flex items-center gap-2 mt-0.5">
-                            <span className="text-xs font-black text-amber-600">R$ 149,90</span>
+                    <div>
+                        <h1 className="font-black text-xl uppercase tracking-tighter">Workspace</h1>
+                        <div className="flex items-center gap-1.5 mt-0.5">
+                            <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span>
+                            <p className="text-[10px] text-indigo-300 font-bold uppercase tracking-widest">Modo Designer (Visualização)</p>
                         </div>
                     </div>
                 </div>
-                {artChoice === 'pro' && <CheckCircle2 size={18} className="text-amber-500" />}
-            </button>
-            {artChoice === 'pro' && (
-                <p className="text-[10px] text-amber-600 dark:text-amber-400 font-medium px-4 py-2 bg-amber-50 dark:bg-amber-900/10 rounded-xl animate-in fade-in">
-                    Banner criado por nossa equipe. Ideal para quem quer um visual profissional.
-                </p>
-            )}
+                <button onClick={onBack} className="p-2 bg-white/5 rounded-xl text-slate-400 hover:text-white"><X size={20} /></button>
+            </header>
+
+            <main className="p-6 space-y-8 pb-32 overflow-y-auto no-scrollbar">
+                <div className="grid grid-cols-2 gap-3">
+                    <div className="bg-slate-900 p-5 rounded-3xl border border-white/5">
+                        <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Pendentes</p>
+                        <p className="text-3xl font-black text-white">08</p>
+                    </div>
+                    <div className="bg-slate-900 p-5 rounded-3xl border border-white/5">
+                        <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Entregar hoje</p>
+                        <p className="text-3xl font-black text-indigo-400">02</p>
+                    </div>
+                </div>
+
+                <div className="space-y-4">
+                    <h3 className="text-xs font-black text-slate-500 uppercase tracking-[0.2em] ml-2">Fila de Pedidos</h3>
+                    {activeProjects.map(proj => (
+                        <div key={proj.id} onClick={() => setView('pro_chat')} className="bg-slate-900 p-5 rounded-[2rem] border border-white/5 flex items-center justify-between hover:border-indigo-500/30 transition-all cursor-pointer group active:scale-[0.98]">
+                            <div className="flex items-center gap-4">
+                                <div className="w-12 h-12 bg-white/5 rounded-2xl flex items-center justify-center text-slate-500 group-hover:text-indigo-400 transition-colors">
+                                    <Building size={20} />
+                                </div>
+                                <div className="text-left">
+                                    <p className="font-bold text-white leading-tight">{proj.store}</p>
+                                    <p className="text-[10px] text-slate-500 uppercase font-black mt-1">{proj.type} • {proj.date}</p>
+                                </div>
+                            </div>
+                            <div className="flex flex-col items-end gap-2">
+                                <span className={`text-[8px] font-black uppercase px-2 py-1 rounded-md border ${
+                                    proj.status === 'briefing_recebido' ? 'bg-blue-50/10 text-blue-400 border-blue-500/20' :
+                                    proj.status === 'em_criacao' ? 'bg-amber-50/10 text-amber-400 border-amber-500/20' :
+                                    'bg-indigo-500/10 text-indigo-400 border-indigo-500/20'
+                                }`}>
+                                    {proj.status.replace('_', ' ')}
+                                </span>
+                                <ChevronRightIcon size={16} className="text-slate-700" />
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </main>
+        </div>
+    );
+  }
+
+  const isCheckoutStep = selectedMode && selectedPeriods.length > 0 && selectedNeighborhoods.length > 0 && isArtSaved;
+
+  return (
+    <div className="min-h-screen bg-[#020617] text-slate-100 font-sans flex flex-col overflow-x-hidden selection:bg-blue-500/30">
+      
+      {toast && (
+        <div className={`fixed top-24 left-1/2 -translate-x-1/2 z-[100] px-6 py-3 rounded-2xl shadow-2xl flex items-center gap-3 animate-in slide-in-from-top-4 border ${toast.type === 'error' ? 'bg-rose-600 border-rose-500' : 'bg-blue-600 border-blue-500'} text-white`}>
+           {toast.type === 'error' ? <AlertTriangle size={18} /> : <Info size={18} />}
+           <p className="text-xs font-black uppercase tracking-tight">{toast.msg}</p>
+        </div>
+      )}
+
+      <header className="sticky top-0 z-40 bg-[#020617]/80 backdrop-blur-xl border-b border-white/5 px-6 py-4 flex items-center gap-4">
+        <button onClick={onBack} className="p-2 bg-slate-900 rounded-xl text-slate-400 hover:text-white transition-all active:scale-95"><ChevronLeft size={20} /></button>
+        <div>
+          <h1 className="font-bold text-lg leading-none flex items-center gap-2">Anunciar no Bairro <Crown size={16} className="text-amber-400 fill-amber-400" /></h1>
+          <p className="text-[10px] text-blue-400 uppercase font-black tracking-widest mt-1">Configuração de Campanha</p>
+        </div>
+      </header>
+
+      <main className="flex-1 p-6 space-y-16 pb-64 max-w-md mx-auto w-full">
+        
+        {/* BLOCO DE DESTAQUE: URGÊNCIA E CONVERSÃO */}
+        <section className="animate-in fade-in slide-in-from-top-4 duration-700">
+            <div className="bg-slate-900 border-l-4 border-blue-600 rounded-r-[2.5rem] p-8 shadow-2xl relative overflow-hidden group">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none"></div>
+                <div className="relative z-10">
+                    <div className="flex items-center gap-2 mb-3">
+                        <ShieldAlert className="w-5 h-5 text-blue-500" />
+                        <h3 className="text-lg font-black text-white leading-tight uppercase tracking-tighter">
+                            Seu concorrente pode estar aqui antes de você
+                        </h3>
+                    </div>
+                    <p className="text-sm text-slate-400 leading-relaxed mb-6 font-medium">
+                        Todos os dias, milhares de pessoas de Jacarepaguá (450 mil+ moradores) acessam o app em busca de produtos e serviços. 
+                        Os espaços de destaque são limitados e essa promoção de lançamento não tem data para acabar.
+                    </p>
+                    <div className="flex flex-col gap-2 pt-4 border-t border-white/5">
+                        <p className="text-xs font-black text-white uppercase tracking-widest flex items-center gap-2">
+                            <span className="w-1.5 h-1.5 bg-blue-500 rounded-full"></span>
+                            Quem garante o espaço agora sai na frente.
+                        </p>
+                        <p className="text-xs font-bold text-slate-500 uppercase tracking-widest flex items-center gap-2">
+                            <span className="w-1.5 h-1.5 bg-slate-700 rounded-full"></span>
+                            Quem deixa para depois, fica invisível.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        {/* BLOCO 1: POSICIONAMENTO */}
+        <section className="space-y-6">
+          <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-blue-500 flex items-center gap-2 px-1">
+            <Target size={14} /> 1. Onde deseja aparecer?
+          </h3>
+          <div className="grid grid-cols-1 gap-4">
+            {DISPLAY_MODES.map((mode) => {
+              let displayPrice = mode.price;
+              if (mode.id === 'cat') {
+                if (categoryName === 'Serviços') displayPrice = 49.90;
+                else if (categoryName === 'Imóveis Comerciais') displayPrice = 59.90;
+              }
+
+              return (
+                <button 
+                  key={mode.id} 
+                  onClick={() => handleModeSelection(mode)} 
+                  className={`relative flex items-start text-left p-6 rounded-[2rem] border-2 transition-all duration-300 gap-5 ${selectedMode?.id === mode.id ? 'bg-blue-600/10 border-blue-500 shadow-lg' : 'bg-white/5 border-white/10'}`}
+                >
+                  <div className={`p-4 rounded-2xl shrink-0 ${selectedMode?.id === mode.id ? 'bg-blue-500 text-white shadow-lg' : 'bg-white/5 text-slate-400'}`}>
+                    <mode.icon size={28} />
+                  </div>
+                  <div className="flex-1 min-w-0 pr-4">
+                    <div className="flex items-center justify-between mb-1">
+                      <p className="text-sm font-black text-white uppercase tracking-tight">{mode.label}</p>
+                      <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 ${selectedMode?.id === mode.id ? 'border-blue-500' : 'border-slate-700'}`}>{selectedMode?.id === mode.id && <div className="w-2 h-2 bg-blue-500 rounded-full" />}</div>
+                    </div>
+                    <div className="flex items-baseline gap-1.5 mb-1.5">
+                      <span className="text-xs text-slate-500 line-through">R$ {mode.originalPrice.toFixed(2).replace('.',',')}</span>
+                      <span className="text-sm font-black text-white">por R$ {displayPrice.toFixed(2).replace('.',',')}</span>
+                    </div>
+                    <p className="text-[10px] text-slate-300 font-medium leading-relaxed">{mode.description}</p>
+                  </div>
+                </button>
+              );
+            })}
           </div>
         </section>
 
-      </div>
-
-      {/* 7. RESUMO E AÇÃO FINAL (FIXO ACIMA DA BOTTOM NAV) */}
-      <footer className="fixed bottom-[80px] left-0 right-0 p-6 bg-white dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800 z-50 max-w-md mx-auto shadow-[0_-10px_30px_rgba(0,0,0,0.05)]">
-        <div className="flex justify-between items-end mb-6">
-            <div className="space-y-1">
-                <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Resumo do Pedido</p>
-                <div className="flex flex-wrap gap-x-2 text-[11px] font-bold text-gray-700 dark:text-gray-200">
-                    <span>{selectedPlacement ? PLACEMENT_OPTIONS.find(p => p.id === selectedPlacement)?.label : 'Selecione o local'}</span>
-                    <span className="text-gray-300">•</span>
-                    <span>{selectedPeriods.length > 0 ? `${selectedPeriods.length} período(s)` : 'Aguardando'}</span>
-                </div>
-                <p className="text-[11px] font-bold text-gray-400">{selectedHoods.length} bairro(s) escolhido(s)</p>
-            </div>
-            <div className="text-right">
-                <p className="text-[9px] font-black text-[#1E5BFF] uppercase tracking-widest mb-1">Total a Investir</p>
-                <p className="text-2xl font-black text-gray-900 dark:text-white tracking-tighter">R$ {calculateTotal.toFixed(2).replace('.', ',')}</p>
-            </div>
-        </div>
-
-        <button 
-          onClick={() => artChoice === 'pro' ? setView('pro_checkout') : alert('Iniciando Pagamento...')}
-          disabled={!selectedPlacement || selectedPeriods.length === 0 || selectedHoods.length === 0 || !artChoice}
-          className="w-full bg-[#1E5BFF] hover:bg-[#1749CC] text-white font-black py-5 rounded-[2rem] shadow-xl shadow-blue-500/20 active:scale-[0.98] transition-all flex items-center justify-center gap-3 disabled:opacity-30 disabled:grayscale uppercase tracking-widest text-xs"
+        {/* BLOCO 2: PERÍODO */}
+        <section 
+            ref={periodRef} 
+            className={`space-y-6 transition-all duration-500 ${!selectedMode ? 'opacity-20 pointer-events-none grayscale' : 'opacity-100'}`}
         >
-          Pagar anúncio
-          <ArrowRight size={16} strokeWidth={3} />
+            <div className={`flex flex-col transition-all duration-500 ${highlightPeriod ? 'scale-105' : 'scale-100'}`}>
+              <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-blue-500 flex items-center gap-2 px-1">
+                <Calendar size={14} /> 2. Período de Exibição
+              </h3>
+              <p className="text-[9px] text-slate-500 uppercase font-bold mt-1 ml-6">Escolha por quanto tempo quer anunciar.</p>
+            </div>
+            
+            <div className={`flex gap-3 transition-all duration-700 ${highlightPeriod ? 'ring-2 ring-blue-500/20 rounded-3xl p-1' : ''}`}>
+                {dynamicPeriods.map(p => (
+                    <button 
+                        key={p.id} 
+                        onClick={() => togglePeriod(p.id)} 
+                        className={`flex-1 p-5 rounded-3xl border-2 transition-all text-left group ${selectedPeriods.includes(p.id) ? 'bg-blue-600/10 border-blue-500' : 'bg-white/5 border-white/10'}`}
+                    >
+                        <div className="flex justify-between items-start mb-2">
+                           <p className="text-[10px] font-black text-white uppercase">{p.label}</p>
+                           {selectedPeriods.includes(p.id) && <CheckCircle2 size={14} className="text-blue-500" />}
+                        </div>
+                        <p className="text-[9px] text-blue-400 font-bold font-mono">{p.dates}</p>
+                        {p.days === 90 && selectedMode && (
+                          <p className="text-[9px] text-emerald-400 font-black uppercase mt-1">3x de R$ {selectedMode.price.toFixed(2).replace('.',',')} s/ juros</p>
+                        )}
+                    </button>
+                ))}
+            </div>
+        </section>
+
+        {/* BLOCO 3: BAIRROS */}
+        <section 
+            ref={neighborhoodRef} 
+            className={`space-y-6 transition-all duration-500 ${selectedPeriods.length === 0 ? 'opacity-20 grayscale pointer-events-none' : 'opacity-100'}`}
+        >
+            <div className="flex items-center justify-between px-1">
+              <div className="flex flex-col">
+                <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-blue-500 flex items-center gap-2">
+                    <MapPin size={14} /> 3. Bairros de Alcance
+                </h3>
+                <p className="text-[9px] text-slate-500 uppercase font-bold mt-1 ml-6">Onde seu banner será visto.</p>
+              </div>
+              <button onClick={selectAllAvailableHoods} className="text-[9px] font-black text-[#1E5BFF] uppercase tracking-widest bg-blue-500/10 px-3 py-1.5 rounded-xl border border-blue-500/20 active:scale-95 transition-all">Selecionar Todos</button>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+                {NEIGHBORHOODS_LIST.map(hood => {
+                    const { status, available } = getNeighborhoodAvailabilityStatus(hood);
+                    const isSelected = selectedNeighborhoods.includes(hood);
+
+                    let statusColorClass = 'text-emerald-500';
+                    if (status === 'Poucas vagas') statusColorClass = 'text-amber-500';
+                    if (status === 'Esgotado') statusColorClass = 'text-rose-500';
+
+                    const statusText = isSelected ? 'Selecionado' : status;
+                    if (isSelected) statusColorClass = 'text-blue-400';
+
+                    return (
+                        <button
+                            key={hood}
+                            onClick={() => {
+                                if (available) {
+                                    setSelectedNeighborhoods(prev =>
+                                        prev.includes(hood)
+                                            ? prev.filter(h => h !== hood)
+                                            : [...prev, hood]
+                                    );
+                                }
+                            }}
+                            className={`p-4 rounded-2xl border-2 flex flex-col justify-between transition-all min-h-[80px] ${
+                                !available
+                                    ? 'bg-slate-900/50 border-white/5 opacity-50 cursor-default'
+                                    : isSelected
+                                    ? 'bg-blue-600/10 border-blue-500'
+                                    : 'bg-slate-900 border-white/5'
+                            }`}
+                        >
+                            <p
+                                className={`font-bold text-xs ${
+                                    !available ? 'text-slate-600' : 'text-white'
+                                }`}
+                            >
+                                {hood}
+                            </p>
+                            <p
+                                className={`text-[8px] font-black uppercase tracking-widest mt-1 ${statusColorClass}`}
+                            >
+                                {statusText}
+                            </p>
+                        </button>
+                    );
+                })}
+            </div>
+        </section>
+
+        {/* BLOCO 4: DESIGN */}
+        <section ref={creativeRef} className={`space-y-8 transition-all duration-500 ${selectedNeighborhoods.length === 0 ? 'opacity-20 pointer-events-none' : 'opacity-100'}`}>
+          <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-blue-500 flex items-center gap-2 px-1"><Palette size={14} /> 4. Design da Arte</h3>
+          
+          <div className="space-y-4">
+              <div onClick={() => setArtChoice('diy')} className={`rounded-[2.5rem] border-2 transition-all cursor-pointer overflow-hidden ${artChoice === 'diy' ? 'bg-slate-900 border-blue-500 shadow-xl' : 'bg-slate-900 border-white/5'}`}>
+                <div className="p-8">
+                    <div className="flex items-start gap-5 mb-6">
+                        <div className="w-12 h-12 bg-blue-500/10 rounded-2xl flex items-center justify-center text-blue-400 shrink-0"><Paintbrush size={24} /></div>
+                        <div>
+                            <h3 className="text-lg font-bold text-white mb-1 leading-tight">Personalizar manualmente</h3>
+                            <p className="text-xs text-slate-400 leading-relaxed">Use seu banner pronto ou crie no editor.</p>
+                        </div>
+                    </div>
+
+                    {artChoice === 'diy' && (
+                        <div className="space-y-4 animate-in slide-in-from-top-4 duration-500 pt-4 border-t border-white/5">
+                            <div className="grid grid-cols-2 gap-3">
+                                <button 
+                                  onClick={(e) => { e.stopPropagation(); setDiyFlowStep('upload'); }}
+                                  className={`p-4 rounded-2xl border-2 flex flex-col items-center text-center gap-3 transition-all ${diyFlowStep === 'upload' && isArtSaved ? 'bg-emerald-500/10 border-emerald-500/30' : 'bg-white/5 border-white/5 hover:border-white/20'}`}
+                                >
+                                    <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-slate-400"><ImageIcon size={20} /></div>
+                                    <div>
+                                        <p className="text-[10px] font-black text-white uppercase leading-tight">Usar banner pronto</p>
+                                        <p className="text-[8px] text-slate-500 uppercase mt-1">Upload de arquivo</p>
+                                    </div>
+                                </button>
+
+                                <button 
+                                  onClick={(e) => { e.stopPropagation(); setDiyFlowStep('editor'); setIsEditingArt(true); }}
+                                  className={`p-4 rounded-2xl border-2 flex flex-col items-center text-center gap-3 transition-all ${diyFlowStep === 'editor' && isArtSaved ? 'bg-blue-500/10 border-blue-500/30' : 'bg-white/5 border-white/5 hover:border-white/20'}`}
+                                >
+                                    <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-slate-400"><Palette size={20} /></div>
+                                    <div>
+                                        <p className="text-[10px] font-black text-white uppercase leading-tight">Criar no editor</p>
+                                        <p className="text-[8px] text-slate-500 uppercase mt-1">Fazer do zero</p>
+                                    </div>
+                                </button>
+                            </div>
+
+                            {isArtSaved && (
+                                <div className="p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl flex items-center justify-between animate-in zoom-in duration-300">
+                                    <div className="flex items-center gap-3">
+                                        <CheckCircle2 size={16} className="text-emerald-400" />
+                                        <span className="text-[10px] font-black text-emerald-400 uppercase">Arte {diyFlowStep === 'upload' ? 'Enviada' : 'Criada'}</span>
+                                    </div>
+                                    <button onClick={() => setDiyFlowStep('selection')} className="text-[9px] font-black text-white bg-slate-800 px-3 py-1.5 rounded-lg uppercase tracking-widest">Alterar</button>
+                                </div>
+                            )}
+                        </div>
+                    )}
+                </div>
+              </div>
+
+              <div onClick={() => { setArtChoice('pro'); setIsArtSaved(true); setView('sales'); scrollTo(paymentRef, 80); }} className={`rounded-[2.5rem] border-2 transition-all cursor-pointer overflow-hidden ${artChoice === 'pro' ? 'bg-slate-900 border-amber-500 shadow-xl shadow-amber-500/5' : 'bg-slate-900 border-white/5'}`}>
+                  <div className="p-8">
+                    <div className="flex items-start justify-between">
+                        <div className="flex items-start gap-5">
+                            <div className="w-12 h-12 bg-amber-400/10 rounded-2xl flex items-center justify-center text-amber-400 shrink-0"><Rocket size={24} /></div>
+                            <div>
+                                <h3 className="text-lg font-bold text-white mb-1 leading-tight">Contratar time profissional</h3>
+                                <p className="text-xs text-slate-400 leading-relaxed max-w-[180px]">Nós criamos o banner profissional para você.</p>
+                            </div>
+                        </div>
+                        <div className="text-right">
+                            <span className="text-slate-500 line-through text-[9px] font-bold">R$ 149</span>
+                            <p className="text-xl font-black text-white">R$ 69,90</p>
+                        </div>
+                    </div>
+                    {artChoice === 'pro' && (
+                         <div className="mt-6 p-4 bg-amber-400/10 border border-amber-400/20 rounded-2xl flex items-center justify-between animate-in zoom-in duration-300">
+                            <div className="flex items-center gap-3">
+                                <CheckCircle2 size={16} className="text-amber-400" />
+                                <span className="text-[10px] font-black text-amber-400 uppercase tracking-widest">Opção PRO Selecionada</span>
+                            </div>
+                            <button onClick={() => setView('pro_chat')} className="text-[9px] font-black text-white bg-amber-600 px-3 py-1.5 rounded-lg uppercase tracking-widest">Enviar Briefing</button>
+                        </div>
+                    )}
+                  </div>
+              </div>
+          </div>
+        </section>
+
+        {/* BLOCO 5: CHECKOUT FINAL */}
+        <section ref={paymentRef} className={`space-y-8 transition-all duration-500 ${!isArtSaved ? 'opacity-20 pointer-events-none' : 'opacity-100'}`}>
+            <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-blue-500 flex items-center gap-2 px-1"><Check size={14} /> 5. Finalizar Compra</h3>
+            <div className="bg-slate-900 rounded-[2.5rem] p-8 border border-white/10 shadow-2xl space-y-8">
+                <div className="space-y-2">
+                    <div className="flex justify-between text-sm"><span className="text-slate-500">Modo: {selectedMode?.label}</span><span className="font-bold text-white">R$ {selectedMode?.price.toFixed(2).replace('.',',')} / mês</span></div>
+                    <div className="flex justify-between text-sm"><span className="text-slate-500">Bairros selecionados</span><span className="font-bold text-white">× {selectedNeighborhoods.length}</span></div>
+                    <div className="flex justify-between text-sm"><span className="text-slate-500">Vigência Total</span><span className="font-bold text-white">{prices.isPackage ? '90 dias' : '30 dias'}</span></div>
+                    {artChoice === 'pro' && <div className="flex justify-between text-sm text-amber-400"><span className="font-medium">Arte Profissional</span><span className="font-black">+ R$ 69,90</span></div>}
+                    
+                    <div className="pt-4 border-t border-white/5 flex flex-col items-end">
+                      <div className="flex justify-between items-center w-full mb-1">
+                        <span className="text-sm font-bold text-slate-300">Total do Pacote</span>
+                        <span className="text-2xl font-black text-white">R$ {prices.current.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                      </div>
+                      {prices.isPackage && (
+                        <p className="text-emerald-400 font-black text-xs uppercase tracking-widest">3x de R$ {prices.monthly.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} sem juros</p>
+                      )}
+                    </div>
+                </div>
+                <div className="space-y-3 pt-6 border-t border-white/10">
+                    <button onClick={() => setPaymentMethod('pix')} className={`w-full p-5 rounded-2xl border-2 flex items-center justify-between transition-all ${paymentMethod === 'pix' ? 'bg-blue-600/10 border-blue-500' : 'bg-slate-950 border-transparent'}`}><div className="flex items-center gap-4"><QrCode size={20} className={paymentMethod === 'pix' ? 'text-blue-400' : 'text-slate-600'} /><span className="font-bold text-sm">PIX (Imediato)</span></div>{paymentMethod === 'pix' && <CheckCircle2 size={18} className="text-blue-500" />}</button>
+                </div>
+            </div>
+            {/* Espaçador para o botão fixo não cobrir o conteúdo final */}
+            <div className="h-32"></div>
+        </section>
+      </main>
+
+      {!isSuccess && (view === 'sales' || view === 'pro_checkout') && (
+      <div className="fixed bottom-0 left-0 right-0 p-6 bg-[#020617]/95 backdrop-blur-2xl border-t border-white/10 z-[100] max-w-md mx-auto shadow-[0_-20px_40px_rgba(0,0,0,0.6)] animate-in slide-in-from-bottom duration-500">
+        <button 
+          onClick={handleFooterClick} 
+          disabled={isSubmitting} 
+          className={`w-full py-5 rounded-[2rem] shadow-xl shadow-blue-500/30 flex flex-col items-center justify-center transition-all active:scale-[0.98] ${
+            selectedMode ? 'bg-[#1E5BFF] text-white hover:bg-blue-600' : 'bg-white/5 text-slate-500 cursor-not-allowed opacity-50'
+          }`}
+        >
+          {isSubmitting ? (
+            <Loader2 className="w-6 h-6 animate-spin" />
+          ) : !isCheckoutStep ? (
+              <span className="font-black text-sm uppercase tracking-widest">
+                  {!selectedMode ? "Escolha onde aparecer" : 
+                   selectedPeriods.length === 0 ? "Escolha o período" :
+                   selectedNeighborhoods.length === 0 ? "Escolha os bairros" :
+                   "Configure a arte"}
+              </span>
+          ) : (
+              <div className="flex flex-col items-center">
+                  <div className="flex items-center gap-2 mb-0.5">
+                    <span className="text-[10px] font-black text-white/60 uppercase tracking-widest">FINALIZAR: {selectedMode.label}</span>
+                    <ArrowRight size={14} className="text-white/60" />
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span className="text-xl font-black text-white">PAGAR AGORA — R$ {prices.current.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                  </div>
+                  {prices.isPackage && (
+                    <span className="text-[9px] font-black text-emerald-400 uppercase tracking-widest mt-0.5">Ou 3x de R$ {prices.monthly.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                  )}
+              </div>
+          )}
         </button>
-      </footer>
+      </div>
+      )}
     </div>
   );
 };

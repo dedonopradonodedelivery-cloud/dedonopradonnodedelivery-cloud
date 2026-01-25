@@ -66,6 +66,72 @@ const MOCK_BANNERS: BannerData[] = [
     category: 'Serviços'
   },
   {
+    id: 'b-fre-4-serv',
+    storeId: 'f-4',
+    title: 'Eletricista 24h',
+    subtitle: 'Emergências elétricas no seu bairro',
+    cta: 'Ligar agora',
+    image: 'https://images.unsplash.com/photo-1617521114992-124c63391620?q=80&w=600',
+    bgColor: 'bg-yellow-600',
+    neighborhood: 'Freguesia',
+    category: 'Serviços'
+  },
+  {
+    id: 'b-fre-5-serv',
+    storeId: 'f-4',
+    title: 'Encanador Profissional',
+    subtitle: 'Vazamentos e reparos hidráulicos',
+    cta: 'Chamar no Zap',
+    image: 'https://images.unsplash.com/photo-1596454848234-b8162d185b9c?q=80&w=600',
+    bgColor: 'bg-cyan-700',
+    neighborhood: 'Freguesia',
+    category: 'Serviços'
+  },
+  {
+    id: 'b-fre-im-1',
+    storeId: 'f-1',
+    title: 'Sua Sala Comercial',
+    subtitle: 'No coração da Freguesia',
+    cta: 'Ver opções',
+    image: 'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?q=80&w=600',
+    bgColor: 'bg-purple-800',
+    neighborhood: 'Freguesia',
+    category: 'Imóveis Comerciais'
+  },
+  {
+    id: 'b-fre-im-2',
+    storeId: 'f-1',
+    title: 'Loja de Rua',
+    subtitle: 'Ponto com alta visibilidade',
+    cta: 'Saber Mais',
+    image: 'https://images.unsplash.com/photo-1449247709967-d4461a6a6103?q=80&w=600',
+    bgColor: 'bg-indigo-800',
+    neighborhood: 'Freguesia',
+    category: 'Imóveis Comerciais'
+  },
+  {
+    id: 'b-fre-im-3',
+    storeId: 'f-1',
+    title: 'Galpão Logístico',
+    subtitle: 'Ideal para seu estoque',
+    cta: 'Consultar',
+    image: 'https://images.unsplash.com/photo-1587022205345-66b3e6486d3b?q=80&w=600',
+    bgColor: 'bg-gray-700',
+    neighborhood: 'Freguesia',
+    category: 'Imóveis Comerciais'
+  },
+  {
+    id: 'b-fre-im-4',
+    storeId: 'f-1',
+    title: 'Andar Corporativo',
+    subtitle: 'Espaço para sua equipe crescer',
+    cta: 'Visitar',
+    image: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=600',
+    bgColor: 'bg-teal-800',
+    neighborhood: 'Freguesia',
+    category: 'Imóveis Comerciais'
+  },
+  {
     id: 'b-gen-2',
     storeId: 'f-8',
     title: 'Academia FitBairro',
@@ -87,63 +153,97 @@ interface HomeBannerCarouselProps {
 export const HomeBannerCarousel: React.FC<HomeBannerCarouselProps> = ({ onStoreClick, categoryName, subcategoryName }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const { currentNeighborhood } = useNeighborhood();
+  const isCategoryView = !!categoryName;
 
-  const bannerCount = subcategoryName ? 2 : 3;
+  const bannerCount = useMemo(() => {
+    if (categoryName === 'Serviços' || categoryName === 'Imóveis Comerciais') {
+      return 4;
+    }
+    if (isCategoryView) {
+      return 2;
+    }
+    return 3; // Home
+  }, [categoryName, isCategoryView]);
 
   const activeBanners = useMemo(() => {
-    // 1. Filtra banners que combinam com o bairro (ou todos)
-    let pool = MOCK_BANNERS.filter(b => b.neighborhood === currentNeighborhood || currentNeighborhood === 'Jacarepaguá (todos)');
+    let pool = MOCK_BANNERS.filter(b => b.neighborhood === currentNeighborhood);
     
     let filtered: BannerData[] = [];
 
-    // 2. Se for subcategoria, tenta pegar as específicas primeiro
     if (subcategoryName) {
       filtered = pool.filter(b => b.subcategory === subcategoryName);
     }
     
-    // 3. Se não encheu ou se for apenas categoria, tenta categoria
     if (filtered.length < bannerCount && categoryName) {
       const catBanners = pool.filter(b => b.category === categoryName && !filtered.find(f => f.id === b.id));
       filtered = [...filtered, ...catBanners];
     }
 
-    // 4. Fallback final: Se ainda não tem o número necessário, completa com banners gerais do bairro
     if (filtered.length < bannerCount) {
       const generalBanners = pool.filter(b => !filtered.find(f => f.id === b.id));
       const needed = bannerCount - filtered.length;
       filtered = [...filtered, ...generalBanners.slice(0, needed)];
     }
 
-    // Retorna a quantidade correta de banners
     return filtered.slice(0, bannerCount);
   }, [currentNeighborhood, categoryName, subcategoryName, bannerCount]);
 
+  // Auto-scroll effect for Home view only
   useEffect(() => {
-    if (activeBanners.length <= 1) return;
+    if (isCategoryView || activeBanners.length <= 1) return;
     const interval = setInterval(() => {
       setCurrentIndex((prev) => (prev + 1) % activeBanners.length);
     }, 5000);
     return () => clearInterval(interval);
-  }, [activeBanners.length]);
+  }, [isCategoryView, activeBanners.length]);
 
-  // Reset index ao mudar de categoria/subcategoria
   useEffect(() => {
     setCurrentIndex(0);
   }, [categoryName, subcategoryName, currentNeighborhood]);
 
-  if (activeBanners.length === 0) return null;
-
-  const currentBanner = activeBanners[currentIndex];
-
-  const handleBannerClick = () => {
-    const store = STORES.find(s => s.id === currentBanner.storeId);
+  const handleBannerClick = (banner: BannerData) => {
+    const store = STORES.find(s => s.id === banner.storeId);
     if (store) onStoreClick(store);
   };
 
+  if (activeBanners.length === 0) return null;
+
+  // --- RENDER PARA CATEGORIAS (2 ou 4 BANNERS VISÍVEIS) ---
+  if (isCategoryView) {
+    return (
+      <div className="flex gap-3 overflow-x-auto no-scrollbar px-5 mb-6 snap-x flex-wrap">
+        {activeBanners.map(banner => (
+          <div 
+            key={banner.id}
+            onClick={() => handleBannerClick(banner)}
+            className={`relative aspect-[4/5] w-[calc(50%-0.375rem)] snap-start flex-shrink-0 rounded-[1.5rem] overflow-hidden shadow-lg cursor-pointer transition-all duration-300 active:brightness-90 active:scale-[0.99] group ${banner.bgColor}`}
+          >
+            <img 
+              src={banner.image} 
+              alt={banner.title} 
+              className="absolute inset-0 w-full h-full object-cover mix-blend-overlay opacity-60"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
+            <div className="relative h-full flex flex-col justify-end p-4 text-white">
+              <h2 className="text-sm font-black uppercase tracking-tighter leading-tight mb-1 drop-shadow-md">
+                {banner.title}
+              </h2>
+              <p className="text-[10px] font-bold text-white/90 leading-tight drop-shadow-sm line-clamp-2">
+                {banner.subtitle}
+              </p>
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  // --- RENDER PARA HOME (BANNER ÚNICO) ---
+  const currentBanner = activeBanners[currentIndex];
   return (
     <div className="px-5 mb-6">
       <div 
-        onClick={handleBannerClick}
+        onClick={() => handleBannerClick(currentBanner)}
         className={`relative aspect-[16/10] w-full rounded-[2.5rem] overflow-hidden shadow-2xl cursor-pointer transition-all duration-300 active:brightness-90 active:scale-[0.99] group ${currentBanner.bgColor}`}
       >
         <img 
@@ -162,7 +262,6 @@ export const HomeBannerCarousel: React.FC<HomeBannerCarouselProps> = ({ onStoreC
           </p>
         </div>
 
-        {/* Indicators */}
         {activeBanners.length > 1 && (
           <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-1.5 z-10">
             {activeBanners.map((_, idx) => (
