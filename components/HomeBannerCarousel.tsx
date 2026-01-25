@@ -156,17 +156,10 @@ export const HomeBannerCarousel: React.FC<HomeBannerCarouselProps> = ({ onStoreC
   const isCategoryView = !!categoryName;
 
   const bannerCount = useMemo(() => {
-    if (categoryName === 'Serviços' || categoryName === 'Imóveis Comerciais') {
-      return 4;
-    }
-    if (isCategoryView) {
-      return 2;
-    }
-    return 3; // Home
-  }, [categoryName, isCategoryView]);
+    return isCategoryView ? 2 : 3;
+  }, [isCategoryView]);
 
   const activeBanners = useMemo(() => {
-    // BUG FIX: Handle "Jacarepaguá (todos)" case correctly.
     const initialPool = currentNeighborhood === 'Jacarepaguá (todos)'
       ? MOCK_BANNERS
       : MOCK_BANNERS.filter(b => b.neighborhood === currentNeighborhood);
@@ -191,27 +184,13 @@ export const HomeBannerCarousel: React.FC<HomeBannerCarouselProps> = ({ onStoreC
     return filtered.slice(0, bannerCount);
   }, [currentNeighborhood, categoryName, subcategoryName, bannerCount]);
 
-  // DEBUGGING: Log banner state as requested.
   useEffect(() => {
-    console.log('[HomeBannerCarousel DEBUG] Environment: Production');
-    console.log(`[HomeBannerCarousel DEBUG] Current Neighborhood: ${currentNeighborhood}`);
-    console.log(`[HomeBannerCarousel DEBUG] Category Filter: ${categoryName || 'N/A'}`);
-    console.log(`[HomeBannerCarousel DEBUG] Active Banners Count: ${activeBanners.length}`);
-    if (activeBanners.length > 0) {
-        console.log('[HomeBannerCarousel DEBUG] Active Banners Data:', JSON.stringify(activeBanners.map(b => ({ id: b.id, title: b.title }))));
-    } else {
-        console.log('[HomeBannerCarousel DEBUG] No active banners found for the current filters.');
-    }
-  }, [activeBanners, currentNeighborhood, categoryName]);
-
-  // Auto-scroll effect for Home view only
-  useEffect(() => {
-    if (isCategoryView || activeBanners.length <= 1) return;
+    if (activeBanners.length <= 1) return;
     const interval = setInterval(() => {
       setCurrentIndex((prev) => (prev + 1) % activeBanners.length);
     }, 5000);
     return () => clearInterval(interval);
-  }, [isCategoryView, activeBanners.length]);
+  }, [activeBanners.length]);
 
   useEffect(() => {
     setCurrentIndex(0);
@@ -222,49 +201,17 @@ export const HomeBannerCarousel: React.FC<HomeBannerCarouselProps> = ({ onStoreC
     if (store) onStoreClick(store);
   };
 
-  // DEBUGGING: Render placeholder if no banners.
   if (activeBanners.length === 0) {
     return (
         <div className="px-5 mb-6">
             <div className="aspect-[16/10] w-full rounded-[2.5rem] bg-gray-100 dark:bg-gray-800 flex flex-col items-center justify-center text-center p-4 border border-dashed border-gray-300 dark:border-gray-700">
-                <p className="text-sm font-bold text-gray-400 dark:text-gray-500">[DEBUG] Carrossel de Banners</p>
-                <p className="text-xs text-gray-400 dark:text-gray-600 mt-1">Banners indisponíveis no momento.</p>
+                <p className="text-sm font-bold text-gray-400 dark:text-gray-500">Carrossel de Banners</p>
+                <p className="text-xs text-gray-400 dark:text-gray-600 mt-1">Nenhum banner disponível para esta seleção.</p>
             </div>
         </div>
     );
   }
 
-  // --- RENDER PARA CATEGORIAS (2 ou 4 BANNERS VISÍVEIS) ---
-  if (isCategoryView) {
-    return (
-      <div className="flex gap-3 overflow-x-auto no-scrollbar px-5 mb-6 snap-x flex-wrap">
-        {activeBanners.map(banner => (
-          <div 
-            key={banner.id}
-            onClick={() => handleBannerClick(banner)}
-            className={`relative aspect-[4/5] w-[calc(50%-0.375rem)] snap-start flex-shrink-0 rounded-[1.5rem] overflow-hidden shadow-lg cursor-pointer transition-all duration-300 active:brightness-90 active:scale-[0.99] group ${banner.bgColor}`}
-          >
-            <img 
-              src={banner.image} 
-              alt={banner.title} 
-              className="absolute inset-0 w-full h-full object-cover mix-blend-overlay opacity-60"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
-            <div className="relative h-full flex flex-col justify-end p-4 text-white">
-              <h2 className="text-sm font-black uppercase tracking-tighter leading-tight mb-1 drop-shadow-md">
-                {banner.title}
-              </h2>
-              <p className="text-[10px] font-bold text-white/90 leading-tight drop-shadow-sm line-clamp-2">
-                {banner.subtitle}
-              </p>
-            </div>
-          </div>
-        ))}
-      </div>
-    );
-  }
-
-  // --- RENDER PARA HOME (BANNER ÚNICO) ---
   const currentBanner = activeBanners[currentIndex];
   return (
     <div className="px-5 mb-6">
@@ -293,7 +240,8 @@ export const HomeBannerCarousel: React.FC<HomeBannerCarouselProps> = ({ onStoreC
             {activeBanners.map((_, idx) => (
               <div 
                 key={idx} 
-                className={`h-1 rounded-full transition-all duration-300 ${idx === currentIndex ? 'w-4 bg-white' : 'w-1 bg-white/40'}`} 
+                onClick={(e) => { e.stopPropagation(); setCurrentIndex(idx); }}
+                className={`h-1.5 rounded-full cursor-pointer transition-all duration-300 ${idx === currentIndex ? 'w-5 bg-white' : 'w-1.5 bg-white/40'}`} 
               />
             ))}
           </div>
