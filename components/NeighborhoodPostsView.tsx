@@ -1,5 +1,5 @@
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Store, Clock, MoreHorizontal, Heart, MessageSquare, Share2, Flag, CheckCircle2, ChevronLeft, Search, SlidersHorizontal, X, Plus } from 'lucide-react';
 import { Store as StoreType, CommunityPost, ReportReason } from '../types';
 import { STORES, MOCK_COMMUNITY_POSTS } from '../constants';
@@ -153,19 +153,42 @@ const PostCard: React.FC<PostCardProps> = ({ post, onStoreClick, user, onRequire
 const FilterModal: React.FC<{
   isOpen: boolean;
   onClose: () => void;
-  onApply: (filters: { neighborhood: string; theme: string; sortBy: string }) => void;
+  onApply: (filters: { neighborhoods: string[]; theme: string; sortBy: string }) => void;
   onClear: () => void;
-  initialFilters: { neighborhood: string; theme: string; sortBy: string };
+  initialFilters: { neighborhoods: string[]; theme: string; sortBy: string };
 }> = ({ isOpen, onClose, onApply, onClear, initialFilters }) => {
-  const [tempNeighborhood, setTempNeighborhood] = useState(initialFilters.neighborhood);
+  const [tempNeighborhoods, setTempNeighborhoods] = useState(initialFilters.neighborhoods);
   const [tempTheme, setTempTheme] = useState(initialFilters.theme);
   const [tempSortBy, setTempSortBy] = useState(initialFilters.sortBy);
 
+  useEffect(() => {
+    if (isOpen) {
+      setTempNeighborhoods(initialFilters.neighborhoods);
+      setTempTheme(initialFilters.theme);
+      setTempSortBy(initialFilters.sortBy);
+    }
+  }, [isOpen, initialFilters]);
+
   if (!isOpen) return null;
+
+  const handleNeighborhoodToggle = (hood: string) => {
+    if (hood === 'Jacarepaguá (todos)') {
+      setTempNeighborhoods([]);
+    } else {
+      setTempNeighborhoods(prev => {
+        const withoutTodos = prev.filter(h => h !== 'Jacarepaguá (todos)');
+        if (withoutTodos.includes(hood)) {
+          return withoutTodos.filter(h => h !== hood);
+        } else {
+          return [...withoutTodos, hood];
+        }
+      });
+    }
+  };
 
   const handleApply = () => {
     onApply({
-      neighborhood: tempNeighborhood,
+      neighborhoods: tempNeighborhoods,
       theme: tempTheme,
       sortBy: tempSortBy,
     });
@@ -176,6 +199,8 @@ const FilterModal: React.FC<{
     onClear();
     onClose();
   };
+  
+  const isAllNeighborhoodsSelected = tempNeighborhoods.length === 0;
 
   return (
     <div className="fixed inset-0 z-[1001] bg-black/60 flex items-end" onClick={onClose}>
@@ -190,15 +215,25 @@ const FilterModal: React.FC<{
           {/* SEÇÃO 1 – Filtrar por bairro */}
           <section>
             <h3 className="text-sm font-bold text-gray-500 dark:text-gray-400 mb-3 uppercase tracking-wider">Bairro</h3>
-            <div className="space-y-2">
-              <button onClick={() => setTempNeighborhood("Jacarepaguá (todos)")} className={`w-full text-left p-3 rounded-lg transition-colors text-sm font-medium flex justify-between items-center ${tempNeighborhood === "Jacarepaguá (todos)" ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600' : 'bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-300'}`}>
-                Jacarepaguá (todos) {tempNeighborhood === "Jacarepaguá (todos)" && <CheckCircle2 size={16} />}
+            <div className="flex flex-wrap gap-2">
+              <button 
+                  onClick={() => handleNeighborhoodToggle('Jacarepaguá (todos)')} 
+                  className={`px-4 py-2 rounded-full text-xs font-bold border-2 transition-all ${isAllNeighborhoodsSelected ? 'bg-blue-600 text-white border-blue-600' : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-500'}`}
+              >
+                  Todos (Jacarepaguá)
               </button>
-              {NEIGHBORHOODS.map(hood => (
-                <button key={hood} onClick={() => setTempNeighborhood(hood)} className={`w-full text-left p-3 rounded-lg transition-colors text-sm font-medium flex justify-between items-center ${tempNeighborhood === hood ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600' : 'bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-300'}`}>
-                  {hood} {tempNeighborhood === hood && <CheckCircle2 size={16} />}
-                </button>
-              ))}
+              {NEIGHBORHOODS.map(hood => {
+                const isSelected = tempNeighborhoods.includes(hood);
+                return (
+                  <button 
+                    key={hood} 
+                    onClick={() => handleNeighborhoodToggle(hood)} 
+                    className={`px-4 py-2 rounded-full text-xs font-bold border-2 transition-all ${isSelected ? 'bg-blue-600 text-white border-blue-600' : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-500'}`}
+                  >
+                    {hood}
+                  </button>
+                )
+              })}
             </div>
           </section>
 
@@ -245,15 +280,18 @@ interface NeighborhoodPostsViewProps {
 }
 
 export const NeighborhoodPostsView: React.FC<NeighborhoodPostsViewProps> = ({ onBack, onStoreClick, user, onRequireLogin }) => {
-  const { currentNeighborhood, setNeighborhood } = useNeighborhood();
+  const { currentNeighborhood: displayNeighborhood } = useNeighborhood();
   const [searchTerm, setSearchTerm] = useState('');
+  
   const [activeTheme, setActiveTheme] = useState('all');
-  const [sortBy, setSortBy] = useState('recent'); // 'recent', 'comments', 'likes'
+  const [sortBy, setSortBy] = useState('recent');
+  const [neighborhoodFilter, setNeighborhoodFilter] = useState<string[]>([]);
+  
   const [isFilterModalOpen, setFilterModalOpen] = useState(false);
 
   const filteredPosts = useMemo(() => {
     let posts = MOCK_POSTS.filter(post => {
-      const matchNeighborhood = currentNeighborhood === "Jacarepaguá (todos)" || post.neighborhood === currentNeighborhood;
+      const matchNeighborhood = neighborhoodFilter.length === 0 || neighborhoodFilter.includes(post.neighborhood || '');
       const matchSearch = !searchTerm || post.content.toLowerCase().includes(searchTerm.toLowerCase()) || post.userName.toLowerCase().includes(searchTerm.toLowerCase());
       const matchTheme = activeTheme === 'all' || post.theme === activeTheme;
       return matchNeighborhood && matchSearch && matchTheme;
@@ -266,27 +304,29 @@ export const NeighborhoodPostsView: React.FC<NeighborhoodPostsViewProps> = ({ on
       // 'recent' is the default, and the mock data is already sorted by recency.
       return 0;
     });
-  }, [currentNeighborhood, searchTerm, activeTheme, sortBy]);
+  }, [neighborhoodFilter, searchTerm, activeTheme, sortBy]);
   
-  const handleApplyFilters = (filters: { neighborhood: string; theme: string; sortBy: string }) => {
-    setNeighborhood(filters.neighborhood);
+  const handleApplyFilters = (filters: { neighborhoods: string[]; theme: string; sortBy: string }) => {
+    setNeighborhoodFilter(filters.neighborhoods);
     setActiveTheme(filters.theme);
     setSortBy(filters.sortBy);
   };
 
   const handleClearFilters = () => {
-    setNeighborhood("Jacarepaguá (todos)");
+    setNeighborhoodFilter([]);
     setActiveTheme('all');
     setSortBy('recent');
   };
   
   const activeFiltersCount = useMemo(() => {
     let count = 0;
-    if (currentNeighborhood !== "Jacarepaguá (todos)") count++;
+    if (neighborhoodFilter.length > 0) {
+      count = neighborhoodFilter.length;
+    }
     if (activeTheme !== 'all') count++;
     if (sortBy !== 'recent') count++;
     return count;
-  }, [currentNeighborhood, activeTheme, sortBy]);
+  }, [neighborhoodFilter, activeTheme, sortBy]);
 
   return (
     <div className="min-h-screen bg-[#F8F9FC] dark:bg-gray-950 font-sans animate-in fade-in duration-500 overflow-x-hidden">
@@ -308,7 +348,7 @@ export const NeighborhoodPostsView: React.FC<NeighborhoodPostsViewProps> = ({ on
                     type="text" 
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    placeholder={`Buscar em ${currentNeighborhood === "Jacarepaguá (todos)" ? "JPA" : currentNeighborhood}...`}
+                    placeholder={`Buscar em JPA...`}
                     className="w-full bg-gray-50 dark:bg-gray-800 border-none py-3.5 pl-11 pr-4 rounded-2xl text-sm font-medium outline-none focus:ring-2 focus:ring-[#1E5BFF]/30 transition-all shadow-inner dark:text-white"
                 />
             </div>
@@ -355,7 +395,7 @@ export const NeighborhoodPostsView: React.FC<NeighborhoodPostsViewProps> = ({ on
         onApply={handleApplyFilters}
         onClear={handleClearFilters}
         initialFilters={{
-          neighborhood: currentNeighborhood,
+          neighborhoods: neighborhoodFilter,
           theme: activeTheme,
           sortBy: sortBy,
         }}
