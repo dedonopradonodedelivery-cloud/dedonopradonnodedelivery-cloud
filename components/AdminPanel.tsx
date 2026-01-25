@@ -22,7 +22,7 @@ import {
   FileText,
   MessageCircle,
   MessageSquare,
-  // Fixed: Added missing Wrench icon to imports
+  // FIX: Added missing Wrench icon to imports
   Wrench
 } from 'lucide-react';
 import { fetchAdminMerchants, fetchAdminUsers } from '../backend/services';
@@ -223,7 +223,7 @@ const AdminFinancialDashboard: React.FC = () => {
                 </div>
             </div>
             <div className="h-64 w-full">
-                <FinancialChart data={data} days={range === 'today' ? 1 : range === '7d' ? 7 : range === '30d' ? 30 : 30} />
+                <FinancialChart data={data} days={range === 'today' ? 1 : range === '7d' ? 7 : 30} />
             </div>
         </section>
 

@@ -1,6 +1,6 @@
 
 import React, { useState, useMemo } from 'react';
-// Added Clock to fix "Cannot find name 'Clock'" error on line 112
+// FIX: Added Clock to fix "Cannot find name 'Clock'" error on line 112
 import { ChevronLeft, Ticket, Calendar, MapPin, Tag, Info, AlertTriangle, X, Search, ChevronRight, Clock } from 'lucide-react';
 import { User } from '@supabase/supabase-js';
 

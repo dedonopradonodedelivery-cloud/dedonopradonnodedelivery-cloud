@@ -16,6 +16,7 @@ import { JobsView } from '@/components/JobsView';
 import { JobDetailView } from '@/components/JobDetailView';
 import { MerchantPerformanceDashboard } from '@/components/MerchantPerformanceDashboard';
 import { NeighborhoodPostsView } from '@/components/NeighborhoodPostsView';
+import { SavedPostsView } from '@/components/SavedPostsView';
 import { AdminPanel } from '@/components/AdminPanel';
 import { MerchantLeadsView } from '@/components/MerchantLeadsView';
 import { ServiceChatView } from '@/components/ServiceChatView';
@@ -114,7 +115,7 @@ const App: React.FC = () => {
     handleNavigate('subcategory_detail');
   };
 
-  const headerExclusionList = ['store_area', 'store_detail', 'profile', 'patrocinador_master', 'merchant_performance', 'neighborhood_posts', 'classifieds', 'services', 'services_landing', 'merchant_leads', 'service_chat', 'admin_panel', 'category_detail', 'subcategory_detail', 'sponsor_info', 'real_estate', 'jobs', 'job_detail'];
+  const headerExclusionList = ['store_area', 'store_detail', 'profile', 'patrocinador_master', 'merchant_performance', 'neighborhood_posts', 'saved_posts', 'classifieds', 'services', 'services_landing', 'merchant_leads', 'service_chat', 'admin_panel', 'category_detail', 'subcategory_detail', 'sponsor_info', 'real_estate', 'jobs', 'job_detail'];
   const hideBottomNav = ['admin_panel', 'weekly_reward_page', 'service_chat', 'sponsor_info', 'real_estate', 'job_detail', 'services_landing'].includes(activeTab);
 
   const RoleSwitcherModal: React.FC = () => {
@@ -199,6 +200,7 @@ const App: React.FC = () => {
                     {activeTab === 'jobs' && <JobsView onBack={() => handleNavigate('classifieds')} onJobClick={handleSelectJob} />}
                     {activeTab === 'job_detail' && selectedJob && <JobDetailView job={selectedJob} onBack={() => handleNavigate('jobs')} />}
                     {activeTab === 'neighborhood_posts' && <NeighborhoodPostsView onBack={() => handleNavigate('home')} onStoreClick={handleSelectStore} user={user} onRequireLogin={() => setIsAuthOpen(true)} userRole={userRole} />}
+                    {activeTab === 'saved_posts' && <SavedPostsView onBack={() => handleNavigate('profile')} onStoreClick={handleSelectStore} onRequireLogin={() => setIsAuthOpen(true)} />}
                     {activeTab === 'sponsor_info' && <SponsorInfoView onBack={() => handleNavigate(previousTab)} />}
                     {activeTab === 'patrocinador_master' && <PatrocinadorMasterScreen onBack={() => handleNavigate(previousTab)} />}
                   </main>

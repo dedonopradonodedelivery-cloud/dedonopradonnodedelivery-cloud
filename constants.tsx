@@ -310,6 +310,42 @@ export const NEIGHBORHOOD_COMMUNITIES: NeighborhoodCommunity[] = [
 
 export const MOCK_COMMUNITY_POSTS: CommunityPost[] = [
   {
+    id: 'post-video-1',
+    userId: 'u-video',
+    userName: 'Cine JPA',
+    userAvatar: 'https://i.pravatar.cc/100?u=cinejpa',
+    authorRole: 'merchant',
+    content: 'Curta o trailer do nosso novo filme em cartaz! 🍿🎬 Venha assistir no cinema do bairro. Uma experiência incrível para toda a família com muita pipoca e diversão. Não perca!',
+    type: 'event',
+    communityId: 'comm-residents',
+    neighborhood: 'Anil',
+    timestamp: '10h',
+    likes: 150,
+    comments: 25,
+    videoUrl: 'https://videos.pexels.com/video-files/3209828/3209828-sd_540_960_25fps.mp4',
+    theme: 'lazer'
+  },
+  {
+    id: 'post-multi-image-1',
+    userId: 'u-gallery',
+    userName: 'Galeria de Arte JPA',
+    userAvatar: 'https://i.pravatar.cc/100?u=galleryjpa',
+    authorRole: 'merchant',
+    content: 'Nossa nova exposição "Cores do Rio" já está aberta! Venha apreciar a arte local. Entrada gratuita. Confira um pouco do que temos por aqui.',
+    type: 'event',
+    communityId: 'comm-residents',
+    neighborhood: 'Freguesia',
+    timestamp: '12h',
+    likes: 88,
+    comments: 12,
+    imageUrls: [
+      'https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?q=80&w=600',
+      'https://images.unsplash.com/photo-1579965342575-1547a4686b28?q=80&w=600',
+      'https://images.unsplash.com/photo-1533100373369-a131b6f04364?q=80&w=600'
+    ],
+    theme: 'lazer'
+  },
+  {
     id: 'post-bibi-1',
     userId: 'u-bibi',
     userName: 'Bibi Lanches',
@@ -322,7 +358,7 @@ export const MOCK_COMMUNITY_POSTS: CommunityPost[] = [
     timestamp: 'Há 30 min',
     likes: 22,
     comments: 3,
-    imageUrl: 'https://images.unsplash.com/photo-1571091718767-18b5b1457add?q=80&w=600&auto=format&fit=crop',
+    imageUrls: ['https://images.unsplash.com/photo-1571091718767-18b5b1457add?q=80&w=600&auto=format&fit=crop'],
     theme: 'dicas',
     showOnStoreProfile: false
   },
@@ -339,7 +375,7 @@ export const MOCK_COMMUNITY_POSTS: CommunityPost[] = [
     timestamp: 'Agora',
     likes: 8,
     comments: 1,
-    imageUrl: 'https://images.unsplash.com/photo-1570125909248-73dfa3383b18?q=80&w=600&auto=format&fit=crop',
+    imageUrls: ['https://images.unsplash.com/photo-1570125909248-73dfa3383b18?q=80&w=600&auto=format&fit=crop'],
     theme: 'utilidade'
   },
   {
@@ -355,7 +391,7 @@ export const MOCK_COMMUNITY_POSTS: CommunityPost[] = [
     timestamp: '1h',
     likes: 10,
     comments: 1,
-    imageUrl: 'https://images.unsplash.com/photo-1570129477492-45c003edd2be?q=80&w=600&auto=format&fit=crop',
+    imageUrls: ['https://images.unsplash.com/photo-1570129477492-45c003edd2be?q=80&w=600&auto=format&fit=crop'],
     theme: 'seguranca'
   },
   {
@@ -371,7 +407,7 @@ export const MOCK_COMMUNITY_POSTS: CommunityPost[] = [
     timestamp: '2h',
     likes: 5,
     comments: 1,
-    imageUrl: 'https://images.unsplash.com/photo-1567332243413-56545bce13f2?q=80&w=600&auto=format&fit=crop',
+    imageUrls: ['https://images.unsplash.com/photo-1567332243413-56545bce13f2?q=80&w=600&auto=format&fit=crop'],
     theme: 'lazer'
   },
   {
@@ -387,7 +423,7 @@ export const MOCK_COMMUNITY_POSTS: CommunityPost[] = [
     timestamp: '3h',
     likes: 45,
     comments: 8,
-    imageUrl: 'https://images.unsplash.com/photo-1561758033-d89a9ad46330?q=80&w=600&auto=format&fit=crop',
+    imageUrls: ['https://images.unsplash.com/photo-1561758033-d89a9ad46330?q=80&w=600&auto=format&fit=crop'],
     theme: 'dicas'
   },
   {
@@ -419,7 +455,7 @@ export const MOCK_COMMUNITY_POSTS: CommunityPost[] = [
     timestamp: '8h',
     likes: 24,
     comments: 31,
-    imageUrl: 'https://images.unsplash.com/photo-1585659722982-789600c7690a?q=80&w=600&auto=format&fit=crop',
+    imageUrls: ['https://images.unsplash.com/photo-1585659722982-789600c7690a?q=80&w=600&auto=format&fit=crop'],
     theme: 'dicas'
   },
 ];

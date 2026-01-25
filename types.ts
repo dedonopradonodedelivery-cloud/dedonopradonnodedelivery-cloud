@@ -217,7 +217,8 @@ export interface CommunityPost {
   timestamp: string;
   likes: number;
   comments: number;
-  imageUrl?: string;
+  imageUrls?: string[];
+  videoUrl?: string;
   theme?: 'utilidade' | 'seguranca' | 'lazer' | 'dicas' | 'geral';
   showOnStoreProfile?: boolean;
 }
