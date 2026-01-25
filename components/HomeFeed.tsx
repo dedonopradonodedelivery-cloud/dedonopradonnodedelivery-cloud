@@ -127,8 +127,8 @@ export const HomeFeed: React.FC<HomeFeedFeedProps> = ({
           </div>
         </div>
         {/* SCROLL INDICATOR BAR */}
-        <div className="px-4 pb-4">
-          <div className="w-full h-[3px] bg-gray-100 dark:bg-gray-800 rounded-full">
+        <div className="px-4 pb-4 flex justify-center">
+          <div className="w-1/3 h-[2px] bg-gray-100 dark:bg-gray-800 rounded-full">
             <div 
               className="h-full bg-brand-blue rounded-full" 
               style={{ 
