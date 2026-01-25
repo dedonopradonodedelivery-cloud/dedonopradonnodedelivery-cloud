@@ -166,27 +166,43 @@ export const HomeBannerCarousel: React.FC<HomeBannerCarouselProps> = ({ onStoreC
   }, [categoryName, isCategoryView]);
 
   const activeBanners = useMemo(() => {
-    let pool = MOCK_BANNERS.filter(b => b.neighborhood === currentNeighborhood);
+    // BUG FIX: Handle "Jacarepaguá (todos)" case correctly.
+    const initialPool = currentNeighborhood === 'Jacarepaguá (todos)'
+      ? MOCK_BANNERS
+      : MOCK_BANNERS.filter(b => b.neighborhood === currentNeighborhood);
     
     let filtered: BannerData[] = [];
 
     if (subcategoryName) {
-      filtered = pool.filter(b => b.subcategory === subcategoryName);
+      filtered = initialPool.filter(b => b.subcategory === subcategoryName);
     }
     
     if (filtered.length < bannerCount && categoryName) {
-      const catBanners = pool.filter(b => b.category === categoryName && !filtered.find(f => f.id === b.id));
+      const catBanners = initialPool.filter(b => b.category === categoryName && !filtered.find(f => f.id === b.id));
       filtered = [...filtered, ...catBanners];
     }
 
     if (filtered.length < bannerCount) {
-      const generalBanners = pool.filter(b => !filtered.find(f => f.id === b.id));
+      const generalBanners = initialPool.filter(b => !filtered.find(f => f.id === b.id));
       const needed = bannerCount - filtered.length;
       filtered = [...filtered, ...generalBanners.slice(0, needed)];
     }
 
     return filtered.slice(0, bannerCount);
   }, [currentNeighborhood, categoryName, subcategoryName, bannerCount]);
+
+  // DEBUGGING: Log banner state as requested.
+  useEffect(() => {
+    console.log('[HomeBannerCarousel DEBUG] Environment: Production');
+    console.log(`[HomeBannerCarousel DEBUG] Current Neighborhood: ${currentNeighborhood}`);
+    console.log(`[HomeBannerCarousel DEBUG] Category Filter: ${categoryName || 'N/A'}`);
+    console.log(`[HomeBannerCarousel DEBUG] Active Banners Count: ${activeBanners.length}`);
+    if (activeBanners.length > 0) {
+        console.log('[HomeBannerCarousel DEBUG] Active Banners Data:', JSON.stringify(activeBanners.map(b => ({ id: b.id, title: b.title }))));
+    } else {
+        console.log('[HomeBannerCarousel DEBUG] No active banners found for the current filters.');
+    }
+  }, [activeBanners, currentNeighborhood, categoryName]);
 
   // Auto-scroll effect for Home view only
   useEffect(() => {
@@ -206,7 +222,17 @@ export const HomeBannerCarousel: React.FC<HomeBannerCarouselProps> = ({ onStoreC
     if (store) onStoreClick(store);
   };
 
-  if (activeBanners.length === 0) return null;
+  // DEBUGGING: Render placeholder if no banners.
+  if (activeBanners.length === 0) {
+    return (
+        <div className="px-5 mb-6">
+            <div className="aspect-[16/10] w-full rounded-[2.5rem] bg-gray-100 dark:bg-gray-800 flex flex-col items-center justify-center text-center p-4 border border-dashed border-gray-300 dark:border-gray-700">
+                <p className="text-sm font-bold text-gray-400 dark:text-gray-500">[DEBUG] Carrossel de Banners</p>
+                <p className="text-xs text-gray-400 dark:text-gray-600 mt-1">Banners indisponíveis no momento.</p>
+            </div>
+        </div>
+    );
+  }
 
   // --- RENDER PARA CATEGORIAS (2 ou 4 BANNERS VISÍVEIS) ---
   if (isCategoryView) {
