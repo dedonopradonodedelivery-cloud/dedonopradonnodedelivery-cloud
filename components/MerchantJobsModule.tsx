@@ -16,7 +16,7 @@ interface MerchantJob {
   daysLeft: number;
 }
 
-const CATEGORIES_JOBS = ['Alimentação', 'Beleza', 'Serviços', 'Pets', 'Moda', 'Saúde', 'Educação', 'Tecnologia'];
+const CATEGORIES_JOBS = ['Alimentação', 'Beleza', 'Orçamento de Serviços', 'Pets', 'Moda', 'Saúde', 'Educação', 'Tecnologia'];
 
 export const MerchantJobsModule: React.FC<MerchantJobsModuleProps> = ({ onBack }) => {
   const [view, setView] = useState<'list' | 'create'>('list');

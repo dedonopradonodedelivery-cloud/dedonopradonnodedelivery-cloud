@@ -23,7 +23,7 @@ export const CATEGORIES: Category[] = [
   { id: 'cat-pets', name: 'Pets', slug: 'pets', icon: <PawPrint />, color: 'bg-brand-blue' },
   { id: 'cat-pro', name: 'Pro', slug: 'pro', icon: <Briefcase />, color: 'bg-brand-blue' },
   { id: 'cat-saude', name: 'Saúde', slug: 'saude', icon: <Heart />, color: 'bg-brand-blue' },
-  { id: 'cat-services', name: 'Serviços', slug: 'servicos', icon: <Wrench />, color: 'bg-brand-blue' },
+  { id: 'cat-services', name: 'Orçamento de Serviços', slug: 'servicos', icon: <Wrench />, color: 'bg-brand-blue' },
   { id: 'cat-imoveis', name: 'Imóveis Comerciais', slug: 'imoveis-comerciais', icon: <Building2 />, color: 'bg-brand-blue' },
   { id: 'cat-beauty', name: 'Beleza', slug: 'beleza', icon: <Scissors />, color: 'bg-brand-blue' },
   { id: 'cat-autos', name: 'Autos', slug: 'autos', icon: <CarFront />, color: 'bg-brand-blue' },
@@ -95,7 +95,7 @@ export const SUBCATEGORIES: Record<string, { name: string; icon: React.ReactNode
     { name: 'Terapias Alternativas', icon: <Sparkles /> },
     { name: 'Saúde Preventiva', icon: <Shield /> },
   ],
-  'Serviços': [
+  'Orçamento de Serviços': [
     { name: 'Limpeza Residencial', icon: <Sparkles /> },
     { name: 'Dedetização', icon: <Shield /> },
     { name: 'Manutenção Geral', icon: <Settings /> },
@@ -411,7 +411,7 @@ const BASE_STORES: Store[] = [
   {
     id: 'grupo-esquematiza',
     name: 'Grupo Esquematiza',
-    category: 'Serviços',
+    category: 'Orçamento de Serviços',
     subcategory: 'Segurança e Facilities',
     rating: 5.0,
     reviewsCount: 152,
@@ -567,45 +567,78 @@ const BASE_STORES: Store[] = [
   },
 ];
 
-// Gerar lojas fake para preenchimento de listas
-const generateFakeStores = (count: number): Store[] => {
-  const hoods = ['Freguesia', 'Taquara', 'Pechincha', 'Anil', 'Tanque', 'Curicica'];
-  const categoriesList = ['Comida', 'Saúde', 'Serviços', 'Pets', 'Beleza', 'Moda'];
-  const stores: Store[] = [];
+// Helper data for store generation
+const hoods = ["Freguesia", "Taquara", "Pechincha", "Tanque", "Anil", "Curicica", "Gardênia Azul", "Cidade de Deus", "Praça Seca"];
+const modifiers = ["Prime", "do Bairro", "Jacarepaguá", "Master", "Central", "Top", "Premium"];
+const imageKeywords: Record<string, string> = {
+  'Comida': 'restaurant,food', 'Pets': 'pet-shop,cute-animal', 'Pro': 'professional-tools,worker', 'Saúde': 'clinic,health', 
+  'Orçamento de Serviços': 'home-repair,technician', 'Imóveis Comerciais': 'commercial-real-estate,office', 'Beleza': 'beauty-salon,haircut', 'Autos': 'car-mechanic,garage', 
+  'Mercado': 'grocery-store,market', 'Casa': 'home-decor,furniture', 'Esportes': 'gym,fitness', 'Lazer': 'entertainment,cinema', 
+  'Educação': 'school,classroom', 'Farmácia': 'pharmacy,medicine', 'Moda': 'fashion-store,clothes', 'Eventos': 'event-planner,party', 'Condomínio': 'apartment-building,condominium'
+};
 
-  for (let i = 1; i <= count; i++) {
-    const cat = categoriesList[i % categoriesList.length];
-    const hood = hoods[i % hoods.length];
-    stores.push({
-      id: `fake-${i}`,
-      name: `Loja Exemplo ${i}`,
-      category: cat,
-      subcategory: 'Geral',
-      rating: 4.0 + (Math.random() * 1.0),
-      reviewsCount: Math.floor(Math.random() * 100),
-      distance: `${hood} • RJ`,
-      neighborhood: hood,
-      adType: AdType.ORGANIC,
-      description: `Descrição breve da loja exemplo número ${i} localizada na região de ${hood}.`,
-      image: `https://images.unsplash.com/photo-${1500000000000 + (i * 1000)}?q=80&w=400&auto=format&fit=crop`,
-      isSponsored: false,
-      isOpenNow: Math.random() > 0.3,
-      verified: Math.random() > 0.4,
-      rua: 'Rua Genérica',
-      numero: `${i * 10}`,
-      bairro: hood,
-      cidade: 'Rio de Janeiro',
-      whatsapp_publico: `2191234567${i%10}`,
-      instagram: `@lojaexemplo${i}`,
-      payment_methods: ['Pix', 'Dinheiro'],
-    });
-  }
-  return stores;
+const generateAllFakeStores = (): Store[] => {
+  const allStores: Store[] = [];
+  let logoIndex = 10; 
+
+  CATEGORIES.forEach(category => {
+    const subs = SUBCATEGORIES[category.name] || [{ name: 'Geral', icon: <Star /> }];
+    
+    for (let i = 0; i < 7; i++) {
+      const hood = hoods[i % hoods.length];
+      const sub = subs[i % subs.length];
+      const isSponsored = i < 2; 
+      const rating = 4.2 + Math.random() * 0.8;
+      const keyword = imageKeywords[category.name] || 'store';
+
+      const store: Store = {
+        id: `fake-${category.slug}-${i}`,
+        name: `${sub.name} ${modifiers[i % modifiers.length]}`,
+        category: category.name,
+        subcategory: sub.name,
+        rating: parseFloat(rating.toFixed(1)),
+        reviewsCount: Math.floor(Math.random() * 200) + 15,
+        distance: hood,
+        neighborhood: hood,
+        adType: isSponsored ? AdType.PREMIUM : AdType.ORGANIC,
+        isSponsored: isSponsored,
+        description: `Especialistas em ${sub.name.toLowerCase()}. Oferecemos o melhor serviço e atendimento da região de ${hood}.`,
+        image: `https://source.unsplash.com/800x600/?${keyword},${i}`,
+        banner_url: `https://source.unsplash.com/1200x400/?${keyword},${i+10}`,
+        gallery: [
+          `https://source.unsplash.com/800x800/?${keyword},${i+20}`,
+          `https://source.unsplash.com/800x800/?${keyword},${i+21}`,
+          `https://source.unsplash.com/800x800/?${keyword},${i+22}`,
+        ],
+        logoUrl: getStoreLogo(logoIndex++),
+        verified: Math.random() > 0.3,
+        isOpenNow: Math.random() > 0.2,
+        rua: 'Estrada dos Três Rios',
+        numero: `${100 + i * 50}`,
+        bairro: hood,
+        cidade: 'Rio de Janeiro',
+        whatsapp_publico: `219${Math.floor(8000 + Math.random() * 1000)}${Math.floor(1000 + Math.random() * 1000)}`,
+        instagram: `@${sub.name.replace(/[\s&]/g, '').toLowerCase()}${hood.toLowerCase()}`,
+        payment_methods: ['Dinheiro', 'Pix', 'Cartão de Crédito', 'Cartão de Débito'],
+        business_hours: {
+          segunda: { open: true, start: '09:00', end: '18:00' },
+          terca: { open: true, start: '09:00', end: '18:00' },
+          quarta: { open: true, start: '09:00', end: '18:00' },
+          quinta: { open: true, start: '09:00', end: '18:00' },
+          sexta: { open: true, start: '09:00', end: '20:00' },
+          sabado: { open: true, start: '09:00', end: '14:00' },
+          domingo: { open: false, start: '', end: '' },
+        },
+      };
+      allStores.push(store);
+    }
+  });
+  return allStores;
 };
 
 export const STORES: Store[] = [
   ...BASE_STORES,
-  ...generateFakeStores(60)
+  ...generateAllFakeStores()
 ];
 
 export const EDITORIAL_SERVICES: EditorialCollection[] = [
@@ -672,94 +705,47 @@ export const MOCK_JOBS: Job[] = [
 ];
 
 export const MOCK_CLASSIFIEDS: Classified[] = [
-    {
-        id: 'cl-1',
-        title: 'Atendente de Balcão',
-        advertiser: 'Padaria Imperial',
-        category: 'Empregos',
-        neighborhood: 'Freguesia',
-        description: 'Vaga para atendimento em padaria tradicional. Horário flexível e benefícios.',
-        timestamp: 'Há 2h',
-        contactWhatsapp: '5521999999999',
-        typeLabel: 'CLT',
-        jobDetails: MOCK_JOBS[0],
-        imageUrl: 'https://images.unsplash.com/photo-1555963634-b51a42e1fe28?q=80&w=800&auto=format&fit=crop'
-    },
-    {
-        id: 'cl-2',
-        title: 'Reforma de Estofados e Poltronas',
-        advertiser: 'Tapeçaria Silva',
-        category: 'Serviços',
-        neighborhood: 'Taquara',
-        description: 'Especialista em reformas de sofás, cadeiras e estofados em geral. Orçamento grátis no local.',
-        timestamp: 'Há 5h',
-        contactWhatsapp: '5521988888888',
-        typeLabel: 'Serviço',
-        imageUrl: 'https://images.unsplash.com/photo-1595861225919-21d53874316b?q=80&w=800&auto=format&fit=crop'
-    },
-    {
-        id: 'cl-3',
-        title: 'Venda de Balcão Refrigerado Industrial',
-        advertiser: 'Padaria Imperial',
-        category: 'Desapega JPA',
-        neighborhood: 'Freguesia',
-        description: 'Balcão em perfeito estado, revisado recentemente. Motivo: reforma total da loja.',
-        timestamp: 'Ontem',
-        contactWhatsapp: '5521999999999',
-        price: 'R$ 1.200,00',
-        typeLabel: 'Venda',
-        imageUrl: 'https://images.unsplash.com/photo-1620912189862-85a732230042?q=80&w=800&auto=format&fit=crop'
-    },
-    {
-        id: 'cl-4',
-        title: 'Aluga-se Sala Comercial na Freguesia',
-        advertiser: 'JPA Imóveis',
-        category: 'Imóveis',
-        neighborhood: 'Freguesia',
-        description: 'Sala com 32m², ar condicionado e 1 vaga. Prédio com portaria 24h. Ideal para consultórios.',
-        timestamp: 'Há 2 dias',
-        contactWhatsapp: '5521977777777',
-        price: 'R$ 1.500/mês',
-        typeLabel: 'Aluguel',
-        imageUrl: 'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?q=80&w=800&auto=format&fit=crop'
-    },
-    {
-        id: 'cl-5',
-        title: 'Vendedor Externo',
-        advertiser: 'JPA Telecom',
-        category: 'Empregos',
-        neighborhood: 'Taquara',
-        description: 'Vendas de planos de internet. Comissionamento agressivo e ajuda de custo.',
-        timestamp: 'Há 1 dia',
-        contactWhatsapp: '5521988888888',
-        typeLabel: 'PJ',
-        jobDetails: MOCK_JOBS[1],
-        imageUrl: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?q=80&w=800&auto=format&fit=crop'
-    },
-    {
-        id: 'cl-6',
-        title: 'Adoção: filhotes de gatinho',
-        advertiser: 'Mariana L.',
-        category: 'Adoção de pets',
-        neighborhood: 'Anil',
-        description: 'Resgatei uma ninhada e agora esses 3 bebês procuram um lar com amor. Já comem ração e usam a caixa de areia.',
-        timestamp: 'Há 3 dias',
-        contactWhatsapp: '5521966666666',
-        typeLabel: 'Adoção',
-        imageUrl: 'https://images.unsplash.com/photo-1574158622682-e40e69841006?q=80&w=800&auto=format&fit=crop'
-    },
-    {
-        id: 'cl-7',
-        title: 'Doação de Roupas de Inverno',
-        advertiser: 'Comunitário',
-        category: 'Doações em geral',
-        neighborhood: 'Pechincha',
-        description: 'Estamos arrecadando casacos e cobertores em bom estado para a campanha do agasalho. Ponto de coleta na associação de moradores.',
-        timestamp: 'Há 4 dias',
-        contactWhatsapp: '5521955555555',
-        typeLabel: 'Doação',
-        imageUrl: 'https://images.unsplash.com/photo-160533833-2413154b54e3?q=80&w=800&auto=format&fit=crop'
-    }
+    // Orçamento de Serviços (5)
+    { id: 'cl-serv-1', title: 'Eletricista Residencial 24h', advertiser: 'Sérgio Luz', category: 'Orçamento de Serviços', neighborhood: 'Freguesia', description: 'Atendo emergências, curto-circuito, troca de disjuntor. Orçamento rápido pelo WhatsApp.', timestamp: 'Há 15 min', contactWhatsapp: '5521999991111', typeLabel: 'Serviço', imageUrl: 'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?q=80&w=800' },
+    { id: 'cl-serv-2', title: 'Instalação de Ar Condicionado Split', advertiser: 'JPA Refrigeração', category: 'Orçamento de Serviços', neighborhood: 'Taquara', description: 'Instalação e manutenção de ar condicionado. Equipe qualificada e com garantia.', timestamp: 'Há 1h', contactWhatsapp: '5521988882222', typeLabel: 'Serviço', imageUrl: 'https://images.unsplash.com/photo-1596541324213-981a54a48576?q=80&w=800' },
+    { id: 'cl-serv-3', title: 'Pintor Profissional', advertiser: 'Renova Cor', category: 'Orçamento de Serviços', neighborhood: 'Anil', description: 'Pintura de apartamentos, casas e fachadas. Serviço limpo e rápido.', timestamp: 'Há 2h', contactWhatsapp: '5521977773333', typeLabel: 'Serviço', imageUrl: 'https://images.unsplash.com/photo-1598252994034-2193f05b1a37?q=80&w=800' },
+    { id: 'cl-serv-4', title: 'Conserto de Geladeiras e Máquinas', advertiser: 'Refrilar Assistência', category: 'Orçamento de Serviços', neighborhood: 'Pechincha', description: 'Conserto de eletrodomésticos linha branca. Visita técnica no mesmo dia.', timestamp: 'Há 4h', contactWhatsapp: '5521966664444', typeLabel: 'Serviço', imageUrl: 'https://images.unsplash.com/photo-1615897184992-3f59055955a8?q=80&w=800' },
+    { id: 'cl-serv-5', title: 'Montador de Móveis', advertiser: 'Carlos Montador', category: 'Orçamento de Serviços', neighborhood: 'Curicica', description: 'Montagem e desmontagem de móveis com agilidade e perfeição. Todos os tipos de móveis.', timestamp: 'Há 8h', contactWhatsapp: '5521955555555', typeLabel: 'Serviço', imageUrl: 'https://images.unsplash.com/photo-1600585152220-029e859e156b?q=80&w=800' },
+
+    // Imóveis (5)
+    { id: 'cl-im-1', title: 'Alugo Sala Comercial 40m²', advertiser: 'JPA Imóveis', category: 'Imóveis', neighborhood: 'Pechincha', description: 'Sala comercial em prédio com portaria. Sol da manhã, 1 vaga. Ideal para consultório.', timestamp: 'Há 3h', contactWhatsapp: '5521977773333', typeLabel: 'Aluguel', price: 'R$ 1.800/mês', imageUrl: 'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?q=80&w=800' },
+    { id: 'cl-im-2', title: 'Vendo Loja de Rua na Freguesia', advertiser: 'Oportunidade Imóveis', category: 'Imóveis', neighborhood: 'Freguesia', description: 'Loja com 80m² em rua movimentada. Ponto excelente para farmácia ou mercado.', timestamp: 'Ontem', contactWhatsapp: '5521988884444', typeLabel: 'Venda', price: 'R$ 450.000', imageUrl: 'https://images.unsplash.com/photo-1556742502-ec7c0e9f34b1?q=80&w=800' },
+    { id: 'cl-im-3', title: 'Alugo Galpão na Taquara', advertiser: 'Direto com Proprietário', category: 'Imóveis', neighborhood: 'Taquara', description: 'Galpão com 200m², pé direito de 6m. Ideal para pequena indústria ou estoque.', timestamp: 'Há 2 dias', contactWhatsapp: '5521999995555', typeLabel: 'Aluguel', price: 'R$ 5.000/mês', imageUrl: 'https://images.unsplash.com/photo-1587022205345-66b3e6486d3b?q=80&w=800' },
+    { id: 'cl-im-4', title: 'Passo o Ponto - Lanchonete Montada', advertiser: 'Carlos Alberto', category: 'Imóveis', neighborhood: 'Freguesia', description: 'Passo o ponto de lanchonete completa e funcionando. Clientela formada. Motivo: mudança de cidade.', timestamp: 'Há 3 dias', contactWhatsapp: '5521987651234', typeLabel: 'Venda', price: 'R$ 80.000', imageUrl: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?q=80&w=800' },
+    { id: 'cl-im-5', title: 'Aluga-se Quiosque em Shopping', advertiser: 'ADM Shopping Center', category: 'Imóveis', neighborhood: 'Anil', description: 'Quiosque de 9m² em corredor de grande movimento no Center Shopping. ', timestamp: 'Há 5 dias', contactWhatsapp: '5521976549876', typeLabel: 'Aluguel', price: 'R$ 3.500/mês', imageUrl: 'https://images.unsplash.com/photo-1580820216940-6d9ac53272e2?q=80&w=800' },
+
+    // Empregos (5)
+    { id: 'cl-emp-1', title: 'Vaga para Vendedor(a) de Loja', advertiser: 'Boutique Chic', category: 'Empregos', neighborhood: 'Anil', description: 'Procuramos vendedora com experiência em moda feminina. Salário + comissão.', timestamp: 'Há 1h', contactWhatsapp: '5521988776655', typeLabel: 'CLT', imageUrl: 'https://images.unsplash.com/photo-1525507119028-ed4c629a60a3?q=80&w=800' },
+    { id: 'cl-emp-2', title: 'Garçom para Fim de Semana', advertiser: 'Bar do Zé', category: 'Empregos', neighborhood: 'Freguesia', description: 'Vaga para garçom/garçonete com experiência para noites de sexta e sábado.', timestamp: 'Há 6h', contactWhatsapp: '5521977665544', typeLabel: 'Freelancer', imageUrl: 'https://images.unsplash.com/photo-1552566626-52f8b828add9?q=80&w=800' },
+    { id: 'cl-emp-3', title: 'Recepcionista para Academia', advertiser: 'Academia FitBairro', category: 'Empregos', neighborhood: 'Taquara', description: 'Vaga para recepcionista no período da tarde/noite. Boa comunicação é essencial.', timestamp: 'Há 9h', contactWhatsapp: '5521966554433', typeLabel: 'CLT', imageUrl: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?q=80&w=800' },
+    { id: 'cl-emp-4', title: 'Motorista Categoria D', advertiser: 'JPA Entregas', category: 'Empregos', neighborhood: 'Curicica', description: 'Vaga para motorista entregador com CNH categoria D. Entregas na região de Jacarepaguá.', timestamp: 'Ontem', contactWhatsapp: '5521955443322', typeLabel: 'CLT', imageUrl: 'https://images.unsplash.com/photo-1551803091-e373c2c606b2?q=80&w=800' },
+    { id: 'cl-emp-5', title: 'Designer Gráfico (Freelance)', advertiser: 'Agência Criativa', category: 'Empregos', neighborhood: 'Freguesia', description: 'Procuramos designer para projetos pontuais de social media para comércios locais.', timestamp: 'Há 2 dias', contactWhatsapp: '5521944332211', typeLabel: 'PJ', imageUrl: 'https://images.unsplash.com/photo-1626785774573-4b799315345d?q=80&w=800' },
+
+    // Adoção de pets (5)
+    { id: 'cl-ado-1', title: 'Adoção Urgente: Gatinhos 2 meses', advertiser: 'Mariana L.', category: 'Adoção de pets', neighborhood: 'Anil', description: 'Resgatei uma ninhada e agora esses 3 bebês procuram um lar com amor. Já comem ração.', timestamp: 'Há 3 dias', contactWhatsapp: '5521966666666', typeLabel: 'Adoção', imageUrl: 'https://images.unsplash.com/photo-1574158622682-e40e69841006?q=80&w=800' },
+    { id: 'cl-ado-2', title: 'Cachorrinha Vira-lata Carinhosa', advertiser: 'Projeto 4 Patas', category: 'Adoção de pets', neighborhood: 'Tanque', description: 'Essa linda menina de porte médio foi resgatada e está pronta para uma família. Castrada e vacinada.', timestamp: 'Há 4 dias', contactWhatsapp: '5521955557777', typeLabel: 'Adoção', imageUrl: 'https://images.unsplash.com/photo-1561037404-61cd46aa615b?q=80&w=800' },
+    { id: 'cl-ado-3', title: 'Filhotes de Labrador para Adoção', advertiser: 'Canil do Bem', category: 'Adoção de pets', neighborhood: 'Freguesia', description: 'Mãe resgatada deu cria. Filhotes saudáveis procurando um lar responsável.', timestamp: 'Há 1 semana', contactWhatsapp: '5521944448888', typeLabel: 'Adoção', imageUrl: 'https://images.unsplash.com/photo-1553882159-4f77243236e7?q=80&w=800' },
+    { id: 'cl-ado-4', title: 'Gato Adulto Preto e Branco', advertiser: 'Ana Paula', category: 'Adoção de pets', neighborhood: 'Pechincha', description: 'Gato muito dócil, castrado. Infelizmente preciso me mudar e não posso levá-lo. Procura um novo sofá para dormir.', timestamp: 'Há 1 semana', contactWhatsapp: '5521933339999', typeLabel: 'Adoção', imageUrl: 'https://images.unsplash.com/photo-1570824104453-508955ab7140?q=80&w=800' },
+    { id: 'cl-ado-5', title: 'Hamster para adoção com gaiola', advertiser: 'Luiza F.', category: 'Adoção de pets', neighborhood: 'Taquara', description: 'Meu filho perdeu o interesse, estou doando o hamster com a gaiola completa e acessórios.', timestamp: 'Há 2 semanas', contactWhatsapp: '5521922221111', typeLabel: 'Adoção', imageUrl: 'https://images.unsplash.com/photo-1425082661705-1834bfd09d64?q=80&w=800' },
+
+    // Doações em geral (5)
+    { id: 'cl-doa-1', title: 'Doação de Roupas de Inverno', advertiser: 'Comunitário', category: 'Doações em geral', neighborhood: 'Pechincha', description: 'Arrecadando casacos e cobertores em bom estado para a campanha do agasalho. Ponto de coleta na associação.', timestamp: 'Há 4 dias', contactWhatsapp: '5521955555555', typeLabel: 'Doação', imageUrl: 'https://images.unsplash.com/photo-160533833-2413154b54e3?q=80&w=800' },
+    { id: 'cl-doa-2', title: 'Doe Livros Infantis', advertiser: 'Escola Aprender', category: 'Doações em geral', neighborhood: 'Anil', description: 'Estamos montando uma biblioteca comunitária para as crianças. Aceitamos doações de livros em bom estado.', timestamp: 'Há 5 dias', contactWhatsapp: '5521944446666', typeLabel: 'Doação', imageUrl: 'https://images.unsplash.com/photo-1507842217343-583bb7270b66?q=80&w=800' },
+    { id: 'cl-doa-3', title: 'Arrecadação de Ração para Abrigo', advertiser: 'Amigos dos Animais', category: 'Doações em geral', neighborhood: 'Freguesia', description: 'Nosso abrigo está precisando de ração para cães e gatos. Qualquer quantidade ajuda!', timestamp: 'Há 1 semana', contactWhatsapp: '5521933337777', typeLabel: 'Doação', imageUrl: 'https://images.unsplash.com/photo-1583232231904-4e7850550604?q=80&w=800' },
+    { id: 'cl-doa-4', title: 'Doe um Brinquedo, Ganhe um Sorriso', advertiser: 'ONG Criança Feliz', category: 'Doações em geral', neighborhood: 'Curicica', description: 'Campanha de arrecadação de brinquedos novos ou usados em bom estado para o Dia das Crianças.', timestamp: 'Há 1 semana', contactWhatsapp: '5521922228888', typeLabel: 'Doação', imageUrl: 'https://images.unsplash.com/photo-1608846932299-617a653c07a3?q=80&w=800' },
+    { id: 'cl-doa-5', title: 'Doação de Cesta Básica', advertiser: 'Igreja da Praça', category: 'Doações em geral', neighborhood: 'Tanque', description: 'Estamos recebendo alimentos não perecíveis para montar cestas básicas para famílias necessitadas.', timestamp: 'Há 10 dias', contactWhatsapp: '5521911119999', typeLabel: 'Doação', imageUrl: 'https://images.unsplash.com/photo-1599059813005-11265ba4b4ce?q=80&w=800' },
+    
+    // Desapega JPA (5)
+    { id: 'cl-des-1', title: 'Vendo Bicicleta Aro 29 Usada', advertiser: 'Pedro M.', category: 'Desapega JPA', neighborhood: 'Freguesia', description: 'Bicicleta em ótimo estado, pouquíssimo usada. Pneus novos. Apenas retirada.', timestamp: 'Há 1 dia', contactWhatsapp: '5521998765432', typeLabel: 'Venda', price: 'R$ 800,00', imageUrl: 'https://images.unsplash.com/photo-1532298229144-0ec0c57515c7?q=80&w=800' },
+    { id: 'cl-des-2', title: 'Sofá 3 lugares Retrátil', advertiser: 'Fernanda R.', category: 'Desapega JPA', neighborhood: 'Taquara', description: 'Sofá confortável, precisa de limpeza, mas estrutura está perfeita. Motivo: comprei um novo.', timestamp: 'Há 2 dias', contactWhatsapp: '5521987659876', typeLabel: 'Venda', price: 'R$ 350,00', imageUrl: 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?q=80&w=800' },
+    { id: 'cl-des-3', title: 'Vendo iPhone 11 64GB', advertiser: 'Lucas T.', category: 'Desapega JPA', neighborhood: 'Pechincha', description: 'Saúde da bateria em 85%. Tela intacta, sempre usado com película. Acompanha caixa e cabo.', timestamp: 'Há 2 dias', contactWhatsapp: '5521976541234', typeLabel: 'Venda', price: 'R$ 1.500,00', imageUrl: 'https://images.unsplash.com/photo-1616348436168-de43ad0e12de?q=80&w=800' },
+    { id: 'cl-des-4', title: 'Mesa de Jantar 4 Lugares', advertiser: 'Beatriz C.', category: 'Desapega JPA', neighborhood: 'Anil', description: 'Mesa de madeira com tampo de vidro. Acompanha 4 cadeiras estofadas. Pequenas marcas de uso.', timestamp: 'Há 4 dias', contactWhatsapp: '5521965439876', typeLabel: 'Venda', price: 'R$ 400,00', imageUrl: 'https://images.unsplash.com/photo-1533090481720-856c6e3c1fdc?q=80&w=800' },
+    { id: 'cl-des-5', title: 'Tênis de Corrida nº 42', advertiser: 'Ricardo S.', category: 'Desapega JPA', neighborhood: 'Freguesia', description: 'Usei apenas 3 vezes, ficou grande para mim. Marca Asics. Em estado de novo.', timestamp: 'Há 5 dias', contactWhatsapp: '5521954328765', typeLabel: 'Venda', price: 'R$ 250,00', imageUrl: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=800' },
 ];
 
 export type TaxonomyType = 'category' | 'subcategory' | 'specialty';

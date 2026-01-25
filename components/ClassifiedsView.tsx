@@ -21,7 +21,7 @@ import { Classified } from '../types';
 import { MOCK_CLASSIFIEDS } from '../constants';
 
 const CLASSIFIED_CATEGORIES = [
-  { id: 'servicos', name: 'Serviços', slug: 'servicos', icon: <Wrench />, color: 'bg-brand-blue' },
+  { id: 'servicos', name: 'Orçamento de Serviços', slug: 'servicos', icon: <Wrench />, color: 'bg-brand-blue' },
   { id: 'imoveis', name: 'Imóveis', slug: 'imoveis', icon: <Building2 />, color: 'bg-brand-blue' },
   { id: 'emprego', name: 'Emprego', slug: 'emprego', icon: <Briefcase />, color: 'bg-brand-blue' },
   { id: 'adocao', name: 'Adoção', slug: 'adocao', icon: <PawPrint />, color: 'bg-brand-blue' },
@@ -143,7 +143,7 @@ export const ClassifiedsView: React.FC<ClassifiedsViewProps> = ({ onBack, onNavi
     });
 
     const mapping: Record<string, string> = {
-      'servicos': 'Serviços',
+      'servicos': 'Orçamento de Serviços',
       'imoveis': 'Imóveis',
       'emprego': 'Empregos',
       'adocao': 'Adoção de pets',

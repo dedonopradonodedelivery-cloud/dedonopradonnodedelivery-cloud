@@ -59,7 +59,7 @@ const MOCK_SLOTS_OCCUPIED: Record<string, Record<string, Record<string, number>>
     }
   },
   'cat': {
-    'Serviços': { // 4 vagas no total
+    'Orçamento de Serviços': { // 4 vagas no total
       'Freguesia': 3, // 1 vaga -> Poucas vagas
       'Pechincha': 4, // 0 vagas -> Esgotado
       'Taquara': 1    // 3 vagas -> Disponível
@@ -249,7 +249,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
         totalSlots = 3;
         occupiedSlots = MOCK_SLOTS_OCCUPIED.home?.all?.[hood] || 0;
     } else if (selectedMode.id === 'cat') {
-        if (categoryName === 'Serviços' || categoryName === 'Imóveis Comerciais') {
+        if (categoryName === 'Orçamento de Serviços' || categoryName === 'Imóveis Comerciais') {
             totalSlots = 4;
         } else {
             totalSlots = 2;
@@ -296,7 +296,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
 
     // Preços dinâmicos por categoria
     if (selectedMode.id === 'cat') {
-      if (categoryName === 'Serviços') {
+      if (categoryName === 'Orçamento de Serviços') {
         basePrice = 49.90;
       } else if (categoryName === 'Imóveis Comerciais') {
         basePrice = 59.90;
@@ -560,7 +560,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
             {DISPLAY_MODES.map((mode) => {
               let displayPrice = mode.price;
               if (mode.id === 'cat') {
-                if (categoryName === 'Serviços') displayPrice = 49.90;
+                if (categoryName === 'Orçamento de Serviços') displayPrice = 49.90;
                 else if (categoryName === 'Imóveis Comerciais') displayPrice = 59.90;
               }
 
@@ -638,48 +638,12 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
             </div>
             <div className="grid grid-cols-2 gap-3">
                 {NEIGHBORHOODS_LIST.map(hood => {
-                    const { status, available } = getNeighborhoodAvailabilityStatus(hood);
+                    const { available } = getNeighborhoodAvailabilityStatus(hood);
                     const isSelected = selectedNeighborhoods.includes(hood);
-
-                    let statusColorClass = 'text-emerald-500';
-                    if (status === 'Poucas vagas') statusColorClass = 'text-amber-500';
-                    if (status === 'Esgotado') statusColorClass = 'text-rose-500';
-
-                    const statusText = isSelected ? 'Selecionado' : status;
-                    if (isSelected) statusColorClass = 'text-blue-400';
-
                     return (
-                        <button
-                            key={hood}
-                            onClick={() => {
-                                if (available) {
-                                    setSelectedNeighborhoods(prev =>
-                                        prev.includes(hood)
-                                            ? prev.filter(h => h !== hood)
-                                            : [...prev, hood]
-                                    );
-                                }
-                            }}
-                            className={`p-4 rounded-2xl border-2 flex flex-col justify-between transition-all min-h-[80px] ${
-                                !available
-                                    ? 'bg-slate-900/50 border-white/5 opacity-50 cursor-default'
-                                    : isSelected
-                                    ? 'bg-blue-600/10 border-blue-500'
-                                    : 'bg-slate-900 border-white/5'
-                            }`}
-                        >
-                            <p
-                                className={`font-bold text-xs ${
-                                    !available ? 'text-slate-600' : 'text-white'
-                                }`}
-                            >
-                                {hood}
-                            </p>
-                            <p
-                                className={`text-[8px] font-black uppercase tracking-widest mt-1 ${statusColorClass}`}
-                            >
-                                {statusText}
-                            </p>
+                        <button key={hood} onClick={() => { if (available) { setSelectedNeighborhoods(prev => prev.includes(hood) ? prev.filter(h => h !== hood) : [...prev, hood]); } }} className={`p-4 rounded-2xl border-2 flex flex-col justify-between transition-all min-h-[80px] ${!available ? 'bg-slate-900/50 border-white/5 opacity-50 cursor-default' : isSelected ? 'bg-blue-600/10 border-blue-500' : 'bg-slate-900 border-white/5'}`}>
+                            <p className={`font-bold text-xs ${!available ? 'text-slate-600' : 'text-white'}`}>{hood}</p>
+                            <p className={`text-[8px] font-black uppercase tracking-widest mt-1 ${!available ? 'text-rose-500' : isSelected ? 'text-blue-400' : 'text-emerald-500'}`}>{!available ? `Ocupado` : isSelected ? 'Selecionado' : 'Livre'}</p>
                         </button>
                     );
                 })}
@@ -775,7 +739,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
             <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-blue-500 flex items-center gap-2 px-1"><Check size={14} /> 5. Finalizar Compra</h3>
             <div className="bg-slate-900 rounded-[2.5rem] p-8 border border-white/10 shadow-2xl space-y-8">
                 <div className="space-y-2">
-                    <div className="flex justify-between text-sm"><span className="text-slate-500">Modo: {selectedMode?.label}</span><span className="font-bold text-white">R$ {selectedMode?.price.toFixed(2).replace('.',',')} / mês</span></div>
+                    <div className="flex justify-between text-sm"><span className="text-slate-500">Modo: {selectedMode?.label}</span><span className="font-bold text-white">R$ {selectedMode?.price.toFixed(2)} / mês</span></div>
                     <div className="flex justify-between text-sm"><span className="text-slate-500">Bairros selecionados</span><span className="font-bold text-white">× {selectedNeighborhoods.length}</span></div>
                     <div className="flex justify-between text-sm"><span className="text-slate-500">Vigência Total</span><span className="font-bold text-white">{prices.isPackage ? '90 dias' : '30 dias'}</span></div>
                     {artChoice === 'pro' && <div className="flex justify-between text-sm text-amber-400"><span className="font-medium">Arte Profissional</span><span className="font-black">+ R$ 69,90</span></div>}
