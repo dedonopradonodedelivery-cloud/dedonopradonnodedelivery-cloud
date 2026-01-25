@@ -1,9 +1,9 @@
-
-import React, { useState } from 'react';
-import { Store, Clock, MoreHorizontal, Heart, MessageSquare, Share2, Flag, CheckCircle2 } from 'lucide-react';
+import React, { useState, useMemo } from 'react';
+import { Store, Clock, MoreHorizontal, Heart, MessageSquare, Share2, Flag, CheckCircle2, ChevronLeft, Search } from 'lucide-react';
 import { Store as StoreType, CommunityPost, ReportReason } from '../types';
 import { STORES, MOCK_COMMUNITY_POSTS } from '../constants';
 import { ReportModal } from './ReportModal';
+import { useNeighborhood, NEIGHBORHOODS } from '../contexts/NeighborhoodContext';
 
 const MOCK_POSTS: CommunityPost[] = MOCK_COMMUNITY_POSTS;
 
@@ -45,9 +45,11 @@ const PostCard: React.FC<{ post: CommunityPost; onStoreClick: (store: StoreType)
       </div>
 
       {/* MÍDIA */}
-      <div className="relative aspect-square bg-gray-100 dark:bg-gray-800">
-        <img src={post.imageUrl} alt="Conteúdo do post" className="w-full h-full object-cover" />
-      </div>
+      {post.imageUrl && (
+        <div className="relative aspect-square bg-gray-100 dark:bg-gray-800">
+            <img src={post.imageUrl} alt="Conteúdo do post" className="w-full h-full object-cover" />
+        </div>
+      )}
 
       {/* AÇÕES */}
       <div className="p-3 flex items-center justify-between">
@@ -111,17 +113,59 @@ const PostCard: React.FC<{ post: CommunityPost; onStoreClick: (store: StoreType)
   );
 };
 
-
 export const NeighborhoodPostsView: React.FC<{ onBack: () => void; onStoreClick: (store: StoreType) => void }> = ({ onBack, onStoreClick }) => {
+  const { currentNeighborhood, setNeighborhood } = useNeighborhood();
+  const [searchTerm, setSearchTerm] = useState('');
+
+  const filteredPosts = useMemo(() => {
+    return MOCK_POSTS.filter(post => {
+      const matchNeighborhood = currentNeighborhood === "Jacarepaguá (todos)" || post.neighborhood === currentNeighborhood;
+      const matchSearch = !searchTerm || post.content.toLowerCase().includes(searchTerm.toLowerCase()) || post.userName.toLowerCase().includes(searchTerm.toLowerCase());
+      return matchNeighborhood && matchSearch;
+    });
+  }, [currentNeighborhood, searchTerm]);
+
   return (
-    <div className="max-w-md mx-auto py-4 space-y-4">
-      {MOCK_POSTS.map((post) => (
-        <PostCard key={post.id} post={post} onStoreClick={onStoreClick} />
-      ))}
-      <div className="py-10 text-center opacity-30 flex flex-col items-center">
-        <Store size={24} className="mb-2" />
-        <p className="text-[10px] font-black uppercase tracking-[0.3em]">Você chegou ao fim dos posts</p>
-      </div>
+    <div className="min-h-screen bg-[#F8F9FC] dark:bg-gray-950 font-sans animate-in fade-in duration-500 overflow-x-hidden">
+      <header className="bg-white dark:bg-gray-900 px-6 pt-10 pb-6 border-b border-gray-100 dark:border-gray-800 rounded-b-[2.5rem] shadow-sm sticky top-0 z-40">
+        <div className="flex items-center gap-4 mb-3">
+          <button onClick={onBack} className="p-2 bg-gray-50 dark:bg-gray-800 rounded-xl text-gray-500 hover:text-gray-900">
+            <ChevronLeft size={20} />
+          </button>
+          <div>
+            <h1 className="font-black text-xl text-gray-900 dark:text-white uppercase tracking-tighter leading-none">JPA Conversa</h1>
+            <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-1">O que está acontecendo agora no seu bairro</p>
+          </div>
+        </div>
+
+        <div className="relative mb-5 mt-4">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
+          <input 
+            type="text" 
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder="Buscar no bairro..."
+            className="w-full bg-gray-50 dark:bg-gray-800 border-none py-3.5 pl-11 pr-4 rounded-2xl text-sm font-medium outline-none focus:ring-2 focus:ring-[#1E5BFF]/30 transition-all shadow-inner dark:text-white"
+          />
+        </div>
+
+        <div className="flex gap-2 overflow-x-auto no-scrollbar -mx-1 px-1">
+          <button onClick={() => setNeighborhood("Jacarepaguá (todos)")} className={`px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap border ${currentNeighborhood === "Jacarepaguá (todos)" ? 'bg-[#1E5BFF] border-[#1E5BFF] text-white shadow-md' : 'bg-white dark:bg-gray-800 border-gray-100 dark:border-gray-700 text-gray-400'}`}>Todos</button>
+          {NEIGHBORHOODS.map(hood => (
+            <button key={hood} onClick={() => setNeighborhood(hood)} className={`px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap border ${currentNeighborhood === hood ? 'bg-[#1E5BFF] border-[#1E5BFF] text-white shadow-md' : 'bg-white dark:bg-gray-800 border-gray-100 dark:border-gray-700 text-gray-400'}`}>{hood}</button>
+          ))}
+        </div>
+      </header>
+      
+      <main className="max-w-md mx-auto py-4 space-y-4 w-full px-4">
+        {filteredPosts.map((post) => (
+          <PostCard key={post.id} post={post} onStoreClick={onStoreClick} />
+        ))}
+        <div className="py-10 text-center opacity-30 flex flex-col items-center">
+          <Store size={24} className="mb-2" />
+          <p className="text-[10px] font-black uppercase tracking-[0.3em]">Você chegou ao fim dos posts</p>
+        </div>
+      </main>
     </div>
   );
 };
