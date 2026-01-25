@@ -174,10 +174,11 @@ export interface Job {
   company: string;
   neighborhood: string;
   category: string;
-  type: 'CLT' | 'PJ' | 'Freelancer';
+  type: 'CLT' | 'PJ' | 'Freelancer' | 'Temporário' | 'Estágio';
   salary?: string;
   description: string;
   requirements: string[];
+  benefits?: string[];
   postedAt: string;
   isUrgentToday?: boolean;
   schedule?: string;
@@ -185,6 +186,11 @@ export interface Job {
   isSponsored?: boolean;
   sponsoredUntil?: string;
   isUrgent?: boolean;
+  logoUrl?: string;
+  candidacy_method: 'cv' | 'whatsapp';
+  modality: 'Presencial' | 'Híbrido' | 'Remoto';
+  experience?: string;
+  schedule_type?: 'Integral' | 'Meio período' | 'Escala';
 }
 
 export interface NeighborhoodCommunity {

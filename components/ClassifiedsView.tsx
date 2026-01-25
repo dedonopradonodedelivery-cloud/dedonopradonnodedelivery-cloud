@@ -23,7 +23,7 @@ import { MOCK_CLASSIFIEDS } from '../constants';
 const CLASSIFIED_CATEGORIES = [
   { id: 'servicos', name: 'Orçamento de Serviços', slug: 'servicos', icon: <Wrench />, color: 'bg-brand-blue' },
   { id: 'imoveis', name: 'Imóveis', slug: 'imoveis', icon: <Building2 />, color: 'bg-brand-blue' },
-  { id: 'emprego', name: 'Emprego', slug: 'emprego', icon: <Briefcase />, color: 'bg-brand-blue' },
+  { id: 'emprego', name: 'Vaga de emprego', slug: 'emprego', icon: <Briefcase />, color: 'bg-brand-blue' },
   { id: 'adocao', name: 'Adoção', slug: 'adocao', icon: <PawPrint />, color: 'bg-brand-blue' },
   { id: 'doacoes', name: 'Doações', slug: 'doacoes', icon: <Heart />, color: 'bg-brand-blue' },
   { id: 'desapega', name: 'Desapega', slug: 'desapega', icon: <Tag />, color: 'bg-brand-blue' },
@@ -216,6 +216,8 @@ export const ClassifiedsView: React.FC<ClassifiedsViewProps> = ({ onBack, onNavi
                     onClick={() => {
                         if (cat.id === 'imoveis') {
                             onNavigate('real_estate');
+                        } else if (cat.id === 'emprego') {
+                            onNavigate('jobs');
                         } else {
                             scrollToCategory(cat.id);
                         }
@@ -226,7 +228,7 @@ export const ClassifiedsView: React.FC<ClassifiedsViewProps> = ({ onBack, onNavi
         
         {/* Blocos de Conteúdo */}
         <div className="space-y-8">
-          {CLASSIFIED_CATEGORIES.filter(c => c.id !== 'imoveis').map(cat => (
+          {CLASSIFIED_CATEGORIES.filter(c => c.id !== 'imoveis' && c.id !== 'emprego').map(cat => (
             <CategorySection 
               key={cat.id}
               category={cat}

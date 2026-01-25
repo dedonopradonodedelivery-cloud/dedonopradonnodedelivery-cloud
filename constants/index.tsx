@@ -112,7 +112,7 @@ export const SUBCATEGORIES: Record<string, { name: string; icon: React.ReactNode
     { name: 'Auto Elétrica', icon: <Zap /> },
     { name: 'Pneus & Alinhamento', icon: <Settings /> },
     { name: 'Funilaria & Pintura', icon: <PaintRoller /> },
-    { name: 'Peças & Accessories', icon: <Package /> },
+    { name: 'Peças & Acessórios', icon: <Package /> },
     { name: 'Vistoria & Documentação', icon: <FileText /> },
     { name: 'Serviços Rápidos Auto', icon: <Zap /> },
   ],
@@ -302,7 +302,8 @@ export const EDITORIAL_SERVICES: EditorialCollection[] = [
 export const quickFilters = [
   { id: 'top_rated', label: 'Top Avaliados', icon: 'star' },
   { id: 'open_now', label: 'Aberto Agora', icon: 'clock' },
-  { id: 'nearby', label: 'Perto de Mim', icon: 'zap' }
+  { id: 'nearby', label: 'Perto de Mim', icon: 'zap' },
+  { id: 'cashback', label: 'Com Cashback', icon: 'percent' }
 ];
 
 export const STORIES: Story[] = [
@@ -326,7 +327,10 @@ export const MOCK_JOBS: Job[] = [
     contactWhatsapp: '5521999999999',
     postedAt: 'Há 2h',
     isSponsored: true,
-    sponsoredUntil: '2025-12-31'
+    sponsoredUntil: '2025-12-31',
+    // FIX: Added missing properties 'candidacy_method' and 'modality' to conform to the Job interface.
+    candidacy_method: 'whatsapp',
+    modality: 'Presencial',
   },
   {
     id: 'job-2',
@@ -341,7 +345,10 @@ export const MOCK_JOBS: Job[] = [
     schedule: 'Seg-Sex',
     contactWhatsapp: '5521988888888',
     postedAt: 'Há 1 dia',
-    isUrgent: true
+    isUrgent: true,
+    // FIX: Added missing properties 'candidacy_method' and 'modality' to conform to the Job interface.
+    candidacy_method: 'whatsapp',
+    modality: 'Presencial',
   }
 ];
 
