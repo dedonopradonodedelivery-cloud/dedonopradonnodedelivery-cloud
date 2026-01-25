@@ -1,9 +1,11 @@
+
 import React, { useState, useMemo } from 'react';
-import { Store, Clock, MoreHorizontal, Heart, MessageSquare, Share2, Flag, CheckCircle2, ChevronLeft, Search, SlidersHorizontal, X } from 'lucide-react';
+import { Store, Clock, MoreHorizontal, Heart, MessageSquare, Share2, Flag, CheckCircle2, ChevronLeft, Search, SlidersHorizontal, X, Plus } from 'lucide-react';
 import { Store as StoreType, CommunityPost, ReportReason } from '../types';
 import { STORES, MOCK_COMMUNITY_POSTS } from '../constants';
 import { ReportModal } from './ReportModal';
 import { useNeighborhood, NEIGHBORHOODS } from '../contexts/NeighborhoodContext';
+import { User } from '@supabase/supabase-js';
 
 const MOCK_POSTS: CommunityPost[] = MOCK_COMMUNITY_POSTS;
 
@@ -21,8 +23,14 @@ const SORT_OPTIONS = [
   { id: 'likes', label: 'Mais curtidos' },
 ];
 
+interface PostCardProps {
+  post: CommunityPost;
+  onStoreClick: (store: StoreType) => void;
+  user: User | null;
+  onRequireLogin: () => void;
+}
 
-const PostCard: React.FC<{ post: CommunityPost; onStoreClick: (store: StoreType) => void }> = ({ post, onStoreClick }) => {
+const PostCard: React.FC<PostCardProps> = ({ post, onStoreClick, user, onRequireLogin }) => {
   const [liked, setLiked] = useState(false);
   const [likesCount, setLikesCount] = useState(post.likes);
   const [isOptionsOpen, setIsOptionsOpen] = useState(false);
@@ -30,6 +38,10 @@ const PostCard: React.FC<{ post: CommunityPost; onStoreClick: (store: StoreType)
   const [showReportSuccess, setShowReportSuccess] = useState(false);
 
   const handleLike = () => {
+    if (!user) {
+      onRequireLogin();
+      return;
+    }
     setLiked(!liked);
     setLikesCount(prev => liked ? prev - 1 : prev + 1);
   };
@@ -44,6 +56,14 @@ const PostCard: React.FC<{ post: CommunityPost; onStoreClick: (store: StoreType)
     setIsReportModalOpen(false);
     setShowReportSuccess(true);
     setTimeout(() => setShowReportSuccess(false), 3000);
+  };
+
+  const handleAction = (action: () => void) => {
+    if (!user) {
+      onRequireLogin();
+    } else {
+      action();
+    }
   };
 
   return (
@@ -74,11 +94,11 @@ const PostCard: React.FC<{ post: CommunityPost; onStoreClick: (store: StoreType)
           <button onClick={handleLike} className={`flex items-center gap-2 transition-colors ${liked ? 'text-rose-500' : 'text-gray-500 dark:text-gray-400 hover:text-rose-500'}`}>
             <Heart size={24} className={liked ? 'fill-current' : ''} />
           </button>
-          <button className="flex items-center gap-2 text-gray-500 dark:text-gray-400 hover:text-blue-500">
+          <button onClick={() => handleAction(() => alert('Comentários em breve!'))} className="flex items-center gap-2 text-gray-500 dark:text-gray-400 hover:text-blue-500">
             <MessageSquare size={24} />
           </button>
         </div>
-        <button className="text-gray-500 dark:text-gray-400 hover:text-blue-500">
+        <button onClick={() => handleAction(() => alert('Compartilhamento em breve!'))} className="text-gray-500 dark:text-gray-400 hover:text-blue-500">
           <Share2 size={24} />
         </button>
       </div>
@@ -98,7 +118,7 @@ const PostCard: React.FC<{ post: CommunityPost; onStoreClick: (store: StoreType)
           <div className="bg-white dark:bg-gray-800 w-full rounded-t-2xl p-4 animate-in slide-in-from-bottom" onClick={e => e.stopPropagation()}>
             <div className="w-12 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full mx-auto mb-4"></div>
             <button 
-              onClick={() => { setIsOptionsOpen(false); setIsReportModalOpen(true); }}
+              onClick={() => handleAction(() => { setIsOptionsOpen(false); setIsReportModalOpen(true); })}
               className="w-full flex items-center gap-3 p-3 rounded-lg text-red-500 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
             >
               <Flag size={20} />
@@ -217,8 +237,14 @@ const FilterModal: React.FC<{
   );
 };
 
+interface NeighborhoodPostsViewProps {
+  onBack: () => void;
+  onStoreClick: (store: StoreType) => void;
+  user: User | null;
+  onRequireLogin: () => void;
+}
 
-export const NeighborhoodPostsView: React.FC<{ onBack: () => void; onStoreClick: (store: StoreType) => void }> = ({ onBack, onStoreClick }) => {
+export const NeighborhoodPostsView: React.FC<NeighborhoodPostsViewProps> = ({ onBack, onStoreClick, user, onRequireLogin }) => {
   const { currentNeighborhood, setNeighborhood } = useNeighborhood();
   const [searchTerm, setSearchTerm] = useState('');
   const [activeTheme, setActiveTheme] = useState('all');
@@ -298,8 +324,24 @@ export const NeighborhoodPostsView: React.FC<{ onBack: () => void; onStoreClick:
       </header>
       
       <main className="max-w-md mx-auto py-4 space-y-4 w-full px-4">
+        <div className="p-4 bg-white dark:bg-gray-900 sm:rounded-2xl border-b sm:border border-gray-100 dark:border-gray-800">
+          <button 
+            onClick={() => {
+              if (!user) {
+                onRequireLogin();
+              } else {
+                alert('Criação de post em breve!');
+              }
+            }}
+            className="w-full bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400 font-bold text-sm py-3 px-4 rounded-xl transition-colors flex items-center gap-2"
+          >
+            <Plus size={16} />
+            Começar uma conversa...
+          </button>
+        </div>
+
         {filteredPosts.map((post) => (
-          <PostCard key={post.id} post={post} onStoreClick={onStoreClick} />
+          <PostCard key={post.id} post={post} onStoreClick={onStoreClick} user={user} onRequireLogin={onRequireLogin} />
         ))}
         <div className="py-10 text-center opacity-30 flex flex-col items-center">
           <Store size={24} className="mb-2" />

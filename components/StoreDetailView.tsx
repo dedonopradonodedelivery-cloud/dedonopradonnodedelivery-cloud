@@ -143,6 +143,7 @@ export const StoreDetailView: React.FC<{
   const encodedAddress = encodeURIComponent(addressFormatted);
   const gmapsRouteUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodedAddress}`;
   const wazeRouteUrl = `https://waze.com/ul?q=${encodedAddress}&navigate=yes`;
+  const instagramUrl = store.instagram ? `https://instagram.com/${store.instagram.replace('@', '')}` : '#';
 
   const reviewsToDisplay = useMemo(() => {
     return MOCK_REVIEWS;
@@ -190,7 +191,7 @@ export const StoreDetailView: React.FC<{
           </div>
 
           {/* Cabeçalho */}
-          <div className="mb-6">
+          <div className="mb-8">
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight leading-tight mb-2">{store.name}</h1>
             <div className="flex items-center gap-2 text-xs font-medium text-gray-500 dark:text-gray-400">
                 <span className="uppercase font-bold tracking-widest text-[#1E5BFF]">{store.category}</span>
@@ -203,18 +204,57 @@ export const StoreDetailView: React.FC<{
             </div>
           </div>
 
-          {/* --- WHATSAPP CTA --- */}
-          <section className="mb-10">
-              <a 
-                href={`https://wa.me/55${whatsappDigits}`} 
-                target="_blank" 
-                rel="noopener noreferrer" 
-                onClick={() => track('store_click_whatsapp')} 
-                className="w-full bg-[#00D95F] hover:bg-[#00C254] text-white font-black py-6 rounded-[24px] flex items-center justify-center gap-3 shadow-md shadow-green-500/10 active:scale-95 transition-all text-sm uppercase tracking-widest"
-              >
-                <MessageSquare className="w-5 h-5 fill-white" />
-                Falar no WhatsApp
-              </a>
+          {/* ONDE ENCONTRAR (REPOSICIONADO) */}
+          <section className="mb-10 space-y-6">
+              <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Onde encontrar essa loja:</h3>
+              
+              <div className="flex gap-3">
+                  <a 
+                    href={`https://wa.me/55${whatsappDigits}`} 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    onClick={() => track('store_click_whatsapp')} 
+                    className="flex-1 bg-[#00D95F] hover:bg-[#00C254] text-white font-black py-4 rounded-2xl flex items-center justify-center gap-2.5 shadow-md shadow-green-500/10 active:scale-95 transition-all text-xs uppercase tracking-widest"
+                  >
+                    <MessageSquare className="w-4 h-4 fill-white" />
+                    WhatsApp
+                  </a>
+                  {store.instagram && (
+                    <a 
+                      href={instagramUrl} 
+                      target="_blank" 
+                      rel="noopener noreferrer" 
+                      onClick={() => track('store_click_instagram')} 
+                      className="flex-1 bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-200 font-bold py-4 rounded-2xl flex items-center justify-center gap-2.5 border border-gray-100 dark:border-gray-700 shadow-sm active:scale-95 transition-all text-xs uppercase tracking-widest"
+                    >
+                      <Instagram className="w-4 h-4" />
+                      Instagram
+                    </a>
+                  )}
+              </div>
+
+              <div className="space-y-4">
+                  <div className="flex items-start gap-4 pt-4 border-t border-gray-50 dark:border-gray-800">
+                      <div className="w-10 h-10 rounded-xl bg-gray-50 dark:bg-gray-900 flex items-center justify-center text-gray-400 shrink-0">
+                          <MapPin size={18} />
+                      </div>
+                      <div className="flex-1">
+                          <p className="text-[9px] font-bold text-gray-400 uppercase tracking-wider mb-0.5">Endereço Unidade</p>
+                          <p className="text-sm font-semibold text-gray-800 dark:text-gray-200 leading-snug">{addressFormatted}</p>
+                          {!hasAddress && <p className="text-[9px] text-amber-500 font-bold uppercase mt-1">Localização não disponível</p>}
+                      </div>
+                  </div>
+                  {hasAddress && (
+                    <div className="flex gap-2">
+                        <a href={wazeRouteUrl} target="_blank" rel="noopener" className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 active:scale-95 transition-all">
+                            <Navigation size={12} className="text-blue-400" /><span className="text-[10px] font-black uppercase tracking-widest text-gray-600 dark:text-gray-300">Waze</span>
+                        </a>
+                        <a href={gmapsRouteUrl} target="_blank" rel="noopener" className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 active:scale-95 transition-all">
+                            <MapIcon size={12} className="text-red-400" /><span className="text-[10px] font-black uppercase tracking-widest text-gray-600 dark:text-gray-300">Maps</span>
+                        </a>
+                    </div>
+                  )}
+              </div>
           </section>
 
           {/* --- NAVEGAÇÃO DE ABAS --- */}
@@ -253,68 +293,8 @@ export const StoreDetailView: React.FC<{
                         </p>
                     </div>
 
-                    {/* Onde encontrar */}
-                    <div className="space-y-8">
-                        <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Onde encontrar</h3>
-                        
-                        <div className="space-y-8">
-                            <div className="flex items-center justify-between group">
-                                <div className="flex gap-4">
-                                    <div className="w-10 h-10 rounded-xl bg-gray-50 dark:bg-gray-900 flex items-center justify-center text-gray-400 shrink-0">
-                                        <Phone size={18} />
-                                    </div>
-                                    <div>
-                                        <p className="text-[9px] font-bold text-gray-400 uppercase tracking-wider mb-0.5">Telefone Comercial</p>
-                                        <p className="text-lg font-black text-gray-800 dark:text-gray-200 tracking-tight leading-none">
-                                            {phoneFormatted || 'Não informado'}
-                                        </p>
-                                    </div>
-                                </div>
-                                {phoneDigits && (
-                                    <a 
-                                      href={`tel:${phoneDigits}`} 
-                                      className="w-10 h-10 rounded-full bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center text-[#1E5BFF] active:scale-90 transition-transform shadow-sm border border-blue-100/50"
-                                    >
-                                        <Phone size={16} />
-                                    </a>
-                                )}
-                            </div>
-
-                            <div className="space-y-4">
-                                <div className="flex gap-4">
-                                    <div className="w-10 h-10 rounded-xl bg-gray-50 dark:bg-gray-900 flex items-center justify-center text-gray-400 shrink-0">
-                                        <MapPin size={18} />
-                                    </div>
-                                    <div className="flex-1">
-                                        <p className="text-[9px] font-bold text-gray-400 uppercase tracking-wider mb-0.5">Endereço Unidade</p>
-                                        <p className="text-sm font-semibold text-gray-800 dark:text-gray-200 leading-snug">{addressFormatted}</p>
-                                        {!hasAddress && <p className="text-[9px] text-amber-500 font-bold uppercase mt-1">Localização não disponível</p>}
-                                    </div>
-                                </div>
-
-                                <div className="w-full h-36 rounded-[24px] bg-gray-100 dark:bg-gray-800 border border-gray-100 dark:border-gray-800 overflow-hidden relative shadow-sm group">
-                                    <img 
-                                        src="https://images.unsplash.com/photo-1524661135-423995f22d0b?q=80&w=800&auto=format&fit=crop" 
-                                        className="w-full h-full object-cover opacity-60 grayscale transition-all group-hover:grayscale-0"
-                                        alt="Mapa"
-                                    />
-                                    <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/5 pointer-events-none">
-                                        <div className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-md px-4 py-2 rounded-full border border-white/20 shadow-xl flex items-center gap-2">
-                                            <MapIcon className="w-3.5 h-3.5 text-[#1E5BFF]" />
-                                            <span className="text-[10px] font-black uppercase tracking-widest text-gray-600 dark:text-gray-300">Mapa Ilustrativo</span>
-                                        </div>
-                                    </div>
-                                    <div className="absolute bottom-3 right-3 flex gap-2">
-                                        <a href={wazeRouteUrl} target="_blank" rel="noopener" onClick={(e) => !hasAddress && e.preventDefault()} className={`flex items-center gap-2 px-3 py-2 rounded-xl backdrop-blur-md border shadow-lg transition-all active:scale-95 ${hasAddress ? 'bg-white/90 border-white/20 text-gray-700 hover:bg-white' : 'bg-gray-200/50 border-transparent text-gray-400 cursor-not-allowed'}`}><Navigation className={`w-3.5 h-3.5 ${hasAddress ? 'text-blue-400' : 'text-gray-400'}`} /><span className="text-[10px] font-black uppercase tracking-widest">Waze</span></a>
-                                        <a href={gmapsRouteUrl} target="_blank" rel="noopener" onClick={(e) => !hasAddress && e.preventDefault()} className={`flex items-center gap-2 px-3 py-2 rounded-xl backdrop-blur-md border shadow-lg transition-all active:scale-95 ${hasAddress ? 'bg-white/90 border-white/20 text-gray-700 hover:bg-white' : 'bg-gray-200/50 border-transparent text-gray-400 cursor-not-allowed'}`}><Navigation2 className={`w-3.5 h-3.5 ${hasAddress ? 'text-red-400' : 'text-gray-400'}`} /><span className="text-[10px] font-black uppercase tracking-widest">Maps</span></a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Pagamento */}
-                    <div className="space-y-4">
+                    {/* Pagamento (REPOSICIONADO) */}
+                    <div className="space-y-4 pt-8 border-t border-gray-50 dark:border-gray-800">
                         <div className="flex items-center gap-2 ml-1">
                             <CreditCard size={14} className="text-gray-400" />
                             <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Formas de pagamento</h3>
@@ -337,7 +317,6 @@ export const StoreDetailView: React.FC<{
               {/* CONTEÚDO: AVALIAÇÕES */}
               {activeTab === 'reviews' && (
                 <div className="animate-in fade-in duration-500 space-y-10">
-                    {/* Lista de Avaliações */}
                     <div className="space-y-8">
                         {reviewsToDisplay.length > 0 ? (
                             reviewsToDisplay.map((rev) => (
@@ -357,30 +336,18 @@ export const StoreDetailView: React.FC<{
                                           </div>
                                       </div>
                                       <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed italic">"{rev.comment}"</p>
-                                      <p className="text-[9px] text-gray-400 font-bold uppercase mt-4 tracking-widest">
-                                        {new Date(rev.created_at).toLocaleDateString()}
-                                      </p>
+                                      <p className="text-[9px] text-gray-400 font-bold uppercase mt-4 tracking-widest">{new Date(rev.created_at).toLocaleDateString()}</p>
                                   </div>
-                                  
-                                  {/* Resposta do Lojista */}
                                   {rev.merchant_response && (
                                     <div className="ml-6 flex gap-3 animate-in slide-in-from-left-2 duration-500">
-                                      <div className="pt-2 text-gray-300">
-                                        <CornerDownRight size={18} />
-                                      </div>
+                                      <div className="pt-2 text-gray-300"><CornerDownRight size={18} /></div>
                                       <div className="flex-1 bg-blue-50/50 dark:bg-blue-900/10 p-4 rounded-[20px] border border-blue-100 dark:border-blue-900/30">
                                         <div className="flex items-center gap-2 mb-1.5">
-                                          <div className="w-5 h-5 rounded-full bg-[#1E5BFF] flex items-center justify-center text-white shrink-0">
-                                            <Building2 size={10} />
-                                          </div>
-                                          <span className="text-[9px] font-black text-[#1E5BFF] uppercase tracking-wider">Resposta do estabelecimento</span>
+                                          <div className="w-5 h-5 rounded-full bg-[#1E5BFF] flex items-center justify-center text-white shrink-0"><Building2 size={10} /></div>
+                                          <span className="text-[9px] font-black text-[#1E5BFF] uppercase tracking-wider">Resposta</span>
                                         </div>
-                                        <p className="text-xs text-gray-700 dark:text-gray-300 leading-relaxed font-medium">
-                                          {rev.merchant_response.text}
-                                        </p>
-                                        <p className="text-[8px] text-gray-400 font-bold uppercase mt-3 text-right">
-                                          {new Date(rev.merchant_response.responded_at).toLocaleDateString()}
-                                        </p>
+                                        <p className="text-xs text-gray-700 dark:text-gray-300 leading-relaxed font-medium">{rev.merchant_response.text}</p>
+                                        <p className="text-[8px] text-gray-400 font-bold uppercase mt-3 text-right">{new Date(rev.merchant_response.responded_at).toLocaleDateString()}</p>
                                       </div>
                                     </div>
                                   )}
@@ -393,57 +360,23 @@ export const StoreDetailView: React.FC<{
                             </div>
                         )}
                     </div>
-
-                    {/* Formulário de Avaliar */}
                     <div className="bg-white dark:bg-gray-900 rounded-[28px] p-6 border border-gray-100 dark:border-gray-800 shadow-sm">
-                        <h3 className="text-sm font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
-                            <Star className="w-4 h-4 text-[#1E5BFF]" /> Avaliar estabelecimento
-                        </h3>
-                        
+                        <h3 className="text-sm font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2"><Star className="w-4 h-4 text-[#1E5BFF]" /> Avaliar estabelecimento</h3>
                         <form onSubmit={handleSubmitReview} className="space-y-5">
                             <div>
                                 <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 ml-1">Sua nota</p>
                                 <div className="flex gap-2">
                                     {[1,2,3,4,5].map((star) => (
-                                        <button
-                                            key={star}
-                                            type="button"
-                                            onClick={() => setUserRating(star)}
-                                            className="p-1 transition-transform active:scale-90"
-                                        >
-                                            <Star 
-                                                size={32} 
-                                                className={`transition-all ${star <= userRating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-200 dark:text-gray-700'}`} 
-                                            />
-                                        </button>
+                                        <button key={star} type="button" onClick={() => setUserRating(star)} className="p-1 transition-transform active:scale-90"><Star size={32} className={`transition-all ${star <= userRating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-200 dark:text-gray-700'}`} /></button>
                                     ))}
                                 </div>
                             </div>
-
                             <div className="space-y-2">
                                 <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Comentário (opcional)</label>
-                                <textarea 
-                                    value={userComment}
-                                    onChange={(e) => setUserComment(e.target.value)}
-                                    placeholder="Conte como foi sua experiência..."
-                                    className="w-full h-24 p-4 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl outline-none focus:border-[#1E5BFF] text-sm dark:text-white transition-all resize-none"
-                                />
+                                <textarea value={userComment} onChange={(e) => setUserComment(e.target.value)} placeholder="Conte como foi sua experiência..." className="w-full h-24 p-4 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl outline-none focus:border-[#1E5BFF] text-sm dark:text-white transition-all resize-none" />
                             </div>
-
-                            {reviewSuccessMessage && (
-                                <div className="p-3 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 text-xs font-bold rounded-xl border border-emerald-100 dark:border-emerald-800 animate-in zoom-in duration-300">
-                                    {reviewSuccessMessage}
-                                </div>
-                            )}
-
-                            <button 
-                                type="submit"
-                                disabled={isSubmittingReview}
-                                className="w-full py-4 bg-gray-900 dark:bg-white text-white dark:text-gray-900 font-bold rounded-2xl flex items-center justify-center gap-2 active:scale-95 transition-all text-xs uppercase tracking-widest disabled:opacity-50"
-                            >
-                                {isSubmittingReview ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-                                Enviar avaliação
-                            </button>
+                            {reviewSuccessMessage && <div className="p-3 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 text-xs font-bold rounded-xl border border-emerald-100 dark:border-emerald-800 animate-in zoom-in duration-300">{reviewSuccessMessage}</div>}
+                            <button type="submit" disabled={isSubmittingReview} className="w-full py-4 bg-gray-900 dark:bg-white text-white dark:text-gray-900 font-bold rounded-2xl flex items-center justify-center gap-2 active:scale-95 transition-all text-xs uppercase tracking-widest disabled:opacity-50">{isSubmittingReview ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />} Enviar avaliação</button>
                         </form>
                     </div>
                 </div>
@@ -454,61 +387,40 @@ export const StoreDetailView: React.FC<{
                 <div className="animate-in fade-in duration-500">
                     <div className="bg-white dark:bg-gray-900 rounded-[28px] p-6 border border-gray-100 dark:border-gray-800 shadow-sm">
                         <div className="flex items-center justify-between mb-8">
-                            <h3 className="text-sm font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                                <Clock className="w-4 h-4 text-[#1E5BFF]" /> Horários de funcionamento
-                            </h3>
-                            {store.isOpenNow !== undefined && (
-                                <div className={`px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-widest ${store.isOpenNow ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' : 'bg-rose-50 text-rose-600 border border-rose-100'}`}>
-                                    {store.isOpenNow ? 'Aberto agora' : 'Fechado'}
-                                </div>
-                            )}
+                            <h3 className="text-sm font-bold text-gray-900 dark:text-white flex items-center gap-2"><Clock className="w-4 h-4 text-[#1E5BFF]" /> Horários de funcionamento</h3>
+                            {store.isOpenNow !== undefined && <div className={`px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-widest ${store.isOpenNow ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' : 'bg-rose-50 text-rose-600 border border-rose-100'}`}>{store.isOpenNow ? 'Aberto agora' : 'Fechado'}</div>}
                         </div>
-
                         <div className="space-y-4">
-                            {store.business_hours ? (
-                                Object.entries(store.business_hours).map(([key, value]) => {
-                                    const h = value as BusinessHour;
-                                    return (
-                                        <div key={key} className="flex items-center justify-between text-sm py-1 border-b border-gray-50 dark:border-gray-800 last:border-0">
-                                            <span className="font-medium text-gray-600 dark:text-gray-400">{WEEK_DAYS_LABELS[key] || key}</span>
-                                            <span className={`font-bold ${h.open ? 'text-gray-900 dark:text-white' : 'text-rose-400 uppercase text-[10px]'}`}>
-                                                {h.open ? `${h.start}–${h.end}` : 'Fechado'}
-                                            </span>
-                                        </div>
-                                    );
-                                })
-                            ) : (
-                                <div className="py-8 text-center bg-gray-50 dark:bg-gray-900/50 rounded-2xl border border-dashed border-gray-200 dark:border-gray-800">
-                                    <p className="text-xs text-gray-400 font-medium uppercase tracking-widest">Horário não informado.</p>
-                                </div>
-                            )}
+                            {store.business_hours ? (Object.entries(store.business_hours).map(([key, value]) => {
+                                const h = value as BusinessHour;
+                                return (<div key={key} className="flex items-center justify-between text-sm py-1 border-b border-gray-50 dark:border-gray-800 last:border-0"><span className="font-medium text-gray-600 dark:text-gray-400">{WEEK_DAYS_LABELS[key] || key}</span><span className={`font-bold ${h.open ? 'text-gray-900 dark:text-white' : 'text-rose-400 uppercase text-[10px]'}`}>{h.open ? `${h.start}–${h.end}` : 'Fechado'}</span></div>);
+                            })) : (<div className="py-8 text-center bg-gray-50 dark:bg-gray-900/50 rounded-2xl border border-dashed border-gray-200 dark:border-gray-800"><p className="text-xs text-gray-400 font-medium uppercase tracking-widest">Horário não informado.</p></div>)}
                         </div>
                     </div>
                 </div>
               )}
           </section>
 
-          {/* --- BOTÕES FINAIS --- */}
+          {/* --- BOTÕES FINAIS (REDESENHADOS) --- */}
           <section className="space-y-3 mt-4">
               {!store.claimed && (
                 <button 
                   onClick={onClaim}
-                  className="w-full py-4 border-2 border-gray-100 dark:border-gray-800 text-gray-600 dark:text-gray-300 rounded-[20px] flex items-center justify-center gap-2 font-black text-[11px] uppercase tracking-widest hover:bg-gray-50 transition-all active:scale-95"
+                  className="w-full py-4 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200 rounded-2xl flex items-center justify-center gap-2 font-black text-[11px] uppercase tracking-widest hover:bg-gray-200 transition-all active:scale-95 border border-gray-200 dark:border-gray-700"
                 >
                   <Building2 size={16} />
                   É o dono? Reivindicar loja
                 </button>
               )}
-
               {closedReported ? (
-                  <div className="w-full py-4 text-center text-amber-600 bg-amber-50 dark:bg-amber-900/10 rounded-[20px] border border-amber-100 dark:border-amber-800 animate-in zoom-in duration-300">
-                      <p className="text-[10px] font-black uppercase tracking-[0.2em]">Obrigado! Em análise técnica.</p>
+                  <div className="w-full py-3 text-center text-amber-600 bg-amber-50 dark:bg-amber-900/10 rounded-2xl border border-amber-100 dark:border-amber-800 animate-in zoom-in duration-300">
+                      <p className="text-[10px] font-black uppercase tracking-widest">Obrigado! Em análise.</p>
                   </div>
               ) : (
                   <button 
                     onClick={handleReportClosed}
                     disabled={isClosedReporting}
-                    className="w-full py-4 flex items-center justify-center gap-2 text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-[0.2em] hover:text-red-400 transition-colors"
+                    className="w-full py-3 flex items-center justify-center gap-2 text-[10px] font-bold text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800/50 rounded-2xl hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
                   >
                     {isClosedReporting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <AlertTriangle className="w-3.5 h-3.5" />}
                     Informar que esta loja fechou
