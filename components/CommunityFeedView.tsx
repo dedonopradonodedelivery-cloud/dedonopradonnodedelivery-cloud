@@ -16,7 +16,14 @@ import {
   PlusCircle,
   Hash,
   AlertCircle,
-  Share2
+  Share2,
+  Loader2,
+  Image as ImageIcon,
+  MapPin,
+  AtSign,
+  CheckCircle2,
+  Search,
+  SlidersHorizontal
 } from 'lucide-react';
 import { NeighborhoodCommunity, CommunityPost, Store, ReportReason } from '../types';
 import { OFFICIAL_COMMUNITIES, MOCK_USER_COMMUNITIES, MOCK_COMMUNITY_POSTS, STORES } from '../constants';
