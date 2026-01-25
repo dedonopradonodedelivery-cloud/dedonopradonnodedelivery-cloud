@@ -117,7 +117,17 @@ export const HomeFeed: React.FC<HomeFeedFeedProps> = ({
         <div ref={categoryScrollRef} className="flex overflow-x-auto no-scrollbar px-4 pb-2 snap-x">
           <div className="grid grid-flow-col grid-rows-2 gap-x-3 gap-y-3">
             {CATEGORIES.map((cat) => (
-              <button key={cat.id} onClick={() => onSelectCategory(cat)} className="flex flex-col items-center group active:scale-95 transition-all">
+              <button 
+                key={cat.id} 
+                onClick={() => {
+                  if (cat.slug === 'servicos') {
+                    onNavigate('services_landing');
+                  } else {
+                    onSelectCategory(cat);
+                  }
+                }}
+                className="flex flex-col items-center group active:scale-95 transition-all"
+              >
                 <div className={`w-[78px] h-[78px] rounded-[22px] shadow-lg flex flex-col items-center justify-between p-2 ${cat.color} border border-white/20`}>
                   <div className="flex-1 flex items-center justify-center w-full">{React.cloneElement(cat.icon as any, { className: "w-7 h-7 text-white drop-shadow-md", strokeWidth: 2.5 })}</div>
                   <div className="w-full bg-black/10 backdrop-blur-[2px] py-1 rounded-b-[20px] -mx-2 -mb-2"><span className="block w-full text-[9px] font-black text-white text-center uppercase tracking-tight">{cat.name}</span></div>
@@ -273,11 +283,11 @@ export const HomeFeed: React.FC<HomeFeedFeedProps> = ({
                   Peça orçamentos de profissionais do bairro
               </h2>
               <p className="text-[10px] font-medium text-gray-500 dark:text-gray-400 mt-1">
-                  Até 5 orçamentos • rápido • fácil • grátis
+                  Até 5 propostas • rápido • fácil • grátis
               </p>
           </div>
           <button 
-            onClick={() => onNavigate('services')}
+            onClick={() => onNavigate('services_landing')}
             className="ml-auto bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-200 font-bold py-3 px-5 rounded-xl text-[10px] uppercase tracking-wider active:scale-[0.98] transition-all whitespace-nowrap border border-gray-100 dark:border-gray-700 shadow-sm"
           >
             Solicitar orçamentos

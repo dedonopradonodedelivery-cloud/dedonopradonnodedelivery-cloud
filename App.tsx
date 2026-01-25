@@ -12,6 +12,8 @@ import { ServicesView } from '@/components/ServicesView';
 import { StoreAreaView } from '@/components/StoreAreaView';
 import { ClassifiedsView } from '@/components/ClassifiedsView';
 import { RealEstateView } from '@/components/RealEstateView';
+import { JobsView } from '@/components/JobsView';
+import { JobDetailView } from '@/components/JobDetailView';
 import { MerchantPerformanceDashboard } from '@/components/MerchantPerformanceDashboard';
 import { NeighborhoodPostsView } from '@/components/NeighborhoodPostsView';
 import { AdminPanel } from '@/components/AdminPanel';
@@ -20,12 +22,13 @@ import { ServiceChatView } from '@/components/ServiceChatView';
 import { CategoryView } from '@/components/CategoryView';
 import { SubcategoryDetailView } from '@/components/SubcategoryDetailView';
 import { SponsorInfoView } from '@/components/SponsorInfoView';
+import { ServicesLandingView } from '@/components/ServicesLandingView';
 import { MapPin, X, Palette } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import { NeighborhoodProvider } from '@/contexts/NeighborhoodContext';
-import { Category, Store } from '@/types';
-import { STORES, CATEGORIES } from '@/constants';
+import { Category, Store, Job } from '@/types';
+import { STORES, CATEGORIES, MOCK_JOBS } from '@/constants';
 
 let splashWasShownInSession = false;
 const ADMIN_EMAIL = 'dedonopradonodedelivery@gmail.com';
@@ -44,6 +47,7 @@ const App: React.FC = () => {
   const [previousTab, setPreviousTab] = useState('home');
   const [globalSearch, setGlobalSearch] = useState('');
   const [selectedStore, setSelectedStore] = useState<Store | null>(null);
+  const [selectedJob, setSelectedJob] = useState<Job | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
   const [selectedSubcategoryName, setSelectedSubcategoryName] = useState<string | null>(null);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
@@ -51,7 +55,6 @@ const App: React.FC = () => {
   const [activeServiceRequestId, setActiveServiceRequestId] = useState<string | null>(null);
   const [chatRole, setChatRole] = useState<'resident' | 'merchant' | 'admin'>('resident');
 
-  // Typewriter effect state for the second line
   const [sloganText, setSloganText] = useState('');
   const [isTyping, setIsTyping] = useState(true);
   const fullSlogan = 'Onde o bairro conversa 💬';
@@ -65,35 +68,28 @@ const App: React.FC = () => {
     setActiveTab(view);
   };
 
-  // Typewriter effect logic
   useEffect(() => {
     if (splashStage >= 4) {
       setIsTyping(false);
       return;
     }
-
     if (sloganText.length === fullSlogan.length) {
       setIsTyping(false);
       return;
     }
-
     const typingTimeout = setTimeout(() => {
       setSloganText(fullSlogan.slice(0, sloganText.length + 1));
-    }, 96); // ~2.5s total duration
-
+    }, 96);
     return () => clearTimeout(typingTimeout);
   }, [sloganText, splashStage]);
 
-
-  // Splash screen timing logic
   useEffect(() => {
     if (splashStage === 4) return;
-    const fadeOutTimer = setTimeout(() => setSplashStage(3), 4500); // Start fade-out at 4.5s
+    const fadeOutTimer = setTimeout(() => setSplashStage(3), 4500);
     const endSplashTimer = setTimeout(() => {
       setSplashStage(4);
       splashWasShownInSession = true;
-    }, 5000); // Total splash duration 5s
-
+    }, 5000);
     return () => {
       clearTimeout(fadeOutTimer);
       clearTimeout(endSplashTimer);
@@ -101,8 +97,13 @@ const App: React.FC = () => {
   }, [splashStage]);
 
   const handleSelectStore = (store: Store) => { setSelectedStore(store); handleNavigate('store_detail'); };
+  const handleSelectJob = (job: Job) => { setSelectedJob(job); handleNavigate('job_detail'); };
   
   const handleSelectCategory = (category: Category) => {
+    if (category.slug === 'servicos') {
+      handleNavigate('services_landing');
+      return;
+    }
     setSelectedCategory(category);
     handleNavigate('category_detail');
   };
@@ -113,8 +114,8 @@ const App: React.FC = () => {
     handleNavigate('subcategory_detail');
   };
 
-  const headerExclusionList = ['store_area', 'store_detail', 'profile', 'patrocinador_master', 'merchant_performance', 'neighborhood_posts', 'classifieds', 'services', 'merchant_leads', 'service_chat', 'admin_panel', 'category_detail', 'subcategory_detail', 'sponsor_info', 'real_estate'];
-  const hideBottomNav = ['admin_panel', 'weekly_reward_page', 'service_chat', 'sponsor_info', 'real_estate'].includes(activeTab);
+  const headerExclusionList = ['store_area', 'store_detail', 'profile', 'patrocinador_master', 'merchant_performance', 'neighborhood_posts', 'classifieds', 'services', 'services_landing', 'merchant_leads', 'service_chat', 'admin_panel', 'category_detail', 'subcategory_detail', 'sponsor_info', 'real_estate', 'jobs', 'job_detail'];
+  const hideBottomNav = ['admin_panel', 'weekly_reward_page', 'service_chat', 'sponsor_info', 'real_estate', 'job_detail', 'services_landing'].includes(activeTab);
 
   const RoleSwitcherModal: React.FC = () => {
     if (!isRoleSwitcherOpen) return null;
@@ -150,16 +151,8 @@ const App: React.FC = () => {
                     {activeTab === 'home' && <HomeFeed onNavigate={handleNavigate} onSelectCategory={handleSelectCategory} onStoreClick={handleSelectStore} stores={STORES} user={user as any} userRole={userRole} />}
                     {activeTab === 'explore' && <ExploreView stores={STORES} searchQuery={globalSearch} onStoreClick={handleSelectStore} onLocationClick={() => {}} onFilterClick={() => {}} onOpenPlans={() => {}} onNavigate={handleNavigate} />}
                     
-                    {activeTab === 'services' && (
-                      <ServicesView 
-                        onNavigate={(view) => handleNavigate(view)} 
-                        onOpenChat={(id: string) => { 
-                          setActiveServiceRequestId(id); 
-                          setChatRole('resident'); 
-                          handleNavigate('service_chat'); 
-                        }} 
-                      />
-                    )}
+                    {activeTab === 'services_landing' && <ServicesLandingView onBack={() => handleNavigate('home')} user={user} onRequireLogin={() => setIsAuthOpen(true)} onNavigate={handleNavigate} />}
+                    {activeTab === 'services' && <ServicesView onNavigate={(view) => handleNavigate(view)} onOpenChat={(id: string) => { setActiveServiceRequestId(id); setChatRole('resident'); handleNavigate('service_chat'); }} />}
 
                     {activeTab === 'category_detail' && selectedCategory && (
                       <CategoryView 
@@ -198,12 +191,13 @@ const App: React.FC = () => {
                         <ServiceChatView requestId={activeServiceRequestId} userRole={chatRole} onBack={() => handleNavigate(isMerchantMode ? 'merchant_leads' : 'home')} />
                     )}
 
-                    {/* Fix: Pass `viewMode` as a prop instead of calling it as a function `viewMode()`. */}
                     {activeTab === 'admin_panel' && <AdminPanel user={user as any} onLogout={signOut} viewMode={viewMode} onOpenViewSwitcher={() => setIsRoleSwitcherOpen(true)} onNavigateToApp={handleNavigate} onOpenMonitorChat={(id: string) => { setActiveServiceRequestId(id); setChatRole('admin'); handleNavigate('service_chat'); }} />}
                     
                     {activeTab === 'store_detail' && selectedStore && <StoreDetailView store={selectedStore} onBack={() => handleNavigate(previousTab)} />}
                     {activeTab === 'classifieds' && <ClassifiedsView onBack={() => handleNavigate('home')} onNavigate={handleNavigate} user={user} onRequireLogin={() => setIsAuthOpen(true)} />}
                     {activeTab === 'real_estate' && <RealEstateView onBack={() => handleNavigate('classifieds')} user={user} onRequireLogin={() => setIsAuthOpen(true)} />}
+                    {activeTab === 'jobs' && <JobsView onBack={() => handleNavigate('classifieds')} onJobClick={handleSelectJob} />}
+                    {activeTab === 'job_detail' && selectedJob && <JobDetailView job={selectedJob} onBack={() => handleNavigate('jobs')} />}
                     {activeTab === 'neighborhood_posts' && <NeighborhoodPostsView onBack={() => handleNavigate('home')} onStoreClick={handleSelectStore} user={user} onRequireLogin={() => setIsAuthOpen(true)} />}
                     {activeTab === 'sponsor_info' && <SponsorInfoView onBack={() => handleNavigate(previousTab)} />}
                     {activeTab === 'patrocinador_master' && <PatrocinadorMasterScreen onBack={() => handleNavigate(previousTab)} />}

@@ -218,6 +218,8 @@ export const ClassifiedsView: React.FC<ClassifiedsViewProps> = ({ onBack, onNavi
                             onNavigate('real_estate');
                         } else if (cat.id === 'emprego') {
                             onNavigate('jobs');
+                        } else if (cat.id === 'servicos') {
+                            onNavigate('services_landing');
                         } else {
                             scrollToCategory(cat.id);
                         }
@@ -228,7 +230,7 @@ export const ClassifiedsView: React.FC<ClassifiedsViewProps> = ({ onBack, onNavi
         
         {/* Blocos de Conteúdo */}
         <div className="space-y-8">
-          {CLASSIFIED_CATEGORIES.filter(c => c.id !== 'imoveis' && c.id !== 'emprego').map(cat => (
+          {CLASSIFIED_CATEGORIES.filter(c => !['imoveis', 'emprego', 'servicos'].includes(c.id)).map(cat => (
             <CategorySection 
               key={cat.id}
               category={cat}
