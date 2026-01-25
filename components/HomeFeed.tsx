@@ -263,23 +263,24 @@ export const HomeFeed: React.FC<HomeFeedFeedProps> = ({
       </section>
 
       {/* 3. PEÇA ORÇAMENTOS (REFORMULADO) */}
-      <section className="px-5 py-6 mb-6">
-        <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-gray-900 dark:to-gray-950 p-8 rounded-[2.5rem] border border-gray-100 dark:border-gray-800 text-center flex flex-col items-center shadow-lg shadow-blue-900/5">
-          <div className="w-16 h-16 bg-white dark:bg-gray-800 rounded-full flex items-center justify-center mb-6 shadow-md border border-gray-100 dark:border-gray-700">
-            <Wrench size={32} className="text-[#1E5BFF]" strokeWidth={2.5} />
+      <section className="px-5 py-4 mb-6">
+        <div className="bg-white dark:bg-gray-900 p-5 rounded-[2rem] border border-gray-100 dark:border-gray-800 shadow-sm flex items-center gap-4">
+          <div className="w-11 h-11 bg-blue-50 dark:bg-blue-900/20 rounded-xl flex items-center justify-center shrink-0 text-[#1E5BFF]">
+              <Wrench size={20} strokeWidth={2.5} />
           </div>
-          <h2 className="text-xl font-black text-gray-900 dark:text-white uppercase tracking-tighter leading-tight max-w-xs mx-auto mb-3">
-            Peça orçamentos de profissionais do bairro
-          </h2>
-          <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em] mb-8">
-            Até 5 orçamentos • rápido • fácil • grátis
-          </p>
+          <div className="flex-1 min-w-0">
+              <h2 className="text-sm font-semibold text-gray-800 dark:text-white leading-tight">
+                  Peça orçamentos de profissionais do bairro
+              </h2>
+              <p className="text-[10px] font-medium text-gray-500 dark:text-gray-400 mt-1">
+                  Até 5 orçamentos • rápido • fácil • grátis
+              </p>
+          </div>
           <button 
             onClick={() => onNavigate('services')}
-            className="w-full max-w-xs bg-[#1E5BFF] text-white font-black py-4 rounded-2xl shadow-xl shadow-blue-500/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2 uppercase tracking-widest text-xs"
+            className="ml-auto bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-200 font-bold py-3 px-5 rounded-xl text-[10px] uppercase tracking-wider active:scale-[0.98] transition-all whitespace-nowrap border border-gray-100 dark:border-gray-700 shadow-sm"
           >
-            Solicitar orçamentos grátis
-            <ArrowRight size={14} strokeWidth={3} />
+            Solicitar orçamentos
           </button>
         </div>
       </section>
