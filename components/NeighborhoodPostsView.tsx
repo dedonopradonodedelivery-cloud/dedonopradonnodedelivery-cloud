@@ -1,8 +1,36 @@
 
-import React, { useState, useMemo, useEffect } from 'react';
-import { Store, Clock, MoreHorizontal, Heart, MessageSquare, Share2, Flag, CheckCircle2, ChevronLeft, Search, SlidersHorizontal, X, Plus } from 'lucide-react';
-import { Store as StoreType, CommunityPost, ReportReason } from '../types';
-import { STORES, MOCK_COMMUNITY_POSTS } from '../constants';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
+import { 
+  Store, 
+  Clock, 
+  MoreHorizontal, 
+  Heart, 
+  MessageSquare, 
+  Share2, 
+  Flag, 
+  CheckCircle2, 
+  ChevronLeft, 
+  Search, 
+  SlidersHorizontal, 
+  X, 
+  Plus,
+  ArrowRight,
+  Image as ImageIcon,
+  MapPin,
+  AtSign,
+  Loader2,
+  ChevronRight,
+  MessageCircle,
+  LayoutGrid,
+  HeartHandshake,
+  ShieldCheck,
+  PlusCircle,
+  Hash,
+  AlertCircle,
+  ChevronDown
+} from 'lucide-react';
+import { NeighborhoodCommunity, CommunityPost } from '../types';
+import { OFFICIAL_COMMUNITIES, MOCK_USER_COMMUNITIES, MOCK_COMMUNITY_POSTS } from '../constants';
 import { ReportModal } from './ReportModal';
 import { useNeighborhood, NEIGHBORHOODS } from '../contexts/NeighborhoodContext';
 import { User } from '@supabase/supabase-js';
@@ -22,6 +50,189 @@ const SORT_OPTIONS = [
   { id: 'comments', label: 'Mais comentados' },
   { id: 'likes', label: 'Mais curtidos' },
 ];
+
+const CreatePostView: React.FC<{
+  user: User;
+  onClose: () => void;
+  onCreatePost: (post: CommunityPost) => void;
+}> = ({ user, onClose, onCreatePost }) => {
+  const [step, setStep] = useState<'media' | 'finalize'>('media');
+  const [mediaFiles, setMediaFiles] = useState<File[]>([]);
+  const [mediaPreviews, setMediaPreviews] = useState<string[]>([]);
+  const [caption, setCaption] = useState('');
+  const [isPosting, setIsPosting] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    // Cleanup object URLs on unmount
+    return () => {
+      mediaPreviews.forEach(url => URL.revokeObjectURL(url));
+    };
+  }, []);
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files) {
+      const files = Array.from(event.target.files);
+      setMediaFiles(files);
+      // FIX: Cast file to Blob to satisfy createObjectURL's type requirement.
+      const previews = files.map(file => URL.createObjectURL(file as Blob));
+      // Revoke old previews before setting new ones
+      mediaPreviews.forEach(url => URL.revokeObjectURL(url));
+      setMediaPreviews(previews);
+    }
+  };
+
+  const removeMedia = (index: number) => {
+    const newFiles = [...mediaFiles];
+    const newPreviews = [...mediaPreviews];
+    
+    URL.revokeObjectURL(newPreviews[index]); // Cleanup
+    
+    newFiles.splice(index, 1);
+    newPreviews.splice(index, 1);
+    
+    setMediaFiles(newFiles);
+    setMediaPreviews(newPreviews);
+
+    if (newFiles.length === 0 && step === 'finalize') {
+      setStep('media');
+    }
+  };
+
+  const handlePostSubmit = () => {
+    setIsPosting(true);
+    // Simulate post creation
+    setTimeout(() => {
+      const newPost: CommunityPost = {
+        id: `post-new-${Date.now()}`,
+        userId: user.id,
+        userName: user.user_metadata?.full_name || 'Usuário JPA',
+        userAvatar: user.user_metadata?.avatar_url || `https://i.pravatar.cc/100?u=${user.id}`,
+        authorRole: 'resident',
+        content: caption,
+        type: 'recommendation',
+        communityId: 'comm-residents',
+        neighborhood: 'Freguesia',
+        timestamp: 'Agora',
+        likes: 0,
+        comments: 0,
+        imageUrl: mediaPreviews[0] || undefined,
+      };
+      onCreatePost(newPost);
+      setIsPosting(false);
+    }, 1500);
+  };
+
+  if (step === 'media') {
+    return (
+      <div className="fixed inset-0 z-[100] bg-white dark:bg-gray-950 flex flex-col animate-in fade-in duration-300">
+        <header className="flex items-center justify-between p-4 border-b border-gray-100 dark:border-gray-800 shrink-0">
+          <button onClick={onClose} className="p-2 text-gray-500"><X size={24} /></button>
+          <h2 className="font-bold text-lg">Novo post</h2>
+          <button 
+            onClick={() => setStep('finalize')} 
+            disabled={mediaPreviews.length === 0}
+            className="font-bold text-blue-600 disabled:text-gray-400"
+          >
+            Avançar
+          </button>
+        </header>
+        <div className="flex-1 flex flex-col items-center justify-center p-6">
+          <input 
+            type="file" 
+            ref={fileInputRef} 
+            multiple 
+            accept="image/*,video/*" 
+            onChange={handleFileChange} 
+            className="hidden" 
+          />
+          {mediaPreviews.length > 0 ? (
+            <div className="w-full h-full grid grid-cols-2 gap-2">
+              {mediaPreviews.map((preview, index) => (
+                <div key={index} className="relative aspect-square">
+                  <img src={preview} alt={`preview ${index}`} className="w-full h-full object-cover rounded-lg" />
+                   <button onClick={() => removeMedia(index)} className="absolute top-1 right-1 bg-black/50 text-white rounded-full p-0.5">
+                      <X size={12} />
+                   </button>
+                </div>
+              ))}
+               {mediaPreviews.length < 4 && (
+                    <button onClick={() => fileInputRef.current?.click()} className="aspect-square bg-gray-100 dark:bg-gray-800 rounded-lg flex flex-col items-center justify-center text-gray-400">
+                        <Plus size={24} />
+                        <span className="text-xs font-bold">Adicionar mais</span>
+                    </button>
+                )}
+            </div>
+          ) : (
+            <div className="text-center">
+              <ImageIcon size={48} className="text-gray-300 mx-auto mb-4" />
+              <h3 className="font-bold text-xl">Selecione suas fotos</h3>
+              <p className="text-gray-500 text-sm mt-2">Escolha imagens ou um vídeo do seu rolo da câmera.</p>
+              <button 
+                onClick={() => fileInputRef.current?.click()} 
+                className="mt-6 bg-blue-600 text-white font-bold py-3 px-6 rounded-xl"
+              >
+                Selecionar do celular
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  if (step === 'finalize') {
+    return (
+       <div className="fixed inset-0 z-[100] bg-white dark:bg-gray-950 flex flex-col animate-in fade-in duration-300">
+        <header className="flex items-center justify-between p-4 border-b border-gray-100 dark:border-gray-800 shrink-0">
+          <button onClick={() => setStep('media')} className="p-2 text-gray-500"><ChevronLeft size={24} /></button>
+          <h2 className="font-bold text-lg">Finalizar post</h2>
+          <button 
+            onClick={handlePostSubmit}
+            disabled={isPosting}
+            className="font-bold text-blue-600 disabled:text-gray-400 flex items-center gap-1"
+          >
+            {isPosting && <Loader2 size={16} className="animate-spin" />}
+            Compartilhar
+          </button>
+        </header>
+        <div className="flex-1 p-4 flex flex-col">
+          <div className="flex gap-4">
+             <div className="w-24 h-24 rounded-lg overflow-hidden shrink-0 relative">
+               <img src={mediaPreviews[0]} alt="preview" className="w-full h-full object-cover" />
+                <button onClick={() => removeMedia(0)} className="absolute top-1 right-1 bg-black/50 text-white rounded-full p-0.5">
+                    <X size={12} />
+                </button>
+             </div>
+             <textarea 
+               value={caption}
+               onChange={(e) => setCaption(e.target.value)}
+               placeholder="Escreva algo para o bairro..."
+               className="flex-1 bg-transparent text-gray-800 dark:text-white outline-none resize-none text-base"
+             />
+          </div>
+          <div className="border-t border-gray-100 dark:border-gray-800 my-4"></div>
+          <div className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800">
+             <div className="flex items-center gap-3">
+               <MapPin size={20} className="text-gray-400" />
+               <span className="font-medium text-sm">Adicionar localização</span>
+             </div>
+             <ChevronRight size={20} className="text-gray-400" />
+          </div>
+          <div className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800">
+             <div className="flex items-center gap-3">
+               <AtSign size={20} className="text-gray-400" />
+               <span className="font-medium text-sm">Marcar pessoas</span>
+             </div>
+             <ChevronRight size={20} className="text-gray-400" />
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  return null;
+}
 
 interface PostCardProps {
   post: CommunityPost;
@@ -280,6 +491,7 @@ interface NeighborhoodPostsViewProps {
 }
 
 export const NeighborhoodPostsView: React.FC<NeighborhoodPostsViewProps> = ({ onBack, onStoreClick, user, onRequireLogin }) => {
+  const [posts, setPosts] = useState<CommunityPost[]>(MOCK_POSTS);
   const { currentNeighborhood: displayNeighborhood } = useNeighborhood();
   const [searchTerm, setSearchTerm] = useState('');
   
@@ -288,23 +500,22 @@ export const NeighborhoodPostsView: React.FC<NeighborhoodPostsViewProps> = ({ on
   const [neighborhoodFilter, setNeighborhoodFilter] = useState<string[]>([]);
   
   const [isFilterModalOpen, setFilterModalOpen] = useState(false);
+  const [isCreatingPost, setIsCreatingPost] = useState(false);
 
   const filteredPosts = useMemo(() => {
-    let posts = MOCK_POSTS.filter(post => {
+    let currentPosts = posts.filter(post => {
       const matchNeighborhood = neighborhoodFilter.length === 0 || neighborhoodFilter.includes(post.neighborhood || '');
       const matchSearch = !searchTerm || post.content.toLowerCase().includes(searchTerm.toLowerCase()) || post.userName.toLowerCase().includes(searchTerm.toLowerCase());
       const matchTheme = activeTheme === 'all' || post.theme === activeTheme;
       return matchNeighborhood && matchSearch && matchTheme;
     });
 
-    // Apply sorting
-    return [...posts].sort((a, b) => {
+    return [...currentPosts].sort((a, b) => {
       if (sortBy === 'comments') return b.comments - a.comments;
       if (sortBy === 'likes') return b.likes - a.likes;
-      // 'recent' is the default, and the mock data is already sorted by recency.
       return 0;
     });
-  }, [neighborhoodFilter, searchTerm, activeTheme, sortBy]);
+  }, [neighborhoodFilter, searchTerm, activeTheme, sortBy, posts]);
   
   const handleApplyFilters = (filters: { neighborhoods: string[]; theme: string; sortBy: string }) => {
     setNeighborhoodFilter(filters.neighborhoods);
@@ -327,21 +538,39 @@ export const NeighborhoodPostsView: React.FC<NeighborhoodPostsViewProps> = ({ on
     if (sortBy !== 'recent') count++;
     return count;
   }, [neighborhoodFilter, activeTheme, sortBy]);
+  
+  const handleStartPost = () => {
+    if (!user) {
+      onRequireLogin();
+    } else {
+      setIsCreatingPost(true);
+    }
+  };
+
+  const handleCreatePost = (newPost: CommunityPost) => {
+    setPosts(prevPosts => [newPost, ...prevPosts]);
+    setIsCreatingPost(false);
+  };
 
   return (
     <div className="min-h-screen bg-[#F8F9FC] dark:bg-gray-950 font-sans animate-in fade-in duration-500 overflow-x-hidden">
       <header className="bg-white dark:bg-gray-900 px-6 pt-10 pb-6 border-b border-gray-100 dark:border-gray-800 rounded-b-[2.5rem] shadow-sm sticky top-0 z-40">
-        <div className="flex items-center gap-4 mb-3">
-          <button onClick={onBack} className="p-2 bg-gray-50 dark:bg-gray-800 rounded-xl text-gray-500 hover:text-gray-900">
-            <ChevronLeft size={20} />
-          </button>
-          <div>
-            <h1 className="font-black text-xl text-gray-900 dark:text-white uppercase tracking-tighter leading-none">JPA Conversa</h1>
-            <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-1">O que está acontecendo agora</p>
+        <div className="flex items-center justify-between gap-4 mb-3">
+          <div className="flex items-center gap-4">
+            <button onClick={onBack} className="p-2 bg-gray-50 dark:bg-gray-800 rounded-xl text-gray-500 hover:text-gray-900">
+              <ChevronLeft size={20} />
+            </button>
+            <div>
+              <h1 className="font-black text-xl text-gray-900 dark:text-white uppercase tracking-tighter leading-none">JPA Conversa</h1>
+              <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-1">O que está acontecendo agora</p>
+            </div>
           </div>
+          <button onClick={handleStartPost} className="p-2 bg-gray-100 dark:bg-gray-800 rounded-xl text-gray-500 hover:text-gray-900">
+            <Plus size={20} />
+          </button>
         </div>
 
-        <div className="flex items-center gap-3 mb-5 mt-4">
+        <div className="flex items-center gap-3 mt-4">
             <div className="relative flex-1">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
                 <input 
@@ -364,30 +593,22 @@ export const NeighborhoodPostsView: React.FC<NeighborhoodPostsViewProps> = ({ on
       </header>
       
       <main className="max-w-md mx-auto py-4 space-y-4 w-full px-4">
-        <div className="p-4 bg-white dark:bg-gray-900 sm:rounded-2xl border-b sm:border border-gray-100 dark:border-gray-800">
-          <button 
-            onClick={() => {
-              if (!user) {
-                onRequireLogin();
-              } else {
-                alert('Criação de post em breve!');
-              }
-            }}
-            className="w-full bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400 font-bold text-sm py-3 px-4 rounded-xl transition-colors flex items-center gap-2"
-          >
-            <Plus size={16} />
-            Começar uma conversa...
-          </button>
-        </div>
-
         {filteredPosts.map((post) => (
           <PostCard key={post.id} post={post} onStoreClick={onStoreClick} user={user} onRequireLogin={onRequireLogin} />
         ))}
         <div className="py-10 text-center opacity-30 flex flex-col items-center">
-          <Store size={24} className="mb-2" />
+          <StoreIcon size={24} className="mb-2" />
           <p className="text-[10px] font-black uppercase tracking-[0.3em]">Você chegou ao fim dos posts</p>
         </div>
       </main>
+
+      {isCreatingPost && user && (
+        <CreatePostView 
+          user={user} 
+          onClose={() => setIsCreatingPost(false)}
+          onCreatePost={handleCreatePost}
+        />
+      )}
 
       <FilterModal
         isOpen={isFilterModalOpen}

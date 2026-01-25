@@ -33,10 +33,10 @@ const ClassifiedCategoryButton: React.FC<{ category: any; onClick: () => void }>
   <button onClick={onClick} className="flex flex-col items-center group active:scale-95 transition-all">
     <div className={`w-full aspect-square rounded-[22px] shadow-lg flex flex-col items-center justify-between p-2 ${category.color} border border-white/20`}>
       <div className="flex-1 flex items-center justify-center w-full">
-        {React.cloneElement(category.icon as any, { className: "w-7 h-7 text-white drop-shadow-md", strokeWidth: 2.5 })}
+        {React.cloneElement(category.icon as any, { className: "w-8 h-8 text-white drop-shadow-md", strokeWidth: 2.5 })}
       </div>
       <div className="w-full bg-black/10 backdrop-blur-[2px] py-1 rounded-b-[20px] -mx-2 -mb-2">
-        <span className="block w-full text-[9px] font-black text-white text-center uppercase tracking-tight">{category.name}</span>
+        <span className="block w-full text-[10px] font-black text-white text-center uppercase tracking-tight">{category.name}</span>
       </div>
     </div>
   </button>
@@ -45,7 +45,7 @@ const ClassifiedCategoryButton: React.FC<{ category: any; onClick: () => void }>
 const ClassifiedCard: React.FC<{ item: Classified; onClick: () => void }> = ({ item, onClick }) => (
     <div 
         onClick={onClick} 
-        className="flex-shrink-0 w-64 bg-white dark:bg-gray-800 rounded-3xl shadow-md border border-gray-100 dark:border-gray-700 flex flex-col group transition-all duration-300 hover:shadow-lg hover:-translate-y-1 cursor-pointer overflow-hidden"
+        className="flex-shrink-0 w-80 bg-white dark:bg-gray-800 rounded-3xl shadow-md border border-gray-100 dark:border-gray-700 flex flex-col group transition-all duration-300 hover:shadow-lg hover:-translate-y-1 cursor-pointer overflow-hidden"
     >
         <div className="aspect-[16/10] w-full overflow-hidden bg-gray-100 dark:bg-gray-700 relative">
             <img 
@@ -91,7 +91,7 @@ const CategorySection: React.FC<{
       </div>
 
       {items.length > 0 ? (
-        <div className="flex gap-4 overflow-x-auto no-scrollbar -mx-5 px-5 pb-2 snap-x">
+        <div className="flex gap-4 overflow-x-auto no-scrollbar -mx-5 px-5 pb-2 snap-x snap-center">
           {items.map(item => <ClassifiedCard key={item.id} item={item} onClick={() => onItemClick(item)} />)}
         </div>
       ) : (
@@ -208,7 +208,7 @@ export const ClassifiedsView: React.FC<ClassifiedsViewProps> = ({ onBack, onNavi
         </div>
 
         {/* Categorias (Estilo Home) */}
-        <div className="grid grid-cols-3 sm:grid-cols-6 gap-3 mb-8">
+        <div className="grid grid-cols-3 gap-4 mb-8">
             {CLASSIFIED_CATEGORIES.map(cat => (
                 <ClassifiedCategoryButton 
                     key={cat.id} 
@@ -231,15 +231,6 @@ export const ClassifiedsView: React.FC<ClassifiedsViewProps> = ({ onBack, onNavi
           ))}
         </div>
       </main>
-
-      <div className="fixed bottom-24 right-5 z-50">
-        <button 
-          onClick={handlePublish}
-          className="w-16 h-16 bg-blue-600 text-white rounded-2xl shadow-2xl flex items-center justify-center active:scale-95 transition-transform"
-        >
-          <Plus size={32} />
-        </button>
-      </div>
 
       {selectedItem && (
         <div className="fixed inset-0 z-[1001] bg-black/60 flex items-end" onClick={() => setSelectedItem(null)}>
