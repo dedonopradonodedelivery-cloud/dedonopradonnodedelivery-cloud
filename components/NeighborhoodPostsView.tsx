@@ -27,7 +27,8 @@ import {
   Hash,
   AlertCircle,
   // FIX: Added Store as StoreIcon to fix usage as component and avoid name conflict
-  Store as StoreIcon
+  Store as StoreIcon,
+  ChevronDown
 } from 'lucide-react';
 // FIX: Added Store and ReportReason types
 import { NeighborhoodCommunity, CommunityPost, Store, ReportReason } from '../types';
@@ -57,16 +58,18 @@ const CreatePostView: React.FC<{
   user: User;
   onClose: () => void;
   onCreatePost: (post: CommunityPost) => void;
-}> = ({ user, onClose, onCreatePost }) => {
+  // Adicionando a prop userRole para verificar se é lojista
+  userRole: 'cliente' | 'lojista' | null;
+}> = ({ user, onClose, onCreatePost, userRole }) => {
   const [step, setStep] = useState<'media' | 'finalize'>('media');
   const [mediaFiles, setMediaFiles] = useState<File[]>([]);
   const [mediaPreviews, setMediaPreviews] = useState<string[]>([]);
   const [caption, setCaption] = useState('');
+  const [showOnStoreProfile, setShowOnStoreProfile] = useState(false);
   const [isPosting, setIsPosting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    // Cleanup object URLs on unmount
     return () => {
       mediaPreviews.forEach(url => URL.revokeObjectURL(url));
     };
@@ -76,9 +79,7 @@ const CreatePostView: React.FC<{
     if (event.target.files) {
       const files = Array.from(event.target.files);
       setMediaFiles(files);
-      // FIX: Cast file to Blob to satisfy createObjectURL's type requirement.
       const previews = files.map(file => URL.createObjectURL(file as Blob));
-      // Revoke old previews before setting new ones
       mediaPreviews.forEach(url => URL.revokeObjectURL(url));
       setMediaPreviews(previews);
     }
@@ -87,15 +88,11 @@ const CreatePostView: React.FC<{
   const removeMedia = (index: number) => {
     const newFiles = [...mediaFiles];
     const newPreviews = [...mediaPreviews];
-    
-    URL.revokeObjectURL(newPreviews[index]); // Cleanup
-    
+    URL.revokeObjectURL(newPreviews[index]);
     newFiles.splice(index, 1);
     newPreviews.splice(index, 1);
-    
     setMediaFiles(newFiles);
     setMediaPreviews(newPreviews);
-
     if (newFiles.length === 0 && step === 'finalize') {
       setStep('media');
     }
@@ -103,14 +100,13 @@ const CreatePostView: React.FC<{
 
   const handlePostSubmit = () => {
     setIsPosting(true);
-    // Simulate post creation
     setTimeout(() => {
       const newPost: CommunityPost = {
         id: `post-new-${Date.now()}`,
         userId: user.id,
         userName: user.user_metadata?.full_name || 'Usuário JPA',
         userAvatar: user.user_metadata?.avatar_url || `https://i.pravatar.cc/100?u=${user.id}`,
-        authorRole: 'resident',
+        authorRole: userRole === 'lojista' ? 'merchant' : 'resident',
         content: caption,
         type: 'recommendation',
         communityId: 'comm-residents',
@@ -119,6 +115,7 @@ const CreatePostView: React.FC<{
         likes: 0,
         comments: 0,
         imageUrl: mediaPreviews[0] || undefined,
+        showOnStoreProfile: userRole === 'lojista' && showOnStoreProfile,
       };
       onCreatePost(newPost);
       setIsPosting(false);
@@ -228,6 +225,21 @@ const CreatePostView: React.FC<{
              </div>
              <ChevronRight size={20} className="text-gray-400" />
           </div>
+
+          {userRole === 'lojista' && (
+            <div className="mt-auto pt-4">
+              <label htmlFor="showOnProfile" className="flex items-center gap-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-800 cursor-pointer">
+                <input 
+                  type="checkbox" 
+                  id="showOnProfile"
+                  checked={showOnStoreProfile}
+                  onChange={(e) => setShowOnStoreProfile(e.target.checked)}
+                  className="h-5 w-5 rounded text-blue-600 focus:ring-blue-500 border-gray-300"
+                />
+                <span className="font-medium text-sm text-gray-800 dark:text-gray-200">Mostrar também no perfil da minha loja</span>
+              </label>
+            </div>
+          )}
         </div>
       </div>
     )
@@ -238,7 +250,6 @@ const CreatePostView: React.FC<{
 
 interface PostCardProps {
   post: CommunityPost;
-  // FIX: Changed StoreType to Store to match the type definition.
   onStoreClick: (store: Store) => void;
   user: User | null;
   onRequireLogin: () => void;
@@ -261,12 +272,10 @@ const PostCard: React.FC<PostCardProps> = ({ post, onStoreClick, user, onRequire
   };
 
   const handleVisitStore = (userName: string) => {
-    // FIX: Using imported STORES constant
     const store = STORES.find(s => s.name === userName);
     if (store) onStoreClick(store);
   };
 
-  // FIX: Using imported ReportReason type
   const handleReportSubmit = (reason: ReportReason) => {
     console.log(`Reporting post ${post.id} by ${post.userName} for reason: ${reason}`);
     setIsReportModalOpen(false);
@@ -284,7 +293,6 @@ const PostCard: React.FC<PostCardProps> = ({ post, onStoreClick, user, onRequire
 
   return (
     <article className="bg-white dark:bg-gray-900 sm:border border-gray-100 dark:border-gray-800 sm:rounded-2xl shadow-sm overflow-hidden">
-      {/* TOPO */}
       <div className="p-3 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-full border-2 border-blue-500 p-0.5">
@@ -295,7 +303,6 @@ const PostCard: React.FC<PostCardProps> = ({ post, onStoreClick, user, onRequire
         <button onClick={() => setIsOptionsOpen(true)} className="p-2 text-gray-400"><MoreHorizontal size={20} /></button>
       </div>
 
-      {/* MÍDIA */}
       <div className="relative aspect-square bg-gray-100 dark:bg-gray-800">
           <img 
             src={post.imageUrl || 'https://images.unsplash.com/photo-1570129477492-45c003edd2be?q=80&w=800&auto=format&fit=crop'} 
@@ -304,7 +311,6 @@ const PostCard: React.FC<PostCardProps> = ({ post, onStoreClick, user, onRequire
           />
       </div>
 
-      {/* AÇÕES */}
       <div className="p-3 flex items-center justify-between">
         <div className="flex items-center gap-4">
           <button onClick={handleLike} className={`flex items-center gap-2 transition-colors ${liked ? 'text-rose-500' : 'text-gray-500 dark:text-gray-400 hover:text-rose-500'}`}>
@@ -319,7 +325,6 @@ const PostCard: React.FC<PostCardProps> = ({ post, onStoreClick, user, onRequire
         </button>
       </div>
       
-      {/* TEXTO E TEMPO */}
       <div className="px-4 pb-4">
         {likesCount > 0 && <p className="text-sm font-bold mb-2">{likesCount} curtidas</p>}
         <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
@@ -419,70 +424,66 @@ const FilterModal: React.FC<{
   const isAllNeighborhoodsSelected = tempNeighborhoods.length === 0;
 
   return (
-    <div className="fixed inset-0 z-[1001] bg-black/60 flex items-end" onClick={onClose}>
+    <div className="fixed inset-0 z-[1001] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4" onClick={onClose}>
       <div 
-        className="bg-white dark:bg-gray-900 w-full rounded-t-[2.5rem] p-6 shadow-2xl animate-in slide-in-from-bottom duration-300 max-h-[85vh] flex flex-col"
+        className="bg-white dark:bg-gray-900 w-full max-w-md rounded-3xl p-6 shadow-2xl animate-in zoom-in-95 duration-300 max-h-[85vh] flex flex-col"
         onClick={e => e.stopPropagation()}
       >
         <div className="w-12 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full mx-auto mb-6 shrink-0"></div>
         <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6 shrink-0">Filtrar e Ordenar</h2>
 
-        <div className="flex-1 overflow-y-auto no-scrollbar space-y-8 pr-2 -mr-2">
-          {/* SEÇÃO 1 – Filtrar por bairro */}
-          <section>
-            <h3 className="text-sm font-bold text-gray-500 dark:text-gray-400 mb-3 uppercase tracking-wider">Bairro</h3>
-            <div className="flex flex-wrap gap-2">
-              <button 
-                  onClick={() => handleNeighborhoodToggle('Jacarepaguá (todos)')} 
-                  className={`px-4 py-2 rounded-full text-xs font-bold border-2 transition-all ${isAllNeighborhoodsSelected ? 'bg-blue-600 text-white border-blue-600' : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-500'}`}
-              >
-                  Todos (Jacarepaguá)
-              </button>
-              {NEIGHBORHOODS.map(hood => {
-                const isSelected = tempNeighborhoods.includes(hood);
-                return (
-                  <button 
-                    key={hood} 
-                    onClick={() => handleNeighborhoodToggle(hood)} 
-                    className={`px-4 py-2 rounded-full text-xs font-bold border-2 transition-all ${isSelected ? 'bg-blue-600 text-white border-blue-600' : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-500'}`}
-                  >
-                    {hood}
-                  </button>
-                )
-              })}
-            </div>
-          </section>
+        <main className="flex-1 overflow-y-auto no-scrollbar space-y-8 pr-2 -mr-2">
+            
+            <section><h3 className="text-sm font-bold text-gray-500 dark:text-gray-400 mb-3 uppercase tracking-wider">Bairro</h3>
+                <div className="flex flex-wrap gap-2">
+                    <button 
+                        onClick={() => handleNeighborhoodToggle('Jacarepaguá (todos)')} 
+                        className={`px-4 py-2 rounded-full text-xs font-bold border-2 transition-all ${isAllNeighborhoodsSelected ? 'bg-blue-600 text-white border-blue-600' : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-500'}`}
+                    >
+                        Todos (Jacarepaguá)
+                    </button>
+                    {NEIGHBORHOODS.map(hood => {
+                        const isSelected = tempNeighborhoods.includes(hood);
+                        return (
+                        <button 
+                            key={hood} 
+                            onClick={() => handleNeighborhoodToggle(hood)} 
+                            className={`px-4 py-2 rounded-full text-xs font-bold border-2 transition-all ${isSelected ? 'bg-blue-600 text-white border-blue-600' : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-500'}`}
+                        >
+                            {hood}
+                        </button>
+                        )
+                    })}
+                </div>
+            </section>
 
-          {/* SEÇÃO 2 – Filtrar por tema */}
-          <section>
-            <h3 className="text-sm font-bold text-gray-500 dark:text-gray-400 mb-3 uppercase tracking-wider">Tema</h3>
-            <div className="flex flex-wrap gap-2">
-              {THEME_FILTERS.map(theme => (
-                <button key={theme.id} onClick={() => setTempTheme(theme.id)} className={`px-4 py-2 rounded-full text-xs font-bold border-2 transition-all ${tempTheme === theme.id ? 'bg-blue-600 text-white border-blue-600' : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-500'}`}>
-                  {theme.label}
-                </button>
-              ))}
-            </div>
-          </section>
+            <section>
+                <h3 className="text-sm font-bold text-gray-500 dark:text-gray-400 mb-3 uppercase tracking-wider">Tema</h3>
+                <div className="flex flex-wrap gap-2">
+                {THEME_FILTERS.map(theme => (
+                    <button key={theme.id} onClick={() => setTempTheme(theme.id)} className={`px-4 py-2 rounded-full text-xs font-bold border-2 transition-all ${tempTheme === theme.id ? 'bg-blue-600 text-white border-blue-600' : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-500'}`}>
+                    {theme.label}
+                    </button>
+                ))}
+                </div>
+            </section>
 
-          {/* SEÇÃO 3 – Ordenar por */}
-          <section>
-            <h3 className="text-sm font-bold text-gray-500 dark:text-gray-400 mb-3 uppercase tracking-wider">Ordenar por</h3>
-            <div className="space-y-2">
-              {SORT_OPTIONS.map(sort => (
-                 <button key={sort.id} onClick={() => setTempSortBy(sort.id)} className={`w-full text-left p-3 rounded-lg transition-colors text-sm font-medium flex justify-between items-center ${tempSortBy === sort.id ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600' : 'bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-300'}`}>
-                  {sort.label} {tempSortBy === sort.id && <CheckCircle2 size={16} />}
-                </button>
-              ))}
-            </div>
-          </section>
-        </div>
+            <section>
+                <h3 className="text-sm font-bold text-gray-500 dark:text-gray-400 mb-3 uppercase tracking-wider">Ordenar por</h3>
+                <div className="space-y-2">
+                {SORT_OPTIONS.map(sort => (
+                    <button key={sort.id} onClick={() => setTempSortBy(sort.id)} className={`w-full text-left p-3 rounded-lg transition-colors text-sm font-medium flex justify-between items-center ${tempSortBy === sort.id ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600' : 'bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-300'}`}>
+                    {sort.label} {tempSortBy === sort.id && <CheckCircle2 size={16} />}
+                    </button>
+                ))}
+                </div>
+            </section>
+        </main>
 
-        {/* Ações do painel */}
-        <div className="pt-6 flex gap-4 shrink-0 border-t border-gray-100 dark:border-gray-800">
-          <button onClick={handleClear} className="flex-1 py-4 text-sm font-bold text-gray-500 bg-gray-100 dark:bg-gray-800 rounded-xl">Limpar filtros</button>
-          <button onClick={handleApply} className="flex-1 py-4 text-sm font-bold bg-blue-600 text-white rounded-xl">Aplicar filtros</button>
-        </div>
+        <footer className="pt-6 flex gap-4 shrink-0 border-t border-gray-100 dark:border-gray-800">
+            <button onClick={handleClear} className="flex-1 py-4 text-sm font-bold text-gray-500 bg-gray-100 dark:bg-gray-800 rounded-xl">Limpar filtros</button>
+            <button onClick={handleApply} className="flex-1 py-4 text-sm font-bold bg-blue-600 text-white rounded-xl">Aplicar filtros</button>
+        </footer>
       </div>
     </div>
   );
@@ -490,13 +491,14 @@ const FilterModal: React.FC<{
 
 interface NeighborhoodPostsViewProps {
   onBack: () => void;
-  // FIX: Changed StoreType to Store to match the type definition.
   onStoreClick: (store: Store) => void;
   user: User | null;
   onRequireLogin: () => void;
+  // Adicionando a prop userRole para CreatePostView
+  userRole: 'cliente' | 'lojista' | null;
 }
 
-export const NeighborhoodPostsView: React.FC<NeighborhoodPostsViewProps> = ({ onBack, onStoreClick, user, onRequireLogin }) => {
+export const NeighborhoodPostsView: React.FC<NeighborhoodPostsViewProps> = ({ onBack, onStoreClick, user, onRequireLogin, userRole }) => {
   const [posts, setPosts] = useState<CommunityPost[]>(MOCK_POSTS);
   const { currentNeighborhood: displayNeighborhood } = useNeighborhood();
   const [searchTerm, setSearchTerm] = useState('');
@@ -519,7 +521,7 @@ export const NeighborhoodPostsView: React.FC<NeighborhoodPostsViewProps> = ({ on
     return [...currentPosts].sort((a, b) => {
       if (sortBy === 'comments') return b.comments - a.comments;
       if (sortBy === 'likes') return b.likes - a.likes;
-      return 0;
+      return 0; // 'recent' is default order
     });
   }, [neighborhoodFilter, searchTerm, activeTheme, sortBy, posts]);
   
@@ -603,7 +605,6 @@ export const NeighborhoodPostsView: React.FC<NeighborhoodPostsViewProps> = ({ on
           <PostCard key={post.id} post={post} onStoreClick={onStoreClick} user={user} onRequireLogin={onRequireLogin} />
         ))}
         <div className="py-10 text-center opacity-30 flex flex-col items-center">
-          {/* FIX: Using imported StoreIcon component */}
           <StoreIcon size={24} className="mb-2" />
           <p className="text-[10px] font-black uppercase tracking-[0.3em]">Você chegou ao fim dos posts</p>
         </div>
@@ -614,6 +615,7 @@ export const NeighborhoodPostsView: React.FC<NeighborhoodPostsViewProps> = ({ on
           user={user} 
           onClose={() => setIsCreatingPost(false)}
           onCreatePost={handleCreatePost}
+          userRole={userRole}
         />
       )}
 
@@ -631,9 +633,3 @@ export const NeighborhoodPostsView: React.FC<NeighborhoodPostsViewProps> = ({ on
     </div>
   );
 };
-
-const ChevronDown = ({ size, className }: { size?: number, className?: string }) => (
-  <svg width={size || 24} height={size || 24} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className={className}>
-    <path d="m6 9 6 6 6-6"/>
-  </svg>
-);

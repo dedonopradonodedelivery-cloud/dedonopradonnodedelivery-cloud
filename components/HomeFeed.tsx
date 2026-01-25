@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
-import { Store, Category, AdType } from '@/types';
+import { Store, Category, AdType, CommunityPost } from '@/types';
 import { 
   Compass, 
   Sparkles, 
@@ -16,7 +16,10 @@ import {
   Loader2,
   Wrench,
   Key,
-  Hammer
+  Hammer,
+  Plus,
+  Heart,
+  Share2
 } from 'lucide-react';
 import { LojasEServicosList } from '@/components/LojasEServicosList';
 import { User } from '@supabase/supabase-js';
@@ -34,13 +37,56 @@ interface HomeFeedFeedProps {
   userRole: 'cliente' | 'lojista' | null;
 }
 
-const LOCAL_SERVICES = [
-  { name: 'Eletricista', icon: Zap, color: 'text-amber-500', bg: 'bg-amber-50' },
-  { name: 'Encanador', icon: Wrench, color: 'text-blue-500', bg: 'bg-blue-50' },
-  { name: 'Chaveiro', icon: Key, color: 'text-sky-500', bg: 'bg-sky-50' },
-  { name: 'Diarista', icon: Sparkles, color: 'text-purple-500', bg: 'bg-purple-50' },
-  { name: 'Montador', icon: Hammer, color: 'text-orange-500', bg: 'bg-orange-50' },
-];
+const MiniPostCard: React.FC<{ post: CommunityPost }> = ({ post }) => {
+  const [liked, setLiked] = useState(false);
+  
+  return (
+    <div className="py-4">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center gap-2.5">
+          <img src={post.userAvatar} alt={post.userName} className="w-8 h-8 rounded-full object-cover" />
+          <div>
+            <p className="font-semibold text-xs text-gray-800 dark:text-white leading-none">{post.userName}</p>
+            <p className="text-[10px] text-gray-400 font-medium leading-none mt-0.5">{post.neighborhood}</p>
+          </div>
+        </div>
+        <p className="text-[10px] font-medium text-gray-400">{post.timestamp}</p>
+      </div>
+
+      {/* Content */}
+      <p className="text-sm text-gray-600 dark:text-gray-300 leading-snug line-clamp-3 my-2">
+        {post.content}
+        {post.content.length > 120 && <button className="text-blue-500 font-semibold ml-1">...ver mais</button>}
+      </p>
+
+      {/* Media */}
+      {post.imageUrl && (
+        <div className="aspect-[4/3] rounded-lg overflow-hidden mt-3 border border-gray-100 dark:border-gray-800">
+          <img src={post.imageUrl} alt="Post media" className="w-full h-full object-cover" />
+        </div>
+      )}
+
+      {/* Actions */}
+      <div className="flex items-center justify-between mt-3">
+        <div className="flex items-center gap-5 text-gray-500 dark:text-gray-400">
+          <button onClick={() => setLiked(!liked)} className={`flex items-center gap-1.5 transition-colors ${liked ? 'text-rose-500' : 'hover:text-rose-500'}`}>
+            <Heart size={16} className={liked ? 'fill-current' : ''} />
+            <span className="text-[11px] font-bold">{liked ? post.likes + 1 : post.likes}</span>
+          </button>
+          <button className="flex items-center gap-1.5 hover:text-blue-500">
+            <MessageSquare size={16} />
+            <span className="text-[11px] font-bold">{post.comments}</span>
+          </button>
+          <button className="hover:text-blue-500">
+            <Share2 size={16} />
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 
 export const HomeFeed: React.FC<HomeFeedFeedProps> = ({ 
   onNavigate, 
@@ -238,37 +284,23 @@ export const HomeFeed: React.FC<HomeFeedFeedProps> = ({
         </div>
       </section>
 
-      {/* 2. ONDE O BAIRRO CONVERSA */}
-      <section className="px-5 py-4 mb-6">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-purple-50 dark:bg-purple-900/20 flex items-center justify-center text-purple-600">
-              <MessageSquare size={18} strokeWidth={2.5} />
-            </div>
-            <div>
-              <h2 className="text-[11px] font-black text-gray-900 dark:text-white uppercase tracking-[0.15em] leading-none mb-1">Onde o bairro conversa</h2>
-              <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest leading-none">Posts recentes dos vizinhos</p>
+      {/* 2. ONDE O BAIRRO CONVERSA - MINI INSTAGRAM */}
+      <section className="px-5 py-4">
+        <div className="bg-white dark:bg-gray-900 rounded-[2rem] p-4 border border-gray-100 dark:border-gray-800 shadow-sm">
+          {/* Header */}
+          <div className="flex items-center justify-between mb-2 px-2">
+            <h2 className="text-lg font-bold text-gray-800 dark:text-white">Bairro Conversa</h2>
+            <div className="flex items-center gap-2">
+              <button onClick={() => onNavigate('neighborhood_posts')} className="text-xs font-bold text-blue-500">Ver tudo</button>
+              <button onClick={() => onNavigate('neighborhood_posts')} className="p-1.5 bg-gray-100 dark:bg-gray-800 rounded-full text-gray-500"><Plus size={14} /></button>
             </div>
           </div>
-          <button onClick={() => onNavigate('neighborhood_posts')} className="text-[9px] font-black text-[#1E5BFF] uppercase tracking-widest">Ver tudo</button>
-        </div>
-
-        <div className="flex gap-4 overflow-x-auto no-scrollbar -mx-5 px-5 pb-2">
-            {MOCK_COMMUNITY_POSTS.slice(0, 3).map((post) => (
-                <div 
-                    key={post.id} 
-                    onClick={() => onNavigate('neighborhood_posts')}
-                    className="flex-shrink-0 w-44 bg-white dark:bg-gray-900 rounded-[2rem] border border-gray-100 dark:border-gray-800 overflow-hidden shadow-sm active:scale-[0.98] transition-all"
-                >
-                    <div className="h-32 w-full overflow-hidden">
-                        <img src={post.imageUrl || 'https://images.unsplash.com/photo-1570129477492-45c003edd2be?q=80&w=800&auto=format&fit=crop'} alt={post.userName} className="w-full h-full object-cover" />
-                    </div>
-                    <div className="p-3">
-                        <p className="text-[10px] font-black text-[#1E5BFF] uppercase tracking-tighter truncate">{post.userName}</p>
-                        <p className="text-[11px] text-gray-600 dark:text-gray-400 font-medium mt-0.5 line-clamp-1">{post.content}</p>
-                    </div>
-                </div>
+          {/* Posts */}
+          <div className="divide-y divide-gray-100 dark:divide-gray-800 px-2">
+            {MOCK_COMMUNITY_POSTS.slice(0, 3).map(post => (
+              <MiniPostCard key={post.id} post={post} />
             ))}
+          </div>
         </div>
       </section>
 
