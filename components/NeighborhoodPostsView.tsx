@@ -1,7 +1,6 @@
 
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { 
-  Store, 
   Clock, 
   MoreHorizontal, 
   Heart, 
@@ -27,10 +26,14 @@ import {
   PlusCircle,
   Hash,
   AlertCircle,
-  ChevronDown
+  ChevronDown,
+  // FIX: Added Store as StoreIcon to fix usage as component and avoid name conflict
+  Store as StoreIcon
 } from 'lucide-react';
-import { NeighborhoodCommunity, CommunityPost } from '../types';
-import { OFFICIAL_COMMUNITIES, MOCK_USER_COMMUNITIES, MOCK_COMMUNITY_POSTS } from '../constants';
+// FIX: Added Store and ReportReason types
+import { NeighborhoodCommunity, CommunityPost, Store, ReportReason } from '../types';
+// FIX: Added STORES constant
+import { OFFICIAL_COMMUNITIES, MOCK_USER_COMMUNITIES, MOCK_COMMUNITY_POSTS, STORES } from '../constants';
 import { ReportModal } from './ReportModal';
 import { useNeighborhood, NEIGHBORHOODS } from '../contexts/NeighborhoodContext';
 import { User } from '@supabase/supabase-js';
@@ -236,7 +239,8 @@ const CreatePostView: React.FC<{
 
 interface PostCardProps {
   post: CommunityPost;
-  onStoreClick: (store: StoreType) => void;
+  // FIX: Changed StoreType to Store to match the type definition.
+  onStoreClick: (store: Store) => void;
   user: User | null;
   onRequireLogin: () => void;
 }
@@ -258,10 +262,12 @@ const PostCard: React.FC<PostCardProps> = ({ post, onStoreClick, user, onRequire
   };
 
   const handleVisitStore = (userName: string) => {
+    // FIX: Using imported STORES constant
     const store = STORES.find(s => s.name === userName);
     if (store) onStoreClick(store);
   };
 
+  // FIX: Using imported ReportReason type
   const handleReportSubmit = (reason: ReportReason) => {
     console.log(`Reporting post ${post.id} by ${post.userName} for reason: ${reason}`);
     setIsReportModalOpen(false);
@@ -485,7 +491,8 @@ const FilterModal: React.FC<{
 
 interface NeighborhoodPostsViewProps {
   onBack: () => void;
-  onStoreClick: (store: StoreType) => void;
+  // FIX: Changed StoreType to Store to match the type definition.
+  onStoreClick: (store: Store) => void;
   user: User | null;
   onRequireLogin: () => void;
 }
@@ -597,6 +604,7 @@ export const NeighborhoodPostsView: React.FC<NeighborhoodPostsViewProps> = ({ on
           <PostCard key={post.id} post={post} onStoreClick={onStoreClick} user={user} onRequireLogin={onRequireLogin} />
         ))}
         <div className="py-10 text-center opacity-30 flex flex-col items-center">
+          {/* FIX: Using imported StoreIcon component */}
           <StoreIcon size={24} className="mb-2" />
           <p className="text-[10px] font-black uppercase tracking-[0.3em]">Você chegou ao fim dos posts</p>
         </div>
@@ -624,3 +632,9 @@ export const NeighborhoodPostsView: React.FC<NeighborhoodPostsViewProps> = ({ on
     </div>
   );
 };
+
+const ChevronDown = ({ size, className }: { size?: number, className?: string }) => (
+  <svg width={size || 24} height={size || 24} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <path d="m6 9 6 6 6-6"/>
+  </svg>
+);

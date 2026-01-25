@@ -42,7 +42,10 @@ const StoreCard: React.FC<{ store: Store; onClick: () => void; isMaster?: boolea
                             <Crown className="w-2.5 h-2.5 fill-white" /> DESTAQUE DA SUBCATEGORIA
                         </span>
                     </div>
-                    <h3 className="font-black text-xl text-gray-900 dark:text-white leading-tight truncate">{store.name}</h3>
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-black text-xl text-gray-900 dark:text-white leading-tight truncate">{store.name}</h3>
+                      {store.verified && <BadgeCheck className="w-5 h-5 text-white fill-[#1E5BFF] shrink-0" />}
+                    </div>
                     <div className="flex items-center gap-2 mt-2">
                         <div className="flex items-center gap-1 text-xs font-bold text-[#1E5BFF] bg-blue-50 dark:bg-blue-900/20 px-2.5 py-0.5 rounded-full border border-blue-100 dark:border-blue-800/50">
                             <Star className="w-3 h-3 fill-current" />
@@ -64,7 +67,10 @@ const StoreCard: React.FC<{ store: Store; onClick: () => void; isMaster?: boolea
       </div>
       <div className="flex-1 min-w-0 flex flex-col justify-center">
         <div className="flex justify-between items-start">
-          <h4 className="font-bold text-gray-900 dark:text-white text-sm truncate pr-2">{store.name}</h4>
+          <div className="flex items-center gap-1.5 min-w-0">
+            <h4 className="font-bold text-gray-900 dark:text-white text-sm truncate">{store.name}</h4>
+            {store.verified && <BadgeCheck className="w-3.5 h-3.5 text-white fill-[#1E5BFF] shrink-0" />}
+          </div>
           {isSponsored && <span className="text-[8px] font-bold text-gray-400 bg-gray-100 dark:bg-gray-700 px-1.5 py-0.5 rounded uppercase tracking-tighter">PATROCINADO</span>}
         </div>
         <div className="flex items-center gap-2 text-[11px] text-gray-500 dark:text-gray-400 mt-1">

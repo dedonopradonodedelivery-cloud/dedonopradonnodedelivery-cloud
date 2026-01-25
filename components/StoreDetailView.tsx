@@ -25,7 +25,12 @@ import {
   Navigation2,
   Send,
   User as UserIcon,
-  CornerDownRight
+  CornerDownRight,
+  BadgeCheck,
+  Coins,
+  Ticket,
+  Zap,
+  ChevronRight as ChevronRightIcon
 } from 'lucide-react';
 import { Store, BusinessHour, StoreReview } from '../types';
 import { supabase } from '../lib/supabaseClient';
@@ -67,6 +72,25 @@ const MOCK_REVIEWS: StoreReview[] = [
   }
 ];
 
+const PixIcon: React.FC<{ className?: string }> = ({ className }) => (
+  <svg viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg" className={className}>
+    <g fill="currentColor">
+      <path d="M128 24a104 104 0 1 0 104 104A104.11 104.11 0 0 0 128 24Zm47.78 131.45-31.11-31.11a12 12 0 0 0-17 0l-31.11 31.11a12 12 0 0 1-18.33-15.43l31.11-31.11a12 12 0 0 0 0-17l-31.11-31.11a12 12 0 0 1 17-17l31.11 31.11a12 12 0 0 0 17 0l31.11-31.11a12 12 0 1 1 17 17l-31.11 31.11a12 12 0 0 0 0 17l31.11 31.11a12 12 0 1 1-15.44 18.33Z"/>
+    </g>
+  </svg>
+);
+
+const paymentIconMap: Record<string, React.ElementType> = {
+  'Dinheiro': Coins,
+  'Pix': PixIcon,
+  'Cartão de Crédito': CreditCard,
+  'Cartão de Débito': CreditCard,
+  'VR': Ticket,
+  'VA': Ticket,
+  'Vale Refeição / Alimentação': Ticket,
+};
+
+
 export const StoreDetailView: React.FC<{ 
   store: Store; 
   onBack: () => void; 
@@ -76,15 +100,33 @@ export const StoreDetailView: React.FC<{
   const { user } = useAuth();
   const { currentNeighborhood } = useNeighborhood();
   const [isFavorite, setIsFavorite] = useState(false);
-  const [activeTab, setActiveTab] = useState<'description' | 'reviews' | 'hours'>('description');
+  const [activeTab, setActiveTab] = useState<'description' | 'reviews' | 'hours' | 'payment'>('description');
   const [isClosedReporting, setIsClosedReporting] = useState(false);
   const [closedReported, setClosedReported] = useState(false);
+  const [currentSlide, setCurrentSlide] = useState(0);
 
   // States para Avaliação
   const [userRating, setUserRating] = useState(0);
   const [userComment, setUserComment] = useState('');
   const [isSubmittingReview, setIsSubmittingReview] = useState(false);
   const [reviewSuccessMessage, setReviewSuccessMessage] = useState('');
+
+  const images = useMemo(() => {
+    const gallery = store.gallery?.slice(0, 6) || [];
+    if (gallery.length > 0) return gallery;
+    return [store.banner_url || store.image || "https://images.unsplash.com/photo-1570129477492-45c003edd2be?q=80&w=1200&auto=format&fit=crop"];
+  }, [store]);
+
+  useEffect(() => {
+    if (images.length <= 1) return;
+    const timer = setInterval(() => {
+      setCurrentSlide(prev => (prev + 1) % images.length);
+    }, 5000);
+    return () => clearInterval(timer);
+  }, [images.length]);
+
+  const goToNext = () => setCurrentSlide(prev => (prev + 1) % images.length);
+  const goToPrev = () => setCurrentSlide(prev => (prev - 1 + images.length) % images.length);
 
   const track = (eventType: OrganicEventType) => {
     if (store) {
@@ -124,7 +166,6 @@ export const StoreDetailView: React.FC<{
     }, 1500);
   };
 
-  const bannerImg = store.banner_url || store.image || "https://images.unsplash.com/photo-1570129477492-45c003edd2be?q=80&w=1200&auto=format&fit=crop";
   const logoImg = store.logo_url || store.logoUrl || '/assets/default-logo.png';
   
   const phoneFormatted = store.telefone_fixo_publico || store.phone || '';
@@ -153,8 +194,8 @@ export const StoreDetailView: React.FC<{
     <div className="min-h-screen bg-white dark:bg-gray-950 font-sans relative overflow-x-hidden">
       <main className="pb-24">
         
-        {/* --- CAPA / BANNER --- */}
-        <section className="relative w-full aspect-[12/5] bg-gray-100 dark:bg-gray-800">
+        {/* --- CAROUSEL DE IMAGENS --- */}
+        <section className="relative w-full aspect-[12/5] bg-gray-100 dark:bg-gray-800 group">
           <div className="absolute top-0 left-0 right-0 p-4 pt-6 flex justify-between items-center z-40">
             <button onClick={onBack} className="w-10 h-10 rounded-full bg-white/90 dark:bg-gray-800/90 backdrop-blur-md flex items-center justify-center shadow-md active:scale-90 transition-transform">
               <ChevronLeft className="w-6 h-6 dark:text-white" />
@@ -168,9 +209,34 @@ export const StoreDetailView: React.FC<{
               </button>
             </div>
           </div>
-          
-          <img src={bannerImg} className="w-full h-full object-cover" alt="Banner" />
+
+          <div className="relative w-full h-full overflow-hidden">
+            {images.map((img, index) => (
+              <img
+                key={index}
+                src={img}
+                alt={`Imagem da loja ${index + 1}`}
+                className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ease-in-out ${index === currentSlide ? 'opacity-100' : 'opacity-0'}`}
+              />
+            ))}
+          </div>
+
           <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent"></div>
+          
+          {images.length > 1 && (
+            <>
+              {/* Navegação Manual */}
+              <button onClick={goToPrev} className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/80 dark:bg-gray-800/80 items-center justify-center shadow-md active:scale-90 transition-all opacity-0 group-hover:opacity-100 hidden sm:flex z-30"><ChevronLeft size={18} /></button>
+              <button onClick={goToNext} className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/80 dark:bg-gray-800/80 items-center justify-center shadow-md active:scale-90 transition-all opacity-0 group-hover:opacity-100 hidden sm:flex z-30"><ChevronRightIcon size={18} /></button>
+              
+              {/* Indicadores (Dots) */}
+              <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-1.5 z-30">
+                {images.map((_, index) => (
+                  <button key={index} onClick={() => setCurrentSlide(index)} className={`h-1.5 rounded-full transition-all duration-300 ${index === currentSlide ? 'w-4 bg-white shadow-md' : 'w-1.5 bg-white/50'}`}></button>
+                ))}
+              </div>
+            </>
+          )}
         </section>
 
         <div className="px-5 relative">
@@ -180,19 +246,19 @@ export const StoreDetailView: React.FC<{
               <div className="w-20 h-20 rounded-[24px] bg-white dark:bg-gray-800 p-1 shadow-lg border-4 border-white dark:border-gray-900 overflow-hidden z-30">
                 <img src={logoImg} alt="Logo" className="w-full h-full object-contain rounded-[20px]" />
               </div>
-              <div className="pb-1">
-                  {store.verified && (
-                    <div className="flex items-center gap-1.5 bg-blue-50 dark:bg-blue-900/20 text-[#1E5BFF] px-3 py-1.5 rounded-full border border-blue-100 dark:border-blue-800 shadow-sm animate-in zoom-in duration-500">
-                      <ShieldCheck size={12} />
-                      <span className="text-[9px] font-black uppercase tracking-widest">Verificada</span>
-                    </div>
-                  )}
-              </div>
           </div>
 
           {/* Cabeçalho */}
           <div className="mb-8">
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight leading-tight mb-2">{store.name}</h1>
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-2 mb-2">
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight leading-tight">{store.name}</h1>
+              {store.verified && (
+                  <div className="flex items-center gap-1.5 bg-blue-50 dark:bg-blue-900/20 text-[#1E5BFF] px-3 py-1 rounded-full border border-blue-100 dark:border-blue-800/50 shadow-sm">
+                      <BadgeCheck size={14} className="fill-current" />
+                      <span className="text-[9px] font-black uppercase tracking-widest">Verificada</span>
+                  </div>
+              )}
+            </div>
             <div className="flex items-center gap-2 text-xs font-medium text-gray-500 dark:text-gray-400">
                 <span className="uppercase font-bold tracking-widest text-[#1E5BFF]">{store.category}</span>
                 <span className="text-gray-300">•</span>
@@ -259,27 +325,34 @@ export const StoreDetailView: React.FC<{
 
           {/* --- NAVEGAÇÃO DE ABAS --- */}
           <section className="mb-10">
-              <div className="flex items-center gap-6 mb-8 px-1 border-b border-gray-100 dark:border-gray-800">
+              <div className="flex items-center gap-2 sm:gap-6 mb-8 px-1 border-b border-gray-100 dark:border-gray-800 overflow-x-auto no-scrollbar">
                   <button 
                     onClick={() => setActiveTab('description')}
-                    className={`pb-4 text-xs font-bold uppercase tracking-widest transition-all relative ${activeTab === 'description' ? 'text-gray-900 dark:text-white' : 'text-gray-400'}`}
+                    className={`flex-shrink-0 pb-4 text-xs font-bold uppercase tracking-widest transition-all relative px-2 ${activeTab === 'description' ? 'text-gray-900 dark:text-white' : 'text-gray-400'}`}
                   >
-                    Sobre a loja
+                    Sobre
                     {activeTab === 'description' && <div className="absolute bottom-0 left-0 right-0 h-1 bg-[#1E5BFF] rounded-t-full"></div>}
                   </button>
                   <button 
                     onClick={() => setActiveTab('reviews')}
-                    className={`pb-4 text-xs font-bold uppercase tracking-widest transition-all relative ${activeTab === 'reviews' ? 'text-gray-900 dark:text-white' : 'text-gray-400'}`}
+                    className={`flex-shrink-0 pb-4 text-xs font-bold uppercase tracking-widest transition-all relative px-2 ${activeTab === 'reviews' ? 'text-gray-900 dark:text-white' : 'text-gray-400'}`}
                   >
                     Avaliações
                     {activeTab === 'reviews' && <div className="absolute bottom-0 left-0 right-0 h-1 bg-[#1E5BFF] rounded-t-full"></div>}
                   </button>
                   <button 
                     onClick={() => setActiveTab('hours')}
-                    className={`pb-4 text-xs font-bold uppercase tracking-widest transition-all relative ${activeTab === 'hours' ? 'text-gray-900 dark:text-white' : 'text-gray-400'}`}
+                    className={`flex-shrink-0 pb-4 text-xs font-bold uppercase tracking-widest transition-all relative px-2 ${activeTab === 'hours' ? 'text-gray-900 dark:text-white' : 'text-gray-400'}`}
                   >
                     Horário
                     {activeTab === 'hours' && <div className="absolute bottom-0 left-0 right-0 h-1 bg-[#1E5BFF] rounded-t-full"></div>}
+                  </button>
+                  <button 
+                    onClick={() => setActiveTab('payment')}
+                    className={`flex-shrink-0 pb-4 text-xs font-bold uppercase tracking-widest transition-all relative px-2 ${activeTab === 'payment' ? 'text-gray-900 dark:text-white' : 'text-gray-400'}`}
+                  >
+                    Pagamento
+                    {activeTab === 'payment' && <div className="absolute bottom-0 left-0 right-0 h-1 bg-[#1E5BFF] rounded-t-full"></div>}
                   </button>
               </div>
 
@@ -291,25 +364,6 @@ export const StoreDetailView: React.FC<{
                         <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed font-medium">
                           {store.description || 'O lojista ainda não preencheu a descrição desta unidade.'}
                         </p>
-                    </div>
-
-                    {/* Pagamento (REPOSICIONADO) */}
-                    <div className="space-y-4 pt-8 border-t border-gray-50 dark:border-gray-800">
-                        <div className="flex items-center gap-2 ml-1">
-                            <CreditCard size={14} className="text-gray-400" />
-                            <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Formas de pagamento</h3>
-                        </div>
-                        <div className="bg-gray-50/50 dark:bg-gray-900/30 p-5 rounded-[24px] border border-gray-100 dark:border-gray-800">
-                            <div className="flex flex-wrap gap-2">
-                                {store.payment_methods && store.payment_methods.length > 0 ? (
-                                    store.payment_methods.map(method => (
-                                        <span key={method} className="bg-white dark:bg-gray-800 px-3 py-1.5 rounded-xl border border-gray-100 dark:border-gray-700 text-[9px] font-black text-gray-600 dark:text-gray-300 uppercase tracking-tight shadow-sm">{method}</span>
-                                    ))
-                                ) : (
-                                    <span className="text-[10px] text-gray-400 italic">Consulte as formas disponíveis no local.</span>
-                                )}
-                            </div>
-                        </div>
                     </div>
                 </div>
               )}
@@ -399,6 +453,35 @@ export const StoreDetailView: React.FC<{
                     </div>
                 </div>
               )}
+
+              {/* CONTEÚDO: FORMAS DE PAGAMENTO */}
+              {activeTab === 'payment' && (
+                <div className="animate-in fade-in duration-500">
+                  {store.payment_methods && store.payment_methods.length > 0 ? (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      {store.payment_methods.map(method => {
+                        const Icon = paymentIconMap[method] || CreditCard;
+                        return (
+                          <div key={method} className="bg-white dark:bg-gray-800 p-4 rounded-xl flex items-center gap-3 border border-gray-100 dark:border-gray-700 shadow-sm">
+                            <div className="w-10 h-10 bg-gray-50 dark:bg-gray-900 rounded-lg flex items-center justify-center text-gray-500 dark:text-gray-400">
+                              <Icon className="w-5 h-5" />
+                            </div>
+                            <span className="font-semibold text-sm text-gray-800 dark:text-gray-200">{method}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <div className="text-center py-12 bg-gray-50 dark:bg-gray-900/50 rounded-[24px] border border-dashed border-gray-200 dark:border-gray-800">
+                      <CreditCard className="w-8 h-8 text-gray-300 mx-auto mb-3" />
+                      <p className="text-xs text-gray-400 font-medium uppercase tracking-widest">
+                        Esta loja ainda não informou as formas de pagamento.
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
+
           </section>
 
           {/* --- BOTÕES FINAIS (REDESENHADOS) --- */}

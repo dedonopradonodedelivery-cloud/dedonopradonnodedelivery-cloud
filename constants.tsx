@@ -442,6 +442,11 @@ const BASE_STORES: Store[] = [
       sabado: { open: false, start: '', end: '' },
       domingo: { open: false, start: '', end: '' },
     },
+    gallery: [
+      'https://images.unsplash.com/photo-1521791136064-7986c2920216?q=80&w=1200&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?q=80&w=1200&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1581093450021-4a7360e9a6b5?q=80&w=1200&auto=format&fit=crop'
+    ],
   },
   {
     id: 'f-1',
@@ -478,6 +483,12 @@ const BASE_STORES: Store[] = [
       sabado: { open: true, start: '12:00', end: '23:00' },
       domingo: { open: false, start: '', end: '' },
     },
+    gallery: [
+      'https://images.unsplash.com/photo-1550547660-d9450f859349?q=80&w=1200&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?q=80&w=1200&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1571091718767-18b5b1457add?q=80&w=1200&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1607013251379-e6eecfffe234?q=80&w=1200&auto=format&fit=crop'
+    ],
   },
   { 
     id: 'f-2', 
@@ -513,6 +524,11 @@ const BASE_STORES: Store[] = [
       domingo: { open: false, start: '', end: '' },
     },
     reviewsCount: 215,
+    gallery: [
+      'https://images.unsplash.com/photo-1521590832167-7ce633395e39?q=80&w=1200&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1560066984-118c38b64a75?q=80&w=1200&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1632345031435-8727f6897d53?q=80&w=1200&auto=format&fit=crop',
+    ],
   },
   { 
     id: 'f-3', 
@@ -574,7 +590,7 @@ const generateFakeStores = (count: number): Store[] => {
       image: `https://images.unsplash.com/photo-${1500000000000 + (i * 1000)}?q=80&w=400&auto=format&fit=crop`,
       isSponsored: false,
       isOpenNow: Math.random() > 0.3,
-      verified: Math.random() > 0.5,
+      verified: Math.random() > 0.4,
       rua: 'Rua Genérica',
       numero: `${i * 10}`,
       bairro: hood,

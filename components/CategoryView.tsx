@@ -40,7 +40,10 @@ const StoreListItem: React.FC<{ store: Store; onClick: () => void }> = ({ store,
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex justify-between items-start">
-          <h4 className="font-bold text-gray-900 dark:text-white text-sm truncate pr-2">{store.name}</h4>
+          <div className="flex items-center gap-1.5 min-w-0">
+            <h4 className="font-bold text-gray-900 dark:text-white text-sm truncate">{store.name}</h4>
+            {store.verified && <BadgeCheck className="w-3.5 h-3.5 text-white fill-[#1E5BFF] shrink-0" />}
+          </div>
           {isSponsored && <span className="text-[9px] font-bold text-gray-400 bg-gray-100 dark:bg-gray-700 px-1.5 py-0.5 rounded uppercase text-[8px] tracking-widest font-black">PATROCINADO</span>}
         </div>
         <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 mt-0.5">
@@ -50,7 +53,6 @@ const StoreListItem: React.FC<{ store: Store; onClick: () => void }> = ({ store,
         </div>
         <div className="flex items-center gap-3 mt-1.5">
           {store.distance && <span className="text-[10px] text-gray-400 font-medium">{store.distance}</span>}
-          {store.verified && <span className="text-[10px] text-blue-600 dark:text-blue-400 font-bold flex items-center gap-0.5"><BadgeCheck className="w-3 h-3" /> Verificado</span>}
         </div>
       </div>
       <div className="h-8 w-8 rounded-full bg-gray-50 dark:bg-gray-800 flex items-center justify-center text-gray-300"><ChevronRight className="w-4 h-4" /></div>

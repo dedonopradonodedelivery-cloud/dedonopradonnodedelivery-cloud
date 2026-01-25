@@ -92,9 +92,10 @@ export const EditorialListView: React.FC<EditorialListViewProps> = ({
 
                 <div className="flex-1 flex flex-col justify-center min-w-0">
                   <div className="flex justify-between items-start gap-1">
-                     <h3 className="font-bold text-gray-900 dark:text-white text-base line-clamp-1">
-                       {store.name}
-                     </h3>
+                    <div className="flex items-center gap-2 min-w-0">
+                        <h3 className="font-bold text-gray-900 dark:text-white text-base truncate">{store.name}</h3>
+                        {store.verified && <BadgeCheck className="w-4 h-4 text-white fill-[#1E5BFF] shrink-0" />}
+                    </div>
                      {isSponsored && (
                        <span className="text-[10px] font-bold text-gray-500 bg-gray-100 dark:bg-gray-700 px-1.5 py-0.5 rounded uppercase tracking-wide">
                          Patrocinado
@@ -120,12 +121,6 @@ export const EditorialListView: React.FC<EditorialListViewProps> = ({
                        <div className="flex items-center gap-1 text-[11px] text-gray-500 dark:text-gray-400">
                           <MapPin className="w-3 h-3" />
                           {store.distance}
-                       </div>
-                     )}
-                     {store.verified && (
-                       <div className="flex items-center gap-1 text-[11px] text-blue-600 dark:text-blue-400 font-medium">
-                          <BadgeCheck className="w-4 h-4 text-white fill-[#1E5BFF]" />
-                          Verificado
                        </div>
                      )}
                   </div>

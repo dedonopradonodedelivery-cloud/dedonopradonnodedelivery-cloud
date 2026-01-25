@@ -210,7 +210,7 @@ export const LojasEServicosList: React.FC<LojasEServicosListProps> = ({ onStoreC
                     <div className="flex-1 flex flex-col justify-center min-w-0">
                         <div className="flex items-center gap-1.5 mb-0.5">
                             <h4 className="font-bold text-gray-900 dark:text-white text-sm truncate">{store.name}</h4>
-                            {store.verified && <BadgeCheck className="w-3.5 h-3.5 text-[#1E5BFF] fill-white shrink-0" />}
+                            {store.verified && <BadgeCheck className="w-3.5 h-3.5 text-white fill-[#1E5BFF] shrink-0" />}
                         </div>
                         <p className="text-[11px] text-gray-500 dark:text-gray-400 truncate">{store.category} • {store.neighborhood || store.distance}</p>
                         <div className="flex items-center gap-3 text-[10px] text-gray-400 mt-2">
