@@ -70,14 +70,26 @@ interface CategoryViewProps {
 }
 
 export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, onStoreClick, stores, userRole, onAdvertiseInCategory, onNavigate, onSubcategoryClick }) => {
+  const [selectedSubcategory, setSelectedSubcategory] = useState<string | null>(null);
+
   const subcategories = SUBCATEGORIES[category.name] || [];
   const MAX_VISIBLE_SUBCATEGORIES = 8;
   const shouldShowMore = subcategories.length > MAX_VISIBLE_SUBCATEGORIES;
   const visibleSubcategories = shouldShowMore ? subcategories.slice(0, MAX_VISIBLE_SUBCATEGORIES - 1) : subcategories;
 
   const filteredStores = useMemo(() => {
-    return stores.filter(s => s.category === category.name);
-  }, [stores, category.name]);
+    let categoryStores = stores.filter(s => s.category === category.name);
+    if (selectedSubcategory) {
+      return categoryStores.filter(s => s.subcategory === selectedSubcategory);
+    }
+    return categoryStores;
+  }, [stores, category.name, selectedSubcategory]);
+
+  const masterSponsor = useMemo(() => stores.find(s => s.id === 'grupo-esquematiza'), [stores]);
+
+  const handleSubcategoryClick = (subName: string) => {
+    setSelectedSubcategory(prev => prev === subName ? null : subName);
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950 pb-24 animate-in slide-in-from-right duration-300">
@@ -111,8 +123,8 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
                     key={i} 
                     icon={sub.icon}
                     name={sub.name}
-                    isSelected={false}
-                    onClick={() => onSubcategoryClick(sub.name)}
+                    isSelected={selectedSubcategory === sub.name}
+                    onClick={() => handleSubcategoryClick(sub.name)}
                     categoryColor={category.color}
                   />
               ))}
@@ -131,7 +143,7 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
 
         <section>
             <h3 className="font-bold text-gray-900 dark:text-white mb-4">
-                Principais em {category.name}
+                {selectedSubcategory || `Principais em ${category.name}`}
             </h3>
             {filteredStores.length > 0 ? (
                 <div className="flex flex-col gap-2">
@@ -149,7 +161,11 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
 
         {/* BANNER PATROCINADOR MASTER FINAL */}
         <section>
-          <MasterSponsorBanner onClick={() => onNavigate('patrocinador_master')} label={category.name} />
+          <MasterSponsorBanner 
+            sponsor={masterSponsor ? { name: masterSponsor.name, subtitle: masterSponsor.description, logoUrl: masterSponsor.logoUrl } : null}
+            onClick={() => onNavigate('patrocinador_master')} 
+            label={category.name} 
+          />
         </section>
       </div>
     </div>
