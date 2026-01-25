@@ -137,7 +137,7 @@ const App: React.FC = () => {
                     {activeTab === 'services' && (
                       <ServicesView 
                         onNavigate={(view) => handleNavigate(view)} 
-                        onOpenChat={(id) => { 
+                        onOpenChat={(id: string) => { 
                           setActiveServiceRequestId(id); 
                           setChatRole('resident'); 
                           handleNavigate('service_chat'); 
@@ -176,13 +176,13 @@ const App: React.FC = () => {
                         : <MenuView user={user as any} userRole={userRole} onAuthClick={() => setIsAuthOpen(true)} onNavigate={handleNavigate} onBack={() => handleNavigate('home')} />
                     )}
                     {activeTab === 'merchant_performance' && <MerchantPerformanceDashboard onBack={() => handleNavigate('profile')} onNavigate={handleNavigate} />}
-                    {activeTab === 'merchant_leads' && <MerchantLeadsView onBack={() => handleNavigate('profile')} onOpenChat={(id) => { setActiveServiceRequestId(id); setChatRole('merchant'); handleNavigate('service_chat'); }} />}
+                    {activeTab === 'merchant_leads' && <MerchantLeadsView onBack={() => handleNavigate('profile')} onOpenChat={(id: string) => { setActiveServiceRequestId(id); setChatRole('merchant'); handleNavigate('service_chat'); }} />}
 
                     {activeTab === 'service_chat' && activeServiceRequestId && (
                         <ServiceChatView requestId={activeServiceRequestId} userRole={chatRole} onBack={() => handleNavigate(isMerchantMode ? 'merchant_leads' : 'home')} />
                     )}
 
-                    {activeTab === 'admin_panel' && <AdminPanel user={user as any} onLogout={signOut} viewMode={viewMode} onOpenViewSwitcher={() => setIsRoleSwitcherOpen(true)} onNavigateToApp={handleNavigate} onOpenMonitorChat={(id) => { setActiveServiceRequestId(id); setChatRole('admin'); handleNavigate('service_chat'); }} />}
+                    {activeTab === 'admin_panel' && <AdminPanel user={user as any} onLogout={signOut} viewMode={viewMode} onOpenViewSwitcher={() => setIsRoleSwitcherOpen(true)} onNavigateToApp={handleNavigate} onOpenMonitorChat={(id: string) => { setActiveServiceRequestId(id); setChatRole('admin'); handleNavigate('service_chat'); }} />}
                     
                     {activeTab === 'store_detail' && selectedStore && <StoreDetailView store={selectedStore} onBack={() => handleNavigate(previousTab)} />}
                     {activeTab === 'classifieds' && <ClassifiedsView onBack={() => handleNavigate('home')} onNavigate={handleNavigate} />}
