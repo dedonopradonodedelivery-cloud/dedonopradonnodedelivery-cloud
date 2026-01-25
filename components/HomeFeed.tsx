@@ -184,7 +184,7 @@ export const HomeFeed: React.FC<HomeFeedFeedProps> = ({
         </div>
 
         <div className="flex gap-4 overflow-x-auto no-scrollbar -mx-5 px-5 pb-2">
-            {MOCK_COMMUNITY_POSTS.slice(0, 5).map((post) => (
+            {MOCK_COMMUNITY_POSTS.slice(0, 3).map((post) => (
                 <div 
                     key={post.id} 
                     onClick={() => onNavigate('neighborhood_posts')}

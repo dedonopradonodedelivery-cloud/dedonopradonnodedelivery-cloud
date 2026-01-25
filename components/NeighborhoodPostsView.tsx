@@ -45,11 +45,13 @@ const PostCard: React.FC<{ post: CommunityPost; onStoreClick: (store: StoreType)
       </div>
 
       {/* MÍDIA */}
-      {post.imageUrl && (
-        <div className="relative aspect-square bg-gray-100 dark:bg-gray-800">
-            <img src={post.imageUrl} alt="Conteúdo do post" className="w-full h-full object-cover" />
-        </div>
-      )}
+      <div className="relative aspect-square bg-gray-100 dark:bg-gray-800">
+          <img 
+            src={post.imageUrl || 'https://images.unsplash.com/photo-1570129477492-45c003edd2be?q=80&w=800&auto=format&fit=crop'} 
+            alt="Conteúdo do post" 
+            className="w-full h-full object-cover" 
+          />
+      </div>
 
       {/* AÇÕES */}
       <div className="p-3 flex items-center justify-between">

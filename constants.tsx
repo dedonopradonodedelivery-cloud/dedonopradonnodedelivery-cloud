@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { 
   Utensils, ShoppingCart, Scissors, Heart, PawPrint, Home, Wrench, 
@@ -308,18 +307,49 @@ export const NEIGHBORHOOD_COMMUNITIES: NeighborhoodCommunity[] = [
 
 export const MOCK_COMMUNITY_POSTS: CommunityPost[] = [
   {
-    id: 'post-1',
-    userId: 'u1',
-    userName: 'Taty Oliveira',
-    userAvatar: 'https://i.pravatar.cc/100?u=taty',
+    id: 'post-new-1',
+    userId: 'u-carlos',
+    userName: 'Carlos Henrique',
+    userAvatar: 'https://i.pravatar.cc/100?u=carloshenrique',
     authorRole: 'resident',
-    content: 'Alguém conhece um chaveiro de confiança na Freguesia? Perdi as chaves de casa agora pouco.',
+    content: "Galera, trânsito totalmente parado agora na Estrada dos Três Rios, sentido Taquara. Parece que teve um acidente mais à frente. Quem puder, evita passar por aqui agora.",
+    type: 'alert',
+    communityId: 'comm-residents',
+    neighborhood: 'Freguesia',
+    timestamp: 'Agora',
+    likes: 8,
+    comments: 1,
+    imageUrl: 'https://images.unsplash.com/photo-1570125909248-73dfa3383b18?q=80&w=600&auto=format&fit=crop'
+  },
+  {
+    id: 'post-new-2',
+    userId: 'u-juliana',
+    userName: 'Juliana Mendes',
+    userAvatar: 'https://i.pravatar.cc/100?u=julianamendes',
+    authorRole: 'resident',
+    content: "Gente, acabaram de roubar um carro aqui na Rua Joaquim Pinheiro 😔 Alguém sabe se já chamaram a polícia? Fiquem atentos.",
+    type: 'alert',
+    communityId: 'comm-residents',
+    neighborhood: 'Freguesia',
+    timestamp: '1h',
+    likes: 10,
+    comments: 1,
+    imageUrl: 'https://images.unsplash.com/photo-1570129477492-45c003edd2be?q=80&w=600&auto=format&fit=crop'
+  },
+  {
+    id: 'post-new-3',
+    userId: 'u-rafaelcosta',
+    userName: 'Rafael Costa',
+    userAvatar: 'https://i.pravatar.cc/100?u=rafaelcosta',
+    authorRole: 'resident',
+    content: "Alguém sabe me dizer qual é o dia da feira livre ali na Araguaia? Passei lá semana passada e não lembro se é terça ou quinta 😅",
     type: 'recommendation',
     communityId: 'comm-tips',
-    neighborhood: 'Freguesia',
+    neighborhood: 'Taquara',
     timestamp: '2h',
-    likes: 8,
-    comments: 16
+    likes: 5,
+    comments: 1,
+    imageUrl: 'https://images.unsplash.com/photo-1567332243413-56545bce13f2?q=80&w=600&auto=format&fit=crop'
   },
   {
     id: 'post-2',
@@ -337,20 +367,6 @@ export const MOCK_COMMUNITY_POSTS: CommunityPost[] = [
     imageUrl: 'https://images.unsplash.com/photo-1561758033-d89a9ad46330?q=80&w=600&auto=format&fit=crop'
   },
   {
-    id: 'post-3',
-    userId: 'u3',
-    userName: 'Bruno Rocha',
-    userAvatar: 'https://i.pravatar.cc/100?u=bruno',
-    authorRole: 'resident',
-    content: 'Alguém sabe se a feira de domingo vai acontecer amanhã mesmo com a chuva?',
-    type: 'event',
-    communityId: 'comm-residents',
-    neighborhood: 'Freguesia',
-    timestamp: '4h',
-    likes: 12,
-    comments: 4
-  },
-  {
     id: 'post-4',
     userId: 'u4',
     userName: 'Mariana Luz',
@@ -363,20 +379,6 @@ export const MOCK_COMMUNITY_POSTS: CommunityPost[] = [
     timestamp: '5h',
     likes: 24,
     comments: 12
-  },
-  {
-    id: 'post-5',
-    userId: 'u5',
-    userName: 'Ricardo Souza',
-    userAvatar: 'https://i.pravatar.cc/100?u=redard',
-    authorRole: 'resident',
-    content: 'Cuidado pessoal: semáforo da Geremário Dantas com problema, tá um caos o trânsito agora.',
-    type: 'alert',
-    communityId: 'comm-residents',
-    neighborhood: 'Freguesia',
-    timestamp: '6h',
-    likes: 38,
-    comments: 14
   },
   {
     id: 'post-6',
@@ -393,48 +395,6 @@ export const MOCK_COMMUNITY_POSTS: CommunityPost[] = [
     comments: 31,
     imageUrl: 'https://images.unsplash.com/photo-1585659722982-789600c7690a?q=80&w=600&auto=format&fit=crop'
   },
-  {
-    id: 'post-7',
-    userId: 'u7',
-    userName: 'Felipe Costa',
-    userAvatar: 'https://i.pravatar.cc/100?u=felipe',
-    authorRole: 'merchant',
-    content: 'Pessoal, abri uma vaga de emprego na minha loja de tintas no Tanque. Interessados, inbox!',
-    type: 'event',
-    communityId: 'comm-jobs',
-    neighborhood: 'Tanque',
-    timestamp: '12h',
-    likes: 15,
-    comments: 22
-  },
-  {
-    id: 'post-8',
-    userId: 'u8',
-    userName: 'Amanda Silva',
-    userAvatar: 'https://i.pravatar.cc/100?u=amanda',
-    authorRole: 'resident',
-    content: 'Apartamento disponível para aluguel na Freguesia, 2 quartos, direto com proprietário.',
-    type: 'recommendation',
-    communityId: 'comm-real-estate',
-    neighborhood: 'Freguesia',
-    timestamp: '14h',
-    likes: 18,
-    comments: 45
-  },
-  {
-    id: 'post-9',
-    userId: 'u9',
-    userName: 'Rafael Lima',
-    userAvatar: 'https://i.pravatar.cc/100?u=rafael',
-    authorRole: 'resident',
-    content: 'Alguém para dividir frete de mudança saindo da Freguesia para o Recreio este mês?',
-    type: 'recommendation',
-    communityId: 'comm-tips',
-    neighborhood: 'Freguesia',
-    timestamp: '1d',
-    likes: 5,
-    comments: 7
-  }
 ];
 
 // Dados das Lojas Iniciais
