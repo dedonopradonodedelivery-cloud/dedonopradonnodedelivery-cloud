@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { Store, Category, AdType } from '@/types';
 import { 
@@ -212,43 +213,24 @@ export const HomeFeed: React.FC<HomeFeedFeedProps> = ({
         </div>
       </section>
 
-      {/* 3. SERVIÇOS LOCAIS PERTO DE VOCÊ */}
-      <section className="px-5 py-6 mb-6 bg-gray-50 dark:bg-gray-900/50 rounded-[2.5rem] border border-gray-100 dark:border-gray-800">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-emerald-50 dark:bg-emerald-900/20 flex items-center justify-center text-emerald-600">
-              <Wrench size={18} strokeWidth={2.5} />
-            </div>
-            <div>
-              <h2 className="text-[11px] font-black text-gray-900 dark:text-white uppercase tracking-[0.15em] leading-none mb-1">Serviços locais perto de você</h2>
-              <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest leading-none">Resolva o que precisa no bairro</p>
-            </div>
+      {/* 3. PEÇA ORÇAMENTOS (REFORMULADO) */}
+      <section className="px-5 py-6 mb-6">
+        <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-gray-900 dark:to-gray-950 p-8 rounded-[2.5rem] border border-gray-100 dark:border-gray-800 text-center flex flex-col items-center shadow-lg shadow-blue-900/5">
+          <div className="w-16 h-16 bg-white dark:bg-gray-800 rounded-full flex items-center justify-center mb-6 shadow-md border border-gray-100 dark:border-gray-700">
+            <Wrench size={32} className="text-[#1E5BFF]" strokeWidth={2.5} />
           </div>
-          <button onClick={() => onNavigate('services')} className="text-[9px] font-black text-[#1E5BFF] uppercase tracking-widest">Ver tudo</button>
-        </div>
-
-        <div className="flex gap-3 overflow-x-auto no-scrollbar -mx-5 px-5 pb-2">
-          {LOCAL_SERVICES.map((service) => {
-            const Icon = service.icon;
-            return (
-              <button 
-                key={service.name} 
-                onClick={() => onNavigate('services')}
-                className="flex-shrink-0 w-28 h-28 bg-white dark:bg-gray-800 rounded-[1.5rem] border border-gray-100 dark:border-gray-700 p-4 flex flex-col items-center justify-center gap-2 shadow-sm active:scale-[0.98] transition-all"
-              >
-                <div className={`w-10 h-10 rounded-full flex items-center justify-center ${service.bg} dark:bg-opacity-20`}>
-                  <Icon size={18} className={service.color} />
-                </div>
-                <p className="text-[10px] font-bold text-gray-700 dark:text-gray-300 truncate">{service.name}</p>
-              </button>
-            );
-          })}
+          <h2 className="text-xl font-black text-gray-900 dark:text-white uppercase tracking-tighter leading-tight max-w-xs mx-auto mb-3">
+            Peça orçamentos de profissionais do bairro
+          </h2>
+          <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em] mb-8">
+            Até 5 orçamentos • rápido • fácil • grátis
+          </p>
           <button 
             onClick={() => onNavigate('services')}
-            className="flex-shrink-0 w-28 h-28 bg-gray-50 dark:bg-gray-800/50 rounded-[1.5rem] border-2 border-dashed border-gray-200 dark:border-gray-700 p-4 flex flex-col items-center justify-center gap-2 shadow-sm active:scale-[0.98] transition-all"
+            className="w-full max-w-xs bg-[#1E5BFF] text-white font-black py-4 rounded-2xl shadow-xl shadow-blue-500/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2 uppercase tracking-widest text-xs"
           >
-            <ArrowRight size={24} className="text-gray-300 dark:text-gray-600" />
-            <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500">Ver todos</p>
+            Solicitar orçamentos grátis
+            <ArrowRight size={14} strokeWidth={3} />
           </button>
         </div>
       </section>
