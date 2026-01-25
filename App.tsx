@@ -30,29 +30,12 @@ const ADMIN_EMAIL = 'dedonopradonodedelivery@gmail.com';
 
 export type RoleMode = 'ADM' | 'Usuário' | 'Lojista' | 'Visitante' | 'Designer';
 
-const TypingText: React.FC<{ text: string; duration: number }> = ({ text, duration }) => {
-  const [displayedText, setDisplayedText] = useState("");
-  useEffect(() => {
-    let i = 0;
-    const charDelay = duration / text.length;
-    const interval = setInterval(() => {
-      if (i < text.length) {
-        setDisplayedText(text.slice(0, i + 1));
-        i++;
-      } else {
-        clearInterval(interval);
-      }
-    }, charDelay);
-    return () => clearInterval(interval);
-  }, [text, duration]);
-  return <p className="text-[15px] font-medium text-white/90 mt-2 text-center whitespace-nowrap overflow-hidden">{displayedText}</p>;
-};
-
 const App: React.FC = () => {
   const { user, userRole, loading: isAuthInitialLoading, signOut } = useAuth();
   const { theme } = useTheme();
   const isAuthReturn = window.location.hash.includes('access_token') || window.location.search.includes('code=');
   const [splashStage, setSplashStage] = useState(splashWasShownInSession || isAuthReturn ? 4 : 0);
+  const [showSponsor, setShowSponsor] = useState(false); // State to control sponsor visibility
   const [viewMode, setViewMode] = useState<RoleMode>(() => (localStorage.getItem('admin_view_mode') as RoleMode) || 'Usuário');
   const [isRoleSwitcherOpen, setIsRoleSwitcherOpen] = useState(false);
   
@@ -76,11 +59,21 @@ const App: React.FC = () => {
     setActiveTab(view);
   };
 
+  // Updated splash screen timing logic
   useEffect(() => {
     if (splashStage === 4) return;
-    const t1 = setTimeout(() => setSplashStage(3), 2800);
-    const t2 = setTimeout(() => { setSplashStage(4); splashWasShownInSession = true; }, 3200);
-    return () => { clearTimeout(t1); clearTimeout(t2); };
+    const sponsorTimer = setTimeout(() => setShowSponsor(true), 2000); // Show sponsor after 2s
+    const fadeOutTimer = setTimeout(() => setSplashStage(3), 4500); // Start fade-out at 4.5s
+    const endSplashTimer = setTimeout(() => {
+      setSplashStage(4);
+      splashWasShownInSession = true;
+    }, 5000); // Total splash duration 5s
+
+    return () => {
+      clearTimeout(sponsorTimer);
+      clearTimeout(fadeOutTimer);
+      clearTimeout(endSplashTimer);
+    };
   }, []);
 
   const handleSelectStore = (store: Store) => { setSelectedStore(store); handleNavigate('store_detail'); };
@@ -124,7 +117,7 @@ const App: React.FC = () => {
     <div className={theme === 'dark' ? 'dark' : ''}>
       <NeighborhoodProvider>
         <div className="min-h-screen bg-white dark:bg-gray-900 flex justify-center relative transition-colors duration-300">
-          <div className={`w-full max-w-md h-full transition-opacity duration-700 ease-out ${splashStage >= 3 ? 'opacity-100' : 'opacity-0'}`}>
+          <div className={`w-full max-w-md h-full transition-opacity duration-500 ease-out ${splashStage >= 3 ? 'opacity-100' : 'opacity-0'}`}>
               <Layout activeTab={activeTab} setActiveTab={handleNavigate} userRole={userRole} hideNav={hideBottomNav}>
                   {!headerExclusionList.includes(activeTab) && (
                     <Header isDarkMode={theme === 'dark'} toggleTheme={() => {}} onAuthClick={() => handleNavigate('profile')} user={user} searchTerm={globalSearch} onSearchChange={setGlobalSearch} onNavigate={handleNavigate} activeTab={activeTab} userRole={userRole as any} stores={STORES} onStoreClick={handleSelectStore} isAdmin={user?.email === ADMIN_EMAIL} viewMode={viewMode} onOpenViewSwitcher={() => setIsRoleSwitcherOpen(true)} />
@@ -195,11 +188,15 @@ const App: React.FC = () => {
           </div>
 
           {splashStage < 4 && (
-            <div className={`fixed inset-0 z-[9999] flex flex-col items-center justify-between py-24 transition-opacity duration-500 ease-out ${splashStage === 3 ? 'opacity-0' : 'opacity-100'}`} style={{ backgroundColor: '#1E5BFF' }}>
+            <div className={`fixed inset-0 z-[9999] flex flex-col items-center justify-between py-16 transition-opacity duration-500 ease-out ${splashStage === 3 ? 'opacity-0' : 'opacity-100'}`} style={{ backgroundColor: '#1E5BFF' }}>
               <div className="flex flex-col items-center animate-fade-in text-center px-4">
                   <div className="relative w-32 h-32 bg-white rounded-[2.5rem] flex items-center justify-center shadow-2xl mb-8 animate-logo-enter"><MapPin className="w-16 h-16 text-brand-blue fill-brand-blue" /></div>
                   <h1 className="text-4xl font-black font-display text-white tracking-tighter drop-shadow-md">Localizei JPA</h1>
-                  <TypingText text="Onde o bairro conversa" duration={2000} />
+                  <p className="text-[15px] font-medium text-white/90 mt-2 text-center">Onde o bairro conversa 💬</p>
+              </div>
+              <div className={`text-center transition-opacity duration-1000 ${showSponsor ? 'opacity-100' : 'opacity-0'}`}>
+                <p className="text-[10px] font-bold text-white/60 uppercase tracking-[0.3em]">Patrocinador Master</p>
+                <p className="text-lg font-display font-bold text-white mt-1 tracking-wide">Grupo Esquematiza</p>
               </div>
             </div>
           )}
@@ -209,3 +206,4 @@ const App: React.FC = () => {
   );
 };
 export default App;
+```

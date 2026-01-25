@@ -50,6 +50,8 @@ Sempre seja curto, use emojis e convide o usuário a explorar as seções do app
         },
       });
 
+      // FIX: Changed response.text() to response.text as per Gemini API guidelines.
+      // .text is a getter property, not a method.
       const text = response.text || "Desculpe, tive um problema para processar sua mensagem.";
       setMessages(prev => [...prev, { role: 'model', text }]);
 
