@@ -225,7 +225,7 @@ export const StoreDetailView: React.FC<{
                       target="_blank" 
                       rel="noopener noreferrer" 
                       onClick={() => track('store_click_instagram')} 
-                      className="flex-1 bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-200 font-bold py-4 rounded-2xl flex items-center justify-center gap-2.5 border border-gray-100 dark:border-gray-700 shadow-sm active:scale-95 transition-all text-xs uppercase tracking-widest"
+                      className="flex-1 bg-gradient-to-br from-purple-600 via-rose-500 to-amber-500 text-white font-black py-4 rounded-2xl flex items-center justify-center gap-2.5 shadow-md shadow-rose-500/10 active:scale-95 transition-all text-xs uppercase tracking-widest"
                     >
                       <Instagram className="w-4 h-4" />
                       Instagram
@@ -245,12 +245,12 @@ export const StoreDetailView: React.FC<{
                       </div>
                   </div>
                   {hasAddress && (
-                    <div className="flex gap-2">
-                        <a href={wazeRouteUrl} target="_blank" rel="noopener" className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 active:scale-95 transition-all">
-                            <Navigation size={12} className="text-blue-400" /><span className="text-[10px] font-black uppercase tracking-widest text-gray-600 dark:text-gray-300">Waze</span>
+                    <div className="flex justify-center gap-3">
+                        <a href={wazeRouteUrl} target="_blank" rel="noopener" className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-sky-500 text-white shadow-md active:scale-95 transition-all">
+                            <Navigation size={16} /><span className="text-[10px] font-black uppercase tracking-widest">Waze</span>
                         </a>
-                        <a href={gmapsRouteUrl} target="_blank" rel="noopener" className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 active:scale-95 transition-all">
-                            <MapIcon size={12} className="text-red-400" /><span className="text-[10px] font-black uppercase tracking-widest text-gray-600 dark:text-gray-300">Maps</span>
+                        <a href={gmapsRouteUrl} target="_blank" rel="noopener" className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 shadow-md active:scale-95 transition-all">
+                            <MapIcon size={16} className="text-green-500" /><span className="text-[10px] font-black uppercase tracking-widest">Maps</span>
                         </a>
                     </div>
                   )}
