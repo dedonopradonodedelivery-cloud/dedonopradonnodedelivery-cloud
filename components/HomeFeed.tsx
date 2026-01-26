@@ -189,8 +189,28 @@ export const HomeFeed: React.FC<HomeFeedFeedProps> = ({
 
       <HomeBannerCarousel onStoreClick={onStoreClick} />
 
-      {/* 1. CUPOM DA SEMANA */}
-      <section className="px-5 py-1 mb-2">
+      {/* 2. ONDE O BAIRRO CONVERSA */}
+      <section className="bg-white dark:bg-gray-950 pt-8 pb-4">
+        <div className="px-5">
+            {/* Header */}
+            <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-bold text-gray-800 dark:text-white">Onde o bairro conversa</h2>
+                <div className="flex items-center gap-2">
+                  <button onClick={() => onNavigate('neighborhood_posts')} className="text-xs font-bold text-blue-500">Ver tudo</button>
+                  <button onClick={() => onNavigate('neighborhood_posts')} className="p-1.5 bg-gray-100 dark:bg-gray-800 rounded-full text-gray-500"><Plus size={14} /></button>
+                </div>
+            </div>
+        </div>
+        {/* Posts */}
+        <div className="flex overflow-x-auto no-scrollbar snap-x -mx-3.5 px-3.5">
+            {MOCK_COMMUNITY_POSTS.slice(0, 5).map((post) => (
+                <MiniPostCard key={post.id} post={post} onNavigate={onNavigate} />
+            ))}
+        </div>
+      </section>
+      
+      {/* 1. CUPOM DA SEMANA (MOVED) */}
+      <section className="px-5 pt-8 mb-2">
         <div className="bg-white dark:bg-gray-900 rounded-[1.75rem] border border-gray-200/80 dark:border-gray-800 shadow-xl shadow-blue-900/5 relative group">
           {/* Ticket Cutouts */}
           <div className="absolute top-1/2 -translate-y-1/2 -left-4 w-8 h-8 rounded-full bg-white dark:bg-gray-950"></div>
@@ -277,46 +297,35 @@ export const HomeFeed: React.FC<HomeFeedFeedProps> = ({
         </div>
       </section>
 
-      {/* 2. ONDE O BAIRRO CONVERSA */}
-      <section className="bg-white dark:bg-gray-950 pt-8 pb-4">
-        <div className="px-5">
-            {/* Header */}
-            <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-bold text-gray-800 dark:text-white">Onde o bairro conversa</h2>
-                <div className="flex items-center gap-2">
-                  <button onClick={() => onNavigate('neighborhood_posts')} className="text-xs font-bold text-blue-500">Ver tudo</button>
-                  <button onClick={() => onNavigate('neighborhood_posts')} className="p-1.5 bg-gray-100 dark:bg-gray-800 rounded-full text-gray-500"><Plus size={14} /></button>
-                </div>
-            </div>
-        </div>
-        {/* Posts */}
-        <div className="flex overflow-x-auto no-scrollbar snap-x -mx-3.5 px-3.5">
-            {MOCK_COMMUNITY_POSTS.slice(0, 5).map((post) => (
-                <MiniPostCard key={post.id} post={post} onNavigate={onNavigate} />
-            ))}
-        </div>
-      </section>
-      
-      {/* 3. PEÇA ORÇAMENTOS */}
+      {/* 3. PEÇA ORÇAMENTOS (REDESIGNED) */}
       <section className="px-5 py-4 mb-6">
-        <div className="bg-white dark:bg-gray-900 p-5 rounded-[2rem] border border-gray-100 dark:border-gray-800 shadow-sm flex items-center gap-4">
-          <div className="w-11 h-11 bg-blue-50 dark:bg-blue-900/20 rounded-xl flex items-center justify-center shrink-0 text-[#1E5BFF]">
-              <Wrench size={20} strokeWidth={2.5} />
+        <div 
+          onClick={() => onNavigate('services')}
+          className="relative bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-slate-800 dark:to-slate-900 rounded-[2.5rem] p-6 shadow-xl shadow-blue-900/5 overflow-hidden group cursor-pointer"
+        >
+          <div className="absolute -top-4 -right-4 w-24 h-24 bg-blue-500/5 dark:bg-white/5 rounded-full blur-2xl"></div>
+          <div className="relative z-10">
+            <div className="flex justify-between items-start mb-4">
+              <div className="w-12 h-12 rounded-2xl bg-white dark:bg-slate-700 flex items-center justify-center shrink-0 shadow-lg border border-gray-100 dark:border-slate-600">
+                <Wrench size={24} className="text-blue-500" />
+              </div>
+              <div className="flex -space-x-3 border-2 border-white/50 dark:border-slate-700/50 rounded-full">
+                <img src="https://i.pravatar.cc/40?u=a" alt="profissional 1" className="w-8 h-8 rounded-full object-cover border-2 border-white dark:border-slate-800" />
+                <img src="https://i.pravatar.cc/40?u=b" alt="profissional 2" className="w-8 h-8 rounded-full object-cover border-2 border-white dark:border-slate-800" />
+                <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-slate-600 flex items-center justify-center border-2 border-white dark:border-slate-800 text-[10px] font-bold text-gray-500 dark:text-gray-300">
+                  +5
+                </div>
+              </div>
+            </div>
+            <h2 className="text-lg font-black text-gray-900 dark:text-white leading-tight mb-1">Precisa de um Profissional?</h2>
+            <p className="text-xs text-gray-500 dark:text-slate-400 font-medium leading-relaxed mb-6">
+              Receba orçamentos gratuitos de especialistas verificados do bairro.
+            </p>
+            <div className="bg-blue-600 text-white font-black py-3 px-5 rounded-2xl shadow-lg shadow-blue-500/30 flex items-center justify-between text-xs uppercase tracking-wider group-hover:gap-3 transition-all w-full text-center group-hover:bg-blue-700">
+              <span>Solicitar Orçamento Grátis</span>
+              <ArrowRight size={16} />
+            </div>
           </div>
-          <div className="flex-1 min-w-0">
-              <h2 className="text-sm font-semibold text-gray-800 dark:text-white leading-tight">
-                  Peça orçamentos de profissionais do bairro
-              </h2>
-              <p className="text-[10px] font-medium text-gray-500 dark:text-gray-400 mt-1">
-                  Até 5 propostas • rápido • fácil • grátis
-              </p>
-          </div>
-          <button 
-            onClick={() => onNavigate('services')}
-            className="ml-auto bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-200 font-bold py-3 px-5 rounded-xl text-[10px] uppercase tracking-wider active:scale-[0.98] transition-all whitespace-nowrap"
-          >
-            Solicitar
-          </button>
         </div>
       </section>
 
