@@ -23,7 +23,7 @@ export const CATEGORIES: Category[] = [
   { id: 'cat-pets', name: 'Pets', slug: 'pets', icon: <PawPrint />, color: 'bg-brand-blue' },
   { id: 'cat-pro', name: 'Pro', slug: 'pro', icon: <Briefcase />, color: 'bg-brand-blue' },
   { id: 'cat-saude', name: 'Saúde', slug: 'saude', icon: <Heart />, color: 'bg-brand-blue' },
-  { id: 'cat-services', name: 'Orçamento de Serviços', slug: 'servicos', icon: <Wrench />, color: 'bg-brand-blue' },
+  { id: 'cat-services', name: 'Serviços', slug: 'servicos', icon: <Wrench />, color: 'bg-brand-blue' },
   { id: 'cat-imoveis', name: 'Imóveis Comerciais', slug: 'imoveis-comerciais', icon: <Building2 />, color: 'bg-brand-blue' },
   { id: 'cat-beauty', name: 'Beleza', slug: 'beleza', icon: <Scissors />, color: 'bg-brand-blue' },
   { id: 'cat-autos', name: 'Autos', slug: 'autos', icon: <CarFront />, color: 'bg-brand-blue' },
@@ -95,7 +95,7 @@ export const SUBCATEGORIES: Record<string, { name: string; icon: React.ReactNode
     { name: 'Terapias Alternativas', icon: <Sparkles /> },
     { name: 'Saúde Preventiva', icon: <Shield /> },
   ],
-  'Orçamento de Serviços': [
+  'Serviços': [
     { name: 'Limpeza Residencial', icon: <Sparkles /> },
     { name: 'Dedetização', icon: <Shield /> },
     { name: 'Manutenção Geral', icon: <Settings /> },
@@ -465,7 +465,7 @@ const BASE_STORES: Store[] = [
   {
     id: 'grupo-esquematiza',
     name: 'Grupo Esquematiza',
-    category: 'Orçamento de Serviços',
+    category: 'Serviços',
     subcategory: 'Segurança e Facilities',
     rating: 5.0,
     reviewsCount: 152,
@@ -627,7 +627,7 @@ const hoods = ["Freguesia", "Taquara", "Pechincha", "Tanque", "Anil", "Curicica"
 const modifiers = ["Prime", "do Bairro", "Jacarepaguá", "Master", "Central", "Top", "Premium"];
 const imageKeywords: Record<string, string> = {
   'Comida': 'restaurant,food', 'Pets': 'pet-shop,cute-animal', 'Pro': 'professional-tools,worker', 'Saúde': 'clinic,health', 
-  'Orçamento de Serviços': 'home-repair,technician', 'Imóveis Comerciais': 'commercial-real-estate,office', 'Beleza': 'beauty-salon,haircut', 'Autos': 'car-mechanic,garage', 
+  'Serviços': 'home-repair,technician', 'Imóveis Comerciais': 'commercial-real-estate,office', 'Beleza': 'beauty-salon,haircut', 'Autos': 'car-mechanic,garage', 
   'Mercado': 'grocery-store,market', 'Casa': 'home-decor,furniture', 'Esportes': 'gym,fitness', 'Lazer': 'entertainment,cinema', 
   'Educação': 'school,classroom', 'Farmácia': 'pharmacy,medicine', 'Moda': 'fashion-store,clothes', 'Eventos': 'event-planner,party', 'Condomínio': 'apartment-building,condominium'
 };

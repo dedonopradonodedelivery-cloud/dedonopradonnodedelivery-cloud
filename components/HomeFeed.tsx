@@ -162,13 +162,7 @@ export const HomeFeed: React.FC<HomeFeedFeedProps> = ({
             {CATEGORIES.map((cat) => (
               <button 
                 key={cat.id} 
-                onClick={() => {
-                  if (cat.slug === 'servicos') {
-                    onNavigate('services_landing');
-                  } else {
-                    onSelectCategory(cat);
-                  }
-                }}
+                onClick={() => onSelectCategory(cat)}
                 className="flex flex-col items-center group active:scale-95 transition-all"
               >
                 <div className={`w-[78px] h-[78px] rounded-[22px] shadow-lg flex flex-col items-center justify-between p-2 ${cat.color} border border-white/20`}>
