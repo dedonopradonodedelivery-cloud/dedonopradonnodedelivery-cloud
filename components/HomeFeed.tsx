@@ -174,7 +174,7 @@ export const HomeFeed: React.FC<HomeFeedFeedProps> = ({
           </div>
         </div>
         {/* SCROLL INDICATOR BAR */}
-        <div className="px-4 pb-4 flex justify-center">
+        <div className="px-4 pb-6 flex justify-center">
           <div className="w-1/3 h-[2px] bg-gray-100 dark:bg-gray-800 rounded-full">
             <div 
               className="h-full bg-brand-blue rounded-full" 
@@ -190,7 +190,7 @@ export const HomeFeed: React.FC<HomeFeedFeedProps> = ({
       <HomeBannerCarousel onStoreClick={onStoreClick} />
 
       {/* 2. ONDE O BAIRRO CONVERSA */}
-      <section className="bg-white dark:bg-gray-950 pt-8 pb-4">
+      <section className="bg-white dark:bg-gray-950 pt-6 pb-4">
         <div className="px-5">
             {/* Header */}
             <div className="flex items-center justify-between mb-4">
@@ -210,7 +210,7 @@ export const HomeFeed: React.FC<HomeFeedFeedProps> = ({
       </section>
       
       {/* 1. CUPOM DA SEMANA (MOVED) */}
-      <section className="px-5 pt-8 mb-2">
+      <section className="bg-white dark:bg-gray-950 px-5 pt-8 mb-2">
         <div className="bg-white dark:bg-gray-900 rounded-[1.75rem] border border-gray-200/80 dark:border-gray-800 shadow-xl shadow-blue-900/5 relative group">
           {/* Ticket Cutouts */}
           <div className="absolute top-1/2 -translate-y-1/2 -left-4 w-8 h-8 rounded-full bg-white dark:bg-gray-950"></div>
@@ -298,7 +298,7 @@ export const HomeFeed: React.FC<HomeFeedFeedProps> = ({
       </section>
 
       {/* 3. PEÇA ORÇAMENTOS (REDESIGNED) */}
-      <section className="px-5 py-4 mb-6">
+      <section className="bg-white dark:bg-gray-950 px-5 py-4 mb-6">
         <div 
           onClick={() => onNavigate('services')}
           className="relative bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-slate-800 dark:to-slate-900 rounded-[2.5rem] p-6 shadow-xl shadow-blue-900/5 overflow-hidden group cursor-pointer"

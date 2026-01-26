@@ -18,26 +18,26 @@ interface BannerData {
 
 const MOCK_BANNERS: BannerData[] = [
   // Home Banners (4 por bairro)
-  { id: 'ch-fre-1', neighborhood: 'Freguesia', placement: 'home', title: 'Sua Sala Comercial', subtitle: 'No coração da Freguesia', image: 'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?q=80&w=600', bgColor: 'bg-blue-800' },
-  { id: 'ch-fre-2', neighborhood: 'Freguesia', placement: 'home', title: 'Contrate Perto de Casa', subtitle: 'Vagas abertas na Freguesia', image: 'https://images.unsplash.com/photo-1521791136064-7986c2920216?q=80&w=600', bgColor: 'bg-emerald-800' },
-  { id: 'ch-fre-3', neighborhood: 'Freguesia', placement: 'home', title: 'Adote um Amigo', subtitle: 'Animais esperando por um lar', image: 'https://images.unsplash.com/photo-1537151608828-ea2b11777ee8?q=80&w=600', bgColor: 'bg-amber-700' },
-  { id: 'ch-fre-4', neighborhood: 'Freguesia', placement: 'home', title: 'Serviços Rápidos', subtitle: 'Resolva tudo sem sair do bairro', image: 'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?q=80&w=600', bgColor: 'bg-slate-800' },
-  { id: 'ch-taq-1', neighborhood: 'Taquara', placement: 'home', title: 'Imóveis na Taquara', subtitle: 'Oportunidades únicas de negócio', image: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?q=80&w=600', bgColor: 'bg-blue-800' },
-  { id: 'ch-taq-2', neighborhood: 'Taquara', placement: 'home', title: 'Empregos na Taquara', subtitle: 'Sua nova carreira começa aqui', image: 'https://images.unsplash.com/photo-1552664730-d307ca884978?q=80&w=600', bgColor: 'bg-emerald-800' },
-  { id: 'ch-taq-3', neighborhood: 'Taquara', placement: 'home', title: 'Adoção Responsável', subtitle: 'Encontre seu pet na Taquara', image: 'https://images.unsplash.com/photo-1598133894008-61f7fdb8cc3a?q=80&w=600', bgColor: 'bg-amber-700' },
-  { id: 'ch-taq-4', neighborhood: 'Taquara', placement: 'home', title: 'Profissionais Locais', subtitle: 'Serviços de confiança na Taquara', image: 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?q=80&w=600', bgColor: 'bg-slate-800' },
+  { id: 'ch-fre-1', storeId: 'f-1', neighborhood: 'Freguesia', placement: 'home', title: 'Sua Sala Comercial', subtitle: 'No coração da Freguesia', image: 'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?q=80&w=600', bgColor: 'bg-blue-800' },
+  { id: 'ch-fre-2', storeId: 'f-2', neighborhood: 'Freguesia', placement: 'home', title: 'Contrate Perto de Casa', subtitle: 'Vagas abertas na Freguesia', image: 'https://images.unsplash.com/photo-1521791136064-7986c2920216?q=80&w=600', bgColor: 'bg-emerald-800' },
+  { id: 'ch-fre-3', storeId: 'f-3', neighborhood: 'Freguesia', placement: 'home', title: 'Adote um Amigo', subtitle: 'Animais esperando por um lar', image: 'https://images.unsplash.com/photo-1537151608828-ea2b11777ee8?q=80&w=600', bgColor: 'bg-amber-700' },
+  { id: 'ch-fre-4', storeId: 'f-4', neighborhood: 'Freguesia', placement: 'home', title: 'Serviços Rápidos', subtitle: 'Resolva tudo sem sair do bairro', image: 'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?q=80&w=600', bgColor: 'bg-slate-800' },
+  { id: 'ch-taq-1', storeId: 'f-1', neighborhood: 'Taquara', placement: 'home', title: 'Imóveis na Taquara', subtitle: 'Oportunidades únicas de negócio', image: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?q=80&w=600', bgColor: 'bg-blue-800' },
+  { id: 'ch-taq-2', storeId: 'f-2', neighborhood: 'Taquara', placement: 'home', title: 'Empregos na Taquara', subtitle: 'Sua nova carreira começa aqui', image: 'https://images.unsplash.com/photo-1552664730-d307ca884978?q=80&w=600', bgColor: 'bg-emerald-800' },
+  { id: 'ch-taq-3', storeId: 'f-3', neighborhood: 'Taquara', placement: 'home', title: 'Adoção Responsável', subtitle: 'Encontre seu pet na Taquara', image: 'https://images.unsplash.com/photo-1598133894008-61f7fdb8cc3a?q=80&w=600', bgColor: 'bg-amber-700' },
+  { id: 'ch-taq-4', storeId: 'f-4', neighborhood: 'Taquara', placement: 'home', title: 'Profissionais Locais', subtitle: 'Serviços de confiança na Taquara', image: 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?q=80&w=600', bgColor: 'bg-slate-800' },
   
   // Category Banners (3 por categoria por bairro)
-  { id: 'cc-fre-re-1', neighborhood: 'Freguesia', placement: 'category', category: 'real_estate', title: 'Aluguel Facilitado', subtitle: 'As melhores salas comerciais', image: 'https://images.unsplash.com/photo-1497366811353-6870744d04b2?q=80&w=600', bgColor: 'bg-purple-800' },
-  { id: 'cc-fre-re-2', neighborhood: 'Freguesia', placement: 'category', category: 'real_estate', title: 'Venda seu Ponto', subtitle: 'Avaliação gratuita com nossos parceiros', image: 'https://images.unsplash.com/photo-1522881193457-33ae7c39524e?q=80&w=600', bgColor: 'bg-sky-800' },
-  { id: 'cc-fre-re-3', neighborhood: 'Freguesia', placement: 'category', category: 'real_estate', title: 'Invista no Bairro', subtitle: 'Imóveis comerciais com alto potencial', image: 'https://images.unsplash.com/photo-1582407947304-fd86f028f716?q=80&w=600', bgColor: 'bg-teal-800' },
-  { id: 'cc-fre-jobs-1', neighborhood: 'Freguesia', placement: 'category', category: 'jobs', title: 'Vagas Urgentes', subtitle: 'Início imediato na Freguesia', image: 'https://images.unsplash.com/photo-1556740758-90de374c12ad?q=80&w=600', bgColor: 'bg-red-800' },
+  { id: 'cc-fre-re-1', storeId: 'f-1', neighborhood: 'Freguesia', placement: 'category', category: 'real_estate', title: 'Aluguel Facilitado', subtitle: 'As melhores salas comerciais', image: 'https://images.unsplash.com/photo-1497366811353-6870744d04b2?q=80&w=600', bgColor: 'bg-purple-800' },
+  { id: 'cc-fre-re-2', storeId: 'f-1', neighborhood: 'Freguesia', placement: 'category', category: 'real_estate', title: 'Venda seu Ponto', subtitle: 'Avaliação gratuita com nossos parceiros', image: 'https://images.unsplash.com/photo-1522881193457-33ae7c39524e?q=80&w=600', bgColor: 'bg-sky-800' },
+  { id: 'cc-fre-re-3', storeId: 'f-1', neighborhood: 'Freguesia', placement: 'category', category: 'real_estate', title: 'Invista no Bairro', subtitle: 'Imóveis comerciais com alto potencial', image: 'https://images.unsplash.com/photo-1582407947304-fd86f028f716?q=80&w=600', bgColor: 'bg-teal-800' },
+  { id: 'cc-fre-jobs-1', storeId: 'f-2', neighborhood: 'Freguesia', placement: 'category', category: 'jobs', title: 'Vagas Urgentes', subtitle: 'Início imediato na Freguesia', image: 'https://images.unsplash.com/photo-1556740758-90de374c12ad?q=80&w=600', bgColor: 'bg-red-800' },
 ];
 
 const GENERAL_BANNERS: BannerData[] = [
-    { id: 'c-gen-1', neighborhood: 'Jacarepaguá (todos)', placement: 'home', title: 'Anuncie nos Classificados', subtitle: 'Visibilidade para seu anúncio ou serviço', image: 'https://images.unsplash.com/photo-1557804506-669a67965ba0?q=80&w=600', bgColor: 'bg-indigo-600' },
-    { id: 'c-gen-2', neighborhood: 'Jacarepaguá (todos)', placement: 'category', category: 'real_estate', title: 'Destaque seu Imóvel', subtitle: 'Venda ou alugue mais rápido', image: 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?q=80&w=600', bgColor: 'bg-purple-600' },
-    { id: 'c-gen-3', neighborhood: 'Jacarepaguá (todos)', placement: 'category', category: 'jobs', title: 'Contrate Talentos Locais', subtitle: 'Anuncie sua vaga de emprego aqui', image: 'https://images.unsplash.com/photo-1552664730-d307ca884978?q=80&w=600', bgColor: 'bg-emerald-600' },
+    { id: 'c-gen-1', storeId: 'grupo-esquematiza', neighborhood: 'Jacarepaguá (todos)', placement: 'home', title: 'Anuncie nos Classificados', subtitle: 'Visibilidade para seu anúncio ou serviço', image: 'https://images.unsplash.com/photo-1557804506-669a67965ba0?q=80&w=600', bgColor: 'bg-indigo-600' },
+    { id: 'c-gen-2', storeId: 'grupo-esquematiza', neighborhood: 'Jacarepaguá (todos)', placement: 'category', category: 'real_estate', title: 'Destaque seu Imóvel', subtitle: 'Venda ou alugue mais rápido', image: 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?q=80&w=600', bgColor: 'bg-purple-600' },
+    { id: 'c-gen-3', storeId: 'grupo-esquematiza', neighborhood: 'Jacarepaguá (todos)', placement: 'category', category: 'jobs', title: 'Contrate Talentos Locais', subtitle: 'Anuncie sua vaga de emprego aqui', image: 'https://images.unsplash.com/photo-1552664730-d307ca884978?q=80&w=600', bgColor: 'bg-emerald-600' },
 ];
 
 interface ClassifiedsBannerCarouselProps {
@@ -93,7 +93,7 @@ export const ClassifiedsBannerCarousel: React.FC<ClassifiedsBannerCarouselProps>
             const store = STORES.find(s => s.id === currentBanner.storeId);
             if (store) onStoreClick(store);
         } else {
-            console.log('Clicked generic banner:', currentBanner.id);
+            console.warn('Banner clicked with no associated storeId:', currentBanner.id);
         }
     };
 
