@@ -5,7 +5,7 @@ import {
   Compass, 
   Sparkles, 
   ArrowRight, 
-  Gift,
+  Ticket,
   CheckCircle2,
   Clock,
   Lock,
@@ -189,87 +189,89 @@ export const HomeFeed: React.FC<HomeFeedFeedProps> = ({
 
       <HomeBannerCarousel onStoreClick={onStoreClick} />
 
-      {/* 1. SISTEMA DE RECOMPENSA (VERSÃO COMPACTA) */}
+      {/* 1. CUPOM DA SEMANA */}
       <section className="px-5 py-1 mb-2">
-        <div className="bg-white dark:bg-gray-900 rounded-[2rem] p-4 border border-gray-100 dark:border-gray-800 shadow-xl shadow-blue-900/5 relative overflow-hidden group">
-          {/* Micro-animação de fundo quando ativado */}
-          <div className={`absolute top-0 right-0 w-24 h-24 bg-blue-500/5 rounded-full blur-3xl -mr-12 -mt-12 transition-opacity duration-1000 ${isAnimating ? 'opacity-100' : 'opacity-0'}`}></div>
+        <div className="bg-white dark:bg-gray-900 rounded-[1.75rem] border border-gray-200/80 dark:border-gray-800 shadow-xl shadow-blue-900/5 relative group">
+          {/* Ticket Cutouts */}
+          <div className="absolute top-1/2 -translate-y-1/2 -left-4 w-8 h-8 rounded-full bg-white dark:bg-gray-950"></div>
+          <div className="absolute top-1/2 -translate-y-1/2 -right-4 w-8 h-8 rounded-full bg-white dark:bg-gray-950"></div>
           
-          <div className="relative z-10">
-            <div className="flex items-center justify-between mb-3">
+          {/* Top part of ticket */}
+          <div className="p-4 pb-0">
+            <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <div className="w-7 h-7 bg-blue-50 dark:bg-blue-900/30 rounded-xl flex items-center justify-center text-[#1E5BFF] border border-blue-100/50 dark:border-blue-800/30 shadow-sm">
-                  <Gift className="w-4 h-4" />
+                <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center text-[#1E5BFF] border border-blue-200/50 dark:border-blue-800/30 shadow-sm">
+                  <Ticket className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="font-black text-[9px] text-[#1E5BFF] uppercase tracking-[0.12em] leading-none mb-0.5">Recompensa da Semana</h3>
-                  <p className="text-[8px] font-bold text-gray-400 uppercase tracking-widest leading-none">Acesse e ganhe</p>
+                  <h3 className="font-black text-sm text-[#1E5BFF]">Cupom da Semana 🎟️</h3>
+                  <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest leading-none">Desbloqueie e use no bairro</p>
                 </div>
               </div>
-              <div className="bg-gray-50 dark:bg-gray-800 px-2 py-1 rounded-lg border border-gray-100 dark:border-gray-700">
-                <span className="text-[8px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-tighter">Dia {consecutiveDays} de 5</span>
-              </div>
             </div>
-
-            <div className="px-1 mb-3">
-              <h2 className="text-[11px] font-bold text-gray-800 dark:text-gray-200 leading-tight">
-                {consecutiveDays < 5 
-                  ? "Cada dia conta para liberar seus benefícios exclusivos" 
-                  : "Parabéns! Sua recompensa está pronta."}
-              </h2>
-            </div>
-
-            {/* Marcadores de Progresso Compactos */}
-            <div className="flex justify-between items-center mb-4 px-2">
+            {/* Progress bar */}
+            <div className="flex justify-between items-center my-5 px-1">
               {[1, 2, 3, 4, 5].map((day) => {
-                const isCompleted = day <= consecutiveDays;
-                const isNext = day === consecutiveDays + 1;
-
-                return (
-                  <div key={day} className="flex flex-col items-center gap-1">
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center border-2 transition-all duration-700 relative ${
-                      isCompleted 
-                        ? 'bg-blue-500 border-blue-500 text-white shadow-md shadow-blue-500/10 scale-105' 
-                        : isNext
-                          ? 'bg-white dark:bg-gray-800 border-blue-200 dark:border-blue-900 border-dashed animate-pulse'
-                          : 'bg-gray-50 dark:bg-gray-800 border-gray-100 dark:border-gray-700 text-gray-300 dark:text-gray-600'
-                    }`}>
-                      {isCompleted ? (
-                        <CheckCircle2 size={14} strokeWidth={3} />
-                      ) : (
-                        <span className="text-[8px] font-black">{day}</span>
-                      )}
-                      
-                      {/* Brilho sutil no dia atual */}
-                      {day === consecutiveDays && !isAnimating && (
-                        <div className="absolute inset-0 rounded-full bg-blue-400/20 animate-ping"></div>
-                      )}
+                  const isCompleted = day <= consecutiveDays;
+                  return (
+                    <div key={day} className="flex flex-col items-center gap-1.5">
+                      <div className={`w-9 h-9 rounded-full flex items-center justify-center border-2 transition-all duration-500 relative shadow-inner ${
+                        isCompleted 
+                          ? 'bg-blue-500 border-blue-500/50 text-white shadow-md shadow-blue-500/10' 
+                          : 'bg-gray-100 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-300 dark:text-gray-600'
+                      }`}>
+                        {isCompleted ? (
+                          <CheckCircle2 size={16} strokeWidth={3.5} />
+                        ) : (
+                          <Lock size={14} />
+                        )}
+                        {day === consecutiveDays && !isAnimating && (
+                          <div className="absolute inset-[-2px] rounded-full bg-blue-400/20 animate-ping"></div>
+                        )}
+                      </div>
+                      <span className={`text-[9px] font-black uppercase tracking-widest ${isCompleted ? 'text-blue-600 dark:text-blue-400' : 'text-gray-400 dark:text-gray-500'}`}>
+                          Dia {day}
+                      </span>
                     </div>
-                  </div>
-                );
-              })}
+                  );
+                })}
             </div>
-
+          </div>
+          
+          {/* Dashed line separator */}
+          <div className="relative px-4">
+              <div className="border-t-2 border-dashed border-gray-200 dark:border-gray-700"></div>
+              <div className="absolute -top-4 -left-4 w-8 h-8 rounded-full bg-white dark:bg-gray-950"></div>
+              <div className="absolute -top-4 -right-4 w-8 h-8 rounded-full bg-white dark:bg-gray-950"></div>
+          </div>
+          
+          {/* Bottom part of ticket */}
+          <div className="p-4 pt-5">
+            <h2 className="text-xs font-bold text-gray-800 dark:text-gray-200 leading-tight text-center mb-4">
+              {consecutiveDays < 5 
+                ? "Desbloqueie todos os dias e libere seu cupom exclusivo!" 
+                : "Parabéns! Sua recompensa da semana está pronta."}
+            </h2>
             <button 
-              onClick={handleClaimReward}
-              disabled={isAnimating}
-              className={`w-full py-3 rounded-xl font-black text-[9px] uppercase tracking-[0.15em] transition-all flex items-center justify-center gap-2 shadow-md active:scale-[0.98] ${
-                isAnimating 
-                  ? 'bg-gray-100 text-gray-400' 
-                  : 'bg-[#1E5BFF] text-white shadow-blue-500/10 hover:brightness-110'
-              }`}
-            >
-              {isAnimating ? (
-                <>
-                  <Loader2 size={12} className="animate-spin" />
-                  Sincronizando...
-                </>
-              ) : (
-                <>
-                  {consecutiveDays < 5 ? `Liberar Dia ${consecutiveDays}` : "Resgatar Recompensa"}
-                  <ArrowRight size={12} strokeWidth={3} />
-                </>
-              )}
+                onClick={handleClaimReward}
+                disabled={isAnimating}
+                className={`w-full py-3 rounded-xl font-black text-[9px] uppercase tracking-[0.15em] transition-all flex items-center justify-center gap-2 shadow-lg active:scale-[0.98]
+                  ${isAnimating 
+                    ? 'bg-gray-100 text-gray-400' 
+                    : consecutiveDays < 5
+                      ? 'bg-[#1E5BFF] text-white shadow-blue-500/20 hover:brightness-110'
+                      : 'bg-emerald-500 text-white shadow-emerald-500/20 hover:brightness-110 animate-bounce'
+                  }
+                `}
+              >
+                {isAnimating ? (
+                  <><Loader2 size={12} className="animate-spin" /> Liberando...</>
+                ) : (
+                  <>
+                    {consecutiveDays < 5 ? `Desbloquear Dia ${consecutiveDays}` : "Resgatar Cupom"}
+                    <ArrowRight size={12} strokeWidth={3} />
+                  </>
+                )}
             </button>
           </div>
         </div>
