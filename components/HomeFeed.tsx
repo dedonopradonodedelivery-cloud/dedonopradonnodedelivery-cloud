@@ -297,34 +297,26 @@ export const HomeFeed: React.FC<HomeFeedFeedProps> = ({
         </div>
       </section>
 
-      {/* 3. PEÇA ORÇAMENTOS (REDESIGNED) */}
-      <section className="bg-white dark:bg-gray-950 px-5 py-4 mb-6">
+      {/* 3. PEÇA ORÇAMENTOS (REDESIGNED iOS Style) */}
+      <section className="px-5 pt-12 pb-6">
         <div 
           onClick={() => onNavigate('services')}
-          className="relative bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-slate-800 dark:to-slate-900 rounded-[2.5rem] p-6 shadow-xl shadow-blue-900/5 overflow-hidden group cursor-pointer"
+          className="bg-white dark:bg-gray-900 rounded-3xl p-6 border border-gray-200/60 dark:border-gray-800 shadow-sm cursor-pointer group transition-all hover:shadow-md"
         >
-          <div className="absolute -top-4 -right-4 w-24 h-24 bg-blue-500/5 dark:bg-white/5 rounded-full blur-2xl"></div>
-          <div className="relative z-10">
-            <div className="flex justify-between items-start mb-4">
-              <div className="w-12 h-12 rounded-2xl bg-white dark:bg-slate-700 flex items-center justify-center shrink-0 shadow-lg border border-gray-100 dark:border-slate-600">
-                <Wrench size={24} className="text-blue-500" />
+          <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-2xl bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center text-blue-500 border border-blue-100 dark:border-blue-800 shrink-0">
+                  <Zap size={24} />
               </div>
-              <div className="flex -space-x-3 border-2 border-white/50 dark:border-slate-700/50 rounded-full">
-                <img src="https://i.pravatar.cc/40?u=a" alt="profissional 1" className="w-8 h-8 rounded-full object-cover border-2 border-white dark:border-slate-800" />
-                <img src="https://i.pravatar.cc/40?u=b" alt="profissional 2" className="w-8 h-8 rounded-full object-cover border-2 border-white dark:border-slate-800" />
-                <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-slate-600 flex items-center justify-center border-2 border-white dark:border-slate-800 text-[10px] font-bold text-gray-500 dark:text-gray-300">
-                  +5
-                </div>
+              <div className="flex-1">
+                  <h2 className="text-base font-bold text-gray-900 dark:text-white leading-tight">Precisa de um Profissional?</h2>
+                  <p className="text-xs text-gray-500 dark:text-slate-400 font-medium leading-normal mt-1">
+                    Receba orçamentos gratuitos de especialistas verificados do bairro.
+                  </p>
+                  <div className="mt-4 flex items-center gap-1 text-blue-600 font-bold text-sm">
+                      <span>Solicitar Orçamento Grátis</span>
+                      <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" strokeWidth={3} />
+                  </div>
               </div>
-            </div>
-            <h2 className="text-lg font-black text-gray-900 dark:text-white leading-tight mb-1">Precisa de um Profissional?</h2>
-            <p className="text-xs text-gray-500 dark:text-slate-400 font-medium leading-relaxed mb-6">
-              Receba orçamentos gratuitos de especialistas verificados do bairro.
-            </p>
-            <div className="bg-blue-600 text-white font-black py-3 px-5 rounded-2xl shadow-lg shadow-blue-500/30 flex items-center justify-between text-xs uppercase tracking-wider group-hover:gap-3 transition-all w-full text-center group-hover:bg-blue-700">
-              <span>Solicitar Orçamento Grátis</span>
-              <ArrowRight size={16} />
-            </div>
           </div>
         </div>
       </section>
