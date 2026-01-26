@@ -101,10 +101,6 @@ const App: React.FC = () => {
   const handleSelectJob = (job: Job) => { setSelectedJob(job); handleNavigate('job_detail'); };
   
   const handleSelectCategory = (category: Category) => {
-    if (category.slug === 'servicos') {
-      handleNavigate('services_landing');
-      return;
-    }
     setSelectedCategory(category);
     handleNavigate('category_detail');
   };

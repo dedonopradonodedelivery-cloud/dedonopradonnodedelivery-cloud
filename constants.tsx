@@ -24,7 +24,6 @@ export const CATEGORIES: Category[] = [
   { id: 'cat-pro', name: 'Pro', slug: 'pro', icon: <Briefcase />, color: 'bg-brand-blue' },
   { id: 'cat-saude', name: 'Saúde', slug: 'saude', icon: <Heart />, color: 'bg-brand-blue' },
   { id: 'cat-services', name: 'Serviços', slug: 'servicos', icon: <Wrench />, color: 'bg-brand-blue' },
-  { id: 'cat-imoveis', name: 'Imóveis Comerciais', slug: 'imoveis-comerciais', icon: <Building2 />, color: 'bg-brand-blue' },
   { id: 'cat-beauty', name: 'Beleza', slug: 'beleza', icon: <Scissors />, color: 'bg-brand-blue' },
   { id: 'cat-autos', name: 'Autos', slug: 'autos', icon: <CarFront />, color: 'bg-brand-blue' },
   { id: 'cat-mercado', name: 'Mercado', slug: 'mercado', icon: <ShoppingCart />, color: 'bg-brand-blue' },
@@ -68,12 +67,6 @@ export const SUBCATEGORIES: Record<string, { name: string; icon: React.ReactNode
     { name: 'Passeadores', icon: <Users /> },
     { name: 'Produtos Pet', icon: <Package /> },
     { name: 'Pets Exóticos', icon: <Sparkles /> },
-  ],
-  'Imóveis Comerciais': [
-    { name: 'Aluguel de Lojas', icon: <StoreIcon /> },
-    { name: 'Aluguel de Salas', icon: <Briefcase /> },
-    { name: 'Venda de Lojas', icon: <Tag /> },
-    { name: 'Venda de Salas', icon: <Tag /> },
   ],
   'Pro': [
     { name: 'Eletricista', icon: <Zap /> },
@@ -627,7 +620,7 @@ const hoods = ["Freguesia", "Taquara", "Pechincha", "Tanque", "Anil", "Curicica"
 const modifiers = ["Prime", "do Bairro", "Jacarepaguá", "Master", "Central", "Top", "Premium"];
 const imageKeywords: Record<string, string> = {
   'Comida': 'restaurant,food', 'Pets': 'pet-shop,cute-animal', 'Pro': 'professional-tools,worker', 'Saúde': 'clinic,health', 
-  'Serviços': 'home-repair,technician', 'Imóveis Comerciais': 'commercial-real-estate,office', 'Beleza': 'beauty-salon,haircut', 'Autos': 'car-mechanic,garage', 
+  'Serviços': 'home-repair,technician', 'Beleza': 'beauty-salon,haircut', 'Autos': 'car-mechanic,garage', 
   'Mercado': 'grocery-store,market', 'Casa': 'home-decor,furniture', 'Esportes': 'gym,fitness', 'Lazer': 'entertainment,cinema', 
   'Educação': 'school,classroom', 'Farmácia': 'pharmacy,medicine', 'Moda': 'fashion-store,clothes', 'Eventos': 'event-planner,party', 'Condomínio': 'apartment-building,condominium'
 };
