@@ -297,26 +297,46 @@ export const HomeFeed: React.FC<HomeFeedFeedProps> = ({
         </div>
       </section>
 
-      {/* 3. PEÇA ORÇAMENTOS (REDESIGNED iOS Style) */}
+      {/* 3. PEÇA ORÇAMENTOS (REDESIGNED with 2D Illustration) */}
       <section className="px-5 pt-12 pb-6">
         <div 
           onClick={() => onNavigate('services')}
-          className="bg-white dark:bg-gray-900 rounded-3xl p-6 border border-gray-200/60 dark:border-gray-800 shadow-sm cursor-pointer group transition-all hover:shadow-md"
+          className="relative bg-white dark:bg-gray-800 rounded-[2.5rem] shadow-lg border border-gray-100 dark:border-gray-700 overflow-hidden cursor-pointer group transition-all duration-300 hover:shadow-xl hover:-translate-y-1"
         >
-          <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-2xl bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center text-blue-500 border border-blue-100 dark:border-blue-800 shrink-0">
-                  <Zap size={24} />
-              </div>
-              <div className="flex-1">
-                  <h2 className="text-base font-bold text-gray-900 dark:text-white leading-tight">Precisa de um Profissional?</h2>
-                  <p className="text-xs text-gray-500 dark:text-slate-400 font-medium leading-normal mt-1">
-                    Receba orçamentos gratuitos de especialistas verificados do bairro.
-                  </p>
-                  <div className="mt-4 flex items-center gap-1 text-blue-600 font-bold text-sm">
-                      <span>Solicitar Orçamento Grátis</span>
-                      <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" strokeWidth={3} />
-                  </div>
-              </div>
+          <div className="flex items-center p-8">
+            {/* Left side: Content */}
+            <div className="flex-1 z-10">
+              <h2 className="text-2xl font-black text-gray-900 dark:text-white leading-tight mb-2">
+                Precisa de um Profissional?
+              </h2>
+              <p className="text-sm text-gray-500 dark:text-gray-400 font-medium leading-relaxed mb-8 max-w-[240px]">
+                Receba orçamentos gratuitos de especialistas verificados do bairro.
+              </p>
+              <button className="bg-blue-600 text-white font-bold py-3 px-6 rounded-xl shadow-lg shadow-blue-500/20 text-xs uppercase tracking-wider flex items-center gap-2 group-hover:gap-3 transition-all active:scale-95">
+                <span>Solicitar Orçamento Grátis</span>
+                <ArrowRight size={16} />
+              </button>
+            </div>
+
+            {/* Right side: Illustration (absolute positioned) */}
+            <div className="absolute -right-8 -bottom-4 w-48 h-48 pointer-events-none group-hover:scale-105 transition-transform duration-500">
+              <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                <ellipse cx="100" cy="185" rx="45" ry="8" fill="#000" opacity="0.1" />
+                <g transform="translate(145, 115) rotate(25)">
+                  <g transform="translate(-20, -60)">
+                      <path d="M0 -15 L10 -25 L20 -15 L10 -5 Z" fill="#9CA3AF" />
+                      <rect x="8" y="-12" width="4" height="40" fill="#D1D5DB" />
+                      <path d="M0 25 C-5 25 -5 35 0 35 L10 40 L20 30 L10 20 Z" fill="#9CA3AF" />
+                  </g>
+                </g>
+                <rect x="70" y="90" width="60" height="95" rx="30" fill="#3B82F6" />
+                <circle cx="100" cy="70" r="30" fill="#F3D9A2" />
+                <path d="M80 45 Q100 30 120 45 L125 70 L75 70 Z" fill="#4A5568" />
+                <circle cx="90" cy="70" r="3" fill="#2D3748" />
+                <circle cx="110" cy="70" r="3" fill="#2D3748" />
+                <path d="M95 80 Q100 85 105 80" stroke="#2D3748" strokeWidth="2" fill="none" strokeLinecap="round" />
+              </svg>
+            </div>
           </div>
         </div>
       </section>
