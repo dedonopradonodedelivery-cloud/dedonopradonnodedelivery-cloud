@@ -19,7 +19,8 @@ import {
   Hammer,
   Plus,
   Heart,
-  Share2
+  Share2,
+  Bookmark
 } from 'lucide-react';
 import { LojasEServicosList } from '@/components/LojasEServicosList';
 import { User } from '@supabase/supabase-js';
@@ -37,42 +38,50 @@ interface HomeFeedFeedProps {
   userRole: 'cliente' | 'lojista' | null;
 }
 
-const MiniPostCard: React.FC<{ post: CommunityPost }> = ({ post }) => {
+const MiniPostCard: React.FC<{ post: CommunityPost; onNavigate: (view: string) => void; }> = ({ post, onNavigate }) => {
   const postImage = post.imageUrls?.[0] || 'https://images.unsplash.com/photo-1549488344-cbb6c34cf08b?q=80&w=400&auto=format&fit=crop';
   
-  // Simplistic action handlers for demo
-  const handleLike = (e: React.MouseEvent) => { e.stopPropagation(); alert('Curtido!'); };
-  const handleComment = (e: React.MouseEvent) => { e.stopPropagation(); alert('Comentário aberto!'); };
+  const handleAction = (e: React.MouseEvent, message: string) => {
+      e.stopPropagation();
+      alert(message);
+  };
 
   return (
-      <div className="flex-shrink-0 w-1/2 snap-center p-1.5 group">
-          <div className="bg-white dark:bg-gray-800 rounded-2xl overflow-hidden shadow-sm border border-gray-100 dark:border-gray-700 relative">
-              <div className="aspect-square relative">
-                  <img src={postImage} alt={post.content} className="w-full h-full object-cover" />
-                  {post.imageUrls && post.imageUrls.length > 0 && (
-                      <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-t from-black/60 to-transparent">
-                         <img src={post.imageUrls[0]} alt={post.content} className="w-full h-full object-cover" />
-                      </div>
-                  )}
-                  <div className="absolute bottom-0 left-0 right-0 p-2.5 text-white">
-                      <div className="flex items-center gap-2">
-                         <img src={post.userAvatar} className="w-5 h-5 rounded-full border-2 border-white" alt={post.userName} />
-                         <p className="text-[10px] font-bold drop-shadow-md truncate">{post.userName}</p>
-                      </div>
-                      <p className="text-[11px] mt-1.5 font-medium leading-tight line-clamp-2 drop-shadow-sm">
-                         {post.content}
-                      </p>
-                  </div>
-              </div>
-              <div className="p-2 flex justify-between items-center bg-white/50 backdrop-blur-sm -mt-10 relative z-10 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <div className="flex items-center gap-2">
-                      <button onClick={handleLike} className="flex items-center gap-1 text-xs text-gray-600"><Heart size={14} /> {post.likes}</button>
-                      <button onClick={handleComment} className="flex items-center gap-1 text-xs text-gray-600"><MessageSquare size={14} /> {post.comments}</button>
-                  </div>
-                  <span className="text-[9px] text-gray-500">{post.timestamp}</span>
-              </div>
+    <div className="flex-shrink-0 w-1/2 snap-center p-1.5">
+      <div 
+        onClick={() => onNavigate('neighborhood_posts')}
+        className="bg-white dark:bg-gray-800 rounded-2xl overflow-hidden shadow-md border border-gray-100 dark:border-gray-700 flex flex-col group cursor-pointer"
+      >
+        {/* Image with overlayed user info */}
+        <div className="relative aspect-square w-full overflow-hidden">
+          <img src={postImage} alt={post.content} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent"></div>
+          <div className="absolute top-2 left-2 flex items-center gap-2">
+            <img src={post.userAvatar} className="w-6 h-6 rounded-full border-2 border-white/80 object-cover" alt={post.userName} />
+            <p className="text-xs font-bold text-white drop-shadow-md truncate">{post.userName}</p>
           </div>
+        </div>
+
+        {/* Actions */}
+        <div className="px-2 pt-2 flex justify-between items-center">
+          <div className="flex items-center gap-2">
+            <button onClick={(e) => handleAction(e, 'Curtido!')} className="text-gray-500 hover:text-rose-500 p-1 transition-colors"><Heart size={20} /></button>
+            <button onClick={(e) => handleAction(e, 'Comentários!')} className="text-gray-500 hover:text-blue-500 p-1 transition-colors"><MessageSquare size={20} /></button>
+          </div>
+          <button onClick={(e) => handleAction(e, 'Salvo!')} className="text-gray-500 hover:text-yellow-500 p-1 transition-colors"><Bookmark size={20} /></button>
+        </div>
+        
+        {/* Content */}
+        <div className="px-3 pb-3">
+            <p className="text-xs text-gray-700 dark:text-gray-300 leading-snug line-clamp-2">
+                {post.content}
+            </p>
+            <span className="text-[10px] text-gray-400 mt-2 block group-hover:text-blue-500 transition-colors">
+                Ver post...
+            </span>
+        </div>
       </div>
+    </div>
   );
 };
 
@@ -287,7 +296,7 @@ export const HomeFeed: React.FC<HomeFeedFeedProps> = ({
         {/* Posts */}
         <div className="flex overflow-x-auto no-scrollbar snap-x -mx-3.5 px-3.5">
             {MOCK_COMMUNITY_POSTS.slice(0, 5).map((post) => (
-                <MiniPostCard key={post.id} post={post} />
+                <MiniPostCard key={post.id} post={post} onNavigate={onNavigate} />
             ))}
         </div>
       </section>
