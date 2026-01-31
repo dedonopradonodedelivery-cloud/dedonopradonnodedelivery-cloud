@@ -1,11 +1,9 @@
 import React, { useState, useMemo, useRef } from 'react';
 import { 
-  ChevronLeft, ArrowRight, Home, LayoutGrid, Zap, MapPin, 
-  Upload, Paintbrush, Sparkles, Check, Crown, Info, 
-  AlertTriangle, Image as ImageIcon, Type, AlignLeft, 
-  AlignCenter, AlignRight, Maximize, Palette, CheckCircle2,
-  Store as StoreIcon, CreditCard, QrCode, Copy, Loader2,
-  MessageCircle, ShieldCheck
+  ChevronLeft, ArrowRight, Home, LayoutGrid, Zap, 
+  Upload, Paintbrush, Sparkles, Crown, Info, 
+  AlertTriangle, Image as ImageIcon, CheckCircle2,
+  QrCode, Copy, Loader2, ShieldCheck
 } from 'lucide-react';
 import { User } from '@supabase/supabase-js';
 import { StoreBannerEditor } from './StoreBannerEditor';
@@ -27,7 +25,7 @@ const BAIRROS = [
 
 export const BannerSalesWizard: React.FC<BannerSalesWizardProps> = ({ user, onBack, onNavigate }) => {
   const [view, setView] = useState<WizardView>('steps');
-  const [step, setStep] = useState<number>(1); // Estado restaurado para controle de progresso inicial
+  const [step, setStep] = useState<number>(1);
   const [paymentTab, setPaymentTab] = useState<'pix' | 'card'>('pix');
   const [isProcessing, setIsProcessing] = useState(false);
   
@@ -69,6 +67,40 @@ export const BannerSalesWizard: React.FC<BannerSalesWizardProps> = ({ user, onBa
     };
   }, [placement, selectedHoods, artType]);
 
+  // Handlers - Definidos antes dos retornos antecipados para evitar erro TS2367
+  const handleHeaderBack = () => {
+    if (view === 'payment') {
+      setView('steps');
+    } else {
+      onBack();
+    }
+  };
+
+  const handleGoToPayment = () => {
+    if (!placement) return alert('Selecione onde quer aparecer.');
+    if (selectedHoods.length === 0) return alert('Selecione pelo menos um bairro.');
+    if (!artType) return alert('Escolha como será a sua arte.');
+    if (artType === 'MY_ART' && !uploadedImage) return alert('Por favor, anexe sua arte.');
+    if (artType === 'EDITOR' && !editorDesign) return alert('Por favor, complete sua arte no editor.');
+    
+    setView('payment');
+    window.scrollTo(0, 0);
+  };
+
+  const handleConfirmPayment = () => {
+    setIsProcessing(true);
+    setTimeout(() => {
+      setIsProcessing(false);
+      setView('success');
+      
+      if (artType === 'PRO') {
+        setTimeout(() => {
+          onNavigate('store_ads_module', 'chat');
+        }, 2000);
+      }
+    }, 2000);
+  };
+
   const toggleHood = (hood: string) => {
     if (hood === 'Todos') {
       setSelectedHoods(selectedHoods.length === BAIRROS.length ? [] : [...BAIRROS]);
@@ -97,32 +129,7 @@ export const BannerSalesWizard: React.FC<BannerSalesWizardProps> = ({ user, onBa
     setIsEditorOpen(false);
   };
 
-  const handleGoToPayment = () => {
-    if (!placement) return alert('Selecione onde quer aparecer.');
-    if (selectedHoods.length === 0) return alert('Selecione pelo menos um bairro.');
-    if (!artType) return alert('Escolha como será a sua arte.');
-    if (artType === 'MY_ART' && !uploadedImage) return alert('Por favor, anexe sua arte.');
-    if (artType === 'EDITOR' && !editorDesign) return alert('Por favor, complete sua arte no editor.');
-    
-    setView('payment');
-    window.scrollTo(0, 0);
-  };
-
-  const handleConfirmPayment = () => {
-    setIsProcessing(true);
-    setTimeout(() => {
-      setIsProcessing(false);
-      setView('success');
-      
-      // Regra especial: Redirecionar para chat se for time Localizei
-      if (artType === 'PRO') {
-        setTimeout(() => {
-          onNavigate('store_ads_module', 'chat');
-        }, 2000);
-      }
-    }, 2000);
-  };
-
+  // Retornos de visualização (Early Returns)
   if (isEditorOpen) {
     return (
       <StoreBannerEditor 
@@ -200,7 +207,7 @@ export const BannerSalesWizard: React.FC<BannerSalesWizardProps> = ({ user, onBa
                       00020126330014BR.GOV.BCB.PIX011112345678901520400005303986540569.905802BR5920LOCALIZEI6009RJ62070503***6304E2D1
                     </div>
                   </div>
-                  <button className="flex items-center gap-2 text-[#1E5BFF] font-black uppercase text-[10px] tracking-widest"><Copy size={14}/> Copiar código PIX</button>
+                  <button type="button" className="flex items-center gap-2 text-[#1E5BFF] font-black uppercase text-[10px] tracking-widest"><Copy size={14}/> Copiar código PIX</button>
                </div>
              ) : (
                <div className="bg-white dark:bg-slate-900 p-6 rounded-[2rem] border border-slate-100 dark:border-slate-800 space-y-4">
@@ -240,11 +247,6 @@ export const BannerSalesWizard: React.FC<BannerSalesWizardProps> = ({ user, onBa
     );
   }
 
-  const handleHeaderBack = () => {
-    if (view === 'payment') setView('steps');
-    else onBack();
-  }
-
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 font-sans flex flex-col animate-in fade-in duration-500">
       
@@ -272,7 +274,7 @@ export const BannerSalesWizard: React.FC<BannerSalesWizardProps> = ({ user, onBa
           </p>
         </header>
 
-        {/* PASSO 1: POSICIONAMENTO — INTERATIVIDADE CORRIGIDA (RADIO GROUP) */}
+        {/* PASSO 1: POSICIONAMENTO — FUNCIONANDO COMO RADIO GROUP SEMPRE ATIVO */}
         <section className="space-y-6">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center font-black text-xs">1</div>
@@ -287,6 +289,7 @@ export const BannerSalesWizard: React.FC<BannerSalesWizardProps> = ({ user, onBa
             ].map(opt => (
               <button 
                 key={opt.id}
+                type="button"
                 onClick={() => { 
                   setPlacement(opt.id as PlacementMode); 
                   if (step === 1) setStep(2); 
@@ -303,9 +306,6 @@ export const BannerSalesWizard: React.FC<BannerSalesWizardProps> = ({ user, onBa
               </button>
             ))}
           </div>
-          <p className="text-center text-[8px] text-slate-400 font-bold uppercase tracking-widest mt-4">
-              Promoção de inauguração por tempo indeterminado.
-          </p>
         </section>
 
         {/* PASSO 2: BAIRROS */}
@@ -317,6 +317,7 @@ export const BannerSalesWizard: React.FC<BannerSalesWizardProps> = ({ user, onBa
 
           <div className="grid grid-cols-2 gap-3">
             <button 
+              type="button"
               onClick={() => toggleHood('Todos')}
               className={`col-span-2 p-4 rounded-2xl border-2 font-black uppercase tracking-widest text-xs flex items-center justify-center gap-2 transition-all active:scale-[0.98] ${selectedHoods.length === BAIRROS.length ? 'border-emerald-500 bg-emerald-50 text-emerald-600' : 'border-slate-200 dark:border-slate-800 text-slate-500'}`}
             >
@@ -326,6 +327,7 @@ export const BannerSalesWizard: React.FC<BannerSalesWizardProps> = ({ user, onBa
             {BAIRROS.map(hood => (
               <button 
                 key={hood}
+                type="button"
                 onClick={() => toggleHood(hood)}
                 className={`p-4 rounded-2xl border-2 text-[10px] font-bold uppercase transition-all active:scale-95 ${selectedHoods.includes(hood) ? 'border-blue-600 bg-blue-50 dark:bg-blue-900/20 text-blue-600' : 'border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-400'}`}
               >
@@ -335,7 +337,7 @@ export const BannerSalesWizard: React.FC<BannerSalesWizardProps> = ({ user, onBa
           </div>
         </section>
 
-        {/* PASSO 3: ARTE — CORRIGIDO */}
+        {/* PASSO 3: ARTE */}
         <section className={`space-y-8 ${selectedHoods.length === 0 ? 'opacity-40 grayscale pointer-events-none' : ''}`}>
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center font-black text-xs">3</div>
@@ -344,6 +346,7 @@ export const BannerSalesWizard: React.FC<BannerSalesWizardProps> = ({ user, onBa
 
           <div className="space-y-4">
             <button 
+              type="button"
               onClick={() => fileInputRef.current?.click()}
               className={`w-full text-left p-6 rounded-3xl border-2 transition-all active:scale-[0.98] ${artType === 'MY_ART' ? 'border-blue-600 bg-blue-50 dark:bg-blue-900/10' : 'border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900'}`}
             >
@@ -364,6 +367,7 @@ export const BannerSalesWizard: React.FC<BannerSalesWizardProps> = ({ user, onBa
             </button>
 
             <button 
+              type="button"
               onClick={() => setIsEditorOpen(true)}
               className={`w-full text-left p-6 rounded-3xl border-2 transition-all active:scale-[0.98] ${artType === 'EDITOR' ? 'border-purple-600 bg-purple-50 dark:bg-purple-900/10' : 'border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900'}`}
             >
@@ -378,6 +382,7 @@ export const BannerSalesWizard: React.FC<BannerSalesWizardProps> = ({ user, onBa
             </button>
 
             <button 
+              type="button"
               onClick={() => setArtType('PRO')}
               className={`w-full text-left p-6 rounded-3xl border-2 transition-all relative overflow-hidden active:scale-[0.98] ${artType === 'PRO' ? 'border-amber-500 bg-amber-50 dark:bg-amber-900/10' : 'border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900'}`}
             >
@@ -406,6 +411,7 @@ export const BannerSalesWizard: React.FC<BannerSalesWizardProps> = ({ user, onBa
             </div>
             
             <button 
+                type="button"
                 onClick={handleGoToPayment}
                 className="w-full bg-[#1E5BFF] text-white font-black py-5 rounded-[2rem] shadow-xl shadow-blue-500/30 active:scale-[0.98] transition-all flex items-center justify-center gap-3 uppercase tracking-widest text-sm"
             >
