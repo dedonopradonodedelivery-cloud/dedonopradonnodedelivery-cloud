@@ -28,7 +28,6 @@ import {
   CreditCard,
   Target,
   Zap,
-  // FIX: Added missing Crown icon to fix "Cannot find name 'Crown'" error
   Crown
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
@@ -65,7 +64,7 @@ export const PatrocinadorMasterScreen: React.FC<PatrocinadorMasterScreenProps> =
   const [selectedMonths, setSelectedMonths] = useState<string[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const chatScrollRef = useRef<HTMLDivElement>(null);
-  const detailsRef = useRef<HTMLDivElement>(null);
+  const detailsSectionRef = useRef<HTMLDivElement>(null);
 
   const availableMonths = useMemo(() => {
     const monthNames = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
@@ -96,8 +95,9 @@ export const PatrocinadorMasterScreen: React.FC<PatrocinadorMasterScreenProps> =
   };
   
   const pricing = useMemo(() => {
-    const count = Math.max(1, selectedMonths.length); // Garante cálculo base mesmo sem seleção manual
-    const basePrice = 4000;
+    const count = Math.max(1, selectedMonths.length);
+    const basePrice = 1500; // ATUALIZADO: De 4000 para 1500
+    const originalPrice = 2500; // NOVO: Preço original para exibição
     const totalWithoutDiscount = selectedMonths.length * basePrice;
     let discountPercent = 0;
     
@@ -114,6 +114,7 @@ export const PatrocinadorMasterScreen: React.FC<PatrocinadorMasterScreenProps> =
         totalSavings,
         finalTotal,
         basePrice,
+        originalPrice
     };
   }, [selectedMonths]);
 
@@ -121,7 +122,8 @@ export const PatrocinadorMasterScreen: React.FC<PatrocinadorMasterScreenProps> =
 
   // --- HANDLERS FLUXO ---
 
-  const handleQuickStart = () => {
+  const handleQuickBuy = () => {
+    // Se não houver meses selecionados, seleciona o primeiro disponível
     if (selectedMonths.length === 0) {
       const firstAvailable = availableMonths.find(m => m.available);
       if (firstAvailable) {
@@ -133,7 +135,7 @@ export const PatrocinadorMasterScreen: React.FC<PatrocinadorMasterScreenProps> =
   };
 
   const scrollToDetails = () => {
-    detailsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    detailsSectionRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
   const handleConfirmPayment = () => {
@@ -172,9 +174,9 @@ export const PatrocinadorMasterScreen: React.FC<PatrocinadorMasterScreenProps> =
 
   const getPageTitle = () => {
     switch (step) {
-        case 'payment': return 'Pagamento';
-        case 'admin_chat': return 'Alinhamento';
-        default: return 'Seja Patrocinador Master';
+        case 'payment': return 'Checkout Seguro';
+        case 'admin_chat': return 'Alinhamento Estratégico';
+        default: return 'Patrocinador Master';
     }
   }
 
@@ -182,117 +184,127 @@ export const PatrocinadorMasterScreen: React.FC<PatrocinadorMasterScreenProps> =
 
   const renderSelection = () => (
     <div className="animate-in fade-in duration-500 px-6 pt-8 pb-32">
-      <section className="text-center">
+      <section className="text-center mb-16">
         <div className="w-24 h-24 bg-gradient-to-br from-amber-400 to-amber-600 rounded-[2.5rem] flex items-center justify-center mx-auto mb-8 shadow-2xl shadow-amber-500/20 border-2 border-white/10">
           <Award className="w-12 h-12 text-white" />
         </div>
-        <h2 className="text-4xl font-black text-white font-display tracking-tight leading-none mb-6">
-          Aqui você não compra um banner. <br/> Você compra <span className="text-amber-400">presença total</span> no app.
+        <h2 className="text-4xl font-black text-white font-display tracking-tight leading-none mb-4">
+          Não compre um banner. <br/> Garanta <span className="text-amber-400">presença total</span>.
         </h2>
-        
-        {/* BLOCO DE PREÇO NA PRIMEIRA DOBRA */}
-        <div className="bg-white/5 border border-white/10 rounded-3xl p-6 mb-8 backdrop-blur-sm shadow-xl animate-in zoom-in-95 duration-700">
-            <p className="text-xs font-black text-amber-400 uppercase tracking-widest mb-2">A partir de</p>
+        <p className="text-slate-400 text-sm font-medium max-w-xs mx-auto mb-8">
+            Domine as áreas mais nobres do aplicativo e seja a primeira escolha dos moradores.
+        </p>
+
+        {/* AJUSTE 1: PREÇO NA PRIMEIRA DOBRA COM VALORES ATUALIZADOS */}
+        <div className="bg-white/5 border border-white/10 rounded-3xl p-6 mb-8 relative overflow-hidden animate-in zoom-in-95 duration-700">
+            <div className="absolute top-0 right-0 w-24 h-24 bg-amber-500/5 rounded-full blur-2xl"></div>
+            
+            <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">
+              De <span className="line-through">R$ 2.500</span> por apenas
+            </p>
             <div className="flex items-baseline justify-center gap-1">
-                <span className="text-xl font-bold text-white opacity-60">R$</span>
-                <span className="text-5xl font-black text-white tracking-tighter">4.000</span>
-                <span className="text-lg font-bold text-slate-400">/mês</span>
+                <span className="text-xl font-bold text-slate-500">R$</span>
+                <span className="text-5xl font-black text-white tracking-tighter">1.500</span>
+                <span className="text-lg font-bold text-slate-500">/mês</span>
             </div>
-            <p className="text-[10px] text-slate-400 font-bold uppercase mt-3 tracking-wider">Venda por mês fechado</p>
-            <p className="text-[9px] text-amber-500/60 font-black uppercase mt-1 tracking-[0.2em]">Promoção de inauguração por tempo indeterminado</p>
+            <p className="text-[9px] text-amber-500/80 font-black uppercase mt-2 tracking-wider">
+              Promoção de inauguração por tempo indeterminado
+            </p>
+            
+            <div className="mt-6 flex flex-col items-center gap-1 border-t border-white/5 pt-4">
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Venda por mês fechado</p>
+            </div>
         </div>
 
-        {/* CTAs DE PRIMEIRA DOBRA */}
-        <div className="flex flex-col gap-3 mb-10">
+        {/* AJUSTE 2: CTAs DE COMPRA IMEDIATA */}
+        <div className="flex flex-col gap-3">
             <button 
-                onClick={handleQuickStart}
-                className="w-full bg-amber-500 hover:bg-amber-600 text-slate-900 font-black py-5 rounded-2xl shadow-xl shadow-amber-500/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                onClick={handleQuickBuy}
+                className="w-full bg-amber-500 hover:bg-amber-600 text-slate-900 font-black py-5 rounded-2xl shadow-xl shadow-amber-500/30 active:scale-[0.98] transition-all flex items-center justify-center gap-2 text-base uppercase tracking-wider"
             >
                 Contratar agora <ArrowRight size={20} strokeWidth={3} />
             </button>
             <button 
                 onClick={scrollToDetails}
-                className="w-full py-4 text-slate-400 font-bold text-sm hover:text-white transition-colors"
+                className="w-full py-3 text-slate-400 font-bold text-sm hover:text-white transition-colors"
             >
                 Ver detalhes do plano
             </button>
         </div>
-
-        <p className="text-base text-slate-400 max-w-lg mx-auto leading-relaxed" ref={detailsRef}>
-          O Patrocinador Master é a contratação de espaço publicitário premium, onde sua marca aparece em aproximadamente <strong>90% das áreas estratégicas</strong> do aplicativo.
-        </p>
       </section>
 
-      <div className="bg-slate-900/50 p-5 rounded-3xl border border-white/5 flex items-start gap-4 mt-12">
-        <div className="p-2 bg-blue-500/10 rounded-xl border border-blue-500/20 text-blue-400">
-          <Info size={20} />
-        </div>
-        <p className="text-xs text-slate-300 leading-relaxed font-medium">
-          Aqui você contrata o espaço Patrocinador Master (por mês fechado). A criação dos materiais visuais acontece após a contratação, com suporte da nossa equipe de design.
-        </p>
+      <div ref={detailsSectionRef} className="scroll-mt-24">
+          <div className="bg-slate-900/50 p-5 rounded-3xl border border-white/5 flex items-start gap-4 mb-12">
+            <div className="p-2 bg-blue-500/10 rounded-xl border border-blue-500/20 text-blue-400">
+              <Info size={20} />
+            </div>
+            <p className="text-xs text-slate-300 leading-relaxed font-medium">
+              O Patrocinador Master garante visibilidade em aproximadamente <strong>90% das telas</strong> do app. A arte é criada pelo nosso time após a contratação.
+            </p>
+          </div>
+          
+          <section>
+            <h3 className="font-bold text-lg text-white mb-6 text-center">Onde sua marca aparece:</h3>
+            <div className="grid grid-cols-2 gap-3">
+              <PlacementItem icon={Home} text="Home do app" />
+              <PlacementItem icon={LayoutGrid} text="Topo das categorias" />
+              <PlacementItem icon={List} text="Listas de empresas" />
+              <PlacementItem icon={Sparkles} text="Destaques patrocinados" />
+              <PlacementItem icon={ImageIcon} text="Banners principais" />
+              <PlacementItem icon={Repeat} text="Espaços premium" />
+            </div>
+          </section>
+
+          <section className="mt-16">
+            <div className="text-center mb-8">
+              <h3 className="font-bold text-xl text-white mb-2">Escolha seus meses</h3>
+              <p className="text-[11px] text-slate-400 font-bold uppercase tracking-widest">(disponibilidade em tempo real)</p>
+            </div>
+
+            {areAllMonthsSoldOut ? (
+              <div className="bg-slate-900 border-2 border-amber-500/20 rounded-3xl p-8 text-center">
+                <h4 className="text-lg font-bold text-amber-400 mb-3">Vagas Esgotadas</h4>
+                <p className="text-slate-300 text-sm mb-4">No momento, as próximas vagas mensais estão esgotadas.</p>
+                <button className="w-full bg-amber-500 text-slate-900 font-bold py-3 rounded-xl">Entrar na lista de espera</button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-3 gap-4 mb-16">
+                {availableMonths.map(month => {
+                  const isSelected = selectedMonths.includes(month.name);
+                  const isFull = selectedMonths.length >= 3 && !isSelected;
+                  return (
+                    <button
+                      key={month.name}
+                      disabled={!month.available || isFull}
+                      onClick={() => handleMonthToggle(month.name)}
+                      className={`p-4 rounded-3xl border-2 flex flex-col items-center justify-center text-center transition-all duration-200 h-32
+                        ${!month.available
+                          ? 'bg-slate-800 border-slate-700 opacity-50 cursor-not-allowed'
+                          : isSelected
+                            ? 'bg-blue-50/20 border-blue-500 scale-105'
+                            : 'bg-slate-900 border-slate-800 hover:border-blue-500 disabled:opacity-30'
+                        }
+                      `}
+                    >
+                      <CalendarDays size={24} className={!month.available ? 'text-slate-600' : 'text-slate-300'} />
+                      <span className="font-black text-lg mt-2">{month.name}</span>
+                      {!month.available && <span className="text-[9px] font-bold text-red-400 uppercase mt-1">Esgotado</span>}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </section>
+
+          <section className="space-y-4">
+            <h3 className="font-bold text-lg text-white mb-6 text-center">Benefícios Exclusivos:</h3>
+            <BenefitItem icon={Eye} text="Máxima exposição local" />
+            <BenefitItem icon={Award} text="Autoridade imediata no bairro" />
+            <BenefitItem icon={Users} text="Sua marca sempre lembrada" />
+            <BenefitItem icon={Phone} text="Mais chamadas, visitas e vendas" />
+            <BenefitItem icon={BarChart3} text="Posicionamento acima da concorrência" />
+          </section>
       </div>
-      
-      <section className="mt-16">
-        <h3 className="font-bold text-lg text-white mb-6 text-center">Onde sua marca aparece:</h3>
-        <div className="grid grid-cols-2 gap-3">
-          <PlacementItem icon={Home} text="Home do app" />
-          <PlacementItem icon={LayoutGrid} text="Topo das categorias" />
-          <PlacementItem icon={List} text="Listas de empresas" />
-          <PlacementItem icon={Sparkles} text="Destaques patrocinados" />
-          <PlacementItem icon={ImageIcon} text="Banners principais" />
-          <PlacementItem icon={Repeat} text="Espaços premium" />
-        </div>
-      </section>
-
-      <section className="mt-16">
-        <div className="text-center mb-8">
-          <h3 className="font-bold text-xl text-white mb-2">Escolha seus meses</h3>
-          <p className="text-[11px] text-slate-400 font-bold uppercase tracking-widest">(venda por mês fechado)</p>
-        </div>
-
-        {areAllMonthsSoldOut ? (
-          <div className="bg-slate-900 border-2 border-amber-500/20 rounded-3xl p-8 text-center">
-            <h4 className="text-lg font-bold text-amber-400 mb-3">Vagas Esgotadas</h4>
-            <p className="text-slate-300 text-sm mb-4">No momento, as próximas vagas mensais estão esgotadas.</p>
-            <button className="w-full bg-amber-500 text-slate-900 font-bold py-3 rounded-xl">Entrar na lista de espera</button>
-          </div>
-        ) : (
-          <div className="grid grid-cols-3 gap-4 mb-16">
-            {availableMonths.map(month => {
-              const isSelected = selectedMonths.includes(month.name);
-              const isFull = selectedMonths.length >= 3 && !isSelected;
-              return (
-                <button
-                  key={month.name}
-                  disabled={!month.available || isFull}
-                  onClick={() => handleMonthToggle(month.name)}
-                  className={`p-4 rounded-3xl border-2 flex flex-col items-center justify-center text-center transition-all duration-200 h-32
-                    ${!month.available
-                      ? 'bg-slate-800 border-slate-700 opacity-50 cursor-not-allowed'
-                      : isSelected
-                        ? 'bg-blue-50/20 border-blue-500 scale-105'
-                        : 'bg-slate-900 border-slate-800 hover:border-blue-500 disabled:opacity-30'
-                    }
-                  `}
-                >
-                  <CalendarDays size={24} className={!month.available ? 'text-slate-600' : 'text-slate-300'} />
-                  <span className="font-black text-lg mt-2">{month.name}</span>
-                  {!month.available && <span className="text-[9px] font-bold text-red-400 uppercase mt-1">Esgotado</span>}
-                </button>
-              );
-            })}
-          </div>
-        )}
-      </section>
-
-      <section className="mt-8 space-y-4">
-        <h3 className="font-bold text-lg text-white mb-6 text-center">Benefícios Diretos:</h3>
-        <BenefitItem icon={Eye} text="Máxima exposição local" />
-        <BenefitItem icon={Award} text="Autoridade imediata no bairro" />
-        <BenefitItem icon={Users} text="Sua marca sempre lembrada" />
-        <BenefitItem icon={Phone} text="Mais chamadas, visitas e vendas" />
-        <BenefitItem icon={BarChart3} text="Posicionamento acima da concorrência" />
-      </section>
 
       <footer className="fixed bottom-[80px] left-0 right-0 p-5 bg-slate-950/80 backdrop-blur-md border-t border-white/5 z-30 max-w-md mx-auto">
         <button 
@@ -300,7 +312,7 @@ export const PatrocinadorMasterScreen: React.FC<PatrocinadorMasterScreenProps> =
             onClick={() => setStep('payment')}
             className="w-full bg-amber-500 hover:bg-amber-600 text-slate-900 font-black text-base py-5 rounded-2xl shadow-xl shadow-amber-500/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-50"
         >
-            Quero contratar Patrocinador Master
+            Prosseguir para contratação
             <ArrowRight className="w-5 h-5 stroke-[3]" />
         </button>
       </footer>
@@ -310,17 +322,20 @@ export const PatrocinadorMasterScreen: React.FC<PatrocinadorMasterScreenProps> =
   const renderPayment = () => (
     <div className="animate-in slide-in-from-right duration-500 flex flex-col h-full px-6 pt-8 pb-32">
         <div className="flex-1">
-            <div className="bg-slate-900 border border-white/10 rounded-[2.5rem] p-8 space-y-6">
+            {/* AJUSTE 3: RESUMO NO CHECKOUT COM VALORES ATUALIZADOS */}
+            <div className="bg-slate-900 border border-white/10 rounded-[2.5rem] p-8 space-y-6 shadow-2xl">
                 <div className="flex justify-between items-start">
                     <div>
-                        <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Produto</p>
-                        <p className="text-xl font-bold text-white">Patrocinador Master</p>
+                        <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Plano Selecionado</p>
+                        <p className="text-xl font-bold text-white flex items-center gap-2">
+                            <Crown className="w-5 h-5 text-amber-500" />
+                            Patrocinador Master
+                        </p>
                     </div>
-                    <Crown className="text-amber-500 w-6 h-6" />
                 </div>
                 
                 <div className="pt-4 border-t border-white/5">
-                    <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-3">Meses Selecionados</p>
+                    <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-3">Vigência (Meses)</p>
                     <div className="flex flex-wrap gap-2">
                         {availableMonths.filter(m => m.available).map(m => (
                             <button
@@ -336,11 +351,15 @@ export const PatrocinadorMasterScreen: React.FC<PatrocinadorMasterScreenProps> =
 
                 <div className="grid grid-cols-2 gap-4 pt-4 border-t border-white/5">
                     <div>
-                        <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Valor por Mês</p>
-                        <p className="text-sm font-bold text-slate-300">R$ 4.000,00</p>
+                        <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Valor Unitário</p>
+                        <div className="flex items-center gap-2">
+                            <span className="text-[10px] text-slate-500 line-through">R$ 2.500</span>
+                            <p className="text-sm font-bold text-slate-300">R$ 1.500,00</p>
+                        </div>
+                        <p className="text-[8px] text-amber-500/60 font-bold uppercase mt-1">Promoção de inauguração</p>
                     </div>
                     <div className="text-right">
-                        <p className="text-[10px] font-black text-emerald-500 uppercase tracking-widest mb-1">Desconto ({pricing.discountPercent}%)</p>
+                        <p className="text-[10px] font-black text-emerald-500 uppercase tracking-widest mb-1">Desconto Progressivo ({pricing.discountPercent}%)</p>
                         <p className="text-sm font-bold text-emerald-400">- R$ {pricing.totalSavings.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
                     </div>
                 </div>
@@ -354,7 +373,7 @@ export const PatrocinadorMasterScreen: React.FC<PatrocinadorMasterScreenProps> =
             <div className="mt-8 bg-blue-500/10 p-5 rounded-2xl border border-blue-500/20 flex gap-4">
                 <Info className="text-blue-400 w-5 h-5 shrink-0" />
                 <p className="text-xs text-slate-400 leading-relaxed font-medium">
-                    Após o pagamento, você será direcionado para um chat exclusivo com nosso time para alinhar os detalhes estratégicos da sua presença no app.
+                    Após o pagamento, nosso administrador iniciará o chat de alinhamento com você para configurar sua marca em todo o app.
                 </p>
             </div>
         </div>
@@ -362,9 +381,10 @@ export const PatrocinadorMasterScreen: React.FC<PatrocinadorMasterScreenProps> =
         <footer className="fixed bottom-0 left-0 right-0 p-6 bg-slate-950 border-t border-white/5 max-w-md mx-auto z-30">
             <button 
                 onClick={handleConfirmPayment}
-                className="w-full bg-[#1E5BFF] hover:bg-blue-600 text-white font-black py-5 rounded-2xl shadow-xl active:scale-[0.98] transition-all"
+                disabled={selectedMonths.length === 0}
+                className="w-full bg-[#1E5BFF] hover:bg-blue-600 text-white font-black py-5 rounded-2xl shadow-xl shadow-blue-500/20 active:scale-[0.98] transition-all disabled:opacity-50"
             >
-                Confirmar Pagamento
+                Confirmar e Pagar com PIX
             </button>
         </footer>
     </div>
@@ -383,15 +403,12 @@ export const PatrocinadorMasterScreen: React.FC<PatrocinadorMasterScreenProps> =
         <div className="w-24 h-24 bg-emerald-500/10 rounded-full flex items-center justify-center mb-8 border-4 border-emerald-500/20 shadow-2xl shadow-emerald-500/10">
             <CheckCircle2 size={48} className="text-emerald-400" />
         </div>
-        <h2 className="text-3xl font-black text-white leading-tight mb-4">Pagamento aprovado ✅</h2>
+        <h2 className="text-3xl font-black text-white leading-tight mb-4">Pagamento aprovado!</h2>
         <p className="text-slate-400 text-lg leading-relaxed max-w-[280px] mb-12 font-medium">
             Parabéns! 🎉<br/>
-            Você agora é um <strong className="text-white">Patrocinador Master</strong>.
+            Você agora é o <strong className="text-white">Patrocinador Master</strong> de Jacarepaguá.
         </p>
-        <p className="text-slate-500 text-sm mb-12">
-            Vamos alinhar os detalhes da sua presença no app.
-        </p>
-
+        
         <button 
             onClick={() => setStep('admin_chat')}
             className="w-full max-w-sm bg-white text-slate-950 font-black py-5 rounded-2xl shadow-2xl active:scale-[0.98] transition-all flex items-center justify-center gap-3"
@@ -410,9 +427,9 @@ export const PatrocinadorMasterScreen: React.FC<PatrocinadorMasterScreenProps> =
                 <div className="p-1 bg-blue-50/10 rounded-lg">
                     <Shield size={12} className="text-blue-400" />
                 </div>
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Administrador: Rafael Carvalho</span>
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Adm Principal: Rafael Carvalho</span>
             </div>
-            <span className="text-[9px] font-bold text-slate-600 uppercase">Segunda a Sexta • 09h - 18h</span>
+            <span className="text-[9px] font-bold text-slate-600 uppercase">Suporte Premium Ativo</span>
         </div>
 
         {/* Chat Messages */}
@@ -437,7 +454,7 @@ export const PatrocinadorMasterScreen: React.FC<PatrocinadorMasterScreenProps> =
                 <div className="flex-1 relative">
                     <input 
                         type="text" 
-                        placeholder="Escreva sua mensagem..."
+                        placeholder="Envie uma mensagem..."
                         className="w-full bg-slate-800 border border-white/5 rounded-2xl py-4 px-5 pr-12 text-sm outline-none focus:border-[#1E5BFF] transition-all"
                     />
                     <button className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500">
@@ -450,7 +467,7 @@ export const PatrocinadorMasterScreen: React.FC<PatrocinadorMasterScreenProps> =
             </div>
             <div className="flex items-center justify-center gap-1.5 mt-4 opacity-30">
                 <ShieldCheck size={10} className="text-slate-500" />
-                <p className="text-[8px] font-black uppercase tracking-[0.3em]">Conexão Segura Localizei</p>
+                <p className="text-[8px] font-black uppercase tracking-[0.3em]">Ambiente de Negócios Seguro</p>
             </div>
         </footer>
     </div>
@@ -467,7 +484,7 @@ export const PatrocinadorMasterScreen: React.FC<PatrocinadorMasterScreenProps> =
         </>
       )}
 
-      {/* CABEÇALHO FIXO PERSISTENTE (STICKY HEADER) */}
+      {/* CABEÇALHO FIXO PERSISTENTE */}
       {step !== 'success' && step !== 'processing' && (
         <header className="sticky top-0 z-50 bg-slate-950/90 backdrop-blur-md px-5 h-16 flex items-center gap-4 border-b border-white/5 shrink-0">
             <button 
@@ -481,7 +498,7 @@ export const PatrocinadorMasterScreen: React.FC<PatrocinadorMasterScreenProps> =
                     {getPageTitle()}
                 </h1>
                 <p className="text-[10px] font-bold text-amber-400 uppercase tracking-widest">
-                    {step === 'selection' ? 'Plano de Máxima Visibilidade' : 'Contratação Premium'}
+                    {step === 'selection' ? 'Destaque Absoluto' : 'Contratação Premium'}
                 </p>
             </div>
         </header>
