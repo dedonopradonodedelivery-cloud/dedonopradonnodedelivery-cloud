@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Layout } from '@/components/layout/Layout';
 import { Header } from '@/components/layout/Header';
@@ -26,8 +25,8 @@ import { SponsorInfoView } from '@/components/SponsorInfoView';
 import { ServicesLandingView } from '@/components/ServicesLandingView';
 import { CategoryBannerSalesView } from '@/components/CategoryBannerSalesView';
 import { BannerSalesWizard } from '@/components/BannerSalesWizard'; 
-import { WeeklyRewardPage } from '@/components/WeeklyRewardPage'; // NOVO
-import { UserCupomScreen } from '@/components/UserCupomScreen'; // NOVO
+import { WeeklyRewardPage } from '@/components/WeeklyRewardPage'; 
+import { UserCupomScreen } from '@/components/UserCupomScreen'; 
 import { MapPin, X, Palette } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
@@ -66,10 +65,17 @@ const App: React.FC = () => {
 
   const isMerchantMode = userRole === 'lojista' || (user?.email === ADMIN_EMAIL && viewMode === 'Lojista');
 
-  const handleNavigate = (view: string) => {
+  const handleNavigate = (view: string, data?: any) => {
     if (view !== 'sponsor_info') {
       setPreviousTab(activeTab);
     }
+    
+    // Captura o ID do pedido se vier da tela de sucesso da Home
+    if (view === 'service_chat' && data?.requestId) {
+        setActiveServiceRequestId(data.requestId);
+        setChatRole('resident');
+    }
+
     setActiveTab(view);
   };
 

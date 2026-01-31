@@ -27,6 +27,7 @@ export const ServiceChatView: React.FC<ServiceChatViewProps> = ({ requestId, use
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const isAdmin = userRole === 'admin';
+  const isResident = userRole === 'resident';
 
   useEffect(() => {
     // Carregar dados mockados
@@ -35,21 +36,23 @@ export const ServiceChatView: React.FC<ServiceChatViewProps> = ({ requestId, use
     if (req) setRequestInfo(req);
 
     const savedMsgs = JSON.parse(localStorage.getItem(`msgs_${requestId}`) || '[]');
-    if (savedMsgs.length === 0 && userRole !== 'admin') {
+    if (savedMsgs.length === 0 && !isAdmin) {
         const initial = [{
             id: 'm1',
             requestId,
             senderId: 'system',
             senderName: 'Localizei JPA',
             senderRole: 'resident' as const,
-            text: 'Seu pedido foi enviado. Aguarde as propostas de profissionais da sua região.',
+            text: isResident 
+                ? 'Seu pedido foi enviado! Estamos notificando os profissionais. Aguarde o retorno por aqui.' 
+                : 'Novo lead disponível! Desbloqueie o contato para enviar uma proposta.',
             timestamp: new Date().toISOString()
         }];
         setMessages(initial);
     } else {
         setMessages(savedMsgs);
     }
-  }, [requestId, userRole]);
+  }, [requestId, userRole, isResident]);
 
   useEffect(() => {
     if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
@@ -87,7 +90,7 @@ export const ServiceChatView: React.FC<ServiceChatViewProps> = ({ requestId, use
           </div>
           <div className="flex flex-col min-w-0">
             <h2 className="font-bold text-gray-900 dark:text-white leading-tight truncate">
-                {isAdmin ? 'Auditoria de Chat' : userRole === 'resident' ? 'Profissional Local' : requestInfo?.userName}
+                {isAdmin ? 'Auditoria de Chat' : userRole === 'resident' ? 'Aguardando Profissionais' : requestInfo?.userName}
             </h2>
             <div className="flex items-center gap-1.5 mt-0.5">
                 <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span>
@@ -144,7 +147,7 @@ export const ServiceChatView: React.FC<ServiceChatViewProps> = ({ requestId, use
       </main>
 
       {/* Input de Mensagem */}
-      {!isAdmin ? (
+      {!isAdmin && (
         <footer className="p-5 bg-white dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800">
             <div className="flex items-center gap-3">
                 <input 
@@ -169,7 +172,9 @@ export const ServiceChatView: React.FC<ServiceChatViewProps> = ({ requestId, use
                 </button>
             </div>
         </footer>
-      ) : (
+      )}
+      
+      {isAdmin && (
         <footer className="p-8 bg-gray-50 dark:bg-gray-950 border-t border-gray-100 dark:border-gray-800 flex flex-col items-center gap-2">
             <div className="p-3 bg-amber-100 dark:bg-amber-900/30 rounded-xl text-amber-700 dark:text-amber-400 flex items-center gap-2">
                 <AlertTriangle size={16} />
