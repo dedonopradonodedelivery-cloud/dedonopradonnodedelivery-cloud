@@ -20,7 +20,13 @@ import {
   Plus,
   Heart,
   Share2,
-  Bookmark
+  Bookmark,
+  Building2,
+  Home as HomeIcon,
+  Coins,
+  Calendar,
+  Coffee,
+  MapPin
 } from 'lucide-react';
 import { LojasEServicosList } from '@/components/LojasEServicosList';
 import { User } from '@supabase/supabase-js';
@@ -99,6 +105,11 @@ export const HomeFeed: React.FC<HomeFeedFeedProps> = ({
   const categoryScrollRef = useRef<HTMLDivElement>(null);
   const [scrollIndicator, setScrollIndicator] = useState({ width: '0%', left: '0%' });
 
+  // Wizard state
+  const [wizardStep, setWizardStep] = useState(0);
+  const [selectedService, setSelectedService] = useState<string | null>(null);
+  const [selectedUrgency, setSelectedUrgency] = useState<string | null>(null);
+
   const [consecutiveDays, setConsecutiveDays] = useState(() => {
     return parseInt(localStorage.getItem('reward_consecutive_days') || '1');
   });
@@ -109,6 +120,13 @@ export const HomeFeed: React.FC<HomeFeedFeedProps> = ({
       setIsAnimating(false);
       onNavigate('weekly_reward_page');
     }, 1200);
+  };
+
+  const handleWizardSubmit = () => {
+    alert(`Pedido enviado!\nServiço: ${selectedService}\nUrgência: ${selectedUrgency}`);
+    setWizardStep(0);
+    setSelectedService(null);
+    setSelectedUrgency(null);
   };
 
   const updateScrollIndicator = useCallback(() => {
@@ -296,50 +314,84 @@ export const HomeFeed: React.FC<HomeFeedFeedProps> = ({
           </div>
         </div>
       </section>
-
-      {/* 3. PEÇA ORÇAMENTOS (REDESIGNED with 2D Illustration) */}
+      
+      {/* 3. JPA CONNECT (NEW macOS Style) */}
       <section className="px-5 pt-12 pb-6">
-        <div 
-          onClick={() => onNavigate('services')}
-          className="relative bg-white dark:bg-gray-800 rounded-[2.5rem] shadow-lg border border-gray-100 dark:border-gray-700 overflow-hidden cursor-pointer group transition-all duration-300 hover:shadow-xl hover:-translate-y-1"
-        >
-          <div className="flex items-center p-8">
-            {/* Left side: Content */}
-            <div className="flex-1 z-10">
-              <h2 className="text-2xl font-black text-gray-900 dark:text-white leading-tight mb-2">
-                Precisa de um Profissional?
-              </h2>
-              <p className="text-sm text-gray-500 dark:text-gray-400 font-medium leading-relaxed mb-8 max-w-[240px]">
-                Receba orçamentos gratuitos de especialistas verificados do bairro.
-              </p>
-              <button className="bg-blue-600 text-white font-bold py-3 px-6 rounded-xl shadow-lg shadow-blue-500/20 text-xs uppercase tracking-wider flex items-center gap-2 group-hover:gap-3 transition-all active:scale-95">
-                <span>Solicitar Orçamento Grátis</span>
-                <ArrowRight size={16} />
-              </button>
+        <div className="bg-white dark:bg-slate-800 rounded-[2.5rem] shadow-xl border border-gray-100 dark:border-slate-700 p-8">
+          <div className="flex items-start gap-5">
+            <div className="relative w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-3xl flex items-center justify-center shrink-0 shadow-lg shadow-blue-500/20">
+              <Wrench size={24} className="text-white absolute transform -rotate-45" />
+              <Hammer size={24} className="text-white absolute transform rotate-45" />
             </div>
-
-            {/* Right side: Illustration (absolute positioned) */}
-            <div className="absolute -right-8 -bottom-4 w-48 h-48 pointer-events-none group-hover:scale-105 transition-transform duration-500">
-              <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-                <ellipse cx="100" cy="185" rx="45" ry="8" fill="#000" opacity="0.1" />
-                <g transform="translate(145, 115) rotate(25)">
-                  <g transform="translate(-20, -60)">
-                      <path d="M0 -15 L10 -25 L20 -15 L10 -5 Z" fill="#9CA3AF" />
-                      <rect x="8" y="-12" width="4" height="40" fill="#D1D5DB" />
-                      <path d="M0 25 C-5 25 -5 35 0 35 L10 40 L20 30 L10 20 Z" fill="#9CA3AF" />
-                  </g>
-                </g>
-                <rect x="70" y="90" width="60" height="95" rx="30" fill="#3B82F6" />
-                <circle cx="100" cy="70" r="30" fill="#F3D9A2" />
-                <path d="M80 45 Q100 30 120 45 L125 70 L75 70 Z" fill="#4A5568" />
-                <circle cx="90" cy="70" r="3" fill="#2D3748" />
-                <circle cx="110" cy="70" r="3" fill="#2D3748" />
-                <path d="M95 80 Q100 85 105 80" stroke="#2D3748" strokeWidth="2" fill="none" strokeLinecap="round" />
-              </svg>
+            <div className="flex-1">
+              <h2 className="text-xl font-black text-gray-900 dark:text-white leading-tight">Encontre profissionais do seu bairro</h2>
+              <p className="text-sm text-gray-500 dark:text-slate-400 mt-2">Orçamentos rápidos com quem já atende em Jacarepaguá.</p>
             </div>
           </div>
+
+          <div className="space-y-4 my-8">
+            <div className="flex items-center gap-3"><CheckCircle2 size={16} className="text-emerald-500" /><p className="text-sm text-gray-700 dark:text-slate-300">Até 5 propostas de profissionais verificados</p></div>
+            <div className="flex items-center gap-3"><MessageSquare size={16} className="text-blue-500" /><p className="text-sm text-gray-700 dark:text-slate-300">Conversa direta no app</p></div>
+            <div className="flex items-center gap-3"><Zap size={16} className="text-yellow-500" /><p className="text-sm text-gray-700 dark:text-slate-300">Resposta rápida • Sem custo</p></div>
+          </div>
+
+          <button 
+            onClick={() => setWizardStep(1)}
+            className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold py-4 rounded-2xl shadow-lg shadow-blue-500/30 active:scale-[0.98] transition-all"
+          >
+            Solicitar orçamento
+          </button>
         </div>
       </section>
+
+      {/* Mini-Wizard Section */}
+      {wizardStep > 0 && (
+        <section className="bg-gray-50 dark:bg-gray-900 rounded-t-[2.5rem] p-6 -mt-4 animate-in slide-in-from-bottom-16 duration-500">
+          {wizardStep === 1 && (
+            <div className="text-center">
+              <h3 className="font-bold text-gray-800 dark:text-white mb-6">Que tipo de serviço?</h3>
+              <div className="grid grid-cols-2 gap-4">
+                {[{l: 'Obras & Reformas', i: <Building2/>}, {l: 'Serviços Rápidos', i: <Zap/>}, {l: 'Casa & Instalações', i: <HomeIcon/>}, {l: 'Eventos & Criativos', i: <Sparkles/>}].map(s => (
+                  <button key={s.l} onClick={() => { setSelectedService(s.l); setWizardStep(2); }} className="p-4 bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700 flex flex-col items-center gap-2 active:scale-95 transition-all">
+                    <div className="text-blue-500">{s.i}</div>
+                    <p className="text-xs font-bold text-gray-700 dark:text-slate-200">{s.l}</p>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+          {wizardStep === 2 && (
+            <div className="text-center">
+              <h3 className="font-bold text-gray-800 dark:text-white mb-6">Como vai a urgência?</h3>
+              <div className="flex flex-wrap justify-center gap-3">
+                 {[{l: 'Para hoje', i: <Zap/>}, {l: 'Amanhã', i: <Calendar/>}, {l: 'Até 3 dias', i: <Clock/>}, {l: 'Não tenho pressa', i: <Coffee/>}].map(u => (
+                  <button key={u.l} onClick={() => { setSelectedUrgency(u.l); setWizardStep(3); }} className="px-5 py-3 bg-white dark:bg-slate-800 rounded-full shadow-sm border border-gray-100 dark:border-slate-700 flex items-center gap-2 active:scale-95 transition-all">
+                    <div className="text-blue-500">{u.i}</div>
+                    <p className="text-sm font-bold text-gray-700 dark:text-slate-200">{u.l}</p>
+                  </button>
+                 ))}
+              </div>
+            </div>
+          )}
+          {wizardStep === 3 && (
+            <div className="text-center">
+              <h3 className="font-bold text-gray-800 dark:text-white mb-6">Confirmar bairro</h3>
+              <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700 flex flex-col items-center gap-4">
+                <MapPin size={24} className="text-blue-500" />
+                <p className="text-lg font-bold text-gray-800 dark:text-white">Você está em {currentNeighborhood}?</p>
+                <button onClick={() => setWizardStep(4)} className="w-full bg-blue-100 dark:bg-blue-900/50 text-blue-600 font-bold py-3 rounded-xl">Tudo certo!</button>
+              </div>
+            </div>
+          )}
+          {wizardStep === 4 && (
+             <div className="text-center">
+              <h3 className="font-bold text-gray-800 dark:text-white mb-2">Tudo pronto! 🎉</h3>
+              <p className="text-sm text-gray-500 dark:text-slate-400 mb-6">Enviar até 5 pedidos para profissionais do bairro.</p>
+              <button onClick={handleWizardSubmit} className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold py-4 rounded-2xl shadow-lg">Enviar pedidos (5)</button>
+            </div>
+          )}
+        </section>
+      )}
 
       {/* LISTA EXPLORAR */}
       <div className="w-full bg-white dark:bg-gray-950 pt-1 pb-10">

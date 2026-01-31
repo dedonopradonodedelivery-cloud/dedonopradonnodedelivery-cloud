@@ -28,7 +28,6 @@ export interface StoreReview {
   };
 }
 
-// Fixed: Expanded Store interface with all properties used in object literals throughout the app
 export interface Store {
   id: string;
   name: string;
@@ -89,6 +88,23 @@ export interface Store {
   email_publico?: string;
 }
 
+// --- NOVO: BANNERS DE CATEGORIA ---
+export type SlotStatus = 'available' | 'reserved' | 'sold';
+
+export interface CategoryBannerSlot {
+  uniqueKey: string; // `${bairroSlug}:${categoriaSlug}:slot${slotNumber}`
+  bairroSlug: string;
+  categoriaSlug: string;
+  slotNumber: 1 | 2;
+  status: SlotStatus;
+  merchantId?: string;
+  merchantName?: string;
+  expiresAt?: string; // Para status 'reserved'
+  image?: string;
+  title?: string;
+  subtitle?: string;
+}
+
 export interface RealEstateProperty {
   id: string;
   type: 'Residencial' | 'Comercial';
@@ -98,10 +114,8 @@ export interface RealEstateProperty {
   neighborhood: string;
   price: number;
   transaction: 'aluguel' | 'venda';
-  area: number; // m²
+  area: number; 
   postedAt: string;
-
-  // Residencial
   bedrooms?: number;
   bathrooms?: number;
   parkingSpaces?: number;
@@ -109,15 +123,11 @@ export interface RealEstateProperty {
   condoFee?: number;
   isFurnished?: boolean;
   petsAllowed?: boolean;
-
-  // Comercial
   propertyTypeCom?: 'Sala comercial' | 'Loja' | 'Galpão' | 'Andar/Conjunto' | 'Terreno comercial';
   hasBathroom?: boolean;
   highCeiling?: boolean;
   loadingAccess?: boolean;
 }
-
-// --- TIPOS DE SERVIÇOS LOCAIS (V1) ---
 
 export type ServiceUrgency = 'Hoje' | 'Essa semana' | 'Sem pressa';
 
@@ -153,7 +163,6 @@ export interface ServiceMessage {
   timestamp: string;
 }
 
-// Re-exporting common types
 export interface Category {
   id: string;
   name: string;
@@ -167,7 +176,6 @@ export interface ChatMessage {
   text: string;
 }
 
-// Fixed: Expanded Job interface with missing properties
 export interface Job {
   id: string;
   role: string;
@@ -225,7 +233,6 @@ export interface CommunityPost {
 
 export type TaxonomyType = 'category' | 'subcategory' | 'specialty';
 
-// Added missing interfaces to fix build errors
 export interface Story {
   id: string;
   name: string;

@@ -1,8 +1,8 @@
-
 import React, { useState, useMemo, useEffect } from 'react';
 import { Store } from '../types';
 import { STORES } from '../constants';
 import { useNeighborhood } from '../contexts/NeighborhoodContext';
+import { NeighborhoodBannersGrid } from './NeighborhoodBannersGrid';
 
 interface BannerData {
   id: string;
@@ -52,6 +52,17 @@ const MOCK_BANNERS: BannerData[] = [
     bgColor: 'bg-blue-600',
     neighborhood: 'Freguesia',
     category: 'Serviços'
+  },
+  // 4º BANNER ADICIONADO: Banners por Bairro
+  {
+    id: 'b-neighborhood-grid',
+    storeId: 'internal',
+    title: 'Banners por Bairro',
+    subtitle: 'Jacarepaguá',
+    cta: '',
+    image: '',
+    bgColor: 'bg-slate-900',
+    neighborhood: 'Jacarepaguá (todos)'
   },
   // Banners Extras para preenchimento (Fallback)
   {
@@ -156,13 +167,13 @@ export const HomeBannerCarousel: React.FC<HomeBannerCarouselProps> = ({ onStoreC
   const isCategoryView = !!categoryName;
 
   const bannerCount = useMemo(() => {
-    return isCategoryView ? 2 : 3;
+    return isCategoryView ? 2 : 4; // Ajustado de 3 para 4 para suportar o novo banner na Home
   }, [isCategoryView]);
 
   const activeBanners = useMemo(() => {
     const initialPool = currentNeighborhood === 'Jacarepaguá (todos)'
       ? MOCK_BANNERS
-      : MOCK_BANNERS.filter(b => b.neighborhood === currentNeighborhood);
+      : MOCK_BANNERS.filter(b => b.neighborhood === currentNeighborhood || b.id === 'b-neighborhood-grid');
     
     let filtered: BannerData[] = [];
 
@@ -197,6 +208,7 @@ export const HomeBannerCarousel: React.FC<HomeBannerCarouselProps> = ({ onStoreC
   }, [categoryName, subcategoryName, currentNeighborhood]);
 
   const handleBannerClick = (banner: BannerData) => {
+    if (banner.id === 'b-neighborhood-grid') return; // Clique gerenciado internamente no grid
     const store = STORES.find(s => s.id === banner.storeId);
     if (store) onStoreClick(store);
   };
@@ -219,21 +231,27 @@ export const HomeBannerCarousel: React.FC<HomeBannerCarouselProps> = ({ onStoreC
         onClick={() => handleBannerClick(currentBanner)}
         className={`relative aspect-[16/10] w-full rounded-[2.5rem] overflow-hidden shadow-2xl cursor-pointer transition-all duration-300 active:brightness-90 active:scale-[0.99] group ${currentBanner.bgColor}`}
       >
-        <img 
-          src={currentBanner.image} 
-          alt={currentBanner.title} 
-          className="absolute inset-0 w-full h-full object-cover mix-blend-overlay opacity-60 transition-transform duration-700" 
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
-        
-        <div className="relative h-full flex flex-col justify-center p-8 text-white">
-          <h2 className="text-2xl font-black uppercase tracking-tighter leading-none mb-2 drop-shadow-md">
-            {currentBanner.title}
-          </h2>
-          <p className="text-xs font-bold text-white/90 max-w-[200px] leading-tight drop-shadow-sm">
-            {currentBanner.subtitle}
-          </p>
-        </div>
+        {currentBanner.id === 'b-neighborhood-grid' ? (
+          <NeighborhoodBannersGrid />
+        ) : (
+          <>
+            <img 
+              src={currentBanner.image} 
+              alt={currentBanner.title} 
+              className="absolute inset-0 w-full h-full object-cover mix-blend-overlay opacity-60 transition-transform duration-700" 
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
+            
+            <div className="relative h-full flex flex-col justify-center p-8 text-white">
+              <h2 className="text-2xl font-black uppercase tracking-tighter leading-none mb-2 drop-shadow-md">
+                {currentBanner.title}
+              </h2>
+              <p className="text-xs font-bold text-white/90 max-w-[200px] leading-tight drop-shadow-sm">
+                {currentBanner.subtitle}
+              </p>
+            </div>
+          </>
+        )}
 
         {activeBanners.length > 1 && (
           <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-1.5 z-10">

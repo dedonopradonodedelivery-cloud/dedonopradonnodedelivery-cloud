@@ -24,6 +24,8 @@ import { CategoryView } from '@/components/CategoryView';
 import { SubcategoryDetailView } from '@/components/SubcategoryDetailView';
 import { SponsorInfoView } from '@/components/SponsorInfoView';
 import { ServicesLandingView } from '@/components/ServicesLandingView';
+import { CategoryBannerSalesView } from '@/components/CategoryBannerSalesView';
+import { BannerSalesWizard } from '@/components/BannerSalesWizard'; // IMPORTADO
 import { MapPin, X, Palette } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
@@ -111,8 +113,8 @@ const App: React.FC = () => {
     handleNavigate('subcategory_detail');
   };
 
-  const headerExclusionList = ['store_area', 'store_detail', 'profile', 'patrocinador_master', 'merchant_performance', 'neighborhood_posts', 'saved_posts', 'classifieds', 'services', 'services_landing', 'merchant_leads', 'service_chat', 'admin_panel', 'category_detail', 'subcategory_detail', 'sponsor_info', 'real_estate', 'jobs', 'job_detail'];
-  const hideBottomNav = ['admin_panel', 'weekly_reward_page', 'service_chat', 'sponsor_info', 'real_estate', 'job_detail'].includes(activeTab);
+  const headerExclusionList = ['store_area', 'store_detail', 'profile', 'patrocinador_master', 'merchant_performance', 'neighborhood_posts', 'saved_posts', 'classifieds', 'services', 'services_landing', 'merchant_leads', 'service_chat', 'admin_panel', 'category_detail', 'subcategory_detail', 'sponsor_info', 'real_estate', 'jobs', 'job_detail', 'category_banner_sales', 'banner_sales_wizard'];
+  const hideBottomNav = ['admin_panel', 'weekly_reward_page', 'service_chat', 'sponsor_info', 'real_estate', 'job_detail', 'category_banner_sales', 'banner_sales_wizard'].includes(activeTab);
 
   const RoleSwitcherModal: React.FC = () => {
     if (!isRoleSwitcherOpen) return null;
@@ -151,17 +153,24 @@ const App: React.FC = () => {
                     {activeTab === 'services_landing' && <ServicesLandingView onBack={() => handleNavigate('home')} user={user} onRequireLogin={() => setIsAuthOpen(true)} onNavigate={handleNavigate} />}
                     {activeTab === 'services' && <ServicesView onNavigate={(view) => handleNavigate(view)} onOpenChat={(id: string) => { setActiveServiceRequestId(id); setChatRole('resident'); handleNavigate('service_chat'); }} />}
 
+                    {activeTab === 'banner_sales_wizard' && (
+                        <BannerSalesWizard 
+                            user={user} 
+                            onBack={() => handleNavigate('profile')} 
+                            onNavigate={handleNavigate}
+                        />
+                    )}
+
+                    {activeTab === 'category_banner_sales' && (
+                        <CategoryBannerSalesView 
+                            user={user} 
+                            onBack={() => handleNavigate('profile')} 
+                            onSuccess={() => handleNavigate('profile')}
+                        />
+                    )}
+
                     {activeTab === 'category_detail' && selectedCategory && (
-                      <CategoryView 
-                        category={selectedCategory} 
-                        onBack={() => handleNavigate('home')} 
-                        onStoreClick={handleSelectStore} 
-                        stores={STORES} 
-                        userRole={userRole as any} 
-                        onAdvertiseInCategory={() => {}} 
-                        onNavigate={handleNavigate}
-                        onSubcategoryClick={(subName) => handleSelectSubcategory(subName, selectedCategory)}
-                      />
+                      <CategoryView category={selectedCategory} onBack={() => handleNavigate('home')} onStoreClick={handleSelectStore} stores={STORES} userRole={userRole as any} onAdvertiseInCategory={() => {}} onNavigate={handleNavigate} />
                     )}
 
                     {activeTab === 'subcategory_detail' && selectedSubcategoryName && selectedCategory && (

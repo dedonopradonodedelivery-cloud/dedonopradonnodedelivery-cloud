@@ -20,7 +20,8 @@ import {
   Crown,
   Star,
   Moon,
-  Sun
+  Sun,
+  ImageIcon
 } from 'lucide-react';
 import { User as SupabaseUser } from '@supabase/supabase-js';
 import { useAuth } from '@/contexts/AuthContext';
@@ -32,7 +33,6 @@ interface StoreAreaViewProps {
   user: SupabaseUser | null;
 }
 
-// Componente Visual Único e Padronizado para todos os itens do menu
 const ServiceBlock: React.FC<{ 
   icon: React.ElementType; 
   label: string; 
@@ -41,11 +41,12 @@ const ServiceBlock: React.FC<{
   isDestructive?: boolean;
   colorClass?: string;
   badge?: number;
+  labelBadge?: string;
   rightElement?: React.ReactNode;
-}> = ({ icon: Icon, label, description, onClick, isDestructive, colorClass, badge, rightElement }) => (
+}> = ({ icon: Icon, label, description, onClick, isDestructive, colorClass, badge, labelBadge, rightElement }) => (
   <button 
     onClick={onClick}
-    className="w-full flex items-center justify-between p-5 bg-white dark:bg-gray-800 border-b border-gray-50 dark:border-gray-700 last:border-b-0 active:bg-gray-50 dark:active:bg-gray-700/50 transition-colors group"
+    className="w-full flex items-center justify-between p-5 bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700 last:border-b-0 active:bg-gray-50 dark:active:bg-gray-700/50 transition-colors group"
   >
     <div className="flex items-center gap-4">
       <div className={`p-2.5 rounded-xl transition-colors relative ${
@@ -101,7 +102,6 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
   return (
     <div className="min-h-screen bg-[#F8F9FB] dark:bg-gray-950 font-sans animate-in fade-in duration-500 pb-32">
       
-      {/* 1. TOPO / PERFIL - CABEÇALHO PADRÃO DO LOJISTA */}
       <div className="bg-white dark:bg-gray-900 px-6 pt-12 pb-8 border-b border-gray-100 dark:border-gray-800 shadow-sm mb-8">
         <div className="flex items-center gap-4">
           <div className="w-20 h-20 rounded-[2rem] border-4 border-white dark:border-gray-800 shadow-xl overflow-hidden shrink-0">
@@ -126,16 +126,29 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
 
       <div className="px-6 space-y-10">
         
-        {/* 2. SEÇÃO: AÇÕES (Marketing e Visibilidade) */}
         <section>
           <SectionHeader title="Ações" icon={Sparkles} />
           <div className="bg-white dark:bg-gray-800 rounded-[2.5rem] border border-gray-100 dark:border-gray-700 overflow-hidden shadow-sm">
             <ServiceBlock 
               icon={Crown} 
-              label="Banners Premium" 
-              description="Apareça em destaque para milhares de pessoas do seu bairro"
-              onClick={() => onNavigate('store_ads_module')}
+              label="Patrocinador Master" 
+              description="Apareça em destaque em 90% das telas do bairro"
+              onClick={() => onNavigate('patrocinador_master')}
+              colorClass="bg-amber-50 text-amber-600"
+            />
+            <ServiceBlock 
+              icon={ImageIcon} 
+              label="Banner em Categoria" 
+              description="Garante seu espaço exclusivo no carrossel de categorias"
+              onClick={() => onNavigate('banner_sales_wizard')}
               colorClass="bg-blue-50 text-blue-600"
+            />
+            <ServiceBlock 
+              icon={LayoutGrid} 
+              label="Banners Home" 
+              description="Anúncios visuais na página inicial"
+              onClick={() => onNavigate('banner_sales_wizard')}
+              colorClass="bg-purple-50 text-purple-600"
             />
             <ServiceBlock 
               icon={Star} 
@@ -145,22 +158,9 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
               badge={2} 
               colorClass="bg-amber-50 text-amber-600"
             />
-            <ServiceBlock 
-              icon={Megaphone} 
-              label="Anunciar (ADS)" 
-              description="Destaque-se nas categorias sem complicação"
-              onClick={() => onNavigate('store_ads_quick')}
-            />
-            <ServiceBlock 
-              icon={BarChart3} 
-              label="Meus Anúncios" 
-              description="Performance e estatísticas"
-              onClick={() => onNavigate('merchant_performance')}
-            />
           </div>
         </section>
 
-        {/* 3. SEÇÃO: SERVIÇOS (Operacional e Financeiro) */}
         <section>
           <SectionHeader title="Serviços" />
           <div className="bg-white dark:bg-gray-800 rounded-[2.5rem] border border-gray-100 dark:border-gray-700 overflow-hidden shadow-sm">
@@ -171,10 +171,10 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
               onClick={() => onNavigate('store_ads_module', 'chat')} 
             />
             <ServiceBlock 
-              icon={FileText} 
-              label="Pedidos de Banner" 
-              description="Status de criação e aprovação"
-              onClick={() => alert('Módulo de pedidos em desenvolvimento')} 
+              icon={BarChart3} 
+              label="Performance" 
+              description="Estatísticas de visualização e cliques"
+              onClick={() => onNavigate('merchant_performance')}
             />
             <ServiceBlock 
               icon={CreditCard} 
@@ -185,7 +185,6 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
           </div>
         </section>
 
-        {/* 4. SEÇÃO: CONFIGURAÇÕES */}
         <section>
           <SectionHeader title="Preferências" />
           <div className="bg-white dark:bg-gray-800 rounded-[2.5rem] border border-gray-100 dark:border-gray-700 overflow-hidden shadow-sm">
@@ -203,10 +202,9 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
           </div>
         </section>
 
-        {/* 5. SEÇÃO: SUPORTE */}
         <section>
           <SectionHeader title="Suporte" />
-          <div className="bg-white dark:bg-gray-800 rounded-[2.5rem] border border-gray-100 dark:border-gray-800 overflow-hidden shadow-sm">
+          <div className="bg-white dark:bg-gray-800 rounded-[2.5rem] border border-gray-100 dark:border-gray-700 overflow-hidden shadow-sm">
             <ServiceBlock 
               icon={LifeBuoy} 
               label="Suporte" 
@@ -216,7 +214,6 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
           </div>
         </section>
 
-        {/* 6. SEÇÃO: GERAL */}
         <section>
           <SectionHeader title="Geral" />
           <div className="bg-white dark:bg-gray-800 rounded-[2.5rem] border border-gray-100 dark:border-gray-700 overflow-hidden shadow-sm">
@@ -241,7 +238,6 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
 
       </div>
 
-      {/* Footer / Info */}
       <div className="mt-12 text-center opacity-30 px-10">
         <p className="text-[9px] font-black text-gray-500 uppercase tracking-[0.3em]">
           Localizei JPA Parceiros <br/> v1.5.0
