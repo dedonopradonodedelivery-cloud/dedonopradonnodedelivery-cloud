@@ -139,10 +139,13 @@ export const BannerSalesWizard: React.FC<BannerSalesWizardProps> = ({ user, onBa
               </button>
             ))}
           </div>
+          {/* DISCLAIMER OBRIGATÓRIO */}
+          <p className="text-center text-[8px] text-slate-400 font-bold uppercase tracking-widest mt-4">
+              Promoção de inauguração por tempo indeterminado.
+          </p>
         </section>
 
         {/* PASSO 2: BAIRROS */}
-        {/* Habilitado se o Passo 1 estiver concluído */}
         <section className={`space-y-6 ${!placement ? 'opacity-40 grayscale pointer-events-none' : ''}`}>
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center font-black text-xs">2</div>
@@ -170,7 +173,6 @@ export const BannerSalesWizard: React.FC<BannerSalesWizardProps> = ({ user, onBa
         </section>
 
         {/* PASSO 3: ARTE */}
-        {/* CORREÇÃO APLICADA: Clicável assim que selectedHoods.length > 0 */}
         <section className={`space-y-8 ${selectedHoods.length === 0 ? 'opacity-40 grayscale pointer-events-none' : ''}`}>
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center font-black text-xs">3</div>

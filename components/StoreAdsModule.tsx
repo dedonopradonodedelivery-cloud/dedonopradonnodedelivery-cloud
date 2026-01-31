@@ -459,6 +459,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
                     <span className="text-sm font-black text-white">por R$ {mode.price.toFixed(2)}</span>
                   </div>
                   <p className="text-[10px] text-slate-300 font-medium leading-relaxed">{mode.description}</p>
+                  <p className="text-[7px] text-slate-500 font-bold uppercase tracking-widest mt-2">Promoção de inauguração por tempo indeterminado.</p>
                 </div>
               </button>
             ))}
@@ -520,7 +521,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
                         <div className="w-12 h-12 bg-blue-500/10 rounded-2xl flex items-center justify-center text-blue-400 shrink-0"><Paintbrush size={24} /></div>
                         <div>
                             <h3 className="text-lg font-bold text-white mb-1 leading-tight">Personalizar manualmente</h3>
-                            <p className="text-xs text-slate-400 leading-relaxed">Use seu banner pronto ou crie no editor.</p>
+                            <p className="text-xs text-slate-400 leading-relaxed">Use seu banner pronto or crie no editor.</p>
                         </div>
                     </div>
                 </div>

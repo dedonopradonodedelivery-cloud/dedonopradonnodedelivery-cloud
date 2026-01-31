@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { ArrowRight, Flame, Zap, Megaphone, Sparkles } from 'lucide-react';
 
@@ -40,6 +39,10 @@ export const LaunchOfferBanner: React.FC<LaunchOfferBannerProps> = ({ onClick })
             <p className="text-xs text-yellow-300 font-bold -mt-1">Por apenas</p>
             <p className="text-5xl font-black text-white tracking-tighter my-1 drop-shadow-lg">R$ 29,90</p>
             <p className="font-bold text-yellow-300 text-lg">Economize R$ 120,00</p>
+            {/* DISCLAIMER OBRIGATÓRIO */}
+            <p className="text-[7px] text-white/40 font-bold uppercase tracking-widest mt-4">
+                Promoção de inauguração por tempo indeterminado.
+            </p>
           </div>
           
           {/* 80% OFF Badge */}
