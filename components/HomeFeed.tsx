@@ -33,7 +33,7 @@ import { CATEGORIES, MOCK_COMMUNITY_POSTS } from '@/constants';
 import { useNeighborhood } from '@/contexts/NeighborhoodContext';
 import { LaunchOfferBanner } from './LaunchOfferBanner';
 import { HomeBannerCarousel } from './HomeBannerCarousel';
-import { FifaBanner } from './FifaBanner'; // NOVO IMPORT
+import { FifaBanner } from './FifaBanner';
 
 const MiniPostCard: React.FC<{ post: CommunityPost; onNavigate: (view: string) => void; }> = ({ post, onNavigate }) => {
   const postImage = post.imageUrls?.[0] || 'https://images.unsplash.com/photo-1549488344-cbb6c34cf08b?q=80&w=400&auto=format&fit=crop';
@@ -82,7 +82,6 @@ const MiniPostCard: React.FC<{ post: CommunityPost; onNavigate: (view: string) =
   );
 };
 
-// FIX: Added missing HomeFeedFeedProps interface to fix compilation error.
 interface HomeFeedFeedProps {
   onNavigate: (view: string) => void;
   onSelectCategory: (category: Category) => void;
@@ -286,7 +285,7 @@ export const HomeFeed: React.FC<HomeFeedFeedProps> = ({
             </h2>
             <button 
                 onClick={handleClaimReward}
-                disabled={isAnimating || (user && consecutiveDays > 5)}
+                disabled={isAnimating || !!(user && consecutiveDays > 5)}
                 className={`w-full py-3 rounded-xl font-black text-[9px] uppercase tracking-[0.15em] transition-all flex items-center justify-center gap-2 shadow-lg active:scale-[0.98]
                   ${isAnimating 
                     ? 'bg-gray-100 text-gray-400' 
@@ -331,7 +330,7 @@ export const HomeFeed: React.FC<HomeFeedFeedProps> = ({
         </div>
       </section>
       
-      {/* 3. FIFA STYLE BANNER (Replaces former JPA Connect block) */}
+      {/* 3. FIFA STYLE BANNER */}
       <section className="px-5 pt-8 pb-6">
         <FifaBanner onClick={() => setWizardStep(1)} />
       </section>
