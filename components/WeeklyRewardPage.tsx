@@ -82,10 +82,10 @@ export const WeeklyRewardPage: React.FC<WeeklyRewardPageProps> = ({ onBack, onNa
                     <div className="flex-1 min-w-0">
                         <h4 className="font-bold text-gray-900 dark:text-white text-sm truncate">{store.name}</h4>
                         <div className="flex flex-col gap-0.5 mt-1">
-                            <span className="text-[10px] text-gray-400 font-bold uppercase tracking-widest flex items-center gap-1">
+                            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest flex items-center gap-1">
                                 <MapPin size={10} /> {store.neighborhood}
                             </span>
-                            <span className="text-[10px] text-blue-500 font-bold uppercase tracking-widest flex items-center gap-1">
+                            <span className="text-[10px] font-bold text-blue-500 uppercase tracking-widest flex items-center gap-1">
                                 <Tag size={10} /> {store.category}
                             </span>
                         </div>
@@ -115,7 +115,7 @@ export const WeeklyRewardPage: React.FC<WeeklyRewardPageProps> = ({ onBack, onNa
         <div className="bg-amber-50 dark:bg-amber-900/10 p-5 rounded-3xl border border-amber-100 dark:border-amber-800/30 flex gap-4">
             <Info className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
             <p className="text-xs text-amber-800 dark:text-amber-200 leading-relaxed font-medium">
-                Todo cupom retirado fica guardado automaticamente em <strong>Menu > Meus Cupons</strong>. Você tem 30 dias para utilizar no estabelecimento.
+                Todo cupom retirado fica guardado automaticamente em <strong>Menu &gt; Meus Cupons</strong>. Você tem 30 dias para utilizar no estabelecimento.
             </p>
         </div>
       </main>
