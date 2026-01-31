@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { Store, Category, AdType, CommunityPost } from '@/types';
 import { 
@@ -34,6 +33,7 @@ import { CATEGORIES, MOCK_COMMUNITY_POSTS } from '@/constants';
 import { useNeighborhood } from '@/contexts/NeighborhoodContext';
 import { LaunchOfferBanner } from './LaunchOfferBanner';
 import { HomeBannerCarousel } from './HomeBannerCarousel';
+import { FifaBanner } from './FifaBanner'; // NOVO IMPORT
 
 const MiniPostCard: React.FC<{ post: CommunityPost; onNavigate: (view: string) => void; }> = ({ post, onNavigate }) => {
   const postImage = post.imageUrls?.[0] || 'https://images.unsplash.com/photo-1549488344-cbb6c34cf08b?q=80&w=400&auto=format&fit=crop';
@@ -214,7 +214,7 @@ export const HomeFeed: React.FC<HomeFeedFeedProps> = ({
 
       <HomeBannerCarousel onStoreClick={onStoreClick} />
 
-      {/* 1. CUPOM DA SEMANA - AGORA ACIMA DE ONDE O BAIRRO CONVERSA */}
+      {/* 1. CUPOM DA SEMANA */}
       <section className="bg-white dark:bg-gray-950 px-5 pt-4 mb-2">
         <div className="bg-white dark:bg-gray-900 rounded-[1.75rem] border border-gray-200/80 dark:border-gray-800 shadow-xl shadow-blue-900/5 relative group">
           {/* Ticket Cutouts */}
@@ -331,33 +331,9 @@ export const HomeFeed: React.FC<HomeFeedFeedProps> = ({
         </div>
       </section>
       
-      {/* 3. JPA CONNECT (NEW macOS Style) */}
-      <section className="px-5 pt-12 pb-6">
-        <div className="bg-white dark:bg-slate-800 rounded-[2.5rem] shadow-xl border border-gray-100 dark:border-slate-700 p-8">
-          <div className="flex items-start gap-5">
-            <div className="relative w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-3xl flex items-center justify-center shrink-0 shadow-lg shadow-blue-500/20">
-              <Wrench size={24} className="text-white absolute transform -rotate-45" />
-              <Hammer size={24} className="text-white absolute transform rotate-45" />
-            </div>
-            <div className="flex-1">
-              <h2 className="text-xl font-black text-gray-900 dark:text-white leading-tight">Encontre profissionais do seu bairro</h2>
-              <p className="text-sm text-gray-500 dark:text-slate-400 mt-2">Orçamentos rápidos com quem já atende em Jacarepaguá.</p>
-            </div>
-          </div>
-
-          <div className="space-y-4 my-8">
-            <div className="flex items-center gap-3"><CheckCircle2 size={16} className="text-emerald-500" /><p className="text-sm text-gray-700 dark:text-slate-300">Até 5 propostas de profissionais verificados</p></div>
-            <div className="flex items-center gap-3"><MessageSquare size={16} className="text-blue-500" /><p className="text-sm text-gray-700 dark:text-slate-300">Conversa direta no app</p></div>
-            <div className="flex items-center gap-3"><Zap size={16} className="text-yellow-500" /><p className="text-sm text-gray-700 dark:text-slate-300">Resposta rápida • Sem custo</p></div>
-          </div>
-
-          <button 
-            onClick={() => setWizardStep(1)}
-            className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold py-4 rounded-2xl shadow-lg shadow-blue-500/20 active:scale-[0.98] transition-all"
-          >
-            Solicitar orçamento
-          </button>
-        </div>
+      {/* 3. FIFA STYLE BANNER (Replaces former JPA Connect block) */}
+      <section className="px-5 pt-8 pb-6">
+        <FifaBanner onClick={() => setWizardStep(1)} />
       </section>
 
       {/* Mini-Wizard Section */}
