@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { 
     ChevronLeft, 
@@ -35,7 +34,7 @@ export const MerchantLeadsView: React.FC<MerchantLeadsViewProps> = ({ onBack, on
   const handleUnlock = (requestId: string) => {
     setIsProcessing(requestId);
     
-    // Simulação de pagamento de R$ 5,90
+    // Simulação de pagamento de R$ 5,90 (débito de créditos)
     setTimeout(() => {
         const newUnlocked = [...unlockedLeads, requestId];
         setUnlockedLeads(newUnlocked);

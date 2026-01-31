@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
-import { Store, Category, AdType, CommunityPost } from '@/types';
+import { Store, Category, AdType, CommunityPost, ServiceRequest, ServiceUrgency } from '@/types';
 import { 
   Compass, 
   Sparkles, 
@@ -25,7 +25,10 @@ import {
   Coins,
   Calendar,
   Coffee,
-  MapPin
+  MapPin,
+  Camera,
+  X,
+  Send
 } from 'lucide-react';
 import { LojasEServicosList } from '@/components/LojasEServicosList';
 import { User } from '@supabase/supabase-js';
@@ -109,13 +112,15 @@ export const HomeFeed: React.FC<HomeFeedFeedProps> = ({
   const [wizardStep, setWizardStep] = useState(0);
   const [selectedService, setSelectedService] = useState<string | null>(null);
   const [selectedUrgency, setSelectedUrgency] = useState<string | null>(null);
+  const [description, setDescription] = useState('');
+  const [images, setImages] = useState<string[]>([]);
+  const [isSubmittingLead, setIsSubmittingLead] = useState(false);
 
   const [consecutiveDays, setConsecutiveDays] = useState(() => {
     return parseInt(localStorage.getItem('reward_consecutive_days') || '1');
   });
 
   const handleClaimReward = () => {
-    // BLOQUEIO OBRIGATÓRIO: Se não logado, interrompe e manda para login
     if (!user) {
         onNavigate('profile'); 
         return;
@@ -128,11 +133,49 @@ export const HomeFeed: React.FC<HomeFeedFeedProps> = ({
     }, 1200);
   };
 
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && images.length < 3) {
+        const file = e.target.files[0];
+        const reader = new FileReader();
+        reader.onloadend = () => {
+            setImages(prev => [...prev, reader.result as string]);
+        };
+        reader.readAsDataURL(file);
+    }
+  };
+
   const handleWizardSubmit = () => {
-    alert(`Pedido enviado!\nServiço: ${selectedService}\nUrgência: ${selectedUrgency}`);
-    setWizardStep(0);
-    setSelectedService(null);
-    setSelectedUrgency(null);
+    if (!user) {
+        // Salva estado para restaurar após login (simulado)
+        localStorage.setItem('pending_wizard_state', JSON.stringify({ selectedService, selectedUrgency, description, images }));
+        onNavigate('profile');
+        return;
+    }
+
+    setIsSubmittingLead(true);
+    
+    // Simula criação do LEAD
+    const newLead: ServiceRequest = {
+        id: `REQ-${Math.floor(1000 + Math.random() * 9000)}`,
+        userId: user.id,
+        userName: user.user_metadata?.full_name || 'Morador Local',
+        serviceType: selectedService || 'Geral',
+        description,
+        neighborhood: currentNeighborhood,
+        urgency: (selectedUrgency as ServiceUrgency) || 'Não tenho pressa',
+        images,
+        status: 'open',
+        createdAt: new Date().toISOString()
+    };
+
+    // Armazena no mock local
+    const existing = JSON.parse(localStorage.getItem('service_requests_mock') || '[]');
+    localStorage.setItem('service_requests_mock', JSON.stringify([newLead, ...existing]));
+
+    setTimeout(() => {
+      setIsSubmittingLead(false);
+      setWizardStep(5); // Tela de Sucesso
+    }, 1500);
   };
 
   const updateScrollIndicator = useCallback(() => {
@@ -337,7 +380,9 @@ export const HomeFeed: React.FC<HomeFeedFeedProps> = ({
 
       {/* Mini-Wizard Section */}
       {wizardStep > 0 && (
-        <section className="bg-gray-50 dark:bg-gray-900 rounded-t-[2.5rem] p-6 -mt-4 animate-in slide-in-from-bottom-16 duration-500">
+        <section className="bg-gray-50 dark:bg-gray-900 rounded-[2.5rem] p-6 -mt-4 mx-5 mb-8 animate-in slide-in-from-bottom-16 duration-500 border border-gray-100 dark:border-gray-800 shadow-xl relative overflow-hidden">
+          <button onClick={() => setWizardStep(0)} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"><X size={20} /></button>
+          
           {wizardStep === 1 && (
             <div className="text-center">
               <h3 className="font-bold text-gray-800 dark:text-white mb-6">Que tipo de serviço?</h3>
@@ -355,10 +400,9 @@ export const HomeFeed: React.FC<HomeFeedFeedProps> = ({
             <div className="text-center">
               <h3 className="font-bold text-gray-800 dark:text-white mb-6">Como vai a urgência?</h3>
               <div className="flex flex-wrap justify-center gap-3">
-                 {[{l: 'Para hoje', i: <Zap/>}, {l: 'Amanhã', i: <Calendar/>}, {l: 'Até 3 dias', i: <Clock/>}, {l: 'Não tenho pressa', i: <Coffee/>}].map(u => (
-                  <button key={u.l} onClick={() => { setSelectedUrgency(u.l); setWizardStep(3); }} className="px-5 py-3 bg-white dark:bg-slate-800 rounded-full shadow-sm border border-gray-100 dark:border-slate-700 flex items-center justify-between gap-2 active:scale-95 transition-all">
-                    <div className="text-blue-500">{u.i}</div>
-                    <p className="text-sm font-bold text-gray-700 dark:text-slate-200">{u.l}</p>
+                 {['Para hoje', 'Amanhã', 'Até 3 dias', 'Não tenho pressa'].map(u => (
+                  <button key={u} onClick={() => { setSelectedUrgency(u); setWizardStep(3); }} className="px-5 py-3 bg-white dark:bg-slate-800 rounded-full shadow-sm border border-gray-100 dark:border-slate-700 flex items-center justify-between gap-2 active:scale-95 transition-all">
+                    <p className="text-sm font-bold text-gray-700 dark:text-slate-200">{u}</p>
                   </button>
                  ))}
               </div>
@@ -375,10 +419,51 @@ export const HomeFeed: React.FC<HomeFeedFeedProps> = ({
             </div>
           )}
           {wizardStep === 4 && (
-             <div className="text-center">
-              <h3 className="font-bold text-gray-800 dark:text-white mb-2">Tudo pronto! 🎉</h3>
-              <p className="text-sm text-gray-500 dark:text-slate-400 mb-6">Enviar até 5 pedidos para profissionais do bairro.</p>
-              <button onClick={handleWizardSubmit} className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold py-4 rounded-2xl shadow-lg">Enviar pedidos (5)</button>
+             <div className="text-center space-y-6">
+                <h3 className="font-bold text-gray-800 dark:text-white mb-2">Descreva o que você precisa</h3>
+                <div className="space-y-4">
+                    <textarea 
+                        value={description}
+                        onChange={(e) => setDescription(e.target.value)}
+                        placeholder="Ex: Preciso de um eletricista para trocar um disjuntor que está desarmando."
+                        maxLength={500}
+                        className="w-full h-32 p-4 bg-white dark:bg-slate-800 rounded-2xl border border-gray-200 dark:border-slate-700 outline-none focus:border-blue-500 text-sm"
+                    />
+                    <div className="flex gap-2">
+                        {images.map((img, i) => (
+                            <div key={i} className="w-16 h-16 rounded-xl overflow-hidden relative">
+                                <img src={img} className="w-full h-full object-cover" />
+                                <button onClick={() => setImages(images.filter((_, idx) => idx !== i))} className="absolute top-0 right-0 bg-red-500 text-white p-0.5 rounded-bl-lg"><X size={12}/></button>
+                            </div>
+                        ))}
+                        {images.length < 3 && (
+                            <label className="w-16 h-16 rounded-xl border-2 border-dashed border-gray-200 dark:border-slate-700 flex items-center justify-center text-gray-400 cursor-pointer">
+                                <Camera size={20} />
+                                <input type="file" className="hidden" accept="image/*" onChange={handleImageUpload} />
+                            </label>
+                        )}
+                    </div>
+                </div>
+                <button 
+                    onClick={handleWizardSubmit}
+                    disabled={!description || isSubmittingLead}
+                    className="w-full bg-[#1E5BFF] text-white font-black py-4 rounded-2xl shadow-lg active:scale-[0.98] flex items-center justify-center gap-2"
+                >
+                    {isSubmittingLead ? <Loader2 size={20} className="animate-spin" /> : 'Enviar pedido de orçamento'}
+                </button>
+             </div>
+          )}
+          {wizardStep === 5 && (
+            <div className="text-center py-6 animate-in zoom-in duration-500">
+                <div className="w-16 h-16 bg-emerald-100 dark:bg-emerald-900/30 rounded-full flex items-center justify-center mx-auto mb-4 text-emerald-600">
+                    <CheckCircle2 size={32} />
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Pedido enviado! 🎉</h3>
+                <p className="text-sm text-gray-500 dark:text-slate-400 mb-8">Profissionais do seu bairro já foram notificados.</p>
+                <div className="space-y-3">
+                    <button onClick={() => { setWizardStep(0); onNavigate('services'); }} className="w-full bg-[#1E5BFF] text-white font-bold py-3 rounded-xl">Acompanhar orçamentos</button>
+                    <button onClick={() => setWizardStep(0)} className="w-full py-3 text-gray-400 font-bold">Voltar para início</button>
+                </div>
             </div>
           )}
         </section>

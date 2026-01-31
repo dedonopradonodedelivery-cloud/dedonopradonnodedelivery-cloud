@@ -129,7 +129,8 @@ export interface RealEstateProperty {
   loadingAccess?: boolean;
 }
 
-export type ServiceUrgency = 'Hoje' | 'Essa semana' | 'Sem pressa';
+// Consolidated ServiceUrgency with all used variants
+export type ServiceUrgency = 'Para hoje' | 'Amanhã' | 'Até 3 dias' | 'Não tenho pressa' | 'Hoje' | 'Essa semana' | 'Sem pressa';
 
 export interface ServiceRequest {
   id: string;
@@ -149,7 +150,8 @@ export interface ServiceLead {
   requestId: string;
   merchantId: string;
   merchantName: string;
-  status: 'pending_payment' | 'paid';
+  status: 'new' | 'unlocked' | 'chatting' | 'finished' | 'lost' | 'pending_payment' | 'paid';
+  unlockedAt?: string;
   purchasedAt?: string;
 }
 
@@ -182,7 +184,7 @@ export interface Job {
   company: string;
   neighborhood: string;
   category: string;
-  type: 'CLT' | 'PJ' | 'Freelancer' | 'Temporário' | 'Estágio';
+  type: 'CLT' | 'PJ' | 'Freelancer' | 'Temporário' | 'Estágio' | 'Aprendiz' | 'Diarista' | 'Meio período' | 'Outros';
   salary?: string;
   description: string;
   requirements: string[];
@@ -195,8 +197,8 @@ export interface Job {
   sponsoredUntil?: string;
   isUrgent?: boolean;
   logoUrl?: string;
-  candidacy_method: 'cv' | 'whatsapp';
-  modality: 'Presencial' | 'Híbrido' | 'Remoto';
+  candidacy_method?: 'cv' | 'whatsapp';
+  modality?: 'Presencial' | 'Híbrido' | 'Remoto';
   experience?: string;
   schedule_type?: 'Integral' | 'Meio período' | 'Escala';
 }
@@ -226,12 +228,11 @@ export interface CommunityPost {
   likes: number;
   comments: number;
   imageUrls?: string[];
+  imageUrl?: string;
   videoUrl?: string;
   theme?: 'utilidade' | 'seguranca' | 'lazer' | 'dicas' | 'geral';
   showOnStoreProfile?: boolean;
 }
-
-export type TaxonomyType = 'category' | 'subcategory' | 'specialty';
 
 export interface Story {
   id: string;
@@ -258,9 +259,11 @@ export interface Classified {
   contactWhatsapp: string;
   typeLabel: string;
   price?: string;
-  jobDetails?: Job;
   imageUrl?: string;
+  jobDetails?: Job;
 }
+
+export type TaxonomyType = 'category' | 'subcategory' | 'specialty';
 
 export interface StoreCredit {
   id: string;
@@ -316,7 +319,7 @@ export interface PostReport {
 
 export interface TaxonomySuggestion {
   id: string;
-  type: 'category' | 'subcategory' | 'specialty';
+  type: TaxonomyType;
   name: string;
   parentName?: string;
   justification?: string;
