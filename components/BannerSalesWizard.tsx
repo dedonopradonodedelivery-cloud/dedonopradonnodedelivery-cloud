@@ -27,6 +27,7 @@ const BAIRROS = [
 
 export const BannerSalesWizard: React.FC<BannerSalesWizardProps> = ({ user, onBack, onNavigate }) => {
   const [view, setView] = useState<WizardView>('steps');
+  const [step, setStep] = useState<number>(1); // Estado restaurado para controle de progresso inicial
   const [paymentTab, setPaymentTab] = useState<'pix' | 'card'>('pix');
   const [isProcessing, setIsProcessing] = useState(false);
   
@@ -239,13 +240,18 @@ export const BannerSalesWizard: React.FC<BannerSalesWizardProps> = ({ user, onBa
     );
   }
 
+  const handleHeaderBack = () => {
+    if (view === 'payment') setView('steps');
+    else onBack();
+  }
+
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 font-sans flex flex-col animate-in fade-in duration-500">
       
       {/* 1. HEADER SIMPLIFICADO */}
       <div className="sticky top-0 z-50 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 shadow-sm">
         <div className="p-4 flex items-center gap-3">
-          <button onClick={onBack} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors">
+          <button onClick={handleHeaderBack} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors">
             <ChevronLeft className="w-6 h-6 dark:text-white" />
           </button>
           <div className="flex-1">
@@ -266,8 +272,8 @@ export const BannerSalesWizard: React.FC<BannerSalesWizardProps> = ({ user, onBa
           </p>
         </header>
 
-        {/* PASSO 1: POSICIONAMENTO */}
-        <section className={`space-y-6 ${placement && step > 1 ? 'opacity-40 grayscale pointer-events-none' : ''}`}>
+        {/* PASSO 1: POSICIONAMENTO — INTERATIVIDADE CORRIGIDA (RADIO GROUP) */}
+        <section className="space-y-6">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center font-black text-xs">1</div>
             <h3 className="font-black text-slate-900 dark:text-white uppercase tracking-tighter">Onde você quer aparecer?</h3>
@@ -281,7 +287,10 @@ export const BannerSalesWizard: React.FC<BannerSalesWizardProps> = ({ user, onBa
             ].map(opt => (
               <button 
                 key={opt.id}
-                onClick={() => { setPlacement(opt.id as PlacementMode); setStep(2); }}
+                onClick={() => { 
+                  setPlacement(opt.id as PlacementMode); 
+                  if (step === 1) setStep(2); 
+                }}
                 className={`relative flex flex-col items-center p-4 rounded-3xl border-2 transition-all text-center gap-2 active:scale-95 ${placement === opt.id ? 'border-blue-600 bg-blue-50 dark:bg-blue-900/20' : 'border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900'}`}
               >
                 {opt.popular && <span className="absolute -top-3 bg-amber-500 text-white text-[8px] font-black px-2 py-1 rounded-full uppercase">Mais vendido</span>}
