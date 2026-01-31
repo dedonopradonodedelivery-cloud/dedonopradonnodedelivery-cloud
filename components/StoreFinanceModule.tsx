@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import { 
   ChevronLeft, 
@@ -143,7 +142,7 @@ export const StoreFinanceModule: React.FC<{ onBack: () => void }> = ({ onBack })
         </div>
       </header>
 
-      <main className="p-6 space-y-8 pb-32">
+      <main className="p-6 space-y-8 pb-48">
         <section className="bg-white dark:bg-gray-800 p-6 rounded-[2.5rem] border border-gray-100 dark:border-gray-700 shadow-sm">
           <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Total investido no app</p>
           <p className="text-3xl font-black text-[#1E5BFF]">R$ {totalInvested.toFixed(2)}</p>
@@ -191,7 +190,7 @@ export const StoreFinanceModule: React.FC<{ onBack: () => void }> = ({ onBack })
         </section>
       </main>
 
-      <footer className="fixed bottom-0 left-0 right-0 p-5 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-t border-gray-100 dark:border-gray-800 max-w-md mx-auto">
+      <footer className="fixed bottom-[80px] left-0 right-0 p-5 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-t border-gray-100 dark:border-gray-800 max-w-md mx-auto z-40">
         <p className="text-center text-[9px] text-gray-400 font-bold uppercase tracking-widest">
             Todos os pagamentos são processados em ambiente seguro.
         </p>

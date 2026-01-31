@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from 'react';
 import { 
   ChevronLeft, 
@@ -45,7 +44,7 @@ export const MerchantCashbackOnboarding: React.FC<MerchantCashbackOnboardingProp
         <span className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-500">Treinamento Obrigatório</span>
       </header>
 
-      <main className="flex-1 overflow-y-auto no-scrollbar px-6 pb-40">
+      <main className="flex-1 overflow-y-auto no-scrollbar px-6 pb-48">
         
         {/* Introdução */}
         <div className="text-center mt-8 mb-10">
@@ -136,8 +135,8 @@ export const MerchantCashbackOnboarding: React.FC<MerchantCashbackOnboardingProp
 
       </main>
 
-      {/* Botão de Ação Inferior */}
-      <div className="fixed bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-slate-950 via-slate-950 to-transparent z-20 max-w-md mx-auto">
+      {/* Botão de Ação Inferior - Ajustado para rodapé acima da Bottom Nav */}
+      <div className="fixed bottom-[80px] left-0 right-0 p-6 bg-gradient-to-t from-slate-950 via-slate-950 to-transparent z-20 max-w-md mx-auto">
         <button 
           onClick={onActivate}
           disabled={!videoFinished}

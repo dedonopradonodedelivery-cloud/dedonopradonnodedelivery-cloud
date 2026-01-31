@@ -3,7 +3,8 @@ import {
   ChevronLeft, ArrowRight, Home, LayoutGrid, Zap, MapPin, 
   Upload, Paintbrush, Sparkles, Check, Crown, Info, 
   AlertTriangle, Image as ImageIcon, Type, AlignLeft, 
-  AlignCenter, AlignRight, Maximize, Palette
+  AlignCenter, AlignRight, Maximize, Palette, CheckCircle2,
+  Store as StoreIcon
 } from 'lucide-react';
 import { User } from '@supabase/supabase-js';
 
@@ -84,10 +85,10 @@ export const BannerSalesWizard: React.FC<BannerSalesWizardProps> = ({ user, onBa
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 pb-32 animate-in fade-in duration-500">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 font-sans flex flex-col animate-in fade-in duration-500">
       
-      {/* 1. HEADER FIXO COM RESUMO DINÂMICO */}
-      <div className="sticky top-0 z-50 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 shadow-xl">
+      {/* 1. HEADER SIMPLIFICADO */}
+      <div className="sticky top-0 z-50 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 shadow-sm">
         <div className="p-4 flex items-center gap-3">
           <button onClick={onBack} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors">
             <ChevronLeft className="w-6 h-6 dark:text-white" />
@@ -97,28 +98,10 @@ export const BannerSalesWizard: React.FC<BannerSalesWizardProps> = ({ user, onBa
             <p className="text-[10px] text-blue-500 font-bold uppercase mt-1">Configuração de Destaque</p>
           </div>
         </div>
-
-        {/* Bloco de Resumo Dinâmico */}
-        <div className="px-5 pb-4">
-          <div className="bg-slate-900 text-white rounded-2xl p-4 flex items-center justify-between shadow-inner">
-            <div className="space-y-1">
-              <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Valor do Investimento</p>
-              <div className="flex items-baseline gap-2">
-                <span className="text-xl font-black text-emerald-400">R$ {summary.total.toFixed(2)}</span>
-                {summary.discount > 0 && (
-                  <span className="text-[10px] bg-emerald-500/20 text-emerald-400 px-1.5 py-0.5 rounded font-black">-{summary.percent}% OFF</span>
-                )}
-              </div>
-            </div>
-            <div className="text-right flex flex-col gap-1">
-              <span className="text-[9px] font-bold text-slate-400 uppercase">{summary.hoods} bairro(s) selecionados</span>
-              <span className="text-[9px] font-bold text-blue-400 uppercase">{placement || 'Sem posicionamento'}</span>
-            </div>
-          </div>
-        </div>
       </div>
 
-      <main className="p-6 space-y-12">
+      {/* 2. CONTEÚDO PRINCIPAL (COM PADDING EXTRA PARA OS FOOTERS FIXOS) */}
+      <main className="flex-1 p-6 space-y-12 pb-64">
         <header className="text-center space-y-2">
           <h2 className="text-2xl font-black text-slate-900 dark:text-white leading-tight uppercase tracking-tighter">
             Seja visto exatamente por quem compra no seu bairro
@@ -193,7 +176,6 @@ export const BannerSalesWizard: React.FC<BannerSalesWizardProps> = ({ user, onBa
           </div>
 
           <div className="space-y-4">
-            {/* OPÇÃO 1: UPLOAD */}
             <div 
               onClick={() => setArtType('MY_ART')}
               className={`p-6 rounded-3xl border-2 transition-all cursor-pointer ${artType === 'MY_ART' ? 'border-blue-600 bg-blue-50 dark:bg-blue-900/10' : 'border-slate-100 dark:border-slate-800'}`}
@@ -213,7 +195,6 @@ export const BannerSalesWizard: React.FC<BannerSalesWizardProps> = ({ user, onBa
               )}
             </div>
 
-            {/* OPÇÃO 2: EDITOR INTERNO */}
             <div 
               onClick={() => setArtType('EDITOR')}
               className={`p-6 rounded-3xl border-2 transition-all cursor-pointer ${artType === 'EDITOR' ? 'border-purple-600 bg-purple-50 dark:bg-purple-900/10' : 'border-slate-100 dark:border-slate-800'}`}
@@ -225,65 +206,8 @@ export const BannerSalesWizard: React.FC<BannerSalesWizardProps> = ({ user, onBa
                   <p className="text-xs text-slate-500">Crie seu banner em segundos</p>
                 </div>
               </div>
-
-              {artType === 'EDITOR' && (
-                <div className="mt-6 space-y-8 animate-in slide-in-from-top-4">
-                  {/* Preview do Banner */}
-                  <div 
-                    className={`aspect-square w-full rounded-2xl flex flex-col p-8 shadow-2xl relative overflow-hidden transition-all duration-700 ${animation === 'pulse' ? 'animate-pulse' : animation === 'zoom' ? 'hover:scale-105' : ''}`}
-                    style={{ backgroundColor: bgColor, color: textColor, alignItems: textAlign === 'center' ? 'center' : textAlign === 'right' ? 'flex-end' : 'flex-start', textAlign }}
-                  >
-                    <div className={`w-16 h-16 bg-white/20 mb-6 flex items-center justify-center border border-white/20 ${logoShape === 'round' ? 'rounded-full' : 'rounded-lg'}`}>
-                       <StoreIcon size={32} className="opacity-40" />
-                    </div>
-                    <h4 className={`font-black uppercase leading-tight tracking-tighter ${fontSize}`}>{editorTitle}</h4>
-                    <p className="text-sm mt-2 opacity-80 font-medium">{editorDesc}</p>
-                  </div>
-
-                  {/* Controles do Editor */}
-                  <div className="space-y-6 bg-white dark:bg-slate-900 p-6 rounded-[2.5rem] border border-slate-100 dark:border-slate-800">
-                    <div className="space-y-3">
-                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Conteúdo</label>
-                      <input value={editorTitle} onChange={e => setEditorTitle(e.target.value)} placeholder="Título do Banner" className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-xl p-3 text-sm font-bold"/>
-                      <input value={editorDesc} onChange={e => setEditorDesc(e.target.value)} placeholder="Subtítulo curto" className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-xl p-3 text-sm font-medium"/>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-3">
-                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Fundo</label>
-                        <input type="color" value={bgColor} onChange={e => setBgColor(e.target.value)} className="w-full h-10 rounded-xl cursor-pointer border-none p-1 bg-slate-100"/>
-                      </div>
-                      <div className="space-y-3">
-                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Texto</label>
-                        <input type="color" value={textColor} onChange={e => setTextColor(e.target.value)} className="w-full h-10 rounded-xl cursor-pointer border-none p-1 bg-slate-100"/>
-                      </div>
-                    </div>
-
-                    <div className="space-y-3">
-                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Alinhamento</label>
-                      <div className="flex gap-2">
-                        <button onClick={() => setTextAlign('left')} className={`flex-1 p-2 rounded-lg border ${textAlign === 'left' ? 'bg-purple-600 text-white' : 'bg-slate-100'}`}><AlignLeft size={16}/></button>
-                        <button onClick={() => setTextAlign('center')} className={`flex-1 p-2 rounded-lg border ${textAlign === 'center' ? 'bg-purple-600 text-white' : 'bg-slate-100'}`}><AlignCenter size={16}/></button>
-                        <button onClick={() => setTextAlign('right')} className={`flex-1 p-2 rounded-lg border ${textAlign === 'right' ? 'bg-purple-600 text-white' : 'bg-slate-100'}`}><AlignRight size={16}/></button>
-                      </div>
-                    </div>
-
-                    <div className="space-y-3">
-                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Efeito Especial</label>
-                      <div className="flex flex-wrap gap-2">
-                        {['none', 'fade', 'slide', 'zoom', 'pulse'].map(anim => (
-                          <button key={anim} onClick={() => setAnimation(anim as any)} className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase border ${animation === anim ? 'bg-purple-600 text-white' : 'bg-slate-100'}`}>
-                            {anim}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
             </div>
 
-            {/* OPÇÃO 3: DESIGN PROFISSIONAL */}
             <div 
               onClick={() => setArtType('PRO')}
               className={`p-6 rounded-3xl border-2 transition-all cursor-pointer relative overflow-hidden ${artType === 'PRO' ? 'border-amber-500 bg-amber-50 dark:bg-amber-900/10' : 'border-slate-100 dark:border-slate-800'}`}
@@ -299,52 +223,53 @@ export const BannerSalesWizard: React.FC<BannerSalesWizardProps> = ({ user, onBa
                   </div>
                 </div>
               </div>
-              <p className="text-[10px] text-slate-500 mt-4 leading-relaxed font-medium">
-                Nossa equipe de designers cria seu banner profissionalmente em até 24h. Suporte via chat incluso.
-              </p>
             </div>
           </div>
         </section>
 
-        {/* FINALIZAÇÃO E GATILHOS */}
         <section className="pt-8 space-y-6">
-            <div className="space-y-4">
-               <div className="flex items-start gap-3 bg-amber-50 dark:bg-amber-900/10 p-4 rounded-2xl border border-amber-100 dark:border-amber-800/30">
-                  <AlertTriangle className="w-5 h-5 text-amber-500 shrink-0" />
-                  <p className="text-[10px] text-amber-800 dark:text-amber-200 font-bold uppercase leading-tight">
-                    Apenas 2 anunciantes por categoria e bairro. O espaço será bloqueado automaticamente após sua compra.
-                  </p>
-               </div>
+            <div className="flex items-start gap-3 bg-amber-50 dark:bg-amber-900/10 p-4 rounded-2xl border border-amber-100 dark:border-amber-800/30">
+               <AlertTriangle className="w-5 h-5 text-amber-500 shrink-0" />
+               <p className="text-[10px] text-amber-800 dark:text-amber-200 font-bold uppercase leading-tight">
+                 Apenas 2 anunciantes por categoria e bairro. O espaço será bloqueado automaticamente após sua compra.
+               </p>
             </div>
-
+            
             <button 
                 disabled={!placement || selectedHoods.length === 0 || !artType}
-                onClick={() => alert('Parabéns! Pedido realizado. Redirecionando para pagamento...')}
+                onClick={() => alert('Redirecionando para pagamento seguro...')}
                 className="w-full bg-[#1E5BFF] text-white font-black py-5 rounded-[2rem] shadow-xl shadow-blue-500/30 active:scale-[0.98] transition-all flex items-center justify-center gap-3 uppercase tracking-widest text-sm disabled:opacity-50 disabled:grayscale"
             >
                 Ativar meu destaque agora
                 <ArrowRight size={20}/>
             </button>
-            <p className="text-center text-[9px] text-slate-400 font-bold uppercase tracking-[0.2em]">Pagamento Seguro via Localizei Pay</p>
         </section>
       </main>
+
+      {/* 3. RESUMO DO PEDIDO - FIXO ACIMA DA BOTTOM NAV */}
+      <div className="fixed bottom-[80px] left-0 right-0 z-[100] bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 p-5 shadow-[0_-10px_25px_rgba(0,0,0,0.1)] max-w-md mx-auto">
+        <div className="flex items-center justify-between">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <span className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em]">Investimento</span>
+              {summary.discount > 0 && (
+                <span className="text-[8px] bg-emerald-500 text-white px-1.5 py-0.5 rounded font-black">-{summary.percent}% OFF</span>
+              )}
+            </div>
+            <div className="flex items-baseline gap-1">
+              <span className="text-xs font-bold text-slate-500">R$</span>
+              <span className="text-2xl font-black text-emerald-600 dark:text-emerald-400">
+                {summary.total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+              </span>
+            </div>
+          </div>
+          
+          <div className="text-right">
+            <p className="text-[9px] font-black text-slate-900 dark:text-white uppercase tracking-tight">{summary.hoods} bairro(s) selecionados</p>
+            <p className="text-[9px] font-bold text-blue-500 uppercase tracking-widest mt-0.5">{placement || 'Sem posicionamento'}</p>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
-
-const CheckCircle2 = ({ className }: { className?: string }) => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className={className}>
-    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-    <path d="m9 11 3 3L22 4"/>
-  </svg>
-);
-
-const StoreIcon = ({ size, className }: { size: number, className?: string }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-    <path d="m2 7 4.41-4.41A2 2 0 0 1 7.83 2h8.34a2 2 0 0 1 1.42.59L22 7"/>
-    <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/>
-    <path d="M15 22v-4a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v4"/>
-    <path d="M2 7h20"/>
-    <path d="M22 7v3a2 2 0 0 1-2 2v0a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 16 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 12 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 8 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 4 12v0a2 2 0 0 1-2-2V7"/>
-  </svg>
-);

@@ -98,7 +98,7 @@ const App: React.FC = () => {
     if (splashStage === 4) return;
     const fadeOutTimer = setTimeout(() => setSplashStage(3), 4500);
     const endSplashTimer = setTimeout(() => {
-      setSplashStage(4);
+      splashStage === 3 && setSplashStage(4);
       splashWasShownInSession = true;
     }, 5000);
     return () => {
@@ -122,7 +122,9 @@ const App: React.FC = () => {
   };
 
   const headerExclusionList = ['store_area', 'store_detail', 'profile', 'patrocinador_master', 'merchant_performance', 'neighborhood_posts', 'saved_posts', 'classifieds', 'services', 'services_landing', 'merchant_leads', 'service_chat', 'admin_panel', 'category_detail', 'subcategory_detail', 'sponsor_info', 'real_estate', 'jobs', 'job_detail', 'category_banner_sales', 'banner_sales_wizard', 'weekly_reward_page', 'user_coupons'];
-  const hideBottomNav = ['admin_panel', 'weekly_reward_page', 'service_chat', 'sponsor_info', 'real_estate', 'job_detail', 'category_banner_sales', 'banner_sales_wizard', 'user_coupons'].includes(activeTab);
+  
+  // REGRA GLOBAL: Barra inferior deve aparecer sempre (exceto splash screen)
+  const hideBottomNav = false;
 
   const RoleSwitcherModal: React.FC = () => {
     if (!isRoleSwitcherOpen) return null;
