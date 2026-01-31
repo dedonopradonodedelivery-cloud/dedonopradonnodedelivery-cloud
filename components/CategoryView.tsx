@@ -4,7 +4,7 @@ import { Category, Store, AdType } from '@/types';
 import { SUBCATEGORIES } from '@/constants';
 import { supabase } from '@/lib/supabaseClient';
 import { LaunchOfferBanner } from './LaunchOfferBanner';
-import { CategoryBannerCarousel } from './CategoryBannerCarousel'; // IMPORTADO
+import { CategoryBannerCarousel } from './CategoryBannerCarousel';
 import { MasterSponsorBanner } from './MasterSponsorBanner';
 
 const BigSurCard: React.FC<{ 
@@ -106,18 +106,11 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
         <h1 className="font-bold text-lg text-gray-900 dark:text-white flex items-center gap-2">{React.cloneElement(category.icon as any, {className: 'w-5 h-5'})} {category.name}</h1>
       </div>
       
-      {/* NOVO CARROSSEL DE SLOTS DE CATEGORIA */}
+      {/* CARROSSEL DE BANNERS DA CATEGORIA - ÚNICO E INDEPENDENTE */}
       <div className="mt-4">
         <CategoryBannerCarousel 
           categoriaSlug={category.slug} 
           onStoreClick={handleMerchantStoreClick}
-          onAdvertiseClick={() => {
-              if (userRole === 'lojista') {
-                onNavigate('category_banner_sales');
-              } else {
-                alert('Apenas lojistas podem anunciar aqui.');
-              }
-          }}
         />
       </div>
 
