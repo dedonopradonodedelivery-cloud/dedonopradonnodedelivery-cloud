@@ -27,6 +27,7 @@ import { CategoryBannerSalesView } from '@/components/CategoryBannerSalesView';
 import { BannerSalesWizard } from '@/components/BannerSalesWizard'; 
 import { WeeklyRewardPage } from '@/components/WeeklyRewardPage'; 
 import { UserCupomScreen } from '@/components/UserCupomScreen'; 
+import { NotificationsView } from '@/components/NotificationsView';
 import { MapPin, X, Palette } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
@@ -66,11 +67,10 @@ const App: React.FC = () => {
   const isMerchantMode = userRole === 'lojista' || (user?.email === ADMIN_EMAIL && viewMode === 'Lojista');
 
   const handleNavigate = (view: string, data?: any) => {
-    if (view !== 'sponsor_info') {
+    if (view !== 'sponsor_info' && view !== 'notifications') {
       setPreviousTab(activeTab);
     }
     
-    // Captura o ID do pedido se vier da tela de sucesso da Home
     if (view === 'service_chat' && data?.requestId) {
         setActiveServiceRequestId(data.requestId);
         setChatRole('resident');
@@ -121,9 +121,8 @@ const App: React.FC = () => {
     handleNavigate('subcategory_detail');
   };
 
-  const headerExclusionList = ['store_area', 'store_detail', 'profile', 'patrocinador_master', 'merchant_performance', 'neighborhood_posts', 'saved_posts', 'classifieds', 'services', 'services_landing', 'merchant_leads', 'service_chat', 'admin_panel', 'category_detail', 'subcategory_detail', 'sponsor_info', 'real_estate', 'jobs', 'job_detail', 'category_banner_sales', 'banner_sales_wizard', 'weekly_reward_page', 'user_coupons'];
+  const headerExclusionList = ['store_area', 'store_detail', 'profile', 'patrocinador_master', 'merchant_performance', 'neighborhood_posts', 'saved_posts', 'classifieds', 'services', 'services_landing', 'merchant_leads', 'service_chat', 'admin_panel', 'category_detail', 'subcategory_detail', 'sponsor_info', 'real_estate', 'jobs', 'job_detail', 'category_banner_sales', 'banner_sales_wizard', 'weekly_reward_page', 'user_coupons', 'notifications'];
   
-  // REGRA GLOBAL: Barra inferior deve aparecer sempre (exceto splash screen)
   const hideBottomNav = false;
 
   const RoleSwitcherModal: React.FC = () => {
@@ -154,7 +153,7 @@ const App: React.FC = () => {
           <div className={`w-full max-w-md h-[100dvh] transition-opacity duration-500 ease-out ${splashStage >= 3 ? 'opacity-100' : 'opacity-0'}`}>
               <Layout activeTab={activeTab} setActiveTab={handleNavigate} userRole={userRole} hideNav={hideBottomNav}>
                   {!headerExclusionList.includes(activeTab) && (
-                    <Header isDarkMode={theme === 'dark'} toggleTheme={() => {}} onAuthClick={() => handleNavigate('profile')} user={user} searchTerm={globalSearch} onSearchChange={setGlobalSearch} onNavigate={handleNavigate} activeTab={activeTab} userRole={userRole as any} stores={STORES} onStoreClick={handleSelectStore} isAdmin={user?.email === ADMIN_EMAIL} viewMode={viewMode} onOpenViewSwitcher={() => setIsRoleSwitcherOpen(true)} />
+                    <Header isDarkMode={theme === 'dark'} toggleTheme={() => {}} onNotificationClick={() => handleNavigate('notifications')} user={user} searchTerm={globalSearch} onSearchChange={setGlobalSearch} onNavigate={handleNavigate} activeTab={activeTab} userRole={userRole as any} stores={STORES} onStoreClick={handleSelectStore} isAdmin={user?.email === ADMIN_EMAIL} viewMode={viewMode} onOpenViewSwitcher={() => setIsRoleSwitcherOpen(true)} />
                   )}
                   <main className="w-full mx-auto">
                     {activeTab === 'home' && <HomeFeed onNavigate={handleNavigate} onSelectCategory={handleSelectCategory} onStoreClick={handleSelectStore} stores={STORES} user={user as any} userRole={userRole} />}
@@ -173,6 +172,14 @@ const App: React.FC = () => {
                     {activeTab === 'user_coupons' && (
                         <UserCupomScreen 
                             onBack={() => handleNavigate('profile')} 
+                        />
+                    )}
+
+                    {activeTab === 'notifications' && (
+                        <NotificationsView 
+                            onBack={() => handleNavigate('home')}
+                            onNavigate={handleNavigate}
+                            userRole={userRole as any}
                         />
                     )}
 

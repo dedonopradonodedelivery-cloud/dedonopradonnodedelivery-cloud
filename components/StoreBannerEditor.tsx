@@ -24,6 +24,7 @@ export interface BannerDesign {
   logoPos: 'top' | 'bottom';
   logoDisplay: 'square' | 'round' | 'none';
   iconName: string | null;
+  align: 'left' | 'center' | 'right';
 }
 
 const BG_LIBRARY = [
@@ -61,7 +62,7 @@ const BannerPreview: React.FC<{ config: BannerDesign; storeName: string; storeLo
   const { 
     title, subtitle, layout, bgType, bgColor, bgImage, 
     textColor, accentColor, titleFont, titleSize, animation,
-    logoSize, logoPos, logoDisplay, iconName 
+    logoSize, logoPos, logoDisplay, iconName, align
   } = config;
 
   const IconComp = iconName ? ICON_COMPONENTS[iconName] : null;
@@ -75,11 +76,11 @@ const BannerPreview: React.FC<{ config: BannerDesign; storeName: string; storeLo
   };
 
   const layoutClasses = {
-    split: 'flex-row items-center justify-between p-12 text-left',
-    centered: 'flex-col items-center justify-center p-12 text-center',
-    footer: 'flex-col items-start justify-end p-12 text-left',
-    card: 'flex-col items-center justify-center p-12 text-center',
-    stacked: 'flex-col items-start justify-start p-12 text-left gap-4'
+    split: `flex-row items-center justify-between p-12 text-${align}`,
+    centered: `flex-col items-center justify-center p-12 text-${align}`,
+    footer: `flex-col items-start justify-end p-12 text-${align}`,
+    card: `flex-col items-center justify-center p-12 text-${align}`,
+    stacked: `flex-col items-start justify-start p-12 text-${align} gap-4`
   };
 
   return (
@@ -107,7 +108,7 @@ const BannerPreview: React.FC<{ config: BannerDesign; storeName: string; storeLo
         )}
 
         {/* Text Group */}
-        <div className={`${layout === 'card' ? 'bg-black/30 backdrop-blur-xl p-8 rounded-[2rem] border border-white/10 shadow-2xl' : ''} max-w-[80%]`}>
+        <div className={`${layout === 'card' ? 'bg-black/30 backdrop-blur-xl p-8 rounded-[2rem] border border-white/10 shadow-2xl' : ''} max-w-[80%] flex flex-col ${align === 'center' ? 'items-center' : align === 'right' ? 'items-end' : 'items-start'}`}>
           <div className="flex items-center gap-3 mb-4 opacity-80" style={{ color: accentColor }}>
             {IconComp && <IconComp size={24} strokeWidth={2.5} />}
             <span className="text-[10px] font-black uppercase tracking-[0.3em]">{storeName}</span>
@@ -153,6 +154,7 @@ export const StoreBannerEditor: React.FC<StoreBannerEditorProps> = ({ storeName,
     logoPos: 'top',
     logoDisplay: 'round',
     iconName: 'Sparkles',
+    align: 'left'
   });
 
   const applyPreset = (presetId: string) => {
@@ -264,10 +266,10 @@ export const StoreBannerEditor: React.FC<StoreBannerEditorProps> = ({ storeName,
                 <div className="space-y-3">
                   <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Alinhamento</label>
                   <div className="flex bg-slate-900 rounded-xl p-1 gap-1">
-                    {['left', 'center', 'right'].map(align => (
+                    {(['left', 'center', 'right'] as const).map(align => (
                         <button 
                             key={align} 
-                            onClick={() => setConfig({...config, align: align as any})}
+                            onClick={() => setConfig({...config, align})}
                             className={`flex-1 flex items-center justify-center py-2 rounded-lg transition-all ${config.align === align ? 'bg-slate-700 text-white' : 'text-slate-500'}`}
                         >
                             {align === 'left' ? <AlignLeft size={16}/> : align === 'center' ? <AlignCenter size={16}/> : <AlignRight size={16}/>}

@@ -1,6 +1,5 @@
-
-import React, { useMemo, useState } from 'react';
-import { Search, User as UserIcon, MapPin, ChevronDown, Check, ChevronRight, SearchX, ShieldCheck, Tag, Mic, MicOff, Loader2 } from 'lucide-react';
+import React, { useMemo, useState, useEffect } from 'react';
+import { Search, MapPin, ChevronDown, Check, ChevronRight, SearchX, ShieldCheck, Tag, Mic, Bell, Loader2 } from 'lucide-react';
 import { useNeighborhood, NEIGHBORHOODS } from '../../contexts/NeighborhoodContext';
 import { Store, Category } from '../../types';
 import { CATEGORIES } from '../../constants';
@@ -8,7 +7,7 @@ import { CATEGORIES } from '../../constants';
 interface HeaderProps {
   isDarkMode: boolean;
   toggleTheme: () => void;
-  onAuthClick: () => void;
+  onNotificationClick: () => void;
   user: any;
   searchTerm: string;
   onSearchChange: (value: string) => void;
@@ -49,7 +48,7 @@ const NeighborhoodSelectorModal: React.FC = () => {
 };
 
 export const Header: React.FC<HeaderProps> = ({
-  onAuthClick, 
+  onNotificationClick, 
   user,
   searchTerm,
   onSearchChange,
@@ -63,8 +62,20 @@ export const Header: React.FC<HeaderProps> = ({
 }) => {
   const { currentNeighborhood, setNeighborhood, toggleSelector } = useNeighborhood();
   const [isListening, setIsListening] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
   
   const showNeighborhoodFilter = ['home', 'explore', 'services', 'community_feed'].includes(activeTab);
+
+  useEffect(() => {
+    // Simulação de check de notificações não lidas
+    const saved = localStorage.getItem('app_notifications');
+    if (saved) {
+      const notifs = JSON.parse(saved);
+      setUnreadCount(notifs.filter((n: any) => !n.read).length);
+    } else {
+      setUnreadCount(2); // Valor mock inicial
+    }
+  }, [activeTab]);
 
   const normalize = (text: any) => (String(text || "")).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
 
@@ -85,41 +96,17 @@ export const Header: React.FC<HeaderProps> = ({
 
   const handleVoiceSearch = () => {
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-    
-    if (!SpeechRecognition) {
-      alert("Seu navegador não suporta busca por voz.");
-      return;
-    }
+    if (!SpeechRecognition) return alert("Seu navegador não suporta busca por voz.");
 
     const recognition = new SpeechRecognition();
     recognition.lang = 'pt-BR';
-    recognition.interimResults = false;
-    recognition.maxAlternatives = 1;
-
-    recognition.onstart = () => {
-      setIsListening(true);
-    };
-
+    recognition.onstart = () => setIsListening(true);
     recognition.onresult = (event: any) => {
-      const transcript = event.results[0][0].transcript;
-      onSearchChange(transcript);
+      onSearchChange(event.results[0][0].transcript);
       setIsListening(false);
     };
-
-    recognition.onerror = (event: any) => {
-      console.error('Speech recognition error', event.error);
-      setIsListening(false);
-      if (event.error === 'not-allowed') {
-        alert("Permissão de microfone negada.");
-      } else {
-        alert("Erro na captura de voz. Tente novamente.");
-      }
-    };
-
-    recognition.onend = () => {
-      setIsListening(false);
-    };
-
+    recognition.onerror = () => setIsListening(false);
+    recognition.onend = () => setIsListening(false);
     recognition.start();
   };
 
@@ -147,11 +134,18 @@ export const Header: React.FC<HeaderProps> = ({
                             <span className="text-[10px] font-bold text-amber-900 dark:text-amber-200 uppercase">{viewMode}</span>
                         </button>
                     )}
-                    <button onClick={onAuthClick} className="flex items-center gap-2 bg-gray-50 dark:bg-gray-800 p-1 pl-3 rounded-full border border-gray-100 dark:border-gray-700 shadow-inner">
-                        <span className="text-[10px] font-bold text-gray-600 dark:text-gray-300">{user ? 'Perfil' : 'Entrar'}</span>
-                        <div className="w-7 h-7 rounded-full bg-white dark:bg-gray-700 flex items-center justify-center text-[#1E5BFF] overflow-hidden relative shadow-sm">
-                            {user?.user_metadata?.avatar_url ? <img src={user.user_metadata.avatar_url} className="w-full h-full object-cover" /> : <UserIcon className="w-4 h-4" />}
-                        </div>
+                    
+                    {/* NOTIFICAÇÕES - SUBSTITUIU O PERFIL */}
+                    <button 
+                        onClick={onNotificationClick}
+                        className="relative p-2.5 bg-gray-50 dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-inner text-gray-500 dark:text-gray-400 hover:text-[#1E5BFF] transition-all active:scale-95"
+                    >
+                        <Bell size={20} />
+                        {unreadCount > 0 && (
+                            <span className="absolute top-1.5 right-1.5 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center border-2 border-white dark:border-gray-900 shadow-sm animate-in zoom-in duration-300">
+                                <span className="text-[8px] font-black text-white">{unreadCount}</span>
+                            </span>
+                        )}
                     </button>
                 </div>
             </div>
@@ -169,9 +163,8 @@ export const Header: React.FC<HeaderProps> = ({
                       <button 
                         onClick={handleVoiceSearch}
                         className={`absolute right-3 top-1/2 -translate-y-1/2 p-1.5 rounded-full transition-all ${isListening ? 'bg-red-100 text-red-600 animate-pulse' : 'text-gray-400 hover:text-[#1E5BFF] hover:bg-gray-200 dark:hover:bg-gray-700'}`}
-                        title="Busca por voz"
                       >
-                        {isListening ? <Mic size={18} /> : <Mic size={18} />}
+                        <Mic size={18} />
                       </button>
                     )}
                     {searchTerm.trim().length > 0 && (activeTab === 'home' || activeTab === 'explore') && (
