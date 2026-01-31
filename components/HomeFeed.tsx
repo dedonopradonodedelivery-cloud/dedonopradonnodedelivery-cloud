@@ -35,15 +35,6 @@ import { useNeighborhood } from '@/contexts/NeighborhoodContext';
 import { LaunchOfferBanner } from './LaunchOfferBanner';
 import { HomeBannerCarousel } from './HomeBannerCarousel';
 
-interface HomeFeedFeedProps {
-  onNavigate: (view: string) => void;
-  onSelectCategory: (category: Category) => void;
-  onStoreClick: (store: Store) => void;
-  stores: Store[];
-  user: User | null;
-  userRole: 'cliente' | 'lojista' | null;
-}
-
 const MiniPostCard: React.FC<{ post: CommunityPost; onNavigate: (view: string) => void; }> = ({ post, onNavigate }) => {
   const postImage = post.imageUrls?.[0] || 'https://images.unsplash.com/photo-1549488344-cbb6c34cf08b?q=80&w=400&auto=format&fit=crop';
   
@@ -91,6 +82,16 @@ const MiniPostCard: React.FC<{ post: CommunityPost; onNavigate: (view: string) =
   );
 };
 
+// FIX: Added missing HomeFeedFeedProps interface to fix compilation error.
+interface HomeFeedFeedProps {
+  onNavigate: (view: string) => void;
+  onSelectCategory: (category: Category) => void;
+  onStoreClick: (store: Store) => void;
+  stores: Store[];
+  user: User | null;
+  userRole: 'cliente' | 'lojista' | null;
+}
+
 export const HomeFeed: React.FC<HomeFeedFeedProps> = ({ 
   onNavigate, 
   onSelectCategory, 
@@ -115,6 +116,12 @@ export const HomeFeed: React.FC<HomeFeedFeedProps> = ({
   });
 
   const handleClaimReward = () => {
+    if (!user) {
+        // Se não logado, abre modal de login (via App/Header)
+        onNavigate('profile'); 
+        return;
+    }
+
     setIsAnimating(true);
     setTimeout(() => {
       setIsAnimating(false);
@@ -207,28 +214,8 @@ export const HomeFeed: React.FC<HomeFeedFeedProps> = ({
 
       <HomeBannerCarousel onStoreClick={onStoreClick} />
 
-      {/* 2. ONDE O BAIRRO CONVERSA */}
-      <section className="bg-white dark:bg-gray-950 pt-6 pb-4">
-        <div className="px-5">
-            {/* Header */}
-            <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-bold text-gray-800 dark:text-white">Onde o bairro conversa</h2>
-                <div className="flex items-center gap-2">
-                  <button onClick={() => onNavigate('neighborhood_posts')} className="text-xs font-bold text-blue-500">Ver tudo</button>
-                  <button onClick={() => onNavigate('neighborhood_posts')} className="p-1.5 bg-gray-100 dark:bg-gray-800 rounded-full text-gray-500"><Plus size={14} /></button>
-                </div>
-            </div>
-        </div>
-        {/* Posts */}
-        <div className="flex overflow-x-auto no-scrollbar snap-x -mx-3.5 px-3.5">
-            {MOCK_COMMUNITY_POSTS.slice(0, 5).map((post) => (
-                <MiniPostCard key={post.id} post={post} onNavigate={onNavigate} />
-            ))}
-        </div>
-      </section>
-      
-      {/* 1. CUPOM DA SEMANA (MOVED) */}
-      <section className="bg-white dark:bg-gray-950 px-5 pt-8 mb-2">
+      {/* 1. CUPOM DA SEMANA - AGORA ACIMA DE ONDE O BAIRRO CONVERSA */}
+      <section className="bg-white dark:bg-gray-950 px-5 pt-4 mb-2">
         <div className="bg-white dark:bg-gray-900 rounded-[1.75rem] border border-gray-200/80 dark:border-gray-800 shadow-xl shadow-blue-900/5 relative group">
           {/* Ticket Cutouts */}
           <div className="absolute top-1/2 -translate-y-1/2 -left-4 w-8 h-8 rounded-full bg-white dark:bg-gray-950"></div>
@@ -243,31 +230,36 @@ export const HomeFeed: React.FC<HomeFeedFeedProps> = ({
                 </div>
                 <div>
                   <h3 className="font-black text-sm text-[#1E5BFF]">Cupom da Semana 🎟️</h3>
-                  <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest leading-none">Desbloqueie e use no bairro</p>
+                  <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest leading-none">Resgate agora e use no bairro</p>
                 </div>
               </div>
             </div>
             {/* Progress bar */}
             <div className="flex justify-between items-center my-5 px-1">
               {[1, 2, 3, 4, 5].map((day) => {
-                  const isCompleted = day <= consecutiveDays;
+                  const isCompleted = day <= (consecutiveDays - 1);
+                  const isCurrent = day === consecutiveDays;
                   return (
                     <div key={day} className="flex flex-col items-center gap-1.5">
                       <div className={`w-9 h-9 rounded-full flex items-center justify-center border-2 transition-all duration-500 relative shadow-inner ${
                         isCompleted 
                           ? 'bg-blue-500 border-blue-500/50 text-white shadow-md shadow-blue-500/10' 
-                          : 'bg-gray-100 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-300 dark:text-gray-600'
+                          : isCurrent 
+                            ? 'bg-white dark:bg-gray-800 border-blue-500 text-blue-500'
+                            : 'bg-gray-100 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-300 dark:text-gray-600'
                       }`}>
                         {isCompleted ? (
                           <CheckCircle2 size={16} strokeWidth={3.5} />
+                        ) : isCurrent ? (
+                           <Zap size={14} fill="currentColor" />
                         ) : (
                           <Lock size={14} />
                         )}
-                        {day === consecutiveDays && !isAnimating && (
+                        {isCurrent && !isAnimating && (
                           <div className="absolute inset-[-2px] rounded-full bg-blue-400/20 animate-ping"></div>
                         )}
                       </div>
-                      <span className={`text-[9px] font-black uppercase tracking-widest ${isCompleted ? 'text-blue-600 dark:text-blue-400' : 'text-gray-400 dark:text-gray-500'}`}>
+                      <span className={`text-[9px] font-black uppercase tracking-widest ${isCompleted || isCurrent ? 'text-blue-600 dark:text-blue-400' : 'text-gray-400 dark:text-gray-500'}`}>
                           Dia {day}
                       </span>
                     </div>
@@ -286,32 +278,56 @@ export const HomeFeed: React.FC<HomeFeedFeedProps> = ({
           {/* Bottom part of ticket */}
           <div className="p-4 pt-5">
             <h2 className="text-xs font-bold text-gray-800 dark:text-gray-200 leading-tight text-center mb-4">
-              {consecutiveDays < 5 
-                ? "Desbloqueie todos os dias e libere seu cupom exclusivo!" 
-                : "Parabéns! Sua recompensa da semana está pronta."}
+              {!user 
+                ? "Faça login para desbloquear recompensas diárias!" 
+                : consecutiveDays <= 5
+                  ? "Retire um novo cupom hoje para completar sua sequência!" 
+                  : "Parabéns! Você completou sua sequência semanal."}
             </h2>
             <button 
                 onClick={handleClaimReward}
-                disabled={isAnimating}
+                disabled={isAnimating || (user && consecutiveDays > 5)}
                 className={`w-full py-3 rounded-xl font-black text-[9px] uppercase tracking-[0.15em] transition-all flex items-center justify-center gap-2 shadow-lg active:scale-[0.98]
                   ${isAnimating 
                     ? 'bg-gray-100 text-gray-400' 
-                    : consecutiveDays < 5
-                      ? 'bg-[#1E5BFF] text-white shadow-blue-500/20 hover:brightness-110'
-                      : 'bg-emerald-500 text-white shadow-emerald-500/20 hover:brightness-110 animate-bounce'
+                    : !user
+                      ? 'bg-blue-600 text-white shadow-blue-500/20'
+                      : consecutiveDays <= 5
+                        ? 'bg-[#1E5BFF] text-white shadow-blue-500/20 hover:brightness-110'
+                        : 'bg-emerald-500 text-white shadow-emerald-500/20 opacity-50'
                   }
                 `}
               >
                 {isAnimating ? (
-                  <><Loader2 size={12} className="animate-spin" /> Liberando...</>
+                  <><Loader2 size={12} className="animate-spin" /> Processando...</>
                 ) : (
                   <>
-                    {consecutiveDays < 5 ? `Desbloquear Dia ${consecutiveDays}` : "Resgatar Cupom"}
+                    {!user ? "Entrar para começar" : consecutiveDays <= 5 ? `Desbloquear Dia ${consecutiveDays}` : "Sequência Completa"}
                     <ArrowRight size={12} strokeWidth={3} />
                   </>
                 )}
             </button>
           </div>
+        </div>
+      </section>
+
+      {/* 2. ONDE O BAIRRO CONVERSA */}
+      <section className="bg-white dark:bg-gray-950 pt-6 pb-4">
+        <div className="px-5">
+            {/* Header */}
+            <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-bold text-gray-800 dark:text-white">Onde o bairro conversa</h2>
+                <div className="flex items-center gap-2">
+                  <button onClick={() => onNavigate('neighborhood_posts')} className="text-xs font-bold text-blue-500">Ver tudo</button>
+                  <button onClick={() => onNavigate('neighborhood_posts')} className="p-1.5 bg-gray-100 dark:bg-gray-800 rounded-full text-gray-500"><Plus size={14} /></button>
+                </div>
+            </div>
+        </div>
+        {/* Posts */}
+        <div className="flex overflow-x-auto no-scrollbar snap-x -mx-3.5 px-3.5">
+            {MOCK_COMMUNITY_POSTS.slice(0, 5).map((post) => (
+                <MiniPostCard key={post.id} post={post} onNavigate={onNavigate} />
+            ))}
         </div>
       </section>
       
@@ -337,7 +353,7 @@ export const HomeFeed: React.FC<HomeFeedFeedProps> = ({
 
           <button 
             onClick={() => setWizardStep(1)}
-            className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold py-4 rounded-2xl shadow-lg shadow-blue-500/30 active:scale-[0.98] transition-all"
+            className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold py-4 rounded-2xl shadow-lg shadow-blue-500/20 active:scale-[0.98] transition-all"
           >
             Solicitar orçamento
           </button>
@@ -365,7 +381,7 @@ export const HomeFeed: React.FC<HomeFeedFeedProps> = ({
               <h3 className="font-bold text-gray-800 dark:text-white mb-6">Como vai a urgência?</h3>
               <div className="flex flex-wrap justify-center gap-3">
                  {[{l: 'Para hoje', i: <Zap/>}, {l: 'Amanhã', i: <Calendar/>}, {l: 'Até 3 dias', i: <Clock/>}, {l: 'Não tenho pressa', i: <Coffee/>}].map(u => (
-                  <button key={u.l} onClick={() => { setSelectedUrgency(u.l); setWizardStep(3); }} className="px-5 py-3 bg-white dark:bg-slate-800 rounded-full shadow-sm border border-gray-100 dark:border-slate-700 flex items-center gap-2 active:scale-95 transition-all">
+                  <button key={u.l} onClick={() => { setSelectedUrgency(u.l); setWizardStep(3); }} className="px-5 py-3 bg-white dark:bg-slate-800 rounded-full shadow-sm border border-gray-100 dark:border-slate-700 flex items-center justify-between gap-2 active:scale-95 transition-all">
                     <div className="text-blue-500">{u.i}</div>
                     <p className="text-sm font-bold text-gray-700 dark:text-slate-200">{u.l}</p>
                   </button>

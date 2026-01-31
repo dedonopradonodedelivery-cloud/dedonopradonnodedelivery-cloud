@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useMemo } from 'react';
 import { ChevronLeft, Star, BadgeCheck, ChevronRight, AlertCircle, Grid, Megaphone, Sparkles, Rocket, Crown, ShieldCheck, MapPin, Tag, Gift, Zap, Flame, Percent, Utensils, Pizza, Coffee, Beef, IceCream, ShoppingCart, Store as StoreIcon, Package, Wrench, Truck, CreditCard, Coins, Award, Smile, Bell, Clock, Heart } from 'lucide-react';
 import { Category, Store, AdType } from '@/types';
@@ -90,7 +89,7 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
   const masterSponsor = useMemo(() => stores.find(s => s.id === 'grupo-esquematiza'), [stores]);
 
   const handleSubcategoryClick = (subName: string) => {
-    setSelectedSubcategory(prev => prev === subName ? null : subName);
+    onSubcategoryClick(subName);
   };
 
   const handleMerchantStoreClick = (merchantId: string) => {

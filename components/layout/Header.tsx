@@ -1,5 +1,6 @@
-import React, { useMemo } from 'react';
-import { Search, User as UserIcon, MapPin, ChevronDown, Check, ChevronRight, SearchX, ShieldCheck, Tag } from 'lucide-react';
+
+import React, { useMemo, useState } from 'react';
+import { Search, User as UserIcon, MapPin, ChevronDown, Check, ChevronRight, SearchX, ShieldCheck, Tag, Mic, MicOff, Loader2 } from 'lucide-react';
 import { useNeighborhood, NEIGHBORHOODS } from '../../contexts/NeighborhoodContext';
 import { Store, Category } from '../../types';
 import { CATEGORIES } from '../../constants';
@@ -61,6 +62,8 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenViewSwitcher
 }) => {
   const { currentNeighborhood, setNeighborhood, toggleSelector } = useNeighborhood();
+  const [isListening, setIsListening] = useState(false);
+  
   const showNeighborhoodFilter = ['home', 'explore', 'services', 'community_feed'].includes(activeTab);
 
   const normalize = (text: any) => (String(text || "")).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
@@ -79,6 +82,48 @@ export const Header: React.FC<HeaderProps> = ({
     }
     return `O que você busca em ${currentNeighborhood}?`;
   }, [currentNeighborhood]);
+
+  const handleVoiceSearch = () => {
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    
+    if (!SpeechRecognition) {
+      alert("Seu navegador não suporta busca por voz.");
+      return;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'pt-BR';
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+
+    recognition.onstart = () => {
+      setIsListening(true);
+    };
+
+    recognition.onresult = (event: any) => {
+      const transcript = event.results[0][0].transcript;
+      onSearchChange(transcript);
+      setIsListening(false);
+    };
+
+    recognition.onerror = (event: any) => {
+      console.error('Speech recognition error', event.error);
+      setIsListening(false);
+      if (event.error === 'not-allowed') {
+        alert("Permissão de microfone negada.");
+      } else {
+        alert("Erro na captura de voz. Tente novamente.");
+      }
+    };
+
+    recognition.onend = () => {
+      setIsListening(false);
+    };
+
+    recognition.start();
+  };
+
+  const isVoiceSupported = typeof window !== 'undefined' && ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window);
 
   return (
     <>
@@ -118,8 +163,17 @@ export const Header: React.FC<HeaderProps> = ({
                       value={searchTerm} 
                       onChange={(e) => onSearchChange(e.target.value)} 
                       placeholder={dynamicPlaceholder} 
-                      className="block w-full pl-10 pr-4 bg-gray-100 dark:bg-gray-800 border-none rounded-2xl text-sm font-medium text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#1E5BFF]/50 py-3 shadow-inner" 
+                      className="block w-full pl-10 pr-10 bg-gray-100 dark:bg-gray-800 border-none rounded-2xl text-sm font-medium text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#1E5BFF]/50 py-3 shadow-inner" 
                     />
+                    {isVoiceSupported && (
+                      <button 
+                        onClick={handleVoiceSearch}
+                        className={`absolute right-3 top-1/2 -translate-y-1/2 p-1.5 rounded-full transition-all ${isListening ? 'bg-red-100 text-red-600 animate-pulse' : 'text-gray-400 hover:text-[#1E5BFF] hover:bg-gray-200 dark:hover:bg-gray-700'}`}
+                        title="Busca por voz"
+                      >
+                        {isListening ? <Mic size={18} /> : <Mic size={18} />}
+                      </button>
+                    )}
                     {searchTerm.trim().length > 0 && (activeTab === 'home' || activeTab === 'explore') && (
                         <div className="absolute top-[calc(100%+8px)] left-0 right-0 bg-white dark:bg-gray-900 rounded-[24px] shadow-2xl border border-gray-100 dark:border-gray-800 z-[100] overflow-hidden animate-in fade-in slide-in-from-top-2">
                             <div className="p-2 max-h-[60vh] overflow-y-auto no-scrollbar">

@@ -1,131 +1,139 @@
 
 import React, { useState, useMemo } from 'react';
-// FIX: Added Clock to fix "Cannot find name 'Clock'" error on line 112
-import { ChevronLeft, Ticket, Calendar, MapPin, Tag, Info, AlertTriangle, X, Search, ChevronRight, Clock } from 'lucide-react';
-import { User } from '@supabase/supabase-js';
+// FIX: Added missing ArrowRight import from lucide-react.
+import { ChevronLeft, Ticket, Calendar, Tag, Info, AlertTriangle, X, Search, ChevronRight, Clock, CheckCircle2, Copy, ArrowRight } from 'lucide-react';
 
 interface UserCupomScreenProps {
-  user: User | null;
   onBack: () => void;
-  onHistory: () => void;
 }
 
-export const UserCupomScreen: React.FC<UserCupomScreenProps> = ({ user, onBack, onHistory }) => {
+export const UserCupomScreen: React.FC<UserCupomScreenProps> = ({ onBack }) => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [filter, setFilter] = useState<'all' | 'soon'>('all');
+  const [copiedId, setCopiedId] = useState<string | null>(null);
 
   const savedCoupons = useMemo(() => {
     const coupons = JSON.parse(localStorage.getItem('user_saved_coupons') || '[]');
-    return coupons.filter((c: any) => c.status === 'available');
+    const now = new Date().getTime();
+
+    return coupons.map((c: any) => {
+        const isExpired = new Date(c.expiresAt).getTime() < now && c.status === 'available';
+        return {
+            ...c,
+            status: isExpired ? 'expired' : c.status
+        };
+    }).sort((a: any, b: any) => new Date(b.redeemedAt).getTime() - new Date(a.redeemedAt).getTime());
   }, []);
 
   const filteredCoupons = useMemo(() => {
-    let list = [...savedCoupons];
-    if (searchTerm) {
-        list = list.filter(c => c.storeName.toLowerCase().includes(searchTerm.toLowerCase()));
+    if (!searchTerm) return savedCoupons;
+    return savedCoupons.filter((c: any) => c.storeName.toLowerCase().includes(searchTerm.toLowerCase()));
+  }, [savedCoupons, searchTerm]);
+
+  const handleCopyCode = (id: string, code: string) => {
+    navigator.clipboard.writeText(code);
+    setCopiedId(id);
+    setTimeout(() => setCopiedId(null), 2000);
+  };
+
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+        case 'available': return <span className="px-2 py-0.5 rounded-lg bg-green-100 text-green-700 text-[9px] font-black uppercase tracking-widest border border-green-200">Ativo</span>;
+        case 'used': return <span className="px-2 py-0.5 rounded-lg bg-gray-100 text-gray-500 text-[9px] font-black uppercase tracking-widest border border-gray-200">Usado</span>;
+        case 'expired': return <span className="px-2 py-0.5 rounded-lg bg-red-50 text-red-400 text-[9px] font-black uppercase tracking-widest border border-red-100">Expirado</span>;
+        default: return null;
     }
-    if (filter === 'soon') {
-        // Ordena por validade
-        list.sort((a, b) => new Date(a.expiresAt).getTime() - new Date(b.expiresAt).getTime());
-    }
-    return list;
-  }, [savedCoupons, searchTerm, filter]);
+  };
 
   return (
-    <div className="min-h-screen bg-[#F8F9FC] dark:bg-gray-950 font-sans flex flex-col pb-24 animate-in slide-in-from-right duration-300">
+    <div className="min-h-screen bg-[#F8F9FC] dark:bg-gray-950 font-sans flex flex-col pb-32 animate-in slide-in-from-right duration-300">
       {/* Header */}
-      <header className="sticky top-0 z-40 bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800 px-5 pt-8 pb-5 flex items-center justify-between shrink-0">
+      <header className="sticky top-0 z-40 bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800 px-5 pt-8 pb-5 flex items-center justify-between shrink-0 shadow-sm">
         <div className="flex items-center gap-4">
           <button onClick={onBack} className="p-2 -ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
             <ChevronLeft className="w-6 h-6 text-gray-800 dark:text-white" />
           </button>
           <div>
-            <h1 className="text-xl font-black text-gray-900 dark:text-white uppercase tracking-tighter">Meus Cupons</h1>
-            <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">{savedCoupons.length} disponíveis</p>
+            <h1 className="text-xl font-black text-gray-900 dark:text-white uppercase tracking-tighter leading-none">Meus Cupons</h1>
+            <p className="text-[10px] text-blue-500 font-bold uppercase tracking-widest mt-1">Histórico de Benefícios</p>
           </div>
         </div>
       </header>
 
       <main className="flex-1 overflow-y-auto no-scrollbar p-5 space-y-6">
         
-        {/* Barra de Busca e Filtro */}
-        <div className="space-y-4">
-            <div className="relative">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
-                <input 
-                    type="text" 
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    placeholder="Buscar loja..."
-                    className="w-full bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 py-3.5 pl-11 pr-4 rounded-2xl text-sm font-medium outline-none focus:border-[#1E5BFF] transition-all"
-                />
-            </div>
-            <div className="flex gap-2">
-                <button 
-                    onClick={() => setFilter('all')}
-                    className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border transition-all ${filter === 'all' ? 'bg-[#1E5BFF] text-white border-[#1E5BFF] shadow-lg shadow-blue-500/10' : 'bg-white dark:bg-gray-800 border-gray-100 text-gray-400'}`}
-                >
-                    Todos
-                </button>
-                <button 
-                    onClick={() => setFilter('soon')}
-                    className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border transition-all ${filter === 'soon' ? 'bg-[#1E5BFF] text-white border-[#1E5BFF] shadow-lg shadow-blue-500/10' : 'bg-white dark:bg-gray-800 border-gray-100 text-gray-400'}`}
-                >
-                    Vencendo em breve
-                </button>
-            </div>
+        <div className="relative">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
+            <input 
+                type="text" 
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Buscar por loja..."
+                className="w-full bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 py-4 pl-11 pr-4 rounded-2xl text-sm font-medium outline-none focus:border-blue-500 transition-all shadow-sm dark:text-white"
+            />
         </div>
 
-        {/* Notificação de Regra de Uso */}
-        <div className="bg-amber-50 dark:bg-amber-900/10 p-5 rounded-3xl border border-amber-100 dark:border-amber-800/30 flex gap-4">
-            <AlertTriangle className="w-6 h-6 text-amber-500 shrink-0" />
-            <div>
-                <h4 className="font-bold text-amber-700 dark:text-amber-300 text-sm">Regra importante</h4>
-                <p className="text-xs text-amber-600/80 dark:text-amber-400 leading-relaxed mt-1">
-                    Você pode usar **apenas 1 cupom por vez**. Este benefício não pode ser combinado com outros.
-                </p>
-            </div>
-        </div>
-
-        {/* Lista de Cupons Salvos */}
+        {/* Lista de Cupons */}
         <div className="space-y-4">
             {filteredCoupons.length > 0 ? filteredCoupons.map((coupon: any) => (
                 <div 
                     key={coupon.id}
-                    className="bg-white dark:bg-gray-800 rounded-[2rem] border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden"
+                    className={`bg-white dark:bg-gray-800 rounded-[2rem] border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden transition-all ${coupon.status !== 'available' ? 'opacity-60 grayscale' : ''}`}
                 >
-                    <div className="p-6 flex items-center justify-between gap-4">
-                        <div className="flex-1 min-w-0">
-                            <h3 className="font-bold text-gray-900 dark:text-white text-base truncate">{coupon.storeName}</h3>
-                            <div className="flex items-center gap-1.5 mt-1 text-[10px] font-bold text-gray-400 uppercase tracking-widest">
-                                <Tag size={12} /> {coupon.category}
+                    <div className="p-6">
+                        <div className="flex justify-between items-start mb-4">
+                            <div className="flex-1 min-w-0">
+                                <h3 className="font-bold text-gray-900 dark:text-white text-base truncate">{coupon.storeName}</h3>
+                                <div className="flex items-center gap-2 mt-1">
+                                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{coupon.neighborhood}</span>
+                                    <span className="w-1 h-1 bg-gray-300 rounded-full"></span>
+                                    <span className="text-[10px] font-bold text-blue-500 uppercase tracking-widest">{coupon.category}</span>
+                                </div>
                             </div>
+                            {getStatusBadge(coupon.status)}
                         </div>
-                        <div className="text-right shrink-0">
-                            <div className="bg-blue-50 dark:bg-blue-900/20 text-[#1E5BFF] px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest border border-blue-100">
-                                Benefício Salvo
+
+                        <div className="bg-gray-50 dark:bg-gray-900/50 p-4 rounded-2xl border border-gray-100 dark:border-gray-800 flex items-center justify-between mb-4">
+                            <div>
+                                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Código do Cupom</p>
+                                <p className="text-lg font-black text-gray-900 dark:text-white font-mono tracking-widest">{coupon.id}</p>
                             </div>
+                            <button 
+                                onClick={() => handleCopyCode(coupon.id, coupon.id)}
+                                className={`p-3 rounded-xl transition-all ${copiedId === coupon.id ? 'bg-emerald-500 text-white' : 'bg-white dark:bg-gray-800 text-blue-600 border border-gray-100 dark:border-gray-700 shadow-sm active:scale-95'}`}
+                            >
+                                {copiedId === coupon.id ? <CheckCircle2 size={20} /> : <Copy size={20} />}
+                            </button>
                         </div>
-                    </div>
-                    
-                    <div className="px-6 py-4 bg-gray-50 dark:bg-gray-900/50 border-t border-gray-100 dark:border-gray-700 flex items-center justify-between">
-                        <div className="flex items-center gap-1.5 text-rose-500 font-bold text-[10px] uppercase">
-                            <Clock size={12} />
-                            Expira em: {new Date(coupon.expiresAt).toLocaleDateString()}
+
+                        <div className="flex items-center justify-between pt-2">
+                             <div className="flex items-center gap-1.5 text-[10px] font-bold text-gray-400">
+                                <Clock size={12} />
+                                <span>Válido até {new Date(coupon.expiresAt).toLocaleDateString()}</span>
+                             </div>
+                             {coupon.status === 'available' && (
+                                <button className="text-[10px] font-black text-blue-600 uppercase tracking-widest flex items-center gap-1 hover:underline">
+                                    Usar Agora <ArrowRight size={12} strokeWidth={3} />
+                                </button>
+                             )}
                         </div>
-                        <button className="text-[10px] font-black text-[#1E5BFF] uppercase tracking-widest flex items-center gap-1 hover:underline">
-                            Usar cupom <ChevronRight size={12} />
-                        </button>
                     </div>
                 </div>
             )) : (
-                <div className="py-20 flex flex-col items-center justify-center text-center opacity-30">
+                <div className="py-24 flex flex-col items-center justify-center text-center opacity-30">
                     <Ticket size={48} className="text-gray-400 mb-4" />
-                    <p className="text-sm font-bold uppercase tracking-widest leading-relaxed">Você não tem cupons<br/>disponíveis no momento.</p>
+                    <p className="text-sm font-bold uppercase tracking-widest leading-relaxed">Sua carteira de cupons<br/>está vazia.</p>
                 </div>
             )}
         </div>
 
+        <div className="bg-blue-50 dark:bg-blue-900/10 p-6 rounded-[2.5rem] border border-blue-100 dark:border-blue-800/30">
+            <h4 className="font-bold text-blue-900 dark:text-blue-200 text-sm mb-2 flex items-center gap-2">
+                <Info size={16} /> Como usar seu cupom?
+            </h4>
+            <p className="text-xs text-blue-700 dark:text-blue-300 leading-relaxed font-medium">
+                Apresente o código acima no caixa do estabelecimento no momento do pagamento para garantir o seu benefício exclusivo Localizei JPA.
+            </p>
+        </div>
       </main>
     </div>
   );
