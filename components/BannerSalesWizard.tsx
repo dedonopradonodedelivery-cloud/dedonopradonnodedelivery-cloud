@@ -11,7 +11,7 @@ import { StoreBannerEditor } from './StoreBannerEditor';
 interface BannerSalesWizardProps {
   user: User | null;
   onBack: () => void;
-  onNavigate: (view: string, initialView?: string) => void;
+  onNavigate: (view: string, data?: any) => void;
 }
 
 type PlacementMode = 'HOME' | 'CAT' | 'COMBO';
@@ -67,7 +67,58 @@ export const BannerSalesWizard: React.FC<BannerSalesWizardProps> = ({ user, onBa
     };
   }, [placement, selectedHoods, artType]);
 
-  // Handlers - Definidos antes dos retornos antecipados para evitar erro TS2367
+  // ============================================================
+  // LÓGICA DE CONFIRMAÇÃO E REDIRECIONAMENTO CRÍTICO
+  // ============================================================
+  const handleConfirmPayment = () => {
+    setIsProcessing(true);
+    
+    setTimeout(() => {
+      setIsProcessing(false);
+      setView('success');
+      
+      // REGRA: Se for Time Localizei (PRO), automatizar chat
+      if (artType === 'PRO') {
+        const orderId = `DSG-${Math.floor(1000 + Math.random() * 9000)}`;
+        
+        // Mensagens solicitadas
+        const msg1 = "✅ Pagamento confirmado! Parabéns por escolher o Time Localizei. Nosso time de designers já foi acionado. Vamos seguir por aqui 😊";
+        const msg2 = "Para começarmos, envie por aqui:\n1) Título do banner\n2) Descrição curta (1–2 linhas)\n3) Logo em alta definição (PNG preferencial; CDR/AI/PDF também serve)\n4) Referências ou exemplos, se tiver";
+
+        const autoMessages = [
+          {
+            id: `sys-${Date.now()}-1`,
+            requestId: orderId,
+            senderId: 'system',
+            senderName: 'Time Localizei',
+            senderRole: 'merchant',
+            text: msg1,
+            timestamp: new Date().toISOString()
+          },
+          {
+            id: `sys-${Date.now()}-2`,
+            requestId: orderId,
+            senderId: 'system',
+            senderName: 'Time Localizei',
+            senderRole: 'merchant',
+            text: msg2,
+            timestamp: new Date().toISOString()
+          }
+        ];
+
+        // Salvando no storage simulado
+        localStorage.setItem(`msgs_${orderId}`, JSON.stringify(autoMessages));
+        // Flag para o ServiceChatView não enviar as mensagens padrão de serviço
+        localStorage.setItem(`auto_msg_sent_${orderId}`, 'true');
+
+        // REDIRECIONAMENTO AUTOMÁTICO APÓS 2 SEGUNDOS (OBRIGATÓRIO)
+        setTimeout(() => {
+          onNavigate('service_chat', { requestId: orderId });
+        }, 2000);
+      }
+    }, 2000);
+  };
+
   const handleHeaderBack = () => {
     if (view === 'payment') {
       setView('steps');
@@ -85,20 +136,6 @@ export const BannerSalesWizard: React.FC<BannerSalesWizardProps> = ({ user, onBa
     
     setView('payment');
     window.scrollTo(0, 0);
-  };
-
-  const handleConfirmPayment = () => {
-    setIsProcessing(true);
-    setTimeout(() => {
-      setIsProcessing(false);
-      setView('success');
-      
-      if (artType === 'PRO') {
-        setTimeout(() => {
-          onNavigate('store_ads_module', 'chat');
-        }, 2000);
-      }
-    }, 2000);
   };
 
   const toggleHood = (hood: string) => {
@@ -129,7 +166,6 @@ export const BannerSalesWizard: React.FC<BannerSalesWizardProps> = ({ user, onBa
     setIsEditorOpen(false);
   };
 
-  // Retornos de visualização (Early Returns)
   if (isEditorOpen) {
     return (
       <StoreBannerEditor 
@@ -149,7 +185,9 @@ export const BannerSalesWizard: React.FC<BannerSalesWizardProps> = ({ user, onBa
         </div>
         <h2 className="text-3xl font-black text-slate-900 dark:text-white uppercase tracking-tighter mb-4">Pagamento aprovado!</h2>
         <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed mb-12">
-          Seu destaque foi ativado. Em instantes você verá sua marca nos espaços selecionados.
+          {artType === 'PRO' 
+            ? 'Seu pedido de design foi recebido. Em instantes você será levado ao chat com nosso time.'
+            : 'Seu destaque foi ativado. Em instantes você verá sua marca nos espaços selecionados.'}
         </p>
         
         {artType === 'PRO' && (
