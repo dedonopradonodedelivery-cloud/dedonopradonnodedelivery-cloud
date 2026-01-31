@@ -115,8 +115,8 @@ export const HomeFeed: React.FC<HomeFeedFeedProps> = ({
   });
 
   const handleClaimReward = () => {
+    // BLOQUEIO OBRIGATÓRIO: Se não logado, interrompe e manda para login
     if (!user) {
-        // Se não logado, abre modal de login (via App/Header)
         onNavigate('profile'); 
         return;
     }

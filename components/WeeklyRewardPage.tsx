@@ -1,7 +1,8 @@
-import React, { useState, useMemo } from 'react';
-import { ChevronLeft, Gift, ArrowRight, CheckCircle2, Tag, Info, Star, MapPin } from 'lucide-react';
+import React, { useState, useMemo, useEffect } from 'react';
+import { ChevronLeft, Gift, ArrowRight, CheckCircle2, Tag, Info, Star, MapPin, Loader2, Lock } from 'lucide-react';
 import { STORES } from '../constants';
 import { Store } from '../types';
+import { useAuth } from '../contexts/AuthContext';
 
 interface WeeklyRewardPageProps {
   onBack: () => void;
@@ -9,15 +10,23 @@ interface WeeklyRewardPageProps {
 }
 
 export const WeeklyRewardPage: React.FC<WeeklyRewardPageProps> = ({ onBack, onNavigate }) => {
+  const { user, loading: authLoading } = useAuth();
   const [savedLojista, setSavedLojista] = useState<string | null>(null);
   
+  // Guard de Autenticação: Se não estiver logado e terminou de carregar o auth, volta para home
+  useEffect(() => {
+    if (!authLoading && !user) {
+      onBack();
+    }
+  }, [user, authLoading, onBack]);
+
   const consecutiveDays = parseInt(localStorage.getItem('reward_consecutive_days') || '1');
 
   // Lojas participantes mockadas da base real
   const participatingStores = useMemo(() => STORES.slice(0, 8), []);
 
   const handleSaveBenefit = (store: Store) => {
-    if (savedLojista) return;
+    if (savedLojista || !user) return;
 
     setSavedLojista(store.id);
     
@@ -46,6 +55,30 @@ export const WeeklyRewardPage: React.FC<WeeklyRewardPageProps> = ({ onBack, onNa
       onNavigate('user_coupons');
     }, 1500);
   };
+
+  // Enquanto carrega a sessão, mostra um loader clean
+  if (authLoading) {
+    return (
+        <div className="min-h-screen bg-white dark:bg-gray-950 flex flex-col items-center justify-center p-6">
+            <Loader2 className="w-10 h-10 text-blue-600 animate-spin mb-4" />
+            <p className="text-xs font-black uppercase tracking-widest text-gray-400">Verificando acesso...</p>
+        </div>
+    );
+  }
+
+  // Se não houver usuário (redundância de segurança pro render)
+  if (!user) {
+    return (
+        <div className="min-h-screen bg-white dark:bg-gray-950 flex flex-col items-center justify-center p-8 text-center">
+            <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-6">
+                <Lock className="w-10 h-10 text-gray-400" />
+            </div>
+            <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Login necessário</h2>
+            <p className="text-sm text-gray-500 mb-8">Você precisa estar logado para acessar seus benefícios semanais.</p>
+            <button onClick={onBack} className="w-full py-4 bg-blue-600 text-white font-bold rounded-2xl">Voltar ao início</button>
+        </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#F8F9FC] dark:bg-gray-950 font-sans flex flex-col pb-32 animate-in slide-in-from-right duration-300">
