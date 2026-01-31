@@ -73,8 +73,6 @@ const App: React.FC = () => {
     
     if (view === 'service_chat' && data?.requestId) {
         setActiveServiceRequestId(data.requestId);
-        // Se o lojista abriu via central de leads, ele é o 'merchant' no chat.
-        // Se foi via pagamento de banner (wizard), o papel é definido no componente, mas preservamos 'resident' como fallback.
         if (data.role) setChatRole(data.role);
         else if (isMerchantMode && data.requestId.startsWith('REQ-')) setChatRole('merchant');
         else setChatRole('resident');
@@ -100,9 +98,11 @@ const App: React.FC = () => {
 
   useEffect(() => {
     if (splashStage === 4) return;
+    // Iniciamos o fade-out aos 4.5s
     const fadeOutTimer = setTimeout(() => setSplashStage(3), 4500);
+    // Removemos completamente o elemento aos 5.0s
     const endSplashTimer = setTimeout(() => {
-      splashStage === 3 && setSplashStage(4);
+      setSplashStage(4);
       splashWasShownInSession = true;
     }, 5000);
     return () => {
@@ -154,6 +154,7 @@ const App: React.FC = () => {
     <div className={theme === 'dark' ? 'dark' : ''}>
       <NeighborhoodProvider>
         <div className="min-h-screen bg-white dark:bg-gray-950 flex justify-center relative transition-colors duration-300">
+          {/* O App se torna interativo e visível imediatamente ao atingir splashStage >= 3 */}
           <div className={`w-full max-w-md h-[100dvh] transition-opacity duration-500 ease-out ${splashStage >= 3 ? 'opacity-100' : 'opacity-0'}`}>
               <Layout activeTab={activeTab} setActiveTab={handleNavigate} userRole={userRole} hideNav={hideBottomNav}>
                   {!headerExclusionList.includes(activeTab) && (
@@ -241,12 +242,9 @@ const App: React.FC = () => {
                             requestId={activeServiceRequestId} 
                             userRole={chatRole} 
                             onBack={() => {
-                                // ROTEAMENTO INTELIGENTE BASEADO NO CONTEXTO DO CHAT
-                                // IDs que começam com DSG- são do "Time Localizei" (Design/Marketing)
                                 if (activeServiceRequestId.startsWith('DSG-')) {
                                     handleNavigate('home');
                                 } else {
-                                    // Retorno padrão para serviços (Leads)
                                     handleNavigate(isMerchantMode ? 'merchant_leads' : 'home');
                                 }
                             }} 
@@ -271,7 +269,8 @@ const App: React.FC = () => {
           </div>
 
           {splashStage < 4 && (
-            <div className={`fixed inset-0 z-[9999] flex flex-col items-center justify-between py-16 transition-opacity duration-500 ease-out ${splashStage === 3 ? 'opacity-0' : 'opacity-100'}`} style={{ backgroundColor: '#1E5BFF' }}>
+            /* A classe pointer-events-none no estágio 3 é CRUCIAL para não bloquear a Home enquanto ela faz fade-in */
+            <div className={`fixed inset-0 z-[9999] flex flex-col items-center justify-between py-16 transition-opacity duration-500 ease-out ${splashStage === 3 ? 'opacity-0 pointer-events-none' : 'opacity-100'}`} style={{ backgroundColor: '#1E5BFF' }}>
               <div className="flex flex-col items-center animate-fade-in text-center px-4">
                   <div className="relative w-32 h-32 bg-white rounded-[2.5rem] flex items-center justify-center shadow-2xl mb-8 animate-logo-enter"><MapPin className="w-16 h-16 text-brand-blue fill-brand-blue" /></div>
                   <h1 className="text-4xl font-black font-display text-white tracking-tighter drop-shadow-md">
