@@ -100,9 +100,13 @@ export const ServiceChatView: React.FC<ServiceChatViewProps> = ({ requestId, use
   };
 
   return (
-    /* PARTE 1: Container Responsivo (Largura Mobile Fixa) */
     <div className="fixed inset-0 z-[150] bg-black/20 backdrop-blur-sm flex justify-center animate-in fade-in duration-300">
-      <div className="w-full max-w-md bg-white dark:bg-gray-950 flex flex-col h-full shadow-2xl relative overflow-hidden">
+      {/* 
+          AJUSTE DE LAYOUT: 
+          Adicionado pb-[80px] para garantir que o input (footer) 
+          fique acima da BottomNav fixa (que tem 80px de altura).
+      */}
+      <div className="w-full max-w-md bg-white dark:bg-gray-950 flex flex-col h-full pb-[80px] shadow-2xl relative overflow-hidden">
         
         {/* Header do Chat */}
         <header className={`px-5 py-5 border-b flex items-center justify-between sticky top-0 z-20 ${isAdmin ? 'bg-amber-50 border-amber-200 dark:bg-amber-950/20 dark:border-amber-800' : 'bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800'}`}>
