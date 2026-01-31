@@ -100,7 +100,7 @@ export const BannerSalesWizard: React.FC<BannerSalesWizardProps> = ({ user, onBa
         </div>
       </div>
 
-      {/* 2. CONTEÚDO PRINCIPAL (COM PADDING EXTRA PARA OS FOOTERS FIXOS) */}
+      {/* 2. CONTEÚDO PRINCIPAL */}
       <main className="flex-1 p-6 space-y-12 pb-64">
         <header className="text-center space-y-2">
           <h2 className="text-2xl font-black text-slate-900 dark:text-white leading-tight uppercase tracking-tighter">
@@ -112,7 +112,7 @@ export const BannerSalesWizard: React.FC<BannerSalesWizardProps> = ({ user, onBa
         </header>
 
         {/* PASSO 1: POSICIONAMENTO */}
-        <section className={`space-y-6 ${step > 1 ? 'opacity-40 grayscale pointer-events-none' : ''}`}>
+        <section className={`space-y-6 ${placement && step > 1 ? 'opacity-40 grayscale pointer-events-none' : ''}`}>
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center font-black text-xs">1</div>
             <h3 className="font-black text-slate-900 dark:text-white uppercase tracking-tighter">Onde você quer aparecer?</h3>
@@ -126,7 +126,7 @@ export const BannerSalesWizard: React.FC<BannerSalesWizardProps> = ({ user, onBa
             ].map(opt => (
               <button 
                 key={opt.id}
-                onClick={() => { setPlacement(opt.id as PlacementMode); if(step === 1) nextStep(); }}
+                onClick={() => { setPlacement(opt.id as PlacementMode); setStep(2); }}
                 className={`relative flex flex-col items-center p-4 rounded-3xl border-2 transition-all text-center gap-2 ${placement === opt.id ? 'border-blue-600 bg-blue-50 dark:bg-blue-900/20' : 'border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900'}`}
               >
                 {opt.popular && <span className="absolute -top-3 bg-amber-500 text-white text-[8px] font-black px-2 py-1 rounded-full uppercase">Mais vendido</span>}
@@ -142,7 +142,8 @@ export const BannerSalesWizard: React.FC<BannerSalesWizardProps> = ({ user, onBa
         </section>
 
         {/* PASSO 2: BAIRROS */}
-        <section className={`space-y-6 ${step !== 2 ? 'opacity-40 grayscale pointer-events-none' : ''}`}>
+        {/* Habilitado se o Passo 1 estiver concluído */}
+        <section className={`space-y-6 ${!placement ? 'opacity-40 grayscale pointer-events-none' : ''}`}>
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center font-black text-xs">2</div>
             <h3 className="font-black text-slate-900 dark:text-white uppercase tracking-tighter">Em quais bairros você quer aparecer?</h3>
@@ -169,7 +170,8 @@ export const BannerSalesWizard: React.FC<BannerSalesWizardProps> = ({ user, onBa
         </section>
 
         {/* PASSO 3: ARTE */}
-        <section className={`space-y-8 ${step !== 3 ? 'opacity-40 grayscale pointer-events-none' : ''}`}>
+        {/* CORREÇÃO APLICADA: Clicável assim que selectedHoods.length > 0 */}
+        <section className={`space-y-8 ${selectedHoods.length === 0 ? 'opacity-40 grayscale pointer-events-none' : ''}`}>
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center font-black text-xs">3</div>
             <h3 className="font-black text-slate-900 dark:text-white uppercase tracking-tighter">Escolha sua arte</h3>
@@ -246,7 +248,7 @@ export const BannerSalesWizard: React.FC<BannerSalesWizardProps> = ({ user, onBa
         </section>
       </main>
 
-      {/* 3. RESUMO DO PEDIDO - FIXO ACIMA DA BOTTOM NAV */}
+      {/* 3. RESUMO DO PEDIDO */}
       <div className="fixed bottom-[80px] left-0 right-0 z-[100] bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 p-5 shadow-[0_-10px_25px_rgba(0,0,0,0.1)] max-w-md mx-auto">
         <div className="flex items-center justify-between">
           <div className="space-y-1">
