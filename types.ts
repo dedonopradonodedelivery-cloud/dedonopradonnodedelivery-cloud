@@ -88,18 +88,17 @@ export interface Store {
   email_publico?: string;
 }
 
-// --- NOVO: BANNERS DE CATEGORIA ---
 export type SlotStatus = 'available' | 'reserved' | 'sold';
 
 export interface CategoryBannerSlot {
-  uniqueKey: string; // `${bairroSlug}:${categoriaSlug}:slot${slotNumber}`
+  uniqueKey: string; 
   bairroSlug: string;
   categoriaSlug: string;
   slotNumber: 1 | 2;
   status: SlotStatus;
   merchantId?: string;
   merchantName?: string;
-  expiresAt?: string; // Para status 'reserved'
+  expiresAt?: string; 
   image?: string;
   title?: string;
   subtitle?: string;
@@ -129,7 +128,6 @@ export interface RealEstateProperty {
   loadingAccess?: boolean;
 }
 
-// Consolidated ServiceUrgency with all used variants
 export type ServiceUrgency = 'Para hoje' | 'Amanhã' | 'Até 3 dias' | 'Não tenho pressa' | 'Hoje' | 'Essa semana' | 'Sem pressa';
 
 export interface ServiceRequest {
@@ -335,7 +333,8 @@ export interface AppNotification {
   userId: string;
   title: string;
   message: string;
-  type: 'claim_approval' | 'claim_rejection' | 'taxonomy_approval' | 'taxonomy_rejection' | 'system';
+  type: 'chat' | 'design' | 'coupon' | 'payment' | 'ad' | 'system';
+  referenceId?: string;
   read: boolean;
   createdAt: string;
 }

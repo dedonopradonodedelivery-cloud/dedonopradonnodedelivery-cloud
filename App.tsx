@@ -73,7 +73,11 @@ const App: React.FC = () => {
     
     if (view === 'service_chat' && data?.requestId) {
         setActiveServiceRequestId(data.requestId);
-        setChatRole('resident');
+        // Se o lojista abriu via central de leads, ele é o 'merchant' no chat.
+        // Se foi via pagamento de banner (wizard), o papel é definido no componente, mas preservamos 'resident' como fallback.
+        if (data.role) setChatRole(data.role);
+        else if (isMerchantMode && data.requestId.startsWith('REQ-')) setChatRole('merchant');
+        else setChatRole('resident');
     }
 
     setActiveTab(view);
@@ -233,7 +237,20 @@ const App: React.FC = () => {
                     {activeTab === 'merchant_leads' && <MerchantLeadsView onBack={() => handleNavigate('profile')} onOpenChat={(id: string) => { setActiveServiceRequestId(id); setChatRole('merchant'); handleNavigate('service_chat'); }} />}
 
                     {activeTab === 'service_chat' && activeServiceRequestId && (
-                        <ServiceChatView requestId={activeServiceRequestId} userRole={chatRole} onBack={() => handleNavigate(isMerchantMode ? 'merchant_leads' : 'home')} />
+                        <ServiceChatView 
+                            requestId={activeServiceRequestId} 
+                            userRole={chatRole} 
+                            onBack={() => {
+                                // ROTEAMENTO INTELIGENTE BASEADO NO CONTEXTO DO CHAT
+                                // IDs que começam com DSG- são do "Time Localizei" (Design/Marketing)
+                                if (activeServiceRequestId.startsWith('DSG-')) {
+                                    handleNavigate('home');
+                                } else {
+                                    // Retorno padrão para serviços (Leads)
+                                    handleNavigate(isMerchantMode ? 'merchant_leads' : 'home');
+                                }
+                            }} 
+                        />
                     )}
 
                     {activeTab === 'admin_panel' && <AdminPanel user={user as any} onLogout={signOut} viewMode={viewMode} onOpenViewSwitcher={() => setIsRoleSwitcherOpen(true)} onNavigateToApp={handleNavigate} onOpenMonitorChat={(id: string) => { setActiveServiceRequestId(id); setChatRole('admin'); handleNavigate('service_chat'); }} />}

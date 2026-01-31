@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { 
   ChevronLeft, 
@@ -116,14 +117,16 @@ export const AdminModerationPanel: React.FC<AdminModerationPanelProps> = ({ onBa
         setClaims(updated);
         localStorage.setItem('manual_claims_jpa', JSON.stringify(updated));
         
-        sendNotification(claim.user_id, 'Loja Reivindicada!', `Sua solicitação para a loja ${claim.store_name} foi aprovada.`, 'claim_approval');
+        // FIX: Using 'system' as notification type because 'claim_approval' is not defined in AppNotification['type']
+        sendNotification(claim.user_id, 'Loja Reivindicada!', `Sua solicitação para a loja ${claim.store_name} foi aprovada.`, 'system');
         alert(`Loja transferida com sucesso para o usuário ${claim.user_email}`);
     } else {
         const updated = claims.map(c => c.id === id ? { ...c, status: 'rejected' as const } : c);
         setClaims(updated);
         localStorage.setItem('manual_claims_jpa', JSON.stringify(updated));
 
-        sendNotification(claim.user_id, 'Reivindicação Negada', `Não pudemos aprovar sua posse da loja ${claim.store_name}. Verifique seus dados.`, 'claim_rejection');
+        // FIX: Using 'system' as notification type because 'claim_rejection' is not defined in AppNotification['type']
+        sendNotification(claim.user_id, 'Reivindicação Negada', `Não pudemos aprovar sua posse da loja ${claim.store_name}. Verifique seus dados.`, 'system');
         alert('Solicitação negada.');
     }
   };
@@ -137,7 +140,8 @@ export const AdminModerationPanel: React.FC<AdminModerationPanelProps> = ({ onBa
       setTaxonomySuggestions(updated);
       localStorage.setItem('taxonomy_suggestions', JSON.stringify(updated));
       
-      sendNotification(sug.merchantId, 'Sugestão Aprovada!', `Sua sugestão de ${sug.type === 'category' ? 'categoria' : 'subcategoria'} "${sug.name}" foi aprovada.`, 'taxonomy_approval');
+      // FIX: Using 'system' as notification type because 'taxonomy_approval' is not defined in AppNotification['type']
+      sendNotification(sug.merchantId, 'Sugestão Aprovada!', `Sua sugestão de ${sug.type === 'category' ? 'categoria' : 'subcategoria'} "${sug.name}" foi aprovada.`, 'system');
       alert('Sugestão aprovada! O lojista foi notificado.');
     } else {
       if (!rejectionReason.trim()) {
@@ -148,7 +152,8 @@ export const AdminModerationPanel: React.FC<AdminModerationPanelProps> = ({ onBa
       setTaxonomySuggestions(updated);
       localStorage.setItem('taxonomy_suggestions', JSON.stringify(updated));
 
-      sendNotification(sug.merchantId, 'Sugestão Recusada', `Não pudemos aprovar "${sug.name}". Motivo: ${rejectionReason}`, 'taxonomy_rejection');
+      // FIX: Using 'system' as notification type because 'taxonomy_rejection' is not defined in AppNotification['type']
+      sendNotification(sug.merchantId, 'Sugestão Recusada', `Não pudemos aprovar "${sug.name}". Motivo: ${rejectionReason}`, 'system');
       alert('Sugestão rejeitada.');
       setRejectionReason('');
       setSelectedSugForAction(null);

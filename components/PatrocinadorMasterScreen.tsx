@@ -24,7 +24,12 @@ import {
   Shield,
   ExternalLink,
   ShieldCheck,
-  X
+  X,
+  CreditCard,
+  Target,
+  Zap,
+  // FIX: Added missing Crown icon to fix "Cannot find name 'Crown'" error
+  Crown
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -60,6 +65,7 @@ export const PatrocinadorMasterScreen: React.FC<PatrocinadorMasterScreenProps> =
   const [selectedMonths, setSelectedMonths] = useState<string[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const chatScrollRef = useRef<HTMLDivElement>(null);
+  const detailsRef = useRef<HTMLDivElement>(null);
 
   const availableMonths = useMemo(() => {
     const monthNames = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
@@ -90,14 +96,14 @@ export const PatrocinadorMasterScreen: React.FC<PatrocinadorMasterScreenProps> =
   };
   
   const pricing = useMemo(() => {
-    const count = selectedMonths.length;
+    const count = Math.max(1, selectedMonths.length); // Garante cálculo base mesmo sem seleção manual
     const basePrice = 4000;
-    const totalWithoutDiscount = count * basePrice;
+    const totalWithoutDiscount = selectedMonths.length * basePrice;
     let discountPercent = 0;
     
-    if (count === 1) discountPercent = 10;
-    if (count === 2) discountPercent = 30;
-    if (count === 3) discountPercent = 50;
+    if (selectedMonths.length === 1) discountPercent = 10;
+    if (selectedMonths.length === 2) discountPercent = 30;
+    if (selectedMonths.length === 3) discountPercent = 50;
     
     const totalSavings = totalWithoutDiscount * (discountPercent / 100);
     const finalTotal = totalWithoutDiscount - totalSavings;
@@ -115,9 +121,25 @@ export const PatrocinadorMasterScreen: React.FC<PatrocinadorMasterScreenProps> =
 
   // --- HANDLERS FLUXO ---
 
+  const handleQuickStart = () => {
+    if (selectedMonths.length === 0) {
+      const firstAvailable = availableMonths.find(m => m.available);
+      if (firstAvailable) {
+        setSelectedMonths([firstAvailable.name]);
+      }
+    }
+    setStep('payment');
+    window.scrollTo(0, 0);
+  };
+
+  const scrollToDetails = () => {
+    detailsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
   const handleConfirmPayment = () => {
-    setStep('processing');
+    setIsProcessing(true);
     setTimeout(() => {
+      setIsProcessing(false);
       setStep('success');
     }, 2000);
   };
@@ -167,7 +189,36 @@ export const PatrocinadorMasterScreen: React.FC<PatrocinadorMasterScreenProps> =
         <h2 className="text-4xl font-black text-white font-display tracking-tight leading-none mb-6">
           Aqui você não compra um banner. <br/> Você compra <span className="text-amber-400">presença total</span> no app.
         </h2>
-        <p className="text-base text-slate-400 max-w-lg mx-auto leading-relaxed">
+        
+        {/* BLOCO DE PREÇO NA PRIMEIRA DOBRA */}
+        <div className="bg-white/5 border border-white/10 rounded-3xl p-6 mb-8 backdrop-blur-sm shadow-xl animate-in zoom-in-95 duration-700">
+            <p className="text-xs font-black text-amber-400 uppercase tracking-widest mb-2">A partir de</p>
+            <div className="flex items-baseline justify-center gap-1">
+                <span className="text-xl font-bold text-white opacity-60">R$</span>
+                <span className="text-5xl font-black text-white tracking-tighter">4.000</span>
+                <span className="text-lg font-bold text-slate-400">/mês</span>
+            </div>
+            <p className="text-[10px] text-slate-400 font-bold uppercase mt-3 tracking-wider">Venda por mês fechado</p>
+            <p className="text-[9px] text-amber-500/60 font-black uppercase mt-1 tracking-[0.2em]">Promoção de inauguração por tempo indeterminado</p>
+        </div>
+
+        {/* CTAs DE PRIMEIRA DOBRA */}
+        <div className="flex flex-col gap-3 mb-10">
+            <button 
+                onClick={handleQuickStart}
+                className="w-full bg-amber-500 hover:bg-amber-600 text-slate-900 font-black py-5 rounded-2xl shadow-xl shadow-amber-500/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+            >
+                Contratar agora <ArrowRight size={20} strokeWidth={3} />
+            </button>
+            <button 
+                onClick={scrollToDetails}
+                className="w-full py-4 text-slate-400 font-bold text-sm hover:text-white transition-colors"
+            >
+                Ver detalhes do plano
+            </button>
+        </div>
+
+        <p className="text-base text-slate-400 max-w-lg mx-auto leading-relaxed" ref={detailsRef}>
           O Patrocinador Master é a contratação de espaço publicitário premium, onde sua marca aparece em aproximadamente <strong>90% das áreas estratégicas</strong> do aplicativo.
         </p>
       </section>
@@ -260,14 +311,27 @@ export const PatrocinadorMasterScreen: React.FC<PatrocinadorMasterScreenProps> =
     <div className="animate-in slide-in-from-right duration-500 flex flex-col h-full px-6 pt-8 pb-32">
         <div className="flex-1">
             <div className="bg-slate-900 border border-white/10 rounded-[2.5rem] p-8 space-y-6">
-                <div>
-                    <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Produto</p>
-                    <p className="text-xl font-bold text-white">Patrocinador Master</p>
+                <div className="flex justify-between items-start">
+                    <div>
+                        <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Produto</p>
+                        <p className="text-xl font-bold text-white">Patrocinador Master</p>
+                    </div>
+                    <Crown className="text-amber-500 w-6 h-6" />
                 </div>
                 
                 <div className="pt-4 border-t border-white/5">
-                    <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Meses Selecionados</p>
-                    <p className="text-base font-semibold text-slate-200">{selectedMonths.join(', ')}</p>
+                    <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-3">Meses Selecionados</p>
+                    <div className="flex flex-wrap gap-2">
+                        {availableMonths.filter(m => m.available).map(m => (
+                            <button
+                                key={m.name}
+                                onClick={() => handleMonthToggle(m.name)}
+                                className={`px-4 py-2 rounded-xl text-xs font-bold border transition-all ${selectedMonths.includes(m.name) ? 'bg-amber-500 text-slate-900 border-amber-500' : 'bg-slate-800 text-slate-500 border-white/5'}`}
+                            >
+                                {m.name}
+                            </button>
+                        ))}
+                    </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4 pt-4 border-t border-white/5">
@@ -287,9 +351,12 @@ export const PatrocinadorMasterScreen: React.FC<PatrocinadorMasterScreenProps> =
                 </div>
             </div>
 
-            <p className="mt-8 text-center text-xs text-slate-400 leading-relaxed max-w-[280px] mx-auto font-medium">
-                Após o pagamento, você será direcionado para um chat exclusivo com nosso time para alinhar os detalhes do Patrocinador Master.
-            </p>
+            <div className="mt-8 bg-blue-500/10 p-5 rounded-2xl border border-blue-500/20 flex gap-4">
+                <Info className="text-blue-400 w-5 h-5 shrink-0" />
+                <p className="text-xs text-slate-400 leading-relaxed font-medium">
+                    Após o pagamento, você será direcionado para um chat exclusivo com nosso time para alinhar os detalhes estratégicos da sua presença no app.
+                </p>
+            </div>
         </div>
 
         <footer className="fixed bottom-0 left-0 right-0 p-6 bg-slate-950 border-t border-white/5 max-w-md mx-auto z-30">
