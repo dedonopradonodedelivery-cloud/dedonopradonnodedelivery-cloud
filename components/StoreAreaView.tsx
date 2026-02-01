@@ -182,7 +182,7 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
               icon={Crown} 
               label="Patrocinador Master" 
               description="Apareça em destaque em 90% das telas do bairro"
-              onClick={() => onNavigate('patrocinador_master')}
+              onClick={() => onNavigate('sponsor_info')}
               colorClass="bg-amber-50 text-amber-600"
             />
             <ServiceBlock 
