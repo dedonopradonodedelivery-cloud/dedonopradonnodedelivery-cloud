@@ -15,7 +15,7 @@ import {
   MapPin,
   Clock,
   ArrowRight,
-  Filter,
+  SlidersHorizontal,
   CheckCircle2,
   X,
   Camera,
@@ -23,7 +23,6 @@ import {
   AlertCircle,
   Megaphone,
   Check,
-  SlidersHorizontal,
   ChevronRight
 } from 'lucide-react';
 import { useNeighborhood, NEIGHBORHOODS } from '../contexts/NeighborhoodContext';
@@ -174,7 +173,6 @@ const CategoryBlock: React.FC<CategoryBlockProps> = ({ category, items, onItemCl
     );
 };
 
-// FIX: Added missing ClassifiedsView component implementation and export to resolve build error in App.tsx
 interface ClassifiedsViewProps {
   onBack: () => void;
   onNavigate: (view: string, data?: any) => void;
@@ -193,7 +191,7 @@ export const ClassifiedsView: React.FC<ClassifiedsViewProps> = ({ onBack, onNavi
   const donations = useMemo(() => MOCK_CLASSIFIEDS.filter(item => item.category === 'Doações em geral').slice(0, 5), []);
   const desapega = useMemo(() => MOCK_CLASSIFIEDS.filter(item => item.category === 'Desapega JPA').slice(0, 5), []);
 
-  const handleAnunciar = (catName: string) => {
+  const handleAnunciar = () => {
     if (!user) {
         onRequireLogin();
         return;
@@ -202,20 +200,37 @@ export const ClassifiedsView: React.FC<ClassifiedsViewProps> = ({ onBack, onNavi
   };
 
   const handleItemClick = (item: Classified) => {
-    // In a real scenario, this would navigate to a detailed page or open a modal
     alert(`Detalhes de: ${item.title}\n\nEntre em contato via WhatsApp: ${item.contactWhatsapp}`);
   };
 
   return (
     <div className="min-h-screen bg-[#F8F9FC] dark:bg-gray-950 font-sans pb-32 animate-in fade-in duration-500 overflow-x-hidden">
-      <header className="sticky top-0 z-40 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md px-5 py-6 border-b border-gray-100 dark:border-gray-800 rounded-b-[2.5rem] shadow-sm">
-        <div className="flex items-center gap-4 mb-6">
-          <button onClick={onBack} className="p-2.5 bg-gray-50 dark:bg-gray-800 rounded-xl text-gray-500 transition-colors active:scale-90 shadow-sm">
+      <header className="sticky top-0 z-40 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md px-5 py-6 border-b border-gray-100 dark:border-gray-800">
+        <div className="flex items-center justify-between gap-3 mb-6">
+          <button onClick={onBack} className="p-2.5 bg-gray-50 dark:bg-gray-800 rounded-xl text-gray-500 transition-colors active:scale-90 shadow-sm shrink-0">
             <ChevronLeft size={20} />
           </button>
-          <div className="flex-1">
-            <h1 className="font-black text-xl text-gray-900 dark:text-white uppercase tracking-tighter leading-none">Classificados</h1>
-            <p className="text-[10px] text-[#1E5BFF] font-black uppercase tracking-widest mt-1">Oportunidades em {currentNeighborhood === "Jacarepaguá (todos)" ? "Jacarepaguá" : currentNeighborhood}</p>
+          
+          <div className="flex-1 min-w-0">
+            <h1 className="font-black text-xl text-gray-900 dark:text-white uppercase tracking-tighter leading-none truncate">Classificados</h1>
+            <p className="text-[10px] text-blue-500 font-black uppercase tracking-widest mt-1 truncate">Oportunidades em {currentNeighborhood === "Jacarepaguá (todos)" ? "Jacarepaguá" : currentNeighborhood}</p>
+          </div>
+
+          <div className="flex items-center gap-2 shrink-0">
+            <button 
+              onClick={handleAnunciar}
+              className="px-3 py-1.5 bg-[#1E5BFF] hover:bg-blue-600 text-white font-black rounded-full shadow-lg shadow-blue-500/10 flex items-center justify-center gap-1.5 uppercase tracking-widest text-[9px] border border-white/10 active:scale-95 transition-all h-9"
+            >
+              <Plus size={12} strokeWidth={4} />
+              + Anunciar
+            </button>
+            
+            <button 
+              onClick={() => alert("Filtros globais de classificados em breve.")} 
+              className="relative p-2.5 bg-gray-50 dark:bg-gray-800 rounded-xl text-gray-400 shadow-sm active:scale-90 transition-all"
+            >
+              <SlidersHorizontal size={20}/>
+            </button>
           </div>
         </div>
 
@@ -246,7 +261,7 @@ export const ClassifiedsView: React.FC<ClassifiedsViewProps> = ({ onBack, onNavi
             category={CLASSIFIED_CATEGORIES[0]} 
             items={services} 
             onItemClick={handleItemClick}
-            onAnunciar={handleAnunciar}
+            onAnunciar={(name) => handleAnunciar()}
             onViewAll={() => onNavigate('services_landing')}
             ctaLabel="Pedir Orçamento Grátis"
             subtitle="Profissionais verificados do bairro"
@@ -256,7 +271,7 @@ export const ClassifiedsView: React.FC<ClassifiedsViewProps> = ({ onBack, onNavi
             category={CLASSIFIED_CATEGORIES[1]} 
             items={realEstate} 
             onItemClick={handleItemClick}
-            onAnunciar={handleAnunciar}
+            onAnunciar={(name) => handleAnunciar()}
             onViewAll={() => onNavigate('real_estate')}
             ctaLabel="Anunciar Ponto Comercial"
             subtitle="Oportunidades imobiliárias"
@@ -266,7 +281,7 @@ export const ClassifiedsView: React.FC<ClassifiedsViewProps> = ({ onBack, onNavi
             category={CLASSIFIED_CATEGORIES[2]} 
             items={jobs} 
             onItemClick={handleItemClick}
-            onAnunciar={handleAnunciar}
+            onAnunciar={(name) => handleAnunciar()}
             onViewAll={() => onNavigate('jobs')}
             ctaLabel="Divulgar Vaga no Bairro"
             subtitle="Encontre talentos locais"
@@ -281,7 +296,7 @@ export const ClassifiedsView: React.FC<ClassifiedsViewProps> = ({ onBack, onNavi
             category={CLASSIFIED_CATEGORIES[3]} 
             items={adoption} 
             onItemClick={handleItemClick}
-            onAnunciar={handleAnunciar}
+            onAnunciar={(name) => handleAnunciar()}
             onViewAll={() => onNavigate('adoption')}
             ctaLabel="Divulgar Adoção"
             subtitle="Ajude um amigo a encontrar um lar"
@@ -291,7 +306,7 @@ export const ClassifiedsView: React.FC<ClassifiedsViewProps> = ({ onBack, onNavi
             category={CLASSIFIED_CATEGORIES[4]} 
             items={donations} 
             onItemClick={handleItemClick}
-            onAnunciar={handleAnunciar}
+            onAnunciar={(name) => handleAnunciar()}
             onViewAll={() => onNavigate('donations')}
             ctaLabel="Divulgar Doação"
             subtitle="Fazer o bem circula no bairro"
@@ -301,7 +316,7 @@ export const ClassifiedsView: React.FC<ClassifiedsViewProps> = ({ onBack, onNavi
             category={CLASSIFIED_CATEGORIES[5]} 
             items={desapega} 
             onItemClick={handleItemClick}
-            onAnunciar={handleAnunciar}
+            onAnunciar={(name) => handleAnunciar()}
             onViewAll={() => onNavigate('desapega')}
             ctaLabel="Anunciar Desapego"
             subtitle="Venda o que você não usa mais"

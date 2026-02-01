@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo } from 'react';
 import { User } from '@supabase/supabase-js';
 import { 
@@ -166,8 +167,8 @@ export const RealEstateView: React.FC<RealEstateViewProps> = ({ onBack, user, on
           </button>
           
           <div className="text-center flex-1 min-w-0">
-            <h1 className="text-lg font-black text-gray-900 dark:text-white font-display uppercase tracking-tighter leading-none">Imóveis Comerciais</h1>
-            <p className="text-[10px] text-blue-500 font-black uppercase tracking-widest mt-1">Oportunidades no Bairro</p>
+            <h1 className="text-lg font-black text-gray-900 dark:text-white uppercase tracking-tighter leading-none truncate">Imóveis Comerciais</h1>
+            <p className="text-[10px] text-blue-500 font-black uppercase tracking-widest mt-1 truncate">Oportunidades no Bairro</p>
           </div>
           
           <div className="flex items-center gap-2 shrink-0">
@@ -176,7 +177,7 @@ export const RealEstateView: React.FC<RealEstateViewProps> = ({ onBack, user, on
                 className="px-3 py-1.5 bg-[#1E5BFF] hover:bg-blue-600 text-white font-black rounded-full shadow-lg shadow-blue-500/10 flex items-center justify-center gap-1.5 uppercase tracking-widest text-[9px] border border-white/10 active:scale-95 transition-all h-9"
             >
                 <Plus size={12} strokeWidth={4} />
-                Começar a anunciar
+                + Anunciar
             </button>
             
             <button onClick={() => setIsFilterOpen(true)} className="relative p-2.5 bg-gray-50 dark:bg-gray-800 rounded-xl text-gray-400 shadow-sm active:scale-90 transition-all">
