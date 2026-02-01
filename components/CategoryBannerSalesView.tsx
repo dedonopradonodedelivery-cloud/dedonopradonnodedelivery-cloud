@@ -1,7 +1,6 @@
 
 import React, { useState, useMemo } from 'react';
 import { ChevronLeft, Check, Lock, DollarSign, Calendar, MapPin, LayoutGrid, Info, ArrowRight, Loader2, CheckCircle2 } from 'lucide-react';
-// FIX: Removed incorrect import of CATEGORIES and NEIGHBORHOODS from NeighborhoodContext.
 import { categoryBannerService } from '../lib/categoryBannerService';
 import { User } from '@supabase/supabase-js';
 
@@ -61,7 +60,6 @@ export const CategoryBannerSalesView: React.FC<CategoryBannerSalesViewProps> = (
     setTimeout(() => {
         categoryBannerService.reserveSlot(slotKey, user.id, user.user_metadata?.store_name || 'Minha Loja');
         
-        // Simula o preenchimento da arte e confirmação de pagamento
         categoryBannerService.confirmPurchase(slotKey, {
             image: 'https://images.unsplash.com/photo-1561758033-d89a9ad46330?q=80&w=800',
             title: 'Oferta Especial',
@@ -118,7 +116,7 @@ export const CategoryBannerSalesView: React.FC<CategoryBannerSalesViewProps> = (
         <section className="space-y-4">
             <div className="flex items-center justify-between px-1">
                 <h2 className="text-xl font-black uppercase tracking-tighter">2. Disponibilidade</h2>
-                <span className="text-[9px] font-black bg-blue-500 text-white px-2 py-0.5 rounded-full uppercase tracking-widest">2 Slots Máx</span>
+                <span className="text-[9px] font-black bg-blue-500 text-white px-2 py-0.5 rounded-full uppercase tracking-widest">288 Espaços Totais</span>
             </div>
 
             <div className="grid grid-cols-1 gap-4">
@@ -160,7 +158,7 @@ export const CategoryBannerSalesView: React.FC<CategoryBannerSalesViewProps> = (
                 </div>
                 <div className="space-y-1">
                     <p className="text-xs text-slate-300 leading-relaxed font-bold">O banner dura 30 dias após a compra.</p>
-                    <p className="text-[10px] text-slate-500 leading-relaxed">Você poderá alterar a arte do banner a qualquer momento através do seu painel administrativo.</p>
+                    <p className="text-[10px] text-slate-500 leading-relaxed">Cada categoria possui apenas 2 banners rotativos por bairro, garantindo exclusividade absoluta.</p>
                 </div>
             </div>
         </section>
@@ -168,8 +166,8 @@ export const CategoryBannerSalesView: React.FC<CategoryBannerSalesViewProps> = (
 
       <footer className="fixed bottom-[80px] left-0 right-0 p-5 bg-slate-950/80 backdrop-blur-md border-t border-white/5 z-30 max-w-md mx-auto flex items-center justify-between">
           <div className="flex flex-col">
-              <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Preço Mensal</span>
-              <span className="text-2xl font-black text-emerald-400">R$ 29,90</span>
+              <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Banner Premium Categoria</span>
+              <span className="text-2xl font-black text-emerald-400">R$ 149,99</span>
           </div>
           <div className="flex items-center gap-2 text-[9px] font-black text-slate-400 uppercase tracking-[0.2em]">
             <CheckCircle2 size={12} className="text-blue-500" />

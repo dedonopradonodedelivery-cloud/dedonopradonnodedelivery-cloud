@@ -13,7 +13,6 @@ export const categoryBannerService = {
     const all = JSON.parse(saved) as CategoryBannerSlot[];
     const cleaned = all.map(slot => {
       if (slot.status === 'reserved' && slot.expiresAt && new Date(slot.expiresAt).getTime() < now) {
-        // FIX: Added 'as const' to status to prevent widening to 'string' and match SlotStatus union.
         return { ...slot, status: 'available' as const, merchantId: undefined, merchantName: undefined, expiresAt: undefined };
       }
       return slot;
@@ -68,7 +67,6 @@ export const categoryBannerService = {
 
     const updated = all.map(s => {
       if (s.uniqueKey === key) {
-        // FIX: Added 'as const' to status to match SlotStatus union.
         return {
           ...s,
           status: 'sold' as const,

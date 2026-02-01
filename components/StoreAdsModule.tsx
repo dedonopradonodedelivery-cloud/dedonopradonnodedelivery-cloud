@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { 
   ChevronLeft, 
@@ -67,30 +68,30 @@ const MOCK_OCCUPANCY: Record<string, Record<string, boolean>> = {
 const DISPLAY_MODES = [
   { 
     id: 'home', 
-    label: 'Home', 
+    label: 'Home Premium', 
     icon: Home, 
-    price: 49.90,
-    originalPrice: 199.90,
+    price: 299.99,
+    originalPrice: 499.00,
     description: 'Exibido no carrossel da página inicial para todos os usuários.',
     whyChoose: 'Ideal para máxima visibilidade imediata.'
   },
   { 
     id: 'cat', 
-    label: 'Categorias', 
+    label: 'Categorias Premium', 
     icon: LayoutGrid, 
-    price: 29.90,
-    originalPrice: 149.90,
+    price: 149.99,
+    originalPrice: 249.00,
     description: 'Exibido no topo das buscas por produtos ou serviços específicos.',
     whyChoose: 'Impacta o cliente no momento da decisão.'
   },
   { 
-    id: 'combo', 
-    label: 'Home + Categorias', 
+    id: 'home_simples', 
+    label: 'Home Simples', 
     icon: Zap, 
-    price: 69.90,
-    originalPrice: 349.80,
-    description: 'Destaque na página inicial e em todas as categorias.',
-    whyChoose: 'Mais alcance, cliques e chances de venda.'
+    price: 69.99,
+    originalPrice: 99.00,
+    description: 'Visibilidade rotativa na página inicial.',
+    whyChoose: 'Custo benefício para marcas locais.'
   },
 ];
 
@@ -141,7 +142,6 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
     if (isDesigner) {
       setView('designer_workspace');
     } else if (initialView === 'chat') {
-      // Mock para a lógica de verificação de pedido ativo.
       const hasActiveOrder = false; 
       if (hasActiveOrder) {
         setView('pro_chat');
@@ -164,7 +164,6 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
     ];
   }, []);
 
-  // Lógica de mensagens automáticas do Chat
   useEffect(() => {
     if (view === 'pro_chat' && proChatStep === 0) {
       setProChatStep(1);
@@ -297,7 +296,6 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
     setTimeout(() => { setIsSubmitting(false); setIsSuccess(true); }, 2000);
   };
 
-  // HANDLERS PARA O CHAT PRO
   const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -366,7 +364,6 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
     );
   }
 
-  // --- TELA DE ONBOARDING PARA O CHAT (CASO NÃO TENHA PEDIDO) ---
   if (view === 'chat_onboarding') {
     return (
         <div className="min-h-screen bg-[#020617] text-slate-100 flex flex-col items-center justify-center p-8 text-center animate-in fade-in duration-500">
@@ -418,7 +415,6 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
 
       <main className="flex-1 p-6 space-y-16 pb-96 max-w-md mx-auto w-full">
         
-        {/* BLOCO DE DESTAQUE */}
         <section className="animate-in fade-in slide-in-from-top-4 duration-700">
             <div className="bg-slate-900 border-l-4 border-blue-600 rounded-r-[2.5rem] p-8 shadow-2xl relative overflow-hidden group">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none"></div>
@@ -436,7 +432,6 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
             </div>
         </section>
 
-        {/* BLOCO 1: POSICIONAMENTO */}
         <section className="space-y-6">
           <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-blue-500 flex items-center gap-2 px-1">
             <Target size={14} /> 1. Onde deseja aparecer?
@@ -459,14 +454,12 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
                     <span className="text-sm font-black text-white">por R$ {mode.price.toFixed(2)}</span>
                   </div>
                   <p className="text-[10px] text-slate-300 font-medium leading-relaxed">{mode.description}</p>
-                  <p className="text-[7px] text-slate-500 font-bold uppercase tracking-widest mt-2">Promoção de inauguração por tempo indeterminado.</p>
                 </div>
               </button>
             ))}
           </div>
         </section>
 
-        {/* BLOCO 2: PERÍODO */}
         <section ref={periodRef} className={`space-y-6 transition-all duration-500 ${!selectedMode ? 'opacity-20 pointer-events-none grayscale' : 'opacity-100'}`}>
             <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-blue-500 flex items-center gap-2 px-1">
               <Calendar size={14} /> 2. Período de Exibição
@@ -488,7 +481,6 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
             </div>
         </section>
 
-        {/* BLOCO 3: BAIRROS */}
         <section ref={neighborhoodRef} className={`space-y-6 transition-all duration-500 ${selectedPeriods.length === 0 ? 'opacity-20 grayscale pointer-events-none' : 'opacity-100'}`}>
             <div className="flex items-center justify-between px-1">
                 <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-blue-500 flex items-center gap-2">
@@ -510,7 +502,6 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
             </div>
         </section>
 
-        {/* BLOCO 4: DESIGN */}
         <section ref={creativeRef} className={`space-y-8 transition-all duration-500 ${selectedNeighborhoods.length === 0 ? 'opacity-20 pointer-events-none' : 'opacity-100'}`}>
           <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-blue-500 flex items-center gap-2 px-1"><Palette size={14} /> 4. Design da Arte</h3>
           
