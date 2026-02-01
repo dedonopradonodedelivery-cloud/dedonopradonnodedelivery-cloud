@@ -250,7 +250,7 @@ const App: React.FC = () => {
                     
                     {activeTab === 'profile' && (
                       isMerchantMode 
-                        ? <StoreAreaView onBack={() => handleNavigate('home')} onNavigate={(view) => handleNavigate(view)} user={user as any} />
+                        ? <StoreAreaView onBack={() => handleNavigate('home')} onNavigate={(view) => handleNavigate(view)} user={user as any} isAdmin={isAdmin} />
                         : <MenuView user={user as any} userRole={userRole} onAuthClick={() => setIsAuthOpen(true)} onNavigate={handleNavigate} onBack={() => handleNavigate('home')} />
                     )}
 

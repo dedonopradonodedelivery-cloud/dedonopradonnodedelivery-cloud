@@ -212,7 +212,7 @@ export const MerchantLeadsView: React.FC<MerchantLeadsViewProps> = ({ onBack, on
                 <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
                     {isAdmin ? 'Todos os Pedidos do App' : 'Pedidos para você'}
                 </h3>
-                <span className="text-[9px] font-bold text-blue-500 bg-blue-50 dark:bg-blue-900/30 px-2 py-0.5 rounded-full">Atualizado agora</span>
+                <span className="text-[9px] font-bold text-blue-50 bg-blue-50 dark:bg-blue-900/30 px-2 py-0.5 rounded-full">Atualizado agora</span>
             </div>
             
             {filteredRequests.length === 0 ? (
@@ -223,7 +223,7 @@ export const MerchantLeadsView: React.FC<MerchantLeadsViewProps> = ({ onBack, on
             ) : filteredRequests.map(req => {
                 const isUnlocked = unlockedLeads.includes(req.id);
                 return (
-                    <div key={req.id} className={`bg-white dark:bg-gray-900 rounded-[2.5rem] border transition-all ${isUnlocked ? 'border-emerald-500/30 shadow-md' : 'border-gray-100 dark:border-gray-800 shadow-sm'} overflow-hidden animate-in slide-in-from-bottom-2`}>
+                    <div key={req.id} className={`bg-white dark:bg-gray-900 rounded-[2.5rem] border transition-all ${isUnlocked || isAdmin ? 'border-emerald-500/30 shadow-md' : 'border-gray-100 dark:border-gray-800 shadow-sm'} overflow-hidden animate-in slide-in-from-bottom-2`}>
                         <div className="p-6">
                             <div className="flex justify-between items-start mb-4">
                                 <div className="space-y-1">
@@ -243,7 +243,7 @@ export const MerchantLeadsView: React.FC<MerchantLeadsViewProps> = ({ onBack, on
                             </div>
 
                             <div className="mb-6">
-                                <p className={`text-sm text-gray-600 dark:text-gray-400 leading-relaxed font-medium line-clamp-2 ${(!isUnlocked && !isAdmin) && 'select-none'}`}>
+                                <p className={`text-sm text-gray-600 dark:text-gray-400 leading-relaxed font-medium line-clamp-2 ${(!isUnlocked && !isAdmin) && 'select-none blur-[2px]'}`}>
                                     "{req.description}"
                                 </p>
                             </div>
@@ -253,7 +253,7 @@ export const MerchantLeadsView: React.FC<MerchantLeadsViewProps> = ({ onBack, on
                                     onClick={() => onOpenChat(req.id)}
                                     className="w-full bg-gray-900 dark:bg-white text-white dark:text-black font-black py-4 rounded-2xl shadow-xl flex items-center justify-center gap-2 text-xs uppercase tracking-widest active:scale-95 transition-all"
                                 >
-                                    {isAdmin ? 'Auditar Chat' : 'Abrir chat com cliente'}
+                                    {isAdmin ? 'Inspecionar Chat' : 'Abrir chat com cliente'}
                                     <ChevronRight size={16} strokeWidth={3} />
                                 </button>
                             ) : (

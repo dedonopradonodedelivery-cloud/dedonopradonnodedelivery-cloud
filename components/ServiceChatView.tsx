@@ -125,7 +125,7 @@ export const ServiceChatView: React.FC<ServiceChatViewProps> = ({ requestId, use
             </div>
             <div className="flex flex-col min-w-0">
               <h2 className="font-bold text-gray-900 dark:text-white leading-tight truncate">
-                  {isAdmin ? 'Auditoria' : isMerchant ? (requestInfo?.userName || 'Cliente') : 'Atendimento Profissional'}
+                  {isAdmin ? 'Auditoria de Conversa' : isMerchant ? (requestInfo?.userName || 'Cliente') : 'Atendimento Profissional'}
               </h2>
               <div className="flex items-center gap-1.5 mt-0.5">
                   <span className="w-1.5 h-1.5 rounded-full bg-green-500"></span>
@@ -140,9 +140,9 @@ export const ServiceChatView: React.FC<ServiceChatViewProps> = ({ requestId, use
 
         {/* Auditoria Label */}
         {isAdmin && (
-          <div className="bg-amber-500 text-white px-5 py-2 flex items-center justify-center gap-2 z-10 shadow-sm">
+          <div className="bg-amber-500 text-white px-5 py-2 flex items-center justify-center gap-2 z-10 shadow-sm shrink-0">
               <Eye size={12} strokeWidth={3} />
-              <span className="text-[9px] font-black uppercase tracking-widest">Modo Leitura / Auditoria</span>
+              <span className="text-[9px] font-black uppercase tracking-widest">Visualização Administrativa (Leitura)</span>
           </div>
         )}
 
@@ -201,7 +201,7 @@ export const ServiceChatView: React.FC<ServiceChatViewProps> = ({ requestId, use
           })}
         </main>
 
-        {/* Input de Mensagem */}
+        {/* Input de Mensagem - Oculto para ADM */}
         {!isAdmin && (
           <footer className="p-5 bg-white dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800 shrink-0">
               <div className="flex items-center gap-3">

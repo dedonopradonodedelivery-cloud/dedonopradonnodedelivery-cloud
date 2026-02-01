@@ -33,6 +33,7 @@ interface StoreAreaViewProps {
   onBack: () => void;
   onNavigate: (view: string, initialView?: 'sales' | 'chat') => void;
   user: SupabaseUser | null;
+  isAdmin?: boolean;
 }
 
 const ServiceBlock: React.FC<{ 
@@ -87,7 +88,7 @@ const SectionHeader: React.FC<{ title: string; icon?: React.ElementType }> = ({ 
   </div>
 );
 
-export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate, user }) => {
+export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate, user, isAdmin = false }) => {
   const { signOut } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const [merchantData, setMerchantData] = useState<any>(null);
@@ -117,9 +118,10 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
 
   // Regra de Negócio: Categorias que recebem leads de serviço
   const SERVICE_CATEGORIES = ['Serviços', 'Pro', 'Casa', 'Autos', 'Saúde', 'Beleza'];
-  const canReceiveLeads = merchantData && SERVICE_CATEGORIES.includes(merchantData.category);
+  // REGRA ESPECIAL: ADM sempre vê a central de leads
+  const canReceiveLeads = isAdmin || (merchantData && SERVICE_CATEGORIES.includes(merchantData.category));
 
-  const storeName = user?.user_metadata?.store_name || "Sua Loja";
+  const storeName = user?.user_metadata?.store_name || (isAdmin ? "Painel Administrativo" : "Sua Loja");
   const avatarUrl = user?.user_metadata?.avatar_url || `https://ui-avatars.com/api/?name=${storeName.replace(' ', '+')}&background=1E5BFF&color=fff`;
 
   if (isLoading) {
@@ -143,22 +145,26 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
             <h1 className="text-2xl font-black text-gray-900 dark:text-white truncate leading-tight uppercase tracking-tighter">
               {storeName}
             </h1>
-            <p className="text-xs text-[#1E5BFF] font-bold uppercase tracking-widest mt-1">Painel do Lojista</p>
+            <p className="text-xs text-[#1E5BFF] font-bold uppercase tracking-widest mt-1">
+              {isAdmin ? "Supervisor do Bairro" : "Painel do Lojista"}
+            </p>
           </div>
         </div>
         
-        <button 
-          onClick={() => onNavigate('store_profile')}
-          className="w-full mt-6 py-3.5 rounded-2xl border-2 border-gray-100 dark:border-gray-700 text-gray-600 dark:text-gray-300 font-bold text-xs uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all active:scale-[0.98]"
-        >
-          <User size={14} />
-          Minha Loja (Perfil Público)
-        </button>
+        {!isAdmin && (
+            <button 
+              onClick={() => onNavigate('store_profile')}
+              className="w-full mt-6 py-3.5 rounded-2xl border-2 border-gray-100 dark:border-gray-700 text-gray-600 dark:text-gray-300 font-bold text-xs uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all active:scale-[0.98]"
+            >
+              <User size={14} />
+              Minha Loja (Perfil Público)
+            </button>
+        )}
       </div>
 
       <div className="px-6 space-y-10">
         
-        {/* BLOCO DE OPORTUNIDADES (VISÍVEL APENAS PARA CATEGORIAS DE SERVIÇO COMPATÍVEIS) */}
+        {/* BLOCO DE OPORTUNIDADES (VISÍVEL PARA SERVIÇOS OU ADM) */}
         {canReceiveLeads && (
             <section className="animate-in slide-in-from-bottom-2 duration-500">
                 <SectionHeader title="Oportunidades" icon={Zap} />
@@ -166,10 +172,10 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
                     <ServiceBlock 
                     icon={ShoppingBag} 
                     label="Central de Leads" 
-                    description="Veja pedidos de serviços e novos orçamentos"
+                    description={isAdmin ? "Monitorar todos os pedidos de serviço do app" : "Veja pedidos de serviços e novos orçamentos"}
                     onClick={() => onNavigate('merchant_leads')}
                     colorClass="bg-blue-50 text-blue-600"
-                    badge={3}
+                    badge={isAdmin ? undefined : 3}
                     />
                 </div>
             </section>
@@ -195,9 +201,9 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
             <ServiceBlock 
               icon={Star} 
               label="Avaliações" 
-              description="Responda seus clientes e gerencie sua reputação"
+              description="Gerenciar reputação e notas"
               onClick={() => onNavigate('merchant_reviews')}
-              badge={2} 
+              badge={isAdmin ? undefined : 2} 
               colorClass="bg-amber-50 text-amber-600"
             />
           </div>
