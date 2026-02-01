@@ -141,6 +141,7 @@ export interface ServiceRequest {
   images: string[];
   status: 'open' | 'closed';
   createdAt: string;
+  winnerId?: string; // ID do lojista que fechou o negócio
 }
 
 export interface ServiceLead {
@@ -148,6 +149,7 @@ export interface ServiceLead {
   requestId: string;
   merchantId: string;
   merchantName: string;
+  merchantLogo?: string;
   status: 'new' | 'unlocked' | 'chatting' | 'finished' | 'lost' | 'pending_payment' | 'paid';
   unlockedAt?: string;
   purchasedAt?: string;

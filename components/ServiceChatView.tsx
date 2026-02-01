@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { 
     ChevronLeft, 
     Send, 
@@ -14,25 +14,39 @@ import {
     Paperclip,
     ClipboardList,
     MapPin,
-    Zap
+    Zap,
+    CheckCircle2,
+    X,
+    // FIX: Added missing Handshake icon import
+    Handshake
 } from 'lucide-react';
-import { ServiceMessage, ServiceRequest } from '../types';
+import { ServiceMessage, ServiceRequest, ServiceLead } from '../types';
 
 interface ServiceChatViewProps {
   requestId: string;
+  professionalId: string;
   userRole: 'resident' | 'merchant' | 'admin';
   onBack: () => void;
 }
 
-export const ServiceChatView: React.FC<ServiceChatViewProps> = ({ requestId, userRole, onBack }) => {
+export const ServiceChatView: React.FC<ServiceChatViewProps> = ({ requestId, professionalId, userRole, onBack }) => {
   const [messages, setMessages] = useState<ServiceMessage[]>([]);
   const [inputText, setInputText] = useState('');
   const [requestInfo, setRequestInfo] = useState<ServiceRequest | null>(null);
+  const [leadInfo, setLeadInfo] = useState<ServiceLead | null>(null);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const isAdmin = userRole === 'admin';
   const isResident = userRole === 'resident';
   const isMerchant = userRole === 'merchant';
+
+  const chatKey = `msgs_${requestId}_${professionalId}`;
+
+  // REGRA: Verifica se o pedido está fechado e quem é o vencedor
+  const isRequestClosed = requestInfo?.status === 'closed';
+  const isWinner = requestInfo?.winnerId === professionalId;
+  const isBlocked = isRequestClosed && !isWinner;
 
   useEffect(() => {
     // 1. Carregar informações do pedido original
@@ -40,51 +54,28 @@ export const ServiceChatView: React.FC<ServiceChatViewProps> = ({ requestId, use
     const req = savedReqs.find((r: any) => r.id === requestId);
     if (req) setRequestInfo(req);
 
-    // 2. Carregar histórico de mensagens existente
-    const savedMsgs = JSON.parse(localStorage.getItem(`msgs_${requestId}`) || '[]');
-    
-    // 3. Lógica de Inicialização do Chat (Briefing do Pedido)
-    const chatInitKey = `chat_initialized_${requestId}`;
-    const isInitialized = localStorage.getItem(chatInitKey) === 'true';
+    // 2. Carregar informações do profissional/lead
+    const savedLeads = JSON.parse(localStorage.getItem('unlocked_leads_full_mock') || '[]');
+    const lead = savedLeads.find((l: any) => l.requestId === requestId && l.merchantId === professionalId);
+    if (lead) setLeadInfo(lead);
 
-    if (!isInitialized && req) {
-        const briefingMsg: ServiceMessage = {
-            id: 'briefing-system',
-            requestId,
-            senderId: 'system',
-            senderName: 'Localizei JPA',
-            senderRole: 'resident',
-            text: `📋 **RESUMO DO PEDIDO - #${req.id.split('-')[1]}**\n\n` +
-                  `• **Serviço:** ${req.serviceType}\n` +
-                  `• **Bairro:** ${req.neighborhood}\n` +
-                  `• **Prazo:** ${req.urgency}\n` +
-                  `• **Data Solicitação:** ${new Date(req.createdAt).toLocaleString()}\n\n` +
-                  `**Descrição do Cliente:**\n"${req.description}"`,
-            timestamp: req.createdAt
-        };
-
-        const initialMsgs = [briefingMsg];
-        setMessages(initialMsgs);
-        localStorage.setItem(`msgs_${requestId}`, JSON.stringify(initialMsgs));
-        localStorage.setItem(chatInitKey, 'true');
-    } else {
-        setMessages(savedMsgs);
-    }
-  }, [requestId, userRole]);
+    // 3. Carregar histórico de mensagens
+    const savedMsgs = JSON.parse(localStorage.getItem(chatKey) || '[]');
+    setMessages(savedMsgs);
+  }, [requestId, professionalId, chatKey]);
 
   useEffect(() => {
     if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
   }, [messages]);
 
   const handleSend = () => {
-    // ADM não envia mensagens conforme regra de negócio
-    if (!inputText.trim() || isAdmin) return;
+    if (!inputText.trim() || isAdmin || isBlocked) return;
     
     const newMsg: ServiceMessage = {
       id: `msg-${Date.now()}`,
       requestId,
       senderId: 'current-user-id',
-      senderName: isResident ? 'Morador' : 'Profissional',
+      senderName: isResident ? 'Morador' : (leadInfo?.merchantName || 'Profissional'),
       senderRole: isResident ? 'resident' : 'merchant',
       text: inputText,
       timestamp: new Date().toISOString()
@@ -92,68 +83,125 @@ export const ServiceChatView: React.FC<ServiceChatViewProps> = ({ requestId, use
 
     const updated = [...messages, newMsg];
     setMessages(updated);
-    localStorage.setItem(`msgs_${requestId}`, JSON.stringify(updated));
+    localStorage.setItem(chatKey, JSON.stringify(updated));
     setInputText('');
   };
 
+  const handleNegocioFechado = () => {
+    setShowConfirmModal(false);
+
+    // 1. Atualizar o status do pedido globalmente
+    const savedReqs = JSON.parse(localStorage.getItem('service_requests_mock') || '[]');
+    const updatedReqs = savedReqs.map((r: ServiceRequest) => {
+        if (r.id === requestId) {
+            return { ...r, status: 'closed', winnerId: professionalId };
+        }
+        return r;
+    });
+    localStorage.setItem('service_requests_mock', JSON.stringify(updatedReqs));
+    
+    // Atualiza localmente
+    const myReq = updatedReqs.find((r: any) => r.id === requestId);
+    if (myReq) setRequestInfo(myReq);
+
+    // 2. Adicionar mensagem de sistema no chat
+    const sysMsg: ServiceMessage = {
+        id: `sys-closed-${Date.now()}`,
+        requestId,
+        senderId: 'system',
+        senderName: 'Localizei JPA',
+        senderRole: 'resident',
+        text: "✨ NEGÓCIO FECHADO! ✨\nVocê confirmou que este serviço será realizado por este profissional.",
+        timestamp: new Date().toISOString()
+    };
+    
+    const updatedMsgs = [...messages, sysMsg];
+    setMessages(updatedMsgs);
+    localStorage.setItem(chatKey, JSON.stringify(updatedMsgs));
+  };
+
   return (
-    <div className="fixed inset-0 z-[150] bg-black/20 backdrop-blur-sm flex justify-center animate-in fade-in duration-300">
-      <div className="w-full max-w-md bg-white dark:bg-gray-950 flex flex-col h-full pb-[80px] shadow-2xl relative overflow-hidden">
+    <div className="fixed inset-0 z-[150] bg-white dark:bg-gray-950 flex flex-col h-full animate-in slide-in-from-right duration-300">
         
         {/* Header do Chat */}
         <header className={`px-5 py-5 border-b flex items-center justify-between sticky top-0 z-20 ${isAdmin ? 'bg-amber-50 border-amber-200 dark:bg-amber-950/20 dark:border-amber-800' : 'bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800'}`}>
-          <div className="flex items-center gap-3">
-            <button onClick={onBack} className="p-2 bg-gray-50 dark:bg-gray-800 rounded-xl text-gray-500 transition-all active:scale-90">
+          <div className="flex items-center gap-3 min-w-0">
+            <button onClick={onBack} className="p-2 bg-gray-50 dark:bg-gray-800 rounded-xl text-gray-500 transition-all active:scale-90 shrink-0">
                 <ChevronLeft size={20}/>
             </button>
-            <div className="w-10 h-10 rounded-full bg-[#1E5BFF] flex items-center justify-center text-white shadow-md shrink-0">
-              {isMerchant ? <UserIcon size={18} /> : <Building size={18} />}
+            <div className="w-10 h-10 rounded-full bg-[#1E5BFF] flex items-center justify-center text-white shadow-md shrink-0 overflow-hidden">
+                {leadInfo?.merchantLogo ? <img src={leadInfo.merchantLogo} className="w-full h-full object-cover" /> : <Building size={18} />}
             </div>
             <div className="flex flex-col min-w-0">
               <h2 className="font-bold text-gray-900 dark:text-white leading-tight truncate">
-                  {isAdmin ? 'Auditoria (Visualização)' : isMerchant ? (requestInfo?.userName || 'Cliente') : 'Atendimento Profissional'}
+                  {isMerchant ? (requestInfo?.userName || 'Cliente') : (leadInfo?.merchantName || 'Time Localizei')}
               </h2>
               <div className="flex items-center gap-1.5 mt-0.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-green-500"></span>
+                  <span className={`w-1.5 h-1.5 rounded-full ${isBlocked ? 'bg-gray-400' : 'bg-green-500'}`}></span>
                   <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest truncate">
                     #{requestId.split('-')[1]} – {requestInfo?.serviceType}
                   </p>
               </div>
             </div>
           </div>
-          <button className="p-2 text-gray-400"><MoreVertical size={20} /></button>
+          
+          {/* Botão Negócio Fechado (Apenas para Residentes) */}
+          {isResident && !isRequestClosed && (
+            <button 
+                onClick={() => setShowConfirmModal(true)}
+                className="bg-emerald-500 text-white text-[9px] font-black uppercase px-2.5 py-2 rounded-xl shadow-lg shadow-emerald-500/20 active:scale-95 transition-all shrink-0"
+            >
+                Negócio Fechado
+            </button>
+          )}
+
+          {isWinner && (
+             <div className="bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 px-2 py-1.5 rounded-lg flex items-center gap-1 border border-emerald-100 dark:border-emerald-800">
+                <CheckCircle2 size={12} />
+                <span className="text-[8px] font-black uppercase">Vencedor</span>
+             </div>
+          )}
         </header>
 
-        {/* Banner de Auditoria ADM */}
-        {isAdmin && (
-          <div className="bg-amber-500 text-white px-5 py-2 flex items-center justify-center gap-2 z-10 shadow-sm shrink-0">
-              <Eye size={12} strokeWidth={3} />
-              <span className="text-[9px] font-black uppercase tracking-widest">Modo Leitura Administrador (Sem Interação)</span>
-          </div>
+        {/* Banner de Status Bloqueado */}
+        {isBlocked && (
+            <div className="bg-gray-100 dark:bg-gray-800 text-gray-500 px-5 py-2.5 flex items-center justify-center gap-2 z-10 border-b border-gray-200 dark:border-gray-700">
+                <XCircle size={14} />
+                <span className="text-[9px] font-black uppercase tracking-widest text-center">Este pedido foi fechado com outro profissional.</span>
+            </div>
         )}
 
         {/* Corpo do Chat */}
         <main ref={scrollRef} className="flex-1 overflow-y-auto p-5 space-y-6 no-scrollbar bg-gray-50 dark:bg-gray-950">
+          
+          {/* Bolha de Resumo Original */}
+          {requestInfo && (
+              <div className="flex justify-center px-2 mb-4">
+                  <div className="p-5 rounded-[2rem] bg-white dark:bg-gray-900 border border-indigo-50 dark:border-indigo-900/50 shadow-sm w-full">
+                      <div className="flex items-center gap-2 mb-2">
+                        <ClipboardList size={14} className="text-indigo-600" />
+                        <span className="text-[9px] font-black uppercase tracking-widest text-indigo-600">Descrição do Pedido</span>
+                      </div>
+                      <p className="text-xs leading-relaxed text-gray-700 dark:text-gray-300 font-medium">
+                          "{requestInfo.description}"
+                      </p>
+                      <div className="mt-3 flex items-center gap-3">
+                        <div className="flex items-center gap-1 text-[9px] text-gray-400 font-bold uppercase"><MapPin size={10}/> {requestInfo.neighborhood}</div>
+                        <div className="flex items-center gap-1 text-[9px] text-gray-400 font-bold uppercase"><Clock size={10}/> {requestInfo.urgency}</div>
+                      </div>
+                  </div>
+              </div>
+          )}
+
           {messages.map((msg) => {
             const isSystem = msg.senderId === 'system';
             const isMe = !isSystem && msg.senderRole === userRole;
-            const isBriefing = msg.id === 'briefing-system';
             
             if (isSystem) {
               return (
                   <div key={msg.id} className="flex justify-center px-2">
-                      <div className={`p-5 rounded-3xl text-left w-full shadow-sm border ${
-                          isBriefing 
-                          ? 'bg-white dark:bg-gray-900 border-indigo-100 dark:border-indigo-900/50' 
-                          : 'bg-blue-50 dark:bg-blue-900/10 border-blue-100 dark:border-blue-800'
-                      }`}>
-                          <div className="flex items-center gap-2 mb-3">
-                            {isBriefing ? <ClipboardList size={16} className="text-indigo-600" /> : <Info size={16} className="text-[#1E5BFF]" />}
-                            <span className={`text-[10px] font-black uppercase tracking-widest ${isBriefing ? 'text-indigo-600' : 'text-[#1E5BFF]'}`}>
-                                {isBriefing ? 'Contexto do Pedido' : 'Aviso do Sistema'}
-                            </span>
-                          </div>
-                          <p className={`text-xs leading-relaxed whitespace-pre-wrap font-medium ${isBriefing ? 'text-gray-700 dark:text-gray-300' : 'text-blue-700 dark:text-blue-300'}`}>
+                      <div className="bg-emerald-50 dark:bg-emerald-900/10 border border-emerald-100 dark:border-emerald-800 p-4 rounded-2xl text-center w-full">
+                          <p className="text-xs text-emerald-700 dark:text-emerald-400 font-bold leading-relaxed whitespace-pre-wrap">
                               {msg.text}
                           </p>
                       </div>
@@ -180,8 +228,8 @@ export const ServiceChatView: React.FC<ServiceChatViewProps> = ({ requestId, use
           })}
         </main>
 
-        {/* Input - Bloqueado para ADM */}
-        {!isAdmin && (
+        {/* Input Area */}
+        {!isAdmin && !isBlocked && (
           <footer className="p-5 bg-white dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800 shrink-0">
               <div className="flex items-center gap-3">
                   <button className="p-3 bg-gray-50 dark:bg-gray-800 rounded-xl text-gray-400">
@@ -205,7 +253,42 @@ export const ServiceChatView: React.FC<ServiceChatViewProps> = ({ requestId, use
               </div>
           </footer>
         )}
+
+        {/* Modal de Confirmação Negócio Fechado */}
+        {showConfirmModal && (
+            <div className="fixed inset-0 z-[200] bg-black/80 backdrop-blur-sm flex items-center justify-center p-6 animate-in fade-in duration-200">
+                <div className="bg-white dark:bg-gray-900 w-full max-w-sm rounded-[2.5rem] p-8 shadow-2xl animate-in zoom-in-95">
+                    <div className="w-16 h-16 bg-emerald-100 dark:bg-emerald-900/30 rounded-2xl flex items-center justify-center mb-6 text-emerald-600 mx-auto">
+                        <Handshake size={32} />
+                    </div>
+                    <h3 className="text-xl font-bold text-gray-900 dark:text-white text-center mb-4">Confirmar Negócio Fechado?</h3>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 text-center mb-8 leading-relaxed">
+                        Ao confirmar, as outras conversas deste pedido serão encerradas e você terá o registro oficial de que fechou com este profissional.
+                    </p>
+                    <div className="space-y-3">
+                        <button 
+                            onClick={handleNegocioFechado}
+                            className="w-full bg-emerald-500 text-white font-black py-4 rounded-2xl shadow-xl shadow-emerald-500/20 active:scale-95 transition-all text-xs uppercase tracking-widest"
+                        >
+                            Sim, fechar negócio
+                        </button>
+                        <button 
+                            onClick={() => setShowConfirmModal(false)}
+                            className="w-full py-4 text-gray-400 font-bold text-xs uppercase tracking-widest hover:text-gray-600 transition-colors"
+                        >
+                            Cancelar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        )}
       </div>
     </div>
   );
 };
+
+const XCircle = ({ size, className }: { size?: number, className?: string }) => (
+    <svg width={size || 24} height={size || 24} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
+      <circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/>
+    </svg>
+  );

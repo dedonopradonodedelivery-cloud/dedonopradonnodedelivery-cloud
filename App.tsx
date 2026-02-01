@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Layout } from '@/components/layout/Layout';
 import { Header } from '@/components/layout/Header';
@@ -31,6 +32,7 @@ import { UserStatementView } from '@/components/UserStatementView';
 import { NotificationsView } from '@/components/NotificationsView';
 import { OnboardingScreen } from '@/components/OnboardingScreen';
 import { StoreProfileEdit } from '@/components/StoreProfileEdit';
+import { ServiceMessagesListView } from '@/components/ServiceMessagesListView';
 import { MapPin, X, Palette } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
@@ -66,6 +68,7 @@ const App: React.FC = () => {
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   
   const [activeServiceRequestId, setActiveServiceRequestId] = useState<string | null>(null);
+  const [activeProfessionalId, setActiveProfessionalId] = useState<string | null>(null);
   const [chatRole, setChatRole] = useState<'resident' | 'merchant' | 'admin'>('resident');
 
   const [sloganText, setSloganText] = useState('');
@@ -90,9 +93,10 @@ const App: React.FC = () => {
     
     if (view === 'service_chat' && data?.requestId) {
         setActiveServiceRequestId(data.requestId);
+        setActiveProfessionalId(data.professionalId || 'admin_auditoria');
         if (isAdmin) setChatRole('admin');
         else if (data.role) setChatRole(data.role);
-        else if (isMerchantMode && data.requestId.startsWith('REQ-')) setChatRole('merchant');
+        else if (isMerchantMode) setChatRole('merchant');
         else setChatRole('resident');
     }
 
@@ -141,7 +145,7 @@ const App: React.FC = () => {
     handleNavigate('subcategory_detail');
   };
 
-  const headerExclusionList = ['store_area', 'store_detail', 'profile', 'patrocinador_master', 'merchant_performance', 'neighborhood_posts', 'saved_posts', 'classifieds', 'services', 'services_landing', 'merchant_leads', 'service_chat', 'admin_panel', 'category_detail', 'subcategory_detail', 'sponsor_info', 'real_estate', 'jobs', 'job_detail', 'category_banner_sales', 'banner_sales_wizard', 'weekly_reward_page', 'user_coupons', 'notifications', 'store_profile', 'about', 'support', 'favorites', 'user_statement'];
+  const headerExclusionList = ['store_area', 'store_detail', 'profile', 'patrocinador_master', 'merchant_performance', 'neighborhood_posts', 'saved_posts', 'classifieds', 'services', 'services_landing', 'merchant_leads', 'service_chat', 'admin_panel', 'category_detail', 'subcategory_detail', 'sponsor_info', 'real_estate', 'jobs', 'job_detail', 'category_banner_sales', 'banner_sales_wizard', 'weekly_reward_page', 'user_coupons', 'notifications', 'store_profile', 'about', 'support', 'favorites', 'user_statement', 'service_messages_list'];
   
   const hideBottomNav = false;
 
@@ -185,7 +189,14 @@ const App: React.FC = () => {
                     {activeTab === 'explore' && <ExploreView stores={STORES} searchQuery={globalSearch} onStoreClick={handleSelectStore} onLocationClick={() => {}} onFilterClick={() => {}} onOpenPlans={() => {}} onNavigate={handleNavigate} />}
                     
                     {activeTab === 'services_landing' && <ServicesLandingView onBack={() => handleNavigate('home')} user={user} onRequireLogin={() => setIsAuthOpen(true)} onNavigate={handleNavigate} />}
-                    {activeTab === 'services' && <ServicesView onNavigate={(view) => handleNavigate(view)} onOpenChat={(id: string) => { setActiveServiceRequestId(id); setChatRole(isAdmin ? 'admin' : 'resident'); handleNavigate('service_chat'); }} />}
+                    {activeTab === 'services' && <ServicesView onNavigate={(view) => handleNavigate(view)} onOpenChat={(id: string) => { setActiveServiceRequestId(id); handleNavigate('service_messages_list'); }} />}
+
+                    {activeTab === 'service_messages_list' && (
+                        <ServiceMessagesListView 
+                            onBack={() => handleNavigate('home')}
+                            onOpenChat={(reqId, proId) => handleNavigate('service_chat', { requestId: reqId, professionalId: proId, role: 'resident' })}
+                        />
+                    )}
 
                     {activeTab === 'weekly_reward_page' && (
                         <WeeklyRewardPage 
@@ -269,17 +280,18 @@ const App: React.FC = () => {
                     )}
 
                     {activeTab === 'merchant_performance' && <MerchantPerformanceDashboard onBack={() => handleNavigate('profile')} onNavigate={handleNavigate} />}
-                    {activeTab === 'merchant_leads' && <MerchantLeadsView isAdmin={isAdmin} onBack={() => handleNavigate('profile')} onOpenChat={(id: string) => { setActiveServiceRequestId(id); setChatRole(isAdmin ? 'admin' : 'merchant'); handleNavigate('service_chat'); }} />}
+                    {activeTab === 'merchant_leads' && <MerchantLeadsView isAdmin={isAdmin} onBack={() => handleNavigate('profile')} onOpenChat={(id: string) => { handleNavigate('service_chat', { requestId: id, role: 'merchant' }); }} />}
 
                     {activeTab === 'service_chat' && activeServiceRequestId && (
                         <ServiceChatView 
                             requestId={activeServiceRequestId} 
+                            professionalId={activeProfessionalId || ''}
                             userRole={chatRole} 
                             onBack={() => {
                                 if (activeServiceRequestId.startsWith('DSG-')) {
                                     handleNavigate('home');
                                 } else {
-                                    handleNavigate(isMerchantMode ? 'merchant_leads' : 'home');
+                                    handleNavigate(isMerchantMode ? 'merchant_leads' : 'service_messages_list');
                                 }
                             }} 
                         />
