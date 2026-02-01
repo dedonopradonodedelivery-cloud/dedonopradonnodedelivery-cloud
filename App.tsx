@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Layout } from '@/components/layout/Layout';
 import { Header } from '@/components/layout/Header';
@@ -11,6 +12,7 @@ import { ServicesView } from '@/components/ServicesView';
 import { StoreAreaView } from '@/components/StoreAreaView';
 import { ClassifiedsView } from '@/components/ClassifiedsView';
 import { RealEstateView } from '@/components/RealEstateView';
+import { RealEstateWizard } from '@/components/RealEstateWizard';
 import { JobsView } from '@/components/JobsView';
 import { JobDetailView } from '@/components/JobDetailView';
 import { AdoptionView } from '@/components/AdoptionView';
@@ -58,7 +60,6 @@ const App: React.FC = () => {
   const { theme } = useTheme();
   const isAuthReturn = window.location.hash.includes('access_token') || window.location.search.includes('code=');
   
-  // Estados de Controle de Tela Inicial
   const [splashStage, setSplashStage] = useState(splashWasShownInSession || isAuthReturn ? 4 : 0);
   const [isOnboardingActive, setIsOnboardingActive] = useState(false);
   
@@ -85,11 +86,9 @@ const App: React.FC = () => {
   const isAdmin = user?.email === ADMIN_EMAIL;
   const isMerchantMode = userRole === 'lojista' || (isAdmin && viewMode === 'Lojista');
 
-  // Controle de Reivindicação de Loja
   const [isClaimFlowActive, setIsClaimFlowActive] = useState(false);
   const [storeToClaim, setStoreToClaim] = useState<Store | null>(null);
 
-  // --- LÓGICA DE ONBOARDING (REGRA DE PRIMEIRO ACESSO) ---
   useEffect(() => {
     const hasSeenOnboarding = localStorage.getItem('localizei_onboarding_seen') === 'true';
     if (!hasSeenOnboarding && !isAuthReturn) {
@@ -167,14 +166,11 @@ const App: React.FC = () => {
 
   const handleClaimSuccess = () => {
     setIsClaimFlowActive(false);
-    // Atualiza o lojista no app ou redireciona
     handleNavigate('profile');
   };
 
-  const headerExclusionList = ['store_area', 'store_detail', 'profile', 'patrocinador_master', 'merchant_performance', 'neighborhood_posts', 'saved_posts', 'classifieds', 'services', 'services_landing', 'merchant_leads', 'service_chat', 'admin_panel', 'category_detail', 'subcategory_detail', 'sponsor_info', 'real_estate', 'jobs', 'job_detail', 'adoption', 'donations', 'desapega', 'category_banner_sales', 'banner_sales_wizard', 'weekly_reward_page', 'user_coupons', 'notifications', 'store_profile', 'about', 'support', 'favorites', 'user_statement', 'service_messages_list', 'merchant_reviews', 'merchant_coupons', 'store_finance', 'store_support'];
+  const headerExclusionList = ['store_area', 'store_detail', 'profile', 'patrocinador_master', 'merchant_performance', 'neighborhood_posts', 'saved_posts', 'classifieds', 'services', 'services_landing', 'merchant_leads', 'service_chat', 'admin_panel', 'category_detail', 'subcategory_detail', 'sponsor_info', 'real_estate', 'jobs', 'job_detail', 'adoption', 'donations', 'desapega', 'category_banner_sales', 'banner_sales_wizard', 'weekly_reward_page', 'user_coupons', 'notifications', 'store_profile', 'about', 'support', 'favorites', 'user_statement', 'service_messages_list', 'merchant_reviews', 'merchant_coupons', 'store_finance', 'store_support', 'real_estate_wizard'];
   
-  const hideBottomNav = false;
-
   const RoleSwitcherModal: React.FC = () => {
     if (!isRoleSwitcherOpen) return null;
     return (
@@ -216,7 +212,7 @@ const App: React.FC = () => {
           )}
 
           <div className={`w-full max-w-md h-[100dvh] transition-opacity duration-500 ease-out ${splashStage >= 3 ? 'opacity-100' : 'opacity-0'}`}>
-              <Layout activeTab={activeTab} setActiveTab={handleNavigate} userRole={userRole} hideNav={hideBottomNav}>
+              <Layout activeTab={activeTab} setActiveTab={handleNavigate} userRole={userRole} hideNav={false}>
                   {!headerExclusionList.includes(activeTab) && (
                     <Header isDarkMode={theme === 'dark'} toggleTheme={() => {}} onNotificationClick={() => handleNavigate('notifications')} user={user} searchTerm={globalSearch} onSearchChange={setGlobalSearch} onNavigate={handleNavigate} activeTab={activeTab} userRole={userRole as any} stores={STORES} onStoreClick={handleSelectStore} isAdmin={isAdmin} viewMode={viewMode} onOpenViewSwitcher={() => setIsRoleSwitcherOpen(true)} />
                   )}
@@ -353,8 +349,9 @@ const App: React.FC = () => {
                     
                     {activeTab === 'store_detail' && selectedStore && <StoreDetailView store={selectedStore} onBack={() => handleNavigate(previousTab)} onClaim={() => handleClaimStore(selectedStore)} />}
                     {activeTab === 'classifieds' && <ClassifiedsView onBack={() => handleNavigate('home')} onNavigate={handleNavigate} user={user} onRequireLogin={() => setIsAuthOpen(true)} />}
-                    {activeTab === 'real_estate' && <RealEstateView onBack={() => handleNavigate('classifieds')} user={user} onRequireLogin={() => setIsAuthOpen(true)} />}
-                    {activeTab === 'jobs' && <JobsView onBack={() => handleNavigate('classifieds')} onJobClick={handleSelectJob} />}
+                    {activeTab === 'real_estate' && <RealEstateView onBack={() => handleNavigate('classifieds')} user={user} onRequireLogin={() => setIsAuthOpen(true)} onNavigate={handleNavigate} />}
+                    {activeTab === 'real_estate_wizard' && <RealEstateWizard user={user} onBack={() => handleNavigate('real_estate')} onComplete={() => handleNavigate('real_estate')} />}
+                    {activeTab === 'jobs' && <JobsView onBack={() => handleNavigate('classifieds')} onJobClick={handleSelectJob} onNavigate={handleNavigate} />}
                     {activeTab === 'job_detail' && selectedJob && <JobDetailView job={selectedJob} onBack={() => handleNavigate('jobs')} />}
                     {activeTab === 'adoption' && <AdoptionView onBack={() => handleNavigate('classifieds')} user={user} onRequireLogin={() => setIsAuthOpen(true)} onNavigate={handleNavigate} />}
                     {activeTab === 'donations' && <DonationsView onBack={() => handleNavigate('classifieds')} user={user} onRequireLogin={() => setIsAuthOpen(true)} onNavigate={handleNavigate} />}
@@ -362,10 +359,7 @@ const App: React.FC = () => {
                     {activeTab === 'neighborhood_posts' && <NeighborhoodPostsView onBack={() => handleNavigate('home')} onStoreClick={handleSelectStore} user={user} onRequireLogin={() => setIsAuthOpen(true)} userRole={userRole} onNavigate={handleNavigate} />}
                     {activeTab === 'saved_posts' && <SavedPostsView onBack={() => handleNavigate('profile')} onStoreClick={handleSelectStore} onRequireLogin={() => setIsAuthOpen(true)} />}
                     
-                    {/* REDIRECIONAMENTO FIXO PARA PAINEL DO LOJISTA ('profile') NO BOTÃO VOLTAR DO PATROCINADOR MASTER */}
                     {activeTab === 'sponsor_info' && <SponsorInfoView onBack={() => handleNavigate('profile')} onNavigate={handleNavigate} />}
-                    
-                    {/* CORREÇÃO OBRIGATÓRIA: Botão voltar da tela Patrocinador Master agora retorna SEMPRE para a HOME */}
                     {activeTab === 'patrocinador_master' && <PatrocinadorMasterScreen onBack={() => handleNavigate('home')} />}
                     
                     {activeTab === 'about' && <AboutView onBack={() => handleNavigate(previousTab)} />}

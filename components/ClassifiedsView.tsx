@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo, useRef } from 'react';
 import { User } from '@supabase/supabase-js';
 import { 
@@ -172,7 +173,7 @@ const CategoryBlock: React.FC<CategoryBlockProps> = ({ category, items, onItemCl
     );
 };
 
-const CreateClassifiedModal: React.FC<{ isOpen: boolean; onClose: () => void; user: User | null; initialCategory: string | null }> = ({ isOpen, onClose, user, initialCategory }) => {
+const CreateClassifiedModal: React.FC<{ isOpen: boolean; onClose: () => void; user: User | null; initialCategory: string | null; onNavigate: (view: string) => void }> = ({ isOpen, onClose, user, initialCategory, onNavigate }) => {
     const [step, setStep] = useState(initialCategory ? 2 : 1);
     const [selectedCat, setSelectedCat] = useState<string | null>(initialCategory);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -186,6 +187,16 @@ const CreateClassifiedModal: React.FC<{ isOpen: boolean; onClose: () => void; us
     }, [isOpen, initialCategory]);
 
     if (!isOpen) return null;
+
+    const handleCategorySelect = (catName: string) => {
+        if (catName === 'Imóveis Comerciais') {
+            onClose();
+            onNavigate('real_estate_wizard');
+            return;
+        }
+        setSelectedCat(catName);
+        setStep(2);
+    };
 
     const handlePublish = () => {
         setIsSubmitting(true);
@@ -211,7 +222,7 @@ const CreateClassifiedModal: React.FC<{ isOpen: boolean; onClose: () => void; us
                             {CLASSIFIED_CATEGORIES.map(cat => (
                                 <button 
                                     key={cat.id} 
-                                    onClick={() => { setSelectedCat(cat.name); setStep(2); }}
+                                    onClick={() => handleCategorySelect(cat.name)}
                                     className="p-5 rounded-2xl bg-gray-50 dark:bg-gray-800 border-2 border-transparent hover:border-blue-500 transition-all text-left flex flex-col gap-3 group"
                                 >
                                     <div className="text-blue-500 group-hover:scale-110 transition-transform">{cat.icon}</div>
@@ -407,7 +418,7 @@ export const ClassifiedsView: React.FC<ClassifiedsViewProps> = ({ onBack, onNavi
         <div className="flex items-center gap-4 mb-5">
           <button onClick={onBack} className="p-2.5 bg-gray-50 dark:bg-gray-800 rounded-xl text-gray-500 transition-all active:scale-90 shadow-sm"><ChevronLeft size={20}/></button>
           <div className="text-center flex-1">
-            <h1 className="text-xl font-black text-gray-900 dark:text-white font-display uppercase tracking-tighter">Classificados JPA</h1>
+            <h1 className="text-xl font-black text-gray-900 dark:text-white font-display uppercase tracking-tighter leading-none">CLASSIFICADOS JPA</h1>
             <p className="text-[10px] text-blue-500 font-black uppercase tracking-widest mt-1">Conectando o bairro</p>
           </div>
           <button 
@@ -429,13 +440,13 @@ export const ClassifiedsView: React.FC<ClassifiedsViewProps> = ({ onBack, onNavi
           />
         </div>
 
-        <div className="flex justify-center px-1">
+        <div className="flex justify-center px-1 mb-2">
           <button 
               onClick={() => handleAnunciarClick(null)}
-              className="px-6 py-2.5 bg-[#1E5BFF] hover:bg-blue-600 text-white font-black rounded-full shadow-lg shadow-blue-500/10 flex items-center justify-center gap-2 uppercase tracking-widest text-[11px] border border-white/10 active:scale-95 transition-all"
+              className="px-6 py-2 bg-[#1E5BFF] hover:bg-blue-600 text-white font-black rounded-full shadow-lg shadow-blue-500/10 flex items-center justify-center gap-2 uppercase tracking-widest text-[10px] border border-white/10 active:scale-95 transition-all h-10"
           >
               <Plus size={14} strokeWidth={4} />
-              Anunciar no bairro
+              Começar a anunciar
           </button>
         </div>
       </header>
@@ -528,6 +539,7 @@ export const ClassifiedsView: React.FC<ClassifiedsViewProps> = ({ onBack, onNavi
         onClose={() => setIsCreateModalOpen(false)} 
         user={user} 
         initialCategory={modalInitialCategory}
+        onNavigate={onNavigate}
       />
 
       <FilterModal 

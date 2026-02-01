@@ -41,7 +41,9 @@ import {
   ClipboardList,
   FileArchive,
   CornerDownRight,
-  ShieldAlert
+  ShieldAlert,
+  // FIX: Added missing Newspaper icon import
+  Newspaper
 } from 'lucide-react';
 import { User } from '@supabase/supabase-js';
 import { StoreBannerEditor } from '@/components/StoreBannerEditor';
@@ -68,30 +70,40 @@ const MOCK_OCCUPANCY: Record<string, Record<string, boolean>> = {
 const DISPLAY_MODES = [
   { 
     id: 'home', 
-    label: 'Home Premium', 
+    label: 'Home', 
     icon: Home, 
-    price: 299.99,
-    originalPrice: 499.00,
+    price: 49.90,
+    originalPrice: 199.90,
     description: 'Exibido no carrossel da página inicial para todos os usuários.',
     whyChoose: 'Ideal para máxima visibilidade imediata.'
   },
   { 
     id: 'cat', 
-    label: 'Categorias Premium', 
+    label: 'Categorias', 
     icon: LayoutGrid, 
-    price: 149.99,
-    originalPrice: 249.00,
+    price: 29.90,
+    originalPrice: 149.90,
     description: 'Exibido no topo das buscas por produtos ou serviços específicos.',
     whyChoose: 'Impacta o cliente no momento da decisão.'
   },
   { 
-    id: 'home_simples', 
-    label: 'Home Simples', 
+    id: 'classifieds', 
+    label: 'Classificados', 
+    icon: Newspaper, 
+    price: 29.99,
+    originalPrice: 79.99,
+    isNew: true,
+    description: 'Destaque visual na aba de Classificados do bairro.',
+    whyChoose: 'Apenas 2 banners por tela. Alta visibilidade para oportunidades locais.'
+  },
+  { 
+    id: 'combo', 
+    label: 'Home + Categorias', 
     icon: Zap, 
-    price: 69.99,
-    originalPrice: 99.00,
-    description: 'Visibilidade rotativa na página inicial.',
-    whyChoose: 'Custo benefício para marcas locais.'
+    price: 69.90,
+    originalPrice: 349.80,
+    description: 'Destaque na página inicial e em todas as categorias.',
+    whyChoose: 'Mais alcance, cliques e chances de venda.'
   },
 ];
 
@@ -266,7 +278,8 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
   };
 
   const prices = useMemo(() => {
-    if (!selectedMode) return { current: 0, original: 0, isPackage: false, installments: 0, monthly: 0 };
+    /* FIX: Added 'count' to the returned object of useMemo to resolve the 'Cannot find name totals' error. 'count' is derived from the multiplier of the selected period. */
+    if (!selectedMode) return { current: 0, original: 0, isPackage: false, installments: 0, monthly: 0, count: 0 };
     const hoodsMult = Math.max(1, selectedNeighborhoods.length);
     const period = dynamicPeriods.find(p => selectedPeriods.includes(p.id));
     const periodsMult = period ? period.multiplier : 1;
@@ -283,7 +296,8 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
       original,
       isPackage: period?.days === 90,
       installments: 3,
-      monthly: (basePrice * 3 * hoodsMult) / 3 
+      monthly: (basePrice * 3 * hoodsMult) / 3,
+      count: period?.multiplier || 0
     };
   }, [selectedMode, selectedPeriods, selectedNeighborhoods, artChoice, dynamicPeriods]);
 
@@ -420,7 +434,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
                 <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none"></div>
                 <div className="relative z-10">
                     <div className="flex items-center gap-2 mb-3">
-                        <ShieldAlert className="w-5 h-5 text-blue-500" />
+                        <ShieldAlert size={14} className="text-blue-500" />
                         <h3 className="text-lg font-black text-white leading-tight uppercase tracking-tighter">
                             Apareça no topo de JPA
                         </h3>
@@ -446,13 +460,19 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
                 <div className={`p-4 rounded-2xl shrink-0 ${selectedMode?.id === mode.id ? 'bg-blue-50 text-white shadow-lg' : 'bg-white/5 text-slate-400'}`}><mode.icon size={28} /></div>
                 <div className="flex-1 min-w-0 pr-4">
                   <div className="flex items-center justify-between mb-1">
-                    <p className="text-sm font-black text-white uppercase tracking-tight">{mode.label}</p>
+                    <div className="flex items-center gap-2">
+                        <p className="text-sm font-black text-white uppercase tracking-tight">{mode.label}</p>
+                        {mode.id === 'classifieds' && (
+                            <span className="bg-amber-400 text-slate-900 text-[8px] font-black px-1.5 py-0.5 rounded uppercase tracking-widest animate-pulse">Lançamento</span>
+                        )}
+                    </div>
                     <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 ${selectedMode?.id === mode.id ? 'border-blue-500' : 'border-slate-700'}`}>{selectedMode?.id === mode.id && <div className="w-2 h-2 bg-blue-500 rounded-full" />}</div>
                   </div>
                   <div className="flex items-baseline gap-1.5 mb-1.5">
                     <span className="text-xs text-slate-500 line-through">R$ {mode.originalPrice.toFixed(2)}</span>
                     <span className="text-sm font-black text-white">por R$ {mode.price.toFixed(2)}</span>
                   </div>
+                  {mode.id === 'classifieds' && <p className="text-[9px] font-black text-amber-400 uppercase tracking-widest mb-1.5">Valor especial de lançamento</p>}
                   <p className="text-[10px] text-slate-300 font-medium leading-relaxed">{mode.description}</p>
                 </div>
               </button>
@@ -488,6 +508,14 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
                 </h3>
                 <button onClick={selectAllAvailableHoods} className="text-[9px] font-black text-[#1E5BFF] uppercase tracking-widest bg-blue-500/10 px-3 py-1.5 rounded-xl border border-blue-500/20 active:scale-95 transition-all">Selecionar Todos</button>
             </div>
+            {selectedMode?.id === 'classifieds' && (
+                <div className="bg-slate-900 border border-white/5 p-4 rounded-2xl mb-2">
+                    <div className="flex justify-between items-center">
+                        <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Espaços disponíveis nos Classificados:</span>
+                        <span className="text-xs font-black text-[#1E5BFF]">18 espaços</span>
+                    </div>
+                </div>
+            )}
             <div className="grid grid-cols-2 gap-3">
                 {NEIGHBORHOODS.map(hood => {
                     const { available } = checkHoodAvailability(hood);
@@ -501,6 +529,25 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
                 })}
             </div>
         </section>
+
+        {selectedMode?.id === 'classifieds' && (
+            <section className="space-y-4">
+                <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-blue-500 px-1">Por que anunciar nos Classificados?</h3>
+                <div className="space-y-3">
+                    {[
+                        "Destaque visual no momento de decisão do morador",
+                        "Exibição segmentada por bairro",
+                        "Apenas 2 banners por tela (baixa concorrência)",
+                        "Alta visibilidade para serviços, imóveis e oportunidades locais"
+                    ].map((arg, i) => (
+                        <div key={i} className="flex gap-3 items-start bg-white/5 p-4 rounded-2xl border border-white/5">
+                            <CheckCircle2 size={16} className="text-emerald-400 shrink-0 mt-0.5" />
+                            <p className="text-xs text-slate-300 font-medium leading-relaxed">{arg}</p>
+                        </div>
+                    ))}
+                </div>
+            </section>
+        )}
 
         <section ref={creativeRef} className={`space-y-8 transition-all duration-500 ${selectedNeighborhoods.length === 0 ? 'opacity-20 pointer-events-none' : 'opacity-100'}`}>
           <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-blue-500 flex items-center gap-2 px-1"><Palette size={14} /> 4. Design da Arte</h3>
@@ -554,11 +601,19 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
           ) : (
               <div className="flex flex-col items-center">
                   <div className="flex items-center gap-2 mb-0.5">
-                    <span className="text-[10px] font-black text-white/60 uppercase tracking-widest">RESUMO DO PEDIDO</span>
+                    <span className="text-[10px] font-black text-white/60 uppercase tracking-widest">
+                        PRODUTO: {selectedMode?.id === 'classifieds' ? 'BANNER NOS CLASSIFICADOS' : `BANNER ${selectedMode.label.toUpperCase()}`}
+                    </span>
                     <ArrowRight size={14} className="text-white/60" />
                   </div>
                   <div className="flex items-center gap-3">
+                    <span className="text-xs text-slate-400 line-through">R$ {prices.original.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
                     <span className="text-xl font-black text-white">R$ {prices.current.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                  </div>
+                  <div className="flex items-center gap-2 mt-0.5">
+                    {/* FIX: Used prices.count instead of the undefined totals.count to fix the "Cannot find name 'totals'" error. */}
+                    <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{prices.count} Mês(es)</span>
+                    <span className="text-[9px] font-black text-emerald-400 uppercase tracking-widest">PAGAMENTO ÚNICO</span>
                   </div>
               </div>
           )}

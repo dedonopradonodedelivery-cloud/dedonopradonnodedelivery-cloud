@@ -3,7 +3,7 @@ import React, { useState, useMemo } from 'react';
 import { User } from '@supabase/supabase-js';
 import { 
   ChevronLeft, SlidersHorizontal, MapPin, Car, Maximize2, 
-  Building2, ArrowRight
+  Building2, ArrowRight, Plus
 } from 'lucide-react';
 import { MOCK_REAL_ESTATE_PROPERTIES, STORES } from '../constants';
 import { RealEstateProperty, Store } from '../types';
@@ -14,7 +14,7 @@ interface RealEstateViewProps {
   onBack: () => void;
   user: User | null;
   onRequireLogin: () => void;
-  onNavigate?: (view: string, data?: any) => void;
+  onNavigate: (view: string, data?: any) => void;
 }
 
 const PropertyCard: React.FC<{ property: RealEstateProperty }> = ({ property }) => {
@@ -96,33 +96,21 @@ export const RealEstateView: React.FC<RealEstateViewProps> = ({ onBack, user, on
 
   const filteredProperties = useMemo(() => {
     return MOCK_REAL_ESTATE_PROPERTIES.filter(p => {
-        // Base: Apenas Comercial
         if (p.type !== 'Comercial') return false;
-
-        // Filtro por Transação
         if (filters.transaction && p.transaction !== filters.transaction) return false;
-
-        // Filtro por Tipo de Imóvel
         if (filters.types.length > 0 && !filters.types.includes(p.propertyTypeCom || '')) return false;
-
-        // Filtro por Nome do Prédio (Contém / Parcial)
         if (filters.buildingName.trim() !== '') {
             const search = filters.buildingName.toLowerCase();
             const bName = (p.buildingName || '').toLowerCase();
             const title = p.title.toLowerCase();
             const desc = p.description.toLowerCase();
-            
             if (!bName.includes(search) && !title.includes(search) && !desc.includes(search)) {
                 return false;
             }
         }
-
-        // Filtro por Preço
         const minP = parseFloat(filters.priceMin) || 0;
         const maxP = parseFloat(filters.priceMax) || Infinity;
         if (p.price < minP || p.price > maxP) return false;
-
-        // Filtro por Vagas
         if (filters.parkingSpaces !== null) {
             const pSpaces = p.parkingSpaces || 0;
             if (filters.parkingSpaces === 3) {
@@ -131,11 +119,8 @@ export const RealEstateView: React.FC<RealEstateViewProps> = ({ onBack, user, on
                 if (pSpaces !== filters.parkingSpaces) return false;
             }
         }
-
-        // Filtros Binários
         if (filters.highCeiling === true && !p.highCeiling) return false;
         if (filters.loadingAccess === true && !p.loadingAccess) return false;
-
         return true;
     });
   }, [filters]);
@@ -149,7 +134,6 @@ export const RealEstateView: React.FC<RealEstateViewProps> = ({ onBack, user, on
     }).length;
   }, [filters]);
 
-  // Destaque da categoria
   const categoryHighlight = useMemo(() => {
     return STORES.find(s => s.id === 'grupo-esquematiza') || STORES[0];
   }, []);
@@ -159,18 +143,23 @@ export const RealEstateView: React.FC<RealEstateViewProps> = ({ onBack, user, on
     setIsFilterOpen(false);
   };
 
+  const handleStartAnnouncement = () => {
+    if (!user) onRequireLogin();
+    else onNavigate('real_estate_wizard');
+  };
+
   return (
     <div className="min-h-screen bg-[#F8F9FC] dark:bg-gray-950 font-sans">
       <header className="sticky top-0 z-40 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md px-5 py-6 border-b border-gray-100 dark:border-gray-800">
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-4 mb-5">
           <button onClick={onBack} className="p-2.5 bg-gray-50 dark:bg-gray-800 rounded-xl text-gray-500 transition-all active:scale-90 shadow-sm">
             <ChevronLeft size={20} />
           </button>
-          <div className="flex-1">
-            <h1 className="text-xl font-black text-gray-900 dark:text-white uppercase tracking-tighter leading-none">Imóveis Comerciais</h1>
+          <div className="text-center flex-1">
+            <h1 className="text-xl font-black text-gray-900 dark:text-white font-display uppercase tracking-tighter leading-none">Imóveis Comerciais</h1>
             <p className="text-[10px] text-blue-500 font-black uppercase tracking-widest mt-1">Oportunidades no Bairro</p>
           </div>
-          <button onClick={() => setIsFilterOpen(true)} className="relative p-2.5 bg-gray-50 dark:bg-gray-800 rounded-xl text-gray-500 shadow-sm active:scale-90 transition-all">
+          <button onClick={() => setIsFilterOpen(true)} className="relative p-2.5 bg-gray-50 dark:bg-gray-800 rounded-xl text-gray-400 shadow-sm active:scale-90 transition-all">
             <SlidersHorizontal size={20}/>
             {activeFiltersCount > 0 && (
               <div className="absolute -top-1 -right-1 w-5 h-5 bg-blue-600 text-white text-[10px] font-black rounded-full flex items-center justify-center border-2 border-white dark:border-gray-900 shadow-sm animate-in zoom-in">
@@ -179,13 +168,22 @@ export const RealEstateView: React.FC<RealEstateViewProps> = ({ onBack, user, on
             )}
           </button>
         </div>
+
+        <div className="flex justify-center px-1">
+          <button 
+              onClick={handleStartAnnouncement}
+              className="px-6 py-2 bg-[#1E5BFF] hover:bg-blue-600 text-white font-black rounded-full shadow-lg shadow-blue-500/10 flex items-center justify-center gap-2 uppercase tracking-widest text-[10px] border border-white/10 active:scale-95 transition-all h-10"
+          >
+              <Plus size={14} strokeWidth={4} />
+              Começar a anunciar
+          </button>
+        </div>
       </header>
 
       <main className="p-5 pb-32">
-        {/* BLOCO DE DESTAQUE ÚNICO */}
         <ClassifiedsCategoryHighlight 
           store={categoryHighlight} 
-          onClick={(store) => onNavigate?.('store_detail', { store })} 
+          onClick={(store) => onNavigate('store_detail', { store })} 
         />
 
         <div className="grid grid-cols-1 gap-6">
