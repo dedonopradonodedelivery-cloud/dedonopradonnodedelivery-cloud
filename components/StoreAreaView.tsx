@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   ChevronRight, 
   Megaphone, 
@@ -21,11 +21,13 @@ import {
   Moon,
   Sun,
   Zap,
-  ShoppingBag
+  ShoppingBag,
+  Loader2
 } from 'lucide-react';
 import { User as SupabaseUser } from '@supabase/supabase-js';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
+import { supabase } from '@/lib/supabaseClient';
 
 interface StoreAreaViewProps {
   onBack: () => void;
@@ -88,6 +90,23 @@ const SectionHeader: React.FC<{ title: string; icon?: React.ElementType }> = ({ 
 export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate, user }) => {
   const { signOut } = useAuth();
   const { theme, toggleTheme } = useTheme();
+  const [merchantData, setMerchantData] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchMerchant = async () => {
+      if (!user) return;
+      try {
+        const { data } = await supabase.from('merchants').select('category, subcategory').eq('owner_id', user.id).maybeSingle();
+        setMerchantData(data);
+      } catch (e) {
+        console.error("Erro ao carregar dados do lojista", e);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchMerchant();
+  }, [user]);
 
   const handleLogout = async () => {
     if (confirm('Deseja realmente sair da sua conta de lojista?')) {
@@ -96,8 +115,21 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
     }
   };
 
+  // Regra de Negócio: Categorias que recebem leads de serviço
+  const SERVICE_CATEGORIES = ['Serviços', 'Pro', 'Casa', 'Autos', 'Saúde', 'Beleza'];
+  const canReceiveLeads = merchantData && SERVICE_CATEGORIES.includes(merchantData.category);
+
   const storeName = user?.user_metadata?.store_name || "Sua Loja";
   const avatarUrl = user?.user_metadata?.avatar_url || `https://ui-avatars.com/api/?name=${storeName.replace(' ', '+')}&background=1E5BFF&color=fff`;
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-white dark:bg-gray-950 flex flex-col items-center justify-center">
+        <Loader2 className="animate-spin text-[#1E5BFF] mb-4" size={32} />
+        <p className="text-xs font-black text-gray-400 uppercase tracking-widest">Carregando Painel...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#F8F9FB] dark:bg-gray-950 font-sans animate-in fade-in duration-500 pb-32">
@@ -126,20 +158,22 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
 
       <div className="px-6 space-y-10">
         
-        {/* NOVO BLOCO DE LEADS */}
-        <section>
-          <SectionHeader title="Oportunidades" icon={Zap} />
-          <div className="bg-white dark:bg-gray-800 rounded-[2.5rem] border border-gray-100 dark:border-gray-700 overflow-hidden shadow-sm">
-            <ServiceBlock 
-              icon={ShoppingBag} 
-              label="Central de Leads" 
-              description="Veja pedidos de serviços e novos orçamentos"
-              onClick={() => onNavigate('merchant_leads')}
-              colorClass="bg-blue-50 text-blue-600"
-              badge={3}
-            />
-          </div>
-        </section>
+        {/* BLOCO DE OPORTUNIDADES (VISÍVEL APENAS PARA CATEGORIAS DE SERVIÇO COMPATÍVEIS) */}
+        {canReceiveLeads && (
+            <section className="animate-in slide-in-from-bottom-2 duration-500">
+                <SectionHeader title="Oportunidades" icon={Zap} />
+                <div className="bg-white dark:bg-gray-800 rounded-[2.5rem] border border-gray-100 dark:border-gray-700 overflow-hidden shadow-sm">
+                    <ServiceBlock 
+                    icon={ShoppingBag} 
+                    label="Central de Leads" 
+                    description="Veja pedidos de serviços e novos orçamentos"
+                    onClick={() => onNavigate('merchant_leads')}
+                    colorClass="bg-blue-50 text-blue-600"
+                    badge={3}
+                    />
+                </div>
+            </section>
+        )}
 
         <section>
           <SectionHeader title="Ações" icon={Sparkles} />

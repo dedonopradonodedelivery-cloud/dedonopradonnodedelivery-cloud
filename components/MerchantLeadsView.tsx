@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { 
     ChevronLeft, 
     ArrowRight, 
@@ -16,6 +16,8 @@ import {
     Users
 } from 'lucide-react';
 import { ServiceRequest } from '../types';
+import { supabase } from '../lib/supabaseClient';
+import { useAuth } from '../contexts/AuthContext';
 
 interface MerchantLeadsViewProps {
   onBack: () => void;
@@ -23,16 +25,52 @@ interface MerchantLeadsViewProps {
 }
 
 export const MerchantLeadsView: React.FC<MerchantLeadsViewProps> = ({ onBack, onOpenChat }) => {
+  const { user } = useAuth();
   const [requests, setRequests] = useState<ServiceRequest[]>([]);
   const [unlockedLeads, setUnlockedLeads] = useState<string[]>([]);
+  const [merchantProfile, setMerchantProfile] = useState<any>(null);
   const [isProcessing, setIsProcessing] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const saved = localStorage.getItem('service_requests_mock');
-    const unlocked = JSON.parse(localStorage.getItem('unlocked_leads_mock') || '[]');
-    if (saved) setRequests(JSON.parse(saved));
-    setUnlockedLeads(unlocked);
-  }, []);
+    const loadData = async () => {
+        setIsLoading(true);
+        try {
+            // 1. Carrega Perfil do Lojista
+            if (user) {
+                const { data: profile } = await supabase.from('merchants').select('category, subcategory').eq('owner_id', user.id).maybeSingle();
+                setMerchantProfile(profile);
+            }
+
+            // 2. Carrega Leads e Unlocked
+            const saved = localStorage.getItem('service_requests_mock');
+            const unlocked = JSON.parse(localStorage.getItem('unlocked_leads_mock') || '[]');
+            if (saved) setRequests(JSON.parse(saved));
+            setUnlockedLeads(unlocked);
+        } catch (e) {
+            console.error(e);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+    loadData();
+  }, [user]);
+
+  // --- REGRA DE COMPATIBILIDADE ---
+  const filteredRequests = useMemo(() => {
+    if (!merchantProfile) return [];
+    
+    return requests.filter(req => {
+        const leadType = req.serviceType.toLowerCase();
+        const mCat = merchantProfile.category?.toLowerCase();
+        const mSub = merchantProfile.subcategory?.toLowerCase();
+
+        // Match se o tipo do serviço for igual à categoria ou subcategoria do lojista
+        return leadType === mCat || leadType === mSub || 
+               // Ou se o lojista está em categorias genéricas de serviço
+               (mCat === 'serviços' && ['obras & reformas', 'serviços rápidos', 'casa & instalações'].includes(leadType));
+    });
+  }, [requests, merchantProfile]);
 
   const handleUnlock = (requestId: string) => {
     setIsProcessing(requestId);
@@ -45,6 +83,14 @@ export const MerchantLeadsView: React.FC<MerchantLeadsViewProps> = ({ onBack, on
         setIsProcessing(null);
     }, 1500);
   };
+
+  if (isLoading) {
+    return (
+        <div className="min-h-screen bg-white dark:bg-gray-950 flex flex-col items-center justify-center">
+            <Loader2 className="animate-spin text-[#1E5BFF]" size={32} />
+        </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#F8F9FC] dark:bg-gray-950 font-sans pb-32 animate-in fade-in duration-500">
@@ -93,19 +139,22 @@ export const MerchantLeadsView: React.FC<MerchantLeadsViewProps> = ({ onBack, on
             </ul>
         </section>
 
-        {/* Lista de Leads */}
+        {/* Lista de Leads Filtrada */}
         <div className="space-y-4">
             <div className="flex items-center justify-between px-1">
-                <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Pedidos recentes</h3>
+                <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Oportunidades para {merchantProfile?.subcategory || merchantProfile?.category}</h3>
                 <span className="text-[9px] font-bold text-blue-500 bg-blue-50 dark:bg-blue-900/30 px-2 py-0.5 rounded-full">Atualizado agora</span>
             </div>
             
-            {requests.length === 0 ? (
-                <div className="py-20 text-center flex flex-col items-center opacity-30">
-                    <ShoppingBag size={48} className="text-gray-400 mb-4" />
-                    <p className="text-sm font-bold uppercase tracking-widest">Aguardando novos pedidos...</p>
+            {filteredRequests.length === 0 ? (
+                <div className="py-20 text-center flex flex-col items-center">
+                    <ShoppingBag size={48} className="text-gray-200 mb-4" />
+                    <p className="text-sm font-bold uppercase tracking-widest text-gray-400">Aguardando novos pedidos compatíveis...</p>
+                    <p className="text-[10px] text-gray-400 max-w-[200px] mt-2 leading-relaxed">
+                        Você só visualiza leads relacionados à sua categoria <strong>({merchantProfile?.category})</strong>.
+                    </p>
                 </div>
-            ) : requests.map(req => {
+            ) : filteredRequests.map(req => {
                 const isUnlocked = unlockedLeads.includes(req.id);
                 return (
                     <div key={req.id} className={`bg-white dark:bg-gray-900 rounded-[2.5rem] border transition-all ${isUnlocked ? 'border-emerald-500/30 shadow-md' : 'border-gray-100 dark:border-gray-800 shadow-sm'} overflow-hidden`}>
@@ -114,7 +163,7 @@ export const MerchantLeadsView: React.FC<MerchantLeadsViewProps> = ({ onBack, on
                             <div className="flex justify-between items-start mb-4">
                                 <div className="space-y-1">
                                     <h4 className="font-black text-gray-900 dark:text-white text-base uppercase tracking-tighter">
-                                        {req.serviceType.toUpperCase() === 'GERAL' ? 'SERVIÇO RÁPIDO' : req.serviceType.toUpperCase()}
+                                        {req.serviceType.toUpperCase()}
                                     </h4>
                                     <div className="flex flex-wrap items-center gap-2">
                                         <div className="flex items-center gap-1 bg-gray-50 dark:bg-gray-800 px-2 py-1 rounded-lg border border-gray-100 dark:border-gray-700 text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-tight">
