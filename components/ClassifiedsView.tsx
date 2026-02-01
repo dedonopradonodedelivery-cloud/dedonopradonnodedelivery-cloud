@@ -29,7 +29,7 @@ import { MasterSponsorBanner } from './MasterSponsorBanner';
 
 const CLASSIFIED_CATEGORIES = [
   { id: 'servicos', name: 'Orçamento de Serviços', slug: 'servicos', icon: <Wrench />, color: 'bg-brand-blue' },
-  { id: 'imoveis', name: 'Imóveis', slug: 'imoveis', icon: <Building2 />, color: 'bg-brand-blue' },
+  { id: 'imoveis', name: 'Imóveis Comerciais', slug: 'imoveis', icon: <Building2 />, color: 'bg-brand-blue' },
   { id: 'emprego', name: 'Vaga de emprego', slug: 'emprego', icon: <Briefcase />, color: 'bg-brand-blue' },
   { id: 'adocao', name: 'Adoção', slug: 'adocao', icon: <PawPrint />, color: 'bg-brand-blue' },
   { id: 'doacoes', name: 'Doações', slug: 'doacoes', icon: <Heart />, color: 'bg-brand-blue' },
@@ -43,14 +43,13 @@ const ClassifiedCategoryButton: React.FC<{ category: any; onClick: () => void }>
         {React.cloneElement(category.icon as any, { className: "w-8 h-8 text-white drop-shadow-md", strokeWidth: 2.5 })}
       </div>
       <div className="w-full bg-black/10 backdrop-blur-[2px] py-1 rounded-b-[20px] -mx-2 -mb-2">
-        <span className="block w-full text-[10px] font-black text-white text-center uppercase tracking-tight">{category.name}</span>
+        <span className="block w-full text-[10px] font-black text-white text-center uppercase tracking-tight leading-tight">{category.name}</span>
       </div>
     </div>
   </button>
 );
 
 const ClassifiedCard: React.FC<{ item: Classified; onClick: () => void }> = ({ item, onClick }) => {
-    // Lógica de diferenciação visual por tipo
     const isDonation = item.category === 'Doações em geral';
     const isAdoption = item.category === 'Adoção de pets';
     const isJob = item.category === 'Empregos';
@@ -67,7 +66,6 @@ const ClassifiedCard: React.FC<{ item: Classified; onClick: () => void }> = ({ i
                     alt={item.title} 
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                 />
-                {/* Selos de Diferenciação */}
                 <div className="absolute top-3 right-3 flex flex-col gap-2 items-end">
                     {isDonation && (
                         <span className="px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest bg-emerald-500 text-white shadow-lg border border-white/20">
@@ -155,7 +153,6 @@ const CategorySection: React.FC<{
   )
 };
 
-// MODAL DE CRIAÇÃO SIMULADO
 const CreateClassifiedModal: React.FC<{ isOpen: boolean; onClose: () => void; user: User | null }> = ({ isOpen, onClose, user }) => {
     const [step, setStep] = useState(1);
     const [selectedCat, setSelectedCat] = useState<string | null>(null);
@@ -280,14 +277,13 @@ export const ClassifiedsView: React.FC<ClassifiedsViewProps> = ({ onBack, onNavi
         return matchSearch && matchHood;
     });
 
-    // Lógica simples de ordenação dos filtros rápidos
     if (quickFilter === 'price') {
         filtered = filtered.filter(item => !!item.price);
     }
 
     const mapping: Record<string, string> = {
       'servicos': 'Orçamento de Serviços',
-      'imoveis': 'Imóveis',
+      'imoveis': 'Imóveis Comerciais',
       'emprego': 'Empregos',
       'adocao': 'Adoção de pets',
       'doacoes': 'Doações em geral',
@@ -303,8 +299,6 @@ export const ClassifiedsView: React.FC<ClassifiedsViewProps> = ({ onBack, onNavi
 
   return (
     <div className="min-h-screen bg-[#F8F9FC] dark:bg-gray-950 font-sans animate-in fade-in duration-500 relative">
-      
-      {/* Botão de Anunciar Fixo */}
       <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-[1000] w-full max-w-[280px] px-4">
         <button 
             onClick={handleAnunciarClick}
@@ -329,14 +323,13 @@ export const ClassifiedsView: React.FC<ClassifiedsViewProps> = ({ onBack, onNavi
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
           <input 
             type="text" 
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            value={searchTerm} 
+            onChange={(e) => setSearchTerm(e.target.value)} 
             placeholder="O que você procura no bairro?"
             className="w-full bg-gray-100 dark:bg-gray-800 border-none py-4 pl-11 pr-4 rounded-2xl text-sm font-medium outline-none focus:ring-2 focus:ring-[#1E5BFF]/30 dark:text-white shadow-inner"
           />
         </div>
 
-        {/* FILTROS RÁPIDOS ADICIONADOS */}
         <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
             {[
                 { id: 'recent', label: 'Mais recentes' },
@@ -359,11 +352,10 @@ export const ClassifiedsView: React.FC<ClassifiedsViewProps> = ({ onBack, onNavi
       </header>
       
       <main className="p-5 pb-48">
-        {/* Filtro de Bairro */}
         <div className="flex gap-2 overflow-x-auto no-scrollbar pb-8">
           <button 
             onClick={() => toggleNeighborhood('Jacarepaguá (todos)')}
-            className={`flex-shrink-0 px-5 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest border transition-all ${selectedNeighborhoods.length === 0 ? 'bg-gray-900 text-white border-gray-900' : 'bg-white dark:bg-gray-800 text-gray-400 border-gray-100 dark:border-gray-700'}`}
+            className={`flex-shrink-0 px-5 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest border transition-all ${selectedNeighborhoods.length === 0 ? 'bg-gray-900 text-white border-gray-900' : 'bg-white dark:bg-gray-800 text-gray-400 border-gray-100 dark:border-gray-800'}`}
           >
             Jacarepaguá (Todos)
           </button>
@@ -371,14 +363,13 @@ export const ClassifiedsView: React.FC<ClassifiedsViewProps> = ({ onBack, onNavi
             <button 
               key={hood}
               onClick={() => toggleNeighborhood(hood)}
-              className={`flex-shrink-0 px-5 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest border transition-all ${selectedNeighborhoods.includes(hood) ? 'bg-blue-600 text-white border-blue-600 shadow-md' : 'bg-white dark:bg-gray-800 text-gray-400 border-gray-100 dark:border-gray-700'}`}
+              className={`flex-shrink-0 px-5 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest border transition-all ${selectedNeighborhoods.includes(hood) ? 'bg-blue-600 text-white border-blue-600 shadow-md' : 'bg-white dark:bg-gray-800 text-gray-400 border-gray-100 dark:border-gray-800'}`}
             >
               {hood}
             </button>
           ))}
         </div>
 
-        {/* Categorias */}
         <div className="grid grid-cols-3 gap-3 mb-10">
             {CLASSIFIED_CATEGORIES.map(cat => (
                 <ClassifiedCategoryButton 
@@ -394,7 +385,6 @@ export const ClassifiedsView: React.FC<ClassifiedsViewProps> = ({ onBack, onNavi
             ))}
         </div>
         
-        {/* Blocos de Conteúdo */}
         <div className="space-y-4">
           {CLASSIFIED_CATEGORIES.filter(c => !['imoveis', 'emprego', 'servicos'].includes(c.id)).map(cat => (
             <CategorySection 
@@ -408,7 +398,6 @@ export const ClassifiedsView: React.FC<ClassifiedsViewProps> = ({ onBack, onNavi
           ))}
         </div>
 
-        {/* Banner Patrocinador Master - Contextualizado */}
         <section className="mt-16">
           <MasterSponsorBanner 
             onClick={() => onNavigate('patrocinador_master')} 
@@ -418,7 +407,6 @@ export const ClassifiedsView: React.FC<ClassifiedsViewProps> = ({ onBack, onNavi
         </section>
       </main>
 
-      {/* MODAL DE CRIAÇÃO */}
       <CreateClassifiedModal 
         isOpen={isCreateModalOpen} 
         onClose={() => setIsCreateModalOpen(false)} 

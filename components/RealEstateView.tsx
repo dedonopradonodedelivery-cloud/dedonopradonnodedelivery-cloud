@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import { User } from '@supabase/supabase-js';
 import { 
@@ -30,9 +29,7 @@ const PropertyCard: React.FC<{ property: RealEstateProperty }> = ({ property }) 
         <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mt-1">{property.neighborhood}</p>
         <div className="flex flex-wrap gap-x-3 gap-y-1.5 text-xs text-gray-500 dark:text-gray-400 mt-3">
           <div className="flex items-center gap-1"><Maximize2 size={12} /> {property.area}m²</div>
-          {property.bedrooms && <div className="flex items-center gap-1"><BedDouble size={12} /> {property.bedrooms}</div>}
-          {property.bathrooms && <div className="flex items-center gap-1"><Bath size={12} /> {property.bathrooms}</div>}
-          {property.parkingSpaces !== undefined && <div className="flex items-center gap-1"><Car size={12} /> {property.parkingSpaces}</div>}
+          {property.parkingSpaces !== undefined && <div className="flex items-center gap-1"><Car size={12} /> {property.parkingSpaces} vagas</div>}
         </div>
         <div className="mt-4 pt-3 border-t border-gray-100 dark:border-gray-800 flex justify-between items-end">
           <div>
@@ -51,7 +48,6 @@ const PropertyCard: React.FC<{ property: RealEstateProperty }> = ({ property }) 
 };
 
 export const RealEstateView: React.FC<RealEstateViewProps> = ({ onBack, user, onRequireLogin }) => {
-  const [activeTab, setActiveTab] = useState<'Residencial' | 'Comercial'>('Residencial');
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [filters, setFilters] = useState<RealEstateFilters>({
     transaction: null, types: [], locations: [], priceMin: '', priceMax: '',
@@ -61,9 +57,9 @@ export const RealEstateView: React.FC<RealEstateViewProps> = ({ onBack, user, on
   });
 
   const filteredProperties = useMemo(() => {
-    return MOCK_REAL_ESTATE_PROPERTIES.filter(p => p.type === activeTab);
-    // Lógica de filtro real será aplicada aqui
-  }, [activeTab, filters]);
+    // REGRA OBRIGATÓRIA: Apenas IMÓVEIS COMERCIAIS
+    return MOCK_REAL_ESTATE_PROPERTIES.filter(p => p.type === 'Comercial');
+  }, [filters]);
 
   const activeFiltersCount = useMemo(() => {
     return Object.values(filters).filter(v => v !== null && v !== '' && (!Array.isArray(v) || v.length > 0)).length;
@@ -71,31 +67,36 @@ export const RealEstateView: React.FC<RealEstateViewProps> = ({ onBack, user, on
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950 font-sans">
-      <header className="sticky top-0 z-30 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md px-5 py-4 border-b border-gray-100 dark:border-gray-800">
+      <header className="sticky top-0 z-40 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md px-5 py-6 border-b border-gray-100 dark:border-gray-800">
         <div className="flex items-center gap-4">
           <button onClick={onBack} className="p-2 bg-gray-50 dark:bg-gray-800 rounded-xl text-gray-500"><ChevronLeft size={20}/></button>
-          <div className="flex-1"><h1 className="text-xl font-black text-gray-900 dark:text-white uppercase tracking-tighter">Imóveis</h1></div>
+          <div className="flex-1">
+            <h1 className="text-xl font-black text-gray-900 dark:text-white uppercase tracking-tighter leading-none">Imóveis Comerciais</h1>
+            <p className="text-[10px] text-blue-500 font-bold uppercase tracking-widest mt-1">Oportunidades de Negócio</p>
+          </div>
           <button onClick={() => setIsFilterOpen(true)} className="relative p-2 bg-gray-50 dark:bg-gray-800 rounded-xl text-gray-500">
             <SlidersHorizontal size={20}/>
             {activeFiltersCount > 0 && <div className="absolute -top-1 -right-1 w-4 h-4 bg-blue-600 text-white text-[9px] font-black rounded-full flex items-center justify-center border-2 border-white dark:border-gray-900">{activeFiltersCount}</div>}
           </button>
         </div>
-        
-        <div className="mt-4 flex gap-1 bg-gray-100 dark:bg-gray-800 p-1 rounded-2xl">
-          <button onClick={() => setActiveTab('Residencial')} className={`flex-1 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${activeTab === 'Residencial' ? 'bg-white dark:bg-gray-700 text-[#1E5BFF] shadow-sm' : 'text-gray-400'}`}>Residencial</button>
-          <button onClick={() => setActiveTab('Comercial')} className={`flex-1 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${activeTab === 'Comercial' ? 'bg-white dark:bg-gray-700 text-[#1E5BFF] shadow-sm' : 'text-gray-400'}`}>Comercial</button>
-        </div>
       </header>
 
       <main className="p-5 pb-24 space-y-4">
-        {filteredProperties.map(prop => <PropertyCard key={prop.id} property={prop} />)}
+        {filteredProperties.length > 0 ? (
+          filteredProperties.map(prop => <PropertyCard key={prop.id} property={prop} />)
+        ) : (
+          <div className="py-20 text-center opacity-30 flex flex-col items-center">
+            <Building2 size={48} className="mb-4" />
+            <p className="font-bold uppercase tracking-widest text-xs">Nenhum imóvel comercial encontrado</p>
+          </div>
+        )}
       </main>
 
       <RealEstateFiltersView 
         isOpen={isFilterOpen} 
         onClose={() => setIsFilterOpen(false)}
         onApply={setFilters}
-        activeTab={activeTab}
+        activeTab="Comercial"
         initialFilters={filters}
       />
     </div>

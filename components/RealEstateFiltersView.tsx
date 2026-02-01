@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { X, SlidersHorizontal, MapPin, DollarSign, BedDouble, Bath, Car, Maximize2 } from 'lucide-react';
 import { NEIGHBORHOODS } from '../contexts/NeighborhoodContext';
@@ -76,11 +75,10 @@ export const RealEstateFiltersView: React.FC<RealEstateFiltersViewProps> = ({ is
         onClick={e => e.stopPropagation()}
       >
         <div className="w-12 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full mx-auto mb-6 shrink-0"></div>
-        <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6 shrink-0">Filtrar e Ordenar</h2>
+        <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6 shrink-0">Filtros Comerciais</h2>
 
         <main className="flex-1 overflow-y-auto no-scrollbar space-y-8 pr-2 -mr-2">
             
-            {/* GERAL */}
             <section><h3 className={SECTION_TITLE_CLASS}>Geral</h3>
                 <div className="grid grid-cols-2 gap-3 mb-4">
                   <button onClick={() => setFilters({...filters, transaction: 'aluguel'})} className={`py-3 rounded-xl font-bold text-sm border ${filters.transaction === 'aluguel' ? 'bg-blue-600 text-white border-blue-600' : 'bg-gray-50 dark:bg-gray-800 border-gray-100 dark:border-gray-700 text-gray-500'}`}>Alugar</button>
@@ -88,19 +86,14 @@ export const RealEstateFiltersView: React.FC<RealEstateFiltersViewProps> = ({ is
                 </div>
             </section>
             
-            {/* TIPO */}
-            <section><h3 className={SECTION_TITLE_CLASS}>Tipo de Imóvel</h3>
+            <section><h3 className={SECTION_TITLE_CLASS}>Tipo de Imóvel Comercial</h3>
               <div className="flex flex-wrap gap-2">
-                {(activeTab === 'Residencial' 
-                  ? ['Casa', 'Apartamento', 'Kitnet/Studio', 'Cobertura'] 
-                  : ['Sala comercial', 'Loja', 'Galpão', 'Andar/Conjunto', 'Terreno comercial']
-                ).map(type => (
+                {['Sala comercial', 'Loja', 'Galpão', 'Andar/Conjunto', 'Terreno comercial'].map(type => (
                   <button key={type} onClick={() => toggleFilter('types', type)} className={`px-4 py-2 text-xs font-bold rounded-full border ${filters.types.includes(type) ? 'bg-blue-600 text-white border-blue-600' : 'bg-gray-50 dark:bg-gray-800 border-gray-100 dark:border-gray-700 text-gray-500'}`}>{type}</button>
                 ))}
               </div>
             </section>
 
-            {/* PREÇO */}
             <section><h3 className={SECTION_TITLE_CLASS}>Faixa de Preço</h3>
               <div className="grid grid-cols-2 gap-3">
                 <input type="number" placeholder="Mínimo (R$)" value={filters.priceMin} onChange={e => setFilters({...filters, priceMin: e.target.value})} className="w-full p-3 bg-gray-50 dark:bg-gray-800 rounded-xl text-sm border border-gray-100 dark:border-gray-700 outline-none" />
@@ -108,44 +101,18 @@ export const RealEstateFiltersView: React.FC<RealEstateFiltersViewProps> = ({ is
               </div>
             </section>
 
-            {/* RESIDENCIAL */}
-            {activeTab === 'Residencial' && (
-              <>
-                <section><h3 className={SECTION_TITLE_CLASS}>Quartos</h3>
-                  <div className="flex gap-2">
-                    {[1,2,3,4].map(q => (<button key={q} onClick={() => setFilters({...filters, bedrooms: q})} className={`flex-1 py-3 text-sm font-bold rounded-xl border ${filters.bedrooms === q ? 'bg-blue-600 text-white' : 'bg-gray-50 dark:bg-gray-800 text-gray-500'}`}>{q === 4 ? '4+' : q}</button>))}
-                  </div>
-                </section>
-                <section><h3 className={SECTION_TITLE_CLASS}>Vagas</h3>
-                  <div className="flex gap-2">
-                    {[0,1,2,3].map(v => (<button key={v} onClick={() => setFilters({...filters, parkingSpaces: v})} className={`flex-1 py-3 text-sm font-bold rounded-xl border ${filters.parkingSpaces === v ? 'bg-blue-600 text-white' : 'bg-gray-50 dark:bg-gray-800 text-gray-500'}`}>{v === 3 ? '3+' : v}</button>))}
-                  </div>
-                </section>
-                <section>
-                    <div className="flex items-center gap-4">
-                        <div className="flex-1 space-y-2"><label className="text-xs font-bold text-gray-400">Mobiliado?</label><button onClick={() => toggleFilter('isFurnished', !filters.isFurnished)} className={`w-full py-2 rounded-lg text-xs font-bold ${filters.isFurnished ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-500'}`}>{filters.isFurnished ? 'Sim' : 'Não'}</button></div>
-                        <div className="flex-1 space-y-2"><label className="text-xs font-bold text-gray-400">Aceita Pet?</label><button onClick={() => toggleFilter('petsAllowed', !filters.petsAllowed)} className={`w-full py-2 rounded-lg text-xs font-bold ${filters.petsAllowed ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-500'}`}>{filters.petsAllowed ? 'Sim' : 'Não'}</button></div>
-                    </div>
-                </section>
-              </>
-            )}
+            <section><h3 className={SECTION_TITLE_CLASS}>Vagas de Estacionamento</h3>
+              <div className="flex gap-2">
+                {[0,1,2,3].map(v => (<button key={v} onClick={() => setFilters({...filters, parkingSpaces: v})} className={`flex-1 py-3 text-sm font-bold rounded-xl border ${filters.parkingSpaces === v ? 'bg-blue-600 text-white' : 'bg-gray-50 dark:bg-gray-800 text-gray-500'}`}>{v === 3 ? '3+' : v}</button>))}
+              </div>
+            </section>
 
-            {/* COMERCIAL */}
-            {activeTab === 'Comercial' && (
-                <>
-                <section><h3 className={SECTION_TITLE_CLASS}>Vagas</h3>
-                  <div className="flex gap-2">
-                    {[0,1,2,3].map(v => (<button key={v} onClick={() => setFilters({...filters, parkingSpaces: v})} className={`flex-1 py-3 text-sm font-bold rounded-xl border ${filters.parkingSpaces === v ? 'bg-blue-600 text-white' : 'bg-gray-50 dark:bg-gray-800 text-gray-500'}`}>{v === 3 ? '3+' : v}</button>))}
-                  </div>
-                </section>
-                 <section>
-                    <div className="flex items-center gap-4">
-                        <div className="flex-1 space-y-2"><label className="text-xs font-bold text-gray-400">Pé-direito alto?</label><button onClick={() => toggleFilter('highCeiling', !filters.highCeiling)} className={`w-full py-2 rounded-lg text-xs font-bold ${filters.highCeiling ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-500'}`}>{filters.highCeiling ? 'Sim' : 'Não'}</button></div>
-                        <div className="flex-1 space-y-2"><label className="text-xs font-bold text-gray-400">Carga/Descarga?</label><button onClick={() => toggleFilter('loadingAccess', !filters.loadingAccess)} className={`w-full py-2 rounded-lg text-xs font-bold ${filters.loadingAccess ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-500'}`}>{filters.loadingAccess ? 'Sim' : 'Não'}</button></div>
-                    </div>
-                </section>
-                </>
-            )}
+            <section><h3 className={SECTION_TITLE_CLASS}>Características</h3>
+                <div className="flex items-center gap-4">
+                    <div className="flex-1 space-y-2"><label className="text-[10px] font-black text-gray-400 uppercase">Pé-direito alto?</label><button onClick={() => setFilters({...filters, highCeiling: !filters.highCeiling})} className={`w-full py-2 rounded-lg text-xs font-bold ${filters.highCeiling ? 'bg-blue-600 text-white' : 'bg-gray-100 dark:bg-gray-800 text-gray-500'}`}>{filters.highCeiling ? 'Sim' : 'Não'}</button></div>
+                    <div className="flex-1 space-y-2"><label className="text-[10px] font-black text-gray-400 uppercase">Carga/Descarga?</label><button onClick={() => setFilters({...filters, loadingAccess: !filters.loadingAccess})} className={`w-full py-2 rounded-lg text-xs font-bold ${filters.loadingAccess ? 'bg-blue-600 text-white' : 'bg-gray-100 dark:bg-gray-800 text-gray-500'}`}>{filters.loadingAccess ? 'Sim' : 'Não'}</button></div>
+                </div>
+            </section>
              
         </main>
 
