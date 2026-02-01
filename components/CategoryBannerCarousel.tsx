@@ -23,21 +23,21 @@ export const CategoryBannerCarousel: React.FC<CategoryBannerCarouselProps> = ({
     [currentNeighborhood]
   );
 
-  // Busca especificamente os 2 slots da categoria/bairro atual
+  // Busca os 2 slots específicos da categoria + bairro atual
   const activeBanners = useMemo(() => {
     const slot1 = categoryBannerService.getSlot(bairroSlug, categoriaSlug, 1);
     const slot2 = categoryBannerService.getSlot(bairroSlug, categoriaSlug, 2);
     
-    // Regra de Ouro: Apenas slots marcados como 'sold' (vendidos) entram no carrossel
+    // Regra: Apenas slots 'sold' entram no carrossel de exibição
     return [slot1, slot2].filter(s => s.status === 'sold');
   }, [bairroSlug, categoriaSlug]);
 
-  // Timer de rotação apenas se houver mais de um banner vendido
+  // Transição automática de 4 segundos conforme solicitado
   useEffect(() => {
     if (activeBanners.length <= 1) return;
     const interval = setInterval(() => {
       setCurrentIndex((prev) => (prev + 1) % activeBanners.length);
-    }, 5000);
+    }, 4000);
     return () => clearInterval(interval);
   }, [activeBanners.length]);
 
@@ -46,7 +46,7 @@ export const CategoryBannerCarousel: React.FC<CategoryBannerCarouselProps> = ({
     setCurrentIndex(0);
   }, [bairroSlug, categoriaSlug]);
 
-  // Regra de Ouro: Se nenhum slot estiver vendido, não renderiza ABSOLUTAMENTE NADA
+  // Se não houver banners ativos para esta segmentação, o carrossel não é exibido
   if (activeBanners.length === 0) {
     return null;
   }
@@ -57,22 +57,24 @@ export const CategoryBannerCarousel: React.FC<CategoryBannerCarouselProps> = ({
     <div className="px-5 mb-6 animate-in fade-in duration-500">
       <div 
         onClick={() => current.merchantId && onStoreClick(current.merchantId)}
-        className="relative aspect-[16/8] w-full rounded-[2.5rem] overflow-hidden shadow-2xl cursor-pointer transition-all duration-300 active:brightness-90 active:scale-[0.99] bg-slate-900 border border-white/5"
+        className="relative aspect-[16/10] w-full rounded-[2.5rem] overflow-hidden shadow-2xl cursor-pointer transition-all duration-300 active:brightness-90 active:scale-[0.99] bg-slate-900 border border-white/5"
       >
-        {/* Imagem do Lojista */}
+        {/* Imagem do Banner do Lojista */}
         <img 
           src={current.image} 
           alt={current.title} 
           className="absolute inset-0 w-full h-full object-cover mix-blend-overlay opacity-70 transition-transform duration-700" 
         />
         
-        {/* Overlay para legibilidade */}
+        {/* Overlay para contraste de texto */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
         
-        {/* Conteúdo Real do Anunciante */}
+        {/* Conteúdo do Anunciante */}
         <div className="relative h-full flex flex-col justify-end p-8 text-white">
           <div className="flex items-center gap-2 mb-2">
-            <span className="bg-[#1E5BFF] text-white text-[7px] font-black px-2 py-0.5 rounded uppercase tracking-widest w-fit">Patrocinado</span>
+            <span className="bg-[#1E5BFF] text-white text-[7px] font-black px-2.5 py-1 rounded-lg uppercase tracking-[0.15em] w-fit border border-white/10 shadow-sm">
+              Patrocinado
+            </span>
           </div>
           <h2 className="text-2xl font-black uppercase tracking-tighter leading-none mb-1 drop-shadow-md">
             {current.title}
@@ -82,7 +84,7 @@ export const CategoryBannerCarousel: React.FC<CategoryBannerCarouselProps> = ({
           </p>
         </div>
 
-        {/* Indicadores Visuais (Dots) - Apenas se houver 2 banners */}
+        {/* Indicadores Visuais (Dots) */}
         {activeBanners.length > 1 && (
           <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-1.5 z-10">
             {activeBanners.map((_, idx) => (
