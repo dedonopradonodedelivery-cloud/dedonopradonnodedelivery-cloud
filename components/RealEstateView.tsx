@@ -177,7 +177,7 @@ export const RealEstateView: React.FC<RealEstateViewProps> = ({ onBack, user, on
                 className="px-3 py-1.5 bg-[#1E5BFF] hover:bg-blue-600 text-white font-black rounded-full shadow-lg shadow-blue-500/10 flex items-center justify-center gap-1.5 uppercase tracking-widest text-[9px] border border-white/10 active:scale-95 transition-all h-9"
             >
                 <Plus size={12} strokeWidth={4} />
-                + Anunciar
+                Anunciar
             </button>
             
             <button onClick={() => setIsFilterOpen(true)} className="relative p-2.5 bg-gray-50 dark:bg-gray-800 rounded-xl text-gray-400 shadow-sm active:scale-90 transition-all">
