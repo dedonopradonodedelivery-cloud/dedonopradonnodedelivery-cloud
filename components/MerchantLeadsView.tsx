@@ -142,23 +142,35 @@ export const MerchantLeadsView: React.FC<MerchantLeadsViewProps> = ({ onBack, on
                 </div>
 
                 <h1 className="text-3xl font-black text-gray-900 dark:text-white leading-tight mb-4 uppercase tracking-tighter">
-                    Oportunidades de serviço no seu bairro
+                    Receba pedidos de moradores do seu bairro
                 </h1>
                 
-                <div className="space-y-6 text-gray-600 dark:text-gray-400 mb-12">
-                    <p className="text-sm font-medium leading-relaxed">
-                        Moradores solicitam serviços pelo app e você pode escolher quais pedidos deseja acessar.
-                    </p>
-                    <p className="text-sm font-medium leading-relaxed">
-                        Cada contato é pago e limitado a até 5 profissionais, garantindo mais qualidade e menos concorrência para o seu negócio.
-                    </p>
+                <p className="text-sm text-gray-500 dark:text-gray-400 font-medium leading-relaxed mb-10">
+                    Moradores solicitam serviços pelo app e você escolhe quais pedidos deseja acessar. 
+                    Cada contato é pago, limitado a até 5 profissionais, garantindo mais qualidade e menos concorrência.
+                </p>
+
+                <div className="w-full space-y-4 mb-12">
+                    {[
+                        "Leads reais de moradores do bairro",
+                        "Você decide quais contatos liberar",
+                        "Pagamento somente por lead liberado",
+                        "Sem mensalidade obrigatória"
+                    ].map((bullet, i) => (
+                        <div key={i} className="flex items-center gap-3 text-left">
+                            <div className="p-1 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 rounded-lg">
+                                <CheckCircle2 size={16} />
+                            </div>
+                            <span className="text-xs font-bold text-gray-700 dark:text-gray-200 uppercase tracking-tight">{bullet}</span>
+                        </div>
+                    ))}
                 </div>
 
                 <button 
                     onClick={handleOptIn}
                     className="w-full bg-[#1E5BFF] text-white font-black py-5 rounded-[2rem] shadow-xl shadow-blue-500/20 active:scale-95 transition-all uppercase tracking-widest text-sm flex items-center justify-center gap-2"
                 >
-                    Participar dos Serviços por Leads
+                    Quero participar dos Leads de Serviços
                     <ChevronRight size={18} strokeWidth={3} />
                 </button>
             </main>
