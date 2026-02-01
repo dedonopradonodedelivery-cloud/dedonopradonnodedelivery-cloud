@@ -306,7 +306,10 @@ const App: React.FC = () => {
                     {activeTab === 'job_detail' && selectedJob && <JobDetailView job={selectedJob} onBack={() => handleNavigate('jobs')} />}
                     {activeTab === 'neighborhood_posts' && <NeighborhoodPostsView onBack={() => handleNavigate('home')} onStoreClick={handleSelectStore} user={user} onRequireLogin={() => setIsAuthOpen(true)} userRole={userRole} onNavigate={handleNavigate} />}
                     {activeTab === 'saved_posts' && <SavedPostsView onBack={() => handleNavigate('profile')} onStoreClick={handleSelectStore} onRequireLogin={() => setIsAuthOpen(true)} />}
-                    {activeTab === 'sponsor_info' && <SponsorInfoView onBack={() => handleNavigate(previousTab)} />}
+                    
+                    {/* REDIRECIONAMENTO FIXO PARA PAINEL DO LOJISTA ('profile') NO BOTÃO VOLTAR DO PATROCINADOR MASTER */}
+                    {activeTab === 'sponsor_info' && <SponsorInfoView onBack={() => handleNavigate('profile')} onNavigate={handleNavigate} />}
+                    
                     {activeTab === 'patrocinador_master' && <PatrocinadorMasterScreen onBack={() => handleNavigate(previousTab)} />}
                     {activeTab === 'about' && <AboutView onBack={() => handleNavigate(previousTab)} />}
                     {activeTab === 'support' && <SupportView onBack={() => handleNavigate(previousTab)} />}
