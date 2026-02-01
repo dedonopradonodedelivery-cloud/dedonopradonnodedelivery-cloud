@@ -317,7 +317,7 @@ const FilterModal: React.FC<{
               </button>
               {NEIGHBORHOODS.map(hood => (
                 <button 
-                  key={hood}
+                  key={hood} 
                   onClick={() => toggleHood(hood)}
                   className={`px-4 py-2 rounded-xl text-xs font-bold border transition-all ${tempHoods.includes(hood) ? 'bg-[#1E5BFF] text-white border-[#1E5BFF]' : 'bg-gray-50 dark:bg-gray-800 text-gray-500 border-transparent'}`}
                 >
@@ -418,7 +418,7 @@ export const ClassifiedsView: React.FC<ClassifiedsViewProps> = ({ onBack, onNavi
           </button>
         </div>
 
-        <div className="relative mb-5">
+        <div className="relative mb-4">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
           <input 
             type="text" 
@@ -429,13 +429,15 @@ export const ClassifiedsView: React.FC<ClassifiedsViewProps> = ({ onBack, onNavi
           />
         </div>
 
-        <button 
-            onClick={() => handleAnunciarClick(null)}
-            className="w-full bg-[#1E5BFF] hover:bg-blue-600 text-white font-black py-4 rounded-2xl shadow-xl shadow-blue-500/20 flex items-center justify-center gap-3 uppercase tracking-widest text-[11px] border border-white/20 active:scale-95 transition-all"
-        >
-            <Plus size={18} strokeWidth={3} />
-            Anunciar nos Classificados
-        </button>
+        <div className="flex justify-center px-1">
+          <button 
+              onClick={() => handleAnunciarClick(null)}
+              className="px-6 py-2.5 bg-[#1E5BFF] hover:bg-blue-600 text-white font-black rounded-full shadow-lg shadow-blue-500/10 flex items-center justify-center gap-2 uppercase tracking-widest text-[11px] border border-white/10 active:scale-95 transition-all"
+          >
+              <Plus size={14} strokeWidth={4} />
+              Anunciar no bairro
+          </button>
+        </div>
       </header>
       
       <main className="p-5 pb-48">
