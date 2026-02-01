@@ -5,8 +5,7 @@ import {
     AlertTriangle, ShieldCheck, MapPin, Building2, 
     CreditCard, QrCode, Copy, Loader2, Info, Check, 
     Maximize2, Car, DollarSign, FileText, Smartphone,
-    // FIX: Added missing Plus and Star icons to the lucide-react imports.
-    Plus, Star
+    Plus, Star, LayoutGrid, Award
 } from 'lucide-react';
 import { User } from '@supabase/supabase-js';
 import { NEIGHBORHOODS } from '../contexts/NeighborhoodContext';
@@ -23,6 +22,10 @@ export const RealEstateWizard: React.FC<RealEstateWizardProps> = ({ user, onBack
   const [step, setStep] = useState<WizardStep>(1);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isHighVisibilitySelected, setIsHighVisibilitySelected] = useState(false);
+  
+  // Lógica de Monetização
+  const [adsPublishedCount] = useState(2); // Simulação: Usuário já atingiu o limite de 2
+  const [isAdditionalFeeApplied, setIsAdditionalFeeApplied] = useState(false);
 
   // Form Data
   const [formData, setFormData] = useState({
@@ -45,7 +48,16 @@ export const RealEstateWizard: React.FC<RealEstateWizardProps> = ({ user, onBack
     paymentMethod: 'pix' as 'pix' | 'card'
   });
 
-  const nextStep = () => setStep(prev => (prev + 1) as WizardStep);
+  const nextStep = () => {
+      // Se estiver no limite e for avançar da etapa 7 para 8, a lógica de cobrança será exibida
+      // Se o usuário já escolheu o destaque na etapa 8, pula a etapa 9 de upsell
+      if (step === 8 && isHighVisibilitySelected) {
+          setStep(10);
+      } else {
+          setStep(prev => (prev + 1) as WizardStep);
+      }
+  };
+
   const prevStep = () => setStep(prev => (prev - 1) as WizardStep);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -73,10 +85,17 @@ export const RealEstateWizard: React.FC<RealEstateWizardProps> = ({ user, onBack
   };
 
   const handlePublishClick = () => {
+      // Se for gratuito e sem destaque, publica direto. Caso contrário, vai para pagamento.
+      const isPaid = isAdditionalFeeApplied || isHighVisibilitySelected;
+      
       setIsProcessing(true);
       setTimeout(() => {
           setIsProcessing(false);
-          setStep(11); // Vai para tela de pagamento (simulada)
+          if (isPaid) {
+              setStep(11); // Tela de pagamento
+          } else {
+              setStep(12); // Sucesso direto
+          }
       }, 2000);
   };
 
@@ -88,11 +107,11 @@ export const RealEstateWizard: React.FC<RealEstateWizardProps> = ({ user, onBack
       }, 1500);
   };
 
-  const formatPrice = (val: string) => {
-    return parseFloat(val || '0').toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+  const formatPrice = (val: string | number) => {
+    const numeric = typeof val === 'string' ? parseFloat(val || '0') : val;
+    return numeric.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
   };
 
-  // FIX: useMemo was already being used but not imported from React.
   const isLowPrice = useMemo(() => {
       const p = parseFloat(formData.price || '0');
       if (formData.negotiation === 'Alugar') return p < 500 && p > 0;
@@ -100,6 +119,22 @@ export const RealEstateWizard: React.FC<RealEstateWizardProps> = ({ user, onBack
   }, [formData.price, formData.negotiation]);
 
   const userName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Anunciante';
+
+  // Cálculo de data de renovação (1º dia do mês que vem)
+  const renewalDate = useMemo(() => {
+    const nextMonth = new Date();
+    nextMonth.setMonth(nextMonth.getMonth() + 1);
+    nextMonth.setDate(1);
+    return nextMonth.toLocaleDateString('pt-BR');
+  }, []);
+
+  // Cálculo de Total Final
+  const totalToPay = useMemo(() => {
+      let total = 0;
+      if (isAdditionalFeeApplied) total += 19.90;
+      if (isHighVisibilitySelected) total += 49.99;
+      return total;
+  }, [isAdditionalFeeApplied, isHighVisibilitySelected]);
 
   return (
     <div className="min-h-screen bg-white dark:bg-gray-950 flex flex-col font-sans animate-in fade-in duration-500 overflow-x-hidden">
@@ -110,8 +145,8 @@ export const RealEstateWizard: React.FC<RealEstateWizardProps> = ({ user, onBack
           <button onClick={step === 1 ? onBack : prevStep} className="p-2 -ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
             <ChevronLeft className="w-6 h-6 text-gray-800 dark:text-white" />
           </button>
-          <div className="flex-1">
-             <h1 className="text-sm font-black uppercase tracking-widest text-gray-400">Passo {step} de 10</h1>
+          <div className="flex-1 text-center">
+             <h1 className="text-[10px] font-black uppercase tracking-widest text-gray-400">Anunciar Imóvel Comercial</h1>
           </div>
           <button onClick={onBack} className="p-2 text-gray-400 hover:text-red-500"><X size={20}/></button>
         </header>
@@ -340,24 +375,66 @@ export const RealEstateWizard: React.FC<RealEstateWizardProps> = ({ user, onBack
             </div>
         )}
 
-        {/* ETAPA 8: LIMITE (SIMULADO) */}
+        {/* ETAPA 8: LIMITE DE ANÚNCIOS */}
         {step === 8 && (
-            <div className="space-y-8 animate-in slide-in-from-right duration-300 py-10 flex flex-col items-center text-center">
-                <div className="w-20 h-20 bg-blue-50 dark:bg-blue-900/20 rounded-[2.5rem] flex items-center justify-center mb-6 text-[#1E5BFF]">
-                    <Info size={40} />
+            <div className="space-y-8 animate-in slide-in-from-right duration-300 py-4">
+                <div className="text-center">
+                    <div className="w-20 h-20 bg-blue-50 dark:bg-blue-900/20 rounded-[2.5rem] flex items-center justify-center mx-auto mb-6 text-[#1E5BFF] shadow-sm border border-blue-100">
+                        <Info size={40} />
+                    </div>
+                    <h2 className="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tighter">Limite gratuito atingido</h2>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 font-medium mt-4 leading-relaxed">
+                        Você já utilizou seus 2 anúncios gratuitos neste mês.<br/>
+                        Seu limite será renovado em <strong className="text-gray-900 dark:text-white">{renewalDate}</strong>.
+                    </p>
                 </div>
-                <h2 className="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tighter">Limite Gratuito</h2>
-                <p className="text-sm text-gray-500 font-medium max-w-[280px]">
-                    Você atingiu o limite gratuito de anúncios de imóveis. Seu limite será renovado em <strong>25/02/2026</strong>.
-                </p>
-                <div className="w-full p-4 bg-gray-50 dark:bg-gray-900 rounded-2xl border border-gray-100 text-[10px] font-black uppercase text-gray-400 mt-4">
-                    MVP: Permitindo avançar para demonstração.
+
+                <div className="space-y-4 pt-6">
+                    <p className="text-xs font-black text-gray-400 uppercase tracking-widest text-center">Para continuar anunciando agora:</p>
+                    
+                    {/* Opção 1: Simples */}
+                    <button 
+                        onClick={() => { setIsAdditionalFeeApplied(true); setIsHighVisibilitySelected(false); nextStep(); }}
+                        className="w-full bg-white dark:bg-gray-900 p-6 rounded-3xl border-2 border-gray-100 dark:border-gray-800 flex items-center justify-between group active:scale-[0.98] transition-all hover:border-blue-200"
+                    >
+                        <div className="flex items-center gap-4">
+                            <div className="w-12 h-12 bg-gray-50 dark:bg-gray-800 rounded-2xl flex items-center justify-center text-gray-400">
+                                <LayoutGrid size={24} />
+                            </div>
+                            <div className="text-left">
+                                <h3 className="font-bold text-sm dark:text-white">Publicação Simples</h3>
+                                <p className="text-[10px] text-gray-400 uppercase font-black tracking-widest">1 Anúncio Adicional</p>
+                            </div>
+                        </div>
+                        <div className="bg-gray-900 dark:bg-white text-white dark:text-black px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest">R$ 19,90</div>
+                    </button>
+
+                    {/* Opção 2: Destaque */}
+                    <button 
+                        onClick={() => { setIsAdditionalFeeApplied(true); setIsHighVisibilitySelected(true); nextStep(); }}
+                        className="w-full bg-indigo-600 p-6 rounded-3xl border-2 border-indigo-400 flex items-center justify-between group active:scale-[0.98] transition-all shadow-xl shadow-indigo-500/20"
+                    >
+                        <div className="flex items-center gap-4">
+                            <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center text-white">
+                                <Star size={24} fill="white" />
+                            </div>
+                            <div className="text-left">
+                                <h3 className="font-bold text-sm text-white">Destaque do Bairro</h3>
+                                <p className="text-[10px] text-indigo-200 uppercase font-black tracking-widest">Topo da Categoria</p>
+                            </div>
+                        </div>
+                        <div className="bg-white text-indigo-600 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest">R$ 49,99</div>
+                    </button>
                 </div>
-                <button onClick={nextStep} className="w-full mt-10 bg-[#1E5BFF] text-white font-black py-5 rounded-[2rem] shadow-xl uppercase tracking-widest text-xs">Entendi, continuar</button>
+
+                <div className="mt-10 flex items-center justify-center gap-2 px-6 py-2 bg-amber-50 dark:bg-amber-900/10 rounded-full border border-amber-100 dark:border-amber-800/30">
+                    <ShieldCheck className="w-3.5 h-3.5 text-amber-600" />
+                    <span className="text-[8px] font-black text-amber-600 uppercase tracking-widest leading-none">MVP: permitido avançar para demonstração</span>
+                </div>
             </div>
         )}
 
-        {/* ETAPA 9: UPSELL */}
+        {/* ETAPA 9: UPSELL (SÓ MOSTRA SE NÃO TIVER PEGO NO LIMITE) */}
         {step === 9 && (
             <div className="space-y-8 animate-in slide-in-from-right duration-300">
                 <div className="text-center">
@@ -422,12 +499,20 @@ export const RealEstateWizard: React.FC<RealEstateWizardProps> = ({ user, onBack
                             <span className="font-bold text-gray-900 dark:text-white uppercase">{formData.negotiation}</span>
                         </div>
                         <div className="flex justify-between text-xs">
-                            <span className="text-gray-400 font-medium">Valor:</span>
+                            <span className="text-gray-400 font-medium">Preço Imóvel:</span>
                             <span className="font-black text-[#1E5BFF] italic">{formatPrice(formData.price)}</span>
                         </div>
+                        
+                        {isAdditionalFeeApplied && (
+                             <div className="flex justify-between text-xs text-gray-500">
+                                <span className="font-medium uppercase tracking-widest">Publicação Adicional:</span>
+                                <span className="font-black">R$ 19,90</span>
+                            </div>
+                        )}
+
                         {isHighVisibilitySelected && (
                             <div className="flex justify-between text-xs text-amber-500">
-                                <span className="font-bold uppercase tracking-widest">⭐ Destaque:</span>
+                                <span className="font-bold uppercase tracking-widest">⭐ Destaque do Bairro:</span>
                                 <span className="font-black">R$ 49,99</span>
                             </div>
                         )}
@@ -436,7 +521,7 @@ export const RealEstateWizard: React.FC<RealEstateWizardProps> = ({ user, onBack
                     <div className="pt-6 border-t border-gray-200 dark:border-gray-800 flex justify-between items-center">
                         <span className="text-sm font-black text-gray-900 dark:text-white uppercase">Total a pagar:</span>
                         <span className="text-2xl font-black text-emerald-600">
-                            {formatPrice(isHighVisibilitySelected ? (49.99).toString() : '0')}
+                            {formatPrice(totalToPay)}
                         </span>
                     </div>
                 </div>
@@ -459,7 +544,7 @@ export const RealEstateWizard: React.FC<RealEstateWizardProps> = ({ user, onBack
                 <div className="bg-white dark:bg-gray-900 rounded-[2.5rem] p-8 border border-gray-100 dark:border-gray-800 shadow-sm space-y-8">
                    <div className="text-center">
                         <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Total do Pedido</p>
-                        <p className="text-4xl font-black text-emerald-600">{formatPrice(isHighVisibilitySelected ? (49.99).toString() : '0')}</p>
+                        <p className="text-4xl font-black text-emerald-600">{formatPrice(totalToPay)}</p>
                    </div>
 
                    <div className="space-y-3">
@@ -499,7 +584,7 @@ export const RealEstateWizard: React.FC<RealEstateWizardProps> = ({ user, onBack
                 <div className="w-24 h-24 bg-emerald-100 dark:bg-emerald-900/30 rounded-[2.5rem] flex items-center justify-center mb-8 text-emerald-600 shadow-xl shadow-emerald-500/10">
                     <CheckCircle2 size={48} />
                 </div>
-                <h2 className="text-3xl font-black text-gray-900 dark:text-white uppercase tracking-tighter leading-tight mb-4">
+                <h2 className="text-3xl font-black text-gray-900 dark:text-white uppercase tracking-tighter leading-none mb-4">
                     Anúncio publicado com sucesso! 🎉
                 </h2>
                 {isHighVisibilitySelected && (
