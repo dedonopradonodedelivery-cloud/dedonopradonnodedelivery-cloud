@@ -22,7 +22,8 @@ import {
   Sun,
   Zap,
   ShoppingBag,
-  Loader2
+  Loader2,
+  Ticket
 } from 'lucide-react';
 import { User as SupabaseUser } from '@supabase/supabase-js';
 import { useAuth } from '@/contexts/AuthContext';
@@ -196,6 +197,13 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
               description="Anúncios visuais no aplicativo"
               onClick={() => onNavigate('banner_sales_wizard')}
               colorClass="bg-purple-50 text-purple-600"
+            />
+            <ServiceBlock 
+              icon={Ticket} 
+              label="Cupons" 
+              description="Ative cupons, acompanhe resgates e controle validade"
+              onClick={() => onNavigate('merchant_coupons')}
+              colorClass="bg-blue-50 text-blue-600"
             />
             <ServiceBlock 
               icon={Star} 

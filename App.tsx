@@ -33,6 +33,7 @@ import { OnboardingScreen } from '@/components/OnboardingScreen';
 import { StoreProfileEdit } from '@/components/StoreProfileEdit';
 import { ServiceMessagesListView } from '@/components/ServiceMessagesListView';
 import { MerchantReviewsModule } from '@/components/MerchantReviewsModule';
+import { MerchantCouponsModule } from '@/components/MerchantCouponsModule';
 import { MapPin, X, Palette } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
@@ -145,7 +146,7 @@ const App: React.FC = () => {
     handleNavigate('subcategory_detail');
   };
 
-  const headerExclusionList = ['store_area', 'store_detail', 'profile', 'patrocinador_master', 'merchant_performance', 'neighborhood_posts', 'saved_posts', 'classifieds', 'services', 'services_landing', 'merchant_leads', 'service_chat', 'admin_panel', 'category_detail', 'subcategory_detail', 'sponsor_info', 'real_estate', 'jobs', 'job_detail', 'category_banner_sales', 'banner_sales_wizard', 'weekly_reward_page', 'user_coupons', 'notifications', 'store_profile', 'about', 'support', 'favorites', 'user_statement', 'service_messages_list', 'merchant_reviews'];
+  const headerExclusionList = ['store_area', 'store_detail', 'profile', 'patrocinador_master', 'merchant_performance', 'neighborhood_posts', 'saved_posts', 'classifieds', 'services', 'services_landing', 'merchant_leads', 'service_chat', 'admin_panel', 'category_detail', 'subcategory_detail', 'sponsor_info', 'real_estate', 'jobs', 'job_detail', 'category_banner_sales', 'banner_sales_wizard', 'weekly_reward_page', 'user_coupons', 'notifications', 'store_profile', 'about', 'support', 'favorites', 'user_statement', 'service_messages_list', 'merchant_reviews', 'merchant_coupons'];
   
   const hideBottomNav = false;
 
@@ -284,6 +285,10 @@ const App: React.FC = () => {
                     
                     {activeTab === 'merchant_reviews' && (
                         <MerchantReviewsModule onBack={() => handleNavigate('profile')} />
+                    )}
+
+                    {activeTab === 'merchant_coupons' && (
+                        <MerchantCouponsModule onBack={() => handleNavigate('profile')} />
                     )}
 
                     {activeTab === 'service_chat' && activeServiceRequestId && (
