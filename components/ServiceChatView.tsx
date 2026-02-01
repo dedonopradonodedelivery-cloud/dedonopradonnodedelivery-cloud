@@ -35,7 +35,7 @@ export const ServiceChatView: React.FC<ServiceChatViewProps> = ({ requestId, use
   const isMerchant = userRole === 'merchant';
 
   useEffect(() => {
-    // 1. Carregar informações do pedido original do LocalStorage
+    // 1. Carregar informações do pedido original
     const savedReqs = JSON.parse(localStorage.getItem('service_requests_mock') || '[]');
     const req = savedReqs.find((r: any) => r.id === requestId);
     if (req) setRequestInfo(req);
@@ -48,7 +48,6 @@ export const ServiceChatView: React.FC<ServiceChatViewProps> = ({ requestId, use
     const isInitialized = localStorage.getItem(chatInitKey) === 'true';
 
     if (!isInitialized && req) {
-        // MENSAGEM 1: O BRIEFING DO PEDIDO (Fixado como sistema)
         const briefingMsg: ServiceMessage = {
             id: 'briefing-system',
             requestId,
@@ -64,20 +63,7 @@ export const ServiceChatView: React.FC<ServiceChatViewProps> = ({ requestId, use
             timestamp: req.createdAt
         };
 
-        // MENSAGEM 2: BOAS-VINDAS DINÂMICA
-        const welcomeMsg: ServiceMessage = {
-            id: 'welcome-system',
-            requestId,
-            senderId: 'system',
-            senderName: 'Localizei JPA',
-            senderRole: 'resident',
-            text: isMerchant 
-                ? 'Olá! Você liberou este lead. Use o chat abaixo para enviar seu orçamento e combinar os detalhes com o cliente.' 
-                : '✅ Pedido enviado! Profissionais do seu bairro já estão analisando sua solicitação.',
-            timestamp: new Date().toISOString()
-        };
-
-        const initialMsgs = [briefingMsg, welcomeMsg];
+        const initialMsgs = [briefingMsg];
         setMessages(initialMsgs);
         localStorage.setItem(`msgs_${requestId}`, JSON.stringify(initialMsgs));
         localStorage.setItem(chatInitKey, 'true');
@@ -88,12 +74,10 @@ export const ServiceChatView: React.FC<ServiceChatViewProps> = ({ requestId, use
 
   useEffect(() => {
     if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-    if (messages.length > 0) {
-        localStorage.setItem(`msgs_${requestId}`, JSON.stringify(messages));
-    }
-  }, [messages, requestId]);
+  }, [messages]);
 
   const handleSend = () => {
+    // ADM não envia mensagens conforme regra de negócio
     if (!inputText.trim() || isAdmin) return;
     
     const newMsg: ServiceMessage = {
@@ -106,7 +90,9 @@ export const ServiceChatView: React.FC<ServiceChatViewProps> = ({ requestId, use
       timestamp: new Date().toISOString()
     };
 
-    setMessages([...messages, newMsg]);
+    const updated = [...messages, newMsg];
+    setMessages(updated);
+    localStorage.setItem(`msgs_${requestId}`, JSON.stringify(updated));
     setInputText('');
   };
 
@@ -125,7 +111,7 @@ export const ServiceChatView: React.FC<ServiceChatViewProps> = ({ requestId, use
             </div>
             <div className="flex flex-col min-w-0">
               <h2 className="font-bold text-gray-900 dark:text-white leading-tight truncate">
-                  {isAdmin ? 'Auditoria de Conversa' : isMerchant ? (requestInfo?.userName || 'Cliente') : 'Atendimento Profissional'}
+                  {isAdmin ? 'Auditoria (Visualização)' : isMerchant ? (requestInfo?.userName || 'Cliente') : 'Atendimento Profissional'}
               </h2>
               <div className="flex items-center gap-1.5 mt-0.5">
                   <span className="w-1.5 h-1.5 rounded-full bg-green-500"></span>
@@ -138,11 +124,11 @@ export const ServiceChatView: React.FC<ServiceChatViewProps> = ({ requestId, use
           <button className="p-2 text-gray-400"><MoreVertical size={20} /></button>
         </header>
 
-        {/* Auditoria Label */}
+        {/* Banner de Auditoria ADM */}
         {isAdmin && (
           <div className="bg-amber-500 text-white px-5 py-2 flex items-center justify-center gap-2 z-10 shadow-sm shrink-0">
               <Eye size={12} strokeWidth={3} />
-              <span className="text-[9px] font-black uppercase tracking-widest">Visualização Administrativa (Leitura)</span>
+              <span className="text-[9px] font-black uppercase tracking-widest">Modo Leitura Administrador (Sem Interação)</span>
           </div>
         )}
 
@@ -170,12 +156,6 @@ export const ServiceChatView: React.FC<ServiceChatViewProps> = ({ requestId, use
                           <p className={`text-xs leading-relaxed whitespace-pre-wrap font-medium ${isBriefing ? 'text-gray-700 dark:text-gray-300' : 'text-blue-700 dark:text-blue-300'}`}>
                               {msg.text}
                           </p>
-                          {isBriefing && (
-                            <div className="mt-4 pt-3 border-t border-indigo-50 dark:border-indigo-900/30 flex gap-4">
-                                <div className="flex items-center gap-1 text-[9px] font-bold text-gray-400 uppercase"><MapPin size={10}/> {requestInfo?.neighborhood}</div>
-                                <div className="flex items-center gap-1 text-[9px] font-bold text-gray-400 uppercase"><Zap size={10}/> {requestInfo?.urgency}</div>
-                            </div>
-                          )}
                       </div>
                   </div>
               );
@@ -194,18 +174,17 @@ export const ServiceChatView: React.FC<ServiceChatViewProps> = ({ requestId, use
                       <span className="text-[9px] text-gray-400 font-bold uppercase tracking-widest">
                           {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                       </span>
-                      {isMe && <Check size={10} className="text-blue-400" />}
                   </div>
               </div>
             );
           })}
         </main>
 
-        {/* Input de Mensagem - Oculto para ADM */}
+        {/* Input - Bloqueado para ADM */}
         {!isAdmin && (
           <footer className="p-5 bg-white dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800 shrink-0">
               <div className="flex items-center gap-3">
-                  <button className="p-3 bg-gray-50 dark:bg-gray-800 rounded-xl text-gray-400 hover:text-blue-500 transition-colors">
+                  <button className="p-3 bg-gray-50 dark:bg-gray-800 rounded-xl text-gray-400">
                     <Paperclip size={20} />
                   </button>
                   <input 
@@ -213,7 +192,7 @@ export const ServiceChatView: React.FC<ServiceChatViewProps> = ({ requestId, use
                       value={inputText}
                       onChange={e => setInputText(e.target.value)}
                       onKeyPress={e => e.key === 'Enter' && handleSend()}
-                      placeholder="Responda o cliente aqui..."
+                      placeholder="Escreva sua mensagem..."
                       className="flex-1 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl px-5 py-4 text-sm outline-none focus:border-[#1E5BFF] transition-all dark:text-white"
                   />
                   <button 

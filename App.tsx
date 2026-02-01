@@ -27,6 +27,7 @@ import { CategoryBannerSalesView } from '@/components/CategoryBannerSalesView';
 import { BannerSalesWizard } from '@/components/BannerSalesWizard'; 
 import { WeeklyRewardPage } from '@/components/WeeklyRewardPage'; 
 import { UserCupomScreen } from '@/components/UserCupomScreen'; 
+import { UserStatementView } from '@/components/UserStatementView';
 import { NotificationsView } from '@/components/NotificationsView';
 import { OnboardingScreen } from '@/components/OnboardingScreen';
 import { StoreProfileEdit } from '@/components/StoreProfileEdit';
@@ -140,7 +141,7 @@ const App: React.FC = () => {
     handleNavigate('subcategory_detail');
   };
 
-  const headerExclusionList = ['store_area', 'store_detail', 'profile', 'patrocinador_master', 'merchant_performance', 'neighborhood_posts', 'saved_posts', 'classifieds', 'services', 'services_landing', 'merchant_leads', 'service_chat', 'admin_panel', 'category_detail', 'subcategory_detail', 'sponsor_info', 'real_estate', 'jobs', 'job_detail', 'category_banner_sales', 'banner_sales_wizard', 'weekly_reward_page', 'user_coupons', 'notifications', 'store_profile', 'about', 'support', 'favorites'];
+  const headerExclusionList = ['store_area', 'store_detail', 'profile', 'patrocinador_master', 'merchant_performance', 'neighborhood_posts', 'saved_posts', 'classifieds', 'services', 'services_landing', 'merchant_leads', 'service_chat', 'admin_panel', 'category_detail', 'subcategory_detail', 'sponsor_info', 'real_estate', 'jobs', 'job_detail', 'category_banner_sales', 'banner_sales_wizard', 'weekly_reward_page', 'user_coupons', 'notifications', 'store_profile', 'about', 'support', 'favorites', 'user_statement'];
   
   const hideBottomNav = false;
 
@@ -196,6 +197,13 @@ const App: React.FC = () => {
                     {activeTab === 'user_coupons' && (
                         <UserCupomScreen 
                             onBack={() => handleNavigate('profile')} 
+                        />
+                    )}
+
+                    {activeTab === 'user_statement' && (
+                        <UserStatementView 
+                            onBack={() => handleNavigate('profile')}
+                            onExploreStores={() => handleNavigate('explore')}
                         />
                     )}
 
