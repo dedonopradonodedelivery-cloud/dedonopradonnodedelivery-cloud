@@ -35,6 +35,7 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }
   };
 
   const handleFinish = () => {
+    // REGRA DE NEGÓCIO: Marca o onboarding como concluído permanentemente no dispositivo
     localStorage.setItem('localizei_onboarding_seen', 'true');
     onComplete();
   };
@@ -88,7 +89,7 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }
         <div className="pt-8">
           <button 
             onClick={handleNext}
-            className="w-full bg-[#1E5BFF] hover:bg-blue-600 text-white font-black py-5 rounded-[2rem] shadow-2xl shadow-blue-500/30 active:scale-[0.98] transition-all flex items-center justify-center gap-3 text-base uppercase tracking-widest"
+            className="w-full bg-[#1E5BFF] hover:bg-blue-600 text-white font-black py-5 rounded-[2rem] shadow-2xl shadow-blue-500/20 active:scale-[0.98] transition-all flex items-center justify-center gap-3 text-base uppercase tracking-widest"
           >
             {currentIndex === ONBOARDING_DATA.length - 1 ? 'Começar agora' : 'Próximo'}
             <ArrowRight size={20} strokeWidth={3} />

@@ -46,8 +46,11 @@ const App: React.FC = () => {
   const { user, userRole, loading: isAuthInitialLoading, signOut } = useAuth();
   const { theme } = useTheme();
   const isAuthReturn = window.location.hash.includes('access_token') || window.location.search.includes('code=');
+  
+  // Estados de Controle de Tela Inicial
   const [splashStage, setSplashStage] = useState(splashWasShownInSession || isAuthReturn ? 4 : 0);
   const [isOnboardingActive, setIsOnboardingActive] = useState(false);
+  
   const [viewMode, setViewMode] = useState<RoleMode>(() => (localStorage.getItem('admin_view_mode') as RoleMode) || 'Usuário');
   const [isRoleSwitcherOpen, setIsRoleSwitcherOpen] = useState(false);
   
@@ -68,6 +71,17 @@ const App: React.FC = () => {
   const fullSlogan = 'Onde o bairro conversa 💬';
 
   const isMerchantMode = userRole === 'lojista' || (user?.email === ADMIN_EMAIL && viewMode === 'Lojista');
+
+  // --- LÓGICA DE ONBOARDING (REGRA DE PRIMEIRO ACESSO) ---
+  useEffect(() => {
+    // Verifica se já viu o onboarding
+    const hasSeenOnboarding = localStorage.getItem('localizei_onboarding_seen') === 'true';
+    
+    // Se não viu e não é um retorno de login (fluxo técnico), ativa o onboarding para ser mostrado após o splash
+    if (!hasSeenOnboarding && !isAuthReturn) {
+      setIsOnboardingActive(true);
+    }
+  }, [isAuthReturn]);
 
   const handleNavigate = (view: string, data?: any) => {
     if (view !== 'sponsor_info' && view !== 'notifications') {
@@ -105,11 +119,6 @@ const App: React.FC = () => {
     const endSplashTimer = setTimeout(() => {
       setSplashStage(4);
       splashWasShownInSession = true;
-      
-      const hasSeenOnboarding = localStorage.getItem('localizei_onboarding_seen');
-      if (!hasSeenOnboarding) {
-        setIsOnboardingActive(true);
-      }
     }, 5000);
     return () => {
       clearTimeout(fadeOutTimer);
@@ -161,7 +170,8 @@ const App: React.FC = () => {
       <NeighborhoodProvider>
         <div className="min-h-screen bg-white dark:bg-gray-950 flex justify-center relative transition-colors duration-300">
           
-          {isOnboardingActive && (
+          {/* O Onboarding só renderiza se a flag isOnboardingActive for true (Primeiro Acesso) E o splash tiver terminado */}
+          {isOnboardingActive && splashStage === 4 && (
             <OnboardingScreen onComplete={() => setIsOnboardingActive(false)} />
           )}
 
