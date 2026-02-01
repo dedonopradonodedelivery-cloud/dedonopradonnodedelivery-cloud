@@ -28,6 +28,7 @@ import { BannerSalesWizard } from '@/components/BannerSalesWizard';
 import { WeeklyRewardPage } from '@/components/WeeklyRewardPage'; 
 import { UserCupomScreen } from '@/components/UserCupomScreen'; 
 import { NotificationsView } from '@/components/NotificationsView';
+import { OnboardingScreen } from '@/components/OnboardingScreen';
 import { MapPin, X, Palette } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
@@ -45,6 +46,7 @@ const App: React.FC = () => {
   const { theme } = useTheme();
   const isAuthReturn = window.location.hash.includes('access_token') || window.location.search.includes('code=');
   const [splashStage, setSplashStage] = useState(splashWasShownInSession || isAuthReturn ? 4 : 0);
+  const [isOnboardingActive, setIsOnboardingActive] = useState(false);
   const [viewMode, setViewMode] = useState<RoleMode>(() => (localStorage.getItem('admin_view_mode') as RoleMode) || 'Usuário');
   const [isRoleSwitcherOpen, setIsRoleSwitcherOpen] = useState(false);
   
@@ -98,12 +100,16 @@ const App: React.FC = () => {
 
   useEffect(() => {
     if (splashStage === 4) return;
-    // Iniciamos o fade-out aos 4.5s
     const fadeOutTimer = setTimeout(() => setSplashStage(3), 4500);
-    // Removemos completamente o elemento aos 5.0s
     const endSplashTimer = setTimeout(() => {
       setSplashStage(4);
       splashWasShownInSession = true;
+      
+      // Verifica onboarding após o splash
+      const hasSeenOnboarding = localStorage.getItem('localizei_onboarding_seen');
+      if (!hasSeenOnboarding) {
+        setIsOnboardingActive(true);
+      }
     }, 5000);
     return () => {
       clearTimeout(fadeOutTimer);
@@ -154,7 +160,11 @@ const App: React.FC = () => {
     <div className={theme === 'dark' ? 'dark' : ''}>
       <NeighborhoodProvider>
         <div className="min-h-screen bg-white dark:bg-gray-950 flex justify-center relative transition-colors duration-300">
-          {/* O App se torna interativo e visível imediatamente ao atingir splashStage >= 3 */}
+          
+          {isOnboardingActive && (
+            <OnboardingScreen onComplete={() => setIsOnboardingActive(false)} />
+          )}
+
           <div className={`w-full max-w-md h-[100dvh] transition-opacity duration-500 ease-out ${splashStage >= 3 ? 'opacity-100' : 'opacity-0'}`}>
               <Layout activeTab={activeTab} setActiveTab={handleNavigate} userRole={userRole} hideNav={hideBottomNav}>
                   {!headerExclusionList.includes(activeTab) && (
@@ -269,7 +279,6 @@ const App: React.FC = () => {
           </div>
 
           {splashStage < 4 && (
-            /* A classe pointer-events-none no estágio 3 é CRUCIAL para não bloquear a Home enquanto ela faz fade-in */
             <div className={`fixed inset-0 z-[9999] flex flex-col items-center justify-between py-16 transition-opacity duration-500 ease-out ${splashStage === 3 ? 'opacity-0 pointer-events-none' : 'opacity-100'}`} style={{ backgroundColor: '#1E5BFF' }}>
               <div className="flex flex-col items-center animate-fade-in text-center px-4">
                   <div className="relative w-32 h-32 bg-white rounded-[2.5rem] flex items-center justify-center shadow-2xl mb-8 animate-logo-enter"><MapPin className="w-16 h-16 text-brand-blue fill-brand-blue" /></div>
