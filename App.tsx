@@ -29,6 +29,7 @@ import { WeeklyRewardPage } from '@/components/WeeklyRewardPage';
 import { UserCupomScreen } from '@/components/UserCupomScreen'; 
 import { NotificationsView } from '@/components/NotificationsView';
 import { OnboardingScreen } from '@/components/OnboardingScreen';
+import { StoreProfileEdit } from '@/components/StoreProfileEdit';
 import { MapPin, X, Palette } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
@@ -105,7 +106,6 @@ const App: React.FC = () => {
       setSplashStage(4);
       splashWasShownInSession = true;
       
-      // Verifica onboarding após o splash
       const hasSeenOnboarding = localStorage.getItem('localizei_onboarding_seen');
       if (!hasSeenOnboarding) {
         setIsOnboardingActive(true);
@@ -131,7 +131,7 @@ const App: React.FC = () => {
     handleNavigate('subcategory_detail');
   };
 
-  const headerExclusionList = ['store_area', 'store_detail', 'profile', 'patrocinador_master', 'merchant_performance', 'neighborhood_posts', 'saved_posts', 'classifieds', 'services', 'services_landing', 'merchant_leads', 'service_chat', 'admin_panel', 'category_detail', 'subcategory_detail', 'sponsor_info', 'real_estate', 'jobs', 'job_detail', 'category_banner_sales', 'banner_sales_wizard', 'weekly_reward_page', 'user_coupons', 'notifications'];
+  const headerExclusionList = ['store_area', 'store_detail', 'profile', 'patrocinador_master', 'merchant_performance', 'neighborhood_posts', 'saved_posts', 'classifieds', 'services', 'services_landing', 'merchant_leads', 'service_chat', 'admin_panel', 'category_detail', 'subcategory_detail', 'sponsor_info', 'real_estate', 'jobs', 'job_detail', 'category_banner_sales', 'banner_sales_wizard', 'weekly_reward_page', 'user_coupons', 'notifications', 'store_profile'];
   
   const hideBottomNav = false;
 
@@ -244,6 +244,13 @@ const App: React.FC = () => {
                         ? <StoreAreaView onBack={() => handleNavigate('home')} onNavigate={(view) => handleNavigate(view)} user={user as any} />
                         : <MenuView user={user as any} userRole={userRole} onAuthClick={() => setIsAuthOpen(true)} onNavigate={handleNavigate} onBack={() => handleNavigate('home')} />
                     )}
+
+                    {activeTab === 'store_profile' && (
+                      <StoreProfileEdit 
+                        onBack={() => handleNavigate('profile')} 
+                      />
+                    )}
+
                     {activeTab === 'merchant_performance' && <MerchantPerformanceDashboard onBack={() => handleNavigate('profile')} onNavigate={handleNavigate} />}
                     {activeTab === 'merchant_leads' && <MerchantLeadsView onBack={() => handleNavigate('profile')} onOpenChat={(id: string) => { setActiveServiceRequestId(id); setChatRole('merchant'); handleNavigate('service_chat'); }} />}
 
