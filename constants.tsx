@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { 
   Utensils, ShoppingCart, Scissors, Heart, PawPrint, Home, Wrench, 
@@ -35,6 +36,46 @@ export const CATEGORIES: Category[] = [
   { id: 'cat-eventos', name: 'Eventos', slug: 'eventos', icon: <PartyPopper />, color: 'bg-brand-blue' },
   { id: 'cat-condominio', name: 'Condomínio', slug: 'condominio', icon: <Building2 />, color: 'bg-brand-blue' },
 ];
+
+// DATASET FAKE PARA BANNERS DE CATEGORIA (SEGMENTADO POR BAIRRO)
+export const CATEGORY_TOP_BANNERS: Record<string, Record<string, { image: string; storeId: string }[]>> = {
+  'comida': {
+    'Freguesia': [
+      { image: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?q=80&w=800', storeId: 'f-5' }, // Pizzaria do Zé
+      { image: 'https://images.unsplash.com/photo-1561758033-d89a9ad46330?q=80&w=800', storeId: 'f-1' }  // Bibi Lanches
+    ],
+    'Taquara': [
+      { image: 'https://images.unsplash.com/photo-1594212699903-ec8a3eca50f5?q=80&w=800', storeId: 'fake-comida-0' },
+      { image: 'https://images.unsplash.com/photo-1571091718767-18b5b1457add?q=80&w=800', storeId: 'fake-comida-1' }
+    ],
+    'Anil': [
+      { image: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=800', storeId: 'fake-comida-2' },
+      { image: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?q=80&w=800', storeId: 'fake-comida-3' }
+    ]
+  },
+  'beleza': {
+    'Taquara': [
+      { image: 'https://images.unsplash.com/photo-1562322140-8baeececf3df?q=80&w=800', storeId: 'f-2' }, // Studio Hair Vip
+      { image: 'https://images.unsplash.com/photo-1560066984-118c38b64a75?q=80&w=800', storeId: 'fake-beleza-0' }
+    ],
+    'Freguesia': [
+      { image: 'https://images.unsplash.com/photo-1521590832167-7ce633395e39?q=80&w=800', storeId: 'fake-beleza-1' },
+      { image: 'https://images.unsplash.com/photo-1632345031435-8727f6897d53?q=80&w=800', storeId: 'fake-beleza-2' }
+    ]
+  },
+  'pets': {
+    'Pechincha': [
+      { image: 'https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?q=80&w=800', storeId: 'f-3' }, // Pet Shop Alegria
+      { image: 'https://images.unsplash.com/photo-1524511751214-b0a384dd932d?q=80&w=800', storeId: 'fake-pets-0' }
+    ]
+  },
+  'servicos': {
+    'Freguesia': [
+      { image: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?q=80&w=800', storeId: 'grupo-esquematiza' },
+      { image: 'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?q=80&w=800', storeId: 'fake-servicos-0' }
+    ]
+  }
+};
 
 export const SUBCATEGORIES: Record<string, { name: string; icon: React.ReactNode }[]> = {
   'Comida': [
@@ -367,7 +408,7 @@ export const MOCK_COMMUNITY_POSTS: CommunityPost[] = [
     timestamp: 'Agora',
     likes: 8,
     comments: 1,
-    imageUrls: ['https://images.unsplash.com/photo-1570125909248-73dfa3383b18?q=80&w=600&auto=format&fit=crop'],
+    imageUrls: ['https://images.unsplash.com/photo-1570129477492-45c003edd2be?q=80&w=600&auto=format&fit=crop'],
     theme: 'utilidade'
   },
   {
@@ -650,12 +691,12 @@ const generateAllFakeStores = (): Store[] => {
         adType: isSponsored ? AdType.PREMIUM : AdType.ORGANIC,
         isSponsored: isSponsored,
         description: `Especialistas em ${sub.name.toLowerCase()}. Oferecemos o melhor serviço e atendimento da região de ${hood}.`,
-        image: `https://source.unsplash.com/800x600/?${keyword},${i}`,
-        banner_url: `https://source.unsplash.com/1200x400/?${keyword},${i+10}`,
+        image: `https://images.unsplash.com/photo-${1550000000000 + i}?q=80&w=800&auto=format&fit=crop`,
+        banner_url: `https://images.unsplash.com/photo-${1560000000000 + i}?q=80&w=1200&auto=format&fit=crop`,
         gallery: [
-          `https://source.unsplash.com/800x800/?${keyword},${i+20}`,
-          `https://source.unsplash.com/800x800/?${keyword},${i+21}`,
-          `https://source.unsplash.com/800x800/?${keyword},${i+22}`,
+          `https://images.unsplash.com/photo-${1570000000000 + i}?q=80&w=800&auto=format&fit=crop`,
+          `https://images.unsplash.com/photo-${1580000000000 + i}?q=80&w=800&auto=format&fit=crop`,
+          `https://images.unsplash.com/photo-${1590000000000 + i}?q=80&w=800&auto=format&fit=crop`,
         ],
         logoUrl: getStoreLogo(logoIndex++),
         verified: Math.random() > 0.3,

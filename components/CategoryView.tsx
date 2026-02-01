@@ -5,7 +5,7 @@ import { Category, Store, AdType } from '@/types';
 import { SUBCATEGORIES } from '@/constants';
 import { supabase } from '@/lib/supabaseClient';
 import { LaunchOfferBanner } from './LaunchOfferBanner';
-import { CategoryBannerCarousel } from './CategoryBannerCarousel';
+import { CategoryTopCarousel } from './CategoryTopCarousel';
 import { MasterSponsorBanner } from './MasterSponsorBanner';
 
 const BigSurCard: React.FC<{ 
@@ -91,11 +91,6 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
     onSubcategoryClick(subName);
   };
 
-  const handleMerchantStoreClick = (merchantId: string) => {
-    const store = stores.find(s => s.id === merchantId);
-    if (store) onStoreClick(store);
-  };
-
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950 pb-24 animate-in slide-in-from-right duration-300">
       <div className={`sticky top-0 z-30 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md px-5 h-16 flex items-center gap-4 border-b border-gray-100 dark:border-gray-800`}>
@@ -105,11 +100,11 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
         <h1 className="font-bold text-lg text-gray-900 dark:text-white flex items-center gap-2">{React.cloneElement(category.icon as any, {className: 'w-5 h-5'})} {category.name}</h1>
       </div>
       
-      {/* CARROSSEL DE BANNERS DA CATEGORIA - TOPO ABSOLUTO */}
+      {/* CARROSSEL DE BANNERS EXCLUSIVO DA CATEGORIA NO TOPO - REGRAS DE 2 BANNERS E 4S */}
       <div className="mt-4">
-        <CategoryBannerCarousel 
+        <CategoryTopCarousel 
           categoriaSlug={category.slug} 
-          onStoreClick={handleMerchantStoreClick}
+          onStoreClick={onStoreClick}
         />
       </div>
 
