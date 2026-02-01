@@ -5,12 +5,12 @@ import {
   Copy, 
   CheckCircle2, 
   Send, 
-  LifeBuoy,
-  MessageSquare,
   HelpCircle,
   ChevronDown,
   ChevronUp,
-  ExternalLink
+  ExternalLink,
+  MessageSquare,
+  LifeBuoy
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -46,8 +46,6 @@ export const StoreSupportModule: React.FC<StoreSupportModuleProps> = ({ onBack }
 
   const handleSubmitForm = (e: React.FormEvent) => {
     e.preventDefault();
-    // Registro local simulado
-    console.log("Chamado aberto:", { subject, category, description, store: storeName, date: new Date().toISOString() });
     setFormSubmitted(true);
     setSubject('');
     setCategory('');
@@ -71,7 +69,6 @@ export const StoreSupportModule: React.FC<StoreSupportModuleProps> = ({ onBack }
 
   return (
     <div className="min-h-screen bg-[#F8F9FC] dark:bg-gray-950 font-sans pb-32 animate-in fade-in duration-300">
-      {/* Header */}
       <header className="sticky top-0 z-40 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md px-5 h-20 flex items-center gap-4 border-b border-gray-100 dark:border-gray-800 shadow-sm">
         <button onClick={onBack} className="p-3 bg-gray-50 dark:bg-gray-800 rounded-2xl hover:bg-gray-100 active:scale-90 transition-all">
           <ChevronLeft size={20} className="text-gray-600 dark:text-gray-300" />
@@ -83,8 +80,6 @@ export const StoreSupportModule: React.FC<StoreSupportModuleProps> = ({ onBack }
       </header>
 
       <main className="p-6 space-y-8 max-w-md mx-auto">
-        
-        {/* Bloco de Contato Direto */}
         <section className="bg-white dark:bg-gray-900 rounded-[2.5rem] p-8 border border-gray-100 dark:border-gray-800 shadow-sm space-y-6">
           <div className="flex flex-col items-center text-center space-y-3">
             <div className="w-14 h-14 bg-blue-50 dark:bg-blue-900/20 rounded-2xl flex items-center justify-center text-[#1E5BFF]">
@@ -119,7 +114,6 @@ export const StoreSupportModule: React.FC<StoreSupportModuleProps> = ({ onBack }
           </div>
         </section>
 
-        {/* Formulário Interno */}
         <section className="space-y-4">
           <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest ml-1">Abrir Solicitação</h3>
           
@@ -196,7 +190,6 @@ export const StoreSupportModule: React.FC<StoreSupportModuleProps> = ({ onBack }
           </div>
         </section>
 
-        {/* FAQ Rápido */}
         <section className="space-y-4 pb-12">
           <div className="flex items-center gap-2 px-1">
             <HelpCircle size={16} className="text-gray-400" />
@@ -227,14 +220,7 @@ export const StoreSupportModule: React.FC<StoreSupportModuleProps> = ({ onBack }
             ))}
           </div>
         </section>
-
       </main>
-
-      <div className="mt-12 text-center opacity-30 px-10">
-        <p className="text-[9px] font-black text-gray-500 uppercase tracking-[0.3em]">
-          Localizei JPA Suporte <br/> v1.5.0
-        </p>
-      </div>
     </div>
   );
 };

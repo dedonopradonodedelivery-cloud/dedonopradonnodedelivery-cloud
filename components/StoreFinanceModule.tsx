@@ -22,11 +22,13 @@ import {
   Crown,
   ShoppingBag,
   Zap,
-  X
+  X,
+  FileText,
+  DollarSign,
+  PieChart
 } from 'lucide-react';
 
 // --- MOCK DATA ---
-
 const MOCK_PAYMENTS = [
   { id: 'pay-01', date: '2024-03-22', product: 'Lead de Serviço (Elétrica)', period: 'Avulso', value: 5.90, status: 'paid' },
   { id: 'pay-02', date: '2024-03-15', product: 'Banner Categoria - Comida', period: 'Mar/2024', value: 29.90, status: 'paid' },
@@ -36,22 +38,10 @@ const MOCK_PAYMENTS = [
 ];
 
 const MOCK_INVOICES = [
-  { id: 'FAT-2024-03', period: 'Março/2024', due: '2024-03-10', value: 1029.90, status: 'paid', paidAt: '2024-03-05' },
-  { id: 'FAT-2024-02', period: 'Fevereiro/2024', due: '2024-02-10', value: 1085.60, status: 'paid', paidAt: '2024-02-08' },
-  { id: 'FAT-2024-01', period: 'Janeiro/2024', due: '2024-01-10', value: 1120.00, status: 'expired', paidAt: null },
+  { id: 'FAT-2024-03', period: 'Março/2024', due: '2024-03-10', value: 1029.90, status: 'paid', paidAt: '2024-03-05', method: 'PIX Automatizado' },
+  { id: 'FAT-2024-02', period: 'Fevereiro/2024', due: '2024-02-10', value: 1085.60, status: 'paid', paidAt: '2024-02-08', method: 'Cartão de Crédito' },
+  { id: 'FAT-2024-01', period: 'Janeiro/2024', due: '2024-01-10', value: 1120.00, status: 'expired', paidAt: null, method: 'PIX' },
 ];
-
-const MOCK_SUBSCRIPTIONS = {
-  master: { active: true, status: 'Ativo', months: 'Mar/24 - Mai/24', monthlyValue: 1000.00, nextRenewal: '2024-06-01' },
-  homeBanners: [
-    { neighborhood: 'Freguesia', period: 'Mar/24', value: 69.90 }
-  ],
-  categoryBanners: [
-    { category: 'Comida', neighborhood: 'Taquara', period: 'Mar/24', value: 29.90 }
-  ]
-};
-
-// --- SUB-COMPONENTS ---
 
 const SummaryCard = ({ icon: Icon, label, value, sub, color }: any) => (
   <div className="bg-white dark:bg-gray-800 p-4 rounded-3xl border border-gray-100 dark:border-gray-700 shadow-sm flex flex-col justify-between h-28">
@@ -95,13 +85,12 @@ export const StoreFinanceModule: React.FC<{ onBack: () => void }> = ({ onBack })
 
   const renderResumo = () => (
     <div className="space-y-8 animate-in fade-in duration-500">
-      {/* Detalhamento do mês */}
       <section>
         <h3 className="text-xs font-black text-gray-400 uppercase tracking-[0.2em] ml-2 mb-4">Detalhamento do Mês</h3>
         <div className="bg-white dark:bg-gray-800 rounded-[2.5rem] border border-gray-100 dark:border-gray-700 overflow-hidden shadow-sm">
           {[
-            { label: 'Banner Home (Freguesia)', value: 69.90, icon: Home, color: 'text-blue-500' },
-            { label: 'Banner Categoria (Comida)', value: 29.90, icon: LayoutGrid, color: 'text-purple-500' },
+            { label: 'Banner Home', value: 69.90, icon: Home, color: 'text-blue-500' },
+            { label: 'Banner Categoria', value: 29.90, icon: LayoutGrid, color: 'text-purple-500' },
             { label: 'Patrocinador Master', value: 1000.00, icon: Crown, color: 'text-amber-500' },
             { label: 'Leads de Serviço (8 unid.)', value: 47.20, icon: ShoppingBag, color: 'text-emerald-500' },
             { label: 'Taxa Cupons', value: 0.00, icon: Zap, color: 'text-gray-300' },
@@ -117,14 +106,13 @@ export const StoreFinanceModule: React.FC<{ onBack: () => void }> = ({ onBack })
         </div>
       </section>
 
-      {/* Pagamentos Recentes */}
       <section>
         <div className="flex justify-between items-center mb-4 px-2">
           <h3 className="text-xs font-black text-gray-400 uppercase tracking-[0.2em]">Pagamentos Recentes</h3>
           <button onClick={() => setActiveTab('faturas')} className="text-[10px] font-black text-[#1E5BFF] uppercase tracking-widest">Ver Todos</button>
         </div>
         <div className="bg-white dark:bg-gray-800 rounded-[2rem] border border-gray-100 dark:border-gray-700 overflow-hidden shadow-sm">
-          {MOCK_PAYMENTS.map((pay, i) => (
+          {MOCK_PAYMENTS.length > 0 ? MOCK_PAYMENTS.map((pay, i) => (
             <div key={i} className="p-4 border-b last:border-b-0 border-gray-50 dark:border-gray-700 flex items-center justify-between">
               <div className="flex flex-col">
                 <span className="text-sm font-bold text-gray-800 dark:text-gray-100">{pay.product}</span>
@@ -135,7 +123,9 @@ export const StoreFinanceModule: React.FC<{ onBack: () => void }> = ({ onBack })
                 <StatusBadge status={pay.status} />
               </div>
             </div>
-          ))}
+          )) : (
+            <div className="p-10 text-center text-gray-400 text-xs font-bold uppercase tracking-widest">Nenhum pagamento encontrado</div>
+          )}
         </div>
       </section>
     </div>
@@ -145,7 +135,7 @@ export const StoreFinanceModule: React.FC<{ onBack: () => void }> = ({ onBack })
     <div className="space-y-4 animate-in slide-in-from-right duration-500">
       <h3 className="text-xs font-black text-gray-400 uppercase tracking-[0.2em] ml-2">Histórico de Faturas</h3>
       {MOCK_INVOICES.map((fat, i) => (
-        <div key={i} className="bg-white dark:bg-gray-800 rounded-3xl p-6 border border-gray-100 dark:border-gray-700 shadow-sm">
+        <div key={i} className="bg-white dark:bg-gray-800 rounded-3xl p-6 border border-gray-100 dark:border-gray-800 shadow-sm">
           <div className="flex justify-between items-start mb-4">
             <div>
               <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{fat.id}</p>
@@ -183,8 +173,7 @@ export const StoreFinanceModule: React.FC<{ onBack: () => void }> = ({ onBack })
     <div className="space-y-8 animate-in slide-in-from-right duration-500">
       <h3 className="text-xs font-black text-gray-400 uppercase tracking-[0.2em] ml-2">Assinaturas Ativas</h3>
       
-      {/* Bloco Master */}
-      <section className="bg-slate-900 dark:bg-slate-900 rounded-[2.5rem] p-8 text-white shadow-xl relative overflow-hidden">
+      <section className="bg-slate-900 rounded-[2.5rem] p-8 text-white shadow-xl relative overflow-hidden">
         <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 rounded-full blur-3xl -mr-10 -mt-10"></div>
         <div className="flex items-center gap-3 mb-6">
           <div className="w-10 h-10 rounded-2xl bg-amber-400/20 flex items-center justify-center text-amber-400">
@@ -203,10 +192,9 @@ export const StoreFinanceModule: React.FC<{ onBack: () => void }> = ({ onBack })
           <div className="flex justify-between"><span className="text-slate-400 text-xs font-medium">Valor Mensal</span><span className="font-black text-sm text-amber-400">R$ 1.000,00</span></div>
           <div className="flex justify-between"><span className="text-slate-400 text-xs font-medium">Próxima Renovação</span><span className="font-bold text-xs text-blue-400">01/06/2024</span></div>
         </div>
-        <button className="w-full py-4 bg-white/10 hover:bg-white/20 border border-white/10 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all">Ver Contratação Completa</button>
+        <button className="w-full py-4 bg-white/10 border border-white/10 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all">Ver Contratação</button>
       </section>
 
-      {/* Bloco Banners Home */}
       <section className="bg-white dark:bg-gray-800 p-6 rounded-[2.5rem] border border-gray-100 dark:border-gray-700 shadow-sm space-y-4">
         <div className="flex items-center gap-3 mb-2">
           <div className="w-10 h-10 rounded-2xl bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center text-blue-600">
@@ -214,18 +202,15 @@ export const StoreFinanceModule: React.FC<{ onBack: () => void }> = ({ onBack })
           </div>
           <h4 className="font-bold text-gray-900 dark:text-white">Banners Home</h4>
         </div>
-        {MOCK_SUBSCRIPTIONS.homeBanners.map((b, i) => (
-          <div key={i} className="flex justify-between items-center py-2 border-b last:border-0 border-gray-50 dark:border-gray-700">
+        <div className="flex justify-between items-center py-2">
             <div className="flex flex-col">
-              <span className="text-xs font-bold text-gray-700 dark:text-gray-200">{b.neighborhood}</span>
-              <span className="text-[10px] text-gray-400 uppercase tracking-widest font-medium">Vigência: {b.period}</span>
+              <span className="text-xs font-bold text-gray-700 dark:text-gray-200">Freguesia</span>
+              <span className="text-[10px] text-gray-400 uppercase tracking-widest font-medium">Vigência: Mar/24</span>
             </div>
-            <span className="text-sm font-black text-gray-900 dark:text-white">R$ {b.value.toFixed(2)}</span>
-          </div>
-        ))}
+            <span className="text-sm font-black text-gray-900 dark:text-white">R$ 69,90</span>
+        </div>
       </section>
 
-      {/* Bloco Banners Categoria */}
       <section className="bg-white dark:bg-gray-800 p-6 rounded-[2.5rem] border border-gray-100 dark:border-gray-700 shadow-sm space-y-4">
         <div className="flex items-center gap-3 mb-2">
           <div className="w-10 h-10 rounded-2xl bg-purple-50 dark:bg-purple-900/20 flex items-center justify-center text-purple-600">
@@ -233,15 +218,13 @@ export const StoreFinanceModule: React.FC<{ onBack: () => void }> = ({ onBack })
           </div>
           <h4 className="font-bold text-gray-900 dark:text-white">Banners Categoria</h4>
         </div>
-        {MOCK_SUBSCRIPTIONS.categoryBanners.map((b, i) => (
-          <div key={i} className="flex justify-between items-center py-2 border-b last:border-0 border-gray-50 dark:border-gray-700">
+        <div className="flex justify-between items-center py-2">
             <div className="flex flex-col">
-              <span className="text-xs font-bold text-gray-700 dark:text-gray-200">{b.category} • {b.neighborhood}</span>
-              <span className="text-[10px] text-gray-400 uppercase tracking-widest font-medium">Vigência: {b.period}</span>
+              <span className="text-xs font-bold text-gray-700 dark:text-gray-200">Comida • Taquara</span>
+              <span className="text-[10px] text-gray-400 uppercase tracking-widest font-medium">Vigência: Mar/24</span>
             </div>
-            <span className="text-sm font-black text-gray-900 dark:text-white">R$ {b.value.toFixed(2)}</span>
-          </div>
-        ))}
+            <span className="text-sm font-black text-gray-900 dark:text-white">R$ 29,90</span>
+        </div>
       </section>
 
       <button className="w-full py-4 text-[10px] font-black text-rose-500 dark:text-rose-400 uppercase tracking-[0.2em] opacity-40">Gerenciar cancelamentos</button>
@@ -268,21 +251,8 @@ export const StoreFinanceModule: React.FC<{ onBack: () => void }> = ({ onBack })
           <CheckCircle2 size={20} className="text-emerald-500" />
         </div>
 
-        <div className="bg-white dark:bg-gray-800 p-5 rounded-3xl border border-gray-100 dark:border-gray-700 flex items-center justify-between shadow-sm">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-gray-50 dark:bg-gray-700 rounded-2xl flex items-center justify-center text-gray-400">
-              <CreditCard size={24} />
-            </div>
-            <div>
-              <p className="font-bold text-gray-900 dark:text-white text-sm leading-tight">Cartão de Crédito</p>
-              <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-0.5">Final •••• 4821</p>
-            </div>
-          </div>
-          <button className="p-2 text-gray-300 hover:text-red-500"><Trash2 size={18}/></button>
-        </div>
-
-        <button className="w-full py-5 bg-gray-50 dark:bg-gray-800 border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-3xl flex items-center justify-center gap-3 text-gray-400 hover:text-[#1E5BFF] hover:border-[#1E5BFF]/30 transition-all group">
-          <Plus size={20} className="group-hover:scale-110 transition-transform" />
+        <button className="w-full py-5 bg-gray-50 dark:bg-gray-800 border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-3xl flex items-center justify-center gap-3 text-gray-400 hover:text-[#1E5BFF] transition-all">
+          <Plus size={20} />
           <span className="font-bold text-sm">Adicionar novo método</span>
         </button>
       </div>
@@ -298,7 +268,6 @@ export const StoreFinanceModule: React.FC<{ onBack: () => void }> = ({ onBack })
 
   return (
     <div className="min-h-screen bg-[#F8F9FC] dark:bg-gray-950 font-sans pb-32 animate-in fade-in duration-300">
-      {/* Header */}
       <header className="sticky top-0 z-40 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md px-5 h-20 flex items-center gap-4 border-b border-gray-100 dark:border-gray-800 shadow-sm">
         <button onClick={onBack} className="p-3 bg-gray-50 dark:bg-gray-800 rounded-2xl hover:bg-gray-100 active:scale-90 transition-all">
           <ChevronLeft size={20} className="text-gray-600 dark:text-gray-300" />
@@ -310,14 +279,12 @@ export const StoreFinanceModule: React.FC<{ onBack: () => void }> = ({ onBack })
       </header>
 
       <main className="p-6 space-y-8 max-w-md mx-auto">
-        {/* Resumo Topo */}
         <section className="grid grid-cols-3 gap-3">
           <SummaryCard icon={DollarSign} label="Pago no Mês" value="R$ 1.029,90" color="bg-emerald-500" />
           <SummaryCard icon={Calendar} label="Próxima Fatura" value="10 de Abr" sub="R$ 1.000,00" color="bg-blue-600" />
           <SummaryCard icon={Package} label="Assinaturas" value="3 Ativas" color="bg-purple-600" />
         </section>
 
-        {/* Tabs Navegação */}
         <div className="flex bg-gray-100 dark:bg-gray-900 p-1 rounded-2xl border border-gray-200 dark:border-gray-800 overflow-x-auto no-scrollbar">
           {tabs.map((tab) => (
             <button 
@@ -330,15 +297,12 @@ export const StoreFinanceModule: React.FC<{ onBack: () => void }> = ({ onBack })
           ))}
         </div>
 
-        {/* Content Tabs */}
         {activeTab === 'resumo' && renderResumo()}
         {activeTab === 'faturas' && renderFaturas()}
         {activeTab === 'assinaturas' && renderAssinaturas()}
         {activeTab === 'metodos' && renderMetodos()}
-
       </main>
 
-      {/* Modal Detalhes Fatura */}
       {selectedInvoice && (
         <div className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm flex items-end justify-center animate-in fade-in duration-300" onClick={() => setSelectedInvoice(null)}>
           <div className="bg-white dark:bg-gray-900 w-full max-w-md rounded-t-[2.5rem] p-8 shadow-2xl animate-in slide-in-from-bottom duration-300 max-h-[85vh] flex flex-col" onClick={e => e.stopPropagation()}>
@@ -354,16 +318,12 @@ export const StoreFinanceModule: React.FC<{ onBack: () => void }> = ({ onBack })
                         <span className="text-xs font-black text-gray-400 uppercase tracking-widest">Valor</span>
                     </div>
                     <div className="flex justify-between items-start">
-                        <div className="flex flex-col"><span className="text-sm font-bold text-gray-800 dark:text-gray-100">Assinatura Master</span><span className="text-[10px] text-gray-400 font-medium">Competência Mar/24</span></div>
+                        <div className="flex flex-col"><span className="text-sm font-bold text-gray-800 dark:text-gray-100">Assinatura Master</span><span className="text-[10px] text-gray-400 font-medium">Competência {selectedInvoice.period}</span></div>
                         <span className="text-sm font-black text-gray-900 dark:text-white">R$ 1.000,00</span>
                     </div>
                     <div className="flex justify-between items-start">
                         <div className="flex flex-col"><span className="text-sm font-bold text-gray-800 dark:text-gray-100">Banner Categoria</span><span className="text-[10px] text-gray-400 font-medium">Comida • Taquara</span></div>
                         <span className="text-sm font-black text-gray-900 dark:text-white">R$ 29,90</span>
-                    </div>
-                    <div className="flex justify-between items-start text-emerald-600">
-                        <span className="text-sm font-bold">Desconto Promoção</span>
-                        <span className="text-sm font-black">- R$ 0,00</span>
                     </div>
                     <div className="pt-4 border-t border-gray-100 dark:border-gray-700 flex justify-between items-center">
                         <span className="text-base font-black text-gray-900 dark:text-white uppercase tracking-tighter">Total Pago</span>
@@ -374,7 +334,7 @@ export const StoreFinanceModule: React.FC<{ onBack: () => void }> = ({ onBack })
                 <div className="space-y-4">
                     <div className="flex justify-between items-center px-4">
                         <span className="text-xs text-gray-500 font-medium">Forma de pagamento</span>
-                        <span className="text-xs font-bold text-gray-700 dark:text-gray-200">PIX Automatizado</span>
+                        <span className="text-xs font-bold text-gray-700 dark:text-gray-200">{selectedInvoice.method}</span>
                     </div>
                     <div className="flex justify-between items-center px-4">
                         <span className="text-xs text-gray-500 font-medium">Vencimento</span>
@@ -382,7 +342,7 @@ export const StoreFinanceModule: React.FC<{ onBack: () => void }> = ({ onBack })
                     </div>
                     <div className="flex justify-between items-center px-4">
                         <span className="text-xs text-gray-500 font-medium">Pagamento realizado</span>
-                        <span className="text-xs font-bold text-emerald-600">{new Date(selectedInvoice.paidAt).toLocaleDateString()}</span>
+                        <span className="text-xs font-bold text-emerald-600">{selectedInvoice.paidAt ? new Date(selectedInvoice.paidAt).toLocaleDateString() : '--'}</span>
                     </div>
                 </div>
              </div>
@@ -398,9 +358,3 @@ export const StoreFinanceModule: React.FC<{ onBack: () => void }> = ({ onBack })
     </div>
   );
 };
-
-const DollarSign = ({ size, className }: any) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
-    <line x1="12" y1="1" x2="12" y2="23" /><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-  </svg>
-);
