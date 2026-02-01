@@ -15,8 +15,8 @@ import {
   Award,
   CalendarDays,
   Smartphone,
-  // Added TrendingUp to the lucide-react imports
-  TrendingUp
+  TrendingUp,
+  Lock
 } from 'lucide-react';
 
 interface SponsorInfoViewProps {
@@ -108,7 +108,6 @@ export const SponsorInfoView: React.FC<SponsorInfoViewProps> = ({ onBack }) => {
                 <span className="text-lg font-bold text-slate-500 line-through">De: R$ 2.500,00/mês</span>
                 <div className="flex items-baseline gap-2">
                   <span className="text-xs font-black uppercase text-slate-300">Por:</span>
-                  {/* Fixed formatting: formatBRL already includes the currency symbol */}
                   <span className="text-4xl font-black text-white tracking-tighter">{formatBRL(1000)}<span className="text-base">/mês</span></span>
                 </div>
               </div>
