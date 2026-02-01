@@ -36,6 +36,7 @@ import { MerchantReviewsModule } from '@/components/MerchantReviewsModule';
 import { MerchantCouponsModule } from '@/components/MerchantCouponsModule';
 import { StoreFinanceModule } from '@/components/StoreFinanceModule';
 import { StoreSupportModule } from '@/components/StoreSupportModule';
+import { StoreClaimFlow } from '@/components/StoreClaimFlow';
 import { MapPin, X, Palette } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
@@ -80,6 +81,10 @@ const App: React.FC = () => {
 
   const isAdmin = user?.email === ADMIN_EMAIL;
   const isMerchantMode = userRole === 'lojista' || (isAdmin && viewMode === 'Lojista');
+
+  // Controle de Reivindicação de Loja
+  const [isClaimFlowActive, setIsClaimFlowActive] = useState(false);
+  const [storeToClaim, setStoreToClaim] = useState<Store | null>(null);
 
   // --- LÓGICA DE ONBOARDING (REGRA DE PRIMEIRO ACESSO) ---
   useEffect(() => {
@@ -148,6 +153,21 @@ const App: React.FC = () => {
     handleNavigate('subcategory_detail');
   };
 
+  const handleClaimStore = (store: Store) => {
+    if (!user) {
+      setIsAuthOpen(true);
+      return;
+    }
+    setStoreToClaim(store);
+    setIsClaimFlowActive(true);
+  };
+
+  const handleClaimSuccess = () => {
+    setIsClaimFlowActive(false);
+    // Atualiza o lojista no app ou redireciona
+    handleNavigate('profile');
+  };
+
   const headerExclusionList = ['store_area', 'store_detail', 'profile', 'patrocinador_master', 'merchant_performance', 'neighborhood_posts', 'saved_posts', 'classifieds', 'services', 'services_landing', 'merchant_leads', 'service_chat', 'admin_panel', 'category_detail', 'subcategory_detail', 'sponsor_info', 'real_estate', 'jobs', 'job_detail', 'category_banner_sales', 'banner_sales_wizard', 'weekly_reward_page', 'user_coupons', 'notifications', 'store_profile', 'about', 'support', 'favorites', 'user_statement', 'service_messages_list', 'merchant_reviews', 'merchant_coupons', 'store_finance', 'store_support'];
   
   const hideBottomNav = false;
@@ -180,6 +200,16 @@ const App: React.FC = () => {
           
           {isOnboardingActive && splashStage === 4 && (
             <OnboardingScreen onComplete={() => setIsOnboardingActive(false)} />
+          )}
+
+          {isClaimFlowActive && storeToClaim && user && (
+            <StoreClaimFlow 
+              store={storeToClaim} 
+              userId={user.id} 
+              onBack={() => setIsClaimFlowActive(false)} 
+              onSuccess={handleClaimSuccess}
+              onNavigate={handleNavigate}
+            />
           )}
 
           <div className={`w-full max-w-md h-[100dvh] transition-opacity duration-500 ease-out ${splashStage >= 3 ? 'opacity-100' : 'opacity-0'}`}>
@@ -318,7 +348,7 @@ const App: React.FC = () => {
 
                     {activeTab === 'admin_panel' && <AdminPanel user={user as any} onLogout={signOut} viewMode={viewMode} onOpenViewSwitcher={() => setIsRoleSwitcherOpen(true)} onNavigateToApp={handleNavigate} onOpenMonitorChat={(id: string) => { setActiveServiceRequestId(id); setChatRole('admin'); handleNavigate('service_chat'); }} />}
                     
-                    {activeTab === 'store_detail' && selectedStore && <StoreDetailView store={selectedStore} onBack={() => handleNavigate(previousTab)} />}
+                    {activeTab === 'store_detail' && selectedStore && <StoreDetailView store={selectedStore} onBack={() => handleNavigate(previousTab)} onClaim={() => handleClaimStore(selectedStore)} />}
                     {activeTab === 'classifieds' && <ClassifiedsView onBack={() => handleNavigate('home')} onNavigate={handleNavigate} user={user} onRequireLogin={() => setIsAuthOpen(true)} />}
                     {activeTab === 'real_estate' && <RealEstateView onBack={() => handleNavigate('classifieds')} user={user} onRequireLogin={() => setIsAuthOpen(true)} />}
                     {activeTab === 'jobs' && <JobsView onBack={() => handleNavigate('classifieds')} onJobClick={handleSelectJob} />}

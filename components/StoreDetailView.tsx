@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState, useMemo } from 'react';
 import {
   ChevronLeft,
@@ -252,7 +251,7 @@ export const StoreDetailView: React.FC<{
           <div className="bg-white dark:bg-gray-800 rounded-3xl p-6 pt-16 -mt-12 text-center shadow-lg border border-gray-100 dark:border-gray-700 mb-8">
             <div className="flex items-center justify-center gap-2 mb-2">
               <h1 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">{store.name}</h1>
-              {store.verified && (
+              {(store.verified || store.claimed) && (
                   <div className="flex items-center gap-1 text-[#1E5BFF]">
                       <BadgeCheck size={20} className="fill-current" />
                   </div>
@@ -267,6 +266,12 @@ export const StoreDetailView: React.FC<{
                   <span className="text-gray-400 opacity-70">({store.reviewsCount ?? 0})</span>
                 </div>
             </div>
+            {store.claimed && (
+                <div className="mt-4 flex items-center justify-center gap-1.5 text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 px-4 py-1.5 rounded-full w-fit mx-auto border border-emerald-100 dark:border-emerald-800">
+                    <CheckCircle2 size={14} />
+                    <span className="text-[10px] font-black uppercase tracking-widest">Loja Verificada pelo Dono</span>
+                </div>
+            )}
           </div>
         
           {/* ONDE ENCONTRAR */}
