@@ -185,7 +185,7 @@ export const AdoptionView: React.FC<AdoptionViewProps> = ({ onBack, user, onRequ
         )}
       </main>
 
-      <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-40 w-full max-w-[280px] px-4">
+      <div className="fixed bottom-32 left-1/2 -translate-x-1/2 z-40 w-full max-w-[280px] px-4">
         <button 
             onClick={handleAnunciar}
             className="w-full bg-amber-500 hover:bg-amber-600 text-white font-black py-4 rounded-2xl shadow-2xl shadow-amber-500/40 flex items-center justify-center gap-3 uppercase tracking-widest text-[11px] border border-white/20 active:scale-95 transition-all"

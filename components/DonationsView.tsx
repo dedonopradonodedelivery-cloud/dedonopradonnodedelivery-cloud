@@ -197,7 +197,7 @@ export const DonationsView: React.FC<DonationsViewProps> = ({ onBack, user, onRe
         )}
       </main>
 
-      <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-40 w-full max-w-[280px] px-4">
+      <div className="fixed bottom-32 left-1/2 -translate-x-1/2 z-40 w-full max-w-[280px] px-4">
         <button 
             onClick={handleAnunciar}
             className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-black py-4 rounded-2xl shadow-2xl shadow-emerald-500/40 flex items-center justify-center gap-3 uppercase tracking-widest text-[11px] border border-white/20 active:scale-95 transition-all"
@@ -209,7 +209,7 @@ export const DonationsView: React.FC<DonationsViewProps> = ({ onBack, user, onRe
 
       {isFilterModalOpen && (
         <div className="fixed inset-0 z-[1100] bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-4 animate-in fade-in duration-200" onClick={() => setIsFilterModalOpen(false)}>
-            <div className="bg-white dark:bg-gray-900 w-full max-w-md rounded-[2.5rem] sm:rounded-3xl shadow-2xl flex flex-col animate-in slide-in-from-bottom sm:zoom-in-95 duration-300 max-h-[90vh] overflow-hidden" onClick={e => e.stopPropagation()}>
+            <div className="bg-white dark:bg-gray-900 w-full max-w-md rounded-t-[2.5rem] p-6 shadow-2xl animate-in slide-in-from-bottom duration-300 max-h-[90vh] flex flex-col">
                 <div className="p-6 pb-0 flex flex-col shrink-0">
                   <div className="w-12 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full mx-auto mb-6 sm:hidden"></div>
                   <div className="flex justify-between items-center mb-6">

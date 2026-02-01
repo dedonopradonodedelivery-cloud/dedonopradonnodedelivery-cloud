@@ -172,7 +172,7 @@ const CreateClassifiedModal: React.FC<{ isOpen: boolean; onClose: () => void; us
     return (
         <div className="fixed inset-0 z-[1100] bg-black/60 backdrop-blur-sm flex items-end justify-center animate-in fade-in duration-200" onClick={onClose}>
             <div className="bg-white dark:bg-gray-900 w-full max-w-md rounded-t-[2.5rem] p-8 shadow-2xl flex flex-col animate-in slide-in-from-bottom duration-300 max-h-[90vh] overflow-y-auto no-scrollbar" onClick={e => e.stopPropagation()}>
-                <div className="w-12 h-1.5 bg-gray-200 dark:bg-gray-800 rounded-full mx-auto mb-6 shrink-0"></div>
+                <div className="w-12 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full mx-auto mb-6 shrink-0"></div>
                 
                 {step === 1 ? (
                     <div className="space-y-6">
@@ -299,7 +299,7 @@ export const ClassifiedsView: React.FC<ClassifiedsViewProps> = ({ onBack, onNavi
 
   return (
     <div className="min-h-screen bg-[#F8F9FC] dark:bg-gray-950 font-sans animate-in fade-in duration-500 relative">
-      <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-[1000] w-full max-w-[280px] px-4">
+      <div className="fixed bottom-32 left-1/2 -translate-x-1/2 z-[1000] w-full max-w-[280px] px-4">
         <button 
             onClick={handleAnunciarClick}
             className="w-full bg-[#1E5BFF] hover:bg-blue-600 text-white font-black py-4 rounded-2xl shadow-2xl shadow-blue-500/40 flex items-center justify-center gap-3 uppercase tracking-widest text-[11px] border border-white/20 active:scale-95 transition-all"

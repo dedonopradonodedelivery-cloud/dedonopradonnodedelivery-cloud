@@ -203,7 +203,7 @@ export const DesapegaView: React.FC<DesapegaViewProps> = ({ onBack, user, onRequ
         )}
       </main>
 
-      <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-40 w-full max-w-[280px] px-4">
+      <div className="fixed bottom-32 left-1/2 -translate-x-1/2 z-40 w-full max-w-[280px] px-4">
         <button 
             onClick={handleAnunciar}
             className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-black py-4 rounded-2xl shadow-2xl shadow-indigo-500/40 flex items-center justify-center gap-3 uppercase tracking-widest text-[11px] border border-white/20 active:scale-95 transition-all"
@@ -215,7 +215,7 @@ export const DesapegaView: React.FC<DesapegaViewProps> = ({ onBack, user, onRequ
 
       {isFilterModalOpen && (
         <div className="fixed inset-0 z-[1100] bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-4 animate-in fade-in duration-200" onClick={() => setIsFilterModalOpen(false)}>
-            <div className="bg-white dark:bg-gray-900 w-full max-w-md rounded-[2.5rem] sm:rounded-3xl p-8 shadow-2xl flex flex-col animate-in slide-in-from-bottom sm:zoom-in-95 duration-300 max-h-[90vh] overflow-y-auto no-scrollbar" onClick={e => e.stopPropagation()}>
+            <div className="bg-white dark:bg-gray-900 w-full max-w-md rounded-[2.5rem] sm:rounded-3xl shadow-2xl flex flex-col animate-in slide-in-from-bottom sm:zoom-in-95 duration-300 max-h-[90vh] overflow-hidden" onClick={e => e.stopPropagation()}>
                 <div className="p-6 pb-0 flex flex-col shrink-0">
                   <div className="w-12 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full mx-auto mb-6 sm:hidden"></div>
                   <div className="flex justify-between items-center mb-6">
@@ -292,7 +292,7 @@ export const DesapegaView: React.FC<DesapegaViewProps> = ({ onBack, user, onRequ
                     <textarea placeholder="Detalhes do item, estado de conservação..." rows={3} className="w-full p-5 bg-gray-50 dark:bg-gray-800 border-none rounded-2xl text-sm font-medium dark:text-white resize-none outline-none focus:ring-2 focus:ring-indigo-500/30" />
                     <div className="relative">
                         <span className="absolute left-5 top-1/2 -translate-y-1/2 font-black text-emerald-600 italic text-lg">R$</span>
-                        <input placeholder="Valor (obrigatório)" className="w-full p-5 pl-12 bg-gray-50 dark:bg-gray-800 border-none rounded-2xl text-sm font-black text-emerald-600 dark:text-emerald-400 outline-none focus:ring-2 focus:ring-indigo-500/30" />
+                        <input placeholder="Valor (obrigatório)" className="w-full p-5 pl-12 bg-gray-50 dark:bg-gray-800 border-none rounded-2xl text-sm font-black text-emerald-600 dark:text-emerald-400 outline-none focus:ring-2 focus:ring-emerald-500/30" />
                     </div>
                 </div>
 
