@@ -15,6 +15,7 @@ import { JobsView } from '@/components/JobsView';
 import { JobDetailView } from '@/components/JobDetailView';
 import { AdoptionView } from '@/components/AdoptionView';
 import { DonationsView } from '@/components/DonationsView';
+import { DesapegaView } from '@/components/DesapegaView';
 import { MerchantPerformanceDashboard } from '@/components/MerchantPerformanceDashboard';
 import { NeighborhoodPostsView } from '@/components/NeighborhoodPostsView';
 import { SavedPostsView } from '@/components/SavedPostsView';
@@ -170,7 +171,7 @@ const App: React.FC = () => {
     handleNavigate('profile');
   };
 
-  const headerExclusionList = ['store_area', 'store_detail', 'profile', 'patrocinador_master', 'merchant_performance', 'neighborhood_posts', 'saved_posts', 'classifieds', 'services', 'services_landing', 'merchant_leads', 'service_chat', 'admin_panel', 'category_detail', 'subcategory_detail', 'sponsor_info', 'real_estate', 'jobs', 'job_detail', 'adoption', 'donations', 'category_banner_sales', 'banner_sales_wizard', 'weekly_reward_page', 'user_coupons', 'notifications', 'store_profile', 'about', 'support', 'favorites', 'user_statement', 'service_messages_list', 'merchant_reviews', 'merchant_coupons', 'store_finance', 'store_support'];
+  const headerExclusionList = ['store_area', 'store_detail', 'profile', 'patrocinador_master', 'merchant_performance', 'neighborhood_posts', 'saved_posts', 'classifieds', 'services', 'services_landing', 'merchant_leads', 'service_chat', 'admin_panel', 'category_detail', 'subcategory_detail', 'sponsor_info', 'real_estate', 'jobs', 'job_detail', 'adoption', 'donations', 'desapega', 'category_banner_sales', 'banner_sales_wizard', 'weekly_reward_page', 'user_coupons', 'notifications', 'store_profile', 'about', 'support', 'favorites', 'user_statement', 'service_messages_list', 'merchant_reviews', 'merchant_coupons', 'store_finance', 'store_support'];
   
   const hideBottomNav = false;
 
@@ -357,6 +358,7 @@ const App: React.FC = () => {
                     {activeTab === 'job_detail' && selectedJob && <JobDetailView job={selectedJob} onBack={() => handleNavigate('jobs')} />}
                     {activeTab === 'adoption' && <AdoptionView onBack={() => handleNavigate('classifieds')} user={user} onRequireLogin={() => setIsAuthOpen(true)} onNavigate={handleNavigate} />}
                     {activeTab === 'donations' && <DonationsView onBack={() => handleNavigate('classifieds')} user={user} onRequireLogin={() => setIsAuthOpen(true)} onNavigate={handleNavigate} />}
+                    {activeTab === 'desapega' && <DesapegaView onBack={() => handleNavigate('classifieds')} user={user} onRequireLogin={() => setIsAuthOpen(true)} onNavigate={handleNavigate} />}
                     {activeTab === 'neighborhood_posts' && <NeighborhoodPostsView onBack={() => handleNavigate('home')} onStoreClick={handleSelectStore} user={user} onRequireLogin={() => setIsAuthOpen(true)} userRole={userRole} onNavigate={handleNavigate} />}
                     {activeTab === 'saved_posts' && <SavedPostsView onBack={() => handleNavigate('profile')} onStoreClick={handleSelectStore} onRequireLogin={() => setIsAuthOpen(true)} />}
                     

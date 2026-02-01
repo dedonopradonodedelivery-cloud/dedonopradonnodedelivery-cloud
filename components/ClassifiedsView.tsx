@@ -355,7 +355,7 @@ export const ClassifiedsView: React.FC<ClassifiedsViewProps> = ({ onBack, onNavi
         <div className="flex gap-2 overflow-x-auto no-scrollbar pb-8">
           <button 
             onClick={() => toggleNeighborhood('Jacarepaguá (todos)')}
-            className={`flex-shrink-0 px-5 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest border transition-all ${selectedNeighborhoods.length === 0 ? 'bg-gray-900 text-white border-gray-900' : 'bg-white dark:bg-gray-800 text-gray-400 border-gray-100 dark:border-gray-700'}`}
+            className={`flex-shrink-0 px-5 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest border transition-all ${selectedNeighborhoods.length === 0 ? 'bg-gray-900 text-white border-gray-900' : 'bg-white dark:bg-gray-800 text-gray-400 border-gray-100 dark:border-gray-800'}`}
           >
             Jacarepaguá (Todos)
           </button>
@@ -382,6 +382,7 @@ export const ClassifiedsView: React.FC<ClassifiedsViewProps> = ({ onBack, onNavi
                         else if (cat.id === 'emprego') onNavigate('jobs');
                         else if (cat.id === 'adocao') onNavigate('adoption');
                         else if (cat.id === 'doacoes') onNavigate('donations');
+                        else if (cat.id === 'desapega') onNavigate('desapega');
                         else scrollToCategory(cat.id);
                     }} 
                 />
@@ -389,7 +390,7 @@ export const ClassifiedsView: React.FC<ClassifiedsViewProps> = ({ onBack, onNavi
         </div>
         
         <div className="space-y-4">
-          {CLASSIFIED_CATEGORIES.filter(c => !['imoveis', 'emprego', 'servicos', 'adocao', 'doacoes'].includes(c.id)).map(cat => (
+          {CLASSIFIED_CATEGORIES.filter(c => !['imoveis', 'emprego', 'servicos', 'adocao', 'doacoes', 'desapega'].includes(c.id)).map(cat => (
             <CategorySection 
               key={cat.id}
               category={cat}
