@@ -84,7 +84,7 @@ const App: React.FC = () => {
   }, [isAuthReturn]);
 
   const handleNavigate = (view: string, data?: any) => {
-    if (view !== 'sponsor_info' && view !== 'notifications') {
+    if (view !== 'sponsor_info' && view !== 'notifications' && view !== 'patrocinador_master') {
       setPreviousTab(activeTab);
     }
     

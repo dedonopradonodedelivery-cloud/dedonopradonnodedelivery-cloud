@@ -86,8 +86,6 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
     return categoryStores;
   }, [stores, category.name, selectedSubcategory]);
 
-  const masterSponsor = useMemo(() => stores.find(s => s.id === 'grupo-esquematiza'), [stores]);
-
   const handleSubcategoryClick = (subName: string) => {
     onSubcategoryClick(subName);
   };
@@ -170,11 +168,7 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
 
         {/* BANNER PATROCINADOR MASTER FINAL */}
         <section>
-          <MasterSponsorBanner 
-            sponsor={masterSponsor ? { name: masterSponsor.name, subtitle: masterSponsor.description, logoUrl: masterSponsor.logoUrl } : null}
-            onClick={() => onNavigate('patrocinador_master')} 
-            label={category.name} 
-          />
+          <MasterSponsorBanner onClick={() => onNavigate('patrocinador_master')} label={category.name} />
         </section>
       </div>
     </div>

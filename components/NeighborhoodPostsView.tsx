@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { 
   ChevronLeft, 
@@ -22,6 +21,7 @@ import { useNeighborhood, NEIGHBORHOODS } from '../contexts/NeighborhoodContext'
 import { User } from '@supabase/supabase-js';
 import { PostCard } from './PostCard';
 import { useSavedPosts } from '@/hooks/useSavedPosts';
+import { MasterSponsorBanner } from './MasterSponsorBanner';
 
 const THEME_FILTERS = [
   { id: 'all', label: 'Todos' },
@@ -281,9 +281,10 @@ interface NeighborhoodPostsViewProps {
   user: User | null;
   onRequireLogin: () => void;
   userRole: 'cliente' | 'lojista' | null;
+  onNavigate: (view: string) => void;
 }
 
-export const NeighborhoodPostsView: React.FC<NeighborhoodPostsViewProps> = ({ onBack, onStoreClick, user, onRequireLogin, userRole }) => {
+export const NeighborhoodPostsView: React.FC<NeighborhoodPostsViewProps> = ({ onBack, onStoreClick, user, onRequireLogin, userRole, onNavigate }) => {
   const [posts, setPosts] = useState<CommunityPost[]>(MOCK_COMMUNITY_POSTS);
   const { currentNeighborhood: displayNeighborhood } = useNeighborhood();
   const [searchTerm, setSearchTerm] = useState('');
@@ -369,7 +370,7 @@ export const NeighborhoodPostsView: React.FC<NeighborhoodPostsViewProps> = ({ on
         </div>
       </header>
       
-      <main className="max-w-md mx-auto py-4 space-y-4 w-full px-0 sm:px-4">
+      <main className="max-w-md mx-auto py-4 space-y-4 w-full px-0 sm:px-4 pb-40">
         {filteredPosts.length > 0 ? filteredPosts.map((post) => (
           <PostCard key={post.id} post={post} onStoreClick={onStoreClick} user={user} onRequireLogin={onRequireLogin} isSaved={isPostSaved(post.id)} onToggleSave={() => toggleSavePost(post.id)} />
         )) : (
@@ -379,6 +380,11 @@ export const NeighborhoodPostsView: React.FC<NeighborhoodPostsViewProps> = ({ on
                 <p className="text-xs text-gray-500 mt-1">Tente ajustar seus filtros ou seja o primeiro a postar!</p>
             </div>
         )}
+
+        {/* BANNER PATROCINADOR MASTER FINAL */}
+        <section className="px-4">
+          <MasterSponsorBanner onClick={() => onNavigate('patrocinador_master')} label="Feed do Bairro" />
+        </section>
       </main>
 
       {isCreatingPost && user && (

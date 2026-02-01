@@ -47,24 +47,6 @@ export const MenuView: React.FC<MenuViewProps> = ({
   const { signOut } = useAuth();
   const isMerchant = userRole === 'lojista';
   const [isLoggingOut, setIsLoggingOut] = useState(false);
-  const [jobsAlerts, setJobsAlerts] = useState(false);
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-
-  useEffect(() => {
-    if (user) {
-      loadPreferences();
-    }
-  }, [user]);
-
-  const loadPreferences = async () => {
-    try {
-      const { data } = await supabase.from('profiles').select('jobsAlertsEnabled, jobCategories').eq('id', user?.id).single();
-      if (data) {
-        setJobsAlerts(!!data.jobsAlertsEnabled);
-        setSelectedCategories(data.jobCategories || []);
-      }
-    } catch (e) { console.warn(e); }
-  };
 
   const handleLogout = async () => {
     if (isLoggingOut) return;
@@ -97,7 +79,7 @@ export const MenuView: React.FC<MenuViewProps> = ({
 
       <div className="px-4 pb-5">
         {/* User Card */}
-        <div onClick={() => onNavigate('edit_profile')} className="mt-6 bg-white dark:bg-gray-800 p-4 rounded-[2rem] shadow-sm border border-gray-100 dark:border-gray-700 flex items-center gap-4 cursor-pointer active:scale-[0.98] mb-6">
+        <div onClick={() => onNavigate('store_profile')} className="mt-6 bg-white dark:bg-gray-800 p-4 rounded-[2rem] shadow-sm border border-gray-100 dark:border-gray-700 flex items-center gap-4 cursor-pointer active:scale-[0.98] mb-6">
           <div className="w-14 h-14 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center overflow-hidden border-2 border-white shadow-sm">
             {user?.user_metadata?.avatar_url ? <img src={user.user_metadata.avatar_url} className="w-full h-full object-cover" /> : <UserIcon className="w-6 h-6 text-gray-400" />}
           </div>
@@ -117,6 +99,11 @@ export const MenuView: React.FC<MenuViewProps> = ({
                 <button onClick={() => onNavigate('support')} className="w-full p-4 flex items-center justify-between active:bg-gray-50"><div className="flex items-center gap-3"><div className="w-9 h-9 rounded-xl bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center text-indigo-600"><HelpCircle className="w-4 h-4" /></div><span className="text-sm font-bold text-gray-700 dark:text-gray-200">Suporte</span></div><ChevronRight className="w-4 h-4 text-gray-300" /></button>
             </div>
         </div>
+
+        {/* BANNER PATROCINADOR MASTER FINAL */}
+        <section className="mb-8">
+            <MasterSponsorBanner onClick={() => onNavigate('patrocinador_master')} label="Menu do App" />
+        </section>
 
         <button onClick={handleLogout} disabled={isLoggingOut} className="w-full bg-red-50 dark:bg-red-900/10 p-5 rounded-[2rem] border border-red-100 dark:border-red-900/30 flex items-center justify-center gap-3 active:scale-[0.98]">
             {isLoggingOut ? <Loader2 className="w-5 h-5 animate-spin text-red-600" /> : <LogOut className="w-5 h-5 text-red-600" />}

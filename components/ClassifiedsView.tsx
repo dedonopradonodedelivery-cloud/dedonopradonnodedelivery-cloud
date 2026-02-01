@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo, useRef } from 'react';
 import { User } from '@supabase/supabase-js';
 import { 
@@ -19,6 +18,7 @@ import {
 import { useNeighborhood, NEIGHBORHOODS } from '../contexts/NeighborhoodContext';
 import { Classified } from '../types';
 import { MOCK_CLASSIFIEDS } from '../constants';
+import { MasterSponsorBanner } from './MasterSponsorBanner';
 
 const CLASSIFIED_CATEGORIES = [
   { id: 'servicos', name: 'Orçamento de Serviços', slug: 'servicos', icon: <Wrench />, color: 'bg-brand-blue' },
@@ -158,11 +158,6 @@ export const ClassifiedsView: React.FC<ClassifiedsViewProps> = ({ onBack, onNavi
 
   }, [searchTerm, selectedNeighborhoods]);
 
-  const handlePublish = () => {
-    if (!user) onRequireLogin();
-    else alert('Tela de publicação em breve!');
-  };
-
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950 font-sans animate-in fade-in duration-500 relative">
       <header className="sticky top-0 z-30 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md px-5 py-6 border-b border-gray-100 dark:border-gray-800">
@@ -192,7 +187,7 @@ export const ClassifiedsView: React.FC<ClassifiedsViewProps> = ({ onBack, onNavi
         <div className="flex gap-2 overflow-x-auto no-scrollbar pb-6">
           <button 
             onClick={() => toggleNeighborhood('Jacarepaguá (todos)')}
-            className={`flex-shrink-0 px-4 py-2 rounded-full text-xs font-bold border transition-all ${selectedNeighborhoods.length === 0 ? 'bg-blue-600 text-white border-blue-600' : 'bg-white dark:bg-gray-800 text-gray-500 border-gray-200 dark:border-gray-700'}`}
+            className={`flex-shrink-0 px-4 py-2 rounded-full text-xs font-bold border transition-all ${selectedNeighborhoods.length === 0 ? 'bg-blue-600 text-white border-blue-600' : 'bg-white dark:bg-gray-800 text-gray-500 border-gray-100 dark:border-gray-700'}`}
           >
             Jacarepaguá (Todos)
           </button>
@@ -200,7 +195,7 @@ export const ClassifiedsView: React.FC<ClassifiedsViewProps> = ({ onBack, onNavi
             <button 
               key={hood}
               onClick={() => toggleNeighborhood(hood)}
-              className={`flex-shrink-0 px-4 py-2 rounded-full text-xs font-bold border transition-all ${selectedNeighborhoods.includes(hood) ? 'bg-blue-600 text-white border-blue-600' : 'bg-white dark:bg-gray-800 text-gray-500 border-gray-200 dark:border-gray-700'}`}
+              className={`flex-shrink-0 px-4 py-2 rounded-full text-xs font-bold border transition-all ${selectedNeighborhoods.includes(hood) ? 'bg-blue-600 text-white border-blue-600' : 'bg-white dark:bg-gray-800 text-gray-500 border-gray-100 dark:border-gray-700'}`}
             >
               {hood}
             </button>
@@ -240,6 +235,11 @@ export const ClassifiedsView: React.FC<ClassifiedsViewProps> = ({ onBack, onNavi
             />
           ))}
         </div>
+
+        {/* BANNER PATROCINADOR MASTER FINAL */}
+        <section className="mt-12">
+          <MasterSponsorBanner onClick={() => onNavigate('patrocinador_master')} label="Classificados JPA" />
+        </section>
       </main>
 
       {selectedItem && (

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { 
   Utensils, ShoppingCart, Scissors, Heart, PawPrint, Home, Wrench, 
@@ -736,10 +735,7 @@ export const MOCK_JOBS: Job[] = [
     contactWhatsapp: '5521999999999',
     postedAt: 'Há 2h',
     isSponsored: true,
-    sponsoredUntil: '2025-12-31',
-    // FIX: Added missing properties 'candidacy_method' and 'modality' to conform to the Job interface.
-    candidacy_method: 'whatsapp',
-    modality: 'Presencial',
+    sponsoredUntil: '2025-12-31'
   },
   {
     id: 'job-2',
@@ -754,10 +750,7 @@ export const MOCK_JOBS: Job[] = [
     schedule: 'Seg-Sex',
     contactWhatsapp: '5521988888888',
     postedAt: 'Há 1 dia',
-    isUrgent: true,
-    // FIX: Added missing properties 'candidacy_method' and 'modality' to conform to the Job interface.
-    candidacy_method: 'whatsapp',
-    modality: 'Presencial',
+    isUrgent: true
   }
 ];
 

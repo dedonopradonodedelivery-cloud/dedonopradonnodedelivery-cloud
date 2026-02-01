@@ -1,6 +1,5 @@
-
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { Star, Loader2, BadgeCheck, Heart, Crown, Store as StoreIcon } from 'lucide-react';
+import { Star, Loader2, BadgeCheck, Heart, Crown, Store as StoreIcon, ChevronRight } from 'lucide-react';
 import { Store, AdType } from '../types';
 import { useFavorites } from '../hooks/useFavorites';
 import { User } from '@supabase/supabase-js';
@@ -38,9 +37,8 @@ export const LojasEServicosList: React.FC<LojasEServicosListProps> = ({ onStoreC
   
   const { toggleFavorite, isFavorite } = useFavorites(user);
 
-  // Identifica o Patrocinador Master do Bairro atual
+  // Identifica o Patrocinador Master do Bairro atual (Regra de Ouro)
   const masterStore = useMemo(() => {
-    // Busca o estabelecimento que é master (ID específico por enquanto para o MVP)
     const master = STORES.find(s => s.id === MASTER_ID);
     if (!master) return null;
     
@@ -66,21 +64,16 @@ export const LojasEServicosList: React.FC<LojasEServicosListProps> = ({ onStoreC
       pool = pool.filter(s => s.isOpenNow);
     } else if (activeFilter === 'top_rated') {
       pool = pool.filter(s => (s.rating || 0) >= 4.7);
-    } else if (activeFilter === 'cashback') {
-      pool = pool.filter(s => s.cashback_active);
     }
 
-    // Regra: 6 Primeiras Patrocinadas Aleatórias
+    // Regra: Patrocinados primeiro, Orgânicos depois
     const sponsored = pool.filter(s => s.isSponsored || s.adType === AdType.PREMIUM);
     const organic = pool.filter(s => !s.isSponsored && s.adType !== AdType.PREMIUM);
 
     const shuffledSponsored = shuffleArray(sponsored);
-    const top6 = shuffledSponsored.slice(0, 6);
-    const remainingSponsored = shuffledSponsored.slice(6);
-    
-    const remainingPool = shuffleArray([...remainingSponsored, ...organic]);
+    const shuffledOrganic = shuffleArray(organic);
 
-    return [...top6, ...remainingPool];
+    return [...shuffledSponsored, ...shuffledOrganic];
   }, [activeFilter, premiumOnly, currentNeighborhood]);
 
   // Resetar ao trocar filtro ou bairro
@@ -89,7 +82,6 @@ export const LojasEServicosList: React.FC<LojasEServicosListProps> = ({ onStoreC
     setVisibleStores(filteredPool.slice(0, ITEMS_PER_PAGE));
   }, [filteredPool]);
 
-  // Função para carregar mais itens
   const loadMore = useCallback(() => {
     if (loading) return;
     if (visibleStores.length >= filteredPool.length) return;
@@ -108,7 +100,6 @@ export const LojasEServicosList: React.FC<LojasEServicosListProps> = ({ onStoreC
     }, 800);
   }, [loading, visibleStores.length, filteredPool, page]);
 
-  // Sentinel para detectar o final da lista
   const lastElementRef = useCallback((node: HTMLDivElement) => {
     if (loading) return;
     if (observer.current) observer.current.disconnect();
@@ -116,9 +107,7 @@ export const LojasEServicosList: React.FC<LojasEServicosListProps> = ({ onStoreC
       if (entries[0].isIntersecting) {
         loadMore();
       }
-    }, {
-      rootMargin: '200px'
-    });
+    }, { rootMargin: '200px' });
     if (node) observer.current.observe(node);
   }, [loading, loadMore]);
 
@@ -128,53 +117,53 @@ export const LojasEServicosList: React.FC<LojasEServicosListProps> = ({ onStoreC
     await toggleFavorite(id);
   };
 
+  const handleMasterClick = () => {
+    if (onNavigate) onNavigate('patrocinador_master');
+  };
+
   return (
     <div className="flex flex-col w-full">
       <div className="flex flex-col gap-4 pb-6">
         
         {/* ============================================================
-            CARD PATROCINADOR MASTER (PREMIUM / DESTACADO)
+            SEÇÃO FIXA: PATROCINADOR MASTER (Hero Card)
            ============================================================ */}
         {masterStore && activeFilter === 'all' && page === 1 && (
            <div 
-               onClick={() => onStoreClick && onStoreClick(masterStore)}
-               className="relative w-full rounded-[28px] p-[2.5px] bg-gradient-to-r from-[#1E5BFF] via-[#4D7CFF] to-[#1E5BFF] shadow-[0_10px_30px_rgba(30,91,255,0.2)] cursor-pointer group active:scale-[0.98] transition-all mb-4 animate-in fade-in slide-in-from-top-4 duration-700"
+               onClick={handleMasterClick}
+               className="relative w-full rounded-[2.5rem] p-[3px] bg-gradient-to-r from-amber-400 via-amber-200 to-amber-400 shadow-[0_15px_40px_rgba(245,158,11,0.2)] cursor-pointer group active:scale-[0.98] transition-all mb-8"
            >
-               <div className="bg-white dark:bg-gray-900 rounded-[26px] p-6 relative overflow-hidden h-full">
+               <div className="bg-slate-900 dark:bg-slate-900 rounded-[2.3rem] p-8 relative overflow-hidden h-full">
                    {/* Efeito de brilho de fundo */}
-                   <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none"></div>
+                   <div className="absolute top-0 right-0 w-48 h-48 bg-amber-500/10 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
                    
-                   <div className="flex gap-5 items-center">
-                       <div className="w-24 h-24 rounded-2xl bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 flex-shrink-0 overflow-hidden relative shadow-sm">
+                   <div className="flex gap-6 items-center">
+                       <div className="w-24 h-24 rounded-3xl bg-white flex-shrink-0 overflow-hidden relative shadow-xl border-4 border-slate-800">
                             <img 
                                src={masterStore.logoUrl || masterStore.image || '/assets/default-logo.png'} 
                                alt={masterStore.name} 
-                               className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" 
+                               className="w-full h-full object-contain p-2 group-hover:scale-110 transition-transform duration-700" 
                            />
                        </div>
-                       <div className="flex-1 min-w-0 py-1">
-                           <div className="flex items-center gap-2 mb-2.5">
-                                <span className="bg-[#1E5BFF] text-white text-[9px] font-black px-2.5 py-1 rounded-lg uppercase tracking-[0.15em] shadow-sm flex items-center gap-1.5 border border-white/20">
-                                   <Crown className="w-3 h-3 fill-white" /> Patrocinador Master
+                       <div className="flex-1 min-w-0">
+                           <div className="flex items-center gap-2 mb-2">
+                                <span className="bg-amber-400 text-slate-900 text-[9px] font-black px-2.5 py-1 rounded-lg uppercase tracking-[0.15em] shadow-md flex items-center gap-1.5">
+                                   <Crown className="w-3 h-3 fill-slate-900" /> Patrocinador Master
                                 </span>
                            </div>
-                           <h3 className="font-black text-2xl text-gray-900 dark:text-white leading-tight truncate mb-1 tracking-tighter">{masterStore.name}</h3>
-                           <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-1 mb-4 font-medium uppercase tracking-widest">{masterStore.subcategory}</p>
-                            <div className="flex items-center gap-3">
-                                <div className="flex items-center gap-1 text-xs font-bold text-[#1E5BFF] bg-blue-50 dark:bg-blue-900/20 px-3 py-1 rounded-full border border-blue-100 dark:border-blue-800/50">
+                           <h3 className="font-black text-2xl text-white leading-tight truncate mb-1 tracking-tighter uppercase">{masterStore.name}</h3>
+                           <p className="text-xs text-slate-400 line-clamp-2 mb-4 font-medium leading-relaxed">{masterStore.description}</p>
+                            <div className="flex items-center gap-4">
+                                <div className="flex items-center gap-1.5 text-xs font-bold text-amber-400 bg-amber-400/10 px-3 py-1.5 rounded-xl border border-amber-400/20">
                                    <Star className="w-3.5 h-3.5 fill-current" />
                                    {masterStore.rating?.toFixed(1)}
                                 </div>
-                                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{masterStore.neighborhood}</span>
+                                <div className="bg-slate-800 px-3 py-1.5 rounded-xl border border-white/5">
+                                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Holdings de Facilities</span>
+                                </div>
                             </div>
                        </div>
                    </div>
-                    <button 
-                       onClick={(e) => handleToggleFavorite(e, masterStore.id)} 
-                       className={`absolute bottom-6 right-6 w-10 h-10 rounded-full flex items-center justify-center transition-all bg-gray-50 dark:bg-gray-800 hover:bg-red-50 dark:hover:bg-red-900/20 border border-gray-100 dark:border-gray-700 ${isFavorite(masterStore.id) ? 'text-red-500' : 'text-gray-300'}`}
-                   >
-                       <Heart className={`w-5 h-5 ${isFavorite(masterStore.id) ? 'fill-current' : ''}`} />
-                   </button>
                </div>
            </div>
         )}
@@ -220,7 +209,6 @@ export const LojasEServicosList: React.FC<LojasEServicosListProps> = ({ onStoreC
                              </div>
                              <span className="w-1 h-1 bg-gray-200 rounded-full"></span>
                              <span>{store.distance}</span>
-                             {store.isOpenNow && <span className="text-emerald-500 font-bold ml-1">Aberto</span>}
                         </div>
                     </div>
                     <button onClick={(e) => handleToggleFavorite(e, store.id)} className={`absolute bottom-3 right-3 w-8 h-8 rounded-full flex items-center justify-center transition-all ${isFavorited ? 'text-red-500' : 'text-gray-300'}`}>
@@ -231,7 +219,6 @@ export const LojasEServicosList: React.FC<LojasEServicosListProps> = ({ onStoreC
         })}
       </div>
       
-      {/* INDICADOR DE CARREGAMENTO */}
       {loading && (
         <div className="w-full flex justify-center py-6">
             <div className="flex items-center gap-3 bg-gray-50 dark:bg-gray-800 px-6 py-2.5 rounded-full border border-gray-100 dark:border-gray-700 shadow-sm">
@@ -241,11 +228,10 @@ export const LojasEServicosList: React.FC<LojasEServicosListProps> = ({ onStoreC
         </div>
       )}
 
-      {/* FIM DA LISTA */}
       {!loading && visibleStores.length >= filteredPool.length && visibleStores.length > 0 && (
         <div className="w-full text-center py-10 opacity-30 flex flex-col items-center gap-2">
             <StoreIcon size={24} className="text-gray-400" />
-            <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em]">Você explorou todas as lojas</p>
+            <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em]">Fim dos resultados locais</p>
         </div>
       )}
     </div>
