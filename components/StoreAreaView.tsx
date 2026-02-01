@@ -134,7 +134,7 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
   }
 
   return (
-    <div className="min-h-screen bg-[#F8F9FB] dark:bg-gray-950 font-sans animate-in fade-in duration-500 pb-32">
+    <div className="min-h-screen bg-[#F8F9FB] dark:bg-gray-950 font-sans animate-in fade-in duration-300 pb-32">
       
       <div className="bg-white dark:bg-gray-900 px-6 pt-12 pb-8 border-b border-gray-100 dark:border-gray-800 shadow-sm mb-8">
         <div className="flex items-center gap-4">
@@ -151,15 +151,14 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
           </div>
         </div>
         
-        {!isAdmin && (
-            <button 
-              onClick={() => onNavigate('store_profile')}
-              className="w-full mt-6 py-3.5 rounded-2xl border-2 border-gray-100 dark:border-gray-700 text-gray-600 dark:text-gray-300 font-bold text-xs uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all active:scale-[0.98]"
-            >
-              <User size={14} />
-              Minha Loja (Perfil Público)
-            </button>
-        )}
+        {/* CORREÇÃO: O ADM também deve visualizar e poder editar o perfil da loja */}
+        <button 
+          onClick={() => onNavigate('store_profile')}
+          className="w-full mt-6 py-3.5 rounded-2xl border-2 border-gray-100 dark:border-gray-700 text-gray-600 dark:text-gray-300 font-bold text-xs uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all active:scale-[0.98]"
+        >
+          <User size={14} />
+          Minha Loja (Perfil Público)
+        </button>
       </div>
 
       <div className="px-6 space-y-10">
