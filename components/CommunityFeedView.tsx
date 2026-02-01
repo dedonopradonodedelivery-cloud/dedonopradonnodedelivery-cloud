@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { 
   ChevronLeft, 
@@ -71,7 +70,6 @@ const CreatePostView: React.FC<{
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setError('');
     if (event.target.files) {
-      // FIX: Explicitly type `files` as File[] to allow access to properties like `type`.
       const files: File[] = Array.from(event.target.files);
       const firstFile = files[0];
 
@@ -253,31 +251,39 @@ const FilterModal: React.FC<{
   const isAllNeighborhoodsSelected = tempNeighborhoods.length === 0;
 
   return (
-    <div className="fixed inset-0 z-[1001] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4" onClick={onClose}>
+    <div className="fixed inset-0 z-[1100] bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-4 animate-in fade-in duration-200" onClick={onClose}>
       <div 
-        className="bg-white dark:bg-gray-900 w-full max-w-md rounded-3xl p-6 shadow-2xl animate-in zoom-in-95 duration-300 max-h-[85vh] flex flex-col"
+        className="bg-white dark:bg-gray-900 w-full max-w-md rounded-[2.5rem] sm:rounded-3xl shadow-2xl flex flex-col animate-in slide-in-from-bottom sm:zoom-in-95 duration-300 max-h-[85vh] overflow-hidden"
         onClick={e => e.stopPropagation()}
       >
-        <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6 shrink-0 text-center">Filtrar e Ordenar</h2>
+        <div className="p-6 pb-0 flex flex-col shrink-0">
+          <div className="w-12 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full mx-auto mb-6 sm:hidden"></div>
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-xl font-black text-gray-900 dark:text-white uppercase tracking-tighter">Filtros da Comunidade</h2>
+            <button onClick={onClose} className="p-2 bg-gray-100 dark:bg-gray-800 rounded-full text-gray-400"><X size={20}/></button>
+          </div>
+        </div>
 
-        <main className="flex-1 overflow-y-auto no-scrollbar space-y-8 pr-2 -mr-2">
-            <section><h3 className="text-sm font-bold text-gray-500 dark:text-gray-400 mb-3 uppercase tracking-wider">Bairro</h3>
+        <main className="flex-1 overflow-y-auto no-scrollbar space-y-8 p-6 pt-0">
+            <section><h3 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4 ml-1">Bairro em Jacarepaguá</h3>
                 <div className="flex flex-wrap gap-2">
-                    <button onClick={() => handleNeighborhoodToggle('Jacarepaguá (todos)')} className={`px-4 py-2 rounded-full text-xs font-bold border-2 transition-all ${isAllNeighborhoodsSelected ? 'bg-blue-600 text-white border-blue-600' : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-500'}`}>Todos (Jacarepaguá)</button>
-                    {NEIGHBORHOODS.map(hood => (<button key={hood} onClick={() => handleNeighborhoodToggle(hood)} className={`px-4 py-2 rounded-full text-xs font-bold border-2 transition-all ${tempNeighborhoods.includes(hood) ? 'bg-blue-600 text-white border-blue-600' : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-500'}`}>{hood}</button>))}
+                    <button onClick={() => handleNeighborhoodToggle('Jacarepaguá (todos)')} className={`px-4 py-2 rounded-xl text-xs font-bold border-2 transition-all ${isAllNeighborhoodsSelected ? 'bg-blue-600 text-white border-blue-600 shadow-md' : 'bg-white dark:bg-gray-800 border-gray-100 dark:border-gray-700 text-gray-500'}`}>Todos</button>
+                    {NEIGHBORHOODS.map(hood => (<button key={hood} onClick={() => handleNeighborhoodToggle(hood)} className={`px-4 py-2 rounded-xl text-xs font-bold border-2 transition-all ${tempNeighborhoods.includes(hood) ? 'bg-blue-600 text-white border-blue-600 shadow-md' : 'bg-white dark:bg-gray-800 border-gray-100 dark:border-gray-700 text-gray-500'}`}>{hood}</button>))}
                 </div>
             </section>
-            <section><h3 className="text-sm font-bold text-gray-500 dark:text-gray-400 mb-3 uppercase tracking-wider">Tema</h3>
-                <div className="flex flex-wrap gap-2">{THEME_FILTERS.map(theme => (<button key={theme.id} onClick={() => setTempTheme(theme.id)} className={`px-4 py-2 rounded-full text-xs font-bold border-2 transition-all ${tempTheme === theme.id ? 'bg-blue-600 text-white border-blue-600' : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-500'}`}>{theme.label}</button>))}</div>
+            <section><h3 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4 ml-1">Tema da postagem</h3>
+                <div className="flex flex-wrap gap-2">{THEME_FILTERS.map(theme => (<button key={theme.id} onClick={() => setTempTheme(theme.id)} className={`px-4 py-2 rounded-xl text-xs font-bold border-2 transition-all ${tempTheme === theme.id ? 'bg-blue-600 text-white border-blue-600 shadow-md' : 'bg-white dark:bg-gray-800 border-gray-100 dark:border-gray-700 text-gray-500'}`}>{theme.label}</button>))}</div>
             </section>
-            <section><h3 className="text-sm font-bold text-gray-500 dark:text-gray-400 mb-3 uppercase tracking-wider">Ordenar por</h3>
-                <div className="space-y-2">{SORT_OPTIONS.map(sort => (<button key={sort.id} onClick={() => setTempSortBy(sort.id)} className={`w-full text-left p-3 rounded-lg transition-colors text-sm font-medium flex justify-between items-center ${tempSortBy === sort.id ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600' : 'bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-300'}`}>{sort.label} {tempSortBy === sort.id && <CheckCircle2 size={16} />}</button>))}</div>
+            <section><h3 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4 ml-1">Ordenar por</h3>
+                <div className="space-y-2">{SORT_OPTIONS.map(sort => (<button key={sort.id} onClick={() => setTempSortBy(sort.id)} className={`w-full p-4 rounded-2xl flex items-center justify-between border-2 transition-all ${tempSortBy === sort.id ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 text-[#1E5BFF]' : 'border-gray-100 dark:border-gray-800 text-gray-500'}`}>{sort.label} {tempSortBy === sort.id && <CheckCircle2 size={16} />}</button>))}</div>
             </section>
         </main>
 
-        <footer className="pt-6 flex gap-4 shrink-0 border-t border-gray-100 dark:border-gray-800">
-            <button onClick={handleClear} className="flex-1 py-4 text-sm font-bold text-gray-500 bg-gray-100 dark:bg-gray-800 rounded-xl">Limpar</button>
-            <button onClick={handleApply} className="flex-1 py-4 text-sm font-bold bg-blue-600 text-white rounded-xl">Aplicar filtros</button>
+        <footer className="p-6 border-t border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 shrink-0">
+            <div className="flex gap-4">
+              <button onClick={handleClear} className="flex-1 py-4 text-xs font-black uppercase tracking-widest text-gray-400 dark:text-gray-500 hover:text-gray-600 bg-gray-50 dark:bg-gray-800 rounded-2xl transition-colors">Limpar</button>
+              <button onClick={handleApply} className="flex-[2] py-4 text-xs font-black uppercase tracking-widest bg-blue-600 text-white rounded-2xl shadow-xl shadow-blue-500/20 active:scale-[0.98] transition-all">Aplicar Filtros</button>
+            </div>
         </footer>
       </div>
     </div>
@@ -290,9 +296,10 @@ interface NeighborhoodPostsViewProps {
   user: User | null;
   onRequireLogin: () => void;
   userRole: 'cliente' | 'lojista' | null;
+  onNavigate: (view: string) => void;
 }
 
-export const NeighborhoodPostsView: React.FC<NeighborhoodPostsViewProps> = ({ onBack, onStoreClick, user, onRequireLogin, userRole }) => {
+export const NeighborhoodPostsView: React.FC<NeighborhoodPostsViewProps> = ({ onBack, onStoreClick, user, onRequireLogin, userRole, onNavigate }) => {
   const [posts, setPosts] = useState<CommunityPost[]>(MOCK_COMMUNITY_POSTS);
   const { currentNeighborhood: displayNeighborhood } = useNeighborhood();
   const [searchTerm, setSearchTerm] = useState('');
@@ -378,7 +385,7 @@ export const NeighborhoodPostsView: React.FC<NeighborhoodPostsViewProps> = ({ on
         </div>
       </header>
       
-      <main className="max-w-md mx-auto py-4 space-y-4 w-full px-0 sm:px-4">
+      <main className="max-w-md mx-auto py-4 space-y-4 w-full px-0 sm:px-4 pb-40">
         {filteredPosts.length > 0 ? filteredPosts.map((post) => (
           <PostCard key={post.id} post={post} onStoreClick={onStoreClick} user={user} onRequireLogin={onRequireLogin} isSaved={isPostSaved(post.id)} onToggleSave={() => toggleSavePost(post.id)} />
         )) : (

@@ -119,13 +119,12 @@ export const AdoptionView: React.FC<AdoptionViewProps> = ({ onBack, user, onRequ
           </div>
           <button 
             onClick={() => setIsFilterModalOpen(true)}
-            className="p-2.5 bg-gray-50 dark:bg-gray-800 rounded-xl text-gray-500 active:scale-90 transition-all"
+            className="p-2.5 bg-gray-50 dark:bg-gray-800 rounded-xl text-gray-500 active:scale-90 transition-all shadow-sm"
           >
             <SlidersHorizontal size={20} />
           </button>
         </div>
 
-        {/* Filtros Rápidos */}
         <div className="space-y-4">
           <div className="flex gap-2 overflow-x-auto no-scrollbar -mx-1 px-1">
             {['Cachorro', 'Gato', 'Outros'].map(species => (
@@ -146,7 +145,6 @@ export const AdoptionView: React.FC<AdoptionViewProps> = ({ onBack, user, onRequ
       </header>
 
       <main className="p-6 space-y-8">
-        {/* Bloco de Propósito */}
         <section className="p-5 bg-blue-50/50 dark:bg-blue-900/10 rounded-[2.5rem] border border-blue-100 dark:border-blue-800/30 flex gap-4">
           <Info className="w-5 h-5 text-blue-600 shrink-0 mt-0.5" />
           <p className="text-xs text-blue-800 dark:text-blue-300 font-semibold leading-relaxed">
@@ -154,7 +152,6 @@ export const AdoptionView: React.FC<AdoptionViewProps> = ({ onBack, user, onRequ
           </p>
         </section>
 
-        {/* Lista de Anúncios */}
         {filteredAdoptions.length > 0 ? (
           <div className="grid grid-cols-1 gap-6">
             {filteredAdoptions.map(item => (
@@ -180,7 +177,6 @@ export const AdoptionView: React.FC<AdoptionViewProps> = ({ onBack, user, onRequ
         )}
       </main>
 
-      {/* Botão de Anunciar Fixo */}
       <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-40 w-full max-w-[280px] px-4">
         <button 
             onClick={handleAnunciar}
@@ -191,21 +187,26 @@ export const AdoptionView: React.FC<AdoptionViewProps> = ({ onBack, user, onRequ
         </button>
       </div>
 
-      {/* Modal de Filtros */}
       {isFilterModalOpen && (
-        <div className="fixed inset-0 z-[1100] bg-black/60 backdrop-blur-sm flex items-end justify-center animate-in fade-in duration-200" onClick={() => setIsFilterModalOpen(false)}>
-            <div className="bg-white dark:bg-gray-900 w-full max-w-md rounded-t-[2.5rem] p-8 shadow-2xl flex flex-col animate-in slide-in-from-bottom duration-300 max-h-[85vh]" onClick={e => e.stopPropagation()}>
-                <div className="w-12 h-1.5 bg-gray-200 dark:bg-gray-800 rounded-full mx-auto mb-8 shrink-0"></div>
-                <h3 className="text-xl font-black text-gray-900 dark:text-white uppercase tracking-tighter mb-8">Filtros Avançados</h3>
-                <div className="flex-1 overflow-y-auto no-scrollbar space-y-8 pb-10">
+        <div className="fixed inset-0 z-[1100] bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-4 animate-in fade-in duration-200" onClick={() => setIsFilterModalOpen(false)}>
+            <div className="bg-white dark:bg-gray-900 w-full max-w-md rounded-[2.5rem] sm:rounded-3xl shadow-2xl flex flex-col animate-in slide-in-from-bottom sm:zoom-in-95 duration-300 max-h-[90vh] overflow-hidden" onClick={e => e.stopPropagation()}>
+                <div className="p-6 pb-0 flex flex-col shrink-0">
+                  <div className="w-12 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full mx-auto mb-6 sm:hidden"></div>
+                  <div className="flex justify-between items-center mb-6">
+                    <h2 className="text-xl font-black text-gray-900 dark:text-white uppercase tracking-tighter">Filtros Avançados</h2>
+                    <button onClick={() => setIsFilterModalOpen(false)} className="p-2 bg-gray-100 dark:bg-gray-800 rounded-full text-gray-400"><X size={20}/></button>
+                  </div>
+                </div>
+
+                <div className="flex-1 overflow-y-auto no-scrollbar space-y-8 p-6 pt-0">
                     <section>
-                        <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4">Filtrar por Bairro</h4>
+                        <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4 ml-1">Bairro em Jacarepaguá</h4>
                         <div className="flex flex-wrap gap-2">
                             <button 
                                 onClick={() => setFilterHood(null)}
                                 className={`px-4 py-2 rounded-xl text-xs font-bold border transition-all ${filterHood === null ? 'bg-gray-900 text-white border-gray-900' : 'bg-gray-50 dark:bg-gray-800 text-gray-500 border-transparent'}`}
                             >
-                                Jacarepaguá (Todos)
+                                Todos
                             </button>
                             {NEIGHBORHOODS.map(hood => (
                                 <button 
@@ -219,7 +220,7 @@ export const AdoptionView: React.FC<AdoptionViewProps> = ({ onBack, user, onRequ
                         </div>
                     </section>
                     <section>
-                        <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4">Filtrar por Espécie</h4>
+                        <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4 ml-1">Espécie do Pet</h4>
                         <div className="grid grid-cols-2 gap-2">
                             {['Cachorro', 'Gato', 'Outros'].map(species => (
                                 <button 
@@ -234,7 +235,7 @@ export const AdoptionView: React.FC<AdoptionViewProps> = ({ onBack, user, onRequ
                         </div>
                     </section>
                     <section>
-                        <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4">Ordenar por</h4>
+                        <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4 ml-1">Ordenar por</h4>
                         <div className="space-y-2">
                             <button onClick={() => setSortBy('recent')} className={`w-full p-4 rounded-2xl flex items-center justify-between border-2 transition-all ${sortBy === 'recent' ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 text-[#1E5BFF]' : 'border-gray-100 dark:border-gray-800 text-gray-500'}`}>
                                 <span className="text-sm font-bold">Mais recentes primeiro</span>
@@ -247,19 +248,21 @@ export const AdoptionView: React.FC<AdoptionViewProps> = ({ onBack, user, onRequ
                         </div>
                     </section>
                 </div>
-                <div className="flex gap-3 pt-6 border-t border-gray-100 dark:border-gray-800">
-                    <button onClick={handleClear} className="flex-1 py-4 text-xs font-black text-gray-400 uppercase tracking-widest bg-gray-50 dark:bg-gray-800 rounded-2xl">Limpar</button>
-                    <button onClick={() => setIsFilterModalOpen(false)} className="flex-[2] py-4 text-xs font-black text-white uppercase tracking-widest bg-[#1E5BFF] rounded-2xl shadow-lg shadow-blue-500/20">Aplicar Filtros</button>
+                
+                <div className="p-6 border-t border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 shrink-0">
+                    <div className="flex gap-4">
+                      <button onClick={handleClear} className="flex-1 py-4 text-xs font-black text-gray-400 uppercase tracking-widest bg-gray-50 dark:bg-gray-800 rounded-2xl transition-colors">Limpar</button>
+                      <button onClick={() => setIsFilterModalOpen(false)} className="flex-[2] py-4 text-xs font-black text-white uppercase tracking-widest bg-[#1E5BFF] rounded-2xl shadow-lg shadow-blue-500/20 active:scale-[0.98] transition-all">Aplicar Filtros</button>
+                    </div>
                 </div>
             </div>
         </div>
       )}
 
-      {/* Modal de Criação Simulado */}
       {isCreateModalOpen && (
-        <div className="fixed inset-0 z-[1100] bg-black/60 backdrop-blur-sm flex items-end justify-center animate-in fade-in duration-200" onClick={() => setIsCreateModalOpen(false)}>
-            <div className="bg-white dark:bg-gray-900 w-full max-w-md rounded-t-[2.5rem] p-8 shadow-2xl animate-in slide-in-from-bottom duration-300 max-h-[90vh] overflow-y-auto no-scrollbar" onClick={e => e.stopPropagation()}>
-                <div className="w-12 h-1.5 bg-gray-200 dark:bg-gray-800 rounded-full mx-auto mb-8 shrink-0"></div>
+        <div className="fixed inset-0 z-[1100] bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-4 animate-in fade-in duration-200" onClick={() => setIsCreateModalOpen(false)}>
+            <div className="bg-white dark:bg-gray-900 w-full max-w-md rounded-[2.5rem] sm:rounded-3xl p-8 shadow-2xl flex flex-col animate-in slide-in-from-bottom sm:zoom-in-95 duration-300 max-h-[90vh] overflow-y-auto no-scrollbar" onClick={e => e.stopPropagation()}>
+                <div className="w-12 h-1.5 bg-gray-200 dark:bg-gray-800 rounded-full mx-auto mb-8 shrink-0 sm:hidden"></div>
                 <div className="flex items-center gap-4 mb-8">
                     <div className="p-3 bg-amber-50 dark:bg-amber-900/20 rounded-2xl text-amber-600"><PawPrint size={24} /></div>
                     <div>
