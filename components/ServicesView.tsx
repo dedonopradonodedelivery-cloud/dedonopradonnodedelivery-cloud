@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import { 
   ChevronLeft, 
@@ -14,14 +13,17 @@ import {
   Search,
   Check,
   ChevronDown,
-  AlertCircle
+  AlertCircle,
+  ShieldCheck,
+  Star,
+  Award,
+  Building2
 } from 'lucide-react';
 import { useNeighborhood, NEIGHBORHOODS } from '../contexts/NeighborhoodContext';
-import { ServiceRequest, ServiceUrgency } from '../types';
-import { MasterSponsorBanner } from './MasterSponsorBanner';
-import { ClassifiedsBannerCarousel } from './ClassifiedsBannerCarousel';
+import { ServiceRequest, ServiceUrgency, Store, AdType } from '../types';
+import { STORES } from '../constants';
 
-type FlowStep = 'intro' | 'form' | 'success';
+type FlowStep = 'form' | 'success';
 
 interface ServicesViewProps {
   onNavigate: (view: string, data?: any) => void;
@@ -57,7 +59,7 @@ const SERVICE_TYPES = [
 
 export const ServicesView: React.FC<ServicesViewProps> = ({ onNavigate, onOpenChat }) => {
   const { currentNeighborhood } = useNeighborhood();
-  const [step, setStep] = useState<FlowStep>('intro');
+  const [step, setStep] = useState<FlowStep>('form');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isServiceModalOpen, setIsServiceModalOpen] = useState(false);
   const [serviceSearch, setServiceSearch] = useState('');
@@ -73,16 +75,12 @@ export const ServicesView: React.FC<ServicesViewProps> = ({ onNavigate, onOpenCh
     images: [] as string[]
   });
 
-  // Validação real e sincronizada
-  const isClientNameValid = formData.clientName.trim().length >= 2;
-  const isDescriptionValid = formData.description.trim().length >= 10;
-  const isServiceTypeValid = formData.serviceType.length >= 3;
-  const isNeighborhoodValid = formData.neighborhood !== "";
-  const isUrgencyValid = !!formData.urgency;
-
+  // Validação
   const isFormValid = useMemo(() => {
-    return isClientNameValid && isServiceTypeValid && isDescriptionValid && isNeighborhoodValid && isUrgencyValid;
-  }, [isClientNameValid, isServiceTypeValid, isDescriptionValid, isNeighborhoodValid, isUrgencyValid]);
+    return formData.serviceType.length >= 3 && 
+           formData.description.trim().length >= 10 && 
+           formData.neighborhood !== "";
+  }, [formData]);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && formData.images.length < 3) {
@@ -105,14 +103,12 @@ export const ServicesView: React.FC<ServicesViewProps> = ({ onNavigate, onOpenCh
 
     setIsSubmitting(true);
     
-    // Gerar número único do pedido
-    const orderNumber = Math.floor(1000 + Math.random() * 9000);
-    const requestId = `REQ-${orderNumber}`;
+    const requestId = `REQ-${Math.floor(1000 + Math.random() * 9000)}`;
 
     const newRequest: ServiceRequest = {
         id: requestId,
         userId: 'current-user-id',
-        userName: formData.clientName,
+        userName: formData.clientName || 'Morador Local',
         serviceType: formData.serviceType,
         description: formData.description,
         neighborhood: formData.neighborhood,
@@ -122,111 +118,54 @@ export const ServicesView: React.FC<ServicesViewProps> = ({ onNavigate, onOpenCh
         createdAt: new Date().toISOString()
     };
 
-    // Salvar no mock local
     const existing = JSON.parse(localStorage.getItem('service_requests_mock') || '[]');
     localStorage.setItem('service_requests_mock', JSON.stringify([newRequest, ...existing]));
 
-    // Seta o ID criado para o botão de sucesso usar depois
     setCreatedRequestId(requestId);
 
-    // Feedback de carregamento antes de mostrar a tela de sucesso
     setTimeout(() => {
       setIsSubmitting(false);
       setStep('success');
-    }, 1200);
+    }, 1500);
   };
 
   const filteredServices = useMemo(() => {
     return SERVICE_TYPES.filter(s => s.toLowerCase().includes(serviceSearch.toLowerCase()));
   }, [serviceSearch]);
 
-  if (step === 'intro') {
-    return (
-      <div className="min-h-screen bg-white dark:bg-gray-950 animate-in fade-in duration-500">
-        <header className="px-6 pt-12 pb-6 flex items-center gap-4">
-          <button onClick={() => onNavigate('classifieds')} className="p-2 bg-gray-50 dark:bg-gray-800 rounded-xl text-gray-500 transition-all active:scale-90"><ChevronLeft size={20}/></button>
-          <h1 className="font-black text-xl text-gray-900 dark:text-white uppercase tracking-tighter">Serviços Locais</h1>
-        </header>
-
-        <main className="p-6 pt-0 space-y-12 pb-32">
-          
-          <ClassifiedsBannerCarousel categoryName="services" />
-
-          <div className="text-center space-y-4">
-            <div className="w-20 h-20 bg-blue-50 dark:bg-blue-900/20 rounded-[2.5rem] flex items-center justify-center mx-auto text-[#1E5BFF]">
-              <Wrench size={40} strokeWidth={1.5} />
-            </div>
-            <h2 className="text-2xl font-black text-gray-900 dark:text-white leading-tight uppercase tracking-tighter">Precisa de um serviço?</h2>
-            <p className="text-gray-500 dark:text-gray-400 text-sm max-w-xs mx-auto font-medium">Descreva o que você precisa e receba até 5 propostas gratuitas de profissionais da sua região.</p>
-          </div>
-
-          <div className="space-y-6">
-            {[
-                { step: 1, title: 'Descreva o serviço', sub: 'Conte o que você precisa e adicione fotos.' },
-                { step: 2, title: 'Profissionais recebem', sub: 'O pedido é enviado para especialistas do bairro.' },
-                { step: 3, title: 'Converse pelo chat', sub: 'Receba orçamentos e feche o serviço por aqui.' }
-            ].map((item) => (
-                <div key={item.step} className="flex items-center gap-5">
-                    <div className="w-12 h-12 rounded-2xl bg-gray-50 dark:bg-gray-800 flex items-center justify-center font-black text-[#1E5BFF] shrink-0 border border-gray-100 dark:border-gray-700">{item.step}</div>
-                    <div>
-                        <h4 className="font-bold text-gray-900 dark:text-white text-sm">{item.title}</h4>
-                        <p className="text-xs text-gray-500 font-medium">{item.sub}</p>
-                    </div>
-                </div>
-            ))}
-          </div>
-
-          <div className="pt-8">
-            <button 
-              onClick={() => setStep('form')}
-              className="w-full bg-[#1E5BFF] text-white font-black py-5 rounded-[2rem] shadow-xl shadow-blue-500/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2 uppercase tracking-widest text-sm"
-            >
-              Pedir orçamento gratuito <ArrowRight size={18} />
-            </button>
-          </div>
-
-          <section>
-            <MasterSponsorBanner onClick={() => onNavigate('patrocinador_master')} label="Serviços" />
-          </section>
-        </main>
-      </div>
-    );
-  }
+  // Mock de profissionais para a tela de sucesso
+  const featuredPros = useMemo(() => {
+    return STORES.filter(s => s.category === 'Serviços' || s.category === 'Pro').slice(0, 3);
+  }, []);
 
   if (step === 'form') {
     return (
-      <div className="min-h-screen bg-white dark:bg-gray-950 animate-in slide-in-from-right duration-300">
-        <form onSubmit={handleSubmit} className="pb-80">
-          <header className="sticky top-0 z-40 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md px-6 py-6 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <button type="button" onClick={() => setStep('intro')} className="p-2 bg-gray-50 dark:bg-gray-800 rounded-xl text-gray-500 transition-all active:scale-90"><ChevronLeft size={20}/></button>
-              <h1 className="font-black text-lg text-gray-900 dark:text-white uppercase tracking-tighter">Solicitação de Orçamento Grátis</h1>
-            </div>
-          </header>
+      <div className="min-h-screen bg-white dark:bg-gray-950 animate-in fade-in duration-500 flex flex-col">
+        <header className="px-6 pt-12 pb-4 flex items-center gap-4 border-b border-gray-50 dark:border-gray-900 bg-white dark:bg-gray-950 sticky top-0 z-40">
+          <button onClick={() => onNavigate('classifieds')} className="p-2 bg-gray-50 dark:bg-gray-800 rounded-xl text-gray-500 active:scale-90 transition-all"><ChevronLeft size={20}/></button>
+          <div>
+            <h1 className="font-black text-xl text-gray-900 dark:text-white uppercase tracking-tighter leading-none">Pedir Orçamento</h1>
+            <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest mt-1">Receba respostas de profissionais do bairro</p>
+          </div>
+        </header>
 
-          <main className="p-6 space-y-8">
-            <div className="space-y-6">
+        <main className="flex-1 p-6 space-y-8 no-scrollbar overflow-y-auto">
+          {/* Bloco Informativo Topo */}
+          <section className="p-5 bg-blue-50/50 dark:bg-blue-900/10 rounded-[2rem] border border-blue-100 dark:border-blue-800/30 flex gap-4">
+            <ShieldCheck className="w-5 h-5 text-blue-600 shrink-0 mt-0.5" />
+            <p className="text-xs text-blue-800 dark:text-blue-300 font-semibold leading-relaxed">
+              Seu pedido será enviado para profissionais verificados do bairro. Até 5 profissionais podem responder.
+            </p>
+          </section>
 
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="space-y-4">
               <div>
-                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1 mb-2 block">Nome do cliente *</label>
-                <input
-                  type="text"
-                  value={formData.clientName}
-                  onChange={e => setFormData({...formData, clientName: e.target.value})}
-                  placeholder="Digite seu nome"
-                  className={`w-full bg-gray-50 dark:bg-gray-800 p-4 rounded-2xl border transition-all outline-none dark:text-white font-bold ${
-                    formData.clientName.length > 0 && !isClientNameValid ? 'border-amber-200' : 'border-transparent focus:border-[#1E5BFF]'
-                  }`}
-                  required
-                />
-              </div>
-              
-              <div>
-                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1 mb-2 block">Tipo de Serviço *</label>
+                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1 mb-2 block">O que você precisa? *</label>
                 <button 
                   type="button"
                   onClick={() => setIsServiceModalOpen(true)}
-                  className="w-full bg-gray-50 dark:bg-gray-800 p-4 rounded-2xl border border-transparent text-left flex items-center justify-between dark:text-white font-bold transition-all hover:bg-gray-100 dark:hover:bg-gray-700"
+                  className="w-full bg-gray-50 dark:bg-gray-800 p-4 rounded-2xl border border-gray-100 dark:border-gray-700 text-left flex items-center justify-between dark:text-white font-bold transition-all"
                 >
                   <span className={formData.serviceType ? "text-gray-900 dark:text-white" : "text-gray-400"}>
                     {formData.serviceType || "Selecione o serviço"}
@@ -235,62 +174,54 @@ export const ServicesView: React.FC<ServicesViewProps> = ({ onNavigate, onOpenCh
                 </button>
               </div>
 
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1 mb-2 block">Seu Bairro *</label>
+                  <select 
+                    value={formData.neighborhood}
+                    onChange={e => setFormData({...formData, neighborhood: e.target.value})}
+                    className="w-full bg-gray-50 dark:bg-gray-800 p-4 rounded-2xl border border-gray-100 dark:border-gray-700 focus:border-[#1E5BFF] outline-none dark:text-white font-bold appearance-none"
+                    required
+                  >
+                    <option value="">Onde você está?</option>
+                    {NEIGHBORHOODS.map(h => <option key={h} value={h}>{h}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1 mb-2 block">Prazo *</label>
+                  <select 
+                    value={formData.urgency}
+                    onChange={e => setFormData({...formData, urgency: e.target.value as any})}
+                    className="w-full bg-gray-50 dark:bg-gray-800 p-4 rounded-2xl border border-gray-100 dark:border-gray-700 focus:border-[#1E5BFF] outline-none dark:text-white font-bold appearance-none"
+                    required
+                  >
+                    <option value="Hoje">Hoje</option>
+                    <option value="Essa semana">Essa semana</option>
+                    <option value="Sem pressa">Sem pressa</option>
+                  </select>
+                </div>
+              </div>
+
               <div>
-                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1 mb-2 block">Descrição detalhada *</label>
+                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1 mb-2 block">Descrição do problema *</label>
                 <textarea 
                   value={formData.description}
                   onChange={e => setFormData({...formData, description: e.target.value})}
-                  placeholder="O que exatamente você precisa?"
+                  placeholder="Ex: Minha descarga está vazando..."
                   rows={4}
-                  className={`w-full bg-gray-50 dark:bg-gray-800 p-4 rounded-2xl border transition-all outline-none dark:text-white font-medium resize-none ${
-                    formData.description.length > 0 && !isDescriptionValid ? 'border-amber-200' : 'border-transparent focus:border-[#1E5BFF]'
-                  }`}
+                  className="w-full bg-gray-50 dark:bg-gray-800 p-4 rounded-2xl border border-gray-100 dark:border-gray-700 focus:border-[#1E5BFF] outline-none dark:text-white font-medium resize-none"
                   required
                 />
-                {formData.description.length > 0 && !isDescriptionValid && (
-                  <p className="text-[10px] text-amber-600 dark:text-amber-400 font-bold uppercase mt-2 ml-1 flex items-center gap-1">
-                    <AlertCircle size={10} /> Mínimo de 10 caracteres
-                  </p>
-                )}
-              </div>
-
-              <div>
-                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1 mb-2 block">Bairro de Jacarepaguá *</label>
-                <select 
-                  value={formData.neighborhood}
-                  onChange={e => setFormData({...formData, neighborhood: e.target.value})}
-                  className="w-full bg-gray-50 dark:bg-gray-800 p-4 rounded-2xl border border-transparent focus:border-[#1E5BFF] outline-none dark:text-white font-bold appearance-none"
-                  required
-                >
-                  <option value="">Selecione o bairro</option>
-                  {NEIGHBORHOODS.map(h => <option key={h} value={h}>{h}</option>)}
-                </select>
-              </div>
-
-              <div>
-                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1 mb-2 block">Urgência *</label>
-                <div className="grid grid-cols-3 gap-2">
-                  {(['Hoje', 'Essa semana', 'Sem pressa'] as const).map(u => (
-                    <button
-                      key={u}
-                      type="button"
-                      onClick={() => setFormData({...formData, urgency: u})}
-                      className={`py-3 rounded-xl text-[10px] font-black uppercase tracking-widest border-2 transition-all ${formData.urgency === u ? 'bg-blue-50 border-[#1E5BFF] text-[#1E5BFF]' : 'bg-white dark:bg-gray-800 border-gray-100 dark:border-gray-700 text-gray-400'}`}
-                    >
-                      {u}
-                    </button>
-                  ))}
-                </div>
               </div>
 
               <div>
                 <div className="flex justify-between items-center mb-2 px-1">
-                  <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Fotos (Máx 3)</label>
+                  <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Fotos (Opcional - Máx 3)</label>
                   <span className="text-[10px] font-bold text-gray-400">{formData.images.length}/3</span>
                 </div>
                 <div className="flex gap-3">
                   {formData.images.map((img, i) => (
-                    <div key={i} className="relative w-20 h-20 rounded-2xl overflow-hidden border border-gray-100 dark:border-gray-800 shadow-sm">
+                    <div key={i} className="relative w-20 h-20 rounded-2xl overflow-hidden border border-gray-100 dark:border-gray-800">
                       <img src={img} className="w-full h-full object-cover" alt="Service" />
                       <button type="button" onClick={() => removeImage(i)} className="absolute top-1 right-1 p-1 bg-black/50 text-white rounded-full"><X size={10}/></button>
                     </div>
@@ -304,37 +235,27 @@ export const ServicesView: React.FC<ServicesViewProps> = ({ onNavigate, onOpenCh
                 </div>
               </div>
             </div>
-          </main>
 
-          {/* FOOTER FIXO ACIMA DA BOTTOM NAV */}
-          <footer className="fixed bottom-[80px] left-0 right-0 p-6 bg-white/95 dark:bg-gray-950/95 backdrop-blur-md border-t border-gray-100 dark:border-gray-800 max-w-md mx-auto z-50 shadow-[0_-10px_20px_rgba(0,0,0,0.05)]">
             <button 
               type="submit"
               disabled={!isFormValid || isSubmitting}
               className={`w-full font-black py-5 rounded-[2rem] shadow-xl transition-all uppercase tracking-widest text-sm flex items-center justify-center gap-3 ${
                 isFormValid && !isSubmitting
-                  ? 'bg-[#1E5BFF] text-white shadow-blue-500/20 active:scale-[0.98] cursor-pointer'
+                  ? 'bg-[#1E5BFF] text-white shadow-blue-500/20 active:scale-[0.98]'
                   : 'bg-gray-100 text-gray-300 cursor-not-allowed border-gray-200'
               }`}
             >
-              {isSubmitting ? (
-                <Loader2 size={20} className="animate-spin" />
-              ) : (
-                <>
-                  Solicitar orçamento gratuito 
-                  <Zap size={16} fill="currentColor" />
-                </>
-              )}
+              {isSubmitting ? <Loader2 size={20} className="animate-spin" /> : <>Enviar pedido agora <ArrowRight size={18} /></>}
             </button>
-          </footer>
-        </form>
+          </form>
+        </main>
 
         {/* MODAL DE SELEÇÃO DE SERVIÇO */}
         {isServiceModalOpen && (
           <div className="fixed inset-0 z-[100] flex items-end justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-200" onClick={() => setIsServiceModalOpen(false)}>
               <div className="bg-white dark:bg-gray-900 w-full max-w-md rounded-t-[2.5rem] p-6 shadow-2xl animate-in slide-in-from-bottom duration-300 relative h-[80vh] flex flex-col" onClick={e => e.stopPropagation()}>
                   <div className="w-12 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full mx-auto mb-6 shrink-0"></div>
-                  <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4 px-2 shrink-0">Tipo de Serviço</h3>
+                  <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4 px-2 shrink-0 text-center">Qual serviço você precisa?</h3>
                   
                   <div className="relative mb-4 shrink-0">
                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
@@ -342,8 +263,8 @@ export const ServicesView: React.FC<ServicesViewProps> = ({ onNavigate, onOpenCh
                       type="text" 
                       value={serviceSearch}
                       onChange={(e) => setServiceSearch(e.target.value)}
-                      placeholder="Pesquisar serviço..."
-                      className="w-full bg-gray-50 dark:bg-gray-800 border-none py-3 pl-11 pr-4 rounded-xl text-sm font-medium outline-none focus:ring-2 focus:ring-[#1E5BFF]/30 dark:text-white"
+                      placeholder="Pesquisar..."
+                      className="w-full bg-gray-50 dark:bg-gray-800 border-none py-3.5 pl-11 pr-4 rounded-xl text-sm font-medium outline-none focus:ring-2 focus:ring-[#1E5BFF]/30 dark:text-white"
                     />
                   </div>
 
@@ -363,11 +284,6 @@ export const ServicesView: React.FC<ServicesViewProps> = ({ onNavigate, onOpenCh
                               {formData.serviceType === service && <Check className="w-4 h-4" />}
                           </button>
                       ))}
-                      {filteredServices.length === 0 && (
-                        <div className="py-12 text-center text-gray-400">
-                          <p className="text-sm font-medium uppercase tracking-widest">Nenhum serviço encontrado</p>
-                        </div>
-                      )}
                   </div>
               </div>
           </div>
@@ -378,26 +294,66 @@ export const ServicesView: React.FC<ServicesViewProps> = ({ onNavigate, onOpenCh
 
   if (step === 'success') {
     return (
-      <div className="min-h-screen bg-white dark:bg-gray-950 flex flex-col items-center justify-center p-8 text-center animate-in zoom-in duration-500">
-        <div className="w-24 h-24 bg-emerald-100 dark:bg-emerald-900/30 rounded-[2.5rem] flex items-center justify-center mb-8 text-emerald-600 dark:text-emerald-400 shadow-xl shadow-emerald-500/10">
-          <CheckCircle2 size={48} />
+      <div className="min-h-screen bg-white dark:bg-gray-950 flex flex-col p-8 animate-in zoom-in duration-500">
+        <div className="flex-1 flex flex-col items-center justify-center text-center">
+            <div className="w-24 h-24 bg-emerald-100 dark:bg-emerald-900/30 rounded-[2.5rem] flex items-center justify-center mb-8 text-emerald-600 shadow-xl">
+            <CheckCircle2 size={48} />
+            </div>
+            <h2 className="text-3xl font-black text-gray-900 dark:text-white uppercase tracking-tighter leading-none mb-4">Pedido Enviado!</h2>
+            <p className="text-gray-500 dark:text-gray-400 text-sm max-w-xs mx-auto leading-relaxed mb-8">
+                Pedido enviado com sucesso. Profissionais do bairro já foram notificados.
+            </p>
+
+            {/* Destaque de Profissionais Pós-Envio */}
+            <div className="w-full space-y-4 text-left">
+                <div className="flex items-center gap-2 px-1">
+                    <Award size={14} className="text-amber-500" />
+                    <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Profissionais Verificados</h3>
+                </div>
+                <div className="space-y-3">
+                    {featuredPros.map(pro => (
+                        <div key={pro.id} className="bg-gray-50 dark:bg-gray-900/50 p-4 rounded-2xl border border-gray-100 dark:border-gray-800 flex items-center gap-4">
+                            <div className="w-12 h-12 rounded-xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 p-1">
+                                <img src={pro.logoUrl || pro.image} className="w-full h-full object-contain" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                                <h4 className="font-bold text-gray-900 dark:text-white text-xs truncate">{pro.name}</h4>
+                                <div className="flex items-center gap-1 text-[10px] text-yellow-500 font-bold">
+                                    <Star size={10} fill="currentColor" /> {pro.rating}
+                                </div>
+                            </div>
+                            <div className="bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 px-2 py-1 rounded text-[8px] font-black uppercase border border-emerald-100 dark:border-emerald-800">
+                                Destaque
+                            </div>
+                        </div>
+                    ))}
+                </div>
+                <p className="text-[9px] text-gray-400 italic text-center pt-2">
+                    Profissionais em destaque costumam responder mais rápido.
+                </p>
+            </div>
         </div>
-        <h2 className="text-3xl font-black text-gray-900 dark:text-white uppercase tracking-tighter leading-none mb-4">Pedido Enviado!</h2>
-        <p className="text-gray-500 dark:text-gray-400 text-sm max-w-xs mx-auto leading-relaxed mb-12">
-            Seu pedido foi enviado para até 5 profissionais da sua região. Em instantes, os interessados entrarão em contato via chat.
-        </p>
-        <button 
-          onClick={() => {
-            if (onOpenChat && createdRequestId) {
-              onOpenChat(createdRequestId);
-            } else {
-              onNavigate('home');
-            }
-          }}
-          className="w-full max-w-sm bg-[#1E5BFF] text-white font-black py-5 rounded-[2rem] shadow-xl active:scale-[0.98] transition-all uppercase tracking-widest text-xs"
-        >
-          Acompanhar pelo chat
-        </button>
+
+        <div className="pt-10 space-y-4">
+            <button 
+            onClick={() => {
+                if (onOpenChat && createdRequestId) {
+                onOpenChat(createdRequestId);
+                } else {
+                onNavigate('service_messages_list');
+                }
+            }}
+            className="w-full bg-[#1E5BFF] text-white font-black py-5 rounded-[2rem] shadow-xl active:scale-[0.98] transition-all uppercase tracking-widest text-xs"
+            >
+            Acompanhar orçamentos
+            </button>
+            <button 
+            onClick={() => onNavigate('home')}
+            className="w-full py-2 text-gray-400 font-black text-[10px] uppercase tracking-[0.2em]"
+            >
+                Voltar ao início
+            </button>
+        </div>
       </div>
     );
   }
