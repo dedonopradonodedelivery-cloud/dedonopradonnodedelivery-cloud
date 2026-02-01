@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Layout } from '@/components/layout/Layout';
 import { Header } from '@/components/layout/Header';
@@ -13,6 +12,7 @@ import { StoreAreaView } from '@/components/StoreAreaView';
 import { ClassifiedsView } from '@/components/ClassifiedsView';
 import { RealEstateView } from '@/components/RealEstateView';
 import { RealEstateWizard } from '@/components/RealEstateWizard';
+import { RealEstateDetailView } from '@/components/RealEstateDetailView';
 import { JobsView } from '@/components/JobsView';
 import { JobDetailView } from '@/components/JobDetailView';
 import { AdoptionView } from '@/components/AdoptionView';
@@ -46,7 +46,7 @@ import { MapPin, X, Palette } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import { NeighborhoodProvider } from '@/contexts/NeighborhoodContext';
-import { Category, Store, Job } from '@/types';
+import { Category, Store, Job, RealEstateProperty } from '@/types';
 import { STORES, CATEGORIES, MOCK_JOBS } from '@/constants';
 import { AboutView, SupportView, FavoritesView } from '@/components/SimplePages';
 
@@ -71,6 +71,7 @@ const App: React.FC = () => {
   const [globalSearch, setGlobalSearch] = useState('');
   const [selectedStore, setSelectedStore] = useState<Store | null>(null);
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
+  const [selectedProperty, setSelectedProperty] = useState<RealEstateProperty | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
   const [selectedSubcategoryName, setSelectedSubcategoryName] = useState<string | null>(null);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
@@ -97,7 +98,7 @@ const App: React.FC = () => {
   }, [isAuthReturn]);
 
   const handleNavigate = (view: string, data?: any) => {
-    if (view !== 'sponsor_info' && view !== 'notifications' && view !== 'patrocinador_master') {
+    if (view !== 'sponsor_info' && view !== 'notifications' && view !== 'patrocinador_master' && view !== 'real_estate_detail') {
       setPreviousTab(activeTab);
     }
     
@@ -108,6 +109,10 @@ const App: React.FC = () => {
         else if (data.role) setChatRole(data.role);
         else if (isMerchantMode) setChatRole('merchant');
         else setChatRole('resident');
+    }
+
+    if (view === 'real_estate_detail' && data?.property) {
+      setSelectedProperty(data.property);
     }
 
     setActiveTab(view);
@@ -169,7 +174,7 @@ const App: React.FC = () => {
     handleNavigate('profile');
   };
 
-  const headerExclusionList = ['store_area', 'store_detail', 'profile', 'patrocinador_master', 'merchant_performance', 'neighborhood_posts', 'saved_posts', 'classifieds', 'services', 'services_landing', 'merchant_leads', 'service_chat', 'admin_panel', 'category_detail', 'subcategory_detail', 'sponsor_info', 'real_estate', 'jobs', 'job_detail', 'adoption', 'donations', 'desapega', 'category_banner_sales', 'banner_sales_wizard', 'weekly_reward_page', 'user_coupons', 'notifications', 'store_profile', 'about', 'support', 'favorites', 'user_statement', 'service_messages_list', 'merchant_reviews', 'merchant_coupons', 'store_finance', 'store_support', 'real_estate_wizard'];
+  const headerExclusionList = ['store_area', 'store_detail', 'profile', 'patrocinador_master', 'merchant_performance', 'neighborhood_posts', 'saved_posts', 'classifieds', 'services', 'services_landing', 'merchant_leads', 'service_chat', 'admin_panel', 'category_detail', 'subcategory_detail', 'sponsor_info', 'real_estate', 'jobs', 'job_detail', 'adoption', 'donations', 'desapega', 'category_banner_sales', 'banner_sales_wizard', 'weekly_reward_page', 'user_coupons', 'notifications', 'store_profile', 'about', 'support', 'favorites', 'user_statement', 'service_messages_list', 'merchant_reviews', 'merchant_coupons', 'store_finance', 'store_support', 'real_estate_wizard', 'real_estate_detail'];
   
   const RoleSwitcherModal: React.FC = () => {
     if (!isRoleSwitcherOpen) return null;
@@ -351,6 +356,7 @@ const App: React.FC = () => {
                     {activeTab === 'classifieds' && <ClassifiedsView onBack={() => handleNavigate('home')} onNavigate={handleNavigate} user={user} onRequireLogin={() => setIsAuthOpen(true)} />}
                     {activeTab === 'real_estate' && <RealEstateView onBack={() => handleNavigate('classifieds')} user={user} onRequireLogin={() => setIsAuthOpen(true)} onNavigate={handleNavigate} />}
                     {activeTab === 'real_estate_wizard' && <RealEstateWizard user={user} onBack={() => handleNavigate('real_estate')} onComplete={() => handleNavigate('real_estate')} />}
+                    {activeTab === 'real_estate_detail' && selectedProperty && <RealEstateDetailView property={selectedProperty} onBack={() => handleNavigate('real_estate')} user={user} onRequireLogin={() => setIsAuthOpen(true)} />}
                     {activeTab === 'jobs' && <JobsView onBack={() => handleNavigate('classifieds')} onJobClick={handleSelectJob} onNavigate={handleNavigate} />}
                     {activeTab === 'job_detail' && selectedJob && <JobDetailView job={selectedJob} onBack={() => handleNavigate('jobs')} />}
                     {activeTab === 'adoption' && <AdoptionView onBack={() => handleNavigate('classifieds')} user={user} onRequireLogin={() => setIsAuthOpen(true)} onNavigate={handleNavigate} />}

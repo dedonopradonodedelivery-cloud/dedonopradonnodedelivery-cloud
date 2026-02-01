@@ -16,11 +16,14 @@ interface RealEstateViewProps {
   onNavigate: (view: string, data?: any) => void;
 }
 
-const PropertyCard: React.FC<{ property: RealEstateProperty }> = ({ property }) => {
+const PropertyCard: React.FC<{ property: RealEstateProperty; onClick: () => void }> = ({ property, onClick }) => {
   const isForSale = property.transaction === 'venda';
   
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-[2.5rem] shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden group flex flex-col h-full transition-all hover:shadow-md">
+    <div 
+      onClick={onClick}
+      className="bg-white dark:bg-gray-800 rounded-[2.5rem] shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden group flex flex-col h-full transition-all hover:shadow-md cursor-pointer active:scale-[0.99]"
+    >
       <div className="aspect-[16/10] bg-gray-100 dark:bg-gray-700 relative overflow-hidden">
         <img 
           src={property.image} 
@@ -46,7 +49,7 @@ const PropertyCard: React.FC<{ property: RealEstateProperty }> = ({ property }) 
         </p>
 
         {property.buildingName && (
-          <p className="text-[10px] font-bold text-blue-50 uppercase tracking-tight mb-4 flex items-center gap-1">
+          <p className="text-[10px] font-bold text-blue-500 uppercase tracking-tight mb-4 flex items-center gap-1">
             <Building2 size={10} /> {property.buildingName}
           </p>
         )}
@@ -74,7 +77,10 @@ const PropertyCard: React.FC<{ property: RealEstateProperty }> = ({ property }) 
             </p>
           </div>
           
-          <button className="w-full bg-[#1E5BFF] hover:bg-blue-600 text-white font-black py-4 rounded-2xl shadow-lg shadow-blue-500/10 flex items-center justify-center gap-2 uppercase tracking-widest text-[10px] active:scale-[0.98] transition-all">
+          <button 
+            onClick={(e) => { e.stopPropagation(); onClick(); }}
+            className="w-full bg-[#1E5BFF] hover:bg-blue-600 text-white font-black py-4 rounded-2xl shadow-lg shadow-blue-500/10 flex items-center justify-center gap-2 uppercase tracking-widest text-[10px] active:scale-[0.98] transition-all"
+          >
             Ver Detalhes
             <ArrowRight size={14} strokeWidth={3} />
           </button>
@@ -147,6 +153,10 @@ export const RealEstateView: React.FC<RealEstateViewProps> = ({ onBack, user, on
     else onNavigate('real_estate_wizard');
   };
 
+  const handlePropertyClick = (property: RealEstateProperty) => {
+    onNavigate('real_estate_detail', { property });
+  };
+
   return (
     <div className="min-h-screen bg-[#F8F9FC] dark:bg-gray-950 font-sans">
       <header className="sticky top-0 z-40 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md px-5 py-6 border-b border-gray-100 dark:border-gray-800">
@@ -189,7 +199,13 @@ export const RealEstateView: React.FC<RealEstateViewProps> = ({ onBack, user, on
 
         <div className="grid grid-cols-1 gap-6">
           {filteredProperties.length > 0 ? (
-            filteredProperties.map(prop => <PropertyCard key={prop.id} property={prop} />)
+            filteredProperties.map(prop => (
+              <PropertyCard 
+                key={prop.id} 
+                property={prop} 
+                onClick={() => handlePropertyClick(prop)}
+              />
+            ))
           ) : (
             <div className="py-24 text-center opacity-40 flex flex-col items-center animate-in fade-in duration-700">
               <Building2 size={40} className="text-gray-400 mb-4" />
