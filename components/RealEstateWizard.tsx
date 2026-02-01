@@ -1,11 +1,12 @@
-
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { 
     ChevronLeft, X, ArrowRight, Camera, CheckCircle2, 
     AlertTriangle, ShieldCheck, MapPin, Building2, 
     CreditCard, QrCode, Copy, Loader2, Info, Check, 
     Maximize2, Car, DollarSign, FileText, Smartphone,
-    Plus, Star, LayoutGrid, Award
+    Plus, Star, LayoutGrid, Award,
+    // Fix: Added missing Crown icon import
+    Crown
 } from 'lucide-react';
 import { User } from '@supabase/supabase-js';
 import { NEIGHBORHOODS } from '../contexts/NeighborhoodContext';
@@ -14,11 +15,12 @@ interface RealEstateWizardProps {
   user: User | null;
   onBack: () => void;
   onComplete: () => void;
+  onNavigate?: (view: string) => void;
 }
 
 type WizardStep = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12;
 
-export const RealEstateWizard: React.FC<RealEstateWizardProps> = ({ user, onBack, onComplete }) => {
+export const RealEstateWizard: React.FC<RealEstateWizardProps> = ({ user, onBack, onComplete, onNavigate }) => {
   const [step, setStep] = useState<WizardStep>(1);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isHighVisibilitySelected, setIsHighVisibilitySelected] = useState(false);
@@ -49,8 +51,6 @@ export const RealEstateWizard: React.FC<RealEstateWizardProps> = ({ user, onBack
   });
 
   const nextStep = () => {
-      // Se estiver no limite e for avançar da etapa 7 para 8, a lógica de cobrança será exibida
-      // Se o usuário já escolheu o destaque na etapa 8, pula a etapa 9 de upsell
       if (step === 8 && isHighVisibilitySelected) {
           setStep(10);
       } else {
@@ -85,7 +85,6 @@ export const RealEstateWizard: React.FC<RealEstateWizardProps> = ({ user, onBack
   };
 
   const handlePublishClick = () => {
-      // Se for gratuito e sem destaque, publica direto. Caso contrário, vai para pagamento.
       const isPaid = isAdditionalFeeApplied || isHighVisibilitySelected;
       
       setIsProcessing(true);
@@ -120,7 +119,6 @@ export const RealEstateWizard: React.FC<RealEstateWizardProps> = ({ user, onBack
 
   const userName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Anunciante';
 
-  // Cálculo de data de renovação (1º dia do mês que vem)
   const renewalDate = useMemo(() => {
     const nextMonth = new Date();
     nextMonth.setMonth(nextMonth.getMonth() + 1);
@@ -128,7 +126,6 @@ export const RealEstateWizard: React.FC<RealEstateWizardProps> = ({ user, onBack
     return nextMonth.toLocaleDateString('pt-BR');
   }, []);
 
-  // Cálculo de Total Final
   const totalToPay = useMemo(() => {
       let total = 0;
       if (isAdditionalFeeApplied) total += 19.90;
@@ -139,7 +136,6 @@ export const RealEstateWizard: React.FC<RealEstateWizardProps> = ({ user, onBack
   return (
     <div className="min-h-screen bg-white dark:bg-gray-950 flex flex-col font-sans animate-in fade-in duration-500 overflow-x-hidden">
       
-      {/* HEADER DINÂMICO */}
       {step < 12 && (
         <header className="sticky top-0 z-40 bg-white dark:bg-gray-900 px-5 h-16 flex items-center gap-4 border-b border-gray-100 dark:border-gray-800">
           <button onClick={step === 1 ? onBack : prevStep} className="p-2 -ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
@@ -154,7 +150,6 @@ export const RealEstateWizard: React.FC<RealEstateWizardProps> = ({ user, onBack
 
       <main className="flex-1 p-6 max-w-md mx-auto w-full pb-40 overflow-y-auto no-scrollbar">
         
-        {/* ETAPA 1: INÍCIO */}
         {step === 1 && (
             <div className="space-y-8 animate-in slide-in-from-right duration-300">
                 <div className="space-y-2">
@@ -179,7 +174,6 @@ export const RealEstateWizard: React.FC<RealEstateWizardProps> = ({ user, onBack
             </div>
         )}
 
-        {/* ETAPA 2: FOTOS */}
         {step === 2 && (
             <div className="space-y-8 animate-in slide-in-from-right duration-300">
                 <div className="space-y-2">
@@ -217,7 +211,6 @@ export const RealEstateWizard: React.FC<RealEstateWizardProps> = ({ user, onBack
             </div>
         )}
 
-        {/* ETAPA 3: INFO BÁSICA */}
         {step === 3 && (
             <div className="space-y-8 animate-in slide-in-from-right duration-300">
                 <h2 className="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tighter">Informações básicas do imóvel</h2>
@@ -267,7 +260,6 @@ export const RealEstateWizard: React.FC<RealEstateWizardProps> = ({ user, onBack
             </div>
         )}
 
-        {/* ETAPA 4: DETALHES */}
         {step === 4 && (
             <div className="space-y-8 animate-in slide-in-from-right duration-300">
                 <h2 className="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tighter">Detalhes do imóvel</h2>
@@ -292,7 +284,6 @@ export const RealEstateWizard: React.FC<RealEstateWizardProps> = ({ user, onBack
             </div>
         )}
 
-        {/* ETAPA 5 & 6: CAPRICHE & SEGURANÇA */}
         {(step === 5 || step === 6) && (
             <div className="space-y-8 animate-in slide-in-from-right duration-300">
                 <div className="space-y-2">
@@ -321,7 +312,6 @@ export const RealEstateWizard: React.FC<RealEstateWizardProps> = ({ user, onBack
                     </div>
                 </div>
 
-                {/* BLOCO DE SEGURANÇA (ETAPA 6 INTEGRADA) */}
                 <div className="bg-yellow-50 dark:bg-yellow-900/10 p-5 rounded-3xl border border-yellow-200 dark:border-yellow-800/30 flex gap-4">
                     <ShieldCheck className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
                     <div className="space-y-1">
@@ -336,7 +326,6 @@ export const RealEstateWizard: React.FC<RealEstateWizardProps> = ({ user, onBack
             </div>
         )}
 
-        {/* ETAPA 7: PREÇO */}
         {step === 7 && (
             <div className="space-y-8 animate-in slide-in-from-right duration-300">
                 <h2 className="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tighter">Defina o preço do seu imóvel</h2>
@@ -375,7 +364,6 @@ export const RealEstateWizard: React.FC<RealEstateWizardProps> = ({ user, onBack
             </div>
         )}
 
-        {/* ETAPA 8: LIMITE DE ANÚNCIOS */}
         {step === 8 && (
             <div className="space-y-8 animate-in slide-in-from-right duration-300 py-4">
                 <div className="text-center">
@@ -385,14 +373,30 @@ export const RealEstateWizard: React.FC<RealEstateWizardProps> = ({ user, onBack
                     <h2 className="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tighter">Limite gratuito atingido</h2>
                     <p className="text-sm text-gray-500 dark:text-gray-400 font-medium mt-4 leading-relaxed">
                         Você já utilizou seus 2 anúncios gratuitos neste mês.<br/>
-                        Seu limite será renovado em <strong className="text-gray-900 dark:text-white">{renewalDate}</strong>.
+                        Sua cota renova em <strong className="text-gray-900 dark:text-white">{renewalDate}</strong>.
                     </p>
                 </div>
 
                 <div className="space-y-4 pt-6">
                     <p className="text-xs font-black text-gray-400 uppercase tracking-widest text-center">Para continuar anunciando agora:</p>
                     
-                    {/* Opção 1: Simples */}
+                    {/* PLANOS MENSAIS (UPSELL) */}
+                    <button 
+                        onClick={() => onNavigate?.('plan_selection')}
+                        className="w-full bg-slate-900 dark:bg-white text-white dark:text-black p-6 rounded-3xl border-2 border-slate-700 flex items-center justify-between group active:scale-[0.98] transition-all shadow-xl"
+                    >
+                        <div className="flex items-center gap-4">
+                            <div className="w-12 h-12 bg-indigo-500/10 dark:bg-indigo-50 rounded-2xl flex items-center justify-center text-indigo-500">
+                                <Crown size={24} />
+                            </div>
+                            <div className="text-left">
+                                <h3 className="font-bold text-sm">Assinar Plano Mensal</h3>
+                                <p className="text-[10px] uppercase font-black tracking-widest opacity-60">Anúncios Ilimitados + Selo</p>
+                            </div>
+                        </div>
+                        <ArrowRight size={18} />
+                    </button>
+
                     <button 
                         onClick={() => { setIsAdditionalFeeApplied(true); setIsHighVisibilitySelected(false); nextStep(); }}
                         className="w-full bg-white dark:bg-gray-900 p-6 rounded-3xl border-2 border-gray-100 dark:border-gray-800 flex items-center justify-between group active:scale-[0.98] transition-all hover:border-blue-200"
@@ -402,39 +406,16 @@ export const RealEstateWizard: React.FC<RealEstateWizardProps> = ({ user, onBack
                                 <LayoutGrid size={24} />
                             </div>
                             <div className="text-left">
-                                <h3 className="font-bold text-sm dark:text-white">Publicação Simples</h3>
-                                <p className="text-[10px] text-gray-400 uppercase font-black tracking-widest">1 Anúncio Adicional</p>
+                                <h3 className="font-bold text-sm dark:text-white">Publicação Avulsa</h3>
+                                <p className="text-[10px] text-gray-400 uppercase font-black tracking-widest">Apenas 1 anúncio adicional</p>
                             </div>
                         </div>
                         <div className="bg-gray-900 dark:bg-white text-white dark:text-black px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest">R$ 19,90</div>
                     </button>
-
-                    {/* Opção 2: Destaque */}
-                    <button 
-                        onClick={() => { setIsAdditionalFeeApplied(true); setIsHighVisibilitySelected(true); nextStep(); }}
-                        className="w-full bg-indigo-600 p-6 rounded-3xl border-2 border-indigo-400 flex items-center justify-between group active:scale-[0.98] transition-all shadow-xl shadow-indigo-500/20"
-                    >
-                        <div className="flex items-center gap-4">
-                            <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center text-white">
-                                <Star size={24} fill="white" />
-                            </div>
-                            <div className="text-left">
-                                <h3 className="font-bold text-sm text-white">Destaque do Bairro</h3>
-                                <p className="text-[10px] text-indigo-200 uppercase font-black tracking-widest">Topo da Categoria</p>
-                            </div>
-                        </div>
-                        <div className="bg-white text-indigo-600 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest">R$ 49,99</div>
-                    </button>
-                </div>
-
-                <div className="mt-10 flex items-center justify-center gap-2 px-6 py-2 bg-amber-50 dark:bg-amber-900/10 rounded-full border border-amber-100 dark:border-amber-800/30">
-                    <ShieldCheck className="w-3.5 h-3.5 text-amber-600" />
-                    <span className="text-[8px] font-black text-amber-600 uppercase tracking-widest leading-none">MVP: permitido avançar para demonstração</span>
                 </div>
             </div>
         )}
 
-        {/* ETAPA 9: UPSELL (SÓ MOSTRA SE NÃO TIVER PEGO NO LIMITE) */}
         {step === 9 && (
             <div className="space-y-8 animate-in slide-in-from-right duration-300">
                 <div className="text-center">
@@ -452,7 +433,7 @@ export const RealEstateWizard: React.FC<RealEstateWizardProps> = ({ user, onBack
                             </div>
                             <div>
                                 <h3 className={`font-black text-lg leading-tight uppercase tracking-tight ${isHighVisibilitySelected ? 'text-white' : 'text-gray-900 dark:text-white'}`}>Destaque do bairro</h3>
-                                <p className="text-[9px] font-black text-amber-400 uppercase tracking-widest mt-1 animate-pulse">Valor especial de lançamento</p>
+                                <p className="text-[9px] font-black text-amber-400 uppercase tracking-widest mt-1 animate-pulse">Apareça no topo de JPA</p>
                             </div>
                         </div>
                         <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${isHighVisibilitySelected ? 'bg-emerald-50 border-emerald-500 text-white' : 'border-gray-200'}`}>
@@ -461,8 +442,7 @@ export const RealEstateWizard: React.FC<RealEstateWizardProps> = ({ user, onBack
                     </div>
 
                     <p className={`text-xs leading-relaxed font-medium mb-8 ${isHighVisibilitySelected ? 'text-indigo-200' : 'text-gray-500 dark:text-gray-400'}`}>
-                        Seu imóvel aparece fixo no topo da categoria de Imóveis Comerciais, com muito mais visualizações. 
-                        <strong> Apenas 3 espaços por bairro.</strong>
+                        Seu imóvel aparece fixo no topo da categoria, com muito mais visualizações e o selo de destaque.
                     </p>
 
                     <div className="flex items-baseline gap-3 relative z-10">
@@ -477,7 +457,6 @@ export const RealEstateWizard: React.FC<RealEstateWizardProps> = ({ user, onBack
             </div>
         )}
 
-        {/* ETAPA 10: RESUMO */}
         {step === 10 && (
             <div className="space-y-8 animate-in slide-in-from-right duration-300">
                 <h2 className="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tighter">Resumo do Anúncio</h2>
@@ -536,7 +515,6 @@ export const RealEstateWizard: React.FC<RealEstateWizardProps> = ({ user, onBack
             </div>
         )}
 
-        {/* ETAPA 11: PAGAMENTO (SIMULADO) */}
         {step === 11 && (
             <div className="space-y-8 animate-in slide-in-from-right duration-300">
                 <h2 className="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tighter">Pagamento</h2>
@@ -578,7 +556,6 @@ export const RealEstateWizard: React.FC<RealEstateWizardProps> = ({ user, onBack
             </div>
         )}
 
-        {/* ETAPA 12: SUCESSO */}
         {step === 12 && (
             <div className="min-h-[70vh] flex flex-col items-center justify-center text-center p-8 animate-in zoom-in duration-500">
                 <div className="w-24 h-24 bg-emerald-100 dark:bg-emerald-900/30 rounded-[2.5rem] flex items-center justify-center mb-8 text-emerald-600 shadow-xl shadow-emerald-500/10">
@@ -615,7 +592,6 @@ export const RealEstateWizard: React.FC<RealEstateWizardProps> = ({ user, onBack
 
       </main>
 
-      {/* FOOTER BAR (BOTÃO AVANÇAR FIXO ONDE COUBER) */}
       <div className="h-20"></div>
     </div>
   );

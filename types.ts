@@ -3,6 +3,8 @@ import React from 'react';
 
 export type ThemeMode = 'light' | 'dark' | 'auto';
 
+export type PlanType = 'free' | 'professional' | 'enterprise' | 'master';
+
 export enum AdType {
   ORGANIC = 'ORGANIC',
   LOCAL = 'LOCAL',   
@@ -86,6 +88,8 @@ export interface Store {
   inscricao_municipal?: string;
   inscricao_estadual?: string;
   email_publico?: string;
+  plan?: PlanType;
+  ads_count?: number;
 }
 
 export type SlotStatus = 'available' | 'reserved' | 'sold';
@@ -127,6 +131,7 @@ export interface RealEstateProperty {
   hasBathroom?: boolean;
   highCeiling?: boolean;
   loadingAccess?: boolean;
+  isVerifiedMerchant?: boolean;
 }
 
 export type ServiceUrgency = 'Para hoje' | 'Amanhã' | 'Até 3 dias' | 'Não tenho pressa' | 'Hoje' | 'Essa semana' | 'Sem pressa';
@@ -142,7 +147,7 @@ export interface ServiceRequest {
   images: string[];
   status: 'open' | 'closed';
   createdAt: string;
-  winnerId?: string; // ID do lojista que fechou o negócio
+  winnerId?: string; 
 }
 
 export interface ServiceLead {
@@ -202,6 +207,8 @@ export interface Job {
   modality?: 'Presencial' | 'Híbrido' | 'Remoto';
   experience?: string;
   schedule_type?: 'Integral' | 'Meio período' | 'Escala';
+  isVerified?: boolean;
+  isVerifiedMerchant?: boolean;
 }
 
 export interface NeighborhoodCommunity {
@@ -262,6 +269,7 @@ export interface Classified {
   price?: string;
   imageUrl?: string;
   jobDetails?: Job;
+  isVerifiedMerchant?: boolean;
 }
 
 export type TaxonomyType = 'category' | 'subcategory' | 'specialty';

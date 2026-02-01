@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { 
   ChevronRight, 
@@ -23,12 +24,15 @@ import {
   Zap,
   ShoppingBag,
   Loader2,
-  Ticket
+  Ticket,
+  BadgeCheck,
+  Award
 } from 'lucide-react';
 import { User as SupabaseUser } from '@supabase/supabase-js';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import { supabase } from '@/lib/supabaseClient';
+import { PlanType } from '@/types';
 
 interface StoreAreaViewProps {
   onBack: () => void;
@@ -95,6 +99,11 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
   const [merchantData, setMerchantData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Simulação de Plano no MVP
+  const [currentPlan, setCurrentPlan] = useState<PlanType>(() => {
+      return (localStorage.getItem('merchant_plan') as PlanType) || 'free';
+  });
+
   useEffect(() => {
     const fetchMerchant = async () => {
       if (!user) return;
@@ -117,10 +126,14 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
     }
   };
 
-  // Regra de Negócio: Categorias que recebem leads de serviço
-  const SERVICE_CATEGORIES = ['Serviços', 'Pro', 'Casa', 'Autos', 'Saúde', 'Beleza'];
-  // BYPASS ADM: O ADM sempre vê a central de leads
-  const canReceiveLeads = isAdmin || (merchantData && SERVICE_CATEGORIES.includes(merchantData.category));
+  const getPlanLabel = (type: PlanType) => {
+      switch(type) {
+          case 'professional': return 'Profissional Local';
+          case 'enterprise': return 'Empresa Bairro';
+          case 'master': return 'Master Imobiliário';
+          default: return 'Gratuito';
+      }
+  };
 
   const storeName = user?.user_metadata?.store_name || (isAdmin ? "Supervisor do Bairro" : "Sua Loja");
   const avatarUrl = user?.user_metadata?.avatar_url || `https://ui-avatars.com/api/?name=${storeName.replace(' ', '+')}&background=1E5BFF&color=fff`;
@@ -128,7 +141,7 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
   if (isLoading) {
     return (
       <div className="min-h-screen bg-white dark:bg-gray-950 flex flex-col items-center justify-center">
-        <Loader2 className="animate-spin text-[#1E5BFF] mb-4" size={32} />
+        <Loader2 className="animate-spin text-[#1E5BFF]" size={32} />
         <p className="text-xs font-black text-gray-400 uppercase tracking-widest">Carregando Painel...</p>
       </div>
     );
@@ -143,43 +156,54 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
             <img src={avatarUrl} alt={storeName} className="w-full h-full object-cover" />
           </div>
           <div className="flex-1 min-w-0">
-            <h1 className="text-2xl font-black text-gray-900 dark:text-white truncate leading-tight uppercase tracking-tighter">
-              {storeName}
-            </h1>
+            <div className="flex items-center gap-2">
+                <h1 className="text-2xl font-black text-gray-900 dark:text-white truncate leading-tight uppercase tracking-tighter">
+                {storeName}
+                </h1>
+                {currentPlan !== 'free' && <BadgeCheck className="text-blue-500 fill-current" size={20} />}
+            </div>
             <p className="text-xs text-[#1E5BFF] font-bold uppercase tracking-widest mt-1">
                 {isAdmin ? "Acesso Master Administrador" : "Painel do Lojista"}
             </p>
           </div>
         </div>
-        
-        {/* CORREÇÃO: O ADM também deve visualizar e poder editar o perfil da loja */}
-        <button 
-          onClick={() => onNavigate('store_profile')}
-          className="w-full mt-6 py-3.5 rounded-2xl border-2 border-gray-100 dark:border-gray-700 text-gray-600 dark:text-gray-300 font-bold text-xs uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all active:scale-[0.98]"
-        >
-          <User size={14} />
-          Minha Loja (Perfil Público)
-        </button>
+
+        {/* STATUS DO PLANO */}
+        <div className="mt-6 p-4 rounded-3xl bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+                <div className={`p-2 rounded-xl ${currentPlan === 'free' ? 'bg-gray-100' : 'bg-blue-600'} text-white`}>
+                    <Award size={18} />
+                </div>
+                <div>
+                    <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Plano Atual</p>
+                    <p className="text-xs font-black text-gray-900 dark:text-white uppercase">{getPlanLabel(currentPlan)}</p>
+                </div>
+            </div>
+            <button 
+                onClick={() => onNavigate('plan_selection')}
+                className="px-4 py-2 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl text-[10px] font-black uppercase tracking-widest text-blue-600 dark:text-blue-400 shadow-sm active:scale-95 transition-all"
+            >
+                Mudar Plano
+            </button>
+        </div>
       </div>
 
       <div className="px-6 space-y-10">
         
         {/* BLOCO DE OPORTUNIDADES (VISÍVEL PARA SERVIÇOS OU ADM) */}
-        {canReceiveLeads && (
-            <section className="animate-in slide-in-from-bottom-2 duration-500">
-                <SectionHeader title="Oportunidades" icon={Zap} />
-                <div className="bg-white dark:bg-gray-800 rounded-[2.5rem] border border-gray-100 dark:border-gray-700 overflow-hidden shadow-sm">
-                    <ServiceBlock 
-                    icon={ShoppingBag} 
-                    label="Central de Leads" 
-                    description={isAdmin ? "Auditoria e monitoramento de todos os leads do bairro" : "Veja pedidos de serviços e novos orçamentos"}
-                    onClick={() => onNavigate('merchant_leads')}
-                    colorClass="bg-blue-50 text-blue-600"
-                    badge={isAdmin ? undefined : 3}
-                    />
-                </div>
-            </section>
-        )}
+        <section className="animate-in slide-in-from-bottom-2 duration-500">
+            <SectionHeader title="Oportunidades" icon={Zap} />
+            <div className="bg-white dark:bg-gray-800 rounded-[2.5rem] border border-gray-100 dark:border-gray-700 overflow-hidden shadow-sm">
+                <ServiceBlock 
+                icon={ShoppingBag} 
+                label="Central de Leads" 
+                description={isAdmin ? "Auditoria e monitoramento de todos os leads do bairro" : "Veja pedidos de serviços e novos orçamentos"}
+                onClick={() => onNavigate('merchant_leads')}
+                colorClass="bg-blue-50 text-blue-600"
+                badge={isAdmin ? undefined : 3}
+                />
+            </div>
+        </section>
 
         <section>
           <SectionHeader title="Ações" icon={Sparkles} />
@@ -284,7 +308,7 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
 
       <div className="mt-12 text-center opacity-30 px-10">
         <p className="text-[9px] font-black text-gray-500 uppercase tracking-[0.3em]">
-          Localizei JPA Parceiros <br/> v1.5.0
+          Localizei JPA Parceiros <br/> v1.6.0
         </p>
       </div>
     </div>
