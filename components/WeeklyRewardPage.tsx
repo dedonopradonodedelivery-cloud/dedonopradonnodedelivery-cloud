@@ -10,15 +10,17 @@ interface WeeklyRewardPageProps {
 }
 
 export const WeeklyRewardPage: React.FC<WeeklyRewardPageProps> = ({ onBack, onNavigate }) => {
-  const { user, loading: authLoading } = useAuth();
+  const { user, userRole, loading: authLoading } = useAuth();
   const [savedLojista, setSavedLojista] = useState<string | null>(null);
   
-  // Guard de Autenticação: Se não estiver logado e terminou de carregar o auth, volta para home
+  // TRAVA DE PERMISSÃO REAL: Se não for 'cliente', expulsa para a Home.
   useEffect(() => {
-    if (!authLoading && !user) {
-      onBack();
+    if (!authLoading) {
+      if (!user || userRole !== 'cliente') {
+        onBack();
+      }
     }
-  }, [user, authLoading, onBack]);
+  }, [user, userRole, authLoading, onBack]);
 
   const consecutiveDays = parseInt(localStorage.getItem('reward_consecutive_days') || '1');
 
@@ -26,7 +28,7 @@ export const WeeklyRewardPage: React.FC<WeeklyRewardPageProps> = ({ onBack, onNa
   const participatingStores = useMemo(() => STORES.slice(0, 8), []);
 
   const handleSaveBenefit = (store: Store) => {
-    if (savedLojista || !user) return;
+    if (savedLojista || !user || userRole !== 'cliente') return;
 
     setSavedLojista(store.id);
     
@@ -66,15 +68,17 @@ export const WeeklyRewardPage: React.FC<WeeklyRewardPageProps> = ({ onBack, onNa
     );
   }
 
-  // Se não houver usuário (redundância de segurança pro render)
-  if (!user) {
+  // Se não houver usuário ou for lojista
+  if (!user || userRole !== 'cliente') {
     return (
         <div className="min-h-screen bg-white dark:bg-gray-950 flex flex-col items-center justify-center p-8 text-center">
             <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-6">
                 <Lock className="w-10 h-10 text-gray-400" />
             </div>
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Login necessário</h2>
-            <p className="text-sm text-gray-500 mb-8">Você precisa estar logado para acessar seus benefícios semanais.</p>
+            <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Acesso Restrito</h2>
+            <p className="text-sm text-gray-500 mb-8">
+                Apenas moradores (perfis de usuário) podem participar da sequência e resgatar prêmios semanais.
+            </p>
             <button onClick={onBack} className="w-full py-4 bg-blue-600 text-white font-bold rounded-2xl">Voltar ao início</button>
         </div>
     );

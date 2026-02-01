@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { Store, Category, AdType, CommunityPost, ServiceRequest, ServiceUrgency } from '@/types';
 import { 
@@ -116,11 +115,19 @@ export const HomeFeed: React.FC<HomeFeedFeedProps> = ({
     return parseInt(localStorage.getItem('reward_consecutive_days') || '1');
   });
 
+  // TRAVA DE PERMISSÃO: Apenas perfil 'cliente' pode interagir
   const handleClaimReward = () => {
     if (!user) {
+        alert("Entre como usuário para participar do Cupom da Semana.");
         onNavigate('profile'); 
         return;
     }
+    
+    if (userRole !== 'cliente') {
+        alert("Esta funcionalidade é exclusiva para moradores. Lojistas não podem resgatar cupons semanais.");
+        return;
+    }
+
     setIsAnimating(true);
     setTimeout(() => {
       setIsAnimating(false);
@@ -168,11 +175,10 @@ export const HomeFeed: React.FC<HomeFeedFeedProps> = ({
 
     setTimeout(() => {
       setIsSubmittingLead(false);
-      setWizardStep(4); // Pula para a tela de sucesso (antigo passo 5)
+      setWizardStep(4);
     }, 1500);
   };
 
-  // FIX: Removed the double assignment that caused block-scoped variable 'updateScrollIndicator' to be used before its declaration and prevented assignment to constant.
   const updateScrollIndicator = useCallback(() => {
     const el = categoryScrollRef.current;
     if (el) {
@@ -237,7 +243,7 @@ export const HomeFeed: React.FC<HomeFeedFeedProps> = ({
 
       <HomeBannerCarousel onStoreClick={onStoreClick} />
 
-      {/* 1. CUPOM DA SEMANA */}
+      {/* 1. CUPOM DA SEMANA - VISUAL MANTIDO, LOGICA PROTEGIDA */}
       <section className="bg-white dark:bg-gray-950 px-5 pt-4 mb-2">
         <div className="bg-white dark:bg-gray-900 rounded-[1.75rem] border border-gray-200/80 dark:border-gray-800 shadow-xl shadow-blue-900/5 relative group">
           <div className="absolute top-1/2 -translate-y-1/2 -left-4 w-8 h-8 rounded-full bg-white dark:bg-gray-950"></div>
@@ -276,9 +282,17 @@ export const HomeFeed: React.FC<HomeFeedFeedProps> = ({
               <div className="absolute -top-4 -right-4 w-8 h-8 rounded-full bg-white dark:bg-gray-950"></div>
           </div>
           <div className="p-4 pt-5">
-            <h2 className="text-xs font-bold text-gray-800 dark:text-gray-200 leading-tight text-center mb-4">{!user ? "Faça login para desbloquear recompensas diárias!" : consecutiveDays <= 5 ? "Retire um novo cupom hoje para completar sua sequência!" : "Parabéns! Você completou sua sequência semanal."}</h2>
-            <button onClick={handleClaimReward} disabled={isAnimating || !!(user && consecutiveDays > 5)} className={`w-full py-3 rounded-xl font-black text-[9px] uppercase tracking-[0.15em] transition-all flex items-center justify-center gap-2 shadow-lg active:scale-[0.98] ${isAnimating ? 'bg-gray-100 text-gray-400' : !user ? 'bg-blue-600 text-white shadow-blue-500/20' : consecutiveDays <= 5 ? 'bg-[#1E5BFF] text-white shadow-blue-500/20 hover:brightness-110' : 'bg-emerald-500 text-white shadow-emerald-500/20 opacity-50'}`}>
-                {isAnimating ? <><Loader2 size={12} className="animate-spin" /> Processando...</> : <>{!user ? "Entrar para começar" : consecutiveDays <= 5 ? `Desbloquear Dia ${consecutiveDays}` : "Sequência Completa"}<ArrowRight size={12} strokeWidth={3} /></>}
+            <h2 className="text-xs font-bold text-gray-800 dark:text-gray-200 leading-tight text-center mb-4">
+              {userRole === 'lojista' 
+                ? "Resgate exclusivo para moradores da região." 
+                : !user 
+                  ? "Faça login como usuário para desbloquear prêmios!" 
+                  : consecutiveDays <= 5 
+                    ? "Retire um novo cupom hoje para completar sua sequência!" 
+                    : "Parabéns! Você completou sua sequência semanal."}
+            </h2>
+            <button onClick={handleClaimReward} disabled={isAnimating || !!(userRole === 'cliente' && consecutiveDays > 5)} className={`w-full py-3 rounded-xl font-black text-[9px] uppercase tracking-[0.15em] transition-all flex items-center justify-center gap-2 shadow-lg active:scale-[0.98] ${isAnimating ? 'bg-gray-100 text-gray-400' : (user && userRole !== 'cliente') ? 'bg-gray-200 text-gray-400 grayscale cursor-not-allowed' : !user ? 'bg-blue-600 text-white shadow-blue-500/20' : consecutiveDays <= 5 ? 'bg-[#1E5BFF] text-white shadow-blue-500/20 hover:brightness-110' : 'bg-emerald-500 text-white shadow-emerald-500/20 opacity-50'}`}>
+                {isAnimating ? <><Loader2 size={12} className="animate-spin" /> Processando...</> : <>{(user && userRole !== 'cliente') ? "Acesso Restrito" : !user ? "Entrar para começar" : consecutiveDays <= 5 ? `Desbloquear Dia ${consecutiveDays}` : "Sequência Completa"}<ArrowRight size={12} strokeWidth={3} /></>}
             </button>
           </div>
         </div>
@@ -307,7 +321,7 @@ export const HomeFeed: React.FC<HomeFeedFeedProps> = ({
         <FifaBanner onClick={() => setWizardStep(1)} />
       </section>
 
-      {/* NOVO WIZARD DE ORÇAMENTO (AJUSTADO) */}
+      {/* NOVO WIZARD DE ORÇAMENTO */}
       {wizardStep > 0 && (
         <section className="bg-gray-50 dark:bg-gray-900 rounded-[2.5rem] p-6 -mt-4 mx-5 mb-8 animate-in slide-in-from-bottom-16 duration-500 border border-gray-100 dark:border-gray-800 shadow-xl relative overflow-hidden">
           <button onClick={() => setWizardStep(0)} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"><X size={20} /></button>
@@ -337,7 +351,6 @@ export const HomeFeed: React.FC<HomeFeedFeedProps> = ({
               </div>
             </div>
           )}
-          {/* PASSO DE BAIRRO REMOVIDO DAQUI */}
           {wizardStep === 3 && (
              <div className="text-center space-y-6">
                 <h3 className="font-bold text-gray-800 dark:text-white mb-2">Descreva o que você precisa</h3>
