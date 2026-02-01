@@ -23,9 +23,11 @@ import {
   Megaphone
 } from 'lucide-react';
 import { useNeighborhood, NEIGHBORHOODS } from '../contexts/NeighborhoodContext';
-import { Classified, AdType } from '../types';
+// FIX: Added Store to imports from types to resolve the "Cannot find name 'Store'" error.
+import { Classified, AdType, Store } from '../types';
 import { MOCK_CLASSIFIEDS, STORES } from '../constants';
 import { MasterSponsorBanner } from './MasterSponsorBanner';
+import { ClassifiedsBannerCarousel } from './ClassifiedsBannerCarousel';
 
 const CLASSIFIED_CATEGORIES = [
   { id: 'servicos', name: 'Orçamento de Serviços', slug: 'servicos', icon: <Wrench />, color: 'bg-brand-blue' },
@@ -324,6 +326,10 @@ export const ClassifiedsView: React.FC<ClassifiedsViewProps> = ({ onBack, onNavi
     onNavigate(mapping[slug]);
   };
 
+  const handleStoreClick = (store: Store) => {
+    onNavigate('store_detail', { store });
+  }
+
   return (
     <div className="min-h-screen bg-[#F8F9FC] dark:bg-gray-950 font-sans animate-in fade-in duration-500 relative">
       {/* Botão flutuante principal */}
@@ -380,6 +386,9 @@ export const ClassifiedsView: React.FC<ClassifiedsViewProps> = ({ onBack, onNavi
       </header>
       
       <main className="p-5 pb-48">
+        {/* CARROSSEL DE DESTAQUES EXCLUSIVO CLASSIFICADOS */}
+        <ClassifiedsBannerCarousel onStoreClick={(store) => onNavigate('store_detail', { store })} />
+
         {/* Filtro de Bairros */}
         <div className="flex gap-2 overflow-x-auto no-scrollbar pb-8 border-b border-gray-50 dark:border-gray-800 mb-8">
           <button 
@@ -513,7 +522,7 @@ export const ClassifiedsView: React.FC<ClassifiedsViewProps> = ({ onBack, onNavi
                         <p className="text-2xl font-black text-emerald-600 italic">{selectedItem.price}</p>
                     </div>
                 )}
-                <div className="flex items-center gap-3 pt-4 border-t border-gray-100 dark:border-gray-800">
+                <div className="flex items-center gap-3 pt-4 border-t border-gray-50 dark:border-gray-800">
                     <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 font-black text-xs uppercase">
                         {selectedItem.advertiser.charAt(0)}
                     </div>

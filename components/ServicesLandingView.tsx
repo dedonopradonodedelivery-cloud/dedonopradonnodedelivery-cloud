@@ -1,5 +1,4 @@
-
-import React from 'react';
+import React, { useMemo } from 'react';
 import { User } from '@supabase/supabase-js';
 import { 
     ChevronLeft, 
@@ -9,10 +8,12 @@ import {
     MessageSquare, 
     CheckCircle2 
 } from 'lucide-react';
+import { ClassifiedsCategoryHighlight } from './ClassifiedsCategoryHighlight';
+import { STORES } from '../constants';
 
 interface ServicesLandingViewProps {
   onBack: () => void;
-  onNavigate: (view: string) => void;
+  onNavigate: (view: string, data?: any) => void;
   user: User | null;
   onRequireLogin: () => void;
 }
@@ -27,6 +28,10 @@ export const ServicesLandingView: React.FC<ServicesLandingViewProps> = ({ onBack
     }
   };
 
+  const categoryHighlight = useMemo(() => {
+    return STORES.find(s => s.category === 'Serviços' && s.isSponsored) || STORES[0];
+  }, []);
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950 font-sans animate-in fade-in duration-500">
       
@@ -39,8 +44,16 @@ export const ServicesLandingView: React.FC<ServicesLandingViewProps> = ({ onBack
 
       <main className="overflow-y-auto no-scrollbar pb-12">
         
+        {/* BLOCO DE DESTAQUE ÚNICO */}
+        <div className="px-6 pt-6">
+          <ClassifiedsCategoryHighlight 
+            store={categoryHighlight} 
+            onClick={(store) => onNavigate?.('store_detail', { store })} 
+          />
+        </div>
+
         {/* 1. New Vibrant Banner */}
-        <section className="p-6">
+        <section className="px-6 pb-6">
           <div className="relative rounded-[2.5rem] bg-gradient-to-br from-blue-500 to-indigo-600 p-8 text-white overflow-hidden shadow-2xl shadow-blue-500/20">
             <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full opacity-50 blur-xl"></div>
             <div className="absolute bottom-0 left-0 right-0 h-2/3 bg-gradient-to-t from-black/10 to-transparent"></div>
@@ -87,7 +100,7 @@ export const ServicesLandingView: React.FC<ServicesLandingViewProps> = ({ onBack
                 <MessageSquare size={16} className="text-blue-500"/>
                 <h4 className="font-bold text-gray-900 dark:text-white">Receba propostas</h4>
               </div>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Até 5 profissionais verificados enviam orçamentos pelo chat interno do Localizei JPA.</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">Até 5 profissionais verificados enviam propostas pelo chat.</p>
             </div>
           </div>
 
@@ -98,7 +111,7 @@ export const ServicesLandingView: React.FC<ServicesLandingViewProps> = ({ onBack
                 <CheckCircle2 size={16} className="text-blue-500"/>
                 <h4 className="font-bold text-gray-900 dark:text-white">Escolha com confiança</h4>
               </div>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Converse, negocie e feche com o melhor profissional para você.</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">Converse, negocie e feche com o melhor profissional.</p>
             </div>
           </div>
         </section>

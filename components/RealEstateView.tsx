@@ -4,14 +4,16 @@ import {
   ChevronLeft, SlidersHorizontal, MapPin, Car, Maximize2, 
   Building2, ArrowRight
 } from 'lucide-react';
-import { MOCK_REAL_ESTATE_PROPERTIES } from '../constants';
-import { RealEstateProperty } from '../types';
+import { MOCK_REAL_ESTATE_PROPERTIES, STORES } from '../constants';
+import { RealEstateProperty, Store } from '../types';
 import { RealEstateFiltersView, RealEstateFilters } from './RealEstateFiltersView';
+import { ClassifiedsCategoryHighlight } from './ClassifiedsCategoryHighlight';
 
 interface RealEstateViewProps {
   onBack: () => void;
   user: User | null;
   onRequireLogin: () => void;
+  onNavigate?: (view: string, data?: any) => void;
 }
 
 const PropertyCard: React.FC<{ property: RealEstateProperty }> = ({ property }) => {
@@ -19,7 +21,6 @@ const PropertyCard: React.FC<{ property: RealEstateProperty }> = ({ property }) 
   
   return (
     <div className="bg-white dark:bg-gray-800 rounded-[2.5rem] shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden group flex flex-col h-full transition-all hover:shadow-md">
-      {/* 1. Imagem com Badge Padronizado */}
       <div className="aspect-[16/10] bg-gray-100 dark:bg-gray-700 relative overflow-hidden">
         <img 
           src={property.image} 
@@ -36,17 +37,14 @@ const PropertyCard: React.FC<{ property: RealEstateProperty }> = ({ property }) 
       </div>
 
       <div className="p-6 flex-1 flex flex-col">
-        {/* 2. Título do imóvel */}
         <h3 className="font-bold text-base text-gray-900 dark:text-white line-clamp-2 leading-tight mb-1">
           {property.title}
         </h3>
 
-        {/* 3. Bairro */}
         <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4">
           {property.neighborhood}
         </p>
 
-        {/* 4. Características (Metragem e Vagas) */}
         <div className="flex items-center gap-4 text-gray-500 dark:text-gray-400 mb-6">
           <div className="flex items-center gap-1.5">
             <Maximize2 size={14} className="text-blue-500" />
@@ -60,7 +58,6 @@ const PropertyCard: React.FC<{ property: RealEstateProperty }> = ({ property }) 
           )}
         </div>
 
-        {/* 5. Preço com Contexto Claro e CTA */}
         <div className="mt-auto pt-4 border-t border-gray-50 dark:border-gray-700 flex flex-col gap-4">
           <div>
             <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-0.5">
@@ -81,7 +78,7 @@ const PropertyCard: React.FC<{ property: RealEstateProperty }> = ({ property }) 
   );
 };
 
-export const RealEstateView: React.FC<RealEstateViewProps> = ({ onBack, user, onRequireLogin }) => {
+export const RealEstateView: React.FC<RealEstateViewProps> = ({ onBack, user, onRequireLogin, onNavigate }) => {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [filters, setFilters] = useState<RealEstateFilters>({
     transaction: null, types: [], locations: [], priceMin: '', priceMax: '',
@@ -91,13 +88,17 @@ export const RealEstateView: React.FC<RealEstateViewProps> = ({ onBack, user, on
   });
 
   const filteredProperties = useMemo(() => {
-    // REGRA OBRIGATÓRIA: Apenas IMÓVEIS COMERCIAIS
     return MOCK_REAL_ESTATE_PROPERTIES.filter(p => p.type === 'Comercial');
   }, [filters]);
 
   const activeFiltersCount = useMemo(() => {
     return Object.values(filters).filter(v => v !== null && v !== '' && (!Array.isArray(v) || v.length > 0)).length;
   }, [filters]);
+
+  // Destaque da categoria
+  const categoryHighlight = useMemo(() => {
+    return STORES.find(s => s.id === 'grupo-esquematiza') || STORES[0];
+  }, []);
 
   return (
     <div className="min-h-screen bg-[#F8F9FC] dark:bg-gray-950 font-sans">
@@ -108,7 +109,7 @@ export const RealEstateView: React.FC<RealEstateViewProps> = ({ onBack, user, on
           </button>
           <div className="flex-1">
             <h1 className="text-xl font-black text-gray-900 dark:text-white uppercase tracking-tighter leading-none">Imóveis Comerciais</h1>
-            <p className="text-[10px] text-blue-500 font-black uppercase tracking-widest mt-1">Oportunidades Comerciais no Bairro</p>
+            <p className="text-[10px] text-blue-500 font-black uppercase tracking-widest mt-1">Oportunidades no Bairro</p>
           </div>
           <button onClick={() => setIsFilterOpen(true)} className="relative p-2.5 bg-gray-50 dark:bg-gray-800 rounded-xl text-gray-500 shadow-sm active:scale-90 transition-all">
             <SlidersHorizontal size={20}/>
@@ -121,18 +122,23 @@ export const RealEstateView: React.FC<RealEstateViewProps> = ({ onBack, user, on
         </div>
       </header>
 
-      <main className="p-5 pb-32 grid grid-cols-1 gap-6">
-        {filteredProperties.length > 0 ? (
-          filteredProperties.map(prop => <PropertyCard key={prop.id} property={prop} />)
-        ) : (
-          <div className="py-24 text-center opacity-40 flex flex-col items-center animate-in fade-in duration-700">
-            <div className="w-20 h-20 bg-gray-100 dark:bg-gray-800 rounded-[2rem] flex items-center justify-center mb-4">
-              <Building2 size={40} className="text-gray-400" />
+      <main className="p-5 pb-32">
+        {/* BLOCO DE DESTAQUE ÚNICO */}
+        <ClassifiedsCategoryHighlight 
+          store={categoryHighlight} 
+          onClick={(store) => onNavigate?.('store_detail', { store })} 
+        />
+
+        <div className="grid grid-cols-1 gap-6">
+          {filteredProperties.length > 0 ? (
+            filteredProperties.map(prop => <PropertyCard key={prop.id} property={prop} />)
+          ) : (
+            <div className="py-24 text-center opacity-40 flex flex-col items-center animate-in fade-in duration-700">
+              <Building2 size={40} className="text-gray-400 mb-4" />
+              <p className="font-black uppercase tracking-[0.2em] text-[10px]">Nenhum imóvel disponível</p>
             </div>
-            <p className="font-black uppercase tracking-[0.2em] text-[10px]">Nenhum imóvel disponível</p>
-            <p className="text-xs mt-1">Tente ajustar seus filtros de busca.</p>
-          </div>
-        )}
+          )}
+        </div>
       </main>
 
       <RealEstateFiltersView 

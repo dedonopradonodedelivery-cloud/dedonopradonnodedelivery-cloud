@@ -20,14 +20,15 @@ import {
   Loader2
 } from 'lucide-react';
 import { useNeighborhood, NEIGHBORHOODS } from '../contexts/NeighborhoodContext';
-import { Classified } from '../types';
-import { MOCK_CLASSIFIEDS } from '../constants';
+import { Classified, Store } from '../types';
+import { MOCK_CLASSIFIEDS, STORES } from '../constants';
+import { ClassifiedsCategoryHighlight } from './ClassifiedsCategoryHighlight';
 
 interface DonationsViewProps {
   onBack: () => void;
   user: User | null;
   onRequireLogin: () => void;
-  onNavigate: (view: string) => void;
+  onNavigate: (view: string, data?: any) => void;
 }
 
 const DONATION_ITEM_CATEGORIES = [
@@ -106,6 +107,10 @@ export const DonationsView: React.FC<DonationsViewProps> = ({ onBack, user, onRe
     return list;
   }, [donations, filterHood, filterCategory, sortBy]);
 
+  const categoryHighlight = useMemo(() => {
+    return STORES.find(s => s.isSponsored) || STORES[0];
+  }, []);
+
   const handleAnunciar = () => {
     if (!user) onRequireLogin();
     else setIsCreateModalOpen(true);
@@ -143,32 +148,19 @@ export const DonationsView: React.FC<DonationsViewProps> = ({ onBack, user, onRe
             <SlidersHorizontal size={20} />
           </button>
         </div>
-
-        <div className="space-y-4">
-          <div className="flex gap-2 overflow-x-auto no-scrollbar -mx-1 px-1">
-            {DONATION_ITEM_CATEGORIES.map(cat => (
-              <button 
-                key={cat.id}
-                onClick={() => setFilterCategory(filterCategory === cat.id ? null : cat.id)}
-                className={`px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest border transition-all flex items-center gap-2 ${
-                  filterCategory === cat.id 
-                  ? 'bg-blue-600 text-white border-blue-600 shadow-md' 
-                  : 'bg-white dark:bg-gray-800 text-gray-400 border-gray-100 dark:border-gray-800'
-                }`}
-              >
-                <cat.icon size={12} />
-                {cat.id}
-              </button>
-            ))}
-          </div>
-        </div>
       </header>
 
       <main className="p-6 space-y-8">
+        {/* BLOCO DE DESTAQUE ÚNICO */}
+        <ClassifiedsCategoryHighlight 
+          store={categoryHighlight} 
+          onClick={(store) => onNavigate?.('store_detail', { store })} 
+        />
+
         <section className="p-5 bg-blue-50/50 dark:bg-blue-900/10 rounded-[2.5rem] border border-blue-100 dark:border-blue-800/30 flex gap-4">
           <Info className="w-5 h-5 text-blue-600 shrink-0 mt-0.5" />
           <p className="text-xs text-blue-800 dark:text-blue-300 font-semibold leading-relaxed">
-            Doações ajudam a circular recursos dentro do bairro e fortalecer a comunidade.
+            Doações ajudam a circular recursos e fortalecer o bairro.
           </p>
         </section>
 
@@ -183,16 +175,7 @@ export const DonationsView: React.FC<DonationsViewProps> = ({ onBack, user, onRe
             <div className="w-20 h-20 bg-gray-100 dark:bg-gray-800 rounded-[2.5rem] flex items-center justify-center mb-6 text-gray-400">
               <Search size={32} />
             </div>
-            <h3 className="text-lg font-black text-gray-900 dark:text-white uppercase tracking-tighter">Nenhuma doação disponível agora</h3>
-            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 max-w-[200px] mx-auto leading-relaxed">
-              Você pode ser o primeiro a ajudar alguém do seu bairro.
-            </p>
-            <button 
-              onClick={handleClear}
-              className="mt-4 text-[10px] font-black text-blue-600 uppercase tracking-widest underline"
-            >
-              Limpar filtros
-            </button>
+            <h3 className="text-lg font-black text-gray-900 dark:text-white uppercase tracking-tighter">Nenhuma doação disponível</h3>
           </div>
         )}
       </main>
@@ -239,35 +222,6 @@ export const DonationsView: React.FC<DonationsViewProps> = ({ onBack, user, onRe
                             ))}
                         </div>
                     </section>
-                    <section>
-                        <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4 ml-1">Categoria do Item</h4>
-                        <div className="grid grid-cols-2 gap-2">
-                            {DONATION_ITEM_CATEGORIES.map(cat => (
-                                <button 
-                                    key={cat.id}
-                                    onClick={() => setFilterCategory(filterCategory === cat.id ? null : cat.id)}
-                                    className={`p-4 rounded-2xl text-sm font-bold border-2 transition-all flex items-center gap-3 ${filterCategory === cat.id ? 'border-blue-500 bg-blue-50 text-blue-600' : 'border-gray-100 dark:border-gray-800 text-gray-500'}`}
-                                >
-                                    <cat.icon size={16} />
-                                    {cat.id}
-                                    {filterCategory === cat.id && <Check className="ml-auto" size={16} />}
-                                </button>
-                            ))}
-                        </div>
-                    </section>
-                    <section>
-                        <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4 ml-1">Ordenar por</h4>
-                        <div className="space-y-2">
-                            <button onClick={() => setSortBy('recent')} className={`w-full p-4 rounded-2xl flex items-center justify-between border-2 transition-all ${sortBy === 'recent' ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 text-[#1E5BFF]' : 'border-gray-100 dark:border-gray-800 text-gray-500'}`}>
-                                <span className="text-sm font-bold">Mais recentes primeiro</span>
-                                {sortBy === 'recent' && <Check size={18} />}
-                            </button>
-                            <button onClick={() => setSortBy('oldest')} className={`w-full p-4 rounded-2xl flex items-center justify-between border-2 transition-all ${sortBy === 'oldest' ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 text-[#1E5BFF]' : 'border-gray-100 dark:border-gray-800 text-gray-500'}`}>
-                                <span className="text-sm font-bold">Mais antigos primeiro</span>
-                                {sortBy === 'oldest' && <Check size={18} />}
-                            </button>
-                        </div>
-                    </section>
                 </div>
 
                 <div className="p-6 border-t border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 shrink-0">
@@ -276,39 +230,6 @@ export const DonationsView: React.FC<DonationsViewProps> = ({ onBack, user, onRe
                       <button onClick={() => setIsFilterModalOpen(false)} className="flex-[2] py-4 text-xs font-black text-white uppercase tracking-widest bg-[#1E5BFF] rounded-2xl shadow-lg shadow-blue-500/20 active:scale-[0.98] transition-all">Aplicar Filtros</button>
                     </div>
                 </div>
-            </div>
-        </div>
-      )}
-
-      {isCreateModalOpen && (
-        <div className="fixed inset-0 z-[1100] bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-4 animate-in fade-in duration-200" onClick={() => setIsCreateModalOpen(false)}>
-            <div className="bg-white dark:bg-gray-900 w-full max-w-md rounded-[2.5rem] sm:rounded-3xl p-8 shadow-2xl flex flex-col animate-in slide-in-from-bottom sm:zoom-in-95 duration-300 max-h-[90vh] overflow-y-auto no-scrollbar" onClick={e => e.stopPropagation()}>
-                <div className="w-12 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full mx-auto mb-8 shrink-0 sm:hidden"></div>
-                <div className="flex items-center gap-4 mb-8">
-                    <div className="p-3 bg-emerald-50 dark:bg-emerald-900/20 rounded-2xl text-emerald-600"><Heart size={24} fill="currentColor" /></div>
-                    <div>
-                        <h2 className="text-xl font-black text-gray-900 dark:text-white uppercase tracking-tighter">Nova Doação</h2>
-                        <p className="text-[10px] text-emerald-500 font-bold uppercase tracking-widest">Categoria: Doações em geral</p>
-                    </div>
-                </div>
-                <div className="space-y-6">
-                    <div className="w-full aspect-video rounded-3xl border-2 border-dashed border-gray-200 dark:border-gray-700 flex flex-col items-center justify-center text-gray-400 bg-gray-50 dark:bg-gray-800/50 cursor-pointer">
-                        <Camera size={32} className="mb-2" />
-                        <span className="text-[10px] font-bold uppercase">Adicionar Fotos</span>
-                    </div>
-                    <input placeholder="O que você está doando?" className="w-full p-5 bg-gray-50 dark:bg-gray-800 border-none rounded-2xl text-sm font-bold dark:text-white outline-none focus:ring-2 focus:ring-emerald-500/30" />
-                    <select className="w-full p-5 bg-gray-50 dark:bg-gray-800 border-none rounded-2xl text-sm font-bold dark:text-white outline-none focus:ring-2 focus:ring-emerald-500/30">
-                        <option value="">Categoria do Item</option>
-                        {DONATION_ITEM_CATEGORIES.map(c => <option key={c.id} value={c.id.toLowerCase()}>{c.id}</option>)}
-                    </select>
-                    <textarea placeholder="Descrição do item e como retirar..." rows={3} className="w-full p-5 bg-gray-50 dark:bg-gray-800 border-none rounded-2xl text-sm font-medium dark:text-white resize-none outline-none focus:ring-2 focus:ring-emerald-500/30" />
-                </div>
-                <button 
-                    onClick={() => { setIsCreateModalOpen(false); alert("Doação enviada para aprovação!"); }}
-                    className="w-full mt-8 py-5 bg-emerald-600 text-white font-black rounded-2xl shadow-xl flex items-center justify-center gap-2 uppercase tracking-widest text-xs"
-                >
-                    Publicar Doação
-                </button>
             </div>
         </div>
       )}
