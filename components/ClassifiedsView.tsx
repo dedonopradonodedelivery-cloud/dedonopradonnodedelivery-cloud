@@ -20,10 +20,11 @@ import {
   Camera,
   Loader2,
   AlertCircle,
-  Megaphone
+  Megaphone,
+  Check,
+  SlidersHorizontal
 } from 'lucide-react';
 import { useNeighborhood, NEIGHBORHOODS } from '../contexts/NeighborhoodContext';
-// FIX: Added Store to imports from types to resolve the "Cannot find name 'Store'" error.
 import { Classified, AdType, Store } from '../types';
 import { MOCK_CLASSIFIEDS, STORES } from '../constants';
 import { MasterSponsorBanner } from './MasterSponsorBanner';
@@ -253,6 +254,91 @@ const CreateClassifiedModal: React.FC<{ isOpen: boolean; onClose: () => void; us
     );
 };
 
+const FilterModal: React.FC<{
+  isOpen: boolean;
+  onClose: () => void;
+  onApply: (neighborhoods: string[], sort: 'recent' | 'nearby' | 'price') => void;
+  selectedNeighborhoods: string[];
+  selectedSort: 'recent' | 'nearby' | 'price';
+}> = ({ isOpen, onClose, onApply, selectedNeighborhoods, selectedSort }) => {
+  const [tempHoods, setTempHoods] = useState(selectedNeighborhoods);
+  const [tempSort, setTempSort] = useState(selectedSort);
+
+  if (!isOpen) return null;
+
+  const toggleHood = (hood: string) => {
+    if (hood === 'Jacarepaguá (todos)') {
+      setTempHoods([]);
+      return;
+    }
+    setTempHoods(prev => 
+      prev.includes(hood) ? prev.filter(h => h !== hood) : [...prev, hood]
+    );
+  };
+
+  return (
+    <div className="fixed inset-0 z-[1100] bg-black/60 backdrop-blur-sm flex items-end justify-center animate-in fade-in duration-200" onClick={onClose}>
+      <div className="bg-white dark:bg-gray-900 w-full max-w-md rounded-t-[2.5rem] p-8 shadow-2xl flex flex-col animate-in slide-in-from-bottom duration-300 max-h-[85vh] overflow-y-auto no-scrollbar" onClick={e => e.stopPropagation()}>
+        <div className="w-12 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full mx-auto mb-6 shrink-0"></div>
+        <div className="flex justify-between items-center mb-8">
+            <h2 className="text-xl font-black text-gray-900 dark:text-white uppercase tracking-tighter">Filtrar e Ordenar</h2>
+            <button onClick={onClose} className="p-2 bg-gray-100 dark:bg-gray-800 rounded-full text-gray-400 hover:text-gray-600 transition-colors"><X size={20}/></button>
+        </div>
+
+        <div className="space-y-8">
+          <section>
+            <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4">Ordenar por</h3>
+            <div className="space-y-2">
+              {[
+                { id: 'recent', label: 'Mais recentes' },
+                { id: 'nearby', label: 'Mais próximos' },
+                { id: 'price', label: 'Menor preço' }
+              ].map(opt => (
+                <button 
+                  key={opt.id} 
+                  onClick={() => setTempSort(opt.id as any)}
+                  className={`w-full p-4 rounded-2xl flex items-center justify-between border-2 transition-all ${tempSort === opt.id ? 'border-[#1E5BFF] bg-blue-50 dark:bg-blue-900/20 text-[#1E5BFF]' : 'border-gray-100 dark:border-gray-800 text-gray-500'}`}
+                >
+                  <span className="text-sm font-bold">{opt.label}</span>
+                  {tempSort === opt.id && <CheckCircle2 size={18} />}
+                </button>
+              ))}
+            </div>
+          </section>
+
+          <section>
+            <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4">Filtrar por Bairro</h3>
+            <div className="flex flex-wrap gap-2">
+              <button 
+                onClick={() => toggleHood('Jacarepaguá (todos)')}
+                className={`px-4 py-2 rounded-xl text-xs font-bold border transition-all ${tempHoods.length === 0 ? 'bg-gray-900 text-white border-gray-900' : 'bg-gray-50 dark:bg-gray-800 text-gray-500 border-transparent'}`}
+              >
+                Jacarepaguá (Todos)
+              </button>
+              {NEIGHBORHOODS.map(hood => (
+                <button 
+                  key={hood}
+                  onClick={() => toggleHood(hood)}
+                  className={`px-4 py-2 rounded-xl text-xs font-bold border transition-all ${tempHoods.includes(hood) ? 'bg-[#1E5BFF] text-white border-[#1E5BFF]' : 'bg-gray-50 dark:bg-gray-800 text-gray-500 border-transparent'}`}
+                >
+                  {hood}
+                </button>
+              ))}
+            </div>
+          </section>
+        </div>
+
+        <button 
+          onClick={() => { onApply(tempHoods, tempSort); onClose(); }}
+          className="w-full mt-10 py-5 bg-[#1E5BFF] text-white font-black rounded-2xl shadow-xl flex items-center justify-center gap-2 uppercase tracking-widest text-xs"
+        >
+          Aplicar Filtros
+        </button>
+      </div>
+    </div>
+  );
+};
+
 export interface ClassifiedsViewProps {
   onBack: () => void;
   onNavigate: (view: string, data?: any) => void;
@@ -265,20 +351,9 @@ export const ClassifiedsView: React.FC<ClassifiedsViewProps> = ({ onBack, onNavi
   const [selectedNeighborhoods, setSelectedNeighborhoods] = useState<string[]>([]);
   const [selectedItem, setSelectedItem] = useState<Classified | null>(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
   const [modalInitialCategory, setModalInitialCategory] = useState<string | null>(null);
   const [quickFilter, setQuickFilter] = useState<'recent' | 'nearby' | 'price'>('recent');
-  
-  const toggleNeighborhood = (hood: string) => {
-    if (hood === 'Jacarepaguá (todos)') {
-      setSelectedNeighborhoods([]);
-      return;
-    }
-    setSelectedNeighborhoods(prev => 
-      prev.includes(hood) 
-        ? prev.filter(h => h !== hood) 
-        : [...prev, hood]
-    );
-  };
   
   const handleAnunciarClick = (catName: string | null = null) => {
     if (!user) {
@@ -326,23 +401,8 @@ export const ClassifiedsView: React.FC<ClassifiedsViewProps> = ({ onBack, onNavi
     onNavigate(mapping[slug]);
   };
 
-  const handleStoreClick = (store: Store) => {
-    onNavigate('store_detail', { store });
-  }
-
   return (
     <div className="min-h-screen bg-[#F8F9FC] dark:bg-gray-950 font-sans animate-in fade-in duration-500 relative">
-      {/* Botão flutuante principal */}
-      <div className="fixed bottom-32 left-1/2 -translate-x-1/2 z-[1000] w-full max-w-[280px] px-4">
-        <button 
-            onClick={() => handleAnunciarClick(null)}
-            className="w-full bg-[#1E5BFF] hover:bg-blue-600 text-white font-black py-4 rounded-2xl shadow-2xl shadow-blue-500/40 flex items-center justify-center gap-3 uppercase tracking-widest text-[11px] border border-white/20 active:scale-95 transition-all"
-        >
-            <Plus size={18} strokeWidth={3} />
-            Anunciar nos Classificados
-        </button>
-      </div>
-
       <header className="sticky top-0 z-30 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md px-5 py-6 border-b border-gray-100 dark:border-gray-800">
         <div className="flex items-center gap-4 mb-5">
           <button onClick={onBack} className="p-2.5 bg-gray-50 dark:bg-gray-800 rounded-xl text-gray-500 transition-all active:scale-90 shadow-sm"><ChevronLeft size={20}/></button>
@@ -350,10 +410,15 @@ export const ClassifiedsView: React.FC<ClassifiedsViewProps> = ({ onBack, onNavi
             <h1 className="text-xl font-black text-gray-900 dark:text-white font-display uppercase tracking-tighter">Classificados JPA</h1>
             <p className="text-[10px] text-blue-500 font-black uppercase tracking-widest mt-1">Conectando o bairro</p>
           </div>
-          <div className="w-10"></div>
+          <button 
+            onClick={() => setIsFilterModalOpen(true)}
+            className="p-2.5 bg-gray-50 dark:bg-gray-800 rounded-xl text-gray-400 hover:text-[#1E5BFF] transition-all active:scale-90 shadow-sm"
+          >
+            <SlidersHorizontal size={20}/>
+          </button>
         </div>
 
-        <div className="relative mb-6">
+        <div className="relative mb-5">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
           <input 
             type="text" 
@@ -364,49 +429,18 @@ export const ClassifiedsView: React.FC<ClassifiedsViewProps> = ({ onBack, onNavi
           />
         </div>
 
-        <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
-            {[
-                { id: 'recent', label: 'Mais recentes' },
-                { id: 'nearby', label: 'Mais próximos' },
-                { id: 'price', label: 'Com preço' },
-            ].map(f => (
-                <button 
-                    key={f.id}
-                    onClick={() => setQuickFilter(f.id as any)}
-                    className={`flex-shrink-0 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all border ${
-                        quickFilter === f.id 
-                        ? 'bg-blue-600 text-white border-blue-600 shadow-md' 
-                        : 'bg-white dark:bg-gray-800 text-gray-400 border-gray-100 dark:border-gray-800'
-                    }`}
-                >
-                    {f.label}
-                </button>
-            ))}
-        </div>
+        <button 
+            onClick={() => handleAnunciarClick(null)}
+            className="w-full bg-[#1E5BFF] hover:bg-blue-600 text-white font-black py-4 rounded-2xl shadow-xl shadow-blue-500/20 flex items-center justify-center gap-3 uppercase tracking-widest text-[11px] border border-white/20 active:scale-95 transition-all"
+        >
+            <Plus size={18} strokeWidth={3} />
+            Anunciar nos Classificados
+        </button>
       </header>
       
       <main className="p-5 pb-48">
         {/* CARROSSEL DE DESTAQUES EXCLUSIVO CLASSIFICADOS */}
         <ClassifiedsBannerCarousel onStoreClick={(store) => onNavigate('store_detail', { store })} />
-
-        {/* Filtro de Bairros */}
-        <div className="flex gap-2 overflow-x-auto no-scrollbar pb-8 border-b border-gray-50 dark:border-gray-800 mb-8">
-          <button 
-            onClick={() => toggleNeighborhood('Jacarepaguá (todos)')}
-            className={`flex-shrink-0 px-5 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest border transition-all ${selectedNeighborhoods.length === 0 ? 'bg-gray-900 text-white border-gray-900' : 'bg-white dark:bg-gray-800 text-gray-400 border-gray-100 dark:border-gray-800'}`}
-          >
-            Jacarepaguá (Todos)
-          </button>
-          {NEIGHBORHOODS.map(hood => (
-            <button 
-              key={hood}
-              onClick={() => toggleNeighborhood(hood)}
-              className={`flex-shrink-0 px-5 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest border transition-all ${selectedNeighborhoods.includes(hood) ? 'bg-blue-600 text-white border-blue-600 shadow-md' : 'bg-white dark:bg-gray-800 text-gray-400 border-gray-100 dark:border-gray-800'}`}
-            >
-              {hood}
-            </button>
-          ))}
-        </div>
 
         {/* Grid de Categorias */}
         <div className="grid grid-cols-3 gap-3 mb-12">
@@ -492,6 +526,17 @@ export const ClassifiedsView: React.FC<ClassifiedsViewProps> = ({ onBack, onNavi
         onClose={() => setIsCreateModalOpen(false)} 
         user={user} 
         initialCategory={modalInitialCategory}
+      />
+
+      <FilterModal 
+        isOpen={isFilterModalOpen}
+        onClose={() => setIsFilterModalOpen(false)}
+        selectedNeighborhoods={selectedNeighborhoods}
+        selectedSort={quickFilter}
+        onApply={(hoods, sort) => {
+          setSelectedNeighborhoods(hoods);
+          setQuickFilter(sort);
+        }}
       />
 
       {selectedItem && (
