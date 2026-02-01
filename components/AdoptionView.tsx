@@ -106,6 +106,14 @@ export const AdoptionView: React.FC<AdoptionViewProps> = ({ onBack, user, onRequ
     setSortBy('recent');
   };
 
+  const handleNeighborhoodSelect = (hood: string | null) => {
+    if (hood === filterHood) {
+      setFilterHood(null);
+    } else {
+      setFilterHood(hood);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#F8F9FC] dark:bg-gray-950 font-sans pb-40 animate-in slide-in-from-right duration-300 relative">
       <header className="sticky top-0 z-40 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md px-5 py-6 border-b border-gray-100 dark:border-gray-800 rounded-b-[2.5rem] shadow-sm">
@@ -203,15 +211,15 @@ export const AdoptionView: React.FC<AdoptionViewProps> = ({ onBack, user, onRequ
                         <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4 ml-1">Bairro em Jacarepaguá</h4>
                         <div className="flex flex-wrap gap-2">
                             <button 
-                                onClick={() => setFilterHood(null)}
-                                className={`px-4 py-2 rounded-xl text-xs font-bold border transition-all ${filterHood === null ? 'bg-gray-900 text-white border-gray-900' : 'bg-gray-50 dark:bg-gray-800 text-gray-500 border-transparent'}`}
+                                onClick={() => handleNeighborhoodSelect(null)}
+                                className={`px-4 py-2 rounded-xl text-xs font-bold border transition-all ${filterHood === null ? 'bg-gray-900 text-white border-gray-900 shadow-md' : 'bg-gray-50 dark:bg-gray-800 text-gray-500 border-transparent'}`}
                             >
-                                Todos
+                                Jacarepaguá (Todos)
                             </button>
                             {NEIGHBORHOODS.map(hood => (
                                 <button 
                                     key={hood}
-                                    onClick={() => setFilterHood(hood)}
+                                    onClick={() => handleNeighborhoodSelect(hood)}
                                     className={`px-4 py-2 rounded-xl text-xs font-bold border transition-all ${filterHood === hood ? 'bg-blue-600 text-white border-blue-600 shadow-md' : 'bg-gray-50 dark:bg-gray-800 text-gray-500 border-transparent'}`}
                                 >
                                     {hood}
@@ -262,7 +270,7 @@ export const AdoptionView: React.FC<AdoptionViewProps> = ({ onBack, user, onRequ
       {isCreateModalOpen && (
         <div className="fixed inset-0 z-[1100] bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-4 animate-in fade-in duration-200" onClick={() => setIsCreateModalOpen(false)}>
             <div className="bg-white dark:bg-gray-900 w-full max-w-md rounded-[2.5rem] sm:rounded-3xl p-8 shadow-2xl flex flex-col animate-in slide-in-from-bottom sm:zoom-in-95 duration-300 max-h-[90vh] overflow-y-auto no-scrollbar" onClick={e => e.stopPropagation()}>
-                <div className="w-12 h-1.5 bg-gray-200 dark:bg-gray-800 rounded-full mx-auto mb-8 shrink-0 sm:hidden"></div>
+                <div className="w-12 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full mx-auto mb-8 shrink-0 sm:hidden"></div>
                 <div className="flex items-center gap-4 mb-8">
                     <div className="p-3 bg-amber-50 dark:bg-amber-900/20 rounded-2xl text-amber-600"><PawPrint size={24} /></div>
                     <div>

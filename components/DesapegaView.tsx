@@ -95,6 +95,7 @@ export const DesapegaView: React.FC<DesapegaViewProps> = ({ onBack, user, onRequ
       let matchPrice = true;
       if (priceRange === 'under50') matchPrice = priceNum < 50;
       else if (priceRange === '50-200') matchPrice = priceNum >= 50 && priceNum <= 200;
+      // FIX: Changed 'pricePrice' to 'priceRange' to fix the reference error on line 98.
       else if (priceRange === 'above200') matchPrice = priceNum > 200;
 
       return matchHood && matchPrice;
@@ -115,6 +116,15 @@ export const DesapegaView: React.FC<DesapegaViewProps> = ({ onBack, user, onRequ
   const handleAnunciar = () => {
     if (!user) onRequireLogin();
     else setIsCreateModalOpen(true);
+  };
+
+  const handleNeighborhoodSelect = (hood: string | null) => {
+    // Se clicar no bairro que já está selecionado, volta para 'Todos' (null)
+    if (hood === filterHood) {
+      setFilterHood(null);
+    } else {
+      setFilterHood(hood);
+    }
   };
 
   return (
@@ -205,7 +215,7 @@ export const DesapegaView: React.FC<DesapegaViewProps> = ({ onBack, user, onRequ
 
       {isFilterModalOpen && (
         <div className="fixed inset-0 z-[1100] bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-4 animate-in fade-in duration-200" onClick={() => setIsFilterModalOpen(false)}>
-            <div className="bg-white dark:bg-gray-900 w-full max-w-md rounded-[2.5rem] sm:rounded-3xl shadow-2xl flex flex-col animate-in slide-in-from-bottom sm:zoom-in-95 duration-300 max-h-[90vh] overflow-hidden" onClick={e => e.stopPropagation()}>
+            <div className="bg-white dark:bg-gray-900 w-full max-w-md rounded-[2.5rem] sm:rounded-3xl p-8 shadow-2xl flex flex-col animate-in slide-in-from-bottom sm:zoom-in-95 duration-300 max-h-[90vh] overflow-y-auto no-scrollbar" onClick={e => e.stopPropagation()}>
                 <div className="p-6 pb-0 flex flex-col shrink-0">
                   <div className="w-12 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full mx-auto mb-6 sm:hidden"></div>
                   <div className="flex justify-between items-center mb-6">
@@ -219,15 +229,15 @@ export const DesapegaView: React.FC<DesapegaViewProps> = ({ onBack, user, onRequ
                         <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4 ml-1">Bairro em Jacarepaguá</h4>
                         <div className="flex flex-wrap gap-2">
                             <button 
-                                onClick={() => setFilterHood(null)}
-                                className={`px-4 py-2 rounded-xl text-xs font-bold border transition-all ${filterHood === null ? 'bg-gray-900 text-white border-gray-900' : 'bg-gray-50 dark:bg-gray-800 text-gray-500 border-transparent'}`}
+                                onClick={() => handleNeighborhoodSelect(null)}
+                                className={`px-4 py-2 rounded-xl text-xs font-bold border transition-all ${filterHood === null ? 'bg-gray-900 text-white border-gray-900 shadow-md' : 'bg-gray-50 dark:bg-gray-800 text-gray-500 border-transparent'}`}
                             >
-                                Todos
+                                Jacarepaguá (Todos)
                             </button>
                             {NEIGHBORHOODS.map(hood => (
                                 <button 
                                     key={hood}
-                                    onClick={() => setFilterHood(hood)}
+                                    onClick={() => handleNeighborhoodSelect(hood)}
                                     className={`px-4 py-2 rounded-xl text-xs font-bold border transition-all ${filterHood === hood ? 'bg-blue-600 text-white border-blue-600 shadow-md' : 'bg-gray-50 dark:bg-gray-800 text-gray-500 border-transparent'}`}
                                 >
                                     {hood}
@@ -264,7 +274,7 @@ export const DesapegaView: React.FC<DesapegaViewProps> = ({ onBack, user, onRequ
       {isCreateModalOpen && (
         <div className="fixed inset-0 z-[1100] bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-4 animate-in fade-in duration-200" onClick={() => setIsCreateModalOpen(false)}>
             <div className="bg-white dark:bg-gray-900 w-full max-w-md rounded-[2.5rem] sm:rounded-3xl p-8 shadow-2xl flex flex-col animate-in slide-in-from-bottom sm:zoom-in-95 duration-300 max-h-[90vh] overflow-y-auto no-scrollbar" onClick={e => e.stopPropagation()}>
-                <div className="w-12 h-1.5 bg-gray-200 dark:bg-gray-800 rounded-full mx-auto mb-8 shrink-0 sm:hidden"></div>
+                <div className="w-12 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full mx-auto mb-8 shrink-0 sm:hidden"></div>
                 <div className="flex items-center gap-4 mb-8">
                     <div className="p-3 bg-indigo-50 dark:bg-indigo-900/20 rounded-2xl text-indigo-600"><Tag size={24} /></div>
                     <div>
@@ -282,7 +292,7 @@ export const DesapegaView: React.FC<DesapegaViewProps> = ({ onBack, user, onRequ
                     <textarea placeholder="Detalhes do item, estado de conservação..." rows={3} className="w-full p-5 bg-gray-50 dark:bg-gray-800 border-none rounded-2xl text-sm font-medium dark:text-white resize-none outline-none focus:ring-2 focus:ring-indigo-500/30" />
                     <div className="relative">
                         <span className="absolute left-5 top-1/2 -translate-y-1/2 font-black text-emerald-600 italic text-lg">R$</span>
-                        <input placeholder="Valor (obrigatório)" className="w-full p-5 pl-12 bg-gray-50 dark:bg-gray-800 border-none rounded-2xl text-sm font-black text-emerald-600 dark:text-emerald-400 outline-none focus:ring-2 focus:ring-emerald-500/30" />
+                        <input placeholder="Valor (obrigatório)" className="w-full p-5 pl-12 bg-gray-50 dark:bg-gray-800 border-none rounded-2xl text-sm font-black text-emerald-600 dark:text-emerald-400 outline-none focus:ring-2 focus:ring-indigo-500/30" />
                     </div>
                 </div>
 
