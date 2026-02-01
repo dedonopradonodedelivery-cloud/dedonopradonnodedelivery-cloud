@@ -1,5 +1,6 @@
+
 import React, { useState, useEffect } from 'react';
-import { X, SlidersHorizontal, MapPin, DollarSign, BedDouble, Bath, Car, Maximize2 } from 'lucide-react';
+import { X, SlidersHorizontal, MapPin, DollarSign, BedDouble, Bath, Car, Maximize2, Building } from 'lucide-react';
 import { NEIGHBORHOODS } from '../contexts/NeighborhoodContext';
 
 export interface RealEstateFilters {
@@ -10,6 +11,7 @@ export interface RealEstateFilters {
   priceMax: string;
   areaMin: string;
   areaMax: string;
+  buildingName: string;
   bedrooms: number | null;
   bathrooms: number | null;
   parkingSpaces: number | null;
@@ -43,7 +45,7 @@ export const RealEstateFiltersView: React.FC<RealEstateFiltersViewProps> = ({ is
 
   const toggleFilter = (field: keyof RealEstateFilters, value: any) => {
     setFilters(prev => {
-      const currentValues = prev[field] as any[];
+      const currentValues = prev[field];
       if (Array.isArray(currentValues)) {
         if (currentValues.includes(value)) {
           return { ...prev, [field]: currentValues.filter(v => v !== value) };
@@ -58,19 +60,19 @@ export const RealEstateFiltersView: React.FC<RealEstateFiltersViewProps> = ({ is
   const handleReset = () => {
     const defaultFilters: RealEstateFilters = {
       transaction: null, types: [], locations: [], priceMin: '', priceMax: '',
-      areaMin: '', areaMax: '', bedrooms: null, bathrooms: null, parkingSpaces: null,
+      areaMin: '', areaMax: '', buildingName: '', bedrooms: null, bathrooms: null, parkingSpaces: null,
       condoMin: '', condoMax: '', isFurnished: null, petsAllowed: null,
       highCeiling: null, loadingAccess: null, sortBy: 'relevantes'
     };
     setFilters(defaultFilters);
-    onApply(defaultFilters);
+    // Don't call onApply here, wait for user to click "Apply" or keep reset local
   };
   
   if (!isOpen) return null;
 
   return (
     <div 
-      className="fixed inset-0 z-[1001] bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-4" 
+      className="fixed inset-0 z-[1100] bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-4 animate-in fade-in duration-200" 
       onClick={onClose}
     >
       <div 
@@ -78,9 +80,11 @@ export const RealEstateFiltersView: React.FC<RealEstateFiltersViewProps> = ({ is
         onClick={e => e.stopPropagation()}
       >
         <div className="p-6 pb-0 flex flex-col shrink-0">
-          <div className="w-12 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full mx-auto mb-6"></div>
+          <div className="w-12 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full mx-auto mb-6 sm:hidden"></div>
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-xl font-black text-gray-900 dark:text-white uppercase tracking-tighter">Filtros Comerciais</h2>
+            <h2 className="text-xl font-black text-gray-900 dark:text-white uppercase tracking-tighter">
+              {activeTab === 'Residencial' ? 'Filtros Residencial' : 'Filtros Comercial'}
+            </h2>
             <button onClick={onClose} className="p-2 bg-gray-100 dark:bg-gray-800 rounded-full text-gray-400"><X size={20}/></button>
           </div>
         </div>
@@ -93,41 +97,93 @@ export const RealEstateFiltersView: React.FC<RealEstateFiltersViewProps> = ({ is
                 </div>
             </section>
             
-            <section><h3 className={SECTION_TITLE_CLASS}>Tipo de Imóvel Comercial</h3>
+            <section><h3 className={SECTION_TITLE_CLASS}>Tipo de Imóvel {activeTab}</h3>
               <div className="flex flex-wrap gap-2">
-                {['Sala comercial', 'Loja', 'Galpão', 'Andar/Conjunto', 'Terreno comercial'].map(type => (
+                {(activeTab === 'Comercial' 
+                  ? ['Sala comercial', 'Loja', 'Galpão', 'Andar/Conjunto', 'Terreno comercial']
+                  : ['Casa', 'Apartamento', 'Kitnet/Studio', 'Cobertura']
+                ).map(type => (
                   <button key={type} onClick={() => toggleFilter('types', type)} className={`px-4 py-2 text-xs font-bold rounded-full border transition-all ${filters.types.includes(type) ? 'bg-blue-600 text-white border-blue-600 shadow-sm' : 'bg-gray-50 dark:bg-gray-800 border-gray-100 dark:border-gray-700 text-gray-500'}`}>{type}</button>
                 ))}
               </div>
             </section>
 
+            {activeTab === 'Comercial' && (
+              <section>
+                <h3 className={SECTION_TITLE_CLASS}>Nome do prédio / centro comercial</h3>
+                <div className="relative group">
+                  <Building className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 group-focus-within:text-blue-500" />
+                  <input 
+                    type="text" 
+                    value={filters.buildingName}
+                    onChange={e => setFilters({...filters, buildingName: e.target.value})}
+                    placeholder="Ex: Quality Shopping, Downtown..." 
+                    className="w-full p-4 pl-11 bg-gray-50 dark:bg-gray-800 rounded-xl text-sm border border-gray-100 dark:border-gray-700 outline-none focus:ring-2 focus:ring-blue-500/20 dark:text-white"
+                  />
+                </div>
+              </section>
+            )}
+
             <section><h3 className={SECTION_TITLE_CLASS}>Faixa de Preço</h3>
               <div className="grid grid-cols-2 gap-3">
-                <input type="number" placeholder="Mínimo (R$)" value={filters.priceMin} onChange={e => setFilters({...filters, priceMin: e.target.value})} className="w-full p-4 bg-gray-50 dark:bg-gray-800 rounded-xl text-sm border border-gray-100 dark:border-gray-700 outline-none focus:ring-2 focus:ring-blue-500/20" />
-                <input type="number" placeholder="Máximo (R$)" value={filters.priceMax} onChange={e => setFilters({...filters, priceMax: e.target.value})} className="w-full p-4 bg-gray-50 dark:bg-gray-800 rounded-xl text-sm border border-gray-100 dark:border-gray-700 outline-none focus:ring-2 focus:ring-blue-500/20" />
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs font-bold">R$</span>
+                  <input type="number" placeholder="Mínimo" value={filters.priceMin} onChange={e => setFilters({...filters, priceMin: e.target.value})} className="w-full p-4 pl-9 bg-gray-50 dark:bg-gray-800 rounded-xl text-sm border border-gray-100 dark:border-gray-700 outline-none focus:ring-2 focus:ring-blue-500/20 dark:text-white" />
+                </div>
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs font-bold">R$</span>
+                  <input type="number" placeholder="Máximo" value={filters.priceMax} onChange={e => setFilters({...filters, priceMax: e.target.value})} className="w-full p-4 pl-9 bg-gray-50 dark:bg-gray-800 rounded-xl text-sm border border-gray-100 dark:border-gray-700 outline-none focus:ring-2 focus:ring-blue-500/20 dark:text-white" />
+                </div>
               </div>
             </section>
 
-            <section><h3 className={SECTION_TITLE_CLASS}>Vagas de Estacionamento</h3>
-              <div className="flex gap-2">
-                {[0,1,2,3].map(v => (<button key={v} onClick={() => setFilters({...filters, parkingSpaces: v})} className={`flex-1 py-3 text-sm font-bold rounded-xl border transition-all ${filters.parkingSpaces === v ? 'bg-blue-600 text-white border-blue-600 shadow-md' : 'bg-gray-50 dark:bg-gray-800 border-gray-100 dark:border-gray-700 text-gray-500'}`}>{v === 3 ? '3+' : v}</button>))}
-              </div>
-            </section>
+            {activeTab === 'Residencial' ? (
+                <section><h3 className={SECTION_TITLE_CLASS}>Dormitórios</h3>
+                  <div className="flex gap-2">
+                    {[1,2,3,4].map(v => (<button key={v} onClick={() => setFilters({...filters, bedrooms: v})} className={`flex-1 py-3 text-sm font-bold rounded-xl border transition-all ${filters.bedrooms === v ? 'bg-blue-600 text-white border-blue-600 shadow-md' : 'bg-gray-50 dark:bg-gray-800 border-gray-100 dark:border-gray-700 text-gray-500'}`}>{v === 4 ? '4+' : v}</button>))}
+                  </div>
+                </section>
+            ) : (
+                <section><h3 className={SECTION_TITLE_CLASS}>Vagas de Estacionamento</h3>
+                  <div className="flex gap-2">
+                    {[0,1,2,3].map(v => (<button key={v} onClick={() => setFilters({...filters, parkingSpaces: v})} className={`flex-1 py-3 text-sm font-bold rounded-xl border transition-all ${filters.parkingSpaces === v ? 'bg-blue-600 text-white border-blue-600 shadow-md' : 'bg-gray-50 dark:bg-gray-800 border-gray-100 dark:border-gray-700 text-gray-500'}`}>{v === 3 ? '3+' : v}</button>))}
+                  </div>
+                </section>
+            )}
 
             <section><h3 className={SECTION_TITLE_CLASS}>Características</h3>
                 <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-black text-gray-400 uppercase tracking-tight ml-1">Pé-direito alto?</label>
-                      <button onClick={() => setFilters({...filters, highCeiling: !filters.highCeiling})} className={`w-full py-3 rounded-xl text-xs font-bold border transition-all ${filters.highCeiling ? 'bg-blue-600 text-white border-blue-600 shadow-sm' : 'bg-gray-50 dark:bg-gray-800 border-gray-100 dark:border-gray-700 text-gray-500'}`}>
-                        {filters.highCeiling ? 'Sim' : 'Não'}
-                      </button>
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-black text-gray-400 uppercase tracking-tight ml-1">Carga/Descarga?</label>
-                      <button onClick={() => setFilters({...filters, loadingAccess: !filters.loadingAccess})} className={`w-full py-3 rounded-xl text-xs font-bold border transition-all ${filters.loadingAccess ? 'bg-blue-600 text-white border-blue-600 shadow-sm' : 'bg-gray-50 dark:bg-gray-800 border-gray-100 dark:border-gray-700 text-gray-500'}`}>
-                        {filters.loadingAccess ? 'Sim' : 'Não'}
-                      </button>
-                    </div>
+                    {activeTab === 'Comercial' ? (
+                      <>
+                        <div className="space-y-2">
+                          <label className="text-[10px] font-black text-gray-400 uppercase tracking-tight ml-1">Pé-direito alto?</label>
+                          <button onClick={() => setFilters({...filters, highCeiling: filters.highCeiling === true ? null : true})} className={`w-full py-3 rounded-xl text-xs font-bold border transition-all ${filters.highCeiling === true ? 'bg-blue-600 text-white border-blue-600 shadow-sm' : 'bg-gray-50 dark:bg-gray-800 border-gray-100 dark:border-gray-700 text-gray-500'}`}>
+                            Sim
+                          </button>
+                        </div>
+                        <div className="space-y-2">
+                          <label className="text-[10px] font-black text-gray-400 uppercase tracking-tight ml-1">Carga/Descarga?</label>
+                          <button onClick={() => setFilters({...filters, loadingAccess: filters.loadingAccess === true ? null : true})} className={`w-full py-3 rounded-xl text-xs font-bold border transition-all ${filters.loadingAccess === true ? 'bg-blue-600 text-white border-blue-600 shadow-sm' : 'bg-gray-50 dark:bg-gray-800 border-gray-100 dark:border-gray-700 text-gray-500'}`}>
+                            Sim
+                          </button>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <div className="space-y-2">
+                          <label className="text-[10px] font-black text-gray-400 uppercase tracking-tight ml-1">Mobiliado?</label>
+                          <button onClick={() => setFilters({...filters, isFurnished: filters.isFurnished === true ? null : true})} className={`w-full py-3 rounded-xl text-xs font-bold border transition-all ${filters.isFurnished === true ? 'bg-blue-600 text-white border-blue-600 shadow-sm' : 'bg-gray-50 dark:bg-gray-800 border-gray-100 dark:border-gray-700 text-gray-500'}`}>
+                            Sim
+                          </button>
+                        </div>
+                        <div className="space-y-2">
+                          <label className="text-[10px] font-black text-gray-400 uppercase tracking-tight ml-1">Aceita Pets?</label>
+                          <button onClick={() => setFilters({...filters, petsAllowed: filters.petsAllowed === true ? null : true})} className={`w-full py-3 rounded-xl text-xs font-bold border transition-all ${filters.petsAllowed === true ? 'bg-blue-600 text-white border-blue-600 shadow-sm' : 'bg-gray-50 dark:bg-gray-800 border-gray-100 dark:border-gray-700 text-gray-500'}`}>
+                            Sim
+                          </button>
+                        </div>
+                      </>
+                    )}
                 </div>
             </section>
         </main>

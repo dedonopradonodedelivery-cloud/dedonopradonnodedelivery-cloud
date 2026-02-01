@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo } from 'react';
 import { User } from '@supabase/supabase-js';
 import { 
@@ -41,9 +42,15 @@ const PropertyCard: React.FC<{ property: RealEstateProperty }> = ({ property }) 
           {property.title}
         </h3>
 
-        <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4">
+        <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">
           {property.neighborhood}
         </p>
+
+        {property.buildingName && (
+          <p className="text-[10px] font-bold text-blue-500 uppercase tracking-tight mb-4 flex items-center gap-1">
+            <Building2 size={10} /> {property.buildingName}
+          </p>
+        )}
 
         <div className="flex items-center gap-4 text-gray-500 dark:text-gray-400 mb-6">
           <div className="flex items-center gap-1.5">
@@ -82,23 +89,75 @@ export const RealEstateView: React.FC<RealEstateViewProps> = ({ onBack, user, on
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [filters, setFilters] = useState<RealEstateFilters>({
     transaction: null, types: [], locations: [], priceMin: '', priceMax: '',
-    areaMin: '', areaMax: '', bedrooms: null, bathrooms: null, parkingSpaces: null,
+    areaMin: '', areaMax: '', buildingName: '', bedrooms: null, bathrooms: null, parkingSpaces: null,
     condoMin: '', condoMax: '', isFurnished: null, petsAllowed: null,
     highCeiling: null, loadingAccess: null, sortBy: 'relevantes'
   });
 
   const filteredProperties = useMemo(() => {
-    return MOCK_REAL_ESTATE_PROPERTIES.filter(p => p.type === 'Comercial');
+    return MOCK_REAL_ESTATE_PROPERTIES.filter(p => {
+        // Base: Apenas Comercial
+        if (p.type !== 'Comercial') return false;
+
+        // Filtro por Transação
+        if (filters.transaction && p.transaction !== filters.transaction) return false;
+
+        // Filtro por Tipo de Imóvel
+        if (filters.types.length > 0 && !filters.types.includes(p.propertyTypeCom || '')) return false;
+
+        // Filtro por Nome do Prédio (Contém / Parcial)
+        if (filters.buildingName.trim() !== '') {
+            const search = filters.buildingName.toLowerCase();
+            const bName = (p.buildingName || '').toLowerCase();
+            const title = p.title.toLowerCase();
+            const desc = p.description.toLowerCase();
+            
+            if (!bName.includes(search) && !title.includes(search) && !desc.includes(search)) {
+                return false;
+            }
+        }
+
+        // Filtro por Preço
+        const minP = parseFloat(filters.priceMin) || 0;
+        const maxP = parseFloat(filters.priceMax) || Infinity;
+        if (p.price < minP || p.price > maxP) return false;
+
+        // Filtro por Vagas
+        if (filters.parkingSpaces !== null) {
+            const pSpaces = p.parkingSpaces || 0;
+            if (filters.parkingSpaces === 3) {
+                if (pSpaces < 3) return false;
+            } else {
+                if (pSpaces !== filters.parkingSpaces) return false;
+            }
+        }
+
+        // Filtros Binários
+        if (filters.highCeiling === true && !p.highCeiling) return false;
+        if (filters.loadingAccess === true && !p.loadingAccess) return false;
+
+        return true;
+    });
   }, [filters]);
 
   const activeFiltersCount = useMemo(() => {
-    return Object.values(filters).filter(v => v !== null && v !== '' && (!Array.isArray(v) || v.length > 0)).length;
+    return Object.entries(filters).filter(([key, v]) => {
+        if (key === 'sortBy') return false;
+        if (v === null || v === '') return false;
+        if (Array.isArray(v) && v.length === 0) return false;
+        return true;
+    }).length;
   }, [filters]);
 
   // Destaque da categoria
   const categoryHighlight = useMemo(() => {
     return STORES.find(s => s.id === 'grupo-esquematiza') || STORES[0];
   }, []);
+
+  const handleApplyFilters = (newFilters: RealEstateFilters) => {
+    setFilters(newFilters);
+    setIsFilterOpen(false);
+  };
 
   return (
     <div className="min-h-screen bg-[#F8F9FC] dark:bg-gray-950 font-sans">
@@ -135,7 +194,11 @@ export const RealEstateView: React.FC<RealEstateViewProps> = ({ onBack, user, on
           ) : (
             <div className="py-24 text-center opacity-40 flex flex-col items-center animate-in fade-in duration-700">
               <Building2 size={40} className="text-gray-400 mb-4" />
-              <p className="font-black uppercase tracking-[0.2em] text-[10px]">Nenhum imóvel disponível</p>
+              <p className="font-black uppercase tracking-[0.2em] text-[10px]">
+                {filters.buildingName 
+                  ? 'Nenhum imóvel encontrado neste prédio.' 
+                  : 'Nenhum imóvel disponível para esses filtros.'}
+              </p>
             </div>
           )}
         </div>
@@ -144,7 +207,7 @@ export const RealEstateView: React.FC<RealEstateViewProps> = ({ onBack, user, on
       <RealEstateFiltersView 
         isOpen={isFilterOpen} 
         onClose={() => setIsFilterOpen(false)}
-        onApply={setFilters}
+        onApply={handleApplyFilters}
         activeTab="Comercial"
         initialFilters={filters}
       />

@@ -115,6 +115,7 @@ export interface RealEstateProperty {
   transaction: 'aluguel' | 'venda';
   area: number; 
   postedAt: string;
+  buildingName?: string;
   bedrooms?: number;
   bathrooms?: number;
   parkingSpaces?: number;
