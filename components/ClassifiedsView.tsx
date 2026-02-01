@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo, useRef } from 'react';
 import { User } from '@supabase/supabase-js';
 import { 
@@ -415,21 +414,35 @@ export const ClassifiedsView: React.FC<ClassifiedsViewProps> = ({ onBack, onNavi
   return (
     <div className="min-h-screen bg-[#F8F9FC] dark:bg-gray-950 font-sans animate-in fade-in duration-500 relative">
       <header className="sticky top-0 z-30 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md px-5 py-6 border-b border-gray-100 dark:border-gray-800">
-        <div className="flex items-center gap-4 mb-5">
-          <button onClick={onBack} className="p-2.5 bg-gray-50 dark:bg-gray-800 rounded-xl text-gray-500 transition-all active:scale-90 shadow-sm"><ChevronLeft size={20}/></button>
-          <div className="text-center flex-1">
-            <h1 className="text-xl font-black text-gray-900 dark:text-white font-display uppercase tracking-tighter leading-none">CLASSIFICADOS JPA</h1>
+        <div className="flex items-center justify-between gap-3 mb-5">
+          <button onClick={onBack} className="p-2.5 bg-gray-50 dark:bg-gray-800 rounded-xl text-gray-500 transition-all active:scale-90 shadow-sm shrink-0">
+            <ChevronLeft size={20}/>
+          </button>
+          
+          <div className="text-center flex-1 min-w-0">
+            <h1 className="text-lg font-black text-gray-900 dark:text-white font-display uppercase tracking-tighter leading-none">CLASSIFICADOS JPA</h1>
             <p className="text-[10px] text-blue-500 font-black uppercase tracking-widest mt-1">Conectando o bairro</p>
           </div>
-          <button 
-            onClick={() => setIsFilterModalOpen(true)}
-            className="p-2.5 bg-gray-50 dark:bg-gray-800 rounded-xl text-gray-400 hover:text-[#1E5BFF] transition-all active:scale-90 shadow-sm"
-          >
-            <SlidersHorizontal size={20}/>
-          </button>
+          
+          <div className="flex items-center gap-2 shrink-0">
+            <button 
+                onClick={() => handleAnunciarClick(null)}
+                className="px-3 py-1.5 bg-[#1E5BFF] hover:bg-blue-600 text-white font-black rounded-full shadow-lg shadow-blue-500/10 flex items-center justify-center gap-1.5 uppercase tracking-widest text-[9px] border border-white/10 active:scale-95 transition-all h-9"
+            >
+                <Plus size={12} strokeWidth={4} />
+                Começar a anunciar
+            </button>
+            
+            <button 
+              onClick={() => setIsFilterModalOpen(true)}
+              className="p-2.5 bg-gray-50 dark:bg-gray-800 rounded-xl text-gray-400 hover:text-[#1E5BFF] transition-all active:scale-90 shadow-sm"
+            >
+              <SlidersHorizontal size={20}/>
+            </button>
+          </div>
         </div>
 
-        <div className="relative mb-4">
+        <div className="relative">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
           <input 
             type="text" 
@@ -438,16 +451,6 @@ export const ClassifiedsView: React.FC<ClassifiedsViewProps> = ({ onBack, onNavi
             placeholder="O que você procura no bairro?"
             className="w-full bg-gray-100 dark:bg-gray-800 border-none py-4 pl-11 pr-4 rounded-2xl text-sm font-medium outline-none focus:ring-2 focus:ring-[#1E5BFF]/30 dark:text-white shadow-inner"
           />
-        </div>
-
-        <div className="flex justify-center px-1 mb-2">
-          <button 
-              onClick={() => handleAnunciarClick(null)}
-              className="px-6 py-2 bg-[#1E5BFF] hover:bg-blue-600 text-white font-black rounded-full shadow-lg shadow-blue-500/10 flex items-center justify-center gap-2 uppercase tracking-widest text-[10px] border border-white/10 active:scale-95 transition-all h-10"
-          >
-              <Plus size={14} strokeWidth={4} />
-              Começar a anunciar
-          </button>
         </div>
       </header>
       

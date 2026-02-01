@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import { User } from '@supabase/supabase-js';
 import { 
@@ -47,7 +46,7 @@ const PropertyCard: React.FC<{ property: RealEstateProperty }> = ({ property }) 
         </p>
 
         {property.buildingName && (
-          <p className="text-[10px] font-bold text-blue-500 uppercase tracking-tight mb-4 flex items-center gap-1">
+          <p className="text-[10px] font-bold text-blue-50 uppercase tracking-tight mb-4 flex items-center gap-1">
             <Building2 size={10} /> {property.buildingName}
           </p>
         )}
@@ -120,7 +119,7 @@ export const RealEstateView: React.FC<RealEstateViewProps> = ({ onBack, user, on
             }
         }
         if (filters.highCeiling === true && !p.highCeiling) return false;
-        if (filters.loadingAccess === true && !p.loadingAccess) return false;
+        if (filters.loadingAccess === true && !p.highCeiling) return false;
         return true;
     });
   }, [filters]);
@@ -151,32 +150,34 @@ export const RealEstateView: React.FC<RealEstateViewProps> = ({ onBack, user, on
   return (
     <div className="min-h-screen bg-[#F8F9FC] dark:bg-gray-950 font-sans">
       <header className="sticky top-0 z-40 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md px-5 py-6 border-b border-gray-100 dark:border-gray-800">
-        <div className="flex items-center gap-4 mb-5">
-          <button onClick={onBack} className="p-2.5 bg-gray-50 dark:bg-gray-800 rounded-xl text-gray-500 transition-all active:scale-90 shadow-sm">
+        <div className="flex items-center justify-between gap-3 mb-5">
+          <button onClick={onBack} className="p-2.5 bg-gray-50 dark:bg-gray-800 rounded-xl text-gray-500 transition-all active:scale-90 shadow-sm shrink-0">
             <ChevronLeft size={20} />
           </button>
-          <div className="text-center flex-1">
-            <h1 className="text-xl font-black text-gray-900 dark:text-white font-display uppercase tracking-tighter leading-none">Imóveis Comerciais</h1>
+          
+          <div className="text-center flex-1 min-w-0">
+            <h1 className="text-lg font-black text-gray-900 dark:text-white font-display uppercase tracking-tighter leading-none">Imóveis Comerciais</h1>
             <p className="text-[10px] text-blue-500 font-black uppercase tracking-widest mt-1">Oportunidades no Bairro</p>
           </div>
-          <button onClick={() => setIsFilterOpen(true)} className="relative p-2.5 bg-gray-50 dark:bg-gray-800 rounded-xl text-gray-400 shadow-sm active:scale-90 transition-all">
-            <SlidersHorizontal size={20}/>
-            {activeFiltersCount > 0 && (
-              <div className="absolute -top-1 -right-1 w-5 h-5 bg-blue-600 text-white text-[10px] font-black rounded-full flex items-center justify-center border-2 border-white dark:border-gray-900 shadow-sm animate-in zoom-in">
-                {activeFiltersCount}
-              </div>
-            )}
-          </button>
-        </div>
-
-        <div className="flex justify-center px-1">
-          <button 
-              onClick={handleStartAnnouncement}
-              className="px-6 py-2 bg-[#1E5BFF] hover:bg-blue-600 text-white font-black rounded-full shadow-lg shadow-blue-500/10 flex items-center justify-center gap-2 uppercase tracking-widest text-[10px] border border-white/10 active:scale-95 transition-all h-10"
-          >
-              <Plus size={14} strokeWidth={4} />
-              Começar a anunciar
-          </button>
+          
+          <div className="flex items-center gap-2 shrink-0">
+            <button 
+                onClick={handleStartAnnouncement}
+                className="px-3 py-1.5 bg-[#1E5BFF] hover:bg-blue-600 text-white font-black rounded-full shadow-lg shadow-blue-500/10 flex items-center justify-center gap-1.5 uppercase tracking-widest text-[9px] border border-white/10 active:scale-95 transition-all h-9"
+            >
+                <Plus size={12} strokeWidth={4} />
+                Começar a anunciar
+            </button>
+            
+            <button onClick={() => setIsFilterOpen(true)} className="relative p-2.5 bg-gray-50 dark:bg-gray-800 rounded-xl text-gray-400 shadow-sm active:scale-90 transition-all">
+              <SlidersHorizontal size={20}/>
+              {activeFiltersCount > 0 && (
+                <div className="absolute -top-1 -right-1 w-5 h-5 bg-blue-600 text-white text-[10px] font-black rounded-full flex items-center justify-center border-2 border-white dark:border-gray-900 shadow-sm animate-in zoom-in">
+                  {activeFiltersCount}
+                </div>
+              )}
+            </button>
+          </div>
         </div>
       </header>
 
@@ -205,7 +206,7 @@ export const RealEstateView: React.FC<RealEstateViewProps> = ({ onBack, user, on
       <RealEstateFiltersView 
         isOpen={isFilterOpen} 
         onClose={() => setIsFilterOpen(false)}
-        onApply={handleApplyFilters}
+        onApply = {handleApplyFilters}
         activeTab="Comercial"
         initialFilters={filters}
       />
