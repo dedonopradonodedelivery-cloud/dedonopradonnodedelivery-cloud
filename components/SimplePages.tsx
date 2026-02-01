@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { 
   ChevronLeft, 
@@ -6,33 +5,23 @@ import {
   Copy, 
   CheckCircle, 
   Share2, 
-  Heart, 
   MapPin, 
-  Crown, 
-  Rocket, 
-  Star, 
-  Loader2, 
-  ArrowRight, 
-  Store as StoreIcon,
-  Compass,
-  ShieldCheck,
-  TrendingUp,
-  Users,
-  Lightbulb,
-  Zap,
-  Award,
-  Coins,
   Target,
   Eye,
   Shield,
-  Sparkles,
-  HeartHandshake,
   CheckCircle2,
-  Flag
+  Users,
+  Building2,
+  Handshake,
+  MessageSquare,
+  ArrowRight,
+  Heart,
+  Star,
+  Loader2
 } from 'lucide-react';
-import { supabase } from '../lib/supabaseClient';
 import { Store, AdType } from '../types';
 import { User } from '@supabase/supabase-js';
+import { supabase } from '../lib/supabaseClient';
 
 interface SimplePageProps {
   onBack: () => void;
@@ -70,7 +59,7 @@ export const SupportView: React.FC<SimplePageProps> = ({ onBack }) => {
 
         <div className="w-full bg-gray-50 dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700 flex flex-col items-center shadow-sm">
             <p className="text-xs text-gray-400 uppercase tracking-wide font-bold mb-3">Canal Oficial</p>
-            <p className="text-sm font-bold text-gray-800 dark:text-white mb-6 break-all text-center bg-white dark:bg-gray-700 px-4 py-2 rounded-lg border border-gray-100 dark:border-gray-600 w-full">
+            <p className="text-sm font-bold text-gray-800 dark:text-white mb-6 break-all text-center bg-white dark:bg-gray-700 px-4 py-2 rounded-lg border border-gray-100 dark:border-gray-700 w-full">
                 {email}
             </p>
             
@@ -83,7 +72,7 @@ export const SupportView: React.FC<SimplePageProps> = ({ onBack }) => {
                 </a>
                 <button 
                     onClick={handleCopy}
-                    className="w-14 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-50 transition-colors"
+                    className="w-14 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-700 rounded-xl flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-50 transition-colors"
                     title="Copiar e-mail"
                 >
                     {copied ? <CheckCircle className="w-5 h-5 text-green-500" /> : <Copy className="w-5 h-5" />}
@@ -97,71 +86,97 @@ export const SupportView: React.FC<SimplePageProps> = ({ onBack }) => {
 
 export const AboutView: React.FC<SimplePageProps> = ({ onBack }) => {
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-900 font-sans animate-in slide-in-from-right duration-300 pb-20">
+    <div className="min-h-screen bg-white dark:bg-gray-950 font-sans animate-in slide-in-from-right duration-300 pb-20">
       <div className="sticky top-0 z-30 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md px-5 h-16 flex items-center gap-4 border-b border-gray-100 dark:border-gray-800">
         <button onClick={onBack} className="p-2 -ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
           <ChevronLeft className="w-6 h-6 text-gray-800 dark:text-white" />
         </button>
-        <h1 className="font-bold text-lg text-gray-900 dark:text-white">Quem Somos</h1>
+        <h1 className="font-bold text-lg text-gray-900 dark:text-white uppercase tracking-tight">Quem Somos</h1>
       </div>
 
-      <div className="overflow-y-auto no-scrollbar h-[calc(100vh-64px)]">
-        <div className="p-10 flex flex-col items-center bg-gradient-to-b from-blue-50 to-white dark:from-blue-900/10 dark:to-gray-900">
-          <div className="w-24 h-24 bg-[#1E5BFF] rounded-[2.5rem] flex items-center justify-center mb-6 shadow-2xl shadow-blue-500/30">
+      <div className="overflow-y-auto no-scrollbar">
+        {/* Banner de Identidade */}
+        <div className="p-12 flex flex-col items-center bg-gradient-to-b from-blue-50 to-white dark:from-blue-900/10 dark:to-gray-950 text-center">
+          <div className="w-24 h-24 bg-[#1E5BFF] rounded-[2.5rem] flex items-center justify-center mb-8 shadow-2xl shadow-blue-500/20">
             <MapPin className="w-12 h-12 text-white fill-white" />
           </div>
-          <h2 className="text-3xl font-black text-gray-900 dark:text-white font-display text-center leading-tight">
-            Localizei <br/> <span className="text-[#1E5BFF]">JPA</span>
+          <h2 className="text-4xl font-black text-gray-900 dark:text-white font-display leading-tight tracking-tighter uppercase">
+            Localizei <span className="text-[#1E5BFF]">JPA</span>
           </h2>
-          <p className="text-[10px] text-[#1E5BFF] font-black uppercase tracking-[0.3em] mt-3">Onde o bairro conversa</p>
+          <p className="text-[10px] text-[#1E5BFF] font-black uppercase tracking-[0.4em] mt-4">Onde o bairro conversa</p>
         </div>
 
-        <div className="px-6 space-y-10 pb-16">
-          <section>
-            <div className="flex items-center gap-2 mb-4">
-              <Sparkles className="w-5 h-5 text-amber-500 fill-amber-500/20" />
-              <h3 className="text-xs font-black text-amber-600 uppercase tracking-[0.2em]">Manifesto</h3>
-            </div>
-            <div className="bg-gray-50 dark:bg-gray-800/40 p-6 rounded-[2rem] border border-gray-100 dark:border-gray-800 shadow-sm">
-                <p className="text-gray-700 dark:text-gray-300 text-base leading-relaxed font-medium">
-                  Onde o bairro conversa. <br/><br/>
-                  Acreditamos que a vida acontece perto. Nos bairros, nas ruas e nas lojas de confiança. <br/><br/>
-                  A Localizei JPA nasceu para aproximar quem procura de quem faz em Jacarepaguá. Queremos fortalecer o comércio local e criar conexões reais entre vizinhos.
+        <div className="px-6 space-y-12 pb-24">
+          {/* Manifesto */}
+          <section className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <h3 className="text-[11px] font-black text-blue-600 dark:text-blue-400 uppercase tracking-[0.2em] mb-4 ml-1">Manifesto</h3>
+            <div className="bg-gray-50 dark:bg-gray-900 p-8 rounded-[2.5rem] border border-gray-100 dark:border-gray-800 shadow-sm relative overflow-hidden">
+                <p className="text-gray-700 dark:text-gray-300 text-base leading-relaxed font-medium relative z-10">
+                  Acreditamos que a vida acontece perto. Nos bairros, nas ruas e nas lojas de confiança. 
+                  O Localizei JPA nasceu para aproximar quem procura de quem faz, fortalecendo a vida local e criando conexões reais entre vizinhos.
+                  <br/><br/>
+                  Nosso espaço é dedicado à valorização do comércio e dos serviços da região, colocando as pessoas no centro de cada experiência. 
+                  Aqui, o pertencimento e a proximidade são os pilares que movem cada conversa.
                 </p>
             </div>
           </section>
 
-          <section className="grid gap-4">
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-3xl border border-gray-100 dark:border-gray-700 flex items-start gap-5 shadow-sm">
-              <div className="w-12 h-12 rounded-2xl bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center shrink-0">
-                <Target className="w-6 h-6 text-[#1E5BFF]" />
+          {/* Missão e Visão */}
+          <section className="grid grid-cols-1 gap-4">
+            <div className="bg-white dark:bg-gray-900 p-6 rounded-[2.5rem] border border-gray-100 dark:border-gray-800 flex flex-col gap-4 shadow-sm">
+              <div className="w-12 h-12 rounded-2xl bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center text-[#1E5BFF] shrink-0">
+                <Target size={24} />
               </div>
               <div>
-                <h4 className="font-black text-gray-900 dark:text-white uppercase text-xs tracking-widest mb-1.5">Missão</h4>
-                <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">Conectar pessoas a serviços locais de forma simples e confiável.</p>
+                <h4 className="font-black text-gray-900 dark:text-white uppercase text-xs tracking-widest mb-2">Missão</h4>
+                <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed font-medium">
+                  Conectar moradores aos comércios, serviços e conversas do seu bairro, fortalecendo a vida local e o senso de comunidade.
+                </p>
               </div>
             </div>
 
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-3xl border border-gray-100 dark:border-gray-700 flex items-start gap-5 shadow-sm">
-              <div className="w-12 h-12 rounded-2xl bg-amber-50 dark:bg-amber-900/20 flex items-center justify-center shrink-0">
-                <Eye className="w-6 h-6 text-amber-600" />
+            <div className="bg-white dark:bg-gray-900 p-6 rounded-[2.5rem] border border-gray-100 dark:border-gray-800 flex flex-col gap-4 shadow-sm">
+              <div className="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-600 shrink-0">
+                <Eye size={24} />
               </div>
               <div>
-                <h4 className="font-black text-gray-900 dark:text-white uppercase text-xs tracking-widest mb-1.5">Visão</h4>
-                <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">Ser o super-app indispensável para quem vive e empreende em Jacarepaguá.</p>
-              </div>
-            </div>
-
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-3xl border border-gray-100 dark:border-gray-700 flex items-start gap-5 shadow-sm">
-              <div className="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center shrink-0">
-                <HeartHandshake className="w-6 h-6 text-indigo-600" />
-              </div>
-              <div>
-                <h4 className="font-black text-gray-900 dark:text-white uppercase text-xs tracking-widest mb-1.5">Valores</h4>
-                <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">Proximidade, Transparência, Impacto Local e Simplicidade.</p>
+                <h4 className="font-black text-gray-900 dark:text-white uppercase text-xs tracking-widest mb-2">Visão</h4>
+                <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed font-medium">
+                  Ser a principal plataforma de vida local do Rio de Janeiro, começando pelos bairros e expandindo de forma orgânica e comunitária.
+                </p>
               </div>
             </div>
           </section>
+
+          {/* Valores */}
+          <section className="space-y-6">
+            <h3 className="text-[11px] font-black text-gray-400 uppercase tracking-[0.2em] mb-4 ml-1">Nossos Valores</h3>
+            <div className="bg-white dark:bg-gray-900 rounded-[2.5rem] border border-gray-100 dark:border-gray-800 overflow-hidden shadow-sm">
+                {[
+                  { title: "Valorização do bairro", icon: MapPin },
+                  { title: "Pessoas em primeiro lugar", icon: Users },
+                  { title: "Proximidade e verdade", icon: Handshake },
+                  { title: "Comércio local forte", icon: Building2 },
+                  { title: "Conversa e convivência", icon: MessageSquare },
+                  { title: "Transparência", icon: Shield },
+                  { title: "Simplicidade", icon: CheckCircle2 },
+                ].map((item, i) => (
+                  <div key={i} className="flex items-center gap-4 p-5 border-b border-gray-50 dark:border-gray-800 last:border-0">
+                    <div className="text-blue-500">
+                      <item.icon size={20} />
+                    </div>
+                    <span className="text-sm font-bold text-gray-700 dark:text-gray-200 uppercase tracking-tight">{item.title}</span>
+                  </div>
+                ))}
+            </div>
+          </section>
+        </div>
+
+        {/* Footer Institucional */}
+        <div className="py-12 text-center opacity-30">
+          <p className="text-[9px] font-black text-gray-400 uppercase tracking-[0.4em] leading-relaxed">
+            Localizei JPA <br/> Plataforma de Vida Local
+          </p>
         </div>
       </div>
     </div>
@@ -179,15 +194,15 @@ export const InviteFriendView: React.FC<SimplePageProps> = ({ onBack }) => {
       </div>
       
       <div className="p-6 flex flex-col items-center justify-center min-h-[70vh]">
-        <div className="w-28 h-28 bg-green-50 dark:bg-green-900/20 rounded-full flex items-center justify-center mb-8 text-green-500 animate-bounce-short">
+        <div className="w-28 h-28 bg-green-50 dark:bg-green-900/20 rounded-full flex items-center justify-center mb-8 text-green-500">
             <Share2 className="w-12 h-12" />
         </div>
         <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4 text-center">Indique e Ganhe</h2>
         <p className="text-center text-gray-600 dark:text-gray-300 text-sm mb-8 max-w-xs leading-relaxed font-medium">
-            Em breve você ganhará <strong>cashback</strong> por indicar amigos. Estamos preparando essa novidade para você.
+            Em breve você ganhará cashback por indicar amigos. Estamos preparando essa novidade para você.
         </p>
         <div className="bg-gray-100 dark:bg-gray-800 px-6 py-3 rounded-full text-xs font-bold text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-gray-700 flex items-center gap-2">
-            <Rocket className="w-4 h-4" /> Novidade chegando em breve
+            Novidade chegando em breve
         </div>
       </div>
     </div>
@@ -274,7 +289,7 @@ export const FavoritesView: React.FC<SimplePageProps> = ({ onBack, onNavigate, u
                 {favorites.map(store => (
                     <div key={store.id} className="bg-white dark:bg-gray-800 p-3 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 flex gap-4 items-center group">
                         <div className="w-16 h-16 rounded-xl bg-gray-200 dark:bg-gray-700 overflow-hidden shrink-0">
-                            {store.image ? <img src={store.image} alt={store.name} className="w-full h-full object-cover" /> : <StoreIcon className="w-6 h-6 text-gray-400" />}
+                            {store.image ? <img src={store.image} alt={store.name} className="w-full h-full object-cover" /> : <Building2 className="w-6 h-6 text-gray-400" />}
                         </div>
                         <div className="flex-1 min-w-0">
                             <h4 className="font-bold text-gray-900 dark:text-white text-sm truncate">{store.name}</h4>
@@ -285,41 +300,6 @@ export const FavoritesView: React.FC<SimplePageProps> = ({ onBack, onNavigate, u
                 ))}
             </div>
         )}
-      </div>
-    </div>
-  );
-};
-
-export const SponsorInfoView: React.FC<SimplePageProps> = ({ onBack }) => {
-  return (
-    <div className="min-h-screen bg-gray-900 font-sans animate-in slide-in-from-right duration-300 text-white">
-      <div className="sticky top-0 z-30 bg-gray-900/80 backdrop-blur-md px-5 h-16 flex items-center gap-4 border-b border-gray-800">
-        <button onClick={onBack} className="p-2 -ml-2 rounded-full hover:bg-gray-800"><ChevronLeft className="w-6 h-6 text-white" /></button>
-        <h1 className="font-bold text-lg">Patrocinador Master</h1>
-      </div>
-      
-      <div className="p-6 flex flex-col items-center text-center">
-        <div className="w-24 h-24 bg-gradient-to-br from-yellow-400 to-[#1E5BFF] rounded-full flex items-center justify-center mb-6 shadow-lg">
-            <Crown className="w-12 h-12 text-white" />
-        </div>
-        <h2 className="text-2xl font-bold mb-4 font-display text-white">Grupo Esquematiza</h2>
-        <p className="text-gray-300 text-sm mb-8 leading-relaxed max-w-sm">
-            O <strong>Patrocinador Master</strong> apoia o desenvolvimento e a digitalização do comércio local em Jacarepaguá.
-        </p>
-        <div className="w-full bg-gray-800/50 rounded-2xl p-6 border border-gray-700 text-left space-y-4 mb-8">
-            <h3 className="font-bold text-yellow-400 text-sm uppercase tracking-wide">Destaque Regional</h3>
-            <ul className="space-y-3 text-sm text-gray-200">
-                <li className="flex items-start gap-3">
-                    <CheckCircle2 className="w-4 h-4 text-yellow-400 shrink-0 mt-0.5" />
-                    <span>Segurança e Facilities com excelência.</span>
-                </li>
-                <li className="flex items-start gap-3">
-                    <CheckCircle2 className="w-4 h-4 text-yellow-400 shrink-0 mt-0.5" />
-                    <span>Líder em serviços para condomínios.</span>
-                </li>
-            </ul>
-        </div>
-        <a href="https://grupoesquematiza.com.br" target="_blank" rel="noopener" className="bg-[#1E5BFF] text-white font-bold py-4 rounded-full w-full shadow-lg flex items-center justify-center gap-2">Visitar Site <ArrowRight className="w-4 h-4" /></a>
       </div>
     </div>
   );

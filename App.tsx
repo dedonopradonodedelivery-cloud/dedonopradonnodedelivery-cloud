@@ -36,6 +36,7 @@ import { useTheme } from '@/contexts/ThemeContext';
 import { NeighborhoodProvider } from '@/contexts/NeighborhoodContext';
 import { Category, Store, Job } from '@/types';
 import { STORES, CATEGORIES, MOCK_JOBS } from '@/constants';
+import { AboutView, SupportView, FavoritesView } from '@/components/SimplePages';
 
 let splashWasShownInSession = false;
 const ADMIN_EMAIL = 'dedonopradonodedelivery@gmail.com';
@@ -70,14 +71,12 @@ const App: React.FC = () => {
   const [isTyping, setIsTyping] = useState(true);
   const fullSlogan = 'Onde o bairro conversa 💬';
 
-  const isMerchantMode = userRole === 'lojista' || (user?.email === ADMIN_EMAIL && viewMode === 'Lojista');
+  const isAdmin = user?.email === ADMIN_EMAIL;
+  const isMerchantMode = userRole === 'lojista' || (isAdmin && viewMode === 'Lojista');
 
   // --- LÓGICA DE ONBOARDING (REGRA DE PRIMEIRO ACESSO) ---
   useEffect(() => {
-    // Verifica se já viu o onboarding
     const hasSeenOnboarding = localStorage.getItem('localizei_onboarding_seen') === 'true';
-    
-    // Se não viu e não é um retorno de login (fluxo técnico), ativa o onboarding para ser mostrado após o splash
     if (!hasSeenOnboarding && !isAuthReturn) {
       setIsOnboardingActive(true);
     }
@@ -90,7 +89,8 @@ const App: React.FC = () => {
     
     if (view === 'service_chat' && data?.requestId) {
         setActiveServiceRequestId(data.requestId);
-        if (data.role) setChatRole(data.role);
+        if (isAdmin) setChatRole('admin');
+        else if (data.role) setChatRole(data.role);
         else if (isMerchantMode && data.requestId.startsWith('REQ-')) setChatRole('merchant');
         else setChatRole('resident');
     }
@@ -140,7 +140,7 @@ const App: React.FC = () => {
     handleNavigate('subcategory_detail');
   };
 
-  const headerExclusionList = ['store_area', 'store_detail', 'profile', 'patrocinador_master', 'merchant_performance', 'neighborhood_posts', 'saved_posts', 'classifieds', 'services', 'services_landing', 'merchant_leads', 'service_chat', 'admin_panel', 'category_detail', 'subcategory_detail', 'sponsor_info', 'real_estate', 'jobs', 'job_detail', 'category_banner_sales', 'banner_sales_wizard', 'weekly_reward_page', 'user_coupons', 'notifications', 'store_profile'];
+  const headerExclusionList = ['store_area', 'store_detail', 'profile', 'patrocinador_master', 'merchant_performance', 'neighborhood_posts', 'saved_posts', 'classifieds', 'services', 'services_landing', 'merchant_leads', 'service_chat', 'admin_panel', 'category_detail', 'subcategory_detail', 'sponsor_info', 'real_estate', 'jobs', 'job_detail', 'category_banner_sales', 'banner_sales_wizard', 'weekly_reward_page', 'user_coupons', 'notifications', 'store_profile', 'about', 'support', 'favorites'];
   
   const hideBottomNav = false;
 
@@ -170,7 +170,6 @@ const App: React.FC = () => {
       <NeighborhoodProvider>
         <div className="min-h-screen bg-white dark:bg-gray-950 flex justify-center relative transition-colors duration-300">
           
-          {/* O Onboarding só renderiza se a flag isOnboardingActive for true (Primeiro Acesso) E o splash tiver terminado */}
           {isOnboardingActive && splashStage === 4 && (
             <OnboardingScreen onComplete={() => setIsOnboardingActive(false)} />
           )}
@@ -178,14 +177,14 @@ const App: React.FC = () => {
           <div className={`w-full max-w-md h-[100dvh] transition-opacity duration-500 ease-out ${splashStage >= 3 ? 'opacity-100' : 'opacity-0'}`}>
               <Layout activeTab={activeTab} setActiveTab={handleNavigate} userRole={userRole} hideNav={hideBottomNav}>
                   {!headerExclusionList.includes(activeTab) && (
-                    <Header isDarkMode={theme === 'dark'} toggleTheme={() => {}} onNotificationClick={() => handleNavigate('notifications')} user={user} searchTerm={globalSearch} onSearchChange={setGlobalSearch} onNavigate={handleNavigate} activeTab={activeTab} userRole={userRole as any} stores={STORES} onStoreClick={handleSelectStore} isAdmin={user?.email === ADMIN_EMAIL} viewMode={viewMode} onOpenViewSwitcher={() => setIsRoleSwitcherOpen(true)} />
+                    <Header isDarkMode={theme === 'dark'} toggleTheme={() => {}} onNotificationClick={() => handleNavigate('notifications')} user={user} searchTerm={globalSearch} onSearchChange={setGlobalSearch} onNavigate={handleNavigate} activeTab={activeTab} userRole={userRole as any} stores={STORES} onStoreClick={handleSelectStore} isAdmin={isAdmin} viewMode={viewMode} onOpenViewSwitcher={() => setIsRoleSwitcherOpen(true)} />
                   )}
                   <main className="w-full mx-auto">
                     {activeTab === 'home' && <HomeFeed onNavigate={handleNavigate} onSelectCategory={handleSelectCategory} onStoreClick={handleSelectStore} stores={STORES} user={user as any} userRole={userRole} />}
                     {activeTab === 'explore' && <ExploreView stores={STORES} searchQuery={globalSearch} onStoreClick={handleSelectStore} onLocationClick={() => {}} onFilterClick={() => {}} onOpenPlans={() => {}} onNavigate={handleNavigate} />}
                     
                     {activeTab === 'services_landing' && <ServicesLandingView onBack={() => handleNavigate('home')} user={user} onRequireLogin={() => setIsAuthOpen(true)} onNavigate={handleNavigate} />}
-                    {activeTab === 'services' && <ServicesView onNavigate={(view) => handleNavigate(view)} onOpenChat={(id: string) => { setActiveServiceRequestId(id); setChatRole('resident'); handleNavigate('service_chat'); }} />}
+                    {activeTab === 'services' && <ServicesView onNavigate={(view) => handleNavigate(view)} onOpenChat={(id: string) => { setActiveServiceRequestId(id); setChatRole(isAdmin ? 'admin' : 'resident'); handleNavigate('service_chat'); }} />}
 
                     {activeTab === 'weekly_reward_page' && (
                         <WeeklyRewardPage 
@@ -262,7 +261,7 @@ const App: React.FC = () => {
                     )}
 
                     {activeTab === 'merchant_performance' && <MerchantPerformanceDashboard onBack={() => handleNavigate('profile')} onNavigate={handleNavigate} />}
-                    {activeTab === 'merchant_leads' && <MerchantLeadsView onBack={() => handleNavigate('profile')} onOpenChat={(id: string) => { setActiveServiceRequestId(id); setChatRole('merchant'); handleNavigate('service_chat'); }} />}
+                    {activeTab === 'merchant_leads' && <MerchantLeadsView isAdmin={isAdmin} onBack={() => handleNavigate('profile')} onOpenChat={(id: string) => { setActiveServiceRequestId(id); setChatRole(isAdmin ? 'admin' : 'merchant'); handleNavigate('service_chat'); }} />}
 
                     {activeTab === 'service_chat' && activeServiceRequestId && (
                         <ServiceChatView 
@@ -285,10 +284,13 @@ const App: React.FC = () => {
                     {activeTab === 'real_estate' && <RealEstateView onBack={() => handleNavigate('classifieds')} user={user} onRequireLogin={() => setIsAuthOpen(true)} />}
                     {activeTab === 'jobs' && <JobsView onBack={() => handleNavigate('classifieds')} onJobClick={handleSelectJob} />}
                     {activeTab === 'job_detail' && selectedJob && <JobDetailView job={selectedJob} onBack={() => handleNavigate('jobs')} />}
-                    {activeTab === 'neighborhood_posts' && <NeighborhoodPostsView onBack={() => handleNavigate('home')} onStoreClick={handleSelectStore} user={user} onRequireLogin={() => setIsAuthOpen(true)} userRole={userRole} />}
+                    {activeTab === 'neighborhood_posts' && <NeighborhoodPostsView onBack={() => handleNavigate('home')} onStoreClick={handleSelectStore} user={user} onRequireLogin={() => setIsAuthOpen(true)} userRole={userRole} onNavigate={handleNavigate} />}
                     {activeTab === 'saved_posts' && <SavedPostsView onBack={() => handleNavigate('profile')} onStoreClick={handleSelectStore} onRequireLogin={() => setIsAuthOpen(true)} />}
                     {activeTab === 'sponsor_info' && <SponsorInfoView onBack={() => handleNavigate(previousTab)} />}
                     {activeTab === 'patrocinador_master' && <PatrocinadorMasterScreen onBack={() => handleNavigate(previousTab)} />}
+                    {activeTab === 'about' && <AboutView onBack={() => handleNavigate(previousTab)} />}
+                    {activeTab === 'support' && <SupportView onBack={() => handleNavigate(previousTab)} />}
+                    {activeTab === 'favorites' && <FavoritesView onBack={() => handleNavigate(previousTab)} user={user} onNavigate={handleNavigate} />}
                   </main>
                   <AuthModal isOpen={isAuthOpen} onClose={() => setIsAuthOpen(false)} user={user as any} />
               </Layout>

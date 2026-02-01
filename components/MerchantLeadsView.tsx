@@ -16,7 +16,9 @@ import {
     Users,
     ShieldCheck,
     Settings2,
-    X
+    X,
+    Eye,
+    ShieldAlert
 } from 'lucide-react';
 import { ServiceRequest } from '../types';
 import { supabase } from '../lib/supabaseClient';
@@ -25,9 +27,10 @@ import { useAuth } from '../contexts/AuthContext';
 interface MerchantLeadsViewProps {
   onBack: () => void;
   onOpenChat: (requestId: string) => void;
+  isAdmin?: boolean;
 }
 
-export const MerchantLeadsView: React.FC<MerchantLeadsViewProps> = ({ onBack, onOpenChat }) => {
+export const MerchantLeadsView: React.FC<MerchantLeadsViewProps> = ({ onBack, onOpenChat, isAdmin = false }) => {
   const { user } = useAuth();
   const [requests, setRequests] = useState<ServiceRequest[]>([]);
   const [unlockedLeads, setUnlockedLeads] = useState<string[]>([]);
@@ -35,18 +38,20 @@ export const MerchantLeadsView: React.FC<MerchantLeadsViewProps> = ({ onBack, on
   const [isProcessing, setIsProcessing] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   
-  // REGRA: Controle de Adesão (Opt-in)
+  // REGRA: Controle de Adesão (Opt-in) - ADM sempre tem adesão ativa
   const [hasOptedIn, setHasOptedIn] = useState<boolean>(() => {
+    if (isAdmin) return true;
     return localStorage.getItem(`leads_optin_${user?.id}`) === 'true';
   });
+  
   const [showSettings, setShowSettings] = useState(false);
 
   useEffect(() => {
     const loadData = async () => {
         setIsLoading(true);
         try {
-            // 1. Carrega Perfil do Lojista
-            if (user) {
+            // 1. Carrega Perfil do Lojista (Apenas se não for ADM ou se ADM quiser ver contexto de lojista)
+            if (user && !isAdmin) {
                 const { data: profile } = await supabase.from('merchants').select('category, subcategory').eq('owner_id', user.id).maybeSingle();
                 setMerchantProfile(profile);
             }
@@ -63,10 +68,11 @@ export const MerchantLeadsView: React.FC<MerchantLeadsViewProps> = ({ onBack, on
         }
     };
     loadData();
-  }, [user]);
+  }, [user, isAdmin]);
 
-  // --- REGRA DE COMPATIBILIDADE ---
+  // --- REGRA DE COMPATIBILIDADE (BYPASS SE FOR ADM) ---
   const filteredRequests = useMemo(() => {
+    if (isAdmin) return requests; // ADM VÊ TUDO
     if (!merchantProfile || !hasOptedIn) return [];
     
     return requests.filter(req => {
@@ -74,13 +80,17 @@ export const MerchantLeadsView: React.FC<MerchantLeadsViewProps> = ({ onBack, on
         const mCat = merchantProfile.category?.toLowerCase();
         const mSub = merchantProfile.subcategory?.toLowerCase();
 
-        // Match se o tipo do serviço for igual à categoria ou subcategoria do lojista
         return leadType === mCat || leadType === mSub || 
                (mCat === 'serviços' && ['obras & reformas', 'serviços rápidos', 'casa & instalações'].includes(leadType));
     });
-  }, [requests, merchantProfile, hasOptedIn]);
+  }, [requests, merchantProfile, hasOptedIn, isAdmin]);
 
   const handleUnlock = (requestId: string) => {
+    if (isAdmin) {
+        // ADM não paga, libera direto para auditoria
+        onOpenChat(requestId);
+        return;
+    }
     setIsProcessing(requestId);
     setTimeout(() => {
         const newUnlocked = [...unlockedLeads, requestId];
@@ -100,6 +110,7 @@ export const MerchantLeadsView: React.FC<MerchantLeadsViewProps> = ({ onBack, on
   };
 
   const handleOptOut = () => {
+    if (isAdmin) return; // ADM não faz opt-out
     if (confirm("Ao desativar, você deixará de visualizar novas oportunidades de serviço. Deseja continuar?")) {
         setHasOptedIn(false);
         localStorage.setItem(`leads_optin_${user?.id}`, 'false');
@@ -115,8 +126,8 @@ export const MerchantLeadsView: React.FC<MerchantLeadsViewProps> = ({ onBack, on
     );
   }
 
-  // --- TELA DE APRESENTAÇÃO (SEM ADESÃO) ---
-  if (!hasOptedIn) {
+  // --- TELA DE APRESENTAÇÃO (SEM ADESÃO) - Ignorada por ADM ---
+  if (!hasOptedIn && !isAdmin) {
     return (
         <div className="min-h-screen bg-white dark:bg-gray-950 font-sans animate-in fade-in duration-500 flex flex-col">
             <header className="px-5 h-20 flex items-center gap-4 shrink-0">
@@ -162,36 +173,45 @@ export const MerchantLeadsView: React.FC<MerchantLeadsViewProps> = ({ onBack, on
   // --- TELA DA CENTRAL DE LEADS (COM ADESÃO) ---
   return (
     <div className="min-h-screen bg-[#F8F9FC] dark:bg-gray-950 font-sans pb-32 animate-in fade-in duration-500">
-      <header className="sticky top-0 z-40 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md px-5 h-20 flex items-center gap-4 border-b border-gray-100 dark:border-gray-800 shadow-sm">
+      <header className={`sticky top-0 z-40 px-5 h-20 flex items-center gap-4 border-b shadow-sm backdrop-blur-md ${isAdmin ? 'bg-amber-500/10 border-amber-500/20' : 'bg-white/95 dark:bg-gray-900/95 border-gray-100 dark:border-gray-800'}`}>
         <button onClick={onBack} className="p-3 bg-gray-50 dark:bg-gray-800 rounded-2xl hover:bg-gray-100 transition-all active:scale-90">
           <ChevronLeft size={20} className="text-gray-600 dark:text-gray-300" />
         </button>
         <div className="flex-1 min-w-0">
           <h1 className="font-black text-xl text-gray-900 dark:text-white uppercase tracking-tighter leading-none truncate">
-            Central de Leads
+            {isAdmin ? 'Monitor de Leads' : 'Central de Leads'}
           </h1>
-          <p className="text-[10px] text-emerald-500 font-black uppercase tracking-widest mt-1">Participação Ativa</p>
+          <p className={`text-[10px] font-black uppercase tracking-widest mt-1 ${isAdmin ? 'text-amber-600' : 'text-emerald-500'}`}>
+              {isAdmin ? 'Visibilidade Master ADM' : 'Participação Ativa'}
+          </p>
         </div>
-        <button onClick={() => setShowSettings(true)} className="p-3 text-gray-400 hover:text-[#1E5BFF] transition-colors">
-            <Settings2 size={20} />
-        </button>
+        {!isAdmin && (
+            <button onClick={() => setShowSettings(true)} className="p-3 text-gray-400 hover:text-[#1E5BFF] transition-colors">
+                <Settings2 size={20} />
+            </button>
+        )}
       </header>
 
       <main className="p-6 space-y-8 max-w-md mx-auto">
         {/* Banner Informativo */}
-        <section className="bg-white dark:bg-gray-900 p-5 rounded-[2.5rem] border border-gray-100 dark:border-gray-800 shadow-sm">
+        <section className={`p-5 rounded-[2.5rem] border shadow-sm ${isAdmin ? 'bg-amber-500/5 border-amber-500/10' : 'bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800'}`}>
             <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest mb-4 flex items-center gap-2">
-                <ShieldCheck size={14} className="text-[#1E5BFF]" /> Modelo Ativo
+                {isAdmin ? <ShieldAlert size={14} className="text-amber-500" /> : <ShieldCheck size={14} className="text-[#1E5BFF]" />} 
+                {isAdmin ? 'Modo Auditoria' : 'Modelo Ativo'}
             </h3>
             <p className="text-xs text-gray-600 dark:text-gray-400 font-medium leading-relaxed">
-                Você está habilitado para receber pedidos de <strong>{merchantProfile?.subcategory || merchantProfile?.category}</strong>. Libere o contato para abrir o chat exclusivo com o morador.
+                {isAdmin 
+                    ? 'Como administrador, você visualiza todos os pedidos de serviço do aplicativo em tempo real, sem restrição de categoria ou pagamento.'
+                    : `Você está habilitado para receber pedidos de ${merchantProfile?.subcategory || merchantProfile?.category}. Libere o contato para abrir o chat exclusivo com o morador.`}
             </p>
         </section>
 
         {/* Lista de Leads */}
         <div className="space-y-4">
             <div className="flex items-center justify-between px-1">
-                <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Pedidos para você</h3>
+                <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                    {isAdmin ? 'Todos os Pedidos do App' : 'Pedidos para você'}
+                </h3>
                 <span className="text-[9px] font-bold text-blue-500 bg-blue-50 dark:bg-blue-900/30 px-2 py-0.5 rounded-full">Atualizado agora</span>
             </div>
             
@@ -199,9 +219,6 @@ export const MerchantLeadsView: React.FC<MerchantLeadsViewProps> = ({ onBack, on
                 <div className="py-20 text-center flex flex-col items-center">
                     <ShoppingBag size={48} className="text-gray-200 mb-4" />
                     <p className="text-sm font-bold uppercase tracking-widest text-gray-400">Aguardando novos pedidos...</p>
-                    <p className="text-[10px] text-gray-400 max-w-[200px] mt-2 leading-relaxed">
-                        Assim que um morador solicitar um serviço de {merchantProfile?.category}, ele aparecerá aqui.
-                    </p>
                 </div>
             ) : filteredRequests.map(req => {
                 const isUnlocked = unlockedLeads.includes(req.id);
@@ -226,17 +243,17 @@ export const MerchantLeadsView: React.FC<MerchantLeadsViewProps> = ({ onBack, on
                             </div>
 
                             <div className="mb-6">
-                                <p className={`text-sm text-gray-600 dark:text-gray-400 leading-relaxed font-medium line-clamp-2 ${!isUnlocked && 'select-none'}`}>
+                                <p className={`text-sm text-gray-600 dark:text-gray-400 leading-relaxed font-medium line-clamp-2 ${(!isUnlocked && !isAdmin) && 'select-none'}`}>
                                     "{req.description}"
                                 </p>
                             </div>
 
-                            {isUnlocked ? (
+                            {isUnlocked || isAdmin ? (
                                 <button 
                                     onClick={() => onOpenChat(req.id)}
                                     className="w-full bg-gray-900 dark:bg-white text-white dark:text-black font-black py-4 rounded-2xl shadow-xl flex items-center justify-center gap-2 text-xs uppercase tracking-widest active:scale-95 transition-all"
                                 >
-                                    Abrir chat com cliente
+                                    {isAdmin ? 'Auditar Chat' : 'Abrir chat com cliente'}
                                     <ChevronRight size={16} strokeWidth={3} />
                                 </button>
                             ) : (
@@ -265,7 +282,7 @@ export const MerchantLeadsView: React.FC<MerchantLeadsViewProps> = ({ onBack, on
       </main>
 
       {/* MODAL DE CONFIGURAÇÕES / OPT-OUT */}
-      {showSettings && (
+      {showSettings && !isAdmin && (
           <div className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm flex items-end justify-center animate-in fade-in duration-300" onClick={() => setShowSettings(false)}>
               <div className="bg-white dark:bg-gray-900 w-full max-w-md rounded-t-[2.5rem] p-8 shadow-2xl animate-in slide-in-from-bottom duration-300" onClick={e => e.stopPropagation()}>
                   <div className="flex justify-between items-center mb-8">
