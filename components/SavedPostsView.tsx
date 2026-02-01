@@ -3,7 +3,8 @@ import React from 'react';
 import { ChevronLeft, Bookmark } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSavedPosts } from '@/hooks/useSavedPosts';
-import { MOCK_COMMUNITY_POSTS } from '@/constants';
+// FIX: Using relative path for constants to ensure consistency and availability of exported members.
+import { MOCK_COMMUNITY_POSTS } from '../constants';
 import { PostCard } from './PostCard';
 import { Store } from '@/types';
 

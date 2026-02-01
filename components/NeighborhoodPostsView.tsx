@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { 
   ChevronLeft, 
@@ -16,6 +17,7 @@ import {
   CheckCircle2
 } from 'lucide-react';
 import { NeighborhoodCommunity, CommunityPost, Store, ReportReason } from '../types';
+// FIX: Using relative path for constants to ensure consistency and availability of exported members.
 import { OFFICIAL_COMMUNITIES, MOCK_USER_COMMUNITIES, MOCK_COMMUNITY_POSTS, STORES } from '../constants';
 import { useNeighborhood, NEIGHBORHOODS } from '../contexts/NeighborhoodContext';
 import { User } from '@supabase/supabase-js';
@@ -377,7 +379,7 @@ export const NeighborhoodPostsView: React.FC<NeighborhoodPostsViewProps> = ({ on
             <div className="text-center py-20 opacity-40 flex flex-col items-center">
                 <AlertCircle size={48} className="mb-4" />
                 <p className="text-sm font-bold">Nenhuma postagem encontrada</p>
-                <p className="text-xs text-gray-500 mt-1">Tente ajustar seus filtros ou seja o primeiro a postar!</p>
+                <p className="text-xs text-gray-500 mt-1">Tente ajustar seus filtros or seja o primeiro a postar!</p>
             </div>
         )}
 

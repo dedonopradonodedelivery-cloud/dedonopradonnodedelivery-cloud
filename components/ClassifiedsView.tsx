@@ -23,8 +23,8 @@ import {
   Megaphone
 } from 'lucide-react';
 import { useNeighborhood, NEIGHBORHOODS } from '../contexts/NeighborhoodContext';
-import { Classified } from '../types';
-import { MOCK_CLASSIFIEDS } from '../constants';
+import { Classified, AdType } from '../types';
+import { MOCK_CLASSIFIEDS, STORES } from '../constants';
 import { MasterSponsorBanner } from './MasterSponsorBanner';
 
 const CLASSIFIED_CATEGORIES = [
@@ -53,7 +53,8 @@ const ClassifiedCard: React.FC<{ item: Classified; onClick: () => void }> = ({ i
     const isDonation = item.category === 'Doações em geral';
     const isAdoption = item.category === 'Adoção de pets';
     const isJob = item.category === 'Empregos';
-    const hasPrice = !!item.price && !isDonation && !isAdoption && !isJob;
+    const isService = item.category === 'Orçamento de Serviços';
+    const hasPrice = !!item.price && !isDonation && !isAdoption && !isJob && !isService;
 
     return (
         <div 
@@ -82,6 +83,11 @@ const ClassifiedCard: React.FC<{ item: Classified; onClick: () => void }> = ({ i
                             VAGA
                         </span>
                     )}
+                    {isService && (
+                        <span className="px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest bg-indigo-600 text-white shadow-lg border border-white/10">
+                            SERVIÇO
+                        </span>
+                    )}
                     <div className="px-2.5 py-1 rounded-full text-[8px] font-black uppercase tracking-widest bg-black/50 text-white backdrop-blur-md">
                         {item.neighborhood}
                     </div>
@@ -106,57 +112,75 @@ const ClassifiedCard: React.FC<{ item: Classified; onClick: () => void }> = ({ i
     );
 };
 
-const CategorySection: React.FC<{
-  category: typeof CLASSIFIED_CATEGORIES[0],
-  items: Classified[],
-  onItemClick: (item: Classified) => void,
-  onAnunciar: () => void,
-  scrollRef: (el: HTMLDivElement | null) => void
-}> = ({ category, items, onItemClick, onAnunciar, scrollRef }) => {
-  const Icon = category.icon;
-  return (
-    <section ref={scrollRef} className="py-6 border-b border-gray-50 dark:border-gray-800 last:border-0">
-      <div className="flex items-center justify-between mb-5 px-1">
-        <div className="flex items-center gap-3">
-          <div className={`w-9 h-9 rounded-xl ${category.color} flex items-center justify-center text-white shadow-md`}>
-            {React.cloneElement(Icon, { size: 18, strokeWidth: 2.5 })}
-          </div>
-          <div>
-            <h2 className="text-lg font-black text-gray-900 dark:text-white uppercase tracking-tighter leading-none">{category.name}</h2>
-          </div>
-        </div>
-        <button className="text-[11px] font-black text-[#1E5BFF] uppercase tracking-widest flex items-center gap-1 hover:underline">
-          Ver tudo <ArrowRight size={12} strokeWidth={3} />
-        </button>
-      </div>
+interface CategoryBlockProps {
+    category: typeof CLASSIFIED_CATEGORIES[0];
+    items: Classified[];
+    onItemClick: (item: Classified) => void;
+    onAnunciar: (catName: string) => void;
+    onViewAll: (slug: string) => void;
+    subtitle?: string;
+    ctaLabel: string;
+}
 
-      {items.length > 0 ? (
-        <div className="flex gap-4 overflow-x-auto no-scrollbar -mx-5 px-5 pb-2 snap-x snap-center">
-          {items.map(item => <ClassifiedCard key={item.id} item={item} onClick={() => onItemClick(item)} />)}
-        </div>
-      ) : (
-        <div className="bg-white dark:bg-gray-900 rounded-[2rem] p-10 text-center border border-dashed border-gray-200 dark:border-gray-800 animate-in fade-in duration-500">
-          <div className="w-16 h-16 bg-gray-50 dark:bg-gray-800 rounded-2xl flex items-center justify-center mx-auto mb-4 text-gray-300">
-            <Search size={32} />
-          </div>
-          <h3 className="font-bold text-gray-900 dark:text-white text-base">Ainda não tem anúncios aqui</h3>
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 mb-6">Seja o primeiro a publicar no seu bairro.</p>
-          <button 
-            onClick={onAnunciar}
-            className="px-6 py-3 bg-[#1E5BFF] text-white text-[10px] font-black uppercase tracking-widest rounded-xl shadow-lg shadow-blue-500/20 active:scale-95 transition-all"
-          >
-            Anunciar agora
-          </button>
-        </div>
-      )}
-    </section>
-  )
+const CategoryBlock: React.FC<CategoryBlockProps> = ({ category, items, onItemClick, onAnunciar, onViewAll, subtitle, ctaLabel }) => {
+    return (
+        <section className="py-8 border-b border-gray-100 dark:border-gray-800 last:border-0">
+            <div className="flex items-center justify-between mb-6 px-1">
+                <div className="flex items-center gap-3">
+                    <div className={`w-10 h-10 rounded-2xl ${category.color} flex items-center justify-center text-white shadow-lg`}>
+                        {React.cloneElement(category.icon as any, { size: 20, strokeWidth: 2.5 })}
+                    </div>
+                    <div>
+                        <h2 className="text-lg font-black text-gray-900 dark:text-white uppercase tracking-tighter leading-none">{category.name}</h2>
+                        {subtitle && <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-1">{subtitle}</p>}
+                    </div>
+                </div>
+                <button onClick={() => onViewAll(category.slug)} className="text-[10px] font-black text-[#1E5BFF] uppercase tracking-widest flex items-center gap-1 hover:underline">
+                    Ver tudo <ArrowRight size={12} strokeWidth={3} />
+                </button>
+            </div>
+
+            {items.length > 0 ? (
+                <div className="space-y-4">
+                    <div className="flex gap-4 overflow-x-auto no-scrollbar -mx-5 px-5 pb-2 snap-x">
+                        {items.map(item => <ClassifiedCard key={item.id} item={item} onClick={() => onItemClick(item)} />)}
+                    </div>
+                    <div className="px-1">
+                        <button 
+                            onClick={() => onAnunciar(category.name)}
+                            className="w-full py-4 rounded-2xl border-2 border-gray-100 dark:border-gray-800 text-gray-500 dark:text-gray-400 font-black text-[10px] uppercase tracking-[0.2em] hover:bg-gray-50 dark:hover:bg-gray-800 transition-all active:scale-95"
+                        >
+                            {ctaLabel}
+                        </button>
+                    </div>
+                </div>
+            ) : (
+                <div className="bg-gray-50/50 dark:bg-gray-900/50 rounded-[2.5rem] p-10 text-center border border-dashed border-gray-200 dark:border-gray-800">
+                    <p className="text-sm font-bold text-gray-400 dark:text-gray-500 mb-6">Ainda não há anúncios nesta categoria.</p>
+                    <button 
+                        onClick={() => onAnunciar(category.name)}
+                        className="px-8 py-3 bg-[#1E5BFF] text-white text-[10px] font-black uppercase tracking-widest rounded-xl shadow-lg shadow-blue-500/20 active:scale-95 transition-all"
+                    >
+                        {ctaLabel}
+                    </button>
+                </div>
+            )}
+        </section>
+    );
 };
 
-const CreateClassifiedModal: React.FC<{ isOpen: boolean; onClose: () => void; user: User | null }> = ({ isOpen, onClose, user }) => {
-    const [step, setStep] = useState(1);
-    const [selectedCat, setSelectedCat] = useState<string | null>(null);
+const CreateClassifiedModal: React.FC<{ isOpen: boolean; onClose: () => void; user: User | null; initialCategory: string | null }> = ({ isOpen, onClose, user, initialCategory }) => {
+    const [step, setStep] = useState(initialCategory ? 2 : 1);
+    const [selectedCat, setSelectedCat] = useState<string | null>(initialCategory);
     const [isSubmitting, setIsSubmitting] = useState(false);
+
+    // Reset step when modal opens
+    React.useEffect(() => {
+        if (isOpen) {
+            setStep(initialCategory ? 2 : 1);
+            setSelectedCat(initialCategory);
+        }
+    }, [isOpen, initialCategory]);
 
     if (!isOpen) return null;
 
@@ -239,10 +263,9 @@ export const ClassifiedsView: React.FC<ClassifiedsViewProps> = ({ onBack, onNavi
   const [selectedNeighborhoods, setSelectedNeighborhoods] = useState<string[]>([]);
   const [selectedItem, setSelectedItem] = useState<Classified | null>(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [modalInitialCategory, setModalInitialCategory] = useState<string | null>(null);
   const [quickFilter, setQuickFilter] = useState<'recent' | 'nearby' | 'price'>('recent');
   
-  const sectionRefs = useRef<Record<string, HTMLDivElement | null>>({});
-
   const toggleNeighborhood = (hood: string) => {
     if (hood === 'Jacarepaguá (todos)') {
       setSelectedNeighborhoods([]);
@@ -255,53 +278,58 @@ export const ClassifiedsView: React.FC<ClassifiedsViewProps> = ({ onBack, onNavi
     );
   };
   
-  const scrollToCategory = (categoryId: string) => {
-    sectionRefs.current[categoryId]?.scrollIntoView({
-      behavior: 'smooth',
-      block: 'start'
-    });
-  };
-
-  const handleAnunciarClick = () => {
+  const handleAnunciarClick = (catName: string | null = null) => {
     if (!user) {
         onRequireLogin();
     } else {
+        setModalInitialCategory(catName);
         setIsCreateModalOpen(true);
     }
   };
 
-  const classifiedsByCat = useMemo(() => {
+  const getFilteredItems = (catId: string) => {
+    const mapping: Record<string, string> = {
+        'servicos': 'Orçamento de Serviços',
+        'imoveis': 'Imóveis Comerciais',
+        'emprego': 'Empregos',
+        'adocao': 'Adoção de pets',
+        'doacoes': 'Doações em geral',
+        'desapega': 'Desapega JPA',
+    };
+    const catName = mapping[catId];
+    
     let filtered = MOCK_CLASSIFIEDS.filter(item => {
         const matchSearch = searchTerm ? item.title.toLowerCase().includes(searchTerm.toLowerCase()) : true;
         const matchHood = selectedNeighborhoods.length === 0 ? true : selectedNeighborhoods.includes(item.neighborhood);
-        return matchSearch && matchHood;
+        const matchCat = item.category === catName;
+        return matchSearch && matchHood && matchCat;
     });
 
     if (quickFilter === 'price') {
         filtered = filtered.filter(item => !!item.price);
     }
 
-    const mapping: Record<string, string> = {
-      'servicos': 'Orçamento de Serviços',
-      'imoveis': 'Imóveis Comerciais',
-      'emprego': 'Empregos',
-      'adocao': 'Adoção de pets',
-      'doacoes': 'Doações em geral',
-      'desapega': 'Desapega JPA',
-    };
-    
-    return CLASSIFIED_CATEGORIES.reduce((acc, cat) => {
-      acc[cat.id] = filtered.filter(item => item.category === mapping[cat.id]);
-      return acc;
-    }, {} as Record<string, Classified[]>);
+    return filtered.slice(0, 2);
+  };
 
-  }, [searchTerm, selectedNeighborhoods, quickFilter]);
+  const handleViewAll = (slug: string) => {
+    const mapping: Record<string, string> = {
+        'servicos': 'services',
+        'imoveis': 'real_estate',
+        'emprego': 'jobs',
+        'adocao': 'adoption',
+        'doacoes': 'donations',
+        'desapega': 'desapega',
+    };
+    onNavigate(mapping[slug]);
+  };
 
   return (
     <div className="min-h-screen bg-[#F8F9FC] dark:bg-gray-950 font-sans animate-in fade-in duration-500 relative">
+      {/* Botão flutuante principal */}
       <div className="fixed bottom-32 left-1/2 -translate-x-1/2 z-[1000] w-full max-w-[280px] px-4">
         <button 
-            onClick={handleAnunciarClick}
+            onClick={() => handleAnunciarClick(null)}
             className="w-full bg-[#1E5BFF] hover:bg-blue-600 text-white font-black py-4 rounded-2xl shadow-2xl shadow-blue-500/40 flex items-center justify-center gap-3 uppercase tracking-widest text-[11px] border border-white/20 active:scale-95 transition-all"
         >
             <Plus size={18} strokeWidth={3} />
@@ -352,7 +380,8 @@ export const ClassifiedsView: React.FC<ClassifiedsViewProps> = ({ onBack, onNavi
       </header>
       
       <main className="p-5 pb-48">
-        <div className="flex gap-2 overflow-x-auto no-scrollbar pb-8">
+        {/* Filtro de Bairros */}
+        <div className="flex gap-2 overflow-x-auto no-scrollbar pb-8 border-b border-gray-50 dark:border-gray-800 mb-8">
           <button 
             onClick={() => toggleNeighborhood('Jacarepaguá (todos)')}
             className={`flex-shrink-0 px-5 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest border transition-all ${selectedNeighborhoods.length === 0 ? 'bg-gray-900 text-white border-gray-900' : 'bg-white dark:bg-gray-800 text-gray-400 border-gray-100 dark:border-gray-800'}`}
@@ -370,51 +399,90 @@ export const ClassifiedsView: React.FC<ClassifiedsViewProps> = ({ onBack, onNavi
           ))}
         </div>
 
-        <div className="grid grid-cols-3 gap-3 mb-10">
+        {/* Grid de Categorias */}
+        <div className="grid grid-cols-3 gap-3 mb-12">
             {CLASSIFIED_CATEGORIES.map(cat => (
                 <ClassifiedCategoryButton 
                     key={cat.id} 
                     category={cat} 
-                    onClick={() => {
-                        // REGRA: Orçamentos de Serviços leva diretamente ao formulário sem landing de banners
-                        if (cat.id === 'servicos') onNavigate('services');
-                        else if (cat.id === 'imoveis') onNavigate('real_estate');
-                        else if (cat.id === 'emprego') onNavigate('jobs');
-                        else if (cat.id === 'adocao') onNavigate('adoption');
-                        else if (cat.id === 'doacoes') onNavigate('donations');
-                        else if (cat.id === 'desapega') onNavigate('desapega');
-                        else scrollToCategory(cat.id);
-                    }} 
+                    onClick={() => handleViewAll(cat.slug)} 
                 />
             ))}
         </div>
         
-        <div className="space-y-4">
-          {CLASSIFIED_CATEGORIES.filter(c => !['imoveis', 'emprego', 'servicos', 'adocao', 'doacoes', 'desapega'].includes(c.id)).map(cat => (
-            <CategorySection 
-              key={cat.id}
-              category={cat}
-              items={classifiedsByCat[cat.id] || []}
-              onItemClick={setSelectedItem}
-              onAnunciar={handleAnunciarClick}
-              scrollRef={el => (sectionRefs.current[cat.id] = el)}
+        {/* BLOCOS POR CATEGORIA */}
+        <div className="space-y-12">
+            <CategoryBlock 
+                category={CLASSIFIED_CATEGORIES[0]}
+                items={getFilteredItems('servicos')}
+                onItemClick={setSelectedItem}
+                onAnunciar={handleAnunciarClick}
+                onViewAll={handleViewAll}
+                subtitle="Pedidos recentes no bairro"
+                ctaLabel="Publicar pedido"
             />
-          ))}
-        </div>
 
-        <section className="mt-16">
-          <MasterSponsorBanner 
-            onClick={() => onNavigate('patrocinador_master')} 
-            label="Classificados JPA" 
-            sponsor={{ name: 'Grupo Esquematiza', subtitle: 'Apoiando os classificados do bairro' }}
-          />
-        </section>
+            <CategoryBlock 
+                category={CLASSIFIED_CATEGORIES[1]}
+                items={getFilteredItems('imoveis')}
+                onItemClick={setSelectedItem}
+                onAnunciar={handleAnunciarClick}
+                onViewAll={handleViewAll}
+                ctaLabel="Anunciar imóvel"
+            />
+
+            <CategoryBlock 
+                category={CLASSIFIED_CATEGORIES[2]}
+                items={getFilteredItems('emprego')}
+                onItemClick={setSelectedItem}
+                onAnunciar={handleAnunciarClick}
+                onViewAll={handleViewAll}
+                ctaLabel="Publicar vaga"
+            />
+
+            {/* PATROCINADOR MASTER - POSICIONADO APÓS 3º BLOCO */}
+            <section className="py-8">
+                <MasterSponsorBanner 
+                    onClick={() => onNavigate('patrocinador_master')} 
+                    label="Classificados JPA" 
+                    sponsor={{ name: 'Grupo Esquematiza', subtitle: 'Apoiando os classificados do bairro' }}
+                />
+            </section>
+
+            <CategoryBlock 
+                category={CLASSIFIED_CATEGORIES[3]}
+                items={getFilteredItems('adocao')}
+                onItemClick={setSelectedItem}
+                onAnunciar={handleAnunciarClick}
+                onViewAll={handleViewAll}
+                ctaLabel="Anunciar adoção"
+            />
+
+            <CategoryBlock 
+                category={CLASSIFIED_CATEGORIES[4]}
+                items={getFilteredItems('doacoes')}
+                onItemClick={setSelectedItem}
+                onAnunciar={handleAnunciarClick}
+                onViewAll={handleViewAll}
+                ctaLabel="Publicar doação"
+            />
+
+            <CategoryBlock 
+                category={CLASSIFIED_CATEGORIES[5]}
+                items={getFilteredItems('desapega')}
+                onItemClick={setSelectedItem}
+                onAnunciar={handleAnunciarClick}
+                onViewAll={handleViewAll}
+                ctaLabel="Anunciar item"
+            />
+        </div>
       </main>
 
       <CreateClassifiedModal 
         isOpen={isCreateModalOpen} 
         onClose={() => setIsCreateModalOpen(false)} 
         user={user} 
+        initialCategory={modalInitialCategory}
       />
 
       {selectedItem && (
@@ -434,7 +502,7 @@ export const ClassifiedsView: React.FC<ClassifiedsViewProps> = ({ onBack, onNavi
             
             <div className="flex-1 overflow-y-auto no-scrollbar space-y-6 pr-1">
                 <div className="aspect-video w-full rounded-3xl overflow-hidden bg-gray-100">
-                    <img src={selectedItem.imageUrl} className="w-full h-full object-cover" />
+                    <img src={selectedItem.imageUrl} className="w-full h-full object-cover" alt={selectedItem.title} />
                 </div>
                 <div className="p-5 bg-gray-50 dark:bg-gray-800 rounded-[2rem] border border-gray-100 dark:border-gray-700">
                     <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed font-medium">{selectedItem.description}</p>

@@ -321,6 +321,160 @@ export const SUBCATEGORIES: Record<string, { name: string; icon: React.ReactNode
   ],
 };
 
+const IMG_IDS: Record<string, string> = {
+  'Comida': '1504674900247-0877df9cc836',
+  'Pets': '1516734212186-a967f81ad0d7',
+  'Pro': '1486312338219-ce68d2c6f44d',
+  'Saúde': '1588776814546-1ffcf47267a5',
+  'Serviços': '1454165804606-c3d57bc86b40',
+  'Beleza': '1562322140-8baeececf3df',
+  'Autos': '1486262715619-67b85e0b08d3',
+  'Mercado': '1587854692152-cbe660dbbb88',
+  'Casa': '1524661135-423995f22d0b',
+  'Esportes': '1534438327276-14e5300c3a48',
+  'Lazer': '1517457373958-b7bdd4587205',
+  'Educação': '1556761175-5973dc0f32e7',
+  'Farmácia': '1587854692152-cbe660dbbb88',
+  'Moda': '1441986300917-64674bd600d8',
+  'Eventos': '1511632765486-a01980e01a18',
+  'Condomínio': '1570129477492-45c003edd2be'
+};
+
+const generateFakeStores = () => {
+    const allStores: Store[] = [];
+    const hoods = ["Freguesia", "Anil", "Taquara", "Pechincha", "Tanque", "Curicica"];
+    const modifiers = ["Gourmet", "Express", "da Villa", "Master", "do Bairro", "Central"];
+
+    Object.entries(SUBCATEGORIES).forEach(([catName, subs]) => {
+        subs.forEach(sub => {
+            // Gerar 6 lojas por subcategoria
+            for (let i = 1; i <= 6; i++) {
+                const isSponsored = i <= 3; // Primeiras 3 patrocinadas
+                const hood = hoods[i % hoods.length];
+                const rating = 4.2 + (Math.random() * 0.8);
+                const imgId = IMG_IDS[catName] || '1557804506-669a67965ba0';
+
+                allStores.push({
+                    id: `fake-${catName}-${sub.name}-${i}`.replace(/\s+/g, '-').toLowerCase(),
+                    name: `${sub.name} ${modifiers[i-1]}`,
+                    category: catName,
+                    subcategory: sub.name,
+                    rating: parseFloat(rating.toFixed(1)),
+                    reviewsCount: Math.floor(Math.random() * 500) + 20,
+                    distance: `${hood} • RJ`,
+                    neighborhood: hood,
+                    adType: isSponsored ? AdType.PREMIUM : AdType.ORGANIC,
+                    isSponsored: isSponsored,
+                    description: `O melhor em ${sub.name.toLowerCase()} de toda a região de ${hood}. Venha conhecer!`,
+                    image: `https://images.unsplash.com/photo-${imgId}?q=80&w=400&auto=format&fit=crop&sig=${sub.name}-${i}`,
+                    verified: Math.random() > 0.4,
+                    isOpenNow: Math.random() > 0.2
+                });
+            }
+        });
+    });
+    return allStores;
+};
+
+// Dados Fixos de Lojas (Preservados para consistência)
+const BASE_STORES: Store[] = [
+  {
+    id: 'grupo-esquematiza',
+    name: 'Grupo Esquematiza',
+    category: 'Serviços',
+    subcategory: 'Segurança e Facilities',
+    description: 'Líder em segurança, limpeza e facilities para condomínios e empresas.',
+    logoUrl: 'https://images.unsplash.com/photo-1560179707-f14e90ef3dab?q=80&w=200&auto=format&fit=crop',
+    image: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?q=80&w=800&auto=format&fit=crop',
+    rating: 5.0,
+    reviewsCount: 150,
+    distance: 'Freguesia • RJ',
+    neighborhood: 'Freguesia',
+    adType: AdType.PREMIUM,
+    address: 'R. Cândido de Figueiredo, 204 – Tanque',
+    phone: '(21) 98555-9480',
+    hours: 'Seg a Sex • 08h às 18h',
+    verified: true,
+    isOpenNow: true,
+    isSponsored: true
+  }
+];
+
+export const STORES: Store[] = [
+  ...BASE_STORES,
+  ...generateFakeStores()
+];
+
+export const EDITORIAL_SERVICES: EditorialCollection[] = [
+  {
+    id: 'culinaria-jpa',
+    title: 'Melhores de JPA',
+    subtitle: 'Onde comer bem no bairro',
+    image: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=800&auto=format&fit=crop',
+    keywords: ['comida', 'restaurante', 'lanches', 'pizza']
+  },
+  {
+    id: 'servicos-confianca',
+    title: 'Serviços de Confiança',
+    subtitle: 'Profissionais avaliados por vizinhos',
+    image: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?q=80&w=800&auto=format&fit=crop',
+    keywords: ['serviços', 'reformas', 'consertos']
+  }
+];
+
+export const quickFilters = [
+  { id: 'top_rated', label: 'Top Avaliados', icon: 'star' },
+  { id: 'open_now', label: 'Aberto Agora', icon: 'clock' },
+  { id: 'nearby', label: 'Perto de Mim', icon: 'zap' },
+  { id: 'cashback', label: 'Com Cashback', icon: 'percent' }
+];
+
+export const STORIES: Story[] = [
+  { id: 's1', name: 'Hamburgueria', image: 'https://images.unsplash.com/photo-1561758033-d89a9ad46330?q=80&w=400&auto=format&fit=crop' },
+  { id: 's2', name: 'Salão Vip', image: 'https://images.unsplash.com/photo-1562322140-8baeececf3df?q=80&w=400&auto=format&fit=crop' },
+  { id: 's3', name: 'Pet Shop', image: 'https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?q=80&w=400&auto=format&fit=crop' },
+];
+
+export const MOCK_JOBS: Job[] = [
+  {
+    id: 'job-1',
+    role: 'Atendente de Balcão',
+    company: 'Padaria Imperial',
+    neighborhood: 'Freguesia',
+    category: 'Alimentação',
+    type: 'CLT',
+    salary: 'R$ 1.450,00',
+    description: 'Atendimento ao público, organização e limpeza do local.',
+    requirements: ['Experiência anterior', 'Boa comunicação'],
+    schedule: '6x1',
+    contactWhatsapp: '5521999999999',
+    postedAt: 'Há 2h',
+    isSponsored: true,
+    sponsoredUntil: '2025-12-31',
+    // FIX: Added missing properties 'candidacy_method' and 'modality' to conform to the Job interface.
+    candidacy_method: 'whatsapp',
+    modality: 'Presencial',
+  },
+  {
+    id: 'job-2',
+    role: 'Vendedor Externo',
+    company: 'JPA Telecom',
+    neighborhood: 'Taquara',
+    category: 'Vendas',
+    type: 'PJ',
+    salary: 'Comissão + Ajuda de Custo',
+    description: 'Vendas de planos de internet e TV a cabo.',
+    requirements: ['Carro próprio', 'Experiência com vendas'],
+    schedule: 'Seg-Sex',
+    contactWhatsapp: '5521988888888',
+    postedAt: 'Há 1 dia',
+    isUrgent: true,
+    // FIX: Added missing properties 'candidacy_method' and 'modality' to conform to the Job interface.
+    candidacy_method: 'whatsapp',
+    modality: 'Presencial',
+  }
+];
+
 export const OFFICIAL_COMMUNITIES: NeighborhoodCommunity[] = [
   {
     id: 'comm-residents',
@@ -335,7 +489,7 @@ export const OFFICIAL_COMMUNITIES: NeighborhoodCommunity[] = [
   {
     id: 'comm-tips',
     name: 'Recomendações e dicas no bairro',
-    description: 'Onde encontrar o melhor serviço? Peça e dê dicas para seus vizinhos.',
+    description: 'Onde encontrar the melhor serviço? Peça e dê dicas para seus vizinhos.',
     image: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?q=80&w=800&auto=format&fit=crop',
     icon: <HelpCircle />,
     color: 'bg-orange-500',
@@ -424,105 +578,18 @@ export const NEIGHBORHOOD_COMMUNITIES: NeighborhoodCommunity[] = [
 
 export const MOCK_COMMUNITY_POSTS: CommunityPost[] = [
   {
-    id: 'post-video-1',
-    userId: 'u-video',
-    userName: 'Cine JPA',
-    userAvatar: 'https://i.pravatar.cc/100?u=cinejpa',
-    authorRole: 'merchant',
-    content: 'Curta o trailer do nosso novo filme em cartaz! 🍿🎬 Venha assistir no cinema do bairro. Uma experiência incrível para toda a família com muita pipoca e diversão. Não perca!',
-    type: 'event',
-    communityId: 'comm-residents',
-    neighborhood: 'Anil',
-    timestamp: '10h',
-    likes: 150,
-    comments: 25,
-    videoUrl: 'https://videos.pexels.com/video-files/3209828/3209828-sd_540_960_25fps.mp4',
-    theme: 'lazer'
-  },
-  {
-    id: 'post-multi-image-1',
-    userId: 'u-gallery',
-    userName: 'Galeria de Arte JPA',
-    userAvatar: 'https://i.pravatar.cc/100?u=galleryjpa',
-    authorRole: 'merchant',
-    content: 'Nossa nova exposição "Cores do Rio" já está aberta! Venha apreciar a arte local. Entrada gratuita. Confira um pouco do que temos por aqui.',
-    type: 'event',
-    communityId: 'comm-residents',
-    neighborhood: 'Freguesia',
-    timestamp: '12h',
-    likes: 88,
-    comments: 12,
-    imageUrls: [
-      'https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?q=80&w=600',
-      'https://images.unsplash.com/photo-1579965342575-1547a4686b28?q=80&w=600',
-      'https://images.unsplash.com/photo-1533100373369-a131b6f04364?q=80&w=600'
-    ],
-    theme: 'lazer'
-  },
-  {
-    id: 'post-bibi-1',
-    userId: 'u-bibi',
-    userName: 'Bibi Lanches',
-    userAvatar: 'https://i.pravatar.cc/100?u=bibilanches',
-    authorRole: 'merchant',
-    content: 'Promoção de hoje: X-Tudo em dobro! Peça agora pelo app e aproveite essa delícia em dobro. Válido somente hoje!',
+    id: 'post-1',
+    userId: 'u1',
+    userName: 'Taty Oliveira',
+    userAvatar: 'https://i.pravatar.cc/100?u=taty',
+    authorRole: 'resident',
+    content: 'Alguém conhece um chaveiro de confiança na Freguesia? Perdi as chaves de casa agora pouco.',
     type: 'recommendation',
     communityId: 'comm-tips',
     neighborhood: 'Freguesia',
-    timestamp: 'Há 30 min',
-    likes: 22,
-    comments: 3,
-    imageUrls: ['https://images.unsplash.com/photo-1571091718767-18b5b1457add?q=80&w=600&auto=format&fit=crop'],
-    theme: 'dicas',
-    showOnStoreProfile: false
-  },
-  {
-    id: 'post-new-1',
-    userId: 'u-carlos',
-    userName: 'Carlos Henrique',
-    userAvatar: 'https://i.pravatar.cc/100?u=carloshenrique',
-    authorRole: 'resident',
-    content: "Galera, trânsito totalmente parado agora na Estrada dos Três Rios, sentido Taquara. Parece que teve um acidente mais à frente. Quem puder, evita passar por aqui agora.",
-    type: 'alert',
-    communityId: 'comm-residents',
-    neighborhood: 'Freguesia',
-    timestamp: 'Agora',
-    likes: 8,
-    comments: 1,
-    imageUrls: ['https://images.unsplash.com/photo-1570129477492-45c003edd2be?q=80&w=600&auto=format&fit=crop'],
-    theme: 'utilidade'
-  },
-  {
-    id: 'post-new-2',
-    userId: 'u-juliana',
-    userName: 'Juliana Mendes',
-    userAvatar: 'https://i.pravatar.cc/100?u=julianamendes',
-    authorRole: 'resident',
-    content: "Gente, acabaram de roubar um carro aqui na Rua Joaquim Pinheiro 😔 Alguém sabe se já chamaram a polícia? Fiquem atentos.",
-    type: 'alert',
-    communityId: 'comm-residents',
-    neighborhood: 'Freguesia',
-    timestamp: '1h',
-    likes: 10,
-    comments: 1,
-    imageUrls: ['https://images.unsplash.com/photo-1570129477492-45c003edd2be?q=80&w=600&auto=format&fit=crop'],
-    theme: 'seguranca'
-  },
-  {
-    id: 'post-new-3',
-    userId: 'u-rafaelcosta',
-    userName: 'Rafael Costa',
-    userAvatar: 'https://i.pravatar.cc/100?u=rafaelcosta',
-    authorRole: 'resident',
-    content: "Alguém sabe me dizer qual é o dia da feira livre ali na Araguaia? Passei lá semana passada e não lembro se é terça ou quinta 😅",
-    type: 'recommendation',
-    communityId: 'comm-tips',
-    neighborhood: 'Taquara',
     timestamp: '2h',
-    likes: 5,
-    comments: 1,
-    imageUrls: ['https://images.unsplash.com/photo-1567332243413-56545bce13f2?q=80&w=600&auto=format&fit=crop'],
-    theme: 'lazer'
+    likes: 8,
+    comments: 16
   },
   {
     id: 'post-2',
@@ -537,344 +604,71 @@ export const MOCK_COMMUNITY_POSTS: CommunityPost[] = [
     timestamp: '3h',
     likes: 45,
     comments: 8,
-    imageUrls: ['https://images.unsplash.com/photo-1561758033-d89a9ad46330?q=80&w=600&auto=format&fit=crop'],
-    theme: 'dicas'
+    imageUrl: 'https://images.unsplash.com/photo-1561758033-d89a9ad46330?q=80&w=600&auto=format&fit=crop'
+  },
+  {
+    id: 'post-3',
+    userId: 'u3',
+    userName: 'Bruno Rocha',
+    userAvatar: 'https://i.pravatar.cc/100?u=bruno',
+    authorRole: 'resident',
+    content: 'Alguém sabe se a feira de domingo vai acontecer amanhã mesmo com a chuva?',
+    type: 'event',
+    communityId: 'comm-residents',
+    neighborhood: 'Freguesia',
+    timestamp: '4h',
+    likes: 12,
+    comments: 4
   },
   {
     id: 'post-4',
     userId: 'u4',
     userName: 'Mariana Luz',
     userAvatar: 'https://i.pravatar.cc/100?u=mari',
-    authorRole: 'merchant',
-    content: 'Vaga aberta para recepcionista em clínica odontológica na Taquara. Horário comercial, salário a combinar. Interessados, inbox!',
+    authorRole: 'resident',
+    content: 'Vaga aberta para recepcionista em clínica odontológica na Taquara. Interessados, inbox!',
     type: 'recommendation',
     communityId: 'comm-jobs',
     neighborhood: 'Taquara',
     timestamp: '5h',
     likes: 24,
-    comments: 12,
-    theme: 'utilidade',
-    showOnStoreProfile: true
+    comments: 12
   },
   {
-    id: 'post-6',
-    userId: 'u6',
-    userName: 'Luciana Melo',
-    userAvatar: 'https://i.pravatar.cc/100?u=luciana',
+    id: 'post-5',
+    userId: 'u5',
+    userName: 'Ricardo Souza',
+    userAvatar: 'https://i.pravatar.cc/100?u=ricardo',
     authorRole: 'resident',
-    content: 'Estou desapegando dessa fritadeira elétrica, funcionando perfeitamente! R$ 150,00 para retirar no Anil.',
-    type: 'recommendation',
-    communityId: 'comm-desapega',
-    neighborhood: 'Anil',
-    timestamp: '8h',
-    likes: 24,
-    comments: 31,
-    imageUrls: ['https://images.unsplash.com/photo-1585659722982-789600c7690a?q=80&w=600&auto=format&fit=crop'],
-    theme: 'dicas'
-  },
-];
-
-// DADOS DE LOJAS FAKE COMPLETOS (REGRA OBRIGATÓRIA)
-const BASE_STORES: Store[] = [
-  {
-    id: 'grupo-esquematiza',
-    name: 'Grupo Esquematiza',
-    category: 'Serviços',
-    subcategory: 'Segurança e Facilities',
-    rating: 5.0,
-    reviewsCount: 152,
-    distance: 'Freguesia',
-    adType: AdType.PREMIUM,
-    description: 'Líder em segurança, portaria, limpeza e facilities para condomínios e empresas em Jacarepaguá. Oferecemos soluções completas para garantir tranquilidade e eficiência.',
-    isSponsored: true,
-    image: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?q=80&w=800&auto=format&fit=crop',
-    banner_url: 'https://images.unsplash.com/photo-1521791136064-7986c2920216?q=80&w=1200&auto=format&fit=crop',
-    logoUrl: getStoreLogo(0),
-    verified: true,
-    isOpenNow: true,
+    content: 'Cuidado pessoal: semáforo da Geremário Dantas com problema, tá um caos o trânsito agora.',
+    type: 'alert',
+    communityId: 'comm-residents',
     neighborhood: 'Freguesia',
-    rua: 'Rua Tirol',
-    numero: '560',
-    bairro: 'Freguesia',
-    cidade: 'Rio de Janeiro',
-    whatsapp_publico: '21985559480',
-    telefone_fixo_publico: '2134158000',
-    instagram: '@grupoesquematiza',
-    payment_methods: ['Boleto', 'Transferência Bancária'],
-    business_hours: {
-      segunda: { open: true, start: '08:00', end: '18:00' },
-      terca: { open: true, start: '08:00', end: '18:00' },
-      quarta: { open: true, start: '08:00', end: '18:00' },
-      quinta: { open: true, start: '08:00', end: '18:00' },
-      sexta: { open: true, start: '08:00', end: '18:00' },
-      sabado: { open: false, start: '', end: '' },
-      domingo: { open: false, start: '', end: '' },
-    },
-    gallery: [
-      'https://images.unsplash.com/photo-1521791136064-7986c2920216?q=80&w=1200&auto=format&fit=crop',
-      'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?q=80&w=1200&auto=format&fit=crop',
-      'https://images.unsplash.com/photo-1581093450021-4a7360e9a6b5?q=80&w=1200&auto=format&fit=crop'
-    ],
-  },
-  {
-    id: 'f-1',
-    name: 'Bibi Lanches',
-    category: 'Comida',
-    subcategory: 'Lanches & Hamburguerias',
-    rating: 4.8,
-    reviewsCount: 188,
-    distance: 'Freguesia',
-    adType: AdType.PREMIUM,
-    description: 'Lanches clássicos e saudáveis, com opções de sucos naturais feitos na hora. Perfeito para uma refeição rápida e deliciosa no coração da Freguesia.',
-    isSponsored: true,
-    image: 'https://images.unsplash.com/photo-1561758033-d89a9ad46330?q=80&w=400&auto=format&fit=crop',
-    banner_url: 'https://images.unsplash.com/photo-1550547660-d9450f859349?q=80&w=1200&auto=format&fit=crop',
-    logoUrl: getStoreLogo(1),
-    verified: true,
-    isOpenNow: true,
-    neighborhood: 'Freguesia',
-    rua: 'Estrada dos Três Rios',
-    numero: '980',
-    complemento: 'Loja B',
-    bairro: 'Freguesia',
-    cidade: 'Rio de Janeiro',
-    whatsapp_publico: '21987654321',
-    telefone_fixo_publico: '2124471234',
-    instagram: '@bibilanchesjpa',
-    payment_methods: ['Dinheiro', 'Pix', 'Cartão de Crédito', 'Cartão de Débito', 'VR'],
-    owner_user_id: 'u-bibi',
-    business_hours: {
-      segunda: { open: true, start: '11:00', end: '22:00' },
-      terca: { open: true, start: '11:00', end: '22:00' },
-      quarta: { open: true, start: '11:00', end: '22:00' },
-      quinta: { open: true, start: '11:00', end: '22:00' },
-      sexta: { open: true, start: '11:00', end: '23:00' },
-      sabado: { open: true, start: '12:00', end: '23:00' },
-      domingo: { open: false, start: '', end: '' },
-    },
-    gallery: [
-      'https://images.unsplash.com/photo-1550547660-d9450f859349?q=80&w=1200&auto=format&fit=crop',
-      'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?q=80&w=1200&auto=format&fit=crop',
-      'https://images.unsplash.com/photo-1571091718767-18b5b1457add?q=80&w=1200&auto=format&fit=crop',
-      'https://images.unsplash.com/photo-1607013251379-e6eecfffe234?q=80&w=1200&auto=format&fit=crop'
-    ],
-  },
-  { 
-    id: 'f-2', 
-    name: 'Studio Hair Vip', 
-    category: 'Beleza', 
-    subcategory: 'Salão de Cabelo', 
-    rating: 4.9, 
-    distance: 'Taquara', 
-    adType: AdType.PREMIUM, 
-    description: 'Especialista em loiros e cortes modernos. Ambiente climatizado e profissionais qualificados para realçar sua beleza.', 
-    isSponsored: true, 
-    image: 'https://images.unsplash.com/photo-1562322140-8baeececf3df?q=80&w=400&auto=format&fit=crop',
-    banner_url: 'https://images.unsplash.com/photo-1632345031435-8727f6897d53?q=80&w=1200&auto=format&fit=crop',
-    logoUrl: getStoreLogo(2),
-    verified: true,
-    isOpenNow: true,
-    neighborhood: 'Taquara',
-    rua: 'Avenida Nelson Cardoso',
-    numero: '1149',
-    bairro: 'Taquara',
-    cidade: 'Rio de Janeiro',
-    whatsapp_publico: '21988887777',
-    telefone_fixo_publico: '2133925566',
-    instagram: '@hairviptaquara',
-    payment_methods: ['Pix', 'Cartão de Crédito'],
-    business_hours: {
-      segunda: { open: false, start: '', end: '' },
-      terca: { open: true, start: '09:00', end: '19:00' },
-      quarta: { open: true, start: '09:00', end: '19:00' },
-      quinta: { open: true, start: '09:00', end: '20:00' },
-      sexta: { open: true, start: '09:00', end: '20:00' },
-      sabado: { open: true, start: '08:00', end: '18:00' },
-      domingo: { open: false, start: '', end: '' },
-    },
-    reviewsCount: 215,
-    gallery: [
-      'https://images.unsplash.com/photo-1521590832167-7ce633395e39?q=80&w=1200&auto=format&fit=crop',
-      'https://images.unsplash.com/photo-1560066984-118c38b64a75?q=80&w=1200&auto=format&fit=crop',
-      'https://images.unsplash.com/photo-1632345031435-8727f6897d53?q=80&w=1200&auto=format&fit=crop',
-    ],
-  },
-  { 
-    id: 'f-3', 
-    name: 'Pet Shop Alegria', 
-    category: 'Pets', 
-    subcategory: 'Pet Shop', 
-    rating: 4.7, 
-    distance: 'Pechincha', 
-    adType: AdType.PREMIUM, 
-    description: 'O carinho que seu pet merece. Temos rações, acessórios, banho & tosa e consultório veterinário.', 
-    isSponsored: true, 
-    image: 'https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?q=80&w=400&auto=format&fit=crop',
-    banner_url: 'https://images.unsplash.com/photo-1524511751214-b0a384dd932d?q=80&w=1200&auto=format&fit=crop',
-    logoUrl: getStoreLogo(3),
-    verified: false,
-    isOpenNow: false,
-    neighborhood: 'Pechincha',
-    rua: 'Estrada do Pau-Ferro',
-    numero: '325',
-    bairro: 'Pechincha',
-    cidade: 'Rio de Janeiro',
-    whatsapp_publico: '21977776666',
-    telefone_fixo_publico: '2124251122',
-    instagram: '@petalegriajpa',
-    payment_methods: ['Dinheiro', 'Pix', 'Cartão de Débito'],
-    business_hours: {
-      segunda: { open: true, start: '09:00', end: '18:00' },
-      terca: { open: true, start: '09:00', end: '18:00' },
-      quarta: { open: true, start: '09:00', end: '18:00' },
-      quinta: { open: true, start: '09:00', end: '18:00' },
-      sexta: { open: true, start: '09:00', end: '18:00' },
-      sabado: { open: true, start: '09:00', end: '14:00' },
-      domingo: { open: false, start: '', end: '' },
-    },
-    reviewsCount: 98,
-  },
-];
-
-// Helper data for store generation
-const hoods = ["Freguesia", "Taquara", "Pechincha", "Tanque", "Anil", "Curicica", "Gardênia Azul", "Cidade de Deus", "Praça Seca"];
-const modifiers = ["Prime", "do Bairro", "Jacarepaguá", "Master", "Central", "Top", "Premium"];
-const imageKeywords: Record<string, string> = {
-  'Comida': 'restaurant,food', 'Pets': 'pet-shop,cute-animal', 'Pro': 'professional-tools,worker', 'Saúde': 'clinic,health', 
-  'Serviços': 'home-repair,technician', 'Beleza': 'beauty-salon,haircut', 'Autos': 'car-mechanic,garage', 
-  'Mercado': 'grocery-store,market', 'Casa': 'home-decor,furniture', 'Esportes': 'gym,fitness', 'Lazer': 'entertainment,cinema', 
-  'Educação': 'school,classroom', 'Farmácia': 'pharmacy,medicine', 'Moda': 'fashion-store,clothes', 'Eventos': 'event-planner,party', 'Condomínio': 'apartment-building,condominium'
-};
-
-const generateAllFakeStores = (): Store[] => {
-  const allStores: Store[] = [];
-  let logoIndex = 10; 
-
-  CATEGORIES.forEach(category => {
-    const subs = SUBCATEGORIES[category.name] || [{ name: 'Geral', icon: <Star /> }];
-    
-    for (let i = 0; i < 7; i++) {
-      const hood = hoods[i % hoods.length];
-      const sub = subs[i % subs.length];
-      const isSponsored = i < 2; 
-      const rating = 4.2 + Math.random() * 0.8;
-      const keyword = imageKeywords[category.name] || 'store';
-
-      const store: Store = {
-        id: `fake-${category.slug}-${i}`,
-        name: `${sub.name} ${modifiers[i % modifiers.length]}`,
-        category: category.name,
-        subcategory: sub.name,
-        rating: parseFloat(rating.toFixed(1)),
-        reviewsCount: Math.floor(Math.random() * 200) + 15,
-        distance: hood,
-        neighborhood: hood,
-        adType: isSponsored ? AdType.PREMIUM : AdType.ORGANIC,
-        isSponsored: isSponsored,
-        description: `Especialistas em ${sub.name.toLowerCase()}. Oferecemos o melhor serviço e atendimento da região de ${hood}.`,
-        image: `https://images.unsplash.com/photo-${1550000000000 + i}?q=80&w=800&auto=format&fit=crop`,
-        banner_url: `https://images.unsplash.com/photo-${1560000000000 + i}?q=80&w=1200&auto=format&fit=crop`,
-        gallery: [
-          `https://images.unsplash.com/photo-${1570000000000 + i}?q=80&w=800&auto=format&fit=crop`,
-          `https://images.unsplash.com/photo-${1580000000000 + i}?q=80&w=800&auto=format&fit=crop`,
-          `https://images.unsplash.com/photo-${1590000000000 + i}?q=80&w=800&auto=format&fit=crop`,
-        ],
-        logoUrl: getStoreLogo(logoIndex++),
-        verified: Math.random() > 0.3,
-        isOpenNow: Math.random() > 0.2,
-        rua: 'Estrada dos Três Rios',
-        numero: `${100 + i * 50}`,
-        bairro: hood,
-        cidade: 'Rio de Janeiro',
-        whatsapp_publico: `219${Math.floor(8000 + Math.random() * 1000)}${Math.floor(1000 + Math.random() * 1000)}`,
-        instagram: `@${sub.name.replace(/[\s&]/g, '').toLowerCase()}${hood.toLowerCase()}`,
-        payment_methods: ['Dinheiro', 'Pix', 'Cartão de Crédito', 'Cartão de Débito'],
-        business_hours: {
-          segunda: { open: true, start: '09:00', end: '18:00' },
-          terca: { open: true, start: '09:00', end: '18:00' },
-          quarta: { open: true, start: '09:00', end: '18:00' },
-          quinta: { open: true, start: '09:00', end: '18:00' },
-          sexta: { open: true, start: '09:00', end: '20:00' },
-          sabado: { open: true, start: '09:00', end: '14:00' },
-          domingo: { open: false, start: '', end: '' },
-        },
-      };
-      if (store.id === 'fake-saude-1') { // Dentistas Central
-        store.owner_user_id = 'u4';
-      }
-      allStores.push(store);
-    }
-  });
-  return allStores;
-};
-
-export const STORES: Store[] = [
-  ...BASE_STORES,
-  ...generateAllFakeStores()
-];
-
-export const EDITORIAL_SERVICES: EditorialCollection[] = [
-  {
-    id: 'culinaria-jpa',
-    title: 'Melhores de JPA',
-    subtitle: 'Onde comer bem no bairro',
-    image: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=800&auto=format&fit=crop',
-    keywords: ['comida', 'restaurante', 'lanches', 'pizza']
-  },
-  {
-    id: 'servicos-confianca',
-    title: 'Serviços de Confiança',
-    subtitle: 'Profissionais avaliados por vizinhos',
-    image: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?q=80&w=800&auto=format&fit=crop',
-    keywords: ['serviços', 'reformas', 'consertos']
+    timestamp: '6h',
+    likes: 38,
+    comments: 14
   }
 ];
 
-export const quickFilters = [
-  { id: 'top_rated', label: 'Top Avaliados', icon: 'star' },
-  { id: 'open_now', label: 'Aberto Agora', icon: 'clock' },
-  { id: 'nearby', label: 'Perto de Mim', icon: 'zap' }
-];
+export type TaxonomyType = 'category' | 'subcategory' | 'specialty';
 
-export const STORIES: Story[] = [
-  { id: 's1', name: 'Hamburgueria', image: 'https://images.unsplash.com/photo-1561758033-d89a9ad46330?q=80&w=400&auto=format&fit=crop' },
-  { id: 's2', name: 'Salão Vip', image: 'https://images.unsplash.com/photo-1562322140-8baeececf3df?q=80&w=400&auto=format&fit=crop' },
-  { id: 's3', name: 'Pet Shop', image: 'https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?q=80&w=400&auto=format&fit=crop' },
-];
-
-export const MOCK_JOBS: Job[] = [
-  {
-    id: 'job-1',
-    role: 'Atendente de Balcão',
-    company: 'Padaria Imperial',
-    neighborhood: 'Freguesia',
-    category: 'Alimentação',
-    type: 'CLT',
-    salary: 'R$ 1.450,00',
-    description: 'Atendimento ao público, organização e limpeza do local.',
-    requirements: ['Experiência anterior', 'Boa comunicação'],
-    schedule: '6x1',
-    contactWhatsapp: '5521999999999',
-    postedAt: 'Há 2h',
-    isSponsored: true,
-    sponsoredUntil: '2025-12-31'
-  },
-  {
-    id: 'job-2',
-    role: 'Vendedor Externo',
-    company: 'JPA Telecom',
-    neighborhood: 'Taquara',
-    category: 'Vendas',
-    type: 'PJ',
-    salary: 'Comissão + Ajuda de Custo',
-    description: 'Vendas de planos de internet e TV a cabo.',
-    requirements: ['Carro próprio', 'Experiência com vendas'],
-    schedule: 'Seg-Sex',
-    contactWhatsapp: '5521988888888',
-    postedAt: 'Há 1 dia',
-    isUrgent: true
-  }
-];
+export const SPECIALTIES: Record<string, string[]> = {
+  'Chaveiro 24h': ['Abertura de portas', 'Troca de fechadura', 'Chave codificada', 'Abertura de cofre', 'Cópia de chaves', 'Instalação de tetra chave'],
+  'Desentupidora': ['Pia de cozinha', 'Vaso sanitário', 'Caixa de gordura', 'Ralo de banheiro', 'Rede de esgoto externa', 'Limpeza de fossa'],
+  'Guincho': ['Reboque leve (carro)', 'Reboque pesado', 'Pane seca', 'Troca de pneu', 'Recarga de bateria'],
+  'Eletricista 24h': ['Queda de energia total', 'Curto-circuito', 'Disjuntor desarmando', 'Cheiro de queimado', 'Tomada em curto'],
+  'Eletricista': ['Instalação de chuveiro', 'Troca de fiação', 'Instalação de tomadas', 'Instalação de ventilador', 'Iluminação e lustres'],
+  'Encanador': ['Vazamento em cano', 'Troca de torneira', 'Instalação de filtro', 'Reparo em descarga', 'Limpeza de caixa d\'água'],
+  'Pedreiro': ['Pequenos reparos', 'Reboco e alvenaria', 'Colocação de piso/azulejo', 'Construção de muro', 'Reforma completa'],
+  'Pintor': ['Pintura interna', 'Pintura externa', 'Texturas e efeitos', 'Tratamento de mofo', 'Pintura de portas e janelas'],
+  'Marido de Aluguel': ['Instalação de cortina/persiana', 'Montagem de prateleiras', 'Troca de lâmpadas', 'Instalação de suporte de TV', 'Pequenos reparos gerais'],
+  'Mecânico': ['Revisão geral', 'Troca de óleo', 'Suspensão e freios', 'Motor e câmbio', 'Diagnóstico eletrônico'],
+  'Funilaria e Pintura': ['Martelinho de ouro', 'Polimento e cristalização', 'Pintura de peças', 'Reparo de para-choque'],
+  'Auto Elétrica': ['Troca de bateria', 'Alternador e motor de arranque', 'Instalação de som/multimídia', 'Lâmpadas e faróis'],
+  'Conserto de Celular': ['Troca de tela', 'Troca de bateria', 'Não carrega', 'Recuperação de sistema', 'Limpeza de água'],
+  'Informática': ['Formatação', 'Remoção de vírus', 'Upgrade de memória/SSD', 'Limpeza interna', 'Configuração de rede'],
+  'default': ['Consultoria', 'Orçamento geral', 'Manutenção preventiva', 'Reparo específico', 'Instalação']
+};
 
 export const MOCK_CLASSIFIEDS: Classified[] = [
     // Orçamento de Serviços (5)
@@ -885,11 +679,11 @@ export const MOCK_CLASSIFIEDS: Classified[] = [
     { id: 'cl-serv-5', title: 'Montador de Móveis', advertiser: 'Carlos Montador', category: 'Orçamento de Serviços', neighborhood: 'Curicica', description: 'Montagem e desmontagem de móveis com agilidade e perfeição. Todos os tipos de móveis.', timestamp: 'Há 8h', contactWhatsapp: '5521955555555', typeLabel: 'Serviço', imageUrl: 'https://images.unsplash.com/photo-1600585152220-029e859e156b?q=80&w=800' },
 
     // Imóveis (5)
-    { id: 'cl-im-1', title: 'Alugo Sala Comercial 40m²', advertiser: 'JPA Imóveis', category: 'Imóveis', neighborhood: 'Pechincha', description: 'Sala comercial em prédio com portaria. Sol da manhã, 1 vaga. Ideal para consultório.', timestamp: 'Há 3h', contactWhatsapp: '5521977773333', typeLabel: 'Aluguel', price: 'R$ 1.800/mês', imageUrl: 'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?q=80&w=800' },
-    { id: 'cl-im-2', title: 'Vendo Loja de Rua na Freguesia', advertiser: 'Oportunidade Imóveis', category: 'Imóveis', neighborhood: 'Freguesia', description: 'Loja com 80m² em rua movimentada. Ponto excelente para farmácia ou mercado.', timestamp: 'Ontem', contactWhatsapp: '5521988884444', typeLabel: 'Venda', price: 'R$ 450.000', imageUrl: 'https://images.unsplash.com/photo-1556742502-ec7c0e9f34b1?q=80&w=800' },
-    { id: 'cl-im-3', title: 'Alugo Galpão na Taquara', advertiser: 'Direto com Proprietário', category: 'Imóveis', neighborhood: 'Taquara', description: 'Galpão com 200m², pé direito de 6m. Ideal para pequena indústria ou estoque.', timestamp: 'Há 2 dias', contactWhatsapp: '5521999995555', typeLabel: 'Aluguel', price: 'R$ 5.000/mês', imageUrl: 'https://images.unsplash.com/photo-1587022205345-66b3e6486d3b?q=80&w=800' },
-    { id: 'cl-im-4', title: 'Passo o Ponto - Lanchonete Montada', advertiser: 'Carlos Alberto', category: 'Imóveis', neighborhood: 'Freguesia', description: 'Passo o ponto de lanchonete completa e funcionando. Clientela formada. Motivo: mudança de cidade.', timestamp: 'Há 3 dias', contactWhatsapp: '5521987651234', typeLabel: 'Venda', price: 'R$ 80.000', imageUrl: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?q=80&w=800' },
-    { id: 'cl-im-5', title: 'Aluga-se Quiosque em Shopping', advertiser: 'ADM Shopping Center', category: 'Imóveis', neighborhood: 'Anil', description: 'Quiosque de 9m² em corredor de grande movimento no Center Shopping. ', timestamp: 'Há 5 dias', contactWhatsapp: '5521976549876', typeLabel: 'Aluguel', price: 'R$ 3.500/mês', imageUrl: 'https://images.unsplash.com/photo-1580820216940-6d9ac53272e2?q=80&w=800' },
+    { id: 'cl-im-1', title: 'Alugo Sala Comercial 40m²', advertiser: 'JPA Imóveis', category: 'Imóveis Comerciais', neighborhood: 'Pechincha', description: 'Sala comercial em prédio com portaria. Sol da manhã, 1 vaga. Ideal para consultório.', timestamp: 'Há 3h', contactWhatsapp: '5521977773333', typeLabel: 'Aluguel', price: 'R$ 1.800/mês', imageUrl: 'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?q=80&w=800' },
+    { id: 'cl-im-2', title: 'Vendo Loja de Rua na Freguesia', advertiser: 'Oportunidade Imóveis', category: 'Imóveis Comerciais', neighborhood: 'Freguesia', description: 'Loja com 80m² em rua movimentada. Ponto excelente para farmácia ou mercado.', timestamp: 'Ontem', contactWhatsapp: '5521988884444', typeLabel: 'Venda', price: 'R$ 450.000', imageUrl: 'https://images.unsplash.com/photo-1556742502-ec7c0f9f34b1?q=80&w=800' },
+    { id: 'cl-im-3', title: 'Alugo Galpão na Taquara', advertiser: 'Direto com Proprietário', category: 'Imóveis Comerciais', neighborhood: 'Taquara', description: 'Galpão com 200m², pé direito de 6m. Ideal para pequena indústria ou estoque.', timestamp: 'Há 2 dias', contactWhatsapp: '5521999995555', typeLabel: 'Aluguel', price: 'R$ 5.000/mês', imageUrl: 'https://images.unsplash.com/photo-1587022205345-66b3e6486d3b?q=80&w=800' },
+    { id: 'cl-im-4', title: 'Passo o Ponto - Lanchonete Montada', advertiser: 'Carlos Alberto', category: 'Imóveis Comerciais', neighborhood: 'Freguesia', description: 'Passo o ponto de lanchonete completa e funcionando. Clientela formada. Motivo: mudança de cidade.', timestamp: 'Há 3 dias', contactWhatsapp: '5521987651234', typeLabel: 'Venda', price: 'R$ 80.000', imageUrl: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?q=80&w=800' },
+    { id: 'cl-im-5', title: 'Aluga-se Quiosque em Shopping', advertiser: 'ADM Shopping Center', category: 'Imóveis Comerciais', neighborhood: 'Anil', description: 'Quiosque de 9m² em corredor de grande movimento no Center Shopping. ', timestamp: 'Há 5 dias', contactWhatsapp: '5521976549876', typeLabel: 'Aluguel', price: 'R$ 3.500/mês', imageUrl: 'https://images.unsplash.com/photo-1580820216940-6d9ac53272e2?q=80&w=800' },
 
     // Empregos (5)
     { id: 'cl-emp-1', title: 'Vaga para Vendedor(a) de Loja', advertiser: 'Boutique Chic', category: 'Empregos', neighborhood: 'Anil', description: 'Procuramos vendedora com experiência em moda feminina. Salário + comissão.', timestamp: 'Há 1h', contactWhatsapp: '5521988776655', typeLabel: 'CLT', imageUrl: 'https://images.unsplash.com/photo-1525507119028-ed4c629a60a3?q=80&w=800' },
@@ -975,24 +769,3 @@ export const MOCK_REAL_ESTATE_PROPERTIES: RealEstateProperty[] = [
     propertyTypeCom: 'Terreno comercial',
   },
 ];
-
-
-export type TaxonomyType = 'category' | 'subcategory' | 'specialty';
-
-export const SPECIALTIES: Record<string, string[]> = {
-  'Chaveiro 24h': ['Abertura de portas', 'Troca de fechadura', 'Chave codificada', 'Abertura de cofre', 'Cópia de chaves', 'Instalação de tetra chave'],
-  'Desentupidora': ['Pia de cozinha', 'Vaso sanitário', 'Caixa de gordura', 'Ralo de banheiro', 'Rede de esgoto externa', 'Limpeza de fossa'],
-  'Guincho': ['Reboque leve (carro)', 'Reboque pesado', 'Pane seca', 'Troca de pneu', 'Recarga de bateria'],
-  'Eletricista 24h': ['Queda de energia total', 'Curto-circuito', 'Disjuntor desarmando', 'Cheiro de queimado', 'Tomada em curto'],
-  'Eletricista': ['Instalação de chuveiro', 'Troca de fiação', 'Instalação de tomadas', 'Instalação de ventilador', 'Iluminação e lustres'],
-  'Encanador': ['Vazamento em cano', 'Troca de torneira', 'Instalação de filtro', 'Reparo em descarga', 'Limpeza de caixa d\'água'],
-  'Pedreiro': ['Pequenos reparos', 'Reboco e alvenaria', 'Colocação de piso/azulejo', 'Construção de muro', 'Reforma completa'],
-  'Pintor': ['Pintura interna', 'Pintura externa', 'Texturas e efeitos', 'Tratamento de mofo', 'Pintura de portas e janelas'],
-  'Marido de Aluguel': ['Instalação de cortina/persiana', 'Montagem de prateleiras', 'Troca de lâmpadas', 'Instalação de suporte de TV', 'Pequenos reparos gerais'],
-  'Mecânico': ['Revisão geral', 'Troca de óleo', 'Suspensão e freios', 'Motor e câmbio', 'Diagnóstico eletrônico'],
-  'Funilaria e Pintura': ['Martelinho de ouro', 'Polimento e cristalização', 'Pintura de peças', 'Reparo de para-choque'],
-  'Auto Elétrica': ['Troca de bateria', 'Alternador e motor de arranque', 'Instalação de som/multimídia', 'Lâmpadas e faróis'],
-  'Conserto de Celular': ['Troca de tela', 'Troca de bateria', 'Não carrega', 'Recuperação de sistema', 'Limpeza de água'],
-  'Informática': ['Formatação', 'Remoção de vírus', 'Upgrade de memória/SSD', 'Limpeza interna', 'Configuração de rede'],
-  'default': ['Consultoria', 'Orçamento geral', 'Manutenção preventiva', 'Reparo específico', 'Instalação']
-};

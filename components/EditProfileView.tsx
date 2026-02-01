@@ -18,6 +18,7 @@ import {
   Edit3
 } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
+// FIX: Using relative path for constants to ensure consistency and availability of exported members.
 import { NEIGHBORHOOD_COMMUNITIES } from '../constants';
 
 interface EditProfileViewProps {

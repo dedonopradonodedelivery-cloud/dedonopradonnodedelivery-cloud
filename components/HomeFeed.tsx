@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { Store, Category, AdType, CommunityPost, ServiceRequest, ServiceUrgency } from '@/types';
 import { 
@@ -32,7 +33,8 @@ import {
 } from 'lucide-react';
 import { LojasEServicosList } from '@/components/LojasEServicosList';
 import { User } from '@supabase/supabase-js';
-import { CATEGORIES, MOCK_COMMUNITY_POSTS } from '@/constants';
+// FIX: Using relative path for constants to ensure consistency and availability of exported members.
+import { CATEGORIES, MOCK_COMMUNITY_POSTS } from '../constants';
 import { useNeighborhood } from '@/contexts/NeighborhoodContext';
 import { LaunchOfferBanner } from './LaunchOfferBanner';
 import { HomeBannerCarousel } from './HomeBannerCarousel';

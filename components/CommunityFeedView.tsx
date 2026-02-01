@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { 
   ChevronLeft, 
@@ -25,6 +26,7 @@ import {
   SlidersHorizontal
 } from 'lucide-react';
 import { NeighborhoodCommunity, CommunityPost, Store, ReportReason } from '../types';
+// FIX: Using relative path for constants to ensure consistency and availability of exported members.
 import { OFFICIAL_COMMUNITIES, MOCK_USER_COMMUNITIES, MOCK_COMMUNITY_POSTS, STORES } from '../constants';
 import { useNeighborhood, NEIGHBORHOODS } from '../contexts/NeighborhoodContext';
 import { User } from '@supabase/supabase-js';
