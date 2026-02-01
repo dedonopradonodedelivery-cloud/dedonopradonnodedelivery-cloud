@@ -329,7 +329,9 @@ const App: React.FC = () => {
                     {/* REDIRECIONAMENTO FIXO PARA PAINEL DO LOJISTA ('profile') NO BOTÃO VOLTAR DO PATROCINADOR MASTER */}
                     {activeTab === 'sponsor_info' && <SponsorInfoView onBack={() => handleNavigate('profile')} onNavigate={handleNavigate} />}
                     
-                    {activeTab === 'patrocinador_master' && <PatrocinadorMasterScreen onBack={() => handleNavigate(previousTab)} />}
+                    {/* CORREÇÃO OBRIGATÓRIA: Botão voltar da tela Patrocinador Master agora retorna SEMPRE para a HOME */}
+                    {activeTab === 'patrocinador_master' && <PatrocinadorMasterScreen onBack={() => handleNavigate('home')} />}
+                    
                     {activeTab === 'about' && <AboutView onBack={() => handleNavigate(previousTab)} />}
                     {activeTab === 'support' && <SupportView onBack={() => handleNavigate(previousTab)} />}
                     {activeTab === 'favorites' && <FavoritesView onBack={() => handleNavigate(previousTab)} user={user} onNavigate={handleNavigate} />}
