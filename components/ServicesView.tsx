@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo } from 'react';
 import { 
   ChevronLeft, 
@@ -17,7 +18,8 @@ import {
   ShieldCheck,
   Star,
   Award,
-  Building2
+  Building2,
+  MessageSquare
 } from 'lucide-react';
 import { useNeighborhood, NEIGHBORHOODS } from '../contexts/NeighborhoodContext';
 import { ServiceRequest, ServiceUrgency, Store, AdType } from '../types';
@@ -132,11 +134,6 @@ export const ServicesView: React.FC<ServicesViewProps> = ({ onNavigate, onOpenCh
   const filteredServices = useMemo(() => {
     return SERVICE_TYPES.filter(s => s.toLowerCase().includes(serviceSearch.toLowerCase()));
   }, [serviceSearch]);
-
-  // Mock de profissionais para a tela de sucesso
-  const featuredPros = useMemo(() => {
-    return STORES.filter(s => s.category === 'Serviços' || s.category === 'Pro').slice(0, 3);
-  }, []);
 
   if (step === 'form') {
     return (
@@ -297,39 +294,22 @@ export const ServicesView: React.FC<ServicesViewProps> = ({ onNavigate, onOpenCh
       <div className="min-h-screen bg-white dark:bg-gray-950 flex flex-col p-8 animate-in zoom-in duration-500">
         <div className="flex-1 flex flex-col items-center justify-center text-center">
             <div className="w-24 h-24 bg-emerald-100 dark:bg-emerald-900/30 rounded-[2.5rem] flex items-center justify-center mb-8 text-emerald-600 shadow-xl">
-            <CheckCircle2 size={48} />
+              <CheckCircle2 size={48} />
             </div>
             <h2 className="text-3xl font-black text-gray-900 dark:text-white uppercase tracking-tighter leading-none mb-4">Pedido Enviado!</h2>
             <p className="text-gray-500 dark:text-gray-400 text-sm max-w-xs mx-auto leading-relaxed mb-8">
-                Pedido enviado com sucesso. Profissionais do bairro já foram notificados.
+                Sua solicitação foi enviada aos profissionais do bairro. Assim que alguém responder, você poderá iniciar um chat.
             </p>
 
-            {/* Destaque de Profissionais Pós-Envio */}
-            <div className="w-full space-y-4 text-left">
-                <div className="flex items-center gap-2 px-1">
-                    <Award size={14} className="text-amber-500" />
-                    <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Profissionais Verificados</h3>
+            <div className="w-full p-6 bg-gray-50 dark:bg-gray-900 rounded-[2rem] border border-gray-100 dark:border-gray-800 text-left space-y-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center text-blue-600">
+                    <MessageSquare size={16} />
+                  </div>
+                  <p className="text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-tight">O que acontece agora?</p>
                 </div>
-                <div className="space-y-3">
-                    {featuredPros.map(pro => (
-                        <div key={pro.id} className="bg-gray-50 dark:bg-gray-900/50 p-4 rounded-2xl border border-gray-100 dark:border-gray-800 flex items-center gap-4">
-                            <div className="w-12 h-12 rounded-xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 p-1">
-                                <img src={pro.logoUrl || pro.image} className="w-full h-full object-contain" />
-                            </div>
-                            <div className="flex-1 min-w-0">
-                                <h4 className="font-bold text-gray-900 dark:text-white text-xs truncate">{pro.name}</h4>
-                                <div className="flex items-center gap-1 text-[10px] text-yellow-500 font-bold">
-                                    <Star size={10} fill="currentColor" /> {pro.rating}
-                                </div>
-                            </div>
-                            <div className="bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 px-2 py-1 rounded text-[8px] font-black uppercase border border-emerald-100 dark:border-emerald-800">
-                                Destaque
-                            </div>
-                        </div>
-                    ))}
-                </div>
-                <p className="text-[9px] text-gray-400 italic text-center pt-2">
-                    Profissionais em destaque costumam responder mais rápido.
+                <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
+                  Profissionais qualificados irão analisar seu pedido. Se algum deles se interessar, ele enviará uma mensagem inicial e o chat será liberado para você negociar.
                 </p>
             </div>
         </div>
@@ -337,11 +317,7 @@ export const ServicesView: React.FC<ServicesViewProps> = ({ onNavigate, onOpenCh
         <div className="pt-10 space-y-4">
             <button 
             onClick={() => {
-                if (onOpenChat && createdRequestId) {
-                onOpenChat(createdRequestId);
-                } else {
                 onNavigate('service_messages_list');
-                }
             }}
             className="w-full bg-[#1E5BFF] text-white font-black py-5 rounded-[2rem] shadow-xl active:scale-[0.98] transition-all uppercase tracking-widest text-xs"
             >

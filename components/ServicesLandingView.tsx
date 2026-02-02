@@ -1,3 +1,4 @@
+
 import React, { useMemo } from 'react';
 import { User } from '@supabase/supabase-js';
 import { 
@@ -6,9 +7,9 @@ import {
     Wrench, 
     FileText, 
     MessageSquare, 
-    CheckCircle2 
+    CheckCircle2,
+    Clock
 } from 'lucide-react';
-import { ClassifiedsCategoryHighlight } from './ClassifiedsCategoryHighlight';
 import { STORES } from '../constants';
 
 interface ServicesLandingViewProps {
@@ -28,9 +29,13 @@ export const ServicesLandingView: React.FC<ServicesLandingViewProps> = ({ onBack
     }
   };
 
-  const categoryHighlight = useMemo(() => {
-    return STORES.find(s => s.category === 'Serviços' && s.isSponsored) || STORES[0];
-  }, []);
+  const handleViewRequests = () => {
+    if (user) {
+      onNavigate('service_messages_list');
+    } else {
+      onRequireLogin();
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950 font-sans animate-in fade-in duration-500">
@@ -42,40 +47,43 @@ export const ServicesLandingView: React.FC<ServicesLandingViewProps> = ({ onBack
         <h1 className="font-bold text-lg text-gray-900 dark:text-white">Orçamento de Serviços</h1>
       </header>
 
-      <main className="overflow-y-auto no-scrollbar pb-12">
+      <main className="overflow-y-auto no-scrollbar pb-12 pt-6">
         
-        {/* BLOCO DE DESTAQUE ÚNICO */}
-        <div className="px-6 pt-6">
-          <ClassifiedsCategoryHighlight 
-            store={categoryHighlight} 
-            onClick={(store) => onNavigate?.('store_detail', { store })} 
-          />
-        </div>
-
         {/* 1. New Vibrant Banner */}
         <section className="px-6 pb-6">
           <div className="relative rounded-[2.5rem] bg-gradient-to-br from-blue-500 to-indigo-600 p-8 text-white overflow-hidden shadow-2xl shadow-blue-500/20">
             <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full opacity-50 blur-xl"></div>
             <div className="absolute bottom-0 left-0 right-0 h-2/3 bg-gradient-to-t from-black/10 to-transparent"></div>
             
-            <div className="relative z-10 flex flex-col items-center justify-center text-center h-64">
-              <div className="w-24 h-24 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center border-2 border-white/30 mb-8 animate-float-slow shadow-lg">
-                <Wrench size={48} className="text-white drop-shadow-lg" />
+            <div className="relative z-10 flex flex-col items-center justify-center text-center h-72">
+              <div className="w-20 h-20 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center border-2 border-white/30 mb-6 animate-float-slow shadow-lg">
+                <Wrench size={40} className="text-white drop-shadow-lg" />
               </div>
-              <button 
-                onClick={handleRequestQuote} 
-                className="w-full max-w-xs bg-white text-blue-600 font-black py-4 rounded-2xl shadow-xl active:scale-95 transition-transform flex items-center justify-center gap-2 uppercase tracking-widest text-sm"
-              >
-                Pedir orçamento gratuito
-                <ArrowRight size={18} />
-              </button>
+              
+              <div className="space-y-4 w-full max-w-xs">
+                <button 
+                  onClick={handleRequestQuote} 
+                  className="w-full bg-white text-blue-600 font-black py-4 rounded-2xl shadow-xl active:scale-95 transition-transform flex items-center justify-center gap-2 uppercase tracking-widest text-sm"
+                >
+                  Pedir orçamento grátis
+                  <ArrowRight size={18} />
+                </button>
+
+                <button 
+                  onClick={handleViewRequests} 
+                  className="w-full bg-blue-700/40 backdrop-blur-md text-white border border-white/20 font-black py-4 rounded-2xl active:scale-95 transition-transform flex items-center justify-center gap-2 uppercase tracking-widest text-xs"
+                >
+                  <MessageSquare size={16} />
+                  Minhas Solicitações
+                </button>
+              </div>
             </div>
           </div>
         </section>
 
         {/* 3. "Como funciona" Title */}
-        <section className="py-12 text-center">
-          <h2 className="text-3xl font-black text-gray-900 dark:text-white font-display tracking-tight">
+        <section className="py-8 text-center">
+          <h2 className="text-2xl font-black text-gray-900 dark:text-white font-display tracking-tight">
             Como funciona
           </h2>
         </section>
