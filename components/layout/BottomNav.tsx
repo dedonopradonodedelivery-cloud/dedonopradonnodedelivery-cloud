@@ -74,24 +74,30 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
     }
 
     const Icon = item.icon;
-    const highlightColor = isActive ? 'text-blue-600 dark:text-blue-400' : 'text-gray-400 dark:text-gray-500';
+    
+    // Cor do ícone baseada no estado e se é ação principal
+    const iconColor = isActive 
+      ? 'text-blue-600 dark:text-blue-400' 
+      : item.isMainAction 
+        ? 'text-gray-600 dark:text-gray-300' 
+        : 'text-gray-400 dark:text-gray-500';
     
     return (
       <div className="relative">
         <Icon 
-          className={`w-6 h-6 transition-all duration-200 ${highlightColor}`} 
-          strokeWidth={item.isMainAction ? (isActive ? 3 : 2.5) : (isActive ? 2.5 : 2)} 
+          className={`w-6 h-6 transition-all duration-200 ${iconColor}`} 
+          strokeWidth={item.isMainAction ? (isActive ? 2.5 : 2) : (isActive ? 2.5 : 2)} 
         />
         {item.badge && !isActive && (
-          <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 border-2 border-white dark:border-gray-900 rounded-full animate-pulse shadow-sm"></span>
+          <span className="absolute -top-1.5 -right-1.5 w-3 h-3 bg-red-500 border-2 border-white dark:border-gray-900 rounded-full animate-pulse shadow-sm"></span>
         )}
       </div>
     );
   };
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 mx-auto w-full max-w-md bg-white dark:bg-gray-950 z-[1000] h-[85px] rounded-t-[28px] shadow-[0_-8px_40px_rgba(0,0,0,0.12)] border-t border-gray-100 dark:border-gray-800 px-2">
-      <div className="grid w-full h-full grid-cols-5">
+    <div className="fixed bottom-0 left-0 right-0 mx-auto w-full max-w-md bg-white dark:bg-gray-950 z-[1000] h-[90px] rounded-t-[28px] shadow-[0_-8px_40px_rgba(0,0,0,0.12)] border-t border-gray-100 dark:border-gray-800 px-3 pb-2">
+      <div className="grid w-full h-full grid-cols-5 items-end pb-3">
         {navItems.map((item) => {
           // Lógica de active state consolidada
           const isMerchantCoupon = item.id === 'merchant_coupons' && activeTab === 'merchant_coupons';
@@ -100,26 +106,36 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
           const isActive = activeTab === item.id || isProfileTab || isMerchantCoupon || isUserCoupon;
 
           return (
-            <div key={item.id} className="flex justify-center items-center h-full">
+            <div key={item.id} className="flex justify-center h-full items-center">
                <button 
                 onClick={() => setActiveTab(item.id)} 
-                className="w-full h-full flex flex-col items-center justify-center gap-1 active:scale-90 transition-transform outline-none" 
+                className="w-full h-full flex flex-col items-center justify-center gap-1.5 outline-none group" 
                 aria-label={item.label}
               >
-                <div className={`flex items-center justify-center h-11 w-11 rounded-2xl transition-all ${
-                  isActive && item.isMainAction 
-                    ? 'bg-blue-50 dark:bg-blue-900/30 scale-110' 
-                    : isActive && item.id !== 'profile' 
-                      ? 'bg-gray-50 dark:bg-gray-800' 
-                      : ''
-                }`}>
+                {/* 
+                   Contêiner do Ícone:
+                   - Se for MainAction (Conversa, Cupom, Classificados): Aplica estilo "alto-relevo" (fundo branco + sombra + borda).
+                   - Se não for (Início, Menu): Fica transparente (flat).
+                */}
+                <div className={`
+                  flex items-center justify-center transition-all duration-300 relative
+                  ${item.isMainAction 
+                    ? `h-11 w-14 rounded-2xl border mb-0.5 ${
+                        isActive 
+                          ? 'bg-blue-50 dark:bg-blue-900/30 border-blue-200 dark:border-blue-800 shadow-md shadow-blue-500/10 -translate-y-1' 
+                          : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 shadow-sm hover:-translate-y-0.5'
+                      }`
+                    : 'h-8 w-8'
+                  }
+                `}>
                   {renderIconOrAvatar(item, isActive)}
                 </div>
-                <span className={`text-[9px] font-black uppercase tracking-tighter transition-colors ${
+                
+                <span className={`text-[9px] font-black uppercase tracking-tighter transition-colors leading-none ${
                   isActive 
                     ? 'text-blue-600 dark:text-blue-400' 
                     : item.isMainAction 
-                      ? 'text-gray-500 dark:text-gray-400' 
+                      ? 'text-gray-600 dark:text-gray-400' 
                       : 'text-gray-400 dark:text-gray-500'
                 }`}>
                   {item.label}
