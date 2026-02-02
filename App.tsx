@@ -11,9 +11,11 @@ import { PatrocinadorMasterScreen } from '@/components/PatrocinadorMasterScreen'
 import { ServicesView } from '@/components/ServicesView';
 import { StoreAreaView } from '@/components/StoreAreaView';
 import { ClassifiedsView } from '@/components/ClassifiedsView';
+import { ClassifiedSearchResultsView } from '@/components/ClassifiedSearchResultsView';
 import { RealEstateView } from '@/components/RealEstateView';
 import { RealEstateWizard } from '@/components/RealEstateWizard';
 import { RealEstateDetailView } from '@/components/RealEstateDetailView';
+import { ClassifiedDetailView } from '@/components/ClassifiedDetailView';
 import { JobsView } from '@/components/JobsView';
 import { JobDetailView } from '@/components/JobDetailView';
 import { JobWizard } from '@/components/JobWizard';
@@ -45,13 +47,14 @@ import { MerchantCouponsModule } from '@/components/MerchantCouponsModule';
 import { StoreFinanceModule } from '@/components/StoreFinanceModule';
 import { StoreSupportModule } from '@/components/StoreSupportModule';
 import { StoreClaimFlow } from '@/components/StoreClaimFlow';
+import { AppSuggestionView } from '@/components/AppSuggestionView';
 import { MapPin, X, Palette } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import { NeighborhoodProvider } from '@/contexts/NeighborhoodContext';
-import { Category, Store, Job, RealEstateProperty, PlanType } from '@/types';
+import { Category, Store, Job, RealEstateProperty, PlanType, Classified } from '@/types';
 import { STORES, CATEGORIES, MOCK_JOBS } from '@/constants';
-import { AboutView, SupportView, FavoritesView } from '@/components/SimplePages';
+import { AboutView, SupportView, FavoritesView, UserActivityView, MyNeighborhoodsView, PrivacyView } from '@/components/SimplePages';
 
 let splashWasShownInSession = false;
 const ADMIN_EMAIL = 'dedonopradonodedelivery@gmail.com';
@@ -75,10 +78,14 @@ const App: React.FC = () => {
   const [selectedStore, setSelectedStore] = useState<Store | null>(null);
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
   const [selectedProperty, setSelectedProperty] = useState<RealEstateProperty | null>(null);
+  const [selectedClassified, setSelectedClassified] = useState<Classified | null>(null);
+  const [classifiedSearchTerm, setClassifiedSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
   const [selectedSubcategoryName, setSelectedSubcategoryName] = useState<string | null>(null);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   
+  const [activityType, setActivityType] = useState<string>('');
+
   const [activeServiceRequestId, setActiveServiceRequestId] = useState<string | null>(null);
   const [activeProfessionalId, setActiveProfessionalId] = useState<string | null>(null);
   const [chatRole, setChatRole] = useState<'resident' | 'merchant' | 'admin'>('resident');
@@ -101,7 +108,7 @@ const App: React.FC = () => {
   }, [isAuthReturn]);
 
   const handleNavigate = (view: string, data?: any) => {
-    if (view !== 'sponsor_info' && view !== 'notifications' && view !== 'patrocinador_master' && view !== 'real_estate_detail' && view !== 'job_detail' && view !== 'plan_selection') {
+    if (view !== 'sponsor_info' && view !== 'notifications' && view !== 'patrocinador_master' && view !== 'real_estate_detail' && view !== 'job_detail' && view !== 'plan_selection' && view !== 'classified_detail' && view !== 'classified_search_results' && view !== 'user_activity' && view !== 'app_suggestion') {
       setPreviousTab(activeTab);
     }
     
@@ -120,6 +127,18 @@ const App: React.FC = () => {
 
     if (view === 'job_detail' && data?.job) {
       setSelectedJob(data.job);
+    }
+
+    if (view === 'classified_detail' && data?.item) {
+      setSelectedClassified(data.item);
+    }
+
+    if (view === 'classified_search_results' && data?.searchTerm) {
+        setClassifiedSearchTerm(data.searchTerm);
+    }
+
+    if (view === 'user_activity' && data?.type) {
+        setActivityType(data.type);
     }
 
     setActiveTab(view);
@@ -186,7 +205,7 @@ const App: React.FC = () => {
       handleNavigate('profile');
   };
 
-  const headerExclusionList = ['store_area', 'store_detail', 'profile', 'patrocinador_master', 'merchant_performance', 'neighborhood_posts', 'saved_posts', 'classifieds', 'services', 'services_landing', 'merchant_leads', 'service_chat', 'admin_panel', 'category_detail', 'subcategory_detail', 'sponsor_info', 'real_estate', 'jobs', 'job_detail', 'job_wizard', 'adoption', 'donations', 'desapega', 'category_banner_sales', 'banner_sales_wizard', 'weekly_reward_page', 'user_coupons', 'notifications', 'store_profile', 'about', 'support', 'favorites', 'user_statement', 'service_messages_list', 'merchant_reviews', 'merchant_coupons', 'store_finance', 'store_support', 'real_estate_wizard', 'real_estate_detail', 'plan_selection'];
+  const headerExclusionList = ['store_area', 'store_detail', 'profile', 'patrocinador_master', 'merchant_performance', 'neighborhood_posts', 'saved_posts', 'classifieds', 'services', 'services_landing', 'merchant_leads', 'service_chat', 'admin_panel', 'category_detail', 'subcategory_detail', 'sponsor_info', 'real_estate', 'jobs', 'job_detail', 'job_wizard', 'adoption', 'donations', 'desapega', 'category_banner_sales', 'banner_sales_wizard', 'weekly_reward_page', 'user_coupons', 'notifications', 'store_profile', 'about', 'support', 'favorites', 'user_statement', 'service_messages_list', 'merchant_reviews', 'merchant_coupons', 'store_finance', 'store_support', 'real_estate_wizard', 'real_estate_detail', 'plan_selection', 'classified_detail', 'classified_search_results', 'user_activity', 'my_neighborhoods', 'privacy_policy', 'app_suggestion'];
   
   const RoleSwitcherModal: React.FC = () => {
     if (!isRoleSwitcherOpen) return null;
@@ -366,9 +385,11 @@ const App: React.FC = () => {
                     
                     {activeTab === 'store_detail' && selectedStore && <StoreDetailView store={selectedStore} onBack={() => handleNavigate(previousTab)} onClaim={() => handleClaimStore(selectedStore)} />}
                     {activeTab === 'classifieds' && <ClassifiedsView onBack={() => handleNavigate('home')} onNavigate={handleNavigate} user={user} onRequireLogin={() => setIsAuthOpen(true)} />}
+                    {activeTab === 'classified_search_results' && <ClassifiedSearchResultsView searchTerm={classifiedSearchTerm} onBack={() => handleNavigate('classifieds')} onNavigate={handleNavigate} />}
                     {activeTab === 'real_estate' && <RealEstateView onBack={() => handleNavigate('classifieds')} user={user} onRequireLogin={() => setIsAuthOpen(true)} onNavigate={handleNavigate} />}
                     {activeTab === 'real_estate_wizard' && <RealEstateWizard user={user} onBack={() => handleNavigate('real_estate')} onComplete={() => handleNavigate('real_estate')} onNavigate={handleNavigate} />}
                     {activeTab === 'real_estate_detail' && selectedProperty && <RealEstateDetailView property={selectedProperty} onBack={() => handleNavigate('real_estate')} user={user} onRequireLogin={() => setIsAuthOpen(true)} />}
+                    {activeTab === 'classified_detail' && selectedClassified && <ClassifiedDetailView item={selectedClassified} onBack={() => handleNavigate(previousTab)} user={user} onRequireLogin={() => setIsAuthOpen(true)} />}
                     {activeTab === 'jobs' && <JobsView onBack={() => handleNavigate('classifieds')} onJobClick={handleSelectJob} onNavigate={handleNavigate} />}
                     {activeTab === 'job_wizard' && <JobWizard user={user} onBack={() => handleNavigate('jobs')} onComplete={() => handleNavigate('jobs')} />}
                     {activeTab === 'job_detail' && selectedJob && <JobDetailView job={selectedJob} onBack={() => handleNavigate('jobs')} />}
@@ -382,6 +403,11 @@ const App: React.FC = () => {
                     {activeTab === 'sponsor_info' && <SponsorInfoView onBack={() => handleNavigate('profile')} onNavigate={handleNavigate} />}
                     {activeTab === 'patrocinador_master' && <PatrocinadorMasterScreen onBack={() => handleNavigate('home')} />}
                     
+                    {activeTab === 'user_activity' && <UserActivityView type={activityType} onBack={() => handleNavigate('profile')} />}
+                    {activeTab === 'my_neighborhoods' && <MyNeighborhoodsView onBack={() => handleNavigate('profile')} />}
+                    {activeTab === 'privacy_policy' && <PrivacyView onBack={() => handleNavigate('profile')} />}
+                    {activeTab === 'app_suggestion' && <AppSuggestionView user={user as any} onBack={() => handleNavigate('profile')} />}
+
                     {activeTab === 'about' && <AboutView onBack={() => handleNavigate(previousTab)} />}
                     {activeTab === 'support' && <SupportView onBack={() => handleNavigate(previousTab)} />}
                     {activeTab === 'favorites' && <FavoritesView onBack={() => handleNavigate(previousTab)} user={user} onNavigate={handleNavigate} />}

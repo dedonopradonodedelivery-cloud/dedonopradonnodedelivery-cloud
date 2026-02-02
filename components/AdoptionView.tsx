@@ -30,9 +30,12 @@ interface AdoptionViewProps {
   onNavigate: (view: string, data?: any) => void;
 }
 
-const AdoptionCard: React.FC<{ item: Classified }> = ({ item }) => {
+const AdoptionCard: React.FC<{ item: Classified; onClick: () => void }> = ({ item, onClick }) => {
   return (
-    <div className="bg-white dark:bg-gray-900 rounded-[2.5rem] border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden flex flex-col group transition-all hover:shadow-md">
+    <div 
+      onClick={onClick}
+      className="bg-white dark:bg-gray-900 rounded-[2.5rem] border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden flex flex-col group transition-all hover:shadow-md cursor-pointer active:scale-[0.99]"
+    >
       <div className="aspect-[16/10] bg-gray-100 relative overflow-hidden">
         <img 
           src={item.imageUrl || "https://images.unsplash.com/photo-1598133894008-61f7fdb8cc3a?q=80&w=800"} 
@@ -137,6 +140,10 @@ export const AdoptionView: React.FC<AdoptionViewProps> = ({ onBack, user, onRequ
       setIsSubmitting(false);
       setViewState('success');
     }, 1500);
+  };
+
+  const handleItemClick = (item: Classified) => {
+    onNavigate('classified_detail', { item });
   };
 
   if (viewState === 'form') {
@@ -264,7 +271,7 @@ export const AdoptionView: React.FC<AdoptionViewProps> = ({ onBack, user, onRequ
         {filteredAdoptions.length > 0 ? (
           <div className="grid grid-cols-1 gap-6">
             {filteredAdoptions.map(item => (
-              <AdoptionCard key={item.id} item={item} />
+              <AdoptionCard key={item.id} item={item} onClick={() => handleItemClick(item)} />
             ))}
           </div>
         ) : (

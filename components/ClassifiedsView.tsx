@@ -204,7 +204,12 @@ export const ClassifiedsView: React.FC<ClassifiedsViewProps> = ({ onBack, onNavi
   };
 
   const handleItemClick = (item: Classified) => {
-    alert(`Detalhes de: ${item.title}\n\nEntre em contato via WhatsApp: ${item.contactWhatsapp}`);
+    onNavigate('classified_detail', { item });
+  };
+
+  const handleSearchSubmit = () => {
+    if (!searchTerm.trim()) return;
+    onNavigate('classified_search_results', { searchTerm });
   };
 
   return (
@@ -217,7 +222,7 @@ export const ClassifiedsView: React.FC<ClassifiedsViewProps> = ({ onBack, onNavi
           
           <div className="flex-1 min-w-0">
             <h1 className="font-black text-xl text-gray-900 dark:text-white uppercase tracking-tighter leading-none truncate">Classificados</h1>
-            <p className="text-[10px] text-blue-500 font-black uppercase tracking-widest mt-1 truncate">Oportunidades em {currentNeighborhood === "Jacarepaguá (todos)" ? "Jacarepaguá" : currentNeighborhood}</p>
+            <p className="text-[10px] text-blue-50 font-black uppercase tracking-widest mt-1 truncate">Oportunidades em {currentNeighborhood === "Jacarepaguá (todos)" ? "Jacarepaguá" : currentNeighborhood}</p>
           </div>
 
           <div className="flex items-center gap-2 shrink-0">
@@ -238,21 +243,30 @@ export const ClassifiedsView: React.FC<ClassifiedsViewProps> = ({ onBack, onNavi
           </div>
         </div>
 
-        <div className="relative">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
-            <input 
-                type="text" 
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="O que você está procurando?"
-                className="w-full bg-gray-50 dark:bg-gray-800 border-none py-3.5 pl-11 pr-4 rounded-2xl text-sm font-medium outline-none focus:ring-2 focus:ring-[#1E5BFF]/30 transition-all shadow-inner dark:text-white"
-            />
+        <div className="space-y-2">
+            <div className="relative">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <input 
+                    type="text" 
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && handleSearchSubmit()}
+                    placeholder="Busque anúncios: vaga, sala comercial, doação, item…"
+                    className="w-full bg-gray-50 dark:bg-gray-800 border-none py-3.5 pl-11 pr-32 rounded-2xl text-sm font-medium outline-none focus:ring-2 focus:ring-[#1E5BFF]/30 transition-all shadow-inner dark:text-white"
+                />
+                <div className="absolute right-3 top-1/2 -translate-y-1/2 bg-blue-50 dark:bg-blue-900/30 px-2.5 py-1 rounded-lg border border-blue-100 dark:border-blue-800">
+                    <span className="text-[9px] font-black text-blue-600 dark:text-blue-400 uppercase tracking-widest">Classificados</span>
+                </div>
+            </div>
+            <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest ml-1 opacity-70">
+                Busca dentro dos Classificados do bairro
+            </p>
         </div>
       </header>
 
       <main className="p-5 space-y-4">
         {/* CARROSSEL DE BANNERS EXCLUSIVO DOS CLASSIFICADOS */}
-        <ClassifiedsBannerCarousel onStoreClick={(store) => onNavigate('store_detail', { store })} />
+        <ClassifiedsBannerCarousel onItemClick={handleItemClick} />
 
         {/* BOTÕES DE CATEGORIA RÁPIDOS */}
         <div className="grid grid-cols-3 gap-4 mb-8">
@@ -291,16 +305,11 @@ export const ClassifiedsView: React.FC<ClassifiedsViewProps> = ({ onBack, onNavi
             subtitle="Encontre talentos locais"
         />
 
-        {/* BANNER PATROCINADOR MASTER FINAL */}
-        <section className="mt-8">
-          <MasterSponsorBanner onClick={() => onNavigate('patrocinador_master')} label="Classificados JPA" />
-        </section>
-
         <CategoryBlock 
             category={CLASSIFIED_CATEGORIES[3]} 
             items={adoption} 
             onItemClick={handleItemClick}
-            onAnunciar={(name) => alert('Fluxo de adoção em breve')}
+            onAnunciar={(name) => onNavigate('adoption')}
             onViewAll={() => onNavigate('adoption')}
             ctaLabel="Divulgar Adoção"
             subtitle="Ajude um amigo a encontrar um lar"
@@ -310,7 +319,7 @@ export const ClassifiedsView: React.FC<ClassifiedsViewProps> = ({ onBack, onNavi
             category={CLASSIFIED_CATEGORIES[4]} 
             items={donations} 
             onItemClick={handleItemClick}
-            onAnunciar={(name) => alert('Fluxo de doação em breve')}
+            onAnunciar={(name) => onNavigate('donations')}
             onViewAll={() => onNavigate('donations')}
             ctaLabel="Divulgar Doação"
             subtitle="Fazer o bem circula no bairro"
@@ -320,11 +329,16 @@ export const ClassifiedsView: React.FC<ClassifiedsViewProps> = ({ onBack, onNavi
             category={CLASSIFIED_CATEGORIES[5]} 
             items={desapega} 
             onItemClick={handleItemClick}
-            onAnunciar={(name) => alert('Fluxo de desapego em breve')}
+            onAnunciar={(name) => onNavigate('desapega')}
             onViewAll={() => onNavigate('desapega')}
             ctaLabel="Anunciar Desapego"
             subtitle="Venda o que você não usa mais"
         />
+
+        {/* BANNER PATROCINADOR MASTER FINAL - ÚLTIMO ELEMENTO DA PÁGINA CONFORME REGRA */}
+        <section className="mt-8">
+          <MasterSponsorBanner onClick={() => onNavigate('patrocinador_master')} label="Classificados JPA" />
+        </section>
       </main>
 
       {/* MODAL DE SELEÇÃO O QUE ANUNCIAR */}

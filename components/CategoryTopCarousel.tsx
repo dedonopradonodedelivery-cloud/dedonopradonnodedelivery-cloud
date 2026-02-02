@@ -44,26 +44,31 @@ export const CategoryTopCarousel: React.FC<CategoryTopCarouselProps> = ({ catego
 
   if (banners.length === 0) return null;
 
-  const handleBannerClick = (storeId: string) => {
-    const store = STORES.find(s => s.id === storeId);
+  const handleBannerClick = () => {
+    const currentBanner = banners[currentIndex];
+    if (!currentBanner) return;
+    
+    const store = STORES.find(s => s.id === currentBanner.storeId);
     if (store) onStoreClick(store);
   };
 
   return (
     <div className="w-full px-5 mb-6 animate-in fade-in duration-500">
-      <div className="relative aspect-[16/9] w-full rounded-[2.5rem] overflow-hidden shadow-2xl bg-gray-100 dark:bg-gray-800">
+      <div 
+        onClick={handleBannerClick}
+        className="relative aspect-[16/9] w-full rounded-[2.5rem] overflow-hidden shadow-2xl bg-gray-100 dark:bg-gray-800 cursor-pointer group"
+      >
         {banners.map((banner, index) => (
           <div
             key={`${banner.storeId}-${index}`}
-            onClick={() => handleBannerClick(banner.storeId)}
-            className={`absolute inset-0 w-full h-full transition-all duration-700 ease-in-out cursor-pointer ${
+            className={`absolute inset-0 w-full h-full transition-all duration-700 ease-in-out ${
               index === currentIndex ? 'opacity-100 scale-100 z-10' : 'opacity-0 scale-105 z-0'
             }`}
           >
             <img 
               src={banner.image} 
               alt="Publicidade de Categoria" 
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
             />
             {/* Overlay sutil para indicar patrocínio */}
             <div className="absolute top-4 right-4 z-20">
@@ -76,12 +81,12 @@ export const CategoryTopCarousel: React.FC<CategoryTopCarouselProps> = ({ catego
           </div>
         ))}
 
-        {/* Indicadores (Dots) discretos */}
-        <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-2 z-30">
+        {/* Indicadores (Dots) discretos - pointer-events-none para não bloquear o clique no banner */}
+        <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-2 z-30 pointer-events-none">
           {banners.map((_, idx) => (
             <div
               key={idx}
-              className={`h-1 rounded-full transition-all duration-300 ${
+              className={`h-1 rounded-full transition-all duration-300 pointer-events-auto ${
                 idx === currentIndex ? 'w-6 bg-white' : 'w-1.5 bg-white/40'
               }`}
             />

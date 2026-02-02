@@ -33,9 +33,12 @@ interface DonationsViewProps {
   onNavigate: (view: string, data?: any) => void;
 }
 
-const DonationCard: React.FC<{ item: Classified }> = ({ item }) => {
+const DonationCard: React.FC<{ item: Classified; onClick: () => void }> = ({ item, onClick }) => {
   return (
-    <div className="bg-white dark:bg-gray-900 rounded-[2.5rem] border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden flex flex-col group transition-all hover:shadow-md">
+    <div 
+      onClick={onClick}
+      className="bg-white dark:bg-gray-900 rounded-[2.5rem] border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden flex flex-col group transition-all hover:shadow-md cursor-pointer active:scale-[0.99]"
+    >
       <div className="aspect-[16/10] bg-gray-100 relative overflow-hidden">
         <img 
           src={item.imageUrl || "https://images.unsplash.com/photo-1593113598332-cd288d649433?q=80&w=800"} 
@@ -128,6 +131,10 @@ export const DonationsView: React.FC<DonationsViewProps> = ({ onBack, user, onRe
       setIsSubmitting(false);
       setViewState('success');
     }, 1500);
+  };
+
+  const handleItemClick = (item: Classified) => {
+    onNavigate('classified_detail', { item });
   };
 
   if (viewState === 'form') {
@@ -260,7 +267,7 @@ export const DonationsView: React.FC<DonationsViewProps> = ({ onBack, user, onRe
         {filteredDonations.length > 0 ? (
           <div className="grid grid-cols-1 gap-6">
             {filteredDonations.map(item => (
-              <DonationCard key={item.id} item={item} />
+              <DonationCard key={item.id} item={item} onClick={() => handleItemClick(item)} />
             ))}
           </div>
         ) : (

@@ -419,3 +419,15 @@ export interface DbWalletMovement {
   description: string;
   created_at: string;
 }
+
+export interface AppSuggestion {
+    id: string;
+    userId: string;
+    userName: string;
+    timestamp: string;
+    subject: string;
+    message: string;
+    category: 'bug' | 'idea' | 'improve' | 'other';
+    contactConsent: boolean;
+    status: 'new' | 'analyzing' | 'responded';
+}

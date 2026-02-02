@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo, useEffect } from 'react';
 import { Store } from '../types';
 import { STORES } from '../constants';
@@ -167,7 +168,7 @@ export const HomeBannerCarousel: React.FC<HomeBannerCarouselProps> = ({ onStoreC
   const isCategoryView = !!categoryName;
 
   const bannerCount = useMemo(() => {
-    return isCategoryView ? 2 : 4; // Ajustado de 3 para 4 para suportar o novo banner na Home
+    return isCategoryView ? 2 : 4;
   }, [isCategoryView]);
 
   const activeBanners = useMemo(() => {
@@ -238,7 +239,7 @@ export const HomeBannerCarousel: React.FC<HomeBannerCarouselProps> = ({ onStoreC
             <img 
               src={currentBanner.image} 
               alt={currentBanner.title} 
-              className="absolute inset-0 w-full h-full object-cover mix-blend-overlay opacity-60 transition-transform duration-700" 
+              className="absolute inset-0 w-full h-full object-cover mix-blend-overlay opacity-60 transition-transform duration-700 group-hover:scale-105" 
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
             
@@ -254,12 +255,11 @@ export const HomeBannerCarousel: React.FC<HomeBannerCarouselProps> = ({ onStoreC
         )}
 
         {activeBanners.length > 1 && (
-          <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-1.5 z-10">
+          <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-1.5 z-10 pointer-events-none">
             {activeBanners.map((_, idx) => (
               <div 
                 key={idx} 
-                onClick={(e) => { e.stopPropagation(); setCurrentIndex(idx); }}
-                className={`h-1.5 rounded-full cursor-pointer transition-all duration-300 ${idx === currentIndex ? 'w-5 bg-white' : 'w-1.5 bg-white/40'}`} 
+                className={`h-1 rounded-full transition-all duration-300 pointer-events-auto ${idx === currentIndex ? 'w-5 bg-white' : 'w-1.5 bg-white/40'}`} 
               />
             ))}
           </div>

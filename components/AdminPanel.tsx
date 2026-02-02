@@ -22,12 +22,18 @@ import {
   FileText,
   MessageCircle,
   MessageSquare,
-  // FIX: Added missing Wrench icon to imports
-  Wrench
+  Wrench,
+  Lightbulb,
+  Bug,
+  CheckCircle2,
+  MoreVertical,
+  ChevronDown
 } from 'lucide-react';
+// Import CATEGORIES from constants
+import { CATEGORIES } from '../constants';
 import { fetchAdminMerchants, fetchAdminUsers } from '../backend/services';
 import { supabase } from '../lib/supabaseClient';
-import { ServiceRequest } from '../types';
+import { ServiceRequest, AppSuggestion } from '../types';
 
 // --- TYPES ---
 type FinancialProductType = 'banner' | 'highlight' | 'master' | 'connect' | 'lead';
@@ -144,7 +150,6 @@ const FinancialChart: React.FC<{ data: FinancialTransaction[], days: number }> =
   );
 };
 
-// Added AdminFinancialDashboard component to fix "Cannot find name 'AdminFinancialDashboard'" error
 const AdminFinancialDashboard: React.FC = () => {
   const [range, setRange] = useState<DateRangeOption>('30d');
   const [data, setData] = useState<FinancialTransaction[]>([]);
@@ -277,17 +282,19 @@ const AdminFinancialDashboard: React.FC = () => {
 };
 
 export const AdminPanel: React.FC<any> = ({ onLogout, viewMode, onOpenViewSwitcher, onNavigateToApp, onOpenMonitorChat }) => {
-  const [activeTab, setActiveTab] = useState<'merchants' | 'users' | 'financial' | 'monitoring'>('financial');
+  const [activeTab, setActiveTab] = useState<'merchants' | 'users' | 'financial' | 'monitoring' | 'suggestions'>('financial');
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [merchants, setMerchants] = useState<any[]>([]);
   const [users, setUsers] = useState<any[]>([]);
   const [serviceRequests, setServiceRequests] = useState<ServiceRequest[]>([]);
+  const [suggestions, setSuggestions] = useState<AppSuggestion[]>([]);
 
   useEffect(() => {
     if(activeTab === 'merchants') loadMerchants();
     if(activeTab === 'users') loadUsers();
     if(activeTab === 'monitoring') loadMonitoring();
+    if(activeTab === 'suggestions') loadSuggestions();
   }, [activeTab, searchTerm]);
 
   const loadMerchants = async () => { setLoading(true); setMerchants(await fetchAdminMerchants(searchTerm)); setLoading(false); };
@@ -295,6 +302,16 @@ export const AdminPanel: React.FC<any> = ({ onLogout, viewMode, onOpenViewSwitch
   const loadMonitoring = () => {
     const saved = localStorage.getItem('service_requests_mock');
     if (saved) setServiceRequests(JSON.parse(saved));
+  };
+  const loadSuggestions = () => {
+    const saved = localStorage.getItem('app_suggestions_mock');
+    if (saved) setSuggestions(JSON.parse(saved));
+  };
+
+  const updateSuggestionStatus = (id: string, status: AppSuggestion['status']) => {
+    const updated = suggestions.map(s => s.id === id ? { ...s, status } : s);
+    setSuggestions(updated);
+    localStorage.setItem('app_suggestions_mock', JSON.stringify(updated));
   };
 
   return (
@@ -317,7 +334,8 @@ export const AdminPanel: React.FC<any> = ({ onLogout, viewMode, onOpenViewSwitch
                 { id: 'financial', label: 'Financeiro', icon: DollarSign },
                 { id: 'merchants', label: 'Lojistas', icon: Store },
                 { id: 'users', label: 'Usuários', icon: Users },
-                { id: 'monitoring', label: 'Chats (Beta)', icon: MessageSquare },
+                { id: 'monitoring', label: 'Chats', icon: MessageSquare },
+                { id: 'suggestions', label: 'Ideias', icon: Lightbulb },
             ].map(tab => (
                 <button key={tab.id} onClick={() => setActiveTab(tab.id as any)} className={`flex-1 min-w-fit px-6 py-3 rounded-2xl flex items-center justify-center gap-2 text-xs font-black uppercase tracking-widest transition-all ${activeTab === tab.id ? 'bg-[#1E5BFF] text-white shadow-lg' : 'bg-white/5 text-slate-500 hover:bg-white/10'}`}>
                     <tab.icon size={14} /> {tab.label}
@@ -355,6 +373,66 @@ export const AdminPanel: React.FC<any> = ({ onLogout, viewMode, onOpenViewSwitch
                             </button>
                         </div>
                     ))}
+                </div>
+            </div>
+        )}
+
+        {activeTab === 'suggestions' && (
+            <div className="space-y-6">
+                <div className="flex flex-col gap-1 px-1">
+                    <h2 className="text-xl font-black text-white uppercase tracking-tight">Sugestões de Melhoria</h2>
+                    <p className="text-xs text-slate-500">O que os moradores estão pedindo.</p>
+                </div>
+                <div className="grid gap-4">
+                    {suggestions.length === 0 ? (
+                        <div className="py-20 text-center opacity-30 flex flex-col items-center">
+                            <Lightbulb size={48} className="mb-4 text-slate-700" />
+                            <p className="font-bold uppercase tracking-widest text-xs">Nenhuma sugestão recebida</p>
+                        </div>
+                    ) : (
+                        suggestions.map(sug => {
+                            const CatIcon = CATEGORIES.find(c => c.id === sug.category)?.icon || Lightbulb;
+                            return (
+                                <div key={sug.id} className="bg-slate-900 p-6 rounded-[2rem] border border-white/5 space-y-4">
+                                    <div className="flex justify-between items-start">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-indigo-400">
+                                                {sug.category === 'bug' ? <Bug size={20}/> : <Lightbulb size={20}/>}
+                                            </div>
+                                            <div>
+                                                <h4 className="font-bold text-white leading-none mb-1">{sug.subject}</h4>
+                                                <p className="text-[9px] text-slate-500 uppercase font-black">Por: {sug.userName} • {new Date(sug.timestamp).toLocaleDateString()}</p>
+                                            </div>
+                                        </div>
+                                        <select 
+                                            value={sug.status} 
+                                            onChange={(e) => updateSuggestionStatus(sug.id, e.target.value as any)}
+                                            className={`text-[8px] font-black uppercase px-2 py-1 rounded-md border bg-transparent outline-none ${
+                                                sug.status === 'new' ? 'text-blue-400 border-blue-500/30' :
+                                                sug.status === 'analyzing' ? 'text-amber-400 border-amber-500/30' :
+                                                'text-emerald-400 border-emerald-500/30'
+                                            }`}
+                                        >
+                                            <option value="new">Novo</option>
+                                            <option value="analyzing">Em análise</option>
+                                            <option value="responded">Respondido</option>
+                                        </select>
+                                    </div>
+                                    <p className="text-sm text-slate-400 leading-relaxed font-medium">"{sug.message}"</p>
+                                    <div className="pt-3 border-t border-white/5 flex justify-between items-center">
+                                        <div className="flex items-center gap-2">
+                                            {sug.contactConsent ? (
+                                                <span className="text-[8px] font-bold text-emerald-500 uppercase flex items-center gap-1"><CheckCircle2 size={10}/> Aceita contato</span>
+                                            ) : (
+                                                <span className="text-[8px] font-bold text-slate-600 uppercase">Não quer contato</span>
+                                            )}
+                                        </div>
+                                        <button className="text-[10px] font-black text-blue-500 uppercase tracking-widest hover:underline">Ver Perfil</button>
+                                    </div>
+                                </div>
+                            );
+                        })
+                    )}
                 </div>
             </div>
         )}
