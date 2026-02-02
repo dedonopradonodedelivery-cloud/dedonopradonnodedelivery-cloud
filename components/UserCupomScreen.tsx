@@ -1,15 +1,34 @@
 
 import React, { useState, useMemo } from 'react';
-// FIX: Added missing ArrowRight import from lucide-react.
-import { ChevronLeft, Ticket, Calendar, Tag, Info, AlertTriangle, X, Search, ChevronRight, Clock, CheckCircle2, Copy, ArrowRight } from 'lucide-react';
+import { 
+  ChevronLeft, 
+  Ticket, 
+  Tag, 
+  Info, 
+  X, 
+  Search, 
+  ChevronRight, 
+  Clock, 
+  CheckCircle2, 
+  Copy, 
+  ArrowRight,
+  Store as StoreIcon,
+  ExternalLink,
+  MessageCircle
+} from 'lucide-react';
+import { Store, AdType } from '../types';
+import { STORES } from '../constants';
 
 interface UserCupomScreenProps {
   onBack: () => void;
+  onNavigate: (view: string, data?: any) => void;
+  onStoreClick: (store: Store) => void;
 }
 
-export const UserCupomScreen: React.FC<UserCupomScreenProps> = ({ onBack }) => {
+export const UserCupomScreen: React.FC<UserCupomScreenProps> = ({ onBack, onNavigate, onStoreClick }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [selectedForUse, setSelectedForUse] = useState<any | null>(null);
 
   const savedCoupons = useMemo(() => {
     const coupons = JSON.parse(localStorage.getItem('user_saved_coupons') || '[]');
@@ -33,6 +52,23 @@ export const UserCupomScreen: React.FC<UserCupomScreenProps> = ({ onBack }) => {
     navigator.clipboard.writeText(code);
     setCopiedId(id);
     setTimeout(() => setCopiedId(null), 2000);
+  };
+
+  const handleGoToStore = (storeId: string, storeName: string) => {
+    setSelectedForUse(null);
+    const store = STORES.find(s => s.id === storeId) || {
+      id: storeId,
+      name: storeName || 'Loja Parceira',
+      category: 'Parceiro Local',
+      description: 'Esta loja é uma parceira oficial do Localizei JPA. Em breve seu perfil completo estará disponível com fotos, cardápio e promoções exclusivas.',
+      adType: AdType.PREMIUM,
+      rating: 5.0,
+      distance: 'Freguesia • RJ',
+      verified: true,
+      isOpenNow: true,
+      logoUrl: '/assets/default-logo.png'
+    };
+    onStoreClick(store as Store);
   };
 
   const getStatusBadge = (status: string) => {
@@ -110,10 +146,17 @@ export const UserCupomScreen: React.FC<UserCupomScreenProps> = ({ onBack }) => {
                                 <Clock size={12} />
                                 <span>Válido até {new Date(coupon.expiresAt).toLocaleDateString()}</span>
                              </div>
-                             {coupon.status === 'available' && (
-                                <button className="text-[10px] font-black text-blue-600 uppercase tracking-widest flex items-center gap-1 hover:underline">
+                             {coupon.status === 'available' ? (
+                                <button 
+                                    onClick={() => setSelectedForUse(coupon)}
+                                    className="text-[10px] h-[44px] px-4 -mr-4 font-black text-blue-600 uppercase tracking-widest flex items-center gap-1 hover:underline active:opacity-60 transition-all"
+                                >
                                     Usar Agora <ArrowRight size={12} strokeWidth={3} />
                                 </button>
+                             ) : (
+                                <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                                    {coupon.status === 'used' ? 'Já utilizado' : 'Expirado'}
+                                </span>
                              )}
                         </div>
                     </div>
@@ -135,6 +178,78 @@ export const UserCupomScreen: React.FC<UserCupomScreenProps> = ({ onBack }) => {
             </p>
         </div>
       </main>
+
+      {/* MODAL / BOTTOM SHEET USAR CUPOM */}
+      {selectedForUse && (
+          <div className="fixed inset-0 z-[1001] bg-black/60 backdrop-blur-sm flex items-end justify-center animate-in fade-in duration-200" onClick={() => setSelectedForUse(null)}>
+              <div 
+                className="bg-white dark:bg-gray-900 w-full max-w-md rounded-t-[2.5rem] p-6 pb-12 shadow-2xl animate-in slide-in-from-bottom duration-300 flex flex-col"
+                onClick={e => e.stopPropagation()}
+              >
+                  <div className="w-12 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full mx-auto mb-8 shrink-0"></div>
+                  
+                  <div className="flex flex-col items-center text-center mb-8">
+                      <div className="w-20 h-20 bg-blue-50 dark:bg-blue-900/30 rounded-3xl flex items-center justify-center text-[#1E5BFF] mb-4 shadow-inner">
+                          <Ticket size={40} />
+                      </div>
+                      <h2 className="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tighter leading-none">{selectedForUse.storeName}</h2>
+                      <p className="text-xs text-gray-400 font-bold uppercase tracking-widest mt-2">{selectedForUse.discount} de desconto</p>
+                  </div>
+
+                  <div className="space-y-6">
+                      <div className="bg-gray-50 dark:bg-gray-800 p-6 rounded-[2rem] border border-gray-100 dark:border-gray-700 text-center">
+                          <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-3">Apresente este código</p>
+                          <h3 className="text-4xl font-black text-gray-900 dark:text-white font-mono tracking-[0.2em] mb-6">{selectedForUse.id}</h3>
+                          <button 
+                            onClick={() => handleCopyCode(selectedForUse.id, selectedForUse.id)}
+                            className={`w-full py-4 rounded-xl flex items-center justify-center gap-2 font-black text-[10px] uppercase tracking-widest transition-all ${
+                                copiedId === selectedForUse.id 
+                                    ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20' 
+                                    : 'bg-white dark:bg-gray-700 text-blue-600 border border-gray-100 dark:border-gray-600 shadow-sm active:scale-95'
+                            }`}
+                          >
+                              {copiedId === selectedForUse.id ? (
+                                  <><CheckCircle2 size={16} /> Código Copiado!</>
+                              ) : (
+                                  <><Copy size={16} /> Copiar Código</>
+                              )}
+                          </button>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-3">
+                          <button 
+                            onClick={() => handleGoToStore(selectedForUse.storeId, selectedForUse.storeName)}
+                            className="p-5 rounded-2xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 flex flex-col items-center gap-2 active:scale-95 transition-all shadow-sm group"
+                          >
+                              <StoreIcon className="text-gray-400 group-hover:text-[#1E5BFF] transition-colors" size={24} />
+                              <span className="text-[9px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest">Ver Perfil</span>
+                          </button>
+                          <button 
+                            onClick={() => window.open(`https://wa.me/5521999999999?text=${encodeURIComponent(`Olá! Vi o cupom da ${selectedForUse.storeName} no Localizei JPA e gostaria de tirar uma dúvida.`)}`, '_blank')}
+                            className="p-5 rounded-2xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 flex flex-col items-center gap-2 active:scale-95 transition-all shadow-sm group"
+                          >
+                              <MessageCircle className="text-gray-400 group-hover:text-emerald-500 transition-colors" size={24} />
+                              <span className="text-[9px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest">Tirar Dúvida</span>
+                          </button>
+                      </div>
+
+                      <div className="bg-amber-50 dark:bg-amber-900/10 p-5 rounded-2xl border border-amber-100 dark:border-amber-800/30 flex gap-3">
+                          <Clock className="w-5 h-5 text-amber-600 shrink-0" />
+                          <p className="text-[10px] text-amber-700 dark:text-amber-300 font-bold leading-relaxed uppercase">
+                              Atenção: Este cupom expira em {new Date(selectedForUse.expiresAt).toLocaleDateString()}. Aproveite logo!
+                          </p>
+                      </div>
+                  </div>
+
+                  <button 
+                    onClick={() => setSelectedForUse(null)}
+                    className="mt-8 text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] hover:text-gray-600"
+                  >
+                      Fechar detalhes
+                  </button>
+              </div>
+          </div>
+      )}
     </div>
   );
 };

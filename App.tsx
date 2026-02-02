@@ -275,7 +275,9 @@ const App: React.FC = () => {
 
                     {activeTab === 'user_coupons' && (
                         <UserCupomScreen 
-                            onBack={() => handleNavigate('profile')} 
+                            onBack={() => handleNavigate('profile')}
+                            onNavigate={handleNavigate}
+                            onStoreClick={handleSelectStore}
                         />
                     )}
 
