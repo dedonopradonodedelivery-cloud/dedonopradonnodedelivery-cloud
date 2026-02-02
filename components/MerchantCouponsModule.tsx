@@ -1,6 +1,5 @@
 
 import React, { useState, useMemo } from 'react';
-// Added Info to the lucide-react imports to fix the error in line 164/165
 import { 
   ChevronLeft, 
   Ticket, 
@@ -23,26 +22,15 @@ import {
   Info
 } from 'lucide-react';
 
-interface CouponMovement {
-  id: string;
-  userId: string;
-  storeName: string;
-  date: string;
-  status: 'available' | 'used' | 'expired';
-  validity: string;
-}
-
 export const MerchantCouponsModule: React.FC<{ onBack: () => void }> = ({ onBack }) => {
-  const [hasOptedIn, setHasOptedIn] = useState(true); // Default true for this view
+  const [hasOptedIn, setHasOptedIn] = useState(true);
   const [activeTab, setActiveTab] = useState<'validation' | 'config' | 'history'>('validation');
   
-  // Validation state
   const [validationCode, setValidationCode] = useState('');
   const [validationStatus, setValidationStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [validationMessage, setValidationMessage] = useState('');
   const [lastValidatedCoupon, setLastValidatedCoupon] = useState<any>(null);
 
-  // Config state
   const [isSaving, setIsSaving] = useState(false);
   const [config, setConfig] = useState({
     title: 'Desconto de Inauguração',
@@ -99,7 +87,6 @@ export const MerchantCouponsModule: React.FC<{ onBack: () => void }> = ({ onBack
             return;
         }
 
-        // Sucesso: Marcar como usado
         coupons[couponIndex].status = 'used';
         localStorage.setItem('user_saved_coupons', JSON.stringify(coupons));
         
@@ -179,7 +166,7 @@ export const MerchantCouponsModule: React.FC<{ onBack: () => void }> = ({ onBack
           
           <div className="space-y-4">
             <div>
-              <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1 block mb-1">Título da Oferta</label>
+              <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1 block mb-1.5">Título da Oferta</label>
               <input 
                 type="text" 
                 value={config.title}
@@ -190,7 +177,7 @@ export const MerchantCouponsModule: React.FC<{ onBack: () => void }> = ({ onBack
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1 block mb-1">Tipo</label>
+                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1 block mb-1.5">Tipo</label>
                 <select 
                   value={config.type}
                   onChange={e => setConfig({...config, type: e.target.value as any})}
@@ -202,7 +189,7 @@ export const MerchantCouponsModule: React.FC<{ onBack: () => void }> = ({ onBack
                 </select>
               </div>
               <div>
-                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1 block mb-1">Valor</label>
+                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1 block mb-1.5">Valor</label>
                 <input 
                   type="text" 
                   value={config.value}
