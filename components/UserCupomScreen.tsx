@@ -179,25 +179,25 @@ export const UserCupomScreen: React.FC<UserCupomScreenProps> = ({ onBack, onNavi
         </div>
       </main>
 
-      {/* MODAL / BOTTOM SHEET USAR CUPOM */}
+      {/* MODAL / BOTTOM SHEET USAR CUPOM - AJUSTE DE CENTRALIZAÇÃO */}
       {selectedForUse && (
-          <div className="fixed inset-0 z-[1001] bg-black/60 backdrop-blur-sm flex items-end justify-center animate-in fade-in duration-200" onClick={() => setSelectedForUse(null)}>
+          <div className="fixed inset-0 z-[1001] bg-black/60 backdrop-blur-sm flex items-end justify-center p-4 animate-in fade-in duration-200" onClick={() => setSelectedForUse(null)}>
               <div 
-                className="bg-white dark:bg-gray-900 w-full max-w-md rounded-t-[2.5rem] p-6 pb-12 shadow-2xl animate-in slide-in-from-bottom duration-300 flex flex-col"
+                className="bg-white dark:bg-gray-900 w-full max-w-md rounded-[2.5rem] p-8 pb-12 shadow-2xl animate-in slide-in-from-bottom duration-300 flex flex-col items-center text-center"
                 onClick={e => e.stopPropagation()}
               >
-                  <div className="w-12 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full mx-auto mb-8 shrink-0"></div>
+                  <div className="w-12 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full mb-8 shrink-0"></div>
                   
-                  <div className="flex flex-col items-center text-center mb-8">
-                      <div className="w-20 h-20 bg-blue-50 dark:bg-blue-900/30 rounded-3xl flex items-center justify-center text-[#1E5BFF] mb-4 shadow-inner">
+                  <div className="flex flex-col items-center mb-8">
+                      <div className="w-20 h-20 bg-blue-50 dark:bg-blue-900/30 rounded-[2rem] flex items-center justify-center text-[#1E5BFF] mb-4 shadow-inner border border-blue-100/50">
                           <Ticket size={40} />
                       </div>
                       <h2 className="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tighter leading-none">{selectedForUse.storeName}</h2>
                       <p className="text-xs text-gray-400 font-bold uppercase tracking-widest mt-2">{selectedForUse.discount} de desconto</p>
                   </div>
 
-                  <div className="space-y-6">
-                      <div className="bg-gray-50 dark:bg-gray-800 p-6 rounded-[2rem] border border-gray-100 dark:border-gray-700 text-center">
+                  <div className="space-y-6 w-full">
+                      <div className="bg-gray-50 dark:bg-gray-800 p-6 rounded-[2rem] border border-gray-100 dark:border-gray-700 w-full">
                           <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-3">Apresente este código</p>
                           <h3 className="text-4xl font-black text-gray-900 dark:text-white font-mono tracking-[0.2em] mb-6">{selectedForUse.id}</h3>
                           <button 
@@ -235,7 +235,7 @@ export const UserCupomScreen: React.FC<UserCupomScreenProps> = ({ onBack, onNavi
 
                       <div className="bg-amber-50 dark:bg-amber-900/10 p-5 rounded-2xl border border-amber-100 dark:border-amber-800/30 flex gap-3">
                           <Clock className="w-5 h-5 text-amber-600 shrink-0" />
-                          <p className="text-[10px] text-amber-700 dark:text-amber-300 font-bold leading-relaxed uppercase">
+                          <p className="text-[10px] text-amber-700 dark:text-amber-300 font-bold leading-relaxed uppercase text-left">
                               Atenção: Este cupom expira em {new Date(selectedForUse.expiresAt).toLocaleDateString()}. Aproveite logo!
                           </p>
                       </div>

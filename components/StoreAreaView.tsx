@@ -26,7 +26,8 @@ import {
   Loader2,
   Ticket,
   BadgeCheck,
-  Award
+  Award,
+  ScanLine
 } from 'lucide-react';
 import { User as SupabaseUser } from '@supabase/supabase-js';
 import { useAuth } from '@/contexts/AuthContext';
@@ -209,6 +210,13 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
           <SectionHeader title="Ações" icon={Sparkles} />
           <div className="bg-white dark:bg-gray-800 rounded-[2.5rem] border border-gray-100 dark:border-gray-700 overflow-hidden shadow-sm">
             <ServiceBlock 
+              icon={ScanLine} 
+              label="Validar Cupom" 
+              description="Digite o código para validar o desconto do cliente"
+              onClick={() => onNavigate('merchant_coupons')}
+              colorClass="bg-emerald-50 text-emerald-600"
+            />
+            <ServiceBlock 
               icon={Crown} 
               label="Patrocinador Master" 
               description="Contratação e apresentação do plano master"
@@ -224,8 +232,8 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
             />
             <ServiceBlock 
               icon={Ticket} 
-              label="Cupons" 
-              description="Ative cupons, acompanhe resgates e controle validade"
+              label="Gerenciar Meus Cupons" 
+              description="Configure campanhas de desconto para atrair clientes"
               onClick={() => onNavigate('merchant_coupons')}
               colorClass="bg-blue-50 text-blue-600"
             />
