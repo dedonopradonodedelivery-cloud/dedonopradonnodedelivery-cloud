@@ -25,6 +25,7 @@ import { supabase } from '../lib/supabaseClient';
 interface StoreAreaViewProps {
   onBack: () => void;
   onNavigate?: (view: string) => void;
+  user: any;
 }
 
 // Mock Base Data (Reference for 30 days)
@@ -90,10 +91,14 @@ const MenuLink: React.FC<{
   </button>
 );
 
-export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate }) => {
+export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate, user }) => {
   const [isCashbackEnabled, setIsCashbackEnabled] = useState(true);
   const [dateRange, setDateRange] = useState<DateRange>('30d');
   const [pendingRequestsCount, setPendingRequestsCount] = useState(0);
+
+  // Use user data if available, otherwise fallback to mock
+  const displayLogo = user?.user_metadata?.avatar_url || STORE_DATA.logo;
+  const displayName = user?.user_metadata?.store_name || STORE_DATA.name;
 
   // Logic to recalculate KPIs based on selected filter
   const currentKpis = useMemo(() => {
@@ -180,12 +185,12 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
 
         <div className="flex items-center gap-4">
             <div className="w-14 h-14 rounded-2xl bg-gray-200 dark:bg-gray-700 overflow-hidden border-2 border-gray-100 dark:border-gray-600 shadow-sm">
-                <img src={STORE_DATA.logo} alt="Logo" className="w-full h-full object-cover" />
+                <img src={displayLogo} alt="Logo" className="w-full h-full object-cover" />
             </div>
             <div>
                 <div className="flex items-center gap-1.5">
                     <h1 className="text-2xl font-bold text-gray-900 dark:text-white font-display leading-tight">
-                        {STORE_DATA.name}
+                        {displayName}
                     </h1>
                     {STORE_DATA.isVerified && <BadgeCheck className="w-5 h-5 text-white fill-[#1E5BFF]" />}
                 </div>

@@ -33,7 +33,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
     }
   }, [user, userRole, activeTab]);
 
-  // Itens da barra fixa - ORDEM EXATA: Início, JPA Conversa, Cupom, Anúncios, Menu
+  // Itens da barra fixa - ORDEM EXATA: Início, JPA Conversa, Cupom, Classificados, Menu
   const navItems = useMemo(() => {
     const items: NavItem[] = [
       { 
@@ -58,7 +58,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
       { 
         id: 'classifieds', 
         icon: Newspaper, 
-        label: 'Anúncios', 
+        label: 'Classificados', 
         isMainAction: true // Destaque Alto-Relevo
       },
       { 
@@ -170,7 +170,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
                 >
                   {/* 
                      CONTÊINER DE ÍCONE:
-                     Se isMainAction = true (JPA Conversa, Cupom, Anúncios): Aplica estilo Card/Pill "Elevated".
+                     Se isMainAction = true (JPA Conversa, Cupom, Classificados): Aplica estilo Card/Pill "Elevated".
                      Se isMainAction = false (Início, Menu): Fica transparente/simples.
                   */}
                   <div className={`
