@@ -169,8 +169,17 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
           </div>
         </div>
 
+        {/* BOTÃO RESTAURADO: MINHA LOJA (PERFIL PÚBLICO) */}
+        <button 
+          onClick={() => onNavigate('store_profile')}
+          className="w-full mt-6 py-4 rounded-2xl border-2 border-gray-100 dark:border-gray-800 text-gray-600 dark:text-gray-300 font-black text-[10px] uppercase tracking-[0.2em] flex items-center justify-center gap-2 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all active:scale-[0.98] shadow-sm"
+        >
+          <User size={14} strokeWidth={3} />
+          Minha Loja (Perfil Público / Editar Dados)
+        </button>
+
         {/* STATUS DO PLANO */}
-        <div className="mt-6 p-4 rounded-3xl bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 flex items-center justify-between">
+        <div className="mt-4 p-4 rounded-3xl bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 flex items-center justify-between">
             <div className="flex items-center gap-3">
                 <div className={`p-2 rounded-xl ${currentPlan === 'free' ? 'bg-gray-100' : 'bg-blue-600'} text-white`}>
                     <Award size={18} />
