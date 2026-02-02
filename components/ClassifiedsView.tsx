@@ -30,6 +30,8 @@ import { Classified, AdType, Store } from '../types';
 import { MOCK_CLASSIFIEDS, STORES } from '../constants';
 import { MasterSponsorBanner } from './MasterSponsorBanner';
 import { ClassifiedsBannerCarousel } from './ClassifiedsBannerCarousel';
+import { ClassifiedsSelectionModal } from './ClassifiedsSelectionModal';
+import { ClassifiedsFilterModal } from './ClassifiedsFilterModal';
 
 const CLASSIFIED_CATEGORIES = [
   { id: 'servicos', name: 'Orçamento de Serviços', slug: 'services_landing', icon: <Wrench />, color: 'bg-brand-blue' },
@@ -183,6 +185,8 @@ interface ClassifiedsViewProps {
 export const ClassifiedsView: React.FC<ClassifiedsViewProps> = ({ onBack, onNavigate, user, onRequireLogin }) => {
   const { currentNeighborhood } = useNeighborhood();
   const [searchTerm, setSearchTerm] = useState('');
+  const [isSelectionOpen, setIsSelectionOpen] = useState(false);
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
 
   const services = useMemo(() => MOCK_CLASSIFIEDS.filter(item => item.category === 'Orçamento de Serviços').slice(0, 5), []);
   const realEstate = useMemo(() => MOCK_CLASSIFIEDS.filter(item => item.category === 'Imóveis Comerciais').slice(0, 5), []);
@@ -191,12 +195,12 @@ export const ClassifiedsView: React.FC<ClassifiedsViewProps> = ({ onBack, onNavi
   const donations = useMemo(() => MOCK_CLASSIFIEDS.filter(item => item.category === 'Doações em geral').slice(0, 5), []);
   const desapega = useMemo(() => MOCK_CLASSIFIEDS.filter(item => item.category === 'Desapega JPA').slice(0, 5), []);
 
-  const handleAnunciar = () => {
+  const handleAnunciarHeader = () => {
     if (!user) {
         onRequireLogin();
         return;
     }
-    alert(`O Localizei JPA está liberando o cadastro manual em breve. Para anunciar agora como parceiro, entre no Menu > Lojista.`);
+    setIsSelectionOpen(true);
   };
 
   const handleItemClick = (item: Classified) => {
@@ -218,7 +222,7 @@ export const ClassifiedsView: React.FC<ClassifiedsViewProps> = ({ onBack, onNavi
 
           <div className="flex items-center gap-2 shrink-0">
             <button 
-              onClick={handleAnunciar}
+              onClick={handleAnunciarHeader}
               className="px-3 py-1.5 bg-[#1E5BFF] hover:bg-blue-600 text-white font-black rounded-full shadow-lg shadow-blue-500/10 flex items-center justify-center gap-1.5 uppercase tracking-widest text-[9px] border border-white/10 active:scale-95 transition-all h-9"
             >
               <Plus size={12} strokeWidth={4} />
@@ -226,7 +230,7 @@ export const ClassifiedsView: React.FC<ClassifiedsViewProps> = ({ onBack, onNavi
             </button>
             
             <button 
-              onClick={() => alert("Filtros globais de classificados em breve.")} 
+              onClick={() => setIsFilterOpen(true)} 
               className="relative p-2.5 bg-gray-50 dark:bg-gray-800 rounded-xl text-gray-400 shadow-sm active:scale-90 transition-all"
             >
               <SlidersHorizontal size={20}/>
@@ -261,7 +265,7 @@ export const ClassifiedsView: React.FC<ClassifiedsViewProps> = ({ onBack, onNavi
             category={CLASSIFIED_CATEGORIES[0]} 
             items={services} 
             onItemClick={handleItemClick}
-            onAnunciar={(name) => handleAnunciar()}
+            onAnunciar={(name) => onNavigate('services_landing')}
             onViewAll={() => onNavigate('services_landing')}
             ctaLabel="Pedir Orçamento Grátis"
             subtitle="Profissionais verificados do bairro"
@@ -271,7 +275,7 @@ export const ClassifiedsView: React.FC<ClassifiedsViewProps> = ({ onBack, onNavi
             category={CLASSIFIED_CATEGORIES[1]} 
             items={realEstate} 
             onItemClick={handleItemClick}
-            onAnunciar={(name) => handleAnunciar()}
+            onAnunciar={(name) => onNavigate('real_estate_wizard')}
             onViewAll={() => onNavigate('real_estate')}
             ctaLabel="Anunciar Ponto Comercial"
             subtitle="Oportunidades imobiliárias"
@@ -281,7 +285,7 @@ export const ClassifiedsView: React.FC<ClassifiedsViewProps> = ({ onBack, onNavi
             category={CLASSIFIED_CATEGORIES[2]} 
             items={jobs} 
             onItemClick={handleItemClick}
-            onAnunciar={(name) => handleAnunciar()}
+            onAnunciar={(name) => onNavigate('job_wizard')}
             onViewAll={() => onNavigate('jobs')}
             ctaLabel="Divulgar Vaga no Bairro"
             subtitle="Encontre talentos locais"
@@ -296,7 +300,7 @@ export const ClassifiedsView: React.FC<ClassifiedsViewProps> = ({ onBack, onNavi
             category={CLASSIFIED_CATEGORIES[3]} 
             items={adoption} 
             onItemClick={handleItemClick}
-            onAnunciar={(name) => handleAnunciar()}
+            onAnunciar={(name) => alert('Fluxo de adoção em breve')}
             onViewAll={() => onNavigate('adoption')}
             ctaLabel="Divulgar Adoção"
             subtitle="Ajude um amigo a encontrar um lar"
@@ -306,7 +310,7 @@ export const ClassifiedsView: React.FC<ClassifiedsViewProps> = ({ onBack, onNavi
             category={CLASSIFIED_CATEGORIES[4]} 
             items={donations} 
             onItemClick={handleItemClick}
-            onAnunciar={(name) => handleAnunciar()}
+            onAnunciar={(name) => alert('Fluxo de doação em breve')}
             onViewAll={() => onNavigate('donations')}
             ctaLabel="Divulgar Doação"
             subtitle="Fazer o bem circula no bairro"
@@ -316,12 +320,32 @@ export const ClassifiedsView: React.FC<ClassifiedsViewProps> = ({ onBack, onNavi
             category={CLASSIFIED_CATEGORIES[5]} 
             items={desapega} 
             onItemClick={handleItemClick}
-            onAnunciar={(name) => handleAnunciar()}
+            onAnunciar={(name) => alert('Fluxo de desapego em breve')}
             onViewAll={() => onNavigate('desapega')}
             ctaLabel="Anunciar Desapego"
             subtitle="Venda o que você não usa mais"
         />
       </main>
+
+      {/* MODAL DE SELEÇÃO O QUE ANUNCIAR */}
+      <ClassifiedsSelectionModal 
+        isOpen={isSelectionOpen}
+        onClose={() => setIsSelectionOpen(false)}
+        onSelect={(slug) => {
+            setIsSelectionOpen(false);
+            onNavigate(slug);
+        }}
+      />
+
+      {/* MODAL DE FILTROS GLOBAIS */}
+      <ClassifiedsFilterModal 
+        isOpen={isFilterOpen}
+        onClose={() => setIsFilterOpen(false)}
+        onApply={(filters) => {
+            console.log("Filtros aplicados:", filters);
+            setIsFilterOpen(false);
+        }}
+      />
     </div>
   );
 };
