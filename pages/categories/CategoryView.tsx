@@ -3,7 +3,10 @@ import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { ChevronLeft, Search, Star, BadgeCheck, ChevronRight, X, AlertCircle, Grid, Filter, Megaphone, ArrowUpRight, Info, Image as ImageIcon, Sparkles, ShieldCheck } from 'lucide-react';
 import { Category, Store, AdType } from '../../types';
 import { SUBCATEGORIES } from '../../constants';
+// FIX: Corrected supabase import path from ../../services/supabaseClient to ../../lib/supabaseClient
 import { supabase } from '../../lib/supabaseClient';
+import { CategoryTopCarousel } from '../../components/CategoryTopCarousel';
+import { MasterSponsorBanner } from '../../components/MasterSponsorBanner';
 
 // --- Reusable Banner Rendering Components ---
 const TemplateBannerRender: React.FC<{ config: any }> = ({ config }) => {
@@ -11,7 +14,7 @@ const TemplateBannerRender: React.FC<{ config: any }> = ({ config }) => {
     switch (template_id) {
       case 'oferta_relampago':
         return (
-          <div className="w-full aspect-video rounded-2xl bg-gradient-to-br from-rose-500 to-red-600 text-white p-6 flex items-center justify-between overflow-hidden relative shadow-lg">
+          <div className="w-full aspect-video rounded-2xl bg-gradient-to-br from-rose-50 to-red-600 text-white p-6 flex items-center justify-between overflow-hidden relative shadow-lg">
             <div className="relative z-10">
               <span className="text-sm font-bold bg-yellow-300 text-red-700 px-3 py-1 rounded-full uppercase shadow-sm">{headline || 'XX% OFF'}</span>
               <h3 className="text-3xl font-black mt-4 drop-shadow-md max-w-[200px] leading-tight">{subheadline || 'Nome do Produto'}</h3>
@@ -133,7 +136,7 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
   const [activeBanner, setActiveBanner] = useState<any | null>(null);
   const [loadingBanner, setLoadingBanner] = useState(true);
 
-  const subcategories = SUBCATEGORIES[category.name] || [];
+  const subcategories = useMemo(() => SUBCATEGORIES[category.name] || [], [category.name]);
   const MAX_VISIBLE_SUBCATEGORIES = 8;
   const shouldShowMore = subcategories.length > MAX_VISIBLE_SUBCATEGORIES;
   const visibleSubcategories = shouldShowMore ? subcategories.slice(0, MAX_VISIBLE_SUBCATEGORIES - 1) : subcategories;
@@ -148,7 +151,8 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
       try {
         const { data, error } = await supabase
           .from('published_banners')
-          .select('id, config')
+          // FIX: Added merchant_id to the select to allow handleBannerClick to find the associated store.
+          .select('id, config, merchant_id')
           .eq('target', `category:${category.slug}`)
           .eq('is_active', true)
           .order('created_at', { ascending: false })
@@ -208,6 +212,18 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
     }
   };
 
+  // FIX: Added handleBannerClick to resolve the error on line 258.
+  const handleBannerClick = (banner: any) => {
+    if (banner.merchant_id) {
+      const store = stores.find(s => s.id === banner.merchant_id);
+      if (store) {
+        onStoreClick(store);
+        return;
+      }
+    }
+    onNavigate('explore');
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950 pb-24 animate-in slide-in-from-right duration-300">
       <div className={`sticky top-0 z-30 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md px-5 h-16 flex items-center gap-4 border-b border-gray-100 dark:border-gray-800`}>
@@ -217,7 +233,12 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
         <h1 className="font-bold text-lg text-gray-900 dark:text-white flex items-center gap-2">{React.cloneElement(category.icon as any, {className: 'w-5 h-5'})} {category.name}</h1>
       </div>
       
-      <div className="p-5 space-y-8">
+      {/* BANNER DE TOPO REDIRECIONANDO PARA PERFIL */}
+      <div className="mt-4">
+        <CategoryTopCarousel categoriaSlug={category.slug} onStoreClick={onStoreClick} />
+      </div>
+
+      <div className="p-5 pt-0 space-y-8">
         {visibleSubcategories.length > 0 && (
           <section>
             <div className="grid grid-cols-4 gap-3">
@@ -248,11 +269,13 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
           {loadingBanner ? (
             <div className="w-full aspect-video bg-gray-200 dark:bg-gray-800 rounded-2xl animate-pulse"></div>
           ) : activeBanner ? (
-            activeBanner.config.type === 'template' ? (
-              <TemplateBannerRender config={activeBanner.config} />
-            ) : (
-              <CustomBannerRender config={activeBanner.config} />
-            )
+            <div onClick={() => handleBannerClick(activeBanner)} className="cursor-pointer active:scale-[0.99] transition-transform">
+              {activeBanner.config.type === 'template' ? (
+                <TemplateBannerRender config={activeBanner.config} />
+              ) : (
+                <CustomBannerRender config={activeBanner.config} />
+              )}
+            </div>
           ) : (
             <div 
               onClick={handleAdvertiseClick}
@@ -291,6 +314,10 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
                     <p className="text-sm font-medium text-gray-500">Nenhuma loja encontrada.</p>
                 </div>
             )}
+        </section>
+
+        <section>
+          <MasterSponsorBanner onClick={() => onNavigate('patrocinador_master')} label={category.name} />
         </section>
       </div>
     </div>

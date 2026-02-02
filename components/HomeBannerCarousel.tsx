@@ -1,6 +1,6 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
-import { Store } from '../types';
+import { Store, AdType } from '../types';
 import { STORES } from '../constants';
 import { useNeighborhood } from '../contexts/NeighborhoodContext';
 import { NeighborhoodBannersGrid } from './NeighborhoodBannersGrid';
@@ -64,101 +64,12 @@ const MOCK_BANNERS: BannerData[] = [
     image: '',
     bgColor: 'bg-slate-900',
     neighborhood: 'Jacarepaguá (todos)'
-  },
-  // Banners Extras para preenchimento (Fallback)
-  {
-    id: 'b-gen-1',
-    storeId: 'grupo-esquematiza',
-    title: 'Segurança Total',
-    subtitle: 'Proteja seu condomínio com quem entende.',
-    cta: 'Saber mais',
-    image: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?q=80&w=800&auto=format&fit=crop',
-    bgColor: 'bg-slate-900',
-    neighborhood: 'Freguesia',
-    category: 'Serviços'
-  },
-  {
-    id: 'b-fre-4-serv',
-    storeId: 'f-4',
-    title: 'Eletricista 24h',
-    subtitle: 'Emergências elétricas no seu bairro',
-    cta: 'Ligar agora',
-    image: 'https://images.unsplash.com/photo-1617521114992-124c63391620?q=80&w=600',
-    bgColor: 'bg-yellow-600',
-    neighborhood: 'Freguesia',
-    category: 'Serviços'
-  },
-  {
-    id: 'b-fre-5-serv',
-    storeId: 'f-4',
-    title: 'Encanador Profissional',
-    subtitle: 'Vazamentos e reparos hidráulicos',
-    cta: 'Chamar no Zap',
-    image: 'https://images.unsplash.com/photo-1596454848234-b8162d185b9c?q=80&w=600',
-    bgColor: 'bg-cyan-700',
-    neighborhood: 'Freguesia',
-    category: 'Serviços'
-  },
-  {
-    id: 'b-fre-im-1',
-    storeId: 'f-1',
-    title: 'Sua Sala Comercial',
-    subtitle: 'No coração da Freguesia',
-    cta: 'Ver opções',
-    image: 'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?q=80&w=600',
-    bgColor: 'bg-purple-800',
-    neighborhood: 'Freguesia',
-    category: 'Imóveis Comerciais'
-  },
-  {
-    id: 'b-fre-im-2',
-    storeId: 'f-1',
-    title: 'Loja de Rua',
-    subtitle: 'Ponto com alta visibilidade',
-    cta: 'Saber Mais',
-    image: 'https://images.unsplash.com/photo-1449247709967-d4461a6a6103?q=80&w=600',
-    bgColor: 'bg-indigo-800',
-    neighborhood: 'Freguesia',
-    category: 'Imóveis Comerciais'
-  },
-  {
-    id: 'b-fre-im-3',
-    storeId: 'f-1',
-    title: 'Galpão Logístico',
-    subtitle: 'Ideal para seu estoque',
-    cta: 'Consultar',
-    image: 'https://images.unsplash.com/photo-1587022205345-66b3e6486d3b?q=80&w=600',
-    bgColor: 'bg-gray-700',
-    neighborhood: 'Freguesia',
-    category: 'Imóveis Comerciais'
-  },
-  {
-    id: 'b-fre-im-4',
-    storeId: 'f-1',
-    title: 'Andar Corporativo',
-    subtitle: 'Espaço para sua equipe crescer',
-    cta: 'Visitar',
-    image: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=600',
-    bgColor: 'bg-teal-800',
-    neighborhood: 'Freguesia',
-    category: 'Imóveis Comerciais'
-  },
-  {
-    id: 'b-gen-2',
-    storeId: 'f-8',
-    title: 'Academia FitBairro',
-    subtitle: 'Matrícula grátis para novos alunos!',
-    cta: 'Ver planos',
-    image: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=400&auto=format&fit=crop',
-    bgColor: 'bg-emerald-700',
-    neighborhood: 'Freguesia',
-    category: 'Esportes'
   }
 ];
 
 interface HomeBannerCarouselProps {
   onStoreClick: (store: Store) => void;
-  onNavigate: (view: string) => void; // Adicionada prop onNavigate
+  onNavigate: (view: string) => void;
   categoryName?: string;
   subcategoryName?: string;
 }
@@ -189,7 +100,7 @@ export const HomeBannerCarousel: React.FC<HomeBannerCarouselProps> = ({ onStoreC
     }
 
     if (filtered.length < bannerCount) {
-      const generalBanners = initialPool.filter(b => !filtered.find(f => f.id === b.id));
+      const generalBanners = initialPool.filter(b => b.id !== 'b-neighborhood-grid' && !filtered.find(f => f.id === b.id));
       const needed = bannerCount - filtered.length;
       filtered = [...filtered, ...generalBanners.slice(0, needed)];
     }
@@ -210,22 +121,28 @@ export const HomeBannerCarousel: React.FC<HomeBannerCarouselProps> = ({ onStoreC
   }, [categoryName, subcategoryName, currentNeighborhood]);
 
   const handleBannerClick = (banner: BannerData) => {
-    if (banner.id === 'b-neighborhood-grid') return; // Clique gerenciado internamente no componente do grid
+    if (banner.id === 'b-neighborhood-grid') return;
     
-    // Redireciona para a página de lojas conforme solicitado
-    onNavigate('explore');
+    // Busca a loja real ou cria o mock placeholder
+    const store = STORES.find(s => s.id === banner.storeId) || {
+      id: banner.storeId,
+      name: 'Loja Parceira',
+      category: banner.category || 'Destaque',
+      subcategory: banner.subcategory || 'Geral',
+      description: 'Perfil em construção. Em breve você poderá conferir todos os detalhes, fotos e promoções deste estabelecimento incrível!',
+      adType: AdType.PREMIUM,
+      rating: 5.0,
+      distance: 'Freguesia • RJ',
+      verified: true,
+      isOpenNow: true,
+      image: banner.image,
+      logoUrl: '/assets/default-logo.png'
+    };
+
+    onStoreClick(store as Store);
   };
 
-  if (activeBanners.length === 0) {
-    return (
-        <div className="px-5 mb-6">
-            <div className="aspect-[16/10] w-full rounded-[2.5rem] bg-gray-100 dark:bg-gray-800 flex flex-col items-center justify-center text-center p-4 border border-dashed border-gray-300 dark:border-gray-700">
-                <p className="text-sm font-bold text-gray-400 dark:text-gray-500">Carrossel de Banners</p>
-                <p className="text-xs text-gray-400 dark:text-gray-600 mt-1">Nenhum banner disponível para esta seleção.</p>
-            </div>
-        </div>
-    );
-  }
+  if (activeBanners.length === 0) return null;
 
   const currentBanner = activeBanners[currentIndex];
   return (
