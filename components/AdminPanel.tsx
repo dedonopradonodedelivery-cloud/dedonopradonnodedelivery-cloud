@@ -10,8 +10,7 @@ import {
   Zap, ChevronRight, Lightbulb, Bug, Activity,
   Settings, BarChart3, X, Filter, Newspaper, Crown,
   UserCheck, ArrowRightLeft, CreditCard,
-  // Added missing icons LayoutGrid and Home
-  LayoutGrid, Home
+  LayoutGrid, Home, Mail, Smartphone, BadgeCheck
 } from 'lucide-react';
 import { fetchAdminMerchants, fetchAdminUsers } from '../backend/services';
 import { ServiceRequest, AppSuggestion } from '../types';
@@ -157,20 +156,21 @@ const SubscriptionDetailView: React.FC<{ title: string, onBack: () => void }> = 
     </div>
 );
 
-// Added SectionHeader to resolve "Cannot find name" errors in lines 349, 360, 387, 432, 463
-const SectionHeader: React.FC<{ title: string; onBack: () => void }> = ({ title, onBack }) => (
-  <div className="flex items-center gap-4 mb-8">
-    <button 
-      onClick={onBack} 
-      className="p-2 bg-white rounded-xl text-gray-400 border border-gray-200 hover:text-gray-900 transition-all active:scale-95 shadow-sm"
-    >
-      <ArrowLeft size={20} />
-    </button>
-    <h2 className="text-2xl font-black text-gray-900 uppercase tracking-tighter">{title}</h2>
+const SectionHeader: React.FC<{ title: string; onBack: () => void; rightElement?: React.ReactNode }> = ({ title, onBack, rightElement }) => (
+  <div className="flex items-center justify-between gap-4 mb-8">
+    <div className="flex items-center gap-4">
+        <button 
+        onClick={onBack} 
+        className="p-2 bg-white rounded-xl text-gray-400 border border-gray-200 hover:text-gray-900 transition-all active:scale-95 shadow-sm"
+        >
+        <ArrowLeft size={20} />
+        </button>
+        <h2 className="text-2xl font-black text-gray-900 uppercase tracking-tighter">{title}</h2>
+    </div>
+    {rightElement}
   </div>
 );
 
-// Added AdminHub to resolve "Cannot find name" error on line 345
 const AdminHub: React.FC<{ onSelect: (tab: any) => void }> = ({ onSelect }) => (
   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-in fade-in duration-500">
     <button onClick={() => onSelect('financial')} className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm hover:shadow-md transition-all text-left group">
@@ -180,12 +180,12 @@ const AdminHub: React.FC<{ onSelect: (tab: any) => void }> = ({ onSelect }) => (
     </button>
     <button onClick={() => onSelect('merchants')} className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm hover:shadow-md transition-all text-left group">
         <div className="w-14 h-14 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform border border-blue-100"><Store size={28}/></div>
-        <h3 className="font-black text-xl text-gray-900 uppercase tracking-tighter mb-2">Lojistas</h3>
+        <h3 className="font-black text-xl text-gray-900 uppercase tracking-tighter mb-2">Base de Lojistas</h3>
         <p className="text-sm text-gray-500 leading-relaxed">Controle da base de estabelecimentos e parceiros cadastrados.</p>
     </button>
     <button onClick={() => onSelect('users')} className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm hover:shadow-md transition-all text-left group">
         <div className="w-14 h-14 bg-purple-50 text-purple-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform border border-purple-100"><Users size={28}/></div>
-        <h3 className="font-black text-xl text-gray-900 uppercase tracking-tighter mb-2">Usuários</h3>
+        <h3 className="font-black text-xl text-gray-900 uppercase tracking-tighter mb-2">Base de Usuários</h3>
         <p className="text-sm text-gray-500 leading-relaxed">Visualização e suporte à base de moradores de Jacarepaguá.</p>
     </button>
     <button onClick={() => onSelect('conversations')} className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm hover:shadow-md transition-all text-left group">
@@ -206,7 +206,6 @@ const AdminHub: React.FC<{ onSelect: (tab: any) => void }> = ({ onSelect }) => (
   </div>
 );
 
-// Added MonitoringView to resolve "Cannot find name" error on line 350
 const MonitoringView: React.FC = () => (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-in fade-in duration-500">
         <div className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm">
@@ -387,8 +386,30 @@ export const AdminPanel: React.FC<any> = ({ onLogout, viewMode, onOpenViewSwitch
     if(activeTab === 'suggestions') loadSuggestions();
   }, [activeTab, searchTerm]);
 
-  const loadMerchants = async () => { setMerchants(await fetchAdminMerchants(searchTerm)); };
-  const loadUsers = async () => { setUsers(await fetchAdminUsers(searchTerm)); };
+  const loadMerchants = async () => { 
+    const data = await fetchAdminMerchants(searchTerm);
+    // Adicionando dados mock extras para exportação se necessário
+    const enriched = data.map(m => ({
+        ...m,
+        responsible: m.responsible || 'Responsável não informado',
+        plan: m.plan || 'free',
+        status: m.status || 'active',
+        created_at: m.created_at || new Date().toISOString()
+    }));
+    setMerchants(enriched); 
+  };
+
+  const loadUsers = async () => { 
+    const data = await fetchAdminUsers(searchTerm);
+    const enriched = data.map(u => ({
+        ...u,
+        status: u.status || 'active',
+        neighborhood: u.neighborhood || 'Jacarepaguá',
+        created_at: u.created_at || new Date().toISOString()
+    }));
+    setUsers(enriched); 
+  };
+
   const loadMonitoring = () => {
     const saved = localStorage.getItem('service_requests_mock');
     if (saved) setServiceRequests(JSON.parse(saved));
@@ -402,6 +423,32 @@ export const AdminPanel: React.FC<any> = ({ onLogout, viewMode, onOpenViewSwitch
     const updated = suggestions.map(s => s.id === id ? { ...s, status } : s);
     setSuggestions(updated);
     localStorage.setItem('app_suggestions_mock', JSON.stringify(updated));
+  };
+
+  // --- CSV EXPORT ENGINE ---
+  const handleExportCSV = () => {
+    let csvContent = "data:text/csv;charset=utf-8,\uFEFF"; // BOM para Excel
+    const isUsers = activeTab === 'users';
+    
+    if (isUsers) {
+      csvContent += "Nome,E-mail,Telefone,Bairro,Data de Cadastro,Status\n";
+      users.forEach(u => {
+        csvContent += `"${u.full_name || 'N/A'}","${u.email}","${u.phone || 'N/A'}","${u.neighborhood}","${new Date(u.created_at).toLocaleDateString()}","${u.status}"\n`;
+      });
+    } else {
+      csvContent += "Nome da Loja,Responsável,E-mail,Telefone,Categoria,Plano,Status,Data de Cadastro\n";
+      merchants.forEach(m => {
+        csvContent += `"${m.name}","${m.responsible}","${m.profiles?.email || 'N/A'}","${m.phone || 'N/A'}","${m.category}","${m.plan}","${m.status}","${new Date(m.created_at).toLocaleDateString()}"\n`;
+      });
+    }
+
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `export_${activeTab}_${new Date().toISOString().split('T')[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   return (
@@ -418,8 +465,8 @@ export const AdminPanel: React.FC<any> = ({ onLogout, viewMode, onOpenViewSwitch
                     <h1 className="font-black text-xl uppercase tracking-tighter text-gray-900">
                         {activeTab === 'hub' ? 'Central Localizei' : 
                          activeTab === 'financial' ? 'Finanças' :
-                         activeTab === 'merchants' ? 'Lojistas' :
-                         activeTab === 'users' ? 'Usuários' :
+                         activeTab === 'merchants' ? 'Base de Lojistas' :
+                         activeTab === 'users' ? 'Base de Usuários' :
                          activeTab === 'conversations' ? 'Conversas' :
                          'Sugestões'}
                     </h1>
@@ -524,7 +571,15 @@ export const AdminPanel: React.FC<any> = ({ onLogout, viewMode, onOpenViewSwitch
         {/* Lojistas view */}
         {activeTab === 'merchants' && (
            <div className="space-y-6">
-             <SectionHeader title="Base de Lojistas" onBack={() => setActiveTab('hub')} />
+             <SectionHeader 
+                title="Lojistas Cadastrados" 
+                onBack={() => setActiveTab('hub')} 
+                rightElement={
+                    <button onClick={handleExportCSV} className="flex items-center gap-2 bg-emerald-50 text-emerald-600 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border border-emerald-100 shadow-sm active:scale-95 transition-all">
+                        <Download size={14} /> Exportar CSV
+                    </button>
+                }
+             />
              <div className="relative">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
                 <input 
@@ -537,15 +592,22 @@ export const AdminPanel: React.FC<any> = ({ onLogout, viewMode, onOpenViewSwitch
              </div>
              <div className="grid gap-4">
                 {merchants.map(m => (
-                    <div key={m.id} className="bg-white p-5 rounded-3xl border border-gray-100 shadow-sm flex items-center justify-between group hover:border-blue-500 transition-all">
-                        <div className="flex items-center gap-4">
-                            <div className="w-12 h-12 bg-gray-50 rounded-2xl flex items-center justify-center text-gray-400 group-hover:text-blue-600 transition-colors"><Building size={20} /></div>
-                            <div>
-                                <h4 className="font-bold text-gray-900 leading-none mb-1">{m.name}</h4>
-                                <p className="text-[10px] text-gray-400 uppercase font-black">{m.profiles?.email || 'N/A'}</p>
+                    <div key={m.id} className="bg-white p-6 rounded-[2.5rem] border border-gray-100 shadow-sm flex flex-col group hover:border-blue-500 transition-all">
+                        <div className="flex items-center justify-between mb-4">
+                            <div className="flex items-center gap-4">
+                                <div className="w-12 h-12 bg-gray-50 rounded-2xl flex items-center justify-center text-gray-400 group-hover:text-blue-600 transition-colors"><Building size={20} /></div>
+                                <div>
+                                    <h4 className="font-bold text-gray-900 leading-none mb-1">{m.name}</h4>
+                                    <p className="text-[10px] text-gray-400 uppercase font-black">{m.category} • {m.plan.toUpperCase()}</p>
+                                </div>
                             </div>
+                            <span className={`text-[8px] font-black uppercase tracking-widest px-2 py-1 rounded ${m.status === 'active' ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'}`}>{m.status}</span>
                         </div>
-                        <ChevronRight size={18} className="text-gray-300" />
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4 border-t border-gray-50">
+                            <div className="flex items-center gap-2 text-xs text-gray-500"><UserIcon size={14} className="text-gray-300"/> <span>{m.responsible}</span></div>
+                            <div className="flex items-center gap-2 text-xs text-gray-500"><Mail size={14} className="text-gray-300"/> <span>{m.profiles?.email || 'N/A'}</span></div>
+                            <div className="flex items-center gap-2 text-xs text-gray-500"><Smartphone size={14} className="text-gray-300"/> <span>{m.phone || 'N/A'}</span></div>
+                        </div>
                     </div>
                 ))}
              </div>
@@ -555,7 +617,15 @@ export const AdminPanel: React.FC<any> = ({ onLogout, viewMode, onOpenViewSwitch
         {/* Usuários view */}
         {activeTab === 'users' && (
            <div className="space-y-6">
-             <SectionHeader title="Base de Usuários" onBack={() => setActiveTab('hub')} />
+             <SectionHeader 
+                title="Moradores Cadastrados" 
+                onBack={() => setActiveTab('hub')} 
+                rightElement={
+                    <button onClick={handleExportCSV} className="flex items-center gap-2 bg-emerald-50 text-emerald-600 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border border-emerald-100 shadow-sm active:scale-95 transition-all">
+                        <Download size={14} /> Exportar CSV
+                    </button>
+                }
+             />
              <div className="relative">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
                 <input 
@@ -568,17 +638,17 @@ export const AdminPanel: React.FC<any> = ({ onLogout, viewMode, onOpenViewSwitch
              </div>
              <div className="grid gap-4">
                 {users.map(u => (
-                    <div key={u.id} className="bg-white p-5 rounded-3xl border border-gray-100 shadow-sm flex items-center justify-between group hover:border-blue-500 transition-all">
+                    <div key={u.id} className="bg-white p-6 rounded-[2.5rem] border border-gray-100 shadow-sm flex items-center justify-between group hover:border-blue-500 transition-all">
                         <div className="flex items-center gap-4">
                             <div className="w-12 h-12 bg-gray-50 rounded-2xl flex items-center justify-center text-gray-400 group-hover:text-blue-600 transition-colors"><UserIcon size={20} /></div>
                             <div>
                                 <h4 className="font-bold text-gray-900 leading-none mb-1">{u.full_name || 'Anônimo'}</h4>
-                                <p className="text-[10px] text-gray-400 uppercase font-black">{u.email}</p>
+                                <p className="text-[10px] text-gray-400 uppercase font-black">{u.email} • {u.neighborhood}</p>
                             </div>
                         </div>
                         <div className="text-right">
-                           <p className="text-[10px] font-black text-emerald-600 uppercase">R$ 0,00</p>
-                           <p className="text-[8px] text-gray-400 font-bold uppercase">Saldo Cashback</p>
+                           <p className="text-xs font-black text-gray-900">{new Date(u.created_at).toLocaleDateString()}</p>
+                           <span className={`text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded ${u.status === 'active' ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'}`}>{u.status}</span>
                         </div>
                     </div>
                 ))}

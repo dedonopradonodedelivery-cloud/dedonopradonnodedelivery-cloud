@@ -27,6 +27,7 @@ import { MerchantPerformanceDashboard } from '@/components/MerchantPerformanceDa
 import { NeighborhoodPostsView } from '@/components/NeighborhoodPostsView';
 import { SavedPostsView } from '@/components/SavedPostsView';
 import { AdminPanel } from '@/components/AdminPanel';
+import { DesignerPanel } from '@/components/DesignerPanel';
 import { MerchantLeadsView } from '@/components/MerchantLeadsView';
 import { ServiceChatView } from '@/components/ServiceChatView';
 import { CategoryView } from '@/components/CategoryView';
@@ -108,7 +109,7 @@ const App: React.FC = () => {
   }, [isAuthReturn]);
 
   const handleNavigate = (view: string, data?: any) => {
-    if (view !== 'sponsor_info' && view !== 'notifications' && view !== 'patrocinador_master' && view !== 'real_estate_detail' && view !== 'job_detail' && view !== 'plan_selection' && view !== 'classified_detail' && view !== 'classified_search_results' && view !== 'user_activity' && view !== 'app_suggestion') {
+    if (view !== 'sponsor_info' && view !== 'notifications' && view !== 'patrocinador_master' && view !== 'real_estate_detail' && view !== 'job_detail' && view !== 'plan_selection' && view !== 'classified_detail' && view !== 'classified_search_results' && view !== 'user_activity' && view !== 'app_suggestion' && view !== 'designer_panel') {
       setPreviousTab(activeTab);
     }
     
@@ -205,7 +206,7 @@ const App: React.FC = () => {
       handleNavigate('profile');
   };
 
-  const headerExclusionList = ['store_area', 'store_detail', 'profile', 'patrocinador_master', 'merchant_performance', 'neighborhood_posts', 'saved_posts', 'classifieds', 'services', 'services_landing', 'merchant_leads', 'service_chat', 'admin_panel', 'category_detail', 'subcategory_detail', 'sponsor_info', 'real_estate', 'jobs', 'job_detail', 'job_wizard', 'adoption', 'donations', 'desapega', 'category_banner_sales', 'banner_sales_wizard', 'weekly_reward_page', 'user_coupons', 'notifications', 'store_profile', 'about', 'support', 'favorites', 'user_statement', 'service_messages_list', 'merchant_reviews', 'merchant_coupons', 'store_finance', 'store_support', 'real_estate_wizard', 'real_estate_detail', 'plan_selection', 'classified_detail', 'classified_search_results', 'user_activity', 'my_neighborhoods', 'privacy_policy', 'app_suggestion'];
+  const headerExclusionList = ['store_area', 'store_detail', 'profile', 'patrocinador_master', 'merchant_performance', 'neighborhood_posts', 'saved_posts', 'classifieds', 'services', 'services_landing', 'merchant_leads', 'service_chat', 'admin_panel', 'category_detail', 'subcategory_detail', 'sponsor_info', 'real_estate', 'jobs', 'job_detail', 'job_wizard', 'adoption', 'donations', 'desapega', 'category_banner_sales', 'banner_sales_wizard', 'weekly_reward_page', 'user_coupons', 'notifications', 'store_profile', 'about', 'support', 'favorites', 'user_statement', 'service_messages_list', 'merchant_reviews', 'merchant_coupons', 'store_finance', 'store_support', 'real_estate_wizard', 'real_estate_detail', 'plan_selection', 'classified_detail', 'classified_search_results', 'user_activity', 'my_neighborhoods', 'privacy_policy', 'app_suggestion', 'designer_panel'];
   
   const RoleSwitcherModal: React.FC = () => {
     if (!isRoleSwitcherOpen) return null;
@@ -218,7 +219,19 @@ const App: React.FC = () => {
                 </div>
                 <div className="space-y-3">
                     {(['ADM', 'Usuário', 'Lojista', 'Visitante', 'Designer'] as RoleMode[]).map((role) => (
-                        <button key={role} onClick={() => { setViewMode(role); localStorage.setItem('admin_view_mode', role); setIsRoleSwitcherOpen(false); if (role === 'Lojista') setActiveTab('profile'); else if (role === 'ADM') setActiveTab('admin_panel'); else setActiveTab('home'); }} className={`w-full p-5 rounded-[1.5rem] border text-left transition-all ${viewMode === role ? 'bg-white text-black' : 'bg-white/5 border-white/5 text-white'}`}>
+                        <button 
+                          key={role} 
+                          onClick={() => { 
+                            setViewMode(role); 
+                            localStorage.setItem('admin_view_mode', role); 
+                            setIsRoleSwitcherOpen(false); 
+                            if (role === 'Lojista') setActiveTab('profile'); 
+                            else if (role === 'ADM') setActiveTab('admin_panel'); 
+                            else if (role === 'Designer') setActiveTab('designer_panel');
+                            else setActiveTab('home'); 
+                          }} 
+                          className={`w-full p-5 rounded-[1.5rem] border text-left transition-all ${viewMode === role ? 'bg-white text-black' : 'bg-white/5 border-white/5 text-white'}`}
+                        >
                             <div className="flex items-center justify-between"><span className="font-black uppercase">{role}</span>{role === 'Designer' && <Palette size={16} className="text-indigo-400" />}</div>
                         </button>
                     ))}
@@ -384,6 +397,10 @@ const App: React.FC = () => {
                     )}
 
                     {activeTab === 'admin_panel' && <AdminPanel user={user as any} onLogout={signOut} viewMode={viewMode} onOpenViewSwitcher={() => setIsRoleSwitcherOpen(true)} onNavigateToApp={handleNavigate} onOpenMonitorChat={(id: string) => { setActiveServiceRequestId(id); setChatRole('admin'); handleNavigate('service_chat'); }} />}
+                    
+                    {activeTab === 'designer_panel' && user && (
+                      <DesignerPanel user={user} onBack={() => handleNavigate('home')} />
+                    )}
                     
                     {activeTab === 'store_detail' && selectedStore && <StoreDetailView store={selectedStore} onBack={() => handleNavigate(previousTab)} onClaim={() => handleClaimStore(selectedStore)} />}
                     {activeTab === 'classifieds' && <ClassifiedsView onBack={() => handleNavigate('home')} onNavigate={handleNavigate} user={user} onRequireLogin={() => setIsAuthOpen(true)} />}
