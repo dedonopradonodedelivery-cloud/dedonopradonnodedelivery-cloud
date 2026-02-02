@@ -3,7 +3,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 // Added Image as ImageIcon to lucide-react imports to fix the error on line 74
 import { ChevronLeft, Star, BadgeCheck, ChevronRight, AlertCircle, Grid, Megaphone, Sparkles, Rocket, Crown, ShieldCheck, MapPin, Tag, Gift, Zap, Flame, Percent, Utensils, Pizza, Coffee, Beef, IceCream, ShoppingCart, Store as StoreIcon, Package, Wrench, Truck, CreditCard, Coins, Award, Smile, Bell, Clock, Heart, Image as ImageIcon } from 'lucide-react';
 import { Category, Store, AdType } from '@/types';
-import { SUBCATEGORIES } from '@/constants';
+import { SUBCATEGORIES, STORES } from '@/constants';
 import { supabase } from '@/lib/supabaseClient';
 import { LaunchOfferBanner } from './LaunchOfferBanner';
 import { CategoryTopCarousel } from './CategoryTopCarousel';
@@ -190,7 +190,24 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
   };
 
   const handleBannerRedirect = () => {
-    onNavigate('explore');
+    // FIX: Aplicando a regra de navegar para o perfil da loja em vez do 'explore'.
+    if (activeBanner?.merchant_id) {
+        const store = STORES.find(s => s.id === activeBanner.merchant_id) || {
+            id: activeBanner.merchant_id,
+            name: 'Loja Parceira',
+            category: category.name,
+            description: 'Perfil em construção. Este estabelecimento em breve terá um perfil completo com fotos, cardápio e contatos!',
+            adType: AdType.PREMIUM,
+            rating: 5.0,
+            distance: 'Freguesia • RJ',
+            verified: true,
+            isOpenNow: true,
+            logoUrl: '/assets/default-logo.png'
+        };
+        onStoreClick(store as Store);
+    } else {
+        onNavigate('explore');
+    }
   };
 
   const handleAdvertiseClick = () => {
@@ -207,11 +224,11 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
         <h1 className="font-bold text-lg text-gray-900 dark:text-white flex items-center gap-2">{React.cloneElement(category.icon as any, {className: 'w-5 h-5'})} {category.name}</h1>
       </div>
       
-      {/* CARROSSEL DE BANNERS GENERALIZADO */}
+      {/* FIX: Corrigido o erro TS2322 passando onStoreClick em vez de onNavigate */}
       <div className="mt-4">
         <CategoryTopCarousel 
           categoriaSlug={category.slug} 
-          onNavigate={onNavigate}
+          onStoreClick={onStoreClick}
         />
       </div>
 
