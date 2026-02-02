@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
-import { Store, Category, AdType, CommunityPost, ServiceRequest, ServiceUrgency } from '@/types';
+import { Store, Category, AdType, CommunityPost, ServiceRequest, ServiceUrgency, Classified } from '@/types';
 import { 
   Compass, 
   Sparkles, 
@@ -30,11 +30,12 @@ import {
   Camera,
   X,
   Send,
-  ChevronRight
+  ChevronRight,
+  Tag
 } from 'lucide-react';
 import { LojasEServicosList } from '@/components/LojasEServicosList';
 import { User } from '@supabase/supabase-js';
-import { CATEGORIES, MOCK_COMMUNITY_POSTS } from '../constants';
+import { CATEGORIES, MOCK_COMMUNITY_POSTS, MOCK_CLASSIFIEDS } from '../constants';
 import { useNeighborhood } from '@/contexts/NeighborhoodContext';
 import { LaunchOfferBanner } from './LaunchOfferBanner';
 import { HomeBannerCarousel } from './HomeBannerCarousel';
@@ -52,14 +53,14 @@ const MiniPostCard: React.FC<{ post: CommunityPost; onNavigate: (view: string) =
     <div className="flex-shrink-0 w-1/2 snap-center p-1.5">
       <div 
         onClick={() => onNavigate('neighborhood_posts')}
-        className="bg-white dark:bg-gray-800 rounded-2xl overflow-hidden shadow-md border border-gray-100 dark:border-gray-700 flex flex-col group cursor-pointer"
+        className="bg-white dark:bg-gray-800 rounded-2xl overflow-hidden shadow-md border border-gray-100 dark:border-gray-700 flex flex-col group cursor-pointer h-full"
       >
         <div className="relative aspect-square w-full overflow-hidden">
           <img src={postImage} alt={post.content} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
           <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent"></div>
           <div className="absolute top-2 left-2 flex items-center gap-2">
             <img src={post.userAvatar} className="w-6 h-6 rounded-full border-2 border-white/80 object-cover" alt={post.userName} />
-            <p className="text-xs font-bold text-white drop-shadow-md truncate">{post.userName}</p>
+            <p className="text-xs font-bold text-white drop-shadow-md truncate max-w-[80px]">{post.userName}</p>
           </div>
         </div>
         <div className="px-2 pt-2 flex justify-between items-center">
@@ -69,13 +70,45 @@ const MiniPostCard: React.FC<{ post: CommunityPost; onNavigate: (view: string) =
           </div>
           <button onClick={(e) => handleAction(e, 'Salvo!')} className="text-gray-500 hover:text-yellow-500 p-1 transition-colors"><Bookmark size={20} /></button>
         </div>
-        <div className="px-3 pb-3">
+        <div className="px-3 pb-3 flex-1">
             <p className="text-xs text-gray-700 dark:text-gray-300 leading-snug line-clamp-2">
                 {post.content}
             </p>
             <span className="text-[10px] text-gray-400 mt-2 block group-hover:text-blue-500 transition-colors">
                 Ver post...
             </span>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const MiniClassifiedCard: React.FC<{ item: Classified; onNavigate: (view: string) => void; }> = ({ item, onNavigate }) => {
+  return (
+    <div className="flex-shrink-0 w-1/2 snap-center p-1.5">
+      <div 
+        onClick={() => onNavigate('classifieds')}
+        className="bg-white dark:bg-gray-800 rounded-2xl overflow-hidden shadow-md border border-gray-100 dark:border-gray-700 flex flex-col group cursor-pointer h-full"
+      >
+        <div className="relative aspect-square w-full overflow-hidden">
+          <img src={item.imageUrl || "https://images.unsplash.com/photo-1570129477492-45c003edd2be?q=80&w=800&auto=format&fit=crop"} alt={item.title} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent"></div>
+          {item.price && (
+             <div className="absolute bottom-2 right-2 bg-emerald-500 text-white text-[9px] font-black px-2 py-0.5 rounded-lg shadow-sm">
+                {item.price}
+             </div>
+          )}
+          <div className="absolute top-2 left-2">
+             <span className="text-[8px] font-black bg-blue-600 text-white px-1.5 py-0.5 rounded uppercase tracking-wider">{item.category.split(' ')[0]}</span>
+          </div>
+        </div>
+        <div className="p-3 flex flex-col flex-1 justify-between">
+            <h3 className="text-xs font-bold text-gray-800 dark:text-white leading-tight line-clamp-2 mb-1">
+                {item.title}
+            </h3>
+            <p className="text-[9px] text-gray-400 font-medium uppercase tracking-wide truncate flex items-center gap-1">
+                <MapPin size={8} /> {item.neighborhood}
+            </p>
         </div>
       </div>
     </div>
@@ -244,7 +277,25 @@ export const HomeFeed: React.FC<HomeFeedFeedProps> = ({
 
       <HomeBannerCarousel onStoreClick={onStoreClick} onNavigate={onNavigate} />
 
-      {/* 1. CUPOM DA SEMANA */}
+      {/* 1. JPA CONVERSA (ORDEM RECONFIGURADA) */}
+      <section className="bg-white dark:bg-gray-950 pt-6 pb-4">
+        <div className="px-5">
+            <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-bold text-gray-800 dark:text-white">JPA Conversa</h2>
+                <div className="flex items-center gap-2">
+                  <button onClick={() => onNavigate('neighborhood_posts')} className="text-xs font-bold text-blue-500">Ver tudo</button>
+                  <button onClick={() => onNavigate('neighborhood_posts')} className="p-1.5 bg-gray-100 dark:bg-gray-800 rounded-full text-gray-500"><Plus size={14} /></button>
+                </div>
+            </div>
+        </div>
+        <div className="flex overflow-x-auto no-scrollbar snap-x -mx-3.5 px-3.5">
+            {MOCK_COMMUNITY_POSTS.slice(0, 5).map((post) => (
+                <MiniPostCard key={post.id} post={post} onNavigate={onNavigate} />
+            ))}
+        </div>
+      </section>
+
+      {/* 2. CUPOM DA SEMANA */}
       <section className="bg-white dark:bg-gray-950 px-5 pt-4 mb-2">
         <div className="bg-white dark:bg-gray-900 rounded-[1.75rem] border border-gray-200/80 dark:border-gray-800 shadow-xl shadow-blue-900/5 relative group">
           <div className="absolute top-1/2 -translate-y-1/2 -left-4 w-8 h-8 rounded-full bg-white dark:bg-gray-950"></div>
@@ -299,27 +350,27 @@ export const HomeFeed: React.FC<HomeFeedFeedProps> = ({
         </div>
       </section>
 
-      {/* 2. ONDE O BAIRRO CONVERSA */}
-      <section className="bg-white dark:bg-gray-950 pt-6 pb-4">
+      {/* 3. SERVIÇOS (BANNER/WIZARD) */}
+      <section className="px-5 pt-8 pb-6">
+        <FifaBanner onClick={() => setWizardStep(1)} />
+      </section>
+
+      {/* 4. JPA CLASSIFICADOS (NOVO BLOCO) */}
+      <section className="bg-white dark:bg-gray-950 pt-2 pb-8">
         <div className="px-5">
             <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-bold text-gray-800 dark:text-white">Onde o bairro conversa</h2>
+                <h2 className="text-lg font-bold text-gray-800 dark:text-white">JPA Classificados</h2>
                 <div className="flex items-center gap-2">
-                  <button onClick={() => onNavigate('neighborhood_posts')} className="text-xs font-bold text-blue-500">Ver tudo</button>
-                  <button onClick={() => onNavigate('neighborhood_posts')} className="p-1.5 bg-gray-100 dark:bg-gray-800 rounded-full text-gray-500"><Plus size={14} /></button>
+                  <button onClick={() => onNavigate('classifieds')} className="text-xs font-bold text-blue-500">Ver todos</button>
+                  <button onClick={() => onNavigate('classifieds')} className="p-1.5 bg-gray-100 dark:bg-gray-800 rounded-full text-gray-500"><Plus size={14} /></button>
                 </div>
             </div>
         </div>
         <div className="flex overflow-x-auto no-scrollbar snap-x -mx-3.5 px-3.5">
-            {MOCK_COMMUNITY_POSTS.slice(0, 5).map((post) => (
-                <MiniPostCard key={post.id} post={post} onNavigate={onNavigate} />
+            {MOCK_CLASSIFIEDS.slice(0, 5).map((item) => (
+                <MiniClassifiedCard key={item.id} item={item} onNavigate={onNavigate} />
             ))}
         </div>
-      </section>
-      
-      {/* 3. FIFA STYLE BANNER */}
-      <section className="px-5 pt-8 pb-6">
-        <FifaBanner onClick={() => setWizardStep(1)} />
       </section>
 
       {/* NOVO WIZARD DE ORÇAMENTO (DESIGN ATUALIZADO) */}
