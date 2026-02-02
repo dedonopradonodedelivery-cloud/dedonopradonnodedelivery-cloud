@@ -158,11 +158,12 @@ const MOCK_BANNERS: BannerData[] = [
 
 interface HomeBannerCarouselProps {
   onStoreClick: (store: Store) => void;
+  onNavigate: (view: string) => void; // Adicionada prop onNavigate
   categoryName?: string;
   subcategoryName?: string;
 }
 
-export const HomeBannerCarousel: React.FC<HomeBannerCarouselProps> = ({ onStoreClick, categoryName, subcategoryName }) => {
+export const HomeBannerCarousel: React.FC<HomeBannerCarouselProps> = ({ onStoreClick, onNavigate, categoryName, subcategoryName }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const { currentNeighborhood } = useNeighborhood();
   const isCategoryView = !!categoryName;
@@ -209,9 +210,10 @@ export const HomeBannerCarousel: React.FC<HomeBannerCarouselProps> = ({ onStoreC
   }, [categoryName, subcategoryName, currentNeighborhood]);
 
   const handleBannerClick = (banner: BannerData) => {
-    if (banner.id === 'b-neighborhood-grid') return; // Clique gerenciado internamente no grid
-    const store = STORES.find(s => s.id === banner.storeId);
-    if (store) onStoreClick(store);
+    if (banner.id === 'b-neighborhood-grid') return; // Clique gerenciado internamente no componente do grid
+    
+    // Redireciona para a página de lojas conforme solicitado
+    onNavigate('explore');
   };
 
   if (activeBanners.length === 0) {
@@ -230,20 +232,20 @@ export const HomeBannerCarousel: React.FC<HomeBannerCarouselProps> = ({ onStoreC
     <div className="px-5 mb-6">
       <div 
         onClick={() => handleBannerClick(currentBanner)}
-        className={`relative aspect-[16/10] w-full rounded-[2.5rem] overflow-hidden shadow-2xl cursor-pointer transition-all duration-300 active:brightness-90 active:scale-[0.99] group ${currentBanner.bgColor}`}
+        className={`relative aspect-[16/10] w-full rounded-[2.5rem] overflow-hidden shadow-2xl cursor-pointer transition-all duration-300 active:scale-[0.98] group ${currentBanner.bgColor}`}
       >
         {currentBanner.id === 'b-neighborhood-grid' ? (
-          <NeighborhoodBannersGrid />
+          <NeighborhoodBannersGrid onNavigate={onNavigate} />
         ) : (
-          <>
+          <div className="w-full h-full relative">
             <img 
               src={currentBanner.image} 
               alt={currentBanner.title} 
-              className="absolute inset-0 w-full h-full object-cover mix-blend-overlay opacity-60 transition-transform duration-700 group-hover:scale-105" 
+              className="absolute inset-0 w-full h-full object-cover mix-blend-overlay opacity-60 transition-transform duration-700 group-hover:scale-105 pointer-events-none" 
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
+            <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent pointer-events-none"></div>
             
-            <div className="relative h-full flex flex-col justify-center p-8 text-white">
+            <div className="relative h-full flex flex-col justify-center p-8 text-white pointer-events-none">
               <h2 className="text-2xl font-black uppercase tracking-tighter leading-none mb-2 drop-shadow-md">
                 {currentBanner.title}
               </h2>
@@ -251,7 +253,7 @@ export const HomeBannerCarousel: React.FC<HomeBannerCarouselProps> = ({ onStoreC
                 {currentBanner.subtitle}
               </p>
             </div>
-          </>
+          </div>
         )}
 
         {activeBanners.length > 1 && (

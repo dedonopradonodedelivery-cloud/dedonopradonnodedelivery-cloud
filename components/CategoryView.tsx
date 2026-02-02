@@ -66,7 +66,7 @@ const TemplateBannerRender: React.FC<{ config: any }> = ({ config }) => {
     switch (template_id) {
       case 'oferta_relampago':
         return (
-          <div className="w-full aspect-video rounded-2xl bg-gradient-to-br from-rose-500 to-red-600 text-white p-6 flex items-center justify-between overflow-hidden relative shadow-lg">
+          <div className="w-full h-full bg-gradient-to-br from-rose-500 to-red-600 text-white p-6 flex items-center justify-between overflow-hidden relative shadow-lg">
             <div className="relative z-10">
               <span className="text-sm font-bold bg-yellow-300 text-red-700 px-3 py-1 rounded-full uppercase shadow-sm">{headline || 'XX% OFF'}</span>
               <h3 className="text-3xl font-black mt-4 drop-shadow-md max-w-[200px] leading-tight">{subheadline || 'Nome do Produto'}</h3>
@@ -78,7 +78,7 @@ const TemplateBannerRender: React.FC<{ config: any }> = ({ config }) => {
         );
       case 'lancamento':
         return (
-          <div className="w-full aspect-video rounded-2xl bg-gradient-to-br from-slate-800 to-slate-900 text-white p-6 flex items-end justify-between overflow-hidden relative shadow-lg">
+          <div className="w-full h-full bg-gradient-to-br from-slate-800 to-slate-900 text-white p-6 flex items-end justify-between overflow-hidden relative shadow-lg">
              <img src={product_image_url || 'https://via.placeholder.com/150'} className="absolute inset-0 w-full h-full object-cover opacity-30 mix-blend-luminosity" />
              <div className="relative z-10">
                 <span className="text-[10px] font-black uppercase tracking-[0.2em] text-cyan-300">{headline || 'LANÇAMENTO'}</span>
@@ -105,7 +105,7 @@ const CustomBannerRender: React.FC<{ config: any }> = ({ config }) => {
 
     return (
         <div 
-            className={`w-full aspect-video rounded-2xl overflow-hidden relative shadow-lg p-8 ${layoutClasses[template_id as keyof typeof layoutClasses] || 'flex flex-col justify-center'}`}
+            className={`w-full h-full overflow-hidden relative shadow-lg p-8 ${layoutClasses[template_id as keyof typeof layoutClasses] || 'flex flex-col justify-center'}`}
             style={{ backgroundColor: background_color, color: text_color }}
         >
             <h3 className={`${template_id === 'headline' ? headlineFontSize[font_size as keyof typeof headlineFontSize] : fontSizes[font_size as keyof typeof fontSizes]} font-black leading-tight line-clamp-2`} style={{ fontFamily: font_family }}>
@@ -189,10 +189,8 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
     onSubcategoryClick(subName);
   };
 
-  const handlePaidBannerClick = () => {
-    if (!activeBanner || !activeBanner.merchant_id) return;
-    const store = stores.find(s => s.owner_user_id === activeBanner.merchant_id);
-    if (store) onStoreClick(store);
+  const handleBannerRedirect = () => {
+    onNavigate('explore');
   };
 
   const handleAdvertiseClick = () => {
@@ -213,7 +211,7 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
       <div className="mt-4">
         <CategoryTopCarousel 
           categoriaSlug={category.slug} 
-          onStoreClick={onStoreClick}
+          onNavigate={onNavigate}
         />
       </div>
 
@@ -254,20 +252,25 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
           {loadingBanner ? (
             <div className="w-full aspect-video bg-gray-200 dark:bg-gray-800 rounded-2xl animate-pulse"></div>
           ) : activeBanner ? (
-            <div onClick={handlePaidBannerClick} className="cursor-pointer active:scale-[0.99] transition-transform">
+            <div 
+              onClick={handleBannerRedirect} 
+              className="w-full aspect-video rounded-2xl overflow-hidden cursor-pointer active:scale-[0.99] transition-transform relative group"
+            >
                {activeBanner.config.type === 'template' ? (
                  <TemplateBannerRender config={activeBanner.config} />
                ) : (
                  <CustomBannerRender config={activeBanner.config} />
                )}
+               {/* Overlay invisible para garantir click area total */}
+               <div className="absolute inset-0 z-20"></div>
             </div>
           ) : (
             <div 
               onClick={handleAdvertiseClick}
               className="w-full aspect-video rounded-2xl bg-slate-900 flex flex-col items-center justify-center text-center p-8 cursor-pointer relative overflow-hidden shadow-2xl border border-white/5 group"
             >
-                <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 rounded-full blur-3xl -mr-16 -mt-16"></div>
-                <div className="absolute bottom-0 left-0 w-24 h-24 bg-indigo-500/10 rounded-full blur-2xl -ml-12 -mb-12"></div>
+                <div className="absolute top-0 right-0 w-32 h-32 bg-blue-50/10 rounded-full blur-3xl -mr-16 -mt-16"></div>
+                <div className="absolute bottom-0 left-0 w-24 h-24 bg-indigo-50/10 rounded-full blur-2xl -ml-12 -mb-12"></div>
                 
                 <div className="relative z-10 flex flex-col items-center">
                     <div className="p-3 bg-white/5 backdrop-blur-md rounded-2xl mb-4 border border-white/10 shadow-xl group-hover:scale-110 transition-transform">

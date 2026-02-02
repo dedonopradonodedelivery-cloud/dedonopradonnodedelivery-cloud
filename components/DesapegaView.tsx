@@ -25,7 +25,7 @@ import {
   AlertTriangle,
   Package,
   Smartphone,
-  Tshirt,
+  Shirt,
   Baby,
   Gamepad,
   Home as HomeIcon,
@@ -50,6 +50,7 @@ const CATEGORY_MAP: Record<string, string[]> = {
   "Infantil e Bebês": ["Brinquedos", "Carrinhos e Cadeirinhas", "Roupas", "Enxoval", "Outros"],
   "Livros e Papelaria": ["Livros", "Revistas", "Material Escolar", "Outros"],
   "Automotivo": ["Peças", "Acessórios", "Som", "Pneus", "Outros"],
+  "Pet": ["Acessórios", "Casinhas", "Brinquedos", "Outros"],
   "Pet": ["Acessórios", "Casinhas", "Brinquedos", "Outros"],
   "Ferramentas e Construção": ["Elétricas", "Manuais", "Material de Construção", "Outros"],
   "Outros": ["Geral"]
@@ -160,7 +161,6 @@ export const DesapegaView: React.FC<DesapegaViewProps> = ({ onBack, user, onRequ
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
-      // FIX: Explicitly type files as File[] to ensure the compiler recognizes them as Blobs for reader.readAsDataURL.
       // Cast the result of Array.from to File[] to fix the 'unknown[]' incompatibility error.
       const files = Array.from(e.target.files).slice(0, 6 - formData.images.length) as File[];
       files.forEach(file => {
@@ -419,7 +419,7 @@ export const DesapegaView: React.FC<DesapegaViewProps> = ({ onBack, user, onRequ
           <button 
             disabled={!formData.category || !formData.subcategory || (showGender && !formData.gender)}
             onClick={() => setViewState('form_description')}
-            className="w-full bg-indigo-600 disabled:bg-gray-100 dark:disabled:bg-gray-800 disabled:text-gray-400 text-white font-black py-5 rounded-[2rem] shadow-xl flex items-center justify-center gap-2 uppercase tracking-widest text-xs transition-all"
+            className="w-full bg-indigo-600 disabled:bg-gray-100 dark:disabled:bg-gray-800 disabled:text-gray-400 text-white font-black py-5 rounded-[2rem] shadow-xl flex items-center justify-center gap-2 uppercase tracking-widest text-sm transition-all"
           >
             Continuar para descrição <ArrowRight size={18} />
           </button>
@@ -496,7 +496,7 @@ export const DesapegaView: React.FC<DesapegaViewProps> = ({ onBack, user, onRequ
           <button 
             disabled={!formData.title || !formData.neighborhood || !formData.whatsapp}
             onClick={() => setViewState('form_price')}
-            className="w-full bg-indigo-600 disabled:bg-gray-100 dark:disabled:bg-gray-800 disabled:text-gray-400 text-white font-black py-5 rounded-[2rem] shadow-xl flex items-center justify-center gap-2 uppercase tracking-widest text-xs transition-all"
+            className="w-full bg-indigo-600 disabled:bg-gray-100 dark:disabled:bg-gray-800 disabled:text-gray-400 text-white font-black py-5 rounded-[2rem] shadow-xl flex items-center justify-center gap-2 uppercase tracking-widest text-sm transition-all"
           >
             Continuar para preço <ArrowRight size={18} />
           </button>
@@ -537,13 +537,14 @@ export const DesapegaView: React.FC<DesapegaViewProps> = ({ onBack, user, onRequ
                     <p className="text-xs text-rose-800 dark:text-rose-200 font-bold mb-3">Esse valor parece abaixo do mercado. Deseja revisar?</p>
                     <div className="flex gap-4 justify-center">
                       <button onClick={() => setFormData({...formData, price: ''})} className="text-[10px] font-black uppercase text-rose-600 underline">Ajustar valor</button>
-                      <button onClick={() => setShowPriceWarning(true)} className="text-[10px] font-black uppercase text-gray-400">Continuar assim</button>
+                      {/* FIX: Replaced non-existent nextStep with setShowPriceWarning(true) to properly handle the price warning dismissal. */}
+                      <button onClick={() => setShowPriceWarning(true)} className="text-[10px] font-black uppercase text-gray-400">Continuar mesmo assim</button>
                     </div>
                 </div>
               )}
            </div>
 
-           <div className="w-full max-w-sm">
+           <div className="w-full max-sm mx-auto">
              <label className="flex items-center gap-4 p-5 bg-gray-50 dark:bg-gray-900 rounded-[2rem] border border-gray-100 dark:border-gray-800 cursor-pointer transition-all active:scale-[0.98]">
                <div className={`w-6 h-6 rounded border-2 flex items-center justify-center transition-colors ${formData.acceptExchange ? 'bg-indigo-600 border-indigo-600' : 'bg-white dark:bg-gray-800 border-gray-200'}`}>
                  {formData.acceptExchange && <Check size={16} className="text-white" strokeWidth={4} />}

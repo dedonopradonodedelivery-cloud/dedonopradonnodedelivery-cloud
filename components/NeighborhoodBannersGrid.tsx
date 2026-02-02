@@ -1,3 +1,4 @@
+
 import React from 'react';
 
 const BAIRROS = [
@@ -12,9 +13,14 @@ const BAIRROS = [
   { name: 'Cidade de Deus', slug: 'cidade-de-deus', color: 'bg-slate-800' },
 ];
 
-export const NeighborhoodBannersGrid: React.FC = () => {
+interface NeighborhoodBannersGridProps {
+  onNavigate: (view: string) => void;
+}
+
+export const NeighborhoodBannersGrid: React.FC<NeighborhoodBannersGridProps> = ({ onNavigate }) => {
   const handleClick = (slug: string) => {
-    window.location.href = `/vender-banners?bairro=${slug}`;
+    // Redireciona para a página de lojas (explore) conforme solicitado
+    onNavigate('explore');
   };
 
   return (
@@ -42,7 +48,7 @@ export const NeighborhoodBannersGrid: React.FC = () => {
       </div>
       
       <div className="mt-2 text-right">
-        <span className="text-[7px] font-bold text-slate-500 uppercase tracking-widest">Toque no bairro para anunciar</span>
+        <span className="text-[7px] font-bold text-slate-500 uppercase tracking-widest">Toque no bairro para explorar</span>
       </div>
     </div>
   );

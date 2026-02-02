@@ -1,15 +1,14 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNeighborhood } from '../contexts/NeighborhoodContext';
-import { CATEGORY_TOP_BANNERS, STORES } from '../constants';
-import { Store } from '../types';
+import { CATEGORY_TOP_BANNERS } from '../constants';
 
 interface CategoryTopCarouselProps {
   categoriaSlug: string;
-  onStoreClick: (store: Store) => void;
+  onNavigate: (view: string) => void;
 }
 
-export const CategoryTopCarousel: React.FC<CategoryTopCarouselProps> = ({ categoriaSlug, onStoreClick }) => {
+export const CategoryTopCarousel: React.FC<CategoryTopCarouselProps> = ({ categoriaSlug, onNavigate }) => {
   const { currentNeighborhood } = useNeighborhood();
   const [currentIndex, setCurrentIndex] = useState(0);
 
@@ -22,8 +21,8 @@ export const CategoryTopCarousel: React.FC<CategoryTopCarouselProps> = ({ catego
     const hoodKey = currentNeighborhood === "Jacarepaguá (todos)" ? "Freguesia" : currentNeighborhood;
     const items = categoryData[hoodKey] || [];
     
-    // Regra: Apenas renderiza se houver exatamente 2 banners
-    return items.length >= 2 ? items.slice(0, 2) : [];
+    // Regra: Apenas renderiza se houver pelo menos 1 banner
+    return items.slice(0, 2);
   }, [categoriaSlug, currentNeighborhood]);
 
   // Lógica de Autoplay a cada 4 segundos
@@ -45,11 +44,7 @@ export const CategoryTopCarousel: React.FC<CategoryTopCarouselProps> = ({ catego
   if (banners.length === 0) return null;
 
   const handleBannerClick = () => {
-    const currentBanner = banners[currentIndex];
-    if (!currentBanner) return;
-    
-    const store = STORES.find(s => s.id === currentBanner.storeId);
-    if (store) onStoreClick(store);
+    onNavigate('explore');
   };
 
   return (
@@ -62,7 +57,7 @@ export const CategoryTopCarousel: React.FC<CategoryTopCarouselProps> = ({ catego
           <div
             key={`${banner.storeId}-${index}`}
             className={`absolute inset-0 w-full h-full transition-all duration-700 ease-in-out ${
-              index === currentIndex ? 'opacity-100 scale-100 z-10' : 'opacity-0 scale-105 z-0'
+              index === currentIndex ? 'opacity-100 scale-100 z-10 pointer-events-auto' : 'opacity-0 scale-105 z-0 pointer-events-none'
             }`}
           >
             <img 
@@ -71,13 +66,13 @@ export const CategoryTopCarousel: React.FC<CategoryTopCarouselProps> = ({ catego
               className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
             />
             {/* Overlay sutil para indicar patrocínio */}
-            <div className="absolute top-4 right-4 z-20">
+            <div className="absolute top-4 right-4 z-20 pointer-events-none">
               <span className="bg-black/40 backdrop-blur-md text-white text-[8px] font-black px-2 py-1 rounded-lg uppercase tracking-widest border border-white/10">
                 Patrocinado
               </span>
             </div>
             {/* Efeito de brilho ao passar o mouse ou foco */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
+            <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent pointer-events-none"></div>
           </div>
         ))}
 
