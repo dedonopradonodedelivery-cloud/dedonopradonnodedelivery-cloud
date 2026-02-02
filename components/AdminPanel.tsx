@@ -10,10 +10,12 @@ import {
   Zap, ChevronRight, Lightbulb, Bug, Activity,
   Settings, BarChart3, X, Filter, Newspaper, Crown,
   UserCheck, ArrowRightLeft, CreditCard,
-  LayoutGrid, Home, Mail, Smartphone, BadgeCheck
+  LayoutGrid, Home, Mail, Smartphone, BadgeCheck,
+  ShieldAlert, Copy, Check
 } from 'lucide-react';
 import { fetchAdminMerchants, fetchAdminUsers } from '../backend/services';
 import { ServiceRequest, AppSuggestion } from '../types';
+import { AdminModerationPanel } from './AdminModerationPanel';
 
 // --- TYPES ---
 type DateRangeOption = 'today' | '7d' | '30d' | '90d';
@@ -46,6 +48,27 @@ const MONETIZATION_CONFIG = {
 };
 
 // --- SUB-COMPONENTS ---
+
+const CopyButton: React.FC<{ text: string }> = ({ text }) => {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    navigator.clipboard.writeText(text);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  return (
+    <button 
+      onClick={handleCopy} 
+      className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors text-gray-400 hover:text-blue-500"
+      title="Copiar"
+    >
+      {copied ? <Check size={14} className="text-emerald-500" /> : <Copy size={14} />}
+    </button>
+  );
+};
 
 const FinancialCard: React.FC<{ 
     type: keyof typeof MONETIZATION_CONFIG; 
@@ -173,20 +196,20 @@ const SectionHeader: React.FC<{ title: string; onBack: () => void; rightElement?
 
 const AdminHub: React.FC<{ onSelect: (tab: any) => void }> = ({ onSelect }) => (
   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-in fade-in duration-500">
+    <button onClick={() => onSelect('moderation')} className="bg-red-50 p-8 rounded-[2.5rem] border border-red-100 shadow-sm hover:shadow-md transition-all text-left group">
+        <div className="w-14 h-14 bg-white text-red-500 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform border border-red-100"><ShieldAlert size={28}/></div>
+        <h3 className="font-black text-xl text-red-900 uppercase tracking-tighter mb-2">Aprovações</h3>
+        <p className="text-sm text-red-700 leading-relaxed font-medium">Categorias, denúncias e reivindicações pendentes.</p>
+    </button>
     <button onClick={() => onSelect('financial')} className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm hover:shadow-md transition-all text-left group">
         <div className="w-14 h-14 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform border border-emerald-100"><DollarSign size={28}/></div>
         <h3 className="font-black text-xl text-gray-900 uppercase tracking-tighter mb-2">Financeiro</h3>
         <p className="text-sm text-gray-500 leading-relaxed">Gestão de faturamento, MRR e transações de anúncios.</p>
     </button>
-    <button onClick={() => onSelect('merchants')} className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm hover:shadow-md transition-all text-left group">
-        <div className="w-14 h-14 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform border border-blue-100"><Store size={28}/></div>
-        <h3 className="font-black text-xl text-gray-900 uppercase tracking-tighter mb-2">Base de Lojistas</h3>
-        <p className="text-sm text-gray-500 leading-relaxed">Controle da base de estabelecimentos e parceiros cadastrados.</p>
-    </button>
-    <button onClick={() => onSelect('users')} className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm hover:shadow-md transition-all text-left group">
-        <div className="w-14 h-14 bg-purple-50 text-purple-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform border border-purple-100"><Users size={28}/></div>
-        <h3 className="font-black text-xl text-gray-900 uppercase tracking-tighter mb-2">Base de Usuários</h3>
-        <p className="text-sm text-gray-500 leading-relaxed">Visualização e suporte à base de moradores de Jacarepaguá.</p>
+    <button onClick={() => onSelect('management')} className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm hover:shadow-md transition-all text-left group">
+        <div className="w-14 h-14 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform border border-blue-100"><Users size={28}/></div>
+        <h3 className="font-black text-xl text-gray-900 uppercase tracking-tighter mb-2">Gerenciamento</h3>
+        <p className="text-sm text-gray-500 leading-relaxed">Base completa de clientes (usuários) e lojistas parceiros.</p>
     </button>
     <button onClick={() => onSelect('conversations')} className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm hover:shadow-md transition-all text-left group">
         <div className="w-14 h-14 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform border border-indigo-100"><MessageCircle size={28}/></div>
@@ -372,7 +395,8 @@ const AdminFinancialDashboard: React.FC = () => {
 // --- CORE COMPONENT ---
 
 export const AdminPanel: React.FC<any> = ({ onLogout, viewMode, onOpenViewSwitcher, onNavigateToApp, onOpenMonitorChat }) => {
-  const [activeTab, setActiveTab] = useState<'hub' | 'merchants' | 'users' | 'financial' | 'monitoring' | 'suggestions' | 'conversations'>('hub');
+  const [activeTab, setActiveTab] = useState<'hub' | 'management' | 'financial' | 'monitoring' | 'suggestions' | 'conversations' | 'moderation'>('hub');
+  const [managementTab, setManagementTab] = useState<'clients' | 'merchants'>('clients');
   const [searchTerm, setSearchTerm] = useState('');
   const [merchants, setMerchants] = useState<any[]>([]);
   const [users, setUsers] = useState<any[]>([]);
@@ -380,11 +404,13 @@ export const AdminPanel: React.FC<any> = ({ onLogout, viewMode, onOpenViewSwitch
   const [suggestions, setSuggestions] = useState<AppSuggestion[]>([]);
 
   useEffect(() => {
-    if(activeTab === 'merchants') loadMerchants();
-    if(activeTab === 'users') loadUsers();
+    if (activeTab === 'management') {
+        if (managementTab === 'clients') loadUsers();
+        else loadMerchants();
+    }
     if(activeTab === 'conversations') loadMonitoring();
     if(activeTab === 'suggestions') loadSuggestions();
-  }, [activeTab, searchTerm]);
+  }, [activeTab, managementTab, searchTerm]);
 
   const loadMerchants = async () => { 
     const data = await fetchAdminMerchants(searchTerm);
@@ -428,14 +454,14 @@ export const AdminPanel: React.FC<any> = ({ onLogout, viewMode, onOpenViewSwitch
   // --- CSV EXPORT ENGINE ---
   const handleExportCSV = () => {
     let csvContent = "data:text/csv;charset=utf-8,\uFEFF"; // BOM para Excel
-    const isUsers = activeTab === 'users';
+    const isUsers = activeTab === 'management' && managementTab === 'clients';
     
     if (isUsers) {
       csvContent += "Nome,E-mail,Telefone,Bairro,Data de Cadastro,Status\n";
       users.forEach(u => {
         csvContent += `"${u.full_name || 'N/A'}","${u.email}","${u.phone || 'N/A'}","${u.neighborhood}","${new Date(u.created_at).toLocaleDateString()}","${u.status}"\n`;
       });
-    } else {
+    } else if (activeTab === 'management' && managementTab === 'merchants') {
       csvContent += "Nome da Loja,Responsável,E-mail,Telefone,Categoria,Plano,Status,Data de Cadastro\n";
       merchants.forEach(m => {
         csvContent += `"${m.name}","${m.responsible}","${m.profiles?.email || 'N/A'}","${m.phone || 'N/A'}","${m.category}","${m.plan}","${m.status}","${new Date(m.created_at).toLocaleDateString()}"\n`;
@@ -445,11 +471,15 @@ export const AdminPanel: React.FC<any> = ({ onLogout, viewMode, onOpenViewSwitch
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `export_${activeTab}_${new Date().toISOString().split('T')[0]}.csv`);
+    link.setAttribute("download", `export_${activeTab}_${managementTab}_${new Date().toISOString().split('T')[0]}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
   };
+
+  if (activeTab === 'moderation') {
+      return <AdminModerationPanel onBack={() => setActiveTab('hub')} />;
+  }
 
   return (
     <div className="min-h-screen bg-[#F9FAFB] text-gray-900 font-sans flex flex-col">
@@ -465,8 +495,7 @@ export const AdminPanel: React.FC<any> = ({ onLogout, viewMode, onOpenViewSwitch
                     <h1 className="font-black text-xl uppercase tracking-tighter text-gray-900">
                         {activeTab === 'hub' ? 'Central Localizei' : 
                          activeTab === 'financial' ? 'Finanças' :
-                         activeTab === 'merchants' ? 'Base de Lojistas' :
-                         activeTab === 'users' ? 'Base de Usuários' :
+                         activeTab === 'management' ? 'Gerenciamento' :
                          activeTab === 'conversations' ? 'Conversas' :
                          'Sugestões'}
                     </h1>
@@ -568,11 +597,11 @@ export const AdminPanel: React.FC<any> = ({ onLogout, viewMode, onOpenViewSwitch
             </div>
         )}
 
-        {/* Lojistas view */}
-        {activeTab === 'merchants' && (
+        {/* Gerenciamento de Usuários e Lojistas Unificado */}
+        {activeTab === 'management' && (
            <div className="space-y-6">
              <SectionHeader 
-                title="Lojistas Cadastrados" 
+                title="Gerenciamento de Usuários" 
                 onBack={() => setActiveTab('hub')} 
                 rightElement={
                     <button onClick={handleExportCSV} className="flex items-center gap-2 bg-emerald-50 text-emerald-600 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border border-emerald-100 shadow-sm active:scale-95 transition-all">
@@ -580,79 +609,109 @@ export const AdminPanel: React.FC<any> = ({ onLogout, viewMode, onOpenViewSwitch
                     </button>
                 }
              />
-             <div className="relative">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                <input 
-                  type="text" 
-                  value={searchTerm} 
-                  onChange={e => setSearchTerm(e.target.value)} 
-                  placeholder="Pesquisar lojista por nome ou e-mail..." 
-                  className="w-full bg-white border border-gray-200 rounded-2xl py-4 pl-12 pr-4 text-sm outline-none focus:ring-2 focus:ring-blue-500 shadow-sm"
-                />
+             
+             {/* Busca e Abas */}
+             <div className="flex flex-col md:flex-row gap-4">
+                 <div className="relative flex-1">
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                    <input 
+                      type="text" 
+                      value={searchTerm} 
+                      onChange={e => setSearchTerm(e.target.value)} 
+                      placeholder="Buscar por nome ou e-mail..." 
+                      className="w-full bg-white border border-gray-200 rounded-2xl py-4 pl-12 pr-4 text-sm outline-none focus:ring-2 focus:ring-blue-500 shadow-sm"
+                    />
+                 </div>
+                 <div className="flex bg-white p-1 rounded-2xl border border-gray-200 shadow-sm shrink-0">
+                    <button 
+                        onClick={() => setManagementTab('clients')}
+                        className={`px-6 py-3 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${managementTab === 'clients' ? 'bg-indigo-600 text-white shadow-md' : 'text-gray-400 hover:text-gray-600'}`}
+                    >
+                        Clientes
+                    </button>
+                    <button 
+                        onClick={() => setManagementTab('merchants')}
+                        className={`px-6 py-3 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${managementTab === 'merchants' ? 'bg-indigo-600 text-white shadow-md' : 'text-gray-400 hover:text-gray-600'}`}
+                    >
+                        Lojistas
+                    </button>
+                 </div>
              </div>
-             <div className="grid gap-4">
-                {merchants.map(m => (
-                    <div key={m.id} className="bg-white p-6 rounded-[2.5rem] border border-gray-100 shadow-sm flex flex-col group hover:border-blue-500 transition-all">
-                        <div className="flex items-center justify-between mb-4">
+
+             {/* Lista de Clientes */}
+             {managementTab === 'clients' && (
+                 <div className="grid gap-4">
+                    {users.map(u => (
+                        <div key={u.id} className="bg-white p-6 rounded-[2.5rem] border border-gray-100 shadow-sm flex items-center justify-between group hover:border-blue-500 transition-all">
                             <div className="flex items-center gap-4">
-                                <div className="w-12 h-12 bg-gray-50 rounded-2xl flex items-center justify-center text-gray-400 group-hover:text-blue-600 transition-colors"><Building size={20} /></div>
+                                <div className="w-12 h-12 bg-gray-50 rounded-2xl flex items-center justify-center text-gray-400 group-hover:text-blue-600 transition-colors">
+                                    <UserIcon size={20} />
+                                </div>
                                 <div>
-                                    <h4 className="font-bold text-gray-900 leading-none mb-1">{m.name}</h4>
-                                    <p className="text-[10px] text-gray-400 uppercase font-black">{m.category} • {m.plan.toUpperCase()}</p>
+                                    <h4 className="font-bold text-gray-900 leading-none mb-1">{u.full_name || 'Anônimo'}</h4>
+                                    <div className="flex items-center gap-3 mt-1">
+                                        <div className="flex items-center gap-1 text-xs text-gray-500">
+                                            <Mail size={12} />
+                                            <span>{u.email}</span>
+                                            <CopyButton text={u.email} />
+                                        </div>
+                                        {u.phone && (
+                                            <div className="flex items-center gap-1 text-xs text-gray-500 border-l border-gray-200 pl-3">
+                                                <Smartphone size={12} />
+                                                <span>{u.phone}</span>
+                                                <CopyButton text={u.phone} />
+                                            </div>
+                                        )}
+                                    </div>
+                                    <p className="text-[10px] text-gray-400 uppercase font-black mt-2">{u.neighborhood}</p>
                                 </div>
                             </div>
-                            <span className={`text-[8px] font-black uppercase tracking-widest px-2 py-1 rounded ${m.status === 'active' ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'}`}>{m.status}</span>
-                        </div>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4 border-t border-gray-50">
-                            <div className="flex items-center gap-2 text-xs text-gray-500"><UserIcon size={14} className="text-gray-300"/> <span>{m.responsible}</span></div>
-                            <div className="flex items-center gap-2 text-xs text-gray-500"><Mail size={14} className="text-gray-300"/> <span>{m.profiles?.email || 'N/A'}</span></div>
-                            <div className="flex items-center gap-2 text-xs text-gray-500"><Smartphone size={14} className="text-gray-300"/> <span>{m.phone || 'N/A'}</span></div>
-                        </div>
-                    </div>
-                ))}
-             </div>
-           </div>
-        )}
-
-        {/* Usuários view */}
-        {activeTab === 'users' && (
-           <div className="space-y-6">
-             <SectionHeader 
-                title="Moradores Cadastrados" 
-                onBack={() => setActiveTab('hub')} 
-                rightElement={
-                    <button onClick={handleExportCSV} className="flex items-center gap-2 bg-emerald-50 text-emerald-600 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border border-emerald-100 shadow-sm active:scale-95 transition-all">
-                        <Download size={14} /> Exportar CSV
-                    </button>
-                }
-             />
-             <div className="relative">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                <input 
-                  type="text" 
-                  value={searchTerm} 
-                  onChange={e => setSearchTerm(e.target.value)} 
-                  placeholder="Pesquisar usuário..." 
-                  className="w-full bg-white border border-gray-200 rounded-2xl py-4 pl-12 pr-4 text-sm outline-none focus:ring-2 focus:ring-blue-500 shadow-sm"
-                />
-             </div>
-             <div className="grid gap-4">
-                {users.map(u => (
-                    <div key={u.id} className="bg-white p-6 rounded-[2.5rem] border border-gray-100 shadow-sm flex items-center justify-between group hover:border-blue-500 transition-all">
-                        <div className="flex items-center gap-4">
-                            <div className="w-12 h-12 bg-gray-50 rounded-2xl flex items-center justify-center text-gray-400 group-hover:text-blue-600 transition-colors"><UserIcon size={20} /></div>
-                            <div>
-                                <h4 className="font-bold text-gray-900 leading-none mb-1">{u.full_name || 'Anônimo'}</h4>
-                                <p className="text-[10px] text-gray-400 uppercase font-black">{u.email} • {u.neighborhood}</p>
+                            <div className="text-right">
+                               <p className="text-xs font-black text-gray-900">{new Date(u.created_at).toLocaleDateString()}</p>
+                               <span className={`text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded ${u.status === 'active' ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'}`}>{u.status}</span>
                             </div>
                         </div>
-                        <div className="text-right">
-                           <p className="text-xs font-black text-gray-900">{new Date(u.created_at).toLocaleDateString()}</p>
-                           <span className={`text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded ${u.status === 'active' ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'}`}>{u.status}</span>
+                    ))}
+                 </div>
+             )}
+
+             {/* Lista de Lojistas */}
+             {managementTab === 'merchants' && (
+                 <div className="grid gap-4">
+                    {merchants.map(m => (
+                        <div key={m.id} className="bg-white p-6 rounded-[2.5rem] border border-gray-100 shadow-sm flex flex-col group hover:border-blue-500 transition-all">
+                            <div className="flex items-center justify-between mb-4">
+                                <div className="flex items-center gap-4">
+                                    <div className="w-12 h-12 bg-gray-50 rounded-2xl flex items-center justify-center text-gray-400 group-hover:text-blue-600 transition-colors">
+                                        <Building size={20} />
+                                    </div>
+                                    <div>
+                                        <h4 className="font-bold text-gray-900 leading-none mb-1">{m.name}</h4>
+                                        <p className="text-[10px] text-gray-400 uppercase font-black">{m.category} • {m.plan.toUpperCase()}</p>
+                                    </div>
+                                </div>
+                                <span className={`text-[8px] font-black uppercase tracking-widest px-2 py-1 rounded ${m.status === 'active' ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'}`}>{m.status}</span>
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4 border-t border-gray-50">
+                                <div className="flex items-center gap-2 text-xs text-gray-500">
+                                    <UserIcon size={14} className="text-gray-300"/> 
+                                    <span>{m.responsible}</span>
+                                </div>
+                                <div className="flex items-center gap-2 text-xs text-gray-500">
+                                    <Mail size={14} className="text-gray-300"/> 
+                                    <span className="truncate">{m.profiles?.email || 'N/A'}</span>
+                                    {m.profiles?.email && <CopyButton text={m.profiles.email} />}
+                                </div>
+                                <div className="flex items-center gap-2 text-xs text-gray-500">
+                                    <Smartphone size={14} className="text-gray-300"/> 
+                                    <span>{m.phone || 'N/A'}</span>
+                                    {m.phone && <CopyButton text={m.phone} />}
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                ))}
-             </div>
+                    ))}
+                 </div>
+             )}
            </div>
         )}
       </main>

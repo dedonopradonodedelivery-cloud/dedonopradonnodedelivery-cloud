@@ -240,7 +240,9 @@ const FilterModal: React.FC<{
   if (!isOpen) return null;
 
   const handleNeighborhoodToggle = (hood: string) => {
-    if (hood === 'Jacarepaguá (todos)') { setTempNeighborhoods([]); } 
+    if (hood === 'Jacarepaguá (todos)') { 
+      setTempNeighborhoods([]); 
+    } 
     else {
       setTempNeighborhoods(prev => {
         const withoutTodos = prev.filter(h => h !== 'Jacarepaguá (todos)');
