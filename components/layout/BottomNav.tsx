@@ -2,6 +2,7 @@
 import React, { useMemo } from 'react';
 import { Home, User as UserIcon, Newspaper, MessageSquare, Ticket } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
+import { AuthModal } from '../AuthModal';
 
 interface BottomNavProps {
   activeTab: string;
@@ -13,12 +14,13 @@ interface NavItem {
   id: string;
   icon: React.ElementType;
   label: string;
-  isMainAction?: boolean;
+  isMainAction?: boolean; // Flag para aplicar o estilo "elevated"
   badge?: boolean;
 }
 
 export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, userRole }) => {
   const { user } = useAuth();
+  const [isAuthModalOpen, setIsAuthModalOpen] = React.useState(false);
 
   // Lógica de badge para cupons ativos do cliente
   const hasActiveCoupons = useMemo(() => {
@@ -31,13 +33,13 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
     }
   }, [user, userRole, activeTab]);
 
-  // Itens da barra fixa - ESTRUTURA OBRIGATÓRIA: Início, JPA Conversa, Cupom, Classificados, Menu
+  // Itens da barra fixa
   const navItems = useMemo(() => {
     const items: NavItem[] = [
       { id: 'home', icon: Home, label: 'Início', isMainAction: false },
       { id: 'neighborhood_posts', icon: MessageSquare, label: 'JPA Conversa', isMainAction: true },
       { 
-        id: userRole === 'lojista' ? 'merchant_coupons' : 'user_coupons', 
+        id: 'cupom_trigger', // ID especial para interceptar o clique
         icon: Ticket, 
         label: 'Cupom', 
         isMainAction: true,
@@ -48,6 +50,36 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
     ];
     return items;
   }, [userRole, hasActiveCoupons]);
+
+  const handleTabClick = (item: NavItem) => {
+    if (item.id === 'cupom_trigger') {
+      if (!user) {
+        // Visitante: Abre modal de login
+        setIsAuthModalOpen(true);
+      } else {
+        // Logado: Redireciona conforme o papel
+        if (userRole === 'lojista') {
+          setActiveTab('merchant_coupons');
+        } else {
+          setActiveTab('user_coupons');
+        }
+      }
+    } else {
+      setActiveTab(item.id);
+    }
+  };
+
+  const handleLoginSuccess = () => {
+    // Callback após login bem-sucedido via modal
+    setIsAuthModalOpen(false);
+    // Tenta redirecionar novamente
+    const role = localStorage.getItem('localizei_user_role') || 'cliente'; // Fallback simples
+    if (role === 'lojista') {
+      setActiveTab('merchant_coupons');
+    } else {
+      setActiveTab('user_coupons');
+    }
+  };
 
   const renderIconOrAvatar = (item: NavItem, isActive: boolean) => {
     if (item.id === 'profile' && user) {
@@ -75,18 +107,19 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
 
     const Icon = item.icon;
     
-    // Cor do ícone baseada no estado e se é ação principal
+    // Cor do ícone baseada no estado
+    // Se for MainAction e estiver ativo, usa cor da marca. Se inativo, cinza.
     const iconColor = isActive 
       ? 'text-blue-600 dark:text-blue-400' 
       : item.isMainAction 
-        ? 'text-gray-600 dark:text-gray-300' 
-        : 'text-gray-400 dark:text-gray-500';
+        ? 'text-gray-500 dark:text-gray-400' // Ícone cinza dentro do box
+        : 'text-gray-400 dark:text-gray-500'; // Ícone cinza fora do box
     
     return (
       <div className="relative">
         <Icon 
           className={`w-6 h-6 transition-all duration-200 ${iconColor}`} 
-          strokeWidth={item.isMainAction ? (isActive ? 2.5 : 2) : (isActive ? 2.5 : 2)} 
+          strokeWidth={item.isMainAction ? 2.5 : 2} 
         />
         {item.badge && !isActive && (
           <span className="absolute -top-1.5 -right-1.5 w-3 h-3 bg-red-500 border-2 border-white dark:border-gray-900 rounded-full animate-pulse shadow-sm"></span>
@@ -96,55 +129,67 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
   };
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 mx-auto w-full max-w-md bg-white dark:bg-gray-950 z-[1000] h-[90px] rounded-t-[28px] shadow-[0_-8px_40px_rgba(0,0,0,0.12)] border-t border-gray-100 dark:border-gray-800 px-3 pb-2">
-      <div className="grid w-full h-full grid-cols-5 items-end pb-3">
-        {navItems.map((item) => {
-          // Lógica de active state consolidada
-          const isMerchantCoupon = item.id === 'merchant_coupons' && activeTab === 'merchant_coupons';
-          const isUserCoupon = item.id === 'user_coupons' && activeTab === 'user_coupons';
-          const isProfileTab = item.id === 'profile' && ['store_area', 'store_ads_module', 'weekly_promo', 'merchant_jobs', 'store_profile', 'store_support', 'about', 'support', 'favorites'].includes(activeTab);
-          const isActive = activeTab === item.id || isProfileTab || isMerchantCoupon || isUserCoupon;
+    <>
+      <div className="fixed bottom-0 left-0 right-0 mx-auto w-full max-w-md bg-white dark:bg-gray-950 z-[1000] h-[90px] rounded-t-[28px] shadow-[0_-8px_40px_rgba(0,0,0,0.12)] border-t border-gray-100 dark:border-gray-800 px-2 pb-2">
+        <div className="grid w-full h-full grid-cols-5 items-end pb-3">
+          {navItems.map((item) => {
+            // Lógica de active state
+            let isActive = false;
+            
+            if (item.id === 'cupom_trigger') {
+               isActive = activeTab === 'merchant_coupons' || activeTab === 'user_coupons';
+            } else if (item.id === 'profile') {
+               isActive = ['store_area', 'store_ads_module', 'weekly_promo', 'merchant_jobs', 'store_profile', 'store_support', 'about', 'support', 'favorites'].includes(activeTab) || activeTab === 'profile';
+            } else {
+               isActive = activeTab === item.id;
+            }
 
-          return (
-            <div key={item.id} className="flex justify-center h-full items-center">
-               <button 
-                onClick={() => setActiveTab(item.id)} 
-                className="w-full h-full flex flex-col items-center justify-center gap-1.5 outline-none group" 
-                aria-label={item.label}
-              >
-                {/* 
-                   Contêiner do Ícone:
-                   - Se for MainAction (Conversa, Cupom, Classificados): Aplica estilo "alto-relevo" (fundo branco + sombra + borda).
-                   - Se não for (Início, Menu): Fica transparente (flat).
-                */}
-                <div className={`
-                  flex items-center justify-center transition-all duration-300 relative
-                  ${item.isMainAction 
-                    ? `h-11 w-14 rounded-2xl border mb-0.5 ${
-                        isActive 
-                          ? 'bg-blue-50 dark:bg-blue-900/30 border-blue-200 dark:border-blue-800 shadow-md shadow-blue-500/10 -translate-y-1' 
-                          : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 shadow-sm hover:-translate-y-0.5'
-                      }`
-                    : 'h-8 w-8'
-                  }
-                `}>
-                  {renderIconOrAvatar(item, isActive)}
-                </div>
-                
-                <span className={`text-[9px] font-black uppercase tracking-tighter transition-colors leading-none ${
-                  isActive 
-                    ? 'text-blue-600 dark:text-blue-400' 
-                    : item.isMainAction 
-                      ? 'text-gray-600 dark:text-gray-400' 
+            return (
+              <div key={item.id} className="flex justify-center h-full items-center">
+                 <button 
+                  onClick={() => handleTabClick(item)} 
+                  className="w-full h-full flex flex-col items-center justify-center gap-1 outline-none group active:scale-95 transition-transform" 
+                  aria-label={item.label}
+                >
+                  {/* 
+                     CONTÊINER DE ALTO RELEVO PARA OS BOTÕES CENTRAIS
+                     Se isMainAction = true, renderiza um box com sombra e borda.
+                     Se false, renderiza apenas o ícone.
+                  */}
+                  <div className={`
+                    flex items-center justify-center transition-all duration-300 relative
+                    ${item.isMainAction 
+                      ? `h-11 w-14 rounded-2xl border mb-1 ${
+                          isActive 
+                            ? 'bg-blue-50 dark:bg-blue-900/30 border-blue-200 dark:border-blue-800 shadow-md shadow-blue-500/10 -translate-y-1' 
+                            : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 shadow-sm'
+                        }`
+                      : 'h-8 w-8'
+                    }
+                  `}>
+                    {renderIconOrAvatar(item, isActive)}
+                  </div>
+                  
+                  <span className={`text-[9px] font-black uppercase tracking-tighter transition-colors leading-none ${
+                    isActive 
+                      ? 'text-blue-600 dark:text-blue-400' 
                       : 'text-gray-400 dark:text-gray-500'
-                }`}>
-                  {item.label}
-                </span>
-              </button>
-            </div>
-          );
-        })}
+                  }`}>
+                    {item.label}
+                  </span>
+                </button>
+              </div>
+            );
+          })}
+        </div>
       </div>
-    </div>
+
+      <AuthModal 
+        isOpen={isAuthModalOpen} 
+        onClose={() => setIsAuthModalOpen(false)}
+        user={null}
+        onLoginSuccess={handleLoginSuccess}
+      />
+    </>
   );
 };
