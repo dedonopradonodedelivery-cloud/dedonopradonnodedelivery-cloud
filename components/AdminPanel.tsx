@@ -29,8 +29,6 @@ import {
   MoreVertical,
   ChevronDown
 } from 'lucide-react';
-// Import CATEGORIES from constants
-import { CATEGORIES } from '../constants';
 import { fetchAdminMerchants, fetchAdminUsers } from '../backend/services';
 import { supabase } from '../lib/supabaseClient';
 import { ServiceRequest, AppSuggestion } from '../types';
@@ -104,7 +102,7 @@ const FinancialChart: React.FC<{ data: FinancialTransaction[], days: number }> =
     return Object.entries(grouped).map(([date, value]) => ({ date, value }));
   }, [data, days]);
 
-  const height = 200;
+  const height = 140;
   const width = 600;
   const padding = 10;
   
@@ -129,152 +127,209 @@ const FinancialChart: React.FC<{ data: FinancialTransaction[], days: number }> =
             <stop offset="100%" stopColor="#1E5BFF" stopOpacity="0.0" />
           </linearGradient>
         </defs>
-        {[0, 0.25, 0.5, 0.75, 1].map(p => (
-           <line key={p} x1={padding} y1={height - padding - (p * (height - padding*2))} x2={width - padding} y2={height - padding - (p * (height - padding*2))} stroke="#e2e8f0" strokeDasharray="4 4" />
-        ))}
         <path d={areaD} fill="url(#chartGradient)" />
         <path d={pathD} fill="none" stroke="#1E5BFF" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
-        {chartData.map((d, i) => {
-            if (chartData.length > 20 && i % 5 !== 0) return null;
-            const x = padding + i * stepX;
-            const y = height - padding - (d.value / maxVal) * (height - padding * 2);
-            return <circle key={i} cx={x} cy={y} r="3" fill="#fff" stroke="#1E5BFF" strokeWidth="2" />
-        })}
       </svg>
-      <div className="flex justify-between px-2 text-[10px] text-slate-400 mt-2 font-mono uppercase">
+      <div className="flex justify-between px-2 text-[8px] text-slate-500 mt-2 font-mono uppercase">
         <span>{chartData[0]?.date}</span>
-        <span>{chartData[Math.floor(chartData.length/2)]?.date}</span>
         <span>{chartData[chartData.length - 1]?.date}</span>
       </div>
     </div>
   );
 };
 
+const SectionHeader: React.FC<{ title: string; subtitle?: string; icon?: React.ElementType; color?: string }> = ({ title, subtitle, icon: Icon, color = "text-slate-400" }) => (
+  <div className="flex flex-col gap-0.5 mb-5 px-1">
+    <div className="flex items-center gap-2">
+      {Icon && <Icon size={14} className={color} />}
+      <h3 className="text-[11px] font-black text-white uppercase tracking-[0.2em]">{title}</h3>
+    </div>
+    {subtitle && <p className="text-[10px] text-slate-500 font-medium">{subtitle}</p>}
+  </div>
+);
+
 const AdminFinancialDashboard: React.FC = () => {
   const [range, setRange] = useState<DateRangeOption>('30d');
   const [data, setData] = useState<FinancialTransaction[]>([]);
   
   useEffect(() => {
-    const days = range === 'today' ? 1 : range === '7d' ? 7 : range === '30d' ? 30 : 30;
+    const days = range === 'today' ? 1 : range === '7d' ? 7 : 30;
     setData(generateFinancialData(days));
   }, [range]);
 
+  const todayRevenue = useMemo(() => data.filter(t => {
+    const d = new Date(t.date);
+    const today = new Date();
+    return d.getDate() === today.getDate() && t.status === 'paid';
+  }).reduce((acc, t) => acc + t.amount, 0), [data]);
+
+  const todayTransactions = useMemo(() => data.filter(t => {
+    const d = new Date(t.date);
+    const today = new Date();
+    return d.getDate() === today.getDate() && t.status === 'paid';
+  }).length, [data]);
+
+  const todayPendencies = useMemo(() => data.filter(t => {
+    const d = new Date(t.date);
+    const today = new Date();
+    return d.getDate() === today.getDate() && t.status === 'pending';
+  }).length, [data]);
+
   const totalRevenue = useMemo(() => data.filter(t => t.status === 'paid').reduce((acc, t) => acc + t.amount, 0), [data]);
-  const pendingRevenue = useMemo(() => data.filter(t => t.status === 'pending').reduce((acc, t) => acc + t.amount, 0), [data]);
+  const pendingRevenueTotal = useMemo(() => data.filter(t => t.status === 'pending').reduce((acc, t) => acc + t.amount, 0), [data]);
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500">
-        <div className="flex flex-col gap-1 px-1">
-            <h2 className="text-xl font-black text-white uppercase tracking-tight">Painel Financeiro</h2>
-            <p className="text-xs text-slate-500">Consolidado de vendas e faturamento do app.</p>
-        </div>
-
-        {/* KPIs */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="bg-slate-900 p-6 rounded-[2rem] border border-white/5 shadow-xl relative overflow-hidden group">
-                <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-500/5 rounded-full blur-3xl -mr-10 -mt-10"></div>
-                <div className="flex justify-between items-start mb-4">
-                    <div className="p-3 bg-emerald-500/10 rounded-2xl text-emerald-400 border border-emerald-500/20"><DollarSign size={20} /></div>
-                    <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Receita Bruta</span>
-                </div>
-                <p className="text-3xl font-black text-white">R$ {totalRevenue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
-                <div className="flex items-center gap-1.5 mt-2 text-emerald-400 text-[10px] font-bold uppercase tracking-wider">
-                    <TrendingUp size={12} /> +12.5% vs anterior
-                </div>
+    <div className="space-y-12 animate-in fade-in duration-500 pb-20">
+        
+        {/* 1. RESUMO DO DIA (Prioridade Máxima) */}
+        <section>
+          <SectionHeader title="Resumo do Dia" subtitle="Saúde operacional imediata" icon={Zap} color="text-amber-400" />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="bg-slate-900 p-6 rounded-[2rem] border border-white/5 shadow-xl relative group">
+              <div className="flex justify-between items-start mb-4">
+                <div className="p-3 bg-emerald-500/10 rounded-2xl text-emerald-400"><DollarSign size={20} /></div>
+                <span className="text-[10px] font-black text-emerald-500 uppercase tracking-widest bg-emerald-500/5 px-2 py-1 rounded">Hoje</span>
+              </div>
+              <p className="text-3xl font-black text-white leading-none">R$ {todayRevenue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+              <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mt-2">Receita processada hoje</p>
             </div>
 
-            <div className="bg-slate-900 p-6 rounded-[2rem] border border-white/5 shadow-xl relative overflow-hidden group">
-                <div className="absolute top-0 right-0 w-24 h-24 bg-amber-500/5 rounded-full blur-3xl -mr-10 -mt-10"></div>
-                <div className="flex justify-between items-start mb-4">
-                    <div className="p-3 bg-amber-500/10 rounded-2xl text-amber-400 border border-amber-500/20"><Clock size={20} /></div>
-                    <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Pendentes</span>
-                </div>
-                <p className="text-3xl font-black text-white">R$ {pendingRevenue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
-                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mt-2">Aguardando compensação</p>
+            <div className="bg-slate-900 p-6 rounded-[2rem] border border-white/5 shadow-xl group">
+              <div className="flex justify-between items-start mb-4">
+                <div className="p-3 bg-blue-500/10 rounded-2xl text-blue-400"><CheckCircle2 size={20} /></div>
+                <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Atividade</span>
+              </div>
+              <p className="text-3xl font-black text-white leading-none">{todayTransactions}</p>
+              <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mt-2">Vendas concluídas hoje</p>
             </div>
 
-            <div className="bg-slate-900 p-6 rounded-[2rem] border border-white/5 shadow-xl">
-                 <div className="flex justify-between items-start mb-4">
-                    <div className="p-3 bg-blue-500/10 rounded-2xl text-blue-400 border border-blue-500/20"><Users size={20} /></div>
-                    <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Conversão Leads</span>
+            <div className={`p-6 rounded-[2rem] border transition-all shadow-xl group ${todayPendencies > 0 ? 'bg-amber-500/5 border-amber-500/30' : 'bg-slate-900 border-white/5'}`}>
+              <div className="flex justify-between items-start mb-4">
+                <div className={`p-3 rounded-2xl ${todayPendencies > 0 ? 'bg-amber-500 text-slate-950' : 'bg-slate-800 text-slate-500'}`}>
+                  <AlertTriangle size={20} />
                 </div>
-                <p className="text-3xl font-black text-white">24%</p>
-                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mt-2">Média de fechamento</p>
+                {todayPendencies > 0 && (
+                  <span className="text-[8px] font-black text-amber-500 uppercase tracking-widest animate-pulse">Atenção</span>
+                )}
+              </div>
+              <p className={`text-3xl font-black leading-none ${todayPendencies > 0 ? 'text-amber-500' : 'text-white'}`}>{todayPendencies}</p>
+              <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mt-2">Pendências urgentes hoje</p>
             </div>
-
-            <div className="bg-slate-900 p-6 rounded-[2rem] border border-white/5 shadow-xl">
-                 <div className="flex justify-between items-start mb-4">
-                    <div className="p-3 bg-indigo-500/10 rounded-2xl text-indigo-400 border border-indigo-500/20"><Crown size={20} /></div>
-                    <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Ticket Médio</span>
-                </div>
-                <p className="text-3xl font-black text-white">R$ {54.90.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
-                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mt-2">Por transação paga</p>
-            </div>
-        </div>
-
-        {/* Gráfico */}
-        <section className="bg-slate-900 p-8 rounded-[3rem] border border-white/5 shadow-2xl">
-            <div className="flex items-center justify-between mb-8">
-                <div>
-                    <h3 className="text-lg font-black text-white uppercase tracking-tighter">Fluxo de Caixa</h3>
-                    <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Faturamento diário confirmado</p>
-                </div>
-                <div className="flex gap-1 bg-slate-800 p-1 rounded-xl">
-                    {(['today', '7d', '30d'] as DateRangeOption[]).map(r => (
-                        <button key={r} onClick={() => setRange(r)} className={`px-4 py-2 text-[9px] font-black uppercase rounded-lg transition-all ${range === r ? 'bg-indigo-600 text-white shadow-lg' : 'text-slate-500 hover:text-slate-300'}`}>
-                            {r === 'today' ? 'Hoje' : r === '7d' ? '7 Dias' : '30 Dias'}
-                        </button>
-                    ))}
-                </div>
-            </div>
-            <div className="h-64 w-full">
-                <FinancialChart data={data} days={range === 'today' ? 1 : range === '7d' ? 7 : 30} />
-            </div>
+          </div>
         </section>
 
-        {/* Últimas Transações */}
-        <section className="space-y-4">
-            <h3 className="text-xs font-black text-slate-500 uppercase tracking-[0.2em] ml-2">Transações Recentes</h3>
-            <div className="bg-slate-900 rounded-[2.5rem] border border-white/5 overflow-hidden">
-                <div className="overflow-x-auto">
-                    <table className="w-full text-left">
-                        <thead className="bg-slate-950/50 border-b border-white/5">
-                            <tr className="text-[10px] font-black text-slate-500 uppercase tracking-widest">
-                                <th className="p-4">Data</th>
-                                <th className="p-4">Lojista</th>
-                                <th className="p-4">Produto</th>
-                                <th className="p-4">Valor</th>
-                                <th className="p-4">Método</th>
-                                <th className="p-4">Status</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-white/5">
-                            {data.slice(0, 8).map(tx => (
-                                <tr key={tx.id} className="hover:bg-white/5 transition-colors group">
-                                    <td className="p-4 text-xs text-slate-400 font-mono">{new Date(tx.date).toLocaleDateString('pt-BR')}</td>
-                                    <td className="p-4 text-xs font-bold text-white">{tx.client}</td>
-                                    <td className="p-4">
-                                        <span className="text-[9px] font-black uppercase bg-slate-800 text-slate-300 px-2 py-1 rounded border border-white/5">
-                                            {tx.type}
-                                        </span>
-                                    </td>
-                                    <td className="p-4 text-xs font-black text-white">R$ {tx.amount.toFixed(2).replace('.', ',')}</td>
-                                    <td className="p-4 text-[10px] font-bold text-slate-500 uppercase">{tx.method}</td>
-                                    <td className="p-4">
-                                        <div className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-md text-[8px] font-black uppercase border ${
-                                            tx.status === 'paid' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' :
-                                            tx.status === 'pending' ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' :
-                                            'bg-rose-500/10 text-rose-400 border-rose-500/20'
-                                        }`}>
-                                            {tx.status === 'paid' ? 'Pago' : tx.status === 'pending' ? 'Pendente' : 'Cancelado'}
-                                        </div>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
+        {/* 2. PERFORMANCE DO APP */}
+        <section>
+          <SectionHeader title="Performance" subtitle="Eficiência da plataforma" icon={TrendingUp} color="text-indigo-400" />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="bg-slate-900/50 p-6 rounded-[2rem] border border-white/5">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="p-2 bg-indigo-500/10 text-indigo-400 rounded-xl"><Users size={16} /></div>
+                <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Conversão Leads</p>
+              </div>
+              <div className="flex items-end gap-2">
+                <p className="text-2xl font-black text-white">24.8%</p>
+                <div className="flex items-center text-emerald-400 text-[10px] font-bold mb-1">
+                  <ArrowUpRight size={12} /> 2.1%
                 </div>
-                <button className="w-full py-4 text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] hover:text-white transition-all bg-slate-950/20">Ver Relatório Completo</button>
+              </div>
+            </div>
+
+            <div className="bg-slate-900/50 p-6 rounded-[2rem] border border-white/5">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="p-2 bg-purple-500/10 text-purple-400 rounded-xl"><CreditCard size={16} /></div>
+                <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Ticket Médio</p>
+              </div>
+              <div className="flex items-end gap-2">
+                <p className="text-2xl font-black text-white">R$ 54,90</p>
+                <div className="flex items-center text-rose-400 text-[10px] font-bold mb-1">
+                  <ArrowDownRight size={12} /> R$ 3,10
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-slate-900/50 p-6 rounded-[2rem] border border-white/5">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="p-2 bg-slate-800 text-slate-400 rounded-xl"><Calendar size={16} /></div>
+                <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Churn Rate</p>
+              </div>
+              <p className="text-2xl font-black text-white">1.2%</p>
+            </div>
+          </div>
+        </section>
+
+        {/* 3. VISÃO FINANCEIRA GERAL */}
+        <section>
+          <SectionHeader title="Faturamento Geral" subtitle="Consolidado acumulado" icon={PieChart} color="text-blue-400" />
+          <div className="bg-slate-900 rounded-[3rem] border border-white/5 shadow-2xl overflow-hidden">
+            <div className="p-8 pb-4 grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="space-y-6">
+                <div>
+                  <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Receita Bruta Acumulada</p>
+                  <h4 className="text-4xl font-black text-white tracking-tighter">R$ {totalRevenue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</h4>
+                  <div className="flex items-center gap-1.5 mt-2 text-emerald-400 text-[10px] font-bold uppercase">
+                    <TrendingUp size={12} /> +15.4% em relação ao mês anterior
+                  </div>
+                </div>
+                <div className="pt-6 border-t border-white/5">
+                  <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Total Pendente (Geral)</p>
+                  <p className="text-2xl font-black text-amber-500">R$ {pendingRevenueTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+                </div>
+              </div>
+              <div className="h-full min-h-[140px] pt-4">
+                <FinancialChart data={data} days={30} />
+              </div>
+            </div>
+            
+            <div className="p-4 bg-slate-950/50 border-t border-white/5 flex justify-between items-center">
+               <button className="text-[10px] font-black text-slate-500 uppercase tracking-widest hover:text-white transition-colors flex items-center gap-2">
+                 <FileText size={14} /> Exportar Relatório Detalhado
+               </button>
+               <div className="flex gap-1 bg-slate-800 p-1 rounded-xl">
+                  {['7d', '30d'].map(r => (
+                      <button key={r} onClick={() => setRange(r as any)} className={`px-4 py-1.5 text-[8px] font-black uppercase rounded-lg transition-all ${range === r ? 'bg-indigo-600 text-white' : 'text-slate-500'}`}>
+                          {r}
+                      </button>
+                  ))}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ÚLTIMAS TRANSAÇÕES (Simplified) */}
+        <section className="space-y-4">
+            <h3 className="text-xs font-black text-slate-500 uppercase tracking-[0.2em] ml-2">Últimas Transações</h3>
+            <div className="bg-slate-900 rounded-[2.5rem] border border-white/5 overflow-hidden">
+                <div className="divide-y divide-white/5">
+                    {data.slice(0, 5).map(tx => (
+                        <div key={tx.id} className="p-5 flex items-center justify-between hover:bg-white/5 transition-colors group">
+                            <div className="flex items-center gap-4">
+                                <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-[10px] font-black uppercase tracking-tighter ${
+                                    tx.type === 'master' ? 'bg-amber-500/10 text-amber-500' : 
+                                    tx.type === 'banner' ? 'bg-blue-500/10 text-blue-500' : 
+                                    'bg-slate-800 text-slate-400'
+                                }`}>
+                                    {tx.type.slice(0, 3)}
+                                </div>
+                                <div>
+                                    <p className="text-sm font-bold text-white">{tx.client}</p>
+                                    <p className="text-[10px] text-slate-500 uppercase font-medium">{new Date(tx.date).toLocaleDateString('pt-BR')} • {tx.method}</p>
+                                </div>
+                            </div>
+                            <div className="text-right">
+                                <p className="text-sm font-black text-white">R$ {tx.amount.toFixed(2).replace('.', ',')}</p>
+                                <span className={`text-[8px] font-black uppercase px-2 py-0.5 rounded ${
+                                    tx.status === 'paid' ? 'bg-emerald-500/10 text-emerald-400' :
+                                    tx.status === 'pending' ? 'bg-amber-500/10 text-amber-400' :
+                                    'text-rose-400'
+                                }`}>
+                                    {tx.status}
+                                </span>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+                <button className="w-full py-4 text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] hover:text-white transition-all bg-slate-950/20">Ver Todas</button>
             </div>
         </section>
     </div>
@@ -331,11 +386,11 @@ export const AdminPanel: React.FC<any> = ({ onLogout, viewMode, onOpenViewSwitch
 
         <nav className="flex gap-2 overflow-x-auto no-scrollbar">
             {[
-                { id: 'financial', label: 'Financeiro', icon: DollarSign },
+                { id: 'financial', label: 'Monitoramento', icon: LayoutDashboard },
                 { id: 'merchants', label: 'Lojistas', icon: Store },
                 { id: 'users', label: 'Usuários', icon: Users },
-                { id: 'monitoring', label: 'Chats', icon: MessageSquare },
-                { id: 'suggestions', label: 'Ideias', icon: Lightbulb },
+                { id: 'monitoring', label: 'Conversas', icon: MessageSquare },
+                { id: 'suggestions', label: 'Sugestões', icon: Lightbulb },
             ].map(tab => (
                 <button key={tab.id} onClick={() => setActiveTab(tab.id as any)} className={`flex-1 min-w-fit px-6 py-3 rounded-2xl flex items-center justify-center gap-2 text-xs font-black uppercase tracking-widest transition-all ${activeTab === tab.id ? 'bg-[#1E5BFF] text-white shadow-lg' : 'bg-white/5 text-slate-500 hover:bg-white/10'}`}>
                     <tab.icon size={14} /> {tab.label}
@@ -391,7 +446,6 @@ export const AdminPanel: React.FC<any> = ({ onLogout, viewMode, onOpenViewSwitch
                         </div>
                     ) : (
                         suggestions.map(sug => {
-                            const CatIcon = CATEGORIES.find(c => c.id === sug.category)?.icon || Lightbulb;
                             return (
                                 <div key={sug.id} className="bg-slate-900 p-6 rounded-[2rem] border border-white/5 space-y-4">
                                     <div className="flex justify-between items-start">
