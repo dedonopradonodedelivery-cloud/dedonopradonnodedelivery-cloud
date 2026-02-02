@@ -12,12 +12,11 @@ import {
   AtSign,
   AlertCircle,
   Video,
-  // FIX: Added missing ChevronRight and CheckCircle2 icons.
   ChevronRight,
-  CheckCircle2
+  CheckCircle2,
+  Store as StoreIcon
 } from 'lucide-react';
 import { NeighborhoodCommunity, CommunityPost, Store, ReportReason } from '../types';
-// FIX: Using relative path for constants to ensure consistency and availability of exported members.
 import { OFFICIAL_COMMUNITIES, MOCK_USER_COMMUNITIES, MOCK_COMMUNITY_POSTS, STORES } from '../constants';
 import { useNeighborhood, NEIGHBORHOODS } from '../contexts/NeighborhoodContext';
 import { User } from '@supabase/supabase-js';
@@ -64,7 +63,6 @@ const CreatePostView: React.FC<{
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setError('');
     if (event.target.files) {
-      // FIX: Explicitly type `files` as File[] to allow access to properties like `type`.
       const files: File[] = Array.from(event.target.files);
       const firstFile = files[0];
 
@@ -198,10 +196,20 @@ const CreatePostView: React.FC<{
         </div>
 
         {userRole === 'lojista' && (
-          <div className="mt-auto pt-4">
-            <label htmlFor="showOnProfile" className="flex items-center gap-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-800 cursor-pointer">
-              <input type="checkbox" id="showOnProfile" checked={showOnStoreProfile} onChange={(e) => setShowOnStoreProfile(e.target.checked)} className="h-5 w-5 rounded text-blue-600 focus:ring-blue-500 border-gray-300" />
-              <span className="font-medium text-sm text-gray-800 dark:text-gray-200">Mostrar também no perfil da minha loja</span>
+          <div className="mt-auto pt-4 border-t border-gray-100 dark:border-gray-800">
+            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3 px-1">Opções de lojista</p>
+            <label htmlFor="showOnProfile" className="flex items-center gap-3 p-4 rounded-xl bg-blue-50 dark:bg-blue-900/10 cursor-pointer border border-blue-100 dark:border-blue-800/30 transition-colors">
+              <div className={`w-5 h-5 rounded border flex items-center justify-center transition-colors ${showOnStoreProfile ? 'bg-blue-600 border-blue-600' : 'bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600'}`}>
+                {showOnStoreProfile && <CheckCircle2 className="w-3.5 h-3.5 text-white" />}
+              </div>
+              <input type="checkbox" id="showOnProfile" checked={showOnStoreProfile} onChange={(e) => setShowOnStoreProfile(e.target.checked)} className="hidden" />
+              <div className="flex-1">
+                 <span className="font-bold text-sm text-gray-800 dark:text-white flex items-center gap-2">
+                    <StoreIcon size={14} className="text-blue-500" /> 
+                    Publicar também no Feed da Loja
+                 </span>
+                 <p className="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5">O post aparecerá na aba "Feed" do seu perfil.</p>
+              </div>
             </label>
           </div>
         )}
@@ -379,7 +387,7 @@ export const NeighborhoodPostsView: React.FC<NeighborhoodPostsViewProps> = ({ on
             <div className="text-center py-20 opacity-40 flex flex-col items-center">
                 <AlertCircle size={48} className="mb-4" />
                 <p className="text-sm font-bold">Nenhuma postagem encontrada</p>
-                <p className="text-xs text-gray-500 mt-1">Tente ajustar seus filtros or seja o primeiro a postar!</p>
+                <p className="text-xs text-gray-500 mt-1">Tente ajustar seus filtros ou seja o primeiro a postar!</p>
             </div>
         )}
 
@@ -397,9 +405,3 @@ export const NeighborhoodPostsView: React.FC<NeighborhoodPostsViewProps> = ({ on
     </div>
   );
 };
-
-const ChevronDown = ({ size, className }: { size?: number, className?: string }) => (
-  <svg width={size || 24} height={size || 24} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className={className}>
-    <path d="m6 9 6 6 6-6"/>
-  </svg>
-);

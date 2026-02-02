@@ -15,6 +15,8 @@ import {
   MessageCircle, HelpCircle, UserCheck, Recycle
 } from 'lucide-react';
 import { AdType, Category, Store, Story, EditorialCollection, Job, CommunityPost, NeighborhoodCommunity, Classified, RealEstateProperty } from '../types';
+import { getStoreLogo } from '@/utils/mockLogos';
+
 
 export const CATEGORIES: Category[] = [
   { id: 'cat-comida', name: 'Comida', slug: 'comida', icon: <Utensils />, color: 'bg-brand-blue' },
@@ -35,7 +37,347 @@ export const CATEGORIES: Category[] = [
   { id: 'cat-condominio', name: 'Condomínio', slug: 'condominio', icon: <Building2 />, color: 'bg-brand-blue' },
 ];
 
-export const STORES: Store[] = [
+// DATASET FAKE PARA BANNERS DE CATEGORIA (SEGMENTADO POR BAIRRO E CATEGORIA)
+// Generalizando para que o componente CategoryTopCarousel funcione em qualquer categoria
+export const CATEGORY_TOP_BANNERS: Record<string, Record<string, { image: string; storeId: string }[]>> = {
+  'comida': {
+    'Freguesia': [
+      { image: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?q=80&w=800', storeId: 'f-5' },
+      { image: 'https://images.unsplash.com/photo-1561758033-d89a9ad46330?q=80&w=800', storeId: 'f-1' }
+    ],
+    'Taquara': [
+      { image: 'https://images.unsplash.com/photo-1594212699903-ec8a3eca50f5?q=80&w=800', storeId: 'fake-comida-0' },
+      { image: 'https://images.unsplash.com/photo-1571091718767-18b5b1457add?q=80&w=800', storeId: 'fake-comida-1' }
+    ]
+  },
+  'beleza': {
+    'Taquara': [
+      { image: 'https://images.unsplash.com/photo-1562322140-8baeececf3df?q=80&w=800', storeId: 'f-2' },
+      { image: 'https://images.unsplash.com/photo-1560066984-118c38b64a75?q=80&w=800', storeId: 'fake-beleza-0' }
+    ],
+    'Freguesia': [
+      { image: 'https://images.unsplash.com/photo-1521590832167-7ce633395e39?q=80&w=800', storeId: 'fake-beleza-1' },
+      { image: 'https://images.unsplash.com/photo-1632345031435-8727f6897d53?q=80&w=800', storeId: 'fake-beleza-2' }
+    ]
+  },
+  'pets': {
+    'Pechincha': [
+      { image: 'https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?q=80&w=800', storeId: 'f-3' },
+      { image: 'https://images.unsplash.com/photo-1524511751214-b0a384dd932d?q=80&w=800', storeId: 'fake-pets-0' }
+    ],
+    'Freguesia': [
+      { image: 'https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?q=80&w=800', storeId: 'fake-pets-1' },
+      { image: 'https://images.unsplash.com/photo-1544568100-847a948585b9?q=80&w=800', storeId: 'fake-pets-2' }
+    ]
+  },
+  'saude': {
+    'Freguesia': [
+      { image: 'https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?q=80&w=800', storeId: 'f-9' },
+      { image: 'https://images.unsplash.com/photo-1576091160550-2173dba999ef?q=80&w=800', storeId: 'fake-saude-0' }
+    ]
+  },
+  'autos': {
+    'Anil': [
+      { image: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=800', storeId: 'f-10' },
+      { image: 'https://images.unsplash.com/photo-1470309634658-8398b2cd0d23?q=80&w=800', storeId: 'fake-autos-0' }
+    ],
+    'Freguesia': [
+      { image: 'https://images.unsplash.com/photo-1445205170230-053b83016050?q=80&w=800', storeId: 'fake-moda-1' },
+      { image: 'https://images.unsplash.com/photo-1512436991641-6745cdb1723f?q=80&w=800', storeId: 'fake-moda-2' }
+    ]
+  },
+  'mercado': {
+    'Freguesia': [
+      { image: 'https://images.unsplash.com/photo-1587854692152-cbe660dbbb88?q=80&w=800', storeId: 'f-7' },
+      { image: 'https://images.unsplash.com/photo-1534723452202-428aae1ad99d?q=80&w=800', storeId: 'fake-mercado-0' }
+    ]
+  },
+  'esportes': {
+    'Taquara': [
+      { image: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=800', storeId: 'f-8' },
+      { image: 'https://images.unsplash.com/photo-1541534741688-6078c6bfb5c5?q=80&w=800', storeId: 'fake-esportes-0' }
+    ]
+  },
+  'servicos': {
+    'Freguesia': [
+      { image: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?q=80&w=800', storeId: 'grupo-esquematiza' },
+      { image: 'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?q=80&w=800', storeId: 'fake-servicos-0' }
+    ]
+  },
+  'casa': {
+    'Freguesia': [
+      { image: 'https://images.unsplash.com/photo-1524661135-423995f22d0b?q=80&w=800', storeId: 'fake-casa-0' },
+      { image: 'https://images.unsplash.com/photo-1557804506-669a67965ba0?q=80&w=800', storeId: 'fake-casa-1' }
+    ]
+  },
+  'pro': {
+    'Freguesia': [
+      { image: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?q=80&w=800', storeId: 'fake-pro-0' },
+      { image: 'https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?q=80&w=800', storeId: 'fake-pro-1' }
+    ]
+  },
+  'lazer': {
+    'Freguesia': [
+      { image: 'https://images.unsplash.com/photo-1517457373958-b7bdd4587205?q=80&w=800', storeId: 'fake-lazer-0' },
+      { image: 'https://images.unsplash.com/photo-1514525253361-bee23e63d890?q=80&w=800', storeId: 'fake-lazer-1' }
+    ]
+  },
+  'educacao': {
+    'Freguesia': [
+      { image: 'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?q=80&w=800', storeId: 'fake-educacao-0' },
+      { image: 'https://images.unsplash.com/photo-1509062522246-3755977927d7?q=80&w=800', storeId: 'fake-educacao-1' }
+    ]
+  },
+  'farmacia': {
+    'Freguesia': [
+      { image: 'https://images.unsplash.com/photo-1587854692152-cbe660dbbb88?q=80&w=800', storeId: 'f-7' },
+      { image: 'https://images.unsplash.com/photo-1628771065518-0d82f1110503?q=80&w=800', storeId: 'fake-farmacia-0' }
+    ]
+  },
+  'moda': {
+    'Anil': [
+      { image: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=800', storeId: 'f-10' },
+      { image: 'https://images.unsplash.com/photo-1470309634658-8398b2cd0d23?q=80&w=800', storeId: 'fake-autos-0' }
+    ],
+    'Freguesia': [
+      { image: 'https://images.unsplash.com/photo-1445205170230-053b83016050?q=80&w=800', storeId: 'fake-moda-1' },
+      { image: 'https://images.unsplash.com/photo-1512436991641-6745cdb1723f?q=80&w=800', storeId: 'fake-moda-2' }
+    ]
+  },
+  'eventos': {
+    'Freguesia': [
+      { image: 'https://images.unsplash.com/photo-1511632765486-a01980e01a18?q=80&w=800', storeId: 'fake-eventos-0' },
+      { image: 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?q=80&w=800', storeId: 'fake-eventos-1' }
+    ]
+  },
+  'condominio': {
+    'Freguesia': [
+      { image: 'https://images.unsplash.com/photo-1570129477492-45c003edd2be?q=80&w=800', storeId: 'fake-condominio-0' },
+      { image: 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?q=80&w=800', storeId: 'fake-condominio-1' }
+    ]
+  }
+};
+
+export const SUBCATEGORIES: Record<string, { name: string; icon: React.ReactNode }[]> = {
+  'Comida': [
+    { name: 'Restaurantes', icon: <Utensils /> },
+    { name: 'Lanches & Hamburguerias', icon: <Beef /> },
+    { name: 'Pizzarias', icon: <Pizza /> },
+    { name: 'Cafés & Cafeterias', icon: <Coffee /> },
+    { name: 'Delivery', icon: <Package /> },
+    { name: 'Doces & Sobremesas', icon: <Cake /> },
+    { name: 'Comida Caseira', icon: <Utensils /> },
+    { name: 'Hortifruti & Naturais', icon: <Apple /> },
+  ],
+  'Eventos': [
+    { name: 'Eventos no Bairro', icon: <MapIcon /> },
+    { name: 'Festas & Comemorações', icon: <PartyPopper /> },
+    { name: 'Feiras & Exposições', icon: <StoreIcon /> },
+    { name: 'Eventos Gastronômicos', icon: <Utensils /> },
+    { name: 'Eventos Culturais', icon: <Music /> },
+    { name: 'Eventos Esportivos', icon: <Dumbbell /> },
+    { name: 'Eventos Infantis', icon: <Baby /> },
+    { name: 'Eventos em Condomínio', icon: <Building2 /> },
+  ],
+  'Pets': [
+    { name: 'Veterinários', icon: <Stethoscope /> },
+    { name: 'Pet Shop', icon: <ShoppingCart /> },
+    { name: 'Banho & Tosa', icon: <Scissors /> },
+    { name: 'Adestramento', icon: <Award /> },
+    { name: 'Hospedagem Pet', icon: <HomeIcon /> },
+    { name: 'Passeadores', icon: <Users /> },
+    { name: 'Produtos Pet', icon: <Package /> },
+    { name: 'Pets Exóticos', icon: <Sparkles /> },
+  ],
+  'Pro': [
+    { name: 'Eletricista', icon: <Zap /> },
+    { name: 'Encanador', icon: <Droplets /> },
+    { name: 'Pintor', icon: <PaintRoller /> },
+    { name: 'Pedreiro', icon: <Hammer /> },
+    { name: 'Técnico em Informática', icon: <Laptop /> },
+    { name: 'Montador de Móveis', icon: <Settings /> },
+    { name: 'Marido de Aluguel', icon: <Wrench /> },
+    { name: 'Freelancers em Geral', icon: <Briefcase /> },
+  ],
+  'Saúde': [
+    { name: 'Clínicas', icon: <Building2 /> },
+    { name: 'Dentistas', icon: <Smile /> },
+    { name: 'Psicologia', icon: <Brain /> },
+    { name: 'Fisioterapia', icon: <Activity /> },
+    { name: 'Exames & Diagnósticos', icon: <Microscope /> },
+    { name: 'Nutrição', icon: <Apple /> },
+    { name: 'Terapias Alternativas', icon: <Sparkles /> },
+    { name: 'Saúde Preventiva', icon: <Shield /> },
+  ],
+  'Serviços': [
+    { name: 'Limpeza Residencial', icon: <Sparkles /> },
+    { name: 'Dedetização', icon: <Shield /> },
+    { name: 'Manutenção Geral', icon: <Settings /> },
+    { name: 'Chaveiro', icon: <Zap /> },
+    { name: 'Segurança', icon: <Shield /> },
+    { name: 'Serviços Rápidos', icon: <Zap /> },
+    { name: 'Assistência Técnica', icon: <Monitor /> },
+    { name: 'Instalações', icon: <Wrench /> },
+  ],
+  'Beleza': [
+    { name: 'Salão de Cabelo', icon: <Scissors /> },
+    { name: 'Barbearia', icon: <Scissors /> },
+    { name: 'Manicure & Pedicure', icon: <Star /> },
+    { name: 'Estética Facial', icon: <Sparkles /> },
+    { name: 'Estética Corporal', icon: <Activity /> },
+    { name: 'Maquiagem', icon: <Star /> },
+    { name: 'Sobrancelhas & Cílios', icon: <Eye /> },
+    { name: 'Spa & Relaxamento', icon: <Heart /> },
+  ],
+  'Autos': [
+    { name: 'Oficinas Mecânicas', icon: <Wrench /> },
+    { name: 'Lava-Jato', icon: <Droplets /> },
+    { name: 'Auto Elétrica', icon: <Zap /> },
+    { name: 'Pneus & Alinhamento', icon: <Settings /> },
+    { name: 'Funilaria & Pintura', icon: <PaintRoller /> },
+    { name: 'Peças & Acessórios', icon: <Package /> },
+    { name: 'Vistoria & Documentação', icon: <FileText /> },
+    { name: 'Serviços Rápidos Auto', icon: <Zap /> },
+  ],
+  'Mercado': [
+    { name: 'Supermercados', icon: <ShoppingCart /> },
+    { name: 'Mercados de Bairro', icon: <HomeIcon /> },
+    { name: 'Atacarejo', icon: <Package /> },
+    { name: 'Conveniência', icon: <Clock /> },
+    { name: 'Produtos Importados', icon: <Globe /> },
+    { name: 'Bebidas', icon: <Beer /> },
+    { name: 'Produtos Congelados', icon: <Package /> },
+    { name: 'Assinaturas & Cestas', icon: <Calendar /> },
+  ],
+  'Casa': [
+    { name: 'Materiais de Construção', icon: <Hammer /> },
+    { name: 'Decoração', icon: <Sparkles /> },
+    { name: 'Iluminação', icon: <Zap /> },
+    { name: 'Móveis', icon: <HomeIcon /> },
+    { name: 'Eletrodomésticos', icon: <Monitor /> },
+    { name: 'Jardinagem', icon: <Leaf /> },
+    { name: 'Organização', icon: <LayoutGrid /> },
+    { name: 'Reforma & Obras', icon: <Hammer /> },
+  ],
+  'Esportes': [
+    { name: 'Academias', icon: <Dumbbell /> },
+    { name: 'Personal Trainer', icon: <Users /> },
+    { name: 'Esportes Coletivos', icon: <Users /> },
+    { name: 'Artes Marciais', icon: <Target /> },
+    { name: 'Yoga & Pilates', icon: <Activity /> },
+    { name: 'Dança', icon: <Music /> },
+    { name: 'Treino Funcional', icon: <Zap /> },
+    { name: 'Esportes ao Ar Livre', icon: <Plane /> },
+  ],
+  'Lazer': [
+    { name: 'Eventos', icon: <PartyPopper /> },
+    { name: 'Shows & Música', icon: <Music /> },
+    { name: 'Cinema & Teatro', icon: <Ticket /> },
+    { name: 'Bares & Baladas', icon: <Beer /> },
+    { name: 'Passeios', icon: <MapIcon /> },
+    { name: 'Turismo Local', icon: <Globe2 /> },
+    { name: 'Experiências', icon: <Sparkles /> },
+    { name: 'Atividades em Família', icon: <Users /> },
+  ],
+  'Educação': [
+    { name: 'Escolas', icon: <Building2 /> },
+    { name: 'Cursos Livres', icon: <GraduationCap /> },
+    { name: 'Idiomas', icon: <Globe2 /> },
+    { name: 'Reforço Escolar', icon: <Edit3 /> },
+    { name: 'Aulas Particulares', icon: <User /> },
+    { name: 'Educação Infantil', icon: <Baby /> },
+    { name: 'Cursos Profissionalizantes', icon: <Briefcase /> },
+    { name: 'Tecnologia & Programação', icon: <Laptop /> },
+  ],
+  'Farmácia': [
+    { name: 'Medicamentos', icon: <Pill /> },
+    { name: 'Genéricos', icon: <Tag /> },
+    { name: 'Manipulação', icon: <Microscope /> },
+    { name: 'Perfumaria', icon: <Star /> },
+    { name: 'Higiene & Cuidados', icon: <Heart /> },
+    { name: 'Testes Rápidos', icon: <Zap /> },
+    { name: 'Suplementos', icon: <Dumbbell /> },
+    { name: 'Delivery Farmácia', icon: <Package /> },
+  ],
+  'Moda': [
+    { name: 'Moda Feminina', icon: <Shirt /> },
+    { name: 'Moda Masculina', icon: <Shirt /> },
+    { name: 'Moda Infantil', icon: <Baby /> },
+    { name: 'Calçados', icon: <Star /> },
+    { name: 'Acessórios', icon: <Star /> },
+    { name: 'Moda Íntima', icon: <Heart /> },
+    { name: 'Moda Fitness', icon: <Dumbbell /> },
+    { name: 'Brechós', icon: <Tag /> },
+  ],
+  'Condomínio': [
+    { name: 'Avisos & Comunicados', icon: <Bell /> },
+    { name: 'Serviços para Condomínio', icon: <Wrench /> },
+    { name: 'Manutenção Predial', icon: <Hammer /> },
+    { name: 'Segurança Condominial', icon: <Shield /> },
+    { name: 'Limpeza & Portaria', icon: <Building2 /> },
+    { name: 'Indicações de Profissionais', icon: <Users /> },
+    { name: 'Eventos do Condomínio', icon: <Calendar /> },
+    { name: 'Achados & Perdidos', icon: <Search /> },
+  ],
+};
+
+const IMG_IDS: Record<string, string> = {
+  'Comida': '1504674900247-0877df9cc836',
+  'Pets': '1516734212186-a967f81ad0d7',
+  'Pro': '1486312338219-ce68d2c6f44d',
+  'Saúde': '1588776814546-1ffcf47267a5',
+  'Serviços': '1454165804606-c3d57bc86b40',
+  'Beleza': '1562322140-8baeececf3df',
+  'Autos': '1486262715619-67b85e0b08d3',
+  'Mercado': '1587854692152-cbe660dbbb88',
+  'Casa': '1524661135-423995f22d0b',
+  'Esportes': '1534438327276-14e5300c3a48',
+  'Lazer': '1517457373958-b7bdd4587205',
+  'Educação': '1556761175-5973dc0f32e7',
+  'Farmácia': '1587854692152-cbe660dbbb88',
+  'Moda': '1441986300917-64674bd600d8',
+  'Eventos': '1511632765486-a01980e01a18',
+  'Condomínio': '1570129477492-45c003edd2be'
+};
+
+const generateFakeStores = () => {
+    const allStores: Store[] = [];
+    const hoods = ["Freguesia", "Anil", "Taquara", "Pechincha", "Tanque", "Curicica"];
+    const modifiers = ["Gourmet", "Express", "da Villa", "Master", "do Bairro", "Central"];
+
+    Object.entries(SUBCATEGORIES).forEach(([catName, subs]) => {
+        subs.forEach(sub => {
+            // Gerar 6 lojas por subcategoria
+            for (let i = 1; i <= 6; i++) {
+                const isSponsored = i <= 3; // Primeiras 3 patrocinadas
+                const hood = hoods[i % hoods.length];
+                const rating = 4.2 + (Math.random() * 0.8);
+                const imgId = IMG_IDS[catName] || '1557804506-669a67965ba0';
+
+                allStores.push({
+                    id: `fake-${catName}-${sub.name}-${i}`.replace(/\s+/g, '-').toLowerCase(),
+                    name: `${sub.name} ${modifiers[i-1]}`,
+                    category: catName,
+                    subcategory: sub.name,
+                    rating: parseFloat(rating.toFixed(1)),
+                    reviewsCount: Math.floor(Math.random() * 500) + 20,
+                    distance: `${hood} • RJ`,
+                    neighborhood: hood,
+                    adType: isSponsored ? AdType.PREMIUM : AdType.ORGANIC,
+                    isSponsored: isSponsored,
+                    description: `O melhor em ${sub.name.toLowerCase()} de toda a região de ${hood}. Venha conhecer!`,
+                    image: `https://images.unsplash.com/photo-${imgId}?q=80&w=400&auto=format&fit=crop&sig=${sub.name}-${i}`,
+                    verified: Math.random() > 0.4,
+                    isOpenNow: Math.random() > 0.2
+                });
+            }
+        });
+    });
+    return allStores;
+};
+
+// Dados Fixos de Lojas (Preservados para consistência)
+const BASE_STORES: Store[] = [
   {
     id: 'grupo-esquematiza',
     name: 'Grupo Esquematiza',
@@ -55,17 +397,42 @@ export const STORES: Store[] = [
     verified: true,
     isOpenNow: true,
     isSponsored: true
+  }
+];
+
+export const STORES: Store[] = [
+  ...BASE_STORES,
+  ...generateFakeStores()
+];
+
+export const EDITORIAL_SERVICES: EditorialCollection[] = [
+  {
+    id: 'culinaria-jpa',
+    title: 'Melhores de JPA',
+    subtitle: 'Onde comer bem no bairro',
+    image: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=800&auto=format&fit=crop',
+    keywords: ['comida', 'restaurante', 'lanches', 'pizza']
   },
-  { id: 'f-1', name: 'Bibi Lanches', category: 'Comida', subcategory: 'Lanches & Hamburguerias', rating: 4.8, distance: 'Freguesia', adType: AdType.PREMIUM, description: 'Lanches clássicos e saudáveis.', isSponsored: true, image: 'https://images.unsplash.com/photo-1561758033-d89a9ad46330?q=80&w=400&auto=format&fit=crop' },
-  { id: 'f-2', name: 'Studio Hair Vip', category: 'Beleza', subcategory: 'Salão de Cabelo', rating: 4.9, distance: 'Taquara', adType: AdType.PREMIUM, description: 'Especialista em loiros e cortes modernos.', isSponsored: true, image: 'https://images.unsplash.com/photo-1562322140-8baeececf3df?q=80&w=400&auto=format&fit=crop' },
-  { id: 'f-3', name: 'Pet Shop Alegria', category: 'Pets', subcategory: 'Pet Shop', rating: 4.7, distance: 'Pechincha', adType: AdType.PREMIUM, description: 'O carinho que seu pet merece.', isSponsored: true, image: 'https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?q=80&w=400&auto=format&fit=crop' },
-  { id: 'f-4', name: 'Mecânica 24h', category: 'Autos', subcategory: 'Oficinas Mecânicas', rating: 4.5, distance: 'Anil', adType: AdType.PREMIUM, description: 'Socorro mecânico a qualquer hora.', isSponsored: true, image: 'https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?q=80&w=400&auto=format&fit=crop' },
-  { id: 'f-5', name: 'Pizzaria do Zé', category: 'Comida', subcategory: 'Pizzarias', rating: 4.6, distance: 'Freguesia', adType: AdType.PREMIUM, description: 'Pizza no forno a lenha.', isSponsored: true, image: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?q=80&w=400&auto=format&fit=crop' },
-  { id: 'f-6', name: 'Açaí da Praça', category: 'Comida', subcategory: 'Doces & Sobremesas', rating: 4.9, distance: 'Tanque', adType: AdType.PREMIUM, description: 'O melhor açaí da região.', isSponsored: true, image: 'https://images.unsplash.com/photo-1590301157890-4810ed352733?q=80&w=400&auto=format&fit=crop' },
-  { id: 'f-7', name: 'Drogaria JPA', category: 'Farmácia', subcategory: 'Medicamentos', rating: 4.4, distance: 'Freguesia', adType: AdType.PREMIUM, description: 'Medicamentos e perfumaria.', isSponsored: true, image: 'https://images.unsplash.com/photo-1587854692152-cbe660dbbb88?q=80&w=400&auto=format&fit=crop' },
-  { id: 'f-8', name: 'Academia FitBairro', category: 'Esportes', subcategory: 'Academias', rating: 4.7, distance: 'Taquara', adType: AdType.PREMIUM, description: 'Treine perto de casa.', isSponsored: true, image: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=400&auto=format&fit=crop' },
-  { id: 'f-9', name: 'Consultório Dra. Ana', category: 'Saúde', subcategory: 'Dentistas', rating: 5.0, distance: 'Freguesia', adType: AdType.PREMIUM, description: 'Cuidado completo com seu sorriso.', isSponsored: true, image: 'https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?q=80&w=400&auto=format&fit=crop' },
-  { id: 'f-10', name: 'Boutique Chic', category: 'Moda', subcategory: 'Moda Feminina', rating: 4.3, distance: 'Anil', adType: AdType.PREMIUM, description: 'Tendências e elegância.', isSponsored: true, image: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=400&auto=format&fit=crop' },
+  {
+    id: 'servicos-confianca',
+    title: 'Serviços de Confiança',
+    subtitle: 'Profissionais avaliados por vizinhos',
+    image: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?q=80&w=800&auto=format&fit=crop',
+    keywords: ['serviços', 'reformas', 'consertos']
+  }
+];
+
+export const quickFilters = [
+  { id: 'top_rated', label: 'Top Avaliados', icon: 'star' },
+  { id: 'open_now', label: 'Aberto Agora', icon: 'clock' },
+  { id: 'nearby', label: 'Perto de Mim', icon: 'zap' },
+  { id: 'cashback', label: 'Com Cashback', icon: 'percent' }
+];
+
+export const STORIES: Story[] = [
+  { id: 's1', name: 'Hamburgueria', image: 'https://images.unsplash.com/photo-1561758033-d89a9ad46330?q=80&w=400&auto=format&fit=crop' },
+  { id: 's2', name: 'Salão Vip', image: 'https://images.unsplash.com/photo-1562322140-8baeececf3df?q=80&w=400&auto=format&fit=crop' },
+  { id: 's3', name: 'Pet Shop', image: 'https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?q=80&w=400&auto=format&fit=crop' },
 ];
 
 export const MOCK_JOBS: Job[] = [
@@ -84,6 +451,7 @@ export const MOCK_JOBS: Job[] = [
     postedAt: 'Há 2h',
     isSponsored: true,
     sponsoredUntil: '2025-12-31',
+    // FIX: Added missing properties 'candidacy_method' and 'modality' to conform to the Job interface.
     candidacy_method: 'whatsapp',
     modality: 'Presencial',
   },
@@ -101,6 +469,7 @@ export const MOCK_JOBS: Job[] = [
     contactWhatsapp: '5521988888888',
     postedAt: 'Há 1 dia',
     isUrgent: true,
+    // FIX: Added missing properties 'candidacy_method' and 'modality' to conform to the Job interface.
     candidacy_method: 'whatsapp',
     modality: 'Presencial',
   }
@@ -129,7 +498,7 @@ export const MOCK_CLASSIFIEDS: Classified[] = [
     { id: 'cl-emp-5', title: 'Designer Gráfico (Freelance)', advertiser: 'Agência Criativa', category: 'Empregos', neighborhood: 'Freguesia', description: 'Procuramos designer para projetos pontuais de social media para comércios locais.', timestamp: 'Há 2 dias', contactWhatsapp: '5521944332211', typeLabel: 'PJ', imageUrl: 'https://images.unsplash.com/photo-1626785774573-4b799315345d?q=80&w=800' },
 
     // Adoção de pets (5)
-    { id: 'cl-ado-1', title: 'Adoção Urgente: Gatinhos 2 meses', advertiser: 'Mariana L.', category: 'Adoção de pets', neighborhood: 'Anil', description: 'Resgate i uma ninhada e agora esses 3 bebês procuram um lar com amor. Já comem ração.', timestamp: 'Há 3 dias', contactWhatsapp: '5521966666666', typeLabel: 'Adoção', imageUrl: 'https://images.unsplash.com/photo-1574158622682-e40e69841006?q=80&w=800' },
+    { id: 'cl-ado-1', title: 'Adoção Urgente: Gatinhos 2 meses', advertiser: 'Mariana L.', category: 'Adoção de pets', neighborhood: 'Anil', description: 'Resgatei uma ninhada e agora esses 3 bebês procuram um lar com amor. Já comem ração.', timestamp: 'Há 3 dias', contactWhatsapp: '5521966666666', typeLabel: 'Adoção', imageUrl: 'https://images.unsplash.com/photo-1574158622682-e40e69841006?q=80&w=800' },
     { id: 'cl-ado-2', title: 'Cachorrinha Vira-lata Carinhosa', advertiser: 'Projeto 4 Patas', category: 'Adoção de pets', neighborhood: 'Tanque', description: 'Essa linda menina de porte médio foi resgatada e está pronta para uma família. Castrada e vacinada.', timestamp: 'Há 4 dias', contactWhatsapp: '5521955557777', typeLabel: 'Adoção', imageUrl: 'https://images.unsplash.com/photo-1561037404-61cd46aa615b?q=80&w=800' },
     { id: 'cl-ado-3', title: 'Filhotes de Labrador para Adoção', advertiser: 'Canil do Bem', category: 'Adoção de pets', neighborhood: 'Freguesia', description: 'Mãe resgatada deu cria. Filhotes saudáveis procurando um lar responsável.', timestamp: 'Há 1 semana', contactWhatsapp: '5521944448888', typeLabel: 'Adoção', imageUrl: 'https://images.unsplash.com/photo-1553882159-4f77243236e7?q=80&w=800' },
     { id: 'cl-ado-4', title: 'Gato Adulto Preto e Branco', advertiser: 'Ana Paula', category: 'Adoção de pets', neighborhood: 'Pechincha', description: 'Gato muito dócil, castrado. Infelizmente preciso me mudar e não posso levá-lo. Procura um novo sofá para dormir.', timestamp: 'Há 1 semana', contactWhatsapp: '5521933339999', typeLabel: 'Adoção', imageUrl: 'https://images.unsplash.com/photo-1570824104453-508955ab7140?q=80&w=800' },
@@ -147,18 +516,7 @@ export const MOCK_CLASSIFIEDS: Classified[] = [
     { id: 'cl-des-2', title: 'Sofá 3 lugares Retrátil', advertiser: 'Fernanda R.', category: 'Desapega JPA', neighborhood: 'Taquara', description: 'Sofá confortável, precisa de limpeza, mas estrutura está perfeita. Motivo: comprei um novo.', timestamp: 'Há 2 dias', contactWhatsapp: '5521987659876', typeLabel: 'Venda', price: 'R$ 350,00', imageUrl: 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?q=80&w=800' },
     { id: 'cl-des-3', title: 'Vendo iPhone 11 64GB', advertiser: 'Lucas T.', category: 'Desapega JPA', neighborhood: 'Pechincha', description: 'Saúde da bateria em 85%. Tela intacta, sempre usado com película. Acompanha caixa e cabo.', timestamp: 'Há 2 dias', contactWhatsapp: '5521976541234', typeLabel: 'Venda', price: 'R$ 1.500,00', imageUrl: 'https://images.unsplash.com/photo-1616348436168-de43ad0e12de?q=80&w=800' },
     { id: 'cl-des-4', title: 'Mesa de Jantar 4 Lugares', advertiser: 'Beatriz C.', category: 'Desapega JPA', neighborhood: 'Anil', description: 'Mesa de madeira com tampo de vidro. Acompanha 4 cadeiras estofadas. Pequenas marcas de uso.', timestamp: 'Há 4 dias', contactWhatsapp: '5521965439876', typeLabel: 'Venda', price: 'R$ 400,00', imageUrl: 'https://images.unsplash.com/photo-1533090481720-856c6e3c1fdc?q=80&w=800' },
-    { id: 'cl-des-5', title: 'Tênis de Corrida nº 42', advertiser: 'Ricardo S.', category: 'Desapega JPA', neighborhood: 'Freguesia', description: 'Use i apenas 3 vezes, ficou grande para mim. Marca Asics. Em estado de novo.', timestamp: 'Há 5 dias', contactWhatsapp: '5521954328765', typeLabel: 'Venda', price: 'R$ 250,00', imageUrl: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=800' },
-
-    // Bairros Adicionais para cobrir todo Jacarepaguá (18 itens totais por categoria nos banners)
-    // Cidade de Deus
-    { id: 'cl-cdd-1', title: 'Doação de Cesta de Alimentos', advertiser: 'Assoc. CDD', category: 'Doações em geral', neighborhood: 'Cidade de Deus', description: 'Apoio às famílias locais.', timestamp: 'Há 2h', contactWhatsapp: '5521911110000', typeLabel: 'Doação', imageUrl: 'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?q=80&w=800' },
-    { id: 'cl-cdd-2', title: 'Vaga para Auxiliar de Limpeza', advertiser: 'Condomínio CDD', category: 'Empregos', neighborhood: 'Cidade de Deus', description: 'Trabalho imediato.', timestamp: 'Há 4h', contactWhatsapp: '5521922220000', typeLabel: 'CLT', imageUrl: 'https://images.unsplash.com/photo-1581578731522-745d05cb9704?q=80&w=800' },
-    // Gardênia Azul
-    { id: 'cl-gar-1', title: 'Apartamento para Alugar Gardênia', advertiser: 'Imobiliária Azul', category: 'Imóveis Comerciais', neighborhood: 'Gardênia Azul', description: 'Próximo à praia.', timestamp: 'Há 6h', contactWhatsapp: '5521933330000', typeLabel: 'Aluguel', price: 'R$ 1.200', imageUrl: 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?q=80&w=800' },
-    { id: 'cl-gar-2', title: 'Vendo Fogão 4 Bocas', advertiser: 'Sandra G.', category: 'Desapega JPA', neighborhood: 'Gardênia Azul', description: 'Funcionando bem.', timestamp: 'Ontem', contactWhatsapp: '5521944440000', typeLabel: 'Venda', price: 'R$ 150', imageUrl: 'https://images.unsplash.com/photo-1584990344616-3b94b3c59230?q=80&w=800' },
-    // Praça Seca
-    { id: 'cl-prs-1', title: 'Cachorrinho Filhote Adoção', advertiser: 'Abrigo Seca', category: 'Adoção de pets', neighborhood: 'Praça Seca', description: 'Resgatado na praça.', timestamp: 'Há 1 dia', contactWhatsapp: '5521955550000', typeLabel: 'Adoção', imageUrl: 'https://images.unsplash.com/photo-1583511655826-05700d52f4d9?q=80&w=800' },
-    { id: 'cl-prs-2', title: 'Serviço de Manicure Express', advertiser: 'Studio Seca', category: 'Orçamento de Serviços', neighborhood: 'Praça Seca', description: 'Atendimento domiciliar.', timestamp: 'Há 2 dias', contactWhatsapp: '5521966660000', typeLabel: 'Serviço', imageUrl: 'https://images.unsplash.com/photo-1519014816548-bf5fe059798b?q=80&w=800' },
+    { id: 'cl-des-5', title: 'Tênis de Corrida nº 42', advertiser: 'Ricardo S.', category: 'Desapega JPA', neighborhood: 'Freguesia', description: 'Usei apenas 3 vezes, ficou grande para mim. Marca Asics. Em estado de novo.', timestamp: 'Há 5 dias', contactWhatsapp: '5521954328765', typeLabel: 'Venda', price: 'R$ 250,00', imageUrl: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=800' },
 ];
 
 export const MOCK_REAL_ESTATE_PROPERTIES: RealEstateProperty[] = [
@@ -438,7 +796,8 @@ export const MOCK_COMMUNITY_POSTS: CommunityPost[] = [
     neighborhood: 'Tanque',
     timestamp: '12h',
     likes: 15,
-    comments: 22
+    comments: 22,
+    showOnStoreProfile: true // Mock flag for demonstration
   },
   {
     id: 'post-8',
@@ -467,5 +826,21 @@ export const MOCK_COMMUNITY_POSTS: CommunityPost[] = [
     timestamp: '1d',
     likes: 5,
     comments: 7
+  },
+  {
+    id: 'post-10',
+    userId: 'u10',
+    userName: 'Padaria Imperial',
+    userAvatar: 'https://ui-avatars.com/api/?name=Padaria+Imperial&background=1E5BFF&color=fff',
+    authorRole: 'merchant',
+    content: 'Acabou de sair pão quentinho! Venham conferir nossa fornada especial de domingo. 🥖🥐',
+    type: 'recommendation',
+    communityId: 'comm-tips',
+    neighborhood: 'Freguesia',
+    timestamp: '30 min',
+    likes: 56,
+    comments: 12,
+    imageUrl: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?q=80&w=600&auto=format&fit=crop',
+    showOnStoreProfile: true
   }
 ];

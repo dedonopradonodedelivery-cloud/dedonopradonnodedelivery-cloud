@@ -31,13 +31,17 @@ import {
   Ticket,
   Zap,
   ChevronRight as ChevronRightIcon,
-  Construction
+  Construction,
+  Newspaper
 } from 'lucide-react';
 import { Store, BusinessHour, StoreReview } from '../types';
 import { supabase } from '../lib/supabaseClient';
 import { useAuth } from '../contexts/AuthContext';
 import { useNeighborhood } from '../contexts/NeighborhoodContext';
 import { trackOrganicEvent, OrganicEventType } from '../lib/analytics';
+import { MOCK_COMMUNITY_POSTS } from '../constants';
+import { PostCard } from './PostCard';
+import { useSavedPosts } from '@/hooks/useSavedPosts';
 
 const WEEK_DAYS_LABELS: Record<string, string> = {
   segunda: 'Segunda-feira',
@@ -100,10 +104,13 @@ export const StoreDetailView: React.FC<{
   const { user } = useAuth();
   const { currentNeighborhood } = useNeighborhood();
   const [isFavorite, setIsFavorite] = useState(false);
-  const [activeTab, setActiveTab] = useState<'description' | 'reviews' | 'hours' | 'payment'>('description');
+  const [activeTab, setActiveTab] = useState<'description' | 'feed' | 'reviews' | 'hours'>('description');
   const [isClosedReporting, setIsClosedReporting] = useState(false);
   const [closedReported, setClosedReported] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
+
+  // Hook para salvar posts, passado para o PostCard
+  const { isPostSaved, toggleSavePost } = useSavedPosts(user);
 
   // Perfil Fake/Construção
   const isPlaceholder = store.name === 'Loja Parceira';
@@ -182,6 +189,16 @@ export const StoreDetailView: React.FC<{
     return isPlaceholder ? [] : MOCK_REVIEWS;
   }, [isPlaceholder]);
 
+  // Filtra posts do JPA Conversa que pertencem a esta loja e têm a flag ativada
+  const storeFeedPosts = useMemo(() => {
+    return MOCK_COMMUNITY_POSTS.filter(post => 
+      post.showOnStoreProfile &&
+      post.authorRole === 'merchant' &&
+      // Lógica de match simples para o MVP. Em produção seria via ID.
+      (post.userName === store.name || store.name.includes(post.userName) || (store.id === 'f-1' && post.userName === 'Padaria Imperial') /* Mock hack for specific demo */)
+    );
+  }, [store.name, store.id]);
+
   return (
     <div className="min-h-screen bg-white dark:bg-gray-950 font-sans relative overflow-x-hidden">
       <main className="pb-24">
@@ -234,169 +251,4 @@ export const StoreDetailView: React.FC<{
           </div>
 
           {/* CARD DE INFORMAÇÕES */}
-          <div className="bg-white dark:bg-gray-800 rounded-3xl p-6 pt-16 -mt-12 text-center shadow-lg border border-gray-100 dark:border-gray-700 mb-8">
-            <div className="flex items-center justify-center gap-2 mb-2">
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">{store.name}</h1>
-              {(store.verified || store.claimed) && (
-                  <div className="flex items-center gap-1 text-[#1E5BFF]">
-                      <BadgeCheck size={20} className="fill-current" />
-                  </div>
-              )}
-            </div>
-
-            {/* AVISO PERFIL EM CONSTRUÇÃO */}
-            {isPlaceholder && (
-              <div className="mt-2 mb-4 bg-amber-50 dark:bg-amber-900/20 px-3 py-1.5 rounded-xl border border-amber-100 dark:border-amber-800 flex items-center justify-center gap-2 mx-auto w-fit">
-                <Construction size={14} className="text-amber-600" />
-                <span className="text-[10px] font-black text-amber-700 dark:text-amber-400 uppercase tracking-widest">Perfil em Construção</span>
-              </div>
-            )}
-
-            <div className="flex items-center justify-center gap-2 text-xs font-medium text-gray-500 dark:text-gray-400">
-                <span className="uppercase font-bold tracking-widest text-gray-400">{store.category}</span>
-                <span className="text-gray-300">•</span>
-                <div className="flex items-center gap-1">
-                  <Star className="w-3.5 h-3.5 text-yellow-400 fill-current" />
-                  <span className="font-bold text-gray-900 dark:text-gray-200">{store.rating}</span>
-                </div>
-            </div>
-          </div>
-        
-          {/* AÇÕES DE CONTATO */}
-          <section className="mb-10 space-y-6">
-              <div className="flex gap-3">
-                  <a 
-                    href={`https://wa.me/55${phoneDigits}`} 
-                    target="_blank" 
-                    rel="noopener noreferrer" 
-                    onClick={() => track('store_click_whatsapp')} 
-                    className="flex-1 bg-[#00D95F] hover:bg-[#00C254] text-white font-black py-4 rounded-2xl flex items-center justify-center gap-2.5 shadow-md shadow-green-500/10 active:scale-95 transition-all text-xs uppercase tracking-widest"
-                  >
-                    <MessageSquare className="w-4 h-4 fill-white" />
-                    WhatsApp
-                  </a>
-                  {store.instagram && !isPlaceholder && (
-                    <a 
-                      href={instagramUrl} 
-                      target="_blank" 
-                      rel="noopener noreferrer" 
-                      onClick={() => track('store_click_instagram')} 
-                      className="flex-1 bg-gradient-to-br from-purple-600 via-rose-500 to-amber-500 text-white font-black py-4 rounded-2xl flex items-center justify-center gap-2.5 shadow-md shadow-rose-500/10 active:scale-95 transition-all text-xs uppercase tracking-widest"
-                    >
-                      <Instagram className="w-4 h-4" />
-                      Instagram
-                    </a>
-                  )}
-              </div>
-
-              {!isPlaceholder && (
-                <div className="space-y-4">
-                    <div className="flex items-start gap-4 pt-4 border-t border-gray-50 dark:border-gray-800">
-                        <div className="w-10 h-10 rounded-xl bg-gray-50 dark:bg-gray-900 flex items-center justify-center text-gray-400 shrink-0">
-                            <MapPin size={18} />
-                        </div>
-                        <div className="flex-1">
-                            <p className="text-[9px] font-bold text-gray-400 uppercase tracking-wider mb-0.5">Endereço Unidade</p>
-                            <p className="text-sm font-semibold text-gray-800 dark:text-gray-200 leading-snug">{addressFormatted}</p>
-                        </div>
-                    </div>
-                    {hasAddress && (
-                      <div className="flex justify-center gap-3">
-                          <a href={wazeRouteUrl} target="_blank" rel="noopener" className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-sky-500 text-white shadow-md active:scale-95 transition-all">
-                              <Navigation size={16} /><span className="text-[10px] font-black uppercase tracking-widest">Waze</span>
-                          </a>
-                          <a href={gmapsRouteUrl} target="_blank" rel="noopener" className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 shadow-md active:scale-95 transition-all">
-                              <MapIcon size={16} className="text-green-500" /><span className="text-[10px] font-black uppercase tracking-widest">Maps</span>
-                          </a>
-                      </div>
-                    )}
-                </div>
-              )}
-          </section>
-
-          {/* ABAS DE CONTEÚDO */}
-          <section className="mb-10">
-              <div className="flex items-center gap-2 sm:gap-6 mb-8 px-1 border-b border-gray-100 dark:border-gray-800 overflow-x-auto no-scrollbar">
-                  <button 
-                    onClick={() => setActiveTab('description')}
-                    className={`flex-shrink-0 pb-4 text-xs font-bold uppercase tracking-widest transition-all relative px-2 ${activeTab === 'description' ? 'text-gray-900 dark:text-white' : 'text-gray-400'}`}
-                  >
-                    Sobre
-                    {activeTab === 'description' && <div className="absolute bottom-0 left-0 right-0 h-1 bg-[#1E5BFF] rounded-t-full"></div>}
-                  </button>
-                  <button 
-                    onClick={() => setActiveTab('reviews')}
-                    className={`flex-shrink-0 pb-4 text-xs font-bold uppercase tracking-widest transition-all relative px-2 ${activeTab === 'reviews' ? 'text-gray-900 dark:text-white' : 'text-gray-400'}`}
-                  >
-                    Avaliações
-                    {activeTab === 'reviews' && <div className="absolute bottom-0 left-0 right-0 h-1 bg-[#1E5BFF] rounded-t-full"></div>}
-                  </button>
-                  {!isPlaceholder && (
-                    <>
-                      <button 
-                        onClick={() => setActiveTab('hours')}
-                        className={`flex-shrink-0 pb-4 text-xs font-bold uppercase tracking-widest transition-all relative px-2 ${activeTab === 'hours' ? 'text-gray-900 dark:text-white' : 'text-gray-400'}`}
-                      >
-                        Horário
-                        {activeTab === 'hours' && <div className="absolute bottom-0 left-0 right-0 h-1 bg-[#1E5BFF] rounded-t-full"></div>}
-                      </button>
-                    </>
-                  )}
-              </div>
-
-              {activeTab === 'description' && (
-                <div className="animate-in fade-in duration-500">
-                    <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed font-medium">
-                      {store.description}
-                    </p>
-                </div>
-              )}
-
-              {activeTab === 'reviews' && (
-                <div className="animate-in fade-in duration-500 space-y-6">
-                    {reviewsToDisplay.length > 0 ? (
-                        reviewsToDisplay.map((rev) => (
-                          <div key={rev.id} className="bg-gray-50 dark:bg-gray-900/50 p-5 rounded-[24px] border border-gray-100 dark:border-gray-800">
-                              <div className="flex items-center justify-between mb-3">
-                                  <div className="flex items-center gap-2">
-                                      <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-800 flex items-center justify-center text-gray-400">
-                                          <UserIcon size={14} />
-                                      </div>
-                                      <p className="text-xs font-bold text-gray-800 dark:text-gray-200">{rev.user_name}</p>
-                                  </div>
-                                  <div className="flex items-center gap-0.5">
-                                      {[1,2,3,4,5].map(s => (
-                                          <Star key={s} size={10} className={`${s <= rev.rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`} />
-                                      ))}
-                                  </div>
-                              </div>
-                              <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed italic">"{rev.comment}"</p>
-                          </div>
-                        ))
-                    ) : (
-                        <div className="py-12 text-center bg-gray-50 dark:bg-gray-900/50 rounded-[24px] border border-dashed border-gray-200 dark:border-gray-800">
-                            <MessageSquare className="w-8 h-8 text-gray-300 mx-auto mb-3" />
-                            <p className="text-xs text-gray-400 font-medium uppercase tracking-widest">Ainda não há avaliações.</p>
-                        </div>
-                    )}
-                </div>
-              )}
-
-              {activeTab === 'hours' && !isPlaceholder && (
-                <div className="animate-in fade-in duration-500">
-                    <div className="bg-white dark:bg-gray-900 rounded-[28px] p-6 border border-gray-100 dark:border-gray-800 shadow-sm">
-                        <div className="space-y-4">
-                            {store.business_hours ? (Object.entries(store.business_hours).map(([key, value]) => {
-                                const h = value as BusinessHour;
-                                return (<div key={key} className="flex items-center justify-between text-sm py-1 border-b border-gray-50 dark:border-gray-800 last:border-0"><span className="font-medium text-gray-600 dark:text-gray-400">{WEEK_DAYS_LABELS[key] || key}</span><span className={`font-bold ${h.open ? 'text-gray-900 dark:text-white' : 'text-rose-400 uppercase text-[10px]'}`}>{h.open ? `${h.start}–${h.end}` : 'Fechado'}</span></div>);
-                            })) : (<div className="py-8 text-center bg-gray-50 dark:bg-gray-900/50 rounded-2xl border border-dashed border-gray-200 dark:border-gray-800"><p className="text-xs text-gray-400 font-medium uppercase tracking-widest">Horário não informado.</p></div>)}
-                        </div>
-                    </div>
-                </div>
-              )}
-          </section>
-        </div>
-      </main>
-    </div>
-  );
-};
+          <div className="bg-white dark:bg-gray-800 rounded-3xl p-6 pt-16 -mt-12 text-center shadow-lg

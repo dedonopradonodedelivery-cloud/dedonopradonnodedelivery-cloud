@@ -179,7 +179,11 @@ export interface CommunityPost {
   timestamp: string;
   likes: number;
   comments: number;
+  imageUrls?: string[];
   imageUrl?: string;
+  videoUrl?: string;
+  theme?: 'utilidade' | 'seguranca' | 'lazer' | 'dicas' | 'geral';
+  showOnStoreProfile?: boolean;
 }
 
 export type TaxonomyType = 'category' | 'subcategory' | 'specialty';
@@ -209,6 +213,7 @@ export interface Classified {
   contactWhatsapp: string;
   typeLabel: string;
   price?: string;
+  imageUrl?: string;
   jobDetails?: Job;
 }
 
@@ -282,7 +287,8 @@ export interface AppNotification {
   userId: string;
   title: string;
   message: string;
-  type: 'claim_approval' | 'claim_rejection' | 'taxonomy_approval' | 'taxonomy_rejection' | 'system';
+  type: 'chat' | 'design' | 'coupon' | 'payment' | 'ad' | 'system';
+  referenceId?: string;
   read: boolean;
   createdAt: string;
 }
@@ -355,4 +361,16 @@ export interface DbWalletMovement {
   amount: number;
   description: string;
   created_at: string;
+}
+
+export interface AppSuggestion {
+    id: string;
+    userId: string;
+    userName: string;
+    timestamp: string;
+    subject: string;
+    message: string;
+    category: 'bug' | 'idea' | 'improve' | 'other';
+    contactConsent: boolean;
+    status: 'new' | 'analyzing' | 'responded';
 }
