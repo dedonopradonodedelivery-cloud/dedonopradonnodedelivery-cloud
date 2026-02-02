@@ -28,34 +28,29 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
     } catch {
       return false;
     }
-  }, [user, userRole, activeTab]); // Re-avalia quando a tab muda (ação de uso)
+  }, [user, userRole, activeTab]);
 
-  // Itens da barra fixa
+  // Itens da barra fixa - ORDEM EXATA: Início, JPA Conversa, Cupom, Classificados, Menu
   const navItems = useMemo(() => {
     const items: NavItem[] = [
       { id: 'home', icon: Home, label: 'Início' },
       { id: 'neighborhood_posts', icon: MessageSquare, label: 'JPA Conversa' },
+      { 
+        id: userRole === 'lojista' ? 'merchant_coupons' : 'user_coupons', 
+        icon: Ticket, 
+        label: 'Cupom',
+        badge: userRole !== 'lojista' ? hasActiveCoupons : false 
+      },
+      { id: 'classifieds', icon: Newspaper, label: 'Classificados' },
+      { id: 'profile', icon: UserIcon, label: 'Menu' },
     ];
-
-    // Slot Dinâmico de Cupons/Validar
-    if (user) {
-      if (userRole === 'lojista') {
-        items.push({ id: 'merchant_coupons', icon: Ticket, label: 'Validar' });
-      } else {
-        items.push({ id: 'user_coupons', icon: Ticket, label: 'Cupons', badge: hasActiveCoupons });
-      }
-    }
-
-    items.push({ id: 'classifieds', icon: Newspaper, label: 'Classificados' });
-    items.push({ id: 'profile', icon: UserIcon, label: 'Menu' });
-
     return items;
-  }, [user, userRole, hasActiveCoupons]);
+  }, [userRole, hasActiveCoupons]);
 
   const renderIconOrAvatar = (item: NavItem, isActive: boolean) => {
     if (item.id === 'profile' && user) {
-      const userInitial = user.email?.charAt(0).toUpperCase() || user.user_metadata?.full_name?.charAt(0).toUpperCase() || 'U';
       const photoUrl = user.user_metadata?.avatar_url;
+      const userInitial = user.email?.charAt(0).toUpperCase() || user.user_metadata?.full_name?.charAt(0).toUpperCase() || 'U';
 
       return (
         <div className={`w-7 h-7 rounded-full overflow-hidden flex items-center justify-center transition-all duration-200 border-2 ${
@@ -92,9 +87,9 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
 
   return (
     <div className="fixed bottom-0 left-0 right-0 mx-auto w-full max-w-md bg-white dark:bg-gray-900 z-[1000] h-[80px] rounded-t-[24px] shadow-[0_-5px_30px_rgba(0,0,0,0.1)] border-t border-gray-100 dark:border-gray-800 px-2">
-      <div className={`grid w-full h-full ${navItems.length === 5 ? 'grid-cols-5' : 'grid-cols-4'}`}>
+      <div className="grid w-full h-full grid-cols-5">
         {navItems.map((item) => {
-          // Lógica de active state expandida para sub-menus do lojista e usuário
+          // Lógica de active state consolidada
           const isMerchantCoupon = item.id === 'merchant_coupons' && activeTab === 'merchant_coupons';
           const isUserCoupon = item.id === 'user_coupons' && activeTab === 'user_coupons';
           const isProfileTab = item.id === 'profile' && ['store_area', 'store_ads_module', 'weekly_promo', 'merchant_jobs', 'store_profile', 'store_support', 'about', 'support', 'favorites'].includes(activeTab);
