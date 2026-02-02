@@ -13,6 +13,7 @@ interface NavItem {
   id: string;
   icon: React.ElementType;
   label: string;
+  isMainAction?: boolean;
   badge?: boolean;
 }
 
@@ -30,19 +31,20 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
     }
   }, [user, userRole, activeTab]);
 
-  // Itens da barra fixa - ORDEM EXATA: Início, JPA Conversa, Cupom, Classificados, Menu
+  // Itens da barra fixa - ESTRUTURA OBRIGATÓRIA: Início, JPA Conversa, Cupom, Classificados, Menu
   const navItems = useMemo(() => {
     const items: NavItem[] = [
-      { id: 'home', icon: Home, label: 'Início' },
-      { id: 'neighborhood_posts', icon: MessageSquare, label: 'JPA Conversa' },
+      { id: 'home', icon: Home, label: 'Início', isMainAction: false },
+      { id: 'neighborhood_posts', icon: MessageSquare, label: 'JPA Conversa', isMainAction: true },
       { 
         id: userRole === 'lojista' ? 'merchant_coupons' : 'user_coupons', 
         icon: Ticket, 
-        label: 'Cupom',
+        label: 'Cupom', 
+        isMainAction: true,
         badge: userRole !== 'lojista' ? hasActiveCoupons : false 
       },
-      { id: 'classifieds', icon: Newspaper, label: 'Classificados' },
-      { id: 'profile', icon: UserIcon, label: 'Menu' },
+      { id: 'classifieds', icon: Newspaper, label: 'Classificados', isMainAction: true },
+      { id: 'profile', icon: UserIcon, label: 'Menu', isMainAction: false },
     ];
     return items;
   }, [userRole, hasActiveCoupons]);
@@ -72,11 +74,13 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
     }
 
     const Icon = item.icon;
+    const highlightColor = isActive ? 'text-blue-600 dark:text-blue-400' : 'text-gray-400 dark:text-gray-500';
+    
     return (
       <div className="relative">
         <Icon 
-          className={`w-6 h-6 transition-colors duration-200 ${isActive ? 'text-blue-600 dark:text-blue-400' : 'text-gray-400 dark:text-gray-500'}`} 
-          strokeWidth={isActive ? 2.5 : 2} 
+          className={`w-6 h-6 transition-all duration-200 ${highlightColor}`} 
+          strokeWidth={item.isMainAction ? (isActive ? 3 : 2.5) : (isActive ? 2.5 : 2)} 
         />
         {item.badge && !isActive && (
           <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 border-2 border-white dark:border-gray-900 rounded-full animate-pulse shadow-sm"></span>
@@ -86,7 +90,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
   };
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 mx-auto w-full max-w-md bg-white dark:bg-gray-900 z-[1000] h-[80px] rounded-t-[24px] shadow-[0_-5px_30px_rgba(0,0,0,0.1)] border-t border-gray-100 dark:border-gray-800 px-2">
+    <div className="fixed bottom-0 left-0 right-0 mx-auto w-full max-w-md bg-white dark:bg-gray-950 z-[1000] h-[85px] rounded-t-[28px] shadow-[0_-8px_40px_rgba(0,0,0,0.12)] border-t border-gray-100 dark:border-gray-800 px-2">
       <div className="grid w-full h-full grid-cols-5">
         {navItems.map((item) => {
           // Lógica de active state consolidada
@@ -102,10 +106,22 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
                 className="w-full h-full flex flex-col items-center justify-center gap-1 active:scale-90 transition-transform outline-none" 
                 aria-label={item.label}
               >
-                <div className={`flex items-center justify-center h-10 w-10 rounded-2xl transition-all ${isActive && item.id !== 'profile' ? 'bg-blue-50 dark:bg-blue-900/20' : ''}`}>
+                <div className={`flex items-center justify-center h-11 w-11 rounded-2xl transition-all ${
+                  isActive && item.isMainAction 
+                    ? 'bg-blue-50 dark:bg-blue-900/30 scale-110' 
+                    : isActive && item.id !== 'profile' 
+                      ? 'bg-gray-50 dark:bg-gray-800' 
+                      : ''
+                }`}>
                   {renderIconOrAvatar(item, isActive)}
                 </div>
-                <span className={`text-[9px] font-black uppercase tracking-tighter transition-colors ${isActive ? 'text-blue-600 dark:text-blue-400' : 'text-gray-400 dark:text-gray-500'}`}>
+                <span className={`text-[9px] font-black uppercase tracking-tighter transition-colors ${
+                  isActive 
+                    ? 'text-blue-600 dark:text-blue-400' 
+                    : item.isMainAction 
+                      ? 'text-gray-500 dark:text-gray-400' 
+                      : 'text-gray-400 dark:text-gray-500'
+                }`}>
                   {item.label}
                 </span>
               </button>
