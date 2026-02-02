@@ -26,20 +26,20 @@ const NeighborhoodSelectorModal: React.FC = () => {
     const { currentNeighborhood, setNeighborhood, isSelectorOpen, toggleSelector } = useNeighborhood();
     if (!isSelectorOpen) return null;
     return (
-        <div className="fixed inset-0 z-[100] flex items-end justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-200 px-4 pb-6 sm:items-center sm:p-0" onClick={toggleSelector}>
-            <div className="bg-white dark:bg-gray-900 w-full max-w-md mx-auto rounded-[2.5rem] p-6 shadow-2xl animate-in slide-in-from-bottom duration-300 relative border border-gray-100 dark:border-gray-800" onClick={e => e.stopPropagation()}>
+        <div className="fixed inset-0 z-[100] flex items-end justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-200" onClick={toggleSelector}>
+            <div className="bg-white dark:bg-gray-900 w-full max-w-md rounded-t-[2rem] p-6 shadow-2xl animate-in slide-in-from-bottom duration-300 relative" onClick={e => e.stopPropagation()}>
                 <div className="w-12 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full mx-auto mb-6"></div>
-                <h3 className="text-lg font-black text-gray-900 dark:text-white mb-6 text-center uppercase tracking-tight">Escolha o Bairro</h3>
+                <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4 px-2">Escolha o Bairro</h3>
                 <div className="max-h-[60vh] overflow-y-auto no-scrollbar space-y-2">
-                    <button onClick={() => setNeighborhood("Jacarepaguá (todos)")} className={`w-full text-left px-4 py-4 rounded-2xl font-bold text-sm transition-all flex items-center justify-between active:scale-[0.98] ${currentNeighborhood === "Jacarepaguá (todos)" ? "bg-[#1E5BFF] text-white shadow-lg shadow-blue-500/20" : "bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"}`}>
+                    <button onClick={() => setNeighborhood("Jacarepaguá (todos)")} className={`w-full text-left px-4 py-3.5 rounded-xl font-medium transition-colors flex items-center justify-between ${currentNeighborhood === "Jacarepaguá (todos)" ? "bg-[#1E5BFF]/10 text-[#1E5BFF]" : "bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-200"}`}>
                         <span>Jacarepaguá (todos)</span>
-                        {currentNeighborhood === "Jacarepaguá (todos)" && <Check className="w-4 h-4" strokeWidth={3} />}
+                        {currentNeighborhood === "Jacarepaguá (todos)" && <Check className="w-4 h-4" />}
                     </button>
-                    <div className="h-px bg-gray-100 dark:bg-gray-800 my-2 mx-2"></div>
+                    <div className="h-px bg-gray-100 dark:bg-gray-800 my-2"></div>
                     {NEIGHBORHOODS.map(hood => (
-                        <button key={hood} onClick={() => setNeighborhood(hood)} className={`w-full text-left px-4 py-4 rounded-2xl font-bold text-sm transition-all flex items-center justify-between active:scale-[0.98] ${currentNeighborhood === hood ? "bg-[#1E5BFF] text-white shadow-lg shadow-blue-500/20" : "bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"}`}>
+                        <button key={hood} onClick={() => setNeighborhood(hood)} className={`w-full text-left px-4 py-3.5 rounded-xl font-medium transition-colors flex items-center justify-between ${currentNeighborhood === hood ? "bg-[#1E5BFF]/10 text-[#1E5BFF]" : "hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300"}`}>
                             <span>{hood}</span>
-                            {currentNeighborhood === hood && <Check className="w-4 h-4" strokeWidth={3} />}
+                            {currentNeighborhood === hood && <Check className="w-4 h-4" />}
                         </button>
                     ))}
                 </div>
