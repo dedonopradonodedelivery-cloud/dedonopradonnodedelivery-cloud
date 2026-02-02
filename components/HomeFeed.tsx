@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
-import { Store, Category, AdType, CommunityPost, ServiceRequest, ServiceUrgency, Classified } from '../types';
+import { Store, Category, AdType, CommunityPost, ServiceRequest, ServiceUrgency, Classified } from '@/types';
 import { 
   Compass, 
   Sparkles, 
@@ -251,7 +251,7 @@ export const HomeFeed: React.FC<HomeFeedFeedProps> = ({
       )}
 
       {/* CATEGORIAS */}
-      <section className="w-full bg-[#FFFFFF] dark:bg-gray-950 pt-4 pb-0 relative z-10">
+      <div className="w-full bg-white dark:bg-gray-950 pt-4 pb-0">
         <div ref={categoryScrollRef} className="flex overflow-x-auto no-scrollbar px-4 pb-2 snap-x">
           <div className="grid grid-flow-col grid-rows-2 gap-x-3 gap-y-3">
             {CATEGORIES.map((cat) => (
@@ -273,7 +273,7 @@ export const HomeFeed: React.FC<HomeFeedFeedProps> = ({
             <div className="h-full bg-brand-blue rounded-full" style={{ width: scrollIndicator.width, marginLeft: scrollIndicator.left }}></div>
           </div>
         </div>
-      </section>
+      </div>
 
       <HomeBannerCarousel onStoreClick={onStoreClick} onNavigate={onNavigate} />
 

@@ -87,8 +87,6 @@ export interface Store {
   inscricao_municipal?: string;
   inscricao_estadual?: string;
   email_publico?: string;
-  accepts_online_orders?: boolean;
-  min_order_value?: number;
 }
 
 export type ServiceUrgency = 'Hoje' | 'Essa semana' | 'Sem pressa';
