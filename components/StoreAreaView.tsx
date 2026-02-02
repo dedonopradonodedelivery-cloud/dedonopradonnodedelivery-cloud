@@ -27,7 +27,9 @@ import {
   Ticket,
   BadgeCheck,
   Award,
-  ScanLine
+  ScanLine,
+  Image as ImageIcon,
+  Users
 } from 'lucide-react';
 import { User as SupabaseUser } from '@supabase/supabase-js';
 import { useAuth } from '@/contexts/AuthContext';
@@ -229,7 +231,7 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
               icon={Crown} 
               label="Patrocinador Master" 
               description="Contratação e apresentação do plano master"
-              onClick={() => onNavigate('sponsor_info')}
+              onClick={() => onNavigate('patrocinador_master')}
               colorClass="bg-amber-50 text-amber-600"
             />
             <ServiceBlock 
@@ -260,6 +262,19 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
         <section>
           <SectionHeader title="Serviços" />
           <div className="bg-white dark:bg-gray-800 rounded-[2.5rem] border border-gray-100 dark:border-gray-700 overflow-hidden shadow-sm">
+            <ServiceBlock 
+              icon={Users} 
+              label="JPA Connect" 
+              description="Grupo de networking exclusivo"
+              onClick={() => onNavigate('store_connect')} 
+              colorClass="bg-indigo-50 text-indigo-600"
+            />
+            <ServiceBlock 
+              icon={MessageSquare} 
+              label="Chat com Designer" 
+              description="Criação e acompanhamento do seu banner"
+              onClick={() => onNavigate('store_ads_module', 'chat')} 
+            />
             <ServiceBlock 
               icon={BarChart3} 
               label="Performance" 
