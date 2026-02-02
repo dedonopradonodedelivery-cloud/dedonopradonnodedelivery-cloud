@@ -305,7 +305,7 @@ export const StoreDetailView: React.FC<{
                         <Navigation2 size={20} />
                     </div>
                     <span className="text-[9px] font-bold text-gray-500 uppercase tracking-tight">Rota</span>
-                </div>
+                </button>
               </div>
           </div>
         </div>
@@ -464,20 +464,23 @@ export const StoreDetailView: React.FC<{
                 <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
                     <div className="bg-white dark:bg-gray-900 p-6 rounded-[2.5rem] border border-gray-100 dark:border-gray-800 shadow-sm">
                         <div className="space-y-4">
-                            {Object.entries(store.business_hours || {}).map(([dayKey, hours]) => (
-                                <div key={dayKey} className="flex justify-between items-center text-sm border-b border-gray-50 dark:border-gray-800 pb-2 last:border-0 last:pb-0">
-                                    <span className="font-bold text-gray-500 dark:text-gray-400 uppercase text-xs tracking-wide">
-                                        {WEEK_DAYS_LABELS[dayKey] || dayKey}
-                                    </span>
-                                    {hours.open ? (
-                                        <span className="font-bold text-gray-900 dark:text-white">
-                                            {hours.start} - {hours.end}
+                            {Object.entries(store.business_hours || {}).map(([dayKey, hours]) => {
+                                const h = hours as BusinessHour;
+                                return (
+                                    <div key={dayKey} className="flex justify-between items-center text-sm border-b border-gray-50 dark:border-gray-800 pb-2 last:border-0 last:pb-0">
+                                        <span className="font-bold text-gray-500 dark:text-gray-400 uppercase text-xs tracking-wide">
+                                            {WEEK_DAYS_LABELS[dayKey] || dayKey}
                                         </span>
-                                    ) : (
-                                        <span className="font-bold text-red-400">Fechado</span>
-                                    )}
-                                </div>
-                            ))}
+                                        {h.open ? (
+                                            <span className="font-bold text-gray-900 dark:text-white">
+                                                {h.start} - {h.end}
+                                            </span>
+                                        ) : (
+                                            <span className="font-bold text-red-400">Fechado</span>
+                                        )}
+                                    </div>
+                                );
+                            })}
                         </div>
                     </div>
 
