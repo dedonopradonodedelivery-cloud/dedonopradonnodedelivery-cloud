@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo } from 'react';
 import { ChevronLeft, Star, BadgeCheck, ChevronRight, Award, Megaphone, Clock, Filter, Store as StoreIcon, Crown, AlertCircle, ArrowRight } from 'lucide-react';
 import { Store, AdType } from '@/types';
@@ -90,7 +91,8 @@ export const SubcategoryDetailView: React.FC<SubcategoryDetailViewProps> = ({ su
       </div>
 
       <div className="mt-4">
-        <HomeBannerCarousel onStoreClick={onStoreClick} categoryName={categoryName} subcategoryName={subcategoryName} />
+        {/* FIX: Passed onNavigate prop to HomeBannerCarousel as it's a required property. */}
+        <HomeBannerCarousel onStoreClick={onStoreClick} onNavigate={onNavigate} categoryName={categoryName} subcategoryName={subcategoryName} />
       </div>
 
       <div className="p-5 pt-0 space-y-8">

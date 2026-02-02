@@ -51,7 +51,6 @@ const CATEGORY_MAP: Record<string, string[]> = {
   "Livros e Papelaria": ["Livros", "Revistas", "Material Escolar", "Outros"],
   "Automotivo": ["Peças", "Acessórios", "Som", "Pneus", "Outros"],
   "Pet": ["Acessórios", "Casinhas", "Brinquedos", "Outros"],
-  "Pet": ["Acessórios", "Casinhas", "Brinquedos", "Outros"],
   "Ferramentas e Construção": ["Elétricas", "Manuais", "Material de Construção", "Outros"],
   "Outros": ["Geral"]
 };
@@ -419,7 +418,7 @@ export const DesapegaView: React.FC<DesapegaViewProps> = ({ onBack, user, onRequ
           <button 
             disabled={!formData.category || !formData.subcategory || (showGender && !formData.gender)}
             onClick={() => setViewState('form_description')}
-            className="w-full bg-indigo-600 disabled:bg-gray-100 dark:disabled:bg-gray-800 disabled:text-gray-400 text-white font-black py-5 rounded-[2rem] shadow-xl flex items-center justify-center gap-2 uppercase tracking-widest text-sm transition-all"
+            className="w-full bg-indigo-600 disabled:bg-gray-100 dark:disabled:bg-gray-800 disabled:text-gray-400 text-white font-black py-5 rounded-[2rem] shadow-xl flex items-center justify-center gap-2 uppercase tracking-widest text-xs transition-all"
           >
             Continuar para descrição <ArrowRight size={18} />
           </button>
