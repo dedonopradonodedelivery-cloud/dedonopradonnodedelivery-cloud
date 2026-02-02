@@ -14,7 +14,7 @@ interface NavItem {
   id: string;
   icon: React.ElementType;
   label: string;
-  isMainAction?: boolean; // Flag para aplicar o estilo "elevated"
+  isMainAction?: boolean; // Flag para aplicar o estilo "alto-relevo" (elevated)
   badge?: boolean;
 }
 
@@ -33,20 +33,40 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
     }
   }, [user, userRole, activeTab]);
 
-  // Itens da barra fixa
+  // Itens da barra fixa - ORDEM EXATA: Início, JPA Conversa, Cupom, Anúncios, Menu
   const navItems = useMemo(() => {
     const items: NavItem[] = [
-      { id: 'home', icon: Home, label: 'Início', isMainAction: false },
-      { id: 'neighborhood_posts', icon: MessageSquare, label: 'JPA Conversa', isMainAction: true },
       { 
-        id: 'cupom_trigger', // ID especial para interceptar o clique
+        id: 'home', 
+        icon: Home, 
+        label: 'Início', 
+        isMainAction: false 
+      },
+      { 
+        id: 'neighborhood_posts', 
+        icon: MessageSquare, 
+        label: 'JPA Conversa', 
+        isMainAction: true // Destaque Alto-Relevo
+      },
+      { 
+        id: 'cupom_trigger', 
         icon: Ticket, 
         label: 'Cupom', 
-        isMainAction: true,
+        isMainAction: true, // Destaque Alto-Relevo
         badge: userRole !== 'lojista' ? hasActiveCoupons : false 
       },
-      { id: 'classifieds', icon: Newspaper, label: 'Classificados', isMainAction: true },
-      { id: 'profile', icon: UserIcon, label: 'Menu', isMainAction: false },
+      { 
+        id: 'classifieds', 
+        icon: Newspaper, 
+        label: 'Anúncios', 
+        isMainAction: true // Destaque Alto-Relevo
+      },
+      { 
+        id: 'profile', 
+        icon: UserIcon, 
+        label: 'Menu', 
+        isMainAction: false 
+      },
     ];
     return items;
   }, [userRole, hasActiveCoupons]);
@@ -70,10 +90,8 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
   };
 
   const handleLoginSuccess = () => {
-    // Callback após login bem-sucedido via modal
     setIsAuthModalOpen(false);
-    // Tenta redirecionar novamente
-    const role = localStorage.getItem('localizei_user_role') || 'cliente'; // Fallback simples
+    const role = localStorage.getItem('localizei_user_role') || 'cliente';
     if (role === 'lojista') {
       setActiveTab('merchant_coupons');
     } else {
@@ -108,18 +126,17 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
     const Icon = item.icon;
     
     // Cor do ícone baseada no estado
-    // Se for MainAction e estiver ativo, usa cor da marca. Se inativo, cinza.
     const iconColor = isActive 
       ? 'text-blue-600 dark:text-blue-400' 
       : item.isMainAction 
-        ? 'text-gray-500 dark:text-gray-400' // Ícone cinza dentro do box
-        : 'text-gray-400 dark:text-gray-500'; // Ícone cinza fora do box
+        ? 'text-gray-600 dark:text-gray-400' // Cinza mais escuro dentro do destaque
+        : 'text-gray-400 dark:text-gray-500'; // Cinza claro fora
     
     return (
       <div className="relative">
         <Icon 
           className={`w-6 h-6 transition-all duration-200 ${iconColor}`} 
-          strokeWidth={item.isMainAction ? 2.5 : 2} 
+          strokeWidth={item.isMainAction ? (isActive ? 2.5 : 2) : (isActive ? 2.5 : 2)} 
         />
         {item.badge && !isActive && (
           <span className="absolute -top-1.5 -right-1.5 w-3 h-3 bg-red-500 border-2 border-white dark:border-gray-900 rounded-full animate-pulse shadow-sm"></span>
@@ -148,18 +165,18 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
               <div key={item.id} className="flex justify-center h-full items-center">
                  <button 
                   onClick={() => handleTabClick(item)} 
-                  className="w-full h-full flex flex-col items-center justify-center gap-1 outline-none group active:scale-95 transition-transform" 
+                  className="w-full h-full flex flex-col items-center justify-center gap-1.5 outline-none group active:scale-95 transition-transform" 
                   aria-label={item.label}
                 >
                   {/* 
-                     CONTÊINER DE ALTO RELEVO PARA OS BOTÕES CENTRAIS
-                     Se isMainAction = true, renderiza um box com sombra e borda.
-                     Se false, renderiza apenas o ícone.
+                     CONTÊINER DE ÍCONE:
+                     Se isMainAction = true (JPA Conversa, Cupom, Anúncios): Aplica estilo Card/Pill "Elevated".
+                     Se isMainAction = false (Início, Menu): Fica transparente/simples.
                   */}
                   <div className={`
                     flex items-center justify-center transition-all duration-300 relative
                     ${item.isMainAction 
-                      ? `h-11 w-14 rounded-2xl border mb-1 ${
+                      ? `h-11 w-14 rounded-2xl border mb-0.5 ${
                           isActive 
                             ? 'bg-blue-50 dark:bg-blue-900/30 border-blue-200 dark:border-blue-800 shadow-md shadow-blue-500/10 -translate-y-1' 
                             : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 shadow-sm'
