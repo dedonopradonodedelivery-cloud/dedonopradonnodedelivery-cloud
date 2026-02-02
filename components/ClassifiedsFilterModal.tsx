@@ -1,6 +1,5 @@
-
 import React, { useState } from 'react';
-import { X, Check, MapPin, SlidersHorizontal, ArrowDownWideArrow } from 'lucide-react';
+import { X, Check, MapPin, SlidersHorizontal, ArrowDownWideNarrow } from 'lucide-react';
 import { NEIGHBORHOODS } from '../contexts/NeighborhoodContext';
 
 interface ClassifiedsFilterModalProps {
@@ -60,7 +59,7 @@ export const ClassifiedsFilterModal: React.FC<ClassifiedsFilterModalProps> = ({ 
           {/* Ordenação */}
           <section>
             <div className="flex items-center gap-2 mb-4">
-              <ArrowDownWideArrow size={16} className="text-blue-500" />
+              <ArrowDownWideNarrow size={16} className="text-blue-500" />
               <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest">Ordenar por</h3>
             </div>
             <div className="space-y-2">
