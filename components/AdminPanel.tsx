@@ -8,18 +8,161 @@ import {
   MessageCircle, Paintbrush, Wrench, CheckCircle2,
   ArrowUpRight, ArrowDownRight, PieChart, FileText,
   Zap, ChevronRight, Lightbulb, Bug, Activity,
-  Settings, BarChart3, X
+  Settings, BarChart3, X, Filter, Newspaper, Crown,
+  UserCheck, ArrowRightLeft, CreditCard,
+  // Added missing icons LayoutGrid and Home
+  LayoutGrid, Home
 } from 'lucide-react';
 import { fetchAdminMerchants, fetchAdminUsers } from '../backend/services';
 import { ServiceRequest, AppSuggestion } from '../types';
 
-// --- SUB-COMPONENTS FOR SPECIFIC TOPICS ---
+// --- TYPES ---
+type DateRangeOption = 'today' | '7d' | '30d' | '90d';
+type MonetizationType = 'all' | 'sponsored' | 'banners' | 'master' | 'real_estate' | 'connect';
 
+interface Transaction {
+    id: string;
+    date: string;
+    type: MonetizationType;
+    client: string;
+    amount: number;
+    status: 'paid' | 'pending';
+}
+
+// --- MOCK DATA ---
+const MOCK_TRANSACTIONS: Transaction[] = [
+    { id: 'TX-001', date: '2024-03-24T10:00:00Z', type: 'banners', client: 'Bibi Lanches', amount: 49.90, status: 'paid' },
+    { id: 'TX-002', date: '2024-03-24T09:30:00Z', type: 'connect', client: 'Rodrigo Bessa', amount: 200.00, status: 'paid' },
+    { id: 'TX-003', date: '2024-03-23T18:00:00Z', type: 'sponsored', client: 'Pet Shop Alegria', amount: 19.90, status: 'paid' },
+    { id: 'TX-004', date: '2024-03-23T14:20:00Z', type: 'master', client: 'Grupo Esquematiza', amount: 1000.00, status: 'paid' },
+    { id: 'TX-005', date: '2024-03-22T11:00:00Z', type: 'real_estate', client: 'Imobiliária JPA', amount: 99.90, status: 'paid' },
+];
+
+const MONETIZATION_CONFIG = {
+    sponsored: { label: 'Patrocinados', icon: Zap, color: 'text-amber-500', bg: 'bg-amber-50' },
+    banners: { label: 'Banners', icon: LayoutGrid, color: 'text-blue-500', bg: 'bg-blue-50' },
+    master: { label: 'Patrocinador Master', icon: Crown, color: 'text-indigo-500', bg: 'bg-indigo-50' },
+    real_estate: { label: 'Planos Imóveis', icon: Home, color: 'text-emerald-500', bg: 'bg-emerald-50' },
+    connect: { label: 'JPA Connect', icon: UserCheck, color: 'text-purple-500', bg: 'bg-purple-50' },
+};
+
+// --- SUB-COMPONENTS ---
+
+const FinancialCard: React.FC<{ 
+    type: keyof typeof MONETIZATION_CONFIG; 
+    revenue: number; 
+    salesCount: number; 
+    pending?: number;
+    onClick: () => void;
+}> = ({ type, revenue, salesCount, pending, onClick }) => {
+    const config = MONETIZATION_CONFIG[type];
+    const Icon = config.icon;
+
+    return (
+        <button 
+            onClick={onClick}
+            className="bg-white p-6 rounded-[2rem] border border-gray-100 shadow-sm hover:shadow-md transition-all text-left flex flex-col group active:scale-[0.98]"
+        >
+            <div className="flex justify-between items-start mb-6">
+                <div className={`w-12 h-12 ${config.bg} ${config.color} rounded-2xl flex items-center justify-center`}>
+                    <Icon size={24} />
+                </div>
+                <div className="bg-gray-50 p-2 rounded-xl text-gray-300 group-hover:text-blue-500 transition-colors">
+                    <ChevronRight size={18} />
+                </div>
+            </div>
+            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">{config.label}</p>
+            <p className="text-2xl font-black text-gray-900">R$ {revenue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+            <div className="mt-4 pt-4 border-t border-gray-50 flex items-center justify-between">
+                <span className="text-[10px] font-bold text-gray-500">{salesCount} vendas</span>
+                {pending && pending > 0 ? (
+                    <span className="text-[9px] font-black text-amber-600 bg-amber-50 px-2 py-0.5 rounded uppercase tracking-wider">{pending} pendentes</span>
+                ) : (
+                    <span className="text-[9px] font-bold text-emerald-500 uppercase tracking-wider">Em dia</span>
+                )}
+            </div>
+        </button>
+    );
+};
+
+const BannersDetailView: React.FC<{ onBack: () => void }> = ({ onBack }) => (
+    <div className="animate-in slide-in-from-right duration-300 space-y-6">
+        <div className="flex items-center gap-4 mb-8">
+            <button onClick={onBack} className="p-2 bg-white rounded-xl text-gray-400 border border-gray-200"><ArrowLeft size={20}/></button>
+            <h2 className="text-2xl font-black text-gray-900 uppercase tracking-tighter">Detalhes: Banners</h2>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {[
+                { label: 'Banner Home', revenue: 12450.00, sales: 24, icon: Home },
+                { label: 'Categorias', revenue: 8200.00, sales: 18, icon: LayoutGrid },
+                { label: 'Subcategorias', revenue: 3500.00, sales: 12, icon: Filter },
+                { label: 'Classificados', revenue: 2100.00, sales: 10, icon: Newspaper },
+            ].map(item => (
+                <div key={item.label} className="bg-white p-6 rounded-[2rem] border border-gray-100 shadow-sm flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                        <div className="w-10 h-10 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center"><item.icon size={20}/></div>
+                        <div>
+                            <p className="text-sm font-bold text-gray-900">{item.label}</p>
+                            <p className="text-[10px] text-gray-400 font-bold uppercase">{item.sales} ativos</p>
+                        </div>
+                    </div>
+                    <p className="text-lg font-black text-gray-900">R$ {item.revenue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+                </div>
+            ))}
+        </div>
+    </div>
+);
+
+const SubscriptionDetailView: React.FC<{ title: string, onBack: () => void }> = ({ title, onBack }) => (
+    <div className="animate-in slide-in-from-right duration-300 space-y-8">
+        <div className="flex items-center gap-4 mb-8">
+            <button onClick={onBack} className="p-2 bg-white rounded-xl text-gray-400 border border-gray-200"><ArrowLeft size={20}/></button>
+            <h2 className="text-2xl font-black text-gray-900 uppercase tracking-tighter">Detalhes: {title}</h2>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm">
+                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">MRR (Recorrência)</p>
+                <p className="text-3xl font-black text-blue-600">R$ 14.200,00</p>
+            </div>
+            <div className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm">
+                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Assinaturas Ativas</p>
+                <p className="text-3xl font-black text-gray-900">72</p>
+            </div>
+            <div className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm">
+                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Churn Rate</p>
+                <p className="text-3xl font-black text-rose-500">2.4%</p>
+            </div>
+        </div>
+
+        <div className="bg-white rounded-[2.5rem] border border-gray-100 shadow-sm overflow-hidden">
+            <div className="p-6 border-b border-gray-50 bg-gray-50/50 flex justify-between items-center">
+                <h3 className="text-sm font-black text-gray-900 uppercase">Movimentação da Base</h3>
+                <span className="text-[10px] font-bold text-gray-400 uppercase">Últimos 30 dias</span>
+            </div>
+            <div className="divide-y divide-gray-50">
+                {[
+                    { label: 'Novas Assinaturas', value: '+12', color: 'text-emerald-500' },
+                    { label: 'Renovações', value: '58', color: 'text-blue-500' },
+                    { label: 'Cancelamentos', value: '-02', color: 'text-rose-500' },
+                ].map(row => (
+                    <div key={row.label} className="p-5 flex justify-between items-center">
+                        <span className="text-sm font-bold text-gray-700">{row.label}</span>
+                        <span className={`text-lg font-black ${row.color}`}>{row.value}</span>
+                    </div>
+                ))}
+            </div>
+        </div>
+    </div>
+);
+
+// Added SectionHeader to resolve "Cannot find name" errors in lines 349, 360, 387, 432, 463
 const SectionHeader: React.FC<{ title: string; onBack: () => void }> = ({ title, onBack }) => (
   <div className="flex items-center gap-4 mb-8">
     <button 
-      onClick={onBack}
-      className="p-2 bg-white rounded-xl text-gray-400 hover:text-gray-900 border border-gray-200 shadow-sm transition-all active:scale-95"
+      onClick={onBack} 
+      className="p-2 bg-white rounded-xl text-gray-400 border border-gray-200 hover:text-gray-900 transition-all active:scale-95 shadow-sm"
     >
       <ArrowLeft size={20} />
     </button>
@@ -27,143 +170,210 @@ const SectionHeader: React.FC<{ title: string; onBack: () => void }> = ({ title,
   </div>
 );
 
-// --- 1. MONITORAMENTO (Saúde do Dia) ---
-const MonitoringView: React.FC = () => {
-    const todayRevenue = 450.90;
-    const todayTransactions = 12;
-    const todayPendencies = 3;
+// Added AdminHub to resolve "Cannot find name" error on line 345
+const AdminHub: React.FC<{ onSelect: (tab: any) => void }> = ({ onSelect }) => (
+  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-in fade-in duration-500">
+    <button onClick={() => onSelect('financial')} className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm hover:shadow-md transition-all text-left group">
+        <div className="w-14 h-14 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform border border-emerald-100"><DollarSign size={28}/></div>
+        <h3 className="font-black text-xl text-gray-900 uppercase tracking-tighter mb-2">Financeiro</h3>
+        <p className="text-sm text-gray-500 leading-relaxed">Gestão de faturamento, MRR e transações de anúncios.</p>
+    </button>
+    <button onClick={() => onSelect('merchants')} className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm hover:shadow-md transition-all text-left group">
+        <div className="w-14 h-14 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform border border-blue-100"><Store size={28}/></div>
+        <h3 className="font-black text-xl text-gray-900 uppercase tracking-tighter mb-2">Lojistas</h3>
+        <p className="text-sm text-gray-500 leading-relaxed">Controle da base de estabelecimentos e parceiros cadastrados.</p>
+    </button>
+    <button onClick={() => onSelect('users')} className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm hover:shadow-md transition-all text-left group">
+        <div className="w-14 h-14 bg-purple-50 text-purple-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform border border-purple-100"><Users size={28}/></div>
+        <h3 className="font-black text-xl text-gray-900 uppercase tracking-tighter mb-2">Usuários</h3>
+        <p className="text-sm text-gray-500 leading-relaxed">Visualização e suporte à base de moradores de Jacarepaguá.</p>
+    </button>
+    <button onClick={() => onSelect('conversations')} className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm hover:shadow-md transition-all text-left group">
+        <div className="w-14 h-14 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform border border-indigo-100"><MessageCircle size={28}/></div>
+        <h3 className="font-black text-xl text-gray-900 uppercase tracking-tighter mb-2">Conversas</h3>
+        <p className="text-sm text-gray-500 leading-relaxed">Auditoria e monitoramento de orçamentos e chats de serviços.</p>
+    </button>
+    <button onClick={() => onSelect('suggestions')} className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm hover:shadow-md transition-all text-left group">
+        <div className="w-14 h-14 bg-amber-50 text-amber-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform border border-amber-100"><Lightbulb size={28}/></div>
+        <h3 className="font-black text-xl text-gray-900 uppercase tracking-tighter mb-2">Sugestões</h3>
+        <p className="text-sm text-gray-500 leading-relaxed">Feedback dos moradores e ideias de melhorias no app.</p>
+    </button>
+    <button onClick={() => onSelect('monitoring')} className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm hover:shadow-md transition-all text-left group">
+        <div className="w-14 h-14 bg-slate-50 text-slate-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform border border-slate-100"><Activity size={28}/></div>
+        <h3 className="font-black text-xl text-gray-900 uppercase tracking-tighter mb-2">Métricas de Sistema</h3>
+        <p className="text-sm text-gray-500 leading-relaxed">Métricas de performance, erros e latência das APIs.</p>
+    </button>
+  </div>
+);
 
-    return (
-        <div className="space-y-8 animate-in fade-in duration-500">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm">
-                    <div className="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center mb-6">
-                        <DollarSign size={24} />
+// Added MonitoringView to resolve "Cannot find name" error on line 350
+const MonitoringView: React.FC = () => (
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-in fade-in duration-500">
+        <div className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm">
+            <h3 className="text-sm font-black text-gray-900 uppercase mb-6 flex items-center gap-2">
+                <BarChart3 size={18} className="text-blue-500" /> Atividade no Bairro
+            </h3>
+            <div className="space-y-4">
+                {[
+                    { label: 'Novos Cadastros', value: '+12', time: 'Última hora', color: 'text-blue-600' },
+                    { label: 'Buscas Realizadas', value: '1.240', time: 'Hoje', color: 'text-slate-900' },
+                    { label: 'Orçamentos Pedidos', value: '28', time: 'Hoje', color: 'text-indigo-600' },
+                ].map(item => (
+                    <div key={item.label} className="flex justify-between items-center py-4 border-b border-gray-50 last:border-0">
+                        <div>
+                            <p className="text-sm font-bold text-gray-700">{item.label}</p>
+                            <p className="text-[10px] text-gray-400 uppercase font-bold tracking-widest">{item.time}</p>
+                        </div>
+                        <span className={`text-lg font-black ${item.color}`}>{item.value}</span>
                     </div>
-                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Receita Hoje</p>
-                    <p className="text-3xl font-black text-gray-900">R$ {todayRevenue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+                ))}
+            </div>
+        </div>
+        <div className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm">
+            <h3 className="text-sm font-black text-gray-900 uppercase mb-6 flex items-center gap-2">
+                <Zap size={18} className="text-amber-500" /> Saúde das APIs
+            </h3>
+            <div className="space-y-6">
+                <div className="flex items-center justify-between p-4 bg-emerald-50 rounded-2xl border border-emerald-100">
+                    <span className="text-xs font-bold text-emerald-800 uppercase tracking-widest">Latência Média</span>
+                    <span className="text-sm font-black text-emerald-600">42ms</span>
                 </div>
-                <div className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm">
-                    <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center mb-6">
-                        <CheckCircle2 size={24} />
-                    </div>
-                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Transações</p>
-                    <p className="text-3xl font-black text-gray-900">{todayTransactions}</p>
+                <div className="flex items-center justify-between p-4 bg-emerald-50 rounded-2xl border border-emerald-100">
+                    <span className="text-xs font-bold text-emerald-800 uppercase tracking-widest">Uptime Mensal</span>
+                    <span className="text-sm font-black text-emerald-600">99.98%</span>
                 </div>
-                <div className={`p-8 rounded-[2.5rem] border shadow-sm ${todayPendencies > 0 ? 'bg-rose-50 border-rose-100' : 'bg-white border-gray-100'}`}>
-                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center mb-6 ${todayPendencies > 0 ? 'bg-rose-500 text-white' : 'bg-gray-50 text-gray-400'}`}>
-                        <AlertTriangle size={24} />
-                    </div>
-                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Pendências</p>
-                    <p className={`text-3xl font-black ${todayPendencies > 0 ? 'text-rose-600' : 'text-gray-900'}`}>{todayPendencies}</p>
+                <div className="flex items-center justify-between p-4 bg-blue-50 rounded-2xl border border-blue-100">
+                    <span className="text-xs font-bold text-blue-800 uppercase tracking-widest">Carga CPU</span>
+                    <span className="text-sm font-black text-blue-600">14%</span>
                 </div>
+            </div>
+        </div>
+    </div>
+);
+
+// --- MAIN FINANCIAL DASHBOARD ---
+
+const AdminFinancialDashboard: React.FC = () => {
+  const [range, setRange] = useState<DateRangeOption>('30d');
+  const [detailView, setDetailView] = useState<MonetizationType | null>(null);
+  const [transactionFilter, setTransactionFilter] = useState<MonetizationType>('all');
+
+  const filteredTransactions = useMemo(() => {
+    if (transactionFilter === 'all') return MOCK_TRANSACTIONS;
+    return MOCK_TRANSACTIONS.filter(t => t.type === transactionFilter);
+  }, [transactionFilter]);
+
+  if (detailView === 'banners') return <BannersDetailView onBack={() => setDetailView(null)} />;
+  if (detailView === 'real_estate') return <SubscriptionDetailView title="Planos Imóveis" onBack={() => setDetailView(null)} />;
+  if (detailView === 'connect') return <SubscriptionDetailView title="JPA Connect" onBack={() => setDetailView(null)} />;
+
+  return (
+    <div className="space-y-12 animate-in fade-in duration-500 pb-20">
+        
+        {/* FILTROS E TOTAL */}
+        <section>
+          <div className="flex justify-between items-center mb-8">
+            <div className="flex gap-1 bg-white p-1 rounded-2xl border border-gray-200 shadow-sm">
+                {(['today', '7d', '30d', '90d'] as DateRangeOption[]).map(r => (
+                    <button 
+                        key={r} 
+                        onClick={() => setRange(r)}
+                        className={`px-5 py-2 text-[10px] font-black uppercase rounded-xl transition-all ${range === r ? 'bg-blue-600 text-white shadow-lg' : 'text-gray-400 hover:text-gray-600'}`}
+                    >
+                        {r}
+                    </button>
+                ))}
+            </div>
+            <button className="flex items-center gap-2 text-blue-600 font-bold text-xs bg-blue-50 px-4 py-2 rounded-xl border border-blue-100">
+                <Download size={14}/> Exportar
+            </button>
+          </div>
+
+          <div className="bg-white p-10 rounded-[3rem] border border-gray-100 shadow-sm flex flex-col items-center text-center relative overflow-hidden">
+             <div className="absolute top-0 left-0 w-full h-1.5 bg-blue-600"></div>
+             <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] mb-4">Receita Total no Período</p>
+             <h2 className="text-6xl font-black text-gray-900 tracking-tighter mb-4">R$ 42.850,00</h2>
+             <div className="flex items-center gap-2 text-emerald-500 bg-emerald-50 px-4 py-1.5 rounded-full border border-emerald-100">
+                <TrendingUp size={16} />
+                <span className="text-xs font-black uppercase tracking-widest">+12.5% vs período anterior</span>
+             </div>
+          </div>
+        </section>
+
+        {/* HUB DE MONETIZAÇÃO */}
+        <section>
+          <div className="flex items-center gap-2 mb-6 px-1">
+            <PieChart size={18} className="text-blue-500" />
+            <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Receita por Monetização</h3>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+             <FinancialCard type="sponsored" revenue={1245.50} salesCount={42} onClick={() => {}} />
+             <FinancialCard type="banners" revenue={18950.00} salesCount={64} onClick={() => setDetailView('banners')} />
+             <FinancialCard type="master" revenue={1000.00} salesCount={1} onClick={() => {}} />
+             <FinancialCard type="real_estate" revenue={8450.00} salesCount={85} onClick={() => setDetailView('real_estate')} />
+             <FinancialCard type="connect" revenue={14204.50} salesCount={72} onClick={() => setDetailView('connect')} />
+          </div>
+        </section>
+
+        {/* ÚLTIMAS TRANSAÇÕES COM FILTRO */}
+        <section>
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 px-1">
+            <div className="flex items-center gap-2">
+                <ArrowRightLeft size={18} className="text-gray-400" />
+                <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Últimas Transações</h3>
             </div>
             
-            <div className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm">
-                <h3 className="text-sm font-black text-gray-900 uppercase tracking-tight mb-6">Eficiência da Plataforma</h3>
-                <div className="grid grid-cols-2 gap-8">
-                    <div>
-                        <p className="text-xs text-gray-400 font-bold uppercase mb-2">Conversão Leads</p>
-                        <div className="flex items-end gap-2">
-                            <span className="text-2xl font-black text-gray-900">24.8%</span>
-                            <span className="text-emerald-500 text-xs font-bold mb-1">↑ 2.1%</span>
+            <div className="flex gap-2 overflow-x-auto no-scrollbar max-w-full pb-1">
+                {(['all', 'sponsored', 'banners', 'master', 'real_estate', 'connect'] as MonetizationType[]).map(t => (
+                    <button 
+                        key={t}
+                        onClick={() => setTransactionFilter(t)}
+                        className={`px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-wider border transition-all whitespace-nowrap ${transactionFilter === t ? 'bg-gray-900 text-white border-gray-900 shadow-md' : 'bg-white text-gray-400 border-gray-200'}`}
+                    >
+                        {t === 'all' ? 'Todas' : MONETIZATION_CONFIG[t as keyof typeof MONETIZATION_CONFIG].label}
+                    </button>
+                ))}
+            </div>
+          </div>
+
+          <div className="bg-white rounded-[2.5rem] border border-gray-100 shadow-sm overflow-hidden">
+             {filteredTransactions.length > 0 ? filteredTransactions.map((tx, idx) => (
+                 <div key={tx.id} className="p-5 flex items-center justify-between hover:bg-gray-50 transition-colors border-b last:border-b-0 border-gray-50">
+                    <div className="flex items-center gap-4">
+                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${tx.status === 'paid' ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600'}`}>
+                            <CreditCard size={18} />
+                        </div>
+                        <div>
+                            <p className="text-sm font-bold text-gray-900">{tx.client}</p>
+                            <p className="text-[10px] text-gray-400 font-bold uppercase tracking-tighter">
+                                {new Date(tx.date).toLocaleDateString()} • {tx.type === 'all' ? '' : MONETIZATION_CONFIG[tx.type as keyof typeof MONETIZATION_CONFIG].label}
+                            </p>
                         </div>
                     </div>
-                    <div>
-                        <p className="text-xs text-gray-400 font-bold uppercase mb-2">SLA Médio Chat</p>
-                        <div className="flex items-end gap-2">
-                            <span className="text-2xl font-black text-gray-900">14 min</span>
-                            <span className="text-rose-500 text-xs font-bold mb-1">↓ 3m</span>
-                        </div>
+                    <div className="text-right">
+                        <p className="text-sm font-black text-gray-900">R$ {tx.amount.toFixed(2)}</p>
+                        <span className={`text-[8px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded ${tx.status === 'paid' ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600'}`}>
+                            {tx.status === 'paid' ? 'Pago' : 'Pendente'}
+                        </span>
                     </div>
-                </div>
-            </div>
-        </div>
-    );
+                 </div>
+             )) : (
+                 <div className="p-20 text-center flex flex-col items-center opacity-30">
+                    <History size={48} className="mb-4" />
+                    <p className="font-bold uppercase tracking-widest text-xs">Nenhuma transação encontrada</p>
+                 </div>
+             )}
+          </div>
+        </section>
+    </div>
+  );
 };
 
-// --- 2. FINANCEIRO (Gráficos e Extratos) ---
-const FinancialView: React.FC = () => {
-    return (
-        <div className="space-y-8 animate-in fade-in duration-500">
-            <div className="bg-white p-8 rounded-[3rem] border border-gray-100 shadow-sm">
-                <div className="flex justify-between items-start mb-10">
-                    <div>
-                        <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-2">Faturamento Bruto Acumulado</p>
-                        <h3 className="text-4xl font-black text-gray-900 tracking-tighter">R$ 425.800,00</h3>
-                    </div>
-                    <div className="flex gap-1 bg-gray-50 p-1 rounded-xl border border-gray-100">
-                        {['7d', '30d', '90d'].map(p => (
-                            <button key={p} className={`px-4 py-2 text-[10px] font-black uppercase rounded-lg ${p === '30d' ? 'bg-white shadow-sm text-blue-600' : 'text-gray-400'}`}>{p}</button>
-                        ))}
-                    </div>
-                </div>
-                {/* Simulação de gráfico simplificada para visual claro */}
-                <div className="h-48 w-full bg-gray-50 rounded-2xl flex items-end justify-around p-4 gap-2">
-                    {[40, 70, 45, 90, 65, 80, 100].map((h, i) => (
-                        <div key={i} className="flex-1 bg-blue-500 rounded-t-lg transition-all hover:brightness-110" style={{ height: `${h}%` }}></div>
-                    ))}
-                </div>
-            </div>
-            
-            <div className="bg-white rounded-[2.5rem] border border-gray-100 shadow-sm overflow-hidden">
-                <div className="p-6 border-b border-gray-50 bg-gray-50/50">
-                    <h3 className="text-sm font-black text-gray-900 uppercase">Últimas Transações</h3>
-                </div>
-                <div className="divide-y divide-gray-50">
-                    {[1,2,3,4,5].map(i => (
-                        <div key={i} className="p-5 flex items-center justify-between hover:bg-gray-50 transition-colors">
-                            <div className="flex items-center gap-4">
-                                <div className="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center text-gray-400"><DollarSign size={18}/></div>
-                                <div>
-                                    <p className="text-sm font-bold text-gray-900">Loja Exemplo {i}</p>
-                                    <p className="text-[10px] text-gray-400 uppercase font-black">Banner Home • PIX</p>
-                                </div>
-                            </div>
-                            <div className="text-right">
-                                <p className="text-sm font-black text-gray-900">R$ 69,90</p>
-                                <span className="text-[8px] font-black uppercase bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded">Pago</span>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            </div>
-        </div>
-    );
-};
-
-// --- HUB COMPONENT ---
-const AdminHub: React.FC<{ onSelect: (id: any) => void }> = ({ onSelect }) => {
-    const cards = [
-        { id: 'monitoring', label: 'Monitoramento', icon: Activity, color: 'text-amber-500', bg: 'bg-amber-50' },
-        { id: 'merchants', label: 'Lojistas', icon: Store, color: 'text-blue-500', bg: 'bg-blue-50' },
-        { id: 'users', label: 'Usuários', icon: Users, color: 'text-indigo-500', bg: 'bg-indigo-50' },
-        { id: 'conversations', label: 'Conversas', icon: MessageSquare, color: 'text-purple-500', bg: 'bg-purple-50' },
-        { id: 'suggestions', label: 'Sugestões', icon: Lightbulb, color: 'text-orange-500', bg: 'bg-orange-50' },
-        { id: 'financial', label: 'Financeiro', icon: DollarSign, color: 'text-emerald-500', bg: 'bg-emerald-50' },
-    ];
-
-    return (
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-6 animate-in fade-in duration-500">
-            {cards.map(card => (
-                <button 
-                    key={card.id}
-                    onClick={() => onSelect(card.id)}
-                    className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all flex flex-col items-center text-center gap-6 group"
-                >
-                    <div className={`w-20 h-20 ${card.bg} rounded-[2rem] flex items-center justify-center ${card.color} transition-transform group-hover:scale-110`}>
-                        <card.icon size={40} />
-                    </div>
-                    <span className="font-black text-gray-900 uppercase tracking-tighter text-lg">{card.label}</span>
-                </button>
-            ))}
-        </div>
-    );
-};
+// --- CORE COMPONENT ---
 
 export const AdminPanel: React.FC<any> = ({ onLogout, viewMode, onOpenViewSwitcher, onNavigateToApp, onOpenMonitorChat }) => {
   const [activeTab, setActiveTab] = useState<'hub' | 'merchants' | 'users' | 'financial' | 'monitoring' | 'suggestions' | 'conversations'>('hub');
-  const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [merchants, setMerchants] = useState<any[]>([]);
   const [users, setUsers] = useState<any[]>([]);
@@ -177,8 +387,8 @@ export const AdminPanel: React.FC<any> = ({ onLogout, viewMode, onOpenViewSwitch
     if(activeTab === 'suggestions') loadSuggestions();
   }, [activeTab, searchTerm]);
 
-  const loadMerchants = async () => { setLoading(true); setMerchants(await fetchAdminMerchants(searchTerm)); setLoading(false); };
-  const loadUsers = async () => { setLoading(true); setUsers(await fetchAdminUsers(searchTerm)); setLoading(false); };
+  const loadMerchants = async () => { setMerchants(await fetchAdminMerchants(searchTerm)); };
+  const loadUsers = async () => { setUsers(await fetchAdminUsers(searchTerm)); };
   const loadMonitoring = () => {
     const saved = localStorage.getItem('service_requests_mock');
     if (saved) setServiceRequests(JSON.parse(saved));
@@ -199,8 +409,22 @@ export const AdminPanel: React.FC<any> = ({ onLogout, viewMode, onOpenViewSwitch
       <header className="bg-white border-b border-gray-200 px-6 py-6 sticky top-0 z-50 shadow-sm shrink-0">
         <div className="flex items-center justify-between max-w-7xl mx-auto w-full">
             <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-indigo-600 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-500/20"><ShieldCheck size={24} className="text-white" /></div>
-                <div><h1 className="font-black text-xl uppercase tracking-tighter text-gray-900">Central Localizei</h1><p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Painel de Administração</p></div>
+                <div className="w-12 h-12 bg-indigo-600 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-500/20">
+                    {activeTab === 'hub' ? <ShieldCheck size={24} className="text-white" /> : (
+                        <button onClick={() => setActiveTab('hub')} className="text-white hover:scale-110 transition-transform"><ArrowLeft size={24}/></button>
+                    )}
+                </div>
+                <div>
+                    <h1 className="font-black text-xl uppercase tracking-tighter text-gray-900">
+                        {activeTab === 'hub' ? 'Central Localizei' : 
+                         activeTab === 'financial' ? 'Finanças' :
+                         activeTab === 'merchants' ? 'Lojistas' :
+                         activeTab === 'users' ? 'Usuários' :
+                         activeTab === 'conversations' ? 'Conversas' :
+                         'Sugestões'}
+                    </h1>
+                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Painel Administrativo</p>
+                </div>
             </div>
             <div className="flex gap-2">
                 <button onClick={onOpenViewSwitcher} className="px-4 py-2 bg-gray-50 hover:bg-gray-100 rounded-xl text-[10px] font-black uppercase tracking-widest text-blue-600 border border-gray-200 shadow-sm">Visão: {viewMode}</button>
@@ -223,10 +447,7 @@ export const AdminPanel: React.FC<any> = ({ onLogout, viewMode, onOpenViewSwitch
         )}
 
         {activeTab === 'financial' && (
-            <>
-                <SectionHeader title="Visão Financeira" onBack={() => setActiveTab('hub')} />
-                <FinancialView />
-            </>
+            <AdminFinancialDashboard />
         )}
 
         {activeTab === 'conversations' && (
