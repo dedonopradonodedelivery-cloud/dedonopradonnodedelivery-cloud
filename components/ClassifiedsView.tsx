@@ -32,6 +32,23 @@ import { MasterSponsorBanner } from './MasterSponsorBanner';
 import { ClassifiedsSelectionModal } from './ClassifiedsSelectionModal';
 import { ClassifiedsFilterModal } from './ClassifiedsFilterModal';
 
+// Imagens de fallback variadas para manter o padrão visual de "sempre ter imagem"
+const FALLBACK_IMAGES = [
+  'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?q=80&w=800', // Objetos
+  'https://images.unsplash.com/photo-1581578731522-745d05cb9704?q=80&w=800', // Serviços
+  'https://images.unsplash.com/photo-1560518883-ce09059eeffa?q=80&w=800', // Imóveis
+  'https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?q=80&w=800', // Pets
+  'https://images.unsplash.com/photo-1534723452202-428aae1ad99d?q=80&w=800', // Genérico
+];
+
+const getFallbackImage = (id: string) => {
+    let hash = 0;
+    for (let i = 0; i < id.length; i++) {
+        hash = id.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    return FALLBACK_IMAGES[Math.abs(hash) % FALLBACK_IMAGES.length];
+};
+
 const CLASSIFIED_CATEGORIES = [
   { id: 'servicos', name: 'Orçamento de Serviços', slug: 'services_landing', icon: <Wrench />, color: 'bg-brand-blue' },
   { id: 'imoveis', name: 'Imóveis Comerciais', slug: 'real_estate', icon: <Building2 />, color: 'bg-brand-blue' },
@@ -61,6 +78,9 @@ const ClassifiedCard: React.FC<{ item: Classified; onClick: () => void }> = ({ i
     const isService = item.category === 'Orçamento de Serviços';
     const hasPrice = !!item.price && !isDonation && !isAdoption && !isJob && !isService;
 
+    // Garante uma imagem mesmo se o item não tiver
+    const displayImage = item.imageUrl || getFallbackImage(item.id);
+
     return (
         <div 
             onClick={onClick} 
@@ -68,7 +88,7 @@ const ClassifiedCard: React.FC<{ item: Classified; onClick: () => void }> = ({ i
         >
             <div className="aspect-[16/10] w-full overflow-hidden bg-gray-100 dark:bg-gray-700 relative">
                 <img 
-                    src={item.imageUrl || "https://images.unsplash.com/photo-1570129477492-45c003edd2be?q=80&w=800&auto=format&fit=crop"} 
+                    src={displayImage} 
                     alt={item.title} 
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                 />

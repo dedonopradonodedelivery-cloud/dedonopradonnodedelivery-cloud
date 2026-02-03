@@ -30,13 +30,16 @@ import { LaunchOfferBanner } from './LaunchOfferBanner';
 import { HomeBannerCarousel } from './HomeBannerCarousel';
 import { FifaBanner } from './FifaBanner';
 
-// Fallback images for robust display if data is missing
+// Imagens de fallback realistas e variadas (Bairro, Pessoas, Comércio, Objetos)
 const FALLBACK_IMAGES = [
-  'https://images.unsplash.com/photo-1570129477492-45c003edd2be?q=80&w=800', 
-  'https://images.unsplash.com/photo-1517457373958-b7bdd4587205?q=80&w=800',
-  'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=800', 
-  'https://images.unsplash.com/photo-1534723452202-428aae1ad99d?q=80&w=800',
-  'https://images.unsplash.com/photo-1581578731522-745d05cb9704?q=80&w=800'
+  'https://images.unsplash.com/photo-1570129477492-45c003edd2be?q=80&w=800', // Bairro/Rua
+  'https://images.unsplash.com/photo-1517457373958-b7bdd4587205?q=80&w=800', // Comércio
+  'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=800', // Pessoas
+  'https://images.unsplash.com/photo-1534723452202-428aae1ad99d?q=80&w=800', // Mercado
+  'https://images.unsplash.com/photo-1581578731522-745d05cb9704?q=80&w=800', // Serviço
+  'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?q=80&w=800', // Casa/Interior
+  'https://images.unsplash.com/photo-1605218427368-35b019b85c11?q=80&w=800', // Urbano
+  'https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?q=80&w=800'  // Pet
 ];
 
 const getFallbackImage = (id: string) => {
@@ -48,8 +51,8 @@ const getFallbackImage = (id: string) => {
 };
 
 const MiniPostCard: React.FC<{ post: CommunityPost; onNavigate: (view: string) => void; }> = ({ post, onNavigate }) => {
-  // Logic to prioritize specific post image or use a deterministic fallback
-  const postImage = post.imageUrl || post.imageUrls?.[0] || getFallbackImage(post.id);
+  // Garante que SEMPRE haja uma imagem, usando fallback determinístico se necessário
+  const postImage = post.imageUrl || (post.imageUrls && post.imageUrls.length > 0 ? post.imageUrls[0] : getFallbackImage(post.id));
   
   const handleAction = (e: React.MouseEvent, message: string) => {
       e.stopPropagation();
@@ -62,7 +65,7 @@ const MiniPostCard: React.FC<{ post: CommunityPost; onNavigate: (view: string) =
         onClick={() => onNavigate('neighborhood_posts')}
         className="bg-white dark:bg-gray-800 rounded-2xl overflow-hidden shadow-md border border-gray-100 dark:border-gray-700 flex flex-col group cursor-pointer h-full"
       >
-        <div className="relative aspect-square w-full overflow-hidden">
+        <div className="relative aspect-square w-full overflow-hidden bg-gray-100">
           <img src={postImage} alt={post.content} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
           <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent"></div>
           <div className="absolute top-2 left-2 flex items-center gap-2">
@@ -91,14 +94,17 @@ const MiniPostCard: React.FC<{ post: CommunityPost; onNavigate: (view: string) =
 };
 
 const MiniClassifiedCard: React.FC<{ item: Classified; onNavigate: (view: string) => void; }> = ({ item, onNavigate }) => {
+  // Garante imagem de fallback
+  const itemImage = item.imageUrl || getFallbackImage(item.id);
+
   return (
     <div className="flex-shrink-0 w-1/2 snap-center p-1.5">
       <div 
         onClick={() => onNavigate('classifieds')}
         className="bg-white dark:bg-gray-800 rounded-2xl overflow-hidden shadow-md border border-gray-100 dark:border-gray-700 flex flex-col group cursor-pointer h-full"
       >
-        <div className="relative aspect-square w-full overflow-hidden">
-          <img src={item.imageUrl || "https://images.unsplash.com/photo-1570129477492-45c003edd2be?q=80&w=800&auto=format&fit=crop"} alt={item.title} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
+        <div className="relative aspect-square w-full overflow-hidden bg-gray-100">
+          <img src={itemImage} alt={item.title} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
           <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent"></div>
           {item.price && (
              <div className="absolute bottom-2 right-2 bg-emerald-500 text-white text-[9px] font-black px-2 py-0.5 rounded-lg shadow-sm">

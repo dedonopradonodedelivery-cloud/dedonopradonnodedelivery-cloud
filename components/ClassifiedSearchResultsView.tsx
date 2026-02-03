@@ -23,6 +23,22 @@ interface ClassifiedSearchResultsViewProps {
   onNavigate: (view: string, data?: any) => void;
 }
 
+// Fallback images para garantir visual sempre preenchido
+const FALLBACK_IMAGES = [
+  'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?q=80&w=800',
+  'https://images.unsplash.com/photo-1581578731522-745d05cb9704?q=80&w=800',
+  'https://images.unsplash.com/photo-1560518883-ce09059eeffa?q=80&w=800',
+  'https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?q=80&w=800'
+];
+
+const getFallbackImage = (id: string) => {
+    let hash = 0;
+    for (let i = 0; i < id.length; i++) {
+        hash = id.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    return FALLBACK_IMAGES[Math.abs(hash) % FALLBACK_IMAGES.length];
+};
+
 const CATEGORY_ICONS: Record<string, any> = {
   'Orçamento de Serviços': Wrench,
   'Imóveis Comerciais': Building2,
@@ -45,6 +61,9 @@ const ResultCard: React.FC<{ item: Classified; onClick: () => void }> = ({ item,
     const isDonation = item.category === 'Doações em geral';
     const isAdoption = item.category === 'Adoção de pets';
     const hasPrice = !!item.price && !isDonation && !isAdoption && item.category !== 'Empregos';
+    
+    // Regra: Nunca sem imagem
+    const displayImage = item.imageUrl || getFallbackImage(item.id);
 
     return (
         <div 
@@ -52,7 +71,7 @@ const ResultCard: React.FC<{ item: Classified; onClick: () => void }> = ({ item,
             className="bg-white dark:bg-gray-800 p-4 rounded-3xl border border-gray-100 dark:border-gray-800 shadow-sm flex gap-4 active:scale-[0.98] transition-all cursor-pointer"
         >
             <div className="w-20 h-20 bg-gray-100 dark:bg-gray-700 rounded-2xl overflow-hidden shrink-0">
-                <img src={item.imageUrl || "https://images.unsplash.com/photo-1570129477492-45c003edd2be?q=80&w=800"} className="w-full h-full object-cover" alt={item.title} />
+                <img src={displayImage} className="w-full h-full object-cover" alt={item.title} />
             </div>
             <div className="flex-1 min-w-0 flex flex-col justify-center">
                 <h4 className="font-bold text-gray-900 dark:text-white text-sm line-clamp-2 leading-tight mb-1">{item.title}</h4>

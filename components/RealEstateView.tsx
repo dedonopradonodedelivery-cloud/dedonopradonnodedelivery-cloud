@@ -17,8 +17,25 @@ interface RealEstateViewProps {
   onNavigate: (view: string, data?: any) => void;
 }
 
+// Fallback images for properties
+const FALLBACK_PROPERTY_IMAGES = [
+  'https://images.unsplash.com/photo-1560518883-ce09059eeffa?q=80&w=800',
+  'https://images.unsplash.com/photo-1554995207-c18c203602cb?q=80&w=800',
+  'https://images.unsplash.com/photo-1582268611958-ebfd161ef230?q=80&w=800',
+  'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?q=80&w=800'
+];
+
+const getFallbackPropertyImage = (id: string) => {
+    let hash = 0;
+    for (let i = 0; i < id.length; i++) {
+        hash = id.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    return FALLBACK_PROPERTY_IMAGES[Math.abs(hash) % FALLBACK_PROPERTY_IMAGES.length];
+};
+
 const PropertyCard: React.FC<{ property: RealEstateProperty; onClick: () => void }> = ({ property, onClick }) => {
   const isForSale = property.transaction === 'venda';
+  const displayImage = property.image || getFallbackPropertyImage(property.id);
   
   return (
     <div 
@@ -27,7 +44,7 @@ const PropertyCard: React.FC<{ property: RealEstateProperty; onClick: () => void
     >
       <div className="aspect-[16/10] bg-gray-100 dark:bg-gray-700 relative overflow-hidden">
         <img 
-          src={property.image} 
+          src={displayImage} 
           alt={property.title} 
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
         />

@@ -32,7 +32,25 @@ interface DonationsViewProps {
   onNavigate: (view: string, data?: any) => void;
 }
 
+// Fallback images for donations
+const FALLBACK_DONATION_IMAGES = [
+  'https://images.unsplash.com/photo-1593113598332-cd288d649433?q=80&w=800',
+  'https://images.unsplash.com/photo-1520697830682-bbb7e855d34c?q=80&w=800',
+  'https://images.unsplash.com/photo-1520333789090-1afc82db536a?q=80&w=800',
+  'https://images.unsplash.com/photo-1512436991641-6745cdb1723f?q=80&w=800'
+];
+
+const getFallbackDonationImage = (id: string) => {
+    let hash = 0;
+    for (let i = 0; i < id.length; i++) {
+        hash = id.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    return FALLBACK_DONATION_IMAGES[Math.abs(hash) % FALLBACK_DONATION_IMAGES.length];
+};
+
 const DonationCard: React.FC<{ item: Classified; onClick: () => void }> = ({ item, onClick }) => {
+  const displayImage = item.imageUrl || getFallbackDonationImage(item.id);
+
   return (
     <div 
       onClick={onClick}
@@ -40,7 +58,7 @@ const DonationCard: React.FC<{ item: Classified; onClick: () => void }> = ({ ite
     >
       <div className="aspect-[16/10] bg-gray-100 relative overflow-hidden">
         <img 
-          src={item.imageUrl || "https://images.unsplash.com/photo-1593113598332-cd288d649433?q=80&w=800"} 
+          src={displayImage} 
           alt={item.title} 
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
         />

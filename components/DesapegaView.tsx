@@ -59,7 +59,25 @@ interface DesapegaViewProps {
   onNavigate: (view: string, data?: any) => void;
 }
 
+// Fallback images for desapega items (Objects/Products)
+const FALLBACK_ITEM_IMAGES = [
+  'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?q=80&w=800',
+  'https://images.unsplash.com/photo-1585659722982-789600c7690a?q=80&w=800',
+  'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?q=80&w=800',
+  'https://images.unsplash.com/photo-1512436991641-6745cdb1723f?q=80&w=800'
+];
+
+const getFallbackItemImage = (id: string) => {
+    let hash = 0;
+    for (let i = 0; i < id.length; i++) {
+        hash = id.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    return FALLBACK_ITEM_IMAGES[Math.abs(hash) % FALLBACK_ITEM_IMAGES.length];
+};
+
 const DesapegaCard: React.FC<{ item: Classified; onClick: () => void }> = ({ item, onClick }) => {
+  const displayImage = item.imageUrl || getFallbackItemImage(item.id);
+
   return (
     <div 
       onClick={onClick}
@@ -67,7 +85,7 @@ const DesapegaCard: React.FC<{ item: Classified; onClick: () => void }> = ({ ite
     >
       <div className="aspect-[16/10] bg-gray-100 relative overflow-hidden">
         <img 
-          src={item.imageUrl || "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?q=80&w=800"} 
+          src={displayImage} 
           alt={item.title} 
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
         />

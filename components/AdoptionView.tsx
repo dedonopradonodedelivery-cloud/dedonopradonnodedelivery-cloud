@@ -29,7 +29,25 @@ interface AdoptionViewProps {
   onNavigate: (view: string, data?: any) => void;
 }
 
+// Fallback images for pets
+const FALLBACK_PET_IMAGES = [
+  'https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?q=80&w=800',
+  'https://images.unsplash.com/photo-1543466835-00a7907e9de1?q=80&w=800',
+  'https://images.unsplash.com/photo-1537151608828-ea2b11777ee8?q=80&w=800',
+  'https://images.unsplash.com/photo-1514888286974-6c27e9cce25b?q=80&w=800'
+];
+
+const getFallbackPetImage = (id: string) => {
+    let hash = 0;
+    for (let i = 0; i < id.length; i++) {
+        hash = id.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    return FALLBACK_PET_IMAGES[Math.abs(hash) % FALLBACK_PET_IMAGES.length];
+};
+
 const AdoptionCard: React.FC<{ item: Classified; onClick: () => void }> = ({ item, onClick }) => {
+  const displayImage = item.imageUrl || getFallbackPetImage(item.id);
+
   return (
     <div 
       onClick={onClick}
@@ -37,7 +55,7 @@ const AdoptionCard: React.FC<{ item: Classified; onClick: () => void }> = ({ ite
     >
       <div className="aspect-[16/10] bg-gray-100 relative overflow-hidden">
         <img 
-          src={item.imageUrl || "https://images.unsplash.com/photo-1598133894008-61f7fdb8cc3a?q=80&w=800"} 
+          src={displayImage} 
           alt={item.title} 
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
         />
