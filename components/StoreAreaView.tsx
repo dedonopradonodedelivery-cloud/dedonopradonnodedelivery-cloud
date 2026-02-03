@@ -10,14 +10,14 @@ import {
   TrendingUp, 
   Wallet, 
   Megaphone, 
-  ChevronRight,
-  Settings,
-  HelpCircle,
-  CreditCard,
-  LayoutDashboard,
-  Calendar,
-  Bell,
-  QrCode,
+  ChevronRight, 
+  Settings, 
+  HelpCircle, 
+  CreditCard, 
+  LayoutDashboard, 
+  Calendar, 
+  Bell, 
+  QrCode, 
   Zap
 } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
@@ -25,6 +25,7 @@ import { supabase } from '../lib/supabaseClient';
 interface StoreAreaViewProps {
   onBack: () => void;
   onNavigate?: (view: string) => void;
+  user?: any;
 }
 
 // Mock Base Data (Reference for 30 days)
@@ -90,7 +91,7 @@ const MenuLink: React.FC<{
   </button>
 );
 
-export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate }) => {
+export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate, user }) => {
   const [isCashbackEnabled, setIsCashbackEnabled] = useState(true);
   const [dateRange, setDateRange] = useState<DateRange>('30d');
   const [pendingRequestsCount, setPendingRequestsCount] = useState(0);
@@ -185,7 +186,7 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
             <div>
                 <div className="flex items-center gap-1.5">
                     <h1 className="text-2xl font-bold text-gray-900 dark:text-white font-display leading-tight">
-                        {STORE_DATA.name}
+                        {user?.user_metadata?.store_name || STORE_DATA.name}
                     </h1>
                     {STORE_DATA.isVerified && <BadgeCheck className="w-5 h-5 text-white fill-[#1E5BFF]" />}
                 </div>
@@ -380,12 +381,6 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
             </button>
         </div>
 
-      </div>
-
-      <div className="mt-12 text-center opacity-30 px-10">
-        <p className="text-[9px] font-black text-gray-500 uppercase tracking-[0.3em]">
-          Localizei JPA Parceiros <br/> v1.5.0
-        </p>
       </div>
     </div>
   );
