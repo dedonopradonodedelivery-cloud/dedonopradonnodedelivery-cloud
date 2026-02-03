@@ -295,8 +295,8 @@ export const HomeFeed: React.FC<HomeFeedFeedProps> = ({
         >
           {categoryPages.map((pageCategories, pageIndex) => (
             <div key={pageIndex} className="min-w-full px-4 pb-2 snap-center">
-              {/* Changed from grid-rows-4 to grid-rows-2 */}
-              <div className="grid grid-cols-4 grid-rows-2 gap-x-2 gap-y-4">
+              {/* Changed spacing to gap-x-1 gap-y-2 for tighter layout */}
+              <div className="grid grid-cols-4 grid-rows-2 gap-x-1 gap-y-2">
                 {pageCategories.map((cat, index) => (
                   <button 
                     key={`${cat.id}-${pageIndex}-${index}`} 
