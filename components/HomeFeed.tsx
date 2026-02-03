@@ -59,29 +59,22 @@ const MiniPostCard: React.FC<{ post: CommunityPost; onNavigate: (view: string) =
       alert(message);
   };
 
+  // Ajuste de largura para ~3 itens na tela (mobile)
   return (
-    <div className="flex-shrink-0 w-[150px] snap-center p-1.5">
+    <div className="flex-shrink-0 w-28 snap-center p-1">
       <div 
         onClick={() => onNavigate('neighborhood_posts')}
-        className="bg-white dark:bg-gray-800 rounded-2xl overflow-hidden shadow-md border border-gray-100 dark:border-gray-700 flex flex-col group cursor-pointer h-full"
+        className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col group cursor-pointer h-full"
       >
         <div className="relative aspect-square w-full overflow-hidden bg-gray-100">
           <img src={postImage} alt={post.content} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
           <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent"></div>
-          <div className="absolute top-2 left-2 flex items-center gap-2">
-            <img src={post.userAvatar} className="w-6 h-6 rounded-full border-2 border-white/80 object-cover" alt={post.userName} />
-            <p className="text-xs font-bold text-white drop-shadow-md truncate max-w-[80px]">{post.userName}</p>
+          <div className="absolute bottom-1 left-1.5 right-1">
+            <p className="text-[9px] font-bold text-white drop-shadow-md truncate">{post.userName}</p>
           </div>
         </div>
-        <div className="px-2 pt-2 flex justify-between items-center">
-          <div className="flex items-center gap-2">
-            <button onClick={(e) => handleAction(e, 'Curtido!')} className="text-gray-500 hover:text-rose-500 p-1 transition-colors"><Heart size={16} /></button>
-            <button onClick={(e) => handleAction(e, 'Comentários!')} className="text-gray-500 hover:text-blue-500 p-1 transition-colors"><MessageSquare size={16} /></button>
-          </div>
-          <button onClick={(e) => handleAction(e, 'Salvo!')} className="text-gray-500 hover:text-yellow-500 p-1 transition-colors"><Bookmark size={16} /></button>
-        </div>
-        <div className="px-3 pb-3 flex-1">
-            <p className="text-[10px] text-gray-700 dark:text-gray-300 leading-snug line-clamp-2">
+        <div className="p-2 pt-1.5 flex-1">
+            <p className="text-[9px] text-gray-600 dark:text-gray-300 leading-snug line-clamp-2 font-medium">
                 {post.content}
             </p>
         </div>
@@ -91,16 +84,15 @@ const MiniPostCard: React.FC<{ post: CommunityPost; onNavigate: (view: string) =
 };
 
 const MiniClassifiedCard: React.FC<{ item: Classified; onNavigate: (view: string) => void; }> = ({ item, onNavigate }) => {
-  // Garante imagem de fallback
   const itemImage = item.imageUrl || getFallbackImage(item.id);
 
   return (
-    <div className="flex-shrink-0 w-1/2 snap-center p-1.5">
+    <div className="flex-shrink-0 w-40 snap-center p-1.5">
       <div 
         onClick={() => onNavigate('classifieds')}
         className="bg-white dark:bg-gray-800 rounded-2xl overflow-hidden shadow-md border border-gray-100 dark:border-gray-700 flex flex-col group cursor-pointer h-full"
       >
-        <div className="relative aspect-square w-full overflow-hidden bg-gray-100">
+        <div className="relative aspect-[4/3] w-full overflow-hidden bg-gray-100">
           <img src={itemImage} alt={item.title} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
           <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent"></div>
           {item.price && (
@@ -143,7 +135,6 @@ export const HomeFeed: React.FC<HomeFeedFeedProps> = ({
   userRole
 }) => {
   const [listFilter, setListFilter] = useState<'all' | 'top_rated' | 'open_now'>('all');
-  const [isAnimating, setIsAnimating] = useState(false);
   const { currentNeighborhood } = useNeighborhood();
   
   // Category Scroll Logic
@@ -189,10 +180,6 @@ export const HomeFeed: React.FC<HomeFeedFeedProps> = ({
   const [isSubmittingLead, setIsSubmittingLead] = useState(false);
   const [lastCreatedRequestId, setLastCreatedRequestId] = useState<string | null>(null);
 
-  const [consecutiveDays, setConsecutiveDays] = useState(() => {
-    return parseInt(localStorage.getItem('reward_consecutive_days') || '1');
-  });
-
   const handleScroll = () => {
     if (!categoryScrollRef.current) return;
     const scrollLeft = categoryScrollRef.current.scrollLeft;
@@ -201,25 +188,6 @@ export const HomeFeed: React.FC<HomeFeedFeedProps> = ({
     if (page !== currentCategoryPage) {
       setCurrentCategoryPage(page);
     }
-  };
-
-  const handleClaimReward = () => {
-    if (!user) {
-        alert("Entre como usuário para participar do Cupom da Semana.");
-        onNavigate('profile'); 
-        return;
-    }
-    
-    if (userRole !== 'cliente') {
-        alert("Esta funcionalidade é exclusiva para moradores. Lojistas não podem resgatar cupons semanais.");
-        return;
-    }
-
-    setIsAnimating(true);
-    setTimeout(() => {
-      setIsAnimating(false);
-      onNavigate('weekly_reward_page');
-    }, 1200);
   };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -284,7 +252,7 @@ export const HomeFeed: React.FC<HomeFeedFeedProps> = ({
         </section>
       )}
 
-      {/* CATEGORIAS (4x2 Grid with Pagination) */}
+      {/* 1. CATEGORIAS (Grid 4x2) */}
       <section className="w-full bg-[#FFFFFF] dark:bg-gray-950 pt-4 pb-0 relative z-10">
         <div 
           ref={categoryScrollRef} 
@@ -293,7 +261,6 @@ export const HomeFeed: React.FC<HomeFeedFeedProps> = ({
         >
           {categoryPages.map((pageCategories, pageIndex) => (
             <div key={pageIndex} className="min-w-full px-4 pb-2 snap-center">
-              {/* Changed spacing to gap-2 for uniform layout */}
               <div className="grid grid-cols-4 grid-rows-2 gap-x-2 gap-y-4">
                 {pageCategories.map((cat, index) => (
                   <button 
@@ -333,22 +300,21 @@ export const HomeFeed: React.FC<HomeFeedFeedProps> = ({
         </div>
       </section>
 
-      {/* CARROSSEL HOME (Fundo Branco Explícito) */}
+      {/* 2. CARROSSEL PRINCIPAL (Banners) */}
       <section className="bg-white dark:bg-gray-950 w-full">
         <HomeBannerCarousel onStoreClick={onStoreClick} onNavigate={onNavigate} />
       </section>
 
-      {/* 1. JPA CONVERSA (ORDEM RECONFIGURADA) - COMPACTO E COM SCROLL INDICATOR */}
-      <section className="bg-white dark:bg-gray-950 pt-4 pb-2 relative">
+      {/* 3. ONDE O BAIRRO CONVERSA (Compacto) */}
+      <section className="bg-white dark:bg-gray-950 pt-2 pb-6 relative">
         <div className="px-5">
             <div className="flex items-center justify-between mb-3">
                 <h2 className="text-lg font-bold text-gray-800 dark:text-white flex items-center gap-2">
-                    Onde o bairro conversa
-                    <MessageSquare className="w-5 h-5 text-blue-500 fill-current" />
+                    JPA Conversa
+                    <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
                 </h2>
                 <div className="flex items-center gap-2">
                   <button onClick={() => onNavigate('neighborhood_posts')} className="text-xs font-bold text-blue-500">Ver tudo</button>
-                  <button onClick={() => onNavigate('neighborhood_posts')} className="p-1.5 bg-gray-100 dark:bg-gray-800 rounded-full text-gray-500"><Plus size={14} /></button>
                 </div>
             </div>
         </div>
@@ -360,77 +326,44 @@ export const HomeFeed: React.FC<HomeFeedFeedProps> = ({
                 ))}
             </div>
             
-            {/* Indicador Sutil de Scroll Horizontal */}
+            {/* Indicador Sutil de Scroll */}
             <div className="absolute right-0 top-1/2 -translate-y-1/2 z-10 h-full flex items-center justify-end bg-gradient-to-l from-white/90 dark:from-gray-950/90 to-transparent w-12 pointer-events-none">
-                <ChevronRight className="w-6 h-6 text-gray-400 dark:text-gray-600 opacity-70 animate-pulse mr-1" />
+                <ChevronRight className="w-5 h-5 text-gray-300 dark:text-gray-600 opacity-80" />
             </div>
         </div>
       </section>
 
-      {/* 2. CUPOM DA SEMANA */}
-      <section className="bg-white dark:bg-gray-950 px-5 pt-4 mb-2">
-        <div className="bg-white dark:bg-gray-900 rounded-[1.75rem] border border-gray-200/80 dark:border-gray-800 shadow-xl shadow-blue-900/5 relative group">
-          <div className="absolute top-1/2 -translate-y-1/2 -left-4 w-8 h-8 rounded-full bg-white dark:bg-gray-950"></div>
-          <div className="absolute top-1/2 -translate-y-1/2 -right-4 w-8 h-8 rounded-full bg-white dark:bg-gray-950"></div>
-          <div className="p-4 pb-0">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center text-[#1E5BFF] border border-blue-200/50 dark:border-blue-800/30 shadow-sm">
-                  <Ticket className="w-5 h-5" />
-                </div>
-                <div>
-                  <h3 className="font-black text-sm text-[#1E5BFF]">Cupom da Semana 🎟️</h3>
-                  <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest leading-none">Resgate agora e use no bairro</p>
-                </div>
-              </div>
-            </div>
-            <div className="flex justify-between items-center my-5 px-1">
-              {[1, 2, 3, 4, 5].map((day) => {
-                  const isCompleted = day <= (consecutiveDays - 1);
-                  const isCurrent = day === consecutiveDays;
-                  return (
-                    <div key={day} className="flex flex-col items-center gap-1.5">
-                      <div className={`w-9 h-9 rounded-full flex items-center justify-center border-2 transition-all duration-500 relative shadow-inner ${isCompleted ? 'bg-blue-500 border-blue-500/50 text-white shadow-md shadow-blue-500/10' : isCurrent ? 'bg-white dark:bg-gray-800 border-blue-500 text-blue-500' : 'bg-gray-100 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-300 dark:text-gray-600'}`}>
-                        {isCompleted ? <CheckCircle2 size={16} strokeWidth={3.5} /> : isCurrent ? <Zap size={14} fill="currentColor" /> : <Lock size={14} />}
-                      </div>
-                      <span className={`text-[9px] font-black uppercase tracking-widest ${isCompleted || isCurrent ? 'text-blue-600 dark:text-blue-400' : 'text-gray-400 dark:text-gray-500'}`}>Dia {day}</span>
-                    </div>
-                  );
-                })}
-            </div>
-          </div>
-          <div className="relative px-4">
-              <div className="border-t-2 border-dashed border-gray-200 dark:border-gray-700"></div>
-              <div className="absolute -top-4 -left-4 w-8 h-8 rounded-full bg-white dark:bg-gray-950"></div>
-              <div className="absolute -top-4 -right-4 w-8 h-8 rounded-full bg-white dark:bg-gray-950"></div>
-          </div>
-          <div className="p-4 pt-5">
-            <h2 className="text-xs font-bold text-gray-800 dark:text-gray-200 leading-tight text-center mb-4">
-              {userRole === 'lojista' 
-                ? "Resgate exclusivo para moradores da região." 
-                : !user 
-                  ? "Faça login como usuário para desbloquear prêmios!" 
-                  : consecutiveDays <= 5 
-                    ? "Retire um novo cupom hoje para completar sua sequência!" 
-                    : "Parabéns! Você completou sua sequência semanal."}
-            </h2>
-            <button onClick={handleClaimReward} disabled={isAnimating || !!(userRole === 'cliente' && consecutiveDays > 5)} className={`w-full py-3 rounded-xl font-black text-[9px] uppercase tracking-[0.15em] transition-all flex items-center justify-center gap-2 shadow-lg active:scale-[0.98] ${isAnimating ? 'bg-gray-100 text-gray-400' : (user && userRole !== 'cliente') ? 'bg-gray-200 text-gray-400 grayscale cursor-not-allowed' : !user ? 'bg-blue-600 text-white shadow-blue-500/20' : consecutiveDays <= 5 ? 'bg-[#1E5BFF] text-white shadow-blue-500/20 hover:brightness-110' : 'bg-emerald-500 text-white shadow-emerald-500/20 opacity-50'}`}>
-                {isAnimating ? <><Loader2 size={12} className="animate-spin" /> Processando...</> : <>{(user && userRole !== 'cliente') ? "Acesso Restrito" : !user ? "Entrar para começar" : consecutiveDays <= 5 ? `Desbloquear Dia ${consecutiveDays}` : "Sequência Completa"}<ArrowRight size={12} strokeWidth={3} /></>}
-            </button>
-          </div>
-        </div>
+      {/* 4. MICRO-GANCHO DE CUPOM (Discreto) */}
+      <section className="px-5 mb-6">
+        <button 
+          onClick={() => onNavigate('weekly_reward_page')}
+          className="w-full bg-gradient-to-r from-emerald-500 to-teal-600 rounded-2xl p-4 flex items-center justify-between shadow-lg shadow-emerald-500/20 active:scale-[0.98] transition-all border border-white/10"
+        >
+           <div className="flex items-center gap-3">
+               <div className="bg-white/20 p-2 rounded-xl backdrop-blur-sm">
+                 <Ticket className="text-white" size={20} />
+               </div>
+               <div className="text-left">
+                 <p className="text-white font-black text-sm uppercase tracking-wide">Cupons Disponíveis</p>
+                 <p className="text-emerald-100 text-[10px] font-medium opacity-90">Resgate descontos exclusivos no bairro</p>
+               </div>
+           </div>
+           <div className="bg-white/10 p-1.5 rounded-full">
+             <ChevronRight className="text-white" size={16} />
+           </div>
+        </button>
       </section>
 
-      {/* 3. SERVIÇOS (BANNER/WIZARD) */}
-      <section className="px-5 pt-8 pb-6">
+      {/* 5. SERVIÇOS / PROFISSIONAIS (Banner Direcional) */}
+      <section className="px-5 mb-8">
         <FifaBanner onClick={() => setWizardStep(1)} />
       </section>
 
-      {/* 4. JPA CLASSIFICADOS (NOVO BLOCO) */}
-      <section className="bg-white dark:bg-gray-950 pt-2 pb-8">
+      {/* 6. CLASSIFICADOS (Resumo) */}
+      <section className="bg-white dark:bg-gray-950 pb-8">
         <div className="px-5">
             <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-bold text-gray-800 dark:text-white">JPA Classificados</h2>
+                <h2 className="text-lg font-bold text-gray-800 dark:text-white">Classificados</h2>
                 <div className="flex items-center gap-2">
                   <button onClick={() => onNavigate('classifieds')} className="text-xs font-bold text-blue-500">Ver todos</button>
                   <button onClick={() => onNavigate('classifieds')} className="p-1.5 bg-gray-100 dark:bg-gray-800 rounded-full text-gray-500"><Plus size={14} /></button>
@@ -444,9 +377,9 @@ export const HomeFeed: React.FC<HomeFeedFeedProps> = ({
         </div>
       </section>
 
-      {/* NOVO WIZARD DE ORÇAMENTO (DESIGN ATUALIZADO) */}
+      {/* WIZARD DE ORÇAMENTO (Quando aberto) */}
       {wizardStep > 0 && (
-        <section className="bg-white dark:bg-slate-900 rounded-[2.5rem] p-8 -mt-4 mx-5 mb-10 animate-in slide-in-from-bottom duration-500 border border-gray-100 dark:border-slate-800 shadow-2xl relative overflow-hidden ring-4 ring-blue-500/5">
+        <section className="bg-white dark:bg-slate-900 rounded-[2.5rem] p-8 -mt-4 mx-5 mb-10 animate-in slide-in-from-bottom duration-500 border border-gray-100 dark:border-slate-800 shadow-2xl relative overflow-hidden ring-4 ring-blue-500/5 z-50">
           <button onClick={() => setWizardStep(0)} className="absolute top-6 right-6 p-2 text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors bg-gray-50 dark:bg-slate-800 rounded-full"><X size={20} /></button>
           
           {wizardStep === 1 && (
@@ -561,7 +494,7 @@ export const HomeFeed: React.FC<HomeFeedFeedProps> = ({
         </section>
       )}
 
-      {/* LISTA EXPLORAR */}
+      {/* 7. EXPLORAR BAIRRO (Lista de Lojas) */}
       <div className="w-full bg-white dark:bg-gray-900 pt-1 pb-10">
         <div className="px-5">
           <SectionHeader icon={Compass} title="Explorar Bairro" subtitle="Tudo o que você precisa" onSeeMore={() => onNavigate('explore')} />
