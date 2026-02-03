@@ -12,7 +12,7 @@ import {
   Baby, GraduationCap, Microscope, Brain, Sparkles, Smile, Beer, 
   Activity, Eye, FileText, Globe, Calendar, Music, PartyPopper, Globe2, Edit3, User, Bell, Search,
   Camera, Vote, Handshake, Flame, Milestone, History, Home as HomeIcon,
-  MessageCircle, HelpCircle, UserCheck, Recycle
+  MessageCircle, HelpCircle, UserCheck, Recycle, Scale, Calculator, PenTool, Ruler
 } from 'lucide-react';
 import { AdType, Category, Store, Story, EditorialCollection, Job, CommunityPost, NeighborhoodCommunity, Classified, RealEstateProperty } from '../types';
 import { getStoreLogo } from '@/utils/mockLogos';
@@ -21,7 +21,7 @@ import { getStoreLogo } from '@/utils/mockLogos';
 export const CATEGORIES: Category[] = [
   { id: 'cat-comida', name: 'Comida', slug: 'comida', icon: <Utensils />, color: 'bg-brand-blue' },
   { id: 'cat-pets', name: 'Pets', slug: 'pets', icon: <PawPrint />, color: 'bg-brand-blue' },
-  { id: 'cat-pro', name: 'Pro', slug: 'pro', icon: <Briefcase />, color: 'bg-brand-blue' },
+  { id: 'cat-pro', name: 'Profissionais', slug: 'pro', icon: <Briefcase />, color: 'bg-brand-blue' },
   { id: 'cat-saude', name: 'Saúde', slug: 'saude', icon: <Heart />, color: 'bg-brand-blue' },
   { id: 'cat-services', name: 'Serviços', slug: 'servicos', icon: <Wrench />, color: 'bg-brand-blue' },
   { id: 'cat-beauty', name: 'Beleza', slug: 'beleza', icon: <Scissors />, color: 'bg-brand-blue' },
@@ -68,15 +68,15 @@ export const SUBCATEGORIES: Record<string, { name: string; icon: React.ReactNode
     { name: 'Produtos Pet', icon: <Package /> },
     { name: 'Pets Exóticos', icon: <Sparkles /> },
   ],
-  'Pro': [
-    { name: 'Eletricista', icon: <Zap /> },
-    { name: 'Encanador', icon: <Droplets /> },
-    { name: 'Pintor', icon: <PaintRoller /> },
-    { name: 'Pedreiro', icon: <Hammer /> },
-    { name: 'Técnico em Informática', icon: <Laptop /> },
-    { name: 'Montador de Móveis', icon: <Settings /> },
-    { name: 'Marido de Aluguel', icon: <Wrench /> },
-    { name: 'Freelancers em Geral', icon: <Briefcase /> },
+  'Profissionais': [
+    { name: 'Advocacia', icon: <Scale /> },
+    { name: 'Contabilidade', icon: <Calculator /> },
+    { name: 'Arquitetura', icon: <Ruler /> },
+    { name: 'Design & Marketing', icon: <PenTool /> },
+    { name: 'Fotografia', icon: <Camera /> },
+    { name: 'Consultoria', icon: <Briefcase /> },
+    { name: 'Engenharia', icon: <Building2 /> },
+    { name: 'Psicologia & Coaching', icon: <Brain /> },
   ],
   'Saúde': [
     { name: 'Clínicas', icon: <Building2 /> },
@@ -89,14 +89,18 @@ export const SUBCATEGORIES: Record<string, { name: string; icon: React.ReactNode
     { name: 'Saúde Preventiva', icon: <Shield /> },
   ],
   'Serviços': [
+    { name: 'Eletricista', icon: <Zap /> },
+    { name: 'Encanador', icon: <Droplets /> },
+    { name: 'Pintor', icon: <PaintRoller /> },
+    { name: 'Pedreiro', icon: <Hammer /> },
+    { name: 'Marido de Aluguel', icon: <Wrench /> },
+    { name: 'Montador de Móveis', icon: <Settings /> },
+    { name: 'Técnico em Informática', icon: <Laptop /> },
+    { name: 'Chaveiro', icon: <Zap /> },
     { name: 'Limpeza Residencial', icon: <Sparkles /> },
     { name: 'Dedetização', icon: <Shield /> },
-    { name: 'Manutenção Geral', icon: <Settings /> },
-    { name: 'Chaveiro', icon: <Zap /> },
     { name: 'Segurança', icon: <Shield /> },
-    { name: 'Serviços Rápidos', icon: <Zap /> },
     { name: 'Assistência Técnica', icon: <Monitor /> },
-    { name: 'Instalações', icon: <Wrench /> },
   ],
   'Beleza': [
     { name: 'Salão de Cabelo', icon: <Scissors /> },
@@ -208,8 +212,8 @@ const IMG_IDS: Record<string, string[]> = {
   'Pets': [
     '1516734212186-a967f81ad0d7', '1543466835-00a7907e9de1', '1537151608828-ea2b11777ee8', '1514888286974-6c27e9cce25b', '1583511655857-d19b40a7a54e', '1583337130417-3346a1be7dee'
   ],
-  'Pro': [
-    '1486312338219-ce68d2c6f44d', '1521791136064-7986c292027b', '1507679799938-d738f46fbcfc', '1581091226825-a6a2a5aee158'
+  'Profissionais': [
+    '1556761175-5973dc0f32e7', '1542744173-8e7e53415bb0', '1507679799938-d738f46fbcfc', '1521791136064-7986c292027b'
   ],
   'Saúde': [
     '1579684385127-1ef15d508118', '1584515933487-9d317552d894', '1576091160399-112ba8d25d1d', '1551076805-e2983fe3600c'
@@ -838,7 +842,7 @@ export const MOCK_COMMUNITY_POSTS: CommunityPost[] = [
     timestamp: '12h',
     likes: 15,
     comments: 22,
-    showOnStoreProfile: true // Mock flag for demonstration
+    storeId: 'grupo-esquematiza'
   },
   {
     id: 'post-8',
