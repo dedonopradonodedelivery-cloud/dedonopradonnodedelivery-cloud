@@ -60,7 +60,7 @@ const MiniPostCard: React.FC<{ post: CommunityPost; onNavigate: (view: string) =
   };
 
   return (
-    <div className="flex-shrink-0 w-1/2 snap-center p-1.5">
+    <div className="flex-shrink-0 w-[150px] snap-center p-1.5">
       <div 
         onClick={() => onNavigate('neighborhood_posts')}
         className="bg-white dark:bg-gray-800 rounded-2xl overflow-hidden shadow-md border border-gray-100 dark:border-gray-700 flex flex-col group cursor-pointer h-full"
@@ -75,18 +75,15 @@ const MiniPostCard: React.FC<{ post: CommunityPost; onNavigate: (view: string) =
         </div>
         <div className="px-2 pt-2 flex justify-between items-center">
           <div className="flex items-center gap-2">
-            <button onClick={(e) => handleAction(e, 'Curtido!')} className="text-gray-500 hover:text-rose-500 p-1 transition-colors"><Heart size={20} /></button>
-            <button onClick={(e) => handleAction(e, 'Comentários!')} className="text-gray-500 hover:text-blue-500 p-1 transition-colors"><MessageSquare size={20} /></button>
+            <button onClick={(e) => handleAction(e, 'Curtido!')} className="text-gray-500 hover:text-rose-500 p-1 transition-colors"><Heart size={16} /></button>
+            <button onClick={(e) => handleAction(e, 'Comentários!')} className="text-gray-500 hover:text-blue-500 p-1 transition-colors"><MessageSquare size={16} /></button>
           </div>
-          <button onClick={(e) => handleAction(e, 'Salvo!')} className="text-gray-500 hover:text-yellow-500 p-1 transition-colors"><Bookmark size={20} /></button>
+          <button onClick={(e) => handleAction(e, 'Salvo!')} className="text-gray-500 hover:text-yellow-500 p-1 transition-colors"><Bookmark size={16} /></button>
         </div>
         <div className="px-3 pb-3 flex-1">
-            <p className="text-xs text-gray-700 dark:text-gray-300 leading-snug line-clamp-2">
+            <p className="text-[10px] text-gray-700 dark:text-gray-300 leading-snug line-clamp-2">
                 {post.content}
             </p>
-            <span className="text-[10px] text-gray-400 mt-2 block group-hover:text-blue-500 transition-colors">
-                Ver post...
-            </span>
         </div>
       </div>
     </div>
@@ -341,10 +338,10 @@ export const HomeFeed: React.FC<HomeFeedFeedProps> = ({
         <HomeBannerCarousel onStoreClick={onStoreClick} onNavigate={onNavigate} />
       </section>
 
-      {/* 1. JPA CONVERSA (ORDEM RECONFIGURADA) */}
-      <section className="bg-white dark:bg-gray-950 pt-6 pb-4">
+      {/* 1. JPA CONVERSA (ORDEM RECONFIGURADA) - COMPACTO E COM SCROLL INDICATOR */}
+      <section className="bg-white dark:bg-gray-950 pt-4 pb-2 relative">
         <div className="px-5">
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center justify-between mb-3">
                 <h2 className="text-lg font-bold text-gray-800 dark:text-white flex items-center gap-2">
                     Onde o bairro conversa
                     <MessageSquare className="w-5 h-5 text-blue-500 fill-current" />
@@ -355,10 +352,18 @@ export const HomeFeed: React.FC<HomeFeedFeedProps> = ({
                 </div>
             </div>
         </div>
-        <div className="flex overflow-x-auto no-scrollbar snap-x -mx-3.5 px-3.5">
-            {MOCK_COMMUNITY_POSTS.slice(0, 5).map((post) => (
-                <MiniPostCard key={post.id} post={post} onNavigate={onNavigate} />
-            ))}
+        
+        <div className="relative group">
+            <div className="flex overflow-x-auto no-scrollbar snap-x -mx-3.5 px-3.5 pb-2">
+                {MOCK_COMMUNITY_POSTS.slice(0, 5).map((post) => (
+                    <MiniPostCard key={post.id} post={post} onNavigate={onNavigate} />
+                ))}
+            </div>
+            
+            {/* Indicador Sutil de Scroll Horizontal */}
+            <div className="absolute right-0 top-1/2 -translate-y-1/2 z-10 h-full flex items-center justify-end bg-gradient-to-l from-white/90 dark:from-gray-950/90 to-transparent w-12 pointer-events-none">
+                <ChevronRight className="w-6 h-6 text-gray-400 dark:text-gray-600 opacity-70 animate-pulse mr-1" />
+            </div>
         </div>
       </section>
 
