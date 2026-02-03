@@ -146,7 +146,24 @@ export interface Job { id: string; role: string; company: string; neighborhood: 
 export interface NeighborhoodCommunity { id: string; name: string; description: string; image: string; icon: React.ReactNode; color: string; membersCount: string; type?: 'official' | 'user'; }
 export interface Story { id: string; name: string; image: string; }
 export interface EditorialCollection { id: string; title: string; subtitle: string; image: string; keywords: string[]; }
-export interface Classified { id: string; title: string; advertiser: string; category: string; neighborhood: string; description: string; timestamp: string; contactWhatsapp: string; typeLabel: string; price?: string; imageUrl?: string; jobDetails?: Job; isVerifiedMerchant?: boolean; }
+export interface Classified { 
+  id: string; 
+  title: string; 
+  advertiser: string; 
+  category: string; 
+  neighborhood: string; 
+  description: string; 
+  timestamp: string; 
+  contactWhatsapp: string; 
+  typeLabel: string; 
+  price?: string; 
+  imageUrl?: string; 
+  jobDetails?: Job; 
+  isVerifiedMerchant?: boolean;
+  acceptsTrade?: boolean;
+  tradeInterests?: string[];
+  tradeCondition?: 'direct' | 'diff_money' | 'any';
+}
 export type TaxonomyType = 'category' | 'subcategory' | 'specialty';
 export interface StoreCredit { id: string; user_id: string; store_id: string; store_name: string; store_logo?: string; balance_cents: number; expiring_soon_cents?: number; updated_at: string; }
 export interface CashbackTransaction { id: string; user_id: string; user_name?: string; store_id: string; merchant_id: string; amount_cents: number; purchase_total_cents?: number; type: 'earn' | 'use'; status: 'pending' | 'approved' | 'rejected' | 'expired'; created_at: string; approved_at?: string; customer_id?: string; customer_name?: string; total_amount_cents?: number; cashback_used_cents?: number; cashback_to_earn_cents?: number; amount_to_pay_now_cents?: number; rejected_at?: string; }

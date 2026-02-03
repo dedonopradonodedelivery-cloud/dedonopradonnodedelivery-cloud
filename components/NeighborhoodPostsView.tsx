@@ -354,30 +354,41 @@ export const NeighborhoodPostsView: React.FC<NeighborhoodPostsViewProps> = ({ on
 
   return (
     <div className="min-h-screen bg-[#F8F9FC] dark:bg-gray-950 font-sans animate-in fade-in duration-500 overflow-x-hidden">
-      <header className="bg-white dark:bg-gray-900 px-6 pt-8 pb-6 border-b border-gray-100 dark:border-gray-800 rounded-b-[2.5rem] shadow-sm sticky top-0 z-40">
-        <div className="w-full flex justify-start mb-2">
-           <button onClick={onBack} className="p-2.5 bg-gray-50 dark:bg-gray-800 rounded-xl text-gray-500 hover:text-gray-900 transition-colors">
+      {/* 
+         CABEÇALHO REESTRUTURADO PARA REDUZIR ALTURA E MELHORAR DENSIDADE 
+         - Botão de voltar absoluto (economiza 1 linha de grid)
+         - Margens e paddings reduzidos
+         - Descrição com max-w-90% e line-clamp-2
+      */}
+      <header className="bg-white dark:bg-gray-900 px-5 pt-5 pb-5 border-b border-gray-100 dark:border-gray-800 rounded-b-[2rem] shadow-sm sticky top-0 z-40 relative">
+        
+        {/* Botão de voltar absoluto - remove ocupação vertical */}
+        <div className="absolute top-5 left-5 z-50">
+           <button onClick={onBack} className="p-2.5 bg-gray-50 dark:bg-gray-800 rounded-xl text-gray-500 hover:text-gray-900 transition-colors shadow-sm active:scale-90">
               <ChevronLeft size={20} />
            </button>
         </div>
 
-        <div className="flex flex-col items-center text-center mb-6">
+        {/* Bloco Central de Título */}
+        <div className="flex flex-col items-center text-center mb-3 mt-1">
             <h1 className="font-black text-2xl text-gray-900 dark:text-white uppercase tracking-tighter leading-none">
               JPA Conversa
             </h1>
-            <p className="text-xs text-gray-500 dark:text-gray-400 font-medium leading-relaxed mt-2 max-w-[260px]">
+            <p className="text-xs text-gray-500 dark:text-gray-400 font-medium leading-tight mt-1.5 max-w-[90%] line-clamp-2 px-8">
               Troque dicas, peça ajuda e saiba o que acontece no bairro em tempo real. O espaço oficial da nossa comunidade.
             </p>
         </div>
 
-        <div className="flex justify-center mb-6">
+        {/* Botão Postar Centralizado e Compacto */}
+        <div className="flex justify-center mb-3">
             <button onClick={handleStartPost} className="flex items-center gap-2 px-8 py-3 bg-[#1E5BFF] text-white rounded-2xl text-sm font-black uppercase tracking-widest shadow-xl shadow-blue-500/20 hover:bg-blue-600 transition-all active:scale-95">
               <Plus size={18} strokeWidth={3} />
               Postar
             </button>
         </div>
 
-        <div className="flex items-center gap-3 mt-4">
+        {/* Barra de Busca e Filtros */}
+        <div className="flex items-center gap-3 mt-2">
             <div className="relative flex-1">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
                 <input type="text" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} placeholder={`Buscar em JPA...`} className="w-full bg-gray-50 dark:bg-gray-800 border-none py-3.5 pl-11 pr-4 rounded-2xl text-sm font-medium outline-none focus:ring-2 focus:ring-[#1E5BFF]/30 transition-all shadow-inner dark:text-white" />
