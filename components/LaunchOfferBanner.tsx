@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { ArrowRight, Flame, Zap, Megaphone, Sparkles } from 'lucide-react';
 

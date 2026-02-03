@@ -37,11 +37,12 @@ export const CategoryTopCarousel: React.FC<CategoryTopCarouselProps> = ({ catego
 
   if (banners.length === 0) return null;
 
-  const handleBannerClick = (banner: any) => {
+  const handleBannerClick = (banner: { storeId: string; image: string }) => {
     const store = STORES.find(s => s.id === banner.storeId) || {
       id: banner.storeId,
       name: 'Loja Parceira',
       category: 'Destaque',
+      subcategory: 'Parceiro',
       description: 'Perfil em construção. Este estabelecimento em breve terá um perfil completo com fotos, cardápio e contatos!',
       adType: AdType.PREMIUM,
       rating: 5.0,

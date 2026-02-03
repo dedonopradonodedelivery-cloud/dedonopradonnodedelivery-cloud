@@ -1,31 +1,25 @@
-
 import React, { useState, useMemo, useRef } from 'react';
 import { Store, Category, CommunityPost, ServiceRequest, ServiceUrgency, Classified } from '../types';
 import { 
   Compass, 
-  Sparkles, 
-  ArrowRight, 
   Ticket,
   CheckCircle2,
-  Lock,
   Zap,
   Loader2,
   Hammer,
   Plus,
-  Heart,
-  Bookmark,
   Home as HomeIcon,
-  MessageSquare,
   MapPin,
   Camera,
   X,
   Send,
   ChevronRight,
+  Sparkles,
 } from 'lucide-react';
-import { LojasEServicosList } from '@/components/LojasEServicosList';
+import { LojasEServicosList } from './LojasEServicosList';
 import { User } from '@supabase/supabase-js';
 import { CATEGORIES, MOCK_COMMUNITY_POSTS, MOCK_CLASSIFIEDS } from '../constants';
-import { useNeighborhood } from '@/contexts/NeighborhoodContext';
+import { useNeighborhood } from '../contexts/NeighborhoodContext';
 import { LaunchOfferBanner } from './LaunchOfferBanner';
 import { HomeBannerCarousel } from './HomeBannerCarousel';
 import { FifaBanner } from './FifaBanner';
@@ -51,15 +45,8 @@ const getFallbackImage = (id: string) => {
 };
 
 const MiniPostCard: React.FC<{ post: CommunityPost; onNavigate: (view: string) => void; }> = ({ post, onNavigate }) => {
-  // Garante que SEMPRE haja uma imagem, usando fallback determinístico se necessário
   const postImage = post.imageUrl || (post.imageUrls && post.imageUrls.length > 0 ? post.imageUrls[0] : getFallbackImage(post.id));
   
-  const handleAction = (e: React.MouseEvent, message: string) => {
-      e.stopPropagation();
-      alert(message);
-  };
-
-  // Ajuste de largura para ~3 itens na tela (mobile)
   return (
     <div className="flex-shrink-0 w-28 snap-center p-1">
       <div 
