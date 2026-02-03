@@ -22,7 +22,8 @@ import {
   CheckCircle2, 
   Crown,
   ArrowRight,
-  Lightbulb
+  Lightbulb,
+  Smartphone
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { User } from '@supabase/supabase-js';
@@ -216,6 +217,13 @@ export const MenuView: React.FC<MenuViewProps> = ({
 
         {/* 5. INSTITUCIONAL */}
         <MenuSection title="Institucional">
+            <MenuItem 
+                icon={Smartphone} 
+                label="Como funciona o app" 
+                sublabel="Guia rápido do Localizei JPA"
+                onClick={() => onNavigate('about_app')}
+                color="text-blue-500"
+            />
             <MenuItem 
                 icon={Info} 
                 label="Quem Somos" 

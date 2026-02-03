@@ -22,7 +22,8 @@ import {
   Moon,
   Sun,
   ImageIcon,
-  Tag
+  Tag,
+  Smartphone
 } from 'lucide-react';
 import { User as SupabaseUser } from '@supabase/supabase-js';
 import { useAuth } from '@/contexts/AuthContext';
@@ -44,14 +45,14 @@ const ServiceBlock: React.FC<{
   badge?: number;
   labelBadge?: string;
   rightElement?: React.ReactNode;
-}> = ({ icon: Icon, label, description, onClick, isDestructive, colorClass, badge, labelBadge, rightElement }) => (
+}> = ({ icon: Icon, label, description, onClick, iisDestructive, colorClass, badge, labelBadge, rightElement }) => (
   <button 
     onClick={onClick}
     className="w-full flex items-center justify-between p-5 bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700 last:border-b-0 active:bg-gray-50 dark:active:bg-gray-700/50 transition-colors group"
   >
     <div className="flex items-center gap-4">
       <div className={`p-2.5 rounded-xl transition-colors relative ${
-        isDestructive 
+        iisDestructive 
           ? 'bg-red-50 text-red-500' 
           : colorClass || 'bg-gray-50 dark:bg-gray-700 text-gray-400 group-hover:text-[#1E5BFF] group-hover:bg-blue-50'
       }`}>
@@ -63,7 +64,7 @@ const ServiceBlock: React.FC<{
         ) : null}
       </div>
       <div className="text-left">
-        <p className={`text-sm font-bold ${isDestructive ? 'text-red-500' : 'text-gray-700 dark:text-gray-200'}`}>
+        <p className={`text-sm font-bold ${iisDestructive ? 'text-red-500' : 'text-gray-700 dark:text-gray-200'}`}>
           {label}
         </p>
         {description && (
@@ -73,7 +74,7 @@ const ServiceBlock: React.FC<{
         )}
       </div>
     </div>
-    {rightElement || <ChevronRight size={16} className={isDestructive ? 'text-red-300' : 'text-gray-300'} />}
+    {rightElement || <ChevronRight size={16} className={iisDestructive ? 'text-red-300' : 'text-gray-300'} />}
   </button>
 );
 
@@ -194,6 +195,25 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
         </section>
 
         <section>
+          <SectionHeader title="Suporte" />
+          <div className="bg-white dark:bg-gray-800 rounded-[2.5rem] border border-gray-100 dark:border-gray-700 overflow-hidden shadow-sm">
+            <ServiceBlock 
+              icon={Smartphone} 
+              label="Sobre o app" 
+              description="Como funciona o Localizei JPA"
+              onClick={() => onNavigate('about_app')}
+              colorClass="bg-blue-50 text-blue-600"
+            />
+            <ServiceBlock 
+              icon={LifeBuoy} 
+              label="Suporte" 
+              description="Ajuda com o app e conta"
+              onClick={() => onNavigate('store_support')} 
+            />
+          </div>
+        </section>
+
+        <section>
           <SectionHeader title="Preferências" />
           <div className="bg-white dark:bg-gray-800 rounded-[2.5rem] border border-gray-100 dark:border-gray-700 overflow-hidden shadow-sm">
             <ServiceBlock 
@@ -206,18 +226,6 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
                   <div className={`w-4 h-4 bg-white rounded-full shadow-sm transform transition-transform duration-300 ${theme === 'dark' ? 'translate-x-6' : 'translate-x-0'}`} />
                 </div>
               }
-            />
-          </div>
-        </section>
-
-        <section>
-          <SectionHeader title="Suporte" />
-          <div className="bg-white dark:bg-gray-800 rounded-[2.5rem] border border-gray-100 dark:border-gray-700 overflow-hidden shadow-sm">
-            <ServiceBlock 
-              icon={LifeBuoy} 
-              label="Suporte" 
-              description="Ajuda com o app e conta"
-              onClick={() => onNavigate('store_support')} 
             />
           </div>
         </section>
@@ -238,7 +246,7 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
             <ServiceBlock 
               icon={LogOut} 
               label="Sair da conta" 
-              isDestructive
+              iisDestructive
               onClick={handleLogout} 
             />
           </div>

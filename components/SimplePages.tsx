@@ -26,8 +26,9 @@ import {
   FileText, 
   Lock, 
   Search,
-  // Added Package to fix the 'Cannot find name' error
-  Package
+  Package,
+  ArrowRight as ArrowRightIcon,
+  ChevronRight
 } from 'lucide-react';
 import { Store, AdType } from '../types';
 import { User } from '@supabase/supabase-js';
@@ -160,6 +161,64 @@ export const AboutView: React.FC<SimplePageProps> = ({ onBack }) => {
   );
 };
 
+export const AboutAppView: React.FC<SimplePageProps> = ({ onBack }) => {
+    const steps = [
+      {
+        title: "Onde o bairro conversa.",
+        description: "Descubra o que está acontecendo em Jacarepaguá, converse com pessoas do seu bairro e fique por dentro de tudo que acontece perto de você.",
+        image: "https://images.unsplash.com/photo-1517457373958-b7bdd4587205?q=80&w=1200&auto=format&fit=crop"
+      },
+      {
+        title: "Tudo o que você precisa, perto de você.",
+        description: "Encontre comércios, serviços, cupons, classificados e novidades dos bairros de Jacarepaguá em um só lugar.",
+        image: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=1200&auto=format&fit=crop"
+      },
+      {
+        title: "Use, participe e aproveite.",
+        description: "Interaja no JPA Conversa, resgate cupons, contrate serviços e faça parte da vida do seu bairro.",
+        image: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=1200&auto=format&fit=crop"
+      }
+    ];
+
+    return (
+        <div className="min-h-screen bg-[#F8F9FC] dark:bg-gray-950 font-sans animate-in slide-in-from-right duration-300 pb-20">
+            <header className="sticky top-0 z-30 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md px-5 h-16 flex items-center gap-4 border-b border-gray-100 dark:border-gray-800">
+                <button onClick={onBack} className="p-2 -ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                    <ChevronLeft className="w-6 h-6 text-gray-800 dark:text-white" />
+                </button>
+                <h1 className="font-bold text-lg text-gray-900 dark:text-white uppercase tracking-tight">Como funciona</h1>
+            </header>
+
+            <main className="p-6 space-y-12">
+                {steps.map((step, idx) => (
+                    <div key={idx} className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-700" style={{ animationDelay: `${idx * 200}ms` }}>
+                        <div className="aspect-video w-full rounded-[2.5rem] overflow-hidden shadow-lg border border-gray-100 dark:border-gray-800">
+                            <img src={step.image} className="w-full h-full object-cover" alt={step.title} />
+                        </div>
+                        <div className="px-2">
+                            <h2 className="text-2xl font-black text-gray-900 dark:text-white tracking-tighter uppercase leading-none mb-3">
+                                {step.title}
+                            </h2>
+                            <p className="text-gray-600 dark:text-gray-400 font-medium leading-relaxed">
+                                {step.description}
+                            </p>
+                        </div>
+                    </div>
+                ))}
+
+                <div className="pt-8 pb-12">
+                    <button 
+                        onClick={onBack}
+                        className="w-full bg-[#1E5BFF] text-white font-black py-5 rounded-[2rem] shadow-xl uppercase tracking-widest text-xs flex items-center justify-center gap-2"
+                    >
+                        Entendi, vamos lá <ArrowRightIcon size={16} />
+                    </button>
+                </div>
+            </main>
+        </div>
+    );
+};
+
 export const FavoritesView: React.FC<SimplePageProps> = ({ onBack, onNavigate, user }) => {
   const [favorites, setFavorites] = useState<Store[]>([]);
   const [loading, setLoading] = useState(true);
@@ -195,8 +254,6 @@ export const FavoritesView: React.FC<SimplePageProps> = ({ onBack, onNavigate, u
     </div>
   );
 };
-
-// --- NOVAS PÁGINAS FAKE DO MENU ---
 
 export const UserActivityView: React.FC<{ type: string; onBack: () => void }> = ({ type, onBack }) => {
   const titles: Record<string, string> = {

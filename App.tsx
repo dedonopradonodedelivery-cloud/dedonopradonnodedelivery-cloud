@@ -42,7 +42,6 @@ import { WeeklyRewardPage } from '@/components/WeeklyRewardPage';
 import { UserCupomScreen } from '@/components/UserCupomScreen'; 
 import { UserStatementView } from '@/components/UserStatementView';
 import { NotificationsView } from '@/components/NotificationsView';
-import { OnboardingScreen } from '@/components/OnboardingScreen';
 import { StoreProfileEdit } from '@/components/StoreProfileEdit';
 import { ServiceMessagesListView } from '@/components/ServiceMessagesListView';
 import { MerchantReviewsModule } from '@/components/MerchantReviewsModule';
@@ -59,7 +58,7 @@ import { useTheme } from '@/contexts/ThemeContext';
 import { NeighborhoodProvider } from '@/contexts/NeighborhoodContext';
 import { Category, Store, Job, RealEstateProperty, PlanType, Classified } from '@/types';
 import { STORES } from '@/constants';
-import { AboutView, SupportView, FavoritesView, UserActivityView, MyNeighborhoodsView, PrivacyView } from '@/components/SimplePages';
+import { AboutView, SupportView, FavoritesView, UserActivityView, MyNeighborhoodsView, PrivacyView, AboutAppView } from '@/components/SimplePages';
 import { MerchantPanel } from '@/components/MerchantPanel';
 
 let splashWasShownInSession = false;
@@ -73,7 +72,6 @@ const App: React.FC = () => {
   const isAuthReturn = window.location.hash.includes('access_token') || window.location.search.includes('code=');
   
   const [splashStage, setSplashStage] = useState(splashWasShownInSession || isAuthReturn ? 4 : 0);
-  const [isOnboardingActive, setIsOnboardingActive] = useState(false);
   
   const [viewMode, setViewMode] = useState<RoleMode>(() => (localStorage.getItem('admin_view_mode') as RoleMode) || 'Usuário');
   const [isRoleSwitcherOpen, setIsRoleSwitcherOpen] = useState(false);
@@ -107,13 +105,6 @@ const App: React.FC = () => {
 
   const [isClaimFlowActive, setIsClaimFlowActive] = useState(false);
   const [storeToClaim, setStoreToClaim] = useState<Store | null>(null);
-
-  useEffect(() => {
-    const hasSeenOnboarding = localStorage.getItem('localizei_onboarding_seen') === 'true';
-    if (!hasSeenOnboarding && !isAuthReturn) {
-      setIsOnboardingActive(true);
-    }
-  }, [isAuthReturn]);
 
   const handleNavigate = (view: string, data?: any) => {
     if (view !== 'sponsor_info' && view !== 'notifications' && view !== 'patrocinador_master' && view !== 'real_estate_detail' && view !== 'job_detail' && view !== 'plan_selection' && view !== 'classified_detail' && view !== 'classified_search_results' && view !== 'user_activity' && view !== 'app_suggestion' && view !== 'designer_panel' && view !== 'store_connect' && view !== 'merchant_panel') {
@@ -219,7 +210,7 @@ const App: React.FC = () => {
       handleNavigate('profile');
   };
 
-  const headerExclusionList = ['store_area', 'store_detail', 'profile', 'patrocinador_master', 'merchant_performance', 'neighborhood_posts', 'saved_posts', 'classifieds', 'services', 'services_landing', 'merchant_leads', 'service_chat', 'admin_panel', 'category_detail', 'subcategory_detail', 'sponsor_info', 'real_estate', 'jobs', 'job_detail', 'job_wizard', 'adoption', 'donations', 'desapega', 'category_banner_sales', 'banner_sales_wizard', 'weekly_reward_page', 'user_coupons', 'notifications', 'store_profile', 'about', 'support', 'favorites', 'user_statement', 'service_messages_list', 'merchant_reviews', 'merchant_coupons', 'merchant_promotions', 'store_finance', 'store_support', 'real_estate_wizard', 'real_estate_detail', 'plan_selection', 'classified_detail', 'classified_search_results', 'user_activity', 'my_neighborhoods', 'privacy_policy', 'app_suggestion', 'designer_panel', 'store_connect', 'merchant_panel', 'store_ads_module', 'store_sponsored'];
+  const headerExclusionList = ['store_area', 'store_detail', 'profile', 'patrocinador_master', 'merchant_performance', 'neighborhood_posts', 'saved_posts', 'classifieds', 'services', 'services_landing', 'merchant_leads', 'service_chat', 'admin_panel', 'category_detail', 'subcategory_detail', 'sponsor_info', 'real_estate', 'jobs', 'job_detail', 'job_wizard', 'adoption', 'donations', 'desapega', 'category_banner_sales', 'banner_sales_wizard', 'weekly_reward_page', 'user_coupons', 'notifications', 'store_profile', 'about', 'support', 'favorites', 'user_statement', 'service_messages_list', 'merchant_reviews', 'merchant_coupons', 'merchant_promotions', 'store_finance', 'store_support', 'real_estate_wizard', 'real_estate_detail', 'plan_selection', 'classified_detail', 'classified_search_results', 'user_activity', 'my_neighborhoods', 'privacy_policy', 'app_suggestion', 'designer_panel', 'store_connect', 'merchant_panel', 'store_ads_module', 'store_sponsored', 'about_app'];
   
   const RoleSwitcherModal: React.FC = () => {
     if (!isRoleSwitcherOpen) return null;
@@ -259,10 +250,6 @@ const App: React.FC = () => {
       <NeighborhoodProvider>
         <div className="min-h-screen bg-white dark:bg-gray-950 flex justify-center relative transition-colors duration-300">
           
-          {isOnboardingActive && splashStage === 4 && (
-            <OnboardingScreen onComplete={() => setIsOnboardingActive(false)} />
-          )}
-
           {isClaimFlowActive && storeToClaim && user && (
             <StoreClaimFlow 
               store={storeToClaim} 
@@ -475,6 +462,7 @@ const App: React.FC = () => {
                     {activeTab === 'about' && <AboutView onBack={() => handleNavigate(previousTab)} />}
                     {activeTab === 'support' && <SupportView onBack={() => handleNavigate(previousTab)} />}
                     {activeTab === 'favorites' && <FavoritesView onBack={() => handleNavigate(previousTab)} user={user} onNavigate={handleNavigate} />}
+                    {activeTab === 'about_app' && <AboutAppView onBack={() => handleNavigate('profile')} />}
                   </main>
                   <AuthModal isOpen={isAuthOpen} onClose={() => setIsAuthOpen(false)} user={user as any} />
               </Layout>
