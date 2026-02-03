@@ -21,7 +21,6 @@ import {
 import { useNeighborhood, NEIGHBORHOODS } from '../contexts/NeighborhoodContext';
 import { Classified, Store } from '../types';
 import { MOCK_CLASSIFIEDS, STORES } from '../constants';
-import { ClassifiedsCategoryHighlight } from './ClassifiedsCategoryHighlight';
 
 interface AdoptionViewProps {
   onBack: () => void;
@@ -109,10 +108,6 @@ export const AdoptionView: React.FC<AdoptionViewProps> = ({ onBack, user, onRequ
     });
     return list;
   }, [adoptions, filterHood, filterSpecies]);
-
-  const categoryHighlight = useMemo(() => {
-    return STORES.find(s => s.category === 'Pets') || STORES[0];
-  }, []);
 
   const handleAnunciar = () => {
     if (!user) {
@@ -263,11 +258,6 @@ export const AdoptionView: React.FC<AdoptionViewProps> = ({ onBack, user, onRequ
       </header>
 
       <main className="p-6 space-y-8">
-        <ClassifiedsCategoryHighlight 
-          store={categoryHighlight} 
-          onClick={(store) => onNavigate?.('store_detail', { store })} 
-        />
-
         {filteredAdoptions.length > 0 ? (
           <div className="grid grid-cols-1 gap-6">
             {filteredAdoptions.map(item => (

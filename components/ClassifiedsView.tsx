@@ -29,7 +29,6 @@ import { useNeighborhood, NEIGHBORHOODS } from '../contexts/NeighborhoodContext'
 import { Classified, AdType, Store } from '../types';
 import { MOCK_CLASSIFIEDS, STORES } from '../constants';
 import { MasterSponsorBanner } from './MasterSponsorBanner';
-import { ClassifiedsBannerCarousel } from './ClassifiedsBannerCarousel';
 import { ClassifiedsSelectionModal } from './ClassifiedsSelectionModal';
 import { ClassifiedsFilterModal } from './ClassifiedsFilterModal';
 
@@ -265,11 +264,9 @@ export const ClassifiedsView: React.FC<ClassifiedsViewProps> = ({ onBack, onNavi
       </header>
 
       <main className="p-5 space-y-4">
-        {/* CARROSSEL DE BANNERS EXCLUSIVO DOS CLASSIFICADOS */}
-        <ClassifiedsBannerCarousel onItemClick={handleItemClick} />
-
+        
         {/* BOTÕES DE CATEGORIA RÁPIDOS */}
-        <div className="grid grid-cols-3 gap-4 mb-8">
+        <div className="grid grid-cols-3 gap-4 mb-8 mt-2">
             {CLASSIFIED_CATEGORIES.map(cat => (
                 <ClassifiedCategoryButton key={cat.id} category={cat} onClick={() => onNavigate(cat.slug)} />
             ))}

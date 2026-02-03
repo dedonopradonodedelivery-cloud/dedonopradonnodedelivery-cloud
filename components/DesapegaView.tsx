@@ -1,8 +1,6 @@
 
 import React, { useState, useMemo, useRef } from 'react';
 import { User } from '@supabase/supabase-js';
-// Corrected import to only include required types and avoid naming conflicts with global browser Blob.
-// Added Part and Blob alias to resolve type ambiguity during multimodal content generation.
 import { GoogleGenAI, Type, Part, Blob as GenAIBlob } from "@google/genai";
 import { 
   ChevronLeft, 
@@ -37,7 +35,6 @@ import {
 import { useNeighborhood, NEIGHBORHOODS } from '../contexts/NeighborhoodContext';
 import { Classified, Store } from '../types';
 import { MOCK_CLASSIFIEDS, STORES } from '../constants';
-import { ClassifiedsCategoryHighlight } from './ClassifiedsCategoryHighlight';
 
 // Dicionário de Categorias e Subcategorias
 const CATEGORY_MAP: Record<string, string[]> = {
@@ -145,10 +142,6 @@ export const DesapegaView: React.FC<DesapegaViewProps> = ({ onBack, user, onRequ
   const filteredItems = useMemo(() => {
     return desapegaItems.filter(item => !filterHood || item.neighborhood === filterHood);
   }, [desapegaItems, filterHood]);
-
-  const categoryHighlight = useMemo(() => {
-    return STORES.find(s => s.category === 'Comida') || STORES[0];
-  }, []);
 
   const handleAnunciar = () => {
     if (!user) {
@@ -624,11 +617,6 @@ export const DesapegaView: React.FC<DesapegaViewProps> = ({ onBack, user, onRequ
       </header>
 
       <main className="p-6 space-y-8">
-        <ClassifiedsCategoryHighlight 
-          store={categoryHighlight} 
-          onClick={(store) => onNavigate?.('store_detail', { store })} 
-        />
-
         {filteredItems.length > 0 ? (
           <div className="grid grid-cols-1 gap-6">
             {filteredItems.map(item => (

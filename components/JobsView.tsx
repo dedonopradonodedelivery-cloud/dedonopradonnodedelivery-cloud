@@ -15,7 +15,6 @@ import {
 } from 'lucide-react';
 import { MOCK_JOBS, STORES } from '../constants';
 import { Job, Store } from '../types';
-import { ClassifiedsCategoryHighlight } from './ClassifiedsCategoryHighlight';
 import { JobFiltersView, JobFilters } from './JobFiltersView';
 
 interface JobsViewProps {
@@ -81,11 +80,6 @@ export const JobsView: React.FC<JobsViewProps> = ({ onBack, onJobClick, onNaviga
     sortBy: 'recent'
   });
 
-  const featuredJobs = useMemo(() => {
-    // Vagas que seriam de empresas com plano ativo
-    return MOCK_JOBS.slice(0, 3).map(j => ({ ...j, isVerified: true, isSponsored: true }));
-  }, []);
-
   const filteredJobs = useMemo(() => {
     return MOCK_JOBS.filter(job => {
       if (filters.hireTypes.length > 0 && !filters.hireTypes.includes(job.type)) return false;
@@ -137,33 +131,6 @@ export const JobsView: React.FC<JobsViewProps> = ({ onBack, onJobClick, onNaviga
       </header>
 
       <main className="p-5 space-y-10">
-        {/* BLOCO DE DESTAQUES EXCLUSIVO DE VAGAS */}
-        <section>
-            <div className="flex items-center gap-2 mb-4 px-1">
-                <span className="text-[10px] font-black text-amber-500 uppercase tracking-[0.2em]">⭐ Destaques em Jacarepaguá</span>
-            </div>
-            <div className="flex gap-4 overflow-x-auto no-scrollbar -mx-5 px-5 pb-2 snap-x">
-                {featuredJobs.map(job => (
-                    <div 
-                        key={`featured-${job.id}`}
-                        onClick={() => onJobClick(job)}
-                        className="bg-white dark:bg-gray-900 rounded-[2.5rem] p-6 shadow-xl border-2 border-amber-400/20 min-w-[280px] snap-center relative overflow-hidden active:scale-[0.98] transition-all cursor-pointer"
-                    >
-                        <div className="absolute top-0 right-0 w-20 h-20 bg-amber-400/5 rounded-full blur-2xl -mr-10 -mt-10"></div>
-                        <div className="flex items-center gap-1 text-emerald-600 text-[8px] font-black uppercase tracking-widest mb-3">
-                            <CheckCircle2 size={10} /> Vaga verificada
-                        </div>
-                        <h4 className="font-black text-gray-900 dark:text-white text-base leading-tight mb-1 uppercase tracking-tight">{job.role}</h4>
-                        <p className="text-[10px] font-bold text-blue-600 uppercase tracking-widest mb-4">{job.company}</p>
-                        <div className="flex items-center justify-between mt-auto">
-                            <span className="text-[9px] font-bold text-gray-400 uppercase">{job.neighborhood}</span>
-                            <span className="text-[9px] font-black text-blue-500 uppercase tracking-widest">Contratação {job.type}</span>
-                        </div>
-                    </div>
-                ))}
-            </div>
-        </section>
-
         {/* LISTAGEM GERAL */}
         <section className="space-y-4">
             <div className="flex items-center justify-between px-1">

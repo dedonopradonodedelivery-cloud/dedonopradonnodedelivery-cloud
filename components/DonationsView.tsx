@@ -24,7 +24,6 @@ import {
 import { useNeighborhood, NEIGHBORHOODS } from '../contexts/NeighborhoodContext';
 import { Classified, Store } from '../types';
 import { MOCK_CLASSIFIEDS, STORES } from '../constants';
-import { ClassifiedsCategoryHighlight } from './ClassifiedsCategoryHighlight';
 
 interface DonationsViewProps {
   onBack: () => void;
@@ -100,10 +99,6 @@ export const DonationsView: React.FC<DonationsViewProps> = ({ onBack, user, onRe
   const filteredDonations = useMemo(() => {
     return donations.filter(item => !filterHood || item.neighborhood === filterHood);
   }, [donations, filterHood]);
-
-  const categoryHighlight = useMemo(() => {
-    return STORES.find(s => s.isSponsored) || STORES[0];
-  }, []);
 
   const handleAnunciar = () => {
     if (!user) {
@@ -259,11 +254,6 @@ export const DonationsView: React.FC<DonationsViewProps> = ({ onBack, user, onRe
       </header>
 
       <main className="p-6 space-y-8">
-        <ClassifiedsCategoryHighlight 
-          store={categoryHighlight} 
-          onClick={(store) => onNavigate?.('store_detail', { store })} 
-        />
-
         {filteredDonations.length > 0 ? (
           <div className="grid grid-cols-1 gap-6">
             {filteredDonations.map(item => (
