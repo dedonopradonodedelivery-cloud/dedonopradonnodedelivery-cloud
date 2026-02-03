@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState, useMemo } from 'react';
 import {
   ChevronLeft,
@@ -11,45 +10,22 @@ import {
   MessageSquare,
   ArrowRight,
   Instagram,
-  Building2,
   ShieldCheck,
-  CreditCard,
-  AlertTriangle,
-  CheckCircle2,
-  Quote,
-  ThumbsUp,
-  Loader2,
-  Map as MapIcon,
-  Navigation,
-  Navigation2,
-  Send,
-  User as UserIcon,
-  CornerDownRight,
   BadgeCheck,
-  Coins,
-  Ticket,
-  Zap,
   ChevronRight as ChevronRightIcon,
-  Construction,
-  Newspaper,
   Info,
-  Flag,
-  UserCheck,
-  Check,
-  XCircle,
-  Image as ImageIconLucide,
-  Tag as TagIcon,
-  X,
   LayoutGrid,
+  X,
+  Navigation2,
   Map as WazeIcon,
-  Crown
+  Crown,
+  // Added User as UserIcon to fix the Cannot find name error in the reviews section
+  User as UserIcon
 } from 'lucide-react';
-import { Store, BusinessHour, StoreReview, StorePromotion } from '../types';
-import { supabase } from '../lib/supabaseClient';
+import { Store, BusinessHour, StorePromotion } from '../types';
 import { useAuth } from '../contexts/AuthContext';
 import { useNeighborhood } from '../contexts/NeighborhoodContext';
 import { trackOrganicEvent, OrganicEventType } from '../lib/analytics';
-import { STORES } from '../constants';
 import { TrustBlock } from './TrustBlock';
 
 const WEEK_DAYS_LABELS: Record<string, string> = {
@@ -72,16 +48,14 @@ const MOCK_BUSINESS_HOURS: Record<string, BusinessHour> = {
     domingo: { open: false, start: '', end: '' },
 };
 
-// Feed fake robusto com 30 imagens
 const STORE_FEED_MOCK = Array.from({ length: 30 }).map((_, i) => ({
   id: `p${i}`,
   imageUrl: `https://images.unsplash.com/photo-${[
     '1513104890138-7c749659a591', '1561758033-d89a9ad46330', '1562322140-8baeececf3df',
     '1516734212186-a967f81ad0d7', '1588776814546-1ffcf47267a5', '1441986300917-64674bd600d8',
     '1587854692152-cbe660dbbb88', '1524661135-423995f22d0b', '1557804506-669a67965ba0',
-    '1504674900247-0877df9cc836', '1556761175-5973dc0f32e7', '1517457373958-b7bdd4587205',
-    '1511632765486-a01980e01a18', '1570129477492-45c003edd2be', '1486312338219-ce68d2c6f44d'
-  ][i % 15]}?q=80&w=400&sig=${i}`
+    '1504674900247-0877df9cc836'
+  ][i % 10]}?q=80&w=400&sig=${i}`
 }));
 
 const MOCK_PROMOTIONS_LIST: StorePromotion[] = [
@@ -135,7 +109,8 @@ export const StoreDetailView: React.FC<{
   }, []);
 
   const logoImg = store.logo_url || store.logoUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(store.name)}&background=1E5BFF&color=fff`;
-  const phoneDigits = (store.whatsapp_publico || store.phone || '').replace(/\D/g, '');
+  const phoneDisplay = store.whatsapp_publico || store.phone || '(21) 99999-9999';
+  const phoneDigits = phoneDisplay.replace(/\D/g, '');
   
   const addressFormatted = useMemo(() => {
     if (store.rua) return `${store.rua}, ${store.numero}${store.complemento ? ` - ${store.complemento}` : ''} - ${store.bairro}`;
@@ -144,17 +119,17 @@ export const StoreDetailView: React.FC<{
 
   const instagramUrl = store.instagram ? `https://instagram.com/${store.instagram.replace('@', '')}` : '#';
 
-  const longDescription = useMemo(() => {
-    if (store.description && store.description.length > 100) return store.description;
-    return `Seja bem-vindo ao ${store.name}! Somos referência em ${store.category.toLowerCase()} na região de Jacarepaguá. Nosso compromisso é oferecer uma experiência única, pautada na excelência do atendimento e na qualidade indiscutível de nossos produtos e serviços.\n\nCom anos de tradição no bairro, unimos o conhecimento local com as melhores práticas do mercado para garantir que cada cliente se sinta em casa. Venha nos visitar e descubra por que somos a escolha preferida dos moradores da ${currentNeighborhood === "Jacarepaguá (todos)" ? "região" : currentNeighborhood}.`;
-  }, [store.name, store.description, store.category, currentNeighborhood]);
+  // Descrição reduzida conforme solicitado
+  const shortDescription = useMemo(() => {
+    return `Seja bem-vindo ao ${store.name}! Somos referência em ${store.category.toLowerCase()} na região de Jacarepaguá. Nosso compromisso é oferecer uma experiência única aos nossos clientes através da excelência no atendimento e qualidade superior em cada detalhe. Valorizamos a confiança da nossa comunidade local e buscamos sempre inovar para garantir que cada visita ou pedido seja especial. Venha nos visitar ou faça seu pedido pelo WhatsApp e aproveite o melhor do bairro conosco.`;
+  }, [store.name, store.category]);
 
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-900 font-sans relative overflow-x-hidden">
+    <div className="min-h-screen bg-white dark:bg-gray-950 font-sans relative overflow-x-hidden">
       <main className="pb-32">
         
-        {/* HEADER / BANNER */}
-        <section className="relative w-full h-[200px] sm:h-[240px] bg-gray-100 dark:bg-gray-800">
+        {/* HEADER / IMAGEM DE CAPA */}
+        <section className="relative w-full h-[220px] sm:h-[260px] bg-gray-100 dark:bg-gray-800">
           <div className="absolute top-0 left-0 right-0 p-4 pt-8 flex justify-between items-center z-40">
             <button onClick={onBack} className="w-10 h-10 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center shadow-md active:scale-90 transition-transform">
               <ChevronLeft className="w-6 h-6 text-white" />
@@ -174,61 +149,88 @@ export const StoreDetailView: React.FC<{
               <img key={index} src={img} alt="" className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${index === currentSlide ? 'opacity-100' : 'opacity-0'}`} />
             ))}
           </div>
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
-
-          {/* LOGO REPOSICIONADA (AVATAR FLUTUANTE) */}
-          <div className="absolute -bottom-8 left-6 z-40">
-            <div className="w-20 h-20 rounded-full bg-white dark:bg-gray-800 p-1 shadow-2xl border-4 border-white dark:border-gray-900 overflow-hidden flex items-center justify-center">
-              <img src={logoImg} alt="Logo" className="w-full h-full object-contain rounded-full" />
-            </div>
-          </div>
+          <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent"></div>
         </section>
 
-        {/* NOME E CATEGORIA */}
-        <div className="px-5 pt-12 pb-4">
-            <div className="flex items-center gap-1.5 mb-0.5">
-                <h1 className="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tighter leading-none">{store.name}</h1>
-                {store.verified && <BadgeCheck className="w-5 h-5 text-[#1E5BFF] fill-blue-50 dark:fill-blue-900/30 shrink-0" />}
-            </div>
-            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{store.category} • {store.subcategory}</p>
+        {/* BANNER ARREDONDADO CENTRALIZADO (ESTILO ANTERIOR) */}
+        <div className="px-5 relative z-10">
+          <div className="bg-white dark:bg-gray-900 rounded-[2.5rem] p-6 pt-14 -mt-16 text-center shadow-2xl border border-gray-100 dark:border-gray-800 relative">
+              {/* LOGO AVATAR FLUTUANTE */}
+              <div className="absolute -top-10 left-1/2 -translate-x-1/2 z-40">
+                <div className="w-20 h-20 rounded-full bg-white dark:bg-gray-800 p-1 shadow-xl border-4 border-white dark:border-gray-900 overflow-hidden flex items-center justify-center">
+                  <img src={logoImg} alt="Logo" className="w-full h-full object-contain rounded-full" />
+                </div>
+              </div>
+
+              <div className="mb-4">
+                  <div className="flex items-center justify-center gap-1.5 mb-1">
+                    <h1 className="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tighter leading-tight">{store.name}</h1>
+                    {store.verified && <BadgeCheck className="w-5 h-5 text-[#1E5BFF] fill-blue-50 dark:fill-blue-900/30 shrink-0" />}
+                  </div>
+                  <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{store.category} • {store.subcategory}</p>
+              </div>
+              
+              <div className="flex justify-center gap-3 mb-6">
+                  <div className="flex items-center gap-1.5 bg-yellow-50 dark:bg-yellow-900/20 px-3 py-1.5 rounded-2xl border border-yellow-100 dark:border-yellow-800/50">
+                      <Star className="w-3.5 h-3.5 text-yellow-500 fill-current" />
+                      <span className="text-sm font-black text-yellow-700 dark:text-yellow-400">{store.rating.toFixed(1)}</span>
+                  </div>
+                  <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-2xl border ${store.isOpenNow ? 'bg-emerald-50 border-emerald-100 text-emerald-700 dark:bg-emerald-900/20 dark:border-emerald-800/50 dark:text-emerald-400' : 'bg-red-50 border-red-100 text-red-700 dark:bg-red-900/20 dark:border-red-800/50 dark:text-red-400'}`}>
+                      <Clock className="w-3.5 h-3.5" />
+                      <span className="text-[10px] font-black uppercase tracking-tight">{store.isOpenNow ? 'Aberto' : 'Fechado'}</span>
+                  </div>
+              </div>
+
+              {/* INFORMAÇÕES DE ENDEREÇO E CONTATO POR ESCRITO */}
+              <div className="space-y-2 mb-8 px-2">
+                <div className="flex items-center justify-center gap-2 text-gray-600 dark:text-gray-400">
+                    <MapPin size={14} className="text-[#1E5BFF] shrink-0" />
+                    <p className="text-xs font-bold leading-tight line-clamp-1">{addressFormatted}</p>
+                </div>
+                <div className="flex items-center justify-center gap-2 text-gray-600 dark:text-gray-400">
+                    <MessageSquare size={14} className="text-emerald-500 shrink-0" />
+                    <p className="text-xs font-bold">{phoneDisplay}</p>
+                </div>
+              </div>
+
+              {/* BOTÕES DE AÇÃO */}
+              <div className="space-y-3">
+                  <div className="flex gap-3">
+                      <button 
+                        onClick={() => window.open(`https://wa.me/55${phoneDigits}`, '_blank')}
+                        className="flex-1 bg-[#25D366] hover:bg-[#20bd5a] text-white py-4 rounded-2xl flex items-center justify-center gap-2 shadow-lg shadow-green-500/10 active:scale-[0.98] transition-all"
+                      >
+                          <MessageSquare size={20} fill="white" />
+                          <span className="text-xs font-black uppercase tracking-widest">WhatsApp</span>
+                      </button>
+                      <button 
+                        onClick={() => window.open(instagramUrl, '_blank')}
+                        className="flex-1 bg-gradient-to-tr from-[#f9ce34] via-[#ee2a7b] to-[#6228d7] text-white py-4 rounded-2xl flex items-center justify-center gap-2 shadow-lg shadow-pink-500/10 active:scale-[0.98] transition-all"
+                      >
+                          <Instagram size={20} />
+                          <span className="text-xs font-black uppercase tracking-widest">Instagram</span>
+                      </button>
+                  </div>
+                  <div className="flex gap-3">
+                      <button 
+                        onClick={() => window.open(`tel:${phoneDigits}`, '_self')}
+                        className="flex-1 bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-300 py-3 rounded-xl flex items-center justify-center gap-2 font-bold text-[10px] uppercase tracking-widest"
+                      >
+                          <Phone size={14} /> Ligar
+                      </button>
+                      <button 
+                        onClick={() => window.open(`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(addressFormatted)}`, '_blank')}
+                        className="flex-1 bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-300 py-3 rounded-xl flex items-center justify-center gap-2 font-bold text-[10px] uppercase tracking-widest"
+                      >
+                          <Navigation2 size={14} /> Rota
+                      </button>
+                  </div>
+              </div>
+          </div>
         </div>
 
-        {/* BOTÕES DE AÇÃO PRINCIPAIS */}
-        <div className="px-5 space-y-3 mb-8">
-            <div className="flex gap-3">
-                <button 
-                  onClick={() => window.open(`https://wa.me/55${phoneDigits}`, '_blank')}
-                  className="flex-1 bg-[#25D366] hover:bg-[#20bd5a] text-white py-4 rounded-2xl flex items-center justify-center gap-2 shadow-lg shadow-green-500/20 active:scale-[0.98] transition-all"
-                >
-                    <MessageSquare size={20} fill="white" />
-                    <span className="text-xs font-black uppercase tracking-widest">WhatsApp</span>
-                </button>
-                <button 
-                  onClick={() => window.open(instagramUrl, '_blank')}
-                  className="flex-1 bg-gradient-to-tr from-[#f9ce34] via-[#ee2a7b] to-[#6228d7] text-white py-4 rounded-2xl flex items-center justify-center gap-2 shadow-lg shadow-pink-500/20 active:scale-[0.98] transition-all"
-                >
-                    <Instagram size={20} />
-                    <span className="text-xs font-black uppercase tracking-widest">Instagram</span>
-                </button>
-            </div>
-            <div className="flex gap-3">
-                <button 
-                  onClick={() => window.open(`tel:${phoneDigits}`, '_self')}
-                  className="flex-1 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 py-3 rounded-xl flex items-center justify-center gap-2 font-bold text-[10px] uppercase tracking-widest"
-                >
-                    <Phone size={14} /> Ligar
-                </button>
-                <button 
-                  onClick={() => window.open(`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(addressFormatted)}`, '_blank')}
-                  className="flex-1 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 py-3 rounded-xl flex items-center justify-center gap-2 font-bold text-[10px] uppercase tracking-widest"
-                >
-                    <Navigation2 size={14} /> Rota
-                </button>
-            </div>
-        </div>
-
-        {/* NAVEGAÇÃO DE ABAS REESTILIZADA (PILL STYLE) */}
-        <div className="px-5">
+        {/* NAVEGAÇÃO DE ABAS */}
+        <div className="mt-10 px-5">
             <div className="flex bg-gray-50 dark:bg-gray-800/50 p-1.5 rounded-full mb-8 overflow-x-auto no-scrollbar border border-gray-100 dark:border-gray-700/50">
                 {[
                   { id: 'description', label: 'Sobre' },
@@ -251,12 +253,11 @@ export const StoreDetailView: React.FC<{
                 ))}
             </div>
 
-            {/* CONTEÚDO COM ANIMAÇÃO DE ENTRADA */}
             <div className="animate-in fade-in zoom-in-95 duration-500">
                 {activeTab === 'description' && (
                     <div className="space-y-8">
                         <div className="space-y-4">
-                            <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed font-medium whitespace-pre-wrap">{longDescription}</p>
+                            <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed font-medium whitespace-pre-wrap">{shortDescription}</p>
                             
                             <div className="pt-6 border-t border-gray-100 dark:border-gray-800">
                                 <div className="flex items-start gap-3 mb-6">
@@ -267,7 +268,6 @@ export const StoreDetailView: React.FC<{
                                     </div>
                                 </div>
                                 
-                                {/* BOTÕES MAPAS */}
                                 <div className="grid grid-cols-2 gap-3">
                                     <button 
                                         onClick={() => window.open(`https://waze.com/ul?q=${encodeURIComponent(addressFormatted)}`, '_blank')}
@@ -285,7 +285,6 @@ export const StoreDetailView: React.FC<{
                             </div>
                         </div>
 
-                        {/* FEED DA LOJA (ESTILO INSTAGRAM) */}
                         <div className="space-y-4 pt-4">
                             <h3 className="text-sm font-black text-gray-900 dark:text-white px-1 uppercase tracking-tight flex items-center gap-2">
                                 <LayoutGrid size={16} className="text-[#1E5BFF]" /> Feed da Loja
@@ -299,17 +298,16 @@ export const StoreDetailView: React.FC<{
                             </div>
                         </div>
 
-                        {/* AÇÕES FINAIS */}
-                        <div className="pt-10 space-y-3 px-1">
-                            <button className="w-full py-4 border-2 border-gray-100 dark:border-gray-800 text-gray-400 dark:text-gray-500 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] hover:bg-gray-50 transition-colors">
+                        {/* AÇÕES FINAIS REESTILIZADAS */}
+                        <div className="pt-10 space-y-4 px-1">
+                            <button className="w-full py-5 bg-[#1E5BFF] hover:bg-blue-600 text-white rounded-[1.75rem] text-xs font-black uppercase tracking-[0.15em] shadow-xl shadow-blue-500/20 active:scale-[0.98] transition-all">
                                 Reivindicar esta loja
                             </button>
-                            <button className="w-full py-4 border-2 border-gray-100 dark:border-gray-800 text-gray-400 dark:text-gray-500 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] hover:bg-gray-50 transition-colors">
+                            <button className="w-full py-4 border-2 border-gray-100 dark:border-gray-800 text-gray-400 dark:text-gray-500 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] hover:bg-gray-50 transition-colors active:scale-[0.98]">
                                 Informar que a loja fechou
                             </button>
                         </div>
 
-                        {/* BANNER PATROCINADOR MASTER DISCRETO */}
                         <div 
                             onClick={() => {}}
                             className="mx-1 p-5 rounded-3xl bg-slate-900 flex items-center justify-between group cursor-pointer border border-white/5"
@@ -455,7 +453,7 @@ export const StoreDetailView: React.FC<{
                   <div className="p-8 overflow-y-auto no-scrollbar">
                       <h2 className="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tighter leading-none mb-4">{selectedPromotion.title}</h2>
                       <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed font-medium mb-8">{selectedPromotion.description}</p>
-                      <button onClick={() => { setSelectedPromotion(null); window.open(`https://wa.me/55${phoneDigits}`, '_blank'); }} className="w-full bg-[#25D366] text-white font-black py-5 rounded-[2rem] shadow-xl flex items-center justify-center gap-3 uppercase tracking-widest text-xs">
+                      <button onClick={() => { setSelectedPromotion(null); window.open(`https://wa.me/55${phoneDigits}`, '_blank'); }} className="w-full bg-[#25D366] text-white font-black py-4 rounded-2xl flex items-center justify-center gap-3 uppercase tracking-widest text-xs">
                           <MessageSquare size={18} fill="white" /> Falar com Lojista
                       </button>
                   </div>
@@ -465,9 +463,3 @@ export const StoreDetailView: React.FC<{
     </div>
   );
 };
-
-const CalendarDays = ({ size, className }: { size?: number, className?: string }) => (
-  <svg width={size || 24} height={size || 24} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
-    <rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/><path d="M8 14h.01"/><path d="M12 14h.01"/><path d="M16 14h.01"/><path d="M8 18h.01"/><path d="M12 18h.01"/><path d="M16 18h.01"/>
-  </svg>
-);
