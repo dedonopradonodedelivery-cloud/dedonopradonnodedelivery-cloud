@@ -138,7 +138,7 @@ export const Header: React.FC<HeaderProps> = ({
 
   return (
     <>
-        <div className="sticky top-0 z-40 w-full bg-white/95 dark:bg-gray-900/95 backdrop-blur-md shadow-sm border-b border-gray-100 dark:border-gray-800">
+        <div className="sticky top-0 z-40 w-full bg-white/95 dark:bg-gray-900/95 backdrop-blur-md shadow-sm border-b border-transparent dark:border-transparent">
         <div className="max-w-md mx-auto flex flex-col relative">
             <div className="flex items-center justify-between px-4 pt-3 pb-1">
                 <button onClick={toggleSelector} className="flex items-center gap-1.5 active:scale-95">

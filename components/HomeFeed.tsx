@@ -135,8 +135,20 @@ export const HomeFeed: React.FC<HomeFeedFeedProps> = ({
   const [listFilter, setListFilter] = useState<'all' | 'top_rated' | 'open_now'>('all');
   const [isAnimating, setIsAnimating] = useState(false);
   const { currentNeighborhood } = useNeighborhood();
+  
+  // Category Scroll Logic
   const categoryScrollRef = useRef<HTMLDivElement>(null);
-  const [scrollIndicator, setScrollIndicator] = useState({ width: '0%', left: '0%' });
+  const [currentCategoryPage, setCurrentCategoryPage] = useState(0);
+  const userInteractedRef = useRef(false);
+  const scrollTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Pagination Configuration
+  // Adjust to 8 items per page (4 columns x 2 rows)
+  const itemsPerPage = 8; 
+  
+  // Ensure we have enough items for scrolling effect.
+  const allCategories = useMemo(() => [...CATEGORIES, ...CATEGORIES], []); 
+  const totalPages = Math.ceil(allCategories.length / itemsPerPage);
 
   const [wizardStep, setWizardStep] = useState(0);
   const [selectedService, setSelectedService] = useState<string | null>(null);
@@ -149,6 +161,45 @@ export const HomeFeed: React.FC<HomeFeedFeedProps> = ({
   const [consecutiveDays, setConsecutiveDays] = useState(() => {
     return parseInt(localStorage.getItem('reward_consecutive_days') || '1');
   });
+
+  // Auto-scroll Logic
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (userInteractedRef.current || !categoryScrollRef.current) return;
+
+      const nextPage = (currentCategoryPage + 1) % totalPages;
+      const scrollAmount = categoryScrollRef.current.clientWidth * nextPage;
+      
+      categoryScrollRef.current.scrollTo({
+        left: scrollAmount,
+        behavior: 'smooth'
+      });
+      // State updates via onScroll handler to ensure sync
+    }, 3500);
+
+    return () => clearInterval(interval);
+  }, [currentCategoryPage, totalPages]);
+
+  const handleScroll = () => {
+    if (!categoryScrollRef.current) return;
+    const scrollLeft = categoryScrollRef.current.scrollLeft;
+    const width = categoryScrollRef.current.clientWidth;
+    const page = Math.round(scrollLeft / width);
+    if (page !== currentCategoryPage) {
+      setCurrentCategoryPage(page);
+    }
+  };
+
+  const handleInteractionStart = () => {
+    userInteractedRef.current = true;
+    if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
+  };
+
+  const handleInteractionEnd = () => {
+    scrollTimeoutRef.current = setTimeout(() => {
+      userInteractedRef.current = false;
+    }, 5000); // Resume auto-scroll after 5s of inactivity
+  };
 
   const handleClaimReward = () => {
     if (!user) {
@@ -213,33 +264,14 @@ export const HomeFeed: React.FC<HomeFeedFeedProps> = ({
     }, 1500);
   };
 
-  const updateScrollIndicator = useCallback(() => {
-    const el = categoryScrollRef.current;
-    if (el) {
-        const { scrollWidth, clientWidth, scrollLeft } = el;
-        if (scrollWidth <= clientWidth) {
-            setScrollIndicator({ width: '0%', left: '0%' });
-            return;
-        }
-        const thumbWidth = (clientWidth / scrollWidth) * 100;
-        const thumbLeft = (scrollLeft / scrollWidth) * 100;
-        setScrollIndicator({ width: `${thumbWidth}%`, left: `${thumbLeft}%` });
+  // Chunk categories into pages
+  const categoryPages = useMemo(() => {
+    const pages = [];
+    for (let i = 0; i < allCategories.length; i += itemsPerPage) {
+      pages.push(allCategories.slice(i, i + itemsPerPage));
     }
-  }, []);
-
-  useEffect(() => {
-      const el = categoryScrollRef.current;
-      if (el) {
-          updateScrollIndicator(); 
-          el.addEventListener('scroll', updateScrollIndicator, { passive: true });
-          const resizeObserver = new ResizeObserver(updateScrollIndicator);
-          resizeObserver.observe(el);
-          return () => {
-              el.removeEventListener('scroll', updateScrollIndicator);
-              resizeObserver.unobserve(el);
-          };
-      }
-  }, [updateScrollIndicator]);
+    return pages;
+  }, [allCategories]);
 
   return (
     <div className="flex flex-col bg-white dark:bg-gray-950 w-full max-w-md mx-auto animate-in fade-in duration-500 overflow-x-hidden pb-32">
@@ -250,28 +282,56 @@ export const HomeFeed: React.FC<HomeFeedFeedProps> = ({
         </section>
       )}
 
-      {/* CATEGORIAS */}
+      {/* CATEGORIAS (4x2 Grid with Pagination) */}
       <section className="w-full bg-[#FFFFFF] dark:bg-gray-950 pt-4 pb-0 relative z-10">
-        <div ref={categoryScrollRef} className="flex overflow-x-auto no-scrollbar px-4 pb-2 snap-x">
-          <div className="grid grid-flow-col grid-rows-2 gap-x-3 gap-y-3">
-            {CATEGORIES.map((cat) => (
-              <button 
-                key={cat.id} 
-                onClick={() => onSelectCategory(cat)}
-                className="flex flex-col items-center group active:scale-95 transition-all"
-              >
-                <div className={`w-[78px] h-[78px] rounded-[22px] shadow-lg flex flex-col items-center justify-between p-2 ${cat.color} border border-white/20`}>
-                  <div className="flex-1 flex items-center justify-center w-full">{React.cloneElement(cat.icon as any, { className: "w-7 h-7 text-white drop-shadow-md", strokeWidth: 2.5 })}</div>
-                  <div className="w-full bg-black/10 backdrop-blur-[2px] py-1 rounded-b-[20px] -mx-2 -mb-2"><span className="block w-full text-[9px] font-black text-white text-center uppercase tracking-tight">{cat.name}</span></div>
-                </div>
-              </button>
-            ))}
-          </div>
+        <div 
+          ref={categoryScrollRef} 
+          className="flex overflow-x-auto no-scrollbar snap-x snap-mandatory scroll-smooth"
+          onScroll={handleScroll}
+          onTouchStart={handleInteractionStart}
+          onTouchEnd={handleInteractionEnd}
+          onMouseEnter={handleInteractionStart}
+          onMouseLeave={handleInteractionEnd}
+        >
+          {categoryPages.map((pageCategories, pageIndex) => (
+            <div key={pageIndex} className="min-w-full px-4 pb-2 snap-center">
+              {/* Changed from grid-rows-4 to grid-rows-2 */}
+              <div className="grid grid-cols-4 grid-rows-2 gap-x-2 gap-y-4">
+                {pageCategories.map((cat, index) => (
+                  <button 
+                    key={`${cat.id}-${pageIndex}-${index}`} 
+                    onClick={() => onSelectCategory(cat)}
+                    className="flex flex-col items-center group active:scale-95 transition-all w-full"
+                  >
+                    <div className={`w-[70px] h-[70px] rounded-[22px] shadow-sm flex flex-col items-center justify-between p-2 ${cat.color} border border-white/20`}>
+                      <div className="flex-1 flex items-center justify-center w-full">
+                        {React.cloneElement(cat.icon as any, { className: "w-6 h-6 text-white drop-shadow-md", strokeWidth: 2.5 })}
+                      </div>
+                      <div className="w-full bg-black/10 backdrop-blur-[2px] py-0.5 rounded-b-[20px] -mx-2 -mb-2">
+                        <span className="block w-full text-[8px] font-black text-white text-center uppercase tracking-tight leading-none py-0.5 truncate px-1">
+                          {cat.name}
+                        </span>
+                      </div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          ))}
         </div>
-        <div className="px-4 pb-6 flex justify-center">
-          <div className="w-1/3 h-[2px] bg-gray-100 dark:bg-gray-800 rounded-full">
-            <div className="h-full bg-brand-blue rounded-full" style={{ width: scrollIndicator.width, marginLeft: scrollIndicator.left }}></div>
-          </div>
+        
+        {/* Pagination Dots */}
+        <div className="flex justify-center gap-1.5 pb-6 pt-2">
+          {categoryPages.map((_, idx) => (
+            <div 
+              key={idx} 
+              className={`rounded-full transition-all duration-300 ${
+                idx === currentCategoryPage 
+                  ? 'bg-gray-800 dark:bg-white w-1.5 h-1.5' 
+                  : 'bg-gray-300 dark:bg-gray-700 w-1.5 h-1.5'
+              }`} 
+            />
+          ))}
         </div>
       </section>
 
@@ -491,7 +551,7 @@ export const HomeFeed: React.FC<HomeFeedFeedProps> = ({
       )}
 
       {/* LISTA EXPLORAR */}
-      <div className="w-full bg-white dark:bg-gray-950 pt-1 pb-10">
+      <div className="w-full bg-white dark:bg-gray-900 pt-1 pb-10">
         <div className="px-5">
           <SectionHeader icon={Compass} title="Explorar Bairro" subtitle="Tudo o que você precisa" onSeeMore={() => onNavigate('explore')} />
           <div className="flex gap-1 bg-gray-100 dark:bg-gray-800 p-1 rounded-xl w-fit mb-4">
