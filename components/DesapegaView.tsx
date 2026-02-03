@@ -193,7 +193,19 @@ export const DesapegaView: React.FC<DesapegaViewProps> = ({ onBack, user, onRequ
 
   // Itens para o Match (Apenas os que aceitam troca)
   const matchStack = useMemo(() => {
-      return desapegaItems.filter(item => item.acceptsTrade);
+      const base = desapegaItems.filter(item => item.acceptsTrade);
+      // Garantir 10-15 itens fake para o deck
+      const extraItems: Classified[] = [
+          { id: 'fake-trade-1', advertiser: 'Thiago R.', title: 'Playstation 4 Slim', category: 'Desapega JPA', neighborhood: 'Taquara', description: 'Com 2 controles', timestamp: 'Hoje', contactWhatsapp: '00', typeLabel: 'Troca', price: 'R$ 1.200', imageUrl: 'https://images.unsplash.com/photo-1506041851282-a3a9a797a7e2?q=80&w=800', acceptsTrade: true, tradeInterests: ['Xbox', 'Nintendo'] },
+          { id: 'fake-trade-2', advertiser: 'Carla M.', title: 'Bicicleta Caloi Aro 29', category: 'Desapega JPA', neighborhood: 'Freguesia', description: 'Revisada', timestamp: 'Ontem', contactWhatsapp: '00', typeLabel: 'Troca', price: 'R$ 900', imageUrl: 'https://images.unsplash.com/photo-1532298229144-0ec0c57515c7?q=80&w=800', acceptsTrade: true, tradeInterests: ['Celular'] },
+          { id: 'fake-trade-3', advertiser: 'João P.', title: 'Sofá Retrátil 3 Lugares', category: 'Desapega JPA', neighborhood: 'Pechincha', description: 'Confortável', timestamp: '2 dias', contactWhatsapp: '00', typeLabel: 'Troca', price: 'R$ 500', imageUrl: 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?q=80&w=800', acceptsTrade: true, tradeInterests: ['TV'] },
+          { id: 'fake-trade-4', advertiser: 'Ana L.', title: 'iPhone 11 64GB', category: 'Desapega JPA', neighborhood: 'Anil', description: 'Bateria 85%', timestamp: 'Hoje', contactWhatsapp: '00', typeLabel: 'Troca', price: 'R$ 1.500', imageUrl: 'https://images.unsplash.com/photo-1616348436168-de43ad0e12de?q=80&w=800', acceptsTrade: true, tradeInterests: ['Android', 'PC'] },
+          { id: 'fake-trade-5', advertiser: 'Pedro H.', title: 'Guitarra Giannini', category: 'Desapega JPA', neighborhood: 'Tanque', description: 'Acústica', timestamp: '3 dias', contactWhatsapp: '00', typeLabel: 'Troca', price: 'R$ 400', imageUrl: 'https://images.unsplash.com/photo-1550985543-f4423c8d32b5?q=80&w=800', acceptsTrade: true, tradeInterests: ['Teclado'] },
+          { id: 'fake-trade-6', advertiser: 'Lucas S.', title: 'Cadeira Gamer', category: 'Desapega JPA', neighborhood: 'Curicica', description: 'Ergonômica', timestamp: '1 semana', contactWhatsapp: '00', typeLabel: 'Troca', price: 'R$ 350', imageUrl: 'https://images.unsplash.com/photo-1598550476439-6847785fcea6?q=80&w=800', acceptsTrade: true, tradeInterests: ['Monitor'] },
+          { id: 'fake-trade-7', advertiser: 'Mariana F.', title: 'Smart TV 43"', category: 'Desapega JPA', neighborhood: 'Freguesia', description: '4K UHD', timestamp: 'Ontem', contactWhatsapp: '00', typeLabel: 'Troca', price: 'R$ 1.100', imageUrl: 'https://images.unsplash.com/photo-1593784653056-143414518a92?q=80&w=800', acceptsTrade: true, tradeInterests: ['Videogame'] },
+          { id: 'fake-trade-8', advertiser: 'Rafael G.', title: 'Microondas Inox', category: 'Desapega JPA', neighborhood: 'Taquara', description: '20 Litros', timestamp: 'Hoje', contactWhatsapp: '00', typeLabel: 'Troca', price: 'R$ 300', imageUrl: 'https://images.unsplash.com/photo-1574269909862-7e1d70bb8078?q=80&w=800', acceptsTrade: true, tradeInterests: ['Airfryer'] }
+      ];
+      return [...base, ...extraItems];
   }, [desapegaItems]);
 
   const currentMatchCard = matchStack[matchDeckIndex];
@@ -238,9 +250,25 @@ export const DesapegaView: React.FC<DesapegaViewProps> = ({ onBack, user, onRequ
 
   const handleOpenMatchChat = () => {
       if (matchedItem) {
+          const requestId = `TRADE-${Date.now()}`;
+          // Pre-inject message in mock storage for the chat view
+          const chatKey = `msgs_${requestId}_admin_auditoria`; // Using a generic merchant ID for demo
+          const initialMsgs = [{
+              id: `sys-trade-${Date.now()}`,
+              requestId,
+              senderId: 'system',
+              senderName: 'Localizei JPA',
+              senderRole: 'merchant',
+              text: "Oi! Dei match no seu item. Vamos combinar a troca?",
+              timestamp: new Date().toISOString()
+          }];
+          localStorage.setItem(chatKey, JSON.stringify(initialMsgs));
+
+          // Navigate to ServiceChatView (reusing it for trade chat)
           onNavigate('service_chat', { 
-              requestId: `TRADE-${Date.now()}`,
-              role: 'resident'
+              requestId: requestId,
+              role: 'resident',
+              professionalId: 'admin_auditoria' // Mock ID
           });
       }
   };

@@ -2,7 +2,7 @@
 import React from 'react';
 
 export type ThemeMode = 'light' | 'dark' | 'auto';
-export type PlanType = 'free' | 'professional' | 'enterprise' | 'master';
+export type PlanType = 'free' | 'professional' | 'enterprise' | 'master' | 'founder';
 
 export enum AdType {
   ORGANIC = 'ORGANIC',
