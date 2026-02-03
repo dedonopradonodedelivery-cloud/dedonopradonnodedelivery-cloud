@@ -104,7 +104,6 @@ export interface ServiceRequest {
   images: string[];
   status: 'open' | 'closed';
   createdAt: string;
-  winnerId?: string;
 }
 
 export interface ServiceLead {
@@ -231,6 +230,10 @@ export interface Classified {
   imageUrl?: string;
   jobDetails?: Job;
   isVerifiedMerchant?: boolean;
+  // Novos campos para Troca-Troca
+  acceptsTrade?: boolean;
+  tradeInterests?: string[]; // Categorias aceitas
+  tradeCondition?: 'direct' | 'diff_money' | 'any';
 }
 
 export interface StoreCredit {

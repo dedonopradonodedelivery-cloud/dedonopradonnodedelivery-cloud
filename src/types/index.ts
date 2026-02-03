@@ -1,4 +1,3 @@
-
 import React from 'react';
 
 // Consistent with root types.ts
@@ -87,6 +86,8 @@ export interface Store {
   inscricao_municipal?: string;
   inscricao_estadual?: string;
   email_publico?: string;
+  accepts_online_orders?: boolean;
+  min_order_value?: number;
 }
 
 export type ServiceUrgency = 'Hoje' | 'Essa semana' | 'Sem pressa';
@@ -102,6 +103,7 @@ export interface ServiceRequest {
   images: string[];
   status: 'open' | 'closed';
   createdAt: string;
+  winnerId?: string;
 }
 
 export interface ServiceLead {
@@ -109,7 +111,9 @@ export interface ServiceLead {
   requestId: string;
   merchantId: string;
   merchantName: string;
-  status: 'pending_payment' | 'paid';
+  status: 'new' | 'unlocked' | 'chatting' | 'finished' | 'lost' | 'pending_payment' | 'paid';
+  merchantLogo?: string;
+  unlockedAt?: string;
   purchasedAt?: string;
 }
 
@@ -142,10 +146,11 @@ export interface Job {
   company: string;
   neighborhood: string;
   category: string;
-  type: 'CLT' | 'PJ' | 'Freelancer';
+  type: 'CLT' | 'PJ' | 'Freelancer' | 'Temporário' | 'Estágio' | 'Aprendiz' | 'Diarista' | 'Meio período' | 'Outros';
   salary?: string;
   description: string;
   requirements: string[];
+  benefits?: string[];
   postedAt: string;
   isUrgentToday?: boolean;
   schedule?: string;
@@ -153,6 +158,13 @@ export interface Job {
   isSponsored?: boolean;
   sponsoredUntil?: string;
   isUrgent?: boolean;
+  logoUrl?: string;
+  candidacy_method?: 'cv' | 'whatsapp';
+  modality?: 'Presencial' | 'Híbrido' | 'Remoto';
+  experience?: string;
+  schedule_type?: 'Integral' | 'Meio período' | 'Escala';
+  isVerified?: boolean;
+  isVerifiedMerchant?: boolean;
 }
 
 export interface NeighborhoodCommunity {
@@ -173,13 +185,19 @@ export interface CommunityPost {
   userAvatar: string;
   authorRole: 'resident' | 'merchant';
   content: string;
-  type: 'recommendation' | 'alert' | 'event' | 'poll';
+  type: 'recommendation' | 'alert' | 'event' | 'poll' | 'promotion';
   communityId: string;
   neighborhood?: string;
   timestamp: string;
   likes: number;
   comments: number;
+  imageUrls?: string[];
   imageUrl?: string;
+  videoUrl?: string;
+  theme?: 'utilidade' | 'seguranca' | 'lazer' | 'dicas' | 'geral';
+  showOnStoreProfile?: boolean;
+  storeId?: string;
+  promotionId?: string;
 }
 
 export type TaxonomyType = 'category' | 'subcategory' | 'specialty';
@@ -209,7 +227,39 @@ export interface Classified {
   contactWhatsapp: string;
   typeLabel: string;
   price?: string;
+  imageUrl?: string;
   jobDetails?: Job;
+  isVerifiedMerchant?: boolean;
+  // Novos campos para Troca-Troca
+  acceptsTrade?: boolean;
+  tradeInterests?: string[]; // Categorias aceitas
+  tradeCondition?: 'direct' | 'diff_money' | 'any';
+}
+
+export interface RealEstateProperty {
+  id: string;
+  type: 'Residencial' | 'Comercial';
+  title: string;
+  description: string;
+  image: string;
+  neighborhood: string;
+  price: number;
+  transaction: 'aluguel' | 'venda';
+  area: number;
+  postedAt: string;
+  buildingName?: string;
+  bedrooms?: number;
+  bathrooms?: number;
+  parkingSpaces?: number;
+  propertyTypeRes?: 'Casa' | 'Apartamento' | 'Kitnet/Studio' | 'Cobertura';
+  condoFee?: number;
+  isFurnished?: boolean;
+  petsAllowed?: boolean;
+  propertyTypeCom?: 'Sala comercial' | 'Loja' | 'Galpão' | 'Andar/Conjunto' | 'Terreno comercial';
+  hasBathroom?: boolean;
+  highCeiling?: boolean;
+  loadingAccess?: boolean;
+  isVerifiedMerchant?: boolean;
 }
 
 export interface StoreCredit {
@@ -282,7 +332,8 @@ export interface AppNotification {
   userId: string;
   title: string;
   message: string;
-  type: 'claim_approval' | 'claim_rejection' | 'taxonomy_approval' | 'taxonomy_rejection' | 'system';
+  type: 'chat' | 'design' | 'coupon' | 'payment' | 'ad' | 'system';
+  referenceId?: string;
   read: boolean;
   createdAt: string;
 }
@@ -301,6 +352,25 @@ export interface StoreClaimRequest {
   contact_phone?: string;
   justification?: string;
 }
+
+export interface StorePromotion {
+  id: string;
+  storeId: string;
+  title: string;
+  description: string;
+  type: 'Dia' | 'Semana' | 'Mês' | 'Sazonal';
+  startDate: string;
+  endDate: string;
+  value?: number;
+  discount?: number;
+  images: string[];
+  status: 'active' | 'scheduled' | 'expired' | 'paused';
+  createdAt: string;
+  publishToCommunity?: boolean;
+}
+
+export type PromotionType = 'Dia' | 'Semana' | 'Mês' | 'Sazonal';
+export type PromotionStatus = 'active' | 'scheduled' | 'expired' | 'paused';
 
 export type TransactionStatus = 'pending' | 'approved' | 'rejected';
 export type SessionType = 'qr' | 'pin';
@@ -355,4 +425,30 @@ export interface DbWalletMovement {
   amount: number;
   description: string;
   created_at: string;
+}
+
+export interface AppSuggestion {
+    id: string;
+    userId: string;
+    userName: string;
+    timestamp: string;
+    subject: string;
+    message: string;
+    category: 'bug' | 'idea' | 'improve' | 'other';
+    contactConsent: boolean;
+    status: 'new' | 'analyzing' | 'responded';
+}
+
+export interface CategoryBannerSlot {
+  uniqueKey: string;
+  bairroSlug: string;
+  categoriaSlug: string;
+  slotNumber: 1 | 2;
+  status: 'available' | 'reserved' | 'sold';
+  merchantId?: string;
+  merchantName?: string;
+  expiresAt?: string;
+  image?: string;
+  title?: string;
+  subtitle?: string;
 }

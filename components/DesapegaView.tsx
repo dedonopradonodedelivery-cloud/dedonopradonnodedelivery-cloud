@@ -1,5 +1,5 @@
 
-import React, { useState, useMemo, useRef } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { User } from '@supabase/supabase-js';
 import { GoogleGenAI, Type, Part, Blob as GenAIBlob } from "@google/genai";
 import { 
@@ -30,7 +30,10 @@ import {
   Wrench,
   BookOpen,
   Car,
-  Dog
+  Dog,
+  Repeat,
+  RotateCcw,
+  ArrowLeftRight
 } from 'lucide-react';
 import { useNeighborhood, NEIGHBORHOODS } from '../contexts/NeighborhoodContext';
 import { Classified, Store } from '../types';
@@ -51,6 +54,17 @@ const CATEGORY_MAP: Record<string, string[]> = {
   "Ferramentas e Construção": ["Elétricas", "Manuais", "Material de Construção", "Outros"],
   "Outros": ["Geral"]
 };
+
+// Categorias simplificadas para filtro de troca
+const TRADE_CATEGORIES = [
+  { id: 'celular', label: 'Celular' },
+  { id: 'games', label: 'Videogame' },
+  { id: 'notebook', label: 'Notebook' },
+  { id: 'bike', label: 'Bicicleta' },
+  { id: 'moveis', label: 'Móveis' },
+  { id: 'roupas', label: 'Roupas' },
+  { id: 'outro', label: 'Outro' }
+];
 
 interface DesapegaViewProps {
   onBack: () => void;
@@ -89,7 +103,12 @@ const DesapegaCard: React.FC<{ item: Classified; onClick: () => void }> = ({ ite
           alt={item.title} 
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
         />
-        <div className="absolute top-4 right-4">
+        <div className="absolute top-4 right-4 flex gap-2">
+          {item.acceptsTrade && (
+             <span className="px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-[0.15em] bg-purple-600 text-white shadow-lg border border-white/20 flex items-center gap-1">
+                <ArrowLeftRight size={10} strokeWidth={3} /> Troca
+             </span>
+          )}
           <span className="px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-[0.15em] bg-indigo-600 text-white shadow-lg border border-white/20">
             VENDA
           </span>
@@ -129,13 +148,181 @@ const DesapegaCard: React.FC<{ item: Classified; onClick: () => void }> = ({ ite
   );
 };
 
+// Componente Card de Troca (Estilo Tinder)
+const TradeCard: React.FC<{ item: Classified; onPass: () => void; onMatch: () => void }> = ({ item, onPass, onMatch }) => {
+    const displayImage = item.imageUrl || getFallbackItemImage(item.id);
+
+    return (
+        <div className="w-full max-w-sm h-[65vh] relative rounded-[3rem] overflow-hidden shadow-2xl border-4 border-white dark:border-gray-800 group animate-in zoom-in-95 duration-300">
+            <img src={displayImage} className="w-full h-full object-cover" alt={item.title} />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent"></div>
+            
+            <div className="absolute bottom-0 left-0 right-0 p-8 pb-10 flex flex-col items-center">
+                <div className="w-full text-left mb-6">
+                    <div className="flex items-center gap-2 mb-2">
+                        <span className="bg-purple-600 text-white text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest border border-white/20">
+                            Aceita Troca
+                        </span>
+                        <span className="bg-black/40 backdrop-blur-md text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest border border-white/10 flex items-center gap-1">
+                            <MapPin size={10} /> {item.neighborhood}
+                        </span>
+                    </div>
+                    <h2 className="text-3xl font-black text-white leading-tight drop-shadow-md mb-2">{item.title}</h2>
+                    {item.tradeCondition === 'direct' && (
+                        <p className="text-emerald-400 text-xs font-black uppercase tracking-widest">🔄 Troca Direta (Pau a Pau)</p>
+                    )}
+                    {item.tradeCondition === 'diff_money' && (
+                        <p className="text-amber-400 text-xs font-black uppercase tracking-widest">💰 Aceita oferta em dinheiro</p>
+                    )}
+                     <p className="text-white/80 text-sm font-medium mt-2 line-clamp-2">
+                        Aceito troca por: {item.tradeInterests?.join(', ') || 'Algo do meu interesse'}
+                    </p>
+                </div>
+
+                <div className="flex items-center gap-6 w-full justify-center">
+                    <button 
+                        onClick={(e) => { e.stopPropagation(); onPass(); }}
+                        className="w-16 h-16 rounded-full bg-white text-red-500 shadow-xl flex items-center justify-center hover:scale-110 transition-transform border-4 border-gray-100"
+                    >
+                        <X size={32} strokeWidth={3} />
+                    </button>
+                    <button 
+                        onClick={(e) => { e.stopPropagation(); onMatch(); }}
+                        className="w-20 h-20 rounded-full bg-purple-600 text-white shadow-xl flex items-center justify-center hover:scale-110 transition-transform border-4 border-purple-400 shadow-purple-500/50"
+                    >
+                        <Repeat size={36} strokeWidth={3} />
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+// Modal de Proposta de Troca
+const TradeProposalModal: React.FC<{ 
+    isOpen: boolean; 
+    onClose: () => void; 
+    targetItem: Classified; 
+    myItems: Classified[]; // Mock dos itens do usuário atual
+    onSendProposal: (myItem: Classified, diffType: string, diffValue: string) => void; 
+}> = ({ isOpen, onClose, targetItem, myItems, onSendProposal }) => {
+    const [step, setStep] = useState(1);
+    const [selectedMyItem, setSelectedMyItem] = useState<Classified | null>(null);
+    const [diffType, setDiffType] = useState<'none' | 'pay' | 'receive'>('none');
+    const [diffValue, setDiffValue] = useState('');
+
+    if (!isOpen) return null;
+
+    const handleNext = () => {
+        if (step === 1 && selectedMyItem) setStep(2);
+        else if (step === 2) onSendProposal(selectedMyItem!, diffType, diffValue);
+    };
+
+    return (
+        <div className="fixed inset-0 z-[1200] bg-black/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-4 animate-in fade-in">
+            <div className="bg-white dark:bg-gray-900 w-full max-w-md rounded-[2.5rem] p-6 shadow-2xl flex flex-col max-h-[85vh]">
+                <div className="flex justify-between items-center mb-6">
+                    <h3 className="text-xl font-black text-gray-900 dark:text-white uppercase tracking-tighter">Propor Troca</h3>
+                    <button onClick={onClose}><X className="text-gray-400" /></button>
+                </div>
+
+                <div className="flex-1 overflow-y-auto no-scrollbar">
+                    {step === 1 && (
+                        <div className="space-y-6">
+                            <p className="text-sm text-gray-500 font-medium">O que você oferece em troca de <strong>{targetItem.title}</strong>?</p>
+                            <div className="space-y-3">
+                                {myItems.length > 0 ? myItems.map(item => (
+                                    <div 
+                                        key={item.id} 
+                                        onClick={() => setSelectedMyItem(item)}
+                                        className={`flex items-center gap-4 p-4 rounded-2xl border-2 cursor-pointer transition-all ${selectedMyItem?.id === item.id ? 'border-purple-600 bg-purple-50 dark:bg-purple-900/20' : 'border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-800'}`}
+                                    >
+                                        <div className="w-16 h-16 rounded-xl bg-gray-200 overflow-hidden shrink-0">
+                                            <img src={item.imageUrl || getFallbackItemImage(item.id)} className="w-full h-full object-cover" />
+                                        </div>
+                                        <div>
+                                            <h4 className="font-bold text-gray-900 dark:text-white text-sm line-clamp-1">{item.title}</h4>
+                                            <p className="text-xs text-gray-500 font-bold">{item.price}</p>
+                                        </div>
+                                        <div className={`ml-auto w-5 h-5 rounded-full border-2 flex items-center justify-center ${selectedMyItem?.id === item.id ? 'border-purple-600 bg-purple-600 text-white' : 'border-gray-300'}`}>
+                                            {selectedMyItem?.id === item.id && <Check size={12} strokeWidth={4} />}
+                                        </div>
+                                    </div>
+                                )) : (
+                                    <div className="text-center py-8 bg-gray-50 dark:bg-gray-800 rounded-2xl border border-dashed border-gray-200">
+                                        <p className="text-xs text-gray-500 font-bold mb-2">Você não tem itens anunciados.</p>
+                                        <button className="text-purple-600 text-xs font-black uppercase underline">Anunciar agora</button>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    )}
+
+                    {step === 2 && (
+                        <div className="space-y-6 animate-in slide-in-from-right">
+                            <div className="flex items-center gap-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-2xl">
+                                <div className="w-12 h-12 bg-gray-200 rounded-lg overflow-hidden shrink-0">
+                                    <img src={selectedMyItem?.imageUrl || ''} className="w-full h-full object-cover" />
+                                </div>
+                                <ArrowRight className="text-gray-400" />
+                                <div className="w-12 h-12 bg-gray-200 rounded-lg overflow-hidden shrink-0">
+                                    <img src={targetItem.imageUrl || ''} className="w-full h-full object-cover" />
+                                </div>
+                                <span className="text-xs font-bold text-gray-500 ml-auto">Ajuste?</span>
+                            </div>
+
+                            <div className="grid grid-cols-3 gap-2">
+                                <button onClick={() => setDiffType('none')} className={`p-3 rounded-xl text-[10px] font-black uppercase tracking-wider border-2 transition-all ${diffType === 'none' ? 'border-purple-600 bg-purple-600 text-white' : 'border-gray-200 text-gray-500'}`}>Sem Volta</button>
+                                <button onClick={() => setDiffType('pay')} className={`p-3 rounded-xl text-[10px] font-black uppercase tracking-wider border-2 transition-all ${diffType === 'pay' ? 'border-purple-600 bg-purple-600 text-white' : 'border-gray-200 text-gray-500'}`}>Eu Pago +</button>
+                                <button onClick={() => setDiffType('receive')} className={`p-3 rounded-xl text-[10px] font-black uppercase tracking-wider border-2 transition-all ${diffType === 'receive' ? 'border-purple-600 bg-purple-600 text-white' : 'border-gray-200 text-gray-500'}`}>Recebo +</button>
+                            </div>
+
+                            {diffType !== 'none' && (
+                                <div>
+                                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1 mb-2 block">Valor da diferença</label>
+                                    <div className="relative">
+                                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold">R$</span>
+                                        <input 
+                                            type="tel" 
+                                            value={diffValue}
+                                            onChange={e => setDiffValue(e.target.value)}
+                                            placeholder="0,00"
+                                            className="w-full bg-gray-50 dark:bg-gray-800 p-4 pl-10 rounded-2xl font-bold text-lg outline-none focus:ring-2 focus:ring-purple-500"
+                                            autoFocus
+                                        />
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    )}
+                </div>
+
+                <div className="pt-6 mt-4 border-t border-gray-100 dark:border-gray-800">
+                    <button 
+                        onClick={handleNext}
+                        disabled={step === 1 && !selectedMyItem}
+                        className="w-full bg-purple-600 disabled:bg-gray-200 disabled:text-gray-400 text-white font-black py-4 rounded-2xl shadow-xl shadow-purple-500/20 active:scale-95 transition-all uppercase tracking-widest text-xs"
+                    >
+                        {step === 1 ? 'Continuar' : 'Enviar Proposta'}
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+};
+
 export const DesapegaView: React.FC<DesapegaViewProps> = ({ onBack, user, onRequireLogin, onNavigate }) => {
-  const [viewState, setViewState] = useState<'list' | 'form_media' | 'form_details' | 'form_description' | 'form_price' | 'success'>('list');
+  const [viewState, setViewState] = useState<'list' | 'troca_mode' | 'form_media' | 'form_details' | 'form_description' | 'form_price' | 'success'>('list');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [filterHood, setFilterHood] = useState<string | null>(null);
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPriceWarning, setShowPriceWarning] = useState(false);
+  
+  // Troca Mode States
+  const [matchIndex, setMatchIndex] = useState(0);
+  const [isProposalModalOpen, setIsProposalModalOpen] = useState(false);
+  const [showMatchAnimation, setShowMatchAnimation] = useState(false);
 
   // Form State
   const [formData, setFormData] = useState({
@@ -150,8 +337,29 @@ export const DesapegaView: React.FC<DesapegaViewProps> = ({ onBack, user, onRequ
     whatsapp: '',
     price: '',
     acceptExchange: false,
-    images: [] as string[]
+    images: [] as string[],
+    // Novos campos
+    acceptsTrade: false,
+    tradeInterests: [] as string[],
+    tradeCondition: 'any' as 'direct' | 'diff_money' | 'any'
   });
+
+  // Mock de itens do próprio usuário para troca
+  const myMockItems = useMemo(() => [
+      { 
+          id: 'my-1', 
+          title: 'Violão Acústico Yamaha', 
+          price: 'R$ 600,00', 
+          category: 'Instrumentos', 
+          neighborhood: 'Freguesia', 
+          description: 'Usado poucas vezes', 
+          timestamp: 'Ontem',
+          contactWhatsapp: '00',
+          typeLabel: 'Venda',
+          advertiser: 'Eu',
+          imageUrl: 'https://images.unsplash.com/photo-1510915361894-db8b60106cb1?q=80&w=800'
+      }
+  ], []);
 
   const desapegaItems = useMemo(() => {
     return MOCK_CLASSIFIEDS.filter(item => item.category === 'Desapega JPA');
@@ -160,6 +368,13 @@ export const DesapegaView: React.FC<DesapegaViewProps> = ({ onBack, user, onRequ
   const filteredItems = useMemo(() => {
     return desapegaItems.filter(item => !filterHood || item.neighborhood === filterHood);
   }, [desapegaItems, filterHood]);
+
+  // Itens elegíveis para Troca-Troca
+  const tradeItems = useMemo(() => {
+      return desapegaItems.filter(item => item.acceptsTrade);
+  }, [desapegaItems]);
+
+  const currentTradeItem = tradeItems[matchIndex];
 
   const handleAnunciar = () => {
     if (!user) {
@@ -271,6 +486,35 @@ export const DesapegaView: React.FC<DesapegaViewProps> = ({ onBack, user, onRequ
 
   const handleItemClick = (item: Classified) => {
     onNavigate('classified_detail', { item });
+  };
+
+  const toggleTradeInterest = (id: string) => {
+      setFormData(prev => ({
+          ...prev,
+          tradeInterests: prev.tradeInterests.includes(id) 
+            ? prev.tradeInterests.filter(i => i !== id) 
+            : [...prev.tradeInterests, id]
+      }));
+  };
+
+  // Troca Actions
+  const nextMatch = () => {
+      if (matchIndex < tradeItems.length - 1) setMatchIndex(prev => prev + 1);
+      else setMatchIndex(0); // Loop for demo
+  };
+
+  const handleProposeTrade = () => {
+      if (!user) { onRequireLogin(); return; }
+      setIsProposalModalOpen(true);
+  };
+
+  const submitProposal = () => {
+      setIsProposalModalOpen(false);
+      setShowMatchAnimation(true);
+      setTimeout(() => {
+          setShowMatchAnimation(false);
+          nextMatch();
+      }, 2000);
   };
 
   // --- RENDER FORM STEPS ---
@@ -422,6 +666,44 @@ export const DesapegaView: React.FC<DesapegaViewProps> = ({ onBack, user, onRequ
                   ))}
                 </div>
               </div>
+
+              {/* BLOCO DE TROCA-TROCA */}
+              <div className="pt-6 border-t border-gray-100 dark:border-gray-800">
+                 <div className="flex items-center justify-between mb-4">
+                     <label className="flex items-center gap-2 text-sm font-bold text-gray-900 dark:text-white">
+                        <ArrowLeftRight className="text-purple-500" size={18} />
+                        Aceita troca?
+                     </label>
+                     <div className="flex bg-gray-100 dark:bg-gray-800 p-1 rounded-xl">
+                        <button onClick={() => setFormData({...formData, acceptsTrade: false})} className={`px-4 py-1.5 text-xs font-bold rounded-lg transition-all ${!formData.acceptsTrade ? 'bg-white shadow-sm text-gray-800' : 'text-gray-400'}`}>Não</button>
+                        <button onClick={() => setFormData({...formData, acceptsTrade: true})} className={`px-4 py-1.5 text-xs font-black uppercase rounded-lg transition-all ${formData.acceptsTrade ? 'bg-purple-600 text-white shadow-md' : 'text-gray-400'}`}>Sim</button>
+                     </div>
+                 </div>
+
+                 {formData.acceptsTrade && (
+                     <div className="animate-in slide-in-from-top-2">
+                        <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 ml-1">Aceito trocar por:</p>
+                        <div className="flex flex-wrap gap-2 mb-6">
+                            {TRADE_CATEGORIES.map(cat => (
+                                <button 
+                                    key={cat.id} 
+                                    onClick={() => toggleTradeInterest(cat.label)}
+                                    className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition-all ${formData.tradeInterests.includes(cat.label) ? 'bg-purple-50 dark:bg-purple-900/20 border-purple-200 text-purple-600' : 'bg-gray-50 dark:bg-gray-800 border-transparent text-gray-500'}`}
+                                >
+                                    {cat.label}
+                                </button>
+                            ))}
+                        </div>
+                        
+                        <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 ml-1">Condição da troca:</p>
+                        <div className="grid grid-cols-3 gap-2">
+                            <button onClick={() => setFormData({...formData, tradeCondition: 'direct'})} className={`py-2 rounded-xl text-[10px] font-bold border ${formData.tradeCondition === 'direct' ? 'border-purple-600 text-purple-600 bg-purple-50' : 'border-gray-200 text-gray-500'}`}>Troca Direta</button>
+                            <button onClick={() => setFormData({...formData, tradeCondition: 'diff_money'})} className={`py-2 rounded-xl text-[10px] font-bold border ${formData.tradeCondition === 'diff_money' ? 'border-purple-600 text-purple-600 bg-purple-50' : 'border-gray-200 text-gray-500'}`}>Aceito Oferta $</button>
+                            <button onClick={() => setFormData({...formData, tradeCondition: 'any'})} className={`py-2 rounded-xl text-[10px] font-bold border ${formData.tradeCondition === 'any' ? 'border-purple-600 text-purple-600 bg-purple-50' : 'border-gray-200 text-gray-500'}`}>Aberto</button>
+                        </div>
+                     </div>
+                 )}
+              </div>
            </div>
         </main>
 
@@ -547,7 +829,6 @@ export const DesapegaView: React.FC<DesapegaViewProps> = ({ onBack, user, onRequ
                     <p className="text-xs text-rose-800 dark:text-rose-200 font-bold mb-3">Esse valor parece abaixo do mercado. Deseja revisar?</p>
                     <div className="flex gap-4 justify-center">
                       <button onClick={() => setFormData({...formData, price: ''})} className="text-[10px] font-black uppercase text-rose-600 underline">Ajustar valor</button>
-                      {/* FIX: Replaced non-existent nextStep with setShowPriceWarning(true) to properly handle the price warning dismissal. */}
                       <button onClick={() => setShowPriceWarning(true)} className="text-[10px] font-black uppercase text-gray-400">Continuar mesmo assim</button>
                     </div>
                 </div>
@@ -559,7 +840,7 @@ export const DesapegaView: React.FC<DesapegaViewProps> = ({ onBack, user, onRequ
                <div className={`w-6 h-6 rounded border-2 flex items-center justify-center transition-colors ${formData.acceptExchange ? 'bg-indigo-600 border-indigo-600' : 'bg-white dark:bg-gray-800 border-gray-200'}`}>
                  {formData.acceptExchange && <Check size={16} className="text-white" strokeWidth={4} />}
                </div>
-               <input type="checkbox" className="hidden" checked={formData.acceptExchange} onChange={e => setFormData({...formData, acceptExchange: e.target.checked})} />
+               <input type="checkbox" className="hidden" checked={formData.acceptExchange} onChange={e => setFormData({...formData, acceptExchange: e.target.value})} />
                <span className="text-sm font-bold text-gray-700 dark:text-gray-300">Aceita troca neste item?</span>
              </label>
            </div>
@@ -602,6 +883,63 @@ export const DesapegaView: React.FC<DesapegaViewProps> = ({ onBack, user, onRequ
     );
   }
 
+  // --- TROCA-TROCA MODE (TINDER STYLE) ---
+  if (viewState === 'troca_mode') {
+      return (
+          <div className="min-h-screen bg-slate-950 flex flex-col items-center font-sans overflow-hidden">
+              <header className="absolute top-0 left-0 right-0 p-5 z-20 flex justify-between items-center">
+                  <button onClick={() => setViewState('list')} className="p-3 bg-white/10 backdrop-blur-md rounded-2xl text-white hover:bg-white/20 transition-colors">
+                      <X size={20} />
+                  </button>
+                  <span className="text-xs font-black text-white uppercase tracking-[0.2em] bg-purple-600/50 backdrop-blur-md px-3 py-1.5 rounded-full border border-purple-500/30">
+                      Modo Troca-Troca
+                  </span>
+                  <div className="w-10"></div>
+              </header>
+
+              <main className="flex-1 flex flex-col items-center justify-center w-full px-4 pt-16">
+                  {tradeItems.length > 0 ? (
+                      <div className="relative w-full max-w-sm flex flex-col items-center">
+                          <TradeCard 
+                            item={currentTradeItem} 
+                            onPass={nextMatch} 
+                            onMatch={handleProposeTrade} 
+                          />
+                          
+                          {showMatchAnimation && (
+                              <div className="absolute inset-0 z-50 flex items-center justify-center animate-in zoom-in duration-300">
+                                  <div className="bg-white p-8 rounded-full shadow-2xl animate-bounce">
+                                      <CheckCircle2 size={64} className="text-green-500" />
+                                  </div>
+                              </div>
+                          )}
+                      </div>
+                  ) : (
+                      <div className="text-center opacity-60">
+                          <AlertTriangle className="w-12 h-12 text-white mx-auto mb-4" />
+                          <p className="text-white text-sm font-bold">Nenhum item disponível para troca no momento.</p>
+                          <button onClick={() => setViewState('list')} className="mt-8 text-white underline text-xs uppercase font-black">Voltar para lista</button>
+                      </div>
+                  )}
+              </main>
+              
+              <div className="p-6 pb-12 w-full text-center z-10">
+                  <p className="text-[10px] text-white/30 uppercase tracking-widest font-bold">
+                      O app não intermedia pagamentos • Negocie com segurança
+                  </p>
+              </div>
+
+              <TradeProposalModal 
+                isOpen={isProposalModalOpen} 
+                onClose={() => setIsProposalModalOpen(false)}
+                targetItem={currentTradeItem}
+                myItems={myMockItems} // Mocked user items
+                onSendProposal={submitProposal}
+              />
+          </div>
+      );
+  }
+
   return (
     <div className="min-h-screen bg-[#F8F9FC] dark:bg-gray-950 font-sans pb-40 animate-in slide-in-from-right duration-300 relative">
       <header className="sticky top-0 z-40 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md px-5 py-6 border-b border-gray-100 dark:border-gray-800 shadow-sm">
@@ -617,6 +955,14 @@ export const DesapegaView: React.FC<DesapegaViewProps> = ({ onBack, user, onRequ
           </div>
           
           <div className="flex items-center gap-2">
+            <button 
+              onClick={() => setViewState('troca_mode')}
+              className="p-2.5 bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 rounded-xl active:scale-90 transition-all shadow-sm border border-purple-200 dark:border-purple-800"
+              title="Modo Troca-Troca"
+            >
+              <Repeat size={20} strokeWidth={2.5} />
+            </button>
+            
             <button 
               onClick={handleAnunciar}
               className="px-3 py-1.5 bg-[#1E5BFF] hover:bg-blue-600 text-white font-black rounded-full shadow-lg shadow-blue-500/10 flex items-center justify-center gap-1.5 uppercase tracking-widest text-[9px] border border-white/10 active:scale-95 transition-all h-9"

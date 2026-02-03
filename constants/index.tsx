@@ -69,15 +69,15 @@ export const SUBCATEGORIES: Record<string, { name: string; icon: React.ReactNode
     { name: 'Produtos Pet', icon: <Package /> },
     { name: 'Pets Exóticos', icon: <Sparkles /> },
   ],
-  'Profissionais': [
-    { name: 'Advocacia', icon: <Scale /> },
-    { name: 'Contabilidade', icon: <Calculator /> },
-    { name: 'Arquitetura', icon: <Ruler /> },
-    { name: 'Design & Marketing', icon: <PenTool /> },
-    { name: 'Fotografia', icon: <Camera /> },
-    { name: 'Consultoria', icon: <Briefcase /> },
-    { name: 'Engenharia', icon: <Building2 /> },
-    { name: 'Psicologia & Coaching', icon: <Brain /> },
+  'Pro': [
+    { name: 'Eletricista', icon: <Zap /> },
+    { name: 'Encanador', icon: <Droplets /> },
+    { name: 'Pintor', icon: <PaintRoller /> },
+    { name: 'Pedreiro', icon: <Hammer /> },
+    { name: 'Técnico em Informática', icon: <Laptop /> },
+    { name: 'Montador de Móveis', icon: <Settings /> },
+    { name: 'Marido de Aluguel', icon: <Wrench /> },
+    { name: 'Freelancers em Geral', icon: <Briefcase /> },
   ],
   'Saúde': [
     { name: 'Clínicas', icon: <Building2 /> },
@@ -90,18 +90,14 @@ export const SUBCATEGORIES: Record<string, { name: string; icon: React.ReactNode
     { name: 'Saúde Preventiva', icon: <Shield /> },
   ],
   'Serviços': [
-    { name: 'Eletricista', icon: <Zap /> },
-    { name: 'Encanador', icon: <Droplets /> },
-    { name: 'Pintor', icon: <PaintRoller /> },
-    { name: 'Pedreiro', icon: <Hammer /> },
-    { name: 'Chaveiro', icon: <Key /> },
-    { name: 'Marido de Aluguel', icon: <Wrench /> },
-    { name: 'Ar Condicionado', icon: <Fan /> },
-    { name: 'Montador de Móveis', icon: <Settings /> },
-    { name: 'Limpeza & Diaristas', icon: <Sparkles /> },
+    { name: 'Limpeza Residencial', icon: <Sparkles /> },
     { name: 'Dedetização', icon: <Shield /> },
-    { name: 'Fretes & Mudanças', icon: <Truck /> },
-    { name: 'Jardinagem', icon: <Shovel /> },
+    { name: 'Manutenção Geral', icon: <Settings /> },
+    { name: 'Chaveiro', icon: <Zap /> },
+    { name: 'Segurança', icon: <Shield /> },
+    { name: 'Serviços Rápidos', icon: <Zap /> },
+    { name: 'Assistência Técnica', icon: <Monitor /> },
+    { name: 'Instalações', icon: <Wrench /> },
   ],
   'Beleza': [
     { name: 'Salão de Cabelo', icon: <Scissors /> },
@@ -557,12 +553,83 @@ export const MOCK_CLASSIFIEDS: Classified[] = [
     { id: 'cl-doa-4', title: 'Doe um Brinquedo, Ganhe um Sorriso', advertiser: 'ONG Criança Feliz', category: 'Doações em geral', neighborhood: 'Curicica', description: 'Campanha de arrecadação de brinquedos novos ou usados em bom estado para o Dia das Crianças.', timestamp: 'Há 1 semana', contactWhatsapp: '5521922228888', typeLabel: 'Doação', imageUrl: 'https://images.unsplash.com/photo-1608846932299-617a653c07a3?q=80&w=800' },
     { id: 'cl-doa-5', title: 'Doação de Cesta Básica', advertiser: 'Igreja da Praça', category: 'Doações em geral', neighborhood: 'Tanque', description: 'Estamos recebendo alimentos não perecíveis para montar cestas básicas para famílias necessitadas.', timestamp: 'Há 10 dias', contactWhatsapp: '5521911119999', typeLabel: 'Doação', imageUrl: 'https://images.unsplash.com/photo-1599059813005-11265ba4b4ce?q=80&w=800' },
     
-    // Desapega JPA (5)
-    { id: 'cl-des-1', title: 'Vendo Bicicleta Aro 29 Usada', advertiser: 'Pedro M.', category: 'Desapega JPA', neighborhood: 'Freguesia', description: 'Bicicleta em ótimo estado, pouquíssimo usada. Pneus novos. Apenas retirada.', timestamp: 'Há 1 dia', contactWhatsapp: '5521998765432', typeLabel: 'Venda', price: 'R$ 800,00', imageUrl: 'https://images.unsplash.com/photo-1532298229144-0ec0c57515c7?q=80&w=800' },
-    { id: 'cl-des-2', title: 'Sofá 3 lugares Retrátil', advertiser: 'Fernanda R.', category: 'Desapega JPA', neighborhood: 'Taquara', description: 'Sofá confortável, precisa de limpeza, mas estrutura está perfeita. Motivo: comprei um novo.', timestamp: 'Há 2 dias', contactWhatsapp: '5521987659876', typeLabel: 'Venda', price: 'R$ 350,00', imageUrl: 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?q=80&w=800' },
-    { id: 'cl-des-3', title: 'Vendo iPhone 11 64GB', advertiser: 'Lucas T.', category: 'Desapega JPA', neighborhood: 'Pechincha', description: 'Saúde da bateria em 85%. Tela intacta, sempre usado com película. Acompanha caixa e cabo.', timestamp: 'Há 2 dias', contactWhatsapp: '5521976541234', typeLabel: 'Venda', price: 'R$ 1.500,00', imageUrl: 'https://images.unsplash.com/photo-1616348436168-de43ad0e12de?q=80&w=800' },
-    { id: 'cl-des-4', title: 'Mesa de Jantar 4 Lugares', advertiser: 'Beatriz C.', category: 'Desapega JPA', neighborhood: 'Anil', description: 'Mesa de madeira com tampo de vidro. Acompanha 4 cadeiras estofadas. Pequenas marcas de uso.', timestamp: 'Há 4 dias', contactWhatsapp: '5521965439876', typeLabel: 'Venda', price: 'R$ 400,00', imageUrl: 'https://images.unsplash.com/photo-1533090481720-856c6e3c1fdc?q=80&w=800' },
-    { id: 'cl-des-5', title: 'Tênis de Corrida nº 42', advertiser: 'Ricardo S.', category: 'Desapega JPA', neighborhood: 'Freguesia', description: 'Usei apenas 3 vezes, ficou grande para mim. Marca Asics. Em estado de novo.', timestamp: 'Há 5 dias', contactWhatsapp: '5521954328765', typeLabel: 'Venda', price: 'R$ 250,00', imageUrl: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=800' },
+    // Desapega JPA (5) (Com campos de troca)
+    { 
+      id: 'cl-des-1', 
+      title: 'Vendo Bicicleta Aro 29 Usada', 
+      advertiser: 'Pedro M.', 
+      category: 'Desapega JPA', 
+      neighborhood: 'Freguesia', 
+      description: 'Bicicleta em ótimo estado, pouquíssimo usada. Pneus novos. Apenas retirada.', 
+      timestamp: 'Há 1 dia', 
+      contactWhatsapp: '5521998765432', 
+      typeLabel: 'Venda', 
+      price: 'R$ 800,00', 
+      imageUrl: 'https://images.unsplash.com/photo-1532298229144-0ec0c57515c7?q=80&w=800',
+      acceptsTrade: true,
+      tradeInterests: ['Celular', 'Videogame'],
+      tradeCondition: 'diff_money'
+    },
+    { 
+      id: 'cl-des-2', 
+      title: 'Sofá 3 lugares Retrátil', 
+      advertiser: 'Fernanda R.', 
+      category: 'Desapega JPA', 
+      neighborhood: 'Taquara', 
+      description: 'Sofá confortável, precisa de limpeza, mas estrutura está perfeita. Motivo: comprei um novo.', 
+      timestamp: 'Há 2 dias', 
+      contactWhatsapp: '5521987659876', 
+      typeLabel: 'Venda', 
+      price: 'R$ 350,00', 
+      imageUrl: 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?q=80&w=800',
+      acceptsTrade: false
+    },
+    { 
+      id: 'cl-des-3', 
+      title: 'Vendo iPhone 11 64GB', 
+      advertiser: 'Lucas T.', 
+      category: 'Desapega JPA', 
+      neighborhood: 'Pechincha', 
+      description: 'Saúde da bateria em 85%. Tela intacta, sempre usado com película. Acompanha caixa e cabo.', 
+      timestamp: 'Há 2 dias', 
+      contactWhatsapp: '5521976541234', 
+      typeLabel: 'Venda', 
+      price: 'R$ 1.500,00', 
+      imageUrl: 'https://images.unsplash.com/photo-1616348436168-de43ad0e12de?q=80&w=800',
+      acceptsTrade: true,
+      tradeInterests: ['Notebook', 'Tablet'],
+      tradeCondition: 'direct'
+    },
+    { 
+      id: 'cl-des-4', 
+      title: 'Mesa de Jantar 4 Lugares', 
+      advertiser: 'Beatriz C.', 
+      category: 'Desapega JPA', 
+      neighborhood: 'Anil', 
+      description: 'Mesa de madeira com tampo de vidro. Acompanha 4 cadeiras estofadas. Pequenas marcas de uso.', 
+      timestamp: 'Há 4 dias', 
+      contactWhatsapp: '5521965439876', 
+      typeLabel: 'Venda', 
+      price: 'R$ 400,00', 
+      imageUrl: 'https://images.unsplash.com/photo-1533090481720-856c6e3c1fdc?q=80&w=800',
+      acceptsTrade: true,
+      tradeInterests: ['Eletrodomésticos', 'Móveis'],
+      tradeCondition: 'any'
+    },
+    { 
+      id: 'cl-des-5', 
+      title: 'Tênis de Corrida nº 42', 
+      advertiser: 'Ricardo S.', 
+      category: 'Desapega JPA', 
+      neighborhood: 'Freguesia', 
+      description: 'Usei apenas 3 vezes, ficou grande para mim. Marca Asics. Em estado de novo.', 
+      timestamp: 'Há 5 dias', 
+      contactWhatsapp: '5521954328765', 
+      typeLabel: 'Venda', 
+      price: 'R$ 250,00', 
+      imageUrl: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=800',
+      acceptsTrade: false
+    },
 ];
 
 export const MOCK_REAL_ESTATE_PROPERTIES: RealEstateProperty[] = [
@@ -846,9 +913,7 @@ export const MOCK_COMMUNITY_POSTS: CommunityPost[] = [
     neighborhood: 'Tanque',
     timestamp: '12h',
     likes: 15,
-    comments: 22,
-    storeId: 'grupo-esquematiza',
-    imageUrl: 'https://images.unsplash.com/photo-1589939705384-5185137a7f0f?q=80&w=600&auto=format&fit=crop'
+    comments: 22
   },
   {
     id: 'post-8',
@@ -862,8 +927,7 @@ export const MOCK_COMMUNITY_POSTS: CommunityPost[] = [
     neighborhood: 'Freguesia',
     timestamp: '14h',
     likes: 18,
-    comments: 45,
-    imageUrl: 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?q=80&w=600&auto=format&fit=crop'
+    comments: 45
   },
   {
     id: 'post-9',
@@ -877,23 +941,6 @@ export const MOCK_COMMUNITY_POSTS: CommunityPost[] = [
     neighborhood: 'Freguesia',
     timestamp: '1d',
     likes: 5,
-    comments: 7,
-    imageUrl: 'https://images.unsplash.com/photo-1600518464441-9154a4dea21b?q=80&w=600&auto=format&fit=crop'
-  },
-  {
-    id: 'post-10',
-    userId: 'u10',
-    userName: 'Padaria Imperial',
-    userAvatar: 'https://ui-avatars.com/api/?name=Padaria+Imperial&background=1E5BFF&color=fff',
-    authorRole: 'merchant',
-    content: 'Acabou de sair pão quentinho! Venham conferir nossa fornada especial de domingo. 🥖🥐',
-    type: 'recommendation',
-    communityId: 'comm-tips',
-    neighborhood: 'Freguesia',
-    timestamp: '30 min',
-    likes: 56,
-    comments: 12,
-    imageUrl: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?q=80&w=600&auto=format&fit=crop',
-    showOnStoreProfile: true
+    comments: 7
   }
 ];
