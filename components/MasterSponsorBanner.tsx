@@ -1,58 +1,53 @@
+
 import React from 'react';
-import { Crown, ArrowRight, Sparkles } from 'lucide-react';
+import { Crown, Star } from 'lucide-react';
 
 interface MasterSponsorBannerProps {
   onClick: () => void;
   label?: string;
-  sponsor?: {
-    name: string;
-    subtitle: string;
-    logoUrl?: string;
-  } | null;
 }
 
-export const MasterSponsorBanner: React.FC<MasterSponsorBannerProps> = ({ onClick, label, sponsor }) => {
+export const MasterSponsorBanner: React.FC<MasterSponsorBannerProps> = ({ onClick, label }) => {
   return (
     <div 
-      onClick={onClick}
-      className="relative w-full mt-12 mb-8 rounded-[2.5rem] bg-gradient-to-br from-slate-800 via-gray-900 to-black p-8 shadow-2xl shadow-black/30 overflow-hidden cursor-pointer group active:scale-[0.98] transition-all"
+       onClick={onClick}
+       className="relative w-full rounded-[2rem] p-[2px] bg-gradient-to-r from-amber-400 via-amber-200 to-amber-400 shadow-[0_10px_30px_rgba(245,158,11,0.15)] cursor-pointer group active:scale-[0.98] transition-all mt-6"
     >
-      {/* Background Decor */}
-      <div className="absolute top-0 right-0 w-64 h-64 bg-amber-500/10 rounded-full blur-3xl -mr-32 -mt-32 pointer-events-none"></div>
-      <div className="absolute bottom-0 left-0 w-48 h-48 bg-blue-600/5 rounded-full blur-2xl -ml-24 -mb-24 pointer-events-none"></div>
-      
-      <div className="relative z-10">
-        {/* Badge superior */}
-        <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md px-3 py-1 rounded-full border border-white/10 mb-6">
-          <Crown className="w-3.5 h-3.5 text-yellow-300 fill-yellow-300" />
-          <span className="text-[10px] font-black text-white uppercase tracking-[0.2em]">Patrocinador Master</span>
-        </div>
+       <div className="bg-slate-900 dark:bg-slate-900 rounded-[1.9rem] p-5 relative overflow-hidden h-full">
+           {/* Efeito de brilho de fundo */}
+           <div className="absolute top-0 right-0 w-48 h-48 bg-amber-500/10 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
+           
+           <div className="absolute top-0 right-6 -translate-y-1/2 z-20">
+              <span className="bg-amber-400 text-slate-900 text-[8px] font-black px-3 py-0.5 rounded-b-lg uppercase tracking-[0.15em] shadow-md flex items-center gap-1.5 border-x border-b border-amber-300">
+                 <Crown className="w-3 h-3 fill-slate-900" /> Patrocinador Master
+              </span>
+           </div>
 
-        {/* Conteúdo Central */}
-        <div className="space-y-2 mb-8">
-          <h2 className="text-2xl font-black text-white leading-tight uppercase tracking-tighter">
-            {sponsor?.name || 'Grupo Esquematiza'}
-          </h2>
-          <p className="text-sm text-slate-300 font-medium leading-relaxed max-w-[260px]">
-            {sponsor?.subtitle || `Apoiando o crescimento dos negócios em ${label || 'Jacarepaguá'}.`}
-          </p>
-        </div>
-
-        {/* Rodapé do Banner */}
-        <div className="flex items-center justify-between pt-6 border-t border-white/10">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center text-white">
-              <Sparkles size={16} />
-            </div>
-            <span className="text-[10px] font-black text-white uppercase tracking-widest">Experiência Exclusiva</span>
-          </div>
-          
-          <button className="bg-white text-slate-900 font-black py-3 px-6 rounded-2xl shadow-xl flex items-center gap-2 text-[10px] uppercase tracking-widest group-hover:gap-3 transition-all">
-            Conhecer holding
-            <ArrowRight size={14} />
-          </button>
-        </div>
-      </div>
+           <div className="flex gap-4 items-center">
+               <div className="w-20 h-20 rounded-2xl bg-white flex-shrink-0 overflow-hidden relative shadow-xl border-2 border-slate-700">
+                    <img 
+                       src="https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?q=80&w=800&auto=format&fit=crop"
+                       alt="Grupo Esquematiza" 
+                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" 
+                   />
+               </div>
+               <div className="flex-1 min-w-0 pt-1">
+                   <h3 className="font-black text-lg text-white leading-tight truncate mb-1 tracking-tighter uppercase">Grupo Esquematiza</h3>
+                   <p className="text-[10px] text-slate-400 line-clamp-2 mb-3 font-medium leading-relaxed">
+                     Líder em segurança e facilities em {label || 'Jacarepaguá'}.
+                   </p>
+                    <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-1 text-[10px] font-bold text-amber-400 bg-amber-400/10 px-2 py-1 rounded-lg border border-amber-400/20">
+                           <Star className="w-3 h-3 fill-current" />
+                           5.0
+                        </div>
+                        <div className="bg-slate-800 px-2 py-1 rounded-lg border border-white/5">
+                            <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Holdings</span>
+                        </div>
+                    </div>
+               </div>
+           </div>
+       </div>
     </div>
   );
 };
