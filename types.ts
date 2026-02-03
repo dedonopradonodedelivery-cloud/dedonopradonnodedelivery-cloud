@@ -240,6 +240,7 @@ export interface CommunityPost {
   videoUrl?: string;
   theme?: 'utilidade' | 'seguranca' | 'lazer' | 'dicas' | 'geral';
   showOnStoreProfile?: boolean;
+  storeId?: string;
 }
 
 export interface Story {

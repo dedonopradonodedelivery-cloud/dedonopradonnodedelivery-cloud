@@ -25,16 +25,29 @@ interface UserCupomScreenProps {
   onStoreClick: (store: Store) => void;
 }
 
+// MOCK LOCAL DE CUPONS (Regra: 3 ATIVO, 2 EXPIRADO, 1 USADO)
+const MOCK_COUPONS = [
+  { id: 'CUP-BIBI20', storeId: 'f-1', storeName: 'Bibi Lanches', category: 'Comida', neighborhood: 'Freguesia', redeemedAt: new Date().toISOString(), expiresAt: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toISOString(), status: 'available', discount: '20% OFF' },
+  { id: 'CUP-PET10', storeId: 'f-3', storeName: 'Pet Shop Alegria', category: 'Pets', neighborhood: 'Pechincha', redeemedAt: new Date().toISOString(), expiresAt: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000).toISOString(), status: 'available', discount: '10% OFF' },
+  { id: 'CUP-HAIR15', storeId: 'f-2', storeName: 'Studio Hair Vip', category: 'Beleza', neighborhood: 'Taquara', redeemedAt: new Date().toISOString(), expiresAt: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString(), status: 'available', discount: '15% OFF' },
+  { id: 'CUP-DROG5', storeId: 'f-7', storeName: 'Drogaria JPA', category: 'Farmácia', neighborhood: 'Freguesia', redeemedAt: new Date().toISOString(), expiresAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(), status: 'expired', discount: '5% OFF' },
+  { id: 'CUP-FIT30', storeId: 'f-8', storeName: 'Academia FitBairro', category: 'Esportes', neighborhood: 'Taquara', redeemedAt: new Date().toISOString(), expiresAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(), status: 'expired', discount: '30% OFF' },
+  { id: 'CUP-ZEPIZZA', storeId: 'f-5', storeName: 'Pizzaria do Zé', category: 'Comida', neighborhood: 'Freguesia', redeemedAt: new Date().toISOString(), expiresAt: new Date(Date.now() + 20 * 24 * 60 * 60 * 1000).toISOString(), status: 'used', discount: '15% OFF' },
+];
+
 export const UserCupomScreen: React.FC<UserCupomScreenProps> = ({ onBack, onNavigate, onStoreClick }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [selectedForUse, setSelectedForUse] = useState<any | null>(null);
 
   const savedCoupons = useMemo(() => {
-    const coupons = JSON.parse(localStorage.getItem('user_saved_coupons') || '[]');
+    // Mescla cupons reais do localStorage com os Mocks
+    const localSaved = JSON.parse(localStorage.getItem('user_saved_coupons') || '[]');
+    const allCoupons = [...MOCK_COUPONS, ...localSaved];
     const now = new Date().getTime();
 
-    return coupons.map((c: any) => {
+    return allCoupons.map((c: any) => {
+        // Validação dinâmica de expiração para cupons 'available'
         const isExpired = new Date(c.expiresAt).getTime() < now && c.status === 'available';
         return {
             ...c,
@@ -104,7 +117,7 @@ export const UserCupomScreen: React.FC<UserCupomScreenProps> = ({ onBack, onNavi
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder="Buscar por loja..."
-                className="w-full bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 py-4 pl-11 pr-4 rounded-2xl text-sm font-medium outline-none focus:border-blue-500 transition-all shadow-sm dark:text-white"
+                className="w-full bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-800 py-4 pl-11 pr-4 rounded-2xl text-sm font-medium outline-none focus:border-blue-500 transition-all shadow-sm dark:text-white"
             />
         </div>
 
@@ -149,7 +162,7 @@ export const UserCupomScreen: React.FC<UserCupomScreenProps> = ({ onBack, onNavi
                              {coupon.status === 'available' ? (
                                 <button 
                                     onClick={() => setSelectedForUse(coupon)}
-                                    className="text-[10px] h-[44px] px-4 -mr-4 font-black text-blue-600 uppercase tracking-widest flex items-center gap-1 hover:underline active:opacity-60 transition-all"
+                                    className="bg-blue-600 text-white text-[10px] px-6 py-2.5 rounded-xl font-black uppercase tracking-widest shadow-lg shadow-blue-500/20 active:scale-95 transition-all flex items-center gap-2"
                                 >
                                     Usar Agora <ArrowRight size={12} strokeWidth={3} />
                                 </button>
@@ -164,7 +177,7 @@ export const UserCupomScreen: React.FC<UserCupomScreenProps> = ({ onBack, onNavi
             )) : (
                 <div className="py-24 flex flex-col items-center justify-center text-center opacity-30">
                     <Ticket size={48} className="text-gray-400 mb-4" />
-                    <p className="text-sm font-bold uppercase tracking-widest leading-relaxed">Sua carteira de cupons<br/>está vazia.</p>
+                    <p className="text-sm font-bold uppercase tracking-widest leading-relaxed">Nenhum cupom<br/>encontrado.</p>
                 </div>
             )}
         </div>
@@ -179,11 +192,11 @@ export const UserCupomScreen: React.FC<UserCupomScreenProps> = ({ onBack, onNavi
         </div>
       </main>
 
-      {/* MODAL / BOTTOM SHEET USAR CUPOM - AJUSTE DE CENTRALIZAÇÃO */}
+      {/* MODAL / BOTTOM SHEET USAR CUPOM */}
       {selectedForUse && (
           <div className="fixed inset-0 z-[1001] bg-black/60 backdrop-blur-sm flex items-end justify-center p-4 animate-in fade-in duration-200" onClick={() => setSelectedForUse(null)}>
               <div 
-                className="bg-white dark:bg-gray-900 w-full max-w-md rounded-[2.5rem] p-8 pb-12 shadow-2xl animate-in slide-in-from-bottom duration-300 flex flex-col items-center text-center"
+                className="bg-white dark:bg-gray-900 w-full max-w-md rounded-t-[2.5rem] p-8 pb-12 shadow-2xl animate-in slide-in-from-bottom duration-300 flex flex-col items-center text-center"
                 onClick={e => e.stopPropagation()}
               >
                   <div className="w-12 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full mb-8 shrink-0"></div>

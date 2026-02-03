@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState, useMemo } from 'react';
 import {
   ChevronLeft,
@@ -35,9 +36,9 @@ import {
   Info,
   Flag,
   UserCheck,
-  /* Fix: adding missing imports for 'Check' and 'XCircle' used on line 312 */
   Check,
-  XCircle
+  XCircle,
+  Image as ImageIconLucide
 } from 'lucide-react';
 import { Store, BusinessHour, StoreReview } from '../types';
 import { supabase } from '../lib/supabaseClient';
@@ -57,6 +58,16 @@ const WEEK_DAYS_LABELS: Record<string, string> = {
   sexta: 'Sexta-feira',
   sabado: 'Sábado',
   domingo: 'Domingo',
+};
+
+const MOCK_BUSINESS_HOURS: Record<string, BusinessHour> = {
+    segunda: { open: true, start: '08:00', end: '18:00' },
+    terca: { open: true, start: '08:00', end: '18:00' },
+    quarta: { open: true, start: '08:00', end: '18:00' },
+    quinta: { open: true, start: '08:00', end: '18:00' },
+    sexta: { open: true, start: '08:00', end: '18:00' },
+    sabado: { open: true, start: '09:00', end: '14:00' },
+    domingo: { open: false, start: '', end: '' },
 };
 
 const MOCK_REVIEWS: StoreReview[] = [
@@ -85,7 +96,7 @@ const MOCK_REVIEWS: StoreReview[] = [
 const PixIcon: React.FC<{ className?: string }> = ({ className }) => (
   <svg viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg" className={className}>
     <g fill="currentColor">
-      <path d="M128 24a104 104 0 1 0 104 104A104.11 104.11 0 0 0 128 24Zm47.78 131.45-31.11-31.11a12 12 0 0 0-17 0l-31.11 31.11a12 12 0 0 1-18.33-15.43l31.11-31.11a12 12 0 0 0 0-17l-31.11-31.11a12 12 0 0 1 17-17l31.11 31.11a12 12 0 0 0 17 0l31.11-31.11a12 12 0 1 1 17 17l-31.11 31.11a12 12 0 0 0 0 17l31.11 31.11a12 12 0 1 1-15.44 18.33Z"/>
+      <path d="M128 24a104 104 0 1 0 104 104A104.11 104.11 0 0 0 128 24Zm47.78 131.45-31.11-31.11a12 12 0 0 0-17 0l-31.11 31.11a12 12 0 0 1-18.33-15.43l31.11-31.11a12 12 0 0 0 0-17l-31.11-31.11a12 12 0 0 1 17-17l31.11 31.11a12 12 0 0 0 17 0l31.11-31.11a12 12 0 1 1 17 17l-31.11 31.11a12 12 0 0 0 0 17l31.11-31.11a12 12 0 1 1-15.44 18.33Z"/>
     </g>
   </svg>
 );
@@ -100,25 +111,13 @@ const paymentIconMap: Record<string, React.ElementType> = {
   'Vale Refeição / Alimentação': Ticket,
 };
 
-// Imagens fake para o feed em grade
-const FEED_PLACEHOLDERS = [
-  'https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=400',
-  'https://images.unsplash.com/photo-1513104890138-7c749659a591?q=80&w=400',
-  'https://images.unsplash.com/photo-1561758033-d89a9ad46330?q=80&w=400',
-  'https://images.unsplash.com/photo-1562322140-8baeececf3df?q=80&w=400',
-  'https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?q=80&w=400',
-  'https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?q=80&w=400',
-  'https://images.unsplash.com/photo-1590301157890-4810ed352733?q=80&w=400',
-  'https://images.unsplash.com/photo-1587854692152-cbe660dbbb88?q=80&w=400',
-  'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=400',
-];
-
 export const StoreDetailView: React.FC<{ 
   store: Store; 
   onBack: () => void; 
   onPay?: () => void;
   onClaim?: () => void;
-}> = ({ store, onBack, onPay, onClaim }) => {
+  onNavigate: (view: string, data?: any) => void;
+}> = ({ store, onBack, onPay, onClaim, onNavigate }) => {
   const { user } = useAuth();
   const { currentNeighborhood } = useNeighborhood();
   const [isFavorite, setIsFavorite] = useState(false);
@@ -127,22 +126,17 @@ export const StoreDetailView: React.FC<{
   const [closedReported, setClosedReported] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
 
-  // Hook para salvar posts, passado para o PostCard (embora o PostCard não seja mais usado diretamente aqui, mantemos se necessário)
-  const { isPostSaved, toggleSavePost } = useSavedPosts(user);
-
-  // Perfil Fake/Construção
   const isPlaceholder = store.name === 'Loja Parceira';
-
-  const [userRating, setUserRating] = useState(0);
-  const [userComment, setUserComment] = useState('');
-  const [isSubmittingReview, setIsSubmittingReview] = useState(false);
-  const [reviewSuccessMessage, setReviewSuccessMessage] = useState('');
 
   const images = useMemo(() => {
     const gallery = store.gallery?.slice(0, 6) || [];
     if (gallery.length > 0) return gallery;
     return [store.banner_url || store.image || "https://images.unsplash.com/photo-1570129477492-45c003edd2be?q=80&w=1200&auto=format&fit=crop"];
   }, [store]);
+
+  const storePosts = useMemo(() => {
+      return MOCK_COMMUNITY_POSTS.filter(p => p.storeId === store.id);
+  }, [store.id]);
 
   useEffect(() => {
     if (images.length <= 1) return;
@@ -164,8 +158,6 @@ export const StoreDetailView: React.FC<{
 
   const handleReportClosed = () => {
     setIsClosedReporting(true);
-    // Simulação de lógica: salvamos o reporte no localStorage.
-    // Em produção, isso iria para uma tabela 'closed_reports'.
     const reports = JSON.parse(localStorage.getItem(`closed_reports_${store.id}`) || '[]');
     const userId = user?.id || 'anonymous';
     if (!reports.includes(userId)) {
@@ -176,10 +168,6 @@ export const StoreDetailView: React.FC<{
     setTimeout(() => {
         setIsClosedReporting(false);
         setClosedReported(true);
-        if (reports.length >= 3) {
-            console.log(`ALERTA ADM: Loja ${store.name} reportada como fechada por 3 usuários.`);
-            // Em produção, dispararia notificação via edge function
-        }
     }, 1200);
   };
 
@@ -201,6 +189,13 @@ export const StoreDetailView: React.FC<{
   const reviewsToDisplay = useMemo(() => {
     return isPlaceholder ? [] : MOCK_REVIEWS;
   }, [isPlaceholder]);
+
+  const displayHours = useMemo(() => {
+    if (store.business_hours && Object.keys(store.business_hours).length > 0) {
+        return store.business_hours;
+    }
+    return MOCK_BUSINESS_HOURS;
+  }, [store.business_hours]);
 
   return (
     <div className="min-h-screen bg-white dark:bg-gray-900 font-sans relative overflow-x-hidden">
@@ -238,15 +233,15 @@ export const StoreDetailView: React.FC<{
 
         <div className="px-5 relative">
           
-          {/* --- LOGO CENTRALIZADA (ESTILO IFOD) --- */}
-          <div className="flex justify-center -mt-14 z-20 relative">
+          {/* --- LOGO CENTRALIZADA (SOBREPOSTA) --- */}
+          <div className="flex justify-center -mt-24 z-30 relative">
             <div className="w-24 h-24 rounded-full bg-white dark:bg-gray-800 p-1 shadow-xl border-4 border-white dark:border-gray-900 overflow-hidden">
               <img src={logoImg} alt="Logo" className="w-full h-full object-contain rounded-full" />
             </div>
           </div>
 
-          {/* CARD DE INFORMAÇÕES (ESTILO IFOD SOBREPOSTO) */}
-          <div className="bg-white dark:bg-gray-800 rounded-3xl p-6 pt-12 -mt-10 text-center shadow-lg border border-gray-100 dark:border-gray-800 relative z-10">
+          {/* CARD DE INFORMAÇÕES (SOBREPOSTO AO TOPO) */}
+          <div className="bg-white dark:bg-gray-800 rounded-3xl p-6 pt-12 -mt-20 text-center shadow-lg border border-gray-100 dark:border-gray-800 relative z-10">
               <div className="mb-2">
                   <div className="flex items-center justify-center gap-1.5 mb-1">
                     <h1 className="text-2xl font-black text-gray-900 dark:text-white leading-tight uppercase tracking-tighter">{store.name}</h1>
@@ -266,7 +261,6 @@ export const StoreDetailView: React.FC<{
                   </div>
               </div>
 
-              {/* Botões de Ação Rápida (Aumentados e em Grid) */}
               <div className="grid grid-cols-4 gap-4 mt-8">
                 <button onClick={() => { track('store_click_whatsapp'); window.open(`https://wa.me/55${phoneDigits}`, '_blank'); }} className="flex flex-col items-center gap-2 group">
                     <div className="w-14 h-14 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 rounded-2xl flex items-center justify-center group-active:scale-90 transition-all border border-emerald-100 dark:border-emerald-800 shadow-sm">
@@ -294,7 +288,6 @@ export const StoreDetailView: React.FC<{
                 </button>
               </div>
 
-              {/* Novas Ações de Reivindicação e Reporte */}
               <div className="grid grid-cols-2 gap-3 mt-6 pt-6 border-t border-gray-100 dark:border-gray-700">
                 <button 
                   onClick={onClaim}
@@ -319,7 +312,6 @@ export const StoreDetailView: React.FC<{
           </div>
         </div>
 
-        {/* TABS DE CONTEÚDO REORGANIZADAS */}
         <div className="mt-8 px-5">
             <div className="flex bg-gray-100 dark:bg-gray-900 p-1 rounded-2xl mb-6 overflow-x-auto no-scrollbar">
                 {[
@@ -338,7 +330,6 @@ export const StoreDetailView: React.FC<{
                 ))}
             </div>
 
-            {/* TAB: SOBRE (Com Feed em Grade) */}
             {activeTab === 'description' && (
                 <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
                     <div className="bg-white dark:bg-gray-900 p-6 rounded-[2.5rem] border border-gray-100 dark:border-gray-800 shadow-sm">
@@ -364,23 +355,42 @@ export const StoreDetailView: React.FC<{
                         )}
                     </div>
 
-                    {/* FEED EM GRADE ESTILO INSTAGRAM DENTRO DO SOBRE */}
+                    {/* FEED EM GRADE VINCULADO AO JPA CONVERSA */}
                     <div className="space-y-4">
                         <div className="flex items-center gap-2 px-1">
-                            <ImageIcon size={16} className="text-blue-500" />
+                            <ImageIconLucide size={16} className="text-blue-500" />
                             <h3 className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-tight">Feed da Loja</h3>
                         </div>
-                        <div className="grid grid-cols-3 gap-1 rounded-[2rem] overflow-hidden border border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-900">
-                            {FEED_PLACEHOLDERS.map((url, i) => (
-                                <div key={i} className="aspect-square bg-gray-200 dark:bg-gray-800 overflow-hidden relative group">
-                                    <img src={url} alt={`Feed ${i}`} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
-                                    <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                                </div>
-                            ))}
-                        </div>
+                        {storePosts.length > 0 ? (
+                            <div className="grid grid-cols-3 gap-1 rounded-[2rem] overflow-hidden border border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-900">
+                                {storePosts.map((post) => (
+                                    <div 
+                                        key={post.id} 
+                                        onClick={() => onNavigate('neighborhood_posts', { postId: post.id })}
+                                        className="aspect-square bg-gray-200 dark:bg-gray-800 overflow-hidden relative group cursor-pointer active:opacity-80 transition-all"
+                                    >
+                                        <img 
+                                            src={post.imageUrl || post.imageUrls?.[0] || 'https://images.unsplash.com/photo-1517457373958-b7bdd4587205?q=80&w=400'} 
+                                            alt={`Post ${post.id}`} 
+                                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" 
+                                        />
+                                        <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                                        {post.videoUrl && (
+                                            <div className="absolute top-1 right-1 p-1 bg-black/40 rounded-md">
+                                                <Zap size={10} className="text-white fill-white" />
+                                            </div>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="p-10 bg-white dark:bg-gray-800 rounded-[2rem] border border-dashed border-gray-200 dark:border-gray-700 text-center flex flex-col items-center">
+                                <ImageIconLucide size={24} className="text-gray-300 mb-2" />
+                                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Nenhuma postagem ainda</p>
+                            </div>
+                        )}
                     </div>
 
-                    {/* Trust Block */}
                     <div className="bg-white dark:bg-gray-900 p-6 rounded-[2.5rem] border border-gray-100 dark:border-gray-800 shadow-sm">
                         <TrustBlock store={store} />
                     </div>
@@ -432,12 +442,12 @@ export const StoreDetailView: React.FC<{
                 </div>
             )}
 
-            {/* TAB: HORÁRIOS */}
+            {/* TAB: HORÁRIOS - COM MOCK LOCAL CONFORME SOLICITADO */}
             {activeTab === 'hours' && (
                 <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
                     <div className="bg-white dark:bg-gray-900 p-6 rounded-[2.5rem] border border-gray-100 dark:border-gray-800 shadow-sm">
                         <div className="space-y-4">
-                            {Object.entries(store.business_hours || {}).map(([dayKey, hours]) => {
+                            {Object.entries(displayHours).map(([dayKey, hours]) => {
                                 const h = hours as BusinessHour;
                                 return (
                                     <div key={dayKey} className="flex justify-between items-center text-sm border-b border-gray-50 dark:border-gray-800 pb-2 last:border-0 last:pb-0">

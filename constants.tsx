@@ -796,7 +796,8 @@ export const MOCK_COMMUNITY_POSTS: CommunityPost[] = [
     neighborhood: 'Tanque',
     timestamp: '12h',
     likes: 15,
-    comments: 22
+    comments: 22,
+    storeId: 'grupo-esquematiza'
   },
   {
     id: 'post-8',
@@ -825,5 +826,21 @@ export const MOCK_COMMUNITY_POSTS: CommunityPost[] = [
     timestamp: '1d',
     likes: 5,
     comments: 7
+  },
+  {
+    id: 'post-10',
+    userId: 'm-padaria',
+    userName: 'Padaria Imperial',
+    userAvatar: 'https://i.pravatar.cc/100?u=padaria',
+    authorRole: 'merchant',
+    content: 'Pão quentinho saindo agora! Venham aproveitar nossa fornada especial de brioche.',
+    type: 'recommendation',
+    communityId: 'comm-tips',
+    neighborhood: 'Freguesia',
+    timestamp: '10 min',
+    likes: 32,
+    comments: 4,
+    imageUrl: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?q=80&w=600&auto=format&fit=crop',
+    storeId: 'f-1'
   }
 ];
