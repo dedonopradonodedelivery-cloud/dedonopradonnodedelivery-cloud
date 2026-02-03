@@ -1,3 +1,4 @@
+
 import React, { useMemo } from 'react';
 import { Home, User as UserIcon, Newspaper, MessageSquare, Ticket } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
@@ -13,7 +14,7 @@ interface NavItem {
   id: string;
   icon: React.ElementType;
   label: string;
-  isMainAction?: boolean; // Flag para aplicar o estilo "alto-relevo" (elevated)
+  isMainAction?: boolean; 
   badge?: boolean;
 }
 
@@ -21,7 +22,6 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
   const { user } = useAuth();
   const [isAuthModalOpen, setIsAuthModalOpen] = React.useState(false);
 
-  // Lógica de badge para cupons ativos do cliente
   const hasActiveCoupons = useMemo(() => {
     if (!user || userRole !== 'cliente') return false;
     try {
@@ -32,42 +32,14 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
     }
   }, [user, userRole, activeTab]);
 
-  // Itens da barra fixa - ORDEM EXATA: Início, JPA Conversa, Cupom, Classificados, Menu
   const navItems = useMemo(() => {
-    const items: NavItem[] = [
-      { 
-        id: 'home', 
-        icon: Home, 
-        label: 'Início', 
-        isMainAction: false 
-      },
-      { 
-        id: 'neighborhood_posts', 
-        icon: MessageSquare, 
-        label: 'JPA Conversa', 
-        isMainAction: true // Destaque Alto-Relevo
-      },
-      { 
-        id: 'cupom_trigger', 
-        icon: Ticket, 
-        label: 'Cupom', 
-        isMainAction: true, // Destaque Alto-Relevo
-        badge: userRole !== 'lojista' ? hasActiveCoupons : false 
-      },
-      { 
-        id: 'classifieds', 
-        icon: Newspaper, 
-        label: 'Classificados', 
-        isMainAction: true // Destaque Alto-Relevo
-      },
-      { 
-        id: 'profile', 
-        icon: UserIcon, 
-        label: 'Menu', 
-        isMainAction: false 
-      },
+    return [
+      { id: 'home', icon: Home, label: 'Início', isMainAction: false },
+      { id: 'neighborhood_posts', icon: MessageSquare, label: 'JPA Conversa', isMainAction: true },
+      { id: 'cupom_trigger', icon: Ticket, label: 'Cupom', isMainAction: true, badge: userRole !== 'lojista' ? hasActiveCoupons : false },
+      { id: 'classifieds', icon: Newspaper, label: 'Classificados', isMainAction: true },
+      { id: 'profile', icon: UserIcon, label: 'Menu', isMainAction: false },
     ];
-    return items;
   }, [userRole, hasActiveCoupons]);
 
   const handleTabClick = (item: NavItem) => {
@@ -121,18 +93,14 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
     }
 
     const Icon = item.icon;
-    const iconColor = isActive 
-      ? 'text-blue-600 dark:text-blue-400' 
-      : 'text-blue-500/80 dark:text-blue-400/80';
-    
     return (
       <div className="relative">
         <Icon 
           className={`w-6 h-6 transition-all duration-200 ${isActive ? 'text-blue-600' : 'text-blue-500'}`} 
-          strokeWidth={2.5} 
+          strokeWidth={isActive ? 3 : 2.5} 
         />
         {item.badge && !isActive && (
-          <span className="absolute -top-1.5 -right-1.5 w-3 h-3 bg-red-500 border-2 border-white dark:border-gray-900 rounded-full animate-pulse shadow-sm"></span>
+          <span className="absolute -top-1.5 -right-1.5 w-3 h-3 bg-red-500 border-2 border-white dark:border-gray-900 rounded-full animate-pulse"></span>
         )}
       </div>
     );
@@ -140,8 +108,8 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
 
   return (
     <>
-      <div className="fixed bottom-0 left-0 right-0 mx-auto w-full max-w-md bg-white dark:bg-gray-950 z-[1000] h-[95px] rounded-t-[32px] shadow-[0_-10px_40px_rgba(0,0,0,0.1)] border-t border-gray-100 dark:border-gray-800 px-2">
-        <div className="grid w-full h-full grid-cols-5 items-center pb-4">
+      <div className="fixed bottom-0 left-0 right-0 mx-auto w-full max-w-md bg-white dark:bg-gray-950 z-[1000] h-[90px] rounded-t-[2.5rem] shadow-[0_-8px_40px_rgba(0,0,0,0.12)] border-t border-gray-100 dark:border-gray-800 px-2">
+        <div className="grid w-full h-full grid-cols-5 items-center">
           {navItems.map((item) => {
             let isActive = false;
             if (item.id === 'cupom_trigger') {
@@ -153,30 +121,30 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
             }
 
             return (
-              <div key={item.id} className="flex justify-center h-full items-center">
+              <div key={item.id} className="flex justify-center h-full items-center px-1">
                  <button 
                   onClick={() => handleTabClick(item)} 
-                  className="w-full h-full flex flex-col items-center justify-center gap-1.5 outline-none group active:scale-95 transition-transform" 
+                  className="w-full h-full flex flex-col items-center justify-center outline-none group active:scale-95 transition-transform" 
                 >
                   <div className={`
                     flex items-center justify-center transition-all duration-300 relative
                     ${item.isMainAction 
-                      ? `h-14 w-14 rounded-full border-[3px] -translate-y-4 mb-[-12px] shadow-lg ${
+                      ? `h-16 w-16 rounded-full border-[3px] -translate-y-8 mb-[-32px] shadow-xl ${
                           isActive 
-                            ? 'bg-blue-50 dark:bg-blue-900/40 border-blue-400 dark:border-blue-500 shadow-blue-500/20' 
-                            : 'bg-white dark:bg-gray-800 border-blue-100 dark:border-gray-700'
+                            ? 'bg-blue-50 dark:bg-blue-900/40 border-blue-500 shadow-blue-500/30 scale-105' 
+                            : 'bg-white dark:bg-gray-800 border-blue-50 dark:border-gray-700 shadow-black/5'
                         }`
-                      : 'h-8 w-8'
+                      : 'h-8 w-8 mb-1'
                     }
                   `}>
                     {renderIconOrAvatar(item, isActive)}
                   </div>
                   
-                  <span className={`text-[8.5px] font-black uppercase tracking-tighter transition-colors leading-none text-center px-1 ${
+                  <span className={`text-[8px] font-black uppercase tracking-tighter transition-colors leading-none text-center px-0.5 ${
                     isActive 
                       ? 'text-blue-600 dark:text-blue-400' 
                       : 'text-gray-400 dark:text-gray-500'
-                  }`}>
+                  } ${item.isMainAction ? 'mt-3' : ''}`}>
                     {item.label}
                   </span>
                 </button>
