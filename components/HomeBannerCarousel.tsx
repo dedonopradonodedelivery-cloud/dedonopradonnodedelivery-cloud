@@ -134,7 +134,7 @@ export const HomeBannerCarousel: React.FC<HomeBannerCarouselProps> = ({ onStoreC
     <div className="px-5 mb-6 bg-white dark:bg-gray-950">
       <div 
         onClick={() => handleBannerClick(currentBanner)}
-        className={`relative aspect-[16/10] w-full rounded-[2.5rem] overflow-hidden cursor-pointer transition-all duration-300 active:scale-[0.98] group ${currentBanner.bgColor}`}
+        className={`relative aspect-[16/12] w-full rounded-[2.5rem] overflow-hidden cursor-pointer transition-all duration-300 active:scale-[0.98] group ${currentBanner.bgColor}`}
       >
         <div className="w-full h-full relative">
           <img 

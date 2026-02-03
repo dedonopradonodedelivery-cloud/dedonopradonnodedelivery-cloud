@@ -355,18 +355,21 @@ export const NeighborhoodPostsView: React.FC<NeighborhoodPostsViewProps> = ({ on
   return (
     <div className="min-h-screen bg-[#F8F9FC] dark:bg-gray-950 font-sans animate-in fade-in duration-500 overflow-x-hidden">
       <header className="bg-white dark:bg-gray-900 px-6 pt-10 pb-6 border-b border-gray-100 dark:border-gray-800 rounded-b-[2.5rem] shadow-sm sticky top-0 z-40">
-        <div className="flex items-center justify-between gap-4 mb-3">
-          <div className="flex items-center gap-4">
-            <button onClick={onBack} className="p-2 bg-gray-50 dark:bg-gray-800 rounded-xl text-gray-500 hover:text-gray-900">
+        <div className="flex items-start justify-between gap-3 mb-4">
+          <div className="flex items-start gap-3 flex-1">
+            <button onClick={onBack} className="p-2.5 bg-gray-50 dark:bg-gray-800 rounded-xl text-gray-500 hover:text-gray-900 mt-1 shrink-0">
               <ChevronLeft size={20} />
             </button>
             <div>
               <h1 className="font-black text-xl text-gray-900 dark:text-white uppercase tracking-tighter leading-none">JPA Conversa</h1>
-              <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-1">O que está acontecendo agora</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 font-medium leading-snug mt-2">
+                Troque dicas, peça ajuda e saiba o que acontece no bairro em tempo real. O espaço oficial da nossa comunidade.
+              </p>
             </div>
           </div>
-          <button onClick={handleStartPost} className="p-2 bg-gray-100 dark:bg-gray-800 rounded-xl text-gray-500 hover:text-gray-900">
-            <Plus size={20} />
+          <button onClick={handleStartPost} className="flex items-center gap-1.5 px-4 py-2.5 bg-[#1E5BFF] text-white rounded-xl text-xs font-bold shadow-lg shadow-blue-500/20 hover:bg-blue-600 transition-all active:scale-95 shrink-0">
+            <Plus size={16} strokeWidth={3} />
+            Postar
           </button>
         </div>
 
@@ -407,3 +410,9 @@ export const NeighborhoodPostsView: React.FC<NeighborhoodPostsViewProps> = ({ on
     </div>
   );
 };
+
+const ChevronDown = ({ size, className }: { size?: number, className?: string }) => (
+  <svg width={size || 24} height={size || 24} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <path d="m6 9 6 6 6-6"/>
+  </svg>
+);
