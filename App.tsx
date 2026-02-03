@@ -36,8 +36,8 @@ import { SponsorInfoView } from '@/components/SponsorInfoView';
 import { ServicesLandingView } from '@/components/ServicesLandingView';
 import { CategoryBannerSalesView } from '@/components/CategoryBannerSalesView';
 import { BannerSalesWizard } from '@/components/BannerSalesWizard'; 
-import { StoreAdsModule } from '@/components/StoreAdsModule'; // Already imported, used in existing code
-import { StoreSponsoredAds } from '@/components/StoreSponsoredAds'; // New Import
+import { StoreAdsModule } from '@/components/StoreAdsModule'; 
+import { StoreSponsoredAds } from '@/components/StoreSponsoredAds'; 
 import { WeeklyRewardPage } from '@/components/WeeklyRewardPage'; 
 import { UserCupomScreen } from '@/components/UserCupomScreen'; 
 import { UserStatementView } from '@/components/UserStatementView';
@@ -47,6 +47,7 @@ import { StoreProfileEdit } from '@/components/StoreProfileEdit';
 import { ServiceMessagesListView } from '@/components/ServiceMessagesListView';
 import { MerchantReviewsModule } from '@/components/MerchantReviewsModule';
 import { MerchantCouponsModule } from '@/components/MerchantCouponsModule';
+import { MerchantPromotionsModule } from '@/components/MerchantPromotionsModule';
 import { StoreFinanceModule } from '@/components/StoreFinanceModule';
 import { StoreSupportModule } from '@/components/StoreSupportModule';
 import { StoreConnectModule } from '@/components/StoreConnectModule';
@@ -91,7 +92,6 @@ const App: React.FC = () => {
   
   const [activityType, setActivityType] = useState<string>('');
   
-  // State for initial view in modules (e.g., chat in StoreAdsModule)
   const [initialModuleView, setInitialModuleView] = useState<'sales' | 'chat' | undefined>(undefined);
 
   const [activeServiceRequestId, setActiveServiceRequestId] = useState<string | null>(null);
@@ -120,7 +120,6 @@ const App: React.FC = () => {
       setPreviousTab(activeTab);
     }
     
-    // Handle data passing for specific views
     if (view === 'store_ads_module' && (data === 'chat' || data === 'sales')) {
        setInitialModuleView(data);
     } else {
@@ -220,7 +219,7 @@ const App: React.FC = () => {
       handleNavigate('profile');
   };
 
-  const headerExclusionList = ['store_area', 'store_detail', 'profile', 'patrocinador_master', 'merchant_performance', 'neighborhood_posts', 'saved_posts', 'classifieds', 'services', 'services_landing', 'merchant_leads', 'service_chat', 'admin_panel', 'category_detail', 'subcategory_detail', 'sponsor_info', 'real_estate', 'jobs', 'job_detail', 'job_wizard', 'adoption', 'donations', 'desapega', 'category_banner_sales', 'banner_sales_wizard', 'weekly_reward_page', 'user_coupons', 'notifications', 'store_profile', 'about', 'support', 'favorites', 'user_statement', 'service_messages_list', 'merchant_reviews', 'merchant_coupons', 'store_finance', 'store_support', 'real_estate_wizard', 'real_estate_detail', 'plan_selection', 'classified_detail', 'classified_search_results', 'user_activity', 'my_neighborhoods', 'privacy_policy', 'app_suggestion', 'designer_panel', 'store_connect', 'merchant_panel', 'store_ads_module', 'store_sponsored'];
+  const headerExclusionList = ['store_area', 'store_detail', 'profile', 'patrocinador_master', 'merchant_performance', 'neighborhood_posts', 'saved_posts', 'classifieds', 'services', 'services_landing', 'merchant_leads', 'service_chat', 'admin_panel', 'category_detail', 'subcategory_detail', 'sponsor_info', 'real_estate', 'jobs', 'job_detail', 'job_wizard', 'adoption', 'donations', 'desapega', 'category_banner_sales', 'banner_sales_wizard', 'weekly_reward_page', 'user_coupons', 'notifications', 'store_profile', 'about', 'support', 'favorites', 'user_statement', 'service_messages_list', 'merchant_reviews', 'merchant_coupons', 'merchant_promotions', 'store_finance', 'store_support', 'real_estate_wizard', 'real_estate_detail', 'plan_selection', 'classified_detail', 'classified_search_results', 'user_activity', 'my_neighborhoods', 'privacy_policy', 'app_suggestion', 'designer_panel', 'store_connect', 'merchant_panel', 'store_ads_module', 'store_sponsored'];
   
   const RoleSwitcherModal: React.FC = () => {
     if (!isRoleSwitcherOpen) return null;
@@ -409,6 +408,10 @@ const App: React.FC = () => {
 
                     {activeTab === 'merchant_coupons' && (
                         <MerchantCouponsModule onBack={() => handleNavigate('profile')} />
+                    )}
+
+                    {activeTab === 'merchant_promotions' && (
+                        <MerchantPromotionsModule onBack={() => handleNavigate('profile')} />
                     )}
 
                     {activeTab === 'store_finance' && (

@@ -11,21 +11,22 @@ import {
   Heart, 
   Info, 
   HelpCircle, 
-  LogOut, 
-  User, 
-  Sparkles, 
-  Compass, 
-  LifeBuoy, 
-  AlertTriangle, 
-  Crown, 
-  Star, 
-  Moon, 
-  Sun, 
-  ImageIcon 
+  LogOut,
+  User,
+  Sparkles,
+  Compass,
+  LifeBuoy,
+  AlertTriangle,
+  Crown,
+  Star,
+  Moon,
+  Sun,
+  ImageIcon,
+  Tag
 } from 'lucide-react';
 import { User as SupabaseUser } from '@supabase/supabase-js';
-import { useAuth } from '../contexts/AuthContext';
-import { useTheme } from '../contexts/ThemeContext';
+import { useAuth } from '@/contexts/AuthContext';
+import { useTheme } from '@/contexts/ThemeContext';
 
 interface StoreAreaViewProps {
   onBack: () => void;
@@ -129,6 +130,13 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
         <section>
           <SectionHeader title="Ações" icon={Sparkles} />
           <div className="bg-white dark:bg-gray-800 rounded-[2.5rem] border border-gray-100 dark:border-gray-700 overflow-hidden shadow-sm">
+            <ServiceBlock 
+              icon={Tag} 
+              label="Promoções" 
+              description="Crie ofertas do dia, semana ou mês"
+              onClick={() => onNavigate('merchant_promotions')}
+              colorClass="bg-red-50 text-red-500"
+            />
             <ServiceBlock 
               icon={Crown} 
               label="Patrocinador Master" 
