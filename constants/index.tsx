@@ -220,7 +220,7 @@ const IMG_IDS: Record<string, string[]> = {
     '1579684385127-1ef15d508118', '1584515933487-9d317552d894', '1576091160399-112ba8d25d1d', '1551076805-e2983fe3600c'
   ],
   'Serviços': [
-    '1621905251189-08b45d6a269e', '1581578731117-10d52b4d8051', '1504328345606-18aff0858706', '1584622024886-0a02091d3744', '1590856029904-53a921d28362'
+    '1581578731117-10d52b4d8051', '1621905251189-08b45d6a269e', '1504328345606-18aff0858706', '1584622024886-0a02091d3744'
   ],
   'Beleza': [
     '1560066984-118c38b64a75', '1522337660859-02fbefca4702', '1562322140-8baeececf3df', '1616394584738-fc6e612e71b9'
@@ -756,7 +756,8 @@ export const MOCK_COMMUNITY_POSTS: CommunityPost[] = [
     neighborhood: 'Freguesia',
     timestamp: '2h',
     likes: 8,
-    comments: 16
+    comments: 16,
+    imageUrl: 'https://images.unsplash.com/photo-1582139329536-e7284fece509?q=80&w=600&auto=format&fit=crop'
   },
   {
     id: 'post-2',
@@ -771,7 +772,7 @@ export const MOCK_COMMUNITY_POSTS: CommunityPost[] = [
     timestamp: '3h',
     likes: 45,
     comments: 8,
-    imageUrl: 'https://images.unsplash.com/photo-1561758033-d89a9ad46330?q=80&w=600&auto=format&fit=crop'
+    imageUrl: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?q=80&w=600&auto=format&fit=crop'
   },
   {
     id: 'post-3',
@@ -785,7 +786,8 @@ export const MOCK_COMMUNITY_POSTS: CommunityPost[] = [
     neighborhood: 'Freguesia',
     timestamp: '4h',
     likes: 12,
-    comments: 4
+    comments: 4,
+    imageUrl: 'https://images.unsplash.com/photo-1488459716781-31db52582fe9?q=80&w=600&auto=format&fit=crop'
   },
   {
     id: 'post-4',
@@ -799,7 +801,8 @@ export const MOCK_COMMUNITY_POSTS: CommunityPost[] = [
     neighborhood: 'Taquara',
     timestamp: '5h',
     likes: 24,
-    comments: 12
+    comments: 12,
+    imageUrl: 'https://images.unsplash.com/photo-1521791136064-7986c292027b?q=80&w=600&auto=format&fit=crop'
   },
   {
     id: 'post-5',
@@ -813,7 +816,8 @@ export const MOCK_COMMUNITY_POSTS: CommunityPost[] = [
     neighborhood: 'Freguesia',
     timestamp: '6h',
     likes: 38,
-    comments: 14
+    comments: 14,
+    imageUrl: 'https://images.unsplash.com/photo-1566809540706-2b4742488820?q=80&w=600&auto=format&fit=crop'
   },
   {
     id: 'post-6',
@@ -843,7 +847,8 @@ export const MOCK_COMMUNITY_POSTS: CommunityPost[] = [
     timestamp: '12h',
     likes: 15,
     comments: 22,
-    storeId: 'grupo-esquematiza'
+    storeId: 'grupo-esquematiza',
+    imageUrl: 'https://images.unsplash.com/photo-1589939705384-5185137a7f0f?q=80&w=600&auto=format&fit=crop'
   },
   {
     id: 'post-8',
@@ -857,7 +862,8 @@ export const MOCK_COMMUNITY_POSTS: CommunityPost[] = [
     neighborhood: 'Freguesia',
     timestamp: '14h',
     likes: 18,
-    comments: 45
+    comments: 45,
+    imageUrl: 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?q=80&w=600&auto=format&fit=crop'
   },
   {
     id: 'post-9',
@@ -871,7 +877,8 @@ export const MOCK_COMMUNITY_POSTS: CommunityPost[] = [
     neighborhood: 'Freguesia',
     timestamp: '1d',
     likes: 5,
-    comments: 7
+    comments: 7,
+    imageUrl: 'https://images.unsplash.com/photo-1600518464441-9154a4dea21b?q=80&w=600&auto=format&fit=crop'
   },
   {
     id: 'post-10',

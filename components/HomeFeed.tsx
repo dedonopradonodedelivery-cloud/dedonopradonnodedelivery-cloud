@@ -30,8 +30,26 @@ import { LaunchOfferBanner } from './LaunchOfferBanner';
 import { HomeBannerCarousel } from './HomeBannerCarousel';
 import { FifaBanner } from './FifaBanner';
 
+// Fallback images for robust display if data is missing
+const FALLBACK_IMAGES = [
+  'https://images.unsplash.com/photo-1570129477492-45c003edd2be?q=80&w=800', 
+  'https://images.unsplash.com/photo-1517457373958-b7bdd4587205?q=80&w=800',
+  'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=800', 
+  'https://images.unsplash.com/photo-1534723452202-428aae1ad99d?q=80&w=800',
+  'https://images.unsplash.com/photo-1581578731522-745d05cb9704?q=80&w=800'
+];
+
+const getFallbackImage = (id: string) => {
+    let hash = 0;
+    for (let i = 0; i < id.length; i++) {
+        hash = id.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    return FALLBACK_IMAGES[Math.abs(hash) % FALLBACK_IMAGES.length];
+};
+
 const MiniPostCard: React.FC<{ post: CommunityPost; onNavigate: (view: string) => void; }> = ({ post, onNavigate }) => {
-  const postImage = post.imageUrls?.[0] || 'https://images.unsplash.com/photo-1549488344-cbb6c34cf08b?q=80&w=400&auto=format&fit=crop';
+  // Logic to prioritize specific post image or use a deterministic fallback
+  const postImage = post.imageUrl || post.imageUrls?.[0] || getFallbackImage(post.id);
   
   const handleAction = (e: React.MouseEvent, message: string) => {
       e.stopPropagation();
