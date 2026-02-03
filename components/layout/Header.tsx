@@ -5,29 +5,30 @@ import { useNeighborhood, NEIGHBORHOODS } from '../../contexts/NeighborhoodConte
 import { Store, Category } from '../../types';
 import { CATEGORIES } from '../../constants';
 
+// Added missing HeaderProps interface
 interface HeaderProps {
-  isDarkMode: boolean;
-  toggleTheme: () => void;
   onNotificationClick: () => void;
   user: any;
   searchTerm: string;
   onSearchChange: (value: string) => void;
-  onNavigate: (tab: string) => void;
+  onNavigate: (view: string, data?: any) => void;
   activeTab: string;
-  userRole: 'cliente' | 'lojista' | 'admin' | null;
   stores?: Store[];
   onStoreClick?: (store: Store) => void;
   isAdmin?: boolean;
   viewMode?: string;
   onOpenViewSwitcher?: () => void;
+  isDarkMode?: boolean;
+  toggleTheme?: () => void;
+  userRole?: string | null;
 }
 
 const NeighborhoodSelectorModal: React.FC = () => {
     const { currentNeighborhood, setNeighborhood, isSelectorOpen, toggleSelector } = useNeighborhood();
     if (!isSelectorOpen) return null;
     return (
-        <div className="fixed inset-0 z-[100] flex items-end justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-200" onClick={toggleSelector}>
-            <div className="bg-white dark:bg-gray-900 w-full max-w-md rounded-t-[2rem] p-6 shadow-2xl animate-in slide-in-from-bottom duration-300 relative" onClick={e => e.stopPropagation()}>
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-200 p-6" onClick={toggleSelector}>
+            <div className="bg-white dark:bg-gray-900 w-full max-w-sm rounded-[2.5rem] p-6 shadow-2xl animate-in zoom-in-95 duration-300 relative" onClick={e => e.stopPropagation()}>
                 <div className="w-12 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full mx-auto mb-6"></div>
                 <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4 px-2">Escolha o Bairro</h3>
                 <div className="max-h-[60vh] overflow-y-auto no-scrollbar space-y-2">
