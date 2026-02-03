@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { Star, Loader2, BadgeCheck, Heart, Crown, Store as StoreIcon, ChevronRight } from 'lucide-react';
 import { Store, AdType } from '../types';
@@ -131,35 +132,37 @@ export const LojasEServicosList: React.FC<LojasEServicosListProps> = ({ onStoreC
         {masterStore && activeFilter === 'all' && page === 1 && (
            <div 
                onClick={handleMasterClick}
-               className="relative w-full rounded-[2.5rem] p-[3px] bg-gradient-to-r from-amber-400 via-amber-200 to-amber-400 shadow-[0_15px_40px_rgba(245,158,11,0.2)] cursor-pointer group active:scale-[0.98] transition-all mb-8"
+               className="relative w-full rounded-[2rem] p-[2px] bg-gradient-to-r from-amber-400 via-amber-200 to-amber-400 shadow-[0_10px_30px_rgba(245,158,11,0.15)] cursor-pointer group active:scale-[0.98] transition-all mb-6 mt-2"
            >
-               <div className="bg-slate-900 dark:bg-slate-900 rounded-[2.3rem] p-8 relative overflow-hidden h-full">
+               <div className="bg-slate-900 dark:bg-slate-900 rounded-[1.9rem] p-5 relative overflow-hidden h-full">
                    {/* Efeito de brilho de fundo */}
                    <div className="absolute top-0 right-0 w-48 h-48 bg-amber-500/10 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
                    
-                   <div className="flex gap-6 items-center">
-                       <div className="w-24 h-24 rounded-3xl bg-white flex-shrink-0 overflow-hidden relative shadow-xl border-4 border-slate-800">
+                   {/* Etiqueta Reposicionada */}
+                   <div className="absolute top-0 right-6 -translate-y-1/2 z-20">
+                      <span className="bg-amber-400 text-slate-900 text-[8px] font-black px-3 py-0.5 rounded-b-lg uppercase tracking-[0.15em] shadow-md flex items-center gap-1.5 border-x border-b border-amber-300">
+                         <Crown className="w-3 h-3 fill-slate-900" /> Patrocinador Master
+                      </span>
+                   </div>
+
+                   <div className="flex gap-4 items-center">
+                       <div className="w-20 h-20 rounded-2xl bg-white flex-shrink-0 overflow-hidden relative shadow-xl border-2 border-slate-700">
                             <img 
                                src={masterStore.logoUrl || masterStore.image || '/assets/default-logo.png'} 
                                alt={masterStore.name} 
                                className="w-full h-full object-contain p-2 group-hover:scale-110 transition-transform duration-700" 
                            />
                        </div>
-                       <div className="flex-1 min-w-0">
-                           <div className="flex items-center gap-2 mb-2">
-                                <span className="bg-amber-400 text-slate-900 text-[9px] font-black px-2.5 py-1 rounded-lg uppercase tracking-[0.15em] shadow-md flex items-center gap-1.5">
-                                   <Crown className="w-3 h-3 fill-slate-900" /> Patrocinador Master
-                                </span>
-                           </div>
-                           <h3 className="font-black text-2xl text-white leading-tight truncate mb-1 tracking-tighter uppercase">{masterStore.name}</h3>
-                           <p className="text-xs text-slate-400 line-clamp-2 mb-4 font-medium leading-relaxed">{masterStore.description}</p>
-                            <div className="flex items-center gap-4">
-                                <div className="flex items-center gap-1.5 text-xs font-bold text-amber-400 bg-amber-400/10 px-3 py-1.5 rounded-xl border border-amber-400/20">
-                                   <Star className="w-3.5 h-3.5 fill-current" />
+                       <div className="flex-1 min-w-0 pt-1">
+                           <h3 className="font-black text-lg text-white leading-tight truncate mb-1 tracking-tighter uppercase">{masterStore.name}</h3>
+                           <p className="text-[10px] text-slate-400 line-clamp-2 mb-3 font-medium leading-relaxed">{masterStore.description}</p>
+                            <div className="flex items-center gap-3">
+                                <div className="flex items-center gap-1 text-[10px] font-bold text-amber-400 bg-amber-400/10 px-2 py-1 rounded-lg border border-amber-400/20">
+                                   <Star className="w-3 h-3 fill-current" />
                                    {masterStore.rating?.toFixed(1)}
                                 </div>
-                                <div className="bg-slate-800 px-3 py-1.5 rounded-xl border border-white/5">
-                                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Holdings de Facilities</span>
+                                <div className="bg-slate-800 px-2 py-1 rounded-lg border border-white/5">
+                                    <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Holdings</span>
                                 </div>
                             </div>
                        </div>
