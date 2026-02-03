@@ -5,7 +5,7 @@ import { Category, Store, AdType } from '../../types';
 import { SUBCATEGORIES } from '../../constants';
 // FIX: Corrected supabase import path from ../../services/supabaseClient to ../../lib/supabaseClient
 import { supabase } from '../../lib/supabaseClient';
-import { CategoryTopCarousel } from '../../components/CategoryTopCarousel';
+import { CategoryTopCarousel } from '@/components/CategoryTopCarousel';
 import { MasterSponsorBanner } from '@/components/MasterSponsorBanner';
 
 // --- Reusable Banner Rendering Components ---
