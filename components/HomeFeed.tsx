@@ -296,7 +296,7 @@ export const HomeFeed: React.FC<HomeFeedFeedProps> = ({
           {categoryPages.map((pageCategories, pageIndex) => (
             <div key={pageIndex} className="min-w-full px-4 pb-2 snap-center">
               {/* Changed spacing to gap-2 for uniform layout */}
-              <div className="grid grid-cols-4 grid-rows-2 gap-2">
+              <div className="grid grid-cols-4 grid-rows-2 gap-x-2 gap-y-4">
                 {pageCategories.map((cat, index) => (
                   <button 
                     key={`${cat.id}-${pageIndex}-${index}`} 
@@ -344,7 +344,10 @@ export const HomeFeed: React.FC<HomeFeedFeedProps> = ({
       <section className="bg-white dark:bg-gray-950 pt-6 pb-4">
         <div className="px-5">
             <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-bold text-gray-800 dark:text-white">JPA Conversa</h2>
+                <h2 className="text-lg font-bold text-gray-800 dark:text-white flex items-center gap-2">
+                    Onde o bairro conversa
+                    <MessageSquare className="w-5 h-5 text-blue-500 fill-current" />
+                </h2>
                 <div className="flex items-center gap-2">
                   <button onClick={() => onNavigate('neighborhood_posts')} className="text-xs font-bold text-blue-500">Ver tudo</button>
                   <button onClick={() => onNavigate('neighborhood_posts')} className="p-1.5 bg-gray-100 dark:bg-gray-800 rounded-full text-gray-500"><Plus size={14} /></button>
@@ -383,7 +386,6 @@ export const HomeFeed: React.FC<HomeFeedFeedProps> = ({
                     <div key={day} className="flex flex-col items-center gap-1.5">
                       <div className={`w-9 h-9 rounded-full flex items-center justify-center border-2 transition-all duration-500 relative shadow-inner ${isCompleted ? 'bg-blue-500 border-blue-500/50 text-white shadow-md shadow-blue-500/10' : isCurrent ? 'bg-white dark:bg-gray-800 border-blue-500 text-blue-500' : 'bg-gray-100 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-300 dark:text-gray-600'}`}>
                         {isCompleted ? <CheckCircle2 size={16} strokeWidth={3.5} /> : isCurrent ? <Zap size={14} fill="currentColor" /> : <Lock size={14} />}
-                        {isCurrent && !isAnimating && <div className="absolute inset-[-2px] rounded-full bg-blue-400/20 animate-ping"></div>}
                       </div>
                       <span className={`text-[9px] font-black uppercase tracking-widest ${isCompleted || isCurrent ? 'text-blue-600 dark:text-blue-400' : 'text-gray-400 dark:text-gray-500'}`}>Dia {day}</span>
                     </div>
