@@ -33,7 +33,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
     }
   }, [user, userRole, activeTab]);
 
-  // Itens da barra fixa - ORDEM EXATA: Início, JPA Conversa, Cupom, Anúncios, Menu
+  // Itens da barra fixa - ORDEM EXATA: Início, JPA Conversa, Cupom, Classificados, Menu
   const navItems = useMemo(() => {
     const items: NavItem[] = [
       { 
@@ -58,7 +58,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
       { 
         id: 'classifieds', 
         icon: Newspaper, 
-        label: 'Anúncios', 
+        label: 'Classificados', 
         isMainAction: true // Destaque Alto-Relevo
       },
       { 
@@ -150,7 +150,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
       <div className="fixed bottom-0 left-0 right-0 mx-auto w-full max-w-md bg-white dark:bg-gray-950 z-[1000] h-[90px] rounded-t-[28px] shadow-[0_-8px_40px_rgba(0,0,0,0.12)] border-t border-gray-100 dark:border-gray-800 px-2 pb-2">
         <div className="grid w-full h-full grid-cols-5 items-end pb-3">
           {navItems.map((item) => {
-            // Lógica de active state
+            // Lógica de estado ativo considerando redirecionamentos
             let isActive = false;
             
             if (item.id === 'cupom_trigger') {
@@ -170,7 +170,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
                 >
                   {/* 
                      CONTÊINER DE ÍCONE:
-                     Se isMainAction = true (JPA Conversa, Cupom, Anúncios): Aplica estilo Card/Pill "Elevated".
+                     Se isMainAction = true (JPA Conversa, Cupom, Classificados): Aplica estilo Card/Pill "Elevated".
                      Se isMainAction = false (Início, Menu): Fica transparente/simples.
                   */}
                   <div className={`
