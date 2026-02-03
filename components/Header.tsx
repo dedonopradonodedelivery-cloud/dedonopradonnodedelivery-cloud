@@ -1,7 +1,6 @@
 
-
-import React, { useMemo } from 'react';
-import { Search, User as UserIcon, MapPin, ChevronDown, Check, ChevronRight, SearchX, ShieldCheck, Tag } from 'lucide-react';
+import React, { useMemo, useState, useEffect, useCallback } from 'react';
+import { Search, MapPin, ChevronDown, Check, ChevronRight, SearchX, ShieldCheck, Tag, Mic, Bell, Loader2, X, User as UserIcon } from 'lucide-react';
 import { useNeighborhood, NEIGHBORHOODS } from '../contexts/NeighborhoodContext';
 import { Store, Category } from '../types';
 import { CATEGORIES } from '../constants';
@@ -9,20 +8,19 @@ import { CATEGORIES } from '../constants';
 interface HeaderProps {
   isDarkMode: boolean;
   toggleTheme: () => void;
-  onAuthClick: () => void;
+  onNotificationClick: () => void;
   user: any;
   searchTerm: string;
   onSearchChange: (value: string) => void;
   onNavigate: (tab: string) => void;
   activeTab: string;
-  userRole: "cliente" | "lojista" | null;
-  onOpenMerchantQr?: () => void; // Mantido para compatibilidade, não renderizado
-  customPlaceholder?: string;
+  userRole: 'cliente' | 'lojista' | 'admin' | null;
   stores?: Store[];
   onStoreClick?: (store: Store) => void;
   isAdmin?: boolean;
   viewMode?: string;
   onOpenViewSwitcher?: () => void;
+  onAuthClick?: () => void;
 }
 
 const NeighborhoodSelectorModal: React.FC = () => {
@@ -34,12 +32,11 @@ const NeighborhoodSelectorModal: React.FC = () => {
                 <div className="w-12 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full mx-auto mb-6"></div>
                 <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4 px-2">Escolha o Bairro</h3>
                 <div className="max-h-[60vh] overflow-y-auto no-scrollbar space-y-2">
-                    {/* FIX: Added "Jacarepaguá (todos)" option to the selector modal. */}
-                    <button onClick={() => setNeighborhood("Jacarepaguá (todos)")} className={`w-full text-left px-4 py-3.5 rounded-xl font-medium transition-colors flex items-center justify-between ${currentNeighborhood === "Jacarepaguá (todos)" ? "bg-[#1E5BFF]/10 text-[#1E5BFF]" : "hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300"}`}>
+                    <button onClick={() => setNeighborhood("Jacarepaguá (todos)")} className={`w-full text-left px-4 py-3.5 rounded-xl font-medium transition-colors flex items-center justify-between ${currentNeighborhood === "Jacarepaguá (todos)" ? "bg-[#1E5BFF]/10 text-[#1E5BFF]" : "bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-200"}`}>
                         <span>Jacarepaguá (todos)</span>
                         {currentNeighborhood === "Jacarepaguá (todos)" && <Check className="w-4 h-4" />}
                     </button>
-                    <div className="h-px bg-gray-100 dark:bg-gray-800 my-1"></div>
+                    <div className="h-px bg-gray-100 dark:bg-gray-800 my-2"></div>
                     {NEIGHBORHOODS.map(hood => (
                         <button key={hood} onClick={() => setNeighborhood(hood)} className={`w-full text-left px-4 py-3.5 rounded-xl font-medium transition-colors flex items-center justify-between ${currentNeighborhood === hood ? "bg-[#1E5BFF]/10 text-[#1E5BFF]" : "hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300"}`}>
                             <span>{hood}</span>
@@ -53,7 +50,7 @@ const NeighborhoodSelectorModal: React.FC = () => {
 };
 
 export const Header: React.FC<HeaderProps> = ({
-  onAuthClick, 
+  onNotificationClick, 
   user,
   searchTerm,
   onSearchChange,
@@ -63,11 +60,66 @@ export const Header: React.FC<HeaderProps> = ({
   onStoreClick,
   isAdmin,
   viewMode,
-  onOpenViewSwitcher
+  onOpenViewSwitcher,
+  onAuthClick
 }) => {
-  // Added setNeighborhood to the destructuring here
   const { currentNeighborhood, setNeighborhood, toggleSelector } = useNeighborhood();
-  const showNeighborhoodFilter = ['home', 'explore', 'services', 'community_feed'].includes(activeTab);
+  const [isListening, setIsListening] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
+  
+  // Monitorar notificações não lidas
+  useEffect(() => {
+    const checkNotifs = () => {
+      const saved = localStorage.getItem('app_notifications');
+      if (saved) {
+        const notifs = JSON.parse(saved);
+        setUnreadCount(notifs.filter((n: any) => !n.read).length);
+      }
+    };
+    checkNotifs();
+    window.addEventListener('storage', checkNotifs);
+    const interval = setInterval(checkNotifs, 3000);
+    return () => {
+      window.removeEventListener('storage', checkNotifs);
+      clearInterval(interval);
+    };
+  }, []);
+
+  // Lógica de Pesquisa por Voz
+  const startVoiceSearch = useCallback(() => {
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    
+    if (!SpeechRecognition) {
+      alert("Seu navegador não suporta pesquisa por voz.");
+      return;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'pt-BR';
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+
+    recognition.onstart = () => {
+      setIsListening(true);
+    };
+
+    recognition.onresult = (event: any) => {
+      const transcript = event.results[0][0].transcript;
+      onSearchChange(transcript);
+      setIsListening(false);
+    };
+
+    recognition.onerror = (event: any) => {
+      console.error('Speech recognition error:', event.error);
+      setIsListening(false);
+    };
+
+    recognition.onend = () => {
+      setIsListening(false);
+    };
+
+    recognition.start();
+  }, [onSearchChange]);
 
   const normalize = (text: any) => (String(text || "")).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
 
@@ -79,7 +131,6 @@ export const Header: React.FC<HeaderProps> = ({
     return { stores: matchedStores.slice(0, 15), categories: matchedCategories.slice(0, 4) };
   }, [stores, searchTerm, activeTab]);
 
-  // Placeholder dinâmico conforme o bairro selecionado
   const dynamicPlaceholder = useMemo(() => {
     if (currentNeighborhood === "Jacarepaguá (todos)") {
       return "O que você busca em JPA?";
@@ -109,11 +160,24 @@ export const Header: React.FC<HeaderProps> = ({
                             <span className="text-[10px] font-bold text-amber-900 dark:text-amber-200 uppercase">{viewMode}</span>
                         </button>
                     )}
+                    
                     <button onClick={onAuthClick} className="flex items-center gap-2 bg-gray-50 dark:bg-gray-800 p-1 pl-3 rounded-full border border-gray-100 dark:border-gray-700 shadow-inner">
                         <span className="text-[10px] font-bold text-gray-600 dark:text-gray-300">{user ? 'Perfil' : 'Entrar'}</span>
                         <div className="w-7 h-7 rounded-full bg-white dark:bg-gray-700 flex items-center justify-center text-[#1E5BFF] overflow-hidden relative shadow-sm">
                             {user?.user_metadata?.avatar_url ? <img src={user.user_metadata.avatar_url} className="w-full h-full object-cover" /> : <UserIcon className="w-4 h-4" />}
                         </div>
+                    </button>
+
+                    <button 
+                        onClick={onNotificationClick}
+                        className="relative p-2.5 bg-gray-50 dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:text-[#1E5BFF] transition-all active:scale-90"
+                    >
+                        <Bell size={22} className={unreadCount > 0 ? 'animate-wiggle' : ''} />
+                        {unreadCount > 0 && (
+                            <span className="absolute top-1.5 right-1.5 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center border-2 border-white dark:border-gray-900 shadow-lg animate-in zoom-in duration-300">
+                                <span className="text-[9px] font-black text-white">{unreadCount > 9 ? '9+' : unreadCount}</span>
+                            </span>
+                        )}
                     </button>
                 </div>
             </div>
@@ -125,8 +189,25 @@ export const Header: React.FC<HeaderProps> = ({
                       value={searchTerm} 
                       onChange={(e) => onSearchChange(e.target.value)} 
                       placeholder={dynamicPlaceholder} 
-                      className="block w-full pl-10 pr-4 bg-gray-100 dark:bg-gray-800 border-none rounded-2xl text-sm font-medium text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#1E5BFF]/50 py-3 shadow-inner" 
+                      className="block w-full pl-10 pr-12 bg-gray-100 dark:bg-gray-800 border-none rounded-2xl text-sm font-medium text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#1E5BFF]/50 py-3 shadow-inner" 
                     />
+                    <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
+                      {searchTerm && (
+                        <button 
+                          onClick={() => onSearchChange('')}
+                          className="p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
+                        >
+                          <X size={16} />
+                        </button>
+                      )}
+                      <button 
+                        onClick={startVoiceSearch}
+                        className={`p-2 rounded-xl transition-all ${isListening ? 'bg-red-500 text-white animate-pulse' : 'text-gray-400 hover:text-[#1E5BFF] dark:hover:text-[#1E5BFF]'}`}
+                      >
+                        <Mic size={18} strokeWidth={isListening ? 3 : 2} />
+                      </button>
+                    </div>
+
                     {searchTerm.trim().length > 0 && (activeTab === 'home' || activeTab === 'explore') && (
                         <div className="absolute top-[calc(100%+8px)] left-0 right-0 bg-white dark:bg-gray-900 rounded-[24px] shadow-2xl border border-gray-100 dark:border-gray-800 z-[100] overflow-hidden animate-in fade-in slide-in-from-top-2">
                             <div className="p-2 max-h-[60vh] overflow-y-auto no-scrollbar">
@@ -146,16 +227,21 @@ export const Header: React.FC<HeaderProps> = ({
                     )}
                 </div>
             </div>
-            {showNeighborhoodFilter && (
-                <div className="flex items-center gap-2 overflow-x-auto no-scrollbar px-4 pb-3 pt-1">
-                    {/* FIX: Added "Todos" button to the horizontal filter bar. */}
-                    <button onClick={() => setNeighborhood("Jacarepaguá (todos)")} className={`flex-shrink-0 px-4 py-1.5 rounded-full text-xs font-bold transition-all border ${currentNeighborhood === "Jacarepaguá (todos)" ? "bg-[#1E5BFF] text-white border-[#1E5BFF]" : "bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-300 border-gray-100 dark:border-gray-800"}`}>Todos</button>
-                    {NEIGHBORHOODS.map(hood => (<button key={hood} onClick={() => setNeighborhood(hood)} className={`flex-shrink-0 px-4 py-1.5 rounded-full text-xs font-bold transition-all border ${currentNeighborhood === hood ? "bg-[#1E5BFF] text-white border-[#1E5BFF]" : "bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-300 border-gray-100 dark:border-gray-800"}`}>{hood}</button>))}
-                </div>
-            )}
         </div>
         </div>
         <NeighborhoodSelectorModal />
+        
+        <style>{`
+          @keyframes wiggle {
+            0%, 100% { transform: rotate(0); }
+            25% { transform: rotate(8deg); }
+            75% { transform: rotate(-8deg); }
+          }
+          .animate-wiggle {
+            animation: wiggle 0.5s ease-in-out infinite alternate;
+            animation-iteration-count: 2;
+          }
+        `}</style>
     </>
   );
 };

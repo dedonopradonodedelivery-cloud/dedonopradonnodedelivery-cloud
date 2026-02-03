@@ -374,3 +374,19 @@ export interface AppSuggestion {
     contactConsent: boolean;
     status: 'new' | 'analyzing' | 'responded';
 }
+
+export interface SponsoredCampaign {
+  id: string;
+  startDate: string;
+  endDate: string;
+  durationMonths: number;
+  totalDays: number;
+  dailyPrice: number;
+  totalPrice: number;
+  status: 'active' | 'ended' | 'pending';
+  metrics: {
+    impressions: number;
+    clicks: number;
+    leads: number;
+  };
+}
