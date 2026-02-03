@@ -335,7 +335,10 @@ export const HomeFeed: React.FC<HomeFeedFeedProps> = ({
         </div>
       </section>
 
-      <HomeBannerCarousel onStoreClick={onStoreClick} onNavigate={onNavigate} />
+      {/* CARROSSEL HOME (Fundo Branco Explícito) */}
+      <section className="bg-white dark:bg-gray-950 w-full">
+        <HomeBannerCarousel onStoreClick={onStoreClick} onNavigate={onNavigate} />
+      </section>
 
       {/* 1. JPA CONVERSA (ORDEM RECONFIGURADA) */}
       <section className="bg-white dark:bg-gray-950 pt-6 pb-4">
