@@ -104,6 +104,7 @@ export interface ServiceRequest {
   images: string[];
   status: 'open' | 'closed';
   createdAt: string;
+  winnerId?: string;
 }
 
 export interface ServiceLead {
@@ -198,6 +199,7 @@ export interface CommunityPost {
   showOnStoreProfile?: boolean;
   storeId?: string;
   promotionId?: string;
+  isActiveResident?: boolean; // Novo campo: Indica se o autor é Morador Ativo
 }
 
 export type TaxonomyType = 'category' | 'subcategory' | 'specialty';
@@ -234,6 +236,32 @@ export interface Classified {
   acceptsTrade?: boolean;
   tradeInterests?: string[]; // Categorias aceitas
   tradeCondition?: 'direct' | 'diff_money' | 'any';
+}
+
+export interface RealEstateProperty {
+  id: string;
+  type: 'Residencial' | 'Comercial';
+  title: string;
+  description: string;
+  image: string;
+  neighborhood: string;
+  price: number;
+  transaction: 'aluguel' | 'venda';
+  area: number;
+  postedAt: string;
+  buildingName?: string;
+  bedrooms?: number;
+  bathrooms?: number;
+  parkingSpaces?: number;
+  propertyTypeRes?: 'Casa' | 'Apartamento' | 'Kitnet/Studio' | 'Cobertura';
+  condoFee?: number;
+  isFurnished?: boolean;
+  petsAllowed?: boolean;
+  propertyTypeCom?: 'Sala comercial' | 'Loja' | 'Galpão' | 'Andar/Conjunto' | 'Terreno comercial';
+  hasBathroom?: boolean;
+  highCeiling?: boolean;
+  loadingAccess?: boolean;
+  isVerifiedMerchant?: boolean;
 }
 
 export interface StoreCredit {
@@ -327,6 +355,25 @@ export interface StoreClaimRequest {
   justification?: string;
 }
 
+export interface StorePromotion {
+  id: string;
+  storeId: string;
+  title: string;
+  description: string;
+  type: 'Dia' | 'Semana' | 'Mês' | 'Sazonal';
+  startDate: string;
+  endDate: string;
+  value?: number;
+  discount?: number;
+  images: string[];
+  status: 'active' | 'scheduled' | 'expired' | 'paused';
+  createdAt: string;
+  publishToCommunity?: boolean;
+}
+
+export type PromotionType = 'Dia' | 'Semana' | 'Mês' | 'Sazonal';
+export type PromotionStatus = 'active' | 'scheduled' | 'expired' | 'paused';
+
 export type TransactionStatus = 'pending' | 'approved' | 'rejected';
 export type SessionType = 'qr' | 'pin';
 export type MovementType = 'credit' | 'debit';
@@ -337,6 +384,8 @@ export interface DbUser {
   email: string;
   wallet_balance: number;
   created_at: string;
+  isActiveResident?: boolean; // Selo de Morador Ativo
+  engagementScore?: number;   // Pontuação de Engajamento
 }
 
 export interface DbMerchant {
@@ -392,4 +441,18 @@ export interface AppSuggestion {
     category: 'bug' | 'idea' | 'improve' | 'other';
     contactConsent: boolean;
     status: 'new' | 'analyzing' | 'responded';
+}
+
+export interface CategoryBannerSlot {
+  uniqueKey: string;
+  bairroSlug: string;
+  categoriaSlug: string;
+  slotNumber: 1 | 2;
+  status: 'available' | 'reserved' | 'sold';
+  merchantId?: string;
+  merchantName?: string;
+  expiresAt?: string;
+  image?: string;
+  title?: string;
+  subtitle?: string;
 }

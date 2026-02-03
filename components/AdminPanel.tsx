@@ -402,6 +402,7 @@ export const AdminPanel: React.FC<any> = ({ onLogout, viewMode, onOpenViewSwitch
   const [users, setUsers] = useState<any[]>([]);
   const [serviceRequests, setServiceRequests] = useState<ServiceRequest[]>([]);
   const [suggestions, setSuggestions] = useState<AppSuggestion[]>([]);
+  const [showActiveResidentsOnly, setShowActiveResidentsOnly] = useState(false);
 
   useEffect(() => {
     if (activeTab === 'management') {
@@ -431,7 +432,9 @@ export const AdminPanel: React.FC<any> = ({ onLogout, viewMode, onOpenViewSwitch
         ...u,
         status: u.status || 'active',
         neighborhood: u.neighborhood || 'Jacarepaguá',
-        created_at: u.created_at || new Date().toISOString()
+        created_at: u.created_at || new Date().toISOString(),
+        isActiveResident: Math.random() > 0.8, // Mocking active resident status randomly for demo
+        engagementScore: Math.floor(Math.random() * 100) // Mocking score
     }));
     setUsers(enriched); 
   };
@@ -457,9 +460,9 @@ export const AdminPanel: React.FC<any> = ({ onLogout, viewMode, onOpenViewSwitch
     const isUsers = activeTab === 'management' && managementTab === 'clients';
     
     if (isUsers) {
-      csvContent += "Nome,E-mail,Telefone,Bairro,Data de Cadastro,Status\n";
+      csvContent += "Nome,E-mail,Telefone,Bairro,Data de Cadastro,Status,Morador Ativo\n";
       users.forEach(u => {
-        csvContent += `"${u.full_name || 'N/A'}","${u.email}","${u.phone || 'N/A'}","${u.neighborhood}","${new Date(u.created_at).toLocaleDateString()}","${u.status}"\n`;
+        csvContent += `"${u.full_name || 'N/A'}","${u.email}","${u.phone || 'N/A'}","${u.neighborhood}","${new Date(u.created_at).toLocaleDateString()}","${u.status}","${u.isActiveResident ? 'Sim' : 'Não'}"\n`;
       });
     } else if (activeTab === 'management' && managementTab === 'merchants') {
       csvContent += "Nome da Loja,Responsável,E-mail,Telefone,Categoria,Plano,Status,Data de Cadastro\n";
@@ -477,9 +480,24 @@ export const AdminPanel: React.FC<any> = ({ onLogout, viewMode, onOpenViewSwitch
     document.body.removeChild(link);
   };
 
+  // --- ACTION HANDLERS FOR BADGE ---
+  const toggleActiveResidentBadge = (userId: string) => {
+    setUsers(prev => prev.map(u => 
+        u.id === userId 
+        ? { ...u, isActiveResident: !u.isActiveResident } 
+        : u
+    ));
+    // In real app, this would update Supabase
+  };
+
   if (activeTab === 'moderation') {
       return <AdminModerationPanel onBack={() => setActiveTab('hub')} />;
   }
+
+  const filteredUsers = useMemo(() => {
+    if (!showActiveResidentsOnly) return users;
+    return users.filter(u => u.isActiveResident);
+  }, [users, showActiveResidentsOnly]);
 
   return (
     <div className="min-h-screen bg-[#0F172A] text-slate-200 font-sans flex flex-col">
@@ -638,17 +656,38 @@ export const AdminPanel: React.FC<any> = ({ onLogout, viewMode, onOpenViewSwitch
                  </div>
              </div>
 
+             {/* Filtro Extra para Morador Ativo */}
+             {managementTab === 'clients' && (
+                 <div className="flex items-center gap-2 px-1">
+                     <button 
+                        onClick={() => setShowActiveResidentsOnly(!showActiveResidentsOnly)}
+                        className={`text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-lg border transition-all ${showActiveResidentsOnly ? 'bg-blue-600 text-white border-blue-600' : 'bg-white/5 text-gray-400 border-white/10 hover:text-white'}`}
+                     >
+                        <Zap size={10} className="inline mr-1" />
+                        {showActiveResidentsOnly ? 'Mostrando apenas Moradores Ativos' : 'Filtrar Moradores Ativos'}
+                     </button>
+                 </div>
+             )}
+
              {/* Lista de Clientes */}
              {managementTab === 'clients' && (
                  <div className="grid gap-4">
-                    {users.map(u => (
+                    {filteredUsers.map(u => (
                         <div key={u.id} className="bg-white p-6 rounded-[2.5rem] border border-gray-100 shadow-sm flex items-center justify-between group hover:border-blue-500 transition-all">
                             <div className="flex items-center gap-4">
-                                <div className="w-12 h-12 bg-gray-50 rounded-2xl flex items-center justify-center text-gray-400 group-hover:text-blue-600 transition-colors">
+                                <div className="w-12 h-12 bg-gray-50 rounded-2xl flex items-center justify-center text-gray-400 group-hover:text-blue-600 transition-colors relative">
                                     <UserIcon size={20} />
+                                    {u.isActiveResident && (
+                                        <div className="absolute -top-1 -right-1 bg-blue-500 rounded-full p-0.5 border-2 border-white">
+                                            <Zap size={8} className="text-white fill-current" />
+                                        </div>
+                                    )}
                                 </div>
                                 <div>
-                                    <h4 className="font-bold text-gray-900 leading-none mb-1">{u.full_name || 'Anônimo'}</h4>
+                                    <div className="flex items-center gap-2">
+                                        <h4 className="font-bold text-gray-900 leading-none mb-1">{u.full_name || 'Anônimo'}</h4>
+                                        {u.isActiveResident && <span className="text-[8px] font-black bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded uppercase tracking-wider border border-blue-100">Morador Ativo</span>}
+                                    </div>
                                     <div className="flex items-center gap-3 mt-1">
                                         <div className="flex items-center gap-1 text-xs text-gray-500">
                                             <Mail size={12} />
@@ -663,12 +702,21 @@ export const AdminPanel: React.FC<any> = ({ onLogout, viewMode, onOpenViewSwitch
                                             </div>
                                         )}
                                     </div>
-                                    <p className="text-[10px] text-gray-400 uppercase font-black mt-2">{u.neighborhood}</p>
+                                    <div className="flex items-center gap-2 mt-2">
+                                        <p className="text-[10px] text-gray-400 uppercase font-black">{u.neighborhood}</p>
+                                        <span className="text-[10px] text-gray-300">•</span>
+                                        <p className="text-[10px] text-gray-400 font-bold">Engajamento: {u.engagementScore || 0}</p>
+                                    </div>
                                 </div>
                             </div>
-                            <div className="text-right">
-                               <p className="text-xs font-black text-gray-900">{new Date(u.created_at).toLocaleDateString()}</p>
+                            <div className="text-right flex flex-col gap-2 items-end">
                                <span className={`text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded ${u.status === 'active' ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'}`}>{u.status}</span>
+                               <button 
+                                    onClick={() => toggleActiveResidentBadge(u.id)}
+                                    className={`text-[9px] font-bold uppercase tracking-wide hover:underline ${u.isActiveResident ? 'text-red-500' : 'text-blue-500'}`}
+                                >
+                                    {u.isActiveResident ? 'Revogar Selo' : 'Conceder Selo'}
+                                </button>
                             </div>
                         </div>
                     ))}

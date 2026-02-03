@@ -15,7 +15,8 @@ import {
     VolumeX,
     ChevronLeft as ChevronLeftIcon,
     ChevronRight as ChevronRightIcon,
-    AlertCircle
+    AlertCircle,
+    Zap // Usado para o selo de Morador Ativo
 } from 'lucide-react';
 import { ReportModal } from './ReportModal';
 
@@ -131,7 +132,21 @@ export const PostCard: React.FC<PostCardProps> = ({ post, onStoreClick, user, on
           <div className="w-9 h-9 rounded-full border-2 border-blue-500 p-0.5">
             <img src={post.userAvatar} alt={post.userName} className="w-full h-full rounded-full object-cover" />
           </div>
-          <button onClick={() => handleVisitStore(post.userName)} className="font-bold text-sm text-gray-900 dark:text-white hover:underline">{post.userName}</button>
+          <div className="flex flex-col">
+            <button onClick={() => handleVisitStore(post.userName)} className="font-bold text-sm text-gray-900 dark:text-white hover:underline text-left leading-tight">
+                {post.userName}
+            </button>
+            
+            {/* SELO MORADOR ATIVO */}
+            {post.isActiveResident && (
+                <div className="flex items-center gap-1 mt-0.5">
+                    <div className="bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 px-1.5 py-0.5 rounded flex items-center gap-1 border border-blue-100 dark:border-blue-800/50">
+                        <Zap size={8} fill="currentColor" />
+                        <span className="text-[8px] font-black uppercase tracking-wider">Morador Ativo</span>
+                    </div>
+                </div>
+            )}
+          </div>
         </div>
         <button onClick={() => setIsOptionsOpen(true)} className="p-2 text-gray-400"><MoreHorizontal size={20} /></button>
       </div>

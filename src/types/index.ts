@@ -1,3 +1,4 @@
+
 import React from 'react';
 
 // Consistent with root types.ts
@@ -198,6 +199,7 @@ export interface CommunityPost {
   showOnStoreProfile?: boolean;
   storeId?: string;
   promotionId?: string;
+  isActiveResident?: boolean;
 }
 
 export type TaxonomyType = 'category' | 'subcategory' | 'specialty';
@@ -382,6 +384,8 @@ export interface DbUser {
   email: string;
   wallet_balance: number;
   created_at: string;
+  isActiveResident?: boolean; // Selo de Morador Ativo
+  engagementScore?: number;   // Pontuação de Engajamento
 }
 
 export interface DbMerchant {

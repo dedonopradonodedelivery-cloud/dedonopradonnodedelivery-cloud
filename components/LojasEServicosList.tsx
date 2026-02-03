@@ -138,10 +138,10 @@ export const LojasEServicosList: React.FC<LojasEServicosListProps> = ({ onStoreC
                    {/* Efeito de brilho de fundo */}
                    <div className="absolute top-0 right-0 w-48 h-48 bg-amber-500/10 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
                    
-                   {/* Etiqueta Reposicionada */}
-                   <div className="absolute top-0 right-6 -translate-y-1/2 z-20">
-                      <span className="bg-amber-400 text-slate-900 text-[8px] font-black px-3 py-0.5 rounded-b-lg uppercase tracking-[0.15em] shadow-md flex items-center gap-1.5 border-x border-b border-amber-300">
-                         <Crown className="w-3 h-3 fill-slate-900" /> Patrocinador Master
+                   {/* Etiqueta Reposicionada (Sobreposta ao card) */}
+                   <div className="absolute top-4 right-4 z-20">
+                      <span className="bg-black/20 backdrop-blur-md text-amber-400 text-[8px] font-black px-2.5 py-1 rounded-lg uppercase tracking-widest border border-amber-400/20 flex items-center gap-1.5 shadow-sm">
+                         <Crown className="w-3 h-3 fill-amber-400" /> Patrocinador Master
                       </span>
                    </div>
 

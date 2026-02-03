@@ -38,6 +38,7 @@ export const CATEGORIES: Category[] = [
   { id: 'cat-condominio', name: 'Condomínio', slug: 'condominio', icon: <Building2 />, color: 'bg-brand-blue' },
 ];
 
+// ... (Subcategories omitted for brevity, keeping existing) ...
 export const SUBCATEGORIES: Record<string, { name: string; icon: React.ReactNode }[]> = {
   'Comida': [
     { name: 'Restaurantes', icon: <Utensils /> },
@@ -201,7 +202,6 @@ export const SUBCATEGORIES: Record<string, { name: string; icon: React.ReactNode
   ],
 };
 
-// ARRAY DE IMAGENS POR CATEGORIA (PARA GARANTIR VARIEDADE)
 const IMG_IDS: Record<string, string[]> = {
   'Comida': [
     '1504674900247-0877df9cc836', '1555939594-58d7cb561ad1', '1565299624946-b28f40a0ae38', '1567620905732-2d1ec7ab7445', '1467003909585-63c6385cdb26', '1540189549336-e6e99c3679fe', '1568901346375-23c9450c58cd', '1484723091739-30a097e8f929'
@@ -265,7 +265,6 @@ const generateFakeStores = () => {
                 const isSponsored = i <= 3; // Primeiras 3 patrocinadas
                 const hood = hoods[i % hoods.length];
                 const rating = 4.2 + (Math.random() * 0.8);
-                // Cycle through available images for the category to ensure variety
                 const catImages = IMG_IDS[catName] || ['1557804506-669a67965ba0', '1568901346375-23c9450c58cd'];
                 const imgId = catImages[i % catImages.length];
 
@@ -330,125 +329,6 @@ export const STORES: Store[] = [
   ...generateFakeStores()
 ];
 
-export const CATEGORY_TOP_BANNERS: Record<string, Record<string, { image: string; storeId: string }[]>> = {
-  'comida': {
-    'Freguesia': [
-      { image: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?q=80&w=800', storeId: 'f-5' },
-      { image: 'https://images.unsplash.com/photo-1561758033-d89a9ad46330?q=80&w=800', storeId: 'f-1' }
-    ],
-    'Taquara': [
-      { image: 'https://images.unsplash.com/photo-1594212699903-ec8a3eca50f5?q=80&w=800', storeId: 'fake-comida-0' },
-      { image: 'https://images.unsplash.com/photo-1571091718767-18b5b1457add?q=80&w=800', storeId: 'fake-comida-1' }
-    ]
-  },
-  'beleza': {
-    'Taquara': [
-      { image: 'https://images.unsplash.com/photo-1562322140-8baeececf3df?q=80&w=800', storeId: 'f-2' },
-      { image: 'https://images.unsplash.com/photo-1560066984-118c38b64a75?q=80&w=800', storeId: 'fake-beleza-0' }
-    ],
-    'Freguesia': [
-      { image: 'https://images.unsplash.com/photo-1521590832167-7ce633395e39?q=80&w=800', storeId: 'fake-beleza-1' },
-      { image: 'https://images.unsplash.com/photo-1632345031435-8727f6897d53?q=80&w=800', storeId: 'fake-beleza-2' }
-    ]
-  },
-  'pets': {
-    'Pechincha': [
-      { image: 'https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?q=80&w=800', storeId: 'f-3' },
-      { image: 'https://images.unsplash.com/photo-1524511751214-b0a384dd932d?q=80&w=800', storeId: 'fake-pets-0' }
-    ],
-    'Freguesia': [
-      { image: 'https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?q=80&w=800', storeId: 'fake-pets-1' },
-      { image: 'https://images.unsplash.com/photo-1544568100-847a948585b9?q=80&w=800', storeId: 'fake-pets-2' }
-    ]
-  },
-  'saude': {
-    'Freguesia': [
-      { image: 'https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?q=80&w=800', storeId: 'f-9' },
-      { image: 'https://images.unsplash.com/photo-1576091160550-2173dba999ef?q=80&w=800', storeId: 'fake-saude-0' }
-    ]
-  },
-  'autos': {
-    'Anil': [
-      { image: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=800', storeId: 'f-10' },
-      { image: 'https://images.unsplash.com/photo-1470309634658-8398b2cd0d23?q=80&w=800', storeId: 'fake-autos-0' }
-    ],
-    'Freguesia': [
-      { image: 'https://images.unsplash.com/photo-1445205170230-053b83016050?q=80&w=800', storeId: 'fake-moda-1' },
-      { image: 'https://images.unsplash.com/photo-1512436991641-6745cdb1723f?q=80&w=800', storeId: 'fake-moda-2' }
-    ]
-  },
-  'mercado': {
-    'Freguesia': [
-      { image: 'https://images.unsplash.com/photo-1587854692152-cbe660dbbb88?q=80&w=800', storeId: 'f-7' },
-      { image: 'https://images.unsplash.com/photo-1534723452202-428aae1ad99d?q=80&w=800', storeId: 'fake-mercado-0' }
-    ]
-  },
-  'esportes': {
-    'Taquara': [
-      { image: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=800', storeId: 'f-8' },
-      { image: 'https://images.unsplash.com/photo-1541534741688-6078c6bfb5c5?q=80&w=800', storeId: 'fake-esportes-0' }
-    ]
-  },
-  'servicos': {
-    'Freguesia': [
-      { image: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?q=80&w=800', storeId: 'grupo-esquematiza' },
-      { image: 'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?q=80&w=800', storeId: 'fake-servicos-0' }
-    ]
-  },
-  'casa': {
-    'Freguesia': [
-      { image: 'https://images.unsplash.com/photo-1524661135-423995f22d0b?q=80&w=800', storeId: 'fake-casa-0' },
-      { image: 'https://images.unsplash.com/photo-1557804506-669a67965ba0?q=80&w=800', storeId: 'fake-casa-1' }
-    ]
-  },
-  'pro': {
-    'Freguesia': [
-      { image: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?q=80&w=800', storeId: 'fake-pro-0' },
-      { image: 'https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?q=80&w=800', storeId: 'fake-pro-1' }
-    ]
-  },
-  'lazer': {
-    'Freguesia': [
-      { image: 'https://images.unsplash.com/photo-1517457373958-b7bdd4587205?q=80&w=800', storeId: 'fake-lazer-0' },
-      { image: 'https://images.unsplash.com/photo-1514525253361-bee23e63d890?q=80&w=800', storeId: 'fake-lazer-1' }
-    ]
-  },
-  'educacao': {
-    'Freguesia': [
-      { image: 'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?q=80&w=800', storeId: 'fake-educacao-0' },
-      { image: 'https://images.unsplash.com/photo-1509062522246-3755977927d7?q=80&w=800', storeId: 'fake-educacao-1' }
-    ]
-  },
-  'farmacia': {
-    'Freguesia': [
-      { image: 'https://images.unsplash.com/photo-1587854692152-cbe660dbbb88?q=80&w=800', storeId: 'f-7' },
-      { image: 'https://images.unsplash.com/photo-1628771065518-0d82f1110503?q=80&w=800', storeId: 'fake-farmacia-0' }
-    ]
-  },
-  'moda': {
-    'Anil': [
-      { image: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=800', storeId: 'f-10' },
-      { image: 'https://images.unsplash.com/photo-1470309634658-8398b2cd0d23?q=80&w=800', storeId: 'fake-autos-0' }
-    ],
-    'Freguesia': [
-      { image: 'https://images.unsplash.com/photo-1445205170230-053b83016050?q=80&w=800', storeId: 'fake-moda-1' },
-      { image: 'https://images.unsplash.com/photo-1512436991641-6745cdb1723f?q=80&w=800', storeId: 'fake-moda-2' }
-    ]
-  },
-  'eventos': {
-    'Freguesia': [
-      { image: 'https://images.unsplash.com/photo-1511632765486-a01980e01a18?q=80&w=800', storeId: 'fake-eventos-0' },
-      { image: 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?q=80&w=800', storeId: 'fake-eventos-1' }
-    ]
-  },
-  'condominio': {
-    'Freguesia': [
-      { image: 'https://images.unsplash.com/photo-1570129477492-45c003edd2be?q=80&w=800', storeId: 'fake-condominio-0' },
-      { image: 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?q=80&w=800', storeId: 'fake-condominio-1' }
-    ]
-  }
-};
-
 export const EDITORIAL_SERVICES: EditorialCollection[] = [
   {
     id: 'culinaria-jpa',
@@ -495,6 +375,7 @@ export const MOCK_JOBS: Job[] = [
     postedAt: 'Há 2h',
     isSponsored: true,
     sponsoredUntil: '2025-12-31',
+    // FIX: Added missing properties 'candidacy_method' and 'modality' to conform to the Job interface.
     candidacy_method: 'whatsapp',
     modality: 'Presencial',
   },
@@ -512,6 +393,7 @@ export const MOCK_JOBS: Job[] = [
     contactWhatsapp: '5521988888888',
     postedAt: 'Há 1 dia',
     isUrgent: true,
+    // FIX: Added missing properties 'candidacy_method' and 'modality' to conform to the Job interface.
     candidacy_method: 'whatsapp',
     modality: 'Presencial',
   }
@@ -553,83 +435,12 @@ export const MOCK_CLASSIFIEDS: Classified[] = [
     { id: 'cl-doa-4', title: 'Doe um Brinquedo, Ganhe um Sorriso', advertiser: 'ONG Criança Feliz', category: 'Doações em geral', neighborhood: 'Curicica', description: 'Campanha de arrecadação de brinquedos novos ou usados em bom estado para o Dia das Crianças.', timestamp: 'Há 1 semana', contactWhatsapp: '5521922228888', typeLabel: 'Doação', imageUrl: 'https://images.unsplash.com/photo-1608846932299-617a653c07a3?q=80&w=800' },
     { id: 'cl-doa-5', title: 'Doação de Cesta Básica', advertiser: 'Igreja da Praça', category: 'Doações em geral', neighborhood: 'Tanque', description: 'Estamos recebendo alimentos não perecíveis para montar cestas básicas para famílias necessitadas.', timestamp: 'Há 10 dias', contactWhatsapp: '5521911119999', typeLabel: 'Doação', imageUrl: 'https://images.unsplash.com/photo-1599059813005-11265ba4b4ce?q=80&w=800' },
     
-    // Desapega JPA (5) (Com campos de troca)
-    { 
-      id: 'cl-des-1', 
-      title: 'Vendo Bicicleta Aro 29 Usada', 
-      advertiser: 'Pedro M.', 
-      category: 'Desapega JPA', 
-      neighborhood: 'Freguesia', 
-      description: 'Bicicleta em ótimo estado, pouquíssimo usada. Pneus novos. Apenas retirada.', 
-      timestamp: 'Há 1 dia', 
-      contactWhatsapp: '5521998765432', 
-      typeLabel: 'Venda', 
-      price: 'R$ 800,00', 
-      imageUrl: 'https://images.unsplash.com/photo-1532298229144-0ec0c57515c7?q=80&w=800',
-      acceptsTrade: true,
-      tradeInterests: ['Celular', 'Videogame'],
-      tradeCondition: 'diff_money'
-    },
-    { 
-      id: 'cl-des-2', 
-      title: 'Sofá 3 lugares Retrátil', 
-      advertiser: 'Fernanda R.', 
-      category: 'Desapega JPA', 
-      neighborhood: 'Taquara', 
-      description: 'Sofá confortável, precisa de limpeza, mas estrutura está perfeita. Motivo: comprei um novo.', 
-      timestamp: 'Há 2 dias', 
-      contactWhatsapp: '5521987659876', 
-      typeLabel: 'Venda', 
-      price: 'R$ 350,00', 
-      imageUrl: 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?q=80&w=800',
-      acceptsTrade: false
-    },
-    { 
-      id: 'cl-des-3', 
-      title: 'Vendo iPhone 11 64GB', 
-      advertiser: 'Lucas T.', 
-      category: 'Desapega JPA', 
-      neighborhood: 'Pechincha', 
-      description: 'Saúde da bateria em 85%. Tela intacta, sempre usado com película. Acompanha caixa e cabo.', 
-      timestamp: 'Há 2 dias', 
-      contactWhatsapp: '5521976541234', 
-      typeLabel: 'Venda', 
-      price: 'R$ 1.500,00', 
-      imageUrl: 'https://images.unsplash.com/photo-1616348436168-de43ad0e12de?q=80&w=800',
-      acceptsTrade: true,
-      tradeInterests: ['Notebook', 'Tablet'],
-      tradeCondition: 'direct'
-    },
-    { 
-      id: 'cl-des-4', 
-      title: 'Mesa de Jantar 4 Lugares', 
-      advertiser: 'Beatriz C.', 
-      category: 'Desapega JPA', 
-      neighborhood: 'Anil', 
-      description: 'Mesa de madeira com tampo de vidro. Acompanha 4 cadeiras estofadas. Pequenas marcas de uso.', 
-      timestamp: 'Há 4 dias', 
-      contactWhatsapp: '5521965439876', 
-      typeLabel: 'Venda', 
-      price: 'R$ 400,00', 
-      imageUrl: 'https://images.unsplash.com/photo-1533090481720-856c6e3c1fdc?q=80&w=800',
-      acceptsTrade: true,
-      tradeInterests: ['Eletrodomésticos', 'Móveis'],
-      tradeCondition: 'any'
-    },
-    { 
-      id: 'cl-des-5', 
-      title: 'Tênis de Corrida nº 42', 
-      advertiser: 'Ricardo S.', 
-      category: 'Desapega JPA', 
-      neighborhood: 'Freguesia', 
-      description: 'Usei apenas 3 vezes, ficou grande para mim. Marca Asics. Em estado de novo.', 
-      timestamp: 'Há 5 dias', 
-      contactWhatsapp: '5521954328765', 
-      typeLabel: 'Venda', 
-      price: 'R$ 250,00', 
-      imageUrl: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=800',
-      acceptsTrade: false
-    },
+    // Desapega JPA (5)
+    { id: 'cl-des-1', title: 'Vendo Bicicleta Aro 29 Usada', advertiser: 'Pedro M.', category: 'Desapega JPA', neighborhood: 'Freguesia', description: 'Bicicleta em ótimo estado, pouquíssimo usada. Pneus novos. Apenas retirada.', timestamp: 'Há 1 dia', contactWhatsapp: '5521998765432', typeLabel: 'Venda', price: 'R$ 800,00', imageUrl: 'https://images.unsplash.com/photo-1532298229144-0ec0c57515c7?q=80&w=800', acceptsTrade: true, tradeInterests: ['Celular'], tradeCondition: 'diff_money' },
+    { id: 'cl-des-2', title: 'Sofá 3 lugares Retrátil', advertiser: 'Fernanda R.', category: 'Desapega JPA', neighborhood: 'Taquara', description: 'Sofá confortável, precisa de limpeza, mas estrutura está perfeita. Motivo: comprei um novo.', timestamp: 'Há 2 dias', contactWhatsapp: '5521987659876', typeLabel: 'Venda', price: 'R$ 350,00', imageUrl: 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?q=80&w=800' },
+    { id: 'cl-des-3', title: 'Vendo iPhone 11 64GB', advertiser: 'Lucas T.', category: 'Desapega JPA', neighborhood: 'Pechincha', description: 'Saúde da bateria em 85%. Tela intacta, sempre usado com película. Acompanha caixa e cabo.', timestamp: 'Há 2 dias', contactWhatsapp: '5521976541234', typeLabel: 'Venda', price: 'R$ 1.500,00', imageUrl: 'https://images.unsplash.com/photo-1616348436168-de43ad0e12de?q=80&w=800', acceptsTrade: true, tradeInterests: ['Notebook'], tradeCondition: 'direct' },
+    { id: 'cl-des-4', title: 'Mesa de Jantar 4 Lugares', advertiser: 'Beatriz C.', category: 'Desapega JPA', neighborhood: 'Anil', description: 'Mesa de madeira com tampo de vidro. Acompanha 4 cadeiras estofadas. Pequenas marcas de uso.', timestamp: 'Há 4 dias', contactWhatsapp: '5521965439876', typeLabel: 'Venda', price: 'R$ 400,00', imageUrl: 'https://images.unsplash.com/photo-1533090481720-856c6e3c1fdc?q=80&w=800', acceptsTrade: true, tradeInterests: ['Móveis'], tradeCondition: 'any' },
+    { id: 'cl-des-5', title: 'Tênis de Corrida nº 42', advertiser: 'Ricardo S.', category: 'Desapega JPA', neighborhood: 'Freguesia', description: 'Usei apenas 3 vezes, ficou grande para mim. Marca Asics. Em estado de novo.', timestamp: 'Há 5 dias', contactWhatsapp: '5521954328765', typeLabel: 'Venda', price: 'R$ 250,00', imageUrl: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=800' },
 ];
 
 export const MOCK_REAL_ESTATE_PROPERTIES: RealEstateProperty[] = [
@@ -824,7 +635,8 @@ export const MOCK_COMMUNITY_POSTS: CommunityPost[] = [
     timestamp: '2h',
     likes: 8,
     comments: 16,
-    imageUrl: 'https://images.unsplash.com/photo-1582139329536-e7284fece509?q=80&w=600&auto=format&fit=crop'
+    imageUrl: 'https://images.unsplash.com/photo-1582139329536-e7284fece509?q=80&w=600&auto=format&fit=crop',
+    isActiveResident: true // Example of active resident badge
   },
   {
     id: 'post-2',
@@ -884,7 +696,8 @@ export const MOCK_COMMUNITY_POSTS: CommunityPost[] = [
     timestamp: '6h',
     likes: 38,
     comments: 14,
-    imageUrl: 'https://images.unsplash.com/photo-1566809540706-2b4742488820?q=80&w=600&auto=format&fit=crop'
+    imageUrl: 'https://images.unsplash.com/photo-1566809540706-2b4742488820?q=80&w=600&auto=format&fit=crop',
+    isActiveResident: true // Example of active resident badge
   },
   {
     id: 'post-6',
