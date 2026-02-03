@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState, useMemo } from 'react';
 import {
   ChevronLeft,
@@ -193,8 +194,9 @@ export const StoreDetailView: React.FC<{
                 </div>
               </div>
 
-              {/* BOTÕES DE AÇÃO */}
+              {/* BOTÕES DE AÇÃO REORGANIZADOS */}
               <div className="space-y-3">
+                  {/* Linha 1: Principais (WhatsApp + Instagram) */}
                   <div className="flex gap-3">
                       <button 
                         onClick={() => window.open(`https://wa.me/55${phoneDigits}`, '_blank')}
@@ -211,18 +213,31 @@ export const StoreDetailView: React.FC<{
                           <span className="text-xs font-black uppercase tracking-widest">Instagram</span>
                       </button>
                   </div>
-                  <div className="flex gap-3">
+
+                  {/* Linha 2: Secundários (Ligar + Waze + Maps) */}
+                  <div className="grid grid-cols-3 gap-3">
                       <button 
                         onClick={() => window.open(`tel:${phoneDigits}`, '_self')}
-                        className="flex-1 bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-300 py-3 rounded-xl flex items-center justify-center gap-2 font-bold text-[10px] uppercase tracking-widest"
+                        className="flex flex-col items-center justify-center py-3 bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 active:scale-95 transition-all"
                       >
-                          <Phone size={14} /> Ligar
+                          <Phone size={18} className="mb-1" />
+                          <span className="text-[9px] font-black uppercase tracking-widest">Ligar</span>
                       </button>
+                      
                       <button 
-                        onClick={() => window.open(`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(addressFormatted)}`, '_blank')}
-                        className="flex-1 bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-300 py-3 rounded-xl flex items-center justify-center gap-2 font-bold text-[10px] uppercase tracking-widest"
+                        onClick={() => window.open(`https://waze.com/ul?q=${encodeURIComponent(addressFormatted)}`, '_blank')}
+                        className="flex flex-col items-center justify-center py-3 bg-blue-50 dark:bg-blue-900/20 text-[#33CCFF] rounded-xl hover:bg-blue-100 dark:hover:bg-blue-900/30 active:scale-95 transition-all"
                       >
-                          <Navigation2 size={14} /> Rota
+                          <WazeIcon size={18} className="mb-1" />
+                          <span className="text-[9px] font-black uppercase tracking-widest">Waze</span>
+                      </button>
+                      
+                      <button 
+                        onClick={() => window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(addressFormatted)}`, '_blank')}
+                        className="flex flex-col items-center justify-center py-3 bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 active:scale-95 transition-all"
+                      >
+                          <MapPin size={18} className="mb-1 text-red-500" />
+                          <span className="text-[9px] font-black uppercase tracking-widest">Maps</span>
                       </button>
                   </div>
               </div>
@@ -259,30 +274,7 @@ export const StoreDetailView: React.FC<{
                         <div className="space-y-4">
                             <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed font-medium whitespace-pre-wrap">{shortDescription}</p>
                             
-                            <div className="pt-6 border-t border-gray-100 dark:border-gray-800">
-                                <div className="flex items-start gap-3 mb-6">
-                                    <MapPin size={18} className="text-[#1E5BFF] mt-0.5 shrink-0" />
-                                    <div>
-                                        <p className="text-sm font-bold text-gray-800 dark:text-gray-200">{addressFormatted}</p>
-                                        <p className="text-[10px] text-gray-400 font-bold uppercase mt-0.5">Jacarepaguá, Rio de Janeiro - RJ</p>
-                                    </div>
-                                </div>
-                                
-                                <div className="grid grid-cols-2 gap-3">
-                                    <button 
-                                        onClick={() => window.open(`https://waze.com/ul?q=${encodeURIComponent(addressFormatted)}`, '_blank')}
-                                        className="bg-[#33CCFF] text-white py-3 rounded-xl flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-widest active:scale-95 transition-all"
-                                    >
-                                        <WazeIcon size={14} fill="white" /> Waze
-                                    </button>
-                                    <button 
-                                        onClick={() => window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(addressFormatted)}`, '_blank')}
-                                        className="bg-white border border-gray-200 text-gray-700 py-3 rounded-xl flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-widest active:scale-95 transition-all"
-                                    >
-                                        <img src="https://www.google.com/images/branding/product/2x/maps_96in128dp.png" className="w-4 h-4 object-contain" /> Maps
-                                    </button>
-                                </div>
-                            </div>
+                            {/* REMOVIDO BLOCO DUPLICADO DE ENDEREÇO E BOTÕES AQUI */}
                         </div>
 
                         <div className="space-y-4 pt-4">
