@@ -289,18 +289,20 @@ export const StoreDetailView: React.FC<{
 
                         {/* AÇÕES DE ENCERRAMENTO E REIVINDICAÇÃO */}
                         <div className="pt-10 space-y-4 px-1">
+                            {/* CTA Principal: Reivindicar - Azul, Bold, Maior */}
                             <button 
                                 onClick={onClaim}
-                                className="w-full py-5 bg-[#1E5BFF] hover:bg-blue-600 text-white rounded-[1.75rem] text-xs font-black uppercase tracking-[0.15em] shadow-xl shadow-blue-500/20 active:scale-[0.98] transition-all"
+                                className="w-full py-4 bg-[#1E5BFF] hover:bg-blue-600 text-white rounded-[1.25rem] text-sm font-bold uppercase tracking-[0.15em] shadow-xl shadow-blue-500/20 active:scale-[0.98] transition-all"
                             >
                                 Reivindicar esta loja
                             </button>
                             
+                            {/* Ação Secundária: Informar Fechamento - Branco, Texto Vermelho, Menor */}
                             <button 
                                 onClick={() => { /* Lógica de reportar fechamento */ }}
-                                className="w-full py-4 flex items-center justify-center gap-2 border-2 border-red-50 dark:border-red-900/20 bg-red-50/50 dark:bg-red-900/10 text-red-500 rounded-2xl text-[10px] font-black uppercase tracking-[0.15em] hover:bg-red-100 dark:hover:bg-red-900/30 transition-all active:scale-[0.98]"
+                                className="w-full py-3.5 flex items-center justify-center gap-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 text-red-500 rounded-[1.25rem] text-xs font-bold uppercase tracking-[0.15em] hover:bg-red-50 dark:hover:bg-red-900/10 transition-all active:scale-[0.98]"
                             >
-                                <StoreIcon size={16} className="text-red-500" />
+                                <StoreIcon size={14} className="text-red-500" />
                                 Informar que a loja fechou
                             </button>
                         </div>
