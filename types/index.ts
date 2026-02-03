@@ -104,6 +104,7 @@ export interface ServiceRequest {
   images: string[];
   status: 'open' | 'closed';
   createdAt: string;
+  winnerId?: string;
 }
 
 export interface ServiceLead {
@@ -111,7 +112,9 @@ export interface ServiceLead {
   requestId: string;
   merchantId: string;
   merchantName: string;
-  status: 'pending_payment' | 'paid';
+  status: 'new' | 'unlocked' | 'chatting' | 'finished' | 'lost' | 'pending_payment' | 'paid';
+  merchantLogo?: string;
+  unlockedAt?: string;
   purchasedAt?: string;
 }
 
@@ -144,10 +147,11 @@ export interface Job {
   company: string;
   neighborhood: string;
   category: string;
-  type: 'CLT' | 'PJ' | 'Freelancer';
+  type: 'CLT' | 'PJ' | 'Freelancer' | 'Temporário' | 'Estágio' | 'Aprendiz' | 'Diarista' | 'Meio período' | 'Outros';
   salary?: string;
   description: string;
   requirements: string[];
+  benefits?: string[];
   postedAt: string;
   isUrgentToday?: boolean;
   schedule?: string;
@@ -155,6 +159,13 @@ export interface Job {
   isSponsored?: boolean;
   sponsoredUntil?: string;
   isUrgent?: boolean;
+  logoUrl?: string;
+  candidacy_method?: 'cv' | 'whatsapp';
+  modality?: 'Presencial' | 'Híbrido' | 'Remoto';
+  experience?: string;
+  schedule_type?: 'Integral' | 'Meio período' | 'Escala';
+  isVerified?: boolean;
+  isVerifiedMerchant?: boolean;
 }
 
 export interface NeighborhoodCommunity {
@@ -175,7 +186,7 @@ export interface CommunityPost {
   userAvatar: string;
   authorRole: 'resident' | 'merchant';
   content: string;
-  type: 'recommendation' | 'alert' | 'event' | 'poll';
+  type: 'recommendation' | 'alert' | 'event' | 'poll' | 'promotion';
   communityId: string;
   neighborhood?: string;
   timestamp: string;
@@ -186,6 +197,8 @@ export interface CommunityPost {
   videoUrl?: string;
   theme?: 'utilidade' | 'seguranca' | 'lazer' | 'dicas' | 'geral';
   showOnStoreProfile?: boolean;
+  storeId?: string;
+  promotionId?: string;
 }
 
 export type TaxonomyType = 'category' | 'subcategory' | 'specialty';
@@ -217,6 +230,7 @@ export interface Classified {
   price?: string;
   imageUrl?: string;
   jobDetails?: Job;
+  isVerifiedMerchant?: boolean;
 }
 
 export interface StoreCredit {

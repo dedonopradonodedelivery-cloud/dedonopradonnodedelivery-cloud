@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { CommunityPost, Store, ReportReason } from '../types';
 import { User } from '@supabase/supabase-js';
