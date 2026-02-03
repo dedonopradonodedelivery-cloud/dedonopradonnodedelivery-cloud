@@ -303,7 +303,7 @@ export const HomeFeed: React.FC<HomeFeedFeedProps> = ({
                     onClick={() => onSelectCategory(cat)}
                     className="flex flex-col items-center group active:scale-95 transition-all w-full"
                   >
-                    <div className={`w-[70px] h-[70px] rounded-[22px] shadow-sm flex flex-col items-center justify-between p-2 ${cat.color} border border-white/20`}>
+                    <div className={`w-full max-w-[84px] aspect-square rounded-[25px] shadow-sm flex flex-col items-center justify-between p-2 ${cat.color} border border-white/20`}>
                       <div className="flex-1 flex items-center justify-center w-full">
                         {React.cloneElement(cat.icon as any, { className: "w-6 h-6 text-white drop-shadow-md", strokeWidth: 2.5 })}
                       </div>
