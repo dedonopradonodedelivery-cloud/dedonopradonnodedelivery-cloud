@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { ChevronLeft, Check, Crown, Zap, Building2, Star, ShieldCheck, ArrowRight, Loader2, CheckCircle2, Medal, Rocket, Sparkles } from 'lucide-react';
+import { ChevronLeft, Check, Crown, Zap, Building2, Star, ShieldCheck, ArrowRight, Loader2, CheckCircle2, Medal, Rocket, Sparkles, Calendar } from 'lucide-react';
 import { PlanType } from '../types';
 
 interface PlanSelectionViewProps {
@@ -11,27 +11,28 @@ interface PlanSelectionViewProps {
 const PLAN_DATA = [
     {
         id: 'founder',
-        name: 'Plano Fundadores',
-        price: '149,70', // 49.90 * 3
+        name: 'Plano Fundador – Inauguração',
+        price: '81,00', // 27 * 3
         period: 'Pagamento Único',
         icon: Medal,
         color: 'bg-gradient-to-br from-amber-400 to-yellow-600',
         textColor: 'text-yellow-950',
         borderColor: 'border-yellow-400',
         isSpecial: true,
-        badge: 'Lançamento Oficial',
+        badge: 'Pague 3, Leve 5 Meses',
         features: [
-            'Acesso estendido: 5 meses de visibilidade (3 + 2 de extensão)',
-            'Selo Exclusivo "Fundador do Bairro" no perfil',
-            'Prioridade inicial no algoritmo de busca',
-            'Destaque no JPA Conversa durante o lançamento',
+            '5 Meses de visibilidade garantida',
+            'Selo Exclusivo "Fundador do Bairro"',
+            'Prioridade inicial no algoritmo',
+            'Suporte prioritário no WhatsApp',
             'Vagas limitadas por região'
         ]
     },
     {
         id: 'professional',
-        name: 'Profissional Local',
-        price: '49,90',
+        name: 'Patrocinado Local',
+        price: '27,00', // Mensal real
+        dailyPrice: '0,90', // Destaque visual
         period: '/mês',
         icon: Zap,
         color: 'bg-blue-600',
@@ -39,11 +40,11 @@ const PLAN_DATA = [
         borderColor: 'border-gray-100',
         isSpecial: false,
         features: [
-            'Até 10 anúncios ativos',
-            '2 anúncios em destaque rotativos',
-            'Prioridade nas buscas do bairro',
-            'Painel profissional completo',
-            'Renovação automática'
+            'Sua loja em destaque no bairro',
+            'Mais visibilidade no momento da decisão',
+            'Presença diária para moradores próximos',
+            'Ideal para testar sem risco',
+            'Cancele quando quiser'
         ]
     },
     {
@@ -56,7 +57,7 @@ const PLAN_DATA = [
         textColor: 'text-white',
         borderColor: 'border-gray-100',
         isSpecial: false,
-        popular: true,
+        popular: false,
         features: [
             'Até 30 anúncios ativos',
             'Destaque contínuo (Mini Banners)',
@@ -81,7 +82,7 @@ const PLAN_DATA = [
             'Presença em "Destaques do Bairro"',
             'Mini-banner fixo na rolagem',
             'Selo Destaque do Bairro',
-            'Atendimento prioritário VIP'
+            'Status e Autoridade máxima'
         ]
     }
 ];
@@ -117,8 +118,8 @@ export const PlanSelectionView: React.FC<PlanSelectionViewProps> = ({ onBack, on
               </h2>
               <p className="text-gray-500 dark:text-gray-400 mb-12">
                   {selectedPlan === 'founder' 
-                    ? 'Sua posição de destaque no bairro foi garantida. Aproveite os benefícios exclusivos de lançamento.' 
-                    : 'Seu acesso profissional já está liberado. Agora você pode criar anúncios sem limites e destacar sua marca.'}
+                    ? 'Sua posição de destaque no bairro foi garantida por 5 meses. Aproveite a exclusividade de inauguração.' 
+                    : 'Seu acesso patrocinado já está liberado. Sua loja começará a aparecer para mais moradores hoje.'}
               </p>
               <button 
                 onClick={() => onSuccess(selectedPlan as PlanType)}
@@ -131,7 +132,7 @@ export const PlanSelectionView: React.FC<PlanSelectionViewProps> = ({ onBack, on
   }
 
   if (step === 'checkout') {
-      const plan = PLAN_DATA.find(p => p.id === selectedPlan);
+      const plan = PLAN_DATA.find(p => p.id === selectedPlan) as any; // Type hack for quick access
       return (
           <div className="min-h-screen bg-gray-50 dark:bg-gray-950 font-sans flex flex-col animate-in slide-in-from-right duration-300">
               <header className="px-5 h-20 flex items-center gap-4 bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800 sticky top-0 z-40">
@@ -148,16 +149,31 @@ export const PlanSelectionView: React.FC<PlanSelectionViewProps> = ({ onBack, on
                       <p className="text-xs font-black text-gray-400 uppercase tracking-widest mb-3">Você escolheu</p>
                       <h2 className="text-3xl font-black text-gray-900 dark:text-white uppercase tracking-tighter leading-none mb-6">{plan?.name}</h2>
                       
-                      <div className="flex items-baseline justify-center gap-1.5 p-4 bg-gray-50 dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700">
-                          <span className="text-sm font-bold text-gray-400">R$</span>
-                          <span className="text-5xl font-black text-[#1E5BFF] tracking-tighter">{plan?.price}</span>
-                          <span className="text-xs font-bold text-gray-400">{plan?.period}</span>
+                      <div className="flex flex-col items-center justify-center p-4 bg-gray-50 dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700">
+                          {plan.id === 'professional' ? (
+                             <>
+                                <div className="flex items-baseline gap-1">
+                                    <span className="text-sm font-bold text-gray-400">R$</span>
+                                    <span className="text-5xl font-black text-[#1E5BFF] tracking-tighter">{plan.dailyPrice}</span>
+                                    <span className="text-xs font-bold text-gray-400">/dia</span>
+                                </div>
+                                <span className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-1">
+                                    Cobrado mensalmente: R$ {plan.price}
+                                </span>
+                             </>
+                          ) : (
+                             <div className="flex items-baseline gap-1">
+                                <span className="text-sm font-bold text-gray-400">R$</span>
+                                <span className="text-5xl font-black text-[#1E5BFF] tracking-tighter">{plan?.price}</span>
+                                <span className="text-xs font-bold text-gray-400">{plan?.period}</span>
+                             </div>
+                          )}
                       </div>
 
                       {plan?.id === 'founder' && (
                           <div className="mt-6 p-4 bg-amber-50 dark:bg-amber-900/10 border border-amber-100 dark:border-amber-800/30 rounded-xl">
                               <p className="text-xs text-amber-800 dark:text-amber-200 font-bold leading-relaxed">
-                                  Você está garantindo <span className="uppercase font-black">5 meses</span> de acesso total e o selo vitalício de Fundador.
+                                  Você está garantindo <span className="uppercase font-black">5 meses</span> de acesso total (3 pagos + 2 grátis) e o selo vitalício de Fundador.
                               </p>
                           </div>
                       )}
@@ -182,7 +198,7 @@ export const PlanSelectionView: React.FC<PlanSelectionViewProps> = ({ onBack, on
                       <p className="text-xs text-blue-800 dark:text-blue-300 font-medium leading-relaxed">
                           {plan?.id === 'founder' 
                             ? 'Sua posição de fundador é única e intransferível. O selo será ativado imediatamente após o pagamento.'
-                            : 'A renovação é automática a cada 30 dias. Você pode cancelar quando quiser sem taxas.'}
+                            : 'A renovação é automática a cada 30 dias. Você pode cancelar a qualquer momento sem multas.'}
                       </p>
                   </div>
               </main>
@@ -204,21 +220,21 @@ export const PlanSelectionView: React.FC<PlanSelectionViewProps> = ({ onBack, on
     <div className="min-h-screen bg-[#F8F9FC] dark:bg-gray-950 font-sans flex flex-col animate-in slide-in-from-right duration-300">
       <header className="sticky top-0 z-40 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md px-5 h-20 flex items-center gap-4 border-b border-gray-100 dark:border-gray-800 shrink-0">
         <button onClick={onBack} className="p-3 bg-gray-50 dark:bg-gray-800 rounded-2xl hover:bg-gray-100 transition-colors"><ChevronLeft className="w-5 h-5 dark:text-white"/></button>
-        <h1 className="font-black text-lg text-gray-900 dark:text-white uppercase tracking-tighter">Escolha seu Plano</h1>
+        <h1 className="font-black text-lg text-gray-900 dark:text-white uppercase tracking-tighter">Planos de Visibilidade</h1>
       </header>
 
       <main className="flex-1 p-6 space-y-8 overflow-y-auto no-scrollbar pb-32">
           <div className="text-center space-y-2">
               <h2 className="text-3xl font-black text-gray-900 dark:text-white uppercase tracking-tighter leading-none">
-                  Não é desconto.<br/>É posição.
+                  Apareça no seu bairro<br/>todos os dias
               </h2>
               <p className="text-sm text-gray-500 dark:text-gray-400 font-medium max-w-xs mx-auto">
-                  Garanta seu lugar na história do bairro ou escolha um plano flexível para crescer.
+                  Visibilidade local real por menos de R$ 1 por dia.
               </p>
           </div>
 
           <div className="space-y-6">
-              {PLAN_DATA.map(plan => {
+              {PLAN_DATA.map((plan: any) => {
                   const Icon = plan.icon;
                   return (
                       <div 
@@ -226,18 +242,18 @@ export const PlanSelectionView: React.FC<PlanSelectionViewProps> = ({ onBack, on
                         className={`relative rounded-[2.5rem] p-8 border-2 transition-all cursor-pointer active:scale-[0.98]
                             ${plan.isSpecial 
                                 ? 'bg-slate-900 border-amber-500 shadow-2xl shadow-amber-500/10' 
-                                : `bg-white dark:bg-gray-900 ${plan.popular ? 'border-[#1E5BFF] shadow-xl shadow-blue-500/10' : 'border-gray-100 dark:border-gray-800 shadow-sm'}`
+                                : `bg-white dark:bg-gray-900 ${plan.id === 'professional' ? 'border-[#1E5BFF] shadow-xl shadow-blue-500/10' : 'border-gray-100 dark:border-gray-800 shadow-sm'}`
                             }
                         `}
                       >
-                          {plan.popular && (
+                          {plan.id === 'professional' && (
                               <div className="absolute -top-3 right-8 bg-[#1E5BFF] text-white px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest shadow-lg border-2 border-white dark:border-gray-900">
-                                  Mais Escolhido
+                                  Melhor Custo-Benefício
                               </div>
                           )}
 
                           {plan.badge && (
-                              <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-amber-400 to-yellow-500 text-yellow-950 px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest shadow-lg flex items-center gap-1.5">
+                              <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-amber-400 to-yellow-500 text-yellow-950 px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest shadow-lg flex items-center gap-1.5 whitespace-nowrap">
                                   <Sparkles size={12} fill="currentColor" /> {plan.badge}
                               </div>
                           )}
@@ -251,18 +267,40 @@ export const PlanSelectionView: React.FC<PlanSelectionViewProps> = ({ onBack, on
                               </h3>
                           </div>
                           
-                          <div className="flex items-baseline gap-1 mb-8">
-                              <span className={`text-sm font-bold ${plan.isSpecial ? 'text-slate-400' : 'text-gray-400'}`}>R$</span>
-                              <span className={`text-5xl font-black tracking-tighter ${plan.isSpecial ? 'text-amber-400' : 'text-gray-900 dark:text-white'}`}>
-                                  {plan.price}
-                              </span>
-                              <span className={`text-xs font-bold uppercase tracking-wider ${plan.isSpecial ? 'text-slate-400' : 'text-gray-400'}`}>
-                                  {plan.period}
-                              </span>
+                          <div className="flex flex-col items-start mb-8">
+                              {plan.id === 'professional' ? (
+                                  <>
+                                     <div className="flex items-baseline gap-1">
+                                        <span className="text-sm font-bold text-gray-400">R$</span>
+                                        <span className="text-5xl font-black tracking-tighter text-[#1E5BFF]">0,90</span>
+                                        <span className="text-xs font-bold uppercase tracking-wider text-gray-400">/ dia</span>
+                                     </div>
+                                     <span className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-1 bg-gray-50 dark:bg-gray-800 px-2 py-1 rounded-md">
+                                        {plan.subPrice}
+                                     </span>
+                                  </>
+                              ) : (
+                                  <>
+                                      <div className="flex items-baseline gap-1">
+                                          <span className={`text-sm font-bold ${plan.isSpecial ? 'text-slate-400' : 'text-gray-400'}`}>R$</span>
+                                          <span className={`text-5xl font-black tracking-tighter ${plan.isSpecial ? 'text-amber-400' : 'text-gray-900 dark:text-white'}`}>
+                                              {plan.price}
+                                          </span>
+                                          <span className={`text-xs font-bold uppercase tracking-wider ${plan.isSpecial ? 'text-slate-400' : 'text-gray-400'}`}>
+                                              {plan.period}
+                                          </span>
+                                      </div>
+                                      {plan.subPrice && (
+                                        <span className="text-[10px] text-amber-200/70 font-bold uppercase tracking-widest mt-1">
+                                            {plan.subPrice}
+                                        </span>
+                                      )}
+                                  </>
+                              )}
                           </div>
 
                           <ul className="space-y-4 mb-10">
-                              {plan.features.map((feat, i) => (
+                              {plan.features.map((feat: string, i: number) => (
                                   <li key={i} className={`flex items-start gap-3 text-xs font-bold ${plan.isSpecial ? 'text-slate-300' : 'text-gray-600 dark:text-gray-300'}`}>
                                       <CheckCircle2 size={16} className={`${plan.isSpecial ? 'text-amber-500' : 'text-blue-500'} shrink-0`} />
                                       {feat}
@@ -275,16 +313,22 @@ export const PlanSelectionView: React.FC<PlanSelectionViewProps> = ({ onBack, on
                             className={`w-full py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all 
                                 ${plan.isSpecial 
                                     ? 'bg-gradient-to-r from-amber-400 to-yellow-500 text-yellow-950 hover:shadow-lg hover:shadow-amber-500/20' 
-                                    : plan.popular 
+                                    : plan.id === 'professional' 
                                         ? 'bg-[#1E5BFF] text-white shadow-lg shadow-blue-500/20' 
                                         : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-[#1E5BFF] hover:text-white'
                                 }`}
                           >
-                              {plan.isSpecial ? 'Quero ser Fundador' : 'Contratar Plano'}
+                              {plan.isSpecial ? 'Quero ser Fundador' : plan.id === 'professional' ? 'Começar Agora' : 'Selecionar'}
                           </button>
                       </div>
                   );
               })}
+          </div>
+
+          <div className="bg-blue-50 dark:bg-blue-900/10 p-5 rounded-3xl border border-blue-100 dark:border-blue-800/30 text-center">
+              <p className="text-xs text-blue-800 dark:text-blue-300 font-bold leading-relaxed">
+                  💡 Dica: Comece com o <span className="uppercase">Patrocinado Local</span> e evolua para o <span className="uppercase">Master</span> quando quiser mais autoridade.
+              </p>
           </div>
       </main>
     </div>

@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo, useRef } from 'react';
 import { Store, Category, CommunityPost, ServiceRequest, ServiceUrgency, Classified } from '../types';
 import { 
@@ -124,17 +125,11 @@ export const HomeFeed: React.FC<HomeFeedFeedProps> = ({
   const [listFilter, setListFilter] = useState<'all' | 'top_rated' | 'open_now'>('all');
   const { currentNeighborhood } = useNeighborhood();
   
-  // Category Scroll Logic
   const categoryScrollRef = useRef<HTMLDivElement>(null);
   const [currentCategoryPage, setCurrentCategoryPage] = useState(0);
 
-  // Pagination Configuration
-  // Adjust to 8 items per page (4 columns x 2 rows)
   const itemsPerPage = 8; 
   
-  // Reorder categories as requested: 
-  // Page 1: Saúde, Moda, Pets, Pro, Beleza, Autos, Esportes, Educação
-  // Page 2: Remaining
   const orderedCategories = useMemo(() => {
     const firstPageIds = [
       'cat-saude',    // Saúde
@@ -157,8 +152,7 @@ export const HomeFeed: React.FC<HomeFeedFeedProps> = ({
   }, []);
 
   const allCategories = orderedCategories; 
-  const totalPages = Math.ceil(allCategories.length / itemsPerPage);
-
+  
   const [wizardStep, setWizardStep] = useState(0);
   const [selectedService, setSelectedService] = useState<string | null>(null);
   const [selectedUrgency, setSelectedUrgency] = useState<string | null>(null);
@@ -221,7 +215,6 @@ export const HomeFeed: React.FC<HomeFeedFeedProps> = ({
     }, 1500);
   };
 
-  // Chunk categories into pages
   const categoryPages = useMemo(() => {
     const pages = [];
     for (let i = 0; i < allCategories.length; i += itemsPerPage) {
