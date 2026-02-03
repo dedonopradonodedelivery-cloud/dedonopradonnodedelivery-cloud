@@ -89,6 +89,7 @@ export interface Store {
   email_publico?: string;
   accepts_online_orders?: boolean;
   min_order_value?: number;
+  tags?: string[]; // Novas tags de produtos/serviços
 }
 
 export type ServiceUrgency = 'Hoje' | 'Essa semana' | 'Sem pressa';
@@ -199,7 +200,7 @@ export interface CommunityPost {
   showOnStoreProfile?: boolean;
   storeId?: string;
   promotionId?: string;
-  isActiveResident?: boolean; // Novo campo: Indica se o autor é Morador Ativo
+  isActiveResident?: boolean;
 }
 
 export type TaxonomyType = 'category' | 'subcategory' | 'specialty';

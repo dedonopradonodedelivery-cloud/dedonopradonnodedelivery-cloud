@@ -89,6 +89,9 @@ export interface Store {
   email_publico?: string;
   accepts_online_orders?: boolean;
   min_order_value?: number;
+  plan?: PlanType;
+  ads_count?: number;
+  tags?: string[];
 }
 
 export type ServiceUrgency = 'Hoje' | 'Essa semana' | 'Sem pressa';
@@ -377,6 +380,7 @@ export type PromotionStatus = 'active' | 'scheduled' | 'expired' | 'paused';
 export type TransactionStatus = 'pending' | 'approved' | 'rejected';
 export type SessionType = 'qr' | 'pin';
 export type MovementType = 'credit' | 'debit';
+export type PlanType = 'free' | 'professional' | 'enterprise' | 'master' | 'founder';
 
 export interface DbUser {
   id: string;

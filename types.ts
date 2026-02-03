@@ -110,6 +110,7 @@ export interface Store {
   ads_count?: number;
   accepts_online_orders?: boolean;
   min_order_value?: number;
+  tags?: string[];
 }
 
 export interface CommunityPost {

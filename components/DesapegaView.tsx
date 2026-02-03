@@ -377,8 +377,8 @@ export const DesapegaView: React.FC<DesapegaViewProps> = ({ onBack, user, onRequ
                   </div>
               </div>
 
-              <div className="flex-1 flex items-center justify-center p-4">
-                  <div className="w-full max-w-sm aspect-[3/4] relative rounded-[3rem] overflow-hidden shadow-2xl border-4 border-slate-800 bg-slate-900 group">
+              <div className="flex-1 flex items-center justify-center px-3 pt-16 pb-4">
+                  <div className="w-full max-w-md aspect-[3/4] relative rounded-[2.5rem] overflow-hidden shadow-2xl border-4 border-slate-800 bg-slate-900 group">
                       <img 
                           src={currentMatchCard.imageUrl || getFallbackItemImage(currentMatchCard.id)} 
                           className="w-full h-full object-cover" 
@@ -386,7 +386,7 @@ export const DesapegaView: React.FC<DesapegaViewProps> = ({ onBack, user, onRequ
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent"></div>
                       
-                      <div className="absolute bottom-0 left-0 right-0 p-8 pb-10">
+                      <div className="absolute bottom-0 left-0 right-0 p-6 pb-8">
                           {currentMatchCard.tradeCondition === 'direct' && (
                               <div className="inline-block px-3 py-1 rounded-full bg-emerald-500/90 backdrop-blur-md text-white text-[9px] font-black uppercase tracking-widest mb-3 shadow-lg">
                                   Troca Direta
@@ -401,7 +401,7 @@ export const DesapegaView: React.FC<DesapegaViewProps> = ({ onBack, user, onRequ
                   </div>
               </div>
 
-              <div className="pb-10 px-10 flex justify-between items-center max-w-md mx-auto w-full">
+              <div className="pb-28 px-8 flex justify-between items-center max-w-md mx-auto w-full z-30 relative">
                   <button 
                       onClick={handleNextCard}
                       className="w-16 h-16 rounded-full bg-slate-800 text-red-500 flex items-center justify-center shadow-lg border border-slate-700 active:scale-90 transition-all hover:bg-slate-700"

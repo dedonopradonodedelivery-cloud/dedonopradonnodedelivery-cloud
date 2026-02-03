@@ -122,12 +122,58 @@ export const Header: React.FC<HeaderProps> = ({
 
   const normalize = (text: any) => (String(text || "")).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
 
+  // Função auxiliar para remover plural simples (s no final)
+  const rootWord = (str: string) => str.endsWith('s') ? str.slice(0, -1) : str;
+
   const searchResults = useMemo(() => {
     const term = normalize(searchTerm);
     if (!term || (activeTab !== 'home' && activeTab !== 'explore')) return { stores: [], categories: [] };
+    
+    const rootTerm = rootWord(term);
+
     const matchedCategories = CATEGORIES.filter(cat => normalize(cat.name).includes(term));
-    const matchedStores = stores.filter(s => normalize(s.name + s.category + (s.neighborhood || "")).includes(term));
-    return { stores: matchedStores.slice(0, 15), categories: matchedCategories.slice(0, 4) };
+    
+    const matchedStores = stores.map(store => {
+        let matchReason = '';
+        const normName = normalize(store.name);
+        const normCat = normalize(store.category);
+        const normSub = normalize(store.subcategory);
+        const normDesc = normalize(store.description);
+        
+        // Prioridade 1: Tags
+        if (store.tags) {
+            const matchedTag = store.tags.find(tag => {
+                const normTag = normalize(tag);
+                return normTag.includes(term) || rootWord(normTag).includes(rootTerm);
+            });
+            if (matchedTag) {
+                matchReason = `Encontrado por: ${matchedTag}`;
+                return { store, matchReason, priority: 1 };
+            }
+        }
+
+        // Prioridade 2: Nome
+        if (normName.includes(term)) {
+            return { store, matchReason: '', priority: 2 };
+        }
+
+        // Prioridade 3: Categoria/Subcategoria
+        if (normCat.includes(term) || normSub.includes(term)) {
+            return { store, matchReason: '', priority: 3 };
+        }
+
+        // Prioridade 4: Descrição
+        if (normDesc.includes(term)) {
+            return { store, matchReason: '', priority: 4 };
+        }
+
+        return null;
+    })
+    .filter(Boolean)
+    .sort((a, b) => (a!.priority - b!.priority))
+    .slice(0, 15);
+
+    return { stores: matchedStores, categories: matchedCategories.slice(0, 4) };
   }, [stores, searchTerm, activeTab]);
 
   const dynamicPlaceholder = useMemo(() => {
@@ -206,12 +252,35 @@ export const Header: React.FC<HeaderProps> = ({
                                 {(searchResults.stores.length > 0 || searchResults.categories.length > 0) ? (
                                     <div className="flex flex-col">
                                         {searchResults.categories.map(cat => (<button key={cat.id} onClick={() => { onNavigate('explore'); onSearchChange(''); }} className="w-full flex items-center gap-3 p-3 hover:bg-gray-50 dark:hover:bg-gray-800/50 rounded-xl transition-colors text-left group"><div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${cat.color} flex items-center justify-center text-white shrink-0`}><Tag size={14} /></div><div className="flex-1"><p className="text-sm font-bold text-gray-900 dark:text-white">{cat.name}</p></div><ChevronRight className="w-4 h-4 text-gray-300" /></button>))}
-                                        {searchResults.stores.map(store => (<button key={store.id} onClick={() => { onStoreClick?.(store); onSearchChange(''); }} className="flex items-center gap-3 p-3 hover:bg-gray-50 dark:hover:bg-gray-800/50 rounded-xl text-left group"><div className="w-10 h-10 rounded-lg bg-gray-100 dark:bg-gray-800 overflow-hidden shrink-0"><img src={store.logoUrl || store.image || "/assets/default-logo.png"} className="w-full h-full object-contain" /></div><div className="flex-1 min-w-0"><p className="text-sm font-bold text-gray-900 dark:text-white truncate">{store.name}</p><p className="text-[9px] text-gray-400 font-medium truncate">{store.category} • {store.neighborhood}</p></div><ChevronRight className="w-4 h-4 text-gray-300 group-hover:text-[#1E5BFF]" /></button>))}
+                                        
+                                        {searchResults.stores.map((item: any) => {
+                                            const store = item.store;
+                                            return (
+                                                <button key={store.id} onClick={() => { onStoreClick?.(store); onSearchChange(''); }} className="flex items-center gap-3 p-3 hover:bg-gray-50 dark:hover:bg-gray-800/50 rounded-xl text-left group">
+                                                    <div className="w-10 h-10 rounded-lg bg-gray-100 dark:bg-gray-800 overflow-hidden shrink-0">
+                                                        <img src={store.logoUrl || store.image || "/assets/default-logo.png"} className="w-full h-full object-contain" />
+                                                    </div>
+                                                    <div className="flex-1 min-w-0">
+                                                        <p className="text-sm font-bold text-gray-900 dark:text-white truncate">{store.name}</p>
+                                                        <div className="flex flex-col">
+                                                            <p className="text-[9px] text-gray-400 font-medium truncate">{store.category} • {store.neighborhood}</p>
+                                                            {item.matchReason && (
+                                                                <span className="text-[9px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-tight mt-0.5 flex items-center gap-1">
+                                                                    <Tag size={8} /> {item.matchReason}
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                    <ChevronRight className="w-4 h-4 text-gray-300 group-hover:text-[#1E5BFF]" />
+                                                </button>
+                                            );
+                                        })}
                                     </div>
                                 ) : (
                                     <div className="py-8 px-4 text-center">
                                         <SearchX className="w-6 h-6 text-gray-300 mx-auto mb-3" />
-                                        <p className="text-sm font-bold text-gray-900 dark:text-white">Nenhum resultado</p>
+                                        <p className="text-sm font-bold text-gray-900 dark:text-white">Não encontramos lojas com esse termo no bairro.</p>
+                                        <p className="text-xs text-gray-500 mt-1">Tente buscar por loja, categoria ou produto.</p>
                                     </div>
                                 )}
                             </div>

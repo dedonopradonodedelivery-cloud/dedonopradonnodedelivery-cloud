@@ -36,6 +36,7 @@ import {
 } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import { useAuth } from '../contexts/AuthContext';
+// FIX: Added ALL_TAGS to imports from constants
 import { CATEGORIES, SUBCATEGORIES, ALL_TAGS } from '../constants';
 import { TaxonomyType, BusinessHour, TaxonomySuggestion } from '../types';
 
