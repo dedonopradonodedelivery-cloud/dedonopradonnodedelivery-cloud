@@ -108,6 +108,8 @@ export interface Store {
   email_publico?: string;
   plan?: PlanType;
   ads_count?: number;
+  accepts_online_orders?: boolean;
+  min_order_value?: number;
 }
 
 export interface CommunityPost {
@@ -130,9 +132,9 @@ export interface CommunityPost {
   showOnStoreProfile?: boolean;
   storeId?: string;
   promotionId?: string;
+  isActiveResident?: boolean;
 }
 
-// Mantendo o restante das interfaces para não quebrar o app
 export type SlotStatus = 'available' | 'reserved' | 'sold';
 export interface CategoryBannerSlot { uniqueKey: string; bairroSlug: string; categoriaSlug: string; slotNumber: 1 | 2; status: SlotStatus; merchantId?: string; merchantName?: string; expiresAt?: string; image?: string; title?: string; subtitle?: string; }
 export interface RealEstateProperty { id: string; type: 'Residencial' | 'Comercial'; title: string; description: string; image: string; neighborhood: string; price: number; transaction: 'aluguel' | 'venda'; area: number; postedAt: string; buildingName?: string; bedrooms?: number; bathrooms?: number; parkingSpaces?: number; propertyTypeRes?: 'Casa' | 'Apartamento' | 'Kitnet/Studio' | 'Cobertura'; condoFee?: number; isFurnished?: boolean; petsAllowed?: boolean; propertyTypeCom?: 'Sala comercial' | 'Loja' | 'Galpão' | 'Andar/Conjunto' | 'Terreno comercial'; hasBathroom?: boolean; highCeiling?: boolean; loadingAccess?: boolean; isVerifiedMerchant?: boolean; }
@@ -177,7 +179,7 @@ export interface StoreClaimRequest { id: string; store_id: string; store_name: s
 export type TransactionStatus = 'pending' | 'approved' | 'rejected';
 export type SessionType = 'qr' | 'pin';
 export type MovementType = 'credit' | 'debit';
-export interface DbUser { id: string; name: string; email: string; wallet_balance: number; created_at: string; }
+export interface DbUser { id: string; name: string; email: string; wallet_balance: number; created_at: string; isActiveResident?: boolean; engagementScore?: number; }
 export interface DbMerchant { id: string; name: string; cashback_percent: number; is_active: boolean; created_at: string; }
 export interface DbMerchantSession { id: string; merchant_id: string; session_type: SessionType; pin_code?: string; expires_at: string; is_used: boolean; created_at: string; }
 export interface DbCashbackTransaction { id: string; user_id: string; merchant_id: string; session_id?: string; purchase_value: number; amount_from_balance: number; amount_to_pay: number; cashback_value: number; status: TransactionStatus; created_at: string; approved_at?: string; rejected_at?: string; }
