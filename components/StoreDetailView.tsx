@@ -84,6 +84,24 @@ const STORE_FEED_MOCK = [
   { id: 'p9', imageUrl: 'https://images.unsplash.com/photo-1557804506-669a67965ba0?q=80&w=400' },
 ];
 
+const MOCK_PROMOTIONS_LIST: StorePromotion[] = [
+    { id: 'pr1', storeId: 'current', title: 'Combo Casal Premium', description: 'Duas pizzas grandes + refrigerante 2L por um preço imbatível.', type: 'Semana', startDate: new Date().toISOString(), endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), value: 89.90, discount: 20, status: 'active', createdAt: new Date().toISOString(), images: ['https://images.unsplash.com/photo-1513104890138-7c749659a591?q=80&w=800', 'https://images.unsplash.com/photo-1574129687527-bdad075841eb?q=80&w=800'] },
+    { id: 'pr2', storeId: 'current', title: 'Terça Maluca', description: 'Toda terça, qualquer lanche com 30% de desconto.', type: 'Dia', startDate: new Date().toISOString(), endDate: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000).toISOString(), discount: 30, status: 'active', createdAt: new Date().toISOString(), images: ['https://images.unsplash.com/photo-1561758033-d89a9ad46330?q=80&w=800'] },
+    { id: 'pr3', storeId: 'current', title: 'Mês do Cliente', description: 'Acumule 10 carimbos e ganhe uma refeição completa por nossa conta.', type: 'Mês', startDate: new Date().toISOString(), endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), status: 'active', createdAt: new Date().toISOString(), images: ['https://images.unsplash.com/photo-1555396273-367ea4eb4db5?q=80&w=800'] },
+    { id: 'pr4', storeId: 'current', title: 'Festival de Verão', description: 'Bebidas selecionadas com preço de custo durante todo o festival.', type: 'Sazonal', startDate: new Date().toISOString(), endDate: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toISOString(), status: 'active', createdAt: new Date().toISOString(), images: ['https://images.unsplash.com/photo-1536935338788-846bb9981813?q=80&w=800'] },
+];
+
+const MOCK_REVIEWS_LIST = [
+    { id: 'r1', userName: 'Ricardo Silva', rating: 5, comment: 'Excelente atendimento e qualidade impecável. Recomendo!', date: 'Há 2 dias' },
+    { id: 'r2', userName: 'Juliana Costa', rating: 4, comment: 'Muito bom, mas o tempo de espera no local foi um pouco longo.', date: 'Há 1 semana' },
+    { id: 'r3', userName: 'Marcos Oliveira', rating: 5, comment: 'Melhor lugar da Freguesia, sem dúvidas.', date: 'Há 3 dias' },
+    { id: 'r4', userName: 'Amanda Lira', rating: 5, comment: 'Sempre peço pelo app e chega rápido e quentinho.', date: 'Há 5 dias' },
+    { id: 'r5', userName: 'Pedro Santos', rating: 4, comment: 'Comida honesta e preço justo.', date: 'Há 2 semanas' },
+    { id: 'r6', userName: 'Fernanda Rocha', rating: 5, comment: 'Ambiente super agradável para ir com a família.', date: 'Há 1 mês' },
+    { id: 'r7', userName: 'Lucas Mendes', rating: 4, comment: 'Gostei muito das promoções, valem super a pena.', date: 'Há 6 dias' },
+    { id: 'r8', userName: 'Sofia Garcia', rating: 5, comment: 'Nota 10 para a limpeza e organização.', date: 'Há 2 dias' },
+];
+
 export const StoreDetailView: React.FC<{ 
   store: Store; 
   onBack: () => void; 
@@ -94,7 +112,7 @@ export const StoreDetailView: React.FC<{
   const { user } = useAuth();
   const { currentNeighborhood } = useNeighborhood();
   const [isFavorite, setIsFavorite] = useState(false);
-  const [activeTab, setActiveTab] = useState<'description' | 'feed' | 'promotions' | 'reviews' | 'hours' | 'payments'>('description');
+  const [activeTab, setActiveTab] = useState<'description' | 'promotions' | 'reviews' | 'hours' | 'payments'>('description');
   const [selectedPromotion, setSelectedPromotion] = useState<StorePromotion | null>(null);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [promoImageSlide, setPromoImageSlide] = useState(0);
@@ -108,14 +126,17 @@ export const StoreDetailView: React.FC<{
   const promotions = useMemo(() => {
     const saved = localStorage.getItem(`promotions_${store.id}`);
     const list: StorePromotion[] = saved ? JSON.parse(saved) : [];
-    const now = new Date().getTime();
     
+    // Se a lista estiver vazia, retorna os mocks
+    if (list.length === 0) return MOCK_PROMOTIONS_LIST;
+
+    const now = new Date().getTime();
     return list.filter(p => {
         const start = new Date(p.startDate).getTime();
         const end = new Date(p.endDate).getTime();
         return (p.status === 'active' || p.status === 'scheduled') && now >= start && now <= end;
     }).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-  }, [store.id, activeTab]);
+  }, [store.id]);
 
   useEffect(() => {
     if (images.length <= 1) return;
@@ -133,7 +154,7 @@ export const StoreDetailView: React.FC<{
     track('store_view');
   }, []);
 
-  const logoImg = store.logo_url || store.logoUrl || '/assets/default-logo.png';
+  const logoImg = store.logo_url || store.logoUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(store.name)}&background=1E5BFF&color=fff`;
   const phoneDigits = (store.whatsapp_publico || store.phone || '').replace(/\D/g, '');
   
   const addressFormatted = useMemo(() => {
@@ -229,7 +250,6 @@ export const StoreDetailView: React.FC<{
             <div className="flex bg-gray-100 dark:bg-gray-900 p-1 rounded-2xl mb-6 overflow-x-auto no-scrollbar">
                 {[
                   { id: 'description', label: 'Sobre' },
-                  { id: 'feed', label: 'Feed' },
                   { id: 'promotions', label: 'Promoções' },
                   { id: 'reviews', label: 'Avaliações' },
                   { id: 'hours', label: 'Horários' },
@@ -246,7 +266,7 @@ export const StoreDetailView: React.FC<{
             </div>
 
             {activeTab === 'description' && (
-                <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
                     <div className="bg-white dark:bg-gray-900 p-6 rounded-[2.5rem] border border-gray-100 dark:border-gray-800 shadow-sm">
                         <h3 className="text-sm font-black text-gray-900 dark:text-white mb-3 uppercase tracking-tight flex items-center gap-2">
                             <Info size={16} className="text-[#1E5BFF]" /> Sobre a loja
@@ -261,17 +281,23 @@ export const StoreDetailView: React.FC<{
                             </div>
                         </div>
                     </div>
-                </div>
-            )}
 
-            {activeTab === 'feed' && (
-                <div className="grid grid-cols-3 gap-1 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                  {STORE_FEED_MOCK.map((post) => (
-                    <div key={post.id} className="aspect-square bg-gray-100 dark:bg-gray-800 overflow-hidden relative group cursor-pointer">
-                      <img src={post.imageUrl} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
-                      <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                    <div className="px-1">
+                        <TrustBlock store={store} />
                     </div>
-                  ))}
+
+                    <div className="space-y-4">
+                        <h3 className="text-sm font-black text-gray-900 dark:text-white px-1 uppercase tracking-tight flex items-center gap-2">
+                            <LayoutGrid size={16} className="text-[#1E5BFF]" /> Feed da Loja
+                        </h3>
+                        <div className="grid grid-cols-3 gap-1">
+                          {STORE_FEED_MOCK.map((post) => (
+                            <div key={post.id} className="aspect-square bg-gray-100 dark:bg-gray-800 overflow-hidden relative group cursor-pointer">
+                              <img src={post.imageUrl} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                            </div>
+                          ))}
+                        </div>
+                    </div>
                 </div>
             )}
 
@@ -321,13 +347,46 @@ export const StoreDetailView: React.FC<{
 
             {activeTab === 'reviews' && (
                 <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                    <div className="flex items-center gap-4 bg-white dark:bg-gray-900 p-6 rounded-[2.5rem] border border-gray-100 dark:border-gray-800 shadow-sm">
-                        <div className="text-center px-2">
-                            <span className="text-4xl font-black text-gray-900 dark:text-white">{store.rating.toFixed(1)}</span>
+                    <div className="bg-white dark:bg-gray-900 p-8 rounded-[2.5rem] border border-gray-100 dark:border-gray-800 shadow-sm flex flex-col items-center">
+                        <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-2">Nota Média</p>
+                        <div className="flex items-center gap-3 mb-2">
+                            <span className="text-5xl font-black text-gray-900 dark:text-white">{store.rating.toFixed(1)}</span>
+                            <div className="flex flex-col">
+                                <div className="flex gap-0.5 text-yellow-400">
+                                    <Star size={14} fill="currentColor" />
+                                    <Star size={14} fill="currentColor" />
+                                    <Star size={14} fill="currentColor" />
+                                    <Star size={14} fill="currentColor" />
+                                    <Star size={14} fill="currentColor" />
+                                </div>
+                                <span className="text-[10px] font-bold text-gray-400 mt-1 uppercase tracking-widest">{MOCK_REVIEWS_LIST.length} avaliações</span>
+                            </div>
                         </div>
-                        <div className="flex-1">
-                            <button className="w-full bg-[#1E5BFF] hover:bg-blue-600 text-white font-black py-3 rounded-xl text-xs uppercase tracking-widest shadow-lg active:scale-95 transition-all">Avaliar Loja</button>
-                        </div>
+                        <button className="w-full mt-6 bg-[#1E5BFF] hover:bg-blue-600 text-white font-black py-4 rounded-2xl text-xs uppercase tracking-widest shadow-lg active:scale-95 transition-all">Avaliar Loja</button>
+                    </div>
+
+                    <div className="space-y-4">
+                        {MOCK_REVIEWS_LIST.map((rev) => (
+                            <div key={rev.id} className="bg-white dark:bg-gray-800 p-6 rounded-[2rem] border border-gray-100 dark:border-gray-800 shadow-sm">
+                                <div className="flex justify-between items-start mb-4">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-gray-400">
+                                            <UserIcon size={20} />
+                                        </div>
+                                        <div>
+                                            <h4 className="font-bold text-gray-900 dark:text-white text-sm">{rev.userName}</h4>
+                                            <div className="flex gap-0.5 text-yellow-400">
+                                                {[...Array(5)].map((_, i) => (
+                                                    <Star key={i} size={10} fill={i < rev.rating ? "currentColor" : "none"} className={i < rev.rating ? "" : "text-gray-200"} />
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <span className="text-[10px] font-bold text-gray-400 uppercase">{rev.date}</span>
+                                </div>
+                                <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed font-medium italic">"{rev.comment}"</p>
+                            </div>
+                        ))}
                     </div>
                 </div>
             )}
