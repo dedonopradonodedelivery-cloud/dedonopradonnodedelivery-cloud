@@ -195,36 +195,74 @@ const SectionHeader: React.FC<{ title: string; onBack: () => void; rightElement?
 );
 
 const AdminHub: React.FC<{ onSelect: (tab: any) => void }> = ({ onSelect }) => (
-  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-in fade-in duration-500">
-    <button onClick={() => onSelect('moderation')} className="bg-red-50 p-8 rounded-[2.5rem] border border-red-100 shadow-sm hover:shadow-md transition-all text-left group">
-        <div className="w-14 h-14 bg-white text-red-500 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform border border-red-100"><ShieldAlert size={28}/></div>
-        <h3 className="font-black text-xl text-red-900 uppercase tracking-tighter mb-2">Aprovações</h3>
-        <p className="text-sm text-red-700 leading-relaxed font-medium">Categorias, denúncias e reivindicações pendentes.</p>
+  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 animate-in fade-in duration-500">
+    {/* 1. Aprovações - Destaque Suave */}
+    <button onClick={() => onSelect('moderation')} className="bg-rose-50/50 p-6 rounded-3xl border border-rose-100 hover:border-rose-200 hover:shadow-lg hover:-translate-y-1 transition-all text-left group relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-32 h-32 bg-rose-100/50 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none transition-opacity group-hover:opacity-100 opacity-50"></div>
+        <div className="relative z-10">
+            <div className="flex justify-between items-start mb-5">
+                <div className="w-14 h-14 bg-white text-rose-500 rounded-2xl flex items-center justify-center border border-rose-100 shadow-sm group-hover:scale-110 transition-transform">
+                    <ShieldAlert size={26}/>
+                </div>
+            </div>
+            <h3 className="font-bold text-xl text-rose-950 mb-2 tracking-tight">Aprovações</h3>
+            <p className="text-sm text-rose-800/70 leading-relaxed font-medium">Categorias, denúncias e reivindicações pendentes.</p>
+        </div>
     </button>
-    <button onClick={() => onSelect('financial')} className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm hover:shadow-md transition-all text-left group">
-        <div className="w-14 h-14 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform border border-emerald-100"><DollarSign size={28}/></div>
-        <h3 className="font-black text-xl text-gray-900 uppercase tracking-tighter mb-2">Financeiro</h3>
-        <p className="text-sm text-gray-500 leading-relaxed">Gestão de faturamento, MRR e transações de anúncios.</p>
+
+    {/* 2. Financeiro */}
+    <button onClick={() => onSelect('financial')} className="bg-white p-6 rounded-3xl border border-gray-100 hover:border-emerald-100 hover:shadow-lg hover:-translate-y-1 transition-all text-left group">
+        <div className="flex justify-between items-start mb-5">
+            <div className="w-14 h-14 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center border border-emerald-100 group-hover:scale-110 transition-transform">
+                <DollarSign size={26}/>
+            </div>
+        </div>
+        <h3 className="font-bold text-xl text-gray-900 mb-2 tracking-tight">Financeiro</h3>
+        <p className="text-sm text-gray-500 leading-relaxed font-medium">Gestão de faturamento, MRR e transações de anúncios.</p>
     </button>
-    <button onClick={() => onSelect('management')} className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm hover:shadow-md transition-all text-left group">
-        <div className="w-14 h-14 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform border border-blue-100"><Users size={28}/></div>
-        <h3 className="font-black text-xl text-gray-900 uppercase tracking-tighter mb-2">Gerenciamento</h3>
-        <p className="text-sm text-gray-500 leading-relaxed">Base completa de clientes (usuários) e lojistas parceiros.</p>
+
+    {/* 3. Gerenciamento */}
+    <button onClick={() => onSelect('management')} className="bg-white p-6 rounded-3xl border border-gray-100 hover:border-blue-100 hover:shadow-lg hover:-translate-y-1 transition-all text-left group">
+        <div className="flex justify-between items-start mb-5">
+            <div className="w-14 h-14 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center border border-blue-100 group-hover:scale-110 transition-transform">
+                <Users size={26}/>
+            </div>
+        </div>
+        <h3 className="font-bold text-xl text-gray-900 mb-2 tracking-tight">Gerenciamento</h3>
+        <p className="text-sm text-gray-500 leading-relaxed font-medium">Base completa de clientes (usuários) e lojistas parceiros.</p>
     </button>
-    <button onClick={() => onSelect('conversations')} className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm hover:shadow-md transition-all text-left group">
-        <div className="w-14 h-14 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform border border-indigo-100"><MessageCircle size={28}/></div>
-        <h3 className="font-black text-xl text-gray-900 uppercase tracking-tighter mb-2">Conversas</h3>
-        <p className="text-sm text-gray-500 leading-relaxed">Auditoria e monitoramento de orçamentos e chats de serviços.</p>
+
+    {/* 4. Conversas */}
+    <button onClick={() => onSelect('conversations')} className="bg-white p-6 rounded-3xl border border-gray-100 hover:border-indigo-100 hover:shadow-lg hover:-translate-y-1 transition-all text-left group">
+        <div className="flex justify-between items-start mb-5">
+            <div className="w-14 h-14 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center border border-indigo-100 group-hover:scale-110 transition-transform">
+                <MessageCircle size={26}/>
+            </div>
+        </div>
+        <h3 className="font-bold text-xl text-gray-900 mb-2 tracking-tight">Conversas</h3>
+        <p className="text-sm text-gray-500 leading-relaxed font-medium">Auditoria e monitoramento de orçamentos e chats de serviços.</p>
     </button>
-    <button onClick={() => onSelect('suggestions')} className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm hover:shadow-md transition-all text-left group">
-        <div className="w-14 h-14 bg-amber-50 text-amber-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform border border-amber-100"><Lightbulb size={28}/></div>
-        <h3 className="font-black text-xl text-gray-900 uppercase tracking-tighter mb-2">Sugestões</h3>
-        <p className="text-sm text-gray-500 leading-relaxed">Feedback dos moradores e ideias de melhorias no app.</p>
+
+    {/* 5. Sugestões */}
+    <button onClick={() => onSelect('suggestions')} className="bg-white p-6 rounded-3xl border border-gray-100 hover:border-amber-100 hover:shadow-lg hover:-translate-y-1 transition-all text-left group">
+        <div className="flex justify-between items-start mb-5">
+            <div className="w-14 h-14 bg-amber-50 text-amber-600 rounded-2xl flex items-center justify-center border border-amber-100 group-hover:scale-110 transition-transform">
+                <Lightbulb size={26}/>
+            </div>
+        </div>
+        <h3 className="font-bold text-xl text-gray-900 mb-2 tracking-tight">Sugestões</h3>
+        <p className="text-sm text-gray-500 leading-relaxed font-medium">Feedback dos moradores e ideias de melhorias no app.</p>
     </button>
-    <button onClick={() => onSelect('monitoring')} className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm hover:shadow-md transition-all text-left group">
-        <div className="w-14 h-14 bg-slate-50 text-slate-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform border border-slate-100"><Activity size={28}/></div>
-        <h3 className="font-black text-xl text-gray-900 uppercase tracking-tighter mb-2">Métricas de Sistema</h3>
-        <p className="text-sm text-gray-500 leading-relaxed">Métricas de performance, erros e latência das APIs.</p>
+
+    {/* 6. Monitoramento */}
+    <button onClick={() => onSelect('monitoring')} className="bg-white p-6 rounded-3xl border border-gray-100 hover:border-slate-200 hover:shadow-lg hover:-translate-y-1 transition-all text-left group">
+        <div className="flex justify-between items-start mb-5">
+            <div className="w-14 h-14 bg-slate-100 text-slate-600 rounded-2xl flex items-center justify-center border border-slate-200 group-hover:scale-110 transition-transform">
+                <Activity size={26}/>
+            </div>
+        </div>
+        <h3 className="font-bold text-xl text-gray-900 mb-2 tracking-tight">Métricas de Sistema</h3>
+        <p className="text-sm text-gray-500 leading-relaxed font-medium">Métricas de performance, erros e latência das APIs.</p>
     </button>
   </div>
 );
