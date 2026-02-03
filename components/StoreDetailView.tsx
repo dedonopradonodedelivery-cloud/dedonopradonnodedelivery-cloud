@@ -39,7 +39,8 @@ import {
   XCircle,
   Image as ImageIconLucide,
   Tag as TagIcon,
-  X
+  X,
+  LayoutGrid
 } from 'lucide-react';
 import { Store, BusinessHour, StoreReview, StorePromotion } from '../types';
 import { supabase } from '../lib/supabaseClient';
@@ -71,37 +72,17 @@ const MOCK_BUSINESS_HOURS: Record<string, BusinessHour> = {
     domingo: { open: false, start: '', end: '' },
 };
 
-const MOCK_REVIEWS: StoreReview[] = [
-  {
-    id: 'rev-1',
-    user_id: 'u1',
-    user_name: 'Anônimo',
-    rating: 5,
-    comment: 'Comida excelente e entrega rápida! Recomendo a todos.',
-    created_at: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(),
-    merchant_response: {
-      text: 'Muito obrigado pelo feedback! Ficamos felizes que tenha gostado.',
-      responded_at: new Date(Date.now() - 1000 * 60 * 60 * 1).toISOString()
-    }
-  },
-  {
-    id: 'rev-2',
-    user_id: 'u2',
-    user_name: 'Anônimo',
-    rating: 4,
-    comment: 'Muito bom, mas a pizza poderia vir um pouco mais quente.',
-    created_at: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(),
-  }
+const STORE_FEED_MOCK = [
+  { id: 'p1', imageUrl: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?q=80&w=400' },
+  { id: 'p2', imageUrl: 'https://images.unsplash.com/photo-1561758033-d89a9ad46330?q=80&w=400' },
+  { id: 'p3', imageUrl: 'https://images.unsplash.com/photo-1562322140-8baeececf3df?q=80&w=400' },
+  { id: 'p4', imageUrl: 'https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?q=80&w=400' },
+  { id: 'p5', imageUrl: 'https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?q=80&w=400' },
+  { id: 'p6', imageUrl: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=400' },
+  { id: 'p7', imageUrl: 'https://images.unsplash.com/photo-1587854692152-cbe660dbbb88?q=80&w=400' },
+  { id: 'p8', imageUrl: 'https://images.unsplash.com/photo-1524661135-423995f22d0b?q=80&w=400' },
+  { id: 'p9', imageUrl: 'https://images.unsplash.com/photo-1557804506-669a67965ba0?q=80&w=400' },
 ];
-
-const paymentIconMap: Record<string, React.ElementType> = {
-  'Dinheiro': Coins,
-  'Pix': Zap,
-  'Cartão de Crédito': CreditCard,
-  'Cartão de Débito': CreditCard,
-  'VR': Ticket,
-  'VA': Ticket,
-};
 
 export const StoreDetailView: React.FC<{ 
   store: Store; 
@@ -113,12 +94,10 @@ export const StoreDetailView: React.FC<{
   const { user } = useAuth();
   const { currentNeighborhood } = useNeighborhood();
   const [isFavorite, setIsFavorite] = useState(false);
-  const [activeTab, setActiveTab] = useState<'description' | 'promotions' | 'reviews' | 'hours' | 'payments'>('description');
+  const [activeTab, setActiveTab] = useState<'description' | 'feed' | 'promotions' | 'reviews' | 'hours' | 'payments'>('description');
   const [selectedPromotion, setSelectedPromotion] = useState<StorePromotion | null>(null);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [promoImageSlide, setPromoImageSlide] = useState(0);
-
-  const isPlaceholder = store.name === 'Loja Parceira';
 
   const images = useMemo(() => {
     const gallery = store.gallery?.slice(0, 6) || [];
@@ -174,7 +153,7 @@ export const StoreDetailView: React.FC<{
     <div className="min-h-screen bg-white dark:bg-gray-900 font-sans relative overflow-x-hidden">
       <main className="pb-24">
         
-        <section className="relative w-full h-[220px] sm:h-[280px] bg-gray-100 dark:bg-gray-800 overflow-hidden">
+        <section className="relative w-full h-[220px] sm:h-[280px] bg-gray-100 dark:bg-gray-800 overflow-visible">
           <div className="absolute top-0 left-0 right-0 p-4 pt-8 flex justify-between items-center z-40">
             <button onClick={onBack} className="w-10 h-10 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center shadow-md active:scale-90 transition-transform">
               <ChevronLeft className="w-6 h-6 text-white" />
@@ -195,16 +174,17 @@ export const StoreDetailView: React.FC<{
             ))}
           </div>
           <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent"></div>
-        </section>
 
-        <div className="px-5 relative">
-          <div className="flex justify-center -mt-24 z-30 relative">
-            <div className="w-24 h-24 rounded-full bg-white dark:bg-gray-800 p-1 shadow-xl border-4 border-white dark:border-gray-900 overflow-hidden">
+          {/* LOGO REPOSICIONADA (FLUTUANTE) */}
+          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 z-40">
+            <div className="w-24 h-24 rounded-full bg-white dark:bg-gray-800 p-1 shadow-2xl border-4 border-white dark:border-gray-900 overflow-hidden flex items-center justify-center">
               <img src={logoImg} alt="Logo" className="w-full h-full object-contain rounded-full" />
             </div>
           </div>
+        </section>
 
-          <div className="bg-white dark:bg-gray-800 rounded-3xl p-6 pt-12 -mt-20 text-center shadow-lg border border-gray-100 dark:border-gray-800 relative z-10">
+        <div className="px-5 relative">
+          <div className="bg-white dark:bg-gray-800 rounded-3xl p-6 pt-16 -mt-8 text-center shadow-lg border border-gray-100 dark:border-gray-800 relative z-10">
               <div className="mb-2">
                   <div className="flex items-center justify-center gap-1.5 mb-1">
                     <h1 className="text-2xl font-black text-gray-900 dark:text-white leading-tight uppercase tracking-tighter">{store.name}</h1>
@@ -249,6 +229,7 @@ export const StoreDetailView: React.FC<{
             <div className="flex bg-gray-100 dark:bg-gray-900 p-1 rounded-2xl mb-6 overflow-x-auto no-scrollbar">
                 {[
                   { id: 'description', label: 'Sobre' },
+                  { id: 'feed', label: 'Feed' },
                   { id: 'promotions', label: 'Promoções' },
                   { id: 'reviews', label: 'Avaliações' },
                   { id: 'hours', label: 'Horários' },
@@ -280,6 +261,17 @@ export const StoreDetailView: React.FC<{
                             </div>
                         </div>
                     </div>
+                </div>
+            )}
+
+            {activeTab === 'feed' && (
+                <div className="grid grid-cols-3 gap-1 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                  {STORE_FEED_MOCK.map((post) => (
+                    <div key={post.id} className="aspect-square bg-gray-100 dark:bg-gray-800 overflow-hidden relative group cursor-pointer">
+                      <img src={post.imageUrl} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                      <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                    </div>
+                  ))}
                 </div>
             )}
 
@@ -327,7 +319,6 @@ export const StoreDetailView: React.FC<{
                 </div>
             )}
 
-            {/* Mantendo as outras abas conforme o layout anterior */}
             {activeTab === 'reviews' && (
                 <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
                     <div className="flex items-center gap-4 bg-white dark:bg-gray-900 p-6 rounded-[2.5rem] border border-gray-100 dark:border-gray-800 shadow-sm">
@@ -344,7 +335,6 @@ export const StoreDetailView: React.FC<{
             {activeTab === 'hours' && (
                 <div className="bg-white dark:bg-gray-900 p-6 rounded-[2.5rem] border border-gray-100 dark:border-gray-800 shadow-sm animate-in fade-in">
                     <div className="space-y-4">
-                        {/* FIX: Cast Object.entries to [string, BusinessHour][] to resolve 'unknown' property access errors */}
                         {(Object.entries(displayHours) as [string, BusinessHour][]).map(([dayKey, hours]) => (
                             <div key={dayKey} className="flex justify-between items-center text-sm border-b border-gray-50 dark:border-gray-800 pb-2 last:border-0 last:pb-0">
                                 <span className="font-bold text-gray-500 dark:text-gray-400 uppercase text-xs tracking-wide">{WEEK_DAYS_LABELS[dayKey] || dayKey}</span>
