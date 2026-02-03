@@ -45,14 +45,14 @@ const ServiceBlock: React.FC<{
   badge?: number;
   labelBadge?: string;
   rightElement?: React.ReactNode;
-}> = ({ icon: Icon, label, description, onClick, iisDestructive, colorClass, badge, labelBadge, rightElement }) => (
+}> = ({ icon: Icon, label, description, onClick, isDestructive, colorClass, badge, labelBadge, rightElement }) => (
   <button 
     onClick={onClick}
     className="w-full flex items-center justify-between p-5 bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700 last:border-b-0 active:bg-gray-50 dark:active:bg-gray-700/50 transition-colors group"
   >
     <div className="flex items-center gap-4">
       <div className={`p-2.5 rounded-xl transition-colors relative ${
-        iisDestructive 
+        isDestructive 
           ? 'bg-red-50 text-red-500' 
           : colorClass || 'bg-gray-50 dark:bg-gray-700 text-gray-400 group-hover:text-[#1E5BFF] group-hover:bg-blue-50'
       }`}>
@@ -64,7 +64,7 @@ const ServiceBlock: React.FC<{
         ) : null}
       </div>
       <div className="text-left">
-        <p className={`text-sm font-bold ${iisDestructive ? 'text-red-500' : 'text-gray-700 dark:text-gray-200'}`}>
+        <p className={`text-sm font-bold ${isDestructive ? 'text-red-500' : 'text-gray-700 dark:text-gray-200'}`}>
           {label}
         </p>
         {description && (
@@ -74,7 +74,7 @@ const ServiceBlock: React.FC<{
         )}
       </div>
     </div>
-    {rightElement || <ChevronRight size={16} className={iisDestructive ? 'text-red-300' : 'text-gray-300'} />}
+    {rightElement || <ChevronRight size={16} className={isDestructive ? 'text-red-300' : 'text-gray-300'} />}
   </button>
 );
 
@@ -246,7 +246,7 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
             <ServiceBlock 
               icon={LogOut} 
               label="Sair da conta" 
-              iisDestructive
+              isDestructive
               onClick={handleLogout} 
             />
           </div>
