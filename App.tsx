@@ -90,6 +90,9 @@ const App: React.FC = () => {
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   
   const [activityType, setActivityType] = useState<string>('');
+  
+  // State for initial view in modules (e.g., chat in StoreAdsModule)
+  const [initialModuleView, setInitialModuleView] = useState<'sales' | 'chat' | undefined>(undefined);
 
   const [activeServiceRequestId, setActiveServiceRequestId] = useState<string | null>(null);
   const [activeProfessionalId, setActiveProfessionalId] = useState<string | null>(null);
@@ -115,6 +118,13 @@ const App: React.FC = () => {
   const handleNavigate = (view: string, data?: any) => {
     if (view !== 'sponsor_info' && view !== 'notifications' && view !== 'patrocinador_master' && view !== 'real_estate_detail' && view !== 'job_detail' && view !== 'plan_selection' && view !== 'classified_detail' && view !== 'classified_search_results' && view !== 'user_activity' && view !== 'app_suggestion' && view !== 'designer_panel' && view !== 'store_connect' && view !== 'merchant_panel') {
       setPreviousTab(activeTab);
+    }
+    
+    // Handle data passing for specific views
+    if (view === 'store_ads_module' && (data === 'chat' || data === 'sales')) {
+       setInitialModuleView(data);
+    } else {
+       setInitialModuleView(undefined);
     }
     
     if (view === 'service_chat' && data?.requestId) {
@@ -328,6 +338,7 @@ const App: React.FC = () => {
                            categoryName={undefined}
                            user={user}
                            viewMode={viewMode}
+                           initialView={initialModuleView}
                         />
                     )}
                     
@@ -373,7 +384,11 @@ const App: React.FC = () => {
                     
                     {activeTab === 'profile' && (
                       isMerchantMode 
-                        ? <StoreAreaView onBack={() => handleNavigate('home')} onNavigate={(view) => handleNavigate(view)} user={user as any} />
+                        ? <StoreAreaView 
+                            onBack={() => handleNavigate('home')} 
+                            onNavigate={(view, data) => handleNavigate(view, data)} 
+                            user={user as any} 
+                          />
                         : <MenuView user={user as any} userRole={userRole} onAuthClick={() => setIsAuthOpen(true)} onNavigate={handleNavigate} onBack={() => handleNavigate('home')} />
                     )}
                     
