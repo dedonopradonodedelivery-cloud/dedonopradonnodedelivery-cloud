@@ -21,9 +21,9 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
   // Itens da barra fixa - ESTRUTURA OBRIGATÓRIA: Início, JPA Conversa, Cupom, Classificados, Menu
   const navItems: NavItem[] = [
     { id: 'home', icon: Home, label: 'Início' },
-    { id: 'neighborhood_posts', icon: MessageSquare, label: 'Conversa' },
+    { id: 'neighborhood_posts', icon: MessageSquare, label: 'JPA Conversa' },
     { id: 'coupons_trigger', icon: Ticket, label: 'Cupom' }, // Botão Central
-    { id: 'classifieds', icon: Newspaper, label: 'Anúncios' },
+    { id: 'classifieds', icon: Newspaper, label: 'Classificados' },
     { id: 'profile', icon: UserIcon, label: 'Menu' },
   ];
 
