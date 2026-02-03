@@ -94,7 +94,7 @@ export interface Store {
   tags?: string[];
 }
 
-export type ServiceUrgency = 'Hoje' | 'Essa semana' | 'Sem pressa';
+export type ServiceUrgency = 'Hoje' | 'Essa semana' | 'Sem pressa' | 'Para hoje' | 'Amanhã' | 'Até 3 dias' | 'Não tenho pressa';
 
 export interface ServiceRequest {
   id: string;

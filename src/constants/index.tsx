@@ -277,6 +277,7 @@ const generateFakeStores = () => {
 
     Object.entries(SUBCATEGORIES).forEach(([catName, subs]) => {
         subs.forEach(sub => {
+            // Gerar 6 lojas por subcategoria
             for (let i = 1; i <= 6; i++) {
                 const isSponsored = i <= 3; // Primeiras 3 patrocinadas
                 const hood = hoods[i % hoods.length];
@@ -305,7 +306,7 @@ const generateFakeStores = () => {
                     adType: isSponsored ? AdType.PREMIUM : AdType.ORGANIC,
                     isSponsored: isSponsored,
                     description: `O melhor em ${sub.name.toLowerCase()} de toda a região de ${hood}. Venha conhecer!`,
-                    image: `https://images.unsplash.com/photo-${imgId}?q=80&w=600&auto=format&fit=crop&sig=${sub.name}-${i}`,
+                    image: `https://images.unsplash.com/photo-${imgId}?q=80&w=400&auto=format&fit=crop&sig=${sub.name}-${i}`,
                     verified: Math.random() > 0.4,
                     isOpenNow: Math.random() > 0.2,
                     logoUrl: getStoreLogo(i * 100),
@@ -522,6 +523,7 @@ export const MOCK_JOBS: Job[] = [
     postedAt: 'Há 2h',
     isSponsored: true,
     sponsoredUntil: '2025-12-31',
+    // FIX: Added missing properties 'candidacy_method' and 'modality' to conform to the Job interface.
     candidacy_method: 'whatsapp',
     modality: 'Presencial',
   },
@@ -539,6 +541,7 @@ export const MOCK_JOBS: Job[] = [
     contactWhatsapp: '5521988888888',
     postedAt: 'Há 1 dia',
     isUrgent: true,
+    // FIX: Added missing properties 'candidacy_method' and 'modality' to conform to the Job interface.
     candidacy_method: 'whatsapp',
     modality: 'Presencial',
   }
