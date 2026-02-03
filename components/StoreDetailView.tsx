@@ -20,7 +20,8 @@ import {
   Navigation2,
   Map as WazeIcon,
   Crown,
-  // Added User as UserIcon to fix the Cannot find name error in the reviews section
+  AlertTriangle,
+  Store as StoreIcon, // Importado para o ícone de fechamento
   User as UserIcon
 } from 'lucide-react';
 import { Store, BusinessHour, StorePromotion } from '../types';
@@ -28,6 +29,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useNeighborhood } from '../contexts/NeighborhoodContext';
 import { trackOrganicEvent, OrganicEventType } from '../lib/analytics';
 import { TrustBlock } from './TrustBlock';
+import { MasterSponsorBanner } from './MasterSponsorBanner'; // Componente importado para destaque
 
 const WEEK_DAYS_LABELS: Record<string, string> = {
   segunda: 'Segunda-feira',
@@ -120,7 +122,6 @@ export const StoreDetailView: React.FC<{
 
   const instagramUrl = store.instagram ? `https://instagram.com/${store.instagram.replace('@', '')}` : '#';
 
-  // Descrição reduzida conforme solicitado
   const shortDescription = useMemo(() => {
     return `Seja bem-vindo ao ${store.name}! Somos referência em ${store.category.toLowerCase()} na região de Jacarepaguá. Nosso compromisso é oferecer uma experiência única aos nossos clientes através da excelência no atendimento e qualidade superior em cada detalhe. Valorizamos a confiança da nossa comunidade local e buscamos sempre inovar para garantir que cada visita ou pedido seja especial. Venha nos visitar ou faça seu pedido pelo WhatsApp e aproveite o melhor do bairro conosco.`;
   }, [store.name, store.category]);
@@ -153,7 +154,7 @@ export const StoreDetailView: React.FC<{
           <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent"></div>
         </section>
 
-        {/* BANNER ARREDONDADO CENTRALIZADO (ESTILO ANTERIOR) */}
+        {/* BANNER ARREDONDADO CENTRALIZADO */}
         <div className="px-5 relative z-10">
           <div className="bg-white dark:bg-gray-900 rounded-[2.5rem] p-6 pt-14 -mt-16 text-center shadow-2xl border border-gray-100 dark:border-gray-800 relative">
               {/* LOGO AVATAR FLUTUANTE */}
@@ -182,7 +183,7 @@ export const StoreDetailView: React.FC<{
                   </div>
               </div>
 
-              {/* INFORMAÇÕES DE ENDEREÇO E CONTATO POR ESCRITO */}
+              {/* INFORMAÇÕES DE ENDEREÇO E CONTATO */}
               <div className="space-y-2 mb-8 px-2">
                 <div className="flex items-center justify-center gap-2 text-gray-600 dark:text-gray-400">
                     <MapPin size={14} className="text-[#1E5BFF] shrink-0" />
@@ -194,9 +195,8 @@ export const StoreDetailView: React.FC<{
                 </div>
               </div>
 
-              {/* BOTÕES DE AÇÃO REORGANIZADOS */}
+              {/* BOTÕES DE AÇÃO */}
               <div className="space-y-3">
-                  {/* Linha 1: Principais (WhatsApp + Instagram) */}
                   <div className="flex gap-3">
                       <button 
                         onClick={() => window.open(`https://wa.me/55${phoneDigits}`, '_blank')}
@@ -214,7 +214,6 @@ export const StoreDetailView: React.FC<{
                       </button>
                   </div>
 
-                  {/* Linha 2: Secundários (Ligar + Waze + Maps) */}
                   <div className="grid grid-cols-3 gap-3">
                       <button 
                         onClick={() => window.open(`tel:${phoneDigits}`, '_self')}
@@ -273,8 +272,6 @@ export const StoreDetailView: React.FC<{
                     <div className="space-y-8">
                         <div className="space-y-4">
                             <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed font-medium whitespace-pre-wrap">{shortDescription}</p>
-                            
-                            {/* REMOVIDO BLOCO DUPLICADO DE ENDEREÇO E BOTÕES AQUI */}
                         </div>
 
                         <div className="space-y-4 pt-4">
@@ -290,31 +287,29 @@ export const StoreDetailView: React.FC<{
                             </div>
                         </div>
 
-                        {/* AÇÕES FINAIS REESTILIZADAS */}
+                        {/* AÇÕES DE ENCERRAMENTO E REIVINDICAÇÃO */}
                         <div className="pt-10 space-y-4 px-1">
-                            <button className="w-full py-5 bg-[#1E5BFF] hover:bg-blue-600 text-white rounded-[1.75rem] text-xs font-black uppercase tracking-[0.15em] shadow-xl shadow-blue-500/20 active:scale-[0.98] transition-all">
+                            <button 
+                                onClick={onClaim}
+                                className="w-full py-5 bg-[#1E5BFF] hover:bg-blue-600 text-white rounded-[1.75rem] text-xs font-black uppercase tracking-[0.15em] shadow-xl shadow-blue-500/20 active:scale-[0.98] transition-all"
+                            >
                                 Reivindicar esta loja
                             </button>
-                            <button className="w-full py-4 border-2 border-gray-100 dark:border-gray-800 text-gray-400 dark:text-gray-500 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] hover:bg-gray-50 transition-colors active:scale-[0.98]">
+                            
+                            <button 
+                                onClick={() => { /* Lógica de reportar fechamento */ }}
+                                className="w-full py-4 flex items-center justify-center gap-2 border-2 border-red-50 dark:border-red-900/20 bg-red-50/50 dark:bg-red-900/10 text-red-500 rounded-2xl text-[10px] font-black uppercase tracking-[0.15em] hover:bg-red-100 dark:hover:bg-red-900/30 transition-all active:scale-[0.98]"
+                            >
+                                <StoreIcon size={16} className="text-red-500" />
                                 Informar que a loja fechou
                             </button>
                         </div>
 
-                        <div 
-                            onClick={() => {}}
-                            className="mx-1 p-5 rounded-3xl bg-slate-900 flex items-center justify-between group cursor-pointer border border-white/5"
-                        >
-                            <div className="flex items-center gap-3">
-                                <div className="w-8 h-8 rounded-lg bg-amber-400/20 flex items-center justify-center text-amber-400">
-                                    <Crown size={18} />
-                                </div>
-                                <div>
-                                    <p className="text-[8px] font-black text-amber-400 uppercase tracking-widest">Patrocinador Master</p>
-                                    <p className="text-xs font-bold text-white">Grupo Esquematiza</p>
-                                </div>
-                            </div>
-                            <ChevronRightIcon size={14} className="text-slate-600 group-hover:text-white group-hover:translate-x-1 transition-all" />
-                        </div>
+                        {/* BANNER DO PATROCINADOR MASTER */}
+                        <MasterSponsorBanner 
+                            onClick={() => onNavigate('patrocinador_master')} 
+                            label={`Parceiro de ${store.neighborhood || 'Jacarepaguá'}`}
+                        />
                     </div>
                 )}
 
