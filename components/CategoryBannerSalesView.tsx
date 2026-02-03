@@ -3,6 +3,7 @@ import React, { useState, useMemo } from 'react';
 import { ChevronLeft, Check, Lock, DollarSign, Calendar, MapPin, LayoutGrid, Info, ArrowRight, Loader2, CheckCircle2 } from 'lucide-react';
 import { categoryBannerService } from '../lib/categoryBannerService';
 import { User } from '@supabase/supabase-js';
+import { SUBCATEGORIES, CATEGORIES } from '../constants';
 
 const BAIRROS_LIST = [
   { name: 'Taquara', slug: 'taquara' },
@@ -16,25 +17,6 @@ const BAIRROS_LIST = [
   { name: 'Cidade de Deus', slug: 'cidade-de-deus' },
 ];
 
-const CAT_LIST = [
-  { name: 'Comida', slug: 'comida' },
-  { name: 'Pets', slug: 'pets' },
-  { name: 'Pro', slug: 'pro' },
-  { name: 'Saúde', slug: 'saude' },
-  { name: 'Serviços', slug: 'servicos' },
-  { name: 'Beleza', slug: 'beleza' },
-  { name: 'Autos', slug: 'autos' },
-  { name: 'Mercado', slug: 'mercado' },
-  { name: 'Casa', slug: 'casa' },
-  { name: 'Esportes', slug: 'esportes' },
-  { name: 'Lazer', slug: 'lazer' },
-  { name: 'Educação', slug: 'educacao' },
-  { name: 'Farmácia', slug: 'farmacia' },
-  { name: 'Moda', slug: 'moda' },
-  { name: 'Eventos', slug: 'eventos' },
-  { name: 'Condomínio', slug: 'condominio' },
-];
-
 interface CategoryBannerSalesViewProps {
   user: User | null;
   onBack: () => void;
@@ -43,14 +25,33 @@ interface CategoryBannerSalesViewProps {
 
 export const CategoryBannerSalesView: React.FC<CategoryBannerSalesViewProps> = ({ user, onBack, onSuccess }) => {
   const [bairro, setBairro] = useState('freguesia');
-  const [categoria, setCategoria] = useState('comida');
+  const [categoria, setCategoria] = useState('Comida');
+  const [subcategoria, setSubcategoria] = useState('');
   const [isBuying, setIsBuying] = useState<string | null>(null);
   
+  // Derivar lista de subcategorias baseado na categoria selecionada
+  const availableSubcategories = useMemo(() => {
+    return SUBCATEGORIES[categoria] || [];
+  }, [categoria]);
+
+  // Set default subcategory when category changes
+  React.useEffect(() => {
+    if (availableSubcategories.length > 0) {
+        setSubcategoria(availableSubcategories[0].name);
+    } else {
+        setSubcategoria('');
+    }
+  }, [categoria, availableSubcategories]);
+  
+  // O slug agora é baseado na subcategoria, pois o banner é de subcategoria
+  const subcategorySlug = useMemo(() => subcategoria.toLowerCase().replace(/\s+/g, '-'), [subcategoria]);
+
   const slots = useMemo(() => {
-    const s1 = categoryBannerService.getSlot(bairro, categoria, 1);
-    const s2 = categoryBannerService.getSlot(bairro, categoria, 2);
-    return [s1, s2];
-  }, [bairro, categoria]);
+    // Busca slots usando o slug da subcategoria
+    const s1 = categoryBannerService.getSlot(bairro, subcategorySlug, 1);
+    // const s2 = categoryBannerService.getSlot(bairro, subcategorySlug, 2); // Removido: Apenas 1 banner fixo por subcategoria conforme regra 2
+    return [s1];
+  }, [bairro, subcategorySlug]);
 
   const handleBuy = (slotKey: string) => {
     if (!user) return alert('Faça login para comprar.');
@@ -79,7 +80,7 @@ export const CategoryBannerSalesView: React.FC<CategoryBannerSalesViewProps> = (
             <ChevronLeft className="w-6 h-6" />
         </button>
         <div>
-            <h1 className="font-bold text-white text-lg leading-tight">Anunciar em Categoria</h1>
+            <h1 className="font-bold text-white text-lg leading-tight">Anunciar em Subcategoria</h1>
             <p className="text-[10px] text-blue-400 uppercase font-black tracking-widest">Slots de Visibilidade</p>
         </div>
       </header>
@@ -101,13 +102,25 @@ export const CategoryBannerSalesView: React.FC<CategoryBannerSalesViewProps> = (
                 </div>
 
                 <div>
-                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 block">Categoria de Exibição</label>
+                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 block">Categoria</label>
                     <select 
                         value={categoria} 
                         onChange={e => setCategoria(e.target.value)}
                         className="w-full bg-slate-950 border border-white/10 rounded-2xl p-4 text-sm font-bold outline-none focus:border-blue-500"
                     >
-                        {CAT_LIST.map(c => <option key={c.slug} value={c.slug}>{c.name}</option>)}
+                        {CATEGORIES.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}
+                    </select>
+                </div>
+
+                <div>
+                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 block">Subcategoria (Onde o anúncio aparecerá)</label>
+                    <select 
+                        value={subcategoria} 
+                        onChange={e => setSubcategoria(e.target.value)}
+                        className="w-full bg-slate-950 border border-white/10 rounded-2xl p-4 text-sm font-bold outline-none focus:border-blue-500"
+                        disabled={availableSubcategories.length === 0}
+                    >
+                        {availableSubcategories.map(s => <option key={s.name} value={s.name}>{s.name}</option>)}
                     </select>
                 </div>
             </div>
@@ -116,7 +129,7 @@ export const CategoryBannerSalesView: React.FC<CategoryBannerSalesViewProps> = (
         <section className="space-y-4">
             <div className="flex items-center justify-between px-1">
                 <h2 className="text-xl font-black uppercase tracking-tighter">2. Disponibilidade</h2>
-                <span className="text-[9px] font-black bg-blue-500 text-white px-2 py-0.5 rounded-full uppercase tracking-widest">288 Espaços Totais</span>
+                <span className="text-[9px] font-black bg-blue-500 text-white px-2 py-0.5 rounded-full uppercase tracking-widest">Alta Procura</span>
             </div>
 
             <div className="grid grid-cols-1 gap-4">
@@ -127,7 +140,7 @@ export const CategoryBannerSalesView: React.FC<CategoryBannerSalesViewProps> = (
                                 <LayoutGrid size={28} />
                             </div>
                             <div className="text-left">
-                                <p className="font-black text-white text-lg leading-tight uppercase tracking-tight">Slot {slot.slotNumber}</p>
+                                <p className="font-black text-white text-lg leading-tight uppercase tracking-tight">Banner Fixo</p>
                                 <p className={`text-[10px] font-bold uppercase tracking-widest mt-1 ${slot.status === 'available' ? 'text-emerald-400' : 'text-slate-500'}`}>
                                     {slot.status === 'available' ? 'Livre para compra' : slot.status === 'reserved' ? 'Sendo comprado agora' : `Vendido para: ${slot.merchantName}`}
                                 </p>
@@ -158,7 +171,7 @@ export const CategoryBannerSalesView: React.FC<CategoryBannerSalesViewProps> = (
                 </div>
                 <div className="space-y-1">
                     <p className="text-xs text-slate-300 leading-relaxed font-bold">O banner dura 30 dias após a compra.</p>
-                    <p className="text-[10px] text-slate-500 leading-relaxed">Cada categoria possui apenas 2 banners rotativos por bairro, garantindo exclusividade absoluta.</p>
+                    <p className="text-[10px] text-slate-500 leading-relaxed">Cada subcategoria possui apenas 1 banner fixo por bairro, garantindo exclusividade absoluta no momento da decisão do cliente.</p>
                 </div>
             </div>
         </section>
@@ -166,8 +179,8 @@ export const CategoryBannerSalesView: React.FC<CategoryBannerSalesViewProps> = (
 
       <footer className="fixed bottom-[80px] left-0 right-0 p-5 bg-slate-950/80 backdrop-blur-md border-t border-white/5 z-30 max-w-md mx-auto flex items-center justify-between">
           <div className="flex flex-col">
-              <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Banner Premium Categoria</span>
-              <span className="text-2xl font-black text-emerald-400">R$ 149,99</span>
+              <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Banner Subcategoria</span>
+              <span className="text-2xl font-black text-emerald-400">R$ 29,90</span>
           </div>
           <div className="flex items-center gap-2 text-[9px] font-black text-slate-400 uppercase tracking-[0.2em]">
             <CheckCircle2 size={12} className="text-blue-500" />

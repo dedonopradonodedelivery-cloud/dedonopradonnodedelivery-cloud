@@ -1,12 +1,11 @@
 
-import React, { useState, useMemo } from 'react';
-import { ChevronLeft, Star, BadgeCheck, ChevronRight, Award, Megaphone, Clock, Filter, Store as StoreIcon, Crown, AlertCircle, ArrowRight } from 'lucide-react';
+import React, { useState, useMemo, useEffect } from 'react';
+import { ChevronLeft, Star, BadgeCheck, ChevronRight, Award, Megaphone, Clock, Filter, Store as StoreIcon, Crown, AlertCircle, ArrowRight, Image as ImageIcon } from 'lucide-react';
 import { Store, AdType } from '@/types';
 import { useNeighborhood } from '@/contexts/NeighborhoodContext';
-import { HomeBannerCarousel } from './HomeBannerCarousel';
 import { MasterSponsorBanner } from './MasterSponsorBanner';
+import { supabase } from '@/lib/supabaseClient';
 
-// Added missing SubcategoryDetailViewProps interface
 interface SubcategoryDetailViewProps {
   subcategoryName: string;
   categoryName: string;
@@ -45,9 +44,62 @@ const StoreCard: React.FC<{ store: Store; onClick: () => void; isMaster?: boolea
   );
 };
 
+// --- Single Banner Renderer for Subcategories ---
+const SubcategoryBanner: React.FC<{ config: any }> = ({ config }) => {
+  const { template_id, headline, subheadline, product_image_url, background_color, text_color, title, subtitle } = config;
+
+  if (template_id) {
+     // Render Templates
+     switch (template_id) {
+      case 'oferta_relampago':
+        return (
+          <div className="w-full h-full bg-gradient-to-br from-rose-500 to-red-600 text-white p-6 flex items-center justify-between overflow-hidden relative shadow-lg">
+            <div className="relative z-10">
+              <span className="text-[10px] font-bold bg-yellow-300 text-red-700 px-2 py-1 rounded-full uppercase shadow-sm">{headline || 'OFERTA'}</span>
+              <h3 className="text-2xl font-black mt-2 drop-shadow-md max-w-[200px] leading-tight">{subheadline}</h3>
+            </div>
+            <div className="relative z-10 w-24 h-24 rounded-full border-4 border-white/50 bg-gray-200 overflow-hidden flex items-center justify-center shrink-0 shadow-2xl">
+              {product_image_url ? <img src={product_image_url} className="w-full h-full object-cover" /> : <ImageIcon className="w-10 h-10 text-gray-400" />}
+            </div>
+          </div>
+        );
+      case 'lancamento':
+        return (
+          <div className="w-full h-full bg-gradient-to-br from-slate-800 to-slate-900 text-white p-6 flex items-end justify-between overflow-hidden relative shadow-lg">
+             <img src={product_image_url || 'https://via.placeholder.com/300'} className="absolute inset-0 w-full h-full object-cover opacity-40 mix-blend-luminosity" />
+             <div className="relative z-10">
+                <span className="text-[9px] font-black uppercase tracking-[0.2em] text-cyan-300">{headline || 'LANÇAMENTO'}</span>
+                <h3 className="text-xl font-bold mt-1 max-w-[220px] leading-tight">{subheadline}</h3>
+             </div>
+          </div>
+        );
+       case 'institucional':
+        return (
+          <div className="w-full h-full bg-gradient-to-br from-white to-gray-100 text-slate-800 p-6 flex flex-col justify-center items-center text-center relative shadow-lg border border-gray-200">
+             <h3 className="text-xl font-black leading-tight">{headline}</h3>
+             <p className="text-xs mt-1 text-slate-500">{subheadline}</p>
+          </div>
+        );
+      default: return null;
+    }
+  } else {
+    // Render Custom Editor
+    return (
+        <div 
+            className="w-full h-full relative shadow-lg p-6 flex flex-col justify-center"
+            style={{ backgroundColor: background_color, color: text_color }}
+        >
+            <h3 className="font-black text-2xl leading-tight line-clamp-2">{title}</h3>
+            <p className="opacity-80 mt-1 text-sm line-clamp-2">{subtitle}</p>
+        </div>
+    );
+  }
+};
+
 export const SubcategoryDetailView: React.FC<SubcategoryDetailViewProps> = ({ subcategoryName, categoryName, onBack, onStoreClick, stores, userRole, onNavigate }) => {
   const { currentNeighborhood } = useNeighborhood();
   const [activeFilter, setActiveFilter] = useState<'all' | 'top_rated' | 'open_now'>('all');
+  const [activeBanner, setActiveBanner] = useState<any | null>(null);
 
   const pool = useMemo(() => {
     let list = stores.filter(s => s.subcategory === subcategoryName);
@@ -67,6 +119,36 @@ export const SubcategoryDetailView: React.FC<SubcategoryDetailViewProps> = ({ su
     
     return [...sponsored, ...organic];
   }, [pool, activeFilter]);
+
+  // Fetch 1 Fixed Banner for this Subcategory
+  useEffect(() => {
+    const fetchSubcategoryBanner = async () => {
+      if (!supabase) return;
+      try {
+        const { data, error } = await supabase
+          .from('published_banners')
+          .select('id, config, merchant_id')
+          .eq('target', `subcategory:${subcategoryName.toLowerCase()}`) // Target específico da subcategoria
+          .eq('is_active', true)
+          .order('created_at', { ascending: false })
+          .limit(1); // APENAS 1 BANNER FIXO
+
+        if (error) throw error;
+        if (data && data.length > 0) setActiveBanner(data[0]);
+        else setActiveBanner(null);
+      } catch (e) {
+        console.error("Error fetching subcategory banner", e);
+      }
+    };
+    fetchSubcategoryBanner();
+  }, [subcategoryName]);
+
+  const handleBannerClick = () => {
+    if (activeBanner?.merchant_id) {
+        const store = stores.find(s => s.id === activeBanner.merchant_id);
+        if (store) onStoreClick(store);
+    }
+  };
 
   const handleAnuncie = () => {
     if (userRole === 'lojista') {
@@ -90,13 +172,34 @@ export const SubcategoryDetailView: React.FC<SubcategoryDetailViewProps> = ({ su
         </div>
       </div>
 
-      <div className="mt-4">
-        {/* FIX: Passed onNavigate prop to HomeBannerCarousel as it's a required property. */}
-        <HomeBannerCarousel onStoreClick={onStoreClick} onNavigate={onNavigate} categoryName={categoryName} subcategoryName={subcategoryName} />
-      </div>
-
-      <div className="p-5 pt-0 space-y-8">
+      <div className="p-5 space-y-8">
         
+        {/* BANNER COMERCIAL FIXO DA SUBCATEGORIA */}
+        {activeBanner ? (
+           <div 
+             onClick={handleBannerClick}
+             className="w-full aspect-[16/7] rounded-[2rem] overflow-hidden cursor-pointer active:scale-[0.99] transition-transform shadow-xl relative group"
+           >
+              <SubcategoryBanner config={activeBanner.config} />
+              <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-md text-gray-900 text-[7px] font-black px-2 py-1 rounded uppercase tracking-widest shadow-sm">
+                 Patrocinado
+              </div>
+           </div>
+        ) : (
+           /* Espaço de venda caso não tenha banner */
+           <div 
+             onClick={handleAnuncie}
+             className="w-full aspect-[16/6] bg-slate-900 rounded-[2rem] flex flex-col items-center justify-center text-center p-6 cursor-pointer relative overflow-hidden shadow-lg border border-white/5"
+           >
+              <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 rounded-full blur-3xl -mr-16 -mt-16"></div>
+              <div className="relative z-10">
+                  <span className="text-[9px] font-black text-blue-400 uppercase tracking-[0.2em] mb-2 block">Espaço Premium</span>
+                  <h3 className="text-lg font-bold text-white leading-tight">Destaque sua marca aqui</h3>
+                  <p className="text-[10px] text-slate-400 mt-1">Fale com moradores interessados em {subcategoryName}</p>
+              </div>
+           </div>
+        )}
+
         <section>
             <div className="flex items-center gap-2 mb-4 px-1">
                 <Filter size={14} className="text-gray-400" />
@@ -139,26 +242,8 @@ export const SubcategoryDetailView: React.FC<SubcategoryDetailViewProps> = ({ su
             )}
         </section>
 
-        {/* BANNER PATROCINADOR MASTER FINAL */}
         <section>
           <MasterSponsorBanner onClick={() => onNavigate('patrocinador_master')} label={subcategoryName} />
-        </section>
-
-        {/* CTA Comercial Final */}
-        <section className="pt-10">
-            <div className="bg-white dark:bg-gray-900 rounded-[2.5rem] p-8 border border-gray-100 dark:border-gray-800 text-center shadow-sm">
-                <div className="w-12 h-12 bg-blue-50 dark:bg-blue-900/20 rounded-2xl flex items-center justify-center mx-auto mb-4 text-[#1E5BFF]">
-                    <Megaphone size={24} />
-                </div>
-                <h4 className="font-bold text-gray-900 dark:text-white text-base">Quer destacar seu negócio aqui?</h4>
-                <p className="text-sm text-gray-500 dark:text-gray-400 mt-2 mb-6">Apareça no topo da categoria {subcategoryName} e atraia mais clientes.</p>
-                <button 
-                    onClick={handleAnuncie}
-                    className="w-full bg-[#1E5BFF] hover:bg-[#1749CC] text-white font-black py-4 rounded-2xl shadow-xl active:scale-95 transition-all text-xs uppercase tracking-widest flex items-center justify-center gap-2"
-                >
-                    Anunciar nesta subcategoria <ArrowRight size={16} />
-                </button>
-            </div>
         </section>
 
       </div>
