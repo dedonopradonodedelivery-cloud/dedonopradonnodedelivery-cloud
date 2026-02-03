@@ -30,6 +30,11 @@ import { User as SupabaseUser } from '@supabase/supabase-js';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
 
+// --- CONFIGURAÇÃO DE DESENVOLVIMENTO ---
+// Defina como true para pular o vídeo ao clicar no Play.
+// Defina como false para produção.
+const DEV_SKIP_VIDEO = true;
+
 interface StoreAreaViewProps {
   onBack: () => void;
   onNavigate: (view: string, initialView?: 'sales' | 'chat') => void;
@@ -112,6 +117,12 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
   };
 
   const handlePlayVideo = () => {
+    // DEV MODE: Pula o vídeo imediatamente para facilitar testes
+    if (DEV_SKIP_VIDEO) {
+      handleVideoEnd();
+      return;
+    }
+
     if (videoRef.current) {
       videoRef.current.play();
       setIsPlaying(true);

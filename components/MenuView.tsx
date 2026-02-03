@@ -31,6 +31,11 @@ import { useAuth } from '../contexts/AuthContext';
 import { User } from '@supabase/supabase-js';
 import { useNeighborhood } from '../contexts/NeighborhoodContext';
 
+// --- CONFIGURAÇÃO DE DESENVOLVIMENTO ---
+// Defina como true para pular o vídeo ao clicar no Play.
+// Defina como false para produção.
+const DEV_SKIP_VIDEO = true;
+
 interface MenuViewProps {
   user: User | null;
   userRole: 'cliente' | 'lojista' | null;
@@ -103,6 +108,12 @@ export const MenuView: React.FC<MenuViewProps> = ({
   };
 
   const handlePlayVideo = () => {
+    // DEV MODE: Pula o vídeo imediatamente para facilitar testes
+    if (DEV_SKIP_VIDEO) {
+      handleVideoEnd();
+      return;
+    }
+
     if (videoRef.current) {
       videoRef.current.play();
       setIsPlaying(true);
