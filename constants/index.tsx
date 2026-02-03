@@ -12,7 +12,8 @@ import {
   Baby, GraduationCap, Microscope, Brain, Sparkles, Smile, Beer, 
   Activity, Eye, FileText, Globe, Calendar, Music, PartyPopper, Globe2, Edit3, User, Bell, Search,
   Camera, Vote, Handshake, Flame, Milestone, History, Home as HomeIcon,
-  MessageCircle, HelpCircle, UserCheck, Recycle, Scale, Calculator, PenTool, Ruler
+  MessageCircle, HelpCircle, UserCheck, Recycle, Scale, Calculator, PenTool, Ruler,
+  Key, Fan, Truck, Shovel
 } from 'lucide-react';
 import { AdType, Category, Store, Story, EditorialCollection, Job, CommunityPost, NeighborhoodCommunity, Classified, RealEstateProperty } from '../types';
 import { getStoreLogo } from '@/utils/mockLogos';
@@ -93,14 +94,14 @@ export const SUBCATEGORIES: Record<string, { name: string; icon: React.ReactNode
     { name: 'Encanador', icon: <Droplets /> },
     { name: 'Pintor', icon: <PaintRoller /> },
     { name: 'Pedreiro', icon: <Hammer /> },
+    { name: 'Chaveiro', icon: <Key /> },
     { name: 'Marido de Aluguel', icon: <Wrench /> },
+    { name: 'Ar Condicionado', icon: <Fan /> },
     { name: 'Montador de Móveis', icon: <Settings /> },
-    { name: 'Técnico em Informática', icon: <Laptop /> },
-    { name: 'Chaveiro', icon: <Zap /> },
-    { name: 'Limpeza Residencial', icon: <Sparkles /> },
+    { name: 'Limpeza & Diaristas', icon: <Sparkles /> },
     { name: 'Dedetização', icon: <Shield /> },
-    { name: 'Segurança', icon: <Shield /> },
-    { name: 'Assistência Técnica', icon: <Monitor /> },
+    { name: 'Fretes & Mudanças', icon: <Truck /> },
+    { name: 'Jardinagem', icon: <Shovel /> },
   ],
   'Beleza': [
     { name: 'Salão de Cabelo', icon: <Scissors /> },
@@ -219,7 +220,7 @@ const IMG_IDS: Record<string, string[]> = {
     '1579684385127-1ef15d508118', '1584515933487-9d317552d894', '1576091160399-112ba8d25d1d', '1551076805-e2983fe3600c'
   ],
   'Serviços': [
-    '1581578731117-10d52b4d8051', '1621905251189-08b45d6a269e', '1504328345606-18aff0858706', '1584622024886-0a02091d3744'
+    '1621905251189-08b45d6a269e', '1581578731117-10d52b4d8051', '1504328345606-18aff0858706', '1584622024886-0a02091d3744', '1590856029904-53a921d28362'
   ],
   'Beleza': [
     '1560066984-118c38b64a75', '1522337660859-02fbefca4702', '1562322140-8baeececf3df', '1616394584738-fc6e612e71b9'
