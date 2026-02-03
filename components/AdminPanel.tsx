@@ -111,7 +111,7 @@ const BannersDetailView: React.FC<{ onBack: () => void }> = ({ onBack }) => (
     <div className="animate-in slide-in-from-right duration-300 space-y-6">
         <div className="flex items-center gap-4 mb-8">
             <button onClick={onBack} className="p-2 bg-white rounded-xl text-gray-400 border border-gray-200"><ArrowLeft size={20}/></button>
-            <h2 className="text-2xl font-black text-gray-900 uppercase tracking-tighter">Detalhes: Banners</h2>
+            <h2 className="text-2xl font-black text-white uppercase tracking-tighter">Detalhes: Banners</h2>
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -140,7 +140,7 @@ const SubscriptionDetailView: React.FC<{ title: string, onBack: () => void }> = 
     <div className="animate-in slide-in-from-right duration-300 space-y-8">
         <div className="flex items-center gap-4 mb-8">
             <button onClick={onBack} className="p-2 bg-white rounded-xl text-gray-400 border border-gray-200"><ArrowLeft size={20}/></button>
-            <h2 className="text-2xl font-black text-gray-900 uppercase tracking-tighter">Detalhes: {title}</h2>
+            <h2 className="text-2xl font-black text-white uppercase tracking-tighter">Detalhes: {title}</h2>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -184,47 +184,47 @@ const SectionHeader: React.FC<{ title: string; onBack: () => void; rightElement?
     <div className="flex items-center gap-4">
         <button 
         onClick={onBack} 
-        className="p-2 bg-white rounded-xl text-gray-400 border border-gray-200 hover:text-gray-900 transition-all active:scale-95 shadow-sm"
+        className="p-2 bg-white/5 rounded-xl text-slate-400 border border-white/10 hover:text-white transition-all active:scale-95 shadow-sm"
         >
         <ArrowLeft size={20} />
         </button>
-        <h2 className="text-2xl font-black text-gray-900 uppercase tracking-tighter">{title}</h2>
+        <h2 className="text-2xl font-black text-white uppercase tracking-tighter">{title}</h2>
     </div>
     {rightElement}
   </div>
 );
 
 const AdminHub: React.FC<{ onSelect: (tab: any) => void }> = ({ onSelect }) => (
-  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-in fade-in duration-500">
-    <button onClick={() => onSelect('moderation')} className="bg-red-50 p-8 rounded-[2.5rem] border border-red-100 shadow-sm hover:shadow-md transition-all text-left group">
-        <div className="w-14 h-14 bg-white text-red-500 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform border border-red-100"><ShieldAlert size={28}/></div>
-        <h3 className="font-black text-xl text-red-900 uppercase tracking-tighter mb-2">Aprovações</h3>
-        <p className="text-sm text-red-700 leading-relaxed font-medium">Categorias, denúncias e reivindicações pendentes.</p>
+  <div className="grid grid-cols-2 gap-4 animate-in fade-in duration-500">
+    <button onClick={() => onSelect('moderation')} className="bg-red-50 p-5 rounded-3xl border border-red-100 shadow-sm hover:shadow-md transition-all text-left group">
+        <div className="w-10 h-10 bg-white text-red-500 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform border border-red-100"><ShieldAlert size={20}/></div>
+        <h3 className="font-black text-sm text-red-900 uppercase tracking-tighter mb-1">Aprovações</h3>
+        <p className="text-[10px] text-red-700 leading-relaxed font-medium">Categorias, denúncias e reivindicações.</p>
     </button>
-    <button onClick={() => onSelect('financial')} className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm hover:shadow-md transition-all text-left group">
-        <div className="w-14 h-14 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform border border-emerald-100"><DollarSign size={28}/></div>
-        <h3 className="font-black text-xl text-gray-900 uppercase tracking-tighter mb-2">Financeiro</h3>
-        <p className="text-sm text-gray-500 leading-relaxed">Gestão de faturamento, MRR e transações de anúncios.</p>
+    <button onClick={() => onSelect('financial')} className="bg-white p-5 rounded-3xl border border-gray-100 shadow-sm hover:shadow-md transition-all text-left group">
+        <div className="w-10 h-10 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform border border-emerald-100"><DollarSign size={20}/></div>
+        <h3 className="font-black text-sm text-gray-900 uppercase tracking-tighter mb-1">Financeiro</h3>
+        <p className="text-[10px] text-gray-500 leading-relaxed font-medium">Gestão de faturamento, MRR e transações.</p>
     </button>
-    <button onClick={() => onSelect('management')} className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm hover:shadow-md transition-all text-left group">
-        <div className="w-14 h-14 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform border border-blue-100"><Users size={28}/></div>
-        <h3 className="font-black text-xl text-gray-900 uppercase tracking-tighter mb-2">Gerenciamento</h3>
-        <p className="text-sm text-gray-500 leading-relaxed">Base completa de clientes (usuários) e lojistas parceiros.</p>
+    <button onClick={() => onSelect('management')} className="bg-white p-5 rounded-3xl border border-gray-100 shadow-sm hover:shadow-md transition-all text-left group">
+        <div className="w-10 h-10 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform border border-blue-100"><Users size={20}/></div>
+        <h3 className="font-black text-sm text-gray-900 uppercase tracking-tighter mb-1">Gerenciamento</h3>
+        <p className="text-[10px] text-gray-500 leading-relaxed font-medium">Base de clientes e lojistas parceiros.</p>
     </button>
-    <button onClick={() => onSelect('conversations')} className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm hover:shadow-md transition-all text-left group">
-        <div className="w-14 h-14 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform border border-indigo-100"><MessageCircle size={28}/></div>
-        <h3 className="font-black text-xl text-gray-900 uppercase tracking-tighter mb-2">Conversas</h3>
-        <p className="text-sm text-gray-500 leading-relaxed">Auditoria e monitoramento de orçamentos e chats de serviços.</p>
+    <button onClick={() => onSelect('conversations')} className="bg-white p-5 rounded-3xl border border-gray-100 shadow-sm hover:shadow-md transition-all text-left group">
+        <div className="w-10 h-10 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform border border-indigo-100"><MessageCircle size={20}/></div>
+        <h3 className="font-black text-sm text-gray-900 uppercase tracking-tighter mb-1">Conversas</h3>
+        <p className="text-[10px] text-gray-500 leading-relaxed font-medium">Auditoria de chats de serviços.</p>
     </button>
-    <button onClick={() => onSelect('suggestions')} className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm hover:shadow-md transition-all text-left group">
-        <div className="w-14 h-14 bg-amber-50 text-amber-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform border border-amber-100"><Lightbulb size={28}/></div>
-        <h3 className="font-black text-xl text-gray-900 uppercase tracking-tighter mb-2">Sugestões</h3>
-        <p className="text-sm text-gray-500 leading-relaxed">Feedback dos moradores e ideias de melhorias no app.</p>
+    <button onClick={() => onSelect('suggestions')} className="bg-white p-5 rounded-3xl border border-gray-100 shadow-sm hover:shadow-md transition-all text-left group">
+        <div className="w-10 h-10 bg-amber-50 text-amber-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform border border-amber-100"><Lightbulb size={20}/></div>
+        <h3 className="font-black text-sm text-gray-900 uppercase tracking-tighter mb-1">Sugestões</h3>
+        <p className="text-[10px] text-gray-500 leading-relaxed font-medium">Feedback dos moradores e melhorias.</p>
     </button>
-    <button onClick={() => onSelect('monitoring')} className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm hover:shadow-md transition-all text-left group">
-        <div className="w-14 h-14 bg-slate-50 text-slate-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform border border-slate-100"><Activity size={28}/></div>
-        <h3 className="font-black text-xl text-gray-900 uppercase tracking-tighter mb-2">Métricas de Sistema</h3>
-        <p className="text-sm text-gray-500 leading-relaxed">Métricas de performance, erros e latência das APIs.</p>
+    <button onClick={() => onSelect('monitoring')} className="bg-white p-5 rounded-3xl border border-gray-100 shadow-sm hover:shadow-md transition-all text-left group">
+        <div className="w-10 h-10 bg-slate-50 text-slate-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform border border-slate-100"><Activity size={20}/></div>
+        <h3 className="font-black text-sm text-gray-900 uppercase tracking-tighter mb-1">Métricas</h3>
+        <p className="text-[10px] text-gray-500 leading-relaxed font-medium">Performance, erros e latência.</p>
     </button>
   </div>
 );
@@ -482,8 +482,8 @@ export const AdminPanel: React.FC<any> = ({ onLogout, viewMode, onOpenViewSwitch
   }
 
   return (
-    <div className="min-h-screen bg-[#F9FAFB] text-gray-900 font-sans flex flex-col">
-      <header className="bg-white border-b border-gray-200 px-6 py-6 sticky top-0 z-50 shadow-sm shrink-0">
+    <div className="min-h-screen bg-[#0F172A] text-slate-200 font-sans flex flex-col">
+      <header className="bg-[#0F172A] border-b border-white/10 px-6 py-6 sticky top-0 z-50 shadow-sm shrink-0">
         <div className="flex items-center justify-between max-w-7xl mx-auto w-full">
             <div className="flex items-center gap-4">
                 <div className="w-12 h-12 bg-indigo-600 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-500/20">
@@ -492,20 +492,20 @@ export const AdminPanel: React.FC<any> = ({ onLogout, viewMode, onOpenViewSwitch
                     )}
                 </div>
                 <div>
-                    <h1 className="font-black text-xl uppercase tracking-tighter text-gray-900">
+                    <h1 className="font-black text-xl uppercase tracking-tighter text-white">
                         {activeTab === 'hub' ? 'Central Localizei' : 
                          activeTab === 'financial' ? 'Finanças' :
                          activeTab === 'management' ? 'Gerenciamento' :
                          activeTab === 'conversations' ? 'Conversas' :
                          'Sugestões'}
                     </h1>
-                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Painel Administrativo</p>
+                    <p className="text-[10px] font-bold text-indigo-400 uppercase tracking-widest">Painel Administrativo</p>
                 </div>
             </div>
             <div className="flex gap-2">
-                <button onClick={onOpenViewSwitcher} className="px-4 py-2 bg-gray-50 hover:bg-gray-100 rounded-xl text-[10px] font-black uppercase tracking-widest text-blue-600 border border-gray-200 shadow-sm">Visão: {viewMode}</button>
-                <button onClick={() => onNavigateToApp('home')} className="p-2.5 bg-gray-50 rounded-xl text-gray-400 hover:text-gray-900 border border-gray-200 transition-all active:scale-95"><ArrowLeft size={20} /></button>
-                <button onClick={onLogout} className="p-2.5 bg-rose-50 rounded-xl text-rose-500 hover:bg-rose-100 border border-rose-100 transition-all active:scale-95"><LogOut size={20} /></button>
+                <button onClick={onOpenViewSwitcher} className="px-4 py-2 bg-white/5 hover:bg-white/10 rounded-xl text-[10px] font-black uppercase tracking-widest text-blue-400 border border-white/10 shadow-sm">Visão: {viewMode}</button>
+                <button onClick={() => onNavigateToApp('home')} className="p-2.5 bg-white/5 rounded-xl text-slate-400 hover:text-white border border-white/10 transition-all active:scale-95"><ArrowLeft size={20} /></button>
+                <button onClick={onLogout} className="p-2.5 bg-rose-900/20 rounded-xl text-rose-500 hover:bg-rose-900/40 border border-rose-900/50 transition-all active:scale-95"><LogOut size={20} /></button>
             </div>
         </div>
       </header>
