@@ -1,37 +1,26 @@
 
-import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
-import { Store, Category, AdType, CommunityPost, ServiceRequest, ServiceUrgency, Classified } from '../types';
+import React, { useState, useMemo, useRef } from 'react';
+import { Store, Category, CommunityPost, ServiceRequest, ServiceUrgency, Classified } from '../types';
 import { 
   Compass, 
   Sparkles, 
   ArrowRight, 
   Ticket,
   CheckCircle2,
-  Clock,
   Lock,
-  Star,
-  MessageSquare,
   Zap,
-  Award,
   Loader2,
-  Wrench,
-  Key,
   Hammer,
   Plus,
   Heart,
-  Share2,
   Bookmark,
-  Building2,
   Home as HomeIcon,
-  Coins,
-  Calendar,
-  Coffee,
+  MessageSquare,
   MapPin,
   Camera,
   X,
   Send,
   ChevronRight,
-  Tag
 } from 'lucide-react';
 import { LojasEServicosList } from '@/components/LojasEServicosList';
 import { User } from '@supabase/supabase-js';
@@ -139,15 +128,13 @@ export const HomeFeed: React.FC<HomeFeedFeedProps> = ({
   // Category Scroll Logic
   const categoryScrollRef = useRef<HTMLDivElement>(null);
   const [currentCategoryPage, setCurrentCategoryPage] = useState(0);
-  const userInteractedRef = useRef(false);
-  const scrollTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Pagination Configuration
   // Adjust to 8 items per page (4 columns x 2 rows)
   const itemsPerPage = 8; 
   
-  // Ensure we have enough items for scrolling effect.
-  const allCategories = useMemo(() => [...CATEGORIES, ...CATEGORIES], []); 
+  // Use unique categories only (no duplication for infinite scroll)
+  const allCategories = CATEGORIES; 
   const totalPages = Math.ceil(allCategories.length / itemsPerPage);
 
   const [wizardStep, setWizardStep] = useState(0);
@@ -162,24 +149,6 @@ export const HomeFeed: React.FC<HomeFeedFeedProps> = ({
     return parseInt(localStorage.getItem('reward_consecutive_days') || '1');
   });
 
-  // Auto-scroll Logic
-  useEffect(() => {
-    const interval = setInterval(() => {
-      if (userInteractedRef.current || !categoryScrollRef.current) return;
-
-      const nextPage = (currentCategoryPage + 1) % totalPages;
-      const scrollAmount = categoryScrollRef.current.clientWidth * nextPage;
-      
-      categoryScrollRef.current.scrollTo({
-        left: scrollAmount,
-        behavior: 'smooth'
-      });
-      // State updates via onScroll handler to ensure sync
-    }, 3500);
-
-    return () => clearInterval(interval);
-  }, [currentCategoryPage, totalPages]);
-
   const handleScroll = () => {
     if (!categoryScrollRef.current) return;
     const scrollLeft = categoryScrollRef.current.scrollLeft;
@@ -188,17 +157,6 @@ export const HomeFeed: React.FC<HomeFeedFeedProps> = ({
     if (page !== currentCategoryPage) {
       setCurrentCategoryPage(page);
     }
-  };
-
-  const handleInteractionStart = () => {
-    userInteractedRef.current = true;
-    if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
-  };
-
-  const handleInteractionEnd = () => {
-    scrollTimeoutRef.current = setTimeout(() => {
-      userInteractedRef.current = false;
-    }, 5000); // Resume auto-scroll after 5s of inactivity
   };
 
   const handleClaimReward = () => {
@@ -288,10 +246,6 @@ export const HomeFeed: React.FC<HomeFeedFeedProps> = ({
           ref={categoryScrollRef} 
           className="flex overflow-x-auto no-scrollbar snap-x snap-mandatory scroll-smooth"
           onScroll={handleScroll}
-          onTouchStart={handleInteractionStart}
-          onTouchEnd={handleInteractionEnd}
-          onMouseEnter={handleInteractionStart}
-          onMouseLeave={handleInteractionEnd}
         >
           {categoryPages.map((pageCategories, pageIndex) => (
             <div key={pageIndex} className="min-w-full px-4 pb-2 snap-center">
