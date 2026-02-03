@@ -133,8 +133,31 @@ export const HomeFeed: React.FC<HomeFeedFeedProps> = ({
   // Adjust to 8 items per page (4 columns x 2 rows)
   const itemsPerPage = 8; 
   
-  // Use unique categories only (no duplication for infinite scroll)
-  const allCategories = CATEGORIES; 
+  // Reorder categories as requested: 
+  // Page 1: Saúde, Moda, Pets, Pro, Beleza, Autos, Esportes, Educação
+  // Page 2: Remaining
+  const orderedCategories = useMemo(() => {
+    const firstPageIds = [
+      'cat-saude',    // Saúde
+      'cat-fashion',  // Moda
+      'cat-pets',     // Pets
+      'cat-pro',      // Pro
+      'cat-beauty',   // Beleza
+      'cat-autos',    // Autos
+      'cat-sports',   // Esportes
+      'cat-edu'       // Educação
+    ];
+
+    const firstPage = firstPageIds
+      .map(id => CATEGORIES.find(c => c.id === id))
+      .filter((c): c is Category => !!c);
+
+    const remaining = CATEGORIES.filter(c => !firstPageIds.includes(c.id));
+
+    return [...firstPage, ...remaining];
+  }, []);
+
+  const allCategories = orderedCategories; 
   const totalPages = Math.ceil(allCategories.length / itemsPerPage);
 
   const [wizardStep, setWizardStep] = useState(0);
