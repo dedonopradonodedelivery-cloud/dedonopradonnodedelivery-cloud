@@ -1,5 +1,4 @@
 
-
 import { supabase } from '../lib/supabaseClient';
 import { StoreClaimRequest } from '../types';
 

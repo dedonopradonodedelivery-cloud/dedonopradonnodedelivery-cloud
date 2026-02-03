@@ -1,6 +1,6 @@
 
 import React, { useMemo, useState, useEffect, useCallback } from 'react';
-import { Search, MapPin, ChevronDown, Check, ChevronRight, SearchX, ShieldCheck, Tag, Mic, Bell, Loader2, X, User as UserIcon } from 'lucide-react';
+import { Search, MapPin, ChevronDown, Check, ChevronRight, SearchX, ShieldCheck, Tag, Mic, Bell, Loader2, X } from 'lucide-react';
 import { useNeighborhood, NEIGHBORHOODS } from '../../contexts/NeighborhoodContext';
 import { Store, Category } from '../../types';
 import { CATEGORIES } from '../../constants';
@@ -20,75 +20,26 @@ interface HeaderProps {
   isAdmin?: boolean;
   viewMode?: string;
   onOpenViewSwitcher?: () => void;
-  onAuthClick?: () => void;
 }
 
 const NeighborhoodSelectorModal: React.FC = () => {
     const { currentNeighborhood, setNeighborhood, isSelectorOpen, toggleSelector } = useNeighborhood();
     if (!isSelectorOpen) return null;
-    
     return (
-        <div 
-            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-200 p-5" 
-            onClick={toggleSelector}
-        >
-            <div 
-                className="bg-white dark:bg-gray-900 w-full max-w-sm rounded-[2.5rem] p-6 shadow-2xl animate-in zoom-in-95 duration-300 relative border border-gray-100 dark:border-gray-800 flex flex-col max-h-[85vh]" 
-                onClick={e => e.stopPropagation()}
-            >
-                {/* Cabeçalho do Modal */}
-                <div className="flex flex-col items-center mb-6 shrink-0">
-                    <div className="w-14 h-14 bg-blue-50 dark:bg-blue-900/20 rounded-2xl flex items-center justify-center text-[#1E5BFF] mb-3 shadow-sm">
-                        <MapPin size={24} strokeWidth={2.5} />
-                    </div>
-                    <h3 className="text-xl font-black text-gray-900 dark:text-white uppercase tracking-tighter text-center leading-none">
-                        Escolha o Bairro
-                    </h3>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 font-bold uppercase tracking-widest mt-2 text-center">
-                        Onde você quer explorar?
-                    </p>
-                </div>
-
-                {/* Lista de Bairros */}
-                <div className="overflow-y-auto no-scrollbar space-y-3 flex-1 px-1">
-                    <button 
-                        onClick={() => setNeighborhood("Jacarepaguá (todos)")} 
-                        className={`w-full p-4 rounded-2xl font-bold text-sm transition-all flex items-center justify-center relative group ${
-                            currentNeighborhood === "Jacarepaguá (todos)" 
-                            ? "bg-[#1E5BFF] text-white shadow-lg shadow-blue-500/30" 
-                            : "bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 border border-transparent"
-                        }`}
-                    >
+        <div className="fixed inset-0 z-[100] flex items-end justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-200" onClick={toggleSelector}>
+            <div className="bg-white dark:bg-gray-900 w-full max-w-md rounded-t-[2rem] p-6 shadow-2xl animate-in slide-in-from-bottom duration-300 relative" onClick={e => e.stopPropagation()}>
+                <div className="w-12 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full mx-auto mb-6"></div>
+                <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4 px-2">Escolha o Bairro</h3>
+                <div className="max-h-[60vh] overflow-y-auto no-scrollbar space-y-2">
+                    <button onClick={() => setNeighborhood("Jacarepaguá (todos)")} className={`w-full text-left px-4 py-3.5 rounded-xl font-medium transition-colors flex items-center justify-between ${currentNeighborhood === "Jacarepaguá (todos)" ? "bg-[#1E5BFF]/10 text-[#1E5BFF]" : "bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-200"}`}>
                         <span>Jacarepaguá (todos)</span>
-                        {currentNeighborhood === "Jacarepaguá (todos)" && (
-                            <div className="absolute right-4 bg-white/20 p-1 rounded-full">
-                                <Check size={14} strokeWidth={3} />
-                            </div>
-                        )}
+                        {currentNeighborhood === "Jacarepaguá (todos)" && <Check className="w-4 h-4" />}
                     </button>
-                    
-                    <div className="flex items-center gap-2 py-1 opacity-50">
-                        <div className="h-px bg-gray-200 dark:bg-gray-700 flex-1"></div>
-                        <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Bairros</span>
-                        <div className="h-px bg-gray-200 dark:bg-gray-700 flex-1"></div>
-                    </div>
-
+                    <div className="h-px bg-gray-100 dark:bg-gray-800 my-2"></div>
                     {NEIGHBORHOODS.map(hood => (
-                        <button 
-                            key={hood} 
-                            onClick={() => setNeighborhood(hood)} 
-                            className={`w-full p-4 rounded-2xl font-bold text-sm transition-all flex items-center justify-center relative group ${
-                                currentNeighborhood === hood 
-                                ? "bg-[#1E5BFF] text-white shadow-lg shadow-blue-500/30" 
-                                : "bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 border border-gray-100 dark:border-gray-700 hover:border-gray-200 dark:hover:border-gray-600"
-                            }`}
-                        >
+                        <button key={hood} onClick={() => setNeighborhood(hood)} className={`w-full text-left px-4 py-3.5 rounded-xl font-medium transition-colors flex items-center justify-between ${currentNeighborhood === hood ? "bg-[#1E5BFF]/10 text-[#1E5BFF]" : "hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300"}`}>
                             <span>{hood}</span>
-                            {currentNeighborhood === hood && (
-                                <div className="absolute right-4 bg-white/20 p-1 rounded-full">
-                                    <Check size={14} strokeWidth={3} />
-                                </div>
-                            )}
+                            {currentNeighborhood === hood && <Check className="w-4 h-4" />}
                         </button>
                     ))}
                 </div>
@@ -108,8 +59,7 @@ export const Header: React.FC<HeaderProps> = ({
   onStoreClick,
   isAdmin,
   viewMode,
-  onOpenViewSwitcher,
-  onAuthClick
+  onOpenViewSwitcher
 }) => {
   const { currentNeighborhood, setNeighborhood, toggleSelector } = useNeighborhood();
   const [isListening, setIsListening] = useState(false);
@@ -209,13 +159,6 @@ export const Header: React.FC<HeaderProps> = ({
                         </button>
                     )}
                     
-                    <button onClick={onAuthClick} className="flex items-center gap-2 bg-gray-50 dark:bg-gray-800 p-1 pl-3 rounded-full border border-gray-100 dark:border-gray-700 shadow-inner">
-                        <span className="text-[10px] font-bold text-gray-600 dark:text-gray-300">{user ? 'Perfil' : 'Entrar'}</span>
-                        <div className="w-7 h-7 rounded-full bg-white dark:bg-gray-700 flex items-center justify-center text-[#1E5BFF] overflow-hidden relative shadow-sm">
-                            {user?.user_metadata?.avatar_url ? <img src={user.user_metadata.avatar_url} className="w-full h-full object-cover" /> : <UserIcon className="w-4 h-4" />}
-                        </div>
-                    </button>
-
                     <button 
                         onClick={onNotificationClick}
                         className="relative p-2.5 bg-gray-50 dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:text-[#1E5BFF] transition-all active:scale-90"

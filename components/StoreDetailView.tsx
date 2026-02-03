@@ -33,8 +33,7 @@ import {
   ChevronRight as ChevronRightIcon,
   Construction,
   Newspaper,
-  Info,
-  LayoutList
+  Info
 } from 'lucide-react';
 import { Store, BusinessHour, StoreReview } from '../types';
 import { supabase } from '../lib/supabaseClient';
@@ -107,6 +106,7 @@ export const StoreDetailView: React.FC<{
   const { user } = useAuth();
   const { currentNeighborhood } = useNeighborhood();
   const [isFavorite, setIsFavorite] = useState(false);
+  const [activeTab, setActiveTab] = useState<'description' | 'feed' | 'reviews' | 'hours'>('description');
   const [isClosedReporting, setIsClosedReporting] = useState(false);
   const [closedReported, setClosedReported] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -136,6 +136,9 @@ export const StoreDetailView: React.FC<{
     return () => clearInterval(timer);
   }, [images.length]);
 
+  const goToNext = () => setCurrentSlide(prev => (prev + 1) % images.length);
+  const goToPrev = () => setCurrentSlide(prev => (prev - 1 + images.length) % images.length);
+
   const track = (eventType: OrganicEventType) => {
     if (store) {
       trackOrganicEvent(eventType, store.id, currentNeighborhood, user);
@@ -152,6 +155,19 @@ export const StoreDetailView: React.FC<{
         setIsClosedReporting(false);
         setClosedReported(true);
     }, 1200);
+  };
+
+  const handleSubmitReview = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (userRating === 0) return;
+    setIsSubmittingReview(true);
+    setTimeout(() => {
+      setIsSubmittingReview(false);
+      setReviewSuccessMessage('Avaliação enviada (modo teste)');
+      setUserRating(0);
+      setUserComment('');
+      setTimeout(() => setReviewSuccessMessage(''), 3000);
+    }, 1500);
   };
 
   const logoImg = store.logo_url || store.logoUrl || '/assets/default-logo.png';
@@ -294,68 +310,76 @@ export const StoreDetailView: React.FC<{
           </div>
         </div>
 
-        {/* CONTEÚDO SCROLLÁVEL - ORDEM REORGANIZADA */}
-        <div className="mt-8 px-5 space-y-6">
+        {/* TABS DE CONTEÚDO */}
+        <div className="mt-8 px-5">
+            <div className="flex bg-gray-100 dark:bg-gray-900 p-1 rounded-2xl mb-6 overflow-x-auto no-scrollbar">
+                {['description', 'feed', 'reviews', 'hours'].map((tab) => (
+                    <button
+                        key={tab}
+                        onClick={() => setActiveTab(tab as any)}
+                        className={`flex-1 py-3 px-4 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${activeTab === tab ? 'bg-white dark:bg-gray-800 text-[#1E5BFF] shadow-sm' : 'text-gray-400'}`}
+                    >
+                        {tab === 'description' ? 'Sobre' : tab === 'feed' ? 'Feed' : tab === 'reviews' ? 'Avaliações' : 'Horários'}
+                    </button>
+                ))}
+            </div>
 
-            {/* 1. SOBRE A LOJA */}
-            <div className="bg-white dark:bg-gray-900 p-6 rounded-[2.5rem] border border-gray-100 dark:border-gray-800 shadow-sm animate-in fade-in slide-in-from-bottom-4 duration-500">
-                <h3 className="text-sm font-black text-gray-900 dark:text-white mb-3 uppercase tracking-tight flex items-center gap-2">
-                    <Info size={16} className="text-[#1E5BFF]" /> Sobre a loja
-                </h3>
-                <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed font-medium">
-                    {store.description}
-                </p>
-                
-                {hasAddress && (
-                    <div className="mt-6 pt-6 border-t border-gray-100 dark:border-gray-800">
-                        <div className="flex items-start gap-3">
-                            <MapPin size={18} className="text-gray-400 mt-0.5 shrink-0" />
-                            <div>
-                                <p className="text-sm font-bold text-gray-800 dark:text-gray-200">{addressFormatted}</p>
-                                <div className="flex gap-4 mt-3">
-                                    <button onClick={() => window.open(gmapsRouteUrl, '_blank')} className="text-[10px] font-black text-blue-600 uppercase tracking-widest hover:underline">Google Maps</button>
-                                    <button onClick={() => window.open(wazeRouteUrl, '_blank')} className="text-[10px] font-black text-blue-600 uppercase tracking-widest hover:underline">Waze</button>
+            {/* TAB: SOBRE */}
+            {activeTab === 'description' && (
+                <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                    <div className="bg-white dark:bg-gray-900 p-6 rounded-[2.5rem] border border-gray-100 dark:border-gray-800 shadow-sm">
+                        <h3 className="text-sm font-black text-gray-900 dark:text-white mb-3 uppercase tracking-tight flex items-center gap-2">
+                            <Info size={16} className="text-[#1E5BFF]" /> Sobre a loja
+                        </h3>
+                        <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed font-medium">
+                            {store.description}
+                        </p>
+                        
+                        {hasAddress && (
+                            <div className="mt-6 pt-6 border-t border-gray-100 dark:border-gray-800">
+                                <div className="flex items-start gap-3">
+                                    <MapPin size={18} className="text-gray-400 mt-0.5 shrink-0" />
+                                    <div>
+                                        <p className="text-sm font-bold text-gray-800 dark:text-gray-200">{addressFormatted}</p>
+                                        <div className="flex gap-4 mt-3">
+                                            <button onClick={() => window.open(gmapsRouteUrl, '_blank')} className="text-[10px] font-black text-blue-600 uppercase tracking-widest hover:underline">Google Maps</button>
+                                            <button onClick={() => window.open(wazeRouteUrl, '_blank')} className="text-[10px] font-black text-blue-600 uppercase tracking-widest hover:underline">Waze</button>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
+                        )}
+                    </div>
+
+                    <div className="bg-white dark:bg-gray-900 p-6 rounded-[2.5rem] border border-gray-100 dark:border-gray-800 shadow-sm">
+                        <h3 className="text-sm font-black text-gray-900 dark:text-white mb-4 uppercase tracking-tight flex items-center gap-2">
+                            <CreditCard size={16} className="text-emerald-500" /> Formas de Pagamento
+                        </h3>
+                        <div className="flex flex-wrap gap-2">
+                            {(store.payment_methods || ['Dinheiro', 'Pix', 'Cartão de Crédito', 'Cartão de Débito']).map((method, idx) => {
+                                const Icon = paymentIconMap[method] || Coins;
+                                return (
+                                    <div key={idx} className="flex items-center gap-2 px-3 py-2 bg-gray-50 dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700">
+                                        <Icon size={14} className="text-gray-500 dark:text-gray-400" />
+                                        <span className="text-xs font-bold text-gray-600 dark:text-gray-300">{method}</span>
+                                    </div>
+                                );
+                            })}
                         </div>
                     </div>
-                )}
-            </div>
 
-            {/* 2. FORMAS DE PAGAMENTO */}
-            <div className="bg-white dark:bg-gray-900 p-6 rounded-[2.5rem] border border-gray-100 dark:border-gray-800 shadow-sm animate-in fade-in slide-in-from-bottom-4 duration-500 delay-75">
-                <h3 className="text-sm font-black text-gray-900 dark:text-white mb-4 uppercase tracking-tight flex items-center gap-2">
-                    <CreditCard size={16} className="text-emerald-500" /> Formas de Pagamento
-                </h3>
-                <div className="flex flex-wrap gap-2">
-                    {(store.payment_methods || ['Dinheiro', 'Pix', 'Cartão de Crédito', 'Cartão de Débito']).map((method, idx) => {
-                        const Icon = paymentIconMap[method] || Coins;
-                        return (
-                            <div key={idx} className="flex items-center gap-2 px-3 py-2 bg-gray-50 dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700">
-                                <Icon size={14} className="text-gray-500 dark:text-gray-400" />
-                                <span className="text-xs font-bold text-gray-600 dark:text-gray-300">{method}</span>
-                            </div>
-                        );
-                    })}
+                    {/* Trust Block */}
+                    <div className="bg-white dark:bg-gray-900 p-6 rounded-[2.5rem] border border-gray-100 dark:border-gray-800 shadow-sm">
+                        <TrustBlock store={store} />
+                    </div>
                 </div>
-            </div>
+            )}
 
-            {/* 3. CONFIANÇA NO BAIRRO */}
-            <div className="bg-white dark:bg-gray-900 p-6 rounded-[2.5rem] border border-gray-100 dark:border-gray-800 shadow-sm animate-in fade-in slide-in-from-bottom-4 duration-500 delay-100">
-                <TrustBlock store={store} />
-            </div>
-
-            {/* 4. FEED DA LOJA (REPOISICIONADO) */}
-            <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500 delay-150">
-                <div className="flex items-center justify-between px-1">
-                    <h3 className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-tight flex items-center gap-2">
-                         <LayoutList size={16} className="text-purple-500" /> Feed da Loja
-                    </h3>
-                </div>
-                
-                {storeFeedPosts.length > 0 ? (
-                    <div className="space-y-4">
-                        {storeFeedPosts.map((post) => (
+            {/* TAB: FEED DA LOJA */}
+            {activeTab === 'feed' && (
+                <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                    {storeFeedPosts.length > 0 ? (
+                        storeFeedPosts.map((post) => (
                             <PostCard 
                                 key={post.id} 
                                 post={post} 
@@ -365,100 +389,101 @@ export const StoreDetailView: React.FC<{
                                 isSaved={isPostSaved(post.id)}
                                 onToggleSave={() => toggleSavePost(post.id)}
                             />
-                        ))}
-                    </div>
-                ) : (
-                    <div className="py-12 text-center flex flex-col items-center bg-white dark:bg-gray-900 rounded-[2rem] border border-gray-100 dark:border-gray-800">
-                        <div className="w-14 h-14 bg-gray-50 dark:bg-gray-800 rounded-full flex items-center justify-center mb-3 text-gray-300">
-                            <Newspaper size={20} />
-                        </div>
-                        <h3 className="text-sm font-bold text-gray-600 dark:text-gray-300">Nenhuma publicação</h3>
-                        <p className="text-[10px] text-gray-400 mt-1 max-w-[200px] uppercase tracking-wide">Acompanhe as novidades desta loja em breve.</p>
-                    </div>
-                )}
-            </div>
-
-            {/* 5. AVALIAÇÕES */}
-            <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 delay-200">
-                <div className="flex items-center gap-4 bg-white dark:bg-gray-900 p-6 rounded-[2.5rem] border border-gray-100 dark:border-gray-800 shadow-sm">
-                    <div className="text-center px-2">
-                        <span className="text-4xl font-black text-gray-900 dark:text-white">{store.rating.toFixed(1)}</span>
-                        <div className="flex gap-0.5 text-yellow-400 justify-center mt-1">
-                            {[1, 2, 3, 4, 5].map((s) => (
-                                <Star key={s} size={10} fill={s <= Math.round(store.rating) ? "currentColor" : "none"} />
-                            ))}
-                        </div>
-                        <p className="text-[9px] text-gray-400 font-bold uppercase mt-2">{store.reviewsCount} avaliações</p>
-                    </div>
-                    <div className="h-12 w-px bg-gray-100 dark:bg-gray-800"></div>
-                    <div className="flex-1">
-                        <button className="w-full bg-[#1E5BFF] hover:bg-blue-600 text-white font-black py-3 rounded-xl text-xs uppercase tracking-widest shadow-lg shadow-blue-500/20 active:scale-95 transition-all">
-                            Avaliar Loja
-                        </button>
-                    </div>
-                </div>
-
-                <div className="space-y-4">
-                    {reviewsToDisplay.map((review) => (
-                        <div key={review.id} className="bg-white dark:bg-gray-900 p-6 rounded-[2rem] border border-gray-100 dark:border-gray-800 shadow-sm">
-                            <div className="flex justify-between items-start mb-3">
-                                <div className="flex items-center gap-2">
-                                    <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
-                                        <UserIcon size={14} className="text-gray-400" />
-                                    </div>
-                                    <span className="text-sm font-bold text-gray-900 dark:text-white">{review.user_name}</span>
-                                </div>
-                                <span className="text-[10px] text-gray-400 font-medium">{new Date(review.created_at).toLocaleDateString()}</span>
+                        ))
+                    ) : (
+                        <div className="py-16 text-center flex flex-col items-center">
+                            <div className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mb-4 text-gray-400">
+                                <Newspaper size={24} />
                             </div>
-                            <div className="flex gap-0.5 text-yellow-400 mb-2">
-                                {[...Array(5)].map((_, i) => (
-                                    <Star key={i} size={12} fill={i < review.rating ? "currentColor" : "none"} />
-                                ))}
-                            </div>
-                            <p className="text-xs text-gray-600 dark:text-gray-300 leading-relaxed font-medium">"{review.comment}"</p>
-                            
-                            {review.merchant_response && (
-                                <div className="mt-4 pl-4 border-l-2 border-gray-100 dark:border-gray-700">
-                                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Resposta da loja</p>
-                                    <p className="text-xs text-gray-500 dark:text-gray-400 italic">"{review.merchant_response.text}"</p>
-                                </div>
-                            )}
-                        </div>
-                    ))}
-                    {reviewsToDisplay.length === 0 && (
-                        <div className="text-center py-6 opacity-40">
-                            <p className="text-xs font-bold uppercase tracking-widest text-gray-400">Sem avaliações recentes</p>
+                            <h3 className="text-base font-bold text-gray-900 dark:text-white">Nenhuma publicação ainda</h3>
+                            <p className="text-xs text-gray-500 mt-1 max-w-[200px]">Acompanhe as novidades desta loja em breve.</p>
                         </div>
                     )}
                 </div>
-            </div>
+            )}
 
-            {/* 6. HORÁRIOS */}
-            <div className="bg-white dark:bg-gray-900 p-6 rounded-[2.5rem] border border-gray-100 dark:border-gray-800 shadow-sm animate-in fade-in slide-in-from-bottom-4 duration-500 delay-300">
-                <h3 className="text-sm font-black text-gray-900 dark:text-white mb-4 uppercase tracking-tight flex items-center gap-2">
-                    <Clock size={16} className="text-orange-500" /> Horários
-                </h3>
-                <div className="space-y-4">
-                    {Object.entries(store.business_hours || {}).map(([dayKey, hours]) => {
-                        const h = hours as BusinessHour;
-                        return (
-                            <div key={dayKey} className="flex justify-between items-center text-sm border-b border-gray-50 dark:border-gray-800 pb-2 last:border-0 last:pb-0">
-                                <span className="font-bold text-gray-500 dark:text-gray-400 uppercase text-xs tracking-wide">
-                                    {WEEK_DAYS_LABELS[dayKey] || dayKey}
-                                </span>
-                                {h.open ? (
-                                    <span className="font-bold text-gray-900 dark:text-white">
-                                        {h.start} - {h.end}
-                                    </span>
-                                ) : (
-                                    <span className="font-bold text-red-400">Fechado</span>
+            {/* TAB: AVALIAÇÕES */}
+            {activeTab === 'reviews' && (
+                <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                    <div className="flex items-center gap-4 bg-white dark:bg-gray-900 p-6 rounded-[2.5rem] border border-gray-100 dark:border-gray-800 shadow-sm">
+                        <div className="text-center px-2">
+                            <span className="text-4xl font-black text-gray-900 dark:text-white">{store.rating.toFixed(1)}</span>
+                            <div className="flex gap-0.5 text-yellow-400 justify-center mt-1">
+                                {[1, 2, 3, 4, 5].map((s) => (
+                                    <Star key={s} size={10} fill={s <= Math.round(store.rating) ? "currentColor" : "none"} />
+                                ))}
+                            </div>
+                            <p className="text-[9px] text-gray-400 font-bold uppercase mt-2">{store.reviewsCount} avaliações</p>
+                        </div>
+                        <div className="h-12 w-px bg-gray-100 dark:bg-gray-800"></div>
+                        <div className="flex-1">
+                            <button className="w-full bg-[#1E5BFF] hover:bg-blue-600 text-white font-black py-3 rounded-xl text-xs uppercase tracking-widest shadow-lg shadow-blue-500/20 active:scale-95 transition-all">
+                                Avaliar Loja
+                            </button>
+                        </div>
+                    </div>
+
+                    <div className="space-y-4">
+                        {reviewsToDisplay.map((review) => (
+                            <div key={review.id} className="bg-white dark:bg-gray-900 p-6 rounded-[2rem] border border-gray-100 dark:border-gray-800 shadow-sm">
+                                <div className="flex justify-between items-start mb-3">
+                                    <div className="flex items-center gap-2">
+                                        <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+                                            <UserIcon size={14} className="text-gray-400" />
+                                        </div>
+                                        <span className="text-sm font-bold text-gray-900 dark:text-white">{review.user_name}</span>
+                                    </div>
+                                    <span className="text-[10px] text-gray-400 font-medium">{new Date(review.created_at).toLocaleDateString()}</span>
+                                </div>
+                                <div className="flex gap-0.5 text-yellow-400 mb-2">
+                                    {[...Array(5)].map((_, i) => (
+                                        <Star key={i} size={12} fill={i < review.rating ? "currentColor" : "none"} />
+                                    ))}
+                                </div>
+                                <p className="text-xs text-gray-600 dark:text-gray-300 leading-relaxed font-medium">"{review.comment}"</p>
+                                
+                                {review.merchant_response && (
+                                    <div className="mt-4 pl-4 border-l-2 border-gray-100 dark:border-gray-700">
+                                        <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Resposta da loja</p>
+                                        <p className="text-xs text-gray-500 dark:text-gray-400 italic">"{review.merchant_response.text}"</p>
+                                    </div>
                                 )}
                             </div>
-                        );
-                    })}
+                        ))}
+                        {reviewsToDisplay.length === 0 && (
+                            <div className="text-center py-10 opacity-40">
+                                <p className="text-xs font-bold uppercase tracking-widest text-gray-400">Sem avaliações recentes</p>
+                            </div>
+                        )}
+                    </div>
                 </div>
+            )}
 
-                <div className="mt-6 pt-4 border-t border-gray-50 dark:border-gray-800">
+            {/* TAB: HORÁRIOS */}
+            {activeTab === 'hours' && (
+                <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                    <div className="bg-white dark:bg-gray-900 p-6 rounded-[2.5rem] border border-gray-100 dark:border-gray-800 shadow-sm">
+                        <div className="space-y-4">
+                            {Object.entries(store.business_hours || {}).map(([dayKey, hours]) => {
+                                const h = hours as BusinessHour;
+                                return (
+                                    <div key={dayKey} className="flex justify-between items-center text-sm border-b border-gray-50 dark:border-gray-800 pb-2 last:border-0 last:pb-0">
+                                        <span className="font-bold text-gray-500 dark:text-gray-400 uppercase text-xs tracking-wide">
+                                            {WEEK_DAYS_LABELS[dayKey] || dayKey}
+                                        </span>
+                                        {h.open ? (
+                                            <span className="font-bold text-gray-900 dark:text-white">
+                                                {h.start} - {h.end}
+                                            </span>
+                                        ) : (
+                                            <span className="font-bold text-red-400">Fechado</span>
+                                        )}
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
+
                     <button 
                         onClick={handleReportClosed} 
                         disabled={isClosedReporting || closedReported}
@@ -467,8 +492,7 @@ export const StoreDetailView: React.FC<{
                         {isClosedReporting ? <Loader2 size={16} className="animate-spin" /> : closedReported ? <><CheckCircle2 size={16}/> Reporte enviado</> : <><AlertTriangle size={16}/> Reportar local fechado</>}
                     </button>
                 </div>
-            </div>
-
+            )}
         </div>
 
       </main>

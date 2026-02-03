@@ -10,22 +10,21 @@ import {
   TrendingUp, 
   Wallet, 
   Megaphone, 
-  ChevronRight, 
-  Settings, 
-  HelpCircle, 
-  CreditCard, 
-  LayoutDashboard, 
-  Calendar, 
-  Bell, 
-  QrCode, 
-  Rocket
+  ChevronRight,
+  Settings,
+  HelpCircle,
+  CreditCard,
+  LayoutDashboard,
+  Calendar,
+  Bell,
+  QrCode,
+  Zap
 } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 
 interface StoreAreaViewProps {
   onBack: () => void;
   onNavigate?: (view: string) => void;
-  user?: any;
 }
 
 // Mock Base Data (Reference for 30 days)
@@ -91,7 +90,7 @@ const MenuLink: React.FC<{
   </button>
 );
 
-export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate, user }) => {
+export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate }) => {
   const [isCashbackEnabled, setIsCashbackEnabled] = useState(true);
   const [dateRange, setDateRange] = useState<DateRange>('30d');
   const [pendingRequestsCount, setPendingRequestsCount] = useState(0);
@@ -186,7 +185,7 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
             <div>
                 <div className="flex items-center gap-1.5">
                     <h1 className="text-2xl font-bold text-gray-900 dark:text-white font-display leading-tight">
-                        {user?.user_metadata?.store_name || STORE_DATA.name}
+                        {STORE_DATA.name}
                     </h1>
                     {STORE_DATA.isVerified && <BadgeCheck className="w-5 h-5 text-white fill-[#1E5BFF]" />}
                 </div>
@@ -238,6 +237,41 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
             </div>
             <ChevronRight className="w-5 h-5 text-white/70" />
         </button>
+
+        {/* --- AÇÕES & MARKETING --- */}
+        <section>
+          <div className="flex items-center justify-between mb-3 px-1">
+             <h3 className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">Ações</h3>
+          </div>
+          <div className="rounded-2xl overflow-hidden shadow-sm border border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800">
+             <MenuLink 
+                icon={Megaphone} 
+                label="Patrocinados" 
+                onClick={() => onNavigate && onNavigate('store_sponsored')}
+                badge={1}
+             />
+             <MenuLink 
+                icon={Zap} 
+                label="Anúncios & Banners" 
+                onClick={() => onNavigate && onNavigate('store_ads_module')}
+             />
+             <MenuLink 
+                icon={Settings} 
+                label="Minha Loja" 
+                onClick={() => onNavigate && onNavigate('store_profile')}
+             />
+             <MenuLink 
+                icon={CreditCard} 
+                label="Financeiro" 
+                onClick={() => onNavigate && onNavigate('store_finance')}
+             />
+             <MenuLink 
+                icon={HelpCircle} 
+                label="Suporte" 
+                onClick={() => onNavigate && onNavigate('store_support')}
+             />
+          </div>
+        </section>
 
         {/* --- VISÃO GERAL & FILTROS --- */}
         <div>
@@ -306,41 +340,6 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
             </div>
         </div>
 
-        {/* --- NAVIGATION LIST --- */}
-        <div>
-            <h3 className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-3 ml-2">
-                Ações
-            </h3>
-            <div className="rounded-2xl overflow-hidden shadow-sm border border-gray-100 dark:border-gray-700">
-                <MenuLink 
-                    icon={Settings} 
-                    label="Minha Loja (Perfil Público)" 
-                    onClick={() => onNavigate && onNavigate('store_profile')}
-                />
-                <MenuLink 
-                    icon={CreditCard} 
-                    label="Minha conta / Financeiro" 
-                    onClick={() => onNavigate && onNavigate('store_finance')}
-                />
-                <MenuLink 
-                    icon={Megaphone} 
-                    label="Banners e Anúncios" 
-                    onClick={() => onNavigate && onNavigate('store_ads_module')}
-                />
-                <MenuLink 
-                    icon={Rocket} 
-                    label="Patrocinados (Destaque)" 
-                    onClick={() => onNavigate && onNavigate('store_sponsored')}
-                    badge={1}
-                />
-                <MenuLink 
-                    icon={HelpCircle} 
-                    label="Suporte ao Lojista" 
-                    onClick={() => onNavigate && onNavigate('store_support')}
-                />
-            </div>
-        </div>
-
         {/* --- BLOCK: CASHBACK --- */}
         <div className="bg-white dark:bg-gray-800 rounded-3xl p-5 shadow-sm border border-gray-100 dark:border-gray-700 relative overflow-hidden">
             <div className="absolute top-0 right-0 w-24 h-24 bg-blue-500/10 rounded-bl-full -mr-4 -mt-4"></div>
@@ -381,6 +380,12 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
             </button>
         </div>
 
+      </div>
+
+      <div className="mt-12 text-center opacity-30 px-10">
+        <p className="text-[9px] font-black text-gray-500 uppercase tracking-[0.3em]">
+          Localizei JPA Parceiros <br/> v1.5.0
+        </p>
       </div>
     </div>
   );

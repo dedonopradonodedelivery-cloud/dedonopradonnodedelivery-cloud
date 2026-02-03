@@ -36,6 +36,8 @@ import { SponsorInfoView } from '@/components/SponsorInfoView';
 import { ServicesLandingView } from '@/components/ServicesLandingView';
 import { CategoryBannerSalesView } from '@/components/CategoryBannerSalesView';
 import { BannerSalesWizard } from '@/components/BannerSalesWizard'; 
+import { StoreAdsModule } from '@/components/StoreAdsModule'; // Already imported, used in existing code
+import { StoreSponsoredAds } from '@/components/StoreSponsoredAds'; // New Import
 import { WeeklyRewardPage } from '@/components/WeeklyRewardPage'; 
 import { UserCupomScreen } from '@/components/UserCupomScreen'; 
 import { UserStatementView } from '@/components/UserStatementView';
@@ -50,15 +52,14 @@ import { StoreSupportModule } from '@/components/StoreSupportModule';
 import { StoreConnectModule } from '@/components/StoreConnectModule';
 import { StoreClaimFlow } from '@/components/StoreClaimFlow';
 import { AppSuggestionView } from '@/components/AppSuggestionView';
-import { StoreAdsModule } from '@/components/StoreAdsModule';
-import { StoreSponsoredModule } from '@/components/StoreSponsoredModule'; // Import new module
 import { MapPin, X, Palette } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import { NeighborhoodProvider } from '@/contexts/NeighborhoodContext';
 import { Category, Store, Job, RealEstateProperty, PlanType, Classified } from '@/types';
-import { STORES, CATEGORIES, MOCK_JOBS } from '@/constants';
+import { STORES } from '@/constants';
 import { AboutView, SupportView, FavoritesView, UserActivityView, MyNeighborhoodsView, PrivacyView } from '@/components/SimplePages';
+import { MerchantPanel } from '@/components/MerchantPanel';
 
 let splashWasShownInSession = false;
 const ADMIN_EMAIL = 'dedonopradonodedelivery@gmail.com';
@@ -112,7 +113,7 @@ const App: React.FC = () => {
   }, [isAuthReturn]);
 
   const handleNavigate = (view: string, data?: any) => {
-    if (view !== 'sponsor_info' && view !== 'notifications' && view !== 'patrocinador_master' && view !== 'real_estate_detail' && view !== 'job_detail' && view !== 'plan_selection' && view !== 'classified_detail' && view !== 'classified_search_results' && view !== 'user_activity' && view !== 'app_suggestion' && view !== 'designer_panel' && view !== 'store_connect' && view !== 'store_sponsored') {
+    if (view !== 'sponsor_info' && view !== 'notifications' && view !== 'patrocinador_master' && view !== 'real_estate_detail' && view !== 'job_detail' && view !== 'plan_selection' && view !== 'classified_detail' && view !== 'classified_search_results' && view !== 'user_activity' && view !== 'app_suggestion' && view !== 'designer_panel' && view !== 'store_connect' && view !== 'merchant_panel') {
       setPreviousTab(activeTab);
     }
     
@@ -209,7 +210,7 @@ const App: React.FC = () => {
       handleNavigate('profile');
   };
 
-  const headerExclusionList = ['store_area', 'store_detail', 'profile', 'patrocinador_master', 'merchant_performance', 'neighborhood_posts', 'saved_posts', 'classifieds', 'services', 'services_landing', 'merchant_leads', 'service_chat', 'admin_panel', 'category_detail', 'subcategory_detail', 'sponsor_info', 'real_estate', 'jobs', 'job_detail', 'job_wizard', 'adoption', 'donations', 'desapega', 'category_banner_sales', 'banner_sales_wizard', 'weekly_reward_page', 'user_coupons', 'notifications', 'store_profile', 'about', 'support', 'favorites', 'user_statement', 'service_messages_list', 'merchant_reviews', 'merchant_coupons', 'store_finance', 'store_support', 'real_estate_wizard', 'real_estate_detail', 'plan_selection', 'classified_detail', 'classified_search_results', 'user_activity', 'my_neighborhoods', 'privacy_policy', 'app_suggestion', 'designer_panel', 'store_connect', 'store_ads_module', 'store_sponsored'];
+  const headerExclusionList = ['store_area', 'store_detail', 'profile', 'patrocinador_master', 'merchant_performance', 'neighborhood_posts', 'saved_posts', 'classifieds', 'services', 'services_landing', 'merchant_leads', 'service_chat', 'admin_panel', 'category_detail', 'subcategory_detail', 'sponsor_info', 'real_estate', 'jobs', 'job_detail', 'job_wizard', 'adoption', 'donations', 'desapega', 'category_banner_sales', 'banner_sales_wizard', 'weekly_reward_page', 'user_coupons', 'notifications', 'store_profile', 'about', 'support', 'favorites', 'user_statement', 'service_messages_list', 'merchant_reviews', 'merchant_coupons', 'store_finance', 'store_support', 'real_estate_wizard', 'real_estate_detail', 'plan_selection', 'classified_detail', 'classified_search_results', 'user_activity', 'my_neighborhoods', 'privacy_policy', 'app_suggestion', 'designer_panel', 'store_connect', 'merchant_panel', 'store_ads_module', 'store_sponsored'];
   
   const RoleSwitcherModal: React.FC = () => {
     if (!isRoleSwitcherOpen) return null;
@@ -321,16 +322,20 @@ const App: React.FC = () => {
                     )}
                     
                     {activeTab === 'store_ads_module' && (
-                      <StoreAdsModule 
-                        onBack={() => handleNavigate('profile')} 
-                        onNavigate={handleNavigate} 
-                        user={user} 
-                        initialView={'sales'}
-                      />
+                        <StoreAdsModule 
+                           onBack={() => handleNavigate('profile')}
+                           onNavigate={handleNavigate}
+                           categoryName={undefined}
+                           user={user}
+                           viewMode={viewMode}
+                        />
                     )}
                     
                     {activeTab === 'store_sponsored' && (
-                      <StoreSponsoredModule onBack={() => handleNavigate('profile')} />
+                        <StoreSponsoredAds 
+                           onBack={() => handleNavigate('profile')}
+                           onNavigate={handleNavigate}
+                        />
                     )}
 
                     {activeTab === 'category_banner_sales' && (
@@ -371,6 +376,8 @@ const App: React.FC = () => {
                         ? <StoreAreaView onBack={() => handleNavigate('home')} onNavigate={(view) => handleNavigate(view)} user={user as any} />
                         : <MenuView user={user as any} userRole={userRole} onAuthClick={() => setIsAuthOpen(true)} onNavigate={handleNavigate} onBack={() => handleNavigate('home')} />
                     )}
+                    
+                    {activeTab === 'merchant_panel' && <MerchantPanel onBack={() => handleNavigate('profile')} />}
 
                     {activeTab === 'store_profile' && (
                       <StoreProfileEdit 

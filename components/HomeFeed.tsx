@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
-import { Store, Category, AdType, CommunityPost, ServiceRequest, ServiceUrgency, Classified } from '@/types';
+import { Store, Category, AdType, CommunityPost, ServiceRequest, ServiceUrgency, Classified } from '../types';
 import { 
   Compass, 
   Sparkles, 
@@ -242,17 +242,17 @@ export const HomeFeed: React.FC<HomeFeedFeedProps> = ({
   }, [updateScrollIndicator]);
 
   return (
-    <div className="flex flex-col bg-[#FFFFFF] dark:bg-gray-950 w-full max-w-md mx-auto animate-in fade-in duration-500 overflow-x-hidden pb-32">
+    <div className="flex flex-col bg-white dark:bg-gray-950 w-full max-w-md mx-auto animate-in fade-in duration-500 overflow-x-hidden pb-32">
       
       {userRole === 'lojista' && (
-        <section className="px-4 py-4 bg-[#FFFFFF] dark:bg-gray-950">
+        <section className="px-4 py-4 bg-white dark:bg-gray-950">
            <LaunchOfferBanner onClick={() => onNavigate('store_ads_module')} />
         </section>
       )}
 
       {/* CATEGORIAS */}
-      <div className="w-full bg-[#FFFFFF] dark:bg-gray-950 pt-4 pb-0 relative z-10">
-        <div ref={categoryScrollRef} className="flex overflow-x-auto no-scrollbar px-4 pb-2 snap-x bg-[#FFFFFF] dark:bg-gray-950">
+      <section className="w-full bg-[#FFFFFF] dark:bg-gray-950 pt-4 pb-0 relative z-10">
+        <div ref={categoryScrollRef} className="flex overflow-x-auto no-scrollbar px-4 pb-2 snap-x">
           <div className="grid grid-flow-col grid-rows-2 gap-x-3 gap-y-3">
             {CATEGORIES.map((cat) => (
               <button 
@@ -268,12 +268,12 @@ export const HomeFeed: React.FC<HomeFeedFeedProps> = ({
             ))}
           </div>
         </div>
-        <div className="px-4 pb-6 flex justify-center bg-[#FFFFFF] dark:bg-gray-950">
+        <div className="px-4 pb-6 flex justify-center">
           <div className="w-1/3 h-[2px] bg-gray-100 dark:bg-gray-800 rounded-full">
             <div className="h-full bg-brand-blue rounded-full" style={{ width: scrollIndicator.width, marginLeft: scrollIndicator.left }}></div>
           </div>
         </div>
-      </div>
+      </section>
 
       <HomeBannerCarousel onStoreClick={onStoreClick} onNavigate={onNavigate} />
 

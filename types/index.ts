@@ -87,6 +87,8 @@ export interface Store {
   inscricao_municipal?: string;
   inscricao_estadual?: string;
   email_publico?: string;
+  accepts_online_orders?: boolean;
+  min_order_value?: number;
 }
 
 export type ServiceUrgency = 'Hoje' | 'Essa semana' | 'Sem pressa';
@@ -373,20 +375,4 @@ export interface AppSuggestion {
     category: 'bug' | 'idea' | 'improve' | 'other';
     contactConsent: boolean;
     status: 'new' | 'analyzing' | 'responded';
-}
-
-export interface SponsoredCampaign {
-  id: string;
-  startDate: string;
-  endDate: string;
-  durationMonths: number;
-  totalDays: number;
-  dailyPrice: number;
-  totalPrice: number;
-  status: 'active' | 'ended' | 'pending';
-  metrics: {
-    impressions: number;
-    clicks: number;
-    leads: number;
-  };
 }
