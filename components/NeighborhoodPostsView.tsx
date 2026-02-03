@@ -354,23 +354,27 @@ export const NeighborhoodPostsView: React.FC<NeighborhoodPostsViewProps> = ({ on
 
   return (
     <div className="min-h-screen bg-[#F8F9FC] dark:bg-gray-950 font-sans animate-in fade-in duration-500 overflow-x-hidden">
-      <header className="bg-white dark:bg-gray-900 px-6 pt-10 pb-6 border-b border-gray-100 dark:border-gray-800 rounded-b-[2.5rem] shadow-sm sticky top-0 z-40">
-        <div className="flex items-start justify-between gap-3 mb-4">
-          <div className="flex items-start gap-3 flex-1">
-            <button onClick={onBack} className="p-2.5 bg-gray-50 dark:bg-gray-800 rounded-xl text-gray-500 hover:text-gray-900 mt-1 shrink-0">
+      <header className="bg-white dark:bg-gray-900 px-6 pt-8 pb-6 border-b border-gray-100 dark:border-gray-800 rounded-b-[2.5rem] shadow-sm sticky top-0 z-40">
+        <div className="w-full flex justify-start mb-2">
+           <button onClick={onBack} className="p-2.5 bg-gray-50 dark:bg-gray-800 rounded-xl text-gray-500 hover:text-gray-900 transition-colors">
               <ChevronLeft size={20} />
+           </button>
+        </div>
+
+        <div className="flex flex-col items-center text-center mb-6">
+            <h1 className="font-black text-2xl text-gray-900 dark:text-white uppercase tracking-tighter leading-none">
+              JPA Conversa
+            </h1>
+            <p className="text-xs text-gray-500 dark:text-gray-400 font-medium leading-relaxed mt-2 max-w-[260px]">
+              Troque dicas, peça ajuda e saiba o que acontece no bairro em tempo real. O espaço oficial da nossa comunidade.
+            </p>
+        </div>
+
+        <div className="flex justify-center mb-6">
+            <button onClick={handleStartPost} className="flex items-center gap-2 px-8 py-3 bg-[#1E5BFF] text-white rounded-2xl text-sm font-black uppercase tracking-widest shadow-xl shadow-blue-500/20 hover:bg-blue-600 transition-all active:scale-95">
+              <Plus size={18} strokeWidth={3} />
+              Postar
             </button>
-            <div>
-              <h1 className="font-black text-xl text-gray-900 dark:text-white uppercase tracking-tighter leading-none">JPA Conversa</h1>
-              <p className="text-xs text-gray-500 dark:text-gray-400 font-medium leading-snug mt-2">
-                Troque dicas, peça ajuda e saiba o que acontece no bairro em tempo real. O espaço oficial da nossa comunidade.
-              </p>
-            </div>
-          </div>
-          <button onClick={handleStartPost} className="flex items-center gap-1.5 px-4 py-2.5 bg-[#1E5BFF] text-white rounded-xl text-xs font-bold shadow-lg shadow-blue-500/20 hover:bg-blue-600 transition-all active:scale-95 shrink-0">
-            <Plus size={16} strokeWidth={3} />
-            Postar
-          </button>
         </div>
 
         <div className="flex items-center gap-3 mt-4">
