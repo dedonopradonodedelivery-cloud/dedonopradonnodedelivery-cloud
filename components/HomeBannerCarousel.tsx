@@ -3,7 +3,6 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { Store, AdType } from '../types';
 import { STORES } from '../constants';
 import { useNeighborhood } from '../contexts/NeighborhoodContext';
-import { NeighborhoodBannersGrid } from './NeighborhoodBannersGrid';
 
 interface BannerData {
   id: string;
@@ -14,56 +13,54 @@ interface BannerData {
   image: string;
   bgColor: string;
   neighborhood: string;
-  category?: string;
+  category: string;
   subcategory?: string;
 }
 
 const MOCK_BANNERS: BannerData[] = [
-  // Banners Gerais / Home
   {
-    id: 'b-fre-1',
-    storeId: 'f-1',
-    title: 'Bibi Lanches',
-    subtitle: 'Almoço especial com suco natural hoje!',
-    cta: 'Abrir cardápio',
-    image: 'https://images.unsplash.com/photo-1561758033-d89a9ad46330?q=80&w=600&auto=format&fit=crop',
-    bgColor: 'bg-orange-600',
-    neighborhood: 'Freguesia',
-    category: 'Comida'
+    id: 'b-saude-1',
+    storeId: 'fake-saude-banner',
+    title: 'Clínica Bem Estar',
+    subtitle: 'Cuidado completo para sua família com especialistas.',
+    cta: 'Agendar Consulta',
+    image: 'https://images.unsplash.com/photo-1576091160550-2173dba999ef?q=80&w=600&auto=format&fit=crop',
+    bgColor: 'bg-emerald-700',
+    neighborhood: 'Jacarepaguá (todos)',
+    category: 'Saúde'
   },
   {
-    id: 'b-fre-2',
-    storeId: 'f-5',
-    title: 'Pizzaria do Zé',
-    subtitle: 'Bordas recheadas grátis nesta terça.',
-    cta: 'Pedir agora',
-    image: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?q=80&w=600&auto=format&fit=crop',
-    bgColor: 'bg-red-700',
-    neighborhood: 'Freguesia',
-    category: 'Comida',
-    subcategory: 'Pizzarias'
+    id: 'b-pet-1',
+    storeId: 'fake-pet-banner',
+    title: 'Amigão Pet Shop',
+    subtitle: 'Banho, tosa e mimos para seu melhor amigo.',
+    cta: 'Ver Serviços',
+    image: 'https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?q=80&w=600&auto=format&fit=crop',
+    bgColor: 'bg-amber-600',
+    neighborhood: 'Jacarepaguá (todos)',
+    category: 'Pets'
   },
   {
-    id: 'b-fre-3',
-    storeId: 'f-4',
-    title: 'Chaveiro Rápido JPA',
-    subtitle: 'Atendimento rápido no bairro',
-    cta: 'Falar agora',
-    image: 'https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?q=80&w=600&auto=format&fit=crop',
-    bgColor: 'bg-blue-600',
-    neighborhood: 'Freguesia',
-    category: 'Serviços'
+    id: 'b-moda-1',
+    storeId: 'fake-moda-banner',
+    title: 'Boutique Urbana',
+    subtitle: 'As tendências da estação chegaram ao bairro.',
+    cta: 'Conferir Lookbook',
+    image: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=600&auto=format&fit=crop',
+    bgColor: 'bg-rose-700',
+    neighborhood: 'Jacarepaguá (todos)',
+    category: 'Moda'
   },
-  // 4º BANNER ADICIONADO: Banners por Bairro
   {
-    id: 'b-neighborhood-grid',
-    storeId: 'internal',
-    title: 'Banners por Bairro',
-    subtitle: 'Jacarepaguá',
-    cta: '',
-    image: '',
-    bgColor: 'bg-slate-900',
-    neighborhood: 'Jacarepaguá (todos)'
+    id: 'b-beleza-1',
+    storeId: 'fake-beleza-banner',
+    title: 'Espaço Glamour',
+    subtitle: 'Realce sua beleza com quem entende do assunto.',
+    cta: 'Ver Promoções',
+    image: 'https://images.unsplash.com/photo-1562322140-8baeececf3df?q=80&w=600&auto=format&fit=crop',
+    bgColor: 'bg-purple-800',
+    neighborhood: 'Jacarepaguá (todos)',
+    category: 'Beleza'
   }
 ];
 
@@ -84,29 +81,17 @@ export const HomeBannerCarousel: React.FC<HomeBannerCarouselProps> = ({ onStoreC
   }, [isCategoryView]);
 
   const activeBanners = useMemo(() => {
-    const initialPool = currentNeighborhood === 'Jacarepaguá (todos)'
-      ? MOCK_BANNERS
-      : MOCK_BANNERS.filter(b => b.neighborhood === currentNeighborhood || b.id === 'b-neighborhood-grid');
-    
-    let filtered: BannerData[] = [];
-
-    if (subcategoryName) {
-      filtered = initialPool.filter(b => b.subcategory === subcategoryName);
+    // Se estiver em uma categoria, tenta filtrar banners daquela categoria primeiro
+    if (isCategoryView) {
+      const catPool = MOCK_BANNERS.filter(b => b.category === categoryName);
+      if (catPool.length > 0) return catPool.slice(0, bannerCount);
     }
     
-    if (filtered.length < bannerCount && categoryName) {
-      const catBanners = initialPool.filter(b => b.category === categoryName && !filtered.find(f => f.id === b.id));
-      filtered = [...filtered, ...catBanners];
-    }
-
-    if (filtered.length < bannerCount) {
-      const generalBanners = initialPool.filter(b => b.id !== 'b-neighborhood-grid' && !filtered.find(f => f.id === b.id));
-      const needed = bannerCount - filtered.length;
-      filtered = [...filtered, ...generalBanners.slice(0, needed)];
-    }
-
-    return filtered.slice(0, bannerCount);
-  }, [currentNeighborhood, categoryName, subcategoryName, bannerCount]);
+    // Na Home, mostra os 4 banners fixos solicitados
+    // A estrutura já permite filtrar por bairro futuramente
+    const pool = MOCK_BANNERS.filter(b => b.neighborhood === 'Jacarepaguá (todos)' || b.neighborhood === currentNeighborhood);
+    return pool.slice(0, bannerCount);
+  }, [currentNeighborhood, categoryName, subcategoryName, bannerCount, isCategoryView]);
 
   useEffect(() => {
     if (activeBanners.length <= 1) return;
@@ -121,22 +106,21 @@ export const HomeBannerCarousel: React.FC<HomeBannerCarouselProps> = ({ onStoreC
   }, [categoryName, subcategoryName, currentNeighborhood]);
 
   const handleBannerClick = (banner: BannerData) => {
-    if (banner.id === 'b-neighborhood-grid') return;
-    
-    // Busca a loja real ou cria o mock placeholder
+    // Busca a loja real ou cria o mock placeholder baseado no segmento
     const store = STORES.find(s => s.id === banner.storeId) || {
       id: banner.storeId,
-      name: 'Loja Parceira',
-      category: banner.category || 'Destaque',
-      subcategory: banner.subcategory || 'Geral',
-      description: 'Perfil em construção. Em breve você poderá conferir todos os detalhes, fotos e promoções deste estabelecimento incrível!',
+      name: banner.title,
+      category: banner.category,
+      subcategory: banner.category,
+      description: `O melhor de ${banner.category.toLowerCase()} na região de Jacarepaguá. ${banner.subtitle}`,
       adType: AdType.PREMIUM,
-      rating: 5.0,
-      distance: 'Freguesia • RJ',
+      rating: 4.9,
+      distance: 'Perto de você',
+      neighborhood: currentNeighborhood === 'Jacarepaguá (todos)' ? 'Freguesia' : currentNeighborhood,
       verified: true,
       isOpenNow: true,
       image: banner.image,
-      logoUrl: '/assets/default-logo.png'
+      logoUrl: `https://ui-avatars.com/api/?name=${encodeURIComponent(banner.title)}&background=random&color=fff`
     };
 
     onStoreClick(store as Store);
@@ -145,33 +129,38 @@ export const HomeBannerCarousel: React.FC<HomeBannerCarouselProps> = ({ onStoreC
   if (activeBanners.length === 0) return null;
 
   const currentBanner = activeBanners[currentIndex];
+
   return (
     <div className="px-5 mb-6 bg-white dark:bg-gray-950">
       <div 
         onClick={() => handleBannerClick(currentBanner)}
-        className={`relative aspect-[16/12] w-full rounded-[2.5rem] overflow-hidden cursor-pointer transition-all duration-300 active:scale-[0.98] group ${currentBanner.bgColor}`}
+        className={`relative aspect-[16/10] w-full rounded-[2.5rem] overflow-hidden cursor-pointer transition-all duration-300 active:scale-[0.98] group ${currentBanner.bgColor}`}
       >
-        {currentBanner.id === 'b-neighborhood-grid' ? (
-          <NeighborhoodBannersGrid onNavigate={onNavigate} />
-        ) : (
-          <div className="w-full h-full relative">
-            <img 
-              src={currentBanner.image} 
-              alt={currentBanner.title} 
-              className="absolute inset-0 w-full h-full object-cover mix-blend-overlay opacity-60 transition-transform duration-700 group-hover:scale-105 pointer-events-none" 
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent pointer-events-none"></div>
-            
-            <div className="relative h-full flex flex-col justify-center p-8 text-white pointer-events-none">
-              <h2 className="text-2xl font-black uppercase tracking-tighter leading-none mb-2 drop-shadow-md">
-                {currentBanner.title}
-              </h2>
-              <p className="text-xs font-bold text-white/90 max-w-[200px] leading-tight drop-shadow-sm">
-                {currentBanner.subtitle}
-              </p>
+        <div className="w-full h-full relative">
+          <img 
+            src={currentBanner.image} 
+            alt={currentBanner.title} 
+            className="absolute inset-0 w-full h-full object-cover mix-blend-overlay opacity-60 transition-transform duration-700 group-hover:scale-105 pointer-events-none" 
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent pointer-events-none"></div>
+          
+          <div className="relative h-full flex flex-col justify-end p-8 text-white pointer-events-none">
+            <div className="flex items-center gap-2 mb-2">
+               <span className="bg-white/20 backdrop-blur-md text-white text-[8px] font-black px-2.5 py-1 rounded-lg uppercase tracking-[0.15em] border border-white/20">
+                  {currentBanner.category}
+               </span>
+            </div>
+            <h2 className="text-2xl font-black uppercase tracking-tighter leading-none mb-2 drop-shadow-md">
+              {currentBanner.title}
+            </h2>
+            <p className="text-[10px] font-bold text-white/90 max-w-[220px] leading-tight drop-shadow-sm mb-4">
+              {currentBanner.subtitle}
+            </p>
+            <div className="inline-flex items-center gap-2 bg-white text-gray-900 px-4 py-2 rounded-xl w-fit">
+               <span className="text-[9px] font-black uppercase tracking-widest">{currentBanner.cta}</span>
             </div>
           </div>
-        )}
+        </div>
 
         {activeBanners.length > 1 && (
           <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-1.5 z-10 pointer-events-none">
