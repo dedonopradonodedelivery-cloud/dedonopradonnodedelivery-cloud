@@ -81,6 +81,7 @@ const App: React.FC = () => {
   
   const [activeTab, setActiveTab] = useState('home');
   const [previousTab, setPreviousTab] = useState('home');
+  const [adminInitialTab, setAdminInitialTab] = useState<string | undefined>(undefined);
   const [globalSearch, setGlobalSearch] = useState('');
   const [selectedStore, setSelectedStore] = useState<Store | null>(null);
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
@@ -92,7 +93,6 @@ const App: React.FC = () => {
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   
   const [activityType, setActivityType] = useState<string>('');
-  
   const [initialModuleView, setInitialModuleView] = useState<'sales' | 'chat' | undefined>(undefined);
 
   const [activeServiceRequestId, setActiveServiceRequestId] = useState<string | null>(null);
@@ -108,6 +108,24 @@ const App: React.FC = () => {
 
   const [isClaimFlowActive, setIsClaimFlowActive] = useState(false);
   const [storeToClaim, setStoreToClaim] = useState<Store | null>(null);
+
+  // LOGICA DE ROUTING PARA ACESSO VIA URL (REQUISITO URGENTE)
+  useEffect(() => {
+    const handleUrlRouting = () => {
+        const path = window.location.pathname;
+        if (path === '/admin/aprovacoes' || path === '/admin/monetizacoes') {
+            if (isAdmin) {
+                setViewMode('ADM');
+                localStorage.setItem('admin_view_mode', 'ADM');
+                setAdminInitialTab(path === '/admin/aprovacoes' ? 'moderation' : 'monetization');
+                setActiveTab('admin_panel');
+            }
+        }
+    };
+    handleUrlRouting();
+    window.addEventListener('popstate', handleUrlRouting);
+    return () => window.removeEventListener('popstate', handleUrlRouting);
+  }, [isAdmin]);
 
   const handleNavigate = (view: string, data?: any) => {
     if (view !== 'sponsor_info' && view !== 'notifications' && view !== 'patrocinador_master' && view !== 'real_estate_detail' && view !== 'job_detail' && view !== 'plan_selection' && view !== 'classified_detail' && view !== 'classified_search_results' && view !== 'user_activity' && view !== 'app_suggestion' && view !== 'designer_panel' && view !== 'store_connect' && view !== 'merchant_panel' && view !== 'coupon_landing') {
@@ -152,7 +170,6 @@ const App: React.FC = () => {
     setActiveTab(view);
   };
 
-  // Redirect after login if needed
   useEffect(() => {
     if (user && activeTab === 'coupon_landing') {
         if (userRole === 'lojista') {
@@ -457,7 +474,7 @@ const App: React.FC = () => {
                         />
                     )}
 
-                    {activeTab === 'admin_panel' && <AdminPanel user={user as any} onLogout={signOut} viewMode={viewMode} onOpenViewSwitcher={() => setIsRoleSwitcherOpen(true)} onNavigateToApp={handleNavigate} onOpenMonitorChat={(id: string) => { setActiveServiceRequestId(id); setChatRole('admin'); handleNavigate('service_chat'); }} />}
+                    {activeTab === 'admin_panel' && <AdminPanel user={user as any} onLogout={signOut} viewMode={viewMode} onOpenViewSwitcher={() => setIsRoleSwitcherOpen(true)} onNavigateToApp={handleNavigate} onOpenMonitorChat={(id: string) => { setActiveServiceRequestId(id); setChatRole('admin'); handleNavigate('service_chat'); }} initialTab={adminInitialTab} />}
                     
                     {activeTab === 'designer_panel' && user && (
                       <DesignerPanel user={user} onBack={() => handleNavigate('home')} />

@@ -397,8 +397,8 @@ const AdminFinancialDashboard: React.FC = () => {
 
 // --- CORE COMPONENT ---
 
-export const AdminPanel: React.FC<any> = ({ onLogout, viewMode, onOpenViewSwitcher, onNavigateToApp, onOpenMonitorChat }) => {
-  const [activeTab, setActiveTab] = useState<'hub' | 'management' | 'financial' | 'monitoring' | 'suggestions' | 'conversations' | 'moderation' | 'monetization'>('hub');
+export const AdminPanel: React.FC<any> = ({ onLogout, viewMode, onOpenViewSwitcher, onNavigateToApp, onOpenMonitorChat, initialTab }) => {
+  const [activeTab, setActiveTab] = useState<'hub' | 'management' | 'financial' | 'monitoring' | 'suggestions' | 'conversations' | 'moderation' | 'monetization'>(initialTab || 'hub');
   const [managementTab, setManagementTab] = useState<'clients' | 'merchants'>('clients');
   const [searchTerm, setSearchTerm] = useState('');
   const [merchants, setMerchants] = useState<any[]>([]);
@@ -489,15 +489,6 @@ export const AdminPanel: React.FC<any> = ({ onLogout, viewMode, onOpenViewSwitch
     ));
   };
 
-  // EARLY RETURNS PARA COMPONENTES DE PÁGINA INTEIRA
-  if (activeTab === 'moderation') {
-      return <AdminModerationPanel onBack={() => setActiveTab('hub')} />;
-  }
-
-  if (activeTab === 'monetization') {
-      return <AdminMonetizationView onBack={() => setActiveTab('hub')} />;
-  }
-
   const filteredUsers = useMemo(() => {
     if (!showActiveResidentsOnly) return users;
     return users.filter(u => u.isActiveResident);
@@ -510,6 +501,8 @@ export const AdminPanel: React.FC<any> = ({ onLogout, viewMode, onOpenViewSwitch
           case 'conversations': return 'Conversas';
           case 'monitoring': return 'Monitoramento';
           case 'suggestions': return 'Sugestões';
+          case 'moderation': return 'Aprovações';
+          case 'monetization': return 'Monetizações';
           default: return 'Central Localizei';
       }
   }, [activeTab]);
@@ -541,8 +534,15 @@ export const AdminPanel: React.FC<any> = ({ onLogout, viewMode, onOpenViewSwitch
 
       <main className="flex-1 p-8 overflow-y-auto no-scrollbar pb-32 max-w-7xl mx-auto w-full">
         
-        {/* VIEW MANAGER */}
         {activeTab === 'hub' && <AdminHub onSelect={setActiveTab} />}
+
+        {activeTab === 'moderation' && (
+            <AdminModerationPanel onBack={() => setActiveTab('hub')} />
+        )}
+
+        {activeTab === 'monetization' && (
+            <AdminMonetizationView onBack={() => setActiveTab('hub')} />
+        )}
 
         {activeTab === 'monitoring' && (
             <>
