@@ -14,7 +14,6 @@ import {
   Tag,
   ShoppingBag,
   ArrowUpRight,
-  // FIX: Added missing AlertTriangle import from lucide-react
   AlertTriangle
 } from 'lucide-react';
 
@@ -34,7 +33,7 @@ const MONETIZATION_ITEMS: MonetizationItem[] = [
   {
     id: 'ads',
     name: 'Patrocinado / Ads',
-    description: 'Lojista paga por dia para aparecer em destaque no topo das listas de lojas e serviços.',
+    description: 'Lojista paga por dia para aparecer em destaque no topo das listas de lojas e serviços no bairro selecionado.',
     value: 'R$ 0,90 / dia',
     status: 'Ativa',
     observations: 'Valor fixo promocional de lançamento. Cobrança pré-paga.',
@@ -44,58 +43,47 @@ const MONETIZATION_ITEMS: MonetizationItem[] = [
   },
   {
     id: 'classifieds',
-    name: 'Classificados Avulsos',
-    description: 'Custo para publicar anúncios adicionais além do limite gratuito (2 por mês).',
-    value: 'R$ 19,90 / anúncio',
-    status: 'Ativa',
-    observations: 'Válido por 30 dias. Inclui destaque visual na categoria.',
+    name: 'Classificados',
+    description: 'Taxa para publicação de anúncios adicionais ou em categorias de alta concorrência.',
+    value: 'A definir',
+    status: 'Inativa',
+    observations: 'Aguardando validação do volume de tráfego orgânico.',
     icon: ShoppingBag,
     color: 'text-emerald-500',
     bg: 'bg-emerald-50 dark:bg-emerald-900/20'
   },
   {
-    id: 'subcategory_banner',
-    name: 'Banner em Subcategoria',
-    description: 'Banner fixo no topo de uma subcategoria (ex: Pizzarias) em um bairro específico.',
-    value: 'R$ 29,90 / mês',
-    status: 'Ativa',
-    observations: 'Apenas 1 slot disponível por subcategoria para exclusividade.',
-    icon: LayoutGrid,
-    color: 'text-blue-500',
-    bg: 'bg-blue-50 dark:bg-blue-900/20'
+    id: 'coupons',
+    name: 'Cupons',
+    description: 'Comissão sobre resgates de cupons ou taxa fixa por campanha de desconto ativa.',
+    value: 'A definir',
+    status: 'Inativa',
+    observations: 'Modelo de performance (CPA) em estudo.',
+    icon: Tag,
+    color: 'text-rose-500',
+    bg: 'bg-rose-50 dark:bg-rose-900/20'
   },
   {
-    id: 'home_banner',
-    name: 'Banners Home',
-    description: 'Banners de grande formato no carrossel da página inicial do aplicativo.',
-    value: 'R$ 69,90 / mês',
-    status: 'Ativa',
-    observations: 'Máxima visibilidade. Limitado a 4 anunciantes por bairro.',
-    icon: Home,
-    color: 'text-purple-500',
-    bg: 'bg-purple-50 dark:bg-purple-900/20'
-  },
-  {
-    id: 'jpa_connect',
-    name: 'JPA Connect',
-    description: 'Assinatura para participar do grupo de networking e eventos empresariais.',
-    value: 'R$ 200,00 / mês',
-    status: 'Ativa',
-    observations: 'Foco em lojistas e profissionais liberais. Encontros semanais.',
+    id: 'subscriptions',
+    name: 'Taxas / Assinatura',
+    description: 'Planos mensais para lojistas (Empresa Bairro, Master Imobiliário) com ferramentas avançadas.',
+    value: 'A definir',
+    status: 'Inativa',
+    observations: 'Definindo pacotes de features por tier (Free vs Pro).',
     icon: UserCheck,
     color: 'text-indigo-500',
     bg: 'bg-indigo-50 dark:bg-indigo-900/20'
   },
   {
-    id: 'master_sponsor',
-    name: 'Patrocinador Master',
-    description: 'Destaque máximo em todo o app: Splash screen, topo da Home e rodapé global.',
-    value: 'R$ 1.000,00 / mês',
-    status: 'Ativa',
-    observations: 'Apenas 1 marca permitida por período. Atualmente: Grupo Esquematiza.',
-    icon: Crown,
-    color: 'text-amber-600',
-    bg: 'bg-amber-100 dark:bg-amber-900/30'
+    id: 'others',
+    name: 'Outras Fontes',
+    description: 'Banners Home, Publiposts no JPA Conversa e parcerias institucionais.',
+    value: 'A definir',
+    status: 'Inativa',
+    observations: 'Venda direta via comercial para marcas de grande porte.',
+    icon: LayoutGrid,
+    color: 'text-slate-500',
+    bg: 'bg-gray-50 dark:bg-gray-800'
   }
 ];
 
@@ -126,14 +114,14 @@ export const AdminMonetizationView: React.FC<{ onBack: () => void }> = ({ onBack
                     <Coins size={32} />
                 </div>
                 <div>
-                    <h2 className="text-xl font-black text-slate-900 dark:text-white uppercase tracking-tighter">Visão Estratégica</h2>
-                    <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">Atualmente o app conta com {MONETIZATION_ITEMS.length} canais de faturamento ativos.</p>
+                    <h2 className="text-xl font-black text-slate-900 dark:text-white uppercase tracking-tighter">Resumo Estratégico</h2>
+                    <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">Esta página é para consulta interna exclusiva da administração. Aqui listamos os valores e canais de faturamento do app.</p>
                 </div>
             </div>
 
             <div className="flex items-center gap-2 bg-emerald-50 dark:bg-emerald-900/20 px-4 py-2 rounded-2xl border border-emerald-100 dark:border-emerald-800/50">
                 <TrendingUp size={18} className="text-emerald-600" />
-                <span className="text-xs font-black text-emerald-700 dark:text-emerald-400 uppercase tracking-widest">Modelo de Baixo Custo / Alto Volume</span>
+                <span className="text-xs font-black text-emerald-700 dark:text-emerald-400 uppercase tracking-widest">Foco em Volume (MVP)</span>
             </div>
         </section>
 
@@ -145,7 +133,11 @@ export const AdminMonetizationView: React.FC<{ onBack: () => void }> = ({ onBack
                         <div className={`w-12 h-12 ${item.bg} ${item.color} rounded-2xl flex items-center justify-center shadow-sm`}>
                             <item.icon size={24} />
                         </div>
-                        <span className="bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded border border-emerald-100 dark:border-emerald-800">
+                        <span className={`text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded border ${
+                            item.status === 'Ativa' 
+                            ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 border-emerald-100 dark:border-emerald-800' 
+                            : 'bg-gray-50 dark:bg-gray-800 text-gray-400 border-gray-100 dark:border-gray-700'
+                        }`}>
                             {item.status}
                         </span>
                     </div>
@@ -158,7 +150,9 @@ export const AdminMonetizationView: React.FC<{ onBack: () => void }> = ({ onBack
                     <div className="space-y-4 pt-6 border-t border-slate-50 dark:border-slate-800">
                         <div className="flex justify-between items-center">
                             <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Valor Atual</span>
-                            <span className="text-base font-black text-blue-600 dark:text-blue-400 italic leading-none">{item.value}</span>
+                            <span className={`text-base font-black italic leading-none ${item.value === 'A definir' ? 'text-gray-400' : 'text-blue-600 dark:text-blue-400'}`}>
+                                {item.value}
+                            </span>
                         </div>
                         
                         <div className="bg-slate-50 dark:bg-slate-800/50 p-3 rounded-xl flex gap-3">
@@ -176,9 +170,9 @@ export const AdminMonetizationView: React.FC<{ onBack: () => void }> = ({ onBack
         <section className="bg-amber-50 dark:bg-amber-900/10 p-6 rounded-3xl border border-amber-100 dark:border-amber-800/30 flex gap-4 items-start">
             <AlertTriangle className="text-amber-600 shrink-0" size={20} />
             <div className="space-y-1">
-                <p className="text-xs text-amber-900 dark:text-amber-200 font-black uppercase tracking-widest leading-none">Manual do Administrador</p>
+                <p className="text-xs text-amber-900 dark:text-amber-200 font-black uppercase tracking-widest leading-none">Aviso aos Administradores</p>
                 <p className="text-xs text-amber-800 dark:text-amber-400 font-medium leading-relaxed">
-                    Estes valores são configurados via código no MVP v1. Para alteração massiva ou sazonal, consulte o arquivo de constantes do sistema. Mudanças aqui documentadas refletem o modelo de negócio atual apresentado aos parceiros.
+                    A alteração destes valores deve ser feita via código nesta versão. Mudanças aqui refletem apenas a documentação para o time. Para alteração funcional, consulte o arquivo de constantes do sistema.
                 </p>
             </div>
         </section>

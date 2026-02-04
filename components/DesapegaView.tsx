@@ -281,6 +281,7 @@ export const DesapegaView: React.FC<DesapegaViewProps> = ({ onBack, user, onRequ
     setViewState('form_media');
   };
 
+  // FIX: handleItemClick added to correct scope
   const handleItemClick = (item: Classified) => {
     onNavigate('classified_detail', { item });
   };

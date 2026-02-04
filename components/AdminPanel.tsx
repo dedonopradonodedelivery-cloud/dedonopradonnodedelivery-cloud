@@ -735,7 +735,7 @@ export const AdminPanel: React.FC<any> = ({ onLogout, viewMode, onOpenViewSwitch
                                         <Building size={20} />
                                     </div>
                                     <div>
-                                        <h4 className="font-bold text-gray-900 leading-none mb-1">{m.name}</h4>
+                                        <h4 className="font-bold text-gray-900 dark:text-white leading-none mb-1">{m.name}</h4>
                                         <p className="text-[10px] text-gray-400 uppercase font-black">{m.category} • {m.plan.toUpperCase()}</p>
                                     </div>
                                 </div>
@@ -763,7 +763,7 @@ export const AdminPanel: React.FC<any> = ({ onLogout, viewMode, onOpenViewSwitch
              )}
            </div>
         )}
-      </header>
+      </main>
     </div>
   );
 };
