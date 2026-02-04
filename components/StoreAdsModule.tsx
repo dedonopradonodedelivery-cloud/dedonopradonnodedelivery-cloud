@@ -78,17 +78,15 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
     COMBO: 359.80
   };
 
-  const dates = useMemo(() => {
+  // Helper para calcular datas por opção
+  const getDatesForDuration = (months: number) => {
     const start = new Date();
     const end = new Date();
-    end.setDate(start.getDate() + (selectedDuration * 30));
+    end.setDate(start.getDate() + (months * 30));
     
     const fmt = (d: Date) => d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
-    return {
-      start: fmt(start),
-      end: fmt(end)
-    };
-  }, [selectedDuration]);
+    return `${fmt(start)} → ${fmt(end)}`;
+  };
 
   const summary = useMemo(() => {
     let basePrice = 0;
@@ -158,7 +156,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
               <div className="space-y-4">
                   <div className="flex justify-between text-sm"><span className="text-slate-400">Posicionamento:</span><span className="font-bold">{summary.placementLabel}</span></div>
                   <div className="flex justify-between text-sm"><span className="text-slate-400">Bairros:</span><span className="font-bold">{summary.hoodsCount} selecionado(s)</span></div>
-                  <div className="flex justify-between text-sm"><span className="text-slate-400">Duração:</span><span className="font-bold text-blue-400">{selectedDuration} mês(es) ({dates.start} a {dates.end})</span></div>
+                  <div className="flex justify-between text-sm"><span className="text-slate-400">Duração:</span><span className="font-bold text-blue-400">{selectedDuration} mês(es)</span></div>
                   <div className="flex justify-between text-sm"><span className="text-slate-400">Arte:</span><span className="font-bold">{artChoice === 'pro' ? 'Time Localizei' : artChoice === 'editor' ? 'Personalizada' : 'Própria'}</span></div>
                   <div className="pt-4 border-t border-white/5 flex justify-between items-center">
                     <span className="font-black text-white uppercase text-xs">Total a Pagar</span>
@@ -207,7 +205,6 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
               </p>
             </div>
             
-            {/* Banner Fundador Apoiador */}
             <div className="bg-gradient-to-br from-blue-600/20 to-indigo-600/10 border border-blue-500/30 p-6 rounded-[2.5rem] text-left relative overflow-hidden shadow-2xl shadow-blue-900/10">
               <div className="absolute top-0 right-0 w-24 h-24 bg-blue-500/5 rounded-full blur-3xl"></div>
               <div className="flex items-center gap-3 mb-4">
@@ -231,7 +228,6 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
           </div>
 
           <div className="grid grid-cols-1 gap-4">
-              {/* HOME */}
               <button 
                 onClick={() => setPlacement({ home: true, cat: false })} 
                 className={`flex items-start text-left p-6 rounded-[2.5rem] border-2 transition-all gap-5 ${placement.home && !placement.cat ? 'bg-blue-600/10 border-blue-500 shadow-lg' : 'bg-white/5 border-white/10'}`}
@@ -257,7 +253,6 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
                 </div>
               </button>
 
-              {/* SUBCATEGORIAS */}
               <button 
                 onClick={() => setPlacement({ home: false, cat: true })} 
                 className={`flex items-start text-left p-6 rounded-[2.5rem] border-2 transition-all gap-5 ${!placement.home && placement.cat ? 'bg-blue-600/10 border-blue-500 shadow-lg' : 'bg-white/5 border-white/10'}`}
@@ -283,7 +278,6 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
                 </div>
               </button>
 
-              {/* COMBO */}
               <button 
                 onClick={() => setPlacement({ home: true, cat: true })} 
                 className={`relative flex items-start text-left p-6 rounded-[2.5rem] border-2 transition-all gap-5 ${placement.home && placement.cat ? 'bg-blue-600/10 border-blue-500 shadow-lg' : 'bg-white/5 border-white/10'}`}
@@ -351,17 +345,12 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
                     onClick={() => setSelectedDuration(opt.months)}
                     className={`p-4 rounded-2xl border-2 flex flex-col items-center justify-center transition-all ${selectedDuration === opt.months ? 'bg-blue-600 border-blue-500 text-white shadow-lg' : 'bg-white/5 border-white/10 text-slate-500'}`}
                   >
-                      <span className="text-xs font-black uppercase tracking-tighter">{opt.label}</span>
-                      <span className={`text-[8px] font-bold mt-1 uppercase ${selectedDuration === opt.months ? 'text-blue-100' : 'text-slate-600'}`}>30 dias p/ mês</span>
+                      <span className="text-xs font-black uppercase tracking-tighter leading-none">{opt.label}</span>
+                      <span className={`text-[7px] font-bold mt-2 uppercase tracking-tighter whitespace-nowrap ${selectedDuration === opt.months ? 'text-blue-100' : 'text-slate-600'}`}>
+                          {getDatesForDuration(opt.months)}
+                      </span>
                   </button>
               ))}
-          </div>
-          <div className="bg-white/5 border border-white/10 p-4 rounded-2xl flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                  <Clock size={16} className="text-blue-400" />
-                  <span className="text-xs font-bold text-slate-300">Período da Campanha</span>
-              </div>
-              <span className="text-xs font-black text-white uppercase tracking-widest">{dates.start} — {dates.end}</span>
           </div>
         </section>
 
