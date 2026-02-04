@@ -516,7 +516,7 @@ export const AdminPanel: React.FC<any> = ({ onLogout, viewMode, onOpenViewSwitch
                          activeTab === 'financial' ? 'Finanças' :
                          activeTab === 'management' ? 'Gerenciamento' :
                          activeTab === 'conversations' ? 'Conversas' :
-                         activeTab === 'monetization' ? 'Monetizações' :
+                         activeTab === 'monitoring' ? 'Monitoramento' :
                          'Sugestões'}
                     </h1>
                     <p className="text-[10px] font-bold text-indigo-400 uppercase tracking-widest">Painel Administrativo</p>
