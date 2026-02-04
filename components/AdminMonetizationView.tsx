@@ -24,7 +24,9 @@ import {
   Award,
   Sparkles,
   ShieldCheck,
-  Lock
+  Lock,
+  ArrowDownToLine,
+  Gem
 } from 'lucide-react';
 
 interface PricingTier {
@@ -45,11 +47,12 @@ interface MonetizationItem {
   unit?: string;
   pricing: {
     base: string;
+    baseValue: number; // Valor numérico para cálculos
     founder?: string;
+    founderValue?: number; // Valor numérico para cálculos
     upfront?: string;
     package_text?: string;
   };
-  // Novos campos para a regra Fundador Protegido
   founder_price_locked?: boolean;
   founder_price_duration_months?: number;
   founder_price_note?: string;
@@ -74,7 +77,9 @@ const INITIAL_MONETIZATION_DATA: MonetizationItem[] = [
     founder_price_note: 'Válido para fundadores que contratarem no 1º mês',
     pricing: {
       base: 'R$ 199,90 / mês',
+      baseValue: 199.90,
       founder: 'R$ 69,90 / mês',
+      founderValue: 69.90,
       upfront: 'R$ 49,90 / mês (à vista)',
       package_text: 'Pacote Fundador: Contrate 3 e ganhe +2 meses (Total 5)'
     }
@@ -94,7 +99,9 @@ const INITIAL_MONETIZATION_DATA: MonetizationItem[] = [
     founder_price_note: 'Preço travado para contratos de inauguração',
     pricing: {
       base: 'R$ 149,90 / mês',
+      baseValue: 149.90,
       founder: 'R$ 59,90 / mês',
+      founderValue: 59.90,
       upfront: 'R$ 39,90 / mês (à vista)',
       package_text: 'Pacote Fundador: Contrate 3 e ganhe +2 meses (Total 5)'
     }
@@ -109,7 +116,8 @@ const INITIAL_MONETIZATION_DATA: MonetizationItem[] = [
     bg: 'bg-emerald-500/10',
     unit: 'conforme plano',
     pricing: {
-      base: 'R$ 49,90 a R$ 199,90'
+      base: 'R$ 49,90 a R$ 199,90',
+      baseValue: 49.90 // Valor base de referência
     },
     tiers: [
       { label: 'PROFISSIONAL LOCAL', value: 'R$ 49,90' },
@@ -129,7 +137,8 @@ const INITIAL_MONETIZATION_DATA: MonetizationItem[] = [
     capacity: '30',
     unit: 'empresários por grupo',
     pricing: {
-      base: 'R$ 200,00 / pessoa / mês'
+      base: 'R$ 200,00 / pessoa / mês',
+      baseValue: 200.00
     },
     observations: 'Inclui reunião presencial semanal com coffee break.'
   },
@@ -148,7 +157,9 @@ const INITIAL_MONETIZATION_DATA: MonetizationItem[] = [
     founder_price_note: 'Apenas 1 cota master protegida por ciclo',
     pricing: {
       base: 'R$ 2.500,00 / mês',
+      baseValue: 2500.00,
       founder: 'R$ 1.500,00 / mês',
+      founderValue: 1500.00,
       package_text: 'Pacote Fundador: 3 meses pagos + 2 grátis (5 meses totais)'
     }
   },
@@ -161,7 +172,8 @@ const INITIAL_MONETIZATION_DATA: MonetizationItem[] = [
     color: 'text-blue-600',
     bg: 'bg-blue-600/10',
     pricing: {
-      base: 'R$ 0,90 / dia'
+      base: 'R$ 0,90 / dia',
+      baseValue: 0.90
     },
     observations: 'Preço promocional de lançamento.'
   }
@@ -171,7 +183,6 @@ export const AdminMonetizationView: React.FC<{ onBack: () => void }> = ({ onBack
   const [items, setItems] = useState<MonetizationItem[]>([]);
   const [isUpdating, setIsUpdating] = useState<string | null>(null);
 
-  // Carregar estados persistidos
   useEffect(() => {
     const savedStatus = localStorage.getItem('admin_monetization_status');
     if (savedStatus) {
@@ -188,32 +199,35 @@ export const AdminMonetizationView: React.FC<{ onBack: () => void }> = ({ onBack
 
   const toggleStatus = (id: string) => {
     setIsUpdating(id);
-    
-    // Simulação de delay de rede
     setTimeout(() => {
       const updatedItems = items.map(item => {
         if (item.id === id) {
           const newStatus = item.status === 'Ativa' ? 'Inativa' : 'Ativa';
-          
-          // Auditoria Simulada
           console.log(`[AUDIT] Monetização ${id} alterada para ${newStatus} por ADM em ${new Date().toISOString()}`);
-          
           return { ...item, status: newStatus as 'Ativa' | 'Inativa' };
         }
         return item;
       });
 
       setItems(updatedItems);
-      
-      // Persistir no LocalStorage
-      const statusMap = updatedItems.reduce((acc, curr) => ({
-        ...acc,
-        [curr.id]: curr.status
-      }), {});
+      const statusMap = updatedItems.reduce((acc, curr) => ({ ...acc, [curr.id]: curr.status }), {});
       localStorage.setItem('admin_monetization_status', JSON.stringify(statusMap));
-      
       setIsUpdating(null);
     }, 600);
+  };
+
+  const calculateVantage = (item: MonetizationItem) => {
+    if (!item.pricing.founderValue || !item.pricing.baseValue) return null;
+    
+    const monthlySaving = item.pricing.baseValue - item.pricing.founderValue;
+    const discountPercent = Math.round((monthlySaving / item.pricing.baseValue) * 100);
+    const annualSaving = monthlySaving * 12;
+
+    return {
+      discountPercent,
+      monthlySaving,
+      annualSaving
+    };
   };
 
   return (
@@ -226,7 +240,7 @@ export const AdminMonetizationView: React.FC<{ onBack: () => void }> = ({ onBack
                 </div>
                 <div>
                     <h2 className="text-2xl font-black text-white uppercase tracking-tighter">Gestão de Receita</h2>
-                    <p className="text-sm text-slate-400 font-medium max-w-md">Controle de ativação e novas regras de proteção para Fundadores.</p>
+                    <p className="text-sm text-slate-400 font-medium max-w-md">Controle de ativação e análise de ROI para os Planos Fundadores.</p>
                 </div>
             </div>
             <div className="flex flex-col items-end gap-2 shrink-0">
@@ -239,124 +253,156 @@ export const AdminMonetizationView: React.FC<{ onBack: () => void }> = ({ onBack
         </section>
 
         <section className="grid grid-cols-1 lg:grid-cols-2 gap-6 pb-20">
-            {items.map((item) => (
-                <div key={item.id} className={`bg-slate-900 rounded-[2.5rem] border transition-all duration-300 p-8 flex flex-col shadow-sm group ${item.status === 'Inativa' ? 'border-red-500/20 opacity-60 grayscale' : 'border-white/5 hover:border-blue-500/30'}`}>
-                    
-                    {/* Header do Card */}
-                    <div className="flex justify-between items-start mb-6">
-                        <div className={`w-14 h-14 ${item.bg} ${item.color} rounded-2xl flex items-center justify-center shadow-sm border border-current opacity-70 group-hover:scale-110 transition-transform`}>
-                            <item.icon size={28} />
-                        </div>
-                        
-                        <div className="flex flex-col items-end gap-3">
-                            <button 
-                                onClick={() => toggleStatus(item.id)}
-                                disabled={isUpdating === item.id}
-                                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all active:scale-95 border ${
-                                    item.status === 'Ativa' 
-                                    ? 'bg-emerald-500 text-white border-emerald-400 shadow-lg shadow-emerald-500/20' 
-                                    : 'bg-slate-800 text-slate-400 border-white/5'
-                                }`}
-                            >
-                                {isUpdating === item.id ? (
-                                    <Loader2 size={14} className="animate-spin" />
-                                ) : item.status === 'Ativa' ? (
-                                    <><CheckCircle2 size={14} /> ATIVA</>
-                                ) : (
-                                    <><XCircle size={14} /> INATIVA</>
-                                )}
-                            </button>
-                            {item.capacity && (
-                                <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest bg-white/5 px-2 py-1 rounded">
-                                    Capacidade: {item.capacity} {item.unit}
-                                </span>
-                            )}
-                        </div>
-                    </div>
-
-                    <h3 className="text-xl font-black text-white uppercase tracking-tight mb-2 flex items-center gap-2">
-                      {item.name}
-                      {item.founder_price_locked && (
-                         <div className="w-5 h-5 bg-amber-500/20 text-amber-500 rounded-full flex items-center justify-center shadow-sm border border-amber-500/30" title="Regra Fundador Protegido">
-                            <Lock size={10} />
-                         </div>
-                      )}
-                    </h3>
-                    <p className="text-sm text-slate-400 leading-relaxed font-medium mb-8">
-                        {item.description}
-                    </p>
-
-                    {/* REGRA: FUNDADOR ANUAL PROTEGIDO */}
-                    {item.founder_price_locked && (
-                      <div className="mb-8 p-4 bg-amber-500/5 border border-amber-500/20 rounded-3xl animate-in zoom-in-95 duration-500">
-                          <div className="flex items-center gap-3 mb-3">
-                              <div className="w-8 h-8 bg-amber-500/20 rounded-xl flex items-center justify-center text-amber-500">
-                                  <ShieldCheck size={18} />
-                              </div>
-                              <div>
-                                  <h4 className="text-[10px] font-black text-white uppercase tracking-widest leading-none">Fundador Anual Protegido</h4>
-                                  <p className="text-[9px] text-amber-400 font-bold uppercase mt-1">Valor garantido por {item.founder_price_duration_months} meses</p>
-                              </div>
+            {items.map((item) => {
+                const vantage = calculateVantage(item);
+                return (
+                  <div key={item.id} className={`bg-slate-900 rounded-[2.5rem] border transition-all duration-300 p-8 flex flex-col shadow-sm group ${item.status === 'Inativa' ? 'border-red-500/20 opacity-60 grayscale' : 'border-white/5 hover:border-blue-500/30'}`}>
+                      
+                      {/* Header do Card */}
+                      <div className="flex justify-between items-start mb-6">
+                          <div className={`w-14 h-14 ${item.bg} ${item.color} rounded-2xl flex items-center justify-center shadow-sm border border-current opacity-70 group-hover:scale-110 transition-transform`}>
+                              <item.icon size={28} />
                           </div>
-                          <p className="text-[10px] text-slate-400 font-medium leading-relaxed italic">
-                             "{item.founder_price_note}"
-                          </p>
+                          
+                          <div className="flex flex-col items-end gap-3">
+                              <button 
+                                  onClick={() => toggleStatus(item.id)}
+                                  disabled={isUpdating === item.id}
+                                  className={`flex items-center gap-2 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all active:scale-95 border ${
+                                      item.status === 'Ativa' 
+                                      ? 'bg-emerald-500 text-white border-emerald-400 shadow-lg shadow-emerald-500/20' 
+                                      : 'bg-slate-800 text-slate-400 border-white/5'
+                                  }`}
+                              >
+                                  {isUpdating === item.id ? (
+                                      <Loader2 size={14} className="animate-spin" />
+                                  ) : item.status === 'Ativa' ? (
+                                      <><CheckCircle2 size={14} /> ATIVA</>
+                                  ) : (
+                                      <><XCircle size={14} /> INATIVA</>
+                                  )}
+                              </button>
+                              {item.capacity && (
+                                  <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest bg-white/5 px-2 py-1 rounded">
+                                      Capacidade: {item.capacity} {item.unit}
+                                  </span>
+                              )}
+                          </div>
                       </div>
-                    )}
 
-                    {/* Bloco de Preços */}
-                    <div className="space-y-4 pt-6 border-t border-white/5 flex-1">
-                        <div className="grid grid-cols-1 gap-4">
-                            {/* Preço Base */}
-                            <div className="flex justify-between items-center">
-                                <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Preço Tabela</span>
-                                <span className="text-lg font-black text-slate-400 italic line-through opacity-50">{item.pricing.base}</span>
-                            </div>
-
-                            {/* Promoção Fundador */}
-                            {item.pricing.founder && (
-                                <div className="flex justify-between items-center p-3 bg-blue-500/5 rounded-2xl border border-blue-500/10">
-                                    <div className="flex items-center gap-2">
-                                        <Award size={14} className="text-[#1E5BFF]" />
-                                        <span className="text-[10px] font-black text-blue-400 uppercase tracking-widest">Preço Fundador</span>
-                                    </div>
-                                    <span className="text-lg font-black text-[#1E5BFF]">{item.pricing.founder}</span>
-                                </div>
-                            )}
-
-                            {/* Tiers/Planos para Imóveis */}
-                            {item.tiers && (
-                                <div className="space-y-2 pt-2">
-                                    {item.tiers.map((tier, idx) => (
-                                        <div key={idx} className="flex justify-between items-center text-xs bg-white/5 p-3 rounded-xl border border-white/5">
-                                            <span className="font-bold text-slate-400 uppercase">{tier.label}</span>
-                                            <span className="font-black text-white">{tier.value}</span>
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
-                        </div>
-
-                        {/* Detalhes do Pacote */}
-                        {item.pricing.package_text && (
-                            <div className="bg-amber-500/5 p-4 rounded-xl border border-amber-500/10 flex gap-3 items-center">
-                                <Sparkles size={14} className="text-amber-500 shrink-0" />
-                                <p className="text-[10px] text-amber-200/70 font-bold uppercase tracking-tight">
-                                    {item.pricing.package_text}
-                                </p>
-                            </div>
+                      <h3 className="text-xl font-black text-white uppercase tracking-tight mb-2 flex items-center gap-2">
+                        {item.name}
+                        {item.founder_price_locked && (
+                           <div className="w-5 h-5 bg-amber-500/20 text-amber-500 rounded-full flex items-center justify-center shadow-sm border border-amber-500/30" title="Regra Fundador Protegido">
+                              <Lock size={10} />
+                           </div>
                         )}
-                    </div>
-                </div>
-            ))}
+                      </h3>
+                      <p className="text-sm text-slate-400 leading-relaxed font-medium mb-8">
+                          {item.description}
+                      </p>
+
+                      {/* REGRA: FUNDADOR ANUAL PROTEGIDO + VANTAGENS PROJETADAS */}
+                      {item.founder_price_locked && (
+                        <div className="mb-8 space-y-3">
+                          <div className="p-5 bg-amber-500/5 border border-amber-500/20 rounded-[2rem] animate-in zoom-in-95 duration-500 relative overflow-hidden">
+                              <div className="absolute top-0 right-0 p-3 opacity-10">
+                                <Gem size={40} className="text-amber-500" />
+                              </div>
+                              
+                              <div className="flex items-center gap-3 mb-4">
+                                  <div className="w-9 h-9 bg-amber-500/20 rounded-xl flex items-center justify-center text-amber-500 border border-amber-500/30">
+                                      <ShieldCheck size={20} />
+                                  </div>
+                                  <div>
+                                      <h4 className="text-[10px] font-black text-white uppercase tracking-[0.2em] leading-none">Fundador Anual Protegido</h4>
+                                      <p className="text-[9px] text-amber-400 font-bold uppercase mt-1">Benefício garantido por {item.founder_price_duration_months} meses</p>
+                                  </div>
+                              </div>
+
+                              {vantage && (
+                                <div className="grid grid-cols-2 gap-3 mt-4">
+                                  <div className="bg-white/5 p-3 rounded-2xl border border-white/5">
+                                    <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest mb-1">Desconto Real</p>
+                                    <p className="text-xl font-black text-emerald-400 leading-none">{vantage.discountPercent}% <span className="text-[10px]">OFF</span></p>
+                                  </div>
+                                  <div className="bg-white/5 p-3 rounded-2xl border border-white/5">
+                                    <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest mb-1">Economia/mês</p>
+                                    <p className="text-xl font-black text-white leading-none">R$ {vantage.monthlySaving.toFixed(2)}</p>
+                                  </div>
+                                  <div className="col-span-2 bg-emerald-500/10 p-3 rounded-2xl border border-emerald-500/20 flex items-center justify-between">
+                                    <div className="flex items-center gap-2">
+                                      <ArrowDownToLine size={14} className="text-emerald-400" />
+                                      <p className="text-[9px] font-black text-emerald-400 uppercase tracking-widest">Economia Total Anual</p>
+                                    </div>
+                                    <p className="text-lg font-black text-emerald-400">R$ {vantage.annualSaving.toFixed(2)}</p>
+                                  </div>
+                                </div>
+                              )}
+                              
+                              <p className="text-[9px] text-slate-500 font-medium leading-relaxed italic mt-4 border-t border-white/5 pt-3">
+                                 "{item.founder_price_note}"
+                              </p>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Bloco de Preços */}
+                      <div className="space-y-4 pt-6 border-t border-white/5 flex-1">
+                          <div className="grid grid-cols-1 gap-4">
+                              {/* Preço Base */}
+                              <div className="flex justify-between items-center px-1">
+                                  <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Preço Tabela</span>
+                                  <span className="text-lg font-black text-slate-400 italic line-through opacity-50">{item.pricing.base}</span>
+                              </div>
+
+                              {/* Promoção Fundador */}
+                              {item.pricing.founder && (
+                                  <div className="flex justify-between items-center p-4 bg-blue-500/5 rounded-2xl border border-blue-500/10 group-hover:border-blue-500/30 transition-colors">
+                                      <div className="flex items-center gap-3">
+                                          <div className="w-8 h-8 rounded-lg bg-blue-500/20 flex items-center justify-center text-[#1E5BFF]">
+                                            <Award size={18} />
+                                          </div>
+                                          <span className="text-[10px] font-black text-blue-400 uppercase tracking-widest">Preço Fundador</span>
+                                      </div>
+                                      <span className="text-xl font-black text-[#1E5BFF]">{item.pricing.founder}</span>
+                                  </div>
+                              )}
+
+                              {/* Tiers/Planos para Imóveis */}
+                              {item.tiers && (
+                                  <div className="space-y-2 pt-2">
+                                      {item.tiers.map((tier, idx) => (
+                                          <div key={idx} className="flex justify-between items-center text-xs bg-white/5 p-4 rounded-2xl border border-white/5 hover:border-white/10 transition-colors">
+                                              <span className="font-bold text-slate-400 uppercase tracking-wide">{tier.label}</span>
+                                              <span className="font-black text-white">{tier.value}</span>
+                                          </div>
+                                      ))}
+                                  </div>
+                              )}
+                          </div>
+
+                          {/* Detalhes do Pacote */}
+                          {item.pricing.package_text && (
+                              <div className="bg-amber-500/5 p-4 rounded-2xl border border-amber-500/10 flex gap-3 items-center">
+                                  <Sparkles size={14} className="text-amber-500 shrink-0" />
+                                  <p className="text-[10px] text-amber-200/70 font-bold uppercase tracking-tight">
+                                      {item.pricing.package_text}
+                                  </p>
+                              </div>
+                          )}
+                      </div>
+                  </div>
+                );
+            })}
         </section>
 
         <section className="bg-amber-500/5 p-6 rounded-3xl border border-amber-500/20 flex gap-4 items-start mb-10">
             <AlertTriangle className="text-amber-500 shrink-0" size={20} />
             <div className="space-y-1">
-                <p className="text-xs text-amber-200 font-black uppercase tracking-widest leading-none">Gestão de Regras</p>
+                <p className="text-xs text-amber-200 font-black uppercase tracking-widest leading-none">Cálculos de ROI</p>
                 <p className="text-xs text-amber-400/80 font-medium leading-relaxed">
-                    A regra "Fundador Anual Protegido" trava o valor promocional no perfil do lojista pelo período definido. Alterações manuais de preço não afetarão lojistas com esta flag ativa até o fim da vigência.
+                    Os valores de economia anual são projetados com base na vigência de 12 meses do plano Fundador. Esta visualização ajuda a equipe comercial a reforçar o valor do "Preço Travado" no fechamento com parceiros âncoras.
                 </p>
             </div>
         </section>
