@@ -11,11 +11,12 @@ import {
   Settings, BarChart3, X, Filter, Newspaper, Crown,
   UserCheck, ArrowRightLeft, CreditCard,
   LayoutGrid, Home, Mail, Smartphone, BadgeCheck,
-  ShieldAlert, Copy, Check
+  ShieldAlert, Copy, Check, Coins
 } from 'lucide-react';
 import { fetchAdminMerchants, fetchAdminUsers } from '../backend/services';
 import { ServiceRequest, AppSuggestion } from '../types';
 import { AdminModerationPanel } from './AdminModerationPanel';
+import { AdminMonetizationView } from './AdminMonetizationView';
 
 // --- TYPES ---
 type DateRangeOption = 'today' | '7d' | '30d' | '90d';
@@ -206,6 +207,11 @@ const AdminHub: React.FC<{ onSelect: (tab: any) => void }> = ({ onSelect }) => (
         <h3 className="font-black text-sm text-gray-900 uppercase tracking-tighter mb-1">Financeiro</h3>
         <p className="text-[10px] text-gray-500 leading-relaxed font-medium">Gestão de faturamento, MRR e transações.</p>
     </button>
+    <button onClick={() => onSelect('monetization')} className="bg-white p-5 rounded-3xl border border-gray-100 shadow-sm hover:shadow-md transition-all text-left group">
+        <div className="w-10 h-10 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform border border-blue-100"><Coins size={20}/></div>
+        <h3 className="font-black text-sm text-gray-900 uppercase tracking-tighter mb-1">Monetizações</h3>
+        <p className="text-[10px] text-gray-500 leading-relaxed font-medium">Tabela de preços e fontes de receita.</p>
+    </button>
     <button onClick={() => onSelect('management')} className="bg-white p-5 rounded-3xl border border-gray-100 shadow-sm hover:shadow-md transition-all text-left group">
         <div className="w-10 h-10 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform border border-blue-100"><Users size={20}/></div>
         <h3 className="font-black text-sm text-gray-900 uppercase tracking-tighter mb-1">Gerenciamento</h3>
@@ -220,11 +226,6 @@ const AdminHub: React.FC<{ onSelect: (tab: any) => void }> = ({ onSelect }) => (
         <div className="w-10 h-10 bg-amber-50 text-amber-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform border border-amber-100"><Lightbulb size={20}/></div>
         <h3 className="font-black text-sm text-gray-900 uppercase tracking-tighter mb-1">Sugestões</h3>
         <p className="text-[10px] text-gray-500 leading-relaxed font-medium">Feedback dos moradores e melhorias.</p>
-    </button>
-    <button onClick={() => onSelect('monitoring')} className="bg-white p-5 rounded-3xl border border-gray-100 shadow-sm hover:shadow-md transition-all text-left group">
-        <div className="w-10 h-10 bg-slate-50 text-slate-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform border border-slate-100"><Activity size={20}/></div>
-        <h3 className="font-black text-sm text-gray-900 uppercase tracking-tighter mb-1">Métricas</h3>
-        <p className="text-[10px] text-gray-500 leading-relaxed font-medium">Performance, erros e latência.</p>
     </button>
   </div>
 );
@@ -395,7 +396,7 @@ const AdminFinancialDashboard: React.FC = () => {
 // --- CORE COMPONENT ---
 
 export const AdminPanel: React.FC<any> = ({ onLogout, viewMode, onOpenViewSwitcher, onNavigateToApp, onOpenMonitorChat }) => {
-  const [activeTab, setActiveTab] = useState<'hub' | 'management' | 'financial' | 'monitoring' | 'suggestions' | 'conversations' | 'moderation'>('hub');
+  const [activeTab, setActiveTab] = useState<'hub' | 'management' | 'financial' | 'monitoring' | 'suggestions' | 'conversations' | 'moderation' | 'monetization'>('hub');
   const [managementTab, setManagementTab] = useState<'clients' | 'merchants'>('clients');
   const [searchTerm, setSearchTerm] = useState('');
   const [merchants, setMerchants] = useState<any[]>([]);
@@ -415,7 +416,6 @@ export const AdminPanel: React.FC<any> = ({ onLogout, viewMode, onOpenViewSwitch
 
   const loadMerchants = async () => { 
     const data = await fetchAdminMerchants(searchTerm);
-    // Adicionando dados mock extras para exportação se necessário
     const enriched = data.map(m => ({
         ...m,
         responsible: m.responsible || 'Responsável não informado',
@@ -433,8 +433,8 @@ export const AdminPanel: React.FC<any> = ({ onLogout, viewMode, onOpenViewSwitch
         status: u.status || 'active',
         neighborhood: u.neighborhood || 'Jacarepaguá',
         created_at: u.created_at || new Date().toISOString(),
-        isActiveResident: Math.random() > 0.8, // Mocking active resident status randomly for demo
-        engagementScore: Math.floor(Math.random() * 100) // Mocking score
+        isActiveResident: Math.random() > 0.8, 
+        engagementScore: Math.floor(Math.random() * 100) 
     }));
     setUsers(enriched); 
   };
@@ -454,9 +454,8 @@ export const AdminPanel: React.FC<any> = ({ onLogout, viewMode, onOpenViewSwitch
     localStorage.setItem('app_suggestions_mock', JSON.stringify(updated));
   };
 
-  // --- CSV EXPORT ENGINE ---
   const handleExportCSV = () => {
-    let csvContent = "data:text/csv;charset=utf-8,\uFEFF"; // BOM para Excel
+    let csvContent = "data:text/csv;charset=utf-8,\uFEFF"; 
     const isUsers = activeTab === 'management' && managementTab === 'clients';
     
     if (isUsers) {
@@ -480,18 +479,20 @@ export const AdminPanel: React.FC<any> = ({ onLogout, viewMode, onOpenViewSwitch
     document.body.removeChild(link);
   };
 
-  // --- ACTION HANDLERS FOR BADGE ---
   const toggleActiveResidentBadge = (userId: string) => {
     setUsers(prev => prev.map(u => 
         u.id === userId 
         ? { ...u, isActiveResident: !u.isActiveResident } 
         : u
     ));
-    // In real app, this would update Supabase
   };
 
   if (activeTab === 'moderation') {
       return <AdminModerationPanel onBack={() => setActiveTab('hub')} />;
+  }
+
+  if (activeTab === 'monetization') {
+      return <AdminMonetizationView onBack={() => setActiveTab('hub')} />;
   }
 
   const filteredUsers = useMemo(() => {
@@ -515,6 +516,7 @@ export const AdminPanel: React.FC<any> = ({ onLogout, viewMode, onOpenViewSwitch
                          activeTab === 'financial' ? 'Finanças' :
                          activeTab === 'management' ? 'Gerenciamento' :
                          activeTab === 'conversations' ? 'Conversas' :
+                         activeTab === 'monetization' ? 'Monetizações' :
                          'Sugestões'}
                     </h1>
                     <p className="text-[10px] font-bold text-indigo-400 uppercase tracking-widest">Painel Administrativo</p>
@@ -615,7 +617,6 @@ export const AdminPanel: React.FC<any> = ({ onLogout, viewMode, onOpenViewSwitch
             </div>
         )}
 
-        {/* Gerenciamento de Usuários e Lojistas Unificado */}
         {activeTab === 'management' && (
            <div className="space-y-6">
              <SectionHeader 
@@ -762,7 +763,7 @@ export const AdminPanel: React.FC<any> = ({ onLogout, viewMode, onOpenViewSwitch
              )}
            </div>
         )}
-      </main>
+      </header>
     </div>
   );
 };

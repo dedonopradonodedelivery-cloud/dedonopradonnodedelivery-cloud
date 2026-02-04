@@ -57,7 +57,6 @@ const getFallbackItemImage = (id: string) => {
     for (let i = 0; i < id.length; i++) {
         hash = id.charCodeAt(i) + ((hash << 5) - hash);
     }
-    // FIX: Corrected variable name from FALLBACK_IMAGES.length to FALLBACK_ITEM_IMAGES.length
     return FALLBACK_ITEM_IMAGES[Math.abs(hash) % FALLBACK_ITEM_IMAGES.length];
 };
 
@@ -282,6 +281,10 @@ export const DesapegaView: React.FC<DesapegaViewProps> = ({ onBack, user, onRequ
     setViewState('form_media');
   };
 
+  const handleItemClick = (item: Classified) => {
+    onNavigate('classified_detail', { item });
+  };
+
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       const files = Array.from(e.target.files).slice(0, 6 - formData.images.length) as File[];
@@ -300,7 +303,6 @@ export const DesapegaView: React.FC<DesapegaViewProps> = ({ onBack, user, onRequ
 
   const analyzeWithIA = async (base64Data: string) => {
     setIsAnalyzing(true);
-    // FIX: Updated GoogleGenAI initialization to strictly use process.env.API_KEY as per guidelines.
     const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     try {
       const prompt = `Analise a foto deste produto para um anúncio de desapego. 
@@ -315,7 +317,6 @@ export const DesapegaView: React.FC<DesapegaViewProps> = ({ onBack, user, onRequ
           thinkingConfig: { thinkingBudget: 0 }
         }
       });
-      // Guideline check: response.text is used correctly.
       const suggestions = JSON.parse(response.text || '{}');
       setFormData(prev => ({ ...prev, ...suggestions }));
     } catch (error) { console.error("IA Error", error); } finally { setIsAnalyzing(false); }
