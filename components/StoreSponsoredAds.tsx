@@ -14,10 +14,9 @@ import {
   Loader2, 
   ArrowRight,
   Clock,
-  Play,
   ChevronRight,
-  Repeat,
-  DollarSign
+  DollarSign,
+  Info
 } from 'lucide-react';
 
 interface StoreSponsoredAdsProps {
@@ -64,7 +63,8 @@ export const StoreSponsoredAds: React.FC<StoreSponsoredAdsProps> = ({ onBack, on
       baseValue,
       totalValue,
       monthlyValue: baseValue,
-      isRecurring: repeatMonths > 0 && billingType === 'recurring'
+      isRecurring: repeatMonths > 0 && billingType === 'recurring',
+      savings: totalValue * 0.1 // Simulação de desconto progressivo se necessário
     };
   }, [days, repeatMonths, billingType]);
 
@@ -167,6 +167,24 @@ export const StoreSponsoredAds: React.FC<StoreSponsoredAdsProps> = ({ onBack, on
 
   return (
     <div className="min-h-screen bg-[#F8F9FC] dark:bg-gray-950 font-sans flex flex-col animate-in fade-in duration-300 pb-32">
+      <style>{`
+        input[type='range']::-webkit-slider-runnable-track {
+          background: #e2e8f0;
+          height: 8px;
+          border-radius: 4px;
+        }
+        .dark input[type='range']::-webkit-slider-runnable-track {
+          background: #1e293b;
+        }
+        input[type='range']::-webkit-slider-thumb {
+          margin-top: -6px;
+          width: 20px;
+          height: 20px;
+          background: #1e5bff;
+          border: 3px solid white;
+          box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+        }
+      `}</style>
       
       <header className="sticky top-0 z-40 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md px-5 h-20 flex items-center gap-4 border-b border-gray-100 dark:border-gray-800 shadow-sm shrink-0">
         <button 
@@ -245,6 +263,7 @@ export const StoreSponsoredAds: React.FC<StoreSponsoredAdsProps> = ({ onBack, on
                 <div className="text-center mb-8">
                     <span className="text-6xl font-black text-[#1E5BFF] tracking-tighter">{days}</span>
                     <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">Dias Selecionados</p>
+                    <p className="text-lg font-black text-emerald-500 mt-2">{formatBRL(calculation.baseValue)}</p>
                 </div>
 
                 <div className="px-2 mb-10">
@@ -308,6 +327,34 @@ export const StoreSponsoredAds: React.FC<StoreSponsoredAdsProps> = ({ onBack, on
                     )}
                 </div>
              </section>
+
+             <div className="bg-gray-50 dark:bg-gray-900/50 p-6 rounded-[2rem] border border-gray-100 dark:border-gray-800 space-y-3">
+                <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400">
+                    <span>Dias selecionados:</span>
+                    <span className="font-bold text-gray-900 dark:text-white">{days}</span>
+                </div>
+                <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400">
+                    <span>Valor por dia:</span>
+                    <span className="font-bold text-gray-900 dark:text-white">R$ 0,90</span>
+                </div>
+                <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400">
+                    <span>Repetir por:</span>
+                    <span className="font-bold text-gray-900 dark:text-white">{repeatMonths === 0 ? 'Não' : `${repeatMonths} meses`}</span>
+                </div>
+                <div className="pt-2 border-t border-gray-200 dark:border-gray-700 flex justify-between items-center">
+                    <span className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-tighter">
+                        {billingType === 'recurring' && repeatMonths > 0 ? 'Valor Mensal' : 'Total'}
+                    </span>
+                    <span className="text-xl font-black text-[#1E5BFF]">
+                        {formatBRL(billingType === 'recurring' && repeatMonths > 0 ? calculation.monthlyValue : calculation.totalValue)}
+                    </span>
+                </div>
+                {billingType === 'recurring' && repeatMonths > 0 && (
+                    <p className="text-[9px] text-gray-400 text-right italic font-medium">
+                        Total do período: {formatBRL(calculation.totalValue)}
+                    </p>
+                )}
+             </div>
 
              <button 
                 onClick={handleCheckoutClick}
