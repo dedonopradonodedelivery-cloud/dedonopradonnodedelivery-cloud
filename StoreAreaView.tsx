@@ -21,7 +21,8 @@ import {
   Star,
   Moon,
   Sun,
-  ImageIcon
+  ImageIcon,
+  TrendingUp
 } from 'lucide-react';
 import { User as SupabaseUser } from '@supabase/supabase-js';
 import { useAuth } from '@/contexts/AuthContext';
@@ -127,36 +128,35 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
       <div className="px-6 space-y-10">
         
         <section>
-          <SectionHeader title="Ações" icon={Sparkles} />
+          <SectionHeader title="Ações de Crescimento" icon={Sparkles} />
           <div className="bg-white dark:bg-gray-800 rounded-[2.5rem] border border-gray-100 dark:border-gray-700 overflow-hidden shadow-sm">
             <ServiceBlock 
               icon={Crown} 
               label="Patrocinador Master" 
               description="Apareça em destaque em 90% das telas do bairro"
-              onClick={() => onNavigate('patrocinador_master')}
+              onClick={() => onNavigate('sponsor_info')}
               colorClass="bg-amber-50 text-amber-600"
             />
             <ServiceBlock 
+              icon={TrendingUp} 
+              label="Patrocinados" 
+              description="Suba para o topo da lista por R$ 0,90/dia"
+              onClick={() => onNavigate('store_sponsored')}
+              colorClass="bg-emerald-50 text-emerald-600"
+            />
+            <ServiceBlock 
               icon={ImageIcon} 
-              label="Banner em Categoria" 
-              description="Garante seu espaço exclusivo no carrossel de categorias"
-              onClick={() => onNavigate('banner_sales_wizard')}
+              label="Banners de Categoria" 
+              description="Garante seu espaço exclusivo no carrossel"
+              onClick={() => onNavigate('category_banner_sales')}
               colorClass="bg-blue-50 text-blue-600"
             />
             <ServiceBlock 
               icon={LayoutGrid} 
               label="Banners Home" 
               description="Anúncios visuais na página inicial"
-              onClick={() => onNavigate('banner_sales_wizard')}
+              onClick={() => onNavigate('store_ads_module')}
               colorClass="bg-purple-50 text-purple-600"
-            />
-            <ServiceBlock 
-              icon={Star} 
-              label="Avaliações" 
-              description="Responda seus clientes e gerencie sua reputação"
-              onClick={() => onNavigate('merchant_reviews')}
-              badge={2} 
-              colorClass="bg-amber-50 text-amber-600"
             />
           </div>
         </section>
@@ -179,7 +179,7 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
             <ServiceBlock 
               icon={CreditCard} 
               label="Pagamentos" 
-              description="Extratos, notas e assinaturas"
+              description="Extratos, faturas e assinaturas"
               onClick={() => onNavigate('store_finance')} 
             />
           </div>
@@ -207,7 +207,7 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
           <div className="bg-white dark:bg-gray-800 rounded-[2.5rem] border border-gray-100 dark:border-gray-700 overflow-hidden shadow-sm">
             <ServiceBlock 
               icon={LifeBuoy} 
-              label="Suporte" 
+              label="Suporte ao Lojista" 
               description="Ajuda com o app e conta"
               onClick={() => onNavigate('store_support')} 
             />
