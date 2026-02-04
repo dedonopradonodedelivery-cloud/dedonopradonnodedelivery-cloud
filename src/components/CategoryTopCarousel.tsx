@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { useNeighborhood } from '../contexts/NeighborhoodContext';
+import { useNeighborhood } from '@/contexts/NeighborhoodContext';
 // FIX: Ensure this is imported
 import { CATEGORY_TOP_BANNERS, STORES } from '../constants';
 import { Store, AdType } from '../types';

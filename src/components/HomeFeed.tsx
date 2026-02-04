@@ -26,9 +26,9 @@ import { LojasEServicosList } from './LojasEServicosList';
 import { User } from '@supabase/supabase-js';
 import { CATEGORIES, MOCK_COMMUNITY_POSTS, MOCK_CLASSIFIEDS } from '../constants';
 import { useNeighborhood } from '@/contexts/NeighborhoodContext';
-import { LaunchOfferBanner } from './LaunchOfferBanner';
-import { HomeBannerCarousel } from './HomeBannerCarousel';
-import { FifaBanner } from './FifaBanner';
+import { LaunchOfferBanner } from '@/components/LaunchOfferBanner';
+import { HomeBannerCarousel } from '@/components/HomeBannerCarousel';
+import { FifaBanner } from '@/components/FifaBanner';
 
 // Imagens de fallback realistas e variadas (Bairro, Pessoas, Comércio, Objetos)
 const FALLBACK_IMAGES = [
@@ -383,10 +383,10 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
 
               <div className="grid grid-cols-2 gap-4">
                 {[
-                  {l: 'Obras & Reformas', i: Hammer, c: 'bg-orange-500', t: 'text-orange-500'}, 
-                  {l: 'Serviços Rápidos', i: Zap, c: 'bg-blue-600', t: 'text-blue-600'}, 
-                  {l: 'Casa & Instalações', i: HomeIcon, c: 'bg-emerald-600', t: 'text-emerald-600'}, 
-                  {l: 'Eventos & Criativos', i: Sparkles, c: 'bg-purple-600', t: 'text-purple-600'}
+                  {l: 'Obras & Reformas', i: Hammer, iIcon: <Hammer/>, c: 'bg-orange-500', t: 'text-orange-500'}, 
+                  {l: 'Serviços Rápidos', i: Zap, iIcon: <Zap/>, c: 'bg-blue-600', t: 'text-blue-600'}, 
+                  {l: 'Casa & Instalações', i: HomeIcon, iIcon: <HomeIcon/>, c: 'bg-emerald-600', t: 'text-emerald-600'}, 
+                  {l: 'Eventos & Criativos', i: Sparkles, iIcon: <Sparkles/>, c: 'bg-purple-600', t: 'text-purple-600'}
                 ].map(s => (
                   <button 
                     key={s.l} 
@@ -394,7 +394,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
                     className="group p-6 bg-gray-50 dark:bg-slate-800 rounded-[2rem] shadow-sm border border-gray-100 dark:border-slate-700 flex flex-col items-center gap-3 transition-all hover:shadow-lg hover:-translate-y-1 active:scale-95"
                   >
                     <div className={`w-14 h-14 rounded-2xl ${s.c} bg-opacity-10 dark:bg-opacity-20 flex items-center justify-center ${s.t} group-hover:scale-110 transition-transform`}>
-                        <s.i size={32} strokeWidth={2.5} />
+                        {React.cloneElement(s.iIcon as any, { size: 32, strokeWidth: 2.5 })}
                     </div>
                     <p className="text-[10px] font-black text-gray-800 dark:text-slate-200 uppercase tracking-tighter leading-tight">{s.l}</p>
                   </button>
