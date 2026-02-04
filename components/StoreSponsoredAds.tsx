@@ -22,6 +22,7 @@ import {
 
 interface StoreSponsoredAdsProps {
   onBack: () => void;
+  onNavigate: (view: string, data?: any) => void;
 }
 
 type ViewState = 'list' | 'create' | 'checkout' | 'success' | 'details';
@@ -43,7 +44,7 @@ const MOCK_CAMPAIGNS: Campaign[] = [
   { id: 'camp-02', status: 'ended', start: '15/06/2023', end: '15/07/2023', duration: 15, type: 'Patrocinado', billing: 'one_time', total: 13.50 },
 ];
 
-export const StoreSponsoredAds: React.FC<StoreSponsoredAdsProps> = ({ onBack }) => {
+export const StoreSponsoredAds: React.FC<StoreSponsoredAdsProps> = ({ onBack, onNavigate }) => {
   const [view, setView] = useState<ViewState>('list');
   const [days, setDays] = useState(7);
   const [repeatMonths, setRepeatMonths] = useState(0);
