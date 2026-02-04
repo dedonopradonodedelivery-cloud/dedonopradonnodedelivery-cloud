@@ -190,11 +190,11 @@ export const StoreSponsoredAds: React.FC<StoreSponsoredAdsProps> = ({ onBack, on
         }
         @keyframes subtle-pulse {
           0% { transform: scale(1); opacity: 0.8; }
-          50% { transform: scale(1.1); opacity: 1; }
+          50% { transform: scale(1.05); opacity: 1; }
           100% { transform: scale(1); opacity: 0.8; }
         }
         .animate-subtle-pulse {
-          animation: subtle-pulse 4s ease-in-out infinite;
+          animation: subtle-pulse 6s ease-in-out infinite;
         }
         @keyframes float-card {
           0%, 100% { transform: translateY(0) rotate(-1deg); }
@@ -203,13 +203,15 @@ export const StoreSponsoredAds: React.FC<StoreSponsoredAdsProps> = ({ onBack, on
         .animate-float-card {
           animation: float-card 8s ease-in-out infinite;
         }
-        @keyframes cta-glow {
-          0%, 100% { box-shadow: 0 10px 15px -3px rgba(30, 91, 255, 0.3); }
-          50% { box-shadow: 0 20px 25px -5px rgba(30, 91, 255, 0.5); transform: scale(1.01); }
+        @keyframes cta-attention {
+          0% { transform: scale(1); box-shadow: 0 10px 15px -3px rgba(30, 91, 255, 0.3); }
+          8% { transform: scale(1.04); box-shadow: 0 20px 30px -5px rgba(30, 91, 255, 0.6); }
+          16% { transform: scale(1); box-shadow: 0 10px 15px -3px rgba(30, 91, 255, 0.3); }
+          100% { transform: scale(1); box-shadow: 0 10px 15px -3px rgba(30, 91, 255, 0.3); }
         }
         .animate-cta-conversion {
-          animation: cta-glow 12s ease-in-out infinite;
-          animation-delay: 2.5s;
+          animation: cta-attention 5s ease-in-out infinite;
+          animation-delay: 1.5s;
         }
       `}</style>
       
@@ -282,13 +284,13 @@ export const StoreSponsoredAds: React.FC<StoreSponsoredAdsProps> = ({ onBack, on
                                 <span className="text-[9px] font-black uppercase text-slate-500 tracking-tighter">Sem contrato</span>
                             </div>
                             <div className="flex flex-col items-center text-center gap-1.5 group">
-                                <div className="p-2.5 bg-blue-500/5 dark:bg-white/5 rounded-2xl text-blue-500 border border-blue-500/10 transition-all duration-700 animate-subtle-pulse" style={{ animationDelay: '0.5s' }}>
+                                <div className="p-2.5 bg-blue-500/5 dark:bg-white/5 rounded-2xl text-blue-500 border border-blue-500/10 transition-all duration-700 animate-subtle-pulse" style={{ animationDelay: '2s' }}>
                                   <Calendar size={18} />
                                 </div>
                                 <span className="text-[9px] font-black uppercase text-slate-500 tracking-tighter">Escolha os dias</span>
                             </div>
                             <div className="flex flex-col items-center text-center gap-1.5 group">
-                                <div className="p-2.5 bg-blue-500/5 dark:bg-white/5 rounded-2xl text-amber-500 border border-amber-500/10 transition-all duration-700 animate-subtle-pulse" style={{ animationDelay: '1s' }}>
+                                <div className="p-2.5 bg-blue-500/5 dark:bg-white/5 rounded-2xl text-amber-500 border border-amber-500/10 transition-all duration-700 animate-subtle-pulse" style={{ animationDelay: '4s' }}>
                                   <DollarSign size={18} />
                                 </div>
                                 <span className="text-[9px] font-black uppercase text-slate-500 tracking-tighter">R$ 0,90/dia</span>
@@ -297,7 +299,7 @@ export const StoreSponsoredAds: React.FC<StoreSponsoredAdsProps> = ({ onBack, on
 
                         <button 
                             onClick={handleCreateClick}
-                            className="w-full bg-[#1E5BFF] text-white font-black py-5 rounded-[2rem] shadow-xl shadow-blue-500/30 active:scale-[0.98] transition-all flex items-center justify-center gap-2 uppercase tracking-[0.1em] text-xs animate-cta-conversion"
+                            className="w-full bg-[#1E5BFF] text-white font-black py-5 rounded-[2rem] shadow-xl active:scale-[0.98] transition-all flex items-center justify-center gap-2 uppercase tracking-[0.1em] text-xs animate-cta-conversion"
                         >
                             Patrocinar por R$ 0,90/dia <ArrowRight size={18} />
                         </button>
