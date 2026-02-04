@@ -1,5 +1,5 @@
 
-import React, { useState, useMemo, useRef, useEffect } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { 
   ChevronLeft, 
   ArrowRight, 
@@ -11,20 +11,12 @@ import {
   Rocket,
   Loader2,
   CheckCircle2,
-  MessageCircle,
   QrCode,
-  Info,
   Paintbrush,
-  Image as ImageIcon,
   Upload,
-  X,
-  Building,
   Target,
-  Crown,
-  Newspaper,
-  Lock,
-  ShieldCheck,
-  TrendingUp
+  Clock,
+  Calendar
 } from 'lucide-react';
 import { User } from '@supabase/supabase-js';
 import { StoreBannerEditor } from '@/components/StoreBannerEditor';
@@ -43,14 +35,24 @@ const NEIGHBORHOODS = [
   "Curicica", "Parque Olímpico", "Gardênia", "Cidade de Deus"
 ];
 
+const DURATION_OPTIONS = [
+  { months: 1, label: '1 mês' },
+  { months: 2, label: '2 meses' },
+  { months: 3, label: '3 meses' },
+  { months: 4, label: '4 meses' },
+  { months: 5, label: '5 meses' },
+  { months: 6, label: '6 meses' },
+];
+
 export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNavigate, user, initialView = 'sales' }) => {
   const [view, setView] = useState<'sales' | 'payment' | 'chat'>('sales');
   const [isEditingArt, setIsEditingArt] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // --- Estados do Pedido (Configurações Originais) ---
+  // --- Estados do Pedido ---
   const [placement, setPlacement] = useState<{home: boolean, cat: boolean}>({ home: false, cat: false });
   const [selectedNeighborhoods, setSelectedNeighborhoods] = useState<string[]>([]);
+  const [selectedDuration, setSelectedDuration] = useState<number>(1);
   const [artChoice, setArtChoice] = useState<'my_art' | 'editor' | 'pro' | null>(null);
 
   useEffect(() => {
@@ -61,15 +63,21 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
   const PRICES = {
     HOME: 69.90,
     CAT: 29.90,
-    COMBO: 89.90, // Desconto se ambos marcados
+    COMBO: 89.90,
     PRO_ART: 69.90
   };
 
-  const FULL_PRICES = {
-    HOME: 199.90,
-    CAT: 159.90,
-    COMBO: 359.80 // Soma dos cheios
-  };
+  const dates = useMemo(() => {
+    const start = new Date();
+    const end = new Date();
+    end.setDate(start.getDate() + (selectedDuration * 30));
+    
+    const fmt = (d: Date) => d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+    return {
+      start: fmt(start),
+      end: fmt(end)
+    };
+  }, [selectedDuration]);
 
   const summary = useMemo(() => {
     let basePrice = 0;
@@ -78,7 +86,9 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
     else if (placement.cat) basePrice = PRICES.CAT;
 
     const hoodsCount = selectedNeighborhoods.length;
-    const subtotal = basePrice * hoodsCount;
+    // O valor base e dos bairros é multiplicado pelo tempo (meses)
+    const subtotal = (basePrice * hoodsCount) * selectedDuration;
+    // A arte PRO é um custo fixo único de setup
     const artExtra = artChoice === 'pro' ? PRICES.PRO_ART : 0;
     const total = subtotal + artExtra;
 
@@ -90,7 +100,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
       total,
       placementLabel: placement.home && placement.cat ? 'Home + Categorias' : placement.home ? 'Página Inicial' : placement.cat ? 'Categorias' : 'Não selecionado'
     };
-  }, [placement, selectedNeighborhoods, artChoice]);
+  }, [placement, selectedNeighborhoods, selectedDuration, artChoice]);
 
   const toggleHood = (hood: string) => {
     if (hood === 'Todos') {
@@ -139,6 +149,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
               <div className="space-y-4">
                   <div className="flex justify-between text-sm"><span className="text-slate-400">Posicionamento:</span><span className="font-bold">{summary.placementLabel}</span></div>
                   <div className="flex justify-between text-sm"><span className="text-slate-400">Bairros:</span><span className="font-bold">{summary.hoodsCount} selecionado(s)</span></div>
+                  <div className="flex justify-between text-sm"><span className="text-slate-400">Duração:</span><span className="font-bold text-blue-400">{selectedDuration} mês(es) ({dates.start} a {dates.end})</span></div>
                   <div className="flex justify-between text-sm"><span className="text-slate-400">Arte:</span><span className="font-bold">{artChoice === 'pro' ? 'Time Localizei' : artChoice === 'editor' ? 'Personalizada' : 'Própria'}</span></div>
                   <div className="pt-4 border-t border-white/5 flex justify-between items-center">
                     <span className="font-black text-white uppercase text-xs">Total a Pagar</span>
@@ -165,7 +176,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
 
   return (
     <div className="min-h-screen bg-[#020617] text-white font-sans flex flex-col overflow-x-hidden">
-      <header className="sticky top-0 z-50 bg-[#020617]/80 backdrop-blur-xl border-b border-white/5 px-6 py-4 flex items-center gap-4">
+      <header className="sticky top-0 z-40 bg-[#020617]/80 backdrop-blur-xl border-b border-white/5 px-6 py-4 flex items-center gap-4">
         <button onClick={onBack} className="p-2 bg-slate-900 rounded-xl text-slate-400 hover:text-white transition-all active:scale-95"><ChevronLeft size={20} /></button>
         <div>
           <h1 className="font-bold text-lg leading-none">Anunciar no Bairro</h1>
@@ -177,22 +188,32 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
         
         {/* 1. ONDE APARECER */}
         <section className="space-y-6">
-          <div className="px-1 space-y-1">
-            <h3 className="text-xl font-black text-white uppercase tracking-tighter flex items-center gap-2">
-              Domine a atenção do seu bairro
-            </h3>
-            <p className="text-sm font-medium text-slate-400 leading-relaxed">
-              Coloque sua loja no topo do app e seja a primeira escolha de quem mora e compra perto de você.
-            </p>
+          <div className="px-1 space-y-3">
+            <div className="space-y-1">
+              <h3 className="text-xl font-black text-white uppercase tracking-tighter flex items-center gap-2">
+                Domine a atenção do seu bairro
+              </h3>
+              <p className="text-sm font-medium text-slate-400 leading-relaxed">
+                Coloque sua loja no topo do app e seja a primeira escolha de quem mora e compra perto de você.
+              </p>
+            </div>
+            
+            <div className="bg-blue-500/10 border border-blue-500/20 p-4 rounded-2xl space-y-2">
+              <p className="text-[10px] font-bold text-blue-300 leading-relaxed">
+                🔒 Apoiando o app no primeiro mês, você garante este valor com desconto por 12 meses.
+              </p>
+              <p className="text-[9px] font-medium text-slate-500 leading-relaxed">
+                Você paga mês a mês. O preço normal pode ser ativado a qualquer momento para novos anunciantes.
+              </p>
+            </div>
           </div>
 
           <div className="grid grid-cols-1 gap-4">
-              {/* HOME */}
               <button 
                 onClick={() => setPlacement({ home: true, cat: false })} 
                 className={`flex items-start text-left p-6 rounded-[2.5rem] border-2 transition-all gap-5 ${placement.home && !placement.cat ? 'bg-blue-600/10 border-blue-500 shadow-lg' : 'bg-white/5 border-white/10'}`}
               >
-                <div className={`p-4 rounded-2xl shrink-0 ${placement.home && !placement.cat ? 'bg-blue-500 text-white' : 'bg-white/5 text-slate-400'}`}><Home size={28} /></div>
+                <div className={`p-4 rounded-2xl shrink-0 ${placement.home && !placement.cat ? 'bg-blue-50 text-white shadow-lg' : 'bg-white/5 text-slate-400'}`}><Home size={28} /></div>
                 <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
                       <p className="font-black text-white uppercase tracking-tight">Home</p>
@@ -213,12 +234,11 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
                 </div>
               </button>
 
-              {/* SUBCATEGORIAS */}
               <button 
                 onClick={() => setPlacement({ home: false, cat: true })} 
                 className={`flex items-start text-left p-6 rounded-[2.5rem] border-2 transition-all gap-5 ${!placement.home && placement.cat ? 'bg-blue-600/10 border-blue-500 shadow-lg' : 'bg-white/5 border-white/10'}`}
               >
-                <div className={`p-4 rounded-2xl shrink-0 ${!placement.home && placement.cat ? 'bg-blue-500 text-white' : 'bg-white/5 text-slate-400'}`}><LayoutGrid size={28} /></div>
+                <div className={`p-4 rounded-2xl shrink-0 ${!placement.home && placement.cat ? 'bg-blue-50 text-white shadow-lg' : 'bg-white/5 text-slate-400'}`}><LayoutGrid size={28} /></div>
                 <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
                       <p className="font-black text-white uppercase tracking-tight">Subcategorias</p>
@@ -239,13 +259,12 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
                 </div>
               </button>
 
-              {/* COMBO */}
               <button 
                 onClick={() => setPlacement({ home: true, cat: true })} 
                 className={`relative flex items-start text-left p-6 rounded-[2.5rem] border-2 transition-all gap-5 ${placement.home && placement.cat ? 'bg-blue-600/10 border-blue-500 shadow-lg' : 'bg-white/5 border-white/10'}`}
               >
-                <div className="absolute -top-3 right-6 bg-amber-400 text-slate-950 text-[8px] font-black px-2 py-0.5 rounded uppercase shadow-lg border border-amber-300">Melhor Pitch</div>
-                <div className={`p-4 rounded-2xl shrink-0 ${placement.home && placement.cat ? 'bg-blue-500 text-white' : 'bg-white/5 text-slate-400'}`}><Zap size={28} /></div>
+                <div className="absolute -top-3 right-6 bg-amber-400 text-slate-950 text-[8px] font-black px-2 py-0.5 rounded uppercase shadow-lg border border-amber-300">Maior visibilidade</div>
+                <div className={`p-4 rounded-2xl shrink-0 ${placement.home && placement.cat ? 'bg-blue-50 text-white shadow-lg' : 'bg-white/5 text-slate-400'}`}><Zap size={28} /></div>
                 <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
                       <p className="font-black text-white uppercase tracking-tight">Home + Subcategorias</p>
@@ -265,10 +284,6 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
                     <p className="text-[7px] text-emerald-400 font-bold uppercase mt-2">Preço garantido por 12 meses</p>
                 </div>
               </button>
-
-              <div className="mt-2 text-[10px] text-slate-500 font-medium flex items-center gap-2 px-1">
-                <span>🔒 Apoie o app no primeiro mês e garanta este valor com desconto por 12 meses.</span>
-              </div>
           </div>
         </section>
 
@@ -297,10 +312,38 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
           </div>
         </section>
 
-        {/* 3. ESCOLHA DO BANNER */}
+        {/* 3. TEMPO DE EXIBIÇÃO (NOVO PASSO) */}
+        <section className="space-y-6">
+          <div className="flex items-center justify-between px-1">
+            <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-blue-500 flex items-center gap-2">
+                <Calendar size={14} /> 3. Escolha o tempo de exibição
+            </h3>
+          </div>
+          <div className="grid grid-cols-3 gap-3">
+              {DURATION_OPTIONS.map(opt => (
+                  <button 
+                    key={opt.months}
+                    onClick={() => setSelectedDuration(opt.months)}
+                    className={`p-4 rounded-2xl border-2 flex flex-col items-center justify-center transition-all ${selectedDuration === opt.months ? 'bg-blue-600 border-blue-500 text-white shadow-lg' : 'bg-white/5 border-white/10 text-slate-500'}`}
+                  >
+                      <span className="text-xs font-black uppercase tracking-tighter">{opt.label}</span>
+                      <span className={`text-[8px] font-bold mt-1 uppercase ${selectedDuration === opt.months ? 'text-blue-100' : 'text-slate-600'}`}>30 dias p/ mês</span>
+                  </button>
+              ))}
+          </div>
+          <div className="bg-white/5 border border-white/10 p-4 rounded-2xl flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                  <Clock size={16} className="text-blue-400" />
+                  <span className="text-xs font-bold text-slate-300">Período da Campanha</span>
+              </div>
+              <span className="text-xs font-black text-white uppercase tracking-widest">{dates.start} — {dates.end}</span>
+          </div>
+        </section>
+
+        {/* 4. ESCOLHA DO BANNER */}
         <section className="space-y-6">
           <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-blue-500 flex items-center gap-2 px-1">
-            <Palette size={14} /> 3. Escolha seu Banner
+            <Palette size={14} /> 4. Escolha seu Banner
           </h3>
           <div className="space-y-4">
               <button 
@@ -341,7 +384,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
 
       </main>
 
-      {/* 4. PRÉVIA DO PEDIDO (FIXA) */}
+      {/* 5. PRÉVIA DO PEDIDO (FIXA) */}
       <div className="fixed bottom-0 left-0 right-0 p-6 bg-slate-950/95 backdrop-blur-2xl border-t border-white/10 z-[100] max-w-md mx-auto shadow-[0_-20px_40px_rgba(0,0,0,0.6)] animate-in slide-in-from-bottom duration-500">
         
         <div className="mb-4 flex flex-col gap-3 border-b border-white/5 pb-4">
@@ -355,8 +398,8 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
             <div className="flex justify-between items-end">
                 <div className="space-y-1">
                     <p className="text-[8px] font-black text-blue-500 uppercase tracking-widest">Resumo em tempo real</p>
-                    <p className="text-xs font-bold text-slate-300">Destaque: <span className="text-white">{summary.placementLabel}</span></p>
-                    <p className="text-xs font-bold text-slate-300">Vigência: <span className="text-white">30 dias / {summary.hoodsCount} bairros</span></p>
+                    <p className="text-xs font-bold text-slate-300">Plano: <span className="text-white">{summary.placementLabel}</span></p>
+                    <p className="text-xs font-bold text-slate-300">Tempo: <span className="text-white">{selectedDuration} meses / {summary.hoodsCount} bairros</span></p>
                 </div>
                 <div className="text-right">
                     <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest leading-none mb-1">Total da Campanha</p>
