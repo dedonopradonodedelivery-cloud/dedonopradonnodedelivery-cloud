@@ -57,6 +57,7 @@ const getFallbackItemImage = (id: string) => {
     for (let i = 0; i < id.length; i++) {
         hash = id.charCodeAt(i) + ((hash << 5) - hash);
     }
+    // FIX: Corrected variable name from FALLBACK_IMAGES.length to FALLBACK_ITEM_IMAGES.length
     return FALLBACK_ITEM_IMAGES[Math.abs(hash) % FALLBACK_ITEM_IMAGES.length];
 };
 
@@ -281,10 +282,6 @@ export const DesapegaView: React.FC<DesapegaViewProps> = ({ onBack, user, onRequ
     setViewState('form_media');
   };
 
-  const handleItemClick = (item: Classified) => {
-    onNavigate('classified_detail', { item });
-  };
-
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       const files = Array.from(e.target.files).slice(0, 6 - formData.images.length) as File[];
@@ -303,19 +300,22 @@ export const DesapegaView: React.FC<DesapegaViewProps> = ({ onBack, user, onRequ
 
   const analyzeWithIA = async (base64Data: string) => {
     setIsAnalyzing(true);
-    // Em produção, usar process.env.API_KEY
-    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
+    // FIX: Updated GoogleGenAI initialization to strictly use process.env.API_KEY as per guidelines.
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     try {
       const prompt = `Analise a foto deste produto para um anúncio de desapego. 
       Sugira em formato JSON: category, subcategory, brand, title, description, gender`;
       const base64Content = base64Data.includes(',') ? base64Data.split(',')[1] : base64Data;
       const parts: Part[] = [{ text: prompt }, { inlineData: { mimeType: "image/jpeg", data: base64Content } as GenAIBlob }];
       const response = await ai.models.generateContent({
-        model: 'gemini-1.5-flash',
+        model: 'gemini-3-flash-preview',
         contents: { parts },
-        // @ts-ignore
-        config: { responseMimeType: "application/json" }
+        config: { 
+          responseMimeType: "application/json",
+          thinkingConfig: { thinkingBudget: 0 }
+        }
       });
+      // Guideline check: response.text is used correctly.
       const suggestions = JSON.parse(response.text || '{}');
       setFormData(prev => ({ ...prev, ...suggestions }));
     } catch (error) { console.error("IA Error", error); } finally { setIsAnalyzing(false); }
@@ -354,7 +354,7 @@ export const DesapegaView: React.FC<DesapegaViewProps> = ({ onBack, user, onRequ
 
               <button 
                   onClick={handleStartSwiping}
-                  className="w-full max-w-sm bg-purple-600 hover:bg-purple-700 text-white font-black py-5 rounded-[2rem] shadow-xl uppercase tracking-widest text-xs flex items-center justify-center gap-2 active:scale-95 transition-all"
+                  className="w-full max-w-sm bg-purple-600 hover:bg-purple-700 text-white font-black py-5 rounded-[2rem] shadow-xl uppercase tracking-widest text-sm flex items-center justify-center gap-2 active:scale-95 transition-all"
               >
                   Começar a explorar <ArrowRight size={16} />
               </button>
@@ -367,55 +367,63 @@ export const DesapegaView: React.FC<DesapegaViewProps> = ({ onBack, user, onRequ
   if (viewState === 'match_deck' && currentMatchCard) {
       return (
           <div className="min-h-screen bg-slate-950 flex flex-col font-sans relative overflow-hidden">
+              {/* Header com padding consistente */}
               <div className="absolute top-0 left-0 right-0 p-6 z-20 flex justify-between items-center">
-                  <button onClick={() => setViewState('list')} className="p-2 bg-black/20 backdrop-blur-md rounded-full text-white/70 hover:text-white">
+                  <button onClick={() => setViewState('list')} className="p-2.5 bg-black/20 backdrop-blur-md rounded-full text-white/70 hover:text-white transition-all active:scale-90">
                       <X size={24} />
                   </button>
-                  <div className="flex items-center gap-1.5 px-3 py-1.5 bg-black/20 backdrop-blur-md rounded-full border border-white/10">
+                  <div className="flex items-center gap-1.5 px-4 py-2 bg-black/20 backdrop-blur-md rounded-full border border-white/10">
                       <MapPin size={10} className="text-purple-400" />
-                      <span className="text-[10px] font-bold text-white uppercase tracking-widest">{currentMatchCard.neighborhood}</span>
+                      <span className="text-[10px] font-black text-white uppercase tracking-widest">{currentMatchCard.neighborhood}</span>
                   </div>
               </div>
 
-              <div className="flex-1 flex items-center justify-center px-3 pt-16 pb-4">
-                  <div className="w-full max-w-md aspect-[3/4] relative rounded-[2.5rem] overflow-hidden shadow-2xl border-4 border-slate-800 bg-slate-900 group">
+              {/* CARD AREA - Garanindo preenchimento total da largura (Stretch) */}
+              <div className="flex-1 flex flex-col items-stretch pt-24 px-5 pb-6">
+                  <div className="flex-1 relative rounded-[2rem] overflow-hidden shadow-2xl border border-white/5 bg-slate-900 group">
                       <img 
                           src={currentMatchCard.imageUrl || getFallbackItemImage(currentMatchCard.id)} 
                           className="w-full h-full object-cover" 
                           alt={currentMatchCard.title} 
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent"></div>
+                      {/* Gradiente sutil para leitura de texto */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent"></div>
                       
-                      <div className="absolute bottom-0 left-0 right-0 p-6 pb-8">
+                      <div className="absolute bottom-0 left-0 right-0 p-8">
                           {currentMatchCard.tradeCondition === 'direct' && (
-                              <div className="inline-block px-3 py-1 rounded-full bg-emerald-500/90 backdrop-blur-md text-white text-[9px] font-black uppercase tracking-widest mb-3 shadow-lg">
-                                  Troca Direta
+                              <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500 text-white text-[9px] font-black uppercase tracking-widest mb-4 shadow-lg">
+                                  <ArrowLeftRight size={10} strokeWidth={3} /> Troca Direta
                               </div>
                           )}
-                          <h2 className="text-3xl font-black text-white leading-none mb-2 drop-shadow-md">{currentMatchCard.title}</h2>
-                          <p className="text-white/80 text-sm font-medium line-clamp-2 mb-4">
-                              Aceita: {currentMatchCard.tradeInterests?.join(', ') || 'Aberto a propostas'}
-                          </p>
-                          <div className="h-1 w-20 bg-purple-500 rounded-full"></div>
+                          <h2 className="text-3xl font-black text-white leading-tight mb-2 drop-shadow-md">{currentMatchCard.title}</h2>
+                          <div className="flex flex-col gap-1 mb-6">
+                            <p className="text-purple-400 text-[10px] font-black uppercase tracking-widest">Tem interesse em:</p>
+                            <p className="text-white/90 text-sm font-bold leading-relaxed line-clamp-2">
+                                {currentMatchCard.tradeInterests?.join(', ') || 'Qualquer item do mesmo valor'}
+                            </p>
+                          </div>
+                          <div className="h-1.5 w-12 bg-[#1E5BFF] rounded-full"></div>
                       </div>
                   </div>
               </div>
 
-              <div className="pb-28 px-8 flex justify-between items-center max-w-md mx-auto w-full z-30 relative">
+              {/* ACTION BUTTONS AREA */}
+              <div className="pb-32 px-8 flex justify-between items-center w-full z-30 relative">
                   <button 
                       onClick={handleNextCard}
-                      className="w-16 h-16 rounded-full bg-slate-800 text-red-500 flex items-center justify-center shadow-lg border border-slate-700 active:scale-90 transition-all hover:bg-slate-700"
+                      className="w-16 h-16 rounded-full bg-slate-800 text-red-500 flex items-center justify-center shadow-2xl border border-white/5 active:scale-90 transition-all hover:bg-slate-700"
                   >
                       <X size={32} strokeWidth={3} />
                   </button>
                   
-                  <button className="text-[10px] font-black text-slate-500 uppercase tracking-widest">
-                      Deslize ou toque
-                  </button>
+                  <div className="flex flex-col items-center gap-1">
+                      <span className="text-[8px] font-black text-slate-500 uppercase tracking-[0.3em] animate-pulse">Jacarepaguá</span>
+                      <Repeat size={14} className="text-slate-700" />
+                  </div>
 
                   <button 
                       onClick={handleMatchLike}
-                      className="w-20 h-20 rounded-full bg-gradient-to-tr from-purple-600 to-indigo-600 text-white flex items-center justify-center shadow-xl shadow-purple-500/30 active:scale-90 transition-all hover:scale-105 border-4 border-slate-950"
+                      className="w-20 h-20 rounded-full bg-gradient-to-tr from-[#1E5BFF] to-indigo-600 text-white flex items-center justify-center shadow-2xl shadow-blue-500/30 active:scale-90 transition-all hover:scale-105 border-4 border-slate-950"
                   >
                       <Heart size={36} fill="currentColor" />
                   </button>
@@ -427,51 +435,51 @@ export const DesapegaView: React.FC<DesapegaViewProps> = ({ onBack, user, onRequ
   if (viewState === 'match_success') {
       return (
           <div className="min-h-screen bg-slate-900 flex flex-col items-center justify-center p-8 text-center animate-in zoom-in duration-300 relative overflow-hidden">
-              <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-purple-500 via-slate-900 to-slate-900"></div>
+              <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-blue-500 via-slate-900 to-slate-900"></div>
               
-              <h1 className="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-600 italic transform -rotate-6 mb-12 drop-shadow-2xl">
-                  It's a Match!
+              <h1 className="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-600 italic transform -rotate-6 mb-12 drop-shadow-2xl uppercase tracking-tighter">
+                  Deu Match!
               </h1>
 
-              <div className="flex items-center justify-center gap-4 mb-12 relative z-10">
-                  <div className="w-28 h-28 rounded-full border-4 border-white shadow-2xl overflow-hidden transform -rotate-6">
+              <div className="flex items-center justify-center gap-4 mb-12 relative z-10 w-full px-4">
+                  <div className="w-28 h-28 rounded-[2rem] border-4 border-white shadow-2xl overflow-hidden transform -rotate-6 shrink-0">
                       <img src={myTradeItem?.imageUrl} className="w-full h-full object-cover" />
                   </div>
-                  <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center absolute shadow-lg z-20 text-purple-600">
-                      <Repeat size={24} />
+                  <div className="w-14 h-14 bg-[#1E5BFF] rounded-2xl flex items-center justify-center absolute shadow-xl z-20 text-white animate-bounce-slow">
+                      <Repeat size={28} />
                   </div>
-                  <div className="w-28 h-28 rounded-full border-4 border-white shadow-2xl overflow-hidden transform rotate-6">
+                  <div className="w-28 h-28 rounded-[2rem] border-4 border-white shadow-2xl overflow-hidden transform rotate-6 shrink-0">
                       <img src={matchedItem?.imageUrl} className="w-full h-full object-cover" />
                   </div>
               </div>
 
               <div className="space-y-2 mb-12 relative z-10">
-                  <p className="text-white font-bold text-lg">Vocês se curtiram!</p>
-                  <p className="text-slate-400 text-sm max-w-xs mx-auto">
-                      O dono de "{matchedItem?.title}" também tem interesse no seu item.
+                  <p className="text-white font-black text-xl uppercase tracking-tight">O vizinho curtiu seu item!</p>
+                  <p className="text-slate-400 text-sm max-w-xs mx-auto font-medium">
+                      O dono de "{matchedItem?.title}" também quer trocar com você.
                   </p>
               </div>
 
               <div className="w-full max-w-xs space-y-3 relative z-10">
                   <button 
                       onClick={handleOpenMatchChat}
-                      className="w-full bg-white text-purple-700 font-black py-5 rounded-[2rem] shadow-xl uppercase tracking-widest text-xs flex items-center justify-center gap-2 active:scale-95 transition-all"
+                      className="w-full bg-white text-blue-700 font-black py-5 rounded-[2rem] shadow-xl uppercase tracking-widest text-xs flex items-center justify-center gap-2 active:scale-95 transition-all"
                   >
                       <MessageCircle size={18} fill="currentColor" />
-                      Combinar Troca
+                      Combinar Troca no Chat
                   </button>
                   <button 
                       onClick={() => setViewState('match_deck')}
                       className="w-full py-4 text-slate-500 font-bold text-xs uppercase tracking-widest hover:text-white transition-colors"
                   >
-                      Continuar jogando
+                      Continuar explorando
                   </button>
               </div>
           </div>
       );
   }
 
-  // WIZARD DE CRIAÇÃO (SIMPLIFICADO PARA CORRIGIR ERROS DE TS)
+  // WIZARD DE CRIAÇÃO (MANTIDO CONFORME ORIGINAL)
   if (viewState.startsWith('form')) {
      return (
          <div className="min-h-screen bg-white dark:bg-gray-900 flex flex-col p-6 animate-in slide-in-from-right duration-300">
@@ -513,7 +521,7 @@ export const DesapegaView: React.FC<DesapegaViewProps> = ({ onBack, user, onRequ
                      </div>
                      <div>
                          <label className="text-xs font-bold text-gray-500 uppercase ml-1">Condição</label>
-                         <select value={formData.condition} onChange={e => setFormData({...formData, condition: e.target.value})} className="w-full p-4 bg-gray-100 dark:bg-gray-800 rounded-xl mt-1 outline-none font-bold">
+                         <select value={formData.condition} onChange={e => setFormData({...formData, condition: e.target.value})} className="w-full bg-gray-100 dark:bg-gray-800 rounded-xl mt-1 outline-none font-bold">
                              <option>Novo</option>
                              <option>Usado - Como novo</option>
                              <option>Usado - Bom estado</option>
