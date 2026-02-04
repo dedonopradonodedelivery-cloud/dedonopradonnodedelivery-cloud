@@ -88,10 +88,10 @@ const INITIAL_MONETIZATION_DATA: MonetizationItem[] = [
     founder_price_duration_months: 12,
     founder_price_note: 'Preço travado para contratos de inauguração',
     pricing: {
-      base: 'R$ 159,90 / mês', // Ajustado conforme pedido
-      baseValue: 159.90,       // Ajustado para recálculo
-      founder: 'R$ 49,90 / mês', // Ajustado conforme pedido
-      founderValue: 49.90,      // Ajustado para recálculo
+      base: 'R$ 159,90 / mês',
+      baseValue: 159.90,
+      founder: 'R$ 49,90 / mês',
+      founderValue: 49.90,
       upfront: 'R$ 39,90 / mês (à vista)'
     }
   },
@@ -230,22 +230,22 @@ export const AdminMonetizationView: React.FC<{ onBack: () => void }> = ({ onBack
             <div className="flex flex-col items-end gap-2 shrink-0">
                 <div className="flex items-center gap-2 bg-emerald-500/10 px-4 py-2 rounded-2xl border border-emerald-500/20">
                     <TrendingUp size={18} className="text-emerald-500" />
-                    <span className="text-xs font-black text-emerald-400 uppercase tracking-widest">Preços: v2.7 (Recálculo Corretivo)</span>
+                    <span className="text-xs font-black text-emerald-400 uppercase tracking-widest">Preços: v2.7 (Build Fix)</span>
                 </div>
-                <p className="text-[9px] text-slate-500 font-bold uppercase tracking-widest">Última atualização: Hoje, 18:20</p>
+                <p className="text-[9px] text-slate-500 font-bold uppercase tracking-widest">Última atualização: Hoje, 18:45</p>
             </div>
         </section>
 
         <section className="grid grid-cols-1 lg:grid-cols-2 gap-6 pb-20">
             {items.map((item) => {
                 const vantage = calculateVantage(item);
+                const ItemIcon = item.icon;
                 return (
                   <div key={item.id} className={`bg-slate-900 rounded-[2.5rem] border transition-all duration-300 p-8 flex flex-col shadow-sm group ${item.status === 'Inativa' ? 'border-red-500/20 opacity-60 grayscale' : 'border-white/5 hover:border-blue-500/30'}`}>
                       
-                      {/* Header do Card */}
                       <div className="flex justify-between items-start mb-6">
                           <div className={`w-14 h-14 ${item.bg} ${item.color} rounded-2xl flex items-center justify-center shadow-sm border border-current opacity-70 group-hover:scale-110 transition-transform`}>
-                              <item.icon size={28} />
+                              <ItemIcon size={28} />
                           </div>
                           
                           <div className="flex flex-col items-end gap-3">
@@ -268,23 +268,20 @@ export const AdminMonetizationView: React.FC<{ onBack: () => void }> = ({ onBack
                           </div>
                       </div>
 
-                      <h3 className="text-xl font-black text-white uppercase tracking-tight mb-2 flex items-center gap-2">
+                      <h3 className="text-xl font-black text-white uppercase tracking-tight mb-2">
                         {item.name}
                       </h3>
                       <p className="text-sm text-slate-400 leading-relaxed font-medium mb-8">
                           {item.description}
                       </p>
 
-                      {/* BLOCO DE PREÇOS REESTRUTURADO */}
                       <div className="space-y-6 pt-6 border-t border-white/5 flex-1">
                           <div className="space-y-4">
-                              {/* PREÇO PRINCIPAL */}
                               <div className="flex justify-between items-center bg-white/5 p-4 rounded-2xl border border-white/5">
                                   <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Preço Padrão</span>
                                   <span className="text-2xl font-black text-white">{item.pricing.base}</span>
                               </div>
 
-                              {/* FUNDADOR ANUAL PROTEGIDO (Motor de Cálculo Dinâmico) */}
                               {item.founder_price_locked && (
                                 <div className="p-5 bg-amber-500/5 border border-amber-500/20 rounded-[2rem] animate-in zoom-in-95 duration-500 relative overflow-hidden">
                                     <div className="absolute top-0 right-0 p-3 opacity-10">
@@ -330,7 +327,6 @@ export const AdminMonetizationView: React.FC<{ onBack: () => void }> = ({ onBack
                                 </div>
                               )}
 
-                              {/* Caso Master (Removido proteção, mas mantendo preço fundador se existir) */}
                               {item.id === 'master_sponsor' && item.pricing.founder && (
                                 <div className="flex justify-between items-center p-4 bg-blue-500/5 rounded-2xl border border-blue-500/10">
                                     <div className="flex items-center gap-3">
@@ -343,4 +339,41 @@ export const AdminMonetizationView: React.FC<{ onBack: () => void }> = ({ onBack
                                 </div>
                               )}
 
-                              
+                              {item.tiers && (
+                                  <div className="space-y-2 pt-2">
+                                      {item.tiers.map((tier, idx) => (
+                                          <div key={idx} className="flex justify-between items-center text-xs bg-white/5 p-4 rounded-2xl border border-white/5 hover:border-white/10 transition-colors">
+                                              <span className="font-bold text-slate-400 uppercase tracking-wide">{tier.label}</span>
+                                              <span className="font-black text-white">{tier.value}</span>
+                                          </div>
+                                      ))}
+                                  </div>
+                              )}
+                          </div>
+
+                          {item.observations && (
+                              <div className="flex items-start gap-3 opacity-50 px-2">
+                                  <Info size={14} className="text-slate-500 shrink-0 mt-0.5" />
+                                  <p className="text-[9px] text-slate-500 font-bold uppercase leading-tight tracking-tight">
+                                      {item.observations}
+                                  </p>
+                              </div>
+                          )}
+                      </div>
+                  </div>
+                );
+            })}
+        </section>
+
+        <section className="bg-amber-500/5 p-6 rounded-3xl border border-amber-500/20 flex gap-4 items-start mb-10">
+            <AlertTriangle className="text-amber-500 shrink-0" size={20} />
+            <div className="space-y-1">
+                <p className="text-xs text-amber-200 font-black uppercase tracking-widest leading-none">Status de Dados</p>
+                <p className="text-xs text-amber-400/80 font-medium leading-relaxed">
+                    Painel administrativo atualizado para o novo ciclo de monetização v2.7. Sincronização de economia anual automatizada para categorias de Banner.
+                </p>
+            </div>
+        </section>
+    </div>
+  );
+};
