@@ -188,6 +188,14 @@ export const StoreSponsoredAds: React.FC<StoreSponsoredAdsProps> = ({ onBack, on
           border: 3px solid white;
           box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
         }
+        @keyframes subtle-pulse {
+          0% { transform: scale(1); opacity: 0.8; }
+          50% { transform: scale(1.1); opacity: 1; }
+          100% { transform: scale(1); opacity: 0.8; }
+        }
+        .animate-subtle-pulse {
+          animation: subtle-pulse 4s ease-in-out infinite;
+        }
       `}</style>
       
       <header className="sticky top-0 z-40 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md px-5 h-20 flex items-center gap-4 border-b border-gray-100 dark:border-gray-800 shadow-sm shrink-0">
@@ -209,31 +217,33 @@ export const StoreSponsoredAds: React.FC<StoreSponsoredAdsProps> = ({ onBack, on
         
         {view === 'list' && (
           <div className="space-y-10 animate-in slide-in-from-right duration-300">
-            {/* NOVO BANNER EXPLICATIVO (CONVERSÃO) */}
+            {/* BANNER EXPLICATIVO REFINADO */}
             <section className="space-y-6">
-                <div className="bg-slate-900 rounded-[2.5rem] overflow-hidden shadow-2xl relative border border-white/5">
+                <div className="bg-slate-100 dark:bg-slate-900 rounded-[2.5rem] overflow-hidden shadow-xl relative border border-gray-200 dark:border-white/5">
                     <div className="relative aspect-[16/9]">
                         <img 
                           src="https://images.unsplash.com/photo-1556761175-5973dc0f32e7?q=80&w=1200&auto=format&fit=crop" 
                           alt="Destaque Patrocinado"
-                          className="w-full h-full object-cover opacity-60 mix-blend-luminosity"
+                          className="w-full h-full object-cover opacity-20 dark:opacity-30 mix-blend-luminosity filter blur-[1px]"
                         />
-                        <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/40 to-transparent"></div>
+                        <div className="absolute inset-0 bg-gradient-to-t from-slate-100 dark:from-slate-900 via-slate-100/40 dark:via-slate-900/40 to-transparent"></div>
                         
-                        {/* Mock de Destaque Patrocinado visual */}
+                        {/* Mock visual centralizado */}
                         <div className="absolute inset-0 flex items-center justify-center p-6">
-                            <div className="w-full max-w-[240px] bg-white dark:bg-gray-800 rounded-2xl p-3 shadow-2xl scale-110 border border-blue-500/30 transform -rotate-1">
+                            <div className="w-full max-w-[240px] bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-2xl border border-blue-500/20 transform -rotate-1">
                                 <div className="flex gap-3">
-                                    <div className="w-10 h-10 rounded-lg bg-gray-100"></div>
+                                    <div className="w-12 h-12 rounded-xl bg-gray-50 dark:bg-gray-700 flex items-center justify-center">
+                                      <StoreIcon className="text-blue-500" size={24} />
+                                    </div>
                                     <div className="flex-1">
-                                        <div className="flex justify-between">
-                                            <div className="h-3 w-20 bg-gray-200 rounded"></div>
+                                        <div className="flex justify-between items-center">
+                                            <div className="h-3 w-20 bg-gray-100 dark:bg-gray-700 rounded"></div>
                                             <span className="text-[8px] font-black bg-blue-100 text-blue-600 px-1.5 py-0.5 rounded uppercase">Patrocinado</span>
                                         </div>
-                                        <div className="h-2 w-12 bg-gray-100 rounded mt-2"></div>
+                                        <div className="h-2 w-12 bg-gray-50 dark:bg-gray-800 rounded mt-2"></div>
                                         <div className="flex gap-1 mt-2">
                                             <div className="h-2 w-4 bg-yellow-400 rounded"></div>
-                                            <div className="h-2 w-16 bg-gray-100 rounded"></div>
+                                            <div className="h-2 w-16 bg-gray-50 dark:bg-gray-800 rounded"></div>
                                         </div>
                                     </div>
                                 </div>
@@ -242,24 +252,30 @@ export const StoreSponsoredAds: React.FC<StoreSponsoredAdsProps> = ({ onBack, on
                     </div>
 
                     <div className="px-8 pb-8 -mt-6 relative z-10">
-                        <h2 className="text-2xl font-black text-white uppercase tracking-tighter leading-tight mb-4">
+                        <h2 className="text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tighter leading-tight mb-4">
                             Apareça antes dos concorrentes no seu bairro
                         </h2>
-                        <p className="text-sm text-slate-400 leading-relaxed font-medium mb-8">
-                            O Patrocinado destaca sua loja no topo das listas do bairro, colocando você na frente dos concorrentes quando o cliente procura por serviços como o seu. <strong className="text-white">Mais visibilidade, mais cliques, mais vendas.</strong>
+                        <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed font-medium mb-8">
+                            O Patrocinado destaca sua loja no topo das listas do bairro, colocando você na frente dos concorrentes quando o cliente procura por serviços como o seu. <strong className="text-slate-900 dark:text-white">Mais visibilidade e vendas.</strong>
                         </p>
 
                         <div className="grid grid-cols-3 gap-2 mb-8">
-                            <div className="flex flex-col items-center text-center gap-1.5">
-                                <div className="p-2 bg-white/5 rounded-xl text-emerald-400 border border-white/5"><CheckCircle2 size={16} /></div>
+                            <div className="flex flex-col items-center text-center gap-1.5 group">
+                                <div className="p-2.5 bg-blue-500/5 dark:bg-white/5 rounded-2xl text-emerald-500 border border-emerald-500/10 transition-all duration-700 animate-subtle-pulse" style={{ animationDelay: '0s' }}>
+                                  <CheckCircle2 size={18} />
+                                </div>
                                 <span className="text-[9px] font-black uppercase text-slate-500 tracking-tighter">Sem contrato</span>
                             </div>
-                            <div className="flex flex-col items-center text-center gap-1.5">
-                                <div className="p-2 bg-white/5 rounded-xl text-blue-400 border border-white/5"><Calendar size={16} /></div>
+                            <div className="flex flex-col items-center text-center gap-1.5 group">
+                                <div className="p-2.5 bg-blue-500/5 dark:bg-white/5 rounded-2xl text-blue-500 border border-blue-500/10 transition-all duration-700 animate-subtle-pulse" style={{ animationDelay: '0.5s' }}>
+                                  <Calendar size={18} />
+                                </div>
                                 <span className="text-[9px] font-black uppercase text-slate-500 tracking-tighter">Escolha os dias</span>
                             </div>
-                            <div className="flex flex-col items-center text-center gap-1.5">
-                                <div className="p-2 bg-white/5 rounded-xl text-amber-400 border border-white/5"><DollarSign size={16} /></div>
+                            <div className="flex flex-col items-center text-center gap-1.5 group">
+                                <div className="p-2.5 bg-blue-500/5 dark:bg-white/5 rounded-2xl text-amber-500 border border-amber-500/10 transition-all duration-700 animate-subtle-pulse" style={{ animationDelay: '1s' }}>
+                                  <DollarSign size={18} />
+                                </div>
                                 <span className="text-[9px] font-black uppercase text-slate-500 tracking-tighter">R$ 0,90/dia</span>
                             </div>
                         </div>
@@ -268,7 +284,7 @@ export const StoreSponsoredAds: React.FC<StoreSponsoredAdsProps> = ({ onBack, on
                             onClick={handleCreateClick}
                             className="w-full bg-[#1E5BFF] text-white font-black py-5 rounded-[2rem] shadow-xl shadow-blue-500/30 active:scale-[0.98] transition-all flex items-center justify-center gap-2 uppercase tracking-[0.1em] text-xs"
                         >
-                            Novo Patrocinado <ArrowRight size={18} />
+                            Patrocinar por R$ 0,90/dia <ArrowRight size={18} />
                         </button>
                     </div>
                 </div>
@@ -493,3 +509,13 @@ export const StoreSponsoredAds: React.FC<StoreSponsoredAdsProps> = ({ onBack, on
     </div>
   );
 };
+
+const StoreIcon = ({ size, className }: { size?: number, className?: string }) => (
+  <svg width={size || 24} height={size || 24} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <path d="m2 7 4.41-4.41A2 2 0 0 1 7.83 2h8.34a2 2 0 0 1 1.42.59L22 7"/>
+    <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/>
+    <path d="M15 22v-4a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v4"/>
+    <path d="M2 7h20"/>
+    <path d="M22 7v3a2 2 0 0 1-2 2v0a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 16 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 12 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 8 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 4 12v0a2 2 0 0 1-2-2V7"/>
+  </svg>
+);
