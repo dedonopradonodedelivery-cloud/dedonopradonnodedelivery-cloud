@@ -28,15 +28,16 @@ import { HomeBannerCarousel } from '@/components/HomeBannerCarousel';
 import { FifaBanner } from '@/components/FifaBanner';
 import { MoreCategoriesModal } from '@/components/MoreCategoriesModal';
 
+// Imagens de fallback realistas e variadas (Bairro, Pessoas, Comércio, Objetos)
 const FALLBACK_IMAGES = [
-  'https://images.unsplash.com/photo-1570129477492-45c003edd2be?q=80&w=800',
-  'https://images.unsplash.com/photo-1517457373958-b7bdd4587205?q=80&w=800',
-  'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=800',
-  'https://images.unsplash.com/photo-1534723452202-428aae1ad99d?q=80&w=800',
-  'https://images.unsplash.com/photo-1581578731522-745d05cb9704?q=80&w=800',
-  'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?q=80&w=800',
-  'https://images.unsplash.com/photo-1605218427368-35b019b85c11?q=80&w=800',
-  'https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?q=80&w=800'
+  'https://images.unsplash.com/photo-1570129477492-45c003edd2be?q=80&w=800', // Bairro/Rua
+  'https://images.unsplash.com/photo-1517457373958-b7bdd4587205?q=80&w=800', // Comércio
+  'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=800', // Pessoas
+  'https://images.unsplash.com/photo-1534723452202-428aae1ad99d?q=80&w=800', // Mercado
+  'https://images.unsplash.com/photo-1581578731522-745d05cb9704?q=80&w=800', // Serviço
+  'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?q=80&w=800', // Casa/Interior
+  'https://images.unsplash.com/photo-1605218427368-35b019b85c11?q=80&w=800', // Urbano
+  'https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?q=80&w=800'  // Pet
 ];
 
 const getFallbackImage = (id: string) => {
@@ -48,7 +49,9 @@ const getFallbackImage = (id: string) => {
 };
 
 const MiniPostCard: React.FC<{ post: CommunityPost; onNavigate: (view: string) => void; }> = ({ post, onNavigate }) => {
+  // Garante que SEMPRE haja uma imagem, usando fallback determinístico se necessário
   const postImage = post.imageUrl || (post.imageUrls && post.imageUrls.length > 0 ? post.imageUrls[0] : getFallbackImage(post.id));
+  
   return (
     <div className="flex-shrink-0 w-28 snap-center p-1">
       <div 
@@ -74,6 +77,7 @@ const MiniPostCard: React.FC<{ post: CommunityPost; onNavigate: (view: string) =
 
 const MiniClassifiedCard: React.FC<{ item: Classified; onNavigate: (view: string) => void; }> = ({ item, onNavigate }) => {
   const itemImage = item.imageUrl || getFallbackImage(item.id);
+
   return (
     <div className="flex-shrink-0 w-40 snap-center p-1.5">
       <div 

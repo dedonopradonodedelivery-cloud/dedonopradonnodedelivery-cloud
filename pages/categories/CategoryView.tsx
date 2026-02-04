@@ -7,6 +7,23 @@ import { supabase } from '@/lib/supabaseClient';
 import { CategoryTopCarousel } from '@/components/CategoryTopCarousel';
 import { MasterSponsorBanner } from '@/components/MasterSponsorBanner';
 
+const FALLBACK_STORE_IMAGES = [
+  'https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=600',
+  'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=600',
+  'https://images.unsplash.com/photo-1522337660859-02fbefca4702?q=80&w=600',
+  'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?q=80&w=600',
+  'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?q=80&w=600',
+  'https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?q=80&w=600'
+];
+
+const getFallbackStoreImage = (id: string) => {
+    let hash = 0;
+    for (let i = 0; i < id.length; i++) {
+        hash = id.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    return FALLBACK_STORE_IMAGES[Math.abs(hash) % FALLBACK_STORE_IMAGES.length];
+};
+
 const DEFAULT_PLACEHOLDER = "https://images.unsplash.com/photo-1570129477492-45c003edd2be?q=80&w=800";
 
 // --- Reusable Banner Rendering Components ---
@@ -97,10 +114,12 @@ const BigSurCard: React.FC<{
 
 const StoreListItem: React.FC<{ store: Store; onClick: () => void }> = ({ store, onClick }) => {
   const isSponsored = store.isSponsored || store.adType === AdType.PREMIUM;
+  const storeImage = store.logoUrl || store.image || getFallbackStoreImage(store.id);
+  
   return (
     <div onClick={onClick} className="flex items-center gap-4 p-2 rounded-2xl hover:bg-white dark:hover:bg-gray-800 active:scale-[0.99] transition-all cursor-pointer border border-transparent hover:border-gray-100 dark:hover:border-gray-700">
       <div className="w-16 h-16 rounded-xl bg-gray-100 dark:bg-gray-800 overflow-hidden relative shadow-sm border border-gray-100 dark:border-gray-700 shrink-0">
-        <img src={store.logoUrl || "/assets/default-logo.png"} alt={store.name} className="w-full h-full object-contain p-1" />
+        <img src={storeImage} alt={store.name} className="w-full h-full object-cover p-0" />
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex justify-between items-start">
@@ -110,7 +129,7 @@ const StoreListItem: React.FC<{ store: Store; onClick: () => void }> = ({ store,
         <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 mt-0.5">
           <span className="flex items-center gap-1 font-bold text-[#1E5BFF]"><Star className="w-3 h-3 fill-current" /> {store.rating?.toFixed(1)}</span>
           <span className="w-1 h-1 rounded-full bg-gray-300 dark:bg-gray-600"></span>
-          <span className="truncate">{store.subcategory}</span>
+          <span className="truncate">{store.category}</span>
         </div>
         <div className="flex items-center gap-3 mt-1.5">
           {store.distance && <span className="text-[10px] text-gray-400 font-medium">{store.distance}</span>}
@@ -340,15 +359,17 @@ export const CategoryView: React.FC<CategoryViewProps> = ({
 // Re-using the StoreCard internal to list for CategoryView
 const StoreCard: React.FC<{ store: Store; onClick: () => void }> = ({ store, onClick }) => {
   const isSponsored = store.isSponsored || store.adType === AdType.PREMIUM;
+  const storeImage = store.logoUrl || store.image || getFallbackStoreImage(store.id);
+
   return (
     <div onClick={onClick} className="flex items-center gap-4 p-4 bg-white dark:bg-gray-900 rounded-3xl border border-gray-100 dark:border-gray-800 shadow-sm hover:shadow-md transition-all cursor-pointer active:scale-[0.98]">
       <div className="w-16 h-16 rounded-2xl bg-gray-100 dark:bg-gray-800 overflow-hidden relative border border-gray-100 dark:border-gray-700 shrink-0">
-        <img src={store.logoUrl || store.image || DEFAULT_PLACEHOLDER} alt={store.name} className="w-full h-full object-cover" />
+        <img src={storeImage} alt={store.name} className="w-full h-full object-cover" />
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex justify-between items-start">
           <h4 className="font-bold text-gray-900 dark:text-white text-base truncate pr-2">{store.name}</h4>
-          {isSponsored && <span className="text-[8px] font-bold text-gray-400 bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded uppercase">Ads</span>}
+          {isSponsored && <span className="text-[8px] font-bold text-gray-400 bg-gray-100 dark:bg-gray-700 px-1.5 py-0.5 rounded uppercase">Ads</span>}
         </div>
         <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 mt-0.5">
           <span className="flex items-center gap-1 font-bold text-[#1E5BFF]"><Star className="w-3 h-3 fill-current" /> {store.rating?.toFixed(1)}</span>

@@ -352,7 +352,7 @@ export const ClassifiedsView: React.FC<ClassifiedsViewProps> = ({ onBack, onNavi
             subtitle="Venda o que você não usa mais"
         />
 
-        {/* BANNER PATROCINADOR MASTER FINAL - ÚLTIMO ELEMENTO DA PÁGINA CONFORME REGRA */}
+        {/* BANNER PATROCINADOR MASTER FINAL */}
         <section className="mt-8">
           <MasterSponsorBanner onClick={() => onNavigate('patrocinador_master')} label="Classificados JPA" />
         </section>
