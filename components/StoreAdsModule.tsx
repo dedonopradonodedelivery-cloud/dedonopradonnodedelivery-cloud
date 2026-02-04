@@ -16,7 +16,12 @@ import {
   Upload,
   Target,
   Clock,
-  Calendar
+  Calendar,
+  Award,
+  Lock,
+  ShieldCheck,
+  TrendingUp,
+  Star
 } from 'lucide-react';
 import { User } from '@supabase/supabase-js';
 import { StoreBannerEditor } from '@/components/StoreBannerEditor';
@@ -67,6 +72,12 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
     PRO_ART: 69.90
   };
 
+  const FULL_PRICES = {
+    HOME: 199.90,
+    CAT: 159.90,
+    COMBO: 359.80
+  };
+
   const dates = useMemo(() => {
     const start = new Date();
     const end = new Date();
@@ -86,9 +97,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
     else if (placement.cat) basePrice = PRICES.CAT;
 
     const hoodsCount = selectedNeighborhoods.length;
-    // O valor base e dos bairros é multiplicado pelo tempo (meses)
     const subtotal = (basePrice * hoodsCount) * selectedDuration;
-    // A arte PRO é um custo fixo único de setup
     const artExtra = artChoice === 'pro' ? PRICES.PRO_ART : 0;
     const total = subtotal + artExtra;
 
@@ -187,28 +196,42 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
       <main className="flex-1 p-6 space-y-16 pb-64 max-w-md mx-auto w-full">
         
         {/* 1. ONDE APARECER */}
-        <section className="space-y-6">
-          <div className="px-1 space-y-3">
-            <div className="space-y-1">
-              <h3 className="text-xl font-black text-white uppercase tracking-tighter flex items-center gap-2">
+        <section className="space-y-8">
+          <div className="px-1 space-y-6 text-center">
+            <div className="space-y-2">
+              <h3 className="text-2xl font-black text-white uppercase tracking-tighter leading-tight">
                 Domine a atenção do seu bairro
               </h3>
-              <p className="text-sm font-medium text-slate-400 leading-relaxed">
+              <p className="text-sm font-medium text-slate-400 leading-relaxed max-w-xs mx-auto">
                 Coloque sua loja no topo do app e seja a primeira escolha de quem mora e compra perto de você.
               </p>
             </div>
             
-            <div className="bg-blue-500/10 border border-blue-500/20 p-4 rounded-2xl space-y-2">
-              <p className="text-[10px] font-bold text-blue-300 leading-relaxed">
-                🔒 Apoiando o app no primeiro mês, você garante este valor com desconto por 12 meses.
-              </p>
-              <p className="text-[9px] font-medium text-slate-500 leading-relaxed">
-                Você paga mês a mês. O preço normal pode ser ativado a qualquer momento para novos anunciantes.
-              </p>
+            {/* Banner Fundador Apoiador */}
+            <div className="bg-gradient-to-br from-blue-600/20 to-indigo-600/10 border border-blue-500/30 p-6 rounded-[2.5rem] text-left relative overflow-hidden shadow-2xl shadow-blue-900/10">
+              <div className="absolute top-0 right-0 w-24 h-24 bg-blue-500/5 rounded-full blur-3xl"></div>
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 rounded-xl bg-amber-400/10 flex items-center justify-center border border-amber-400/20">
+                  <Award className="w-6 h-6 text-amber-400" />
+                </div>
+                <h4 className="text-xs font-black text-white uppercase tracking-tight">Fundador Apoiador do Localizei JPA</h4>
+              </div>
+              <div className="space-y-4">
+                <p className="text-[11px] text-slate-200 leading-relaxed font-bold">
+                  Ao anunciar no mês de inauguração, sua loja recebe o selo de <span className="text-amber-400 uppercase">Fundador Apoiador</span> no perfil.
+                </p>
+                <p className="text-[11px] text-slate-400 leading-relaxed">
+                  🔒 Além disso, você garante este valor com desconto durante todo o primeiro ano, pagando mês a mês.
+                </p>
+                <p className="text-[9px] text-slate-500 italic leading-relaxed pt-2 border-t border-white/5">
+                  Após o lançamento, novos anunciantes entram com o preço normal, que pode ser ativado a qualquer momento.
+                </p>
+              </div>
             </div>
           </div>
 
           <div className="grid grid-cols-1 gap-4">
+              {/* HOME */}
               <button 
                 onClick={() => setPlacement({ home: true, cat: false })} 
                 className={`flex items-start text-left p-6 rounded-[2.5rem] border-2 transition-all gap-5 ${placement.home && !placement.cat ? 'bg-blue-600/10 border-blue-500 shadow-lg' : 'bg-white/5 border-white/10'}`}
@@ -234,6 +257,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
                 </div>
               </button>
 
+              {/* SUBCATEGORIAS */}
               <button 
                 onClick={() => setPlacement({ home: false, cat: true })} 
                 className={`flex items-start text-left p-6 rounded-[2.5rem] border-2 transition-all gap-5 ${!placement.home && placement.cat ? 'bg-blue-600/10 border-blue-500 shadow-lg' : 'bg-white/5 border-white/10'}`}
@@ -259,6 +283,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
                 </div>
               </button>
 
+              {/* COMBO */}
               <button 
                 onClick={() => setPlacement({ home: true, cat: true })} 
                 className={`relative flex items-start text-left p-6 rounded-[2.5rem] border-2 transition-all gap-5 ${placement.home && placement.cat ? 'bg-blue-600/10 border-blue-500 shadow-lg' : 'bg-white/5 border-white/10'}`}
@@ -312,7 +337,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
           </div>
         </section>
 
-        {/* 3. TEMPO DE EXIBIÇÃO (NOVO PASSO) */}
+        {/* 3. TEMPO DE EXIBIÇÃO */}
         <section className="space-y-6">
           <div className="flex items-center justify-between px-1">
             <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-blue-500 flex items-center gap-2">
@@ -391,7 +416,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
             <div className="flex items-center gap-2 bg-blue-500/10 border border-blue-500/20 px-3 py-1.5 rounded-xl">
                 <CheckCircle2 size={12} className="text-blue-400" />
                 <p className="text-[9px] font-bold text-blue-300 uppercase tracking-tight">
-                    Valor promocional garantido por 12 meses para apoiadores iniciais.
+                    ✅ Valor promocional garantido por 12 meses para apoiadores iniciais.
                 </p>
             </div>
             
