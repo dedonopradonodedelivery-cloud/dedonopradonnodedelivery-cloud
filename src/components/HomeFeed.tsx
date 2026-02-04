@@ -1,6 +1,6 @@
 
 import React, { useState, useMemo, useRef } from 'react';
-import { Store, Category, CommunityPost, ServiceRequest, ServiceUrgency, Classified } from '../types';
+import { Store, Category, CommunityPost, ServiceRequest, ServiceUrgency, Classified } from '@/types';
 import { 
   Compass, 
   Sparkles, 
@@ -22,9 +22,9 @@ import {
   Send, 
   ChevronRight,
 } from 'lucide-react';
-import { LojasEServicosList } from './LojasEServicosList';
+import { LojasEServicosList } from '@/components/LojasEServicosList';
 import { User } from '@supabase/supabase-js';
-import { CATEGORIES, MOCK_COMMUNITY_POSTS, MOCK_CLASSIFIEDS } from '../constants';
+import { CATEGORIES, MOCK_COMMUNITY_POSTS, MOCK_CLASSIFIEDS } from '@/constants';
 import { useNeighborhood } from '@/contexts/NeighborhoodContext';
 import { LaunchOfferBanner } from '@/components/LaunchOfferBanner';
 import { HomeBannerCarousel } from '@/components/HomeBannerCarousel';
@@ -298,8 +298,8 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
       </section>
 
       {/* 3. ONDE O BAIRRO CONVERSA (Compacto) */}
-      <section className="bg-white dark:bg-gray-950 pt-2 pb-6 relative">
-        <div className="px-5">
+      <section className="bg-white dark:bg-gray-950 pt-2 pb-6 relative px-5">
+        <div className="">
             <div className="flex items-center justify-between mb-3">
                 <h2 className="text-lg font-bold text-gray-800 dark:text-white flex items-center gap-2">
                     JPA Conversa
@@ -312,7 +312,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
         </div>
         
         <div className="relative group">
-            <div className="flex overflow-x-auto no-scrollbar snap-x -mx-3.5 px-3.5 pb-2">
+            <div className="flex overflow-x-auto no-scrollbar snap-x -mx-1 pb-2">
                 {MOCK_COMMUNITY_POSTS.slice(0, 5).map((post) => (
                     <MiniPostCard key={post.id} post={post} onNavigate={onNavigate} />
                 ))}
@@ -347,7 +347,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
       </section>
 
       {/* 5. SERVIÇOS / PROFISSIONAIS (Banner Direcional) */}
-      <section className="px-5 mb-8">
+      <section className="px-5 mb-8 bg-white dark:bg-gray-950">
         <FifaBanner onClick={() => setWizardStep(1)} />
       </section>
 
