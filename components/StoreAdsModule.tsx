@@ -21,7 +21,9 @@ import {
   Building,
   Target,
   Crown,
-  Newspaper
+  Newspaper,
+  Lock,
+  ShieldCheck
 } from 'lucide-react';
 import { User } from '@supabase/supabase-js';
 import { StoreBannerEditor } from '@/components/StoreBannerEditor';
@@ -178,9 +180,13 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
               >
                 <div className={`p-4 rounded-2xl shrink-0 ${placement.home && !placement.cat ? 'bg-blue-500 text-white' : 'bg-white/5 text-slate-400'}`}><Home size={28} /></div>
                 <div className="flex-1">
-                    <p className="font-black text-white uppercase tracking-tight">Home</p>
+                    <div className="flex items-center gap-2 mb-1">
+                      <p className="font-black text-white uppercase tracking-tight">Home</p>
+                      <span className="text-[7px] font-black bg-blue-500/20 text-blue-400 px-1.5 py-0.5 rounded border border-blue-500/30 uppercase tracking-widest">Fundador Protegido</span>
+                    </div>
                     <p className="text-sm font-bold text-slate-300">R$ 69,90/mês</p>
-                    <p className="text-[10px] text-slate-500 mt-1 leading-relaxed">Exibido na página inicial do aplicativo.</p>
+                    <p className="text-[7px] text-emerald-400 font-bold uppercase mt-1">Preço garantido por 12 meses</p>
+                    <p className="text-[10px] text-slate-500 mt-2 leading-relaxed">Exibido na página inicial do aplicativo.</p>
                 </div>
               </button>
 
@@ -190,9 +196,13 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
               >
                 <div className={`p-4 rounded-2xl shrink-0 ${!placement.home && placement.cat ? 'bg-blue-500 text-white' : 'bg-white/5 text-slate-400'}`}><LayoutGrid size={28} /></div>
                 <div className="flex-1">
-                    <p className="font-black text-white uppercase tracking-tight">Subcategorias</p>
+                    <div className="flex items-center gap-2 mb-1">
+                      <p className="font-black text-white uppercase tracking-tight">Subcategorias</p>
+                      <span className="text-[7px] font-black bg-blue-500/20 text-blue-400 px-1.5 py-0.5 rounded border border-blue-500/30 uppercase tracking-widest">Fundador Protegido</span>
+                    </div>
                     <p className="text-sm font-bold text-slate-300">R$ 29,90/mês</p>
-                    <p className="text-[10px] text-slate-500 mt-1 leading-relaxed">Destaque no topo das buscas específicas.</p>
+                    <p className="text-[7px] text-emerald-400 font-bold uppercase mt-1">Preço garantido por 12 meses</p>
+                    <p className="text-[10px] text-slate-500 mt-2 leading-relaxed">Destaque no topo das buscas específicas.</p>
                 </div>
               </button>
 
@@ -203,11 +213,19 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
                 <div className="absolute -top-3 right-6 bg-amber-400 text-slate-950 text-[8px] font-black px-2 py-0.5 rounded uppercase">Melhor Oferta</div>
                 <div className={`p-4 rounded-2xl shrink-0 ${placement.home && placement.cat ? 'bg-blue-500 text-white' : 'bg-white/5 text-slate-400'}`}><Zap size={28} /></div>
                 <div className="flex-1">
-                    <p className="font-black text-white uppercase tracking-tight">Home + Subcategorias</p>
+                    <div className="flex items-center gap-2 mb-1">
+                      <p className="font-black text-white uppercase tracking-tight">Home + Subcategorias</p>
+                      <span className="text-[7px] font-black bg-blue-500/20 text-blue-400 px-1.5 py-0.5 rounded border border-blue-500/30 uppercase tracking-widest">Fundador Protegido</span>
+                    </div>
                     <p className="text-sm font-bold text-slate-300">R$ 89,90/mês</p>
-                    <p className="text-[10px] text-slate-500 mt-1 leading-relaxed">Máximo alcance e visibilidade no bairro.</p>
+                    <p className="text-[7px] text-emerald-400 font-bold uppercase mt-1">Preço garantido por 12 meses</p>
+                    <p className="text-[10px] text-slate-500 mt-2 leading-relaxed">Máximo alcance e visibilidade no bairro.</p>
                 </div>
               </button>
+
+              <div className="mt-2 text-[10px] text-slate-500 font-medium flex items-center gap-2 px-1">
+                <span>🔒 Apoie o app no primeiro mês e garanta este valor com desconto por 12 meses.</span>
+              </div>
           </div>
         </section>
 
@@ -283,17 +301,26 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
       {/* 4. PRÉVIA DO PEDIDO (FIXA) */}
       <div className="fixed bottom-0 left-0 right-0 p-6 bg-slate-950/95 backdrop-blur-2xl border-t border-white/10 z-[100] max-w-md mx-auto shadow-[0_-20px_40px_rgba(0,0,0,0.6)] animate-in slide-in-from-bottom duration-500">
         
-        <div className="mb-4 flex justify-between items-end border-b border-white/5 pb-4">
-            <div className="space-y-1">
-                <p className="text-[8px] font-black text-blue-500 uppercase tracking-widest">Resumo em tempo real</p>
-                <p className="text-xs font-bold text-slate-300">Destaque: <span className="text-white">{summary.placementLabel}</span></p>
-                <p className="text-xs font-bold text-slate-300">Vigência: <span className="text-white">30 dias / {summary.hoodsCount} bairros</span></p>
-            </div>
-            <div className="text-right">
-                <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest leading-none mb-1">Total da Campanha</p>
-                <p className="text-2xl font-black text-emerald-400 tracking-tighter leading-none">
-                    R$ {summary.total.toFixed(2).replace('.', ',')}
+        <div className="mb-4 flex flex-col gap-3 border-b border-white/5 pb-4">
+            <div className="flex items-center gap-2 bg-blue-500/10 border border-blue-500/20 px-3 py-1.5 rounded-xl">
+                <CheckCircle2 size={12} className="text-blue-400" />
+                <p className="text-[9px] font-bold text-blue-300 uppercase tracking-tight">
+                    Valor promocional garantido por 12 meses para apoiadores iniciais.
                 </p>
+            </div>
+            
+            <div className="flex justify-between items-end">
+                <div className="space-y-1">
+                    <p className="text-[8px] font-black text-blue-500 uppercase tracking-widest">Resumo em tempo real</p>
+                    <p className="text-xs font-bold text-slate-300">Destaque: <span className="text-white">{summary.placementLabel}</span></p>
+                    <p className="text-xs font-bold text-slate-300">Vigência: <span className="text-white">30 dias / {summary.hoodsCount} bairros</span></p>
+                </div>
+                <div className="text-right">
+                    <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest leading-none mb-1">Total da Campanha</p>
+                    <p className="text-2xl font-black text-emerald-400 tracking-tighter leading-none">
+                        R$ {summary.total.toFixed(2).replace('.', ',')}
+                    </p>
+                </div>
             </div>
         </div>
 
