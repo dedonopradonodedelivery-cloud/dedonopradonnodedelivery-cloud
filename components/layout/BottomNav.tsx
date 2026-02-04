@@ -22,8 +22,6 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
   const { user } = useAuth();
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   
-  // State removed: authModalProps is no longer needed here as the logic moved to a dedicated page
-
   const hasActiveCoupons = useMemo(() => {
     if (!user || userRole !== 'cliente') return false;
     try {
@@ -47,10 +45,8 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
   const handleTabClick = (item: NavItem) => {
     if (item.id === 'cupom_trigger') {
       if (!user) {
-        // Redirect to Educational Landing Page for visitors
         setActiveTab('coupon_landing');
       } else {
-        // Logged in logic
         if (userRole === 'lojista') {
           setActiveTab('merchant_coupons');
         } else {
@@ -64,8 +60,6 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
 
   const handleLoginSuccess = () => {
     setIsAuthModalOpen(false);
-    const role = localStorage.getItem('localizei_user_role') || 'cliente';
-    // Logic for other auth triggers if any remain here
   };
 
   const renderIconOrAvatar = (item: NavItem, isActive: boolean) => {
@@ -74,16 +68,16 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
       const photoUrl = user.user_metadata?.avatar_url;
 
       return (
-        <div className={`w-full h-full rounded-full overflow-hidden flex items-center justify-center transition-all duration-200 border ${
+        <div className={`w-full h-full rounded-full overflow-hidden flex items-center justify-center transition-all duration-200 border-2 ${
           isActive 
-            ? 'border-blue-600 shadow-sm' 
-            : 'border-transparent'
+            ? 'border-white shadow-lg scale-110' 
+            : 'border-white/20'
         }`}>
           {photoUrl ? (
             <img src={photoUrl} alt="Avatar" className="w-full h-full object-cover" />
           ) : (
             <div className={`w-full h-full flex items-center justify-center text-[10px] font-black ${
-              isActive ? 'bg-blue-600 text-white' : 'bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400'
+              isActive ? 'bg-white text-[#1E5BFF]' : 'bg-white/20 text-white/80'
             }`}>
               {userInitial}
             </div>
@@ -93,21 +87,17 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
     }
 
     const Icon = item.icon;
-    const iconSize = item.isMainAction ? 24 : 22;
+    const iconSize = item.isMainAction ? 26 : 22;
     
-    const iconColor = isActive 
-        ? 'text-blue-600 dark:text-blue-400' 
-        : 'text-gray-400 dark:text-gray-500';
-
     return (
-      <div className="relative flex items-center justify-center w-full h-full">
+      <div className={`relative flex items-center justify-center w-full h-full transition-all duration-300 ${isActive ? 'opacity-100 scale-110' : 'opacity-70'}`}>
          <Icon 
           size={iconSize}
-          className={`transition-colors duration-200 ${iconColor}`} 
+          className={`text-white ${isActive ? 'drop-shadow-[0_0_8px_rgba(255,255,255,0.4)]' : ''}`} 
           strokeWidth={isActive ? 2.5 : 2} 
         />
         {item.badge && (
-             <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white dark:border-gray-800 animate-pulse"></span>
+             <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-[#1E5BFF] animate-pulse"></span>
         )}
       </div>
     );
@@ -115,16 +105,15 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
 
   return (
     <>
-      <div className="fixed bottom-0 left-0 right-0 mx-auto w-full max-w-md bg-white dark:bg-gray-950 z-[1000] h-[90px] rounded-t-[2.5rem] shadow-[0_-8px_40px_rgba(0,0,0,0.12)] border-t border-gray-100 dark:border-gray-800 px-2">
+      <div className="fixed bottom-0 left-0 right-0 mx-auto w-full max-w-md bg-[#1E5BFF] z-[1000] h-[90px] rounded-t-[2.5rem] shadow-[0_-8px_40px_rgba(0,0,0,0.2)] border-t border-white/10 px-2 transition-colors duration-500">
         <div className="grid w-full h-full grid-cols-5 items-center">
           {navItems.map((item) => {
             let isActive = false;
             
             if (item.id === 'cupom_trigger') {
-               // Active state also covers the educational landing page
                isActive = activeTab === 'merchant_coupons' || activeTab === 'user_coupons' || activeTab === 'coupon_landing';
             } else if (item.id === 'profile') {
-               isActive = ['store_area', 'store_ads_module', 'weekly_promo', 'merchant_jobs', 'store_profile', 'store_support', 'about', 'support', 'favorites'].includes(activeTab) || activeTab === 'profile';
+               isActive = ['store_area', 'store_ads_module', 'weekly_promo', 'merchant_jobs', 'store_profile', 'store_support', 'about', 'support', 'favorites', 'user_profile_full', 'edit_profile_view'].includes(activeTab);
             } else {
                isActive = activeTab === item.id;
             }
@@ -138,10 +127,10 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
                   <div className={`
                     flex items-center justify-center transition-all duration-300 relative
                     ${item.isMainAction 
-                      ? `h-16 w-16 rounded-full border-[3px] -translate-y-8 mb-[-32px] shadow-xl ${
+                      ? `h-16 w-16 rounded-full border-[3px] -translate-y-8 mb-[-32px] shadow-2xl ${
                           isActive 
-                            ? 'bg-blue-50 dark:bg-blue-900/40 border-blue-500 shadow-blue-500/30 scale-105' 
-                            : 'bg-white dark:bg-gray-800 border-blue-50 dark:border-gray-700 shadow-black/5'
+                            ? 'bg-blue-700 border-white scale-110' 
+                            : 'bg-[#1E5BFF] border-white/30'
                         }`
                       : 'h-8 w-8 mb-1'
                     }
@@ -149,10 +138,10 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
                     {renderIconOrAvatar(item, isActive)}
                   </div>
                   
-                  <span className={`text-[8px] font-black uppercase tracking-tighter transition-colors leading-none text-center px-0.5 ${
+                  <span className={`text-[8px] font-black uppercase tracking-tighter transition-all leading-none text-center px-0.5 mt-1.5 ${
                     isActive 
-                      ? 'text-blue-600 dark:text-blue-400' 
-                      : 'text-gray-400 dark:text-gray-500'
+                      ? 'text-white opacity-100 scale-105' 
+                      : 'text-white opacity-70'
                   } ${item.isMainAction ? 'mt-3' : ''}`}>
                     {item.label}
                   </span>

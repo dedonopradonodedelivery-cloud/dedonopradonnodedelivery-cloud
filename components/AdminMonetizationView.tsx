@@ -143,10 +143,10 @@ const INITIAL_MONETIZATION_DATA: MonetizationItem[] = [
     unit: 'cota única anual/mensal',
     founder_price_locked: false,
     pricing: {
-      base: 'R$ 2.500,00 / mês',
-      baseValue: 2500.00,
-      founder: 'R$ 1.500,00 / mês',
-      founderValue: 1500.00
+      base: 'R$ 4.000,00 / mês',
+      baseValue: 4000.00,
+      founder: 'R$ 1.497,00 / mês',
+      founderValue: 1497.00
     }
   },
   {
@@ -204,7 +204,8 @@ export const AdminMonetizationView: React.FC<{ onBack: () => void }> = ({ onBack
     if (!item.pricing.founderValue || !item.pricing.baseValue) return null;
     
     const monthlySaving = item.pricing.baseValue - item.pricing.founderValue;
-    const discountPercent = Math.round((monthlySaving / item.pricing.baseValue) * 100);
+    // Usando precisão de uma casa decimal para alinhar com o requisito de 62.6%
+    const discountPercent = parseFloat(((monthlySaving / item.pricing.baseValue) * 100).toFixed(1));
     const annualSaving = monthlySaving * 12;
 
     return {
@@ -327,15 +328,25 @@ export const AdminMonetizationView: React.FC<{ onBack: () => void }> = ({ onBack
                                 </div>
                               )}
 
-                              {item.id === 'master_sponsor' && item.pricing.founder && (
-                                <div className="flex justify-between items-center p-4 bg-blue-500/5 rounded-2xl border border-blue-500/10">
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-8 h-8 rounded-lg bg-blue-500/20 flex items-center justify-center text-[#1E5BFF]">
-                                          <Award size={18} />
+                              {item.id === 'master_sponsor' && vantage && (
+                                <div className="p-5 bg-blue-500/5 border border-blue-500/20 rounded-[2rem] relative overflow-hidden">
+                                    <div className="flex justify-between items-center mb-4">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-8 h-8 rounded-lg bg-blue-500/20 flex items-center justify-center text-[#1E5BFF]">
+                                              <Award size={18} />
+                                            </div>
+                                            <span className="text-[10px] font-black text-blue-400 uppercase tracking-widest">Valor Lançamento</span>
                                         </div>
-                                        <span className="text-[10px] font-black text-blue-400 uppercase tracking-widest">Valor Lançamento</span>
+                                        <span className="text-xl font-black text-[#1E5BFF]">{item.pricing.founder}</span>
                                     </div>
-                                    <span className="text-xl font-black text-[#1E5BFF]">{item.pricing.founder}</span>
+                                    <div className="flex items-center justify-between text-[10px] font-bold">
+                                        <span className="text-slate-500 uppercase">Economia Mensal</span>
+                                        <span className="text-emerald-500">R$ {vantage.monthlySaving.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                                    </div>
+                                    <div className="mt-1 flex items-center justify-between text-[10px] font-bold">
+                                        <span className="text-slate-500 uppercase">Desconto Especial</span>
+                                        <span className="text-blue-500">{vantage.discountPercent}% OFF</span>
+                                    </div>
                                 </div>
                               )}
 

@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo } from 'react';
 import { 
   ChevronLeft, 
@@ -95,8 +96,8 @@ export const SponsorInfoView: React.FC<SponsorInfoViewProps> = ({ onBack, onNavi
 
   const totals = useMemo(() => {
     const count = selectedMonthIds.length;
-    const unitPrice = 1000;
-    const originalUnitPrice = 2500;
+    const unitPrice = 1497; // NOVO PREÇO EM 7
+    const originalUnitPrice = 4000; // PREÇO PADRÃO AJUSTADO
     const promoTotal = count * unitPrice;
     const originalTotal = count * originalUnitPrice;
     const savings = originalTotal - promoTotal;
@@ -128,11 +129,10 @@ export const SponsorInfoView: React.FC<SponsorInfoViewProps> = ({ onBack, onNavi
       setIsProcessing(false);
       setView('success');
       
-      // Notificar ADM sobre a nova contratação
       const savedNotifs = JSON.parse(localStorage.getItem('app_notifications') || '[]');
       const adminNotif: AppNotification = {
         id: `admin-master-${Date.now()}`,
-        userId: 'admin-auditoria', // ID fixo para ADM
+        userId: 'admin-auditoria',
         title: 'Nova Contratação Master!',
         message: `Uma loja acaba de contratar o Patrocinador Master para os meses: ${totals.monthsLabels}.`,
         type: 'system',
@@ -145,15 +145,13 @@ export const SponsorInfoView: React.FC<SponsorInfoViewProps> = ({ onBack, onNavi
 
   const handleOpenChat = () => {
     const orderId = `MASTER-${Math.floor(1000 + Math.random() * 9000)}`;
-    
-    // Preparar primeira mensagem automática
     const autoMsg = `✨ NOVO PATROCINADOR MASTER ✨
     
 Plano: Patrocinador Master
 Meses contratados: ${totals.monthsLabels}
 Valor original: R$ ${totals.originalTotal.toFixed(2)} (Riscado)
 Valor pago: R$ ${totals.promoTotal.toFixed(2)}
-Economia total: R$ ${totals.savings.toFixed(2)} • 60% OFF
+Economia total: R$ ${totals.savings.toFixed(2)} • 62,6% OFF
 
 Próximos passos para iniciarmos sua vitrine:
 1) Enviar sua logo (PNG preferencial)
@@ -163,7 +161,6 @@ Próximos passos para iniciarmos sua vitrine:
 
 Nosso time de designers iniciará a criação em breve!`;
 
-    // Salvar mensagem no storage do chat
     const chatKey = `msgs_${orderId}_admin_auditoria`;
     const initialMsgs = [{
       id: `sys-master-${Date.now()}`,
@@ -175,12 +172,9 @@ Nosso time de designers iniciará a criação em breve!`;
       timestamp: new Date().toISOString()
     }];
     localStorage.setItem(chatKey, JSON.stringify(initialMsgs));
-
-    // Navegar para o chat no modo morador/cliente
     onNavigate('service_chat', { requestId: orderId, professionalId: 'admin_auditoria', role: 'resident' });
   };
 
-  // --- RENDERIZAR TELA DE SUCESSO ---
   if (view === 'success') {
     return (
       <div className="min-h-screen bg-white dark:bg-gray-950 flex flex-col items-center justify-center p-8 text-center animate-in zoom-in duration-500">
@@ -202,7 +196,6 @@ Nosso time de designers iniciará a criação em breve!`;
     );
   }
 
-  // --- RENDERIZAR TELA DE PAGAMENTO ---
   if (view === 'payment') {
     return (
       <div className="min-h-screen bg-[#F8F9FC] dark:bg-gray-950 font-sans flex flex-col animate-in slide-in-from-right duration-300">
@@ -214,7 +207,6 @@ Nosso time de designers iniciará a criação em breve!`;
         </header>
 
         <main className="flex-1 p-6 space-y-8 overflow-y-auto no-scrollbar pb-32">
-          {/* Resumo */}
           <section className="bg-slate-900 rounded-[2.5rem] p-8 text-white shadow-xl relative overflow-hidden">
             <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 rounded-full blur-3xl -mr-10 -mt-10"></div>
             <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-blue-400 mb-4">Resumo da Contratação</h3>
@@ -232,12 +224,11 @@ Nosso time de designers iniciará a criação em breve!`;
                 <div className="flex items-center gap-2">
                   <span className="text-3xl font-black text-white">{formatBRL(totals.promoTotal)}</span>
                 </div>
-                <span className="text-[10px] font-black text-emerald-400 uppercase mt-1">Você economiza {formatBRL(totals.savings)} (60% OFF)</span>
+                <span className="text-[10px] font-black text-emerald-400 uppercase mt-1">Você economiza {formatBRL(totals.savings)} (62,6% OFF)</span>
               </div>
             </div>
           </section>
 
-          {/* Formas de Pagamento */}
           <section className="space-y-4">
             <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest ml-1">Forma de Pagamento</h3>
             <div className="flex gap-2 p-1 bg-gray-100 dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800">
@@ -312,11 +303,9 @@ Nosso time de designers iniciará a criação em breve!`;
     );
   }
 
-  // --- RENDERIZAR TELA DE VENDA ---
   return (
     <div className="min-h-screen bg-[#F8F9FC] dark:bg-gray-950 font-sans animate-in slide-in-from-right duration-300 flex flex-col relative overflow-x-hidden">
       
-      {/* 1. CABEÇALHO */}
       <header className="sticky top-0 z-40 bg-white/90 dark:bg-gray-950/90 backdrop-blur-md px-5 h-16 flex items-center gap-4 border-b border-gray-100 dark:border-gray-800 shrink-0">
         <button onClick={onBack} className="p-2 -ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
           <ChevronLeft className="w-6 h-6 text-gray-800 dark:text-white" />
@@ -328,7 +317,6 @@ Nosso time de designers iniciará a criação em breve!`;
       </header>
 
       <main className="flex-1 overflow-y-auto no-scrollbar pb-64">
-        {/* Intro Copy */}
         <section className="p-8 text-center bg-gradient-to-b from-white to-transparent dark:from-gray-900 dark:to-transparent">
           <div className="w-20 h-20 bg-amber-100 dark:bg-amber-900/30 rounded-[2.5rem] flex items-center justify-center mx-auto mb-6 border-4 border-white dark:border-gray-800 shadow-xl">
             <Crown className="w-10 h-10 text-amber-600 dark:text-amber-400" />
@@ -338,7 +326,6 @@ Nosso time de designers iniciará a criação em breve!`;
           </p>
         </section>
 
-        {/* 2. OFERTA COM ANCORAGEM */}
         <section className="px-6 mb-12">
           <div className="bg-slate-900 rounded-[2.5rem] p-8 text-white relative overflow-hidden shadow-2xl shadow-blue-500/10 border border-white/5">
             <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 rounded-full blur-3xl -mr-10 -mt-10"></div>
@@ -346,21 +333,21 @@ Nosso time de designers iniciará a criação em breve!`;
             <div className="relative z-10">
               <span className="text-[9px] font-black uppercase tracking-[0.2em] text-amber-400 mb-2 block">Oportunidade Única</span>
               <div className="flex flex-col gap-1 mb-6">
-                <span className="text-lg font-bold text-slate-500 line-through">De: R$ 2.500,00/mês</span>
+                <span className="text-lg font-bold text-slate-500 line-through">De: R$ 4.000,00/mês</span>
                 <div className="flex items-baseline gap-2">
                   <span className="text-xs font-black uppercase text-slate-300">Por:</span>
-                  <span className="text-4xl font-black text-white tracking-tighter">{formatBRL(1000)}<span className="text-base">/mês</span></span>
+                  <span className="text-4xl font-black text-white tracking-tighter">{formatBRL(1497)}<span className="text-base">/mês</span></span>
                 </div>
               </div>
 
               <div className="space-y-2">
                 <div className="flex items-center gap-2 bg-emerald-500/10 text-emerald-400 w-fit px-3 py-1.5 rounded-full border border-emerald-500/20">
                   <TrendingUp size={14} />
-                  <span className="text-[10px] font-black uppercase tracking-widest">Você economiza R$ 1.500,00 por mês</span>
+                  <span className="text-[10px] font-black uppercase tracking-widest">Você economiza R$ 2.503,00 por mês</span>
                 </div>
                 <div className="flex items-center gap-2 bg-blue-500/10 text-blue-400 w-fit px-3 py-1.5 rounded-full border border-blue-500/20">
                   <Zap size={14} />
-                  <span className="text-[10px] font-black uppercase tracking-widest">Desconto de 60% na inauguração</span>
+                  <span className="text-[10px] font-black uppercase tracking-widest">Desconto de 62,6% na inauguração</span>
                 </div>
               </div>
 
@@ -371,7 +358,6 @@ Nosso time de designers iniciará a criação em breve!`;
           </div>
         </section>
 
-        {/* 3. PROVA DE VALOR */}
         <section className="px-6 mb-12">
           <h3 className="text-xs font-black text-gray-400 uppercase tracking-[0.2em] mb-6 ml-1">Por que o Patrocinador Master vale mais</h3>
           <div className="space-y-4">
@@ -395,7 +381,6 @@ Nosso time de designers iniciará a criação em breve!`;
           </div>
         </section>
 
-        {/* 4. ONDE SUA MARCA APARECE */}
         <section className="px-6 mb-12">
           <h3 className="text-xs font-black text-gray-400 uppercase tracking-[0.2em] mb-6 ml-1">Sua marca em quase todo o app</h3>
           <div className="grid grid-cols-1 gap-3">
@@ -418,7 +403,6 @@ Nosso time de designers iniciará a criação em breve!`;
           </div>
         </section>
 
-        {/* 5. SELEÇÃO DE MESES */}
         <section className="px-6 mb-12">
           <div className="bg-white dark:bg-gray-900 rounded-[2.5rem] p-8 border border-gray-100 dark:border-gray-800 shadow-sm">
             <h3 className="text-lg font-black text-gray-900 dark:text-white uppercase tracking-tighter mb-1">Escolha os meses</h3>
@@ -445,10 +429,10 @@ Nosso time de designers iniciará a criação em breve!`;
                   >
                     {month.label}
                     {!month.available && (
-                      <span className="absolute -top-1.5 -right-1.5 bg-gray-400 dark:bg-gray-700 text-white text-[7px] px-1 py-0.5 rounded-md">Indisponível</span>
+                      <span className="absolute -top-1 -right-1 bg-gray-400 dark:bg-gray-700 text-white text-[7px] px-1 py-0.5 rounded-md">Indisponível</span>
                     )}
                     {isSelected && (
-                      <div className="absolute -top-1.5 -right-1.5 bg-emerald-500 text-white p-0.5 rounded-full shadow-md">
+                      <div className="absolute -top-1 -right-1 bg-emerald-500 text-white p-0.5 rounded-full shadow-md">
                         <CheckCircle2 size={12} strokeWidth={3} />
                       </div>
                     )}
@@ -469,7 +453,6 @@ Nosso time de designers iniciará a criação em breve!`;
           </div>
         </section>
 
-        {/* 6. FAQ SECTION */}
         <section className="px-6 mb-24">
             <h3 className="text-xs font-black text-gray-400 uppercase tracking-[0.2em] mb-6 ml-1">Dúvidas Frequentes</h3>
             <div className="space-y-3">
@@ -496,7 +479,6 @@ Nosso time de designers iniciará a criação em breve!`;
 
       </main>
 
-      {/* 6. RESUMO DA COMPRA (FIXO) */}
       <div className="fixed bottom-[80px] left-0 right-0 z-[50] bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl border-t border-gray-100 dark:border-gray-800 p-6 shadow-[0_-10px_40px_rgba(0,0,0,0.1)] max-w-md mx-auto">
         <div className="flex items-center justify-between mb-4">
           <div className="flex flex-col">
@@ -508,7 +490,7 @@ Nosso time de designers iniciará a criação em breve!`;
           </div>
           <div className="text-right flex flex-col items-end">
             <span className="text-[10px] font-black text-emerald-500 uppercase bg-emerald-50 dark:bg-emerald-900/20 px-2 py-0.5 rounded-full border border-emerald-100 dark:border-emerald-800">Economia {formatBRL(totals.savings)}</span>
-            <span className="text-[10px] font-black text-blue-500 uppercase mt-1">60% OFF</span>
+            <span className="text-[10px] font-black text-blue-500 uppercase mt-1">62,6% OFF</span>
           </div>
         </div>
 
