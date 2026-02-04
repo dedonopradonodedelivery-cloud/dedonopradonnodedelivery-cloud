@@ -23,7 +23,8 @@ import {
   Crown,
   Newspaper,
   Lock,
-  ShieldCheck
+  ShieldCheck,
+  TrendingUp
 } from 'lucide-react';
 import { User } from '@supabase/supabase-js';
 import { StoreBannerEditor } from '@/components/StoreBannerEditor';
@@ -62,6 +63,12 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
     CAT: 29.90,
     COMBO: 89.90, // Desconto se ambos marcados
     PRO_ART: 69.90
+  };
+
+  const FULL_PRICES = {
+    HOME: 199.90,
+    CAT: 159.90,
+    COMBO: 359.80 // Soma dos cheios
   };
 
   const summary = useMemo(() => {
@@ -170,10 +177,17 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
         
         {/* 1. ONDE APARECER */}
         <section className="space-y-6">
-          <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-blue-500 flex items-center gap-2 px-1">
-            <Target size={14} /> 1. Onde deseja aparecer?
-          </h3>
+          <div className="px-1 space-y-1">
+            <h3 className="text-xl font-black text-white uppercase tracking-tighter flex items-center gap-2">
+              Domine a atenção do seu bairro
+            </h3>
+            <p className="text-sm font-medium text-slate-400 leading-relaxed">
+              Coloque sua loja no topo do app e seja a primeira escolha de quem mora e compra perto de você.
+            </p>
+          </div>
+
           <div className="grid grid-cols-1 gap-4">
+              {/* HOME */}
               <button 
                 onClick={() => setPlacement({ home: true, cat: false })} 
                 className={`flex items-start text-left p-6 rounded-[2.5rem] border-2 transition-all gap-5 ${placement.home && !placement.cat ? 'bg-blue-600/10 border-blue-500 shadow-lg' : 'bg-white/5 border-white/10'}`}
@@ -184,12 +198,22 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
                       <p className="font-black text-white uppercase tracking-tight">Home</p>
                       <span className="text-[7px] font-black bg-blue-500/20 text-blue-400 px-1.5 py-0.5 rounded border border-blue-500/30 uppercase tracking-widest">Fundador Protegido</span>
                     </div>
-                    <p className="text-sm font-bold text-slate-300">R$ 69,90/mês</p>
-                    <p className="text-[7px] text-emerald-400 font-bold uppercase mt-1">Preço garantido por 12 meses</p>
-                    <p className="text-[10px] text-slate-500 mt-2 leading-relaxed">Exibido na página inicial do aplicativo.</p>
+                    <div className="flex flex-col">
+                      <span className="text-sm text-slate-500 line-through font-bold">R$ 199,90/mês</span>
+                      <div className="flex items-baseline gap-1">
+                        <span className="text-xl font-black text-white">R$ 69,90</span>
+                        <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">/mês</span>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 mt-2">
+                      <span className="text-[8px] font-black bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded border border-emerald-500/20 uppercase tracking-widest">Economize R$ 130,00</span>
+                      <span className="text-[8px] font-black text-blue-400 uppercase">65% OFF</span>
+                    </div>
+                    <p className="text-[7px] text-emerald-400 font-bold uppercase mt-2">Preço garantido por 12 meses</p>
                 </div>
               </button>
 
+              {/* SUBCATEGORIAS */}
               <button 
                 onClick={() => setPlacement({ home: false, cat: true })} 
                 className={`flex items-start text-left p-6 rounded-[2.5rem] border-2 transition-all gap-5 ${!placement.home && placement.cat ? 'bg-blue-600/10 border-blue-500 shadow-lg' : 'bg-white/5 border-white/10'}`}
@@ -200,26 +224,45 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
                       <p className="font-black text-white uppercase tracking-tight">Subcategorias</p>
                       <span className="text-[7px] font-black bg-blue-500/20 text-blue-400 px-1.5 py-0.5 rounded border border-blue-500/30 uppercase tracking-widest">Fundador Protegido</span>
                     </div>
-                    <p className="text-sm font-bold text-slate-300">R$ 29,90/mês</p>
-                    <p className="text-[7px] text-emerald-400 font-bold uppercase mt-1">Preço garantido por 12 meses</p>
-                    <p className="text-[10px] text-slate-500 mt-2 leading-relaxed">Destaque no topo das buscas específicas.</p>
+                    <div className="flex flex-col">
+                      <span className="text-sm text-slate-500 line-through font-bold">R$ 159,90/mês</span>
+                      <div className="flex items-baseline gap-1">
+                        <span className="text-xl font-black text-white">R$ 29,90</span>
+                        <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">/mês</span>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 mt-2">
+                      <span className="text-[8px] font-black bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded border border-emerald-500/20 uppercase tracking-widest">Economize R$ 130,00</span>
+                      <span className="text-[8px] font-black text-blue-400 uppercase">81% OFF</span>
+                    </div>
+                    <p className="text-[7px] text-emerald-400 font-bold uppercase mt-2">Preço garantido por 12 meses</p>
                 </div>
               </button>
 
+              {/* COMBO */}
               <button 
                 onClick={() => setPlacement({ home: true, cat: true })} 
                 className={`relative flex items-start text-left p-6 rounded-[2.5rem] border-2 transition-all gap-5 ${placement.home && placement.cat ? 'bg-blue-600/10 border-blue-500 shadow-lg' : 'bg-white/5 border-white/10'}`}
               >
-                <div className="absolute -top-3 right-6 bg-amber-400 text-slate-950 text-[8px] font-black px-2 py-0.5 rounded uppercase">Melhor Oferta</div>
+                <div className="absolute -top-3 right-6 bg-amber-400 text-slate-950 text-[8px] font-black px-2 py-0.5 rounded uppercase shadow-lg border border-amber-300">Melhor Pitch</div>
                 <div className={`p-4 rounded-2xl shrink-0 ${placement.home && placement.cat ? 'bg-blue-500 text-white' : 'bg-white/5 text-slate-400'}`}><Zap size={28} /></div>
                 <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
                       <p className="font-black text-white uppercase tracking-tight">Home + Subcategorias</p>
                       <span className="text-[7px] font-black bg-blue-500/20 text-blue-400 px-1.5 py-0.5 rounded border border-blue-500/30 uppercase tracking-widest">Fundador Protegido</span>
                     </div>
-                    <p className="text-sm font-bold text-slate-300">R$ 89,90/mês</p>
-                    <p className="text-[7px] text-emerald-400 font-bold uppercase mt-1">Preço garantido por 12 meses</p>
-                    <p className="text-[10px] text-slate-500 mt-2 leading-relaxed">Máximo alcance e visibilidade no bairro.</p>
+                    <div className="flex flex-col">
+                      <span className="text-sm text-slate-500 line-through font-bold">R$ 359,80/mês</span>
+                      <div className="flex items-baseline gap-1">
+                        <span className="text-xl font-black text-white">R$ 89,90</span>
+                        <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">/mês</span>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 mt-2">
+                      <span className="text-[8px] font-black bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded border border-emerald-500/20 uppercase tracking-widest">Economize R$ 269,90</span>
+                      <span className="text-[8px] font-black text-blue-400 uppercase">75% OFF</span>
+                    </div>
+                    <p className="text-[7px] text-emerald-400 font-bold uppercase mt-2">Preço garantido por 12 meses</p>
                 </div>
               </button>
 
