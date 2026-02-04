@@ -31,11 +31,6 @@ import { useAuth } from '../contexts/AuthContext';
 import { User } from '@supabase/supabase-js';
 import { useNeighborhood } from '../contexts/NeighborhoodContext';
 
-// --- CONFIGURAÇÃO DE DESENVOLVIMENTO ---
-// Defina como true para pular o vídeo ao clicar no Play.
-// Defina como false para produção.
-const DEV_SKIP_VIDEO = true;
-
 interface MenuViewProps {
   user: User | null;
   userRole: 'cliente' | 'lojista' | null;
@@ -47,7 +42,7 @@ interface MenuViewProps {
 const MenuSection: React.FC<{ title: string; children: React.ReactNode }> = ({ title, children }) => (
   <div className="space-y-3 mb-8">
     <h3 className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.2em] ml-2 mb-2">{title}</h3>
-    <div className="bg-white dark:bg-gray-900 rounded-[2.5rem] overflow-hidden border border-gray-100 dark:border-gray-800 shadow-sm">
+    <div className="space-y-2">
       {children}
     </div>
   </div>
@@ -64,10 +59,10 @@ const MenuItem: React.FC<{
 }> = ({ icon: Icon, label, sublabel, badge, onClick, isDestructive, color = "text-gray-500" }) => (
   <button 
     onClick={onClick} 
-    className="w-full p-4 flex items-center justify-between border-b last:border-b-0 border-gray-50 dark:border-gray-800 active:bg-gray-50 dark:active:bg-gray-800/50 transition-colors group"
+    className={`w-full p-4 flex items-center justify-between bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm active:scale-[0.98] transition-all group`}
   >
     <div className="flex items-center gap-3">
-      <div className={`w-10 h-10 rounded-2xl flex items-center justify-center transition-colors ${isDestructive ? 'bg-red-50 text-red-500' : `bg-gray-50 dark:bg-gray-800 group-hover:bg-blue-50 ${color}`}`}>
+      <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors ${isDestructive ? 'bg-red-50 text-red-500' : `bg-gray-50 dark:bg-gray-800 group-hover:bg-blue-50 ${color}`}`}>
         <Icon size={20} />
       </div>
       <div className="text-left">
@@ -94,26 +89,20 @@ export const MenuView: React.FC<MenuViewProps> = ({
   const { currentNeighborhood } = useNeighborhood();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   
-  // Lógica de vídeo de onboarding para o usuário
-  const videoRef = useRef<HTMLVideoElement>(null);
+  const storageKey = `onboarding_video_user_${user?.id}`;
   const [hasWatchedVideo, setHasWatchedVideo] = useState(() => {
-    return localStorage.getItem(`onboarding_video_user_${user?.id}`) === 'true';
+    return localStorage.getItem(storageKey) === 'true';
   });
   const [isPlaying, setIsPlaying] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   const handleVideoEnd = () => {
     setHasWatchedVideo(true);
     setIsPlaying(false);
-    localStorage.setItem(`onboarding_video_user_${user?.id}`, 'true');
+    localStorage.setItem(storageKey, 'true');
   };
 
   const handlePlayVideo = () => {
-    // DEV MODE: Pula o vídeo imediatamente para facilitar testes
-    if (DEV_SKIP_VIDEO) {
-      handleVideoEnd();
-      return;
-    }
-
     if (videoRef.current) {
       videoRef.current.play();
       setIsPlaying(true);
@@ -125,8 +114,6 @@ export const MenuView: React.FC<MenuViewProps> = ({
     setIsLoggingOut(true);
     try { await signOut(); onNavigate('home'); } catch (error) { console.warn(error); } finally { setIsLoggingOut(false); }
   };
-
-  const couponsCount = 2; // Mock
 
   if (!user) {
     return (
@@ -155,81 +142,56 @@ export const MenuView: React.FC<MenuViewProps> = ({
 
       <div className="px-5">
         
-        {/* BANNER DE ONBOARDING OBRIGATÓRIO PARA O USUÁRIO */}
-        <section className="mt-6">
-          <div className={`relative bg-slate-900 rounded-[2rem] overflow-hidden shadow-2xl transition-all duration-500 ${hasWatchedVideo ? 'border border-emerald-500/30' : 'border border-blue-500/30 ring-4 ring-blue-500/5'}`}>
-            <div className="p-6">
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex items-center gap-3">
-                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${hasWatchedVideo ? 'bg-emerald-500/10 text-emerald-500' : 'bg-blue-500/10 text-blue-500'}`}>
-                    {hasWatchedVideo ? <CheckCircle2 size={24} /> : <Play size={24} className="ml-1" />}
-                  </div>
-                  <div>
-                    <h3 className="font-black text-white text-sm uppercase tracking-tight">
-                      {hasWatchedVideo ? "Onboarding Concluído" : "Como o app funciona"}
-                    </h3>
-                    <p className="text-[10px] text-slate-400 font-medium leading-relaxed max-w-[200px]">
-                      {hasWatchedVideo 
-                        ? "Você já conhece as regras do bairro! Aproveite." 
-                        : "Este vídeo explica como usar o app e aproveitar tudo do seu bairro."}
-                    </p>
+        {/* BANNER DE ONBOARDING - SÓ APARECE SE NÃO ASSISTIDO */}
+        {!hasWatchedVideo && (
+          <section className="mt-6">
+            <div className="relative bg-slate-900 rounded-[2rem] overflow-hidden shadow-2xl border border-blue-500/30 ring-4 ring-blue-500/5">
+              <div className="p-6">
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-blue-500/10 text-blue-500">
+                      <Play size={24} className="ml-1" />
+                    </div>
+                    <div>
+                      <h3 className="font-black text-white text-sm uppercase tracking-tight">Como o app funciona</h3>
+                      <p className="text-[10px] text-slate-400 font-medium leading-relaxed max-w-[200px]">Este vídeo explica como usar o app e aproveitar tudo do seu bairro.</p>
+                    </div>
                   </div>
                 </div>
-                {hasWatchedVideo && (
-                  <span className="bg-emerald-500 text-white text-[8px] font-black px-2 py-1 rounded-full uppercase tracking-widest">Assistido ✔</span>
-                )}
-              </div>
 
-              {/* PLAYER DE VÍDEO */}
-              <div className="relative aspect-video rounded-2xl overflow-hidden bg-black group border border-white/5">
-                <video 
-                  ref={videoRef}
-                  src="https://videos.pexels.com/video-files/3129957/3129957-sd_540_960_30fps.mp4" 
-                  className="w-full h-full object-cover"
-                  onEnded={handleVideoEnd}
-                  playsInline
-                  controls={isPlaying}
-                  onPlay={() => setIsPlaying(true)}
-                />
-                
-                {!isPlaying && !hasWatchedVideo && (
-                  <div className="absolute inset-0 flex items-center justify-center bg-black/60 backdrop-blur-[2px] transition-all group-hover:bg-black/40">
-                    <button 
-                      onClick={handlePlayVideo}
-                      className="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-2xl transform active:scale-90 transition-all hover:scale-105"
-                    >
-                      <Play className="w-8 h-8 text-blue-600 fill-blue-600 ml-1" />
-                    </button>
-                  </div>
-                )}
-              </div>
-
-              {!hasWatchedVideo && (
+                <div className="relative aspect-video rounded-2xl overflow-hidden bg-black group border border-white/5">
+                  <video 
+                    ref={videoRef}
+                    src="https://videos.pexels.com/video-files/3129957/3129957-sd_540_960_30fps.mp4" 
+                    className="w-full h-full object-cover"
+                    onEnded={handleVideoEnd}
+                    playsInline
+                    controls={isPlaying}
+                    onPlay={() => setIsPlaying(true)}
+                  />
+                  {!isPlaying && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/60 backdrop-blur-[2px]">
+                      <button onClick={handlePlayVideo} className="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-2xl transform active:scale-90 transition-all hover:scale-105">
+                        <Play className="w-8 h-8 text-blue-600 fill-blue-600 ml-1" />
+                      </button>
+                    </div>
+                  )}
+                </div>
                 <div className="mt-4 flex items-center justify-center gap-2 py-2 bg-white/5 rounded-xl border border-white/5 animate-pulse">
                   <Lock size={12} className="text-amber-500" />
-                  <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Painel bloqueado até o fim do vídeo</span>
+                  <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Ações limitadas até o fim do vídeo</span>
                 </div>
-              )}
-            </div>
-          </div>
-        </section>
-
-        {/* CONTEÚDO DO PAINEL (BLOQUEADO SE NÃO ASSISTIU) */}
-        <div className={`relative transition-all duration-700 ${!hasWatchedVideo ? 'opacity-40 grayscale pointer-events-none scale-[0.98]' : 'opacity-100 scale-100'}`}>
-          
-          {/* OVERLAY DE BLOQUEIO VISUAL */}
-          {!hasWatchedVideo && (
-            <div className="absolute inset-0 z-10 flex items-start justify-center pt-20 pointer-events-none">
-              <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-md px-6 py-4 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-2xl flex flex-col items-center gap-2">
-                  <Lock className="text-amber-500" size={24} />
-                  <p className="text-xs font-bold text-gray-700 dark:text-gray-200 uppercase tracking-tight">Painel Bloqueado</p>
               </div>
             </div>
-          )}
+          </section>
+        )}
 
+        {/* CONTEÚDO DO PAINEL */}
+        <div className={`relative transition-all duration-700 ${!hasWatchedVideo ? 'opacity-40 grayscale pointer-events-none' : 'opacity-100'}`}>
+          
           {/* 1. TOPO DO MENU: Perfil */}
           <div 
-            onClick={() => onNavigate('store_profile')} 
+            onClick={() => onNavigate('user_profile_full')} 
             className="mt-6 bg-white dark:bg-gray-900 p-6 rounded-[2.5rem] shadow-sm border border-gray-100 dark:border-gray-800 flex items-center gap-5 cursor-pointer active:scale-[0.98] mb-8 group transition-all"
           >
             <div className="w-16 h-16 rounded-[1.5rem] bg-gray-100 dark:bg-gray-800 flex items-center justify-center overflow-hidden border-4 border-white dark:border-gray-950 shadow-md group-hover:scale-105 transition-transform">
@@ -246,7 +208,6 @@ export const MenuView: React.FC<MenuViewProps> = ({
             </div>
           </div>
 
-          {/* 2. BLOCO: MINHA ATIVIDADE NO BAIRRO */}
           <MenuSection title="Minha atividade no bairro">
               <MenuItem 
                   icon={MessageSquare} 
@@ -278,127 +239,52 @@ export const MenuView: React.FC<MenuViewProps> = ({
               />
           </MenuSection>
 
-          {/* 3. BLOCO: GERAL */}
           <MenuSection title="Geral">
               <MenuItem 
                   icon={Ticket} 
                   label="Meus Cupons" 
-                  badge={couponsCount > 0 ? `${couponsCount} ativos` : undefined}
                   onClick={() => onNavigate('user_coupons')}
                   color="text-emerald-500"
               />
               <MenuItem 
                   icon={Heart} 
                   label="Favoritos" 
-                  sublabel="Lojas e anúncios que você marcou"
+                  sublabel="Lojas e anúncios marcados"
                   onClick={() => onNavigate('favorites')}
                   color="text-rose-500"
               />
               <MenuItem 
                   icon={Bookmark} 
                   label="Postagens Salvas" 
-                  sublabel="Conteúdos do JPA Conversa"
                   onClick={() => onNavigate('saved_posts')}
                   color="text-blue-400"
               />
-              <MenuItem 
-                  icon={MapPin} 
-                  label="Meus Bairros" 
-                  sublabel="Bairro principal e interesses"
-                  onClick={() => onNavigate('my_neighborhoods')}
-                  color="text-orange-500"
-              />
           </MenuSection>
 
-          {/* 4. NOTIFICAÇÕES */}
-          <MenuSection title="Comunicação">
-              <MenuItem 
-                  icon={Bell} 
-                  label="Notificações" 
-                  sublabel="Alertas, respostas e cupons"
-                  onClick={() => onNavigate('notifications')}
-                  color="text-blue-600"
-              />
-          </MenuSection>
-
-          {/* 5. INSTITUCIONAL */}
           <MenuSection title="Institucional">
-              <MenuItem 
-                  icon={Smartphone} 
-                  label="Como funciona o app" 
-                  sublabel="Guia rápido do Localizei JPA"
-                  onClick={() => onNavigate('about_app')}
-                  color="text-blue-500"
-              />
-              <MenuItem 
-                  icon={Info} 
-                  label="Quem Somos" 
-                  sublabel="Manifesto, missão e valores"
-                  onClick={() => onNavigate('about')}
-                  color="text-slate-500"
-              />
-              <MenuItem 
-                  icon={HelpCircle} 
-                  label="Suporte" 
-                  sublabel="contato.localizeijpa@gmail.com"
-                  onClick={() => onNavigate('support')}
-                  color="text-indigo-400"
-              />
-              <MenuItem 
-                  icon={Lightbulb} 
-                  label="Sugerir melhoria no app" 
-                  sublabel="Ajude a melhorar o Localizei JPA"
-                  onClick={() => onNavigate('app_suggestion')}
-                  color="text-amber-500"
-              />
+              <MenuItem icon={Smartphone} label="Como funciona o app" onClick={() => onNavigate('about_app')} color="text-blue-500" />
+              <MenuItem icon={Info} label="Quem Somos" onClick={() => onNavigate('about')} color="text-slate-500" />
+              <MenuItem icon={HelpCircle} label="Suporte" onClick={() => onNavigate('support')} color="text-indigo-400" />
+              <MenuItem icon={Lightbulb} label="Sugerir melhoria" onClick={() => onNavigate('app_suggestion')} color="text-amber-500" />
           </MenuSection>
 
-          {/* 6. CONFIGURAÇÕES */}
           <MenuSection title="Configurações">
-              <MenuItem 
-                  icon={Moon} 
-                  label="Modo escuro" 
-                  sublabel="Em breve"
-                  onClick={() => {}}
-                  color="text-gray-400"
-              />
-              <MenuItem 
-                  icon={ShieldCheck} 
-                  label="Privacidade" 
-                  sublabel="Seus dados e termos"
-                  onClick={() => onNavigate('privacy_policy')}
-                  color="text-emerald-600"
-              />
-              <MenuItem 
-                  icon={LogOut} 
-                  label="Sair da conta" 
-                  onClick={handleLogout}
-                  isDestructive
-              />
+              <MenuItem icon={ShieldCheck} label="Privacidade" onClick={() => onNavigate('privacy_policy')} color="text-emerald-600" />
+              <MenuItem icon={LogOut} label="Sair da conta" onClick={handleLogout} isDestructive />
           </MenuSection>
 
-          {/* 7. PATROCINADOR MASTER FINAL */}
-          <div className="mt-4 mb-10 px-2 opacity-80 hover:opacity-100 transition-opacity">
-              <div 
-                onClick={() => onNavigate('patrocinador_master')}
-                className="bg-slate-900 rounded-3xl p-5 border border-white/5 flex items-center justify-between cursor-pointer group"
-              >
+          <div className="mt-4 mb-10 px-2 opacity-80">
+              <div onClick={() => onNavigate('patrocinador_master')} className="bg-slate-900 rounded-3xl p-5 border border-white/5 flex items-center justify-between cursor-pointer group">
                   <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-xl bg-amber-400/20 flex items-center justify-center text-amber-400">
-                          <Crown size={18} />
-                      </div>
+                      <div className="w-8 h-8 rounded-xl bg-amber-400/20 flex items-center justify-center text-amber-400"><Crown size={18} /></div>
                       <div>
-                          <p className="text-[10px] font-black text-amber-400 uppercase tracking-widest leading-none">Patrocinador Master do Localizei JPA</p>
+                          <p className="text-[10px] font-black text-amber-400 uppercase tracking-widest leading-none">Patrocinador Master</p>
                           <p className="text-sm font-bold text-white mt-1">Grupo Esquematiza</p>
                       </div>
                   </div>
                   <ArrowRight size={16} className="text-slate-500 group-hover:text-white group-hover:translate-x-1 transition-all" />
               </div>
           </div>
-        </div>
-
-        <div className="text-center opacity-30 py-4">
-          <p className="text-[9px] font-black text-gray-400 uppercase tracking-[0.4em]">Localizei JPA • v1.6.0</p>
         </div>
       </div>
     </div>
