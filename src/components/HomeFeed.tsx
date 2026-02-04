@@ -6,20 +6,20 @@ import {
   Sparkles, 
   ArrowRight, 
   Ticket,
-  CheckCircle2,
-  Lock,
-  Zap,
-  Loader2,
-  Hammer,
-  Plus,
-  Heart,
-  Bookmark,
+  CheckCircle2, 
+  Lock, 
+  Zap, 
+  Loader2, 
+  Hammer, 
+  Plus, 
+  Heart, 
+  Bookmark, 
   Home as HomeIcon,
-  MessageSquare,
-  MapPin,
-  Camera,
-  X,
-  Send,
+  MessageSquare, 
+  MapPin, 
+  Camera, 
+  X, 
+  Send, 
   ChevronRight,
 } from 'lucide-react';
 import { LojasEServicosList } from './LojasEServicosList';
@@ -54,12 +54,6 @@ const MiniPostCard: React.FC<{ post: CommunityPost; onNavigate: (view: string) =
   // Garante que SEMPRE haja uma imagem, usando fallback determinístico se necessário
   const postImage = post.imageUrl || (post.imageUrls && post.imageUrls.length > 0 ? post.imageUrls[0] : getFallbackImage(post.id));
   
-  const handleAction = (e: React.MouseEvent, message: string) => {
-      e.stopPropagation();
-      alert(message);
-  };
-
-  // Ajuste de largura para ~3 itens na tela (mobile)
   return (
     <div className="flex-shrink-0 w-28 snap-center p-1">
       <div 
@@ -117,7 +111,7 @@ const MiniClassifiedCard: React.FC<{ item: Classified; onNavigate: (view: string
   );
 };
 
-interface HomeFeedFeedProps {
+interface HomeFeedProps {
   onNavigate: (view: string, data?: any) => void;
   onSelectCategory: (category: Category) => void;
   onStoreClick: (store: Store) => void;
@@ -126,7 +120,7 @@ interface HomeFeedFeedProps {
   userRole: 'cliente' | 'lojista' | null;
 }
 
-export const HomeFeed: React.FC<HomeFeedFeedProps> = ({ 
+export const HomeFeed: React.FC<HomeFeedProps> = ({ 
   onNavigate, 
   onSelectCategory, 
   onStoreClick, 
@@ -145,9 +139,7 @@ export const HomeFeed: React.FC<HomeFeedFeedProps> = ({
   // Adjust to 8 items per page (4 columns x 2 rows)
   const itemsPerPage = 8; 
   
-  // Reorder categories as requested: 
-  // Page 1: Saúde, Moda, Pets, Pro, Beleza, Autos, Esportes, Educação
-  // Page 2: Remaining
+  // Reorder categories as requested
   const orderedCategories = useMemo(() => {
     const firstPageIds = [
       'cat-saude',    // Saúde
@@ -481,7 +473,11 @@ export const HomeFeed: React.FC<HomeFeedFeedProps> = ({
                     <button 
                       onClick={() => { 
                         setWizardStep(0); 
-                        onNavigate('service_chat', { requestId: lastCreatedRequestId }); 
+                        if(lastCreatedRequestId) {
+                          onNavigate('service_chat', { requestId: lastCreatedRequestId }); 
+                        } else {
+                          onNavigate('services_landing');
+                        }
                       }} 
                       className="w-full bg-[#1E5BFF] text-white font-black py-5 rounded-[2rem] shadow-xl uppercase tracking-widest text-xs active:scale-95 transition-all"
                     >
@@ -525,4 +521,10 @@ const SectionHeader: React.FC<{ icon: React.ElementType; title: string; subtitle
     </div>
     <button onClick={onSeeMore} className="text-[10px] font-black text-[#1E5BFF] uppercase tracking-widest hover:underline active:opacity-60">Ver mais</button>
   </div>
+);
+
+const ChevronDown = ({ size, className }: { size?: number, className?: string }) => (
+  <svg width={size || 24} height={size || 24} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <path d="m6 9 6 6 6-6"/>
+  </svg>
 );

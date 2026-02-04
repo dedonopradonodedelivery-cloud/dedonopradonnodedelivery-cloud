@@ -1,5 +1,5 @@
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Home, User as UserIcon, Newspaper, MessageSquare, Ticket } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { AuthModal } from '../AuthModal';
@@ -20,7 +20,9 @@ interface NavItem {
 
 export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, userRole }) => {
   const { user } = useAuth();
-  const [isAuthModalOpen, setIsAuthModalOpen] = React.useState(false);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  
+  // State removed: authModalProps is no longer needed here as the logic moved to a dedicated page
 
   const hasActiveCoupons = useMemo(() => {
     if (!user || userRole !== 'cliente') return false;
@@ -45,8 +47,10 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
   const handleTabClick = (item: NavItem) => {
     if (item.id === 'cupom_trigger') {
       if (!user) {
-        setIsAuthModalOpen(true);
+        // Redirect to Educational Landing Page for visitors
+        setActiveTab('coupon_landing');
       } else {
+        // Logged in logic
         if (userRole === 'lojista') {
           setActiveTab('merchant_coupons');
         } else {
@@ -61,28 +65,24 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
   const handleLoginSuccess = () => {
     setIsAuthModalOpen(false);
     const role = localStorage.getItem('localizei_user_role') || 'cliente';
-    if (role === 'lojista') {
-      setActiveTab('merchant_coupons');
-    } else {
-      setActiveTab('user_coupons');
-    }
+    // Logic for other auth triggers if any remain here
   };
 
   const renderIconOrAvatar = (item: NavItem, isActive: boolean) => {
     if (item.id === 'profile' && user) {
-      const photoUrl = user.user_metadata?.avatar_url;
       const userInitial = user.email?.charAt(0).toUpperCase() || user.user_metadata?.full_name?.charAt(0).toUpperCase() || 'U';
+      const photoUrl = user.user_metadata?.avatar_url;
 
       return (
-        <div className={`w-7 h-7 rounded-full overflow-hidden flex items-center justify-center transition-all duration-200 border-2 ${
+        <div className={`w-full h-full rounded-full overflow-hidden flex items-center justify-center transition-all duration-200 border ${
           isActive 
-            ? 'border-blue-600 scale-110 shadow-lg shadow-blue-500/20' 
-            : 'border-gray-200 dark:border-gray-700'
+            ? 'border-blue-600 shadow-sm' 
+            : 'border-transparent'
         }`}>
           {photoUrl ? (
             <img src={photoUrl} alt="Avatar" className="w-full h-full object-cover" />
           ) : (
-            <div className={`w-full h-full flex items-center justify-center text-[11px] font-black ${
+            <div className={`w-full h-full flex items-center justify-center text-[10px] font-black ${
               isActive ? 'bg-blue-600 text-white' : 'bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400'
             }`}>
               {userInitial}
@@ -93,14 +93,21 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
     }
 
     const Icon = item.icon;
+    const iconSize = item.isMainAction ? 24 : 22;
+    
+    const iconColor = isActive 
+        ? 'text-blue-600 dark:text-blue-400' 
+        : 'text-gray-400 dark:text-gray-500';
+
     return (
-      <div className="relative">
-        <Icon 
-          className={`w-6 h-6 transition-all duration-200 ${isActive ? 'text-blue-600' : 'text-blue-500'}`} 
-          strokeWidth={isActive ? 3 : 2.5} 
+      <div className="relative flex items-center justify-center w-full h-full">
+         <Icon 
+          size={iconSize}
+          className={`transition-colors duration-200 ${iconColor}`} 
+          strokeWidth={isActive ? 2.5 : 2} 
         />
-        {item.badge && !isActive && (
-          <span className="absolute -top-1.5 -right-1.5 w-3 h-3 bg-red-500 border-2 border-white dark:border-gray-900 rounded-full animate-pulse"></span>
+        {item.badge && (
+             <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white dark:border-gray-800 animate-pulse"></span>
         )}
       </div>
     );
@@ -112,8 +119,10 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
         <div className="grid w-full h-full grid-cols-5 items-center">
           {navItems.map((item) => {
             let isActive = false;
+            
             if (item.id === 'cupom_trigger') {
-               isActive = activeTab === 'merchant_coupons' || activeTab === 'user_coupons';
+               // Active state also covers the educational landing page
+               isActive = activeTab === 'merchant_coupons' || activeTab === 'user_coupons' || activeTab === 'coupon_landing';
             } else if (item.id === 'profile') {
                isActive = ['store_area', 'store_ads_module', 'weekly_promo', 'merchant_jobs', 'store_profile', 'store_support', 'about', 'support', 'favorites'].includes(activeTab) || activeTab === 'profile';
             } else {

@@ -3,24 +3,29 @@ import React, { useState, useMemo, useRef } from 'react';
 import { Store, Category, CommunityPost, ServiceRequest, ServiceUrgency, Classified } from '../types';
 import { 
   Compass, 
+  Sparkles, 
+  ArrowRight, 
   Ticket,
-  CheckCircle2,
-  Zap,
-  Loader2,
-  Hammer,
-  Plus,
+  CheckCircle2, 
+  Lock, 
+  Zap, 
+  Loader2, 
+  Hammer, 
+  Plus, 
+  Heart, 
+  Bookmark, 
   Home as HomeIcon,
-  MapPin,
-  Camera,
-  X,
-  Send,
+  MessageSquare, 
+  MapPin, 
+  Camera, 
+  X, 
+  Send, 
   ChevronRight,
-  Sparkles,
 } from 'lucide-react';
 import { LojasEServicosList } from './LojasEServicosList';
 import { User } from '@supabase/supabase-js';
 import { CATEGORIES, MOCK_COMMUNITY_POSTS, MOCK_CLASSIFIEDS } from '../constants';
-import { useNeighborhood } from '../contexts/NeighborhoodContext';
+import { useNeighborhood } from '@/contexts/NeighborhoodContext';
 import { LaunchOfferBanner } from './LaunchOfferBanner';
 import { HomeBannerCarousel } from './HomeBannerCarousel';
 import { FifaBanner } from './FifaBanner';
@@ -46,6 +51,7 @@ const getFallbackImage = (id: string) => {
 };
 
 const MiniPostCard: React.FC<{ post: CommunityPost; onNavigate: (view: string) => void; }> = ({ post, onNavigate }) => {
+  // Garante que SEMPRE haja uma imagem, usando fallback determinístico se necessário
   const postImage = post.imageUrl || (post.imageUrls && post.imageUrls.length > 0 ? post.imageUrls[0] : getFallbackImage(post.id));
   
   return (
@@ -105,7 +111,7 @@ const MiniClassifiedCard: React.FC<{ item: Classified; onNavigate: (view: string
   );
 };
 
-interface HomeFeedFeedProps {
+interface HomeFeedProps {
   onNavigate: (view: string, data?: any) => void;
   onSelectCategory: (category: Category) => void;
   onStoreClick: (store: Store) => void;
@@ -114,7 +120,7 @@ interface HomeFeedFeedProps {
   userRole: 'cliente' | 'lojista' | null;
 }
 
-export const HomeFeed: React.FC<HomeFeedFeedProps> = ({ 
+export const HomeFeed: React.FC<HomeFeedProps> = ({ 
   onNavigate, 
   onSelectCategory, 
   onStoreClick, 
@@ -125,11 +131,15 @@ export const HomeFeed: React.FC<HomeFeedFeedProps> = ({
   const [listFilter, setListFilter] = useState<'all' | 'top_rated' | 'open_now'>('all');
   const { currentNeighborhood } = useNeighborhood();
   
+  // Category Scroll Logic
   const categoryScrollRef = useRef<HTMLDivElement>(null);
   const [currentCategoryPage, setCurrentCategoryPage] = useState(0);
 
+  // Pagination Configuration
+  // Adjust to 8 items per page (4 columns x 2 rows)
   const itemsPerPage = 8; 
   
+  // Reorder categories as requested
   const orderedCategories = useMemo(() => {
     const firstPageIds = [
       'cat-saude',    // Saúde
@@ -152,7 +162,8 @@ export const HomeFeed: React.FC<HomeFeedFeedProps> = ({
   }, []);
 
   const allCategories = orderedCategories; 
-  
+  const totalPages = Math.ceil(allCategories.length / itemsPerPage);
+
   const [wizardStep, setWizardStep] = useState(0);
   const [selectedService, setSelectedService] = useState<string | null>(null);
   const [selectedUrgency, setSelectedUrgency] = useState<string | null>(null);
@@ -215,6 +226,7 @@ export const HomeFeed: React.FC<HomeFeedFeedProps> = ({
     }, 1500);
   };
 
+  // Chunk categories into pages
   const categoryPages = useMemo(() => {
     const pages = [];
     for (let i = 0; i < allCategories.length; i += itemsPerPage) {
@@ -286,8 +298,8 @@ export const HomeFeed: React.FC<HomeFeedFeedProps> = ({
       </section>
 
       {/* 3. ONDE O BAIRRO CONVERSA (Compacto) */}
-      <section className="bg-white dark:bg-gray-950 pt-2 pb-6 relative">
-        <div className="px-5">
+      <section className="bg-white dark:bg-gray-950 pt-2 pb-6 relative px-5">
+        <div className="">
             <div className="flex items-center justify-between mb-3">
                 <h2 className="text-lg font-bold text-gray-800 dark:text-white flex items-center gap-2">
                     JPA Conversa
@@ -300,7 +312,7 @@ export const HomeFeed: React.FC<HomeFeedFeedProps> = ({
         </div>
         
         <div className="relative group">
-            <div className="flex overflow-x-auto no-scrollbar snap-x -mx-3.5 px-3.5 pb-2">
+            <div className="flex overflow-x-auto no-scrollbar snap-x -mx-1 pb-2">
                 {MOCK_COMMUNITY_POSTS.slice(0, 5).map((post) => (
                     <MiniPostCard key={post.id} post={post} onNavigate={onNavigate} />
                 ))}
@@ -335,7 +347,7 @@ export const HomeFeed: React.FC<HomeFeedFeedProps> = ({
       </section>
 
       {/* 5. SERVIÇOS / PROFISSIONAIS (Banner Direcional) */}
-      <section className="px-5 mb-8">
+      <section className="px-5 mb-8 bg-white dark:bg-gray-950">
         <FifaBanner onClick={() => setWizardStep(1)} />
       </section>
 
@@ -461,7 +473,11 @@ export const HomeFeed: React.FC<HomeFeedFeedProps> = ({
                     <button 
                       onClick={() => { 
                         setWizardStep(0); 
-                        onNavigate('service_chat', { requestId: lastCreatedRequestId }); 
+                        if(lastCreatedRequestId) {
+                          onNavigate('service_chat', { requestId: lastCreatedRequestId }); 
+                        } else {
+                          onNavigate('services_landing');
+                        }
                       }} 
                       className="w-full bg-[#1E5BFF] text-white font-black py-5 rounded-[2rem] shadow-xl uppercase tracking-widest text-xs active:scale-95 transition-all"
                     >
@@ -505,4 +521,10 @@ const SectionHeader: React.FC<{ icon: React.ElementType; title: string; subtitle
     </div>
     <button onClick={onSeeMore} className="text-[10px] font-black text-[#1E5BFF] uppercase tracking-widest hover:underline active:opacity-60">Ver mais</button>
   </div>
+);
+
+const ChevronDown = ({ size, className }: { size?: number, className?: string }) => (
+  <svg width={size || 24} height={size || 24} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <path d="m6 9 6 6 6-6"/>
+  </svg>
 );

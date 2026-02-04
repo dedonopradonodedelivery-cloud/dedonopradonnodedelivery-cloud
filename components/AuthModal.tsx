@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
+// FIX: Corrected supabase import path from ../services/supabaseClient to ../lib/supabaseClient
 import { supabase } from '../lib/supabaseClient';
 import {
   X,
@@ -21,6 +22,8 @@ interface AuthModalProps {
   user: SupabaseUser | null;
   signupContext?: 'default' | 'merchant_lead_qr';
   onLoginSuccess?: () => void;
+  customTitle?: string;
+  customSubtitle?: string;
 }
 
 const DISPOSABLE_DOMAINS = [
@@ -54,13 +57,15 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   onClose,
   signupContext = 'default',
   onLoginSuccess,
+  customTitle,
+  customSubtitle
 }) => {
   const [mode, setMode] = useState<'login' | 'register'>('login');
   const [profileType, setProfileType] = useState<'cliente' | 'store'>('cliente');
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [website, setWebsite] = useState(''); // HoneyPot field for bots
+  const [website, setWebsite] = useState('');
 
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -73,12 +78,10 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       setSuccessMsg('');
       setWebsite('');
       setIsLoading(false);
-      // Se o contexto for cadastro de lead via QR, forçar modo registro de loja
       if (signupContext === 'merchant_lead_qr') {
         setMode('register');
         setProfileType('store');
       } else {
-        // Reset padrão
         setProfileType('cliente'); 
       }
     }
@@ -100,7 +103,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     e.preventDefault();
 
     if (website) {
-      onClose(); // Bot detected
+      onClose();
       return;
     }
 
@@ -115,7 +118,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
     try {
       if (mode === 'login') {
-        // --- LOGIN FLOW ---
         const { error } = await Promise.race([
             supabase.auth.signInWithPassword({
                 email,
@@ -128,15 +130,13 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         finishAuth();
 
       } else {
-        // --- REGISTER FLOW ---
         const role = profileType === 'store' ? 'lojista' : 'cliente';
 
-        // 1. Criar usuário no Auth
         const { data, error } = await supabase.auth.signUp({
           email,
           password,
           options: {
-            data: { role }, // Salva metadata importante
+            data: { role },
           },
         });
 
@@ -145,13 +145,11 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         if (data.session) {
           const userId = data.user?.id;
           if (userId) {
-            // 2. Garantir criação do perfil na tabela 'profiles'
-            // Isso é crucial para o App.tsx decidir qual tela mostrar
             const { error: profileError } = await supabase.from('profiles').upsert(
               {
                 id: userId,
                 email,
-                role, // 'cliente' ou 'lojista'
+                role,
                 created_at: new Date().toISOString()
               },
               { onConflict: 'id' }
@@ -159,16 +157,13 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
             if (profileError) {
                 console.error("Erro ao criar perfil:", profileError);
-                // Não bloqueamos o fluxo, mas logamos. O App.tsx tentará corrigir/criar depois.
             }
           }
 
           setSuccessMsg(role === 'lojista' ? 'Conta de Lojista criada! Acessando painel...' : 'Conta criada! Entrando...');
           
-          // Pequeno delay para usuário ler a mensagem
           setTimeout(() => finishAuth(), 1000);
         } else {
-          // Caso de confirmação de email obrigatória (se ativado no Supabase)
           setMode('login');
           setSuccessMsg('Conta criada. Verifique seu e-mail para confirmar.');
         }
@@ -197,11 +192,10 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     setError('');
     setSuccessMsg('');
     try {
-      // Supabase will handle the redirect, so no need to call finishAuth here
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: window.location.origin, // Ensures it redirects back to the app
+          redirectTo: window.location.origin,
         },
       });
       if (error) throw error;
@@ -222,10 +216,10 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
         <div className="text-center mb-6">
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white font-display">
-            {mode === 'login' ? 'Bem-vindo de volta' : 'Criar sua conta'}
+            {customTitle ? customTitle : (mode === 'login' ? 'Bem-vindo de volta' : 'Criar sua conta')}
             </h2>
             <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                {mode === 'login' ? 'Acesse para continuar' : 'Escolha seu tipo de perfil'}
+                {customSubtitle ? customSubtitle : (mode === 'login' ? 'Acesse para continuar' : 'Escolha seu tipo de perfil')}
             </p>
         </div>
 

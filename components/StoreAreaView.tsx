@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { 
   ChevronRight, 
@@ -26,7 +25,6 @@ import {
 import { User as SupabaseUser } from '@supabase/supabase-js';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
-import { InstitutionalSponsorBanner } from './InstitutionalSponsorBanner';
 
 interface StoreAreaViewProps {
   onBack: () => void;
@@ -103,7 +101,6 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
   return (
     <div className="min-h-screen bg-[#F8F9FB] dark:bg-gray-950 font-sans animate-in fade-in duration-500 pb-32">
       
-      {/* TOPO: PERFIL DA LOJA */}
       <div className="bg-white dark:bg-gray-900 px-6 pt-12 pb-8 border-b border-gray-100 dark:border-gray-800 shadow-sm mb-8">
         <div className="flex items-center gap-4">
           <div className="w-20 h-20 rounded-[2rem] border-4 border-white dark:border-gray-800 shadow-xl overflow-hidden shrink-0">
@@ -128,9 +125,8 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
 
       <div className="px-6 space-y-10">
         
-        {/* BLOCO 1: DESTAQUE DA SUA LOJA */}
         <section>
-          <SectionHeader title="Destaque da sua Loja" icon={Sparkles} />
+          <SectionHeader title="Ações" icon={Sparkles} />
           <div className="bg-white dark:bg-gray-800 rounded-[2.5rem] border border-gray-100 dark:border-gray-700 overflow-hidden shadow-sm">
             <ServiceBlock 
               icon={Crown} 
@@ -148,18 +144,11 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
             />
             <ServiceBlock 
               icon={LayoutGrid} 
-              label="Banners da Home" 
-              description="Anúncios visuais na página inicial do app"
+              label="Banners Home" 
+              description="Destaques visuais na página inicial"
               onClick={() => onNavigate('banner_sales_wizard')}
               colorClass="bg-purple-50 text-purple-600"
             />
-          </div>
-        </section>
-
-        {/* BLOCO 2: REPUTAÇÃO DA LOJA */}
-        <section>
-          <SectionHeader title="Reputação da Loja" />
-          <div className="bg-white dark:bg-gray-800 rounded-[2.5rem] border border-gray-100 dark:border-gray-700 overflow-hidden shadow-sm">
             <ServiceBlock 
               icon={Star} 
               label="Avaliações" 
@@ -171,10 +160,15 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
           </div>
         </section>
 
-        {/* BLOCO 3: GESTÃO E RESULTADOS */}
         <section>
-          <SectionHeader title="Gestão e Resultados" />
+          <SectionHeader title="Serviços" />
           <div className="bg-white dark:bg-gray-800 rounded-[2.5rem] border border-gray-100 dark:border-gray-700 overflow-hidden shadow-sm">
+            <ServiceBlock 
+              icon={MessageSquare} 
+              label="Chat com Designer" 
+              description="Criação e acompanhamento do seu banner"
+              onClick={() => onNavigate('store_ads_module', 'chat')} 
+            />
             <ServiceBlock 
               icon={BarChart3} 
               label="Performance" 
@@ -190,20 +184,6 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
           </div>
         </section>
 
-        {/* BLOCO 4: SERVIÇOS LOCALIZEI */}
-        <section>
-          <SectionHeader title="Serviços Localizei" />
-          <div className="bg-white dark:bg-gray-800 rounded-[2.5rem] border border-gray-100 dark:border-gray-700 overflow-hidden shadow-sm">
-            <ServiceBlock 
-              icon={MessageSquare} 
-              label="Chat com Designer" 
-              description="Criação e acompanhamento do seu banner"
-              onClick={() => onNavigate('store_ads_module', 'chat')} 
-            />
-          </div>
-        </section>
-
-        {/* BLOCO 5: PREFERÊNCIAS */}
         <section>
           <SectionHeader title="Preferências" />
           <div className="bg-white dark:bg-gray-800 rounded-[2.5rem] border border-gray-100 dark:border-gray-700 overflow-hidden shadow-sm">
@@ -221,9 +201,8 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
           </div>
         </section>
 
-        {/* BLOCO 6: AJUDA */}
         <section>
-          <SectionHeader title="Ajuda" />
+          <SectionHeader title="Suporte" />
           <div className="bg-white dark:bg-gray-800 rounded-[2.5rem] border border-gray-100 dark:border-gray-700 overflow-hidden shadow-sm">
             <ServiceBlock 
               icon={LifeBuoy} 
@@ -234,9 +213,8 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
           </div>
         </section>
 
-        {/* BLOCO 7: SOBRE */}
         <section>
-          <SectionHeader title="Sobre" />
+          <SectionHeader title="Geral" />
           <div className="bg-white dark:bg-gray-800 rounded-[2.5rem] border border-gray-100 dark:border-gray-700 overflow-hidden shadow-sm">
             <ServiceBlock 
               icon={Heart} 
@@ -255,11 +233,6 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
               onClick={handleLogout} 
             />
           </div>
-        </section>
-
-        {/* BANNER FINAL DO PATROCINADOR MASTER */}
-        <section className="mt-8">
-           <InstitutionalSponsorBanner type="merchant" onClick={() => onNavigate('patrocinador_master')} />
         </section>
 
       </div>

@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { 
   ChevronLeft, 
@@ -149,8 +148,6 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
   const paymentRef = useRef<HTMLDivElement>(null);
   const chatScrollRef = useRef<HTMLDivElement>(null);
 
-  // ... (rest of the component remains the same until return)
-
   useEffect(() => {
     if (isDesigner) {
       setView('designer_workspace');
@@ -177,10 +174,6 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
     ];
   }, []);
 
-  // ... (chat logic and other helpers remain the same) ...
-  
-  // Re-declare showToast, scrollTo, handleModeSelection, checkHoodAvailability, togglePeriod, selectAllAvailableHoods, handlePayPro, handleSaveDesign, prices, handleFooterClick, handleLogoUpload, confirmLogoSend, saveBriefing here to ensure context is correct
-  
   const showToast = (msg: string, type: 'info' | 'error' | 'designer' = 'info') => {
     setToast({ msg, type });
     setTimeout(() => setToast(null), 4000);
@@ -345,7 +338,6 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
   // --- Views ---
   
   if (view === 'chat_onboarding') {
-    // ... same code as before ...
      return (
         <div className="min-h-screen bg-[#020617] text-slate-100 flex flex-col items-center justify-center p-8 text-center animate-in fade-in duration-500">
             <header className="absolute top-0 left-0 right-0 p-6 flex">
@@ -361,7 +353,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
                 Este é o canal para criação e acompanhamento de banners com nosso time de designers.
             </p>
             <p className="text-slate-400 leading-relaxed max-w-sm mb-12">
-                Para iniciar um novo banner, crie um anúncio ou contrate a criação profissional.
+                Para iniciar um novo banner, crie um patrocinado ou contrate a criação profissional.
             </p>
             
             <button 
@@ -391,14 +383,41 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
       <header className="sticky top-0 z-40 bg-[#020617]/80 backdrop-blur-xl border-b border-white/5 px-6 py-4 flex items-center gap-4">
         <button onClick={onBack} className="p-2 bg-slate-900 rounded-xl text-slate-400 hover:text-white transition-all active:scale-95"><ChevronLeft size={20} /></button>
         <div>
-          <h1 className="font-bold text-lg leading-none flex items-center gap-2">Anunciar no Bairro <Crown size={16} className="text-amber-400 fill-amber-400" /></h1>
+          <h1 className="font-bold text-lg leading-none flex items-center gap-2">Patrocinar no Bairro <Crown size={16} className="text-amber-400 fill-amber-400" /></h1>
           <p className="text-[10px] text-blue-400 uppercase font-black tracking-widest mt-1">Configuração de Campanha</p>
         </div>
       </header>
 
       <main className="flex-1 p-6 space-y-16 pb-96 max-w-md mx-auto w-full">
         
-        {/* ... (Bloco de Destaque / Urgencia stays the same) ... */}
+        {/* BLOCO DE DESTAQUE: URGÊNCIA E CONVERSÃO */}
+        <section className="animate-in fade-in slide-in-from-top-4 duration-700">
+            <div className="bg-slate-900 border-l-4 border-blue-600 rounded-r-[2.5rem] p-8 shadow-2xl relative overflow-hidden group">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none"></div>
+                <div className="relative z-10">
+                    <div className="flex items-center gap-2 mb-3">
+                        <ShieldAlert className="w-5 h-5 text-blue-500" />
+                        <h3 className="text-lg font-black text-white leading-tight uppercase tracking-tighter">
+                            Seu concorrente pode estar aqui antes de você
+                        </h3>
+                    </div>
+                    <p className="text-sm text-slate-400 leading-relaxed mb-6 font-medium">
+                        Todos os dias, milhares de pessoas de Jacarepaguá (450 mil+ moradores) acessam o app em busca de produtos e serviços. 
+                        Os espaços de destaque são limitados e essa promoção de lançamento não tem data para acabar.
+                    </p>
+                    <div className="flex flex-col gap-2 pt-4 border-t border-white/5">
+                        <p className="text-xs font-black text-white uppercase tracking-widest flex items-center gap-2">
+                            <span className="w-1.5 h-1.5 bg-blue-500 rounded-full"></span>
+                            Quem garante o espaço agora sai na frente.
+                        </p>
+                        <p className="text-xs font-bold text-slate-500 uppercase tracking-widest flex items-center gap-2">
+                            <span className="w-1.5 h-1.5 bg-slate-700 rounded-full"></span>
+                            Quem deixa para depois, fica invisível.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
 
         {/* BLOCO 1: POSICIONAMENTO */}
         <section className="space-y-6">
@@ -434,8 +453,6 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
             ))}
           </div>
         </section>
-
-        {/* ... (Rest of the wizard sections: Period, Neighborhood, Design - identical to previous logic) ... */}
         
         {/* BLOCO 2: PERÍODO */}
         <section 
@@ -446,7 +463,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
               <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-blue-500 flex items-center gap-2 px-1">
                 <Calendar size={14} /> 2. Período de Exibição
               </h3>
-              <p className="text-[9px] text-slate-500 uppercase font-bold mt-1 ml-6">Escolha por quanto tempo quer anunciar.</p>
+              <p className="text-[9px] text-slate-500 uppercase font-bold mt-1 ml-6">Escolha por quanto tempo quer patrocinar.</p>
             </div>
             
             <div className={`flex gap-3 transition-all duration-700 ${highlightPeriod ? 'ring-2 ring-blue-500/20 rounded-3xl p-1' : ''}`}>
@@ -575,6 +592,39 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
           </div>
         </section>
 
+        {/* BLOCO 5: CHECKOUT FINAL */}
+        <section ref={paymentRef} className={`space-y-8 transition-all duration-500 ${!isArtSaved ? 'opacity-20 pointer-events-none' : 'opacity-100'}`}>
+            <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-blue-500 flex items-center gap-2 px-1"><Check size={14} /> 5. Finalizar Compra</h3>
+            <div className="bg-slate-900 rounded-[2.5rem] p-8 border border-white/10 shadow-2xl space-y-8">
+                <div className="space-y-2">
+                    <div className="flex justify-between text-sm"><span className="text-slate-500">Modo: {selectedMode?.label}</span><span className="font-bold text-white">R$ {selectedMode?.price.toFixed(2)} / mês</span></div>
+                    <div className="flex justify-between text-sm"><span className="text-slate-500">Bairros selecionados</span><span className="font-bold text-white">× {selectedNeighborhoods.length}</span></div>
+                    <div className="flex justify-between text-sm"><span className="text-slate-500">Vigência Total</span><span className="font-bold text-white">{prices.isPackage ? '90 dias' : '30 dias'}</span></div>
+                    {artChoice === 'pro' && <div className="flex justify-between text-sm text-amber-400"><span className="font-medium">Arte Profissional</span><span className="font-black">+ R$ 69,90</span></div>}
+                    
+                    <div className="pt-4 border-t border-white/5 flex flex-col items-end">
+                      <div className="flex justify-between items-center w-full mb-1">
+                        <span className="text-sm font-bold text-slate-300">Total do Pacote</span>
+                        <span className="text-2xl font-black text-white">R$ {prices.current.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                      </div>
+                      {prices.isPackage && (
+                        <p className="text-emerald-400 font-black text-xs uppercase tracking-widest">3x de R$ {prices.monthly.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} sem juros</p>
+                      )}
+                    </div>
+                </div>
+                <div className="space-y-3 pt-6 border-t border-white/10">
+                    <button onClick={() => setPaymentMethod('pix')} className={`w-full p-5 rounded-2xl border-2 flex items-center justify-between transition-all ${paymentMethod === 'pix' ? 'bg-blue-600/10 border-blue-500' : 'bg-slate-950 border-transparent'}`}><div className="flex items-center gap-4"><QrCode size={20} className={paymentMethod === 'pix' ? 'text-blue-400' : 'text-slate-600'} /><span className="font-bold text-sm">PIX (Imediato)</span></div>{paymentMethod === 'pix' && <CheckCircle2 size={18} className="text-blue-500" />}</button>
+                </div>
+                
+                <div className="pt-2 text-center">
+                    <p className="text-[10px] text-amber-500 font-bold uppercase tracking-widest flex items-center justify-center gap-2">
+                        <ShieldAlert size={12} /> Apenas 2 patrocinadores por bairro
+                    </p>
+                </div>
+            </div>
+            {/* Espaçador para o botão fixo não cobrir o conteúdo final */}
+            <div className="h-32"></div>
+        </section>
       </main>
 
       {!isSuccess && (view === 'sales' || view === 'pro_checkout') && (
@@ -599,7 +649,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
               <div className="flex flex-col items-center">
                   <div className="flex items-center gap-2 mb-0.5">
                     <span className="text-[10px] font-black text-white/60 uppercase tracking-widest">
-                        PRODUTO: {selectedMode?.id === 'classifieds' ? 'BANNER NOS CLASSIFICADOS' : `BANNER ${selectedMode.label.toUpperCase()}`}
+                        PRODUTO: {selectedMode?.id === 'classifieds' ? 'PATROCINADO CLASSIFICADOS' : `PATROCINADO ${selectedMode.label.toUpperCase()}`}
                     </span>
                     <ArrowRight size={14} className="text-white/60" />
                   </div>
