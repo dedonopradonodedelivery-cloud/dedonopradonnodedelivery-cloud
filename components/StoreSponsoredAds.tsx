@@ -196,6 +196,21 @@ export const StoreSponsoredAds: React.FC<StoreSponsoredAdsProps> = ({ onBack, on
         .animate-subtle-pulse {
           animation: subtle-pulse 4s ease-in-out infinite;
         }
+        @keyframes float-card {
+          0%, 100% { transform: translateY(0) rotate(-1deg); }
+          50% { transform: translateY(-6px) rotate(-1deg); }
+        }
+        .animate-float-card {
+          animation: float-card 8s ease-in-out infinite;
+        }
+        @keyframes cta-glow {
+          0%, 100% { box-shadow: 0 10px 15px -3px rgba(30, 91, 255, 0.3); }
+          50% { box-shadow: 0 20px 25px -5px rgba(30, 91, 255, 0.5); transform: scale(1.01); }
+        }
+        .animate-cta-conversion {
+          animation: cta-glow 12s ease-in-out infinite;
+          animation-delay: 2.5s;
+        }
       `}</style>
       
       <header className="sticky top-0 z-40 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md px-5 h-20 flex items-center gap-4 border-b border-gray-100 dark:border-gray-800 shadow-sm shrink-0">
@@ -219,20 +234,20 @@ export const StoreSponsoredAds: React.FC<StoreSponsoredAdsProps> = ({ onBack, on
           <div className="space-y-10 animate-in slide-in-from-right duration-300">
             {/* BANNER EXPLICATIVO REFINADO */}
             <section className="space-y-6">
-                <div className="bg-slate-100 dark:bg-slate-900 rounded-[2.5rem] overflow-hidden shadow-xl relative border border-gray-200 dark:border-white/5">
+                <div className="bg-slate-50 dark:bg-slate-900/40 rounded-[2.5rem] overflow-hidden shadow-xl relative border border-gray-100 dark:border-white/5">
                     <div className="relative aspect-[16/9]">
                         <img 
                           src="https://images.unsplash.com/photo-1556761175-5973dc0f32e7?q=80&w=1200&auto=format&fit=crop" 
                           alt="Destaque Patrocinado"
-                          className="w-full h-full object-cover opacity-20 dark:opacity-30 mix-blend-luminosity filter blur-[1px]"
+                          className="w-full h-full object-cover opacity-10 dark:opacity-20 mix-blend-luminosity filter blur-[2px]"
                         />
-                        <div className="absolute inset-0 bg-gradient-to-t from-slate-100 dark:from-slate-900 via-slate-100/40 dark:via-slate-900/40 to-transparent"></div>
+                        <div className="absolute inset-0 bg-gradient-to-t from-slate-50 dark:from-[#020617] via-transparent to-transparent"></div>
                         
-                        {/* Mock visual centralizado */}
+                        {/* Mock visual com animação de flutuação */}
                         <div className="absolute inset-0 flex items-center justify-center p-6">
-                            <div className="w-full max-w-[240px] bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-2xl border border-blue-500/20 transform -rotate-1">
+                            <div className="w-full max-w-[240px] bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-2xl border border-blue-500/20 animate-float-card">
                                 <div className="flex gap-3">
-                                    <div className="w-12 h-12 rounded-xl bg-gray-50 dark:bg-gray-700 flex items-center justify-center">
+                                    <div className="w-12 h-12 rounded-xl bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center">
                                       <StoreIcon className="text-blue-500" size={24} />
                                     </div>
                                     <div className="flex-1">
@@ -282,7 +297,7 @@ export const StoreSponsoredAds: React.FC<StoreSponsoredAdsProps> = ({ onBack, on
 
                         <button 
                             onClick={handleCreateClick}
-                            className="w-full bg-[#1E5BFF] text-white font-black py-5 rounded-[2rem] shadow-xl shadow-blue-500/30 active:scale-[0.98] transition-all flex items-center justify-center gap-2 uppercase tracking-[0.1em] text-xs"
+                            className="w-full bg-[#1E5BFF] text-white font-black py-5 rounded-[2rem] shadow-xl shadow-blue-500/30 active:scale-[0.98] transition-all flex items-center justify-center gap-2 uppercase tracking-[0.1em] text-xs animate-cta-conversion"
                         >
                             Patrocinar por R$ 0,90/dia <ArrowRight size={18} />
                         </button>
