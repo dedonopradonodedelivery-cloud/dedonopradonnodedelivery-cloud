@@ -128,9 +128,19 @@ interface CategoryViewProps {
   userRole: 'cliente' | 'lojista' | null;
   onAdvertiseInCategory: (categoryName: string | null) => void;
   onNavigate: (view: string) => void;
+  onSubcategoryClick?: (subName: string) => void;
 }
 
-export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, onStoreClick, stores, userRole, onAdvertiseInCategory, onNavigate }) => {
+export const CategoryView: React.FC<CategoryViewProps> = ({ 
+  category, 
+  onBack, 
+  onStoreClick, 
+  stores, 
+  userRole, 
+  onAdvertiseInCategory, 
+  onNavigate,
+  onSubcategoryClick
+}) => {
   const [selectedSubcategory, setSelectedSubcategory] = useState<string | null>(null);
   const [activeBanner, setActiveBanner] = useState<any | null>(null);
   const [loadingBanner, setLoadingBanner] = useState(true);
@@ -198,7 +208,11 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
   }, [stores, category.name, selectedSubcategory]);
 
   const handleSubcategoryClick = (subName: string) => {
-    setSelectedSubcategory(prev => (prev === subName ? null : subName));
+    if (onSubcategoryClick) {
+        onSubcategoryClick(subName);
+    } else {
+        setSelectedSubcategory(prev => (prev === subName ? null : subName));
+    }
   };
 
   const handleAdvertiseClick = () => {

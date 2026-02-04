@@ -29,7 +29,7 @@ import { useTheme } from '@/contexts/ThemeContext';
 
 interface StoreAreaViewProps {
   onBack: () => void;
-  onNavigate: (view: string, initialView?: 'sales' | 'chat') => void;
+  onNavigate: (view: string, data?: any) => void;
   user: SupabaseUser | null;
 }
 

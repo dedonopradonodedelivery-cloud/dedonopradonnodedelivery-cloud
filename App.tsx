@@ -9,7 +9,7 @@ import { AuthModal } from '@/components/AuthModal';
 import { MenuView } from '@/components/MenuView';
 import { PatrocinadorMasterScreen } from '@/components/PatrocinadorMasterScreen';
 import { ServicesView } from '@/components/ServicesView';
-import { StoreAreaView } from '@/components/StoreAreaView';
+import { StoreAreaView } from '@/StoreAreaView';
 import { ClassifiedsView } from '@/components/ClassifiedsView';
 import { ClassifiedSearchResultsView } from '@/components/ClassifiedSearchResultsView';
 import { RealEstateView } from '@/components/RealEstateView';
@@ -30,7 +30,7 @@ import { AdminPanel } from '@/components/AdminPanel';
 import { DesignerPanel } from '@/components/DesignerPanel';
 import { MerchantLeadsView } from '@/components/MerchantLeadsView';
 import { ServiceChatView } from '@/components/ServiceChatView';
-import { CategoryView } from '@/components/CategoryView';
+import { CategoryView } from '@/pages/categories/CategoryView';
 import { SubcategoryDetailView } from '@/components/SubcategoryDetailView';
 import { SponsorInfoView } from '@/components/SponsorInfoView';
 import { ServicesLandingView } from '@/components/ServicesLandingView';
@@ -391,7 +391,7 @@ const App: React.FC = () => {
                       isMerchantMode 
                         ? <StoreAreaView 
                             onBack={() => handleNavigate('home')} 
-                            onNavigate={(view, data) => handleNavigate(view, data)} 
+                            onNavigate={handleNavigate} 
                             user={user as any} 
                           />
                         : <MenuView user={user as any} userRole={userRole} onAuthClick={() => setIsAuthOpen(true)} onNavigate={handleNavigate} onBack={() => handleNavigate('home')} />
@@ -490,8 +490,8 @@ const App: React.FC = () => {
 
           {splashStage < 4 && (
             <div className={`fixed inset-0 z-[9999] flex flex-col items-center justify-between py-16 transition-opacity duration-500 ease-out ${splashStage === 3 ? 'opacity-0 pointer-events-none' : 'opacity-100'}`} style={{ backgroundColor: '#1E5BFF' }}>
-              <div className="flex flex-col items-center animate-fade-in text-center px-4">
-                  <div className="relative w-32 h-32 bg-white rounded-[2.5rem] flex items-center justify-center shadow-2xl mb-8 animate-logo-enter"><MapPin className="w-16 h-16 text-brand-blue fill-brand-blue" /></div>
+              <div className="flex flex-col items-center animate-logo-enter text-center px-4">
+                  <div className="relative w-32 h-32 bg-white rounded-[2.5rem] flex items-center justify-center shadow-2xl mb-8"><MapPin className="w-16 h-16 text-brand-blue fill-brand-blue" /></div>
                   <h1 className="text-4xl font-black font-display text-white tracking-tighter drop-shadow-md">
                     Localizei JPA
                   </h1>
