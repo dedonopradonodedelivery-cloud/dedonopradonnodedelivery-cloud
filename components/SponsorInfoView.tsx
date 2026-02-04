@@ -73,7 +73,7 @@ const FAQ_ITEMS = [
   },
   { 
     q: "Por que o valor está com desconto?", 
-    a: "O valor promocional é uma condição especial de inauguração do Localizei JPA. O desconto é por tempo indeterminado e pode ser encerrado sem aviso prévio." 
+    a: "O valor promocional é uma condition especial de inauguração do Localizei JPA. O desconto é por tempo indeterminado e pode ser encerrado sem aviso prévio." 
   },
   { 
     q: "O pagamento é automático?", 
@@ -96,8 +96,8 @@ export const SponsorInfoView: React.FC<SponsorInfoViewProps> = ({ onBack, onNavi
 
   const totals = useMemo(() => {
     const count = selectedMonthIds.length;
-    const unitPrice = 1497; // NOVO PREÇO EM 7
-    const originalUnitPrice = 4000; // PREÇO PADRÃO AJUSTADO
+    const unitPrice = 1497;
+    const originalUnitPrice = 4000;
     const promoTotal = count * unitPrice;
     const originalTotal = count * originalUnitPrice;
     const savings = originalTotal - promoTotal;
@@ -265,25 +265,25 @@ Nosso time de designers iniciará a criação em breve!`;
               <div className="bg-white dark:bg-gray-900 rounded-[2.5rem] p-8 border border-gray-100 dark:border-gray-800 space-y-5">
                 <div className="space-y-1.5">
                   <label className="text-[10px] font-black text-gray-400 uppercase ml-1">Nome no Cartão</label>
-                  <input type="text" placeholder="Como no cartão" className="w-full p-4 bg-gray-50 dark:bg-gray-950 border-none rounded-2xl text-sm font-bold focus:ring-2 focus:ring-blue-500" />
+                  <input type="text" placeholder="Como no cartão" className="w-full p-4 bg-gray-50 dark:bg-gray-800 border-none rounded-2xl text-sm font-bold focus:ring-2 focus:ring-blue-500" />
                 </div>
                 <div className="space-y-1.5">
                   <label className="text-[10px] font-black text-gray-400 uppercase ml-1">Número do Cartão</label>
-                  <input type="text" placeholder="0000 0000 0000 0000" className="w-full p-4 bg-gray-50 dark:bg-gray-950 border-none rounded-2xl text-sm font-bold focus:ring-2 focus:ring-blue-500" />
+                  <input type="text" placeholder="0000 0000 0000 0000" className="w-full p-4 bg-gray-50 dark:bg-gray-900 border-none rounded-2xl text-sm font-bold focus:ring-2 focus:ring-blue-500" />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-1.5">
                     <label className="text-[10px] font-black text-gray-400 uppercase ml-1">Validade</label>
-                    <input type="text" placeholder="MM/AA" className="w-full p-4 bg-gray-50 dark:bg-gray-950 border-none rounded-2xl text-sm font-bold focus:ring-2 focus:ring-blue-500" />
+                    <input type="text" placeholder="MM/AA" className="w-full p-4 bg-gray-50 dark:bg-gray-800 border-none rounded-2xl text-sm font-bold focus:ring-2 focus:ring-blue-500" />
                   </div>
                   <div className="space-y-1.5">
                     <label className="text-[10px] font-black text-gray-400 uppercase ml-1">CVV</label>
-                    <input type="text" placeholder="123" className="w-full p-4 bg-gray-50 dark:bg-gray-950 border-none rounded-2xl text-sm font-bold focus:ring-2 focus:ring-blue-500" />
+                    <input type="text" placeholder="123" className="w-full p-4 bg-gray-50 dark:bg-gray-800 border-none rounded-2xl text-sm font-bold focus:ring-2 focus:ring-blue-500" />
                   </div>
                 </div>
                 <div className="space-y-1.5">
                   <label className="text-[10px] font-black text-gray-400 uppercase ml-1">CPF do Titular</label>
-                  <input type="text" placeholder="000.000.000-00" className="w-full p-4 bg-gray-50 dark:bg-gray-950 border-none rounded-2xl text-sm font-bold focus:ring-2 focus:ring-blue-500" />
+                  <input type="text" placeholder="000.000.000-00" className="w-full p-4 bg-gray-50 dark:bg-gray-800 border-none rounded-2xl text-sm font-bold focus:ring-2 focus:ring-blue-500" />
                 </div>
               </div>
             )}
@@ -360,7 +360,54 @@ Nosso time de designers iniciará a criação em breve!`;
           </div>
         </section>
 
-        {/* NOVO POSICIONAMENTO: Bloco Escolha os meses */}
+        {/* Benefícios Section */}
+        <section className="px-6 mb-12">
+          <h3 className="text-xs font-black text-gray-400 uppercase tracking-[0.2em] mb-6 ml-1">Por que o Patrocinador Master vale mais</h3>
+          <div className="space-y-4">
+            {[
+              { icon: Target, title: "Presença constante", desc: "Sua marca aparece em pontos estratégicos do app." },
+              { icon: Award, title: "Top of mind local", desc: "Você vira referência absoluta no bairro." },
+              { icon: ShieldCheck, title: "Autoridade e confiança", desc: "Destaque premium para quem quer ser lembrado primeiro." },
+              { icon: Users, title: "Foco em moradores reais", desc: "Alcance hiperlocal e qualificado diariamente." },
+              { icon: Lock, title: "Exclusividade", desc: "Apenas 1 Patrocinador Master ativo por região definida." },
+            ].map((item, i) => (
+              <div key={i} className="flex gap-4 p-5 bg-white dark:bg-gray-900 rounded-3xl border border-gray-100 dark:border-gray-800 shadow-sm">
+                <div className="w-10 h-10 bg-blue-50 dark:bg-blue-900/30 rounded-2xl flex items-center justify-center text-[#1E5BFF] shrink-0 border border-blue-100 dark:border-blue-800/30">
+                  <item.icon size={20} />
+                </div>
+                <div>
+                  <h4 className="font-bold text-gray-900 dark:text-white text-sm">{item.title}</h4>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 leading-relaxed font-medium">{item.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Positions Section */}
+        <section className="px-6 mb-12">
+          <h3 className="text-xs font-black text-gray-400 uppercase tracking-[0.2em] mb-6 ml-1">Sua marca em quase todo o app</h3>
+          <div className="grid grid-cols-1 gap-3">
+            {[
+              { icon: Sparkles, title: "Tela de Splash", desc: "Impacto no primeiro segundo do app." },
+              { icon: Layout, title: "Topo da Home", desc: "Destaque fixo e imbatível no Feed." },
+              { icon: ArrowRight, title: "Rodapé de Páginas", desc: "Banner ao final das buscas internas." },
+              { icon: Smartphone, title: "Página Institucional", desc: "Uma tela exclusiva para contar sua história." },
+            ].map((item, i) => (
+              <div key={i} className="flex items-center gap-4 p-4 bg-gray-50 dark:bg-gray-900/50 rounded-2xl border border-gray-100 dark:border-gray-800">
+                <div className="p-2 bg-white dark:bg-gray-800 rounded-xl text-[#1E5BFF] shadow-sm">
+                  <item.icon size={16} />
+                </div>
+                <div>
+                  <h4 className="text-xs font-bold text-gray-800 dark:text-white uppercase tracking-tight">{item.title}</h4>
+                  <p className="text-[10px] text-gray-500 dark:text-gray-500 font-medium">{item.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Escolha os meses */}
         <section className="px-6 mb-12">
           <div className="bg-white dark:bg-gray-900 rounded-[2.5rem] p-6 border border-gray-100 dark:border-gray-800 shadow-sm">
             <h3 className="text-lg font-black text-gray-900 dark:text-white uppercase tracking-tighter mb-1">Escolha os meses</h3>
@@ -408,53 +455,6 @@ Nosso time de designers iniciará a criação em breve!`;
                 <span className="text-lg font-black text-gray-900 dark:text-white">{formatBRL(totals.promoTotal)}</span>
               </div>
             </div>
-          </div>
-        </section>
-
-        {/* Benefícios Section */}
-        <section className="px-6 mb-12">
-          <h3 className="text-xs font-black text-gray-400 uppercase tracking-[0.2em] mb-6 ml-1">Por que o Patrocinador Master vale mais</h3>
-          <div className="space-y-4">
-            {[
-              { icon: Target, title: "Presença constante", desc: "Sua marca aparece em pontos estratégicos do app." },
-              { icon: Award, title: "Top of mind local", desc: "Você vira referência absoluta no bairro." },
-              { icon: ShieldCheck, title: "Autoridade e confiança", desc: "Destaque premium para quem quer ser lembrado primeiro." },
-              { icon: Users, title: "Foco em moradores reais", desc: "Alcance hiperlocal e qualificado diariamente." },
-              { icon: Lock, title: "Exclusividade", desc: "Apenas 1 Patrocinador Master ativo por região definida." },
-            ].map((item, i) => (
-              <div key={i} className="flex gap-4 p-5 bg-white dark:bg-gray-900 rounded-3xl border border-gray-100 dark:border-gray-800 shadow-sm">
-                <div className="w-10 h-10 bg-blue-50 dark:bg-blue-900/30 rounded-2xl flex items-center justify-center text-[#1E5BFF] shrink-0 border border-blue-100 dark:border-blue-800/30">
-                  <item.icon size={20} />
-                </div>
-                <div>
-                  <h4 className="font-bold text-gray-900 dark:text-white text-sm">{item.title}</h4>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 leading-relaxed font-medium">{item.desc}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* Positions Section */}
-        <section className="px-6 mb-12">
-          <h3 className="text-xs font-black text-gray-400 uppercase tracking-[0.2em] mb-6 ml-1">Sua marca em quase todo o app</h3>
-          <div className="grid grid-cols-1 gap-3">
-            {[
-              { icon: Sparkles, title: "Tela de Splash", desc: "Impacto no primeiro segundo do app." },
-              { icon: Layout, title: "Topo da Home", desc: "Destaque fixo e imbatível no Feed." },
-              { icon: ArrowRight, title: "Rodapé de Páginas", desc: "Banner ao final das buscas internas." },
-              { icon: Smartphone, title: "Página Institucional", desc: "Uma tela exclusiva para contar sua história." },
-            ].map((item, i) => (
-              <div key={i} className="flex items-center gap-4 p-4 bg-gray-50 dark:bg-gray-900/50 rounded-2xl border border-gray-100 dark:border-gray-800">
-                <div className="p-2 bg-white dark:bg-gray-800 rounded-xl text-[#1E5BFF] shadow-sm">
-                  <item.icon size={16} />
-                </div>
-                <div>
-                  <h4 className="text-xs font-bold text-gray-800 dark:text-white uppercase tracking-tight">{item.title}</h4>
-                  <p className="text-[10px] text-gray-500 dark:text-gray-500 font-medium">{item.desc}</p>
-                </div>
-              </div>
-            ))}
           </div>
         </section>
 
