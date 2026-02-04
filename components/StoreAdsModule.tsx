@@ -1,5 +1,5 @@
 
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { 
   ChevronLeft, 
   ArrowRight, 
@@ -14,14 +14,10 @@ import {
   QrCode,
   Paintbrush,
   Upload,
-  Target,
-  Clock,
   Calendar,
   Award,
-  Lock,
-  ShieldCheck,
-  TrendingUp,
-  Star
+  Image as ImageIcon,
+  X
 } from 'lucide-react';
 import { User } from '@supabase/supabase-js';
 import { StoreBannerEditor } from '@/components/StoreBannerEditor';
@@ -59,6 +55,11 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
   const [selectedNeighborhoods, setSelectedNeighborhoods] = useState<string[]>([]);
   const [selectedDuration, setSelectedDuration] = useState<number>(1);
   const [artChoice, setArtChoice] = useState<'my_art' | 'editor' | 'pro' | null>(null);
+  const [uploadedBanner, setUploadedBanner] = useState<string | null>(null);
+
+  // Refs para automações de UX
+  const step2Ref = useRef<HTMLElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (initialView === 'chat') setView('chat');
@@ -70,12 +71,6 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
     CAT: 29.90,
     COMBO: 89.90,
     PRO_ART: 69.90
-  };
-
-  const FULL_PRICES = {
-    HOME: 199.90,
-    CAT: 159.90,
-    COMBO: 359.80
   };
 
   // Helper para calcular datas por opção
@@ -109,11 +104,31 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
     };
   }, [placement, selectedNeighborhoods, selectedDuration, artChoice]);
 
+  const handlePlacementSelection = (choice: {home: boolean, cat: boolean}) => {
+    setPlacement(choice);
+    // UX: Auto-avanço para o Passo 2 com scroll suave
+    setTimeout(() => {
+      step2Ref.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 100);
+  };
+
   const toggleHood = (hood: string) => {
     if (hood === 'Todos') {
       setSelectedNeighborhoods(selectedNeighborhoods.length === NEIGHBORHOODS.length ? [] : [...NEIGHBORHOODS]);
     } else {
       setSelectedNeighborhoods(prev => prev.includes(hood) ? prev.filter(h => h !== hood) : [...prev, hood]);
+    }
+  };
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        setUploadedBanner(event.target?.result as string);
+        setArtChoice('my_art');
+      };
+      reader.readAsDataURL(file);
     }
   };
 
@@ -172,7 +187,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
               </button>
           </div>
         </main>
-        <footer className="p-6 bg-slate-950 border-t border-white/10">
+        <footer className="p-6 bg-slate-950 border-t border-white/10 pb-32">
           <button onClick={handleFinish} disabled={isSubmitting} className="w-full py-5 bg-[#1E5BFF] text-white font-black rounded-2xl shadow-xl flex items-center justify-center gap-2 uppercase tracking-widest text-xs">
             {isSubmitting ? <Loader2 className="animate-spin" /> : 'Confirmar e Publicar'}
           </button>
@@ -191,7 +206,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
         </div>
       </header>
 
-      <main className="flex-1 p-6 space-y-16 pb-64 max-w-md mx-auto w-full">
+      <main className="flex-1 p-6 space-y-16 pb-96 max-w-md mx-auto w-full">
         
         {/* 1. ONDE APARECER */}
         <section className="space-y-8">
@@ -228,8 +243,9 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
           </div>
 
           <div className="grid grid-cols-1 gap-4">
+              {/* HOME */}
               <button 
-                onClick={() => setPlacement({ home: true, cat: false })} 
+                onClick={() => handlePlacementSelection({ home: true, cat: false })} 
                 className={`flex items-start text-left p-6 rounded-[2.5rem] border-2 transition-all gap-5 ${placement.home && !placement.cat ? 'bg-blue-600/10 border-blue-500 shadow-lg' : 'bg-white/5 border-white/10'}`}
               >
                 <div className={`p-4 rounded-2xl shrink-0 ${placement.home && !placement.cat ? 'bg-blue-50 text-white shadow-lg' : 'bg-white/5 text-slate-400'}`}><Home size={28} /></div>
@@ -253,8 +269,9 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
                 </div>
               </button>
 
+              {/* SUBCATEGORIAS */}
               <button 
-                onClick={() => setPlacement({ home: false, cat: true })} 
+                onClick={() => handlePlacementSelection({ home: false, cat: true })} 
                 className={`flex items-start text-left p-6 rounded-[2.5rem] border-2 transition-all gap-5 ${!placement.home && placement.cat ? 'bg-blue-600/10 border-blue-500 shadow-lg' : 'bg-white/5 border-white/10'}`}
               >
                 <div className={`p-4 rounded-2xl shrink-0 ${!placement.home && placement.cat ? 'bg-blue-50 text-white shadow-lg' : 'bg-white/5 text-slate-400'}`}><LayoutGrid size={28} /></div>
@@ -278,8 +295,9 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
                 </div>
               </button>
 
+              {/* COMBO */}
               <button 
-                onClick={() => setPlacement({ home: true, cat: true })} 
+                onClick={() => handlePlacementSelection({ home: true, cat: true })} 
                 className={`relative flex items-start text-left p-6 rounded-[2.5rem] border-2 transition-all gap-5 ${placement.home && placement.cat ? 'bg-blue-600/10 border-blue-500 shadow-lg' : 'bg-white/5 border-white/10'}`}
               >
                 <div className="absolute -top-3 right-6 bg-amber-400 text-slate-950 text-[8px] font-black px-2 py-0.5 rounded uppercase shadow-lg border border-amber-300">Maior visibilidade</div>
@@ -307,7 +325,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
         </section>
 
         {/* 2. QUAIS BAIRROS */}
-        <section className="space-y-6">
+        <section ref={step2Ref} className="space-y-6 scroll-mt-24">
           <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-blue-500 flex items-center gap-2 px-1">
             <MapPin size={14} /> 2. Quais bairros?
           </h3>
@@ -360,15 +378,26 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
             <Palette size={14} /> 4. Escolha seu Banner
           </h3>
           <div className="space-y-4">
+              <input 
+                type="file" 
+                ref={fileInputRef} 
+                onChange={handleFileUpload} 
+                accept="image/*" 
+                className="hidden" 
+              />
+              
               <button 
-                onClick={() => setArtChoice('my_art')}
+                onClick={() => fileInputRef.current?.click()}
                 className={`w-full p-6 rounded-[2rem] border-2 text-left flex items-center gap-5 transition-all ${artChoice === 'my_art' ? 'bg-blue-600/10 border-blue-500 shadow-xl' : 'bg-white/5 border-white/10'}`}
               >
-                <div className="w-12 h-12 bg-white/5 rounded-xl flex items-center justify-center text-slate-400"><Upload size={24} /></div>
-                <div>
-                  <h4 className="font-bold text-white text-sm">Usar meu banner</h4>
-                  <p className="text-[10px] text-slate-500 mt-0.5">Anexe sua arte pronta em JPG/PNG.</p>
+                <div className="w-12 h-12 bg-white/5 rounded-xl flex items-center justify-center text-slate-400 shrink-0">
+                    {uploadedBanner ? <img src={uploadedBanner} className="w-full h-full object-cover rounded-lg" /> : <Upload size={24} />}
                 </div>
+                <div className="min-w-0 flex-1">
+                  <h4 className="font-bold text-white text-sm truncate">{uploadedBanner ? 'Banner selecionado' : 'Usar meu banner'}</h4>
+                  <p className="text-[10px] text-slate-500 mt-0.5 truncate">{uploadedBanner ? 'Toque para trocar o arquivo' : 'Galeria (Mobile) / Explorador (PC)'}</p>
+                </div>
+                {uploadedBanner && <CheckCircle2 size={18} className="text-emerald-500 shrink-0" />}
               </button>
 
               <button 
@@ -399,7 +428,8 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
       </main>
 
       {/* 5. PRÉVIA DO PEDIDO (FIXA) */}
-      <div className="fixed bottom-0 left-0 right-0 p-6 bg-slate-950/95 backdrop-blur-2xl border-t border-white/10 z-[100] max-w-md mx-auto shadow-[0_-20px_40px_rgba(0,0,0,0.6)] animate-in slide-in-from-bottom duration-500">
+      {/* Ajustado fixed bottom e paddings para respeitar a BottomNav do App.tsx */}
+      <div className="fixed bottom-[90px] left-0 right-0 p-6 bg-slate-950/95 backdrop-blur-2xl border-t border-white/10 z-[100] max-w-md mx-auto shadow-[0_-20px_40px_rgba(0,0,0,0.6)] animate-in slide-in-from-bottom duration-500 rounded-t-[2.5rem]">
         
         <div className="mb-4 flex flex-col gap-3 border-b border-white/5 pb-4">
             <div className="flex items-center gap-2 bg-blue-500/10 border border-blue-500/20 px-3 py-1.5 rounded-xl">
