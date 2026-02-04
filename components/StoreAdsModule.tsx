@@ -84,6 +84,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
     return `${fmt(start)} → ${fmt(end)}`;
   };
 
+  // Lógica Incremental do Resumo
   const summary = useMemo(() => {
     let basePrice = 0;
     if (placement.home && placement.cat) basePrice = PRICES.COMBO;
@@ -91,7 +92,12 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
     else if (placement.cat) basePrice = PRICES.CAT;
 
     const hoodsCount = selectedNeighborhoods.length;
-    const subtotal = (basePrice * hoodsCount) * selectedDuration;
+    
+    // REGRA DE UX: Para o resumo ser imediato, se nenhum bairro for selecionado,
+    // mostramos o valor base de 1 unidade para o lojista ter a prévia do plano.
+    const hoodsMultiplier = Math.max(1, hoodsCount);
+    
+    const subtotal = (basePrice * hoodsMultiplier) * selectedDuration;
     const artExtra = artChoice === 'pro' ? PRICES.PRO_ART : 0;
     const total = subtotal + artExtra;
 
@@ -101,7 +107,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
       subtotal,
       artExtra,
       total,
-      placementLabel: placement.home && placement.cat ? 'Home + Categorias' : placement.home ? 'Página Inicial' : placement.cat ? 'Categorias' : 'Não selecionado'
+      placementLabel: placement.home && placement.cat ? 'Home + Categorias' : placement.home ? 'Página Inicial' : placement.cat ? 'Categorias' : 'Escolha um plano'
     };
   }, [placement, selectedNeighborhoods, selectedDuration, artChoice]);
 
@@ -207,7 +213,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
         </div>
       </header>
 
-      <main className="flex-1 p-6 space-y-16 pb-96 max-w-md mx-auto w-full">
+      <main className="flex-1 p-6 space-y-16 pb-[320px] max-w-md mx-auto w-full">
         
         {/* 1. ONDE APARECER */}
         <section className="space-y-8">
@@ -236,9 +242,6 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
                 <p className="text-[11px] text-slate-400 leading-relaxed">
                   🔒 Além disso, você garante este valor com desconto durante todo o primeiro ano, pagando mês a mês.
                 </p>
-                <p className="text-[9px] text-slate-500 italic leading-relaxed pt-2 border-t border-white/5">
-                  Após o lançamento, novos anunciantes entram com o preço normal, que pode ser ativado a qualquer momento.
-                </p>
               </div>
             </div>
           </div>
@@ -247,7 +250,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
               {/* HOME */}
               <button 
                 onClick={() => handlePlacementSelection({ home: true, cat: false })} 
-                className={`flex items-start text-left p-6 rounded-[2.5rem] border-2 transition-all gap-5 ${placement.home && !placement.cat ? 'bg-blue-600/10 border-blue-500 shadow-lg' : 'bg-white/5 border-white/10'}`}
+                className={`flex items-start text-left p-6 rounded-[2rem] border-2 transition-all gap-5 ${placement.home && !placement.cat ? 'bg-blue-600/10 border-blue-500 shadow-lg' : 'bg-white/5 border-white/10'}`}
               >
                 <div className={`p-4 rounded-2xl shrink-0 ${placement.home && !placement.cat ? 'bg-blue-50 text-white shadow-lg' : 'bg-white/5 text-slate-400'}`}><Home size={28} /></div>
                 <div className="flex-1">
@@ -262,18 +265,13 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
                         <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">/mês</span>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2 mt-2">
-                      <span className="text-[8px] font-black bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded border border-emerald-500/20 uppercase tracking-widest">Economize R$ 130,00</span>
-                      <span className="text-[8px] font-black text-blue-400 uppercase">65% OFF</span>
-                    </div>
-                    <p className="text-[7px] text-emerald-400 font-bold uppercase mt-2">Preço garantido por 12 meses</p>
                 </div>
               </button>
 
               {/* SUBCATEGORIAS */}
               <button 
                 onClick={() => handlePlacementSelection({ home: false, cat: true })} 
-                className={`flex items-start text-left p-6 rounded-[2.5rem] border-2 transition-all gap-5 ${!placement.home && placement.cat ? 'bg-blue-600/10 border-blue-500 shadow-lg' : 'bg-white/5 border-white/10'}`}
+                className={`flex items-start text-left p-6 rounded-[2rem] border-2 transition-all gap-5 ${!placement.home && placement.cat ? 'bg-blue-600/10 border-blue-500 shadow-lg' : 'bg-white/5 border-white/10'}`}
               >
                 <div className={`p-4 rounded-2xl shrink-0 ${!placement.home && placement.cat ? 'bg-blue-50 text-white shadow-lg' : 'bg-white/5 text-slate-400'}`}><LayoutGrid size={28} /></div>
                 <div className="flex-1">
@@ -288,18 +286,13 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
                         <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">/mês</span>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2 mt-2">
-                      <span className="text-[8px] font-black bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded border border-emerald-500/20 uppercase tracking-widest">Economize R$ 130,00</span>
-                      <span className="text-[8px] font-black text-blue-400 uppercase">81% OFF</span>
-                    </div>
-                    <p className="text-[7px] text-emerald-400 font-bold uppercase mt-2">Preço garantido por 12 meses</p>
                 </div>
               </button>
 
               {/* COMBO */}
               <button 
                 onClick={() => handlePlacementSelection({ home: true, cat: true })} 
-                className={`relative flex items-start text-left p-6 rounded-[2.5rem] border-2 transition-all gap-5 ${placement.home && placement.cat ? 'bg-blue-600/10 border-blue-500 shadow-lg' : 'bg-white/5 border-white/10'}`}
+                className={`relative flex items-start text-left p-6 rounded-[2rem] border-2 transition-all gap-5 ${placement.home && placement.cat ? 'bg-blue-600/10 border-blue-500 shadow-lg' : 'bg-white/5 border-white/10'}`}
               >
                 <div className="absolute -top-3 right-6 bg-amber-400 text-slate-950 text-[8px] font-black px-2 py-0.5 rounded uppercase shadow-lg border border-amber-300">Maior visibilidade</div>
                 <div className={`p-4 rounded-2xl shrink-0 ${placement.home && placement.cat ? 'bg-blue-50 text-white shadow-lg' : 'bg-white/5 text-slate-400'}`}><Zap size={28} /></div>
@@ -315,11 +308,6 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
                         <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">/mês</span>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2 mt-2">
-                      <span className="text-[8px] font-black bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded border border-emerald-500/20 uppercase tracking-widest">Economize R$ 269,90</span>
-                      <span className="text-[8px] font-black text-blue-400 uppercase">75% OFF</span>
-                    </div>
-                    <p className="text-[7px] text-emerald-400 font-bold uppercase mt-2">Preço garantido por 12 meses</p>
                 </div>
               </button>
           </div>
@@ -336,7 +324,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
                 className={`col-span-2 p-4 rounded-2xl border-2 font-black uppercase text-xs flex items-center justify-center gap-2 transition-all ${selectedNeighborhoods.length === NEIGHBORHOODS.length ? 'bg-blue-600 border-blue-500 text-white' : 'bg-white/5 border-white/10 text-slate-400'}`}
               >
                 {selectedNeighborhoods.length === NEIGHBORHOODS.length ? <CheckCircle2 size={16}/> : <LayoutGrid size={16}/>}
-                Todos os bairros (9 unidades)
+                Todos os bairros
               </button>
               {NEIGHBORHOODS.map(hood => (
                   <button 
@@ -443,7 +431,6 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
       </main>
 
       {/* 5. PRÉVIA DO PEDIDO (FIXA) */}
-      {/* Ajustado fixed bottom e paddings para respeitar a BottomNav do App.tsx */}
       <div className="fixed bottom-[90px] left-0 right-0 p-6 bg-slate-950/95 backdrop-blur-2xl border-t border-white/10 z-[100] max-w-md mx-auto shadow-[0_-20px_40px_rgba(0,0,0,0.6)] animate-in slide-in-from-bottom duration-500 rounded-t-[2.5rem]">
         
         <div className="mb-4 flex flex-col gap-3 border-b border-white/5 pb-4">
@@ -461,7 +448,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
                     <p className="text-xs font-bold text-slate-300">Tempo: <span className="text-white">{selectedDuration} meses / {summary.hoodsCount} bairros</span></p>
                 </div>
                 <div className="text-right">
-                    <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest leading-none mb-1">Total da Campanha</p>
+                    <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest leading-none mb-1">Custo da Campanha</p>
                     <p className="text-2xl font-black text-emerald-400 tracking-tighter leading-none">
                         R$ {summary.total.toFixed(2).replace('.', ',')}
                     </p>
@@ -476,7 +463,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
             (placement.home || placement.cat) && selectedNeighborhoods.length > 0 && artChoice ? 'bg-[#1E5BFF] text-white hover:bg-blue-600' : 'bg-white/5 text-slate-500 cursor-not-allowed'
           }`}
         >
-          {isSubmitting ? <Loader2 className="w-6 h-6 animate-spin" /> : <>Continuar para Pagamento <ArrowRight size={18} /></>}
+          {isSubmitting ? <Loader2 className="w-6 h-6 animate-spin" /> : <>Concluir compra <ArrowRight size={18} /></>}
         </button>
       </div>
 
