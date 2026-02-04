@@ -253,7 +253,7 @@ Nosso time de designers iniciará a criação em breve!`;
                 </div>
                 <div className="space-y-3">
                   <p className="text-xs font-bold text-gray-500 uppercase tracking-widest">Código Pix Copia e Cola</p>
-                  <div className="bg-gray-50 dark:bg-gray-950 p-4 rounded-xl border border-gray-200 dark:border-gray-800 font-mono text-[10px] break-all text-gray-400">
+                  <div className="bg-gray-50 dark:bg-gray-950 p-4 rounded-xl border border-gray-100 dark:border-gray-800 font-mono text-[10px] break-all text-gray-400">
                     00020126330014BR.GOV.BCB.PIX011112345678901520400005303986540510.005802BR5920LOCALIZEI6009RJ62070503***6304E2D1
                   </div>
                   <button className="flex items-center justify-center gap-2 text-[#1E5BFF] text-[10px] font-black uppercase tracking-widest mx-auto">
@@ -317,6 +317,7 @@ Nosso time de designers iniciará a criação em breve!`;
       </header>
 
       <main className="flex-1 overflow-y-auto no-scrollbar pb-64">
+        {/* Título e descrição inicial */}
         <section className="p-8 text-center bg-gradient-to-b from-white to-transparent dark:from-gray-900 dark:to-transparent">
           <div className="w-20 h-20 bg-amber-100 dark:bg-amber-900/30 rounded-[2.5rem] flex items-center justify-center mx-auto mb-6 border-4 border-white dark:border-gray-800 shadow-xl">
             <Crown className="w-10 h-10 text-amber-600 dark:text-amber-400" />
@@ -326,6 +327,7 @@ Nosso time de designers iniciará a criação em breve!`;
           </p>
         </section>
 
+        {/* Banner Oportunidade Única */}
         <section className="px-6 mb-12">
           <div className="bg-slate-900 rounded-[2.5rem] p-8 text-white relative overflow-hidden shadow-2xl shadow-blue-500/10 border border-white/5">
             <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 rounded-full blur-3xl -mr-10 -mt-10"></div>
@@ -358,59 +360,15 @@ Nosso time de designers iniciará a criação em breve!`;
           </div>
         </section>
 
+        {/* NOVO POSICIONAMENTO: Bloco Escolha os meses */}
         <section className="px-6 mb-12">
-          <h3 className="text-xs font-black text-gray-400 uppercase tracking-[0.2em] mb-6 ml-1">Por que o Patrocinador Master vale mais</h3>
-          <div className="space-y-4">
-            {[
-              { icon: Target, title: "Presença constante", desc: "Sua marca aparece em pontos estratégicos do app." },
-              { icon: Award, title: "Top of mind local", desc: "Você vira referência absoluta no bairro." },
-              { icon: ShieldCheck, title: "Autoridade e confiança", desc: "Destaque premium para quem quer ser lembrado primeiro." },
-              { icon: Users, title: "Foco em moradores reais", desc: "Alcance hiperlocal e qualificado diariamente." },
-              { icon: Lock, title: "Exclusividade", desc: "Apenas 1 Patrocinador Master ativo por região definida." },
-            ].map((item, i) => (
-              <div key={i} className="flex gap-4 p-5 bg-white dark:bg-gray-900 rounded-3xl border border-gray-100 dark:border-gray-800 shadow-sm">
-                <div className="w-10 h-10 bg-blue-50 dark:bg-blue-900/30 rounded-2xl flex items-center justify-center text-[#1E5BFF] shrink-0 border border-blue-100 dark:border-blue-800/30">
-                  <item.icon size={20} />
-                </div>
-                <div>
-                  <h4 className="font-bold text-gray-900 dark:text-white text-sm">{item.title}</h4>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 leading-relaxed font-medium">{item.desc}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        <section className="px-6 mb-12">
-          <h3 className="text-xs font-black text-gray-400 uppercase tracking-[0.2em] mb-6 ml-1">Sua marca em quase todo o app</h3>
-          <div className="grid grid-cols-1 gap-3">
-            {[
-              { icon: Sparkles, title: "Tela de Splash", desc: "Impacto no primeiro segundo do app." },
-              { icon: Layout, title: "Topo da Home", desc: "Destaque fixo e imbatível no Feed." },
-              { icon: ArrowRight, title: "Rodapé de Páginas", desc: "Banner ao final das buscas internas." },
-              { icon: Smartphone, title: "Página Institucional", desc: "Uma tela exclusiva para contar sua história." },
-            ].map((item, i) => (
-              <div key={i} className="flex items-center gap-4 p-4 bg-gray-50 dark:bg-gray-900/50 rounded-2xl border border-gray-100 dark:border-gray-800">
-                <div className="p-2 bg-white dark:bg-gray-800 rounded-xl text-[#1E5BFF] shadow-sm">
-                  <item.icon size={16} />
-                </div>
-                <div>
-                  <h4 className="text-xs font-bold text-gray-800 dark:text-white uppercase tracking-tight">{item.title}</h4>
-                  <p className="text-[10px] text-gray-500 dark:text-gray-500 font-medium">{item.desc}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        <section className="px-6 mb-12">
-          <div className="bg-white dark:bg-gray-900 rounded-[2.5rem] p-8 border border-gray-100 dark:border-gray-800 shadow-sm">
+          <div className="bg-white dark:bg-gray-900 rounded-[2.5rem] p-6 border border-gray-100 dark:border-gray-800 shadow-sm">
             <h3 className="text-lg font-black text-gray-900 dark:text-white uppercase tracking-tighter mb-1">Escolha os meses</h3>
             <p className="text-xs text-gray-500 dark:text-gray-400 font-medium mb-6 leading-relaxed">
               Selecione um ou mais meses. Você pode escolher meses não consecutivos.
             </p>
 
-            <div className="grid grid-cols-3 gap-3 mb-8">
+            <div className="grid grid-cols-3 gap-3">
               {MONTHS.map(month => {
                 const isSelected = selectedMonthIds.includes(month.id);
                 return (
@@ -441,10 +399,10 @@ Nosso time de designers iniciará a criação em breve!`;
               })}
             </div>
 
-            <div className="flex items-center justify-between pt-6 border-t border-gray-50 dark:border-gray-800">
+            <div className="flex items-center justify-between pt-6 mt-6 border-t border-gray-50 dark:border-gray-800">
               <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400">
                 <CalendarDays size={18} />
-                <span className="text-xs font-black uppercase tracking-widest">Meses selecionados: {totals.count}</span>
+                <span className="text-xs font-black uppercase tracking-widest">Meses: {totals.count}</span>
               </div>
               <div className="text-right">
                 <span className="text-lg font-black text-gray-900 dark:text-white">{formatBRL(totals.promoTotal)}</span>
@@ -453,6 +411,54 @@ Nosso time de designers iniciará a criação em breve!`;
           </div>
         </section>
 
+        {/* Benefícios Section */}
+        <section className="px-6 mb-12">
+          <h3 className="text-xs font-black text-gray-400 uppercase tracking-[0.2em] mb-6 ml-1">Por que o Patrocinador Master vale mais</h3>
+          <div className="space-y-4">
+            {[
+              { icon: Target, title: "Presença constante", desc: "Sua marca aparece em pontos estratégicos do app." },
+              { icon: Award, title: "Top of mind local", desc: "Você vira referência absoluta no bairro." },
+              { icon: ShieldCheck, title: "Autoridade e confiança", desc: "Destaque premium para quem quer ser lembrado primeiro." },
+              { icon: Users, title: "Foco em moradores reais", desc: "Alcance hiperlocal e qualificado diariamente." },
+              { icon: Lock, title: "Exclusividade", desc: "Apenas 1 Patrocinador Master ativo por região definida." },
+            ].map((item, i) => (
+              <div key={i} className="flex gap-4 p-5 bg-white dark:bg-gray-900 rounded-3xl border border-gray-100 dark:border-gray-800 shadow-sm">
+                <div className="w-10 h-10 bg-blue-50 dark:bg-blue-900/30 rounded-2xl flex items-center justify-center text-[#1E5BFF] shrink-0 border border-blue-100 dark:border-blue-800/30">
+                  <item.icon size={20} />
+                </div>
+                <div>
+                  <h4 className="font-bold text-gray-900 dark:text-white text-sm">{item.title}</h4>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 leading-relaxed font-medium">{item.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Positions Section */}
+        <section className="px-6 mb-12">
+          <h3 className="text-xs font-black text-gray-400 uppercase tracking-[0.2em] mb-6 ml-1">Sua marca em quase todo o app</h3>
+          <div className="grid grid-cols-1 gap-3">
+            {[
+              { icon: Sparkles, title: "Tela de Splash", desc: "Impacto no primeiro segundo do app." },
+              { icon: Layout, title: "Topo da Home", desc: "Destaque fixo e imbatível no Feed." },
+              { icon: ArrowRight, title: "Rodapé de Páginas", desc: "Banner ao final das buscas internas." },
+              { icon: Smartphone, title: "Página Institucional", desc: "Uma tela exclusiva para contar sua história." },
+            ].map((item, i) => (
+              <div key={i} className="flex items-center gap-4 p-4 bg-gray-50 dark:bg-gray-900/50 rounded-2xl border border-gray-100 dark:border-gray-800">
+                <div className="p-2 bg-white dark:bg-gray-800 rounded-xl text-[#1E5BFF] shadow-sm">
+                  <item.icon size={16} />
+                </div>
+                <div>
+                  <h4 className="text-xs font-bold text-gray-800 dark:text-white uppercase tracking-tight">{item.title}</h4>
+                  <p className="text-[10px] text-gray-500 dark:text-gray-500 font-medium">{item.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* FAQ Section */}
         <section className="px-6 mb-24">
             <h3 className="text-xs font-black text-gray-400 uppercase tracking-[0.2em] mb-6 ml-1">Dúvidas Frequentes</h3>
             <div className="space-y-3">
@@ -479,6 +485,7 @@ Nosso time de designers iniciará a criação em breve!`;
 
       </main>
 
+      {/* FOOTER: Resumo de valores e CTA */}
       <div className="fixed bottom-[80px] left-0 right-0 z-[50] bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl border-t border-gray-100 dark:border-gray-800 p-6 shadow-[0_-10px_40px_rgba(0,0,0,0.1)] max-w-md mx-auto">
         <div className="flex items-center justify-between mb-4">
           <div className="flex flex-col">
