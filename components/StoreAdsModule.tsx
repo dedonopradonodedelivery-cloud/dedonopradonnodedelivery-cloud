@@ -17,7 +17,8 @@ import {
   Calendar,
   Award,
   Image as ImageIcon,
-  X
+  X,
+  Info
 } from 'lucide-react';
 import { User } from '@supabase/supabase-js';
 import { StoreBannerEditor } from '@/components/StoreBannerEditor';
@@ -422,6 +423,20 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
                   <p className="text-[10px] text-slate-500 mt-0.5">Nossos designers criam para você (+R$ 69,90).</p>
                 </div>
               </button>
+              
+              {/* Aviso Discreto: Criação Única de Banner (Apenas se PRO e +1 mês) */}
+              {artChoice === 'pro' && selectedDuration > 1 && (
+                <div className="mx-1 mt-2 p-4 bg-blue-500/5 border border-blue-500/20 rounded-2xl flex gap-3 animate-in fade-in duration-300">
+                  <Info size={16} className="text-blue-400 shrink-0 mt-0.5" />
+                  <div className="space-y-1">
+                    <p className="text-[10px] font-black text-white uppercase tracking-wider leading-none">Criação única de banner</p>
+                    <p className="text-[10px] text-slate-400 leading-relaxed font-medium">
+                      Ao contratar mais de 1 mês, o mesmo banner será utilizado durante todo o período contratado. 
+                      O valor de R$ 69,90 refere-se a uma única criação.
+                    </p>
+                  </div>
+                </div>
+              )}
           </div>
         </section>
 
