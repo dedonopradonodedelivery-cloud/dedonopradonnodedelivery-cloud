@@ -1,6 +1,5 @@
 
 import React, { useState, useEffect } from 'react';
-// FIX: Added Loader2, Award, and Sparkles to the imports from lucide-react.
 import { 
   Coins, 
   Zap, 
@@ -23,7 +22,9 @@ import {
   Newspaper,
   Loader2,
   Award,
-  Sparkles
+  Sparkles,
+  ShieldCheck,
+  Lock
 } from 'lucide-react';
 
 interface PricingTier {
@@ -48,6 +49,11 @@ interface MonetizationItem {
     upfront?: string;
     package_text?: string;
   };
+  // Novos campos para a regra Fundador Protegido
+  founder_price_locked?: boolean;
+  founder_price_duration_months?: number;
+  founder_price_note?: string;
+  
   tiers?: PricingTier[];
   observations?: string;
 }
@@ -63,6 +69,9 @@ const INITIAL_MONETIZATION_DATA: MonetizationItem[] = [
     bg: 'bg-blue-500/10',
     capacity: '36',
     unit: 'posições (4 por bairro)',
+    founder_price_locked: true,
+    founder_price_duration_months: 12,
+    founder_price_note: 'Válido para fundadores que contratarem no 1º mês',
     pricing: {
       base: 'R$ 199,90 / mês',
       founder: 'R$ 69,90 / mês',
@@ -80,6 +89,9 @@ const INITIAL_MONETIZATION_DATA: MonetizationItem[] = [
     bg: 'bg-purple-500/10',
     capacity: '1152',
     unit: 'posições (1 por subcat/bairro)',
+    founder_price_locked: true,
+    founder_price_duration_months: 12,
+    founder_price_note: 'Preço travado para contratos de inauguração',
     pricing: {
       base: 'R$ 149,90 / mês',
       founder: 'R$ 59,90 / mês',
@@ -131,6 +143,9 @@ const INITIAL_MONETIZATION_DATA: MonetizationItem[] = [
     bg: 'bg-amber-500/10',
     capacity: '1',
     unit: 'cota única anual/mensal',
+    founder_price_locked: true,
+    founder_price_duration_months: 12,
+    founder_price_note: 'Apenas 1 cota master protegida por ciclo',
     pricing: {
       base: 'R$ 2.500,00 / mês',
       founder: 'R$ 1.500,00 / mês',
@@ -211,15 +226,15 @@ export const AdminMonetizationView: React.FC<{ onBack: () => void }> = ({ onBack
                 </div>
                 <div>
                     <h2 className="text-2xl font-black text-white uppercase tracking-tighter">Gestão de Receita</h2>
-                    <p className="text-sm text-slate-400 font-medium max-w-md">Controle de ativação e tabela de preços de todas as fontes de renda do Localizei JPA.</p>
+                    <p className="text-sm text-slate-400 font-medium max-w-md">Controle de ativação e novas regras de proteção para Fundadores.</p>
                 </div>
             </div>
             <div className="flex flex-col items-end gap-2 shrink-0">
                 <div className="flex items-center gap-2 bg-emerald-500/10 px-4 py-2 rounded-2xl border border-emerald-500/20">
                     <TrendingUp size={18} className="text-emerald-500" />
-                    <span className="text-xs font-black text-emerald-400 uppercase tracking-widest">Preços: v2.4 (Mar/24)</span>
+                    <span className="text-xs font-black text-emerald-400 uppercase tracking-widest">Preços: v2.5 (Fundador)</span>
                 </div>
-                <p className="text-[9px] text-slate-500 font-bold uppercase tracking-widest">Última atualização: Hoje, 14:20</p>
+                <p className="text-[9px] text-slate-500 font-bold uppercase tracking-widest">Última atualização: Hoje, 15:40</p>
             </div>
         </section>
 
@@ -259,18 +274,43 @@ export const AdminMonetizationView: React.FC<{ onBack: () => void }> = ({ onBack
                         </div>
                     </div>
 
-                    <h3 className="text-xl font-black text-white uppercase tracking-tight mb-2">{item.name}</h3>
+                    <h3 className="text-xl font-black text-white uppercase tracking-tight mb-2 flex items-center gap-2">
+                      {item.name}
+                      {item.founder_price_locked && (
+                         <div className="w-5 h-5 bg-amber-500/20 text-amber-500 rounded-full flex items-center justify-center shadow-sm border border-amber-500/30" title="Regra Fundador Protegido">
+                            <Lock size={10} />
+                         </div>
+                      )}
+                    </h3>
                     <p className="text-sm text-slate-400 leading-relaxed font-medium mb-8">
                         {item.description}
                     </p>
+
+                    {/* REGRA: FUNDADOR ANUAL PROTEGIDO */}
+                    {item.founder_price_locked && (
+                      <div className="mb-8 p-4 bg-amber-500/5 border border-amber-500/20 rounded-3xl animate-in zoom-in-95 duration-500">
+                          <div className="flex items-center gap-3 mb-3">
+                              <div className="w-8 h-8 bg-amber-500/20 rounded-xl flex items-center justify-center text-amber-500">
+                                  <ShieldCheck size={18} />
+                              </div>
+                              <div>
+                                  <h4 className="text-[10px] font-black text-white uppercase tracking-widest leading-none">Fundador Anual Protegido</h4>
+                                  <p className="text-[9px] text-amber-400 font-bold uppercase mt-1">Valor garantido por {item.founder_price_duration_months} meses</p>
+                              </div>
+                          </div>
+                          <p className="text-[10px] text-slate-400 font-medium leading-relaxed italic">
+                             "{item.founder_price_note}"
+                          </p>
+                      </div>
+                    )}
 
                     {/* Bloco de Preços */}
                     <div className="space-y-4 pt-6 border-t border-white/5 flex-1">
                         <div className="grid grid-cols-1 gap-4">
                             {/* Preço Base */}
                             <div className="flex justify-between items-center">
-                                <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Preço Base</span>
-                                <span className="text-lg font-black text-slate-300 italic">{item.pricing.base}</span>
+                                <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Preço Tabela</span>
+                                <span className="text-lg font-black text-slate-400 italic line-through opacity-50">{item.pricing.base}</span>
                             </div>
 
                             {/* Promoção Fundador */}
@@ -278,17 +318,9 @@ export const AdminMonetizationView: React.FC<{ onBack: () => void }> = ({ onBack
                                 <div className="flex justify-between items-center p-3 bg-blue-500/5 rounded-2xl border border-blue-500/10">
                                     <div className="flex items-center gap-2">
                                         <Award size={14} className="text-[#1E5BFF]" />
-                                        <span className="text-[10px] font-black text-blue-400 uppercase tracking-widest">Promo Fundador</span>
+                                        <span className="text-[10px] font-black text-blue-400 uppercase tracking-widest">Preço Fundador</span>
                                     </div>
                                     <span className="text-lg font-black text-[#1E5BFF]">{item.pricing.founder}</span>
-                                </div>
-                            )}
-
-                            {/* Pagamento Antecipado */}
-                            {item.pricing.upfront && (
-                                <div className="flex justify-between items-center px-3">
-                                    <span className="text-[10px] font-black text-emerald-500 uppercase tracking-widest">Antecipado (À vista)</span>
-                                    <span className="text-base font-black text-emerald-400">{item.pricing.upfront}</span>
                                 </div>
                             )}
 
@@ -314,15 +346,6 @@ export const AdminMonetizationView: React.FC<{ onBack: () => void }> = ({ onBack
                                 </p>
                             </div>
                         )}
-
-                        {item.observations && (
-                            <div className="bg-white/5 p-3 rounded-xl flex gap-3">
-                                <Info size={14} className="text-slate-500 shrink-0 mt-0.5" />
-                                <p className="text-[9px] text-slate-400 font-bold leading-tight uppercase tracking-tight">
-                                    Obs: {item.observations}
-                                </p>
-                            </div>
-                        )}
                     </div>
                 </div>
             ))}
@@ -331,9 +354,9 @@ export const AdminMonetizationView: React.FC<{ onBack: () => void }> = ({ onBack
         <section className="bg-amber-500/5 p-6 rounded-3xl border border-amber-500/20 flex gap-4 items-start mb-10">
             <AlertTriangle className="text-amber-500 shrink-0" size={20} />
             <div className="space-y-1">
-                <p className="text-xs text-amber-200 font-black uppercase tracking-widest leading-none">Controle Global de Checkout</p>
+                <p className="text-xs text-amber-200 font-black uppercase tracking-widest leading-none">Gestão de Regras</p>
                 <p className="text-xs text-amber-400/80 font-medium leading-relaxed">
-                    Monetizações desativadas neste painel são suspensas instantaneamente em todo o aplicativo. O lojista não conseguirá iniciar novos checkouts ou renovações automáticas para itens inativos.
+                    A regra "Fundador Anual Protegido" trava o valor promocional no perfil do lojista pelo período definido. Alterações manuais de preço não afetarão lojistas com esta flag ativa até o fim da vigência.
                 </p>
             </div>
         </section>
