@@ -16,7 +16,11 @@ import {
   Clock,
   ChevronRight,
   DollarSign,
-  Info
+  Info,
+  ShieldCheck,
+  Zap,
+  Target,
+  BadgeCheck
 } from 'lucide-react';
 
 interface StoreSponsoredAdsProps {
@@ -64,7 +68,7 @@ export const StoreSponsoredAds: React.FC<StoreSponsoredAdsProps> = ({ onBack, on
       totalValue,
       monthlyValue: baseValue,
       isRecurring: repeatMonths > 0 && billingType === 'recurring',
-      savings: totalValue * 0.1 // Simulação de desconto progressivo se necessário
+      savings: totalValue * 0.1 
     };
   }, [days, repeatMonths, billingType]);
 
@@ -204,21 +208,70 @@ export const StoreSponsoredAds: React.FC<StoreSponsoredAdsProps> = ({ onBack, on
       <main className="flex-1 p-6 overflow-y-auto no-scrollbar">
         
         {view === 'list' && (
-          <div className="space-y-8 animate-in slide-in-from-right duration-300">
-            <section className="text-center py-6">
-                <div className="w-20 h-20 bg-blue-50 dark:bg-blue-900/30 rounded-[2rem] flex items-center justify-center mx-auto mb-4 text-[#1E5BFF] shadow-lg shadow-blue-500/10">
-                    <TrendingUp size={32} />
+          <div className="space-y-10 animate-in slide-in-from-right duration-300">
+            {/* NOVO BANNER EXPLICATIVO (CONVERSÃO) */}
+            <section className="space-y-6">
+                <div className="bg-slate-900 rounded-[2.5rem] overflow-hidden shadow-2xl relative border border-white/5">
+                    <div className="relative aspect-[16/9]">
+                        <img 
+                          src="https://images.unsplash.com/photo-1556761175-5973dc0f32e7?q=80&w=1200&auto=format&fit=crop" 
+                          alt="Destaque Patrocinado"
+                          className="w-full h-full object-cover opacity-60 mix-blend-luminosity"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/40 to-transparent"></div>
+                        
+                        {/* Mock de Destaque Patrocinado visual */}
+                        <div className="absolute inset-0 flex items-center justify-center p-6">
+                            <div className="w-full max-w-[240px] bg-white dark:bg-gray-800 rounded-2xl p-3 shadow-2xl scale-110 border border-blue-500/30 transform -rotate-1">
+                                <div className="flex gap-3">
+                                    <div className="w-10 h-10 rounded-lg bg-gray-100"></div>
+                                    <div className="flex-1">
+                                        <div className="flex justify-between">
+                                            <div className="h-3 w-20 bg-gray-200 rounded"></div>
+                                            <span className="text-[8px] font-black bg-blue-100 text-blue-600 px-1.5 py-0.5 rounded uppercase">Patrocinado</span>
+                                        </div>
+                                        <div className="h-2 w-12 bg-gray-100 rounded mt-2"></div>
+                                        <div className="flex gap-1 mt-2">
+                                            <div className="h-2 w-4 bg-yellow-400 rounded"></div>
+                                            <div className="h-2 w-16 bg-gray-100 rounded"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="px-8 pb-8 -mt-6 relative z-10">
+                        <h2 className="text-2xl font-black text-white uppercase tracking-tighter leading-tight mb-4">
+                            Apareça antes dos concorrentes no seu bairro
+                        </h2>
+                        <p className="text-sm text-slate-400 leading-relaxed font-medium mb-8">
+                            O Patrocinado destaca sua loja no topo das listas do bairro, colocando você na frente dos concorrentes quando o cliente procura por serviços como o seu. <strong className="text-white">Mais visibilidade, mais cliques, mais vendas.</strong>
+                        </p>
+
+                        <div className="grid grid-cols-3 gap-2 mb-8">
+                            <div className="flex flex-col items-center text-center gap-1.5">
+                                <div className="p-2 bg-white/5 rounded-xl text-emerald-400 border border-white/5"><CheckCircle2 size={16} /></div>
+                                <span className="text-[9px] font-black uppercase text-slate-500 tracking-tighter">Sem contrato</span>
+                            </div>
+                            <div className="flex flex-col items-center text-center gap-1.5">
+                                <div className="p-2 bg-white/5 rounded-xl text-blue-400 border border-white/5"><Calendar size={16} /></div>
+                                <span className="text-[9px] font-black uppercase text-slate-500 tracking-tighter">Escolha os dias</span>
+                            </div>
+                            <div className="flex flex-col items-center text-center gap-1.5">
+                                <div className="p-2 bg-white/5 rounded-xl text-amber-400 border border-white/5"><DollarSign size={16} /></div>
+                                <span className="text-[9px] font-black uppercase text-slate-500 tracking-tighter">R$ 0,90/dia</span>
+                            </div>
+                        </div>
+
+                        <button 
+                            onClick={handleCreateClick}
+                            className="w-full bg-[#1E5BFF] text-white font-black py-5 rounded-[2rem] shadow-xl shadow-blue-500/30 active:scale-[0.98] transition-all flex items-center justify-center gap-2 uppercase tracking-[0.1em] text-xs"
+                        >
+                            Novo Patrocinado <ArrowRight size={18} />
+                        </button>
+                    </div>
                 </div>
-                <h2 className="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tighter">Venda mais no Bairro</h2>
-                <p className="text-sm text-gray-500 dark:text-gray-400 font-medium mt-2 max-w-[260px] mx-auto leading-relaxed">
-                    Apareça antes dos concorrentes por apenas <span className="text-emerald-500 font-bold">R$ 0,90/dia</span>.
-                </p>
-                <button 
-                    onClick={handleCreateClick}
-                    className="mt-6 w-full bg-[#1E5BFF] text-white font-black py-4 rounded-2xl shadow-xl shadow-blue-500/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2 uppercase tracking-widest text-xs"
-                >
-                    Novo Patrocinado <ArrowRight size={16} />
-                </button>
             </section>
 
             <section>
