@@ -31,6 +31,8 @@ interface Transaction {
     status: 'paid' | 'pending';
 }
 
+const DEFAULT_PLACEHOLDER = "https://images.unsplash.com/photo-1570129477492-45c003edd2be?q=80&w=800";
+
 // --- MOCK DATA ---
 const MOCK_TRANSACTIONS: Transaction[] = [
     { id: 'TX-001', date: '2024-03-24T10:00:00Z', type: 'banners', client: 'Bibi Lanches', amount: 49.90, status: 'paid' },
@@ -487,6 +489,7 @@ export const AdminPanel: React.FC<any> = ({ onLogout, viewMode, onOpenViewSwitch
     ));
   };
 
+  // EARLY RETURNS PARA COMPONENTES DE PÁGINA INTEIRA
   if (activeTab === 'moderation') {
       return <AdminModerationPanel onBack={() => setActiveTab('hub')} />;
   }
@@ -500,6 +503,17 @@ export const AdminPanel: React.FC<any> = ({ onLogout, viewMode, onOpenViewSwitch
     return users.filter(u => u.isActiveResident);
   }, [users, showActiveResidentsOnly]);
 
+  const headerTitle = useMemo(() => {
+      switch(activeTab) {
+          case 'financial': return 'Finanças';
+          case 'management': return 'Gerenciamento';
+          case 'conversations': return 'Conversas';
+          case 'monitoring': return 'Monitoramento';
+          case 'suggestions': return 'Sugestões';
+          default: return 'Central Localizei';
+      }
+  }, [activeTab]);
+
   return (
     <div className="min-h-screen bg-[#0F172A] text-slate-200 font-sans flex flex-col">
       <header className="bg-[#0F172A] border-b border-white/10 px-6 py-6 sticky top-0 z-50 shadow-sm shrink-0">
@@ -512,12 +526,7 @@ export const AdminPanel: React.FC<any> = ({ onLogout, viewMode, onOpenViewSwitch
                 </div>
                 <div>
                     <h1 className="font-black text-xl uppercase tracking-tighter text-white">
-                        {activeTab === 'hub' ? 'Central Localizei' : 
-                         activeTab === 'financial' ? 'Finanças' :
-                         activeTab === 'management' ? 'Gerenciamento' :
-                         activeTab === 'conversations' ? 'Conversas' :
-                         activeTab === 'monitoring' ? 'Monitoramento' :
-                         'Sugestões'}
+                        {headerTitle}
                     </h1>
                     <p className="text-[10px] font-bold text-indigo-400 uppercase tracking-widest">Painel Administrativo</p>
                 </div>
@@ -686,7 +695,7 @@ export const AdminPanel: React.FC<any> = ({ onLogout, viewMode, onOpenViewSwitch
                                 </div>
                                 <div>
                                     <div className="flex items-center gap-2">
-                                        <h4 className="font-bold text-gray-900 leading-none mb-1">{u.full_name || 'Anônimo'}</h4>
+                                        <h4 className="font-bold text-gray-900 dark:text-white leading-none mb-1">{u.full_name || 'Anônimo'}</h4>
                                         {u.isActiveResident && <span className="text-[8px] font-black bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded uppercase tracking-wider border border-blue-100">Morador Ativo</span>}
                                     </div>
                                     <div className="flex items-center gap-3 mt-1">

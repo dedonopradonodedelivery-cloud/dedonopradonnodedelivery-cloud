@@ -1,7 +1,10 @@
+
 import React, { useState, useMemo } from 'react';
 import { Store, AdType } from '../types';
 import { STORES } from '../constants';
 import { Star, BadgeCheck, ChevronRight, Crown } from 'lucide-react';
+
+const DEFAULT_PLACEHOLDER = "https://images.unsplash.com/photo-1570129477492-45c003edd2be?q=80&w=800";
 
 interface LojasEServicosListProps {
   onStoreClick: (store: Store) => void;
@@ -17,12 +20,12 @@ const StoreCard: React.FC<{ store: Store; onClick: () => void }> = ({ store, onC
   return (
     <div onClick={onClick} className="flex items-center gap-4 p-4 bg-white dark:bg-gray-900 rounded-3xl border border-gray-100 dark:border-gray-800 shadow-sm hover:shadow-md transition-all cursor-pointer active:scale-[0.98]">
       <div className="w-16 h-16 rounded-2xl bg-gray-100 dark:bg-gray-800 overflow-hidden relative border border-gray-100 dark:border-gray-700 shrink-0">
-        <img src={store.logoUrl || store.image || "/assets/default-logo.png"} alt={store.name} className="w-full h-full object-cover" />
+        <img src={store.logoUrl || store.image || DEFAULT_PLACEHOLDER} alt={store.name} className="w-full h-full object-cover" />
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex justify-between items-start">
           <h4 className="font-bold text-gray-900 dark:text-white text-base truncate pr-2">{store.name}</h4>
-          {isSponsored && <span className="text-[8px] font-bold text-gray-400 bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded uppercase">Patrocinado</span>}
+          {isSponsored && <span className="text-[8px] font-bold text-gray-400 bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded uppercase">Ads</span>}
         </div>
         <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 mt-0.5">
           <span className="flex items-center gap-1 font-bold text-[#1E5BFF]"><Star className="w-3 h-3 fill-current" /> {store.rating?.toFixed(1)}</span>
@@ -96,7 +99,7 @@ export const LojasEServicosList: React.FC<LojasEServicosListProps> = ({
                    <div className="flex gap-4 items-center relative z-10">
                        <div className="w-20 h-20 rounded-2xl bg-white flex-shrink-0 overflow-hidden relative shadow-xl border-2 border-slate-700">
                             <img 
-                               src={masterStore.logoUrl || masterStore.image || '/assets/default-logo.png'} 
+                               src={masterStore.logoUrl || masterStore.image || DEFAULT_PLACEHOLDER} 
                                alt={masterStore.name} 
                                className="w-full h-full object-contain p-2 group-hover:scale-110 transition-transform duration-700" 
                            />

@@ -17,6 +17,8 @@ import { useUserLocation } from "../hooks/useUserLocation";
 import { useMediaQuery } from "../hooks/useMediaQuery";
 import { quickFilters } from "../constants";
 
+const DEFAULT_PLACEHOLDER = "https://images.unsplash.com/photo-1570129477492-45c003edd2be?q=80&w=800";
+
 type ExploreViewProps = {
   stores: Store[];
   searchQuery: string;
@@ -63,7 +65,7 @@ const NovidadesDaSemana: React.FC<{ stores: Store[]; onStoreClick?: (store: Stor
         <div className="flex gap-4 overflow-x-auto no-scrollbar snap-x -mx-4 px-4">
           {newArrivals.map((store) => (
             <button key={store.id} onClick={() => onStoreClick && onStoreClick(store)} className="flex-shrink-0 w-[170px] aspect-[4/5] rounded-[2.5rem] overflow-hidden relative snap-center shadow-2xl group active:scale-[0.98] transition-all">
-              <img src={store.image || store.logoUrl} alt="" className="absolute inset-0 w-full h-full object-cover transition-transform group-hover:scale-110" />
+              <img src={store.image || store.logoUrl || DEFAULT_PLACEHOLDER} alt="" className="absolute inset-0 w-full h-full object-cover transition-transform group-hover:scale-110" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent"></div>
               <div className="absolute inset-0 p-4 flex flex-col justify-end text-left">
                 <span className="w-fit bg-emerald-500 text-white text-[7px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest mb-1.5 shadow-lg">Novo</span>
@@ -87,7 +89,7 @@ const SugestoesParaVoce: React.FC<{ stores: Store[]; onStoreClick?: (store: Stor
         {suggestions.map((store) => (
           <button key={store.id} onClick={() => onStoreClick && onStoreClick(store)} className="flex-shrink-0 w-[240px] bg-white dark:bg-gray-900 rounded-[2rem] overflow-hidden snap-center shadow-xl border border-gray-100 dark:border-gray-800 group active:scale-[0.98] transition-all text-left">
             <div className="relative h-32 overflow-hidden">
-              <img src={store.image || store.logoUrl} alt="" className="w-full h-full object-cover transition-transform group-hover:scale-110" />
+              <img src={store.image || store.logoUrl || DEFAULT_PLACEHOLDER} alt="" className="w-full h-full object-cover transition-transform group-hover:scale-110" />
             </div>
             <div className="p-5">
               <span className="text-[9px] font-black text-[#1E5BFF] uppercase tracking-widest block mb-1">{store.category}</span>
@@ -114,7 +116,7 @@ const EmAltaNaCidade: React.FC<{ stores: Store[]; onStoreClick?: (store: Store) 
         {trending.map((store, idx) => (
           <button key={store.id} onClick={() => onStoreClick && onStoreClick(store)} className={`flex-1 rounded-[2.5rem] p-6 flex flex-col items-center text-center transition-all active:scale-[0.98] shadow-sm ${idx === 0 ? 'bg-rose-50/70 dark:bg-rose-900/20' : 'bg-blue-50/70 dark:bg-blue-900/20'}`}>
             <div className="w-20 h-20 rounded-full overflow-hidden bg-white shadow-xl border-4 border-white mb-5">
-              <img src={store.logoUrl || store.image} alt="" className="w-full h-full object-cover" />
+              <img src={store.logoUrl || store.image || DEFAULT_PLACEHOLDER} alt="" className="w-full h-full object-cover" />
             </div>
             <h3 className="text-sm font-black text-gray-900 dark:text-white leading-tight mb-1">{store.name}</h3>
             <p className="text-[8px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-6">{store.category}</p>
@@ -176,7 +178,7 @@ const HorizontalStoreSection: React.FC<{ title: string; subtitle?: string; store
         {stores.map((store) => (
           <button key={store.id} onClick={() => onStoreClick(store)} className="min-w-[250px] max-w-[260px] bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 overflow-hidden text-left hover:-translate-y-0.5 transition-all duration-200">
             <div className="relative h-24 bg-gray-100 dark:bg-gray-800 overflow-hidden">
-              <img src={store.image} alt={store.name} className="w-full h-full object-cover transition-transform duration-500 hover:scale-110" />
+              <img src={store.image || store.logoUrl || DEFAULT_PLACEHOLDER} alt={store.name} className="w-full h-full object-cover transition-transform duration-500 hover:scale-110" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
               <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between gap-2">
                 <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-black/70 backdrop-blur-sm">
