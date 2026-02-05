@@ -132,20 +132,14 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
 
       <div className="px-5">
         
-        {/* 1. MINHA LOJA - DUAS OPÇÕES CLARAS */}
+        {/* 1. MINHA LOJA - CENTRALIZADO */}
         <section>
           <SectionHeader title="Minha Loja" icon={Building} />
           <NavCard 
             icon={StoreIcon} 
             label="Perfil Público da Loja" 
-            description="Dados visíveis para os clientes e indexação de busca"
+            description="Informações visíveis, busca e dados para emissão de nota"
             onClick={() => onNavigate('store_profile')} 
-          />
-          <NavCard 
-            icon={FileText} 
-            label="Dados para Nota Fiscal" 
-            description="Informações jurídicas e fiscais da sua empresa"
-            onClick={() => onNavigate('store_fiscal')} 
           />
         </section>
 

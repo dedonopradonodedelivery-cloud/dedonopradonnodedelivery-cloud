@@ -43,7 +43,6 @@ import { UserCupomScreen } from '@/components/UserCupomScreen';
 import { UserStatementView } from '@/components/UserStatementView';
 import { NotificationsView } from '@/components/NotificationsView';
 import { StoreProfileEdit } from '@/components/StoreProfileEdit';
-import { StoreFiscalEdit } from '@/components/StoreFiscalEdit';
 import { ServiceMessagesListView } from '@/components/ServiceMessagesListView';
 import { MerchantReviewsModule } from '@/components/MerchantReviewsModule';
 import { MerchantCouponsModule } from '@/components/MerchantCouponsModule';
@@ -110,7 +109,6 @@ const App: React.FC = () => {
   const [isClaimFlowActive, setIsClaimFlowActive] = useState(false);
   const [storeToClaim, setStoreToClaim] = useState<Store | null>(null);
 
-  // LOGICA DE ROUTING PARA ACESSO VIA URL (REQUISITO URGENTE)
   useEffect(() => {
     const handleUrlRouting = () => {
         const path = window.location.pathname;
@@ -242,7 +240,7 @@ const App: React.FC = () => {
       handleNavigate('profile');
   };
 
-  const headerExclusionList = ['store_area', 'store_detail', 'profile', 'patrocinador_master', 'merchant_performance', 'neighborhood_posts', 'saved_posts', 'classifieds', 'services', 'services_landing', 'merchant_leads', 'service_chat', 'admin_panel', 'category_detail', 'subcategory_detail', 'sponsor_info', 'real_estate', 'jobs', 'job_detail', 'job_wizard', 'adoption', 'donations', 'desapega', 'category_banner_sales', 'banner_sales_wizard', 'weekly_reward_page', 'user_coupons', 'notifications', 'store_profile', 'store_fiscal', 'about', 'support', 'favorites', 'user_statement', 'service_messages_list', 'merchant_reviews', 'merchant_coupons', 'merchant_promotions', 'store_finance', 'store_support', 'real_estate_wizard', 'real_estate_detail', 'plan_selection', 'classified_detail', 'classified_search_results', 'user_activity', 'my_neighborhoods', 'privacy_policy', 'app_suggestion', 'designer_panel', 'jpa_connect', 'merchant_panel', 'store_ads_module', 'store_sponsored', 'about_app', 'coupon_landing', 'user_profile_full', 'edit_profile_view'];
+  const headerExclusionList = ['store_area', 'store_detail', 'profile', 'patrocinador_master', 'merchant_performance', 'neighborhood_posts', 'saved_posts', 'classifieds', 'services', 'services_landing', 'merchant_leads', 'service_chat', 'admin_panel', 'category_detail', 'subcategory_detail', 'sponsor_info', 'real_estate', 'jobs', 'job_detail', 'job_wizard', 'adoption', 'donations', 'desapega', 'category_banner_sales', 'banner_sales_wizard', 'weekly_reward_page', 'user_coupons', 'notifications', 'store_profile', 'about', 'support', 'favorites', 'user_statement', 'service_messages_list', 'merchant_reviews', 'merchant_coupons', 'merchant_promotions', 'store_finance', 'store_support', 'real_estate_wizard', 'real_estate_detail', 'plan_selection', 'classified_detail', 'classified_search_results', 'user_activity', 'my_neighborhoods', 'privacy_policy', 'app_suggestion', 'designer_panel', 'jpa_connect', 'merchant_panel', 'store_ads_module', 'store_sponsored', 'about_app', 'coupon_landing', 'user_profile_full', 'edit_profile_view'];
   
   const RoleSwitcherModal: React.FC = () => {
     if (!isRoleSwitcherOpen) return null;
@@ -429,12 +427,6 @@ const App: React.FC = () => {
 
                     {activeTab === 'store_profile' && (
                       <StoreProfileEdit 
-                        onBack={() => handleNavigate('profile')} 
-                      />
-                    )}
-
-                    {activeTab === 'store_fiscal' && (
-                      <StoreFiscalEdit 
                         onBack={() => handleNavigate('profile')} 
                       />
                     )}

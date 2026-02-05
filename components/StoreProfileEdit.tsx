@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { 
   ChevronLeft, 
@@ -24,9 +25,10 @@ import {
   CreditCard,
   Phone,
   AlertCircle,
-  // Added missing Hash and FileText icon imports
   Hash,
-  FileText
+  FileText,
+  Mail,
+  Info
 } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import { useAuth } from '../contexts/AuthContext';
@@ -61,10 +63,11 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
   const [showSuccess, setShowSuccess] = useState(false);
   
   const logoInputRef = useRef<HTMLInputElement>(null);
-  const tagInputRef = useRef<HTMLInputElement>(null);
+  const [tagInput, setTagInput] = useState('');
 
-  // --- STATE DO FORMULÁRIO COMPLETO ---
+  // --- STATE DO FORMULÁRIO UNIFICADO (PÚBLICO + FISCAL) ---
   const [formData, setFormData] = useState({
+    // Públicos
     nome_exibido: '',
     category: '',
     subcategory: '',
@@ -88,10 +91,16 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
       ...acc, 
       [day.key]: { open: true, start: '09:00', end: '18:00' } 
     }), {} as Record<string, BusinessHour>),
-    confirm_correct: false
-  });
+    confirm_correct: false,
 
-  const [tagInput, setTagInput] = useState('');
+    // Fiscais (Uso Interno)
+    razao_social: '',
+    cnpj: '',
+    inscricao_estadual: '',
+    inscricao_municipal: '',
+    fiscal_address: '',
+    email_fiscal: ''
+  });
 
   useEffect(() => {
     if (!user) return;
@@ -176,15 +185,15 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
     <div className="min-h-screen bg-[#F4F7FF] dark:bg-gray-950 font-sans pb-32 animate-in slide-in-from-right duration-300">
       <div className="sticky top-0 z-40 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md px-5 h-20 flex items-center gap-4 border-b border-blue-100 dark:border-gray-800">
         <button onClick={onBack} className="p-2.5 bg-gray-100 dark:bg-gray-800 rounded-2xl hover:bg-gray-200 transition-colors"><ChevronLeft size={20} className="text-gray-800 dark:text-white" /></button>
-        <div className="flex-1"><h1 className="font-black text-lg text-gray-900 dark:text-white uppercase tracking-tighter">Perfil Público</h1></div>
+        <div className="flex-1"><h1 className="font-black text-lg text-gray-900 dark:text-white uppercase tracking-tighter">Dados da Loja</h1></div>
         <button onClick={handleSave} disabled={isSaving} className="p-3 bg-[#1E5BFF] text-white rounded-2xl shadow-xl active:scale-90 transition-all">{isSaving ? <Loader2 size={20} className="animate-spin" /> : <Save size={20} />}</button>
       </div>
 
       <div className="p-6 space-y-12 max-w-md mx-auto">
         
-        {/* 1. IDENTIFICAÇÃO DA LOJA */}
+        {/* --- DADOS PÚBLICOS --- */}
         <section className="space-y-6">
-          <div className="flex items-center gap-2 px-1"><StoreIcon size={16} className="text-[#1E5BFF]" /><h2 className="text-[11px] font-black text-blue-400 uppercase tracking-widest">1. Identificação</h2></div>
+          <div className="flex items-center gap-2 px-1"><StoreIcon size={16} className="text-[#1E5BFF]" /><h2 className="text-[11px] font-black text-blue-400 uppercase tracking-widest">1. Perfil Público (Visível)</h2></div>
           <div className="bg-white dark:bg-gray-900 rounded-[2.5rem] p-8 border border-blue-50 dark:border-gray-800 shadow-sm space-y-6">
              <div className="flex flex-col items-center">
                 <div className="relative group">
@@ -193,50 +202,20 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
                     </div>
                     <button onClick={() => logoInputRef.current?.click()} className="absolute -bottom-2 -right-2 bg-[#1E5BFF] text-white p-2.5 rounded-xl shadow-lg border-2 border-white dark:border-gray-900"><Pencil size={16} /></button>
                 </div>
-                <p className="text-[9px] font-bold text-gray-400 uppercase mt-4">Logotipo Quadrado</p>
+                <p className="text-[9px] font-bold text-gray-400 uppercase mt-4 text-center leading-tight">Logo Quadrada <br/><span className="text-[8px] opacity-60">Aparece na busca e no perfil</span></p>
              </div>
              
              <div>
                 <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1 mb-1.5">Nome Fantasia *</label>
-                <input required value={formData.nome_exibido} onChange={e => setFormData({...formData, nome_exibido: e.target.value})} className="w-full p-4 bg-blue-50/50 dark:bg-gray-800 border border-blue-100 dark:border-gray-800 rounded-2xl text-sm font-bold dark:text-white outline-none focus:border-[#1E5BFF]" placeholder="Como o cliente conhece sua loja" />
-                <p className="text-[9px] text-gray-400 mt-2 ml-1 italic">Este nome e a logo aparecerão no perfil e nos resultados de busca.</p>
+                <input required value={formData.nome_exibido} onChange={e => setFormData({...formData, nome_exibido: e.target.value})} className="w-full p-4 bg-blue-50/50 dark:bg-gray-800 border border-blue-100 dark:border-gray-800 rounded-2xl text-sm font-bold dark:text-white outline-none focus:border-[#1E5BFF]" placeholder="Ex: Padaria do Bairro" />
              </div>
-          </div>
-        </section>
 
-        {/* 2. INFORMAÇÕES DE CONTATO */}
-        <section className="space-y-6">
-          <div className="flex items-center gap-2 px-1"><Smartphone size={16} className="text-emerald-500" /><h2 className="text-[11px] font-black text-blue-400 uppercase tracking-widest">2. Contato</h2></div>
-          <div className="bg-white dark:bg-gray-900 rounded-[2.5rem] p-8 border border-blue-50 dark:border-gray-800 shadow-sm space-y-5">
              <div>
-                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1 mb-1.5">WhatsApp *</label>
-                <div className="relative">
-                    <Smartphone className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                    <input required value={formData.whatsapp_publico} onChange={e => setFormData({...formData, whatsapp_publico: e.target.value})} className="w-full p-4 pl-12 bg-blue-50/50 dark:bg-gray-800 border border-blue-100 dark:border-gray-800 rounded-2xl text-sm font-bold dark:text-white outline-none" placeholder="(21) 99999-0000" />
-                </div>
-                <p className="text-[9px] text-gray-400 mt-2 ml-1 italic">Gera um botão de contato rápido no seu perfil.</p>
+                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1 mb-1.5">WhatsApp Comercial *</label>
+                <input required value={formData.whatsapp_publico} onChange={e => setFormData({...formData, whatsapp_publico: e.target.value})} className="w-full p-4 bg-blue-50/50 dark:bg-gray-800 border border-blue-100 dark:border-gray-800 rounded-2xl text-sm font-bold dark:text-white outline-none" placeholder="(21) 99999-0000" />
+                <p className="text-[9px] text-gray-400 mt-2 ml-1 italic">Gera botão de contato direto no seu perfil.</p>
              </div>
-             <div>
-                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1 mb-1.5">Telefone Fixo (Opcional)</label>
-                <div className="relative">
-                    <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                    <input value={formData.telefone_fixo_publico} onChange={e => setFormData({...formData, telefone_fixo_publico: e.target.value})} className="w-full p-4 pl-12 bg-blue-50/50 dark:bg-gray-800 border border-blue-100 dark:border-gray-800 rounded-2xl text-sm font-bold dark:text-white outline-none" placeholder="(21) 2222-0000" />
-                </div>
-             </div>
-             <div>
-                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1 mb-1.5">Instagram (@)</label>
-                <div className="relative">
-                    <Instagram className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                    <input value={formData.instagram} onChange={e => setFormData({...formData, instagram: e.target.value})} className="w-full p-4 pl-12 bg-blue-50/50 dark:bg-gray-800 border border-blue-100 dark:border-gray-800 rounded-2xl text-sm font-bold dark:text-white outline-none" placeholder="@sualoja" />
-                </div>
-             </div>
-          </div>
-        </section>
 
-        {/* 3. ENDEREÇO */}
-        <section className="space-y-6">
-          <div className="flex items-center gap-2 px-1"><MapPin size={16} className="text-rose-500" /><h2 className="text-[11px] font-black text-blue-400 uppercase tracking-widest">3. Endereço</h2></div>
-          <div className="bg-white dark:bg-gray-900 rounded-[2.5rem] p-8 border border-blue-50 dark:border-gray-800 shadow-sm space-y-4">
              <div className="grid grid-cols-4 gap-3">
                  <div className="col-span-3">
                     <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1 mb-1.5">Rua *</label>
@@ -247,23 +226,19 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
                     <input required value={formData.numero} onChange={e => setFormData({...formData, numero: e.target.value})} className="w-full p-4 bg-blue-50/50 dark:bg-gray-800 border border-blue-100 dark:border-gray-800 rounded-2xl text-sm font-bold dark:text-white outline-none" placeholder="100" />
                  </div>
              </div>
-             <div className="grid grid-cols-2 gap-3">
-                 <div>
-                    <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1 mb-1.5">Bairro *</label>
-                    <input required value={formData.bairro} onChange={e => setFormData({...formData, bairro: e.target.value})} className="w-full p-4 bg-blue-50/50 dark:bg-gray-800 border border-blue-100 dark:border-gray-800 rounded-2xl text-sm font-bold dark:text-white outline-none" placeholder="Freguesia" />
-                 </div>
-                 <div>
-                    <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1 mb-1.5">Cidade *</label>
-                    <input required value={formData.cidade} onChange={e => setFormData({...formData, cidade: e.target.value})} className="w-full p-4 bg-blue-50/50 dark:bg-gray-800 border border-blue-100 dark:border-gray-800 rounded-2xl text-sm font-bold dark:text-white outline-none" placeholder="Rio de Janeiro" />
-                 </div>
+             <div>
+                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1 mb-1.5">Bairro *</label>
+                <select required value={formData.bairro} onChange={e => setFormData({...formData, bairro: e.target.value})} className="w-full p-4 bg-blue-50/50 dark:bg-gray-800 border border-blue-100 dark:border-gray-800 rounded-2xl text-sm font-bold dark:text-white outline-none">
+                    <option value="">Selecione...</option>
+                    {['Freguesia', 'Taquara', 'Anil', 'Pechincha', 'Tanque', 'Curicica'].map(h => <option key={h} value={h}>{h}</option>)}
+                </select>
              </div>
-             <p className="text-[9px] text-gray-400 mt-2 ml-1 italic">O endereço ajuda clientes próximos a encontrar sua loja fisicamente.</p>
           </div>
         </section>
 
-        {/* 4. HORÁRIO DE FUNCIONAMENTO */}
+        {/* --- HORÁRIOS --- */}
         <section className="space-y-6">
-          <div className="flex items-center gap-2 px-1"><Clock size={16} className="text-amber-500" /><h2 className="text-[11px] font-black text-blue-400 uppercase tracking-widest">4. Horários</h2></div>
+          <div className="flex items-center gap-2 px-1"><Clock size={16} className="text-amber-500" /><h2 className="text-[11px] font-black text-blue-400 uppercase tracking-widest">2. Horário de Funcionamento</h2></div>
           <div className="bg-white dark:bg-gray-900 rounded-[2.5rem] p-8 border border-blue-50 dark:border-gray-800 shadow-sm space-y-4">
              {WEEK_DAYS.map(day => (
                  <div key={day.key} className="flex items-center justify-between py-2 border-b border-gray-50 last:border-0">
@@ -274,18 +249,18 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
                         <span className="text-xs font-bold text-gray-700 dark:text-gray-300">{day.label}</span>
                     </div>
                     <div className={`flex items-center gap-2 transition-opacity ${!formData.business_hours[day.key].open && 'opacity-20 pointer-events-none'}`}>
-                        <input type="time" value={formData.business_hours[day.key].start} onChange={e => setFormData(prev => ({...prev, business_hours: {...prev.business_hours, [day.key]: {...prev.business_hours[day.key], start: e.target.value}}}))} className="bg-gray-50 dark:bg-gray-800 p-2 rounded-lg text-xs font-bold" />
+                        <input type="time" value={formData.business_hours[day.key].start} onChange={e => setFormData(prev => ({...prev, business_hours: {...prev.business_hours, [day.key]: {...prev.business_hours[day.key], start: e.target.value}}}))} className="bg-blue-50/50 dark:bg-gray-800 p-2 rounded-lg text-xs font-bold" />
                         <span className="text-gray-400">-</span>
-                        <input type="time" value={formData.business_hours[day.key].end} onChange={e => setFormData(prev => ({...prev, business_hours: {...prev.business_hours, [day.key]: {...prev.business_hours[day.key], end: e.target.value}}}))} className="bg-gray-50 dark:bg-gray-800 p-2 rounded-lg text-xs font-bold" />
+                        <input type="time" value={formData.business_hours[day.key].end} onChange={e => setFormData(prev => ({...prev, business_hours: {...prev.business_hours, [day.key]: {...prev.business_hours[day.key], end: e.target.value}}}))} className="bg-blue-50/50 dark:bg-gray-800 p-2 rounded-lg text-xs font-bold" />
                     </div>
                  </div>
              ))}
           </div>
         </section>
 
-        {/* 5. FORMAS DE PAGAMENTO */}
+        {/* --- FORMAS DE PAGAMENTO --- */}
         <section className="space-y-6">
-          <div className="flex items-center gap-2 px-1"><CreditCard size={16} className="text-purple-500" /><h2 className="text-[11px] font-black text-blue-400 uppercase tracking-widest">5. Pagamento</h2></div>
+          <div className="flex items-center gap-2 px-1"><CreditCard size={16} className="text-emerald-500" /><h2 className="text-[11px] font-black text-blue-400 uppercase tracking-widest">3. Formas de Pagamento</h2></div>
           <div className="bg-white dark:bg-gray-900 rounded-[2.5rem] p-8 border border-blue-50 dark:border-gray-800 shadow-sm space-y-4">
              <div className="grid grid-cols-2 gap-3">
                  {PAYMENT_METHODS.map(m => (
@@ -299,82 +274,98 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
              </div>
              <div>
                 <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1 mb-1.5 mt-4">Outras Formas</label>
-                <input value={formData.payment_other} onChange={e => setFormData({...formData, payment_other: e.target.value})} className="w-full p-4 bg-blue-50/50 dark:bg-gray-800 border border-blue-100 dark:border-gray-800 rounded-2xl text-sm font-bold dark:text-white outline-none" placeholder="Ex: VR, Sodexo, Ame..." />
+                <input value={formData.payment_other} onChange={e => setFormData({...formData, payment_other: e.target.value})} className="w-full p-4 bg-blue-50/50 dark:bg-gray-800 border border-blue-100 dark:border-gray-800 rounded-2xl text-sm font-bold dark:text-white outline-none" placeholder="Ex: VR, Sodexo, Ticket..." />
              </div>
-             <p className="text-[9px] text-gray-400 mt-2 ml-1 italic">Isso ajuda o cliente na decisão de entrar em contato.</p>
+             <p className="text-[9px] text-gray-400 mt-2 ml-1 italic">Ajuda o cliente na decisão de contato.</p>
           </div>
         </section>
 
-        {/* 6. CATEGORIA E SUBCATEGORIA */}
+        {/* --- CLASSIFICAÇÃO E BUSCA --- */}
         <section className="space-y-6">
-          <div className="flex items-center gap-2 px-1"><Tag size={16} className="text-[#1E5BFF]" /><h2 className="text-[11px] font-black text-blue-400 uppercase tracking-widest">6. Classificação</h2></div>
-          <div className="bg-white dark:bg-gray-900 rounded-[2.5rem] p-8 border border-blue-50 dark:border-gray-800 shadow-sm space-y-5">
+          <div className="flex items-center gap-2 px-1"><Hash size={16} className="text-[#1E5BFF]" /><h2 className="text-[11px] font-black text-blue-400 uppercase tracking-widest">4. Indexação e Busca</h2></div>
+          <div className="bg-white dark:bg-gray-900 rounded-[2.5rem] p-8 border border-blue-50 dark:border-gray-800 shadow-sm space-y-6">
              <div>
                 <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1 mb-1.5">Categoria Principal *</label>
-                <select value={formData.category} onChange={e => setFormData({...formData, category: e.target.value, subcategory: ''})} className="w-full p-4 bg-blue-50/50 dark:bg-gray-800 border border-blue-100 dark:border-gray-800 rounded-2xl text-sm font-bold dark:text-white outline-none">
+                <select required value={formData.category} onChange={e => setFormData({...formData, category: e.target.value, subcategory: ''})} className="w-full p-4 bg-blue-50/50 dark:bg-gray-800 border border-blue-100 dark:border-gray-800 rounded-2xl text-sm font-bold dark:text-white outline-none">
                     <option value="">Selecione...</option>
                     {CATEGORIES.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}
                 </select>
              </div>
-             <div>
-                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1 mb-1.5">Subcategoria *</label>
-                <select disabled={!formData.category} value={formData.subcategory} onChange={e => setFormData({...formData, subcategory: e.target.value})} className="w-full p-4 bg-blue-50/50 dark:bg-gray-800 border border-blue-100 dark:border-gray-800 rounded-2xl text-sm font-bold dark:text-white outline-none disabled:opacity-30">
-                    <option value="">Selecione...</option>
-                    {(SUBCATEGORIES[formData.category] || []).map(s => <option key={s.name} value={s.name}>{s.name}</option>)}
-                </select>
-             </div>
-             <p className="text-[9px] text-gray-400 mt-2 ml-1 italic">Define em qual área do app sua loja aparecerá nas buscas.</p>
-          </div>
-        </section>
 
-        {/* 7. TAGS (COMPORTAMENTO ENTER) */}
-        <section className="space-y-6">
-          <div className="flex items-center gap-2 px-1"><Hash size={16} className="text-[#1E5BFF]" /><h2 className="text-[11px] font-black text-blue-400 uppercase tracking-widest">7. Tags de Busca</h2></div>
-          <div className="bg-white dark:bg-gray-900 rounded-[2.5rem] p-8 border border-blue-50 dark:border-gray-800 shadow-sm space-y-4">
-             <div className="space-y-3">
-                 <input 
+             <div>
+                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1 mb-1.5">Tags de Busca (ENTER para criar) *</label>
+                <input 
                     value={tagInput}
                     onChange={e => setTagInput(e.target.value)}
                     onKeyDown={handleAddTag}
-                    placeholder="Digite e pressione ENTER" 
-                    className="w-full p-4 bg-blue-50/50 dark:bg-gray-800 border border-blue-100 dark:border-gray-800 rounded-2xl text-sm font-bold dark:text-white outline-none focus:border-[#1E5BFF]" 
-                 />
-                 <div className="flex flex-wrap gap-2">
+                    placeholder="Ex: pizza, delivery, massa..." 
+                    className="w-full p-4 bg-blue-50/50 dark:bg-gray-800 border border-blue-100 dark:border-gray-800 rounded-2xl text-sm font-bold dark:text-white outline-none" 
+                />
+                <div className="flex flex-wrap gap-2 mt-3">
                     {formData.tags.map(t => (
-                        <div key={t} className="bg-[#1E5BFF]/10 text-[#1E5BFF] px-3 py-1.5 rounded-full text-[10px] font-black uppercase flex items-center gap-2 border border-blue-200">
+                        <div key={t} className="bg-blue-600 text-white px-3 py-1.5 rounded-full text-[10px] font-black uppercase flex items-center gap-2">
                             {t}
                             <button onClick={() => removeTag(t)}><X size={12} /></button>
                         </div>
                     ))}
-                 </div>
+                </div>
+                <p className="text-[9px] text-blue-500 mt-2 ml-1 font-bold">As tags ajudam sua loja a aparecer na barra de busca. <br/>Limite: 15 tags.</p>
              </div>
-             <div className="p-4 bg-blue-50 dark:bg-blue-900/10 rounded-2xl border border-blue-100 dark:border-blue-800/30">
-                 <p className="text-[10px] text-blue-700 dark:text-blue-300 leading-relaxed font-bold uppercase tracking-tight">
-                    As tags ajudam sua loja a aparecer na barra de busca. <br/>
-                    Exemplo: pizzaria, lanche, delivery, massa, comida italiana.
-                 </p>
+
+             <div>
+                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1 mb-1.5">Descrição Curta *</label>
+                <textarea required value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} placeholder="Escreva uma breve apresentação da sua loja..." className="w-full p-4 bg-blue-50/50 dark:bg-gray-800 border border-blue-100 dark:border-gray-800 rounded-2xl text-sm font-medium dark:text-white outline-none min-h-[120px] resize-none" />
              </div>
-             <p className="text-[9px] text-gray-400 mt-1 ml-1 text-right">{formData.tags.length}/15 tags</p>
           </div>
         </section>
 
-        {/* 8. DESCRIÇÃO DA LOJA */}
+        {/* --- DADOS FISCAIS (NOVO - CENTRALIZADO) --- */}
         <section className="space-y-6">
-          <div className="flex items-center gap-2 px-1"><FileText size={16} className="text-indigo-500" /><h2 className="text-[11px] font-black text-blue-400 uppercase tracking-widest">8. Descrição</h2></div>
-          <div className="bg-white dark:bg-gray-900 rounded-[2.5rem] p-8 border border-blue-50 dark:border-gray-800 shadow-sm">
-             <textarea value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} placeholder="Escreva uma breve apresentação da sua loja..." className="w-full p-4 bg-blue-50/50 dark:bg-gray-800 border border-blue-100 dark:border-gray-800 rounded-2xl text-sm font-medium dark:text-white outline-none min-h-[150px] resize-none" />
-             <p className="text-[9px] text-gray-400 mt-4 ml-1 italic">Uma boa descrição gera confiança e melhora o posicionamento.</p>
+          <div className="flex items-center gap-2 px-1"><FileText size={16} className="text-slate-500" /><h2 className="text-[11px] font-black text-slate-500 uppercase tracking-widest">5. Dados para Nota Fiscal (Uso Interno)</h2></div>
+          <div className="bg-slate-50 dark:bg-slate-900 rounded-[2.5rem] p-8 border border-slate-200 dark:border-slate-800 shadow-sm space-y-6">
+             <div className="p-4 bg-amber-50 dark:bg-amber-900/10 rounded-2xl border border-amber-100 dark:border-amber-800/30 flex gap-4">
+                <Info size={20} className="text-amber-600 shrink-0 mt-1" />
+                <p className="text-[10px] text-amber-800 dark:text-amber-200 font-bold leading-relaxed">
+                  Estes dados são utilizados exclusivamente para faturamento de serviços e emissão de NF. <strong className="uppercase">Não ficam visíveis para os clientes.</strong>
+                </p>
+             </div>
+
+             <div>
+                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 mb-1.5">Razão Social</label>
+                <input value={formData.razao_social} onChange={e => setFormData({...formData, razao_social: e.target.value.toUpperCase()})} className="w-full p-4 bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-2xl text-sm font-bold dark:text-white outline-none" placeholder="RAZÃO SOCIAL DA EMPRESA LTDA" />
+             </div>
+
+             <div>
+                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 mb-1.5">CNPJ</label>
+                <input value={formData.cnpj} onChange={e => setFormData({...formData, cnpj: e.target.value})} className="w-full p-4 bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-2xl text-sm font-bold dark:text-white outline-none" placeholder="00.000.000/0001-00" />
+             </div>
+
+             <div className="grid grid-cols-2 gap-4">
+                <div>
+                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 mb-1.5">Insc. Estadual</label>
+                    <input value={formData.inscricao_estadual} onChange={e => setFormData({...formData, inscricao_estadual: e.target.value})} className="w-full p-4 bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-2xl text-sm font-bold dark:text-white outline-none" placeholder="Opcional" />
+                </div>
+                <div>
+                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 mb-1.5">Insc. Municipal</label>
+                    <input value={formData.inscricao_municipal} onChange={e => setFormData({...formData, inscricao_municipal: e.target.value})} className="w-full p-4 bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-2xl text-sm font-bold dark:text-white outline-none" placeholder="Opcional" />
+                </div>
+             </div>
+
+             <div>
+                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 mb-1.5">E-mail Fiscal / Faturamento</label>
+                <input value={formData.email_fiscal} onChange={e => setFormData({...formData, email_fiscal: e.target.value})} className="w-full p-4 bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-2xl text-sm font-bold dark:text-white outline-none" placeholder="financeiro@empresa.com.br" />
+             </div>
           </div>
         </section>
 
-        {/* 9. CONFIRMAÇÃO E SALVAR */}
+        {/* --- CONFIRMAÇÃO --- */}
         <section className="space-y-6">
             <div className="bg-white dark:bg-gray-900 rounded-[2.5rem] p-8 border border-blue-50 dark:border-gray-800 shadow-sm">
                 <label className="flex items-center gap-4 cursor-pointer group">
                     <div onClick={() => setFormData({...formData, confirm_correct: !formData.confirm_correct})} className={`w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all ${formData.confirm_correct ? 'bg-[#1E5BFF] border-[#1E5BFF]' : 'border-gray-200 group-hover:border-blue-400'}`}>
                         {formData.confirm_correct && <Check size={16} className="text-white" strokeWidth={4} />}
                     </div>
-                    <span className="text-xs font-bold text-gray-600 dark:text-gray-300 leading-tight">Confirmo que as informações acima estão corretas e atualizadas.</span>
+                    <span className="text-xs font-bold text-gray-600 dark:text-gray-300 leading-tight">Confirmo que as informações acima (públicas e fiscais) estão corretas e atualizadas.</span>
                 </label>
 
                 <button 
@@ -382,7 +373,7 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
                   disabled={isSaving || !formData.confirm_correct}
                   className="w-full bg-[#1E5BFF] text-white font-black py-5 rounded-[2rem] shadow-xl shadow-blue-500/20 active:scale-[0.98] transition-all flex items-center justify-center gap-3 uppercase tracking-widest text-sm mt-8 disabled:opacity-30 disabled:grayscale"
                 >
-                    {isSaving ? <Loader2 className="animate-spin" /> : <><CheckCircle2 size={20}/> Salvar Perfil Público</>}
+                    {isSaving ? <Loader2 className="animate-spin" /> : <><CheckCircle2 size={20}/> Salvar Dados da Loha</>}
                 </button>
             </div>
         </section>
@@ -394,7 +385,7 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
       {showSuccess && (
         <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-[100] bg-gray-900 dark:bg-white text-white dark:text-gray-900 px-8 py-4 rounded-full shadow-2xl flex items-center gap-3 animate-in slide-in-from-bottom-5">
            <CheckCircle2 size={56} className="w-5 h-5 text-emerald-400" />
-           <span className="font-black text-xs uppercase tracking-widest">Perfil Atualizado!</span>
+           <span className="font-black text-xs uppercase tracking-widest">Loja Atualizada!</span>
         </div>
       )}
     </div>
