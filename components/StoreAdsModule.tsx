@@ -23,10 +23,12 @@ import {
   Check,
   ShieldCheck,
   ShieldEllipsis,
-  Crown
+  Crown,
+  AlertTriangle
 } from 'lucide-react';
 import { User } from '@supabase/supabase-js';
 import { StoreBannerEditor } from '@/components/StoreBannerEditor';
+import { supabase } from '@/lib/supabaseClient';
 
 interface StoreAdsModuleProps {
   onBack: () => void;
@@ -141,39 +143,70 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
     window.scrollTo(0, 0);
   };
 
-  const handleConfirmPayment = () => {
+  const handleConfirmPayment = async () => {
     setIsSubmitting(true);
     setView('processing');
     
-    setTimeout(() => {
-      const campaignId = `CAMP-${Math.floor(1000 + Math.random() * 9000)}`;
-      const activeCampaigns = JSON.parse(localStorage.getItem('active_ads_jpa') || '[]');
-      activeCampaigns.push({
-          id: campaignId,
-          user: user?.id,
-          placement,
-          hoods: selectedNeighborhoods,
-          duration: selectedDuration,
-          total: summary.total,
-          artType: artChoice,
-          timestamp: new Date().toISOString()
-      });
-      localStorage.setItem('active_ads_jpa', JSON.stringify(activeCampaigns));
+    try {
+        if (!user || !supabase) throw new Error("Acesso não disponível");
 
-      if (artChoice === 'pro') {
-          const orderId = `DSG-${Math.floor(1000 + Math.random() * 9000)}`;
-          const initialMsgs = [
-              { id: 1, requestId: orderId, senderId: 'system', senderName: 'Localizei JPA', senderRole: 'merchant', text: '🎉 Parabéns pela sua campanha!\nSeu banner será criado pelo time Localizei.', timestamp: new Date().toISOString() },
-              { id: 2, requestId: orderId, senderId: 'system', senderName: 'Localizei JPA', senderRole: 'merchant', text: 'Para começarmos a criação do seu banner, envie por aqui:\n• Nome da loja\n• Logo (se tiver)\n• Cores ou referências visuais\n• Texto promocional (se desejar)', timestamp: new Date().toISOString() },
-              { id: 3, requestId: orderId, senderId: 'system', senderName: 'Localizei JPA', senderRole: 'merchant', text: 'Caso prefira, nosso time pode criar o banner completo para você.', timestamp: new Date().toISOString() }
-          ];
-          localStorage.setItem(`msgs_${orderId}`, JSON.stringify(initialMsgs));
-          localStorage.setItem(`designer_order_${campaignId}`, orderId);
-      }
+        const campaignId = `CAMP-${Math.floor(1000 + Math.random() * 9000)}`;
+        
+        // Simulação de banco Local
+        const activeCampaigns = JSON.parse(localStorage.getItem('active_ads_jpa') || '[]');
+        activeCampaigns.push({
+            id: campaignId,
+            user: user?.id,
+            placement,
+            hoods: selectedNeighborhoods,
+            duration: selectedDuration,
+            total: summary.total,
+            artType: artChoice,
+            timestamp: new Date().toISOString()
+        });
+        localStorage.setItem('active_ads_jpa', JSON.stringify(activeCampaigns));
 
-      setIsSubmitting(false);
-      setView('success');
-    }, 3000);
+        // Registro opcional no banco real se as tabelas existirem
+        // Se falhar (ex: tabela published_banners ausente), o catch cuidará de avisar o admin.
+        const { error: dbError } = await supabase.from('published_banners').insert({
+            merchant_id: user.id,
+            target: placement.home && placement.cat ? 'combo' : placement.home ? 'home' : 'category',
+            config: {
+                art_type: artChoice,
+                hoods: selectedNeighborhoods,
+                duration: selectedDuration
+            }
+        });
+
+        if (dbError && (dbError.code === 'PGRST116' || dbError.message.includes('schema cache'))) {
+            throw new Error("MIGRATION_MISSING");
+        }
+
+        if (artChoice === 'pro') {
+            const orderId = `DSG-${Math.floor(1000 + Math.random() * 9000)}`;
+            const initialMsgs = [
+                { id: 1, requestId: orderId, senderId: 'system', senderName: 'Localizei JPA', senderRole: 'merchant', text: '🎉 Parabéns pela sua campanha!\nSeu banner será criado pelo time Localizei.', timestamp: new Date().toISOString() },
+                { id: 2, requestId: orderId, senderId: 'system', senderName: 'Localizei JPA', senderRole: 'merchant', text: 'Para começarmos a criação do seu banner, envie por aqui:\n• Nome da loja\n• Logo (se tiver)\n• Cores ou referências visuais\n• Texto promocional (se desejar)', timestamp: new Date().toISOString() },
+                { id: 3, requestId: orderId, senderId: 'system', senderName: 'Localizei JPA', senderRole: 'merchant', text: 'Caso prefira, nosso time pode criar o banner completo para você.', timestamp: new Date().toISOString() }
+            ];
+            localStorage.setItem(`msgs_${orderId}`, JSON.stringify(initialMsgs));
+            localStorage.setItem(`designer_order_${campaignId}`, orderId);
+        }
+
+        setTimeout(() => {
+            setIsSubmitting(false);
+            setView('success');
+        }, 2000);
+
+    } catch (err: any) {
+        setIsSubmitting(false);
+        setView('payment_selection');
+        if (err.message === "MIGRATION_MISSING") {
+            alert("Atenção Admin: As tabelas de anúncios (published_banners) não foram encontradas no Supabase. Por favor, execute o SQL de migração fornecido no full_schema_v2.sql.");
+        } else {
+            alert(`Erro ao processar: ${err.message}`);
+        }
+    }
   };
 
   const handleGoToDesignerChat = () => {
@@ -259,14 +292,14 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
               <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Escolha como pagar</p>
               <button onClick={() => setPaymentMethod('pix')} className={`w-full p-6 rounded-2xl border-2 flex items-center justify-between transition-all ${paymentMethod === 'pix' ? 'bg-blue-600/10 border-blue-500' : 'bg-white/5 border-transparent'}`}>
                 <div className="flex items-center gap-4 text-left">
-                  <div className={`p-3 rounded-xl ${paymentMethod === 'pix' ? 'bg-blue-500 text-white' : 'bg-white/5 text-slate-500'}`}><QrCode size={24} /></div>
+                  <div className={`p-3 rounded-xl ${paymentMethod === 'pix' ? 'bg-blue-50 text-white' : 'bg-white/5 text-slate-500'}`}><QrCode size={24} /></div>
                   <div><p className="font-black text-sm uppercase">Pix Imediato</p><p className="text-[10px] text-slate-400 font-bold">Liberação instantânea do anúncio</p></div>
                 </div>
                 {paymentMethod === 'pix' && <CheckCircle2 size={18} className="text-blue-500" />}
               </button>
               <button onClick={() => setPaymentMethod('card')} className={`w-full p-6 rounded-2xl border-2 flex items-center justify-between transition-all ${paymentMethod === 'card' ? 'bg-blue-600/10 border-blue-500' : 'bg-white/5 border-transparent'}`}>
                 <div className="flex items-center gap-4 text-left">
-                  <div className={`p-3 rounded-xl ${paymentMethod === 'card' ? 'bg-blue-500 text-white' : 'bg-white/5 text-slate-500'}`}><CreditCard size={24} /></div>
+                  <div className={`p-3 rounded-xl ${paymentMethod === 'card' ? 'bg-blue-50 text-white' : 'bg-white/5 text-slate-500'}`}><CreditCard size={24} /></div>
                   <div><p className="font-black text-sm uppercase">Cartão de Crédito</p><p className="text-[10px] text-slate-400 font-bold">Em até 12x (consulte taxas)</p></div>
                 </div>
                 {paymentMethod === 'card' && <CheckCircle2 size={18} className="text-blue-500" />}

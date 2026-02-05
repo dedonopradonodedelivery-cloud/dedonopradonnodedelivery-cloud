@@ -96,39 +96,19 @@ const BigSurCard: React.FC<{
   isMoreButton?: boolean;
   categoryColor?: string;
 }> = ({ icon, name, isSelected, onClick, isMoreButton, categoryColor }) => {
-  // Padronização total com os ícones da Home
-  const baseClasses = `flex flex-col items-center justify-between p-2 rounded-[25px] border transition-all duration-300 active:scale-95 w-full aspect-square relative overflow-hidden`;
-  
-  // Cores e estilos baseados no tipo do botão
-  const backgroundClass = isMoreButton 
-    ? "bg-gray-100 dark:bg-gray-800 border-gray-200 dark:border-gray-700" 
-    : `${categoryColor || 'bg-brand-blue'} border-white/20 shadow-sm`;
-    
-  const iconColorClass = isMoreButton 
-    ? "text-gray-600 dark:text-gray-400" 
-    : "text-white";
-
-  // Efeito de seleção
-  const selectionEffects = isSelected 
-    ? "ring-4 ring-[#1E5BFF]/30 scale-[0.96] brightness-110" 
-    : "hover:brightness-105";
-
+  const baseClasses = `relative w-full aspect-square rounded-[24px] flex flex-col items-center justify-center gap-1.5 transition-all duration-300 cursor-pointer overflow-hidden border`;
+  const backgroundClass = isMoreButton ? "bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700" : `${categoryColor || 'bg-brand-blue'} border-transparent shadow-md`;
+  const textClass = isMoreButton ? "text-gray-500 dark:text-gray-400" : "text-white drop-shadow-sm";
+  const iconContainerClass = isMoreButton ? "bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400" : "bg-white/20 text-white backdrop-blur-md border border-white/20";
+  const selectionEffects = isSelected ? "ring-4 ring-black/10 dark:ring-white/20 scale-[0.96] brightness-110 shadow-inner" : "hover:shadow-lg hover:-translate-y-1 hover:brightness-105";
   return (
     <button onClick={onClick} className={`${baseClasses} ${backgroundClass} ${selectionEffects}`}>
-      {/* Container do Ícone (Centralizado no espaço disponível superior) */}
-      <div className="flex-1 flex items-center justify-center w-full">
-        {React.isValidElement(icon) ? React.cloneElement(icon as React.ReactElement<any>, { 
-          className: `w-6 h-6 ${iconColorClass} drop-shadow-md`, 
-          strokeWidth: 3 
-        }) : null}
+      <div className={`w-9 h-9 rounded-2xl flex items-center justify-center transition-colors ${iconContainerClass}`}>
+        {React.isValidElement(icon) ? React.cloneElement(icon as React.ReactElement<any>, { className: `w-4.5 h-4.5`, strokeWidth: 2.5 }) : null}
       </div>
-
-      {/* Overlay de Texto Inferior (Idêntico ao grid da Home) */}
-      <div className={`w-full ${isMoreButton ? 'bg-black/5' : 'bg-black/10'} backdrop-blur-[2px] py-1 rounded-b-[20px] -mx-2 -mb-2 px-1`}>
-        <span className={`block w-full text-[8px] font-black text-center uppercase tracking-tight leading-tight line-clamp-2 break-words ${isMoreButton ? 'text-gray-600 dark:text-gray-400' : 'text-white'}`}>
-          {name}
-        </span>
-      </div>
+      <span className={`text-[9px] font-bold leading-tight px-1.5 line-clamp-2 w-full text-center tracking-tight break-words ${textClass}`}>
+        {name}
+      </span>
     </button>
   );
 };
@@ -208,7 +188,14 @@ export const CategoryView: React.FC<CategoryViewProps> = ({
           .order('created_at', { ascending: false })
           .limit(1);
 
-        if (error) throw error;
+        if (error) {
+            // FIX: Gracefully handle missing table error (PGRST116 / 404)
+            if (error.code === 'PGRST116' || error.message.includes('published_banners')) {
+                setActiveBanner(null);
+                return;
+            }
+            throw error;
+        }
 
         if (data && data.length > 0) {
           setActiveBanner(data[0]);
@@ -216,7 +203,10 @@ export const CategoryView: React.FC<CategoryViewProps> = ({
           setActiveBanner(null);
         }
       } catch (e: any) {
-        console.error("Failed to fetch category banner from Supabase:", e.message || e);
+        // Only log serious errors, not missing table setup errors
+        if (!e.message?.includes('published_banners')) {
+            console.error("Failed to fetch category banner:", e.message || e);
+        }
         setActiveBanner(null);
       } finally {
         setLoadingBanner(false);
@@ -225,6 +215,7 @@ export const CategoryView: React.FC<CategoryViewProps> = ({
     
     fetchCategoryBanner();
 
+    // Listen for changes ONLY if the table exists (best effort)
     const channel = supabase.channel(`category-banner-${category.slug}`)
       .on('postgres_changes', {
           event: '*',
