@@ -127,7 +127,7 @@ export const JPAConnectSalesView: React.FC<JPAConnectSalesViewProps> = ({ onBack
                 onClick={() => setIsModalOpen(true)}
                 className="w-full bg-white text-slate-900 font-black py-5 rounded-[2rem] shadow-2xl active:scale-[0.98] transition-all flex items-center justify-center gap-2 uppercase tracking-widest text-xs"
             >
-                Quero solicitar minha vaga <ArrowRight size={18} strokeWidth={3} />
+                Quero fazer minha aplicação <ArrowRight size={18} strokeWidth={3} />
             </button>
         </section>
 
@@ -224,7 +224,6 @@ export const JPAConnectSalesView: React.FC<JPAConnectSalesViewProps> = ({ onBack
                         "Prefere o anonimato à autoridade local"
                     ].map((text, i) => (
                         <div key={i} className="flex items-center gap-3 px-1 opacity-50">
-                            {/* FIX: Use XCircle icon instead of undefined XCircle */}
                             <XCircle size={18} className="text-slate-500" />
                             <span className="text-sm text-slate-500 font-medium">{text}</span>
                         </div>
@@ -259,7 +258,6 @@ export const JPAConnectSalesView: React.FC<JPAConnectSalesViewProps> = ({ onBack
         {/* CTA FINAL */}
         <section className="pt-10 space-y-6">
             <div className="bg-amber-500/5 border border-amber-500/20 p-5 rounded-2xl flex gap-4">
-                {/* FIX: Use Info icon instead of undefined Info */}
                 <span className="shrink-0"><Info size={20} className="text-amber-500" /></span>
                 <p className="text-[11px] text-amber-200/70 font-bold uppercase leading-relaxed">
                     A entrada no grupo depende de análise prévia de nicho e perfil empresarial para garantir a qualidade do círculo.
