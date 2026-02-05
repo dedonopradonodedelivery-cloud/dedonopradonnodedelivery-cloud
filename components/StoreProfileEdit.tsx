@@ -33,7 +33,8 @@ import {
   Lock,
   Tag,
   ShoppingBag,
-  Plus
+  Plus,
+  FileText
 } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import { useAuth } from '../contexts/AuthContext';
@@ -169,7 +170,7 @@ const TaxonomyField: React.FC<TaxonomyFieldProps> = ({ label, placeholder, optio
   );
 };
 
-// --- COMPONENTE DE TAGS (Refatorado) ---
+// --- COMPONENTE DE TAGS ---
 const TagSelector: React.FC<{
   selectedTags: string[];
   onChange: (tags: string[]) => void;
@@ -178,7 +179,6 @@ const TagSelector: React.FC<{
   const [showSuggestions, setShowSuggestions] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Normalização para comparação (remove acentos, espaços extras e vira lowercase)
   const normalize = (str: string) => str.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim().replace(/\s+/g, ' ');
 
   const availableTags = ALL_TAGS.filter(tag => 
@@ -189,7 +189,6 @@ const TagSelector: React.FC<{
   const normalizedInput = useMemo(() => normalize(input), [input]);
   const isValidNewTag = normalizedInput.length >= 2 && normalizedInput.length <= 30;
   
-  // Verifica se o input atual já existe nas sugestões filtradas ou nas selecionadas
   const hasExactMatch = useMemo(() => {
     return availableTags.some(t => normalize(t) === normalizedInput) || 
            selectedTags.some(t => normalize(t) === normalizedInput);
@@ -197,9 +196,8 @@ const TagSelector: React.FC<{
 
   const handleAddTag = (tag: string) => {
     if (selectedTags.length >= 15) return;
-    const finalTag = tag.trim().replace(/\s+/g, ' '); // Preserva o case original digitado, mas limpa espaços
+    const finalTag = tag.trim().replace(/\s+/g, ' ');
     
-    // Evita duplicados reais antes de adicionar
     if (!selectedTags.some(st => normalize(st) === normalize(finalTag))) {
         onChange([...selectedTags, finalTag]);
     }
@@ -259,7 +257,6 @@ const TagSelector: React.FC<{
         {showSuggestions && (input.length > 0) && (
           <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl shadow-2xl z-50 max-h-64 overflow-y-auto no-scrollbar py-2">
             
-            {/* Opção Adicionar Novo (Caso não tenha match exato) */}
             {isValidNewTag && !hasExactMatch && selectedTags.length < 15 && (
                 <button
                   type="button"
@@ -276,7 +273,6 @@ const TagSelector: React.FC<{
                 </button>
             )}
 
-            {/* Sugestões da Base */}
             {availableTags.map(tag => (
               <button
                 key={tag}
@@ -397,12 +393,10 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
   const [isSaving, setIsSaving] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   
-  // Estados de criação de taxonomia
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [createType, setCreateType] = useState<'category' | 'subcategory'>('category');
   const [pendingTaxonomyMsg, setPendingTaxonomyMsg] = useState<string | null>(null);
 
-  // Combinação de constantes e aprovados
   const [availableCategories, setAvailableCategories] = useState(CATEGORIES.map(c => ({ name: c.name })));
   const [availableSubcategories, setAvailableSubcategories] = useState<any[]>([]);
   
@@ -463,18 +457,15 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
     registration_date: new Date().toLocaleDateString('pt-BR'),
   });
 
-  // Carregar taxonomias aprovadas do localStorage e verificar se há pendentes
   useEffect(() => {
     const loadTaxonomies = () => {
         const savedApproved = localStorage.getItem('approved_taxonomy');
         if (savedApproved) {
             const approved = JSON.parse(savedApproved);
-            // Mesclar categorias
             const extraCats = approved.filter((a: any) => a.type === 'category').map((a: any) => ({ name: a.name }));
             setAvailableCategories([...CATEGORIES.map(c => ({ name: c.name })), ...extraCats]);
         }
 
-        // Verificar sugestões pendentes do usuário atual
         if (user) {
             const savedSuggestions = localStorage.getItem('taxonomy_suggestions');
             if (savedSuggestions) {
@@ -491,7 +482,6 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
     return () => window.removeEventListener('storage', loadTaxonomies);
   }, [user]);
 
-  // Atualizar subcategorias ao mudar categoria
   useEffect(() => {
     if (!formData.category) {
         setAvailableSubcategories([]);
@@ -530,7 +520,6 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
   }, [user]);
 
   const handleSave = async () => {
-    // Validar campos obrigatórios
     if (!formData.nome_exibido) { alert('Informe o nome da loja.'); return; }
     if (!formData.description) { alert('Informe uma descrição curta.'); return; }
     if (!formData.whatsapp_publico) { alert('Informe o telefone/WhatsApp.'); return; }
@@ -583,7 +572,6 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
   return (
     <div className="min-h-screen bg-[#F8F9FC] dark:bg-gray-950 font-sans pb-32 animate-in slide-in-from-right duration-300">
       
-      {/* HEADER */}
       <div className="sticky top-0 z-40 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md px-5 h-20 flex items-center gap-4 border-b border-gray-100 dark:border-gray-800">
         <button onClick={onBack} className="p-2.5 bg-gray-100 dark:bg-gray-800 rounded-2xl hover:bg-gray-200 transition-colors">
           <ChevronLeft className="w-6 h-6 text-gray-800 dark:text-white" />
@@ -603,7 +591,7 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
         <section className="space-y-6">
           <div className="flex items-center gap-2 px-1">
             <StoreIcon size={16} className="text-[#1E5BFF]" />
-            <h2 className="text-[11px] font-black text-gray-400 uppercase tracking-widest">1. Informações da Loja</h2>
+            <h2 className="text-[11px] font-black text-gray-400 uppercase tracking-widest">1. Informações da Loja (Perfil Público)</h2>
           </div>
 
           <div className="bg-white dark:bg-gray-900 rounded-[2.5rem] p-6 border border-gray-100 dark:border-gray-800 shadow-sm space-y-6">
@@ -632,7 +620,7 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
              <FormField label="Telefone / WhatsApp *" value={formData.whatsapp_publico} onChange={v => setFormData({...formData, whatsapp_publico: v})} icon={Smartphone} placeholder="(21) 99999-0000" />
              
              <div className="space-y-1.5">
-                 <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Endereço *</label>
+                 <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Endereço Público *</label>
                  <div className="space-y-3">
                      <input value={formData.cep} onChange={e => setFormData({...formData, cep: e.target.value})} placeholder="CEP" className="w-full bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-4 text-sm font-bold dark:text-white outline-none" />
                      <div className="grid grid-cols-4 gap-3">
@@ -686,14 +674,13 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
           </div>
         </section>
 
-        {/* BLOCO 3: PRODUTOS E TAGS (Separado conforme solicitado) */}
+        {/* BLOCO 3: PRODUTOS E SERVIÇOS */}
         <section className="space-y-6">
           <div className="flex items-center gap-2 px-1">
             <Tag size={16} className="text-emerald-500" />
             <h2 className="text-[11px] font-black text-gray-400 uppercase tracking-widest">3. Produtos e Serviços</h2>
           </div>
           <div className="bg-white dark:bg-gray-900 rounded-[2.5rem] p-6 border border-gray-100 dark:border-gray-800 shadow-sm space-y-6">
-             {/* TAGS SELECTOR (Fluxo Inline com Adicionar Tag) */}
              <TagSelector 
                 selectedTags={formData.tags || []} 
                 onChange={(tags) => setFormData({...formData, tags})} 
@@ -719,6 +706,47 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
                     />
                 </div>
              </div>
+          </div>
+        </section>
+
+        {/* BLOCO 4: DADOS PARA EMISSÃO DE NOTA FISCAL */}
+        <section className="space-y-6">
+          <div className="flex items-center gap-2 px-1">
+            <FileText size={16} className="text-purple-500" />
+            <h2 className="text-[11px] font-black text-gray-400 uppercase tracking-widest">4. Dados para Emissão de Nota Fiscal</h2>
+          </div>
+          <div className="bg-white dark:bg-gray-900 rounded-[2.5rem] p-6 border border-gray-100 dark:border-gray-800 shadow-sm space-y-6">
+             <FormField label="Razão Social" value={formData.razao_social} onChange={v => setFormData({...formData, razao_social: v})} placeholder="Nome jurídico da empresa" />
+             <FormField label="Nome Fantasia" value={formData.nome_fantasia_fiscal} onChange={v => setFormData({...formData, nome_fantasia_fiscal: v})} placeholder="Nome comercial" />
+             <FormField label="CNPJ" value={formData.cnpj} onChange={v => setFormData({...formData, cnpj: v})} placeholder="00.000.000/0000-00" />
+             
+             <div className="grid grid-cols-2 gap-4">
+                <FormField label="Insc. Estadual" value={formData.inscricao_estadual} onChange={v => setFormData({...formData, inscricao_estadual: v})} placeholder="Isento ou Nº" />
+                <FormField label="Insc. Municipal" value={formData.inscricao_municipal} onChange={v => setFormData({...formData, inscricao_municipal: v})} placeholder="Nº de cadastro" />
+             </div>
+
+             <div className="space-y-1.5">
+                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Regime Tributário</label>
+                <select 
+                    value={formData.tax_regime}
+                    onChange={e => setFormData({...formData, tax_regime: e.target.value})}
+                    className="w-full bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-4 text-sm font-bold dark:text-white outline-none focus:border-[#1E5BFF]"
+                >
+                    {TAX_REGIMES.map(r => <option key={r} value={r}>{r}</option>)}
+                </select>
+             </div>
+
+             <div className="space-y-1.5">
+                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Endereço Fiscal Completo</label>
+                <textarea 
+                    value={formData.fiscal_address} 
+                    onChange={e => setFormData({...formData, fiscal_address: e.target.value})} 
+                    placeholder="Rua, Nº, Bairro, Cidade, Estado, CEP"
+                    className="w-full bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-4 text-sm font-bold dark:text-white outline-none focus:border-[#1E5BFF] transition-all resize-none min-h-[80px]"
+                />
+             </div>
+
+             <FormField label="E-mail para Nota Fiscal" value={formData.billing_email} onChange={v => setFormData({...formData, billing_email: v})} icon={Mail} placeholder="financeiro@sualoja.com" />
           </div>
         </section>
 
