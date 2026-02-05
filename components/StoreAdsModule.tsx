@@ -45,9 +45,9 @@ const NEIGHBORHOODS = [
 ];
 
 const PLACEMENT_OPTIONS = [
-  { id: 'home', label: 'Home', icon: Home, price: 69.90, desc: 'Sua loja no carrossel principal da página inicial.' },
-  { id: 'subcat', label: 'Subcategorias', icon: LayoutGrid, price: 49.90, desc: 'Banner fixo no topo das buscas por categoria.' },
-  { id: 'combo', label: 'Home + Subcategorias', icon: Zap, price: 99.90, desc: 'Visibilidade máxima: Página Inicial + Categorias.' },
+  { id: 'home', label: 'Home', icon: Home, price: 69.90, originalPrice: 199.90, desc: 'Sua loja no carrossel principal da página inicial.' },
+  { id: 'subcat', label: 'Subcategorias', icon: LayoutGrid, price: 159.90, originalPrice: 199.90, desc: 'Banner fixo no topo das buscas por categoria.' },
+  { id: 'combo', label: 'Home + Subcategorias', icon: Zap, price: 189.90, originalPrice: 399.80, desc: 'Visibilidade máxima: Página Inicial + Categorias.' },
 ];
 
 const DURATION_OPTIONS = [
@@ -348,14 +348,24 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
                   <div className="flex items-center justify-between">
                     <p className="font-black text-sm uppercase text-white leading-tight">{opt.label}</p>
                     {selectedPlacement === opt.id && (
-                        <span className="text-[7px] font-black bg-emerald-500 text-white px-1.5 py-0.5 rounded uppercase">Preço Travado</span>
+                        <span className="text-[7px] font-black bg-emerald-500 text-white px-1.5 py-0.5 rounded uppercase tracking-tighter">Oferta Ativa</span>
                     )}
                   </div>
                   <p className="text-[10px] text-slate-500 font-medium mt-0.5">{opt.desc}</p>
                 </div>
-                <div className="text-right">
-                  <p className="text-xs font-black text-white">R$ {opt.price.toFixed(2)}</p>
+                <div className="text-right flex flex-col items-end">
+                  <span className="text-[10px] text-slate-500 line-through font-bold">R$ {opt.originalPrice.toFixed(2)}</span>
+                  <div className="flex items-center gap-1.5 mt-0.5">
+                    <p className="text-xs font-black text-white">R$ {opt.price.toFixed(2)}</p>
+                    <span className="text-[7px] font-black bg-blue-600 text-white px-1.5 py-0.5 rounded uppercase">Fundador Apoiador</span>
+                  </div>
                   <p className="text-[8px] text-slate-600 uppercase font-bold tracking-tighter">por mês/bairro</p>
+                  {selectedPlacement === opt.id && (
+                    <div className="flex items-center gap-1 mt-1">
+                       <ShieldCheck size={8} className="text-amber-500" />
+                       <span className="text-[7px] font-black text-amber-500 uppercase">Garantido 12 meses</span>
+                    </div>
+                  )}
                 </div>
               </button>
             ))}
