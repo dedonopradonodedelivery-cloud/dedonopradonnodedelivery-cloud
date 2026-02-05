@@ -143,16 +143,9 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
           />
         </section>
 
-        {/* 2. CRESCIMENTO E ANÚNCIOS */}
+        {/* 2. CRESCIMENTO E ANÚNCIOS - ORDEM REORGANIZADA */}
         <section>
           <SectionHeader title="Crescimento e Anúncios" icon={Sparkles} />
-          <NavCard 
-            icon={Crown} 
-            label="Patrocinador Master" 
-            description="Visibilidade em 90% do app"
-            onClick={() => onNavigate('sponsor_info')}
-            colorClass="bg-amber-50 text-amber-600 dark:bg-amber-900/20"
-          />
           <NavCard 
             icon={TrendingUp} 
             label="Patrocinados" 
@@ -166,6 +159,13 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
             description="Sua loja nas áreas nobres do bairro"
             onClick={() => onNavigate('store_ads_module')}
             colorClass="bg-purple-50 text-purple-600 dark:bg-purple-900/20"
+          />
+          <NavCard 
+            icon={Crown} 
+            label="Patrocinador Master" 
+            description="Visibilidade em 90% do app"
+            onClick={() => onNavigate('sponsor_info')}
+            colorClass="bg-amber-50 text-amber-600 dark:bg-amber-900/20"
           />
           <NavCard 
             icon={Handshake} 
