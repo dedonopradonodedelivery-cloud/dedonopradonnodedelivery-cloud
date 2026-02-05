@@ -161,7 +161,6 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
 
         const { error: dbError } = await supabase.from('published_banners').insert({
             merchant_id: user.id,
-            // FIX: Corrigido de 'cat' para 'subcat' para alinhar com o tipo union definido no state
             target: selectedPlacement === 'home' ? 'home' : selectedPlacement === 'subcat' ? 'category' : 'featured',
             config: {
                 art_type: artChoice,
@@ -282,7 +281,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
   }
 
   return (
-    <div className="min-h-screen bg-[#020617] text-white font-sans flex flex-col overflow-x-hidden">
+    <div className="min-h-screen bg-[#020617] text-white flex flex-col overflow-x-hidden">
       <header className="sticky top-0 z-40 bg-[#020617]/80 backdrop-blur-xl border-b border-white/5 px-6 py-4 flex items-center gap-4">
         <button onClick={onBack} className="p-2 bg-slate-900 rounded-xl text-slate-400 hover:text-white transition-all active:scale-95"><ChevronLeft size={20} /></button>
         <div><h1 className="font-bold text-lg leading-none">Banners em Destaque</h1><p className="text-[10px] text-blue-400 uppercase font-black tracking-widest mt-1">Configuração de Campanha</p></div>
@@ -290,7 +289,30 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
 
       <main className="flex-1 p-6 space-y-16 pb-[320px] max-w-md mx-auto w-full">
         
-        {/* BLOCO 0: POSICIONAMENTO */}
+        {/* APRESENTAÇÃO E CONTEXTO (TOPO DO FLUXO) */}
+        <section className="space-y-8">
+          <div className="px-1 space-y-4 text-center">
+            <h3 className="text-3xl font-black text-white uppercase tracking-tighter leading-[0.9]">
+                Banners em Destaque
+            </h3>
+            <p className="text-sm text-slate-400 font-medium max-w-xs mx-auto leading-relaxed">
+                Aumente sua visibilidade no bairro com benefícios exclusivos de Fundador Apoiador.
+            </p>
+            <div className="bg-gradient-to-br from-blue-600/20 to-indigo-600/10 border border-blue-500/30 p-6 rounded-[2.5rem] text-left relative overflow-hidden shadow-2xl">
+              <div className="flex items-center gap-3 mb-2">
+                <div className="w-10 h-10 rounded-xl bg-amber-400/10 flex items-center justify-center border border-amber-400/20">
+                  <Award className="w-6 h-6 text-amber-400" />
+                </div>
+                <h4 className="text-xs font-black text-white uppercase tracking-tight">Fundador Apoiador do Localizei JPA</h4>
+              </div>
+              <p className="text-[11px] text-slate-200 leading-relaxed font-bold">
+                  🔒 Oferta de inauguração: Preços especiais garantidos por 12 meses.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* PASSO 0: POSICIONAMENTO */}
         <section className="space-y-6">
           <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-blue-500 flex items-center gap-2 px-1">
             <LayoutGrid size={14} /> 0. Onde deseja anunciar?
@@ -318,29 +340,10 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
           </div>
         </section>
 
+        {/* CONTAINER DE PASSOS SEQUENCIAIS (HABILITADO APÓS PASSO 0) */}
         <div className={`transition-all duration-500 space-y-16 ${!selectedPlacement ? 'opacity-20 grayscale pointer-events-none' : 'opacity-100'}`}>
-            <section className="space-y-8">
-              <div className="px-1 space-y-4 text-center">
-                <h3 className="text-3xl font-black text-white uppercase tracking-tighter leading-[0.9]">
-                    Banners em Destaque
-                </h3>
-                <p className="text-sm text-slate-400 font-medium max-w-xs mx-auto leading-relaxed">
-                    Sua loja nos banners da Home com benefícios exclusivos de Fundador Apoiador.
-                </p>
-                <div className="bg-gradient-to-br from-blue-600/20 to-indigo-600/10 border border-blue-500/30 p-6 rounded-[2.5rem] text-left relative overflow-hidden shadow-2xl">
-                  <div className="flex items-center gap-3 mb-2">
-                    <div className="w-10 h-10 rounded-xl bg-amber-400/10 flex items-center justify-center border border-amber-400/20">
-                      <Award className="w-6 h-6 text-amber-400" />
-                    </div>
-                    <h4 className="text-xs font-black text-white uppercase tracking-tight">Fundador Apoiador do Localizei JPA</h4>
-                  </div>
-                  <p className="text-[11px] text-slate-200 leading-relaxed font-bold">
-                      🔒 Oferta de inauguração: Preços especiais garantidos por 12 meses.
-                  </p>
-                </div>
-              </div>
-            </section>
-
+            
+            {/* PASSO 1: BAIRROS */}
             <section className="space-y-6 scroll-mt-24">
               <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-blue-500 flex items-center gap-2 px-1"><MapPin size={14} /> 1. Quais bairros?</h3>
               <div className="grid grid-cols-2 gap-3">
@@ -351,6 +354,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
               </div>
             </section>
 
+            {/* PASSO 2: TEMPO */}
             <section className="space-y-6">
               <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-blue-500 flex items-center gap-2 px-1"><Calendar size={14} /> 2. Tempo de exibição</h3>
               <div className="grid grid-cols-3 gap-3">
@@ -363,6 +367,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
               </div>
             </section>
 
+            {/* PASSO 3: ARTE */}
             <section className="space-y-6">
               <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-blue-500 flex items-center gap-2 px-1"><Palette size={14} /> 3. Arte do Banner</h3>
               <div className="space-y-4">
@@ -379,6 +384,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
         </div>
       </main>
 
+      {/* FOOTER: RESUMO E CONCLUSÃO */}
       <div className="fixed bottom-[90px] left-0 right-0 p-6 bg-slate-950/95 backdrop-blur-2xl border-t border-white/10 z-[100] max-w-md mx-auto rounded-t-[2.5rem]">
         <div className="mb-4 flex justify-between items-end">
             <div className="space-y-1">
