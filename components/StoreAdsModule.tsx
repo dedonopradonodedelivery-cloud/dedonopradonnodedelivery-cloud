@@ -293,21 +293,38 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
         <section className="space-y-8">
           <div className="px-1 space-y-4 text-center">
             <h3 className="text-3xl font-black text-white uppercase tracking-tighter leading-[0.9]">
-                Banners em Destaque
+                Fundador Apoiador do Localizei JPA
             </h3>
-            <p className="text-sm text-slate-400 font-medium max-w-xs mx-auto leading-relaxed">
-                Aumente sua visibilidade no bairro com benefícios exclusivos de Fundador Apoiador.
+            <p className="text-sm text-slate-400 font-medium max-w-sm mx-auto leading-relaxed">
+                Aproveite a oportunidade única de inauguração. Ao contratar agora, você garante sua posição de destaque e trava o preço promocional por um ano inteiro.
             </p>
-            <div className="bg-gradient-to-br from-blue-600/20 to-indigo-600/10 border border-blue-500/30 p-6 rounded-[2.5rem] text-left relative overflow-hidden shadow-2xl">
-              <div className="flex items-center gap-3 mb-2">
-                <div className="w-10 h-10 rounded-xl bg-amber-400/10 flex items-center justify-center border border-amber-400/20">
-                  <Award className="w-6 h-6 text-amber-400" />
+            <div className="bg-gradient-to-br from-blue-600/30 to-indigo-600/20 border border-blue-500/40 p-8 rounded-[2.5rem] text-left relative overflow-hidden shadow-2xl">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-amber-400/5 rounded-full blur-3xl -mr-16 -mt-16"></div>
+              
+              <div className="flex items-center gap-4 mb-6">
+                <div className="w-14 h-14 rounded-2xl bg-amber-400/10 flex items-center justify-center border border-amber-400/20 shadow-[0_0_20px_rgba(245,158,11,0.15)]">
+                  <Award className="w-8 h-8 text-amber-400" />
                 </div>
-                <h4 className="text-xs font-black text-white uppercase tracking-tight">Fundador Apoiador do Localizei JPA</h4>
+                <div>
+                    <h4 className="text-xs font-black text-white uppercase tracking-widest leading-none">Condição de Inauguração</h4>
+                    <p className="text-[9px] text-amber-400 font-bold uppercase mt-1">Oferta exclusiva para os primeiros parceiros</p>
+                </div>
               </div>
-              <p className="text-[11px] text-slate-200 leading-relaxed font-bold">
-                  🔒 Oferta de inauguração: Preços especiais garantidos por 12 meses.
-              </p>
+
+              <div className="space-y-4">
+                  <div className="flex flex-wrap gap-2">
+                      <div className="bg-blue-600 text-white px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest shadow-lg border border-blue-400/30 flex items-center gap-1.5">
+                        <Check size={10} strokeWidth={4} /> Desconto Fundador Apoiador
+                      </div>
+                      <div className="bg-slate-800 text-amber-400 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest shadow-lg border border-amber-500/20 flex items-center gap-1.5">
+                        <ShieldCheck size={10} /> Preço garantido por 12 meses
+                      </div>
+                  </div>
+                  
+                  <p className="text-[11px] text-slate-200 leading-relaxed font-bold">
+                      🔒 Seja um pioneiro em Jacarepaguá. O valor da sua assinatura não sofrerá reajustes durante os primeiros 12 meses de contrato, independente do crescimento do app.
+                  </p>
+              </div>
             </div>
           </div>
         </section>
@@ -328,7 +345,12 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
                   <opt.icon size={22} />
                 </div>
                 <div className="flex-1">
-                  <p className="font-black text-sm uppercase text-white leading-tight">{opt.label}</p>
+                  <div className="flex items-center justify-between">
+                    <p className="font-black text-sm uppercase text-white leading-tight">{opt.label}</p>
+                    {selectedPlacement === opt.id && (
+                        <span className="text-[7px] font-black bg-emerald-500 text-white px-1.5 py-0.5 rounded uppercase">Preço Travado</span>
+                    )}
+                  </div>
                   <p className="text-[10px] text-slate-500 font-medium mt-0.5">{opt.desc}</p>
                 </div>
                 <div className="text-right">
@@ -389,7 +411,12 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
         <div className="mb-4 flex justify-between items-end">
             <div className="space-y-1">
                 <p className="text-xs font-bold text-slate-300">Plano: <span className="text-white">{summary.placementLabel}</span></p>
-                <p className="text-xs font-bold text-slate-300">Total Bairros: <span className="text-white">{summary.hoodsCount}</span></p>
+                <div className="flex items-center gap-2">
+                    <p className="text-xs font-bold text-slate-300">Total Bairros: <span className="text-white">{summary.hoodsCount}</span></p>
+                    {summary.hoodsCount >= 9 && (
+                        <span className="text-[8px] font-black text-emerald-400 uppercase">Garantia Fundador Ativa</span>
+                    )}
+                </div>
             </div>
             <div className="text-right">
                 <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest leading-none mb-1">Total da Campanha</p>
