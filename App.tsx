@@ -49,7 +49,7 @@ import { MerchantCouponsModule } from '@/components/MerchantCouponsModule';
 import { MerchantPromotionsModule } from '@/components/MerchantPromotionsModule';
 import { StoreFinanceModule } from '@/components/StoreFinanceModule';
 import { StoreSupportModule } from '@/components/StoreSupportModule';
-import { JPAConnectComingSoon } from '@/components/JPAConnectComingSoon';
+import { JPAConnectSalesView } from '@/components/JPAConnectSalesView';
 import { StoreClaimFlow } from '@/components/StoreClaimFlow';
 import { AppSuggestionView } from '@/components/AppSuggestionView';
 import { CouponLandingView } from '@/components/CouponLandingView';
@@ -455,7 +455,7 @@ const App: React.FC = () => {
                     )}
 
                     {activeTab === 'jpa_connect' && (
-                        <JPAConnectComingSoon onBack={() => handleNavigate('profile')} />
+                        <JPAConnectSalesView onBack={() => handleNavigate('profile')} />
                     )}
 
                     {activeTab === 'service_chat' && activeServiceRequestId && (
