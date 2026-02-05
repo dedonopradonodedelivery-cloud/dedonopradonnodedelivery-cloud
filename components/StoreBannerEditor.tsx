@@ -58,7 +58,8 @@ interface StoreBannerEditorProps {
   onBack: () => void;
 }
 
-const BannerPreview: React.FC<{ config: BannerDesign; storeName: string; storeLogo?: string | null; }> = ({ config, storeName, storeLogo }) => {
+// FIX: Exported BannerPreview component so it can be used in StoreAdsModule.tsx
+export const BannerPreview: React.FC<{ config: BannerDesign; storeName: string; storeLogo?: string | null; }> = ({ config, storeName, storeLogo }) => {
   const { 
     title, subtitle, layout, bgType, bgColor, bgImage, 
     textColor, accentColor, titleFont, titleSize, animation,
