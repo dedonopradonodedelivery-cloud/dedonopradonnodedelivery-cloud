@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { 
   ChevronLeft, 
   Store as StoreIcon, 
@@ -55,6 +55,25 @@ const PAYMENT_METHODS = [
     { id: 'credito', label: 'Cartão de Crédito' },
     { id: 'debito', label: 'Cartão de Débito' },
 ];
+
+const CATEGORY_SUGGESTIONS: Record<string, string[]> = {
+  'Comida': ['pizza', 'delivery', 'almoço', 'lanche', 'comida caseira', 'restaurante', 'marmita', 'café', 'sobremesa', 'self-service', 'japonês', 'hambúrguer', 'pão', 'bebidas', 'açai', 'doces', 'massas', 'churrasco', 'vegetariano', 'petiscos'],
+  'Serviços': ['manutenção', 'conserto', 'atendimento rápido', 'orçamento', 'instalação', 'reparo', 'serviço local', 'residencial', 'predial', 'chaveiro', 'elétrica', 'hidráulica', 'limpeza', 'dedetização', 'segurança', 'marcenaria', 'pintura', 'vidraçaria', 'ar condicionado', 'montagem'],
+  'Saúde': ['clínica', 'consulta', 'bem-estar', 'estética', 'saúde preventiva', 'atendimento especializado', 'médico', 'dentista', 'fisioterapia', 'exames', 'nutrição', 'psicologia', 'terapias', 'hospital', 'laboratório', 'pediatria', 'cardiologia', 'odontologia', 'saúde mental', 'farmácia'],
+  'Autos': ['mecânica', 'troca de óleo', 'revisão', 'funilaria', 'auto center', 'oficina', 'alinhamento', 'balanceamento', 'lavajato', 'peças', 'pneus', 'auto elétrica', 'guincho', 'insulfilm', 'estofamento', 'suspensão', 'freios', 'ar condicionado automotivo', 'venda de carros', 'motos'],
+  'Pets': ['pet shop', 'veterinário', 'banho e tosa', 'ração', 'acessórios pet', 'clínica veterinária', 'adestramento', 'passeador', 'hotel pet', 'creche pet', 'gatos', 'cachorros', 'aves', 'peixes', 'medicamentos pet', 'cirurgia veterinária', 'urgência pet', 'estética pet', 'vacinacao', 'castracao'],
+  'Beleza': ['salão de beleza', 'barbearia', 'corte de cabelo', 'manicure', 'pedicure', 'maquiagem', 'estética facial', 'estética corporal', 'sobrancelha', 'cílios', 'depilação', 'penteado', 'coloração', 'escova', 'massagem', 'dia de noiva', 'limpeza de pele', 'unhas em gel', 'barba', 'hidratação'],
+  'Casa': ['móveis', 'decoração', 'reforma', 'material de construção', 'iluminação', 'jardinagem', 'utensílios domésticos', 'cama mesa e banho', 'eletrodomésticos', 'marcenaria', 'arquitetura', 'design de interiores', 'cortinas', 'tapetes', 'organização', 'limpeza residencial', 'pintura', 'reparos', 'ferramentas', 'piscina'],
+  'Educação': ['escola', 'curso', 'idiomas', 'reforço escolar', 'aula particular', 'infantil', 'profissionalizante', 'música', 'dança', 'esportes', 'artes', 'tecnologia', 'preparatório', 'concursos', 'vestibular', 'ead', 'presencial', 'capacitação', 'treinamento', 'workshop'],
+  'Moda': ['roupas', 'feminina', 'masculina', 'infantil', 'calçados', 'acessórios', 'bolsas', 'moda íntima', 'fitness', 'praia', 'brechó', 'alfaiataria', 'costura', 'tênis', 'vestidos', 'jeans', 'camisetas', 'óculos', 'relógios', 'joias'],
+  'Lazer': ['eventos', 'festas', 'aluguel de espaço', 'buffet', 'animação', 'decoração de festas', 'clube', 'parque', 'turismo', 'viagem', 'hospedagem', 'espetáculo', 'teatro', 'cinema', 'show', 'excursão', 'lazer infantil', 'recreação', 'gastronomia', 'cultura'],
+  'Condomínio': ['administradora', 'síndico', 'manutenção predial', 'limpeza', 'segurança', 'portaria', 'jardinagem', 'reforma', 'pintura', 'elevadores', 'piscina', 'sistema de câmeras', 'interfone', 'limpeza de caixa d’água', 'dedetização', 'jurídico', 'contabilidade', 'facilities', 'bompet', 'coleta seletiva'],
+  'Mercado': ['supermercado', 'minimercado', 'hortifruti', 'padaria', 'açougue', 'bebidas', 'conveniência', 'produtos naturais', 'suplementos', 'limpeza', 'higiene', 'congelados', 'latas e conservas', 'biscoitos', 'leite e derivados', 'adega', 'vinho', 'cerveja', 'importados', 'cestas de natal'],
+  'Farmácia': ['medicamentos', 'genéricos', 'perfumaria', 'higiene', 'cosméticos', 'suplementos', 'manipulação', 'fraldas', 'cuidados pessoais', 'saúde', 'curativos', 'dermocosméticos', 'beleza', 'infantil', 'primeiros socorros', 'termômetro', 'vitaminas', 'emagrecimento', 'ortopédicos', 'testes rápidos'],
+  'Esportes': ['academia', 'treino', 'crossfit', 'yoga', 'pilates', 'lutas', 'natação', 'futebol', 'vôlei', 'beach tennis', 'dança', 'funcional', 'personal trainer', 'artigos esportivos', 'suplementos', 'emagrecimento', 'saúde', 'esporte infantil', 'quadra', 'atletismo'],
+  'Profissionais': ['advogado', 'contador', 'arquiteto', 'engenheiro', 'médico', 'dentista', 'psicólogo', 'nutricionista', 'veterinário', 'designer', 'desenvolvedor', 'corretor', 'fotógrafo', 'consultor', 'professor', 'tradutor', 'manicure', 'eletricista', 'encanador', 'pedreiro'],
+  'Eventos': ['festa', 'casamento', 'aniversário', 'buffet', 'decoração', 'espaço para eventos', 'aluguel de brinquedos', 'som e luz', 'dj', 'fotógrafo', 'filmagens', 'cerimonialista', 'doces finos', 'bolo', 'convites', 'lembrancinhas', 'trajes', 'maquiagem', 'música ao vivo', 'barman']
+};
 
 export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) => {
   const { user } = useAuth();
@@ -123,14 +142,10 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
   }, [user]);
 
   // --- LÓGICA DE TAGS (ENTER PARA CRIAR) ---
-  const handleAddTag = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-        e.preventDefault();
-        const val = tagInput.trim().toLowerCase();
-        if (val && !formData.tags.includes(val) && formData.tags.length < 15) {
-            setFormData(prev => ({ ...prev, tags: [...prev.tags, val] }));
-            setTagInput('');
-        }
+  const handleAddTag = (val: string) => {
+    const cleanVal = val.trim().toLowerCase();
+    if (cleanVal && !formData.tags.includes(cleanVal) && formData.tags.length < 15) {
+        setFormData(prev => ({ ...prev, tags: [...prev.tags, cleanVal] }));
     }
   };
 
@@ -179,6 +194,12 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
     reader.readAsDataURL(file);
   };
 
+  const suggestedTags = useMemo(() => {
+    if (!formData.category) return [];
+    const suggestions = CATEGORY_SUGGESTIONS[formData.category] || [];
+    return suggestions.filter(t => !formData.tags.includes(t)).slice(0, 20);
+  }, [formData.category, formData.tags]);
+
   if (isLoading) return <div className="min-h-screen flex items-center justify-center bg-white dark:bg-gray-950"><Loader2 className="animate-spin text-[#1E5BFF]" /></div>;
 
   return (
@@ -202,7 +223,7 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
                     </div>
                     <button onClick={() => logoInputRef.current?.click()} className="absolute -bottom-2 -right-2 bg-[#1E5BFF] text-white p-2.5 rounded-xl shadow-lg border-2 border-white dark:border-gray-900"><Pencil size={16} /></button>
                 </div>
-                <p className="text-[9px] font-bold text-gray-400 uppercase mt-4 text-center leading-tight">Logo Quadrada <br/><span className="text-[8px] opacity-60">Aparece na busca e no perfil</span></p>
+                <p className="text-[9px] font-bold text-gray-400 uppercase mt-4 text-center leading-tight">Logotipo <br/><span className="text-[8px] opacity-60">Aparece na busca e no perfil</span></p>
              </div>
              
              <div>
@@ -274,7 +295,7 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
              </div>
              <div>
                 <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1 mb-1.5 mt-4">Outras Formas</label>
-                <input value={formData.payment_other} onChange={e => setFormData({...formData, payment_other: e.target.value})} className="w-full p-4 bg-blue-50/50 dark:bg-gray-800 border border-blue-100 dark:border-gray-800 rounded-2xl text-sm font-bold dark:text-white outline-none" placeholder="Ex: VR, Sodexo, Ticket..." />
+                <input value={formData.payment_other} onChange={e => setFormData({...formData, payment_other: e.target.value})} className="w-full p-4 bg-blue-50/30 dark:bg-gray-800 border border-blue-100 dark:border-gray-800 rounded-2xl text-sm font-bold dark:text-white outline-none" placeholder="Ex: VR, Sodexo, Ticket..." />
              </div>
              <p className="text-[9px] text-gray-400 mt-2 ml-1 italic">Ajuda o cliente na decisão de contato.</p>
           </div>
@@ -297,10 +318,12 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
                 <input 
                     value={tagInput}
                     onChange={e => setTagInput(e.target.value)}
-                    onKeyDown={handleAddTag}
+                    onKeyDown={(e) => { if(e.key === 'Enter') { e.preventDefault(); handleAddTag(tagInput); setTagInput(''); } }}
                     placeholder="Ex: pizza, delivery, massa..." 
                     className="w-full p-4 bg-blue-50/50 dark:bg-gray-800 border border-blue-100 dark:border-gray-800 rounded-2xl text-sm font-bold dark:text-white outline-none" 
                 />
+                
+                {/* TAGS SELECIONADAS */}
                 <div className="flex flex-wrap gap-2 mt-3">
                     {formData.tags.map(t => (
                         <div key={t} className="bg-blue-600 text-white px-3 py-1.5 rounded-full text-[10px] font-black uppercase flex items-center gap-2">
@@ -309,6 +332,27 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
                         </div>
                     ))}
                 </div>
+
+                {/* TAGS SUGERIDAS DINÂMICAS */}
+                {suggestedTags.length > 0 && (
+                    <div className="mt-6 pt-4 border-t border-gray-50 dark:border-gray-800">
+                        <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 ml-1">Sugestões para {formData.category}</p>
+                        <div className="flex flex-wrap gap-2">
+                            {suggestedTags.map(tag => (
+                                <button 
+                                    key={tag}
+                                    type="button"
+                                    onClick={() => handleAddTag(tag)}
+                                    className="px-3 py-1.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 text-[10px] font-bold uppercase transition-all hover:border-blue-500 hover:text-blue-500 active:scale-95"
+                                >
+                                    + {tag}
+                                </button>
+                            ))}
+                        </div>
+                        <p className="text-[9px] text-gray-400 mt-4 ml-1 font-medium">Clique nas sugestões para adicionar rapidamente suas tags de busca.</p>
+                    </div>
+                )}
+                
                 <p className="text-[9px] text-blue-500 mt-2 ml-1 font-bold">As tags ajudam sua loja a aparecer na barra de busca. <br/>Limite: 15 tags.</p>
              </div>
 
