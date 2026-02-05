@@ -55,8 +55,8 @@ export const MerchantCouponsModule: React.FC<{ onBack: () => void }> = ({ onBack
   };
 
   return (
-    <div className="min-h-screen bg-[#F8F9FB] dark:bg-gray-950 font-sans pb-32 animate-in fade-in duration-300 flex flex-col">
-      <header className="sticky top-0 z-40 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md px-5 h-20 flex items-center gap-4 border-b border-gray-100 dark:border-gray-800 shadow-sm">
+    <div className="min-h-screen bg-[#F4F7FF] dark:bg-gray-950 font-sans pb-32 animate-in fade-in duration-300 flex flex-col">
+      <header className="sticky top-0 z-40 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md px-5 h-20 flex items-center gap-4 border-b border-blue-100 dark:border-gray-800 shadow-sm">
         <button onClick={view === 'list' ? onBack : () => setView('list')} className="p-3 bg-gray-50 dark:bg-gray-800 rounded-2xl hover:bg-gray-100 active:scale-90 transition-all"><ChevronLeft size={20} className="text-gray-600 dark:text-gray-300" /></button>
         <div className="flex-1">
             <h1 className="font-black text-xl text-gray-900 dark:text-white uppercase tracking-tighter leading-none">Meus Cupons</h1>
@@ -79,17 +79,17 @@ export const MerchantCouponsModule: React.FC<{ onBack: () => void }> = ({ onBack
             </button>
 
             <div className="space-y-4">
-                <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] ml-2">Suas Campanhas</h3>
+                <h3 className="text-[10px] font-black text-blue-400/70 uppercase tracking-[0.2em] ml-2">Suas Campanhas</h3>
                 {coupons.map(coupon => (
-                    <div key={coupon.id} className="bg-white dark:bg-gray-900 p-5 rounded-[2.5rem] border border-gray-100 dark:border-gray-800 shadow-sm flex flex-col gap-4">
+                    <div key={coupon.id} className="bg-white dark:bg-gray-900 p-5 rounded-[2.5rem] border border-blue-50 dark:border-gray-800 shadow-sm flex flex-col gap-4">
                         <div className="flex justify-between items-start">
                             <div className="flex items-center gap-3">
                                 <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-900/20 text-[#1E5BFF] flex items-center justify-center"><Ticket size={20}/></div>
                                 <div><h4 className="font-bold text-gray-900 dark:text-white text-sm">{coupon.title}</h4><p className="text-[10px] font-mono text-[#1E5BFF] font-black tracking-widest">{coupon.code}</p></div>
                             </div>
-                            <span className={`text-[8px] font-black uppercase px-2 py-0.5 rounded-md ${coupon.status === 'active' ? 'bg-emerald-50 text-emerald-600' : 'bg-gray-100 text-gray-500'}`}>{coupon.status === 'active' ? 'Ativo' : 'Pausado'}</span>
+                            <span className={`text-[8px] font-black uppercase px-2 py-0.5 rounded-md ${coupon.status === 'active' ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' : 'bg-gray-100 text-gray-500 border border-gray-200'}`}>{coupon.status === 'active' ? 'Ativo' : 'Pausado'}</span>
                         </div>
-                        <div className="flex items-center justify-between pt-4 border-t border-gray-50 dark:border-gray-800">
+                        <div className="flex items-center justify-between pt-4 border-t border-blue-50 dark:border-gray-800">
                             <div className="flex gap-4">
                                 <div className="text-center"><p className="text-[8px] font-bold text-gray-400 uppercase">Resgates</p><p className="text-sm font-black text-gray-900 dark:text-white">{coupon.redemptions}</p></div>
                                 <div className="text-center"><p className="text-[8px] font-bold text-gray-400 uppercase">Desconto</p><p className="text-sm font-black text-emerald-600">{coupon.value}{coupon.type === 'percentage' ? '%' : 'R$'}</p></div>
@@ -109,17 +109,11 @@ export const MerchantCouponsModule: React.FC<{ onBack: () => void }> = ({ onBack
                     <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">Digite o código do cupom retirado pelo morador no app.</p>
                 </div>
 
-                <div className="bg-white dark:bg-gray-900 p-8 rounded-[3rem] border border-gray-100 dark:border-gray-800 shadow-xl space-y-6">
-                    <input value={validationCode} onChange={e => setValidationCode(e.target.value.toUpperCase())} placeholder="CUP-XXXXXX" className="w-full bg-[#F1F2F4] dark:bg-gray-800 border-none rounded-2xl p-5 text-center text-3xl font-black tracking-[0.2em] outline-none dark:text-white" />
+                <div className="bg-white dark:bg-gray-900 p-8 rounded-[3rem] border border-blue-100 dark:border-gray-800 shadow-xl space-y-6">
+                    <input value={validationCode} onChange={e => setValidationCode(e.target.value.toUpperCase())} placeholder="CUP-XXXXXX" className="w-full bg-blue-50/50 dark:bg-gray-800 border-none rounded-2xl p-5 text-center text-3xl font-black tracking-[0.2em] outline-none dark:text-white" />
                     <button onClick={handleValidate} disabled={!validationCode || isProcessing} className="w-full bg-emerald-500 text-white font-black py-5 rounded-2xl shadow-xl active:scale-95 transition-all flex items-center justify-center gap-3">
                         {isProcessing ? <Loader2 className="animate-spin" /> : <><CheckCircle2 /> Validar e Aplicar</>}
                     </button>
-                    {validationResult === 'success' && (
-                        <div className="p-4 bg-emerald-50 text-emerald-700 rounded-xl text-center font-bold text-sm border border-emerald-100 animate-in zoom-in">Cupom Validado com Sucesso! ✅</div>
-                    )}
-                    {validationResult === 'error' && (
-                        <div className="p-4 bg-red-50 text-red-700 rounded-xl text-center font-bold text-sm border border-red-100 animate-in shake">Código inválido ou já utilizado. ❌</div>
-                    )}
                 </div>
             </div>
         )}
@@ -127,12 +121,12 @@ export const MerchantCouponsModule: React.FC<{ onBack: () => void }> = ({ onBack
         {view === 'form' && (
             <div className="space-y-8 animate-in slide-in-from-right pt-4">
                 <h2 className="text-xl font-black text-gray-900 dark:text-white uppercase tracking-tighter">Criar Novo Cupom</h2>
-                <div className="bg-white dark:bg-gray-900 p-8 rounded-[3rem] border border-gray-100 dark:border-gray-800 shadow-sm space-y-6">
-                    <div className="space-y-2"><label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Título da Oferta</label><input placeholder="Ex: 20% OFF no Almoço" className="w-full bg-[#F1F2F4] dark:bg-gray-800 border-none rounded-2xl p-4 text-sm font-bold dark:text-white outline-none" /></div>
-                    <div className="space-y-2"><label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Código Promocional</label><input placeholder="EX: ANIL20" className="w-full bg-[#F1F2F4] dark:bg-gray-800 border-none rounded-2xl p-4 text-sm font-black tracking-widest dark:text-white outline-none" /></div>
+                <div className="bg-white dark:bg-gray-900 p-8 rounded-[3rem] border border-blue-50 dark:border-gray-800 shadow-sm space-y-6">
+                    <div className="space-y-2"><label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Título da Oferta</label><input placeholder="Ex: 20% OFF no Almoço" className="w-full bg-blue-50/30 dark:bg-gray-800 border-none rounded-2xl p-4 text-sm font-bold dark:text-white outline-none focus:ring-2 focus:ring-blue-500/20" /></div>
+                    <div className="space-y-2"><label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Código Promocional</label><input placeholder="EX: ANIL20" className="w-full bg-blue-50/30 dark:bg-gray-800 border-none rounded-2xl p-4 text-sm font-black tracking-widest dark:text-white outline-none focus:ring-2 focus:ring-blue-500/20" /></div>
                     <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2"><label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Valor</label><input type="number" placeholder="20" className="w-full bg-[#F1F2F4] dark:bg-gray-800 border-none rounded-2xl p-4 text-sm font-bold dark:text-white outline-none" /></div>
-                        <div className="space-y-2"><label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Vencimento</label><input type="date" className="w-full bg-[#F1F2F4] dark:bg-gray-800 border-none rounded-2xl p-4 text-sm font-bold dark:text-white outline-none" /></div>
+                        <div className="space-y-2"><label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Valor</label><input type="number" placeholder="20" className="w-full bg-blue-50/30 dark:bg-gray-800 border-none rounded-2xl p-4 text-sm font-bold dark:text-white outline-none focus:ring-2 focus:ring-blue-500/20" /></div>
+                        <div className="space-y-2"><label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Vencimento</label><input type="date" className="w-full bg-blue-50/30 dark:bg-gray-800 border-none rounded-2xl p-4 text-sm font-bold dark:text-white outline-none focus:ring-2 focus:ring-blue-500/20" /></div>
                     </div>
                     <button onClick={() => setView('list')} className="w-full bg-[#1E5BFF] text-white font-black py-5 rounded-2xl shadow-xl active:scale-95 transition-all">Criar Cupom</button>
                 </div>

@@ -29,7 +29,8 @@ import {
   Zap,
   Store as StoreIcon,
   PieChart,
-  Building
+  Building,
+  Handshake
 } from 'lucide-react';
 import { User as SupabaseUser } from '@supabase/supabase-js';
 import { useAuth } from '@/contexts/AuthContext';
@@ -54,13 +55,13 @@ const NavCard: React.FC<{
 }> = ({ icon: Icon, label, description, onClick, isDestructive, colorClass, badge, rightElement }) => (
   <button 
     onClick={onClick}
-    className="w-full flex items-center justify-between p-5 bg-[#F1F2F4] dark:bg-slate-900 border-b border-white/5 last:border-b-0 active:bg-gray-200 dark:active:bg-slate-800 transition-colors group rounded-2xl mb-2"
+    className="w-full flex items-center justify-between p-5 bg-white dark:bg-slate-900/60 border-b border-blue-100/50 dark:border-white/5 last:border-b-0 active:bg-blue-50 dark:active:bg-slate-800 transition-colors group rounded-2xl mb-2 shadow-sm"
   >
     <div className="flex items-center gap-4">
       <div className={`p-2.5 rounded-xl transition-colors relative ${
         isDestructive 
           ? 'bg-red-100 text-red-600 dark:bg-red-900/30' 
-          : colorClass || 'bg-white dark:bg-slate-800 text-gray-400 group-hover:text-[#1E5BFF] shadow-sm'
+          : colorClass || 'bg-blue-50/50 dark:bg-slate-800 text-gray-400 group-hover:text-[#1E5BFF] shadow-sm'
       }`}>
         <Icon size={20} />
         {badge ? (
@@ -87,7 +88,7 @@ const NavCard: React.FC<{
 const SectionHeader: React.FC<{ title: string; icon?: React.ElementType }> = ({ title, icon: Icon }) => (
   <div className="flex items-center gap-2 mb-4 mt-8 px-2 first:mt-0">
     {Icon && <Icon size={14} className="text-[#1E5BFF]" />}
-    <h2 className="text-[11px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.2em]">
+    <h2 className="text-[11px] font-black text-blue-400/80 dark:text-gray-500 uppercase tracking-[0.2em]">
       {title}
     </h2>
   </div>
@@ -108,12 +109,12 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
   const avatarUrl = user?.user_metadata?.avatar_url || `https://ui-avatars.com/api/?name=${storeName.replace(' ', '+')}&background=1E5BFF&color=fff`;
 
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-950 font-sans animate-in fade-in duration-500 pb-40">
+    <div className="min-h-screen bg-[#F4F7FF] dark:bg-gray-950 font-sans animate-in fade-in duration-500 pb-40">
       
-      {/* HEADER DE PERFIL */}
-      <div className="bg-white dark:bg-gray-950 px-6 pt-12 pb-8 border-b border-gray-100 dark:border-gray-800 shadow-sm mb-6">
+      {/* HEADER DE PERFIL NO CONTEXTO DE GESTÃO */}
+      <div className="bg-white dark:bg-gray-950 px-6 pt-12 pb-8 border-b border-blue-100 dark:border-gray-800 shadow-sm mb-6">
         <div className="flex items-center gap-5">
-          <div className="w-20 h-20 rounded-[2rem] border-4 border-[#F1F2F4] dark:border-slate-800 shadow-xl overflow-hidden shrink-0">
+          <div className="w-20 h-20 rounded-[2rem] border-4 border-[#F4F7FF] dark:border-slate-800 shadow-xl overflow-hidden shrink-0">
             <img src={avatarUrl} alt={storeName} className="w-full h-full object-cover" />
           </div>
           <div className="flex-1 min-w-0">
@@ -176,6 +177,14 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
             description="Sua loja nas áreas nobres do bairro"
             onClick={() => onNavigate('store_ads_module')}
             colorClass="bg-purple-50 text-purple-600 dark:bg-purple-900/20"
+          />
+          <NavCard 
+            icon={Handshake} 
+            label="JPA Connect" 
+            description="Conectando lojistas do bairro"
+            onClick={() => onNavigate('jpa_connect')}
+            colorClass="bg-indigo-50 text-indigo-600 dark:bg-indigo-900/20"
+            rightElement={<span className="text-[8px] font-black bg-blue-100 text-blue-600 px-1.5 py-0.5 rounded uppercase tracking-widest">Em breve</span>}
           />
         </section>
 

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { 
   ChevronLeft, 
@@ -18,7 +19,6 @@ import {
   Plus,
   Clock,
   Instagram,
-  // Added missing CheckCircle2 import to fix "Cannot find name 'CheckCircle2'" error
   CheckCircle2
 } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
@@ -63,7 +63,7 @@ const FormField: React.FC<{
         disabled={disabled}
         onChange={e => onChange(e.target.value)}
         placeholder={placeholder}
-        className={`w-full bg-[#F1F2F4] dark:bg-gray-900 border border-transparent dark:border-gray-800 rounded-2xl p-4 text-sm font-bold dark:text-white outline-none focus:border-[#1E5BFF] focus:bg-white dark:focus:bg-slate-900 shadow-sm transition-all ${Icon ? 'pl-11' : ''} ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+        className={`w-full bg-blue-50/50 dark:bg-gray-900 border border-blue-100 dark:border-gray-800 rounded-2xl p-4 text-sm font-bold dark:text-white outline-none focus:border-[#1E5BFF] focus:ring-4 focus:ring-blue-500/5 transition-all ${Icon ? 'pl-11' : ''} ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
       />
     </div>
     {helperText && <p className="text-[9px] text-gray-400 italic ml-1 leading-none">{helperText}</p>}
@@ -129,7 +129,7 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
   }, [user]);
 
   const handleSave = async () => {
-    if (!formData.nome_exibido || !formData.whatsapp_publico || !formData.bairro || !formData.category) {
+    if (!formData.nome_exibido || !formData.whatsapp_publico || !formData.bairro) {
       alert('Preencha os campos obrigatórios (*)');
       return;
     }
@@ -158,8 +158,8 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
   if (isLoading) return <div className="min-h-screen flex items-center justify-center bg-white dark:bg-gray-950"><Loader2 className="animate-spin text-[#1E5BFF]" /></div>;
 
   return (
-    <div className="min-h-screen bg-[#F8F9FC] dark:bg-gray-950 font-sans pb-32 animate-in slide-in-from-right duration-300">
-      <div className="sticky top-0 z-40 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md px-5 h-20 flex items-center gap-4 border-b border-gray-100 dark:border-gray-800">
+    <div className="min-h-screen bg-[#F4F7FF] dark:bg-gray-950 font-sans pb-32 animate-in slide-in-from-right duration-300">
+      <div className="sticky top-0 z-40 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md px-5 h-20 flex items-center gap-4 border-b border-blue-100 dark:border-gray-800">
         <button onClick={onBack} className="p-2.5 bg-gray-100 dark:bg-gray-800 rounded-2xl hover:bg-gray-200 transition-colors"><ChevronLeft size={20} className="text-gray-800 dark:text-white" /></button>
         <div className="flex-1"><h1 className="font-black text-lg text-gray-900 dark:text-white uppercase tracking-tighter">Configurar Loja</h1></div>
         <button onClick={handleSave} disabled={isSaving} className="p-3 bg-[#1E5BFF] text-white rounded-2xl shadow-xl active:scale-90 transition-all">{isSaving ? <Loader2 size={20} className="animate-spin" /> : <Save size={20} />}</button>
@@ -169,32 +169,28 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
         
         {/* SEÇÃO 1: PERFIL PÚBLICO */}
         <section className="space-y-6">
-          <div className="flex items-center gap-2 px-1"><StoreIcon size={16} className="text-[#1E5BFF]" /><h2 className="text-[11px] font-black text-gray-400 uppercase tracking-widest">1. Perfil Público</h2></div>
-          <div className="bg-white dark:bg-gray-900 rounded-[2.5rem] p-8 border border-gray-100 dark:border-gray-800 shadow-sm space-y-6">
+          <div className="flex items-center gap-2 px-1"><StoreIcon size={16} className="text-[#1E5BFF]" /><h2 className="text-[11px] font-black text-blue-400 uppercase tracking-widest">1. Perfil Público</h2></div>
+          <div className="bg-white dark:bg-gray-900 rounded-[2.5rem] p-8 border border-blue-50 dark:border-gray-800 shadow-sm space-y-6">
              <div className="flex flex-col items-center">
                 <div className="relative group">
-                    <div className="w-28 h-28 rounded-[2rem] bg-[#F1F2F4] dark:bg-gray-800 border-2 border-dashed border-gray-200 dark:border-gray-700 flex items-center justify-center overflow-hidden">
-                        {formData.logo_url ? <img src={formData.logo_url} className="w-full h-full object-contain p-2" /> : <StoreIcon className="text-gray-300" size={32} />}
+                    <div className="w-28 h-28 rounded-[2rem] bg-blue-50 dark:bg-gray-800 border-2 border-dashed border-blue-100 dark:border-gray-700 flex items-center justify-center overflow-hidden">
+                        {formData.logo_url ? <img src={formData.logo_url} className="w-full h-full object-contain p-2" /> : <StoreIcon className="text-blue-200" size={32} />}
                     </div>
                     <button onClick={() => logoInputRef.current?.click()} className="absolute -bottom-2 -right-2 bg-[#1E5BFF] text-white p-2.5 rounded-xl shadow-lg border-2 border-white dark:border-gray-900"><Pencil size={16} /></button>
                 </div>
                 <p className="text-[9px] font-bold text-gray-400 uppercase mt-4">Logotipo</p>
              </div>
              <FormField label="Nome da Loja *" value={formData.nome_exibido} onChange={v => setFormData({...formData, nome_exibido: v})} required placeholder="Ex: Padaria Central" />
-             <div className="space-y-1.5"><label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Descrição Pública *</label><textarea value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} placeholder="Breve resumo da sua loja..." className="w-full bg-[#F1F2F4] dark:bg-gray-900 border border-transparent dark:border-gray-800 rounded-2xl p-4 text-sm font-bold dark:text-white outline-none focus:bg-white dark:focus:bg-slate-900 focus:border-[#1E5BFF] transition-all resize-none min-h-[100px]" /></div>
-             <div className="grid grid-cols-1 gap-4">
-               <FormField label="Telefone / WhatsApp *" value={formData.whatsapp_publico} onChange={v => setFormData({...formData, whatsapp_publico: v})} icon={Smartphone} />
-               <FormField label="Instagram (@)" value={formData.instagram} onChange={v => setFormData({...formData, instagram: v})} icon={Instagram} />
-             </div>
+             <div className="space-y-1.5"><label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Descrição Pública *</label><textarea value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} placeholder="Breve resumo da sua loja..." className="w-full bg-blue-50/50 dark:bg-gray-900 border border-blue-100 dark:border-gray-800 rounded-2xl p-4 text-sm font-bold dark:text-white outline-none focus:bg-white dark:focus:bg-slate-900 focus:border-[#1E5BFF] transition-all resize-none min-h-[100px]" /></div>
           </div>
         </section>
 
         {/* SEÇÃO: ENDEREÇO E REGRAS */}
         <section className="space-y-6">
-          <div className="flex items-center gap-2 px-1"><Building2 size={16} className="text-blue-500" /><h2 className="text-[11px] font-black text-gray-400 uppercase tracking-widest">2. Endereço e Pedidos</h2></div>
-          <div className="bg-white dark:bg-gray-900 rounded-[2.5rem] p-8 border border-gray-100 dark:border-gray-800 shadow-sm space-y-6">
+          <div className="flex items-center gap-2 px-1"><Building2 size={16} className="text-blue-500" /><h2 className="text-[11px] font-black text-blue-400 uppercase tracking-widest">2. Endereço e Pedidos</h2></div>
+          <div className="bg-white dark:bg-gray-900 rounded-[2.5rem] p-8 border border-blue-50 dark:border-gray-800 shadow-sm space-y-6">
              <FormField label="Bairro *" value={formData.bairro} onChange={v => setFormData({...formData, bairro: v})} placeholder="Ex: Freguesia" />
-             <div onClick={() => setFormData({...formData, accepts_online_orders: !formData.accepts_online_orders})} className="flex items-center justify-between p-4 bg-[#F1F2F4] dark:bg-gray-800 rounded-2xl cursor-pointer">
+             <div onClick={() => setFormData({...formData, accepts_online_orders: !formData.accepts_online_orders})} className="flex items-center justify-between p-4 bg-blue-50/50 dark:bg-gray-800 rounded-2xl cursor-pointer border border-blue-100 dark:border-gray-700">
                  <span className="text-sm font-bold text-gray-700 dark:text-gray-200">Aceita Pedidos Online?</span>
                  <div className={`w-10 h-5 rounded-full p-1 transition-colors ${formData.accepts_online_orders ? 'bg-emerald-500' : 'bg-gray-300'}`}>
                     <div className={`w-3 h-3 bg-white rounded-full transform transition-transform ${formData.accepts_online_orders ? 'translate-x-5' : 'translate-x-0'}`}></div>
@@ -203,23 +199,6 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
              <FormField label="Valor de Pedido Mínimo" value={formData.min_order_value} onChange={v => setFormData({...formData, min_order_value: v})} icon={DollarSign} placeholder="0,00" type="number" />
           </div>
         </section>
-
-        {/* SEÇÃO: VÍDEOS */}
-        <section className="space-y-6">
-          <div className="flex items-center gap-2 px-1"><Video size={16} className="text-purple-500" /><h2 className="text-[11px] font-black text-gray-400 uppercase tracking-widest">3. Vídeos da Loja</h2></div>
-          <div className="bg-white dark:bg-gray-900 rounded-[2.5rem] p-8 border border-gray-100 dark:border-gray-800 shadow-sm">
-             <p className="text-xs text-gray-500 mb-6 font-medium">Habilite até 2 vídeos curtos (até 60s) para mostrar seus diferenciais.</p>
-             <div className="grid grid-cols-2 gap-4">
-                {[0, 1].map(i => (
-                    <div key={i} className="aspect-[9/16] bg-[#F1F2F4] dark:bg-gray-800 rounded-2xl border-2 border-dashed border-gray-200 dark:border-gray-700 flex flex-col items-center justify-center gap-2 cursor-pointer hover:bg-gray-100 transition-colors">
-                        <Plus className="text-gray-300" />
-                        <span className="text-[8px] font-black uppercase text-gray-400 tracking-widest">Vídeo {i + 1}</span>
-                    </div>
-                ))}
-             </div>
-          </div>
-        </section>
-
       </div>
       <input type="file" ref={logoInputRef} className="hidden" accept="image/*" onChange={e => handleImageUpload(e, 'logo_url')} />
       {showSuccess && (
