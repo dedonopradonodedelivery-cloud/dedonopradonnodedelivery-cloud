@@ -44,7 +44,7 @@ import {
   ShieldAlert
 } from 'lucide-react';
 import { User } from '@supabase/supabase-js';
-import { StoreBannerEditor } from '@/components/StoreBannerEditor';
+import { StoreBannerEditor, BannerPreview } from '@/components/StoreBannerEditor';
 import { supabase } from '@/lib/supabaseClient';
 
 interface StoreAdsModuleProps {
@@ -159,11 +159,10 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
     return { current, isPackage: period?.days === 90, monthly: (basePrice * 3 * hoodsMult) / 3 };
   }, [selectedMode, selectedPeriods, selectedNeighborhoods, artChoice, dynamicPeriods]);
 
-  // FIX: Added isCheckoutStep definition used in multiple render blocks
   const isCheckoutStep = !!selectedMode && selectedPeriods.length > 0 && selectedNeighborhoods.length > 0 && isArtSaved;
 
   const handleSaveDesign = (design: any) => {
-    setSavedDesign({ type: 'editor', ...design });
+    setSavedDesign(design);
     setIsArtSaved(true);
     setIsEditingArt(false);
     setDiyFlowStep('editor');
@@ -193,10 +192,32 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
       <div className="min-h-screen bg-[#020617] text-slate-100 font-sans flex flex-col">
         <header className="sticky top-0 z-40 bg-[#020617]/80 backdrop-blur-xl border-b border-white/5 px-6 py-4 flex items-center gap-4">
             <button onClick={onBack} className="p-2 bg-slate-900 rounded-xl text-slate-400 hover:text-white transition-all"><ChevronLeft size={20} /></button>
-            <h1 className="font-bold text-lg leading-none">Anunciar no Bairro</h1>
+            <h1 className="font-bold text-lg leading-none">Finalizar Destaque</h1>
         </header>
 
         <main className="flex-1 p-6 space-y-12 pb-64 max-w-md mx-auto w-full overflow-y-auto no-scrollbar">
+            
+            {/* 1. PREVIEW DO BANNER CONCLUÍDO (SOLICITAÇÃO 2 & 3) */}
+            {isArtSaved && savedDesign && (
+              <section className="animate-in fade-in zoom-in-95 duration-500">
+                <div className="flex flex-col gap-3">
+                  <div className="flex items-center justify-between px-1">
+                    <h3 className="text-[10px] font-black uppercase tracking-widest text-emerald-500 flex items-center gap-2">
+                       <CheckCircle2 size={12} /> Banner pronto para publicar
+                    </h3>
+                    <button onClick={() => setIsEditingArt(true)} className="text-[9px] font-black uppercase text-blue-400 hover:underline">Editar Arte</button>
+                  </div>
+                  <div className="w-full aspect-[16/10] bg-slate-900/40 rounded-[2.5rem] border border-emerald-500/20 shadow-2xl shadow-emerald-500/5 p-1">
+                    <BannerPreview 
+                      config={savedDesign} 
+                      storeName={user?.user_metadata?.store_name || "Sua Loja"} 
+                      storeLogo={user?.user_metadata?.logo_url} 
+                    />
+                  </div>
+                </div>
+              </section>
+            )}
+
             <section className="space-y-6">
                 <h3 className="text-[10px] font-black uppercase tracking-widest text-blue-500">1. Onde deseja aparecer?</h3>
                 <div className="grid grid-cols-1 gap-4">
@@ -233,21 +254,32 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
                 </div>
             </section>
 
-            <section className={`space-y-6 ${selectedNeighborhoods.length === 0 && 'opacity-20'}`}>
-                <h3 className="text-[10px] font-black uppercase tracking-widest text-blue-500">4. Arte</h3>
-                <button onClick={() => setIsEditingArt(true)} className={`w-full p-6 rounded-[2rem] border-2 text-left flex items-center gap-5 ${isArtSaved ? 'bg-emerald-500/10 border-emerald-500' : 'bg-white/5 border-white/10'}`}>
-                    <div className="w-12 h-12 bg-white/5 rounded-xl flex items-center justify-center text-slate-400"><Paintbrush size={24} /></div>
-                    <div>
-                        <h4 className="font-bold text-white text-sm">{isArtSaved ? 'Arte Pronta!' : 'Criar Arte no Editor'}</h4>
-                        <p className="text-[10px] text-slate-500 uppercase font-black">Toque para {isArtSaved ? 'editar' : 'começar'}</p>
-                    </div>
-                </button>
-            </section>
+            {!isArtSaved && (
+              <section className={`space-y-6 ${selectedNeighborhoods.length === 0 && 'opacity-20'}`}>
+                  <h3 className="text-[10px] font-black uppercase tracking-widest text-blue-500">4. Arte</h3>
+                  <button onClick={() => setIsEditingArt(true)} className={`w-full p-6 rounded-[2rem] border-2 text-left flex items-center gap-5 ${isArtSaved ? 'bg-emerald-500/10 border-emerald-500' : 'bg-white/5 border-white/10'}`}>
+                      <div className="w-12 h-12 bg-white/5 rounded-xl flex items-center justify-center text-slate-400"><Paintbrush size={24} /></div>
+                      <div>
+                          <h4 className="font-bold text-white text-sm">{isArtSaved ? 'Arte Pronta!' : 'Criar Arte no Editor'}</h4>
+                          <p className="text-[10px] text-slate-500 uppercase font-black">Toque para {isArtSaved ? 'editar' : 'começar'}</p>
+                      </div>
+                  </button>
+              </section>
+            )}
         </main>
 
         <div className="fixed bottom-0 left-0 right-0 p-6 bg-slate-900 border-t border-white/10 z-[100] max-w-md mx-auto">
-            <button onClick={handleFooterClick} className={`w-full py-5 rounded-[2rem] font-black uppercase tracking-widest text-xs transition-all ${isCheckoutStep ? 'bg-blue-600 text-white' : 'bg-white/5 text-slate-500 cursor-not-allowed'}`}>
-                {isSubmitting ? <Loader2 className="animate-spin mx-auto" /> : isCheckoutStep ? `Finalizar — R$ ${prices.current.toFixed(2)}` : 'Complete os passos'}
+            <button onClick={handleFooterClick} className={`w-full py-5 rounded-[2rem] font-black uppercase tracking-widest text-xs transition-all ${isCheckoutStep ? 'bg-blue-600 text-white shadow-xl shadow-blue-500/20 active:scale-[0.98]' : 'bg-white/5 text-slate-500 cursor-not-allowed'}`}>
+                {isSubmitting ? (
+                  <Loader2 className="animate-spin mx-auto" />
+                ) : isCheckoutStep ? (
+                  <div className="flex flex-col items-center">
+                    <span className="text-[9px] opacity-60 mb-0.5">Clique para ativar</span>
+                    <span>PAGAR AGORA — R$ {prices.current.toFixed(2)}</span>
+                  </div>
+                ) : (
+                  'Complete os passos acima'
+                )}
             </button>
         </div>
       </div>
