@@ -170,133 +170,105 @@ const TaxonomyField: React.FC<TaxonomyFieldProps> = ({ label, placeholder, optio
   );
 };
 
-// --- COMPONENTE DE TAGS ---
+// --- COMPONENTE DE TAGS (Refatorado para formato de Botão Interativo) ---
 const TagSelector: React.FC<{
   selectedTags: string[];
   onChange: (tags: string[]) => void;
 }> = ({ selectedTags, onChange }) => {
   const [input, setInput] = useState('');
-  const [showSuggestions, setShowSuggestions] = useState(false);
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  const normalize = (str: string) => str.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim().replace(/\s+/g, ' ');
-
-  const availableTags = ALL_TAGS.filter(tag => 
-    !selectedTags.some(st => normalize(st) === normalize(tag)) && 
-    tag.toLowerCase().includes(input.toLowerCase())
-  );
-
-  const normalizedInput = useMemo(() => normalize(input), [input]);
-  const isValidNewTag = normalizedInput.length >= 2 && normalizedInput.length <= 30;
-  
-  const hasExactMatch = useMemo(() => {
-    return availableTags.some(t => normalize(t) === normalizedInput) || 
-           selectedTags.some(t => normalize(t) === normalizedInput);
-  }, [availableTags, selectedTags, normalizedInput]);
 
   const handleAddTag = (tag: string) => {
-    if (selectedTags.length >= 15) return;
-    const finalTag = tag.trim().replace(/\s+/g, ' ');
-    
-    if (!selectedTags.some(st => normalize(st) === normalize(finalTag))) {
-        onChange([...selectedTags, finalTag]);
+    const cleanTag = tag.trim().toLowerCase();
+    if (!cleanTag) return;
+    if (selectedTags.length >= 15) {
+      alert("Você pode adicionar no máximo 15 tags.");
+      return;
     }
-    
+    if (!selectedTags.includes(cleanTag)) {
+      onChange([...selectedTags, cleanTag]);
+    }
     setInput('');
-    setShowSuggestions(false);
   };
 
-  const handleRemoveTag = (tag: string) => {
-    onChange(selectedTags.filter(t => t !== tag));
+  const handleRemoveTag = (tagToRemove: string) => {
+    onChange(selectedTags.filter(tag => tag !== tagToRemove));
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
       e.preventDefault();
-      if (isValidNewTag && !hasExactMatch && selectedTags.length < 15) {
-        handleAddTag(input);
-      }
+      handleAddTag(input);
     }
   };
 
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
-        setShowSuggestions(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+  // Filtrar sugestões (mostra até 15 tags que ainda não foram selecionadas)
+  const suggestions = useMemo(() => {
+    return ALL_TAGS
+      .filter(tag => !selectedTags.includes(tag.toLowerCase()))
+      .slice(0, 15);
+  }, [selectedTags]);
 
   return (
-    <div className="space-y-2" ref={containerRef}>
-      <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">
-        Produtos / Serviços (TAGS) <span className="text-red-500">*</span>
-      </label>
-      
-      <div className="relative">
-        <div className="w-full bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-2 flex flex-wrap gap-2 min-h-[56px] focus-within:ring-4 focus-within:ring-blue-500/5 focus-within:bg-white dark:focus-within:bg-gray-900 focus-within:border-blue-500 shadow-sm transition-all">
-          {selectedTags.map(tag => (
-            <span key={tag} className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 px-3 py-1.5 rounded-xl text-xs font-bold border border-gray-100 dark:border-gray-600 flex items-center gap-1.5 shadow-sm">
-              {tag}
-              <button type="button" onClick={() => handleRemoveTag(tag)} className="text-gray-400 hover:text-red-500"><X size={12} /></button>
-            </span>
-          ))}
-          <input 
-            value={input}
-            onChange={e => { setInput(e.target.value); setShowSuggestions(true); }}
-            onFocus={() => setShowSuggestions(true)}
-            onKeyDown={handleKeyDown}
-            placeholder={selectedTags.length < 15 ? "Digite para adicionar..." : "Limite atingido"}
-            className="flex-1 bg-transparent border-none outline-none text-sm font-bold p-2 min-w-[120px] dark:text-white"
-            disabled={selectedTags.length >= 15}
-          />
-        </div>
+    <div className="space-y-4">
+      <div className="space-y-1.5">
+        <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">
+          Produtos / Serviços (Tags) <span className="text-red-500">*</span>
+        </label>
         
-        {showSuggestions && (input.length > 0) && (
-          <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl shadow-2xl z-50 max-h-64 overflow-y-auto no-scrollbar py-2">
-            
-            {isValidNewTag && !hasExactMatch && selectedTags.length < 15 && (
-                <button
-                  type="button"
-                  onClick={() => handleAddTag(input)}
-                  className="w-full text-left px-4 py-3 flex items-center gap-3 bg-blue-50/30 hover:bg-blue-50 dark:bg-blue-900/10 dark:hover:bg-blue-900/20 transition-colors border-b border-gray-50 dark:border-gray-800"
-                >
-                  <div className="w-8 h-8 rounded-lg bg-blue-500 text-white flex items-center justify-center">
-                    <Plus size={16} strokeWidth={3} />
-                  </div>
-                  <div>
-                    <p className="text-sm font-bold text-blue-600 dark:text-blue-400">Adicionar tag: "{input.trim()}"</p>
-                    <p className="text-[10px] text-gray-400 uppercase font-black">Nova palavra-chave</p>
-                  </div>
-                </button>
-            )}
-
-            {availableTags.map(tag => (
+        {/* Lista de Tags Selecionadas (Botões acima do campo) */}
+        {selectedTags.length > 0 && (
+          <div className="flex flex-wrap gap-2 mb-3 animate-in fade-in slide-in-from-top-1">
+            {selectedTags.map(tag => (
               <button
                 key={tag}
                 type="button"
-                onClick={() => handleAddTag(tag)}
-                className="w-full text-left px-4 py-3 text-sm font-bold text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors flex items-center gap-3"
+                onClick={() => handleRemoveTag(tag)}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#1E5BFF] text-white rounded-full text-[10px] font-black uppercase tracking-wider shadow-sm hover:bg-red-500 transition-colors group"
               >
-                <div className="w-8 h-8 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-400">
-                    <Tag size={14} />
-                </div>
                 {tag}
+                <X size={12} strokeWidth={3} className="group-hover:scale-125 transition-transform" />
               </button>
             ))}
-
-            {availableTags.length === 0 && !isValidNewTag && !hasExactMatch && (
-                <div className="px-4 py-6 text-center opacity-40">
-                    <p className="text-xs font-bold uppercase">Nenhum resultado</p>
-                </div>
-            )}
           </div>
         )}
+
+        {/* Campo de Entrada */}
+        <div className="relative group">
+          <Tag className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 group-focus-within:text-[#1E5BFF]" />
+          <input 
+            type="text"
+            value={input}
+            onChange={e => setInput(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder="Digite e aperte Enter para adicionar..."
+            className="w-full bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-4 pl-11 text-sm font-bold dark:text-white outline-none focus:border-[#1E5BFF] focus:bg-white dark:focus:bg-gray-900 shadow-sm transition-all"
+          />
+        </div>
       </div>
-      <p className="text-[9px] text-gray-400 font-bold uppercase ml-1 tracking-widest">
-        {selectedTags.length}/15 Tags. Use termos como "pizzaria", "tênis", "oficina".
+
+      {/* Tags Sugeridas (Botões clicáveis) */}
+      {suggestions.length > 0 && (
+        <div className="space-y-2">
+           <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Sugestões de Tags</p>
+           <div className="flex flex-wrap gap-2">
+              {suggestions.map(tag => (
+                <button
+                  key={tag}
+                  type="button"
+                  onClick={() => handleAddTag(tag)}
+                  className="px-3 py-1.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-[10px] font-bold text-gray-600 dark:text-gray-300 hover:border-[#1E5BFF] hover:text-[#1E5BFF] transition-all active:scale-95 flex items-center gap-1"
+                >
+                  <PlusCircle size={10} />
+                  {tag}
+                </button>
+              ))}
+           </div>
+        </div>
+      )}
+
+      {/* Texto Explicativo SEO */}
+      <p className="text-[10px] text-gray-400 font-medium leading-relaxed italic ml-1">
+        “Essas tags ajudam os clientes a encontrarem seus produtos e serviços quando pesquisam na barra de buscas. Use termos simples e claros que representem o que sua loja vende.”
       </p>
     </div>
   );
@@ -730,7 +702,7 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
                 <select 
                     value={formData.tax_regime}
                     onChange={e => setFormData({...formData, tax_regime: e.target.value})}
-                    className="w-full bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-4 text-sm font-bold dark:text-white outline-none focus:border-[#1E5BFF] focus:bg-white dark:focus:bg-gray-900 shadow-sm transition-all"
+                    className="w-full bg-gray-100 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl p-4 text-sm font-bold dark:text-white outline-none focus:border-[#1E5BFF] focus:bg-white dark:focus:bg-gray-900 shadow-sm transition-all"
                 >
                     {TAX_REGIMES.map(r => <option key={r} value={r}>{r}</option>)}
                 </select>
