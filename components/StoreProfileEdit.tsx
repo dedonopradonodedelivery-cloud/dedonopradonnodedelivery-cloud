@@ -81,7 +81,7 @@ const FormField: React.FC<{
         disabled={disabled}
         onChange={e => onChange(e.target.value)}
         placeholder={placeholder}
-        className={`w-full bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-4 text-sm font-bold dark:text-white outline-none focus:border-[#1E5BFF] focus:ring-4 focus:ring-blue-500/5 transition-all ${Icon ? 'pl-11' : ''} ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+        className={`w-full bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-4 text-sm font-bold dark:text-white outline-none focus:border-[#1E5BFF] focus:bg-white dark:focus:bg-gray-900 focus:ring-4 focus:ring-blue-500/5 shadow-sm transition-all ${Icon ? 'pl-11' : ''} ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
       />
     </div>
     {helperText && <p className="text-[9px] text-gray-400 italic ml-1 leading-none">{helperText}</p>}
@@ -126,7 +126,7 @@ const TaxonomyField: React.FC<TaxonomyFieldProps> = ({ label, placeholder, optio
           type="button"
           disabled={disabled}
           onClick={() => setIsOpen(!isOpen)}
-          className={`w-full bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-4 flex items-center justify-between text-sm font-bold transition-all ${disabled ? 'opacity-50 cursor-not-allowed' : ''} ${selected ? 'text-gray-900 dark:text-white' : 'text-gray-400'}`}
+          className={`w-full bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-4 flex items-center justify-between text-sm font-bold shadow-sm transition-all ${disabled ? 'opacity-50 cursor-not-allowed' : ''} ${selected ? 'text-gray-900 dark:text-white' : 'text-gray-400'}`}
         >
           {selected || placeholder}
           <ChevronDown size={18} className={`text-gray-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
@@ -236,9 +236,9 @@ const TagSelector: React.FC<{
       </label>
       
       <div className="relative">
-        <div className="w-full bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-2 flex flex-wrap gap-2 min-h-[56px] focus-within:ring-4 focus-within:ring-blue-500/5 focus-within:border-blue-500 transition-all">
+        <div className="w-full bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-2 flex flex-wrap gap-2 min-h-[56px] focus-within:ring-4 focus-within:ring-blue-500/5 focus-within:bg-white dark:focus-within:bg-gray-900 focus-within:border-blue-500 shadow-sm transition-all">
           {selectedTags.map(tag => (
-            <span key={tag} className="bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 px-3 py-1.5 rounded-xl text-xs font-bold border border-gray-100 dark:border-gray-700 flex items-center gap-1.5 shadow-sm">
+            <span key={tag} className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 px-3 py-1.5 rounded-xl text-xs font-bold border border-gray-100 dark:border-gray-600 flex items-center gap-1.5 shadow-sm">
               {tag}
               <button type="button" onClick={() => handleRemoveTag(tag)} className="text-gray-400 hover:text-red-500"><X size={12} /></button>
             </span>
@@ -372,11 +372,11 @@ const CreateTaxonomyModal: React.FC<{
                     )}
                     <div>
                         <label className="text-xs font-bold text-gray-500 uppercase ml-1">Nome sugerido</label>
-                        <input value={name} onChange={e => setName(e.target.value)} className="w-full p-3 bg-gray-50 dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 outline-none mt-1 font-medium dark:text-white" placeholder={`Ex: ${type === 'category' ? 'Automóveis' : 'Pneus'}`} autoFocus />
+                        <input value={name} onChange={e => setName(e.target.value)} className="w-full p-3 bg-gray-100 dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 outline-none mt-1 font-medium dark:text-white" placeholder={`Ex: ${type === 'category' ? 'Automóveis' : 'Pneus'}`} autoFocus />
                     </div>
                     <div>
                         <label className="text-xs font-bold text-gray-500 uppercase ml-1">Descrição curta (Opcional)</label>
-                        <textarea value={justification} onChange={e => setJustification(e.target.value)} rows={3} className="w-full p-3 bg-gray-50 dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 outline-none mt-1 text-sm dark:text-white resize-none" placeholder="Breve descrição..." />
+                        <textarea value={justification} onChange={e => setJustification(e.target.value)} rows={3} className="w-full p-3 bg-gray-100 dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 outline-none mt-1 text-sm dark:text-white resize-none" placeholder="Breve descrição..." />
                     </div>
                     <button type="submit" disabled={isSubmitting || !name} className="w-full bg-[#1E5BFF] text-white font-black py-4 rounded-xl shadow-lg active:scale-95 transition-all flex items-center justify-center gap-2">
                         {isSubmitting ? <Loader2 className="animate-spin" /> : 'Enviar para aprovação'}
@@ -597,7 +597,7 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
           <div className="bg-white dark:bg-gray-900 rounded-[2.5rem] p-6 border border-gray-100 dark:border-gray-800 shadow-sm space-y-6">
              <div className="flex flex-col items-center">
                 <div className="relative group">
-                    <div className="w-28 h-28 rounded-[2rem] bg-gray-50 dark:bg-gray-800 border-2 border-dashed border-gray-200 dark:border-gray-700 flex items-center justify-center overflow-hidden">
+                    <div className="w-28 h-28 rounded-[2rem] bg-gray-100 dark:bg-gray-800 border-2 border-dashed border-gray-200 dark:border-gray-700 flex items-center justify-center overflow-hidden shadow-inner">
                         {formData.logo_url ? <img src={formData.logo_url} className="w-full h-full object-contain p-2" /> : <StoreIcon className="text-gray-300" size={32} />}
                     </div>
                     <button onClick={() => logoInputRef.current?.click()} className="absolute -bottom-2 -right-2 bg-[#1E5BFF] text-white p-2.5 rounded-xl shadow-lg border-2 border-white dark:border-gray-900"><Pencil size={16} /></button>
@@ -613,7 +613,7 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
                     value={formData.description} 
                     onChange={e => setFormData({...formData, description: e.target.value})} 
                     placeholder="Conte um pouco sobre sua loja..."
-                    className="w-full bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-4 text-sm font-bold dark:text-white outline-none focus:border-[#1E5BFF] transition-all resize-none min-h-[100px]"
+                    className="w-full bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-4 text-sm font-bold dark:text-white outline-none focus:border-[#1E5BFF] focus:bg-white dark:focus:bg-gray-900 shadow-sm transition-all resize-none min-h-[100px]"
                 />
              </div>
 
@@ -622,12 +622,12 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
              <div className="space-y-1.5">
                  <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Endereço Público *</label>
                  <div className="space-y-3">
-                     <input value={formData.cep} onChange={e => setFormData({...formData, cep: e.target.value})} placeholder="CEP" className="w-full bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-4 text-sm font-bold dark:text-white outline-none" />
+                     <input value={formData.cep} onChange={e => setFormData({...formData, cep: e.target.value})} placeholder="CEP" className="w-full bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-4 text-sm font-bold dark:text-white outline-none focus:bg-white dark:focus:bg-gray-900 shadow-sm transition-all" />
                      <div className="grid grid-cols-4 gap-3">
-                        <input value={formData.rua} onChange={e => setFormData({...formData, rua: e.target.value})} placeholder="Rua" className="col-span-3 w-full bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-4 text-sm font-bold dark:text-white outline-none" />
-                        <input value={formData.numero} onChange={e => setFormData({...formData, numero: e.target.value})} placeholder="Nº" className="col-span-1 w-full bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-4 text-sm font-bold dark:text-white outline-none" />
+                        <input value={formData.rua} onChange={e => setFormData({...formData, rua: e.target.value})} placeholder="Rua" className="col-span-3 w-full bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-4 text-sm font-bold dark:text-white outline-none focus:bg-white dark:focus:bg-gray-900 shadow-sm transition-all" />
+                        <input value={formData.numero} onChange={e => setFormData({...formData, numero: e.target.value})} placeholder="Nº" className="col-span-1 w-full bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-4 text-sm font-bold dark:text-white outline-none focus:bg-white dark:focus:bg-gray-900 shadow-sm transition-all" />
                      </div>
-                     <input value={formData.bairro} onChange={e => setFormData({...formData, bairro: e.target.value})} placeholder="Bairro" className="w-full bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-4 text-sm font-bold dark:text-white outline-none" />
+                     <input value={formData.bairro} onChange={e => setFormData({...formData, bairro: e.target.value})} placeholder="Bairro" className="w-full bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-4 text-sm font-bold dark:text-white outline-none focus:bg-white dark:focus:bg-gray-900 shadow-sm transition-all" />
                  </div>
              </div>
           </div>
@@ -686,7 +686,7 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
                 onChange={(tags) => setFormData({...formData, tags})} 
              />
 
-             <div onClick={() => setFormData({...formData, accepts_online_orders: !formData.accepts_online_orders})} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 cursor-pointer">
+             <div onClick={() => setFormData({...formData, accepts_online_orders: !formData.accepts_online_orders})} className="flex items-center justify-between p-4 bg-gray-100 dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 cursor-pointer shadow-sm">
                  <span className="text-sm font-bold text-gray-700 dark:text-gray-200">Aceita Pedidos Online?</span>
                  <div className={`w-12 h-6 rounded-full p-1 transition-colors ${formData.accepts_online_orders ? 'bg-emerald-500' : 'bg-gray-300 dark:bg-gray-600'}`}>
                     <div className={`w-4 h-4 bg-white rounded-full shadow-sm transform transition-transform ${formData.accepts_online_orders ? 'translate-x-6' : 'translate-x-0'}`}></div>
@@ -702,7 +702,7 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
                         value={formData.min_order_value}
                         onChange={e => setFormData({...formData, min_order_value: e.target.value})}
                         placeholder="0,00"
-                        className="w-full bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-4 pl-10 text-sm font-bold dark:text-white outline-none focus:border-[#1E5BFF]"
+                        className="w-full bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-4 pl-10 text-sm font-bold dark:text-white outline-none focus:border-[#1E5BFF] focus:bg-white dark:focus:bg-gray-900 shadow-sm transition-all"
                     />
                 </div>
              </div>
@@ -730,7 +730,7 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
                 <select 
                     value={formData.tax_regime}
                     onChange={e => setFormData({...formData, tax_regime: e.target.value})}
-                    className="w-full bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-4 text-sm font-bold dark:text-white outline-none focus:border-[#1E5BFF]"
+                    className="w-full bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-4 text-sm font-bold dark:text-white outline-none focus:border-[#1E5BFF] focus:bg-white dark:focus:bg-gray-900 shadow-sm transition-all"
                 >
                     {TAX_REGIMES.map(r => <option key={r} value={r}>{r}</option>)}
                 </select>
@@ -742,7 +742,7 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
                     value={formData.fiscal_address} 
                     onChange={e => setFormData({...formData, fiscal_address: e.target.value})} 
                     placeholder="Rua, Nº, Bairro, Cidade, Estado, CEP"
-                    className="w-full bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-4 text-sm font-bold dark:text-white outline-none focus:border-[#1E5BFF] transition-all resize-none min-h-[80px]"
+                    className="w-full bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-4 text-sm font-bold dark:text-white outline-none focus:border-[#1E5BFF] focus:bg-white dark:focus:bg-gray-900 shadow-sm transition-all resize-none min-h-[80px]"
                 />
              </div>
 
