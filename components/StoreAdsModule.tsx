@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { 
   ChevronLeft, 
@@ -19,13 +20,14 @@ import {
   CreditCard,
   QrCode,
   Info,
+  // Added missing AlertCircle import
   AlertCircle,
   AlertTriangle,
   Lock,
   Unlock,
   CheckSquare,
   Paintbrush,
-  ImageIcon,
+  Image as ImageIcon,
   Upload,
   X,
   Plus,
