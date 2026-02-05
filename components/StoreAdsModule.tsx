@@ -44,6 +44,12 @@ const NEIGHBORHOODS = [
   "Curicica", "Parque Olímpico", "Gardênia", "Cidade de Deus"
 ];
 
+const PLACEMENT_OPTIONS = [
+  { id: 'home', label: 'Home', icon: Home, price: 69.90, desc: 'Sua loja no carrossel principal da página inicial.' },
+  { id: 'subcat', label: 'Subcategorias', icon: LayoutGrid, price: 49.90, desc: 'Banner fixo no topo das buscas por categoria.' },
+  { id: 'combo', label: 'Home + Subcategorias', icon: Zap, price: 99.90, desc: 'Visibilidade máxima: Página Inicial + Categorias.' },
+];
+
 const DURATION_OPTIONS = [
   { months: 1, label: '1 mês' },
   { months: 2, label: '2 meses' },
@@ -68,13 +74,13 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
   const [paymentMethod, setPaymentMethod] = useState<'pix' | 'card'>('pix');
 
   // --- Estados do Pedido ---
+  const [selectedPlacement, setSelectedPlacement] = useState<'home' | 'subcat' | 'combo' | null>(null);
   const [selectedNeighborhoods, setSelectedNeighborhoods] = useState<string[]>([]);
   const [selectedDuration, setSelectedDuration] = useState<number>(1);
   const [artChoice, setArtChoice] = useState<'my_art' | 'editor' | 'pro' | null>(null);
   const [uploadedBanner, setUploadedBanner] = useState<string | null>(null);
 
   // Refs para automações de UX
-  const step2Ref = useRef<HTMLElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -82,13 +88,15 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
   }, [initialView]);
 
   // --- Precificação Unificada (Banners em Destaque) ---
-  const PRICES = { BASE: 69.90, PRO_ART: 89.90 };
-  const ORIGINAL_PRICE = 199.90;
+  const PRICES = { PRO_ART: 89.90 };
 
   const summary = useMemo(() => {
+    const placement = PLACEMENT_OPTIONS.find(p => p.id === selectedPlacement);
+    const basePrice = placement?.price || 0;
+    
     const hoodsCount = selectedNeighborhoods.length;
     const hoodsMultiplier = Math.max(1, hoodsCount);
-    const subtotal = (PRICES.BASE * hoodsMultiplier) * selectedDuration;
+    const subtotal = (basePrice * hoodsMultiplier) * selectedDuration;
     const artExtra = artChoice === 'pro' ? PRICES.PRO_ART : 0;
     const total = subtotal + artExtra;
 
@@ -97,9 +105,9 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
       subtotal,
       artExtra,
       total,
-      placementLabel: 'Banners em Destaque'
+      placementLabel: placement?.label || 'Banners em Destaque'
     };
-  }, [selectedNeighborhoods, selectedDuration, artChoice]);
+  }, [selectedPlacement, selectedNeighborhoods, selectedDuration, artChoice]);
 
   const toggleHood = (hood: string) => {
     if (hood === 'Todos') {
@@ -122,6 +130,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
   };
 
   const handleGoToPayment = () => {
+    if (!selectedPlacement) return alert("Selecione onde deseja anunciar.");
     if (selectedNeighborhoods.length === 0) return alert("Selecione pelo menos um bairro.");
     if (!artChoice) return alert("Escolha uma opção de arte.");
     setView('payment_selection');
@@ -141,7 +150,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
         activeCampaigns.push({
             id: campaignId,
             user: user?.id,
-            placement: { home: true, cat: true },
+            placement: selectedPlacement,
             hoods: selectedNeighborhoods,
             duration: selectedDuration,
             total: summary.total,
@@ -152,7 +161,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
 
         const { error: dbError } = await supabase.from('published_banners').insert({
             merchant_id: user.id,
-            target: 'featured',
+            target: selectedPlacement === 'home' ? 'home' : selectedPlacement === 'cat' ? 'category' : 'featured',
             config: {
                 art_type: artChoice,
                 hoods: selectedNeighborhoods,
@@ -186,7 +195,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
   };
 
   if (isEditingArt) {
-    return <StoreBannerEditor storeName={user?.user_metadata?.store_name || "Sua Loja"} onSave={() => { setIsEditingArt(false); setArtChoice('editor'); }} onBack={() => setIsEditingArt(false)} />;
+    return <StoreBannerEditor storeName={user?.user_metadata?.store_name || "Sua Loja"} onSave={(design) => { setIsEditingArt(false); setArtChoice('editor'); setUploadedBanner(null); }} onBack={() => setIsEditingArt(false)} />;
   }
 
   if (view === 'processing') {
@@ -217,7 +226,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
           <div className="w-full max-w-sm bg-slate-900 rounded-[2.5rem] p-8 border border-white/5 text-left space-y-6 shadow-2xl">
               <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-widest border-b border-white/5 pb-4">Resumo da Contratação</h3>
               <div className="space-y-4">
-                  <div className="flex justify-between items-center"><span className="text-xs text-slate-400 font-bold uppercase">Plano</span><span className="text-sm font-black text-white">Banners em Destaque</span></div>
+                  <div className="flex justify-between items-center"><span className="text-xs text-slate-400 font-bold uppercase">Plano</span><span className="text-sm font-black text-white">{summary.placementLabel}</span></div>
                   <div className="flex justify-between items-center"><span className="text-xs text-slate-400 font-bold uppercase">Alcance</span><span className="text-sm font-black text-white">{summary.hoodsCount} Bairro(s)</span></div>
                   <div className="flex justify-between items-center"><span className="text-xs text-slate-400 font-bold uppercase">Vigência</span><span className="text-sm font-black text-blue-400">{selectedDuration} Mês(es)</span></div>
               </div>
@@ -279,63 +288,94 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
       </header>
 
       <main className="flex-1 p-6 space-y-16 pb-[320px] max-w-md mx-auto w-full">
-        <section className="space-y-8">
-          <div className="px-1 space-y-4 text-center">
-            <h3 className="text-3xl font-black text-white uppercase tracking-tighter leading-[0.9]">
-                Banners em Destaque
-            </h3>
-            <p className="text-sm text-slate-400 font-medium max-w-xs mx-auto leading-relaxed">
-                Sua loja nos banners da Home com benefícios exclusivos de Fundador Apoiador.
-            </p>
-            <div className="bg-gradient-to-br from-blue-600/20 to-indigo-600/10 border border-blue-500/30 p-6 rounded-[2.5rem] text-left relative overflow-hidden shadow-2xl">
-              <div className="flex items-center gap-3 mb-2">
-                <div className="w-10 h-10 rounded-xl bg-amber-400/10 flex items-center justify-center border border-amber-400/20">
-                  <Award className="w-6 h-6 text-amber-400" />
+        
+        {/* BLOCO 0: POSICIONAMENTO */}
+        <section className="space-y-6">
+          <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-blue-500 flex items-center gap-2 px-1">
+            <LayoutGrid size={14} /> 0. Onde deseja anunciar?
+          </h3>
+          <div className="grid grid-cols-1 gap-3">
+            {PLACEMENT_OPTIONS.map(opt => (
+              <button
+                key={opt.id}
+                onClick={() => setSelectedPlacement(opt.id as any)}
+                className={`p-5 rounded-3xl border-2 text-left flex items-center gap-4 transition-all active:scale-[0.98] ${selectedPlacement === opt.id ? 'bg-blue-600/10 border-blue-500 shadow-lg' : 'bg-white/5 border-white/10 text-slate-400'}`}
+              >
+                <div className={`p-3 rounded-2xl ${selectedPlacement === opt.id ? 'bg-blue-50 text-blue-600 shadow-md' : 'bg-white/5 text-slate-500'}`}>
+                  <opt.icon size={22} />
                 </div>
-                <h4 className="text-xs font-black text-white uppercase tracking-tight">Fundador Apoiador do Localizei JPA</h4>
-              </div>
-              <p className="text-[11px] text-slate-200 leading-relaxed font-bold">
-                  🔒 Oferta de inauguração: R$ {PRICES.BASE.toFixed(2)} por mês/bairro. Preço garantido por 12 meses.
-              </p>
-            </div>
-          </div>
-        </section>
-
-        <section ref={step2Ref} className="space-y-6 scroll-mt-24">
-          <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-blue-500 flex items-center gap-2 px-1"><MapPin size={14} /> 1. Quais bairros?</h3>
-          <div className="grid grid-cols-2 gap-3">
-              <button onClick={() => toggleHood('Todos')} className={`col-span-2 p-4 rounded-2xl border-2 font-black uppercase text-xs flex items-center justify-center gap-2 transition-all ${selectedNeighborhoods.length === NEIGHBORHOODS.length ? 'bg-blue-600 border-blue-500 text-white' : 'bg-white/5 border-white/10 text-slate-400'}`}>Todos os bairros</button>
-              {NEIGHBORHOODS.map(hood => (
-                  <button key={hood} onClick={() => toggleHood(hood)} className={`p-4 rounded-2xl border-2 text-[10px] font-bold uppercase transition-all ${selectedNeighborhoods.includes(hood) ? 'bg-blue-600/10 border-blue-500 text-blue-400' : 'bg-white/5 border-white/10 text-slate-500'}`}>{hood}</button>
-              ))}
-          </div>
-        </section>
-
-        <section className="space-y-6">
-          <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-blue-500 flex items-center gap-2 px-1"><Calendar size={14} /> 2. Tempo de exibição</h3>
-          <div className="grid grid-cols-3 gap-3">
-              {DURATION_OPTIONS.map(opt => (
-                  <button key={opt.months} onClick={() => setSelectedDuration(opt.months)} className={`p-4 rounded-2xl border-2 flex flex-col items-center justify-center transition-all ${selectedDuration === opt.months ? 'bg-blue-600 border-blue-500 text-white' : 'bg-white/5 border-white/10 text-slate-500'}`}>
-                      <span className="text-xs font-black uppercase leading-none">{opt.label}</span>
-                      <span className={`text-[7px] font-bold mt-2 uppercase ${selectedDuration === opt.months ? 'text-blue-100' : 'text-slate-600'}`}>{getDatesForDuration(opt.months)}</span>
-                  </button>
-              ))}
-          </div>
-        </section>
-
-        <section className="space-y-6">
-          <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-blue-500 flex items-center gap-2 px-1"><Palette size={14} /> 3. Arte do Banner</h3>
-          <div className="space-y-4">
-              <input type="file" ref={fileInputRef} onChange={handleFileUpload} accept="image/*" className="hidden" />
-              <button onClick={() => fileInputRef.current?.click()} className={`w-full p-6 rounded-[2rem] border-2 text-left flex items-center gap-5 transition-all ${artChoice === 'my_art' ? 'bg-blue-600/10 border-blue-500 shadow-xl' : 'bg-white/5 border-white/10'}`}>
-                <div className="w-12 h-12 bg-white/5 rounded-xl flex items-center justify-center text-slate-400 shrink-0">{uploadedBanner ? <img src={uploadedBanner} className="w-full h-full object-cover rounded-lg" /> : <Upload size={24} />}</div>
-                <div className="min-w-0 flex-1"><h4 className="font-bold text-white text-sm truncate">{uploadedBanner ? 'Banner selecionado' : 'Usar meu banner'}</h4></div>
-                {uploadedBanner && <CheckCircle2 size={18} className="text-emerald-500 shrink-0" />}
+                <div className="flex-1">
+                  <p className="font-black text-sm uppercase text-white leading-tight">{opt.label}</p>
+                  <p className="text-[10px] text-slate-500 font-medium mt-0.5">{opt.desc}</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-xs font-black text-white">R$ {opt.price.toFixed(2)}</p>
+                  <p className="text-[8px] text-slate-600 uppercase font-bold tracking-tighter">por mês/bairro</p>
+                </div>
               </button>
-              <button onClick={() => setIsEditingArt(true)} className={`w-full p-6 rounded-[2rem] border-2 text-left flex items-center gap-5 transition-all ${artChoice === 'editor' ? 'bg-blue-600/10 border-blue-500 shadow-xl' : 'bg-white/5 border-white/10'}`}><div className="w-12 h-12 bg-white/5 rounded-xl flex items-center justify-center text-slate-400"><Paintbrush size={24} /></div><div><h4 className="font-bold text-white text-sm">Criar banner personalizado</h4></div></button>
-              <button onClick={() => setArtChoice('pro')} className={`relative w-full p-6 rounded-[2rem] border-2 text-left flex items-center gap-5 transition-all ${artChoice === 'pro' ? 'bg-blue-600/10 border-blue-500 shadow-xl' : 'bg-white/5 border-white/10'}`}><div className="w-12 h-12 bg-white/5 rounded-xl flex items-center justify-center text-slate-400"><Rocket size={24} /></div><div><h4 className="font-bold text-white text-sm">Fazer com time Localizei</h4><p className="text-[10px] text-slate-500 mt-0.5">Designers criam para você (+R$ 89,90).</p></div></button>
+            ))}
           </div>
         </section>
+
+        <div className={`transition-all duration-500 space-y-16 ${!selectedPlacement ? 'opacity-20 grayscale pointer-events-none' : 'opacity-100'}`}>
+            <section className="space-y-8">
+              <div className="px-1 space-y-4 text-center">
+                <h3 className="text-3xl font-black text-white uppercase tracking-tighter leading-[0.9]">
+                    Banners em Destaque
+                </h3>
+                <p className="text-sm text-slate-400 font-medium max-w-xs mx-auto leading-relaxed">
+                    Sua loja nos banners da Home com benefícios exclusivos de Fundador Apoiador.
+                </p>
+                <div className="bg-gradient-to-br from-blue-600/20 to-indigo-600/10 border border-blue-500/30 p-6 rounded-[2.5rem] text-left relative overflow-hidden shadow-2xl">
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="w-10 h-10 rounded-xl bg-amber-400/10 flex items-center justify-center border border-amber-400/20">
+                      <Award className="w-6 h-6 text-amber-400" />
+                    </div>
+                    <h4 className="text-xs font-black text-white uppercase tracking-tight">Fundador Apoiador do Localizei JPA</h4>
+                  </div>
+                  <p className="text-[11px] text-slate-200 leading-relaxed font-bold">
+                      🔒 Oferta de inauguração: Preços especiais garantidos por 12 meses.
+                  </p>
+                </div>
+              </div>
+            </section>
+
+            <section className="space-y-6 scroll-mt-24">
+              <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-blue-500 flex items-center gap-2 px-1"><MapPin size={14} /> 1. Quais bairros?</h3>
+              <div className="grid grid-cols-2 gap-3">
+                  <button onClick={() => toggleHood('Todos')} className={`col-span-2 p-4 rounded-2xl border-2 font-black uppercase text-xs flex items-center justify-center gap-2 transition-all ${selectedNeighborhoods.length === NEIGHBORHOODS.length ? 'bg-blue-600 border-blue-500 text-white' : 'bg-white/5 border-white/10 text-slate-400'}`}>Todos os bairros</button>
+                  {NEIGHBORHOODS.map(hood => (
+                      <button key={hood} onClick={() => toggleHood(hood)} className={`p-4 rounded-2xl border-2 text-[10px] font-bold uppercase transition-all ${selectedNeighborhoods.includes(hood) ? 'bg-blue-600/10 border-blue-500 text-blue-400' : 'bg-white/5 border-white/10 text-slate-500'}`}>{hood}</button>
+                  ))}
+              </div>
+            </section>
+
+            <section className="space-y-6">
+              <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-blue-500 flex items-center gap-2 px-1"><Calendar size={14} /> 2. Tempo de exibição</h3>
+              <div className="grid grid-cols-3 gap-3">
+                  {DURATION_OPTIONS.map(opt => (
+                      <button key={opt.months} onClick={() => setSelectedDuration(opt.months)} className={`p-4 rounded-2xl border-2 flex flex-col items-center justify-center transition-all ${selectedDuration === opt.months ? 'bg-blue-600 border-blue-500 text-white' : 'bg-white/5 border-white/10 text-slate-500'}`}>
+                          <span className="text-xs font-black uppercase leading-none">{opt.label}</span>
+                          <span className={`text-[7px] font-bold mt-2 uppercase ${selectedDuration === opt.months ? 'text-blue-100' : 'text-slate-600'}`}>{getDatesForDuration(opt.months)}</span>
+                      </button>
+                  ))}
+              </div>
+            </section>
+
+            <section className="space-y-6">
+              <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-blue-500 flex items-center gap-2 px-1"><Palette size={14} /> 3. Arte do Banner</h3>
+              <div className="space-y-4">
+                  <input type="file" ref={fileInputRef} onChange={handleFileUpload} accept="image/*" className="hidden" />
+                  <button onClick={() => fileInputRef.current?.click()} className={`w-full p-6 rounded-[2rem] border-2 text-left flex items-center gap-5 transition-all ${artChoice === 'my_art' ? 'bg-blue-600/10 border-blue-500 shadow-xl' : 'bg-white/5 border-white/10'}`}>
+                    <div className="w-12 h-12 bg-white/5 rounded-xl flex items-center justify-center text-slate-400 shrink-0">{uploadedBanner ? <img src={uploadedBanner} className="w-full h-full object-cover rounded-lg" /> : <Upload size={24} />}</div>
+                    <div className="min-w-0 flex-1"><h4 className="font-bold text-white text-sm truncate">{uploadedBanner ? 'Banner selecionado' : 'Usar meu banner'}</h4></div>
+                    {uploadedBanner && <CheckCircle2 size={18} className="text-emerald-500 shrink-0" />}
+                  </button>
+                  <button onClick={() => setIsEditingArt(true)} className={`w-full p-6 rounded-[2rem] border-2 text-left flex items-center gap-5 transition-all ${artChoice === 'editor' ? 'bg-blue-600/10 border-blue-500 shadow-xl' : 'bg-white/5 border-white/10'}`}><div className="w-12 h-12 bg-white/5 rounded-xl flex items-center justify-center text-slate-400"><Paintbrush size={24} /></div><div><h4 className="font-bold text-white text-sm">Criar banner personalizado</h4></div></button>
+                  <button onClick={() => setArtChoice('pro')} className={`relative w-full p-6 rounded-[2rem] border-2 text-left flex items-center gap-5 transition-all ${artChoice === 'pro' ? 'bg-blue-600/10 border-blue-500 shadow-xl' : 'bg-white/5 border-white/10'}`}><div className="w-12 h-12 bg-white/5 rounded-xl flex items-center justify-center text-slate-400"><Rocket size={24} /></div><div><h4 className="font-bold text-white text-sm">Fazer com time Localizei</h4><p className="text-[10px] text-slate-500 mt-0.5">Designers criam para você (+R$ 89,90).</p></div></button>
+              </div>
+            </section>
+        </div>
       </main>
 
       <div className="fixed bottom-[90px] left-0 right-0 p-6 bg-slate-950/95 backdrop-blur-2xl border-t border-white/10 z-[100] max-w-md mx-auto rounded-t-[2.5rem]">
@@ -349,7 +389,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
                 <p className="text-2xl font-black text-emerald-400 tracking-tighter leading-none">R$ {summary.total.toFixed(2).replace('.', ',')}</p>
             </div>
         </div>
-        <button onClick={handleGoToPayment} className={`w-full py-5 rounded-[2rem] shadow-xl flex items-center justify-center gap-3 transition-all active:scale-[0.98] ${ selectedNeighborhoods.length > 0 && artChoice ? 'bg-[#1E5BFF] text-white hover:bg-blue-600' : 'bg-white/5 text-slate-500 cursor-not-allowed' }`}>
+        <button onClick={handleGoToPayment} className={`w-full py-5 rounded-[2rem] shadow-xl flex items-center justify-center gap-3 transition-all active:scale-[0.98] ${ selectedPlacement && selectedNeighborhoods.length > 0 && artChoice ? 'bg-[#1E5BFF] text-white hover:bg-blue-600' : 'bg-white/5 text-slate-500 cursor-not-allowed' }`}>
           {isSubmitting ? <Loader2 className="w-6 h-6 animate-spin" /> : <>Concluir compra <ArrowRight size={18} /></>}
         </button>
       </div>
