@@ -19,7 +19,10 @@ import {
   Plus,
   Clock,
   Instagram,
-  CheckCircle2
+  CheckCircle2,
+  // Added missing icon imports
+  MapPin,
+  ShoppingBag
 } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import { useAuth } from '../contexts/AuthContext';
@@ -161,15 +164,15 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
     <div className="min-h-screen bg-[#F4F7FF] dark:bg-gray-950 font-sans pb-32 animate-in slide-in-from-right duration-300">
       <div className="sticky top-0 z-40 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md px-5 h-20 flex items-center gap-4 border-b border-blue-100 dark:border-gray-800">
         <button onClick={onBack} className="p-2.5 bg-gray-100 dark:bg-gray-800 rounded-2xl hover:bg-gray-200 transition-colors"><ChevronLeft size={20} className="text-gray-800 dark:text-white" /></button>
-        <div className="flex-1"><h1 className="font-black text-lg text-gray-900 dark:text-white uppercase tracking-tighter">Configurar Loja</h1></div>
+        <div className="flex-1"><h1 className="font-black text-lg text-gray-900 dark:text-white uppercase tracking-tighter">Perfil Público</h1></div>
         <button onClick={handleSave} disabled={isSaving} className="p-3 bg-[#1E5BFF] text-white rounded-2xl shadow-xl active:scale-90 transition-all">{isSaving ? <Loader2 size={20} className="animate-spin" /> : <Save size={20} />}</button>
       </div>
 
       <div className="p-6 space-y-12 max-w-md mx-auto">
         
-        {/* SEÇÃO 1: PERFIL PÚBLICO */}
+        {/* SEÇÃO 1: IDENTIDADE VISUAL */}
         <section className="space-y-6">
-          <div className="flex items-center gap-2 px-1"><StoreIcon size={16} className="text-[#1E5BFF]" /><h2 className="text-[11px] font-black text-blue-400 uppercase tracking-widest">1. Perfil Público</h2></div>
+          <div className="flex items-center gap-2 px-1"><StoreIcon size={16} className="text-[#1E5BFF]" /><h2 className="text-[11px] font-black text-blue-400 uppercase tracking-widest">1. Identidade Visual</h2></div>
           <div className="bg-white dark:bg-gray-900 rounded-[2.5rem] p-8 border border-blue-50 dark:border-gray-800 shadow-sm space-y-6">
              <div className="flex flex-col items-center">
                 <div className="relative group">
@@ -181,32 +184,60 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
                 <p className="text-[9px] font-bold text-gray-400 uppercase mt-4">Logotipo</p>
              </div>
              <FormField label="Nome da Loja *" value={formData.nome_exibido} onChange={v => setFormData({...formData, nome_exibido: v})} required placeholder="Ex: Padaria Central" />
-             <div className="space-y-1.5"><label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Descrição Pública *</label><textarea value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} placeholder="Breve resumo da sua loja..." className="w-full bg-blue-50/50 dark:bg-gray-900 border border-blue-100 dark:border-gray-800 rounded-2xl p-4 text-sm font-bold dark:text-white outline-none focus:bg-white dark:focus:bg-slate-900 focus:border-[#1E5BFF] transition-all resize-none min-h-[100px]" /></div>
+             <div className="space-y-1.5"><label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Descrição Curta *</label><textarea value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} placeholder="Breve resumo da sua loja..." className="w-full bg-blue-50/50 dark:bg-gray-900 border border-blue-100 dark:border-gray-800 rounded-2xl p-4 text-sm font-bold dark:text-white outline-none focus:bg-white dark:focus:bg-slate-900 focus:border-[#1E5BFF] transition-all resize-none min-h-[100px]" /></div>
           </div>
         </section>
 
-        {/* SEÇÃO: ENDEREÇO E REGRAS */}
+        {/* SEÇÃO 2: CONTATOS E LOCALIZAÇÃO */}
         <section className="space-y-6">
-          <div className="flex items-center gap-2 px-1"><Building2 size={16} className="text-blue-500" /><h2 className="text-[11px] font-black text-blue-400 uppercase tracking-widest">2. Endereço e Pedidos</h2></div>
+          <div className="flex items-center gap-2 px-1"><Smartphone size={16} className="text-emerald-500" /><h2 className="text-[11px] font-black text-blue-400 uppercase tracking-widest">2. Contatos e Local</h2></div>
           <div className="bg-white dark:bg-gray-900 rounded-[2.5rem] p-8 border border-blue-50 dark:border-gray-800 shadow-sm space-y-6">
-             <FormField label="Bairro *" value={formData.bairro} onChange={v => setFormData({...formData, bairro: v})} placeholder="Ex: Freguesia" />
+             <FormField label="WhatsApp / Celular *" value={formData.whatsapp_publico} onChange={v => setFormData({...formData, whatsapp_publico: v})} icon={Smartphone} placeholder="(21) 99999-0000" />
+             <FormField label="Instagram (@)" value={formData.instagram} onChange={v => setFormData({...formData, instagram: v})} icon={Instagram} placeholder="@sualoja" />
+             {/* Fix: Added missing MapPin usage for the Bairro field */}
+             <FormField label="Bairro *" value={formData.bairro} onChange={v => setFormData({...formData, bairro: v})} icon={MapPin} placeholder="Ex: Freguesia" />
+          </div>
+        </section>
+
+        {/* SEÇÃO 3: REGRAS DE PEDIDO */}
+        <section className="space-y-6">
+          {/* Fix: Added missing ShoppingBag icon usage for the section header */}
+          <div className="flex items-center gap-2 px-1"><ShoppingBag size={16} className="text-amber-500" /><h2 className="text-[11px] font-black text-blue-400 uppercase tracking-widest">3. Regras de Pedido</h2></div>
+          <div className="bg-white dark:bg-gray-900 rounded-[2.5rem] p-8 border border-blue-50 dark:border-gray-800 shadow-sm space-y-6">
              <div onClick={() => setFormData({...formData, accepts_online_orders: !formData.accepts_online_orders})} className="flex items-center justify-between p-4 bg-blue-50/50 dark:bg-gray-800 rounded-2xl cursor-pointer border border-blue-100 dark:border-gray-700">
                  <span className="text-sm font-bold text-gray-700 dark:text-gray-200">Aceita Pedidos Online?</span>
-                 <div className={`w-10 h-5 rounded-full p-1 transition-colors ${formData.accepts_online_orders ? 'bg-emerald-500' : 'bg-gray-300'}`}>
-                    <div className={`w-3 h-3 bg-white rounded-full transform transition-transform ${formData.accepts_online_orders ? 'translate-x-5' : 'translate-x-0'}`}></div>
+                 <div className={`w-12 h-6 rounded-full p-1 transition-colors ${formData.accepts_online_orders ? 'bg-emerald-500' : 'bg-gray-300'}`}>
+                    <div className={`w-4 h-4 bg-white rounded-full transform transition-transform ${formData.accepts_online_orders ? 'translate-x-6' : 'translate-x-0'}`}></div>
                  </div>
              </div>
              <FormField label="Valor de Pedido Mínimo" value={formData.min_order_value} onChange={v => setFormData({...formData, min_order_value: v})} icon={DollarSign} placeholder="0,00" type="number" />
           </div>
         </section>
+
+        {/* SEÇÃO 4: VÍDEOS */}
+        <section className="space-y-6">
+          <div className="flex items-center gap-2 px-1"><Video size={16} className="text-purple-500" /><h2 className="text-[11px] font-black text-blue-400 uppercase tracking-widest">4. Vídeos da Loja</h2></div>
+          <div className="bg-white dark:bg-gray-900 rounded-[2.5rem] p-8 border border-blue-50 dark:border-gray-800 shadow-sm">
+             <p className="text-xs text-gray-500 mb-6 font-medium">Habilite até 2 vídeos curtos para seu perfil.</p>
+             <div className="grid grid-cols-2 gap-4">
+                {[0, 1].map(i => (
+                    <div key={i} className="aspect-[9/16] bg-blue-50/30 dark:bg-gray-800 rounded-2xl border-2 border-dashed border-blue-100 dark:border-gray-700 flex flex-col items-center justify-center gap-2 cursor-pointer hover:bg-white transition-colors">
+                        <Plus className="text-blue-300" />
+                        <span className="text-[8px] font-black uppercase text-gray-400 tracking-widest">Vídeo {i + 1}</span>
+                    </div>
+                ))}
+             </div>
+          </div>
+        </section>
+
       </div>
       <input type="file" ref={logoInputRef} className="hidden" accept="image/*" onChange={e => handleImageUpload(e, 'logo_url')} />
       {showSuccess && (
         <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-[100] bg-gray-900 dark:bg-white text-white dark:text-gray-900 px-8 py-4 rounded-full shadow-2xl flex items-center gap-3 animate-in slide-in-from-bottom-5">
            <CheckCircle2 className="w-5 h-5 text-emerald-400" />
-           <span className="font-black text-xs uppercase tracking-widest">Loja Atualizada!</span>
+           <span className="font-black text-xs uppercase tracking-widest">Perfil Atualizado!</span>
         </div>
       )}
     </div>
   );
-}
+};

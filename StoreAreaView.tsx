@@ -30,7 +30,8 @@ import {
   Store as StoreIcon,
   PieChart,
   Building,
-  Handshake
+  Handshake,
+  FileText
 } from 'lucide-react';
 import { User as SupabaseUser } from '@supabase/supabase-js';
 import { useAuth } from '@/contexts/AuthContext';
@@ -111,7 +112,7 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
   return (
     <div className="min-h-screen bg-[#F4F7FF] dark:bg-gray-950 font-sans animate-in fade-in duration-500 pb-40">
       
-      {/* HEADER DE PERFIL NO CONTEXTO DE GESTÃO */}
+      {/* HEADER DE PERFIL */}
       <div className="bg-white dark:bg-gray-950 px-6 pt-12 pb-8 border-b border-blue-100 dark:border-gray-800 shadow-sm mb-6">
         <div className="flex items-center gap-5">
           <div className="w-20 h-20 rounded-[2rem] border-4 border-[#F4F7FF] dark:border-slate-800 shadow-xl overflow-hidden shrink-0">
@@ -131,26 +132,20 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
 
       <div className="px-5">
         
-        {/* 1. MINHA LOJA */}
+        {/* 1. MINHA LOJA - REORGANIZADO */}
         <section>
           <SectionHeader title="Minha Loja" icon={Building} />
           <NavCard 
             icon={StoreIcon} 
             label="Perfil Público da Loja" 
-            description="Informações básicas, logo e banner"
+            description="Informações visíveis para seus clientes"
             onClick={() => onNavigate('store_profile')} 
           />
           <NavCard 
-            icon={Clock} 
-            label="Endereço e Horários" 
-            description="Atualize como e onde te encontram"
-            onClick={() => onNavigate('store_profile')} 
-          />
-          <NavCard 
-            icon={ShoppingBag} 
-            label="Regras de Pedido" 
-            description="Pedido mínimo e vendas online"
-            onClick={() => onNavigate('store_profile')} 
+            icon={FileText} 
+            label="Dados para Nota Fiscal" 
+            description="Informações jurídicas e fiscais"
+            onClick={() => onNavigate('store_fiscal')} 
           />
         </section>
 
@@ -195,7 +190,7 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
             icon={Star} 
             label="Avaliações de Clientes" 
             description="Responda o que dizem sobre você"
-            badge={3} // Mock de avaliações pendentes
+            badge={3} 
             onClick={() => onNavigate('merchant_reviews')} 
           />
           <NavCard 
