@@ -12,7 +12,6 @@ import {
   Phone,
   CheckCircle2,
   AlertCircle,
-  // Added missing icon import
   Info
 } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
@@ -144,7 +143,6 @@ export const StoreFiscalEdit: React.FC<{ onBack: () => void }> = ({ onBack }) =>
           </div>
         </section>
 
-        {/* Fix: Added Info icon import to the header of the file */}
         <div className="p-6 bg-blue-50/50 dark:bg-blue-900/10 rounded-[2.5rem] border border-blue-100 dark:border-blue-800/30 flex gap-4">
           <Info size={20} className="text-blue-500 shrink-0 mt-1" />
           <p className="text-xs text-blue-800 dark:text-blue-200 font-medium leading-relaxed">
