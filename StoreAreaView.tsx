@@ -145,16 +145,9 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
               colorClass="bg-emerald-50 text-emerald-600"
             />
             <ServiceBlock 
-              icon={ImageIcon} 
-              label="Banners de Categoria" 
-              description="Garante seu espaço exclusivo no carrossel"
-              onClick={() => onNavigate('category_banner_sales')}
-              colorClass="bg-blue-50 text-blue-600"
-            />
-            <ServiceBlock 
               icon={LayoutGrid} 
-              label="Banners Home" 
-              description="Anúncios visuais na página inicial"
+              label="Banners em Destaque" 
+              description="Sua loja nos banners da Home com benefícios exclusivos de Fundador Apoiador."
               onClick={() => onNavigate('store_ads_module')}
               colorClass="bg-purple-50 text-purple-600"
             />
@@ -163,7 +156,7 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
 
         <section>
           <SectionHeader title="Serviços" />
-          <div className="bg-white dark:bg-gray-800 rounded-[2.5rem] border border-gray-100 dark:border-gray-700 overflow-hidden shadow-sm">
+          <div className="bg-white dark:bg-gray-800 rounded-[2.5rem] border border-gray-100 dark:border-gray-800 overflow-hidden shadow-sm">
             <ServiceBlock 
               icon={MessageSquare} 
               label="Chat com Designer" 
@@ -187,7 +180,7 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
 
         <section>
           <SectionHeader title="Preferências" />
-          <div className="bg-white dark:bg-gray-800 rounded-[2.5rem] border border-gray-100 dark:border-gray-700 overflow-hidden shadow-sm">
+          <div className="bg-white dark:bg-gray-800 rounded-[2.5rem] border border-gray-100 dark:border-gray-800 overflow-hidden shadow-sm">
             <ServiceBlock 
               icon={theme === 'dark' ? Moon : Sun} 
               label="Modo Noite" 
@@ -204,7 +197,7 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
 
         <section>
           <SectionHeader title="Suporte" />
-          <div className="bg-white dark:bg-gray-800 rounded-[2.5rem] border border-gray-100 dark:border-gray-700 overflow-hidden shadow-sm">
+          <div className="bg-white dark:bg-gray-800 rounded-[2.5rem] border border-gray-100 dark:border-gray-800 overflow-hidden shadow-sm">
             <ServiceBlock 
               icon={LifeBuoy} 
               label="Suporte ao Lojista" 
@@ -216,7 +209,7 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
 
         <section>
           <SectionHeader title="Geral" />
-          <div className="bg-white dark:bg-gray-800 rounded-[2.5rem] border border-gray-100 dark:border-gray-700 overflow-hidden shadow-sm">
+          <div className="bg-white dark:bg-gray-800 rounded-[2.5rem] border border-gray-100 dark:border-gray-800 overflow-hidden shadow-sm">
             <ServiceBlock 
               icon={Heart} 
               label="Favoritos" 
