@@ -108,21 +108,38 @@ export const JPAConnectSalesView: React.FC<JPAConnectSalesViewProps> = ({ onBack
       <main className="flex-1 p-6 space-y-20 max-w-md mx-auto w-full">
         
         {/* HERO SECTION */}
-        <section className="text-center pt-10 relative">
+        <section className="text-center pt-10 relative space-y-10">
             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-64 bg-indigo-600/10 rounded-full blur-[100px] pointer-events-none"></div>
             
-            <div className="inline-flex items-center gap-2 bg-indigo-500/10 border border-indigo-500/20 px-4 py-1.5 rounded-full mb-8 animate-in slide-in-from-top-4 duration-700">
-                <Gem size={14} className="text-indigo-400" />
-                <span className="text-[10px] font-black text-indigo-300 uppercase tracking-widest">Acesso Restrito</span>
+            <div className="space-y-6">
+                <div className="inline-flex items-center gap-2 bg-indigo-500/10 border border-indigo-500/20 px-4 py-1.5 rounded-full animate-in slide-in-from-top-4 duration-700">
+                    <Gem size={14} className="text-indigo-400" />
+                    <span className="text-[10px] font-black text-indigo-300 uppercase tracking-widest">Acesso Restrito</span>
+                </div>
+                
+                <h2 className="text-4xl font-black text-white leading-[1.1] uppercase tracking-tighter animate-in slide-in-from-bottom-4 duration-700 delay-100">
+                    Conectando as lideranças que movem <span className="text-indigo-500">Jacarepaguá.</span>
+                </h2>
+                
+                <p className="text-base text-slate-400 font-medium leading-relaxed max-w-sm mx-auto animate-in slide-in-from-bottom-6 duration-700 delay-200">
+                    Um grupo seleto de empresários focado em relacionamento estratégico, confiança mútua e crescimento local.
+                </p>
             </div>
-            
-            <h2 className="text-4xl font-black text-white leading-[1.1] uppercase tracking-tighter mb-6 animate-in slide-in-from-bottom-4 duration-700 delay-100">
-                Conectando as lideranças que movem <span className="text-indigo-500">Jacarepaguá.</span>
-            </h2>
-            
-            <p className="text-base text-slate-400 font-medium leading-relaxed max-w-sm mx-auto mb-10 animate-in slide-in-from-bottom-6 duration-700 delay-200">
-                Um grupo seleto de empresários focado em relacionamento estratégico, confiança mútua e crescimento local.
-            </p>
+
+            {/* BLOCO DE VÍDEO (REPOSICIONADO NO TOPO) */}
+            <div className="space-y-6 animate-in fade-in duration-1000 delay-300">
+                <h3 className="text-xl font-black text-white uppercase tracking-tighter text-center max-w-[280px] mx-auto leading-tight">
+                    Assista ao vídeo e entenda como funciona o JPA Connect
+                </h3>
+                <div className="relative aspect-video rounded-[2.5rem] overflow-hidden bg-slate-900 border border-white/10 shadow-2xl group mx-auto w-full">
+                    <video 
+                        src="https://videos.pexels.com/video-files/3129957/3129957-sd_540_960_30fps.mp4" 
+                        className="w-full h-full object-cover"
+                        controls
+                        poster="https://images.unsplash.com/photo-1515169067868-5387ec356754?q=80&w=800"
+                    />
+                </div>
+            </div>
 
             <button 
                 onClick={() => setIsModalOpen(true)}
@@ -257,39 +274,22 @@ export const JPAConnectSalesView: React.FC<JPAConnectSalesViewProps> = ({ onBack
         </section>
 
         {/* CTA FINAL */}
-        <section className="pt-10 space-y-12">
+        <section className="pt-10 space-y-6">
             <div className="bg-amber-50/5 border border-amber-500/20 p-5 rounded-2xl flex gap-4">
                 <span className="shrink-0"><Info size={20} className="text-amber-500" /></span>
                 <p className="text-[11px] text-amber-200/70 font-bold uppercase leading-relaxed">
                     A entrada no grupo depende de análise prévia de nicho e perfil empresarial para garantir a qualidade do círculo.
                 </p>
             </div>
-
-            {/* BLOCO DE VÍDEO */}
-            <div className="space-y-6">
-                <h3 className="text-xl font-black text-white uppercase tracking-tighter text-center max-w-[280px] mx-auto leading-tight">
-                    Assista ao vídeo e entenda como funciona o JPA Connect
-                </h3>
-                <div className="relative aspect-video rounded-[2.5rem] overflow-hidden bg-slate-900 border border-white/10 shadow-2xl group mx-auto w-full">
-                    <video 
-                        src="https://videos.pexels.com/video-files/3129957/3129957-sd_540_960_30fps.mp4" 
-                        className="w-full h-full object-cover"
-                        controls
-                        poster="https://images.unsplash.com/photo-1515169067868-5387ec356754?q=80&w=800"
-                    />
-                </div>
-            </div>
             
-            <div className="space-y-6">
-                <button 
-                    onClick={() => setIsModalOpen(true)}
-                    className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-black py-5 rounded-[2rem] shadow-xl shadow-indigo-500/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2 uppercase tracking-[0.2em] text-xs"
-                >
-                    Quero fazer minha aplicação
-                    <ArrowRight size={18} strokeWidth={3} />
-                </button>
-                <p className="text-center text-[9px] text-slate-500 font-bold uppercase tracking-widest">Vagas limitadas • Jacarepaguá/RJ</p>
-            </div>
+            <button 
+                onClick={() => setIsModalOpen(true)}
+                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-black py-5 rounded-[2rem] shadow-xl shadow-indigo-500/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2 uppercase tracking-[0.2em] text-xs"
+            >
+                Quero fazer minha aplicação
+                <ArrowRight size={18} strokeWidth={3} />
+            </button>
+            <p className="text-center text-[9px] text-slate-500 font-bold uppercase tracking-widest">Vagas limitadas • Jacarepaguá/RJ</p>
         </section>
 
       </main>
