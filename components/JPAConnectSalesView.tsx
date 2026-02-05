@@ -23,7 +23,6 @@ import {
   Briefcase,
   Zap,
   Gem,
-  // Added missing icon imports
   XCircle,
   Info
 } from 'lucide-react';
@@ -167,7 +166,7 @@ export const JPAConnectSalesView: React.FC<JPAConnectSalesViewProps> = ({ onBack
                     Indicações que nascem da confiança real.
                 </h2>
                 <p className="text-sm text-slate-400 leading-relaxed font-medium">
-                    No JPA Connect, não existem trocas forçadas ou comissões ocultas. 
+                    No JPA Connect, não existem trocas forçadas or comissões ocultas. 
                     O modelo é baseado na economia de proximidade: empresários que se conhecem, 
                     confiam e se indicam naturalmente para suas redes de contatos.
                 </p>
@@ -240,12 +239,13 @@ export const JPAConnectSalesView: React.FC<JPAConnectSalesViewProps> = ({ onBack
                 <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] mb-4">Investimento</h3>
                 <div className="inline-block bg-white p-10 rounded-[3rem] shadow-2xl relative">
                     <div className="absolute top-0 inset-x-0 h-1.5 bg-indigo-600 rounded-t-full"></div>
-                    <p className="text-sm font-bold text-slate-400 mb-2">Mensalidade Única</p>
+                    <p className="text-sm font-bold text-slate-400 mb-2">Investimento Mensal</p>
                     <div className="flex items-baseline justify-center gap-1">
                         <span className="text-xl font-bold text-slate-400">R$</span>
                         <span className="text-6xl font-black text-slate-900 tracking-tighter">200</span>
                         <span className="text-sm font-bold text-slate-400">,00</span>
                     </div>
+                    <p className="text-[10px] font-bold text-slate-500 mt-4 uppercase tracking-tight">Cobrança mensal. Cancelamento simples a qualquer momento.</p>
                 </div>
             </div>
             
@@ -260,7 +260,7 @@ export const JPAConnectSalesView: React.FC<JPAConnectSalesViewProps> = ({ onBack
         <section className="pt-10 space-y-6">
             <div className="bg-amber-500/5 border border-amber-500/20 p-5 rounded-2xl flex gap-4">
                 {/* FIX: Use Info icon instead of undefined Info */}
-                <Info size={20} className="text-amber-500 shrink-0" />
+                <span className="shrink-0"><Info size={20} className="text-amber-500" /></span>
                 <p className="text-[11px] text-amber-200/70 font-bold uppercase leading-relaxed">
                     A entrada no grupo depende de análise prévia de nicho e perfil empresarial para garantir a qualidade do círculo.
                 </p>
