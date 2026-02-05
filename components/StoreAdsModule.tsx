@@ -309,9 +309,16 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
                 </div>
                 <h4 className="text-xs font-black text-white uppercase tracking-tight">Fundador Apoiador do Localizei JPA</h4>
               </div>
-              <div className="space-y-4">
+              <div className="space-y-3">
                 <p className="text-[11px] text-slate-200 leading-relaxed font-bold">
-                    Ao anunciar no mês de inauguração, sua loja recebe o selo de <span className="text-amber-400 uppercase">Fundador Apoiador</span> no perfil.
+                    🔒 Ao apoiar o Localizei JPA no mês de inauguração, você congela este preço com desconto por 12 meses.
+                    <span className="text-white"> Você paga mês a mês, sem necessidade de contratar um plano anual.</span>
+                </p>
+                <p className="text-[11px] text-slate-400 leading-relaxed font-medium">
+                    O desconto de fundador é válido por tempo indeterminado para quem entra agora, garantindo o mesmo valor promocional durante todo o primeiro ano.
+                </p>
+                <p className="text-[11px] text-slate-500 leading-relaxed font-medium italic">
+                    Após o lançamento, novos anunciantes entram com o preço normal.
                 </p>
               </div>
             </div>
