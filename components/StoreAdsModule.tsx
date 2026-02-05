@@ -161,7 +161,8 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
 
         const { error: dbError } = await supabase.from('published_banners').insert({
             merchant_id: user.id,
-            target: selectedPlacement === 'home' ? 'home' : selectedPlacement === 'cat' ? 'category' : 'featured',
+            // FIX: Corrigido de 'cat' para 'subcat' para alinhar com o tipo union definido no state
+            target: selectedPlacement === 'home' ? 'home' : selectedPlacement === 'subcat' ? 'category' : 'featured',
             config: {
                 art_type: artChoice,
                 hoods: selectedNeighborhoods,
@@ -223,7 +224,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
           </div>
           <h1 className="text-4xl font-black uppercase tracking-tighter leading-none mb-4">Destaque Confirmado!</h1>
           <p className="text-slate-400 text-sm font-medium max-w-xs mb-10 leading-relaxed">Parabéns! Sua campanha de Banners em Destaque foi ativada com sucesso.</p>
-          <div className="w-full max-w-sm bg-slate-900 rounded-[2.5rem] p-8 border border-white/5 text-left space-y-6 shadow-2xl">
+          <div className="w-full masonry-box bg-slate-900 rounded-[2.5rem] p-8 border border-white/5 text-left space-y-6 shadow-2xl">
               <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-widest border-b border-white/5 pb-4">Resumo da Contratação</h3>
               <div className="space-y-4">
                   <div className="flex justify-between items-center"><span className="text-xs text-slate-400 font-bold uppercase">Plano</span><span className="text-sm font-black text-white">{summary.placementLabel}</span></div>

@@ -21,56 +21,38 @@ import {
   Map as WazeIcon,
   Crown,
   AlertTriangle,
-  Store as StoreIcon, // Importado para o ícone de fechamento
-  User as UserIcon
+  Store as StoreIcon,
+  User as UserIcon,
+  ShoppingBag,
+  CheckCircle2
 } from 'lucide-react';
 import { Store, BusinessHour, StorePromotion } from '../types';
 import { useAuth } from '../contexts/AuthContext';
 import { useNeighborhood } from '../contexts/NeighborhoodContext';
 import { trackOrganicEvent, OrganicEventType } from '../lib/analytics';
 import { TrustBlock } from './TrustBlock';
-import { MasterSponsorBanner } from './MasterSponsorBanner'; // Componente importado para destaque
+import { MasterSponsorBanner } from './MasterSponsorBanner';
 
 const WEEK_DAYS_LABELS: Record<string, string> = {
   segunda: 'Segunda-feira',
   terca: 'Terça-feira',
   quarta: 'Quarta-feira',
-  quinta: 'Quinta-feira',
+  quinta: 'Quarta-feira',
   sexta: 'Sexta-feira',
   sabado: 'Sábado',
   domingo: 'Domingo',
 };
 
-const MOCK_BUSINESS_HOURS: Record<string, BusinessHour> = {
-    segunda: { open: true, start: '08:00', end: '18:00' },
-    terca: { open: true, start: '08:00', end: '18:00' },
-    quarta: { open: true, start: '08:00', end: '18:00' },
-    quinta: { open: true, start: '08:00', end: '18:00' },
-    sexta: { open: true, start: '08:00', end: '18:00' },
-    sabado: { open: true, start: '09:00', end: '14:00' },
-    domingo: { open: false, start: '', end: '' },
-};
-
-const STORE_FEED_MOCK = Array.from({ length: 30 }).map((_, i) => ({
+// Mock extendido para testar o "Ver mais" (45 itens)
+const STORE_FEED_MOCK = Array.from({ length: 45 }).map((_, i) => ({
   id: `p${i}`,
   imageUrl: `https://images.unsplash.com/photo-${[
     '1513104890138-7c749659a591', '1561758033-d89a9ad46330', '1562322140-8baeececf3df',
     '1516734212186-a967f81ad0d7', '1588776814546-1ffcf47267a5', '1441986300917-64674bd600d8',
     '1587854692152-cbe660dbbb88', '1524661135-423995f22d0b', '1557804506-669a67965ba0',
-    '1504674900247-0877df9cc836', '1565299624946-b28f40a0ae38', '1567620905732-2d1ec7ab7445',
-    '1467003909585-63c6385cdb26', '1540189549336-e6e99c3679fe', '1568901346375-23c9450c58cd',
-    '1484723091739-30a097e8f929', '1543466835-00a7907e9de1', '1537151608828-ea2b11777ee8',
-    '1514888286974-6c27e9cce25b', '1583511655857-d19b40a7a54e', '1583337130417-3346a1be7dee',
-    '1521791136064-7986c292027b', '1507679799938-d738f46fbcfc', '1581091226825-a6a2a5aee158',
-    '1579684385127-1ef15d508118', '1584515933487-9d317552d894', '1576091160399-112ba8d25d1d',
-    '1551076805-e2983fe3600c', '1581578731117-10d52b4d8051', '1621905251189-08b45d6a269e'
-  ][i % 30]}?q=80&w=400&sig=${i}`
+    '1504674900247-0877df9cc836', '1565299624946-b28f40a0ae38', '1567620905732-2d1ec7ab7445'
+  ][i % 12]}?q=80&w=400&sig=${i}`
 }));
-
-const MOCK_PROMOTIONS_LIST: StorePromotion[] = [
-    { id: 'pr1', storeId: 'current', title: 'Combo Casal Premium', description: 'Duas pizzas grandes + refrigerante 2L por um preço imbatível.', type: 'Semana', startDate: new Date().toISOString(), endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), value: 89.90, discount: 20, status: 'active', createdAt: new Date().toISOString(), images: ['https://images.unsplash.com/photo-1513104890138-7c749659a591?q=80&w=800'] },
-    { id: 'pr2', storeId: 'current', title: 'Terça Maluca', description: 'Toda terça, qualquer lanche com 30% de desconto.', type: 'Dia', startDate: new Date().toISOString(), endDate: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000).toISOString(), discount: 30, status: 'active', createdAt: new Date().toISOString(), images: ['https://images.unsplash.com/photo-1561758033-d89a9ad46330?q=80&w=800'] },
-];
 
 const MOCK_REVIEWS_LIST = Array.from({ length: 8 }).map((_, i) => ({
     id: `r${i}`,
@@ -100,8 +82,12 @@ export const StoreDetailView: React.FC<{
   const { currentNeighborhood } = useNeighborhood();
   const [isFavorite, setIsFavorite] = useState(false);
   const [activeTab, setActiveTab] = useState<'description' | 'promotions' | 'reviews' | 'hours' | 'payments'>('description');
-  const [selectedPromotion, setSelectedPromotion] = useState<StorePromotion | null>(null);
   const [currentSlide, setCurrentSlide] = useState(0);
+
+  // --- Estados do Feed ---
+  const [visibleRows, setVisibleRows] = useState(4);
+  const itemsPerRow = 3;
+  const itemsToShow = visibleRows * itemsPerRow;
 
   const images = useMemo(() => {
     const gallery = store.gallery?.slice(0, 6) || [];
@@ -123,14 +109,10 @@ export const StoreDetailView: React.FC<{
   
   const addressFormatted = useMemo(() => {
     if (store.rua) return `${store.rua}, ${store.numero}${store.complemento ? ` - ${store.complemento}` : ''} - ${store.bairro}`;
-    return store.address || 'Rua Araguaia, 1260 – Freguesia';
+    return store.address || 'Jacarepaguá, Rio de Janeiro - RJ';
   }, [store]);
 
   const instagramUrl = store.instagram ? `https://instagram.com/${store.instagram.replace('@', '')}` : '#';
-
-  const shortDescription = useMemo(() => {
-    return `Seja bem-vindo ao ${store.name}! Somos referência em ${store.category.toLowerCase()} na região de Jacarepaguá. Nosso compromisso é oferecer uma experiência única aos nossos clientes através da excelência no atendimento e qualidade superior em cada detalhe. Valorizamos a confiança da nossa comunidade local e buscamos sempre inovar para garantir que cada visita ou pedido seja especial. Venha nos visitar ou faça seu pedido pelo WhatsApp e aproveite o melhor do bairro conosco.`;
-  }, [store.name, store.category]);
 
   return (
     <div className="min-h-screen bg-white dark:bg-gray-950 font-sans relative overflow-x-hidden">
@@ -187,6 +169,22 @@ export const StoreDetailView: React.FC<{
                       <Clock className="w-3.5 h-3.5" />
                       <span className="text-[10px] font-black uppercase tracking-tight">{store.isOpenNow ? 'Aberto' : 'Fechado'}</span>
                   </div>
+              </div>
+
+              {/* INFO DE PEDIDO E STATUS (Sincronizado com Painel) */}
+              <div className="flex flex-wrap justify-center gap-2 mb-6">
+                  {store.accepts_online_orders && (
+                      <div className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 dark:bg-blue-900/20 text-[#1E5BFF] rounded-xl border border-blue-100 dark:border-blue-800/50">
+                          <ShoppingBag size={12} />
+                          <span className="text-[9px] font-black uppercase tracking-widest">Aceita Pedidos Online</span>
+                      </div>
+                  )}
+                  {store.min_order_value && (
+                      <div className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-400 rounded-xl border border-gray-100 dark:border-gray-700">
+                          <CheckCircle2 size={12} className="text-emerald-500" />
+                          <span className="text-[9px] font-black uppercase tracking-widest">Mínimo: R$ {parseFloat(String(store.min_order_value)).toFixed(2).replace('.', ',')}</span>
+                      </div>
+                  )}
               </div>
 
               {/* INFORMAÇÕES DE ENDEREÇO E CONTATO */}
@@ -275,37 +273,46 @@ export const StoreDetailView: React.FC<{
 
             <div className="animate-in fade-in zoom-in-95 duration-500">
                 {activeTab === 'description' && (
-                    <div className="space-y-8">
+                    <div className="space-y-10">
                         <div className="space-y-4">
-                            <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed font-medium whitespace-pre-wrap">{shortDescription}</p>
+                            <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed font-medium whitespace-pre-wrap">{store.description || 'Nenhuma descrição informada.'}</p>
                         </div>
 
                         <div className="space-y-4 pt-4">
                             <h3 className="text-sm font-black text-gray-900 dark:text-white px-1 uppercase tracking-tight flex items-center gap-2">
                                 <LayoutGrid size={16} className="text-[#1E5BFF]" /> Feed da Loja
                             </h3>
+                            
+                            {/* GRADE DO FEED - LIMITADA PELO visibleRows */}
                             <div className="grid grid-cols-3 gap-1">
-                              {STORE_FEED_MOCK.map((post) => (
+                              {STORE_FEED_MOCK.slice(0, itemsToShow).map((post) => (
                                 <div key={post.id} className="aspect-square bg-gray-100 dark:bg-gray-800 overflow-hidden relative group cursor-pointer active:brightness-75 transition-all">
                                   <img src={post.imageUrl} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
                                 </div>
                               ))}
                             </div>
+
+                            {/* BOTÃO VER MAIS (Carrega 4 linhas por vez) */}
+                            {itemsToShow < STORE_FEED_MOCK.length && (
+                              <div className="pt-4 flex justify-center">
+                                <button 
+                                  onClick={() => setVisibleRows(prev => prev + 4)}
+                                  className="px-8 py-3 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-full text-[10px] font-black text-[#1E5BFF] uppercase tracking-widest shadow-sm active:scale-95 transition-all hover:bg-gray-50"
+                                >
+                                  Ver mais fotos
+                                </button>
+                              </div>
+                            )}
                         </div>
 
-                        {/* AÇÕES DE ENCERRAMENTO E REIVINDICAÇÃO */}
                         <div className="pt-10 space-y-4 px-1">
-                            {/* CTA Principal: Reivindicar - Azul, Bold, Maior */}
                             <button 
                                 onClick={onClaim}
                                 className="w-full py-4 bg-[#1E5BFF] hover:bg-blue-600 text-white rounded-[1.25rem] text-sm font-bold uppercase tracking-[0.15em] shadow-xl shadow-blue-500/20 active:scale-[0.98] transition-all"
                             >
                                 Reivindicar esta loja
                             </button>
-                            
-                            {/* Ação Secundária: Informar Fechamento - Branco, Texto Vermelho, Menor */}
                             <button 
-                                onClick={() => { /* Lógica de reportar fechamento */ }}
                                 className="w-full py-3.5 flex items-center justify-center gap-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 text-red-500 rounded-[1.25rem] text-xs font-bold uppercase tracking-[0.15em] hover:bg-red-50 dark:hover:bg-red-900/10 transition-all active:scale-[0.98]"
                             >
                                 <StoreIcon size={14} className="text-red-500" />
@@ -313,81 +320,35 @@ export const StoreDetailView: React.FC<{
                             </button>
                         </div>
 
-                        {/* BANNER DO PATROCINADOR MASTER */}
                         <MasterSponsorBanner 
                             onClick={() => onNavigate('patrocinador_master')} 
                             label={`Parceiro de ${store.neighborhood || 'Jacarepaguá'}`}
                         />
                     </div>
                 )}
-
-                {activeTab === 'promotions' && (
-                    <div className="space-y-4">
-                        {MOCK_PROMOTIONS_LIST.map((promo) => (
-                            <div 
-                                key={promo.id}
-                                onClick={() => setSelectedPromotion(promo)}
-                                className="bg-white dark:bg-gray-800 rounded-3xl border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden flex flex-col group cursor-pointer active:scale-[0.98] transition-all"
-                            >
-                                <div className="aspect-[16/7] relative overflow-hidden bg-gray-100">
-                                    <img src={promo.images[0]} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
-                                    <div className="absolute top-3 left-3 flex gap-2">
-                                        <span className="bg-blue-600 text-white text-[8px] font-black uppercase px-2 py-1 rounded-lg shadow-lg">{promo.type}</span>
-                                    </div>
-                                    {promo.discount && (
-                                        <div className="absolute bottom-3 right-3 bg-red-600 text-white font-black px-3 py-1 rounded-xl shadow-xl text-xs uppercase tracking-tighter">
-                                            {promo.discount}% OFF
-                                        </div>
-                                    )}
-                                </div>
-                                <div className="p-5 flex flex-col">
-                                    <h4 className="font-bold text-gray-900 dark:text-white text-base leading-tight mb-2">{promo.title}</h4>
-                                    <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2 font-medium mb-4">{promo.description}</p>
-                                    <div className="flex items-center justify-between pt-4 border-t border-gray-50 dark:border-gray-700">
-                                        <div className="flex items-center gap-1.5 text-[10px] text-gray-400 font-bold uppercase tracking-widest">
-                                            <Clock size={12} />
-                                            <span>Expira em: {new Date(promo.endDate).toLocaleDateString()}</span>
-                                        </div>
-                                        <div className="text-[10px] font-black text-blue-600 uppercase tracking-widest flex items-center gap-1">Ver Oferta <ChevronRightIcon size={12} strokeWidth={3} /></div>
-                                    </div>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                )}
-
+                
                 {activeTab === 'reviews' && (
                     <div className="space-y-8">
-                        <div className="px-1">
-                            <TrustBlock store={store} />
-                        </div>
-
+                        <div className="px-1"><TrustBlock store={store} /></div>
                         <div className="bg-white dark:bg-gray-900 p-8 rounded-[2.5rem] border border-gray-100 dark:border-gray-800 shadow-sm flex flex-col items-center">
                             <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-2">Nota Média</p>
                             <div className="flex items-center gap-3 mb-6">
                                 <span className="text-5xl font-black text-gray-900 dark:text-white">{store.rating.toFixed(1)}</span>
                                 <div className="flex flex-col">
                                     <div className="flex gap-0.5 text-yellow-400">
-                                        <Star size={14} fill="currentColor" />
-                                        <Star size={14} fill="currentColor" />
-                                        <Star size={14} fill="currentColor" />
-                                        <Star size={14} fill="currentColor" />
-                                        <Star size={14} fill="currentColor" />
+                                        {[1,2,3,4,5].map(i => <Star key={i} size={14} fill="currentColor" />)}
                                     </div>
                                     <span className="text-[10px] font-bold text-gray-400 mt-1 uppercase tracking-widest">8 avaliações</span>
                                 </div>
                             </div>
                             <button className="w-full bg-[#1E5BFF] hover:bg-blue-600 text-white font-black py-4 rounded-2xl text-xs uppercase tracking-widest shadow-lg active:scale-95 transition-all">Avaliar Loja</button>
                         </div>
-
                         <div className="space-y-4 pb-12">
                             {MOCK_REVIEWS_LIST.map((rev) => (
                                 <div key={rev.id} className="bg-white dark:bg-gray-800 p-6 rounded-[2rem] border border-gray-100 dark:border-gray-800 shadow-sm">
                                     <div className="flex justify-between items-start mb-4">
                                         <div className="flex items-center gap-3">
-                                            <div className="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-gray-400">
-                                                <UserIcon size={20} />
-                                            </div>
+                                            <div className="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-gray-400"><UserIcon size={20} /></div>
                                             <div>
                                                 <h4 className="font-bold text-gray-900 dark:text-white text-sm">{rev.userName}</h4>
                                                 <div className="flex gap-0.5 text-yellow-400">
@@ -405,56 +366,24 @@ export const StoreDetailView: React.FC<{
                         </div>
                     </div>
                 )}
-
                 {activeTab === 'hours' && (
                     <div className="bg-white dark:bg-gray-900 p-6 rounded-[2.5rem] border border-gray-100 dark:border-gray-800 shadow-sm">
                         <div className="space-y-4">
-                            {Object.entries(MOCK_BUSINESS_HOURS).map(([dayKey, hours]) => (
-                                <div key={dayKey} className="flex justify-between items-center text-sm border-b border-gray-50 dark:border-gray-800 pb-2 last:border-0 last:pb-0">
-                                    <span className="font-bold text-gray-500 dark:text-gray-400 uppercase text-xs tracking-wide">{WEEK_DAYS_LABELS[dayKey] || dayKey}</span>
-                                    {hours.open ? <span className="font-bold text-gray-900 dark:text-white">{hours.start} - {hours.end}</span> : <span className="font-bold text-red-400">Fechado</span>}
-                                </div>
-                            ))}
+                            {Object.entries(store.business_hours || {}).map(([dayKey, h]) => {
+                                const hours = h as BusinessHour;
+                                return (
+                                    <div key={dayKey} className="flex justify-between items-center text-sm border-b border-gray-50 dark:border-gray-800 pb-2 last:border-0 last:pb-0">
+                                        <span className="font-bold text-gray-500 dark:text-gray-400 uppercase text-xs tracking-wide">{WEEK_DAYS_LABELS[dayKey] || dayKey}</span>
+                                        {hours.open ? <span className="font-bold text-gray-900 dark:text-white">{hours.start} - {hours.end}</span> : <span className="font-bold text-red-400">Fechado</span>}
+                                    </div>
+                                );
+                            })}
                         </div>
                     </div>
-                )}
-
-                {activeTab === 'payments' && (
-                  <div className="bg-white dark:bg-gray-900 p-6 rounded-[2.5rem] border border-gray-100 dark:border-gray-800 shadow-sm">
-                      <div className="flex flex-wrap gap-2">
-                          {['Dinheiro', 'Pix', 'Cartão de Crédito', 'Cartão de Débito'].map((method, idx) => (
-                              <div key={idx} className="flex items-center gap-2 px-3 py-2 bg-gray-50 dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700">
-                                  <span className="text-xs font-bold text-gray-600 dark:text-gray-300">{method}</span>
-                              </div>
-                          ))}
-                      </div>
-                  </div>
                 )}
             </div>
         </div>
       </main>
-
-      {/* MODAL PROMOÇÃO */}
-      {selectedPromotion && (
-          <div className="fixed inset-0 z-[1001] bg-black/80 backdrop-blur-sm flex items-end justify-center p-4" onClick={() => setSelectedPromotion(null)}>
-              <div 
-                className="bg-white dark:bg-gray-900 w-full max-w-md rounded-t-[2.5rem] shadow-2xl overflow-hidden flex flex-col max-h-[90vh] animate-in slide-in-from-bottom duration-300"
-                onClick={e => e.stopPropagation()}
-              >
-                  <div className="relative w-full aspect-square bg-gray-100 shrink-0">
-                      <img src={selectedPromotion.images[0]} alt="" className="w-full h-full object-cover" />
-                      <button onClick={() => setSelectedPromotion(null)} className="absolute top-4 right-4 p-2 bg-black/50 text-white rounded-full"><X size={20}/></button>
-                  </div>
-                  <div className="p-8 overflow-y-auto no-scrollbar">
-                      <h2 className="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tighter leading-none mb-4">{selectedPromotion.title}</h2>
-                      <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed font-medium mb-8">{selectedPromotion.description}</p>
-                      <button onClick={() => { setSelectedPromotion(null); window.open(`https://wa.me/55${phoneDigits}`, '_blank'); }} className="w-full bg-[#25D366] text-white font-black py-4 rounded-2xl flex items-center justify-center gap-3 uppercase tracking-widest text-xs">
-                          <MessageSquare size={18} fill="white" /> Falar com Lojista
-                      </button>
-                  </div>
-              </div>
-          </div>
-      )}
     </div>
   );
 };
