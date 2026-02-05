@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { 
   ChevronLeft, 
@@ -21,7 +22,8 @@ import {
   CreditCard,
   Check,
   ShieldCheck,
-  ShieldEllipsis
+  ShieldEllipsis,
+  Crown
 } from 'lucide-react';
 import { User } from '@supabase/supabase-js';
 import { StoreBannerEditor } from '@/components/StoreBannerEditor';
@@ -80,6 +82,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
 
   // --- Precificação ---
   const PRICES = { HOME: 69.90, CAT: 29.90, COMBO: 89.90, PRO_ART: 89.90 };
+  const ORIGINAL_PRICES = { HOME: 199.90, CAT: 129.90, COMBO: 329.80 };
 
   const summary = useMemo(() => {
     let basePrice = 0;
@@ -292,17 +295,85 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
 
       <main className="flex-1 p-6 space-y-16 pb-[320px] max-w-md mx-auto w-full">
         <section className="space-y-8">
-          <div className="px-1 space-y-6 text-center">
-            <h3 className="text-2xl font-black text-white uppercase tracking-tighter leading-tight">Domine a atenção do seu bairro</h3>
+          <div className="px-1 space-y-4 text-center">
+            <h3 className="text-3xl font-black text-white uppercase tracking-tighter leading-[0.9]">
+                Domine a atenção<br/>do seu bairro
+            </h3>
+            <p className="text-sm text-slate-400 font-medium max-w-xs mx-auto leading-relaxed">
+                Coloque sua loja no topo do app e seja a primeira escolha de quem mora e compra perto de você.
+            </p>
             <div className="bg-gradient-to-br from-blue-600/20 to-indigo-600/10 border border-blue-500/30 p-6 rounded-[2.5rem] text-left relative overflow-hidden shadow-2xl">
-              <div className="flex items-center gap-3 mb-4"><div className="w-10 h-10 rounded-xl bg-amber-400/10 flex items-center justify-center border border-amber-400/20"><Award className="w-6 h-6 text-amber-400" /></div><h4 className="text-xs font-black text-white uppercase tracking-tight">Fundador Apoiador do Localizei JPA</h4></div>
-              <div className="space-y-4"><p className="text-[11px] text-slate-200 leading-relaxed font-bold">Ao anunciar no mês de inauguração, sua loja recebe o selo de <span className="text-amber-400 uppercase">Fundador Apoiador</span> no perfil.</p></div>
+              <div className="flex items-center gap-3 mb-2">
+                <div className="w-10 h-10 rounded-xl bg-amber-400/10 flex items-center justify-center border border-amber-400/20">
+                  <Award className="w-6 h-6 text-amber-400" />
+                </div>
+                <h4 className="text-xs font-black text-white uppercase tracking-tight">Fundador Apoiador do Localizei JPA</h4>
+              </div>
+              <div className="space-y-4">
+                <p className="text-[11px] text-slate-200 leading-relaxed font-bold">
+                    Ao anunciar no mês de inauguração, sua loja recebe o selo de <span className="text-amber-400 uppercase">Fundador Apoiador</span> no perfil.
+                </p>
+              </div>
             </div>
           </div>
+
           <div className="grid grid-cols-1 gap-4">
-              <button onClick={() => handlePlacementSelection({ home: true, cat: false })} className={`flex items-start text-left p-6 rounded-[2rem] border-2 transition-all gap-5 ${placement.home && !placement.cat ? 'bg-blue-600/10 border-blue-500' : 'bg-white/5 border-white/10'}`}><div className={`p-4 rounded-2xl shrink-0 ${placement.home && !placement.cat ? 'bg-blue-50 text-white' : 'bg-white/5 text-slate-400'}`}><Home size={28} /></div><div className="flex-1"><div className="flex items-center gap-2 mb-1"><p className="font-black text-white uppercase tracking-tight">Home</p></div><div className="flex flex-col"><span className="text-sm text-slate-500 line-through font-bold">R$ 199,90/mês</span><div className="flex items-baseline gap-1"><span className="text-xl font-black text-white">R$ 69,90</span><span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">/mês</span></div></div></div></button>
-              <button onClick={() => handlePlacementSelection({ home: false, cat: true })} className={`flex items-start text-left p-6 rounded-[2rem] border-2 transition-all gap-5 ${!placement.home && placement.cat ? 'bg-blue-600/10 border-blue-500' : 'bg-white/5 border-white/10'}`}><div className={`p-4 rounded-2xl shrink-0 ${!placement.home && placement.cat ? 'bg-blue-50 text-white' : 'bg-white/5 text-slate-400'}`}><LayoutGrid size={28} /></div><div className="flex-1"><div className="flex items-center gap-2 mb-1"><p className="font-black text-white uppercase tracking-tight">Subcategorias</p></div><div className="flex flex-col"><span className="text-sm text-slate-500 line-through font-bold">R$ 159,90/mês</span><div className="flex items-baseline gap-1"><span className="text-xl font-black text-white">R$ 29,90</span><span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">/mês</span></div></div></div></button>
-              <button onClick={() => handlePlacementSelection({ home: true, cat: true })} className={`relative flex items-start text-left p-6 rounded-[2rem] border-2 transition-all gap-5 ${placement.home && placement.cat ? 'bg-blue-600/10 border-blue-500' : 'bg-white/5 border-white/10'}`}><div className={`p-4 rounded-2xl shrink-0 ${placement.home && placement.cat ? 'bg-blue-50 text-white' : 'bg-white/5 text-slate-400'}`}><Zap size={28} /></div><div className="flex-1"><div className="flex items-center gap-2 mb-1"><p className="font-black text-white uppercase tracking-tight">Home + Subcategorias</p></div><div className="flex flex-col"><span className="text-sm text-slate-500 line-through font-bold">R$ 359,80/mês</span><div className="flex items-baseline gap-1"><span className="text-xl font-black text-white">R$ 89,90</span><span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">/mês</span></div></div></div></button>
+              <button onClick={() => handlePlacementSelection({ home: true, cat: false })} className={`flex items-start text-left p-6 rounded-[2rem] border-2 transition-all gap-5 ${placement.home && !placement.cat ? 'bg-blue-600/10 border-blue-500' : 'bg-white/5 border-white/10'}`}>
+                <div className={`p-4 rounded-2xl shrink-0 ${placement.home && !placement.cat ? 'bg-blue-50 text-white' : 'bg-white/5 text-slate-400'}`}><Home size={28} /></div>
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-1"><p className="font-black text-white uppercase tracking-tight">Home</p></div>
+                  <div className="flex flex-col">
+                    <span className="text-sm text-slate-500 line-through font-bold">R$ {ORIGINAL_PRICES.HOME.toFixed(2)}</span>
+                    <div className="flex items-baseline gap-1">
+                      <span className="text-xl font-black text-white">R$ {PRICES.HOME.toFixed(2)}</span>
+                      <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">/mês</span>
+                    </div>
+                  </div>
+                  <div className="mt-2 flex items-center gap-1.5">
+                    <div className="bg-amber-400/10 text-amber-400 border border-amber-400/20 px-1.5 py-0.5 rounded text-[7px] font-black uppercase tracking-widest flex items-center gap-1">
+                        <Crown size={8} className="fill-amber-400" /> Selo: Fundador Apoiador
+                    </div>
+                  </div>
+                </div>
+              </button>
+
+              <button onClick={() => handlePlacementSelection({ home: false, cat: true })} className={`flex items-start text-left p-6 rounded-[2rem] border-2 transition-all gap-5 ${!placement.home && placement.cat ? 'bg-blue-600/10 border-blue-500' : 'bg-white/5 border-white/10'}`}>
+                <div className={`p-4 rounded-2xl shrink-0 ${!placement.home && placement.cat ? 'bg-blue-50 text-white' : 'bg-white/5 text-slate-400'}`}><LayoutGrid size={28} /></div>
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-1"><p className="font-black text-white uppercase tracking-tight">Subcategorias</p></div>
+                  <div className="flex flex-col">
+                    <span className="text-sm text-slate-500 line-through font-bold">R$ {ORIGINAL_PRICES.CAT.toFixed(2)}</span>
+                    <div className="flex items-baseline gap-1">
+                      <span className="text-xl font-black text-white">R$ {PRICES.CAT.toFixed(2)}</span>
+                      <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">/mês</span>
+                    </div>
+                  </div>
+                  <div className="mt-2 flex items-center gap-1.5">
+                    <div className="bg-amber-400/10 text-amber-400 border border-amber-400/20 px-1.5 py-0.5 rounded text-[7px] font-black uppercase tracking-widest flex items-center gap-1">
+                        <Crown size={8} className="fill-amber-400" /> Selo: Fundador Apoiador
+                    </div>
+                  </div>
+                </div>
+              </button>
+
+              <button onClick={() => handlePlacementSelection({ home: true, cat: true })} className={`relative flex items-start text-left p-6 rounded-[2rem] border-2 transition-all gap-5 ${placement.home && placement.cat ? 'bg-blue-600/10 border-blue-500' : 'bg-white/5 border-white/10'}`}>
+                <div className={`p-4 rounded-2xl shrink-0 ${placement.home && placement.cat ? 'bg-blue-50 text-white' : 'bg-white/5 text-slate-400'}`}><Zap size={28} /></div>
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-1"><p className="font-black text-white uppercase tracking-tight">Home + Subcategorias</p></div>
+                  <div className="flex flex-col">
+                    <span className="text-sm text-slate-500 line-through font-bold">R$ {ORIGINAL_PRICES.COMBO.toFixed(2)}</span>
+                    <div className="flex items-baseline gap-1">
+                      <span className="text-xl font-black text-white">R$ {PRICES.COMBO.toFixed(2)}</span>
+                      <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">/mês</span>
+                    </div>
+                  </div>
+                  <div className="mt-2 flex items-center gap-1.5">
+                    <div className="bg-amber-400/10 text-amber-400 border border-amber-400/20 px-1.5 py-0.5 rounded text-[7px] font-black uppercase tracking-widest flex items-center gap-1">
+                        <Crown size={8} className="fill-amber-400" /> Selo: Fundador Apoiador
+                    </div>
+                  </div>
+                </div>
+              </button>
           </div>
         </section>
 
