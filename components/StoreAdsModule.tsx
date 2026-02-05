@@ -20,8 +20,6 @@ import {
   CreditCard,
   QrCode,
   Info,
-  // Added missing AlertCircle import
-  AlertCircle,
   AlertTriangle,
   Lock,
   Unlock,
@@ -109,7 +107,6 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
   const [isEditingArt, setIsEditingArt] = useState(false);
   const [savedDesign, setSavedDesign] = useState<any>(null);
   const [merchantSubcategory, setMerchantSubcategory] = useState<string>('');
-  const [editsRemaining, setEditsRemaining] = useState(2); // Limite de 2 alterações
   const [toast, setToast] = useState<{msg: string, type: 'info' | 'error' | 'designer'} | null>(null);
   
   // States para o Chat Pro
@@ -165,10 +162,6 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
   const isCheckoutStep = !!selectedMode && selectedPeriods.length > 0 && selectedNeighborhoods.length > 0 && isArtSaved;
 
   const handleSaveDesign = (design: any) => {
-    // Se a arte já estava salva, consome um crédito de edição
-    if (isArtSaved) {
-        setEditsRemaining(prev => Math.max(0, prev - 1));
-    }
     setSavedDesign(design);
     setIsArtSaved(true);
     setIsEditingArt(false);
@@ -189,7 +182,6 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
         storeSubcategory={merchantSubcategory}
         onSave={handleSaveDesign} 
         onBack={() => setIsEditingArt(false)} 
-        editsRemaining={editsRemaining}
       />
     );
   }
@@ -205,34 +197,16 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
 
         <main className="flex-1 p-6 space-y-12 pb-64 max-w-md mx-auto w-full overflow-y-auto no-scrollbar">
             
-            {/* 1. PREVIEW DO BANNER CONCLUÍDO */}
+            {/* 1. PREVIEW DO BANNER CONCLUÍDO (SOLICITAÇÃO 2 & 3) */}
             {isArtSaved && savedDesign && (
               <section className="animate-in fade-in zoom-in-95 duration-500">
                 <div className="flex flex-col gap-3">
                   <div className="flex items-center justify-between px-1">
-                    <div className="flex flex-col">
-                        <h3 className="text-[10px] font-black uppercase tracking-widest text-emerald-500 flex items-center gap-2">
-                            <CheckCircle2 size={12} /> Banner pronto para publicar
-                        </h3>
-                        <p className={`text-[9px] font-bold uppercase tracking-tight mt-0.5 ${editsRemaining > 0 ? 'text-amber-500' : 'text-red-500'}`}>
-                            Edições restantes: {editsRemaining}
-                        </p>
-                    </div>
-                    
-                    {editsRemaining > 0 ? (
-                        <button 
-                            onClick={() => setIsEditingArt(true)} 
-                            className="text-[9px] font-black uppercase text-blue-400 hover:underline bg-blue-500/10 px-3 py-1.5 rounded-lg border border-blue-500/20"
-                        >
-                            Editar Arte
-                        </button>
-                    ) : (
-                        <div className="flex items-center gap-1.5 text-[9px] font-black text-red-500 bg-red-500/10 px-3 py-1.5 rounded-lg border border-red-500/20">
-                            <Lock size={10} /> Edição Bloqueada
-                        </div>
-                    )}
+                    <h3 className="text-[10px] font-black uppercase tracking-widest text-emerald-500 flex items-center gap-2">
+                       <CheckCircle2 size={12} /> Banner pronto para publicar
+                    </h3>
+                    <button onClick={() => setIsEditingArt(true)} className="text-[9px] font-black uppercase text-blue-400 hover:underline">Editar Arte</button>
                   </div>
-
                   <div className="w-full aspect-[16/10] bg-slate-900/40 rounded-[2.5rem] border border-emerald-500/20 shadow-2xl shadow-emerald-500/5 p-1">
                     <BannerPreview 
                       config={savedDesign} 
@@ -240,15 +214,6 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
                       storeLogo={user?.user_metadata?.logo_url} 
                     />
                   </div>
-
-                  {editsRemaining === 0 && (
-                      <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-2xl flex items-start gap-3 mt-2">
-                          <AlertCircle size={14} className="text-red-500 shrink-0 mt-0.5" />
-                          <p className="text-[10px] text-red-400 font-bold leading-relaxed uppercase">
-                              Este banner já atingiu o limite de alterações após publicação. Caso precise de suporte, entre em contato.
-                          </p>
-                      </div>
-                  )}
                 </div>
               </section>
             )}

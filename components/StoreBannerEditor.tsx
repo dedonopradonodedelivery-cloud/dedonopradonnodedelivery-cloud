@@ -5,7 +5,7 @@ import {
   Image as ImageIcon, Check, Crown, ShieldCheck, 
   Rocket, Megaphone, Zap, Flame, Star, Award, 
   Maximize, MousePointer2, Layers, Monitor, AlignLeft,
-  AlignCenter, AlignRight, X, AlertCircle
+  AlignCenter, AlignRight, X
 } from 'lucide-react';
 
 export interface BannerDesign {
@@ -94,10 +94,9 @@ const ICON_COMPONENTS: Record<string, React.ElementType> = {
 interface StoreBannerEditorProps {
   storeName: string;
   storeLogo?: string | null;
-  storeSubcategory?: string;
+  storeSubcategory?: string; // Propriedade adicionada para contexto
   onSave: (design: BannerDesign) => void;
   onBack: () => void;
-  editsRemaining?: number; // Adicionado para feedback
 }
 
 export const BannerPreview: React.FC<{ config: BannerDesign; storeName: string; storeLogo?: string | null; }> = ({ config, storeName, storeLogo }) => {
@@ -177,7 +176,7 @@ export const BannerPreview: React.FC<{ config: BannerDesign; storeName: string; 
   );
 };
 
-export const StoreBannerEditor: React.FC<StoreBannerEditorProps> = ({ storeName, storeLogo, storeSubcategory, onSave, onBack, editsRemaining }) => {
+export const StoreBannerEditor: React.FC<StoreBannerEditorProps> = ({ storeName, storeLogo, storeSubcategory, onSave, onBack }) => {
   const [activeTab, setActiveTab] = useState<'content' | 'layout' | 'style' | 'logo'>('content');
   const [config, setConfig] = useState<BannerDesign>({
     title: 'Sua Oferta Premium',
@@ -229,21 +228,12 @@ export const StoreBannerEditor: React.FC<StoreBannerEditorProps> = ({ storeName,
             <p className="text-[9px] text-blue-400 font-bold uppercase">{storeName}</p>
           </div>
         </div>
-        
-        <div className="flex items-center gap-4">
-            {editsRemaining !== undefined && (
-                <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-[9px] font-black uppercase tracking-tighter ${editsRemaining > 0 ? 'bg-amber-500/10 border-amber-500/30 text-amber-500' : 'bg-red-500/10 border-red-500/30 text-red-500'}`}>
-                    {editsRemaining === 0 ? <AlertCircle size={10}/> : <Sparkles size={10}/>}
-                    {editsRemaining} edições restantes
-                </div>
-            )}
-            <button 
-                onClick={() => onSave(config)} 
-                className="bg-[#1E5BFF] px-5 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center gap-2 shadow-xl active:scale-95 transition-all"
-            >
-                <Save size={14} /> Publicar
-            </button>
-        </div>
+        <button 
+          onClick={() => onSave(config)} 
+          className="bg-[#1E5BFF] px-5 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center gap-2 shadow-xl active:scale-95 transition-all"
+        >
+          <Save size={14} /> Publicar
+        </button>
       </header>
       
       <div className="flex-1 flex flex-col overflow-hidden">
