@@ -4,7 +4,6 @@ import { ChevronLeft, Search, Star, BadgeCheck, ChevronRight, X, AlertCircle, Gr
 import { Category, Store, AdType } from '@/types';
 import { SUBCATEGORIES } from '@/constants';
 import { supabase } from '@/lib/supabaseClient';
-import { CategoryTopCarousel } from '@/components/CategoryTopCarousel';
 import { MasterSponsorBanner } from '@/components/MasterSponsorBanner';
 
 const FALLBACK_STORE_IMAGES = [
@@ -97,17 +96,39 @@ const BigSurCard: React.FC<{
   isMoreButton?: boolean;
   categoryColor?: string;
 }> = ({ icon, name, isSelected, onClick, isMoreButton, categoryColor }) => {
-  const baseClasses = `relative w-full aspect-square rounded-[24px] flex flex-col items-center justify-center gap-2 transition-all duration-300 cursor-pointer overflow-hidden border`;
-  const backgroundClass = isMoreButton ? "bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700" : `${categoryColor || 'bg-brand-blue'} border-transparent shadow-md`;
-  const textClass = isMoreButton ? "text-gray-500 dark:text-gray-400" : "text-white drop-shadow-sm";
-  const iconContainerClass = isMoreButton ? "bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400" : "bg-white/20 text-white backdrop-blur-md border border-white/20";
-  const selectionEffects = isSelected ? "ring-4 ring-black/10 dark:ring-white/20 scale-[0.96] brightness-110 shadow-inner" : "hover:shadow-lg hover:-translate-y-1 hover:brightness-105";
+  // Padronização total com os ícones da Home
+  const baseClasses = `flex flex-col items-center justify-between p-2 rounded-[25px] border transition-all duration-300 active:scale-95 w-full aspect-square relative overflow-hidden`;
+  
+  // Cores e estilos baseados no tipo do botão
+  const backgroundClass = isMoreButton 
+    ? "bg-gray-100 dark:bg-gray-800 border-gray-200 dark:border-gray-700" 
+    : `${categoryColor || 'bg-brand-blue'} border-white/20 shadow-sm`;
+    
+  const iconColorClass = isMoreButton 
+    ? "text-gray-600 dark:text-gray-400" 
+    : "text-white";
+
+  // Efeito de seleção
+  const selectionEffects = isSelected 
+    ? "ring-4 ring-[#1E5BFF]/30 scale-[0.96] brightness-110" 
+    : "hover:brightness-105";
+
   return (
     <button onClick={onClick} className={`${baseClasses} ${backgroundClass} ${selectionEffects}`}>
-      <div className={`w-10 h-10 rounded-2xl flex items-center justify-center transition-colors ${iconContainerClass}`}>
-        {React.isValidElement(icon) ? React.cloneElement(icon as React.ReactElement<any>, { className: `w-5 h-5`, strokeWidth: 2.5 }) : null}
+      {/* Container do Ícone (Centralizado no espaço disponível superior) */}
+      <div className="flex-1 flex items-center justify-center w-full">
+        {React.isValidElement(icon) ? React.cloneElement(icon as React.ReactElement<any>, { 
+          className: `w-6 h-6 ${iconColorClass} drop-shadow-md`, 
+          strokeWidth: 3 
+        }) : null}
       </div>
-      <span className={`text-[10px] font-bold leading-tight px-1 truncate w-full text-center tracking-tight ${textClass}`}>{name}</span>
+
+      {/* Overlay de Texto Inferior (Idêntico ao grid da Home) */}
+      <div className={`w-full ${isMoreButton ? 'bg-black/5' : 'bg-black/10'} backdrop-blur-[2px] py-1 rounded-b-[20px] -mx-2 -mb-2 px-1`}>
+        <span className={`block w-full text-[8px] font-black text-center uppercase tracking-tight leading-tight line-clamp-2 break-words ${isMoreButton ? 'text-gray-600 dark:text-gray-400' : 'text-white'}`}>
+          {name}
+        </span>
+      </div>
     </button>
   );
 };
@@ -265,12 +286,28 @@ export const CategoryView: React.FC<CategoryViewProps> = ({
         <h1 className="font-bold text-lg text-gray-900 dark:text-white flex items-center gap-2">{React.cloneElement(category.icon as any, {className: 'w-5 h-5'})} {category.name}</h1>
       </div>
       
-      {/* BANNER DE TOPO REDIRECIONANDO PARA PERFIL */}
-      <div className="mt-4">
-        <CategoryTopCarousel categoriaSlug={category.slug} onStoreClick={onStoreClick} />
+      {/* BANNER FIXO INSTITUCIONAL (Altura Reduzida 16/6) */}
+      <div className="mt-4 px-5">
+        <div 
+          onClick={() => onNavigate('explore')}
+          className={`relative aspect-[16/6] w-full rounded-[2rem] overflow-hidden cursor-pointer shadow-lg bg-[#1E5BFF] border border-white/5`}
+        >
+          <img 
+            src="https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=1200&auto=format&fit=crop" 
+            alt="Jacarepaguá" 
+            className="absolute inset-0 w-full h-full object-cover mix-blend-overlay opacity-50"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+          <div className="relative h-full flex flex-col justify-end p-6 text-white">
+            <h2 className="text-xl font-black uppercase tracking-tighter leading-none mb-1">
+              {category.name} <span className="opacity-70">em Jacarepaguá</span>
+            </h2>
+            <p className="text-[9px] font-bold text-blue-100 uppercase tracking-[0.2em]">O melhor do bairro em um só lugar</p>
+          </div>
+        </div>
       </div>
 
-      <div className="p-5 pt-0 space-y-8">
+      <div className="p-5 pt-6 space-y-8">
         {visibleSubcategories.length > 0 && (
           <section>
             <div className="grid grid-cols-4 gap-3">
