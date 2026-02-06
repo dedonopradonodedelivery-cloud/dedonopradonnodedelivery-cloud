@@ -186,9 +186,9 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
               colorClass="bg-purple-50 text-purple-600 dark:bg-purple-900/20"
               topRightTag={
                 <div 
-                  className="absolute -top-3 -right-1 z-20 bg-yellow-400 text-slate-900 py-1.5 px-3 shadow-xl border border-yellow-500 animate-subtle-pulse flex flex-col items-center"
+                  className="absolute -top-4 -right-1 z-20 bg-yellow-400 text-slate-900 py-1.5 px-3 shadow-xl border border-yellow-500 animate-subtle-pulse flex flex-col items-center"
                   style={{
-                    clipPath: 'polygon(100% 0%, 97% 20%, 100% 40%, 97% 60%, 100% 80%, 97% 100%, 0% 100%, 3% 80%, 0% 60%, 3% 40%, 0% 20%, 3% 0%)'
+                    clipPath: 'polygon(100% 0%, 95% 5%, 100% 10%, 95% 15%, 100% 20%, 95% 25%, 100% 30%, 95% 35%, 100% 40%, 95% 45%, 100% 50%, 95% 55%, 100% 60%, 95% 65%, 100% 70%, 95% 75%, 100% 80%, 95% 85%, 100% 90%, 95% 95%, 100% 100%, 0% 100%, 5% 95%, 0% 90%, 5% 85%, 0% 80%, 5% 75%, 0% 70%, 5% 65%, 0% 60%, 5% 55%, 0% 50%, 5% 45%, 0% 40%, 5% 35%, 0% 30%, 5% 25%, 0% 20%, 5% 15%, 0% 10%, 5% 5%, 0% 0%)'
                   }}
                 >
                   <p className="text-[8px] font-black leading-none mb-0.5">💎 A PARTIR DE R$ 49,90/MÊS</p>

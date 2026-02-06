@@ -84,8 +84,9 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
   const [merchantSubcategory, setMerchantSubcategory] = useState<string>('');
   const [occupancy, setOccupancy] = useState<OccupancyRecord[]>([]);
   
-  const finishStepRef = useRef<HTMLDivElement>(null);
+  const mainContainerRef = useRef<HTMLDivElement>(null);
   const step2Ref = useRef<HTMLElement>(null);
+  const finishStepRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const savedOccupancy = localStorage.getItem('localizei_hood_occupancy');
@@ -131,15 +132,11 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
     );
   };
 
-  // CORREÇÃO PASSO 2: Cálculo de Datas Sequenciais de 30 dias sem sobreposição
   const getMonthDateRange = (index: number) => {
     const start = new Date();
-    // O início de cada bloco é sempre 30 dias após o início do bloco anterior
     start.setDate(start.getDate() + (index * 30));
-    
     const end = new Date(start);
-    end.setDate(end.getDate() + 29); // 30 dias corridos incluindo o start
-
+    end.setDate(end.getDate() + 29);
     const fmt = (d: Date) => d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
     return { start: fmt(start), end: fmt(end) };
   };
@@ -150,6 +147,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
     const numMonths = selectedMonths.length;
     const numHoods = selectedNeighborhoods.length;
     
+    // Mostra valor base se nada for selecionado (multiplicador 1)
     const current = (selectedMode.price * Math.max(1, numMonths)) * Math.max(1, numHoods);
     const original = (selectedMode.originalPrice * Math.max(1, numMonths)) * Math.max(1, numHoods);
     
@@ -169,7 +167,10 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
     setIsArtSaved(true);
     setView('sales');
     setTimeout(() => {
-      finishStepRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      if (finishStepRef.current && mainContainerRef.current) {
+        const y = finishStepRef.current.offsetTop - 20;
+        mainContainerRef.current.scrollTo({ top: y, behavior: 'smooth' });
+      }
     }, 300);
   };
 
@@ -184,11 +185,19 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
 
   const handleModeSelection = (mode: typeof DISPLAY_MODES[0]) => {
     setSelectedMode(mode);
+    
+    // PROBLEMA 1 CORREÇÃO: Auto-avanço com scroll suave no container interno para o Passo 2
     setTimeout(() => {
-      if (step2Ref.current) {
-        const yOffset = -100; // Offset para não cobrir o título (considerando o header fixo)
-        const y = step2Ref.current.getBoundingClientRect().top + window.pageYOffset + yOffset;
-        window.scrollTo({ top: y, behavior: 'smooth' });
+      if (step2Ref.current && mainContainerRef.current) {
+        const container = mainContainerRef.current;
+        const target = step2Ref.current;
+        const yOffset = -20; 
+        const targetPosition = target.offsetTop + yOffset;
+        
+        container.scrollTo({
+          top: targetPosition,
+          behavior: 'smooth'
+        });
       }
     }, 100);
   };
@@ -209,13 +218,17 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
       videoUrl="https://videos.pexels.com/video-files/3129957/3129957-sd_540_960_30fps.mp4" 
       storageKey="highlight_banners"
     >
-      <div className="min-h-screen bg-[#020617] text-slate-100 font-sans flex flex-col selection:bg-blue-500/30">
-        <header className="sticky top-0 z-40 bg-[#020617]/80 backdrop-blur-xl border-b border-white/5 px-6 py-4 flex items-center gap-4">
+      <div className="min-h-screen bg-[#020617] text-slate-100 font-sans flex flex-col selection:bg-blue-500/30 overflow-hidden relative">
+        <header className="flex-shrink-0 bg-[#020617]/80 backdrop-blur-xl border-b border-white/5 px-6 py-4 flex items-center gap-4 z-50">
             <button onClick={onBack} className="p-2 bg-slate-900 rounded-xl text-slate-400 hover:text-white transition-all"><ChevronLeft size={20} /></button>
             <h1 className="font-bold text-lg leading-none">Anunciar nos Banners</h1>
         </header>
 
-        <main className="flex-1 w-full space-y-16 pb-[320px] overflow-y-auto no-scrollbar">
+        {/* CONTAINER SCROLLÁVEL PRINCIPAL */}
+        <main 
+          ref={mainContainerRef}
+          className="flex-1 w-full space-y-16 pb-[320px] overflow-y-auto no-scrollbar relative"
+        >
             <section className="px-6 pt-10 space-y-4 text-center flex flex-col items-center">
                 <h2 className="text-3xl font-black text-white uppercase tracking-tighter leading-[0.95] max-w-[320px]">
                   Seu concorrente já pode estar aqui. Você vai ficar de fora?
@@ -309,7 +322,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
             </section>
         </main>
 
-        {/* --- BLOCO DE RESUMO PERSISTENTE (FIXO ACIMA DA BARRA) --- */}
+        {/* --- PROBLEMA 2 CORREÇÃO: BLOCO DE RESUMO PERSISTENTE (FIXO ACIMA DA BARRA) --- */}
         <div className="fixed bottom-[165px] left-0 right-0 z-[102] max-w-md mx-auto px-4 pointer-events-none">
           <div className={`p-4 bg-slate-900/95 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl pointer-events-auto transition-all duration-500 ${!selectedMode ? 'translate-y-20 opacity-0' : 'translate-y-0 opacity-100'}`}>
             <div className="flex items-center justify-between">
