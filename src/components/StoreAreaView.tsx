@@ -37,7 +37,7 @@ import { User as SupabaseUser } from '@supabase/supabase-js';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import { InstitutionalSponsorBanner } from '@/components/InstitutionalSponsorBanner';
-import { MandatoryVideoLock } from './MandatoryVideoLock';
+import { MandatoryVideoLock } from '@/components/MandatoryVideoLock';
 import { useFeatures } from '@/contexts/FeatureContext';
 
 interface StoreAreaViewProps {
@@ -223,6 +223,14 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
                 colorClass="bg-amber-50 text-amber-600 dark:bg-amber-900/20"
                 />
             )}
+            <NavCard 
+              icon={Handshake} 
+              label="JPA Connect" 
+              description="Conectando lojistas do bairro"
+              onClick={() => onNavigate('jpa_connect')}
+              colorClass="bg-indigo-50 text-indigo-600 dark:bg-indigo-900/20"
+              rightElement={<span className="text-[8px] font-black bg-blue-100 text-blue-600 px-1.5 py-0.5 rounded uppercase tracking-widest">Em breve</span>}
+            />
           </section>
 
           {/* 4. RELACIONAMENTO COM CLIENTES */}
