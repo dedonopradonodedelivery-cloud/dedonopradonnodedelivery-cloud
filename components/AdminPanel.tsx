@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useMemo } from 'react';
 import { 
   ShieldCheck, Users, Store, History, Search, 
@@ -10,7 +11,9 @@ import {
   Settings, BarChart3, X, Filter, Newspaper, Crown,
   UserCheck, ArrowRightLeft, CreditCard,
   LayoutGrid, Home, Mail, Smartphone, BadgeCheck,
-  ShieldAlert, Copy, Check, Coins, ToggleLeft, ToggleRight
+  ShieldAlert, Copy, Check, Coins, ToggleLeft, ToggleRight,
+  // Added Info import to resolve "Cannot find name 'Info'" error
+  Info
 } from 'lucide-react';
 import { fetchAdminMerchants, fetchAdminUsers } from '../backend/services';
 import { ServiceRequest, AppSuggestion } from '../types';
@@ -30,32 +33,53 @@ const FeatureManagement: React.FC = () => {
     ];
 
     return (
-        <div className="space-y-8 animate-in fade-in duration-500">
-            {sections.map(section => (
-                <div key={section.id} className="space-y-4">
-                    <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] ml-2">
-                        {section.label}
-                    </h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                        {featureList.filter(f => f.category === section.id).map(feature => (
-                            <div key={feature.id} className="bg-slate-900 border border-white/5 p-5 rounded-2xl flex items-center justify-between group transition-all hover:border-blue-500/30">
-                                <div>
-                                    <p className="font-bold text-white text-sm">{feature.label}</p>
-                                    <p className={`text-[9px] font-black uppercase mt-1 tracking-widest ${feature.active ? 'text-emerald-500' : 'text-slate-500'}`}>
-                                        {feature.active ? 'Ativado (ON)' : 'Inativo (OFF)'}
-                                    </p>
+        <div className="space-y-10 animate-in fade-in duration-500">
+            {sections.map(section => {
+                const items = featureList.filter(f => f.category === section.id);
+                if (items.length === 0) return null;
+
+                return (
+                    <div key={section.id} className="space-y-4">
+                        <div className="flex items-center gap-3 ml-2">
+                            <div className="w-1.5 h-4 bg-indigo-500 rounded-full"></div>
+                            <h3 className="text-[11px] font-black text-slate-400 uppercase tracking-[0.25em]">
+                                {section.label}
+                            </h3>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            {items.map(feature => (
+                                <div key={feature.id} className="bg-slate-900 border border-white/5 p-6 rounded-[2rem] flex items-center justify-between group transition-all hover:border-blue-500/30 shadow-sm">
+                                    <div className="space-y-1">
+                                        <p className="font-bold text-white text-sm tracking-tight">{feature.label}</p>
+                                        <div className="flex items-center gap-2">
+                                            <div className={`w-1.5 h-1.5 rounded-full ${feature.active ? 'bg-emerald-500 animate-pulse' : 'bg-slate-600'}`}></div>
+                                            <p className={`text-[9px] font-black uppercase tracking-widest ${feature.active ? 'text-emerald-500' : 'text-slate-500'}`}>
+                                                {feature.active ? 'ATIVADO (ON)' : 'DESATIVADO (OFF)'}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <button 
+                                        onClick={() => toggleFeature(feature.id)}
+                                        className={`p-1 rounded-full transition-all active:scale-90 ${feature.active ? 'text-blue-500' : 'text-slate-700'}`}
+                                    >
+                                        {feature.active ? <ToggleRight size={44} strokeWidth={1.5} /> : <ToggleLeft size={44} strokeWidth={1.5} />}
+                                    </button>
                                 </div>
-                                <button 
-                                    onClick={() => toggleFeature(feature.id)}
-                                    className={`p-2 transition-all active:scale-90 ${feature.active ? 'text-blue-500' : 'text-slate-700'}`}
-                                >
-                                    {feature.active ? <ToggleRight size={32} /> : <ToggleLeft size={32} />}
-                                </button>
-                            </div>
-                        ))}
+                            ))}
+                        </div>
                     </div>
+                );
+            })}
+            
+            <div className="p-6 bg-blue-900/10 border border-blue-500/20 rounded-[2.5rem] mt-12">
+                <div className="flex gap-4">
+                    {/* Info icon was previously undefined */}
+                    <Info className="text-blue-400 shrink-0" size={20} />
+                    <p className="text-xs text-blue-200/70 leading-relaxed">
+                        <strong>Nota do Sistema:</strong> As alterações nas abas e módulos são aplicadas instantaneamente em todos os dispositivos sem necessidade de atualização da página ou do aplicativo.
+                    </p>
                 </div>
-            ))}
+            </div>
         </div>
     );
 };
@@ -77,13 +101,17 @@ const SectionHeader: React.FC<{ title: string; onBack: () => void; rightElement?
 
 const AdminHub: React.FC<{ onSelect: (tab: any) => void }> = ({ onSelect }) => (
   <div className="grid grid-cols-2 gap-4 animate-in fade-in duration-500">
-    <button onClick={() => onSelect('features')} className="bg-blue-900/40 p-5 rounded-3xl border border-blue-500/20 shadow-sm hover:shadow-md transition-all text-left group col-span-2">
-        <div className="w-10 h-10 bg-white text-blue-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform border border-blue-100"><Zap size={20}/></div>
-        <h3 className="font-black text-sm text-white uppercase tracking-tighter mb-1">Gerenciamento de Funcionalidades</h3>
-        <p className="text-[10px] text-blue-200 leading-relaxed font-medium">Ligar/Desligar blocos, abas e módulos do aplicativo.</p>
+    <button onClick={() => onSelect('features')} className="bg-blue-900/40 p-6 rounded-[2.5rem] border border-blue-500/30 shadow-xl hover:shadow-blue-500/10 transition-all text-left group col-span-2 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 rounded-full blur-3xl -mr-16 -mt-16"></div>
+        <div className="w-12 h-12 bg-white text-blue-600 rounded-2xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform border border-blue-100 shadow-sm"><Zap size={24} fill="currentColor"/></div>
+        <h3 className="font-black text-base text-white uppercase tracking-tight mb-1">Gerenciamento de Funcionalidades</h3>
+        <p className="text-[11px] text-blue-200 leading-relaxed font-medium max-w-xs">Ligar/Desligar abas de navegação, blocos da Home e módulos do aplicativo em tempo real.</p>
+        <div className="mt-6 flex items-center gap-2 text-[9px] font-black text-blue-400 uppercase tracking-widest">
+            Acessar Controle <ChevronRight size={12} />
+        </div>
     </button>
-    <button onClick={() => onSelect('moderation')} className="bg-red-50 p-5 rounded-3xl border border-red-100 shadow-sm hover:shadow-md transition-all text-left group">
-        <div className="w-10 h-10 bg-white text-red-500 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform border border-red-100"><ShieldAlert size={20}/></div>
+    <button onClick={() => onSelect('moderation')} className="bg-white p-5 rounded-3xl border border-gray-100 shadow-sm hover:shadow-md transition-all text-left group">
+        <div className="w-10 h-10 bg-red-50 text-red-500 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform border border-red-100"><ShieldAlert size={20}/></div>
         <h3 className="font-black text-sm text-red-900 uppercase tracking-tighter mb-1">Aprovações</h3>
         <p className="text-[10px] text-red-700 leading-relaxed font-medium">Categorias, denúncias e reivindicações.</p>
     </button>
@@ -113,8 +141,6 @@ export const AdminPanel: React.FC<any> = ({ onLogout, viewMode, onOpenViewSwitch
   const [searchTerm, setSearchTerm] = useState('');
   const [merchants, setMerchants] = useState<any[]>([]);
   const [users, setUsers] = useState<any[]>([]);
-  const [serviceRequests, setServiceRequests] = useState<ServiceRequest[]>([]);
-  const [suggestions, setSuggestions] = useState<AppSuggestion[]>([]);
 
   useEffect(() => {
     if (activeTab === 'management') {
