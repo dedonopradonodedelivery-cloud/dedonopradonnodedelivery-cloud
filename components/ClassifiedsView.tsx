@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo, useRef } from 'react';
 import { User } from '@supabase/supabase-js';
 import { 
@@ -50,11 +49,11 @@ const getFallbackImage = (id: string) => {
 };
 
 const CLASSIFIED_CATEGORIES = [
-  { id: 'servicos', name: 'Orçamento de Serviços', slug: 'services_landing', icon: <Wrench />, color: 'bg-brand-blue', bentoClass: 'col-span-2 aspect-[2/1]' },
-  { id: 'imoveis', name: 'Imóveis Comerciais', slug: 'real_estate_wizard', icon: <Building2 />, color: 'bg-brand-blue', bentoClass: 'col-span-1 row-span-2' },
-  { id: 'emprego', name: 'Vaga de emprego', slug: 'jobs', icon: <Briefcase />, color: 'bg-brand-blue', bentoClass: 'col-span-1 aspect-square' },
-  { id: 'doacoes', name: 'Doações', slug: 'donations', icon: <Heart />, color: 'bg-brand-blue', bentoClass: 'col-span-2 aspect-[2.1/1]' },
-  { id: 'desapega', name: 'Desapega', slug: 'desapega', icon: <Tag />, color: 'bg-brand-blue', bentoClass: 'col-span-1 aspect-[1/1.1]' },
+  { id: 'servicos', name: 'Orçamento de Serviços', slug: 'services_landing', icon: <Wrench />, color: 'bg-brand-blue', bentoClass: 'col-span-3 aspect-[3/0.95]' }, // Mais largo
+  { id: 'imoveis', name: 'Imóveis Comerciais', slug: 'real_estate', icon: <Building2 />, color: 'bg-brand-blue', bentoClass: 'col-span-1 row-span-2 h-full' }, // Mais alto
+  { id: 'emprego', name: 'Vaga de emprego', slug: 'jobs', icon: <Briefcase />, color: 'bg-brand-blue', bentoClass: 'col-span-1 aspect-[1/0.9]' }, // Quase quadrado
+  { id: 'doacoes', name: 'Doações', slug: 'donations', icon: <Heart />, color: 'bg-brand-blue', bentoClass: 'col-span-1 aspect-[1/0.7]' }, // Mais compacto
+  { id: 'desapega', name: 'Desapega', slug: 'desapega', icon: <Tag />, color: 'bg-brand-blue', bentoClass: 'col-span-1 aspect-[0.8/1]' }, // Mais estreito
 ];
 
 const ClassifiedCategoryButton: React.FC<{ category: any; onClick: () => void }> = ({ category, onClick }) => (
@@ -62,15 +61,15 @@ const ClassifiedCategoryButton: React.FC<{ category: any; onClick: () => void }>
     onClick={onClick}
     className={`flex flex-col items-center group active:scale-95 transition-all w-full h-full ${category.bentoClass}`}
   >
-    <div className={`w-full h-full rounded-[25px] border border-white/20 shadow-sm flex flex-col items-center justify-between p-2 ${category.color}`}>
+    <div className={`w-full h-full rounded-[22px] border border-white/20 shadow-sm flex flex-col items-center justify-between p-2 ${category.color}`}>
       <div className="flex-1 flex items-center justify-center">
         {React.cloneElement(category.icon as any, { 
             className: "text-white drop-shadow-md", 
-            size: category.bentoClass.includes('col-span-2') ? 32 : 24,
+            size: category.id === 'servicos' ? 28 : (category.id === 'imoveis' ? 32 : 22),
             strokeWidth: 3 
         })}
       </div>
-      <span className="text-[8px] w-full font-black text-white text-center uppercase tracking-tighter leading-tight pb-1 truncate">
+      <span className="text-[7.5px] w-full font-black text-white text-center uppercase tracking-tighter leading-tight pb-1 truncate">
         {category.name}
       </span>
     </div>
@@ -233,7 +232,7 @@ export const ClassifiedsView: React.FC<ClassifiedsViewProps> = ({ onBack, onNavi
 
   return (
     <div className="min-h-screen bg-[#F8F9FC] dark:bg-gray-950 font-sans pb-32 animate-in fade-in duration-500 overflow-x-hidden">
-      <header className="sticky top-0 z-40 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md px-5 py-6 border-b border-gray-100 dark:border-gray-800">
+      <header className="sticky top-0 z-40 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md px-5 py-6 border-b border-gray-100 dark:border-gray-800 shadow-sm">
         <div className="flex items-center justify-between gap-3 mb-6">
           <button onClick={onBack} className="p-2.5 bg-gray-50 dark:bg-gray-800 rounded-xl text-gray-500 transition-colors active:scale-90 shadow-sm shrink-0">
             <ChevronLeft size={20} />
@@ -282,7 +281,7 @@ export const ClassifiedsView: React.FC<ClassifiedsViewProps> = ({ onBack, onNavi
 
       <main className="p-5 space-y-4">
         
-        {/* BENTO GRID DE CATEGORIAS EQUILIBRADO */}
+        {/* BENTO GRID DE CATEGORIAS ORGÂNICO E ASSIMÉTRICO */}
         <div className="grid grid-cols-4 gap-3 mb-8 mt-2">
             {CLASSIFIED_CATEGORIES.map(cat => (
                 <ClassifiedCategoryButton 
@@ -298,47 +297,48 @@ export const ClassifiedsView: React.FC<ClassifiedsViewProps> = ({ onBack, onNavi
             items={services} 
             onItemClick={handleItemClick}
             onAnunciar={(name) => onNavigate('services_landing')}
-            onViewAll={() => onNavigate('services_landing')}
+            onViewAll={(slug) => onNavigate(slug)}
             ctaLabel="Pedir Orçamento Grátis"
             subtitle="Profissionais verificados do bairro"
         />
 
         <CategoryBlock 
-            category={CLASSIFIED_CATEGORIES[1]} 
+            // FIX: Corrected line 307 to remove the reference to undefined 'categoryName'.
+            category={CLASSIFIED_CATEGORIES.find(c => c.id === 'imoveis')!} 
             items={realEstate} 
             onItemClick={handleItemClick}
             onAnunciar={(name) => onNavigate('real_estate_wizard')}
-            onViewAll={() => onNavigate('real_estate')}
+            onViewAll={(slug) => onNavigate(slug)}
             ctaLabel="Anunciar Ponto Comercial"
             subtitle="Oportunidades imobiliárias"
         />
 
         <CategoryBlock 
-            category={CLASSIFIED_CATEGORIES[2]} 
+            category={CLASSIFIED_CATEGORIES.find(c => c.id === 'emprego')!} 
             items={jobs} 
             onItemClick={handleItemClick}
             onAnunciar={(name) => onNavigate('job_wizard')}
-            onViewAll={() => onNavigate('jobs')}
+            onViewAll={(slug) => onNavigate(slug)}
             ctaLabel="Divulgar Vaga no Bairro"
             subtitle="Encontre talentos locais"
         />
 
         <CategoryBlock 
-            category={CLASSIFIED_CATEGORIES[3]} 
+            category={CLASSIFIED_CATEGORIES.find(c => c.id === 'doacoes')!} 
             items={donations} 
             onItemClick={handleItemClick}
             onAnunciar={(name) => onNavigate('donations')}
-            onViewAll={() => onNavigate('donations')}
+            onViewAll={(slug) => onNavigate(slug)}
             ctaLabel="Divulgar Doação ou Adoção"
             subtitle="Ações sociais e pets no bairro"
         />
 
         <CategoryBlock 
-            category={CLASSIFIED_CATEGORIES[4]} 
+            category={CLASSIFIED_CATEGORIES.find(c => c.id === 'desapega')!} 
             items={desapega} 
             onItemClick={handleItemClick}
             onAnunciar={(name) => onNavigate('desapega')}
-            onViewAll={() => onNavigate('desapega')}
+            onViewAll={(slug) => onNavigate(slug)}
             ctaLabel="Anunciar Desapego"
             subtitle="Venda o que você não usa mais"
         />

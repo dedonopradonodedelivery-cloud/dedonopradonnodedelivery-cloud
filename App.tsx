@@ -238,11 +238,13 @@ const App: React.FC = () => {
 
   useEffect(() => {
     if (splashStage === 4) return;
-    const fadeOutTimer = setTimeout(() => setSplashStage(3), 4500);
+    // Splash permanece visível por 5 segundos antes de iniciar o fade-out (stage 3)
+    const fadeOutTimer = setTimeout(() => setSplashStage(3), 5000);
+    // Completa a transição de fade-out e dissolve aos 5.6 segundos para ser suave
     const endSplashTimer = setTimeout(() => {
       setSplashStage(4);
       splashWasShownInSession = true;
-    }, 5000);
+    }, 5600);
     return () => {
       clearTimeout(fadeOutTimer);
       clearTimeout(endSplashTimer);
@@ -332,7 +334,7 @@ const App: React.FC = () => {
             />
           )}
 
-          <div className={`w-full max-w-md h-[100dvh] transition-opacity duration-500 ease-out ${splashStage >= 3 ? 'opacity-100' : 'opacity-0'}`}>
+          <div className={`w-full max-w-md h-[100dvh] transition-opacity duration-700 ease-in-out ${splashStage >= 3 ? 'opacity-100' : 'opacity-0'}`}>
               <Layout activeTab={activeTab} setActiveTab={handleNavigate} userRole={userRole} hideNav={false}>
                   {!headerExclusionList.includes(activeTab) && (
                     <Header isDarkMode={theme === 'dark'} toggleTheme={() => {}} onNotificationClick={() => handleNavigate('notifications')} user={user} searchTerm={globalSearch} onSearchChange={setGlobalSearch} onNavigate={handleNavigate} activeTab={activeTab} userRole={userRole as any} stores={STORES} onStoreClick={handleSelectStore} isAdmin={isAdmin} viewMode={viewMode} onOpenViewSwitcher={() => setIsRoleSwitcherOpen(true)} />
@@ -557,7 +559,7 @@ const App: React.FC = () => {
           </div>
 
           {splashStage < 4 && (
-            <div className={`fixed inset-0 z-[9999] flex flex-col items-center justify-between py-16 transition-opacity duration-500 ease-out ${splashStage === 3 ? 'opacity-0 pointer-events-none' : 'opacity-100'}`} style={{ backgroundColor: '#1E5BFF' }}>
+            <div className={`fixed inset-0 z-[9999] flex flex-col items-center justify-between py-16 transition-opacity duration-700 ease-in-out ${splashStage === 3 ? 'opacity-0 pointer-events-none' : 'opacity-100'}`} style={{ backgroundColor: '#1E5BFF' }}>
               <div className="flex flex-col items-center animate-logo-enter text-center px-4">
                   <div className="relative w-32 h-32 bg-white rounded-[2.5rem] flex items-center justify-center shadow-2xl mb-8"><MapPin className="w-16 h-16 text-brand-blue fill-brand-blue" /></div>
                   <h1 className="text-4xl font-black font-display text-white tracking-tighter drop-shadow-md">
