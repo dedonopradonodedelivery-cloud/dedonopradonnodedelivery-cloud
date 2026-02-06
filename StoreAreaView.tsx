@@ -54,11 +54,13 @@ const NavCard: React.FC<{
   colorClass?: string;
   badge?: number;
   rightElement?: React.ReactNode;
-}> = ({ icon: Icon, label, description, onClick, isDestructive, colorClass, badge, rightElement }) => (
+  topRightTag?: React.ReactNode;
+}> = ({ icon: Icon, label, description, onClick, isDestructive, colorClass, badge, rightElement, topRightTag }) => (
   <button 
     onClick={onClick}
-    className="w-full flex items-center justify-between p-5 bg-white dark:bg-slate-900/60 border-b border-blue-100/50 dark:border-white/5 last:border-b-0 active:bg-blue-50 dark:active:bg-slate-800 transition-colors group rounded-2xl mb-2 shadow-sm"
+    className="w-full flex items-center justify-between p-5 bg-white dark:bg-slate-900/60 border-b border-blue-100/50 dark:border-white/5 last:border-b-0 active:bg-blue-50 dark:active:bg-slate-800 transition-colors group rounded-2xl mb-2 shadow-sm relative"
   >
+    {topRightTag}
     <div className="flex items-center gap-4">
       <div className={`p-2.5 rounded-xl transition-colors relative ${
         isDestructive 
@@ -182,6 +184,17 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
               description="Sua loja nas áreas nobres do bairro"
               onClick={() => onNavigate('store_ads_module')}
               colorClass="bg-purple-50 text-purple-600 dark:bg-purple-900/20"
+              topRightTag={
+                <div 
+                  className="absolute -top-3 -right-1 z-20 bg-yellow-400 text-slate-900 py-1.5 px-3 shadow-xl border border-yellow-500 animate-subtle-pulse flex flex-col items-center"
+                  style={{
+                    clipPath: 'polygon(100% 0%, 97% 20%, 100% 40%, 97% 60%, 100% 80%, 97% 100%, 0% 100%, 3% 80%, 0% 60%, 3% 40%, 0% 20%, 3% 0%)'
+                  }}
+                >
+                  <p className="text-[8px] font-black leading-none mb-0.5">💎 A PARTIR DE R$ 49,90/MÊS</p>
+                  <p className="text-[7px] font-bold opacity-80 leading-none">EXCLUSIVO PARA FUNDADORES</p>
+                </div>
+              }
             />
             <NavCard 
               icon={Crown} 
@@ -294,6 +307,15 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
           </div>
         </div>
       </div>
+      <style>{`
+        @keyframes subtle-pulse {
+          0%, 100% { transform: scale(1); }
+          50% { transform: scale(1.03); }
+        }
+        .animate-subtle-pulse {
+          animation: subtle-pulse 3s ease-in-out infinite;
+        }
+      `}</style>
     </MandatoryVideoLock>
   );
 };
