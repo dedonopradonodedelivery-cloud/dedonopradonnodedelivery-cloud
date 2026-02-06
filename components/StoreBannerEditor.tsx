@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { 
   ChevronLeft, AlignLeft, AlignCenter, AlignRight, 
@@ -136,23 +135,23 @@ export const StoreBannerEditor: React.FC<StoreBannerEditorProps> = ({ storeName,
             <p className="text-[9px] text-blue-400 font-bold uppercase">{storeName}</p>
           </div>
         </div>
-        <button onClick={() => onSave(config)} className="bg-[#1E5BFF] px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-xl active:scale-95 transition-all">Pronto</button>
+        <button onClick={() => onSave(config)} className="bg-blue-600 px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-xl active:scale-95 transition-all">Pronto</button>
       </header>
       <div className="flex-shrink-0 p-4 bg-slate-950 border-b border-white/5">
           <div className="w-full max-w-sm mx-auto"><BannerPreview config={config} storeName={storeName} storeLogo={storeLogo} /></div>
           <div className="mt-3 flex items-center justify-center gap-2"><Wand2 size={12} className="text-blue-500" /><p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Ajustamos o contraste automaticamente.</p></div>
       </div>
       <nav className="flex-shrink-0 flex border-b border-white/5 bg-slate-900/50 p-1 gap-1">
-          <button onClick={() => setActiveTab('content')} className={`flex-1 flex flex-col items-center gap-1 py-3 rounded-2xl transition-all ${activeTab === 'content' ? 'bg-blue-600 text-white' : 'text-slate-500'}`}><Type size={18} /><span className="text-[8px] font-black uppercase">Mensagem</span></button>
-          <button onClick={() => setActiveTab('background')} className={`flex-1 flex flex-col items-center gap-1 py-3 rounded-2xl transition-all ${activeTab === 'background' ? 'bg-blue-600 text-white' : 'text-slate-500'}`}><ImageIcon size={18} /><span className="text-[8px] font-black uppercase">Fundo</span></button>
-          <button onClick={() => setActiveTab('brand')} className={`flex-1 flex flex-col items-center gap-1 py-3 rounded-2xl transition-all ${activeTab === 'brand' ? 'bg-blue-600 text-white' : 'text-slate-500'}`}><Layout size={18} /><span className="text-[8px] font-black uppercase">Marca</span></button>
+          <button onClick={() => setActiveTab('content')} className={`flex-1 flex flex-col items-center gap-1 py-3 rounded-2xl transition-all ${activeTab === 'content' ? 'bg-blue-600 text-white' : 'text-slate-50'}`}><Type size={18} /><span className="text-[8px] font-black uppercase">Mensagem</span></button>
+          <button onClick={() => setActiveTab('background')} className={`flex-1 flex flex-col items-center gap-1 py-3 rounded-2xl transition-all ${activeTab === 'background' ? 'bg-blue-600 text-white' : 'text-slate-50'}`}><ImageIcon size={18} /><span className="text-[8px] font-black uppercase">Fundo</span></button>
+          <button onClick={() => setActiveTab('brand')} className={`flex-1 flex flex-col items-center gap-1 py-3 rounded-2xl transition-all ${activeTab === 'brand' ? 'bg-blue-600 text-white' : 'text-slate-50'}`}><Layout size={18} /><span className="text-[8px] font-black uppercase">Marca</span></button>
       </nav>
       <div className="flex-1 overflow-y-auto p-6 space-y-8 no-scrollbar pb-40 bg-slate-950">
           {activeTab === 'content' && (
               <div className="space-y-6 animate-in fade-in duration-300">
-                  <div className="space-y-2"><label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">O que você oferece?</label><input value={config.offer} onChange={e => setConfig({...config, offer: e.target.value.slice(0, 35)})} placeholder="Nome do produto" className="w-full bg-slate-900 border border-white/10 rounded-2xl p-4 text-sm font-bold focus:border-blue-500 outline-none" /></div>
-                  <div className="space-y-2"><label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Qual a vantagem?</label><input value={config.benefit} onChange={e => setConfig({...config, benefit: e.target.value.slice(0, 60)})} placeholder="Diferencial" className="w-full bg-slate-900 border border-white/10 rounded-2xl p-4 text-sm font-bold focus:border-blue-500 outline-none" /></div>
-                  <div className="space-y-2"><label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Destaque (Preço/Chamada)</label><input value={config.priceTag} onChange={e => setConfig({...config, priceTag: e.target.value.slice(0, 20)})} placeholder="Ex: R$ 39,90" className="w-full bg-slate-900 border border-white/10 rounded-2xl p-4 text-sm font-black text-yellow-400 outline-none" /></div>
+                  <div className="space-y-2"><label className="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-1 mb-2 block">O que você oferece?</label><input value={config.offer} onChange={e => setConfig({...config, offer: e.target.value.slice(0, 35)})} placeholder="Nome do produto" className="w-full bg-slate-900 border border-white/10 rounded-2xl p-4 text-sm font-bold focus:border-blue-600 outline-none" /></div>
+                  <div className="space-y-2"><label className="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-1 mb-2 block">Qual a vantagem?</label><input value={config.benefit} onChange={e => setConfig({...config, benefit: e.target.value.slice(0, 60)})} placeholder="Diferencial" className="w-full bg-slate-900 border border-white/10 rounded-2xl p-4 text-sm font-bold focus:border-blue-600 outline-none" /></div>
+                  <div className="space-y-2"><label className="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-1 mb-2 block">Destaque (Preço/Chamada)</label><input value={config.priceTag} onChange={e => setConfig({...config, priceTag: e.target.value.slice(0, 20)})} placeholder="Ex: R$ 39,90" className="w-full bg-slate-900 border border-white/10 rounded-2xl p-4 text-sm font-black text-yellow-400 outline-none" /></div>
               </div>
           )}
           {activeTab === 'background' && (
@@ -169,15 +168,15 @@ export const StoreBannerEditor: React.FC<StoreBannerEditorProps> = ({ storeName,
           {activeTab === 'brand' && (
               <div className="space-y-10 animate-in fade-in duration-300">
                   <section className="space-y-4">
-                      <div className="flex items-center justify-between"><label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Exibir Logo da Loja?</label><button onClick={() => setConfig({...config, showLogo: !config.showLogo})} className={`w-12 h-6 rounded-full p-1 transition-colors ${config.showLogo ? 'bg-blue-600' : 'bg-slate-700'}`}><div className={`w-4 h-4 bg-white rounded-full transition-transform ${config.showLogo ? 'translate-x-6' : 'translate-x-0'}`}></div></button></div>
-                      {config.showLogo && <div className="grid grid-cols-1 gap-6"><div className="space-y-3"><p className="text-[9px] font-bold text-slate-500 uppercase ml-1">Formato</p><div className="flex gap-2"><button onClick={() => setConfig({...config, logoShape: 'round'})} className={`flex-1 py-4 rounded-2xl border-2 flex flex-col items-center gap-2 transition-all ${config.logoShape === 'round' ? 'bg-blue-600/10 border-blue-500 text-white' : 'bg-slate-900 border-white/5 text-slate-500'}`}><Circle size={18} /><span className="text-[8px] font-black uppercase">Redonda</span></button><button onClick={() => setConfig({...config, logoShape: 'square'})} className={`flex-1 py-4 rounded-2xl border-2 flex flex-col items-center gap-2 transition-all ${config.logoShape === 'square' ? 'bg-blue-600/10 border-blue-500 text-white' : 'bg-slate-900 border-white/5 text-slate-500'}`}><Square size={18} /><span className="text-[8px] font-black uppercase">Quadrada</span></button></div></div></div>}
+                      <div className="flex items-center justify-between"><label className="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-1">Exibir Logo da Loja?</label><button onClick={() => setConfig({...config, showLogo: !config.showLogo})} className={`w-12 h-6 rounded-full p-1 transition-colors ${config.showLogo ? 'bg-blue-600' : 'bg-slate-700'}`}><div className={`w-4 h-4 bg-white rounded-full transition-transform ${config.showLogo ? 'translate-x-6' : 'translate-x-0'}`}></div></button></div>
+                      {config.showLogo && <div className="grid grid-cols-1 gap-6"><div className="space-y-3"><p className="text-[9px] font-bold text-gray-500 uppercase ml-1">Formato</p><div className="flex gap-2"><button onClick={() => setConfig({...config, logoShape: 'round'})} className={`flex-1 py-4 rounded-2xl border-2 flex flex-col items-center gap-2 transition-all ${config.logoShape === 'round' ? 'bg-blue-600/10 border-blue-600 text-white' : 'bg-slate-900 border-white/5 text-gray-500'}`}><Circle size={18} /><span className="text-[8px] font-black uppercase">Redonda</span></button><button onClick={() => setConfig({...config, logoShape: 'square'})} className={`flex-1 py-4 rounded-2xl border-2 flex flex-col items-center gap-2 transition-all ${config.logoShape === 'square' ? 'bg-blue-600/10 border-blue-600 text-white' : 'bg-slate-900 border-white/5 text-gray-500'}`}><Square size={18} /><span className="text-[8px] font-black uppercase">Quadrada</span></button></div></div></div>}
                   </section>
               </div>
           )}
       </div>
       <footer className="flex-shrink-0 p-6 pb-12 bg-slate-900 border-t border-white/5 flex flex-col items-center gap-4">
-          <div className="flex items-center gap-2 px-3 py-1 bg-white/5 rounded-full border border-white/5"><MousePointer2 size={10} className="text-blue-500" /><p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Você poderá editar este banner depois.</p></div>
-          <button onClick={() => onSave(config)} className="w-full max-w-sm py-5 bg-[#1E5BFF] text-white font-black rounded-[2rem] shadow-xl active:scale-[0.98] transition-all uppercase tracking-widest text-sm flex items-center justify-center gap-2">Finalizar Arte <ArrowRight size={18} /></button>
+          <div className="flex items-center gap-2 px-3 py-1 bg-white/5 rounded-full border border-white/5"><MousePointer2 size={10} className="text-blue-600" /><p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Você poderá editar este banner depois.</p></div>
+          <button onClick={() => onSave(config)} className="w-full max-w-sm py-5 bg-blue-600 text-white font-black rounded-[2rem] shadow-xl active:scale-[0.98] transition-all uppercase tracking-widest text-sm flex items-center justify-center gap-2">Finalizar Arte <ArrowRight size={18} /></button>
       </footer>
     </div>
   );

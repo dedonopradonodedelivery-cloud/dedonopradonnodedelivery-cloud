@@ -201,7 +201,6 @@ export const SUBCATEGORIES: Record<string, { name: string; icon: React.ReactNode
   ],
 };
 
-// 🔹 LISTA DE 60 TAGS INICIAIS (OBRIGATÓRIAS)
 export const ALL_TAGS = [
   'tênis', 'camisa', 'camiseta', 'calça', 'bermuda', 'vestido', 'saia', 'moletom', 'jaqueta', 'roupa social', 'roupa feminina', 'roupa masculina',
   'relógio', 'óculos', 'bolsa', 'mochila', 'cinto', 'pulseira', 'colar', 'boné',
@@ -212,7 +211,6 @@ export const ALL_TAGS = [
   'eletricista', 'encanador', 'pedreiro', 'pintor', 'chaveiro', 'montagem de móveis', 'limpeza residencial', 'manutenção geral'
 ];
 
-// FIX: Added missing IMG_IDS used by generateFakeStores
 const IMG_IDS: Record<string, string[]> = {
   'Comida': ['1504674900247-0877df9cc836', '1555939594-58d7cb561ad1', '1565299624946-b28f40a0ae38', '1567620905732-2d1ec7ab7445', '1467003909585-63c6385cdb26', '1540189549336-e6e99c3679fe', '1568901346375-23c9450c58cd', '1484723091739-30a097e8f929'],
   'Pets': ['1516734212186-a967f81ad0d7', '1543466835-00a7907e9de1', '1537151608828-ea2b11777ee8', '1514888286974-6c27e9cce25b', '1583511655857-d19b40a7a54e', '1583337130417-3346a1be7dee'],
@@ -232,7 +230,6 @@ const IMG_IDS: Record<string, string[]> = {
   'Condomínio': ['1560518883-ce09059eeffa', '1486406146926-c627a92ad1ab', '1460317442991-08cf2a256144', '1497366811353-6870744d04b2']
 };
 
-// FIX: Added missing generateFakeStores function to fix missing name error on line 216
 const generateFakeStores = () => {
     const allStores: Store[] = [];
     const hoods = ["Freguesia", "Anil", "Taquara", "Pechincha", "Tanque", "Curicica"];
@@ -240,15 +237,13 @@ const generateFakeStores = () => {
 
     Object.entries(SUBCATEGORIES).forEach(([catName, subs]) => {
         subs.forEach(sub => {
-            // Gerar 6 lojas por subcategoria
             for (let i = 1; i <= 6; i++) {
-                const isSponsored = i <= 3; // Primeiras 3 patrocinadas
+                const isSponsored = i <= 3;
                 const hood = hoods[i % hoods.length];
                 const rating = 4.2 + (Math.random() * 0.8);
                 const catImages = IMG_IDS[catName] || ['1557804506-669a67965ba0', '1568901346375-23c9450c58cd'];
                 const imgId = catImages[i % catImages.length];
 
-                // Lógica de Tags Fakes baseada na categoria
                 let storeTags: string[] = [];
                 if (catName === 'Moda') storeTags = ['tênis', 'camisa', 'calça', 'vestido'].sort(() => 0.5 - Math.random()).slice(0, 3);
                 else if (catName === 'Pets') storeTags = ['ração', 'banho e tosa', 'veterinário'].sort(() => 0.5 - Math.random()).slice(0, 2);

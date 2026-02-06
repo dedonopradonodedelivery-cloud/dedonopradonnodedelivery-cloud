@@ -1,4 +1,3 @@
-
 import React, { useMemo, useState } from 'react';
 import { Home, User as UserIcon, Newspaper, MessageSquare, Ticket } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
@@ -77,7 +76,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
             <img src={photoUrl} alt="Avatar" className="w-full h-full object-cover" />
           ) : (
             <div className={`w-full h-full flex items-center justify-center text-[10px] font-black ${
-              isActive ? 'bg-white text-[#1E5BFF]' : 'bg-white/20 text-white/80'
+              isActive ? 'bg-white text-blue-600' : 'bg-white/20 text-white/80'
             }`}>
               {userInitial}
             </div>
@@ -97,7 +96,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
           strokeWidth={isActive ? 2.5 : 2} 
         />
         {item.badge && (
-             <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-[#1E5BFF] animate-pulse"></span>
+             <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-yellow-400 rounded-full border-2 border-blue-600 animate-pulse"></span>
         )}
       </div>
     );
@@ -105,7 +104,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
 
   return (
     <>
-      <div className="fixed bottom-0 left-0 right-0 mx-auto w-full max-w-md bg-[#1E5BFF] z-[1000] h-[90px] rounded-t-[2.5rem] shadow-[0_-8px_40px_rgba(0,0,0,0.2)] border-t border-white/10 px-2 transition-colors duration-500">
+      <div className="fixed bottom-0 left-0 right-0 mx-auto w-full max-w-md bg-blue-600 z-[1000] h-[90px] rounded-t-[2.5rem] shadow-[0_-8px_40px_rgba(0,0,0,0.2)] border-t border-white/10 px-2 transition-colors duration-500">
         <div className="grid w-full h-full grid-cols-5 items-center">
           {navItems.map((item) => {
             let isActive = false;
@@ -130,7 +129,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
                       ? `h-16 w-16 rounded-full border-[3px] -translate-y-8 mb-[-32px] shadow-2xl ${
                           isActive 
                             ? 'bg-blue-700 border-white scale-110' 
-                            : 'bg-[#1E5BFF] border-white/30'
+                            : 'bg-blue-600 border-white/30'
                         }`
                       : 'h-8 w-8 mb-1'
                     }
