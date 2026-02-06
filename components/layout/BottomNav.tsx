@@ -1,4 +1,3 @@
-
 import React, { useMemo } from 'react';
 import { Home, User as UserIcon, Newspaper, MessageSquare, Ticket, Compass } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
@@ -65,7 +64,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
     }
   };
 
-  const renderIconOrAvatar = (item: NavItem, isActive: boolean) => {
+  const renderIconOrAvatar = (item: NavItem, isActive: boolean, isSpecial: boolean) => {
     if (item.id === 'profile' && user) {
       const userInitial = user.email?.charAt(0).toUpperCase() || user.user_metadata?.full_name?.charAt(0).toUpperCase() || 'U';
       const photoUrl = user.user_metadata?.avatar_url;
@@ -91,12 +90,12 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
     return (
       <div className="relative">
         <Icon 
-          size={22}
-          className={`transition-all duration-300 ${isActive ? 'text-white scale-110' : 'text-white/60'}`} 
+          size={isSpecial ? 25 : 22}
+          className={`transition-all duration-300 ${isActive ? 'text-white scale-105' : 'text-white/60'}`} 
           strokeWidth={isActive ? 2.5 : 2} 
         />
         {item.badge && (
-          <span className="absolute -top-1 -right-1 w-2 h-2 bg-yellow-400 rounded-full border border-blue-600 animate-pulse"></span>
+          <span className={`absolute ${isSpecial ? '-top-1 -right-1.5' : '-top-1 -right-1'} w-2 h-2 bg-yellow-400 rounded-full border border-blue-600 animate-pulse`}></span>
         )}
       </div>
     );
@@ -106,7 +105,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
   if (activeNavItems.length === 0) return null;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 mx-auto w-full max-w-md bg-blue-600 z-[1000] h-[80px] rounded-t-[24px] shadow-[0_-5px_30px_rgba(0,0,0,0.2)] border-t border-white/10 px-2">
+    <div className="fixed bottom-0 left-0 right-0 mx-auto w-full max-w-md bg-blue-600 z-[1000] h-[80px] rounded-t-[24px] shadow-[0_-5px_30px_rgba(0,0,0,0.2)] border-t border-white/10 px-1">
       <div 
         className="grid w-full h-full"
         style={{ gridTemplateColumns: `repeat(${activeNavItems.length}, minmax(0, 1fr))` }}
@@ -120,16 +119,30 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
             (item.id === 'profile' && isProfileGroup) ||
             (item.id === 'cupom_trigger' && isCouponGroup);
 
+          // IDENTIFICAÇÃO DE ABAS ESPECIAIS (CUPOM E CLASSIFICADOS)
+          const isSpecial = item.id === 'cupom_trigger' || item.id === 'classifieds';
+
           return (
             <button 
               key={item.id}
               onClick={() => handleTabClick(item)} 
-              className="w-full h-full flex flex-col items-center justify-center outline-none active:scale-95 transition-transform" 
+              className={`w-full h-full flex flex-col items-center justify-center outline-none active:scale-95 transition-all relative ${
+                isSpecial 
+                  ? 'bg-blue-500/10 shadow-[0_-4px_12px_rgba(0,0,0,0.15)] -translate-y-[2px]' 
+                  : ''
+              }`} 
             >
-              <div className="mb-1">
-                {renderIconOrAvatar(item, isActive)}
+              {/* BORDA SUPERIOR INDICADORA PARA ITENS ESPECIAIS */}
+              {isSpecial && (
+                <div className="absolute top-0 left-[20%] right-[20%] h-[3px] bg-amber-400 rounded-b-full shadow-[0_1px_5px_rgba(251,191,36,0.4)]"></div>
+              )}
+
+              <div className={isSpecial ? 'mb-0.5 mt-1' : 'mb-1'}>
+                {renderIconOrAvatar(item, isActive, isSpecial)}
               </div>
-              <span className={`text-[8px] font-black uppercase tracking-tighter transition-all ${
+              <span className={`font-black uppercase tracking-tighter transition-all ${
+                isSpecial ? 'text-[9px]' : 'text-[8px]'
+              } ${
                 isActive ? 'text-white opacity-100' : 'text-white/60'
               }`}>
                 {item.label}
