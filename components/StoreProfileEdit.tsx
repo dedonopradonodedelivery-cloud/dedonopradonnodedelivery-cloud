@@ -10,30 +10,34 @@ import {
   Search, 
   PlusCircle, 
   Pencil, 
+  Trash2, 
   Building2, 
   Check,
-  Smartphone,
-  ImageIcon,
-  DollarSign,
-  Video,
-  Plus,
-  Clock,
-  Instagram,
-  CheckCircle2,
-  MapPin,
-  Tag,
-  CreditCard,
-  Phone,
-  AlertCircle,
   Hash,
-  FileText,
+  Sparkles,
+  CheckCircle2,
+  Send,
+  AlertCircle,
+  MapPin,
+  Smartphone,
   Mail,
-  Info
+  Info,
+  Globe,
+  Image as ImageIcon,
+  Eye,
+  Clock,
+  CreditCard,
+  ShieldCheck,
+  ExternalLink,
+  Calendar,
+  Lock,
+  Tag,
+  ShoppingBag
 } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import { useAuth } from '../contexts/AuthContext';
-import { CATEGORIES, SUBCATEGORIES } from '../constants';
-import { BusinessHour } from '../types';
+import { CATEGORIES, SUBCATEGORIES, ALL_TAGS } from '../constants';
+import { TaxonomyType, BusinessHour, TaxonomySuggestion } from '../types';
 
 interface StoreProfileEditProps {
   onBack: () => void;
@@ -43,36 +47,304 @@ const WEEK_DAYS = [
   { key: 'segunda', label: 'Segunda-feira' },
   { key: 'terca', label: 'Terça-feira' },
   { key: 'quarta', label: 'Quarta-feira' },
-  { key: 'quinta', label: 'Quarta-feira' },
+  { key: 'quinta', label: 'Quinta-feira' },
   { key: 'sexta', label: 'Sexta-feira' },
   { key: 'sabado', label: 'Sábado' },
   { key: 'domingo', label: 'Domingo' },
 ];
 
-const PAYMENT_METHODS = [
-    { id: 'dinheiro', label: 'Dinheiro' },
-    { id: 'pix', label: 'PIX' },
-    { id: 'credito', label: 'Cartão de Crédito' },
-    { id: 'debito', label: 'Cartão de Débito' },
-];
+const TAX_REGIMES = ['Simples Nacional', 'MEI', 'Lucro Presumido', 'Lucro Real', 'Pessoa Física'];
 
-const CATEGORY_SUGGESTIONS: Record<string, string[]> = {
-  'Comida': ['pizza', 'delivery', 'almoço', 'lanche', 'comida caseira', 'restaurante', 'marmita', 'café', 'sobremesa', 'self-service', 'japonês', 'hambúrguer', 'pão', 'bebidas', 'açai', 'doces', 'massas', 'churrasco', 'vegetariano', 'petiscos'],
-  'Serviços': ['manutenção', 'conserto', 'atendimento rápido', 'orçamento', 'instalação', 'reparo', 'serviço local', 'residencial', 'predial', 'chaveiro', 'elétrica', 'hidráulica', 'limpeza', 'dedetização', 'segurança', 'marcenaria', 'pintura', 'vidraçaria', 'ar condicionado', 'montagem'],
-  'Saúde': ['clínica', 'consulta', 'bem-estar', 'estética', 'saúde preventiva', 'atendimento especializado', 'médico', 'dentista', 'fisioterapia', 'exames', 'nutrição', 'psicologia', 'terapias', 'hospital', 'laboratório', 'pediatria', 'cardiologia', 'odontologia', 'saúde mental', 'farmácia'],
-  'Autos': ['mecânica', 'troca de óleo', 'revisão', 'funilaria', 'auto center', 'oficina', 'alinhamento', 'balanceamento', 'lavajato', 'peças', 'pneus', 'auto elétrica', 'guincho', 'insulfilm', 'estofamento', 'suspensão', 'freios', 'ar condicionado automotivo', 'venda de carros', 'motos'],
-  'Pets': ['pet shop', 'veterinário', 'banho e tosa', 'ração', 'acessórios pet', 'clínica veterinária', 'adestramento', 'passeador', 'hotel pet', 'creche pet', 'gatos', 'cachorros', 'aves', 'peixes', 'medicamentos pet', 'cirurgia veterinária', 'urgência pet', 'estética pet', 'vacinacao', 'castracao'],
-  'Beleza': ['salão de beleza', 'barbearia', 'corte de cabelo', 'manicure', 'pedicure', 'maquiagem', 'estética facial', 'estética corporal', 'sobrancelha', 'cílios', 'depilação', 'penteado', 'coloração', 'escova', 'massagem', 'dia de noiva', 'limpeza de pele', 'unhas em gel', 'barba', 'hidratação'],
-  'Casa': ['móveis', 'decoração', 'reforma', 'material de construção', 'iluminação', 'jardinagem', 'utensílios domésticos', 'cama mesa e banho', 'eletrodomésticos', 'marcenaria', 'arquitetura', 'design de interiores', 'cortinas', 'tapetes', 'organização', 'limpeza residencial', 'pintura', 'reparos', 'ferramentas', 'piscina'],
-  'Educação': ['escola', 'curso', 'idiomas', 'reforço escolar', 'aula particular', 'infantil', 'profissionalizante', 'música', 'dança', 'esportes', 'artes', 'tecnologia', 'preparatório', 'concursos', 'vestibular', 'ead', 'presencial', 'capacitação', 'treinamento', 'workshop'],
-  'Moda': ['roupas', 'feminina', 'masculina', 'infantil', 'calçados', 'acessórios', 'bolsas', 'moda íntima', 'fitness', 'praia', 'brechó', 'alfaiataria', 'costura', 'tênis', 'vestidos', 'jeans', 'camisetas', 'óculos', 'relógios', 'joias'],
-  'Lazer': ['eventos', 'festas', 'aluguel de espaço', 'buffet', 'animação', 'decoração de festas', 'clube', 'parque', 'turismo', 'viagem', 'hospedagem', 'espetáculo', 'teatro', 'cinema', 'show', 'excursão', 'lazer infantil', 'recreação', 'gastronomia', 'cultura'],
-  'Condomínio': ['administradora', 'síndico', 'manutenção predial', 'limpeza', 'segurança', 'portaria', 'jardinagem', 'reforma', 'pintura', 'elevadores', 'piscina', 'sistema de câmeras', 'interfone', 'limpeza de caixa d’água', 'dedetização', 'jurídico', 'contabilidade', 'facilities', 'bompet', 'coleta seletiva'],
-  'Mercado': ['supermercado', 'minimercado', 'hortifruti', 'padaria', 'açougue', 'bebidas', 'conveniência', 'produtos naturais', 'suplementos', 'limpeza', 'higiene', 'congelados', 'latas e conservas', 'biscoitos', 'leite e derivados', 'adega', 'vinho', 'cerveja', 'importados', 'cestas de natal'],
-  'Farmácia': ['medicamentos', 'genéricos', 'perfumaria', 'higiene', 'cosméticos', 'suplementos', 'manipulação', 'fraldas', 'cuidados pessoais', 'saúde', 'curativos', 'dermocosméticos', 'beleza', 'infantil', 'primeiros socorros', 'termômetro', 'vitaminas', 'emagrecimento', 'ortopédicos', 'testes rápidos'],
-  'Esportes': ['academia', 'treino', 'crossfit', 'yoga', 'pilates', 'lutas', 'natação', 'futebol', 'vôlei', 'beach tennis', 'dança', 'funcional', 'personal trainer', 'artigos esportivos', 'suplementos', 'emagrecimento', 'saúde', 'esporte infantil', 'quadra', 'atletismo'],
-  'Profissionais': ['advogado', 'contador', 'arquiteto', 'engenheiro', 'médico', 'dentista', 'psicólogo', 'nutricionista', 'veterinário', 'designer', 'desenvolvedor', 'corretor', 'fotógrafo', 'consultor', 'professor', 'tradutor', 'manicure', 'eletricista', 'encanador', 'pedreiro'],
-  'Eventos': ['festa', 'casamento', 'aniversário', 'buffet', 'decoração', 'espaço para eventos', 'aluguel de brinquedos', 'som e luz', 'dj', 'fotógrafo', 'filmagens', 'cerimonialista', 'doces finos', 'bolo', 'convites', 'lembrancinhas', 'trajes', 'maquiagem', 'música ao vivo', 'barman']
+// --- Componente Auxiliar de Input ---
+const FormField: React.FC<{
+  label: string;
+  value: string;
+  onChange: (val: string) => void;
+  placeholder?: string;
+  type?: string;
+  required?: boolean;
+  helperText?: string;
+  icon?: React.ElementType;
+  disabled?: boolean;
+}> = ({ label, value, onChange, placeholder, type = "text", required, helperText, icon: Icon, disabled }) => (
+  <div className="space-y-1.5">
+    <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">
+      {label} {required && <span className="text-red-500">*</span>}
+    </label>
+    <div className="relative group">
+      {Icon && <Icon className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 group-focus-within:text-[#1E5BFF]" />}
+      <input 
+        type={type}
+        value={value}
+        disabled={disabled}
+        onChange={e => onChange(e.target.value)}
+        placeholder={placeholder}
+        className={`w-full bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-4 text-sm font-bold dark:text-white outline-none focus:border-[#1E5BFF] focus:ring-4 focus:ring-blue-500/5 transition-all ${Icon ? 'pl-11' : ''} ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+      />
+    </div>
+    {helperText && <p className="text-[9px] text-gray-400 italic ml-1 leading-none">{helperText}</p>}
+  </div>
+);
+
+// --- Componente de Classificação ---
+interface TaxonomyFieldProps {
+  label: string;
+  placeholder: string;
+  options: { name: string; icon?: React.ReactNode }[];
+  selected: string;
+  onSelect: (name: string) => void;
+  required?: boolean;
+  allowCreate?: boolean;
+  onCreate?: () => void;
+  disabled?: boolean;
+}
+
+const TaxonomyField: React.FC<TaxonomyFieldProps> = ({ label, placeholder, options, selected, onSelect, required, allowCreate, onCreate, disabled }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [search, setSearch] = useState('');
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const filtered = options.filter(opt => opt.name.toLowerCase().includes(search.toLowerCase()));
+  const finalOptions = [...filtered];
+
+  return (
+    <div className="space-y-1.5" ref={dropdownRef}>
+      <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">
+        {label} {required && <span className="text-red-500">*</span>}
+      </label>
+      <div className="relative">
+        <button 
+          type="button"
+          disabled={disabled}
+          onClick={() => setIsOpen(!isOpen)}
+          className={`w-full bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-4 flex items-center justify-between text-sm font-bold transition-all ${disabled ? 'opacity-50 cursor-not-allowed' : ''} ${selected ? 'text-gray-900 dark:text-white' : 'text-gray-400'}`}
+        >
+          {selected || placeholder}
+          <ChevronDown size={18} className={`text-gray-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+        </button>
+
+        {isOpen && (
+          <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl shadow-2xl z-[100] overflow-hidden animate-in slide-in-from-top-2">
+            <div className="p-3 border-b border-gray-50 dark:border-gray-800 flex items-center gap-2 bg-gray-50/50">
+              <Search size={16} className="text-gray-400" />
+              <input 
+                autoFocus
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+                placeholder="Buscar..."
+                className="flex-1 bg-transparent border-none outline-none text-sm dark:text-white"
+              />
+            </div>
+            <div className="max-h-60 overflow-y-auto no-scrollbar py-2">
+              {finalOptions.map((opt, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={() => { 
+                      onSelect(opt.name); 
+                      setIsOpen(false); 
+                  }}
+                  className={`w-full px-4 py-3 text-left text-sm flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-gray-600 dark:text-gray-300`}
+                >
+                  <div className="flex items-center gap-3">
+                    {opt.icon && <span className="opacity-70">{opt.icon}</span>}
+                    {opt.name}
+                  </div>
+                  {selected === opt.name && <Check size={16} className="text-[#1E5BFF]" />}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+// --- COMPONENTE DE TAGS ---
+const TagSelector: React.FC<{
+  selectedTags: string[];
+  onChange: (tags: string[]) => void;
+}> = ({ selectedTags, onChange }) => {
+  const [input, setInput] = useState('');
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const availableTags = ALL_TAGS.filter(tag => 
+    !selectedTags.includes(tag) && tag.toLowerCase().includes(input.toLowerCase())
+  );
+
+  const handleAddTag = (tag: string) => {
+    if (selectedTags.length >= 15) return;
+    onChange([...selectedTags, tag]);
+    setInput('');
+    setShowSuggestions(false);
+  };
+
+  const handleRemoveTag = (tag: string) => {
+    onChange(selectedTags.filter(t => t !== tag));
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      if (input.trim() && !selectedTags.includes(input.trim()) && selectedTags.length < 15) {
+        handleAddTag(input.trim());
+      }
+    }
+  };
+
+  // Close suggestions on click outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+        setShowSuggestions(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  return (
+    <div className="space-y-2" ref={containerRef}>
+      <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">
+        Produtos / Serviços (Tags) <span className="text-red-500">*</span>
+      </label>
+      
+      <div className="relative">
+        <div className="w-full bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-2 flex flex-wrap gap-2 min-h-[56px]">
+          {selectedTags.map(tag => (
+            <span key={tag} className="bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 px-3 py-1.5 rounded-xl text-xs font-bold border border-gray-100 dark:border-gray-700 flex items-center gap-1.5">
+              {tag}
+              <button type="button" onClick={() => handleRemoveTag(tag)} className="text-gray-400 hover:text-red-500"><X size={12} /></button>
+            </span>
+          ))}
+          <input 
+            value={input}
+            onChange={e => { setInput(e.target.value); setShowSuggestions(true); }}
+            onFocus={() => setShowSuggestions(true)}
+            onKeyDown={handleKeyDown}
+            placeholder={selectedTags.length < 15 ? "Adicionar tag..." : "Limite atingido"}
+            className="flex-1 bg-transparent border-none outline-none text-sm font-medium p-2 min-w-[120px] dark:text-white"
+            disabled={selectedTags.length >= 15}
+          />
+        </div>
+        
+        {showSuggestions && input.length > 0 && availableTags.length > 0 && (
+          <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl shadow-xl z-50 max-h-48 overflow-y-auto no-scrollbar">
+            {availableTags.map(tag => (
+              <button
+                key={tag}
+                type="button"
+                onClick={() => handleAddTag(tag)}
+                className="w-full text-left px-4 py-3 text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+              >
+                {tag}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+      <p className="text-[9px] text-gray-400 italic ml-1">
+        {selectedTags.length}/15 tags selecionadas. Digite para buscar ou criar nova.
+      </p>
+    </div>
+  );
+};
+
+// --- MODAL DE CRIAÇÃO DE TAXONOMIA ---
+const CreateTaxonomyModal: React.FC<{
+    isOpen: boolean;
+    onClose: () => void;
+    type: 'category' | 'subcategory';
+    parentName?: string;
+    storeName: string;
+    onSuccess: () => void;
+    userId: string;
+}> = ({ isOpen, onClose, type, parentName, storeName, onSuccess, userId }) => {
+    const [name, setName] = useState('');
+    const [justification, setJustification] = useState('');
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
+    if (!isOpen) return null;
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!name.trim()) return;
+        setIsSubmitting(true);
+
+        try {
+            const saved = localStorage.getItem('taxonomy_suggestions') || '[]';
+            const suggestions: TaxonomySuggestion[] = JSON.parse(saved);
+            const exists = suggestions.find(s => s.type === type && s.name.toLowerCase() === name.toLowerCase());
+
+            if (exists) {
+                alert('Já existe uma solicitação para este nome.');
+                setIsSubmitting(false);
+                return;
+            }
+
+            const newSuggestion: TaxonomySuggestion = {
+                id: `sug-${Date.now()}`,
+                type,
+                name: name.trim(),
+                parentName,
+                justification,
+                status: 'pending',
+                storeName,
+                merchantId: userId,
+                createdAt: new Date().toISOString()
+            };
+
+            localStorage.setItem('taxonomy_suggestions', JSON.stringify([...suggestions, newSuggestion]));
+            onSuccess();
+            onClose();
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    return (
+        <div className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-4 animate-in fade-in">
+            <div className="bg-white dark:bg-gray-900 w-full max-w-sm rounded-[2rem] p-6 shadow-2xl animate-in slide-in-from-bottom sm:zoom-in-95" onClick={e => e.stopPropagation()}>
+                <div className="flex justify-between items-center mb-6">
+                    <h3 className="font-black text-lg text-gray-900 dark:text-white">Nova {type === 'category' ? 'Categoria' : 'Subcategoria'}</h3>
+                    <button onClick={onClose}><X size={20} className="text-gray-400" /></button>
+                </div>
+                <form onSubmit={handleSubmit} className="space-y-4">
+                    {type === 'subcategory' && (
+                        <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded-xl border border-gray-100 dark:border-gray-700">
+                             <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Categoria Pai</p>
+                             <p className="font-bold text-gray-900 dark:text-white">{parentName}</p>
+                        </div>
+                    )}
+                    <div>
+                        <label className="text-xs font-bold text-gray-500 uppercase ml-1">Nome sugerido</label>
+                        <input value={name} onChange={e => setName(e.target.value)} className="w-full p-3 bg-gray-50 dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 outline-none mt-1 font-medium dark:text-white" placeholder={`Ex: ${type === 'category' ? 'Automóveis' : 'Pneus'}`} autoFocus />
+                    </div>
+                    <div>
+                        <label className="text-xs font-bold text-gray-500 uppercase ml-1">Descrição curta (Opcional)</label>
+                        <textarea value={justification} onChange={e => setJustification(e.target.value)} rows={3} className="w-full p-3 bg-gray-50 dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 outline-none mt-1 text-sm dark:text-white resize-none" placeholder="Breve descrição..." />
+                    </div>
+                    <button type="submit" disabled={isSubmitting || !name} className="w-full bg-[#1E5BFF] text-white font-black py-4 rounded-xl shadow-lg active:scale-95 transition-all flex items-center justify-center gap-2">
+                        {isSubmitting ? <Loader2 className="animate-spin" /> : 'Enviar para aprovação'}
+                    </button>
+                </form>
+            </div>
+        </div>
+    );
 };
 
 export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) => {
@@ -81,19 +353,24 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
   const [isSaving, setIsSaving] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   
-  const logoInputRef = useRef<HTMLInputElement>(null);
-  const [tagInput, setTagInput] = useState('');
+  // Estados de criação de taxonomia
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [createType, setCreateType] = useState<'category' | 'subcategory'>('category');
+  const [pendingTaxonomyMsg, setPendingTaxonomyMsg] = useState<string | null>(null);
 
-  // --- STATE DO FORMULÁRIO UNIFICADO (PÚBLICO + FISCAL) ---
+  // Combinação de constantes e aprovados
+  const [availableCategories, setAvailableCategories] = useState(CATEGORIES.map(c => ({ name: c.name })));
+  const [availableSubcategories, setAvailableSubcategories] = useState<any[]>([]);
+  
+  const logoInputRef = useRef<HTMLInputElement>(null);
+  const bannerInputRef = useRef<HTMLInputElement>(null);
+
   const [formData, setFormData] = useState({
-    // Públicos
+    // --- DADOS PÚBLICOS ---
     nome_exibido: '',
     category: '',
     subcategory: '',
     bairro: '',
-    rua: '',
-    numero: '',
-    cidade: 'Rio de Janeiro',
     description: '',
     whatsapp_publico: '',
     telefone_fixo_publico: '',
@@ -101,25 +378,92 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
     email_publico: '',
     logo_url: '',
     banner_url: '',
+    gallery: [] as string[],
     tags: [] as string[],
-    payment_methods: [] as string[],
-    payment_other: '',
+
+    // --- ENDEREÇO UNIDADE ---
+    cep: '',
+    rua: '',
+    numero: '',
+    complemento: '',
+    cidade: 'Rio de Janeiro',
+    estado: 'RJ',
+    is_delivery_only: false,
+    
+    // --- CONFIGURAÇÕES ADICIONAIS ---
     accepts_online_orders: false,
     min_order_value: '',
+
+    // --- HORÁRIOS ---
     business_hours: WEEK_DAYS.reduce((acc, day) => ({ 
       ...acc, 
       [day.key]: { open: true, start: '09:00', end: '18:00' } 
     }), {} as Record<string, BusinessHour>),
-    confirm_correct: false,
+    hours_observations: '',
 
-    // Fiscais (Uso Interno)
+    // --- DADOS FISCAIS ---
     razao_social: '',
+    nome_fantasia_fiscal: '',
     cnpj: '',
     inscricao_estadual: '',
     inscricao_municipal: '',
+    tax_regime: 'Simples Nacional',
     fiscal_address: '',
-    email_fiscal: ''
+    billing_email: '',
+    legal_representative: '',
+    legal_rep_cpf: '',
+
+    // --- ADMINISTRATIVO ---
+    is_active: true,
+    account_type: 'Grátis',
+    registration_date: new Date().toLocaleDateString('pt-BR'),
   });
+
+  // Carregar taxonomias aprovadas do localStorage e verificar se há pendentes
+  useEffect(() => {
+    const loadTaxonomies = () => {
+        const savedApproved = localStorage.getItem('approved_taxonomy');
+        if (savedApproved) {
+            const approved = JSON.parse(savedApproved);
+            // Mesclar categorias
+            const extraCats = approved.filter((a: any) => a.type === 'category').map((a: any) => ({ name: a.name }));
+            setAvailableCategories([...CATEGORIES.map(c => ({ name: c.name })), ...extraCats]);
+        }
+
+        // Verificar sugestões pendentes do usuário atual
+        if (user) {
+            const savedSuggestions = localStorage.getItem('taxonomy_suggestions');
+            if (savedSuggestions) {
+                const suggestions: TaxonomySuggestion[] = JSON.parse(savedSuggestions);
+                const myPending = suggestions.filter(s => s.merchantId === user.id && s.status === 'pending');
+                if (myPending.length > 0) {
+                    setPendingTaxonomyMsg(`Você tem ${myPending.length} sugestão(ões) de categoria aguardando aprovação.`);
+                }
+            }
+        }
+    };
+    loadTaxonomies();
+    window.addEventListener('storage', loadTaxonomies);
+    return () => window.removeEventListener('storage', loadTaxonomies);
+  }, [user]);
+
+  // Atualizar subcategorias ao mudar categoria
+  useEffect(() => {
+    if (!formData.category) {
+        setAvailableSubcategories([]);
+        return;
+    }
+    const constSubs = SUBCATEGORIES[formData.category] || [];
+    const saved = localStorage.getItem('approved_taxonomy');
+    let extraSubs: any[] = [];
+    if (saved) {
+        const approved = JSON.parse(saved);
+        extraSubs = approved
+            .filter((a: any) => a.type === 'subcategory' && a.parentName === formData.category)
+            .map((a: any) => ({ name: a.name }));
+    }
+    setAvailableSubcategories([...constSubs, ...extraSubs]);
+  }, [formData.category]);
 
   useEffect(() => {
     if (!user) return;
@@ -131,9 +475,9 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
             ...prev,
             ...data,
             business_hours: data.business_hours || prev.business_hours,
-            tags: data.tags || [],
-            payment_methods: data.payment_methods || [],
-            min_order_value: data.min_order_value ? String(data.min_order_value) : ''
+            accepts_online_orders: data.accepts_online_orders ?? false,
+            min_order_value: data.min_order_value ? String(data.min_order_value) : '',
+            tags: data.tags || []
           }));
         }
       } catch (e) { console.warn(e); } finally { setIsLoading(false); }
@@ -141,36 +485,15 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
     fetchStoreData();
   }, [user]);
 
-  // --- LÓGICA DE TAGS (ENTER PARA CRIAR) ---
-  const handleAddTag = (val: string) => {
-    const cleanVal = val.trim().toLowerCase();
-    if (cleanVal && !formData.tags.includes(cleanVal) && formData.tags.length < 15) {
-        setFormData(prev => ({ ...prev, tags: [...prev.tags, cleanVal] }));
-    }
-  };
-
-  const removeTag = (t: string) => {
-    setFormData(prev => ({ ...prev, tags: prev.tags.filter(tag => tag !== t) }));
-  };
-
-  const togglePayment = (id: string) => {
-    setFormData(prev => ({
-        ...prev,
-        payment_methods: prev.payment_methods.includes(id) 
-            ? prev.payment_methods.filter(m => m !== id)
-            : [...prev.payment_methods, id]
-    }));
-  };
-
   const handleSave = async () => {
-    if (!formData.nome_exibido || !formData.whatsapp_publico || !formData.bairro || !formData.category) {
-      alert('Preencha os campos obrigatórios (*)');
-      return;
-    }
-    if (!formData.confirm_correct) {
-      alert('Você precisa confirmar que as informações estão corretas.');
-      return;
-    }
+    // Validar campos obrigatórios
+    if (!formData.nome_exibido) { alert('Informe o nome da loja.'); return; }
+    if (!formData.description) { alert('Informe uma descrição curta.'); return; }
+    if (!formData.whatsapp_publico) { alert('Informe o telefone/WhatsApp.'); return; }
+    if (!formData.bairro) { alert('Informe o endereço/bairro.'); return; }
+    if (!formData.category) { alert('Selecione uma categoria.'); return; }
+    if (!formData.subcategory) { alert('Selecione uma subcategoria.'); return; }
+    if (!formData.tags || formData.tags.length === 0) { alert('Adicione pelo menos uma tag de produto ou serviço.'); return; }
 
     setIsSaving(true);
     try {
@@ -180,257 +503,205 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
         min_order_value: formData.min_order_value ? parseFloat(formData.min_order_value) : null,
         updated_at: new Date().toISOString()
       }, { onConflict: 'owner_id' });
+      
       if (error) throw error;
+      
       setShowSuccess(true);
       setTimeout(() => setShowSuccess(false), 3000);
-    } catch (err) { alert('Erro ao salvar.'); } finally { setIsSaving(false); }
+    } catch (err) { 
+      console.error(err);
+      alert('Erro ao salvar alterações.'); 
+    } finally { 
+      setIsSaving(false); 
+    }
   };
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>, target: 'logo_url' | 'banner_url') => {
     const file = e.target.files?.[0];
     if (!file) return;
     const reader = new FileReader();
-    reader.onload = () => setFormData({ ...formData, logo_url: reader.result as string });
+    reader.onload = () => setFormData({ ...formData, [target]: reader.result as string });
     reader.readAsDataURL(file);
   };
 
-  const suggestedTags = useMemo(() => {
-    if (!formData.category) return [];
-    const suggestions = CATEGORY_SUGGESTIONS[formData.category] || [];
-    return suggestions.filter(t => !formData.tags.includes(t)).slice(0, 20);
-  }, [formData.category, formData.tags]);
+  const handleCreateTaxonomy = (type: 'category' | 'subcategory') => {
+      setCreateType(type);
+      setShowCreateModal(true);
+  };
+
+  const onSuggestionSuccess = () => {
+      setPendingTaxonomyMsg("Sua sugestão foi enviada e está aguardando aprovação.");
+      setTimeout(() => setPendingTaxonomyMsg(null), 5000);
+  };
 
   if (isLoading) return <div className="min-h-screen flex items-center justify-center bg-white dark:bg-gray-950"><Loader2 className="animate-spin text-[#1E5BFF]" /></div>;
 
   return (
-    <div className="min-h-screen bg-[#F4F7FF] dark:bg-gray-950 font-sans pb-32 animate-in slide-in-from-right duration-300">
-      <div className="sticky top-0 z-40 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md px-5 h-20 flex items-center gap-4 border-b border-blue-100 dark:border-gray-800">
-        <button onClick={onBack} className="p-2.5 bg-gray-100 dark:bg-gray-800 rounded-2xl hover:bg-gray-200 transition-colors"><ChevronLeft size={20} className="text-gray-800 dark:text-white" /></button>
-        <div className="flex-1"><h1 className="font-black text-lg text-gray-900 dark:text-white uppercase tracking-tighter">Dados da Loja</h1></div>
-        <button onClick={handleSave} disabled={isSaving} className="p-3 bg-[#1E5BFF] text-white rounded-2xl shadow-xl active:scale-90 transition-all">{isSaving ? <Loader2 size={20} className="animate-spin" /> : <Save size={20} />}</button>
+    <div className="min-h-screen bg-[#F8F9FC] dark:bg-gray-950 font-sans pb-32 animate-in slide-in-from-right duration-300">
+      
+      {/* HEADER */}
+      <div className="sticky top-0 z-40 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md px-5 h-20 flex items-center gap-4 border-b border-gray-100 dark:border-gray-800">
+        <button onClick={onBack} className="p-2.5 bg-gray-100 dark:bg-gray-800 rounded-2xl hover:bg-gray-200 transition-colors">
+          <ChevronLeft className="w-6 h-6 text-gray-800 dark:text-white" />
+        </button>
+        <div className="flex-1">
+          <h1 className="font-black text-lg text-gray-900 dark:text-white uppercase tracking-tighter">Configurar Loja</h1>
+          <p className="text-[10px] text-blue-500 font-bold uppercase tracking-widest leading-none mt-0.5">Gestão do Perfil</p>
+        </div>
+        <button onClick={handleSave} disabled={isSaving} className="p-3 bg-[#1E5BFF] text-white rounded-2xl shadow-xl shadow-blue-500/20 active:scale-90 transition-all">
+          {isSaving ? <Loader2 size={20} className="animate-spin" /> : <Save size={20} />}
+        </button>
       </div>
 
       <div className="p-6 space-y-12 max-w-md mx-auto">
         
-        {/* --- DADOS PÚBLICOS --- */}
+        {/* BLOCO 1: INFORMAÇÕES DA LOJA */}
         <section className="space-y-6">
-          <div className="flex items-center gap-2 px-1"><StoreIcon size={16} className="text-[#1E5BFF]" /><h2 className="text-[11px] font-black text-blue-400 uppercase tracking-widest">1. Perfil Público (Visível)</h2></div>
-          <div className="bg-white dark:bg-gray-900 rounded-[2.5rem] p-8 border border-blue-50 dark:border-gray-800 shadow-sm space-y-6">
+          <div className="flex items-center gap-2 px-1">
+            <StoreIcon size={16} className="text-[#1E5BFF]" />
+            <h2 className="text-[11px] font-black text-gray-400 uppercase tracking-widest">1. Informações da Loja</h2>
+          </div>
+
+          <div className="bg-white dark:bg-gray-900 rounded-[2.5rem] p-6 border border-gray-100 dark:border-gray-800 shadow-sm space-y-6">
              <div className="flex flex-col items-center">
                 <div className="relative group">
-                    <div className="w-28 h-28 rounded-[2rem] bg-blue-50 dark:bg-gray-800 border-2 border-dashed border-blue-100 dark:border-gray-700 flex items-center justify-center overflow-hidden">
-                        {formData.logo_url ? <img src={formData.logo_url} className="w-full h-full object-contain p-2" /> : <StoreIcon className="text-blue-200" size={32} />}
+                    <div className="w-28 h-28 rounded-[2rem] bg-gray-50 dark:bg-gray-800 border-2 border-dashed border-gray-200 dark:border-gray-700 flex items-center justify-center overflow-hidden">
+                        {formData.logo_url ? <img src={formData.logo_url} className="w-full h-full object-contain p-2" /> : <StoreIcon className="text-gray-300" size={32} />}
                     </div>
                     <button onClick={() => logoInputRef.current?.click()} className="absolute -bottom-2 -right-2 bg-[#1E5BFF] text-white p-2.5 rounded-xl shadow-lg border-2 border-white dark:border-gray-900"><Pencil size={16} /></button>
                 </div>
-                <p className="text-[9px] font-bold text-gray-400 uppercase mt-4 text-center leading-tight">Logotipo <br/><span className="text-[8px] opacity-60">Aparece na busca e no perfil</span></p>
+                <p className="text-[9px] font-bold text-gray-400 uppercase mt-4">Logotipo</p>
              </div>
+
+             <FormField label="Nome da Loja *" value={formData.nome_exibido} onChange={v => setFormData({...formData, nome_exibido: v})} required placeholder="Ex: Padaria Central" />
              
-             <div>
-                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1 mb-1.5">Nome Fantasia *</label>
-                <input required value={formData.nome_exibido} onChange={e => setFormData({...formData, nome_exibido: e.target.value})} className="w-full p-4 bg-blue-50/50 dark:bg-gray-800 border border-blue-100 dark:border-gray-800 rounded-2xl text-sm font-bold dark:text-white outline-none focus:border-[#1E5BFF]" placeholder="Ex: Padaria do Bairro" />
-             </div>
-
-             <div>
-                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1 mb-1.5">WhatsApp Comercial *</label>
-                <input required value={formData.whatsapp_publico} onChange={e => setFormData({...formData, whatsapp_publico: e.target.value})} className="w-full p-4 bg-blue-50/50 dark:bg-gray-800 border border-blue-100 dark:border-gray-800 rounded-2xl text-sm font-bold dark:text-white outline-none" placeholder="(21) 99999-0000" />
-                <p className="text-[9px] text-gray-400 mt-2 ml-1 italic">Gera botão de contato direto no seu perfil.</p>
-             </div>
-
-             <div className="grid grid-cols-4 gap-3">
-                 <div className="col-span-3">
-                    <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1 mb-1.5">Rua *</label>
-                    <input required value={formData.rua} onChange={e => setFormData({...formData, rua: e.target.value})} className="w-full p-4 bg-blue-50/50 dark:bg-gray-800 border border-blue-100 dark:border-gray-800 rounded-2xl text-sm font-bold dark:text-white outline-none" placeholder="Av. Geremário Dantas" />
-                 </div>
-                 <div className="col-span-1">
-                    <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1 mb-1.5">Nº *</label>
-                    <input required value={formData.numero} onChange={e => setFormData({...formData, numero: e.target.value})} className="w-full p-4 bg-blue-50/50 dark:bg-gray-800 border border-blue-100 dark:border-gray-800 rounded-2xl text-sm font-bold dark:text-white outline-none" placeholder="100" />
-                 </div>
-             </div>
-             <div>
-                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1 mb-1.5">Bairro *</label>
-                <select required value={formData.bairro} onChange={e => setFormData({...formData, bairro: e.target.value})} className="w-full p-4 bg-blue-50/50 dark:bg-gray-800 border border-blue-100 dark:border-gray-800 rounded-2xl text-sm font-bold dark:text-white outline-none">
-                    <option value="">Selecione...</option>
-                    {['Freguesia', 'Taquara', 'Anil', 'Pechincha', 'Tanque', 'Curicica'].map(h => <option key={h} value={h}>{h}</option>)}
-                </select>
-             </div>
-          </div>
-        </section>
-
-        {/* --- HORÁRIOS --- */}
-        <section className="space-y-6">
-          <div className="flex items-center gap-2 px-1"><Clock size={16} className="text-amber-500" /><h2 className="text-[11px] font-black text-blue-400 uppercase tracking-widest">2. Horário de Funcionamento</h2></div>
-          <div className="bg-white dark:bg-gray-900 rounded-[2.5rem] p-8 border border-blue-50 dark:border-gray-800 shadow-sm space-y-4">
-             {WEEK_DAYS.map(day => (
-                 <div key={day.key} className="flex items-center justify-between py-2 border-b border-gray-50 last:border-0">
-                    <div className="flex items-center gap-3">
-                        <div onClick={() => setFormData(prev => ({...prev, business_hours: {...prev.business_hours, [day.key]: {...prev.business_hours[day.key], open: !prev.business_hours[day.key].open}}}))} className={`w-5 h-5 rounded border flex items-center justify-center cursor-pointer transition-colors ${formData.business_hours[day.key].open ? 'bg-blue-600 border-blue-600' : 'border-gray-300'}`}>
-                            {formData.business_hours[day.key].open && <Check size={14} className="text-white" />}
-                        </div>
-                        <span className="text-xs font-bold text-gray-700 dark:text-gray-300">{day.label}</span>
-                    </div>
-                    <div className={`flex items-center gap-2 transition-opacity ${!formData.business_hours[day.key].open && 'opacity-20 pointer-events-none'}`}>
-                        <input type="time" value={formData.business_hours[day.key].start} onChange={e => setFormData(prev => ({...prev, business_hours: {...prev.business_hours, [day.key]: {...prev.business_hours[day.key], start: e.target.value}}}))} className="bg-blue-50/50 dark:bg-gray-800 p-2 rounded-lg text-xs font-bold" />
-                        <span className="text-gray-400">-</span>
-                        <input type="time" value={formData.business_hours[day.key].end} onChange={e => setFormData(prev => ({...prev, business_hours: {...prev.business_hours, [day.key]: {...prev.business_hours[day.key], end: e.target.value}}}))} className="bg-blue-50/50 dark:bg-gray-800 p-2 rounded-lg text-xs font-bold" />
-                    </div>
-                 </div>
-             ))}
-          </div>
-        </section>
-
-        {/* --- FORMAS DE PAGAMENTO --- */}
-        <section className="space-y-6">
-          <div className="flex items-center gap-2 px-1"><CreditCard size={16} className="text-emerald-500" /><h2 className="text-[11px] font-black text-blue-400 uppercase tracking-widest">3. Formas de Pagamento</h2></div>
-          <div className="bg-white dark:bg-gray-900 rounded-[2.5rem] p-8 border border-blue-50 dark:border-gray-800 shadow-sm space-y-4">
-             <div className="grid grid-cols-2 gap-3">
-                 {PAYMENT_METHODS.map(m => (
-                     <div key={m.id} onClick={() => togglePayment(m.id)} className={`p-4 rounded-2xl border-2 flex items-center gap-3 cursor-pointer transition-all ${formData.payment_methods.includes(m.id) ? 'bg-blue-50 border-blue-600' : 'bg-gray-50 dark:bg-gray-800 border-transparent'}`}>
-                        <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${formData.payment_methods.includes(m.id) ? 'bg-blue-600 border-blue-600' : 'border-gray-300'}`}>
-                            {formData.payment_methods.includes(m.id) && <Check size={10} className="text-white" />}
-                        </div>
-                        <span className="text-[10px] font-black uppercase tracking-tight text-gray-700 dark:text-gray-300">{m.label}</span>
-                     </div>
-                 ))}
-             </div>
-             <div>
-                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1 mb-1.5 mt-4">Outras Formas</label>
-                <input value={formData.payment_other} onChange={e => setFormData({...formData, payment_other: e.target.value})} className="w-full p-4 bg-blue-50/30 dark:bg-gray-800 border border-blue-100 dark:border-gray-800 rounded-2xl text-sm font-bold dark:text-white outline-none" placeholder="Ex: VR, Sodexo, Ticket..." />
-             </div>
-             <p className="text-[9px] text-gray-400 mt-2 ml-1 italic">Ajuda o cliente na decisão de contato.</p>
-          </div>
-        </section>
-
-        {/* --- CLASSIFICAÇÃO E BUSCA --- */}
-        <section className="space-y-6">
-          <div className="flex items-center gap-2 px-1"><Hash size={16} className="text-[#1E5BFF]" /><h2 className="text-[11px] font-black text-blue-400 uppercase tracking-widest">4. Indexação e Busca</h2></div>
-          <div className="bg-white dark:bg-gray-900 rounded-[2.5rem] p-8 border border-blue-50 dark:border-gray-800 shadow-sm space-y-6">
-             <div>
-                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1 mb-1.5">Categoria Principal *</label>
-                <select required value={formData.category} onChange={e => setFormData({...formData, category: e.target.value, subcategory: ''})} className="w-full p-4 bg-blue-50/50 dark:bg-gray-800 border border-blue-100 dark:border-gray-800 rounded-2xl text-sm font-bold dark:text-white outline-none">
-                    <option value="">Selecione...</option>
-                    {CATEGORIES.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}
-                </select>
-             </div>
-
-             <div>
-                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1 mb-1.5">Tags de Busca (ENTER para criar) *</label>
-                <input 
-                    value={tagInput}
-                    onChange={e => setTagInput(e.target.value)}
-                    onKeyDown={(e) => { if(e.key === 'Enter') { e.preventDefault(); handleAddTag(tagInput); setTagInput(''); } }}
-                    placeholder="Ex: pizza, delivery, massa..." 
-                    className="w-full p-4 bg-blue-50/50 dark:bg-gray-800 border border-blue-100 dark:border-gray-800 rounded-2xl text-sm font-bold dark:text-white outline-none" 
+             <div className="space-y-1.5">
+                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Descrição Curta *</label>
+                <textarea 
+                    value={formData.description} 
+                    onChange={e => setFormData({...formData, description: e.target.value})} 
+                    placeholder="Conte um pouco sobre sua loja..."
+                    className="w-full bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-4 text-sm font-bold dark:text-white outline-none focus:border-[#1E5BFF] transition-all resize-none min-h-[100px]"
                 />
-                
-                {/* TAGS SELECIONADAS */}
-                <div className="flex flex-wrap gap-2 mt-3">
-                    {formData.tags.map(t => (
-                        <div key={t} className="bg-blue-600 text-white px-3 py-1.5 rounded-full text-[10px] font-black uppercase flex items-center gap-2">
-                            {t}
-                            <button onClick={() => removeTag(t)}><X size={12} /></button>
-                        </div>
-                    ))}
-                </div>
-
-                {/* TAGS SUGERIDAS DINÂMICAS */}
-                {suggestedTags.length > 0 && (
-                    <div className="mt-6 pt-4 border-t border-gray-50 dark:border-gray-800">
-                        <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 ml-1">Sugestões para {formData.category}</p>
-                        <div className="flex flex-wrap gap-2">
-                            {suggestedTags.map(tag => (
-                                <button 
-                                    key={tag}
-                                    type="button"
-                                    onClick={() => handleAddTag(tag)}
-                                    className="px-3 py-1.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 text-[10px] font-bold uppercase transition-all hover:border-blue-500 hover:text-blue-500 active:scale-95"
-                                >
-                                    + {tag}
-                                </button>
-                            ))}
-                        </div>
-                        <p className="text-[9px] text-gray-400 mt-4 ml-1 font-medium">Clique nas sugestões para adicionar rapidamente suas tags de busca.</p>
-                    </div>
-                )}
-                
-                <p className="text-[9px] text-blue-500 mt-2 ml-1 font-bold">As tags ajudam sua loja a aparecer na barra de busca. <br/>Limite: 15 tags.</p>
              </div>
 
-             <div>
-                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1 mb-1.5">Descrição Curta *</label>
-                <textarea required value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} placeholder="Escreva uma breve apresentação da sua loja..." className="w-full p-4 bg-blue-50/50 dark:bg-gray-800 border border-blue-100 dark:border-gray-800 rounded-2xl text-sm font-medium dark:text-white outline-none min-h-[120px] resize-none" />
+             <FormField label="Telefone / WhatsApp *" value={formData.whatsapp_publico} onChange={v => setFormData({...formData, whatsapp_publico: v})} icon={Smartphone} placeholder="(21) 99999-0000" />
+             
+             <div className="space-y-1.5">
+                 <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Endereço *</label>
+                 <div className="space-y-3">
+                     <input value={formData.cep} onChange={e => setFormData({...formData, cep: e.target.value})} placeholder="CEP" className="w-full bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-4 text-sm font-bold dark:text-white outline-none" />
+                     <div className="grid grid-cols-4 gap-3">
+                        <input value={formData.rua} onChange={e => setFormData({...formData, rua: e.target.value})} placeholder="Rua" className="col-span-3 w-full bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-4 text-sm font-bold dark:text-white outline-none" />
+                        <input value={formData.numero} onChange={e => setFormData({...formData, numero: e.target.value})} placeholder="Nº" className="col-span-1 w-full bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-4 text-sm font-bold dark:text-white outline-none" />
+                     </div>
+                     <input value={formData.bairro} onChange={e => setFormData({...formData, bairro: e.target.value})} placeholder="Bairro" className="w-full bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-4 text-sm font-bold dark:text-white outline-none" />
+                 </div>
              </div>
           </div>
         </section>
 
-        {/* --- DADOS FISCAIS (NOVO - CENTRALIZADO) --- */}
+        {/* BLOCO 2: RAMO DO NEGÓCIO */}
         <section className="space-y-6">
-          <div className="flex items-center gap-2 px-1"><FileText size={16} className="text-slate-500" /><h2 className="text-[11px] font-black text-slate-500 uppercase tracking-widest">5. Dados para Nota Fiscal (Uso Interno)</h2></div>
-          <div className="bg-slate-50 dark:bg-slate-900 rounded-[2.5rem] p-8 border border-slate-200 dark:border-slate-800 shadow-sm space-y-6">
-             <div className="p-4 bg-amber-50 dark:bg-amber-900/10 rounded-2xl border border-amber-100 dark:border-amber-800/30 flex gap-4">
-                <Info size={20} className="text-amber-600 shrink-0 mt-1" />
-                <p className="text-[10px] text-amber-800 dark:text-amber-200 font-bold leading-relaxed">
-                  Estes dados são utilizados exclusivamente para faturamento de serviços e emissão de NF. <strong className="uppercase">Não ficam visíveis para os clientes.</strong>
-                </p>
-             </div>
-
-             <div>
-                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 mb-1.5">Razão Social</label>
-                <input value={formData.razao_social} onChange={e => setFormData({...formData, razao_social: e.target.value.toUpperCase()})} className="w-full p-4 bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-2xl text-sm font-bold dark:text-white outline-none" placeholder="RAZÃO SOCIAL DA EMPRESA LTDA" />
-             </div>
-
-             <div>
-                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 mb-1.5">CNPJ</label>
-                <input value={formData.cnpj} onChange={e => setFormData({...formData, cnpj: e.target.value})} className="w-full p-4 bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-2xl text-sm font-bold dark:text-white outline-none" placeholder="00.000.000/0001-00" />
-             </div>
-
-             <div className="grid grid-cols-2 gap-4">
-                <div>
-                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 mb-1.5">Insc. Estadual</label>
-                    <input value={formData.inscricao_estadual} onChange={e => setFormData({...formData, inscricao_estadual: e.target.value})} className="w-full p-4 bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-2xl text-sm font-bold dark:text-white outline-none" placeholder="Opcional" />
+          <div className="flex items-center gap-2 px-1">
+            <Tag size={16} className="text-blue-500" />
+            <h2 className="text-[11px] font-black text-gray-400 uppercase tracking-widest">2. Ramo do Negócio</h2>
+          </div>
+          <div className="bg-white dark:bg-gray-900 rounded-[2.5rem] p-6 border border-gray-100 dark:border-gray-800 shadow-sm space-y-5">
+             
+             {pendingTaxonomyMsg && (
+                <div className="bg-amber-50 dark:bg-amber-900/20 p-4 rounded-2xl border border-amber-200 dark:border-amber-800/30 flex items-start gap-3">
+                    <Clock size={16} className="text-amber-600 shrink-0 mt-0.5" />
+                    <p className="text-xs text-amber-700 dark:text-amber-300 font-bold leading-relaxed">{pendingTaxonomyMsg}</p>
                 </div>
-                <div>
-                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 mb-1.5">Insc. Municipal</label>
-                    <input value={formData.inscricao_municipal} onChange={e => setFormData({...formData, inscricao_municipal: e.target.value})} className="w-full p-4 bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-2xl text-sm font-bold dark:text-white outline-none" placeholder="Opcional" />
-                </div>
-             </div>
+             )}
 
-             <div>
-                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 mb-1.5">E-mail Fiscal / Faturamento</label>
-                <input value={formData.email_fiscal} onChange={e => setFormData({...formData, email_fiscal: e.target.value})} className="w-full p-4 bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-2xl text-sm font-bold dark:text-white outline-none" placeholder="financeiro@empresa.com.br" />
-             </div>
+             <TaxonomyField 
+                label="Categoria Principal *" 
+                placeholder="Selecione..." 
+                options={availableCategories} 
+                selected={formData.category} 
+                onSelect={v => setFormData({...formData, category: v, subcategory: ''})} 
+             />
+             
+             <TaxonomyField 
+                label="Subcategoria *" 
+                placeholder="Selecione..." 
+                options={availableSubcategories} 
+                selected={formData.subcategory} 
+                onSelect={v => setFormData({...formData, subcategory: v})} 
+                disabled={!formData.category}
+             />
+
+             {/* TAGS SELECTOR */}
+             <TagSelector 
+                selectedTags={formData.tags || []} 
+                onChange={(tags) => setFormData({...formData, tags})} 
+             />
+
+             <button 
+                onClick={() => handleCreateTaxonomy(formData.category ? 'subcategory' : 'category')}
+                className="w-full py-4 rounded-2xl border-2 border-dashed border-gray-200 dark:border-gray-700 text-gray-400 dark:text-gray-500 font-bold text-xs uppercase tracking-widest hover:border-blue-400 hover:text-blue-500 transition-all flex items-center justify-center gap-2"
+             >
+                <PlusCircle size={16} /> Não encontrou? Sugerir nova categoria
+             </button>
           </div>
         </section>
 
-        {/* --- CONFIRMAÇÃO --- */}
+        {/* BLOCO 3: CONFIGURAÇÕES ADICIONAIS */}
         <section className="space-y-6">
-            <div className="bg-white dark:bg-gray-900 rounded-[2.5rem] p-8 border border-blue-50 dark:border-gray-800 shadow-sm">
-                <label className="flex items-center gap-4 cursor-pointer group">
-                    <div onClick={() => setFormData({...formData, confirm_correct: !formData.confirm_correct})} className={`w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all ${formData.confirm_correct ? 'bg-[#1E5BFF] border-[#1E5BFF]' : 'border-gray-200 group-hover:border-blue-400'}`}>
-                        {formData.confirm_correct && <Check size={16} className="text-white" strokeWidth={4} />}
-                    </div>
-                    <span className="text-xs font-bold text-gray-600 dark:text-gray-300 leading-tight">Confirmo que as informações acima (públicas e fiscais) estão corretas e atualizadas.</span>
-                </label>
+          <div className="flex items-center gap-2 px-1">
+            <ShoppingBag size={16} className="text-emerald-500" />
+            <h2 className="text-[11px] font-black text-gray-400 uppercase tracking-widest">3. Configurações Adicionais</h2>
+          </div>
+          <div className="bg-white dark:bg-gray-900 rounded-[2.5rem] p-6 border border-gray-100 dark:border-gray-800 shadow-sm space-y-6">
+             <div onClick={() => setFormData({...formData, accepts_online_orders: !formData.accepts_online_orders})} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 cursor-pointer">
+                 <span className="text-sm font-bold text-gray-700 dark:text-gray-200">Aceita Pedidos Online?</span>
+                 <div className={`w-12 h-6 rounded-full p-1 transition-colors ${formData.accepts_online_orders ? 'bg-emerald-500' : 'bg-gray-300 dark:bg-gray-600'}`}>
+                    <div className={`w-4 h-4 bg-white rounded-full shadow-sm transform transition-transform ${formData.accepts_online_orders ? 'translate-x-6' : 'translate-x-0'}`}></div>
+                 </div>
+             </div>
 
-                <button 
-                  onClick={handleSave} 
-                  disabled={isSaving || !formData.confirm_correct}
-                  className="w-full bg-[#1E5BFF] text-white font-black py-5 rounded-[2rem] shadow-xl shadow-blue-500/20 active:scale-[0.98] transition-all flex items-center justify-center gap-3 uppercase tracking-widest text-sm mt-8 disabled:opacity-30 disabled:grayscale"
-                >
-                    {isSaving ? <Loader2 className="animate-spin" /> : <><CheckCircle2 size={20}/> Salvar Dados da Loha</>}
-                </button>
-            </div>
+             <div className="space-y-1.5">
+                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Valor de Pedido Mínimo</label>
+                <div className="relative group">
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold">R$</span>
+                    <input 
+                        type="number"
+                        value={formData.min_order_value}
+                        onChange={e => setFormData({...formData, min_order_value: e.target.value})}
+                        placeholder="0,00"
+                        className="w-full bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-4 pl-10 text-sm font-bold dark:text-white outline-none focus:border-[#1E5BFF]"
+                    />
+                </div>
+             </div>
+          </div>
         </section>
 
       </div>
-      
-      <input type="file" ref={logoInputRef} className="hidden" accept="image/*" onChange={handleImageUpload} />
 
+      {/* INPUTS OCULTOS P/ UPLOAD */}
+      <input type="file" ref={logoInputRef} className="hidden" accept="image/*" onChange={e => handleImageUpload(e, 'logo_url')} />
+      <input type="file" ref={bannerInputRef} className="hidden" accept="image/*" onChange={e => handleImageUpload(e, 'banner_url')} />
+
+      {/* FEEDBACK SUCESSO */}
       {showSuccess && (
         <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-[100] bg-gray-900 dark:bg-white text-white dark:text-gray-900 px-8 py-4 rounded-full shadow-2xl flex items-center gap-3 animate-in slide-in-from-bottom-5">
-           <CheckCircle2 size={56} className="w-5 h-5 text-emerald-400" />
+           <CheckCircle2 className="w-5 h-5 text-emerald-400" />
            <span className="font-black text-xs uppercase tracking-widest">Loja Atualizada!</span>
         </div>
+      )}
+
+      {showCreateModal && user && (
+          <CreateTaxonomyModal 
+              isOpen={showCreateModal}
+              onClose={() => setShowCreateModal(false)}
+              type={createType}
+              parentName={createType === 'subcategory' ? formData.category : undefined}
+              storeName={formData.nome_exibido || 'Loja'}
+              userId={user.id}
+              onSuccess={onSuggestionSuccess}
+          />
       )}
     </div>
   );

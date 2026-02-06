@@ -13,9 +13,7 @@ import {
   Activity, Eye, FileText, Globe, Calendar, Music, PartyPopper, Globe2, Edit3, User, Bell, Search,
   Camera, Vote, Handshake, Flame, Milestone, History, Home as HomeIcon,
   MessageCircle, HelpCircle, UserCheck, Recycle, Scale, Calculator, PenTool, Ruler,
-  Key, Fan, Truck, Shovel,
-  // Added missing icon imports
-  Meh, ThumbsDown, Gift, RefreshCw
+  Key, Fan, Truck, Shovel
 } from 'lucide-react';
 import { AdType, Category, Store, Story, EditorialCollection, Job, CommunityPost, NeighborhoodCommunity, Classified, RealEstateProperty } from './types';
 import { getStoreLogo } from '@/utils/mockLogos';
@@ -24,7 +22,7 @@ import { getStoreLogo } from '@/utils/mockLogos';
 export const CATEGORIES: Category[] = [
   { id: 'cat-comida', name: 'Comida', slug: 'comida', icon: <Utensils />, color: 'bg-brand-blue' },
   { id: 'cat-pets', name: 'Pets', slug: 'pets', icon: <PawPrint />, color: 'bg-brand-blue' },
-  { id: 'cat-pro', name: 'Profissionais', slug: 'profissionais', icon: <Briefcase />, color: 'bg-brand-blue' },
+  { id: 'cat-pro', name: 'Pro', slug: 'pro', icon: <Briefcase />, color: 'bg-brand-blue' },
   { id: 'cat-saude', name: 'Saúde', slug: 'saude', icon: <Heart />, color: 'bg-brand-blue' },
   { id: 'cat-services', name: 'Serviços', slug: 'servicos', icon: <Wrench />, color: 'bg-brand-blue' },
   { id: 'cat-beauty', name: 'Beleza', slug: 'beleza', icon: <Scissors />, color: 'bg-brand-blue' },
@@ -71,7 +69,7 @@ export const SUBCATEGORIES: Record<string, { name: string; icon: React.ReactNode
     { name: 'Produtos Pet', icon: <Package /> },
     { name: 'Pets Exóticos', icon: <Sparkles /> },
   ],
-  'Profissionais': [
+  'Pro': [
     { name: 'Eletricista', icon: <Zap /> },
     { name: 'Encanador', icon: <Droplets /> },
     { name: 'Pintor', icon: <PaintRoller /> },
@@ -228,7 +226,7 @@ const IMG_IDS: Record<string, string[]> = {
   'Pets': [
     '1516734212186-a967f81ad0d7', '1543466835-00a7907e9de1', '1537151608828-ea2b11777ee8', '1514888286974-6c27e9cce25b', '1583511655857-d19b40a7a54e', '1583337130417-3346a1be7dee'
   ],
-  'Profissionais': [
+  'Pro': [
     '1556761175-5973dc0f32e7', '1542744173-8e7e53415bb0', '1507679799938-d738f46fbcfc', '1521791136064-7986c292027b'
   ],
   'Saúde': [
@@ -294,7 +292,7 @@ const generateFakeStores = () => {
                 else if (catName === 'Beleza') storeTags = ['corte de cabelo', 'manicure', 'maquiagem'].sort(() => 0.5 - Math.random()).slice(0, 2);
                 else if (catName === 'Autos') storeTags = ['troca de óleo', 'lava jato', 'alinhamento'].sort(() => 0.5 - Math.random()).slice(0, 2);
                 else if (catName === 'Saúde') storeTags = ['dentista', 'fisioterapia', 'exames laboratoriais'].sort(() => 0.5 - Math.random()).slice(0, 2);
-                else if (catName === 'Serviços' || catName === 'Profissionais') storeTags = ['eletricista', 'encanador', 'chaveiro'].sort(() => 0.5 - Math.random()).slice(0, 2);
+                else if (catName === 'Serviços' || catName === 'Pro') storeTags = ['eletricista', 'encanador', 'chaveiro'].sort(() => 0.5 - Math.random()).slice(0, 2);
 
                 allStores.push({
                     id: `fake-${catName}-${sub.name}-${i}`.replace(/\s+/g, '-').toLowerCase(),
@@ -360,127 +358,6 @@ export const STORES: Store[] = [
   ...generateFakeStores()
 ];
 
-export const CATEGORY_TOP_BANNERS: Record<string, Record<string, { image: string; storeId: string }[]>> = {
-  'comida': {
-    'Freguesia': [
-      { image: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?q=80&w=800', storeId: 'f-5' },
-      { image: 'https://images.unsplash.com/photo-1561758033-d89a9ad46330?q=80&w=800', storeId: 'f-1' }
-    ],
-    'Taquara': [
-      { image: 'https://images.unsplash.com/photo-1594212699903-ec8a3eca50f5?q=80&w=800', storeId: 'fake-comida-0' },
-      { image: 'https://images.unsplash.com/photo-1571091718767-18b5b1457add?q=80&w=800', storeId: 'fake-comida-1' }
-    ]
-  },
-  'beleza': {
-    'Taquara': [
-      { image: 'https://images.unsplash.com/photo-1562322140-8baeececf3df?q=80&w=800', storeId: 'f-2' },
-      { image: 'https://images.unsplash.com/photo-1560066984-118c38b64a75?q=80&w=800', storeId: 'fake-beleza-0' }
-    ],
-    'Freguesia': [
-      { image: 'https://images.unsplash.com/photo-1521590832167-7ce633395e39?q=80&w=800', storeId: 'fake-beleza-1' },
-      { image: 'https://images.unsplash.com/photo-1632345031435-8727f6897d53?q=80&w=800', storeId: 'fake-beleza-2' }
-    ]
-  },
-  'pets': {
-    'Pechincha': [
-      { image: 'https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?q=80&w=800', storeId: 'f-3' },
-      { image: 'https://images.unsplash.com/photo-1524511751214-b0a384dd932d?q=80&w=800', storeId: 'fake-pets-0' }
-    ],
-    'Freguesia': [
-      { image: 'https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?q=80&w=800', storeId: 'fake-pets-1' },
-      { image: 'https://images.unsplash.com/photo-1544568100-847a948585b9?q=80&w=800', storeId: 'fake-pets-2' }
-    ]
-  },
-  'saude': {
-    'Freguesia': [
-      { image: 'https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?q=80&w=800', storeId: 'f-9' },
-      { image: 'https://images.unsplash.com/photo-1576091160550-2173dba999ef?q=80&w=800', storeId: 'fake-saude-0' }
-    ]
-  },
-  'autos': {
-    'Anil': [
-      { image: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=800', storeId: 'f-10' },
-      { image: 'https://images.unsplash.com/photo-1470309634658-8398b2cd0d23?q=80&w=800', storeId: 'fake-autos-0' }
-    ],
-    'Freguesia': [
-      { image: 'https://images.unsplash.com/photo-1445205170230-053b83016050?q=80&w=800', storeId: 'fake-moda-1' },
-      { image: 'https://images.unsplash.com/photo-1512436991641-6745cdb1723f?q=80&w=800', storeId: 'fake-moda-2' }
-    ]
-  },
-  'mercado': {
-    'Freguesia': [
-      { image: 'https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?q=80&w=800', storeId: 'f-7' },
-      { image: 'https://images.unsplash.com/photo-1534723452202-428aae1ad99d?q=80&w=800', storeId: 'fake-mercado-0' }
-    ]
-  },
-  'esportes': {
-    'Taquara': [
-      { image: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=800', storeId: 'f-8' },
-      { image: 'https://images.unsplash.com/photo-1541534741688-6078c6bfb5c5?q=80&w=800', storeId: 'fake-esportes-0' }
-    ]
-  },
-  'servicos': {
-    'Freguesia': [
-      { image: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?q=80&w=800', storeId: 'grupo-esquematiza' },
-      { image: 'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?q=80&w=800', storeId: 'fake-servicos-0' }
-    ]
-  },
-  'casa': {
-    'Freguesia': [
-      { image: 'https://images.unsplash.com/photo-1524661135-423995f22d0b?q=80&w=800', storeId: 'fake-casa-0' },
-      { image: 'https://images.unsplash.com/photo-1557804506-669a67965ba0?q=80&w=800', storeId: 'fake-casa-1' }
-    ]
-  },
-  'profissionais': {
-    'Freguesia': [
-      { image: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?q=80&w=800', storeId: 'fake-pro-0' },
-      { image: 'https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?q=80&w=800', storeId: 'fake-pro-1' }
-    ]
-  },
-  'lazer': {
-    'Freguesia': [
-      { image: 'https://images.unsplash.com/photo-1517457373958-b7bdd4587205?q=80&w=800', storeId: 'fake-lazer-0' },
-      { image: 'https://images.unsplash.com/photo-1514525253361-bee23e63d890?q=80&w=800', storeId: 'fake-lazer-1' }
-    ]
-  },
-  'educacao': {
-    'Freguesia': [
-      { image: 'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?q=80&w=800', storeId: 'fake-educacao-0' },
-      { image: 'https://images.unsplash.com/photo-1509062522246-3755977927d7?q=80&w=800', storeId: 'fake-educacao-1' }
-    ]
-  },
-  'farmacia': {
-    'Freguesia': [
-      { image: 'https://images.unsplash.com/photo-1587854692152-cbe660dbbb88?q=80&w=800', storeId: 'f-7' },
-      { image: 'https://images.unsplash.com/photo-1628771065518-0d82f1110503?q=80&w=800', storeId: 'fake-farmacia-0' }
-    ]
-  },
-  'moda': {
-    'Anil': [
-      { image: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=800', storeId: 'f-10' },
-      { image: 'https://images.unsplash.com/photo-1470309634658-8398b2cd0d23?q=80&w=800', storeId: 'fake-autos-0' }
-    ],
-    'Freguesia': [
-      { image: 'https://images.unsplash.com/photo-1445205170230-053b83016050?q=80&w=800', storeId: 'fake-moda-1' },
-      { image: 'https://images.unsplash.com/photo-1512436991641-6745cdb1723f?q=80&w=800', storeId: 'fake-moda-2' }
-    ]
-  },
-  'eventos': {
-    'Freguesia': [
-      { image: 'https://images.unsplash.com/photo-1511632765486-a01980e01a18?q=80&w=800', storeId: 'fake-eventos-0' },
-      { image: 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?q=80&w=800', storeId: 'fake-eventos-1' }
-    ]
-  },
-  'condominio': {
-    'Freguesia': [
-      { image: 'https://images.unsplash.com/photo-1570129477492-45c003edd2be?q=80&w=800', storeId: 'fake-condominio-0' },
-      { image: 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?q=80&w=800', storeId: 'fake-condominio-1' }
-    ]
-  }
-};
-
-// --- FIX: Added missing exported members from constants/index.tsx ---
-
 export const EDITORIAL_SERVICES: EditorialCollection[] = [
   {
     id: 'culinaria-jpa',
@@ -527,6 +404,7 @@ export const MOCK_JOBS: Job[] = [
     postedAt: 'Há 2h',
     isSponsored: true,
     sponsoredUntil: '2025-12-31',
+    // FIX: Added missing properties 'candidacy_method' and 'modality' to conform to the Job interface.
     candidacy_method: 'whatsapp',
     modality: 'Presencial',
   },
@@ -544,6 +422,7 @@ export const MOCK_JOBS: Job[] = [
     contactWhatsapp: '5521988888888',
     postedAt: 'Há 1 dia',
     isUrgent: true,
+    // FIX: Added missing properties 'candidacy_method' and 'modality' to conform to the Job interface.
     candidacy_method: 'whatsapp',
     modality: 'Presencial',
   }
@@ -649,6 +528,8 @@ export const MOCK_REAL_ESTATE_PROPERTIES: RealEstateProperty[] = [
   },
 ];
 
+
+export type TaxonomyType = 'category' | 'subcategory' | 'specialty';
 
 export const SPECIALTIES: Record<string, string[]> = {
   'Chaveiro 24h': ['Abertura de portas', 'Troca de fechadura', 'Chave codificada', 'Abertura de cofre', 'Cópia de chaves', 'Instalação de tetra chave'],
@@ -916,3 +797,122 @@ export const MOCK_COMMUNITY_POSTS: CommunityPost[] = [
     storeId: 'f-1'
   }
 ];
+
+export const CATEGORY_TOP_BANNERS: Record<string, Record<string, { image: string; storeId: string }[]>> = {
+  'comida': {
+    'Freguesia': [
+      { image: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?q=80&w=800', storeId: 'f-5' },
+      { image: 'https://images.unsplash.com/photo-1561758033-d89a9ad46330?q=80&w=800', storeId: 'f-1' }
+    ],
+    'Taquara': [
+      { image: 'https://images.unsplash.com/photo-1594212699903-ec8a3eca50f5?q=80&w=800', storeId: 'fake-comida-0' },
+      { image: 'https://images.unsplash.com/photo-1571091718767-18b5b1457add?q=80&w=800', storeId: 'fake-comida-1' }
+    ]
+  },
+  'beleza': {
+    'Taquara': [
+      { image: 'https://images.unsplash.com/photo-1562322140-8baeececf3df?q=80&w=800', storeId: 'f-2' },
+      { image: 'https://images.unsplash.com/photo-1560066984-118c38b64a75?q=80&w=800', storeId: 'fake-beleza-0' }
+    ],
+    'Freguesia': [
+      { image: 'https://images.unsplash.com/photo-1521590832167-7ce633395e39?q=80&w=800', storeId: 'fake-beleza-1' },
+      { image: 'https://images.unsplash.com/photo-1632345031435-8727f6897d53?q=80&w=800', storeId: 'fake-beleza-2' }
+    ]
+  },
+  'pets': {
+    'Pechincha': [
+      { image: 'https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?q=80&w=800', storeId: 'f-3' },
+      { image: 'https://images.unsplash.com/photo-1524511751214-b0a384dd932d?q=80&w=800', storeId: 'fake-pets-0' }
+    ],
+    'Freguesia': [
+      { image: 'https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?q=80&w=800', storeId: 'fake-pets-1' },
+      { image: 'https://images.unsplash.com/photo-1544568100-847a948585b9?q=80&w=800', storeId: 'fake-pets-2' }
+    ]
+  },
+  'saude': {
+    'Freguesia': [
+      { image: 'https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?q=80&w=800', storeId: 'f-9' },
+      { image: 'https://images.unsplash.com/photo-1576091160550-2173dba999ef?q=80&w=800', storeId: 'fake-saude-0' }
+    ]
+  },
+  'autos': {
+    'Anil': [
+      { image: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=800', storeId: 'f-10' },
+      { image: 'https://images.unsplash.com/photo-1470309634658-8398b2cd0d23?q=80&w=800', storeId: 'fake-autos-0' }
+    ],
+    'Freguesia': [
+      { image: 'https://images.unsplash.com/photo-1445205170230-053b83016050?q=80&w=800', storeId: 'fake-moda-1' },
+      { image: 'https://images.unsplash.com/photo-1512436991641-6745cdb1723f?q=80&w=800', storeId: 'fake-moda-2' }
+    ]
+  },
+  'mercado': {
+    'Freguesia': [
+      { image: 'https://images.unsplash.com/photo-1587854692152-cbe660dbbb88?q=80&w=800', storeId: 'f-7' },
+      { image: 'https://images.unsplash.com/photo-1534723452202-428aae1ad99d?q=80&w=800', storeId: 'fake-mercado-0' }
+    ]
+  },
+  'esportes': {
+    'Taquara': [
+      { image: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=800', storeId: 'f-8' },
+      { image: 'https://images.unsplash.com/photo-1541534741688-6078c6bfb5c5?q=80&w=800', storeId: 'fake-esportes-0' }
+    ]
+  },
+  'servicos': {
+    'Freguesia': [
+      { image: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?q=80&w=800', storeId: 'grupo-esquematiza' },
+      { image: 'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?q=80&w=800', storeId: 'fake-servicos-0' }
+    ]
+  },
+  'casa': {
+    'Freguesia': [
+      { image: 'https://images.unsplash.com/photo-1524661135-423995f22d0b?q=80&w=800', storeId: 'fake-casa-0' },
+      { image: 'https://images.unsplash.com/photo-1557804506-669a67965ba0?q=80&w=800', storeId: 'fake-casa-1' }
+    ]
+  },
+  'pro': {
+    'Freguesia': [
+      { image: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?q=80&w=800', storeId: 'fake-pro-0' },
+      { image: 'https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?q=80&w=800', storeId: 'fake-pro-1' }
+    ]
+  },
+  'lazer': {
+    'Freguesia': [
+      { image: 'https://images.unsplash.com/photo-1517457373958-b7bdd4587205?q=80&w=800', storeId: 'fake-lazer-0' },
+      { image: 'https://images.unsplash.com/photo-1514525253361-bee23e63d890?q=80&w=800', storeId: 'fake-lazer-1' }
+    ]
+  },
+  'educacao': {
+    'Freguesia': [
+      { image: 'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?q=80&w=800', storeId: 'fake-educacao-0' },
+      { image: 'https://images.unsplash.com/photo-1509062522246-3755977927d7?q=80&w=800', storeId: 'fake-educacao-1' }
+    ]
+  },
+  'farmacia': {
+    'Freguesia': [
+      { image: 'https://images.unsplash.com/photo-1587854692152-cbe660dbbb88?q=80&w=800', storeId: 'f-7' },
+      { image: 'https://images.unsplash.com/photo-1628771065518-0d82f1110503?q=80&w=800', storeId: 'fake-farmacia-0' }
+    ]
+  },
+  'moda': {
+    'Anil': [
+      { image: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=800', storeId: 'f-10' },
+      { image: 'https://images.unsplash.com/photo-1470309634658-8398b2cd0d23?q=80&w=800', storeId: 'fake-autos-0' }
+    ],
+    'Freguesia': [
+      { image: 'https://images.unsplash.com/photo-1445205170230-053b83016050?q=80&w=800', storeId: 'fake-moda-1' },
+      { image: 'https://images.unsplash.com/photo-1512436991641-6745cdb1723f?q=80&w=800', storeId: 'fake-moda-2' }
+    ]
+  },
+  'eventos': {
+    'Freguesia': [
+      { image: 'https://images.unsplash.com/photo-1511632765486-a01980e01a18?q=80&w=800', storeId: 'fake-eventos-0' },
+      { image: 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?q=80&w=800', storeId: 'fake-eventos-1' }
+    ]
+  },
+  'condominio': {
+    'Freguesia': [
+      { image: 'https://images.unsplash.com/photo-1570129477492-45c003edd2be?q=80&w=800', storeId: 'fake-condominio-0' },
+      { image: 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?q=80&w=800', storeId: 'fake-condominio-1' }
+    ]
+  }
+};

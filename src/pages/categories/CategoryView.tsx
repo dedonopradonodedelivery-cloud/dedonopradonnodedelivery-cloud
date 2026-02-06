@@ -1,9 +1,10 @@
 
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { ChevronLeft, Search, Star, BadgeCheck, ChevronRight, X, AlertCircle, Grid, Filter, Megaphone, ArrowUpRight, Info, Image as ImageIcon, Sparkles, ShieldCheck } from 'lucide-react';
-import { Category, Store, AdType } from '@/types';
-import { SUBCATEGORIES } from '@/constants';
-import { supabase } from '@/lib/supabaseClient';
+import { Category, Store, AdType } from '../../types';
+import { SUBCATEGORIES } from '../../constants';
+// FIX: Corrected supabase import path from ../../services/supabaseClient to ../../lib/supabaseClient
+import { supabase } from '../../lib/supabaseClient';
 import { CategoryTopCarousel } from '@/components/CategoryTopCarousel';
 import { MasterSponsorBanner } from '@/components/MasterSponsorBanner';
 
@@ -128,19 +129,9 @@ interface CategoryViewProps {
   userRole: 'cliente' | 'lojista' | null;
   onAdvertiseInCategory: (categoryName: string | null) => void;
   onNavigate: (view: string) => void;
-  onSubcategoryClick?: (subName: string) => void;
 }
 
-export const CategoryView: React.FC<CategoryViewProps> = ({ 
-  category, 
-  onBack, 
-  onStoreClick, 
-  stores, 
-  userRole, 
-  onAdvertiseInCategory, 
-  onNavigate,
-  onSubcategoryClick
-}) => {
+export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, onStoreClick, stores, userRole, onAdvertiseInCategory, onNavigate }) => {
   const [selectedSubcategory, setSelectedSubcategory] = useState<string | null>(null);
   const [activeBanner, setActiveBanner] = useState<any | null>(null);
   const [loadingBanner, setLoadingBanner] = useState(true);
@@ -160,6 +151,7 @@ export const CategoryView: React.FC<CategoryViewProps> = ({
       try {
         const { data, error } = await supabase
           .from('published_banners')
+          // FIX: Added merchant_id to the select to allow handleBannerClick to find the associated store.
           .select('id, config, merchant_id')
           .eq('target', `category:${category.slug}`)
           .eq('is_active', true)
@@ -208,11 +200,7 @@ export const CategoryView: React.FC<CategoryViewProps> = ({
   }, [stores, category.name, selectedSubcategory]);
 
   const handleSubcategoryClick = (subName: string) => {
-    if (onSubcategoryClick) {
-        onSubcategoryClick(subName);
-    } else {
-        setSelectedSubcategory(prev => (prev === subName ? null : subName));
-    }
+    setSelectedSubcategory(prev => (prev === subName ? null : subName));
   };
 
   const handleAdvertiseClick = () => {
@@ -224,6 +212,7 @@ export const CategoryView: React.FC<CategoryViewProps> = ({
     }
   };
 
+  // FIX: Added handleBannerClick to resolve the error on line 258.
   const handleBannerClick = (banner: any) => {
     if (banner.merchant_id) {
       const store = stores.find(s => s.id === banner.merchant_id);
@@ -316,7 +305,7 @@ export const CategoryView: React.FC<CategoryViewProps> = ({
             {filteredStores.length > 0 ? (
                 <div className="flex flex-col gap-2">
                     {filteredStores.map(store => (
-                        <StoreCard key={store.id} store={store} onClick={() => onStoreClick(store)} />
+                        <StoreListItem key={store.id} store={store} onClick={() => onStoreClick(store)} />
                     ))}
                 </div>
             ) : (
@@ -331,34 +320,6 @@ export const CategoryView: React.FC<CategoryViewProps> = ({
           <MasterSponsorBanner onClick={() => onNavigate('patrocinador_master')} label={category.name} />
         </section>
       </div>
-    </div>
-  );
-};
-
-// Re-using the StoreCard internal to list for CategoryView
-const StoreCard: React.FC<{ store: Store; onClick: () => void }> = ({ store, onClick }) => {
-  const isSponsored = store.isSponsored || store.adType === AdType.PREMIUM;
-  return (
-    <div onClick={onClick} className="flex items-center gap-4 p-4 bg-white dark:bg-gray-900 rounded-3xl border border-gray-100 dark:border-gray-800 shadow-sm hover:shadow-md transition-all cursor-pointer active:scale-[0.98]">
-      <div className="w-16 h-16 rounded-2xl bg-gray-100 dark:bg-gray-800 overflow-hidden relative border border-gray-100 dark:border-gray-700 shrink-0">
-        <img src={store.logoUrl || store.image || "/assets/default-logo.png"} alt={store.name} className="w-full h-full object-cover" />
-      </div>
-      <div className="flex-1 min-w-0">
-        <div className="flex justify-between items-start">
-          <h4 className="font-bold text-gray-900 dark:text-white text-base truncate pr-2">{store.name}</h4>
-          {isSponsored && <span className="text-[8px] font-bold text-gray-400 bg-gray-100 dark:bg-gray-700 px-1.5 py-0.5 rounded uppercase">Ads</span>}
-        </div>
-        <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-          <span className="flex items-center gap-1 font-bold text-[#1E5BFF]"><Star className="w-3 h-3 fill-current" /> {store.rating?.toFixed(1)}</span>
-          <span className="w-1 h-1 rounded-full bg-gray-300 dark:bg-gray-600"></span>
-          <span className="truncate">{store.category}</span>
-        </div>
-        <div className="flex items-center gap-3 mt-1.5">
-          {store.distance && <span className="text-[10px] text-gray-400 font-medium">{store.distance}</span>}
-          {store.verified && <span className="text-[10px] text-blue-600 dark:text-blue-400 font-bold flex items-center gap-0.5"><BadgeCheck className="w-3 h-3" /> Verificado</span>}
-        </div>
-      </div>
-      <div className="h-8 w-8 rounded-full bg-gray-50 dark:bg-gray-800 flex items-center justify-center text-gray-300"><ChevronRight className="w-4 h-4" /></div>
     </div>
   );
 };

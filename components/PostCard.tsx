@@ -16,7 +16,7 @@ import {
     ChevronLeft as ChevronLeftIcon,
     ChevronRight as ChevronRightIcon,
     AlertCircle,
-    Zap 
+    Zap // Usado para o selo de Morador Ativo
 } from 'lucide-react';
 import { ReportModal } from './ReportModal';
 
@@ -136,6 +136,8 @@ export const PostCard: React.FC<PostCardProps> = ({ post, onStoreClick, user, on
             <button onClick={() => handleVisitStore(post.userName)} className="font-bold text-sm text-gray-900 dark:text-white hover:underline text-left leading-tight">
                 {post.userName}
             </button>
+            
+            {/* SELO MORADOR ATIVO */}
             {post.isActiveResident && (
                 <div className="flex items-center gap-1 mt-0.5">
                     <div className="bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 px-1.5 py-0.5 rounded flex items-center gap-1 border border-blue-100 dark:border-blue-800/50">

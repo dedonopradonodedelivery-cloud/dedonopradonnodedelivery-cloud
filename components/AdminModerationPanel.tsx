@@ -13,9 +13,7 @@ import {
   Search,
   Filter,
   Check,
-  ShieldCheck,
-  Flag,
-  AlertCircle
+  ShieldCheck
 } from 'lucide-react';
 import { PostReport, TaxonomySuggestion, StoreClaimRequest } from '../types';
 
@@ -69,6 +67,17 @@ const MOCK_SUGGESTIONS: TaxonomySuggestion[] = [
         storeName: 'Geek Zone JPA',
         createdAt: new Date().toISOString(),
         merchantId: 'm-123'
+    },
+    {
+        id: 'sug-2',
+        type: 'subcategory',
+        name: 'Açaíteria',
+        parentName: 'Comida',
+        justification: 'Já tem pizzaria e lanchonete, falta açaí específico.',
+        status: 'pending',
+        storeName: 'Açaí do Zé',
+        createdAt: new Date(Date.now() - 3600000).toISOString(),
+        merchantId: 'm-456'
     }
 ];
 
@@ -85,7 +94,9 @@ export const AdminModerationPanel: React.FC<AdminModerationPanelProps> = ({ onBa
   const [rejectionReason, setRejectionReason] = useState('');
   const [selectedItemForAction, setSelectedItemForAction] = useState<string | null>(null);
 
+  // Load Initial Data from LocalStorage (Mock Persistence)
   useEffect(() => {
+    // Carregar sugestões
     const savedSug = localStorage.getItem('taxonomy_suggestions');
     if (savedSug) {
         setTaxonomySuggestions(JSON.parse(savedSug));
@@ -93,6 +104,8 @@ export const AdminModerationPanel: React.FC<AdminModerationPanelProps> = ({ onBa
         setTaxonomySuggestions(MOCK_SUGGESTIONS);
         localStorage.setItem('taxonomy_suggestions', JSON.stringify(MOCK_SUGGESTIONS));
     }
+
+    // Carregar reivindicações
     const savedClaims = localStorage.getItem('manual_claims_jpa');
     if (savedClaims) {
         setClaims(JSON.parse(savedClaims));
@@ -107,12 +120,17 @@ export const AdminModerationPanel: React.FC<AdminModerationPanelProps> = ({ onBa
       const updated = taxonomySuggestions.map(s => s.id === id ? { ...s, status: 'approved' as const } : s);
       setTaxonomySuggestions(updated);
       localStorage.setItem('taxonomy_suggestions', JSON.stringify(updated));
+      
+      // Adicionar à lista oficial (persistida no local storage para o merchant ler)
       const savedApproved = JSON.parse(localStorage.getItem('approved_taxonomy') || '[]');
       const newEntry = { type: sug.type, name: sug.name, parentName: sug.parentName };
+      
+      // Evitar duplicação
       if (!savedApproved.find((a: any) => a.type === newEntry.type && a.name === newEntry.name)) {
           localStorage.setItem('approved_taxonomy', JSON.stringify([...savedApproved, newEntry]));
       }
-      alert(`Sugestão "${sug.name}" aprovada!`);
+      
+      alert(`Sugestão "${sug.name}" aprovada e adicionada ao catálogo!`);
     } else {
       if (!rejectionReason.trim()) {
         alert('Por favor, informe o motivo da rejeição.');
@@ -121,12 +139,15 @@ export const AdminModerationPanel: React.FC<AdminModerationPanelProps> = ({ onBa
       const updated = taxonomySuggestions.map(s => s.id === id ? { ...s, status: 'rejected' as const, rejectionReason } : s);
       setTaxonomySuggestions(updated);
       localStorage.setItem('taxonomy_suggestions', JSON.stringify(updated));
+
+      alert('Sugestão rejeitada.');
       setRejectionReason('');
       setSelectedItemForAction(null);
     }
   };
 
   const handleClaimModerate = (id: string, action: 'approve' | 'reject') => {
+      // Simplificado para demo
       const updated = claims.map(c => c.id === id ? { ...c, status: action === 'approve' ? 'approved' as const : 'rejected' as const } : c);
       setClaims(updated);
       localStorage.setItem('manual_claims_jpa', JSON.stringify(updated));
@@ -139,67 +160,90 @@ export const AdminModerationPanel: React.FC<AdminModerationPanelProps> = ({ onBa
   );
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-500">
-      <div className="flex bg-slate-800/50 p-1 rounded-2xl border border-white/5 overflow-x-auto no-scrollbar">
-        <button onClick={() => setActiveTab('taxonomy')} className={`px-6 py-4 text-[10px] font-black uppercase tracking-widest transition-all shrink-0 rounded-xl ${activeTab === 'taxonomy' ? 'bg-[#1E5BFF] text-white shadow-lg shadow-blue-500/20' : 'text-gray-400'}`}>Categorias ({filteredSuggestions.length})</button>
-        <button onClick={() => setActiveTab('claims')} className={`px-6 py-4 text-[9px] font-black uppercase tracking-widest transition-all shrink-0 rounded-xl ${activeTab === 'claims' ? 'bg-[#1E5BFF] text-white shadow-lg shadow-blue-500/20' : 'text-gray-400'}`}>Lojistas ({claims.filter(c => c.status === 'pending').length})</button>
-        <button onClick={() => setActiveTab('reports')} className={`px-6 py-4 text-[9px] font-black uppercase tracking-widest transition-all shrink-0 rounded-xl ${activeTab === 'reports' ? 'bg-[#1E5BFF] text-white shadow-lg shadow-blue-500/20' : 'text-gray-400'}`}>Denúncias ({reports.filter(r => r.status === 'open').length})</button>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 font-sans animate-in slide-in-from-right duration-300">
+      <div className="sticky top-0 z-30 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md px-5 h-16 flex items-center gap-4 border-b border-gray-100 dark:border-gray-800">
+        <button onClick={onBack} className="p-2 -ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"><ChevronLeft className="w-6 h-6 text-gray-800 dark:text-white" /></button>
+        <h1 className="font-bold text-lg text-gray-900 dark:text-white flex items-center gap-2"><ShieldAlert className="w-5 h-5 text-red-500" /> Aprovações</h1>
       </div>
 
-      <div>
+      <div className="flex bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700 overflow-x-auto no-scrollbar">
+        <button onClick={() => setActiveTab('taxonomy')} className={`px-6 py-4 text-[10px] font-black uppercase tracking-widest transition-all shrink-0 ${activeTab === 'taxonomy' ? 'text-[#1E5BFF] border-b-2 border-[#1E5BFF]' : 'text-gray-400'}`}>Categorias ({filteredSuggestions.length})</button>
+        <button onClick={() => setActiveTab('claims')} className={`px-6 py-4 text-[9px] font-black uppercase tracking-widest transition-all shrink-0 ${activeTab === 'claims' ? 'text-[#1E5BFF] border-b-2 border-[#1E5BFF]' : 'text-gray-400'}`}>Lojistas ({claims.filter(c => c.status === 'pending').length})</button>
+        <button onClick={() => setActiveTab('reports')} className={`px-6 py-4 text-[9px] font-black uppercase tracking-widest transition-all shrink-0 ${activeTab === 'reports' ? 'text-[#1E5BFF] border-b-2 border-[#1E5BFF]' : 'text-gray-400'}`}>Denúncias ({reports.filter(r => r.status === 'open').length})</button>
+      </div>
+
+      <div className="p-5 pb-24">
+        {/* Barra de Busca */}
         <div className="relative mb-6">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 w-4 h-4" />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
             <input 
                 type="text" 
                 value={searchTerm}
                 onChange={e => setSearchTerm(e.target.value)}
-                placeholder="Buscar solicitações..." 
-                className="w-full bg-slate-900 border border-white/10 rounded-2xl py-3 pl-11 pr-4 text-sm text-white outline-none focus:ring-2 focus:ring-[#1E5BFF] shadow-inner"
+                placeholder="Buscar por nome ou lojista..." 
+                className="w-full bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl py-3 pl-11 pr-4 text-sm outline-none focus:ring-2 focus:ring-[#1E5BFF]"
             />
         </div>
 
+        {/* TAB: TAXONOMIA (CATEGORIAS) */}
         {activeTab === 'taxonomy' && (
             <div className="space-y-4">
                 {filteredSuggestions.length === 0 ? (
                     <div className="text-center py-20 opacity-30 flex flex-col items-center"><CheckCircle2 size={48} className="mb-4" /><p className="font-bold uppercase tracking-widest text-xs">Tudo aprovado por aqui</p></div>
                 ) : (
                     filteredSuggestions.map((sug) => (
-                        <div key={sug.id} className="bg-slate-900 rounded-[2rem] p-6 shadow-md border border-white/5">
+                        <div key={sug.id} className="bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-md border border-gray-100 dark:border-gray-700">
                             <div className="flex justify-between items-start mb-4">
                                 <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center text-[#1E5BFF]"><Tag size={20} /></div>
+                                    <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center text-[#1E5BFF]"><Tag size={20} /></div>
                                     <div>
-                                        <span className="text-[9px] font-black bg-blue-900/50 text-blue-400 px-2 py-0.5 rounded uppercase tracking-wider border border-blue-500/20">
-                                            NOVA {sug.type === 'category' ? 'CATEGORIA' : 'SUBCATEGORIA'}
-                                        </span>
-                                        <h4 className="font-bold text-white text-lg mt-1">{sug.name}</h4>
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-[9px] font-black bg-blue-100 text-blue-600 px-2 py-0.5 rounded uppercase tracking-wider">
+                                                NOVA {sug.type === 'category' ? 'CATEGORIA' : 'SUBCATEGORIA'}
+                                            </span>
+                                        </div>
+                                        <h4 className="font-bold text-gray-900 dark:text-white text-lg mt-1">{sug.name}</h4>
                                     </div>
                                 </div>
                             </div>
+
                             {sug.parentName && (
-                                <div className="mb-4 px-3 py-2 bg-white/5 rounded-lg border border-white/5 flex items-center gap-2">
-                                    <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Dentro de:</span>
-                                    <span className="text-xs font-bold text-slate-200">{sug.parentName}</span>
+                                <div className="mb-4 px-3 py-2 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-100 dark:border-gray-700 flex items-center gap-2">
+                                    <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Dentro de:</span>
+                                    <span className="text-xs font-bold text-gray-700 dark:text-gray-300">{sug.parentName}</span>
                                 </div>
                             )}
+
                             <div className="flex items-center gap-2 mb-4">
-                                <Building2 size={14} className="text-slate-500" />
-                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Solicitado por: <span className="text-white">{sug.storeName}</span></p>
+                                <Building2 size={14} className="text-gray-400" />
+                                <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Solicitado por: <span className="text-gray-800 dark:text-white">{sug.storeName}</span></p>
                             </div>
-                            {sug.justification && <p className="text-xs text-slate-400 italic mb-6">"{sug.justification}"</p>}
+                            
+                            {sug.justification && <p className="text-xs text-gray-500 italic mb-6">"{sug.justification}"</p>}
+
                             {selectedItemForAction === sug.id ? (
-                                <div className="space-y-3 animate-in zoom-in-95 bg-red-950/20 p-4 rounded-2xl border border-red-500/20">
-                                    <p className="text-[10px] font-black text-red-400 uppercase tracking-widest">Motivo da Rejeição</p>
-                                    <textarea value={rejectionReason} onChange={e => setRejectionReason(e.target.value)} placeholder="Explique ao lojista..." className="w-full bg-black/40 p-3 rounded-xl border border-white/10 text-xs text-white outline-none" rows={2} />
+                                <div className="space-y-3 animate-in zoom-in-95 bg-red-50 dark:bg-red-900/10 p-4 rounded-xl">
+                                    <p className="text-xs font-bold text-red-600 uppercase">Motivo da Rejeição</p>
+                                    <textarea 
+                                        value={rejectionReason}
+                                        onChange={e => setRejectionReason(e.target.value)}
+                                        placeholder="Explique ao lojista..."
+                                        className="w-full bg-white dark:bg-gray-900 p-3 rounded-lg border border-red-100 dark:border-red-900/30 text-xs outline-none"
+                                        rows={2}
+                                    />
                                     <div className="flex gap-2">
-                                        <button onClick={() => setSelectedItemForAction(null)} className="flex-1 py-2 text-[10px] font-black uppercase text-slate-400 bg-slate-800 rounded-xl">Cancelar</button>
-                                        <button onClick={() => handleTaxonomyModerate(sug.id, 'reject')} className="flex-1 bg-red-600 text-white py-2 rounded-xl text-[10px] font-black uppercase">Confirmar Rejeição</button>
+                                        <button onClick={() => setSelectedItemForAction(null)} className="flex-1 py-2 text-[10px] font-bold uppercase text-gray-500 bg-white dark:bg-gray-800 rounded-lg border">Cancelar</button>
+                                        <button onClick={() => handleTaxonomyModerate(sug.id, 'reject')} className="flex-1 bg-red-500 text-white py-2 rounded-lg text-[10px] font-black uppercase">Confirmar Rejeição</button>
                                     </div>
                                 </div>
                             ) : (
-                                <div className="flex gap-3 pt-4 border-t border-white/5">
-                                    <button onClick={() => setSelectedItemForAction(sug.id)} className="flex-1 py-3 rounded-xl bg-red-500/10 text-red-500 font-black text-[10px] uppercase tracking-widest border border-red-500/20 active:scale-95 transition-all">Rejeitar</button>
-                                    <button onClick={() => handleTaxonomyModerate(sug.id, 'approve')} className="flex-[2] py-3 rounded-xl bg-green-600 text-white font-black text-[10px] uppercase tracking-widest active:scale-95 transition-all shadow-lg shadow-green-500/20">Aprovar</button>
+                                <div className="flex gap-3 pt-4 border-t border-gray-100 dark:border-gray-700">
+                                    <button onClick={() => setSelectedItemForAction(sug.id)} className="flex-1 py-3 rounded-xl bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 font-bold text-xs flex items-center justify-center gap-2 active:scale-95 transition-all">
+                                        <XCircle size={16} /> Rejeitar
+                                    </button>
+                                    <button onClick={() => handleTaxonomyModerate(sug.id, 'approve')} className="flex-[2] py-3 rounded-xl bg-green-500 text-white font-bold text-xs flex items-center justify-center gap-2 active:scale-95 transition-all shadow-lg shadow-green-500/20">
+                                        <CheckCircle2 size={16} /> Aprovar
+                                    </button>
                                 </div>
                             )}
                         </div>
@@ -208,28 +252,41 @@ export const AdminModerationPanel: React.FC<AdminModerationPanelProps> = ({ onBa
             </div>
         )}
 
+        {/* TAB: REIVINDICAÇÕES */}
         {activeTab === 'claims' && (
             <div className="space-y-4">
                  {claims.filter(c => c.status === 'pending').length === 0 ? (
                     <div className="text-center py-20 opacity-30 flex flex-col items-center"><ShieldCheck size={48} className="mb-4" /><p className="font-bold uppercase tracking-widest text-xs">Nenhuma reivindicação pendente</p></div>
                  ) : (
                     claims.filter(c => c.status === 'pending').map((claim) => (
-                        <div key={claim.id} className="bg-slate-900 rounded-[2rem] p-6 shadow-md border border-white/5">
+                        <div key={claim.id} className="bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-md border border-gray-100 dark:border-gray-700">
                              <div className="flex items-center gap-3 mb-4">
-                                <div className="w-10 h-10 bg-indigo-500/10 text-indigo-400 rounded-xl flex items-center justify-center border border-indigo-500/20"><Building2 size={20} /></div>
+                                <div className="w-10 h-10 bg-indigo-100 text-indigo-600 rounded-xl flex items-center justify-center"><Building2 size={20} /></div>
                                 <div>
-                                    <h4 className="font-bold text-white leading-tight">{claim.store_name}</h4>
-                                    <p className="text-[10px] text-slate-500 uppercase font-black tracking-widest mt-0.5">ID: {claim.store_id}</p>
+                                    <h4 className="font-bold text-gray-900 dark:text-white">{claim.store_name}</h4>
+                                    <p className="text-[10px] text-gray-400 uppercase font-black">ID: {claim.store_id}</p>
                                 </div>
                              </div>
+                             
                              <div className="space-y-2 mb-6">
-                                <div className="flex items-center gap-2 text-xs text-slate-300"><UserIcon size={14} className="text-slate-500" /> <span className="font-bold">{claim.responsible_name}</span> ({claim.user_email})</div>
-                                <div className="flex items-center gap-2 text-xs text-slate-300"><FileText size={14} className="text-slate-500" /> CNPJ: <span className="font-mono">{claim.cnpj}</span></div>
-                                {claim.justification && <div className="p-3 bg-black/20 rounded-xl text-xs text-slate-500 italic mt-2 border border-white/5">"{claim.justification}"</div>}
+                                <div className="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-300">
+                                    <UserIcon size={14} className="text-gray-400" /> 
+                                    <span className="font-bold">{claim.responsible_name}</span> ({claim.user_email})
+                                </div>
+                                <div className="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-300">
+                                    <FileText size={14} className="text-gray-400" /> 
+                                    CNPJ: <span className="font-mono">{claim.cnpj}</span>
+                                </div>
+                                {claim.justification && (
+                                    <div className="p-3 bg-gray-50 dark:bg-gray-900 rounded-xl text-xs text-gray-500 italic mt-2">
+                                        "{claim.justification}"
+                                    </div>
+                                )}
                              </div>
+
                              <div className="flex gap-3">
-                                <button onClick={() => handleClaimModerate(claim.id, 'reject')} className="flex-1 py-3 bg-slate-800 text-slate-400 rounded-xl text-[10px] font-black uppercase tracking-widest">Rejeitar</button>
-                                <button onClick={() => handleClaimModerate(claim.id, 'approve')} className="flex-[2] py-3 bg-indigo-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-indigo-500/20">Aprovar Propriedade</button>
+                                <button onClick={() => handleClaimModerate(claim.id, 'reject')} className="flex-1 py-3 bg-gray-100 text-gray-600 rounded-xl text-xs font-bold">Rejeitar</button>
+                                <button onClick={() => handleClaimModerate(claim.id, 'approve')} className="flex-[2] py-3 bg-indigo-600 text-white rounded-xl text-xs font-bold shadow-lg shadow-indigo-500/20">Aprovar Transferência</button>
                              </div>
                         </div>
                     ))
@@ -237,35 +294,6 @@ export const AdminModerationPanel: React.FC<AdminModerationPanelProps> = ({ onBa
             </div>
         )}
 
-        {activeTab === 'reports' && (
-            <div className="space-y-4">
-                {reports.filter(r => r.status === 'open').length === 0 ? (
-                    <div className="text-center py-20 opacity-30 flex flex-col items-center"><CheckCircle2 size={48} className="mb-4" /><p className="font-bold uppercase tracking-widest text-xs">Sem denúncias pendentes</p></div>
-                ) : (
-                    reports.filter(r => r.status === 'open').map(report => (
-                        <div key={report.id} className="bg-slate-900 rounded-[2rem] p-6 shadow-md border border-white/5">
-                            <div className="flex justify-between items-start mb-4">
-                                <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 rounded-xl bg-red-500/10 flex items-center justify-center text-red-500"><Flag size={20} /></div>
-                                    <div>
-                                        <span className="text-[9px] font-black bg-red-900/50 text-red-400 px-2 py-0.5 rounded uppercase tracking-wider border border-red-500/20">Denúncia Ativa</span>
-                                        <h4 className="font-bold text-white text-base mt-1">Autor: @{report.authorUsername}</h4>
-                                    </div>
-                                </div>
-                                <span className={`text-[8px] font-black uppercase px-2 py-1 rounded border ${report.priority === 'high' ? 'bg-red-500 text-white border-red-400' : 'bg-slate-800 text-slate-400 border-white/5'}`}>Prioridade {report.priority}</span>
-                            </div>
-                            <div className="bg-black/20 p-4 rounded-xl border border-white/5 mb-6">
-                                <p className="text-xs text-slate-400 leading-relaxed italic">"{report.postContentSnippet}"</p>
-                            </div>
-                            <div className="flex gap-3">
-                                <button className="flex-1 py-3 bg-slate-800 text-slate-400 rounded-xl text-[10px] font-black uppercase tracking-widest">Ignorar</button>
-                                <button className="flex-[2] py-3 bg-red-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-red-500/20">Remover Post</button>
-                            </div>
-                        </div>
-                    ))
-                )}
-            </div>
-        )}
       </div>
     </div>
   );

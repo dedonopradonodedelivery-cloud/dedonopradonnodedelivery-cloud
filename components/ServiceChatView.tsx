@@ -19,8 +19,7 @@ import {
     CheckCircle2,
     X,
     XCircle,
-    Handshake,
-    Palette
+    Handshake
 } from 'lucide-react';
 import { ServiceMessage, ServiceRequest, ServiceLead } from '../types';
 
@@ -42,9 +41,8 @@ export const ServiceChatView: React.FC<ServiceChatViewProps> = ({ requestId, pro
   const isAdmin = userRole === 'admin';
   const isResident = userRole === 'resident';
   const isMerchant = userRole === 'merchant';
-  const isDesignerChat = requestId.startsWith('DSG-');
 
-  const chatKey = `msgs_${requestId}`;
+  const chatKey = `msgs_${requestId}_${professionalId}`;
 
   // REGRA: Verifica se o pedido está fechado e quem é o vencedor
   const isRequestClosed = requestInfo?.status === 'closed';
@@ -52,21 +50,20 @@ export const ServiceChatView: React.FC<ServiceChatViewProps> = ({ requestId, pro
   const isBlocked = isRequestClosed && !isWinner;
 
   useEffect(() => {
-    // 1. Carregar histórico de mensagens
+    // 1. Carregar informações do pedido original
+    const savedReqs = JSON.parse(localStorage.getItem('service_requests_mock') || '[]');
+    const req = savedReqs.find((r: any) => r.id === requestId);
+    if (req) setRequestInfo(req);
+
+    // 2. Carregar informações do profissional/lead
+    const savedLeads = JSON.parse(localStorage.getItem('unlocked_leads_full_mock') || '[]');
+    const lead = savedLeads.find((l: any) => l.requestId === requestId && l.merchantId === professionalId);
+    if (lead) setLeadInfo(lead);
+
+    // 3. Carregar histórico de mensagens
     const savedMsgs = JSON.parse(localStorage.getItem(chatKey) || '[]');
     setMessages(savedMsgs);
-
-    if (!isDesignerChat) {
-        // Lógica para pedidos de serviço regulares
-        const savedReqs = JSON.parse(localStorage.getItem('service_requests_mock') || '[]');
-        const req = savedReqs.find((r: any) => r.id === requestId);
-        if (req) setRequestInfo(req);
-
-        const savedLeads = JSON.parse(localStorage.getItem('unlocked_leads_full_mock') || '[]');
-        const lead = savedLeads.find((l: any) => l.requestId === requestId && l.merchantId === professionalId);
-        if (lead) setLeadInfo(lead);
-    }
-  }, [requestId, professionalId, chatKey, isDesignerChat]);
+  }, [requestId, professionalId, chatKey]);
 
   useEffect(() => {
     if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
@@ -79,7 +76,7 @@ export const ServiceChatView: React.FC<ServiceChatViewProps> = ({ requestId, pro
       id: `msg-${Date.now()}`,
       requestId,
       senderId: 'current-user-id',
-      senderName: isResident ? 'Morador' : (isDesignerChat ? 'Designer' : (leadInfo?.merchantName || 'Profissional')),
+      senderName: isResident ? 'Morador' : (leadInfo?.merchantName || 'Profissional'),
       senderRole: isResident ? 'resident' : 'merchant',
       text: inputText,
       timestamp: new Date().toISOString()
@@ -92,11 +89,6 @@ export const ServiceChatView: React.FC<ServiceChatViewProps> = ({ requestId, pro
   };
 
   const handleNegocioFechado = () => {
-    if (isDesignerChat) {
-        alert("Sua arte está em produção. Você será notificado por aqui!");
-        return;
-    }
-    
     setShowConfirmModal(false);
 
     // 1. Atualizar o status do pedido globalmente
@@ -109,6 +101,7 @@ export const ServiceChatView: React.FC<ServiceChatViewProps> = ({ requestId, pro
     });
     localStorage.setItem('service_requests_mock', JSON.stringify(updatedReqs));
     
+    // Atualiza localmente
     const myReq = updatedReqs.find((r: any) => r.id === requestId);
     if (myReq) setRequestInfo(myReq);
 
@@ -137,38 +130,66 @@ export const ServiceChatView: React.FC<ServiceChatViewProps> = ({ requestId, pro
             <button onClick={onBack} className="p-2 bg-gray-50 dark:bg-gray-800 rounded-xl text-gray-500 transition-all active:scale-90 shrink-0">
                 <ChevronLeft size={20}/>
             </button>
-            <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white shadow-md shrink-0 overflow-hidden ${isDesignerChat ? 'bg-indigo-600' : 'bg-[#1E5BFF]'}`}>
-                {isDesignerChat ? <Palette size={20} /> : (leadInfo?.merchantLogo ? <img src={leadInfo.merchantLogo} className="w-full h-full object-cover" /> : <Building size={18} />)}
+            <div className="w-10 h-10 rounded-full bg-[#1E5BFF] flex items-center justify-center text-white shadow-md shrink-0 overflow-hidden">
+                {leadInfo?.merchantLogo ? <img src={leadInfo.merchantLogo} className="w-full h-full object-cover" /> : <Building size={18} />}
             </div>
             <div className="flex flex-col min-w-0">
               <h2 className="font-bold text-gray-900 dark:text-white leading-tight truncate">
-                  {isDesignerChat ? (isResident ? 'Time de Design' : 'Minha Campanha') : (isMerchant ? (requestInfo?.userName || 'Cliente') : (leadInfo?.merchantName || 'Time Localizei'))}
+                  {isMerchant ? (requestInfo?.userName || 'Cliente') : (leadInfo?.merchantName || 'Time Localizei')}
               </h2>
               <div className="flex items-center gap-1.5 mt-0.5">
                   <span className={`w-1.5 h-1.5 rounded-full ${isBlocked ? 'bg-gray-400' : 'bg-green-500'}`}></span>
                   <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest truncate">
-                    {isDesignerChat ? `Briefing de Campanha #${requestId.split('-')[1]}` : `#{requestId.split('-')[1]} – {requestInfo?.serviceType}`}
+                    #{requestId.split('-')[1]} – {requestInfo?.serviceType}
                   </p>
               </div>
             </div>
           </div>
+          
+          {/* Botão Negócio Fechado (Apenas para Residentes) */}
+          {isResident && !isRequestClosed && (
+            <button 
+                onClick={() => setShowConfirmModal(true)}
+                className="bg-emerald-500 text-white text-[9px] font-black uppercase px-2.5 py-2 rounded-xl shadow-lg shadow-emerald-500/20 active:scale-95 transition-all shrink-0"
+            >
+                Negócio Fechado
+            </button>
+          )}
+
+          {isWinner && (
+             <div className="bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 px-2 py-1.5 rounded-lg flex items-center gap-1 border border-emerald-100 dark:border-emerald-800">
+                <CheckCircle2 size={12} />
+                <span className="text-[8px] font-black uppercase">Vencedor</span>
+             </div>
+          )}
         </header>
+
+        {/* Banner de Status Bloqueado */}
+        {isBlocked && (
+            <div className="bg-gray-100 dark:bg-gray-800 text-gray-500 px-5 py-2.5 flex items-center justify-center gap-2 z-10 border-b border-gray-200 dark:border-gray-700">
+                <XCircle size={14} />
+                <span className="text-[9px] font-black uppercase tracking-widest text-center">Este pedido foi fechado com outro profissional.</span>
+            </div>
+        )}
 
         {/* Corpo do Chat */}
         <main ref={scrollRef} className="flex-1 overflow-y-auto p-5 space-y-6 no-scrollbar bg-gray-50 dark:bg-gray-950">
           
-          {isDesignerChat && (
+          {/* Bolha de Resumo Original */}
+          {requestInfo && (
               <div className="flex justify-center px-2 mb-4">
-                  <div className="p-5 rounded-[2rem] bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-100 dark:border-indigo-800/50 shadow-sm w-full flex gap-4 items-start">
-                    <div className="p-2 bg-indigo-100 dark:bg-indigo-800 rounded-xl text-indigo-600 dark:text-indigo-300">
-                        <Palette size={18} />
-                    </div>
-                    <div>
-                        <h4 className="text-xs font-black text-indigo-900 dark:text-indigo-200 uppercase tracking-widest mb-1">Criação Profissional</h4>
-                        <p className="text-xs text-indigo-700 dark:text-indigo-400 font-medium leading-relaxed">
-                            Envie suas informações agora e nosso time responderá em até 24h úteis.
-                        </p>
-                    </div>
+                  <div className="p-5 rounded-[2rem] bg-white dark:bg-gray-900 border border-indigo-50 dark:border-indigo-900/50 shadow-sm w-full">
+                      <div className="flex items-center gap-2 mb-2">
+                        <ClipboardList size={14} className="text-indigo-600" />
+                        <span className="text-[9px] font-black uppercase tracking-widest text-indigo-600">Descrição do Pedido</span>
+                      </div>
+                      <p className="text-xs leading-relaxed text-gray-700 dark:text-gray-300 font-medium">
+                          "{requestInfo.description}"
+                      </p>
+                      <div className="mt-3 flex items-center gap-3">
+                        <div className="flex items-center gap-1 text-[9px] text-gray-400 font-bold uppercase"><MapPin size={10}/> {requestInfo.neighborhood}</div>
+                        <div className="flex items-center gap-1 text-[9px] text-gray-400 font-bold uppercase"><Clock size={10}/> {requestInfo.urgency}</div>
+                      </div>
                   </div>
               </div>
           )}
@@ -180,8 +201,8 @@ export const ServiceChatView: React.FC<ServiceChatViewProps> = ({ requestId, pro
             if (isSystem) {
               return (
                   <div key={msg.id} className="flex justify-center px-2">
-                      <div className="bg-blue-50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-800 p-4 rounded-2xl text-center w-full">
-                          <p className="text-xs text-blue-700 dark:text-blue-400 font-bold leading-relaxed whitespace-pre-wrap">
+                      <div className="bg-emerald-50 dark:bg-emerald-900/10 border border-emerald-100 dark:border-emerald-800 p-4 rounded-2xl text-center w-full">
+                          <p className="text-xs text-emerald-700 dark:text-emerald-400 font-bold leading-relaxed whitespace-pre-wrap">
                               {msg.text}
                           </p>
                       </div>
@@ -232,6 +253,35 @@ export const ServiceChatView: React.FC<ServiceChatViewProps> = ({ requestId, pro
                   </button>
               </div>
           </footer>
+        )}
+
+        {/* Modal de Confirmação Negócio Fechado */}
+        {showConfirmModal && (
+            <div className="fixed inset-0 z-[200] bg-black/80 backdrop-blur-sm flex items-center justify-center p-6 animate-in fade-in duration-200">
+                <div className="bg-white dark:bg-gray-900 w-full max-w-sm rounded-[2.5rem] p-8 shadow-2xl animate-in zoom-in-95">
+                    <div className="w-16 h-16 bg-emerald-100 dark:bg-emerald-900/30 rounded-2xl flex items-center justify-center mb-6 text-emerald-600 mx-auto">
+                        <Handshake size={32} />
+                    </div>
+                    <h3 className="text-xl font-bold text-gray-900 dark:text-white text-center mb-4">Confirmar Negócio Fechado?</h3>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 text-center mb-8 leading-relaxed">
+                        Ao confirmar, as outras conversas deste pedido serão encerradas e você terá o registro oficial de que fechou com este profissional.
+                    </p>
+                    <div className="space-y-3">
+                        <button 
+                            onClick={handleNegocioFechado}
+                            className="w-full bg-emerald-500 text-white font-black py-4 rounded-2xl shadow-xl shadow-emerald-500/20 active:scale-95 transition-all text-xs uppercase tracking-widest"
+                        >
+                            Sim, fechar negócio
+                        </button>
+                        <button 
+                            onClick={() => setShowConfirmModal(false)}
+                            className="w-full py-4 text-gray-400 font-bold text-xs uppercase tracking-widest hover:text-gray-600 transition-colors"
+                        >
+                            Cancelar
+                        </button>
+                    </div>
+                </div>
+            </div>
         )}
     </div>
   );

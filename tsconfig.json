@@ -23,10 +23,9 @@
 
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./*"]
+      "@/*": ["./src/*"]
     }
   },
-  "include": ["src", "*.tsx", "*.ts", "components/**/*.tsx", "components/**/*.ts"],
-  "exclude": ["node_modules", "dist", "vite.config.ts"],
+  "include": ["src"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }
