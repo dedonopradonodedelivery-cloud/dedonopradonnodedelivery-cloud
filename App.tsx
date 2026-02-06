@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Layout } from '@/components/layout/Layout';
 import { Header } from '@/components/layout/Header';
@@ -73,9 +74,9 @@ const FeatureUnavailableView: React.FC<{ onBack: () => void }> = ({ onBack }) =>
         <div className="w-20 h-20 bg-blue-50 dark:bg-blue-900/20 rounded-[2.5rem] flex items-center justify-center mb-6 text-[#1E5BFF]">
             <AlertCircle size={40} />
         </div>
-        <h2 className="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tighter mb-2">Em breve</h2>
+        <h2 className="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tighter mb-2">Acesso Restrito</h2>
         <p className="text-gray-500 dark:text-gray-400 text-sm max-w-xs leading-relaxed mb-10">
-            Esta funcionalidade não está disponível no momento. Estamos trabalhando para trazê-la o mais rápido possível!
+            Esta funcionalidade não está disponível no momento.
         </p>
         <button onClick={onBack} className="w-full max-w-xs bg-blue-600 text-white font-black py-4 rounded-2xl shadow-xl uppercase tracking-widest text-xs active:scale-95 transition-all">Voltar ao Início</button>
     </div>
@@ -140,26 +141,31 @@ const App: React.FC = () => {
   }, [isAdmin]);
 
   const handleNavigate = (view: string, data?: any) => {
-    // Verificar se a funcionalidade de destino está ativa antes de permitir a navegação
+    // MAPEAMENTO DE SEGURANÇA: Aba -> Feature Flag correspondente
     const routeMapping: Partial<Record<string, FeatureKey>> = {
         'home': 'home_tab',
-        'neighborhood_posts': 'community_feed',
         'explore': 'explore_guide',
+        'classifieds': 'classifieds',
+        'neighborhood_posts': 'community_feed',
         'coupon_landing': 'coupons',
         'user_coupons': 'coupons',
         'merchant_coupons': 'coupons',
-        'classifieds': 'classifieds',
+        // Funcionalidades de Crescimento
         'store_sponsored': 'sponsored_ads',
         'store_ads_module': 'banner_highlights',
         'sponsor_info': 'master_sponsor',
+        // Outros
         'merchant_reviews': 'customer_reviews',
         'merchant_leads': 'service_chat',
         'service_messages_list': 'service_chat'
     };
 
     const requiredFeature = routeMapping[view];
+    
+    // BLOQUEIO LOGÍCO: Se a aba estiver OFF no ADM, redireciona para Home
     if (requiredFeature && !isFeatureActive(requiredFeature) && !isAdmin) {
-        setActiveTab('feature_unavailable');
+        console.warn(`Tentativa de acesso a recurso desativado: ${view}`);
+        setActiveTab('home');
         return;
     }
 
