@@ -55,56 +55,43 @@ const getFallbackImage = (id: string) => {
 };
 
 const QuickActionBlock: React.FC<{ onNavigate: (view: string) => void }> = ({ onNavigate }) => (
-  <section className="px-5 mb-8">
-    <div className="bg-white dark:bg-gray-900 rounded-[2.5rem] p-6 border border-gray-100 dark:border-gray-800 shadow-sm">
-      <div className="mb-6">
-        <h2 className="text-lg font-black text-gray-900 dark:text-white uppercase tracking-tighter leading-tight mb-1">
-          Precisa resolver algo agora no seu bairro?
+  <section className="px-5 mb-10">
+    <div className="bg-white dark:bg-gray-900 rounded-[3rem] p-8 border border-gray-100 dark:border-gray-800 shadow-sm text-center">
+      <div className="mb-8">
+        <h2 className="text-xl font-black text-gray-900 dark:text-white uppercase tracking-tighter leading-tight mb-2">
+          Resolve isso agora, sem complicação.
         </h2>
-        <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">
-          Encontre ajuda, serviços ou ofertas perto de você.
+        <p className="text-sm text-gray-500 dark:text-gray-400 font-medium leading-relaxed max-w-[280px] mx-auto">
+          Serviços, ofertas e oportunidades do seu bairro — do jeito mais rápido.
         </p>
       </div>
 
-      <div className="grid grid-cols-2 gap-3">
-        <button 
-          onClick={() => onNavigate('services_landing')}
-          className="flex flex-col items-center justify-center p-4 bg-gray-50 dark:bg-gray-800 rounded-3xl border border-transparent hover:border-blue-500/30 transition-all active:scale-95 group h-28 text-center"
-        >
-          <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center text-[#1E5BFF] mb-2 group-hover:scale-110 transition-transform">
-            <Wrench size={20} />
-          </div>
-          <span className="text-[10px] font-black text-gray-700 dark:text-gray-200 uppercase tracking-tight leading-tight">Pedir orçamento</span>
-        </button>
+      <button 
+        onClick={() => onNavigate('services_landing')}
+        className="w-full bg-[#1E5BFF] hover:bg-blue-600 text-white py-5 rounded-[2rem] font-black text-sm uppercase tracking-widest flex items-center justify-center gap-3 shadow-xl shadow-blue-500/20 active:scale-[0.98] transition-all mb-10"
+      >
+        <Wrench size={20} strokeWidth={3} />
+        Pedir orçamento agora
+      </button>
 
+      <div className="flex flex-wrap justify-center gap-2">
         <button 
           onClick={() => onNavigate('coupon_landing')}
-          className="flex flex-col items-center justify-center p-4 bg-gray-50 dark:bg-gray-800 rounded-3xl border border-transparent hover:border-blue-500/30 transition-all active:scale-95 group h-28 text-center"
+          className="px-4 py-2.5 bg-gray-50 dark:bg-gray-800 rounded-full text-[9px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest hover:text-[#1E5BFF] dark:hover:text-white transition-colors border border-transparent hover:border-blue-500/10"
         >
-          <div className="w-10 h-10 bg-emerald-100 dark:bg-emerald-900/30 rounded-xl flex items-center justify-center text-emerald-600 mb-2 group-hover:scale-110 transition-transform">
-            <ShoppingBag size={20} />
-          </div>
-          <span className="text-[10px] font-black text-gray-700 dark:text-gray-200 uppercase tracking-tight leading-tight">Ver ofertas</span>
+          Ver ofertas
         </button>
-
-        <button 
-          onClick={() => onNavigate('explore')}
-          className="flex flex-col items-center justify-center p-4 bg-gray-50 dark:bg-gray-800 rounded-3xl border border-transparent hover:border-blue-500/30 transition-all active:scale-95 group h-28 text-center"
-        >
-          <div className="w-10 h-10 bg-orange-100 dark:bg-orange-900/30 rounded-xl flex items-center justify-center text-orange-600 mb-2 group-hover:scale-110 transition-transform">
-            <MapPin size={20} />
-          </div>
-          <span className="text-[10px] font-black text-gray-700 dark:text-gray-200 uppercase tracking-tight leading-tight">Encontrar perto de mim</span>
-        </button>
-
         <button 
           onClick={() => onNavigate('classifieds')}
-          className="flex flex-col items-center justify-center p-4 bg-gray-50 dark:bg-gray-800 rounded-3xl border border-transparent hover:border-blue-500/30 transition-all active:scale-95 group h-28 text-center"
+          className="px-4 py-2.5 bg-gray-50 dark:bg-gray-800 rounded-full text-[9px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest hover:text-[#1E5BFF] dark:hover:text-white transition-colors border border-transparent hover:border-blue-500/10"
         >
-          <div className="w-10 h-10 bg-purple-100 dark:bg-purple-900/30 rounded-xl flex items-center justify-center text-purple-600 mb-2 group-hover:scale-110 transition-transform">
-            <Package size={20} />
-          </div>
-          <span className="text-[10px] font-black text-gray-700 dark:text-gray-200 uppercase tracking-tight leading-tight">Ver classificados</span>
+          Ver classificados
+        </button>
+        <button 
+          onClick={() => onNavigate('explore')}
+          className="px-4 py-2.5 bg-gray-50 dark:bg-gray-800 rounded-full text-[9px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest hover:text-[#1E5BFF] dark:hover:text-white transition-colors border border-transparent hover:border-blue-500/10"
+        >
+          Encontrar perto de mim
         </button>
       </div>
     </div>
@@ -193,8 +180,6 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
   const [isMoreCategoriesOpen, setIsMoreCategoriesOpen] = useState(false);
 
   // Lógica de Categorias Fixas
-  // Bloco 1: 8 primeiras categorias
-  // Bloco 2: 7 categorias seguintes + Botão "+"
   const block1Categories = useMemo(() => CATEGORIES.slice(0, 8), []);
   const block2Categories = useMemo(() => CATEGORIES.slice(8, 15), []);
 
@@ -255,7 +240,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
         </section>
       )}
 
-      {/* BLOCO DE AÇÃO RÁPIDA "RESOLVA AGORA" */}
+      {/* BLOCO DE AÇÃO IMEDIATA REFORMULADO */}
       <QuickActionBlock onNavigate={onNavigate} />
 
       {isFeatureActive('banner_highlights') && (
